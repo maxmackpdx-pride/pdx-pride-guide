@@ -1,5 +1,5 @@
 // Shared design constants for the Inbox bottom-sheet, ported verbatim from the
-// PDX Pride Guide "Member / Admin / Owner Inbox" design handoff. Values are the
+// Zaylist "Member / Admin / Owner Inbox" design handoff. Values are the
 // final source of truth for this surface.
 import type { CSSProperties } from "react";
 

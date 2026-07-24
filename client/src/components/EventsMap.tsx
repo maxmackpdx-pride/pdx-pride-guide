@@ -11,7 +11,7 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-l
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import { DAY_COLORS, DAY_SORT_ORDER, PRIDE_WEEK_DAYS, RSVP_COLOR } from "@shared/prideWeek";
+import { DAY_COLORS, DAY_SORT_ORDER, EVENT_WEEK_DAYS, RSVP_COLOR } from "@shared/eventWeek";
 import {
   MAP_PIN_SIZE,
   MAP_SURFACE_BG,
@@ -445,7 +445,7 @@ export function MapView({
 
         <div className={`map-legend${variant === "home" ? " map-legend--home" : ""}`} aria-label="Map key">
           <div className="map-legend-items">
-            {(legendDays.length > 0 ? legendDays : PRIDE_WEEK_DAYS).map((day) => {
+            {(legendDays.length > 0 ? legendDays : EVENT_WEEK_DAYS).map((day) => {
               const color = DAY_COLORS[day as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;
               return (
                 <div key={day} className="map-legend-item">

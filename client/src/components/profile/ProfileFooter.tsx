@@ -5,7 +5,7 @@ type Props = {
 
 export default function ProfileFooter({ username }: Props) {
   const handle = username.replace(/^@/, "");
-  const url = `prideguidepdx.com/u/${handle}`;
+  const url = `zaylist.com/u/${handle}`;
 
   return (
     <footer className="pp-close">

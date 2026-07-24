@@ -88,7 +88,7 @@ function emptyCopy(tab: HubFeedTab): string {
     case "rsvps":
       return "No new RSVPs yet. Be the first to say you are going.";
     case "boards":
-      return "No new board posts yet. The Pride Werk highlight stays below.";
+      return "No new board posts yet. The Gig Werk highlight stays below.";
     default:
       return "Nothing new in this feed yet.";
   }

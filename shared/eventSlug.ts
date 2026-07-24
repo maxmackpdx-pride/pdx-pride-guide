@@ -18,7 +18,7 @@ export function eventPath(id: number, title: string, day?: string | null): strin
   return base;
 }
 
-export function eventUrl(id: number, title: string, siteUrl = "https://www.prideguidepdx.com", day?: string | null): string {
+export function eventUrl(id: number, title: string, siteUrl = "https://www.zaylist.com", day?: string | null): string {
   const base = siteUrl.replace(/\/$/, "");
   return `${base}${eventPath(id, title, day)}`;
 }

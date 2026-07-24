@@ -3,7 +3,7 @@ import type { Event } from "@shared/schema";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 
-import { DAY_TEXT_COLORS } from "@shared/prideWeek";
+import { DAY_TEXT_COLORS } from "@shared/eventWeek";
 
 type EventTagsRowProps = {
   event: Event;

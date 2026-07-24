@@ -17,7 +17,7 @@ export function placePath(id: number, name: string): string {
 export function placeUrl(
   id: number,
   name: string,
-  siteUrl = "https://www.prideguidepdx.com",
+  siteUrl = "https://www.zaylist.com",
 ): string {
   const base = siteUrl.replace(/\/$/, "");
   return `${base}${placePath(id, name)}`;

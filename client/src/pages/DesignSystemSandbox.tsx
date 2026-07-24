@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Link } from "wouter";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAY_OPTIONS } from "@shared/eventWeek";
 import {
   SANDBOX_BANNERS,
   SANDBOX_EVENTS,
@@ -82,7 +82,7 @@ function Section({
 export default function DesignSystemSandbox() {
   usePageSeo(
     "Design System Sandbox",
-    "Isolated preview of PDX Pride Guide design tokens and components. Not production.",
+    "Isolated preview of Zaylist design tokens and components. Not production.",
     { url: typeof window !== "undefined" ? `${window.location.origin}/design-preview` : undefined },
   );
 
@@ -202,7 +202,7 @@ export default function DesignSystemSandbox() {
               Pride week days
             </h3>
             <div className="ds-sandbox__grid ds-sandbox__grid--swatches">
-              {PRIDE_WEEK_DAY_OPTIONS.map((d) => (
+              {EVENT_WEEK_DAY_OPTIONS.map((d) => (
                 <div key={d.value} className="ds-sandbox__swatch">
                   <div
                     className="ds-sandbox__swatch-chip"

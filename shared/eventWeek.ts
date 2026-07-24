@@ -1,18 +1,18 @@
 /**
- * Portland Pride Week 2026 (Mon Jul 13 – Sun Jul 19) — single source of truth
+ * Portland Event week 2026 (Mon Jul 13 – Sun Jul 19) — single source of truth
  * for day codes, dates, labels, and day colors. Everything that renders or
  * stores a Pride day derives from this file. See docs/PRIDE_WEEK_13_19_PLAN.md.
  */
 import { pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
 
-export const PRIDE_WEEK_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
-export type PrideWeekDay = (typeof PRIDE_WEEK_DAYS)[number];
+export const EVENT_WEEK_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
+export type EventWeekDay = (typeof EVENT_WEEK_DAYS)[number];
 
 /** Reserved for RSVP pulse on the events map — no day may use this hex. */
 export const RSVP_COLOR = "#CCFF00";
 
-export const PRIDE_WEEK_DAY_OPTIONS: ReadonlyArray<{
-  value: PrideWeekDay;
+export const EVENT_WEEK_DAY_OPTIONS: ReadonlyArray<{
+  value: EventWeekDay;
   label: string;
   date: string;
   nextDate: string;
@@ -30,8 +30,8 @@ export const PRIDE_WEEK_DAY_OPTIONS: ReadonlyArray<{
   { value: "SUN", label: "Sunday July 19", date: "2026-07-19", nextDate: "2026-07-20", color: "#FF6600", textColor: "#FF6600" },
 ];
 
-export const PRIDE_WEEK_START_DATE = PRIDE_WEEK_DAY_OPTIONS[0].date;
-export const PRIDE_WEEK_END_DATE = PRIDE_WEEK_DAY_OPTIONS[PRIDE_WEEK_DAY_OPTIONS.length - 1].date;
+export const EVENT_WEEK_START_DATE = EVENT_WEEK_DAY_OPTIONS[0].date;
+export const EVENT_WEEK_END_DATE = EVENT_WEEK_DAY_OPTIONS[EVENT_WEEK_DAY_OPTIONS.length - 1].date;
 
 /**
  * After Pride Sunday 6pm Pacific, users may add / show events past Jul 19.
@@ -44,54 +44,54 @@ export function postPrideEventsOpenAtMs(): number {
 }
 
 /**
- * Pride Week 2026 has ended and the guide is year-round now, so the post-Pride
+ * Event week 2026 has ended and the guide is year-round now, so the post-Pride
  * cap that hid (and boot-pruned) events dated after Jul 19 is permanently off.
  * Kept as a function so the historical call sites still resolve; it just never
  * suppresses anything anymore. Flipping this back to a date check would re-lock
- * the whole calendar to Pride Week.
+ * the whole calendar to Event week.
  */
-export function isPostPrideListingCapActive(_nowMs: number = Date.now()): boolean {
+export function isPostEventWeekListingCapActive(_nowMs: number = Date.now()): boolean {
   return false;
 }
 
 /** Calendar day (YYYY-MM-DD) is after Pride Sunday. */
 export function isAfterPrideWeekCalendarDay(dayKey: string | null | undefined): boolean {
   if (!dayKey) return false;
-  return dayKey > PRIDE_WEEK_END_DATE;
+  return dayKey > EVENT_WEEK_END_DATE;
 }
 
 export const DAY_COLORS: Record<string, string> = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map((d) => [d.value, d.color]),
+  EVENT_WEEK_DAY_OPTIONS.map((d) => [d.value, d.color]),
 );
 
 export const DAY_TEXT_COLORS: Record<string, string> = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map((d) => [d.value, d.textColor]),
+  EVENT_WEEK_DAY_OPTIONS.map((d) => [d.value, d.textColor]),
 );
 
 /** Calendar order MON(13)→SUN(19) for filters, pie slices, and sorts. */
 export const DAY_SORT_ORDER: Record<string, number> = Object.fromEntries(
-  PRIDE_WEEK_DAYS.map((d, i) => [d, i]),
+  EVENT_WEEK_DAYS.map((d, i) => [d, i]),
 );
 
 const DAY_DATE_MAP = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map((d) => [d.value, d.date]),
-) as Record<PrideWeekDay, string>;
+  EVENT_WEEK_DAY_OPTIONS.map((d) => [d.value, d.date]),
+) as Record<EventWeekDay, string>;
 
 const DAY_NEXT_MAP = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map((d) => [d.value, d.nextDate]),
-) as Record<PrideWeekDay, string>;
+  EVENT_WEEK_DAY_OPTIONS.map((d) => [d.value, d.nextDate]),
+) as Record<EventWeekDay, string>;
 
-export function prideWeekDate(day: string): string {
-  return DAY_DATE_MAP[day as PrideWeekDay] || DAY_DATE_MAP.FRI;
+export function eventWeekDate(day: string): string {
+  return DAY_DATE_MAP[day as EventWeekDay] || DAY_DATE_MAP.FRI;
 }
 
-export function prideWeekNextDate(day: string): string {
-  return DAY_NEXT_MAP[day as PrideWeekDay] || DAY_NEXT_MAP.FRI;
+export function eventWeekNextDate(day: string): string {
+  return DAY_NEXT_MAP[day as EventWeekDay] || DAY_NEXT_MAP.FRI;
 }
 
-export function defaultPrideDateTimes(day: string) {
-  const d = prideWeekDate(day);
-  const next = prideWeekNextDate(day);
+export function defaultEventWeekDateTimes(day: string) {
+  const d = eventWeekDate(day);
+  const next = eventWeekNextDate(day);
   return {
     dateStart: `${d}T21:00`,
     dateEnd: `${next}T02:00`,
@@ -107,7 +107,7 @@ export function prideDayFromDate(dateStart?: string | null): string {
 
 /* ---- Schedule page model (see client/src/pages/Schedule.tsx) ---- */
 
-export type DayKey = PrideWeekDay;
+export type DayKey = EventWeekDay;
 
 export interface DayDef {
   key: DayKey;
@@ -158,8 +158,8 @@ export interface PrideEvent {
   feat?: boolean;
 }
 
-/** Schedule grid day columns — derived from PRIDE_WEEK_DAY_OPTIONS. */
-export const DAYS: DayDef[] = PRIDE_WEEK_DAY_OPTIONS.map((d) => ({
+/** Schedule grid day columns — derived from EVENT_WEEK_DAY_OPTIONS. */
+export const DAYS: DayDef[] = EVENT_WEEK_DAY_OPTIONS.map((d) => ({
   key: d.value,
   label: d.label.split(" ")[0].toUpperCase(),
   short: d.value,
@@ -187,14 +187,14 @@ export const TYPE_LABEL: Record<EventType, string> = {
 };
 
 export const EVENTS: PrideEvent[] = [
-  { id: 101, day: "MON", s: 1080, e: 1260, title: "Pride Week Opening Mixer", venue: "Q Center", hood: "N Portland", adm: "FREE", types: ["community"], age: "all-ages", going: 24, blurb: "Kick off the week with the crews behind the guide. Grab your button, meet organizers, and map out your Pride Week." },
+  { id: 101, day: "MON", s: 1080, e: 1260, title: "Event week Opening Mixer", venue: "Q Center", hood: "N Portland", adm: "FREE", types: ["community"], age: "all-ages", going: 24, blurb: "Kick off the week with the crews behind the guide. Grab your button, meet organizers, and map out your Event week." },
   { id: 102, day: "MON", s: 1200, e: 1380, title: "Dyke Night: Week One", venue: "Doug Fir Lounge", hood: "SE Portland", adm: "TICKETED", types: ["dance"], age: "21+", going: 9, blurb: "The dyke-bar takeover that runs all week. Openers spinning disco and post-punk to warm the floor." },
   { id: 103, day: "TUE", s: 1140, e: 1260, title: "Trans Resource Night", venue: "Q Center", hood: "N Portland", adm: "FREE", types: ["community"], age: "all-ages", going: 15, blurb: "Name-change clinic, care resources, and community. Hosted by and for the trans community." },
   { id: 104, day: "TUE", s: 1200, e: 1440, title: "Karaoke From Hell: Pride", venue: "Dante's", hood: "Downtown", adm: "TICKETED", types: ["music"], age: "21+", going: 11, blurb: "A live band, 1,100 songs, and zero shame. The most unhinged karaoke in Portland goes full Pride." },
   { id: 105, day: "WED", s: 1050, e: 1200, title: "Queer Book Club: Pride Reads", venue: "Mother Foucault's", hood: "SE Portland", adm: "FREE", types: ["community"], age: "all-ages", going: 8, blurb: "This month: a stack of new queer fiction and a very opinionated group. Newcomers always welcome." },
   { id: 106, day: "WED", s: 1140, e: 1320, title: "Drag Bingo Benefit", venue: "CC Slaughters", hood: "Old Town", adm: "SUGGESTED_DONATION", types: ["drag"], age: "21+", going: 20, blurb: "Filthy calls, real prizes, every dollar to the community fund. Hosted by your favorite Old Town queens." },
   { id: 107, day: "WED", s: 1260, e: 1500, title: "Bridge Club: Midweek Warmup", venue: "Holocene", hood: "SE Portland", adm: "TICKETED", types: ["dance"], age: "21+", going: 14, blurb: "House and breaks all night. A midweek reset before the weekend goes fully off." },
-  { id: 108, day: "THU", s: 1080, e: 1200, title: "Kickoff Happy Hour", venue: "Camp Bar PDX", hood: "Downtown", adm: "FREE", types: ["community"], age: "21+", going: 31, blurb: "The Gayborhood's newest bar throws open the doors. Drink specials and a soft launch of Pride Week." },
+  { id: 108, day: "THU", s: 1080, e: 1200, title: "Kickoff Happy Hour", venue: "Camp Bar PDX", hood: "Downtown", adm: "FREE", types: ["community"], age: "21+", going: 31, blurb: "The Gayborhood's newest bar throws open the doors. Drink specials and a soft launch of Event week." },
   { id: 109, day: "THU", s: 1140, e: 1260, title: "Sad Girl Summer: Pride Edition", venue: "Black Water", hood: "NE Portland", adm: "TICKETED", types: ["drag"], age: "21+", going: 12, blurb: "Portland's biggest bummer of a drag show, back and sadder than ever. Bring tissues." },
   { id: 110, day: "THU", s: 1145, e: 1290, title: "Portland Pickles Pride Night", venue: "Walker Stadium", hood: "SE Portland", adm: "TICKETED", types: ["sports"], age: "all-ages", going: 60, blurb: "Pride baseball vs. the Gresham Greywolves. On-field activities, a drag first pitch, tickets from $12." },
   { id: 111, day: "THU", s: 1200, e: 1380, title: "Sasha Colby Pride Kick-Off", venue: "Star Theater", hood: "Old Town", adm: "TICKETED", feat: true, types: ["drag"], age: "21+", going: 42, blurb: "Headline performance by drag superstar Sasha Colby to officially open Portland Pride. This one sells out." },
@@ -223,7 +223,7 @@ export const EVENTS: PrideEvent[] = [
   { id: 134, day: "SUN", s: 840, e: 960, title: "Portland Trans Pride March", venue: "North Park Blocks", hood: "Downtown", adm: "FREE", types: ["march"], age: "all-ages", going: 120, blurb: "By and for the trans community. Masks encouraged. Free, all ages, and fiercely joyful." },
   { id: 135, day: "SUN", s: 960, e: 1260, title: "Lumbertwink: Plaid Patio Pride", venue: "Jackie's", hood: "SE Portland", adm: "FREE", types: ["community"], age: "21+", going: 26, blurb: "Flannel, cold beer, and a sunny patio (4–9pm, shifted for World Cup). The coziest, gayest way to wind down the weekend." },
   { id: 136, day: "SUN", s: 1140, e: 1380, title: "Chai & Roses Pride Party", venue: "Holocene", hood: "SE Portland", adm: "TICKETED", types: ["dance"], age: "21+", going: 37, blurb: "Sunday tea dance for QTBIPOC and allies. DJs Suavecito and Anjali, MC Armaan Singh." },
-  { id: 137, day: "SUN", s: 1260, e: 1560, title: "Yes Sir: Gay Dance Party", venue: "REALM PDX", hood: "SE Portland", adm: "TICKETED", types: ["dance"], age: "21+", going: 29, blurb: "The last dance of Pride Week. Secret warehouse underwear night with DJ Ottogyro. Location on your ticket." },
+  { id: 137, day: "SUN", s: 1260, e: 1560, title: "Yes Sir: Gay Dance Party", venue: "REALM PDX", hood: "SE Portland", adm: "TICKETED", types: ["dance"], age: "21+", going: 29, blurb: "The last dance of Event week. Secret warehouse underwear night with DJ Ottogyro. Location on your ticket." },
 ];
 
 /** hex + alpha → rgba() string */

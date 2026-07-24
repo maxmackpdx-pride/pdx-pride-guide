@@ -2,7 +2,7 @@ import html2canvas from "html2canvas";
 import type { EventListing } from "@shared/multiDayEvents";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { PRIDE_WEEK_DAYS, PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAYS, EVENT_WEEK_DAY_OPTIONS } from "@shared/eventWeek";
 
 function loadLogoImage(): Promise<HTMLImageElement | null> {
   return new Promise(resolve => {
@@ -14,12 +14,12 @@ function loadLogoImage(): Promise<HTMLImageElement | null> {
 }
 
 const DAY_LABELS: Record<string, string> = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map(d => [
+  EVENT_WEEK_DAY_OPTIONS.map(d => [
     d.value,
     `${d.label.split(" ")[0].toUpperCase()} · JULY ${Number(d.date.slice(-2))}`,
   ]),
 );
-const DAY_ORDER: readonly string[] = PRIDE_WEEK_DAYS;
+const DAY_ORDER: readonly string[] = EVENT_WEEK_DAYS;
 const ACCENT_CYCLE = ["#19E3FF", "#FF6600", "#39FF14", "#A855F7", "#FF00CC"];
 
 function formatTime(value: string): string {
@@ -83,7 +83,7 @@ function makeCard(event: EventListing, accent: string, cardW: number, cardH: num
  */
 export async function exportScheduleToStories(events: EventListing[]): Promise<void> {
   const byDay: Record<string, EventListing[]> = Object.fromEntries(
-    PRIDE_WEEK_DAYS.map(d => [d, [] as EventListing[]]),
+    EVENT_WEEK_DAYS.map(d => [d, [] as EventListing[]]),
   );
   for (const e of events) {
     const bucket = e.dayOfWeek ? byDay[e.dayOfWeek] : undefined;
@@ -115,7 +115,7 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
   header.innerHTML = `
     <div style="display:flex;align-items:center;gap:16px;">
       ${logoImg ? `<img src="/favicon.png" width="52" height="52" style="border-radius:8px;flex-shrink:0;" />` : ""}
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:52px;letter-spacing:0.03em;color:#C8FA3C;line-height:1;">PDX PRIDE GUIDE</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:52px;letter-spacing:0.03em;color:#C8FA3C;line-height:1;">ZAYLIST</div>
     </div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;letter-spacing:0.05em;color:#fff;margin-top:6px;">MY SCHEDULE</div>
     <div style="height:4px;background:linear-gradient(90deg,#00FFFF,#FF00CC,#39FF14,#FF6600);margin-top:16px;border-radius:2px;"></div>
@@ -160,7 +160,7 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
   footer.style.cssText = `padding-top:20px;border-top:1px solid #222;display:flex;justify-content:space-between;align-items:center;`;
   footer.innerHTML = `
     <div style="font-family:'Inter',sans-serif;font-size:18px;color:#555;">${totalEvents} event${totalEvents === 1 ? "" : "s"} · Portland, OR</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;color:#C8FA3C;letter-spacing:0.04em;">prideguidepdx.com</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;color:#C8FA3C;letter-spacing:0.04em;">zaylist.com</div>
   `;
   node.appendChild(footer);
 

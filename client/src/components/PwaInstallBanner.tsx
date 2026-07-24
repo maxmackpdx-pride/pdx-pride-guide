@@ -64,12 +64,12 @@ export default function PwaInstallBanner() {
     >
       <div style={{ flex: 1, minWidth: 200 }}>
         <div className="display" style={{ fontSize: "0.85rem", color: "#fff", marginBottom: 4 }}>
-          {iosHint ? "Add to Home Screen" : "Install Pride Guide"}
+          {iosHint ? "Add to Home Screen" : "Install Zaylist"}
         </div>
         <p style={{ margin: 0, fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
           {iosHint
             ? "Tap Share, then Add to Home Screen for the full app, required for push notifications on iPhone."
-            : "Tap ⋮ in Chrome → Install app for full-screen Pride Guide and home-screen badge."}
+            : "Tap ⋮ in Chrome → Install app for full-screen Zaylist and home-screen badge."}
         </p>
       </div>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

@@ -2,7 +2,7 @@ import webpush from "web-push";
 import { PUSH_NOTIFICATION_BADGE, PUSH_NOTIFICATION_ICON } from "@shared/pushAssets";
 import { ensureVapidConfigured } from "./vapid";
 
-const SITE_ORIGIN = process.env.PUBLIC_SITE_URL || "https://www.prideguidepdx.com";
+const SITE_ORIGIN = process.env.PUBLIC_SITE_URL || "https://www.zaylist.com";
 
 /**
  * Declarative Web Push payload (Safari 18.4+ / WebKit) plus legacy top-level
@@ -52,7 +52,7 @@ export function buildDeclarativePayload(input: {
   badge?: number;
   tag?: string;
 }): DeclarativePushPayload {
-  const title = (input.title || "PDX Pride Guide").trim().slice(0, 120) || "PDX Pride Guide";
+  const title = (input.title || "Zaylist").trim().slice(0, 120) || "Zaylist";
   const body = input.body?.replace(/\s+/g, " ").trim().slice(0, 180) || undefined;
   const navigate = absoluteUrl(input.navigate || "/");
   const icon = absoluteUrl(PUSH_NOTIFICATION_ICON);
@@ -70,7 +70,7 @@ export function buildDeclarativePayload(input: {
       silent: false,
       icon,
       badge,
-      tag: input.tag || "pdx-pride-guide",
+      tag: input.tag || "zaylist",
       renotify: true,
       ...(input.badge != null && input.badge > 0 ? { app_badge: String(input.badge) } : {}),
     },

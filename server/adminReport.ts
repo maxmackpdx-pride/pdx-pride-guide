@@ -281,7 +281,7 @@ export function renderAdminReportHtml(data: ReturnType<typeof buildAdminReport>)
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex" />
-<title>PDX Pride Guide — Backlog Report</title>
+<title>Zaylist — Backlog Report</title>
 <style>
   :root { color-scheme: light; }
   * { box-sizing: border-box; }

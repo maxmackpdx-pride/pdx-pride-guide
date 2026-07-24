@@ -42,15 +42,15 @@ export default function MemberProfile() {
   const username = routeParams?.username || "";
   const { toast } = useToast();
   usePageSeo(
-    username ? `@${username} · Profile | PDX Pride Guide` : "Profile | PDX Pride Guide",
+    username ? `@${username} · Profile | Zaylist` : "Profile | Zaylist",
     username
-      ? `Pride Guide member profile for @${username}.`
-      : "Pride Guide member profile.",
+      ? `Zaylist member profile for @${username}.`
+      : "Zaylist member profile.",
     username
       ? {
-          url: `https://www.prideguidepdx.com/u/${encodeURIComponent(username)}`,
-          image: `https://www.prideguidepdx.com/api/og/profile/${encodeURIComponent(username)}?v=2`,
-          imageAlt: `@${username} on PDX Pride Guide`,
+          url: `https://www.zaylist.com/u/${encodeURIComponent(username)}`,
+          image: `https://www.zaylist.com/api/og/profile/${encodeURIComponent(username)}?v=2`,
+          imageAlt: `@${username} on Zaylist`,
           type: "article",
         }
       : undefined,
@@ -212,7 +212,7 @@ export default function MemberProfile() {
   const profileUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/u/${username}`
-      : `https://prideguidepdx.com/u/${username}`;
+      : `https://zaylist.com/u/${username}`;
 
   const onCopy = useCallback(async () => {
     const ok = await copyTextToClipboard(profileUrl);
@@ -243,7 +243,7 @@ export default function MemberProfile() {
           </p>
           <p className="mp-notfound__copy">
             {notFound
-              ? `No active member named @${username} on the Pride Guide.`
+              ? `No active member named @${username} on Zaylist.`
               : "The profile API is unavailable right now. Try again in a moment."}
           </p>
           <a href="/" className="btn-neon solid">

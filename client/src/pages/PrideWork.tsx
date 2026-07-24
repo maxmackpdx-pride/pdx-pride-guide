@@ -115,7 +115,7 @@ function thumbGradient(isLooking: boolean) {
 
 export default function PrideWork() {
   usePageSeo(
-    "Pride Work: Jobs & Gigs | PDX Pride Guide",
+    "Pride Work: Jobs & Gigs | Zaylist",
     "Find queer-friendly gigs and workers for Portland Pride 2026. Post or browse Pride Work listings in PDX.",
   );
   const { toast } = useToast();
@@ -248,7 +248,7 @@ export default function PrideWork() {
 
   const submitGig = (data: GigFormData) => {
     if (!acceptRules) {
-      toast({ title: "Board rules", description: "Please agree to the Pride Werk rules before posting.", variant: "destructive" });
+      toast({ title: "Board rules", description: "Please agree to the Gig Werk rules before posting.", variant: "destructive" });
       return;
     }
     const personalsErr = validateGigPostContent(data);
@@ -689,7 +689,7 @@ export default function PrideWork() {
 
       <BoardCloseSeam
         line="Pay your people. Take care of each other."
-        url="prideguidepdx.com/gigs"
+        url="zaylist.com/gigs"
       />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

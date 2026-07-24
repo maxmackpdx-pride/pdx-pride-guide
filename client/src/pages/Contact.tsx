@@ -28,8 +28,8 @@ export default function Contact() {
   const [contactOpen, setContactOpen] = useState(false);
 
   usePageSeo(
-    "Contact | PDX Pride Guide",
-    "Reach PDX Pride Guide about listings, privacy, or help. Messages go to the site owner inbox.",
+    "Contact | Zaylist",
+    "Reach Zaylist about listings, privacy, or help. Messages go to the site owner inbox.",
   );
 
   return (

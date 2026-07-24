@@ -14,7 +14,7 @@ export default function ProfileTopBar({ isOwner = false }: Props) {
           </svg>
         </Link>
         <span className="pp-topbar__wordmark display">
-          PDX Pride <span className="pp-topbar__accent">Guide</span>
+          <span className="pp-topbar__accent">ZAYLIST</span>
         </span>
       </div>
       {isOwner ? (

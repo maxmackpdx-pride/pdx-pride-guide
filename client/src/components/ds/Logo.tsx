@@ -7,6 +7,7 @@ const CSS = `
   border-radius:22.6%; flex:none; }
 .pdxLogo__wm{ display:flex; flex-direction:column; font-family:var(--font-display); font-weight:900;
   text-transform:uppercase; line-height:.86; letter-spacing:.01em; }
+.pdxLogo__wm--zaylist{ flex-direction:row; letter-spacing:.04em; }
 .pdxLogo__wm span{ display:block; }
 .pdxLogo--light .pdxLogo__wm{ color:var(--text-hi); }
 .pdxLogo--dark .pdxLogo__wm{ color:var(--ink-1000); }
@@ -28,16 +29,15 @@ if (typeof document !== "undefined" && !document.getElementById("pdx-logo-css"))
 }
 
 /**
- * Logo, the official lockup: the app-icon mark + stacked wordmark
- * (PDX / PRIDE / GUIDE, PRIDE in rainbow). Per brand rule the mark
- * always appears with the wordmark unless `variant="icon"`.
+ * Logo, the official lockup: the app-icon mark + ZAYLIST spectrum wordmark.
+ * Per brand rule the mark always appears with the wordmark unless `variant="icon"`.
  */
 export function Logo({
   variant = "lockup",      // lockup | stacked | icon | wordmark
   size = 56,               // icon px (drives wordmark scale in lockup/stacked)
   tone = "light",          // light (on dark) | dark (on paper)
   src = "assets/logo.png",
-  alt = "PDX Pride Guide",
+  alt = "Zaylist",
   className = "",
   href,
   ...rest
@@ -57,10 +57,8 @@ export function Logo({
           style={{ "--_sz": `${size}px` }} aria-hidden={showText ? "true" : undefined} />
       )}
       {showText && (
-        <span className="pdxLogo__wm" style={{ fontSize: `${wmSize}px` }}>
-          <span>PDX</span>
-          <span className="pdxLogo__rainbow">PRIDE</span>
-          <span>GUIDE</span>
+        <span className="pdxLogo__wm pdxLogo__wm--zaylist" style={{ fontSize: `${wmSize}px` }}>
+          <span className="pdxLogo__rainbow">ZAYLIST</span>
         </span>
       )}
     </>

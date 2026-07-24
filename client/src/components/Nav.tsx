@@ -626,10 +626,10 @@ export default function Nav() {
     <>
       <header className="site-header site-header--real-seam">
         <div className="site-header-inner">
-          <Link href="/" className="site-brand site-brand--desktop" aria-label="PDX Pride Guide home">
+          <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <img
               src={logoWordmark}
-              alt="PDX Pride Guide 2026"
+              alt="Zaylist 2026"
               className="site-brand-lockup"
               width={1504}
               height={688}

@@ -1,5 +1,5 @@
 /* ============================================================
-   PDX Pride Guide | Schedule
+   Zaylist | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
    side; packed days widen and scroll horizontally instead of
    squishing text; the day-color system carries the meaning.
@@ -24,7 +24,7 @@ import {
   type AdmKey,
   type EventType,
   type LaneInfo,
-} from "@shared/prideWeek";
+} from "@shared/eventWeek";
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import { pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
@@ -163,7 +163,7 @@ export default function Schedule({
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   usePageSeo(
-    "Schedule | PDX Pride Guide",
+    "Schedule | Zaylist",
     "Portland's queer events, laid out side by side. Build your week.",
     { skip: embed },
   );
@@ -452,11 +452,11 @@ export default function Schedule({
       if (list.length > rows.length) {
         x.fillStyle = '#CCFF00';
         x.font = '700 30px "Barlow Condensed", sans-serif';
-        x.fillText('+ ' + (list.length - rows.length) + ' MORE ON PRIDEGUIDEPDX.COM', 104, y + 6);
+        x.fillText('+ ' + (list.length - rows.length) + ' MORE ON ZAYLIST.COM', 104, y + 6);
       }
       x.fillStyle = '#fff';
       x.font = '900 40px "Barlow Condensed", sans-serif';
-      x.fillText('PDX PRIDE GUIDE', 74, H - 96);
+      x.fillText('ZAYLIST', 74, H - 96);
       x.fillStyle = '#FF00CC';
       x.font = '700 27px "Barlow Condensed", sans-serif';
       x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER. ✦', 74, H - 56);
@@ -1572,7 +1572,7 @@ export default function Schedule({
       {!embed && (
         <BoardCloseSeam
           line="Build your week. Take care of each other."
-          url="prideguidepdx.com/schedule"
+          url="zaylist.com/schedule"
         />
       )}
 

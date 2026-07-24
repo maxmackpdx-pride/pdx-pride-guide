@@ -110,7 +110,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
         ) : null}
       </div>
       <p className="tip-support__note about-v2-donate__note">
-        One tap opens Venmo to pay @{venmoHandle} (note: Pride Guide).
+        One tap opens Venmo to pay @{venmoHandle} (note: Zaylist).
         {applePayReady
           ? " Card / Apple Pay uses Stripe when you prefer that."
           : " Apple Pay later = Stripe Payment Link (optional)."}

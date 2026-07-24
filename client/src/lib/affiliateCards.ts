@@ -1,5 +1,5 @@
 import type { EventListing } from "@shared/multiDayEvents";
-import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 import type { AdServePayload } from "@/lib/adTypes";
 
 export type AffiliateBrand = "mrs" | "cockblock";
@@ -125,7 +125,7 @@ export function scatterAffiliateCards(
   items.forEach((item, i) => {
     if (item.kind !== "event") return;
     const day = item.event.dayOfWeek;
-    if (!day || !(PRIDE_WEEK_DAYS as readonly string[]).includes(day)) return;
+    if (!day || !(EVENT_WEEK_DAYS as readonly string[]).includes(day)) return;
     const list = dayIndices.get(day) ?? [];
     list.push(i);
     dayIndices.set(day, list);
@@ -142,7 +142,7 @@ function scatterLegacy(
   items: EventsGridItem[],
   dayIndices: Map<string, number[]>,
 ): EventsGridItem[] {
-  const eligibleDays = PRIDE_WEEK_DAYS.filter((d) => (dayIndices.get(d)?.length ?? 0) >= 2);
+  const eligibleDays = EVENT_WEEK_DAYS.filter((d) => (dayIndices.get(d)?.length ?? 0) >= 2);
   if (eligibleDays.length === 0) return items;
 
   type Insertion = { afterIndex: number; brand: AffiliateBrand; day: string };
@@ -211,8 +211,8 @@ function scatterFromAds(
   type Insertion = { afterIndex: number; ad: AdServePayload; day: string };
   const planned: Insertion[] = [];
 
-  for (let dayIdx = 0; dayIdx < PRIDE_WEEK_DAYS.length; dayIdx++) {
-    const day = PRIDE_WEEK_DAYS[dayIdx];
+  for (let dayIdx = 0; dayIdx < EVENT_WEEK_DAYS.length; dayIdx++) {
+    const day = EVENT_WEEK_DAYS[dayIdx];
     const indices = dayIndices.get(day);
     if (!indices || indices.length === 0) continue;
 

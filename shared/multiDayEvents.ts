@@ -1,19 +1,19 @@
 import type { Event } from "./schema";
 import { pacificCalendarDate, pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
 import {
-  isPostPrideListingCapActive,
-  PRIDE_WEEK_DAYS,
-  PRIDE_WEEK_END_DATE,
-  PRIDE_WEEK_START_DATE,
-} from "./prideWeek";
+  isPostEventWeekListingCapActive,
+  EVENT_WEEK_DAYS,
+  EVENT_WEEK_END_DATE,
+  EVENT_WEEK_START_DATE,
+} from "./eventWeek";
 
 const PACIFIC_TZ = "America/Los_Angeles";
-const PRIDE_LISTING_DAYS = new Set<string>(PRIDE_WEEK_DAYS);
+const PRIDE_LISTING_DAYS = new Set<string>(EVENT_WEEK_DAYS);
 
 /** During the Pride-week lock, only emit board days inside the week. */
 function isWithinPrideWeekCalendar(dayKey: string | null | undefined): boolean {
   if (!dayKey) return false;
-  return dayKey >= PRIDE_WEEK_START_DATE && dayKey <= PRIDE_WEEK_END_DATE;
+  return dayKey >= EVENT_WEEK_START_DATE && dayKey <= EVENT_WEEK_END_DATE;
 }
 
 export type EventListing = Event & { listingInstanceKey?: string };
@@ -161,11 +161,11 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
   const expanded: EventListing[] = [];
   // Until Jul 19 6pm Pacific: no board days after Pride Sunday.
   // After that unlock, post-Pride nights expand/list normally.
-  const prideCap = isPostPrideListingCapActive();
+  const prideCap = isPostEventWeekListingCapActive();
 
   for (const event of events) {
     const startKey = pacificCalendarDate(event.dateStart);
-    if (prideCap && startKey && startKey > PRIDE_WEEK_END_DATE) continue;
+    if (prideCap && startKey && startKey > EVENT_WEEK_END_DATE) continue;
 
     if (!isMultiDayFestival(event.dateStart, event.dateEnd)) {
       expanded.push({
@@ -203,7 +203,7 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
     }
 
     if (emitted === 0) {
-      if (!prideCap || (startKey && startKey <= PRIDE_WEEK_END_DATE)) {
+      if (!prideCap || (startKey && startKey <= EVENT_WEEK_END_DATE)) {
         expanded.push({
           ...event,
           dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),

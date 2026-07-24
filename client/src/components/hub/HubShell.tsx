@@ -155,7 +155,7 @@ const ADMIN_MORE_NAV: Array<{
   { key: "qsearch", label: "QSearch", icon: Search, catalogOnly: true },
   { key: "events", label: "All events", icon: CalendarDays, catalogOnly: true },
   { key: "users", label: "All users", icon: UserCircle, usersOnly: true },
-  { key: "gigs", label: "Pride Werk", icon: Briefcase, catalogOnly: true },
+  { key: "gigs", label: "Gig Werk", icon: Briefcase, catalogOnly: true },
   { key: "promoters", label: "Promoters", icon: Users },
   { key: "venue-claims", label: "Venue claims", icon: Store },
   { key: "team", label: "My team", icon: Users, teamOnly: true },
@@ -262,9 +262,9 @@ export default function HubShell({
 
       <div className="hub-shell__frame">
         <aside className="hub-side" aria-label="Hub navigation">
-          <Link href="/" className="hub-home-link hub-side__home" aria-label="Return to Pride Guide home">
+          <Link href="/" className="hub-home-link hub-side__home" aria-label="Return to Zaylist home">
             <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
-            <span>Return to Pride Guide</span>
+            <span>Return to Zaylist</span>
           </Link>
 
           {isAdminUser && (
@@ -390,9 +390,9 @@ export default function HubShell({
 
         <div className="hub-main">
           <header className="hub-mtop" aria-label="Hub mobile header">
-            <Link href="/" className="hub-home-link hub-mtop__home" aria-label="Return to Pride Guide home">
+            <Link href="/" className="hub-home-link hub-mtop__home" aria-label="Return to Zaylist home">
               <ChevronLeft size={16} strokeWidth={2.4} aria-hidden />
-              <span>Return to Pride Guide</span>
+              <span>Return to Zaylist</span>
             </Link>
             <div className="hub-mtop__spacer" />
             {mode === "admin" && notifyBell}

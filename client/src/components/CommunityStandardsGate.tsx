@@ -62,7 +62,7 @@ function StandardsScroll({ blocks }: { blocks: CommunityStandardsBlock[] }) {
       <p style={{ margin: 0, fontSize: "0.8rem", color: "#444" }}>
         Full policies also live at{" "}
         <a href="/legal" style={{ color: "#0066aa" }}>
-          prideguidepdx.com/legal
+          zaylist.com/legal
         </a>
         . Version {COMMUNITY_STANDARDS_VERSION}.
       </p>
@@ -216,7 +216,7 @@ export default function CommunityStandardsGate() {
             Community Standards & legal
           </h2>
           <p style={{ margin: "8px 0 0", fontSize: "0.9rem", color: "#333", lineHeight: 1.45 }}>
-            Pride Guide PDX updated its Community Standards. Please read and agree to continue.
+            Zaylist updated its Community Standards. Please read and agree to continue.
             If you do not agree, we will send you to Portland-area drug and public health support
             resources.
           </p>

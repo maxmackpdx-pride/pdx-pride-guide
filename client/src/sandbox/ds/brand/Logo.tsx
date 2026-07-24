@@ -9,7 +9,7 @@ export interface LogoProps extends HTMLAttributes<HTMLElement> {
   tone?: "light" | "dark";
   /** Path to the mark PNG. */
   src?: string;
-  /** Accessible name. Default "PDX Pride Guide". */
+  /** Accessible name. Default "Zaylist". */
   alt?: string;
   /** Render as a link. */
   href?: string;
@@ -22,7 +22,7 @@ export function Logo({
   size = 56,
   tone = "light",
   src = DEFAULT_LOGO_SRC,
-  alt = "PDX Pride Guide",
+  alt = "Zaylist",
   className = "",
   href,
   ...rest
@@ -50,10 +50,8 @@ export function Logo({
         />
       )}
       {showText && (
-        <span className="pdxLogo__wm" style={wmStyle}>
-          <span>PDX</span>
-          <span className="pdxLogo__rainbow">PRIDE</span>
-          <span>GUIDE</span>
+        <span className="pdxLogo__wm pdxLogo__wm--zaylist" style={wmStyle}>
+          <span className="pdxLogo__rainbow">ZAYLIST</span>
         </span>
       )}
     </>

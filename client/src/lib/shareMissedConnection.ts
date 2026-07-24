@@ -123,7 +123,7 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
   `;
   footer.innerHTML = `
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:38px;color:#C8FA3C;letter-spacing:0.04em;">MISSED CONNECTIONS</div>
-    <div style="font-family:'Inter',sans-serif;font-size:26px;color:#666;">prideguidepdx.com · Portland, OR</div>
+    <div style="font-family:'Inter',sans-serif;font-size:26px;color:#666;">zaylist.com · Portland, OR</div>
   `;
   node.appendChild(footer);
 
@@ -147,5 +147,5 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
 export async function shareMissedConnectionStory(post: ShareMissedConnection) {
   const canvas = await buildMissedConnectionCanvas(post);
   const filename = `missed-connection-${post.id}.png`;
-  return shareOrDownloadPng(canvas, filename, "Missed Connections | PDX Pride Guide");
+  return shareOrDownloadPng(canvas, filename, "Missed Connections | Zaylist");
 }

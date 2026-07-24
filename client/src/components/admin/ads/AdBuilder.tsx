@@ -9,7 +9,7 @@ import {
   type AdFormat,
   type AdTemplateKey,
 } from "@/lib/adTypes";
-import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 
 const SWATCHES = [
   AD_BRAND_PRIMARY.cockblock,
@@ -680,7 +680,7 @@ export default function AdBuilder({ onSaved }: Props) {
             Target Pride days (none = all week)
           </label>
           <div className="ad-mgr__days">
-            {PRIDE_WEEK_DAYS.map((day) => {
+            {EVENT_WEEK_DAYS.map((day) => {
               const on = draft.days.includes(day);
               const color = DAY_COLORS[day] || "#19e3ff";
               return (

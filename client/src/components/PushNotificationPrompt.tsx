@@ -109,7 +109,7 @@ export default function PushNotificationPrompt() {
     try {
       const outcome = await promptInstall();
       if (outcome === "accepted") {
-        toast({ title: "Installing Pride Guide", description: "Look for it on your home screen in a moment." });
+        toast({ title: "Installing Zaylist", description: "Look for it on your home screen in a moment." });
         setVisible(false);
         return;
       }
@@ -155,7 +155,7 @@ export default function PushNotificationPrompt() {
 
   const intro =
     installMode === "ios"
-      ? "Add Pride Guide to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
+      ? "Add Zaylist to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
       : installMode === "android"
       ? "Allow notifications for inbox and host updates. You can also install the app for a full-screen home-screen experience and launcher badge:"
       : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer.";

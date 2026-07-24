@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "PDX Pride Guide",
-  "short_name": "Pride Guide",
-  "description": "Portland Pride 2026 — events, community, gifting, and Pride Werk",
+  "name": "Zaylist",
+  "short_name": "Zaylist",
+  "description": "Portland Pride 2026 — events, community, gifting, and Gig Werk",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

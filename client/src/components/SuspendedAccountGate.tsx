@@ -92,7 +92,7 @@ export default function SuspendedAccountGate() {
             textTransform: "uppercase",
           }}
         >
-          You cannot use Pride Guide right now
+          You cannot use Zaylist right now
         </h1>
         <p style={{ margin: "12px 0 0", lineHeight: 1.5, color: "#c8c4bb" }}>
           {user.suspendReasonLabel || "Community standards"}

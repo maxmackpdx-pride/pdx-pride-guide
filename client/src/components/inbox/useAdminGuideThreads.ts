@@ -159,10 +159,10 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
       const self = m.fromUserId === guideUserId;
       const party = self
         ? {
-            photoUrl: "/brand/pdx-pride-guide-avatar.jpg",
+            photoUrl: "/brand/zaylist-avatar.jpg",
             avatarChoice: 1,
             avatarRing: "rainbow",
-            displayName: "PDX Pride Guide",
+            displayName: "Zaylist",
             username: "prideguidepdx",
           }
         : senderAvatar(m);

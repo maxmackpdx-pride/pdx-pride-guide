@@ -44,7 +44,7 @@ type EventHostProfile = {
   role: string;
 };
 
-import { DAY_TEXT_COLORS } from "@shared/prideWeek";
+import { DAY_TEXT_COLORS } from "@shared/eventWeek";
 
 type ModerationMode = null | "remove" | "flag" | "transfer";
 

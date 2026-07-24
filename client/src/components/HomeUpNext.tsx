@@ -30,7 +30,7 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
           <span className="home-up-next__dot" aria-hidden />
           Up next
         </div>
-        <span className="home-up-next__lede">Coming up next on the Pride Guide:</span>
+        <span className="home-up-next__lede">Coming up next on Zaylist:</span>
       </div>
       <div className="home-up-next__grid">
         {events.map(event => {

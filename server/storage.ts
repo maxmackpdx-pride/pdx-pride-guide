@@ -69,7 +69,7 @@ import { isGuideSystemUsername } from "@shared/peopleHub";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
-import { isPostPrideListingCapActive } from "@shared/prideWeek";
+import { isPostEventWeekListingCapActive } from "@shared/eventWeek";
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -2998,7 +2998,7 @@ function hardDeleteEventIds(ids: number[]) {
  * Multi-day events that spill past Jul 19 are clipped (not deleted) while locked.
  */
 function prunePostPrideWeekEvents() {
-  if (!isPostPrideListingCapActive()) return;
+  if (!isPostEventWeekListingCapActive()) return;
 
   // Anything whose start calendar day is after Jul 19 is hard-deleted.
   const byStart = sqlite
@@ -3708,7 +3708,7 @@ function runBootMigrationsOnce() {
         name: "Sold By Scott",
         type: "realestate",
         description:
-          "Bay Area and Pacific Northwest queer-friendly real estate team. Scott Edelman (scotte@soldxscott.com, 415-481-2962) and Scott Gunner Friesen (scottf@soldxscott.com, 415-961-0281). The one real estate listing in the Pride Guide.",
+          "Bay Area and Pacific Northwest queer-friendly real estate team. Scott Edelman (scotte@soldxscott.com, 415-481-2962) and Scott Gunner Friesen (scottf@soldxscott.com, 415-961-0281). The one real estate listing in Zaylist.",
         address: null,
         neighborhood: "Portland / Bay Area",
         website: "https://soldxscott.com",
@@ -5872,9 +5872,9 @@ function hubFeedPostToItem(
 }
 
 const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
-  displayName: "PDX Pride Guide",
+  displayName: "Zaylist",
   username: "prideguidepdx",
-  photoUrl: "/brand/pdx-pride-guide-avatar.jpg",
+  photoUrl: "/brand/zaylist-avatar.jpg",
   avatarChoice: 1,
   avatarRing: "rainbow",
 };
@@ -5963,7 +5963,7 @@ function buildHubFeedPinnedItems(
         id: `pin-gig-${gig.id}`,
         kind: "gig",
         badge: "Gig",
-        action: "Open on Pride Werk",
+        action: "Open on Gig Werk",
         title: gig.title,
         text: gig.description || null,
         createdAt: anchorTime,
@@ -6015,7 +6015,7 @@ function expireGiftingPosts() {
   `).run();
 }
 
-export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: Zaylist";
 export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
 export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach, PDX PRIDE";
 export const SITE_OWNER_EMAIL = (
@@ -6026,9 +6026,9 @@ export const SITE_OWNER_EMAIL = (
 
 /** Shared non-personal sender for admin rejects / guide notices. Replies land in Admin inbox. */
 export const GUIDE_ADMIN_USERNAME = "prideguidepdx";
-export const GUIDE_ADMIN_EMAIL = "admin@prideguidepdx.com";
-export const GUIDE_ADMIN_DISPLAY_NAME = "PDX Pride Guide";
-export const GUIDE_ADMIN_PHOTO_URL = "/brand/pdx-pride-guide-avatar.jpg";
+export const GUIDE_ADMIN_EMAIL = "admin@zaylist.com";
+export const GUIDE_ADMIN_DISPLAY_NAME = "Zaylist";
+export const GUIDE_ADMIN_PHOTO_URL = "/brand/zaylist-avatar.jpg";
 
 /** Message context types that always send as the shared guide-admin identity. */
 const GUIDE_ADMIN_CONTEXT_TYPES = new Set([
@@ -6096,7 +6096,7 @@ type SiteOwnerRow = {
   username: string;
 };
 
-const SITE_ADMIN_GIG_DESCRIPTION = `PDX Pride Guide is looking for site admins to help during Pride season and beyond.
+const SITE_ADMIN_GIG_DESCRIPTION = `Zaylist is looking for site admins to help during Pride season and beyond.
 
 What you would help with:
 • Review new event submissions and promoter claims before they go live
@@ -6288,7 +6288,7 @@ function findSiteAdminGigPostId(): number | undefined {
   if (byTitle) return byTitle.id;
   const byMarker = sqlite.prepare(`
     SELECT id FROM gig_posts
-    WHERE description LIKE 'PDX Pride Guide is looking for site admins%'
+    WHERE description LIKE 'Zaylist is looking for site admins%'
     ORDER BY id ASC
     LIMIT 1
   `).get() as { id: number } | undefined;
@@ -6494,7 +6494,7 @@ function notifySubmissionOutcome(
   if (approved) {
     const body = sub.type === "CLAIM"
       ? `Your claim for "${sub.title}" was approved. Open your dashboard to manage the event and post host updates.`
-      : `Your event "${sub.title}" is live on the Pride Guide. Open your dashboard to see it listed.`;
+      : `Your event "${sub.title}" is live on Zaylist. Open your dashboard to see it listed.`;
     notifyGuideInbox(recipient.id, `Approved: ${sub.title}`, body, {
       contextType: "SUBMISSION",
       contextId: sub.id,
@@ -6519,7 +6519,7 @@ function ensureSiteAdminGigPost() {
     postType: "POSTING_GIG",
     title: SITE_ADMIN_GIG_TITLE,
     name: owner?.displayName || "Tucker",
-    contactEmail: owner?.email || "hello@pdxprideguide.com",
+    contactEmail: owner?.email || "hello@zaylist.com",
     description: SITE_ADMIN_GIG_DESCRIPTION,
     skills: "Moderation, Event review, Community support, Detail-oriented",
     compensation: "Volunteer, community help",
@@ -7302,7 +7302,7 @@ export const storage: IStorage = {
       const guide = sqlite.prepare(`
         SELECT COUNT(*) AS count FROM users u
         WHERE u.status = 'active' AND u.id != ?
-          AND lower(u.username) IN ('prideguidepdx', 'pdxprideguide')
+          AND lower(u.username) IN ('prideguidepdx', 'zaylist')
           AND NOT EXISTS (
             SELECT 1 FROM follow_blocks fb
             WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
@@ -7327,7 +7327,7 @@ export const storage: IStorage = {
       const guide = sqlite.prepare(`
         SELECT COUNT(*) AS count FROM users u
         WHERE u.status = 'active' AND u.id != ?
-          AND lower(u.username) IN ('prideguidepdx', 'pdxprideguide')
+          AND lower(u.username) IN ('prideguidepdx', 'zaylist')
           AND NOT EXISTS (
             SELECT 1 FROM follow_blocks fb
             WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
@@ -12215,7 +12215,7 @@ export const storage: IStorage = {
         id: `gig-${gig.id}`,
         kind: "gig",
         badge: gig.postType === "LOOKING_FOR_WORK" ? "Looking" : "Gig",
-        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Pride Werk" : "Posted a gig on Pride Werk",
+        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Gig Werk" : "Posted a gig on Gig Werk",
         title: gig.title,
         text: gig.description || null,
         createdAt: gig.createdAt,
@@ -12226,7 +12226,7 @@ export const storage: IStorage = {
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        // Deep-link opens Pride Werk with this exact post expanded.
+        // Deep-link opens Gig Werk with this exact post expanded.
         link: `/pride-work?post=${gig.id}`,
         boardPostId: gig.id,
       });

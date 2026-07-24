@@ -24,7 +24,7 @@ function alreadyDismissed(): boolean {
 
 /**
  * Friendly "under construction" pop-up for the home screen. Tells visitors the
- * Pride guide is growing into a year-round Portland LGBTQ+ events home, thanks
+ * Zaylist is growing into a year-round Portland LGBTQ+ events home, thanks
  * them, and invites an optional tip. Shows on every visit until the visitor
  * dismisses it (localStorage), then stays hidden.
  */
@@ -81,7 +81,7 @@ export default function HomeConstructionNudge() {
 
         <div className="pgc-body">
           <p>
-            Thanks for using the PDX Pride Guide this year — we hope it helped you find your
+            Thanks for using Zaylist this year — we hope it helped you find your
             people and your parties. 🌈
           </p>
           <p>

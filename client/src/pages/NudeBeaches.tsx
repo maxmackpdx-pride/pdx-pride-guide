@@ -185,7 +185,7 @@ function SauvieIslandPanel() {
 
 export default function NudeBeaches() {
   usePageSeo(
-    "Nude Beaches | PDX Pride Guide",
+    "Nude Beaches | Zaylist",
     "Traveler logistics for Rooster Rock and Collins Beach on Sauvie Island — live river levels, swim status, parking permits, and essential links.",
   );
 

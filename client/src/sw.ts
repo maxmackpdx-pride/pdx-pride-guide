@@ -61,12 +61,12 @@ async function applyAppBadge(count: number | undefined): Promise<void> {
 // Handles Declarative Web Push (web_push: 8030) and legacy title/body payloads.
 self.addEventListener("push", (event) => {
   const show = async () => {
-    let title = "PDX Pride Guide";
+    let title = "Zaylist";
     let body: string | undefined;
     let url = "/";
     let icon = absoluteAsset(PUSH_NOTIFICATION_ICON);
     let badge = absoluteAsset(PUSH_NOTIFICATION_BADGE);
-    let tag = "pdx-pride-guide";
+    let tag = "zaylist";
     let appBadge: number | undefined;
 
     if (event.data) {

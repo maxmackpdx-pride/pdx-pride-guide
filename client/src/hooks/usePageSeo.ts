@@ -37,7 +37,7 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     meta.setAttribute("content", description);
 
     const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
-    const image = options?.image || "https://www.prideguidepdx.com/og-preview.jpg";
+    const image = options?.image || "https://www.zaylist.com/og-preview.jpg";
     const imageAlt = options?.imageAlt || (options?.image ? title : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections");
     const type = options?.type || "website";
 
@@ -61,7 +61,7 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     upsertMeta("name", "twitter:description", description);
     upsertMeta("name", "twitter:image", image);
     upsertMeta("name", "twitter:image:alt", imageAlt);
-    upsertMeta("property", "og:site_name", "PDX Pride Guide");
+    upsertMeta("property", "og:site_name", "Zaylist");
     if (!options?.image) {
       upsertMeta("property", "og:image:width", "1024");
       upsertMeta("property", "og:image:height", "578");

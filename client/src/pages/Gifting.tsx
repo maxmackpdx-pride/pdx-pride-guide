@@ -62,7 +62,7 @@ function isActivePost(p: GiftingPost) {
 
 export default function Gifting() {
   usePageSeo(
-    "Gifting Board | PDX Pride Guide | Portland Pride 2026",
+    "Gifting Board | Zaylist | Portland Pride 2026",
     "Give and find free stuff in Portland's queer community during Pride 2026 and beyond. PDX Pride gifting and ISO board.",
   );
   const { user } = useAuth();
@@ -427,7 +427,7 @@ export default function Gifting() {
 
       <BoardCloseSeam
         line="Pride is a protest. Take care of each other."
-        url="prideguidepdx.com/gifting"
+        url="zaylist.com/gifting"
       />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

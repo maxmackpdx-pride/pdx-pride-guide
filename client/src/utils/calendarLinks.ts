@@ -43,11 +43,11 @@ export function getICSContent(event: {
   const start = toICSDate(event.dateStart);
   const end = toICSDate(event.dateEnd);
   const location = [event.venueName, event.address].filter(Boolean).join(", ");
-  const uid = `pdx-pride-${event.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}@prideguidepdx.com`;
+  const uid = `pdx-pride-${event.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}@zaylist.com`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//PDX Pride Guide//EN",
+    "PRODID:-//Zaylist//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

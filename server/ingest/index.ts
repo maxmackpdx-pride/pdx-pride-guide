@@ -44,7 +44,7 @@ type ParseSourceTag =
 
 /**
  * Venue status blurbs that calendars often publish as "events" but are not
- * parties/shows to list on Pride Guide (closed nights, holidays off, etc.).
+ * parties/shows to list on Zaylist (closed nights, holidays off, etc.).
  * Prefer title signals so "we were closed for renovation — now open" still counts.
  */
 export function isNonEventListing(draft: Pick<IngestEventDraft, "title" | "description">): boolean {
@@ -80,7 +80,7 @@ export function isNonEventListing(draft: Pick<IngestEventDraft, "title" | "descr
 
 /**
  * Multi-city brands (Bearracuda, touring groups) often list SF/Seattle/etc.
- * Pride Guide only wants Portland metro listings for group sources.
+ * Zaylist only wants Portland metro listings for group sources.
  */
 export function isPortlandEventListing(
   draft: Pick<IngestEventDraft, "title" | "description" | "venueName" | "address" | "neighborhood" | "sourceUrl">,

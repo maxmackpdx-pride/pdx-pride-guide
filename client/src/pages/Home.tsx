@@ -42,7 +42,7 @@ const DIRECTORY_CHIPS = [
 
 export default function Home() {
   usePageSeo(
-    "PDX Pride Guide | Portland Pride 2026 Events",
+    "Zaylist | Portland Pride 2026 Events",
     "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   );
 

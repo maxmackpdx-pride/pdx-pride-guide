@@ -7,7 +7,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { DAY_TEXT_COLORS } from "@shared/prideWeek";
+import { DAY_TEXT_COLORS } from "@shared/eventWeek";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import EventModal from "@/components/EventModal";
 import type { Event } from "@shared/schema";

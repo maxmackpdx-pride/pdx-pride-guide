@@ -3,13 +3,13 @@ import { parsePacificDateTime, pacificCalendarDate } from "@shared/missedConnect
 import type { EventListing } from "@shared/multiDayEvents";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import {
-  PRIDE_WEEK_DAY_OPTIONS,
-  PRIDE_WEEK_DAYS,
+  EVENT_WEEK_DAY_OPTIONS,
+  EVENT_WEEK_DAYS,
   type AdmKey,
   type DayKey,
   type EventType,
   type PrideEvent,
-} from "@shared/prideWeek";
+} from "@shared/eventWeek";
 import {
   beachVenueLabel,
   defaultDepartHour,
@@ -73,7 +73,7 @@ export type ScheduleEvent = PrideEvent & {
 };
 
 function dayKeyFromCalendarDate(ymd: string): DayKey | null {
-  const hit = PRIDE_WEEK_DAY_OPTIONS.find(d => d.date === ymd);
+  const hit = EVENT_WEEK_DAY_OPTIONS.find(d => d.date === ymd);
   return hit ? (hit.value as DayKey) : null;
 }
 
@@ -227,7 +227,7 @@ export function eventListingToScheduleEvent(
   going = 0,
 ): ScheduleEvent | null {
   const day = event.dayOfWeek as DayKey;
-  if (!day || !(PRIDE_WEEK_DAYS as readonly string[]).includes(day)) return null;
+  if (!day || !(EVENT_WEEK_DAYS as readonly string[]).includes(day)) return null;
 
   const startMin = pacificClockMinutes(event.dateStart);
   let endMin = pacificClockMinutes(event.dateEnd);

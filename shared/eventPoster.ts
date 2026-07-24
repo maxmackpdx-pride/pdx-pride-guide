@@ -1,5 +1,5 @@
 import type { NudeBeachTab } from "./nudeBeaches";
-import { PRIDE_WEEK_DAYS, type PrideWeekDay } from "./prideWeek";
+import { EVENT_WEEK_DAYS, type EventWeekDay } from "./eventWeek";
 
 /** Neutral fallback when day is unknown — no weekday word. */
 export const EVENT_PLACEHOLDER_PENDING = "/placeholders/event-placeholder-pending.svg";
@@ -12,7 +12,7 @@ export const EVENT_PLACEHOLDERS = [
   EVENT_PLACEHOLDER_PENDING,
 ] as const;
 
-const DAY_PLACEHOLDER: Record<PrideWeekDay, string> = {
+const DAY_PLACEHOLDER: Record<EventWeekDay, string> = {
   MON: "/placeholders/event-day-mon.svg",
   TUE: "/placeholders/event-day-tue.svg",
   WED: "/placeholders/event-day-wed.svg",
@@ -22,8 +22,8 @@ const DAY_PLACEHOLDER: Record<PrideWeekDay, string> = {
   SUN: "/placeholders/event-day-sun.svg",
 };
 
-function isPrideWeekDay(day: string): day is PrideWeekDay {
-  return (PRIDE_WEEK_DAYS as readonly string[]).includes(day);
+function isEventWeekDay(day: string): day is EventWeekDay {
+  return (EVENT_WEEK_DAYS as readonly string[]).includes(day);
 }
 
 /** True for generated flyer stand-ins (not real promoter art). */
@@ -44,7 +44,7 @@ export function resolveEventPosterUrl(
 ): string {
   if (posterImageUrl && !isEventPlaceholderUrl(posterImageUrl)) return posterImageUrl;
   const day = (dayOfWeek || "").toUpperCase();
-  if (isPrideWeekDay(day)) return DAY_PLACEHOLDER[day];
+  if (isEventWeekDay(day)) return DAY_PLACEHOLDER[day];
   void eventId;
   return EVENT_PLACEHOLDER_PENDING;
 }

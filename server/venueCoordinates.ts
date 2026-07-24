@@ -138,7 +138,7 @@ export async function geocodePortlandLocation(
     url.searchParams.set("limit", "1");
 
     const response = await fetch(url, {
-      headers: { "User-Agent": "PDXPrideGuide/1.0 (map-sync)" },
+      headers: { "User-Agent": "Zaylist/1.0 (map-sync)" },
     });
     if (!response.ok) return null;
 

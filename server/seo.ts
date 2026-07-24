@@ -7,7 +7,7 @@ import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
 
-const SITE_URL = (process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
 
 type SeoEvent = {
   id: number;
@@ -61,7 +61,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Portland Pride 2026 Events | PDX Pride Guide",
+    name: "Portland Pride 2026 Events | Zaylist",
     description: "Community-run directory of Portland Pride Week and year-round queer events.",
     numberOfItems: events.length,
     itemListElement: events.map((evt, index) => ({
@@ -92,9 +92,9 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
 
 export function buildSeoHeadExtras(eventCount: number) {
   return [
-    `<link rel="alternate" type="application/json" href="${SITE_URL}/api/events" title="PDX Pride Guide live events JSON" />`,
-    `<link rel="alternate" type="text/plain" href="${SITE_URL}/llms.txt" title="PDX Pride Guide events for AI crawlers" />`,
-    `<meta name="pdx-pride-guide:event-count" content="${eventCount}" />`,
+    `<link rel="alternate" type="application/json" href="${SITE_URL}/api/events" title="Zaylist live events JSON" />`,
+    `<link rel="alternate" type="text/plain" href="${SITE_URL}/llms.txt" title="Zaylist events for AI crawlers" />`,
+    `<meta name="zaylist:event-count" content="${eventCount}" />`,
   ].join("\n    ");
 }
 
@@ -121,7 +121,7 @@ export function buildCrawlerEventDirectory(events: SeoEvent[]) {
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
   return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
-      <h1>PDX Pride Guide | Portland Pride 2026 Events</h1>
+      <h1>Zaylist | Portland Pride 2026 Events</h1>
       <p>${events.length} live events listed for Portland Pride Week and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
       <ul>
       ${items}
@@ -131,14 +131,14 @@ export function buildCrawlerEventDirectory(events: SeoEvent[]) {
 
 export function buildNoscriptEventDirectory(events: SeoEvent[]) {
   if (events.length === 0) {
-    return `<noscript><p>Enable JavaScript for the full PDX Pride Guide experience, or visit <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a> for event listings.</p></noscript>`;
+    return `<noscript><p>Enable JavaScript for the full Zaylist experience, or visit <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a> for event listings.</p></noscript>`;
   }
 
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
   return `<noscript>
     <section aria-label="Portland Pride 2026 events" style="max-width:960px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif;color:#f5f5f0;background:#0a0a0a">
-      <h1>PDX Pride Guide | Portland Pride 2026 Events</h1>
+      <h1>Zaylist | Portland Pride 2026 Events</h1>
       <p>${events.length} live events listed for Portland Pride Week and summer 2026. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
       <ul>
       ${items}
@@ -149,7 +149,7 @@ export function buildNoscriptEventDirectory(events: SeoEvent[]) {
 
 export function buildLlmsTxt(events: SeoEvent[]) {
   const lines = [
-    "# PDX Pride Guide",
+    "# Zaylist",
     "",
     "> Portland's Pride calendar, kept by the people who actually go.",
     "",
@@ -216,63 +216,63 @@ export function buildCanonicalUrl(requestPath: string) {
 
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "PDX Pride Guide | Portland Pride 2026 Events",
+    title: "Zaylist | Portland Pride 2026 Events",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/events": {
-    title: "Portland Pride 2026 Events | PDX Pride Guide",
+    title: "Portland Pride 2026 Events | Zaylist",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/about": {
-    title: "About PDX Pride Guide | Portland Pride 2026",
+    title: "About Zaylist | Portland Pride 2026",
     description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
   },
   "/resume": {
-    title: "Tucker Max Resume | PDX Pride Guide",
+    title: "Tucker Max Resume | Zaylist",
     description: "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   },
   "/contact": {
-    title: "Contact | PDX Pride Guide",
-    description: "One inbox, one guy. Reach PDX Pride Guide about listings, privacy, or help.",
+    title: "Contact | Zaylist",
+    description: "One inbox, one guy. Reach Zaylist about listings, privacy, or help.",
   },
   "/sponsors": {
-    title: "Sponsors | PDX Pride Guide",
-    description: "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
+    title: "Sponsors | Zaylist",
+    description: "Local businesses can help keep Zaylist free. Sponsorship is support, not pay-to-rank.",
   },
   "/access": {
-    title: "Access & Safety | PDX Pride Guide",
-    description: "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
+    title: "Access & Safety | Zaylist",
+    description: "What Zaylist listings cover, what we can't promise, and how to take care of each other during Pride week.",
   },
   "/legal": {
-    title: "Legal | PDX Pride Guide",
-    description: "Terms of use, privacy policy, and community guidelines for PDX Pride Guide.",
+    title: "Legal | Zaylist",
+    description: "Terms of use, privacy policy, and community guidelines for Zaylist.",
   },
   "/gifting": {
-    title: "Gift with Pride | PDX Pride Guide",
+    title: "Gift with Pride | Zaylist",
     description: "Free queer gifting board for Portland Pride 2026. Post gifts and in-search-of requests in PDX through July 26.",
   },
   "/pride-work": {
-    title: "Pride Werk: Gigs & Jobs | PDX Pride Guide",
+    title: "Gig Werk: Gigs & Jobs | Zaylist",
     description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
   },
   "/spotted": {
-    title: "Missed Connections | PDX Pride Guide",
+    title: "Missed Connections | Zaylist",
     description: "Missed connections from Portland Pride 2026 events. Reconnect after PDX Pride weekend.",
   },
   "/submit": {
-    title: "Submit an Event | PDX Pride Guide",
-    description: "Submit or claim a Portland Pride 2026 event listing on the community-run PDX Pride Guide.",
+    title: "Submit an Event | Zaylist",
+    description: "Submit or claim a Portland Pride 2026 event listing on the community-run Zaylist.",
   },
   "/inbox": {
-    title: "Inbox | PDX Pride Guide",
-    description: "Private messages from missed connections, Pride Werk, event hosts, and check-ins on the PDX Pride Guide.",
+    title: "Inbox | Zaylist",
+    description: "Private messages from missed connections, Gig Werk, event hosts, and check-ins on Zaylist.",
   },
   "/dashboard": {
-    title: "Dashboard | PDX Pride Guide",
-    description: "Your PDX Pride Guide profile, submissions, gigs, gifting, and event check-ins.",
+    title: "Dashboard | Zaylist",
+    description: "Your Zaylist profile, submissions, gigs, gifting, and event check-ins.",
   },
   "/directory": {
-    title: "Queer Portland Directory | PDX Pride Guide",
+    title: "Queer Portland Directory | Zaylist",
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   },
 };
@@ -343,8 +343,8 @@ export function buildWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "PDX Pride Guide",
-    alternateName: ["Portland Pride Guide", "PDX Pride 2026"],
+    name: "Zaylist",
+    alternateName: ["Portland Zaylist", "PDX Pride 2026"],
     url: SITE_URL,
     description: "Community-run Portland Pride 2026 event directory for PDX.",
     potentialAction: {
@@ -365,7 +365,7 @@ export function buildFaqJsonLd() {
         name: "When is Portland Pride 2026?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Portland Pride Week 2026 runs July 13–19, 2026 (Monday through Sunday). PDX Pride Guide lists events across the full week and related summer listings.",
+          text: "Portland Pride Week 2026 runs July 13–19, 2026 (Monday through Sunday). Zaylist lists events across the full week and related summer listings.",
         },
       },
       {
@@ -373,23 +373,23 @@ export function buildFaqJsonLd() {
         name: "Where can I find Portland Pride 2026 events?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Browse all live Portland Pride and PDX Pride events at prideguidepdx.com/events. Filter by day, neighborhood, and type, or open any event page for details and tickets.",
+          text: "Browse all live Portland Pride and PDX Pride events at zaylist.com/events. Filter by day, neighborhood, and type, or open any event page for details and tickets.",
         },
       },
       {
         "@type": "Question",
-        name: "What is PDX Pride Guide?",
+        name: "What is Zaylist?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "PDX Pride Guide is a free, community-run directory of Portland Pride 2026 events, queer parties, festivals, and year-round PDX listings, independent from corporate Pride apps.",
+          text: "Zaylist is a free, community-run directory of Portland Pride 2026 events, queer parties, festivals, and year-round PDX listings, independent from corporate Pride apps.",
         },
       },
       {
         "@type": "Question",
-        name: "How do I add my event to the Portland Pride Guide?",
+        name: "How do I add my event to the Portland Zaylist?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Promoters can submit a new event or claim an existing listing at prideguidepdx.com/submit after creating an account.",
+          text: "Promoters can submit a new event or claim an existing listing at zaylist.com/submit after creating an account.",
         },
       },
     ],
@@ -469,11 +469,11 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
   const pageTitle = liveEvent
-    ? `${liveEvent.title} | Portland Pride 2026 | PDX Pride Guide`
+    ? `${liveEvent.title} | Portland Pride 2026 | Zaylist`
     : livePlace
-      ? `${livePlace.name} | Queer Portland Directory | PDX Pride Guide`
+      ? `${livePlace.name} | Queer Portland Directory | Zaylist`
       : liveProfile
-        ? `${liveProfile.displayName || liveProfile.username} (@${liveProfile.username}) | PDX Pride Guide`
+        ? `${liveProfile.displayName || liveProfile.username} (@${liveProfile.username}) | Zaylist`
         : routeSeo.title;
   const pageDescription = liveEvent
     ? truncateText(
@@ -483,13 +483,13 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     : livePlace
       ? truncateText(
           [livePlace.neighborhood, livePlace.type, livePlace.description].filter(Boolean).join(" · ") ||
-            `${livePlace.name} on PDX Pride Guide.`,
+            `${livePlace.name} on Zaylist.`,
           160,
         )
       : liveProfile
         ? truncateText(
             liveProfile.bio
-              || `${liveProfile.displayName || liveProfile.username} on PDX Pride Guide — Portland Pride member profile.`,
+              || `${liveProfile.displayName || liveProfile.username} on Zaylist — Portland Pride member profile.`,
             160,
           )
         : routeSeo.description;
@@ -557,7 +557,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       : livePlace
         ? livePlace.name
         : liveProfile
-          ? `${liveProfile.displayName || liveProfile.username} on PDX Pride Guide`
+          ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
           : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
     type: liveEvent || livePlace || liveProfile ? "profile" : "website",
     // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg
@@ -566,7 +566,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     imageHeight: pageImageIsCard ? 630 : 578,
   });
 
-  if (!out.includes("pdx-pride-guide:event-count")) {
+  if (!out.includes("zaylist:event-count")) {
     out = out.replace("</head>", `    ${headExtras}\n  </head>`);
   }
   if (!out.includes("pdx-pride-event-directory")) {

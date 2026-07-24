@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
-import { PRIDE_WEEK_DAY_OPTIONS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAY_OPTIONS } from "@shared/eventWeek";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { EVENT_TYPE_PICKER_LABELS } from "@shared/eventTypeTags";
 import type { EventEditFormState } from "@/lib/eventEditForm";
@@ -118,7 +118,7 @@ export function DashboardEventEditForm({
           <div>
             <label style={labelStyle}>Day</label>
             <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
-              {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+              {EVENT_WEEK_DAY_OPTIONS.map(d => (
                 <option key={d.value} value={d.value}>{d.label}</option>
               ))}
             </select>

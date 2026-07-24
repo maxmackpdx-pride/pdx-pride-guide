@@ -9,8 +9,8 @@ export default function Sponsors() {
   const [pitchOpen, setPitchOpen] = useState(false);
 
   usePageSeo(
-    "Sponsors | PDX Pride Guide",
-    "Local businesses can help keep PDX Pride Guide free. Sponsorship is support, not pay-to-rank.",
+    "Sponsors | Zaylist",
+    "Local businesses can help keep Zaylist free. Sponsorship is support, not pay-to-rank.",
   );
 
   return (

@@ -22,7 +22,7 @@ const LABELS: Record<keyof NotificationPrefs, { title: string; body: string }> =
   },
   account: {
     title: "Account updates",
-    body: "Submission results, claims, and promoter status from PDX Pride Guide.",
+    body: "Submission results, claims, and promoter status from Zaylist.",
   },
   admin: {
     title: "Admin alerts",

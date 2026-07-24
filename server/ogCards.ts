@@ -20,7 +20,7 @@ import {
 
 const W = 1200;
 const H = 630;
-const SITE_URL = (process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
 
 const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
 
@@ -113,7 +113,7 @@ async function fetchRemoteImage(url: string): Promise<Buffer | null> {
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "PDXPrideGuide-OG/1.0 (+https://www.prideguidepdx.com)",
+        "User-Agent": "Zaylist-OG/1.0 (+https://www.zaylist.com)",
         Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
       },
       redirect: "follow",
@@ -281,10 +281,10 @@ export async function renderEventOgCard(eventId: number): Promise<Buffer | null>
   <rect width="${W}" height="${H}" fill="#0a0a0a"/>
   ${rainbowBarSvg()}
   <rect x="0" y="8" width="${W}" height="${H - 8}" fill="#0c0c0f"/>
-  <text x="${textX}" y="72" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="18" letter-spacing="0.22em">PDX PRIDE GUIDE · EVENT</text>
+  <text x="${textX}" y="72" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="18" letter-spacing="0.22em">ZAYLIST · EVENT</text>
   ${titleSvg}
   ${meta ? `<text x="${textX}" y="${160 + titleLines.length * 58 + 24}" fill="#19E3FF" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.12em">${escapeXml(meta.toUpperCase())}</text>` : ""}
-  <text x="${textX}" y="${H - 48}" fill="#888888" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.16em">PRIDEGUIDEPDX.COM</text>
+  <text x="${textX}" y="${H - 48}" fill="#888888" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.16em">ZAYLIST.COM</text>
 </svg>`);
 
   const base = sharp(svg).png();
@@ -418,7 +418,7 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
   <rect width="${W}" height="${H}" fill="url(#inward)"/>
   <!-- Bottom name plate -->
   <rect x="0" y="${H - 120}" width="${W}" height="120" fill="#060608" fill-opacity="0.72"/>
-  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">PDX PRIDE GUIDE · MEMBER</text>
+  <text x="48" y="${H - 68}" fill="#CCFF00" font-family="ui-monospace, Menlo, monospace" font-size="16" letter-spacing="0.2em">ZAYLIST · MEMBER</text>
   <text x="48" y="${H - 28}" fill="#FFFFFF" font-family="Arial Narrow, Arial, sans-serif" font-weight="900" font-size="42" letter-spacing="0.02em">${escapeXml(display.toUpperCase())}</text>
   <text x="${W - 48}" y="${H - 32}" fill="${escapeXml(accent)}" font-family="ui-monospace, Menlo, monospace" font-size="22" letter-spacing="0.08em" text-anchor="end">${escapeXml(handle)}</text>
 </svg>`);

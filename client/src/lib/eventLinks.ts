@@ -50,7 +50,7 @@ function buildEventDetails(event: Pick<Event, "description" | "venueName" | "add
   if (event.venueName) lines.push(`Venue: ${event.venueName}`);
   if (event.address) lines.push(`Address: ${event.address}`);
   if (event.ticketUrl) lines.push(`Tickets: ${event.ticketUrl}`);
-  lines.push("via PDX Pride Guide at prideguidepdx.com");
+  lines.push("via Zaylist at zaylist.com");
   return lines.join("\n");
 }
 
@@ -91,13 +91,13 @@ export function downloadIcsFile(
   const end = fmtCalendar(event.dateEnd);
   const details = buildEventDetails(event);
   const location = event.address || event.venueName || "";
-  const uid = `pdx-pride-event-${event.id}@prideguidepdx.com`;
+  const uid = `pdx-pride-event-${event.id}@zaylist.com`;
   const stamp = fmtCalendar(new Date().toISOString());
 
   const rawLines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//PDX Pride Guide//EN",
+    "PRODID:-//Zaylist//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VTIMEZONE",
@@ -176,7 +176,7 @@ export function beachCheckinCalendarEvent(input: {
     `River Brats check-in · ${window}`,
     input.note?.trim() || null,
     `Maps: https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`,
-    "via PDX Pride Guide at prideguidepdx.com/nude-beaches",
+    "via Zaylist at zaylist.com/nude-beaches",
   ].filter(Boolean) as string[];
   const numericId =
     typeof input.id === "number"

@@ -1,4 +1,4 @@
-// ─── Content moderation for PDX Pride Guide boards ────────────────────────────
+// ─── Content moderation for Zaylist boards ────────────────────────────
 //
 // House rules (from the site owner):
 //   • This is a deliberately sex-positive, kink-positive, sex-worker-friendly
@@ -282,8 +282,8 @@ export const ALLOWED_LINK_HOSTS = [
   "youtube.com",
   "youtu.be",
   "eventbrite.com",
-  "prideguidepdx.com",
-  "www.prideguidepdx.com",
+  "zaylist.com",
+  "www.zaylist.com",
 ];
 
 function isAllowedLinkHost(rawHost: string): boolean {

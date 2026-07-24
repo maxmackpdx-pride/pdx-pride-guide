@@ -1,10 +1,10 @@
-import { PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { EVENT_WEEK_DAYS } from "@shared/eventWeek";
 
 /** CSS accent token for Pride week day filter chips. */
 export function dayAccentToken(day: string): string {
   if (day === "ALL") return "var(--neon-yellow)";
   const code = day.toUpperCase();
-  if ((PRIDE_WEEK_DAYS as readonly string[]).includes(code)) {
+  if ((EVENT_WEEK_DAYS as readonly string[]).includes(code)) {
     return `var(--day-${code.toLowerCase()})`;
   }
   return "var(--neon-yellow)";

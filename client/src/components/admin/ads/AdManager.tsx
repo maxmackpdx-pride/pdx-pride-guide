@@ -115,7 +115,7 @@ export default function AdManager() {
       )}
 
       <div className="ad-mgr__seam">
-        Pride is a protest · <span>prideguidepdx.com/admin?tab=ads</span>
+        Pride is a protest · <span>zaylist.com/admin?tab=ads</span>
       </div>
     </div>
   );

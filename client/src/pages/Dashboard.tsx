@@ -67,7 +67,7 @@ function hubSectionFromSearch(params: URLSearchParams): HubSection {
 }
 
 export default function Dashboard() {
-  usePageSeo("My Dashboard · PDX Pride Guide", "Your PDX Pride Guide hub: events, feed, people, and more.");
+  usePageSeo("My Dashboard · Zaylist", "Your Zaylist hub: events, feed, people, and more.");
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();

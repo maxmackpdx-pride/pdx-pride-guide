@@ -34,7 +34,7 @@ export default function PageHeader({
       <div className="page-header__inner">
         <nav className="page-header__crumb" aria-label="Breadcrumb">
           <Link href="/" className="page-header__crumb-home">
-            PDX Pride Guide
+            Zaylist
           </Link>
           <span className="page-header__crumb-sep" aria-hidden="true">
             /

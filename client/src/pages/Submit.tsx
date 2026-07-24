@@ -23,7 +23,7 @@ import PromoterIntake, {
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
-import { PRIDE_WEEK_DAY_OPTIONS, defaultPrideDateTimes } from "@shared/prideWeek";
+import { EVENT_WEEK_DAY_OPTIONS, defaultEventWeekDateTimes } from "@shared/eventWeek";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
@@ -87,7 +87,7 @@ const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLin
 
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
-  ...defaultPrideDateTimes("FRI"),
+  ...defaultEventWeekDateTimes("FRI"),
   dayOfWeek: "FRI",
   ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
   posterImageUrl: "", isPublic: true, isHouseParty: false,
@@ -101,7 +101,7 @@ const emptyPromoterForm = () => ({
 
 export default function Submit() {
   usePageSeo(
-    "Promoter hub | PDX Pride Guide",
+    "Promoter hub | Zaylist",
     "Submit events, claim listings, apply as a verified promoter, or tip the guide about something we missed.",
   );
   const { toast } = useToast();
@@ -705,10 +705,10 @@ export default function Submit() {
                           value={eventForm.dayOfWeek}
                           onChange={e => {
                             const day = e.target.value;
-                            setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
+                            setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
                           }}
                         >
-                          {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                          {EVENT_WEEK_DAY_OPTIONS.map(d => (
                             <option key={d.value} value={d.value}>{d.label}</option>
                           ))}
                         </select>
@@ -941,10 +941,10 @@ export default function Submit() {
                     value={eventForm.dayOfWeek}
                     onChange={e => {
                       const day = e.target.value;
-                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultPrideDateTimes(day) }));
+                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
                     }}
                   >
-                    {PRIDE_WEEK_DAY_OPTIONS.map(d => (
+                    {EVENT_WEEK_DAY_OPTIONS.map(d => (
                       <option key={d.value} value={d.value}>{d.label}</option>
                     ))}
                   </select>
@@ -1050,7 +1050,7 @@ export default function Submit() {
       {mode === "landing" && (
         <BoardCloseSeam
           line="Submit it. Claim it. Keep Portland queer."
-          url="prideguidepdx.com/submit"
+          url="zaylist.com/submit"
         />
       )}
     </div>

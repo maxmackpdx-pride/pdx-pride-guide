@@ -16,8 +16,8 @@ export default function Legal() {
   const [contactOpen, setContactOpen] = useState(false);
 
   usePageSeo(
-    "Legal | PDX Pride Guide",
-    "Terms of use, privacy policy, and Community Standards for PDX Pride Guide.",
+    "Legal | Zaylist",
+    "Terms of use, privacy policy, and Community Standards for Zaylist.",
   );
 
   return (
@@ -28,7 +28,7 @@ export default function Legal() {
         titleLine1="TERMS &"
         titleLine2="STANDARDS"
         accent="cyan"
-        lede="How PDX Pride Guide works, what we collect, and the Community Standards everyone agrees to."
+        lede="How Zaylist works, what we collect, and the Community Standards everyone agrees to."
         bgImage="/motifs/hero-about.png"
         bgPosition="40% center"
         actions={
@@ -155,7 +155,7 @@ export default function Legal() {
                 }}
               >
                 <li style={{ marginBottom: 8 }}>
-                  PDX Pride Guide is independently run and is not affiliated with Pride Northwest unless a
+                  Zaylist is independently run and is not affiliated with Pride Northwest unless a
                   listing says otherwise.
                 </li>
                 <li style={{ marginBottom: 8 }}>

@@ -25,7 +25,7 @@ export async function fetchIngestSource(rawUrl: string): Promise<FetchedSource> 
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PDXPrideGuide-Ingest/1.0 (+https://www.prideguidepdx.com)",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Zaylist-Ingest/1.0 (+https://www.zaylist.com)",
         Accept: "text/html, application/xhtml+xml, application/json, text/calendar, */*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
       },

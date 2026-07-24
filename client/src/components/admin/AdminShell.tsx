@@ -45,7 +45,7 @@ const VIEW_TITLES: Record<AdminView, string> = {
   qsearch: "QSearch",
   events: "All events",
   users: "All users",
-  gigs: "Pride Werk",
+  gigs: "Gig Werk",
   promoters: "Promoters",
   "venue-claims": "Venue claims",
   team: "My team",
@@ -69,7 +69,7 @@ const VIEW_LEDES: Record<AdminView, string> = {
   qsearch: "Pull events from venue sites and directory websites. Preview, then commit as HIDDEN.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",
-  gigs: "Live Pride Werk posts. Take down spam, keep the board useful for workers and hosts.",
+  gigs: "Live Gig Werk posts. Take down spam, keep the board useful for workers and hosts.",
   promoters: "Pending applications and approved hosts who can claim and edit events.",
   "venue-claims": "Business-owner claims on existing venues, new-business submissions, and logo change requests.",
   team: "Site admins can open this panel while logged into their own account. Grant it to people you trust with the queues.",
@@ -140,7 +140,7 @@ export default function AdminShell({
     { key: "events", label: "All events", count: navCounts.events },
     { key: "team", label: "My team", count: navCounts.team },
     { key: "users", label: "All users", count: navCounts.users },
-    { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
+    { key: "gigs", label: "Gig Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
     { key: "venue-claims", label: "Venue claims", count: navCounts["venue-claims"] },
   ];
@@ -155,7 +155,7 @@ export default function AdminShell({
   const moreItems: AdminNavItem[] = [
     { key: "qsearch", label: "QSearch" },
     { key: "users", label: "All users", count: navCounts.users },
-    { key: "gigs", label: "Pride Werk", count: navCounts.gigs },
+    { key: "gigs", label: "Gig Werk", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
     { key: "venue-claims", label: "Venue claims", count: navCounts["venue-claims"] },
     { key: "team", label: "My team", count: navCounts.team },
@@ -177,9 +177,7 @@ export default function AdminShell({
         <div className="admin-shell__brand">
           <img src={logo} alt="" width={38} height={38} />
           <div className="admin-shell__brand-text">
-            <div>PDX</div>
-            <div className="pride">PRIDE</div>
-            <div>GUIDE</div>
+            <div className="pride">ZAYLIST</div>
           </div>
         </div>
 
@@ -262,7 +260,7 @@ export default function AdminShell({
         <div className="admin-shell__mobile-top">
           <img src={logo} alt="" width={32} height={32} />
           <div className="admin-shell__brand-text" style={{ fontSize: 12 }}>
-            <div>PDX <span className="pride">PRIDE</span> GUIDE</div>
+            <div className="pride">ZAYLIST</div>
           </div>
           <span className="admin-shell__badge">ADMIN</span>
           <span style={{ flex: 1 }} />

@@ -59,7 +59,7 @@ const FAQ = [
 
 export default function About() {
   usePageSeo(
-    "About PDX Pride Guide | Portland Pride 2026",
+    "About Zaylist | Portland Pride 2026",
     "Built by one person in Portland. Free Pride week directory with zero interest in being a sanitized corporate pamphlet.",
   );
 
@@ -216,7 +216,7 @@ export default function About() {
                         <circle cx="12" cy="8" r="4" />
                         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
                       </svg>
-                      Follow Me On Pride Guide
+                      Follow Me On Zaylist
                     </Link>
                     <a
                       href={IG_URL}
@@ -473,7 +473,7 @@ export default function About() {
       <section className="about-v2-close">
         <div className="about-v2-close__row">
           <span>Pride is a protest. Take care of each other.</span>
-          <span>prideguidepdx.com</span>
+          <span>zaylist.com</span>
         </div>
       </section>
 

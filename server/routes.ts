@@ -4,10 +4,10 @@ import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } fr
 import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import {
-  isPostPrideListingCapActive,
+  isPostEventWeekListingCapActive,
   prideDayFromDate,
-  PRIDE_WEEK_END_DATE,
-} from "@shared/prideWeek";
+  EVENT_WEEK_END_DATE,
+} from "@shared/eventWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
 import {
   adminSearchForViewer,
@@ -337,9 +337,9 @@ function validateEventDates(
   const end = (dateEnd ?? existing?.dateEnd ?? undefined) || undefined;
 
   // Until Jul 19 6pm Pacific, block starts after Pride Sunday (even if only dateStart is patched).
-  if (isPostPrideListingCapActive() && start) {
+  if (isPostEventWeekListingCapActive() && start) {
     const startDay = pacificCalendarDate(start);
-    if (startDay && startDay > PRIDE_WEEK_END_DATE) {
+    if (startDay && startDay > EVENT_WEEK_END_DATE) {
       return "Post–Pride week events open Sunday July 19 at 6pm Pacific. Until then, list nights through July 19 only.";
     }
   }
@@ -356,9 +356,9 @@ function validateEventDates(
 
 /** Public board: hide events whose start day is after Pride week while the cap is active. */
 function isPublicEventVisibleUnderPrideCap(evt: { dateStart?: string | null }): boolean {
-  if (!isPostPrideListingCapActive()) return true;
+  if (!isPostEventWeekListingCapActive()) return true;
   const startDay = pacificCalendarDate(evt.dateStart || "");
-  if (startDay && startDay > PRIDE_WEEK_END_DATE) return false;
+  if (startDay && startDay > EVENT_WEEK_END_DATE) return false;
   return true;
 }
 
@@ -721,7 +721,7 @@ function assertGigBoardAllowed(body: any, fields: {
   skills?: string | null;
   compensation?: string | null;
 }) {
-  if (!body.acceptRules) throw new Error("You must agree to the Pride Werk board rules.");
+  if (!body.acceptRules) throw new Error("You must agree to the Gig Werk board rules.");
   const personalsErr = validateGigPostContent(fields);
   if (personalsErr) throw new Error(personalsErr);
 }
@@ -743,7 +743,7 @@ function getBaseUrl(req: any) {
 
 function googleRedirectUri(_req: any) {
   // Always use www so OAuth state cookie + Google redirect URI stay on one host.
-  return process.env.GOOGLE_REDIRECT_URI || "https://www.prideguidepdx.com/api/auth/google/callback";
+  return process.env.GOOGLE_REDIRECT_URI || "https://www.zaylist.com/api/auth/google/callback";
 }
 
 const GOOGLE_OAUTH_STATE_MAX_MS = 15 * 60 * 1000;
@@ -2551,7 +2551,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         });
         clearGoogleOAuthStateCookie(res);
         return res.status(400).send(googleOAuthErrorPage(
-          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open prideguidepdx.com in Chrome or your system browser and try Google again.",
+          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open zaylist.com in Chrome or your system browser and try Google again.",
         ));
       }
 
@@ -2637,7 +2637,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
         const existingGoogleUser = storage.getUserByGoogleId(profile.sub);
         if (existingGoogleUser && existingGoogleUser.id !== linkUserId) {
-          return res.status(409).send(googleOAuthErrorPage("That Google account is already linked to another PDX Pride Guide profile."));
+          return res.status(409).send(googleOAuthErrorPage("That Google account is already linked to another Zaylist profile."));
         }
         const linkedUser = storage.getUserById(linkUserId);
         if (!linkedUser) {
@@ -3624,7 +3624,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
     }
     const payload = buildDeclarativePayload({
-      title: "PDX Pride Guide test",
+      title: "Zaylist test",
       body: "Push notifications are working. If you see this, delivery is fixed.",
       navigate: "/dashboard",
       tag: `pdx-test-${Date.now()}`,
@@ -3652,7 +3652,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       sent,
       total: subs.length,
       results,
-      hint: "On Mac: check Notification Center (and System Settings → Notifications → Safari). On iPhone: open the Home Screen Pride Guide app; Settings → Notifications → Pride Guide must allow alerts.",
+      hint: "On Mac: check Notification Center (and System Settings → Notifications → Safari). On iPhone: open the Home Screen Zaylist app; Settings → Notifications → Zaylist must allow alerts.",
     });
   });
 
@@ -6273,7 +6273,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (moderationGate(res, "Admin guide message", { subject: subject || "Admin message", body })) return;
     const msg = storage.sendAsGuideAdmin(
       target.id,
-      subject || `Message from PDX Pride Guide`,
+      subject || `Message from Zaylist`,
       body,
       { contextType: "ADMIN_MESSAGE" },
     );

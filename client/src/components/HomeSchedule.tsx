@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { DAYS, type DayKey } from "@shared/prideWeek";
+import { DAYS, type DayKey } from "@shared/eventWeek";
 import { buildScheduleEvents } from "@/lib/scheduleEvents";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import RailCard from "@/components/RailCard";

@@ -328,7 +328,7 @@ export function publicPreviewLinks(opts: {
   username?: string | null;
   businessId?: number | null;
 }) {
-  const site = (process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "https://www.prideguidepdx.com").replace(/\/$/, "");
+  const site = (process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
   const out: { type: string; url: string; label: string }[] = [];
   if (opts.eventId && Number.isFinite(opts.eventId)) {
     const evt = storage.getEvent(Number(opts.eventId));

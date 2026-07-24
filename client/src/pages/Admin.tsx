@@ -6,7 +6,7 @@ import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { DAY_SORT_ORDER, PRIDE_WEEK_DAYS } from "@shared/prideWeek";
+import { DAY_SORT_ORDER, EVENT_WEEK_DAYS } from "@shared/eventWeek";
 import { findSubmissionMatches, type SubmissionMatchCandidate } from "@shared/submissionMatch";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
@@ -199,7 +199,7 @@ interface SiteAdminMember extends AdminUserProfile {
   lastActivityLabel?: string | null;
 }
 
-const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: Zaylist";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
 
@@ -224,7 +224,7 @@ function adminTabFromQuery(
 }
 
 export default function Admin() {
-  usePageSeo("Admin | PDX Pride Guide", "Site administration panel.");
+  usePageSeo("Admin | Zaylist", "Site administration panel.");
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const { openSheet } = useInboxSheet();
@@ -277,7 +277,7 @@ export default function Admin() {
   const [messageTarget, setMessageTarget] = useState<{
     username: string;
     displayName?: string | null;
-    /** guide = shared PDX Pride Guide inbox; personal = logged-in admin’s own inbox. */
+    /** guide = shared Zaylist inbox; personal = logged-in admin’s own inbox. */
     as: "guide" | "personal";
   } | null>(null);
   const [messageBody, setMessageBody] = useState("");
@@ -1416,7 +1416,7 @@ export default function Admin() {
         });
         toast({
           title: "Message sent",
-          description: `Sent as PDX Pride Guide. @${messageTarget.username} can reply to the shared admin inbox.`,
+          description: `Sent as Zaylist. @${messageTarget.username} can reply to the shared admin inbox.`,
         });
       }
       setMessageTarget(null);
@@ -1439,7 +1439,7 @@ export default function Admin() {
         className="display text-xs px-3 py-1 border"
         style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
         data-testid={`admin-message-${uname}`}
-        title="Send as PDX Pride Guide — replies go to shared Admin inbox"
+        title="Send as Zaylist — replies go to shared Admin inbox"
       >
         MESSAGE
       </button>
@@ -1542,7 +1542,7 @@ export default function Admin() {
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <Lock size={28} style={{ color: "#C8FA3C", margin: "0 auto 16px" }} />
             <h1 className="dash-anton dash-admin-title">Admin</h1>
-            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 6 }}>PDX Pride Guide</p>
+            <p className="dash-mono" style={{ fontSize: 11, color: "var(--dash-muted)", marginTop: 6 }}>Zaylist</p>
           </div>
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
@@ -2360,7 +2360,7 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">DAY</label>
                             <select value={editForm.dayOfWeek || ""} onChange={e => setEditForm(f => ({ ...f, dayOfWeek: e.target.value }))}
                               className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
-                              {PRIDE_WEEK_DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                              {EVENT_WEEK_DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
                           </div>
                           <div>
@@ -3304,7 +3304,7 @@ export default function Admin() {
             )}
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
               <p className="text-white/40 text-sm" style={{ margin: 0 }}>
-                Every registered account on PDX Pride Guide. Search by username, email, or display name.
+                Every registered account on Zaylist. Search by username, email, or display name.
               </p>
               {isSuperAdmin && (
                 <button
@@ -3455,7 +3455,7 @@ export default function Admin() {
             </div>
             <div>
               <p className="text-white/40 text-sm mb-4">
-                Site admins can open this dashboard while logged into their PDX Pride Guide account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.
+                Site admins can open this dashboard while logged into their Zaylist account (footer Admin Panel link). Owner accounts in Railway env cannot be removed here.
               </p>
               <form
                 className="border border-white/10 p-5 space-y-4 max-w-xl"
@@ -3579,7 +3579,7 @@ export default function Admin() {
           aria-label={
             messageTarget.as === "personal"
               ? `Message @${messageTarget.username} as ${signedInAdminLabel}`
-              : `Message @${messageTarget.username} as PDX Pride Guide`
+              : `Message @${messageTarget.username} as Zaylist`
           }
           onClick={() => !messageSending && setMessageTarget(null)}
         >
@@ -3594,7 +3594,7 @@ export default function Admin() {
             >
               {messageTarget.as === "personal"
                 ? `MESSAGE FROM ${signedInAdminLabel.toUpperCase()}`
-                : "MESSAGE AS PDX PRIDE GUIDE"}
+                : "MESSAGE AS ZAYLIST"}
             </p>
             <h2 className="text-white text-lg mt-1 mb-1">
               @{messageTarget.username}
@@ -3605,7 +3605,7 @@ export default function Admin() {
             <p className="text-white/40 text-xs mb-3">
               {messageTarget.as === "personal"
                 ? `Sends from your personal account (${signedInAdminLabel}). Their reply lands in your Personal inbox — not shared admin.`
-                : "Sends as PDX Pride Guide. Their reply lands in shared Admin · Inbox."}
+                : "Sends as Zaylist. Their reply lands in shared Admin · Inbox."}
             </p>
             <textarea
               value={messageBody}

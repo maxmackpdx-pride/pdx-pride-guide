@@ -22,7 +22,7 @@ const HOW_IT_WORKS = [
 
 export default function MissedConnections() {
   usePageSeo(
-    "Missed Connections | PDX Pride Guide",
+    "Missed Connections | Zaylist",
     "Post anonymous missed connections from Portland Pride 2026 events. See someone at PDX Pride? Say hi privately.",
   );
   const { user } = useAuth();
@@ -184,7 +184,7 @@ export default function MissedConnections() {
 
       <BoardCloseSeam
         line="Shoot your shot. Stay kind. Take care of each other."
-        url="prideguidepdx.com/spotted"
+        url="zaylist.com/spotted"
       />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

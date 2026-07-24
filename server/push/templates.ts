@@ -13,7 +13,7 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
   } else if (ctx === "MISSED_CONNECTION") {
     title = "Missed connection reply";
   } else if (ctx === "GIG") {
-    title = "Pride Werk message";
+    title = "Gig Werk message";
   } else if (ctx === "GIFTING") {
     title = "Gifting update";
   } else if (ctx === "CHECK_IN") {
@@ -36,7 +36,7 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
       tag: `msg-${message.id || "new"}`,
     });
   } else if (ctx === "SUBMISSION" || ctx === "EVENT_CLAIM" || ctx === "PROMOTER" || ctx === "GUIDE_UPDATE") {
-    title = message.subject?.trim() || "PDX Pride Guide update";
+    title = message.subject?.trim() || "Zaylist update";
     const navigate = ctx === "PROMOTER" ? "/submit" : "/dashboard";
     return buildDeclarativePayload({
       title,

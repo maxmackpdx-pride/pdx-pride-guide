@@ -5,7 +5,7 @@ import { useModalA11y } from "@/hooks/useModalA11y";
 export const STANK_TICKET_URL = "https://members.pdxsanctuary.com/events/93071";
 
 type Props = {
-  /** Primary: continue into Pride Guide signup (Join). */
+  /** Primary: continue into Zaylist signup (Join). */
   onContinue: () => void;
   /** Optional dismiss without signup. */
   onClose?: () => void;
@@ -13,7 +13,7 @@ type Props = {
 
 /**
  * Interstitial after direct secret-story exit: push Yes Coach tickets via
- * Pride Guide signup, with a small escape hatch to the venue ticket page.
+ * Zaylist signup, with a small escape hatch to the venue ticket page.
  */
 export default function StankTicketGate({ onContinue, onClose }: Props) {
   const handleClose = useCallback(() => {
@@ -103,7 +103,7 @@ export default function StankTicketGate({ onContinue, onClose }: Props) {
             textShadow: "0 0 18px rgba(91,255,91,0.45)",
           }}
         >
-          Get your Yes Coach tickets before they are gone — through the PDX Pride Guide
+          Get your Yes Coach tickets before they are gone — through Zaylist
         </h2>
 
         <p

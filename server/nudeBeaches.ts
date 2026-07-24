@@ -67,7 +67,7 @@ async function fetchText(url: string, timeoutMs = 12_000): Promise<string> {
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "PDX-Pride-Guide/1.0 (+https://www.prideguidepdx.com)",
+        "User-Agent": "Zaylist/1.0 (+https://www.zaylist.com)",
         Accept: "application/geo+json,application/json,text/html",
       },
     });

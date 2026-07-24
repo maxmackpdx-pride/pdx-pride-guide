@@ -67,7 +67,7 @@ export default function ProfileActionRow({
   const [shareOpen, setShareOpen] = useState(false);
 
   const isPromoter = !!data.showPromoterVariant;
-  const profileUrl = typeof window !== "undefined" ? window.location.href : `https://www.prideguidepdx.com/u/${username}`;
+  const profileUrl = typeof window !== "undefined" ? window.location.href : `https://www.zaylist.com/u/${username}`;
 
   return (
     <div className="mp-actions">

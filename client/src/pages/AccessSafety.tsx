@@ -9,8 +9,8 @@ export default function AccessSafety() {
   const [reportOpen, setReportOpen] = useState(false);
 
   usePageSeo(
-    "Access & Safety | PDX Pride Guide",
-    "What PDX Pride Guide listings cover, what we can't promise, and how to take care of each other during Pride week.",
+    "Access & Safety | Zaylist",
+    "What Zaylist listings cover, what we can't promise, and how to take care of each other during Pride week.",
   );
 
   return (

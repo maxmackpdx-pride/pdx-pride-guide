@@ -1,13 +1,13 @@
 import type { Event } from "@shared/schema";
 import type { EventListing } from "@shared/multiDayEvents";
-import { PRIDE_WEEK_DAY_OPTIONS, PRIDE_WEEK_START_DATE } from "@shared/prideWeek";
+import { EVENT_WEEK_DAY_OPTIONS, EVENT_WEEK_START_DATE } from "@shared/eventWeek";
 import { pacificCalendarDate, parsePacificDateTime } from "@shared/missedConnections";
 import { formatListingWhen, listingDay, listingPosterUrl, listingTypeTags } from "@/lib/dsEvent";
 
 const PACIFIC_TZ = "America/Los_Angeles";
 
 /** Fallback if no Jul 13 listings are loaded yet (midnight PDT Pride Week open). */
-export const HOME_COUNTDOWN_TARGET = `${PRIDE_WEEK_START_DATE}T00:00:00-07:00`;
+export const HOME_COUNTDOWN_TARGET = `${EVENT_WEEK_START_DATE}T00:00:00-07:00`;
 
 /** Make a stored dateStart safe for `new Date()` / Countdown (force Pacific offset). */
 export function toCountdownTarget(dateStart: string): string {
@@ -29,7 +29,7 @@ export function earliestPrideWeekStartTarget(
   let earliestRaw: string | null = null;
 
   for (const event of events) {
-    if (pacificCalendarDate(event.dateStart) !== PRIDE_WEEK_START_DATE) continue;
+    if (pacificCalendarDate(event.dateStart) !== EVENT_WEEK_START_DATE) continue;
     const ms = parsePacificDateTime(event.dateStart);
     if (ms == null) continue;
     if (earliestMs == null || ms < earliestMs) {
@@ -86,7 +86,7 @@ export const HOME_MARQUEE_FALLBACK = [
 ];
 
 const DAY_DATE_LOOKUP = Object.fromEntries(
-  PRIDE_WEEK_DAY_OPTIONS.map(d => [d.value, d.date]),
+  EVENT_WEEK_DAY_OPTIONS.map(d => [d.value, d.date]),
 ) as Record<string, string>;
 
 export function shuffleArray<T>(items: T[]): T[] {

@@ -35,7 +35,7 @@ import CountUpValue from "@/components/CountUpValue";
 
 const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
-import { DAY_SORT_ORDER } from "@shared/prideWeek";
+import { DAY_SORT_ORDER } from "@shared/eventWeek";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import "./Events.css";
 
@@ -256,7 +256,7 @@ function filterBoardEvents(
 
 /** Branded 1200×630 card (replaces raw flyer as social preview image). */
 function eventOgCardImage(eventId: number) {
-  return `https://www.prideguidepdx.com/api/og/event/${eventId}`;
+  return `https://www.zaylist.com/api/og/event/${eventId}`;
 }
 
 function truncateSeo(text: string, max = 160) {
@@ -381,8 +381,8 @@ export default function Events() {
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
     shareEvent
-      ? `${shareEvent.title} | Portland Pride 2026 | PDX Pride Guide`
-      : "Portland Pride 2026 Events | PDX Pride Guide",
+      ? `${shareEvent.title} | Portland Pride 2026 | Zaylist`
+      : "Portland Pride 2026 Events | Zaylist",
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
@@ -820,7 +820,7 @@ export default function Events() {
 
       <BoardCloseSeam
         line="Find the party. Show up for your people."
-        url="prideguidepdx.com/events"
+        url="zaylist.com/events"
       />
     </div>
   );

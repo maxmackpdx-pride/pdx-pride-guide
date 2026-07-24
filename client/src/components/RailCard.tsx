@@ -1,5 +1,5 @@
 import type { EventListing } from "@shared/multiDayEvents";
-import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/prideWeek";
+import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/eventWeek";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import LiveWave from "@/components/LiveWave";

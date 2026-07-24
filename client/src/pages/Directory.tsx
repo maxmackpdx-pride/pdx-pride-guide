@@ -298,8 +298,8 @@ export default function Directory() {
   const placeSeo = selectedPlace;
   usePageSeo(
     placeSeo
-      ? `${placeSeo.name} | Queer Portland Directory | PDX Pride Guide`
-      : "Queer Portland Directory | PDX Pride Guide",
+      ? `${placeSeo.name} | Queer Portland Directory | Zaylist`
+      : "Queer Portland Directory | Zaylist",
     placeSeo
       ? [
           placeSeo.neighborhood,
@@ -308,12 +308,12 @@ export default function Directory() {
         ]
           .filter(Boolean)
           .join(" · ")
-          .slice(0, 160) || `${placeSeo.name} on PDX Pride Guide.`
+          .slice(0, 160) || `${placeSeo.name} on Zaylist.`
       : "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
-          image: `https://www.prideguidepdx.com/api/og/place/${placeSeo.id}`,
+          image: `https://www.zaylist.com/api/og/place/${placeSeo.id}`,
           imageAlt: placeSeo.name,
           type: "article",
         }
@@ -950,7 +950,7 @@ export default function Directory() {
 
       <BoardCloseSeam
         line="Keep us healthy."
-        url="prideguidepdx.com/directory"
+        url="zaylist.com/directory"
       />
     </div>
   );

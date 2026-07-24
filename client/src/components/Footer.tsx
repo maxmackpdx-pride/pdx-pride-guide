@@ -54,7 +54,7 @@ export default function Footer() {
           <div className="site-footer__brand-col">
             <img
               src={logoWordmark}
-              alt="PDX Pride Guide 2026"
+              alt="Zaylist 2026"
               className="site-footer__logo"
               width={1504}
               height={688}
@@ -101,7 +101,7 @@ export default function Footer() {
             <span className="site-footer__legal-sep" aria-hidden="true">
               ·
             </span>
-            <span>© 2026 PDX Pride Guide · Free to Browse · Independently Run</span>
+            <span>© 2026 Zaylist · Free to Browse · Independently Run</span>
             <Link href="/legal" className="site-footer__legal-link">
               Legal
             </Link>

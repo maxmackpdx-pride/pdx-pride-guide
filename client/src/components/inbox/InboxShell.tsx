@@ -60,7 +60,7 @@ export interface InboxShellProps extends InboxProps {
   /** Force the single-column (list ↔ thread) layout regardless of viewport
    *  width. Used when the shell is embedded in a narrow floating panel. */
   forceNarrow?: boolean;
-  /** Hide the "Pride Guide / Messages / Calm" brand bar. Used when the shell
+  /** Hide the "Zaylist / Messages / Calm" brand bar. Used when the shell
    *  is embedded in the floating overlay, which supplies its own header. */
   hideBrandHeader?: boolean;
   /** Minimal chrome for the floating overlay: no list heading/segments row,
@@ -652,7 +652,7 @@ export function InboxShell({
                   className="pdx-display"
                   style={{ fontSize: "0.72rem", lineHeight: 0.82, color: "var(--lime)", textAlign: "center" }}
                 >
-                  PDX
+                  Z
                 </span>
               </div>
               <div style={{ minWidth: 0 }}>
@@ -660,7 +660,7 @@ export function InboxShell({
                   className="pdx-display"
                   style={{ fontSize: "1.02rem", lineHeight: 1.05, letterSpacing: ".01em", whiteSpace: "nowrap" }}
                 >
-                  Pride Guide
+                  Zaylist
                 </div>
                 <div className="pdx-kicker" style={{ fontSize: "0.56rem", color: "var(--text-faint)", marginTop: "2px" }}>
                   Messages

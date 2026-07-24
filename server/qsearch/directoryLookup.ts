@@ -127,7 +127,7 @@ async function scrapeWebsite(website: string): Promise<{
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; PDXPrideGuide-DirectoryLookup/1.0; +https://www.prideguidepdx.com)",
+          "Mozilla/5.0 (compatible; Zaylist-DirectoryLookup/1.0; +https://www.zaylist.com)",
         Accept: "text/html,application/xhtml+xml",
       },
     });

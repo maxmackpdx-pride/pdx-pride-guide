@@ -4,7 +4,7 @@ import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
 import ScrollReveal from "./ScrollReveal";
 
-import { DAY_COLORS } from "@shared/prideWeek";
+import { DAY_COLORS } from "@shared/eventWeek";
 
 type EventBoardCardProps = {
   event: Event;

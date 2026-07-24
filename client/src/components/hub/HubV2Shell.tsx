@@ -591,9 +591,9 @@ export default function HubV2Shell({
 
       <div className={showRight ? "grid3" : "grid2"}>
         <aside className="lrail hs hub-v2-lrail hub-v2-lrail--desktop" aria-label="Hub navigation">
-          <Link href="/" className="hub-v2-home" aria-label="Return to Pride Guide home">
+          <Link href="/" className="hub-v2-home" aria-label="Return to Zaylist home">
             <ChevronLeft size={15} strokeWidth={2.4} aria-hidden />
-            <span>Return to Pride Guide</span>
+            <span>Return to Zaylist</span>
           </Link>
 
           {desktopModeToggle}

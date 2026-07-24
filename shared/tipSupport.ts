@@ -5,7 +5,7 @@
  */
 
 export const DEFAULT_VENMO_HANDLE = "tucker_pdmax";
-export const DEFAULT_TIP_NOTE = "PDX Pride Guide - buy me a coffee";
+export const DEFAULT_TIP_NOTE = "Zaylist - buy me a coffee";
 
 /**
  * Direct Venmo “pay this person” URL (web + opens app when installed).

@@ -1,9 +1,9 @@
 import {
-  PRIDE_WEEK_DAYS,
-  PRIDE_WEEK_DAY_OPTIONS,
-  PRIDE_WEEK_START_DATE,
-  PRIDE_WEEK_END_DATE,
-} from "@shared/prideWeek";
+  EVENT_WEEK_DAYS,
+  EVENT_WEEK_DAY_OPTIONS,
+  EVENT_WEEK_START_DATE,
+  EVENT_WEEK_END_DATE,
+} from "@shared/eventWeek";
 
 /** Visual symbol for WMO weather codes (hub forecast strip). */
 export type WeatherIconKind =
@@ -53,9 +53,9 @@ export type PortlandWeather = {
   currentIcon: WeatherIconKind;
 };
 
-export const PRIDE_WEEKEND_START = PRIDE_WEEK_START_DATE;
-export const PRIDE_WEEKEND_END = PRIDE_WEEK_END_DATE;
-export const PRIDE_DAY_LABELS = PRIDE_WEEK_DAYS;
+export const PRIDE_WEEKEND_START = EVENT_WEEK_START_DATE;
+export const PRIDE_WEEKEND_END = EVENT_WEEK_END_DATE;
+export const PRIDE_DAY_LABELS = EVENT_WEEK_DAYS;
 
 /** Downtown Portland, OR (Pioneer Courthouse Square area). */
 const PORTLAND_LAT = "45.5152";
@@ -64,7 +64,7 @@ const PORTLAND_TZ = "America/Los_Angeles";
 export const PORTLAND_CITY = "Portland";
 export const PORTLAND_LOCATION_LABEL = "Portland, OR";
 
-const PRIDE_DATES = PRIDE_WEEK_DAY_OPTIONS.map(d => d.date);
+const PRIDE_DATES = EVENT_WEEK_DAY_OPTIONS.map(d => d.date);
 const PRIDE_DATE_LABELS = ["Jul 13", "Jul 14", "Jul 15", "Jul 16", "Jul 17", "Jul 18", "Jul 19"];
 
 const WMO_LABELS: Record<number, string> = {

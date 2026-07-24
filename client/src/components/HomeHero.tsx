@@ -19,10 +19,10 @@ export default function HomeHero({ eventCount }: Props) {
 
   const shareSite = async () => {
     const who = (user?.displayName || user?.username || "").trim();
-    const title = "The PDX Pride Guide";
+    const title = "Zaylist";
     const text = who
-      ? `${who} wants you to check out The PDX Pride Guide`
-      : "Check out The PDX Pride Guide";
+      ? `${who} wants you to check out Zaylist`
+      : "Check out Zaylist";
     try {
       const result = await sharePageLink("/", title, text);
       setShareState(result);
@@ -33,7 +33,7 @@ export default function HomeHero({ eventCount }: Props) {
   };
 
   return (
-    <section className="home-hero" aria-label="Portland Pride Guide hero">
+    <section className="home-hero" aria-label="Portland Zaylist hero">
       <img
         className="home-hero__bg"
         src={heroWallpaper}
@@ -97,9 +97,7 @@ export default function HomeHero({ eventCount }: Props) {
         </div>
 
         <h1 className="home-hero__title">
-          <span className="home-hero__word">PDX</span>
-          <span className="home-hero__word home-hero__word--pride">PRIDE</span>
-          <span className="home-hero__word">GUIDE</span>
+          <span className="home-hero__word home-hero__word--pride">ZAYLIST</span>
         </h1>
 
         <p className="home-hero__tagline">

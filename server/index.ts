@@ -17,15 +17,15 @@ app.set("trust proxy", 1);
 // Apex → www canonical host (301, preserve path + query).
 app.use((req, res, next) => {
   const host = (req.headers.host || "").split(":")[0].toLowerCase();
-  if (host === "prideguidepdx.com") {
-    return res.redirect(301, `https://www.prideguidepdx.com${req.originalUrl}`);
+  if (host === "zaylist.com") {
+    return res.redirect(301, `https://www.zaylist.com${req.originalUrl}`);
   }
   next();
 });
 
 // Short, shareable branded links → full destinations. 302 (temporary) so a
 // target can be changed or retired later without browsers caching it forever.
-// Add a slug here and it becomes prideguidepdx.com/<slug>.
+// Add a slug here and it becomes zaylist.com/<slug>.
 const SHORT_LINKS: Record<string, string> = {
   stank: "/events/7/stank-x-yes-coach-pride-weekend?day=SAT",
 };

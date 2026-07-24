@@ -203,7 +203,7 @@ function Tape({
 
 export default function Resume() {
   usePageSeo(
-    "Tucker Max Resume | PDX Pride Guide",
+    "Tucker Max Resume | Zaylist",
     "Sales and operations leader with 12+ years in big tech and EV brands, now producing live events and building community platforms in Portland.",
   );
 
@@ -369,7 +369,7 @@ export default function Resume() {
               <span className="resume-close__star" aria-hidden="true">
                 ✦
               </span>
-              <Link href="/">prideguidepdx.com</Link>
+              <Link href="/">zaylist.com</Link>
             </p>
           </div>
           <Button

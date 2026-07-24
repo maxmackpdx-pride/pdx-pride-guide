@@ -57,7 +57,7 @@ async function fetchFromGitHub(relPath: string): Promise<Buffer> {
       signal: controller.signal,
       headers: {
         Accept: "application/vnd.github.raw+json",
-        "User-Agent": "PDXPrideGuide-FlyerReader/1.0",
+        "User-Agent": "Zaylist-FlyerReader/1.0",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
