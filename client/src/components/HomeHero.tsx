@@ -12,7 +12,8 @@ const LETTER_ORBS = [
   { letter: "Z", color: "#FF19D6", left: "16%", top: "38%" },
   { letter: "A", color: "#FF196C", left: "28%", top: "42%" },
   { letter: "Y", color: "#FFD119", left: "40%", top: "36%" },
-  { letter: "L", color: "#9CFF19", left: "50%", top: "44%" },
+  // Center L - dropped 30% lower on the panel
+  { letter: "L", color: "#9CFF19", left: "50%", top: "74%" },
   { letter: "I", color: "#19F7FF", left: "60%", top: "38%" },
   { letter: "S", color: "#1956FF", left: "70%", top: "42%" },
   { letter: "T", color: "#E419FF", left: "82%", top: "36%" },
