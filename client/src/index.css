@@ -2245,10 +2245,25 @@ a.event-host-name.event-host-name--link:hover {
     display: none;
   }
 
-  /* Center anchor: Hub — quiet cyan chip when not the active route */
-  .site-hub-mobile-bar .hub-mobile-tab--center svg {
+  /* Center anchor: Hub — Zaylist Z mark from brand kit */
+  .site-hub-mobile-bar .hub-mobile-tab--center svg,
+  .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
     width: 28px;
     height: 28px;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
+    display: block;
+    object-fit: contain;
+    flex: 0 0 auto;
+    /* Spectrum mark already colored; keep crisp on dark dock */
+    filter: drop-shadow(0 0 6px rgba(25, 227, 255, 0.35));
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab--center.is-active .hub-mobile-tab__z-mark {
+    filter:
+      drop-shadow(0 0 8px rgba(25, 227, 255, 0.55))
+      drop-shadow(0 0 14px rgba(255, 25, 214, 0.25));
   }
 
   .site-hub-mobile-bar .hub-mobile-tab--center span:last-child {

@@ -54,10 +54,10 @@ export default function Footer() {
           <div className="site-footer__brand-col">
             <img
               src={logoWordmark}
-              alt="Zaylist 2026"
+              alt="Zaylist"
               className="site-footer__logo"
-              width={1504}
-              height={688}
+              width={1200}
+              height={423}
               decoding="async"
             />
             <p className="site-footer__tagline">

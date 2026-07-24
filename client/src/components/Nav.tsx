@@ -629,10 +629,10 @@ export default function Nav() {
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <img
               src={logoWordmark}
-              alt="Zaylist 2026"
+              alt="Zaylist"
               className="site-brand-lockup"
-              width={1504}
-              height={688}
+              width={1200}
+              height={423}
               decoding="async"
             />
           </Link>

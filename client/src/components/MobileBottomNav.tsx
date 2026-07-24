@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { CalendarDays, Home, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
+import { CalendarDays, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
@@ -12,9 +12,25 @@ import {
 } from "@/lib/mobileNavDismiss";
 import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
+import zMark from "@/assets/z-mark-nav.png";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
+
+/** Center Hub tab: Zaylist Z mark from the brand kit (not a generic home icon). */
+function HubMark({ active }: { active: boolean }) {
+  return (
+    <img
+      src={zMark}
+      alt=""
+      width={28}
+      height={28}
+      className={`hub-mobile-tab__z-mark${active ? " is-active" : ""}`}
+      decoding="async"
+      aria-hidden
+    />
+  );
+}
 
 function tabClass(
   active: boolean,
@@ -182,7 +198,7 @@ export default function MobileBottomNav() {
               aria-current={hubActive ? "page" : undefined}
               onClick={handleNavLink}
             >
-              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <HubMark active={hubActive} />
               <span>Hub</span>
             </Link>
           ) : (
@@ -195,7 +211,7 @@ export default function MobileBottomNav() {
                 setShowAuth(true);
               }}
             >
-              <Home size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <HubMark active={false} />
               <span>Hub</span>
             </button>
           )}
