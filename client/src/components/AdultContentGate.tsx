@@ -42,11 +42,11 @@ export default function AdultContentGate({
       <h4 className="adult-gate__title display">Grown folks' chat</h4>
       <p className="adult-gate__copy">
         Group chats can include adult conversation. By entering you confirm
-        you're 18 or older. Be kind — keep exact meetup details to DMs.
+        you're 18 or older. Be kind - keep exact meetup details to DMs.
       </p>
       <div className="adult-gate__actions">
         <button type="button" className="adult-gate__enter display" onClick={accept}>
-          I'm 18+ — enter chat
+          I'm 18+ - enter chat
         </button>
         {onDecline && (
           <button type="button" className="adult-gate__leave" onClick={onDecline}>

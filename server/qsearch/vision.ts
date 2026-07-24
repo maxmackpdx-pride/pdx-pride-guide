@@ -16,7 +16,7 @@ export type VisionResult = {
 };
 
 export function visionConfigured(): { url: string; key: string; model: string } | null {
-  // Same kill switch as the Flyer Reader — one env stops all paid vision.
+  // Same kill switch as the Flyer Reader - one env stops all paid vision.
   if (process.env.FLYER_LLM_DISABLED === "1") return null;
 
   // Gemini first: free tier, OpenAI-compatible, and the model proven live by
@@ -53,7 +53,7 @@ function draftFromPartial(
 ): IngestEventDraft | null {
   const title = String(p.title || p.name || "").trim();
   if (!title) return null;
-  // Year is mandatory — reject or repair partial dates that drop the year
+  // Year is mandatory - reject or repair partial dates that drop the year
   let dateStart = toPacificWallClock(p.dateStart || p.start || p.date || p.when);
   if (!dateStart && p.date && p.time) {
     const datePart = String(p.date);
@@ -83,7 +83,7 @@ function draftFromPartial(
   const venueName = String(p.venueName || p.venue || p.location || "TBA").slice(0, 200);
   const description = String(p.description || p.details || `${title} at ${venueName}.`).slice(0, 8000);
   const warnings = [`Vision extract confidence ${confidence.toFixed(2)}`];
-  if (confidence < 0.55) warnings.push("Low confidence — review carefully");
+  if (confidence < 0.55) warnings.push("Low confidence - review carefully");
 
   return {
     title: title.slice(0, 200),
@@ -115,7 +115,7 @@ function draftFromPartial(
 
 /**
  * Flyer image → event draft(s) via cloud vision API (xAI Grok Vision or OpenAI).
- * There is no on-device / custom mini-model — without XAI_API_KEY or OPENAI_API_KEY this cannot OCR flyers.
+ * There is no on-device / custom mini-model - without XAI_API_KEY or OPENAI_API_KEY this cannot OCR flyers.
  *
  * `imageUrl` may be https://… or data:image/…;base64,… (uploads use data URLs so the
  * remote vision API can read local files). `posterStoreUrl` is what we save on the draft
@@ -134,7 +134,7 @@ export async function visionFlyerToDrafts(opts: {
       drafts: [],
       model: null,
       error:
-        "Vision not configured. Set XAI_API_KEY or OPENAI_API_KEY (optional QSEARCH_VISION_MODEL). Flyer reading uses a cloud vision model — not a custom local model.",
+        "Vision not configured. Set XAI_API_KEY or OPENAI_API_KEY (optional QSEARCH_VISION_MODEL). Flyer reading uses a cloud vision model - not a custom local model.",
     };
   }
 

@@ -17,11 +17,11 @@ Companion overview for **exact hit URLs** in [`VENUE_SCRAPE_EXACT_URLS.md`](./VE
 
 ## Tiers (priority)
 
-1. **Tier 1** — queer venues, direct feeds (ICS / JSON / structured HTML)
-2. **Tier 2** — music rooms with queer bookings (Bandsintown, Tixr, RA)
-3. **Tier 3** — community / seasonal (Pride org, Q Center, Eventbrite venue searches)
-4. **Aggregators** — dragpdx, QSC, EverOut, pdx-events, Bandsintown city
-5. **Meta-only** — IG/FB; no stable public URL yet
+1. **Tier 1** - queer venues, direct feeds (ICS / JSON / structured HTML)
+2. **Tier 2** - music rooms with queer bookings (Bandsintown, Tixr, RA)
+3. **Tier 3** - community / seasonal (Pride org, Q Center, Eventbrite venue searches)
+4. **Aggregators** - dragpdx, QSC, EverOut, pdx-events, Bandsintown city
+5. **Meta-only** - IG/FB; no stable public URL yet
 
 ## Parser capability matrix (current)
 

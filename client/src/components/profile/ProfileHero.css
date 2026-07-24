@@ -150,7 +150,7 @@
   white-space: nowrap;
 }
 
-/* Cover scrim: lighter than before, weight toward bottom (avatar seam) — not a full blackout */
+/* Cover scrim: lighter than before, weight toward bottom (avatar seam) - not a full blackout */
 .pp-hero--reimagined .pp-hero__scrim {
   position: absolute;
   left: 0;
@@ -288,7 +288,7 @@
   max-width: 42rem;
 }
 
-/* One action row only (Edit / theme / Share / Follow) — no under-avatar duplicate */
+/* One action row only (Edit / theme / Share / Follow) - no under-avatar duplicate */
 .pp-hero--reimagined .pp-hero__actions {
   display: flex;
   align-items: center;

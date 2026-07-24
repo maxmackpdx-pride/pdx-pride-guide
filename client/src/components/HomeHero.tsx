@@ -41,7 +41,7 @@ export default function HomeHero({ eventCount }: Props) {
         decoding="async"
       />
 
-      {/* Aurora orbs — signature glow; silenced on reduced-motion / calm */}
+      {/* Aurora orbs - signature glow; silenced on reduced-motion / calm */}
       <div className="home-hero__aurora" aria-hidden>
         <span className="home-hero__orb home-hero__orb--magenta" />
         <span className="home-hero__orb home-hero__orb--cyan" />
@@ -55,7 +55,7 @@ export default function HomeHero({ eventCount }: Props) {
       {/* Film grain (SVG fractal noise tile) */}
       <div className="home-hero__grain" aria-hidden />
 
-      {/* Mobile-only site share — top right of first panel */}
+      {/* Mobile-only site share - top right of first panel */}
       <button
         type="button"
         className="home-hero__share"
@@ -101,7 +101,7 @@ export default function HomeHero({ eventCount }: Props) {
         </h1>
 
         <p className="home-hero__tagline">
-          Your map to the good nights: parties, people, the rooms that hold us — and{" "}
+          Your map to the good nights: parties, people, the rooms that hold us - and{" "}
           <strong>take care of each other.</strong>
         </p>
 

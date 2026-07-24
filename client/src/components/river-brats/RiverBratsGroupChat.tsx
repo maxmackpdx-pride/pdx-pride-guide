@@ -62,7 +62,7 @@ type Props = {
   accent: "orange" | "green";
   locked: boolean;
   checkedIn: boolean;
-  /** Checked in but anonymous — counted in going, never connected to the chat. */
+  /** Checked in but anonymous - counted in going, never connected to the chat. */
   anonymous?: boolean;
   goingCount: number;
   /** GPS-verified on the sand right now (not the same as chat going count). */
@@ -184,7 +184,7 @@ export default function RiverBratsGroupChat({
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}
         {!isLoading && messages.length === 0 && !locked && (
           <p className="rb-group-chat__empty">
-            You're checked in. Say hi — others heading out today can see this until 10pm.
+            You're checked in. Say hi - others heading out today can see this until 10pm.
           </p>
         )}
         {messages.map(msg => (

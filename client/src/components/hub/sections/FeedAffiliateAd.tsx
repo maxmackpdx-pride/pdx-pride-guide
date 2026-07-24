@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import "@/components/AffiliatePosterCard.css";
 
-/** Exact affiliate destinations — do not alter path or query. */
+/** Exact affiliate destinations - do not alter path or query. */
 export const FEED_AFFILIATE_URLS = {
   cockblock: "https://cockblocktoys.com/tucker060",
   mrs: "https://www.mr-s-leather.com/?acc=TUCKERMAX",

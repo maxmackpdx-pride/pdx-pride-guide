@@ -146,7 +146,7 @@ export function appleMapsUrl(event: Pick<Event, "address" | "venueName" | "lat" 
   return `https://maps.apple.com/?q=${q}`;
 }
 
-/** For tests and audits — Pacific wall-clock calendar strings. */
+/** For tests and audits - Pacific wall-clock calendar strings. */
 export function calendarExportSnapshot(
   event: Pick<Event, "id" | "title" | "description" | "dateStart" | "dateEnd" | "address" | "venueName" | "ticketUrl">,
 ) {

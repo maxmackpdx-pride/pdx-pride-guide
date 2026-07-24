@@ -103,9 +103,9 @@ function weekRangeLabel(weekStartYmd: string): string {
   return `${monthFmt.format(new Date(startMs))} – ${(sameMonth ? dayFmt : monthFmt).format(new Date(endMs))}`;
 }
 
-/** Legacy prop — event blocks always use full-bleed flyer backgrounds. */
+/** Legacy prop - event blocks always use full-bleed flyer backgrounds. */
 export type PosterStyle = 'Color blocks' | 'Poster chip' | 'Poster peek';
-/** Row density — vertical scale of the grid. */
+/** Row density - vertical scale of the grid. */
 export type Density = 'Comfortable' | 'Compact';
 
 export interface ScheduleProps {
@@ -293,7 +293,7 @@ export default function Schedule({
     return () => window.removeEventListener('keydown', onKey);
   }, [closeEvent]);
 
-  // Open on Friday afternoon — the packed part of the grid (3pm, FRI column).
+  // Open on Friday afternoon - the packed part of the grid (3pm, FRI column).
   useEffect(() => {
     const id = setTimeout(() => {
       const el = scrollElRef.current;
@@ -325,7 +325,7 @@ export default function Schedule({
       setShowAuth(true);
       return;
     }
-    // Negative ids are synthetic beach schedule blocks — uncheck via River Brats.
+    // Negative ids are synthetic beach schedule blocks - uncheck via River Brats.
     if (eventId < 0) {
       const checkinId = Math.abs(eventId);
       if (checkinId > 0) withdrawBeachMutation.mutate(checkinId);
@@ -938,7 +938,7 @@ export default function Schedule({
       'Sign in and tap “I’ll be there” on events to build your schedule.';
   else if (view === 'mine' && myCount === 0)
     emptyBanner =
-      'Your week is wide open. Tap the heart on events — or plan a River Brats beach day — and it lands here.';
+      'Your week is wide open. Tap the heart on events - or plan a River Brats beach day - and it lands here.';
   else if (totalVisible === 0) emptyBanner = 'Nothing found. Check the spelling, or drop a word.';
 
   /* ---- selected popover ------------------------------------------- */
@@ -964,7 +964,7 @@ export default function Schedule({
       // Home embed: the anchor math above assumes the block's on-screen
       // rect is stable, but ScrollReveal's reveal transform (and the
       // embed's own horizontal scroll container) can put the click point
-      // anywhere — including off the edge of a narrow viewport. Skip the
+      // anywhere - including off the edge of a narrow viewport. Skip the
       // anchor math entirely and center the popover in a fixed overlay,
       // same idiom as AuthModal / MissedConnectionsPanel.
       const maxH = Math.min(vh - 40, 640);
@@ -989,7 +989,7 @@ export default function Schedule({
       if (left < 10) left = Math.max(10, (vw - POP_W) / 2);
       let top = r.top != null ? r.top : vh / 2 - 180;
       top = Math.max(64, Math.min(top, vh - 420));
-      // Cap the panel to the viewport — long event descriptions scroll inside
+      // Cap the panel to the viewport - long event descriptions scroll inside
       // the popover instead of growing it into a several-thousand-pixel-tall
       // fixed layer (which iOS Safari can't composite: the panel background
       // drops out and raw text bleeds over the page underneath).
@@ -1526,7 +1526,7 @@ export default function Schedule({
 
       {/* ---- Detail popover ----
           Home embed: fixed-overlay flex-center wrapper (same idiom as
-          AuthModal / MissedConnectionsPanel) — the panel is centered
+          AuthModal / MissedConnectionsPanel) - the panel is centered
           and click-outside-to-close happens on the overlay itself.
           Full /schedule page: unchanged anchored positioning, overlay is
           just a click-catching backdrop behind the absolutely-positioned

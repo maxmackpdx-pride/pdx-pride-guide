@@ -6,7 +6,7 @@ export function categoryFromContext(contextType?: string | null): Category {
   if (ctx === "EVENT_TALENT_REQUEST" || ctx === "GIG" || ctx === "EVENT_TALENT") {
     return "gigs";
   }
-  // Gift / ISO interest threads — never "Host" (that badge is for event hosts).
+  // Gift / ISO interest threads - never "Host" (that badge is for event hosts).
   if (ctx === "GIFTING") return "gifting";
   if (
     ctx === "HOST_UPDATE"
@@ -35,7 +35,7 @@ export function categoryFromContext(contextType?: string | null): Category {
   ) {
     return "hosts";
   }
-  // Generic DMs / guide updates — neutral host bucket is wrong; keep hosts only
+  // Generic DMs / guide updates - neutral host bucket is wrong; keep hosts only
   // for true event-host traffic above. Fallback = hosts for unknown legacy rows
   // that were already event-adjacent, but GIFTING is handled explicitly.
   return "hosts";

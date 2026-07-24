@@ -1,7 +1,7 @@
 import "./support.css";
 
 export const SPONSOR_CHECKS = [
-  "Owned by us — or truly for us.",
+  "Owned by us - or truly for us.",
   "Treats its people right. Pays them right.",
   "Does not need us to scrub anything clean first.",
 ] as const;

@@ -4,7 +4,7 @@ export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
   if (!Number.isFinite(then)) return "";
   const diff = Date.now() - then;
-  // Future timestamps (party nights used as feed activity) — don't say "just now"
+  // Future timestamps (party nights used as feed activity) - don't say "just now"
   if (diff < 0) {
     const ahead = -diff;
     if (ahead < 60_000) return "soon";

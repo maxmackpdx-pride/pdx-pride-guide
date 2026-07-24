@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * One shared <audio> element per hook instance — naturally enforces "only one
+ * One shared <audio> element per hook instance - naturally enforces "only one
  * track plays at a time" since a single Audio object can't play two sources.
  * Used by the profile Media tab; stops on unmount (tab switch away from Media).
  */

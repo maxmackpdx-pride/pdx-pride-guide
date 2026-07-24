@@ -240,7 +240,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
         <div className="px-4 pb-4 space-y-3 border-t border-white/10 pt-3">
           <p className="text-white/45 text-xs leading-relaxed">
             <strong className="text-white/70">Directory · auto</strong> lists every Place with a
-            website — add a site in the directory and it shows up here. Curated tiers keep the
+            website - add a site in the directory and it shows up here. Curated tiers keep the
             specialized feeds (Tribe, Squarespace JSON, Badlands worker). Preview expands{" "}
             <code className="text-white/55">/events</code> paths when the homepage is empty.
             Default commit is <strong className="text-white/70">HIDDEN</strong>.
@@ -248,7 +248,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
 
           {sourcesError && (
             <p className="text-amber-300/90 text-xs">
-              Could not load live directory sources — showing curated list only.{" "}
+              Could not load live directory sources - showing curated list only.{" "}
               <button type="button" className="underline" onClick={() => void refetchSources()}>
                 Retry
               </button>
@@ -304,7 +304,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
             {!sourcesLoading && tierSources.length === 0 && (
               <span className="text-white/45 text-xs">
                 {tier === "directory"
-                  ? "No directory websites yet — add a website on a Place and refresh."
+                  ? "No directory websites yet - add a website on a Place and refresh."
                   : "No sources in this tier."}
               </span>
             )}
@@ -457,7 +457,7 @@ export default function AdminIngestPanel({ onCommitted }: { onCommitted?: () => 
                       {item.strongDuplicate && (
                         <div className="text-[#FF00CC] text-xs mt-1">
                           Strong duplicate of #{item.strongDuplicate.eventId}{" "}
-                          “{item.strongDuplicate.title}” — deselected by default
+                          “{item.strongDuplicate.title}” - deselected by default
                         </div>
                       )}
                       {item.draft.warnings?.length > 0 && (

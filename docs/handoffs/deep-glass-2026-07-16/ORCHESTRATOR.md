@@ -1,4 +1,4 @@
-# Deep-glass migration — orchestrator notes
+# Deep-glass migration - orchestrator notes
 
 **Package path:** `docs/handoffs/deep-glass-2026-07-16/`  
 **Sources:** `GROK_MIGRATION_PROMPT.md`, `GROK_PER_AGENT_TASKS.md`, `GROK_ANIMATION_MIGRATION.md` (+ §6 GitHub audit), `Card System.html`, `screenshots/`.
@@ -19,11 +19,11 @@ Translucent `#0c0c12@76%` lite glass + soft drop + brutal magenta CTA offsets �
 
 | Topic | Correction |
 |-------|------------|
-| Card entrance | **`pgDirCardIn`** — 22px / `.55s` / `--ease-out` (PlaceCard already). Not `dirCardIn` 20px/.5s. Alias `dirCardIn` → same keyframe for reference HTML parity. |
+| Card entrance | **`pgDirCardIn`** - 22px / `.55s` / `--ease-out` (PlaceCard already). Not `dirCardIn` 20px/.5s. Alias `dirCardIn` → same keyframe for reference HTML parity. |
 | Glass hover | **6px lift** + brightness/saturate/shadow on directory-style cards. `--hover-lift: -2px` stays for **legacy** only. |
 | Seam engine | **One system:** `pdx-rainbow-rule` (3px, same as header/PlaceModal). `dirRefract` is an **alias / thinner edge-masked presentation**, not a second engine. |
 | Resting glow | Driven by **`--dir-gm`** (or token equivalent). Calm **zeros the multiplier**, does not delete the shadow rule. |
-| Feature keyframes | ~80 outside `effects.css` — **do not drop** (aurora, glitch, map RSVP pulse, board, inbox, attendance, avatar breathe, self-injecting suites, `pdxa*` mirrors). |
+| Feature keyframes | ~80 outside `effects.css` - **do not drop** (aurora, glitch, map RSVP pulse, board, inbox, attendance, avatar breathe, self-injecting suites, `pdxa*` mirrors). |
 
 ## Token contract (land first)
 
@@ -41,9 +41,9 @@ Translucent `#0c0c12@76%` lite glass + soft drop + brutal magenta CTA offsets �
 ## Agent order
 
 1. **Foundation** (this pass): `tokens/glass.css`, `ds/glass.ts`, `ds/mapTheme.ts`, `tokens/effects.css` hooks, exports.
-2. **Agent 5 Maps** + **Agent 7** (introduces neutral) + **Agent 8** (introduces `--edge-deboss`) — first surface wave.
-3. **Agents 1–4** (event / open event / directory / boards) — biggest card impact.
-4. **Agents 6, 9–14** — remaining surfaces.
+2. **Agent 5 Maps** + **Agent 7** (introduces neutral) + **Agent 8** (introduces `--edge-deboss`) - first surface wave.
+3. **Agents 1–4** (event / open event / directory / boards) - biggest card impact.
+4. **Agents 6, 9–14** - remaining surfaces.
 
 Each agent: own files only · point at shared tokens · match `screenshots/NN-*.png` · search anchor in `Card System.html` · calm + reduced-motion · **no layout reflow**.
 
@@ -57,10 +57,10 @@ Each agent: own files only · point at shared tokens · match `screenshots/NN-*.
 
 ## Current repo baseline (2026-07-16)
 
-- **Lite glass already shipped** in `client/src/components/ds/tokens/glass.css` (`--pdx-glass-fill` @76%, soft shadow) — this migration **supersedes** that recipe.
+- **Lite glass already shipped** in `client/src/components/ds/tokens/glass.css` (`--pdx-glass-fill` @76%, soft shadow) - this migration **supersedes** that recipe.
 - **PlaceCard** is the furthest along deep-glass (pgDirCardIn, `--dir-gm` glow, media well scanline, 6px hover).
 - **MapPanel** still uses old radial + flowing 3px seams; needs `--map-surface` frame.
-- **Button** still brutal magenta offset — glass button variant lands with foundation + agent CTAs.
+- **Button** still brutal magenta offset - glass button variant lands with foundation + agent CTAs.
 
 ## Reference
 

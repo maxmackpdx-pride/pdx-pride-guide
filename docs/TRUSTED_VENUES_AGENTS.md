@@ -8,7 +8,7 @@
 5. **QSearch UI** “Trusted” tab with health indicators.
 
 ## Shared registry
-`shared/trustedVenues.ts` — single source of truth for Badlands + Sanctuary.
+`shared/trustedVenues.ts` - single source of truth for Badlands + Sanctuary.
 
 ## File ownership (do not edit outside your list)
 

@@ -1,4 +1,4 @@
-# Phase 1 Handoff — PWA Shell + Prerequisites
+# Phase 1 Handoff - PWA Shell + Prerequisites
 
 ## Meta
 
@@ -18,7 +18,7 @@ Zaylist is now an installable PWA. Manifest, icons, service worker (`sw.js`), iO
 - [x] `vite-plugin-pwa` injectManifest → `dist/public/sw.js`
 - [x] `client/public/manifest.webmanifest`
 - [x] Icons in `client/public/icons/`
-- [x] `client/src/sw.ts` — network-first navigation + push handler stub
+- [x] `client/src/sw.ts` - network-first navigation + push handler stub
 - [x] `client/src/lib/pwa.ts`
 - [x] `PwaInstallBanner` on Dashboard
 - [x] `HOST_UPDATE` badge fix in `inboxContext.ts`
@@ -26,6 +26,6 @@ Zaylist is now an installable PWA. Manifest, icons, service worker (`sw.js`), iO
 ## For Phase 2
 
 - Extend push handlers in `client/src/sw.ts` (already has declarative + imperative)
-- Register via `/sw.js` — `registerServiceWorker()` in `main.tsx` (prod only)
+- Register via `/sw.js` - `registerServiceWorker()` in `main.tsx` (prod only)
 - Notification icon: `/icons/icon-192.png`
 - iOS: use `isStandalonePwa()` before permission prompts

@@ -63,7 +63,7 @@ function isActivePost(p: GiftingPost) {
 export default function Gifting() {
   usePageSeo(
     "Gifting Board | Zaylist | Portland Pride 2026",
-    "Give and find free stuff for the scene — Pride week and all year. Gifting and ISO board.",
+    "Give and find free stuff for the scene - Pride week and all year. Gifting and ISO board.",
   );
   const { user } = useAuth();
   const { toast } = useToast();

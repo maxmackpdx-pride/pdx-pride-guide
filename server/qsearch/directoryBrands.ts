@@ -112,9 +112,9 @@ function nameLooselyMatch(a: string, b: string): boolean {
 }
 
 export type MatchDirectoryBrandsOpts = {
-  /** QSearch source label e.g. "Darcelle XV" — used when venue is TBA/empty */
+  /** QSearch source label e.g. "Darcelle XV" - used when venue is TBA/empty */
   sourceLabel?: string | null;
-  /** Curated source id e.g. sanctuary-ics — used for host/label hints */
+  /** Curated source id e.g. sanctuary-ics - used for host/label hints */
   sourceId?: string | null;
 };
 
@@ -125,7 +125,7 @@ export function cleanSourceLabel(label: string | null | undefined): string {
       /\s*[\(\[]\s*(ics|json|tribe|html|wix|squarespace|eventbrite|tixr|bit|bandsintown|vision|upload|api|calendar|jsonld)\s*[\)\]]\s*/gi,
       " ",
     )
-    .replace(/\s*[-–—|]\s*(ics|tribe|json|eventbrite|tixr|calendar)\s*$/i, "")
+    .replace(/\s*[-–-|]\s*(ics|tribe|json|eventbrite|tixr|calendar)\s*$/i, "")
     .replace(/\s+/g, " ")
     .trim();
 }

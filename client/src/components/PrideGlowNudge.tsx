@@ -36,7 +36,7 @@ function forcedPreview(): boolean {
 
 /**
  * One-time nudge that reminds members who haven't picked a glow ring and/or a
- * non-default avatar that they can show off their pride — and lets them do it
+ * non-default avatar that they can show off their pride - and lets them do it
  * right here: pick an illustrated avatar, upload a photo, and choose a pride
  * ring, then save. A profile photo counts as "has an avatar". Shows once per
  * member (localStorage); `?glowNudge=1` force-shows it for previewing.
@@ -199,7 +199,7 @@ export default function PrideGlowNudge() {
       toast({ title: "Looking good 🌈" });
       setOpen(false);
     } catch {
-      toast({ title: "Could not save — try again", variant: "destructive" });
+      toast({ title: "Could not save - try again", variant: "destructive" });
     } finally {
       setSaving(false);
     }

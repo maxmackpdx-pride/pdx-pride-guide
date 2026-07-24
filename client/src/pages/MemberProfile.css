@@ -421,7 +421,7 @@ a.pp-btn {
   pointer-events: auto;
 }
 
-/* Share menu portaled to body — hero isolation was trapping clicks under later sections */
+/* Share menu portaled to body - hero isolation was trapping clicks under later sections */
 .pp-share-pop--portal {
   position: fixed;
   top: auto;
@@ -1290,7 +1290,7 @@ a.pp-btn {
   --profile-acc-t: var(--neon-magenta);
 }
 
-/* Cover flush under nav seam — no dead band between rainbow divider and banner */
+/* Cover flush under nav seam - no dead band between rainbow divider and banner */
 .pp-page--reimagined .pp-hero.pp-hero--reimagined {
   min-height: 0;
   justify-content: flex-start;

@@ -1,4 +1,4 @@
-/* Hub v2 — Nude Beaches utility register. Ported from Hub-standalone.html */
+/* Hub v2 - Nude Beaches utility register. Ported from Hub-standalone.html */
 
 .hub-root {
   --panel-ink: #06060a;
@@ -22,7 +22,7 @@
 }
 
 *{box-sizing:border-box}
-    /* Scope hub chrome — do NOT leak a:hover yellow/underline to the whole site */
+    /* Scope hub chrome - do NOT leak a:hover yellow/underline to the whole site */
     .hub-root, .hub-root body{margin:0;background:var(--panel-ink)}
     .hub-root a{color:var(--link);text-decoration:none}
     .hub-root a:hover{color:var(--neon-yellow)}
@@ -37,7 +37,7 @@
     .seg{cursor:pointer;border:none;background:transparent;color:var(--board-muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:6px 2px;transition:.15s;white-space:nowrap}
     .seg:hover{color:#fff}
     .seg.on{color:#fff;box-shadow:inset 0 -2px 0 var(--panel-cyan)}
-    /* Follow — cyan glass-btn (§2.13 / §1.5); .on = outlined glass (following) */
+    /* Follow - cyan glass-btn (§2.13 / §1.5); .on = outlined glass (following) */
     .foll{
       --c:var(--panel-cyan,#19e3ff);
       cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
@@ -167,7 +167,7 @@
     .hub-v2-mobile-admin{display:none;margin-bottom:14px}
     @media(max-width:720px){.hub-v2-mobile-admin{display:block}}
 
-    /* Unified hub chrome — same on member + admin */
+    /* Unified hub chrome - same on member + admin */
     .hub-v2-rainbow{
       height:3px;width:100%;
       background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#24408e,#732982,#ff00cc);
@@ -208,7 +208,7 @@
       margin-top:10px;padding:12px;border:1px solid var(--panel-border);
       border-radius:12px;background:var(--panel-card);font-size:12px;color:var(--board-muted);
     }
-    /* Keys live in rail / drawer — drop double-box when hub-keys is the only child */
+    /* Keys live in rail / drawer - drop double-box when hub-keys is the only child */
     .hub-v2-side-extra:has(.hub-keys){
       padding:0;border:none;background:transparent;
     }
@@ -234,7 +234,7 @@
       display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;
     }
     .hub-v2-lrail{max-height:calc(100vh - 24px);top:12px;overflow:auto}
-    /* Admin tools page reuses hub shell — body sits in same main column */
+    /* Admin tools page reuses hub shell - body sits in same main column */
     .hub-root--admin .admin-panel-body{padding-top:4px}
     .hub-root--unified{min-height:100vh}
     .hub-root--unified .dash-page{background:transparent;min-height:0}
@@ -249,7 +249,7 @@
       .hub-root .fitem,.hub-root .statnum,.hub-root .rowin,.hub-root .reveal,.hub-root .seg.on::after,.hub-root .navi.on::before,.hub-root .ld{animation:none !important}
     }
 
-    /* Hub profile — behind-the-scenes editor (?edit=profile) */
+    /* Hub profile - behind-the-scenes editor (?edit=profile) */
     .hub-v2-profile__kicker{color:var(--panel-lime)}
     .hub-v2-profile__preview{margin-top:28px;padding-top:22px;border-top:1px solid var(--panel-border)}
     .hub-v2-profile__preview-kicker{letter-spacing:.16em;margin-bottom:16px;color:var(--board-muted)}
@@ -290,7 +290,7 @@
       .hub-v2-profile__stat:nth-last-child(-n+2){border-bottom:none}
     }
 
-    /* Profile editor form — hub-v2 register */
+    /* Profile editor form - hub-v2 register */
     .hub-v2-profile-editor{
       background:var(--panel-card);border:1px solid var(--panel-border);border-radius:14px;
       padding:22px 24px 24px;margin:20px 0 0;
@@ -338,7 +338,7 @@
     .hub-v2-profile-editor__save:disabled{opacity:.55;cursor:not-allowed}
     .hub-v2-profile-editor__msg{color:var(--panel-lime);font-size:.85rem}
 
-    /* Hub events — .card list + hub-thread rows (matches People register) */
+    /* Hub events - .card list + hub-thread rows (matches People register) */
     .hub-events-tabs{display:flex;gap:22px;border-bottom:1px solid var(--panel-border);margin:20px 0 22px}
     .hub-events-list{padding:0;overflow:hidden}
     .hub-events-empty{text-align:center}
@@ -355,7 +355,7 @@
     .hub-event-thread__admission{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--panel-cyan);white-space:nowrap}
     .hub-event-thread__going{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--board-muted);white-space:nowrap}
 
-    /* Hub people — .hub-thread rows (Experiment 101 cyan register) */
+    /* Hub people - .hub-thread rows (Experiment 101 cyan register) */
     .hub-people-hero-kick{color:var(--panel-cyan)}
     .hub-people-tabs{display:flex;gap:22px;border-bottom:1px solid var(--panel-border);margin:20px 0 22px}
     .hub-people-places{margin-bottom:22px}
@@ -380,7 +380,7 @@
     .hub-people-empty__cta{text-decoration:none;padding:10px 16px}
     .hub-people-empty__cta--primary{border:1px solid var(--panel-cyan);border-radius:8px;color:var(--panel-cyan)}
     .hub-people-empty__cta--ghost{border:1px solid var(--panel-border-2);border-radius:99px;color:var(--board-muted)}
-    /* Who-to-follow rail — neutral OLED glass (§2.13) */
+    /* Who-to-follow rail - neutral OLED glass (§2.13) */
     .hub-people-rail{
       --c:var(--glass-neutral-c2,#b8b8c2);
       padding:0;overflow:hidden;
@@ -474,7 +474,7 @@
     .hub-feed{display:flex;flex-direction:column;gap:18px}
     .hub-feed-stack{display:flex;flex-direction:column;gap:16px}
 
-    /* 7-day forecast — feed-top slot (replaces keys banner) */
+    /* 7-day forecast - feed-top slot (replaces keys banner) */
     .hub-v2-weather{
       padding:16px 18px 14px;
       margin-bottom:4px;
@@ -592,7 +592,7 @@
     .hub-feed-empty__msg{margin:0;font-size:15px;color:var(--board-text)}
     .hub-feed-retry{margin-top:14px;color:var(--panel-cyan);justify-content:center;width:100%}
 
-    /* ── Feed cards — deep-glass §2.13 ─────────────────────────
+    /* ── Feed cards - deep-glass §2.13 ─────────────────────────
        Neutral activity rows: OLED neutral glass + corner sheen as *background*
        (not an absolute overlay) so body copy stays legible.
        Board accent rows keep accent glass; Looking gets full rainbow top.
@@ -619,7 +619,7 @@
     }
     .hub-feed-card--clickable{cursor:pointer}
     .hub-feed-card--pin{border-color:color-mix(in srgb,var(--glass-neutral-c2,#b8b8c2) 62%,#101014)}
-    /* Board / accent cards — accented glass keyed to --hub-feed-accent.
+    /* Board / accent cards - accented glass keyed to --hub-feed-accent.
        !important beats tokens/glass.css `.fitem--glow` so sheen stays a *bg*
        layer (text-legible) rather than an absolute wash. */
     .hub-root .hub-feed-card--accent,
@@ -641,11 +641,11 @@
         inset 0 1px 0 color-mix(in srgb,var(--c) 55%,rgba(255,255,255,.12)),
         inset 0 0 34px -26px color-mix(in srgb,var(--c) 40%,transparent));
     }
-    /* Looking posts — full rainbow top bar (shared seam via fitem--glow::before) */
+    /* Looking posts - full rainbow top bar (shared seam via fitem--glow::before) */
     .hub-feed-card--looking{
       --c:var(--hub-feed-accent,var(--panel-purple));
     }
-    /* Right-rail next-moves + who-to-follow — neutral glass dock (design rails) */
+    /* Right-rail next-moves + who-to-follow - neutral glass dock (design rails) */
     .rrail > .card.hub-rail-card,
     .rrail > .hub-rail-card,
     .rrail > .card.hub-people-rail,
@@ -724,7 +724,7 @@
     .hub-feed-card__meta{font-size:10.5px;letter-spacing:.06em;margin-top:5px}
     .hub-feed-card__postedby{display:flex;align-items:center;gap:6px;margin-top:7px}
     .hub-feed-card__postedby-name{font-size:10.5px;letter-spacing:.05em;color:var(--text-lo,#8c8980);margin:0}
-    /* Status badges — outlined-glass pills in status color (RSVP/Submitted/Looking/Check-in/Event) */
+    /* Status badges - outlined-glass pills in status color (RSVP/Submitted/Looking/Check-in/Event) */
     .hub-feed-card__badge{
       --c:var(--hub-feed-accent,var(--panel-cyan));
       flex:none;font-size:10px;letter-spacing:.1em;
@@ -772,7 +772,7 @@
     .hub-feed-mc__place{margin-top:14px;font-size:10.5px;letter-spacing:.12em;color:var(--panel-magenta)}
     .hub-feed-mc__reply{margin-top:12px;font-size:10.5px;letter-spacing:.12em;color:var(--panel-magenta)}
 
-    /* Nested event chip inside a feed card — dark glass well (thin black edge) */
+    /* Nested event chip inside a feed card - dark glass well (thin black edge) */
     .hub-feed-event{
       display:flex;align-items:center;gap:11px;margin-top:12px;width:100%;padding:12px 14px;
       background:
@@ -860,7 +860,7 @@
     .hub-settings__actions{display:flex;gap:12px;flex-wrap:wrap}
     button.sw{border:none;padding:0;font:inherit;color:inherit}
 
-    /* Notification prefs — embedded in hub settings card */
+    /* Notification prefs - embedded in hub settings card */
     .hub-settings-prefs{margin:0;padding:0;border:none;background:transparent}
     .hub-settings-prefs__lede{margin:0 0 14px;font-size:13px;color:var(--board-muted);line-height:1.45}
     .hub-settings-prefs__enable-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
@@ -988,7 +988,7 @@
       .calm-mode .hub-next-rsvp__dot{animation:none !important}
     }
 
-    /* Mobile hub drawer — slim pill peeks above site nav; sheet drags open/closed */
+    /* Mobile hub drawer - slim pill peeks above site nav; sheet drags open/closed */
     .hub-v2-drawer,
     .hub-v2-drawer-backdrop{
       display:none;
@@ -998,7 +998,7 @@
         /* Solid grab strip height (room for glowing pill + padding) */
         --hub-mobile-drawer-collapsed:36px;
       }
-      /* Portaled to body — re-declare hub tokens so mode tabs render correctly */
+      /* Portaled to body - re-declare hub tokens so mode tabs render correctly */
       .hub-v2-drawer{
         --panel-cyan:#19e3ff;
         --hub-cyan:#19e3ff;
@@ -1135,7 +1135,7 @@
       .hub-v2-kicker--drawer{padding:0 2px 10px;color:#888}
       .hub-v2-side-extra--drawer{margin-top:10px}
       /*
-       * Do NOT use overflow:hidden alone on body — iOS Safari detaches the
+       * Do NOT use overflow:hidden alone on body - iOS Safari detaches the
        * position:fixed 5-tab bar and leaves it below the visual viewport after
        * the drawer closes. Scroll is blocked via touchmove in HubV2Shell.
        */

@@ -1,4 +1,4 @@
-// @ts-nocheck — sandbox components are ported JSX without strict typings.
+// @ts-nocheck - sandbox components are ported JSX without strict typings.
 import {
   Component,
   type ChangeEvent,

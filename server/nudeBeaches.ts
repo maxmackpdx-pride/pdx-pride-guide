@@ -128,7 +128,7 @@ function crossingWindowNoteFromSeries(
   const loTime = new Date(lo.at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   if (latest.ft - lo.ft < 0.15) {
-    return `About as low as it's been today — a good window to cross. Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
+    return `About as low as it's been today - a good window to cross. Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
   }
   if (delta < -0.1) {
     return `Should keep getting easier over the next few hours. Today's range: ${lo.ft.toFixed(2)}–${hi.ft.toFixed(2)} ft.`;
@@ -378,7 +378,7 @@ async function fetchRrcWaterExtras(): Promise<{
       waterTempSite: data.temp?.site ?? "Columbia at Warrendale (below Bonneville)",
       waterClarity: clarityLabel
         ? clarityWhy
-          ? `${clarityLabel} — ${clarityWhy}`
+          ? `${clarityLabel} - ${clarityWhy}`
           : clarityLabel
         : null,
       clarityWindFrom: clarity?.windFrom ?? null,
@@ -439,7 +439,7 @@ async function fetchSwimGuideCollins(): Promise<Pick<SauvieIslandLive, "swimStat
 /**
  * Parse Sauvie parking portal copy carefully.
  * Official site often says the **seasonal** beaches permit is SOLD OUT while
- * **daily / day** permits ($10) remain for sale — do not treat that as "parking sold out."
+ * **daily / day** permits ($10) remain for sale - do not treat that as "parking sold out."
  */
 function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parkingNote" | "parkingStatusLabel"> {
   const seasonSoldOut =
@@ -460,7 +460,7 @@ function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parki
   if (dailySoldOut) {
     return {
       parkingNote:
-        "Daily beaches day-passes look sold out on the portal for some dates — check SauvieIslandParking.com for your day (releases often hit Friday 4pm).",
+        "Daily beaches day-passes look sold out on the portal for some dates - check SauvieIslandParking.com for your day (releases often hit Friday 4pm).",
       parkingStatusLabel: "SOLD OUT",
     };
   }
@@ -468,7 +468,7 @@ function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parki
   if (seasonSoldOut) {
     return {
       parkingNote:
-        "2026 seasonal beaches permits are sold out — daily $10 day passes are still sold online for weekends/holidays (buy before you go; they go fast).",
+        "2026 seasonal beaches permits are sold out - daily $10 day passes are still sold online for weekends/holidays (buy before you go; they go fast).",
       parkingStatusLabel: "DAY PASS",
     };
   }
@@ -476,7 +476,7 @@ function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parki
   if (dailyMentioned || buyNow || /available/i.test(html)) {
     return {
       parkingNote:
-        "Daily beaches permits ($10) appear available on SauvieIslandParking.com for permit-required days — confirm your date before you drive out.",
+        "Daily beaches permits ($10) appear available on SauvieIslandParking.com for permit-required days - confirm your date before you drive out.",
       parkingStatusLabel: "OPEN",
     };
   }
@@ -484,14 +484,14 @@ function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parki
   if (html.length < 800) {
     return {
       parkingNote:
-        "Permit portal loads dynamically — open SauvieIslandParking.com. Seasonal passes may be sold out; day passes are sold separately.",
+        "Permit portal loads dynamically - open SauvieIslandParking.com. Seasonal passes may be sold out; day passes are sold separately.",
       parkingStatusLabel: "CHECK",
     };
   }
 
   return {
     parkingNote:
-      "Weekends/holidays through Labor Day need a Sauvie beaches permit. Seasonal passes may be sold out — buy a daily day pass online before you go.",
+      "Weekends/holidays through Labor Day need a Sauvie beaches permit. Seasonal passes may be sold out - buy a daily day pass online before you go.",
     parkingStatusLabel: "CHECK",
   };
 }
@@ -499,7 +499,7 @@ function interpretSauvieParkingHtml(html: string): Pick<SauvieIslandLive, "parki
 async function fetchParkingSnapshot(): Promise<Pick<SauvieIslandLive, "parkingNote" | "parkingStatusLabel">> {
   const fallback = {
     parkingNote:
-      "Could not reach the parking portal — buy a daily beaches day pass at SauvieIslandParking.com if you need a weekend/holiday permit (seasonal passes may already be sold out).",
+      "Could not reach the parking portal - buy a daily beaches day pass at SauvieIslandParking.com if you need a weekend/holiday permit (seasonal passes may already be sold out).",
     parkingStatusLabel: "CHECK" as const,
   };
   try {

@@ -1,5 +1,5 @@
-/* Inbox shell — hover states + composer primitives
-   Agent 6 / deep-glass §2.6 — shell surface + FAB glossy chrome.
+/* Inbox shell - hover states + composer primitives
+   Agent 6 / deep-glass §2.6 - shell surface + FAB glossy chrome.
    Overlay enter keyframes stay in index.css (inbox-overlay-in / fade). */
 
 .inbox-shell-root {
@@ -118,7 +118,7 @@ html.calm-mode .inbox-shell-root--deep-glass,
 }
 
 /* ============================================================
-   Desktop floating inbox FAB — deep-glass surface (Agent 6 / §2.6)
+   Desktop floating inbox FAB - deep-glass surface (Agent 6 / §2.6)
    Layout, drag, halo pulse keyframes: unchanged (index.css).
    Surface: glossy radial + top inset gloss + accent bloom.
    ============================================================ */

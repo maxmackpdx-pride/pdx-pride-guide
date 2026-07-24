@@ -19,7 +19,7 @@ body {
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-/* Card-like link shells — never underline or recolor (home islands, etc.) */
+/* Card-like link shells - never underline or recolor (home islands, etc.) */
 a.home-boards__utility:hover,
 a.home-boards__utility:focus,
 a.home-boards__utility:active,
@@ -64,7 +64,7 @@ p { margin: 0; }
   border: 0;
   /* visible so a short bloom can feather under the hard bar; parent clips */
   overflow: visible;
-  /* hard bar ~20% stronger presence — no filter (filter expands into a fog band) */
+  /* hard bar ~20% stronger presence - no filter (filter expands into a fog band) */
   opacity: 1;
   background: linear-gradient(90deg,
     var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
@@ -72,7 +72,7 @@ p { margin: 0; }
   animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
   z-index: 3;
 }
-/* Soft glass edge under the hard seam — short + tight so it does not become a fog bar */
+/* Soft glass edge under the hard seam - short + tight so it does not become a fog bar */
 .pdx-rainbow-rule::before,
 .pdx-seam::before {
   content: "";
@@ -111,7 +111,7 @@ p { margin: 0; }
 /* ── Card top rainbow seam (clickable cards) ────────────────
    Events (grid/list/schedule), boards (gigs/gifts/MC), places,
    and glowing hub-feed board cards. Same motion as .pdx-rainbow-rule.
-   NOT on plain hub-feed activity rows — only .fitem--glow.
+   NOT on plain hub-feed activity rows - only .fitem--glow.
    PlaceCard uses an explicit .pdxPlace__seam element.
    Calm / reduced-motion → static (see effects.css). */
 .pdxBoard,
@@ -127,7 +127,7 @@ p { margin: 0; }
   overflow: hidden;
 }
 
-/* Rainbow top seam on event/schedule/hub cards — NOT on board quote cards (MC/gifts/gigs) */
+/* Rainbow top seam on event/schedule/hub cards - NOT on board quote cards (MC/gifts/gigs) */
 .pdxBoard::before,
 .pdxRow::before,
 .event-board-card::before,
@@ -142,7 +142,7 @@ p { margin: 0; }
   height: 3px;
   z-index: 6;
   pointer-events: none;
-  /* hard bar + tight glow (filter removed — it bloated into a fog band) */
+  /* hard bar + tight glow (filter removed - it bloated into a fog band) */
   background: linear-gradient(
     90deg,
     var(--neon-cyan),
@@ -157,7 +157,7 @@ p { margin: 0; }
     pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite;
 }
 
-/* Board quote cards: no rainbow seam — accent neon frame only */
+/* Board quote cards: no rainbow seam - accent neon frame only */
 .board-listing-card::before,
 .board-spotted-card::before,
 .spotted-card::before {

@@ -37,11 +37,11 @@ export function serveStatic(app: Express) {
     app.get(from, (_req, res) => res.redirect(302, to));
   }
 
-  // Serve injected HTML for the homepage — express.static would bypass SEO injection.
+  // Serve injected HTML for the homepage - express.static would bypass SEO injection.
   app.get("/", sendSeoIndex);
   app.get("/index.html", sendSeoIndex);
 
-  // Hashed build assets are content-addressed — cache forever. A hash miss
+  // Hashed build assets are content-addressed - cache forever. A hash miss
   // (stale page after a deploy) must 404, not fall through to the SPA HTML,
   // so the client can detect it and reload.
   app.use("/assets", express.static(path.join(distPath, "assets"), {

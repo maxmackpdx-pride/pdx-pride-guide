@@ -1,5 +1,5 @@
 /**
- * Local demo helpers — chrome visible on localhost / Vite without a session
+ * Local demo helpers - chrome visible on localhost / Vite without a session
  * so Hub, profile, and floating inbox can be reviewed as a guest.
  */
 import type { AuthUser } from "@/context/AuthContext";
@@ -42,7 +42,7 @@ export function getLocalDemoHubUser(): AuthUser {
     avatarChoice: 1,
     avatarRing: "none",
     avatarCrop: null,
-    bio: "Local demo shell — sign in for your real hub.",
+    bio: "Local demo shell - sign in for your real hub.",
     photoUrl: null,
     coverImageUrl: null,
     coverCrop: null,

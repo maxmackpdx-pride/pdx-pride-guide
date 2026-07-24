@@ -50,12 +50,12 @@ export function resetPageScroll() {
 }
 
 /**
- * Horizontal only — keeps vertical position.
+ * Horizontal only - keeps vertical position.
  * Use after pinch-zoom settles back to ~1× or resize that shoves content sideways.
  */
 export function reCenterHorizontalScroll() {
   const y = window.scrollY || document.documentElement.scrollTop || 0;
-  // Only touch window scroll if X is actually off — avoids interrupting Y momentum
+  // Only touch window scroll if X is actually off - avoids interrupting Y momentum
   const x =
     window.scrollX ||
     document.documentElement.scrollLeft ||
@@ -98,7 +98,7 @@ function visualScale(): number {
 
 /** Soft re-center: only if scrollX is non-zero and we are not mid-zoom. */
 export function ensurePageCentered() {
-  // While pinch-zoomed the user pans with non-zero offsets — do not fight them.
+  // While pinch-zoomed the user pans with non-zero offsets - do not fight them.
   if (visualScale() > 1.02) return;
   if (isHorizontallyOffset()) {
     reCenterHorizontalScroll();
@@ -124,7 +124,7 @@ export function installScrollRecenterListeners() {
   if ((window as Window & { __pdxScrollRecenter?: boolean }).__pdxScrollRecenter) return;
   (window as Window & { __pdxScrollRecenter?: boolean }).__pdxScrollRecenter = true;
 
-  // Full reload + bfcache restore — once, not a cascade of top jumps
+  // Full reload + bfcache restore - once, not a cascade of top jumps
   window.addEventListener("pageshow", (e) => {
     scheduleScrollReset();
     if (e.persisted) {
@@ -162,7 +162,7 @@ export function installScrollRecenterListeners() {
 
   const vv = window.visualViewport;
   if (vv) {
-    // resize = scale/chrome changes; scroll = pan (skip — causes glitchy L/R)
+    // resize = scale/chrome changes; scroll = pan (skip - causes glitchy L/R)
     vv.addEventListener("resize", onViewportSettled);
   }
   window.addEventListener("resize", onViewportSettled);

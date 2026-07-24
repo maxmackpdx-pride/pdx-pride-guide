@@ -174,7 +174,7 @@ export default function MemberProfile() {
     return list.find(b => b.id === placeId) ?? null;
   }, []);
 
-  /** Open PlaceModal on the profile — no route change so X keeps you here. */
+  /** Open PlaceModal on the profile - no route change so X keeps you here. */
   const openPlaceFromTop8 = useCallback(
     async (entry: Extract<ProfileTop8Entry, { kind: "place" }>, originEl: HTMLElement | null) => {
       if (originEl) {

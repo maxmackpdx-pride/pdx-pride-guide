@@ -1,5 +1,5 @@
 /* ============================================================
-   Zaylist — DEEP GLASS / OLED-NEON (canonical LIVE chrome)
+   Zaylist - DEEP GLASS / OLED-NEON (canonical LIVE chrome)
 
    Source of truth: THIS FILE + production components on master / live site.
    Rulebook: docs/LIVE_DESIGN_STANDARD.md
@@ -108,7 +108,7 @@
     linear-gradient(#000, #000) border-box;
   --glass-btn-border: 2px solid #000;
   --glass-btn-color: #fff;
-  /* Buttons: thin black outline + inward sheen only — no outer neon bloom */
+  /* Buttons: thin black outline + inward sheen only - no outer neon bloom */
   --glass-btn-shadow:
     0 0 0 1px #000,
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -154,7 +154,7 @@
 
   /* ── 1.6 Map surface ────────────────────────────────────── */
   --map-surface-bg: #06060a;
-  /* Debossed map well — thin black rim + deep inward hole (no outer bloom) */
+  /* Debossed map well - thin black rim + deep inward hole (no outer bloom) */
   --map-frame-shadow:
     0 0 0 1px #000,
     inset 0 0 0 1px rgba(0, 0, 0, 0.85),
@@ -174,7 +174,7 @@
     rgba(0, 0, 0, 0.48) 100%
   );
   --map-vignette-inset: inset 0 0 18px 2px rgba(0, 0, 0, 0.48), inset 0 0 56px 10px rgba(0, 0, 0, 0.4);
-  /* No outer bloom on maps — frame is black outline + inset deboss only */
+  /* No outer bloom on maps - frame is black outline + inset deboss only */
   --map-neutral-glow: none;
 
   /* ── Nav deboss (Agent 8 / §2.8) ────────────────────────── */
@@ -264,7 +264,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Utility classes — point components here; set --c on the node
+   Utility classes - point components here; set --c on the node
    ═══════════════════════════════════════════════════════════ */
 
 .pdx-glass-card,
@@ -292,7 +292,7 @@
   border-left: 4px solid var(--c);
 }
 
-/* Corner sheen — mount as child or ::after */
+/* Corner sheen - mount as child or ::after */
 .pdx-glass-sheen,
 .pdx-glass-card::after {
   content: "";
@@ -316,7 +316,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Map key / legend panels — neutral deep-glass on ALL maps
+   Map key / legend panels - neutral deep-glass on ALL maps
    (events, home, directory, DS MapLegend). Pin shapes/colors
    stay in component CSS; this is panel chrome only.
    docs/LIVE_DESIGN_STANDARD.md
@@ -326,7 +326,7 @@
 .directory-map-key,
 .pdxLegend {
   --c: var(--glass-neutral-c2, #b8b8c2);
-  /* Do not set position here — .map-legend is absolute over the map */
+  /* Do not set position here - .map-legend is absolute over the map */
   overflow: hidden;
   background: var(--glass-card-neutral-bg);
   border: var(--glass-card-neutral-border);
@@ -415,7 +415,7 @@ html.calm-mode .pdxLegend,
   background: var(--poster-well-scan);
 }
 
-/* Default glass CTA — dark fill + accent rim (state sheet DEFAULT) */
+/* Default glass CTA - dark fill + accent rim (state sheet DEFAULT) */
 .pdx-glass-btn {
   display: inline-flex;
   align-items: center;
@@ -529,7 +529,7 @@ html.calm-mode .pdxLegend,
   overflow: hidden;
   background: var(--map-surface-bg);
   border: 1px solid #000;
-  /* Debossed well edge — thin black rim + deep inward hole */
+  /* Debossed well edge - thin black rim + deep inward hole */
   box-shadow: var(--map-frame-shadow);
 }
 
@@ -595,12 +595,12 @@ html.calm-mode .pdxLegend,
 .spotted-card,
 .board-detail-modal,
 .board-post-overlay,
-/* .event-modal — shell chrome lives in index.css (opaque; no backdrop-filter double) */
+/* .event-modal - shell chrome lives in index.css (opaque; no backdrop-filter double) */
 .event-board-card,
 .pdxBoard,
 .pdxRow,
 .board-stats-bar,
-/* .board-stats-band — dedicated cyan strip bloom below (not full glass-card fill) */
+/* .board-stats-band - dedicated cyan strip bloom below (not full glass-card fill) */
 .nude-live-card,
 .nb-log-fee,
 .nb-log,
@@ -623,7 +623,7 @@ html.calm-mode .pdxLegend,
   -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }
 
-/* Keep-alive panel: neutral glass (Agent 12) — not accented */
+/* Keep-alive panel: neutral glass (Agent 12) - not accented */
 .about-v2-donate--panel.support-keepalive,
 .support-keepalive {
   --c: var(--glass-neutral-c2);
@@ -734,7 +734,7 @@ html.calm-mode .pdxLegend,
     );
 }
 
-/* Decorative board motifs — line SVGs, board accent, top-right watermark (§17) */
+/* Decorative board motifs - line SVGs, board accent, top-right watermark (§17) */
 .board-glass-motif {
   position: absolute;
   top: 10%;
@@ -771,7 +771,7 @@ html.calm-mode .pdxLegend,
   pointer-events: none;
   color: inherit;
 }
-/* MC quotes — oversized typographic watermark (top-right, design board cards) */
+/* MC quotes - oversized typographic watermark (top-right, design board cards) */
 .board-glass-motif--quote-wrap .board-glass-motif--quote {
   position: absolute;
   top: -12px;
@@ -852,7 +852,7 @@ html.calm-mode .pdxLegend,
   --dc: var(--_day, var(--c)); /* pdxPulse / legacy glow hooks */
 }
 
-/* Day-colored ambient pulse (deep-glass slab, bloom breathes — keeps black ring) */
+/* Day-colored ambient pulse (deep-glass slab, bloom breathes - keeps black ring) */
 @keyframes pdxGlassDayPulse {
   0%,
   100% {
@@ -877,15 +877,15 @@ html.calm-mode .pdxLegend,
 
 .pdxBoard,
 .pdxRow {
-  /* IMPORTANT: entrance uses fill-mode `backwards` only — NOT `both`/`forwards`.
+  /* IMPORTANT: entrance uses fill-mode `backwards` only - NOT `both`/`forwards`.
      `both` keeps transform:none after the entrance and blocks hover lift.
-     No resting infinite box-shadow pulse — animating multi-layer shadows on
+     No resting infinite box-shadow pulse - animating multi-layer shadows on
      every grid card tanks scroll (L/R + U/D). Bloom is static; hover warms it. */
   animation: pgDirCardIn 0.55s var(--ease-out, ease) backwards;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
 
-/* New thin prismatic top seam (deep-glass) — overrides thick glowing base seam */
+/* New thin prismatic top seam (deep-glass) - overrides thick glowing base seam */
 .pdxBoard::before,
 .pdxRow::before {
   content: "";
@@ -988,7 +988,7 @@ html.calm-mode .pdxRow::before,
   box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.8);
 }
 
-/* Hover: hot rim bloom (pdxPulse demoted — brighten existing bloom, not second engine) */
+/* Hover: hot rim bloom (pdxPulse demoted - brighten existing bloom, not second engine) */
 .board-listing-card--makeover:hover,
 .board-listing-card--makeover.is-expanded,
 .board-listing-card:hover,

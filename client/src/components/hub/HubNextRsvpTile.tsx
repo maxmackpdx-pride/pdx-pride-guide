@@ -16,7 +16,7 @@ function typePillClass(label: string): string {
 }
 
 /**
- * Mobile-only poster tile at the top of member hub — the member's next RSVP'd event.
+ * Mobile-only poster tile at the top of member hub - the member's next RSVP'd event.
  */
 export default function HubNextRsvpTile() {
   const { user } = useAuth();

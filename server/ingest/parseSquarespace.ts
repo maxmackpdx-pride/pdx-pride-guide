@@ -42,7 +42,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
       dateStart = toPacificWallClock(String(item.startDate));
     } else if (item.addedOn) {
       dateStart = toPacificWallClock(String(item.addedOn));
-      warnings.push("No startDate — used addedOn");
+      warnings.push("No startDate - used addedOn");
     }
 
     if (typeof item.endDate === "number") {
@@ -54,7 +54,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
     if (!dateStart) continue;
     if (!dateEnd) {
       dateEnd = defaultEndFromStart(dateStart);
-      warnings.push("No endDate — defaulted +3h");
+      warnings.push("No endDate - defaulted +3h");
     }
 
     const loc = item.location || {};
@@ -81,7 +81,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
     }
     if (!description) {
       description = `${title} at ${venueName}.`;
-      warnings.push("No description — stub");
+      warnings.push("No description - stub");
     }
 
     const path = item.fullUrl || item.url || item.websiteUrl || "";
@@ -96,7 +96,7 @@ export function parseSquarespaceJson(raw: string, sourceUrl: string | null = nul
     }
     const ticketUrl = eventPageUrl || sourceUrl;
 
-    // Prefer original/full asset over thumbnail — flyers must be full quality
+    // Prefer original/full asset over thumbnail - flyers must be full quality
     const poster =
       preferFullQualityImageUrl(
         pickBestImageFromUnknown(item.image) ||

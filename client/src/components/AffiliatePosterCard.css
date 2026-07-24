@@ -1,4 +1,4 @@
-/* Affiliate / sponsored ads — deep-glass chrome (Agent 14 / §2.14)
+/* Affiliate / sponsored ads - deep-glass chrome (Agent 14 / §2.14)
    Grid slot: green glass · In-feed: red glass
    Tokens: --glass-card, --glass-sheen, --poster-well, --glass-btn
    Layout / placement algorithms: untouched. */
@@ -17,7 +17,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   GRID SLOT — .pdxBoard--affiliate (events grid)
+   GRID SLOT - .pdxBoard--affiliate (events grid)
    Same deep-glass chrome as event cards; brand drives --c:
      CockBlock → red · Mr. S → cyan
    ═══════════════════════════════════════════════════════════ */
@@ -28,7 +28,7 @@
   --_dayt: var(--c, var(--ac));
   text-decoration: none;
   color: inherit;
-  /* Entrance only — infinite filter pulse forces per-frame repaints while scrolling */
+  /* Entrance only - infinite filter pulse forces per-frame repaints while scrolling */
   animation: pgDirCardIn 0.55s var(--ease-out, ease) backwards;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
@@ -45,7 +45,7 @@
   --_day: #19e3ff;
 }
 
-/* Custom partners — accent comes from inline --c (builder primaryColor) */
+/* Custom partners - accent comes from inline --c (builder primaryColor) */
 .pdxBoard--affiliate-custom .pdxBoard__affChip {
   color: #050506;
 }
@@ -64,7 +64,7 @@
   color: inherit;
 }
 
-/* Poster well — radial accent + 4px floor (stripe becomes the floor) */
+/* Poster well - radial accent + 4px floor (stripe becomes the floor) */
 .pdxBoard--affiliate .pdxBoard__poster {
   position: relative;
   background: var(--poster-well-bg);
@@ -181,7 +181,7 @@
   z-index: 2;
 }
 
-/* AFFILIATE chip — filled with brand accent (red / cyan) */
+/* AFFILIATE chip - filled with brand accent (red / cyan) */
 .pdxBoard__affChip {
   position: absolute;
   z-index: 3;
@@ -249,7 +249,7 @@
 }
 
 /*
- * SHOP NOW — solid glass primary CTA (brand fill).
+ * SHOP NOW - solid glass primary CTA (brand fill).
  * Bare .pdx-glass-btn was washing Mr. S into cyan-on-cyan (unreadable).
  * Force solid fill + dark ink; CockBlock red keeps white type.
  */
@@ -302,7 +302,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   IN-FEED SLOT — .feed-aff (scene feed)
+   IN-FEED SLOT - .feed-aff (scene feed)
    Deep-glass shell + black ring + brand neon edge bloom.
    CockBlock red · Mr. S cyan. Layout / 3 rows preserved.
    Overrides hub-v2.css surface only.

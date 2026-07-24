@@ -332,7 +332,7 @@ export default function AttendanceCluster({
         </div>
       )}
 
-      {/* Avatar grid — hosts, talent, and attendees */}
+      {/* Avatar grid - hosts, talent, and attendees */}
       {gridPeople.length > 0 && (
         <div className="attendance-avatar-grid">
           {gridPeople.map(p => {

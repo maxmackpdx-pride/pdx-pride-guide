@@ -32,7 +32,7 @@ export type GiftingPost = {
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
 
-/** Deep-glass board accents (SoT §2.4) — Gifting board is lime; grab keeps orange cue. */
+/** Deep-glass board accents (SoT §2.4) - Gifting board is lime; grab keeps orange cue. */
 const ACCENT = {
   GIFT: "#CCFF00",
   ISO: "#CCFF00",
@@ -41,7 +41,7 @@ const ACCENT = {
 
 /**
  * Decorative line motifs for deep-glass board cards (Card System §17).
- * Stroke SVGs / quote marks — opacity + placement via .board-glass-motif CSS.
+ * Stroke SVGs / quote marks - opacity + placement via .board-glass-motif CSS.
  * Always a single root element (no Fragment) so stacking selectors match.
  */
 export function BoardGlassMotif({

@@ -33,7 +33,7 @@ export async function setupVite(server: Server, app: Express) {
   app.use("/{*path}", async (req, res, next) => {
     const url = req.originalUrl.split("?")[0] ?? req.originalUrl;
 
-    // Only fall back to the SPA shell for app routes — not missing static files.
+    // Only fall back to the SPA shell for app routes - not missing static files.
     if (/\.[a-zA-Z0-9]+$/.test(url) && !url.endsWith(".html")) {
       return res.status(404).end();
     }

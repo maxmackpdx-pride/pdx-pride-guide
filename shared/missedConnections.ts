@@ -68,7 +68,7 @@ export function getMissedConnectionWindow(
       opensAt,
       closesAt,
       canPost: false,
-      reason: "Posting closed — window ended 7 days after the event ended",
+      reason: "Posting closed - window ended 7 days after the event ended",
     };
   }
   return { opensAt, closesAt, canPost: true };
@@ -98,7 +98,7 @@ export function isMissedConnectionPostable(
 export type MissedConnectionEventTiming = "upcoming" | "live" | "past";
 
 /**
- * Schedule phase from doors/end only — not the 7-day missed-connection post window.
+ * Schedule phase from doors/end only - not the 7-day missed-connection post window.
  * Use this for the Events board (main grid vs PAST tab), tickets, RSVP labels, etc.
  */
 export function getEventScheduleTiming(
@@ -157,7 +157,7 @@ export const MISSED_CONNECTION_ANON_LABEL = "Anonymous";
 /**
  * Standard: some directory categories never surface Missed Connections. A
  * healthcare provider (clinic, therapist, PrEP, etc.) is not a venue where a
- * "spotted you here" post belongs. This Set is the single source of truth —
+ * "spotted you here" post belongs. This Set is the single source of truth -
  * add a category here to hide the Missed Connections tab on every surface.
  */
 export const MISSED_CONNECTIONS_HIDDEN_CATEGORIES: ReadonlySet<string> = new Set([

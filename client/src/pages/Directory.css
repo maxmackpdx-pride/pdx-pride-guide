@@ -1,5 +1,5 @@
 /* ============================================================
-   Directory — deep-glass card chrome (Agent 3) + page surfaces.
+   Directory - deep-glass card chrome (Agent 3) + page surfaces.
    Place cards: OLED slab / black ring / always-on bloom / poster-well
    (see PlaceCard.tsx). Non-card surfaces still use dir-glass-* until
    their agents migrate.
@@ -175,7 +175,7 @@ html.calm-mode .directory-recent__chip,
 }
 
 /*
- * Place cards — SoT from Directory cards redesign / Card System.html.
+ * Place cards - SoT from Directory cards redesign / Card System.html.
  * Full chrome lives in PlaceCard.tsx; page only wires --c and must not
  * reintroduce boxed poster-well or lite-glass fills.
  */
@@ -203,7 +203,7 @@ html.calm-mode .directory-recent__chip,
     radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) !important;
 }
 
-/* Map island — debossed well (shared --map-frame-shadow) */
+/* Map island - debossed well (shared --map-frame-shadow) */
 .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
 .directory-page .directory-browse-layout__map-desktop .directory-map-wrap {
   background: var(--map-surface-bg, #06060a);
@@ -214,12 +214,12 @@ html.calm-mode .directory-recent__chip,
   -webkit-backdrop-filter: none;
 }
 
-/* MAP KEY — spacing only; neutral deep-glass from glass.css (.directory-map-key) */
+/* MAP KEY - spacing only; neutral deep-glass from glass.css (.directory-map-key) */
 .directory-page .directory-map-key {
   margin: 12px 0 0;
 }
 
-/* Add-place form panel — keep lime neon edge, neutral dark glass fill */
+/* Add-place form panel - keep lime neon edge, neutral dark glass fill */
 .directory-page .gifting-form-panel--makeover.directory-form-panel,
 .directory-page .directory-form-panel {
   background:
@@ -270,7 +270,7 @@ html.calm-mode .directory-recent__chip,
   -webkit-backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
 }
 
-/* Count banner — light glass chip */
+/* Count banner - light glass chip */
 .directory-page .events-count-banner {
   background:
     var(--dir-glass-specular),
@@ -310,7 +310,7 @@ html.calm-mode .directory-recent__chip,
     background: #050508 !important;
   }
 
-  /* Solid OLED slab when backdrop-filter unsupported — keep edge + black ring */
+  /* Solid OLED slab when backdrop-filter unsupported - keep edge + black ring */
   .directory-page .pdxPlace__body {
     background:
       radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%) padding-box,

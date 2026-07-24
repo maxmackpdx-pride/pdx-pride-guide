@@ -82,7 +82,7 @@ export default function FloatingInbox() {
         startY: event.clientY,
         startBottom: bottomPx,
       };
-      // Capture only after a real drag starts — capturing on down can swallow
+      // Capture only after a real drag starts - capturing on down can swallow
       // the open gesture on some browsers / trackpads.
     },
     [bottomPx],
@@ -153,7 +153,7 @@ export default function FloatingInbox() {
   } as CSSProperties;
 
   // Pulse only when something needs attention (unread DMs and/or admin/owner queue).
-  // Idle FAB keeps a soft static neon — no perpetual "you've got mail" throb.
+  // Idle FAB keeps a soft static neon - no perpetual "you've got mail" throb.
   // Local guest: soft attention so the demo FAB is easy to spot.
   const needsAttention = !open && (attentionCount > 0 || (localDemo && !user));
 

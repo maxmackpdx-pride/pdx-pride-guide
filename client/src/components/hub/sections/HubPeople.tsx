@@ -23,11 +23,11 @@ const TABS: Array<{ key: PeopleHubTab; label: string }> = [
 const EMPTY_COPY: Record<PeopleHubTab, { title: string; body: string }> = {
   following: {
     title: "Your following list is empty",
-    body: "Follow people from Discover or their profile, and follow venues from the Places directory — both show up here.",
+    body: "Follow people from Discover or their profile, and follow venues from the Places directory - both show up here.",
   },
   followers: {
     title: "No followers yet",
-    body: "Show up at events, post on the boards, and keep your profile fresh — people find each other here.",
+    body: "Show up at events, post on the boards, and keep your profile fresh - people find each other here.",
   },
   discover: {
     title: "No suggestions right now",

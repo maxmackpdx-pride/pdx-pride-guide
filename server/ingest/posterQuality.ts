@@ -46,21 +46,21 @@ export function preferFullQualityImageUrl(raw: string | null | undefined): strin
 
     // Squarespace CDN: drop format/size shrink params when possible; keep original path
     if (/squarespace-cdn\.com|sqsp\.net|static1\.squarespace/i.test(u.hostname)) {
-      // common: ?format=100w or format=1500w — prefer original by removing format/size
+      // common: ?format=100w or format=1500w - prefer original by removing format/size
       u.searchParams.delete("format");
       u.searchParams.delete("width");
       u.searchParams.delete("height");
-      // path sometimes has /1000w/ — leave path alone (site-specific)
+      // path sometimes has /1000w/ - leave path alone (site-specific)
       return u.toString();
     }
 
     // WordPress sized: image-300x200.jpg → image.jpg
-    // Sanctuary also uses AlienOrgy-980x980-1.avif — strip -WxH and trailing -N before ext
+    // Sanctuary also uses AlienOrgy-980x980-1.avif - strip -WxH and trailing -N before ext
     u.pathname = u.pathname
       .replace(/-\d{2,4}x\d{2,4}(-\d+)?(\.[a-z0-9]+)$/i, "$2")
       .replace(/-\d{2,4}x\d{2,4}(\.[a-z0-9]+)$/i, "$1");
 
-    // Cloudinary / imgix style w_ / h_ transforms — hard to reverse; keep as-is
+    // Cloudinary / imgix style w_ / h_ transforms - hard to reverse; keep as-is
     // Tribe / Eventbrite often put size in query
     for (const k of ["w", "h", "width", "height", "resize", "fit", "quality"]) {
       // Don't strip quality if it's already high; strip tiny sizes
@@ -188,10 +188,10 @@ export async function captureFullQualityPoster(
     }
     const buf = Buffer.from(await res.arrayBuffer());
     if (buf.byteLength < 800) {
-      return { url: upgraded, captured: false, warning: "Poster too small — kept remote URL" };
+      return { url: upgraded, captured: false, warning: "Poster too small - kept remote URL" };
     }
     if (buf.byteLength > MAX_BYTES) {
-      return { url: upgraded, captured: false, warning: "Poster over size cap — kept remote URL" };
+      return { url: upgraded, captured: false, warning: "Poster over size cap - kept remote URL" };
     }
 
     let ext = ".jpg";
@@ -289,7 +289,7 @@ export function extractSanctuaryFlyerUrls(html: string, pageUrl = "https://pdxsa
 }
 
 /**
- * Pull candidate flyer URLs from page HTML — og:image, twitter:image, large <img>, srcset.
+ * Pull candidate flyer URLs from page HTML - og:image, twitter:image, large <img>, srcset.
  * Prefers wider images and skips logos/icons.
  */
 export function extractFlyerCandidatesFromHtml(html: string, pageUrl: string): string[] {
@@ -415,7 +415,7 @@ export async function enrichDraftPoster<T extends { posterImageUrl: string | nul
   draft: T,
   extraCandidates: string[] = [],
 ): Promise<T> {
-  // If the draft already has a per-event poster, only upgrade THAT url — never
+  // If the draft already has a per-event poster, only upgrade THAT url - never
   // fall through to shared list-page candidates (wrong flyer for sibling nights).
   const candidates = draft.posterImageUrl
     ? ([preferFullQualityImageUrl(draft.posterImageUrl) || draft.posterImageUrl].filter(

@@ -433,7 +433,7 @@
   box-shadow: 0 0 12px rgba(204, 255, 0, 0.35);
 }
 
-/* "You planned 4pm — are you here?" nudge above the compose card. */
+/* "You planned 4pm - are you here?" nudge above the compose card. */
 .rb-arrival-banner {
   --c: var(--rb-accent, #ff6600);
   position: relative;
@@ -927,7 +927,7 @@ html.calm-mode .rb-dm-panel {
   50% { opacity: 0.45; }
 }
 
-/* Compact GPS “on location” pill — pops in only when someone is verified HERE */
+/* Compact GPS “on location” pill - pops in only when someone is verified HERE */
 .rb-on-site {
   display: inline-flex;
   align-items: center;
@@ -1127,7 +1127,7 @@ html.calm-mode .rb-dm-panel {
   font-size: 1rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  /* Soft white edge — never solid neon / cyan border */
+  /* Soft white edge - never solid neon / cyan border */
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
   padding: 13px 28px;
@@ -1685,7 +1685,7 @@ html.calm-mode .river-brats__hero-accent--green {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Deep-glass / OLED-neon (Agent 9 — Islands · River Brats)
+   Deep-glass / OLED-neon (Agent 9 - Islands · River Brats)
    Surfaces only: glass-card fill + black ring + sheen + glass CTAs.
    Layout / rb-* keyframes preserved (rb-dm-in, rb-pulse-blink,
    rb-on-site-pop, rb-checkin-in, rb-msg-in, rb-join-pop).

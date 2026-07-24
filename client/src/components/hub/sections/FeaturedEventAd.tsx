@@ -178,7 +178,7 @@ function EasterEggOverlay({
         flexDirection: "column",
       }}
     >
-      {/* Close — top LEFT */}
+      {/* Close - top LEFT */}
       <div
         style={{
           position: "fixed",
@@ -197,7 +197,7 @@ function EasterEggOverlay({
         </button>
       </div>
 
-      {/* Mute — stays top RIGHT */}
+      {/* Mute - stays top RIGHT */}
       <div
         style={{
           position: "fixed",
@@ -350,7 +350,7 @@ export default function FeaturedEventAd({
           </div>
         )}
 
-        {/* Row 1 — countdown (cyan) */}
+        {/* Row 1 - countdown (cyan) */}
         <div
           className="featured-event-ad__row featured-event-ad__row--countdown"
           role={easterEggUrl ? "button" : undefined}
@@ -369,7 +369,7 @@ export default function FeaturedEventAd({
         </div>
       </div>
 
-      {/* Rows 2–3 — tickets (green) + RSVP (orange); outside egg zone */}
+      {/* Rows 2–3 - tickets (green) + RSVP (orange); outside egg zone */}
       <div className="featured-event-ad__actions">
         {event.ticketUrl && (
           <a

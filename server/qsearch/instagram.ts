@@ -68,7 +68,7 @@ function captionToDraft(
     if (/^\d{4}-/.test(raw) || yearFromDateString(raw) != null) {
       dateStart = toPacificWallClock(`${raw.includes("T") ? raw : `${raw}T20:00:00`}`);
     } else {
-      // Month + day only — use Pacific calendar year (and +1 if that date already passed)
+      // Month + day only - use Pacific calendar year (and +1 if that date already passed)
       const y = pacificCalendarYear();
       let d = new Date(`${raw} ${y} 20:00:00 GMT-0700`);
       if (Number.isFinite(d.getTime()) && d.getTime() < Date.now() - 12 * 3600_000) {
@@ -102,7 +102,7 @@ function captionToDraft(
       posterImageUrl: mediaUrl,
       sourceUrl,
       parseSource: "instagram",
-      warnings: ["IG caption missing clear date/year — placeholder; unselected"],
+      warnings: ["IG caption missing clear date/year - placeholder; unselected"],
       confidence: 0.25,
     };
   }
@@ -130,7 +130,7 @@ function captionToDraft(
     posterImageUrl: mediaUrl,
     sourceUrl,
     parseSource: "instagram",
-    warnings: ["Parsed from IG caption — verify venue/time"],
+    warnings: ["Parsed from IG caption - verify venue/time"],
     confidence: 0.45,
   };
 }
@@ -223,7 +223,7 @@ export async function igFromUrl(opts: {
       };
     }
   } else {
-    // Unknown URL — try as image for vision
+    // Unknown URL - try as image for vision
     imageUrl = raw;
     postUrl = raw;
   }
@@ -322,7 +322,7 @@ export async function igPasteAssist(opts: {
       mode: "paste",
       error: "Paste an Instagram post URL or image URL (caption optional).",
       note: metaConfigured()
-        ? "Meta credentials present — advanced Graph pull still available."
+        ? "Meta credentials present - advanced Graph pull still available."
         : "Meta Business Discovery not configured.",
     };
   }

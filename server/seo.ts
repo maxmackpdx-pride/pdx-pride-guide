@@ -109,7 +109,7 @@ function formatEventLine(evt: SeoEvent) {
 }
 
 // Inline visually-hidden style so the crawler feed never paints before the app
-// bundle removes it — a stylesheet class would still flash while CSS loads.
+// bundle removes it - a stylesheet class would still flash while CSS loads.
 const CRAWLER_FEED_HIDDEN_STYLE =
   "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
 
@@ -489,7 +489,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       : liveProfile
         ? truncateText(
             liveProfile.bio
-              || `${liveProfile.displayName || liveProfile.username} on Zaylist — Portland Pride member profile.`,
+              || `${liveProfile.displayName || liveProfile.username} on Zaylist - Portland Pride member profile.`,
             160,
           )
         : routeSeo.description;

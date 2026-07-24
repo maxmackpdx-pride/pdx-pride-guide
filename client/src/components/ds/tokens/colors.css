@@ -118,7 +118,7 @@
     var(--day-sat),
     var(--day-sun)
   );
-  /* Reserved — map RSVP pulse + primary CTA only. Never a day color. */
+  /* Reserved - map RSVP pulse + primary CTA only. Never a day color. */
   --rsvp: var(--neon-yellow);
   --day-unknown: #ffffff;
 

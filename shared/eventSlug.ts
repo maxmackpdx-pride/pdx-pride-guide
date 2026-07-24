@@ -9,7 +9,7 @@ export function slugifyEventTitle(title: string): string {
     .slice(0, 80) || "event";
 }
 
-/** @deprecated Use slugifyEventTitle — kept for existing imports */
+/** @deprecated Use slugifyEventTitle - kept for existing imports */
 export const eventSlug = slugifyEventTitle;
 
 export function eventPath(id: number, title: string, day?: string | null): string {

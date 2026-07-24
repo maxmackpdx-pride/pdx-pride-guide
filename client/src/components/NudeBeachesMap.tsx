@@ -200,7 +200,7 @@ export default function NudeBeachesMap({ tab, height }: Props) {
         <div className="pdx-map-live__vignette" aria-hidden="true" />
         <div className="pdx-map-live__shaft" aria-hidden="true" />
         <div className="nude-beaches-map__chip" aria-hidden="true">
-          {/* Black-core pin swatch — color ring only, no outer bloom */}
+          {/* Black-core pin swatch - color ring only, no outer bloom */}
           <span
             className="nude-beaches-map__chip-dot"
             style={{

@@ -79,7 +79,7 @@ export async function syncPushSubscriptionWithServer(): Promise<void> {
     });
     if (res.ok) emitPushStateChange();
   } catch {
-    /* non-blocking — inbox still works */
+    /* non-blocking - inbox still works */
   }
 }
 

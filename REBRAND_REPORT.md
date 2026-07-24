@@ -15,7 +15,7 @@
 | `shared/prideWeek.ts` | Renamed → `shared/eventWeek.ts` + symbol renames |
 | GitHub repo path | **Restored** to `maxmackpdx-pride/pdx-pride-guide` (remote not renamed) |
 | Domain in meta/copy | Placeholder **zaylist.com** (confirm before go-live) |
-| System username `prideguidepdx` | **Left intact** (data identity) — see review list |
+| System username `prideguidepdx` | **Left intact** (data identity) - see review list |
 
 ## Assets installed
 
@@ -66,7 +66,7 @@ Imports updated across client/server/shared (~37 files). CSS class names like `.
 
 Updated in: `client/src/index.css`, `client/src/components/ds/tokens/colors.css`, `client/src/sandbox/ds/tokens/colors.css`, `sandbox/design-system/source/tokens/colors.css`, `design-system/tokens/tokens.css`.
 
-## Review list — do not auto-change (standalone “pride” / identities)
+## Review list - do not auto-change (standalone “pride” / identities)
 
 These are **not** the product brand “Pride Guide”; left as-is pending human decision.
 
@@ -87,7 +87,7 @@ These are **not** the product brand “Pride Guide”; left as-is pending human 
 | Pride Week calendar | `docs/PRIDE_WEEK_13_19_PLAN.md`, day labels, “Portland Pride 2026” SEO | Keep as event copy, not product name |
 | Route `/pride-work` + `PrideWork.tsx` | Gig board path | Consider `/gigs` later; not renamed this pass |
 | CSS `.pride-work-*`, `.home-hero-title-pride` | Layout hooks | Safe to leave; rename only with CSS audit |
-| Pride glow / flag tokens | `PrideGlowNudge`, `--flag-*`, “pride bloom” | Community feature — keep |
+| Pride glow / flag tokens | `PrideGlowNudge`, `--flag-*`, “pride bloom” | Community feature - keep |
 | FlyerStash ladders “PDX SOUND LEGEND” | Geographic slang | Keep |
 | PlaceModal “upcoming Pride events” | Event-scoped | Soft: “upcoming events” |
 | `calendarLinks` uid prefix `pdx-pride-` | Technical id | Optional rename to `zaylist-` |
@@ -101,7 +101,7 @@ These are **not** the product brand “Pride Guide”; left as-is pending human 
 
 ## Build / check
 
-- `npm run check` (tsc): existing failures in `server/qsearch/analyze.ts`, `server/storage.ts` follow APIs, ingest — **not introduced by rebrand** (no eventWeek/Zaylist errors).
+- `npm run check` (tsc): existing failures in `server/qsearch/analyze.ts`, `server/storage.ts` follow APIs, ingest - **not introduced by rebrand** (no eventWeek/Zaylist errors).
 - Full production build not run in this pass (optional local `npm run build`).
 
 ## Working tree size
@@ -110,4 +110,4 @@ These are **not** the product brand “Pride Guide”; left as-is pending human 
 
 ## Commits (local)
 
-Planned small commits on this branch only — no push.
+Planned small commits on this branch only - no push.

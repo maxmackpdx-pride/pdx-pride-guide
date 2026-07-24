@@ -36,7 +36,7 @@ type Pulse = {
 
 /**
  * Hub admin launchpad. Real moderation lives in the floating inbox queue and /admin.
- * This view is read + jump only — no approve/deny here.
+ * This view is read + jump only - no approve/deny here.
  */
 export default function HubAdminOverview({
   pendingCount,
@@ -113,8 +113,8 @@ export default function HubAdminOverview({
           { n: q?.total ?? pendingCount, label: "Queue", color: "#fff" },
           { n: guideUnread, label: "Guide inbox", color: "#fff" },
           ...(isPrimaryOwner ? [{ n: desk, label: "Owner desk", color: "#fff" }] : []),
-          { n: pulse?.liveEvents ?? "—", label: "Live events", color: "#fff" },
-          { n: pulse?.newUsersToday ?? "—", label: "New users today", color: "#fff" },
+          { n: pulse?.liveEvents ?? "-", label: "Live events", color: "#fff" },
+          { n: pulse?.newUsersToday ?? "-", label: "New users today", color: "#fff" },
         ].map((s) => (
           <div key={s.label} style={{ padding: 16, background: "var(--panel-card)" }}>
             <div

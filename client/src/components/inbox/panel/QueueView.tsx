@@ -41,7 +41,7 @@ type QueueRow = {
   readOnly?: boolean;
 };
 
-/** Every admin queue surface — always shown in floating inbox, even at 0. */
+/** Every admin queue surface - always shown in floating inbox, even at 0. */
 /**
  * Shared Admin · Queue buckets only.
  * Logos are Owner desk only (not shared keyholder queue).
@@ -129,9 +129,9 @@ function mapPendingGig(g: any, completed = false): QueueRow | null {
     title: g.title || "Gig post",
     meta: `Needs review · ${g.postType || "GIG"}${g.username ? ` · @${g.username}` : g.name ? ` · ${g.name}` : ""}${g.createdAt ? " · " + ts(g.createdAt) : ""}`,
     fields: [
-      ["Type", String(g.postType || "—")],
-      ["Where", String(g.location || (g.isRemote ? "Remote" : "—"))],
-      ["Comp", String(g.compensation || "—")],
+      ["Type", String(g.postType || "-")],
+      ["Where", String(g.location || (g.isRemote ? "Remote" : "-"))],
+      ["Comp", String(g.compensation || "-")],
     ],
     note: g.description || g.adminNotes || "",
     outcome: completed ? status : undefined,
@@ -152,8 +152,8 @@ function mapRiverBratsReport(r: any, completed = false): QueueRow | null {
     title: `${r.target_type || "Content"} #${r.target_id}`,
     meta: `Report · ${r.reason || "Flagged"}${r.reporterUsername ? ` · by ${r.reporterUsername}` : ""}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
     fields: [
-      ["Target", `${r.target_type || "—"} #${r.target_id ?? "—"}`],
-      ["Reason", String(r.reason || "—")],
+      ["Target", `${r.target_type || "-"} #${r.target_id ?? "-"}`],
+      ["Reason", String(r.reason || "-")],
     ],
     note: r.details || r.message || "",
     outcome: completed ? status : undefined,
@@ -173,7 +173,7 @@ function mapGiftingReport(r: any, completed = false): QueueRow | null {
     tagColor: C.red,
     title: r.postTitle || `Report #${r.id}`,
     meta: String(r.reason || "Flagged gifting post"),
-    fields: [["Post", String(r.postTitle || r.postId || "—")]],
+    fields: [["Post", String(r.postTitle || r.postId || "-")]],
     note: r.message || "",
     outcome: completed ? status : undefined,
     completedAt: completed ? String(r.createdAt || r.resolved_at || "") : undefined,
@@ -197,7 +197,7 @@ function mapGiftingFlagged(p: any, completed = false): QueueRow | null {
     tagColor: C.purple,
     title: p.title || `Gifting post #${p.id}`,
     meta: `${p.postType || "POST"} · ${p.reportCount} report(s)`,
-    fields: [["Status", String(p.status || "—")]],
+    fields: [["Status", String(p.status || "-")]],
     note: p.description || "",
     outcome: completed ? status : undefined,
     completedAt: completed ? String(p.createdAt || p.updated_at || "") : undefined,
@@ -247,7 +247,7 @@ const MODERATION_TAG: Record<string, { label: string; color: string }> = {
   SUSPEND_APPEAL: { label: "APPEAL", color: C.cyan },
 };
 
-/** Shared admin moderation queue (moderation_requests) — reports and
+/** Shared admin moderation queue (moderation_requests) - reports and
  * notifications that should reach every admin, not just the owner. */
 function mapModerationRequest(m: any, completed = false): QueueRow | null {
   const status = String(m.status || "").toUpperCase();
@@ -295,7 +295,7 @@ function mapPromoterRequest(r: any): QueueRow {
   };
 }
 
-/** Venue/business claims (business_claims table) — someone claiming a
+/** Venue/business claims (business_claims table) - someone claiming a
  * directory listing as its owner. */
 function mapBusinessClaim(r: any, completed = false): QueueRow | null {
   const status = String(r.status || "").toUpperCase();
@@ -360,7 +360,7 @@ function mapLogoRequest(r: any, completed = false): QueueRow | null {
     tagColor: C.cyan,
     title: `${r.businessName || "Venue"} · new logo`,
     meta: `Logo request${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
-    fields: [["Venue", String(r.businessName || "—")]],
+    fields: [["Venue", String(r.businessName || "-")]],
     note: "",
     attachments: r.imageUrl ? [String(r.imageUrl)] : [],
     outcome: completed ? status : undefined,
@@ -450,7 +450,7 @@ export default function QueueView({
 }: {
   mode: "admin" | "owner";
   queueFolder: QueueFolder;
-  /** Shared guide-admin message unread — shown as a jump chip into Admin · Inbox. */
+  /** Shared guide-admin message unread - shown as a jump chip into Admin · Inbox. */
   guideUnread?: number;
   ownerCount?: number;
   onOpenGuideInbox?: () => void;
@@ -1247,7 +1247,7 @@ export default function QueueView({
 
       {failedSources.length > 0 && (
         <div className="inbox-exp-alert inbox-exp-alert--error">
-          Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error — not an empty queue.
+          Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error - not an empty queue.
         </div>
       )}
 
@@ -1266,7 +1266,7 @@ export default function QueueView({
               </div>
               {bucketRows.length === 0 ? (
                 <div className="inbox-exp-empty inbox-exp-empty--compact">
-                  {completed ? "None in recently completed" : "None waiting — queue clear"}
+                  {completed ? "None in recently completed" : "None waiting - queue clear"}
                 </div>
               ) : (
                 <div className="inbox-exp-list">

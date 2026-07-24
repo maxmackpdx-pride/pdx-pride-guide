@@ -8,7 +8,7 @@ import { Button } from "@/components/ds";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 
 /**
- * The Missed Connections detail card — the same overlay you get when you tap a
+ * The Missed Connections detail card - the same overlay you get when you tap a
  * post on the board. Shared so the hub feed can open the identical card instead
  * of bouncing to the board page. Self-contained: owns the private-reply flow.
  *

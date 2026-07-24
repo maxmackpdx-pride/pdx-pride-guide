@@ -246,7 +246,7 @@ export function assertProductionSecrets() {
       ...missing.map(k => `${k} is not set`),
       ...insecure.map(k => `${k} is still the repository default`),
     ];
-    console.warn(`[secrets] WARNING — Production secrets misconfigured: ${parts.join("; ")}`);
+    console.warn(`[secrets] WARNING - Production secrets misconfigured: ${parts.join("; ")}`);
   }
 }
 
@@ -254,12 +254,12 @@ export function assertProductionPersistence() {
   const config = getPersistenceConfig();
   if (!config.production || process.env.LOCAL_PREVIEW === "1") return config;
   if (config.errors.length) {
-    console.error("[persistence] FATAL — user data will not survive deploys:");
+    console.error("[persistence] FATAL - user data will not survive deploys:");
     config.errors.forEach((err) => console.error(`  - ${err}`));
     throw new Error("Production persistence misconfigured");
   }
   console.log(
-    `[persistence] OK — db=${config.databasePath} uploads=${config.uploadsDir} sessions=sqlite`,
+    `[persistence] OK - db=${config.databasePath} uploads=${config.uploadsDir} sessions=sqlite`,
   );
   return config;
 }
@@ -279,7 +279,7 @@ export function getPersistenceAudit(counts: Record<string, number>) {
       {
         id: "soft_launch_popup",
         label: "Soft-launch welcome dismissed",
-        storage: "localStorage (browser only — not server data)",
+        storage: "localStorage (browser only - not server data)",
         key: "softLaunchWelcomeDismissed",
       },
     ],

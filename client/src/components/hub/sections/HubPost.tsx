@@ -285,8 +285,8 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
               {postAs === "self"
                 ? "Shows your profile as the poster."
                 : postAs === "event"
-                  ? "Shows the event as the poster — your name appears as the co-host who posted."
-                  : "Shows the venue as the poster — your name appears as who posted."}
+                  ? "Shows the event as the poster - your name appears as the co-host who posted."
+                  : "Shows the venue as the poster - your name appears as who posted."}
             </p>
           </div>
         )}

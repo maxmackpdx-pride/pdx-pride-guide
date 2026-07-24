@@ -45,7 +45,7 @@ type ParseSourceTag =
 /**
  * Venue status blurbs that calendars often publish as "events" but are not
  * parties/shows to list on Zaylist (closed nights, holidays off, etc.).
- * Prefer title signals so "we were closed for renovation — now open" still counts.
+ * Prefer title signals so "we were closed for renovation - now open" still counts.
  */
 export function isNonEventListing(draft: Pick<IngestEventDraft, "title" | "description">): boolean {
   const title = String(draft.title || "").trim().toLowerCase();
@@ -176,7 +176,7 @@ function parseBody(
   }
 
   if (isJson && !isIcs) {
-    // Badlands worker JSON before Tribe/Squarespace — Tribe also keys on `.events[]`.
+    // Badlands worker JSON before Tribe/Squarespace - Tribe also keys on `.events[]`.
     const badlandsUrl =
       urlHint.includes("badlandsportland.workers.dev") ||
       urlHint.includes("badlands-api") ||
@@ -338,7 +338,7 @@ export async function previewIngest(input: {
     description: decodeEntities(d.description),
   }));
 
-  // Harvest page-level flyer candidates (og:image, etc.) — ONLY safe to assign when
+  // Harvest page-level flyer candidates (og:image, etc.) - ONLY safe to assign when
   // this fetch produced a single event. Multi-event calendars must not share one
   // list-page hero across every night (that stamped the same flyer on all venues).
   const pageFlyerPool: string[] = [];
@@ -449,7 +449,7 @@ function hasValue(v: unknown): boolean {
  *
  * Rule: the newest sync wins on any field it actually carries a value for; the
  * existing row fills gaps the sync lacks (never overwritten with empty). Date/
- * time is ALWAYS taken from the newest sync — that is the point of a merge —
+ * time is ALWAYS taken from the newest sync - that is the point of a merge -
  * and dayOfWeek is set explicitly because updateEvent() writes columns raw and
  * does not recompute it. Safety flags (sex-positive / nudity / house-party) are
  * OR-ed so a venue never silently loses a marking on update. Identity, status/
@@ -564,7 +564,7 @@ export async function commitIngest(input: {
     if (!draft.posterImageUrl) {
       draft = {
         ...draft,
-        warnings: [...draft.warnings, "No flyer image found — add poster before going LIVE"],
+        warnings: [...draft.warnings, "No flyer image found - add poster before going LIVE"],
       };
     }
 

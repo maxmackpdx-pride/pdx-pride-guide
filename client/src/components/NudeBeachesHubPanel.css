@@ -1,5 +1,5 @@
 /*
- * Nude beaches hub — stacked top-rim islands (SoT: 10-islands.png)
+ * Nude beaches hub - stacked top-rim islands (SoT: 10-islands.png)
  *
  * Right column = discrete cards (Live / River / Parking), NOT one outer shell
  * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet
@@ -10,7 +10,7 @@
   --nb-accent: #ff6600;
   --nb-rim: var(--nb-accent, #ff6600);
   --c: var(--nb-rim);
-  /* Top-rim island shadow stack — short bloom above top edge, no full-perimeter neon */
+  /* Top-rim island shadow stack - short bloom above top edge, no full-perimeter neon */
   --nb-island-shadow:
     0 0 0 1px #000,
     0 18px 36px -20px rgba(0, 0, 0, 0.92),
@@ -39,7 +39,7 @@
   gap: 12px;
   height: 100%;
   min-height: 380px;
-  /* Transparent stack — chrome lives on each island, not the wrapper */
+  /* Transparent stack - chrome lives on each island, not the wrapper */
   background: transparent;
   border: none;
   border-radius: 0;
@@ -99,7 +99,7 @@
   overflow: hidden;
 }
 
-/* Corner sheen — top-left glass highlight only */
+/* Corner sheen - top-left glass highlight only */
 .nb-hub__section::before {
   content: "";
   position: absolute;
@@ -259,7 +259,7 @@
   text-shadow: 0 0 10px rgba(25, 227, 255, 0.16);
 }
 
-/* Live / weather island — accent top rim (orange or green) */
+/* Live / weather island - accent top rim (orange or green) */
 .nb-hub--rooster .nb-hub__section--pulse {
   --nb-rim: #ff6600;
   --c: #ff6600;
@@ -272,7 +272,7 @@
   --c: #39ff14;
 }
 
-/* River level island — cyan top rim (text values already cyan) */
+/* River level island - cyan top rim (text values already cyan) */
 .nb-hub__level {
   --nb-rim: #19e3ff;
   --c: #19e3ff;
@@ -302,7 +302,7 @@
   }
 }
 
-/* Swim / water quality island (Sauvie) — green rim; status can recolor */
+/* Swim / water quality island (Sauvie) - green rim; status can recolor */
 .nb-hub__swim {
   --nb-rim: #39ff14;
   --c: #39ff14;

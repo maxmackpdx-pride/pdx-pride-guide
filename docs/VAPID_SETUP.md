@@ -1,4 +1,4 @@
-# VAPID Keys — Railway Setup
+# VAPID Keys - Railway Setup
 
 Generate once (do not commit private key):
 
@@ -26,4 +26,4 @@ After deploy:
 2. Dashboard → Enable push on this device
 3. `POST /api/push/test` (admin session) or send yourself an inbox message
 
-Push is gracefully skipped when keys are missing — inbox still works.
+Push is gracefully skipped when keys are missing - inbox still works.

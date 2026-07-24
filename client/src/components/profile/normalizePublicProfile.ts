@@ -134,7 +134,7 @@ export function boardPostsFromActivity(
       replies: g.replies ?? 0,
     });
   }
-  // activity.spotted intentionally ignored — anonymity.
+  // activity.spotted intentionally ignored - anonymity.
 
   posts.sort((a, b) => {
     const ta = a.createdAt ? Date.parse(a.createdAt) : 0;

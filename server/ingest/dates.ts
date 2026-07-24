@@ -23,7 +23,7 @@ export function pacificCalendarYear(nowMs = Date.now()): number {
 /**
  * Convert any absolute timestamp (or ICS-like local) into the wall-clock
  * Pacific format used by the events table: `YYYY-MM-DDTHH:mm:ss` (no Z).
- * Always preserves the real year from the source — never defaults to a hard-coded year.
+ * Always preserves the real year from the source - never defaults to a hard-coded year.
  */
 export function toPacificWallClock(value: string | Date | null | undefined): string | null {
   if (value == null) return null;
@@ -51,7 +51,7 @@ export function toPacificWallClock(value: string | Date | null | undefined): str
       const t = new Date(raw).getTime();
       ms = Number.isFinite(t) ? t : null;
     } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) {
-      // Already wall-clock-ish — normalize seconds.
+      // Already wall-clock-ish - normalize seconds.
       const m = raw.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2}))?/);
       if (!m) return null;
       return `${m[1]}:${m[2] ?? "00"}`;
@@ -77,7 +77,7 @@ export function toPacificWallClock(value: string | Date | null | undefined): str
   }).formatToParts(new Date(ms));
 
   const get = (type: string) => parts.find(p => p.type === type)?.value ?? "00";
-  // en-US hour12:false can emit "24" for midnight in some engines — normalize.
+  // en-US hour12:false can emit "24" for midnight in some engines - normalize.
   let hour = get("hour");
   if (hour === "24") hour = "00";
 

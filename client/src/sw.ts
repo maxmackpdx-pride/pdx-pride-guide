@@ -9,7 +9,7 @@ declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<string | { url: string; revision: string | null }>;
 };
 
-// Never precache index.html — a stale shell breaks installed PWA launches after deploy.
+// Never precache index.html - a stale shell breaks installed PWA launches after deploy.
 const precacheManifest = self.__WB_MANIFEST.filter(entry => {
   const url = typeof entry === "string" ? entry : entry.url;
   return url !== "index.html" && !url.endsWith("/index.html");
@@ -57,7 +57,7 @@ async function applyAppBadge(count: number | undefined): Promise<void> {
   }
 }
 
-// Web Push — always show a user-visible notification (Safari revokes silent pushes).
+// Web Push - always show a user-visible notification (Safari revokes silent pushes).
 // Handles Declarative Web Push (web_push: 8030) and legacy title/body payloads.
 self.addEventListener("push", (event) => {
   const show = async () => {

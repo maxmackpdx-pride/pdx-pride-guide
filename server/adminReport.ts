@@ -146,7 +146,7 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
       accent: "#1391c9",
       count: logos.length,
       rows: logos.map((l) => ({
-        head: `${l.businessName || "Venue"} — new logo`,
+        head: `${l.businessName || "Venue"} - new logo`,
         meta: `Logo request · ${fmt(l.createdAt)}`,
         fields: fields(l.imageUrl && ["Image", l.imageUrl]),
         note: "",
@@ -182,7 +182,7 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
       accent: "#d6820a",
       count: riverBrats.length,
       rows: riverBrats.map((r) => ({
-        head: `${r.target_type || "Content"} #${r.target_id ?? "—"}`,
+        head: `${r.target_type || "Content"} #${r.target_id ?? "-"}`,
         meta: `${r.reason || "Reported"}${r.reporterUsername ? ` · by ${r.reporterUsername}` : ""} · ${fmt(r.createdAt)}`,
         fields: fields(),
         note: cut(r.details || r.message),
@@ -208,7 +208,7 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
       rows: giftingFlagged.map((p) => ({
         head: p.title || `Gifting post #${p.id}`,
         meta: `${p.postType || "POST"} · ${p.reportCount || 0} report(s)`,
-        fields: fields(["Status", String(p.status || "—")]),
+        fields: fields(["Status", String(p.status || "-")]),
         note: cut(p.description),
       })),
     },
@@ -281,7 +281,7 @@ export function renderAdminReportHtml(data: ReturnType<typeof buildAdminReport>)
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex" />
-<title>Zaylist — Backlog Report</title>
+<title>Zaylist - Backlog Report</title>
 <style>
   :root { color-scheme: light; }
   * { box-sizing: border-box; }

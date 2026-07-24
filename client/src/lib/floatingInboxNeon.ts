@@ -7,7 +7,7 @@ export type FloatingInboxNeon = {
 
 /**
  * Dark-blue → bright-blue neon family (matches deep-glass inbox drawer).
- * Rotates slightly within the blue gradient on each load — no orange/magenta.
+ * Rotates slightly within the blue gradient on each load - no orange/magenta.
  */
 export const FLOATING_INBOX_NEON_PALETTE: FloatingInboxNeon[] = [
   { id: "blue-deep", color: "#0a2a9c", rgb: "10 42 156" },

@@ -46,7 +46,7 @@ export type TipLinks = {
   venmoUrl: string;
   venmoProfileUrl: string;
   venmoHandle: string;
-  /** Stripe Payment Link — enables Apple Pay / Google Pay / cards on the web. */
+  /** Stripe Payment Link - enables Apple Pay / Google Pay / cards on the web. */
   stripePaymentLink: string | null;
   /** True when a Stripe link is configured. */
   applePayReady: boolean;

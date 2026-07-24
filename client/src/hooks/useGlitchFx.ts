@@ -10,7 +10,7 @@ export type GlitchFxOptions = {
   bandSpeed?: number;
   freq?: number;
   pixel?: number;
-  /** CRT scanlines only — no RGB slice bursts */
+  /** CRT scanlines only - no RGB slice bursts */
   scanlinesOnly?: boolean;
 };
 

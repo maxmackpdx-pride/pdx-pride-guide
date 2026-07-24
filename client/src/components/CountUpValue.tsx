@@ -104,7 +104,7 @@ export default function CountUpValue({
       started = true;
       revealedRef.current = true;
       const to = targetRef.current;
-      // Already at target (e.g. still mode or prior snap) — don't restart 0→N.
+      // Already at target (e.g. still mode or prior snap) - don't restart 0→N.
       if (prevRef.current === to && to > 0) {
         setDisplay(to);
         return;
@@ -124,7 +124,7 @@ export default function CountUpValue({
     );
     io.observe(el);
 
-    // Page reload / above-the-fold: IO can lag a frame — kick immediately when visible.
+    // Page reload / above-the-fold: IO can lag a frame - kick immediately when visible.
     const kick = window.requestAnimationFrame(() => {
       if (!cancelled && isInViewport(el)) startCountUp();
     });

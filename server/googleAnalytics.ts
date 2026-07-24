@@ -23,7 +23,7 @@ function parseCredentials(): Record<string, unknown> | null {
     return JSON.parse(raw) as Record<string, unknown>;
   } catch {
     if (!warned) {
-      console.warn("[ga] GA_SERVICE_ACCOUNT_JSON is set but not valid JSON — skipping GA admin metrics");
+      console.warn("[ga] GA_SERVICE_ACCOUNT_JSON is set but not valid JSON - skipping GA admin metrics");
       warned = true;
     }
     return null;
@@ -48,7 +48,7 @@ async function getClient(): Promise<GaClient | null> {
   } catch (err) {
     gaImportFailed = true;
     if (!warned) {
-      console.warn("[ga] @google-analytics/data unavailable — admin GA metrics disabled:", err);
+      console.warn("[ga] @google-analytics/data unavailable - admin GA metrics disabled:", err);
       warned = true;
     }
     client = null;

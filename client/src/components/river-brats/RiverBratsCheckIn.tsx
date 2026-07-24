@@ -30,7 +30,7 @@ import {
 import RiverBratsHourChips from "./RiverBratsHourChips";
 import RiverBratsGroupChat from "./RiverBratsGroupChat";
 
-/** Compact “people GPS-verified on site” chip — only renders when count > 0. */
+/** Compact “people GPS-verified on site” chip - only renders when count > 0. */
 function OnLocationPill({
   count,
   className = "",
@@ -79,9 +79,9 @@ type CheckinRow = {
 type Props = {
   beachId: NudeBeachTab;
   accent: "orange" | "green";
-  /** From ?verify=1 deep link (arrival push) — auto-run the GPS confirm once. */
+  /** From ?verify=1 deep link (arrival push) - auto-run the GPS confirm once. */
   autoVerify?: boolean;
-  /** From ?chat=1 deep link (Inbox GROUP row) — scroll the chat into view. */
+  /** From ?chat=1 deep link (Inbox GROUP row) - scroll the chat into view. */
   autoOpenChat?: boolean;
   /** Jump to Carpool tab for this plan day. */
   onGoToCarpool?: (date: string) => void;
@@ -131,7 +131,7 @@ export default function RiverBratsCheckIn({
             : "Could not load check-ins",
         );
       }
-      // Guard: error payloads are objects — never feed them to .filter/.map
+      // Guard: error payloads are objects - never feed them to .filter/.map
       return Array.isArray(body) ? (body as CheckinRow[]) : [];
     },
     // Beach day: poll so the small on-location pill pops when someone verifies.
@@ -163,13 +163,13 @@ export default function RiverBratsCheckIn({
   const mine = user ? rows.find(r => (r.userId ?? r.user_id) === user.id) : undefined;
   const checkedIn = Boolean(mine);
   // Anonymous check-ins are counted in "going" but never connected to the group
-  // chat — they can't read or post, since the chat is not anonymous.
+  // chat - they can't read or post, since the chat is not anonymous.
   const isAnon = Boolean(mine?.isAnonymous);
   // Day-room opens 48h before the beach day and closes 10pm that day.
   const chatWindowOpen = isRiverBratsChatOpen(selectedDate);
   const inChat = checkedIn && !isAnon && chatWindowOpen;
   const goingCount = rows.length;
-  /** GPS-verified “I'm here” — independent of chat window (chat is 48h calendar). */
+  /** GPS-verified “I'm here” - independent of chat window (chat is 48h calendar). */
   const onLocationCount = useMemo(
     () => rows.filter(r => r.presence === "HERE").length,
     [rows],
@@ -262,7 +262,7 @@ export default function RiverBratsCheckIn({
       toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
   });
 
-  // "I am here" — grab the device location once, confirm presence server-side.
+  // "I am here" - grab the device location once, confirm presence server-side.
   // Coordinates go straight to the verify endpoint and are never stored.
   const runGpsVerify = () => {
     if (!isViewingToday) {
@@ -291,7 +291,7 @@ export default function RiverBratsCheckIn({
           const data = await r.json().catch(() => ({}));
           if (r.ok && data.ok) {
             queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-            toast({ title: "You're here", description: "Verified on the beach — say hi in chat." });
+            toast({ title: "You're here", description: "Verified on the beach - say hi in chat." });
           } else if (data.error === "TOO_FAR") {
             toast({
               title: "Not quite there yet",
@@ -307,7 +307,7 @@ export default function RiverBratsCheckIn({
       },
       () => {
         setVerifying(false);
-        toast({ title: "Couldn't get your location", description: "No worries — you're still listed as planned." });
+        toast({ title: "Couldn't get your location", description: "No worries - you're still listed as planned." });
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 30_000 },
     );
@@ -441,7 +441,7 @@ export default function RiverBratsCheckIn({
       {arrivalDue && (
         <div className={`rb-arrival-banner rb-arrival-banner--${accent}`} role="status">
           <span className="rb-arrival-banner__copy">
-            You planned {formatRiverBratsHour(mine!.arrival_hour)} — are you at {beachShortLabel}?
+            You planned {formatRiverBratsHour(mine!.arrival_hour)} - are you at {beachShortLabel}?
           </span>
           <button
             type="button"
@@ -690,7 +690,7 @@ export default function RiverBratsCheckIn({
           </div>
         ) : (
           <div className="rb-checkin__self-placeholder">
-            You haven&apos;t checked in for {dayLabel.toLowerCase()} yet — pick a time and how long you&apos;ll stay.
+            You haven&apos;t checked in for {dayLabel.toLowerCase()} yet - pick a time and how long you&apos;ll stay.
           </div>
         )}
 

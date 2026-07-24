@@ -1,4 +1,4 @@
-/* Main Stage home (direction 1a) — page layout from zaylisthome.html */
+/* Main Stage home (direction 1a) - page layout from zaylisthome.html */
 
 .home-main-stage {
   position: relative;
@@ -6,7 +6,7 @@
   background: var(--ink-900);
   overflow-x: clip;
   color: var(--text-mid);
-  /* Loop-safe rainbow for PRIDE / “each other” — starts & ends on cyan */
+  /* Loop-safe rainbow for PRIDE / “each other” - starts & ends on cyan */
   --home-title-rainbow: linear-gradient(
     90deg,
     #00ffff 0%,
@@ -39,7 +39,7 @@
   background: #050505;
 }
 
-/* Mobile-only site share — top right of hero panel */
+/* Mobile-only site share - top right of hero panel */
 .home-hero__share {
   display: none;
   position: absolute;
@@ -106,7 +106,7 @@
   filter: saturate(1.08) contrast(1.04);
 }
 
-/* z-1 aurora orbs — match PDX Hero Wallpaper (animated).html */
+/* z-1 aurora orbs - match PDX Hero Wallpaper (animated).html */
 .home-hero__aurora {
   position: absolute;
   inset: 0;
@@ -125,7 +125,7 @@
   will-change: transform;
 }
 
-/* a1 magenta — top-left */
+/* a1 magenta - top-left */
 .home-hero__orb--magenta {
   width: 33vw;
   height: 33vw;
@@ -137,7 +137,7 @@
   animation: homeAurora1 14s ease-in-out infinite;
 }
 
-/* a2 cyan — lower-mid */
+/* a2 cyan - lower-mid */
 .home-hero__orb--cyan {
   width: 30vw;
   height: 30vw;
@@ -149,7 +149,7 @@
   animation: homeAurora2 18s ease-in-out infinite;
 }
 
-/* a3 violet — mid-right */
+/* a3 violet - mid-right */
 .home-hero__orb--violet {
   width: 27vw;
   height: 27vw;
@@ -161,7 +161,7 @@
   animation: homeAurora3 16s ease-in-out infinite;
 }
 
-/* z-2 scrims — single stack matching animated HTML */
+/* z-2 scrims - single stack matching animated HTML */
 .home-hero__scrim {
   position: absolute;
   inset: 0;
@@ -192,7 +192,7 @@
   background: none;
 }
 
-/* z-3 film grain — SVG fractal noise (animated HTML: baseFrequency 0.8, 2 octaves) */
+/* z-3 film grain - SVG fractal noise (animated HTML: baseFrequency 0.8, 2 octaves) */
 .home-hero__grain {
   position: absolute;
   inset: 0;
@@ -251,7 +251,7 @@
   filter: none;
 }
 
-/* PRIDE rainbow — leave animation as-is (loop-safe flow) */
+/* PRIDE rainbow - leave animation as-is (loop-safe flow) */
 .home-hero__word--pride {
   filter: none;
   text-shadow: none;
@@ -625,7 +625,7 @@ html.calm-mode .home-hero__grain {
 }
 
 /* Where-to-Go split into SPOTS / NONPROFITS columns (mirrors .pg-board3's
-   header + view-more pattern) — additive modifier, does not change the
+   header + view-more pattern) - additive modifier, does not change the
    base .pg-places / .pg-placescol rules above used elsewhere. */
 .home-main-stage .pg-places--dual {
   grid-template-columns: 1fr 1fr;
@@ -811,7 +811,7 @@ html.calm-mode .home-main-stage .pg-note--spot {
 .home-boards {
   position: relative;
   width: 100%;
-  /* Framed panel (design 1a) — solid ink, no beach/wallpaper wash behind tiles */
+  /* Framed panel (design 1a) - solid ink, no beach/wallpaper wash behind tiles */
   background: #08080a;
   overflow: hidden;
   color: var(--text-mid, #b9b6ae);
@@ -1230,7 +1230,7 @@ html.calm-mode .home-boards__card {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Homepage redesign (HANDOFF 1a — loud zine desktop)
+   Homepage redesign (HANDOFF 1a - loud zine desktop)
    ═══════════════════════════════════════════════════════════ */
 
 @keyframes homeAurora1 {
@@ -1248,7 +1248,7 @@ html.calm-mode .home-boards__card {
   50% { transform: translate(40px, -50px) scale(1.2); }
 }
 
-/* Hero styles live on .home-hero* above — no stage overrides that kill aurora/grain */
+/* Hero styles live on .home-hero* above - no stage overrides that kill aurora/grain */
 
 /* Stat strip */
 .home-stat-strip {
@@ -1426,7 +1426,7 @@ html.calm-mode .home-boards__card {
   pointer-events: none;
 }
 
-/* Day-colored gradient over poster — dialed down from full strength, still present */
+/* Day-colored gradient over poster - dialed down from full strength, still present */
 .home-up-next__backdrop-scrim {
   position: absolute;
   inset: 0;
@@ -1525,7 +1525,7 @@ html.calm-mode .home-boards__card {
 }
 
 /*
- * Community Boards + home islands — dark liquid glass (test on home first).
+ * Community Boards + home islands - dark liquid glass (test on home first).
  * Neon accents stay: top bar, titles, glows. Glass is fill/edge/depth only.
  * Does not touch hero rainbow animation.
  */
@@ -1641,7 +1641,7 @@ a.home-boards__utility:active * {
   text-decoration-line: none !important;
 }
 
-/* Re-assert title colors so inherit doesn't wash them out — no title glow */
+/* Re-assert title colors so inherit doesn't wash them out - no title glow */
 a.home-boards__utility:hover .home-boards__utility-name,
 a.home-boards__utility:focus .home-boards__utility-name {
   color: var(--c, var(--util-acc)) !important;

@@ -14,7 +14,7 @@ interface ScheduleCardProps {
 
 /**
  * "1A" framed dark-card chrome wrapping the all-week timeline
- * (`<Schedule embed />`) — ported from the design mock's `1a` variant.
+ * (`<Schedule embed />`) - ported from the design mock's `1a` variant.
  * Used for the Events page "Schedule" tab.
  */
 export default function ScheduleCard({

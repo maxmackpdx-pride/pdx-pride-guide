@@ -3,7 +3,7 @@ import { isPushConfigured } from "./push/vapid";
 import { sendPushToSubscription, buildDeclarativePayload } from "./push/send";
 import { beachVenueLabel, formatRiverBratsHour, isValidBeachId } from "@shared/riverBrats";
 
-// Fires persisted one-shot prompts ("you said 4pm — are you here?") and
+// Fires persisted one-shot prompts ("you said 4pm - are you here?") and
 // piggybacks the hourly chat-retention purge. Single-process by design
 // (better-sqlite3, one dyno); claimDuePrompts marks rows SENT atomically.
 

@@ -1,14 +1,14 @@
 /**
- * Hawks PDX — Squarespace events collection (`?format=json`).
+ * Hawks PDX - Squarespace events collection (`?format=json`).
  *
  * Feed: https://www.hawkspdx.com/hawks-events?format=json
  *   - items[] / upcoming[] with epoch-ms startDate/endDate
  *   - assetUrl full posters (preferFullQualityImageUrl strips SQ shrink params)
  *   - paginated via pagination.nextPageUrl
  *
- * Policy: gay men's sex club — sex-positive + nudity flags always on
+ * Policy: gay men's sex club - sex-positive + nudity flags always on
  * (Sanctuary-style), age defaulted 21_PLUS (conservative; leave a verify
- * breadcrumb — some nights may be 18+). Never invent FREE.
+ * breadcrumb - some nights may be 18+). Never invent FREE.
  */
 import { getTrustedVenue } from "@shared/trustedVenues";
 import type { IngestEventDraft } from "../types";
@@ -21,7 +21,7 @@ const HAWKS_VENUE = "Hawks PDX";
 const HAWKS_ADDRESS = "335 SE 99th Ave, Portland, OR 97216";
 const HAWKS_NEIGHBORHOOD = "SE Portland";
 /**
- * Schema enum ALL_AGES | 18_PLUS | 21_PLUS. Sex club — never ALL_AGES.
+ * Schema enum ALL_AGES | 18_PLUS | 21_PLUS. Sex club - never ALL_AGES.
  * Default 21_PLUS (restrictive direction); reviewer adjusts for 18+ nights.
  */
 export const HAWKS_AGE_REQUIREMENT = "21_PLUS" as const;
@@ -46,7 +46,7 @@ function parseEventTypesJson(raw: string | null | undefined): string[] {
 
 /**
  * Stamp every Hawks draft as 21+ sex-positive (sex club policy).
- * Mirrors applySanctuaryPolicy — same product locks, same enum form.
+ * Mirrors applySanctuaryPolicy - same product locks, same enum form.
  */
 export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
   const tags = parseEventTypesJson(draft.eventTypes);
@@ -60,7 +60,7 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
 
   const adm = inferAdmissionFromText(draft.title, draft.description);
   // Never invent FREE: keep meaningful upstream values (demoting unconfirmed
-  // FREE); when upstream had no signal (UNKNOWN), trust text inference — FREE
+  // FREE); when upstream had no signal (UNKNOWN), trust text inference - FREE
   // only survives when the listing text clearly says so.
   const admission =
     draft.admission && draft.admission !== "UNKNOWN" && draft.admission !== "ALL_AGES"
@@ -76,7 +76,7 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
 
   const warnings = [...(draft.warnings || [])];
   if (draft.ageRequirement !== HAWKS_AGE_REQUIREMENT) {
-    warnings.push("Age defaulted to 21_PLUS (Hawks sex club) — verify for 18+ nights");
+    warnings.push("Age defaulted to 21_PLUS (Hawks sex club) - verify for 18+ nights");
   }
   if (!draft.isSexPositive || !draft.nudityOk) {
     warnings.push("Sex-positive + nudity flags set for Hawks PDX sex club");

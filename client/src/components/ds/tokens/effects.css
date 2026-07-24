@@ -4,7 +4,7 @@
 
    Default interactive CTAs → --glass-btn (glass.css), NEVER these offsets.
    --brutal-shadow* = intentional stickers / zine chrome only.
-   Claim sticker (live): pure #00FFFF + soft cyan 3px offset — not yellow rim,
+   Claim sticker (live): pure #00FFFF + soft cyan 3px offset - not yellow rim,
    not magenta brutal default. See .pdxBoard__claim-tag / meta-tag--claim.
 
    Motion: 0.15s snappy hovers, ~4s ambient pulse; card entrance
@@ -12,7 +12,7 @@
    ============================================================ */
 
 :root {
-  /* ---- BRUTALIST OFFSET (sticker / legacy ONLY — not default CTA) ---- */
+  /* ---- BRUTALIST OFFSET (sticker / legacy ONLY - not default CTA) ---- */
   /* Do not re-wire buttons / tickets / Shop Now / RSVP to these. */
   --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
   --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
@@ -73,7 +73,7 @@
   50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
 }
 
-/* Deep-glass card entrance — canonical values from PlaceCard / §6 audit:
+/* Deep-glass card entrance - canonical values from PlaceCard / §6 audit:
    22px rise, .55s, --ease-out. dirCardIn is an alias for reference HTML parity. */
 @keyframes pgDirCardIn {
   from { opacity: 0; transform: translateY(22px); }
@@ -97,7 +97,7 @@
   50%      { transform: translateY(-3px); opacity: 1; background: #4a4a55; }
 }
 
-/* Entrance reveal: fade + short rise (.sch-block / schIn) — non-card sections */
+/* Entrance reveal: fade + short rise (.sch-block / schIn) - non-card sections */
 @keyframes pdxReveal {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: none; }
@@ -158,7 +158,7 @@ html.calm-mode .btn-neon,
 html.calm-mode .map-pin-rsvp-pulse {
   box-shadow: none !important;
   text-shadow: none !important;
-  /* Do NOT set filter:none — calm mode may greyscale chrome; photos opt out separately */
+  /* Do NOT set filter:none - calm mode may greyscale chrome; photos opt out separately */
 }
 
 :root[data-calm="true"] .pdxBoard:hover,
@@ -203,7 +203,7 @@ html.calm-mode .pdxRow {
 @keyframes pdxaNumPop    { 0%{transform:translateY(0) scale(1)} 42%{transform:translateY(-2px) scale(1.14)} 100%{transform:translateY(0) scale(1)} }
 @keyframes pdxaFloatUp   { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-28px)} }
 
-/* ANIMATED RAINBOW DIVIDER — flowing + glowing seam shared by
+/* ANIMATED RAINBOW DIVIDER - flowing + glowing seam shared by
    .pdx-seam, .pdx-rainbow-rule, .pdxSeam and .pdxDivider--rainbow's line.
    Colors flow L→R; soft glow pulses; traveling highlight uses pdxSeamGlint. */
 @keyframes pdxSeamGlint { 0% { transform: translateX(-165%); } 60% { transform: translateX(150%); } 100% { transform: translateX(150%); } }

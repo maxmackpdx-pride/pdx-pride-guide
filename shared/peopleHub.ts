@@ -1,4 +1,4 @@
-/** System guide identity — never shown in member people lists or discover. */
+/** System guide identity - never shown in member people lists or discover. */
 export const GUIDE_SYSTEM_USERNAMES = (process.env.GUIDE_SYSTEM_USERNAMES || "prideguidepdx")
   .split(",")
   .map((s) => s.trim().toLowerCase().replace(/^@/, ""))

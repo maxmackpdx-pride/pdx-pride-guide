@@ -1,11 +1,11 @@
-# Agent rules — Zaylist
+# Agent rules - Zaylist
 
 ## Prod fixes: ready-to-ship + confirm before push (hard rule)
 
 When the user reports a **live-site bug** or asks to **fix** something on the product (reload glitch, broken UI, wrong data, etc.):
 
-1. **Destination is production**, not a local-only patch. Implement the fix on `master` (or a clean commit that will land on `master`) with **only the fix** — leave unrelated feature WIP unstaged.
-2. **Never imply the site is fixed** while the change is still local/unpushed. Say clearly: *“Fixed locally — ready to push”* (or equivalent).
+1. **Destination is production**, not a local-only patch. Implement the fix on `master` (or a clean commit that will land on `master`) with **only the fix** - leave unrelated feature WIP unstaged.
+2. **Never imply the site is fixed** while the change is still local/unpushed. Say clearly: *“Fixed locally - ready to push”* (or equivalent).
 3. **Always confirm before `git push`** (and before any Railway deploy). Show short summary: commit subject, files, that prod will update. Wait for an explicit yes (e.g. “push,” “ship,” “do it,” “go”).
 4. **After they confirm:** `git push origin master` → poll Railway until **SUCCESS** → live probe when useful. Same bar as “ship.”
 5. **Local / preview testing only when they explicitly ask.** Don’t default to “test this first” and leave it there.
@@ -22,7 +22,7 @@ When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**
 
 Local-only edits, stashes, or unpushed branches are **not** done. Do not leave WIP stashed after a “ship” request without saying so and finishing the ship.
 
-**Always keep local `master` synced with `origin/master` before and after shipping** (`git fetch` + `pull --ff-only` when behind). Multi-agent (Claude/etc.) pushes to the same remote — lagging local is how “desync” happens.
+**Always keep local `master` synced with `origin/master` before and after shipping** (`git fetch` + `pull --ff-only` when behind). Multi-agent (Claude/etc.) pushes to the same remote - lagging local is how “desync” happens.
 
 ## Deploy / “push” claims (hard rule)
 
@@ -32,9 +32,9 @@ When the user asks to **push** / **deploy** / **ship** (or after any push to `ma
 
 | Step | Required | Language if this is all you have |
 |------|----------|----------------------------------|
-| 0. `git fetch` + sync local with `origin/master` | Always before starting | “Behind remote — pulled first” |
+| 0. `git fetch` + sync local with `origin/master` | Always before starting | “Behind remote - pulled first” |
 | 1. `git push` + local `HEAD` == `origin/master` | Always | “On GitHub / remote has the commit” |
-| 2. GitHub commit on `master` confirmed | Always | Same — still not “live” |
+| 2. GitHub commit on `master` confirmed | Always | Same - still not “live” |
 | 3. Railway production deploy **SUCCESS** (poll until terminal) | Always before “shipped/live” | Building/deploying → “deploy in progress” |
 | 4. Live probe when relevant (`/api/health`, asset, or JS string) | Preferred | Note cache risk if asset looks stale |
 
@@ -53,7 +53,7 @@ Railway: project `zaylist`, production, https://www.zaylist.com
 |----------|----------|
 | 1 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
 | 2 | Tokens: `client/src/components/ds/tokens/glass.css` (+ colors/type/layout/effects) |
-| 3 | Portable: `design-system/` (sync only — never invent chrome that fights live) |
+| 3 | Portable: `design-system/` (sync only - never invent chrome that fights live) |
 | Archive | `docs/handoffs/deep-glass-2026-07-16/` (migration package, not open work orders) |
 
 **Canonical rulebook:** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)

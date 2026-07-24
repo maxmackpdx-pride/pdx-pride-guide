@@ -155,7 +155,7 @@ function nodeToDraft(node: Record<string, any>, sourceUrl: string | null): Inges
   // Skip Wix UI chrome mis-detected as events
   if (/^(settings|my account|notifications|my orders|my wallet)$/i.test(title)) return null;
 
-  const warnings: string[] = ["Parsed from Wix/warmup blob — verify times"];
+  const warnings: string[] = ["Parsed from Wix/warmup blob - verify times"];
   const { start: startRaw, end: endRaw } = extractStartEnd(node);
 
   const dateStart = toPacificWallClock(
@@ -171,7 +171,7 @@ function nodeToDraft(node: Record<string, any>, sourceUrl: string | null): Inges
   );
   if (!dateEnd) {
     dateEnd = defaultEndFromStart(dateStart);
-    warnings.push("No end — defaulted +3h");
+    warnings.push("No end - defaulted +3h");
   }
 
   const loc = node.location || node.venue || node.eventLocation || {};

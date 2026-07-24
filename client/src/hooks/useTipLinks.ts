@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { buildTipLinks, type TipLinks } from "@shared/tipSupport";
 
-/** Client-side Venmo always works — never wait on the API for coffee tips. */
+/** Client-side Venmo always works - never wait on the API for coffee tips. */
 const LOCAL = buildTipLinks();
 
 /**
@@ -27,7 +27,7 @@ export function useTipLinks(): TipLinks & { loading: boolean } {
 
   return {
     ...(data || LOCAL),
-    // Venmo never depends on loading — always show the button.
+    // Venmo never depends on loading - always show the button.
     loading: false,
   };
 }

@@ -23,7 +23,7 @@ export type QSearchSourceHealth = {
   zeroYieldStreak: number;
   instagramHandle: string | null;
   dragpdxOptIn: boolean;
-  /** Soft-removed — excluded from scans until re-enabled */
+  /** Soft-removed - excluded from scans until re-enabled */
   disabled: boolean;
   /** Admin-added source (not from curated registry or directory auto) */
   isCustom: boolean;

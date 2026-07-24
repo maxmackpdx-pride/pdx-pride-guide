@@ -20,7 +20,7 @@ const CSS = `
   box-shadow:var(--glass-card-shadow);
   backdrop-filter:blur(var(--glass-card-blur));
   -webkit-backdrop-filter:blur(var(--glass-card-blur));
-  /* Entrance fill-mode backwards only — so hover transform works after entry.
+  /* Entrance fill-mode backwards only - so hover transform works after entry.
      No infinite box-shadow pulse at rest (dense grids + scroll = paint thrash). */
   animation: pgDirCardIn .55s var(--ease-out,ease) backwards;
   animation-delay:calc(var(--i, 0) * 40ms);
@@ -54,7 +54,7 @@ a.pdxBoard:hover{
   position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.35;
   background:var(--poster-well-scan);
 }
-/* Full flyer on the card face — never crop art/type off the edges */
+/* Full flyer on the card face - never crop art/type off the edges */
 .pdxBoard__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; z-index:0; }
 .pdxBoard__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   padding:20px; text-align:center; z-index:0; }
@@ -74,7 +74,7 @@ a.pdxBoard:hover{
 .pdxTag--day{ background:#fff; color:#000; }
 .pdxTag--type{ border:1px solid var(--border-strong); color:var(--text-lo); }
 .pdxTag--meta{ border:1px solid var(--border-strong); color:var(--text-mid); }
-/* Inline claim chip (if used in tags row) — Card System cyan sticker */
+/* Inline claim chip (if used in tags row) - Card System cyan sticker */
 .pdxTag--claim{
   color:#050506; background:#00FFFF; border:0;
   box-shadow:3px 3px 0 rgba(0,255,255,.35);
@@ -102,7 +102,7 @@ a.pdxBoard:hover{
   letter-spacing:.05em; text-transform:uppercase; color:var(--_dayt,var(--_day)); margin-top:2px;
   display:inline-flex; align-items:center; gap:5px; }
 
-/* Claim sticker — LIVE standard (not yellow-rim brutal, not default CTA glass).
+/* Claim sticker - LIVE standard (not yellow-rim brutal, not default CTA glass).
    docs/LIVE_DESIGN_STANDARD.md · tokens: --claim-sticker-* in effects.css */
 .pdxBoard__claim{ margin-top:auto; padding-top:10px; display:flex; }
 .pdxBoard__claim-tag{
@@ -218,7 +218,7 @@ export function PosterCard({
           </a>
         )}
         {when && <div className="pdxBoard__when">{when}</div>}
-        {/* Only render when it navigates — dead "Event details" spans on board cards do nothing (card click opens modal). */}
+        {/* Only render when it navigates - dead "Event details" spans on board cards do nothing (card click opens modal). */}
         {showDetailsLink && detailsHref ? (
           <a className="pdxBoard__link" href={detailsHref} onClick={stop}>Event details &rarr;</a>
         ) : null}

@@ -435,7 +435,7 @@ export default function Dashboard() {
                   }}
                 >
                   <strong style={{ color: "#19e3ff" }}>Local demo hub</strong>
-                  {" — "}
+                  {" - "}
                   chrome only. Feed, posts, and admin tools need a real login.{" "}
                   <Link href={LOCAL_DEMO_PROFILE_PATH} style={{ color: "#ccff00" }}>
                     Open @{demoUser.username} profile →

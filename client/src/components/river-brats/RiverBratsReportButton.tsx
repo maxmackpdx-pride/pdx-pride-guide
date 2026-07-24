@@ -31,7 +31,7 @@ export default function RiverBratsReportButton({ targetType, targetId }: Props) 
       }),
     onSuccess: () => {
       setOpen(false);
-      toast({ title: "Reported", description: "Thanks — we'll review it." });
+      toast({ title: "Reported", description: "Thanks - we'll review it." });
     },
     onError: (err: Error) => toast({ title: "Could not report", description: err.message, variant: "destructive" }),
   });

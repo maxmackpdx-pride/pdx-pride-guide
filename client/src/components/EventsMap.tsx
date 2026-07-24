@@ -20,7 +20,7 @@ import {
   mapPinMultiHtml,
 } from "@/components/ds/mapTheme";
 
-/** Pin color when an event has no recognizable day — neutral so it can't read as a day. */
+/** Pin color when an event has no recognizable day - neutral so it can't read as a day. */
 const UNKNOWN_DAY_COLOR = "#FFFFFF";
 
 function sortByPrideDay(days: string[]): string[] {

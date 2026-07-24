@@ -55,16 +55,16 @@ Live sandbox: `/design-preview` (`DesignSystemSandbox.tsx`).
 
 ### Locked visual rules (smoke these after mass CSS/token changes)
 
-1. **Rainbow top seam on every clickable card** — Events grid/list, schedule cells, boards (gigs/gifts/MC), glowing hub-feed board cards only (`.fitem--glow`), featured event ad, PlaceCard / PlaceModal, EventModal bar.  
+1. **Rainbow top seam on every clickable card** - Events grid/list, schedule cells, boards (gigs/gifts/MC), glowing hub-feed board cards only (`.fitem--glow`), featured event ad, PlaceCard / PlaceModal, EventModal bar.  
    - Animated (`pdxSeamFlow` / glow / glint) unless **calm** or `prefers-reduced-motion` → static bar.  
    - Reference: PlaceCard `.pdxPlace__seam.pdx-rainbow-rule` or root `::before` list in `base.css`.  
    - **Do not** invent one-off stripes or solid day-color caps.
 
 2. **Feed posts vs glowing cards**  
-   - **Plain feed rows:** RSVPs, check-ins, member text/photo — no glow, no overlay.  
-   - **Glowing cards:** board posts (gig purple / gift lime / MC magenta) + featured event ad — border + glow + tap-to-open.
+   - **Plain feed rows:** RSVPs, check-ins, member text/photo - no glow, no overlay.  
+   - **Glowing cards:** board posts (gig purple / gift lime / MC magenta) + featured event ad - border + glow + tap-to-open.
 
-3. **Board triad** — board page + feed card + feed overlay must share **one** card component.  
+3. **Board triad** - board page + feed card + feed overlay must share **one** card component.  
    - Overlay: accent border + outer glow, portal to `body`, close restores scroll.  
    - Feed deep-link shape: `link: /<board>?post=${id}` + `boardPostId` (`shared/hubFeed.ts` / `getHubFeed()`).
 
@@ -76,9 +76,9 @@ Live sandbox: `/design-preview` (`DesignSystemSandbox.tsx`).
 | Gifting | lime `#ccff00` |
 | Gig Werk | purple `#b06bff` |
 
-5. **Featured event ad** — top of hub feed; day-color glow; slideshow; countdown; Buy tickets + RSVP → EventModal. Config/rotation in `HubFeed.tsx` (`FEATURED`, localStorage `hub-featured-rotation`). See `docs/featured-event-card.md`.
+5. **Featured event ad** - top of hub feed; day-color glow; slideshow; countdown; Buy tickets + RSVP → EventModal. Config/rotation in `HubFeed.tsx` (`FEATURED`, localStorage `hub-featured-rotation`). See `docs/featured-event-card.md`.
 
-6. **Day colors** — always from `shared/eventWeek.ts` / day tokens, not hard-coded one-offs.
+6. **Day colors** - always from `shared/eventWeek.ts` / day tokens, not hard-coded one-offs.
 
 ---
 
@@ -118,7 +118,7 @@ From `client/src/App.tsx`:
 | `/events?q=…` | Search query sync | Events |
 | `/events?tab=schedule` | Schedule sub-tab | Events |
 | `/events/:id/…?chat=1` | Auto-open event group chat once (strips param) | `AttendanceCluster.tsx` (embedded) |
-| Admin “VIEW PUBLIC” → `/events?event=ID` | **Legacy / likely broken** — Events does **not** read `?event=`; canonical is path `/events/:id/...` | `Admin.tsx` links only |
+| Admin “VIEW PUBLIC” → `/events?event=ID` | **Legacy / likely broken** - Events does **not** read `?event=`; canonical is path `/events/:id/...` | `Admin.tsx` links only |
 
 **APIs (smoke health):**
 
@@ -139,7 +139,7 @@ From `client/src/App.tsx`:
 | Impression | `POST /api/ads/:id/impression` body `{ sessionId?, surface? }` | capped / freq |
 | Click | `POST /api/ads/:id/click` same body | rollups on `ads` row |
 | Audience | Derived from **session** (members vs guests); clients cannot spoof via query | `adsRoutes` comment |
-| Featured event ad | **Not** Ad Manager — product feature in hub feed (`FeaturedEventAd`) | separate from `/api/ads` |
+| Featured event ad | **Not** Ad Manager - product feature in hub feed (`FeaturedEventAd`) | separate from `/api/ads` |
 
 **Owner Ad Manager:** Admin UI (owner-only). Track rate limit: `app.use("/api/ads", adsTrackLimiter)` in `server/index.ts`.
 
@@ -246,7 +246,7 @@ Use against **local** (`SMOKE_BASE_URL`) and **prod** after mass design/CSS or r
 |---|-----|------|
 | B1 | `/pride-work?post=<active-id>` | Card expands |
 | B2 | `/gifting?post=<active-id>` | Card expands |
-| B3 | `/spotted?post=<id>` | **Document gap** — currently may only land on board |
+| B3 | `/spotted?post=<id>` | **Document gap** - currently may only land on board |
 | B4 | `/directory?place=<id>` | Place modal/detail |
 | B5 | `/dashboard?section=feed` (and posts/edit*) | Correct hub pane |
 | B6 | `/inbox?thread=…` | Thread opens (auth) |
@@ -282,7 +282,7 @@ npm run sync:design-system
 
 **Not yet automated (candidates for later):**
 
-- Full design seam matrix (D1–D11) — visual / Playwright screenshots  
+- Full design seam matrix (D1–D11) - visual / Playwright screenshots  
 - Ads serve + impression/click (A1–A6)  
 - Events multi-day + `?chat=1` (E2, E5)  
 - Board `?post=` (B1–B3)  
@@ -292,11 +292,11 @@ npm run sync:design-system
 
 ## 6. Known gaps / watch items
 
-1. **Admin public event links use `?event=`** while Events only honors `/events/:id/...` — fix or add alias before relying on those links in smoke.  
-2. **MC `?post=`** documented in board standard / feed `link` field but board page may not auto-expand — feed overlay path is the reliable open.  
-3. **Featured event ad ≠ Ad Manager ads** — test both after ads or hub feed changes.  
+1. **Admin public event links use `?event=`** while Events only honors `/events/:id/...` - fix or add alias before relying on those links in smoke.  
+2. **MC `?post=`** documented in board standard / feed `link` field but board page may not auto-expand - feed overlay path is the reliable open.  
+3. **Featured event ad ≠ Ad Manager ads** - test both after ads or hub feed changes.  
 4. **Deploy desync** (ongoing ops rule): ship = GitHub `master` + Railway SUCCESS + local sync; multi-agent pushes are the usual gap.  
-5. **Unrelated WIP (not this report):** message-reactions stash; Stripe Payment Link optional; tip/Venmo direct pay; Sauvie day-pass vs season copy — verify live separately if product work resumes.
+5. **Unrelated WIP (not this report):** message-reactions stash; Stripe Payment Link optional; tip/Venmo direct pay; Sauvie day-pass vs season copy - verify live separately if product work resumes.
 
 ---
 

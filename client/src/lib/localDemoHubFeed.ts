@@ -77,7 +77,7 @@ export function getLocalDemoHubFeed(tab: HubFeedTab = "all"): HubFeedResponse {
 }
 
 /**
- * Right-rail “Your next moves” — design shows featured datetime row + day-dot row.
+ * Right-rail “Your next moves” - design shows featured datetime row + day-dot row.
  * First row: full when-line (no day dot). Second: day chip + short venue line.
  */
 export function getLocalDemoNextMoves(): HubEventRow[] {
@@ -105,7 +105,7 @@ export function getLocalDemoNextMoves(): HubEventRow[] {
   ];
 }
 
-/** Right-rail “Who to follow” — verified hosts matching design mock. */
+/** Right-rail “Who to follow” - verified hosts matching design mock. */
 export function getLocalDemoWhoToFollow(): PeopleHubUser[] {
   return [
     {

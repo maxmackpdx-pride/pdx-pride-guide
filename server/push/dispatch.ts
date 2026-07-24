@@ -67,7 +67,7 @@ export async function dispatchPushForMessage(message: Message): Promise<void> {
     return;
   }
   if (!isPushConfigured()) {
-    console.log("[push] skip — VAPID not configured");
+    console.log("[push] skip - VAPID not configured");
     return;
   }
 
@@ -78,7 +78,7 @@ export async function dispatchPushForMessage(message: Message): Promise<void> {
       .map((a) => a.userId)
       .filter((id) => id && id !== message.fromUserId);
     if (targets.length === 0) {
-      console.log("[push] guide-admin message — no site admins to notify");
+      console.log("[push] guide-admin message - no site admins to notify");
       return;
     }
     await Promise.all(targets.map((userId) => pushToUser(userId, message)));

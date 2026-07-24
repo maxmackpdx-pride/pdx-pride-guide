@@ -19,7 +19,7 @@ const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 
-/** Match Yes Coach / Stank by title — never hardcode event ids (they differ local vs prod). */
+/** Match Yes Coach / Stank by title - never hardcode event ids (they differ local vs prod). */
 function isYesCoachEvent(title: string): boolean {
   const t = title.toLowerCase();
   return t.includes("yes coach") || /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(title);
@@ -37,7 +37,7 @@ const VALUES = [
 const FAQ = [
   {
     q: "Is this just for Pride Week?",
-    a: "Not anymore. It started as the Pride Week guide and now runs all year — parties, drag, marches, community nights, and the quiet stuff too. Pride is every day here.",
+    a: "Not anymore. It started as the Pride Week guide and now runs all year - parties, drag, marches, community nights, and the quiet stuff too. Pride is every day here.",
   },
   {
     q: "Where do I find events?",
@@ -83,7 +83,7 @@ export default function About() {
       setSelectedEvent(yesCoachEvent);
       return;
     }
-    // Fallback: list may still be loading or title variant differs — fetch by search among all events
+    // Fallback: list may still be loading or title variant differs - fetch by search among all events
     try {
       const res = await apiRequest("GET", "/api/events");
       if (!res.ok) return;
@@ -100,14 +100,14 @@ export default function About() {
       { num: eventCount, label: "Events, and counting", color: "#ccff00" },
       { num: 7, label: "Days, one guide", color: "#19e3ff" },
       { num: 0, label: "To browse. Always. ($0)", color: "#ff1fa0" },
-      { num: 1, label: "Guide — room for more", color: "#ffb020" },
+      { num: 1, label: "Guide - room for more", color: "#ffb020" },
     ],
     [eventCount],
   );
 
   return (
     <div className="about-v2 board-page--makeover">
-      {/* Poster-wall hero (pride-posters-wall.jpg) — restored */}
+      {/* Poster-wall hero (pride-posters-wall.jpg) - restored */}
       <section className="about-v2-hero" aria-label="About">
         <div className="about-v2-hero__scrim" aria-hidden="true" />
         <div className="about-v2-hero__inner">

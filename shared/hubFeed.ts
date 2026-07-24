@@ -20,7 +20,7 @@ export type HubFeedAuthor = {
   avatarChoice?: number;
   avatarRing?: string | null;
   anonymous?: boolean;
-  /** Directory venue logo — render contained with padding, not cropped. */
+  /** Directory venue logo - render contained with padding, not cropped. */
   venueLogo?: boolean;
   /** When venueLogo, deep-link the avatar to this directory place. */
   businessId?: number | null;
@@ -46,7 +46,7 @@ export type HubFeedItem = {
   text?: string | null;
   createdAt: string;
   author: HubFeedAuthor;
-  /** Real person behind an event/venue post — shown as a "posted by" sub-line
+  /** Real person behind an event/venue post - shown as a "posted by" sub-line
    *  so co-hosts posting under a shared identity are still attributable. */
   postedBy?: HubFeedAuthor | null;
   event?: HubFeedEventEmbed | null;

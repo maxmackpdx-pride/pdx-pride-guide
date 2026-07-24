@@ -1,4 +1,4 @@
-/* About page overhaul — redesigned layout from About.dc.html */
+/* About page overhaul - redesigned layout from About.dc.html */
 
 /* Local keyframes only when no equivalent is already in effects.css */
 @keyframes aboutStickerFloat {
@@ -163,7 +163,7 @@
 
 .about-v2.board-page--makeover .board-stats-band {
   animation: board-hero-in 0.52s 0.07s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  /* Home-style grey outlines — no cyan bloom */
+  /* Home-style grey outlines - no cyan bloom */
   --stats-bloom: 0;
   --stats-bloom-c: transparent;
   border-top: 2px solid #1c1c22;
@@ -221,7 +221,7 @@ html.calm-mode .about-v2-hero__inner {
   width: 100%;
 }
 
-/* Full pink display title — matches design reference */
+/* Full pink display title - matches design reference */
 .about-v2-manifesto__h1 {
   font-family: var(--font-display);
   font-weight: 900;
@@ -462,7 +462,7 @@ html.calm-mode .about-v2-hero__inner {
 }
 
 /* ── Open for business / collaborative projects ──
-   SoT: design image — soft cyan OLED glass card, text kicker (not pill),
+   SoT: design image - soft cyan OLED glass card, text kicker (not pill),
    single-line headline, cyan outline chips, footer note + pill CTAs right. */
 .about-v2-work {
   background: #070708;
@@ -520,7 +520,7 @@ html.calm-mode .about-v2-hero__inner {
   margin-bottom: 22px;
 }
 
-/* Text + live dot only — no pill chrome (design image #2) */
+/* Text + live dot only - no pill chrome (design image #2) */
 .about-v2-work__badge {
   display: inline-flex;
   align-items: center;
@@ -555,7 +555,7 @@ html.calm-mode .about-v2-hero__inner {
   color: #6a675f;
 }
 
-/* Horizontal headline — not a stacked 20ch column */
+/* Horizontal headline - not a stacked 20ch column */
 .about-v2-work__headline {
   font-family: var(--font-display);
   font-weight: 900;
@@ -636,7 +636,7 @@ html.calm-mode .about-v2-hero__inner {
   margin-left: auto;
 }
 
-/* Glass pill CTAs — View resume solid cyan, Pitch me outline */
+/* Glass pill CTAs - View resume solid cyan, Pitch me outline */
 .about-v2-work__ctas .pdxBtn,
 .about-v2-work__ctas .btn-neon {
   --_c: var(--cyan, #19e3ff) !important;
@@ -714,7 +714,7 @@ html.calm-mode .about-v2-work__card {
   }
 }
 
-/* ── Project cards — neutral deep-glass + refract seam (SoT: 08-work-project-rows) ── */
+/* ── Project cards - neutral deep-glass + refract seam (SoT: 08-work-project-rows) ── */
 .about-v2-projects {
   background: var(--aw-ink);
   border-top: 1px solid var(--aw-border);

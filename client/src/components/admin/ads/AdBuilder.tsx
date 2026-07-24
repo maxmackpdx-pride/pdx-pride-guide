@@ -116,7 +116,7 @@ export default function AdBuilder({ onSaved }: Props) {
         ...emptyAdDraft("feed"),
         business: "New partner",
         title: "Your headline",
-        body: "Short body copy for the feed card — keep it to one or two lines.",
+        body: "Short body copy for the feed card - keep it to one or two lines.",
         ctaTitle: "Shop now",
         ctaCopy: "your-site.com · ships nationwide",
         pillLabel: "Partner",
@@ -253,7 +253,7 @@ export default function AdBuilder({ onSaved }: Props) {
           <h3 className="ad-mgr__kicker">01 · Start from a live template</h3>
           <p className="ad-mgr__help">
             Templates match the ads already on the <strong className="cb">events grid</strong> and{" "}
-            <strong className="nb">news feed</strong> after the deep-glass refresh. Edit copy, color, and media —
+            <strong className="nb">news feed</strong> after the deep-glass refresh. Edit copy, color, and media -
             the preview uses the same components the site renders.
           </p>
           <div className="ad-mgr__template-row ad-mgr__template-row--3">
@@ -311,7 +311,7 @@ export default function AdBuilder({ onSaved }: Props) {
               <input type="text" value={draft.ctaCopy} onChange={(e) => set("ctaCopy", e.target.value)} />
               <span className="ad-mgr__field-hint">
                 {isPoster
-                  ? "Solid brand button — usually “Shop Now →”"
+                  ? "Solid brand button - usually “Shop Now →”"
                   : "e.g. “cockblocktoys.com · free US & CA shipping”"}
               </span>
             </div>
@@ -354,7 +354,7 @@ export default function AdBuilder({ onSaved }: Props) {
         <section className="ad-mgr__card">
           <h3 className="ad-mgr__kicker">03 · Color & glow</h3>
           <p className="ad-mgr__help" style={{ marginTop: 0 }}>
-            Primary drives the glass edge, chip, and Shop Now fill — same as live cards (CockBlock{" "}
+            Primary drives the glass edge, chip, and Shop Now fill - same as live cards (CockBlock{" "}
             <span style={{ color: AD_BRAND_PRIMARY.cockblock }}>#ff1f1f</span>, Mr. S{" "}
             <span style={{ color: AD_BRAND_PRIMARY.mrs }}>#19e3ff</span>).
           </p>
@@ -729,8 +729,8 @@ export default function AdBuilder({ onSaved }: Props) {
         </div>
         <p className="ad-mgr__preview-note">
           {isPoster
-            ? "Poster uses the same PosterAdCard as /events — 2:3 media well, brand chip, solid Shop Now."
-            : "Feed uses the same FeedAdCard as the hub — media, title, and footer CTA row."}
+            ? "Poster uses the same PosterAdCard as /events - 2:3 media well, brand chip, solid Shop Now."
+            : "Feed uses the same FeedAdCard as the hub - media, title, and footer CTA row."}
         </p>
       </aside>
     </div>

@@ -22,7 +22,7 @@ function titleToSlug(title: string): string {
 
 /**
  * Fill eventPageUrl when parsers only have a feed URL.
- * Sanctuary ICS has no URL property — public pages follow /events/{slug}/.
+ * Sanctuary ICS has no URL property - public pages follow /events/{slug}/.
  */
 export function enrichEventPageUrl(draft: IngestEventDraft): IngestEventDraft {
   if (draft.eventPageUrl && !isIngestFeedUrl(draft.eventPageUrl)) {

@@ -43,7 +43,7 @@ export default function PushNotificationPrompt() {
     }
 
     // Android in the browser: optional install section, but push still works in
-    // Chrome without installing — fall through to the permission flow below.
+    // Chrome without installing - fall through to the permission flow below.
     const androidBrowser = isAndroidDevice() && !isStandalonePwa();
     let onInstallAvailable: (() => void) | undefined;
     if (androidBrowser) {
@@ -155,7 +155,7 @@ export default function PushNotificationPrompt() {
 
   const intro =
     installMode === "ios"
-      ? "Add Zaylist to your home screen — opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
+      ? "Add Zaylist to your home screen - opens full-screen like a real app, one tap away, and unlocks push alerts. iPhone does this from Safari's Share button:"
       : installMode === "android"
       ? "Allow notifications for inbox and host updates. You can also install the app for a full-screen home-screen experience and launcher badge:"
       : "Get alerts for inbox messages, host updates, and Pride weekend happenings. You can change this anytime in the site footer.";
@@ -223,7 +223,7 @@ export default function PushNotificationPrompt() {
 
         {installFirst && (
           <p style={{ color: "#FF00CC", fontSize: "0.86rem", fontStyle: "italic", lineHeight: 1.5, marginBottom: 18 }}>
-            IYKYK — it's the same move as saving Sniffies to your home screen. 😏
+            IYKYK - it's the same move as saving Sniffies to your home screen. 😏
           </p>
         )}
 
@@ -242,7 +242,7 @@ export default function PushNotificationPrompt() {
 
         {installMode === "android" && (
           <p style={{ color: "#8a8a92", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 12 }}>
-            {installReady ? "Or do it yourself:" : "Your browser will offer a one-tap Install once it's ready — or do it now:"}
+            {installReady ? "Or do it yourself:" : "Your browser will offer a one-tap Install once it's ready - or do it now:"}
           </p>
         )}
 
@@ -272,7 +272,7 @@ export default function PushNotificationPrompt() {
 
 const CYAN = "#19E3FF";
 
-// The iOS Share glyph (up arrow out of a tray) — the button Apple uses for
+// The iOS Share glyph (up arrow out of a tray) - the button Apple uses for
 // "Add to Home Screen"; it can't be triggered from a web page.
 function ShareGlyph() {
   return (
@@ -284,7 +284,7 @@ function ShareGlyph() {
   );
 }
 
-// A rounded square with a plus — "Add to Home Screen".
+// A rounded square with a plus - "Add to Home Screen".
 function AddGlyph() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -305,7 +305,7 @@ function MenuGlyph() {
   );
 }
 
-// Download-into-tray glyph — Chrome's "Install app".
+// Download-into-tray glyph - Chrome's "Install app".
 function InstallGlyph() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -325,18 +325,18 @@ type Step = { icon: ReactNode; title: ReactNode; sub: string };
 const b = (t: string) => <strong style={{ color: "#fff" }}>{t}</strong>;
 
 const IOS_STEPS: Step[] = [
-  { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "In Safari's toolbar — the ⬆️ square, usually bottom-center." },
+  { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "In Safari's toolbar - the ⬆️ square, usually bottom-center." },
   { icon: <AddGlyph />, title: <>Choose {b("Add to Home Screen")}</>, sub: "Scroll the share menu down a little if you don't see it." },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
 ];
 
 const ANDROID_STEPS: Step[] = [
   { icon: <MenuGlyph />, title: <>Tap the {b("⋮ menu")}</>, sub: "Top-right corner of Chrome." },
   { icon: <InstallGlyph />, title: <>Choose {b("Install app")}</>, sub: "Some phones label it \"Add to Home screen.\"" },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
 ];
 
-// On-brand, self-contained visual how-to. No screenshots — the exact controls
+// On-brand, self-contained visual how-to. No screenshots - the exact controls
 // live in the browser's own chrome, so we point the user straight at them.
 function InstallSteps({ steps }: { steps: Step[] }) {
   return (

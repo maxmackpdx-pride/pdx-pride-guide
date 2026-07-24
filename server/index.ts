@@ -90,7 +90,7 @@ const adsTrackLimiter = rateLimit({
 });
 app.use("/api/ads", adsTrackLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
-// cap — the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
+// cap - the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
 app.use("/api", limiter);
 
 declare module "http" {

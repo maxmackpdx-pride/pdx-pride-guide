@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 
-/* Button — deep-glass CTA (Card System §16 state sheet).
+/* Button - deep-glass CTA (Card System §16 state sheet).
    Default: near-black fill + thin black ring + inward sheen (no outer bloom).
    solid: filled accent primary · outline: secondary · gradient: rainbow special. */
 const CSS = `
@@ -54,7 +54,7 @@ const CSS = `
 .pdxBtn--lg{ padding:14px 28px; font-size:1.0625rem; }
 .pdxBtn--block{ width:100%; }
 
-/* SOLID primary CTA (filled accent) — no outer neon bloom */
+/* SOLID primary CTA (filled accent) - no outer neon bloom */
 .pdxBtn--solid{ background:var(--_c); color:#050506;
   box-shadow:0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.65),
     inset 0 -6px 12px -6px rgba(0,0,0,.28); }
@@ -130,7 +130,7 @@ const ACCENTS = {
 };
 
 /**
- * Button — glass CTA (default) with solid / outline / gradient variants.
+ * Button - glass CTA (default) with solid / outline / gradient variants.
  * @param {any} props
  */
 export function Button({

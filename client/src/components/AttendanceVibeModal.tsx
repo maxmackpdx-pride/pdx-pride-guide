@@ -92,7 +92,7 @@ export default function AttendanceVibeModal({
                   data-testid="attendance-visibility-anonymous"
                 />
                 <span className="attendance-visibility__label">Stay anonymous</span>
-                <span className="attendance-visibility__hint">Vibe only — no name or photo on the grid</span>
+                <span className="attendance-visibility__hint">Vibe only - no name or photo on the grid</span>
               </label>
             </div>
           </fieldset>

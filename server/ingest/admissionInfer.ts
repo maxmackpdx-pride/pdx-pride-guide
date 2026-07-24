@@ -1,5 +1,5 @@
 /**
- * Infer admission from listing text — never invent FREE when unsure.
+ * Infer admission from listing text - never invent FREE when unsure.
  */
 import {
   ADMISSION_UNKNOWN,
@@ -62,6 +62,6 @@ export function inferAdmissionFromText(
 
   return {
     admission: ADMISSION_UNKNOWN,
-    reason: "Cover unknown — not assumed free",
+    reason: "Cover unknown - not assumed free",
   };
 }

@@ -63,7 +63,7 @@ export type HubV2ShellProps = {
   isPrimaryOwner?: boolean;
   canPostToFeed?: boolean;
   canManageTeam?: boolean;
-  /** When true, left rail shows admin tools (same chrome as member — only items change). */
+  /** When true, left rail shows admin tools (same chrome as member - only items change). */
   chromeMode?: HubChromeMode;
   /** Pending queue badge for Messages / admin keys. */
   pendingCount?: number;
@@ -76,7 +76,7 @@ export type HubV2ShellProps = {
   onSearchChange?: (value: string) => void;
   /** Extra block at bottom of left rail (e.g. push status on admin tools). */
   sideExtra?: ReactNode;
-  /** Optional top-of-main toolbar (refresh, etc.) — stays inside the same shell. */
+  /** Optional top-of-main toolbar (refresh, etc.) - stays inside the same shell. */
   mainToolbar?: ReactNode;
 };
 
@@ -117,7 +117,7 @@ export default function HubV2Shell({
   const memberNav = MEMBER_NAV.filter((item) => !item.posterOnly || canPostToFeed);
   const adminNav = hubAdminNavItems(canManageTeam, isPrimaryOwner);
 
-  // Route / chromeMode only — do not flip the rail when section is "admin" on /dashboard.
+  // Route / chromeMode only - do not flip the rail when section is "admin" on /dashboard.
   const isAdminChrome = chromeMode === "admin" || location.startsWith("/admin");
   const isHubRoute = location === "/dashboard" || location.startsWith("/admin");
   const routeMenuMode: HubChromeMode = isAdminChrome ? "admin" : "member";
@@ -154,7 +154,7 @@ export default function HubV2Shell({
     e.preventDefault();
     e.stopPropagation();
     closeMobileDrawer();
-    // One navigation only — never stack navigate + onSectionChange + replaceState
+    // One navigation only - never stack navigate + onSectionChange + replaceState
     // (that could thrash history when leaving /admin).
     if (isAdminChrome) {
       navigate("/dashboard");
@@ -173,7 +173,7 @@ export default function HubV2Shell({
     navigate("/admin?tab=overview");
   };
 
-  // Mobile drawer: mode tabs switch the menu only — navigate when a section is picked.
+  // Mobile drawer: mode tabs switch the menu only - navigate when a section is picked.
   const goDrawerMemberMode = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -555,7 +555,7 @@ export default function HubV2Shell({
               >
                 {/* Single glowing pill (not 3-line bars) */}
                 <span className="hub-v2-drawer__grip" aria-hidden />
-                {/* Pill always; label only during hub bounce (closed) or while open — never inflate the peek */}
+                {/* Pill always; label only during hub bounce (closed) or while open - never inflate the peek */}
                 {isHubRoute && (mobileDrawerOpen || drawerBounceHint) && (
                   <span className="hub-v2-drawer__hint">
                     {mobileDrawerOpen ? "SWIPE DOWN TO CLOSE" : "SWIPE UP FOR MENU"}

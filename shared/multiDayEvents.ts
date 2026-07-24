@@ -78,7 +78,7 @@ function enumeratePacificCalendarDays(dateStart: string, dateEnd: string): strin
   return days.length > 0 ? days : [startKey];
 }
 
-/** One night out (e.g. 9pm Fri → 2am Sat) — not a multi-day festival. */
+/** One night out (e.g. 9pm Fri → 2am Sat) - not a multi-day festival. */
 export function isOvernightSpill(dateStart: string, dateEnd: string): boolean {
   const startKey = pacificCalendarDate(dateStart);
   const endKey = pacificCalendarDate(dateEnd);

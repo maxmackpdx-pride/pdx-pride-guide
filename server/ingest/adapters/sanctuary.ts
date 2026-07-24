@@ -22,7 +22,7 @@ const SANCTUARY_NEIGHBORHOOD = "Pearl District";
 
 /**
  * Schema ageRequirement enum is ALL_AGES | 18_PLUS | 21_PLUS (underscore form).
- * Sanctuary is a 21+ sex club — never 18+ / ALL_AGES.
+ * Sanctuary is a 21+ sex club - never 18+ / ALL_AGES.
  */
 export const SANCTUARY_AGE_REQUIREMENT = "21_PLUS" as const;
 /** JSON tags stored in eventTypes (see shared/eventTypeTags SEX_POSITIVE / NUDITY_OK). */
@@ -32,14 +32,14 @@ const DEFAULT_FEED =
   getTrustedVenue("sanctuary-ics")?.feedUrl ||
   "https://pdxsanctuary.com/events/calendar/sanctuary/ics/";
 
-/** Site logo / brand art — not a real event flyer. */
+/** Site logo / brand art - not a real event flyer. */
 export function isSanctuaryLogoPoster(url: string | null | undefined): boolean {
   if (!url || !String(url).trim()) return true;
   return /logo|cropped-|favicon|t_color_full|trans_color/i.test(url);
 }
 
 /**
- * Normalize titles for series matching: "Game Bang — July 2026 PRIDE" → "game bang".
+ * Normalize titles for series matching: "Game Bang - July 2026 PRIDE" → "game bang".
  * Strips dates, months, years, ordinals, bare numbers, and "pride".
  */
 export function seriesTitleKey(title: string): string {
@@ -48,7 +48,7 @@ export function seriesTitleKey(title: string): string {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[''`]/g, "")
-    .replace(/[–—−]/g, " ")
+    .replace(/[–-−]/g, " ")
     .replace(
       /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/g,
       " ",
@@ -65,7 +65,7 @@ export function seriesTitleKey(title: string): string {
 /* ── Events-index URL harvest ─────────────────────────────────────────────
  * Sanctuary's real event URLs carry WP collision suffixes and per-occurrence
  * dates ("/events/game-bang-blanket-forts-3-2/2026-07-22/") that title-slug
- * inference can never predict — guessed slugs 404 and the flyer enrich step
+ * inference can never predict - guessed slugs 404 and the flyer enrich step
  * gets no page to pull from. So: fetch the public /events/ index, harvest the
  * REAL hrefs, and match them to ICS drafts by title tokens + occurrence day.
  * Slug inference (enrichEventPageUrl) stays as fallback for unmatched drafts.
@@ -80,7 +80,7 @@ export type SanctuaryIndexEntry = {
   day: string | null;
 };
 
-/** Non-event /events/* paths (views, feeds, archives) — never event pages. */
+/** Non-event /events/* paths (views, feeds, archives) - never event pages. */
 const SANCTUARY_INDEX_EXCLUDE =
   /^(calendar|category|categories|list|month|week|day|today|tag|page|feed|photo|map|ical|search)$/i;
 
@@ -132,7 +132,7 @@ export function extractSanctuaryIndexNextUrls(html: string, baseUrl: string): st
 }
 
 /**
- * WordPress sitemap harvest — the FULL slug map. Sanctuary runs Sugar
+ * WordPress sitemap harvest - the FULL slug map. Sanctuary runs Sugar
  * Calendar, whose /events/ list paginates via JS (no hrefs), so the index
  * page can only ever show ~1 week. WP sitemaps list every sc_event page URL
  * server-side: wp-sitemap.xml → wp-sitemap-posts-sc_event-N.xml. This is the
@@ -193,7 +193,7 @@ export async function fetchSanctuarySitemapEntries(
       const fetched = await fetchIngestSource(url);
       absorb(sitemapLocsToIndexEntries(extractSitemapLocs(fetched.body)));
     } catch {
-      /* missing page number / plugin rename — try discovery below */
+      /* missing page number / plugin rename - try discovery below */
     }
   }
 
@@ -224,7 +224,7 @@ export async function fetchSanctuarySitemapEntries(
 
 /**
  * Fetch the events index (following pagination a few pages, SSRF-guarded via
- * fetchIngestSource). Failures return what we have — callers warn + fall back.
+ * fetchIngestSource). Failures return what we have - callers warn + fall back.
  */
 export async function fetchSanctuaryEventIndex(
   feedUrl: string,
@@ -257,7 +257,7 @@ export async function fetchSanctuaryEventIndex(
         if (!seenPages.has(next)) queue.push(next);
       }
     } catch {
-      /* single page failure is fine — keep whatever we harvested */
+      /* single page failure is fine - keep whatever we harvested */
     }
   }
   return entries;
@@ -341,7 +341,7 @@ export function matchSanctuaryIndexUrl(
     }
     if (e.day && e.day === day) score += 50; // exact occurrence beats series root
     // Tie-break same-series duplicates ("game-bang-2" vs "game-bang-3-2")
-    // toward the highest WP collision suffix — the newest page carries the
+    // toward the highest WP collision suffix - the newest page carries the
     // current flyer. Tiny bonus: never outweighs overlap or day match.
     const suffixNums = e.slug.match(/-(\d+)/g) || [];
     score += Math.min(
@@ -355,7 +355,7 @@ export function matchSanctuaryIndexUrl(
 
 /**
  * Third-party events at Sanctuary (Polyitopia via SP Portland, EbonyFest…)
- * often have no pdxsanctuary.com page — but the ICS DESCRIPTION carries the
+ * often have no pdxsanctuary.com page - but the ICS DESCRIPTION carries the
  * organizer's URL, whose page has the flyer (og:image). Extract it as an
  * eventPageUrl fallback for the standard enrich path (SSRF-guarded there).
  */
@@ -430,7 +430,7 @@ function parseEventTypesJson(raw: string | null | undefined): string[] {
 
 /**
  * Stamp every Sanctuary draft as 21+ sex-positive (sex club policy).
- * ageRequirement must be schema enum "21_PLUS" — not "21+" or "18+".
+ * ageRequirement must be schema enum "21_PLUS" - not "21+" or "18+".
  */
 export function applySanctuaryPolicy(draft: IngestEventDraft): IngestEventDraft {
   const tags = parseEventTypesJson(draft.eventTypes);
@@ -475,7 +475,7 @@ export function buildSeriesPosterHintMap(hints: SeriesPosterHint[] | undefined):
 
 /**
  * When a draft lacks a real flyer (missing or site logo), copy poster from
- * another draft in the same series that already has good art — first from
+ * another draft in the same series that already has good art - first from
  * this batch, then from existing board events (cross-run memory: last month's
  * Game Bang already carries the series flyer even when this run's page fetch
  * came up empty).
@@ -522,7 +522,7 @@ export type FetchSanctuaryDraftsOpts = {
   feedUrl?: string;
   maxPages?: number;
   concurrency?: number;
-  /** When true, keep past VEVENTs (default false — adapter drops them). */
+  /** When true, keep past VEVENTs (default false - adapter drops them). */
   includePast?: boolean;
   /** Existing board events' titles+posters for cross-run series flyer reuse. */
   seriesPosterHints?: SeriesPosterHint[];
@@ -568,7 +568,7 @@ export async function fetchSanctuaryDrafts(
     drafts = drafts.filter(d => !isPastEventListing(d));
   }
 
-  // Real event URLs from the /events/ index — guessed slugs 404 on Sanctuary's
+  // Real event URLs from the /events/ index - guessed slugs 404 on Sanctuary's
   // suffixed permalinks, so match harvested hrefs by title tokens + day first.
   let indexWarning: string | null = null;
   if (!opts?.skipIndexHarvest) {
@@ -587,7 +587,7 @@ export async function fetchSanctuaryDrafts(
         indexEntries.push(e);
       }
     } catch {
-      /* harvested nothing — warn below */
+      /* harvested nothing - warn below */
     }
     if (indexEntries.length) {
       drafts = drafts.map(d => {
@@ -602,7 +602,7 @@ export async function fetchSanctuaryDrafts(
         };
       });
     } else {
-      indexWarning = "Sanctuary events index unavailable — slug inference fallback";
+      indexWarning = "Sanctuary events index unavailable - slug inference fallback";
     }
   }
 
@@ -649,11 +649,11 @@ export async function fetchSanctuaryDrafts(
       : d,
   );
 
-  // Series reuse fills null/logo gaps — sibling occurrences first, then
+  // Series reuse fills null/logo gaps - sibling occurrences first, then
   // existing board events (cross-run memory)
   enriched = applySeriesFlyerReuse(enriched, buildSeriesPosterHintMap(opts?.seriesPosterHints));
   enriched = enriched.map(applySanctuaryVenue);
-  // 21+ sex club policy — always, before auto-LIVE or review queue
+  // 21+ sex club policy - always, before auto-LIVE or review queue
   enriched = enriched.map(applySanctuaryPolicy);
 
   // Re-check past after page may have refined dates

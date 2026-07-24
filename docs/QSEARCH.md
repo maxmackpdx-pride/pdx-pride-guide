@@ -12,14 +12,14 @@ Admin event intelligence for Zaylist. **Discover + draft only.** Review supports
 | Location | Own admin tab only (not under All Events) |
 | Publish | Human select + `confirm: true` → `commitIngest` / approve |
 | Approve status | Human chooses `LIVE` or `HIDDEN` on approve (API: `status` body; never auto) |
-| Candidates | `qsearch_*` tables only — never touch `events` until human commit |
+| Candidates | `qsearch_*` tables only - never touch `events` until human commit |
 | Directory auto | Registers sources + scan targets; no silent publish |
 | Curated feeds | Prefer specialized URLs for known hosts over plain homepages |
 | dragpdx | Opt-in only (`POST /api/admin/qsearch/dragpdx-opt-in`) |
 | Instagram | No unauth scrape; paste assist + optional Meta Business Discovery (Bearer token) |
 | FB Events API | Out of scope |
 | SSRF | `server/ingest/ssrf.ts` on all fetch paths (http/https, DNS private-IP block, redirect re-check) |
-| **Groups** | **Portland-metro events only** — multi-city brands (e.g. Bearracuda) drop SF/Seattle/etc. (`portlandOnly` / `businessType: group`) |
+| **Groups** | **Portland-metro events only** - multi-city brands (e.g. Bearracuda) drop SF/Seattle/etc. (`portlandOnly` / `businessType: group`) |
 
 ## Architecture
 
@@ -77,12 +77,12 @@ Flyers are first-class. On parse + commit QSearch:
 
 ### Trusted flyer hardening (2026-07)
 
-- **Sanctuary real-URL harvest** — slugs are never guessed first: the `/events/` index (plus pagination, ≤5 pages) is fetched and real hrefs (WP collision suffixes + `/YYYY-MM-DD/` occurrence paths) are matched to ICS drafts by title tokens + day (`matchSanctuaryIndexUrl`). Slug inference remains fallback only. Wrong-day occurrence URLs are rejected (wrong night → wrong flyer).
-- **Cross-run series flyer memory** — when a draft has no art, series art is reused from this batch first, then from existing board events (`seriesPosterHints` from trustedSync). Logos never qualify.
-- **No silent failures** — event-page enrich failures and enrich-budget drops now leave warning breadcrumbs on the draft; enrich budget spends soonest-first.
-- **Flyer coverage in health** — trusted sync records `flyerCount`; dashboard derives `flyerCoverage`, and green degrades to yellow when coverage < 0.5 on ≥3 drafts (`deriveTrustedHealth`). A venue must hold green *including coverage* before its scrape sources are pruned.
+- **Sanctuary real-URL harvest** - slugs are never guessed first: the `/events/` index (plus pagination, ≤5 pages) is fetched and real hrefs (WP collision suffixes + `/YYYY-MM-DD/` occurrence paths) are matched to ICS drafts by title tokens + day (`matchSanctuaryIndexUrl`). Slug inference remains fallback only. Wrong-day occurrence URLs are rejected (wrong night → wrong flyer).
+- **Cross-run series flyer memory** - when a draft has no art, series art is reused from this batch first, then from existing board events (`seriesPosterHints` from trustedSync). Logos never qualify.
+- **No silent failures** - event-page enrich failures and enrich-budget drops now leave warning breadcrumbs on the draft; enrich budget spends soonest-first.
+- **Flyer coverage in health** - trusted sync records `flyerCount`; dashboard derives `flyerCoverage`, and green degrades to yellow when coverage < 0.5 on ≥3 drafts (`deriveTrustedHealth`). A venue must hold green *including coverage* before its scrape sources are pruned.
 
-### Trusted wave 2 — directory audit (2026-07-21)
+### Trusted wave 2 - directory audit (2026-07-21)
 
 Directory audit: every `queer_owned` bar/venue was assessed for trusted promotion.
 Promoted (structured feed + flyers, dedicated adapters):
@@ -92,45 +92,45 @@ Promoted (structured feed + flyers, dedicated adapters):
 | Darcelle XV Showplace | `darcelle-tribe` | `darcelle_tribe` | Tribe REST (paginated, `image.url` flyers) + ICS `?ical=1` fallback | 21_PLUS default + verify breadcrumb (all-ages/brunch) |
 | Hawks PDX | `hawks-json` | `hawks_squarespace` | Squarespace `?format=json` (paginated, `assetUrl` posters) | 21_PLUS default + verify breadcrumb (18+ nights); sex-positive/nudity/KINK always stamped (Sanctuary-style, enforced again at publish) |
 
-Not promotable yet (no structured event source — stays in scan lane):
+Not promotable yet (no structured event source - stays in scan lane):
 CC Slaughters (HTML+WP posters), Scandals East (Zyrosite gallery, needs OCR),
 Silverado (SQS archive stale; live = IG/FB), Camp Bar (static weeklies),
 Peacock (html/JS cards + IG), Back 2 Earth (no events feed), The Nest Lounge
-(IG-only), Stag PDX (Eventbrite organizer — third-party; candidate for a
+(IG-only), Stag PDX (Eventbrite organizer - third-party; candidate for a
 future `eventbrite` fetchMode). Queer-owned wine bars/cafes (Living Room
 Wines, Stem, Coffee Beer…) excluded as not LGBTQ-exclusive nightlife venues.
 
-**Scrape sources NOT pruned yet** — per migration rule, `darcelle-tribe` /
+**Scrape sources NOT pruned yet** - per migration rule, `darcelle-tribe` /
 `darcelle-ics` / `hawks-json` stay in INGEST_SOURCES until both venues hold
 green (incl. flyer coverage) on the live Trusted board.
 
-### Sanctuary flyer fix v2 — sitemap slug map + honest coverage (2026-07-21)
+### Sanctuary flyer fix v2 - sitemap slug map + honest coverage (2026-07-21)
 
 Live finding: Sanctuary runs **Sugar Calendar**, whose /events/ list paginates
-via JS (no hrefs) — the index harvest could only ever see ~1 week (~9 events)
+via JS (no hrefs) - the index harvest could only ever see ~1 week (~9 events)
 while the ICS holds months, so everything past week one leaned on series-flyer
 reuse. Fixes:
 
-- **WP sitemap harvest is now the primary slug map** — `wp-sitemap-posts-sc_event-N.xml`
+- **WP sitemap harvest is now the primary slug map** - `wp-sitemap-posts-sc_event-N.xml`
   (index-file discovery fallback) lists EVERY event page URL server-side, no
   pagination. Index page still contributes dated occurrence URLs; slug
   inference remains last-resort.
-- **Duplicate-series tie-break** — same series key ("game-bang-2" vs
+- **Duplicate-series tie-break** - same series key ("game-bang-2" vs
   "game-bang-blanket-forts-3-2") resolves toward the highest WP collision
   suffix (newest page = current flyer); tiny bonus, never outweighs
   title-overlap or day match.
-- **Coverage counts FRESH flyers only** (`countFreshFlyerDrafts`) — series-reuse
+- **Coverage counts FRESH flyers only** (`countFreshFlyerDrafts`) - series-reuse
   backfill still displays but no longer counts toward flyer coverage, so the
   health board exposes the real acquisition rate instead of reuse masking it.
 
-### Trusted wave 3 — generic-mode promotions + declarative venuePolicy (2026-07-21)
+### Trusted wave 3 - generic-mode promotions + declarative venuePolicy (2026-07-21)
 
 `TrustedVenueDef.venuePolicy` (applied by `server/ingest/venuePolicy.ts`, runs
 after any dedicated adapter policy): declarative age / sex-positive /
-never-invent-FREE rules — **new venues scale via data, not code**.
+never-invent-FREE rules - **new venues scale via data, not code**.
 
 Promoted via fetchMode `generic` (existing discover pipeline; relevance guards
-already venue-scope Eventbrite — incl. Stag ≠ Stags' Leap and sports+bra
+already venue-scope Eventbrite - incl. Stag ≠ Stags' Leap and sports+bra
 token rules):
 
 | Venue | sourceId | Source | Policy |
@@ -141,7 +141,7 @@ token rules):
 | Camp Bar PDX | `camp-bar` | Static #events HTML | 21_PLUS |
 | CC Slaughters | `cc-slaughters` | HTML + WP posters | 21_PLUS |
 
-These five are **scrape-grade sources on the trusted board** — the flyer
+These five are **scrape-grade sources on the trusted board** - the flyer
 coverage + yield health is the probation gate. 12h poll (vs 6h for feed-grade).
 Scan-lane entries stay until each holds green.
 
@@ -151,8 +151,8 @@ When a scrape is weekly/monthly **or** matches catalog:
 
 | Catalog pattern | Flag |
 |-----------------|------|
-| Multiple instances same title/venue/weekday | **Catalog already series** — skip create; optional flyer/time refresh |
-| Single one-off listing | **Needs recurring update** — update that event, don’t stack a second host |
+| Multiple instances same title/venue/weekday | **Catalog already series** - skip create; optional flyer/time refresh |
+| Single one-off listing | **Needs recurring update** - update that event, don’t stack a second host |
 | Scrape weekly + catalog one-off | Candidate unselected + action note for human |
 
 ## Vision (how flyer reading works)
@@ -164,8 +164,8 @@ There is **no custom/local mini-model**. Flyer OCR uses a **cloud vision API**:
 | `XAI_API_KEY` | `grok-2-vision-latest` (or `QSEARCH_VISION_MODEL`) |
 | `OPENAI_API_KEY` | `gpt-4o-mini` |
 
-- `POST /api/admin/qsearch/vision` — `{ imageUrl, venueHint? }` (https or `/uploads/…`)
-- `POST /api/admin/qsearch/vision/upload` — multipart `flyers` (1–12 images) + optional `venueHint`
+- `POST /api/admin/qsearch/vision` - `{ imageUrl, venueHint? }` (https or `/uploads/…`)
+- `POST /api/admin/qsearch/vision/upload` - multipart `flyers` (1–12 images) + optional `venueHint`
 - Low confidence (&lt;0.55) unselected by default
 - **Scan:** optional `tryVision` samples page images when structured parse is empty
 
@@ -173,7 +173,7 @@ Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does
 
 ## Instagram assist
 
-- **URL only:** `POST /api/admin/qsearch/instagram` `{ mode: "url", url }` — post link or direct image CDN  
+- **URL only:** `POST /api/admin/qsearch/instagram` `{ mode: "url", url }` - post link or direct image CDN  
 - Tries public OG image (often blocked) then vision on the image  
 - **Graph:** Meta Business Discovery when tokens set  
 - **Never** full unauth Instagram scrape  
@@ -184,7 +184,7 @@ Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does
 |--------|------|
 | GET | `/api/admin/qsearch/dashboard` |
 | GET | `/api/admin/qsearch/queue` |
-| POST | `/api/admin/qsearch/scan` | body: `{ includePastEvents?, tryVision?, sourceIds?, onlyFailing?, onlyNew?, … }` — **past off by default** |
+| POST | `/api/admin/qsearch/scan` | body: `{ includePastEvents?, tryVision?, sourceIds?, onlyFailing?, onlyNew?, … }` - **past off by default** |
 | GET | `/api/admin/qsearch/scan/:jobId` |
 | POST | `/api/admin/qsearch/scan/:jobId/cancel` |
 | POST | `/api/admin/qsearch/scan/nightly-now` |
@@ -203,20 +203,20 @@ Without those keys, calendar **HTML/JSON/ICS** still work; flyer-from-image does
 - UI checkbox **Include past events** on QSearch hero passes `includePastEvents: true`.
 - Weekly/monthly series still form; the representative date is the **next upcoming** occurrence when past is excluded.
 
-## Flyer Reader (GitHub-sourced OCR — Phase 1 shipped 2026-07-21)
+## Flyer Reader (GitHub-sourced OCR - Phase 1 shipped 2026-07-21)
 
-Server-side flyer parsing inside this app (no separate service — one Railway
+Server-side flyer parsing inside this app (no separate service - one Railway
 deploy). `server/flyerReader/`:
 
-- **Source**: flyers live in the repo `flyers/` folder — loaded disk-first
+- **Source**: flyers live in the repo `flyers/` folder - loaded disk-first
   (ships with the deploy), GitHub API fallback (`GITHUB_FLYERS_REPO`,
   optional `GITHUB_TOKEN`). Paths strictly confined to `flyers/`.
 - **OCR**: sharp preprocess (rotate/grayscale/normalize/upscale-to-1200px)
   → tesseract.js (pure WASM, lazy worker, traineddata cached in
   `TESSERACT_CACHE_DIR`, default /tmp/tesseract).
-- **Endpoint**: `POST /api/admin/qsearch/flyer-reader/ocr` (admin) —
+- **Endpoint**: `POST /api/admin/qsearch/flyer-reader/ocr` (admin) -
   `{githubPath}` or small `{imageBase64}` → `{text, confidence, preprocessMs, ocrMs}`.
-- **Phase 2 (shipped)**: `POST /api/admin/qsearch/flyer-reader/parse` —
+- **Phase 2 (shipped)**: `POST /api/admin/qsearch/flyer-reader/parse` -
   `{githubPath | imageBase64 | rawText}` → OCR (skipped when rawText given)
   → LLM structuring → brief schema JSON (title, start_date, end_date, time,
   venue, address, description, url, qr_info, confidence, raw_text) + an
@@ -227,13 +227,13 @@ deploy). `server/flyerReader/`:
   self-report with OCR quality. Never-invent-FREE applies to drafts.
 - **Vision hybrid (title lever, r2)**: when the flyer image is available and
   a vision model is configured, `structureFlyer` sends the IMAGE (downscaled
-  1024px JPEG) to the vision model with OCR text as a hint — stylized display
+  1024px JPEG) to the vision model with OCR text as a hint - stylized display
   type never survives Tesseract ("Gaylabration" → "Reorder"). Providers:
   Groq `FLYER_VISION_MODEL` (default llama-4-scout-17b-16e-instruct) → XAI
   grok-2-vision → OpenAI. Any failure falls back to the text path with a
   breadcrumb. /parse endpoint + validator are vision-first automatically.
 - **Phase 4 harness (shipped, needs your flyers)**: `npx tsx
-  script/validate-flyers.ts [--limit N] [--json report.json]` — runs the
+  script/validate-flyers.ts [--limit N] [--json report.json]` - runs the
   full pipeline over every entry in `flyers/ground-truth.json`, scores
   fields (fuzzy title/venue, exact day, ±30min time, street-number address,
   hostname url), prints per-field + overall accuracy, exits non-zero under

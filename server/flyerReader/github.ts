@@ -1,14 +1,14 @@
 /**
- * Flyer sourcing — GitHub repo `flyers/` folder (Phase 1 of the Flyer Reader).
+ * Flyer sourcing - GitHub repo `flyers/` folder (Phase 1 of the Flyer Reader).
  *
  * Two paths, tried in order:
- * 1. LOCAL DISK — the flyers folder ships with the repo, so the deployed
+ * 1. LOCAL DISK - the flyers folder ships with the repo, so the deployed
  *    Railway app already has the files. Zero network, zero rate limits.
- * 2. GITHUB API — freshness between deploys / private-repo access. Uses
+ * 2. GITHUB API - freshness between deploys / private-repo access. Uses
  *    GITHUB_FLYERS_REPO ("owner/repo", defaults to this app's repo) and
  *    optional GITHUB_TOKEN for private repos.
  *
- * Paths are strictly confined to the flyers directory — no traversal, no
+ * Paths are strictly confined to the flyers directory - no traversal, no
  * absolute paths, image/PDF extensions only.
  */
 import { readFileSync, existsSync } from "node:fs";

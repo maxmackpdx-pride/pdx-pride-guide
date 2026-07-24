@@ -11,7 +11,7 @@ type Props = {
 /**
  * Direct Venmo tip (pay composer) + optional Stripe (card / Apple Pay).
  * Venmo never needs Stripe or a special merchant setup.
- * Buy me a coffee: solid lime glass — matches Pitch a sponsorship.
+ * Buy me a coffee: solid lime glass - matches Pitch a sponsorship.
  */
 export default function TipSupport({ variant = "about", className = "" }: Props) {
   const { venmoUrl, venmoHandle, stripePaymentLink, applePayReady } = useTipLinks();

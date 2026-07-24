@@ -15,7 +15,7 @@ type ShareBusiness = {
   logoUrl?: string | null;
 };
 
-/** html2canvas can't resolve CSS custom properties reliably on a detached node — always
+/** html2canvas can't resolve CSS custom properties reliably on a detached node - always
  * render with literal hex. Callers pass either a ds category key or an explicit #hex. */
 const CATEGORY_HEX: Record<string, string> = {
   bars: "#FF2AA8", food: "#FF6600", cafes: "#39FF14", venues: "#19E3FF",

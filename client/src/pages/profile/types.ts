@@ -156,7 +156,7 @@ export type MemberProfileData = {
   isOwner?: boolean;
   /** Site admin (env list, site_admin_grants, or subAdmin). */
   isAdmin?: boolean;
-  /** Primary site owner — OWNER sticker instead of ADMIN. */
+  /** Primary site owner - OWNER sticker instead of ADMIN. */
   isSiteOwner?: boolean;
   /** True when the signed-in viewer is a site admin viewing someone else's profile. */
   viewerIsAdmin?: boolean;

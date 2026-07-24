@@ -39,7 +39,7 @@ export function parseTribeEventsJson(raw: string, sourceUrl: string | null = nul
     );
     if (!dateEnd) {
       dateEnd = defaultEndFromStart(dateStart);
-      warnings.push("No end_date — defaulted +3h");
+      warnings.push("No end_date - defaulted +3h");
     }
 
     const venueObj = evt.venue || evt.venues?.[0] || {};
@@ -58,7 +58,7 @@ export function parseTribeEventsJson(raw: string, sourceUrl: string | null = nul
     let description = String(evt.description || evt.excerpt || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (!description) {
       description = `${title} at ${venueName}.`;
-      warnings.push("No description — stub");
+      warnings.push("No description - stub");
     }
 
     // Tribe evt.url is the human event page (not the REST feed)

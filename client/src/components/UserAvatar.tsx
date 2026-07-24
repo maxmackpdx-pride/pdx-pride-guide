@@ -13,7 +13,7 @@ export interface UserAvatarProps {
   title?: string;
   /** Glow shimmer (light-only sweep). Default true when a ring/glow is present. Never on ring=none. */
   shimmer?: boolean;
-  /** Directory venue logo — contained with padding inside the circle. */
+  /** Directory venue logo - contained with padding inside the circle. */
   logoFit?: boolean;
   /**
    * When set, avatar navigates here (member profile or directory place).

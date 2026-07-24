@@ -15,7 +15,7 @@ import "./HomeSchedule.css";
 const dayColorVar = (key: string) => `var(--day-${key.toLowerCase()})`;
 
 /**
- * Home page "1D" — day-tabbed big-flyer grid. Ported from the design
+ * Home page "1D" - day-tabbed big-flyer grid. Ported from the design
  * mock's `1d` variant (The Schedule.dc.html): pick a day, see its flyers
  * full-size. Replaces the old `<Schedule embed />` grid on Home.tsx.
  */

@@ -1,9 +1,9 @@
 /**
- * Flyer OCR — sharp preprocessing + Tesseract (Phase 1 of the Flyer Reader).
+ * Flyer OCR - sharp preprocessing + Tesseract (Phase 1 of the Flyer Reader).
  *
  * Preprocess: auto-rotate, flatten to white, grayscale, normalize contrast,
  * upscale small images (stylized flyer type needs pixels), light sharpen.
- * OCR: tesseract.js (pure WASM — no system tesseract binary needed on
+ * OCR: tesseract.js (pure WASM - no system tesseract binary needed on
  * Railway). The worker is created lazily on first use and reused; language
  * data caches under /tmp between requests.
  */
@@ -50,7 +50,7 @@ let workerPromise: Promise<TesseractWorker> | null = null;
 async function getWorker(): Promise<TesseractWorker> {
   if (!workerPromise) {
     workerPromise = (async () => {
-      // Lazy import — keeps server boot fast and makes the dependency optional
+      // Lazy import - keeps server boot fast and makes the dependency optional
       // until the first OCR request.
       const mod: any = await import("tesseract.js");
       const createWorker = mod.createWorker || mod.default?.createWorker;

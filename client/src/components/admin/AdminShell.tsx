@@ -77,7 +77,7 @@ const VIEW_LEDES: Record<AdminView, string> = {
 };
 
 const SIDEBAR_ICON = 15;
-/** Mobile bottom bar — ~3× sidebar icons; CSS also scales with viewport. */
+/** Mobile bottom bar - ~3× sidebar icons; CSS also scales with viewport. */
 const MOBILE_ICON = 45;
 
 function makeIcons(size: number): Record<AdminView | "more", ReactNode> {

@@ -10,7 +10,7 @@ import { toPacificWallClock, yearFromDateString } from "./dates";
 
 function looksLikeSiteLogo(url: string | null | undefined): boolean {
   if (!url) return true;
-  // NB: no bare `elementor` — Sanctuary (WordPress/Elementor) serves some real
+  // NB: no bare `elementor` - Sanctuary (WordPress/Elementor) serves some real
   // flyers through Elementor's image optimizer, and that token was nuking them.
   return /logo|cropped-|favicon|trans_color|t_color_full|apple-touch/i.test(url);
 }
@@ -148,7 +148,7 @@ export async function enrichDraftFromEventPage(
     }
 
     // Refine time-of-day from page ONLY when year matches the feed year.
-    // Sanctuary pages list many events — never pick a 2025 widget date over a 2026 ICS year.
+    // Sanctuary pages list many events - never pick a 2025 widget date over a 2026 ICS year.
     const feedYear = yearFromDateString(draft.dateStart);
     const datetimes = [...html.matchAll(/datetime=["']([^"']+)["']/gi)].map(m => m[1]);
     const absolute = datetimes
@@ -176,7 +176,7 @@ export async function enrichDraftFromEventPage(
         // If page day differs but year matches, prefer feed dateStart day + only use page if feed lacked TZ certainty
       }
     } else if (feedYear == null && absolute.length) {
-      // No year from feed (shouldn't happen for ICS) — take earliest absolute
+      // No year from feed (shouldn't happen for ICS) - take earliest absolute
       const sorted = absolute.map(x => x.wall).sort();
       dateStart = sorted[0];
       if (sorted[1] && sorted[1] > sorted[0]) dateEnd = sorted[1];
@@ -193,7 +193,7 @@ export async function enrichDraftFromEventPage(
       warnings: Array.from(new Set(warnings)),
     };
   } catch (err: unknown) {
-    // Never fail the sync — but leave a breadcrumb so Review shows WHY the
+    // Never fail the sync - but leave a breadcrumb so Review shows WHY the
     // flyer/description is missing (404 slug, timeout, SSRF reject, …).
     const msg = err instanceof Error ? err.message : String(err);
     return {
@@ -239,7 +239,7 @@ export async function enrichDraftsFromEventPages(
       warnings: Array.from(
         new Set([
           ...(out[i].warnings || []),
-          `Enrich budget (${maxPages}) reached — event page not visited`,
+          `Enrich budget (${maxPages}) reached - event page not visited`,
         ]),
       ),
     };

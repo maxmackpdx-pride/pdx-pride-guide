@@ -1,4 +1,4 @@
-# Phase N Handoff — [TITLE]
+# Phase N Handoff - [TITLE]
 
 > Copy this template to `PHASE_N_COMPLETE.md` when a phase agent finishes.
 > The next phase agent reads this file before starting work.
@@ -49,7 +49,7 @@
 
 | Issue | Severity | Suggested owner |
 |-------|----------|-----------------|
-| — | — | Phase N+1 / PM |
+| - | - | Phase N+1 / PM |
 
 ---
 
@@ -74,7 +74,7 @@
 
 | ID | Question | Blocking? |
 |----|----------|-----------|
-| — | — | yes/no |
+| - | - | yes/no |
 
 *PM resolves in `PUSH_NOTIFICATION_PROGRAM.md` → Open questions / Decision log before next phase starts if blocking.*
 
@@ -84,7 +84,7 @@
 
 | Question | Needs approval? |
 |----------|-----------------|
-| — | UX / deploy / secrets |
+| - | UX / deploy / secrets |
 
 ---
 

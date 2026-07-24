@@ -11,7 +11,7 @@ export default function ProfileStatStrip({ data, accent }: { data: MemberProfile
     ? [
         { num: String(stats.hosting), label: "Hosting" },
         { num: `${stats.events}+`, label: "Shows" },
-        { num: memberYear ? String(memberYear) : "—", label: "Est." },
+        { num: memberYear ? String(memberYear) : "-", label: "Est." },
       ]
     : [
         { num: String(stats.going), label: "Going" },

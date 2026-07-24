@@ -103,7 +103,7 @@ export default function StankTicketGate({ onContinue, onClose }: Props) {
             textShadow: "0 0 18px rgba(91,255,91,0.45)",
           }}
         >
-          Get your Yes Coach tickets before they are gone — through Zaylist
+          Get your Yes Coach tickets before they are gone - through Zaylist
         </h2>
 
         <p

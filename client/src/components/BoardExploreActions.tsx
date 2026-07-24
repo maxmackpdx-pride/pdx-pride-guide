@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ds";
 
 type Props = {
-  /** Page-specific CTA (e.g. Add a place) — rendered first when provided */
+  /** Page-specific CTA (e.g. Add a place) - rendered first when provided */
   primary?: ReactNode;
   /** Show Schedule link (Events only) */
   showSchedule?: boolean;
@@ -12,7 +12,7 @@ type Props = {
 };
 
 /**
- * Cross-page hero links — Promoters hub everywhere; Schedule on Events only.
+ * Cross-page hero links - Promoters hub everywhere; Schedule on Events only.
  */
 export default function BoardExploreActions({ primary, showSchedule = false, scheduleLead = false }: Props) {
   return (

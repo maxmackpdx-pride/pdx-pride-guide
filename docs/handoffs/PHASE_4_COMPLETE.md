@@ -1,4 +1,4 @@
-# Phase 4 Handoff — Polish & Ship
+# Phase 4 Handoff - Polish & Ship
 
 ## Meta
 

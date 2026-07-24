@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 
-/* MapLegend — layout + pin dots only. Panel chrome = glass.css .pdxLegend (neutral deep-glass). */
+/* MapLegend - layout + pin dots only. Panel chrome = glass.css .pdxLegend (neutral deep-glass). */
 const CSS = `
 .pdxLegend{
   padding:12px 16px; display:flex; flex-direction:column; gap:9px;

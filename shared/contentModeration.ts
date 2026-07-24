@@ -14,7 +14,7 @@
 //   • REVIEW: borderline matches (a lone weapon word, mild aggression) are
 //     accepted but flagged to the site owner's inbox.
 //
-// Pure module — no imports, safe for client and server.
+// Pure module - no imports, safe for client and server.
 
 export type ModerationVerdict = "ALLOW" | "REVIEW" | "BLOCK";
 
@@ -73,13 +73,13 @@ export function normalizeForModeration(text: string): string {
   return out;
 }
 
-// ─── ALLOWLIST — sex/kink/SW vocabulary + known false-positive sources ────────
+// ─── ALLOWLIST - sex/kink/SW vocabulary + known false-positive sources ────────
 // Matched spans are blanked out of the text before category matching, so these
 // can never trip SCAT/GORE/WEAPONS/ABUSE rules. (LINKS and ILLEGAL run on the
-// unmasked text — links have their own host allowlist, and ILLEGAL compounds
+// unmasked text - links have their own host allowlist, and ILLEGAL compounds
 // need the sexual-context words this list would otherwise hide.)
 const ALLOWLIST: RegExp[] = [
-  // Sexuality / nudity / kink vocabulary — always welcome here.
+  // Sexuality / nudity / kink vocabulary - always welcome here.
   /\bsex[- ]?positive\b/g,
   /\bsex(?:y|ual|uality)?\b/g,
   /\bsex[- ]?work(?:er)?s?\b/g,
@@ -119,7 +119,7 @@ const ALLOWLIST: RegExp[] = [
   /\bhook ?ups?\b/g,
   /\bpolyam(?:ory|orous)?\b/g,
   /\bswingers?\b/g,
-  // Reclaimed community usage — never treat as an attack on its own.
+  // Reclaimed community usage - never treat as an attack on its own.
   /\bdyke (?:march|night|bar)\b/g,
   /\bdykes on bikes\b/g,
   // Known false-positive sources for the block categories.
@@ -158,9 +158,9 @@ interface Rule {
   patterns: RegExp[];
 }
 
-// SCAT — waste play is the one kink the house rules exclude. (11 patterns)
+// SCAT - waste play is the one kink the house rules exclude. (11 patterns)
 const SCAT_BLOCK: RegExp[] = [
-  // common alternate spellings — "skat"/"skatt"/"scatt" (leet-folding handles sk@t)
+  // common alternate spellings - "skat"/"skatt"/"scatt" (leet-folding handles sk@t)
   /\bsk[a@]tt?\s*(?:play|kink|scene|session|fetish)?\b/i,
   /\bscatt\b/i,
   /\bscat\b/,
@@ -176,7 +176,7 @@ const SCAT_BLOCK: RegExp[] = [
   /\bhuman waste play\b/,
 ];
 
-// GORE — blood is excluded even though kink broadly isn't. (13 patterns)
+// GORE - blood is excluded even though kink broadly isn't. (13 patterns)
 const GORE_BLOCK: RegExp[] = [
   /\bblood ?play\b/,
   /\bblood ?letting\b/,
@@ -196,7 +196,7 @@ const GORE_BLOCK: RegExp[] = [
 const WEAPON_WORDS =
   "guns?|glocks?|pistols?|firearms?|rifles?|handguns?|shotguns?|ak-?47s?|ar-?15s?|kni(?:fe|ves)|switchblades?|machetes?|weapons?";
 
-// WEAPONS — blocked when paired with sale / carry / threat context. (8 patterns)
+// WEAPONS - blocked when paired with sale / carry / threat context. (8 patterns)
 const WEAPONS_BLOCK: RegExp[] = [
   new RegExp(`\\b(?:sell|selling|sellin|sold|buy|buying|trade|trading)\\s+(?:a|an|my|this|some|used)?\\s*(?:${WEAPON_WORDS})\\b`),
   new RegExp(`\\b(?:${WEAPON_WORDS})\\s+(?:for|4)\\s*sale\\b`),
@@ -208,12 +208,12 @@ const WEAPONS_BLOCK: RegExp[] = [
   new RegExp(`\\bgun to (?:your|ur|his|her|their) head\\b`),
 ];
 
-// WEAPONS — a lone weapon word without context is borderline → REVIEW. (1 pattern)
+// WEAPONS - a lone weapon word without context is borderline → REVIEW. (1 pattern)
 const WEAPONS_REVIEW: RegExp[] = [
   new RegExp(`\\b(?:${WEAPON_WORDS}|ammo|ammunition)\\b`),
 ];
 
-// ABUSE — threats, slur attacks, doxxing. (12 block patterns)
+// ABUSE - threats, slur attacks, doxxing. (12 block patterns)
 const ABUSE_BLOCK: RegExp[] = [
   /\bkill? ?(?:your|ur|you)? ?sel(?:f|ves)\b/, // kill yourself / kill urself / killyourself
   /\bkys\b/,
@@ -231,15 +231,15 @@ const ABUSE_BLOCK: RegExp[] = [
   /\b(?:home|his|her|their) address is\b/,
 ];
 
-// ABUSE — mild aggression → REVIEW. (4 patterns)
+// ABUSE - mild aggression → REVIEW. (4 patterns)
 const ABUSE_REVIEW: RegExp[] = [
   /\bfuck (?:you|u|off)\b/,
   /\b(?:punch|beat|slap|hurt) (?:you|u|him|her|them)\b/,
-  /\b(?:tranny|troon|shemale)s?\b/, // slur without attack framing — human review
+  /\b(?:tranny|troon|shemale)s?\b/, // slur without attack framing - human review
   /\bwatch your back\b/,
 ];
 
-// ILLEGAL — minors + sexual context, non-consent assertions. Runs on the
+// ILLEGAL - minors + sexual context, non-consent assertions. Runs on the
 // UNMASKED text so allowlisted sexual vocabulary still provides context. (10)
 const ILLEGAL_BLOCK: RegExp[] = [
   /\b(?:child|children|minors?|under ?age|preteens?|pre-teens?|jail ?bait)\W+(?:porn|sex|sexual|nudes?|nudity|kink|hookups?|play|pics?|content|photos?)\b/,
@@ -347,7 +347,7 @@ export function moderateContent(
   const tag = (r: ModerationReason): ModerationReason =>
     opts?.fieldLabel ? { ...r, field: opts.fieldLabel } : r;
 
-  // 1. Links — raw text, own host allowlist.
+  // 1. Links - raw text, own host allowlist.
   for (const r of checkLinks(text)) {
     reasons.push(tag(r));
     bump("BLOCK");
@@ -355,7 +355,7 @@ export function moderateContent(
 
   const normalized = normalizeForModeration(text);
 
-  // 2. ILLEGAL — unmasked normalized text (compounds need sexual-context words
+  // 2. ILLEGAL - unmasked normalized text (compounds need sexual-context words
   //    that the allowlist would otherwise mask out).
   for (const re of ILLEGAL_BLOCK) {
     const hit = normalized.match(re);
@@ -365,7 +365,7 @@ export function moderateContent(
     }
   }
 
-  // 3. Everything else — allowlisted vocabulary masked out first, so sexy /
+  // 3. Everything else - allowlisted vocabulary masked out first, so sexy /
   //    kinky / SW terms can never feed another rule.
   const masked = maskAllowlisted(normalized);
   for (const rule of RULES) {

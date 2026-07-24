@@ -191,7 +191,7 @@ export async function lookupDirectoryPlace(
     lng = coords.lng;
     sources.push("nominatim");
   } else {
-    warnings.push("Could not geocode — add address manually if needed");
+    warnings.push("Could not geocode - add address manually if needed");
   }
 
   // Website scrape for blurb / social / phone / logo
@@ -209,11 +209,11 @@ export async function lookupDirectoryPlace(
 
   if (!description || description.length < 10) {
     description =
-      `${name}${address ? ` at ${address}` : ""} — Portland LGBTQ+ friendly place. Edit this blurb before saving.`.slice(
+      `${name}${address ? ` at ${address}` : ""} - Portland LGBTQ+ friendly place. Edit this blurb before saving.`.slice(
         0,
         500,
       );
-    warnings.push("Using placeholder description — edit before save");
+    warnings.push("Using placeholder description - edit before save");
   }
 
   if (!neighborhood && address) neighborhood = extractNeighborhood(address);

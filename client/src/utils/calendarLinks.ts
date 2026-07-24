@@ -73,5 +73,5 @@ export function downloadICS(event: Parameters<typeof getICSContent>[0]): void {
   URL.revokeObjectURL(url);
 }
 
-// Apple Calendar uses the same .ics format — downloadICS works for both.
+// Apple Calendar uses the same .ics format - downloadICS works for both.
 // On iOS/Mac the OS handles opening .ics in Calendar automatically.

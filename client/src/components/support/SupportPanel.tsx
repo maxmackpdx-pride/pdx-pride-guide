@@ -6,7 +6,7 @@ type Props = {
 };
 
 /**
- * Keep-this-guide-alive panel — neutral deep-glass card + TipSupport CTAs.
+ * Keep-this-guide-alive panel - neutral deep-glass card + TipSupport CTAs.
  * Surface only; payment URLs / Stripe gating live in TipSupport + useTipLinks.
  */
 export default function SupportPanel({ className = "" }: Props) {

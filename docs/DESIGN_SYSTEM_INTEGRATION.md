@@ -8,7 +8,7 @@
 
 Production React + CSS on `master` / zaylist.com supersede portable previews, sandbox HTML, and the deep-glass migration handoff. If a document conflicts with live, **fix the document**.
 
-### Surface chrome (deep-glass / OLED-neon) — shipped
+### Surface chrome (deep-glass / OLED-neon) - shipped
 
 Deep-glass is the **canonical** card/map/button surface standard. It **overrides** prior lite-glass + default brutal-CTA look.
 
@@ -18,7 +18,7 @@ Deep-glass is the **canonical** card/map/button surface standard. It **overrides
 | Effects (sticker-only brutal; motion) | `client/src/components/ds/tokens/effects.css` |
 | Helpers | `client/src/components/ds/glass.ts` · `mapTheme.ts` |
 | Components | `client/src/components/ds/*` (Button, PosterCard, PlaceCard, …) |
-| Migration archive | `docs/handoffs/deep-glass-2026-07-16/` (**historical** — do not re-run as open agents) |
+| Migration archive | `docs/handoffs/deep-glass-2026-07-16/` (**historical** - do not re-run as open agents) |
 
 Layout, spacing, fonts, and type scale stay on the modular token files. Feature motion outside glass is preserved.
 
@@ -34,7 +34,7 @@ client/src/components/ds/tokens/*   modular production tokens (glass = chrome)
 client/src/index.css             legacy + app chrome vars still in use
         ↓  npm run sync:design-system
 design-system/tokens/tokens.css  portable colors/days (not a second glass system)
-design-system/previews/*.html    samples — must not reintroduce retired CTAs
+design-system/previews/*.html    samples - must not reintroduce retired CTAs
 ```
 
 Before every push that touches colors, Pride week, or global CSS:
@@ -49,7 +49,7 @@ If chrome/behavior rules change, also update `docs/LIVE_DESIGN_STANDARD.md`.
 ## Shipped (complete)
 
 ### Foundation
-- `client/src/components/ds/` — tokens + production components (Avatar excluded)
+- `client/src/components/ds/` - tokens + production components (Avatar excluded)
 - Global token import in `main.tsx`, calm mode syncs `data-calm` on `<html>`
 - Live sandbox: `/design-preview` (`DesignSystemSandbox.tsx`)
 - Portable kit: `design-system/` (README, EVENTS_GUIDE, AVATARS_GUIDE, previews)
@@ -71,7 +71,7 @@ If chrome/behavior rules change, also update `docs/LIVE_DESIGN_STANDARD.md`.
 
 | Component | Role |
 |-----------|------|
-| `Button` | **Glass CTA** (default glass / solid fill / outline) — **not** brutal magenta offset |
+| `Button` | **Glass CTA** (default glass / solid fill / outline) - **not** brutal magenta offset |
 | `Badge` | Status / count badges |
 | `FilterChip` | Events / directory / board filter pills |
 | `StickerBadge` | Board sticker labels |
@@ -96,7 +96,7 @@ If chrome/behavior rules change, also update `docs/LIVE_DESIGN_STANDARD.md`.
 |-----------|------|
 | `ads/PosterAdCard` | Events grid affiliate/poster ads (same chrome as board) |
 | `ads/FeedAdCard` | Hub news-feed ads |
-| `admin/ads/AdBuilder` | WYSIWYG builder — must preview those components |
+| `admin/ads/AdBuilder` | WYSIWYG builder - must preview those components |
 
 Templates / brand accents: `client/src/lib/adTypes.ts` (`AD_BRAND_PRIMARY`).
 
@@ -106,28 +106,28 @@ Templates / brand accents: `client/src/lib/adTypes.ts` (`AD_BRAND_PRIMARY`).
 - Admin `StatCard` metrics, `Button` / `Badge` on key actions
 
 ### Cards & home
-- **Events** — `ListingCard` → `PosterCard` / `EventCard`; claim sticker + share; **no** dead Event details row on grid
-- **Directory** — `PlaceCard` with linked upcoming events
-- **Rainbow top seam** — required on clickable cards (see `docs/BOARD_CARD_STANDARD.md`)
-- **Dashboard hub** — `StatPill` summary chips
+- **Events** - `ListingCard` → `PosterCard` / `EventCard`; claim sticker + share; **no** dead Event details row on grid
+- **Directory** - `PlaceCard` with linked upcoming events
+- **Rainbow top seam** - required on clickable cards (see `docs/BOARD_CARD_STANDARD.md`)
+- **Dashboard hub** - `StatPill` summary chips
 
 ### Helpers
-- `client/src/lib/dsEvent.ts` — event → listing card prop mapping
-- `client/src/lib/dsColors.ts` — dashboard accent → DS color tokens
-- `client/src/components/ds/adapters/` — production adapters
-- `shared/missedConnections.ts` — `getEventScheduleTiming` / `isEventSchedulePast` for board past; MC window stays separate
+- `client/src/lib/dsEvent.ts` - event → listing card prop mapping
+- `client/src/lib/dsColors.ts` - dashboard accent → DS color tokens
+- `client/src/components/ds/adapters/` - production adapters
+- `shared/missedConnections.ts` - `getEventScheduleTiming` / `isEventSchedulePast` for board past; MC window stays separate
 
 ## Intentionally unchanged / partial
 
 - Full home hero collage → not fully on `HeroBanner` (GlitchWord / video overlay)
 - Full merge of every legacy class in `index.css` into DS tokens only
-- Avatar system (see `design-system/AVATARS_GUIDE.md` — excluded from React DS)
+- Avatar system (see `design-system/AVATARS_GUIDE.md` - excluded from React DS)
 
-## Design rules (quick — full list in LIVE_DESIGN_STANDARD)
+## Design rules (quick - full list in LIVE_DESIGN_STANDARD)
 
 - **Cards:** deep-glass (`--glass-card*`), black ring + neon edge, sheen, radius ~14px on glass cards
 - **CTAs:** glass buttons; solid primary uses accent fill + dark type `#050506` (white on CockBlock red)
-- **Claim:** pure cyan fill + soft cyan offset — not yellow-rim brutal
+- **Claim:** pure cyan fill + soft cyan offset - not yellow-rim brutal
 - **Maps:** debossed frame, no outer bloom
 - **Display:** Barlow Condensed 700–900 uppercase; body Inter
 - **One neon per element**; day colors are data (`var(--day-*)`); lime `#CCFF00` reserved for primary action / RSVP where specified
@@ -136,7 +136,7 @@ Templates / brand accents: `client/src/lib/adTypes.ts` (`AD_BRAND_PRIMARY`).
 
 ## Previews (`design-system/previews/`)
 
-First line carries `@dsCard group="…"` for Claude Design indexing. Previews are **samples** — if they show brutal default CTAs or flat cards, treat as stale and match live components instead.
+First line carries `@dsCard group="…"` for Claude Design indexing. Previews are **samples** - if they show brutal default CTAs or flat cards, treat as stale and match live components instead.
 
 ## Preview (app)
 

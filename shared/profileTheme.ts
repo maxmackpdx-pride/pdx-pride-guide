@@ -1,4 +1,4 @@
-/** Profile accent color swatches — the only selectable hexes, all existing design-system neon tokens. */
+/** Profile accent color swatches - the only selectable hexes, all existing design-system neon tokens. */
 export const PROFILE_ACCENT_COLORS = [
   "#FF00CC", // neon-magenta
   "#00FFFF", // neon-cyan

@@ -7,12 +7,12 @@ import { placePath } from "@shared/placeSlug";
 import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 
-/* PlaceCard = directory card — Card System.html "DIRECTORY CARDS" SoT
+/* PlaceCard = directory card - Card System.html "DIRECTORY CARDS" SoT
    (Directory cards redesign.zip). OLED glass(c) by category, dual sheen,
    thin dir-refract seam, soft logo orb (not boxed poster floor), neon logo,
    6px hover lift. Nonprofit keeps rainbow --_edge. */
 const CSS = `
-/* Little directory cards — SoT: 03-directory-cards / design image
+/* Little directory cards - SoT: 03-directory-cards / design image
    OLED near-black slab, soft category bloom, solid cat chip, neon logo.
    Follow/Share only on hover so resting state matches the clean design. */
 .pdxPlace{
@@ -22,7 +22,7 @@ const CSS = `
   --c: var(--_c, var(--pink));
   --dir-gm: 60;
 }
-/* Soft outer neon cloud (always-on) — pink/cyan halo around the little card */
+/* Soft outer neon cloud (always-on) - pink/cyan halo around the little card */
 .pdxPlace__glow{
   position:absolute; inset:-6px; border-radius:20px; pointer-events:none; z-index:0;
   box-shadow:
@@ -57,14 +57,14 @@ const CSS = `
     var(--_edge, linear-gradient(var(--c), var(--c))) border-box;
   border:2px solid transparent;
 }
-/* Dual sheen — quiet so type stays readable */
+/* Dual sheen - quiet so type stays readable */
 .pdxPlace__sheen{
   position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
   background:
     linear-gradient(133deg, rgba(255,255,255,.12), rgba(255,255,255,.02) 14%, transparent 36%),
     radial-gradient(70% 55% at 108% 112%, rgba(255,255,255,.08), color-mix(in srgb, var(--c) 10%, transparent) 34%, transparent 66%);
 }
-/* Very thin top refract — design reads as soft edge glow, not a thick bar */
+/* Very thin top refract - design reads as soft edge glow, not a thick bar */
 .pdxPlace__seam{
   position:absolute; top:0; left:10px; right:10px; height:1.5px; margin:0; z-index:5;
   border-radius:0; pointer-events:none; overflow:visible;
@@ -99,7 +99,7 @@ const CSS = `
     0 0 56px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.1%), transparent),
     0 0 90px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .7%), transparent);
 }
-/* Logo well — soft category orb under neon mark */
+/* Logo well - soft category orb under neon mark */
 .pdxPlace__media{
   position:relative; height:148px; border-radius:0; overflow:visible;
   box-sizing:border-box;
@@ -132,7 +132,7 @@ const CSS = `
   max-width:58%; max-height:96px; mix-blend-mode:normal;
   filter:drop-shadow(0 0 14px color-mix(in srgb, var(--c) 55%, transparent));
 }
-/* Solid category chip — filled accent, black type */
+/* Solid category chip - filled accent, black type */
 .pdxPlace__cat .pdxBadge,
 .pdxPlace__cat [class*="Badge"],
 .pdxPlace__cat > *{
@@ -162,7 +162,7 @@ const CSS = `
   font-family:var(--font-body); font-size:.86rem; color:#c4c0b6; line-height:1.4; }
 .pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:1;
   stroke:var(--c); color:var(--c); }
-/* Body copy — soft grey, not bright white */
+/* Body copy - soft grey, not bright white */
 .pdxPlace__desc{ margin:0; font-family:var(--font-body); font-size:.9rem; line-height:1.5;
   color:#8e8a82; position:relative; z-index:1; }
 .pdxPlace__links{ display:flex; flex-wrap:wrap; gap:14px; margin-top:2px; position:relative; z-index:1; }
@@ -189,7 +189,7 @@ const CSS = `
   border:1px solid color-mix(in srgb, var(--c) 45%, transparent); color:var(--c); }
 .pdxPlace__row a{ color:inherit; text-decoration:none; }
 .pdxPlace__row a:hover{ text-decoration:underline; text-underline-offset:2px; }
-/* Actions hidden at rest — design little cards are clean; show on hover/focus */
+/* Actions hidden at rest - design little cards are clean; show on hover/focus */
 .pdxPlace__actions{
   position:absolute; top:10px; right:10px; z-index:4;
   display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;
@@ -310,7 +310,7 @@ export function PlaceCard({
   lat?: number | null;
   lng?: number | null;
   promoters?: Array<{ id: number; username: string; displayName?: string | null }>;
-  /** Directory business id — enables Follow me on every venue card */
+  /** Directory business id - enables Follow me on every venue card */
   businessId?: number;
   isFollowing?: boolean;
   onRequireAuth?: () => void;

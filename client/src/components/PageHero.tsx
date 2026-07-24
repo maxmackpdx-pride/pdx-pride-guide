@@ -27,7 +27,7 @@ export type PageHeroProps = {
   /** WebM overlay stack on the hero photo. `false` disables overlays. */
   overlayPreset?: HeroOverlayPreset | false;
   overlays?: HeroOverlayId[];
-  /** Mirror light-leaks video horizontally — alternate across panels. */
+  /** Mirror light-leaks video horizontally - alternate across panels. */
   flipLightLeaks?: boolean;
   className?: string;
 };

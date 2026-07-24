@@ -1,4 +1,4 @@
-/* TipSupport — deep-glass CTAs (surface only; payment logic untouched)
+/* TipSupport - deep-glass CTAs (surface only; payment logic untouched)
    Buy me a coffee matches Pitch a sponsorship (solid lime glass). */
 
 .tip-support__btns {
@@ -64,7 +64,7 @@
   overflow: hidden;
 }
 
-/* Cyan glass (Stripe / Apple Pay secondary) — unchanged secondary */
+/* Cyan glass (Stripe / Apple Pay secondary) - unchanged secondary */
 .tip-support__btn--cyan-glass {
   --c: var(--neon-cyan, #19e3ff);
   color: #050506 !important;

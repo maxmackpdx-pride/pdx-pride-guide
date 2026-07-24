@@ -52,7 +52,7 @@ function isWeakVenueName(name: string | null | undefined): boolean {
   return /^(tba|tbd|n\/?a|unknown|various|online|virtual|see listing|multiple|portland)$/i.test(v);
 }
 
-/** Prefer a real venue site as website — skip Eventbrite/Facebook list noise. */
+/** Prefer a real venue site as website - skip Eventbrite/Facebook list noise. */
 function guessWebsiteFromCandidate(c: {
   sourceUrl?: string;
   draft: { sourceUrl?: string | null; ticketUrl?: string | null };
@@ -102,7 +102,7 @@ type SourceHealth = {
   isCustom?: boolean;
 };
 
-/** City catch-alls / aggregators — not one directory listing. */
+/** City catch-alls / aggregators - not one directory listing. */
 const GENERAL_SCRAPE_TIERS = new Set(["eventbrite", "partiful", "agg"]);
 
 /** Strip recipe suffixes so "Holocene events" and "Holocene (BIT)" group under Holocene. */
@@ -131,7 +131,7 @@ function hostKey(url: string | null | undefined): string {
 function isGeneralScrapeSource(h: SourceHealth): boolean {
   if (h.isDirectory || h.businessId != null) return false;
   if (GENERAL_SCRAPE_TIERS.has(h.tier)) return true;
-  // Portland identity keyword searches (EB + EverOut) — not a single directory listing
+  // Portland identity keyword searches (EB + EverOut) - not a single directory listing
   if (/^eb-/i.test(h.sourceId)) return true;
   if (/^everout-/i.test(h.sourceId)) return true;
   if (
@@ -473,7 +473,7 @@ function buildDirectoryFormFromCandidate(c: Candidate): DirectoryFormState {
   const name = String(c.draft.venueName || "").trim();
   const desc =
     (c.draft.description || "").trim().slice(0, 500) ||
-    `${name} — found via QSearch (${c.sourceLabel || "scan"}). Edit this blurb before publishing.`;
+    `${name} - found via QSearch (${c.sourceLabel || "scan"}). Edit this blurb before publishing.`;
   return {
     name,
     type: "venue",
@@ -585,7 +585,7 @@ function defaultSeriesMode(c: {
 }
 
 function fmtEta(sec: number | null | undefined): string {
-  if (sec == null || !Number.isFinite(sec)) return "—";
+  if (sec == null || !Number.isFinite(sec)) return "-";
   if (sec < 60) return `~${sec}s`;
   return `~${Math.floor(sec / 60)}m ${sec % 60}s`;
 }
@@ -599,7 +599,7 @@ function fmtWhen(iso: string | null): string {
   }
 }
 
-/** Human-readable party window — always includes year (critical for multi-year ICS). */
+/** Human-readable party window - always includes year (critical for multi-year ICS). */
 function formatPartyWhen(dateStart?: string | null, dateEnd?: string | null): string {
   if (!dateStart) return "";
   const parse = (s: string) => {
@@ -648,7 +648,7 @@ function isTicketVendorUrl(url: string): boolean {
   return /ticketmaster|etix\.com|eventbrite\.com\/checkout|dice\.fm\/checkout/i.test(url);
 }
 
-/** Public page for this listing — not the scrape feed. */
+/** Public page for this listing - not the scrape feed. */
 function humanEventPageUrl(c: Candidate): string | null {
   const d = c.draft;
   const candidates = [d.eventPageUrl, d.ticketUrl, d.sourceUrl, c.sourceUrl].filter(
@@ -761,7 +761,7 @@ function SourceRow({
             </button>
           ) : (
             <>
-              <span style={{ color: "var(--qs-muted)", fontSize: 12 }}>{h.winningParser || "—"}</span>
+              <span style={{ color: "var(--qs-muted)", fontSize: 12 }}>{h.winningParser || "-"}</span>
               <button
                 type="button"
                 className="qsearch__btn-delete"
@@ -903,7 +903,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     setSelected(prev => {
       if (Object.keys(prev).length) return prev;
       const init: Record<string, boolean> = {};
-      // Select duplicate-flagged candidates too — they default to Merge, so the
+      // Select duplicate-flagged candidates too - they default to Merge, so the
       // Approve button is usable instead of silently disabled on a dup-only queue.
       for (const c of list) init[c.id] = c.selected !== false;
       return init;
@@ -940,7 +940,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             setJobId(latest.id);
             toast({
               title: "Scan already in progress",
-              description: "Showing live progress — use Cancel if it's stuck.",
+              description: "Showing live progress - use Cancel if it's stuck.",
             });
             return;
           }
@@ -1042,7 +1042,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       toast({
         title: n ? "Flyer added to Review" : "No event found on flyer",
         description: n
-          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then Approve LIVE or Stage HIDDEN.`
+          ? `${n} draft${n === 1 ? "" : "s"} - check Review, then Approve LIVE or Stage HIDDEN.`
           : data.error || "Try a clearer image or add a venue name.",
       });
       if (n) {
@@ -1054,7 +1054,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         title: "Could not read flyer",
         description: parseApiError(
           err,
-          "Needs cloud vision (XAI_API_KEY or OPENAI_API_KEY) — not a local model",
+          "Needs cloud vision (XAI_API_KEY or OPENAI_API_KEY) - not a local model",
         ),
         variant: "destructive",
       });
@@ -1171,7 +1171,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       if (!res.ok) throw new Error(data.error || "Upload failed");
       if (data.url) {
         setDirForm(prev => (prev ? { ...prev, imageUrl: data.url } : prev));
-        toast({ title: "Logo uploaded", description: "Preview updated — save to attach to the place." });
+        toast({ title: "Logo uploaded", description: "Preview updated - save to attach to the place." });
       }
     } catch (err) {
       toast({
@@ -1196,7 +1196,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       toast({
         title: n ? "Instagram → Review" : "No event found",
         description: n
-          ? `${n} draft${n === 1 ? "" : "s"} — check Review, then Approve LIVE or Stage HIDDEN.`
+          ? `${n} draft${n === 1 ? "" : "s"} - check Review, then Approve LIVE or Stage HIDDEN.`
           : data.error || data.note || "Try a direct image URL or upload the flyer.",
       });
       if (n) {
@@ -1439,10 +1439,10 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
         ? data.warnings.slice(0, 2).join(" · ")
         : "";
       setDirLookupNote(
-        [src ? `Looked up via ${src}` : "Lookup finished", warn].filter(Boolean).join(" — "),
+        [src ? `Looked up via ${src}` : "Lookup finished", warn].filter(Boolean).join(" - "),
       );
     } catch (err) {
-      setDirLookupNote(parseApiError(err, "Lookup incomplete — fill fields manually"));
+      setDirLookupNote(parseApiError(err, "Lookup incomplete - fill fields manually"));
     } finally {
       setDirLookingUp(false);
     }
@@ -1560,7 +1560,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       if (!res.ok) throw new Error(data.error || "Could not remove source");
       toast({
         title: hard ? "Source deleted" : "Source removed",
-        description: hard ? h.label : `${h.label} — restore anytime from Removed`,
+        description: hard ? h.label : `${h.label} - restore anytime from Removed`,
       });
       if (!hard) setShowRemoved(true);
       void refetch();
@@ -1672,41 +1672,41 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             type="button"
             className={`qsearch__stat${statFocus === "scan-urls" ? " is-active" : ""}`}
             onClick={() => openStat("scan-urls")}
-            title="Open Sources — all scan URLs"
+            title="Open Sources - all scan URLs"
             data-testid="qsearch-stat-urls"
           >
-            <div className="qsearch__stat-val is-cyan">{stats?.urlCount ?? "—"}</div>
+            <div className="qsearch__stat-val is-cyan">{stats?.urlCount ?? "-"}</div>
             <div className="qsearch__stat-label">Scan URLs</div>
           </button>
           <button
             type="button"
             className={`qsearch__stat${statFocus === "directory" ? " is-active" : ""}`}
             onClick={() => openStat("directory")}
-            title="Open Sources — directory places with websites"
+            title="Open Sources - directory places with websites"
             data-testid="qsearch-stat-directory"
           >
-            <div className="qsearch__stat-val">{stats?.directoryPlaces ?? "—"}</div>
+            <div className="qsearch__stat-val">{stats?.directoryPlaces ?? "-"}</div>
             <div className="qsearch__stat-label">Directory places</div>
           </button>
           <button
             type="button"
             className={`qsearch__stat${statFocus === "works" ? " is-active" : ""}`}
             onClick={() => openStat("works")}
-            title="Open Sources — yield works"
+            title="Open Sources - yield works"
             data-testid="qsearch-stat-works"
           >
-            <div className="qsearch__stat-val">{stats?.healthyCount ?? "—"}</div>
+            <div className="qsearch__stat-val">{stats?.healthyCount ?? "-"}</div>
             <div className="qsearch__stat-label">Yield works</div>
           </button>
           <button
             type="button"
             className={`qsearch__stat${statFocus === "trouble" ? " is-active" : ""}`}
             onClick={() => openStat("trouble")}
-            title="Open Health — sources having trouble"
+            title="Open Health - sources having trouble"
             data-testid="qsearch-stat-trouble"
           >
             <div className={`qsearch__stat-val ${(stats?.failingCount || 0) > 0 ? "is-warn" : ""}`}>
-              {stats?.failingCount ?? "—"}
+              {stats?.failingCount ?? "-"}
             </div>
             <div className="qsearch__stat-label">Trouble</div>
           </button>
@@ -1726,11 +1726,11 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             type="button"
             className={`qsearch__stat${statFocus === "new-links" ? " is-active" : ""}`}
             onClick={() => openStat("new-links")}
-            title="Open Health — new directory auto-links"
+            title="Open Health - new directory auto-links"
             data-testid="qsearch-stat-new"
           >
             <div className={`qsearch__stat-val ${(stats?.newDirectoryCount || 0) > 0 ? "is-warn" : ""}`}>
-              {stats?.newDirectoryCount ?? "—"}
+              {stats?.newDirectoryCount ?? "-"}
             </div>
             <div className="qsearch__stat-label">New auto-links</div>
           </button>
@@ -1941,7 +1941,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   {dash!.failing.slice(0, 50).map(h => (
                     <li key={h.sourceId}>
                       <span className={`qsearch__badge ${yieldBadge(h.yieldStatus)}`}>{h.yieldStatus}</span>
-                      <strong>{h.label}</strong> — {h.lastError || "No data"}
+                      <strong>{h.label}</strong> - {h.lastError || "No data"}
                       {h.zeroYieldStreak > 0 ? ` · zero×${h.zeroYieldStreak}` : ""}
                       <br />
                       <a href={h.resolvedUrl || h.url} target="_blank" rel="noreferrer">
@@ -2023,7 +2023,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <p style={{ fontSize: 13, color: "var(--qs-muted)", margin: 0 }}>
               ~3:00am America/Los_Angeles when <code>QSEARCH_NIGHTLY</code> is on (default in production).
               See <code>docs/QSEARCH.md</code>. Priority: never-scanned → failing → Tier1/EB → rest.
-              Candidates land here — Approve LIVE or Stage HIDDEN.
+              Candidates land here - Approve LIVE or Stage HIDDEN.
             </p>
           </div>
         </div>
@@ -2267,7 +2267,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 </span>
               </h2>
               <p className="qsearch__section-hint">
-                Eventbrite city searches, Partiful drops, and aggregators. High noise — review carefully
+                Eventbrite city searches, Partiful drops, and aggregators. High noise - review carefully
                 before commit.
               </p>
               {!sourcesByArea.general.length ? (
@@ -2492,7 +2492,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           </div>
                         ) : (
                           <div className="qsearch__cand-logo qsearch__cand-logo--empty" title="No group match">
-                            —
+                            -
                           </div>
                         )}
                         {groupBrand && (
@@ -2523,7 +2523,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           </div>
                         ) : (
                           <div className="qsearch__cand-logo qsearch__cand-logo--empty" title="No venue match">
-                            —
+                            -
                           </div>
                         )}
                         {venueBrand && (
@@ -2713,7 +2713,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           {c.recurringDupAction || c.strongDuplicate?.note}
                         </p>
                       )}
-                      {/* Recurring series — more than a badge: choose one night vs full series */}
+                      {/* Recurring series - more than a badge: choose one night vs full series */}
                       {c.condensed &&
                         (c.recurring === "weekly" || c.recurring === "monthly") &&
                         (c.recurringCount || 0) >= 2 && (
@@ -2724,7 +2724,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             onMouseDown={e => e.stopPropagation()}
                           >
                             <div className="qsearch__series-title">
-                              Recurring {c.recurring} series — {c.recurringCount} dates found
+                              Recurring {c.recurring} series - {c.recurringCount} dates found
                             </div>
                             <p className="qsearch__series-lede">
                               Choose how many nights to create when you approve. Series uses every
@@ -2752,7 +2752,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 </span>
                                 <span>
                                   One occurrence only
-                                  <em> — next/representative date only</em>
+                                  <em> - next/representative date only</em>
                                 </span>
                               </button>
                               <button
@@ -2771,10 +2771,10 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                   {(seriesMode[c.id] || defaultSeriesMode(c)) === "series" ? "●" : "○"}
                                 </span>
                                 <span>
-                                  Full series — create all {c.recurringCount} nights
+                                  Full series - create all {c.recurringCount} nights
                                   <em>
                                     {" "}
-                                    —{" "}
+                                    -{" "}
                                     {(c.memberDrafts || [])
                                       .map(d => (d.dateStart || "").slice(0, 10))
                                       .filter(Boolean)
@@ -2848,7 +2848,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <DialogTitle>Add place to directory</DialogTitle>
             <DialogDescription>
               Venue from this scan is not in the directory yet. We look up address coordinates and
-              the website (when known) to prefill fields — review, then save. Goes live as an admin
+              the website (when known) to prefill fields - review, then save. Goes live as an admin
               listing.
             </DialogDescription>
           </DialogHeader>
@@ -2894,7 +2894,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                     />
                   </label>
                   <p className="qsearch__assist-note" style={{ margin: 0 }}>
-                    Flyer is prefilled when present — replace with a square neon logo when you have
+                    Flyer is prefilled when present - replace with a square neon logo when you have
                     one.
                   </p>
                 </div>
@@ -3047,18 +3047,18 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <h2 className="qsearch__panel-title">When to use this tab</h2>
             <ol className="qsearch__assist-steps">
               <li>
-                <strong>Scan now</strong> — calendars into Review.
+                <strong>Scan now</strong> - calendars into Review.
               </li>
               <li>
-                <strong>Read a flyer</strong> — paste image URL <em>or upload</em> one/many posters.
-                Cloud vision (Grok/OpenAI) reads title/date/venue — not a local mini-model.
+                <strong>Read a flyer</strong> - paste image URL <em>or upload</em> one/many posters.
+                Cloud vision (Grok/OpenAI) reads title/date/venue - not a local mini-model.
               </li>
               <li>
-                <strong>Instagram</strong> — paste the post URL (or direct image URL) only.
+                <strong>Instagram</strong> - paste the post URL (or direct image URL) only.
               </li>
             </ol>
             <p className="qsearch__assist-note">
-              Drafts land in <strong>Review</strong> — Approve LIVE or Stage HIDDEN. Needs{" "}
+              Drafts land in <strong>Review</strong> - Approve LIVE or Stage HIDDEN. Needs{" "}
               <code>XAI_API_KEY</code> or <code>OPENAI_API_KEY</code> on the server to read flyers.
             </p>
           </div>
@@ -3067,7 +3067,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <h2 className="qsearch__panel-title">1 · Read a flyer</h2>
             <p className="qsearch__assist-blurb">
               Cloud vision reads the poster (title, date, venue). Without an API key this step cannot
-              OCR flyers — there is no custom on-device model.
+              OCR flyers - there is no custom on-device model.
             </p>
             <div className="qsearch__assist-fields">
               <label className="qsearch__field qsearch__field--wide">
@@ -3092,7 +3092,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 />
               </label>
               <label className="qsearch__field qsearch__field--wide">
-                <span>Upload flyer(s) — single or batch (max 12)</span>
+                <span>Upload flyer(s) - single or batch (max 12)</span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/gif"
@@ -3122,7 +3122,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <h2 className="qsearch__panel-title">2 · Instagram URL</h2>
             <p className="qsearch__assist-blurb">
               Paste the <strong>post link</strong> or a <strong>direct image address</strong>. We try
-              to pull the flyer image and run vision — we do <em>not</em> log into Instagram. If the
+              to pull the flyer image and run vision - we do <em>not</em> log into Instagram. If the
               post is blocked, right‑click the image → copy address, or upload under Read a flyer.
             </p>
             <div className="qsearch__assist-fields">
@@ -3182,7 +3182,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           <div className="qsearch__panel">
             <h2 className="qsearch__panel-title">3 · Whole calendar URL (advanced)</h2>
             <p className="qsearch__assist-blurb" style={{ marginBottom: 0 }}>
-              Prefer <strong>Scan now</strong> — it already walks the source list. To debug one URL
+              Prefer <strong>Scan now</strong> - it already walks the source list. To debug one URL
               from scripts or API: <code>POST /api/admin/events/ingest/preview</code> then commit.
               That path is for engineers, not day‑to‑day review.
             </p>

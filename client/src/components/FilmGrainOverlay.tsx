@@ -1,4 +1,4 @@
-/** Subtle print-grit overlay from motion handoff — pointer-events none, sitewide. */
+/** Subtle print-grit overlay from motion handoff - pointer-events none, sitewide. */
 export default function FilmGrainOverlay() {
   return (
     <div className="film-grain-overlay" aria-hidden="true">

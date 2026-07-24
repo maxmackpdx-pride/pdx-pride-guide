@@ -19,7 +19,7 @@ type Props = {
 };
 
 function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
-  // DAY PASS = seasonal sold out but daily permits still sold — treat as open-ish.
+  // DAY PASS = seasonal sold out but daily permits still sold - treat as open-ish.
   if (label === "OPEN" || label === "DAY PASS") return "good";
   if (label === "SOLD OUT") return "warn";
   return "neutral";
@@ -79,13 +79,13 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__grid">
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--orange">
-                  {rooster.airTempF != null ? `${rooster.airTempF}°` : "—"}
+                  {rooster.airTempF != null ? `${rooster.airTempF}°` : "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--water">
-                  {rooster.waterTempF != null ? `${Math.round(rooster.waterTempF)}°` : "—"}
+                  {rooster.waterTempF != null ? `${Math.round(rooster.waterTempF)}°` : "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">Water temp</div>
               </div>
@@ -97,7 +97,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--water">
-                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "—"}
+                  {rooster.riverLevelFt != null ? `${rooster.riverLevelFt.toFixed(1)}ft` : "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">
                   {rooster.depthEstimate || "River depth"}
@@ -117,13 +117,13 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             <div className="home-beach-widget__grid">
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
-                  {normalizeSwimStatusLabel(sauvie.swimStatusLabel, sauvie.swimStatus) || "—"}
+                  {normalizeSwimStatusLabel(sauvie.swimStatusLabel, sauvie.swimStatus) || "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">Collins swim</div>
               </div>
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
-                  {sauvie.airTempF != null ? `${sauvie.airTempF}°` : "—"}
+                  {sauvie.airTempF != null ? `${sauvie.airTempF}°` : "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">Air temp</div>
               </div>
@@ -137,7 +137,7 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
                 <div
                   className={`home-beach-widget__stat home-beach-widget__stat--${parkingStatusTone(sauvie.parkingStatusLabel)}`}
                 >
-                  {sauvie.parkingStatusLabel || "—"}
+                  {sauvie.parkingStatusLabel || "-"}
                 </div>
                 <div className="home-beach-widget__stat-label">Parking permits</div>
               </div>

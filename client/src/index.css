@@ -42,7 +42,7 @@
   --board-gifting: var(--neon-yellow);
   --board-gigs: var(--neon-violet);
 
-  /* Day colors — mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
+  /* Day colors - mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
   --day-mon: #8800FF;
   --day-tue: #0044FF;
   --day-wed: #FFEE00;
@@ -70,7 +70,7 @@
   --hero-layer-scrim: 2;
   --hero-layer-fx: 3;
   --hero-layer-content: 4;
-  /* Gifting, Gigs, Spotted — home promo panels + individual page heroes */
+  /* Gifting, Gigs, Spotted - home promo panels + individual page heroes */
   --board-promo-scrim:
     linear-gradient(102deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.66) 32%, rgba(0, 0, 0, 0.56) 56%, rgba(0, 0, 0, 0.35) 100%),
     linear-gradient(to top, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.32) 42%, rgba(0, 0, 0, 0.04) 72%);
@@ -95,7 +95,7 @@
 
 * { box-sizing: border-box; }
 
-/* Avoid overflow:hidden on the scroll root — iOS Safari can detach
+/* Avoid overflow:hidden on the scroll root - iOS Safari can detach
    position:fixed (mobile bottom nav). overflow-x: clip still contains
    sideways bleed without creating a classic overflow scrollport. */
 html {
@@ -161,7 +161,7 @@ body::before {
 }
 
 /* Absolute (not fixed): fixed grain lives inside main (z-index 2) and paints
-   over the site footer (z-index 1) while you scroll — Places and every other
+   over the site footer (z-index 1) while you scroll - Places and every other
    zine page looked noisy under the footer. Absolute keeps texture on-page. */
 .zine-page::before {
   content: "";
@@ -261,7 +261,7 @@ body::before {
 }
 
 .site-header-inner {
-  /* Full lockup is landscape (~2.2:1) — height drives width */
+  /* Full lockup is landscape (~2.2:1) - height drives width */
   --site-logo-h: clamp(52px, 7.5vw, 72px);
   --site-nav-size: clamp(1.05rem, calc(var(--site-logo-h) * 0.2), 1.35rem);
   --site-nav-pad-x: clamp(8px, calc(var(--site-logo-h) * 0.14), 16px);
@@ -365,7 +365,7 @@ body::before {
 
 /*
   Neon glow for PRIDE wordmark.
-  IMPORTANT: never put filter on this ancestor of .glitch-word__gradient —
+  IMPORTANT: never put filter on this ancestor of .glitch-word__gradient -
   Chrome breaks background-clip:text under filter, leaving only a solid neon
   silhouette. Glow lives on the outline layer instead.
 */
@@ -373,11 +373,11 @@ body::before {
   filter: none;
 }
 
-/* Slow chunky glitch — nav + hero PRIDE */
+/* Slow chunky glitch - nav + hero PRIDE */
 .glitch-word {
   position: relative;
   display: inline-block;
-  /* avoid isolation:isolate — can break large-scale background-clip:text */
+  /* avoid isolation:isolate - can break large-scale background-clip:text */
 }
 
 .glitch-word--rainbow .glitch-word__gradient {
@@ -555,7 +555,7 @@ body::before {
 }
 
 @media (min-width: 1024px) {
-  /* Desktop: no logo — nav links flush left; avatar + calm stay on the right */
+  /* Desktop: no logo - nav links flush left; avatar + calm stay on the right */
   .site-brand--desktop {
     display: none !important;
   }
@@ -713,7 +713,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 0;
-  /* No left border on the whole cluster — seam sits between Hub and avatar */
+  /* No left border on the whole cluster - seam sits between Hub and avatar */
   margin-left: clamp(6px, 0.8vw, 12px);
   padding-left: 0;
   border-left: 0;
@@ -727,7 +727,7 @@ body::before {
   flex: 0 0 auto;
 }
 
-/* Vertical divider — equal space on both sides so it sits 50% between Hub and avatar */
+/* Vertical divider - equal space on both sides so it sits 50% between Hub and avatar */
 .site-auth__seam {
   flex: 0 0 1px;
   align-self: center;
@@ -821,7 +821,7 @@ body::before {
   font-size: calc(var(--site-nav-size) * 0.82);
 }
 
-/* Display headline style — editorial condensed */
+/* Display headline style - editorial condensed */
 .display {
   font-family: var(--font-display);
   font-weight: 800;
@@ -847,7 +847,7 @@ body::before {
   line-height: 1;
 }
 
-/* Main H1/H2 — thin black outline + depth shadow */
+/* Main H1/H2 - thin black outline + depth shadow */
 h1.display,
 h2.display,
 .page-hero-title,
@@ -1203,7 +1203,7 @@ h2.display,
   z-index: var(--hero-layer-bg);
 }
 
-/* Legacy unused panel class — points at the single active skyline collage */
+/* Legacy unused panel class - points at the single active skyline collage */
 .home-hero-bg-collage {
   position: absolute;
   top: -8%;
@@ -1264,7 +1264,7 @@ h2.display,
   bottom: -8%;
   left: 0;
   right: 0;
-  /* Same skyline collage as desktop — no alternate pride crop */
+  /* Same skyline collage as desktop - no alternate pride crop */
   background-image: url("/home-hero-collage.jpg");
   background-size: cover;
   background-position: center center;
@@ -1335,13 +1335,13 @@ h2.display,
   }
 }
 
-/* Rainbow gradient text — no filter on this wrapper (breaks clip-text in Chrome) */
+/* Rainbow gradient text - no filter on this wrapper (breaks clip-text in Chrome) */
 .home-hero-title-pride {
   display: inline-block;
   filter: none;
 }
 
-/* Only strip shadows on the clipped gradient fill — outline keeps black ink + neon glow */
+/* Only strip shadows on the clipped gradient fill - outline keeps black ink + neon glow */
 .display .glitch-word__gradient {
   text-shadow: none;
 }
@@ -1505,7 +1505,7 @@ h2.display,
   outline-color: #000;
 }
 
-/* YOU control — thin black + cyan edge, no outer neon bloom */
+/* YOU control - thin black + cyan edge, no outer neon bloom */
 .map-locate-btn {
   position: absolute;
   left: 12px;
@@ -1547,7 +1547,7 @@ h2.display,
   font-size: 0.455rem;
 }
 
-/* Day legend — panel chrome from glass.css (.map-legend = neutral deep-glass); layout only here */
+/* Day legend - panel chrome from glass.css (.map-legend = neutral deep-glass); layout only here */
 .map-legend {
   position: absolute;
   bottom: 28px;
@@ -1594,7 +1594,7 @@ h2.display,
   white-space: nowrap;
 }
 
-/* Home strip: horizontal layout only — keep shared glass chrome (no cyan bloom) */
+/* Home strip: horizontal layout only - keep shared glass chrome (no cyan bloom) */
 .map-legend--home {
   left: 50%;
   right: auto;
@@ -1795,7 +1795,7 @@ a.event-host-name.event-host-name--link:hover {
 
 @media (max-width: 1023px) {
   :root {
-    /* Header scrolls away on mobile — sticky filter bars pin to viewport top */
+    /* Header scrolls away on mobile - sticky filter bars pin to viewport top */
     --site-header-height: 0px;
   }
 
@@ -2224,7 +2224,7 @@ a.event-host-name.event-host-name--link:hover {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Phone: Hub lives in the bottom-nav center tab — hide desktop Hub + seam */
+  /* Phone: Hub lives in the bottom-nav center tab - hide desktop Hub + seam */
   .site-auth__hub,
   .site-auth__seam {
     display: none;
@@ -2238,14 +2238,14 @@ a.event-host-name.event-host-name--link:hover {
   }
 }
 
-/* Inbox lives in bottom nav on mobile — Hub stays in avatar menu */
+/* Inbox lives in bottom nav on mobile - Hub stays in avatar menu */
 @media (max-width: 640px) {
   .site-profile-menu__item--inbox,
   .site-profile-menu__item--hub {
     display: none;
   }
 
-  /* Center anchor: Hub — Zaylist Z mark from brand kit */
+  /* Center anchor: Hub - Zaylist Z mark from brand kit */
   .site-hub-mobile-bar .hub-mobile-tab--center svg,
   .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
     width: 28px;
@@ -2300,7 +2300,7 @@ a.event-host-name.event-host-name--link:hover {
   display: none;
 }
 
-/* Blue neon family (dark → bright) — matches deep-glass inbox drawer */
+/* Blue neon family (dark → bright) - matches deep-glass inbox drawer */
 .floating-inbox--blue-deep {
   --fab-neon: #0a2a9c;
   --fab-neon-rgb: 10 42 156;
@@ -2896,7 +2896,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .btn-neon.green {
   --c: var(--neon-green);
 }
-/* Section divider — torn paper effect */
+/* Section divider - torn paper effect */
 .torn-divider {
   height: 8px;
   width: 100%;
@@ -2995,7 +2995,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   box-shadow: 0 10px 26px rgba(0,0,0,0.58);
 }
 
-/* Inbox — compact utility hero (messages are the focus) */
+/* Inbox - compact utility hero (messages are the focus) */
 .inbox-page .page-hero {
   min-height: clamp(108px, 14vh, 148px);
 }
@@ -3025,7 +3025,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   line-height: 1.55;
 }
 
-/* Events page — compact title hero, roomier map */
+/* Events page - compact title hero, roomier map */
 .events-map-row {
   display: flex;
   flex-direction: column-reverse;
@@ -3110,7 +3110,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   margin: 0.25rem 0 0.15rem;
 }
 
-/* Events page filter/nav bar — 2× readable size */
+/* Events page filter/nav bar - 2× readable size */
 .events-page .zine-filter-bar {
   font-size: 1.4rem;
 }
@@ -3199,7 +3199,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   color: #000;
 }
 
-/* Events map legend — layout only; glass chrome from .map-legend (no lime bloom) */
+/* Events map legend - layout only; glass chrome from .map-legend (no lime bloom) */
 .events-map-panel .map-legend {
   padding: 12px 14px;
   bottom: 16px;
@@ -3276,7 +3276,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   }
 }
 
-/* Events poster grid — ~1.5× larger tiles */
+/* Events poster grid - ~1.5× larger tiles */
 .events-page .events-poster-grid {
   gap: 15px;
 }
@@ -3294,7 +3294,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 @media (max-width: 880px) {
-  /* Hide overlay tags on mobile — day stripe + bottom info is enough */
+  /* Hide overlay tags on mobile - day stripe + bottom info is enough */
   .event-card-tags--overlay {
     display: none;
   }
@@ -3306,7 +3306,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
     gap: 10px;
   }
 
-  /* Extra-compact event tags on mobile (list/grid only — open modal keeps readable sizes) */
+  /* Extra-compact event tags on mobile (list/grid only - open modal keeps readable sizes) */
   .event-type-tag,
   .event-type-tag--sm,
   .event-type-tag--md,
@@ -3461,7 +3461,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   opacity: 0.62;
 }
 
-/* Home promo panels — compact flush heroes matching board page heads */
+/* Home promo panels - compact flush heroes matching board page heads */
 .home-promo-stack .home-promo-panel,
 .home-promo-stack .page-hero {
   border-bottom: none;
@@ -3581,13 +3581,13 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   96% { opacity: 1; transform: translateX(0); }
 }
 
-/* Board pages (Gifting + Gigs) — headliner hero sections */
+/* Board pages (Gifting + Gigs) - headliner hero sections */
 .board-page {
   color: var(--board-text);
   position: relative;
 }
 
-/* Absolute, not fixed — same footer bleed as zine-page (Places, Gigs, Gifting, etc.) */
+/* Absolute, not fixed - same footer bleed as zine-page (Places, Gigs, Gifting, etc.) */
 .board-page::after {
   content: "";
   position: absolute;
@@ -3618,7 +3618,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   box-shadow: 4px 4px 0 var(--accent-pop);
 }
 
-/* Board page heroes — Gigs, Gifting, About, Missed (home uses .home-hero) */
+/* Board page heroes - Gigs, Gifting, About, Missed (home uses .home-hero) */
 /* ── Compact page chrome (nav-aligned titles) ─────────────────────────── */
 .page-header {
   background:
@@ -3753,7 +3753,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #19e3ff, #ff8c00) 1;
 }
 
-/* Gifting template — flush hero on photo scrim */
+/* Gifting template - flush hero on photo scrim */
 .page-hero--flush {
   min-height: 600px;
   border-image: linear-gradient(90deg, #c8fa3c, #19e3ff, #ff1fa0, #ff8c00) 1;
@@ -3963,7 +3963,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .page-hero__panel .page-hero__accent--rainbow,
 .page-hero__accent--rainbow {
   display: inline-block;
-  /* no filter — breaks background-clip:text on GlitchWord fill in Chrome */
+  /* no filter - breaks background-clip:text on GlitchWord fill in Chrome */
   filter: none;
 }
 
@@ -4123,7 +4123,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   font-size: 0.9375rem;
 }
 
-/* Paper sticker steps — only when NOT using the dark makeover skin.
+/* Paper sticker steps - only when NOT using the dark makeover skin.
    Makeover boards force dark cards; black text there is unreadable. */
 .gifting-page .board-how--inline:not(.board-how--makeover) .board-steps,
 .gigs-page .board-how--inline:not(.board-how--makeover) .board-steps,
@@ -4800,7 +4800,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 .gifting-actions .cyan {
-  /* legacy class — map to lime on gifting board */
+  /* legacy class - map to lime on gifting board */
   border-color: #ccff00;
   color: #ccff00;
 }
@@ -4815,7 +4815,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .gifting-how {
   overflow: hidden;
   border-bottom: 1px solid rgba(255,255,255,0.1);
-  /* Lime wash — gifting board accent is #CCFF00, not cyan */
+  /* Lime wash - gifting board accent is #CCFF00, not cyan */
   background:
     linear-gradient(90deg, rgba(204, 255, 0, 0.1), rgba(204, 255, 0, 0.06)),
     #080808;
@@ -5330,14 +5330,14 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 /* ── User avatars (circle crop + optional pride glow) ──
-   Pride “rings” render as a soft multi-color bloom *behind* the photo —
+   Pride “rings” render as a soft multi-color bloom *behind* the photo -
    same family of effect as the mobile notify bolt’s alert glow, with a
    slow rotate + breathe (the old shimmer motion).
    Stacking: glow/shimmer at z-index -1 inside an isolated context so the
    photo (and hover zoom) always paint on top of the bloom. */
 .user-avatar {
   --avatar-size: 55px; /* base 48px +15% */
-  /* Tight halo — half the previous outward reach */
+  /* Tight halo - half the previous outward reach */
   --glow-outset: 6.5%;
   --glow-blur: calc(var(--avatar-size) * 0.044);
   --glow-shimmer-blur: calc(var(--avatar-size) * 0.024);
@@ -5367,7 +5367,7 @@ a.user-avatar.user-avatar--link:focus-visible {
   border-radius: 50%;
 }
 
-/* Soft pride bloom — behind the photo only (z-index -1) */
+/* Soft pride bloom - behind the photo only (z-index -1) */
 .user-avatar::before {
   content: "";
   position: absolute;
@@ -5394,7 +5394,7 @@ a.user-avatar.user-avatar--link:focus-visible {
   50% { opacity: 1; }
 }
 
-/* Photo disc — always above glow; opaque so bloom can't wash the face */
+/* Photo disc - always above glow; opaque so bloom can't wash the face */
 .user-avatar__inner {
   position: relative;
   z-index: 2;
@@ -5451,7 +5451,7 @@ a.user-avatar.user-avatar--link:focus-visible {
   filter: drop-shadow(0 0 4px rgba(180, 190, 210, 0.8));
 }
 
-/* Light sweep on the glow only — masked off the photo disc, always behind */
+/* Light sweep on the glow only - masked off the photo disc, always behind */
 .user-avatar__shimmer {
   position: absolute;
   inset: calc(var(--glow-outset) * -1);
@@ -5505,7 +5505,7 @@ a.user-avatar.user-avatar--link:focus-visible {
   animation-duration: 1.4s;
 }
 
-/* Scale photo only — stays above glow (z-index 2 + translateZ layer) */
+/* Scale photo only - stays above glow (z-index 2 + translateZ layer) */
 .user-avatar--shimmer:hover .user-avatar__inner {
   transform: translateZ(0) scale(1.04);
   z-index: 2;
@@ -5790,7 +5790,7 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 }
 
 /* ============================================================
-   Desktop nav redesign ("Avatar Menu" design import) — desktop only.
+   Desktop nav redesign ("Avatar Menu" design import) - desktop only.
    Scoped under min-width:1024px so the mobile top bar / hamburger
    menu keep their existing styling untouched.
    ============================================================ */
@@ -5941,7 +5941,7 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 }
 
 /* Avatar dropdown on mobile matches the desktop redesign (the .site-hub-mtop bar
-   only renders on mobile, so no media query needed). This is the AVATAR menu only —
+   only renders on mobile, so no media query needed). This is the AVATAR menu only -
    it does not touch the nav-bar board folders. */
 .site-hub-mtop .site-profile-menu__panel {
   min-width: 300px;
@@ -6245,7 +6245,7 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 footer a { transition: color 0.15s ease; }
 footer a:hover { color: #00FFFF !important; }
 
-/* Leaflet overrides — CartoDB Dark Matter tiles are already dark, NO filter */
+/* Leaflet overrides - CartoDB Dark Matter tiles are already dark, NO filter */
 
 .parallax-container {
   background-attachment: fixed;
@@ -6712,7 +6712,7 @@ footer a:hover { color: #00FFFF !important; }
   50% { opacity: 0.3; }
 }
 
-/* Active board feed — unified Gifting / Gigs / Missed layout */
+/* Active board feed - unified Gifting / Gigs / Missed layout */
 .diag {
   background-image: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 9px);
 }
@@ -8281,7 +8281,7 @@ footer a:hover { color: #00FFFF !important; }
   to { background-position: 288px 0; }
 }
 
-/* Talent role picker — selected = neon fill, unselected = neon outline */
+/* Talent role picker - selected = neon fill, unselected = neon outline */
 .talent-role-pill {
   font-family: var(--font-display);
   font-size: 0.72rem;
@@ -8315,7 +8315,7 @@ footer a:hover { color: #00FFFF !important; }
   min-height: 34px;
 }
 
-/* Events board — full I'll Be There cluster on each card */
+/* Events board - full I'll Be There cluster on each card */
 .events-board-stack {
   display: flex;
   flex-direction: column;
@@ -8468,7 +8468,7 @@ footer a:hover { color: #00FFFF !important; }
   color: #fff;
 }
 
-/* Sold-out badge — prominent red label on cards + modal */
+/* Sold-out badge - prominent red label on cards + modal */
 .event-sold-out-badge {
   display: inline-block;
   margin: 0 0 6px;
@@ -8633,7 +8633,7 @@ footer a:hover { color: #00FFFF !important; }
   font-size: 0.8rem;
 }
 
-/* Events submit callout — branded banner matching placeholder stock art */
+/* Events submit callout - branded banner matching placeholder stock art */
 .events-submit-callout {
   min-height: clamp(190px, 24vw, 250px);
   border: 1px solid #1a1a1a;
@@ -8647,7 +8647,7 @@ footer a:hover { color: #00FFFF !important; }
   text-shadow: 0 2px 0 #000, 0 0 18px rgba(204, 255, 0, 0.35);
 }
 
-/* Event modal — single panel, one scroll, one sticky footer.
+/* Event modal - single panel, one scroll, one sticky footer.
    Overlay must NOT scroll (that stacked a second copy of the card mid-viewport). */
 .event-modal-overlay {
   position: fixed;
@@ -8662,7 +8662,7 @@ footer a:hover { color: #00FFFF !important; }
   background: rgba(0, 0, 0, 0.92);
 }
 
-/* Deep-glass open-event panel — day-accent neon edge + black ring + OLED fill.
+/* Deep-glass open-event panel - day-accent neon edge + black ring + OLED fill.
    Base sizes are mobile-first. Desktop bumps width + height below. */
 .event-modal {
   --c: var(--event-accent, #19e3ff);
@@ -8703,7 +8703,7 @@ footer a:hover { color: #00FFFF !important; }
   background: #050506;
 }
 
-/* One footer only — opaque, never mid-scroll ghost */
+/* One footer only - opaque, never mid-scroll ghost */
 .event-modal__sticky-cta {
   position: relative;
   z-index: 4;
@@ -8727,7 +8727,7 @@ footer a:hover { color: #00FFFF !important; }
   text-align: center;
 }
 
-/* Rainbow top seam — motion/color from .pdx-rainbow-rule (base.css); calm = static */
+/* Rainbow top seam - motion/color from .pdx-rainbow-rule (base.css); calm = static */
 .event-modal__bar {
   position: relative;
   z-index: 5;
@@ -8739,7 +8739,7 @@ footer a:hover { color: #00FFFF !important; }
   border-radius: 0;
 }
 
-/* Corner sheen overlays — above body, below seam/close; pointer-events none */
+/* Corner sheen overlays - above body, below seam/close; pointer-events none */
 .event-modal__sheen {
   z-index: 4;
   border-radius: inherit;
@@ -8895,7 +8895,7 @@ footer a:hover { color: #00FFFF !important; }
   color: var(--text-meta);
 }
 
-/* Section kickers (FLAGS / TAGS / ABOUT) — mono uppercase SoT */
+/* Section kickers (FLAGS / TAGS / ABOUT) - mono uppercase SoT */
 .event-modal__kicker,
 .event-modal__block .event-modal__kicker {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -8911,7 +8911,7 @@ footer a:hover { color: #00FFFF !important; }
   margin-bottom: 20px;
 }
 
-/* Mid-page Tickets CTA — solid day-accent glass with sheen + soft bloom */
+/* Mid-page Tickets CTA - solid day-accent glass with sheen + soft bloom */
 .event-modal__tickets-mid {
   display: flex !important;
   width: 100%;
@@ -8942,7 +8942,7 @@ footer a:hover { color: #00FFFF !important; }
   color: #050506 !important;
 }
 
-/* Open-event tags — larger type, more padding, easier to scan */
+/* Open-event tags - larger type, more padding, easier to scan */
 .event-modal__tags {
   display: flex;
   flex-wrap: wrap;
@@ -8982,7 +8982,7 @@ footer a:hover { color: #00FFFF !important; }
   box-shadow: 2px 2px 0 var(--neon-yellow, #ccff00);
 }
 
-/* Claim chip — LIVE standard tokens */
+/* Claim chip - LIVE standard tokens */
 .event-modal__tags .event-card-meta-tag--claim {
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -9130,7 +9130,7 @@ footer a:hover { color: #00FFFF !important; }
   padding-top: 20px;
 }
 
-/* Glass action chrome — §16 glass btn shape in event modal */
+/* Glass action chrome - §16 glass btn shape in event modal */
 .event-modal .pdx-glass-btn,
 .event-modal__action-btn.pdx-glass-btn {
   display: inline-flex;
@@ -9539,7 +9539,7 @@ html.calm-mode .event-modal,
   box-shadow: 2px 2px 0 var(--neon-yellow);
 }
 
-/* Claim chip — LIVE standard (docs/LIVE_DESIGN_STANDARD.md); not yellow-rim brutal */
+/* Claim chip - LIVE standard (docs/LIVE_DESIGN_STANDARD.md); not yellow-rim brutal */
 .event-card-meta-tag--claim {
   color: var(--claim-sticker-fg, #050506);
   background: var(--claim-sticker-bg, #00ffff);
@@ -9795,7 +9795,7 @@ html.calm-mode .event-modal,
   animation: floatY 6s ease-in-out infinite;
 }
 
-/* Full wordmark lockup — footer intro + bottom brand */
+/* Full wordmark lockup - footer intro + bottom brand */
 .footer-brand-lockup {
   display: block;
   height: clamp(72px, 14vw, 112px);
@@ -9836,7 +9836,7 @@ html.calm-mode .event-modal,
 }
 
 .footer-brand-wordmark__line--accent {
-  /* no filter — breaks background-clip:text on GlitchWord fill in Chrome */
+  /* no filter - breaks background-clip:text on GlitchWord fill in Chrome */
   filter: none;
 }
 
@@ -10059,7 +10059,7 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
   }
 }
 
-/* Alive on hover — motion guide */
+/* Alive on hover - motion guide */
 .poster-card {
   transition: border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -10139,7 +10139,7 @@ html.calm-mode .home-live-ticker__marquee .pdxMarquee__star {
   transform: none;
 }
 
-/* Event tags — filled sticker standard (lime border + hard offset shadow) */
+/* Event tags - filled sticker standard (lime border + hard offset shadow) */
 .sticker-tag {
   display: inline-block;
   font-family: var(--font-display);
@@ -10515,9 +10515,9 @@ html.calm-mode .board-detail-backdrop {
   margin-bottom: 8px;
 }
 
-/* Spotted calm mode — see board pages calm block below */
+/* Spotted calm mode - see board pages calm block below */
 
-/* ── Missed Connections — legacy bubble board (kept for reference) ── */
+/* ── Missed Connections - legacy bubble board (kept for reference) ── */
 .mc-board {
   width: 100%;
 }
@@ -10993,7 +10993,7 @@ html.calm-mode .board-detail-backdrop {
 }
 
 
-/* Gifting, Gigs, Promoters collage heroes — scrim + legible text panel over busy art */
+/* Gifting, Gigs, Promoters collage heroes - scrim + legible text panel over busy art */
 .gifting-page .page-hero__bg,
 .gigs-page .page-hero__bg,
 .submit-page .page-hero__bg {
@@ -11104,7 +11104,7 @@ html.calm-mode .board-detail-backdrop {
 
 
 /* ═══════════════════════════════════════════════════════════
-   SITE FOOTER — solid black (no grain / wallpaper bleed)
+   SITE FOOTER - solid black (no grain / wallpaper bleed)
    ═══════════════════════════════════════════════════════════ */
 
 .site-footer {
@@ -11215,7 +11215,7 @@ html.calm-mode .board-detail-backdrop {
   line-height: 1.4;
 }
 
-/* Base footer coffee CTA — solid lime glass (matches Pitch a sponsorship) */
+/* Base footer coffee CTA - solid lime glass (matches Pitch a sponsorship) */
 .site-footer__coffee-btn {
   position: relative;
   display: inline-flex;
@@ -11772,7 +11772,7 @@ html:not(.calm-mode) .calm-mode-toggle__label {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CALM MODE — high-contrast grayscale dark
+   CALM MODE - high-contrast grayscale dark
    Toggled via html.calm-mode (ThemeContext).
    Everything greyscale (chrome, neons, rings, badges).
    KEEP COLOR: photos only (flyers, portraits, map tiles, video).
@@ -11788,7 +11788,7 @@ html.calm-mode {
   --calm-text: #ffffff;
   --calm-text-muted: #a3a3a3;
   --calm-text-subtle: #737373;
-  /* Active UI stays high-contrast white/grey — no neon chroma */
+  /* Active UI stays high-contrast white/grey - no neon chroma */
   --calm-accent-active: #e5e5e5;
 
   /* Remap neon + hub/panel tokens → neutral gray */
@@ -11917,7 +11917,7 @@ html.calm-mode .glitch-logo {
   animation: none !important;
 }
 
-/* GlitchWord uses background-clip:text — solid fill + solid bg = grey rectangle in calm mode */
+/* GlitchWord uses background-clip:text - solid fill + solid bg = grey rectangle in calm mode */
 html.calm-mode .glitch-word__gradient {
   background: none !important;
   -webkit-background-clip: border-box !important;
@@ -11966,7 +11966,7 @@ html.calm-mode .pdxSeam::after {
   display: none !important;
 }
 
-/* ── Heroes & panels — 10% photo, 90% dark scrim, no FX overlays ── */
+/* ── Heroes & panels - 10% photo, 90% dark scrim, no FX overlays ── */
 html.calm-mode .hero-video-overlays,
 html.calm-mode .hero-video-overlay {
   display: none !important;
@@ -12011,7 +12011,7 @@ html.calm-mode .pride-work-hero::after {
   opacity: 0 !important;
 }
 
-/* Legacy heroes with baked-in background images — 10% photo via 90% scrim wash */
+/* Legacy heroes with baked-in background images - 10% photo via 90% scrim wash */
 html.calm-mode .about-hero {
   background:
     linear-gradient(rgba(0, 0, 0, var(--calm-hero-scrim-alpha)), rgba(0, 0, 0, var(--calm-hero-scrim-alpha))),
@@ -12236,7 +12236,7 @@ html.calm-mode .pdxPlace__body {
   --stats-bloom: 0 !important;
 }
 
-/* Greyscale neon chrome only — never on parents that wrap photos (filter inherits) */
+/* Greyscale neon chrome only - never on parents that wrap photos (filter inherits) */
 html.calm-mode .hub-mobile-tab.is-active,
 html.calm-mode .hub-mobile-bar__pull,
 html.calm-mode .hub-v2-drawer__grip,
@@ -12384,10 +12384,10 @@ html.calm-mode .footer-brand-logo {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CALM MODE — Gifting, Gigs & Spotted board pages
+   CALM MODE - Gifting, Gigs & Spotted board pages
    ═══════════════════════════════════════════════════════════ */
 
-/* Page shells — kill cyan radial washes & film grain */
+/* Page shells - kill cyan radial washes & film grain */
 html.calm-mode .gifting-page,
 html.calm-mode .gigs-page,
 html.calm-mode .missed-page {
@@ -12987,7 +12987,7 @@ html.calm-mode .schedule-now-line {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  /* Full flyer on the card face — letterbox instead of cropping */
+  /* Full flyer on the card face - letterbox instead of cropping */
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -13087,7 +13087,7 @@ html.calm-mode .schedule-now-line {
     min-width: 0;
   }
 
-  /* Slightly compact cards — venue hidden, slightly smaller time */
+  /* Slightly compact cards - venue hidden, slightly smaller time */
   .schedule-event-card {
     padding: 4px 6px;
     border-radius: 5px;
@@ -13200,7 +13200,7 @@ html.calm-mode .schedule-now-line {
   background: var(--map-surface-bg, #06060a);
   border: 1px solid #000;
   border-radius: 16px;
-  /* Debossed map edge — inward hole-rim only */
+  /* Debossed map edge - inward hole-rim only */
   box-shadow: var(
     --map-frame-shadow,
     0 0 0 1px #000,
@@ -13218,7 +13218,7 @@ html.calm-mode .schedule-now-line {
   overflow: hidden;
 }
 
-/* Directory map key — layout only; glass chrome from glass.css .directory-map-key */
+/* Directory map key - layout only; glass chrome from glass.css .directory-map-key */
 .directory-map-key {
   max-width: 1200px;
   margin: 12px auto 16px;
@@ -13285,7 +13285,7 @@ html.calm-mode .schedule-now-line {
   color: var(--text-mid, #b9b6ae);
 }
 
-/* Queer Directory — stable CSS grid (not multi-column).
+/* Queer Directory - stable CSS grid (not multi-column).
    Multi-column masonry + entrance animations reflowed on logo load/scroll,
    which made cards vanish and reappear while scrolling. */
 .directory-grid {
@@ -13558,13 +13558,13 @@ html.calm-mode .directory-card__owned-badge {
   background: #1a1a1a !important;
 }
 
-/* Footer logo — compact, matching the visual size of the nav bar logo */
+/* Footer logo - compact, matching the visual size of the nav bar logo */
 .footer-brand .glitch-logo {
   height: 44px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEMBER PROFILE (/u/:username) — all classes prefixed .mp-
+   MEMBER PROFILE (/u/:username) - all classes prefixed .mp-
    ═══════════════════════════════════════════════════════════════════════ */
 
 .mp-page {
@@ -15061,7 +15061,7 @@ html.calm-mode .pdxPlace--rainbow {
 html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Board makeover — Gifting (from Page makeovers for three boards)
+   Board makeover - Gifting (from Page makeovers for three boards)
    Shared chrome: running head, hero, stats band, steps, cards, close seam
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -15138,7 +15138,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   color: #ccff00;
 }
 
-/* Community board hero row — nav aligned with lede, above stats band */
+/* Community board hero row - nav aligned with lede, above stats band */
 .community-board-hero-row {
   display: flex;
   align-items: flex-end;
@@ -15362,7 +15362,7 @@ html.calm-mode .board-detail-modal {
 }
 
 /*
- * Stats band (full bleed) — columns = --board-stats-cols (default 3)
+ * Stats band (full bleed) - columns = --board-stats-cols (default 3)
  * Home-style grey outlines, no cyan bloom (all pages).
  * Nude Beaches keeps its own padding/rules in NudeBeaches.css.
  */
@@ -15636,7 +15636,7 @@ html.calm-mode .board-stats-band,
   padding-bottom: 4px;
 }
 
-/* Listing cards — design density */
+/* Listing cards - design density */
 .board-listing-grid--makeover {
   gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -15951,7 +15951,7 @@ html.calm-mode .board-stats-band,
     #06060a;
 }
 
-/* Events + Schedule makeover — board-standard layout chrome */
+/* Events + Schedule makeover - board-standard layout chrome */
 .events-page.board-page--makeover .events-map-row {
   max-width: 1180px;
   margin: 0 auto;
@@ -16375,7 +16375,7 @@ html.calm-mode .category-constellation__orb {
     align-self: flex-start;
   }
 
-  /* Match DIRECTORY_MAP_HEIGHT (741) — ~30% taller than prior 570 */
+  /* Match DIRECTORY_MAP_HEIGHT (741) - ~30% taller than prior 570 */
   .directory-browse-layout__map-desktop .directory-map,
   .directory-browse-layout__map-mobile .directory-map {
     height: 741px;
@@ -16459,7 +16459,7 @@ html.calm-mode .category-constellation__orb {
   filter: brightness(1.04);
   transform: translateY(-2px);
 }
-/* Legacy quote mark — prefer .board-glass-motif; keep as soft fallback */
+/* Legacy quote mark - prefer .board-glass-motif; keep as soft fallback */
 .board-spotted-card__quote {
   position: absolute;
   top: -22px;
@@ -16678,7 +16678,7 @@ html.calm-mode .category-constellation__orb {
 .board-active-feed__kicker--purple { color: #b06bff; }
 
 /* ============================================================
-   Promoter hub makeover — board-standard chrome for /submit
+   Promoter hub makeover - board-standard chrome for /submit
    ============================================================ */
 .submit-page.board-page--makeover {
   background:
@@ -17165,7 +17165,7 @@ html.calm-mode .category-constellation__orb {
   }
 }
 
-/* "Missed Connections" is a long tab label — let the community board strip
+/* "Missed Connections" is a long tab label - let the community board strip
    scroll on phones instead of clipping offscreen (overrides the makeover
    bar's flex-end alignment). */
 @media (max-width: 640px) {

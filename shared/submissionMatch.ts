@@ -95,7 +95,7 @@ export function normalizeTitleKey(value: string): string {
   return stripDiacritics(value)
     .toLowerCase()
     .replace(/[''`]/g, "")
-    .replace(/[–—−]/g, "-")
+    .replace(/[–-−]/g, "-")
     .replace(/\s*[x×]\s*/gi, " ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
@@ -162,7 +162,7 @@ export function titleSimilarity(
   if (!na || !nb) return { score: 0, kind: null };
   if (na === nb) return { score: 1, kind: "Exact title" };
 
-  // Strip trailing " — night 1" style variants for near-exact
+  // Strip trailing " - night 1" style variants for near-exact
   const stripNight = (s: string) => s.replace(/\s+(night|part|day)\s*\d+\s*$/i, "").trim();
   if (stripNight(na) && stripNight(na) === stripNight(nb)) {
     return { score: 0.95, kind: "Near-exact title" };
@@ -173,7 +173,7 @@ export function titleSimilarity(
   const jaccard = tokenOverlapScore(a, b, extraStop);
   let best = Math.max(contain * 0.92, jaccard);
 
-  // Long shared prefix of normalized strings (handles "Pride in Demand — Night 1" vs full name)
+  // Long shared prefix of normalized strings (handles "Pride in Demand - Night 1" vs full name)
   const minLen = Math.min(na.length, nb.length);
   if (minLen >= 12) {
     let pref = 0;
@@ -355,7 +355,7 @@ export function scoreSubmissionAgainstEvent(
     score = Math.max(score, 74);
   }
 
-  // Exact title + same venue is a twin when same/adjacent day or times unknown —
+  // Exact title + same venue is a twin when same/adjacent day or times unknown -
   // NOT across weeks (weekly series nights must not block each other).
   if (
     titleS >= 0.99 &&

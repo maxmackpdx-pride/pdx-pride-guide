@@ -10,7 +10,7 @@ type Props = {
 
 /**
  * Simple WMO weather glyphs for the hub 7-day strip.
- * Stroke icons — inherit `currentColor`.
+ * Stroke icons - inherit `currentColor`.
  */
 export default function WeatherIcon({ kind, className = "", label, size = 22 }: Props) {
   const common = {

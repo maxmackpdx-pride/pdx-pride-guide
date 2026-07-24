@@ -115,7 +115,7 @@ export type PublicProfileData = {
    * Role stickers also use isSiteOwner for the primary owner badge.
    */
   isAdmin?: boolean;
-  /** Primary site owner — OWNER sticker instead of ADMIN. */
+  /** Primary site owner - OWNER sticker instead of ADMIN. */
   isSiteOwner?: boolean;
   roles?: string[];
   accentColor?: string;

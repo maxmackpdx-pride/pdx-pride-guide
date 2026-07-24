@@ -126,8 +126,8 @@ export type TrustedSyncResult = {
 
 export type TrustedSyncOpts = {
   /**
-   * review (default) — land drafts in QSearch Review for admin approve.
-   * publish — commit LIVE without review (nightly automation only).
+   * review (default) - land drafts in QSearch Review for admin approve.
+   * publish - commit LIVE without review (nightly automation only).
    */
   mode?: TrustedSyncMode;
 };
@@ -160,12 +160,12 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
     next = applyDarcellePolicy(next);
   }
 
-  // Hawks is a sex club — Sanctuary-style stamps, never ALL_AGES
+  // Hawks is a sex club - Sanctuary-style stamps, never ALL_AGES
   if (venue.sourceId === "hawks-json" || venue.fetchMode === "hawks_squarespace") {
     next = applyHawksPolicy(next);
   }
 
-  // Badlands is a 21+ bar — never ALL_AGES; never invent FREE cover
+  // Badlands is a 21+ bar - never ALL_AGES; never invent FREE cover
   if (venue.sourceId === "badlands-api" || venue.fetchMode === "badlands_api") {
     const adm = inferAdmissionFromText(next.title, next.description);
     // Only keep FREE if re-infer still says free; otherwise UNKNOWN/DOOR/TICKETED
@@ -189,7 +189,7 @@ function applyVenueDefaults(draft: IngestEventDraft, venue: TrustedVenueDef): In
     };
   }
 
-  // Declarative rules last — new venues scale via data, not code
+  // Declarative rules last - new venues scale via data, not code
   next = applyDeclaredVenuePolicy(next, venue);
 
   return next;
@@ -324,7 +324,7 @@ async function fetchGenericDrafts(
     existingEvents,
     allowExpand: true,
   });
-  // Venue-scope relevance — the scan lane applies this per source, and
+  // Venue-scope relevance - the scan lane applies this per source, and
   // trusted generic mode must too: an Eventbrite venue-scoped search page
   // (e.g. Sports Bra /d/ URL) returns city-wide noise without it. For own-
   // site feeds the mode resolves to "open" and everything passes.
@@ -429,7 +429,7 @@ function queueDraftsForReview(
     if (c.alreadyOnBoard?.length) {
       skipped.push({
         title: c.draft.title,
-        reason: `${c.alreadyOnBoard.length} date(s) already on main board — only new nights queued`,
+        reason: `${c.alreadyOnBoard.length} date(s) already on main board - only new nights queued`,
       });
     }
   }
@@ -547,7 +547,7 @@ async function publishDraftsLive(
 
 /**
  * Sync one trusted venue.
- * Default mode **review** — queues for QSearch Review (manual Sync now).
+ * Default mode **review** - queues for QSearch Review (manual Sync now).
  * Pass mode **publish** only for automated LIVE commit (nightly).
  */
 export async function syncTrustedVenue(
@@ -592,7 +592,7 @@ export async function syncTrustedVenue(
     const raw = await fetchDraftsForVenue(venue, existingEvents);
     const drafts = prepareDrafts(raw, venue);
     base.fetched = drafts.length;
-    // Flyer yield this run — FRESH acquisitions only (series-reuse backfill
+    // Flyer yield this run - FRESH acquisitions only (series-reuse backfill
     // excluded): sync can be "ok" and every card can show art while the
     // actual flyer path is broken. Coverage must measure acquisition.
     const flyerCount = countFreshFlyerDrafts(drafts);

@@ -26,7 +26,7 @@ const ORDER_SIZES = [
   { value: '14"', label: '14″' },
   { value: '18"', label: '18″' },
   { value: '24"', label: '24″' },
-  { value: "Bigger (let's discuss)", label: "Bigger — let's discuss" },
+  { value: "Bigger (let's discuss)", label: "Bigger - let's discuss" },
 ] as const;
 
 const DISCO_GALLERY = [
@@ -212,7 +212,7 @@ export default function PortfolioContactModal({
 
             {isOrder && (
               <p className="pcm-order-note">
-                Sizes: <strong>14″ · 18″ · 24″</strong>. Bigger is an option — we can discuss.
+                Sizes: <strong>14″ · 18″ · 24″</strong>. Bigger is an option - we can discuss.
                 Custom rope color and details welcome. Photos of your space help.
               </p>
             )}
@@ -324,7 +324,7 @@ export default function PortfolioContactModal({
                     required
                     maxLength={800}
                     rows={3}
-                    placeholder="Room, over a dance floor, bedroom, bar, etc. — describe the space you see it in."
+                    placeholder="Room, over a dance floor, bedroom, bar, etc. - describe the space you see it in."
                   />
                 </label>
 
@@ -383,7 +383,7 @@ export default function PortfolioContactModal({
               )}
             </label>
 
-            {/* Honeypot — hidden from real visitors, bots tend to fill every field */}
+            {/* Honeypot - hidden from real visitors, bots tend to fill every field */}
             <input
               type="text"
               value={honeypot}

@@ -1,5 +1,5 @@
 /**
- * Declarative venue policy (TrustedVenueDef.venuePolicy) — the scaling path:
+ * Declarative venue policy (TrustedVenueDef.venuePolicy) - the scaling path:
  * new trusted venues get age / sex-positive / admission rules from data, not
  * new code. Runs after any dedicated adapter policy; adapter stamps win only
  * where the declarative policy is silent.
@@ -11,7 +11,7 @@ import { inferAdmissionFromText } from "./admissionInfer";
 /**
  * Fresh-flyer predicate for health coverage: a draft counts toward flyer
  * coverage only when its art was actually ACQUIRED this sync (feed field or
- * event-page enrich) — NOT backfilled by series reuse. Reused art still
+ * event-page enrich) - NOT backfilled by series reuse. Reused art still
  * displays (good UX), but coverage must expose the real acquisition rate or
  * reuse quietly masks a broken flyer path.
  */

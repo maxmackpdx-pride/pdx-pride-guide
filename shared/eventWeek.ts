@@ -1,5 +1,5 @@
 /**
- * Portland Event week 2026 (Mon Jul 13 – Sun Jul 19) — single source of truth
+ * Portland Event week 2026 (Mon Jul 13 – Sun Jul 19) - single source of truth
  * for day codes, dates, labels, and day colors. Everything that renders or
  * stores a Pride day derives from this file. See docs/PRIDE_WEEK_13_19_PLAN.md.
  */
@@ -8,7 +8,7 @@ import { pacificDayOfWeek, parsePacificDateTime } from "./missedConnections";
 export const EVENT_WEEK_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 export type EventWeekDay = (typeof EVENT_WEEK_DAYS)[number];
 
-/** Reserved for RSVP pulse on the events map — no day may use this hex. */
+/** Reserved for RSVP pulse on the events map - no day may use this hex. */
 export const RSVP_COLOR = "#CCFF00";
 
 export const EVENT_WEEK_DAY_OPTIONS: ReadonlyArray<{
@@ -16,9 +16,9 @@ export const EVENT_WEEK_DAY_OPTIONS: ReadonlyArray<{
   label: string;
   date: string;
   nextDate: string;
-  /** Neon accent — map pins, glows, fills (≥3:1 on near-black). */
+  /** Neon accent - map pins, glows, fills (≥3:1 on near-black). */
   color: string;
-  /** Text-safe variant — day pills, tags, labels (≥4.5:1 on near-black). */
+  /** Text-safe variant - day pills, tags, labels (≥4.5:1 on near-black). */
   textColor: string;
 }> = [
   { value: "MON", label: "Monday July 13", date: "2026-07-13", nextDate: "2026-07-14", color: "#8800FF", textColor: "#AA66FF" },
@@ -154,11 +154,11 @@ export interface PrideEvent {
   age: string;
   going: number;
   blurb: string;
-  /** featured / headliner — surfaced in the Stories export */
+  /** featured / headliner - surfaced in the Stories export */
   feat?: boolean;
 }
 
-/** Schedule grid day columns — derived from EVENT_WEEK_DAY_OPTIONS. */
+/** Schedule grid day columns - derived from EVENT_WEEK_DAY_OPTIONS. */
 export const DAYS: DayDef[] = EVENT_WEEK_DAY_OPTIONS.map((d) => ({
   key: d.value,
   label: d.label.split(" ")[0].toUpperCase(),

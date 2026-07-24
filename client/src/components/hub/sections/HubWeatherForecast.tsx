@@ -62,7 +62,7 @@ export default function HubWeatherForecast() {
   );
   const displayTemp = showLiveNow
     ? weather!.currentTemp
-    : (featured?.high ?? weather?.currentTemp ?? "—");
+    : (featured?.high ?? weather?.currentTemp ?? "-");
   const displayCond = featured?.condition ?? weather?.condition ?? "";
   const displayContext = showLiveNow
     ? weather!.tempContext

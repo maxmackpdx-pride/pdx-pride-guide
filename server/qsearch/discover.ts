@@ -156,7 +156,7 @@ export async function discoverAndParse(opts: {
           /* ignore discover fetch errors */
         }
       }
-      // Good enough on the exact primary path — don't chase bigger dumps
+      // Good enough on the exact primary path - don't chase bigger dumps
       if (drafts.length >= 1 && scoreHit(url, drafts.length) >= 1000) break;
       if (best.eventCount >= 3 && bestScore >= 1000) break;
     } catch {

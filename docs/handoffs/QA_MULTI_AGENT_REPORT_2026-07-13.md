@@ -1,4 +1,4 @@
-# Master QA report — multi-agent bug hunt
+# Master QA report - multi-agent bug hunt
 
 **Date:** 2026-07-13  
 **Prompt pack:** `docs/handoffs/MULTI_AGENT_BUG_TEST_PROMPT.md`  

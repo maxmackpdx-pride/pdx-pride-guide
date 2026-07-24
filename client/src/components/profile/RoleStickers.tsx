@@ -5,7 +5,7 @@ export type RoleStickersProps = {
   isPromoter?: boolean;
   /** From GET /api/users/:username isAdmin (env admins, grants, subAdmin). */
   isAdmin?: boolean;
-  /** Primary site owner (Tucker) — shows OWNER instead of ADMIN. */
+  /** Primary site owner (Tucker) - shows OWNER instead of ADMIN. */
   isSiteOwner?: boolean;
   className?: string;
 };

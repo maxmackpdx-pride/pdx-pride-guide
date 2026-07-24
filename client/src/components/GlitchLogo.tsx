@@ -4,7 +4,7 @@ type GlitchLogoProps = {
   className?: string;
 };
 
-/** Chunky RGB glitch for the nav logo — same timing as GlitchWord PRIDE. */
+/** Chunky RGB glitch for the nav logo - same timing as GlitchWord PRIDE. */
 export default function GlitchLogo({ src, alt, className = "" }: GlitchLogoProps) {
   return (
     <span className={`glitch-logo${className ? ` ${className}` : ""}`}>

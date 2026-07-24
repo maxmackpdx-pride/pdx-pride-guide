@@ -1,6 +1,6 @@
 /**
- * Eagle Portland — Wix Events on /what-s-happening (appsWarmupData).
- * 21+ leather/cruise bar — never ALL_AGES; never invent FREE cover.
+ * Eagle Portland - Wix Events on /what-s-happening (appsWarmupData).
+ * 21+ leather/cruise bar - never ALL_AGES; never invent FREE cover.
  */
 import type { IngestEventDraft } from "../types";
 import { fetchIngestSource } from "../fetchSource";
@@ -70,7 +70,7 @@ export async function fetchEagleDrafts(
     const v = `${d.venueName} ${d.address || ""} ${d.sourceUrl || ""}`.toLowerCase();
     return /eagle|lombard|eagleportland/.test(v) || /eagleportland\.com/i.test(feedUrl);
   });
-  // If filter emptied because venue said TBA but URLs are eagle — keep all from page
+  // If filter emptied because venue said TBA but URLs are eagle - keep all from page
   if (!drafts.length) {
     drafts = parseWarmupDataFromHtml(fetched.body, fetched.url || feedUrl);
   }

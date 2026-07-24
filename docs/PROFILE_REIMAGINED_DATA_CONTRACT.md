@@ -99,7 +99,7 @@ Related mutations (same username resource):
 {
   events: number;    // hostedUpcoming.length + hostedPast.length
   hosting: number;   // hostedUpcoming.length
-  going: number;     // goingToUpcoming.length — 0 for non-owners (privacy)
+  going: number;     // goingToUpcoming.length - 0 for non-owners (privacy)
   posts: number;     // gigs + gifting + spotted counts
   gigs: number;
   gifting: number;
@@ -108,7 +108,7 @@ Related mutations (same username resource):
 }
 ```
 
-No `shows`, `estYear`, `saved` keys live — derive on client (`shows ≈ stats.events`, `estYear` from `memberSince`, `saved` **MISSING**).
+No `shows`, `estYear`, `saved` keys live - derive on client (`shows ≈ stats.events`, `estYear` from `memberSince`, `saved` **MISSING**).
 
 ### `activity` (live nesting)
 
@@ -119,8 +119,8 @@ activity: {
   gigs: ProfileGig[];
   gifting: ProfileGifting[];
   spotted: ProfileSpotted[];
-  goingTo: ProfileEvent[];           // upcoming RSVPs — **owner only** ([] for public viewers)
-  attendedPast: ProfileEvent[];      // past RSVPs — public
+  goingTo: ProfileEvent[];           // upcoming RSVPs - **owner only** ([] for public viewers)
+  attendedPast: ProfileEvent[];      // past RSVPs - public
 }
 ```
 
@@ -182,7 +182,7 @@ Legacy fallback synthesizes from `profileEmbeds` when no `profile_media` row.
   | `sticker-wall` | `/sandbox-ds/banners/banner-stickers.png` |
   | `pride-guide-social` | `/sandbox-ds/banners/banner-social.png` |
 
-- **`shared/profileConstants.ts`** uses a **different** model (path-or-null banners + slightly different accent greens). Used by **unwired** `client/src/components/profile/AccentPicker.tsx`. **Do not send path strings to `PUT /api/users/me`** — server will 400.
+- **`shared/profileConstants.ts`** uses a **different** model (path-or-null banners + slightly different accent greens). Used by **unwired** `client/src/components/profile/AccentPicker.tsx`. **Do not send path strings to `PUT /api/users/me`** - server will 400.
 
 ### Privacy notes
 
@@ -210,7 +210,7 @@ Legacy fallback synthesizes from `profileEmbeds` when no `profile_media` row.
 2. **UI view-model for reimagined layout:** keep `PublicProfileData` in `components/profile/types.ts` **as a client-normalized view model**, not as a claim about the HTTP response.
 3. **Ship path:** `MemberProfile.tsx` should fetch API → `normalizePublicProfile(api)` → `PublicProfileData`, then compose reimagined panels. Eventually collapse duplicate helpers; until then, prefer **pages types = wire shape**, **components types = UI shape**.
 
-Do **not** change the server response field names solely to match redesign types without a normalize layer — live clients and handoffs already use `activity.*` / `showPromoterVariant`.
+Do **not** change the server response field names solely to match redesign types without a normalize layer - live clients and handoffs already use `activity.*` / `showPromoterVariant`.
 
 ---
 
@@ -240,19 +240,19 @@ Design fields from `/tmp/profile-reimagined/grok-prompt.md` + `PublicProfileData
 | `events.hosting.past` | `activity.hostedEventsPast` | **CLIENT NORMALIZE** |
 | `events.going.upcoming` | `activity.goingTo` | **CLIENT NORMALIZE** (owner-only data) |
 | `events.going.past` | `activity.attendedPast` | **CLIENT NORMALIZE** |
-| `events.*.posterImageUrl` | — | **MISSING** — server SELECT or client fetch per event |
-| `events.*.goingCount` | — | **MISSING on profile** — join `GET /api/events/attendance-summaries` |
-| `events.*.address` / `neighborhood` / `ageRequirement` / `eventTypes` | — | **MISSING** on profile events |
+| `events.*.posterImageUrl` | - | **MISSING** - server SELECT or client fetch per event |
+| `events.*.goingCount` | - | **MISSING on profile** - join `GET /api/events/attendance-summaries` |
+| `events.*.address` / `neighborhood` / `ageRequirement` / `eventTypes` | - | **MISSING** on profile events |
 | `stats.followers` | `stats.followers` | OK |
 | `stats.hosting` | `stats.hosting` | OK |
 | `stats.going` | `stats.going` | OK for owner; 0 public |
 | `stats.shows` | derive `stats.events` | **CLIENT** |
 | `stats.estYear` | year of `memberSince` | **CLIENT** |
 | `stats.checkIns` | `stats.checkIns` | OK |
-| `stats.saved` | — | **MISSING** (no saved-events API on profile) |
+| `stats.saved` | - | **MISSING** (no saved-events API on profile) |
 | `stats.gigs` / `gifting` | `stats.gigs` / `stats.gifting` | OK |
 | `boardPosts` | merge `activity.gigs` + `gifting` + `spotted` | **CLIENT NORMALIZE** (see BoardTab) |
-| Updates rail (likes/replies) | — | **MISSING** — no public social posts API |
+| Updates rail (likes/replies) | - | **MISSING** - no public social posts API |
 | Hub organizer posts | `GET /api/hub/feed/posts/mine` (auth, self only) | **NOT public profile** |
 | `businessPlace` | `ownedBusiness` | **CLIENT ALIAS** |
 | `linkedVenues` | `linkedVenues` | OK |
@@ -260,7 +260,7 @@ Design fields from `/tmp/profile-reimagined/grok-prompt.md` + `PublicProfileData
 | `marquee` / `pup` / pack / media / socialLinks | same | OK |
 | `ticketUrl` (profile-level) | first upcoming host `ticketUrl` | **CLIENT DERIVE** (not top-level) |
 | `isOwner` / `isFollowing` | same | OK |
-| `isAdmin` sticker | — | **MISSING on public profile** (see § Admin) |
+| `isAdmin` sticker | - | **MISSING on public profile** (see § Admin) |
 
 ---
 
@@ -383,13 +383,13 @@ function resolveProfileBannerSrc(banner?: string | null): string | null {
 // shared/profileConstants BOARD_COLORS: Spotted/Gifting/Gigs
 ```
 
-Use this for **UpdatesPanel** text cards **without** inventing likes/replies (show `timeAgo` only; hide heart/reply or hardcode `—` with TODO).
+Use this for **UpdatesPanel** text cards **without** inventing likes/replies (show `timeAgo` only; hide heart/reply or hardcode `-` with TODO).
 
 ---
 
 ## 6. Server gaps that block poster / going / updates
 
-### 6.1 Poster images on profile events — **BLOCKS Hosting rail quality**
+### 6.1 Poster images on profile events - **BLOCKS Hosting rail quality**
 
 `getPublicProfile` event SELECTs omit `poster_image_url`.  
 Redesign `PosterCard` + `resolveEventPosterUrl(id, posterImageUrl)` will always fall back to placeholders.
@@ -407,18 +407,18 @@ e.event_types AS eventTypes
 Parse `eventTypes` JSON server-side or leave string for client.  
 Client types already have `posterImageUrl?` on redesign `ProfileEvent`.
 
-### 6.2 Going counts — **client-join available (no server required for counts)**
+### 6.2 Going counts - **client-join available (no server required for counts)**
 
 `GET /api/events/attendance-summaries` → `Record<eventId, { count, preview }>`.
 
 Already used in:
 
 - `pages/profile/tabs/EventsTab.tsx` (always enabled)
-- `components/profile/EventsTab.tsx` (enabled when `!!user` — fix to always load for public counts)
+- `components/profile/EventsTab.tsx` (enabled when `!!user` - fix to always load for public counts)
 
 Pass into `normalizePublicProfile` or read in the panel.
 
-### 6.3 Public “Going to” list privacy — **product gap**
+### 6.3 Public “Going to” list privacy - **product gap**
 
 Non-owners get `activity.goingTo = []` and `stats.going = 0`.  
 Redesign “Going” panel will look empty for every public visitor.
@@ -428,7 +428,7 @@ Redesign “Going” panel will look empty for every public visitor.
 - A) Accept privacy (show empty / “private calendar”).  
 - B) Server patch: return upcoming going for everyone (or a privacy flag later).
 
-### 6.4 Updates panel (social posts with likes/replies) — **no API**
+### 6.4 Updates panel (social posts with likes/replies) - **no API**
 
 | Source | Public by username? | Has likes/replies? |
 |--------|---------------------|--------------------|
@@ -437,7 +437,7 @@ Redesign “Going” panel will look empty for every public visitor.
 | Missed connections list endpoints | Not filtered as “profile updates rail” | No |
 
 **Closest existing source for UpdatesPanel:** same merge as BoardTab (`gigs` + `gifting` + `spotted`), sorted by `createdAt`.  
-**TODO marker:** likes/replies require new tables/endpoints — do not invent.
+**TODO marker:** likes/replies require new tables/endpoints - do not invent.
 
 Optional future minimal endpoint (not required to ship UI shell):
 
@@ -445,7 +445,7 @@ Optional future minimal endpoint (not required to ship UI shell):
 GET /api/users/:username/board-posts  // or expand getPublicProfile with boardPosts[]
 ```
 
-### 6.5 Admin sticker — **MISSING on public profile**
+### 6.5 Admin sticker - **MISSING on public profile**
 
 Public payload has no admin flag. Viewer `authUser.isAdmin` only describes the **logged-in viewer**, not the profile subject.
 
@@ -458,7 +458,7 @@ isSiteAdmin: isEnvListedSiteAdmin(user) || storage.hasSiteAdminGrant(user.id) ||
 
 (Or reuse `isMainAdminUser` logic without leaking email.)
 
-Client: `isSiteAdmin || username === "tucker_pdmax"` is **not** a full admin rule — see § Admin.
+Client: `isSiteAdmin || username === "tucker_pdmax"` is **not** a full admin rule - see § Admin.
 
 ### 6.6 Banner dual package
 
@@ -628,7 +628,7 @@ const isAdmin = Boolean(user?.isAdmin || adminSession?.isAdmin);
 // After server adds isSiteAdmin to getPublicProfile:
 const showAdminSticker = !!profile.isSiteAdmin;
 
-// Until then — incomplete fallbacks only:
+// Until then - incomplete fallbacks only:
 // - Viewer cannot know subject admin status from public API
 // - Hardcoding username === "tucker_pdmax" matches default env owner only
 ```
@@ -722,19 +722,19 @@ Hosting rail day border/chip should use `DAY_COLORS[dayOfWeek]` or `var(--day-sa
 | `components/profile/EventsTab.tsx` | Expects `posterImageUrl` + `isPromoter` + nested `events` |
 | `components/profile/BoardTab.tsx` | Expects prebuilt `posts` |
 | `components/profile/profileHelpers.ts` | Social + promoter copy helpers |
-| `components/profile/AccentPicker.tsx` | ⚠️ path-based banners — mismatch with live API |
+| `components/profile/AccentPicker.tsx` | ⚠️ path-based banners - mismatch with live API |
 
 **None of `components/profile/*` are imported by `App.tsx` today.**
 
 ### Shared DS / utilities to prefer in reimagined UI
 
-- `UserAvatar` — glow rings  
+- `UserAvatar` - glow rings  
 - `@/components/ds`: `PosterCard`, `EventCard`, `Button`, `StickerBadge`, `StatPill`, `SectionHeader`, `Marquee`, `Countdown`  
 - `@shared/eventPoster` `resolveEventPosterUrl`  
 - `@/hooks/useEventRsvp`  
 - `@shared/eventSlug` `eventPath`  
 - `@shared/eventWeek` day colors  
-- `FeaturedEventAd` — reference for countdown + ticket + EventModal composition (hub only)
+- `FeaturedEventAd` - reference for countdown + ticket + EventModal composition (hub only)
 
 ---
 

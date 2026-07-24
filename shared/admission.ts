@@ -4,7 +4,7 @@ export const ADMISSION_TYPES = [
   "TICKETED",
   "DOOR_FEE",
   "SUGGESTED_DONATION",
-  /** Cover unknown — never treat as free when scrape has no signal. */
+  /** Cover unknown - never treat as free when scrape has no signal. */
   "UNKNOWN",
 ] as const;
 
@@ -34,7 +34,7 @@ export const ADMISSION_OPTIONS: ReadonlyArray<{ value: AdmissionType; label: str
   {
     value: "UNKNOWN",
     label: "See listing",
-    hint: "Cover not confirmed — check the event page. Never assume free.",
+    hint: "Cover not confirmed - check the event page. Never assume free.",
   },
 ];
 
@@ -46,7 +46,7 @@ export const ADMISSION_DISPLAY_LABELS: Record<AdmissionType, string> = {
   UNKNOWN: "See listing",
 };
 
-/** Default when ingest cannot prove free/ticketed/door — never invent FREE. */
+/** Default when ingest cannot prove free/ticketed/door - never invent FREE. */
 export const ADMISSION_UNKNOWN: AdmissionType = "UNKNOWN";
 
 /** Filter chip label on Events board (matches EVENT_TYPE_FILTERS). */

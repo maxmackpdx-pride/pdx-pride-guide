@@ -108,7 +108,7 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
           {!isLoading && messages.length === 0 && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi — others heading out today can see this until 10pm.
+              You're checked in. Say hi - others heading out today can see this until 10pm.
             </p>
           )}
           {messages.map(msg => (

@@ -1,5 +1,5 @@
 /**
- * Admin ingest presets — machine-readable twin of docs/VENUE_SCRAPE_EXACT_URLS.md.
+ * Admin ingest presets - machine-readable twin of docs/VENUE_SCRAPE_EXACT_URLS.md.
  * Keep curated URLs in lockstep with that doc.
  *
  * Directory websites are merged live via `buildDirectoryIngestSources` /
@@ -90,7 +90,7 @@ function buildPortlandEventbriteKeywordSources(): IngestSource[] {
   }));
 }
 
-/** EverOut Portland category/tag searches — parallel to EB keywords. */
+/** EverOut Portland category/tag searches - parallel to EB keywords. */
 export const PORTLAND_EVEROUT_CATEGORIES: Array<{
   id: string;
   label: string;
@@ -145,7 +145,7 @@ function buildPortlandEveroutCategorySources(): IngestSource[] {
     tier: "agg" as const,
     format: "html" as const,
     priority: k.priority,
-    notes: k.notes || "Portland EverOut identity/category search — not city-wide unfiltered.",
+    notes: k.notes || "Portland EverOut identity/category search - not city-wide unfiltered.",
   }));
 }
 
@@ -222,7 +222,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     tier: "1",
     format: "html",
     caution: true,
-    notes: "Zyrosite flyer gallery — not Squarespace JSON. Harvest poster imgs / OCR. ?format=json returns HTML.",
+    notes: "Zyrosite flyer gallery - not Squarespace JSON. Harvest poster imgs / OCR. ?format=json returns HTML.",
   },
   {
     id: "badlands-api",
@@ -259,7 +259,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     tier: "1",
     format: "wix",
     caution: true,
-    notes: "/events 404 — homepage only. Often empty; trivia via EB/Untapped.",
+    notes: "/events 404 - homepage only. Often empty; trivia via EB/Untapped.",
   },
   {
     id: "montavilla",
@@ -330,7 +330,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     portlandOnly: true,
     businessType: "group",
     notes:
-      "Multi-city brand — PORTLAND ONLY. Scrape #events /events/{slug}/; keep PDX/Nova/Sanctuary; drop SF/Seattle. Flyers on WP uploads.",
+      "Multi-city brand - PORTLAND ONLY. Scrape #events /events/{slug}/; keep PDX/Nova/Sanctuary; drop SF/Seattle. Flyers on WP uploads.",
   },
   {
     id: "rose-court",
@@ -398,7 +398,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     tier: "2",
     format: "jsonld",
     priority: true,
-    notes: "novapdx.com is parked — Tixr is SoT. Queer parties + concerts.",
+    notes: "novapdx.com is parked - Tixr is SoT. Queer parties + concerts.",
   },
   {
     id: "realm-events",
@@ -449,14 +449,14 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "html",
     notes: "Extract Google Calendar ICS id",
   },
-  // Venue-scoped Eventbrite (not city dumps — require venue match in scan filter)
+  // Venue-scoped Eventbrite (not city dumps - require venue match in scan filter)
   {
     id: "escape-eb",
     label: "Escape (Eventbrite venue)",
     url: "https://www.eventbrite.com/d/or--portland/escape-bar-and-grill/",
     tier: "3",
     format: "eventbrite",
-    notes: "Venue-scoped only — not city-wide. Filter requires Escape in venue/title.",
+    notes: "Venue-scoped only - not city-wide. Filter requires Escape in venue/title.",
   },
   {
     id: "bar-cala-eb",
@@ -472,12 +472,12 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
     tier: "3",
     format: "eventbrite",
-    notes: "Venue-scoped — not generic sports events.",
+    notes: "Venue-scoped - not generic sports events.",
   },
 
   // ── Eventbrite · Portland-only identity keyword searches ─────────────────
   // Pattern: https://www.eventbrite.com/d/or--portland/{query}/
-  // Keep these separate — never use /d/local/events/ or bare /events.
+  // Keep these separate - never use /d/local/events/ or bare /events.
   // Each search is independent so yield/debug stays readable per term.
   ...buildPortlandEventbriteKeywordSources(),
 
@@ -497,7 +497,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "partiful",
   },
 
-  // ── Aggregators (queer-scoped feeds only — no city-wide dumps) ───────────
+  // ── Aggregators (queer-scoped feeds only - no city-wide dumps) ───────────
   {
     id: "dragpdx-tribe",
     label: "dragpdx (ask first)",
@@ -515,7 +515,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "squarespace",
     notes: "Portland queer events feed",
   },
-  // EverOut Portland — separate category searches (same idea as EB keywords)
+  // EverOut Portland - separate category searches (same idea as EB keywords)
   ...buildPortlandEveroutCategorySources(),
   {
     id: "ra-process",
@@ -523,7 +523,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://ra.co/promoters/141994",
     tier: "agg",
     format: "jsonld",
-    notes: "Process promoter page — not full RA city dump",
+    notes: "Process promoter page - not full RA city dump",
   },
 ];
 
@@ -621,7 +621,7 @@ export function resolveDirectoryWebsite(
   const fromField = normalizeIngestWebsite(biz.website);
   if (fromField) return { url: fromField, source: "field" };
 
-  // Lazy import avoided — caller can pass map; default loaded below in helper
+  // Lazy import avoided - caller can pass map; default loaded below in helper
   const map = fallbacks || VENUE_WEBSITE_FALLBACKS;
   const key = normalizeVenueKey(biz.name);
   if (!key) return { url: null, source: "none" };
@@ -654,7 +654,7 @@ export type DirectoryCoverageRow = {
   absorbedByCurated: boolean;
 };
 
-/** Full directory coverage report — all active places, not only those with a website field. */
+/** Full directory coverage report - all active places, not only those with a website field. */
 export function buildDirectoryCoverage(
   businesses: DirectoryBusinessForIngest[],
   curated: IngestSource[] = INGEST_SOURCES,
@@ -713,7 +713,7 @@ export function buildDirectoryIngestSources(
       resolved.source === "fallback"
         ? "Website filled from venue link map (missing on directory card)"
         : weak
-          ? "Social / link-in-bio URL — low structured-data yield"
+          ? "Social / link-in-bio URL - low structured-data yield"
           : "Auto from directory website",
       isGroup ? "GROUP: Portland-metro events only (drop other cities)" : null,
     ]
@@ -790,7 +790,7 @@ export function expandWebsiteScrapeCandidates(website: string): string[] {
   const base = normalizeIngestWebsite(website);
   if (!base) return [];
   if (isWeakScrapeHost(base)) return [base];
-  // Eventbrite/Tixr/etc.: never expand to /events — that becomes a local dump
+  // Eventbrite/Tixr/etc.: never expand to /events - that becomes a local dump
   // and discovery used to "win" on event count (Stag → /d/local/events/).
   if (isNoPathExpandHost(base)) return [base];
 

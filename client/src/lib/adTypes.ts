@@ -244,7 +244,7 @@ export function templateDraft(key: AdTemplateKey): AdDraft {
       billing: "Affiliate · code TUCKERMAX",
     };
   }
-  // mrs-poster — matches AffiliatePosterCard Mr. S grid card
+  // mrs-poster - matches AffiliatePosterCard Mr. S grid card
   return {
     ...emptyAdDraft("poster"),
     business: "Mr. S Leather",

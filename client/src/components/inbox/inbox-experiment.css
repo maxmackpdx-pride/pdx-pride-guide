@@ -1,7 +1,7 @@
 /* Pull shell + FAB deep-glass surfaces (loaded with floating overlay module). */
 @import "./inbox.css";
 
-/* Experiment design 101 — inbox list skin (hub panel register)
+/* Experiment design 101 - inbox list skin (hub panel register)
    Scoped to floating inbox lists only. Bucket filter chips on admin queue stay legacy.
 
    Deep-glass card shell + dark-blue → bright-blue neon gradient edge.
@@ -83,7 +83,7 @@
   isolation: isolate;
 }
 
-/* Dual sheen — corner light + blue-tinted specular (glass card) */
+/* Dual sheen - corner light + blue-tinted specular (glass card) */
 .inbox-overlay--experiment::before {
   content: "";
   position: absolute;
@@ -173,7 +173,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   flex-direction: column;
 }
 
-/* List shell — hub .card */
+/* List shell - hub .card */
 .inbox-exp-list {
   border: 1px solid var(--panel-border);
   border-radius: 12px;
@@ -186,7 +186,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   margin-bottom: 12px;
 }
 
-/* Message / thread row — hub .hub-thread */
+/* Message / thread row - hub .hub-thread */
 .inbox-exp-row {
   display: flex;
   align-items: flex-start;
@@ -377,7 +377,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   box-shadow: 0 0 7px #39ff14;
 }
 
-/* Section kicker — hub .kick */
+/* Section kicker - hub .kick */
 .inbox-exp-kicker {
   display: flex;
   align-items: center;
@@ -460,7 +460,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   transition: background 0.15s ease;
 }
 
-/* Admin shared queue — magenta chrome, not cyan */
+/* Admin shared queue - magenta chrome, not cyan */
 .inbox-exp-admin .inbox-exp-kicker {
   color: var(--panel-magenta);
 }
@@ -473,7 +473,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   color: var(--panel-magenta);
 }
 
-/* Owner desk queue — purple chrome, not cyan */
+/* Owner desk queue - purple chrome, not cyan */
 .inbox-exp-owner .inbox-exp-kicker {
   color: var(--panel-purple);
 }
@@ -571,7 +571,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   font-size: 10.5px;
 }
 
-/* Mark all read — hub ghost / magenta outline */
+/* Mark all read - hub ghost / magenta outline */
 .inbox-exp-mark-read {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
   font-size: 10px;
@@ -1492,7 +1492,7 @@ html.calm-mode .inbox-overlay--experiment::after,
   cursor: pointer;
 }
 
-/* Group chat — experiment 101 (hub panel register) */
+/* Group chat - experiment 101 (hub panel register) */
 .inbox-overlay--experiment .inbox-group-chat {
   display: flex;
   flex-direction: column;

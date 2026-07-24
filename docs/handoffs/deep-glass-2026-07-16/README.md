@@ -1,4 +1,4 @@
-# Deep-glass package — **ARCHIVED migration** (2026-07-16)
+# Deep-glass package - **ARCHIVED migration** (2026-07-16)
 
 > **Status: MIGRATION COMPLETE.** Do **not** treat this folder as open agent
 > work orders or as the live source of truth.
@@ -28,10 +28,10 @@ Card System export.
 
 ## Original contents (archive)
 
-- **GROK_MIGRATION_PROMPT.md** — original migration brief (§1 tokens, §2 surfaces)
-- **GROK_PER_AGENT_TASKS.md** — 14 parallel work orders (**done**)
-- **GROK_ANIMATION_MIGRATION.md** — motion vocabulary
-- **Card System.html** — design export used during migration
-- **screenshots/** — section references from the original package
+- **GROK_MIGRATION_PROMPT.md** - original migration brief (§1 tokens, §2 surfaces)
+- **GROK_PER_AGENT_TASKS.md** - 14 parallel work orders (**done**)
+- **GROK_ANIMATION_MIGRATION.md** - motion vocabulary
+- **Card System.html** - design export used during migration
+- **screenshots/** - section references from the original package
 
 Source repo: `maxmackpdx-pride/pdx-pride-guide`.

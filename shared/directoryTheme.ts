@@ -1,4 +1,4 @@
-/** Directory type accent colors — keep in sync with Directory.tsx TYPE_COLORS. */
+/** Directory type accent colors - keep in sync with Directory.tsx TYPE_COLORS. */
 export const DIRECTORY_TYPE_COLORS: Record<string, string> = {
   bar: "#FF00CC",
   restaurant: "#FF6600",

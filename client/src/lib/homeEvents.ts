@@ -133,7 +133,7 @@ export function pickMarqueeItems(events: EventListing[], limit = 21): string[] {
 
 /**
  * Next N events that haven't ended yet (live + upcoming), earliest start first.
- * Home Up Next row — advances as Pride Week moves, not frozen on Monday openers.
+ * Home Up Next row - advances as Pride Week moves, not frozen on Monday openers.
  */
 export function eventsUpNext(
   events: EventListing[],
@@ -144,7 +144,7 @@ export function eventsUpNext(
     .filter(e => {
       const endMs = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
       if (endMs == null) return false;
-      // Still open or starts soon — drop nights that already closed.
+      // Still open or starts soon - drop nights that already closed.
       return endMs >= nowMs;
     })
     .sort((a, b) => {
@@ -178,7 +178,7 @@ export function nextRsvpEvent(
   return uniqueByEventId(upcoming)[0] ?? null;
 }
 
-/** @deprecated Use eventsUpNext — Monday-only openers no longer make sense mid-week. */
+/** @deprecated Use eventsUpNext - Monday-only openers no longer make sense mid-week. */
 export function eventsForMonday(events: EventListing[], limit = 4): EventListing[] {
   return eventsUpNext(events, limit);
 }

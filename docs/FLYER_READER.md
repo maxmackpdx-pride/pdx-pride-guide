@@ -1,4 +1,4 @@
-# Flyer Reader — API & integration guide
+# Flyer Reader - API & integration guide
 
 Reads event poster flyers (image → structured event data) server-side.
 Vision: Gemini free tier via self-discovering provider chain (Groq text,
@@ -15,10 +15,10 @@ Body: `{ "githubPath": "flyers/name.jpg" }` or small `{ "imageBase64": "..." }`
 ### POST /api/admin/qsearch/flyer-reader/parse
 Full pipeline: OCR → vision/LLM → structured event.
 Body options:
-- `githubPath` — flyer in the repo flyers/ folder (disk-first, GitHub fallback)
-- `imageBase64` — small upload (JSON body limit ~100kb)
-- `rawText` — skip OCR/vision, structure existing text
-- `queue: true` — ALSO land the draft in the QSearch Review queue
+- `githubPath` - flyer in the repo flyers/ folder (disk-first, GitHub fallback)
+- `imageBase64` - small upload (JSON body limit ~100kb)
+- `rawText` - skip OCR/vision, structure existing text
+- `queue: true` - ALSO land the draft in the QSearch Review queue
   (human approve → LIVE/HIDDEN; never auto-LIVE)
 
 → `{ ok, parse: {title, start_date, end_date, time, venue, address,
@@ -48,9 +48,9 @@ async function scanFlyer(githubPath: string) {
 | Var | Purpose |
 |---|---|
 | GROQ_API_KEY | text structuring (cheap) |
-| GEMINI_API_KEY | vision (free tier) — REQUIRED for image reading |
+| GEMINI_API_KEY | vision (free tier) - REQUIRED for image reading |
 | FLYER_VISION_MODEL / _FALLBACK | model overrides (self-discovery handles stale ids) |
-| FLYER_LLM_DISABLED=1 | kill switch — stops all paid calls instantly |
+| FLYER_LLM_DISABLED=1 | kill switch - stops all paid calls instantly |
 | FLYER_VALIDATE_MAX | vision-call cap per validation run (default 25) |
 | FLYERS_DIR / GITHUB_FLYERS_REPO / GITHUB_FLYERS_BRANCH | flyer sourcing |
 | TESSERACT_CACHE_DIR | OCR language data cache (default /tmp/tesseract) |

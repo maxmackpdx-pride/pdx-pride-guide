@@ -16,7 +16,7 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(delay = 
       return;
     }
 
-    // Already on screen when mounted — don't leave sections at opacity 0.
+    // Already on screen when mounted - don't leave sections at opacity 0.
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight && rect.bottom > 0) {
       reveal();

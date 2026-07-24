@@ -13,7 +13,7 @@ export type PromoterIntakeAction = {
 };
 
 export type PromoterIntakeProps = {
-  /** Verified promoter / admin — shows neutral verified banner */
+  /** Verified promoter / admin - shows neutral verified banner */
   isVerified: boolean;
   /** Path rows (Submit / Claim / Spotted [+ Apply]). Order preserved. */
   actions: PromoterIntakeAction[];

@@ -1,4 +1,4 @@
-# Standing roadmap — any Claude session picks up from here
+# Standing roadmap - any Claude session picks up from here
 
 Read this first. The repo is the memory; chat sessions are ephemeral.
 Rules that always apply: review-queue only (never auto-LIVE), never-invent-FREE,
@@ -15,18 +15,18 @@ must stay at baseline (37), offline smokes must pass before push.
   at GET /api/game-poster). Needs SPORTS_BRA_AIRTABLE_TOKEN on Railway (Tucker
   has the pat token; see docs/SPORTS_BRA_AIRTABLE.md). Falls back to the
   venue-scoped EB feed until the token is set. LIVE FETCH UNTESTED from sandbox
-  (Airtable blocked) — verify on Railway after the env var lands.
+  (Airtable blocked) - verify on Railway after the env var lands.
 - Also fixed the venue-scope leak generally: two-token venue match now requires
   the venue name to appear in LOCATION fields, not the event title (a title
   saying "Sports Night" no longer scope-matches The Sports Bra).
 - USER FLYER AUTOFILL shipped: POST /api/flyer-autofill + Submit uploader wiring
-  — a submitter uploads a poster and OCR+vision fills blank form fields (review
+  - a submitter uploads a poster and OCR+vision fills blank form fields (review
   only; still goes through /api/submit moderation). Caps FLYER_AUTOFILL_USER_DAILY
   (10) / _GLOBAL_DAILY (200) + FLYER_LLM_DISABLED kill switch.
 - PROD-CRASH FIXED (my regression): gamePoster.ts read font files at module load;
   prod bundles to one dist/index.cjs so the files weren't there → crash-loop.
   Fonts now inlined as base64 (server/posters/fontData.ts). LESSON: anything that
-  reads a bundled-adjacent file at import time breaks prod — inline assets or
+  reads a bundled-adjacent file at import time breaks prod - inline assets or
   verify by bundling to CJS and running with no sibling files.
 - Flyer Reader: Phases 1, 2, 4 done. Validation at 97% (reports/). Vision =
   Gemini free tier via self-discovering provider chain. Phase 3 shipped:
@@ -37,7 +37,7 @@ must stay at baseline (37), offline smokes must pass before push.
 - Scan-pipeline vision UNLOCKED: qsearch/vision.ts now recognizes
   GEMINI_API_KEY (free tier, model proven by validation suite) + honors the
   FLYER_LLM_DISABLED kill switch. Zero-yield scan sources with flyer-only
-  pages (Scandals-class) now get vision-read drafts — capped at 2 images per
+  pages (Scandals-class) now get vision-read drafts - capped at 2 images per
   source, first success stops. Nightly vision stays gated behind
   QSEARCH_NIGHTLY_VISION=1.
 - Phase 5 docs: docs/FLYER_READER.md (API, frontend sample, env table).
@@ -49,18 +49,18 @@ must stay at baseline (37), offline smokes must pass before push.
 2. Watch reports/ after any flyer/parser change; investigate any drop below 90%.
 3. When Tucker confirms trusted venues green: prune their scan-lane entries
    from shared/ingestSources.ts (one venue per commit, cite the confirmation).
-4. Nice-to-have (ask first — spends money at scale): multi-event flyer mode
+4. Nice-to-have (ask first - spends money at scale): multi-event flyer mode
    (Eagle monthly schedule class); Sanctuary flyer-coverage recheck on live
    board; UI surface for flyer-reader in QSearchDashboard.
 
-## Ideas parked (Tucker's — not started, discuss before building)
+## Ideas parked (Tucker's - not started, discuss before building)
 - NEWSLETTER MAILROOM (Tucker, 2026-07-24): a dedicated email address subscribes
   to every directory venue's newsletter; each scan cycle, new emails are parsed
   for events (HTML/JSON-LD links + embedded flyer images through the existing
   Flyer Reader + vision) → Review queue, attributed to the venue. NOT the app's
-  "Inbox" (that's user DMs) — name it distinctly (Mailroom/Feed). Reuses:
+  "Inbox" (that's user DMs) - name it distinctly (Mailroom/Feed). Reuses:
   ingest pipeline, flyer reader, dedup, review-queue lock, cost caps + kill
-  switch. New pieces needed: (1) how mail gets IN — inbound-email provider
+  switch. New pieces needed: (1) how mail gets IN - inbound-email provider
   webhook (Mailgun/Postmark/CloudMailin) or IMAP polling of one mailbox;
   (2) one-time signup effort per venue (many use double opt-in confirm clicks);
   (3) relevance/noise filter (merch/promo emails aren't events); (4) hard vision

@@ -13,7 +13,7 @@ Last captured: 2026-07-14 (session guidance).
 **Damage:** Mass-hide/LIVE/delete events, wrong merge, wiped hosts during Pride week.  
 **Why:** One bad select-all on All Events is irreversible community damage.  
 **If ever:** Dry-run preview, max N, owner-only for harsh actions, undo window, no “send to queue” that auto-resolves.  
-**Status:** Bulk hide/claimable exists with preview + confirm + max batch — do **not** expand to mass delete, mass LIVE, or mass submission approve without the same guards.
+**Status:** Bulk hide/claimable exists with preview + confirm + max batch - do **not** expand to mass delete, mass LIVE, or mass submission approve without the same guards.
 
 ### 2. AI auto-flag / auto-reject / auto-approve
 **Damage:** Wrong bans, killed gifting/MC posts, legal/trust blowups, biased moderation.  
@@ -26,7 +26,7 @@ Last captured: 2026-07-14 (session guidance).
 ### 4. Task assignment as “only assignee can act” without reclaim
 **Damage:** Queue stuck when someone leaves/sleeps; Pride backlog freezes.  
 **If ever:** Soft assignment + any admin can take over + stale reclaim after N hours.  
-**Status:** Soft claim/takeover/release implemented — **never** make claims exclusive locks.
+**Status:** Soft claim/takeover/release implemented - **never** make claims exclusive locks.
 
 ### 5. Multi-tab “realtime” that rewrites local UI from push without reconciliation
 **Damage:** Lost reply text, flapping badges, wrong queue state, duplicate actions.  
@@ -43,7 +43,7 @@ Last captured: 2026-07-14 (session guidance).
 ### 8. Global search that surfaces PII to all admins
 **Damage:** Email/phone leakage to broad admin cohort.  
 **Guard:** Owner-only fields; search redaction; rate limit; audit sensitive hits.  
-**Status:** Non-owner search redacts emails — keep it that way.
+**Status:** Non-owner search redacts emails - keep it that way.
 
 ### 9. “Bulk send to shared queue” that duplicates or reopens resolved items
 **Damage:** Queue noise, double work, members re-notified.  
@@ -55,7 +55,7 @@ Last captured: 2026-07-14 (session guidance).
 
 ### 11. Quick Actions FAB stacking on floating inbox FAB
 **Damage:** Mobile dead zones, can’t open inbox (SSOT).  
-**Prefer:** Hub chrome / Overview / avatar / in-sheet drawer — one FAB max on mobile.
+**Prefer:** Hub chrome / Overview / avatar / in-sheet drawer - one FAB max on mobile.
 
 ### 12. Expanding admin powers on env-listed / peer owners without gates
 **Damage:** Team revoke, purge QA, user PII, push blast, catalog wipe.  
@@ -63,7 +63,7 @@ Last captured: 2026-07-14 (session guidance).
 
 ### 13. Logging into or messaging as the system guide account
 **Damage:** Shared inbox compromised; personal/system boundary collapses.  
-**Status:** Guide `@prideguidepdx` is locked — **do not reverse**.
+**Status:** Guide `@prideguidepdx` is locked - **do not reverse**.
 
 ### 14. Auto-migrate historical personal DMs into guide threads
 **Damage:** Wrong parties, privacy mixups.  
@@ -80,7 +80,7 @@ Last captured: 2026-07-14 (session guidance).
 ### 17. “View as public” that uses admin session cookies in a public window
 **Damage:** Session confusion / thinking you’re anonymous when you’re not.  
 **Prefer:** True public URL in new tab (or token without admin cookie).  
-**Status:** VIEW PUBLIC uses real public URLs — keep it that way.
+**Status:** VIEW PUBLIC uses real public URLs - keep it that way.
 
 ### 18. Push-driven multi-device “sync” that marks queue items resolved without UI confirm
 **Damage:** Wrong-item actions while scrolling.  
@@ -92,15 +92,15 @@ Last captured: 2026-07-14 (session guidance).
 
 ### 20. Anything that creates a second approval UI outside floating inbox
 **Damage:** Split brain (approve in Overview, deny in sheet).  
-**SSOT = floating inbox** — Overview is **read + jump only** (no Approve/Reject there).
+**SSOT = floating inbox** - Overview is **read + jump only** (no Approve/Reject there).
 
 ### 21. Rate-unlimited admin message / guide blast
 **Damage:** Accidental spam, push storms, cost spikes.  
-**Status:** Soft rate limit on guide DMs — keep / tighten; multi-send needs confirm.
+**Status:** Soft rate limit on guide DMs - keep / tighten; multi-send needs confirm.
 
 ### 22. Concurrent agent / force-push / schema thrash during Pride
 **Damage:** Lost work, thrash (already seen historically).  
-Process risk — higher damage than half the UI list. No force-push master without ask.
+Process risk - higher damage than half the UI list. No force-push master without ask.
 
 ---
 
@@ -143,5 +143,5 @@ Process risk — higher damage than half the UI list. No force-push master witho
 
 - Mobile and desktop **nav / header / footer** should look the same at first glance.  
 - **Avatar / logo dropdown** and **in-sheet drawers** are fair game.  
-- Admin queue lives in **floating inbox** (open via Messages) — not a separate nav Queue tab.  
+- Admin queue lives in **floating inbox** (open via Messages) - not a separate nav Queue tab.  
 - Admin-facing tools are fair game; normal member/customer UI is not the place for queue power.

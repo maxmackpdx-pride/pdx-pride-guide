@@ -1,17 +1,17 @@
 /**
- * The Sports Bra — official watch-party schedule from their Airtable base.
+ * The Sports Bra - official watch-party schedule from their Airtable base.
  *
  * The bar publishes the games it's showing in an Airtable (embedded on
  * thesportsbraofficial.com/pages/portland). We read that base via Airtable's
- * official REST API with a Personal Access Token (data.records:read) — this
+ * official REST API with a Personal Access Token (data.records:read) - this
  * replaces the old Eventbrite keyword search that pulled city-wide "sports"
  * noise (church pickleball, barbell certs, etc.).
  *
- * Config (env — token is a SECRET, set on Railway, never commit):
+ * Config (env - token is a SECRET, set on Railway, never commit):
  *   SPORTS_BRA_AIRTABLE_TOKEN   (falls back to AIRTABLE_TOKEN)
  *   SPORTS_BRA_AIRTABLE_BASE    (default appMRorYHS2sB2qeZ)
- *   SPORTS_BRA_AIRTABLE_TABLE   (optional — auto-discovered from the base if unset)
- *   SPORTS_BRA_AIRTABLE_VIEW    (optional — restrict to one view)
+ *   SPORTS_BRA_AIRTABLE_TABLE   (optional - auto-discovered from the base if unset)
+ *   SPORTS_BRA_AIRTABLE_VIEW    (optional - restrict to one view)
  *
  * Games with no attached flyer get a clean auto-generated Swedish-minimal
  * poster (server/posters/gamePoster.ts) so the listing never looks empty.
@@ -146,7 +146,7 @@ export function recordToDraft(
   const warnings: string[] = [];
   if (!time) {
     time = { hhmm: "12:00", label: "See Bar" };
-    warnings.push("Game time missing in Airtable — defaulted; verify before publishing");
+    warnings.push("Game time missing in Airtable - defaulted; verify before publishing");
   }
   const dateStart = `${iso}T${time.hhmm}`;
 
@@ -170,7 +170,7 @@ export function recordToDraft(
 
   const description =
     note ||
-    `${title} — watch party at The Sports Bra, Portland's women's sports bar.`;
+    `${title} - watch party at The Sports Bra, Portland's women's sports bar.`;
 
   return {
     title,
@@ -223,7 +223,7 @@ async function airtableGet(url: string, token: string): Promise<any> {
   return res.json();
 }
 
-/** Discover a table name if not configured — prefers one named for the schedule. */
+/** Discover a table name if not configured - prefers one named for the schedule. */
 async function discoverTable(base: string, token: string): Promise<string | null> {
   try {
     const meta = await airtableGet(`${AIRTABLE_API}/meta/bases/${base}/tables`, token);
@@ -238,14 +238,14 @@ async function discoverTable(base: string, token: string): Promise<string | null
 
 /**
  * Live fetch: read the Sports Bra Airtable and return game drafts. Returns []
- * (never throws) if unconfigured or the API is unreachable — the caller then
+ * (never throws) if unconfigured or the API is unreachable - the caller then
  * falls back to the (now venue-scoped) Eventbrite feed so the venue isn't empty.
  */
 export async function fetchSportsBraDrafts(
   opts: SportsBraParseOpts = {},
 ): Promise<{ drafts: IngestEventDraft[]; warnings: string[] }> {
   const token = sportsBraToken();
-  if (!token) return { drafts: [], warnings: ["SPORTS_BRA_AIRTABLE_TOKEN not set — using fallback feed"] };
+  if (!token) return { drafts: [], warnings: ["SPORTS_BRA_AIRTABLE_TOKEN not set - using fallback feed"] };
   const base = process.env.SPORTS_BRA_AIRTABLE_BASE || DEFAULT_BASE;
   const warnings: string[] = [];
   try {

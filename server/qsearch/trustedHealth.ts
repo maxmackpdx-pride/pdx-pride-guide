@@ -1,5 +1,5 @@
 /**
- * Trusted venue health store — last sync / last published for auto-publish path.
+ * Trusted venue health store - last sync / last published for auto-publish path.
  * Table: qsearch_trusted_health. Registry: shared/trustedVenues.ts
  */
 import { sqlite, storage } from "../storage";
@@ -345,7 +345,7 @@ export function getTrustedDashboard(): { venues: TrustedVenueDashboardRow[] } {
   return { venues };
 }
 
-/** Lightweight counts for optional dashboards — safe to call anytime. */
+/** Lightweight counts for optional dashboards - safe to call anytime. */
 export function trustedHealthSummary() {
   const { venues } = getTrustedDashboard();
   return {

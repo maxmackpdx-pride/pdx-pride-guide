@@ -1,4 +1,4 @@
-# Push Notification Program — PM Source of Truth
+# Push Notification Program - PM Source of Truth
 
 > **Program manager:** Grok (bird's-eye continuity across phases and agents)
 > **Goal:** Zaylist as an installable PWA with working Web Push for logged-in users
@@ -24,7 +24,7 @@
 
 1. **One phase agent runs at a time.** Do not start Phase N+1 until Phase N handoff is written and PM marks the gate passed.
 2. **Each agent reads this file + the previous handoff** before writing code.
-3. **Blocked or unclear?** Agent adds a question to [Open questions](#open-questions) and asks the PM (Grok) or Tucker — do not guess on product decisions.
+3. **Blocked or unclear?** Agent adds a question to [Open questions](#open-questions) and asks the PM (Grok) or Tucker - do not guess on product decisions.
 4. **When done,** agent writes `docs/handoffs/PHASE_N_COMPLETE.md` using the template, updates the phase status table below, and stops.
 
 ### Slash commands
@@ -32,10 +32,10 @@
 | Phase | Agent | Command |
 |-------|-------|---------|
 | PM / status | Grok orchestrator | `/pdx-push-pm` |
-| 1 — PWA shell | Phase 1 agent | `/pdx-push-phase-1` |
-| 2 — Web push | Phase 2 agent | `/pdx-push-phase-2` |
-| 3 — Dispatch | Phase 3 agent | `/pdx-push-phase-3` |
-| 4 — Polish & ship | Phase 4 agent | `/pdx-push-phase-4` |
+| 1 - PWA shell | Phase 1 agent | `/pdx-push-phase-1` |
+| 2 - Web push | Phase 2 agent | `/pdx-push-phase-2` |
+| 3 - Dispatch | Phase 3 agent | `/pdx-push-phase-3` |
+| 4 - Polish & ship | Phase 4 agent | `/pdx-push-phase-4` |
 
 ### Reference docs (all agents)
 
@@ -56,7 +56,7 @@
 | **3** | Inbox → push dispatch | `COMPLETE` | [PHASE_3](./handoffs/PHASE_3_COMPLETE.md) | `/pdx-push-phase-3` |
 | **4** | Polish, prefs UI, UAT | `COMPLETE` | [PHASE_4](./handoffs/PHASE_4_COMPLETE.md) | `/pdx-push-phase-4` |
 
-**Program status:** `SHIPPED` — code complete; awaiting Railway VAPID + device UAT
+**Program status:** `SHIPPED` - code complete; awaiting Railway VAPID + device UAT
 
 **Status values:** `NOT_STARTED` · `IN_PROGRESS` · `COMPLETE` · `BLOCKED`
 
@@ -66,12 +66,12 @@
 
 ## Program goals (non-negotiable)
 
-1. **Inbox remains source of truth** — push is a delivery channel only
-2. **Session-cookie auth** — no localStorage for auth or prefs
-3. **Declarative Web Push first** — Safari / iOS Home Screen reliability
-4. **iOS = Home Screen PWA** — educate users; no push from Safari tab
-5. **Deploy-safe service worker** — no stale bundles after Railway deploy
-6. **SQLite on `/data`** — new tables registered in `server/persistence.ts`
+1. **Inbox remains source of truth** - push is a delivery channel only
+2. **Session-cookie auth** - no localStorage for auth or prefs
+3. **Declarative Web Push first** - Safari / iOS Home Screen reliability
+4. **iOS = Home Screen PWA** - educate users; no push from Safari tab
+5. **Deploy-safe service worker** - no stale bundles after Railway deploy
+6. **SQLite on `/data`** - new tables registered in `server/persistence.ts`
 7. **User approval** for visitor-visible UX (install banners, permission prompts, Dashboard toggles)
 
 ---
@@ -125,11 +125,11 @@
 | 2026-07-02 | 4 sequential phase agents with handoffs | Continuity; one concern per agent |
 | 2026-07-02 | Keep push subscription on logout | Device-level sub; prefs server-side (Q1 default) |
 | 2026-07-02 | Install prompt on Dashboard after login | Q3 default |
-| 2026-07-02 | Admin push deferred to post-ship | Q2 — throttle if added later |
+| 2026-07-02 | Admin push deferred to post-ship | Q2 - throttle if added later |
 | 2026-07-02 | DIY `web-push` + VAPID, not OneSignal | Privacy, one Safari-compatible path |
 | 2026-07-02 | Declarative Web Push primary | iOS / ITP service worker eviction |
 | 2026-07-02 | 4 user prefs: messages, my_events, account, admin | Simplifies 14 contextTypes |
-| — | Logout deletes push sub? | **OPEN** — see questions below |
+| - | Logout deletes push sub? | **OPEN** - see questions below |
 
 ---
 
@@ -150,7 +150,7 @@ Questions agents cannot answer alone. PM (Grok) or Tucker resolves; then move to
 | ID | Default |
 |----|---------|
 | Q1 | Keep subscription on logout (device-level); prefs stay server-side |
-| Q2 | Throttle admin push — max 1 per kind per 5 min |
+| Q2 | Throttle admin push - max 1 per kind per 5 min |
 | Q3 | Install prompt after login on Dashboard only |
 
 ---
@@ -159,8 +159,8 @@ Questions agents cannot answer alone. PM (Grok) or Tucker resolves; then move to
 
 | Item | Phase | Owner | Status |
 |------|-------|-------|--------|
-| `VAPID_PUBLIC_KEY` | 2 | Tucker → Railway | **GENERATED** — see `.railway/vapid-keys.txt` |
-| `VAPID_PRIVATE_KEY` | 2 | Tucker → Railway | **GENERATED** — run `script/set-railway-vapid.sh` |
+| `VAPID_PUBLIC_KEY` | 2 | Tucker → Railway | **GENERATED** - see `.railway/vapid-keys.txt` |
+| `VAPID_PRIVATE_KEY` | 2 | Tucker → Railway | **GENERATED** - run `script/set-railway-vapid.sh` |
 | `VAPID_SUBJECT` | 2 | `mailto:hello@zaylist.com` | ready |
 | App icons | 1 | Phase 1 agent | ✅ shipped |
 | Code deploy | all | commit `2be78ce` | pushed → Railway CI |
@@ -187,8 +187,8 @@ When acting as program manager:
 1. **Track phase status** in this file
 2. **Answer agent questions** in Open questions / Decision log
 3. **Accept or reject handoffs** against phase gates
-4. **Maintain continuity** — ensure agents don't contradict prior decisions
+4. **Maintain continuity** - ensure agents don't contradict prior decisions
 5. **Escalate to Tucker** for UX approval, Railway secrets, production deploy timing
-6. **Do not implement phase work** when in PM mode — delegate to the phase agent
+6. **Do not implement phase work** when in PM mode - delegate to the phase agent
 
 When Tucker says "run the program" or "start phase 1": launch `/pdx-push-phase-1`. When a handoff lands, review it, update gates, launch the next phase agent.

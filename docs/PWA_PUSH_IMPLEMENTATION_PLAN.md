@@ -7,10 +7,10 @@
 
 Zaylist is a **Vite + React SPA on Express** with **session-cookie auth**. There is no service worker, manifest, or push infrastructure today. The fastest path to a working web app with push:
 
-1. **PWA shell** — manifest + icons + service worker for installability and offline app shell
-2. **Web Push** — VAPID keys, subscription storage, `web-push` dispatcher
-3. **Notification bridge** — hook `sendMessage()` and admin queue events to push delivery
-4. **Declarative Web Push** — Safari/iOS Home Screen compatibility from day one
+1. **PWA shell** - manifest + icons + service worker for installability and offline app shell
+2. **Web Push** - VAPID keys, subscription storage, `web-push` dispatcher
+3. **Notification bridge** - hook `sendMessage()` and admin queue events to push delivery
+4. **Declarative Web Push** - Safari/iOS Home Screen compatibility from day one
 
 Target: **logged-in users on HTTPS** who opt in after a contextual prompt.
 
@@ -22,7 +22,7 @@ Target: **logged-in users on HTTPS** who opt in after a contextual prompt.
 |------|--------|-------|
 | HTTPS | ✅ | `www.zaylist.com`, Railway TLS |
 | SPA routing | ✅ | Express fallback in `server/static.ts` |
-| Session auth | ✅ | `credentials: "include"` — push subs must be per-user server-side |
+| Session auth | ✅ | `credentials: "include"` - push subs must be per-user server-side |
 | Service worker | ❌ | None |
 | Web manifest | ❌ | None |
 | Apple meta tags | ❌ | No `apple-mobile-web-app-capable` |
@@ -31,11 +31,11 @@ Target: **logged-in users on HTTPS** who opt in after a contextual prompt.
 
 ### Constraints to respect
 
-- **Hash routes migrated away** — clean paths (`/events`, `/inbox`); push `navigate` URLs must use same paths
-- **Deploy cache busting** — `index.html` is `no-cache`; SW update strategy must not strand users on stale bundles (see existing bundle-reload script in `index.html`)
-- **Helmet CSP disabled** — enables easier SW rollout; tighten CSP in Phase 2
-- **SQLite on Railway volume** — new tables persist via `/data` like everything else
-- **No localStorage for auth** — project rule; push prefs live server-side only
+- **Hash routes migrated away** - clean paths (`/events`, `/inbox`); push `navigate` URLs must use same paths
+- **Deploy cache busting** - `index.html` is `no-cache`; SW update strategy must not strand users on stale bundles (see existing bundle-reload script in `index.html`)
+- **Helmet CSP disabled** - enables easier SW rollout; tighten CSP in Phase 2
+- **SQLite on Railway volume** - new tables persist via `/data` like everything else
+- **No localStorage for auth** - project rule; push prefs live server-side only
 
 ---
 
@@ -73,7 +73,7 @@ iOS web push **only works when the site is installed to the Home Screen** as a P
 ┌──────────────────────────▼──────────────────────────────────┐
 │                     Express (Railway)                        │
 │  push_subscriptions table · notification_preferences         │
-│  dispatchPush(userId, payload) — called from sendMessage()   │
+│  dispatchPush(userId, payload) - called from sendMessage()   │
 │  web-push (VAPID) → browser push endpoints                   │
 └──────────────────────────┬──────────────────────────────────┘
                            │
@@ -87,7 +87,7 @@ iOS web push **only works when the site is installed to the Home Screen** as a P
 
 - **DIY with `web-push`** keeps one code path for all browsers including Safari web push
 - No third-party SDK in the privacy-sensitive queer community app
-- Inbox already exists — push is a delivery channel, not a new messaging system
+- Inbox already exists - push is a delivery channel, not a new messaging system
 - Cost stays flat at scale
 
 Consider OneSignal later only if ops burden grows.
@@ -96,14 +96,14 @@ Consider OneSignal later only if ops burden grows.
 
 ## Phase plan
 
-### Phase 0 — Prerequisites (1 day)
+### Phase 0 - Prerequisites (1 day)
 
 - [ ] Generate VAPID key pair (`npx web-push generate-vapid-keys`)
 - [ ] Add Railway env: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT=mailto:hello@zaylist.com`
 - [ ] Create app icons: 192×192, 512×512, maskable variant, apple-touch-icon 180×180
 - [ ] Fix `HOST_UPDATE` badge bug in `inboxContext.ts`
 
-### Phase 1 — PWA shell (2–3 days) → Agent: `pdx-pwa-shell`
+### Phase 1 - PWA shell (2–3 days) → Agent: `pdx-pwa-shell`
 
 **Goal:** Installable app, offline shell, no push yet.
 
@@ -138,7 +138,7 @@ Consider OneSignal later only if ops burden grows.
 - App opens standalone without browser chrome
 - Deploy does not break cached users (SW update + existing bundle-reload fallback)
 
-### Phase 2 — Web Push client + API (2–3 days) → Agent: `pdx-web-push`
+### Phase 2 - Web Push client + API (2–3 days) → Agent: `pdx-web-push`
 
 **Goal:** Users can subscribe; server can send a test push.
 
@@ -174,14 +174,14 @@ notification_preferences (user_id, category, enabled)
 2. Permission flow: contextual prompt on Dashboard or after first inbox message
 3. Subscribe via `registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })`
 4. POST subscription JSON to server
-5. Handle `pushsubscriptionchange` — re-subscribe and PATCH server
+5. Handle `pushsubscriptionchange` - re-subscribe and PATCH server
 6. iOS gate: if not `standalone`, show install instructions instead of permission prompt
 
 #### Service worker push handler
 
 Support **both** formats:
 
-**Declarative (preferred — Safari/ITP safe):**
+**Declarative (preferred - Safari/ITP safe):**
 ```json
 {
   "web_push": 8030,
@@ -220,7 +220,7 @@ self.addEventListener('notificationclick', (event) => {
 - Unsubscribe clears server row
 - 410 from push endpoint marks subscription inactive
 
-### Phase 3 — Notification dispatch bridge (2–3 days) → Agent: `pdx-notification-dispatch`
+### Phase 3 - Notification dispatch bridge (2–3 days) → Agent: `pdx-notification-dispatch`
 
 **Goal:** Real inbox events trigger push automatically.
 
@@ -232,9 +232,9 @@ async function dispatchPushForUser(userId: number, payload: PushPayload): Promis
 ```
 
 Call from:
-- `storage.sendMessage()` — after insert, if recipient has prefs enabled for category
-- `notifyGuideInbox()` — account category
-- `notifyAttendeesOfHostUpdate()` — my_events category (batch)
+- `storage.sendMessage()` - after insert, if recipient has prefs enabled for category
+- `notifyGuideInbox()` - account category
+- `notifyAttendeesOfHostUpdate()` - my_events category (batch)
 - Admin queue (optional): new submission → admin users with `admin` pref
 
 #### Category mapping
@@ -254,7 +254,7 @@ See [NOTIFICATION_SYSTEM_REFERENCE.md](./NOTIFICATION_SYSTEM_REFERENCE.md#push-c
 
 #### Batching / dedup
 
-- Host update to 50 RSVPs: send individual pushes (or collapse if same event within 5 min — Phase 4)
+- Host update to 50 RSVPs: send individual pushes (or collapse if same event within 5 min - Phase 4)
 - Don't push for messages user sends themselves
 - Don't push if user is active on site (optional Phase 4: Page Visibility API heartbeat)
 
@@ -268,7 +268,7 @@ Separate high-priority channel for admins when `pending-count` increases.
 - Submission approved → promoter gets push if `account` enabled
 - Prefs off → no push, inbox still works
 
-### Phase 4 — Polish (ongoing)
+### Phase 4 - Polish (ongoing)
 
 - [ ] Notification prefs UI on Dashboard (4 toggles)
 - [ ] iOS "Add to Home Screen" onboarding card
@@ -302,14 +302,14 @@ Separate high-priority channel for admins when `pending-count` increases.
 | SW caches stale bundle after deploy | Network-first navigation + existing bundle-reload script + `skipWaiting` prompt |
 | Push spam on host updates | User toggle + batch/dedup |
 | Dead subscriptions | Prune on 410/404 from `web-push` |
-| Session expired but push sub exists | Sub tied to user_id; logout does not delete sub (user may want pushes while logged out on phone — discuss) |
+| Session expired but push sub exists | Sub tied to user_id; logout does not delete sub (user may want pushes while logged out on phone - discuss) |
 | VAPID key rotation | Support multiple keys during transition |
 
 ---
 
 ## Agent ownership
 
-**Program manager:** `/pdx-push-pm` (Grok — gates, handoffs, continuity)
+**Program manager:** `/pdx-push-pm` (Grok - gates, handoffs, continuity)
 
 | Phase | Agent | Slash command | Handoff |
 |-------|-------|---------------|---------|
@@ -330,7 +330,7 @@ Execute in order: **phase-1 → phase-2 → phase-3 → phase-4**. One agent at 
 - [ ] Android Chrome: install → login → enable notifications → receive test push → tap opens inbox
 - [ ] iOS: Add to Home Screen → open standalone → enable notifications → host update push arrives
 - [ ] Prefs off: no push, inbox still populated
-- [ ] Logout/login: subscription persists (or re-prompt — document chosen behavior)
+- [ ] Logout/login: subscription persists (or re-prompt - document chosen behavior)
 - [ ] Deploy mid-session: app recovers without white screen
 - [ ] `GET /api/admin/persistence` still OK after new tables
 

@@ -12,7 +12,7 @@ type Props = {
   username: string;
   accountStatus?: string | null;
   shadowBanned?: boolean;
-  /** Primary site owner only — full account delete. */
+  /** Primary site owner only - full account delete. */
   canDeleteAccount?: boolean;
   onDone?: () => void;
 };

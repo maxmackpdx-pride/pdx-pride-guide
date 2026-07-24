@@ -37,7 +37,7 @@ export default function HubAdminKeys({
           >
             <span>Shared admin queue</span>
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}>
-              {pendingCount > 0 ? pendingCount : "—"}
+              {pendingCount > 0 ? pendingCount : "-"}
             </span>
           </button>
           {isPrimaryOwner && (
@@ -49,7 +49,7 @@ export default function HubAdminKeys({
             >
               <span>Owner desk</span>
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}>
-                {ownerCount > 0 ? ownerCount : "—"}
+                {ownerCount > 0 ? ownerCount : "-"}
               </span>
             </button>
           )}

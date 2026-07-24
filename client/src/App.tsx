@@ -24,7 +24,7 @@ function RouteBoundary({ children }: { children: ReactNode }) {
 
 function ScrollToTop() {
   const [location] = useLocation();
-  // Pathname only — query changes (filters, ?q=) must not yank scroll to top
+  // Pathname only - query changes (filters, ?q=) must not yank scroll to top
   const pathname = location.split("?")[0] || location;
   useEffect(() => {
     scheduleScrollReset();

@@ -14,7 +14,7 @@ type AttendanceBubbleFaceProps = {
   className?: string;
 };
 
-/** Face inside an attendance bubble — pride ring follows the user when not masked. */
+/** Face inside an attendance bubble - pride ring follows the user when not masked. */
 export default function AttendanceBubbleFace({
   handle,
   displayName,

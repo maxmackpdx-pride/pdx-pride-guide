@@ -1,5 +1,5 @@
 /**
- * Trusted venue calendars — QSearch "Trusted" health board + dedicated adapters.
+ * Trusted venue calendars - QSearch "Trusted" health board + dedicated adapters.
  *
  * Manual Sync now / Sync all → Review queue (admin approves LIVE or HIDDEN).
  * Keep this list small and intentional.
@@ -44,7 +44,7 @@ export type TrustedVenueDef = {
     ageNote?: string;
     /** Sex-club stamps: isSexPositive + nudityOk + SEX_POSITIVE/NUDITY_OK/KINK tags */
     sexPositive?: boolean;
-    /** Re-infer admission from text — never invent FREE (default true) */
+    /** Re-infer admission from text - never invent FREE (default true) */
     reinferAdmission?: boolean;
   };
 };
@@ -86,7 +86,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 6,
     notes:
-      "Wix Events via appsWarmupData. 21+ bar — never ALL_AGES; cover UNKNOWN unless listing says free.",
+      "Wix Events via appsWarmupData. 21+ bar - never ALL_AGES; cover UNKNOWN unless listing says free.",
   },
   {
     sourceId: "darcelle-tribe",
@@ -99,7 +99,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 6,
     notes:
-      "Tribe REST JSON, image.url flyers, paginated (next_rest_url); ICS ?ical=1 fallback (ATTACH flyers). Age defaults 21_PLUS — verify all-ages/brunch shows in Review.",
+      "Tribe REST JSON, image.url flyers, paginated (next_rest_url); ICS ?ical=1 fallback (ATTACH flyers). Age defaults 21_PLUS - verify all-ages/brunch shows in Review.",
   },
   {
     sourceId: "hawks-json",
@@ -112,7 +112,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 6,
     notes:
-      "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club — sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
+      "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club - sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
   },
   {
     sourceId: "stag-eb",
@@ -129,7 +129,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       ageNote: "Age set to 21_PLUS (Stag is a 21+ bar)",
     },
     notes:
-      "Eventbrite organizer via generic discover (relevance guards handle Stags' Leap false-positives). Brunch/specials only — nightly dancers are not discrete rows.",
+      "Eventbrite organizer via generic discover (relevance guards handle Stags' Leap false-positives). Brunch/specials only - nightly dancers are not discrete rows.",
   },
   {
     sourceId: "sports-bra-eb",
@@ -142,10 +142,10 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 12,
     venuePolicy: {
-      ageNote: "Verify age — Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
+      ageNote: "Verify age - Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
     },
     notes:
-      "Official watch-party schedule via their Airtable (SPORTS_BRA_AIRTABLE_TOKEN). Games only — no Eventbrite city noise. No-flyer games get an auto Swedish-minimal poster. Falls back to venue-scoped Eventbrite if token unset.",
+      "Official watch-party schedule via their Airtable (SPORTS_BRA_AIRTABLE_TOKEN). Games only - no Eventbrite city noise. No-flyer games get an auto Swedish-minimal poster. Falls back to venue-scoped Eventbrite if token unset.",
   },
   {
     sourceId: "living-room-eb",
@@ -159,7 +159,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 12,
     venuePolicy: {
       ageRequirement: "21_PLUS",
-      ageNote: "Age set to 21_PLUS (wine bar — ticketed tastings/classes)",
+      ageNote: "Age set to 21_PLUS (wine bar - ticketed tastings/classes)",
     },
     notes:
       "Eventbrite organizer via generic discover. Ticketed classes only; free nights are IG-only (stay in scan lane).",
@@ -219,7 +219,7 @@ export function trustedSourceIds(): string[] {
  * - red: last sync failed, consecutive fails, or very stale
  * - unknown: never synced
  *
- * Catalog “last LIVE event” fallbacks must NOT force yellow — only real trusted
+ * Catalog “last LIVE event” fallbacks must NOT force yellow - only real trusted
  * publish timestamps (`fromTrustedPublish`) may.
  */
 /**

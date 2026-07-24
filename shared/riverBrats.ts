@@ -22,7 +22,7 @@ export const RIVER_BRATS_HOURS = Array.from(
 const PACIFIC_TZ = "America/Los_Angeles";
 
 export function formatRiverBratsHour(hour: number): string {
-  if (hour < 1 || hour > 23) return "—";
+  if (hour < 1 || hour > 23) return "-";
   if (hour === 12) return "12pm";
   if (hour === 0) return "12am";
   if (hour < 12) return `${hour}am`;

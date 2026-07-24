@@ -1,4 +1,4 @@
-# Phase 2 Handoff — Web Push Infrastructure
+# Phase 2 Handoff - Web Push Infrastructure
 
 ## Meta
 

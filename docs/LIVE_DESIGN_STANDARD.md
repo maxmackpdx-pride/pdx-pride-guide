@@ -4,9 +4,9 @@
 
 | Priority | What | Path |
 |----------|------|------|
-| **1 — Truth** | Production React + CSS on `master` / zaylist.com | `client/src/components/ds/**`, page CSS, adapters |
-| **2 — Tokens** | Modular production tokens | `client/src/components/ds/tokens/` especially **`glass.css`** |
-| **3 — Portable kit** | Claude Design export (must not invent chrome) | `design-system/` via `npm run sync:design-system` |
+| **1 - Truth** | Production React + CSS on `master` / zaylist.com | `client/src/components/ds/**`, page CSS, adapters |
+| **2 - Tokens** | Modular production tokens | `client/src/components/ds/tokens/` especially **`glass.css`** |
+| **3 - Portable kit** | Claude Design export (must not invent chrome) | `design-system/` via `npm run sync:design-system` |
 | **Archive** | Migration package + screenshots | `docs/handoffs/deep-glass-2026-07-16/` |
 
 If a doc, preview HTML, sandbox, or handoff **disagrees with live**, **live wins**. Update the doc; do not “fix” production back to an outdated rule.
@@ -19,9 +19,9 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 | Retired default | Live rule instead |
 |-----------------|-------------------|
-| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glass buttons** — `.pdx-glass-btn` / `.pdxBtn` / solid fill, black ring, **no outer neon bloom** |
-| Lite-glass translucent cards + hard `#2b2b2b` only | **Deep-glass** — `--glass-card*`, black ring + neon edge, sheen, poster-well |
-| Map outer neon bloom / thick glow frame | **Debossed map well** — thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
+| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glass buttons** - `.pdx-glass-btn` / `.pdxBtn` / solid fill, black ring, **no outer neon bloom** |
+| Lite-glass translucent cards + hard `#2b2b2b` only | **Deep-glass** - `--glass-card*`, black ring + neon edge, sheen, poster-well |
+| Map outer neon bloom / thick glow frame | **Debossed map well** - thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
 | Sitewide cyan “pull” above bottom nav | **Removed**; hub drawer grip only |
 | Claim chip = yellow rim + magenta offset brutal sticker | **Claim this event** = pure `#00FFFF` fill, dark type `#050506`, soft cyan offset `3px 3px 0 rgba(0,255,255,.35)` (no yellow border) |
 | “Event details →” dead text on grid cards | **Omit**; card click opens modal |
@@ -29,7 +29,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Mr. S ad primary `#ff0033` (red) | Mr. S = **cyan** `#19e3ff`; CockBlock = **red** `#ff1f1f` |
 | Ads that don’t match grid/feed | Builder must use **`PosterAdCard` / `FeedAdCard`** + live templates in `lib/adTypes.ts` |
 | Day color on primary RSVP | RSVP / primary action accent stays **lime** `#CCFF00` where reserved; day colors are data only |
-| Touch nav chrome without explicit ask | **Nav locked** unless user requests — black outlines; cyan for active/handle only |
+| Touch nav chrome without explicit ask | **Nav locked** unless user requests - black outlines; cyan for active/handle only |
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
@@ -64,7 +64,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 ## Ads (grid + feed)
 
 - Live components: `PosterAdCard`, `FeedAdCard` (+ legacy hard-coded affiliate cards must match them).
-- Templates: `templateDraft()` in `client/src/lib/adTypes.ts` — CockBlock red, Mr. S cyan.
+- Templates: `templateDraft()` in `client/src/lib/adTypes.ts` - CockBlock red, Mr. S cyan.
 - Builder preview must render those same components (WYSIWYG).
 - Shop Now = solid brand fill; **dark type on cyan/lime**, **white type on CockBlock red**.
 
@@ -83,7 +83,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 - Prefer existing tokens + `pgDirCardIn` entrances.
 - Calm / `prefers-reduced-motion` kill ambient pulses and seam animation (bar may stay static).
-- See archive `GROK_ANIMATION_MIGRATION.md` only for inventory — do not re-migrate.
+- See archive `GROK_ANIMATION_MIGRATION.md` only for inventory - do not re-migrate.
 
 ---
 
@@ -112,10 +112,10 @@ Before inventing a new global rule:
 
 | Doc | Role after this standard |
 |-----|---------------------------|
-| `docs/LIVE_DESIGN_STANDARD.md` | **This file** — superseding global rules |
+| `docs/LIVE_DESIGN_STANDARD.md` | **This file** - superseding global rules |
 | `docs/DESIGN_SYSTEM_INTEGRATION.md` | Integration map + component inventory (defers here for chrome) |
 | `docs/BOARD_CARD_STANDARD.md` | Board triad / rainbow seam / feed structure |
-| `docs/handoffs/deep-glass-2026-07-16/` | **Historical** migration package — not active work orders |
+| `docs/handoffs/deep-glass-2026-07-16/` | **Historical** migration package - not active work orders |
 | `design-system/EVENTS_GUIDE.md` | Event system structure; chrome → live components |
 | `AGENTS.md` | Ship rules + points here for design SoT |
 
@@ -123,10 +123,10 @@ Before inventing a new global rule:
 
 ## Quick agent checklist
 
-- [ ] CTA uses glass-btn / pdxBtn — **not** default brutal offset  
-- [ ] Card uses glass-card + sheen + rebind — **not** flat `#0b0b0b` + only `#2b2b2b`  
-- [ ] Map frame debossed — **no** outer bloom  
-- [ ] Claim sticker cyan soft-offset — **no** yellow rim  
+- [ ] CTA uses glass-btn / pdxBtn - **not** default brutal offset  
+- [ ] Card uses glass-card + sheen + rebind - **not** flat `#0b0b0b` + only `#2b2b2b`  
+- [ ] Map frame debossed - **no** outer bloom  
+- [ ] Claim sticker cyan soft-offset - **no** yellow rim  
 - [ ] Grid ads/events match live components  
 - [ ] Past events only under PAST  
 - [ ] Nav untouched unless asked  

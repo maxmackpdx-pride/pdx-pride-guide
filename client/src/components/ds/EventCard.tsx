@@ -22,7 +22,7 @@ const CSS = `
   box-shadow:var(--glass-card-shadow);
   backdrop-filter:blur(var(--glass-card-blur));
   -webkit-backdrop-filter:blur(var(--glass-card-blur));
-  /* backwards only — both/forwards locks transform and kills hover lift.
+  /* backwards only - both/forwards locks transform and kills hover lift.
      No infinite box-shadow pulse at rest (scroll jank on dense lists). */
   animation: pgDirCardIn .55s var(--ease-out,ease) backwards;
   animation-delay:calc(var(--i, 0) * 40ms);
@@ -57,10 +57,10 @@ a.pdxRow:hover{
   position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.35;
   background:var(--poster-well-scan);
 }
-/* Day-color floor (poster-well 4px) — absolute so thumb size stays 84×96 */
+/* Day-color floor (poster-well 4px) - absolute so thumb size stays 84×96 */
 .pdxRow__thumbFloor{ position:absolute; left:0; right:0; bottom:0; height:4px;
   background:var(--c,var(--_day)); z-index:2; pointer-events:none; }
-/* Full flyer in the thumb — letterbox rather than crop */
+/* Full flyer in the thumb - letterbox rather than crop */
 .pdxRow__thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; z-index:0; }
 .pdxRow__thumbPh{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--font-display); font-weight:var(--fw-black); font-size:1.6rem; color:var(--_day); opacity:.8; z-index:0; }
@@ -103,7 +103,7 @@ a.pdxRow:hover{
 .pdxRow__save:hover{ color:var(--neon-magenta); }
 .pdxRow__save:active{ transform:scale(.85); }
 .pdxRow__save[aria-pressed="true"]{ color:var(--neon-magenta); }
-/* Claim sticker — LIVE standard (docs/LIVE_DESIGN_STANDARD.md) */
+/* Claim sticker - LIVE standard (docs/LIVE_DESIGN_STANDARD.md) */
 .pdxRow__claim{
   font-family:var(--font-display); font-weight:700; font-size:.58rem;
   letter-spacing:.07em; text-transform:uppercase; line-height:1.3;

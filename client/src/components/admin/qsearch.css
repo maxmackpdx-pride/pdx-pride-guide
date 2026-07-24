@@ -1,7 +1,7 @@
 .qsearch {
   --qs-orange: #ff6600;
   --qs-lime: #c8fa3c;
-  --qs-yellow: #ccff00; /* neon "go" — filled primary actions */
+  --qs-yellow: #ccff00; /* neon "go" - filled primary actions */
   --qs-cyan: #19e3ff;
   --qs-pink: #ff00cc;
   --qs-violet: #6e3dff;
@@ -65,7 +65,7 @@
   font-weight: 600;
 }
 
-/* Signature rainbow seam — flowing spine along the hero's bottom edge */
+/* Signature rainbow seam - flowing spine along the hero's bottom edge */
 .qsearch__seam {
   height: 2px;
   margin: 0 -1.5rem;
@@ -655,7 +655,7 @@ button.qsearch__stat.is-active {
   -webkit-box-orient: vertical;
 }
 
-/* Square brand tile — directory neon logos, not circular avatars */
+/* Square brand tile - directory neon logos, not circular avatars */
 .qsearch__cand-logo {
   width: 88px;
   height: 88px;
@@ -1474,7 +1474,7 @@ button.qsearch__stat.is-active {
     padding: 0.5rem 0.6rem;
   }
 
-  /* Series picker options already stack — just enlarge tap area */
+  /* Series picker options already stack - just enlarge tap area */
   .qsearch__series-opt {
     min-height: 44px;
     padding: 0.65rem 0.7rem;
@@ -1522,7 +1522,7 @@ button.qsearch__stat.is-active {
   border-radius: 4px;
 }
 
-/* Primary queue action (Approve / Read flyer) — filled neon-yellow pill */
+/* Primary queue action (Approve / Read flyer) - filled neon-yellow pill */
 .qsearch__toolbar button.is-primary {
   border-color: var(--qs-yellow);
   background: var(--qs-yellow);

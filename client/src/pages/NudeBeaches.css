@@ -1,4 +1,4 @@
-/* Nude Beaches — tab-scoped wireframe (live strip → logistics → checklist → links) */
+/* Nude Beaches - tab-scoped wireframe (live strip → logistics → checklist → links) */
 
 /* ---- ANIMATIONS (Delta #2: Motion/DS Polish) ---- */
 @keyframes board-hero-in {
@@ -124,7 +124,7 @@
   margin-left: 8px;
 }
 
-/* Live metrics — always a horizontal strip, never mixed with prose blocks */
+/* Live metrics - always a horizontal strip, never mixed with prose blocks */
 .nude-live-strip {
   display: grid;
   gap: 12px;
@@ -439,29 +439,29 @@
   line-height: 1.45;
 }
 
-/* Tab body only — hide inactive panel from layout/a11y */
+/* Tab body only - hide inactive panel from layout/a11y */
 .nude-tab-panel[hidden] {
   display: none !important;
 }
 
-/* Map + hub row — board-standard layout (matches Events) */
+/* Map + hub row - board-standard layout (matches Events) */
 .nude-beaches-page .nude-beaches-map-row .events-map-row__panel .nb-hub {
   height: 100%;
   min-height: 0;
   max-height: clamp(440px, 52vh, 600px);
 }
 
-/* Beach map wrap — OLED framed card (beach map SoT) */
+/* Beach map wrap - OLED framed card (beach map SoT) */
 .nude-beaches-page .nude-beaches-map {
   border: 1px solid #000;
   border-radius: 16px;
   overflow: hidden;
   background: var(--map-surface-bg, #06060a);
-  /* Deboss only — no outer accent bloom */
+  /* Deboss only - no outer accent bloom */
   box-shadow: var(--map-frame-shadow);
 }
 
-/* Explicit map height — avoid height:100% chain that collapses on mobile stack layout */
+/* Explicit map height - avoid height:100% chain that collapses on mobile stack layout */
 .nude-beaches-page .nude-beaches-map__canvas {
   height: clamp(380px, 48vh, 520px);
   min-height: 320px;
@@ -472,7 +472,7 @@
   box-shadow: var(--map-frame-shadow);
 }
 
-/* Beach map label chip — medium corner badge (between oversized / too-tiny) */
+/* Beach map label chip - medium corner badge (between oversized / too-tiny) */
 .nude-beaches-page .nude-beaches-map__chip {
   position: absolute;
   top: 10px;
@@ -569,7 +569,7 @@
   }
 }
 
-/* Header — tabs align with lede last line, just above stats band */
+/* Header - tabs align with lede last line, just above stats band */
 .nude-beaches-header {
   max-width: 1180px;
   margin: 0 auto;
@@ -633,12 +633,12 @@
 
 /* ---- ANIMATION APPLICATIONS (entrance + motion) ---- */
 
-/* Hero entrance — fade + rise over 0.48s */
+/* Hero entrance - fade + rise over 0.48s */
 .nude-beaches-hero-row {
   animation: board-hero-in 0.48s var(--ease-out);
 }
 
-/* Stats band entrance — delayed by 0.07s, same motion.
+/* Stats band entrance - delayed by 0.07s, same motion.
    Counter bar: pre-bloom strip (solid #1c1c22 edges, no cyan glass glow). */
 .nude-beaches-page .board-stats-band {
   --stats-bloom: 0;
@@ -662,7 +662,7 @@
   border-right: 2px solid #1c1c22;
 }
 
-/* Live metric tiles — resting bloom is glass; pdxPulse demoted to hover */
+/* Live metric tiles - resting bloom is glass; pdxPulse demoted to hover */
 .nude-live-card {
   --dc: var(--c, #19e3ff);
 }
@@ -671,18 +671,18 @@
   filter: brightness(1.06) saturate(1.06);
 }
 
-/* Live LIVE NOW kicker — gentle blink */
+/* Live LIVE NOW kicker - gentle blink */
 .board-active-feed__kicker {
   animation: pdxBlink 2.5s ease-in-out infinite;
 }
 
-/* Live status indicator dot — blink pulse */
+/* Live status indicator dot - blink pulse */
 .board-stats-bar__dot,
 .board-stats-band__dot {
   animation: pdxBlink 1.2s ease-in-out infinite;
 }
 
-/* Footer seam — gentle glow pulse */
+/* Footer seam - gentle glow pulse */
 .nude-beaches-page .board-close-seam {
   animation: pdxSeamGlow 3s ease-in-out infinite;
 }
@@ -742,7 +742,7 @@ html.calm-mode .board-close-seam {
 }
 
 /* Beach buttons: island accent only (orange Rooster / green Sauvie).
-   Soft charcoal+tint edge — never cyan, never solid neon border. */
+   Soft charcoal+tint edge - never cyan, never solid neon border. */
 .nude-map-btn {
   --c: var(--nb-accent, #ff6600);
   display: inline-flex;
@@ -797,7 +797,7 @@ html.calm-mode .board-close-seam {
 }
 
 /* ===================================================================
-   Trip-logistics section (.nb-log-*) — Sauvie + Rooster bottom half
+   Trip-logistics section (.nb-log-*) - Sauvie + Rooster bottom half
    =================================================================== */
 .nb-log__kicker {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -919,7 +919,7 @@ html.calm-mode .board-close-seam {
 }
 .nb-log-step__link:hover { text-decoration: underline; }
 
-/* Rule tiles (checkmark) — top-rim green; keep left accent stripe */
+/* Rule tiles (checkmark) - top-rim green; keep left accent stripe */
 .nb-log-rule {
   --c: #39ff14;
   --nb-rim: #39ff14;
@@ -1104,7 +1104,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
   border-bottom-color: #39ff14;
 }
 
-/* Sauvie stats — green for swim + air; wind stays cyan */
+/* Sauvie stats - green for swim + air; wind stays cyan */
 .nude-beaches-page--sauvie .board-stats-band__num {
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -1134,7 +1134,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Islands · Nude Beaches — top-rim neon only (10-islands.png)
+   Islands · Nude Beaches - top-rim neon only (10-islands.png)
      Rooster → orange #FF6600 · Sauvie → green #39FF14
      River level → cyan #19E3FF top rim
    Discrete stacked islands; no full-perimeter bloom shell.
@@ -1186,7 +1186,7 @@ html.calm-mode .nude-beaches-map__chip-dot {
   --dir-gm: 28;
 }
 
-/* Hub wrapper is transparent stack — islands are .nb-hub__section */
+/* Hub wrapper is transparent stack - islands are .nb-hub__section */
 .nude-beaches-page .nb-hub {
   background: transparent !important;
   border: none !important;
@@ -1319,7 +1319,7 @@ html.calm-mode .nude-map-btn--primary {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Beach page buttons — no cyan, no solid neon borders
+   Beach page buttons - no cyan, no solid neon borders
    Rooster → orange #FF6600 · Sauvie → green #39FF14
    ═══════════════════════════════════════════════════════════ */
 
@@ -1436,7 +1436,7 @@ html.calm-mode .nude-map-btn--primary {
   box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* River Brats primary / send — glass fill, black rim, no outer bloom */
+/* River Brats primary / send - glass fill, black rim, no outer bloom */
 .nude-beaches-page .rb-checkin__primary,
 .nude-beaches-page .rb-checkin__plan-next-btn,
 .nude-beaches-page .rb-group-chat__send {

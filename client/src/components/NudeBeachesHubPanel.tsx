@@ -88,17 +88,17 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
             <span className="nb-hub__weather-value">
-              {live.airTempF != null ? `${live.airTempF}°F` : "—"}
+              {live.airTempF != null ? `${live.airTempF}°F` : "-"}
             </span>
             <span className="nb-hub__weather-label">Air temp</span>
           </div>
           <div className="nb-hub__weather-stat">
-            <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
+            <span className="nb-hub__weather-stat-value">{live.wind || "-"}</span>
             <span className="nb-hub__weather-stat-label">Wind</span>
           </div>
           <div className="nb-hub__weather-stat nb-hub__weather-stat--water">
             <span className="nb-hub__weather-stat-value">
-              {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "—"}
+              {live.waterTempF != null ? `${Math.round(live.waterTempF)}°F` : "-"}
             </span>
             <span className="nb-hub__weather-stat-label">
               Water{live.waterTempSite ? " · Warrendale" : ""}
@@ -106,7 +106,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           </div>
           <div className="nb-hub__weather-stat">
             <span className="nb-hub__weather-stat-value">
-              {live.airQuality?.split(" · ")[0] || "—"}
+              {live.airQuality?.split(" · ")[0] || "-"}
             </span>
             <span className="nb-hub__weather-stat-label">Air quality</span>
           </div>
@@ -129,7 +129,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           {live.crossingBand ? <span className="nb-hub__badge">{live.crossingBand}</span> : null}
         </div>
         <div className="nb-hub__level-value">
-          {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "—"}
+          {live.riverLevelFt != null ? live.riverLevelFt.toFixed(2) : "-"}
           <span className="nb-hub__level-unit">ft</span>
         </div>
         <p className="nb-hub__level-detail">
@@ -139,14 +139,14 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
           <div>
             <span className="nb-hub__range-label">Today&apos;s low</span>
             <span className="nb-hub__range-value">
-              {live.todayLowFt != null ? `${live.todayLowFt.toFixed(2)} ft` : "—"}
+              {live.todayLowFt != null ? `${live.todayLowFt.toFixed(2)} ft` : "-"}
               {lowTime ? ` · ${lowTime}` : ""}
             </span>
           </div>
           <div>
             <span className="nb-hub__range-label">Today&apos;s high</span>
             <span className="nb-hub__range-value">
-              {live.todayHighFt != null ? `${live.todayHighFt.toFixed(2)} ft` : "—"}
+              {live.todayHighFt != null ? `${live.todayHighFt.toFixed(2)} ft` : "-"}
               {highTime ? ` · ${highTime}` : ""}
             </span>
           </div>
@@ -184,17 +184,17 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
             <span className="nb-hub__weather-value">
-              {live.airTempF != null ? `${live.airTempF}°F` : "—"}
+              {live.airTempF != null ? `${live.airTempF}°F` : "-"}
             </span>
             <span className="nb-hub__weather-label">Air temp</span>
           </div>
           <div className="nb-hub__weather-stat">
-            <span className="nb-hub__weather-stat-value">{live.wind || "—"}</span>
+            <span className="nb-hub__weather-stat-value">{live.wind || "-"}</span>
             <span className="nb-hub__weather-stat-label">Wind</span>
           </div>
           <div className="nb-hub__weather-stat">
             <span className="nb-hub__weather-stat-value">
-              {live.forecastDays?.[0]?.highF != null ? `${live.forecastDays[0].highF}°F` : "—"}
+              {live.forecastDays?.[0]?.highF != null ? `${live.forecastDays[0].highF}°F` : "-"}
             </span>
             <span className="nb-hub__weather-stat-label">
               {live.forecastDays?.[0]?.name ? `${live.forecastDays[0].name} high` : "Day high"}
@@ -202,7 +202,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
           </div>
           <div className="nb-hub__weather-stat">
             <span className="nb-hub__weather-stat-value">
-              {live.parkingStatusLabel || "—"}
+              {live.parkingStatusLabel || "-"}
             </span>
             <span className="nb-hub__weather-stat-label">Parking</span>
           </div>
@@ -220,7 +220,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
             className="nb-hub__swim-value"
             style={{ color: swimColor, textShadow: `0 0 22px ${swimColor}59` }}
           >
-            {swimLabel || "—"}
+            {swimLabel || "-"}
           </span>
           {live.lastSampleAt ? (
             <span className="nb-hub__swim-sampled">sampled {live.lastSampleAt}</span>
@@ -239,7 +239,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         <div className="nb-hub__kicker">Parking permits</div>
         <p className="nb-hub__summary">
           {live.parkingNote ||
-            "Mandatory on summer weekends through Labor Day. Buy a daily day pass online — seasonal sold-out is not the same as day passes gone."}
+            "Mandatory on summer weekends through Labor Day. Buy a daily day pass online - seasonal sold-out is not the same as day passes gone."}
         </p>
         <a className="nb-hub__link" href={SAUVIE_ISLAND_PARKING_URL} target="_blank" rel="noopener noreferrer">
           Sauvie Island Parking →

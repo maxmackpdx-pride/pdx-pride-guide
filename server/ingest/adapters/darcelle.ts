@@ -1,5 +1,5 @@
 /**
- * Darcelle XV Showplace — The Events Calendar (Tribe) REST, ICS fallback.
+ * Darcelle XV Showplace - The Events Calendar (Tribe) REST, ICS fallback.
  *
  * Primary: https://darcellexv.com/wp-json/tribe/events/v1/events
  *   - per-event `image.url` flyers (full sizes via image.sizes)
@@ -7,7 +7,7 @@
  * Fallback: https://darcellexv.com/events/?ical=1 (ICS with ATTACH flyers)
  *
  * Policy: iconic drag showplace / cabaret. Evening shows are 21+; some
- * matinee/brunch shows admit younger with guardian — we default 21_PLUS
+ * matinee/brunch shows admit younger with guardian - we default 21_PLUS
  * (conservative, restrictive direction) and leave a verify breadcrumb for
  * Review. Never invent FREE.
  */
@@ -22,7 +22,7 @@ import { inferAdmissionFromText } from "../admissionInfer";
 const DARCELLE_VENUE = "Darcelle XV Showplace";
 const DARCELLE_ADDRESS = "208 NW 3rd Ave, Portland, OR";
 const DARCELLE_NEIGHBORHOOD = "Old Town";
-/** Conservative default — reviewer downgrades for all-ages/brunch shows. */
+/** Conservative default - reviewer downgrades for all-ages/brunch shows. */
 const DARCELLE_AGE = "21_PLUS" as const;
 const DARCELLE_ICS_FALLBACK = "https://darcellexv.com/events/?ical=1";
 
@@ -36,7 +36,7 @@ const MAX_TRIBE_PAGES = 4;
 export function applyDarcellePolicy(draft: IngestEventDraft): IngestEventDraft {
   const adm = inferAdmissionFromText(draft.title, draft.description);
   // Never invent FREE: keep meaningful upstream values (demoting unconfirmed
-  // FREE); when upstream had no signal (UNKNOWN), trust text inference — FREE
+  // FREE); when upstream had no signal (UNKNOWN), trust text inference - FREE
   // only survives when the listing text clearly says so.
   const admission =
     draft.admission && draft.admission !== "UNKNOWN" && draft.admission !== "ALL_AGES"
@@ -60,7 +60,7 @@ export function applyDarcellePolicy(draft: IngestEventDraft): IngestEventDraft {
     warnings: Array.from(
       new Set([
         ...(draft.warnings || []),
-        "Age defaulted to 21_PLUS (Darcelle evening shows) — verify for all-ages/brunch shows",
+        "Age defaulted to 21_PLUS (Darcelle evening shows) - verify for all-ages/brunch shows",
         ...(adm.reason ? [adm.reason] : []),
       ]),
     ),
@@ -132,12 +132,12 @@ export async function fetchDarcelleDrafts(
           drafts = parseIcs(fetched.body, fetched.url || icsUrl).map(d => ({
             ...d,
             warnings: Array.from(
-              new Set([...(d.warnings || []), "Tribe REST empty — ICS fallback used"]),
+              new Set([...(d.warnings || []), "Tribe REST empty - ICS fallback used"]),
             ),
           }));
         }
       } catch {
-        /* both paths failed — return empty, sync records the error */
+        /* both paths failed - return empty, sync records the error */
       }
     }
   }

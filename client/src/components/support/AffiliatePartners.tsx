@@ -1,6 +1,6 @@
 import "./support.css";
 
-/** Exact affiliate destinations — do not alter path or query. */
+/** Exact affiliate destinations - do not alter path or query. */
 export const AFFILIATE_PARTNER_URLS = {
   cockblock: "https://cockblocktoys.com/tucker060",
   mrs: "https://www.mr-s-leather.com/?acc=TUCKERMAX",
@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * Partner brand affiliate tiles — cyan left accent + neutral glass glow.
+ * Partner brand affiliate tiles - cyan left accent + neutral glass glow.
  * Logos sit on #050506 wells. Promo sticker on CockBlock only.
  */
 export default function AffiliatePartners({ className = "" }: Props) {

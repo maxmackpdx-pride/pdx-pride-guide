@@ -10,3 +10,4 @@ dist/
 # data.db is intentionally tracked until prod uses a persistent volume.
 .design-handoff/
 .design-handoff-tmp/
+**/.DS_Store

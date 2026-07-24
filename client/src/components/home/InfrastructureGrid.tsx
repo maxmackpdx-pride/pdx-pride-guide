@@ -1,5 +1,5 @@
 /**
- * Infrastructure Grid — 2×2 deep-glass left-accent cards.
+ * Infrastructure Grid - 2×2 deep-glass left-accent cards.
  *
  * SoT: docs/handoffs/deep-glass-2026-07-16/ §2.11
  *      screenshots/12-infrastructure-grid.png
@@ -16,7 +16,7 @@ export type InfraCard = {
   href: string;
   title: string;
   description: string;
-  /** Per-card accent — drives --c for glass fill / edge / left bar */
+  /** Per-card accent - drives --c for glass fill / edge / left bar */
   accent: string;
 };
 

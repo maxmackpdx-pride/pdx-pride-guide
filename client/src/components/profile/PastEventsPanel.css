@@ -40,7 +40,7 @@
   pointer-events: none;
 }
 
-/* Day color gradient over poster — reduced ~30%, still a real wash */
+/* Day color gradient over poster - reduced ~30%, still a real wash */
 .pp-past-events__scrim {
   position: absolute;
   inset: 0;

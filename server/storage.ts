@@ -358,7 +358,7 @@ function ensureGigPostsSchema() {
   if (!colNames.has("is_remote")) addColumn(`ALTER TABLE gig_posts ADD COLUMN is_remote INTEGER DEFAULT 0`);
   if (!colNames.has("admin_notes")) addColumn(`ALTER TABLE gig_posts ADD COLUMN admin_notes TEXT`);
 
-  // Gigs post live without admin approval — promote any legacy PENDING rows.
+  // Gigs post live without admin approval - promote any legacy PENDING rows.
   try {
     sqlite.exec(`UPDATE gig_posts SET status = 'LIVE' WHERE UPPER(status) = 'PENDING'`);
   } catch {
@@ -623,7 +623,7 @@ function ensureHubFeedPostsSchema() {
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_user_idx ON hub_feed_posts(user_id)`);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS hub_feed_posts_created_idx ON hub_feed_posts(created_at)`);
-    // "Post as" identity — added after launch, so backfill onto existing tables.
+    // "Post as" identity - added after launch, so backfill onto existing tables.
     const cols = new Set(
       (sqlite.prepare(`PRAGMA table_info(hub_feed_posts)`).all() as { name: string }[]).map((c) => c.name),
     );
@@ -982,7 +982,7 @@ function ensureEventTalentSchema() {
     `);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_event_idx ON event_talent(event_id)`);
     sqlite.exec(`CREATE INDEX IF NOT EXISTS event_talent_status_idx ON event_talent(status)`);
-    // Talent self-tags go live without approval — clear legacy queue.
+    // Talent self-tags go live without approval - clear legacy queue.
     sqlite.exec(`UPDATE event_talent SET status = 'LIVE' WHERE status = 'PENDING'`);
   } catch (e) {
     console.error("[event_talent] schema migration failed:", e);
@@ -999,7 +999,7 @@ function ensureMissedConnectionsSchema() {
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_notes TEXT`);
     if (!names.has("admin_reviewed")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN admin_reviewed INTEGER DEFAULT 0`);
     if (!names.has("beach_id")) sqlite.exec(`ALTER TABLE missed_connections ADD COLUMN beach_id TEXT`);
-    // Spotted is public without approval — mark existing live posts reviewed so nothing sits in a fake queue.
+    // Spotted is public without approval - mark existing live posts reviewed so nothing sits in a fake queue.
     try {
       sqlite.exec(`UPDATE missed_connections SET admin_reviewed = 1 WHERE status = 'ACTIVE' AND (admin_reviewed IS NULL OR admin_reviewed = 0)`);
     } catch {
@@ -1051,7 +1051,7 @@ function ensureRiverBratsSchema() {
     `);
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN is_anonymous INTEGER NOT NULL DEFAULT 0`); } catch (e) {}
     // GPS presence: 'PLANNED' (picked an arrival hour) → 'HERE' (location-verified
-    // on the beach). Raw coordinates are never persisted — only this state flag
+    // on the beach). Raw coordinates are never persisted - only this state flag
     // and the verification timestamp.
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN presence TEXT NOT NULL DEFAULT 'PLANNED'`); } catch (e) {}
     try { sqlite.exec(`ALTER TABLE beach_checkins ADD COLUMN gps_verified_at TEXT`); } catch (e) {}
@@ -1142,7 +1142,7 @@ function ensureGiftingPostsSchema() {
     const cols = sqlite.prepare(`PRAGMA table_info(gifting_posts)`).all() as Array<{ name: string }>;
     const names = new Set(cols.map(c => c.name));
     if (!names.has("admin_notes")) sqlite.exec(`ALTER TABLE gifting_posts ADD COLUMN admin_notes TEXT`);
-    // Gifting posts go live without admin approval — promote legacy PENDING rows.
+    // Gifting posts go live without admin approval - promote legacy PENDING rows.
     sqlite.exec(`UPDATE gifting_posts SET status = 'LOOKING' WHERE UPPER(status) = 'PENDING' AND UPPER(post_type) = 'ISO'`);
     sqlite.exec(`UPDATE gifting_posts SET status = 'OPEN' WHERE UPPER(status) = 'PENDING'`);
   } catch (e) {
@@ -1203,7 +1203,7 @@ function seedData() {
       (hasLegacySeed && (!isProduction || allowReseed)) ||
       needsDevRepair;
     if (needsReseed) {
-      // Only replace admin seed events — never wipe user gigs, claims, or submissions.
+      // Only replace admin seed events - never wipe user gigs, claims, or submissions.
       sqlite.exec(`
         DELETE FROM attendances
         WHERE event_id IN (
@@ -1329,7 +1329,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Stank Yes Coach — PDX PRIDE",
+      title: "Stank Yes Coach - PDX PRIDE",
       description: "Sports-themed party with DJs JUMPR, Bro Hoe, Lake Everett, Spencer Stanks, Tucker Max. Leather community sponsors. Hosted by Tucker Max and Spencer Stanks.",
       venueName: "Sanctuary Club",
       address: "33 NW 9th Ave, Portland, OR 97209",
@@ -1383,7 +1383,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Pride in Demand — Portland Queer Takeover — Night 1",
+      title: "Pride in Demand - Portland Queer Takeover - Night 1",
       description: "Night 1 of DotGay's Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Friday July 17, 2026 at 9pm.",
       venueName: "Star Theater and Starlight Lounge",
       address: "13 NW 6th Ave, Portland, OR 97209",
@@ -1470,7 +1470,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Bearracuda Pride Friday — Vaseline Alley",
+      title: "Bearracuda Pride Friday - Vaseline Alley",
       description: "Theme: VASELINE ALLEY. Harnesses, jockstraps, and fetish gear encouraged. DJs Matt Consola (PDX) + Cactuhead (UK). Hosted by Matt Bearracuda & JP Hardy. $28. Venmo tickets at will call.",
       venueName: "722 E Burnside",
       address: "722 E Burnside St, Portland, OR 97214",
@@ -1544,7 +1544,7 @@ function seedData() {
       address: "SW 3rd Ave & SW Morrison St, Portland, OR 97204",
       neighborhood: "Downtown",
       lat: 45.520091, lng: -122.677007,
-      // Cap through Pride Sunday only — never expand onto Mon Jul 20.
+      // Cap through Pride Sunday only - never expand onto Mon Jul 20.
       dateStart: "2026-07-17T17:00:00", dateEnd: "2026-07-19T20:00:00",
       dayOfWeek: "FRI",
       ageRequirement: "21_PLUS",
@@ -1709,7 +1709,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "I Do at Darcelle's — Mass Wedding",
+      title: "I Do at Darcelle's - Mass Wedding",
       description: "Free outdoor public event at the newly opened Darcelle XV Plaza. Celebrate love at Portland's new queer landmark. All are welcome. Free admission.",
       venueName: "Darcelle XV Plaza",
       address: "800 SW Harvey Milk St, Portland, OR 97205",
@@ -1947,7 +1947,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Pride in Demand — Portland Queer Takeover — Night 2",
+      title: "Pride in Demand - Portland Queer Takeover - Night 2",
       description: "Night 2 of the Pride in Demand takeover. Organized by DotGay. Queer superhero theme. Star Theater and Starlight Lounge.",
       venueName: "Star Theater and Starlight Lounge",
       address: "13 NW 6th Ave, Portland, OR 97209",
@@ -1964,7 +1964,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Ankeny Alley Pride Block Party — Sunday",
+      title: "Ankeny Alley Pride Block Party - Sunday",
       description: "Day 2 of the official PrideNW block party in Old Town's Ankeny Alley. Local vendors, community gathering. Free and all ages.",
       venueName: "Ankeny Alley",
       address: "SW Ankeny St, Portland, OR 97204",
@@ -1981,7 +1981,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Portland Pride Drag Brunch at Stag PDX — Sunday",
+      title: "Portland Pride Drag Brunch at Stag PDX - Sunday",
       description: "Day 2 of the all-ages drag brunch at Stag PDX in the Pearl District. Performances, mimosas, and Pride energy.",
       venueName: "Stag PDX",
       address: "317 NW Broadway, Portland, OR 97209",
@@ -1998,7 +1998,7 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Fresh Paint — Weekly Open-Call Drag Showcase",
+      title: "Fresh Paint - Weekly Open-Call Drag Showcase",
       description: "Weekly Monday drag showcase at Badlands. Hosted by @theriodiehl, new talent plus a dance party after. Runs through Pride Month. No cover before 9PM.",
       venueName: "Badlands Portland",
       address: "110 NW Broadway, Portland, OR 97209",
@@ -2112,7 +2112,7 @@ function seedData() {
     }
   }
 
-  // Seed one real-looking gig (LOOKING_FOR_WORK only — let real users post gigs)
+  // Seed one real-looking gig (LOOKING_FOR_WORK only - let real users post gigs)
   insertGigPostCompat({
     postType: "LOOKING_FOR_WORK", title: "Sound Tech & DJ Available Pride Weekend",
     name: "DJ Queerwave", contactEmail: "djqueerwave@example.com",
@@ -2195,8 +2195,8 @@ function applyVerifiedEventOverrides() {
     description: "Official PrideNW Old Town activation. Unstoppable joy, radical love, and Pride weekend community energy in and around Ankeny Alley.",
     eventTypes: JSON.stringify(["BLOCK-PARTY", "OFFICIAL", "FREE", "OUTDOOR"]),
   });
-  runTitle("Ankeny Alley Pride Block Party — Sunday", {
-    newTitle: "Old Town Block Party — Sunday",
+  runTitle("Ankeny Alley Pride Block Party - Sunday", {
+    newTitle: "Old Town Block Party - Sunday",
     description: "Official PrideNW Old Town activation. Unstoppable joy, radical love, and Pride weekend community energy in and around Ankeny Alley.",
     eventTypes: JSON.stringify(["BLOCK-PARTY", "OFFICIAL", "FREE", "OUTDOOR"]),
   });
@@ -2271,28 +2271,28 @@ function applyVerifiedEventOverrides() {
     venueName: "Sanctuary Club",
     description: "Bearracuda's Pride Friday kick-off at Sanctuary Club. DJ TIGERBEATZ from Seattle, hosted by JP Hardy. Wristband color system at the door: red=top, blue=vers, green=bottom, white=side. Venmo tickets available with no surcharge.",
   });
-  runTitle("Bearracuda Pride Friday — Vaseline Alley", {
+  runTitle("Bearracuda Pride Friday - Vaseline Alley", {
     description: "Bearracuda Pride Friday at 722 E Burnside. Theme: VASELINE ALLEY. Harnesses and fetish gear encouraged.",
   });
   sqlite.prepare(`
     UPDATE events SET
       status = 'HIDDEN',
       admin_notes = 'Duplicate/old Friday listing. Confirmed 2026 Pride in Demand listing is Saturday July 18 at Star Theater.'
-    WHERE title = 'Pride in Demand — Portland Queer Takeover'
+    WHERE title = 'Pride in Demand - Portland Queer Takeover'
       AND date_start = '2026-07-17T21:00:00'
   `).run();
   sqlite.prepare(`
     UPDATE events SET
-      title = 'Pride in Demand — Portland Queer Takeover',
+      title = 'Pride in Demand - Portland Queer Takeover',
       description = 'DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Confirmed Saturday July 18, 2026 at 9pm. Ticket range reported at $31-$134. This is Night 2 of 2. Night 1 is Friday July 17, 2026 9:00 PM.',
       ticket_url = 'https://www.startheaterportland.com/tm-event/pride-in-demand-portland-queer-takeover/',
       event_types = '["PARTY","TAKEOVER","MULTI-DAY"]',
       status = 'LIVE'
-    WHERE (title = 'Pride in Demand — Portland Queer Takeover — Night 2'
-      OR title = 'Pride in Demand — Portland Queer Takeover')
+    WHERE (title = 'Pride in Demand - Portland Queer Takeover - Night 2'
+      OR title = 'Pride in Demand - Portland Queer Takeover')
       AND date_start = '2026-07-18T21:00:00'
   `).run();
-  runTitle("Stank Yes Coach — PDX PRIDE", {
+  runTitle("Stank Yes Coach - PDX PRIDE", {
     description: "Yes Coach / Stank Pride party at Sanctuary Club. Hosted by Tucker Max and Spencer Stanks. DJs: JUMPR, Bro Hoe, Lake Everett, Spencer Stanks, and Tucker Max.",
   });
   runTitle("Gay Witch Appreciation Day + Pride at Seagrape", {
@@ -2302,7 +2302,7 @@ function applyVerifiedEventOverrides() {
     description: "Portland Pride Drag Brunch at Stag PDX. Confirmed Saturday July 18, 2026 at 11am. Ticket range reported at $45-$150.",
     ageRequirement: "21_PLUS",
   });
-  runTitle("Portland Pride Drag Brunch at Stag PDX — Sunday", {
+  runTitle("Portland Pride Drag Brunch at Stag PDX - Sunday", {
     description: "Portland Pride Drag Brunch at Stag PDX. Confirmed Sunday July 19, 2026 at 11am. Ticket range reported at $40-$150.",
     ageRequirement: "21_PLUS",
   });
@@ -2353,8 +2353,8 @@ function applyVerifiedEventOverrides() {
   runTitle("Yes Sir Gay Dance Party", {
     description: "Secret warehouse gay underwear night at REALM PDX featuring DJ Ottogyro. Location details revealed to ticket holders only.",
   });
-  runTitle("Twirl! PDX Queer Disco — Pride Edition (HOLD)", {
-    newTitle: "Twirl! PDX Queer Disco — Pride Edition (2025 Hold)",
+  runTitle("Twirl! PDX Queer Disco - Pride Edition (HOLD)", {
+    newTitle: "Twirl! PDX Queer Disco - Pride Edition (2025 Hold)",
     description: "Hold listing only: this was a July 20, 2025 event. No 2026 date has been announced.",
     dateStart: "2025-07-20T15:00:00",
     dateEnd: "2025-07-20T22:30:00",
@@ -2397,13 +2397,13 @@ function removePrePrideWeekEvents() {
   sqlite.prepare(`
     UPDATE events SET
       status = 'HIDDEN',
-      admin_notes = 'Hidden: pre-Pride Week listing — Portland Pride Week starts Jul 13, 2026'
+      admin_notes = 'Hidden: pre-Pride Week listing - Portland Pride Week starts Jul 13, 2026'
     WHERE date_start < '2026-07-13'
       AND status = 'LIVE'
   `).run();
 }
 
-/** PDX PAH Barking Chain — July 2026 Happy Pahride newsletter (admin_seeded, claimable). */
+/** PDX PAH Barking Chain - July 2026 Happy Pahride newsletter (admin_seeded, claimable). */
 function seedPdxPahJuly2026Events() {
   const now = new Date().toISOString();
   const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
@@ -2473,7 +2473,7 @@ function seedPdxPahJuly2026Events() {
   });
 
   insert({
-    title: "The Pahvillion — PDX PAH at Waterfront Pride Festival",
+    title: "The Pahvillion - PDX PAH at Waterfront Pride Festival",
     description:
       "Hang with the puppies at Pride Weekend. PDX PAH hosts booths #7 and #8 at Tom McCall Waterfront Park with Portland Sisters of Perpetual Indulgence, Quirky Witches, Animal Expressants of a Different Breed, and elected officials. Snacks, drinks, headpats, and a cool-down from the heat. Henna and handcrafted dupatta sales from Amrapali Boutique on behalf of the Sisters.",
     venueName: "Tom McCall Waterfront Park, PDX PAH Booths 7 & 8",
@@ -2563,7 +2563,7 @@ function seedPdxPahJuly2026Events() {
   });
 
   insert({
-    title: "OSLC Info Session — So You Want to Be a Titleholder?",
+    title: "OSLC Info Session - So You Want to Be a Titleholder?",
     description:
       "Virtual info session for anyone curious about becoming an Oregon State Leather titleholder. July session via Google Meet, links on the OSLC calendar. Additional sessions run through July 19.",
     venueName: "Virtual (Google Meet)",
@@ -2592,7 +2592,7 @@ function seedPdxPahJuly2026Events() {
     adminNotes: "From PDX PAH Barking Chain July 2026 newsletter. Wed Jul 15 7pm session.",
   });
 
-  // Oregon State Leather Contest (Aug 7–9) intentionally not seeded — post-Pride week cap.
+  // Oregon State Leather Contest (Aug 7–9) intentionally not seeded - post-Pride week cap.
 }
 
 /** Camp Bar PDX full Pride Week 2026 schedule (Mon Jul 13 – Sun Jul 19).
@@ -2811,7 +2811,7 @@ function seedMissingWweekPrideEvents2026() {
   });
 
   insert({
-    title: "Purple Rain — Queer Pop-Up Strip Club",
+    title: "Purple Rain - Queer Pop-Up Strip Club",
     description:
       "Queer pop-up strip club Purple Rain turns Buckman queer bar Peacock PDX (former Crush Bar) into an all-gender pole-dancing palace for Pride weekend.",
     venueName: "Peacock PDX",
@@ -2994,7 +2994,7 @@ function hardDeleteEventIds(ids: number[]) {
 /**
  * Until Jul 19 2026 6pm Pacific: no live listings after Pride Sunday.
  * Runs every boot so seeds cannot revive post-Pride nights early.
- * After the unlock, this is a no-op — post-Pride events stay.
+ * After the unlock, this is a no-op - post-Pride events stay.
  * Multi-day events that spill past Jul 19 are clipped (not deleted) while locked.
  */
 function prunePostPrideWeekEvents() {
@@ -3008,7 +3008,7 @@ function prunePostPrideWeekEvents() {
 
   // Clip multi-day spans so they do not expand onto Mon Jul 20+ (e.g. Midtown).
   // Overnight parties that end before noon Mon can keep early-morning end times
-  // under Jul 20T — but festival-style ends on Mon afternoon get cut to Jul 19.
+  // under Jul 20T - but festival-style ends on Mon afternoon get cut to Jul 19.
   const spanRows = sqlite
     .prepare(`
       SELECT id, date_end FROM events
@@ -3045,7 +3045,7 @@ function prunePostPrideWeekEvents() {
 
 /** No-op: post-Pride restores are intentionally dead so events stop reappearing. */
 function restorePrunedPrideEvents() {
-  /* intentionally empty — restore used to re-insert OSLC (Aug) + Midtown Mon hours */
+  /* intentionally empty - restore used to re-insert OSLC (Aug) + Midtown Mon hours */
 }
 
 /** Hard-delete unverified Checking-Portland batch rows (and Purple Rain duplicate). */
@@ -3080,13 +3080,13 @@ function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET
       status = 'HIDDEN',
-      admin_notes = 'Hidden: unverified TBD placeholder — no 2026 Pride details on steamportland.com'
+      admin_notes = 'Hidden: unverified TBD placeholder - no 2026 Pride details on steamportland.com'
     WHERE title = 'Steam Portland Pride Weekend TBD'
   `).run();
   sqlite.prepare(`
     UPDATE events SET
       status = 'HIDDEN',
-      admin_notes = 'Hidden: incorrect stub — Fri is AWOO at 835 N Lombard, Sat is Under Gear; not verified Eagle Pup Night'
+      admin_notes = 'Hidden: incorrect stub - Fri is AWOO at 835 N Lombard, Sat is Under Gear; not verified Eagle Pup Night'
     WHERE title = 'Eagle Portland Pup Night Pride Edition TBD'
   `).run();
   sqlite.prepare(`
@@ -3101,7 +3101,7 @@ function applyEventDataAuditFixes() {
   `).run();
   sqlite.prepare(`
     UPDATE events SET admission = 'DOOR_FEE'
-    WHERE title = 'Stank Yes Coach — PDX PRIDE' AND admission = 'TICKETED'
+    WHERE title = 'Stank Yes Coach - PDX PRIDE' AND admission = 'TICKETED'
   `).run();
   sqlite.prepare(`
     UPDATE events SET poster_image_url = '/posters/stag-pdx-drag-brunch-saturday.jpg'
@@ -3109,7 +3109,7 @@ function applyEventDataAuditFixes() {
   `).run();
   sqlite.prepare(`
     UPDATE events SET poster_image_url = '/posters/stag-pdx-drag-brunch-sunday.jpg'
-    WHERE title = 'Portland Pride Drag Brunch at Stag PDX — Sunday'
+    WHERE title = 'Portland Pride Drag Brunch at Stag PDX - Sunday'
   `).run();
   sqlite.prepare(`
     UPDATE events SET poster_image_url = '/posters/divapalooza-5th-anniversary.jpg'
@@ -3117,7 +3117,7 @@ function applyEventDataAuditFixes() {
   `).run();
   sqlite.prepare(`
     UPDATE events SET
-      title = 'Pride in Demand — Portland Queer Takeover — Night 1',
+      title = 'Pride in Demand - Portland Queer Takeover - Night 1',
       description = 'Night 1 of DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Friday July 17, 2026 at 9pm.',
       poster_image_url = '/posters/pride-in-demand.jpg',
       status = 'LIVE',
@@ -3132,7 +3132,7 @@ function applyEventDataAuditFixes() {
   `).run();
   sqlite.prepare(`
     UPDATE events SET
-      title = 'Pride in Demand — Portland Queer Takeover — Night 2',
+      title = 'Pride in Demand - Portland Queer Takeover - Night 2',
       description = 'Night 2 of DotGay''s Pride in Demand Portland Queer Takeover at Star Theater. Queer superhero theme. Saturday July 18, 2026 at 9pm.',
       poster_image_url = CASE
         WHEN poster_image_url IS NULL OR poster_image_url LIKE '/placeholders/%'
@@ -3148,11 +3148,11 @@ function applyEventDataAuditFixes() {
   sqlite.prepare(`
     UPDATE events SET
       status = 'HIDDEN',
-      admin_notes = 'Duplicate Night 1 row — consolidated to single Friday listing'
-    WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+      admin_notes = 'Duplicate Night 1 row - consolidated to single Friday listing'
+    WHERE title = 'Pride in Demand - Portland Queer Takeover - Night 1'
       AND id NOT IN (
         SELECT MIN(id) FROM events
-        WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+        WHERE title = 'Pride in Demand - Portland Queer Takeover - Night 1'
           AND date_start LIKE '2026-07-17%'
       )
   `).run();
@@ -3257,11 +3257,11 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`
       UPDATE events SET
         status = 'HIDDEN',
-        admin_notes = 'Duplicate Night 1 row — consolidated to single Friday listing'
-      WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+        admin_notes = 'Duplicate Night 1 row - consolidated to single Friday listing'
+      WHERE title = 'Pride in Demand - Portland Queer Takeover - Night 1'
         AND id NOT IN (
           SELECT MIN(id) FROM events
-          WHERE title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+          WHERE title = 'Pride in Demand - Portland Queer Takeover - Night 1'
             AND date_start LIKE '2026-07-17%'
         )
     `).run();
@@ -3305,7 +3305,7 @@ function runBootMigrationsOnce() {
   }
   if (!hasBootMigration("seed_businesses_directory_v3")) {
     const now = new Date().toISOString();
-    // Remove Chelo — closed Dec 19, 2025 after owner's arrest
+    // Remove Chelo - closed Dec 19, 2025 after owner's arrest
     sqlite.prepare(`DELETE FROM businesses WHERE name = 'Chelo'`).run();
     // Fix CC Slaughters instagram (new ownership changed handle)
     sqlite.prepare(`UPDATE businesses SET instagram = '@slaughterspdx', website = 'https://ccslaughterspdx.com' WHERE name = 'CC Slaughters'`).run();
@@ -3761,12 +3761,12 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_plus_psychiatry_v1");
   }
-  // Grand openings: ONLY verified doors-open dates — never "just added to directory".
+  // Grand openings: ONLY verified doors-open dates - never "just added to directory".
   // Clear bad is_new flags from seed/add waves (Hawks, underU, Meet Rack, therapy, etc.).
   if (!hasBootMigration("grand_opening_verified_dates_v1")) {
     try {
       sqlite.prepare(`UPDATE businesses SET is_new = 0, grand_opening_date = NULL`).run();
-      // Camp Bar PDX — verified grand opening Sat Jul 11, 2026 (KOIN / OregonLive / IG).
+      // Camp Bar PDX - verified grand opening Sat Jul 11, 2026 (KOIN / OregonLive / IG).
       sqlite
         .prepare(
           `UPDATE businesses
@@ -3806,7 +3806,7 @@ function runBootMigrationsOnce() {
       name: "Bowery Bagels",
       type: "cafe",
       description:
-        "Portland's premier New York-style handcrafted kosher bagels—boiled & baked fresh daily, with delicious schmears, sandwiches, vegan options, and Stumptown coffee. Active Pride participant with rainbow schmear specials.",
+        "Portland's premier New York-style handcrafted kosher bagels-boiled & baked fresh daily, with delicious schmears, sandwiches, vegan options, and Stumptown coffee. Active Pride participant with rainbow schmear specials.",
       address: "310 NW Broadway",
       neighborhood: "Old Town Chinatown",
       website: "https://www.bowerybagels.com/",
@@ -3925,7 +3925,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("fix_brohoejams_displayname_v2");
   }
 
-  // Sanctuary events were never free — door fee / ticketed only.
+  // Sanctuary events were never free - door fee / ticketed only.
   if (!hasBootMigration("sanctuary_never_free_v1")) {
     sqlite.prepare(`
       UPDATE events
@@ -3949,7 +3949,7 @@ function runBootMigrationsOnce() {
         name: "The Imperial Sovereign Rose Court of Oregon",
         type: "group",
         description:
-          "Portland's Imperial Sovereign Rose Court — the oldest continuously operating court system organization in the world. Coronations, fundraisers, and community service for LGBTQ+ causes across Oregon.",
+          "Portland's Imperial Sovereign Rose Court - the oldest continuously operating court system organization in the world. Coronations, fundraisers, and community service for LGBTQ+ causes across Oregon.",
         address: "Portland, OR",
         neighborhood: "Portland",
         website: "https://rosecourt.org",
@@ -3961,7 +3961,7 @@ function runBootMigrationsOnce() {
         name: "Pink Ponies",
         type: "group",
         description:
-          "Portland queer social and party collective — Western nights, fundraisers, and scene-building collabs (including Yes Coach × Pink Ponies). Community first, boots optional.",
+          "Portland queer social and party collective - Western nights, fundraisers, and scene-building collabs (including Yes Coach × Pink Ponies). Community first, boots optional.",
         address: "Portland, OR",
         neighborhood: "Portland",
         website: null,
@@ -3983,7 +3983,7 @@ function runBootMigrationsOnce() {
 
   // Flyer-confirmed live events: add @brohoejams as DJ + COHOST (idempotent).
   // Archive nights (Locker Room series, Stank 2025, Cozy, Camp Honey, Hyde, Overtime)
-  // are credited via mergeTuckerHostedArchivePast — not rows in event_*.
+  // are credited via mergeTuckerHostedArchivePast - not rows in event_*.
   if (!hasBootMigration("credit_brohoejams_flyer_events_v1")) {
     ensureEventHostsSchema();
     ensureEventTalentSchema();
@@ -4032,7 +4032,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("credit_brohoejams_flyer_events_v1");
   }
 
-  // syncOwnerDisplayName mistakenly renamed granted admins to Tucker_PDmaX — undo + fix Sugar Pill.
+  // syncOwnerDisplayName mistakenly renamed granted admins to Tucker_PDmaX - undo + fix Sugar Pill.
   if (!hasBootMigration("fix_owner_displayname_clobber_v1")) {
     const ownerDisplay = (
       process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX"
@@ -4186,7 +4186,7 @@ function runBootMigrationsOnce() {
     sqlite.prepare(`
       UPDATE events SET
         status = 'HIDDEN',
-        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden as duplicate of Lavender Rain Pride Edition (Gay Barn / Peacock Jul 18) — WW used Purple Rain name.'
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden as duplicate of Lavender Rain Pride Edition (Gay Barn / Peacock Jul 18) - WW used Purple Rain name.'
       WHERE title LIKE 'Purple Rain%'
     `).run();
     recordBootMigration("verify_checking_portland_events_v2");
@@ -4198,13 +4198,13 @@ function runBootMigrationsOnce() {
     const POSTER = "/posters/cc-slaughters-glow-2026.jpg";
     const DJ_LINE =
       "Feat. DJ Robb, DJ Mawmie, Lyta Blunt, Chelsea Starr, DJ Ragnarok, and special guest DJ Pup Sam.";
-    // Thursday (Trans-UHH-Licious) already exists — align it to the poster and
+    // Thursday (Trans-UHH-Licious) already exists - align it to the poster and
     // attach the shared GLOW artwork.
     sqlite.prepare(`
       UPDATE events SET
         poster_image_url = ?,
         admission = 'TICKETED',
-        description = 'GLOW Pride 2026 edition of Trans-Uhh-Licious at CC Slaughters — the residency dedicated to the trans community, hosted by Sheniqua Volt with DJ Robb. Live show 9–11pm. $10 cover. 21+.',
+        description = 'GLOW Pride 2026 edition of Trans-Uhh-Licious at CC Slaughters - the residency dedicated to the trans community, hosted by Sheniqua Volt with DJ Robb. Live show 9–11pm. $10 cover. 21+.',
         admin_notes = COALESCE(admin_notes || ' | ', '') || 'Updated from official CC Slaughters GLOW Pride 2026 poster: $10 cover, DJ Robb, poster attached.'
       WHERE title = 'Trans-UHH-Licious' AND venue_name = 'CC Slaughters'
     `).run(POSTER);
@@ -4245,7 +4245,7 @@ function runBootMigrationsOnce() {
       {
         title: "CC Slaughters GLOW: Pride Party",
         description:
-          "The GLOW Pride Party at CC Slaughters — glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). Earlier: a Gay Cinema Matinee (3–9pm) screening The Birdcage, Fire Island, and To Wong Foo. $20 cover beginning at 8pm. 21+. " +
+          "The GLOW Pride Party at CC Slaughters - glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). Earlier: a Gay Cinema Matinee (3–9pm) screening The Birdcage, Fire Island, and To Wong Foo. $20 cover beginning at 8pm. 21+. " +
           DJ_LINE,
         dateStart: "2026-07-18T21:00:00",
         dateEnd: "2026-07-19T02:00:00",
@@ -4257,7 +4257,7 @@ function runBootMigrationsOnce() {
       {
         title: "CC Slaughters GLOW: Parade Day Party",
         description:
-          "GLOW Pride 2026 parade day at CC Slaughters — front-row NW Pride Parade viewing, a self-serve bloody mary bar, live DJs, and a puppy mosh. No cover. 21+. " +
+          "GLOW Pride 2026 parade day at CC Slaughters - front-row NW Pride Parade viewing, a self-serve bloody mary bar, live DJs, and a puppy mosh. No cover. 21+. " +
           DJ_LINE,
         dateStart: "2026-07-19T10:00:00",
         dateEnd: "2026-07-20T02:00:00",
@@ -4293,7 +4293,7 @@ function runBootMigrationsOnce() {
       UPDATE events SET description = ?
       WHERE title = 'CC Slaughters GLOW: Pride Party'
     `).run(
-      "The GLOW Pride Party at CC Slaughters — glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). $20 cover beginning at 8pm. 21+. " +
+      "The GLOW Pride Party at CC Slaughters - glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). $20 cover beginning at 8pm. 21+. " +
         DJ_LINE,
     );
     const glowBase = {
@@ -4343,7 +4343,7 @@ function runBootMigrationsOnce() {
       {
         title: "CC Slaughters GLOW: Gay Cinema Matinee",
         description:
-          "Gay Cinema Matinee at CC Slaughters for GLOW Pride 2026 — a triple bill of The Birdcage, Fire Island, and To Wong Foo. 3–9pm. 21+.",
+          "Gay Cinema Matinee at CC Slaughters for GLOW Pride 2026 - a triple bill of The Birdcage, Fire Island, and To Wong Foo. 3–9pm. 21+.",
         dateStart: "2026-07-18T15:00:00",
         dateEnd: "2026-07-18T21:00:00",
         dayOfWeek: "SAT",
@@ -4366,7 +4366,7 @@ function runBootMigrationsOnce() {
     if (!exists) {
       const now = new Date().toISOString();
       db.insert(events).values({
-        title: "Fridays Are A DRAG — Pride Weekend",
+        title: "Fridays Are A DRAG - Pride Weekend",
         description:
           "Portland Pride Weekend edition of Fridays Are A DRAG at Badlands. Drag showtime 9:30pm with hot gogos, then Friday night dance party with Haute Toddy. Cast: Jay Colby, Mija (LA), Glenn Coco (Seattle), April Rition (Dallas), Seven (PDX), Harlow (PDX). No cover before 9pm. 21+.",
         venueName: "Badlands",
@@ -4602,7 +4602,7 @@ function runBootMigrationsOnce() {
         posterImageUrl: "/posters/badlands-fresh-paint.jpg",
       },
       {
-        title: "Karaoke at Badlands — Tuesday",
+        title: "Karaoke at Badlands - Tuesday",
         description: "Karaoke at Badlands. 9pm–2am. 21+. Official Badlands calendar listing for Pride week.",
         dateStart: "2026-07-14T21:00:00",
         dateEnd: "2026-07-15T02:00:00",
@@ -4622,7 +4622,7 @@ function runBootMigrationsOnce() {
         posterImageUrl: "/posters/badlands-request-night.jpg",
       },
       {
-        title: "Karaoke at Badlands — Wednesday",
+        title: "Karaoke at Badlands - Wednesday",
         description: "Karaoke at Badlands. 9:30pm–2am. 21+. Official Badlands calendar listing for Pride week.",
         dateStart: "2026-07-15T21:30:00",
         dateEnd: "2026-07-16T02:00:00",
@@ -4685,7 +4685,7 @@ function runBootMigrationsOnce() {
         posterImageUrl: "/posters/badlands-rupauls-all-stars.jpg",
       },
       {
-        title: "Fridays Are A DRAG — Pride Weekend",
+        title: "Fridays Are A DRAG - Pride Weekend",
         description:
           "Fridays Are A Drag PRIDE with Jay Colby at Badlands (official calendar). Showcase of Portland drag excellence into the Friday dance party with hot gogos and Haute Toddy. Showtime 9:30pm. 21+.",
         dateStart: "2026-07-17T21:30:00",
@@ -4883,7 +4883,7 @@ function runBootMigrationsOnce() {
 
     recordBootMigration("seed_fetlife_pride_week_gaps_2026_v1");
   }
-  // Hawks PDX Pride week (Jul 13–19 2026) — weekly programming from hawkspdx.com/hawks-events.
+  // Hawks PDX Pride week (Jul 13–19 2026) - weekly programming from hawkspdx.com/hawks-events.
   // Replaces HIDDEN weekend placeholders with real LIVE listings + official flyers.
   if (!hasBootMigration("seed_hawks_pride_week_2026_v1")) {
     const now = new Date().toISOString();
@@ -5158,7 +5158,7 @@ function runBootMigrationsOnce() {
   }
 
   // Locker Room series: drop Jan/Feb/Jul/Sep (any year) and June 2026 from live events.
-  // Archive dates are filtered in shared/tuckerHostedArchive.ts — this cleans any seeded/live rows.
+  // Archive dates are filtered in shared/tuckerHostedArchive.ts - this cleans any seeded/live rows.
   if (!hasBootMigration("scrub_locker_room_excluded_months_v1")) {
     sqlite.prepare(`
       DELETE FROM events
@@ -5179,7 +5179,7 @@ function runBootMigrationsOnce() {
       .prepare(
         `SELECT MIN(id) AS id FROM events
          WHERE status = 'LIVE'
-           AND title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+           AND title = 'Pride in Demand - Portland Queer Takeover - Night 1'
            AND substr(date_start, 1, 16) = '2026-07-17T21:00'`,
       )
       .get() as { id: number | null } | undefined;
@@ -5189,9 +5189,9 @@ function runBootMigrationsOnce() {
           `UPDATE events
            SET status = 'HIDDEN',
                admin_notes = COALESCE(admin_notes || ' | ', '') ||
-                 'Hidden: duplicate LIVE Pride in Demand Night 1 — keeper id ' || ?
+                 'Hidden: duplicate LIVE Pride in Demand Night 1 - keeper id ' || ?
            WHERE status = 'LIVE'
-             AND title = 'Pride in Demand — Portland Queer Takeover — Night 1'
+             AND title = 'Pride in Demand - Portland Queer Takeover - Night 1'
              AND substr(date_start, 1, 16) = '2026-07-17T21:00'
              AND id != ?`,
         )
@@ -5212,7 +5212,7 @@ function runBootMigrationsOnce() {
       .prepare(
         `UPDATE events
          SET admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
-           'Duplicate leftover of LIVE Midtown Beer Garden Pride multi-day listing — not a missing public event.'
+           'Duplicate leftover of LIVE Midtown Beer Garden Pride multi-day listing - not a missing public event.'
          WHERE status = 'HIDDEN' AND title = 'Midtown Beer Garden Pride'`,
       )
       .run();
@@ -5229,7 +5229,7 @@ function runBootMigrationsOnce() {
           `UPDATE events
            SET status = 'HIDDEN',
                admin_notes = COALESCE(admin_notes || ' | ', '') ||
-                 'Hidden: duplicate Midtown Beer Garden Pride — LIVE keeper id ' || ?
+                 'Hidden: duplicate Midtown Beer Garden Pride - LIVE keeper id ' || ?
            WHERE status = 'LIVE'
              AND title = 'Midtown Beer Garden Pride'
              AND id != ?`,
@@ -5278,7 +5278,7 @@ function runBootMigrationsOnce() {
           name: "Bearracuda",
           type: "group",
           description:
-            "Portland bear dance party / nightlife brand. Events at Nova PDX, Crystal Ballroom, and partner venues — follow brand calendar + IG for flyers.",
+            "Portland bear dance party / nightlife brand. Events at Nova PDX, Crystal Ballroom, and partner venues - follow brand calendar + IG for flyers.",
           address: null,
           neighborhood: "Portland",
           website: "https://bearracuda.com",
@@ -5432,7 +5432,7 @@ function hubFeedResolveBusinessForEvent(
 function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
   const biz = hubFeedResolveBusinessForEvent(evt, businesses);
   const name = biz?.name || venueName;
-  // Prefer static neon pack (/directory-logos), then DB imageUrl, then type fallback —
+  // Prefer static neon pack (/directory-logos), then DB imageUrl, then type fallback -
   // same resolution the Directory UI uses (Camp Bar PDX, etc.).
   const logo =
     resolveDirectoryLogo(String(name), biz?.imageUrl)
@@ -5570,7 +5570,7 @@ function hubFeedNormalizeVenueKey(name: string | null | undefined): string {
 
 /**
  * Feed sort/time for event cards.
- * Bulk-seeded venue parties share one created_at second — that piles the whole
+ * Bulk-seeded venue parties share one created_at second - that piles the whole
  * guide into "just now". Prefer the party date_start so the feed spreads across
  * the week. User submissions keep their real listing timestamp.
  */
@@ -5581,7 +5581,7 @@ function hubFeedEventActivityAt(evt: {
   createdAt?: string | null;
   dateStart?: string | null;
 }): string {
-  // News-feed order is chronological by when the event was listed/posted — NOT
+  // News-feed order is chronological by when the event was listed/posted - NOT
   // by the (often future) party date. Sorting by party start floats every
   // upcoming party to the top and buries real-time posts, host updates, and
   // RSVPs beneath the whole week's catalog. Prefer the created/listed time for
@@ -5672,7 +5672,7 @@ function bundleHubFeedRecurringSeries(cluster: HubFeedItem[]): HubFeedItem {
     action,
     // Don't dump the first night's long description on a series card.
     text: null,
-    // Single embed only — HubFeedCard must not render N event rows.
+    // Single embed only - HubFeedCard must not render N event rows.
     event: next.event ?? null,
     events: undefined,
     createdAt: newest.createdAt,
@@ -5707,7 +5707,7 @@ function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
 
 /**
  * Same-venue multi-night drops within a short createdAt window
- * (different show titles — not a single recurring series).
+ * (different show titles - not a single recurring series).
  */
 function condenseHubFeedByVenueWindow(items: HubFeedItem[]): HubFeedItem[] {
   if (items.length <= 1) return items;
@@ -5743,7 +5743,7 @@ function condenseHubFeedByVenueWindow(items: HubFeedItem[]): HubFeedItem[] {
 function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
   if (items.length <= 1) return items;
 
-  // Pass 1 — recurring series: same venue + same title (bulk weekly/monthly adds).
+  // Pass 1 - recurring series: same venue + same title (bulk weekly/monthly adds).
   // One news-feed card with badge "Recurring", not one row per night.
   const bySeries = new Map<string, HubFeedItem[]>();
   for (const item of items) {
@@ -5762,7 +5762,7 @@ function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
     }
   }
 
-  // Pass 2 — leftover multi-title drops at the same venue still window-bundle.
+  // Pass 2 - leftover multi-title drops at the same venue still window-bundle.
   return [...seriesOut, ...condenseHubFeedByVenueWindow(residual)];
 }
 
@@ -5820,7 +5820,7 @@ function hubFeedPostToItem(
     }
   }
 
-  // The real person is always the account that posted — used as the primary
+  // The real person is always the account that posted - used as the primary
   // author for "self" posts, and as the "posted by" sub-line for event/venue
   // posts so co-hosts stay attributable.
   const personAuthor = hubFeedAuthorFromUser({
@@ -6150,7 +6150,7 @@ function resolveSiteOwner(): SiteOwnerRow | undefined {
 
 /**
  * Shared site identity for admin-originated member messages (photo reject, queue
- * outcomes, manual admin DMs). Not a login for humans — replies go here so they
+ * outcomes, manual admin DMs). Not a login for humans - replies go here so they
  * show under floating inbox → Admin → Inbox / Sent for every keyholder.
  */
 function ensureGuideAdminUser(): User {
@@ -6270,7 +6270,7 @@ function isOwnerAdminPeer(user: { username?: string | null } | null | undefined)
   return OWNER_ADMIN_PEER_USERNAMES.includes(uname);
 }
 
-/** Primary owner OR designated peer — full admin tools except Owner Desk. */
+/** Primary owner OR designated peer - full admin tools except Owner Desk. */
 function hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean {
   return isPrimarySiteOwner(user) || isOwnerAdminPeer(user);
 }
@@ -6337,7 +6337,7 @@ function syncSiteOwnerPortfolio() {
 
   const yesCoachId = findSiteOwnerEventId();
   if (yesCoachId == null) {
-    console.warn("[site_owner] Yes Coach event not found — skipping event host sync");
+    console.warn("[site_owner] Yes Coach event not found - skipping event host sync");
   } else {
     sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(yesCoachId);
     const existingHost = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(yesCoachId, owner.id);
@@ -6717,7 +6717,7 @@ export interface IStorage {
   isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
   isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean;
   isOwnerAdminPeer(user: { username?: string | null } | null | undefined): boolean;
-  /** Primary owner or peer (e.g. brohoejams) — full admin tools except Owner Desk. */
+  /** Primary owner or peer (e.g. brohoejams) - full admin tools except Owner Desk. */
   hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean;
   // Promoters
   getPromoterByEmail(email: string): Promoter | undefined;
@@ -6961,7 +6961,7 @@ export interface IStorage {
   ): Message | undefined;
   /** Drop a content-moderation alert into the site owner's guide inbox. */
   notifyOwnerModeration(subject: string, body: string): void;
-  /** Public "Message me" / sponsorship pitch / custom order form on the About page — always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
+  /** Public "Message me" / sponsorship pitch / custom order form on the About page - always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
   sendPortfolioContactMessage(input: {
     kind?: "message" | "sponsor" | "order";
     name: string;
@@ -7083,7 +7083,7 @@ export interface IStorage {
   createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
   getFeedbackReports(status?: string): FeedbackReport[];
   resolveFeedbackReport(id: number): void;
-  // Owner desk — contact form, bug reports, owner-only escalations
+  // Owner desk - contact form, bug reports, owner-only escalations
   createOwnerDeskItem(data: {
     kind: string;
     title: string;
@@ -7686,7 +7686,7 @@ export const storage: IStorage = {
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
     const attendedPastLive = attendedAll.filter(isPastEvent);
-    // Host nights Tucker archived are nights he ran and was there — surface in
+    // Host nights Tucker archived are nights he ran and was there - surface in
     // both hosting.past and attended past without inventing fake RSVP rows.
     const attendedPast = mergeTuckerHostedArchivePast(user.username, attendedPastLive);
     // Public Going rail: upcoming RSVPs are visible on member profiles.
@@ -7699,7 +7699,7 @@ export const storage: IStorage = {
       hostedEventsPast: hostedPast,
       gigs,
       gifting,
-      // Always empty — missed connections must not de-anonymize on profiles.
+      // Always empty - missed connections must not de-anonymize on profiles.
       spotted: [],
       goingTo: goingToUpcoming,
       attendedPast,
@@ -7984,7 +7984,7 @@ export const storage: IStorage = {
       const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
 
       if (sub.type === "PROMOTER_APPLICATION") {
-        // Standalone promoter application — approve user, no event created
+        // Standalone promoter application - approve user, no event created
         if (submitter) db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
       } else if (sub.type === "CLAIM" && sub.eventId) {
         db.update(events).set({
@@ -8004,7 +8004,7 @@ export const storage: IStorage = {
           lat: sub.lat,
           lng: sub.lng,
         }, directoryRows);
-        // Community tip — goes live as unclaimed (anyone can claim it later)
+        // Community tip - goes live as unclaimed (anyone can claim it later)
         db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
@@ -8028,7 +8028,7 @@ export const storage: IStorage = {
           lat: sub.lat,
           lng: sub.lng,
         }, directoryRows);
-        // NEW_EVENT — create event, and if user was pending promoter, approve them too
+        // NEW_EVENT - create event, and if user was pending promoter, approve them too
         const created = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
@@ -8406,7 +8406,7 @@ export const storage: IStorage = {
   },
   getAdminQueueBreakdown() {
     // Must match shared Admin · Queue buckets (QueueView mode="admin").
-    // Logos are Owner desk only — not in shared total.
+    // Logos are Owner desk only - not in shared total.
     // Guide-admin DMs are under Admin · Inbox (guideUnread), not total.
     const submissions = this.getSubmissions("PENDING")
       .filter((s) => s.type !== "PROMOTER_APPLICATION").length;
@@ -8441,7 +8441,7 @@ export const storage: IStorage = {
       promoters,
       businessClaims,
       businessSubmissions,
-      /** Owner desk only — not part of shared `total`. */
+      /** Owner desk only - not part of shared `total`. */
       logoRequests,
       giftingReports,
       giftingFlagged,
@@ -8976,7 +8976,7 @@ export const storage: IStorage = {
     if (isEnvListedSiteAdmin(user)) return { error: "Owner admins configured in Railway env cannot be removed here" };
     if (!storage.hasSiteAdminGrant(userId)) return { error: "User is not a granted site admin" };
     sqlite.prepare("DELETE FROM site_admin_grants WHERE user_id = ?").run(userId);
-    // Mirror set-sub-admin grant:false — GRANT SUB-ADMIN sets both the grant row and
+    // Mirror set-sub-admin grant:false - GRANT SUB-ADMIN sets both the grant row and
     // subAdmin; leaving subAdmin true would keep userIsSiteAdmin / userIsAdminNow true.
     storage.updateUser(userId, { subAdmin: false });
     return { ok: true };
@@ -9492,7 +9492,7 @@ export const storage: IStorage = {
           status: "APPROVED",
           approvals: JSON.stringify([adminName]),
         }).where(eq(submissions.id, sub.id)).run();
-        // Promoter inbox notice is sent by setPromoterStatus — avoid a duplicate "event is live" message.
+        // Promoter inbox notice is sent by setPromoterStatus - avoid a duplicate "event is live" message.
       } else {
         db.update(submissions).set({
           status: "REJECTED",
@@ -9671,7 +9671,7 @@ export const storage: IStorage = {
     Array.from(pastSet).forEach(id => targets.add(id));
     Array.from(followerSet).forEach(id => targets.add(id));
 
-    // Skip current active RSVPs on this event — they're already going.
+    // Skip current active RSVPs on this event - they're already going.
     const already = sqlite.prepare(`
       SELECT DISTINCT user_id AS userId FROM attendances
       WHERE event_id = ? AND is_active = 1 AND user_id IS NOT NULL
@@ -9686,7 +9686,7 @@ export const storage: IStorage = {
     const defaultBody =
       `You're invited to ${evt.title} at ${evt.venueName}. Open this message to view the event and RSVP.`;
     const body = note
-      ? `${note}\n\n— ${evt.title} · ${evt.venueName}`
+      ? `${note}\n\n- ${evt.title} · ${evt.venueName}`
       : defaultBody;
     const subject = `You're invited: ${evt.title}`;
 
@@ -10021,7 +10021,7 @@ export const storage: IStorage = {
       return { talent, needsAdmin: false, isHostSelf: storage.isUserEventHost(eventId, userId) };
     }
     const isHost = storage.isUserEventHost(eventId, userId);
-    // Lineup self-tags go live immediately — no admin (or host) approval required.
+    // Lineup self-tags go live immediately - no admin (or host) approval required.
     const status = "LIVE";
     const created = db.insert(eventTalent).values({
       eventId,
@@ -10108,7 +10108,7 @@ export const storage: IStorage = {
   },
   getPendingTalentForUnclaimedEvents() {
     ensureEventTalentSchema();
-    // Talent no longer requires admin approval — promote any legacy pending rows, then return none.
+    // Talent no longer requires admin approval - promote any legacy pending rows, then return none.
     try {
       sqlite.exec(`UPDATE event_talent SET status = 'LIVE' WHERE status = 'PENDING'`);
     } catch {
@@ -10506,7 +10506,7 @@ export const storage: IStorage = {
   },
   createMissedConnection(data) {
     const createdAt = new Date().toISOString();
-    // Spotted posts go live immediately — no admin approval queue.
+    // Spotted posts go live immediately - no admin approval queue.
     const row = db.insert(missedConnections).values({
       ...data,
       status: "ACTIVE",
@@ -10733,7 +10733,7 @@ export const storage: IStorage = {
   },
   createGiftingPost(data, status) {
     const postType = data.postType === "ISO" ? "ISO" : "GIFT";
-    // Gifting goes live immediately — never create as PENDING for admin review.
+    // Gifting goes live immediately - never create as PENDING for admin review.
     const liveStatus = status === "PENDING" || !status
       ? (postType === "ISO" ? "LOOKING" : "OPEN")
       : status;
@@ -11653,7 +11653,7 @@ export const storage: IStorage = {
     return true;
   },
   verifyBeachPresence(userId: number, beachId: string, calendarDate: string, lat: number, lng: number) {
-    // Coordinates are compared against the beach anchor and discarded —
+    // Coordinates are compared against the beach anchor and discarded -
     // never written to the database or logs.
     const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
     if (!mine) return { ok: false as const, error: "NO_CHECKIN" as const };
@@ -11677,7 +11677,7 @@ export const storage: IStorage = {
     `).run(checkin.userId, checkin.beachId, checkin.calendarDate);
     if ((checkin as any).presence === "HERE") return;
     const fireAt = riverBratsArrivalPromptIso(checkin.calendarDate, checkin.arrivalHour);
-    if (fireAt <= nowIso) return; // arriving now/past — no prompt needed
+    if (fireAt <= nowIso) return; // arriving now/past - no prompt needed
     sqlite.prepare(`
       INSERT INTO scheduled_prompts (user_id, kind, fire_at, beach_id, calendar_date, checkin_id, status, created_at)
       VALUES (?, 'BEACH_ARRIVAL', ?, ?, ?, ?, 'PENDING', ?)
@@ -12171,7 +12171,7 @@ export const storage: IStorage = {
       const masked = maskAttendanceRow(viewerUserId, viewerRsvped, row);
       const anonymous = Boolean(masked.isAnonymous || masked.masked);
       // Anonymous/masked RSVPs render as a nameless "Someone in the scene is
-      // going" card — too vague to be worth a public feed slot. Only surface
+      // going" card - too vague to be worth a public feed slot. Only surface
       // RSVPs where a real name shows.
       if (anonymous) continue;
       items.push({
@@ -12261,7 +12261,7 @@ export const storage: IStorage = {
         text: row.body || "",
         place,
         createdAt: row.createdAt,
-        // Missed connections are anonymous — the card renders without a person.
+        // Missed connections are anonymous - the card renders without a person.
         author: { displayName: "Missed Connection", anonymous: true },
         // No event embed: tapping opens the Missed Connections detail card
         // (see `spotted`), it does not deep-link to an event.

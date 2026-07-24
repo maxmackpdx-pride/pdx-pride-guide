@@ -1,4 +1,4 @@
-/** Copy link or invoke native Web Share — shares a URL, never a card image. */
+/** Copy link or invoke native Web Share - shares a URL, never a card image. */
 export async function sharePageLink(
   url: string,
   title: string,
@@ -22,5 +22,5 @@ export async function sharePageLink(
   return "copied";
 }
 
-/** @deprecated Prefer sharePageLink — same behavior for event URLs. */
+/** @deprecated Prefer sharePageLink - same behavior for event URLs. */
 export const shareEventLink = sharePageLink;

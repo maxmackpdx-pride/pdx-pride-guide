@@ -155,7 +155,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
                 <input
                   value={announcement}
                   onChange={e => setAnnouncement(e.target.value)}
-                  placeholder="Announcement — pinned + messaged to everyone going"
+                  placeholder="Announcement - pinned + messaged to everyone going"
                   maxLength={1000}
                 />
                 <button
@@ -195,7 +195,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
           )}
           {!isLoading && messages.length === 0 && windowState === "OPEN" && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi — everyone going can see this until 4 hours after the event ends.
+              You're checked in. Say hi - everyone going can see this until 4 hours after the event ends.
             </p>
           )}
           {!isLoading && messages.length === 0 && windowState === "CLOSED" && (

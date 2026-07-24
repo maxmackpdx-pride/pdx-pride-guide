@@ -43,7 +43,7 @@ function tabClass(
  * Mobile bottom navigation (all visitors), a single 5-tab footer used across the
  * whole site: Places / Events / Hub (center) / Boards / Messages. Beaches lives
  * inside the Events sheet (same pattern as Boards). This is the only mobile
- * bottom bar — hub/admin shells no longer render their own.
+ * bottom bar - hub/admin shells no longer render their own.
  */
 export default function MobileBottomNav() {
   const [location] = useLocation();
@@ -166,7 +166,7 @@ export default function MobileBottomNav() {
 
       <nav className="hub-mobile-bar site-hub-mobile-bar" aria-label="Site mobile navigation">
         <div className="hub-mobile-bar__dock">
-          {/* No decorative pull on the site-wide dock — hub drawer grip is only on /dashboard */}
+          {/* No decorative pull on the site-wide dock - hub drawer grip is only on /dashboard */}
           <Link
             href="/directory"
             className={tabClass(placesActive, "cyan")}

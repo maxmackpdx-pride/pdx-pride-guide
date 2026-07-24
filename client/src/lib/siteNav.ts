@@ -10,7 +10,7 @@ export type NavEntry =
   | { type: "link"; href: string; label: string }
   | { type: "dropdown"; id: string; label: string; items: NavLinkItem[] };
 
-/** Primary nav — labels match on-page titles where possible. */
+/** Primary nav - labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home" },
   { type: "link", href: "/about", label: "About" },

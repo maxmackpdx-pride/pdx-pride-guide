@@ -1,4 +1,4 @@
-/* UpdatesPanel: profile board rail — matches hub feed glow cards */
+/* UpdatesPanel: profile board rail - matches hub feed glow cards */
 
 .pp-updates {
   width: 100%;
@@ -212,7 +212,7 @@
   margin-top: 14px;
 }
 
-/* Pill engagement controls — same family as DM reaction chips */
+/* Pill engagement controls - same family as DM reaction chips */
 .pp-updates__engage {
   appearance: none;
   display: inline-flex;

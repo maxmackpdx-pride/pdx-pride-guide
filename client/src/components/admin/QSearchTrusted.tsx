@@ -41,7 +41,7 @@ function asHealth(v: string | null | undefined): TrustedHealth {
 }
 
 function fmtAbsolute(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleString();
   } catch {
@@ -104,7 +104,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
   async function syncOne(sourceId: string, venueName: string) {
     if (
       !window.confirm(
-        `Sync trusted venue “${venueName}” now?\n\nNew events go to the Review queue — you approve before anything goes live.`,
+        `Sync trusted venue “${venueName}” now?\n\nNew events go to the Review queue - you approve before anything goes live.`,
       )
     ) {
       return;
@@ -124,7 +124,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
           body.message ||
           (body.queued != null
             ? `${body.queued} candidate${body.queued === 1 ? "" : "s"} in Review`
-            : "Trusted sync finished — check Review"),
+            : "Trusted sync finished - check Review"),
       });
       await invalidate();
       void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
@@ -153,7 +153,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
   async function syncAll() {
     if (
       !window.confirm(
-        `Sync all trusted venues now?\n\nNew events go to the Review queue — you approve before anything goes live.`,
+        `Sync all trusted venues now?\n\nNew events go to the Review queue - you approve before anything goes live.`,
       )
     ) {
       return;
@@ -173,7 +173,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
           body.message ||
           (body.queued != null
             ? `${body.queued} candidates in Review`
-            : `Finished ${venues.length} venue${venues.length === 1 ? "" : "s"} — check Review`),
+            : `Finished ${venues.length} venue${venues.length === 1 ? "" : "s"} - check Review`),
       });
       await invalidate();
       void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
@@ -258,7 +258,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
             </h2>
             <p className="qsearch__trusted-lede">
               First-party feeds (Badlands, Sanctuary, …). <strong>Sync now</strong> pulls into the{" "}
-              <strong>Review</strong> queue — approve there before anything goes live.
+              <strong>Review</strong> queue - approve there before anything goes live.
               Health shows last successful feed pull.
             </p>
           </div>
@@ -351,7 +351,7 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
                     </div>
                     <div>
                       <dt>Poll</dt>
-                      <dd>every {v.pollHours ?? "—"}h</dd>
+                      <dd>every {v.pollHours ?? "-"}h</dd>
                     </div>
                     <div className="qsearch__trusted-meta--wide">
                       <dt>Last published</dt>

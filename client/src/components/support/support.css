@@ -1,5 +1,5 @@
 /* ============================================================
-   Support surfaces — deep-glass / OLED-neon (§2.12)
+   Support surfaces - deep-glass / OLED-neon (§2.12)
    Keep-alive + Sponsors = neutral glass
    Affiliate = cyan left accent + neutral glow
    CTAs = lime glass buttons
@@ -27,7 +27,7 @@
   box-shadow: var(--glass-card-neutral-shadow) !important;
   backdrop-filter: blur(var(--glass-card-blur, 12px));
   -webkit-backdrop-filter: blur(var(--glass-card-blur, 12px));
-  /* Kill prior lime left bar — neutral has no accent edge */
+  /* Kill prior lime left bar - neutral has no accent edge */
   border-left: var(--glass-card-neutral-border) !important;
 }
 
@@ -139,7 +139,7 @@
   z-index: 1;
 }
 
-/* Partner logo wells — #050506 */
+/* Partner logo wells - #050506 */
 .support-affiliate__tile {
   position: relative;
   flex: 1 1 240px;
@@ -247,7 +247,7 @@
 }
 
 /* ── Sponsors panel (neutral shell + lime-left check rows) ─
-   SoT: design image — one outer OLED glass card, large lime title,
+   SoT: design image - one outer OLED glass card, large lime title,
    lime-left qualifier rows, solid lime pitch CTA (never cyan). */
 .support-sponsors {
   position: relative;
@@ -292,7 +292,7 @@
   z-index: 1;
 }
 
-/* Large display title (design: SPONSORS) — not a mono kicker */
+/* Large display title (design: SPONSORS) - not a mono kicker */
 .support-sponsors__title {
   font-family: var(--font-display);
   font-weight: 900;
@@ -326,7 +326,7 @@
   z-index: 1;
 }
 
-/* Qualifier rows — OLED glass, soft lime left edge only (no cyan) */
+/* Qualifier rows - OLED glass, soft lime left edge only (no cyan) */
 .support-sponsors__check {
   display: flex;
   gap: 12px;
@@ -359,7 +359,7 @@
   text-shadow: 0 0 12px color-mix(in srgb, var(--lime, #ccff00) 55%, transparent);
 }
 
-/* Pitch CTA — solid lime glass, no outer bloom (never cyan) */
+/* Pitch CTA - solid lime glass, no outer bloom (never cyan) */
 .support-sponsors__pitch {
   --c: var(--lime, #ccff00);
   display: inline-flex;

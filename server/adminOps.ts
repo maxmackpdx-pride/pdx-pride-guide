@@ -279,7 +279,7 @@ export function getAdminQueueAggregate() {
     generatedAt: new Date().toISOString(),
     breakdown,
     claims,
-    /** Full entities for QueueView mappers — one round-trip instead of ~10. */
+    /** Full entities for QueueView mappers - one round-trip instead of ~10. */
     raw: {
       submissions: submissionsPending,
       promoters,
@@ -316,7 +316,7 @@ export function checkAdminMessageRateLimit(actorUserId: number): { ok: true } | 
   const now = Date.now();
   const hits = (msgRateByUser.get(actorUserId) || []).filter((t) => now - t < MSG_RATE_WINDOW_MS);
   if (hits.length >= MSG_RATE_MAX) {
-    return { ok: false, error: `Slow down — max ${MSG_RATE_MAX} admin messages per minute` };
+    return { ok: false, error: `Slow down - max ${MSG_RATE_MAX} admin messages per minute` };
   }
   hits.push(now);
   msgRateByUser.set(actorUserId, hits);
@@ -380,7 +380,7 @@ export function adminSearchForViewer(
     events: raw.events,
     queue: raw.queue.map((item) => ({
       ...item,
-      // Queue meta may include submitter email — redact for non-owners
+      // Queue meta may include submitter email - redact for non-owners
       meta: canSeeEmail
         ? item.meta
         : item.meta.replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, "…@…"),

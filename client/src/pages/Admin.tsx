@@ -296,7 +296,7 @@ export default function Admin() {
           if (user.displayName || user.username) setAdminName(user.displayName || user.username);
           if (user.isSuperAdmin) setIsSuperAdmin(true);
           if (user.isPrimaryOwner) setIsPrimaryOwner(true);
-          // Trust server flags only — no OR-with-isSuperAdmin (that reopened team tools).
+          // Trust server flags only - no OR-with-isSuperAdmin (that reopened team tools).
           if (user.canManageTeam) setCanManageTeam(true);
           if (user.canViewUsers) setCanViewUsers(true);
           if (user.canPush) setCanPush(true);
@@ -377,7 +377,7 @@ export default function Admin() {
     syncAdminTabFromUrl();
   }, [authenticated, syncAdminTabFromUrl]);
 
-  // Stay on /admin for overview — never bounce to /dashboard?section=admin.
+  // Stay on /admin for overview - never bounce to /dashboard?section=admin.
   // That path + HubV2's admin→/admin redirect caused a history.pushState storm.
 
   useEffect(() => {
@@ -1158,7 +1158,7 @@ export default function Admin() {
   async function handleUserSearch() {
     const raw = userSearchQ.trim();
     if (!raw) return;
-    // "@user" must match username "user" — server and client both strip leading @
+    // "@user" must match username "user" - server and client both strip leading @
     const q = raw.toLowerCase().replace(/^@+/, "");
     setUserSearching(true);
     try {
@@ -1402,14 +1402,14 @@ export default function Admin() {
     setMessageSending(true);
     try {
       if (messageTarget.as === "personal") {
-        // Logged-in admin’s personal DM — replies land in *their* Personal inbox only.
+        // Logged-in admin’s personal DM - replies land in *their* Personal inbox only.
         await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
         toast({
           title: "Message sent",
           description: `Sent as ${signedInAdminLabel}. @${messageTarget.username} replies go to your personal inbox.`,
         });
       } else {
-        // Shared guide-admin sender — replies land in floating inbox → Admin → Inbox.
+        // Shared guide-admin sender - replies land in floating inbox → Admin → Inbox.
         await apiRequest("POST", "/api/admin/messages", {
           username: messageTarget.username,
           body,
@@ -1439,7 +1439,7 @@ export default function Admin() {
         className="display text-xs px-3 py-1 border"
         style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
         data-testid={`admin-message-${uname}`}
-        title="Send as Zaylist — replies go to shared Admin inbox"
+        title="Send as Zaylist - replies go to shared Admin inbox"
       >
         MESSAGE
       </button>
@@ -1460,7 +1460,7 @@ export default function Admin() {
         className="display text-xs px-3 py-1 border"
         style={{ borderColor: "#C8FA3C", color: "#C8FA3C" }}
         data-testid={`admin-message-personal-${uname}`}
-        title={`Send as ${signedInAdminLabel} — replies go to your personal inbox`}
+        title={`Send as ${signedInAdminLabel} - replies go to your personal inbox`}
       >
         MESSAGE FROM {signedInAdminLabel.toUpperCase()}
       </button>
@@ -1521,7 +1521,7 @@ export default function Admin() {
     );
   }
 
-  // Legacy password gate — only when not already signed in as a site admin
+  // Legacy password gate - only when not already signed in as a site admin
   if (!authenticated) {
     if (user) {
       return (
@@ -3083,7 +3083,7 @@ export default function Admin() {
                 FULL DIRECTORY ({adminDirectory.length})
               </p>
               <p className="text-white/40 text-xs mb-3">
-                Every place in the Directory. Assign a member as owner the same way you assign event hosts —
+                Every place in the Directory. Assign a member as owner the same way you assign event hosts -
                 they get listing control and a guide inbox notice.
               </p>
               <div className="flex flex-wrap gap-2 mb-3 items-center">
@@ -3604,7 +3604,7 @@ export default function Admin() {
             </h2>
             <p className="text-white/40 text-xs mb-3">
               {messageTarget.as === "personal"
-                ? `Sends from your personal account (${signedInAdminLabel}). Their reply lands in your Personal inbox — not shared admin.`
+                ? `Sends from your personal account (${signedInAdminLabel}). Their reply lands in your Personal inbox - not shared admin.`
                 : "Sends as Zaylist. Their reply lands in shared Admin · Inbox."}
             </p>
             <textarea

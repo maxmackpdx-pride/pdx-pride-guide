@@ -12,7 +12,7 @@ exact file to edit, what must not change, the layout decision, the smoke test, a
 This README is the design spec it references.
 
 ## About the design files
-`Promoter Hub.dc.html` is a **design reference built in plain HTML** — a prototype showing the
+`Promoter Hub.dc.html` is a **design reference built in plain HTML** - a prototype showing the
 intended look, copy, and behavior. It is **not production code to copy**. Recreate it inside the
 existing React + TypeScript app (`client/src/pages/Submit.tsx`) using the repo's own components and
 CSS tokens. Do not ship the HTML.
@@ -30,7 +30,7 @@ rhythm, and copy faithfully, but express everything with the app's existing comp
 The mockup has two toggle bars at the very top: **Preview as** (New visitor / Member / Verified /
 Pending) and **Landing** (Layout A / B / C). These exist only so the reviewer can preview states and
 compare directions. **Do not port them.** Real account state comes from `useAuth()`. Ship one landing
-layout — default **Layout A (Sorter)**.
+layout - default **Layout A (Sorter)**.
 
 ## Screens / Views
 
@@ -51,18 +51,18 @@ layout — default **Layout A (Sorter)**.
 
 The four paths, their accents, and their chips (chip text/color depend on account state):
 
-- **Submit an event** — accent `--panel-lime`. "You're running it. Put your event on the guide."
+- **Submit an event** - accent `--panel-lime`. "You're running it. Put your event on the guide."
   Chip: verified `Goes live now` (lime), else `Reviewed first` (cyan).
-- **Claim a listing** — accent `--panel-cyan`. "It's listed, not yours yet. Take the host seat on an
+- **Claim a listing** - accent `--panel-cyan`. "It's listed, not yours yet. Take the host seat on an
   event already up." Chip: same rule as Submit.
-- **Apply as promoter** — accent `--panel-purple`. "Not posting yet, want the fast lane later. Get
+- **Apply as promoter** - accent `--panel-purple`. "Not posting yet, want the fast lane later. Get
   verified once. Skip the queue after." Chip: `One-time review` (purple). **Hidden for verified users.**
-- **Spotted an event** — accent `--panel-magenta`. "Not yours, the guide is missing it. Tip us and
+- **Spotted an event** - accent `--panel-magenta`. "Not yours, the guide is missing it. Tip us and
   we will chase it down." Chip: `No promoter status` (magenta).
 
 - **State banners (one at a time):**
-  - Verified: lime border, "Verified promoter — everything goes live instantly."
-  - Pending: cyan border, "Application pending — you can still submit and claim now."
+  - Verified: lime border, "Verified promoter - everything goes live instantly."
+  - Pending: cyan border, "Application pending - you can still submit and claim now."
   - Logged out: lime left-border, "Free account needed for most paths" + a "Log in / Join" button.
     Copy must state Spotted needs an account but **not** promoter status.
 - **Submit-vs-Apply clarifier (non-verified only):** `--panel-card` panel, orange mono kicker, two
@@ -113,7 +113,7 @@ Centered card, colored border matching the flow accent, a filled circle check, t
 Reuse what `Submit.tsx` already has: `useAuth`, `mode`/`view`, `promoterStatus`, `eventForm`,
 `promoterForm`, `unclaimedEvents`, `allEvents`, `applyMutation`, `eventMutation`,
 `handleSubmitWithEvent`. The only state simplification: the non-verified submit no longer navigates
-between two screens — both sections render together.
+between two screens - both sections render together.
 
 ## Design tokens (from `client/src/index.css`)
 - Surfaces: `--panel-ink #06060a` (page), `--panel-band #070708`, `--panel-card #0c0c0f`,
@@ -133,7 +133,7 @@ None. No images or icons beyond inline text glyphs (arrow, check) and the design
 `Divider` / `Button` / `StatCard` visuals.
 
 ## Files
-- `Promoter Hub.dc.html` — the design reference (all views + both prototype switchers).
-- `GROK_PROMPT.md` — the implementer's task brief (connect to GitHub, edit `Submit.tsx`, smoke test,
+- `Promoter Hub.dc.html` - the design reference (all views + both prototype switchers).
+- `GROK_PROMPT.md` - the implementer's task brief (connect to GitHub, edit `Submit.tsx`, smoke test,
   deploy).
 - Target in the app: `client/src/pages/Submit.tsx`; tokens in `client/src/index.css`.

@@ -1,5 +1,5 @@
 /*
- * Place modal — open directory card
+ * Place modal - open directory card
  * Deep-glass OLED (matches PlaceCard / design) + little→big FLIP expand.
  */
 
@@ -41,7 +41,7 @@
   flex: none;
   border-radius: 14px;
   overflow: hidden;
-  /* OLED glass fill — not translucent purple wash */
+  /* OLED glass fill - not translucent purple wash */
   background:
     radial-gradient(
       90% 70% at 50% 46%,
@@ -125,7 +125,7 @@
     );
 }
 
-/* Thin refract seam (PlaceCard language — not thick header bar) */
+/* Thin refract seam (PlaceCard language - not thick header bar) */
 .place-modal-panel__seam {
   position: absolute;
   top: 0;

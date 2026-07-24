@@ -43,7 +43,7 @@ function eventHref(item: HubFeedItem): string | null {
 }
 
 function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
-  // Recurring bulk series: one card, one row (badge "Recurring") — never expand N nights.
+  // Recurring bulk series: one card, one row (badge "Recurring") - never expand N nights.
   if (item.badge === "Recurring" && item.event) return [item.event];
   if (item.events?.length) return item.events;
   if (item.event) return [item.event];
@@ -110,7 +110,7 @@ export default function HubFeedCard({ item }: Props) {
   const [boardOpen, setBoardOpen] = useState(false);
   const [modalEvent, setModalEvent] = useState<Event | null>(null);
   const [openingEventId, setOpeningEventId] = useState<number | null>(null);
-  // Soft-launch: everyone follows everyone — Unfollow unless they already dropped them.
+  // Soft-launch: everyone follows everyone - Unfollow unless they already dropped them.
   const [followOverride, setFollowOverride] = useState<boolean | null>(null);
   const badgeColor = hubFeedBadgeColor(item.kind);
   const href = item.link || eventHref(item);
@@ -165,7 +165,7 @@ export default function HubFeedCard({ item }: Props) {
     },
   });
 
-  /** Open the real event modal in place — stay on the feed (no navigation). */
+  /** Open the real event modal in place - stay on the feed (no navigation). */
   const openEventInPlace = async (eventId: number) => {
     if (openingEventId != null) return;
     setOpeningEventId(eventId);
@@ -417,7 +417,7 @@ export default function HubFeedCard({ item }: Props) {
     );
   }
 
-  // Don't wrap the whole card in a link when it embeds event rows — those open
+  // Don't wrap the whole card in a link when it embeds event rows - those open
   // EventModal in place. Other non-event deep links still navigate.
   if (href && !item.event && !item.events?.length && item.ctaAction !== "feedback") {
     return (

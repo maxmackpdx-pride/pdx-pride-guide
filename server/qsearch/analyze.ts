@@ -17,7 +17,7 @@ import {
   type DirectoryBrand,
 } from "./directoryBrands";
 
-/** True when two titles are the same series (e.g. "BI Night" / "BI Night — July"). */
+/** True when two titles are the same series (e.g. "BI Night" / "BI Night - July"). */
 export function titlesSameSeries(a: string, b: string): boolean {
   const na = normalizeTitleKey(a || "");
   const nb = normalizeTitleKey(b || "");
@@ -29,7 +29,7 @@ export function titlesSameSeries(a: string, b: string): boolean {
 }
 
 /**
- * Reuse a prior flyer ONLY for the same series — never "any event at this venue".
+ * Reuse a prior flyer ONLY for the same series - never "any event at this venue".
  * Example: BI Night scrape has a new time but no image → use catalog BI Night flyer.
  * Does not pull Friday Night Show art onto Saturday Night Show.
  */
@@ -46,7 +46,7 @@ export function priorFlyerFromCatalog(
   const draftTitle = draft.title || "";
   const vKey = normalizeVenueKey(draft.venueName || "");
 
-  // 1) High-confidence matches first — still require same series title
+  // 1) High-confidence matches first - still require same series title
   for (const id of matchEventIds) {
     const e = catalog.find(ev => ev.id === id);
     if (!e || !titlesSameSeries(draftTitle, e.title || "")) continue;
@@ -249,7 +249,7 @@ export function applyCatalogCoverage(
     }
   }
 
-  // Fully covered by main board — disappear from Review / never queue
+  // Fully covered by main board - disappear from Review / never queue
   if (!newMembers.length) return null;
 
   const allNew = alreadyOnBoard.length === 0 && newMembers.length === members.length;
@@ -328,7 +328,7 @@ export function applyCatalogCoverage(
       !(candidate.fieldConflicts?.length > 0),
     alreadyOnBoard,
     recurringDupAction: alreadyOnBoard.length
-      ? `Only new dates queued — ${alreadyOnBoard.length} already on main board`
+      ? `Only new dates queued - ${alreadyOnBoard.length} already on main board`
       : candidate.recurringDupAction,
   };
 }
@@ -399,7 +399,7 @@ export function assessCatalogRecurring(
       kind: "weekly",
       status: "catalog_already_recurring",
       instanceCount: distinctDays.size,
-      note: `Catalog already has ${distinctDays.size} weekly-like instances for this title/venue — treat as series, don't re-add every week`,
+      note: `Catalog already has ${distinctDays.size} weekly-like instances for this title/venue - treat as series, don't re-add every week`,
     };
   }
 
@@ -408,7 +408,7 @@ export function assessCatalogRecurring(
       kind: "monthly",
       status: "catalog_already_recurring",
       instanceCount: distinctMonths.size,
-      note: `Catalog already has multi-month instances — likely monthly series`,
+      note: `Catalog already has multi-month instances - likely monthly series`,
     };
   }
 
@@ -418,7 +418,7 @@ export function assessCatalogRecurring(
       kind: null,
       status: "catalog_one_off_needs_recurring_update",
       instanceCount: 1,
-      note: `Catalog only has one listing (#${match.id}) — if this is weekly/monthly, update that event's schedule/notes (or expand instances) rather than creating a new row`,
+      note: `Catalog only has one listing (#${match.id}) - if this is weekly/monthly, update that event's schedule/notes (or expand instances) rather than creating a new row`,
     };
   }
 
@@ -427,7 +427,7 @@ export function assessCatalogRecurring(
       kind: "series",
       status: "catalog_already_recurring",
       instanceCount: siblings.length,
-      note: `Catalog has ${siblings.length} related instances — already series-like`,
+      note: `Catalog has ${siblings.length} related instances - already series-like`,
     };
   }
 
@@ -505,7 +505,7 @@ export function condenseRecurring(
         draft: {
           ...primary.draft,
           description:
-            `${primary.draft.description}\n\n[QSearch] Weekly series — ${members.length} dates condensed (showing: ${primary.draft.dateStart}).`.slice(
+            `${primary.draft.description}\n\n[QSearch] Weekly series - ${members.length} dates condensed (showing: ${primary.draft.dateStart}).`.slice(
               0,
               8000,
             ),
@@ -549,7 +549,7 @@ export function condenseRecurring(
           draft: {
             ...primary.draft,
             description:
-              `${primary.draft.description}\n\n[QSearch] Monthly series — ${members.length} dates condensed (showing: ${primary.draft.dateStart}).`.slice(
+              `${primary.draft.description}\n\n[QSearch] Monthly series - ${members.length} dates condensed (showing: ${primary.draft.dateStart}).`.slice(
                 0,
                 8000,
               ),
@@ -607,10 +607,10 @@ export function findVenueConflicts(draft: IngestEventDraft, catalog: Event[]): V
     let note = `Overlaps ${evt.status} listing #${evt.id} at same venue`;
     if (titleSim >= 0.7) {
       kind = "same_slot";
-      note = `Same venue + similar title as #${evt.id} — likely already listed`;
+      note = `Same venue + similar title as #${evt.id} - likely already listed`;
     } else {
       kind = "likely_replacement";
-      note = `Different title at same venue/time as #${evt.id} — one-off may replace a repeat, or keep both`;
+      note = `Different title at same venue/time as #${evt.id} - one-off may replace a repeat, or keep both`;
     }
 
     conflicts.push({
@@ -635,19 +635,19 @@ function recurringDupAction(
 
   if (scrapeRecurring === "weekly" || scrapeRecurring === "monthly") {
     if (catalogStatus === "catalog_already_recurring" && catalogKind === scrapeRecurring) {
-      return `Scrape is ${scrapeRecurring}; catalog already models ${catalogKind} — skip create, optional flyer/time refresh only`;
+      return `Scrape is ${scrapeRecurring}; catalog already models ${catalogKind} - skip create, optional flyer/time refresh only`;
     }
     if (catalogStatus === "catalog_already_recurring") {
-      return `Scrape is ${scrapeRecurring}; catalog has series (${catalogKind || "series"}) — don't stack another series; update existing if times changed`;
+      return `Scrape is ${scrapeRecurring}; catalog has series (${catalogKind || "series"}) - don't stack another series; update existing if times changed`;
     }
     if (catalogStatus === "catalog_one_off_needs_recurring_update") {
-      return `Scrape is ${scrapeRecurring} but catalog is a one-off — UPDATE existing event to recurring (or add series instances), do not create a second host listing`;
+      return `Scrape is ${scrapeRecurring} but catalog is a one-off - UPDATE existing event to recurring (or add series instances), do not create a second host listing`;
     }
-    return `Scrape is ${scrapeRecurring} — check catalog is set up for recurring before adding`;
+    return `Scrape is ${scrapeRecurring} - check catalog is set up for recurring before adding`;
   }
 
   if (catalogStatus === "catalog_already_recurring") {
-    return `Catalog is already ${catalogKind || "recurring"} — this scrape may be one instance; prefer update over duplicate`;
+    return `Catalog is already ${catalogKind || "recurring"} - this scrape may be one instance; prefer update over duplicate`;
   }
   return null;
 }
@@ -700,7 +700,7 @@ function isWeakVenueNameLocal(name: string | null | undefined): boolean {
   return /^(tba|tbd|n\/?a|unknown|various|online|virtual|see listing|multiple|portland)$/i.test(v);
 }
 
-/** Completeness score — prefer richer scrape as primary when bundling. */
+/** Completeness score - prefer richer scrape as primary when bundling. */
 function draftRichness(d: IngestEventDraft): number {
   let s = 0;
   if (d.posterImageUrl && !isEventPlaceholderUrl(d.posterImageUrl)) s += 40;
@@ -717,7 +717,7 @@ function draftRichness(d: IngestEventDraft): number {
 }
 
 /**
- * URLs that identify a *specific* event listing — not a shared feed/calendar
+ * URLs that identify a *specific* event listing - not a shared feed/calendar
  * all nights inherit (Badlands worker API, ICS feed, venue /calendar home).
  * Never use draft.sourceUrl here: it's almost always the list feed for the whole scan.
  */
@@ -1104,7 +1104,7 @@ export function buildScanCandidates(
         (row.recurring === "weekly" || row.recurring === "monthly") &&
         assessment.status === "catalog_one_off_needs_recurring_update"
       ) {
-        note = `NEEDS UPDATE: scrape is ${row.recurring} (${row.recurringCount} dates) but #${m.eventId} is a single listing — convert that event to recurring / add instances rather than creating a new one`;
+        note = `NEEDS UPDATE: scrape is ${row.recurring} (${row.recurringCount} dates) but #${m.eventId} is a single listing - convert that event to recurring / add instances rather than creating a new one`;
       } else if (
         (row.recurring === "weekly" || row.recurring === "monthly") &&
         assessment.status === "catalog_already_recurring"
@@ -1184,7 +1184,7 @@ export function buildScanCandidates(
           ];
     const fieldConflicts: FieldConflict[] = row.fieldConflicts || [];
     if (fieldConflicts.length) {
-      // Multi-source disagreement needs a human look — don't auto-select
+      // Multi-source disagreement needs a human look - don't auto-select
       // (selected already computed; force off)
     }
 

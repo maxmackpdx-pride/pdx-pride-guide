@@ -1,5 +1,5 @@
 /**
- * Map surface theme — deep-glass / OLED frame.
+ * Map surface theme - deep-glass / OLED frame.
  * SoT: GROK_MIGRATION_PROMPT.md §1.6 + Card System.html map frames.
  *
  * Live Leaflet tiles still need network; frame, grid, pins, vignette
@@ -34,7 +34,7 @@ export const mapGridBackground = [
   "radial-gradient(120% 90% at 60% 40%, #101018 0%, #06060A 70%)",
 ].join(", ");
 
-/** Hole-rim vignette — softens map edge into the deboss well. */
+/** Hole-rim vignette - softens map edge into the deboss well. */
 export const mapVignetteBackground =
   "radial-gradient(128% 128% at 50% 50%, transparent 48%, rgba(0,0,0,.18) 72%, rgba(0,0,0,.48) 100%)";
 
@@ -42,7 +42,7 @@ export const mapVignetteInset =
   "inset 0 0 18px 2px rgba(0,0,0,.48), inset 0 0 56px 10px rgba(0,0,0,.4)";
 
 /**
- * @deprecated No outer glow on maps — kept as empty for callers that still
+ * @deprecated No outer glow on maps - kept as empty for callers that still
  * reference the token. Prefer mapFrameShadow alone.
  */
 export const mapNeutralGlow = "none";
@@ -54,7 +54,7 @@ export const mapLightShaftBackground =
 const MULTI_CONIC =
   "conic-gradient(var(--purple,#8800FF),var(--blue,#1A4DFF),var(--cyan,#00FFFF),var(--green,#39FF14),var(--yellow,#FFEE00),var(--orange,#FF6600),var(--pink,#FF00CC),var(--purple,#8800FF))";
 
-/** Pin core shadow: thin black ring + inward hole only — no outer neon bloom. */
+/** Pin core shadow: thin black ring + inward hole only - no outer neon bloom. */
 const PIN_INSET =
   "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.06)";
 
@@ -83,7 +83,7 @@ export function mapPinMultiStyle(extraShadow = ""): string {
   ].join("; ");
 }
 
-/** HTML for Leaflet divIcon — single day / category pin. */
+/** HTML for Leaflet divIcon - single day / category pin. */
 export function mapPinHtml(
   dayColor: string,
   opts?: { rsvpPulse?: boolean; rsvpColor?: string },
@@ -94,14 +94,14 @@ export function mapPinHtml(
   return `<div${cls} style="${mapPinStyle(dayColor)}"></div>`;
 }
 
-/** HTML for Leaflet divIcon — multi-day conic, no white outer bloom. */
+/** HTML for Leaflet divIcon - multi-day conic, no white outer bloom. */
 export function mapPinMultiHtml(opts?: { rsvpPulse?: boolean; rsvpColor?: string }): string {
   const rsvp = opts?.rsvpPulse;
   const cls = rsvp ? ' class="map-pin-rsvp-pulse"' : "";
   return `<div${cls} style="${mapPinMultiStyle()}"></div>`;
 }
 
-/** Legend / Expand chips — accent border + thin black + inward only. */
+/** Legend / Expand chips - accent border + thin black + inward only. */
 export function mapChipStyle(): string {
   return [
     "color:var(--lime, #CCFF00)",
@@ -115,7 +115,7 @@ export function mapChipStyle(): string {
 
 /** Inline CSS for outer map frame (apply to shell around Leaflet). */
 export function mapFrameStyle(_opts?: { neutralGlow?: boolean }): string {
-  // neutralGlow ignored — maps never get outer bloom
+  // neutralGlow ignored - maps never get outer bloom
   return [
     "position:relative",
     "border-radius:16px",
@@ -130,7 +130,7 @@ export function mapFrameStyle(_opts?: { neutralGlow?: boolean }): string {
  * Inject once into live Leaflet map roots.
  * Uses glass.css vars when present; falls back to §1.6 literals.
  * Frame: pair with class `pdx-map-surface` (+ `pdx-map-surface--neutral` for directory).
- * Neutral no longer adds outer glow — same inward frame as every map.
+ * Neutral no longer adds outer glow - same inward frame as every map.
  */
 export const LIVE_MAP_CHROME_CSS = `
 .pdx-map-live.pdx-map-surface,
@@ -189,7 +189,7 @@ export const LIVE_MAP_CHROME_CSS = `
     inset 0 -10px 28px -14px rgba(0,0,0,.75);
   outline:none;
 }
-/* Expand chip — separate from legend; thin black + lime edge */
+/* Expand chip - separate from legend; thin black + lime edge */
 .pdx-map-live .pdx-map-live__expand{
   color:var(--lime, #CCFF00);
   background:rgba(5,5,7,.88);

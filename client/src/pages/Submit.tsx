@@ -286,7 +286,7 @@ export default function Submit() {
     },
   ];
 
-  /** Deep-glass intake rows — every status chip is the same solid glass pill.
+  /** Deep-glass intake rows - every status chip is the same solid glass pill.
    *  "Goes live now" always lime fill; other chips use the row accent (cyan / purple / magenta). */
   const intakeActions: PromoterIntakeAction[] = paths.map((path) => {
     const goesLive = /goes live/i.test(path.chip.label);
@@ -429,7 +429,7 @@ export default function Submit() {
   const handleSubmitWithEvent = async () => {
     if (!user) { openAuth(); return; }
     if (!isApproved) {
-      // Fire promoter application first — bail out if it fails
+      // Fire promoter application first - bail out if it fails
       const r = await apiRequest("POST", "/api/submit", {
         type: "PROMOTER_APPLICATION",
         submitterOrg,
@@ -769,12 +769,12 @@ export default function Submit() {
                         )}
                         {flyerReadStatus === "filled" && (
                           <div className="board-copy-sm" style={{ marginTop: 6, color: "var(--panel-purple, #b06bff)" }}>
-                            Filled from your flyer — please double-check everything before submitting.
+                            Filled from your flyer - please double-check everything before submitting.
                           </div>
                         )}
                         {flyerReadStatus === "error" && (
                           <div className="board-copy-sm" style={{ marginTop: 6, opacity: 0.8 }}>
-                            Couldn't read that one automatically — just fill the form in below.
+                            Couldn't read that one automatically - just fill the form in below.
                           </div>
                         )}
                       </label>

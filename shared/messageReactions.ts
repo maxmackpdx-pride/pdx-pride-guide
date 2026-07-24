@@ -1,6 +1,6 @@
 /**
  * DM message reactions (long-press on a bubble).
- * Social posts keep their own ♥ / 💬 engagement — not this set.
+ * Social posts keep their own ♥ / 💬 engagement - not this set.
  */
 
 export const MESSAGE_REACTION_CODES = [

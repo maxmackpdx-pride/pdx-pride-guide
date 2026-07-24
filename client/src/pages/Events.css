@@ -1,4 +1,4 @@
-/* Events page — full-width map row (matches Nude Beaches / Directory) */
+/* Events page - full-width map row (matches Nude Beaches / Directory) */
 
 .events-map-toolbar {
   display: flex;
@@ -96,7 +96,7 @@
   }
 }
 
-/* Past board view chip — sits with day categories */
+/* Past board view chip - sits with day categories */
 .events-page .events-filter-chip--past[aria-pressed="true"] {
   background: #2a2a32;
   border-color: #6e6b64;
@@ -108,7 +108,7 @@
   font-weight: 600;
 }
 
-/* Board / Schedule tabs — right-aligned below map, 20% larger than board standard */
+/* Board / Schedule tabs - right-aligned below map, 20% larger than board standard */
 .events-page.board-page--makeover .events-page-tab-bar {
   display: flex;
   justify-content: flex-end;

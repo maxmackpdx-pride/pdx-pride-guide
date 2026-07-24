@@ -1,14 +1,14 @@
 /**
- * Flyer structured parsing — Phase 2 of the Flyer Reader.
+ * Flyer structured parsing - Phase 2 of the Flyer Reader.
  *
  * OCR text → LLM → strict JSON event fields. LLM resolution order:
- *   1. GROQ_API_KEY (brief's preference — OpenAI-compatible, cheap)
+ *   1. GROQ_API_KEY (brief's preference - OpenAI-compatible, cheap)
  *   2. XAI_API_KEY / OPENAI_API_KEY (already configured for qsearch/vision.ts)
  * With no key configured, a deterministic heuristic parser still returns
  * best-effort fields (low confidence, warning attached) so dev never breaks.
  *
  * Output schema (per project brief): title, start_date, end_date, time,
- * venue, address, description, url, qr_info, confidence, raw_text — plus an
+ * venue, address, description, url, qr_info, confidence, raw_text - plus an
  * IngestEventDraft for direct QSearch use (Phase 3).
  */
 import type { IngestEventDraft } from "../ingest/types";
@@ -62,7 +62,7 @@ export function flyerLlmConfigured(): LlmConfig | null {
 }
 
 /**
- * Vision-capable model config — the title-accuracy lever. Stylized flyer
+ * Vision-capable model config - the title-accuracy lever. Stylized flyer
  * lettering OCRs to soup; a vision model reads the art directly. Same
  * provider order as text: Groq → XAI → OpenAI.
  */
@@ -147,7 +147,7 @@ export function heuristicDate(text: string, now = new Date()): string | null {
   }
   if (month < 1 || month > 12 || day < 1 || day > 31) return null;
 
-  // Flyers omit the year — pick the CLOSEST occurrence: flyers are usually
+  // Flyers omit the year - pick the CLOSEST occurrence: flyers are usually
   // scanned near their event date, so a date up to ~45 days past stays in
   // the current year (a Pride flyer scanned the week after must not roll a
   // year forward); older than that rolls to next year.
@@ -207,21 +207,21 @@ export function heuristicFlyerParse(rawText: string, now = new Date()): FlyerPar
     confidence: 25,
     raw_text: rawText,
     model: null,
-    warnings: ["LLM not configured — heuristic parse only (set GROQ_API_KEY)"],
+    warnings: ["LLM not configured - heuristic parse only (set GROQ_API_KEY)"],
   };
 }
 
-const PARSE_PROMPT = `You extract structured event data from OCR text of nightlife/community event flyers (Portland, Oregon context). OCR text is noisy — infer carefully, never invent.
+const PARSE_PROMPT = `You extract structured event data from OCR text of nightlife/community event flyers (Portland, Oregon context). OCR text is noisy - infer carefully, never invent.
 
 Return ONLY a JSON object with exactly these keys:
 {"title": string|null, "start_date": "YYYY-MM-DD"|null, "end_date": "YYYY-MM-DD"|null, "time": "HH:MM" 24h|null, "venue": string|null, "address": string|null, "description": string|null, "url": string|null, "qr_info": string|null, "confidence": 0-100}
 
 Rules:
 - Unknown → null. NEVER guess an address or venue not present in the text.
-- "title" is the EVENT NAME — usually the visually dominant words. It is NOT a DJ/performer/host name, not the venue, not a date, not a sponsor, not ticket text. Prefer a short distinctive name ("Treasure Trail", "Gaylabration: Radiance") over lineup words.
-- Flyers usually omit the year: choose the year that puts the date CLOSEST to today (given below). A date within the last ~6 weeks is this year's PAST event — do NOT roll it a year forward. Only pick next year when the date would otherwise be months in the past.
+- "title" is the EVENT NAME - usually the visually dominant words. It is NOT a DJ/performer/host name, not the venue, not a date, not a sponsor, not ticket text. Prefer a short distinctive name ("Treasure Trail", "Gaylabration: Radiance") over lineup words.
+- Flyers usually omit the year: choose the year that puts the date CLOSEST to today (given below). A date within the last ~6 weeks is this year's PAST event - do NOT roll it a year forward. Only pick next year when the date would otherwise be months in the past.
 - Overnight events: if the end time is after midnight (e.g. "9PM-3AM"), "end_date" is the NEXT calendar day after start_date.
-- "url": include the scheme — if the flyer prints "WWW.EXAMPLE.COM", return "https://www.example.com".
+- "url": include the scheme - if the flyer prints "WWW.EXAMPLE.COM", return "https://www.example.com".
 - "description" = one clean sentence summarizing the event from the text, not a transcript.
 - "qr_info" = text near any QR mention (e.g. "scan for tickets"), else null.
 - "confidence" = your honest overall extraction confidence.`;
@@ -306,7 +306,7 @@ export async function structureFlyerText(
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     const fallback = heuristicFlyerParse(rawText, now);
-    fallback.warnings = [`LLM parse failed (${message.slice(0, 120)}) — heuristic fallback`];
+    fallback.warnings = [`LLM parse failed (${message.slice(0, 120)}) - heuristic fallback`];
     return fallback;
   } finally {
     clearTimeout(timer);
@@ -317,7 +317,7 @@ export async function structureFlyerText(
 const discoveredVisionModels = new Map<string, string>();
 
 /**
- * Secondary vision provider — Groq's current lineup has NO multimodal models
+ * Secondary vision provider - Groq's current lineup has NO multimodal models
  * (verified via /models 2026-07: text/audio/safety only), so when Groq is the
  * primary key, vision falls through to XAI (grok-2-vision, already used by
  * qsearch/vision.ts) or OpenAI when configured.
@@ -326,7 +326,7 @@ export function fallbackVisionConfigured(primary: LlmConfig | null): LlmConfig |
   if (llmKilled()) return null;
 
   // Free first: Google Gemini's OpenAI-compatible endpoint reads images on
-  // the free tier — the right price for a community project. Key from
+  // the free tier - the right price for a community project. Key from
   // aistudio.google.com/apikey → secret/env GEMINI_API_KEY.
   const gemini = process.env.GEMINI_API_KEY?.trim();
   if (gemini) {
@@ -347,7 +347,7 @@ export function fallbackVisionConfigured(primary: LlmConfig | null): LlmConfig |
     process.env.XAI_API_BASE?.trim() ||
     (process.env.XAI_API_KEY ? "https://api.x.ai/v1" : "https://api.openai.com/v1")
   ).replace(/\/$/, "");
-  if (primary && primary.base === base) return null; // same provider — no point
+  if (primary && primary.base === base) return null; // same provider - no point
   const model =
     process.env.FLYER_VISION_MODEL_FALLBACK?.trim() ||
     (process.env.XAI_API_KEY ? "grok-2-vision-latest" : "gpt-4o-mini");
@@ -401,7 +401,7 @@ export async function discoverVisionModel(
 }
 
 export type StructureFlyerOpts = {
-  /** Original flyer image — enables the vision pass (title authority). */
+  /** Original flyer image - enables the vision pass (title authority). */
   imageBuffer?: Buffer | null;
   rawText: string;
   ocrConfidence?: number;
@@ -417,7 +417,7 @@ export type StructureFlyerOpts = {
  */
 export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerParse> {
   // Provider chain up front: primary (Groq/XAI/OpenAI) AND/OR the free
-  // fallback (Gemini). Vision runs if ANY provider is configured — a
+  // fallback (Gemini). Vision runs if ANY provider is configured - a
   // Gemini-only setup must not silently skip vision.
   const primary = opts.imageBuffer ? flyerVisionConfigured() : null;
   const fallbackCfg = opts.imageBuffer ? fallbackVisionConfigured(primary) : null;
@@ -429,7 +429,7 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
   const now = opts.now ?? new Date();
   const fetchImpl = opts.fetchImpl ?? fetch;
 
-  // Downscale once for token cost — 1024px wide JPEG is plenty for flyer type
+  // Downscale once for token cost - 1024px wide JPEG is plenty for flyer type
   let dataUrl: string;
   try {
     const sharp = (await import("sharp")).default;
@@ -462,7 +462,7 @@ export async function structureFlyer(opts: StructureFlyerOpts): Promise<FlyerPar
   }
 
   const fallback = await structureFlyerText(opts.rawText, opts);
-  fallback.warnings = Array.from(new Set([...chainWarnings, "All vision providers failed — text fallback", ...fallback.warnings]));
+  fallback.warnings = Array.from(new Set([...chainWarnings, "All vision providers failed - text fallback", ...fallback.warnings]));
   return fallback;
 }
 
@@ -496,7 +496,7 @@ async function attemptVisionProvider(
               content: [
                 {
                   type: "text",
-                  text: `Today is ${now.toISOString().slice(0, 10)}.\n\nRead the flyer IMAGE directly — it is authoritative, especially for the stylized title text. Noisy OCR text as a secondary hint:\n${String(rawText || "").slice(0, 6000)}`,
+                  text: `Today is ${now.toISOString().slice(0, 10)}.\n\nRead the flyer IMAGE directly - it is authoritative, especially for the stylized title text. Noisy OCR text as a secondary hint:\n${String(rawText || "").slice(0, 6000)}`,
                 },
                 { type: "image_url", image_url: { url: dataUrl } },
               ],
@@ -525,13 +525,13 @@ async function attemptVisionProvider(
         res = await callVision(cand);
         if (res.ok) {
           visionWarnings.push(
-            `Vision model ${cfg.model} unavailable (HTTP ${tried.length === 2 ? "404/429" : "…"}) — auto-discovered ${cand}`,
+            `Vision model ${cfg.model} unavailable (HTTP ${tried.length === 2 ? "404/429" : "…"}) - auto-discovered ${cand}`,
           );
           discoveredVisionModels.set(cfg.base, cand);
           modelUsed = cand;
           break;
         }
-        if (![400, 404, 429].includes(res.status)) break; // real error — stop burning candidates
+        if (![400, 404, 429].includes(res.status)) break; // real error - stop burning candidates
       }
       if (!res.ok) {
         // Surface exactly what was tried + offered so the report explains

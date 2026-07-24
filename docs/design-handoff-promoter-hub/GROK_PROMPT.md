@@ -1,4 +1,4 @@
-# Grok task prompt — Promoter hub redesign
+# Grok task prompt - Promoter hub redesign
 
 Paste this whole file to Grok (or run it as your task brief). It assumes you have push access to
 `maxmackpdx-pride/pdx-pride-guide` (default branch `master`) and the app already builds and runs locally.
@@ -53,9 +53,9 @@ unclear go-live rules. The redesign fixes exactly that:
 
 ### The three landing layouts in the mockup are OPTIONS, not all three
 
-The mockup ships an A/B/C landing switcher and a "Preview as" account switcher — those are prototype
+The mockup ships an A/B/C landing switcher and a "Preview as" account switcher - those are prototype
 scaffolding for review. **Do not port the switchers.** Ship ONE landing layout. Default to
-**Layout A (Sorter)** — the single vertical list of four path rows under "What are you here to do?" —
+**Layout A (Sorter)** - the single vertical list of four path rows under "What are you here to do?" -
 unless the maintainer (Tucker) has picked another. Account state comes from the real `useAuth()`,
 not a toggle.
 

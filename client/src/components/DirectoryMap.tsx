@@ -287,7 +287,7 @@ const POPUP_STYLES = `
   .pdx-dir-popup .leaflet-popup-close-button:hover { color: #fff !important; }
 `;
 
-/** Color key for map pins — sits under the map on Directory. */
+/** Color key for map pins - sits under the map on Directory. */
 export function DirectoryMapKey({ className = "" }: { className?: string }) {
   return (
     <div

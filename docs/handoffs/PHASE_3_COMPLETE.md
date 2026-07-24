@@ -1,4 +1,4 @@
-# Phase 3 Handoff — Inbox → Push Dispatch
+# Phase 3 Handoff - Inbox → Push Dispatch
 
 ## Meta
 
@@ -20,4 +20,4 @@ All `sendMessage()` calls now schedule push delivery. Prefs filter by category; 
 
 ## Deferred
 
-- Admin queue push (throttled alerts) — Phase 4 optional
+- Admin queue push (throttled alerts) - Phase 4 optional

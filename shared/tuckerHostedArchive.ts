@@ -1,7 +1,7 @@
 /**
  * Profile-only hosted past events for @tucker_pdmax.
  * Sources: yescoachparty.com, pdxsanctuary.com, Eagle Locker Room series.
- * Negative IDs — never in LIVE feeds; merged only in getPublicProfile hosting.past.
+ * Negative IDs - never in LIVE feeds; merged only in getPublicProfile hosting.past.
  *
  * Flyer-confirmed @brohoejams (Bro Hoe) DJ + Host credits are also merged into
  * his profile hosting.past (subset of this archive).
@@ -34,7 +34,7 @@ export type TuckerHostedArchiveRow = {
 
 const LOCKER_ROOM_POSTER = "/posters/tucker-archive/locker-room-dec-2025.png";
 const LOCKER_ROOM_DESC =
-  "The Locker Room: Athletic Gear Night — every last Friday at The Eagle Portland, 9PM–close. Hosted by Tucker Max, music by DJ Bro Hoe, $5 cover. Jocks, singlets, compression gear encouraged. Stripping contest with cash prizes. 835 N Lombard St, Portland.";
+  "The Locker Room: Athletic Gear Night - every last Friday at The Eagle Portland, 9PM–close. Hosted by Tucker Max, music by DJ Bro Hoe, $5 cover. Jocks, singlets, compression gear encouraged. Stripping contest with cash prizes. 835 N Lombard St, Portland.";
 
 /**
  * Locker Room last-Friday series.
@@ -160,7 +160,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_001,
     slug: "woof-christmas-2025",
-    title: "Woof of Wall Street — Office Christmas Party",
+    title: "Woof of Wall Street - Office Christmas Party",
     description:
       "The office Christmas party just got promoted. Woof of Wall Street brings business, pleasure, and bad decisions to Sanctuary. Dress in suits, ties, or office kink. Music by StormyRoxx. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
@@ -174,7 +174,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-coach-1989",
     title: "Yes Coach: 1989",
     description:
-      "YES COACH: 1989 at Sanctuary PDX with Remy D and BirthdayGurl. Neon 80s gym fantasy — sweat, spandex, and synth. Athletic fetish encouraged: spandex, jocks, tanks, sneakers, vintage workout gear.",
+      "YES COACH: 1989 at Sanctuary PDX with Remy D and BirthdayGurl. Neon 80s gym fantasy - sweat, spandex, and synth. Athletic fetish encouraged: spandex, jocks, tanks, sneakers, vintage workout gear.",
     venueName: "Sanctuary Club",
     start: "2025-11-02T18:00:00-0800",
     end: "2025-11-02T22:30:00-0800",
@@ -186,7 +186,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "fraternity-pledge-night-2025",
     title: "The Fraternity: Pledge Night",
     description:
-      "Yes Coach Productions at Sanctuary U — full-contact initiation with beer pong dares, gear checks, and hazing games. Hosts: Tucker Max & JP Hardy. DJ Greg McKeon.",
+      "Yes Coach Productions at Sanctuary U - full-contact initiation with beer pong dares, gear checks, and hazing games. Hosts: Tucker Max & JP Hardy. DJ Greg McKeon.",
     venueName: "Sanctuary Club",
     start: "2025-09-07T18:00:00-0700",
     end: "2025-09-07T23:00:00-0700",
@@ -199,7 +199,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-ponies-2025",
     title: "Yes Ponies",
     description:
-      "Western-themed collab between Yes Coach Productions and Pink Ponies — chaps, corsets, Stetsons, and stilettos at Sanctuary. Fundraiser hoedown hosted by Tucker Max.",
+      "Western-themed collab between Yes Coach Productions and Pink Ponies - chaps, corsets, Stetsons, and stilettos at Sanctuary. Fundraiser hoedown hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2025-08-03T18:00:00-0700",
     end: "2025-08-03T23:00:00-0700",
@@ -210,9 +210,9 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_005,
     slug: "stank-pride-2025",
-    title: "Stank × Yes Coach — Portland Pride",
+    title: "Stank × Yes Coach - Portland Pride",
     description:
-      "STANK x YES COACH — Portland's dirtiest Pride after-hours party. Gear-heavy crossover with sweaty bodies, jockstraps, sneakers, dark beats, and raw cruising energy at Sanctuary. Prizes from Mr-S Leather, Cellblock 13, and Fuck Water. Hosted by Tucker Max and Spencer Stanks. DJs include Bro Hoe.",
+      "STANK x YES COACH - Portland's dirtiest Pride after-hours party. Gear-heavy crossover with sweaty bodies, jockstraps, sneakers, dark beats, and raw cruising energy at Sanctuary. Prizes from Mr-S Leather, Cellblock 13, and Fuck Water. Hosted by Tucker Max and Spencer Stanks. DJs include Bro Hoe.",
     venueName: "Sanctuary Club",
     start: "2025-07-19T22:00:00-0700",
     end: "2025-07-20T04:00:00-0700",
@@ -225,7 +225,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "sunny-sides-2025",
     title: "Sunny Sides",
     description:
-      "Brunchtime jack-off party for sides — Yes Coach Productions × Stumptown Strokes at Sanctuary. Hands, bodies, lube, and slow simmers. No penetration. Doors close 11:30AM.",
+      "Brunchtime jack-off party for sides - Yes Coach Productions × Stumptown Strokes at Sanctuary. Hands, bodies, lube, and slow simmers. No penetration. Doors close 11:30AM.",
     venueName: "Sanctuary Club",
     start: "2025-07-06T11:00:00-0700",
     end: "2025-07-06T14:00:00-0700",
@@ -237,7 +237,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "glowpocalypse-2025",
     title: "Glowpocalypse",
     description:
-      "GLOWPOCALYPSE — radioactive rave dripping in sweat, glowing in UV, pulsing with end-of-days energy. Gear up, strip down, and get filthy in a neon-lit wasteland of men, muscle, and mayhem. Woof of Wall Street series at Sanctuary. Hosted by Tucker Max.",
+      "GLOWPOCALYPSE - radioactive rave dripping in sweat, glowing in UV, pulsing with end-of-days energy. Gear up, strip down, and get filthy in a neon-lit wasteland of men, muscle, and mayhem. Woof of Wall Street series at Sanctuary. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2025-06-01T18:00:00-0700",
     end: "2025-06-01T23:00:00-0700",
@@ -247,9 +247,9 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_008,
     slug: "honey-tradie-2025",
-    title: "Honey — Tradie Night",
+    title: "Honey - Tradie Night",
     description:
-      "Tradie Night at the honey factory — blue-collar kink, industrial fantasy, and raw sweaty connection at Sanctuary. Hosts Tucker Max & JP Hardy. Music by Remy D. Hi-vis, hard hats, and tradie gear encouraged.",
+      "Tradie Night at the honey factory - blue-collar kink, industrial fantasy, and raw sweaty connection at Sanctuary. Hosts Tucker Max & JP Hardy. Music by Remy D. Hi-vis, hard hats, and tradie gear encouraged.",
     venueName: "Sanctuary Club",
     start: "2025-05-04T18:00:00-0700",
     end: "2025-05-04T23:00:00-0700",
@@ -261,7 +261,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-coach-apr-2025",
     title: "Yes Coach!",
     description:
-      "Athletic fetish party at Sanctuary — sporty meets sexy. Featuring Greg McKeon and Starkey. Hosted by Tucker Max. 6PM–11PM.",
+      "Athletic fetish party at Sanctuary - sporty meets sexy. Featuring Greg McKeon and Starkey. Hosted by Tucker Max. 6PM–11PM.",
     venueName: "Sanctuary Club",
     start: "2025-04-06T18:00:00-0700",
     end: "2025-04-06T23:00:00-0700",
@@ -271,7 +271,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_010,
     slug: "hyde-golden-age",
-    title: "Hyde — Golden Age",
+    title: "Hyde - Golden Age",
     description:
       "Cowboy leather daddy Western night at Sanctuary PDX. Second Hyde party following Leather Disco. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
@@ -285,7 +285,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "camp-honey-2025",
     title: "Camp Honey",
     description:
-      "Outdoor camp fantasy at Sanctuary — bears, honey, and mountain energy. Ranger JP Hardy. Music by Bro Hoe. Yes Coach Productions.",
+      "Outdoor camp fantasy at Sanctuary - bears, honey, and mountain energy. Ranger JP Hardy. Music by Bro Hoe. Yes Coach Productions.",
     venueName: "Sanctuary Club",
     start: "2025-02-02T18:00:00-0800",
     end: "2025-02-02T23:00:00-0800",
@@ -297,7 +297,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "woof-jan-2025",
     title: "Yes Coach Woof of Wall Street",
     description:
-      "Mandatory Meeting Alert: The Woof of Wall Street. Tucker Max & JP Hardy at Sanctuary — corporate-themed party where business meets pleasure. DJs Remy D & Noël. Business suits or geek chic.",
+      "Mandatory Meeting Alert: The Woof of Wall Street. Tucker Max & JP Hardy at Sanctuary - corporate-themed party where business meets pleasure. DJs Remy D & Noël. Business suits or geek chic.",
     venueName: "Sanctuary Club",
     start: "2025-01-05T18:00:00-0800",
     end: "2025-01-05T23:00:00-0800",
@@ -319,9 +319,9 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_015,
     slug: "primal-masquerade-2024",
-    title: "Primal Masquerade — Mask 4 Mask",
+    title: "Primal Masquerade - Mask 4 Mask",
     description:
-      "Masquerade night at Sanctuary — masks, mystery, and primal energy. Tucker Max presents. Music by Remy D & StormyRoxx.",
+      "Masquerade night at Sanctuary - masks, mystery, and primal energy. Tucker Max presents. Music by Remy D & StormyRoxx.",
     venueName: "Sanctuary Club",
     start: "2024-10-06T18:00:00-0700",
     end: "2024-10-06T23:00:00-0700",
@@ -332,7 +332,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     id: -900_016,
     slug: "hyde-2024",
     title: "Hyde",
-    description: "Leather disco bash at Sanctuary — the first Hyde party. Hosted by Tucker Max.",
+    description: "Leather disco bash at Sanctuary - the first Hyde party. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2024-09-01T17:55:00-0700",
     end: "2024-09-01T22:45:00-0700",
@@ -344,7 +344,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "fairy-dust-2024",
     title: "Fairy Dust",
     description:
-      "Fantasy-forward play party at Sanctuary — wings, firelight, and forest magic. Tucker Max presents. Water-based lube only.",
+      "Fantasy-forward play party at Sanctuary - wings, firelight, and forest magic. Tucker Max presents. Water-based lube only.",
     venueName: "Sanctuary Club",
     start: "2024-08-04T18:00:00-0700",
     end: "2024-08-05T00:00:00-0700",
@@ -356,7 +356,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-coach-pride-2024",
     title: "Yes Coach! Pride",
     description:
-      "Yes Coach! PRIDE during Portland Pride weekend at Sanctuary — expanded celebration of athletic gear fetish and community. DJs TreVer Pearson, Remy D, and StormyRoxx. Hosted by Tucker Max.",
+      "Yes Coach! PRIDE during Portland Pride weekend at Sanctuary - expanded celebration of athletic gear fetish and community. DJs TreVer Pearson, Remy D, and StormyRoxx. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2024-07-20T21:00:00-0700",
     end: "2024-07-21T02:00:00-0700",
@@ -366,7 +366,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_019,
     slug: "caligula-2024",
-    title: "Caligula — A Toga-y Party!",
+    title: "Caligula - A Toga-y Party!",
     description:
       "Roman debauchery at Sanctuary with DJ TreVer Pearson. Togas, indulgence, and sensual exploration. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
@@ -380,7 +380,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "kink-codes-2024",
     title: "Kink Codes",
     description:
-      "Kink Codes at Sanctuary — a celebration of flagging culture. Shadows, desire, and pulsating beats from DJ Orso. Leather, PVC, and a diverse array of kinks and fetishes. Hosted by Tucker Max.",
+      "Kink Codes at Sanctuary - a celebration of flagging culture. Shadows, desire, and pulsating beats from DJ Orso. Leather, PVC, and a diverse array of kinks and fetishes. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2024-06-02T18:00:00-0700",
     end: "2024-06-03T00:00:00-0700",
@@ -392,7 +392,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "honey-2024",
     title: "Honey",
     description:
-      "Welcome to Honey — the ultimate gathering for bears and beefy enthusiasts. Honey flows as freely as the good vibes. Tantalizing drinks, steamy dance floor, unleash your inner beast. Hosted by Tucker Max at Sanctuary.",
+      "Welcome to Honey - the ultimate gathering for bears and beefy enthusiasts. Honey flows as freely as the good vibes. Tantalizing drinks, steamy dance floor, unleash your inner beast. Hosted by Tucker Max at Sanctuary.",
     venueName: "Sanctuary Club",
     start: "2024-05-05T18:00:00-0700",
     end: "2024-05-06T00:00:00-0700",
@@ -416,7 +416,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "cozy-2026",
     title: "Cozy",
     description:
-      "Intimate Yes Coach night at Sanctuary — soft lighting, close bodies, and slow heat. Hosted by Tucker Max. Music by Bro Hoe.",
+      "Intimate Yes Coach night at Sanctuary - soft lighting, close bodies, and slow heat. Hosted by Tucker Max. Music by Bro Hoe.",
     venueName: "Sanctuary Club",
     start: "2026-01-04T17:00:00-0800",
     end: "2026-01-04T23:00:00-0800",
@@ -428,7 +428,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "hyde-feb-2026",
     title: "Hyde",
     description:
-      "1970s leather & disco night at Sanctuary — hosted by Bro Hoe for Yes Coach Productions. Classic cock, Fuck Water, arrive before 8.",
+      "1970s leather & disco night at Sanctuary - hosted by Bro Hoe for Yes Coach Productions. Classic cock, Fuck Water, arrive before 8.",
     venueName: "Sanctuary Club",
     start: "2026-02-01T17:00:00-0800",
     end: "2026-02-01T23:00:00-0800",
@@ -440,7 +440,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "yes-codes-2025",
     title: "Yes Codes",
     description:
-      "Learn · Flag · Play — Yes Coach Productions kink-codes night at Sanctuary. Hosted by Unworthyslutboy. Top, bottom, vers energy and consent-forward flagging culture.",
+      "Learn · Flag · Play - Yes Coach Productions kink-codes night at Sanctuary. Hosted by Unworthyslutboy. Top, bottom, vers energy and consent-forward flagging culture.",
     venueName: "Sanctuary Club",
     start: "2025-03-01T18:00:00-0800",
     end: "2025-03-01T23:00:00-0800",
@@ -450,9 +450,9 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_027,
     slug: "primal-masquerade-2025",
-    title: "Primal Masquerade — Mask 4 Mask",
+    title: "Primal Masquerade - Mask 4 Mask",
     description:
-      "Masquerade night at Sanctuary — masks, mystery, and primal energy. DJs Poundstar & Heart On. Hosted by Tucker Max.",
+      "Masquerade night at Sanctuary - masks, mystery, and primal energy. DJs Poundstar & Heart On. Hosted by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2025-10-05T18:00:00-0700",
     end: "2025-10-05T23:00:00-0700",
@@ -462,9 +462,9 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
   archiveRow({
     id: -900_028,
     slug: "yes-coach-apr-2026",
-    title: "Yes Coach — Fantasy Fetish",
+    title: "Yes Coach - Fantasy Fetish",
     description:
-      "Yes Coach Productions fantasy fetish party at Sanctuary — athletic gear, sports fantasy, and team energy. Friday night 9PM–close. Presented by Tucker Max.",
+      "Yes Coach Productions fantasy fetish party at Sanctuary - athletic gear, sports fantasy, and team energy. Friday night 9PM–close. Presented by Tucker Max.",
     venueName: "Sanctuary Club",
     start: "2026-04-03T21:00:00-0700",
     end: "2026-04-04T02:00:00-0700",
@@ -476,7 +476,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "sanctuary-overtime-2026",
     title: "Sanctuary Overtime",
     description:
-      "Construction-site chaos at Sanctuary — overtime energy, hard hats, and after-hours play. Yes Coach Productions. Hosted by Tucker Max with Detour Dan. Music by DJ Bro Hoe.",
+      "Construction-site chaos at Sanctuary - overtime energy, hard hats, and after-hours play. Yes Coach Productions. Hosted by Tucker Max with Detour Dan. Music by DJ Bro Hoe.",
     venueName: "Sanctuary Club",
     start: "2026-05-03T18:00:00-0700",
     end: "2026-05-03T23:00:00-0700",
@@ -488,7 +488,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "jawbreakers-2026",
     title: "Jawbreakers",
     description:
-      "Yes Coach Productions summer party at Sanctuary — June 7, 6PM–close. Tucker summer presale $19. Choking hazard warning: suckers, trophies, and hard candy energy.",
+      "Yes Coach Productions summer party at Sanctuary - June 7, 6PM–close. Tucker summer presale $19. Choking hazard warning: suckers, trophies, and hard candy energy.",
     venueName: "Sanctuary Club",
     start: "2026-06-07T18:00:00-0700",
     end: "2026-06-07T23:00:00-0700",
@@ -500,7 +500,7 @@ const TUCKER_HOSTED_ARCHIVE_ONE_OFFS: TuckerHostedArchiveRow[] = [
     slug: "goon-den-2026",
     title: "The Goon Den",
     description:
-      "Cock × Block presents The Goon Den at Sanctuary — July 5, 6PM–close. Bators-only night hosted by Tucker Max. Yes Coach Productions.",
+      "Cock × Block presents The Goon Den at Sanctuary - July 5, 6PM–close. Bators-only night hosted by Tucker Max. Yes Coach Productions.",
     venueName: "Sanctuary Club",
     start: "2026-07-05T18:00:00-0700",
     end: "2026-07-05T23:00:00-0700",
@@ -648,7 +648,7 @@ export type ProfileHostedEventWire = {
  * Flyer-confirmed archive nights where @brohoejams is DJ + Host.
  * Locker Room series (every last Friday) + Stank 2025, Camp Honey, Cozy,
  * Hyde Feb 2026 (hosted by Bro Hoe), Sanctuary Overtime.
- * Fairy Dust excluded — flyer only has DJ placeholders.
+ * Fairy Dust excluded - flyer only has DJ placeholders.
  */
 const BROHOE_ARCHIVE_ONE_OFF_SLUGS = new Set([
   "stank-pride-2025",
@@ -738,7 +738,7 @@ export function getArchiveSyntheticCredits(eventId: number): ArchiveSyntheticCre
     { username: TUCKER_HOSTED_ARCHIVE_USERNAME, role: "PRIMARY" },
   ];
   if (isBroHoeArchiveCredit(row)) {
-    // Hyde Feb 2026 flyer: hosted by Bro Hoe — still list Tucker as series primary,
+    // Hyde Feb 2026 flyer: hosted by Bro Hoe - still list Tucker as series primary,
     // Bro Hoe as COHOST + DJ (matches "DJ and Host" on every flyer-found credit).
     credits.push({ username: BROHOE_ARCHIVE_USERNAME, role: "COHOST" });
     credits.push({ username: BROHOE_ARCHIVE_USERNAME, role: "DJ" });

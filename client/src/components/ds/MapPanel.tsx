@@ -7,7 +7,7 @@ import { MapLegend } from "./MapLegend";
    background so the branded parts read: glowing day-colored pins, the legend,
    the rainbow seams top and bottom, and the Expand control. Feed it `pins`
    with { x, y, day } (percentages) or { x, y, multi:true }. */
-/* Deep-glass map surface — SoT §1.6 (overrides prior unframed radial map). */
+/* Deep-glass map surface - SoT §1.6 (overrides prior unframed radial map). */
 const CSS = `
 .pdxMap{
   position:relative; overflow:hidden; width:100%;
@@ -48,7 +48,7 @@ const CSS = `
 .pdxMap::before{ content:""; position:absolute; top:-10%; bottom:-10%; left:52%; width:90px; z-index:1;
   background:linear-gradient(180deg, rgba(40,60,90,.35), rgba(20,30,50,.28));
   transform:rotate(12deg); filter:blur(2px); pointer-events:none; }
-/* Shared rainbow engine (3px) — not a second seam system */
+/* Shared rainbow engine (3px) - not a second seam system */
 .pdxMap__seam{ position:absolute; left:0; right:0; height:3px; z-index:4; overflow:visible;
   background:var(--rainbow-bar, linear-gradient(90deg,var(--neon-cyan),var(--neon-yellow),var(--neon-magenta),var(--neon-orange),var(--neon-cyan)));
   background-size:200% 100%;

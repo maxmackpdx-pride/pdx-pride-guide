@@ -37,7 +37,7 @@ function parseProps(block: string[]): Map<string, string> {
 function icsDateValue(rawLine: string | undefined, plain: string | undefined): string | null {
   if (rawLine) {
     // DTSTART;TZID=America/Los_Angeles:20260718T210000
-    // DTSTART;TZID=UTC:20250628T010000  (UTC without Z — treat as Z)
+    // DTSTART;TZID=UTC:20250628T010000  (UTC without Z - treat as Z)
     const m = rawLine.match(/^DT(?:START|END)([^:]*):(.*)$/i);
     if (m) {
       const params = m[1];
@@ -49,7 +49,7 @@ function icsDateValue(rawLine: string | undefined, plain: string | undefined): s
       if (/TZID=(UTC|GMT)/i.test(params) && /^\d{8}T\d{6}$/i.test(val) && !/Z$/i.test(val)) {
         val = `${val}Z`;
       }
-      // Floating local with America/Los_Angeles — keep as Pacific wall-clock (no Z)
+      // Floating local with America/Los_Angeles - keep as Pacific wall-clock (no Z)
       if (/TZID=America\/Los_Angeles/i.test(params) && /^\d{8}T\d{6}$/i.test(val)) {
         const c = val.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
         if (c) return `${c[1]}-${c[2]}-${c[3]}T${c[4]}:${c[5]}:${c[6]}`;
@@ -109,15 +109,15 @@ export function parseIcs(text: string, sourceUrl: string | null = null): IngestE
     }
     let dateEnd = icsDateValue(props.get("DTEND_RAW"), props.get("DTEND"));
     if (!dateEnd) {
-      // DURATION not fully supported — default +3h
+      // DURATION not fully supported - default +3h
       dateEnd = defaultEndFromStart(dateStart);
-      warnings.push("No DTEND — defaulted to start + 3 hours");
+      warnings.push("No DTEND - defaulted to start + 3 hours");
     }
 
     const location = unescapeIcs(props.get("LOCATION") || "");
     const description = unescapeIcs(props.get("DESCRIPTION") || "") ||
       `${title}${location ? ` at ${location}` : ""}.`;
-    if (!props.get("DESCRIPTION")) warnings.push("No DESCRIPTION — generated stub");
+    if (!props.get("DESCRIPTION")) warnings.push("No DESCRIPTION - generated stub");
 
     const icsUrl = unescapeIcs(props.get("URL") || "");
     const eventPageUrl =

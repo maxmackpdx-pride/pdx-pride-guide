@@ -42,7 +42,7 @@ export default function HomeStatStrip({ placesCount, goingCount, countdownTarget
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--countdown" aria-live="polite">
           {!hasTarget ? (
-            <span>—</span>
+            <span>-</span>
           ) : live ? (
             <span>Now</span>
           ) : (

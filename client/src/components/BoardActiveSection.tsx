@@ -14,7 +14,7 @@ type BoardActiveSectionProps = {
   /** `sticker` = rotated badge (legacy). `mono` = design-makeover kicker. */
   stickerStyle?: "sticker" | "mono";
   title: string;
-  /** e.g. "6 showing" — mono meta on the right of the head. */
+  /** e.g. "6 showing" - mono meta on the right of the head. */
   resultCount?: ReactNode;
   filters?: ReactNode;
   filterRow2?: ReactNode;

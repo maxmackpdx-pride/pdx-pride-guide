@@ -168,7 +168,7 @@ function HubRightRail({
           {suggestions.length === 0 && (
             <p className="kick hub-people-rail__empty-copy">
               You&apos;re following the scene by default. Unfollow anyone on their
-              profile or from their posts — they&apos;ll show up here to re-follow.
+              profile or from their posts - they&apos;ll show up here to re-follow.
             </p>
           )}
         </div>
@@ -280,8 +280,8 @@ export default function HubV2({
   const stats =
     profileStats ??
     [
-      { value: followStats?.followers ?? "—", label: "Followers" },
-      { value: followStats?.following ?? "—", label: "Following" },
+      { value: followStats?.followers ?? "-", label: "Followers" },
+      { value: followStats?.following ?? "-", label: "Following" },
       { value: hostingEvents.length + goingEvents.length, label: "Events" },
       { value: postsCount, label: "Posts" },
     ];
@@ -321,7 +321,7 @@ export default function HubV2({
       )}
       {section === "people" && <HubPeople key="people" />}
       {section === "settings" && <HubSettings key="settings" onLogout={onLogout} />}
-      {/* Admin overview / tables only on /admin — not mixed into member hub. */}
+      {/* Admin overview / tables only on /admin - not mixed into member hub. */}
     </>
   );
 

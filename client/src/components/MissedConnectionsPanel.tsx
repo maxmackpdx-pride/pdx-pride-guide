@@ -194,14 +194,14 @@ export default function MissedConnectionsPanel({
     onSuccess: () => {
       setReplyingTo(null);
       setReplyBody("");
-      toast({ title: "Reported", description: "Thanks — our team will review this post." });
+      toast({ title: "Reported", description: "Thanks - our team will review this post." });
     },
     onError: () => toast({ title: "Could not report", variant: "destructive" }),
   });
 
   const handleReport = () => {
     if (!replyingTo) return;
-    const reason = window.prompt("Report this post — what's wrong with it? (optional)");
+    const reason = window.prompt("Report this post - what's wrong with it? (optional)");
     if (reason === null) return; // cancelled
     reportMutation.mutate(reason.trim());
   };

@@ -7,7 +7,7 @@ export const PROFILE_ACCENT_COLORS = [
   "#CCFF00",
   "#FF6600",
   "#8800FF",
-  "#00EE44", // neon-green — must match profileTheme (not day-sat #39FF14)
+  "#00EE44", // neon-green - must match profileTheme (not day-sat #39FF14)
   "#0044FF",
   "#FF2400",
 ] as const;

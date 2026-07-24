@@ -168,7 +168,7 @@ export const insertModerationRequestSchema = createInsertSchema(moderationReques
 export type InsertModerationRequest = z.infer<typeof insertModerationRequestSchema>;
 export type ModerationRequest = typeof moderationRequests.$inferSelect;
 
-// Business ownership claims (existing venue) — mirrors the event CLAIM flow in `submissions`
+// Business ownership claims (existing venue) - mirrors the event CLAIM flow in `submissions`
 export const businessClaims = sqliteTable("business_claims", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   businessId: integer("business_id").notNull(),
@@ -269,16 +269,16 @@ export const users = sqliteTable("users", {
   socialLinks: text("social_links"), // JSON object keyed by platform
   profileEmbeds: text("profile_embeds"), // JSON array of {id,src,title}
   profilePhotos: text("profile_photos"), // JSON array of {url,caption}
-  talents: text("talents"), // JSON string[] — skills/roles the profile owner offers
-  standFor: text("stand_for"), // JSON string[] — promoter-only "what we stand for" checklist
-  affiliatedVenueIds: text("affiliated_venue_ids"), // JSON number[] — "Resident at" venues (business ids)
-  marquee: text("marquee"), // JSON {items:string[],speed:number,color:string} | null — promoter-only ticker
-  top8: text("top8"), // JSON [{k:"u"|"b",id:number}] | null — MySpace-style Top 8 (people + venues)
+  talents: text("talents"), // JSON string[] - skills/roles the profile owner offers
+  standFor: text("stand_for"), // JSON string[] - promoter-only "what we stand for" checklist
+  affiliatedVenueIds: text("affiliated_venue_ids"), // JSON number[] - "Resident at" venues (business ids)
+  marquee: text("marquee"), // JSON {items:string[],speed:number,color:string} | null - promoter-only ticker
+  top8: text("top8"), // JSON [{k:"u"|"b",id:number}] | null - MySpace-style Top 8 (people + venues)
   accentColor: text("accent_color"), // hex from the fixed neon allowlist, or null for the site default
   banner: text("banner"), // 'accent-gradient' | 'neon-collage' | 'sticker-wall' | 'pride-guide-social'
   coverImageUrl: text("cover_image_url"),
   coverCrop: text("cover_crop"),
-  pup: text("pup"), // JSON {name,hood,role,lookingFor} | null — member-only, opt-in pup identity
+  pup: text("pup"), // JSON {name,hood,role,lookingFor} | null - member-only, opt-in pup identity
   googleId: text("google_id").unique(),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
@@ -318,7 +318,7 @@ export const follows = sqliteTable("follows", {
 });
 export type Follow = typeof follows.$inferSelect;
 
-// Pack links (profile "Pack & pup life" card — packmate/handler relations between real users)
+// Pack links (profile "Pack & pup life" card - packmate/handler relations between real users)
 export const packLinks = sqliteTable("pack_links", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
@@ -462,7 +462,7 @@ export type GiftingInterest = typeof giftingInterests.$inferSelect;
 export type InsertGiftingReport = z.infer<typeof insertGiftingReportSchema>;
 export type GiftingReport = typeof giftingReports.$inferSelect;
 
-// River Brats — Nude Beaches social
+// River Brats - Nude Beaches social
 export const beachCheckins = sqliteTable("beach_checkins", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
@@ -475,14 +475,14 @@ export const beachCheckins = sqliteTable("beach_checkins", {
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   reportCount: integer("report_count").notNull().default(0),
-  // 'PLANNED' | 'HERE' — GPS-verified presence; raw coordinates never stored.
+  // 'PLANNED' | 'HERE' - GPS-verified presence; raw coordinates never stored.
   presence: text("presence").notNull().default("PLANNED"),
   gpsVerifiedAt: text("gps_verified_at"),
   expiresAt: text("expires_at").notNull(),
   createdAt: text("created_at").notNull().default(""),
 });
 
-// One-shot timed nudges ("you said 4pm — are you here?"). Fired by the
+// One-shot timed nudges ("you said 4pm - are you here?"). Fired by the
 // server-side prompt scheduler; PENDING → SENT | CANCELLED | SKIPPED.
 export const scheduledPrompts = sqliteTable("scheduled_prompts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -643,7 +643,7 @@ export const insertHubFeedPostSchema = createInsertSchema(hubFeedPosts).omit({
 export type InsertHubFeedPost = z.infer<typeof insertHubFeedPostSchema>;
 export type HubFeedPost = typeof hubFeedPosts.$inferSelect;
 
-// Event hosts (up to 3 per event — primary + co-hosts)
+// Event hosts (up to 3 per event - primary + co-hosts)
 export const eventHosts = sqliteTable("event_hosts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   eventId: integer("event_id").notNull(),

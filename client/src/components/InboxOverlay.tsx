@@ -126,7 +126,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Close on outside press — but never on the same gesture that opened the
+  // Close on outside press - but never on the same gesture that opened the
   // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open
   // can toggle cleanly without an instant close.
   useEffect(() => {
@@ -242,7 +242,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           </header>
           <div style={{ padding: "28px 22px 32px", display: "flex", flexDirection: "column", gap: 16, alignItems: "flex-start" }}>
             <p style={{ margin: 0, color: "#e6e3da", fontSize: "0.95rem", lineHeight: 1.5, maxWidth: 36 + "ch" }}>
-              Local demo — floating inbox glass shell. Sign in to load real threads, posts, and queues.
+              Local demo - floating inbox glass shell. Sign in to load real threads, posts, and queues.
             </p>
             <p style={{ margin: 0, color: "#8a8a8a", fontSize: "0.8rem", lineHeight: 1.45 }}>
               Smoke account if seeded: <code style={{ color: "#3d7cff" }}>tucker@test.com</code> /{" "}
@@ -679,7 +679,7 @@ type ThreadDetailProps = {
   onReact?: (messageId: string, code: MessageReactionCode) => void | Promise<void>;
 };
 
-// Full thread view rendered in place inside the floating inbox — no navigation.
+// Full thread view rendered in place inside the floating inbox - no navigation.
 // Reading, replying, archiving, and lineup approve/deny all happen here.
 function ThreadDetail({
   thread,

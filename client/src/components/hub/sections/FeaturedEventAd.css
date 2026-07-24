@@ -1,4 +1,4 @@
-/* Featured event ad (Yes Coach / Stank, etc.) — deep-glass shell.
+/* Featured event ad (Yes Coach / Stank, etc.) - deep-glass shell.
    Layout / 3 rows (countdown · tickets · RSVP) and row colors unchanged.
    Edge: black ring + day-accent bloom (same language as feed affiliate cards). */
 
@@ -49,7 +49,7 @@
   border-color: color-mix(in srgb, var(--c) 65%, transparent);
 }
 
-/* Poster well — day-accent floor under slideshow */
+/* Poster well - day-accent floor under slideshow */
 .featured-event-ad__media {
   position: relative;
   width: 100%;
@@ -95,7 +95,7 @@
   );
 }
 
-/* Three content rows under media — same spacing/type as before */
+/* Three content rows under media - same spacing/type as before */
 .featured-event-ad__row {
   display: block;
   width: 100%;
@@ -138,7 +138,7 @@
   color: var(--board-muted, #999);
 }
 
-/* Row accents — data colors stay intact */
+/* Row accents - data colors stay intact */
 .featured-event-ad__row-label--cyan {
   color: #19e3ff;
   text-shadow: 0 0 16px #19e3ff80;

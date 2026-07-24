@@ -36,7 +36,7 @@ import "./Directory.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-/** Browse layout map — desktop sticky map; ~30% taller than prior 570px. */
+/** Browse layout map - desktop sticky map; ~30% taller than prior 570px. */
 const DIRECTORY_MAP_HEIGHT = 741;
 
 export type DirectoryEventSummary = {
@@ -206,7 +206,7 @@ export default function Directory() {
     width: number;
     height: number;
   } | null>(null);
-  // Lazy init — function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
+  // Lazy init - function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
   const [showGrid, setShowGrid] = useState(() => directoryHasDeepLink() || Boolean(routePlaceId));
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
@@ -268,7 +268,7 @@ export default function Directory() {
     setLocation(`/directory${directoryQuerySuffix()}`);
   }, [setLocation, directoryQuerySuffix]);
 
-  // Deep link: /directory/:id/:slug or legacy ?place= — open when present, clear when gone (browser back).
+  // Deep link: /directory/:id/:slug or legacy ?place= - open when present, clear when gone (browser back).
   // Origin rect is owned by openPlace (card click). Deep links leave it null for soft enter.
   useEffect(() => {
     if (!businesses.length) return;
@@ -309,7 +309,7 @@ export default function Directory() {
           .filter(Boolean)
           .join(" · ")
           .slice(0, 160) || `${placeSeo.name} on Zaylist.`
-      : "Bars, restaurants, cafes, venues, and services that are ours — or truly for us — in Portland.",
+      : "Bars, restaurants, cafes, venues, and services that are ours - or truly for us - in Portland.",
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
@@ -569,7 +569,7 @@ export default function Directory() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list spots that are ours or truly for us — including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it.</p>
+            <p className="board-copy-sm">Logged-in members can list spots that are ours or truly for us - including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it.</p>
             {submitResult ? (
               <div className="submit-success">
                 <div className="submit-success__title">{submitResult.title}</div>
@@ -809,7 +809,7 @@ export default function Directory() {
                             openPlace(live);
                             return;
                           }
-                          // Stale id still on disk — open by path so deep-link can resolve if still live.
+                          // Stale id still on disk - open by path so deep-link can resolve if still live.
                           setShowGrid(true);
                           setLocation(`${placePath(entry.id, entry.name)}${directoryQuerySuffix()}`);
                         }}

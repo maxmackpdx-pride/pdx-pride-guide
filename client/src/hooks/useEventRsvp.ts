@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { DEFAULT_ATTENDANCE_PHRASE_KEY, attendancePhraseLabel } from "@shared/attendancePhrases";
 
 /**
- * Shared RSVP (attendance check-in) toggle — same mutations/query-keys as
+ * Shared RSVP (attendance check-in) toggle - same mutations/query-keys as
  * Schedule.tsx's inline implementation, extracted for reuse by the Home
  * headliner rail and the Events page "On Now" rails.
  */

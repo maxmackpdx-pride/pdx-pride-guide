@@ -117,7 +117,7 @@ function buildDayChips(pool: EventListing[], pastView: boolean, nowMs: number): 
   const chips: DayChip[] = [{ key: "ALL", label: "All" }];
   const { weekend, thisWeek, nextWeek } = buildDateWindows(nowMs);
 
-  // Week windows first — quick “what’s on now / coming up”
+  // Week windows first - quick “what’s on now / coming up”
   if (poolHitsDates(pool, thisWeek)) {
     chips.push({ key: "THIS_WEEK", label: "This week" });
   }
@@ -458,7 +458,7 @@ export default function Events() {
     return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
   }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
 
-  // All upcoming (not-yet-ended) live events — the site is year-round now.
+  // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;
 
   const heroStats = useMemo(() => {

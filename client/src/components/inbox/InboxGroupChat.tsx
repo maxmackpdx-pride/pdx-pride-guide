@@ -61,7 +61,7 @@ type Props = {
 
 /**
  * Event / beach day-room chat rendered inside the floating inbox sheet
- * (same chrome as ThreadDetail — no full-page navigation, no off-screen drawer).
+ * (same chrome as ThreadDetail - no full-page navigation, no off-screen drawer).
  */
 export default function InboxGroupChat({ target, onBack }: Props) {
   const [body, setBody] = useState("");

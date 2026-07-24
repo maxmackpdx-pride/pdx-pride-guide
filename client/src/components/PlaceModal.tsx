@@ -78,7 +78,7 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
   };
 }
 
-/* Detail modal for a directory business — same fixed-overlay flex-center
+/* Detail modal for a directory business - same fixed-overlay flex-center
    idiom as the Schedule embed popover / AuthModal / MissedConnectionsPanel:
    click the overlay to close, stopPropagation on the panel. Roomier version
    of PlaceCard's content (name, category, address/hours/phone, description,
@@ -100,13 +100,13 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** Nonprofit card border — full-spectrum rainbow instead of a single category color. */
+/** Nonprofit card border - full-spectrum rainbow instead of a single category color. */
 const NONPROFIT_RAINBOW_EDGE =
   "linear-gradient(120deg,var(--neon-red),#FF9500,var(--yellow),var(--green),var(--neon-cyan),#3A6BFF,var(--neon-violet),var(--neon-magenta))";
-/** Health & Care — pink → white neon edge. */
+/** Health & Care - pink → white neon edge. */
 const HEALTHCARE_EDGE =
   "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
-/** Real Estate — neon navy → white edge. */
+/** Real Estate - neon navy → white edge. */
 const REALESTATE_EDGE =
   "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
 
@@ -202,7 +202,7 @@ export default function PlaceModal({
   place: Business | null;
   onClose: () => void;
   onRequireAuth: () => void;
-  /** Bounding rect of the directory card that was clicked — drives little→big expand. */
+  /** Bounding rect of the directory card that was clicked - drives little→big expand. */
   originRect?: PlaceModalOriginRect | null;
 }) {
   const { toast } = useToast();

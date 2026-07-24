@@ -270,7 +270,7 @@ export function startScan(opts: StartScanOpts): { jobId: string; total: number; 
     return { error: "A scan is already running" };
   }
   if (active && !live.has(active.id)) {
-    // DB says running but process has no handle — mark failed and continue
+    // DB says running but process has no handle - mark failed and continue
     updateScanJob({
       id: active.id,
       status: "failed",
@@ -739,7 +739,7 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
         sourceId: String(c.sourceId || ""),
       });
 
-      // Same-series prior flyer only — never "any poster from this venue"
+      // Same-series prior flyer only - never "any poster from this venue"
       const missingFlyer = !draft.posterImageUrl || isEventPlaceholderUrl(draft.posterImageUrl);
       const strong = c.strongDuplicate as { eventId?: number; confidence?: string } | null | undefined;
       const dups =
@@ -835,7 +835,7 @@ export function dashboardSnapshot(businesses: StartScanOpts["businesses"]) {
   };
 }
 
-/** Resume marker if process died mid-scan — mark orphan running jobs failed. */
+/** Resume marker if process died mid-scan - mark orphan running jobs failed. */
 export function recoverOrphanScans() {
   const active = getActiveScanJobRow();
   if (active && !live.has(active.id)) {

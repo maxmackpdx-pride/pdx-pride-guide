@@ -30,7 +30,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
       text: g.description || g.title,
       createdAt: g.createdAt || "",
     })),
-    // Missed connections intentionally omitted — anonymous by design.
+    // Missed connections intentionally omitted - anonymous by design.
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (

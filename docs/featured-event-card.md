@@ -1,4 +1,4 @@
-# Featured Event Card — template & how it rotates
+# Featured Event Card - template & how it rotates
 
 The **featured event ad** is the big glowing card pinned at the top of the Hub
 Scene Feed (the one built for **Stank · Yes Coach**): a poster/slideshow hero
@@ -34,12 +34,12 @@ const CAMP_SLIDES = ["/posters/camp-slides/1.jpg", "/posters/camp-slides/2.jpg"]
 const FEATURED: FeaturedConfig[] = [
   { key: "stank", anchor: true, match: (t) => /stank/i.test(t), slides: STANK_SLIDES },
 
-  // 👇 new one — no `anchor`, so it rotates through the in-between slots
+  // 👇 new one - no `anchor`, so it rotates through the in-between slots
   { key: "camp", match: (t) => /gaylabration|camp/i.test(t), slides: CAMP_SLIDES },
 ];
 ```
 
-That's it — the matching event auto-features. `match` is a function on the
+That's it - the matching event auto-features. `match` is a function on the
 event title, so use a regex loose enough to survive punctuation.
 
 ## How multiple featured events share the slot (the rules)
@@ -57,7 +57,7 @@ more than one eligible:
 
 - **Auto-expires after the event ends.** Once `Date.now()` passes the event's
   end time (`eventEndMs` handles the 9pm–2am cross-midnight case; falls back to
-  ~6h if no end time), that card stops showing — no cleanup needed.
+  ~6h if no end time), that card stops showing - no cleanup needed.
 - **Dismiss (X) hides it for the rest of the Pacific day**, per event
   (`hub-promo-<key>-dismissed-day`). It comes back the next day (until the event
   ends). Dismissing one doesn't swap in another on the same load.
@@ -78,5 +78,5 @@ more than one eligible:
 2. Slides in `client/public/posters/<key>-slides/`.
 3. One `FEATURED` entry (`key`, `match`, `slides`; add `anchor: true` only for
    the every-other event).
-4. `npm run build`, then load `/dashboard` — the card shows at the top of the
+4. `npm run build`, then load `/dashboard` - the card shows at the top of the
    feed, glowing in the day color, and disappears after the event ends.

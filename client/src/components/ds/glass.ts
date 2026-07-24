@@ -5,7 +5,7 @@
  * (GROK_MIGRATION_PROMPT.md §1 + Card System.html glass()/glassGrey()).
  * Overrides prior locked lite-glass + default brutal CTA chrome.
  *
- * Layout, radii-as-structure, fonts, and type scale are out of scope —
+ * Layout, radii-as-structure, fonts, and type scale are out of scope -
  * these only set fill / edge / bloom / sheen / button chrome.
  *
  * Prefer CSS utilities in tokens/glass.css (set --c / --_c on the node).
@@ -35,7 +35,7 @@ export function glass(accent: GlassAccent): string {
   ].join("; ");
 }
 
-/** Neutral / grey glass (no semantic accent) — glassGrey(). */
+/** Neutral / grey glass (no semantic accent) - glassGrey(). */
 export function glassNeutral(): string {
   const c1 = NEUTRAL_C1;
   const c2 = NEUTRAL_C2;
@@ -52,7 +52,7 @@ export function glassNeutral(): string {
   ].join("; ");
 }
 
-/** @deprecated alias — same as glassNeutral */
+/** @deprecated alias - same as glassNeutral */
 export const glassGrey = glassNeutral;
 
 /** Top-left diagonal sheen layer (absolute child). */

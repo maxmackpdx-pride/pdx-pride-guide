@@ -6,7 +6,7 @@ const PACIFIC_TZ = "America/Los_Angeles";
 const DEFAULT_VENUE = "Badlands";
 const DEFAULT_ADDRESS = "110 NW Broadway, Portland, OR";
 const DEFAULT_NEIGHBORHOOD = "Old Town";
-/** Badlands is a 21+ bar — never all-ages. */
+/** Badlands is a 21+ bar - never all-ages. */
 const BADLANDS_AGE = "21_PLUS" as const;
 
 /**
@@ -118,7 +118,7 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
     let dateEnd = toPacificWallClock(evt.end);
     if (!dateEnd) {
       dateEnd = defaultEndFromStart(dateStart);
-      warnings.push("No end — defaulted +3h");
+      warnings.push("No end - defaulted +3h");
     }
 
     let description = String(evt.description || evt.blurb || "")
@@ -127,7 +127,7 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
       .trim();
     if (!description) {
       description = `${title} at ${DEFAULT_VENUE}.`;
-      warnings.push("No description — stub");
+      warnings.push("No description - stub");
     }
 
     const link = evt.link ? String(evt.link).trim() : "";
@@ -136,7 +136,7 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
 
     const poster = evt.photoUrl ? String(evt.photoUrl).trim() : "";
 
-    // Never invent FREE — only FREE when text clearly says so
+    // Never invent FREE - only FREE when text clearly says so
     const adm = inferAdmissionFromText(title, description);
     if (adm.reason) warnings.push(adm.reason);
 

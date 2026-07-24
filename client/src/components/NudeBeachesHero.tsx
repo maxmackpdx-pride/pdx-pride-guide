@@ -19,7 +19,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
   const stats = isRooster
     ? [
         {
-          num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "—",
+          num: snapshot?.roosterRock.airTempF != null ? `${snapshot.roosterRock.airTempF}°` : "-",
           label: "air temp",
           color: "var(--neon-orange, #ff6600)",
         },
@@ -27,7 +27,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           num:
             snapshot?.roosterRock.waterTempF != null
               ? `${Math.round(snapshot.roosterRock.waterTempF)}°`
-              : "—",
+              : "-",
           label: "water temp",
           color: "#19e3ff",
         },
@@ -43,12 +43,12 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
             normalizeSwimStatusLabel(
               snapshot?.sauvieIsland.swimStatusLabel,
               snapshot?.sauvieIsland.swimStatus,
-            ) || "—",
+            ) || "-",
           label: "Collins swim",
           color: "var(--neon-green, #00EE44)",
         },
         {
-          num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "—",
+          num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "-",
           label: "air temp",
           color: "var(--neon-green, #00EE44)",
         },
@@ -78,7 +78,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           }
           lede={
             isRooster
-              ? "River level, air and water temps, forecast, directions, and day-use parking pass info — plus a GPS group chat that unlocks once you're actually on the beach."
+              ? "River level, air and water temps, forecast, directions, and day-use parking pass info - plus a GPS group chat that unlocks once you're actually on the beach."
               : "Swim Guide water quality, Sauvie Island Parking permits, island weather, and the links Collins Beach travelers use."
           }
         />

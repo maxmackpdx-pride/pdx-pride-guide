@@ -1,5 +1,5 @@
 /* ============================================================
-   Sandbox DS — data-display components
+   Sandbox DS - data-display components
    ============================================================ */
 
 /* ---- Badge ------------------------------------------------ */
@@ -89,7 +89,7 @@
   letter-spacing: 0.02em;
   text-shadow: 0 0 22px color-mix(in srgb, var(--_c, var(--lime)) 60%, transparent);
 }
-/* Rainbow numbers — same sweep as marquee --grad-rainbow */
+/* Rainbow numbers - same sweep as marquee --grad-rainbow */
 .pdxCountdown--rainbow .pdxCountdown__num,
 .pdxCountdown--rainbow .pdxCountdown__done {
   background: var(--grad-rainbow);

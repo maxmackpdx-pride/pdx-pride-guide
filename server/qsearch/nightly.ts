@@ -1,5 +1,5 @@
 /**
- * Nightly QSearch scan — ~3am America/Los_Angeles.
+ * Nightly QSearch scan - ~3am America/Los_Angeles.
  * Lands candidates in review queue (pending), never LIVE.
  *
  * Trusted venue auto-publish sync also runs once per day at 3am Pacific
@@ -64,7 +64,7 @@ export function startQSearchNightly() {
 
 /**
  * Fire-and-forget trusted venue pull (once per Pacific day).
- * Queues into Review (same as manual) — never auto-LIVE at night.
+ * Queues into Review (same as manual) - never auto-LIVE at night.
  */
 function fireTrustedSync(dayKey: string) {
   if (lastTrustedSyncKey === dayKey) return;
@@ -73,7 +73,7 @@ function fireTrustedSync(dayKey: string) {
   void import("./trustedSync")
     .then(mod => {
       if (typeof mod.syncAllTrustedVenues !== "function") {
-        console.warn("[qsearch-nightly] trustedSync.syncAllTrustedVenues missing — skip");
+        console.warn("[qsearch-nightly] trustedSync.syncAllTrustedVenues missing - skip");
         return;
       }
       return mod.syncAllTrustedVenues({ mode: "review" }).then(
@@ -100,7 +100,7 @@ async function tick() {
   // Avoid double-run if last job was nightly today
   const latest = getLatestScanJob();
   if (latest?.kind === "nightly" && latest.startedAt?.startsWith(key.slice(0, 10))) {
-    // startedAt is ISO UTC — fall back to lastNightlyKey only
+    // startedAt is ISO UTC - fall back to lastNightlyKey only
   }
 
   lastNightlyKey = key;

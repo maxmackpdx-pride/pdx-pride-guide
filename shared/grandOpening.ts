@@ -2,7 +2,7 @@
  * Grand Opening badge + date under place name.
  *
  * ONLY use a verified grandOpeningDate (YYYY-MM-DD or ISO). Never treat
- * directory seed date / createdAt / isNew alone as a grand opening — many
+ * directory seed date / createdAt / isNew alone as a grand opening - many
  * places were flagged isNew when added to the guide years after opening.
  *
  * Tags and date line stay live for 60 days from the verified opening day.

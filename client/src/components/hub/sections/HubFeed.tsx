@@ -48,7 +48,7 @@ const FEATURED: FeaturedConfig[] = [
     slides: STANK_SLIDES,
     easterEggUrl: "/easter-eggs/stank-secret-story.html",
   },
-  // Add more featured events here — they rotate through the non-anchor slots.
+  // Add more featured events here - they rotate through the non-anchor slots.
 ];
 
 const dismissKeyFor = (key: string) => `hub-promo-${key}-dismissed-day`;
@@ -133,7 +133,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       const params = new URLSearchParams({ tab: filter, limit: "30" });
       try {
         const r = await fetch(`/api/hub/feed?${params}`, { credentials: "include" });
-        // Local demo (no session): API is auth-gated — scene sample cards for look/feel.
+        // Local demo (no session): API is auth-gated - scene sample cards for look/feel.
         if (!r.ok) {
           if (isLocalDemo()) return getLocalDemoHubFeed(filter);
           throw new Error("Could not load feed");

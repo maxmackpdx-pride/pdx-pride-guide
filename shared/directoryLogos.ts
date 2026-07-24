@@ -135,7 +135,7 @@ export function resolveDirectoryLogo(
   const norm = normalizeDirectoryName(name);
   let stem = STEM_BY_NORMALIZED[norm];
   // Safe prefix only (venue name starts with a known stem). Never substring /
-  // reverse-prefix — those false-match ("Not Darcelle", "Night Hawks").
+  // reverse-prefix - those false-match ("Not Darcelle", "Night Hawks").
   // Prefer longest key so "campbarpdx" wins over "camp" if both ever applied.
   if (!stem && norm.length >= 6) {
     let bestKey = "";

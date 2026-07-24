@@ -45,7 +45,7 @@ function extractJsonLdBlocks(html: string): unknown[] {
     try {
       blocks.push(JSON.parse(raw));
     } catch {
-      // Some sites emit trailing commas or multi-root — try a soft fix.
+      // Some sites emit trailing commas or multi-root - try a soft fix.
       try {
         blocks.push(JSON.parse(raw.replace(/,\s*([}\]])/g, "$1")));
       } catch {
@@ -205,7 +205,7 @@ function nodeToDraft(node: Record<string, unknown>, sourceUrl: string | null): I
   let dateEnd = toPacificWallClock(textOf(node.endDate));
   if (!dateEnd) {
     dateEnd = defaultEndFromStart(dateStart);
-    warnings.push("No endDate — defaulted to start + 3 hours");
+    warnings.push("No endDate - defaulted to start + 3 hours");
   }
 
   const place = placeFrom(node);
@@ -213,7 +213,7 @@ function nodeToDraft(node: Record<string, unknown>, sourceUrl: string | null): I
   if (description.includes("<")) description = stripHtml(description);
   if (!description) {
     description = `${title} at ${place.venueName}.`;
-    warnings.push("No description — generated stub");
+    warnings.push("No description - generated stub");
   }
 
   const poster = imageUrl(node);

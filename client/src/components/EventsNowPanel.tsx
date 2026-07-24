@@ -17,7 +17,7 @@ import AuthModal from "@/components/AuthModal";
 import "./EventsNowPanel.css";
 
 /**
- * Events page panel beside the map: two right-to-left marquees —
+ * Events page panel beside the map: two right-to-left marquees -
  * Happening Now (anything currently between start and end) and
  * Up Next (next 10 not-yet-started events).
  */

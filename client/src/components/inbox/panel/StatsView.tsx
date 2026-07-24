@@ -59,7 +59,7 @@ function fmtSession(sec: number): string {
   return `${m}m ${s}s`;
 }
 function fmtDelta(cur: number, prev: number): string {
-  if (!prev) return cur > 0 ? "new" : "—";
+  if (!prev) return cur > 0 ? "new" : "-";
   const pct = Math.round(((cur - prev) / prev) * 100);
   return `${pct >= 0 ? "+" : ""}${pct}% vs last week`;
 }
@@ -138,7 +138,7 @@ export default function StatsView() {
         [m.users, "REGISTERED USERS"],
         [m.newUsersToday, "NEW USERS TODAY"],
         [m.liveEvents, "LIVE EVENTS"],
-        [places.length || "—", "DIRECTORY PLACES"],
+        [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
         [m.giftingPosts, "GIFTING POSTS"],
         [m.missedConnections, "MISSED CONNECTIONS"],
@@ -146,7 +146,7 @@ export default function StatsView() {
       ]
     : [
         [m.liveEvents, "LIVE EVENTS"],
-        [places.length || "—", "DIRECTORY PLACES"],
+        [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
         [m.giftingPosts, "GIFTING POSTS"],
         [m.missedConnections, "MISSED CONNECTIONS"],

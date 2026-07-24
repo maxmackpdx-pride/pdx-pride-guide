@@ -7,7 +7,7 @@ import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 
 /**
  * Opens a board post (gig or gift) as an overlay on top of whatever's behind
- * it — tapped from the hub feed, it shows the real, fully-interactive board
+ * it - tapped from the hub feed, it shows the real, fully-interactive board
  * card (Say Hi / Raise Hand / owner actions) without navigating away, so
  * closing returns you to your exact scroll spot. Portaled to <body> so the
  * fixed overlay escapes the feed's transformed wrappers.

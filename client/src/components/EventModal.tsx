@@ -595,7 +595,7 @@ function EventModalInner({
             )}
           </div>
 
-          {/* Flags = day + policy chips; Tags = JSON types — open-event SoT */}
+          {/* Flags = day + policy chips; Tags = JSON types - open-event SoT */}
           {(() => {
             const flagsRow = (
               <EventTagsRow

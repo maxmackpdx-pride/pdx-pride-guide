@@ -1,5 +1,5 @@
 /**
- * Scan relevance filters — keep QSearch drafts on Portland queer nightlife,
+ * Scan relevance filters - keep QSearch drafts on Portland queer nightlife,
  * not Eventbrite city dumps, German webinars, or random bar crawls.
  */
 import type { IngestEventDraft } from "./types";
@@ -14,7 +14,7 @@ const QUEER_SIGNAL =
 const QUEER_VENUE =
   /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|crush|nest\s*lounge|process|escape\s*bar|sports\s*bra|bar\s*cala|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf[eé]|living\s*room\s*wines)\b/i;
 
-/** Generic Eventbrite "local events" dumps — never a valid resolved recipe. */
+/** Generic Eventbrite "local events" dumps - never a valid resolved recipe. */
 export function isGenericEventbriteDumpUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   try {
@@ -115,8 +115,8 @@ export function matchesVenueScope(
     .join(" ")
     .toLowerCase();
 
-  // Where the event actually IS — venue name, address, and the event's own
-  // Eventbrite slug — as opposed to what its title/description happen to say.
+  // Where the event actually IS - venue name, address, and the event's own
+  // Eventbrite slug - as opposed to what its title/description happen to say.
   // A generic word like "Sports" in a *title* must never scope-match The
   // Sports Bra; only a location field (or the event's own EB slug) counts.
   const locBlob = [draft.venueName, draft.address, draft.sourceUrl, draft.ticketUrl]
@@ -134,15 +134,15 @@ export function matchesVenueScope(
   // Multi-token venue (sports + bra): need the distinctive pair to appear in the
   // LOCATION fields, not merely in a title. "Kellogg Creek Ward Sports Night"
   // (title has "sports", venue is a church) and "StrongFirst Barbell Cert"
-  // (at Hardstyle Strength) must both fail — they are not AT The Sports Bra.
+  // (at Hardstyle Strength) must both fail - they are not AT The Sports Bra.
   if (scopeTokens.length >= 2) {
     const hits = scopeTokens.filter(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(locBlob));
     if (hits.length >= 2) return true;
-    // concatenated form e.g. "sportbra" rare — also allow full phrase (location fields)
+    // concatenated form e.g. "sportbra" rare - also allow full phrase (location fields)
     const phrase = scopeTokens.join("\\s+");
     if (new RegExp(`\\b${phrase}\\b`, "i").test(locBlob)) return true;
     // A single distinctive token can stand in for the venue (e.g. "escape",
-    // "sanctuary") — but NOT a generic word like "sports"/"dance"/"night", or
+    // "sanctuary") - but NOT a generic word like "sports"/"dance"/"night", or
     // every sports/dance/night event city-wide would pass.
     const distinctive = scopeTokens.filter(t => t.length >= 5 && !GENERIC_SCOPE_TOKEN.test(t));
     if (distinctive.some(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(blob))) return true;
@@ -168,8 +168,8 @@ export type SourceRelevanceContext = {
  * Infer how strict to be for this source.
  * - venue: Eventbrite org or city search named after a place
  * - keyword: city LGBTQ keyword searches (gay, drag, …)
- * - general: aggregators / loose city feeds — queer + Portland
- * - open: trusted venue calendars (Sanctuary HTML, Tribe, …) — only drop foreign EB + non-events
+ * - general: aggregators / loose city feeds - queer + Portland
+ * - open: trusted venue calendars (Sanctuary HTML, Tribe, …) - only drop foreign EB + non-events
  */
 export function relevanceModeForSource(ctx: SourceRelevanceContext): "venue" | "keyword" | "general" | "open" {
   const id = ctx.sourceId.toLowerCase();

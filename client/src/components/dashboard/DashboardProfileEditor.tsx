@@ -6,7 +6,7 @@ import { AVATAR_EMOJI_OPTIONS } from "@shared/avatarRings";
 import { PROFILE_PHOTO_RULES_SUMMARY } from "@shared/boardModeration";
 import { formatUsernameChangeDate, usernameChangeEligibility } from "@shared/username";
 
-/** Kept for DashboardEventEditor — event forms still use inline dash styles. */
+/** Kept for DashboardEventEditor - event forms still use inline dash styles. */
 const labelStyle: React.CSSProperties = {
   display: "block", fontFamily: "var(--font-display)", fontWeight: 900,
   fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase",

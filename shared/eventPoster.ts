@@ -1,7 +1,7 @@
 import type { NudeBeachTab } from "./nudeBeaches";
 import { EVENT_WEEK_DAYS, type EventWeekDay } from "./eventWeek";
 
-/** Neutral fallback when day is unknown — no weekday word. */
+/** Neutral fallback when day is unknown - no weekday word. */
 export const EVENT_PLACEHOLDER_PENDING = "/placeholders/event-placeholder-pending.svg";
 
 /** Legacy rotation set (neutral / non-day-specific). Kept for any old references. */

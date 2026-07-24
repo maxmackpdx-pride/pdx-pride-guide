@@ -1,4 +1,4 @@
-# Zaylist — Notification System Reference
+# Zaylist - Notification System Reference
 
 > Canonical reference for building the notification system (in-app today, push tomorrow).
 > Last updated: 2026-07-02
@@ -36,10 +36,10 @@ Users are one base type plus optional hats:
 ## Four delivery buckets
 
 ```
-1. INBOX      — Private messages (logged-in users)
-2. ADMIN QUEUE — Review items (admins only)
-3. ON-PAGE    — Public updates while browsing
-4. LIVE       — WebSocket refresh (no stored message)
+1. INBOX      - Private messages (logged-in users)
+2. ADMIN QUEUE - Review items (admins only)
+3. ON-PAGE    - Public updates while browsing
+4. LIVE       - WebSocket refresh (no stored message)
 ```
 
 ---
@@ -66,14 +66,14 @@ All items live in `messages` with a `context_type` column (camelCase `contextTyp
 
 | Notification | Trigger | From | `contextType` | Inbox badge |
 |--------------|---------|------|---------------|-------------|
-| Thread reply | Reply in existing thread | User | inherits original | — |
+| Thread reply | Reply in existing thread | User | inherits original | - |
 | Missed Connection reply | Response to your post | User | `MISSED_CONNECTION` | MISSED CONNECTION |
-| Gig Werk message | Message on your gig post | User | `GIG` | — |
-| Gifting interest | Someone wants your gift | User | `GIFTING` | — |
-| ISO offer | Offer on your ISO post | User | `GIFTING` | — |
-| Gifting pickup chosen | Poster picked you | User | `GIFTING` | — |
-| Check-in message | RSVP'd attendee messages you | User | `CHECK_IN` | — |
-| Message to host | Question about your event | User | `EVENT_HOST` | — |
+| Gig Werk message | Message on your gig post | User | `GIG` | - |
+| Gifting interest | Someone wants your gift | User | `GIFTING` | - |
+| ISO offer | Offer on your ISO post | User | `GIFTING` | - |
+| Gifting pickup chosen | Poster picked you | User | `GIFTING` | - |
+| Check-in message | RSVP'd attendee messages you | User | `CHECK_IN` | - |
+| Message to host | Question about your event | User | `EVENT_HOST` | - |
 
 #### Promoter
 
@@ -126,7 +126,7 @@ Automated messages use `notifyGuideInbox()` in `server/storage.ts`, which sends 
 **API:** `GET /api/admin/pending-count`  
 **Indicator:** Dot on ADMIN nav
 
-Not the user Inbox — this is a review queue.
+Not the user Inbox - this is a review queue.
 
 | Kind (`AdminInbox.tsx`) | Trigger |
 |-------------------------|---------|

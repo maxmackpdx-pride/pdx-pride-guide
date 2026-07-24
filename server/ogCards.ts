@@ -2,7 +2,7 @@
  * Dynamic 1200×630 social share cards (events, places, profiles).
  * Replaces raw flyer/logo/avatar (or generic og-preview) in og:image / twitter:image.
  *
- * Profile cards: full-bleed rectangular photo — pride ring glows around the
+ * Profile cards: full-bleed rectangular photo - pride ring glows around the
  * outer edge of the image (inward), not a circular crop.
  */
 import fs from "node:fs";
@@ -35,7 +35,7 @@ function publicRoots(): string[] {
 /** Map a site path (/posters/x.jpg, /uploads/y.png) to a local file if present. */
 export function resolveLocalAsset(urlPath: string | null | undefined): string | null {
   if (!urlPath) return null;
-  if (/^https?:\/\//i.test(urlPath)) return null; // remote — skip embed for now
+  if (/^https?:\/\//i.test(urlPath)) return null; // remote - skip embed for now
   const cleaned = urlPath.split("?")[0].replace(/^\/+/, "");
   if (cleaned.startsWith("uploads/")) {
     const file = path.join(UPLOADS_DIR, path.basename(cleaned));
@@ -319,7 +319,7 @@ export async function renderEventOgCard(eventId: number): Promise<Buffer | null>
 
 /**
  * Directory place share card: logo only, centered on dark 1200×630.
- * No title / copy column — just the neon logo.
+ * No title / copy column - just the neon logo.
  */
 export async function renderPlaceOgCard(placeId: number): Promise<Buffer | null> {
   const place = storage.getBusiness(placeId) as any;
@@ -373,7 +373,7 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
   if (!user || String(user.status || "").toLowerCase() !== "active") return null;
 
   const ring = normalizeAvatarRing(user.avatarRing);
-  // Local /uploads photos OR remote (Google Sign-In avatars — previously skipped → monogram fallback)
+  // Local /uploads photos OR remote (Google Sign-In avatars - previously skipped → monogram fallback)
   const raw = await loadAvatarBuffer(user.photoUrl || null);
 
   let photoBuf: Buffer | null = null;

@@ -81,16 +81,16 @@ export default function HomeConstructionNudge() {
 
         <div className="pgc-body">
           <p>
-            Thanks for using Zaylist this year — we hope it helped you find your
+            Thanks for using Zaylist this year - we hope it helped you find your
             people and your parties. 🌈
           </p>
           <p>
             We're rebuilding it into a <strong>year-round</strong> home for Portland's LGBTQ+
-            community — all 365 days, not just Pride Week. Pardon our dust while we make it better.
+            community - all 365 days, not just Pride Week. Pardon our dust while we make it better.
           </p>
           <p className="pgc-tip">
             Keeping the lights on isn't free. If this was useful, you're welcome to toss a couple
-            bucks toward a coffee or a muffin. Truly no pressure — every little bit helps. 💛
+            bucks toward a coffee or a muffin. Truly no pressure - every little bit helps. 💛
           </p>
         </div>
 

@@ -167,7 +167,7 @@ export default function ProfileHero({
             </div>
           </div>
 
-          {/* Single action row — no second copy under the avatar/bio */}
+          {/* Single action row - no second copy under the avatar/bio */}
           <div className="pp-hero__actions">
             {!isOwner && (
               <>

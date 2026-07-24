@@ -5,7 +5,7 @@ export const BOARD_REJECT_REASONS = [
   { code: "SPAM", label: "Spam, promo, or solicitation" },
   { code: "SAFETY", label: "Safety or PG-13 concern" },
   { code: "CONTACT", label: "Contact or meetup details belong in inbox replies" },
-  { code: "UNCLEAR", label: "Too vague — needs clearer details" },
+  { code: "UNCLEAR", label: "Too vague - needs clearer details" },
   { code: "DUPLICATE", label: "Duplicate or already covered" },
   { code: "OTHER", label: "Other (see admin note)" },
 ] as const;
@@ -19,15 +19,15 @@ export function boardRejectReasonLabel(code: string): string {
 export function formatBoardRejectMessage(reasonCode: string, note?: string): string {
   const label = boardRejectReasonLabel(reasonCode);
   const trimmed = (note || "").trim();
-  return trimmed ? `${label} — ${trimmed}` : label;
+  return trimmed ? `${label} - ${trimmed}` : label;
 }
 
 export const GIG_BOARD_RULES_SUMMARY =
   "Gig Werk is PG-13 and work-focused: paid gigs, volunteer shifts, and real availability. No personals, dating, hookups, escorting, or adult content.";
 
-/** Shown beside profile photo upload — public-facing images only. */
+/** Shown beside profile photo upload - public-facing images only. */
 export const PROFILE_PHOTO_RULES_SUMMARY =
-  "Yes, this site is about keeping Pride events visible and uncensored, and what you do in private chats is on you. But public profile photos are a different story — this runs on one person and a laptop, so we can't keep nudes safe or legal here yet. No genitalia, no zoomed-in ass shots, no drugs — you get the point.";
+  "Yes, this site is about keeping Pride events visible and uncensored, and what you do in private chats is on you. But public profile photos are a different story - this runs on one person and a laptop, so we can't keep nudes safe or legal here yet. No genitalia, no zoomed-in ass shots, no drugs - you get the point.";
 
 export const PROFILE_PHOTO_REJECT_REASONS = [
   { code: "NSFW", label: "Nudity or sexual content" },
@@ -47,7 +47,7 @@ export function profilePhotoRejectReasonLabel(code: string): string {
 export function formatProfilePhotoRejectMessage(reasonCode: string, note?: string): string {
   const label = profilePhotoRejectReasonLabel(reasonCode);
   const trimmed = (note || "").trim();
-  return trimmed ? `${label} — ${trimmed}` : label;
+  return trimmed ? `${label} - ${trimmed}` : label;
 }
 
 const GIG_PERSONALS_TERMS = [
@@ -109,7 +109,7 @@ export function validateGigPostContent(fields: {
 
   const hit = GIG_PERSONALS_TERMS.find(term => haystack.includes(term));
   if (hit) {
-    return "Gig Werk is for work and gigs only — no personals or dating posts. Keep it PG-13 and job-related.";
+    return "Gig Werk is for work and gigs only - no personals or dating posts. Keep it PG-13 and job-related.";
   }
 
   return null;

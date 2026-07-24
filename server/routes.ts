@@ -160,7 +160,7 @@ const upload = multer({
   },
 });
 
-// Contact-form attachments (public, unauthenticated) — images or PDFs, small cap.
+// Contact-form attachments (public, unauthenticated) - images or PDFs, small cap.
 const contactUpload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
@@ -363,7 +363,7 @@ function isPublicEventVisibleUnderPrideCap(evt: { dateStart?: string | null }): 
 }
 
 /**
- * dateStart is authoritative for dayOfWeek — derive it on every write so a
+ * dateStart is authoritative for dayOfWeek - derive it on every write so a
  * stale or mistaken client value can never disagree with the actual date.
  */
 function syncDayOfWeek(patch: Record<string, unknown>, existing?: { dateStart?: string | null }) {
@@ -406,7 +406,7 @@ function isMainAdminUser(user: any) {
     || storage.hasSiteAdminGrant(user.id);
 }
 
-/** Live admin check — never trust sticky session.isAdmin alone (revoke must stick). */
+/** Live admin check - never trust sticky session.isAdmin alone (revoke must stick). */
 function userIsAdminNow(user: any): boolean {
   return !!(user && (
     isMainAdminUser(user)
@@ -427,7 +427,7 @@ function markAdminSessionForUser(req: any, user: any) {
 }
 
 function syncOwnerDisplayName(user: any) {
-  // Only Tucker (primary owner) — not env-listed co-admins or granted admins like @heygirl.
+  // Only Tucker (primary owner) - not env-listed co-admins or granted admins like @heygirl.
   if (!storage.isPrimarySiteOwner(user) || user.displayName === OWNER_DISPLAY_NAME) return user;
   storage.updateUser(user.id, { displayName: OWNER_DISPLAY_NAME });
   return { ...user, displayName: OWNER_DISPLAY_NAME };
@@ -457,7 +457,7 @@ function authUserResponse(req: any, user: any) {
     createdAt: user.createdAt || "",
     isAdmin,
     isSuperAdmin: isMainAdminUser(user) || storage.hasOwnerAdminAccess(user),
-    // Primary owner only — Owner Desk stays private to Tucker.
+    // Primary owner only - Owner Desk stays private to Tucker.
     isPrimaryOwner: storage.isPrimarySiteOwner(user),
     // Owner + peers (brohoejams): full site admin tools except Owner Desk.
     canManageTeam: storage.hasOwnerAdminAccess(user),
@@ -614,7 +614,7 @@ function sanitizePup(input: unknown): string | null {
 //   BLOCK  → sends a friendly 400 and returns true (caller must stop).
 //   REVIEW → content is accepted, but an alert lands in the site owner's inbox.
 // Sexual / kink / sex-work content is allowlisted inside the shared module and
-// never trips these gates — this only catches the house-rule exclusions
+// never trips these gates - this only catches the house-rule exclusions
 // (scat, blood/gore, weapons, abuse, illegal content, off-platform links).
 function moderationGate(
   res: any,
@@ -764,7 +764,7 @@ function safeEqualStr(a: string, b: string): boolean {
   return crypto.timingSafeEqual(ba, bb);
 }
 
-/** Stateless OAuth CSRF token — survives mobile browsers that drop the session cookie mid Google hop. */
+/** Stateless OAuth CSRF token - survives mobile browsers that drop the session cookie mid Google hop. */
 function createGoogleOAuthState(linkUserId?: number): string {
   const body = Buffer.from(JSON.stringify({
     n: crypto.randomBytes(16).toString("hex"),
@@ -812,7 +812,7 @@ function productionSecureCookies(): boolean {
 
 function setGoogleOAuthStateCookie(res: any, state: string) {
   const secure = productionSecureCookies() ? "; Secure" : "";
-  // append — never replace the session Set-Cookie express-session already queued
+  // append - never replace the session Set-Cookie express-session already queued
   res.append(
     "Set-Cookie",
     `${GOOGLE_OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(GOOGLE_OAUTH_STATE_MAX_MS / 1000)}${secure}`,
@@ -966,7 +966,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   assertProductionSecrets();
 
-  // Lightweight probe for Railway healthchecks — must not hit the DB.
+  // Lightweight probe for Railway healthchecks - must not hit the DB.
   // Public tip links (Venmo + optional Stripe Payment Link for Apple Pay / cards).
   // Set STRIPE_PAYMENT_LINK (or TIP_STRIPE_URL) on Railway after creating a Payment Link.
   app.get("/api/site/tip-links", (_req, res) => {
@@ -1094,7 +1094,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.type("text/plain; charset=utf-8").send(buildRobotsTxt());
   });
 
-  // Session middleware — persisted on the same SQLite volume as user data
+  // Session middleware - persisted on the same SQLite volume as user data
   app.use(session({
     secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? (() => { throw new Error("SESSION_SECRET env var is required in production"); })() : "pdxpride_secret_dev_only"),
     store: new BetterSqliteSessionStore(sqlite),
@@ -1117,7 +1117,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Flyer autofill: a submitter uploads a poster; we read it (OCR + vision) and
-  // return SUGGESTED form fields for them to review. Suggestions only — nothing
+  // return SUGGESTED form fields for them to review. Suggestions only - nothing
   // is created here; the real submit still goes through /api/submit's moderation.
   // Daily caps + the shared FLYER_LLM_DISABLED kill switch keep vision cost bounded.
   const flyerAutofill = { day: "", perUser: new Map<string, number>(), global: 0 };
@@ -1136,7 +1136,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (flyerAutofill.global >= FLYER_AUTOFILL_GLOBAL_DAILY || used >= FLYER_AUTOFILL_USER_DAILY) {
         return res
           .status(429)
-          .json({ error: "Flyer autofill limit reached for today — you can still fill the form in manually." });
+          .json({ error: "Flyer autofill limit reached for today - you can still fill the form in manually." });
       }
 
       const uploadUrl = String(req.body?.uploadUrl || "");
@@ -1162,7 +1162,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         rawText = ocr.text;
         ocrConfidence = ocr.confidence;
       } catch {
-        /* OCR optional — vision reads the image directly */
+        /* OCR optional - vision reads the image directly */
       }
       const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence });
 
@@ -1188,7 +1188,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         },
       });
     } catch (err) {
-      return res.status(500).json({ error: "Could not read that flyer — please fill the form in manually." });
+      return res.status(500).json({ error: "Could not read that flyer - please fill the form in manually." });
     }
   });
 
@@ -1217,10 +1217,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
   });
 
-  // Public "Message me" / sponsorship pitch / custom order form — no login required, lands in Owner Desk only.
+  // Public "Message me" / sponsorship pitch / custom order form - no login required, lands in Owner Desk only.
   app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
     const honeypot = String(req.body?.company || "").trim();
-    if (honeypot) return res.json({ ok: true }); // bot filled the hidden field — silently drop
+    if (honeypot) return res.json({ ok: true }); // bot filled the hidden field - silently drop
 
     const kindRaw = String(req.body?.kind || "message").trim().toLowerCase();
     const kind =
@@ -1274,7 +1274,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
-  // Serve uploaded files statically (ESM-safe — do not use require())
+  // Serve uploaded files statically (ESM-safe - do not use require())
   app.use("/uploads", express.static(UPLOADS_DIR));
 
   // ─── ANALYTICS ──────────────────────────────────────────────────────────
@@ -1405,7 +1405,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const promoterStatus = user.promoterStatus || "none";
       const isAdminUser = userIsAdminNow(user);
 
-      // Standalone promoter application — no event fields needed
+      // Standalone promoter application - no event fields needed
       if (type === "PROMOTER_APPLICATION") {
         const now = new Date().toISOString();
         const data = insertSubmissionSchema.parse({
@@ -1584,7 +1584,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(fresh ? enrichEventForMap(fresh) : fresh);
   });
 
-  // ─── MODERATION REQUESTS (remove/flag — claims go through /api/submit) ───
+  // ─── MODERATION REQUESTS (remove/flag - claims go through /api/submit) ───
   app.post("/api/moderation-request", requireAuth, (req, res) => {
     try {
       const data = insertModerationRequestSchema.parse(req.body);
@@ -1726,7 +1726,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const gigs = storage.getGigPosts("LIVE");
     const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
     // Flag which listings the logged-in user can self-service edit (hosted/claimed/
-    // submitted an event there) — drives the "Edit venue info" button client-side;
+    // submitted an event there) - drives the "Edit venue info" button client-side;
     // the PATCH endpoint below re-checks this server-side regardless.
     const linkedIds = req.session?.userId
       ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
@@ -1855,7 +1855,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Promoter self-service venue edit: only description/hours/phone/website/instagram/donateUrl,
   // only if the requester has hosted, claimed, or submitted an event matching this business.
   // Name/address/type/lat/lng are never accepted here (would let a linked promoter hijack or
-  // relocate a shared directory listing) — edits go live immediately, no moderation queue.
+  // relocate a shared directory listing) - edits go live immediately, no moderation queue.
   const businessEditSchema = z.object({
     description: z.string().trim().min(10).max(2000).optional(),
     hours: z.string().trim().max(200).optional().nullable(),
@@ -1866,7 +1866,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Business owners (real ownerId, see claim flow below) get a wider self-service field set.
-  // lat/lng always stay geocoded, and imageUrl is never accepted here — logo changes route
+  // lat/lng always stay geocoded, and imageUrl is never accepted here - logo changes route
   // through the logo-request queue for Tucker's manual conversion (see /api/upload/business-logo).
   const businessOwnerEditSchema = z.object({
     name: z.string().trim().min(2).max(120).optional(),
@@ -1920,7 +1920,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(400).json({ error: e.message || "Invalid venue info" });
     }
 
-    // Only the six allowed fields are ever applied — anything else in req.body (name, address,
+    // Only the six allowed fields are ever applied - anything else in req.body (name, address,
     // type, lat, lng, ...) is silently dropped by the zod parse above (unknown keys stripped).
     const patch: Record<string, string | null> = {};
     if (parsed.description !== undefined) patch.description = parsed.description.replace(/[<>]/g, "");
@@ -2385,7 +2385,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedToCommunityStandards) {
         return res.status(400).json({ error: "You must agree to the Community Standards and legal terms to join" });
       }
-      // Reserved shared guide-admin identity — not a human signup.
+      // Reserved shared guide-admin identity - not a human signup.
       if (storage.isSystemGuideAccount({ username, email })) {
         return res.status(400).json({ error: "That username or email is reserved" });
       }
@@ -2618,7 +2618,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
             res.redirect(redirectTo);
           });
         };
-        // Fresh session id after OAuth (matches password login) — cleaner cookies on mobile Chrome.
+        // Fresh session id after OAuth (matches password login) - cleaner cookies on mobile Chrome.
         if (typeof req.session.regenerate === "function") {
           return req.session.regenerate((err) => {
             if (err) {
@@ -2692,7 +2692,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(authUserResponse(req, user));
   });
 
-  // Username autocomplete — requires auth, returns up to 8 matches
+  // Username autocomplete - requires auth, returns up to 8 matches
   app.get("/api/users/search", requireAuth, (req, res) => {
     const q = String(req.query.q || "").trim().replace(/^@/, "").toLowerCase();
     if (!q || q.length < 2) return res.json([]);
@@ -2774,7 +2774,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // "Stand for" is promoter-only, same reasoning as marquee below.
     if (standFor !== undefined && user?.promoterStatus === "approved") patch.standFor = sanitizeTalents(standFor);
     if (affiliatedVenueIds !== undefined) patch.affiliatedVenueIds = sanitizeAffiliatedVenueIds(affiliatedVenueIds);
-    // Marquee is promoter-only — silently ignored for everyone else rather than erroring,
+    // Marquee is promoter-only - silently ignored for everyone else rather than erroring,
     // since the field simply doesn't apply to a member's own profile.
     if (marquee !== undefined && user?.promoterStatus === "approved") patch.marquee = sanitizeMarquee(marquee);
     if (accentColor !== undefined) patch.accentColor = accentColor;
@@ -3007,7 +3007,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── MEMBER PROFILES + FOLLOWS ───────────────────────────────────────────
-  // Public profile page — no auth required; viewer detected via session.
+  // Public profile page - no auth required; viewer detected via session.
   app.get("/api/users/:username", (req: any, res) => {
     const username = String(req.params.username || "").trim().replace(/^@/, "");
     const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
@@ -3292,7 +3292,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       eventTitle: post.title || `Missed connection #${post.id}`,
       requesterName: actor?.displayName || actor?.username || "member",
       requesterEmail: actor?.email || null,
-      proof: `Missed connection #${post.id} reported — ${reason}`,
+      proof: `Missed connection #${post.id} reported - ${reason}`,
     } as any);
     res.json({ ok: true });
   });
@@ -3359,7 +3359,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // GPS presence confirm ("I am here"). Coordinates are compared to the beach
-  // anchor server-side and discarded — never persisted or logged.
+  // anchor server-side and discarded - never persisted or logged.
   app.post("/api/river-brats/checkins/verify", requireAuth, (req, res) => {
     const beachId = String(req.body.beachId || "");
     const date = String(req.body.date || pacificTodayDate());
@@ -3662,7 +3662,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Group chats the viewer belongs to (event rooms via check-in/hosting, plus
-  // today's beach room) — powers the Inbox sheet GROUP rows.
+  // today's beach room) - powers the Inbox sheet GROUP rows.
   app.get("/api/chats/mine", requireAuth, (req, res) => {
     res.json(storage.getMyGroupChats(req.session.userId!));
   });
@@ -4001,7 +4001,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       eventTitle: evt.title,
       requesterName: user.displayName || user.username,
       requesterEmail: user.email,
-      proof: `${target}${notes ? ` — ${notes}` : ""}`,
+      proof: `${target}${notes ? ` - ${notes}` : ""}`,
     });
     res.json(req2);
   });
@@ -4166,7 +4166,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { adminName } = req.body;
     if (!adminName) return res.status(400).json({ error: "adminName required" });
     const pending = storage.getSubmissions().find(s => s.id === Number(req.params.id));
-    // Only event submissions carry real dates — promoter applications and
+    // Only event submissions carry real dates - promoter applications and
     // claims store a placeholder timestamp where start === end.
     if (pending && (pending.type === "NEW_EVENT" || pending.type === "SUGGEST")) {
       const dateErr = validateEventDates(pending.dateStart, pending.dateEnd);
@@ -4769,7 +4769,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       /** Badge total for Admin tab / mobile Queue: queue items + guide-inbox unreplies. */
       adminBadge: queueCount + guideUnread,
       ownerCount,
-      /** Category counts — one mobile-friendly payload for badges and overview. */
+      /** Category counts - one mobile-friendly payload for badges and overview. */
       breakdown,
     });
   });
@@ -4878,7 +4878,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   /** Execute bulk event actions (guarded: hide / claimable only, max batch). */
   app.post("/api/admin/events/bulk/execute", requireAdmin, (req, res) => {
     if (!req.body?.confirm) {
-      return res.status(400).json({ error: "confirm: true required — use preview first" });
+      return res.status(400).json({ error: "confirm: true required - use preview first" });
     }
     const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : [];
     const action = String(req.body?.action || "");
@@ -5013,7 +5013,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const draft = flyerParseToDraft(parse, { sourcePath: flyerPath });
 
       // Phase 3: queue=true lands the draft in the QSearch Review queue
-      // (same human-approve path as every other source — never auto-LIVE).
+      // (same human-approve path as every other source - never auto-LIVE).
       let queuedJobId: string | null = null;
       if (req.body?.queue === true && draft) {
         if (flyerPath) {
@@ -5074,7 +5074,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   ) {
     try {
       const mod = await import("./qsearch/trustedSync");
-      // Admin manual sync always goes to Review — ignore body.mode=publish
+      // Admin manual sync always goes to Review - ignore body.mode=publish
       const syncOpts = { mode: "review" as const };
 
       if (sourceId) {
@@ -5102,7 +5102,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
               updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
             ]
               .filter(Boolean)
-              .join(" · ") || "Sync finished — nothing new",
+              .join(" · ") || "Sync finished - nothing new",
         });
       }
 
@@ -5129,7 +5129,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
             updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
           ]
             .filter(Boolean)
-            .join(" · ") || "Sync finished — nothing new",
+            .join(" · ") || "Sync finished - nothing new",
       });
     } catch (err: any) {
       const msg = String(err?.message || err || "trusted sync failed");
@@ -5282,7 +5282,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       kind: req.body?.kind === "nightly" ? "nightly" : "manual",
       // Default on; pass tryVision: false to skip flyer vision sampling
       tryVision: req.body?.tryVision !== false,
-      // Default off — only upcoming/current listings unless explicitly included
+      // Default off - only upcoming/current listings unless explicitly included
       includePastEvents: req.body?.includePastEvents === true,
       businesses,
       existingEvents: storage.getEvents({}),
@@ -5324,7 +5324,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!req.body?.confirm) {
       return res.status(400).json({ error: "confirm: true required" });
     }
-    // LIVE only if explicitly requested — still never automatic
+    // LIVE only if explicitly requested - still never automatic
     const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
     const rawItems = Array.isArray(req.body?.items) ? req.body.items : [];
     if (!rawItems.length) return res.status(400).json({ error: "No items" });
@@ -5383,12 +5383,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     const existingEvents = storage.getEvents({});
     // When every picked candidate was a MERGE (or there is simply nothing to
-    // create), skip commitIngest — an empty item list is a no-op, not an error.
+    // create), skip commitIngest - an empty item list is a no-op, not an error.
     const result = items.length
       ? await commitIngest({
           items,
           status,
-          // Always on for admin approve — never re-create main-board twins
+          // Always on for admin approve - never re-create main-board twins
           skipDuplicates: req.body?.skipDuplicates !== false,
           existingEvents,
           createEvent: (data) => storage.createEvent(data),
@@ -5635,7 +5635,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     },
   );
 
-  /** Instagram assist — single URL preferred; Graph Business Discovery if creds exist. */
+  /** Instagram assist - single URL preferred; Graph Business Discovery if creds exist. */
   app.post("/api/admin/qsearch/instagram", requireAdmin, async (req, res) => {
     try {
       const mode = String(req.body?.mode || "url");
@@ -5687,7 +5687,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   /**
-   * Phase 4 ingest — preview only (no DB writes).
+   * Phase 4 ingest - preview only (no DB writes).
    * Body: { url?: string, html?: string, ics?: string, expandPaths?: boolean }
    * expandPaths (default true): if homepage is empty, try /events, format=json, Tribe REST, etc.
    */
@@ -5706,7 +5706,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const candidates = expandWebsiteScrapeCandidates(url).slice(1);
         const warnings = [
           ...result.warnings,
-          `No events on primary URL — tried ${candidates.length} event-path candidates`,
+          `No events on primary URL - tried ${candidates.length} event-path candidates`,
         ];
         for (const candidate of candidates.slice(0, 6)) {
           const next = await previewIngest({ url: candidate, existingEvents });
@@ -5733,7 +5733,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   /**
-   * Phase 4 ingest — commit after preview.
+   * Phase 4 ingest - commit after preview.
    * Body: {
    *   confirm: true,
    *   status?: "HIDDEN" | "LIVE" (default HIDDEN),
@@ -5744,7 +5744,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
    */
   app.post("/api/admin/events/ingest/commit", requireAdmin, async (req, res) => {
     if (!req.body?.confirm) {
-      return res.status(400).json({ error: "confirm: true required — use preview first" });
+      return res.status(400).json({ error: "confirm: true required - use preview first" });
     }
     const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
     const skipDuplicates = req.body?.skipDuplicates !== false;

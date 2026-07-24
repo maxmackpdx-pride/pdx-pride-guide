@@ -1,15 +1,15 @@
-# Floating Inbox — Architecture & Handoff Guide
+# Floating Inbox - Architecture & Handoff Guide
 
 The floating inbox is the single inbox surface on the site: a bottom-sheet
-overlay (mobile) / bottom-right panel (desktop FAB) that holds three tabs —
-**INBOX**, **POSTS**, **STATS** — and, under INBOX, three account views:
+overlay (mobile) / bottom-right panel (desktop FAB) that holds three tabs -
+**INBOX**, **POSTS**, **STATS** - and, under INBOX, three account views:
 **Personal**, **Admin** (shared keyholder queue), and **Owner** (Owner Desk).
-Everything happens **in place** — opening a thread, replying, archiving, and
+Everything happens **in place** - opening a thread, replying, archiving, and
 approving/denying admin items never navigate to a URL.
 
 ---
 
-## TL;DR — where to look
+## TL;DR - where to look
 
 Start here, in this order:
 
@@ -18,9 +18,9 @@ Start here, in this order:
 | **Overlay shell** (tabs, account switcher, in-place thread detail, bottom search) | `client/src/components/InboxOverlay.tsx` |
 | **Open/close state + mounting** (context provider, `openSheet`/`toggleSheet`) | `client/src/context/InboxSheetContext.tsx` |
 | **Desktop FAB** (the floating button, ≥641px; drag to reposition) | `client/src/components/FloatingInbox.tsx` |
-| **Data hook** — threads + all thread actions | `client/src/components/inbox/useInboxThreads.ts` |
+| **Data hook** - threads + all thread actions | `client/src/components/inbox/useInboxThreads.ts` |
 | **Personal thread list** (Received/Sent, filters) | `client/src/components/inbox/panel/PersonalView.tsx` |
-| **Admin/Owner queue** — every category, mappers, approve/deny mutations | `client/src/components/inbox/panel/QueueView.tsx` |
+| **Admin/Owner queue** - every category, mappers, approve/deny mutations | `client/src/components/inbox/panel/QueueView.tsx` |
 | **Posts tab** | `client/src/components/inbox/panel/PostsView.tsx` |
 | **Stats tab** | `client/src/components/inbox/panel/StatsView.tsx` |
 | **Design tokens** (colors `C.*`, fonts, helpers) | `client/src/components/inbox/panel/sheet.ts` |
@@ -51,7 +51,7 @@ FloatingInbox (components/FloatingInbox.tsx)  ← desktop FAB; calls toggleSheet
 ```
 
 - **Opening a thread:** `PersonalView` calls `onOpenThread(id)` → `InboxOverlay.openThread` sets local `activeId` and calls `setRead(id, false)` (marks the latest message read → invalidates `/api/messages/unread-count`, so the badge resets). When `activeId` is set, `InboxOverlay` renders its in-file `ThreadDetail` (back header, message bubbles, reply composer, archive) **instead of** the list, and hides the account tabs / personal toolbar / bottom search. No navigation.
-- **The badge count** comes from `/api/admin/pending-count` (`getAdminPendingCount` in `server/storage.ts`). It sums every admin category **plus** promoter requests, business claims/submissions, and logo requests — so the count must match what `QueueView` renders (it does now; see history below).
+- **The badge count** comes from `/api/admin/pending-count` (`getAdminPendingCount` in `server/storage.ts`). It sums every admin category **plus** promoter requests, business claims/submissions, and logo requests - so the count must match what `QueueView` renders (it does now; see history below).
 
 ---
 
@@ -67,14 +67,14 @@ archive, remove, revealSelf, resolveLineup }`.
 | Load full thread (when `activeThreadId` set) | (query) | `GET /api/messages/thread/:id` |
 | Send reply | `sendMessage(id, body)` | `POST /api/messages/thread/:id/reply` |
 | Mark read (reset badge) | `setRead(id, false)` | `PUT /api/messages/:id/read` + invalidates `/api/messages/unread-count` |
-| Archive (client-side, localStorage `pdx-inbox-archived-v1`) | `archive(id)` | — |
+| Archive (client-side, localStorage `pdx-inbox-archived-v1`) | `archive(id)` | - |
 | Delete thread | `remove(id)` | `DELETE /api/messages/thread/:id` |
 | Reveal identity (anonymous MC threads) | `revealSelf(id)` | `POST /api/messages/thread/:id/reveal` |
 | Approve/deny event-talent "lineup" request | `resolveLineup(id, decision)` | `POST /api/talent-request/:reqId/approve|reject` |
 
 ---
 
-## Admin queue (INBOX · Admin) — every category
+## Admin queue (INBOX · Admin) - every category
 
 Rendered by `QueueView` (`components/inbox/panel/QueueView.tsx`). Each category
 has: a query (fetch), a `mapX` mapper (row shape + which fields display), and an
@@ -100,7 +100,7 @@ List endpoints (all `requireAdmin`): `GET /api/admin/submissions`,
 
 ---
 
-## Owner Desk (INBOX · Owner) — owner only
+## Owner Desk (INBOX · Owner) - owner only
 
 `QueueView mode="owner"` → `GET /api/admin/feedback` (gated to the primary site
 owner; carries contact PII). Item kinds come from `owner_desk_items` +
@@ -112,7 +112,7 @@ owner; carries contact PII). Item kinds come from `owner_desk_items` +
 | **Sponsor** | Sponsorship pitch | name, email, business, sponsorship type, length, message | Reply · Mark done |
 | **Bug** | Bug report via feedback form | description, page, severity | Mark done |
 | **Feedback** | General feedback | message, page | Mark done |
-| **Crash** (auto) | `ErrorBoundary` self-report when the UI crashes — stack trace + user agent, **not** a person | error, stack, page URL, user agent | Mark done |
+| **Crash** (auto) | `ErrorBoundary` self-report when the UI crashes - stack trace + user agent, **not** a person | error, stack, page URL, user agent | Mark done |
 | **Keyholder / Escalation** | team-access requests / admin escalations to owner | who, what, context | Reply · Mark done |
 
 Resolve → `POST /api/admin/feedback/:id/resolve` (body `{ source: "desk" | "feedback" }`).

@@ -1,4 +1,4 @@
-/* Member hub interiors — match Hub.pdf / Hub.dc.html */
+/* Member hub interiors - match Hub.pdf / Hub.dc.html */
 
 .hub-home {
   display: flex;
@@ -117,7 +117,7 @@
   background:
     linear-gradient(133deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 12%, transparent 34%),
     var(--glass-card-bg);
-  /* Explicit magenta rim — do not use inherited cyan --glass-card-border from hub root */
+  /* Explicit magenta rim - do not use inherited cyan --glass-card-border from hub root */
   border: 1px solid color-mix(in srgb, var(--c) 70%, #101014) !important;
   box-shadow: var(--glass-card-shadow) !important;
   backdrop-filter: blur(var(--glass-card-blur, 12px));
@@ -151,7 +151,7 @@
   color: var(--neon-violet, #8800ff);
 }
 
-/* Magenta glass primary CTA (Admin queue) — §1.5 glass-btn, no brutal offset */
+/* Magenta glass primary CTA (Admin queue) - §1.5 glass-btn, no brutal offset */
 .hub-keys .pdxBtn--solid,
 .hub-keys .pdxBtn--neon {
   --_c: var(--c, var(--panel-magenta, #ff1fa0));
@@ -210,7 +210,7 @@
   transform: none;
 }
 
-/* Compact rail/drawer keys — same magenta glass, column stack unchanged */
+/* Compact rail/drawer keys - same magenta glass, column stack unchanged */
 .hub-keys--compact {
   flex-direction: column;
   align-items: stretch;
@@ -286,7 +286,7 @@ html.calm-mode .hub-keys,
   color: #666;
 }
 
-/* .hub-thread / .hub-empty — consolidated in hub-v2.css (Experiment 101 register) */
+/* .hub-thread / .hub-empty - consolidated in hub-v2.css (Experiment 101 register) */
 
 .hub-widget-stack {
   display: flex;
@@ -294,7 +294,7 @@ html.calm-mode .hub-keys,
   gap: 18px;
 }
 
-/* Weather card — Portland, OR Pride Week */
+/* Weather card - Portland, OR Pride Week */
 .hub-weather {
   position: relative;
   overflow: hidden;
