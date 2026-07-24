@@ -1,6 +1,6 @@
-/* PDX Pride Guide — canonical design tokens
-   Synced from shared/prideWeek.ts + client/src/index.css + client/src/components/ds/tokens.
-   Source chain: prideWeek.ts → index.css / ds tokens → this file (npm run sync:design-system).
+/* Zaylist — canonical design tokens
+   Synced from shared/eventWeek.ts + client/src/index.css + client/src/components/ds/tokens.
+   Source chain: eventWeek.ts → index.css / ds tokens → this file (npm run sync:design-system).
    Full modular tokens live in client/src/components/ds/tokens/ (colors, type, layout, effects).
 */
 :root {
@@ -53,7 +53,7 @@
   --red: var(--neon-red);
 
   /* ---- DAY COLORS (Pride Week Jul 13–19 2026) ---------- */
-  /* Semantic data — pins, filters, tags, glows. From prideWeek.ts */
+  /* Semantic data — pins, filters, tags, glows. From eventWeek.ts */
   --day-mon: #8800FF;
   --day-tue: #0044FF;
   --day-wed: #FFEE00;
@@ -144,14 +144,7 @@
     var(--neon-orange)
   );
   --grad-flag: var(--rainbow-bar);
-  --grad-rainbow: linear-gradient(
-    100deg,
-    var(--neon-cyan) 0%,
-    var(--green) 24%,
-    var(--neon-yellow) 44%,
-    var(--neon-orange) 70%,
-    var(--neon-magenta) 100%
-  );
+  --grad-rainbow: linear-gradient(100deg, #FF19D6 0%, #FF196C 12%, #FF5319 24%, #FFD119 34%, #9CFF19 44%, #5BFF19 54%, #19F7FF 66%, #1956FF 76%, #E419FF 90%, #FF19D6 100%);
   --grad-hot: linear-gradient(120deg, var(--neon-magenta) 0%, var(--neon-orange) 100%);
   --grad-electric: linear-gradient(120deg, var(--neon-cyan) 0%, var(--neon-violet) 100%);
   --grad-acid: linear-gradient(115deg, var(--neon-cyan) 0%, var(--neon-yellow) 100%);

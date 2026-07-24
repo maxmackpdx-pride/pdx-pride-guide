@@ -1,7 +1,7 @@
 /* ============================================================
-   PDX Pride Guide, COLOR SYSTEM
+   Zaylist, COLOR SYSTEM
    Canonical source: repo design-system/tokens/tokens.css
-   (mirror of client/src/index.css + shared/prideWeek.ts).
+   (mirror of client/src/index.css + shared/eventWeek.ts).
    Near-black brutalist base + one-neon-per-element accents.
    ============================================================ */
 
@@ -76,10 +76,8 @@
   /* Rainbow bar (canonical): cyan > yellow > magenta > orange */
   --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   --grad-flag: var(--rainbow-bar);
-  /* Hero wordmark sweep (cyan > green > yellow > orange > magenta) */
-  --grad-rainbow: linear-gradient(100deg,
-    var(--neon-cyan) 0%, var(--green) 24%, var(--neon-yellow) 44%,
-    var(--neon-orange) 70%, var(--neon-magenta) 100%);
+  /* Zaylist spectrum wordmark (9-stop full-hue tape, wraps to magenta) */
+  --grad-rainbow: linear-gradient(100deg, #FF19D6 0%, #FF196C 12%, #FF5319 24%, #FFD119 34%, #9CFF19 44%, #5BFF19 54%, #19F7FF 66%, #1956FF 76%, #E419FF 90%, #FF19D6 100%);
   --grad-nightglow: radial-gradient(120% 90% at 12% 0%, #1c0a30 0%, transparent 55%),
                     radial-gradient(120% 90% at 100% 8%, #04262e 0%, transparent 55%),
                     var(--ink-900);
@@ -88,7 +86,7 @@
   --grad-acid:     linear-gradient(115deg, var(--neon-cyan) 0%, var(--neon-yellow) 100%);
 
   /* ============================================================
-     DAY COLOR SYSTEM (mirror of shared/prideWeek.ts).
+     DAY COLOR SYSTEM (mirror of shared/eventWeek.ts).
      Pride Week = Jul 13 to 19; the Thu to Sun weekend carries the
      event program.
        MON Jul 13  violet  #8800FF   (week opener)

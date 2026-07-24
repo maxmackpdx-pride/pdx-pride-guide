@@ -24,7 +24,7 @@
   --ring: 74 100% 50%;
   --radius: 0.25rem;
 
-  /* PDX Pride Design Tokens */
+  /* Zaylist Design Tokens */
   --neon-yellow: #CCFF00;
   --neon-cyan: #00FFFF;
   --neon-magenta: #FF00CC;
@@ -42,7 +42,7 @@
   --board-gifting: var(--neon-yellow);
   --board-gigs: var(--neon-violet);
 
-  /* Day colors — mirror of shared/prideWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
+  /* Day colors — mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
   --day-mon: #8800FF;
   --day-tue: #0044FF;
   --day-wed: #FFEE00;
@@ -89,9 +89,7 @@
   --text-meta: var(--text-lo);
   --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
   --grad-flag: var(--rainbow-bar);
-  --grad-rainbow: linear-gradient(100deg,
-    var(--neon-cyan) 0%, var(--neon-green) 24%, var(--neon-yellow) 44%,
-    var(--neon-orange) 70%, var(--neon-magenta) 100%);
+  --grad-rainbow: linear-gradient(100deg, #FF19D6 0%, #FF196C 12%, #FF5319 24%, #FFD119 34%, #9CFF19 44%, #5BFF19 54%, #19F7FF 66%, #1956FF 76%, #E419FF 90%, #FF19D6 100%);
   --prose-spacing: 1.35rem;
 }
 
@@ -291,7 +289,7 @@ body::before {
   text-decoration: none;
 }
 
-/* Combined compass + PDX PRIDE GUIDE lockup (nav) */
+/* Combined compass + ZAYLIST lockup (nav) */
 .site-brand-lockup {
   display: block;
   height: var(--site-logo-h);
