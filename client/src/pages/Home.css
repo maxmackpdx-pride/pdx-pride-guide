@@ -35,7 +35,7 @@
   width: 100%;
   min-height: 780px;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* kicker sits at top of panel */
   background: #050505;
 }
 
@@ -187,13 +187,13 @@
   );
 }
 
-/* z-3 content - slight counter-parallax */
+/* z-3 content - slight counter-parallax; top-aligned with light top pad */
 .home-hero__inner {
   position: relative;
   z-index: 3;
   max-width: 940px;
   margin: 0;
-  padding: 52px 64px;
+  padding: max(20px, env(safe-area-inset-top, 0px) + 16px) 64px 40px;
   text-align: left;
   will-change: transform;
   transform: translate3d(
@@ -212,7 +212,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #ccff00;
-  margin-bottom: 22px;
+  margin: 0 0 18px;
 }
 
 .home-hero__dot {
@@ -417,7 +417,7 @@ html.calm-mode .home-hero__orb {
   }
 
   .home-hero__inner {
-    padding: 28px 20px 40px;
+    padding: max(16px, env(safe-area-inset-top, 0px) + 12px) 20px 32px;
   }
 
   .home-hero__title {
