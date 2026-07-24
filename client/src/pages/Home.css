@@ -146,27 +146,27 @@
   max-height: 360px;
   /* Center on left/top so letter positions are true centers */
   transform: translate(-50%, -50%);
-  /* Very slow drift within ±5% of start */
-  animation: homeLetterOrb 48s ease-in-out infinite;
+  /* Drift within ±5.5% of start (~10% wider than ±5%); 30% faster than 48s */
+  animation: homeLetterOrb 33.6s ease-in-out infinite;
 }
 
-/* Drift within 5% of starting center - very slow */
+/* Drift within ~5.5% of starting center (10% wider than 5%) - still slow */
 @keyframes homeLetterOrb {
   0%,
   100% {
     transform: translate(-50%, -50%) translate(0%, 0%);
   }
   20% {
-    transform: translate(-50%, -50%) translate(5%, -3%);
+    transform: translate(-50%, -50%) translate(5.5%, -3.3%);
   }
   45% {
-    transform: translate(-50%, -50%) translate(-2%, 5%);
+    transform: translate(-50%, -50%) translate(-2.2%, 5.5%);
   }
   70% {
-    transform: translate(-50%, -50%) translate(-5%, -4%);
+    transform: translate(-50%, -50%) translate(-5.5%, -4.4%);
   }
   85% {
-    transform: translate(-50%, -50%) translate(3%, 2%);
+    transform: translate(-50%, -50%) translate(3.3%, 2.2%);
   }
 }
 
