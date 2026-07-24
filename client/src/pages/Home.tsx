@@ -18,7 +18,6 @@ import {
 } from "@/components/ds";
 import {
   HOME_MARQUEE_FALLBACK,
-  nextEventStartTarget,
   eventsUpNext,
   pickMarqueeItems,
 } from "@/lib/homeEvents";
@@ -75,7 +74,6 @@ export default function Home() {
   }, [events]);
 
   const upNext = useMemo(() => eventsUpNext(events, 4), [events]);
-  const countdownTarget = useMemo(() => nextEventStartTarget(events) ?? "", [events]);
   // Same source as /events hero: expanded listings from GET /api/events
   // (multi-day festivals count once per day they appear on the board).
   const eventCount = events.length;
@@ -88,11 +86,11 @@ export default function Home() {
   return (
     <div className="home-main-stage">
       <HomeConstructionNudge />
-      <HomeHero eventCount={eventCount} />
+      <HomeHero />
       <HomeStatStrip
+        eventCount={eventCount}
         placesCount={placesCount}
         goingCount={goingCount}
-        countdownTarget={countdownTarget}
       />
 
       <div className="home-marquee-band" aria-label="Event name ticker">

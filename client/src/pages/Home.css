@@ -1315,6 +1315,13 @@ html.calm-mode .home-boards__card {
   margin-top: 8px;
 }
 
+.home-stat-strip__label--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
 /* Marquee band */
 .home-marquee-band {
   overflow: hidden;

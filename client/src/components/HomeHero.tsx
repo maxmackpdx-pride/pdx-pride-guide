@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import CountUpValue from "@/components/CountUpValue";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
-type Props = {
-  eventCount: number;
-};
-
 /**
  * Full-bleed home hero (above the ticker): skyline wallpaper, aurora orbs,
- * left-weighted scrim, film grain, wordmark + count-up + CTAs.
+ * left-weighted scrim, film grain, wordmark + CTAs.
+ * Event count lives in HomeStatStrip, not the hero.
  */
-export default function HomeHero({ eventCount }: Props) {
+export default function HomeHero() {
   const { user } = useAuth();
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
 
@@ -104,20 +100,6 @@ export default function HomeHero({ eventCount }: Props) {
           Your map to the good nights: parties, people, the rooms that hold us - and{" "}
           <strong>take care of each other.</strong>
         </p>
-
-        <div className="home-hero__stat" aria-label={`${eventCount} upcoming events`}>
-          <div className="home-hero__stat-label">Upcoming events</div>
-          <div className="home-hero__stat-row">
-            <span className="home-hero__stat-num" data-testid="home-events-count">
-              <CountUpValue value={eventCount} duration={1400} />
-            </span>
-            <span className="home-hero__stat-meta">
-              and counting
-              <br />
-              all across Portland
-            </span>
-          </div>
-        </div>
 
         <div className="home-hero__cta">
           <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
