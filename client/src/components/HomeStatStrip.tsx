@@ -8,7 +8,7 @@ type Props = {
 
 /**
  * Three-column stat band under the home hero:
- * live event total (was hero counter) · directory places · RSVPs going.
+ * events in the next 7 days · directory places · RSVPs going.
  */
 export default function HomeStatStrip({ eventCount, placesCount, goingCount }: Props) {
   return (
@@ -17,12 +17,13 @@ export default function HomeStatStrip({ eventCount, placesCount, goingCount }: P
         <div
           className="home-stat-strip__value home-stat-strip__value--countdown"
           data-testid="home-events-count"
+          aria-label={`${eventCount} events in the next 7 days`}
         >
           <CountUpValue value={eventCount} duration={1400} />
         </div>
         <div className="home-stat-strip__label home-stat-strip__label--stack">
+          <span>next 7 days</span>
           <span>and counting</span>
-          <span>all across Portland</span>
         </div>
       </div>
       <div className="home-stat-strip__cell">

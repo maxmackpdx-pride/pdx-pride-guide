@@ -18,6 +18,7 @@ import {
 } from "@/components/ds";
 import {
   HOME_MARQUEE_FALLBACK,
+  countEventsNext7Days,
   eventsUpNext,
   pickMarqueeItems,
 } from "@/lib/homeEvents";
@@ -74,9 +75,8 @@ export default function Home() {
   }, [events]);
 
   const upNext = useMemo(() => eventsUpNext(events, 4), [events]);
-  // Same source as /events hero: expanded listings from GET /api/events
-  // (multi-day festivals count once per day they appear on the board).
-  const eventCount = events.length;
+  // Rolling next-7-days total (expanded LIVE listings from GET /api/events).
+  const eventCount = useMemo(() => countEventsNext7Days(events), [events]);
   const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
   const goingCount = useMemo(
     () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),

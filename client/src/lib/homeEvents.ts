@@ -132,6 +132,33 @@ export function pickMarqueeItems(events: EventListing[], limit = 21): string[] {
 }
 
 /**
+ * Listings that overlap the rolling window [now, now + days].
+ * Multi-day expansions count per day they appear on the board.
+ */
+export function eventsInNextDays(
+  events: EventListing[],
+  days = 7,
+  nowMs: number = Date.now(),
+): EventListing[] {
+  const windowEnd = nowMs + days * 24 * 60 * 60 * 1000;
+  return events.filter(e => {
+    const startMs = parsePacificDateTime(e.dateStart);
+    if (startMs == null) return false;
+    const endMs = parsePacificDateTime(e.dateEnd) ?? startMs;
+    // Still on / starts soon, and begins before the window closes.
+    return endMs >= nowMs && startMs <= windowEnd;
+  });
+}
+
+/** Home stat strip counter: LIVE listings in the next 7 days (expanded). */
+export function countEventsNext7Days(
+  events: EventListing[],
+  nowMs: number = Date.now(),
+): number {
+  return eventsInNextDays(events, 7, nowMs).length;
+}
+
+/**
  * Next N events that haven't ended yet (live + upcoming), earliest start first.
  * Home Up Next row - advances as Pride Week moves, not frozen on Monday openers.
  */
