@@ -202,7 +202,7 @@
   /* Tight shadow = depth without a brown soft blob under feathered bloom */
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.55));
   will-change: transform;
-  animation: homeWordmarkFloat 6.5s ease-in-out infinite;
+  animation: homeWordmarkFloat 4s ease-in-out infinite;
 }
 
 @keyframes homeWordmarkFloat {
@@ -211,7 +211,7 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-24px);
   }
 }
 
@@ -242,10 +242,10 @@
 .home-hero__orb {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.1;
+  opacity: 0.24;
   /* Additive under type only — never on the wordmark layer (z2 < z3) */
   mix-blend-mode: screen;
-  filter: blur(80px);
+  filter: blur(64px) saturate(1.5);
   pointer-events: none;
   will-change: transform, opacity, filter;
   width: 22vw;
@@ -260,44 +260,44 @@
    * Stagger via animation-delay on each letter in HomeHero.
    */
   animation:
-    homeLetterOrb 33.6s ease-in-out infinite,
-    homeOrbHaze 11s ease-in-out infinite;
+    homeLetterOrb 15s ease-in-out infinite,
+    homeOrbHaze 6s ease-in-out infinite;
 }
 
-/* Drift within ~5.5% of starting center (10% wider than 5%) - still slow */
+/* Drift ~12% of starting center — livelier, faster travel */
 @keyframes homeLetterOrb {
   0%,
   100% {
     transform: translate(-50%, -50%) translate(0%, 0%) scale(1);
   }
   20% {
-    transform: translate(-50%, -50%) translate(5.5%, -3.3%) scale(1.04);
+    transform: translate(-50%, -50%) translate(12%, -7.5%) scale(1.1);
   }
   45% {
-    transform: translate(-50%, -50%) translate(-2.2%, 5.5%) scale(0.96);
+    transform: translate(-50%, -50%) translate(-5%, 12%) scale(0.88);
   }
   70% {
-    transform: translate(-50%, -50%) translate(-5.5%, -4.4%) scale(1.05);
+    transform: translate(-50%, -50%) translate(-12%, -9.5%) scale(1.12);
   }
   85% {
-    transform: translate(-50%, -50%) translate(3.3%, 2.2%) scale(0.98);
+    transform: translate(-50%, -50%) translate(7.5%, 5%) scale(0.94);
   }
 }
 
-/* Soft heat-haze: opacity + blur breathe (independent of path) */
+/* Heat-haze: brighter opacity + tighter blur breathe (more vivid color) */
 @keyframes homeOrbHaze {
   0%,
   100% {
-    opacity: 0.09;
-    filter: blur(80px);
+    opacity: 0.22;
+    filter: blur(64px) saturate(1.5);
   }
   40% {
-    opacity: 0.14;
-    filter: blur(72px);
+    opacity: 0.36;
+    filter: blur(52px) saturate(1.7);
   }
   70% {
-    opacity: 0.11;
-    filter: blur(88px);
+    opacity: 0.28;
+    filter: blur(72px) saturate(1.5);
   }
 }
 
