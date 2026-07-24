@@ -42,7 +42,7 @@ export interface MockStat {
 
 export const sampleEvents: MockEvent[] = [
   {
-    title: "Queer Dance Party",
+    title: "Dance Party",
     venue: "Holocene",
     when: "Fri, Jul 17 · 9:00 PM · SE Portland",
     day: "FRI",
@@ -102,7 +102,7 @@ export const samplePlaces: MockPlace[] = [
     hours: "Mon-Sun · 4 PM - 2 AM",
     phone: "(503) 236-0020",
     description:
-      "Queer-owned neighborhood bar with patio, drag nights, and a welcoming crowd every night of the week.",
+      "Neighborhood bar that is ours with patio, drag nights, and a welcoming crowd every night of the week.",
     website: "https://example.com/campbar",
     instagram: "@campbarpdx",
     events: [
