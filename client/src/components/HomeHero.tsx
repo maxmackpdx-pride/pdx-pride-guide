@@ -6,7 +6,7 @@ import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
 
 /**
  * Full-bleed home hero (above the ticker): skyline wallpaper, aurora orbs,
- * left-weighted scrim, film grain, wordmark + CTAs.
+ * left-weighted scrim, film grain, kicker + CTAs.
  * Event count lives in HomeStatStrip, not the hero.
  */
 export default function HomeHero() {
@@ -87,19 +87,11 @@ export default function HomeHero() {
       </button>
 
       <div className="home-hero__inner">
+        <h1 className="sr-only">Zaylist</h1>
         <div className="home-hero__kicker">
           <span className="home-hero__dot" aria-hidden />
           Portland nights · all year
         </div>
-
-        <h1 className="home-hero__title">
-          <span className="home-hero__word home-hero__word--pride">ZAYLIST</span>
-        </h1>
-
-        <p className="home-hero__tagline">
-          Your map to the good nights: parties, people, the rooms that hold us - and{" "}
-          <strong>take care of each other.</strong>
-        </p>
 
         <div className="home-hero__cta">
           <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
