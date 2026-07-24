@@ -1,4 +1,4 @@
-# PDX Pride Guide — Events System Explainer
+# Zaylist — Events System Explainer
 
 Written for claude.ai/design (or any design tool) that needs to understand how
 events, cards, and the two event layouts work. Everything here mirrors the live
@@ -231,7 +231,7 @@ Portable samples: `previews/event-card.html`, `events-page-layout.html`,
 
 ### Tokens used on events
 
-- Day fills: `--day-mon` … `--day-sun` (from `shared/prideWeek.ts`)
+- Day fills: `--day-mon` … `--day-sun` (from `shared/eventWeek.ts`)
 - Day text-safe: `--day-mon-text`, `--day-tue-text` (pills/tags on near-black)
 - Multi-day pin: `--day-multi`
 - RSVP / primary: `--rsvp` / `--neon-yellow` (`#CCFF00`) — **never** a day

@@ -1,6 +1,6 @@
 # Handoff For AI Tucker Team — 2026-06-22 (from Grok)
 
-**AI Tucker Team** = Grok + Codex + Claude (+ Tucker). Read this file first when joining the PDX Pride Guide project.
+**AI Tucker Team** = Grok + Codex + Claude (+ Tucker). Read this file first when joining Zaylist project.
 
 GitHub is the communication bus. There is no live API tunnel between agents (Cowork/Codex/Grok cannot share a session).
 
@@ -15,7 +15,7 @@ Closest thing to a "direct line": **`AGENT_TUNNEL.jsonl`** + **`scripts/agent-tu
 | `./scripts/agent-tunnel.sh send codex grok "..."` | Anyone — sends message, auto-pushes `master` |
 | `./scripts/agent-tunnel.sh status` | Last 5 messages |
 
-**Codex start prompt:** `cd pdx-pride-guide && ./scripts/agent-tunnel.sh poll codex`
+**Codex start prompt:** `cd zaylist && ./scripts/agent-tunnel.sh poll codex`
 
 **Claude Cowork:** cannot poll live — push to tunnel via commit or ask Tucker to relay.
 
@@ -178,7 +178,7 @@ After any deploy touching `server/` or uploads:
 
 ## Latest session — 2026-06-26 (Grok) — Update 11
 
-**HEAD:** (this commit) · **Site:** https://www.prideguidepdx.com · **API:** 44 events OK
+**HEAD:** (this commit) · **Site:** https://www.zaylist.com · **API:** 44 events OK
 
 **Full memory refresh:** `SESSION_HANDOFF_2026-06-23.md` + **Saved data persistence** section above (read first).
 
@@ -267,7 +267,7 @@ After any deploy touching `server/` or uploads:
 ### Railway volume — DONE 2026-06-22 ~19:35Z
 
 Grok applied via Railway GraphQL API (project token):
-1. Volume `pdx-pride-guide-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) mounted at `/data`
+1. Volume `zaylist-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) mounted at `/data`
 2. `DATABASE_PATH=/data/data.db` set on service
 3. Redeploy `16d8d756` → **SUCCESS**
 4. Verified: `GET /api/events` → 200, 44 events auto-seeded on fresh volume
@@ -352,14 +352,14 @@ Grok applied via Railway GraphQL API (project token):
 | Item | Status |
 | --- | --- |
 | **GitHub HEAD** | `8c2bb42` (Claude audit batch + handoff) |
-| Live site | `https://www.prideguidepdx.com` — `index-C-SXoEXS.css`, `index-Bcyhax6z.js` |
+| Live site | `https://www.zaylist.com` — `index-C-SXoEXS.css`, `index-Bcyhax6z.js` |
 | `GET /api/gigs` on www | **FIXED** — returns `[]` (zero LIVE posts in DB; expected) |
 | Production deploy drift | **FIXED** — GitHub Actions on `master` |
 | Pride Work UI error masking | **FIXED** |
 | Avatar system (Section 17) | **DEPLOYED** — circle crop + optional pride rings |
 | Mobile hero + nav | **DEPLOYED** |
 | Gift With Pride art | **DEPLOYED** |
-| Apex `prideguidepdx.com` | **FIXED** 2026-06-22 — ALIAS `9piptmie.up.railway.app` + `TXT _railway-verify` |
+| Apex `zaylist.com` | **FIXED** 2026-06-22 — ALIAS `9piptmie.up.railway.app` + `TXT _railway-verify` |
 | UAT P1 items | **NOT STARTED** (ticket links, mobile overflow, admin cleanup) |
 | Claim route / popup / feedback | Deployed — needs browser re-UAT |
 | **DB persistence** | **FIXED** — volume `/data`, `DATABASE_PATH=/data/data.db` |
@@ -375,7 +375,7 @@ Grok applied via Railway GraphQL API (project token):
 |------|-------|
 | Canonical repo | `/Users/tuckercasey/pdx-pride-guide` (Codex local workspace retired — git history unchanged) |
 | GitHub | `maxmackpdx-pride/pdx-pride-guide` (branch `master`) |
-| Plan PDF | `/Users/tuckercasey/Downloads/pdx-pride-guide-plan-v8.pdf` |
+| Plan PDF | `/Users/tuckercasey/Downloads/zaylist-plan-v8.pdf` |
 | UAT report | `SOFT_LAUNCH_UAT_REPORT_CODEX.md` |
 
 ## Admin & identity
@@ -414,7 +414,7 @@ Grok applied via Railway GraphQL API (project token):
 
 - Dashboard → Edit Profile → crop → optional ring → save
 - Files: `UserAvatar.tsx`, `AvatarEditor.tsx`, `shared/avatarRings.ts`
-- Test live: `https://www.prideguidepdx.com/#/dashboard`
+- Test live: `https://www.zaylist.com/#/dashboard`
 
 ## Deploy
 
@@ -425,10 +425,10 @@ GitHub Actions: `.github/workflows/railway-deploy.yml` on push to `master`.
 ## Verification
 
 ```bash
-curl -sS "https://prideguidepdx.com/api/events?limit=1"
-curl -sS "https://www.prideguidepdx.com/api/events?limit=1"
-curl -sS "https://www.prideguidepdx.com/api/gigs"
-curl -sS "https://www.prideguidepdx.com/" | grep -oE 'index-[^"]+\.(css|js)' | head -2
+curl -sS "https://zaylist.com/api/events?limit=1"
+curl -sS "https://www.zaylist.com/api/events?limit=1"
+curl -sS "https://www.zaylist.com/api/gigs"
+curl -sS "https://www.zaylist.com/" | grep -oE 'index-[^"]+\.(css|js)' | head -2
 ```
 
 ## Browser UAT checklist

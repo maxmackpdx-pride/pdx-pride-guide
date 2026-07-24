@@ -18,7 +18,7 @@
 
 ## What we're doing
 
-Expand from Thu–Sun Jul 16–19 to full Pride Week Jul 13–19 with one canonical source in `shared/prideWeek.ts` for dates, colors, helpers, map pins, tag colors, filters, schedule, weather, and copy.
+Expand from Thu–Sun Jul 16–19 to full Pride Week Jul 13–19 with one canonical source in `shared/eventWeek.ts` for dates, colors, helpers, map pins, tag colors, filters, schedule, weather, and copy.
 
 ## Current problems (audit)
 
@@ -93,12 +93,12 @@ Expand from Thu–Sun Jul 16–19 to full Pride Week Jul 13–19 with one canoni
 
 | Plan claim | Verdict | Detail |
 |---|---|---|
-| prideWeek.ts is WED 15 → MON 20 | ✅ True | `shared/prideWeek.ts:11–16`. Missing MON 13 + TUE 14, **and includes an extra MON Jul 20** past the plan's end date (see Concern 1). No `prideDayFromDate` helper exists — it must be written, not "synced". |
+| prideWeek.ts is WED 15 → MON 20 | ✅ True | `shared/eventWeek.ts:11–16`. Missing MON 13 + TUE 14, **and includes an extra MON Jul 20** past the plan's end date (see Concern 1). No `prideDayFromDate` helper exists — it must be written, not "synced". |
 | multiDayEvents.ts missing TUE | ✅ True | `shared/multiDayEvents.ts:5` — also a hardcoded duplicate list; it does **not** import prideWeek.ts. |
 | 6 DAY_COLORS copies, SAT/SUN split | ✅ True | Exactly 6 JS maps. Group A (SAT `#39FF14` / SUN `#FF6600`, 4 days): `Events.tsx:32`, `Directory.tsx:46`, `EventBoardCard.tsx:7`, `EventsMap.tsx:14`. Group B (SAT `#FF6600` / SUN `#FF2400`, incl. WED): `EventModal.tsx:35`, `EventTagsRow.tsx:6`. CSS vars in `index.css:41–46` + `tokens.css:22–26` match Group B. Bonus bug: `Schedule.tsx:18–21` uses `var(--day-sat, #39FF14)` — Group A *fallbacks* against Group B *vars*, so its source reads green/orange but renders orange/red. |
 | Events filter THU–SUN; kicker "July 18–19" | ✅ True | `Events.tsx:38` (`DAYS`), `:39` (`DAY_SORT_ORDER`), `:466` (kicker — wrong even for the current site; quick-fixable today). |
 | Map legend 4 days; pie needs sort | ✅ True | `EventsMap.tsx:368–388`. Pie slice order is venue-group insertion order (`EventsMap.tsx:119`), not day order; popup `primaryColor` uses unsorted `days[0]` too. The MULTI-DAY legend swatch hardcodes 4 hexes **mixing both color groups**. |
-| Admin dropdown hardcoded THU–SUN | ❌ **Already fixed** | `3d237cb` switched `DashboardEventEditor.tsx:103` and both Submit form selects to `PRIDE_WEEK_DAY_OPTIONS`. Phase 6's admin item is done — but both forms now inherit the wrong WED 15 → MON 20 window. |
+| Admin dropdown hardcoded THU–SUN | ❌ **Already fixed** | `3d237cb` switched `DashboardEventEditor.tsx:103` and both Submit form selects to `EVENT_WEEK_DAY_OPTIONS`. Phase 6's admin item is done — but both forms now inherit the wrong WED 15 → MON 20 window. |
 
 **Calendar check:** verified with `date` — Jul 13, 2026 is Monday and Jul 19 is Sunday. The authoritative table is correct.
 

@@ -11,13 +11,13 @@ Add to Railway project environment:
 ```
 VAPID_PUBLIC_KEY=<public key from command>
 VAPID_PRIVATE_KEY=<private key from command>
-VAPID_SUBJECT=mailto:hello@pdxprideguide.com
+VAPID_SUBJECT=mailto:hello@zaylist.com
 ```
 
 Optional:
 
 ```
-PUBLIC_SITE_URL=https://www.prideguidepdx.com
+PUBLIC_SITE_URL=https://www.zaylist.com
 ```
 
 After deploy:

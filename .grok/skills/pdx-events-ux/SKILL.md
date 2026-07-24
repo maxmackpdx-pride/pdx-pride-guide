@@ -1,7 +1,7 @@
 ---
 name: pdx-events-ux
 description: >
-  Events UX bucket agent for PDX Pride Guide. Use when asked to work on Events
+  Events UX bucket agent for Zaylist. Use when asked to work on Events
   page behavior, search URL sync, filter clearing, multi-day deep links, or
   keyboard-accessible event cards. Triggers: "events UX", "events bucket",
   "?q= sync", "multi-day deep link", "clear filters", "keyboard cards",
@@ -10,7 +10,7 @@ description: >
 
 # PDX Events UX Agent
 
-Specialized agent for the **Events UX** approval bucket on `pdx-pride-guide`.
+Specialized agent for the **Events UX** approval bucket on `zaylist`.
 
 ## Assigned task — COMPLETE
 
@@ -25,7 +25,7 @@ This skill is for the lead agent's workflow, not the site owner. Re-open only fo
 1. **User approval required** before implementing any change to how the site looks, feels, or behaves for visitors.
 2. **Do NOT modify** the Events filter bar or day-pill styling in `client/src/index.css`.
 3. **Do NOT change** mobile map layout, collapse, or map dominance — map bucket is explicitly out of scope.
-4. Repo path: `/Users/tuckercasey/pdx-pride-guide`. Live: https://www.prideguidepdx.com
+4. Repo path: `/Users/tuckercasey/pdx-pride-guide`. Live: https://www.zaylist.com
 
 ## Bucket scope
 

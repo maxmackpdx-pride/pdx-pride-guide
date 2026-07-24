@@ -1,7 +1,7 @@
 ---
 name: pdx-push-phase-4
 description: >
-  Phase 4 agent — polish and ship for PDX Pride Guide push program. Dashboard notification
+  Phase 4 agent — polish and ship for Zaylist push program. Dashboard notification
   prefs UI, iOS Add to Home Screen onboarding, app badges, gap notifications, Codex UAT
   checklist, program closeout. Reads PHASE_3 handoff. Writes PHASE_4_COMPLETE. Triggers:
   "phase 4 push", "push polish", "ship push notifications", "/pdx-push-phase-4". UX changes

@@ -1,8 +1,8 @@
-# PDX Pride Guide — Soft Launch UAT Report
+# Zaylist — Soft Launch UAT Report
 
 Date: June 22, 2026
 Tester: Codex production pass
-Live site: https://www.prideguidepdx.com
+Live site: https://www.zaylist.com
 Repo head tested locally/pushed: 638106b
 Live bundle during test: assets/index-WvdW41JC.js, assets/index-dQITpYT1.css
 
@@ -20,7 +20,7 @@ The core event browse path works, but production is stale versus GitHub and stil
 | Claim an Event route | `#/submit?mode=claim&eventId=20` and `#/submit/claim/20` both show React 404 on live | Users trying to claim Treasure Trail / Bearracuda hit the 404 |
 | Pride Work API | `GET /api/gigs` returns 500: missing `post_type` column | Pride Work cannot load real listings |
 | Pride Work UI masking | Page shows “0 posts / no posts yet” instead of surfacing the API failure | Testers/admin may think the board is empty rather than broken |
-| Apex API | `https://prideguidepdx.com/api/events?limit=1` returns homepage HTML after redirect | API only works correctly on `www` while apex is still Squarespace-controlled |
+| Apex API | `https://zaylist.com/api/events?limit=1` returns homepage HTML after redirect | API only works correctly on `www` while apex is still Squarespace-controlled |
 
 ## P1 / Before Wider Share
 
@@ -33,7 +33,7 @@ The core event browse path works, but production is stale versus GitHub and stil
 
 ## What Works Live
 
-- `GET https://www.prideguidepdx.com/api/events?limit=1` returns JSON.
+- `GET https://www.zaylist.com/api/events?limit=1` returns JSON.
 - Events API returns 44 events.
 - Events page renders 44 cards and a Leaflet map.
 - Expanded events map has `BACK TO EVENTS` and `COLLAPSE`.

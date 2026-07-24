@@ -33,7 +33,7 @@ async function bodyHasContent(page) {
 const REMAINING_TABS = [
   { key: "overview", label: "Overview", expect: /Needs attention|Control room|push/i },
   { key: "events", label: "Events", expect: /events total|Assign unclaimed/i },
-  { key: "gigs", label: "Gigs", expect: /Pride Werk|gig/i },
+  { key: "gigs", label: "Gigs", expect: /Gig Werk|gig/i },
   { key: "promoters", label: "Promoters", expect: /Promoter|scene/i },
   { key: "venue-claims", label: "Venue claims", expect: /Venue|claim|directory/i },
   { key: "users", label: "Users", expect: /user|community/i },

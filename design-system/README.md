@@ -1,4 +1,4 @@
-# PDX Pride Guide — Design System (portable kit)
+# Zaylist — Design System (portable kit)
 
 Sync-ready bundle for a claude.ai/design project.
 
@@ -13,7 +13,7 @@ Sync-ready bundle for a claude.ai/design project.
 
 ```
 LIVE SITE + client/src/components/ds/tokens/glass.css
-  ← shared/prideWeek.ts + client tokens
+  ← shared/eventWeek.ts + client tokens
   → design-system/tokens/tokens.css + previews (sync)
 ```
 
@@ -52,7 +52,7 @@ Modular production tokens (richer, multi-file) live in
 - Display: Barlow Condensed 700–900 uppercase. Body: Inter `#e6e3da`.
 - One neon per element. Lime `#CCFF00` = reserved primary/RSVP where specified;
   never a Pride day color.
-- Day colors: semantic Pride Week from `shared/prideWeek.ts`.
+- Day colors: semantic Pride Week from `shared/eventWeek.ts`.
 - Rainbow top seam on clickable cards (`docs/BOARD_CARD_STANDARD.md`).
 - Motion: ~0.15s hover; calm / reduced-motion kills ambient pulse.
 - Full retired-rule trap list: `docs/LIVE_DESIGN_STANDARD.md`.

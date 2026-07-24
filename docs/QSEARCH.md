@@ -1,6 +1,6 @@
 # QSearch
 
-Admin event intelligence for Pride Guide PDX. **Discover + draft only.** Review supports **Approve LIVE** or **Stage HIDDEN**. Never auto-LIVE without human approve.
+Admin event intelligence for Zaylist. **Discover + draft only.** Review supports **Approve LIVE** or **Stage HIDDEN**. Never auto-LIVE without human approve.
 
 **Route:** `/admin?tab=qsearch`  
 **Branch work:** `feature/phase4-ingest`

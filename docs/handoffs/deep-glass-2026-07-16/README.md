@@ -5,7 +5,7 @@
 >
 > **Live design standard:** [`docs/LIVE_DESIGN_STANDARD.md`](../../LIVE_DESIGN_STANDARD.md)  
 > **Live tokens:** `client/src/components/ds/tokens/glass.css`  
-> **Live product:** https://www.prideguidepdx.com (`master` on Railway)
+> **Live product:** https://www.zaylist.com (`master` on Railway)
 
 Post-migration polish also landed on production (claim sticker, Shop Now
 contrast, PAST board timing, ad builder WYSIWYG, map deboss, etc.). Those

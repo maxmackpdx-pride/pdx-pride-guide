@@ -12,7 +12,7 @@
 ### Chain (do not fork)
 
 ```
-shared/prideWeek.ts                 day codes, dates, day colors, RSVP hex
+shared/eventWeek.ts                 day codes, dates, day colors, RSVP hex
         ↓
 client/src/index.css                global / legacy CSS vars
 client/src/components/ds/tokens/*   modular production tokens
@@ -74,11 +74,11 @@ Live sandbox: `/design-preview` (`DesignSystemSandbox.tsx`).
 |-------|-----------|
 | Missed Connections | magenta `#ff1fa0` |
 | Gifting | lime `#ccff00` |
-| Pride Werk | purple `#b06bff` |
+| Gig Werk | purple `#b06bff` |
 
 5. **Featured event ad** — top of hub feed; day-color glow; slideshow; countdown; Buy tickets + RSVP → EventModal. Config/rotation in `HubFeed.tsx` (`FEATURED`, localStorage `hub-featured-rotation`). See `docs/featured-event-card.md`.
 
-6. **Day colors** — always from `shared/prideWeek.ts` / day tokens, not hard-coded one-offs.
+6. **Day colors** — always from `shared/eventWeek.ts` / day tokens, not hard-coded one-offs.
 
 ---
 
@@ -317,7 +317,7 @@ npm run sync:design-system
 
 | Area | Paths |
 |------|--------|
-| Tokens | `client/src/components/ds/tokens/*`, `shared/prideWeek.ts` |
+| Tokens | `client/src/components/ds/tokens/*`, `shared/eventWeek.ts` |
 | Card standard | `docs/BOARD_CARD_STANDARD.md`, `base.css`, `effects.css` |
 | Board pages | `PrideWork.tsx`, `Gifting.tsx`, `MissedConnections.tsx` |
 | Feed | `HubFeed.tsx`, `HubFeedCard.tsx`, `FeaturedEventAd.tsx`, `BoardPostOverlay.tsx` |

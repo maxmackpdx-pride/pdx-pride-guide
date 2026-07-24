@@ -1,12 +1,12 @@
 # Session Handoff — 2026-06-23 (Grok → Tucker + AI Team)
 
-**Read this first after reboot.** Full memory refresh for the PDX Pride Guide work session.
+**Read this first after reboot.** Full memory refresh for Zaylist work session.
 
 ---
 
 ## Quick start prompt (paste into any agent)
 
-> Read `SESSION_HANDOFF_2026-06-23.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Site: prideguidepdx.com. Standing constraint: Tucker likes the site as-is — only make requested changes. Do NOT touch `client/src/pages/Events.tsx` or filter bar / day-pill styling in `client/src/index.css` (handled separately). Local path: `/Users/tuckercasey/pdx-pride-guide`.
+> Read `SESSION_HANDOFF_2026-06-23.md` in `maxmackpdx-pride/pdx-pride-guide` on `master`. Site: zaylist.com. Standing constraint: Tucker likes the site as-is — only make requested changes. Do NOT touch `client/src/pages/Events.tsx` or filter bar / day-pill styling in `client/src/index.css` (handled separately). Local path: `/Users/tuckercasey/pdx-pride-guide`.
 
 ---
 
@@ -14,7 +14,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Site** | https://prideguidepdx.com / https://www.prideguidepdx.com |
+| **Site** | https://zaylist.com / https://www.zaylist.com |
 | **Repo** | `maxmackpdx-pride/pdx-pride-guide` |
 | **Branch** | `master` |
 | **Local path** | `/Users/tuckercasey/pdx-pride-guide` |
@@ -156,7 +156,7 @@ dist/                     (committed with builds)
 ### One-shot prompt for Claude Design
 
 ```
-Design assets for prideguidepdx.com — 90s punk zine × rave Pride aesthetic on pure black. Colors: #CCFF00 primary, #00FFFF water accent, #FF00CC sparingly, #FF6600 Sunday, RGB hard-edge rainbow divider strips. Massive condensed ALL-CAPS type with 1px black outline and sharp 5px black shadow down-right. Deliver: (1) "PDX PRIDE MAP" lettering PNG 16:9, (2) neon LED border frame loop 6s, (3) laser grid atmosphere loop 6s, (4) vertical glowstick/bolt/droplet sticker stack loop 9:16, (5) rotating neon pin ring loop 1:1. All video: seamless loop, camera locked, one simple pulse motion, no people, no stock Pride, no real geography. Photocopy grit, blacklight, laser grid, LED bloom.
+Design assets for zaylist.com — 90s punk zine × rave Pride aesthetic on pure black. Colors: #CCFF00 primary, #00FFFF water accent, #FF00CC sparingly, #FF6600 Sunday, RGB hard-edge rainbow divider strips. Massive condensed ALL-CAPS type with 1px black outline and sharp 5px black shadow down-right. Deliver: (1) "PDX PRIDE MAP" lettering PNG 16:9, (2) neon LED border frame loop 6s, (3) laser grid atmosphere loop 6s, (4) vertical glowstick/bolt/droplet sticker stack loop 9:16, (5) rotating neon pin ring loop 1:1. All video: seamless loop, camera locked, one simple pulse motion, no people, no stock Pride, no real geography. Photocopy grit, blacklight, laser grid, LED bloom.
 ```
 
 ### Suggested filenames

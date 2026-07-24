@@ -1,6 +1,6 @@
 ---
-name: pdx-pride-guide-design
-description: Use this skill to generate well-branded interfaces and assets for PDX Pride Guide (prideguidepdx.com), the community-run Portland Pride event guide, either for production or throwaway prototypes/mocks. Contains essential design guidelines, colors, day-color system, type, fonts, assets, and UI kit components for prototyping.
+name: zaylist-design
+description: Use this skill to generate well-branded interfaces and assets for Zaylist (zaylist.com), the community-run Portland Pride event guide, either for production or throwaway prototypes/mocks. Contains essential design guidelines, colors, day-color system, type, fonts, assets, and UI kit components for prototyping.
 user-invocable: true
 ---
 

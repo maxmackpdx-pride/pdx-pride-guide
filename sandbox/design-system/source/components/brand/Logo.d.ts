@@ -10,7 +10,7 @@ export interface LogoProps extends React.HTMLAttributes<HTMLElement> {
   tone?: "light" | "dark";
   /** Path to the mark PNG. Default "assets/logo.png" — pass the correct relative path per page. */
   src?: string;
-  /** Accessible name. Default "PDX Pride Guide". */
+  /** Accessible name. Default "Zaylist". */
   alt?: string;
   /** Render as a link. */
   href?: string;

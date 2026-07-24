@@ -6,7 +6,7 @@
 
 **Canonical design rules:** [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md)
 
-Production React + CSS on `master` / prideguidepdx.com supersede portable previews, sandbox HTML, and the deep-glass migration handoff. If a document conflicts with live, **fix the document**.
+Production React + CSS on `master` / zaylist.com supersede portable previews, sandbox HTML, and the deep-glass migration handoff. If a document conflicts with live, **fix the document**.
 
 ### Surface chrome (deep-glass / OLED-neon) — shipped
 
@@ -29,7 +29,7 @@ Layout, spacing, fonts, and type scale stay on the modular token files. Feature 
 ```
 LIVE SITE (master / Railway)
         ↑
-shared/prideWeek.ts              day codes, dates, day colors, RSVP reserved hex
+shared/eventWeek.ts              day codes, dates, day colors, RSVP reserved hex
 client/src/components/ds/tokens/*   modular production tokens (glass = chrome)
 client/src/index.css             legacy + app chrome vars still in use
         ↓  npm run sync:design-system

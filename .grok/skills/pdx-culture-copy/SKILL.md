@@ -1,7 +1,7 @@
 ---
 name: pdx-culture-copy
 description: >
-  Culture and copy bucket agent for PDX Pride Guide. Use for Pride taxonomy
+  Culture and copy bucket agent for Zaylist. Use for Pride taxonomy
   (MARCH, TRANS, QTBIPOC filters), FAQ expansion, Spotted tagline, About copy,
   march/programming visibility, and Portland queer community authenticity.
   Triggers: "culture bucket", "copy bucket", "MARCH filter", "QTBIPOC", "FAQ",

@@ -2,7 +2,7 @@
 
 ```jsx
 <Button accent="lime" size="lg" arrow>View All Events</Button>   {/* primary */}
-<Button accent="pink" size="lg" arrow>Pride Werk</Button>        {/* secondary */}
+<Button accent="pink" size="lg" arrow>Gig Werk</Button>        {/* secondary */}
 <Button accent="lime" live>Live Events</Button>
 <Button variant="solid" accent="pink">Get Tickets</Button>
 <Button variant="gradient" arrow>Submit an Event</Button>

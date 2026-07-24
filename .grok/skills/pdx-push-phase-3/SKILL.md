@@ -1,7 +1,7 @@
 ---
 name: pdx-push-phase-3
 description: >
-  Phase 3 agent — notification dispatch bridge for PDX Pride Guide. Hooks sendMessage
+  Phase 3 agent — notification dispatch bridge for Zaylist. Hooks sendMessage
   and system notify functions to Web Push, payload templates per contextType, preference
   filtering, admin alerts. Reads PHASE_2 handoff. Writes PHASE_3_COMPLETE for Phase 4.
   Triggers: "phase 3 push", "dispatch phase", "inbox to push", "/pdx-push-phase-3".
@@ -57,7 +57,7 @@ description: >
 ## Payload rules
 
 - Use **Declarative Web Push** via Phase 2 send helper
-- `navigate`: absolute `https://www.prideguidepdx.com/...`
+- `navigate`: absolute `https://www.zaylist.com/...`
 - Include `app_badge` with unread count when possible
 - Title/body from message subject + truncated body
 

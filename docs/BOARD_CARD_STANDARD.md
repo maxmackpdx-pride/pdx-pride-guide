@@ -1,7 +1,7 @@
 # Board card + feed overlay standard
 
 The reusable pattern behind Missed Connections, the Gifting/free board, and
-Pride Werk. Follow this when adding a **new board category** so it looks and
+Gig Werk. Follow this when adding a **new board category** so it looks and
 behaves like the others: a colored card on its own board page, a matching card
 in the hub feed, and a tap-to-open overlay that shows the real, interactive
 card on top of the feed (close = back to your exact scroll spot).
@@ -153,7 +153,7 @@ Each board owns a signature color; sub-types within a board can vary it.
 |---|---|---|
 | Missed Connections (`spotted`) | magenta `--panel-magenta` / `#ff1fa0` | event cyan, beach orange, around-town `#ff8c00` |
 | Gifting (`gifting`) | acid-yellow / lime `--panel-lime` / `#ccff00` | GIFT `#ccff00`, ISO `#19e3ff`, open-grab `#ff8c00` |
-| Pride Werk (`gig`) | purple `--panel-purple` / `#b06bff` | POSTING_GIG `#b06bff`, LOOKING_FOR_WORK (talent) `#19e3ff` |
+| Gig Werk (`gig`) | purple `--panel-purple` / `#b06bff` | POSTING_GIG `#b06bff`, LOOKING_FOR_WORK (talent) `#19e3ff` |
 
 Badge/tag colors are centralized in `hubFeedBadgeColor()` in
 `shared/hubFeed.ts` — add your new kind there.

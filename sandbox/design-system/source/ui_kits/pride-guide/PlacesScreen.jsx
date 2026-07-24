@@ -2,7 +2,7 @@
    masonry-ish grid of PlaceCards. */
 const {
   MapPanel: PlMap, FilterChip: PlChip, PlaceCard: PlCard, StatPill: PlStatPill,
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 
 function PlacesScreen({ data }) {
   const [cat, setCat] = React.useState("all");

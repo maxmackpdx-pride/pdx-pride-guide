@@ -1,7 +1,7 @@
-# PDX Pride Guide — Design Standard Migration Brief (for Grok)
+# Zaylist — Design Standard Migration Brief (for Grok)
 
 ## Your job
-The PDX Pride Guide app (`maxmackpdx-pride/pdx-pride-guide`) currently ships a **"lite glass" design standard** — translucent panels, soft shadows, neon kept only on borders/CTAs. We have moved to a **new "deep-glass / OLED-neon" standard**. Your task is to **rewrite the global design standards and every surface's styling** to match the new standard, starting with **cards and maps**, which change the most.
+Zaylist app (`maxmackpdx-pride/pdx-pride-guide`) currently ships a **"lite glass" design standard** — translucent panels, soft shadows, neon kept only on borders/CTAs. We have moved to a **new "deep-glass / OLED-neon" standard**. Your task is to **rewrite the global design standards and every surface's styling** to match the new standard, starting with **cards and maps**, which change the most.
 
 This brief is organized so that **every section names (a) what it was, (b) what it is now, and (c) which NEW universal token it points back to.** Do not invent per-component values — everything resolves to the universal tokens in §1. A reference screenshot is named for each section (see `/screenshots`), and a fully-built reference implementation is included as `Card System.html` (open it in a browser — it is the source of truth for pixel values).
 

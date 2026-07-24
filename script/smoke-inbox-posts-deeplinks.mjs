@@ -10,7 +10,7 @@ mkdirSync(OUT, { recursive: true });
 const CLAIMED_EVENT_ID = 13;
 const CLAIMED_EVENT_TITLE = "Stank Yes Coach — PDX PRIDE";
 const GIG_ID = 4;
-const GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+const GIG_TITLE = "Site Admins Needed: Zaylist";
 const BAD_EVENT_ID = 999999;
 
 const results = [];

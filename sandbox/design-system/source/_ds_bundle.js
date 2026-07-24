@@ -1,8 +1,8 @@
-/* @ds-bundle: {"format":4,"namespace":"PDXPrideGuideDesignSystem_b20420","components":[{"name":"Avatar","sourcePath":"components/brand/Avatar.jsx"},{"name":"Logo","sourcePath":"components/brand/Logo.jsx"},{"name":"Badge","sourcePath":"components/data-display/Badge.jsx"},{"name":"Countdown","sourcePath":"components/data-display/Countdown.jsx"},{"name":"EventCard","sourcePath":"components/data-display/EventCard.jsx"},{"name":"PlaceCard","sourcePath":"components/data-display/PlaceCard.jsx"},{"name":"PosterCard","sourcePath":"components/data-display/PosterCard.jsx"},{"name":"StatCard","sourcePath":"components/data-display/StatCard.jsx"},{"name":"StatPill","sourcePath":"components/data-display/StatPill.jsx"},{"name":"StickerBadge","sourcePath":"components/data-display/StickerBadge.jsx"},{"name":"Button","sourcePath":"components/forms/Button.jsx"},{"name":"FilterChip","sourcePath":"components/forms/FilterChip.jsx"},{"name":"IconButton","sourcePath":"components/forms/IconButton.jsx"},{"name":"SearchInput","sourcePath":"components/forms/SearchInput.jsx"},{"name":"Divider","sourcePath":"components/layout/Divider.jsx"},{"name":"HeroBanner","sourcePath":"components/layout/HeroBanner.jsx"},{"name":"Marquee","sourcePath":"components/layout/Marquee.jsx"},{"name":"SectionHeader","sourcePath":"components/layout/SectionHeader.jsx"},{"name":"MapLegend","sourcePath":"components/map/MapLegend.jsx"},{"name":"MapPanel","sourcePath":"components/map/MapPanel.jsx"}],"sourceHashes":{"components/brand/Avatar.jsx":"9ad86941833b","components/brand/Logo.jsx":"388d6e2f334e","components/data-display/Badge.jsx":"fedf9781384c","components/data-display/Countdown.jsx":"e04e58e062e5","components/data-display/EventCard.jsx":"1c56d6227efa","components/data-display/PlaceCard.jsx":"5154e4a39231","components/data-display/PosterCard.jsx":"63c8f9748a23","components/data-display/StatCard.jsx":"673841d98d5b","components/data-display/StatPill.jsx":"174c9d5345b0","components/data-display/StickerBadge.jsx":"23b96038aac6","components/forms/Button.jsx":"07695dfedb2b","components/forms/FilterChip.jsx":"1e7482e9c840","components/forms/IconButton.jsx":"89732c11c272","components/forms/SearchInput.jsx":"3b79d835144a","components/layout/Divider.jsx":"b875a2551a50","components/layout/HeroBanner.jsx":"2b2d5f4e4926","components/layout/Marquee.jsx":"abeec8625ba3","components/layout/SectionHeader.jsx":"28d8bb3d132b","components/map/MapLegend.jsx":"aa074007e17d","components/map/MapPanel.jsx":"704459619f61","ui_kits/pride-guide/AdminScreen.jsx":"a720dc61ab1b","ui_kits/pride-guide/AppShell.jsx":"8e0d7c60b46c","ui_kits/pride-guide/EventsScreen.jsx":"9a8dc8d08c2b","ui_kits/pride-guide/HomeScreen.jsx":"72b837a12e4d","ui_kits/pride-guide/HubScreen.jsx":"92b3afca3e8e","ui_kits/pride-guide/PlacesScreen.jsx":"5d978e9ef9f4","ui_kits/pride-guide/data.js":"d6ed8ee68faa"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":4,"namespace":"ZaylistDesignSystem_b20420","components":[{"name":"Avatar","sourcePath":"components/brand/Avatar.jsx"},{"name":"Logo","sourcePath":"components/brand/Logo.jsx"},{"name":"Badge","sourcePath":"components/data-display/Badge.jsx"},{"name":"Countdown","sourcePath":"components/data-display/Countdown.jsx"},{"name":"EventCard","sourcePath":"components/data-display/EventCard.jsx"},{"name":"PlaceCard","sourcePath":"components/data-display/PlaceCard.jsx"},{"name":"PosterCard","sourcePath":"components/data-display/PosterCard.jsx"},{"name":"StatCard","sourcePath":"components/data-display/StatCard.jsx"},{"name":"StatPill","sourcePath":"components/data-display/StatPill.jsx"},{"name":"StickerBadge","sourcePath":"components/data-display/StickerBadge.jsx"},{"name":"Button","sourcePath":"components/forms/Button.jsx"},{"name":"FilterChip","sourcePath":"components/forms/FilterChip.jsx"},{"name":"IconButton","sourcePath":"components/forms/IconButton.jsx"},{"name":"SearchInput","sourcePath":"components/forms/SearchInput.jsx"},{"name":"Divider","sourcePath":"components/layout/Divider.jsx"},{"name":"HeroBanner","sourcePath":"components/layout/HeroBanner.jsx"},{"name":"Marquee","sourcePath":"components/layout/Marquee.jsx"},{"name":"SectionHeader","sourcePath":"components/layout/SectionHeader.jsx"},{"name":"MapLegend","sourcePath":"components/map/MapLegend.jsx"},{"name":"MapPanel","sourcePath":"components/map/MapPanel.jsx"}],"sourceHashes":{"components/brand/Avatar.jsx":"9ad86941833b","components/brand/Logo.jsx":"388d6e2f334e","components/data-display/Badge.jsx":"fedf9781384c","components/data-display/Countdown.jsx":"e04e58e062e5","components/data-display/EventCard.jsx":"1c56d6227efa","components/data-display/PlaceCard.jsx":"5154e4a39231","components/data-display/PosterCard.jsx":"63c8f9748a23","components/data-display/StatCard.jsx":"673841d98d5b","components/data-display/StatPill.jsx":"174c9d5345b0","components/data-display/StickerBadge.jsx":"23b96038aac6","components/forms/Button.jsx":"07695dfedb2b","components/forms/FilterChip.jsx":"1e7482e9c840","components/forms/IconButton.jsx":"89732c11c272","components/forms/SearchInput.jsx":"3b79d835144a","components/layout/Divider.jsx":"b875a2551a50","components/layout/HeroBanner.jsx":"2b2d5f4e4926","components/layout/Marquee.jsx":"abeec8625ba3","components/layout/SectionHeader.jsx":"28d8bb3d132b","components/map/MapLegend.jsx":"aa074007e17d","components/map/MapPanel.jsx":"704459619f61","ui_kits/pride-guide/AdminScreen.jsx":"a720dc61ab1b","ui_kits/pride-guide/AppShell.jsx":"8e0d7c60b46c","ui_kits/pride-guide/EventsScreen.jsx":"9a8dc8d08c2b","ui_kits/pride-guide/HomeScreen.jsx":"72b837a12e4d","ui_kits/pride-guide/HubScreen.jsx":"92b3afca3e8e","ui_kits/pride-guide/PlacesScreen.jsx":"5d978e9ef9f4","ui_kits/pride-guide/data.js":"d6ed8ee68faa"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
-const __ds_ns = (window.PDXPrideGuideDesignSystem_b20420 = window.PDXPrideGuideDesignSystem_b20420 || {});
+const __ds_ns = (window.ZaylistDesignSystem_b20420 = window.ZaylistDesignSystem_b20420 || {});
 
 const __ds_scope = {};
 
@@ -141,7 +141,7 @@ function Logo({
   tone = "light",
   // light (on dark) | dark (on paper)
   src = "assets/logo.png",
-  alt = "PDX Pride Guide",
+  alt = "Zaylist",
   className = "",
   href,
   ...rest
@@ -2189,7 +2189,7 @@ const {
   StatPill: AdStatPill,
   Button: AdBtn,
   Badge: AdBadge
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 const STATS = [{
   value: 14,
   label: "Registered Users",
@@ -2367,12 +2367,12 @@ Object.assign(window, {
 
 // ui_kits/pride-guide/AppShell.jsx
 try { (() => {
-/* AppShell, header nav + footer for the Pride Guide UI kit. */
+/* AppShell, header nav + footer for Zaylist UI kit. */
 const {
   Logo: PGLogo,
   Button: PGBtn,
   StatPill: PGStatPill
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 const NAV = [{
   key: "home",
   label: "Home",
@@ -2386,7 +2386,7 @@ const NAV = [{
   label: "Promoters"
 }, {
   key: "pridewerk",
-  label: "Pride Werk"
+  label: "Gig Werk"
 }, {
   key: "gifting",
   label: "Gifting"
@@ -2528,7 +2528,7 @@ function Footer({
     onClick: e => e.preventDefault()
   }, "Buy Us a Coffee"))), /*#__PURE__*/React.createElement("div", {
     className: "pg-footer__bar"
-  }, /*#__PURE__*/React.createElement("span", null, "\xA9 2026 PDX Pride Guide. A community project."), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, "\xA9 2026 Zaylist. A community project."), /*#__PURE__*/React.createElement("span", {
     className: "pg-footer__protest"
   }, "Pride is a protest. Take care of each other. \u2726"))));
 }
@@ -2552,7 +2552,7 @@ const {
   EventCard: EvRow,
   StatPill: EvStatPill,
   Badge: EvBadge
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 function GridIcon({
   on
 }) {
@@ -2775,7 +2775,7 @@ const {
   SectionHeader: HSection,
   FilterChip: HChip,
   Divider: HDivider
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 function whenLine(e) {
   const dayName = {
     THU: "Thu",
@@ -2940,7 +2940,7 @@ const {
   StatPill: HbStatPill,
   Countdown: HbCountdown,
   StickerBadge: HbSticker
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 const WX = [{
   d: "Mon",
   t: "72°"
@@ -3110,7 +3110,7 @@ function HubScreen({
     }, "Open Inbox")
   }, /*#__PURE__*/React.createElement("p", {
     className: "pg-panel__body"
-  }, "No threads yet. Replies from Spotted, Pride Werk, event hosts, and check-ins show up here."), /*#__PURE__*/React.createElement("div", {
+  }, "No threads yet. Replies from Spotted, Gig Werk, event hosts, and check-ins show up here."), /*#__PURE__*/React.createElement("div", {
     className: "pg-quickrow"
   }, /*#__PURE__*/React.createElement(HbBtn, {
     variant: "ghost",
@@ -3118,7 +3118,7 @@ function HubScreen({
   }, "Spotted"), /*#__PURE__*/React.createElement(HbBtn, {
     variant: "ghost",
     size: "sm"
-  }, "Pride Werk"), /*#__PURE__*/React.createElement(HbBtn, {
+  }, "Gig Werk"), /*#__PURE__*/React.createElement(HbBtn, {
     variant: "ghost",
     size: "sm"
   }, "Submit Event"))), /*#__PURE__*/React.createElement("div", {
@@ -3266,7 +3266,7 @@ const {
   FilterChip: PlChip,
   PlaceCard: PlCard,
   StatPill: PlStatPill
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 function PlacesScreen({
   data
 }) {
@@ -3348,7 +3348,7 @@ Object.assign(window, {
 
 // ui_kits/pride-guide/data.js
 try { (() => {
-/* Real Portland Pride 2026 content pulled from prideguidepdx.com.
+/* Real Portland Pride 2026 content pulled from zaylist.com.
    A representative subset across all four days, community-board sample
    posts, and venue directory places. Loaded as window.PDX_DATA.
    Day accents follow the site's map legend:

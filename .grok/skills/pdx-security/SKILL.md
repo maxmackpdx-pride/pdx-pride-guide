@@ -1,7 +1,7 @@
 ---
 name: pdx-security
 description: >
-  Security hardening bucket agent for PDX Pride Guide. Use for bcrypt passwords,
+  Security hardening bucket agent for Zaylist. Use for bcrypt passwords,
   attendance PII masking, admin PUT allowlist, auth rate limits, CSP, upload
   validation, or production secret audits. Triggers: "security bucket", "bcrypt",
   "PII masking", "admin allowlist", "IDOR", "/pdx-security". Backend-only items

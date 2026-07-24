@@ -561,7 +561,7 @@ type Props = { event: Event; onDismiss: () => void; slides?: string[] };
 // local useCountdown(eventStartMs(event.dateStart)) → { done, days, hours, minutes, seconds }
 // Ticket: <a href={event.ticketUrl}> if present
 // RSVP row: setOpen(true) → <EventModal event={event} onClose={() => setOpen(false)} />
-// Day accent: DAY_TEXT_COLORS[event.dayOfWeek] from @shared/prideWeek
+// Day accent: DAY_TEXT_COLORS[event.dayOfWeek] from @shared/eventWeek
 ```
 
 Shared countdown also exists at `client/src/lib/countdown.ts` (`useCountdown` + `parsePacificEventTime`) and DS `client/src/components/ds/Countdown.tsx`.
@@ -590,7 +590,7 @@ Promoter hero currently forces `avatarRing="none"` when rendering avatar (`Profi
 In `client/src/pages/Admin.tsx`:
 
 ```ts
-const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: PDX Pride Guide";
+const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: Zaylist";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 // Sticker only on admin gig moderation cards:
 // gig.title === SITE_ADMIN_GIG_TITLE || gig.username === SITE_ADMIN_GIG_OWNER
@@ -685,7 +685,7 @@ Defined in `client/src/index.css` and `design-system/tokens/tokens.css`:
 | `--day-tue-text` | `#4488FF` |
 | `--day-multi` | rainbow gradient |
 
-JS maps: `DAY_COLORS` / `DAY_TEXT_COLORS` in `shared/prideWeek.ts`.  
+JS maps: `DAY_COLORS` / `DAY_TEXT_COLORS` in `shared/eventWeek.ts`.  
 CSS helper: `dayAccentToken(day)` in `client/src/lib/dsColors.ts` → `var(--day-${code})`.  
 Classes: `.day-MON` … `.day-SUN` in `index.css`.
 
@@ -733,7 +733,7 @@ Hosting rail day border/chip should use `DAY_COLORS[dayOfWeek]` or `var(--day-sa
 - `@shared/eventPoster` `resolveEventPosterUrl`  
 - `@/hooks/useEventRsvp`  
 - `@shared/eventSlug` `eventPath`  
-- `@shared/prideWeek` day colors  
+- `@shared/eventWeek` day colors  
 - `FeaturedEventAd` — reference for countdown + ticket + EventModal composition (hub only)
 
 ---
@@ -767,7 +767,7 @@ Hosting rail day border/chip should use `DAY_COLORS[dayOfWeek]` or `var(--day-sa
 | Profile theme (live) | `/Users/tuckercasey/pdx-pride-guide/shared/profileTheme.ts` |
 | Profile constants (draft) | `/Users/tuckercasey/pdx-pride-guide/shared/profileConstants.ts` |
 | Event poster helper | `/Users/tuckercasey/pdx-pride-guide/shared/eventPoster.ts` |
-| Day colors | `/Users/tuckercasey/pdx-pride-guide/shared/prideWeek.ts` |
+| Day colors | `/Users/tuckercasey/pdx-pride-guide/shared/eventWeek.ts` |
 | RSVP hook | `/Users/tuckercasey/pdx-pride-guide/client/src/hooks/useEventRsvp.ts` |
 | Featured ad | `/Users/tuckercasey/pdx-pride-guide/client/src/components/hub/sections/FeaturedEventAd.tsx` |
 | Countdown util | `/Users/tuckercasey/pdx-pride-guide/client/src/lib/countdown.ts` |

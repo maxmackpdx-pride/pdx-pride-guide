@@ -1,11 +1,11 @@
-/* AppShell, header nav + footer for the Pride Guide UI kit. */
-const { Logo: PGLogo, Button: PGBtn, StatPill: PGStatPill } = window.PDXPrideGuideDesignSystem_b20420;
+/* AppShell, header nav + footer for Zaylist UI kit. */
+const { Logo: PGLogo, Button: PGBtn, StatPill: PGStatPill } = window.ZaylistDesignSystem_b20420;
 
 const NAV = [
   { key: "home", label: "Home", nav: true },
   { key: "events", label: "Events", nav: true },
   { key: "promoters", label: "Promoters" },
-  { key: "pridewerk", label: "Pride Werk" },
+  { key: "pridewerk", label: "Gig Werk" },
   { key: "gifting", label: "Gifting" },
   { key: "spotted", label: "Spotted!" },
   { key: "places", label: "Places", nav: true },
@@ -73,7 +73,7 @@ function Footer({ onNav }) {
           </div>
         </div>
         <div className="pg-footer__bar">
-          <span>© 2026 PDX Pride Guide. A community project.</span>
+          <span>© 2026 Zaylist. A community project.</span>
           <span className="pg-footer__protest">Pride is a protest. Take care of each other. ✦</span>
         </div>
       </div>

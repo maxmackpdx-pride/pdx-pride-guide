@@ -1,4 +1,4 @@
-/* Real Portland Pride 2026 content pulled from prideguidepdx.com.
+/* Real Portland Pride 2026 content pulled from zaylist.com.
    A representative subset across all four days, community-board sample
    posts, and venue directory places. Loaded as window.PDX_DATA.
    Day accents follow the site's map legend:

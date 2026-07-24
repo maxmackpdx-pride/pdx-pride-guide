@@ -55,7 +55,7 @@ function buildEventDetails(event) {
   if (event.venueName) lines.push(`Venue: ${event.venueName}`);
   if (event.address) lines.push(`Address: ${event.address}`);
   if (event.ticketUrl) lines.push(`Tickets: ${event.ticketUrl}`);
-  lines.push("via PDX Pride Guide — prideguidepdx.com");
+  lines.push("via Zaylist — zaylist.com");
   return lines.join("\n");
 }
 
@@ -96,7 +96,7 @@ if (!snapshot.details.includes(sample.ticketUrl)) {
 
 let liveOk = false;
 try {
-  const res = await fetch("https://prideguidepdx.com/api/events?limit=1");
+  const res = await fetch("https://zaylist.com/api/events?limit=1");
   if (res.ok) {
     const events = await res.json();
     const ev = Array.isArray(events) ? events[0] : events?.events?.[0];

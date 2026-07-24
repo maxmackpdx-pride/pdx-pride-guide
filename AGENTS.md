@@ -1,4 +1,4 @@
-# Agent rules — PDX Pride Guide
+# Agent rules — Zaylist
 
 ## Prod fixes: ready-to-ship + confirm before push (hard rule)
 
@@ -17,7 +17,7 @@ Default bias: **fix for prod, ask once, then ship.** Not “fixed” until they 
 When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**, or similar, they mean **the real product**:
 
 1. **GitHub `master`** on `maxmackpdx-pride/pdx-pride-guide` (commit + push)
-2. **Railway production** for project `pdx-pride-guide` (auto-deploys from `master`) until status is **SUCCESS**
+2. **Railway production** for project `zaylist` (auto-deploys from `master`) until status is **SUCCESS**
 3. Prefer a live probe (`/api/health` or the fixed path)
 
 Local-only edits, stashes, or unpushed branches are **not** done. Do not leave WIP stashed after a “ship” request without saying so and finishing the ship.
@@ -43,11 +43,11 @@ When the user asks to **push** / **deploy** / **ship** (or after any push to `ma
 - **BUILDING / DEPLOYING** → in progress only; do not declare done.
 
 Repo: `maxmackpdx-pride/pdx-pride-guide`  
-Railway: project `pdx-pride-guide`, production, https://www.prideguidepdx.com  
+Railway: project `zaylist`, production, https://www.zaylist.com  
 
 ## Design source of truth (hard rule)
 
-**The live site is truth.** Production code on `master` / https://www.prideguidepdx.com beats portable kits, previews, sandboxes, and old handoffs.
+**The live site is truth.** Production code on `master` / https://www.zaylist.com beats portable kits, previews, sandboxes, and old handoffs.
 
 | Priority | Location |
 |----------|----------|

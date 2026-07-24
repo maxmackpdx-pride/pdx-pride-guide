@@ -11,7 +11,7 @@
 
 ## Summary
 
-PDX Pride Guide is now an installable PWA. Manifest, icons, service worker (`sw.js`), iOS meta tags, standalone detection, Dashboard install banner, and `HOST_UPDATE` inbox badge fix are shipped.
+Zaylist is now an installable PWA. Manifest, icons, service worker (`sw.js`), iOS meta tags, standalone detection, Dashboard install banner, and `HOST_UPDATE` inbox badge fix are shipped.
 
 ## Shipped
 

@@ -1,7 +1,7 @@
 ---
 name: pdx-share-social
 description: >
-  Share and social preview bucket agent for PDX Pride Guide. Use when asked to
+  Share and social preview bucket agent for Zaylist. Use when asked to
   improve OG/Twitter cards, per-event share images (1200x630), Web Share API,
   copy-link flows, or EventModal share. Triggers: "share bucket", "social preview",
   "OG cards", "Web Share", "EventModal share", "/pdx-share-social". Requires
@@ -54,7 +54,7 @@ Per-event 1200×630 share cards (separate from site default social image).
 ## Design constraints
 
 - Match neon zine brand: Barlow Condensed display, lime/magenta/cyan accents, dark background
-- Share cards must include: event title, date, venue, PDX Pride Guide wordmark
+- Share cards must include: event title, date, venue, Zaylist wordmark
 - Prefer JPG/PNG for OG — never SVG for social crawlers
 
 ## Out of scope

@@ -4,7 +4,7 @@ const {
   Countdown: HCountdown, StickerBadge: HSticker, Button: HBtn,
   PosterCard: HPoster, EventCard: HRow, SectionHeader: HSection,
   FilterChip: HChip, Divider: HDivider,
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 
 function whenLine(e) {
   const dayName = { THU: "Thu", FRI: "Fri", SAT: "Sat", SUN: "Sun" }[e.day] || e.day;

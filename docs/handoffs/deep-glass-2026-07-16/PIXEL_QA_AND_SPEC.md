@@ -1,4 +1,4 @@
-# PDX Pride Guide — Pixel-QA + Spec Answers
+# Zaylist — Pixel-QA + Spec Answers
 
 Grounded in `maxmackpdx-pride/pdx-pride-guide@master` (read directly, not from memory). Use with `Card-System.html` and `screenshots/`. QA rows are the SoT-vs-repo deltas I can confirm from source; the live-app pixel pass (the property-by-property checklist you drafted) still needs a human at the running app — this tells that human exactly what to look for.
 

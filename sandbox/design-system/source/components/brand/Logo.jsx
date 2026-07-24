@@ -36,7 +36,7 @@ export function Logo({
   size = 56,               // icon px (drives wordmark scale in lockup/stacked)
   tone = "light",          // light (on dark) | dark (on paper)
   src = "assets/logo.png",
-  alt = "PDX Pride Guide",
+  alt = "Zaylist",
   className = "",
   href,
   ...rest

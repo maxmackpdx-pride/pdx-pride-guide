@@ -1,7 +1,7 @@
 ---
 name: pdx-push-phase-1
 description: >
-  Phase 1 agent — PWA shell and prerequisites for PDX Pride Guide push program.
+  Phase 1 agent — PWA shell and prerequisites for Zaylist push program.
   Manifest, icons, service worker, install UX, iOS standalone detection, HOST_UPDATE
   badge fix. Writes PHASE_1_COMPLETE handoff for Phase 2. Triggers: "phase 1 push",
   "start push phase 1", "PWA shell phase", "/pdx-push-phase-1". Visitor-visible UX

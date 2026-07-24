@@ -1,11 +1,11 @@
 # PWA + Web Push Implementation Plan
 
-> Research-backed plan to make PDX Pride Guide installable and deliver working push notifications.
+> Research-backed plan to make Zaylist installable and deliver working push notifications.
 > Companion doc: [NOTIFICATION_SYSTEM_REFERENCE.md](./NOTIFICATION_SYSTEM_REFERENCE.md)
 
 ## Executive summary
 
-PDX Pride Guide is a **Vite + React SPA on Express** with **session-cookie auth**. There is no service worker, manifest, or push infrastructure today. The fastest path to a working web app with push:
+Zaylist is a **Vite + React SPA on Express** with **session-cookie auth**. There is no service worker, manifest, or push infrastructure today. The fastest path to a working web app with push:
 
 1. **PWA shell** — manifest + icons + service worker for installability and offline app shell
 2. **Web Push** — VAPID keys, subscription storage, `web-push` dispatcher
@@ -20,7 +20,7 @@ Target: **logged-in users on HTTPS** who opt in after a contextual prompt.
 
 | Item | Status | Notes |
 |------|--------|-------|
-| HTTPS | ✅ | `www.prideguidepdx.com`, Railway TLS |
+| HTTPS | ✅ | `www.zaylist.com`, Railway TLS |
 | SPA routing | ✅ | Express fallback in `server/static.ts` |
 | Session auth | ✅ | `credentials: "include"` — push subs must be per-user server-side |
 | Service worker | ❌ | None |
@@ -99,7 +99,7 @@ Consider OneSignal later only if ops burden grows.
 ### Phase 0 — Prerequisites (1 day)
 
 - [ ] Generate VAPID key pair (`npx web-push generate-vapid-keys`)
-- [ ] Add Railway env: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT=mailto:hello@pdxprideguide.com`
+- [ ] Add Railway env: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT=mailto:hello@zaylist.com`
 - [ ] Create app icons: 192×192, 512×512, maskable variant, apple-touch-icon 180×180
 - [ ] Fix `HOST_UPDATE` badge bug in `inboxContext.ts`
 
@@ -109,8 +109,8 @@ Consider OneSignal later only if ops burden grows.
 
 1. Add `vite-plugin-pwa` with `injectManifest` strategy (custom SW for push later)
 2. Create `client/public/manifest.webmanifest`:
-   - `name`: PDX Pride Guide
-   - `short_name`: Pride Guide
+   - `name`: Zaylist
+   - `short_name`: Zaylist
    - `start_url`: `/`
    - `display`: `standalone`
    - `theme_color` / `background_color`: match site neon-on-black
@@ -188,7 +188,7 @@ Support **both** formats:
   "notification": {
     "title": "Host update: Drag Brunch",
     "body": "Doors moved to 2pm",
-    "navigate": "https://www.prideguidepdx.com/inbox?thread=abc123",
+    "navigate": "https://www.zaylist.com/inbox?thread=abc123",
     "app_badge": "3"
   }
 }
@@ -247,7 +247,7 @@ See [NOTIFICATION_SYSTEM_REFERENCE.md](./NOTIFICATION_SYSTEM_REFERENCE.md#push-c
 |---------------|--------------------|-----------|
 | `HOST_UPDATE` | Host update: {event} | `/inbox?thread={threadId}` |
 | `MISSED_CONNECTION` | New missed connection reply | `/inbox?thread={threadId}` |
-| `GIG` | Pride Werk message | `/inbox?thread={threadId}` |
+| `GIG` | Gig Werk message | `/inbox?thread={threadId}` |
 | `GIFTING` | Gifting update | `/inbox?thread={threadId}` |
 | `SUBMISSION` | Submission update | `/dashboard` |
 | `EVENT_TALENT_REQUEST` | Lineup request | `/inbox?thread={threadId}` |
@@ -348,5 +348,5 @@ npm install -D vite-plugin-pwa workbox-precaching workbox-routing workbox-strate
 ```
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
-VAPID_SUBJECT=mailto:hello@pdxprideguide.com
+VAPID_SUBJECT=mailto:hello@zaylist.com
 ```

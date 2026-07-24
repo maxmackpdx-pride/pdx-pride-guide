@@ -1,7 +1,7 @@
 /* AdminScreen, the moderation dashboard: stat grid + review queue. */
 const {
   StatCard: AdStatCard, StatPill: AdStatPill, Button: AdBtn, Badge: AdBadge,
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 
 const STATS = [
   { value: 14, label: "Registered Users", color: "lime" },

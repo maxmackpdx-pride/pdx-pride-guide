@@ -3,7 +3,7 @@
 const {
   HeroBanner: HbHero, Button: HbBtn, StatPill: HbStatPill, Countdown: HbCountdown,
   StickerBadge: HbSticker,
-} = window.PDXPrideGuideDesignSystem_b20420;
+} = window.ZaylistDesignSystem_b20420;
 
 const WX = [
   { d: "Mon", t: "72°" }, { d: "Tue", t: "73°" }, { d: "Wed", t: "74°" },
@@ -76,10 +76,10 @@ function HubScreen({ onNav }) {
         <div className="pg-hub__grid" style={{ marginBottom: "var(--space-8)" }}>
           <Panel title="Inbox" titleColor="var(--neon-cyan)" accent="var(--border-default)"
             action={<HbBtn accent="cyan" size="sm" arrow>Open Inbox</HbBtn>}>
-            <p className="pg-panel__body">No threads yet. Replies from Spotted, Pride Werk, event hosts, and check-ins show up here.</p>
+            <p className="pg-panel__body">No threads yet. Replies from Spotted, Gig Werk, event hosts, and check-ins show up here.</p>
             <div className="pg-quickrow">
               <HbBtn variant="ghost" size="sm">Spotted</HbBtn>
-              <HbBtn variant="ghost" size="sm">Pride Werk</HbBtn>
+              <HbBtn variant="ghost" size="sm">Gig Werk</HbBtn>
               <HbBtn variant="ghost" size="sm">Submit Event</HbBtn>
             </div>
           </Panel>

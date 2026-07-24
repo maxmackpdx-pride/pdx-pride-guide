@@ -1,21 +1,21 @@
-# PDX Pride Guide, Design System
+# Zaylist, Design System
 
 Energetic queer maximalism meets ruthlessly usable utility. A high-energy digital
 club flyer and Portland DIY zine, given a polished 2026 glow-up while staying
 welcoming, scannable, and community-first. Anti-corporate by design: built by and
 for the PDX scene, not a sponsor.
 
-This design system powers **PDX Pride Guide** (prideguidepdx.com), a community-run
+This design system powers **Zaylist** (zaylist.com), a community-run
 guide to Portland Pride Week 2026 (July 13 to 19). It covers the event directory,
 the venue/places map, community boards (Spotted, Gifting, Gigs), the member Hub,
 and the admin dashboard.
 
 ## Sources (ground truth)
-- **Live site:** https://www.prideguidepdx.com
+- **Live site:** https://www.zaylist.com
 - **Repo:** `maxmackpdx-pride/pdx-pride-guide` (default branch `master`). The
   canonical token + preview bundle lives at `design-system/` in that repo
   (`tokens/tokens.css`, `previews/*.html`, `EVENTS_GUIDE.md`). Token source of
-  truth is `client/src/index.css`; day colors mirror `shared/prideWeek.ts`.
+  truth is `client/src/index.css`; day colors mirror `shared/eventWeek.ts`.
 - Reference screenshots of Home, Events, Places, Hub, and Admin were provided by
   the client and are reflected throughout.
 
@@ -111,7 +111,7 @@ without being sterile. It talks to the reader as **"you"** and to the community 
 ## Components
 
 Reusable primitives (React, styled via CSS custom properties). Import from
-`window.PDXPrideGuideDesignSystem_b20420` in card/kit HTML.
+`window.ZaylistDesignSystem_b20420` in card/kit HTML.
 
 **Brand:** `Logo`, `Avatar`
 **Forms:** `Button`, `IconButton`, `SearchInput`, `FilterChip`
@@ -142,7 +142,7 @@ Data lives in `ui_kits/pride-guide/data.js`.
 
 ## Foundations (Design System tab)
 Specimen cards under groups **Colors**, **Type**, **Spacing**, **Brand**, plus
-**Components** and **Pride Guide** previews.
+**Components** and **Zaylist** previews.
 
 ## Root manifest
 - `styles.css` — the single entry point consumers link (imports only).

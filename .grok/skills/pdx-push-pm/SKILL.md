@@ -1,7 +1,7 @@
 ---
 name: pdx-push-pm
 description: >
-  Program manager for PDX Pride Guide PWA + push notification rollout. Use for
+  Program manager for Zaylist PWA + push notification rollout. Use for
   bird's-eye status, phase gates, handoff review, answering agent questions,
   continuity across phases, and deciding when to launch the next phase agent.
   Triggers: "push PM", "push program", "phase status", "handoff review",

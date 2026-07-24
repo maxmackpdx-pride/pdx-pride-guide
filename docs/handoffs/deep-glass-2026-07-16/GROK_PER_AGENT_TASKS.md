@@ -1,4 +1,4 @@
-# PDX Pride Guide — Per-Agent Migration Tasks
+# Zaylist — Per-Agent Migration Tasks
 
 **How to use this file:** spin up **one agent per section below**. Each block is a self-contained work order: the surface it owns, the source files to edit, exactly what changes, which universal tokens to point at, the screenshot to match, and where in the reference build (`Card System.html`) to look. Every agent shares the same token contract from `GROK_MIGRATION_PROMPT.md §1` — read §1 first, then only touch your section. Do not redefine tokens; point at them. Do not change layout, spacing, radii, fonts, or type scale — this is a **surface/edge/glow** migration only.
 

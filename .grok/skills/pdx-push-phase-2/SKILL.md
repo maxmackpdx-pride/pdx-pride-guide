@@ -1,7 +1,7 @@
 ---
 name: pdx-push-phase-2
 description: >
-  Phase 2 agent — Web Push infrastructure for PDX Pride Guide. VAPID, push_subscriptions
+  Phase 2 agent — Web Push infrastructure for Zaylist. VAPID, push_subscriptions
   table, subscribe API, SW push handlers, Declarative Web Push, notification prefs API.
   Reads PHASE_1 handoff. Writes PHASE_2_COMPLETE for Phase 3. Triggers: "phase 2 push",
   "web push phase", "VAPID setup", "/pdx-push-phase-2". Permission UX needs approval.

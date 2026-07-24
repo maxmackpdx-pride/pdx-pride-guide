@@ -1,8 +1,8 @@
 # Push Notification Program — PM Source of Truth
 
 > **Program manager:** Grok (bird's-eye continuity across phases and agents)
-> **Goal:** PDX Pride Guide as an installable PWA with working Web Push for logged-in users
-> **Production:** `https://www.prideguidepdx.com`
+> **Goal:** Zaylist as an installable PWA with working Web Push for logged-in users
+> **Production:** `https://www.zaylist.com`
 
 ## How this program works
 
@@ -161,7 +161,7 @@ Questions agents cannot answer alone. PM (Grok) or Tucker resolves; then move to
 |------|-------|-------|--------|
 | `VAPID_PUBLIC_KEY` | 2 | Tucker → Railway | **GENERATED** — see `.railway/vapid-keys.txt` |
 | `VAPID_PRIVATE_KEY` | 2 | Tucker → Railway | **GENERATED** — run `script/set-railway-vapid.sh` |
-| `VAPID_SUBJECT` | 2 | `mailto:hello@pdxprideguide.com` | ready |
+| `VAPID_SUBJECT` | 2 | `mailto:hello@zaylist.com` | ready |
 | App icons | 1 | Phase 1 agent | ✅ shipped |
 | Code deploy | all | commit `2be78ce` | pushed → Railway CI |
 

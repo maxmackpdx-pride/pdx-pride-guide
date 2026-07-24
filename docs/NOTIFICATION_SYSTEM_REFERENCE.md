@@ -1,4 +1,4 @@
-# PDX Pride Guide — Notification System Reference
+# Zaylist — Notification System Reference
 
 > Canonical reference for building the notification system (in-app today, push tomorrow).
 > Last updated: 2026-07-02
@@ -14,7 +14,7 @@
 | Web Push / PWA install | **Not built** |
 | Native iOS/Android apps | **Not built** |
 
-Production URL: `https://www.prideguidepdx.com`
+Production URL: `https://www.zaylist.com`
 
 ---
 
@@ -58,7 +58,7 @@ All items live in `messages` with a `context_type` column (camelCase `contextTyp
 |-------|---------------------|
 | **People wrote you** | `THREAD`, `MISSED_CONNECTION`, `GIG`, `GIFTING`, `CHECK_IN`, `EVENT_HOST` |
 | **Your event** | `HOST_UPDATE`, `EVENT_TALENT`, `EVENT_TALENT_REQUEST`, `EVENT_HOST` |
-| **From PDX Pride Guide** | `SUBMISSION`, `EVENT_CLAIM`, `PROMOTER`, `GUIDE_UPDATE` |
+| **From Zaylist** | `SUBMISSION`, `EVENT_CLAIM`, `PROMOTER`, `GUIDE_UPDATE` |
 
 ### Full catalog
 
@@ -68,7 +68,7 @@ All items live in `messages` with a `context_type` column (camelCase `contextTyp
 |--------------|---------|------|---------------|-------------|
 | Thread reply | Reply in existing thread | User | inherits original | — |
 | Missed Connection reply | Response to your post | User | `MISSED_CONNECTION` | MISSED CONNECTION |
-| Pride Werk message | Message on your gig post | User | `GIG` | — |
+| Gig Werk message | Message on your gig post | User | `GIG` | — |
 | Gifting interest | Someone wants your gift | User | `GIFTING` | — |
 | ISO offer | Offer on your ISO post | User | `GIFTING` | — |
 | Gifting pickup chosen | Poster picked you | User | `GIFTING` | — |

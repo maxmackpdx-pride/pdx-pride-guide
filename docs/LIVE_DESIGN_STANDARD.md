@@ -4,7 +4,7 @@
 
 | Priority | What | Path |
 |----------|------|------|
-| **1 — Truth** | Production React + CSS on `master` / prideguidepdx.com | `client/src/components/ds/**`, page CSS, adapters |
+| **1 — Truth** | Production React + CSS on `master` / zaylist.com | `client/src/components/ds/**`, page CSS, adapters |
 | **2 — Tokens** | Modular production tokens | `client/src/components/ds/tokens/` especially **`glass.css`** |
 | **3 — Portable kit** | Claude Design export (must not invent chrome) | `design-system/` via `npm run sync:design-system` |
 | **Archive** | Migration package + screenshots | `docs/handoffs/deep-glass-2026-07-16/` |

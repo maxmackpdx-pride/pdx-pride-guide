@@ -1,6 +1,6 @@
-# PDX Pride Guide — Live Events Export
+# Zaylist — Live Events Export
 **Generated:** 2026-07-02
-**Source:** https://www.prideguidepdx.com/api/events
+**Source:** https://www.zaylist.com/api/events
 **Total listings:** 52 (multi-day events appear once per day)
 **Unique event IDs:** 47
 

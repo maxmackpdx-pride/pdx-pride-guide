@@ -1,4 +1,4 @@
-# Pride Guide PDX — Exact Scrape URLs
+# Zaylist — Exact Scrape URLs
 
 *Verified July 2026. This is the "where exactly to look" companion to `VENUE_SCRAPE_REGISTRY.md`.*
 

@@ -1,7 +1,7 @@
 # Handoff: Promoter hub redesign
 
 ## Overview
-Redesign of the PDX Pride Guide promoter page (`/submit`, `client/src/pages/Submit.tsx`). The old
+Redesign of Zaylist promoter page (`/submit`, `client/src/pages/Submit.tsx`). The old
 page was confusing: four sibling paths thrown at the user at once, two stacked "how it works"
 panels, a two-screen submit stepper, and unclear rules about when a submission goes live. This
 redesign keeps all four paths but makes each one's audience and outcome unmistakable, collapses the

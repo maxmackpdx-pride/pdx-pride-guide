@@ -1,4 +1,4 @@
-# PDX Pride Guide — Avatars & Pride Rings
+# Zaylist — Avatars & Pride Rings
 
 For claude.ai/design (or any design tool). Source of truth:
 `client/src/components/UserAvatar.tsx`, `shared/avatarRings.ts`, and the

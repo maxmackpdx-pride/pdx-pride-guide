@@ -86,7 +86,7 @@ try {
     "ACCOUNT_SHADOWBAN",
     `@${u.username}`,
     owner?.username || "site_owner",
-    "owner@prideguidepdx.com",
+    "owner@zaylist.com",
     [
       "Action: shadowban",
       `By: @${owner?.username || "owner"} (ops script)`,

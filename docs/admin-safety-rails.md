@@ -1,4 +1,4 @@
-# Admin safety rails (PDX Pride Guide)
+# Admin safety rails (Zaylist)
 
 **Keep in mind for every admin / floating-inbox / catalog change.**  
 Live Pride traffic, volunteer admins, shared queues, and public trust for events and safety.

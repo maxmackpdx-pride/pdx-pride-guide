@@ -5,7 +5,7 @@
  *
  * Source of truth chain (live site wins for chrome — see docs/LIVE_DESIGN_STANDARD.md):
  *   LIVE SITE + client/src/components/ds/tokens/glass.css
- *   shared/prideWeek.ts → client/src/index.css + ds tokens
+ *   shared/eventWeek.ts → client/src/index.css + ds tokens
  *   → design-system/tokens/tokens.css + previews/colors.html + chips-effects.html
  *
  * This script syncs colors / Pride days / portable tokens only.
@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const prideWeekPath = join(root, "shared/prideWeek.ts");
+const prideWeekPath = join(root, "shared/eventWeek.ts");
 const indexCssPath = join(root, "client/src/index.css");
 const tokensPath = join(root, "design-system/tokens/tokens.css");
 const colorsPreviewPath = join(root, "design-system/previews/colors.html");
@@ -78,8 +78,8 @@ function buildTokensCss(days, neon, dayMulti) {
     dayMulti ||
     `linear-gradient(\n    90deg,\n    ${days.map((d) => d.color).join(",\n    ")}\n  )`;
 
-  return `/* PDX Pride Guide — canonical design tokens
-   Synced from shared/prideWeek.ts + client/src/index.css + client/src/components/ds/tokens.
+  return `/* Zaylist — canonical design tokens
+   Synced from shared/eventWeek.ts + client/src/index.css + client/src/components/ds/tokens.
    Source chain: prideWeek.ts → index.css / ds tokens → this file (npm run sync:design-system).
    Full modular tokens live in client/src/components/ds/tokens/ (colors, type, layout, effects).
 */

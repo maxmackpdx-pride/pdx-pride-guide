@@ -1,6 +1,6 @@
 # Git Hygiene Report
 
-**Repo:** `pdx-pride-guide`  
+**Repo:** `zaylist`  
 **Date:** 2026-07-13  
 **Base ref:** `origin/master` @ `88bd634` (`fix(nav): put Hub left of desktop seam, seam mid-gap to avatar`)  
 **Agent scope:** inventory stashes and branches; drop only data.db-only stashes; delete only fully merged feature branches (merge-base ancestor of `origin/master`). No force-push. No application source changes beyond this report.
@@ -34,7 +34,7 @@ Fourteen stashes existed at start. Six pure `data.db` stashes were dropped. Eigh
 | stash@{3} | On master: wip | 5 files: Admin metrics labels ("Live listings"), Schedule small edits (+30/-12) | **REVIEW** | Copy tweak only: "Live events" to "Live listings". Not on master today (`AdminMetricsPanel` still says "Live events (excl. placeholders)"). Safe small apply if product wants that wording. |
 | stash@{4} | On master: motion remaining: sparks avatar schedule | 8 files: AttendanceCluster sparks, RailCard, UserAvatar, Schedule, index.css (+100/-7) | **REVIEW** | Core RsvpSparks / LiveWave already on master (`AttendanceCluster`, `RailCard`, `HomeUpNext`). Stash may hold leftover motion CSS / Schedule wiring not fully ported. Cherry-pick by file, do not apply whole stash. |
 | stash@{5} | On feat/motion-add-ons: footer folders | Footer.tsx + index.css (+176/-44) | **REVIEW** | Footer folders structure already on master (`FOOTER_FOLDERS`). Stash is older folder link set (missing Nude Beaches / different Spotted label). Prefer master Footer; only mine if a specific link is missing. |
-| stash@{6} | On master: wip local | `shared/boardModeration.ts` only (+3/-8) | **KEEP** | Policy WIP: rewrites Pride Werk rules to allow sensual/erotic massage as paid work; removes several banned terms. **Not on master** (master still PG-13 and bans "sensual massage" / "erotic massage"). Product/legal decision required before apply. |
+| stash@{6} | On master: wip local | `shared/boardModeration.ts` only (+3/-8) | **KEEP** | Policy WIP: rewrites Gig Werk rules to allow sensual/erotic massage as paid work; removes several banned terms. **Not on master** (master still PG-13 and bans "sensual massage" / "erotic massage"). Product/legal decision required before apply. |
 | stash@{7} | On master: pre-schedule-redesign-handoff | `.DS_Store`, Home.tsx one-line label, `data.db` | **REVIEW** | Label idea: "Spots" to "LGBTQ+IA Businesses". Home layout has moved on; path may not apply cleanly. Mostly junk + one copy idea. |
 
 ### 1.3 Stash actions taken
@@ -140,7 +140,7 @@ Delete method: `git merge-base --is-ancestor origin/<branch> origin/master` then
 
 ## 4. Suggested next human steps
 
-1. **Policy:** Open stash@{6} (`boardModeration`) in a side branch if Pride Werk rules should allow paid sensual/erotic massage; otherwise drop it deliberately.
+1. **Policy:** Open stash@{6} (`boardModeration`) in a side branch if Gig Werk rules should allow paid sensual/erotic massage; otherwise drop it deliberately.
 2. **Copy:** If "Live listings" wording is wanted, re-implement from stash@{3} against current admin components (file paths changed).
 3. **Orphan branches:** Diff unmerged remotes and either revive or delete:
    ```bash

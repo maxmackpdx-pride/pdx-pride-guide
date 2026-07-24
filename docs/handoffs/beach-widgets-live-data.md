@@ -14,7 +14,7 @@ in background"). Owner reported it as "the widgets stopped refreshing."
   `client/src/components/NudeBeachesMap.tsx`) are static client data and never
   touch the condition fetch path.
 - **Not a missing User-Agent.** `fetchText` in `server/nudeBeaches.ts:57` already
-  sends `User-Agent: PDX-Pride-Guide/1.0 (+https://www.prideguidepdx.com)`.
+  sends `User-Agent: Zaylist/1.0 (+https://www.zaylist.com)`.
 - **Not a broken code path.** `GET /api/nude-beaches` returns the correct shape;
   the values are null because the upstream fetches error out.
 

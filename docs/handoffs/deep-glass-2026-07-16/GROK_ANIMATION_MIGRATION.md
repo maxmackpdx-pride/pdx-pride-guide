@@ -1,4 +1,4 @@
-# PDX Pride Guide — Animation / Motion Migration Brief (for Grok)
+# Zaylist — Animation / Motion Migration Brief (for Grok)
 
 **Scope:** motion ONLY. You already have the surface/token brief (`GROK_MIGRATION_PROMPT.md`) and the per-agent tasks. This document is the companion for **animation standards** — what the design system already ships, what the new deep-glass standard adds, and how the two reconcile. Keep the existing motion vocabulary; layer the new deep-glass motions on top; retire nothing except where noted.
 

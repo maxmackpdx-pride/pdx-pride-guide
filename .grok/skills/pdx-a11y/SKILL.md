@@ -1,7 +1,7 @@
 ---
 name: pdx-a11y
 description: >
-  Accessibility bucket agent for PDX Pride Guide. Use for EventModal focus trap,
+  Accessibility bucket agent for Zaylist. Use for EventModal focus trap,
   Escape to close, scroll lock, AuthModal/soft-launch modal a11y, tab keyboard
   navigation, and clickable-div fixes outside the Events filter bar. Triggers:
   "a11y bucket", "accessibility", "focus trap", "EventModal a11y", "keyboard",

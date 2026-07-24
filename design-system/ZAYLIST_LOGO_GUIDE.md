@@ -48,6 +48,6 @@ Consistent design across platforms and applications ensures brand integrity.
 
 **Design Principles Applied:** Swiss-inspired minimalism for scalability and timelessness. The 30% scale reference ensures the logo remains impactful even at smaller sizes without losing legibility or core identity.
 
-**Integration Notes:** Aligns with PDX Pride Guide neon/rainbow motifs and glassmorphism tokens while providing a clean, professional wordmark option for headers, merch, or partner co-branding.
+**Integration Notes:** Aligns with Zaylist neon/rainbow motifs and glassmorphism tokens while providing a clean, professional wordmark option for headers, merch, or partner co-branding.
 
 *Source: User-provided design guide update (July 2026). Sync with client/src/components/ds/tokens/ for color extensions if expanding the neon palette.*
