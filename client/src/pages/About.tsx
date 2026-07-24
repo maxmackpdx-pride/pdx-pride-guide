@@ -44,7 +44,7 @@ const FAQ = [
     a: "The Events page. Every live listing on a map and a board. Filter by day, type, or neighborhood, then open anything for times, venue, and tickets.",
   },
   {
-    q: "How is this different from other queer event apps?",
+    q: "How is this different from other event apps?",
     a: "It is free, run by a person, and built for this city. No corporate feed. No paying to rank higher. Promoters post their events and the community shows up.",
   },
   {
@@ -114,7 +114,7 @@ export default function About() {
           <div>
             <div className="about-v2-hero__kicker">
               <span className="about-v2-hero__dot" aria-hidden="true" />
-              About · Portland's queer events guide · all year
+              About · Portland nights · all year
             </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
@@ -167,10 +167,10 @@ export default function About() {
               <p>
                 Stop censoring our community.
                 <br />
-                Stop pretending queer culture only matters once it&apos;s been scrubbed clean.
+                Stop pretending our nights only matter once they&apos;ve been scrubbed clean.
               </p>
               <p>
-                This app is really gay. This app really is{" "}
+                This app is after dark. This app really is{" "}
                 <span className="about-v2-manifesto__glitch">ours.</span>
               </p>
             </div>

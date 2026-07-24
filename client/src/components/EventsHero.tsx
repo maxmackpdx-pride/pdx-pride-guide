@@ -15,7 +15,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
     <>
       <BoardHero
         accent="cyan"
-        kicker="Portland's queer events · all year"
+        kicker="Portland nights · all year"
         title={
           <>
             <CountUpValue
@@ -25,7 +25,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
             <span className="board-hero__title-accent">events</span>
           </>
         }
-        lede="Every queer party, parade, show, and gathering in Portland — Pride and all year round, all in one place."
+        lede="Every party, show, afterparty, and gathering worth knowing — Pride week and every weekend after, all in one place."
         actions={<BoardExploreActions showSchedule scheduleLead />}
       />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />

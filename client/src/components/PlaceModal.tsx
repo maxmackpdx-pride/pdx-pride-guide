@@ -638,11 +638,11 @@ export default function PlaceModal({
                   </label>
                   <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <input type="checkbox" checked={ownerForm.queerOwned} onChange={e => setOwnerForm(f => ({ ...f, queerOwned: e.target.checked }))} />
-                    Queer-owned
+                    Owned by us
                   </label>
                   <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <input type="checkbox" checked={ownerForm.queerFriendly} onChange={e => setOwnerForm(f => ({ ...f, queerFriendly: e.target.checked }))} />
-                    Queer-friendly
+                    For our crowd
                   </label>
                 </>
               )}

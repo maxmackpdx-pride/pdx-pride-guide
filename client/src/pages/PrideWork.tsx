@@ -116,7 +116,7 @@ function thumbGradient(isLooking: boolean) {
 export default function PrideWork() {
   usePageSeo(
     "Pride Work: Jobs & Gigs | Zaylist",
-    "Find queer-friendly gigs and workers for Portland Pride 2026. Post or browse Pride Work listings in PDX.",
+    "Find gigs and workers for Portland nights. Post or browse the gig board.",
   );
   const { toast } = useToast();
   const { user } = useAuth();

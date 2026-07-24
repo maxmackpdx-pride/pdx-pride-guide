@@ -226,7 +226,7 @@ export default function HubPeople() {
             </Link>
             {tab !== "following" && (
               <Link href="/directory" className="seg hub-people-empty__cta hub-people-empty__cta--ghost">
-                Queer directory
+                Directory
               </Link>
             )}
           </div>

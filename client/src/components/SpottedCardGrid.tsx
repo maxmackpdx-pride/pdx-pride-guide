@@ -215,7 +215,7 @@ export default function SpottedCardGrid({
               className="board-text-field"
               value={draftVenueHint}
               onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
-              placeholder="e.g. Powell's queer lit aisle, the MAX Blue Line"
+              placeholder="e.g. Powell's late stacks, the MAX Blue Line"
               maxLength={80}
             />
           </label>

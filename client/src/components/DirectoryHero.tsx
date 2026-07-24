@@ -19,7 +19,7 @@ export default function DirectoryHero({ placeCount, stats, onAddPlace }: Props) 
     <>
       <BoardHero
         accent="magenta"
-        kicker="Queer-owned · Queer-friendly · Community-rooted"
+        kicker="Ours · For us · In the scene"
         title={
           <>
             <CountUpValue
@@ -31,7 +31,7 @@ export default function DirectoryHero({ placeCount, stats, onAddPlace }: Props) 
             </span>
           </>
         }
-        lede="Bars, restaurants, cafes, shops, and services that make up Portland's LGBTQ+ community. Show up, spend money, keep them alive."
+        lede="Bars, late kitchens, shops, and rooms that keep the nights going. Show up, spend money, keep them open."
         actions={
           <BoardExploreActions
             primary={

@@ -50,7 +50,7 @@ function buildPin(color: string) {
 const DANGER_RED = "#ff1f1f";
 
 /** Smaller solid dot for points of interest so they read as secondary to the
- *  beach anchor. Rainbow = queer hangouts; red = out-of-bounds warning. */
+ *  beach anchor. Rainbow = our hangouts; red = out-of-bounds warning. */
 function buildPoiPin(color: string, variant: "accent" | "rainbow" | "red" = "accent") {
   if (variant === "rainbow") {
     return divIcon({

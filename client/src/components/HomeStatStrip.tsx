@@ -62,7 +62,7 @@ export default function HomeStatStrip({ placesCount, goingCount, countdownTarget
       </div>
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--lime">{placesCount}</div>
-        <div className="home-stat-strip__label">Queer places to back</div>
+        <div className="home-stat-strip__label">Places to back</div>
       </div>
       <div className="home-stat-strip__cell home-stat-strip__cell--last">
         <div className="home-stat-strip__value home-stat-strip__value--orange">{goingCount}</div>

@@ -298,8 +298,8 @@ export default function Directory() {
   const placeSeo = selectedPlace;
   usePageSeo(
     placeSeo
-      ? `${placeSeo.name} | Queer Portland Directory | Zaylist`
-      : "Queer Portland Directory | Zaylist",
+      ? `${placeSeo.name} | Portland Directory | Zaylist`
+      : "Portland Directory | Zaylist",
     placeSeo
       ? [
           placeSeo.neighborhood,
@@ -309,7 +309,7 @@ export default function Directory() {
           .filter(Boolean)
           .join(" · ")
           .slice(0, 160) || `${placeSeo.name} on Zaylist.`
-      : "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
+      : "Bars, restaurants, cafes, venues, and services that are ours — or truly for us — in Portland.",
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
@@ -569,7 +569,7 @@ export default function Directory() {
               <X size={18} />
             </button>
             <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list queer-owned and queer-friendly spots — including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and community-rooted. Owners can claim a listing to manage it.</p>
+            <p className="board-copy-sm">Logged-in members can list spots that are ours or truly for us — including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it.</p>
             {submitResult ? (
               <div className="submit-success">
                 <div className="submit-success__title">{submitResult.title}</div>
@@ -680,11 +680,11 @@ export default function Directory() {
               <label className="span directory-form-checks">
                 <label className="gifting-rules">
                   <input type="checkbox" checked={form.queerOwned} onChange={e => setForm(f => ({ ...f, queerOwned: e.target.checked }))} />
-                  Queer-owned
+                  Owned by us
                 </label>
                 <label className="gifting-rules">
                   <input type="checkbox" checked={form.queerFriendly} onChange={e => setForm(f => ({ ...f, queerFriendly: e.target.checked }))} />
-                  Queer-friendly
+                  For our crowd
                 </label>
               </label>
             </div>

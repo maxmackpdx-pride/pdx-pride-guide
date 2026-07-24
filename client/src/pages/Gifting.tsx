@@ -20,7 +20,7 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 
 const CATEGORIES = [
-  "Clothing", "Queer Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
+  "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
   "Kink Gear", "Leather / Rubber / Fetish Wear", "Event Supplies", "Pride Weekend Stuff",
   "Home Goods", "Furniture", "Kitchen", "Electronics", "Books and Media", "Art and Craft Supplies",
   "Pet Stuff", "Tickets or Passes", "Tools", "Decorations", "Camping / Beach / River Gear",
@@ -42,7 +42,7 @@ const blankForm = {
   postType: "GIFT",
   title: "",
   description: "",
-  category: "Queer Closet",
+  category: "Party Closet",
   neighborhood: "",
   pickupPreference: "Message to coordinate",
   acceptRules: false,
@@ -63,7 +63,7 @@ function isActivePost(p: GiftingPost) {
 export default function Gifting() {
   usePageSeo(
     "Gifting Board | Zaylist | Portland Pride 2026",
-    "Give and find free stuff in Portland's queer community during Pride 2026 and beyond. PDX Pride gifting and ISO board.",
+    "Give and find free stuff for the scene — Pride week and all year. Gifting and ISO board.",
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -233,7 +233,7 @@ export default function Gifting() {
           accent="lime"
           kicker="Free board · Pride season 2026"
           title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
-          lede="A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
+          lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
         />
       </CommunityBoardHeroRow>
 

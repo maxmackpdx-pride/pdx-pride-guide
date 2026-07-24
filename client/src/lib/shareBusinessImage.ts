@@ -117,7 +117,7 @@ async function buildBusinessCardCanvas(business: ShareBusiness): Promise<HTMLCan
     justify-content: space-between; align-items: center;
   `;
   footer.innerHTML = `
-    <div style="font-family:'Inter',sans-serif;font-size:24px;color:#666;">Queer Directory · Portland, OR</div>
+    <div style="font-family:'Inter',sans-serif;font-size:24px;color:#666;">Directory · Portland, OR</div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;color:${accent};letter-spacing:0.04em;">zaylist.com</div>
   `;
   node.appendChild(footer);

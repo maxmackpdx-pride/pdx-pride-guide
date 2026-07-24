@@ -325,7 +325,7 @@ export default function DesignSystemSandbox() {
               <C.Marquee
                 items={[
                   "Pride Week Jul 13 to 19",
-                  "Keep Portland Queer",
+                  "Keep the nights ours",
                   "Take Care of Each Other",
                 ]}
                 color="rainbow"
@@ -370,7 +370,7 @@ export default function DesignSystemSandbox() {
               )}
               {C.StickerBadge ? (
                 <>
-                  <C.StickerBadge color="lime">KEEP PORTLAND QUEER</C.StickerBadge>
+                  <C.StickerBadge color="lime">KEEP THE NIGHTS OURS</C.StickerBadge>
                   <C.StickerBadge color="pink" rotate={3}>
                     PRIDE IS A PROTEST
                   </C.StickerBadge>

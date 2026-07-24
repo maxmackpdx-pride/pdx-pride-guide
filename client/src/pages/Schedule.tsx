@@ -164,7 +164,7 @@ export default function Schedule({
 
   usePageSeo(
     "Schedule | Zaylist",
-    "Portland's queer events, laid out side by side. Build your week.",
+    "Portland nights, laid out side by side. Build your week.",
     { skip: embed },
   );
 

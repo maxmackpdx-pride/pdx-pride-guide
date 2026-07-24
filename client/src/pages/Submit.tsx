@@ -638,7 +638,7 @@ export default function Submit() {
                             className="board-text-field"
                             value={submitterOrg}
                             onChange={e => setSubmitterOrg(e.target.value)}
-                            placeholder="e.g. Queer Night PDX"
+                            placeholder="e.g. After Dark PDX"
                           />
                         </label>
                         <label className="span">
@@ -873,7 +873,7 @@ export default function Submit() {
                 </label>
                 <label className="span">
                   Organization or event name (optional)
-                  <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. Queer Night PDX" />
+                  <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. After Dark PDX" />
                 </label>
                 <label className="span">
                   Website, Instagram, or portfolio link
@@ -928,7 +928,7 @@ export default function Submit() {
               <div className="gifting-form-grid">
                 <label className="span">
                   Event name *
-                  <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Queer Dance Night at Wonder Ballroom" />
+                  <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Dance Night at Wonder Ballroom" />
                 </label>
                 <label>
                   Venue or location (if known)
@@ -1049,7 +1049,7 @@ export default function Submit() {
 
       {mode === "landing" && (
         <BoardCloseSeam
-          line="Submit it. Claim it. Keep Portland queer."
+          line="Submit it. Claim it. Keep the nights ours."
           url="zaylist.com/submit"
         />
       )}

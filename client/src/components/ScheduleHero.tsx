@@ -14,7 +14,7 @@ export default function ScheduleHero({ stats }: Props) {
     <>
       <BoardHero
         accent="cyan"
-        kicker="Portland's queer calendar · all year"
+        kicker="Portland nights · all year"
         title={
           <>
             My <span className="board-hero__title-accent">schedule</span>

@@ -164,7 +164,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         ) : (
           <form onSubmit={handleRegister}>
             <label style={labelStyle}>Username</label>
-            <input style={inputStyle} type="text" value={username} onChange={e => setUsername(e.target.value)} required placeholder="queerbabe99" minLength={3} />
+            <input style={inputStyle} type="text" value={username} onChange={e => setUsername(e.target.value)} required placeholder="nightowl99" minLength={3} />
             <label style={labelStyle}>Display Name <span style={{ color: "#aaa", fontWeight: 400 }}>(optional)</span></label>
             <input style={inputStyle} type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="How you want to appear" />
             <label style={labelStyle}>Email</label>

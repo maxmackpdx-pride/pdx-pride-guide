@@ -3,7 +3,7 @@ import type { PageHeroProps } from "@/components/PageHero";
 export const giftingHeroContent = {
   kicker: "Free board · Pride season 2026",
   titleLine1: "Gift with Pride",
-  lede: "A queer Portland free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need.",
+  lede: "A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need.",
   tagline: "Keep it free · keep it kind · keep it moving",
   taglineAccent: "magenta",
   bgImage: "/motifs/hero-gifting.jpg",

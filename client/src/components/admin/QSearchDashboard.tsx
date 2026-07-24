@@ -477,7 +477,7 @@ function buildDirectoryFormFromCandidate(c: Candidate): DirectoryFormState {
   return {
     name,
     type: "venue",
-    description: desc.length >= 10 ? desc : `${desc} Portland LGBTQ+ / nightlife place.`.slice(0, 500),
+    description: desc.length >= 10 ? desc : `${desc} Portland nightlife place.`.slice(0, 500),
     address: String(c.draft.address || "").trim(),
     neighborhood: "",
     website: guessWebsiteFromCandidate(c),
@@ -1658,7 +1658,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   return (
     <div className="qsearch" data-testid="qsearch-dashboard">
       <header className="qsearch__hero">
-        <p className="qsearch__kicker">Queer event intelligence</p>
+        <p className="qsearch__kicker">Nightlife intelligence</p>
         <h1 className="qsearch__title">QSearch</h1>
         <p className="qsearch__lede">
           <strong>Scan now</strong> pulls calendars into the Review queue. Use{" "}
@@ -3005,7 +3005,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                     checked={dirForm.queerFriendly}
                     onChange={e => setDirForm({ ...dirForm, queerFriendly: e.target.checked })}
                   />{" "}
-                  Queer-friendly
+                  For our crowd
                 </label>
                 <label>
                   <input
@@ -3013,7 +3013,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                     checked={dirForm.queerOwned}
                     onChange={e => setDirForm({ ...dirForm, queerOwned: e.target.checked })}
                   />{" "}
-                  Queer-owned
+                  Owned by us
                 </label>
               </div>
             </div>

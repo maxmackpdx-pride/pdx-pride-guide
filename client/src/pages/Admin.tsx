@@ -3083,7 +3083,7 @@ export default function Admin() {
                 FULL DIRECTORY ({adminDirectory.length})
               </p>
               <p className="text-white/40 text-xs mb-3">
-                Every place in the Queer Directory. Assign a member as owner the same way you assign event hosts —
+                Every place in the Directory. Assign a member as owner the same way you assign event hosts —
                 they get listing control and a guide inbox notice.
               </p>
               <div className="flex flex-wrap gap-2 mb-3 items-center">

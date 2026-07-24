@@ -40,7 +40,7 @@ const TABLE_META: Partial<
   },
   "tbl-claims": {
     title: "Venue Claims",
-    lede: "Businesses claiming their listing in the Queer Directory.",
+    lede: "Businesses claiming their listing in the Directory.",
     actionLabel: "Open venue claims",
   },
   "tbl-team": {

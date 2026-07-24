@@ -43,7 +43,7 @@ const DIRECTORY_CHIPS = [
 export default function Home() {
   usePageSeo(
     "Zaylist | Portland Pride 2026 Events",
-    "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+    "Every Portland night worth knowing, in one place. Find the party, back the rooms that host it, and stick around after July 19.",
   );
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
@@ -187,9 +187,9 @@ export default function Home() {
         <section className="home-directory-row" aria-label="Directory and nude beaches">
           <div className="home-directory-teaser">
             <div className="home-directory-teaser__kicker">THE DIRECTORY FOR US</div>
-            <h3 className="home-directory-teaser__title">SPEND QUEER, KEEP US HEALTHY</h3>
+            <h3 className="home-directory-teaser__title">SPEND HERE, KEEP THE NIGHTS OPEN</h3>
             <p className="home-directory-teaser__copy">
-              Bars, cafes, shops, and venues that are queer-owned or genuinely queer-friendly. Filter by category, find them on the map.
+              Bars, cafes, shops, and venues that are ours — or truly for us. Filter by category, find them on the map.
             </p>
             <div className="home-directory-teaser__chips">
               {DIRECTORY_CHIPS.map(chip => (

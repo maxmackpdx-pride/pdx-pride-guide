@@ -93,7 +93,7 @@ export default function HomeHero({ eventCount }: Props) {
       <div className="home-hero__inner">
         <div className="home-hero__kicker">
           <span className="home-hero__dot" aria-hidden />
-          Portland's queer events · all year
+          Portland nights · all year
         </div>
 
         <h1 className="home-hero__title">
@@ -101,7 +101,7 @@ export default function HomeHero({ eventCount }: Props) {
         </h1>
 
         <p className="home-hero__tagline">
-          Your welcoming map to queer Portland: discover events, find your people, back the venues that host us, and{" "}
+          Your map to the good nights: parties, people, the rooms that hold us — and{" "}
           <strong>take care of each other.</strong>
         </p>
 
