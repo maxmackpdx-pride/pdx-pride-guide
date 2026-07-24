@@ -38,6 +38,7 @@ import {
   fetchHawksDrafts,
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
+import { fetchSportsBraDrafts, sportsBraConfigured } from "../ingest/adapters/sportsBra";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
 import { isRelevantScanDraft } from "../ingest/relevance";
@@ -351,6 +352,15 @@ async function fetchDraftsForVenue(
       return fetchDarcelleDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "hawks_squarespace":
       return fetchHawksDrafts({ feedUrl: venue.feedUrl, includePast: false });
+    case "sports_bra_airtable": {
+      // Official Airtable schedule when a token is configured; otherwise fall
+      // back to the (venue-scoped) Eventbrite feed so the venue isn't empty.
+      if (sportsBraConfigured()) {
+        const { drafts } = await fetchSportsBraDrafts({ includePast: false });
+        return drafts;
+      }
+      return fetchGenericDrafts(venue, existingEvents);
+    }
     case "generic":
     default:
       return fetchGenericDrafts(venue, existingEvents);

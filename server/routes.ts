@@ -49,6 +49,7 @@ import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAnd
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
+import { renderGamePosterPng } from "./posters/gamePoster";
 import {
   INGEST_SOURCES,
   buildDirectoryIngestSources,
@@ -989,6 +990,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
       pushConfigured: isPushConfigured(),
       pushSubscriptions: isPushConfigured() ? storage.countActivePushSubscriptions() : 0,
     });
+  });
+
+  // Auto-generated game poster (Swedish-minimal, Sports Bra brand). Stateless
+  // image from short text params; small in-memory cache + long browser cache.
+  // Used as fallback art for watch-party games that have no flyer.
+  const gamePosterCache = new Map<string, Buffer>();
+  const clip = (s: unknown, n: number): string => String(s ?? "").slice(0, n);
+  app.get("/api/game-poster", async (req, res) => {
+    try {
+      const q = req.query as Record<string, string>;
+      const input = {
+        league: clip(q.league, 40) || "Game Day",
+        tag: clip(q.tag, 24) || "Watch Party",
+        away: clip(q.away, 60) || "Women's Sports",
+        home: clip(q.home, 60) || null,
+        dateLabel: clip(q.date, 40) || "This Week",
+        timeLabel: clip(q.time, 24) || "See Bar",
+      };
+      const key = JSON.stringify(input);
+      let png = gamePosterCache.get(key);
+      if (!png) {
+        png = await renderGamePosterPng(input);
+        if (gamePosterCache.size > 200) gamePosterCache.clear();
+        gamePosterCache.set(key, png);
+      }
+      res.set("Content-Type", "image/png");
+      res.set("Cache-Control", "public, max-age=86400, immutable");
+      return res.send(png);
+    } catch (err) {
+      return res.status(500).json({ error: "poster render failed" });
+    }
   });
 
   // 1200×630 branded social cards (replace raw flyer/logo in og:image)

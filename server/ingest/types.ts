@@ -11,7 +11,8 @@ export type IngestParseSource =
   | "vision"
   | "caption"
   | "instagram"
-  | "flyer-reader";
+  | "flyer-reader"
+  | "airtable";
 
 /** Normalized draft event ready for createEvent (Pacific wall-clock strings). */
 export type IngestEventDraft = {

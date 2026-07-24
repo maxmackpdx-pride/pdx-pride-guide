@@ -5,9 +5,20 @@ Rules that always apply: review-queue only (never auto-LIVE), never-invent-FREE,
 SSRF guard on fetches, spending caps + kill switch (COSTS.md), tsc error count
 must stay at baseline (37), offline smokes must pass before push.
 
-## State (updated 2026-07-23, PM)
+## State (updated 2026-07-24)
 - Trusted venues: 10 on the board. Scan-source pruning WAITS for Tucker
   confirming a venue green (incl. flyer coverage) on the live Trusted tab.
+- Sports Bra: switched OFF the Eventbrite keyword search (pulled city-wide
+  "sports" noise) → official Airtable schedule (fetchMode sports_bra_airtable,
+  server/ingest/adapters/sportsBra.ts). Games with no flyer get an
+  auto-generated Swedish-minimal poster (server/posters/gamePoster.ts, served
+  at GET /api/game-poster). Needs SPORTS_BRA_AIRTABLE_TOKEN on Railway (Tucker
+  has the pat token; see docs/SPORTS_BRA_AIRTABLE.md). Falls back to the
+  venue-scoped EB feed until the token is set. LIVE FETCH UNTESTED from sandbox
+  (Airtable blocked) — verify on Railway after the env var lands.
+- Also fixed the venue-scope leak generally: two-token venue match now requires
+  the venue name to appear in LOCATION fields, not the event title (a title
+  saying "Sports Night" no longer scope-matches The Sports Bra).
 - Flyer Reader: Phases 1, 2, 4 done. Validation at 97% (reports/). Vision =
   Gemini free tier via self-discovering provider chain. Phase 3 shipped:
   POST /api/admin/qsearch/flyer-reader/parse with {queue:true} → Review queue.

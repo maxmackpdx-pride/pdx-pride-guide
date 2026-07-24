@@ -32,9 +32,13 @@ function assert(cond: unknown, msg: string) {
 
 /* ── registry wiring ── */
 assert(TRUSTED_VENUES.length === 10, `10 trusted venues registered (got ${TRUSTED_VENUES.length})`);
-for (const sid of ["stag-eb", "sports-bra-eb", "living-room-eb", "camp-bar", "cc-slaughters"]) {
+for (const sid of ["stag-eb", "living-room-eb", "camp-bar", "cc-slaughters"]) {
   assert(getTrustedVenue(sid)?.fetchMode === "generic", `${sid} registered as generic mode`);
 }
+assert(
+  getTrustedVenue("sports-bra-eb")?.fetchMode === "sports_bra_airtable",
+  "sports-bra-eb registered as sports_bra_airtable mode (official schedule, not EB noise)",
+);
 assert(getTrustedVenue("darcelle-tribe")?.fetchMode === "darcelle_tribe", "darcelle-tribe registered with fetchMode darcelle_tribe");
 assert(getTrustedVenue("hawks-json")?.fetchMode === "hawks_squarespace", "hawks-json registered with fetchMode hawks_squarespace");
 

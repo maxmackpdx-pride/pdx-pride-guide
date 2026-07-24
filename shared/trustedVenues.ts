@@ -22,6 +22,7 @@ export type TrustedVenueDef = {
     | "eagle_wix"
     | "darcelle_tribe"
     | "hawks_squarespace"
+    | "sports_bra_airtable"
     | "generic";
   /** Primary feed URL (may need date expansion at runtime) */
   feedUrl: string;
@@ -135,16 +136,16 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     venueName: "The Sports Bra",
     address: "2512 NE Broadway, Portland, OR",
     neighborhood: "NE Portland",
-    fetchMode: "generic",
-    feedUrl: "https://www.eventbrite.com/d/or--portland/sports-bra/",
-    calendarPageUrl: "https://thesportsbraofficial.com/",
+    fetchMode: "sports_bra_airtable",
+    feedUrl: "https://thesportsbraofficial.com/pages/portland",
+    calendarPageUrl: "https://thesportsbraofficial.com/pages/portland",
     publishStatus: "LIVE",
     pollHours: 12,
     venuePolicy: {
       ageNote: "Verify age — Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
     },
     notes:
-      "Eventbrite venue-scoped search via generic discover (sports+bra token scope). Women's sports bar — do not force 21+.",
+      "Official watch-party schedule via their Airtable (SPORTS_BRA_AIRTABLE_TOKEN). Games only — no Eventbrite city noise. No-flyer games get an auto Swedish-minimal poster. Falls back to venue-scoped Eventbrite if token unset.",
   },
   {
     sourceId: "living-room-eb",

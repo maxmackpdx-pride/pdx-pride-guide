@@ -14,7 +14,10 @@ on:
     paths:
       - "flyers/**"
       - "server/flyerReader/**"
+      - "server/posters/**"
+      - "server/ingest/adapters/sportsBra.ts"
       - "script/validate-flyers.ts"
+      - "script/smoke-sports-bra.ts"
       - ".github/workflows/flyer-validate.yml"
   workflow_dispatch: {}
 
@@ -47,6 +50,7 @@ jobs:
           npx tsx script/smoke-flyer-reader.ts
           npx tsx script/smoke-trusted-flyers.ts
           npx tsx script/smoke-trusted-new-venues.ts
+          npx tsx script/smoke-sports-bra.ts
 
       - name: "Dump provider model list (which models can this key see)"
         env:
