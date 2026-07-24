@@ -93,17 +93,18 @@
   }
 }
 
-/* z-0 wallpaper */
+/* z-0 wallpaper - ZAYLIST neon wordmark (full mark, not skyline crop) */
 .home-hero__bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center center;
   display: block;
   z-index: 0;
-  filter: saturate(1.08) contrast(1.04);
+  background: #000;
+  filter: saturate(1.12) contrast(1.05);
 }
 
 /* z-1 aurora orbs - match PDX Hero Wallpaper (animated).html */
