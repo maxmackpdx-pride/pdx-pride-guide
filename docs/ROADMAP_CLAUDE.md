@@ -19,6 +19,15 @@ must stay at baseline (37), offline smokes must pass before push.
 - Also fixed the venue-scope leak generally: two-token venue match now requires
   the venue name to appear in LOCATION fields, not the event title (a title
   saying "Sports Night" no longer scope-matches The Sports Bra).
+- USER FLYER AUTOFILL shipped: POST /api/flyer-autofill + Submit uploader wiring
+  — a submitter uploads a poster and OCR+vision fills blank form fields (review
+  only; still goes through /api/submit moderation). Caps FLYER_AUTOFILL_USER_DAILY
+  (10) / _GLOBAL_DAILY (200) + FLYER_LLM_DISABLED kill switch.
+- PROD-CRASH FIXED (my regression): gamePoster.ts read font files at module load;
+  prod bundles to one dist/index.cjs so the files weren't there → crash-loop.
+  Fonts now inlined as base64 (server/posters/fontData.ts). LESSON: anything that
+  reads a bundled-adjacent file at import time breaks prod — inline assets or
+  verify by bundling to CJS and running with no sibling files.
 - Flyer Reader: Phases 1, 2, 4 done. Validation at 97% (reports/). Vision =
   Gemini free tier via self-discovering provider chain. Phase 3 shipped:
   POST /api/admin/qsearch/flyer-reader/parse with {queue:true} → Review queue.
