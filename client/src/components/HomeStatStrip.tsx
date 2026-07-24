@@ -21,10 +21,7 @@ export default function HomeStatStrip({ eventCount, placesCount, goingCount }: P
         >
           <CountUpValue value={eventCount} duration={1400} />
         </div>
-        <div className="home-stat-strip__label home-stat-strip__label--stack">
-          <span>next 7 days</span>
-          <span>and counting</span>
-        </div>
+        <div className="home-stat-strip__label">next 7 days</div>
       </div>
       <div className="home-stat-strip__cell">
         <div className="home-stat-strip__value home-stat-strip__value--lime">{placesCount}</div>
