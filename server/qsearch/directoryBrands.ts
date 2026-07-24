@@ -125,7 +125,7 @@ export function cleanSourceLabel(label: string | null | undefined): string {
       /\s*[\(\[]\s*(ics|json|tribe|html|wix|squarespace|eventbrite|tixr|bit|bandsintown|vision|upload|api|calendar|jsonld)\s*[\)\]]\s*/gi,
       " ",
     )
-    .replace(/\s*[-–-|]\s*(ics|tribe|json|eventbrite|tixr|calendar)\s*$/i, "")
+    .replace(/\s*[-–|]\s*(ics|tribe|json|eventbrite|tixr|calendar)\s*$/i, "")
     .replace(/\s+/g, " ")
     .trim();
 }

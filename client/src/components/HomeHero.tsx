@@ -2,26 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
-import heroWallpaper from "@/assets/home/hero-wallpaper.jpg";
+import heroBg from "@/assets/home/hero-bg.jpg";
+import heroWordmark from "@/assets/home/hero-wordmark.png";
 
 /**
- * Letter orbs under Z-A-Y-L-I-S-T on the spectrum wordmark.
+ * Letter orbs under Z-A-Y-L-I-S-T (mid-layer glow between bg + wordmark).
  * Colors sample the Zaylist gradient at each letter’s place in the tape.
  */
 const LETTER_ORBS = [
-  { letter: "Z", color: "#FF19D6", left: "16%", top: "38%" },
-  { letter: "A", color: "#FF196C", left: "28%", top: "42%" },
-  { letter: "Y", color: "#FFD119", left: "40%", top: "36%" },
-  // Center L - dropped 30% lower on the panel
-  { letter: "L", color: "#9CFF19", left: "50%", top: "74%" },
-  { letter: "I", color: "#19F7FF", left: "60%", top: "38%" },
-  { letter: "S", color: "#1956FF", left: "70%", top: "42%" },
-  { letter: "T", color: "#E419FF", left: "82%", top: "36%" },
+  { letter: "Z", color: "#FF19D6", left: "16%", top: "42%" },
+  { letter: "A", color: "#FF196C", left: "28%", top: "46%" },
+  { letter: "Y", color: "#FFD119", left: "40%", top: "40%" },
+  { letter: "L", color: "#9CFF19", left: "50%", top: "48%" },
+  { letter: "I", color: "#19F7FF", left: "60%", top: "42%" },
+  { letter: "S", color: "#1956FF", left: "70%", top: "46%" },
+  { letter: "T", color: "#E419FF", left: "82%", top: "40%" },
 ] as const;
 
 /**
- * Full-bleed home hero: ZAYLIST wallpaper, letter-matched spectrum orbs,
- * grain, kicker + CTAs. Parallax on pointer + scroll (respects reduced-motion).
+ * Multi-layer hero cutouts (must match Home.css z-order):
+ *  z0 BG · z1 grain (behind neon) · z2 orbs (glow under type)
+ *  z3 wordmark (color-faithful) · z4 kicker · z5 CTAs · z6 share
+ * Scroll-only — no pointer. Respects reduced-motion / calm.
  */
 export default function HomeHero() {
   const { user } = useAuth();
@@ -36,55 +38,36 @@ export default function HomeHero() {
 
     let raf = 0;
     let running = true;
-    const target = { x: 0, y: 0 };
-    const current = { x: 0, y: 0 };
+    // Scroll-only parallax (no pointer) — Y only
+    let targetY = 0;
+    let currentY = 0;
 
     const readScroll = () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      // -1 when panel is above, +1 below; 0 when centered
       return Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh * 0.55)));
     };
 
-    const onPointer = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      if (r.width < 1 || r.height < 1) return;
-      target.x = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      target.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    };
-
-    const onLeave = () => {
-      target.x = 0;
-      // keep scroll bias
-      target.y = readScroll() * 0.65;
-    };
-
     const onScroll = () => {
-      const s = readScroll();
-      // blend scroll into y when pointer is idle-ish
-      target.y = target.y * 0.35 + s * 0.65;
+      targetY = readScroll();
     };
 
     const tick = () => {
       if (!running) return;
-      current.x += (target.x - current.x) * 0.07;
-      current.y += (target.y - current.y) * 0.07;
-      el.style.setProperty("--px", current.x.toFixed(4));
-      el.style.setProperty("--py", current.y.toFixed(4));
+      currentY += (targetY - currentY) * 0.05;
+      el.style.setProperty("--px", "0");
+      el.style.setProperty("--py", currentY.toFixed(4));
       raf = requestAnimationFrame(tick);
     };
 
-    target.y = readScroll() * 0.65;
-    el.addEventListener("pointermove", onPointer, { passive: true });
-    el.addEventListener("pointerleave", onLeave);
+    targetY = readScroll();
+    currentY = targetY;
     window.addEventListener("scroll", onScroll, { passive: true });
     raf = requestAnimationFrame(tick);
 
     return () => {
       running = false;
       cancelAnimationFrame(raf);
-      el.removeEventListener("pointermove", onPointer);
-      el.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll", onScroll);
       el.style.removeProperty("--px");
       el.style.removeProperty("--py");
@@ -109,17 +92,23 @@ export default function HomeHero() {
   return (
     <section
       ref={panelRef}
-      className="home-hero home-hero--parallax"
+      className="home-hero home-hero--parallax home-hero--cutouts"
       aria-label="Portland Zaylist hero"
     >
-      <img
-        className="home-hero__bg"
-        src={heroWallpaper}
-        alt=""
-        decoding="async"
-      />
+      {/* z0 — atmosphere BG (slow scroll + tiny idle bounce) */}
+      <div className="home-hero__bg-wrap" aria-hidden>
+        <img
+          className="home-hero__bg"
+          src={heroBg}
+          alt=""
+          decoding="async"
+        />
+      </div>
 
-      {/* Letter-matched spectrum orbs under Z-A-Y-L-I-S-T */}
+      {/* z1 — film grain (behind orbs + wordmark so it never washes neon) */}
+      <div className="home-hero__grain" aria-hidden />
+
+      {/* z2 — spectrum orbs under the wordmark */}
       <div className="home-hero__aurora" aria-hidden>
         {LETTER_ORBS.map((orb, i) => (
           <span
@@ -129,7 +118,6 @@ export default function HomeHero() {
               background: orb.color,
               left: orb.left,
               top: orb.top,
-              // slight stagger in float phase via animation-delay
               animationDelay: `${i * -1.4}s`,
             }}
             data-letter={orb.letter}
@@ -137,10 +125,17 @@ export default function HomeHero() {
         ))}
       </div>
 
-      {/* Film grain */}
-      <div className="home-hero__grain" aria-hidden />
+      {/* z3 — ZAYLIST cutout (parallax wrap + idle float); above grain/orbs */}
+      <div className="home-hero__wordmark-wrap" aria-hidden>
+        <img
+          className="home-hero__wordmark"
+          src={heroWordmark}
+          alt=""
+          decoding="async"
+        />
+      </div>
 
-      {/* Mobile-only site share - top right of first panel */}
+      {/* Mobile-only site share */}
       <button
         type="button"
         className="home-hero__share"
@@ -183,7 +178,7 @@ export default function HomeHero() {
         </div>
       </div>
 
-      {/* Center-bottom glass CTAs */}
+      {/* z5 — CTAs under the wordmark, almost locked */}
       <div className="home-hero__cta">
         <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
           View all events →

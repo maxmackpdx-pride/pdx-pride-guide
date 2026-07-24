@@ -93,13 +93,36 @@
   }
 }
 
-/* Parallax vars set by HomeHero (pointer + scroll). Default 0. */
+/* Parallax vars set by HomeHero (scroll Y only; --px stays 0). --py in [-1, 1]. */
 .home-hero--parallax {
   --px: 0;
   --py: 0;
 }
 
-/* z-0 wallpaper - fill panel, stay centered; parallax is scale-only from center */
+/*
+ * Multi-layer cutouts (far → near), scroll-only Y + idle bounce:
+ *  z0 BG wrap     — slow scroll (far) + tiny loop bounce
+ *  z1 grain       — BEHIND logo + buttons (never over neon)
+ *  z2 letter orbs — heat-haze under type (screen blend, not on mark)
+ *  z3 wordmark    — faster scroll (near) + small loop bounce; color-faithful
+ *  z4 kicker      — fixed
+ *  z5 CTAs        — mid scroll Y
+ *  z6 share       — mobile pill
+ */
+/* z-0 BG wrap — far layer: less scroll travel = depth */
+.home-hero__bg-wrap {
+  position: absolute;
+  /* Extra height so Y parallax never shows seams */
+  inset: -10% 0;
+  width: 100%;
+  height: 120%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(0, calc(var(--py) * 6px), 0);
+}
+
 .home-hero__bg {
   position: absolute;
   inset: 0;
@@ -108,99 +131,210 @@
   object-fit: cover;
   object-position: center center;
   display: block;
-  z-index: 0;
   background: #000;
-  filter: saturate(1.12) contrast(1.05);
-  transform-origin: center center;
+  /* BG-only grade — never inherit onto the wordmark layer */
+  filter: saturate(1.15) contrast(1.06);
   will-change: transform;
-  /* Keep visual center fixed - depth via scale only (no xy drift) */
-  transform: scale(calc(1.06 + var(--py) * 0.02 + var(--px) * 0.01));
+  /* Slow auto bounce, opposite phase feel from wordmark */
+  animation: homeBgFloat 12s ease-in-out infinite;
 }
 
-/* z-1 letter orbs under Z-A-Y-L-I-S-T (spectrum colors) */
+@keyframes homeBgFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* z-1 grain — behind orbs + wordmark so noise never desaturates neon */
+.home-hero__grain {
+  z-index: 1;
+  mix-blend-mode: normal;
+}
+
+/* z-2 letter orbs — above grain, under logo (additive glow only) */
 .home-hero__aurora {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
   overflow: hidden;
+  transform: none;
+  /* Do NOT isolate — orbs need screen-blend against BG */
+}
+
+/* z-3 wrap — near layer: more scroll travel than BG (3D parallax) */
+.home-hero__wordmark-wrap {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 3;
+  width: min(100vw, 1274px);
+  max-height: 75%;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  /* Own group so sibling orb screen-blend cannot re-tint letter RGB */
+  isolation: isolate;
+  mix-blend-mode: normal;
+  filter: none;
   will-change: transform;
+  transform-origin: center center;
   transform: translate3d(
-    calc(var(--px) * 22px),
-    calc(var(--py) * 18px),
+    -50%,
+    calc(-50% + var(--py) * 18px),
     0
   );
+}
+
+/* Wordmark img — crisp neon; drop-shadow only (no blur/sat/contrast/blend) */
+.home-hero__wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  opacity: 1;
+  mix-blend-mode: normal;
+  /* Tight shadow = depth without a brown soft blob under feathered bloom */
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.55));
+  will-change: transform;
+  animation: homeWordmarkFloat 6.5s ease-in-out infinite;
+}
+
+@keyframes homeWordmarkFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.home-hero--cutouts .home-hero__grain {
+  z-index: 1;
+}
+
+.home-hero--cutouts .home-hero__aurora {
+  z-index: 2;
+}
+
+.home-hero--cutouts .home-hero__wordmark-wrap {
+  z-index: 3;
+}
+
+.home-hero--cutouts .home-hero__inner {
+  z-index: 4;
+}
+
+.home-hero--cutouts .home-hero__cta {
+  z-index: 5;
+}
+
+.home-hero--cutouts .home-hero__share {
+  z-index: 6;
 }
 
 .home-hero__orb {
   position: absolute;
   border-radius: 50%;
   opacity: 0.1;
+  /* Additive under type only — never on the wordmark layer (z2 < z3) */
   mix-blend-mode: screen;
   filter: blur(80px);
   pointer-events: none;
-  will-change: transform;
+  will-change: transform, opacity, filter;
   width: 22vw;
   height: 22vw;
   max-width: 360px;
   max-height: 360px;
   /* Center on left/top so letter positions are true centers */
   transform: translate(-50%, -50%);
-  /* Drift within ±5.5% of start (~10% wider than ±5%); 30% faster than 48s */
-  animation: homeLetterOrb 33.6s ease-in-out infinite;
+  /*
+   * Atmosphere (idle): slow path drift + heat-haze scale/blur/opacity.
+   * Not pointer-driven — keeps life when the cursor is still.
+   * Stagger via animation-delay on each letter in HomeHero.
+   */
+  animation:
+    homeLetterOrb 33.6s ease-in-out infinite,
+    homeOrbHaze 11s ease-in-out infinite;
 }
 
 /* Drift within ~5.5% of starting center (10% wider than 5%) - still slow */
 @keyframes homeLetterOrb {
   0%,
   100% {
-    transform: translate(-50%, -50%) translate(0%, 0%);
+    transform: translate(-50%, -50%) translate(0%, 0%) scale(1);
   }
   20% {
-    transform: translate(-50%, -50%) translate(5.5%, -3.3%);
+    transform: translate(-50%, -50%) translate(5.5%, -3.3%) scale(1.04);
   }
   45% {
-    transform: translate(-50%, -50%) translate(-2.2%, 5.5%);
+    transform: translate(-50%, -50%) translate(-2.2%, 5.5%) scale(0.96);
   }
   70% {
-    transform: translate(-50%, -50%) translate(-5.5%, -4.4%);
+    transform: translate(-50%, -50%) translate(-5.5%, -4.4%) scale(1.05);
   }
   85% {
-    transform: translate(-50%, -50%) translate(3.3%, 2.2%);
+    transform: translate(-50%, -50%) translate(3.3%, 2.2%) scale(0.98);
   }
 }
 
-/* z-2 film grain (scrim removed) */
+/* Soft heat-haze: opacity + blur breathe (independent of path) */
+@keyframes homeOrbHaze {
+  0%,
+  100% {
+    opacity: 0.09;
+    filter: blur(80px);
+  }
+  40% {
+    opacity: 0.14;
+    filter: blur(72px);
+  }
+  70% {
+    opacity: 0.11;
+    filter: blur(88px);
+  }
+}
+
+/* film grain — z1 only (behind orbs + wordmark); never overlay/multiply */
 .home-hero__grain {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   opacity: 0.12;
+  mix-blend-mode: normal;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
-  will-change: transform;
-  transform: translate3d(
-    calc(var(--px) * 8px),
-    calc(var(--py) * 6px),
-    0
-  );
+  will-change: opacity;
+  transform: none;
+  animation: homeGrainPulse 16s ease-in-out infinite;
 }
 
-/* z-3 content - slight counter-parallax; top-aligned with light top pad */
+@keyframes homeGrainPulse {
+  0%,
+  100% {
+    opacity: 0.09;
+  }
+  50% {
+    opacity: 0.16;
+  }
+}
+
+/* kicker — fixed (no pointer parallax) */
 .home-hero__inner {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   max-width: 940px;
   margin: 0;
   padding: max(20px, env(safe-area-inset-top, 0px) + 16px) 64px 40px;
   text-align: left;
-  will-change: transform;
-  transform: translate3d(
-    calc(var(--px) * -10px),
-    calc(var(--py) * -8px),
-    0
-  );
+  transform: none;
 }
 
 .home-hero__kicker {
@@ -315,7 +449,7 @@
   border: none;
 }
 
-/* Center-bottom CTA row on the hero panel */
+/* Center-bottom CTA row — almost locked (≤4px) so targets stay easy to hit */
 .home-hero__cta {
   position: absolute;
   left: 50%;
@@ -330,9 +464,10 @@
   width: max-content;
   max-width: calc(100% - 32px);
   margin: 0;
+  /* CTAs between BG and wordmark in depth — moderate scroll Y */
   transform: translate3d(
-    calc(-50% + var(--px) * -6px),
-    calc(var(--py) * -4px),
+    -50%,
+    calc(var(--py) * -12px),
     0
   );
   will-change: transform;
@@ -360,7 +495,12 @@
     0 0 0 1px rgba(0, 0, 0, 0.55),
     0 8px 28px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  color: #fff;
+  transition:
+    transform 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .home-hero__btn:hover {
@@ -372,25 +512,27 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-/* VIEW ALL EVENTS - acid yellow text on black glass */
+/* VIEW ALL EVENTS — white default, acid yellow on hover */
 .home-hero__btn--primary {
-  color: #ccff00;
+  color: #fff;
   background: rgba(0, 0, 0, 0.72);
 }
 
 .home-hero__btn--primary:hover {
-  color: #d8ff33;
+  color: #ccff00;
+  border-color: color-mix(in srgb, #ccff00 45%, rgba(255, 255, 255, 0.2));
   filter: none;
 }
 
-/* HEADED TO THE RIVER? - orange text on black glass */
+/* HEADED TO THE RIVER? — white default, orange on hover */
 .home-hero__btn--river {
-  color: #ff6600;
+  color: #fff;
   background: rgba(0, 0, 0, 0.72);
 }
 
 .home-hero__btn--river:hover {
-  color: #ff8533;
+  color: #ff6600;
+  border-color: color-mix(in srgb, #ff6600 45%, rgba(255, 255, 255, 0.2));
   filter: none;
 }
 
@@ -410,17 +552,30 @@
 }
 
 html.calm-mode .home-hero__dot,
-html.calm-mode .home-hero__orb {
+html.calm-mode .home-hero__orb,
+html.calm-mode .home-hero__grain {
   animation: none !important;
 }
 
 html.calm-mode .home-hero--parallax,
+html.calm-mode .home-hero--parallax .home-hero__bg-wrap,
 html.calm-mode .home-hero--parallax .home-hero__bg,
 html.calm-mode .home-hero--parallax .home-hero__aurora,
+html.calm-mode .home-hero--parallax .home-hero__wordmark-wrap,
 html.calm-mode .home-hero--parallax .home-hero__grain,
 html.calm-mode .home-hero--parallax .home-hero__inner {
   --px: 0 !important;
   --py: 0 !important;
+  transform: none !important;
+}
+
+html.calm-mode .home-hero--parallax .home-hero__wordmark-wrap {
+  transform: translate(-50%, -50%) !important;
+}
+
+html.calm-mode .home-hero__wordmark,
+html.calm-mode .home-hero__bg {
+  animation: none !important;
   transform: none !important;
 }
 
@@ -439,6 +594,7 @@ html.calm-mode .home-hero__grain {
 
 html.calm-mode .home-hero__orb {
   opacity: 0.12;
+  filter: blur(80px);
 }
 
 @media (max-width: 900px) {
@@ -448,6 +604,12 @@ html.calm-mode .home-hero__orb {
 
   .home-hero__inner {
     padding: max(16px, env(safe-area-inset-top, 0px) + 12px) 20px 32px;
+  }
+
+  .home-hero__wordmark-wrap {
+    top: 40%;
+    width: min(100vw, 936px);
+    max-height: 62%;
   }
 
   .home-hero__title {
@@ -466,11 +628,22 @@ html.calm-mode .home-hero__orb {
     --py: 0 !important;
   }
 
+  .home-hero--parallax .home-hero__bg-wrap,
   .home-hero--parallax .home-hero__bg,
   .home-hero--parallax .home-hero__aurora,
+  .home-hero--parallax .home-hero__wordmark-wrap,
   .home-hero--parallax .home-hero__grain,
   .home-hero--parallax .home-hero__inner {
     transform: none !important;
+  }
+
+  .home-hero--parallax .home-hero__wordmark-wrap {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .home-hero__wordmark,
+  .home-hero__bg {
+    animation: none !important;
   }
 
   .home-hero--parallax .home-hero__cta {
@@ -478,9 +651,19 @@ html.calm-mode .home-hero__orb {
   }
 
   .home-hero__orb,
+  .home-hero__grain,
   .home-hero__dot,
   .home-hero__word--pride {
     animation: none !important;
+  }
+
+  .home-hero__orb {
+    filter: blur(80px);
+    opacity: 0.1;
+  }
+
+  .home-hero__grain {
+    opacity: 0.12;
   }
 
   .home-hero__word--pride {
