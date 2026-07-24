@@ -1116,6 +1116,82 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ url: `/uploads/${req.file.filename}` });
   });
 
+  // Flyer autofill: a submitter uploads a poster; we read it (OCR + vision) and
+  // return SUGGESTED form fields for them to review. Suggestions only — nothing
+  // is created here; the real submit still goes through /api/submit's moderation.
+  // Daily caps + the shared FLYER_LLM_DISABLED kill switch keep vision cost bounded.
+  const flyerAutofill = { day: "", perUser: new Map<string, number>(), global: 0 };
+  const FLYER_AUTOFILL_USER_DAILY = Math.max(1, Number(process.env.FLYER_AUTOFILL_USER_DAILY) || 10);
+  const FLYER_AUTOFILL_GLOBAL_DAILY = Math.max(1, Number(process.env.FLYER_AUTOFILL_GLOBAL_DAILY) || 200);
+  app.post("/api/flyer-autofill", requireAuth, async (req: any, res: any) => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      if (flyerAutofill.day !== today) {
+        flyerAutofill.day = today;
+        flyerAutofill.perUser.clear();
+        flyerAutofill.global = 0;
+      }
+      const uid = String(req.session?.userId ?? req.user?.id ?? "anon");
+      const used = flyerAutofill.perUser.get(uid) || 0;
+      if (flyerAutofill.global >= FLYER_AUTOFILL_GLOBAL_DAILY || used >= FLYER_AUTOFILL_USER_DAILY) {
+        return res
+          .status(429)
+          .json({ error: "Flyer autofill limit reached for today — you can still fill the form in manually." });
+      }
+
+      const uploadUrl = String(req.body?.uploadUrl || "");
+      if (!uploadUrl.startsWith("/uploads/")) {
+        return res.status(400).json({ error: "Upload the flyer first, then autofill." });
+      }
+      // Confine to UPLOADS_DIR (no traversal) and cap size.
+      const filePath = path.join(UPLOADS_DIR, path.basename(uploadUrl));
+      if (!filePath.startsWith(UPLOADS_DIR) || !fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "Flyer not found." });
+      }
+      if (fs.statSync(filePath).size > 8 * 1024 * 1024) {
+        return res.status(413).json({ error: "Flyer too large (max 8MB)." });
+      }
+
+      const imageBuffer = fs.readFileSync(filePath);
+      const { ocrFlyer } = await import("./flyerReader/ocr");
+      const { structureFlyer } = await import("./flyerReader/parse");
+      let rawText = "";
+      let ocrConfidence: number | undefined;
+      try {
+        const ocr = await ocrFlyer(imageBuffer);
+        rawText = ocr.text;
+        ocrConfidence = ocr.confidence;
+      } catch {
+        /* OCR optional — vision reads the image directly */
+      }
+      const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence });
+
+      // Count only a successful read against the cap.
+      flyerAutofill.perUser.set(uid, used + 1);
+      flyerAutofill.global += 1;
+
+      // Shape to the Submit form (datetime-local "YYYY-MM-DDTHH:mm").
+      const dateStart = parse.start_date ? `${parse.start_date}T${parse.time || "21:00"}` : null;
+      const dateEnd = parse.end_date ? `${parse.end_date}T02:00` : null;
+      return res.json({
+        ok: true,
+        confidence: parse.confidence,
+        model: parse.model,
+        fields: {
+          title: parse.title,
+          description: parse.description,
+          venueName: parse.venue,
+          address: parse.address,
+          dateStart,
+          dateEnd,
+          ticketUrl: parse.url,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({ error: "Could not read that flyer — please fill the form in manually." });
+    }
+  });
+
   app.post("/api/admin/upload/poster", requireAdmin, upload.single("poster"), (req: any, res: any) => {
     if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
     res.json({ url: `/uploads/${req.file.filename}` });

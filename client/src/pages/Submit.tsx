@@ -125,6 +125,37 @@ export default function Submit() {
   const [mode, setMode] = useState<PageMode>(initialMode);
   const [submitStep, setSubmitStep] = useState<SubmitStep>("promoter_app");
   const [eventForm, setEventForm] = useState(emptyEventForm());
+  const [flyerReadStatus, setFlyerReadStatus] = useState<"idle" | "reading" | "filled" | "error">("idle");
+
+  // Upload a flyer → read it (OCR + vision) → fill blank fields for review.
+  // Never clobbers anything the user already typed; dates come from the flyer
+  // when present (the form's default date is only a placeholder).
+  const handleFlyerUploaded = async (url: string) => {
+    setEventForm(f => ({ ...f, posterImageUrl: url }));
+    setFlyerReadStatus("reading");
+    try {
+      const r = await apiRequest("POST", "/api/flyer-autofill", { uploadUrl: url });
+      if (!r.ok) {
+        setFlyerReadStatus("error");
+        return;
+      }
+      const data = await r.json();
+      const fields = data?.fields || {};
+      setEventForm(f => ({
+        ...f,
+        title: f.title || fields.title || "",
+        description: f.description || fields.description || "",
+        venueName: f.venueName || fields.venueName || "",
+        address: f.address || fields.address || "",
+        ticketUrl: f.ticketUrl || fields.ticketUrl || "",
+        ...(fields.dateStart ? { dateStart: fields.dateStart } : {}),
+        ...(fields.dateEnd ? { dateEnd: fields.dateEnd } : {}),
+      }));
+      setFlyerReadStatus("filled");
+    } catch {
+      setFlyerReadStatus("error");
+    }
+  };
   const [promoterForm, setPromoterForm] = useState({
     ...emptyPromoterForm(),
     claimEventId: claimPathEventId,
@@ -728,9 +759,24 @@ export default function Submit() {
                           endpoint="/api/upload/poster"
                           fieldName="poster"
                           currentUrl={eventForm.posterImageUrl}
-                          onUploaded={url => setEventForm(f => ({ ...f, posterImageUrl: url }))}
+                          onUploaded={handleFlyerUploaded}
                           label="Upload flyer"
                         />
+                        {flyerReadStatus === "reading" && (
+                          <div className="board-copy-sm" style={{ marginTop: 6, opacity: 0.8 }}>
+                            Reading your flyer… fields will fill in a moment.
+                          </div>
+                        )}
+                        {flyerReadStatus === "filled" && (
+                          <div className="board-copy-sm" style={{ marginTop: 6, color: "var(--panel-purple, #b06bff)" }}>
+                            Filled from your flyer — please double-check everything before submitting.
+                          </div>
+                        )}
+                        {flyerReadStatus === "error" && (
+                          <div className="board-copy-sm" style={{ marginTop: 6, opacity: 0.8 }}>
+                            Couldn't read that one automatically — just fill the form in below.
+                          </div>
+                        )}
                       </label>
                     </div>
                   </ScrollReveal>
