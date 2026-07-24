@@ -1,12 +1,12 @@
 {
-  "overall": 100,
+  "overall": 97,
   "perField": {
     "title": {
       "hit": 8,
       "scored": 8
     },
     "start_date": {
-      "hit": 6,
+      "hit": 5,
       "scored": 6
     },
     "end_date": {
@@ -38,7 +38,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-120b, allam-2-7b, openai/gpt-oss-20b, llama-3.1-8b-instant, whisper-large-v3-turbo, canopylabs/orpheus-arabic-saudi, groq/compound-mini, llama-3.3-70b-versatile, whisper-large-v3, openai)",
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, canopylabs/orpheus-v1-english, groq/compound-mini, meta-llama/llama-prompt-guard-2-22m, meta-llama/llama-prompt-guard-2-86m, llama-3.1-8b-instant, openai/gpt-oss-120b, allam-2-7b, ope)",
         "Vision model gemini-2.0-flash unavailable (HTTP 404/429) — auto-discovered gemini-flash-lite-latest"
       ],
       "fields": {
@@ -86,7 +86,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound-mini, qwen/qwen3.6-27b, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, whisper-large-v3, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, canopylabs/orpheus-arabic-saudi, meta-ll)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[qwen/qwen3.6-27b, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, whisper-large-v3-turbo, llama-3.3-70b-versatile, groq/compound-mini, whisper-large-v3, opena)"
       ],
       "fields": {
         "title": {
@@ -116,7 +116,7 @@
         },
         "address": {
           "expected": "680 SE 6th Ave, Portland OR 97214",
-          "actual": "680 SE 6th Ave, Portland, OR 97214",
+          "actual": "680 SE 6th Ave, Portland OR 97214",
           "hit": true
         },
         "url": {
@@ -133,7 +133,7 @@
       "parseConfidence": 60,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, llama-3.3-70b-versatile, qwen/qwen3.6-27b, allam-2-7b, canopylabs/orpheus-v1-english, groq/compound-mini, whisper-large-v3-turbo, groq/compound,)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, groq/compound, meta-llama/llama-prompt-guard-2-22m, groq/compound-mini, whisper-large-v3-turbo, meta-llama/llama-prompt-guard-2-86m, allam-2-7b, qwen/qwen3.6-27b, canopylabs/orpheus-a)"
       ],
       "fields": {
         "title": {
@@ -180,12 +180,12 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, groq/compound-mini, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-86m, qwen/qwen3.6-27b, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-safeguard-20b, llama-3.3-70b-versatile, meta-llama/llama-pro)"
       ],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "Stank Yes Coach: PDX Pride",
+          "actual": "Stank Yes Coach",
           "hit": true
         },
         "start_date": {
@@ -210,7 +210,7 @@
         },
         "address": {
           "expected": "33 NW 9th Ave",
-          "actual": "33 NW 9th Ave",
+          "actual": "33 NW 9th Ave, Portland, OR",
           "hit": true
         },
         "url": {
@@ -224,10 +224,10 @@
       "path": "flyers/stfu-femdom-play-party.jpg",
       "ok": true,
       "ocrConfidence": 33,
-      "parseConfidence": 90,
+      "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3, openai/gpt-oss-120b, canopylabs/orpheus-v1-english, whisper-large-v3-turbo, allam-2-7b, openai/gpt-oss-20b, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-86m, qwen/qwen3.6-)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3-turbo, allam-2-7b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3, groq/compound, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-arabic-saudi, qwen)"
       ],
       "fields": {
         "title": {
@@ -237,12 +237,12 @@
         },
         "start_date": {
           "expected": "2026-07-16",
-          "actual": "2026-07-16",
-          "hit": true
+          "actual": "2027-07-16",
+          "hit": false
         },
         "end_date": {
           "expected": null,
-          "actual": "2026-07-16",
+          "actual": null,
           "hit": null
         },
         "time": {
@@ -274,7 +274,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, whisper-large-v3-turbo, llama-3.1-8b-instant, openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, allam-2-7b, qwen/qwen3.6-27b, groq/compound-mini, whisper-large-v3, gro)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, openai/gpt-oss-safeguard-20b, groq/compound, llama-3.3-70b-versatile, groq/compound-mini, canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-86m, qwen/qwen3)"
       ],
       "fields": {
         "title": {
@@ -321,7 +321,7 @@
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[allam-2-7b, whisper-large-v3-turbo, whisper-large-v3, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, qwen/qwen3.6-27b, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-safeguard-20b, groq/co)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-arabic-saudi, groq/compound-mini, whisper-large-v3, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-20b, allam-2-7b, llama-3.1-8b-instant, groq/compound, llama-3.3-70b-versatile,)"
       ],
       "fields": {
         "title": {
@@ -346,7 +346,7 @@
         },
         "venue": {
           "expected": "Realm PDX",
-          "actual": "Realm PDX",
+          "actual": "REALM PDX",
           "hit": true
         },
         "address": {
@@ -368,7 +368,7 @@
       "parseConfidence": 75,
       "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, meta-llama/llama-prompt-guard-2-22m, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, whisper-large-v3-turbo, groq/compound-mini, meta-llama/llama-prompt-guard-2-86m, whisper)"
+        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-120b, whisper-large-v3, qwen/qwen3.6-27b, groq/compound, openai/gpt-oss-safeguard-20b, allam-2-7b, llama-3.3-70b-versatile, meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-g)"
       ],
       "fields": {
         "title": {
