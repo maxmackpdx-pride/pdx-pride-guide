@@ -32,28 +32,38 @@ export default function HomeHero() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const panelRef = useRef<HTMLElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Muted autoplay loop, but hold on the poster frame for reduced-motion / Calm.
-  useEffect(() => {
-    const v = bgVideoRef.current;
-    if (!v) return;
-    // React's `muted` attribute doesn't always set the DOM property — force it,
-    // or iOS/Chrome block muted autoplay.
-    v.muted = true;
+  // Render the video only while it can actually autoplay. In Calm / reduced-motion
+  // — or when the browser blocks muted autoplay (e.g. iOS Low Power Mode) — fall
+  // back to the poster still so iOS never overlays its inline "play" button.
+  const [showVideo, setShowVideo] = useState(() => {
+    if (typeof window === "undefined") return true;
     const still =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       document.documentElement.classList.contains("calm-mode");
-    if (still) {
-      try {
-        v.pause();
-      } catch {
-        /* ignore */
-      }
-    } else {
-      const p = v.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    }
-  }, []);
+    return !still;
+  });
+
+  useEffect(() => {
+    if (!showVideo) return;
+    const v = bgVideoRef.current;
+    if (!v) return;
+    // React's `muted` attribute doesn't always set the DOM property — force it.
+    v.muted = true;
+    let cancelled = false;
+    const toPoster = () => {
+      if (!cancelled) setShowVideo(false);
+    };
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(toPoster);
+    // Belt: if it still isn't playing shortly after, drop to the poster (no button).
+    const t = window.setTimeout(() => {
+      if (!cancelled && v.paused) toPoster();
+    }, 1200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [showVideo]);
 
   useEffect(() => {
     const el = panelRef.current;
@@ -120,19 +130,23 @@ export default function HomeHero() {
       className="home-hero home-hero--parallax home-hero--cutouts"
       aria-label="Portland Zaylist hero"
     >
-      {/* z0 — atmosphere BG: muted looping video (poster fallback, no audio) */}
+      {/* z0 — atmosphere BG: muted looping video, or poster still if it can't play */}
       <div className="home-hero__bg-wrap" aria-hidden>
-        <video
-          ref={bgVideoRef}
-          className="home-hero__bg"
-          src={heroLoop}
-          poster={heroLoopPoster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-        />
+        {showVideo ? (
+          <video
+            ref={bgVideoRef}
+            className="home-hero__bg"
+            src={heroLoop}
+            poster={heroLoopPoster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
+        ) : (
+          <img className="home-hero__bg" src={heroLoopPoster} alt="" decoding="async" />
+        )}
       </div>
 
       {/* z1 — film grain (behind orbs + wordmark so it never washes neon) */}
