@@ -641,7 +641,7 @@ html.calm-mode .home-hero__orb {
 
 @media (max-width: 900px) {
   .home-hero {
-    min-height: min(88vh, 720px);
+    min-height: min(84vh, 700px);
   }
 
   .home-hero__inner {
@@ -649,10 +649,17 @@ html.calm-mode .home-hero__orb {
   }
 
   .home-hero__wordmark-wrap {
-    top: 40%;
+    /* Drop the mark onto the video's mandala center (~54%) so they read as one
+       and the upper dead space closes up */
+    top: 48%;
     /* Art fills ~95-100% of the canvas, so keep a margin or it clips the edges */
     width: min(94vw, 936px);
     max-height: 80%;
+  }
+
+  /* Pull the CTAs up closer to the mark — less empty band below */
+  .home-hero__cta {
+    bottom: max(14%, env(safe-area-inset-bottom, 0px) + 11%);
   }
 
   .home-hero__title {
