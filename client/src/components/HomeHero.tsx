@@ -4,8 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroLoop from "@/assets/home/hero-loop.mp4";
 import heroLoopPoster from "@/assets/home/hero-loop-poster.jpg";
-import heroWordmarkGlow from "@/assets/home/hero-wordmark-glow.webp";
-import heroWordmarkCore from "@/assets/home/hero-wordmark-core.webp";
+import heroWordmark from "@/assets/home/hero-wordmark.webp";
 
 /**
  * Letter orbs under Z-A-Y-L-I-S-T (mid-layer glow between bg + wordmark).
@@ -169,21 +168,10 @@ export default function HomeHero() {
         ))}
       </div>
 
-      {/* z3 — ZAYLIST: glow layer (slow pulse + deeper parallax) under crisp core */}
+      {/* z3 — ZAYLIST wordmark (single image; sign wrapper keeps the float bounce) */}
       <div className="home-hero__wordmark-wrap" aria-hidden>
         <div className="home-hero__wordmark-sign">
-          <img
-            className="home-hero__wordmark home-hero__wordmark--glow"
-            src={heroWordmarkGlow}
-            alt=""
-            decoding="async"
-          />
-          <img
-            className="home-hero__wordmark home-hero__wordmark--core"
-            src={heroWordmarkCore}
-            alt=""
-            decoding="async"
-          />
+          <img className="home-hero__wordmark" src={heroWordmark} alt="" decoding="async" />
         </div>
       </div>
 
