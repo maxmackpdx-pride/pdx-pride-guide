@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { sharePageLink } from "@/lib/shareEvent";
-import heroBg from "@/assets/home/hero-bg.jpg";
+import heroLoop from "@/assets/home/hero-loop.mp4";
+import heroLoopPoster from "@/assets/home/hero-loop-poster.jpg";
 import heroWordmarkGlow from "@/assets/home/hero-wordmark-glow.webp";
 import heroWordmarkCore from "@/assets/home/hero-wordmark-core.webp";
 
@@ -30,6 +31,23 @@ export default function HomeHero() {
   const { user } = useAuth();
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const panelRef = useRef<HTMLElement>(null);
+  const bgVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Muted autoplay loop, but hold on the poster frame for reduced-motion / Calm.
+  useEffect(() => {
+    const v = bgVideoRef.current;
+    if (!v) return;
+    const still =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.classList.contains("calm-mode");
+    if (still) {
+      try {
+        v.pause();
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const el = panelRef.current;
@@ -96,13 +114,18 @@ export default function HomeHero() {
       className="home-hero home-hero--parallax home-hero--cutouts"
       aria-label="Portland Zaylist hero"
     >
-      {/* z0 — atmosphere BG (slow scroll + tiny idle bounce) */}
+      {/* z0 — atmosphere BG: muted looping video (poster fallback, no audio) */}
       <div className="home-hero__bg-wrap" aria-hidden>
-        <img
+        <video
+          ref={bgVideoRef}
           className="home-hero__bg"
-          src={heroBg}
-          alt=""
-          decoding="async"
+          src={heroLoop}
+          poster={heroLoopPoster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
         />
       </div>
 
