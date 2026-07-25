@@ -14,11 +14,22 @@ const httpServer = createServer(app);
 // Railway terminates TLS at the edge; required for secure session cookies.
 app.set("trust proxy", 1);
 
-// Apex → www canonical host (301, preserve path + query).
+// Canonical host: everything that is not www.zaylist.com → https://www.zaylist.com
+// (apex zaylist, legacy prideguidepdx / pdxpg brands). Preserve path + query.
+const CANONICAL_HOST = "www.zaylist.com";
+const REDIRECT_HOSTS = new Set([
+  "zaylist.com",
+  "prideguidepdx.com",
+  "www.prideguidepdx.com",
+  "pdxpg.com",
+  "www.pdxpg.com",
+  "pdxprideguide.com",
+  "www.pdxprideguide.com",
+]);
 app.use((req, res, next) => {
   const host = (req.headers.host || "").split(":")[0].toLowerCase();
-  if (host === "zaylist.com") {
-    return res.redirect(301, `https://www.zaylist.com${req.originalUrl}`);
+  if (REDIRECT_HOSTS.has(host)) {
+    return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
   }
   next();
 });
