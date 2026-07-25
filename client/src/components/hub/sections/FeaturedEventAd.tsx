@@ -8,6 +8,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { DAY_TEXT_COLORS } from "@shared/eventWeek";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import EventModal from "@/components/EventModal";
 import type { Event } from "@shared/schema";
@@ -72,16 +73,16 @@ function EasterEggOverlay({
   const [muted, setMuted] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
 
-  // Scroll lock + Escape to close
+  // Scroll lock + Escape to close (iOS-safe lock — overflow:hidden detaches the
+  // fixed bottom nav on iOS Safari)
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlockBodyScroll();
       window.removeEventListener("keydown", onKey);
     };
   }, [onClose]);

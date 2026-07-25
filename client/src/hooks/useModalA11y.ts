@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -23,8 +24,8 @@ export function useModalA11y(opts: {
     previousFocus.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // iOS-safe: position:fixed lock (overflow:hidden detaches the fixed bottom nav)
+    lockBodyScroll();
 
     const node = dialogRef.current;
     const focusables = () =>
@@ -71,7 +72,7 @@ export function useModalA11y(opts: {
     document.addEventListener("keydown", onKeyDown, true);
     return () => {
       document.removeEventListener("keydown", onKeyDown, true);
-      document.body.style.overflow = prevOverflow;
+      unlockBodyScroll();
       previousFocus.current?.focus?.();
     };
   }, [enabled, open, onClose]);
