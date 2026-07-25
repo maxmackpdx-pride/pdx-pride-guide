@@ -91,6 +91,9 @@ function AppLayout() {
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
             <Route path="/pride-work" component={PrideWork} />
+            <Route path="/gigs">
+              {() => <Redirect to="/pride-work" />}
+            </Route>
             <Route path="/gifting" component={Gifting} />
             <Route path="/about" component={About} />
             <Route path="/resume" component={Resume} />

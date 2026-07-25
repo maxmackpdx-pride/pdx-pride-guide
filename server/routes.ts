@@ -2675,7 +2675,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy(err => {
       if (err) return res.status(500).json({ error: "Logout failed" });
-      res.clearCookie("connect.sid");
+      // Must match session cookie attributes or Secure cookies will not clear in browsers.
+      res.clearCookie("connect.sid", {
+        path: "/",
+        secure: productionSecureCookies(),
+        httpOnly: true,
+        sameSite: "lax",
+      });
       res.json({ ok: true });
     });
   });
@@ -6268,7 +6274,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const target = storage.getUserByUsername(username);
     if (!target || target.status !== "active") return res.status(404).json({ error: "User not found" });
     if (storage.isGuideAdminUserId(target.id)) {
-      return res.status(400).json({ error: "Cannot message the guide admin identity" });
+      return res.status(400).json({ error: "Cannot message the Zaylist system identity" });
     }
     if (moderationGate(res, "Admin guide message", { subject: subject || "Admin message", body })) return;
     const msg = storage.sendAsGuideAdmin(

@@ -60,7 +60,7 @@ const FAQ = [
 export default function About() {
   usePageSeo(
     "About Zaylist | Portland Pride 2026",
-    "Built by one person in Portland. A year-round guide to queer nightlife and events, with zero interest in being a sanitized corporate pamphlet.",
+    "Built by one person in Portland. A year-round home for queer nightlife and events, with zero interest in being a sanitized corporate pamphlet.",
   );
 
   const { data: events = [] } = useQuery<EventListing[]>({
@@ -98,9 +98,9 @@ export default function About() {
   const heroStats = useMemo(
     () => [
       { num: eventCount, label: "Events, and counting", color: "#ccff00" },
-      { num: 7, label: "Days, one guide", color: "#19e3ff" },
+      { num: 7, label: "Days, one list", color: "#19e3ff" },
       { num: 0, label: "To browse. Always. ($0)", color: "#ff1fa0" },
-      { num: 1, label: "Guide - room for more", color: "#ffb020" },
+      { num: 1, label: "Zaylist - room for more", color: "#ffb020" },
     ],
     [eventCount],
   );

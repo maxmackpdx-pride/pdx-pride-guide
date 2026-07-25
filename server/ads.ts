@@ -472,7 +472,7 @@ export function seedAdsIfNeeded(db: Database) {
       pill_label: "Affiliate",
       title: "Mr. S Leather",
       body: "Harnesses, restraints & fetish gear, made in SF",
-      cta_title: "Shop the link, support the guide",
+      cta_title: "Shop the link, support Zaylist",
       cta_copy: "Shop Now →",
       logo_text: "Mr. S Leather",
       logo_img: null,
@@ -634,7 +634,7 @@ function syncLiveAffiliateTemplates(db: Database) {
       fields: {
         primary_color: "#19e3ff",
         secondary_color: "#ffffff",
-        cta_title: "Shop the link, support the guide",
+        cta_title: "Shop the link, support Zaylist",
         cta_copy: "Shop Now →",
         tag1: "Leather & Gear",
         tag2: "Ships Worldwide",

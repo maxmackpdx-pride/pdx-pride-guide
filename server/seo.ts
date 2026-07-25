@@ -192,7 +192,23 @@ Sitemap: ${SITE_URL}/sitemap.xml
 }
 
 export function buildSitemapXml(events: SeoEvent[]) {
-  const staticPaths = ["/", "/events", "/gifting", "/pride-work", "/spotted", "/about", "/resume", "/legal", "/submit"];
+  const staticPaths = [
+    "/",
+    "/events",
+    "/schedule",
+    "/directory",
+    "/gifting",
+    "/pride-work",
+    "/spotted",
+    "/about",
+    "/contact",
+    "/sponsors",
+    "/access",
+    "/nude-beaches",
+    "/resume",
+    "/legal",
+    "/submit",
+  ];
   const staticUrls = staticPaths
     .map(path => `  <url><loc>${SITE_URL}${path === "/" ? "/" : path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
     .join("\n");
@@ -274,6 +290,18 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/directory": {
     title: "Queer Portland Directory | Zaylist",
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
+  },
+  "/schedule": {
+    title: "Portland Pride Schedule | Zaylist",
+    description: "Your Portland Pride and year-round queer event schedule. Filter by day, save favorites, and plan the week.",
+  },
+  "/nude-beaches": {
+    title: "Nude Beaches near Portland | Zaylist",
+    description: "River Brats guide to nude and clothing-optional beaches near Portland — local intel, not corporate maps.",
+  },
+  "/gigs": {
+    title: "Gig Werk: Gigs & Jobs | Zaylist",
+    description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
   },
 };
 
@@ -373,7 +401,7 @@ export function buildFaqJsonLd() {
         name: "Where can I find Portland Pride 2026 events?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Browse all live Portland Pride and PDX Pride events at zaylist.com/events. Filter by day, neighborhood, and type, or open any event page for details and tickets.",
+          text: `Browse all live Portland Pride and PDX Pride events at ${SITE_URL}/events. Filter by day, neighborhood, and type, or open any event page for details and tickets.`,
         },
       },
       {
@@ -389,7 +417,7 @@ export function buildFaqJsonLd() {
         name: "How do I add my event to the Portland Zaylist?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Promoters can submit a new event or claim an existing listing at zaylist.com/submit after creating an account.",
+          text: `Promoters can submit a new event or claim an existing listing at ${SITE_URL}/submit after creating an account.`,
         },
       },
     ],
@@ -434,6 +462,7 @@ function applySocialMeta(
   if (opts.imageHeight) out = replaceMeta(out, "property", "og:image:height", String(opts.imageHeight));
   out = replaceMeta(out, "property", "og:image:alt", opts.imageAlt);
   out = replaceMeta(out, "property", "og:type", opts.type || "website");
+  out = replaceMeta(out, "property", "og:site_name", "Zaylist");
   out = replaceMeta(out, "name", "twitter:card", "summary_large_image");
   out = replaceMeta(out, "name", "twitter:title", opts.title);
   out = replaceMeta(out, "name", "twitter:description", opts.description);
@@ -558,7 +587,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? livePlace.name
         : liveProfile
           ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-          : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections",
+          : "Zaylist | Portland Pride Week: Events, Gigs, Missed Connections",
     type: liveEvent || livePlace || liveProfile ? "profile" : "website",
     // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg
     imageType: pageImageIsCard ? "image/png" : "image/jpeg",

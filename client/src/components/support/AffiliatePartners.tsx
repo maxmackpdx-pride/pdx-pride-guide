@@ -65,7 +65,7 @@ export default function AffiliatePartners({ className = "" }: Props) {
         </a>
       </div>
       <p className="support-affiliate__note about-v2-partners__note">
-        Affiliate links. You pay the same, shop through this link, the guide gets a small cut. CockBlock:
+        Affiliate links. You pay the same, shop through this link, Zaylist gets a small cut. CockBlock:
         10% off with code{" "}
         <span className="support-affiliate__code about-v2-partners__code">{AFFILIATE_PROMO_CODE}</span>.
       </p>

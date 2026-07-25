@@ -69,7 +69,7 @@ export default function AdminSubmissionMerge({
           Possible existing events
         </p>
         <p className="text-white/60 text-sm m-0">
-          This submission may duplicate a listing already in the guide. Review matches and merge promoter updates into the existing event instead of publishing a second listing.
+          This submission may duplicate a listing already on Zaylist. Review matches and merge promoter updates into the existing event instead of publishing a second listing.
         </p>
       </div>
 

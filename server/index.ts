@@ -39,6 +39,8 @@ app.use((req, res, next) => {
 // Add a slug here and it becomes zaylist.com/<slug>.
 const SHORT_LINKS: Record<string, string> = {
   stank: "/events/7/stank-x-yes-coach-pride-weekend?day=SAT",
+  // Marketing alias for Gig Board (copy still says zaylist.com/gigs)
+  gigs: "/pride-work",
 };
 app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();

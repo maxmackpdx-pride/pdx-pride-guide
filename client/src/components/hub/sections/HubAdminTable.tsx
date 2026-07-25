@@ -20,12 +20,12 @@ const TABLE_META: Partial<
   },
   "tbl-events": {
     title: "All Events",
-    lede: "Every event across the guide, live and pending.",
+    lede: "Every event across Zaylist, live and pending.",
     actionLabel: "Open events admin",
   },
   "tbl-users": {
     title: "All Users",
-    lede: "Members, promoters, and admins on the guide.",
+    lede: "Members, promoters, and admins on Zaylist.",
     actionLabel: "Open users admin",
   },
   "tbl-werk": {

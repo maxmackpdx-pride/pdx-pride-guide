@@ -12,8 +12,8 @@ SERVICE_ID="${RAILWAY_SERVICE_ID:-c87eff12-aee2-4af2-8fd9-7f42b67c3ba3}"
 
 VAPID_PUBLIC_KEY="${VAPID_PUBLIC_KEY:-}"
 VAPID_PRIVATE_KEY="${VAPID_PRIVATE_KEY:-}"
-VAPID_SUBJECT="${VAPID_SUBJECT:-mailto:hello@pdxprideguide.com}"
-PUBLIC_SITE_URL="${PUBLIC_SITE_URL:-https://www.prideguidepdx.com}"
+VAPID_SUBJECT="${VAPID_SUBJECT:-mailto:hello@zaylist.com}"
+PUBLIC_SITE_URL="${PUBLIC_SITE_URL:-https://www.zaylist.com}"
 
 KEYS_FILE=".railway/vapid-keys.txt"
 if [[ -z "$VAPID_PUBLIC_KEY" || -z "$VAPID_PRIVATE_KEY" ]]; then

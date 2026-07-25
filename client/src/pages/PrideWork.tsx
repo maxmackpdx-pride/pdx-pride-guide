@@ -689,7 +689,7 @@ export default function PrideWork() {
 
       <BoardCloseSeam
         line="Pay your people. Take care of each other."
-        url="zaylist.com/gigs"
+        url="zaylist.com/pride-work"
       />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

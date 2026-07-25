@@ -136,7 +136,7 @@ export default function PortfolioContactModal({
 
   const sub =
     isSponsor
-      ? "Goes straight to my Owner Desk. Tell me who you are and how long you want to be on the guide."
+      ? "Goes straight to my Owner Desk. Tell me who you are and how long you want to be on Zaylist."
       : isOrder
         ? "Made to order, custom, about a month to finish. $1600 for 18″. Tell me the size, the room, and how high your ceiling is."
         : "Goes straight to my Owner Desk, not personal email or the shared admin queue.";

@@ -79,7 +79,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
       data-affiliate-brand={brand}
       aria-label={
         isMrs
-          ? "Affiliate: Mr. S Leather. Shop the link, support the guide."
+          ? "Affiliate: Mr. S Leather. Shop the link, support Zaylist."
           : "Affiliate: CockBlock Toys. Code TUCKERMAX for 10% off."
       }
     >
@@ -126,7 +126,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
         </div>
 
         {isMrs ? (
-          <div className="pdxBoard__affMeta">Shop the link, support the guide</div>
+          <div className="pdxBoard__affMeta">Shop the link, support Zaylist</div>
         ) : (
           <div className="pdxBoard__affMeta pdxBoard__affMeta--code">
             Code TUCKERMAX for 10% off

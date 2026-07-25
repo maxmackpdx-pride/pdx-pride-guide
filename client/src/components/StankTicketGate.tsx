@@ -115,7 +115,7 @@ export default function StankTicketGate({ onContinue, onClose }: Props) {
             color: "rgba(91,255,91,0.75)",
           }}
         >
-          Join free to grab tickets in the Guide and stay in the loop for Pride.
+          Join free to grab tickets on Zaylist and stay in the loop for Pride.
         </p>
 
         <button

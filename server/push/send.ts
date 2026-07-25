@@ -2,7 +2,11 @@ import webpush from "web-push";
 import { PUSH_NOTIFICATION_BADGE, PUSH_NOTIFICATION_ICON } from "@shared/pushAssets";
 import { ensureVapidConfigured } from "./vapid";
 
-const SITE_ORIGIN = process.env.PUBLIC_SITE_URL || "https://www.zaylist.com";
+const SITE_ORIGIN = (
+  process.env.PUBLIC_SITE_URL ||
+  process.env.SITE_URL ||
+  "https://www.zaylist.com"
+).replace(/\/$/, "");
 
 /**
  * Declarative Web Push payload (Safari 18.4+ / WebKit) plus legacy top-level

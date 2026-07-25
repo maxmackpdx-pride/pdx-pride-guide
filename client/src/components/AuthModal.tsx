@@ -185,7 +185,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               disabled={loading || (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
               style={submitStyle}
             >
-              {loading ? "JOINING..." : "JOIN THE GUIDE →"}
+              {loading ? "JOINING..." : "JOIN ZAYLIST →"}
             </button>
             <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "var(--text-meta)" }}>
               Already have an account?{" "}

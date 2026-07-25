@@ -7,6 +7,7 @@ import { contextLabelOf, contextTypeOf } from "@/lib/inboxContext";
 import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTalent";
 import { categoryFromContext, formatThreadTime } from "./mapContext";
 import type { ApiMessageRow, Folder, LineupDecision, Thread, ThreadMessage, ThreadReveal } from "./types";
+import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
 
 const ARCHIVE_KEY = "pdx-inbox-archived-v1";
 
@@ -50,7 +51,10 @@ function displayNameFromParty(party: InboxPartyAvatar, anonymous: boolean): stri
 
 function handleFromParty(party: InboxPartyAvatar, anonymous: boolean): string {
   if (anonymous) return "@anonymous";
-  return party.username ? `@${party.username}` : "";
+  if (!party.username) return "";
+  // System mailbox may still be prideguidepdx in DB; show brand handle publicly.
+  if (isGuideSystemUsername(party.username)) return `@${GUIDE_PUBLIC_HANDLE}`;
+  return `@${party.username}`;
 }
 
 function previewMessage(row: ApiMessageRow, folder: Folder, userId: number): ThreadMessage {

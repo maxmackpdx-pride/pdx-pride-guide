@@ -23,7 +23,7 @@ clientsClaim();
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({
-      cacheName: "pdx-navigations",
+      cacheName: "zaylist-navigations",
       networkTimeoutSeconds: 5,
     }),
   ),

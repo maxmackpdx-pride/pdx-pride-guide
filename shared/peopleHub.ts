@@ -1,8 +1,15 @@
-/** System guide identity - never shown in member people lists or discover. */
-export const GUIDE_SYSTEM_USERNAMES = (process.env.GUIDE_SYSTEM_USERNAMES || "prideguidepdx")
+/**
+ * System / brand identities - never shown in member people lists or discover.
+ * Keep `prideguidepdx` as the live system mailbox username until a deliberate migration.
+ * `zaylist` is reserved so it cannot be squatted as a member handle.
+ */
+export const GUIDE_SYSTEM_USERNAMES = (process.env.GUIDE_SYSTEM_USERNAMES || "prideguidepdx,zaylist")
   .split(",")
   .map((s) => s.trim().toLowerCase().replace(/^@/, ""))
   .filter(Boolean);
+
+/** Public-facing handle for the system guide account (DB may still be prideguidepdx). */
+export const GUIDE_PUBLIC_HANDLE = "zaylist";
 
 export function isGuideSystemUsername(username: string): boolean {
   return GUIDE_SYSTEM_USERNAMES.includes(username.trim().toLowerCase().replace(/^@/, ""));

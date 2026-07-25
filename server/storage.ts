@@ -6869,6 +6869,9 @@ export interface IStorage {
   removePackLink(userId: number, relation: "packmate" | "handler", linkedUserId: number): void;
   getProfileMedia(userId: number): any | null;
   saveProfileMedia(userId: number, data: any): any;
+  /** Soft-launch: every active member follows every other unless unfollowed. */
+  isFollowAllDefault(): boolean;
+  isFollowBlocked(followerUserId: number, followingUserId: number): boolean;
   followUser(followerUserId: number, followingUserId: number): void;
   unfollowUser(followerUserId: number, followingUserId: number): void;
   getFollowerCount(userId: number): number;
@@ -8608,7 +8611,10 @@ export const storage: IStorage = {
     if (user.id != null && storage.isGuideAdminUserId(user.id)) return true;
     const uname = String(user.username || "").trim().toLowerCase().replace(/^@/, "");
     const email = String(user.email || "").trim().toLowerCase();
-    return uname === GUIDE_ADMIN_USERNAME || email === GUIDE_ADMIN_EMAIL;
+    if (email === GUIDE_ADMIN_EMAIL) return true;
+    // prideguidepdx (live mailbox) + zaylist (reserved brand handle) + any GUIDE_SYSTEM_USERNAMES
+    if (uname === GUIDE_ADMIN_USERNAME || isGuideSystemUsername(uname)) return true;
+    return false;
   },
   hasSiteAdminGrant(userId) {
     return !!sqlite.prepare("SELECT 1 FROM site_admin_grants WHERE user_id = ?").get(userId);

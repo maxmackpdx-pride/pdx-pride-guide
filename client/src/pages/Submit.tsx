@@ -102,7 +102,7 @@ const emptyPromoterForm = () => ({
 export default function Submit() {
   usePageSeo(
     "Promoter hub | Zaylist",
-    "Submit events, claim listings, apply as a verified promoter, or tip the guide about something we missed.",
+    "Submit events, claim listings, apply as a verified promoter, or tip Zaylist about something we missed.",
   );
   const { toast } = useToast();
   const { user, loading } = useAuth();
@@ -256,7 +256,7 @@ export default function Submit() {
       key: "submit",
       title: "Submit an event",
       forWho: "You're running it.",
-      outcome: "Put your event on the guide.",
+      outcome: "Put your event on Zaylist.",
       accent: "var(--neon-yellow, #ccff00)",
       chip: submitChip,
     },
@@ -279,7 +279,7 @@ export default function Submit() {
     {
       key: "suggest",
       title: "Spotted an event",
-      forWho: "Not yours, the guide is missing it.",
+      forWho: "Not yours — Zaylist is missing it.",
       outcome: "Tip us and we will chase it down.",
       accent: "var(--neon-magenta, #ff00cc)",
       chip: suggestChip,
@@ -373,14 +373,14 @@ export default function Submit() {
           desc: heldForReview
             ? (payload.heldReason
               ? `${payload.heldReason}. An admin will merge your updates with the existing listing or publish separately.`
-              : "We found a similar event already in the guide. An admin will review before publishing.")
+              : "We found a similar event already on Zaylist. An admin will review before publishing.")
             : autoApproved || isApproved
-              ? "Your event is now live on the guide and on your profile."
+              ? "Your event is now live on Zaylist and on your profile."
               : "Your event and promoter application are in the queue. We will publish them together once approved.",
         },
         SUGGEST: {
           title: "Tip received",
-          desc: "We will review it and may add the event to the guide. Thanks for the heads up.",
+          desc: "We will review it and may add the event to Zaylist. Thanks for the heads up.",
         },
         CLAIM: {
           title: autoApproved || isApproved ? "Event claimed" : "Claim submitted",
@@ -456,7 +456,7 @@ export default function Submit() {
       kicker: "Submit an event",
       title: "Add your event",
       accent: "lime",
-      lede: "You're running it. Put your event on the guide.",
+      lede: "You're running it. Put your event on Zaylist.",
     },
     apply: {
       kicker: "Promoter verification",
@@ -468,7 +468,7 @@ export default function Submit() {
       kicker: "Community tip",
       title: "Spotted an event",
       accent: "magenta",
-      lede: "Not yours, the guide is missing it. Tip us and we will chase it down. Free account required. No promoter status needed.",
+      lede: "Not yours — Zaylist is missing it. Tip us and we will chase it down. Free account required. No promoter status needed.",
     },
     claim: {
       kicker: "Host your listing",
@@ -520,7 +520,7 @@ export default function Submit() {
           variant="band"
           showLive={false}
           stats={[
-            { num: allEvents.length, label: "Live in the guide", color: "#ccff00" },
+            { num: allEvents.length, label: "Live on Zaylist", color: "#ccff00" },
             { num: unclaimedEvents.length, label: "Unclaimed, open to grab", color: "#19e3ff" },
             { num: venueCount, label: "Venues repping Pride", color: "#ff1fa0" },
           ]}
@@ -593,7 +593,7 @@ export default function Submit() {
                 </p>
                 {eventSubmitSuccess.potentialMatches && eventSubmitSuccess.potentialMatches.length > 0 && (
                   <div className="submit-match-box">
-                    <p className="submit-match-box__title">Similar events in the guide</p>
+                    <p className="submit-match-box__title">Similar events on Zaylist</p>
                     <ul className="submit-match-box__list">
                       {eventSubmitSuccess.potentialMatches.map(match => (
                         <li key={`${match.title}-${match.venueName}`}>
@@ -805,7 +805,7 @@ export default function Submit() {
                         <div>
                           <div className="submit-warning__title">House parties are public</div>
                           <div className="submit-warning__body">
-                            There is no invite-only option. Anyone browsing the guide can see it and show up. Only post if you are open to the community attending.
+                            There is no invite-only option. Anyone browsing Zaylist can see it and show up. Only post if you are open to the community attending.
                           </div>
                         </div>
                       </div>
@@ -908,7 +908,7 @@ export default function Submit() {
             <div className="submit-success__check" aria-hidden="true">✓</div>
             <div className="submit-success__title">Tip received</div>
             <p className="submit-success__body">
-              We will review it and may add the event to the guide. Thanks for the heads up.
+              We will review it and may add the event to Zaylist. Thanks for the heads up.
             </p>
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>

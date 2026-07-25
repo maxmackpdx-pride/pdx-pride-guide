@@ -38,7 +38,7 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
 
     const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
     const image = options?.image || "https://www.zaylist.com/og-preview.jpg";
-    const imageAlt = options?.imageAlt || (options?.image ? title : "PDX Pride Week July 13-19: Events, Gigs, Missed Connections");
+    const imageAlt = options?.imageAlt || (options?.image ? title : "Zaylist | Portland Pride Week: Events, Gigs, Missed Connections");
     const type = options?.type || "website";
 
     const ogKeys = [

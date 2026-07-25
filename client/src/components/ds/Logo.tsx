@@ -36,7 +36,7 @@ export function Logo({
   variant = "lockup",      // lockup | stacked | icon | wordmark
   size = 56,               // icon px (drives wordmark scale in lockup/stacked)
   tone = "light",          // light (on dark) | dark (on paper)
-  src = "assets/logo.png",
+  src = "/brand/z-icon-dark.png",
   alt = "Zaylist",
   className = "",
   href,

@@ -133,7 +133,7 @@ export default function AdBuilder({ onSaved }: Props) {
       business: "New partner",
       title: "New partner",
       body: "One-line pitch that sits under the title on the poster card.",
-      ctaTitle: "Support the guide",
+      ctaTitle: "Support Zaylist",
       ctaCopy: "Shop Now →",
       tag1: "Partner",
       tag2: "Local",
@@ -302,7 +302,7 @@ export default function AdBuilder({ onSaved }: Props) {
               <input type="text" value={draft.ctaTitle} onChange={(e) => set("ctaTitle", e.target.value)} />
               <span className="ad-mgr__field-hint">
                 {isPoster
-                  ? "e.g. “Code TUCKERMAX for 10% off” or “Shop the link, support the guide”"
+                  ? "e.g. “Code TUCKERMAX for 10% off” or “Shop the link, support Zaylist”"
                   : "e.g. “10% Off · Code: TUCKERMAX”"}
               </span>
             </div>

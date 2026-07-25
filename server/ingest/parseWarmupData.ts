@@ -161,13 +161,13 @@ function nodeToDraft(node: Record<string, any>, sourceUrl: string | null): Inges
   const dateStart = toPacificWallClock(
     typeof startRaw === "object" && startRaw && (startRaw as any).timestamp
       ? new Date(Number((startRaw as any).timestamp))
-      : startRaw,
+      : (startRaw as string | Date | null | undefined),
   );
   if (!dateStart) return null;
   let dateEnd = toPacificWallClock(
     typeof endRaw === "object" && endRaw && (endRaw as any).timestamp
       ? new Date(Number((endRaw as any).timestamp))
-      : endRaw,
+      : (endRaw as string | Date | null | undefined),
   );
   if (!dateEnd) {
     dateEnd = defaultEndFromStart(dateStart);

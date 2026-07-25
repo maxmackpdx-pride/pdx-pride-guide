@@ -31,7 +31,7 @@ const EMPTY_COPY: Record<PeopleHubTab, { title: string; body: string }> = {
   },
   discover: {
     title: "No suggestions right now",
-    body: "Verified hosts and event organizers will show up here as more people join the guide.",
+    body: "Verified hosts and event organizers will show up here as more people join Zaylist.",
   },
 };
 

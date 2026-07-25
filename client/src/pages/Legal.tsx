@@ -35,7 +35,7 @@ export default function Legal() {
           <>
             <Link href="/about">
               <Button as="span" variant="solid">
-                About the guide
+                About Zaylist
               </Button>
             </Link>
             <Button type="button" accent="cyan" onClick={() => setContactOpen(true)}>

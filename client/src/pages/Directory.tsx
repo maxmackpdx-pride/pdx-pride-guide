@@ -579,7 +579,7 @@ export default function Directory() {
                 {submitResult.potentialMatches && submitResult.potentialMatches.length > 0 && (
                   <div style={{ border: "1px solid #444", background: "var(--ink-850)", padding: 14, marginBottom: 22, borderRadius: 3 }}>
                     <p style={{ color: "var(--neon-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 8px" }}>
-                      Similar places in the guide
+                      Similar places on Zaylist
                     </p>
                     <ul style={{ margin: "0 0 14px", paddingLeft: 18, color: "#aaa", fontSize: "0.85rem", lineHeight: 1.5 }}>
                       {submitResult.potentialMatches.map(match => (

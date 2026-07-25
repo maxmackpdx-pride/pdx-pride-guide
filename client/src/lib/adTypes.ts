@@ -251,7 +251,7 @@ export function templateDraft(key: AdTemplateKey): AdDraft {
     pillLabel: "Affiliate",
     title: "Mr. S Leather",
     body: "Harnesses, restraints & fetish gear, made in SF",
-    ctaTitle: "Shop the link, support the guide",
+    ctaTitle: "Shop the link, support Zaylist",
     ctaCopy: "Shop Now →",
     logoText: "Mr. S Leather",
     tag1: "Leather & Gear",

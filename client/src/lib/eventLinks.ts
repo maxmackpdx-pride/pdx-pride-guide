@@ -91,7 +91,7 @@ export function downloadIcsFile(
   const end = fmtCalendar(event.dateEnd);
   const details = buildEventDetails(event);
   const location = event.address || event.venueName || "";
-  const uid = `pdx-pride-event-${event.id}@zaylist.com`;
+  const uid = `zaylist-event-${event.id}@zaylist.com`;
   const stamp = fmtCalendar(new Date().toISOString());
 
   const rawLines = [

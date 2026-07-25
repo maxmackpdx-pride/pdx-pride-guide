@@ -41,13 +41,16 @@ const TRACKED_PREFIXES = [
   "/schedule",
   "/submit",
   "/pride-work",
+  "/gigs",
   "/gifting",
   "/about",
   "/contact",
   "/directory",
   "/spotted",
   "/sponsors",
+  "/access",
   "/access-safety",
+  "/nude-beaches",
   "/legal",
   "/u/",
   "/dashboard",
@@ -99,7 +102,14 @@ export function bucketReferrer(referrer?: string | null): string {
     if (host.includes("tiktok")) return "TikTok";
     if (host.includes("facebook") || host.includes("fb.com") || host === "fb.me") return "Facebook";
     if (host.includes("twitter") || host === "t.co" || host.includes("x.com")) return "X / Twitter";
-    if (host.includes("prideguidepdx")) return "Internal";
+    if (
+      host.includes("zaylist") ||
+      host.includes("prideguidepdx") ||
+      host.includes("pdxpg") ||
+      host.includes("pdxprideguide")
+    ) {
+      return "Internal";
+    }
     if (host.includes("bing")) return "Bing";
     if (host.includes("yahoo")) return "Yahoo";
     return "Referral";

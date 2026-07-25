@@ -284,6 +284,11 @@ export const ALLOWED_LINK_HOSTS = [
   "eventbrite.com",
   "zaylist.com",
   "www.zaylist.com",
+  // Legacy product hosts (301 → zaylist); allow pasting old event/profile links
+  "prideguidepdx.com",
+  "www.prideguidepdx.com",
+  "pdxpg.com",
+  "www.pdxpg.com",
 ];
 
 function isAllowedLinkHost(rawHost: string): boolean {

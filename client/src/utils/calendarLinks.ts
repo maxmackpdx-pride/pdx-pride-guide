@@ -43,7 +43,7 @@ export function getICSContent(event: {
   const start = toICSDate(event.dateStart);
   const end = toICSDate(event.dateEnd);
   const location = [event.venueName, event.address].filter(Boolean).join(", ");
-  const uid = `pdx-pride-${event.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}@zaylist.com`;
+  const uid = `zaylist-${event.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}@zaylist.com`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",

@@ -30,12 +30,12 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/submit", "Claim an Event"],
       ["/pride-work", "Post a Gig"],
       ["/gifting", "Post a Gift / In Search Of"],
-      ["/sponsors", "Sponsor the Guide"],
+      ["/sponsors", "Sponsor Zaylist"],
     ],
   },
   {
-    id: "guide",
-    title: "Guide",
+    id: "about",
+    title: "About",
     links: [
       ["/about", "About"],
       ["/access", "Access & Safety"],

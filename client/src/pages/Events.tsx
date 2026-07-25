@@ -799,7 +799,7 @@ export default function Events() {
           <div className="events-submit-panel board-path-card board-path-card--host">
             <div className="board-path-card__label">Promoters</div>
             <h3>Not seeing your event?</h3>
-            <p>Submit a new listing or claim one that is already in the guide.</p>
+            <p>Submit a new listing or claim one that is already on Zaylist.</p>
             <Link href="/submit">
               <Button as="span" variant="solid" accent="lime" arrow>Get started</Button>
             </Link>
