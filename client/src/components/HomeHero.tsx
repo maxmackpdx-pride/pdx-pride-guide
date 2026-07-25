@@ -37,6 +37,9 @@ export default function HomeHero() {
   useEffect(() => {
     const v = bgVideoRef.current;
     if (!v) return;
+    // React's `muted` attribute doesn't always set the DOM property — force it,
+    // or iOS/Chrome block muted autoplay.
+    v.muted = true;
     const still =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       document.documentElement.classList.contains("calm-mode");
@@ -46,6 +49,9 @@ export default function HomeHero() {
       } catch {
         /* ignore */
       }
+    } else {
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
     }
   }, []);
 
