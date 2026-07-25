@@ -132,11 +132,27 @@
   object-position: center center;
   display: block;
   background: #000;
-  /* BG-only grade — never inherit onto the wordmark layer */
-  filter: saturate(1.15) contrast(1.06);
+  /* Never intercept taps (no native controls / play affordance) */
+  pointer-events: none;
+  /* BG-only grade + dim so the neon orbs (screen blend) + wordmark read on top */
+  filter: saturate(1.18) contrast(1.06) brightness(0.62);
   will-change: transform;
   /* Slow auto bounce, opposite phase feel from wordmark */
   animation: homeBgFloat 12s ease-in-out infinite;
+}
+
+/* Kill iOS Safari's inline-video play button / native media controls on the
+   background video — it renders above page content and buries the overlays. */
+.home-hero__bg::-webkit-media-controls,
+.home-hero__bg::-webkit-media-controls-enclosure,
+.home-hero__bg::-webkit-media-controls-panel,
+.home-hero__bg::-webkit-media-controls-overlay-play-button,
+.home-hero__bg::-webkit-media-controls-start-playback-button,
+.home-hero__bg::-webkit-media-controls-play-button {
+  display: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  opacity: 0 !important;
 }
 
 @keyframes homeBgFloat {
