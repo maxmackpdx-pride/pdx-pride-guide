@@ -6371,6 +6371,7 @@ function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor
     dateStart: evt.dateStart ?? evt.date_start ?? "",
     admission: evt.admission ?? "FREE",
     goingCount,
+    posterImageUrl: evt.posterImageUrl ?? evt.poster_image_url ?? null,
     poster: poster ?? null,
   };
 }

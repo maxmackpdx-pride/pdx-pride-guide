@@ -14,6 +14,7 @@ import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
 import type { Event } from "@shared/schema";
+import FeedEventDeck from "./FeedEventDeck";
 
 function stopCardNav(e: MouseEvent) {
   e.stopPropagation();
@@ -22,20 +23,6 @@ function stopCardNav(e: MouseEvent) {
 type Props = {
   item: HubFeedItem;
 };
-
-function dayDotClass(day?: string | null) {
-  const key = String(day || "").trim().toUpperCase().slice(0, 3);
-  const map: Record<string, string> = {
-    MON: "d-mon",
-    TUE: "d-tue",
-    WED: "d-wed",
-    THU: "d-thu",
-    FRI: "d-fri",
-    SAT: "d-sat",
-    SUN: "d-sun",
-  };
-  return map[key] ?? "";
-}
 
 function eventHref(item: HubFeedItem): string | null {
   if (!item.event) return null;
@@ -48,57 +35,6 @@ function eventRowsForItem(item: HubFeedItem): HubFeedEventEmbed[] {
   if (item.events?.length) return item.events;
   if (item.event) return [item.event];
   return [];
-}
-
-function EventFeedRow({
-  event,
-  showPoster,
-  onOpen,
-  loading,
-}: {
-  event: HubFeedEventEmbed;
-  showPoster: boolean;
-  onOpen: (eventId: number) => void;
-  loading?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className="hub-feed-event"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onOpen(event.id);
-      }}
-      disabled={loading}
-      aria-label={`Open ${event.title}`}
-    >
-      {showPoster && event.poster ? (
-        <UserAvatar
-          photoUrl={event.poster.photoUrl}
-          avatarChoice={event.poster.avatarChoice}
-          avatarRing={event.poster.avatarRing}
-          displayName={event.poster.displayName}
-          username={event.poster.username ?? undefined}
-          logoFit={event.poster.venueLogo}
-          href={avatarHrefFor(event.poster)}
-          onClick={stopCardNav}
-          size={34}
-        />
-      ) : null}
-      <span className={`dot ${dayDotClass(event.dayOfWeek)}`} />
-      <div className="hub-feed-event__main">
-        <div className="hub-feed-event__title">{event.title}</div>
-        <div className="kick hub-feed-event__meta">
-          {event.venueName}
-          {event.goingCount != null && event.goingCount > 0
-            ? ` · ${event.goingCount} going`
-            : ""}
-          {loading ? " · Opening…" : ""}
-        </div>
-      </div>
-    </button>
-  );
 }
 
 export default function HubFeedCard({ item }: Props) {
@@ -200,17 +136,10 @@ export default function HubFeedCard({ item }: Props) {
   const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
 
   const bundledEvents = eventRowsForItem(item);
-  const showPosterOnRows = bundledEvents.length > 1;
+  // Events render as the profile-style poster deck: one card for a single event,
+  // a fanned tap-to-cycle stack when there's more than one.
   const eventBlock = bundledEvents.length > 0
-    ? bundledEvents.map((event) => (
-      <EventFeedRow
-        key={event.id}
-        event={event}
-        showPoster={showPosterOnRows}
-        onOpen={openEventInPlace}
-        loading={openingEventId === event.id}
-      />
-    ))
+    ? <FeedEventDeck events={bundledEvents} onOpen={openEventInPlace} />
     : null;
 
   const beachBlock = item.beachLabel && !item.event ? (

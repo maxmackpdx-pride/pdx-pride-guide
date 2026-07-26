@@ -34,6 +34,8 @@ export type HubFeedEventEmbed = {
   dateStart: string;
   admission: string;
   goingCount?: number;
+  /** Flyer art for the poster-deck view (null → day-aware placeholder). */
+  posterImageUrl?: string | null;
   /** Person or venue who posted this event (shown per row in bundled cards). */
   poster?: HubFeedAuthor | null;
 };
