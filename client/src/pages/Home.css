@@ -1657,26 +1657,9 @@ html.calm-mode .home-boards__card {
   color: transparent;
 }
 
-/* Marquee band */
-.home-marquee-band {
-  overflow: hidden;
-  background: var(--grad-rainbow);
-  color: #000;
-  border-top: 2px solid var(--ink-1000);
-  border-bottom: 2px solid var(--ink-1000);
-}
-
-.home-marquee-band .pdxMarquee {
-  border: none;
-}
-
-.home-marquee-band .pdxMarquee__item {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #000;
+/* Full-bleed rainbow under stats - same engine as header / .rainbow-bar */
+.home-rainbow-seam {
+  flex-shrink: 0;
 }
 
 /* Body shell */
@@ -1686,11 +1669,9 @@ html.calm-mode .home-boards__card {
   padding: 52px 64px 0;
 }
 
+/* Section seam under Up Next - uses .rainbow-bar (loop-safe cyan bookends).
+   Do not redeclare a non-looping gradient here (orange→cyan reads as a hard line). */
 .home-body__seam {
-  height: 2px;
-  background: var(--rainbow-bar);
-  background-size: 200% 100%;
-  animation: pdxSeamFlow 10s linear infinite;
   margin-bottom: 52px;
 }
 

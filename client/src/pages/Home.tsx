@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,13 +14,10 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import {
   Button,
   Divider,
-  Marquee,
 } from "@/components/ds";
 import {
-  HOME_MARQUEE_FALLBACK,
   countEventsNext7Days,
   eventsUpNext,
-  pickMarqueeItems,
 } from "@/lib/homeEvents";
 import "./Home.css";
 
@@ -46,8 +43,6 @@ export default function Home() {
     "Every Portland night worth knowing, in one place. Find the party, back the rooms that host it, and stick around after July 19.",
   );
 
-  const [marqueeItems, setMarqueeItems] = useState<string[]>([]);
-
   const { data: events = [] } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
@@ -66,13 +61,6 @@ export default function Home() {
     queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
     staleTime: 60_000,
   });
-
-  useEffect(() => {
-    if (events.length === 0) return;
-    setMarqueeItems(prev =>
-      prev.length > 0 ? prev : pickMarqueeItems(events),
-    );
-  }, [events]);
 
   const upNext = useMemo(() => eventsUpNext(events, 4), [events]);
   // Rolling next-7-days total (expanded LIVE listings from GET /api/events).
@@ -93,22 +81,16 @@ export default function Home() {
         goingCount={goingCount}
       />
 
-      <div className="home-marquee-band" aria-label="Event name ticker">
-        <Marquee
-          color="rainbow"
-          items={marqueeItems.length > 0 ? marqueeItems : HOME_MARQUEE_FALLBACK}
-          className="home-marquee-band__track"
-          speed={60}
-          separator="✦"
-        />
-      </div>
+      {/* Same animated rainbow seam as under the top nav (not the old event ticker) */}
+      <div className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam" aria-hidden="true" />
 
       <div className="home-body">
         <ScrollReveal>
           <HomeUpNext events={upNext} posterBackdrop />
         </ScrollReveal>
 
-        <div className="home-body__seam" aria-hidden />
+        {/* Loop-safe site rainbow (cyan bookends) — not the hard orange→cyan seam line */}
+        <div className="rainbow-bar rainbow-bar--thick home-body__seam" aria-hidden="true" />
 
         <section className="home-boards" aria-label="Community boards">
           <div className="home-boards__running">
