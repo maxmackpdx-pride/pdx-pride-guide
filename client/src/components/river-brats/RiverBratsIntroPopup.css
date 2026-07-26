@@ -1,0 +1,240 @@
+.rbi-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  animation: rbiFade 0.18s ease both;
+}
+
+@keyframes rbiFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.rbi-card {
+  position: relative;
+  width: 100%;
+  max-width: min(440px, calc(100vw - 32px));
+  max-height: min(92vh, 740px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 22px 20px;
+  text-align: left;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(25, 227, 255, 0.12), transparent 55%),
+    radial-gradient(90% 60% at 100% 100%, rgba(255, 102, 0, 0.1), transparent 50%),
+    #0b0b0e;
+  border: 1px solid #2a2a34;
+  border-radius: 20px;
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.78),
+    0 0 28px rgba(25, 227, 255, 0.1),
+    0 0 40px rgba(255, 102, 0, 0.08);
+  animation: rbiPop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+@keyframes rbiPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rbi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, #ff6600, #19e3ff, #39ff14, #ff6600);
+  background-size: 200% 100%;
+  animation: rbiSeam 5s linear infinite;
+}
+
+@keyframes rbiSeam {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.rbi-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #9a9aa2;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.13s ease,
+    color 0.13s ease;
+}
+
+.rbi-x:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.rbi-kicker {
+  margin: 0 0 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #19e3ff;
+}
+
+.rbi-title {
+  margin: 0 0 10px;
+  font-size: clamp(1.45rem, 4.5vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.rbi-lede {
+  margin: 0 0 16px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #c4c4cc;
+}
+
+.rbi-lede strong {
+  color: #fff;
+  font-weight: 650;
+}
+
+.rbi-steps {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.rbi-steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.rbi-step-n {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  font-family: var(--font-display, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0a0a0a;
+  background: linear-gradient(145deg, #19e3ff, #39ff14);
+  box-shadow: 0 0 12px rgba(25, 227, 255, 0.25);
+}
+
+.rbi-steps strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.rbi-steps span:not(.rbi-step-n) {
+  display: block;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #a8a8b2;
+}
+
+.rbi-note {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 102, 0, 0.28);
+  background: color-mix(in srgb, #ff6600 10%, transparent);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #e8d4c4;
+}
+
+.rbi-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-display, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff6600 0%, #ff9a3c 45%, #19e3ff 100%);
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.28);
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.rbi-btn:hover {
+  filter: brightness(1.05);
+}
+
+.rbi-btn:active {
+  transform: scale(0.98);
+}
+
+.rbi-foot {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6e6e78;
+}
+
+@media (max-width: 420px) {
+  .rbi-card {
+    padding: 24px 18px 16px;
+  }
+}
+
+html.calm-mode .rbi-card::before,
+html.calm-mode .rbi-btn {
+  animation: none;
+  box-shadow: none;
+}
