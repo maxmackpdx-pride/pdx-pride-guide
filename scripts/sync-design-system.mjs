@@ -116,10 +116,24 @@ Omitted from the main app repo (still on the public Pages repo):
 - probe/export helper HTML
 - oversized one-off aurora source JPG
 
+**Always keep:** \`.nojekyll\` on the public Pages repo (and here). Without it,
+Jekyll strips \`_ds_bundle.js\` / \`guidelines/_spec.js\` and specimen iframes
+render blank. This script re-creates the empty file after every mirror.
+
 Refreshed by: \`npm run sync:design-system\`
 `,
   "utf8",
 );
+
+// GitHub Pages + Jekyll: never ship without this (underscore assets must be public)
+writeFileSync(join(dest, ".nojekyll"), "");
+if (existsSync(src)) {
+  try {
+    writeFileSync(join(src, ".nojekyll"), "");
+  } catch {
+    /* source may be read-only */
+  }
+}
 
 // Ensure README documents main-repo context (public package readme is Pages-oriented)
 const mainReadme = join(dest, "README.md");
@@ -130,3 +144,4 @@ if (!existsSync(mainReadme)) {
 
 console.log("✓ design-system mirrored from canonical package");
 console.log("  Public: https://maxmackpdx-pride.github.io/zaylist-design-system/");
+console.log("  .nojekyll ensured (Pages must not run Jekyll on _ds_bundle.js)");

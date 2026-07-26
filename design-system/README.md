@@ -26,6 +26,18 @@ python3 -m http.server 8765
 
 Entry: `index.html` (share button top-right; mobile drawer nav).
 
+## GitHub Pages (public package)
+
+The public site is served from `maxmackpdx-pride/zaylist-design-system`.
+
+**Required:** root file **`.nojekyll`** (empty). Without it, GitHub Pages runs Jekyll, which **drops every path starting with `_`**. That breaks:
+
+- `_ds_bundle.js` — React component specimens (blank black iframes)
+- `_ds_manifest.json` — guide stats
+- `guidelines/_spec.js` — color/type specimen helpers
+
+If component panels look empty on Pages but work in Claude Design or local `python3 -m http.server`, check that `.nojekyll` is present and `_ds_bundle.js` returns HTTP 200.
+
 ## Layout
 
 | Path | Role |
