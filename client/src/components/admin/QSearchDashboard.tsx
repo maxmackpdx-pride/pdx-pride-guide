@@ -2709,6 +2709,34 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                               {conf.eventId}
                             </span>
                           ))}
+                          {(c.fieldConflicts || []).some(
+                            fc =>
+                              fc.field === "address" ||
+                              /address\s*≠|directory/i.test(fc.label || ""),
+                          ) && (
+                            <span
+                              className="qsearch__badge is-fail is-important"
+                              title={(c.fieldConflicts || [])
+                                .filter(
+                                  fc =>
+                                    fc.field === "address" ||
+                                    /address|directory/i.test(fc.label || ""),
+                                )
+                                .map(fc =>
+                                  `${fc.label}: ${(fc.values || []).map(v => v.value).join(" vs ")}`,
+                                )
+                                .join(" · ")}
+                            >
+                              Address ≠ directory
+                            </span>
+                          )}
+                          {(c.fieldConflicts || []).some(
+                            fc =>
+                              fc.field !== "address" &&
+                              !/address\s*≠|directory/i.test(fc.label || ""),
+                          ) && (
+                            <span className="qsearch__badge is-conflict">Field conflict</span>
+                          )}
                           <span className="qsearch__cand-via" title={c.sourceUrl || undefined}>
                             via {c.sourceLabel || "source"}
                           </span>
@@ -2722,6 +2750,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           needsRecurringUpdate ||
                           c.strongDuplicate ||
                           (c.conflicts && c.conflicts.length) ||
+                          (c.fieldConflicts && c.fieldConflicts.length) ||
                           (c.condensed && (c.recurringCount || 0) >= 2)
                         )
                       }
@@ -2813,6 +2842,30 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         )}
                       </div>
                     </div>
+                    {(c.fieldConflicts || []).length > 0 && (
+                      <div
+                        className="qsearch__field-conflicts"
+                        data-testid={`qsearch-field-conflicts-${c.id}`}
+                      >
+                        <div className="qsearch__field-conflicts-title">
+                          Important · verify before approve
+                        </div>
+                        {(c.fieldConflicts || []).map(fc => (
+                          <div key={`${fc.field}-${fc.label}`} className="qsearch__field-conflict-row">
+                            <strong>{fc.label}</strong>
+                            <ul>
+                              {(fc.values || []).map((v, vi) => (
+                                <li key={vi}>
+                                  <span className="qsearch__field-conflict-src">{v.sourceLabel}</span>
+                                  {": "}
+                                  {v.value}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="qsearch__cand-body">
                       <p className="qsearch__cand-party">
                         <span className="qsearch__cand-party-line">

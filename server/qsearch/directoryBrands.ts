@@ -14,7 +14,77 @@ export type DirectoryBrand = {
   role: "venue" | "group" | "place";
   score: number;
   reasons: string[];
+  /** Directory address on file (for mismatch UI) */
+  directoryAddress?: string | null;
+  /** True when listing address conflicts with directory address for this brand */
+  addressMismatch?: boolean;
 };
+
+/**
+ * When a directory venue is matched by name but the listing address does not
+ * match the address we have on file — important QSearch Review flag.
+ * Example: Eventbrite says "The Sports Bra" at SE 80th; directory has Broadway.
+ */
+export type DirectoryAddressConflict = {
+  businessId: number;
+  businessName: string;
+  directoryAddress: string;
+  listingAddress: string;
+  /** Ready for FieldConflict / review UI */
+  fieldConflict: {
+    field: "address";
+    label: string;
+    values: Array<{ sourceLabel: string; sourceId: string; value: string }>;
+  };
+  warning: string;
+};
+
+export function directoryVenueAddressConflicts(
+  draft: Pick<IngestEventDraft, "address" | "venueName">,
+  brands: DirectoryBrand[],
+  businesses: Business[],
+): DirectoryAddressConflict[] {
+  const listingAddr = String(draft.address || "").trim();
+  if (!listingAddr || listingAddr.length < 6) return [];
+
+  const out: DirectoryAddressConflict[] = [];
+  for (const brand of brands) {
+    if (brand.role !== "venue" && brand.role !== "place") continue;
+    const biz = businesses.find(b => b.id === brand.businessId);
+    const dirAddr = String(biz?.address || brand.directoryAddress || "").trim();
+    if (!dirAddr || dirAddr.length < 6) continue;
+
+    // Name matched (that's why we have a brand) but street does not
+    if (addressesLooselyMatch(listingAddr, dirAddr)) continue;
+
+    // Weak/partial name-only hits without solid venue name match: skip noise
+    const nameHit =
+      brand.reasons.some(r => /venue name|source label venue|source id venue/i.test(r)) ||
+      nameLooselyMatch(String(draft.venueName || ""), brand.name);
+    if (!nameHit) continue;
+
+    const warning =
+      `IMPORTANT: Address does not match directory for ${brand.name}. ` +
+      `Listing: “${listingAddr.slice(0, 80)}” · On file: “${dirAddr.slice(0, 80)}” — verify venue or reject.`;
+
+    out.push({
+      businessId: brand.businessId,
+      businessName: brand.name,
+      directoryAddress: dirAddr,
+      listingAddress: listingAddr,
+      fieldConflict: {
+        field: "address",
+        label: `Address ≠ ${brand.name} (directory)`,
+        values: [
+          { sourceLabel: "Listing / feed", sourceId: "listing", value: listingAddr },
+          { sourceLabel: `Directory · ${brand.name}`, sourceId: `directory-${brand.businessId}`, value: dirAddr },
+        ],
+      },
+      warning,
+    });
+  }
+  return out;
+}
 
 function logoFor(biz: Pick<Business, "id" | "name" | "imageUrl" | "type">): string {
   return (
@@ -306,6 +376,18 @@ export function matchDirectoryBrands(
     if (addressesLooselyMatch(address, biz.address)) {
       score += 50;
       reasons.push("Address match");
+    } else if (
+      address &&
+      biz.address &&
+      String(address).trim().length >= 6 &&
+      String(biz.address).trim().length >= 6 &&
+      (nameLooselyMatch(venueName, biz.name) ||
+        (venueProbe && nameLooselyMatch(venueProbe, biz.name)))
+    ) {
+      // Name matches a known place but street does not — keep match for Review
+      // but do not boost score (Sports Bra name + wrong SE 80th address).
+      reasons.push("Address mismatch with directory");
+      score = Math.max(0, score - 15);
     }
     // Street-only venueName is also an address signal
     if (isAddressLikeVenueName(venueName) && addressesLooselyMatch(venueName, biz.address)) {
@@ -345,6 +427,7 @@ export function matchDirectoryBrands(
   if (scored[0]) {
     const top = scored[0];
     seen.add(top.biz.id);
+    const addrMismatch = top.reasons.some(r => /address mismatch/i.test(r));
     brands.push({
       businessId: top.biz.id,
       name: top.biz.name,
@@ -354,6 +437,8 @@ export function matchDirectoryBrands(
       role: top.role,
       score: top.score,
       reasons: top.reasons,
+      directoryAddress: top.biz.address || null,
+      addressMismatch: addrMismatch,
     });
   }
 

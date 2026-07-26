@@ -25,7 +25,11 @@ import {
 import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
 import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
-import { enrichDraftVenueFromSource, matchDirectoryBrands } from "./directoryBrands";
+import {
+  enrichDraftVenueFromSource,
+  matchDirectoryBrands,
+  directoryVenueAddressConflicts,
+} from "./directoryBrands";
 import { isEventPlaceholderUrl } from "@shared/eventPoster";
 import { discoverAndParse } from "./discover";
 import { fetchIngestSource } from "../ingest/fetchSource";
@@ -809,6 +813,14 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
         sourceLabel: String(c.sourceLabel || ""),
         sourceId: String(c.sourceId || ""),
       });
+      const dirAddrConflicts = directoryVenueAddressConflicts(draft, directoryBrands, businesses);
+      const existingFc = Array.isArray((c as any).fieldConflicts)
+        ? ((c as any).fieldConflicts as unknown[])
+        : [];
+      const fieldConflicts = [
+        ...existingFc,
+        ...dirAddrConflicts.map(x => x.fieldConflict),
+      ];
 
       // Same-series prior flyer only - never "any poster from this venue"
       const missingFlyer = !draft.posterImageUrl || isEventPlaceholderUrl(draft.posterImageUrl);
@@ -840,7 +852,23 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
         }
       }
 
-      return { ...c, draft, directoryBrands };
+      if (dirAddrConflicts.length) {
+        draft = {
+          ...draft,
+          warnings: Array.from(
+            new Set([...(draft.warnings || []), ...dirAddrConflicts.map(x => x.warning)]),
+          ),
+        };
+      }
+
+      return {
+        ...c,
+        draft,
+        directoryBrands,
+        fieldConflicts,
+        // Force human review — never auto-select when address ≠ directory
+        selected: dirAddrConflicts.length ? false : (c as any).selected,
+      };
     } catch {
       return c;
     }

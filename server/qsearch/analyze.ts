@@ -14,6 +14,7 @@ import { enrichEventPageUrl, isIngestFeedUrl } from "../ingest/eventPageUrl";
 import {
   enrichDraftVenueFromSource,
   matchDirectoryBrands,
+  directoryVenueAddressConflicts,
   type DirectoryBrand,
 } from "./directoryBrands";
 
@@ -1065,6 +1066,9 @@ export function buildScanCandidates(
           sourceId: row.sourceId,
         })
       : [];
+    const dirAddrConflicts = businesses.length
+      ? directoryVenueAddressConflicts(resolvedDraft, directoryBrands, businesses)
+      : [];
     const matches = findSubmissionMatches(
       {
         title: resolvedDraft.title,
@@ -1139,13 +1143,17 @@ export function buildScanCandidates(
         : null;
 
     // Deselect strong dups; also deselect when weekly scrape matches one-off (needs human update path)
-    const selected = !strong && !hasConflict && !lowConf && !needsRecurringUpdate;
+    // or directory address does not match the listing (Sports Bra name + wrong street).
+    const hasDirAddrConflict = dirAddrConflicts.length > 0;
+    const selected =
+      !strong && !hasConflict && !lowConf && !needsRecurringUpdate && !hasDirAddrConflict;
 
     // Same-series prior flyer only (e.g. BI Night update, no new art → old BI Night flyer).
     // Never borrow another night's art from the same venue.
     let draft: IngestEventDraft = resolvedDraft;
     const warnings = [...(draft.warnings || [])];
     if (action) warnings.push(action);
+    for (const c of dirAddrConflicts) warnings.push(c.warning);
 
     const scrapeMissingFlyer =
       !draft.posterImageUrl || isEventPlaceholderUrl(draft.posterImageUrl);
@@ -1182,11 +1190,11 @@ export function buildScanCandidates(
               sourceUrl: row.sourceUrl,
             },
           ];
-    const fieldConflicts: FieldConflict[] = row.fieldConflicts || [];
-    if (fieldConflicts.length) {
-      // Multi-source disagreement needs a human look - don't auto-select
-      // (selected already computed; force off)
-    }
+    const fieldConflicts: FieldConflict[] = [
+      ...(row.fieldConflicts || []),
+      ...dirAddrConflicts.map(c => c.fieldConflict),
+    ];
+    // Multi-source disagreement or directory address mismatch needs a human look
 
     return {
       id: `cand-${index}-${row.sourceId}`,

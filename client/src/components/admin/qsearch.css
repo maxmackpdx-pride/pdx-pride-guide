@@ -634,6 +634,51 @@ button.qsearch__stat.is-active {
   color: var(--qs-pink);
 }
 
+.qsearch__badge.is-important {
+  font-weight: 800;
+  border-width: 1.5px;
+  box-shadow: 0 0 0 1px rgba(255, 0, 204, 0.2);
+}
+
+.qsearch__field-conflicts {
+  margin: 10px 0 6px;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(255, 0, 204, 0.45);
+  background: rgba(255, 0, 204, 0.08);
+  border-radius: 6px;
+}
+
+.qsearch__field-conflicts-title {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--qs-pink);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.qsearch__field-conflict-row {
+  font-size: 0.78rem;
+  color: var(--qs-text, #e8e6ef);
+  margin-bottom: 6px;
+}
+
+.qsearch__field-conflict-row ul {
+  margin: 4px 0 0;
+  padding-left: 1.1rem;
+}
+
+.qsearch__field-conflict-row li {
+  margin: 2px 0;
+  line-height: 1.35;
+}
+
+.qsearch__field-conflict-src {
+  color: var(--qs-cyan);
+  font-weight: 600;
+}
+
 .qsearch__cand {
   display: grid;
   grid-template-columns: auto minmax(280px, 320px) 1fr;
