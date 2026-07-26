@@ -1,0 +1,710 @@
+{
+  "meta": {
+    "prepared_by": "Grok for Tucker - verified Eventbrite open only",
+    "prepared_at": "2026-07-26",
+    "region": "Portland, OR",
+    "purpose": "fix QSearch sources + seed Review + fill year-round gaps",
+    "notes": "Only events whose Eventbrite pages opened and returned real og/JSON-LD fields. Bar Cala address is 2703 NE Alberta (verified), not SW 10th. Living Room / Q Center weeklys still need venue-owned calendars. Did not invent FREE. Poster only when og:image present. Site audit notes: ~200 LIVE after Jul 20 show UNKNOWN admission (retarget via description infer); de-dupe Twisted Thursday / Oliver Tree / Charli XCX. Crush Bar permanently closed 2025-01-01 (CLOSED_PERMANENT_2025-01-01) — not a source gap; successor Peacock PDX is the year-round scrape slot.",
+    "source_gaps": [
+      {
+        "venue": "Q Center",
+        "why_missing": "Weekly groups not on Eventbrite; needs Q Center calendar/site adapter",
+        "suggest_qsearch_source_url": "https://www.pdxqcenter.org/",
+        "confidence": "high gap"
+      }
+    ],
+    "failed_urls": [],
+    "event_count": 17,
+    "closed_permanent": [
+      {
+        "venue": "Crush Bar",
+        "address": "1400 SE Morrison St, Portland, OR",
+        "status": "CLOSED_PERMANENT_2025-01-01",
+        "closed_at": "2025-01-01",
+        "successor": "Peacock PDX",
+        "successor_website": "https://peacockpdx.com/",
+        "successor_qsearch_source": "peacock-pdx",
+        "why": "Permanently closed; space reopened as Peacock PDX. Never scrape @crushbarpdx or invent Crush listings.",
+        "directory": "status=CLOSED, active=false, closed_at=2025-01-01 (historical linkage only)"
+      }
+    ],
+    "year_round_source_slot": {
+      "replaced": "Crush Bar",
+      "with": "Peacock PDX",
+      "ingest_source_id": "peacock-pdx",
+      "url": "https://peacockpdx.com/"
+    }
+  },
+  "events": [
+    {
+      "title": "DRAG BRUNCH BAR-CALA (With RuPauls Drag Race SUGAR & SPICE) Sunday July 26",
+      "start": "2026-07-26T11:00",
+      "end": "2026-07-26T13:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Bar Cala",
+      "address": "2703 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Bar Cala",
+      "host_group_url": "https://www.barcalapdx.com",
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rupauls-drag-race-sugar-spice-sunday-july-26-tickets-1988440330556",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rupauls-drag-race-sugar-spice-sunday-july-26-tickets-1988440330556",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1185303382%2F2300969672943%2F1%2Foriginal.20260524-062031?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=095cfcf7ce6cf9cca8e0aa1e06f3356d",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "DRAG BRUNCH BAR-CALA (With RuPauls Drag Race SUGAR & SPICE) Sunday July 26",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rupauls-drag-race-sugar-spice-sunday-july-26-tickets-1988440330556",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rupauls-drag-race-sugar-spice-sunday-july-26-tickets-1988440330556",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 44.52"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/bar-cala/",
+        "suggest_directory_place": "Bar Cala",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "DRAG BRUNCH BAR-CALA (With RPDR SUGAR & SPICE) Sunday July 26 (2PM SHOW)",
+      "start": "2026-07-26T14:00",
+      "end": "2026-07-26T16:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Bar Cala",
+      "address": "2703 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Bar Cala",
+      "host_group_url": "https://www.barcalapdx.com",
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rpdr-sugar-spice-sunday-july-26-2pm-show-tickets-1991819124620",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rpdr-sugar-spice-sunday-july-26-2pm-show-tickets-1991819124620",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1186812441%2F2300969672943%2F1%2Foriginal.20260613-073450?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=341038902f0da03fdcfe181b95deb33a",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "DRAG BRUNCH BAR-CALA (With RuPauls Drag Race  SUGAR & SPICE) Sunday July 26 (2PM SHOW)",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rpdr-sugar-spice-sunday-july-26-2pm-show-tickets-1991819124620",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-with-rpdr-sugar-spice-sunday-july-26-2pm-show-tickets-1991819124620",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 33.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/bar-cala/",
+        "suggest_directory_place": "Bar Cala",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "DRAG BRUNCH BAR-CALA (Sunday August 2)",
+      "start": "2026-08-02T11:00",
+      "end": "2026-08-02T13:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Bar Cala",
+      "address": "2703 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Bar Cala",
+      "host_group_url": "https://www.barcalapdx.com",
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-2-tickets-1993040254051",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-2-tickets-1993040254051",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1188108958%2F2300969672943%2F1%2Foriginal.20260702-194023?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=a89a7718ad296468cf4fb05f558f6ceb",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "DRAG BRUNCH BAR-CALA (Sunday August 2)",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-2-tickets-1993040254051",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-2-tickets-1993040254051",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 28.52"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/bar-cala/",
+        "suggest_directory_place": "Bar Cala",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "DRAG BRUNCH BAR-CALA (Sunday August 9) - Rupauls Drag Race GIA GUNN & KERRI",
+      "start": "2026-08-09T11:00",
+      "end": "2026-08-09T13:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Bar Cala",
+      "address": "2703 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Bar Cala",
+      "host_group_url": "https://www.barcalapdx.com",
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-9-rupauls-drag-race-gia-gunn-kerri-tickets-1991955702127",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-9-rupauls-drag-race-gia-gunn-kerri-tickets-1991955702127",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1186989236%2F2300969672943%2F1%2Foriginal.20260616-003543?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=c857b089d99d4913358fd11a796f09a2",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "DRAG BRUNCH BAR-CALA (Sunday August 9) - Rupauls Drag Race GIA GUNN & KERRI COLBY",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-9-rupauls-drag-race-gia-gunn-kerri-tickets-1991955702127",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-sunday-august-9-rupauls-drag-race-gia-gunn-kerri-tickets-1991955702127",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 33.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/bar-cala/",
+        "suggest_directory_place": "Bar Cala",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "DRAG BRUNCH BAR-CALA  - THE DRAGULA SPECIAL with ASIA CONSENT",
+      "start": "2026-08-23T11:00",
+      "end": "2026-08-23T14:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Bar Cala",
+      "address": "2703 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Bar Cala",
+      "host_group_url": "https://www.barcalapdx.com",
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-the-dragula-special-with-asia-consent-tickets-1991517455319",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-the-dragula-special-with-asia-consent-tickets-1991517455319",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1186554565%2F2300969672943%2F1%2Foriginal.20260610-005636?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=58c3ad91877a8801cb520c64903db901",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "DRAG BRUNCH BAR-CALA  - THE DRAGULA SPECIAL with ASIA CONSENT - Sunday AUGUST 23rd",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-the-dragula-special-with-asia-consent-tickets-1991517455319",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-bar-cala-the-dragula-special-with-asia-consent-tickets-1991517455319",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 33.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/bar-cala/",
+        "suggest_directory_place": "Bar Cala",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Drag Brunch PDX - Hosted by Nicoleonoscopi!",
+      "start": "2026-01-17T12:00",
+      "end": "2026-11-21T15:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Alberta Street Pub",
+      "address": "1036 Northeast Alberta Street, Portland, OR 97211, Portland, OR",
+      "neighborhood": "Alberta Arts District",
+      "host_group": "Drag Brunch PDX / Nicoleonoscopi",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/drag-brunch-pdx-hosted-by-nicoleonoscopi-tickets-1979170012786",
+      "event_page_url": "https://www.eventbrite.com/e/drag-brunch-pdx-hosted-by-nicoleonoscopi-tickets-1979170012786",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173605371%2F1837432729763%2F1%2Foriginal.20251228-174815?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=c30acbc7bee264c5876fe43e35c65135",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": true,
+      "recurrence_note": "Series or multi-date listing on Eventbrite (verify next occurrence)",
+      "description": "BRUNCH, BUT MAKE IT FABULOUS!",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-brunch-pdx-hosted-by-nicoleonoscopi-tickets-1979170012786",
+        "event_page_url": "https://www.eventbrite.com/e/drag-brunch-pdx-hosted-by-nicoleonoscopi-tickets-1979170012786",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 23.18"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/alberta-street-pub/",
+        "suggest_directory_place": "Alberta Street Pub",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Portland Drag Brunch - Lipstick Divas",
+      "start": "2026-08-15T11:30",
+      "end": "2026-08-15T13:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "10 Barrel Brewing Portland",
+      "address": "1411 Northwest Flanders Street, Portland, OR 97209, Portland, OR",
+      "neighborhood": "Pearl District",
+      "host_group": "Lipstick Divas",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/portland-drag-brunch-lipstick-divas-tickets-1992803549060",
+      "event_page_url": "https://www.eventbrite.com/e/portland-drag-brunch-lipstick-divas-tickets-1992803549060",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1188184517%2F983297535093%2F1%2Foriginal.20260703-232701?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=a939578f5b53b230a4a6bdd68ffaa5ae",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "☀️ Hot Divas Summer is here!  Join the Lipstick Divas for fierce drag, brunch, mimosas & nonstop fun. Grab tickets now! ✨",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/portland-drag-brunch-lipstick-divas-tickets-1992803549060",
+        "event_page_url": "https://www.eventbrite.com/e/portland-drag-brunch-lipstick-divas-tickets-1992803549060",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 23.18"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/lipstick-divas/",
+        "suggest_directory_place": "10 Barrel Brewing Portland",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Drag Bingo @ Space Room Lounge",
+      "start": "2025-04-01T19:30",
+      "end": "2026-10-27T22:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Space Room Lounge",
+      "address": "4800 Southeast Hawthorne Boulevard, Portland, OR 97215, Portland, OR",
+      "neighborhood": "Hawthorne",
+      "host_group": "Space Room Lounge",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/drag-bingo-space-room-lounge-tickets-1304761198869",
+      "event_page_url": "https://www.eventbrite.com/e/drag-bingo-space-room-lounge-tickets-1304761198869",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1182818004%2F2670521487481%2F1%2Foriginal.20260422-203022?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.508&fp-y=0.033&s=52a2fa7f851d3128476fa9f90aa42e17",
+      "admission": "FREE",
+      "age": "21_PLUS",
+      "is_recurring": true,
+      "recurrence_note": "Series or multi-date listing on Eventbrite (verify next occurrence)",
+      "description": "Drag Bingo @ Space Room Lounge | Free | 21+ | Every Tuesday | Doors @ 7:30 PM, Bingo at 8 PM",
+      "tags": [
+        "year-round",
+        "drag"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-bingo-space-room-lounge-tickets-1304761198869",
+        "event_page_url": "https://www.eventbrite.com/e/drag-bingo-space-room-lounge-tickets-1304761198869",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 0.0"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": "https://www.eventbrite.com/d/or--portland/space-room/",
+        "suggest_directory_place": "Space Room Lounge",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "BROADWAY'S FINEST Drag Brunch",
+      "start": "2026-08-22T11:00",
+      "end": "2026-08-22T15:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Stag PDX",
+      "address": "317 Northwest Broadway, Portland, OR 97209, Portland, OR",
+      "neighborhood": "Old Town / Pearl",
+      "host_group": "Stag PDX",
+      "host_group_url": "https://www.eventbrite.com/o/stag-pdx-73608204703",
+      "ticket_url": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403710185",
+      "event_page_url": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403710185",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1187456872%2F1849716196323%2F1%2Foriginal.20260623-054357?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=79e4e1a3270f716a91a72f81e1bd47f6",
+      "admission": "TICKETED",
+      "age": "21_PLUS",
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Join us for a fabulous drag brunch featuring the best performers in town! Complimentary mimosa and all you can eat buffet included. 21+ only",
+      "tags": [
+        "year-round",
+        "drag",
+        "brunch"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403710185",
+        "event_page_url": "https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403710185",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 39.62"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": "stag-eb",
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Stag PDX",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Dyke Pool Presents: Off The Felt Dance Party",
+      "start": "2026-08-16T19:30",
+      "end": "2026-08-17T01:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Goodfoot Pub & Lounge",
+      "address": "2845 SE Stark St, Portland, OR 97214, Portland, OR",
+      "neighborhood": null,
+      "host_group": "Dyke Pool",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/dyke-pool-presents-off-the-felt-dance-party-tickets-1994899789973",
+      "event_page_url": "https://www.eventbrite.com/e/dyke-pool-presents-off-the-felt-dance-party-tickets-1994899789973",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1189420723%2F47393402685%2F1%2Foriginal.20260722-195859?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.493&fp-y=0.025&s=38cbd84c32a3b9db8c4268dd8cdf5e31",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": true,
+      "recurrence_note": "Series or multi-date listing on Eventbrite (verify next occurrence)",
+      "description": "Dyke Pool presents Off the Felt, a dance event at The Goodfoot (Downstairs) for the queer community and allies.",
+      "tags": [
+        "year-round",
+        "queer"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/dyke-pool-presents-off-the-felt-dance-party-tickets-1994899789973",
+        "event_page_url": "https://www.eventbrite.com/e/dyke-pool-presents-off-the-felt-dance-party-tickets-1994899789973",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 12.51"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Goodfoot Pub & Lounge",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Queer Board Games and Bites",
+      "start": "2026-08-02T12:30",
+      "end": "2026-08-02T16:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Senet Game Bar",
+      "address": "12553 Southwest Main Street, #201, Tigard, OR 97223, Tigard, OR",
+      "neighborhood": "SE Portland",
+      "host_group": "Senet Game Bar",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/queer-board-games-and-bites-tickets-1994596368431",
+      "event_page_url": "https://www.eventbrite.com/e/queer-board-games-and-bites-tickets-1994596368431",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1189246443%2F288188699814%2F1%2Foriginal.20260720-193130?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.492&fp-y=0.354&s=421b90c0c2057828710c11978ed04490",
+      "admission": "FREE",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Join us for our 3rd Queer Board Game Brunch event!! Meet new people or bring a friend, have a drink, eat brunch, and play board games.",
+      "tags": [
+        "year-round",
+        "queer"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/queer-board-games-and-bites-tickets-1994596368431",
+        "event_page_url": "https://www.eventbrite.com/e/queer-board-games-and-bites-tickets-1994596368431",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 0.0"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Senet Game Bar",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Queer Mountaineers Drag Bingo Social Hour @ The Pharmacy PDX",
+      "start": "2026-08-12T19:30",
+      "end": null,
+      "timezone": "America/Los_Angeles",
+      "venue_name": "The Pharmacy Bar PDX",
+      "address": "2100 Northwest Glisan Street, Portland, OR 97210, Portland, OR",
+      "neighborhood": null,
+      "host_group": "Queer Mountaineers",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/queer-mountaineers-drag-bingo-social-hour-the-pharmacy-pdx-tickets-1994114242379",
+      "event_page_url": "https://www.eventbrite.com/e/queer-mountaineers-drag-bingo-social-hour-the-pharmacy-pdx-tickets-1994114242379",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1037367133%2F2728444399371%2F1%2Foriginal.20250523-044256?w=940&auto=format%2Ccompress&q=75&sharp=10&s=bf347886f60274c6580f06fd4abc5f05",
+      "admission": "FREE",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Join Queer Mountaineers for a social hour over drag bingo at The Pharmacy",
+      "tags": [
+        "year-round",
+        "drag",
+        "queer"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/queer-mountaineers-drag-bingo-social-hour-the-pharmacy-pdx-tickets-1994114242379",
+        "event_page_url": "https://www.eventbrite.com/e/queer-mountaineers-drag-bingo-social-hour-the-pharmacy-pdx-tickets-1994114242379",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 0.0"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "The Pharmacy Bar PDX",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Sapphic Singles Craft Night Mixer",
+      "start": "2026-07-29T18:30",
+      "end": "2026-07-29T22:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Escape Bar & Grill",
+      "address": "9004 Northeast Sandy Boulevard, Portland, OR 97220, Portland, OR",
+      "neighborhood": "NE Sandy",
+      "host_group": "Escape Bar & Grill",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/sapphic-singles-craft-night-mixer-registration-1990897634418",
+      "event_page_url": "https://www.eventbrite.com/e/sapphic-singles-craft-night-mixer-registration-1990897634418",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F688797369%2F1994803980933%2F1%2Foriginal.20240202-201437?w=940&auto=format%2Ccompress&q=75&sharp=10&rect=204%2C0%2C940%2C470&s=3f10654a26e9444e24b104c08c23d1a7",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Music, Crafts, Community and Vibes.",
+      "tags": [
+        "year-round",
+        "queer"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/sapphic-singles-craft-night-mixer-registration-1990897634418",
+        "event_page_url": "https://www.eventbrite.com/e/sapphic-singles-craft-night-mixer-registration-1990897634418",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 17.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Escape Bar & Grill",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "QT DayFest.",
+      "start": "2026-08-08T16:00",
+      "end": "2026-08-08T22:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "WonderLove",
+      "address": "262 Southeast Main Street, Portland, OR 97214, Portland, OR",
+      "neighborhood": "SE Portland",
+      "host_group": "WonderLove",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/qt-dayfest-tickets-1992791853077",
+      "event_page_url": "https://www.eventbrite.com/e/qt-dayfest-tickets-1992791853077",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1187978002%2F1278839125353%2F1%2Foriginal.20260701-041241?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.495&fp-y=0.025&s=635789b1fdc7326428458937e4581761",
+      "admission": "TICKETED",
+      "age": "21_PLUS",
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "A QTBIPOC 21+ Daytime Festival at Wonderlove!",
+      "tags": [
+        "year-round"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/qt-dayfest-tickets-1992791853077",
+        "event_page_url": "https://www.eventbrite.com/e/qt-dayfest-tickets-1992791853077",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 33.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "WonderLove",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Daytime Dance @ Wonderlove!!",
+      "start": "2026-06-13T15:00",
+      "end": "2026-09-26T21:00",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "WonderLove",
+      "address": "262 Southeast Main Street, Portland, OR 97214, Portland, OR",
+      "neighborhood": "SE Portland",
+      "host_group": "WonderLove",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/daytime-dance-wonderlove-tickets-1991294744184",
+      "event_page_url": "https://www.eventbrite.com/e/daytime-dance-wonderlove-tickets-1991294744184",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1186326769%2F13632843539%2F1%2Foriginal.20260607-021053?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=ae552c4b6a442eda5a9970d7c497bb57",
+      "admission": "FREE",
+      "age": null,
+      "is_recurring": true,
+      "recurrence_note": "Series or multi-date listing on Eventbrite (verify next occurrence)",
+      "description": "Dance hard and be home before bedtime! Join us for an afternoon of  House Music, Live Horns & Classics!",
+      "tags": [
+        "year-round"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/daytime-dance-wonderlove-tickets-1991294744184",
+        "event_page_url": "https://www.eventbrite.com/e/daytime-dance-wonderlove-tickets-1991294744184",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 0.0"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "WonderLove",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "Drag Show at Day Wines!",
+      "start": "2026-08-15T18:00",
+      "end": "2026-08-15T20:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Day Wines",
+      "address": "21160 Oregon 99W, Dundee, OR 97115, Dundee, OR",
+      "neighborhood": null,
+      "host_group": "Day Wines",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/drag-show-at-day-wines-tickets-1993629201609",
+      "event_page_url": "https://www.eventbrite.com/e/drag-show-at-day-wines-tickets-1993629201609",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1188567690%2F539773170161%2F1%2Foriginal.20260709-202257?crop=focalpoint&fit=crop&w=940&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.657&fp-y=0.474&s=d6a81cefbfb8fce37f9d7dffcda2cca5",
+      "admission": "TICKETED",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Get ready for a fabulous evening of glamour, laughter, and unforgettable performances at this drag extravaganza hosted by Wine Country Pride",
+      "tags": [
+        "year-round",
+        "drag"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/drag-show-at-day-wines-tickets-1993629201609",
+        "event_page_url": "https://www.eventbrite.com/e/drag-show-at-day-wines-tickets-1993629201609",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 33.85"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Day Wines",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    },
+    {
+      "title": "LGBTQ+ Community Workout",
+      "start": "2026-07-26T10:00",
+      "end": "2026-07-26T11:30",
+      "timezone": "America/Los_Angeles",
+      "venue_name": "Oregon Park",
+      "address": "NE Oregon St & Northeast 30th Avenue, Portland, OR 97232, Portland, OR",
+      "neighborhood": null,
+      "host_group": "Oregon Park",
+      "host_group_url": null,
+      "ticket_url": "https://www.eventbrite.com/e/lgbtq-community-workout-tickets-1993945130561",
+      "event_page_url": "https://www.eventbrite.com/e/lgbtq-community-workout-tickets-1993945130561",
+      "poster_image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1188858651%2F121275649347%2F1%2Foriginal.20260714-185455?w=940&auto=format%2Ccompress&q=75&sharp=10&s=1b4d63ac80d741d3e9e18f0886745e59",
+      "admission": "FREE",
+      "age": null,
+      "is_recurring": false,
+      "recurrence_note": null,
+      "description": "Queer, body-positive fitness in the park! Featuring empowering movement, mobility, and radical self-love.",
+      "tags": [
+        "year-round",
+        "queer"
+      ],
+      "provenance": {
+        "how_found": "Opened Eventbrite event page directly and read og:title, startDate, Place, price from page HTML (verified 2026-07-26)",
+        "source_kind": "eventbrite_event",
+        "source_url": "https://www.eventbrite.com/e/lgbtq-community-workout-tickets-1993945130561",
+        "event_page_url": "https://www.eventbrite.com/e/lgbtq-community-workout-tickets-1993945130561",
+        "checked_at": "2026-07-26",
+        "confidence": "high",
+        "raw_notes": "Eventbrite price signal: 0.0"
+      },
+      "ingest_hints": {
+        "suggest_trusted_venue": null,
+        "suggest_qsearch_source_url": null,
+        "suggest_directory_place": "Oregon Park",
+        "flyer_issue": null,
+        "link_issue": null
+      }
+    }
+  ]
+}

@@ -324,12 +324,14 @@ sqlite.exec(`
   );
 `);
 
-// Add is_new, hours, phone, owner_id, grand_opening_date columns to businesses if not present
+// Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN grand_opening_date TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN hours TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN phone TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN owner_id INTEGER`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`); } catch {}
 
 // Add new columns to gig_posts if not present (SQLite doesn't support IF NOT EXISTS on ALTER)
 let gigPostsLegacyCols = false;
@@ -3732,6 +3734,70 @@ function runBootMigrationsOnce() {
     // Reclassify Sold By Scott under realestate (green→white neon) if an older seed used service.
     sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
     recordBootMigration("seed_businesses_directory_v11_type_accents");
+  }
+  /**
+   * Crush Bar permanently closed 2025-01-01 — same address as Peacock PDX (successor).
+   * Keep a CLOSED inactive row for historical venue linkage; never QSearch-scrape @crushbarpdx.
+   * Peacock remains the live directory + year-round ingest slot.
+   */
+  if (!hasBootMigration("crush_bar_closed_permanent_2025_01_01_v1")) {
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`);
+    } catch { /* already present */ }
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`);
+    } catch { /* already present */ }
+
+    const now = new Date().toISOString();
+    const existingCrush = sqlite
+      .prepare(`SELECT id FROM businesses WHERE lower(name) IN ('crush bar', 'crush bar pdx', 'crush') LIMIT 1`)
+      .get() as { id: number } | undefined;
+    if (existingCrush) {
+      sqlite
+        .prepare(
+          `UPDATE businesses
+           SET status = 'CLOSED', closed_at = '2025-01-01', active = 0,
+               description = COALESCE(NULLIF(trim(description), ''),
+                 'Former Buckman queer bar at 1400 SE Morrison. Permanently closed 2025-01-01; space reopened as Peacock PDX. Kept for historical event linkage only — do not scrape.'),
+               address = COALESCE(address, '1400 SE Morrison St'),
+               neighborhood = COALESCE(neighborhood, 'SE Portland')
+           WHERE id = ?`,
+        )
+        .run(existingCrush.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name: "Crush Bar",
+          type: "bar",
+          description:
+            "Former Buckman queer bar at 1400 SE Morrison. Permanently closed 2025-01-01; space reopened as Peacock PDX. Kept for historical event linkage only — do not scrape.",
+          address: "1400 SE Morrison St",
+          neighborhood: "SE Portland",
+          website: null,
+          instagram: null,
+          queerOwned: true,
+          queerFriendly: true,
+          lat: 45.5169,
+          lng: -122.6490,
+          active: false,
+          status: "CLOSED",
+          closedAt: "2025-01-01",
+          isNew: false,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    // Ensure successor Peacock is OPEN/active for discovery + directory ingest
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET status = 'OPEN', closed_at = NULL, active = 1,
+             website = COALESCE(website, 'https://peacockpdx.com'),
+             instagram = COALESCE(instagram, '@peacock.pdx')
+         WHERE lower(name) IN ('peacock pdx', 'peacock')`,
+      )
+      .run();
+    recordBootMigration("crush_bar_closed_permanent_2025_01_01_v1");
   }
   if (!hasBootMigration("seed_plus_psychiatry_v1")) {
     const now = new Date().toISOString();

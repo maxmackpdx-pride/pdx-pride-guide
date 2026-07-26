@@ -15,7 +15,7 @@ Research compiled **2026-07-19** for QSearch accuracy.
 | 8 | Jackie's | bar | - | **ig-only** | IG `@jackiespdx` | high |
 | 9 | Living Room Wines | bar | Eventbrite org `o/104468106391` | eventbrite | EB card art; free nights IG | high |
 | 10 | Montavilla Station | bar | `https://montavillastation.com/` `#fun` | static html | none | med |
-| 11 | Peacock PDX | bar | `https://peacockpdx.com/` Events section | html/JS | cards + IG `@peacock.pdx` | med |
+| 11 | Peacock PDX | bar | `https://peacockpdx.com/` Events section | html/JS | cards + IG `@peacock.pdx` | med · year-round (ex-Crush; never scrape `@crushbarpdx`) |
 | 12 | Process | bar | `https://www.processpdx.club/` Schedule | html + RA | RA event art better | high |
 | 13 | Ring Ding Ding | bar | - | **ig-only** | IG `@ringdingdingpdx` | high |
 | 14 | Scandals East | bar | `https://scandalspdx.com/events` | zyrosite flyer gallery | full posters on zyrosite CDN | high |
@@ -54,6 +54,7 @@ Research compiled **2026-07-19** for QSearch accuracy.
 
 | URL | Why |
 |-----|-----|
+| Crush Bar / `@crushbarpdx` / crushbarpdx.com | **CLOSED_PERMANENT_2025-01-01** — space is Peacock PDX (`peacock-pdx` ingest source) |
 | `novapdx.com` | Parked domain |
 | `theautomaticbarpdx.com/events` | 404 |
 | `stagportland.com/events?format=json` | Empty SQS page, not calendar |

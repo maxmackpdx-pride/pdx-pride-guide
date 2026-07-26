@@ -121,6 +121,14 @@ export const businesses = sqliteTable("businesses", {
   lat: real("lat"),
   lng: real("lng"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  /**
+   * Place lifecycle: OPEN (default) | CLOSED.
+   * CLOSED places stay in DB for historical event linkage but must set active=false
+   * so they drop from discovery, directory auto-ingest, and SEO place pages.
+   */
+  status: text("status").notNull().default("OPEN"),
+  /** YYYY-MM-DD doors-closed day when status is CLOSED. */
+  closedAt: text("closed_at"),
   /** Legacy flag; do not use alone for UI. Prefer grandOpeningDate. */
   isNew: integer("is_new", { mode: "boolean" }).notNull().default(false),
   /** Verified doors-open day (YYYY-MM-DD). Required for Grand Opening chrome. */

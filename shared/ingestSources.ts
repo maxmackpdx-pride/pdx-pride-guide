@@ -7,6 +7,50 @@
  */
 import { normalizeVenueKey, VENUE_WEBSITE_FALLBACKS } from "./venueLinks";
 
+/**
+ * Permanently closed venues / dead scrape targets — never auto-chip, never re-add as source_gaps.
+ * Keys: lowercase venue name fragments and hostnames.
+ * Crush Bar → CLOSED_PERMANENT_2025-01-01 (successor: Peacock PDX).
+ */
+export const CLOSED_PERMANENT_VENUES: Array<{
+  id: string;
+  names: string[];
+  hosts: string[];
+  closedAt: string; // YYYY-MM-DD
+  successor?: string;
+  note: string;
+}> = [
+  {
+    id: "crush-bar",
+    names: ["crush bar", "crush bar pdx", "crush"],
+    hosts: ["crushbarpdx.com", "instagram.com/crushbarpdx", "www.instagram.com/crushbarpdx"],
+    closedAt: "2025-01-01",
+    successor: "Peacock PDX",
+    note: "CLOSED_PERMANENT_2025-01-01 — Buckman bar closed; space is Peacock PDX. Do not scrape IG @crushbarpdx.",
+  },
+];
+
+export function isClosedPermanentVenueName(name: string | null | undefined): boolean {
+  const key = normalizeVenueKey(name || "");
+  if (!key) return false;
+  return CLOSED_PERMANENT_VENUES.some(v =>
+    v.names.some(n => {
+      if (key === n) return true;
+      // Longer aliases only (avoid matching "crush" inside unrelated names)
+      if (n.length >= 6 && (key.includes(n) || n.includes(key))) return true;
+      return false;
+    }),
+  );
+}
+
+export function isClosedPermanentScrapeUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return CLOSED_PERMANENT_VENUES.some(v =>
+    v.hosts.some(h => lower.includes(h.toLowerCase())),
+  );
+}
+
 export type IngestSourceTier =
   | "1"
   | "2"
@@ -291,6 +335,16 @@ export const INGEST_SOURCES: IngestSource[] = [
     tier: "1",
     format: "html",
     notes: "Static weeklies in #events; specials IG @campbarpdx only",
+  },
+  {
+    id: "peacock-pdx",
+    label: "Peacock PDX",
+    url: "https://peacockpdx.com/",
+    tier: "1",
+    format: "html",
+    priority: true,
+    notes:
+      "Year-round queer bar at 1400 SE Morrison (former Crush Bar, closed 2025-01-01). Events section + IG @peacock.pdx. Never scrape crushbarpdx / @crushbarpdx.",
   },
   {
     id: "camp-trc",
@@ -711,7 +765,7 @@ export function buildDirectoryCoverage(
     curated.map(s => ingestHostKey(s.url)).filter(Boolean) as string[],
   );
   const sorted = [...businesses]
-    .filter(b => b && b.active !== false)
+    .filter(b => b && b.active !== false && !isClosedPermanentVenueName(b.name))
     .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
 
   return sorted.map(biz => {
@@ -742,13 +796,21 @@ export function buildDirectoryIngestSources(
   const seenHosts = new Set<string>();
 
   const sorted = [...businesses]
-    .filter(b => b && b.active !== false)
+    .filter(
+      b =>
+        b &&
+        b.active !== false &&
+        !isClosedPermanentVenueName(b.name) &&
+        // status CLOSED (when present on row) never auto-scrapes
+        String((b as { status?: string }).status || "OPEN").toUpperCase() !== "CLOSED",
+    )
     .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
 
   for (const biz of sorted) {
     const resolved = resolveDirectoryWebsite(biz);
     const url = resolved.url;
     if (!url) continue;
+    if (isClosedPermanentScrapeUrl(url)) continue;
     const host = ingestHostKey(url);
     if (!host) continue;
     // One chip per host (multiple listings sharing a parent site → first name wins)
