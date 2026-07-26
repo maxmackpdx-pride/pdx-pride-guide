@@ -688,6 +688,26 @@ html.calm-mode .home-hero__orb {
 
 }
 
+/* Desktop hero: the wordmark art is 4:3 (ZAYLIST over PORTLAND), so at the old
+   75vh cap it grew wide on short/wide screens and its PORTLAND line dropped onto
+   the CTAs. Shrink + lift the mark and anchor the CTAs lower so they clear it.
+   Scoped to >900px only — mobile keeps its own (larger) sizing above. */
+@media (min-width: 901px) {
+  .home-hero__wordmark-wrap {
+    top: 41%;
+    width: min(66vw, 860px);
+    max-height: 62%;
+  }
+
+  .home-hero__wordmark {
+    max-height: 58vh;
+  }
+
+  .home-hero__cta {
+    bottom: max(14%, env(safe-area-inset-bottom, 0px) + 12%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-hero--parallax {
     --px: 0 !important;
