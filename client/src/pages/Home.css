@@ -694,17 +694,19 @@ html.calm-mode .home-hero__orb {
    Scoped to >900px only — mobile keeps its own (larger) sizing above. */
 @media (min-width: 901px) {
   .home-hero__wordmark-wrap {
-    top: 41%;
-    width: min(66vw, 860px);
-    max-height: 62%;
+    top: 43%;
+    width: min(46vw, 600px);
+    max-height: 44%;
   }
 
+  /* Render the mark ~30% smaller than its box: at a smaller display size the
+     4:3 art reads crisper, and it sits cleanly on the video's mandala center. */
   .home-hero__wordmark {
-    max-height: 58vh;
+    max-height: 40vh;
   }
 
   .home-hero__cta {
-    bottom: max(14%, env(safe-area-inset-bottom, 0px) + 12%);
+    bottom: max(17%, env(safe-area-inset-bottom, 0px) + 15%);
   }
 }
 

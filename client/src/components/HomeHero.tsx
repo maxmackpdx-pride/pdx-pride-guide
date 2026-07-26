@@ -212,10 +212,6 @@ export default function HomeHero() {
 
       <div className="home-hero__inner">
         <h1 className="sr-only">Zaylist</h1>
-        <div className="home-hero__kicker">
-          <span className="home-hero__dot" aria-hidden />
-          Portland nights · all year
-        </div>
       </div>
 
       {/* z5 — CTAs under the wordmark, almost locked */}
