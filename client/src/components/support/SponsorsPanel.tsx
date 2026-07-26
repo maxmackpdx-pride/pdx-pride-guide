@@ -42,14 +42,15 @@ export default function SponsorsPanel({
         <div className="support-sponsors__copy about-v2-sponsors__copy">
           <h3 className="support-sponsors__title">{kicker}</h3>
           <p>
-            Sponsors can buy featured posts in the scene feed and/or ads on the site. That is how this stays free
-            to browse. The bar is simple: you need to be part of the community or already support what we are
-            building. No scrubbing your brand first. No random corporate Pride cosplay.
+            Sponsors can buy labeled support — featured feed posts, site ads, and more partner
+            formats as they ship. That is how browsing can stay free. The bar is simple: you need to
+            be part of the community or already show up for us. No scrubbing your brand first. No
+            random corporate Pride cosplay. Organic ranking is not for sale.
           </p>
           <p>
-            And it does not stop on July 19. After Pride week this becomes a{" "}
-            <strong className="support-sponsors__strong about-v2-sponsors__strong">year round resource</strong> for
-            the scene, so your support keeps working long after the parade.
+            And it does not stop on July 19. This is a{" "}
+            <strong className="support-sponsors__strong about-v2-sponsors__strong">year-round resource</strong> for
+            the scene, so your support can keep working long after the parade.
           </p>
           {showPitch && onPitch ? (
             <>

@@ -10,7 +10,7 @@ export default function Sponsors() {
 
   usePageSeo(
     "Sponsors | Zaylist",
-    "Local businesses can help keep Zaylist free. Sponsorship is support, not pay-to-rank.",
+    "Local businesses can help keep browsing free. Labeled support and ads — never pay-to-rank.",
   );
 
   return (
@@ -26,10 +26,14 @@ export default function Sponsors() {
       <div className="zine-content" style={{ maxWidth: 720, margin: "0 auto", padding: "28px 20px 64px" }}>
         <ScrollReveal>
           <p className="board-copy">
-            Here's the deal. You get a spot on the site and a thank you that means something, because people trust this list. You do not get to move your event up the list, bury somebody else's, or put a logo on the parade. Nobody can buy that. It isn't a pricing thing, it just isn't for sale.
+            Here's the deal. Community listings stay free to browse. Support is{" "}
+            <strong>labeled</strong> — featured posts, ads, and other partner spots as I grow them.
+            What you cannot buy: the organic order of the list, burying someone else's night, or my
+            silence about who paid. Ranking is not for sale. Trust is the product.
           </p>
           <p className="board-copy">
-            If your business belongs here, you probably already know it. Write to me and say what you had in mind.
+            Packages will get clearer over time. If your business belongs here, you probably already
+            know it — write me and say what you had in mind.
           </p>
 
           <div style={{ marginTop: 28 }}>

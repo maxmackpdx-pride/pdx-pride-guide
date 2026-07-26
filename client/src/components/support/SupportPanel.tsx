@@ -21,9 +21,10 @@ export default function SupportPanel({ className = "" }: Props) {
           Keep this guide <span className="support-keepalive__alive">alive</span>
         </h3>
         <p>
-          Servers and domains cost money. Time costs the most. If this pointed you toward one good night,
-          chip in and it stays free for the next person. Venmo is one tap. Card and Apple Pay use a secure
-          Stripe checkout when it is turned on.
+          Servers and domains cost money. Time costs the most. If this pointed you toward one good
+          night, chip in so browsing can stay free for the next person. Venmo is one tap. Card and
+          Apple Pay use a secure Stripe checkout when it is turned on. Local businesses can also
+          sponsor — see Sponsors.
         </p>
       </div>
       <div className="support-keepalive__cta about-v2-donate__cta">
