@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import "./RiverBratsIntroPopup.css";
 
-/**
- * Bump when copy changes OR when we need everyone to see the intro again.
- * v2: first ship was easy to miss / dismiss; force one more show + manual reopen.
- */
-const DISMISS_KEY = "zaylist:river-brats-intro:v2";
-
+/** Bump to re-show for everyone after a broken ship. */
+const DISMISS_KEY = "zaylist:river-brats-intro:v3";
 export const RIVER_BRATS_INTRO_OPEN_EVENT = "zaylist:river-brats-intro:open";
 
-/** `?rbIntro=1` force-shows (ignores dismissal). */
 function forcedPreview(): boolean {
   try {
     return new URLSearchParams(window.location.search).get("rbIntro") === "1";
@@ -27,53 +22,41 @@ function alreadyDismissed(): boolean {
   }
 }
 
-type Props = {
-  /** When true, skip auto-open (parent only mounts for manual control). Default auto. */
-  manualOnly?: boolean;
-};
+function shouldAutoOpen(): boolean {
+  if (typeof window === "undefined") return false;
+  if (forcedPreview()) return true;
+  return !alreadyDismissed();
+}
 
 /**
- * One-time explainer for River Brats on Nude Beaches.
- * Auto-shows once per browser until dismissed. Re-open anytime via
- * `window.dispatchEvent(new Event(RIVER_BRATS_INTRO_OPEN_EVENT))` or `?rbIntro=1`.
+ * One-time River Brats explainer on Nude Beaches.
+ * Opens synchronously on first visit (no delayed effect — previous version
+ * was easy to miss). Reopen: How it works button or ?rbIntro=1
  */
-export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
-  const [open, setOpen] = useState(false);
+export default function RiverBratsIntroPopup() {
+  // Open on first paint when not dismissed — no useEffect race / cleanup cancel.
+  const [open, setOpen] = useState(shouldAutoOpen);
 
-  useEffect(() => {
-    const openNow = () => setOpen(true);
-    window.addEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
-
-    if (manualOnly) {
-      return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
-    }
-
-    const forced = forcedPreview();
-    if (!forced && alreadyDismissed()) {
-      return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
-    }
-
-    // Next frame + short delay so layout/fonts settle; forced = immediate
-    let t = 0;
-    const raf = window.requestAnimationFrame(() => {
-      t = window.setTimeout(openNow, forced ? 0 : 200);
-    });
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(t);
-      window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
-    };
-  }, [manualOnly]);
-
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     try {
       localStorage.setItem(DISMISS_KEY, "1");
+      // Clear older keys so they don't confuse debugging
+      localStorage.removeItem("zaylist:river-brats-intro:v1");
+      localStorage.removeItem("zaylist:river-brats-intro:v2");
     } catch {
       /* ignore */
     }
     setOpen(false);
-  };
+  }, []);
 
+  // Manual reopen from shell button
+  useEffect(() => {
+    const openNow = () => setOpen(true);
+    window.addEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+    return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+  }, []);
+
+  // Escape + body scroll lock
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -86,37 +69,87 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, dismiss]);
 
-  if (!open || typeof document === "undefined" || !document.body) return null;
+  if (!open) return null;
+
+  const node =
+    typeof document !== "undefined" && document.body ? document.body : null;
+  if (!node) return null;
+
+  // Inline critical layout so the overlay is visible even if CSS chunk is late/cached wrong.
+  const backdropStyle: CSSProperties = {
+    position: "fixed",
+    inset: 0,
+    zIndex: 2147483000,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    background: "rgba(0,0,0,0.82)",
+    boxSizing: "border-box",
+  };
+
+  const cardStyle: CSSProperties = {
+    position: "relative",
+    width: "100%",
+    maxWidth: 440,
+    maxHeight: "min(92vh, 740px)",
+    overflowY: "auto",
+    padding: "28px 22px 20px",
+    background: "#0b0b0e",
+    border: "1px solid #3a3a48",
+    borderRadius: 20,
+    color: "#fff",
+    boxShadow: "0 28px 64px rgba(0,0,0,0.85)",
+    boxSizing: "border-box",
+  };
 
   return createPortal(
     <div
       className="rbi-backdrop"
+      style={backdropStyle}
       role="presentation"
       data-testid="river-brats-intro-backdrop"
       onClick={dismiss}
     >
       <div
         className="rbi-card"
+        style={cardStyle}
         role="dialog"
         aria-modal="true"
         aria-labelledby="rbi-title"
         data-testid="river-brats-intro-dialog"
         onClick={e => e.stopPropagation()}
       >
-        <button type="button" className="rbi-x" onClick={dismiss} aria-label="Close">
+        <button
+          type="button"
+          className="rbi-x"
+          onClick={dismiss}
+          aria-label="Close"
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 32,
+            height: 32,
+            border: "none",
+            borderRadius: 8,
+            background: "rgba(255,255,255,0.08)",
+            color: "#ccc",
+            cursor: "pointer",
+          }}
+        >
           ✕
         </button>
 
         <p className="rbi-kicker">Nude beaches · River Brats</p>
         <h2 id="rbi-title" className="rbi-title display">
-          How this works
+          How River Brats works
         </h2>
         <p className="rbi-lede">
-          River Brats is the check-in + group chat for people heading to{" "}
-          <strong>Rooster Rock</strong> or <strong>Collins Beach</strong>. Weather and logistics
-          stay above; this is the social layer.
+          Check-in + group chat for people heading to <strong>Rooster Rock</strong> or{" "}
+          <strong>Collins Beach</strong>. Weather stays above; this is the social layer.
         </p>
 
         <ol className="rbi-steps">
@@ -126,7 +159,7 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
             </span>
             <div>
               <strong>Check in</strong>
-              <span>Say you&apos;re going, up to 7 days ahead. Pick arrive + leave times.</span>
+              <span>Say you&apos;re going (up to 7 days ahead). Pick arrive + leave times.</span>
             </div>
           </li>
           <li>
@@ -136,8 +169,8 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
             <div>
               <strong>Chat opens immediately</strong>
               <span>
-                The moment you check in (with your @username), you join that beach&apos;s group
-                chat. No waiting.
+                Check in with your @username and you&apos;re in that beach&apos;s group chat right
+                away.
               </span>
             </div>
           </li>
@@ -148,8 +181,8 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
             <div>
               <strong>One room per beach</strong>
               <span>
-                Everyone going any day this week shares the same chat. Day chips under names show
-                when each person is going.
+                Everyone going any day this week shares one chat. Day chips under names show when
+                each person is going.
               </span>
             </div>
           </li>
@@ -160,8 +193,7 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
             <div>
               <strong>Multi-day keeps you in</strong>
               <span>
-                Check in for more days and your chat access extends until 12 hours after your last
-                beach day ends.
+                Extra days extend access until 12 hours after your last beach day ends.
               </span>
             </div>
           </li>
@@ -172,16 +204,16 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
             <div>
               <strong>Anonymous option</strong>
               <span>
-                You can check in anonymously to count as going without joining the chat. Chat is
-                never anonymous.
+                Anonymous check-in counts you as going but stays out of chat. Chat is never
+                anonymous.
               </span>
             </div>
           </li>
         </ol>
 
         <p className="rbi-note">
-          Be kind. Keep exact meetups and personal details in DMs. GPS &quot;I&apos;m here&quot; is
-          separate from the chat count.
+          Be kind. Exact meetups and personal details stay in DMs. GPS &quot;I&apos;m here&quot; is
+          separate from the chat.
         </p>
 
         <button
@@ -192,14 +224,13 @@ export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
         >
           Got it · let&apos;s go
         </button>
-        <p className="rbi-foot">One-time tip · reopen anytime via &ldquo;How it works&rdquo;</p>
+        <p className="rbi-foot">One-time · reopen with How it works under the title</p>
       </div>
     </div>,
-    document.body,
+    node,
   );
 }
 
-/** Open the intro from elsewhere (e.g. shell help button). */
 export function openRiverBratsIntro() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new Event(RIVER_BRATS_INTRO_OPEN_EVENT));

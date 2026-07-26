@@ -15,6 +15,15 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
+import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
+
+/** Mount intro outside RouteBoundary so a page crash cannot kill the popup. */
+function RiverBratsIntroOnBeaches() {
+  const [location] = useLocation();
+  const path = location.split("?")[0] || "";
+  if (path !== "/nude-beaches") return null;
+  return <RiverBratsIntroPopup />;
+}
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -137,6 +146,7 @@ export default function App() {
               <ScrollToTop />
               <AnalyticsTracker />
               <PrideGlowNudge />
+              <RiverBratsIntroOnBeaches />
               <AppLayout />
               <Toaster />
             </InboxSheetProvider>

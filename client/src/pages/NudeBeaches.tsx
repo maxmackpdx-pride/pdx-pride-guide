@@ -9,7 +9,6 @@ import NudeBeachesHero from "@/components/NudeBeachesHero";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
-import RiverBratsIntroPopup from "@/components/river-brats/RiverBratsIntroPopup";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
@@ -253,7 +252,6 @@ export default function NudeBeaches() {
     <div
       className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
-      <RiverBratsIntroPopup />
       <header className="nude-beaches-header">
         <NudeBeachesHero
           key={activeTab}
