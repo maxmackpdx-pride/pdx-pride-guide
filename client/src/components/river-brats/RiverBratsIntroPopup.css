@@ -1,7 +1,8 @@
 .rbi-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 15000;
+  /* Above mobile nav, inbox sheet, and pride glow nudge */
+  z-index: 20050;
   display: flex;
   align-items: center;
   justify-content: center;

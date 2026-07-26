@@ -73,6 +73,40 @@
   font-size: clamp(1.9rem, 4.4vw, 3rem);
 }
 
+.river-brats__how-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--rb-accent) 55%, #444);
+  background: color-mix(in srgb, var(--rb-accent) 12%, transparent);
+  color: var(--rb-accent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.river-brats__how-btn:hover {
+  background: color-mix(in srgb, var(--rb-accent) 22%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rb-accent) 28%, transparent);
+}
+
+.river-brats__how-btn--orange {
+  --rb-accent: #ff6600;
+}
+
+.river-brats__how-btn--green {
+  --rb-accent: #39ff14;
+}
+
 .river-brats__hero-accent--orange {
   color: var(--neon-orange, #ff6600);
   text-shadow: 0 0 30px rgba(255, 102, 0, 0.4);

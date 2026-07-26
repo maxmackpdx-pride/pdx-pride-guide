@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./RiverBratsIntroPopup.css";
 
-/** Bump when copy changes so returning visitors see the update once. */
-const DISMISS_KEY = "zaylist:river-brats-intro:v1";
+/**
+ * Bump when copy changes OR when we need everyone to see the intro again.
+ * v2: first ship was easy to miss / dismiss; force one more show + manual reopen.
+ */
+const DISMISS_KEY = "zaylist:river-brats-intro:v2";
 
-/** `?rbIntro=1` force-shows for preview (ignores dismissal). */
+export const RIVER_BRATS_INTRO_OPEN_EVENT = "zaylist:river-brats-intro:open";
+
+/** `?rbIntro=1` force-shows (ignores dismissal). */
 function forcedPreview(): boolean {
   try {
     return new URLSearchParams(window.location.search).get("rbIntro") === "1";
@@ -22,19 +27,43 @@ function alreadyDismissed(): boolean {
   }
 }
 
+type Props = {
+  /** When true, skip auto-open (parent only mounts for manual control). Default auto. */
+  manualOnly?: boolean;
+};
+
 /**
- * One-time explainer for River Brats when someone hits Nude Beaches.
- * Dismiss = never show again (localStorage). Preview: ?rbIntro=1
+ * One-time explainer for River Brats on Nude Beaches.
+ * Auto-shows once per browser until dismissed. Re-open anytime via
+ * `window.dispatchEvent(new Event(RIVER_BRATS_INTRO_OPEN_EVENT))` or `?rbIntro=1`.
  */
-export default function RiverBratsIntroPopup() {
+export default function RiverBratsIntroPopup({ manualOnly = false }: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    const openNow = () => setOpen(true);
+    window.addEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+
+    if (manualOnly) {
+      return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+    }
+
     const forced = forcedPreview();
-    if (!forced && alreadyDismissed()) return;
-    const t = window.setTimeout(() => setOpen(true), forced ? 0 : 500);
-    return () => window.clearTimeout(t);
-  }, []);
+    if (!forced && alreadyDismissed()) {
+      return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+    }
+
+    // Next frame + short delay so layout/fonts settle; forced = immediate
+    let t = 0;
+    const raf = window.requestAnimationFrame(() => {
+      t = window.setTimeout(openNow, forced ? 0 : 200);
+    });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+      window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
+    };
+  }, [manualOnly]);
 
   const dismiss = () => {
     try {
@@ -59,15 +88,21 @@ export default function RiverBratsIntroPopup() {
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined" || !document.body) return null;
 
   return createPortal(
-    <div className="rbi-backdrop" role="presentation" onClick={dismiss}>
+    <div
+      className="rbi-backdrop"
+      role="presentation"
+      data-testid="river-brats-intro-backdrop"
+      onClick={dismiss}
+    >
       <div
         className="rbi-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="rbi-title"
+        data-testid="river-brats-intro-dialog"
         onClick={e => e.stopPropagation()}
       >
         <button type="button" className="rbi-x" onClick={dismiss} aria-label="Close">
@@ -157,9 +192,15 @@ export default function RiverBratsIntroPopup() {
         >
           Got it · let&apos;s go
         </button>
-        <p className="rbi-foot">You&apos;ll only see this once</p>
+        <p className="rbi-foot">One-time tip · reopen anytime via &ldquo;How it works&rdquo;</p>
       </div>
     </div>,
     document.body,
   );
+}
+
+/** Open the intro from elsewhere (e.g. shell help button). */
+export function openRiverBratsIntro() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(RIVER_BRATS_INTRO_OPEN_EVENT));
 }

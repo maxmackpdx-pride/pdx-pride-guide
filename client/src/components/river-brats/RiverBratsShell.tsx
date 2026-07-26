@@ -5,6 +5,7 @@ import { RIVER_BRATS_SHORE_TABS, readRiverBratsShore, type RiverBratsShoreTab } 
 import RiverBratsCheckIn from "./RiverBratsCheckIn";
 import RiverBratsCarpool from "./RiverBratsCarpool";
 import RiverBratsSpotted from "./RiverBratsSpotted";
+import { openRiverBratsIntro } from "./RiverBratsIntroPopup";
 import "./RiverBrats.css";
 
 type Props = {
@@ -91,6 +92,14 @@ export default function RiverBratsShell({ beachId }: Props) {
           Chat opens the moment you check in — one room for every day you&apos;re going. Multi-day
           plans keep you in until 12 hours after your last beach day ends. No addresses, no drama.
         </p>
+        <button
+          type="button"
+          className={`river-brats__how-btn river-brats__how-btn--${accent}`}
+          onClick={() => openRiverBratsIntro()}
+          data-testid="river-brats-how-it-works"
+        >
+          How it works
+        </button>
       </div>
 
       <nav className="events-tab-bar river-brats__tabs" aria-label="River Brats">
