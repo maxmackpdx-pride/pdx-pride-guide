@@ -9,7 +9,7 @@ import { isLocalDemo } from "@/lib/localDemo";
 import { getLocalDemoNextMoves, getLocalDemoWhoToFollow } from "@/lib/localDemoHubFeed";
 import HubPersonRow from "./sections/HubPersonRow";
 
-import PwaInstallBanner from "@/components/PwaInstallBanner";
+import InstallAppCard from "@/components/InstallAppCard";
 import HubV2Shell from "./HubV2Shell";
 import HubFeed from "./sections/HubFeed";
 import HubProfile from "./sections/HubProfile";
@@ -290,10 +290,10 @@ export default function HubV2({
 
   const center = (
     <>
-      <PwaInstallBanner />
       {errorBanner}
       {(section === "feed" || section === "post") && (
         <>
+          <InstallAppCard />
           <HubWeatherForecast />
           <HubFeed key="feed" canPostToFeed={canPostToFeed} />
         </>
