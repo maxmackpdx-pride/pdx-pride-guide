@@ -13035,10 +13035,16 @@ export const storage: IStorage = {
     const items: HubFeedItem[] = [];
 
     // Venue parties we listed on the guide + every user-submitted event.
-    // Order by party date when available so bulk seed timestamps don't clump.
+    // Order by LISTING time (created_at), the same axis the feed sorts on, so
+    // newly-listed events are always in the candidate set. (Ordering by the
+    // future party date meant that once 80+ upcoming events existed, a new
+    // near-date event never became a candidate and never showed in the feed.)
+    // The venue/series condense pass collapses bulk seeds per venue, so a
+    // larger candidate pool doesn't flood the feed.
     const recentEvents = sqlite.prepare(`
       SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
              date_start AS dateStart, admission, created_at AS createdAt,
+             poster_image_url AS posterImageUrl,
              claimed_by AS claimedBy, submitted_by AS submittedBy, source
       FROM events
       WHERE status = 'LIVE'
@@ -13049,8 +13055,8 @@ export const storage: IStorage = {
           OR datetime(created_at) >= datetime('now', '-60 days')
           OR date(date_start) >= date('now', '-14 days')
         )
-      ORDER BY COALESCE(date_start, created_at) DESC
-      LIMIT 80
+      ORDER BY datetime(COALESCE(created_at, date_start)) DESC
+      LIMIT 200
     `).all() as any[];
     const rawEventItems: HubFeedItem[] = [];
     for (const evt of recentEvents) {
@@ -13090,7 +13096,7 @@ export const storage: IStorage = {
     const hostRows = sqlite.prepare(`
       SELECT hm.id, hm.body, hm.created_at AS createdAt, hm.event_id AS eventId,
              e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.admission,
+             e.date_start AS dateStart, e.admission, e.poster_image_url AS posterImageUrl,
              u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM host_messages hm
@@ -13117,7 +13123,7 @@ export const storage: IStorage = {
       SELECT a.id, a.message, a.is_anonymous AS isAnonymous, a.created_at AS createdAt,
              a.user_id AS userId, a.event_id AS eventId,
              e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
-             e.date_start AS dateStart, e.admission,
+             e.date_start AS dateStart, e.admission, e.poster_image_url AS posterImageUrl,
              u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
