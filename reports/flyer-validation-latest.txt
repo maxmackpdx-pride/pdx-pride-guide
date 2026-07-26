@@ -1,46 +1,39 @@
 
 ▸ flyers/gaylabration-radiance.jpg
-  ✗ title: expected "Gaylabration: Radiance" got "Reorder"
-  ✗ start_date: expected "2026-07-18" got "2024-07-18"
-  ✗ end_date: expected "2026-07-19" got "2024-07-19"
+  ✓ title: expected "Gaylabration: Radiance" got "Gaylabration: Radiance"
+  ✓ start_date: expected "2026-07-18" got "2026-07-18"
+  ✓ end_date: expected "2026-07-19" got "2026-07-19"
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Crystal Ballroom" got "Crystal Ballroom"
-  model: groq:llama-3.3-70b-versatile
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound, whisper-large-v3, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, openai/gpt-oss-20b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, groq/compound-mini, openai/gpt-os)
-  ! Vision via gemini-vision failed (Vision HTTP 503; tried [gemini-2.0-flash, gemini-flash-lite-latest]. /models ok: 57 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.0-flash, models/gemini-2.0-flash-001, models/gemini-2.0-flash-lite-001, models/gemini-2.0-flash-lite, models/gemini-2.5-flash-preview-tt)
-  ! All vision providers failed - text fallback
+  model: gemini-vision:gemini-flash-lite-latest
+  ! Vision model gemini-2.0-flash unavailable (HTTP …) - auto-discovered gemini-flash-lite-latest
 
 ▸ flyers/spellman-spectacle.webp
   ✓ title: expected "A Spellman Spectacle" got "A Spellman Spectacle: A 30th Anniversary Special"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
   ✓ venue: expected "The Get Down" got "The Get Down"
-  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6th Ave, Portland OR 97214"
+  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6th Ave, Portland, OR 97214"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, qwen/qwen3.6-27b, canopylabs/orpheus-v1-english, whisper-large-v3, groq/compound, meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-120b, whis)
-  ! Vision model gemini-2.0-flash unavailable (HTTP 404/429) - auto-discovered gemini-flash-lite-latest
 
 ▸ flyers/sports-bra-pride-block-party.jpg
   ✓ title: expected "The Sports Bra Pride 5th Annual Block Party" got "Sports Bra Pride 5th Annual Block Party"
   ✓ venue: expected "The Sports Bra" got "The Sports Bra"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, openai/gpt-oss-120b, allam-2-7b, whisper-large-v3, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, gro)
 
 ▸ flyers/stank-yes-coach.jpg
-  ✓ title: expected "Stank: Yes Coach — PDX Pride" got "Stank Yes Coach"
+  ✓ title: expected "Stank: Yes Coach — PDX Pride" got "Stank Yes Coach: PDX Pride"
   ✓ start_date: expected "2026-07-18" got "2026-07-18"
   ✓ end_date: expected "2026-07-19" got "2026-07-19"
   ✓ time: expected "20:00" got "20:00"
   ✓ venue: expected "Sanctuary" got "Sanctuary"
-  ✓ address: expected "33 NW 9th Ave" got "33 NW 9th Ave, Portland, OR"
+  ✓ address: expected "33 NW 9th Ave" got "33 NW 9th Ave"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound-mini, canopylabs/orpheus-v1-english, whisper-large-v3, canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, allam-2-7b, meta-llama/llama-prompt-g)
 
 ▸ flyers/stfu-femdom-play-party.jpg
   ✓ title: expected "Mistress Viola's Femdom Play Party" got "Mistress Viola's Femdom Play Party"
-  ✓ start_date: expected "2026-07-16" got "2026-07-16"
+  ✗ start_date: expected "2026-07-16" got "2027-07-16"
   ✓ venue: expected "The Den" got "The Den"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[qwen/qwen3.6-27b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b, openai/gpt-oss-120b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound, whisper-l)
 
 ▸ flyers/treasure-trail-bearracuda.jpg
   ✓ title: expected "Treasure Trail" got "Treasure Trail"
@@ -49,7 +42,6 @@
   ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9th, Portland, OR"
   ✓ url: expected "https://www.bearracuda.com" got "https://www.bearracuda.com"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-120b, groq/compound-mini, canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, groq/compound, allam-2-7b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, meta-)
 
 ▸ flyers/yes-sir-pride-closer.jpg
   ✓ title: expected "Yes Sir: Portland Pride Closer" got "Portland Pride Closer"
@@ -58,22 +50,20 @@
   ✓ time: expected "21:00" got "21:00"
   ✓ venue: expected "Realm PDX" got "REALM PDX"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, groq/compound-mini, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-20b, whisper-large-v3, meta-llama/llama-prompt-guard-2-22m, groq/compound, ca)
 
 ▸ flyers/sasha-colby-live.jpg
-  ✓ title: expected "Sasha Colby Live" got "Sasha Colby Live: Portland Pride"
+  ✓ title: expected "Sasha Colby Live" got "Sasha Colby Live"
   model: gemini-vision:gemini-flash-lite-latest
-  ! Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3, groq/compound, openai/gpt-oss-20b, llama-3.1-8b-instant, whisper-large-v3-turbo, canopylabs/orp)
 
 ══ Field accuracy ══
-  title       7/8  (88%)
+  title       8/8  (100%)
   start_date  5/6  (83%)
-  end_date    2/3  (67%)
+  end_date    3/3  (100%)
   time        4/4  (100%)
   venue       6/6  (100%)
   address     3/3  (100%)
   url         1/1  (100%)
 
-  OVERALL     28/31  (90%)
+  OVERALL     30/31  (97%)
   Flyers: 8/8 processed
   Report written: reports/flyer-validation-latest.json

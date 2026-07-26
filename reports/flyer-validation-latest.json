@@ -1,8 +1,8 @@
 {
-  "overall": 90,
+  "overall": 97,
   "perField": {
     "title": {
-      "hit": 7,
+      "hit": 8,
       "scored": 8
     },
     "start_date": {
@@ -10,7 +10,7 @@
       "scored": 6
     },
     "end_date": {
-      "hit": 2,
+      "hit": 3,
       "scored": 3
     },
     "time": {
@@ -35,28 +35,26 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 59,
-      "model": "groq:llama-3.3-70b-versatile",
+      "parseConfidence": 95,
+      "model": "gemini-vision:gemini-flash-lite-latest",
       "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound, whisper-large-v3, canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, openai/gpt-oss-20b, llama-3.1-8b-instant, meta-llama/llama-prompt-guard-2-22m, groq/compound-mini, openai/gpt-os)",
-        "Vision via gemini-vision failed (Vision HTTP 503; tried [gemini-2.0-flash, gemini-flash-lite-latest]. /models ok: 57 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.0-flash, models/gemini-2.0-flash-001, models/gemini-2.0-flash-lite-001, models/gemini-2.0-flash-lite, models/gemini-2.5-flash-preview-tt)",
-        "All vision providers failed - text fallback"
+        "Vision model gemini-2.0-flash unavailable (HTTP …) - auto-discovered gemini-flash-lite-latest"
       ],
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
-          "actual": "Reorder",
-          "hit": false
+          "actual": "Gaylabration: Radiance",
+          "hit": true
         },
         "start_date": {
           "expected": "2026-07-18",
-          "actual": "2024-07-18",
-          "hit": false
+          "actual": "2026-07-18",
+          "hit": true
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": "2024-07-19",
-          "hit": false
+          "actual": "2026-07-19",
+          "hit": true
         },
         "time": {
           "expected": "21:00",
@@ -86,10 +84,7 @@
       "ocrConfidence": 63,
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-20b, qwen/qwen3.6-27b, canopylabs/orpheus-v1-english, whisper-large-v3, groq/compound, meta-llama/llama-prompt-guard-2-86m, meta-llama/llama-prompt-guard-2-22m, openai/gpt-oss-120b, whis)",
-        "Vision model gemini-2.0-flash unavailable (HTTP 404/429) - auto-discovered gemini-flash-lite-latest"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
@@ -118,7 +113,7 @@
         },
         "address": {
           "expected": "680 SE 6th Ave, Portland OR 97214",
-          "actual": "680 SE 6th Ave, Portland OR 97214",
+          "actual": "680 SE 6th Ave, Portland, OR 97214",
           "hit": true
         },
         "url": {
@@ -132,11 +127,9 @@
       "path": "flyers/sports-bra-pride-block-party.jpg",
       "ok": true,
       "ocrConfidence": 0,
-      "parseConfidence": 60,
+      "parseConfidence": 70,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[canopylabs/orpheus-v1-english, llama-3.3-70b-versatile, openai/gpt-oss-120b, allam-2-7b, whisper-large-v3, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3-turbo, openai/gpt-oss-safeguard-20b, gro)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "The Sports Bra Pride 5th Annual Block Party",
@@ -181,13 +174,11 @@
       "ocrConfidence": 41,
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[groq/compound-mini, canopylabs/orpheus-v1-english, whisper-large-v3, canopylabs/orpheus-arabic-saudi, meta-llama/llama-prompt-guard-2-22m, llama-3.3-70b-versatile, allam-2-7b, meta-llama/llama-prompt-g)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "Stank Yes Coach",
+          "actual": "Stank Yes Coach: PDX Pride",
           "hit": true
         },
         "start_date": {
@@ -212,7 +203,7 @@
         },
         "address": {
           "expected": "33 NW 9th Ave",
-          "actual": "33 NW 9th Ave, Portland, OR",
+          "actual": "33 NW 9th Ave",
           "hit": true
         },
         "url": {
@@ -228,9 +219,7 @@
       "ocrConfidence": 33,
       "parseConfidence": 90,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[qwen/qwen3.6-27b, whisper-large-v3, canopylabs/orpheus-arabic-saudi, openai/gpt-oss-20b, openai/gpt-oss-120b, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, groq/compound, whisper-l)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "Mistress Viola's Femdom Play Party",
@@ -239,12 +228,12 @@
         },
         "start_date": {
           "expected": "2026-07-16",
-          "actual": "2026-07-16",
-          "hit": true
+          "actual": "2027-07-16",
+          "hit": false
         },
         "end_date": {
           "expected": null,
-          "actual": "2026-07-16",
+          "actual": null,
           "hit": null
         },
         "time": {
@@ -275,9 +264,7 @@
       "ocrConfidence": 32,
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[whisper-large-v3-turbo, openai/gpt-oss-120b, groq/compound-mini, canopylabs/orpheus-v1-english, qwen/qwen3.6-27b, groq/compound, allam-2-7b, llama-3.3-70b-versatile, openai/gpt-oss-safeguard-20b, meta-)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
@@ -322,9 +309,7 @@
       "ocrConfidence": 46,
       "parseConfidence": 95,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[llama-3.1-8b-instant, groq/compound-mini, openai/gpt-oss-safeguard-20b, meta-llama/llama-prompt-guard-2-86m, openai/gpt-oss-20b, whisper-large-v3, meta-llama/llama-prompt-guard-2-22m, groq/compound, ca)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
@@ -367,15 +352,13 @@
       "path": "flyers/sasha-colby-live.jpg",
       "ok": true,
       "ocrConfidence": 58,
-      "parseConfidence": 70,
+      "parseConfidence": 60,
       "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [
-        "Vision via groq-vision failed (Vision HTTP 404; tried [meta-llama/llama-4-scout-17b-16e-instruct]. /models ok: 15 models, sample=[openai/gpt-oss-safeguard-20b, openai/gpt-oss-120b, meta-llama/llama-prompt-guard-2-86m, whisper-large-v3, groq/compound, openai/gpt-oss-20b, llama-3.1-8b-instant, whisper-large-v3-turbo, canopylabs/orp)"
-      ],
+      "warnings": [],
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
-          "actual": "Sasha Colby Live: Portland Pride",
+          "actual": "Sasha Colby Live",
           "hit": true
         },
         "start_date": {
