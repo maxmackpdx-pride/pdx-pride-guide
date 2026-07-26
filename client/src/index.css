@@ -3278,9 +3278,9 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   }
 }
 
-/* Events poster grid - ~1.5× larger tiles */
+/* Events poster grid - denser gap; column count scales with viewport (see below) */
 .events-page .events-poster-grid {
-  gap: 15px;
+  gap: 14px;
 }
 
 .events-page .event-type-tag--sm {
@@ -8336,10 +8336,20 @@ footer a:hover { color: #00FFFF !important; }
   }
 }
 
+/*
+ * Events poster grid - scales with window width.
+ * Fluid auto-fill so wide desktops get more columns (≈6 full-screen),
+ * not a hard 4 that leaves huge tiles.
+ */
 .events-poster-grid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.events-page .events-poster-grid {
+  /* ~2 on narrow phones, then auto-fill as width allows */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr));
 }
 
 @media (min-width: 640px) {
@@ -8348,7 +8358,8 @@ footer a:hover { color: #00FFFF !important; }
   }
 
   .events-page .events-poster-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* tablet: ~3–4 depending on width */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
   }
 }
 
@@ -8358,17 +8369,38 @@ footer a:hover { color: #00FFFF !important; }
   }
 
   .events-page .events-poster-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* desktop: ~4–5 */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .events-poster-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .events-page .events-poster-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* large desktop: ~5–6 */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  .events-poster-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .events-page .events-poster-grid {
+    /* full-screen / ultrawide: target 6 across */
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1920px) {
+  .events-page .events-poster-grid {
+    /* keep cards readable past 6 if the board is very wide */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    max-width: none;
   }
 }
 
