@@ -2,13 +2,13 @@
   "id": "/",
   "name": "Zaylist",
   "short_name": "Zaylist",
-  "description": "Portland Pride 2026 - events, community, gifting, and Gig Werk",
+  "description": "Portland's queer events, all in one place.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
   "icons": [
     {
       "src": "/icons/apple-touch-icon.png",
@@ -35,8 +35,8 @@
       "purpose": "maskable"
     },
     {
-      "src": "/icons/badge-72.png",
-      "sizes": "72x72",
+      "src": "/icons/icon-mono-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "monochrome"
     }
