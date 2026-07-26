@@ -71,18 +71,20 @@ export const ANDROID_STEPS: Step[] = [
   { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
 ];
 
-// On-brand, self-contained visual how-to.
-export function InstallSteps({ steps }: { steps: Step[] }) {
+// On-brand, self-contained visual how-to. `compact` tightens spacing so the
+// modal fits smaller phones without scrolling.
+export function InstallSteps({ steps, compact = false }: { steps: Step[]; compact?: boolean }) {
+  const box = compact ? 38 : 44;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: compact ? 8 : 10 }}>
       {steps.map((s, i) => (
         <div
           key={i}
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 13,
-            padding: "11px 13px",
+            gap: compact ? 11 : 13,
+            padding: compact ? "9px 11px" : "11px 13px",
             background: "#0c0c0f",
             border: "1px solid rgba(25,227,255,0.28)",
             borderRadius: 12,
@@ -91,8 +93,8 @@ export function InstallSteps({ steps }: { steps: Step[] }) {
           <div
             style={{
               position: "relative",
-              width: 44,
-              height: 44,
+              width: box,
+              height: box,
               flex: "none",
               display: "grid",
               placeItems: "center",
@@ -124,8 +126,8 @@ export function InstallSteps({ steps }: { steps: Step[] }) {
             </span>
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ color: "#e8e8ea", fontSize: "0.95rem", lineHeight: 1.3 }}>{s.title}</div>
-            <div style={{ color: "#8a8a92", fontSize: "0.8rem", lineHeight: 1.4, marginTop: 2 }}>{s.sub}</div>
+            <div style={{ color: "#e8e8ea", fontSize: compact ? "0.9rem" : "0.95rem", lineHeight: 1.3 }}>{s.title}</div>
+            <div style={{ color: "#8a8a92", fontSize: compact ? "0.78rem" : "0.8rem", lineHeight: 1.4, marginTop: 2 }}>{s.sub}</div>
           </div>
         </div>
       ))}

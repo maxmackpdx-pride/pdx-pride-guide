@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import GlitchLogo from "@/components/GlitchLogo";
+import InstallModal from "@/components/pwa/InstallModal";
+import { isAndroidDevice, isIosDevice, isStandalonePwa } from "@/lib/pwa";
 import { prefersStillMotion } from "@/lib/motion";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroLoop from "@/assets/home/hero-loop.mp4";
@@ -33,8 +35,17 @@ export default function HomeHero() {
   const { user } = useAuth();
   const { calmMode } = useTheme();
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
+  // DOWNLOAD APP button (mirrors Share): only on a phone browser that isn't the
+  // already-installed app. Detected after mount so SSR/hydration stays stable.
+  const [canInstall, setCanInstall] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (isStandalonePwa()) return;
+    if (isIosDevice() || isAndroidDevice()) setCanInstall(true);
+  }, []);
   // Render the video only while it can actually autoplay. In Calm / reduced-motion
   //  -  or when the browser blocks muted autoplay (e.g. iOS Low Power Mode)  -  fall
   // back to the poster still so iOS never overlays its inline "play" button.
@@ -229,6 +240,25 @@ export default function HomeHero() {
         </div>
       </div>
 
+      {/* Mobile-only DOWNLOAD APP — sits top-left, across from Share */}
+      {canInstall && (
+        <button
+          type="button"
+          className="home-hero__download"
+          onClick={() => setInstallOpen(true)}
+          aria-haspopup="dialog"
+          aria-label="Download the app"
+          data-testid="home-hero-download"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M8 10l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="home-hero__share-label">Download app</span>
+        </button>
+      )}
+
       {/* Mobile-only site share */}
       <button
         type="button"
@@ -277,6 +307,8 @@ export default function HomeHero() {
           Headed to the river? →
         </Link>
       </div>
+
+      <InstallModal open={installOpen} onClose={() => setInstallOpen(false)} />
     </section>
   );
 }

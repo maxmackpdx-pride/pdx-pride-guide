@@ -35,11 +35,11 @@ export default function PushNotificationPrompt() {
     if (!user) return;
     if (sessionStorage.getItem(DISMISS_KEY) === "1") return;
 
-    // iPhone/iPad in Safari, not yet installed → "Save as Web App" how-to.
-    // Independent of push config: iOS can't do web push until it's a home-screen app.
+    // iPhone/iPad in Safari, not yet installed: DON'T auto-pop the install modal.
+    // The hub Install-app card and the home-hero DOWNLOAD APP button cover this on
+    // demand now, so the automatic nag is removed. (iOS can't web-push until it's a
+    // home-screen app anyway, so there's no push flow to fall through to here.)
     if (shouldShowInstallBeforePush()) {
-      setInstallMode("ios");
-      setVisible(true);
       return;
     }
 

@@ -77,6 +77,40 @@
   line-height: 1;
 }
 
+/* DOWNLOAD APP — mirror of Share, anchored top-left (across from it). */
+.home-hero__download {
+  display: none;
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: max(12px, env(safe-area-inset-left, 0px));
+  z-index: 5;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(6, 6, 10, 0.55);
+  color: var(--text-hi, #fff);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.home-hero__download:hover,
+.home-hero__download:focus-visible {
+  border-color: var(--neon-cyan, #19e3ff);
+  color: var(--neon-cyan, #19e3ff);
+  outline: none;
+}
+
 @media (max-width: 900px) {
   .home-hero__share {
     display: inline-flex;
@@ -88,6 +122,20 @@
   }
 
   .home-hero__share svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .home-hero__download {
+    display: inline-flex;
+    top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px));
+    min-height: 41px;
+    padding: 7px 12px;
+    font-size: 0.86rem;
+    gap: 6px;
+  }
+
+  .home-hero__download svg {
     width: 18px;
     height: 18px;
   }
