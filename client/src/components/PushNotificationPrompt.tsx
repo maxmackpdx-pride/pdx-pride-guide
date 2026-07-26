@@ -327,13 +327,13 @@ const b = (t: string) => <strong style={{ color: "#fff" }}>{t}</strong>;
 const IOS_STEPS: Step[] = [
   { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "In Safari's toolbar - the ⬆️ square, usually bottom-center." },
   { icon: <AddGlyph />, title: <>Choose {b("Add to Home Screen")}</>, sub: "Scroll the share menu down a little if you don't see it." },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
+  { icon: <HomeIcon src="/icons/zaylist-180.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
 ];
 
 const ANDROID_STEPS: Step[] = [
   { icon: <MenuGlyph />, title: <>Tap the {b("⋮ menu")}</>, sub: "Top-right corner of Chrome." },
   { icon: <InstallGlyph />, title: <>Choose {b("Install app")}</>, sub: "Some phones label it \"Add to Home screen.\"" },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
+  { icon: <HomeIcon src="/icons/zaylist-180.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app - icon and all." },
 ];
 
 // On-brand, self-contained visual how-to. No screenshots - the exact controls

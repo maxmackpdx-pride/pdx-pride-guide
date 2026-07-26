@@ -587,12 +587,12 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? livePlace.name
         : liveProfile
           ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-          : "Zaylist | Portland Pride Week: Events, Gigs, Missed Connections",
+          : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory",
     type: liveEvent || livePlace || liveProfile ? "profile" : "website",
-    // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg
+    // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg (1200×630)
     imageType: pageImageIsCard ? "image/png" : "image/jpeg",
-    imageWidth: pageImageIsCard ? 1200 : 1024,
-    imageHeight: pageImageIsCard ? 630 : 578,
+    imageWidth: 1200,
+    imageHeight: 630,
   });
 
   if (!out.includes("zaylist:event-count")) {

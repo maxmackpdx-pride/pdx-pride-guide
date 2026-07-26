@@ -1,6 +1,19 @@
-# Zaylist brand reference assets (not wired into the UI)
+# Zaylist brand reference assets
 
-wordmark/zaylist-wordmark-neon.png   — ZAYLIST neon wordmark, transparent bg (for dark surfaces)
-wordmark/zaylist-wordmark-on-white.png — ZAYLIST neon wordmark on white (light surfaces)
-icon/zaylist-z-icon-source.jpg        — rainbow Z favicon source (Z on black)
-icon/zaylist-z-app-tile-source.png    — glossy Z app-tile source (used to generate /icons/*)
+## Wordmarks
+- `wordmark/zaylist-wordmark-primary.png` — ZAYLIST + PORTLAND neon lockup (site hero + OG)
+- `wordmark/zaylist-wordmark-neon.png` — full neon wordmark, transparent
+- `wordmark/zaylist-wordmark-on-white.png` — neon on white
+
+## App face (home screen / PWA) — source of truth
+See `app-face/` and repo root install from Downloads/handoff:
+- Live icons: `/icons/zaylist-{180,192,512,mask,mono,1024}.png`
+- Spec: `app-face/app-face.json` + `App Face Standards.html` (handoff)
+- **Seam is the only color element.** Letter is cream. Never round corners in the file.
+
+## Social / OG
+- `social/zaylist-og-1200x630.png` — default share card (also `client/public/og-preview.jpg`)
+- Rebuild: `node script/build-og-preview.mjs`
+
+## Line icons
+- `../line-icons/*.svg` — 32 product line icons from icons_export

@@ -38,7 +38,7 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
 
     const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
     const image = options?.image || "https://www.zaylist.com/og-preview.jpg";
-    const imageAlt = options?.imageAlt || (options?.image ? title : "Zaylist | Portland Pride Week: Events, Gigs, Missed Connections");
+    const imageAlt = options?.imageAlt || (options?.image ? title : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory");
     const type = options?.type || "website";
 
     const ogKeys = [
@@ -63,8 +63,8 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     upsertMeta("name", "twitter:image:alt", imageAlt);
     upsertMeta("property", "og:site_name", "Zaylist");
     if (!options?.image) {
-      upsertMeta("property", "og:image:width", "1024");
-      upsertMeta("property", "og:image:height", "578");
+      upsertMeta("property", "og:image:width", "1200");
+      upsertMeta("property", "og:image:height", "630");
       upsertMeta("property", "og:image:alt", imageAlt);
       upsertMeta("property", "og:image:secure_url", image);
     }
