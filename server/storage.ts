@@ -3899,6 +3899,28 @@ function runBootMigrationsOnce() {
     recordBootMigration("sync_event_map_coordinates_v1");
   }
 
+  // Squarespace (and similar) sometimes ship map pins outside PDX (Hawks → NYC).
+  // Rewrite LIVE pins that fall outside greater Portland using directory match.
+  if (!hasBootMigration("fix_out_of_metro_event_coords_v1")) {
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const rows = sqlite.prepare(`
+      SELECT id, venue_name AS venueName, address, lat, lng
+      FROM events
+      WHERE status = 'LIVE' AND lat IS NOT NULL AND lng IS NOT NULL
+        AND NOT (lat >= 45.0 AND lat <= 46.1 AND lng >= -123.8 AND lng <= -121.5)
+    `).all() as Array<{ id: number; venueName: string; address: string | null; lat: number | null; lng: number | null }>;
+    for (const row of rows) {
+      const merged = mergeMapCoordinates(
+        { venueName: row.venueName, address: row.address, lat: null, lng: null },
+        directoryRows,
+      );
+      if (merged.lat != null && merged.lng != null) {
+        sqlite.prepare(`UPDATE events SET lat = ?, lng = ? WHERE id = ?`).run(merged.lat, merged.lng, row.id);
+      }
+    }
+    recordBootMigration("fix_out_of_metro_event_coords_v1");
+  }
+
   // Fix brohoejams talent row: the DJ credit on yes_coach event has tucker's user_id instead of brohoejams'
   if (!hasBootMigration("fix_brohoejams_talent_v1")) {
     const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
