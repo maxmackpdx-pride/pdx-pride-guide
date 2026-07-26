@@ -9,9 +9,25 @@ import path from "node:path";
 const viteLogger = createLogger();
 
 export async function setupVite(server: Server, app: Express) {
+  const listenPort = (() => {
+    try {
+      const addr = server.address();
+      if (addr && typeof addr === "object" && "port" in addr) return addr.port;
+    } catch {
+      /* ignore */
+    }
+    return Number(process.env.PORT) || 5050;
+  })();
+
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server, path: "/vite-hmr" },
+    // Same HTTP port as Express (not Vite's default 5173) so Chrome HMR works.
+    hmr: {
+      server,
+      path: "/vite-hmr",
+      clientPort: listenPort,
+      protocol: "ws" as const,
+    },
     allowedHosts: true as const,
   };
 
