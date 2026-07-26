@@ -179,8 +179,8 @@ export default function ListingCard({
           venue={event.venueName}
           venueHref={venueHref}
           address={address}
-          ticketHref={ticketHref}
-          ticketLabel={ticketLabel}
+          /* Grid mini-cards: open modal for details/tickets — no inline CTAs */
+          ticketHref={undefined}
           when={when}
           day={day}
           image={image}

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { CommunityStandardsSignupBlock } from "@/components/CommunityStandardsGate";
@@ -76,10 +77,12 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
     } finally { setLoading(false); }
   };
 
-  return (
+  // Always portal to body so login is never trapped inside event cards / modals
+  // that use transform, overflow, or stacking contexts (claim-this-event flow).
+  return createPortal(
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 9999,
+        position: "fixed", inset: 0, zIndex: 100000,
         background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center",
         backdropFilter: "blur(4px)",
       }}
@@ -196,7 +199,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
