@@ -69,7 +69,7 @@ export type Business = {
   lat: number | null;
   lng: number | null;
   isNew: boolean;
-  /** OPEN (default) | CLOSED — closed places are not returned by public directory list. */
+  /** OPEN (default) | CLOSED  -  closed places are not returned by public directory list. */
   status?: string;
   /** YYYY-MM-DD when status is CLOSED. */
   closedAt?: string | null;

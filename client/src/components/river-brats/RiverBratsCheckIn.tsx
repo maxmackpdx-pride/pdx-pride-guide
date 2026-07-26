@@ -269,7 +269,7 @@ export default function RiverBratsCheckIn({
         description:
           visibility === "anonymous"
             ? `You're on the ${dayLabel} list anonymously (counted, not in chat).`
-            : `You're on the ${dayLabel} list — group chat is open now. Multi-day plans keep you in longer.`,
+            : `You're on the ${dayLabel} list  -  group chat is open now. Multi-day plans keep you in longer.`,
       });
       if (row?.id) {
         // Keep local calendar payload id for ICS UID stability after first save.
@@ -615,7 +615,7 @@ export default function RiverBratsCheckIn({
             )}
           </div>
           <p className="rb-checkin__fine">
-            Plan up to 7 days ahead. Chat opens when you check in — one group room for every day
+            Plan up to 7 days ahead. Chat opens when you check in  -  one group room for every day
             you&apos;re going. You stay until 12 hours after that day ends. Be kind; keep exact
             meetup details to DMs.
           </p>

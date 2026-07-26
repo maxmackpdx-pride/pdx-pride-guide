@@ -10,7 +10,7 @@ export default function Sponsors() {
 
   usePageSeo(
     "Sponsors | Zaylist",
-    "Local businesses can help keep browsing free. Labeled support and ads — never pay-to-rank.",
+    "Local businesses can help keep browsing free. Labeled support and ads  -  never pay-to-rank.",
   );
 
   return (
@@ -27,13 +27,13 @@ export default function Sponsors() {
         <ScrollReveal>
           <p className="board-copy">
             Here's the deal. Community listings stay free to browse. Support is{" "}
-            <strong>labeled</strong> — featured posts, ads, and other partner spots as I grow them.
+            <strong>labeled</strong>  -  featured posts, ads, and other partner spots as I grow them.
             What you cannot buy: the organic order of the list, burying someone else's night, or my
             silence about who paid. Ranking is not for sale. Trust is the product.
           </p>
           <p className="board-copy">
             Packages will get clearer over time. If your business belongs here, you probably already
-            know it — write me and say what you had in mind.
+            know it  -  write me and say what you had in mind.
           </p>
 
           <div style={{ marginTop: 28 }}>

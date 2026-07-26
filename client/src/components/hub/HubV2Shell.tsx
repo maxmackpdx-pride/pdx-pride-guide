@@ -34,6 +34,15 @@ type NavItem = {
   posterOnly?: boolean;
 };
 
+
+const NAV_ACCENTS: Record<string, string> = {
+  feed: "var(--panel-cyan, #19e3ff)",
+  profile: "var(--panel-magenta, #ff1fa0)",
+  events: "var(--panel-lime, #c8fa3c)",
+  people: "var(--panel-purple, #a78bfa)",
+  settings: "var(--panel-orange, #ff8a3d)",
+};
+
 const MEMBER_NAV: NavItem[] = [
   { key: "feed", label: "Feed", icon: <HubIconFeed /> },
   { key: "profile", label: "Profile", icon: <HubIconProfile /> },
@@ -470,6 +479,7 @@ export default function HubV2Shell({
               key={item.key}
               type="button"
               onClick={() => pickSection(item.key)}
+              style={{ ["--nav-accent" as string]: NAV_ACCENTS[item.key] || "var(--panel-cyan)" }}
               className={`navi${section === item.key ? " on" : ""}`}
             >
               {item.icon}
@@ -493,6 +503,7 @@ export default function HubV2Shell({
               key={item.section}
               type="button"
               onClick={() => pickSection(item.section)}
+              style={{ ["--nav-accent" as string]: "var(--panel-cyan)" }}
               className={`navi${section === item.section ? " on" : ""}`}
             >
               {ADMIN_ICONS[item.section] ?? <HubIconAdmin size={18} />}

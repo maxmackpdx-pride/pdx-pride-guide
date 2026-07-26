@@ -1,4 +1,4 @@
-import { StickerBadge } from "@/components/ds/StickerBadge";
+import { Badge } from "@/components/ds/Badge";
 import "./RoleStickers.css";
 
 export type RoleStickersProps = {
@@ -11,8 +11,8 @@ export type RoleStickersProps = {
 };
 
 /**
- * Role sticker badges next to the display name (PROMOTER yellow, OWNER/ADMIN cyan).
- * Only renders stickers the member earned. Driven by live API flags only.
+ * Role tags next to the display name (PROMOTER yellow, OWNER/ADMIN cyan).
+ * Uses Badge (not StickerBadge) - stickers are for slogans only.
  */
 export default function RoleStickers({
   isPromoter,
@@ -26,21 +26,21 @@ export default function RoleStickers({
   if (!showPromoter && !showOwner && !showAdmin) return null;
 
   return (
-    <span className={`pp-role-stickers${className ? ` ${className}` : ""}`}>
+    <span className={`pp-role-tags${className ? ` ${className}` : ""}`}>
       {showPromoter && (
-        <StickerBadge color="yellow" size="sm" rotate={-3} className="pp-role-sticker">
+        <Badge variant="outline" size="sm" color="yellow" className="pp-role-tag">
           PROMOTER
-        </StickerBadge>
+        </Badge>
       )}
       {showOwner && (
-        <StickerBadge color="cyan" size="sm" rotate={2} className="pp-role-sticker">
+        <Badge variant="outline" size="sm" color="cyan" className="pp-role-tag">
           OWNER
-        </StickerBadge>
+        </Badge>
       )}
       {showAdmin && (
-        <StickerBadge color="cyan" size="sm" rotate={2} className="pp-role-sticker">
+        <Badge variant="outline" size="sm" color="cyan" className="pp-role-tag">
           ADMIN
-        </StickerBadge>
+        </Badge>
       )}
     </span>
   );

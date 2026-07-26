@@ -38,6 +38,8 @@
   --radius-md:   4px;    /* default card / button */
   --radius-lg:   6px;
   --radius-xl:   8px;
+  --radius-tile: 10px;
+  --radius-panel: 12px;
   --radius-pill: 999px;
 
   /* ---- BORDERS ------------------------------------------- */
@@ -52,3 +54,5 @@
   --z-modal: 900;     /* @kind other */
   --z-toast: 1000;    /* @kind other */
 }
+
+:root { --site-header-height: 120px; --hub-side-w: 266px; }

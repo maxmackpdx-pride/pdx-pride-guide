@@ -73,7 +73,7 @@ function EasterEggOverlay({
   const [muted, setMuted] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
 
-  // Scroll lock + Escape to close (iOS-safe lock — overflow:hidden detaches the
+  // Scroll lock + Escape to close (iOS-safe lock  -  overflow:hidden detaches the
   // fixed bottom nav on iOS Safari)
   useEffect(() => {
     lockBodyScroll();

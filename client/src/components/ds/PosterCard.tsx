@@ -145,8 +145,9 @@ a.pdxBoard:hover{
 .pdxBoard__rsvp{
   font-family:var(--font-display); font-weight:var(--fw-bold); font-size:.72rem;
   letter-spacing:.06em; text-transform:uppercase; color:#050506;
-  background:var(--glass-btn-solid-bg,var(--c)); border:var(--glass-btn-solid-border,2px solid #000);
-  box-shadow:var(--glass-btn-solid-shadow);
+  background:var(--neon-yellow,#CCFF00); border:2px solid #000;
+  box-shadow:0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.55);
+  color:#050506;
   border-radius:9px; padding:5px 12px 4px; cursor:pointer; white-space:nowrap;
   flex-shrink:0; min-width:max-content;
 }
@@ -243,7 +244,7 @@ export function PosterCard({
         {venue && (venueHref
           ? <a className="pdxBoard__venue pdxBoard__venue--link" href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} ↗</a>
           : <div className="pdxBoard__venue">{venue}</div>)}
-        {/* Dense grid: neighborhood is already in `when` — skip street address to free vertical space */}
+        {/* Dense grid: neighborhood is already in `when`  -  skip street address to free vertical space */}
         {!dense && address ? <div className="pdxBoard__address">{address}</div> : null}
         {ticketHref && (
           <a className="pdxBoard__ticket pdx-glass-btn pdx-glass-btn--solid" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>

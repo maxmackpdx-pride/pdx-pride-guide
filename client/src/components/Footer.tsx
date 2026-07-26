@@ -61,7 +61,7 @@ export default function Footer() {
               decoding="async"
             />
             <p className="site-footer__tagline">
-              Built by one person in Portland. No committee, no corporate parent — just someone who loves this scene.
+              Built by one person in Portland. No committee, no corporate parent  -  just someone who loves this scene.
             </p>
             <div className="site-footer__controls">
               <FeedbackButton />
@@ -97,7 +97,7 @@ export default function Footer() {
             <SplitFlapSignoff />
           </div>
           <div className="site-footer__legal">
-            <span>Portland, Oregon. Made by Tucker — for the community, not shareholders.</span>
+            <span>Portland, Oregon. Made by Tucker  -  for the community, not shareholders.</span>
             <span className="site-footer__legal-sep" aria-hidden="true">
               ·
             </span>

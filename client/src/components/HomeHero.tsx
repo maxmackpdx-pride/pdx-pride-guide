@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
+import GlitchLogo from "@/components/GlitchLogo";
+import { prefersStillMotion } from "@/lib/motion";
 import { sharePageLink } from "@/lib/shareEvent";
 import heroLoop from "@/assets/home/hero-loop.mp4";
 import heroLoopPoster from "@/assets/home/hero-loop-poster.jpg";
@@ -24,29 +27,68 @@ const LETTER_ORBS = [
  * Multi-layer hero cutouts (must match Home.css z-order):
  *  z0 BG · z1 grain (behind neon) · z2 orbs (glow under type)
  *  z3 wordmark (color-faithful) · z4 kicker · z5 CTAs · z6 share
- * Scroll-only — no pointer. Respects reduced-motion / calm.
+ * Scroll-only  -  no pointer. Respects reduced-motion / calm.
  */
 export default function HomeHero() {
   const { user } = useAuth();
+  const { calmMode } = useTheme();
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const panelRef = useRef<HTMLElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
   // Render the video only while it can actually autoplay. In Calm / reduced-motion
-  // — or when the browser blocks muted autoplay (e.g. iOS Low Power Mode) — fall
+  //  -  or when the browser blocks muted autoplay (e.g. iOS Low Power Mode)  -  fall
   // back to the poster still so iOS never overlays its inline "play" button.
   const [showVideo, setShowVideo] = useState(() => {
     if (typeof window === "undefined") return true;
-    const still =
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      document.documentElement.classList.contains("calm-mode");
-    return !still;
+    return !prefersStillMotion();
   });
+
+  // Re-check calm / data-calm / reduced-motion mid-session so toggling Calm
+  // (ThemeContext) or document class changes pause video → poster immediately.
+  useEffect(() => {
+    const syncStill = () => {
+      if (prefersStillMotion()) {
+        setShowVideo(false);
+        const v = bgVideoRef.current;
+        if (v) {
+          try {
+            v.pause();
+          } catch {
+            /* ignore */
+          }
+        }
+      } else {
+        setShowVideo(true);
+      }
+    };
+    syncStill();
+
+    let mq: MediaQueryList | null = null;
+    const onMq = () => syncStill();
+    try {
+      mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", onMq);
+    } catch {
+      /* ignore */
+    }
+
+    const obs = new MutationObserver(syncStill);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-calm"],
+    });
+
+    return () => {
+      if (mq) mq.removeEventListener("change", onMq);
+      obs.disconnect();
+    };
+  }, [calmMode]);
 
   useEffect(() => {
     if (!showVideo) return;
     const v = bgVideoRef.current;
     if (!v) return;
-    // React's `muted` attribute doesn't always set the DOM property — force it.
+    // React's `muted` attribute doesn't always set the DOM property  -  force it.
     v.muted = true;
     let cancelled = false;
     const toPoster = () => {
@@ -61,18 +103,26 @@ export default function HomeHero() {
     return () => {
       cancelled = true;
       window.clearTimeout(t);
+      try {
+        v.pause();
+      } catch {
+        /* ignore */
+      }
     };
   }, [showVideo]);
 
   useEffect(() => {
     const el = panelRef.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (document.documentElement.classList.contains("calm-mode")) return;
+    if (prefersStillMotion()) {
+      el.style.removeProperty("--px");
+      el.style.removeProperty("--py");
+      return;
+    }
 
     let raf = 0;
     let running = true;
-    // Scroll-only parallax (no pointer) — Y only
+    // Scroll-only parallax (no pointer)  -  Y only
     let targetY = 0;
     let currentY = 0;
 
@@ -106,7 +156,7 @@ export default function HomeHero() {
       el.style.removeProperty("--px");
       el.style.removeProperty("--py");
     };
-  }, []);
+  }, [calmMode]);
 
   const shareSite = async () => {
     const who = (user?.displayName || user?.username || "").trim();
@@ -129,7 +179,7 @@ export default function HomeHero() {
       className="home-hero home-hero--parallax home-hero--cutouts"
       aria-label="Portland Zaylist hero"
     >
-      {/* z0 — atmosphere BG: muted looping video, or poster still if it can't play */}
+      {/* z0  -  atmosphere BG: muted looping video, or poster still if it can't play */}
       <div className="home-hero__bg-wrap" aria-hidden>
         {showVideo ? (
           <video
@@ -148,10 +198,10 @@ export default function HomeHero() {
         )}
       </div>
 
-      {/* z1 — film grain (behind orbs + wordmark so it never washes neon) */}
+      {/* z1  -  film grain (behind orbs + wordmark so it never washes neon) */}
       <div className="home-hero__grain" aria-hidden />
 
-      {/* z2 — spectrum orbs under the wordmark */}
+      {/* z2  -  spectrum orbs under the wordmark */}
       <div className="home-hero__aurora" aria-hidden>
         {LETTER_ORBS.map((orb, i) => (
           <span
@@ -168,10 +218,14 @@ export default function HomeHero() {
         ))}
       </div>
 
-      {/* z3 — ZAYLIST wordmark (single image; sign wrapper keeps the float bounce) */}
+      {/* z3  -  ZAYLIST wordmark (GlitchLogo ghosts; sign wrapper keeps the float bounce) */}
       <div className="home-hero__wordmark-wrap" aria-hidden>
         <div className="home-hero__wordmark-sign">
-          <img className="home-hero__wordmark" src={heroWordmark} alt="" decoding="async" />
+          <GlitchLogo
+            src={heroWordmark}
+            alt=""
+            className="home-hero__wordmark home-hero__wordmark-glitch"
+          />
         </div>
       </div>
 
@@ -214,7 +268,7 @@ export default function HomeHero() {
         <h1 className="sr-only">Zaylist</h1>
       </div>
 
-      {/* z5 — CTAs under the wordmark, almost locked */}
+      {/* z5  -  CTAs under the wordmark, almost locked */}
       <div className="home-hero__cta">
         <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
           View all events →

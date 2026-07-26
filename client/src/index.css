@@ -34,7 +34,8 @@
   --neon-orange: #FF6600;
   --neon-violet: #8800FF;
   --neon-red: #FF2400;
-  --neon-green: #00EE44;
+  --green-acid: #39FF14;
+  --neon-green: var(--green-acid); /* was #39FF14 */
   --neon-blue: #0044FF;
 
   /* Community board identity colors */
@@ -58,7 +59,7 @@
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-board-display: 'Barlow Condensed', sans-serif;
-  --font-board-mono: 'Inter', sans-serif;
+  --font-board-mono: var(--font-mono);
   --site-header-height: 120px;
   /* Loop-safe: ends on cyan so animated background-position never hard-edges orange→cyan */
   --site-rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
@@ -326,10 +327,14 @@ body::before {
     drop-shadow(0 0 18px rgba(204, 255, 0, 0.22));
 }
 
+/* Guide recipe: two tinted ghosts, screen blend, jump ~every 3.2s */
 .glitch-logo__ghost {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
   opacity: 0;
   pointer-events: none;
   mix-blend-mode: screen;
@@ -337,15 +342,14 @@ body::before {
 
 .glitch-logo__ghost--cyan {
   z-index: 2;
-  filter: saturate(2.4) brightness(1.15) hue-rotate(165deg);
-  animation: glitch-word-cyan 3s infinite steps(1, end);
+  filter: hue-rotate(150deg) saturate(2.2);
+  animation: glitch-word-cyan 3.2s steps(1) infinite;
 }
 
 .glitch-logo__ghost--magenta {
   z-index: 3;
-  filter: saturate(2.6) brightness(1.1) hue-rotate(285deg);
-  animation: glitch-word-magenta 3s infinite steps(1, end);
-  animation-delay: 0.12s;
+  filter: hue-rotate(-95deg) saturate(2.2);
+  animation: glitch-word-magenta 3.2s steps(1) infinite;
 }
 
 .site-brand-wordmark {
@@ -375,7 +379,7 @@ body::before {
   filter: none;
 }
 
-/* Slow chunky glitch - nav + hero PRIDE */
+/* Slow chunky glitch - accent text (same timing recipe as GlitchLogo) */
 .glitch-word {
   position: relative;
   display: inline-block;
@@ -446,70 +450,66 @@ body::before {
 
 .glitch-word::before {
   color: #19e3ff;
-  animation: glitch-word-cyan 3s infinite steps(1, end);
+  animation: glitch-word-cyan 3.2s steps(1) infinite;
 }
 
 .glitch-word::after {
   color: #ff1fa0;
-  animation: glitch-word-magenta 3s infinite steps(1, end);
-  animation-delay: 0.12s;
+  animation: glitch-word-magenta 3.2s steps(1) infinite;
 }
 
+/*
+  Brand glitch recipe (design-system/guidelines/brand-glitch.html):
+  3.2s steps(1), active window ~86–97%, max 3px offsets.
+*/
 @keyframes glitch-word-cyan {
-  0%, 94%, 100% {
+  0%,
+  86%,
+  100% {
     opacity: 0;
     transform: none;
-    clip-path: none;
   }
-  94.6% {
-    opacity: 0.82;
+  88% {
+    opacity: 0.85;
     transform: translate(-3px, 1px);
-    clip-path: inset(18% 0 62% 0);
   }
-  95.2% {
-    opacity: 0.55;
-    transform: translate(2px, -1px);
-    clip-path: inset(58% 0 20% 0);
-  }
-  95.8% {
+  92% {
     opacity: 0.7;
-    transform: translate(-2px, 0);
-    clip-path: inset(36% 0 44% 0);
+    transform: translate(2px, -1px);
   }
-  96.4% {
+  96% {
     opacity: 0;
     transform: none;
-    clip-path: none;
   }
 }
 
 @keyframes glitch-word-magenta {
-  0%, 95%, 100% {
+  0%,
+  86%,
+  100% {
     opacity: 0;
     transform: none;
-    clip-path: none;
   }
-  95.4% {
-    opacity: 0.78;
-    transform: translate(3px, 0);
-    clip-path: inset(42% 0 38% 0);
+  89% {
+    opacity: 0.85;
+    transform: translate(3px, -1px);
   }
-  96% {
-    opacity: 0.5;
-    transform: translate(-2px, 1px);
-    clip-path: inset(8% 0 72% 0);
+  93% {
+    opacity: 0.7;
+    transform: translate(-2px, 2px);
   }
-  96.6% {
+  97% {
     opacity: 0;
     transform: none;
-    clip-path: none;
   }
 }
 
+/* Calm / reduced motion: remove ghosts entirely (not just opacity 0) */
 @media (prefers-reduced-motion: reduce) {
   .glitch-word::before,
   .glitch-word::after,
   .glitch-logo__ghost {
+    display: none;
     animation: none;
   }
 }
@@ -535,7 +535,7 @@ body::before {
   font-size: 1.44rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  box-shadow: 4px 4px 0 rgba(255,0,204,0.45);
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.12);
 }
 
 .site-nav {
@@ -674,6 +674,11 @@ body::before {
 }
 
 .site-nav-dropdown__panel {
+  background: rgba(8, 8, 10, 0.96);
+  border: 1px solid #1c1c22;
+  border-radius: 16px;
+  box-shadow: 0 24px 48px -20px rgba(0,0,0,.9), 0 0 0 1px #000;
+  
   display: none;
 }
 
@@ -813,7 +818,7 @@ body::before {
   color: #000;
   cursor: pointer;
   font-size: calc(var(--site-nav-size) * 0.95);
-  box-shadow: 4px 4px 0 rgba(255,0,204,0.55);
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.45), 0 10px 22px -12px rgba(0,0,0,.75);
 }
 
 .site-logout-button {
@@ -9984,7 +9989,7 @@ html.calm-mode .home-live-ticker__label {
 }
 
 html.calm-mode .home-live-ticker__marquee.pdxMarquee--rainbow {
-  background: #1a1a1a !important;
+  background: linear-gradient(90deg, #00FFFF, #CCFF00, #FF00CC, #FF6600, #00FFFF) !important;
 }
 
 html.calm-mode .home-live-ticker__marquee .pdxMarquee__item,
@@ -11885,6 +11890,11 @@ html.calm-mode {
     rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 0%,
     rgba(0, 0, 0, var(--calm-hero-scrim-alpha)) 72%
   );
+  /* Seams keep brand rainbow (static). Neon chrome is greyscale above; hardcode
+     stops so --rainbow-bar is not washed to grey by the calm neon remap. */
+  --rainbow-bar: linear-gradient(90deg, #00FFFF, #CCFF00, #FF00CC, #FF6600, #00FFFF);
+  --site-rainbow-bar: linear-gradient(90deg, #00FFFF, #CCFF00, #FF00CC, #FF6600, #00FFFF);
+  --grad-flag: var(--rainbow-bar);
   font-size: 108%;
 }
 
@@ -11946,7 +11956,8 @@ html.calm-mode .glitch-logo__main {
 }
 
 html.calm-mode .glitch-logo__ghost {
-  opacity: 0 !important;
+  display: none !important;
+  animation: none !important;
 }
 
 html.calm-mode .glitch-logo {
@@ -11969,6 +11980,7 @@ html.calm-mode .glitch-word__outline {
 html.calm-mode .glitch-word::before,
 html.calm-mode .glitch-word::after {
   display: none !important;
+  animation: none !important;
 }
 
 html.calm-mode .home-hero-title-pride,
@@ -11979,7 +11991,7 @@ html.calm-mode .page-hero__accent--rainbow {
   filter: none !important;
 }
 
-/* ── Rainbow bars → solid dark gray ── */
+/* ── Rainbow bars → static brand rainbow (match effects.css freeze; not greyscale) ── */
 html.calm-mode .rainbow-bar,
 html.calm-mode .pdx-rainbow-rule,
 html.calm-mode .pdx-seam,
@@ -11987,18 +11999,23 @@ html.calm-mode .pdxMap__seam,
 html.calm-mode .site-header::after,
 html.calm-mode .site-header-rainbow-seam.pdxSeam,
 html.calm-mode .pdxSeam {
-  background: #1a1a1a !important;
+  background: var(--rainbow-bar) !important;
   background-size: auto !important;
   opacity: 1;
   animation: none !important;
   box-shadow: none !important;
+  filter: none !important;
 }
 html.calm-mode .rainbow-bar::after,
 html.calm-mode .pdx-rainbow-rule::after,
 html.calm-mode .pdx-seam::after,
 html.calm-mode .pdxMap__seam::after,
 html.calm-mode .site-header-rainbow-seam.pdxSeam::after,
-html.calm-mode .pdxSeam::after {
+html.calm-mode .pdxSeam::after,
+html.calm-mode .rainbow-bar::before,
+html.calm-mode .pdx-rainbow-rule::before,
+html.calm-mode .pdx-seam::before,
+html.calm-mode .pdxSeam::before {
   display: none !important;
 }
 
@@ -14941,7 +14958,7 @@ html.calm-mode .directory-card__owned-badge {
 .mp-footer__divider {
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #FF2400, #FF6600, #CCFF00, #00EE44, #00FFFF, #0044FF, #8800FF, #FF00CC);
+  background: linear-gradient(90deg, #FF2400, #FF6600, #CCFF00, #39FF14, #00FFFF, #0044FF, #8800FF, #FF00CC);
   margin-bottom: 40px;
 }
 
@@ -15655,7 +15672,7 @@ html.calm-mode .board-stats-band,
 .board-active-feed__kicker--cyan { color: #19e3ff; }
 .board-active-feed__kicker--magenta { color: #ff1fa0; }
 .board-active-feed__kicker--orange { color: var(--neon-orange, #FF6600); }
-.board-active-feed__kicker--green  { color: var(--neon-green, #00EE44); }
+.board-active-feed__kicker--green  { color: var(--neon-green, #39FF14); }
 
 .board-active-feed__title {
   margin: 0 !important;
@@ -15911,9 +15928,9 @@ html.calm-mode .board-stats-band,
   text-shadow: 0 0 34px rgba(255, 102, 0, 0.4);
 }
 
-.board-hero--green .board-hero__kicker { color: var(--neon-green, #00EE44); }
+.board-hero--green .board-hero__kicker { color: var(--neon-green, #39FF14); }
 .board-hero--green .board-hero__title-accent {
-  color: var(--neon-green, #00EE44);
+  color: var(--neon-green, #39FF14);
   text-shadow: 0 0 34px rgba(0, 238, 68, 0.4);
 }
 
@@ -17441,4 +17458,24 @@ html.calm-mode .category-constellation__orb {
 .glow-nudge__later:hover { color: #cfcfd6; }
 @media (prefers-reduced-motion: reduce) {
   .glow-nudge, .glow-nudge__backdrop, .glow-nudge::before { animation: none; }
+}
+
+/* WS7: Hub Z spectrum bar under mark */
+.hub-mobile-tab--hub .hub-mobile-tab__zstack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.hub-mobile-tab__zbar {
+  width: 22px;
+  height: 3px;
+  border-radius: 1px;
+  background: var(--grad-rainbow, linear-gradient(90deg, #00FFFF, #CCFF00, #FF00CC, #FF6600));
+}
+.hub-mobile-tab--center:not(.is-active) {
+  color: #6e6e76 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
 }

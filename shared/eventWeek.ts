@@ -169,7 +169,7 @@ export const DAYS: DayDef[] = EVENT_WEEK_DAY_OPTIONS.map((d) => ({
 }));
 
 export const ADM: Record<AdmKey, AdmDef> = {
-  FREE: { label: "Free", color: "#CCFF00" },
+  FREE: { label: "Free", color: "#c8fa3c" },
   TICKETED: { label: "Ticketed", color: "#00FFFF" },
   SUGGESTED_DONATION: { label: "Donation", color: "#FFB23D" },
 };

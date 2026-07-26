@@ -97,10 +97,10 @@ const HOW_IT_WORKS = [
   { title: "Stamp it done", body: "Mark filled or found when the match wraps.", color: "#ff1fa0" },
 ];
 
-/** Deep-glass board accent for Gigs (SoT §2.4 #6E3DFF). Subtype motifs differ; rim is board purple. */
+/** Deep-glass board accent for Gigs (SoT §2.4 var(--board-gigs)). Subtype motifs differ; rim is board purple. */
 const ACCENT = {
-  POSTING_GIG: "#6E3DFF",
-  LOOKING_FOR_WORK: "#6E3DFF",
+  POSTING_GIG: "var(--board-gigs)",
+  LOOKING_FOR_WORK: "var(--board-gigs)",
 } as const;
 
 function ghostLetter(title: string) {
@@ -689,7 +689,7 @@ export default function PrideWork() {
       </BoardActiveSection>
 
       <BoardCloseSeam
-        line="Pay your people. Take care of each other."
+        line="Need work · need help · both belong"
         url="zaylist.com/pride-work"
       />
 

@@ -4,7 +4,7 @@
  * SoT: docs/handoffs/deep-glass-2026-07-16/ §2.11
  *      screenshots/12-infrastructure-grid.png
  * Tokens: glass.css `.pdx-glass-card` + `.pdx-glass-card--left-accent`
- * Accents: Gigs #6E3DFF · Gifting #CCFF00 · MC #FF00CC · Nude Beaches #FF6600
+ * Accents: Gigs var(--board-gigs) · Gifting #CCFF00 · MC #FF00CC · Nude Beaches #FF6600
  * No title glow.
  */
 
@@ -27,7 +27,7 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
     title: "Gigs",
     description:
       "Do you offer a trade, need work, or want to put your talents out there? Check gigs.",
-    accent: "#6E3DFF",
+    accent: "var(--board-gigs)",
   },
   {
     href: "/gifting",

@@ -3,7 +3,7 @@ type GlitchWordProps = {
   className?: string;
 };
 
-/** Slow, chunky RGB glitch for accent wordmarks (nav PRIDE, hero PRIDE). */
+/** Slow RGB glitch for accent text. Same timing recipe as GlitchLogo. */
 export default function GlitchWord({ text, className = "" }: GlitchWordProps) {
   return (
     <span

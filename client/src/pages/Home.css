@@ -215,15 +215,34 @@
   animation: homeWordmarkFloat 4s ease-in-out infinite;
 }
 
-/* Wordmark img — crisp neon; drop-shadow only (no blur/sat/contrast/blend) */
-.home-hero__wordmark {
+/* Wordmark — crisp neon; color-faithful main + guide glitch ghosts */
+.home-hero__wordmark,
+.home-hero__wordmark-glitch.glitch-logo {
   display: block;
   width: 100%;
   height: auto;
   max-height: 75vh;
+  flex: none;
+  isolation: auto;
+}
+
+/* Main establishes the box; ghosts fill it (inset 0 from glitch-logo CSS) */
+.home-hero__wordmark-glitch .glitch-logo__main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
   object-fit: contain;
+  object-position: center center;
   opacity: 1;
+  /* Hero mark is already neon art — do not re-tint like the nav lockup */
   mix-blend-mode: normal;
+  filter: none;
+}
+
+.home-hero__wordmark-glitch .glitch-logo__ghost {
+  object-position: center center;
 }
 
 /* Crisp core sits on top and defines the sign's box */
@@ -632,6 +651,8 @@ html.calm-mode .home-hero--parallax .home-hero__wordmark-wrap {
 
 html.calm-mode .home-hero__wordmark-sign,
 html.calm-mode .home-hero__wordmark,
+html.calm-mode .home-hero__wordmark-glitch,
+html.calm-mode .home-hero__wordmark-glitch .glitch-logo__main,
 html.calm-mode .home-hero__bg {
   animation: none !important;
   transform: none !important;
@@ -701,7 +722,9 @@ html.calm-mode .home-hero__orb {
 
   /* Render the mark ~30% smaller than its box: at a smaller display size the
      4:3 art reads crisper, and it sits cleanly on the video's mandala center. */
-  .home-hero__wordmark {
+  .home-hero__wordmark,
+  .home-hero__wordmark-glitch.glitch-logo,
+  .home-hero__wordmark-glitch .glitch-logo__main {
     max-height: 40vh;
   }
 
@@ -731,6 +754,7 @@ html.calm-mode .home-hero__orb {
 
   .home-hero__wordmark-sign,
   .home-hero__wordmark,
+  .home-hero__wordmark-glitch,
   .home-hero__bg {
     animation: none !important;
   }
@@ -1721,20 +1745,35 @@ html.calm-mode .home-boards__card {
 
 .home-up-next__card {
   position: relative;
+  --c: var(--up-day, var(--neon-cyan));
+  background: var(--glass-card-bg, #0b0b0f);
+  border: 1px solid color-mix(in srgb, var(--c) 45%, #1a1a1a);
+  border-left: 4px solid var(--c);
+  border-radius: var(--radius-md, 14px);
+  box-shadow: 0 0 0 2px #000, 0 18px 40px -20px rgba(0,0,0,.85);
   overflow: hidden;
-  background: var(--ink-800, #0b0b0b);
-  border: 2px solid var(--border-default);
-  border-left: 4px solid var(--up-day, var(--day-mon, #8800ff));
-  border-radius: 6px;
-  padding: 18px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.home-up-next__card::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .home-up-next__card:hover {
-  border-color: color-mix(in srgb, var(--up-day, var(--day-mon)) 40%, var(--border-default));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--up-day, var(--day-mon)) 22%, transparent);
+  border-color: color-mix(in srgb, var(--c, var(--up-day)) 55%, var(--border-default));
+  box-shadow:
+    0 0 0 2px #000,
+    0 22px 48px -18px rgba(0, 0, 0, 0.9),
+    0 0 28px -10px color-mix(in srgb, var(--c, var(--up-day)) 35%, transparent);
+  transform: translateY(-2px);
+}
+
+html.calm-mode .home-up-next__card::before {
+  animation: none;
 }
 
 .home-up-next__backdrop {

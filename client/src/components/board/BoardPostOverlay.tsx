@@ -13,9 +13,9 @@ import { GigListingCard, type GigPost } from "@/pages/PrideWork";
  * fixed overlay escapes the feed's transformed wrappers.
  *
  * Deep-glass SoT §2.4: same --glass-card recipe as board cards; accent keyed
- * to the post (Gifting #CCFF00 / Gigs #6E3DFF).
+ * to the post (Gifting #CCFF00 / Gigs var(--board-gigs)).
  */
-const GIG_ACCENT = { POSTING_GIG: "#6E3DFF", LOOKING_FOR_WORK: "#6E3DFF" } as const;
+const GIG_ACCENT = { POSTING_GIG: "var(--board-gigs)", LOOKING_FOR_WORK: "var(--board-gigs)" } as const;
 
 type Props = {
   kind: "gig" | "gifting";

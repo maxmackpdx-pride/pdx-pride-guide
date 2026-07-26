@@ -128,7 +128,8 @@
     @keyframes segSlide{from{transform:scaleX(0);opacity:.4}to{transform:scaleX(1);opacity:1}}
     /* nav row icon nudge + row entrance */
     .navi{position:relative}
-    .navi.on::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:var(--panel-cyan);animation:segSlide .25s var(--ease-out) both;transform-origin:top}
+    .navi.on { color: var(--nav-accent, var(--panel-cyan)); }
+.navi.on::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background: var(--nav-accent, var(--panel-cyan));animation:segSlide .25s var(--ease-out) both;transform-origin:top}
     .lrail .navi svg,.lrail .navi{transition:.13s,transform .13s}
     .navi:hover svg{transform:translateX(2px)}
     /* row / table entrance */
@@ -141,13 +142,14 @@
     .ico svg{transition:transform .15s}
     .ico:hover svg{transform:scale(1.14)}
     /* pulse glow on the live dot's kicker on hover-free ambient */
-    .calm-mode .fitem,.calm-mode .statnum,.calm-mode .rowin,.calm-mode .reveal,.calm-mode .seg.on::after,.calm-mode .navi.on::before{animation:none !important}
+    .calm-mode .fitem,.calm-mode .statnum,.calm-mode .rowin,.calm-mode .reveal,.calm-mode .seg.on::after,.calm-mode .navi.on { color: var(--nav-accent, var(--panel-cyan)); }
+.navi.on::before{animation:none !important}
     .trow td{padding:14px 14px;border-bottom:1px solid var(--panel-border);font-size:14px;color:var(--board-text);vertical-align:middle}
     .trow:hover td{background:rgba(255,255,255,.02)}
     .th{padding:11px 14px;text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--board-muted);border-bottom:1px solid var(--panel-border-2)}
     .calm-mode .ld{animation:none}
-    .grid3{display:grid;grid-template-columns:236px minmax(0,1fr) 296px;gap:22px;max-width:1240px;margin:0 auto;align-items:start;padding:22px 24px 60px}
-    .grid2{display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;max-width:1240px;margin:0 auto;align-items:start;padding:22px 24px 60px}
+    .grid3{display:grid;grid-template-columns:266px minmax(0,1fr) 296px;gap:22px;max-width:1240px;margin:0 auto;align-items:start;padding:22px 24px 60px}
+    .grid2{display:grid;grid-template-columns:266px minmax(0,1fr);gap:22px;max-width:1240px;margin:0 auto;align-items:start;padding:22px 24px 60px}
     .lrail{position:sticky;top:80px;display:flex;flex-direction:column;gap:3px}
     .rrail{position:sticky;top:80px;display:flex;flex-direction:column;gap:16px}
     @media(max-width:1080px){
@@ -246,7 +248,8 @@
     .hub-admin-folder--menu .hub-admin-folder__child.active,.hub-admin-folder--menu .hub-admin-folder__child:hover{color:#fff;background:rgba(204,255,0,.08)}
     .hub-admin-folder__sheet .hub-more-item{display:flex;align-items:center;gap:10px}
     @media (prefers-reduced-motion: reduce) {
-      .hub-root .fitem,.hub-root .statnum,.hub-root .rowin,.hub-root .reveal,.hub-root .seg.on::after,.hub-root .navi.on::before,.hub-root .ld{animation:none !important}
+      .hub-root .fitem,.hub-root .statnum,.hub-root .rowin,.hub-root .reveal,.hub-root .seg.on::after,.hub-root .navi.on { color: var(--nav-accent, var(--panel-cyan)); }
+.navi.on::before,.hub-root .ld{animation:none !important}
     }
 
     /* Hub profile - behind-the-scenes editor (?edit=profile) */

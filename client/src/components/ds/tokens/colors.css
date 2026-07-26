@@ -23,7 +23,8 @@
   --neon-orange:  #FF6600;  /* SUN, warm pop */
   --neon-violet:  #8800FF;  /* MON */
   --neon-red:     #FF2400;  /* protest red / rose red */
-  --neon-green:   #00EE44;  /* general neon green */
+  --green-acid: #39FF14;
+  --neon-green:   var(--green-acid); /* #39FF14 */  /* general neon green */
   --neon-blue:    #0044FF;  /* TUE */
   --accent-pop:   var(--neon-cyan);
 
@@ -166,4 +167,10 @@
   --cat-hotels:  var(--neon-blue);
 
   --focus-ring:     var(--neon-cyan);
+}
+
+:root{
+  --panel-lime: #c8fa3c;
+  --tag-free: var(--panel-lime);
+  --board-gigs: #6E3DFF;
 }

@@ -426,7 +426,7 @@ export default function Gifting() {
       </BoardActiveSection>
 
       <BoardCloseSeam
-        line="Pride is a protest. Take care of each other."
+        line="Keep it free · keep it kind · keep it moving"
         url="zaylist.com/gifting"
       />
 
