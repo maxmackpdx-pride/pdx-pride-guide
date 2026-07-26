@@ -6061,20 +6061,45 @@ function runBootMigrationsOnce() {
    * (BJJ, beer runs, rock gym, Shriners, Camas art walk, women golf outing, etc.).
    * Open-mode now requires queer signal for Eventbrite (eb_no_queer_signal).
    */
-  if (!hasBootMigration("scrub_url_ingest_eb_no_queer_v1")) {
+  if (!hasBootMigration("scrub_url_ingest_eb_no_queer_v2")) {
+    const drop = new Set<number>();
+    // Known noise ids (live audit 2026-07-26)
+    for (const id of [366, 373, 378, 379, 380, 382, 385, 365, 368, 374, 375, 383, 384]) {
+      drop.add(id);
+    }
+    // Title / venue patterns (id-independent)
+    const patterned = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE
+           lower(title) LIKE '%girls in gis%'
+           OR lower(title) LIKE '%no-gi event%'
+           OR lower(title) LIKE '%women golf outing%'
+           OR lower(title) LIKE '%hosts & home teams%'
+           OR lower(title) LIKE '%hosts and home teams%'
+           OR lower(title) LIKE '%5k beer run%'
+           OR lower(title) LIKE '%brewery running series%'
+           OR lower(title) LIKE '%camas art%wine%'
+           OR lower(title) LIKE '%shriners%sports consortium%'
+           OR lower(title) LIKE '%rock gym%climbing%'
+           OR lower(venue_name) LIKE '%10th planet jiu%'
+           OR lower(venue_name) LIKE '%portland rock gym%'
+           OR lower(venue_name) LIKE '%shriners children%'
+           OR lower(venue_name) LIKE '%patricia reser center%'
+           OR (lower(COALESCE(ticket_url,'')) LIKE '%eventbrite%'
+               AND lower(COALESCE(source,'')) = 'url_ingest'
+               AND lower(title) LIKE '%golf outing%')`,
+      )
+      .all() as Array<{ id: number }>;
+    for (const r of patterned) drop.add(r.id);
+
+    // Broader: LIVE url_ingest + Eventbrite ticket, no LGBTQ signal in text
     const rows = sqlite
       .prepare(
-        `SELECT id, title, venue_name, address, description, ticket_url, source, admin_notes
+        `SELECT id, title, venue_name, address, description, ticket_url, source
          FROM events
          WHERE status = 'LIVE'
-           AND (
-             source = 'url_ingest'
-             OR lower(COALESCE(admin_notes, '')) LIKE '%ingested from%eventbrite%'
-           )
-           AND (
-             lower(COALESCE(ticket_url, '')) LIKE '%eventbrite%'
-             OR lower(COALESCE(admin_notes, '')) LIKE '%eventbrite%'
-           )`,
+           AND lower(COALESCE(source, '')) = 'url_ingest'
+           AND lower(COALESCE(ticket_url, '')) LIKE '%eventbrite%'`,
       )
       .all() as Array<{
         id: number;
@@ -6084,7 +6109,6 @@ function runBootMigrationsOnce() {
         description: string | null;
         ticket_url: string | null;
         source: string | null;
-        admin_notes: string | null;
       }>;
 
     const QUEER =
@@ -6092,17 +6116,34 @@ function runBootMigrationsOnce() {
     const QUEER_VENUE =
       /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|process|escape\s*bar|sports\s*bra|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf|living\s*room\s*wines)\b/i;
 
-    const drop: number[] = [];
-    // Always drop these known noise ids if still present
-    for (const id of [366, 373, 378, 379, 380, 382, 385]) drop.push(id);
-
     for (const r of rows) {
       const blob = [r.title, r.venue_name, r.address, (r.description || "").slice(0, 500)].join(" ");
       if (QUEER.test(blob) || QUEER_VENUE.test(blob)) continue;
-      drop.push(r.id);
+      drop.add(r.id);
     }
-    hardDeleteEventIds(Array.from(new Set(drop)));
-    recordBootMigration("scrub_url_ingest_eb_no_queer_v1");
+
+    const ids = Array.from(drop);
+    try {
+      hardDeleteEventIds(ids);
+    } catch (e) {
+      console.error("[boot] scrub_url_ingest_eb_no_queer_v2 hardDelete failed, soft-hiding:", e);
+      for (const id of ids) {
+        try {
+          sqlite
+            .prepare(
+              `UPDATE events SET status = 'HIDDEN',
+                 admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                   'Hidden: Eventbrite url_ingest without LGBTQ signal (scrub_url_ingest_eb_no_queer_v2)'
+               WHERE id = ?`,
+            )
+            .run(id);
+        } catch {
+          /* ignore single-row failures */
+        }
+      }
+    }
+    console.info(`[boot] scrub_url_ingest_eb_no_queer_v2: removed/hid ${ids.length} events`);
+    recordBootMigration("scrub_url_ingest_eb_no_queer_v2");
   }
 }
 
