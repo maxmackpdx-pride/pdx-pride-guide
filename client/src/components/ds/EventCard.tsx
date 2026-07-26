@@ -146,6 +146,23 @@ const DAY_BASE = { MON:"var(--day-mon)", TUE:"var(--day-tue)", WED:"var(--day-we
 const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", DOOR_FEE:"Door fee", SUGGESTED_DONATION:"Donation" };
 const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 
+function tagKey(s: string) {
+  return String(s).toLowerCase().replace(/[^a-z0-9+]/g, "");
+}
+
+/** Skip admission/age meta when type chips already show them (no "DOOR FEE" + "Door fee · 21+"). */
+function buildMetaBits(admission?: string, age?: string, types: string[] = []) {
+  const covered = new Set(types.map(tagKey));
+  const bits: string[] = [];
+  if (admission && ADM_LABEL[admission] && !covered.has(tagKey(ADM_LABEL[admission])) && !covered.has(tagKey(admission))) {
+    bits.push(ADM_LABEL[admission]);
+  }
+  if (age && AGE_LABEL[age] && !covered.has(tagKey(AGE_LABEL[age])) && !covered.has(tagKey(age))) {
+    bits.push(AGE_LABEL[age]);
+  }
+  return bits.join(" · ");
+}
+
 /** EventCard, the list-view row. */
 export function EventCard({
   title, venue, when, day = "FRI", image,
@@ -159,7 +176,8 @@ export function EventCard({
 }: any) {
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
-  const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
+  const typeSlice = types.slice(0, 2);
+  const metaBits = buildMetaBits(admission, age, typeSlice);
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
   return (
@@ -174,7 +192,7 @@ export function EventCard({
       <div className="pdxRow__main">
         <div className="pdxRow__tags">
           <span className="pdxRowTag pdxRowTag--day">{day}</span>
-          {types.slice(0, 2).map((t, i) => <span className="pdxRowTag pdxRowTag--type" key={i}>{t}</span>)}
+          {typeSlice.map((t, i) => <span className="pdxRowTag pdxRowTag--type" key={i}>{t}</span>)}
           {metaBits && <span className="pdxRowTag pdxRowTag--meta">{metaBits}</span>}
         </div>
         <h3 className="pdxRow__title">{title}</h3>

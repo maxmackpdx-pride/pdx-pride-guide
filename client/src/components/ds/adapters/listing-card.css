@@ -46,10 +46,11 @@
 
 /* Dense event grid: skip offscreen paint work; cards are nearly opaque so
    backdrop-filter only costs scroll FPS (no visible glass through the slab).
-   No contain:paint - that clips day bloom + hover lift. */
+   No contain:paint - that clips day bloom + hover lift.
+   Intrinsic size ≈ poster + slim dense meta. */
 .events-poster-grid > .ds-listing-card {
   content-visibility: auto;
-  contain-intrinsic-size: auto 480px;
+  contain-intrinsic-size: auto 420px;
 }
 
 .events-poster-grid .pdxBoard {
@@ -68,6 +69,17 @@
 .events-poster-grid .pdxBoard__img {
   object-fit: cover;
   object-position: center top;
+}
+
+/* Dense grid: less meta chrome; extras hug the card */
+.events-poster-grid .ds-listing-card--grid .ds-listing-card__extras {
+  padding: 4px 2px 0;
+  min-height: 0;
+}
+
+.events-poster-grid .ds-listing-card--grid .ds-listing-card__extras:empty {
+  display: none;
+  padding: 0;
 }
 
 /* Hover lift - !important beats any residual animation fill on transform */

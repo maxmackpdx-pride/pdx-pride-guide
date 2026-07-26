@@ -87,6 +87,18 @@ a.pdxBoard:hover{
 .pdxBoard__venue--link:hover{ text-decoration:underline; color:#7af0ff; }
 .pdxBoard__address{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); line-height:1.35; }
 .pdxBoard__when{ font-family:var(--font-body); font-size:var(--meta); color:var(--text-lo); }
+
+/* Dense grid cards: less chrome under the flyer so more posters fit on screen */
+.pdxBoard--dense .pdxBoard__meta{ padding:10px 12px 12px; gap:5px; }
+.pdxBoard--dense .pdxBoard__title{ font-size:clamp(0.78rem, 1.6vw, 0.95rem); line-height:1.08;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.pdxBoard--dense .pdxBoard__venue{ font-size:0.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pdxBoard--dense .pdxBoard__when{ font-size:0.68rem; }
+.pdxBoard--dense .pdxBoard__tags{ gap:4px; max-height:1.35em; overflow:hidden; }
+.pdxBoard--dense .pdxTag{ font-size:.55rem; padding:0 5px; }
+.pdxBoard--dense .pdxBoard__claim{ padding-top:6px; }
+.pdxBoard--dense .pdxBoard__claim-tag{ font-size:.55rem; padding:3px 8px 2px; }
+.pdxBoard--dense .pdxBoard__foot{ padding-top:6px; }
 /* Primary CTA → solid glass button */
 .pdxBoard__ticket.pdx-glass-btn,
 .pdxBoard__ticket{
@@ -165,6 +177,24 @@ const DAY_TEXT = { MON:"var(--day-mon-text)", TUE:"var(--day-tue-text)", WED:"va
 const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", DOOR_FEE:"Door fee", SUGGESTED_DONATION:"Donation" };
 const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 
+/** Normalize tag text so "DOOR FEE" / "Door fee" / "door_fee" match. */
+function tagKey(s: string) {
+  return String(s).toLowerCase().replace(/[^a-z0-9+]/g, "");
+}
+
+/** Admission/age chip text only when type tags do not already cover it (avoids DOOR FEE + "Door fee · 21+"). */
+function buildMetaBits(admission?: string, age?: string, types: string[] = []) {
+  const covered = new Set(types.map(tagKey));
+  const bits: string[] = [];
+  if (admission && ADM_LABEL[admission] && !covered.has(tagKey(ADM_LABEL[admission])) && !covered.has(tagKey(admission))) {
+    bits.push(ADM_LABEL[admission]);
+  }
+  if (age && AGE_LABEL[age] && !covered.has(tagKey(AGE_LABEL[age])) && !covered.has(tagKey(age))) {
+    bits.push(AGE_LABEL[age]);
+  }
+  return bits.join(" · ");
+}
+
 /** PosterCard, the event board card. */
 export function PosterCard({
   title, venue, when, day = "FRI", image,
@@ -173,6 +203,7 @@ export function PosterCard({
   onClaimClick,
   going, onRsvp, href, showLink = true, showDetailsLink = true,
   venueHref, address, ticketHref, ticketLabel = "Get tickets",
+  dense = false,
   className = "", style = {}, ...rest
 }: any) {
   const cardHref = onRsvp ? undefined : href;
@@ -180,11 +211,12 @@ export function PosterCard({
   const Tag = cardHref ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayt = DAY_TEXT[day] || "#fff";
-  const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
+  const metaBits = buildMetaBits(admission, age, types);
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
+  const claimLabel = dense ? "Claim →" : "Claim this event →";
   return (
-    <Tag className={`pdxBoard pdx-glass-rebind ${className}`} href={cardHref}
+    <Tag className={`pdxBoard pdx-glass-rebind${dense ? " pdxBoard--dense" : ""}${className ? ` ${className}` : ""}`} href={cardHref}
       style={{ "--_day": base, "--c": base, "--dc": base, "--_dayt": dayt, ...style }} {...rest}>
       <span className="pdxBoard__sheenSpec" aria-hidden="true" />
       <div className="pdxBoard__poster">
@@ -211,7 +243,8 @@ export function PosterCard({
         {venue && (venueHref
           ? <a className="pdxBoard__venue pdxBoard__venue--link" href={venueHref} target="_blank" rel="noopener noreferrer" onClick={stop}>{venue} ↗</a>
           : <div className="pdxBoard__venue">{venue}</div>)}
-        {address && <div className="pdxBoard__address">{address}</div>}
+        {/* Dense grid: neighborhood is already in `when` — skip street address to free vertical space */}
+        {!dense && address ? <div className="pdxBoard__address">{address}</div> : null}
         {ticketHref && (
           <a className="pdxBoard__ticket pdx-glass-btn pdx-glass-btn--solid" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
             {ticketLabel} →
@@ -237,7 +270,7 @@ export function PosterCard({
           <div className="pdxBoard__claim">
             {claimPending ? (
               <span className="pdxBoard__claim-tag pdxBoard__claim-tag--pending" data-testid="tag-claim-pending">
-                Claim pending
+                {dense ? "Pending" : "Claim pending"}
               </span>
             ) : (
               <button
@@ -250,7 +283,7 @@ export function PosterCard({
                   onClaimClick?.();
                 }}
               >
-                Claim this event →
+                {claimLabel}
               </button>
             )}
           </div>

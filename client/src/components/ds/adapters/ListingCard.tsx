@@ -178,8 +178,8 @@ export default function ListingCard({
           title={event.title}
           venue={event.venueName}
           venueHref={venueHref}
-          address={address}
-          /* Grid mini-cards: open modal for details/tickets — no inline CTAs */
+          /* Grid: no street address (neighborhood is in `when`); open modal for full details/tickets */
+          address={undefined}
           ticketHref={undefined}
           when={when}
           day={day}
@@ -190,6 +190,7 @@ export default function ListingCard({
           going={showAttendance ? attendanceSummary!.count : undefined}
           showLink={false}
           showDetailsLink={false}
+          dense
           style={{ cursor: "pointer", height: "100%" }}
           {...claimProps}
         />
