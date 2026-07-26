@@ -304,6 +304,13 @@ export function isOffSceneNoiseDraft(
   ) {
     return { noise: true, reason: "generic_civic_fitness_noise" };
   }
+  // Romance book event at Sports Bra (EB) — not a sports/watch listing we want
+  if (
+    /\bromance\s*x\s*women'?s?\s*sports\s*book\b/i.test(blob) ||
+    (/\banita\s+kelly\b/i.test(blob) && /\bsamantha\s+saldivar\b/i.test(blob))
+  ) {
+    return { noise: true, reason: "sports_bra_romance_book_noise" };
+  }
   return { noise: false };
 }
 

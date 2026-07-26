@@ -6145,6 +6145,24 @@ function runBootMigrationsOnce() {
     console.info(`[boot] scrub_url_ingest_eb_no_queer_v2: removed/hid ${ids.length} events`);
     recordBootMigration("scrub_url_ingest_eb_no_queer_v2");
   }
+
+  // One-off: Romance x Women's Sports Book Event (EB / Sports Bra noise) — remove LIVE listing.
+  if (!hasBootMigration("remove_romance_womens_sports_book_event_v1")) {
+    const rows = sqlite
+      .prepare(
+        `SELECT id FROM events
+         WHERE id = 143
+            OR (
+              lower(title) LIKE '%romance%x%women%sports%book%'
+              OR lower(title) LIKE '%romance x women%sports book%'
+              OR lower(title) LIKE '%anita kelly%samatha saldivar%'
+              OR lower(title) LIKE '%anita kelly%samantha saldivar%'
+            )`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(rows.map(r => r.id));
+    recordBootMigration("remove_romance_womens_sports_book_event_v1");
+  }
 }
 
 function parseEnvAdminLists() {
