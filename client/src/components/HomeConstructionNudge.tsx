@@ -88,18 +88,18 @@ export default function HomeConstructionNudge() {
 
         <div className="pgc-body">
           <p>
-            Thanks for using <strong>Pride Guide</strong> these past years — we hope it
-            helped you find your people and your parties. 🌈
+            Thanks for using <strong>Pride Guide</strong> these past years — I hope it helped
+            you find your people and your parties. 🌈
           </p>
           <p>
-            We&apos;re now <strong>Zaylist</strong>: a year-round home for Portland&apos;s
-            LGBTQ+ community — events, boards, directory, and more, all 365 days, not just
-            Pride Week.
+            I&apos;m renaming it <strong>Zaylist</strong>: same home, new name. Year-round
+            for Portland&apos;s LGBTQ+ community — events, boards, directory, and more, all
+            365 days, not just Pride Week.
           </p>
           <p className="pgc-tip">
             Keeping the lights on isn&apos;t free. If this was useful, you&apos;re welcome to
-            toss a couple bucks toward a coffee or a muffin. Truly no pressure — every little
-            bit helps. 💛
+            toss me a couple bucks toward a coffee or a muffin. Truly no pressure — every
+            little bit helps. 💛
           </p>
         </div>
 
