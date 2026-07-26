@@ -70,12 +70,24 @@ export function applyDeclaredVenuePolicy(
     const adm = inferAdmissionFromText(next.title, next.description);
     // Never invent FREE: meaningful upstream values kept (unconfirmed FREE
     // demoted); UNKNOWN defers to text inference.
-    next.admission =
+    // Club venues: if still UNKNOWN after text, default DOOR_FEE (never invent FREE).
+    let admission =
       next.admission && next.admission !== "UNKNOWN" && next.admission !== "ALL_AGES"
         ? next.admission === "FREE" && adm.admission !== "FREE"
           ? adm.admission
           : next.admission
         : adm.admission;
+    if (
+      (admission === "UNKNOWN" || !admission) &&
+      policy.defaultDoorFeeWhenUnknown
+    ) {
+      admission = "DOOR_FEE";
+      warnings.push(
+        policy.defaultDoorFeeNote ||
+          "Admission defaulted to DOOR_FEE (club weekly - verify if free/ticketed)",
+      );
+    }
+    next.admission = admission;
     if (adm.reason) warnings.push(adm.reason);
   }
 

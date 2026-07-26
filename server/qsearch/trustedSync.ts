@@ -39,6 +39,10 @@ import {
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
 import { fetchSportsBraDrafts, sportsBraConfigured } from "../ingest/adapters/sportsBra";
+import { fetchEventbriteOrgDrafts } from "../ingest/adapters/eventbriteOrg";
+import { fetchCampBarDrafts } from "../ingest/adapters/campBar";
+import { fetchCcSlaughtersDrafts } from "../ingest/adapters/ccSlaughters";
+import { fetchCampTrcDrafts } from "../ingest/adapters/campTrc";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
 import { isRelevantScanDraft } from "../ingest/relevance";
@@ -371,6 +375,20 @@ async function fetchDraftsForVenue(
       }
       return fetchGenericDrafts(venue, existingEvents);
     }
+    case "eventbrite_org":
+      return fetchEventbriteOrgDrafts({
+        feedUrl: venue.feedUrl,
+        venueName: venue.venueName,
+        address: venue.address,
+        neighborhood: venue.neighborhood || "",
+        includePast: false,
+      });
+    case "camp_bar_html":
+      return fetchCampBarDrafts({ feedUrl: venue.feedUrl, includePast: false });
+    case "cc_slaughters_html":
+      return fetchCcSlaughtersDrafts({ feedUrl: venue.feedUrl, includePast: false });
+    case "camp_trc_html":
+      return fetchCampTrcDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "generic":
     default:
       return fetchGenericDrafts(venue, existingEvents);

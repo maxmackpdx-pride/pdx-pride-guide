@@ -35,10 +35,22 @@ function assert(cond: unknown, msg: string) {
 }
 
 /* ── registry wiring ── */
-assert(TRUSTED_VENUES.length === 10, `10 trusted venues registered (got ${TRUSTED_VENUES.length})`);
-for (const sid of ["stag-eb", "living-room-eb", "camp-bar", "cc-slaughters"]) {
-  assert(getTrustedVenue(sid)?.fetchMode === "generic", `${sid} registered as generic mode`);
-}
+assert(TRUSTED_VENUES.length === 11, `11 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+assert(getTrustedVenue("stag-eb")?.fetchMode === "eventbrite_org", "stag-eb → eventbrite_org");
+assert(
+  getTrustedVenue("living-room-eb")?.fetchMode === "eventbrite_org",
+  "living-room-eb → eventbrite_org",
+);
+assert(getTrustedVenue("camp-bar")?.fetchMode === "camp_bar_html", "camp-bar → camp_bar_html");
+assert(
+  getTrustedVenue("cc-slaughters")?.fetchMode === "cc_slaughters_html",
+  "cc-slaughters → cc_slaughters_html",
+);
+assert(getTrustedVenue("camp-trc")?.fetchMode === "camp_trc_html", "camp-trc → camp_trc_html");
+assert(
+  isTrustedLaneSource({ id: "camp-trc", url: "https://camptrc.org/" }),
+  "camp-trc host is trusted lane",
+);
 // Trusted lane stays off the QSearch catch-all (siblings + own-site hosts)
 assert(isTrustedLaneSource({ id: "sanctuary-ics" }), "sanctuary-ics is trusted lane");
 assert(isTrustedLaneSource({ id: "sanctuary-calendar" }), "sanctuary calendar sibling is trusted lane");

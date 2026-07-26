@@ -109,6 +109,12 @@ const HEALTHCARE_EDGE =
 /** Real Estate - neon navy → white edge. */
 const REALESTATE_EDGE =
   "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
+/** Campgrounds - lime → dark forest green neon edge. */
+const CAMPGROUND_EDGE =
+  "linear-gradient(125deg,#B8FF3C 0%,#39FF14 28%,#0F8A3D 62%,#064E2A 100%)";
+/** Clubs & Groups - white → gold neon edge. */
+const GROUP_EDGE =
+  "linear-gradient(125deg,#FFFFFF 0%,#FFF3C4 32%,#FFD700 68%,#C9A227 100%)";
 
 function Icon({ d }: { d: React.ReactNode }) {
   return (
@@ -346,13 +352,19 @@ export default function PlaceModal({
   const isNonprofit = place.type === "nonprofit";
   const isHealthcare = place.type === "healthcare" || category === "healthcare";
   const isRealEstate = place.type === "realestate" || category === "realestate";
+  const isCampground = place.type === "campground" || category === "campgrounds";
+  const isGroup = place.type === "group" || category === "groups";
   const accent = isNonprofit
     ? "var(--cyan)"
     : isHealthcare
       ? "#FF00CC"
       : isRealEstate
         ? "#1A4DFF"
-        : ({
+        : isCampground
+          ? "#39FF14"
+          : isGroup
+            ? "#FFD700"
+            : ({
             bars: "var(--pink)",
             food: "var(--orange)",
             cafes: "var(--green)",
@@ -362,6 +374,8 @@ export default function PlaceModal({
             hotels: "var(--blue)",
             healthcare: "#FF00CC",
             realestate: "#1A4DFF",
+            campgrounds: "#39FF14",
+            groups: "#FFD700",
           } as Record<string, string>)[category] || "var(--pink)";
   const edge = isNonprofit
     ? NONPROFIT_RAINBOW_EDGE
@@ -369,7 +383,11 @@ export default function PlaceModal({
       ? HEALTHCARE_EDGE
       : isRealEstate
         ? REALESTATE_EDGE
-        : `linear-gradient(${accent},${accent})`;
+        : isCampground
+          ? CAMPGROUND_EDGE
+          : isGroup
+            ? GROUP_EDGE
+            : `linear-gradient(${accent},${accent})`;
   const logoUrl = resolveDirectoryLogo(place.name, place.imageUrl);
   const fallbackLogoUrl = directoryFallbackLogo(place.type);
 
@@ -440,7 +458,8 @@ export default function PlaceModal({
     { key: "gigs", label: "Gigs", count: gigs.length },
   ];
 
-  const useSpecialEdge = isNonprofit || isHealthcare || isRealEstate;
+  const useSpecialEdge =
+    isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
   const panelClass = [
     "place-modal-panel",
     "pdx-glass-rebind",

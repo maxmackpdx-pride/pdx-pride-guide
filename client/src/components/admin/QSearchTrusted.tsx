@@ -270,12 +270,18 @@ export default function QSearchTrusted({
             <p className="qsearch__trusted-lede">
               {compact ? (
                 <>
-                  Sync → Review. Expand a row for errors, last published, and feed links.
+                  <strong>Daily path:</strong> Sync a venue (or Sync all) → drafts go to{" "}
+                  <strong>Review</strong> → you approve LIVE / HIDDEN / dismiss. Custom adapters per
+                  bar (not city-wide scrapes). Expand a row for last error, last published, and feed
+                  links. Open <strong>Lab</strong> if Sync is empty or flyers look wrong.
                 </>
               ) : (
                 <>
-                  Core venues with known feeds. <strong>Sync</strong> → Review → approve or ✕
-                  dismiss. Health = last successful pull.
+                  <strong>Trusted</strong> = core venues with dedicated feeds (ICS, Wix, Tribe,
+                  Eventbrite <em>organizer</em> only, Airtable, homepage weeklies).{" "}
+                  <strong>Sync</strong> → Review → approve or dismiss. Health = last successful pull
+                  + flyer coverage. These are excluded from the QSearch catch-all Sources list so they
+                  are not double-scraped.
                 </>
               )}
             </p>

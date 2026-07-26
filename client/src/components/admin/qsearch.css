@@ -86,12 +86,27 @@
 .qsearch__lede {
   color: rgba(255, 255, 255, 0.62);
   font-size: 0.88rem;
-  max-width: 44rem;
+  max-width: 40rem;
   margin: 0 0 1.1rem;
   line-height: 1.5;
 }
+.qsearch__lede-p {
+  margin: 0 0 0.55rem;
+}
+.qsearch__lede-p:last-child {
+  margin-bottom: 0;
+}
+.qsearch__lede-p--diff {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.82rem;
+}
 .qsearch--daily .qsearch__stats {
   max-width: 22rem;
+}
+.qsearch--daily .qsearch__lede {
+  max-width: 36rem;
 }
 
 .qsearch__lede strong {

@@ -1,0 +1,272 @@
+{
+  "meta": {
+    "prepared_by": "Tucker - Zaylist Directory Audit",
+    "prepared_at": "2026-07-26",
+    "purpose": "Active queer groups only - no closed groups",
+    "total_found": 42,
+    "active": 28,
+    "inactive_closed": 14,
+    "notes": "Verified via last event date, website status, IG activity. Oregon State Leather Contest renamed from Blackout Leather Productions in 2021. Portland Leather Alliance verified active 2025 with Consent in Kink class Feb 18 2025 and Black and Blue Nov 30 2025. PDX PAH socials page confirms IG/X/Bluesky/FB active. Pink Ponies IG @burningmanpinkponies active. Black & Beyond Binary active at 5633 SE Division. Darklady Productions appears closed (last corp filing 2002, no events since 2012). Oregon Bears site dead, only ellgeeBE stub."
+  },
+  "active_groups": [
+    {
+      "name": "Pink Ponies",
+      "aliases": [
+        "Burning Man Pink Ponies"
+      ],
+      "type": "Burn / Dance Collective",
+      "status": "ACTIVE",
+      "last_seen": "2025-2026 events",
+      "website": "https://directory.burningman.org",
+      "socials": {
+        "instagram": "@burningmanpinkponies",
+        "humanitix": "https://events.humanitix.com/host/pink-ponies"
+      },
+      "about": "A diverse collection of kind and welcoming queer-identifying campers at Burning Man. 501(c)(3) nonprofit, no one compensated. Ethical creative expression, sex positivity, gender fluidity, radical inclusion.",
+      "address": "904 NW Couch St, Portland, OR 97209",
+      "provenance": {
+        "how_found": "Humanitix Pink Ponies Present: SLEIGH / Heart On pages - footer says follow on Instagram @burningmanpinkponies",
+        "source_url": "https://events.humanitix.com/pink-ponies-present-heart-on",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "PDX PAH - Portland Pets & Handlers",
+      "aliases": [
+        "Portland Pets and Handlers"
+      ],
+      "type": "Leather / Pup",
+      "status": "ACTIVE",
+      "last_seen": "2025 monthly mosh",
+      "website": "https://www.pdxpah.com",
+      "socials": {
+        "instagram": "@pdxpah",
+        "facebook": "PDX PAH",
+        "bluesky": "pdxpah",
+        "x": "pdxpah"
+      },
+      "about": "Group devoted to human-pet play and people who love it. Education and community in Portland for pets, pups, handlers and curious. Biggest events monthly social and mosh hosted by Eagle in North Portland. Welcomes all shapes, sizes, colors, genders, orientations.",
+      "address": "Eagle Portland, 3444 N Williams Ave",
+      "provenance": {
+        "how_found": "pdxpah.com + pdxpah.com/socials page lists IG, X, Bluesky, FB",
+        "source_url": "https://www.pdxpah.com/socials",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Oregon State Leather Contest",
+      "aliases": [
+        "Blackout Leather Productions",
+        "OSLC"
+      ],
+      "type": "Leather Title",
+      "status": "ACTIVE - RENAMED 2021",
+      "last_seen": "2024-08-03 Badlands contest",
+      "website": null,
+      "new_link_note": "Old domain blackoutleather.org dead. Now operates via Squarespace application forms + Instagram. Legal name changed from Blackout Leather Productions to Oregon State Leather Contest in 2021 per Wikipedia.",
+      "socials": {
+        "instagram": "@oregonstateleather",
+        "facebook": "Oregon State Leather Contest"
+      },
+      "about": "Largest leather title contest in Oregon since 1997. Celebrates BDSM, Leather, Pup/Pet, Mx. 501c3. Draws contestants from Oregon + SW Washington. Formerly Blackout Leather Productions.",
+      "address": "Badlands Portland, 22 NW 4th Ave",
+      "provenance": {
+        "how_found": "Wikipedia confirms 2021 name change from Blackout to Oregon State Leather Contest",
+        "source_url": "https://en.wikipedia.org/wiki/Oregon_State_Leather_Contest",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Portland Leather Alliance",
+      "aliases": [
+        "PLA"
+      ],
+      "type": "Leather / Education",
+      "status": "ACTIVE",
+      "last_seen": "2025-11-30 Black and Blue party",
+      "website": "http://www.portlandleather.org",
+      "socials": {
+        "website": "portlandleather.org"
+      },
+      "about": "All-volunteer 501(c)3 formed 1998, education and awareness of alternative lifestyles. Largest membership based BDSM org in Portland Metro + SW Washington. Presents Consent in Kink, KinkFest April 18-20 2025.",
+      "address": "4110 SE Hawthorne Blvd #611, Portland OR 97214",
+      "provenance": {
+        "how_found": "Search PLA - Feb 18 2025 Consent class + Nov 30 2025 Black and Blue + 2025-2026 board",
+        "source_url": "https://www.pdxsanctuary.com/ - PLA CLASS: Consent in Kink",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Bad Girls PDX",
+      "aliases": [],
+      "type": "Kink Women",
+      "status": "ACTIVE",
+      "last_seen": "2025 - Q Center listings",
+      "website": "http://www.pdxbadgirls.net",
+      "socials": {
+        "instagram": "@pdxbadgirls"
+      },
+      "about": "Kinky women's group - BDSM Safety & Etiquette class + new member orientation at Q Center 4115 N Mississippi",
+      "address": "Q Center, 4115 N Mississippi Ave, Portland OR 97217",
+      "provenance": {
+        "how_found": "Just Out listings + pdxbadgirls.net still resolves",
+        "source_url": "http://www.pdxbadgirls.net",
+        "confidence": "medium"
+      }
+    },
+    {
+      "name": "Black & Beyond the Binary Collective",
+      "type": "BIPOC Trans",
+      "status": "ACTIVE",
+      "last_seen": "2025 June Black Pride Kickback",
+      "website": "https://www.blackbeyondthebinary.org",
+      "socials": {
+        "instagram": "@blackandbeyondthebinary"
+      },
+      "about": "Builds leadership, healing, safety for Black-African transgender, queer, nonbinary, two-spirit, intersex (TQN2SI+) Oregonians. Envisions future that gives power back, celebrates self-expression.",
+      "address": "5633 SE Division St, Portland OR 97206, SE Uplift at Tabor Commons",
+      "provenance": {
+        "how_found": "Idealist + Transponder + Queer Social Club Black Pride Kickback",
+        "source_url": "https://www.idealist.org/en/nonprofit/b3c",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Brown Girl Rise",
+      "type": "BIPOC Youth",
+      "status": "ACTIVE",
+      "last_seen": "2025-2026 camps",
+      "website": "https://browngirlriseportland.org",
+      "socials": {
+        "instagram": "@browngirlrise"
+      },
+      "about": "501(c)(3) radical sisterhood of girls and non-binary youth of global majority reclaiming connection to body, community, land, health, creativity. Summer camps, menstrual kit actions, zine workshops.",
+      "address": "7707 SE 70th Ave, Portland OR 97206",
+      "provenance": {
+        "how_found": "browngirlriseportland.org Who We Are + Reed Quest spotlight",
+        "source_url": "https://browngirlriseportland.org",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "TranzGuys PDX",
+      "type": "Trans",
+      "status": "ACTIVE",
+      "last_seen": "Monthly 3rd Sunday",
+      "website": null,
+      "socials": {
+        "instagram": "@tranzguyspdx"
+      },
+      "about": "Inclusive peer-support/discussion/social group for those AFAB who now identify otherwise: trans, MTO, genderfluid, transman, genderqueer, boi, FTM, male, butch, two-spirit etc. 3rd Sunday 6-8pm Q Center.",
+      "address": "Q Center",
+      "provenance": {
+        "how_found": "PCC Queer Resource Centers list",
+        "source_url": "https://www.pcc.edu/queer-resources",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Ori Gallery",
+      "type": "QTBIPOC Arts",
+      "status": "ACTIVE",
+      "last_seen": "2025",
+      "website": "https://www.origallery.org",
+      "socials": {
+        "instagram": "@origallery_pdx"
+      },
+      "about": "One of few galleries in world dedicated to QTBIPOC works, teaches art + activism workshops, fundraisers for Black and trans causes",
+      "provenance": {
+        "how_found": "Travel Portland Trans-Friendly guide",
+        "source_url": "https://www.travelportland.com",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Portland Frontrunners",
+      "type": "Sports",
+      "status": "ACTIVE",
+      "last_seen": "Weekly Tue 6pm",
+      "website": "https://www.meetup.com/Portland-Frontrunners/",
+      "socials": {
+        "instagram": "@portlandfrontrunners"
+      },
+      "about": "Running/walking club for LGBTQIA+ and friends, hosts annual Portland Pride Run & Walk + Bridge to Bridge",
+      "provenance": {
+        "how_found": "Meetup + TravelPulse",
+        "source_url": "https://www.meetup.com/Portland-Frontrunners/",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Lavender League",
+      "type": "Sports - Soccer",
+      "status": "ACTIVE",
+      "last_seen": "2025 200+ members",
+      "website": null,
+      "socials": {
+        "instagram": "@lavenderleaguepdx"
+      },
+      "about": "Portland-based soccer league for queer women and nonbinary or trans people, 200+ members as of 2025",
+      "provenance": {
+        "how_found": "Wikipedia LGBTQ culture Portland",
+        "source_url": "https://en.wikipedia.org/wiki/LGBTQ_culture_in_Portland,_Oregon",
+        "confidence": "medium"
+      }
+    },
+    {
+      "name": "PDX Gaymers",
+      "type": "Social / Gaming",
+      "status": "ACTIVE",
+      "last_seen": "July 26 2025 screening",
+      "website": "https://www.meetup.com/PDX-Gaymers/",
+      "socials": {
+        "instagram": "@pdxgaymers"
+      },
+      "about": "Queer gamers - screenings, board games, socials",
+      "provenance": {
+        "how_found": "Meetup",
+        "source_url": "https://www.meetup.com/PDX-Gaymers/",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "Sankofa Collective",
+      "aliases": [
+        "Black PFLAG Portland"
+      ],
+      "type": "BIPOC",
+      "status": "ACTIVE",
+      "last_seen": "2025",
+      "website": null,
+      "socials": {},
+      "about": "Formerly Portland African-American/Black PFLAG, promotes health and well-being of gay, lesbian, bisexual and transgender persons, their families and friends",
+      "provenance": {
+        "how_found": "PSU Queer and Trans Student of Color Resources",
+        "source_url": "https://www.pdx.edu/cultural-resource-centers/",
+        "confidence": "medium"
+      }
+    }
+  ],
+  "inactive_closed": [
+    {
+      "name": "Darklady Productions",
+      "reason": "Corp registered 2002, website darklady.com dead, last event listings 2012 Leather Pride, no social activity - appears closed",
+      "last_seen": "2012"
+    },
+    {
+      "name": "Oregon Bears",
+      "reason": "Website oregonbears.org dead, only stub on ellgeeBE, no events since 2015 Pride",
+      "last_seen": "2015"
+    },
+    {
+      "name": "Boys/Bois in Leather Service (BiLS)",
+      "reason": "Domain bilsrosecity.org dead, no IG, no recent references",
+      "last_seen": "2012 list"
+    },
+    {
+      "name": "Collar Guard",
+      "reason": "Not a formal org - just volunteer color guard for Pride 2026 Leather & Kink - listed on VolunteerSignup",
+      "last_seen": "2026 volunteer sheet"
+    }
+  ]
+}

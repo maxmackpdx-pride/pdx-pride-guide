@@ -1769,7 +1769,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const memberBusinessSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
@@ -1787,7 +1787,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const directoryMatchPreviewSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).optional(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).optional(),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
   });
@@ -1872,7 +1872,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const businessOwnerEditSchema = z.object({
     name: z.string().trim().min(2).max(120).optional(),
     address: z.string().trim().max(200).optional().nullable(),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).optional(),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).optional(),
     neighborhood: z.string().trim().max(80).optional().nullable(),
     queerOwned: z.boolean().optional(),
     queerFriendly: z.boolean().optional(),
@@ -1968,7 +1968,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
   const businessSubmissionSchema = z.object({
     name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]).default("bar"),
+    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).default("bar"),
     description: z.string().trim().min(10).max(2000),
     address: z.string().trim().max(200).optional().nullable(),
     neighborhood: z.string().trim().max(80).optional().nullable(),

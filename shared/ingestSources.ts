@@ -42,10 +42,16 @@ export type IngestSource = {
   businessId?: number;
   businessType?: string | null;
   /**
-   * When true (or businessType is group), scan drops non-Portland listings.
-   * Use for multi-city brands like Bearracuda.
+   * When true (or businessType is group without cityAllowlist), scan drops
+   * non-Portland listings. Prefer cityAllowlist for multi-city brands.
    */
   portlandOnly?: boolean;
+  /**
+   * Multi-city brands (e.g. Bearracuda): keep events only in these cities.
+   * Values: portland | seattle | … (see isAllowedCityEventListing).
+   * When set, takes precedence over portlandOnly.
+   */
+  cityAllowlist?: string[];
 };
 
 /**
@@ -287,6 +293,16 @@ export const INGEST_SOURCES: IngestSource[] = [
     notes: "Static weeklies in #events; specials IG @campbarpdx only",
   },
   {
+    id: "camp-trc",
+    label: "Camp TRC (Triangle Recreation Camp)",
+    url: "https://camptrc.org/",
+    tier: "1",
+    format: "html",
+    priority: true,
+    notes:
+      "Trusted lane. Homepage Event Calendar (theme weekends). WA campground; Wild Apricot event detail + RSS login-gated.",
+  },
+  {
     id: "covert-events",
     label: "Covert Café events",
     url: "https://www.thecovertcafe.com/events",
@@ -322,15 +338,15 @@ export const INGEST_SOURCES: IngestSource[] = [
   // ── Groups (Portland events only) ───────────────────────────────────────
   {
     id: "bearracuda",
-    label: "Bearracuda (Portland only)",
+    label: "Bearracuda (Portland + Seattle)",
     url: "https://bearracuda.com/",
     tier: "1",
     format: "html",
     priority: true,
-    portlandOnly: true,
     businessType: "group",
+    cityAllowlist: ["portland", "seattle"],
     notes:
-      "Multi-city brand - PORTLAND ONLY. Scrape #events /events/{slug}/; keep PDX/Nova/Sanctuary; drop SF/Seattle. Flyers on WP uploads.",
+      "Multi-city brand — keep Portland + Seattle only (drop SF/LA/etc). Scrape #events /events/{slug}/. Flyers on WP uploads. Group can host at multiple venues (Nova, Sanctuary, …).",
   },
   {
     id: "rose-court",
@@ -464,7 +480,39 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://www.eventbrite.com/d/or--portland/bar-cala/",
     tier: "3",
     format: "eventbrite",
-    notes: "Venue-scoped drag brunches etc.",
+    notes: "Venue-scoped drag brunches (NE Alberta). Require Bar Cala in venue fields.",
+  },
+  {
+    id: "alberta-street-pub-eb",
+    label: "Alberta Street Pub (Eventbrite venue)",
+    url: "https://www.eventbrite.com/d/or--portland/alberta-street-pub/",
+    tier: "3",
+    format: "eventbrite",
+    notes: "Drag Brunch PDX + live music. Venue-scoped only (not city dump).",
+  },
+  {
+    id: "lipstick-divas-eb",
+    label: "Lipstick Divas / 10 Barrel (Eventbrite)",
+    url: "https://www.eventbrite.com/d/or--portland/lipstick-divas/",
+    tier: "3",
+    format: "eventbrite",
+    notes: "Pearl drag brunch at 10 Barrel. Scope: lipstick / 10 barrel in venue or title.",
+  },
+  {
+    id: "space-room-eb",
+    label: "Space Room Lounge (Eventbrite venue)",
+    url: "https://www.eventbrite.com/d/or--portland/space-room/",
+    tier: "3",
+    format: "eventbrite",
+    notes: "Drag Bingo + lounge nights. Require Space Room in venue.",
+  },
+  {
+    id: "escape-eb-org",
+    label: "Escape Bar (Eventbrite venue keyword)",
+    url: "https://www.eventbrite.com/d/or--portland/escape-bar/",
+    tier: "3",
+    format: "eventbrite",
+    notes: "Sapphic mixers etc. Venue-scoped; pairs with escape-eb path.",
   },
   {
     id: "sports-bra-eb",
@@ -472,7 +520,7 @@ export const INGEST_SOURCES: IngestSource[] = [
     url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
     tier: "3",
     format: "eventbrite",
-    notes: "Venue-scoped - not generic sports events.",
+    notes: "Venue-scoped - not generic sports events. Trusted Airtable is primary for games.",
   },
 
   // ── Eventbrite · Portland-only identity keyword searches ─────────────────

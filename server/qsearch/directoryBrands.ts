@@ -357,9 +357,12 @@ export function matchDirectoryBrands(
     });
   }
 
-  // Groups / orgs named in title or description
+  // Groups / orgs named in title or description (can co-exist with a venue —
+  // e.g. Bearracuda at Nova, PDX PAH at Eagle, OSLC at Badlands).
   const text = `${title} ${description}`.toLowerCase();
   const titleKey = normalizeVenueKey(title);
+  const sourceLabelKey = normalizeVenueKey(sourceLabel);
+  const sourceIdKey = String(opts?.sourceId || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 
   for (const biz of active) {
     if (biz.type !== "group" && biz.type !== "nonprofit") continue;
@@ -367,13 +370,44 @@ export function matchDirectoryBrands(
     const nameKey = normalizeVenueKey(biz.name);
     if (!nameKey || nameKey.length < 3) continue;
     const nameLow = biz.name.toLowerCase();
+    const nameCompact = nameKey.replace(/\s+/g, "");
+    const aliases = groupAliasesFor(biz.name);
+
     const mentioned =
       text.includes(nameLow) ||
-      (nameKey.length >= 4 && (titleKey.includes(nameKey) || text.replace(/[^a-z0-9]+/g, " ").includes(nameKey))) ||
-      nameLooselyMatch(title, biz.name);
+      (nameKey.length >= 4 &&
+        (titleKey.includes(nameKey) ||
+          text.replace(/[^a-z0-9]+/g, " ").includes(nameKey))) ||
+      nameLooselyMatch(title, biz.name) ||
+      aliases.some(a => {
+        const ak = normalizeVenueKey(a);
+        if (!ak || ak.length < 3) return false;
+        return (
+          text.includes(a.toLowerCase()) ||
+          titleKey.includes(ak) ||
+          nameLooselyMatch(title, a) ||
+          (sourceLabelKey && (sourceLabelKey.includes(ak) || nameLooselyMatch(sourceLabel, a)))
+        );
+      });
 
-    if (!mentioned) continue;
-    if (biz.type === "nonprofit" && !text.includes(nameLow) && !nameLooselyMatch(title, biz.name)) {
+    // Source-level attach: curated group sources (bearracuda) or source label
+    const fromSource =
+      (sourceIdKey &&
+        nameCompact.length >= 5 &&
+        (sourceIdKey.includes(nameCompact.slice(0, Math.min(10, nameCompact.length))) ||
+          nameCompact.includes(sourceIdKey.replace(/-/g, "").slice(0, 8)))) ||
+      (sourceLabelKey &&
+        (sourceLabelKey.includes(nameKey) ||
+          nameLooselyMatch(sourceLabel, biz.name) ||
+          aliases.some(a => nameLooselyMatch(sourceLabel, a))));
+
+    if (!mentioned && !fromSource) continue;
+    if (
+      biz.type === "nonprofit" &&
+      !text.includes(nameLow) &&
+      !nameLooselyMatch(title, biz.name) &&
+      !fromSource
+    ) {
       continue;
     }
 
@@ -385,23 +419,58 @@ export function matchDirectoryBrands(
       logoUrl: logoFor(biz),
       color: directoryTypeColor(biz.type),
       role: biz.type === "group" ? "group" : "place",
-      score: text.includes(nameLow) ? 80 : 55,
-      reasons: ["Named in event title/description"],
+      score: text.includes(nameLow) ? 80 : fromSource ? 75 : 55,
+      reasons: [
+        mentioned ? "Named in event title/description" : null,
+        fromSource ? "Matched scan source (group brand)" : null,
+      ].filter(Boolean) as string[],
     });
   }
 
-  // Order: group first, then venue (UI: Group - Venue - Flyer)
-  const group = brands.find(b => b.role === "group");
+  // Order: group first, then venue (UI: Group - Venue - Flyer). Groups may
+  // appear at many venues; we keep both brands when both match.
+  const groups = brands.filter(b => b.role === "group");
   const venue = brands.find(b => b.role === "venue") || brands.find(b => b.role === "place");
   const out: DirectoryBrand[] = [];
-  if (group) out.push(group);
-  if (venue && (!group || venue.businessId !== group.businessId)) out.push(venue);
+  // Prefer highest-scoring group when several match
+  groups.sort((a, b) => b.score - a.score);
+  if (groups[0]) out.push(groups[0]);
+  if (venue && !out.some(b => b.businessId === venue.businessId)) out.push(venue);
   if (!out.length) return brands.slice(0, 2);
   // Always ensure logoUrl is a usable path (pack → DB → type fallback)
   return out.map(b => ({
     ...b,
     logoUrl: b.logoUrl || directoryFallbackLogo(b.type || "venue"),
   }));
+}
+
+/** Alias map for Clubs & Groups directory matching (multi-name orgs). */
+function groupAliasesFor(name: string): string[] {
+  const key = normalizeVenueKey(name).replace(/\s+/g, "");
+  const MAP: Record<string, string[]> = {
+    pinkponies: ["Burning Man Pink Ponies", "Pink Ponies PDX"],
+    pdxpahportlandpetsandhandlers: ["Portland Pets and Handlers", "PDX PAH", "PAH"],
+    pdxpah: ["Portland Pets and Handlers", "PDX PAH"],
+    oregonstateleathercontest: ["Blackout Leather Productions", "OSLC", "Oregon State Leather"],
+    portlandleatheralliance: ["PLA", "Portland Leather"],
+    badgirlspdx: ["Bad Girls", "PDX Bad Girls"],
+    blackbeyondthebinarycollective: ["Black and Beyond the Binary", "B3C", "Black & Beyond Binary"],
+    browngirlrise: ["Brown Girl Rise Portland"],
+    tranzguyspdx: ["TranzGuys", "Tranz Guys"],
+    origallery: ["Ori"],
+    portlandfrontrunners: ["Frontrunners PDX", "Portland Front Runners"],
+    lavenderleague: ["Lavender League PDX"],
+    pdxgaymers: ["Gaymers PDX", "PDX Gamers"],
+    sankofacollective: ["Black PFLAG Portland", "Sankofa"],
+    bearracuda: ["Bearracuda PDX", "Bearracuda Portland", "Bearracuda Seattle"],
+    theimperialsovereignrosecourtoforegon: ["Rose Court", "ISRC", "Imperial Rose Court"],
+  };
+  // Direct + fuzzy key hits
+  if (MAP[key]) return MAP[key];
+  for (const [k, aliases] of Object.entries(MAP)) {
+    if (key.includes(k) || k.includes(key)) return aliases;
+  }
+  return [];
 }
 
 /** Re-resolve logos on stored brands (pack paths may improve after logo map updates). */

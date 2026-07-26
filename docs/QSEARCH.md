@@ -138,15 +138,16 @@ token rules):
 
 | Venue | sourceId | Source | Policy |
 |-------|----------|--------|--------|
-| Stag PDX | `stag-eb` | Eventbrite organizer | 21_PLUS |
-| The Sports Bra | `sports-bra-eb` | Eventbrite venue-scoped | age NOT forced (note-only: verify per event) |
-| Living Room Wines | `living-room-eb` | Eventbrite organizer | 21_PLUS |
-| Camp Bar PDX | `camp-bar` | Static #events HTML | 21_PLUS |
-| CC Slaughters | `cc-slaughters` | HTML + WP posters | 21_PLUS |
+| Stag PDX | `stag-eb` | `eventbrite_org` (upcomingEvents embed) | 21_PLUS |
+| The Sports Bra | `sports-bra-eb` | `sports_bra_airtable` (public share) | age NOT forced (note-only) |
+| Living Room Wines | `living-room-eb` | `eventbrite_org` | 21_PLUS (empty when org has 0 upcoming) |
+| Camp Bar PDX | `camp-bar` | `camp_bar_html` weeklies → 6 weeks | 21_PLUS |
+| CC Slaughters | `cc-slaughters` | `cc_slaughters_html` + ADVERTICAL poster | 21_PLUS |
+| Triangle Recreation Camp (Camp TRC) | `camp-trc` | `camp_trc_html` homepage Event Calendar (WA; login-gated WA detail pages) | 21_PLUS |
 
-These five are **scrape-grade sources on the trusted board** - the flyer
-coverage + yield health is the probation gate. 12h poll (vs 6h for feed-grade).
-They are no longer re-scanned by the QSearch catch-all (same trusted-lane filter).
+Dedicated parsers (2026-07-26): Eventbrite org JSON embed, Camp weekly
+columns, CC homepage nights. No longer rely on generic discover for these.
+They are excluded from the QSearch catch-all (trusted-lane filter).
 
 ## Recurring ↔ duplicate checks
 

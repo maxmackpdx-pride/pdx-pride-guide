@@ -9,7 +9,7 @@ import {
 } from "@shared/ingestSources";
 import { isTrustedLaneSource } from "@shared/trustedVenues";
 import type { IngestEventDraft } from "../ingest/types";
-import { isPortlandEventListing } from "../ingest";
+import { isPortlandEventListing, isAllowedCityEventListing } from "../ingest";
 import { isPastEventListing } from "../ingest/dates";
 import {
   isGenericEventbriteDumpUrl,
@@ -433,9 +433,11 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         const remaining = sources.length - times.length;
         const etaSeconds = Math.max(0, Math.round((remaining * avgMs) / 1000));
 
+        const cityAllowlist = Array.isArray(source.cityAllowlist) ? source.cityAllowlist : null;
         const portlandOnly =
-          source.portlandOnly === true ||
-          String(source.businessType || "").toLowerCase() === "group";
+          !cityAllowlist?.length &&
+          (source.portlandOnly === true ||
+            String(source.businessType || "").toLowerCase() === "group");
         const relevanceCtx: SourceRelevanceContext = {
           sourceId: source.id,
           label: source.label,
@@ -446,6 +448,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
 
         let kept = 0;
         for (const draft of sanctuaryDrafts) {
+          if (cityAllowlist?.length && !isAllowedCityEventListing(draft, cityAllowlist)) continue;
           if (portlandOnly && !isPortlandEventListing(draft)) continue;
           if (!includePast && isPastEventListing(draft)) continue;
           const rel = isRelevantScanDraft(draft, relevanceCtx);
@@ -563,10 +566,12 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         }
       }
 
-      // Groups / multi-city brands: Portland-metro only (e.g. Bearracuda national calendar)
+      // Groups / multi-city brands: city allowlist (Bearracuda PDX+SEA) or Portland-only
+      const cityAllowlist = Array.isArray(source.cityAllowlist) ? source.cityAllowlist : null;
       const portlandOnly =
-        source.portlandOnly === true ||
-        String(source.businessType || "").toLowerCase() === "group";
+        !cityAllowlist?.length &&
+        (source.portlandOnly === true ||
+          String(source.businessType || "").toLowerCase() === "group");
 
       const relevanceCtx: SourceRelevanceContext = {
         sourceId: source.id,
@@ -579,6 +584,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
       // Also drop Eventbrite dumps / non-queer city noise / venue-mismatched org scrapes
       const includePast = opts.includePastEvents === true;
       const upcomingDrafts = hit.drafts.filter(d => {
+        if (cityAllowlist?.length && !isAllowedCityEventListing(d, cityAllowlist)) return false;
         if (portlandOnly && !isPortlandEventListing(d)) return false;
         if (!includePast && isPastEventListing(d)) return false;
         const rel = isRelevantScanDraft(d, relevanceCtx);
@@ -615,15 +621,18 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         });
       }
 
-      // Reflect Portland filter in health counts when we dropped out-of-market rows
-      if (portlandOnly && kept !== hit.eventCount) {
+      // Reflect city filter in health counts when we dropped out-of-market rows
+      if ((portlandOnly || cityAllowlist?.length) && kept !== hit.eventCount) {
         const last = handle.perSource[handle.perSource.length - 1];
         if (last && last.sourceId === source.id) {
           last.eventCount = kept;
+          const market = cityAllowlist?.length
+            ? cityAllowlist.join("+")
+            : "Portland";
           last.error =
             kept === 0
               ? hit.eventCount > 0
-                ? `Zero Portland yield (${hit.eventCount} out-of-market dropped)`
+                ? `Zero ${market} yield (${hit.eventCount} out-of-market dropped)`
                 : "Zero yield"
               : last.error;
         }

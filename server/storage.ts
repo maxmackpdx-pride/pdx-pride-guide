@@ -3963,6 +3963,68 @@ function runBootMigrationsOnce() {
     recordBootMigration("sanctuary_never_free_v1");
   }
 
+  // Year-round trusted club pulls often leave admission UNKNOWN (thin feed text).
+  // Re-tag from title+description when clear; else door fee for known club venues.
+  if (!hasBootMigration("retag_unknown_admission_v1")) {
+    // Explicit free / no cover
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'FREE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(title || ' ' || COALESCE(description, '')) LIKE '%no cover%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free entry%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free admission%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free show%'
+        )
+    `).run();
+    // Ticket language or Eventbrite ticket URL
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'TICKETED'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(COALESCE(ticket_url, '')) LIKE '%eventbrite.com/e/%'
+          OR LOWER(COALESCE(ticket_url, '')) LIKE '%ticketmaster%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%ticket%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%get tix%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%buy tickets%'
+        )
+    `).run();
+    // Cover / door fee signals
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(title || ' ' || COALESCE(description, '')) LIKE '%cover%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%door fee%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%at the door%'
+        )
+    `).run();
+    // Club weeklies from Trusted adapters with no text signal → DOOR_FEE (not FREE)
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(venue_name) LIKE '%badlands%'
+          OR LOWER(venue_name) LIKE '%hawks%'
+          OR LOWER(venue_name) LIKE '%darcelle%'
+          OR LOWER(venue_name) LIKE '%eagle%'
+          OR LOWER(venue_name) LIKE '%sanctuary%'
+          OR LOWER(venue_name) LIKE '%cc slaughter%'
+          OR LOWER(venue_name) LIKE '%camp bar%'
+          OR LOWER(venue_name) LIKE '%stag%'
+        )
+    `).run();
+    recordBootMigration("retag_unknown_admission_v1");
+  }
+
   // Clubs & Groups directory section (claimable like other businesses).
   if (!hasBootMigration("seed_directory_clubs_groups_v1")) {
     const now = new Date().toISOString();
@@ -5289,6 +5351,51 @@ function runBootMigrationsOnce() {
     recordBootMigration("sanctuary_club_website_v1");
   }
 
+  // Triangle Recreation Camp (Camp TRC) — LGBTQ+ campground outside Portland, important to locals.
+  if (!hasBootMigration("seed_camp_trc_directory_v1")) {
+    const exists = sqlite
+      .prepare(
+        `SELECT id FROM businesses WHERE lower(name) LIKE '%triangle recreation camp%' OR lower(name) = 'camp trc' OR website LIKE '%camptrc.org%' LIMIT 1`,
+      )
+      .get() as { id?: number } | undefined;
+    if (!exists?.id) {
+      const now = new Date().toISOString();
+      db.insert(businesses)
+        .values({
+          name: "Triangle Recreation Camp",
+          type: "campground",
+          description:
+            "Camp TRC — the Northwest's premier LGBTQ+ owned and operated recreational campground (est. 1975). 80 acres of trails, river, tent sites, and RVs in the Cascade foothills near Granite Falls, WA (about 4 hours from Portland). 21+ only; open mid-April through early October. Theme weekends, day use, and overnight camping.",
+          address: "47715 Mountain Loop Highway, Granite Falls, WA 98252",
+          neighborhood: "Granite Falls, WA",
+          website: "https://camptrc.org/",
+          instagram: null,
+          hours: "Seasonal mid-April through early October · reservations recommended",
+          phone: null,
+          queerOwned: true,
+          queerFriendly: true,
+          lat: 48.0745268,
+          lng: -121.5901687,
+          imageUrl: "/directory-logos/Triangle_Recreation_Camp.png",
+          active: true,
+          isNew: true,
+          createdAt: now,
+        } as any)
+        .run();
+    } else {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET type = 'campground',
+             website = COALESCE(NULLIF(TRIM(website), ''), 'https://camptrc.org/'),
+             address = COALESCE(NULLIF(TRIM(address), ''), '47715 Mountain Loop Highway, Granite Falls, WA 98252'),
+             imageUrl = COALESCE(NULLIF(TRIM(imageUrl), ''), '/directory-logos/Triangle_Recreation_Camp.png')
+           WHERE id = ?`,
+        )
+        .run(exists.id);
+    }
+    recordBootMigration("seed_camp_trc_directory_v1");
+  }
+
   // Bearracuda: nightlife brand / promoter as directory group (events at partner venues).
   if (!hasBootMigration("seed_bearracuda_group_v1")) {
     const exists = sqlite
@@ -5300,9 +5407,9 @@ function runBootMigrationsOnce() {
           name: "Bearracuda",
           type: "group",
           description:
-            "Portland bear dance party / nightlife brand. Events at Nova PDX, Crystal Ballroom, and partner venues - follow brand calendar + IG for flyers.",
+            "Multi-city bear dance party / nightlife brand. Portland + Seattle events only on Zaylist (hosts at Nova, Sanctuary, and partner venues). National calendar also runs SF/LA — those cities are filtered out of QSearch.",
           address: null,
-          neighborhood: "Portland",
+          neighborhood: "Portland / Seattle",
           website: "https://bearracuda.com",
           instagram: "@bearracudapdx",
           queerOwned: true,
@@ -5314,6 +5421,216 @@ function runBootMigrationsOnce() {
         .run();
     }
     recordBootMigration("seed_bearracuda_group_v1");
+  }
+
+  // Active Clubs & Groups from directory audit (data/directory-active-groups.json).
+  // Idempotent upsert by name; type=group with white→gold card accent.
+  if (!hasBootMigration("seed_active_groups_directory_v2")) {
+    const now = new Date().toISOString();
+    type GroupSeed = {
+      name: string;
+      description: string;
+      address?: string | null;
+      neighborhood?: string | null;
+      website?: string | null;
+      instagram?: string | null;
+    };
+    const groups: GroupSeed[] = [
+      {
+        name: "Pink Ponies",
+        description:
+          "Queer-identifying Burning Man camp + Portland party collective (501(c)(3)). Ethical creative expression, sex positivity, gender fluidity, radical inclusion. Also known as Burning Man Pink Ponies.",
+        address: "904 NW Couch St, Portland, OR 97209",
+        neighborhood: "NW Portland",
+        website: "https://events.humanitix.com/host/pink-ponies",
+        instagram: "@burningmanpinkponies",
+      },
+      {
+        name: "PDX PAH - Portland Pets & Handlers",
+        description:
+          "Human-pet play community in Portland: education, socials, and monthly mosh (often at Eagle Portland). Welcomes pets, pups, handlers, and the curious — all shapes, sizes, colors, genders, orientations.",
+        address: "Eagle Portland, 3444 N Williams Ave",
+        neighborhood: "North Portland",
+        website: "https://www.pdxpah.com",
+        instagram: "@pdxpah",
+      },
+      {
+        name: "Oregon State Leather Contest",
+        description:
+          "Largest leather title contest in Oregon since 1997 (formerly Blackout Leather Productions; renamed 2021). Celebrates BDSM, Leather, Pup/Pet, Mx. Draws contestants from Oregon + SW Washington. Often partners with Badlands and other clubs.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@oregonstateleather",
+      },
+      {
+        name: "Portland Leather Alliance",
+        description:
+          "All-volunteer 501(c)3 (est. 1998) — education and awareness for alternative lifestyles. Largest membership-based BDSM org in Portland Metro + SW Washington. Consent in Kink, KinkFest, Black and Blue.",
+        address: "4110 SE Hawthorne Blvd #611, Portland OR 97214",
+        neighborhood: "SE Portland",
+        website: "http://www.portlandleather.org",
+        instagram: null,
+      },
+      {
+        name: "Bad Girls PDX",
+        description:
+          "Kinky women's group — BDSM Safety & Etiquette class + new member orientation (often at Q Center).",
+        address: "Q Center, 4115 N Mississippi Ave, Portland OR 97217",
+        neighborhood: "N Portland",
+        website: "http://www.pdxbadgirls.net",
+        instagram: "@pdxbadgirls",
+      },
+      {
+        name: "Black & Beyond the Binary Collective",
+        description:
+          "Leadership, healing, and safety for Black-African transgender, queer, nonbinary, two-spirit, intersex (TQN2SI+) Oregonians. Community at SE Uplift / Tabor Commons and citywide.",
+        address: "5633 SE Division St, Portland OR 97206",
+        neighborhood: "SE Portland",
+        website: "https://www.blackbeyondthebinary.org",
+        instagram: "@blackandbeyondthebinary",
+      },
+      {
+        name: "Brown Girl Rise",
+        description:
+          "501(c)(3) radical sisterhood of girls and non-binary youth of the global majority — camps, menstrual kit actions, zine workshops, connection to body, community, land, and creativity.",
+        address: "7707 SE 70th Ave, Portland OR 97206",
+        neighborhood: "SE Portland",
+        website: "https://browngirlriseportland.org",
+        instagram: "@browngirlrise",
+      },
+      {
+        name: "TranzGuys PDX",
+        description:
+          "Inclusive peer-support / discussion / social group for AFAB folks who identify as trans, MTO, genderfluid, transman, genderqueer, boi, FTM, male, butch, two-spirit, and more. 3rd Sunday 6–8pm at Q Center.",
+        address: "Q Center, Portland, OR",
+        neighborhood: "N Portland",
+        website: null,
+        instagram: "@tranzguyspdx",
+      },
+      {
+        name: "Ori Gallery",
+        description:
+          "QTBIPOC art gallery and workshop space — art + activism, fundraisers for Black and trans causes.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.origallery.org",
+        instagram: "@origallery_pdx",
+      },
+      {
+        name: "Portland Frontrunners",
+        description:
+          "Running/walking club for LGBTQIA+ and friends. Weekly runs + annual Portland Pride Run & Walk and Bridge to Bridge.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.meetup.com/Portland-Frontrunners/",
+        instagram: "@portlandfrontrunners",
+      },
+      {
+        name: "Lavender League",
+        description:
+          "Portland soccer league for queer women and nonbinary or trans people (200+ members).",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@lavenderleaguepdx",
+      },
+      {
+        name: "PDX Gaymers",
+        description: "Queer gamers — screenings, board games, socials.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.meetup.com/PDX-Gaymers/",
+        instagram: "@pdxgaymers",
+      },
+      {
+        name: "Sankofa Collective",
+        description:
+          "Formerly Portland African-American/Black PFLAG — health and well-being for gay, lesbian, bisexual, and transgender persons, their families and friends.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: null,
+      },
+      {
+        name: "Bearracuda",
+        description:
+          "Multi-city bear dance party brand. Zaylist shows Portland + Seattle only (events at partner venues like Nova PDX and Sanctuary). SF/LA and other tour cities are filtered out of QSearch.",
+        address: null,
+        neighborhood: "Portland / Seattle",
+        website: "https://bearracuda.com",
+        instagram: "@bearracudapdx",
+      },
+      {
+        name: "The Imperial Sovereign Rose Court of Oregon",
+        description:
+          "Portland's Imperial Sovereign Rose Court — oldest continuously operating court system organization in the world. Coronations, fundraisers, community service for LGBTQ+ causes across Oregon.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://rosecourt.org",
+        instagram: "@rosecourtpdx",
+      },
+    ];
+
+    for (const g of groups) {
+      const row = sqlite
+        .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+        .get(g.name) as { id?: number } | undefined;
+      if (row?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               type = 'group',
+               description = COALESCE(NULLIF(TRIM(description), ''), ?),
+               address = COALESCE(NULLIF(TRIM(address), ''), ?),
+               neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), ?),
+               website = COALESCE(NULLIF(TRIM(website), ''), ?),
+               instagram = COALESCE(NULLIF(TRIM(instagram), ''), ?),
+               queer_owned = 1,
+               queer_friendly = 1,
+               active = 1
+             WHERE id = ?`,
+          )
+          .run(
+            g.description,
+            g.address ?? null,
+            g.neighborhood ?? null,
+            g.website ?? null,
+            g.instagram ?? null,
+            row.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: g.name,
+            type: "group",
+            description: g.description,
+            address: g.address ?? null,
+            neighborhood: g.neighborhood ?? null,
+            website: g.website ?? null,
+            instagram: g.instagram ?? null,
+            queerOwned: true,
+            queerFriendly: true,
+            active: true,
+            isNew: false,
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+    // Soft-deactivate known closed groups if present
+    for (const closed of ["Darklady Productions", "Oregon Bears", "Collar Guard"]) {
+      try {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET active = 0 WHERE LOWER(name) = LOWER(?) AND type = 'group'`,
+          )
+          .run(closed);
+      } catch {
+        /* ignore */
+      }
+    }
+    recordBootMigration("seed_active_groups_directory_v2");
   }
 
   // Remove Back 2 Earth from directory (venue no longer listed).

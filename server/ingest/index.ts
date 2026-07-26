@@ -78,14 +78,13 @@ export function isNonEventListing(draft: Pick<IngestEventDraft, "title" | "descr
   return false;
 }
 
-/**
- * Multi-city brands (Bearracuda, touring groups) often list SF/Seattle/etc.
- * Zaylist only wants Portland metro listings for group sources.
- */
-export function isPortlandEventListing(
-  draft: Pick<IngestEventDraft, "title" | "description" | "venueName" | "address" | "neighborhood" | "sourceUrl">,
-): boolean {
-  const blob = [
+type CityListingDraft = Pick<
+  IngestEventDraft,
+  "title" | "description" | "venueName" | "address" | "neighborhood" | "sourceUrl"
+>;
+
+function listingBlob(draft: CityListingDraft): string {
+  return [
     draft.venueName,
     draft.address,
     draft.neighborhood,
@@ -96,22 +95,14 @@ export function isPortlandEventListing(
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+}
 
-  // Explicit non-PDX cities (common multi-city brand calendars)
-  if (
-    /\b(san francisco|sf bay|oakland|seattle|los angeles|\bla\b|chicago|denver|atlanta|new orleans|austin|dallas|houston|phoenix|vegas|miami|nyc|new york|boston|dc|washington)\b/i.test(
-      blob,
-    ) &&
-    !/\b(portland|pdx|oregon|\bor\b)\b/i.test(blob)
-  ) {
-    return false;
-  }
-  // Strong Portland signals
+/** Strong Portland-metro signals (venues or city words). */
+function hasPortlandSignal(blob: string): boolean {
   if (/\b(portland|pdx|beaverton|gresham|milwaukie|oregon city|tualatin|hillsboro|lake oswego)\b/i.test(blob)) {
     return true;
   }
   if (/\b(or|oregon)\s*\d{5}\b/i.test(blob) || /,\s*or\b/i.test(blob)) return true;
-  // Known local venues without "Portland" in the string
   if (
     /\b(darcelle|stag|badlands|eagle|silverado|cc slaughters|slaughters|nova|holocene|sanctuary|hawks|camp bar|scandals|crystal ballroom|star theater|get down|alberta rose|meet rack)\b/i.test(
       blob,
@@ -119,8 +110,76 @@ export function isPortlandEventListing(
   ) {
     return true;
   }
+  return false;
+}
+
+function hasSeattleSignal(blob: string): boolean {
+  if (/\b(seattle|sea-?tac|capitol hill|bellevue|tacoma)\b/i.test(blob)) return true;
+  if (/\b(wa|washington)\s*\d{5}\b/i.test(blob) || /,\s*wa\b/i.test(blob)) return true;
+  // Common Seattle queer venues that appear without "Seattle" in the title
+  if (/\b(re-bar|rebar|neighbour|neighbor|cc\s*attles|rialto|neumos|chop\s*suey)\b/i.test(blob)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Multi-city brands (Bearracuda, touring groups) often list SF/Seattle/etc.
+ * Default group filter: Portland metro only.
+ */
+export function isPortlandEventListing(draft: CityListingDraft): boolean {
+  const blob = listingBlob(draft);
+
+  // Explicit non-PDX cities without a Portland counter-signal
+  if (
+    /\b(san francisco|sf bay|oakland|seattle|los angeles|\bla\b|chicago|denver|atlanta|new orleans|austin|dallas|houston|phoenix|vegas|miami|nyc|new york|boston|dc|washington)\b/i.test(
+      blob,
+    ) &&
+    !hasPortlandSignal(blob)
+  ) {
+    return false;
+  }
+  if (hasPortlandSignal(blob)) return true;
   // No clear city → drop for group filters (prefer precision over noise)
   return false;
+}
+
+/**
+ * Allowlist filter for multi-city brands.
+ * Cities: portland | seattle (extend as needed).
+ * Returns true when the draft matches at least one allowed city.
+ */
+export function isAllowedCityEventListing(
+  draft: CityListingDraft,
+  cities: string[] | null | undefined,
+): boolean {
+  if (!cities?.length) return isPortlandEventListing(draft);
+  const allow = new Set(cities.map(c => String(c || "").toLowerCase().trim()).filter(Boolean));
+  const blob = listingBlob(draft);
+
+  // Hard-drop cities that appear and are NOT on the allowlist
+  const foreignHits: Array<{ re: RegExp; key: string }> = [
+    { re: /\b(san francisco|sf bay|oakland)\b/i, key: "sf" },
+    { re: /\b(los angeles|\bla\b)\b/i, key: "la" },
+    { re: /\b(chicago|denver|atlanta|austin|dallas|houston|phoenix|vegas|miami|nyc|new york|boston)\b/i, key: "other" },
+  ];
+  for (const { re, key } of foreignHits) {
+    if (re.test(blob)) {
+      // only keep if that foreign city is somehow allowlisted (none today)
+      if (!allow.has(key) && !allow.has("all")) {
+        // still keep if an allowed city also matches (title lists tour stops)
+        const ok =
+          (allow.has("portland") && hasPortlandSignal(blob)) ||
+          (allow.has("seattle") && hasSeattleSignal(blob));
+        if (!ok) return false;
+      }
+    }
+  }
+
+  let matched = false;
+  if (allow.has("portland") && hasPortlandSignal(blob)) matched = true;
+  if (allow.has("seattle") && hasSeattleSignal(blob)) matched = true;
+  return matched;
 }
 
 export { isPastEventListing } from "./dates";

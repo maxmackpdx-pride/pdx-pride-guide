@@ -10,6 +10,8 @@ const GRAND_OPENING_COLOR = "#FFEE00";
 const ORB_NUM_COLORS: Partial<Record<string, string>> = {
   realestate: "#4488FF",
   healthcare: "#FF5FA8",
+  campground: "#1DB954",
+  group: "#C9A227",
 };
 
 const BASE_POSITIONS: Record<string, { x: number; y: number }> = {
@@ -23,6 +25,8 @@ const BASE_POSITIONS: Record<string, { x: number; y: number }> = {
   healthcare: { x: 41, y: 15 },
   hotel: { x: 90, y: 78 },
   realestate: { x: 17, y: 24 },
+  group: { x: 52, y: 18 },
+  campground: { x: 28, y: 88 },
   grandopening: { x: 57, y: 90 },
 };
 
@@ -37,6 +41,8 @@ const CATEGORY_ORDER = [
   "healthcare",
   "hotel",
   "realestate",
+  "group",
+  "campground",
 ] as const;
 
 type CategoryKey = (typeof CATEGORY_ORDER)[number] | "grandopening";

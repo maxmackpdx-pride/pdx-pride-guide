@@ -241,13 +241,17 @@ if (typeof document !== "undefined") {
 const CAT_COLOR = {
   bars:"var(--pink)", food:"var(--orange)", cafes:"var(--green)", venues:"var(--cyan)",
   services:"var(--purple)", shops:"var(--amber)", hotels:"var(--blue)",
-  healthcare:"#FF00CC", realestate:"#1A4DFF",
+  healthcare:"#FF00CC", realestate:"#1A4DFF", campgrounds:"#39FF14", groups:"#FFD700",
 };
 const RAINBOW_EDGE = "linear-gradient(120deg,#FF2400,#FF9500,#FFEE00,#39FF14,#00FFFF,#3A6BFF,#8800FF,#FF00CC)";
 /** Pink → white neon for Health & Care cards. */
 const HEALTHCARE_EDGE = "linear-gradient(125deg,#FF00CC 0%,#FF4DD2 35%,#FFB3EC 70%,#FFFFFF 100%)";
 /** Neon navy → white for Real Estate cards. */
 const REALESTATE_EDGE = "linear-gradient(125deg,#061A66 0%,#0A1F8C 28%,#1A4DFF 62%,#FFFFFF 100%)";
+/** Lime green → dark forest green for Campgrounds cards. */
+const CAMPGROUND_EDGE = "linear-gradient(125deg,#B8FF3C 0%,#39FF14 28%,#0F8A3D 62%,#064E2A 100%)";
+/** White → gold neon for Clubs & Groups cards. */
+const GROUP_EDGE = "linear-gradient(125deg,#FFFFFF 0%,#FFF3C4 32%,#FFD700 68%,#C9A227 100%)";
 const DAY_COLOR = { MON:"var(--day-mon,var(--pink))", TUE:"var(--day-tue,var(--orange))", WED:"var(--day-wed,var(--yellow))", THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };
 
 function Icon({ d }) {
@@ -320,6 +324,8 @@ export function PlaceCard({
 }) {
   const isHealthcare = category === "healthcare";
   const isRealEstate = category === "realestate";
+  const isCampground = category === "campgrounds";
+  const isGroup = category === "groups";
   const accent = isNonprofit
     ? "var(--cyan)"
     : (CAT_COLOR[category] || "var(--pink)");
@@ -329,7 +335,11 @@ export function PlaceCard({
       ? HEALTHCARE_EDGE
       : isRealEstate
         ? REALESTATE_EDGE
-        : `linear-gradient(${accent},${accent})`;
+        : isCampground
+          ? CAMPGROUND_EDGE
+          : isGroup
+            ? GROUP_EDGE
+            : `linear-gradient(${accent},${accent})`;
   const [logoFailed, setLogoFailed] = useState(false);
   const [sharing, setSharing] = useState(false);
   const showLogo = logoUrl && !logoFailed;
@@ -348,7 +358,8 @@ export function PlaceCard({
     }
   };
 
-  const useSpecialEdge = isNonprofit || isHealthcare || isRealEstate;
+  const useSpecialEdge =
+    isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
 
   return (
     <article

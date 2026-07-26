@@ -33,8 +33,20 @@ const DEFAULT_FEED =
 /** Max Tribe REST pages to follow (per_page=50 → up to 200 events). */
 const MAX_TRIBE_PAGES = 4;
 
+function decodeEntities(s: string): string {
+  return String(s || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#8217;|&#39;|&rsquo;/g, "'")
+    .replace(/&#8220;|&#8221;|&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&nbsp;/gi, " ")
+    .trim();
+}
+
 export function applyDarcellePolicy(draft: IngestEventDraft): IngestEventDraft {
-  const adm = inferAdmissionFromText(draft.title, draft.description);
+  const title = decodeEntities(draft.title);
+  const description = decodeEntities(draft.description || "");
+  const adm = inferAdmissionFromText(title, description);
   // Never invent FREE: keep meaningful upstream values (demoting unconfirmed
   // FREE); when upstream had no signal (UNKNOWN), trust text inference - FREE
   // only survives when the listing text clearly says so.
@@ -52,6 +64,8 @@ export function applyDarcellePolicy(draft: IngestEventDraft): IngestEventDraft {
 
   return {
     ...draft,
+    title,
+    description,
     venueName: weakVenue ? DARCELLE_VENUE : draft.venueName,
     address: draft.address?.trim() ? draft.address : DARCELLE_ADDRESS,
     neighborhood: draft.neighborhood?.trim() ? draft.neighborhood : DARCELLE_NEIGHBORHOOD,

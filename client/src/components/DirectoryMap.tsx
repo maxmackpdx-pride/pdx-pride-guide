@@ -40,6 +40,8 @@ export const MAP_TYPE_COLORS: Record<string, string> = {
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC",
   realestate: "#1A4DFF",
+  group: "#FFD700",
+  campground: "#39FF14",
 };
 
 /** CSS backgrounds for legend swatches (solid or gradient neon). */
@@ -54,6 +56,8 @@ export const MAP_TYPE_SWATCH: Record<string, string> = {
   nonprofit: "conic-gradient(#FF2400,#FF6600,#FFEE00,#39FF14,#00FFFF,#0044FF,#8800FF,#FF00CC,#FF2400)",
   healthcare: "linear-gradient(135deg,#FF00CC 0%,#FF7AE0 48%,#FFFFFF 100%)",
   realestate: "linear-gradient(135deg,#0A1F8C 0%,#1A4DFF 48%,#FFFFFF 100%)",
+  group: "linear-gradient(135deg,#FFFFFF 0%,#FFF3C4 40%,#FFD700 100%)",
+  campground: "linear-gradient(135deg,#B8FF3C 0%,#39FF14 32%,#0F8A3D 68%,#064E2A 100%)",
 };
 
 export const MAP_TYPE_LABELS: Record<string, string> = {
@@ -67,6 +71,8 @@ export const MAP_TYPE_LABELS: Record<string, string> = {
   nonprofit: "Nonprofits",
   healthcare: "Health & Care",
   realestate: "Real Estate",
+  group: "Clubs & Groups",
+  campground: "Campgrounds",
 };
 
 /** Legend order for the directory map key. */
@@ -81,6 +87,8 @@ export const MAP_KEY_TYPES = [
   "nonprofit",
   "healthcare",
   "realestate",
+  "group",
+  "campground",
 ] as const;
 
 const TYPE_COLORS = MAP_TYPE_COLORS;

@@ -96,6 +96,13 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   pluspsychiatry: "Plus_Psychiatry",
   pluspsych: "Plus_Psychiatry",
   pluspsychiatryllc: "Plus_Psychiatry",
+  // Camp TRC (Triangle Recreation Camp) — Granite Falls WA LGBTQ+ campground
+  trianglerecreationcamp: "Triangle_Recreation_Camp",
+  camptrc: "Triangle_Recreation_Camp",
+  camptrcwashington: "Triangle_Recreation_Camp",
+  trianglerc: "Triangle_Recreation_Camp",
+  trccamp: "Triangle_Recreation_Camp",
+  trcgranitefalls: "Triangle_Recreation_Camp",
 };
 
 const FALLBACK_BY_TYPE: Record<string, string> = {
@@ -109,7 +116,8 @@ const FALLBACK_BY_TYPE: Record<string, string> = {
   hotel: "/directory-logos/fallback_venues.png",
   healthcare: "/directory-logos/fallback_healthcare.png",
   realestate: "/directory-logos/fallback_realestate.png",
-  group: "/directory-logos/fallback_nonprofits.png",
+  group: "/directory-logos/fallback_groups.png",
+  campground: "/directory-logos/fallback_campgrounds.png",
 };
 
 export function normalizeDirectoryName(name: string): string {

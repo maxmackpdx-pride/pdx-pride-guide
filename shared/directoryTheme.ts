@@ -10,7 +10,10 @@ export const DIRECTORY_TYPE_COLORS: Record<string, string> = {
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC",
   realestate: "#1A4DFF",
-  group: "#CCFF00",
+  /** Gold pole of white→gold Clubs & Groups neon */
+  group: "#FFD700",
+  /** Lime pole of lime→dark green campground neon */
+  campground: "#39FF14",
 };
 
 export function directoryTypeColor(type: string | null | undefined): string {

@@ -101,6 +101,7 @@ export const TYPE_LABELS: Record<string, string> = {
   healthcare: "Health & Care",
   realestate: "Real Estate",
   group: "Clubs & Groups",
+  campground: "Campgrounds",
 };
 
 /** Solid pin / accent hex (gradients live on PlaceCard edges). */
@@ -115,7 +116,8 @@ export const TYPE_COLORS: Record<string, string> = {
   nonprofit: "#FFFFFF",
   healthcare: "#FF00CC", // pink pole of pink→white neon
   realestate: "#1A4DFF", // neon navy pole of navy→white neon
-  group: "#CCFF00",
+  group: "#FFD700", // gold pole of white→gold neon
+  campground: "#39FF14", // lime pole of lime→dark green neon
 };
 
 const NEIGHBORHOODS = [
@@ -985,7 +987,8 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   nonprofit: "services",
   healthcare: "healthcare",
   realestate: "realestate",
-  group: "services",
+  group: "groups",
+  campground: "campgrounds",
 };
 
 function DirectoryCard({

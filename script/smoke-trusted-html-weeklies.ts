@@ -1,0 +1,132 @@
+/**
+ * Smoke: Camp Bar + CC Slaughters + Eventbrite org parsers (offline fixtures).
+ * Run: npx tsx script/smoke-trusted-html-weeklies.ts
+ */
+import {
+  parseCampBarWeeklies,
+  parseCampTime,
+  weekliesToDrafts,
+  nextWeekdayDates,
+} from "../server/ingest/adapters/campBar";
+import {
+  parseCcSlaughtersNights,
+  extractCcVerticalPosters,
+  nightsToDrafts,
+} from "../server/ingest/adapters/ccSlaughters";
+import {
+  extractEventbriteUpcomingEvents,
+} from "../server/ingest/adapters/eventbriteOrg";
+import { getTrustedVenue } from "../shared/trustedVenues";
+
+function assert(cond: unknown, msg: string) {
+  if (!cond) {
+    console.error("FAIL:", msg);
+    process.exit(1);
+  }
+  console.log("ok:", msg);
+}
+
+/* ── fetch modes registered ── */
+assert(getTrustedVenue("camp-bar")?.fetchMode === "camp_bar_html", "camp-bar → camp_bar_html");
+assert(
+  getTrustedVenue("cc-slaughters")?.fetchMode === "cc_slaughters_html",
+  "cc-slaughters → cc_slaughters_html",
+);
+assert(getTrustedVenue("stag-eb")?.fetchMode === "eventbrite_org", "stag-eb → eventbrite_org");
+assert(
+  getTrustedVenue("living-room-eb")?.fetchMode === "eventbrite_org",
+  "living-room-eb → eventbrite_org",
+);
+
+/* ── Camp Bar ── */
+assert(parseCampTime("7 PM to 9 PM") === "19:00", "camp time 7 PM");
+assert(parseCampTime("8pm") === "20:00", "camp time 8pm");
+assert(parseCampTime("Midnight") === "19:00" || parseCampTime("12 AM") === "00:00", "camp time fallback ok");
+
+const CAMP_HTML = `
+<div id="weeklyevents">
+  <div class="dow"><h4>Tuesdays</h4>
+    <div class='weeklyevent hh'>Happy Hour 4 PM to 7 PM Happy Hour $1 off</div>
+    <div class='weeklyevent game'>Game On 6 PM to Midnight</div>
+  </div>
+  <div class="dow"><h4>Wednesdays</h4>
+    <div class='weeklyevent karaoke'>Karaoke 8 PM to Midnight</div>
+  </div>
+  <div class="dow"><h4>Thursdays</h4>
+    <div class='weeklyevent bingo'>Drag Bingo with Peachy Springs 7 PM to 9 PM</div>
+  </div>
+</div>`;
+
+const weeklies = parseCampBarWeeklies(CAMP_HTML);
+assert(weeklies.some(w => w.title === "Game On" && w.dow === 2), "camp parses Game On Tuesday");
+assert(weeklies.some(w => /karaoke/i.test(w.title) && w.dow === 3), "camp parses Karaoke Wednesday");
+assert(weeklies.some(w => /bingo/i.test(w.title) && w.dow === 4), "camp parses Drag Bingo Thursday");
+
+const campDrafts = weekliesToDrafts(weeklies, {
+  weeks: 2,
+  includeHappyHour: false,
+  now: new Date("2026-07-20T12:00:00"),
+});
+assert(campDrafts.length >= 6, `camp expands non-HH weeklies (got ${campDrafts.length})`);
+assert(
+  campDrafts.every(d => d.ageRequirement === "21_PLUS" && d.venueName === "Camp Bar PDX"),
+  "camp policy stamps",
+);
+assert(
+  campDrafts.every(d => !/^happy hour$/i.test(d.title)),
+  "happy hour omitted by default",
+);
+
+const tueDates = nextWeekdayDates(2, 3, new Date("2026-07-20T12:00:00"));
+assert(tueDates[0] === "2026-07-21", `next Tuesday from Mon Jul 20 is 21 (got ${tueDates[0]})`);
+
+/* ── CC Slaughters ── */
+const CC_HTML = `
+Monday Game-Day CC's Community Foundation presents Drag Queen Bingo with Nicole Onoscopi. Join the fun every Monday night at 7pm for drinks.
+Tuesday | 9pm Feat. DJ Mawmie No Cover 21+ | no exceptions
+Wednesday It's amateur night at CC's.. Hump night is your chance to strip at CC's and earn some extra cash in your jocks
+Thursday night. Featuring music by DJ ROBB. Afterwards we welcome DJ Lyta Blunt
+Friday | 7pm Feat. live piano and singing No Cover 21+
+Saturday! Starring Rogue Storm Safari. Every 2nd Saturday | 9pm Featuring DJ Queer Cub $10 Cover 21+
+Sunday | 7pm Featuring Saint Syndrome & Kevin Hutman No Cover 21+
+<img src="https://ccslaughterspdx.com/wp-content/uploads/2026/07/WEEKLYS_2026_ADVERTICAL_ONLINE.png" />
+<img src="https://ccslaughterspdx.com/wp-content/uploads/2026/07/WEEKLYS_2026_ADVERTICAL_ONLINE-350x623.png" />
+`;
+
+const nights = parseCcSlaughtersNights(CC_HTML);
+assert(nights.length >= 5, `cc parses most weeknights (got ${nights.length})`);
+assert(
+  nights.some(n => /bingo|game-?day/i.test(n.title) && n.dow === 1),
+  "cc Monday bingo/game-day night",
+);
+const posters = extractCcVerticalPosters(CC_HTML);
+assert(
+  posters.some(p => p.endsWith("WEEKLYS_2026_ADVERTICAL_ONLINE.png")),
+  "cc prefers full ADVERTICAL not resized",
+);
+const ccDrafts = nightsToDrafts(nights, posters[0], {
+  weeks: 2,
+  now: new Date("2026-07-20T12:00:00"),
+});
+assert(ccDrafts.length >= 10, `cc expands nights (got ${ccDrafts.length})`);
+assert(
+  ccDrafts.every(d => d.venueName === "CC Slaughters" && d.ageRequirement === "21_PLUS"),
+  "cc policy stamps",
+);
+assert(ccDrafts.some(d => d.posterImageUrl?.includes("ADVERTICAL")), "cc drafts carry poster");
+
+/* ── Eventbrite org embed ── */
+const EB_HTML = `
+<html><body>
+<script>
+window.__data = {"upcomingEvents":[
+  {"id":"1994403710185","name":"BROADWAY'S FINEST Drag Brunch","url":"https://www.eventbrite.com/e/broadways-finest-drag-brunch-tickets-1994403710185","start_date":"2026-08-22","start_time":"11:00:00","end_date":"2026-08-22","end_time":"14:00:00","timezone":"America/Los_Angeles","is_cancelled":false,"image":{"url":"https://img.evbuc.com/brunch.jpg"}},
+  {"id":"1","name":"Past Night","url":"https://www.eventbrite.com/e/x-1","start_date":"2020-01-01","start_time":"20:00:00"}
+]};
+</script>
+</body></html>`;
+const events = extractEventbriteUpcomingEvents(EB_HTML);
+assert(events.length === 2, `eb extract upcomingEvents (got ${events.length})`);
+assert(events[0].name.includes("Drag Brunch"), "eb first event is brunch");
+
+console.log("\nAll Camp / CC / Eventbrite-org smoke checks passed.");

@@ -43,7 +43,7 @@ const gigSchema = z.object({
 
 const newBusinessSubmissionSchema = z.object({
   name: z.string().trim().min(2, "Name required"),
-  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group"]),
+  type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]),
   description: z.string().trim().min(10, "Description must be at least 10 characters"),
   address: z.string().trim().max(200).optional(),
   neighborhood: z.string().trim().max(80).optional(),
@@ -499,6 +499,7 @@ export default function PrideWork() {
                         <option value="service">Service</option>
                         <option value="shop">Shop</option>
                         <option value="hotel">Hotel</option>
+                        <option value="campground">Campground</option>
                       </select>
                       <textarea className="board-text-field" rows={3} placeholder="Description *" value={newBusinessForm.description} onChange={e => setNewBusinessForm(f => ({ ...f, description: e.target.value }))} />
                       <input className="board-text-field" placeholder="Address" value={newBusinessForm.address} onChange={e => setNewBusinessForm(f => ({ ...f, address: e.target.value }))} />

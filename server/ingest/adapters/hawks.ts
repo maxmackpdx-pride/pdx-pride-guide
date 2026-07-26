@@ -51,6 +51,16 @@ function parseEventTypesJson(raw: string | null | undefined): string[] {
  * Stamp every Hawks draft as 21+ sex-positive (sex club policy).
  * Mirrors applySanctuaryPolicy - same product locks, same enum form.
  */
+function decodeEntities(s: string): string {
+  return String(s || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#8217;|&#39;|&rsquo;/g, "'")
+    .replace(/&#8220;|&#8221;|&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&nbsp;/gi, " ")
+    .trim();
+}
+
 export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
   const tags = parseEventTypesJson(draft.eventTypes);
   const upper = new Set(tags.map(t => t.trim().toUpperCase().replace(/[\s-]+/g, "_")));
@@ -61,7 +71,9 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
     }
   }
 
-  const adm = inferAdmissionFromText(draft.title, draft.description);
+  const title = decodeEntities(draft.title);
+  const description = decodeEntities(draft.description || "");
+  const adm = inferAdmissionFromText(title, description);
   // Never invent FREE: keep meaningful upstream values (demoting unconfirmed
   // FREE); when upstream had no signal (UNKNOWN), trust text inference - FREE
   // only survives when the listing text clearly says so.
@@ -88,6 +100,8 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
 
   return {
     ...draft,
+    title,
+    description,
     venueName: weakVenue ? HAWKS_VENUE : draft.venueName,
     address: draft.address?.trim() ? draft.address : HAWKS_ADDRESS,
     neighborhood: draft.neighborhood?.trim() ? draft.neighborhood : HAWKS_NEIGHBORHOOD,

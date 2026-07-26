@@ -1750,6 +1750,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               className={`qsearch__mode-btn${mode === "daily" ? " is-on" : ""}`}
               onClick={() => setWorkspaceMode("daily")}
               data-testid="qsearch-mode-daily"
+              title="Daily: Review + Trusted sync + hand add. No Sources or Health."
+              aria-pressed={mode === "daily"}
             >
               Daily
             </button>
@@ -1758,24 +1760,51 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
               className={`qsearch__mode-btn${mode === "lab" ? " is-on" : ""}`}
               onClick={() => setWorkspaceMode("lab")}
               data-testid="qsearch-mode-lab"
+              title="Lab: full console. Sources, Health, yield, advanced scans."
+              aria-pressed={mode === "lab"}
             >
               Lab
             </button>
           </div>
         </div>
-        <p className="qsearch__lede">
+        <div className="qsearch__lede" id="qsearch-mode-help">
           {mode === "daily" ? (
             <>
-              <strong>Trusted</strong> sync or <strong>Scan</strong> → <strong>Review</strong> → LIVE /
-              HIDDEN / ✕. Lab mode is for Sources, Health, and feed wiring.
+              <p className="qsearch__lede-p">
+                <strong>Daily</strong> is the day-to-day desk. Pull known venues, clear the queue, ship
+                listings. Nothing goes LIVE until you approve it in Review.
+              </p>
+              <p className="qsearch__lede-p">
+                <strong>How to use:</strong> open <strong>Trusted</strong> and Sync a venue (or Sync
+                all) → drafts land in <strong>Review</strong> → Approve LIVE, Stage HIDDEN, or dismiss.
+                Use <strong>Add by hand</strong> for a one-off URL, paste, flyer, or Instagram assist.
+              </p>
+              <p className="qsearch__lede-p qsearch__lede-p--diff">
+                <strong>vs Lab:</strong> Daily hides Sources and Health so you stay on pull + approve.
+                Switch to <strong>Lab</strong> when a feed is empty, a flyer is wrong, or you need to
+                wire a new scrape URL.
+              </p>
             </>
           ) : (
             <>
-              Full console: Sources, Health, yield, recipes. Switch to <strong>Daily</strong> when you
-              only need Review + Trusted.
+              <p className="qsearch__lede-p">
+                <strong>Lab</strong> is the full intake console. Same Review and Trusted as Daily, plus
+                the tools that fix and expand how QSearch finds events.
+              </p>
+              <p className="qsearch__lede-p">
+                <strong>How to use:</strong> <strong>Sources</strong> = every catch-all URL (directory
+                sites, keyword calendars, custom links). Check yield, recipes, and trouble.{" "}
+                <strong>Health</strong> = what is working vs zero yield. Run broader scans from Lab when
+                you are wiring feeds. Trusted venues stay on their own adapters (not re-scraped as
+                catch-all noise).
+              </p>
+              <p className="qsearch__lede-p qsearch__lede-p--diff">
+                <strong>vs Daily:</strong> Lab is for diagnosing and adding sources. Switch back to{" "}
+                <strong>Daily</strong> when you only need Trusted sync + Review + hand add.
+              </p>
             </>
           )}
-        </p>
+        </div>
 
         <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">
           <button

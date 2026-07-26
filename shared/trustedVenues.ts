@@ -23,6 +23,10 @@ export type TrustedVenueDef = {
     | "darcelle_tribe"
     | "hawks_squarespace"
     | "sports_bra_airtable"
+    | "eventbrite_org"
+    | "camp_bar_html"
+    | "cc_slaughters_html"
+    | "camp_trc_html"
     | "generic";
   /** Primary feed URL (may need date expansion at runtime) */
   feedUrl: string;
@@ -46,6 +50,12 @@ export type TrustedVenueDef = {
     sexPositive?: boolean;
     /** Re-infer admission from text - never invent FREE (default true) */
     reinferAdmission?: boolean;
+    /**
+     * When text has no free/ticket/cover signal, stamp DOOR_FEE instead of
+     * leaving UNKNOWN (club weeklies). Never invent FREE.
+     */
+    defaultDoorFeeWhenUnknown?: boolean;
+    defaultDoorFeeNote?: string;
   };
 };
 
@@ -62,6 +72,12 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 6,
     notes: "Worker JSON + photoUrl flyers. Requires ?from=&to= date window.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Badlands is a 21+ club)",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (Badlands weekly - verify free/ticketed nights)",
+    },
   },
   {
     sourceId: "sanctuary-ics",
@@ -87,6 +103,13 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 6,
     notes:
       "Wix Events via appsWarmupData. 21+ bar - never ALL_AGES; cover UNKNOWN unless listing says free.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Eagle is a bar)",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote:
+        "Admission defaulted to DOOR_FEE when listing omits cover (verify free entry nights)",
+    },
   },
   {
     sourceId: "darcelle-tribe",
@@ -100,6 +123,12 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 6,
     notes:
       "Tribe REST JSON, image.url flyers, paginated (next_rest_url); ICS ?ical=1 fallback (ATTACH flyers). Age defaults 21_PLUS - verify all-ages/brunch shows in Review.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age defaulted to 21_PLUS (Darcelle evening shows) - verify for all-ages/brunch",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (Darcelle door - ticketed when TIX URL present)",
+    },
   },
   {
     sourceId: "hawks-json",
@@ -113,13 +142,20 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     pollHours: 6,
     notes:
       "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club - sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age defaulted to 21_PLUS (Hawks sex club) - verify for 18+ nights",
+      sexPositive: true,
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (Hawks - verify free entry nights)",
+    },
   },
   {
     sourceId: "stag-eb",
     venueName: "Stag PDX",
     address: "317 NW Broadway, Portland, OR",
     neighborhood: "Old Town",
-    fetchMode: "generic",
+    fetchMode: "eventbrite_org",
     feedUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
     calendarPageUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
     publishStatus: "LIVE",
@@ -129,7 +165,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       ageNote: "Age set to 21_PLUS (Stag is a 21+ bar)",
     },
     notes:
-      "Eventbrite organizer via generic discover (relevance guards handle Stags' Leap false-positives). Brunch/specials only - nightly dancers are not discrete rows.",
+      "Eventbrite organizer upcomingEvents embed (dedicated parser). Brunch/specials only - nightly dancers are not discrete rows.",
   },
   {
     sourceId: "sports-bra-eb",
@@ -145,14 +181,14 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       ageNote: "Verify age - Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
     },
     notes:
-      "Official watch-party schedule via their Airtable (SPORTS_BRA_AIRTABLE_TOKEN). Games only - no Eventbrite city noise. No-flyer games get an auto Swedish-minimal poster. Falls back to venue-scoped Eventbrite if token unset.",
+      "Public Airtable shared view (no PAT) + optional private API. Games only; auto Swedish-minimal posters when no attachment.",
   },
   {
     sourceId: "living-room-eb",
     venueName: "Living Room Wines",
     address: "4818 N Lombard St, Portland, OR",
     neighborhood: "N Portland",
-    fetchMode: "generic",
+    fetchMode: "eventbrite_org",
     feedUrl: "https://www.eventbrite.com/o/104468106391",
     calendarPageUrl: "https://livingroomwinespdx.com",
     publishStatus: "LIVE",
@@ -162,31 +198,33 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       ageNote: "Age set to 21_PLUS (wine bar - ticketed tastings/classes)",
     },
     notes:
-      "Eventbrite organizer via generic discover. Ticketed classes only; free nights are IG-only (stay in scan lane).",
+      "Eventbrite organizer upcomingEvents embed (dedicated parser). Ticketed classes only; free nights are IG-only.",
   },
   {
     sourceId: "camp-bar",
     venueName: "Camp Bar PDX",
     address: "1125 SW Harvey Milk St, Portland, OR",
     neighborhood: "Downtown",
-    fetchMode: "generic",
+    fetchMode: "camp_bar_html",
     feedUrl: "https://campbarpdx.com",
     calendarPageUrl: "https://campbarpdx.com",
     publishStatus: "LIVE",
     pollHours: 12,
+    notes:
+      "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. IG specials still scan-lane.",
     venuePolicy: {
       ageRequirement: "21_PLUS",
       ageNote: "Age set to 21_PLUS (Camp Bar is a 21+ bar)",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (Camp weekly - Happy Hour is free-ish, verify)",
     },
-    notes:
-      "Static #events weeklies via generic discover; flyers limited (IG specials). Watch flyer coverage on the board before pruning scan sources.",
   },
   {
     sourceId: "cc-slaughters",
     venueName: "CC Slaughters",
     address: "219 NW Davis St, Portland, OR",
     neighborhood: "Old Town",
-    fetchMode: "generic",
+    fetchMode: "cc_slaughters_html",
     feedUrl: "https://www.ccslaughterspdx.com/",
     calendarPageUrl: "https://www.ccslaughterspdx.com/",
     publishStatus: "LIVE",
@@ -194,9 +232,28 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     venuePolicy: {
       ageRequirement: "21_PLUS",
       ageNote: "Age set to 21_PLUS (CC Slaughters is a 21+ bar)",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (CC weekly - no cover nights re-infer FREE from text)",
     },
     notes:
-      "HTML weeklies + WP vertical posters (*_ADVERTICAL_*) via generic discover. Watch flyer coverage before pruning scan sources.",
+      "Homepage Mon-Sun lineup expanded 6 weeks + latest ADVERTICAL weekly poster.",
+  },
+  {
+    sourceId: "camp-trc",
+    venueName: "Triangle Recreation Camp",
+    address: "47715 Mountain Loop Highway, Granite Falls, WA 98252",
+    neighborhood: "Granite Falls, WA",
+    fetchMode: "camp_trc_html",
+    feedUrl: "https://camptrc.org/",
+    calendarPageUrl: "https://camptrc.org/",
+    publishStatus: "LIVE",
+    pollHours: 24,
+    notes:
+      "LGBTQ+ campground (est. 1975) near Granite Falls WA — important PDX regional destination. Public homepage 2026 Event Calendar (theme weekends). Wild Apricot event pages + Events RSS are login-gated; do not rely on /Events/RSS.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Camp TRC is a 21+ LGBTQ+ campground)",
+    },
   },
 ];
 
@@ -284,7 +341,7 @@ export function isTrustedLaneSource(input: {
   // Sibling curated recipes for the same venues (calendar HTML, ICS fallbacks)
   if (
     id &&
-    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters)([-_]|$)/i.test(
+    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters|camp-trc|camptrc)([-_]|$)/i.test(
       id,
     )
   ) {
