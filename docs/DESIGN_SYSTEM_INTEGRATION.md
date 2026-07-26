@@ -1,58 +1,62 @@
 # Design System integration
 
-**Rule:** Only replace surfaces that have a clear DS component spec. Everything else stays as-is until there is a rule.
+**Rule:** Only replace product surfaces that have a clear DS component spec. Everything else stays as-is until the guide covers it.
 
-## Live site is truth
+## Design guide is truth
 
-**Canonical design rules:** [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md)
+| Layer | Path |
+|-------|------|
+| **Design guide (SoT)** | [`design-system/`](../design-system/) · https://maxmackpdx-pride.github.io/zaylist-design-system/ |
+| **Production trap list** | [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md) (must not contradict the guide) |
+| **Implementation** | `client/src/components/ds/**`, page CSS |
 
-Production React + CSS on `master` / zaylist.com supersede portable previews, sandbox HTML, and the deep-glass migration handoff. If a document conflicts with live, **fix the document**.
+The old portable kit (`EVENTS_GUIDE.md`, single-file `tokens/tokens.css`, `previews/*.html`) is **removed**. Do not recreate it.
 
-### Surface chrome (deep-glass / OLED-neon) - shipped
+### Surface chrome (deep-glass / OLED-neon) - shipped in product
 
-Deep-glass is the **canonical** card/map/button surface standard. It **overrides** prior lite-glass + default brutal-CTA look.
+Deep-glass is the **canonical** card/map/button surface standard (see guide glass / card system panels).
 
 | Piece | Path |
 |-------|------|
-| Glass tokens | `client/src/components/ds/tokens/glass.css` |
+| Guide tokens / specimens | `design-system/tokens/`, `design-system/guidelines/` |
+| Live glass tokens | `client/src/components/ds/tokens/glass.css` |
 | Effects (sticker-only brutal; motion) | `client/src/components/ds/tokens/effects.css` |
 | Helpers | `client/src/components/ds/glass.ts` · `mapTheme.ts` |
 | Components | `client/src/components/ds/*` (Button, PosterCard, PlaceCard, …) |
-| Migration archive | `docs/handoffs/deep-glass-2026-07-16/` (**historical** - do not re-run as open agents) |
+| Migration archive | `docs/handoffs/deep-glass-2026-07-16/` (**historical**) |
 
-Layout, spacing, fonts, and type scale stay on the modular token files. Feature motion outside glass is preserved.
-
-**Claude Design / agents:** Prefer live components + `glass.css` for chrome. Use `design-system/` (tokens + previews + `EVENTS_GUIDE.md`) as a **portable color/type kit**, not a second chrome system.
+**Agents:** Read the design guide first. Implement with live components + `glass.css`. Never invent chrome that fights the guide.
 
 ## Source of truth chain
 
 ```
-LIVE SITE (master / Railway)
-        ↑
-shared/eventWeek.ts              day codes, dates, day colors, RSVP reserved hex
+design-system/  (+ public Pages)
+        = written standard + specimens
+        ↓
 client/src/components/ds/tokens/*   modular production tokens (glass = chrome)
-client/src/index.css             legacy + app chrome vars still in use
-        ↓  npm run sync:design-system
-design-system/tokens/tokens.css  portable colors/days (not a second glass system)
-design-system/previews/*.html    samples - must not reintroduce retired CTAs
+client/src/components/ds/*          React components
+shared/eventWeek.ts                 day codes / day colors (data)
+        ↑  product implements guide; mark guide "queued" when ahead
+npm run sync:design-system          mirrors zaylist-design-system checkout → design-system/
 ```
 
-Before every push that touches colors, Pride week, or global CSS:
+Refresh the in-repo guide from the public package:
 
 ```bash
 npm run sync:design-system
 git add design-system/
 ```
 
-If chrome/behavior rules change, also update `docs/LIVE_DESIGN_STANDARD.md`.
+If chrome/behavior rules change, update the **design guide** (and `LIVE_DESIGN_STANDARD.md` trap list if needed).
 
 ## Shipped (complete)
 
 ### Foundation
-- `client/src/components/ds/` - tokens + production components (Avatar excluded)
+- Design guide: `design-system/` (index shell, tokens, guidelines, components, brand-guide, app-face)
+- Public shareable guide: https://maxmackpdx-pride.github.io/zaylist-design-system/
+- `client/src/components/ds/` - production components
 - Global token import in `main.tsx`, calm mode syncs `data-calm` on `<html>`
-- Live sandbox: `/design-preview` (`DesignSystemSandbox.tsx`)
-- Portable kit: `design-system/` (README, EVENTS_GUIDE, AVATARS_GUIDE, previews)
+- Dev gallery only: `/design-preview` (`DesignSystemSandbox.tsx`) — not a second design guide
 
 ### Modular tokens (`client/src/components/ds/tokens/`)
 
@@ -121,11 +125,13 @@ Templates / brand accents: `client/src/lib/adTypes.ts` (`AD_BRAND_PRIMARY`).
 
 - Full home hero collage → not fully on `HeroBanner` (GlitchWord / video overlay)
 - Full merge of every legacy class in `index.css` into DS tokens only
-- Avatar system (see `design-system/AVATARS_GUIDE.md` - excluded from React DS)
+- Avatar system (see design guide avatars / brand panels - not all rings are React DS components)
 
-## Design rules (quick - full list in LIVE_DESIGN_STANDARD)
+## Design rules (quick)
 
-- **Cards:** deep-glass (`--glass-card*`), black ring + neon edge, sheen, radius ~14px on glass cards
+Full written standard: **`design-system/`** (guidelines + tokens). Production traps: `LIVE_DESIGN_STANDARD.md`.
+
+- **Cards:** deep-glass (`--glass-card*`), black ring + neon edge, sheen
 - **CTAs:** glass buttons; solid primary uses accent fill + dark type `#050506` (white on CockBlock red)
 - **Claim:** pure cyan fill + soft cyan offset - not yellow-rim brutal
 - **Maps:** debossed frame, no outer bloom
@@ -134,11 +140,15 @@ Templates / brand accents: `client/src/lib/adTypes.ts` (`AD_BRAND_PRIMARY`).
 - **Motion:** ~150ms hover; entrances `pgDirCardIn`; calm / reduced-motion kills ambient pulse
 - **Nav:** do not restyle without explicit user request
 
-## Previews (`design-system/previews/`)
+## View the guide
 
-First line carries `@dsCard group="…"` for Claude Design indexing. Previews are **samples** - if they show brutal default CTAs or flat cards, treat as stale and match live components instead.
+```bash
+cd design-system && python3 -m http.server 8765
+# → http://localhost:8765/
+# or https://maxmackpdx-pride.github.io/zaylist-design-system/
+```
 
-## Preview (app)
+Dev component gallery only (not the design guide):
 
 ```bash
 npm run dev
@@ -153,4 +163,5 @@ npm run dev
 - Ship UI that hard-codes day hexes where `var(--day-*)` belongs
 - Grow the DS with one-off components that lack a live component path
 - Restore retired global rules listed in `LIVE_DESIGN_STANDARD.md`
+- Recreate the old portable kit (`EVENTS_GUIDE.md`, `previews/*.html` as a second SoT)
 - Treat `docs/handoffs/deep-glass-2026-07-16/GROK_PER_AGENT_TASKS.md` as open work (migration complete)

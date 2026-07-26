@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zaylist</title>
+<link rel="stylesheet" href="../../styles.css" />
+<link rel="stylesheet" href="app.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="data.js"></script>
+<style>
+  html,body{ margin:0; background:var(--bg-app); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="AppShell.jsx"></script>
+<script type="text/babel" src="HomeScreen.jsx"></script>
+<script type="text/babel" src="EventsScreen.jsx"></script>
+<script type="text/babel" src="EventDetailScreen.jsx"></script>
+<script type="text/babel" src="ScheduleScreen.jsx"></script>
+<script type="text/babel" src="PlacesScreen.jsx"></script>
+<script type="text/babel" src="HubScreen.jsx"></script>
+<script type="text/babel" src="AboutScreen.jsx"></script>
+<script type="text/babel" src="NudeBeachesScreen.jsx"></script>
+<script type="text/babel" src="ProfileScreen.jsx"></script>
+<script type="text/babel" src="AdminScreen.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const { useState } = React;
+
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "spotted": "#FF00CC",
+    "gifting": "#CCFF00",
+    "gigs": "#8800FF",
+    "dispFont": "Barlow Condensed",
+    "bodyFont": "Inter",
+    "density": "Cozy"
+  }/*EDITMODE-END*/;
+
+  const DENSITY = {
+    Compact: { "--space-16":"40px","--space-12":"34px","--space-10":"28px","--space-8":"22px","--space-6":"16px","--space-5":"14px","--pad-card":"14px","--gap-list":"8px","--pad-page":"clamp(14px,4vw,32px)" },
+    Cozy: {},
+    Roomy: { "--space-16":"88px","--space-12":"60px","--space-10":"56px","--space-8":"44px","--space-6":"32px","--space-5":"28px","--pad-card":"28px","--gap-list":"18px","--pad-page":"clamp(20px,6vw,64px)" }
+  };
+
+  function App(){
+    const data = window.PDX_DATA;
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    const [route, setRoute] = useState(() => {
+      const h = (window.location.hash || "").replace(/^#/, "");
+      return ["home","events","schedule","places","hub","admin","about","nudebeaches","profile"].includes(h) ? h : "home";
+    });
+    const [saved, setSaved] = useState({});
+    const [toast, setToast] = useState(null);
+    const [eventId, setEventId] = useState(null);
+
+    const onSave = (id) => setSaved((m) => ({ ...m, [id]: !m[id] }));
+    const notify = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2200); };
+    const onRsvp = (id) => notify("You're on the list. See you there! ✦");
+    const nav = (r) => { setRoute(r); window.scrollTo(0, 0); };    const openEvent = (id) => { setEventId(id); setRoute("event"); window.scrollTo(0, 0); };
+
+    const Header = window.PGHeader, Footer = window.PGFooter;
+    let Screen = null;
+    if (route === "home")   Screen = <window.PGHomeScreen  data={data} saved={saved} onSave={onSave} onRsvp={onRsvp} onNav={nav} onOpen={openEvent} />;
+    else if (route === "events") Screen = <window.PGEventsScreen data={data} saved={saved} onSave={onSave} onRsvp={onRsvp} onNav={nav} onOpen={openEvent} />;
+    else if (route === "event") Screen = <window.PGEventDetailScreen data={data} id={eventId} saved={saved} onSave={onSave} onRsvp={onRsvp} onNotify={notify} onOpen={openEvent} onBack={() => nav("events")} />;
+    else if (route === "about") Screen = <window.PGAboutScreen />;
+    else if (route === "schedule") Screen = <window.PGScheduleScreen data={data} saved={saved} onSave={onSave} onRsvp={onRsvp} />;
+    else if (route === "places") Screen = <window.PGPlacesScreen data={data} />;
+    else if (route === "hub")    Screen = <window.PGHubScreen onNav={nav} />;
+    else if (route === "admin")  Screen = <window.PGAdminScreen />;
+    else if (route === "nudebeaches") Screen = <window.PGNudeBeachesScreen />;
+    else if (route === "profile") Screen = <window.PGProfileScreen data={data} />;
+    else Screen = <window.PGHomeScreen data={data} saved={saved} onSave={onSave} onRsvp={onRsvp} onNav={nav} onOpen={openEvent} />;
+
+    const rootStyle = {
+      "--font-display": "'" + t.dispFont + "', 'Arial Narrow', system-ui, sans-serif",
+      "--font-body": "'" + t.bodyFont + "', system-ui, -apple-system, 'Segoe UI', sans-serif",
+      "--board-spotted": t.spotted,
+      "--board-gifting": t.gifting,
+      "--board-gigs": t.gigs,
+      ...(DENSITY[t.density] || {})
+    };
+
+    return (
+      <div className="pg-app" style={rootStyle}>
+        <Header route={route} onNav={nav} />
+        {Screen}
+        <Footer onNav={nav} />
+        {toast && (
+          <div style={{ position:"fixed", left:"50%", bottom:28, transform:"translateX(-50%)", zIndex:1000,
+            background:"var(--neon-yellow)", color:"#000", fontFamily:"var(--font-display)", fontWeight:700,
+            letterSpacing:".04em", textTransform:"uppercase", padding:"12px 22px", borderRadius:"4px",
+            boxShadow:"4px 4px 0 rgba(255,0,204,.4)" }}>{toast}</div>
+        )}
+        <TweaksPanel>
+          <TweakSection label="Community boards" />
+          <TweakColor label="Missed Connections" value={t.spotted} options={["#FF00CC","#FF1493","#FF3131","#C400FF"]} onChange={(v)=>setTweak("spotted", v)} />
+          <TweakColor label="Gifting" value={t.gifting} options={["#CCFF00","#AEEA00","#FFEE00","#39FF14"]} onChange={(v)=>setTweak("gifting", v)} />
+          <TweakColor label="Gigs" value={t.gigs} options={["#8800FF","#B026FF","#6A5CFF","#00E5FF"]} onChange={(v)=>setTweak("gigs", v)} />
+          <TweakSection label="Typography" />
+          <TweakSelect label="Display font" value={t.dispFont} options={["Barlow Condensed","Anton","Oswald"]} onChange={(v)=>setTweak("dispFont", v)} />
+          <TweakSelect label="Body font" value={t.bodyFont} options={["Inter","IBM Plex Sans","Work Sans"]} onChange={(v)=>setTweak("bodyFont", v)} />
+          <TweakSection label="Layout" />
+          <TweakRadio label="Density" value={t.density} options={["Compact","Cozy","Roomy"]} onChange={(v)=>setTweak("density", v)} />
+        </TweaksPanel>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

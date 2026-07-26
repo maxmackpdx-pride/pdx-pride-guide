@@ -1,0 +1,55 @@
+<!-- @dsCard group="Components" viewport="700x360" name="Data display" subtitle="Badges, stat pills, the event countdown and slogan stickers" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body{ margin:0; background:var(--bg-app); padding:26px; }
+  .lbl{ font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+        color:var(--text-faint); margin:22px 0 12px; }
+  .lbl:first-child{ margin-top:0; }
+  .wrap{ display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Badge, StatPill, Countdown, StickerBadge } = window.PDXPrideGuideDesignSystem_b20420;
+  function Demo(){
+    return (
+      <div>
+        <div className="lbl">Countdown to events (hand-drawn sticker numerals)</div>
+        <Countdown target="2026-07-16T19:00:00" />
+
+        <div className="lbl">Tags, admission, day, category, status. One solid fill per card, the rest tinted</div>
+        <div className="wrap">
+          <Badge admission="FREE" variant="solid" /><Badge admission="TICKETED" /><Badge admission="SUGGESTED_DONATION" />
+          <Badge day="THU" dot /><Badge day="FRI" dot /><Badge day="SAT" dot /><Badge day="SUN" dot />
+          <Badge category="bars" /><Badge category="cafes" /><Badge category="venues" />
+          <Badge color="yellow" glow>Grand Opening</Badge>
+          <Badge color="pink">Party</Badge><Badge color="cyan">Bear</Badge>
+          <Badge variant="neutral">Drag</Badge>
+          <Badge variant="paper">21+</Badge>
+        </div>
+
+        <div className="lbl">Stat pills</div>
+        <div className="wrap">
+          <StatPill count={52} color="lime">Events</StatPill>
+          <StatPill count={1} color="cyan">Events</StatPill>
+          <StatPill count={3} color="pink">Action Items</StatPill>
+          <StatPill count={1} color="orange">Posts</StatPill>
+          <StatPill variant="solid" color="lime" glow dot>Live</StatPill>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body>
+</html>

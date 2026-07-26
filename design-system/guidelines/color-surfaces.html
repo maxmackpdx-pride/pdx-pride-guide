@@ -1,0 +1,25 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><script src="_spec.js"></script>
+<style>
+body{margin:0;background:var(--bg-app);padding:22px;font-family:var(--font-body);color:var(--text-body)}
+.cap{font-family:var(--font-mono);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--neon-cyan);margin:0 0 12px}
+.cap+.cap,section+section .cap{margin-top:0}
+section{margin-bottom:26px}
+section:last-child{margin-bottom:0}
+.hint{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-disabled);margin:14px 0 0}
+</style></head><body>
+<section><div class="cap">Ink surfaces</div><div id="ink"></div></section>
+<section><div class="cap">Borders</div><div id="bord"></div></section>
+<section><div class="cap">Text</div><div id="text"></div></section>
+<p class="hint">Click any swatch to copy its token name.</p>
+<script>
+Spec.grid("#ink", [
+  ["--ink-1000","Stage"],["--ink-900","App"],["--ink-800","Card"],["--ink-750","Raised"],["--ink-850","Inset"],["--panel-ink","Utility page"],["--panel-card","Utility card"]
+], {w:112, h:52});
+Spec.grid("#bord", [
+  ["--ink-border-faint","Faint"],["--ink-border","Default"],["--ink-border-strong","Strong"]
+], {w:112, h:34});
+Spec.grid("#text", [
+  ["--text-hi","Heading",{text:1}],["--text-body","Body",{text:1}],["--text-body-muted","Muted",{text:1}],["--text-lo","Meta",{text:1}],["--text-faint","Faint",{text:1}],["--text-disabled","Disabled",{text:1}]
+], {w:112, h:52});
+</script>
+</body></html>

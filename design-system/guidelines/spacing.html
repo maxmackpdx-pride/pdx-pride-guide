@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><script src="_spec.js"></script>
+<!-- Every number on this page is read back from tokens/layout.css at runtime.
+     Nothing here is typed by hand, so the specimen cannot drift from the scale. -->
+<style>
+body{margin:0;background:var(--bg-app);padding:var(--space-6);font-family:var(--font-body);color:var(--text-body)}
+h2{font-family:var(--font-display);font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 var(--space-1);color:var(--text-hi)}
+.lede{font-size:12.5px;line-height:1.5;color:var(--text-lo);margin:0 0 var(--space-6);max-width:64ch;text-wrap:pretty}
+.cap{font-family:var(--font-mono);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--neon-cyan);margin:var(--space-6) 0 var(--space-3)}
+.cap:first-of-type{margin-top:0}
+.ramp{display:flex;align-items:flex-end;gap:var(--space-3);flex-wrap:wrap}
+.step{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);background:none;border:0;padding:0;cursor:pointer;font:inherit}
+.step:hover .tok,.step:hover .val{color:var(--neon-yellow)}
+.step.copied .tok{color:var(--status-good)}
+.rad div{cursor:pointer}
+.rad div:hover{border-color:var(--neon-yellow);color:var(--neon-yellow)}
+tr[data-token]{cursor:pointer}
+tr[data-token]:hover td.k{color:var(--neon-yellow)}
+.hint{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-disabled);margin:var(--space-6) 0 0}
+.step .bar{background:var(--neon-yellow);border-radius:var(--radius-xs)}
+.step .tok{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;color:var(--text-faint);white-space:nowrap}
+.step .val{font-family:var(--font-mono);font-size:10px;color:var(--text-lo)}
+table{border-collapse:collapse;width:100%;max-width:620px}
+td{padding:var(--space-2) var(--space-4) var(--space-2) 0;border-bottom:1px solid var(--border-faint);vertical-align:middle;font-size:12px}
+td.k{font-family:var(--font-mono);font-size:11px;color:var(--neon-cyan);white-space:nowrap;width:1%}
+td.v{font-family:var(--font-mono);font-size:11px;color:var(--text-lo);white-space:nowrap;width:1%}
+td.n{color:var(--text-faint);font-size:11.5px}
+td.sw{width:1%}
+td.sw i{display:block;height:14px;background:var(--neon-magenta);border-radius:var(--radius-xs)}
+.rad{display:flex;gap:var(--space-3);flex-wrap:wrap}
+.rad div{width:70px;height:56px;background:var(--surface-card);border:1px solid var(--border-default);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-family:var(--font-mono);font-size:9px;color:var(--text-faint)}
+</style></head><body>
+<h2>Spacing &amp; radius</h2>
+<p class="lede">A 4px base grid. Every value below is read from <code>tokens/layout.css</code> when this page loads, so the specimen is the scale rather than a picture of it.</p>
+<div class="cap">Space scale</div>
+<div class="ramp" id="ramp"></div>
+<div class="cap">Semantic spacing</div>
+<table id="sem"></table>
+<div class="cap">Radius</div>
+<div class="rad" id="rad"></div>
+<p class="hint">Click any step, row or tile to copy its token name.</p>
+<script>
+const cs=getComputedStyle(document.documentElement);
+const read=n=>cs.getPropertyValue(n).trim();
+const SCALE=["--space-0","--space-1","--space-2","--space-3","--space-4","--space-5","--space-6","--space-8","--space-10","--space-12","--space-16","--space-20","--space-24","--space-32"];
+document.getElementById("ramp").innerHTML=SCALE.map(n=>{
+  const v=read(n),px=parseFloat(v)||0;
+  return '<button class="step" data-token="'+n+'" title="Copy '+n+'"><div class="bar" style="width:'+Math.max(px,2)+'px;height:'+Math.max(px,2)+'px"></div><span class="val">'+(px||0)+'</span><span class="tok">'+n.replace("--space-","")+'</span></button>';
+}).join("");
+const SEM=[["--gap-card","inside cards"],["--gap-list","between event rows"],["--gap-section","between page sections"],["--pad-card","card padding"],["--pad-page","page gutter"]];
+document.getElementById("sem").innerHTML=SEM.map(([n,d])=>{
+  const v=read(n),px=parseFloat(v)||0;
+  return '<tr data-token="'+n+'" title="Copy '+n+'"><td class="k">'+n+'</td><td class="v">'+v+'</td><td class="sw"><i style="width:'+Math.min(Math.max(px,4),200)+'px"></i></td><td class="n">'+d+'</td></tr>';
+}).join("");
+const RAD=["--radius-xs","--radius-sm","--radius-md","--radius-lg","--radius-xl","--radius-tile","--radius-panel","--radius-pill"];
+document.getElementById("rad").innerHTML=RAD.map(n=>{
+  const v=read(n);
+  return '<div data-token="'+n+'" title="Copy '+n+'" style="border-radius:'+v+'">'+n.replace("--radius-","")+' · '+v+'</div>';
+}).join("");
+</script>
+</body></html>

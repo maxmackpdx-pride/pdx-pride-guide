@@ -1,0 +1,525 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Motion, loaders &amp; seams</title>
+<link rel="stylesheet" href="../styles.css"><script src="_spec.js"></script>
+<!-- Every pdx* keyframe below comes from tokens/effects.css and tokens/glass.css via styles.css.
+     This page must never redeclare one: it demonstrates the shared animation, it does not define it.
+     Only the demo-rig keyframes (rideOut, spectrum*, ptr-spin, gA/gB, the avatar shimmer pair) are local. -->
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0a0a0a;color:#e6e2d9;font-family:var(--font-body,Inter,sans-serif);padding:34px}
+a{color:#19e3ff}a:hover{color:#ccff00}
+h1{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900;font-size:46px;line-height:.92;text-transform:uppercase;margin:0 0 10px;color:#fff}
+.lede{margin:0 0 8px;max-width:82ch;font-size:14px;line-height:1.6;color:#c8c4bb;text-wrap:pretty}
+.src{font-family:var(--font-mono,ui-monospace,monospace);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#5c5c5c;margin:0 0 30px}
+code{font-family:var(--font-mono,ui-monospace,monospace);font-size:11.5px;color:#19e3ff}
+h2{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:44px 0 4px;color:#fff;padding-top:18px;border-top:2px solid #1c1c22}
+.h2sub{margin:0 0 20px;font-size:13px;line-height:1.55;color:#8f8f8f;max-width:82ch;text-wrap:pretty}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.cell{padding:15px 17px;border:1px solid #1c1c22;border-radius:10px;background:#0c0c0f}
+.cell h4{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 8px;color:#fff}
+.cell p{margin:0;font-size:12.5px;line-height:1.55;color:#999;text-wrap:pretty}
+.no{border-top:3px solid #FF4D4D}
+.panel{border:1px solid #1c1c22;border-radius:12px;background:#0c0c0f;overflow:hidden;margin-bottom:16px}
+.phead{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #17171c;background:#0a0a0c}
+.pnum{font-family:var(--font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.14em}
+.pname{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:.02em;color:#fff}
+.ptag{margin-left:auto;font-family:var(--font-mono,ui-monospace,monospace);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#6a6a72}
+.demo{padding:26px 18px;display:flex;flex-wrap:wrap;gap:22px;align-items:center;justify-content:center;background:radial-gradient(120% 100% at 30% 0%,#100e16 0%,#08080a 62%)}
+.note{padding:13px 16px;border-top:1px solid #17171c;font-size:12.5px;line-height:1.55;color:#999;text-wrap:pretty}
+.mono{font-family:var(--font-mono,ui-monospace,monospace);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6a6a72}
+.stack{display:flex;flex-direction:column;align-items:center;gap:9px}
+.btn{background:none;border:1px solid #26262e;border-radius:4px;color:#c8c4bb;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;cursor:pointer}
+.btn:hover{border-color:#6a6a72;color:#fff}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+/* ── easing + duration ── */
+.ease{width:96px;height:96px;border:1px solid #1c1c22;border-radius:8px;background:#08080a;position:relative;overflow:hidden}
+.ease i{position:absolute;left:8px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--neon-orange,#FF6600)}
+@keyframes rideOut{0%,10%{transform:translateX(0)}90%,100%{transform:translateX(60px)}}
+.ease--out i{animation:rideOut 1.8s cubic-bezier(.2,.8,.2,1) infinite alternate}
+.ease--spring i{animation:rideOut 1.8s cubic-bezier(.34,1.56,.64,1) infinite alternate;background:#19e3ff}
+.ease--inout i{animation:rideOut 1.8s cubic-bezier(.65,0,.35,1) infinite alternate;background:#ff1fa0}
+/* ── seams ── */
+.seamwrap{width:100%;max-width:560px}
+.seam{position:relative;height:3px;width:100%;overflow:hidden;opacity:.8;
+  background:linear-gradient(90deg,#00FFFF,#FFEE00,#FF00CC,#FF6600,#00FFFF);background-size:200% 100%;
+  animation:pdxSeamFlow 3.4s linear infinite,pdxSeamGlow 3.4s cubic-bezier(.65,0,.35,1) infinite}
+.seam::after{content:"";position:absolute;top:-1px;bottom:-1px;left:0;width:24%;transform:translateX(-165%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);mix-blend-mode:screen;pointer-events:none;
+  animation:pdxSeamGlint 3.4s cubic-bezier(.65,0,.35,1) infinite}
+.seam--thin{height:2px}.seam--thick{height:2.7px}
+.seam--static{animation:none;background:linear-gradient(90deg,#00FFFF,#FFEE00,#FF00CC,#FF6600);background-size:auto;
+  box-shadow:0 0 8px rgba(0,255,255,.30),0 2px 8px 1px rgba(255,0,204,.18)}
+.seam--static::after{display:none}
+/* seam charge (route loader) */
+.charge{position:relative;height:2.7px;width:100%;background:#101014;overflow:hidden}
+.charge__fill{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,#c8fa3c,#19e3ff,#ff1fa0,#ff8c00);animation:pdxSeamFill 1.15s cubic-bezier(.2,.8,.2,1) forwards}
+.charge__glint{position:absolute;top:-1px;bottom:-1px;left:0;width:24%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);mix-blend-mode:screen;animation:pdxSeamGlint 1.15s cubic-bezier(.65,0,.35,1) forwards}
+.charge__flash{position:absolute;inset:0;background:#fff;opacity:0;animation:pdxSeamFlash 1.15s linear forwards}
+/* ── loaders ── */
+.sl{display:flex;align-items:center;justify-content:center}
+.sl--full{flex-direction:column;gap:26px}
+.sl__ring{width:52px;height:52px;border-radius:50%;
+  background:conic-gradient(from 0deg,#E40303,#FF8C00,#FFED00,#008026,#004DFF,#750787,#E40303);
+  -webkit-mask:radial-gradient(circle,transparent 58%,#000 59%);mask:radial-gradient(circle,transparent 58%,#000 59%);
+  animation:spectrumSpin 1.1s linear infinite}
+.sl__dots{display:flex;gap:10px}
+.sl__dots span{width:11px;height:11px;border-radius:50%;animation:spectrumBob 1.2s ease-in-out infinite}
+.sl__dots span:nth-child(1){background:#FF1FA0;animation-delay:0s}
+.sl__dots span:nth-child(2){background:#19E3FF;animation-delay:.18s}
+.sl__dots span:nth-child(3){background:#C8FA3C;animation-delay:.36s}
+.sl__bar{position:relative;width:184px;height:7px;background:rgba(255,255,255,.1);overflow:hidden}
+.sl__fill{position:absolute;top:0;left:0;height:100%;width:55%;background:linear-gradient(90deg,#FF8C00,#FF1FA0,#750787);animation:spectrumShimmer 1.6s ease-in-out infinite}
+@keyframes spectrumSpin{to{transform:rotate(360deg)}}
+@keyframes spectrumBob{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(-7px);opacity:1}}
+@keyframes spectrumShimmer{0%{left:-55%}100%{left:100%}}
+.blabel{margin:0;color:#8a8a92;font-family:var(--font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+/* pull to refresh */
+.ptr{width:36px;height:36px;border-radius:50%;background:rgba(10,10,12,.92);border:1px solid rgba(255,255,255,.14);display:grid;place-items:center;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+.ptr i{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.22);border-top-color:#19e3ff;display:block;animation:ptr-spin .7s linear infinite}
+.ptr--drag i{animation:none;transform:rotate(216deg)}
+@keyframes ptr-spin{to{transform:rotate(360deg)}}
+/* ── entrances ── */
+.card4{width:150px;padding:14px;border:1px solid #1c1c22;border-radius:10px;background:#0c0c0f}
+.card4 b{display:block;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-size:15px;text-transform:uppercase;color:#fff}
+.card4 span{font-family:var(--font-mono,ui-monospace,monospace);font-size:9.5px;letter-spacing:.12em;color:#6a6a72}
+.e-card{animation:pgDirCardIn .55s cubic-bezier(.2,.8,.2,1) both}
+.e-reveal{animation:pdxReveal .22s cubic-bezier(.2,.8,.2,1) both}
+.e-hero{animation:pdxHeroIn .48s cubic-bezier(.2,.8,.2,1) both}
+.e-pop{animation:pdxPop .2s cubic-bezier(.2,.8,.2,1) both}
+/* ── ambient ── */
+.pulse{width:150px;height:74px;border-radius:10px;border:1px solid #1c1c22;background:#0c0c0f;--dc:#00FFFF;animation:pdxPulse 4s ease-in-out infinite}
+.pulse--spot{--dc:#FF00CC;animation:pdxSpotPulse 4s ease-in-out infinite}
+.blink{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono,ui-monospace,monospace);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c8c4bb}
+.blink i{width:8px;height:8px;border-radius:50%;background:#39FF14;box-shadow:0 0 10px #39FF14;animation:pdxBlink 1.8s ease-in-out infinite}
+.grip{position:relative;width:150px;height:34px;border-radius:10px;background:#0c0c0f;border:1px solid #1c1c22}
+.grip i{position:absolute;top:-6px;left:50%;margin-left:-21px;width:42px;height:4px;border-radius:99px;background:#19e3ff;box-shadow:0 0 10px #19e3ff,0 0 22px rgba(25,227,255,.55);animation:pdxPullHandle 2.4s ease-in-out infinite}
+/* ── avatar flag ring, the real recipe ── */
+.av{--avatar-size:78px;--glow-outset:6.5%;--glow-blur:calc(var(--avatar-size)*.044);--glow-shimmer-blur:calc(var(--avatar-size)*.024);--avatar-outline:2px;
+  position:relative;display:inline-flex;align-items:center;justify-content:center;width:var(--avatar-size);height:var(--avatar-size);flex:none;overflow:visible;isolation:isolate;z-index:0}
+.av::before{content:"";position:absolute;inset:calc(var(--glow-outset)*-1);border-radius:50%;z-index:-1;opacity:0;pointer-events:none;
+  filter:blur(var(--glow-blur)) saturate(1.2) brightness(1.12);background:var(--flag)}
+.av[data-ring]:not([data-ring="none"])::before{opacity:.86;animation:pdxaShimmer 5s linear infinite,avatar-glow-breathe 2.4s ease-in-out infinite}
+@keyframes avatar-glow-breathe{0%,100%{opacity:.58}50%{opacity:1}}
+@keyframes pdxaShimmer{to{transform:rotate(360deg)}}
+.av__inner{position:relative;z-index:2;width:100%;height:100%;border-radius:50%;overflow:hidden;background:#000;
+  box-shadow:0 0 0 var(--avatar-outline) #000,inset 0 0 0 1px rgba(0,0,0,.9);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.av__face{width:100%;height:100%;display:grid;place-items:center;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900;font-size:calc(var(--avatar-size)*.38);color:#000;background:#00FFFF}
+.av__shimmer{position:absolute;inset:calc(var(--glow-outset)*-1);border-radius:50%;pointer-events:none;z-index:-1;
+  background:conic-gradient(from 0deg,transparent 0deg 40deg,rgba(255,255,255,.66) 58deg,transparent 92deg 360deg);
+  filter:blur(var(--glow-shimmer-blur));opacity:.78;animation:pdxaShimmer 5s linear infinite;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--glow-outset) - var(--avatar-outline) - 2px),#000 calc(100% - var(--glow-outset) + 2px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - var(--glow-outset) - var(--avatar-outline) - 2px),#000 calc(100% - var(--glow-outset) + 2px))}
+.av__shimmer--chain{background:conic-gradient(from 0deg,transparent 0deg 42deg,rgba(228,234,246,.85) 54deg,transparent 72deg 360deg);animation-duration:3.6s}
+.av:hover::before{animation-duration:2.2s,1.6s;filter:blur(var(--glow-blur)) saturate(1.28) brightness(1.22)}
+.av:hover .av__shimmer{animation-duration:1.9s;filter:blur(var(--glow-shimmer-blur)) brightness(1.65);opacity:.95}
+.av:hover .av__shimmer--chain{animation-duration:1.4s}
+.av__lock{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);z-index:3;font-size:calc(var(--avatar-size)*.18);line-height:1;filter:drop-shadow(0 0 4px rgba(180,190,210,.8))}
+.avlbl{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:700;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:#8f8f8f}
+/* ── logo glitch on the real PNG ── */
+.glitch{position:relative;display:inline-block;width:min(400px,90%);line-height:0}
+.glitch img{display:block;width:100%;height:auto}
+.glitch__ghost{position:absolute;inset:0;mix-blend-mode:screen;pointer-events:none}
+.glitch__ghost--a{filter:hue-rotate(150deg) saturate(2.2);animation:gA 3.2s steps(1) infinite}
+.glitch__ghost--b{filter:hue-rotate(-95deg) saturate(2.2);animation:gB 3.2s steps(1) infinite}
+@keyframes gA{0%,86%,100%{transform:none;opacity:0}88%{transform:translate(-3px,1px);opacity:.85}92%{transform:translate(2px,-1px);opacity:.7}96%{transform:none;opacity:0}}
+@keyframes gB{0%,86%,100%{transform:none;opacity:0}89%{transform:translate(3px,-1px);opacity:.85}93%{transform:translate(-2px,2px);opacity:.7}97%{transform:none;opacity:0}}
+/* ── add-ons ── */
+.eq{display:flex;align-items:flex-end;gap:4px;height:34px}
+.eq i{width:5px;height:100%;background:#39FF14;transform-origin:bottom;animation:pdxEqBounce 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.12s}.eq i:nth-child(3){animation-delay:.24s}.eq i:nth-child(4){animation-delay:.36s}
+.num{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900;font-size:44px;line-height:1;color:var(--neon-orange,#FF6600);font-variant-numeric:tabular-nums;animation:pdxNumPop .5s cubic-bezier(.34,1.56,.64,1)}
+.floatup{position:absolute;font-family:var(--font-mono,ui-monospace,monospace);font-size:11px;color:#39FF14;animation:pdxFloatUp 1.1s ease-out forwards}
+/* Button, solid variant. Same atoms as Button.jsx .pdxBtn--solid. */
+.rsvpbtn{--c:var(--neon-yellow);position:relative;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#07070a;background:var(--acid-lit);border:0;border-radius:var(--chrome-radius-md);padding:9px 16px;cursor:pointer;box-shadow:var(--chrome-keyline),var(--chrome-bevel),var(--chrome-floor),var(--chrome-bloom),var(--chrome-drop)}
+.rsvpbtn:active{background:var(--acid-lit-press);box-shadow:var(--chrome-keyline),var(--chrome-press)}
+.spark{position:absolute;width:5px;height:5px;border-radius:50%;background:#ccff00;pointer-events:none;animation:pdxSparkFly .62s ease-out forwards}
+.flap{display:inline-flex;gap:3px;perspective:220px}
+.flap b{position:relative;overflow:hidden}
+.flap b span{display:block;transform-origin:center bottom;backface-visibility:hidden;animation:pdxFlap 2.6s cubic-bezier(.2,.8,.2,1) infinite}
+.flap b:nth-child(2) span{animation-delay:.13s}
+.flap b:nth-child(3) span{animation-delay:.26s}
+.flap b:nth-child(4) span{animation-delay:.39s}
+@keyframes pdxFlap{0%,58%{transform:rotateX(0);opacity:1}66%{transform:rotateX(-90deg);opacity:.25}67%{transform:rotateX(90deg);opacity:.25}76%,100%{transform:rotateX(0);opacity:1}}
+.flap b::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#000;opacity:.85;pointer-events:none}
+:root[data-calm="true"] .flap b span{animation:none}
+.flap b{width:22px;height:30px;display:grid;place-items:center;background:#141418;border:1px solid #22222a;border-radius:3px;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800;font-size:17px;color:#fff}
+</style></head>
+<body>
+<h1>Motion, loaders &amp; seams</h1>
+<p class="lede">Every timing, loader and divider in production, ported value for value. Motion here is ambient and additive: slow loops that idle, snappy 150ms responses to touch, and one flowing seam that doubles as the page loader. Calm mode and reduced motion silence all of it, and both are treated as a real state, not an afterthought.</p>
+<p class="src">Ported from client/src/components/ds/tokens/effects.css · SpectrumLoader.tsx · BoardLoadingState.tsx · PullToRefresh.tsx · UserAvatar.tsx · index.css (.rainbow-bar, .user-avatar, .spectrum-loader)</p>
+<div class="ctl">
+  <button class="btn" id="calmBtn" type="button">Calm off</button>
+  <button class="btn" id="replayBtn" type="button">Replay entrances</button>
+</div>
+
+<h2>01 · Foundations</h2>
+<p class="h2sub">Three easings and four durations cover the whole site. Anything that reacts to a finger uses <code>--dur-fast</code>; anything that idles uses <code>--dur-pulse</code>.</p>
+<div class="demo" style="border:1px solid #1c1c22;border-radius:12px;margin-bottom:16px">
+  <div class="stack"><div class="ease ease--out"><i></i></div><span class="mono">ease-out · .2,.8,.2,1</span></div>
+  <div class="stack"><div class="ease ease--spring"><i></i></div><span class="mono">spring · .34,1.56,.64,1</span></div>
+  <div class="stack"><div class="ease ease--inout"><i></i></div><span class="mono">ease-inout · .65,0,.35,1</span></div>
+</div>
+<div class="grid">
+  <div class="cell"><h4>Durations</h4><p><code>--dur-fast 150ms</code> snappy hover and press. <code>--dur-base 220ms</code> default. <code>--dur-slow 360ms</code> panels. <code>--dur-pulse 4s</code> ambient.</p></div>
+  <div class="cell"><h4>Interaction</h4><p><code>--hover-lift -2px</code> and <code>--press-scale .97</code>. Buttons lift up and left on hover, press down and right. Cards lift 2px.</p></div>
+  <div class="cell"><h4>Entrance ladder</h4><p>Hero .48s, stats band at +.07s, feeds .35s, compose panels .25s, modals .2s. Scroll reveal fades sections in on first view.</p></div>
+  <div class="cell no"><h4>Never</h4><p>No entrance on a resting glass card's bloom, no bounce on data, and no animation that cannot be removed by calm mode.</p></div>
+</div>
+
+<h2>02 · Page dividers, the seam engine</h2>
+<p class="h2sub">One bar does all the dividing: under the header, above the footer, between sections, and across the top of clickable cards. Cyan to yellow to magenta to orange, five stops on a 200% track so it can flow forever.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#19e3ff">02.1</span><span class="pname">Flowing seam</span><span class="ptag">Idle loop · 3.4s</span></div>
+  <div class="demo" style="flex-direction:column;gap:26px">
+    <div class="seamwrap"><div class="seam seam--thin"></div><div class="mono" style="margin-top:8px">Thin · 2px · between sections</div></div>
+    <div class="seamwrap"><div class="seam"></div><div class="mono" style="margin-top:8px">Default · 3px · under the header</div></div>
+    <div class="seamwrap"><div class="seam seam--thick"></div><div class="mono" style="margin-top:8px">Thick · 2.7px full bleed · above the footer</div></div>
+    <div class="seamwrap"><div class="seam seam--static"></div><div class="mono" style="margin-top:8px">Calm · static bar, tight edge shadow, no glint</div></div>
+  </div>
+  <p class="note">Three animations run together at 3.4s: <code>pdxSeamFlow</code> slides the gradient, <code>pdxSeamGlow</code> breathes the box-shadow from cyan to magenta, and a 24% wide white <code>::after</code> rides <code>pdxSeamGlint</code> on <code>mix-blend-mode:screen</code> from <code>translateX(-165%)</code> to 150%. The whole bar sits at opacity .8. Calm and reduced motion swap to a flat <code>--rainbow-bar</code>, hide the glint and pin a tight static shadow: visible, still, never gone.</p>
+</div>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#ff8c00">02.2</span><span class="pname">Seam Charge</span><span class="ptag">Route + fetch loader</span></div>
+  <div class="demo" style="flex-direction:column;gap:18px">
+    <div class="seamwrap" id="chargeWrap"><div class="charge"><div class="charge__fill"></div><div class="charge__glint"></div><div class="charge__flash"></div></div></div>
+    <button class="btn" id="chargeBtn" type="button">Navigate</button>
+  </div>
+  <p class="note">The header seam is the page loader. While the router is navigating or a query is fetching, the softened gradient (<code>#c8fa3c</code>, <code>#19e3ff</code>, <code>#ff1fa0</code>, <code>#ff8c00</code>) fills with <code>pdxSeamFill</code> to 68% of the timeline, the glint sweeps, and <code>pdxSeamFlash</code> blinks the bar white at 74% as it completes. No spinner, no top-of-page progress bar: the divider already there does the work.</p>
+</div>
+
+<h2>03 · Loading screens</h2>
+<p class="h2sub">One loader, four shapes. The ring is the six-stripe pride flag as a conic gradient; the dots and bar use the softened panel neons so they sit calmly inside utility surfaces.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#FF1FA0">03.1</span><span class="pname">Spectrum loader</span><span class="ptag">ring · dots · bar · full</span></div>
+  <div class="demo" style="gap:44px">
+    <div class="stack"><div class="sl"><div class="sl__ring"></div></div><span class="mono">ring</span></div>
+    <div class="stack"><div class="sl"><div class="sl__dots"><span></span><span></span><span></span></div></div><span class="mono">dots</span></div>
+    <div class="stack"><div class="sl"><div class="sl__bar"><div class="sl__fill"></div></div></div><span class="mono">bar</span></div>
+  </div>
+  <p class="note">Ring: 52px, <code>conic-gradient(#E40303,#FF8C00,#FFED00,#008026,#004DFF,#750787)</code> masked to a band by <code>radial-gradient(circle,transparent 58%,#000 59%)</code>, spinning at <code>1.1s linear</code>. Dots: three 11px circles in <code>#FF1FA0</code>, <code>#19E3FF</code>, <code>#C8FA3C</code> bobbing on <code>1.2s ease-in-out</code> at 0, .18s and .36s. Bar: 184 by 7 on 10% white with a 55% wide <code>#FF8C00 → #FF1FA0 → #750787</code> fill sweeping at 1.6s. Reduced motion stops all three and leaves the shapes in place.</p>
+</div>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#ff8c00">03.2</span><span class="pname">Board loading state</span><span class="ptag">Full page · boards, profiles</span></div>
+  <div class="demo" style="flex-direction:column;gap:22px;padding:40px 18px">
+    <div class="sl sl--full"><div class="sl__ring"></div><div class="sl__dots"><span></span><span></span><span></span></div><div class="sl__bar"><div class="sl__fill"></div></div></div>
+    <p class="blabel">Loading</p>
+  </div>
+  <p class="note">The <code>full</code> variant stacks all three at 26px gaps with a monospace label under it. This is what a board, a member profile or the inbox shows while its first query resolves. Never a blank screen, and never a skeleton that guesses at a layout it does not have yet.</p>
+</div>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#19e3ff">03.3</span><span class="pname">Pull to refresh</span><span class="ptag">Installed PWA only</span></div>
+  <div class="demo" style="gap:40px">
+    <div class="stack"><div class="ptr ptr--drag"><i></i></div><span class="mono">dragging · 60%</span></div>
+    <div class="stack"><div class="ptr"><i></i></div><span class="mono">refreshing</span></div>
+  </div>
+  <p class="note">Standalone display mode hides the browser's own gesture, so the app ships its own. Pull from the very top: 72px of resolved travel triggers it, capped at 110px with 0.5 resistance. The chip is 36px of <code>rgba(10,10,12,.92)</code> with a 14% white edge; inside, an 18px ring with a cyan top rotates with the drag, then spins at <code>ptr-spin .7s linear</code> while every query refetches, and settles 450ms after. Touch devices in standalone only, so it can never double up with the browser.</p>
+</div>
+
+<h2>04 · Entrances</h2>
+<p class="h2sub">Everything enters by rising and fading. The distance is the only variable: 22px for a card, 10px for a hero, 5px for a section, 8px plus a hair of scale for a popover.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#39FF14">04.1</span><span class="pname">The four entrances</span><span class="ptag">On mount · on reveal</span></div>
+  <div class="demo" id="entrances">
+    <div class="card4 e-card"><b>Card</b><span>pgDirCardIn · 22px · .55s</span></div>
+    <div class="card4 e-hero"><b>Hero</b><span>pdxHeroIn · 10px · .48s</span></div>
+    <div class="card4 e-reveal"><b>Section</b><span>pdxReveal · 5px · .22s</span></div>
+    <div class="card4 e-pop"><b>Popover</b><span>pdxPop · 8px + .98 · .2s</span></div>
+  </div>
+  <p class="note">All four use <code>--ease-out</code>. <code>pgDirCardIn</code> is the canonical deep-glass card entrance and <code>dirCardIn</code> is its alias. The scroll-reveal utility applies the section values as a transition rather than a keyframe so it can be triggered by an intersection observer.</p>
+</div>
+
+<h2>05 · Ambient loops</h2>
+<p class="h2sub">The slow layer. Each of these idles forever at around 4s and reads as breathing, not blinking.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#00FFFF">05.1</span><span class="pname">Pulse, blink, grip</span><span class="ptag">Idle · 1.8s to 4s</span></div>
+  <div class="demo" style="gap:34px">
+    <div class="stack"><div class="pulse"></div><span class="mono">pdxPulse · accent driven</span></div>
+    <div class="stack"><div class="pulse pulse--spot"></div><span class="mono">pdxSpotPulse · missed connections</span></div>
+    <div class="stack"><div class="blink"><i></i>Happening now</div><span class="mono">pdxBlink · 1.8s</span></div>
+    <div class="stack"><div class="grip"><i></i></div><span class="mono">pullHandle · hub drawer only</span></div>
+  </div>
+  <p class="note"><code>pdxPulse</code> reads a per-element <code>--dc</code> (the day or accent color) and breathes the glow from 18% to 32%. On deep-glass surfaces the resting bloom is already baked into the card token, so the pulse is hover and emphasis only, never the resting state. <code>pdxSpotPulse</code> is the fixed magenta version for missed-connection cards. The cyan grip belongs to the hub drawer alone: the sitewide version above the mobile bar was retired.</p>
+</div>
+
+<h2>06 · Flag ring glow</h2>
+<p class="h2sub">The ring is not a ring. It is a soft flag-colored bloom sitting behind the photo, with a light sweep that orbits the halo. Nothing is ever drawn on top of a face.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#b06bff">06.1</span><span class="pname">Ring bloom + shimmer</span><span class="ptag">Idle 5s · hover 1.9s</span></div>
+  <div class="demo" id="rings" style="gap:26px"></div>
+  <p class="note">Two layers, both at <code>z-index:-1</code> inside an isolated stacking context. <code>::before</code> is the flag itself as a conic or linear gradient, inset <code>-6.5%</code>, blurred by <code>--avatar-size * .044</code> at <code>saturate(1.2) brightness(1.12)</code>, held at opacity .86, running <code>pdxaShimmer 5s linear</code> to rotate and <code>avatar-glow-breathe 2.4s</code> to fade between .58 and 1. The highlight is a separate conic (transparent to 40deg, <code>rgba(255,255,255,.66)</code> at 58deg, transparent after 92deg) blurred by <code>--avatar-size * .024</code> at opacity .78, radial-masked to the halo band so it can never cross the photo. Hover speeds the bloom to 2.2s and 1.6s at <code>saturate(1.28) brightness(1.22)</code>, and the sweep to 1.9s at <code>brightness(1.65)</code>. Chain swaps to a cooler steel highlight at 3.6s, 1.4s on hover, and carries the padlock charm.</p>
+  <p class="note"><b style="color:#fff">No Glow</b> (<code>ring="none"</code>) renders neither layer: no bloom, no sweep, and no shimmer element in the DOM at all. Calm mode and reduced motion set <code>animation:none</code> on both layers and calm additionally greys them to <code>grayscale(1)</code> at opacity .45, while the photo keeps its color. The ring is identity, so it stays visible under calm even when it stops moving.</p>
+  <p class="note"><b style="color:#fff">Code note:</b> <code>pdxRingShimmer</code> exists in <code>effects.css</code> but nothing in the client references it. The live motion is <code>pdxaShimmer</code> plus <code>avatar-glow-breathe</code>. Treat the former as an orphan keyframe, not the spec.</p>
+</div>
+
+<h2>07 · Signature add-ons</h2>
+<p class="h2sub">Six additive layers on top of the foundations. Each one is optional, each one is silenced by calm mode, and none of them is required for a surface to feel finished.</p>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#39FF14">07.1</span><span class="pname">Live Wave · Count It Up · RSVP Sparks · Split-Flap</span><span class="ptag">Reveal · press</span></div>
+  <div class="demo" style="gap:40px">
+    <div class="stack"><div class="eq"><i></i><i></i><i></i><i></i></div><span class="mono">pdxEqBounce · live now</span></div>
+    <div class="stack"><div class="num" id="countNum">148</div><span class="mono">pdxNumPop · stats</span></div>
+    <div class="stack"><button class="rsvpbtn" id="rsvpBtn" type="button">RSVP</button><span class="mono">pdxSparkFly · going</span></div>
+    <div class="stack"><div class="flap" id="flap"><b><span>L</span></b><b><span>O</span></b><b><span>V</span></b><b><span>E</span></b></div><span class="mono">split-flap · footer sign-off</span></div>
+  </div>
+  <p class="note">Live Wave is a four-bar equalizer scaling from .22 to 1 for anything happening right now. Count It Up spins stat numerals on reveal with <code>pdxNumPop</code>, and <code>pdxFloatUp</code> carries a delta upward as it fades. RSVP Sparks throws a handful of lime dots along <code>--tx</code> and <code>--ty</code> when you join a night: confirmation you can feel, on the press only. Split-Flap is JS-driven <code>rotateX</code> flipping, used for the footer sign-off.</p>
+</div>
+<div class="panel">
+  <div class="phead"><span class="pnum" style="color:#fff">07.2</span><span class="pname">Logo glitch</span><span class="ptag">Load · idle ~3s</span></div>
+  <div class="demo">
+    <span class="glitch">
+      <img src="../assets/logo-lockup.png" alt="ZAYLIST wordmark">
+      <img class="glitch__ghost glitch__ghost--a" src="../assets/logo-lockup.png" alt="" aria-hidden="true">
+      <img class="glitch__ghost glitch__ghost--b" src="../assets/logo-lockup.png" alt="" aria-hidden="true">
+    </span>
+  </div>
+  <p class="note">The real wordmark art, not type. Two hue-rotated copies of <code>assets/logo-lockup.png</code> sit over the base on <code>mix-blend-mode:screen</code> and tear for a few frames roughly every three seconds, then rest. Because the ghosts are the artwork itself, the glitch survives any change to the logo. Calm mode and reduced motion remove the ghost layers entirely and leave the clean mark.</p>
+  <p class="note"><b style="color:#fff">Code note:</b> <code>GlitchWord.tsx</code> and <code>GlitchLogo.tsx</code> on master still target the old "PRIDE" string. They should glitch ZAYLIST or be removed.</p>
+</div>
+
+<h2>08 · Calm mode</h2>
+<p class="h2sub">Calm is a first-class state, not a degradation. <code>[data-calm="true"]</code> and <code>prefers-reduced-motion</code> are handled together.</p>
+<div class="grid">
+  <div class="cell"><h4>Stops</h4><p>Grain, glitch, the aurora orbs, tickers, ambient glows, entrance animation, the hero background video (poster still instead), and the RSVP pin pulse.</p></div>
+  <div class="cell"><h4>Freezes</h4><p>Seams stay visible but static, with a tight edge shadow and no glint. Card top seams flatten to a plain rainbow bar.</p></div>
+  <div class="cell"><h4>Flattens</h4><p>Day colors drop to grey so color can never be the only signal, and map chip outlines drop to <code>#555</code>.</p></div>
+  <div class="cell"><h4>Keeps</h4><p>Flag rings, greyed but present. They are meaning, not decoration. Photos keep their color; only chrome greys.</p></div>
+</div>
+
+<script>
+/* ---- rings: the real bloom + sweep, one per flag ---- */
+var FLAGS = [
+  ["Progress", "conic-gradient(from 220deg,#FF0018,#FFA52C,#FFFF41,#008018,#0000F9,#86007D,#000,#784F17,#5BCEFA,#F5A9B8,#fff,#FF0018)", "MV"],
+  ["Rainbow", "conic-gradient(from 220deg,#FF0018,#FFA52C,#FFFF41,#008018,#0000F9,#86007D,#FF0018)", "DO"],
+  ["Transgender", "conic-gradient(from 220deg,#5BCEFA,#F5A9B8,#fff,#F5A9B8,#5BCEFA,#5BCEFA)", "AL"],
+  ["Nonbinary", "conic-gradient(from 220deg,#FCF434,#fff,#9C59D1,#2C2C2C,#FCF434)", "RS"],
+  ["Leather", "conic-gradient(from 220deg,#000,#00308F,#fff,#00308F,#000,#D10000,#000)", "TC"],
+  ["Chain", "conic-gradient(from 220deg,#8b8f98,#e4eaf6,#6f7480,#cfd6e4,#8b8f98)", "KP"],
+  ["No Glow", "none", "NG"]
+];
+var wrap = document.getElementById("rings");
+FLAGS.forEach(function(f){
+  var none = f[0] === "No Glow";
+  var chain = f[0] === "Chain";
+  var d = document.createElement("div");
+  d.className = "stack";
+  d.innerHTML =
+    '<span class="av" data-ring="' + (none ? "none" : f[0].toLowerCase()) + '" style="--flag:' + f[1] + '">' +
+      '<span class="av__inner"><span class="av__face">' + f[2] + '</span></span>' +
+      (none ? "" : '<span class="av__shimmer' + (chain ? " av__shimmer--chain" : "") + '"></span>') +
+      (chain ? '<span class="av__lock">\uD83D\uDD12</span>' : "") +
+    '</span><span class="avlbl">' + f[0] + '</span>';
+  wrap.appendChild(d);
+});
+
+/* ---- calm toggle ---- */
+var calm = false, calmBtn = document.getElementById("calmBtn");
+calmBtn.addEventListener("click", function(){
+  calm = !calm;
+  document.documentElement.setAttribute("data-calm", calm ? "true" : "false");
+  calmBtn.textContent = calm ? "Calm on" : "Calm off";
+});
+
+/* ---- entrances: replay on demand, and loop so the panel is never
+        a row of static cards by the time you scroll to it ---- */
+function replayEntrances(){
+  document.querySelectorAll("#entrances > *").forEach(function(el){
+    el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+  });
+}
+document.getElementById("replayBtn").addEventListener("click", replayEntrances);
+var entranceTimer = setInterval(function(){
+  if (document.documentElement.getAttribute("data-calm") === "true") return;
+  replayEntrances();
+}, 3200);
+
+/* ---- split-flap: cycle the letters as each cell turns over ---- */
+(function(){
+  var WORDS = ["LOVE","LOUD","FREE","HERE"], w = 0;
+  var cells = document.querySelectorAll("#flap b span");
+  if (!cells.length) return;
+  setInterval(function(){
+    if (document.documentElement.getAttribute("data-calm") === "true") return;
+    w = (w + 1) % WORDS.length;
+    cells.forEach(function(c, i){
+      setTimeout(function(){ c.textContent = WORDS[w][i]; }, 1740 + i * 130);
+    });
+  }, 2600);
+})();
+
+
+/* ---- copyable recipe per panel ---- */
+var RECIPES = {
+"02.1": ["The flowing seam", `/* Three loops on one bar. All from tokens/effects.css. */
+.pdx-seam {
+  height: 3px; opacity: .8;
+  background: var(--rainbow-bar); background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s ease-in-out infinite;
+}
+.pdx-seam::after {                 /* the travelling glint */
+  content: ""; position: absolute; inset: 0; width: 24%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen;
+  animation: pdxSeamGlint 3.4s linear infinite;
+}
+/* Calm: keep the bar, drop the motion. Never hide the seam. */
+:root[data-calm="true"] .pdx-seam { background: var(--rainbow-bar); background-size: auto; animation: none; }
+:root[data-calm="true"] .pdx-seam::after { display: none; }`],
+
+"02.2": ["Seam Charge, the route loader", `/* The seam doubles as the page loader: it charges, a glint races it,
+   a flash caps it, then it loops until the route or query resolves. */
+.pdx-charge { position: relative; height: 2.7px; background: #101014; overflow: hidden; }
+.pdx-charge__fill  { transform-origin: left; animation: pdxSeamFill 1.15s cubic-bezier(.2,.8,.2,1) infinite; }
+.pdx-charge__glint { width: 24%; mix-blend-mode: screen; animation: pdxSeamGlint 1.15s linear infinite; }
+.pdx-charge__flash { position: absolute; inset: 0; background: #fff; opacity: 0;
+                     animation: pdxSeamFlash 1.15s linear forwards; }`],
+
+"03.1": ["Spectrum loader", `/* One loader, four shapes. The ring is the six-stripe flag as a conic. */
+.pdx-loader__ring {
+  border-radius: 50%;
+  background: conic-gradient(#E40303,#FF8C00,#FFED00,#008026,#24408E,#732982,#E40303);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 0);
+  animation: spectrumSpin 1.1s linear infinite;
+}
+.pdx-loader__dots span { animation: spectrumBob 1.2s ease-in-out infinite; }
+.pdx-loader__dots span:nth-child(2) { animation-delay: .14s; }
+.pdx-loader__dots span:nth-child(3) { animation-delay: .28s; }
+.pdx-loader__fill { animation: spectrumShimmer 1.6s ease-in-out infinite; }
+
+@keyframes spectrumSpin    { to { transform: rotate(360deg); } }
+@keyframes spectrumBob     { 0%,100% { transform: translateY(0); opacity: .55; } 50% { transform: translateY(-7px); opacity: 1; } }
+@keyframes spectrumShimmer { 0% { left: -55%; } 100% { left: 100%; } }`],
+
+"03.2": ["Board loading state", `/* Full-page wait: ring, dots and bar stacked, centred, nothing else on screen.
+   Use for a first paint that has no skeleton to show. */
+.pdx-loader--full { display: grid; justify-items: center; gap: 22px; padding: 40px 18px; }
+/* Reuse .pdx-loader__ring / __dots / __bar from 03.1 verbatim. */`],
+
+"03.3": ["Pull to refresh", `/* Installed PWA only. Never on the web page: it fights native overscroll. */
+.pdx-ptr i {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.22); border-top-color: var(--neon-cyan);
+  animation: ptr-spin .7s linear infinite;
+}
+/* While the finger is down, freeze the spinner and map drag distance to rotation. */
+.pdx-ptr--drag i { animation: none; transform: rotate(216deg); }
+@keyframes ptr-spin { to { transform: rotate(360deg); } }`],
+
+"04.1": ["The four entrances", `/* Everything enters by rising and fading. Distance is the only variable.
+   All four keyframes live in tokens/effects.css and glass.css: never redeclare them. */
+.enter-card    { animation: pgDirCardIn .55s var(--ease-out) both; }  /* 22px, deep-glass card */
+.enter-hero    { animation: pdxHeroIn   .48s var(--ease-out) both; }  /* 10px, page hero */
+.enter-section { animation: pdxReveal   .22s var(--ease-out) both; }  /*  5px, scroll reveal */
+.enter-popover { animation: pdxPop      .2s  var(--ease-out) both; }  /*  8px + .98 scale */
+
+/* The ladder: hero .48s, stats band at +.07s, feeds .35s, panels .25s, modals .2s. */
+.stats-band { animation-delay: .07s; }
+
+:root[data-calm="true"] [class^="enter-"] { animation: none; }`],
+
+"05.1": ["Ambient loops", `/* The slow layer. Everything here idles; nothing here signals. */
+.pdx-pulse { --dc: var(--day-thu); animation: pdxPulse 4s ease-in-out infinite; }   /* accent driven */
+.pdx-spot  { animation: pdxSpotPulse 4s ease-in-out infinite; }                     /* Spotted cards */
+.pdx-live  { animation: pdxBlink 1.8s ease-in-out infinite; }                       /* live dots */
+.pdx-grip  { animation: pdxPullHandle 2.4s ease-in-out infinite; }                  /* drawer grip */
+
+/* pdxPulse reads --dc, so set the day or accent colour per element
+   and the glow follows without a new keyframe. */`],
+
+"06.1": ["Identity ring bloom", `/* The ring is not a ring. It is a blurred flag bloom behind the photo,
+   with a light-only sweep orbiting it. Nothing is ever drawn over a face. */
+.user-avatar { --avatar-size: 78px; --glow-outset: 6.5%; isolation: isolate; }
+.user-avatar::before {
+  content: ""; position: absolute; inset: calc(var(--glow-outset) * -1); z-index: -1;
+  border-radius: 50%; background: var(--flag);
+  filter: blur(calc(var(--avatar-size) * .044)) saturate(1.2) brightness(1.12);
+  opacity: .86;
+  animation: pdxaShimmer 5s linear infinite, avatar-glow-breathe 2.4s ease-in-out infinite;
+}
+.user-avatar[data-ring="none"]::before { content: none; }
+
+@keyframes avatar-glow-breathe { 0%,100% { opacity: .58; } 50% { opacity: 1; } }
+@keyframes pdxaShimmer { to { transform: rotate(360deg); } }`],
+
+"07.1": ["The add-ons", `/* Live Wave: four bars, .22 to 1, stagger 120ms. */
+.pdx-eq i { transform-origin: bottom; animation: pdxEqBounce 1s ease-in-out infinite; }
+.pdx-eq i:nth-child(2) { animation-delay: .12s; }
+.pdx-eq i:nth-child(3) { animation-delay: .24s; }
+.pdx-eq i:nth-child(4) { animation-delay: .36s; }
+
+/* Count It Up: pop the numeral, float a +1 off it. */
+.pdx-stat-num { font-variant-numeric: tabular-nums; animation: pdxNumPop .5s cubic-bezier(.34,1.56,.64,1); }
+.pdx-floatup  { animation: pdxFloatUp 1.1s ease-out forwards; }
+
+/* RSVP Sparks: set --tx / --ty per particle in JS, then let CSS throw it. */
+.pdx-spark { animation: pdxSparkFly .62s ease-out forwards; }
+/* el.style.setProperty("--tx", dx + "px"); el.style.setProperty("--ty", dy + "px"); */
+
+/* Split-Flap: per-cell rotateX, no shared keyframe. Swap the glyph at the
+   halfway point of the flip, while the cell is edge-on and invisible. */
+.pdx-flap { perspective: 220px; }
+.pdx-flap b { position: relative; overflow: hidden; }
+.pdx-flap b span { transform-origin: center bottom; backface-visibility: hidden;
+  animation: pdxFlap 2.6s cubic-bezier(.2,.8,.2,1) infinite; }
+.pdx-flap b:nth-child(2) span { animation-delay: .13s; }
+.pdx-flap b:nth-child(3) span { animation-delay: .26s; }
+.pdx-flap b:nth-child(4) span { animation-delay: .39s; }
+.pdx-flap b::after { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: #000; opacity: .85; }
+
+@keyframes pdxFlap {
+  0%, 58%   { transform: rotateX(0);      opacity: 1; }
+  66%       { transform: rotateX(-90deg); opacity: .25; }
+  67%       { transform: rotateX(90deg);  opacity: .25; }  /* swap the glyph here */
+  76%, 100% { transform: rotateX(0);      opacity: 1; }
+}`],
+
+"07.2": ["Logo glitch", `/* Two tinted copies on screen blend, hard cuts, ~350ms every 3.2s.
+   Nav mark and hero wordmark only. Full spec on the Glitch panel. */
+.pdx-glitch__ghost--a { filter: hue-rotate(150deg) saturate(2.2); animation: pdxGlitchA 3.2s steps(1) infinite; }
+.pdx-glitch__ghost--b { filter: hue-rotate(-95deg) saturate(2.2); animation: pdxGlitchB 3.2s steps(1) infinite; }`]
+};
+document.querySelectorAll(".panel").forEach(function(p){
+  var n = p.querySelector(".pnum");
+  var r = n && RECIPES[n.textContent.trim()];
+  if (r && window.Spec) Spec.recipe(p, r[1], r[0]);
+});
+
+/* ---- seam charge replay ---- */
+document.getElementById("chargeBtn").addEventListener("click", function(){
+  document.querySelectorAll("#chargeWrap .charge > *").forEach(function(el){
+    el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+  });
+});
+
+/* ---- count it up ---- */
+var numEl = document.getElementById("countNum"), n = 148;
+setInterval(function(){
+  if (calm) return;
+  n += Math.floor(Math.random() * 3) + 1;
+  numEl.textContent = n;
+  numEl.style.animation = "none"; void numEl.offsetWidth; numEl.style.animation = "";
+  var up = document.createElement("span");
+  up.className = "floatup"; up.textContent = "+1";
+  numEl.parentNode.style.position = "relative";
+  numEl.parentNode.appendChild(up);
+  setTimeout(function(){ up.remove(); }, 1100);
+}, 3200);
+
+/* ---- rsvp sparks ---- */
+var rsvp = document.getElementById("rsvpBtn"), going = false;
+rsvp.addEventListener("click", function(){
+  going = !going;
+  rsvp.textContent = going ? "Going" : "RSVP";
+  if (!going || calm) return;
+  for (var i = 0; i < 9; i++) {
+    var s = document.createElement("span");
+    s.className = "spark";
+    var a = (Math.PI * 2 * i) / 9;
+    s.style.setProperty("--tx", Math.cos(a) * 34 + "px");
+    s.style.setProperty("--ty", Math.sin(a) * 34 + "px");
+    s.style.left = "50%"; s.style.top = "50%";
+    rsvp.appendChild(s);
+    setTimeout(function(el){ return function(){ el.remove(); }; }(s), 640);
+  }
+});
+</script>
+</body></html>

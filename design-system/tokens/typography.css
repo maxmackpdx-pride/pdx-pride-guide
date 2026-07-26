@@ -1,0 +1,127 @@
+/* ============================================================
+   Zaylist, TYPOGRAPHY
+   Display : Barlow Condensed 700 to 900, UPPERCASE, tight.
+   Body    : Inter.
+   ============================================================ */
+
+:root {
+  /* ---- FAMILIES ------------------------------------------ */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Mono is the official third voice (2026): utility kickers, running-head
+     nav, stat labels, live indicators. 10 to 12px, wide-tracked, uppercase. */
+  --font-mono:    ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+  /* Board-surface aliases (mirror client/src/index.css) */
+  --font-board-display: var(--font-display);
+  --font-board-mono:    var(--font-mono);
+
+  /* ---- WEIGHTS ------------------------------------------- */
+  --fw-regular: 400;  /* @kind font */
+  --fw-medium:  500;  /* @kind font */
+  --fw-semibold:600;  /* @kind font */
+  --fw-bold:    700;  /* @kind font */
+  --fw-heavy:   800;  /* @kind font */
+  --fw-black:   900;  /* @kind font */
+
+  /* ---- DISPLAY SCALE (Barlow Condensed, black) ----------- */
+  --display-hero:  clamp(3.5rem, 11vw, 9rem);    /* @kind font */
+  --display-1:     clamp(2.75rem, 7vw, 5.5rem);  /* @kind font */
+  --display-2:     clamp(2rem, 4.5vw, 3.5rem);   /* @kind font */
+  --display-3:     1.75rem;                       /* @kind font */
+
+  --lh-display:    0.95;        /* @kind other */
+  --tracking-display: 0.005em;  /* @kind other */
+
+  /* ---- CHROME (Barlow 700, UI labels) -------------------- */
+  --chrome-lg:  1.25rem;   /* nav @kind font */
+  --chrome-md:  1rem;      /* buttons @kind font */
+  --chrome-sm:  0.85rem;   /* chips @kind font */
+  --chrome-xs:  0.7rem;    /* badges @kind font */
+  --tracking-chrome: 0.06em;  /* @kind other */
+
+  /* ---- TITLE / HEADING (card titles, Barlow 900) --------- */
+  --title-lg:  1.5rem;    /* @kind font */
+  --title-md:  1.3125rem; /* @kind font */
+  --title-sm:  1.0625rem; /* @kind font */
+  --lh-title:  1.05;      /* @kind other */
+
+  /* ---- BODY (Inter) -------------------------------------- */
+  --body-lg:   1.125rem;  /* @kind font */
+  --body-md:   1rem;      /* @kind font */
+  --body-sm:   0.875rem;  /* @kind font */
+  --lh-body:   1.55;      /* @kind other */
+
+  /* ---- META ---------------------------------------------- */
+  --meta:      0.8125rem; /* @kind font */
+  --meta-sm:   0.6875rem; /* @kind font */
+  --lh-meta:   1.35;      /* @kind other */
+
+  /* ---- TRACKING ------------------------------------------ */
+  --tracking-tight:  -0.01em;  /* @kind other */
+  --tracking-normal: 0;         /* @kind other */
+  --tracking-wide:   0.04em;    /* @kind other */
+  --tracking-kicker: 0.14em;    /* @kind other */
+  --tracking-mono:   0.2em;     /* mono kickers @kind other */
+
+  /* ---- MONO UTILITY SIZES -------------------------------- */
+  --mono-kicker: 12px;   /* section kickers, running head @kind font */
+  --mono-label:  11px;   /* stat labels @kind font */
+  --mono-micro:  10px;   /* tile labels @kind font */
+
+  /* ---- PROSE --------------------------------------------- */
+  --prose-spacing: 1.35rem;  /* @kind other */
+}
+
+/* ---- BASE ELEMENT DEFAULTS ------------------------------- */
+body {
+  font-family: var(--font-body);
+  font-size: var(--body-md);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  font-weight: var(--fw-regular);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Poster / display helper */
+.pdx-display {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Chrome label helper (Barlow 700) */
+.pdx-chrome {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-chrome);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Kicker chip label */
+.pdx-kicker {
+  font-family: var(--font-display);
+  font-size: var(--chrome-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--text-meta);
+}
+
+/* Mono kicker (utility layer): pair with a color + optional live dot */
+/* The kicker is a label, not an action: it takes the surface's accent only
+   when the surface has one. Default is quiet text, never acid yellow. */
+.pdx-kicker-mono {
+  font-family: var(--font-mono);
+  font-size: var(--mono-kicker);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+/* Opt in when the section owns an accent. Inside a [data-context] scope this
+   picks the context primary up automatically. */
+.pdx-kicker-mono--accent { color: var(--accent); }

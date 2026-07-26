@@ -1,0 +1,13 @@
+/* ============================================================
+   Zaylist, Webfonts
+   Source of truth: repo design-system/tokens/tokens.css
+     --font-display: 'Barlow Condensed'  (700 to 900, uppercase, tight)
+     --font-body:    'Inter'
+   No brand font files were provided; these load from Google Fonts.
+   The @import below pulls current, self-updating font URLs for every
+   weight in use (Barlow Condensed 600 to 900, Inter 400 to 700), so no
+   hardcoded gstatic woff2 URLs are kept here (those pin to version
+   hashes Google rotates, which 404 over time and break offline bundles).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');

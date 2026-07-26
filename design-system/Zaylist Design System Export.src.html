@@ -1,0 +1,1693 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaylist Design System — full export</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="_export_fonts.css" id="fontsheet">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#050506"/><rect x="104" width="16" height="30" fill="#CCFF00"/><rect x="104" y="30" width="16" height="30" fill="#19E3FF"/><rect x="104" y="60" width="16" height="30" fill="#FF1FA0"/><rect x="104" y="90" width="16" height="30" fill="#750787"/><text x="52" y="74" font-family="Helvetica,Arial,sans-serif" font-size="52" font-weight="900" fill="#fff" text-anchor="middle">Z</text></svg></template>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg-app,#050506);color:var(--text-body,#e6e2d9);font-family:var(--font-body,Inter,sans-serif);font-size:14px;line-height:1.6}
+a{color:var(--neon-cyan)}a:hover{color:var(--neon-yellow)}
+code{font-family:var(--font-mono);font-size:11.5px;color:var(--neon-cyan);background:var(--panel-card);border:1px solid var(--ink-border-faint);border-radius:3px;padding:1px 5px}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+@media (max-width:900px){.app{grid-template-columns:1fr}.nv{position:static;height:auto}}
+/* sidebar */
+.nv{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 16px 40px;border-right:1px solid var(--ink-border);background:#030304}
+.nv__w{font-family:var(--font-display);font-weight:900;font-size:20px;line-height:.95;text-transform:uppercase;color:var(--text-hi);margin:0 0 3px}
+.nv__k{font-family:var(--font-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-disabled);margin:0 0 18px}
+.nv__b{font-family:var(--font-display);font-weight:800;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--nc);margin:20px 0 7px;padding-bottom:5px;border-bottom:1px solid color-mix(in srgb,var(--nc) 30%,transparent)}
+.nv__i{display:block;font-size:12.5px;color:var(--text-lo);text-decoration:none;padding:3px 0}
+.nv__i:hover{color:var(--text-hi)}
+/* main */
+.mn{padding:0 0 90px;min-width:0}
+.hero{padding:52px 48px 40px;border-bottom:2px solid var(--ink-border);background:radial-gradient(120% 90% at 50% 0%,rgba(25,227,255,.07),transparent 62%)}
+.hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(44px,7vw,86px);line-height:.9;text-transform:uppercase;margin:0 0 14px;color:var(--text-hi)}
+.hero p{margin:0 0 12px;max-width:80ch;text-wrap:pretty}
+.hero .kick{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-cyan);margin-bottom:14px}
+.hero .bar{height:3px;margin:26px 0 0;background:var(--rainbow-bar-loop,linear-gradient(90deg,#E40303,#FF8C00,#FFED00,#008026,#004DFF,#750787))}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:26px}
+.meta div{padding:12px 14px;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card)}
+.meta b{display:block;font-family:var(--font-display);font-weight:800;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-disabled);margin-bottom:4px}
+.meta span{font-size:12.5px;color:var(--text-hi)}
+.band{padding:40px 48px 10px}
+.band__t{font-family:var(--font-display);font-weight:900;font-size:34px;line-height:1;text-transform:uppercase;margin:0 0 8px;color:var(--nc)}
+.band__d{margin:0 0 6px;max-width:80ch;color:var(--text-lo);font-size:13px}
+.grp__t{font-family:var(--font-display);font-weight:800;font-size:17px;letter-spacing:.03em;text-transform:uppercase;margin:34px 0 5px;color:var(--text-hi);padding-top:14px;border-top:1px solid var(--ink-750)}
+.grp__d{margin:0 0 8px;max-width:80ch;color:var(--text-lo);font-size:12.5px}
+/* panel */
+.pn{margin:26px 0 40px;scroll-margin-top:14px}
+.pn__h{display:flex;gap:14px;align-items:flex-start}
+.pn__n{font-family:var(--font-mono);font-size:11px;color:var(--nc);padding-top:5px}
+.pn__t{font-family:var(--font-display);font-weight:800;font-size:19px;letter-spacing:.02em;text-transform:uppercase;margin:0;color:var(--text-hi);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.pn__f{font-family:var(--font-mono);font-size:10.5px;color:var(--text-disabled);margin:3px 0 0}
+.pn__s{margin:9px 0 0;max-width:88ch;font-size:12.5px;color:var(--text-lo)}
+.pn__c{margin:7px 0 0;font-size:12px;color:var(--text-disabled)}
+.pn__jsx{margin:10px 0 0;padding:11px 13px;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card);font-family:var(--font-mono);font-size:11.5px;line-height:1.6;color:var(--text-body);overflow-x:auto}
+.st{font-family:var(--font-display);font-weight:800;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px 2px;border-radius:2px}
+.st--queued{color:#050506;background:var(--neon-orange)}
+.st--draft{color:var(--text-lo);border:1px solid var(--border-strong)}
+.pn__frame{margin:14px 0 0;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:#000;overflow:hidden;box-shadow:0 22px 50px -26px rgba(0,0,0,.9)}
+.pn__frame iframe{display:block;max-width:100%}
+/* assets */
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin:14px 0 26px}
+.ai{margin:0;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card);overflow:hidden}
+.ai__b{aspect-ratio:4/3;display:grid;place-items:center;padding:10px;background:#0a0a0c}
+.ai--dark .ai__b{background:#050506}
+.ai__b img{max-width:100%;max-height:100%;object-fit:contain}
+.ai figcaption{padding:8px 10px 9px;border-top:1px solid var(--ink-border-faint)}
+.ai figcaption b{display:block;font-size:11.5px;color:var(--text-hi);word-break:break-all}
+.ai figcaption span{display:block;font-family:var(--font-mono);font-size:9.5px;color:var(--text-disabled);word-break:break-all;margin-top:2px}
+/* sources */
+.src{margin:0 0 8px;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card);overflow:hidden}
+.src summary{cursor:pointer;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:12px;color:var(--neon-cyan)}
+.src summary i{font-style:normal;color:var(--text-disabled);font-size:10.5px}
+.src pre{margin:0;padding:14px 16px;border-top:1px solid var(--ink-border-faint);font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-body);white-space:pre-wrap;word-break:break-word;max-height:600px;overflow:auto}
+.foot{padding:34px 48px 0;border-top:2px solid var(--ink-border);margin-top:30px;color:var(--text-disabled);font-size:12px}
+</style></head><body>
+<div class="app">
+<nav class="nv">
+  <p class="nv__w">Zaylist<br>Design System</p>
+  <p class="nv__k">Full export &middot; self-contained</p>
+  <a class="nv__i" href="#top">Top</a>
+  <div class="nv__b" style="--nc:var(--neon-cyan)">00 · Read me</div><a class="nv__i" href="#p1">Read me</a><a class="nv__i" href="#p2">Prompts</a><div class="nv__b" style="--nc:var(--neon-yellow)">A · Language</div><a class="nv__i" href="#p3">Surfaces &amp; text</a><a class="nv__i" href="#p4">Context primaries</a><a class="nv__i" href="#p5">Neon &amp; spectrum</a><a class="nv__i" href="#p6">Day colors</a><a class="nv__i" href="#p7">Board accents</a><a class="nv__i" href="#p8">Utility layer</a><a class="nv__i" href="#p9">Type system</a><a class="nv__i" href="#p10">Spacing &amp; radius</a><a class="nv__i" href="#p11">Copy rules</a><a class="nv__i" href="#p12">Line icon library</a><div class="nv__b" style="--nc:var(--neon-cyan)">B · Brand</div><a class="nv__i" href="#p13">Lit plate &amp; bloom</a><a class="nv__i" href="#p14">Seam, markers &amp; tags</a><a class="nv__i" href="#p15">Card system</a><a class="nv__i" href="#p16">Glitch</a><a class="nv__i" href="#p17">Brand guide</a><a class="nv__i" href="#p18">App Face Standards</a><div class="nv__b" style="--nc:var(--neon-magenta)">C · Surfaces</div><a class="nv__i" href="#p19">Glass surface system</a><a class="nv__i" href="#p20">Buttons &amp; inputs</a><a class="nv__i" href="#p21">Badges &amp; pills</a><a class="nv__i" href="#p22">Board, ad &amp; feed</a><a class="nv__i" href="#p23">Headers &amp; dividers</a><a class="nv__i" href="#p24">Infra &amp; action rows</a><a class="nv__i" href="#p25">Avatars &amp; rings</a><a class="nv__i" href="#p26">Motion, loaders &amp; seams</a><a class="nv__i" href="#p27">Motion library</a><div class="nv__b" style="--nc:var(--neon-orange)">D · Patterns</div><a class="nv__i" href="#p28">Desktop</a><a class="nv__i" href="#p29">Mobile</a><a class="nv__i" href="#p30">Hub shell &amp; news feed</a><a class="nv__i" href="#p31">Inbox, queue &amp; desk</a><a class="nv__i" href="#p32">Map surfaces &amp; pins</a><div class="nv__b" style="--nc:var(--day-mon-text)">E · In use</div><a class="nv__i" href="#p33">Full site</a><a class="nv__i" href="#p34">Nude Beaches</a><a class="nv__i" href="#p35">Public profile</a>
+  <div class="nv__b" style="--nc:var(--neon-green,#39FF14)">Appendix</div>
+  <a class="nv__i" href="#assets">Asset library</a>
+  <a class="nv__i" href="#sources">Token &amp; doc source</a>
+</nav>
+<main class="mn">
+<header class="hero" id="top">
+  <p class="kick">Zaylist &middot; complete design system export</p>
+  <h1>Zaylist<br>Design System</h1>
+  <p>A high-energy neon zine with a utility backbone: welcoming, scannable, and community-first. Anti-corporate by design, and proudly solo-run: built by one person for the PDX scene, not a sponsor.</p>
+  <p>This single file is the whole system. Every panel below is the live specimen, not a screenshot, with its own stylesheet and scripts embedded. Every image is at full resolution and labeled with the exact path it is referenced by. The token files and the written standard are included as text at the end, so the system can be rebuilt from this file alone with nothing else to fetch.</p>
+  <div class="meta">
+    <div><b>Panels</b><span>35 live specimens</span></div>
+    <div><b>Images</b><span>86, full resolution</span></div>
+    <div><b>Source of truth</b><span>maxmackpdx-pride/pdx-pride-guide @ master</span></div>
+    <div><b>Live site</b><span>zaylist.com</span></div>
+    <div><b>Offline</b><span>No network needed</span></div>
+    <div><b>Rebuild input</b><span>Tokens + docs included as text</span></div>
+  </div>
+  <div class="bar"></div>
+</header>
+<section class="band" style="--nc:var(--neon-cyan)"><h2 class="band__t">00 · Read me</h2><h3 class="grp__t">Read me</h3><p class="grp__d">What this system is, where the ground truth lives, the caveats, and how to ask for any of it.</p><article class="pn" id="p1">
+<div class="pn__h"><span class="pn__n">01</span><div><h4 class="pn__t">Design system read me</h4><p class="pn__f">guidelines/readme.html</p></div></div>
+<p class="pn__s">The whole written standard: sources, site map, content fundamentals, visual foundations, signature effects, page patterns, iconography, avatars, components, caveats and known code gaps.</p>
+
+
+<div class="pn__frame" style="width:980px;max-width:100%"><iframe src="_eb/guidelines/readme.html" loading="eager" style="width:980px;height:2600px;border:0" title="Design system read me"></iframe></div>
+</article><article class="pn" id="p2">
+<div class="pn__h"><span class="pn__n">02</span><div><h4 class="pn__t">Prompts</h4><p class="pn__f">guidelines/prompts.html</p></div></div>
+<p class="pn__s">How to ask for anything in this system, in the words the system already uses: the vocabulary index, say-this-not-that, six copyable prompt recipes, the guardrails worth repeating, and the difference between using the system and changing it.</p>
+
+
+<div class="pn__frame" style="width:980px;max-width:100%"><iframe src="_eb/guidelines/prompts.html" loading="eager" style="width:980px;height:2400px;border:0" title="Prompts"></iframe></div>
+</article></section><section class="band" style="--nc:var(--neon-yellow)"><h2 class="band__t">A · Language</h2><p class="band__d">The measurable layer. Everything downstream is assembled out of these four groups, so they come first.</p><h3 class="grp__t">Color</h3><p class="grp__d">Surfaces, the context primaries, the nine-stop spectrum, and the two colour systems that carry data rather than decoration.</p><article class="pn" id="p3">
+<div class="pn__h"><span class="pn__n">03</span><div><h4 class="pn__t">Surfaces &amp; text</h4><p class="pn__f">guidelines/color-surfaces.html</p></div></div>
+<p class="pn__s">Near-black base, hard borders, warm text.</p>
+
+
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/guidelines/color-surfaces.html" loading="eager" style="width:900px;height:520px;border:0" title="Surfaces &amp; text"></iframe></div>
+</article><article class="pn" id="p4">
+<div class="pn__h"><span class="pn__n">04</span><div><h4 class="pn__t">Context primaries<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/color-primaries.html</p></div></div>
+<p class="pn__s">Acid yellow is the default action colour, not the only one. Hub and settings are cyan, admin is magenta, the owner desk is violet, Rooster Rock is orange and Sauvie Island is acid green. One data-context attribute rebinds --accent and --c for a whole subtree.</p>
+
+
+<div class="pn__frame" style="width:1000px;max-width:100%"><iframe src="_eb/guidelines/color-primaries.html" loading="eager" style="width:1000px;height:1000px;border:0" title="Context primaries"></iframe></div>
+</article><article class="pn" id="p5">
+<div class="pn__h"><span class="pn__n">05</span><div><h4 class="pn__t">Neon palette &amp; spectrum</h4><p class="pn__f">guidelines/color-neon.html</p></div></div>
+<p class="pn__s">One neon per element, yellow is primary, plus the nine-stop spectrum tape with hex, RGB and hue reference.</p>
+
+
+<div class="pn__frame" style="width:760px;max-width:100%"><iframe src="_eb/guidelines/color-neon.html" loading="eager" style="width:760px;height:1500px;border:0" title="Neon palette &amp; spectrum"></iframe></div>
+</article><article class="pn" id="p6">
+<div class="pn__h"><span class="pn__n">06</span><div><h4 class="pn__t">Day colors</h4><p class="pn__f">guidelines/color-days.html</p></div></div>
+<p class="pn__s">Mon to Sun keys. Data, not decoration. Toggle calm mode in the sidebar to watch them flatten.</p>
+
+
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/guidelines/color-days.html" loading="eager" style="width:900px;height:430px;border:0" title="Day colors"></iframe></div>
+</article><article class="pn" id="p7">
+<div class="pn__h"><span class="pn__n">07</span><div><h4 class="pn__t">Community board accents</h4><p class="pn__f">guidelines/color-boards.html</p></div></div>
+<p class="pn__s">One identity color per board, softened on utility surfaces.</p>
+
+
+<div class="pn__frame" style="width:720px;max-width:100%"><iframe src="_eb/guidelines/color-boards.html" loading="eager" style="width:720px;height:270px;border:0" title="Community board accents"></iframe></div>
+</article><article class="pn" id="p8">
+<div class="pn__h"><span class="pn__n">08</span><div><h4 class="pn__t">Utility layer</h4><p class="pn__f">guidelines/color-utility.html</p></div></div>
+<p class="pn__s">Ink panels, mono kickers and the status ramp: the data-dense register.</p>
+
+
+<div class="pn__frame" style="width:880px;max-width:100%"><iframe src="_eb/guidelines/color-utility.html" loading="eager" style="width:880px;height:560px;border:0" title="Utility layer"></iframe></div>
+</article><h3 class="grp__t">Type &amp; space</h3><p class="grp__d">Two families and a 4px grid. Both specimens read their numbers back from the token files at load.</p><article class="pn" id="p9">
+<div class="pn__h"><span class="pn__n">09</span><div><h4 class="pn__t">Type system</h4><p class="pn__f">guidelines/type-body.html</p></div></div>
+<p class="pn__s">Barlow Condensed display, Inter body, mono utility, with the full display to meta scale.</p>
+
+
+<div class="pn__frame" style="width:880px;max-width:100%"><iframe src="_eb/guidelines/type-body.html" loading="eager" style="width:880px;height:1220px;border:0" title="Type system"></iframe></div>
+</article><article class="pn" id="p10">
+<div class="pn__h"><span class="pn__n">10</span><div><h4 class="pn__t">Spacing &amp; radius</h4><p class="pn__f">guidelines/spacing.html</p></div></div>
+<p class="pn__s">The 4px scale, semantic gaps and the radius ramp, each value read from tokens/layout.css when the page loads.</p>
+
+
+<div class="pn__frame" style="width:760px;max-width:100%"><iframe src="_eb/guidelines/spacing.html" loading="eager" style="width:760px;height:700px;border:0" title="Spacing &amp; radius"></iframe></div>
+</article><h3 class="grp__t">Voice</h3><p class="grp__d">How the system sounds. The third half of the language, and the one most often skipped.</p><article class="pn" id="p11">
+<div class="pn__h"><span class="pn__n">11</span><div><h4 class="pn__t">Copy rules</h4><p class="pn__f">guidelines/copy-rules.html</p></div></div>
+<p class="pn__s">The register with write-this and not-this, the name pun, scene vernacular, mantras, casing and the event line.</p>
+
+
+<div class="pn__frame" style="width:1000px;max-width:100%"><iframe src="_eb/guidelines/copy-rules.html" loading="eager" style="width:1000px;height:1500px;border:0" title="Copy rules"></iframe></div>
+</article><h3 class="grp__t">Icons</h3><p class="grp__d">One drawing standard, 32 glyphs.</p><article class="pn" id="p12">
+<div class="pn__h"><span class="pn__n">12</span><div><h4 class="pn__t">Line icon library</h4><p class="pn__f">guidelines/icons.html</p></div></div>
+<p class="pn__s">All 32 brand icons on a 24px grid, 2.2 stroke, round caps, spectrum-colored. Inherit currentColor when inlined.</p>
+
+
+<div class="pn__frame" style="width:880px;max-width:100%"><iframe src="_eb/guidelines/icons.html" loading="eager" style="width:880px;height:440px;border:0" title="Line icon library"></iframe></div>
+</article></section><section class="band" style="--nc:var(--neon-cyan)"><h2 class="band__t">B · Brand</h2><p class="band__d">The parts that are Zaylist rather than good practice: the treatments, the written standard, and the app face.</p><h3 class="grp__t">Treatments</h3><p class="grp__d">The card shell every surface shares, plus the three effects that carry the brand without a logo in sight.</p><article class="pn" id="p13">
+<div class="pn__h"><span class="pn__n">13</span><div><h4 class="pn__t">Lit plate &amp; floor bloom<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/brand-bloom.html</p></div></div>
+<p class="pn__s">The flat 4px magenta offset is retired. Posters, markers, tape and collage now read as a lit plate on a black keyline with the element's own accent blooming on the floor, the same idiom as the seam, chips and tags.</p>
+
+
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/guidelines/brand-bloom.html" loading="eager" style="width:900px;height:900px;border:0" title="Lit plate &amp; floor bloom"></iframe></div>
+</article><article class="pn" id="p14">
+<div class="pn__h"><span class="pn__n">14</span><div><h4 class="pn__t">Seam, markers &amp; tags<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/brand-motifs.html</p></div></div>
+<p class="pn__s">Animated flowing seam (route loader), kicker chip, filled sticker tags.</p>
+
+
+<div class="pn__frame" style="width:700px;max-width:100%"><iframe src="_eb/guidelines/brand-motifs.html" loading="eager" style="width:700px;height:300px;border:0" title="Seam, markers &amp; tags"></iframe></div>
+</article><article class="pn" id="p15">
+<div class="pn__h"><span class="pn__n">15</span><div><h4 class="pn__t">Card system, deep glass</h4><p class="pn__f">guidelines/card-system.html</p></div></div>
+<p class="pn__s">One shell drives Events, the Directory, the ads and every board. The accent contract, the anatomy layer by layer, the four surfaces, the modal as the open state of the same object, motion, and the token table. Housing is queued on the same shell.</p>
+<p class="pn__c">Components: <code>data-display/EventCard</code> <code>data-display/PosterCard</code> <code>data-display/PlaceCard</code> <code>data-display/StatCard</code></p>
+
+<div class="pn__frame" style="width:1180px;max-width:100%"><iframe src="_eb/guidelines/card-system.html" loading="eager" style="width:1180px;height:4200px;border:0" title="Card system, deep glass"></iframe></div>
+</article><article class="pn" id="p16">
+<div class="pn__h"><span class="pn__n">16</span><div><h4 class="pn__t">Glitch</h4><p class="pn__f">guidelines/brand-glitch.html</p></div></div>
+<p class="pn__s">The slow RGB glitch on the nav and hero wordmark: cycle, active window, offsets, ghost filters, and the off switch. Copyable markup and CSS.</p>
+
+
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/guidelines/brand-glitch.html" loading="eager" style="width:900px;height:820px;border:0" title="Glitch"></iframe></div>
+</article><h3 class="grp__t">Brand guide</h3><p class="grp__d">The written standard for everything that has no token: the mark, imagery, voice, accessibility, trademark.</p><article class="pn" id="p17">
+<div class="pn__h"><span class="pn__n">17</span><div><h4 class="pn__t">Brand guide</h4><p class="pn__f">brand-guide/Zaylist Brand Guide v2.html</p></div></div>
+<p class="pn__s">Thirteen sections: the mark, the city lockup, clear space, glow, monochrome, backgrounds, misuse, applications, essence, grid, imagery, voice, accessibility and trademark. Scroll inside the frame.</p>
+
+
+<div class="pn__frame" style="width:1180px;max-width:100%"><iframe src="_eb/brand-guide/Zaylist Brand Guide v2.html" loading="eager" style="width:1180px;height:1400px;border:0" title="Brand guide"></iframe></div>
+</article><h3 class="grp__t">App face</h3><p class="grp__d">The one artifact with its own end-to-end package.</p><article class="pn" id="p18">
+<div class="pn__h"><span class="pn__n">18</span><div><h4 class="pn__t">App Face Standards</h4><p class="pn__f">app-face/App Face Standards.html</p></div></div>
+<p class="pn__s">The spec, verbatim from the handoff package in app-face/. Anatomy, the six iOS appearances, the two web build paths, every shipped export, and the files themselves. Downloads are live.</p>
+
+
+<div class="pn__frame" style="width:1180px;max-width:100%"><iframe src="_eb/app-face/App Face Standards.html" loading="eager" style="width:1180px;height:2600px;border:0" title="App Face Standards"></iframe></div>
+</article></section><section class="band" style="--nc:var(--neon-magenta)"><h2 class="band__t">C · Surfaces</h2><p class="band__d">Everything you can put on a screen: the shared glass chassis, the components built on it, and how all of it moves.</p><h3 class="grp__t">Glass</h3><p class="grp__d">One token set drives every card, tile, inbox, map, row and nav surface in the system.</p><article class="pn" id="p19">
+<div class="pn__h"><span class="pn__n">19</span><div><h4 class="pn__t">Glass surface system</h4><p class="pn__f">guidelines/glass-cards.html</p></div></div>
+<p class="pn__s">The source of truth: bevel, bloom, refract seam and the poster well, with every surface that inherits them.</p>
+
+
+<div class="pn__frame" style="width:1200px;max-width:100%"><iframe src="_eb/guidelines/glass-cards.html" loading="eager" style="width:1200px;height:1500px;border:0" title="Glass surface system"></iframe></div>
+</article><h3 class="grp__t">Components</h3><p class="grp__d">Everything shipped as a React component, previewed from the compiled bundle. Each entry copies a working import line and expands its real props table, read live from the .d.ts.</p><article class="pn" id="p20">
+<div class="pn__h"><span class="pn__n">20</span><div><h4 class="pn__t">Buttons, inputs &amp; filters<span class="st st--queued">queued</span></h4><p class="pn__f">components/forms/forms.card.html</p></div></div>
+<p class="pn__s">The home hero glass pill, neon CTAs, icon buttons, search, filter chips.</p>
+<p class="pn__c">Components: <code>forms/Button</code> <code>forms/IconButton</code> <code>forms/SearchInput</code> <code>forms/FilterChip</code></p>
+<pre class="pn__jsx">&lt;Button accent=&quot;lime&quot; arrow&gt;View as schedule&lt;/Button&gt;
+&lt;Button variant=&quot;solid&quot; accent=&quot;cyan&quot; size=&quot;sm&quot;&gt;RSVP&lt;/Button&gt;
+&lt;IconButton label=&quot;Filter&quot; icon={&lt;FilterIcon /&gt;} /&gt;
+&lt;SearchInput placeholder=&quot;Search events, places, people&quot; onChange={setQ} /&gt;
+&lt;FilterChip active accent=&quot;magenta&quot;&gt;Tonight&lt;/FilterChip&gt;</pre>
+<div class="pn__frame" style="width:700px;max-width:100%"><iframe src="_eb/components/forms/forms.card.html" loading="eager" style="width:700px;height:520px;border:0" title="Buttons, inputs &amp; filters"></iframe></div>
+</article><article class="pn" id="p21">
+<div class="pn__h"><span class="pn__n">21</span><div><h4 class="pn__t">Badges, pills, countdown &amp; stickers<span class="st st--queued">queued</span></h4><p class="pn__f">components/data-display/data-display.card.html</p></div></div>
+<p class="pn__s">Labels, counts, the event countdown, slogan stickers.</p>
+<p class="pn__c">Components: <code>data-display/Badge</code> <code>data-display/StatPill</code> <code>data-display/Countdown</code> <code>data-display/StickerBadge</code></p>
+<pre class="pn__jsx">&lt;Badge accent=&quot;cyan&quot;&gt;Ticketed&lt;/Badge&gt;
+&lt;StatPill label=&quot;Going&quot; value={128} /&gt;
+&lt;Countdown to=&quot;2026-07-16T18:00:00-07:00&quot; /&gt;
+&lt;StickerBadge accent=&quot;yellow&quot;&gt;Free&lt;/StickerBadge&gt;</pre>
+<div class="pn__frame" style="width:700px;max-width:100%"><iframe src="_eb/components/data-display/data-display.card.html" loading="eager" style="width:700px;height:360px;border:0" title="Badges, pills, countdown &amp; stickers"></iframe></div>
+</article><article class="pn" id="p22">
+<div class="pn__h"><span class="pn__n">22</span><div><h4 class="pn__t">Board, ad &amp; feed cards</h4><p class="pn__f">components/data-display/board-ad-feed.card.html</p></div></div>
+<p class="pn__s">Community board posts with motifs, affiliate ad slots, hub scene-feed items on glass.</p>
+<p class="pn__c">Components: <code>data-display/BoardCard</code> <code>data-display/AdCard</code> <code>data-display/FeedItem</code></p>
+<pre class="pn__jsx">&lt;BoardCard board=&quot;spotted&quot; title=&quot;Blue jacket at Darcelle&quot; body={post.body} author={post.author} /&gt;
+&lt;AdCard sponsor=&quot;Rooster Rock Farm Stand&quot; href=&quot;/go/rrfs&quot; /&gt;
+&lt;FeedItem kind=&quot;rsvp&quot; author={user} event={event} at={ts} /&gt;</pre>
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/components/data-display/board-ad-feed.card.html" loading="eager" style="width:900px;height:620px;border:0" title="Board, ad &amp; feed cards"></iframe></div>
+</article><article class="pn" id="p23">
+<div class="pn__h"><span class="pn__n">23</span><div><h4 class="pn__t">Section headers &amp; dividers</h4><p class="pn__f">components/layout/layout.card.html</p></div></div>
+<p class="pn__s">Section openers and spectrum dividers.</p>
+<p class="pn__c">Components: <code>layout/SectionHeader</code> <code>layout/Divider</code></p>
+<pre class="pn__jsx">&lt;SectionHeader kicker=&quot;Up next&quot; title=&quot;Thursday&quot; accent=&quot;cyan&quot; /&gt;
+&lt;Divider variant=&quot;rainbow&quot; /&gt;</pre>
+<div class="pn__frame" style="width:700px;max-width:100%"><iframe src="_eb/components/layout/layout.card.html" loading="eager" style="width:700px;height:420px;border:0" title="Section headers &amp; dividers"></iframe></div>
+</article><article class="pn" id="p24">
+<div class="pn__h"><span class="pn__n">24</span><div><h4 class="pn__t">Infra tiles, action rows &amp; nav</h4><p class="pn__f">components/layout/infra-action-nav.card.html</p></div></div>
+<p class="pn__s">Left-accent infrastructure tiles, numbered promoter action rows, and the nav bar shell.</p>
+<p class="pn__c">Components: <code>layout/InfoTile</code> <code>forms/ActionRow</code> <code>layout/NavBar</code></p>
+<pre class="pn__jsx">&lt;InfoTile accent=&quot;violet&quot; label=&quot;Venues&quot; value={42} note=&quot;Directory&quot; /&gt;
+&lt;ActionRow n={1} title=&quot;Claim your venue&quot; href=&quot;/promoters/claim&quot; /&gt;
+&lt;NavBar user={user} unread={3} onCalmToggle={toggleCalm} /&gt;</pre>
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/components/layout/infra-action-nav.card.html" loading="eager" style="width:900px;height:560px;border:0" title="Infra tiles, action rows &amp; nav"></iframe></div>
+</article><article class="pn" id="p25">
+<div class="pn__h"><span class="pn__n">25</span><div><h4 class="pn__t">Avatars &amp; identity rings</h4><p class="pn__f">components/brand/avatars.card.html</p></div></div>
+<p class="pn__s">Identity ring around the face, all eighteen from the live avatarRings.ts. Progress is the default.</p>
+<p class="pn__c">Components: <code>brand/Avatar</code> <code>brand/Logo</code></p>
+<pre class="pn__jsx">&lt;Avatar name=&quot;Tucker&quot; ring=&quot;progress&quot; size=&quot;lg&quot; /&gt;
+&lt;Avatar name=&quot;Rowan&quot; ring=&quot;aromantic&quot; size=&quot;md&quot; /&gt;
+&lt;Logo variant=&quot;lockup&quot; size={56} src=&quot;app-face/icons/zaylist-512.png&quot; /&gt;</pre>
+<div class="pn__frame" style="width:700px;max-width:100%"><iframe src="_eb/components/brand/avatars.card.html" loading="eager" style="width:700px;height:420px;border:0" title="Avatars &amp; identity rings"></iframe></div>
+</article><h3 class="grp__t">Motion</h3><p class="grp__d">How surfaces behave. Easings, durations, the signature keyframes, the wider ambient library, and calm mode over all of it.</p><article class="pn" id="p26">
+<div class="pn__h"><span class="pn__n">26</span><div><h4 class="pn__t">Motion, loaders &amp; seams<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/motion.html</p></div></div>
+<p class="pn__s">Easings and durations, the seam engine and Seam Charge route loader, spectrum loaders, pull to refresh, entrances, ambient loops, the flag-ring bloom, the add-ons, and calm mode. Every pdx* keyframe here comes from tokens/effects.css; the page never redeclares one. The RSVP button in the sparks demo is the solid Button from 09.1, so this panel is queued with it.</p>
+
+
+<div class="pn__frame" style="width:980px;max-width:100%"><iframe src="_eb/guidelines/motion.html" loading="eager" style="width:980px;height:3400px;border:0" title="Motion, loaders &amp; seams"></iframe></div>
+</article><article class="pn" id="p27">
+<div class="pn__h"><span class="pn__n">27</span><div><h4 class="pn__t">Motion library</h4><p class="pn__f">guidelines/motion-library.html</p></div></div>
+<p class="pn__s">The fifteen ambient and surface motions outside the seam, loader and entrance sets: the two aurora layers, spectrum wave, divider flow, word glitch, sticker float, board flicker, schedule entrance, attendance pop, sheet up, inbox overlay, holo sheen, the hero parallax, the hero overlay videos and the generic parallax containers. Every card copies a Claude-ready rules block, or take all fifteen at once.</p>
+
+
+<div class="pn__frame" style="width:1000px;max-width:100%"><iframe src="_eb/guidelines/motion-library.html" loading="eager" style="width:1000px;height:2600px;border:0" title="Motion library"></iframe></div>
+</article></section><section class="band" style="--nc:var(--neon-orange)"><h2 class="band__t">D · Patterns</h2><p class="band__d">Page-level surfaces that are composed rather than componentized. Bigger than a component, smaller than a page.</p><h3 class="grp__t">Nav bar</h3><p class="grp__d">Two navigation models: one header row on desktop, two bars on mobile that split identity from movement.</p><article class="pn" id="p28">
+<div class="pn__h"><span class="pn__n">28</span><div><h4 class="pn__t">Desktop nav<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/nav-desktop.html</p></div></div>
+<p class="pn__s">The header row: wordmark, primary links with the Boards dropdown, Hub with its unread dot, the avatar menu, calm toggle, the signed-out Join button, and the seam. Ported from Nav.tsx and siteNav.ts. The Join button is drawn from the same chrome atoms as 09.1, so it is queued with the rest of the button work.</p>
+
+
+<div class="pn__frame" style="width:1400px;max-width:100%"><iframe src="_eb/guidelines/nav-desktop.html" loading="eager" style="width:1400px;height:1500px;border:0" title="Desktop nav"></iframe></div>
+</article><article class="pn" id="p29">
+<div class="pn__h"><span class="pn__n">29</span><div><h4 class="pn__t">Mobile nav</h4><p class="pn__f">guidelines/mobile-nav.html</p></div></div>
+<p class="pn__s">Both bars. Top: Home and About segmented pair, alert bolt, avatar cluster or Join. Bottom: the five-tab dock, every active accent, the two tab sheets, and the full spec.</p>
+
+
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/guidelines/mobile-nav.html" loading="eager" style="width:900px;height:2100px;border:0" title="Mobile nav"></iframe></div>
+</article><h3 class="grp__t">Hub &amp; feed</h3><p class="grp__d">The signed-in home: a three-column shell, five feed tabs, eleven card kinds.</p><article class="pn" id="p30">
+<div class="pn__h"><span class="pn__n">30</span><div><h4 class="pn__t">Hub shell &amp; news feed</h4><p class="pn__f">guidelines/hub-feed.html</p></div></div>
+<p class="pn__s">Rail sections and accents, the right rails, feed tabs and predicates, card kinds, card anatomy. Ported from hub/HubV2.tsx and shared/hubFeed.ts.</p>
+
+
+<div class="pn__frame" style="width:1100px;max-width:100%"><iframe src="_eb/guidelines/hub-feed.html" loading="eager" style="width:1100px;height:2100px;border:0" title="Hub shell &amp; news feed"></iframe></div>
+</article><h3 class="grp__t">Floating inbox</h3><p class="grp__d">One overlay surface for everything, and it never navigates.</p><article class="pn" id="p31">
+<div class="pn__h"><span class="pn__n">31</span><div><h4 class="pn__t">Inbox, admin queue, owner desk &amp; stats<span class="st st--queued">queued</span></h4><p class="pn__f">guidelines/floating-inbox.html</p></div></div>
+<p class="pn__s">The navy-framed sheet and desktop button, every admin category with its endpoints, all six owner-desk kinds, the bar-chart stats, and the sheet palette. Ported from InboxOverlay.tsx and docs/floating-inbox.md. Queue actions now use the outline Button from 09.1, so they are queued with it.</p>
+
+
+<div class="pn__frame" style="width:1100px;max-width:100%"><iframe src="_eb/guidelines/floating-inbox.html" loading="eager" style="width:1100px;height:2400px;border:0" title="Inbox, admin queue, owner desk &amp; stats"></iframe></div>
+</article><h3 class="grp__t">Maps</h3><p class="grp__d">Large enough to be its own pattern rather than a component: four map surfaces, every pin, and all the chrome.</p><article class="pn" id="p32">
+<div class="pn__h"><span class="pn__n">32</span><div><h4 class="pn__t">Map surfaces &amp; pins</h4><p class="pn__f">components/map/map.card.html</p></div></div>
+<p class="pn__s">The Events board, the home strip, the Directory island and the two beaches, plus pins, the key, and all map chrome. Ported from ds/mapTheme.ts.</p>
+<p class="pn__c">Components: <code>map/MapPanel</code> <code>map/MapLegend</code></p>
+<pre class="pn__jsx">&lt;MapPanel pins={pins} height={320} legend locate /&gt;
+&lt;MapLegend cats={DIR_CATS} /&gt;</pre>
+<div class="pn__frame" style="width:900px;max-width:100%"><iframe src="_eb/components/map/map.card.html" loading="eager" style="width:900px;height:2600px;border:0" title="Map surfaces &amp; pins"></iframe></div>
+</article></section><section class="band" style="--nc:var(--day-mon-text)"><h2 class="band__t">E · In use</h2><p class="band__d">The payoff. Everything above, assembled and working.</p><h3 class="grp__t">The live site</h3><p class="grp__d">Interactive. Click through it, then compare any surface against its specimen above.</p><article class="pn" id="p33">
+<div class="pn__h"><span class="pn__n">33</span><div><h4 class="pn__t">Zaylist, full site</h4><p class="pn__f">ui_kits/zaylist/index.html</p></div></div>
+<p class="pn__s">Home, Events, Schedule, Directory, Hub and Admin.</p>
+
+
+<div class="pn__frame" style="width:1280px;max-width:100%"><iframe src="_eb/ui_kits/zaylist/index.html" loading="eager" style="width:1280px;height:860px;border:0" title="Zaylist, full site"></iframe></div>
+</article><article class="pn" id="p34">
+<div class="pn__h"><span class="pn__n">34</span><div><h4 class="pn__t">Nude Beaches</h4><p class="pn__f">ui_kits/zaylist/index.html#nudebeaches</p></div></div>
+<p class="pn__s">Rooster Rock and Collins Beach: live conditions band, refresh bar, map with the queer-corner legend, and the real trip logistics (fees, checklist, wildlife-area rules, farm stops).</p>
+
+
+<div class="pn__frame" style="width:1280px;max-width:100%"><iframe src="_eb/ui_kits/zaylist/index.html#nudebeaches" loading="eager" style="width:1280px;height:860px;border:0" title="Nude Beaches"></iframe></div>
+</article><article class="pn" id="p35">
+<div class="pn__h"><span class="pn__n">35</span><div><h4 class="pn__t">Public profile</h4><p class="pn__f">ui_kits/zaylist/index.html#profile</p></div></div>
+<p class="pn__s">A member profile at /u/handle: hero, Followers / Hosting / Attended / Going strip, accent marquee, hosting rails, Top 8, The Big One, Going, Updates and the flyer stash.</p>
+
+
+<div class="pn__frame" style="width:1280px;max-width:100%"><iframe src="_eb/ui_kits/zaylist/index.html#profile" loading="eager" style="width:1280px;height:860px;border:0" title="Public profile"></iframe></div>
+</article></section>
+<section class="band" id="assets" style="--nc:var(--neon-green,#39FF14)">
+  <h2 class="band__t">Asset library</h2>
+  <p class="band__d">Every image the system references, at full resolution, labeled with the path used in the guide. Use these paths verbatim when rebuilding, so panel markup resolves without edits.</p>
+  <h3 class="grp__t">Brand & editorial photography</h3><p class="grp__d"><code>assets/</code> &middot; 7 files</p><div class="ag"><figure class="ai"><div class="ai__b"><img src="_eb/assets/diggn-for-bones.jpg" alt="diggn-for-bones.jpg" loading="eager"></div><figcaption><b>diggn-for-bones.jpg</b><span>assets/diggn-for-bones.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/festival-posters-wall.jpg" alt="festival-posters-wall.jpg" loading="eager"></div><figcaption><b>festival-posters-wall.jpg</b><span>assets/festival-posters-wall.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/logo-lockup-city.jpg" alt="logo-lockup-city.jpg" loading="eager"></div><figcaption><b>logo-lockup-city.jpg</b><span>assets/logo-lockup-city.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/logo-lockup.png" alt="logo-lockup.png" loading="eager"></div><figcaption><b>logo-lockup.png</b><span>assets/logo-lockup.png</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/logo-z.jpg" alt="logo-z.jpg" loading="eager"></div><figcaption><b>logo-z.jpg</b><span>assets/logo-z.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/tucker-portrait.jpg" alt="tucker-portrait.jpg" loading="eager"></div><figcaption><b>tucker-portrait.jpg</b><span>assets/tucker-portrait.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/tucker-yes-coach.jpg" alt="tucker-yes-coach.jpg" loading="eager"></div><figcaption><b>tucker-yes-coach.jpg</b><span>assets/tucker-yes-coach.jpg</span></figcaption></figure></div><h3 class="grp__t">Event flyers (poster wells)</h3><p class="grp__d"><code>assets/flyers/</code> &middot; 17 files</p><div class="ag"><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/ankeny-alley-pride.jpg" alt="ankeny-alley-pride.jpg" loading="eager"></div><figcaption><b>ankeny-alley-pride.jpg</b><span>assets/flyers/ankeny-alley-pride.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-fri-purple.jpg" alt="camp-fri-purple.jpg" loading="eager"></div><figcaption><b>camp-fri-purple.jpg</b><span>assets/flyers/camp-fri-purple.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-mon-yellow.jpg" alt="camp-mon-yellow.jpg" loading="eager"></div><figcaption><b>camp-mon-yellow.jpg</b><span>assets/flyers/camp-mon-yellow.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-sat-pink.jpg" alt="camp-sat-pink.jpg" loading="eager"></div><figcaption><b>camp-sat-pink.jpg</b><span>assets/flyers/camp-sat-pink.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-sun-cyan.jpg" alt="camp-sun-cyan.jpg" loading="eager"></div><figcaption><b>camp-sun-cyan.jpg</b><span>assets/flyers/camp-sun-cyan.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-thu-blue.jpg" alt="camp-thu-blue.jpg" loading="eager"></div><figcaption><b>camp-thu-blue.jpg</b><span>assets/flyers/camp-thu-blue.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-tue-orange.jpg" alt="camp-tue-orange.jpg" loading="eager"></div><figcaption><b>camp-tue-orange.jpg</b><span>assets/flyers/camp-tue-orange.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/camp-wed-green.jpg" alt="camp-wed-green.jpg" loading="eager"></div><figcaption><b>camp-wed-green.jpg</b><span>assets/flyers/camp-wed-green.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/certified-freak-block-party.jpg" alt="certified-freak-block-party.jpg" loading="eager"></div><figcaption><b>certified-freak-block-party.jpg</b><span>assets/flyers/certified-freak-block-party.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/gay-witch-appreciation-day.jpg" alt="gay-witch-appreciation-day.jpg" loading="eager"></div><figcaption><b>gay-witch-appreciation-day.jpg</b><span>assets/flyers/gay-witch-appreciation-day.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/gaylabration-radiance.jpg" alt="gaylabration-radiance.jpg" loading="eager"></div><figcaption><b>gaylabration-radiance.jpg</b><span>assets/flyers/gaylabration-radiance.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/horse-meat-disco-tuff.jpg" alt="horse-meat-disco-tuff.jpg" loading="eager"></div><figcaption><b>horse-meat-disco-tuff.jpg</b><span>assets/flyers/horse-meat-disco-tuff.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/lez-out-pride-brunch.jpg" alt="lez-out-pride-brunch.jpg" loading="eager"></div><figcaption><b>lez-out-pride-brunch.jpg</b><span>assets/flyers/lez-out-pride-brunch.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/lumbertwink-bearracuda.jpg" alt="lumbertwink-bearracuda.jpg" loading="eager"></div><figcaption><b>lumbertwink-bearracuda.jpg</b><span>assets/flyers/lumbertwink-bearracuda.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/sasha-colby-live.jpg" alt="sasha-colby-live.jpg" loading="eager"></div><figcaption><b>sasha-colby-live.jpg</b><span>assets/flyers/sasha-colby-live.jpg</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/spellman-spectacle.webp" alt="spellman-spectacle.webp" loading="eager"></div><figcaption><b>spellman-spectacle.webp</b><span>assets/flyers/spellman-spectacle.webp</span></figcaption></figure><figure class="ai"><div class="ai__b"><img src="_eb/assets/flyers/yes-sir-pride-closer.jpg" alt="yes-sir-pride-closer.jpg" loading="eager"></div><figcaption><b>yes-sir-pride-closer.jpg</b><span>assets/flyers/yes-sir-pride-closer.jpg</span></figcaption></figure></div><h3 class="grp__t">Directory venue logos + category fallbacks</h3><p class="grp__d"><code>assets/venue-logos/</code> &middot; 24 files</p><div class="ag"><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Backstory_Books_and_Yarn.png" alt="Backstory_Books_and_Yarn.png" loading="eager"></div><figcaption><b>Backstory_Books_and_Yarn.png</b><span>assets/venue-logos/Backstory_Books_and_Yarn.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Badlands.png" alt="Badlands.png" loading="eager"></div><figcaption><b>Badlands.png</b><span>assets/venue-logos/Badlands.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/CC_Slaughters.png" alt="CC_Slaughters.png" loading="eager"></div><figcaption><b>CC_Slaughters.png</b><span>assets/venue-logos/CC_Slaughters.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Camp_Bar_PDX.png" alt="Camp_Bar_PDX.png" loading="eager"></div><figcaption><b>Camp_Bar_PDX.png</b><span>assets/venue-logos/Camp_Bar_PDX.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Covert_Cafe.png" alt="Covert_Cafe.png" loading="eager"></div><figcaption><b>Covert_Cafe.png</b><span>assets/venue-logos/Covert_Cafe.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Darcelle_XV_Showplace.png" alt="Darcelle_XV_Showplace.png" loading="eager"></div><figcaption><b>Darcelle_XV_Showplace.png</b><span>assets/venue-logos/Darcelle_XV_Showplace.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Eagle_Portland.png" alt="Eagle_Portland.png" loading="eager"></div><figcaption><b>Eagle_Portland.png</b><span>assets/venue-logos/Eagle_Portland.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Escape_Bar_and_Grill.png" alt="Escape_Bar_and_Grill.png" loading="eager"></div><figcaption><b>Escape_Bar_and_Grill.png</b><span>assets/venue-logos/Escape_Bar_and_Grill.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Gigis_Cafe.png" alt="Gigis_Cafe.png" loading="eager"></div><figcaption><b>Gigis_Cafe.png</b><span>assets/venue-logos/Gigis_Cafe.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Happylucky_No_1.png" alt="Happylucky_No_1.png" loading="eager"></div><figcaption><b>Happylucky_No_1.png</b><span>assets/venue-logos/Happylucky_No_1.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Hawks_PDX.png" alt="Hawks_PDX.png" loading="eager"></div><figcaption><b>Hawks_PDX.png</b><span>assets/venue-logos/Hawks_PDX.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Holocene.png" alt="Holocene.png" loading="eager"></div><figcaption><b>Holocene.png</b><span>assets/venue-logos/Holocene.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Jackies.png" alt="Jackies.png" loading="eager"></div><figcaption><b>Jackies.png</b><span>assets/venue-logos/Jackies.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Kann.png" alt="Kann.png" loading="eager"></div><figcaption><b>Kann.png</b><span>assets/venue-logos/Kann.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Living_Room_Wines.png" alt="Living_Room_Wines.png" loading="eager"></div><figcaption><b>Living_Room_Wines.png</b><span>assets/venue-logos/Living_Room_Wines.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Mis_Tacones.png" alt="Mis_Tacones.png" loading="eager"></div><figcaption><b>Mis_Tacones.png</b><span>assets/venue-logos/Mis_Tacones.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Nova_PDX.png" alt="Nova_PDX.png" loading="eager"></div><figcaption><b>Nova_PDX.png</b><span>assets/venue-logos/Nova_PDX.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Peacock_PDX.png" alt="Peacock_PDX.png" loading="eager"></div><figcaption><b>Peacock_PDX.png</b><span>assets/venue-logos/Peacock_PDX.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Pizza_Thief.png" alt="Pizza_Thief.png" loading="eager"></div><figcaption><b>Pizza_Thief.png</b><span>assets/venue-logos/Pizza_Thief.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/Prism_Health.png" alt="Prism_Health.png" loading="eager"></div><figcaption><b>Prism_Health.png</b><span>assets/venue-logos/Prism_Health.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/fallback_bars.png" alt="fallback_bars.png" loading="eager"></div><figcaption><b>fallback_bars.png</b><span>assets/venue-logos/fallback_bars.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/fallback_cafes.png" alt="fallback_cafes.png" loading="eager"></div><figcaption><b>fallback_cafes.png</b><span>assets/venue-logos/fallback_cafes.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/fallback_nonprofits.png" alt="fallback_nonprofits.png" loading="eager"></div><figcaption><b>fallback_nonprofits.png</b><span>assets/venue-logos/fallback_nonprofits.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/venue-logos/fallback_venues.png" alt="fallback_venues.png" loading="eager"></div><figcaption><b>fallback_venues.png</b><span>assets/venue-logos/fallback_venues.png</span></figcaption></figure></div><h3 class="grp__t">Line icon library, 32 glyphs</h3><p class="grp__d"><code>assets/icons/</code> &middot; 32 files</p><div class="ag"><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/01-community.svg" alt="01-community.svg" loading="eager"></div><figcaption><b>01-community.svg</b><span>assets/icons/01-community.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/02-connection.svg" alt="02-connection.svg" loading="eager"></div><figcaption><b>02-connection.svg</b><span>assets/icons/02-connection.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/03-events.svg" alt="03-events.svg" loading="eager"></div><figcaption><b>03-events.svg</b><span>assets/icons/03-events.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/04-pup-play.svg" alt="04-pup-play.svg" loading="eager"></div><figcaption><b>04-pup-play.svg</b><span>assets/icons/04-pup-play.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/05-pride.svg" alt="05-pride.svg" loading="eager"></div><figcaption><b>05-pride.svg</b><span>assets/icons/05-pride.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/06-safety.svg" alt="06-safety.svg" loading="eager"></div><figcaption><b>06-safety.svg</b><span>assets/icons/06-safety.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/07-filter.svg" alt="07-filter.svg" loading="eager"></div><figcaption><b>07-filter.svg</b><span>assets/icons/07-filter.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/08-search.svg" alt="08-search.svg" loading="eager"></div><figcaption><b>08-search.svg</b><span>assets/icons/08-search.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/09-profile.svg" alt="09-profile.svg" loading="eager"></div><figcaption><b>09-profile.svg</b><span>assets/icons/09-profile.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/10-play-video.svg" alt="10-play-video.svg" loading="eager"></div><figcaption><b>10-play-video.svg</b><span>assets/icons/10-play-video.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/11-favorite.svg" alt="11-favorite.svg" loading="eager"></div><figcaption><b>11-favorite.svg</b><span>assets/icons/11-favorite.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/12-alerts.svg" alt="12-alerts.svg" loading="eager"></div><figcaption><b>12-alerts.svg</b><span>assets/icons/12-alerts.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/13-venue.svg" alt="13-venue.svg" loading="eager"></div><figcaption><b>13-venue.svg</b><span>assets/icons/13-venue.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/14-ticket.svg" alt="14-ticket.svg" loading="eager"></div><figcaption><b>14-ticket.svg</b><span>assets/icons/14-ticket.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/15-verified.svg" alt="15-verified.svg" loading="eager"></div><figcaption><b>15-verified.svg</b><span>assets/icons/15-verified.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/16-message.svg" alt="16-message.svg" loading="eager"></div><figcaption><b>16-message.svg</b><span>assets/icons/16-message.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/17-rsvp.svg" alt="17-rsvp.svg" loading="eager"></div><figcaption><b>17-rsvp.svg</b><span>assets/icons/17-rsvp.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/18-home.svg" alt="18-home.svg" loading="eager"></div><figcaption><b>18-home.svg</b><span>assets/icons/18-home.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/19-navigate.svg" alt="19-navigate.svg" loading="eager"></div><figcaption><b>19-navigate.svg</b><span>assets/icons/19-navigate.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/20-boards.svg" alt="20-boards.svg" loading="eager"></div><figcaption><b>20-boards.svg</b><span>assets/icons/20-boards.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/21-share.svg" alt="21-share.svg" loading="eager"></div><figcaption><b>21-share.svg</b><span>assets/icons/21-share.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/22-gifting.svg" alt="22-gifting.svg" loading="eager"></div><figcaption><b>22-gifting.svg</b><span>assets/icons/22-gifting.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/23-gigs.svg" alt="23-gigs.svg" loading="eager"></div><figcaption><b>23-gigs.svg</b><span>assets/icons/23-gigs.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/24-missed-connection.svg" alt="24-missed-connection.svg" loading="eager"></div><figcaption><b>24-missed-connection.svg</b><span>assets/icons/24-missed-connection.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/25-energy.svg" alt="25-energy.svg" loading="eager"></div><figcaption><b>25-energy.svg</b><span>assets/icons/25-energy.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/26-inbox.svg" alt="26-inbox.svg" loading="eager"></div><figcaption><b>26-inbox.svg</b><span>assets/icons/26-inbox.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/27-archive.svg" alt="27-archive.svg" loading="eager"></div><figcaption><b>27-archive.svg</b><span>assets/icons/27-archive.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/28-settings.svg" alt="28-settings.svg" loading="eager"></div><figcaption><b>28-settings.svg</b><span>assets/icons/28-settings.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/29-add.svg" alt="29-add.svg" loading="eager"></div><figcaption><b>29-add.svg</b><span>assets/icons/29-add.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/30-close.svg" alt="30-close.svg" loading="eager"></div><figcaption><b>30-close.svg</b><span>assets/icons/30-close.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/31-nightlife.svg" alt="31-nightlife.svg" loading="eager"></div><figcaption><b>31-nightlife.svg</b><span>assets/icons/31-nightlife.svg</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/assets/icons/32-voice.svg" alt="32-voice.svg" loading="eager"></div><figcaption><b>32-voice.svg</b><span>assets/icons/32-voice.svg</span></figcaption></figure></div><h3 class="grp__t">App face exports</h3><p class="grp__d"><code>app-face/icons/</code> &middot; 6 files</p><div class="ag"><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-1024.png" alt="zaylist-1024.png" loading="eager"></div><figcaption><b>zaylist-1024.png</b><span>app-face/icons/zaylist-1024.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-180.png" alt="zaylist-180.png" loading="eager"></div><figcaption><b>zaylist-180.png</b><span>app-face/icons/zaylist-180.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-192.png" alt="zaylist-192.png" loading="eager"></div><figcaption><b>zaylist-192.png</b><span>app-face/icons/zaylist-192.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-512.png" alt="zaylist-512.png" loading="eager"></div><figcaption><b>zaylist-512.png</b><span>app-face/icons/zaylist-512.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-mask.png" alt="zaylist-mask.png" loading="eager"></div><figcaption><b>zaylist-mask.png</b><span>app-face/icons/zaylist-mask.png</span></figcaption></figure><figure class="ai ai--dark"><div class="ai__b"><img src="_eb/app-face/icons/zaylist-mono.png" alt="zaylist-mono.png" loading="eager"></div><figcaption><b>zaylist-mono.png</b><span>app-face/icons/zaylist-mono.png</span></figcaption></figure></div><h3 class="grp__t">Site kit imagery</h3><p class="grp__d"><code>ui_kits/zaylist/</code> &middot; 1 files</p><div class="ag"><figure class="ai"><div class="ai__b"><img src="_eb/ui_kits/zaylist/untitled---july-24-2026-at-01-41-04-3-mryphizr-xfp7.png" alt="untitled---july-24-2026-at-01-41-04-3-mryphizr-xfp7.png" loading="eager"></div><figcaption><b>untitled---july-24-2026-at-01-41-04-3-mryphizr-xfp7.png</b><span>ui_kits/zaylist/untitled---july-24-2026-at-01-41-04-3-mryphizr-xfp7.png</span></figcaption></figure></div>
+</section>
+<section class="band" id="sources" style="--nc:var(--neon-violet,#B026FF)">
+  <h2 class="band__t">Token &amp; doc source</h2>
+  <p class="band__d">The complete text of the global stylesheet, every token file, and the written standard. This is the machine-readable payload: hand these to a build and the visual layer reproduces exactly.</p>
+  <details class="src"><summary><b>styles.css</b><i>0.5 KB</i></summary><pre>/* ============================================================
+   Zaylist Design System entry point.
+   Consumers link THIS one file. Import lines only.
+   ============================================================ */
+
+@import url("tokens/fonts.css");
+@import url("tokens/colors.css");
+@import url("tokens/typography.css");
+@import url("tokens/layout.css");
+@import url("tokens/effects.css");
+@import url("tokens/glass.css");
+@import url("tokens/base.css");
+</pre></details>
+<details class="src"><summary><b>tokens/base.css</b><i>4.5 KB</i></summary><pre>/* ============================================================
+   Zaylist, light base reset + shared primitives.
+   Kept minimal; tokens live in the other files.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-body);
+}
+
+/* Selection = magenta highlighter */
+::selection { background: var(--neon-magenta); color: #000; }
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Focus, cyan ring, never removed */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+img, svg { display: block; max-width: 100%; }
+
+h1, h2, h3, h4 { margin: 0; color: var(--text-heading); }
+p { margin: 0; }
+
+/* Custom scrollbar on dark */
+* { scrollbar-color: var(--ink-border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--ink-border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg-app);
+}
+
+/* ---- Shared brand primitives (usable in raw HTML) -------- */
+
+/* Rainbow rule / bar, the section divider (cyan &gt; yellow &gt; magenta &gt; orange).
+   Animated: colors flow left to right, a white glint sweeps across, a soft
+   rainbow glow pulses. Silenced + flattened to a static bar by calm mode and
+   reduced-motion (see effects.css). */
+.pdx-rainbow-rule {
+  position: relative;
+  height: 3px;
+  border: 0;
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+}
+.pdx-rainbow-rule::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
+}
+
+/* Text stroked in rainbow (headline accent word) */
+.pdx-text-rainbow {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Marker / kicker chip, the neon marker used for hero kickers
+   ("OUR EVENTS · PORTLAND"). Barlow Condensed 700,
+   with a brutalist cyan offset behind the acid-yellow fill. */
+.pdx-marker {
+  display: inline-block;
+  position: relative;
+  /* A sticker is one line. Wrapping paints the second line outside the pill. */
+  white-space: nowrap;
+  transform: rotate(-1deg);
+  background: var(--cyan-lit);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--chrome-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px 4px;
+  border-radius: var(--chrome-radius-tag);
+  --c: var(--neon-cyan);
+  box-shadow: var(--sticker-lit);
+}
+.pdx-marker--pink   { background: var(--neon-magenta); color: #fff;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-magenta) 90%, transparent); }
+.pdx-marker--cyan   { background: var(--cyan-lit); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-cyan) 90%, transparent); }
+.pdx-marker--rainbow{ background: var(--grad-rainbow); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel); }
+.pdx-marker--yellow { background: var(--acid-lit); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-yellow) 90%, transparent); }
+
+/* Rainbow seam, the thin gradient line under the header and above the
+   footer. Full flag sweep, animated to match .pdx-rainbow-rule above. */
+.pdx-seam {
+  position: relative;
+  height: 3px;
+  border: 0;
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+}
+.pdx-seam::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
+}
+</pre></details>
+<details class="src"><summary><b>tokens/colors.css</b><i>11.9 KB</i></summary><pre>/* ============================================================
+   Zaylist, COLOR SYSTEM
+   Canonical source: repo design-system/tokens/tokens.css
+   (mirror of client/src/index.css + shared/eventWeek.ts).
+   Near-black brutalist base + one-neon-per-element accents.
+   ============================================================ */
+
+:root {
+  /* ---- SURFACES (exact) ---------------------------------- */
+  --ink-1000: #050505;   /* deepest, ring shadows / full bleed */
+  --ink-900:  #0a0a0a;   /* app background (always near-black) */
+  --ink-850:  #111111;   /* inset chips / inputs */
+  --ink-800:  #0b0b0b;   /* card surface */
+  --ink-750:  #141414;   /* raised surface / hover */
+  --ink-border: #2b2b2b; /* default 2px card border */
+  --ink-border-faint: #1a1a1a;
+  --ink-border-strong: #333333;
+
+  /* ---- PAPER (marker / sticker / day-tag fills) ---------- */
+  --paper:      #f4eee1;   /* warm off-white, day tags + paper stickers */
+  --paper-2:    #e8dfcc;
+  --paper-ink:  #101015;   /* text on paper */
+
+  /* ---- NEON PALETTE (exact hexes) ------------------------ */
+  --neon-yellow:  #CCFF00;  /* acid yellow (chartreuse). Default action colour, not "the" primary: see CONTEXT PRIMARIES below. */
+  --neon-cyan:    #00FFFF;  /* accent pop, THU, links */
+  --neon-magenta: #FF00CC;  /* FRI, offset shadows + glows */
+  --neon-orange:  #FF6600;  /* SUN, warm pop */
+  --neon-violet:  #8800FF;  /* MON */
+  --neon-red:     #FF2400;  /* rose red */
+  --green-acid:   #39FF14;  /* the only green in the system: SAT, status-good, Sauvie Island, schedule accent 3 */
+  --neon-green:   var(--green-acid); /* DEPRECATED alias. #00EE44 is retired; do not reintroduce it. */
+  --neon-blue:    #0044FF;  /* TUE */
+  --accent-pop:   var(--neon-cyan);
+  /* ~40% of decorative magenta accents shifted to cyan site-wide (2026) */
+  --accent-pop-shadow: rgba(0, 255, 255, 0.55);
+
+  /* ---- UTILITY / PANEL LAYER ("board makeover") ----------
+     Ink panels + softened neons for boards, hub, admin, about,
+     Nude Beaches, and other data-dense surfaces. */
+  --panel-ink:      #06060a;   /* utility page background */
+  --panel-band:     #070708;   /* full-bleed band (how-it-works, stats) */
+  --panel-card:     #0c0c0f;   /* utility card / hub panel */
+  --panel-card-2:   #0d0d10;   /* live-data tile */
+  --panel-border:   #1c1c22;   /* utility hairline */
+  --panel-border-2: #24242c;   /* tile hairline */
+  --panel-lime:     #c8fa3c;   /* softened neons: tab underlines, kickers */
+  --panel-cyan:     #19e3ff;
+  --panel-magenta:  #ff1fa0;
+  --panel-orange:   #ff8c00;
+  --panel-purple:   #b06bff;
+  /* Softened seam used under .page-header chrome */
+  --panel-seam: linear-gradient(90deg, var(--panel-lime), var(--panel-cyan), var(--panel-magenta), var(--panel-orange));
+
+  /* ---- STATUS RAMP (live-conditions tiles) --------------- */
+  --status-good:    var(--green-acid);
+  --status-warn:    #FFB347;
+  --status-bad:     #FF4D4D;
+  --status-neutral: #19E3FF;
+
+  /* ---- LEGACY / SEMANTIC COLOR NAMES (used across kit) ----
+     Kept as aliases so components read naturally. Values are
+     the canonical neons above. */
+  --lime:    var(--neon-yellow);
+  --lime-hot:#D8FF3D;
+  --pink:    var(--neon-magenta);
+  --pink-hot:#FF33D6;
+  --cyan:    var(--neon-cyan);
+  --green:   var(--green-acid);
+  --orange:  var(--neon-orange);
+  --purple:  var(--neon-violet);
+  --blue:    var(--neon-blue);
+  --yellow:  #FFEE00;              /* WED day + highlighter (GRAND OPENING) */
+  --amber:   #FFB23D;              /* supporting warm (donation, shops) */
+  --red:     var(--neon-red);
+
+  /* ---- NEON, softened for tints -------------------------- */
+  --lime-soft:  #CCFF0022;
+  --pink-soft:  #FF00CC22;
+  --cyan-soft:  #00FFFF22;
+  --green-soft: #39FF1422;
+  --orange-soft:#FF660022;
+  --purple-soft:#8800FF22;
+
+  /* ---- TEXT (exact) -------------------------------------- */
+  --text-hi:      #ffffff;  /* headings */
+  --text-mid:     var(--text-body);  /* DEPRECATED alias of --text-body. Do not use in new work. */
+  --text-lo:      #999999;  /* meta / captions */
+  --text-faint:   #666666;  /* labels / hints */
+  --text-disabled:#4a4a4a;
+  --text-inverse: #000000;  /* text on neon fills */
+
+  /* ---- FLAG NODS ----------------------------------- */
+  --flag-red:    #E40303;
+  --flag-orange: #FF8C00;
+  --flag-yellow: #FFED00;
+  --flag-green:  #008026;
+  --flag-blue:   #004DFF;
+  --flag-violet: #750787;
+  --flag-trans-blue: #5BCEFA;
+  --flag-trans-pink: #F5A9B8;
+  --flag-white:      #FFFFFF;
+  --flag-brown:      #613915;
+  --flag-black:      #000000;
+
+  /* ---- SIGNATURE GRADIENTS ------------------------------- */
+  /* Rainbow bar (canonical): cyan &gt; yellow &gt; magenta &gt; orange */
+  --rainbow-bar: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange));
+  --grad-flag: var(--rainbow-bar);
+  /* Tiling version. --rainbow-bar ends on orange, so repeating it butts orange
+     against cyan and the seam shows. Anything that scrolls or repeats must use
+     this one: it wraps back to cyan so the tile join is invisible. */
+  --rainbow-bar-loop: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  /* Hero wordmark sweep: full 360deg hue rotation (spectrum tape), not a
+     two-color blend. Stops measured along the wordmark's own width, left
+     edge of Z to right edge of T; wraps back to magenta at 100% so the
+     loop reads as a spectrum. Do not reorder these stops. */
+  --grad-rainbow: linear-gradient(100deg,
+    #FF19D6 0%, #FF196C 12%, #FF5319 24%, #FFD119 34%, #9CFF19 44%,
+    #5BFF19 54%, #19F7FF 66%, #1956FF 76%, #E419FF 90%, #FF19D6 100%); /* @kind color */
+  --grad-nightglow: radial-gradient(120% 90% at 12% 0%, #1c0a30 0%, transparent 55%),
+                    radial-gradient(120% 90% at 100% 8%, #04262e 0%, transparent 55%),
+                    var(--ink-900);
+  --grad-hot:      linear-gradient(120deg, var(--neon-magenta) 0%, var(--neon-orange) 100%);
+  --grad-electric: linear-gradient(120deg, var(--neon-cyan) 0%, var(--neon-violet) 100%);
+  --grad-acid:     linear-gradient(115deg, var(--neon-cyan) 0%, var(--neon-yellow) 100%);
+
+  /* ============================================================
+     DAY COLOR SYSTEM (mirror of shared/eventWeek.ts).
+     Event calendar (rolling); the Thu to Sun weekend carries the
+     event program.
+       MON Jul 13  violet  #8800FF   (week opener)
+       TUE Jul 14  blue    #0044FF
+       WED Jul 15  yellow  #FFEE00
+       THU Jul 16  cyan    #00FFFF   (official festival kickoff)
+       FRI Jul 17  magenta #FF00CC
+       SAT Jul 18  green   #39FF14
+       SUN Jul 19  orange  #FF6600   (parade day)
+     ============================================================ */
+  --day-mon:   #8800FF;
+  --day-tue:   #0044FF;
+  --day-wed:   #FFEE00;
+  --day-thu:   #00FFFF;
+  --day-fri:   #FF00CC;
+  --day-sat:   var(--green-acid);
+  --day-sun:   #FF6600;
+  /* lighter text-safe versions of the dark day colors */
+  --day-mon-text: #AA66FF;
+  --day-tue-text: #4488FF;
+  /* Unknown/no day = white; multi-day venues get the pie gradient */
+  --day-unknown: #ffffff;
+  --day-multi: linear-gradient(90deg, var(--day-mon), var(--day-tue), var(--day-wed), var(--day-thu), var(--day-fri), var(--day-sat), var(--day-sun)); /* @kind color */
+
+  /* Schedule grid cards cycle these (NOT day colors; the column is the day) */
+  --schedule-accent-1: #19e3ff;
+  --schedule-accent-2: #ff6600;
+  --schedule-accent-3: var(--green-acid);
+  --schedule-accent-4: #a855f7;
+  --schedule-accent-5: #ff00cc;
+
+  /* ============================================================
+     SEMANTIC ALIASES
+     ============================================================ */
+  --bg-app:        var(--ink-900);
+  --bg-stage:      var(--ink-1000);
+  --bg-band:       var(--ink-850);
+  --surface-card:  var(--ink-800);
+  --surface-card-hover: var(--ink-750);
+  --surface-inset: var(--ink-850);
+
+  --text-body:     #e6e2d9;          /* live-site body (was --text-mid) */
+  --text:          var(--text-body); /* alias: bare --text used by page chrome */
+  --text-body-muted: #c8c4bb;
+  --text-heading:  var(--text-hi);
+  --text-meta:     var(--text-lo);
+
+  --border-default: var(--ink-border);
+  --border-faint:   var(--ink-border-faint);
+  --border-strong:  var(--ink-border-strong);
+
+  --accent:           var(--primary);
+  --accent-ink:       var(--text-inverse);
+  --accent-secondary: var(--neon-magenta);
+  --link:             var(--neon-cyan);
+
+  /* ============================================================
+     CONTEXT PRIMARIES
+     Acid yellow is NOT the default. Cyan is: it is already the link,
+     focus and hover colour on every surface, so defaulting to it means
+     the primary action and the primary link agree instead of fighting.
+     Yellow is now flair only (Gifting board identity, FREE tags,
+     stickers, live dots). Each surface family owns its own action
+     colour; set data-context on any subtree and --accent + --c rebind
+     for everything inside it.
+     ============================================================ */
+  --primary:         var(--neon-cyan);     /* default: marketing, events, boards */
+  --primary-hub:     var(--neon-cyan);     /* Hub and settings (same as default) */
+  --primary-admin:   var(--neon-magenta);  /* admin queue and moderation */
+  --primary-owner:   var(--neon-violet);   /* owner desk and venue owners */
+  --primary-rooster: var(--neon-orange);   /* Rooster Rock */
+  --primary-sauvie:  var(--green-acid);    /* Sauvie Island, Collins Beach */
+
+  /* Admission badges. Free is the most common admission, so it reads as a
+     softened plate rather than a full acid block: one solid fill per card. */
+  --tag-free:       var(--panel-lime);
+  --tag-free-ink:   var(--text-inverse);
+  --tag-ticketed:   var(--neon-cyan);
+  --tag-ticketed-ink: var(--text-inverse);
+  --tag-donation:   var(--amber);
+  --tag-donation-ink: var(--text-inverse);
+
+  /* Place categories (venue directory borders) */
+  --cat-bars:    var(--neon-magenta);
+  --cat-food:    var(--neon-orange);
+  --cat-cafes:   var(--green-acid);
+  --cat-venues:  var(--neon-cyan);
+  --cat-services:var(--neon-violet);
+  --cat-shops:   var(--amber);
+  --cat-hotels:  var(--neon-blue);
+
+  /* Community board accents (one identity color per board) */
+  --board-spotted: var(--neon-magenta);  /* magenta, Missed Connections */
+  --board-gifting: var(--neon-yellow);   /* acid yellow, Gifting board */
+  --board-gigs:    var(--neon-violet);   /* violet, Gig Board */
+  --board-housing: var(--neon-cyan);     /* cyan, Housing board (queued) */
+  /* Board pages read warmer, paper-toned text on the dark makeover */
+  --board-text:    #f4f1ea;
+  --board-muted:   #bdbab2;
+
+  /* Member profile accents: any of the 8 neons; magenta is default.
+     Violet/blue swap to their --day-*-text variants for text. */
+  --profile-accent-default: var(--neon-magenta);
+
+  --focus-ring:     var(--neon-cyan);
+}
+
+/* ============================================================
+   CONTEXT SCOPES
+   One attribute rebinds the action colour for a whole subtree.
+   Buttons, chips, blooms and glass accents all read --accent /
+   --c, so nothing inside needs to know which context it is in.
+     &lt;section data-context="hub"&gt;      cyan
+     &lt;section data-context="admin"&gt;    magenta
+     &lt;section data-context="owner"&gt;    violet
+     &lt;section data-context="rooster"&gt;  orange
+     &lt;section data-context="sauvie"&gt;   acid green
+   ============================================================ */
+[data-context="hub"]     { --accent: var(--primary-hub);     --c: var(--primary-hub);     --_c: var(--primary-hub); }
+[data-context="admin"]   { --accent: var(--primary-admin);   --c: var(--primary-admin);   --_c: var(--primary-admin); }
+[data-context="owner"]   { --accent: var(--primary-owner);   --c: var(--primary-owner);   --_c: var(--primary-owner); }
+[data-context="rooster"] { --accent: var(--primary-rooster); --c: var(--primary-rooster); --_c: var(--primary-rooster); }
+[data-context="sauvie"]  { --accent: var(--primary-sauvie);  --c: var(--primary-sauvie);  --_c: var(--primary-sauvie); }
+</pre></details>
+<details class="src"><summary><b>tokens/typography.css</b><i>4.7 KB</i></summary><pre>/* ============================================================
+   Zaylist, TYPOGRAPHY
+   Display : Barlow Condensed 700 to 900, UPPERCASE, tight.
+   Body    : Inter.
+   ============================================================ */
+
+:root {
+  /* ---- FAMILIES ------------------------------------------ */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Mono is the official third voice (2026): utility kickers, running-head
+     nav, stat labels, live indicators. 10 to 12px, wide-tracked, uppercase. */
+  --font-mono:    ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+  /* Board-surface aliases (mirror client/src/index.css) */
+  --font-board-display: var(--font-display);
+  --font-board-mono:    var(--font-mono);
+
+  /* ---- WEIGHTS ------------------------------------------- */
+  --fw-regular: 400;  /* @kind font */
+  --fw-medium:  500;  /* @kind font */
+  --fw-semibold:600;  /* @kind font */
+  --fw-bold:    700;  /* @kind font */
+  --fw-heavy:   800;  /* @kind font */
+  --fw-black:   900;  /* @kind font */
+
+  /* ---- DISPLAY SCALE (Barlow Condensed, black) ----------- */
+  --display-hero:  clamp(3.5rem, 11vw, 9rem);    /* @kind font */
+  --display-1:     clamp(2.75rem, 7vw, 5.5rem);  /* @kind font */
+  --display-2:     clamp(2rem, 4.5vw, 3.5rem);   /* @kind font */
+  --display-3:     1.75rem;                       /* @kind font */
+
+  --lh-display:    0.95;        /* @kind other */
+  --tracking-display: 0.005em;  /* @kind other */
+
+  /* ---- CHROME (Barlow 700, UI labels) -------------------- */
+  --chrome-lg:  1.25rem;   /* nav @kind font */
+  --chrome-md:  1rem;      /* buttons @kind font */
+  --chrome-sm:  0.85rem;   /* chips @kind font */
+  --chrome-xs:  0.7rem;    /* badges @kind font */
+  --tracking-chrome: 0.06em;  /* @kind other */
+
+  /* ---- TITLE / HEADING (card titles, Barlow 900) --------- */
+  --title-lg:  1.5rem;    /* @kind font */
+  --title-md:  1.3125rem; /* @kind font */
+  --title-sm:  1.0625rem; /* @kind font */
+  --lh-title:  1.05;      /* @kind other */
+
+  /* ---- BODY (Inter) -------------------------------------- */
+  --body-lg:   1.125rem;  /* @kind font */
+  --body-md:   1rem;      /* @kind font */
+  --body-sm:   0.875rem;  /* @kind font */
+  --lh-body:   1.55;      /* @kind other */
+
+  /* ---- META ---------------------------------------------- */
+  --meta:      0.8125rem; /* @kind font */
+  --meta-sm:   0.6875rem; /* @kind font */
+  --lh-meta:   1.35;      /* @kind other */
+
+  /* ---- TRACKING ------------------------------------------ */
+  --tracking-tight:  -0.01em;  /* @kind other */
+  --tracking-normal: 0;         /* @kind other */
+  --tracking-wide:   0.04em;    /* @kind other */
+  --tracking-kicker: 0.14em;    /* @kind other */
+  --tracking-mono:   0.2em;     /* mono kickers @kind other */
+
+  /* ---- MONO UTILITY SIZES -------------------------------- */
+  --mono-kicker: 12px;   /* section kickers, running head @kind font */
+  --mono-label:  11px;   /* stat labels @kind font */
+  --mono-micro:  10px;   /* tile labels @kind font */
+
+  /* ---- PROSE --------------------------------------------- */
+  --prose-spacing: 1.35rem;  /* @kind other */
+}
+
+/* ---- BASE ELEMENT DEFAULTS ------------------------------- */
+body {
+  font-family: var(--font-body);
+  font-size: var(--body-md);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  font-weight: var(--fw-regular);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Poster / display helper */
+.pdx-display {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Chrome label helper (Barlow 700) */
+.pdx-chrome {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-chrome);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Kicker chip label */
+.pdx-kicker {
+  font-family: var(--font-display);
+  font-size: var(--chrome-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--text-meta);
+}
+
+/* Mono kicker (utility layer): pair with a color + optional live dot */
+/* The kicker is a label, not an action: it takes the surface's accent only
+   when the surface has one. Default is quiet text, never acid yellow. */
+.pdx-kicker-mono {
+  font-family: var(--font-mono);
+  font-size: var(--mono-kicker);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+/* Opt in when the section owns an accent. Inside a [data-context] scope this
+   picks the context primary up automatically. */
+.pdx-kicker-mono--accent { color: var(--accent); }
+</pre></details>
+<details class="src"><summary><b>tokens/layout.css</b><i>2.1 KB</i></summary><pre>/* ============================================================
+   Zaylist, SPACING, RADIUS, LAYOUT
+   4px base grid. Dense-but-scannable event lists.
+   ============================================================ */
+
+:root {
+  /* ---- SPACE SCALE (4px base) ---------------------------- */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* Semantic spacing */
+  --gap-card:      var(--space-4);   /* inside cards */
+  --gap-list:      var(--space-3);   /* between event rows */
+  --gap-section:   var(--space-16);  /* between page sections */
+  --pad-card:      var(--space-5);   /* card padding */
+  --pad-page:      clamp(16px, 5vw, 48px); /* page gutter */
+
+  /* ---- CONTENT WIDTHS ------------------------------------ */
+  --w-content:  1180px;  /* main app column */
+  --w-prose:    680px;   /* readable blurb width */
+  --w-narrow:   440px;   /* forms / single column */
+
+  /* ---- RADIUS (brutalist zine: 0 to 8px; utility tiles go rounder) */
+  --radius-xs:   2px;
+  --radius-sm:   3px;
+  --radius-md:   4px;    /* default card / button */
+  --radius-lg:   6px;
+  --radius-xl:   8px;
+  --radius-tile: 10px;   /* utility-layer data tiles (directory, live cards) */
+  --radius-panel: 12px;  /* utility panels (now panel, status cards) */
+  --radius-pill: 999px;
+
+  /* ---- BORDERS ------------------------------------------- */
+  --bw-hair:   1px;   /* @kind other */
+  --bw-bold:   2px;   /* @kind other */
+  --bw-chunk:  3px;   /* @kind other */
+
+  --z-base: 0;        /* @kind other */
+  --z-sticky: 100;    /* @kind other */
+  --z-nav: 200;       /* @kind other */
+  --z-overlay: 800;   /* @kind other */
+  --z-modal: 900;     /* @kind other */
+  --z-toast: 1000;    /* @kind other */
+
+  /* ---- SITE CHROME --------------------------------------- */
+  --site-header-height: 120px;  /* sticky header @kind other */
+  --hub-side-w: 266px;          /* hub sidebar @kind other */
+}
+</pre></details>
+<details class="src"><summary><b>tokens/effects.css</b><i>8.4 KB</i></summary><pre>/* ============================================================
+   Zaylist, EFFECTS: shadows, glows, motion
+   Canonical signatures from repo tokens:
+     --brutal-shadow : 4px 4px 0 rgba(255,0,204,0.36)  (magenta offset)
+     --glow          : 0 0 14px color-mix(cyan 18%)      (soft neon)
+     Motion          : 0.15s snappy hovers, ~4s ambient pulse
+   ============================================================ */
+
+:root {
+  /* ---- BRUTALIST OFFSET (RETIRED) ------------------------
+     DEPRECATED. The flat offset has been replaced everywhere by the
+     sticker bloom (tokens/glass.css 1.5b): a lit plate on a black
+     keyline with an accent bloom on the floor. Use --sticker-lit.
+     These are kept only so old markup does not break. */
+  --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
+  --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
+  --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
+  --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+
+  /* Generic hard offsets (zine sticker) */
+  --shadow-hard-sm: 3px 3px 0 var(--ink-1000);
+  --shadow-hard:    4px 4px 0 var(--ink-1000);
+  --shadow-hard-lg: 6px 6px 0 var(--ink-1000);
+
+  /* ---- SOFT DEPTH ---------------------------------------- */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --shadow-md:  0 8px 24px -8px rgba(0,0,0,.7);
+  --shadow-lg:  0 14px 30px rgba(0,0,0,.42);
+
+  /* ---- NEON GLOWS (soft, pulse-able) --------------------- */
+  --glow:        0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
+  --glow-pink:   0 0 16px color-mix(in srgb, var(--neon-magenta) 26%, transparent);
+  --glow-cyan:   0 0 16px color-mix(in srgb, var(--neon-cyan) 26%, transparent);
+  --glow-lime:   0 0 16px color-mix(in srgb, var(--neon-yellow) 24%, transparent);
+  --glow-violet: 0 0 16px color-mix(in srgb, var(--neon-violet) 30%, transparent);
+
+  /* ---- MOTION -------------------------------------------- */
+  --ease-out:    cubic-bezier(.2,.8,.2,1);      /* @kind other */
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);  /* @kind other */
+  --ease-inout:  cubic-bezier(.65,0,.35,1);     /* @kind other */
+
+  --dur-fast:   150ms;   /* @kind other */ /* snappy hover */
+  --dur-base:   220ms;   /* @kind other */
+  --dur-slow:   360ms;   /* @kind other */
+  --dur-pulse:  4s;      /* @kind other */ /* ambient neon pulse */
+
+  --press-scale: 0.97;   /* @kind other */
+  --hover-lift:  -2px;   /* @kind other */
+
+  /* ---- SEAM / GRAIN / HERO STACK (2026) ------------------ */
+  --seam-h:       2px;    /* rainbow bar, thin @kind other */
+  --seam-h-thick: 2.7px;  /* header / footer seam @kind other */
+  --site-film-grain-opacity:  0.12;   /* @kind other */
+  --board-page-grain-opacity: 0.108;  /* @kind other */
+  --board-promo-grain-opacity: 0.121; /* @kind other */
+  --hero-dot-grid-opacity: 0.072;     /* @kind other */
+  /* Hero stack order: bg (0) -&gt; video overlays (1) -&gt; scrim (2) -&gt; grain (3) -&gt; content (4) */
+  --hero-layer-bg: 0;       /* @kind other */
+  --hero-layer-video: 1;    /* @kind other */
+  --hero-layer-scrim: 2;    /* @kind other */
+  --hero-layer-fx: 3;       /* @kind other */
+  --hero-layer-content: 4;  /* @kind other */
+  /* Legibility scrim over board/promo hero photos (heavier left + bottom) */
+  --board-promo-scrim:
+    linear-gradient(102deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.66) 32%, rgba(0,0,0,0.56) 56%, rgba(0,0,0,0.35) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.64) 0%, rgba(0,0,0,0.32) 42%, rgba(0,0,0,0.04) 72%); /* @kind other */
+}
+
+/* Ambient neon pulse, driven by a per-element --dc (day/accent color) */
+@keyframes pdxPulse {
+  0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent); }
+  50%      { box-shadow: 0 0 24px color-mix(in srgb, var(--dc, var(--neon-cyan)) 32%, transparent); }
+}
+/* Slow magenta glow pulse (Spotted / missed-connections cards) */
+@keyframes pdxSpotPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,0,204,0.25); }
+  50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
+}
+/* Entrance reveal: fade + short rise. Site source: .sch-block (schIn, .28s ease). */
+@keyframes pdxReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Popover / menu entrance: fade + rise + slight scale. Site source: .sch-pop (schPop, .18s ease-out). */
+@keyframes pdxPop {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+/* Live status blink (going dots, "now playing"). Site source: .sch-livedot (schPulse, 1.6s); board live dots run it at 1.8s. */
+@keyframes pdxBlink { 50% { opacity: .35; } }
+/* Utility-page entrance: hero fades up 10px over .48s; stats band follows at +0.07s. Site source: board-hero-in. */
+@keyframes pdxHeroIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Horizontal ticker used by the Marquee component. */
+@keyframes pdxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ============================================================
+   WEB ANIMATION ADD-ONS (zaylist.com, 2026)
+   Six additive motion layers. Each rides an element that is
+   already on the page (never replaces it), and all are silenced
+   by calm mode + the reduced-motion query below.
+   ============================================================ */
+
+/* 01 SEAM CHARGE, the rainbow header seam doubles as the page
+   loader: it charges empty to full, a bright glint races the bar,
+   a flash caps it, then it loops until the page is ready. */
+@keyframes pdxSeamFill  { 0%{ transform: scaleX(0); } 68%{ transform: scaleX(1); } 100%{ transform: scaleX(1); } }
+@keyframes pdxSeamGlint { 0%{ transform: translateX(-165%); } 60%{ transform: translateX(150%); } 100%{ transform: translateX(150%); } }
+@keyframes pdxSeamFlash { 0%,64%{ opacity: 0; } 74%{ opacity: .5; } 88%{ opacity: 0; } 100%{ opacity: 0; } }
+
+/* 03 LIVE WAVE, a neon equalizer bar rides the LIVE NOW strip.
+   Vary duration + delay + color per bar; drops the beat on tap. */
+@keyframes pdxEqBounce { 0%,100%{ transform: scaleY(.22); } 50%{ transform: scaleY(1); } }
+
+/* 04 COUNT IT UP, stat numbers spin up from zero on reveal and
+   pop on each fresh tick while a +1 floats off. */
+@keyframes pdxNumPop  { 0%{ transform: translateY(0) scale(1); } 42%{ transform: translateY(-2px) scale(1.14); } 100%{ transform: translateY(0) scale(1); } }
+@keyframes pdxFloatUp { 0%{ opacity: 1; transform: translateY(0); } 100%{ opacity: 0; transform: translateY(-28px); } }
+
+/* 05 RSVP SPARKS, a tap throws a burst of day-colored confetti.
+   Drive each particle's direction with --tx / --ty. */
+@keyframes pdxSparkFly { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity: 0; } }
+
+/* 06 RING SHIMMER, a soft highlight arc orbits an identity ring.
+   Light only (screen blend) so chosen flag colors never shift. */
+@keyframes pdxRingShimmer { to { transform: rotate(360deg); } }
+
+/* 02 SPLIT-FLAP has no shared keyframe, it is a per-cell rotateX
+   transition flip driven in JS (see the Motion "add-ons" card). */
+
+/* ANIMATED RAINBOW DIVIDER, the flowing + glowing seam shared by
+   .pdx-seam, .pdx-rainbow-rule, .pdxSeam and .pdxDivider--rainbow's line.
+   Colors flow left to right and a soft rainbow glow pulses; the traveling
+   highlight reuses pdxSeamGlint above. */
+@keyframes pdxSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+@keyframes pdxSeamGlow { 0%,100% { box-shadow: 0 0 6px rgba(0,255,255,.28); } 50% { box-shadow: 0 0 18px rgba(255,0,204,.5); } }
+
+/* Reduced motion + calm mode both silence glows/animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+:root[data-calm="true"] *,
+.calm * {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
+:root[data-calm="true"] .pdx-seam,
+:root[data-calm="true"] .pdx-rainbow-rule,
+:root[data-calm="true"] .pdxSeam,
+:root[data-calm="true"] .pdxMap__seam,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line {
+  background: var(--rainbow-bar);
+  background-size: auto;
+}
+:root[data-calm="true"] .pdx-seam::after,
+:root[data-calm="true"] .pdx-rainbow-rule::after,
+:root[data-calm="true"] .pdxSeam::after,
+:root[data-calm="true"] .pdxMap__seam::after,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after {
+  display: none;
+}
+</pre></details>
+<details class="src"><summary><b>tokens/glass.css</b><i>20.1 KB</i></summary><pre>/* ============================================================
+   Zaylist, DEEP GLASS / OLED-NEON (canonical, 2026)
+   Mirrors the live source of truth: master branch
+   client/src/components/ds/tokens/glass.css (deep-glass-2026-07-16).
+
+   Surface only: fill / edge / bloom / sheen / button chrome / map frame.
+   Layout, spacing, structural radii, fonts, type scale stay unchanged.
+
+   NOTE: the Nude Beaches / River Brats page keeps its OWN standards and is
+   deliberately NOT folded into this glass system. Do not apply .pdx-glass-*
+   to nb-* / rb-* surfaces.
+   ============================================================ */
+
+:root {
+  /* Accent contract: set --c (or the legacy --_c / --dc) per instance. */
+  --c: var(--_c, var(--dc, var(--neon-cyan, #19e3ff)));
+  --dir-gm: 60; /* @kind other */
+
+  /* ---- 1.1 Master card (accented) ------------------------ */
+  --glass-card-radius: 14px; /* @kind radius */
+  --glass-card-blur: 12px;   /* @kind other */
+  --glass-card-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%); /* @kind other */
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014); /* @kind other */
+  --glass-card-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0,0,0,.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255,255,255,.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent); /* @kind shadow */
+
+  /* ---- 1.1b Neutral card (no semantic accent) ------------ */
+  --glass-neutral-c1: #4a4a52; /* @kind color */
+  --glass-neutral-c2: #b8b8c2; /* @kind color */
+  --glass-card-neutral-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--glass-neutral-c1) 8%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--glass-neutral-c1) 20%, transparent), transparent 56%); /* @kind other */
+  --glass-card-neutral-border: 1px solid color-mix(in srgb, var(--glass-neutral-c2) 50%, #101014); /* @kind other */
+  --glass-card-neutral-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0,0,0,.95),
+    0 0 26px -8px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--glass-neutral-c2) 55%, rgba(255,255,255,.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--glass-neutral-c1) 45%, transparent); /* @kind shadow */
+
+  /* ---- 1.2 Sheen overlays -------------------------------- */
+  --glass-sheen: linear-gradient(133deg, rgba(255,255,255,.15), rgba(255,255,255,.03) 12%, transparent 34%); /* @kind other */
+  --glass-sheen-specular: radial-gradient(70% 55% at 108% 112%, rgba(255,255,255,.1), color-mix(in srgb, var(--c) 12%, transparent) 40%, transparent 70%); /* @kind other */
+
+  /* ---- 1.3 Refract seam ---------------------------------- */
+  --refract-seam-height: 2px; /* @kind other */
+  --refract-seam-gradient: linear-gradient(90deg,#ff2d5e,#ff9500,#ffee00,#39ff14,#00ffff,#3a6bff,#8800ff,#ff00cc,#ff2d5e); /* @kind other */
+  --glass-refract: var(--refract-seam-gradient); /* @kind other */ /* back-compat alias */
+
+  /* ---- 1.4 Poster / logo well ---------------------------- */
+  --poster-well-bg: radial-gradient(130% 130% at 50% 14%, color-mix(in srgb, var(--c) 32%, #050506), #050506 72%); /* @kind other */
+  --poster-well-floor: 4px solid var(--c); /* @kind other */
+  --poster-well-scan: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.16) 3px 4px); /* @kind other */
+
+  /* ---- 1.5 Glass buttons (Card System §16 state sheet) --- */
+  --glass-btn-radius: 9px; /* @kind radius */
+  --glass-btn-bg:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c) 15%, #0b0b0d), #060608) padding-box,
+    linear-gradient(#000, #000) border-box; /* @kind other */
+  --glass-btn-border: 2px solid #000; /* @kind other */
+  --glass-btn-color: #fff; /* @kind color */
+  --glass-btn-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.08), inset 0 -6px 12px -8px rgba(0,0,0,.55); /* @kind shadow */
+  --glass-btn-hover-bg:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c) 24%, #0b0b0d), #060608) padding-box,
+    linear-gradient(#000, #000) border-box; /* @kind other */
+  --glass-btn-hover-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.12), inset 0 -6px 12px -8px rgba(0,0,0,.55); /* @kind shadow */
+  --glass-btn-active-bg:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c) 12%, #08080a), #050506) padding-box,
+    linear-gradient(#000, #000) border-box; /* @kind other */
+  --glass-btn-active-shadow: 0 0 0 1px #000, inset 0 2px 5px rgba(0,0,0,.7); /* @kind shadow */
+  --glass-btn-solid-bg: var(--c); /* @kind other */
+  --glass-btn-solid-color: #050506; /* @kind color */
+  --glass-btn-solid-border: 2px solid #000; /* @kind other */
+  --glass-btn-solid-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.65), inset 0 -6px 12px -6px rgba(0,0,0,.28); /* @kind shadow */
+  --glass-btn-outline-border: 1px solid #000; /* @kind other */
+  --glass-btn-outline-bg: rgba(0,0,0,.5); /* @kind other */
+  --glass-btn-outline-color: var(--c); /* @kind other */
+  --glass-btn-outline-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.08); /* @kind shadow */
+
+  /* ---- 1.6 Map surface ----------------------------------- */
+  --map-surface-bg: var(--panel-ink); /* @kind color */
+  --map-frame-shadow:
+    0 0 0 1px #000, inset 0 0 0 1px rgba(0,0,0,.85), inset 0 2px 3px rgba(0,0,0,.9),
+    inset 0 0 28px -8px rgba(0,0,0,.95), inset 0 0 52px 10px rgba(0,0,0,.42),
+    inset 0 4px 10px -2px rgba(0,0,0,.75), inset 0 -1px 0 rgba(255,255,255,.045); /* @kind shadow */
+  --map-grid-bg:
+    repeating-linear-gradient(0deg, transparent 0 38px, rgba(255,255,255,.022) 38px 39px),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.022) 46px 47px),
+    radial-gradient(120% 90% at 60% 40%, #101018 0%, #06060a 70%); /* @kind other */
+  --map-vignette-bg: radial-gradient(128% 128% at 50% 50%, transparent 48%, rgba(0,0,0,.18) 72%, rgba(0,0,0,.48) 100%); /* @kind other */
+  --map-vignette-inset: inset 0 0 18px 2px rgba(0,0,0,.48), inset 0 0 56px 10px rgba(0,0,0,.4); /* @kind shadow */
+
+  /* ---- Nav deboss (§2.8) --------------------------------- */
+  --edge-deboss: inset 0 0 34px -10px rgba(0,0,0,.95), inset 0 2px 3px rgba(0,0,0,.6); /* @kind shadow */
+
+  /* ---- 1.7 Chrome (buttons / kickers / tags / tape) ------
+     Interactive chrome sits on the same OLED chassis as the cards:
+     black keyline, 1px top bevel, floor shade, accent bloom. Compose
+     these atoms, never hand-roll a stack. The flat 4px magenta offset
+     is retired from chrome and survives only on posters and collage. */
+  --chrome-radius-lg: 12px; /* @kind radius */
+  --chrome-radius-md: 10px; /* @kind radius */
+  --chrome-radius-sm: 8px;  /* @kind radius */
+  --chrome-radius-tag: 7px; /* @kind radius */
+
+  --chrome-keyline:    0 0 0 1px #000; /* @kind shadow */
+  --chrome-bevel:      inset 0 1px 0 rgba(255,255,255,.72); /* @kind shadow */
+  --chrome-bevel-dark: inset 0 1px 0 rgba(255,255,255,.12); /* @kind shadow */
+  --chrome-floor:      inset 0 -9px 14px -9px rgba(0,0,0,.32); /* @kind shadow */
+  --chrome-drop:       0 2px 5px rgba(0,0,0,.6); /* @kind shadow */
+  --chrome-press:      inset 0 2px 6px rgba(0,0,0,.4); /* @kind shadow */
+  --chrome-focus:      0 0 0 3px rgba(0,255,255,.55); /* @kind shadow */
+
+  /* Bloom is its own property so calm mode can zero it without
+     erasing the keyline and bevel that make chrome legible. */
+  --chrome-bloom:       0 10px 26px -13px color-mix(in srgb, var(--c, #00FFFF) 75%, transparent); /* @kind shadow */
+  --chrome-bloom-hover: 0 16px 34px -13px color-mix(in srgb, var(--c, #00FFFF) 95%, transparent); /* @kind shadow */
+  --chrome-bloom-sm:    0 8px 20px -13px color-mix(in srgb, var(--c, #00FFFF) 75%, transparent); /* @kind shadow */
+  --chrome-bloom-lg:    0 12px 30px -13px color-mix(in srgb, var(--c, #00FFFF) 80%, transparent); /* @kind shadow */
+
+  /* ---- 1.5b Sticker bloom -------------------------------------
+     Posters, markers, tape and collage flair kept the flat 4px
+     magenta offset. It is retired everywhere: those surfaces now
+     read as a lit plate on a black keyline with an accent bloom
+     cast on the floor, the same idiom as the seam, kicker chips
+     and tags. Keep the tilt, drop the offset. Accent from --c. */
+  --sticker-bloom:       0 12px 26px -14px color-mix(in srgb, var(--c, #00FFFF) 90%, transparent); /* @kind shadow */
+  --sticker-bloom-hover: 0 18px 38px -14px color-mix(in srgb, var(--c, #00FFFF) 100%, transparent); /* @kind shadow */
+  --sticker-bloom-press: 0 5px 12px -8px color-mix(in srgb, var(--c, #00FFFF) 80%, transparent); /* @kind shadow */
+  /* The whole lit-plate stack in one token. */
+  --sticker-lit:       var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom); /* @kind shadow */
+  --sticker-lit-hover: var(--chrome-keyline), inset 0 1px 0 rgba(255,255,255,.85), var(--sticker-bloom-hover); /* @kind shadow */
+  --sticker-lit-press: var(--chrome-keyline), var(--chrome-press), var(--sticker-bloom-press); /* @kind shadow */
+
+  /* Lit fills: a vertical gradient reads as a lit surface, flat does not. */
+  --acid-lit:       linear-gradient(180deg,#E2FF5E 0%,#CCFF00 44%,#B2E400 100%); /* @kind other */
+  --acid-lit-hover: linear-gradient(180deg,#EBFF7A,#D6FF2B 44%,#BEEE00); /* @kind other */
+  --acid-lit-press: linear-gradient(180deg,#B8E800,#CCFF00); /* @kind other */
+  --acid-lit-chip:  linear-gradient(180deg,#E2FF5E,#C4F200); /* @kind other */
+  --acid-lit-tag:   linear-gradient(180deg,#DDFF4A,#C4F200); /* @kind other */
+  --acid-lit-tape:  linear-gradient(170deg,#E2FF5E,#C4F200); /* @kind other */
+  --cyan-lit:       linear-gradient(180deg,#3DFFFF,#00E2E2); /* @kind other */
+  --cyan-lit-tape:  linear-gradient(170deg,#3DFFFF,#00E9E9); /* @kind other */
+
+  --chrome-ink-fill: radial-gradient(130% 110% at 50% 0%, color-mix(in srgb, var(--c, #00FFFF) 17%, transparent), #0b0b0f 62%, #08080b); /* @kind other */
+}
+
+/* Per-instance rebind: recompute the recipes against a local --c so each
+   card/board/nav gets its own day/category/board accent instead of root cyan. */
+.pdx-glass-rebind, .pdx-glass-card, .pdx-glass, .pdxBoard, .pdxRow,
+.pdxPlace, .pdxStatCard, .pdxBoardCard, .pdxAd, .pdxActionRow, .pdxInfoTile {
+  --c: var(--_c, var(--dc, var(--neon-cyan, #19e3ff)));
+  --glass-card-bg:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  --glass-card-shadow:
+    0 0 0 2px #000, 0 34px 66px -24px rgba(0,0,0,.95),
+    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255,255,255,.12)),
+    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --glass-sheen-specular: radial-gradient(70% 55% at 108% 112%, rgba(255,255,255,.1), color-mix(in srgb, var(--c) 12%, transparent) 40%, transparent 70%);
+  /* Button recipes must rebind too, or a solid CTA inside an accented card
+     resolves --glass-btn-solid-bg at :root and renders cyan on a green card. */
+  --glass-btn-solid-bg: var(--c);
+  --glass-btn-outline-color: var(--c);
+}
+
+/* ---- Utility classes — set --c (or --_c) on the node ------ */
+.pdx-glass-card, .pdx-glass {
+  position: relative; overflow: visible;
+  background: var(--glass-card-bg); border: var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
+  backdrop-filter: blur(var(--glass-card-blur)); -webkit-backdrop-filter: blur(var(--glass-card-blur));
+  animation: pgDirCardIn .55s var(--ease-out, ease) both;
+}
+.pdx-glass-card--neutral, .pdx-glass--neutral {
+  background: var(--glass-card-neutral-bg); border: var(--glass-card-neutral-border);
+  box-shadow: var(--glass-card-neutral-shadow);
+}
+.pdx-glass-card--left-accent, .pdx-glass--left { border-left: 4px solid var(--c); }
+/* Full rainbow border variant (non-profit / hero tile) */
+.pdx-glass--rainbow {
+  border: 2px solid transparent;
+  background:
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, #060509 100%) padding-box,
+    var(--refract-seam-gradient) border-box;
+  box-shadow: 0 34px 66px -24px rgba(0,0,0,.95),
+    0 0 24px -2px color-mix(in srgb, var(--c) 60%, transparent),
+    0 0 62px -14px color-mix(in srgb, var(--c) 42%, transparent),
+    inset 0 3px 7px -1px rgba(0,0,0,.9), inset 0 1px 2px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05);
+}
+
+/* Corner sheen — child or ::before/::after */
+.pdx-glass-card::before, .pdx-glass::before, .pdx-glass-sheen {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; z-index: 2; background: var(--glass-sheen);
+}
+.pdx-glass-card::after, .pdx-glass::after, .pdx-glass-sheen--specular {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; z-index: 2; background: var(--glass-sheen-specular);
+}
+.pdx-glass-card &gt; *, .pdx-glass &gt; * { position: relative; z-index: 3; }
+
+/* Prismatic refraction seam — .pdx-refract-seam (master) / .pdx-refract (legacy) */
+.pdx-refract-seam, .pdx-refract, .dir-refract {
+  position: absolute; top: 0; left: 7px; right: 7px; height: var(--refract-seam-height); z-index: 5;
+  pointer-events: none; background: var(--refract-seam-gradient); background-size: 200% 100%;
+  opacity: .7; filter: blur(.2px); animation: dirRefract 7s linear infinite;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+.pdx-refract::after {
+  content: ""; position: absolute; top: -3px; left: 0; right: 0; height: 8px; z-index: -1;
+  background: var(--refract-seam-gradient); background-size: 200% 100%;
+  opacity: .28; filter: blur(7px); animation: dirRefract 7s linear infinite;
+  -webkit-mask: inherit; mask: inherit;
+}
+
+/* Poster / logo well */
+.pdx-poster-well, .pdx-glass-well {
+  position: relative; border-radius: 13px 13px 0 0; overflow: hidden;
+  background: var(--poster-well-bg); border-bottom: var(--poster-well-floor);
+}
+.pdx-poster-well__scan, .pdx-glass-well__scan {
+  position: absolute; inset: 0; pointer-events: none; opacity: .35; background: var(--poster-well-scan);
+}
+
+/* ---- Glass buttons ------------------------------------------ */
+.pdx-glass-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; line-height: 1; padding: 11px 20px; font-size: .86rem;
+  border-radius: var(--glass-btn-radius, 9px); color: var(--glass-btn-color, #fff);
+  border: var(--glass-btn-border); background: var(--glass-btn-bg); box-shadow: var(--glass-btn-shadow);
+  cursor: pointer; text-decoration: none;
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.pdx-glass-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06);
+  background: var(--glass-btn-hover-bg); box-shadow: var(--glass-btn-hover-shadow); text-decoration: none; }
+.pdx-glass-btn:active:not(:disabled) { transform: translateY(1px) scale(.98); filter: none;
+  background: var(--glass-btn-active-bg); box-shadow: var(--glass-btn-active-shadow); }
+.pdx-glass-btn:disabled { opacity: .55; cursor: not-allowed; color: #6a6870; transform: none; filter: none; }
+.pdx-glass-btn--solid { color: var(--glass-btn-solid-color, #050506);
+  background: var(--glass-btn-solid-bg, var(--c)); border: var(--glass-btn-solid-border, 2px solid #000);
+  box-shadow: var(--glass-btn-solid-shadow); }
+.pdx-glass-btn--outline { color: var(--glass-btn-outline-color, var(--c));
+  background: var(--glass-btn-outline-bg); border: var(--glass-btn-outline-border); box-shadow: var(--glass-btn-outline-shadow); }
+.pdx-glass-btn--gradient { color: #050506; border: 1px solid #000;
+  background: linear-gradient(100deg,#ff2400,#ff9500,#ffee00,#39ff14,#00ffff,#8800ff,#ff00cc); background-size: 180% 180%;
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.55), inset 0 -6px 12px -6px rgba(0,0,0,.3); }
+.pdx-glass-btn--gradient:hover:not(:disabled) { filter: brightness(1.05); background-position: 100% 50%; }
+
+/* ---- Map surface -------------------------------------------- */
+.pdx-map-surface, .pdx-map-surface--neutral {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: var(--map-surface-bg); border: 1px solid #000; box-shadow: var(--map-frame-shadow);
+}
+.pdx-map-surface__plate { position: relative; overflow: hidden; background: var(--map-grid-bg); }
+.pdx-map-surface__vignette { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: var(--map-vignette-bg); box-shadow: var(--map-vignette-inset); }
+.pdx-map-surface__shaft { position: absolute; top: -20%; bottom: -20%; left: 48%; width: 70px; z-index: 1;
+  pointer-events: none; transform: rotate(14deg); filter: blur(1px); opacity: .85;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015) 50%, transparent); }
+.pdx-map-pin { --_c: var(--day-sat); position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: #000; border: 3px solid var(--_c); box-shadow: 0 0 12px 1px var(--_c); }
+.pdx-map-pin--multi { border: 0; box-shadow: 0 0 12px 1px rgba(255,255,255,.4);
+  background: conic-gradient(#8800ff,#0044ff,#00ffff,#39ff14,#ffee00,#ff6600,#ff00cc,#8800ff); }
+
+.pdx-edge-deboss { box-shadow: var(--edge-deboss), 0 0 22px -10px color-mix(in srgb, var(--neon-cyan, #19e3ff) 40%, transparent); }
+
+/* ---- Keyframes (pg-prefixed canonical + legacy aliases) ----- */
+@keyframes pgDirCardIn { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes dirCardIn   { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes pdxCardIn   { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes dirRefract  { from { background-position: 200% 0; } to { background-position: 0 0; } }
+@keyframes pdxRefract  { from { background-position: 200% 0; } to { background-position: 0 0; } }
+@keyframes pdxPullHandle { 0%,100% { transform: translateY(0); opacity: .7; } 50% { transform: translateY(-3px); opacity: 1; background: #4a4a55; } }
+
+/* ---- Calm mode + reduced motion: zero bloom, freeze motion ---
+   Zero the bloom only. The keyline, bevel and floor stay so chrome keeps
+   its chassis. A blanket box-shadow:none must never apply to chrome. */
+:root[data-calm="true"], html.calm-mode {
+  --dir-gm: 0; /* @kind other */
+  --chrome-bloom: 0 0 0 transparent; /* @kind shadow */
+  --chrome-bloom-hover: 0 0 0 transparent; /* @kind shadow */
+  --chrome-bloom-sm: 0 0 0 transparent; /* @kind shadow */
+  --chrome-bloom-lg: 0 0 0 transparent; /* @kind shadow */
+  --sticker-bloom: 0 0 0 transparent; /* @kind shadow */
+  --sticker-bloom-hover: 0 0 0 transparent; /* @kind shadow */
+  --sticker-bloom-press: 0 0 0 transparent; /* @kind shadow */
+}
+:root[data-calm="true"] .pdx-glass-card, :root[data-calm="true"] .pdx-glass,
+:root[data-calm="true"] .pdx-refract-seam, :root[data-calm="true"] .pdx-refract, :root[data-calm="true"] .dir-refract,
+html.calm-mode .pdx-glass-card, html.calm-mode .pdx-glass, html.calm-mode .pdx-refract-seam {
+  animation: none !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdx-glass-card, .pdx-glass, .pdx-refract-seam, .pdx-refract, .dir-refract { animation: none !important; }
+}
+
+/* No backdrop-filter support: solid OLED slab */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pdx-glass-card, .pdx-glass, .pdx-glass-card--neutral { background: #050506 !important; }
+}
+</pre></details>
+<details class="src"><summary><b>tokens/fonts.css</b><i>0.8 KB</i></summary><pre>/* ============================================================
+   Zaylist, Webfonts
+   Source of truth: repo design-system/tokens/tokens.css
+     --font-display: 'Barlow Condensed'  (700 to 900, uppercase, tight)
+     --font-body:    'Inter'
+   No brand font files were provided; these load from Google Fonts.
+   The @import below pulls current, self-updating font URLs for every
+   weight in use (Barlow Condensed 600 to 900, Inter 400 to 700), so no
+   hardcoded gstatic woff2 URLs are kept here (those pin to version
+   hashes Google rotates, which 404 over time and break offline bundles).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap');
+</pre></details>
+<details class="src"><summary><b>readme.md</b><i>28.8 KB</i></summary><pre># **Zaylist Design System**
+
+A high-energy neon zine with a utility backbone: welcoming, scannable, and community-first. Anti-corporate by design, and proudly solo-run: built by one person for the PDX scene, not a sponsor.
+
+This design system powers **Zaylist** (zaylist.com), a community-run guide to Portland's queer events. It covers the event directory and schedule, the Queer Directory, Nude Beaches, the community boards (Spotted!, Gifting, Gig Board), the promoter hub, member profiles, the member Hub, and the admin dashboard.
+
+## **Sources (ground truth)**
+
+- **Live site:** [https://www.zaylist.com](https://www.zaylist.com/)
+
+- **Repo:** `maxmackpdx-pride/pdx-pride-guide` (default branch `master`). The canonical token + preview bundle lives at `design-system/` in that repo (`tokens/tokens.css`, `previews/*.html`, `EVENTS_GUIDE.md`, `AVATARS_GUIDE.md`, `ZAYLIST_LOGO_GUIDE.md`). Token source of truth is `client/src/index.css`; day colors and the schedule model mirror `shared/eventWeek.ts`; profile accents mirror `shared/profileConstants.ts`. The canonical "live product is truth" chrome standard is `docs/LIVE_DESIGN_STANDARD.md`.
+
+Assets, fonts, and color values here mirror that repo bundle. Where this project adds components beyond the repo bundle (map, stat cards, place cards, dividers, avatars, marquee), they are enhancements built on the same canonical foundations.
+
+---
+
+## **SITE MAP (what this system serves)**
+
+**Primary nav:** Home · About · Events · **Places** · Nude Beaches · **Boards** dropdown (Gig Board, Gifting, Missed Connections!) · Promoters. Labels come from `PRIMARY_NAV` in `client/src/lib/siteNav.ts`. Logged in, a Hub link (with unread dot) plus an avatar menu (Edit profile, public profile, Inbox, Notification settings, Sign out); logged out, a LOG IN / JOIN button. A minimal CALM toggle sits in the header controls.
+
+- **Events** `/events` (cards + map + filters; event modal at `/events/:id/:slug`) and **Schedule** `/schedule` (week grid + Stories export).
+
+- **Places** `/directory`: the "Queer Directory" of queer-owned and queer-friendly places. The nav label is **Places**, the page H1 is **Directory**. Both are correct in their own place; do not unify them.
+
+- **Nude Beaches** `/nude-beaches`: live-conditions utility page (Rooster Rock / Sauvie Island tabs).
+
+- **Boards:** Gig Board `/pride-work` (two-way: workers and hosts), Gifting `/gifting` (free board), Missed Connections! `/spotted` (anonymous missed connections; `/missed-connections` redirects).
+
+- **Promoter hub** `/submit`: submit an event, claim an event (`/submit/claim/:eventId`), become a verified promoter.
+
+- **About cluster:** About `/about`, Resume `/resume` (Tucker's hire-me page), Contact, Sponsors, Access &amp; Safety `/access`, Legal.
+
+- **Account:** Your Hub `/dashboard`, Inbox `/inbox`, Notification settings, Admin `/admin`.
+
+- **Member profiles** `/u/:username`: a standalone shell: no site nav, no footer, no film grain; its own top bar and theme.
+
+**Footer:** brand column (wordmark lockup, tagline, Feedback + Push + Calm controls) · Explore / Participate / Guide link columns · support column ("Free to use, but not free to run." + BUY ME A COFFEE via Venmo) · split-flap sign-off · legal line · thick rainbow seam. A full-bleed rainbow bar also sits just above the footer on every page.
+
+## **CONTENT FUNDAMENTALS (voice &amp; copy)**
+
+The voice is **straightforward with a slight bro lean**: plainspoken, low-key, a little dry. Short sentences. Say the thing, then stop. It talks to the reader as **"you"** and to the community as **"we" / "each other."** It is also openly **one person's project**: "Built by one person in Portland. No committee, no corporate parent. Just someone who loves this scene." and "Portland, Oregon. Made by Tucker, for the community, not shareholders."
+
+- **Register:** casual and direct, never breathless or promotional. "Here's the week." "Tickets are at the door." "Pull up." No exclamation stacking, no hype adjectives, no marketing verbs. Cheeky is fine, corny is not.
+
+- **Scene vernacular is allowed, in small doses.** "Yas" and "gurl" are on-brand and land well in stickers, empty states, toasts and board taglines. One per screen at most, and never inside functional UI (buttons, labels, nav, form errors).
+
+- **Tone:** warm and practical. Signature sign-off energy: *"Take care of each other."*
+
+- **No protest or activist framing in our own voice.** Zaylist copy (hero, section blurbs, buttons, stickers, footer, FAQ answers) does not editorialize or take a stance. Event listings are the exception: an event keeps its real name and its own language, so "Dyke March", "Trans March" and a member's post about a hand-painted sign all stay as written. The rule applies to what we say, not to what we list.
+
+- **Casing:** UI chrome (nav, buttons, chips, badges, section titles, counts) is **ALL CAPS** in the condensed display face. Body copy is sentence case.
+
+- **Kickers come in two registers.** Zine kicker: a lime chip in Barlow ("PORTLAND FEST 2026 · COMMUNITY SUBMISSIONS"). Utility kicker: small monospace, 0.2em tracking, colored per section, often with a blinking live dot.
+
+- **Three-beat mantras**, separated by "·", are the board tagline pattern: "Keep it free · keep it kind · keep it moving" (Gifting), "Stay kind · stay anonymous · reveal when ready" (Missed Connections), "Need work? Need help? Both belong here." (Gig Board), "Submit it. Claim it. Keep Portland queer." (Promoters).
+
+- **Close seams:** board-style pages end with a thin seam plus a mantra and the page URL, e.g. "Show up. Spend queer. Keep them alive." + `zaylist.com/directory`.
+
+- **Slogans / stickers:** loud, irreverent, collage-y: "KEEP PORTLAND WEIRD", "FUCK META", "MADE BY THE SCENE", "YAS GURL". Flair, never functional labels. Irreverent is fine, political is not.
+
+- **The name is a pun, use it.** Said out loud, Zaylist sounds like "the list," the fancy one you want to be on. The joke lives in the phrasing, not the spelling: *"You're on Zaylist."* *"Is your party on Zaylist?"* *"Get on Zaylist."* Setting it up with "on" or "your" is what makes the ear hear it. It is the closest thing we have to a tagline mechanic, so it earns a place in heroes, promoter pitches, submission confirmations and share cards. Rules: it is **always spelled Zaylist**, one word, one capital, no apostrophe. Never respell it to force the joke (no Zay'List, Zay List, ZayList), and keep it to one instance per screen so it stays a wink instead of a bit.
+
+- **Event copy** stays tight and scannable: title, venue, when-line ("Fri, Jul 17 · 9:00 PM · Pearl District"), a few tags. No fluff.
+
+- **Emoji:** essentially none in the UI. A single sparkle "✦" appears as a decorative separator. Day and status meaning is carried by **color**, not emoji.
+
+- **No em dashes, ever.** Use periods, commas, colons, parentheses, or "to" for ranges ("July 13 to 19"). Hard project rule (see CLAUDE.md and `docs/LIVE_DESIGN_STANDARD.md`).
+
+## **VISUAL FOUNDATIONS**
+
+### **One card shell**
+
+Every card on the site is the same object: a near-black OLED slab with a neon edge, a glass sheen, a rainbow refract seam and a soft outer bloom. It is called **deep glass**. A surface does not get its own card, it gets the shell pointed at its own accent through a single custom property, `--c`, which every piece of chrome downstream is `color-mix`ed off. Events aim it at the day colour, the Directory at the category neon, boards at the board accent. Any node that sets its own `--c` must also carry `.pdx-glass-rebind`, or it silently inherits root cyan. Full anatomy, the four surfaces, the modal as the open state of the same card, and the token table are on the **Card system** card under Brand.
+
+### **Two layers, one brand**
+
+The 2026 site runs two registers of the same identity. Pick the layer first, then style within it.
+
+1. **Zine layer**: heroes, events, marketing moments. Near-black base, pure neons, brutalist offset shadows, collage photo heroes under scrims and grain, glitch wordmarks, sticker tags. Loud.
+
+2. **Utility layer** ("board makeover"): boards, Nude Beaches, About, Hub, Admin, stats. Ink panels (`#050505` / `#06060a` / `#070708` bands, `#0c0c0f` cards) with `#1c1c22` borders, **monospace kickers and labels**, softened panel neons (`#c8fa3c` lime, `#19e3ff` cyan, `#ff1fa0` magenta, `#ff8c00` orange, `#b06bff` purple), tabular numerals, restrained glows, radius up to 10 to 12px on data tiles. Calm, dense, legible.
+
+### **Core rules**
+
+- **Base:** always near-black `#0a0a0a`. Zine content sits on `#0b0b0b` cards with `2px solid #2b2b2b` borders, radius 0 to 6px. Utility cards sit on `#0c0c0f` / `#0d0d10` with `#1c1c22` / `#24242c` hairlines, radius 6 to 12px. Pills and avatars are the only fully-round shapes.
+
+- **One neon per element.** Acid yellow `#CCFF00` is the **default** action colour, not the only one. Five surface families own their own primary and set it with a single `data-context` attribute that rebinds `--accent` and `--c` for the whole subtree: **Hub and settings cyan** (`--primary-hub`), **admin and moderation magenta** (`--primary-admin`), **owner desk violet** (`--primary-owner`), **Rooster Rock orange** (`--primary-rooster`), **Sauvie Island acid green** (`--primary-sauvie`). Everything else falls back to `--primary`. Cyan is also the link and focus colour everywhere, including inside the hub, so links stay underlined there. Never reach for a neon directly in a component: read `--accent`.
+
+- **One green.** `--green-acid #39FF14` is the only green in the system. The old `#00EE44` is retired everywhere (status ramp, cafés category, avatar presence dot, Collins Beach pins, two line icons); `--neon-green` survives only as a deprecated alias of `--green-acid`.
+
+- **Day color system (the rule that matters most).** Every event belongs to one event day, and that day drives its color everywhere (map pin, filter pill, day tag, card glow, schedule column underline). MON `#8800FF`, TUE `#0044FF`, WED `#FFEE00`, THU `#00FFFF`, FRI `#FF00CC`, SAT `#39FF14`, SUN `#FF6600`. MON and TUE have lighter text variants (`--day-mon-text`, `--day-tue-text`). Unknown day = white (`--day-unknown`); multi-day venues use the `--day-multi` gradient (map pins render a pie, one slice per day, MON to SUN order). Colors are **data, not decoration**; always use the `--day-*` tokens so calm mode can flatten them to grey. `#CCFF00` is never a day color.
+
+- **Admission tags:** FREE `--tag-free` (a softened lime **plate**, not a solid acid block: Free is the most common admission, and the rule is one solid fill per card), TICKETED cyan `--tag-ticketed`, DONATION amber `#FFB23D` `--tag-donation`.
+
+- **Schedule accents:** schedule grid cards do NOT use day colors (the column is the day); they cycle `--schedule-accent-1..5` (`#19E3FF`, `#FF6600`, `#39FF14`, `#A855F7`, `#FF00CC`).
+
+- **Directory categories:** each place type has a category neon (`--cat-bars` magenta, `--cat-food` orange, `--cat-cafes` acid green, `--cat-venues` cyan, `--cat-services` violet, `--cat-shops` amber, `--cat-hotels` blue) used as the card's accent and its map pin. It drives the whole deep-glass shell (border tint, bloom, sheen, logo orb), not a 3px top border: that was the old lite-glass card. Nonprofit, healthcare, real estate, campgrounds and groups take a specialty `--_edge` gradient instead of a flat accent border. The map key adds a rainbow conic swatch for queer-owned.
+
+- **Community board accents.** Board identity via `--board-*` tokens: Missed Connections! magenta, **Gifting** acid yellow, **Gigs** violet, and **Housing** softened cyan (`--board-housing`, queued: the board ships on the same deep-glass shell in a future update, reusing the Gig Board give/ISO pattern). Board accents are identity, so a `data-context` scope never repaints them. On utility surfaces these soften to `#ff1fa0` / lime / `#b06bff` (tab underlines, running heads). Boards also carry warmer paper text: `--board-text #f4f1ea`, `--board-muted #bdbab2`.
+
+- **Status ramp** (live-conditions tiles): good `#39FF14`, warn `#FFB347`, bad `#FF4D4D`, neutral `#19E3FF`, as 3px top borders on data cards.
+
+- **Text:** headings `#fff`; body `#e6e2d9` (muted `#c8c4bb`); meta `#999`; faint `#666`. Links cyan.
+
+- **Type:** display is **Barlow Condensed** (700 to 900, uppercase, tight \~0.95, down to 0.82 for stat numerals); body is **Inter**; and **monospace is now an official third voice** (ui-monospace stack) for utility kickers, running-head nav, stat labels, and meta chips: 10 to 12px, 0.14 to 0.2em tracking, uppercase. Big page titles on utility chrome (`.page-header__title`) use a lighter weight with a 1px black text-stroke and hard 2px shadow over paper white `#f7f5ee`.
+
+- **Backgrounds &amp; texture:** a sitewide **film-grain overlay** (SVG turbulence, opacity \~0.12) plus a fixed body wash of three faint neon radials and 1px scanlines. Zine pages add a chartreuse halftone dot grid (`.zine-page`). Photo heroes stack in fixed order: bg photo (saturate 1.08, contrast 1.04) → optional **webm overlay videos** stacked by preset from `client/src/lib/heroOverlays.ts` (light leaks screen .308 at 0.5x, film grain overlay .202 at 0.85x, scanlines screen .09, confetti screen .2 at 0.75x, rain screen .26; home = leaks + grain + confetti, panel and atmosphere = leaks + grain) → legibility scrim → grain → content. Imagery reads warm, nighttime-saturated, heavy grain.
+
+### **Signature effects**
+
+- **Lit plate and floor bloom** (replaces the brutalist offset). Anything that used to carry the flat `4px 4px 0` magenta offset now reads as a lit fill on a black keyline, a 1px highlight along the top edge, and the element's own accent blooming on the floor beneath it: `--sticker-lit` for posters, markers, tape and collage, `--chrome-*` for product chrome. Hover grows the bloom, press collapses it to a press shade. `--brutal-shadow` is deprecated and kept only so old markup does not break. Calm mode zeroes the bloom and leaves the keyline and bevel.
+
+- **Animated rainbow seam.** The rainbow bar (cyan → yellow → magenta → orange; thin 2px, thick 2.7px) now **flows continuously** with a traveling white glint and a soft glow pulse, under the header, above the footer, and between sections. As **Seam Charge**, the header seam doubles as the route/page loader (the nav drives it while navigating or fetching). Utility page-headers use a softened seam gradient (`#c8fa3c`, `#19e3ff`, `#ff1fa0`, `#ff8c00`).
+
+- **Soft neon glow** `0 0 14px color-mix(&lt;accent&gt; 18%)` on cards with a slow \~4s pulse; hover brightens. Missed Connections cards pulse magenta.
+
+- **Sticker outline:** big display numerals (countdown) carry an off-center black outline over the neon.
+
+- **Glitch:** the ZAYLIST wordmark and accent words run a slow, chunky RGB glitch: two tinted copies on `mix-blend-mode: screen`, hard `steps(1)` cuts, a 3.2s cycle with roughly 350ms of activity and offsets never above 3px. Off in calm/reduced motion. (See KNOWN CODE GAPS: the glitch components on `master` still target the old "PRIDE" string.)
+
+- **Neon tape** (Resume, collage moments): neon strips rotated ±0.7 to 1.6° with dark ink text, a lit bevel and a floor bloom. The tilt stays, the flat offset is gone. Lime "HIRE ME" sticker variant rotates -3 to -4°.
+
+- **Aurora, two layers.** Behind the home hero, `HeroAurora` drifts three large blurred orbs (violet, cyan, magenta) on coprime 19s / 23s / 27s loops. In front of those, `.home-hero__aurora` holds seven letter-orbs, one per letter of ZAYLIST, each coloured by that letter's place in the spectrum tape and started 1.4s earlier than the last so the glow travels across the word. Both sit over the hero background video.
+
+- **Live dots:** 8px neon dots with a 10px glow blink at 1.8s next to LIVE / open-to-work / kicker labels.
+
+### **Tags &amp; badges**
+
+- **Sticker tag** (the filled standard): display font, black text, lit neon fill (default magenta), black keyline, top bevel and an accent floor bloom (`--sticker-lit`).
+
+- **Event type tag:** monospace, lime fill, 1.5px border, keyline and a small bloom. Day tag: white pill, black text. Meta tag: outline.
+
+- **Sold out:** prominent red label on cards and modal. **CLAIMABLE:** tag on unclaimed events linking to the claim flow. **Verified:** accent-filled chip on profiles. Pronouns: cyan outline pill.
+
+### **Motion**
+
+- 0.15s snappy on hovers/presses; \~4s ease-in-out ambient pulses. Buttons lift up-left on hover and press down-right. Cards lift 2px.
+
+- **Entrance system (utility pages):** hero fades up 10px over 0.48s, the stats band follows at +0.07s, feeds fade in at 0.35s, compose panels 0.25s, modals 0.2s. A scroll-reveal utility fades sections in on first view.
+
+- Signature keyframes live in `tokens/effects.css`: `pdxReveal`, `pdxPop`, `pdxBlink` (site also uses a 1.8s blink for live dots), `pdxSpotPulse`, `pdxPulse`, `pdxMarquee`, plus the animated-seam trio `pdxSeamFlow` / `pdxSeamGlint` / `pdxSeamGlow`. Seven **web add-ons** layer on top (each additive, silenced by calm/reduced-motion): Seam Charge (`pdxSeamFill`/`pdxSeamGlint`/`pdxSeamFlash`), Split-Flap (per-cell `rotateX`, the glyph swaps at the halfway point while the cell is edge-on; used in the footer sign-off), Live Wave (`pdxEqBounce`), Count It Up (`pdxNumPop`/`pdxFloatUp`), RSVP Sparks (`pdxSparkFly`), Ring Shimmer (the live client runs `pdxaShimmer`; `pdxRingShimmer` exists in `effects.css` but nothing references it) and the logo glitch. Beyond these, a **Motion library** card documents fifteen ambient and surface motions ported from the live client: the two aurora layers (three atmosphere orbs behind the hero, seven letter orbs in front of them), spectrum wave, rainbow divider flow, word glitch, sticker float, board flicker, schedule card entrance, attendance pop, sheet up, inbox overlay, flyer stash holo, the hero parallax, the hero overlay videos and the generic `--parallax-y` containers. Every entry there copies a rules block. See the **Motion** and **Motion library** cards.
+
+- **Calm mode** (`[data-calm]` / `.calm-mode`) and reduced motion silence grain, glitch, aurora, ticker, glows, entrance animation, and the home hero background video (poster still shown instead); seams go static; day colors flatten to grey; **flag rings stay** (they are meaning, not decoration).
+
+## **PAGE PATTERNS**
+
+- **Page chrome (`.page-header`):** interior pages open with a compact black band: breadcrumb (HOME · section in lime), condensed title with optional neon accent word, lede, optional actions, softened rainbow seam underneath.
+
+- **Home hero:** full-bleed atmosphere layer runs a muted, looping, poster-fallback background video (`client/src/assets/home/hero-loop.mp4`), dimmed so the letter-orbs and wordmark read on top. It falls back to a poster still (`hero-loop-poster.jpg`) when muted autoplay is blocked (iOS Low Power Mode) or in Calm / reduced-motion. The ZAYLIST wordmark image floats above it (`hero-wordmark.webp`) with a slow bounce, over the seven drifting letter-orbs.
+
+- **PageHero:** the photo hero used by boards and promo panels: bg photo + overlay videos + scrim + grain, then a left-aligned panel with a lime kicker chip, a huge (up to 7.5rem, 0.88 line-height) title with an accent or glitch-rainbow word, lede, mono mantra tagline, actions. `flush` (left panel on scrim) and `compact` (75% height) variants.
+
+- **Board anatomy** (Gifting, Gig Board, Missed Connections, and adopted by Directory + Nude Beaches): running head (mono LIVE dot + mono nav) → hero row with tab bar (display tabs, 4px underline in board accent) → full-bleed 3-col **stats band** (huge tabular numerals, mono labels) → "how it works" steps on `#070708` → compose/form panels → active feed of listing cards → **close seam** (mantra + URL). Gig Board adds talent/host path cards; Missed Connection! renders quote-style cards.
+
+- **Events:** page hero → map strip (day pins, RSVP `#CCFF00` pulse, legend) → sticky filter bar (day pills fill with day color when active) → poster-card grid or list rows (4px day left border). Cards carry attendance clusters ("12 going") and an RSVP cluster. An **EventsNowPanel** (HAPPENING NOW / UP NEXT rows with a blinking magenta dot and a mini-card marquee) and a live **event ticker** surface what's on right now.
+
+- **Schedule:** 7-column day × time grid, 3px day underlines on column headers, magenta now-line, cards cycle schedule accents, MY SCHEDULE toggle, and an Export to Instagram Stories button (1080×1920 PNG render).
+
+- **Directory:** category-filtered 4-col grid of place cards (3px category top border, radius 10px), map with category pins + rainbow queer-owned swatch in the key, member add-a-place form (Queer-owned / Queer-friendly checks).
+
+- **Nude Beaches:** two location tabs, each its own context primary (**Rooster Rock orange** `--primary-rooster`, **Sauvie Island acid green** `--primary-sauvie`). Map pins follow: Rooster Rock is orange with spectrum pins on the queer corners, Collins Beach on Sauvie is acid green with spectrum pins. Live-condition cards (river level, weather, crowd) with status top borders; logistics checklist tiles; resource links.
+
+- **About:** poster-wall photo hero with heavy scrim, live mono kicker, giant lime stat headline; 4-col stat band; manifesto with a 5px magenta left-border shout in paper white; "Made by Tucker" creator section (photo + lime hire sticker, cyan open-for-work badge, project cards).
+
+- **Resume:** neon-tape employer labels, rainbow marquee band (black text on `--grad-rainbow`, 32s loop, pauses on hover), green open-to-work badge, neon-bordered stat cards, XP cards with per-card neon hover glow and colored bullet markers.
+
+- **Member profiles (`/u/`):** standalone shell. 4px rainbow bar top; banner photo (DS collage art) or accent-radial fallback with dot grid; avatar with flag ring; verified chip in the member's accent; name in 900 condensed; venue chips; marquee band; stat strip; About / Events / Media / Board tabs. Members pick an **accent** (all 8 neons, default magenta; violet/blue get text-safe variants) and a **banner** via the Theme popover.
+
+- **Hub (`/dashboard`, "Your Hub"):** dark sidebar shell (266px, `#050505` on `#0a0a0a`, `#1c1c22` borders) with 3px inset accent rails per nav item (cyan/green/lime/pink); panels for profile editor, event editor, inbox preview, venue section, widgets. **Inbox** is a list + thread split layout. **Admin** shares the shell: stat grids, review inbox, member growth chart, owner desk.
+
+## **ICONOGRAPHY**
+
+- The brand ships a **32-icon line set** (`assets/icons/`, 24px grid, 2.2 stroke, round caps, spectrum-colored) covering community, events, boards, safety, and nav. In components, icons are inline SVGs so they inherit color with no dependency. There is no brand icon font.
+
+- **Emoji are not used** as UI icons (the "✦" sparkle and the chain ring's padlock charm aside). Meaning is color-coded by day/admission/category, not iconified.
+
+- The brand mark is the wordmark lockup and the Z. Nav and footer use the full baked ZAYLIST wordmark `assets/logo-lockup.png` (`Logo variant="full"`); the square Z in `assets/logo-z.jpg` covers watermarks and in-product placements. Home-screen icons and favicons are a separate system: `app-face/` holds the App face standards and every shipped export (180 iOS, 192 and 512 Android, maskable, monochrome, 1024 master). That package is the only source of truth for the app face, so nothing else here restates its artwork or sizes.
+
+## **AVATARS &amp; FLAG RINGS (canonical)**
+
+One component, three layers: a **conic-gradient flag ring** (4px at 48px, scales via `--avatar-size`), a cover-fit photo (user-cropped) or an initial fallback on one of six neon chips, and an optional charm. **18 rings** (rainbow, progress, lesbian, gay-men, bisexual, transgender, nonbinary, pansexual, genderfluid, genderqueer, intersex, asexual, aromantic, agender, leather, bear, chain + none); **Progress flag is the default** for unset values; `chain` is metallic with a padlock charm. The ring is **identity, not status**: never repurpose ring colors for roles (the HOST chip is colored by the event's day). Masked/anonymous = no ring. Calm mode keeps rings. Clusters overlap by \~-8px with a 2px `#0b0b0b` border + "12 going" count. A light-only shimmer may orbit the ring (Ring Shimmer).
+
+---
+
+## **Components**
+
+Reusable primitives (React, styled via CSS custom properties). Import from `window.PDXPrideGuideDesignSystem_b20420` in card/kit HTML.
+
+**Brand:** `Logo`, `Avatar` **Forms:** `Button`, `IconButton`, `SearchInput`, `FilterChip`, `ActionRow` **Data display:** `Badge`, `EventCard`, `PosterCard`, `PlaceCard`, `BoardCard`, `AdCard`, `FeedItem`, `Countdown`, `StatPill`, `StatCard`, `StickerBadge` **Layout:** `SectionHeader`, `Divider`, `HeroBanner`, `Marquee`, `InfoTile`, `NavBar` **Map:** `MapPanel`, `MapLegend`
+
+Each component directory holds `&lt;Name&gt;.jsx`, `&lt;Name&gt;.d.ts` (props + JSDoc), an optional `&lt;Name&gt;.prompt.md` (usage), and a `@dsCard` preview HTML. The six deep-glass additions (`BoardCard`, `AdCard`, `FeedItem`, `InfoTile`, `ActionRow`, `NavBar`) build out the new board / ad / hub / infrastructure / promoter / nav surfaces on the shared glass token; the rest map to live `client/src/components/ds/` counterparts.
+
+### **Site patterns not yet componentized here**
+
+Real site surfaces to follow by rule when needed: `PageHero` + `.page-header` chrome, the board system (running head, stats band, section kickers, close seam, tab bar), `EventsNowPanel`, event ticker, attendance clusters, split-flap sign-off, CountUp stats, film grain overlay, glitch word/logo, hero video overlays, the home hero background video, the Hub sidebar shell, and profile theming. Their rules live in PAGE PATTERNS above; lift exact values from `client/src/index.css` in the repo.
+
+## **UI kit**
+
+`ui_kits/zaylist/` is an interactive recreation of core site surfaces (a representative subset, not every 2026 page). Open `ui_kits/zaylist/index.html`. Screens: **Home**, **Events**, **Schedule**, **Directory** (venue cards + map), **Hub**, **Admin**, plus an event detail view. Data lives in `ui_kits/zaylist/data.js`.
+
+## **Foundations (Design System tab)**
+
+The reference page is banded, in the order you learn the system: **00 Read me**, **A Language** (colour, context primaries, type and space, voice, icons), **B Brand** (treatments, brand guide, app face), **C Surfaces** (glass, components, motion, motion library), **D Patterns** (nav, hub and feed, floating inbox, maps), **E In use** (the live site, Nude Beaches, a public profile). Each entry carries a SHIPPED / QUEUED / DRAFT chip, a copyable import line and a props table read live from its `.d.ts`, and the sidebar drills into every panel's own sections.
+
+## **Root manifest**
+
+- `styles.css`: the single entry point consumers link (imports only).
+
+- `tokens/`: `fonts.css`, `colors.css`, `typography.css`, `layout.css`, `effects.css`, `base.css`.
+
+- `components/`: `brand/`, `forms/`, `data-display/`, `layout/`, `map/`.
+
+- `ui_kits/zaylist/`: the interactive site recreation.
+
+- `assets/`: `logo-lockup.png` (baked wordmark), `logo-z.jpg` (square Z), `icons/` (32 line icons), `banners/` (collage heroes; also the profile banner choices), photos used by About/Resume.
+
+- `app-face/`: the App face standards plus every home-screen and favicon export. The only source of truth for the app face.
+
+- `guidelines/`: foundation specimen cards.
+
+- `CLAUDE.md`: project rules (no em dashes). `SKILL.md`: portable skill wrapper.
+
+## **Repo bundle (`design-system/`)**
+
+On `master`, `design-system/` is a portable color/type/export kit. It does NOT ship the component library or UI kits. It contains:
+
+- `README.md`: what the bundle is and is not; points to `docs/LIVE_DESIGN_STANDARD.md` as the live standard.
+
+- `tokens/tokens.css`: the exported design tokens.
+
+- `previews/`: static preview HTML.
+
+- `EVENTS_GUIDE.md`, `AVATARS_GUIDE.md`, `ZAYLIST_LOGO_GUIDE.md`: specimen and usage guides.
+
+## **CAVEATS**
+
+- **Fonts:** no brand font files were provided. **Barlow Condensed** and **Inter** load from Google Fonts to match `--font-display` / `--font-body`; monospace uses the system `ui-monospace` stack, same as production. If real files exist, drop them in `assets/fonts/` and swap the rules in `tokens/fonts.css`.
+
+- **Hero overlay videos:** the site's webm overlay files (`/overlays/*.webm`) are not bundled here; approximate with the CSS grain + scrim recipe when mocking heroes.
+
+- **Map tiles:** `MapPanel` renders the branded overlay (glowing day pins, legend, seams) over a dark faux-street background. Production uses Leaflet + CARTO Dark Matter tiles (already dark, no filter).
+
+- Event, place, and community copy in the UI kit is a representative subset of the real data, not the full live dataset.
+
+## **KNOWN CODE GAPS (on `master`, flagged for fixing, not yet true in code)**
+
+- The glitch wordmark still targets the old "PRIDE" string. `GlitchWord.tsx` and `GlitchLogo.tsx` comments/targets read "nav PRIDE, hero PRIDE." The rebrand did not reach these components; they should be updated to glitch "ZAYLIST" (or be removed).
+
+- The live footer sign-off and tagline currently contain em dashes ("no corporate parent: just someone…", "Made by Tucker: for the community…") in `client/src/components/Footer.tsx`, which breaks the project's own "no em dashes, ever" rule. They should be swapped to periods/commas, as written in CONTENT FUNDAMENTALS above.
+</pre></details>
+
+</section>
+<footer class="foot"><p>Zaylist design system, full export. Self-contained: open it anywhere, offline, and it renders exactly as authored. When this export and the live product disagree, the live product wins.</p></footer>
+</main>
+</div>
+<script>
+/* The two webfonts live once in this document. Each panel is a self-contained
+   page, so it needs the @font-face rules in its own document: inject the same
+   single copy instead of shipping the font bytes 35 times. */
+(function(){
+  function fontCss(){
+    var out="";
+    for (var i=0;i<document.styleSheets.length;i++){
+      var s=document.styleSheets[i], r;
+      try { r=s.cssRules; } catch(e){ continue; }
+      for (var j=0;j<r.length;j++) if (r[j].type===5) out+=r[j].cssText+"\n";
+    }
+    return out;
+  }
+  var css=null;
+  function dress(f){
+    try{
+      var d=f.contentDocument; if(!d||!d.head) return;
+      if(d.getElementById("__exportfonts")) return;
+      if(css===null) css=fontCss();
+      if(!css) return;
+      var st=d.createElement("style"); st.id="__exportfonts"; st.textContent=css;
+      d.head.appendChild(st);
+    }catch(e){}
+  }
+  function all(){ document.querySelectorAll("iframe").forEach(dress); }
+  document.querySelectorAll("iframe").forEach(function(f){ f.addEventListener("load",function(){dress(f)}); });
+  addEventListener("load",function(){ all(); setTimeout(all,400); setTimeout(all,1500); });
+  all();
+})();
+</script>
+</body></html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>body{margin:0;background:var(--bg-app);padding:22px;font-family:var(--font-body)}
+.cap{font-family:var(--font-body);font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin:0 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.chip{display:inline-flex;align-items:center;font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:#0a0a0a;background:var(--acid-lit-chip);padding:8px 14px;border-radius:var(--chrome-radius-sm);box-shadow:var(--chrome-keyline),inset 0 1px 0 rgba(255,255,255,.65),0 9px 24px -13px rgba(204,255,0,.9)}
+.chip--cyan{background:var(--cyan-lit);color:#06060a;box-shadow:var(--chrome-keyline),inset 0 1px 0 rgba(255,255,255,.6),0 9px 24px -13px rgba(0,255,255,.9)}
+.mono{--c:#c8fa3c;display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--c);padding:8px 14px;border-radius:var(--chrome-radius-sm);background:color-mix(in srgb,var(--c) 9%,transparent);border:1px solid color-mix(in srgb,var(--c) 30%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.mono--rule{padding:0 0 0 11px;background:none;border:0;border-left:2px solid var(--c);box-shadow:none;border-radius:0}
+.mono__dot{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 9px var(--c);animation:pdxBlink 1.8s steps(1,end) infinite}
+@keyframes pdxBlink{50%{opacity:.25}}
+.tag{--c:#b8b5ad;display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:6px 11px;border-radius:var(--chrome-radius-tag);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#08080b);border:1px solid color-mix(in srgb,var(--c) 38%,#101014);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 0 18px -9px var(--c)}
+.tag--solid{color:#0a0a0a;background:var(--acid-lit-tag);border-color:#000;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 18px -9px var(--neon-yellow)}
+.tag--neutral{color:#b8b5ad;background:#111114;border-color:#26262e;box-shadow:none}
+.tag__dot{width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.tape{display:inline-block;padding:9px 18px;border-radius:3px;font-family:var(--font-display);font-weight:900;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#06060a;background:var(--cyan-lit-tape);transform:rotate(-1.1deg);box-shadow:0 0 0 1px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.55),0 12px 26px -14px rgba(0,255,255,.9)}
+.tape--acid{font-size:17px;letter-spacing:.05em;padding:9px 16px;background:var(--acid-lit-tape);transform:rotate(-3deg);box-shadow:0 0 0 1px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.6),0 12px 26px -14px rgba(204,255,0,.9)}
+</style></head><body>
+<div class="cap">Rainbow seam (animated: flow + glint + glow; static in calm mode; "Seam Charge" doubles as the route loader under the header)</div><div class="pdx-rainbow-rule"></div>
+
+<div class="cap" style="margin-top:24px">Kicker chips (lit fill, black keyline, bloom on the floor. No second-hue border, no flat offset)</div>
+<div class="row"><span class="chip">The Guide</span><span class="chip chip--cyan">Tonight</span></div>
+
+<div class="cap" style="margin-top:24px">Utility mono kicker (plated, and the running-head rule variant)</div>
+<div class="row"><span class="mono"><span class="mono__dot"></span>Live now</span><span class="mono mono--rule">Section 04</span></div>
+
+<div class="cap" style="margin-top:24px">Tags (tinted plate is the default. One solid fill per card, never two)</div>
+<div class="row">
+  <span class="tag tag--solid">Free</span>
+  <span class="tag" style="--c:var(--neon-cyan)"><span class="tag__dot"></span>Ticketed</span>
+  <span class="tag" style="--c:var(--neon-magenta)">Claimable</span>
+  <span class="tag tag--neutral">Drag</span>
+</div>
+
+<div class="cap" style="margin-top:24px">Neon tape (keeps the tilt, swaps the flat offset for a lit bevel and bloom)</div>
+<div class="row"><span class="tape">Neon tape</span><span class="tape tape--acid">Hire me</span></div>
+</body></html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Zaylist</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:1280px;height:854px;overflow:hidden}
+.tile{display:grid;grid-template-columns:1fr 148px;width:1280px;height:854px}
+.main{position:relative;display:grid;place-items:center;background:#050506;overflow:hidden}
+.main::before{content:"";position:absolute;left:50%;top:52%;width:104%;height:82%;transform:translate(-50%,-50%);background:radial-gradient(ellipse closest-side,rgba(25,227,255,.16),rgba(204,255,0,.07) 46%,transparent 74%);filter:blur(30px)}
+.main img{position:relative;width:82%;filter:drop-shadow(0 0 26px rgba(255,255,255,.18))}
+.strip{display:grid;grid-template-rows:repeat(4,1fr)}
+.strip i{display:block}
+</style></head><body>
+<div class="tile">
+  <div class="main"><img src="assets/logo-lockup.png" alt="Zaylist"></div>
+  <div class="strip"><i style="background:#CCFF00"></i><i style="background:#19E3FF"></i><i style="background:#FF1FA0"></i><i style="background:#750787"></i></div>
+</div>
+</body></html>

@@ -1,0 +1,228 @@
+{
+  "name": "Zaylist app face",
+  "version": "1.0",
+  "canvas": {
+    "shape": "square",
+    "master": 1024,
+    "colorSpace": "sRGB",
+    "cornerRadius": "none, both platforms mask the file"
+  },
+  "colors": {
+    "tile": "#0a0a0a",
+    "tileGradient": [
+      "#141417",
+      "#0a0a0a"
+    ],
+    "tileGradientStop": 0.58,
+    "letter": "#f7f5ee",
+    "letterLit": [
+      "#ffffff",
+      "#f7f3e9",
+      "#d6d0c2"
+    ],
+    "seam": [
+      {
+        "offset": 0,
+        "color": "#00FFFF"
+      },
+      {
+        "offset": 0.34,
+        "color": "#FFEE00"
+      },
+      {
+        "offset": 0.68,
+        "color": "#FF00CC"
+      },
+      {
+        "offset": 1,
+        "color": "#FF6600"
+      }
+    ],
+    "monochrome": "#ffffff"
+  },
+  "geometry": {
+    "note": "All values are fractions of the square canvas edge. Origin is top left.",
+    "letter": {
+      "x": 0.185,
+      "y": 0.15,
+      "width": 0.63,
+      "height": 0.52
+    },
+    "letterPolygon": {
+      "note": "Fractions of the letter box, not the canvas. Nine points, closed.",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.395,
+          0.76
+        ],
+        [
+          0.758,
+          0.76
+        ],
+        [
+          0.928,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0.171,
+          0.76
+        ],
+        [
+          0.664,
+          0.24
+        ],
+        [
+          0.171,
+          0.24
+        ]
+      ]
+    },
+    "seam": {
+      "x": 0.185,
+      "y": 0.76,
+      "width": 0.63,
+      "height": 0.08,
+      "radius": "height / 2"
+    },
+    "maskableScale": 0.78
+  },
+  "lighting": {
+    "note": "Baked into PNG exports only. Never into the SVG layers. k = size / 150.",
+    "letterShadow": {
+      "color": "#000000",
+      "opacity": 0.6,
+      "offsetY": "3.5 * k",
+      "blur": "4 * k"
+    },
+    "letterFace": {
+      "type": "linear",
+      "angleDeg": 168,
+      "stops": [
+        "#ffffff 0%",
+        "#f7f3e9 46%",
+        "#d6d0c2 100%"
+      ]
+    },
+    "letterFoot": {
+      "note": "bottom 16 percent of the letter box",
+      "from": "rgba(0,0,0,0.30)",
+      "to": "rgba(0,0,0,0)"
+    },
+    "letterRim": {
+      "note": "top 9 percent of the letter box",
+      "from": "rgba(255,255,255,0.5)",
+      "to": "rgba(255,255,255,0)"
+    },
+    "seamShadow": {
+      "color": "rgba(0,0,0,0.6)",
+      "offsetY": "3 * k",
+      "blur": "6 * k"
+    },
+    "seamRim": {
+      "color": "rgba(255,255,255,0.6)",
+      "height": "1 * k",
+      "position": "top inside edge"
+    },
+    "seamUnder": {
+      "color": "rgba(0,0,0,0.34)",
+      "height": "2.4 * k",
+      "position": "bottom inside edge"
+    }
+  },
+  "exports": [
+    {
+      "file": "icons/zaylist-180.png",
+      "size": 180,
+      "platform": "ios-web",
+      "slot": "apple-touch-icon",
+      "scale": 1,
+      "opaque": true,
+      "lighting": "baked"
+    },
+    {
+      "file": "icons/zaylist-192.png",
+      "size": 192,
+      "platform": "android-web",
+      "purpose": "any",
+      "scale": 1,
+      "opaque": true,
+      "lighting": "baked"
+    },
+    {
+      "file": "icons/zaylist-512.png",
+      "size": 512,
+      "platform": "android-web",
+      "purpose": "any",
+      "scale": 1,
+      "opaque": true,
+      "lighting": "baked"
+    },
+    {
+      "file": "icons/zaylist-mask.png",
+      "size": 512,
+      "platform": "android-web",
+      "purpose": "maskable",
+      "scale": 0.78,
+      "opaque": true,
+      "lighting": "baked"
+    },
+    {
+      "file": "icons/zaylist-mono.png",
+      "size": 512,
+      "platform": "android-web",
+      "purpose": "monochrome",
+      "scale": 0.78,
+      "opaque": false,
+      "lighting": "none, flat #ffffff silhouette"
+    },
+    {
+      "file": "icons/zaylist-1024.png",
+      "size": 1024,
+      "platform": "master",
+      "scale": 1,
+      "opaque": true,
+      "lighting": "baked"
+    },
+    {
+      "file": "icons/src/01-background.svg",
+      "size": 1024,
+      "platform": "ios-native",
+      "layer": "background",
+      "lighting": "none"
+    },
+    {
+      "file": "icons/src/02-z.svg",
+      "size": 1024,
+      "platform": "ios-native",
+      "layer": "foreground-1",
+      "lighting": "none"
+    },
+    {
+      "file": "icons/src/03-seam.svg",
+      "size": 1024,
+      "platform": "ios-native",
+      "layer": "foreground-2",
+      "lighting": "none"
+    }
+  ],
+  "rules": [
+    "Never round the corners in the file. Both platforms mask it.",
+    "Never ship an alpha channel in zaylist-180.png. Transparency renders as solid black.",
+    "zaylist-mono.png is the only file that is meant to be transparent, and it is Android only.",
+    "Never reuse the iOS file for Android maskable. A circular launcher crop cuts the ends off the seam.",
+    "Never bake lighting into the SVG layers. The system lights them.",
+    "The seam is the only element allowed to carry color."
+  ]
+}

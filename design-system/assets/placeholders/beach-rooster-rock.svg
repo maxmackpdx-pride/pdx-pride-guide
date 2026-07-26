@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="Rooster Rock beach day">
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a0a00"></stop>
+      <stop offset="55%" stop-color="#0a0500"></stop>
+      <stop offset="100%" stop-color="#050505"></stop>
+    </linearGradient>
+    <linearGradient id="sun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8833"></stop>
+      <stop offset="100%" stop-color="#FF6600"></stop>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#FF6600" stroke-width="0.6" opacity="0.28"></path>
+    </pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="14"></feGaussianBlur></filter>
+  </defs>
+  <rect width="800" height="1000" fill="url(#sky)"></rect>
+  <rect width="800" height="1000" fill="url(#grid)"></rect>
+  
+  <circle cx="400" cy="340" r="130" fill="#FF6600" opacity="0.18" filter="url(#blur)"></circle>
+  <circle cx="400" cy="340" r="88" fill="url(#sun)"></circle>
+  <circle cx="400" cy="340" r="88" fill="none" stroke="#fff" stroke-width="4" opacity="0.85"></circle>
+  
+  <rect x="0" y="520" width="800" height="18" fill="#FF6600"></rect>
+  <rect x="0" y="538" width="800" height="10" fill="#fff" opacity="0.9"></rect>
+  <rect x="0" y="548" width="800" height="14" fill="#111"></rect>
+  
+  <path d="M80 720 L180 580 L280 640 L360 540 L480 620 L560 560 L700 680 L720 780 L80 780 Z" fill="#111" stroke="#FF6600" stroke-width="3"></path>
+  <path d="M120 780 L200 680 L300 720 L400 650 L520 720 L620 680 L680 780 Z" fill="#1a1a1a" stroke="#fff" stroke-width="1.5" opacity="0.9"></path>
+  
+  <rect x="48" y="48" width="704" height="904" fill="none" stroke="#FF6600" stroke-width="4"></rect>
+  <rect x="64" y="64" width="672" height="872" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.55"></rect>
+  
+  <text x="400" y="200" text-anchor="middle" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-size="34" font-weight="900" fill="#fff" letter-spacing="10">RIVER BRATS</text>
+  <text x="400" y="860" text-anchor="middle" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-size="64" font-weight="900" fill="#FF6600" letter-spacing="4">ROOSTER</text>
+  <text x="400" y="920" text-anchor="middle" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-size="48" font-weight="900" fill="#fff" letter-spacing="8">ROCK</text>
+  <text x="400" y="960" text-anchor="middle" font-family="ui-monospace, monospace" font-size="16" fill="#FF6600" letter-spacing="5" opacity="0.8">BEACH DAY · PDX</text>
+</svg>

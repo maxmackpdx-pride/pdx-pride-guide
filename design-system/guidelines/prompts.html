@@ -1,0 +1,182 @@
+<!-- @dsCard group="00 Overview" viewport="980x2400" name="Prompts" subtitle="How to ask for anything in this system, in the words the system already uses" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Prompts</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-app);color:var(--text-body);font-family:var(--font-body);font-size:14px;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding:40px 44px 72px}
+a{color:var(--neon-cyan)}a:hover{color:var(--neon-yellow)}
+h1{font-family:var(--font-display);font-weight:900;font-size:clamp(40px,6vw,68px);line-height:.92;text-transform:uppercase;margin:0 0 16px;color:var(--text-hi)}
+h2{font-family:var(--font-display);font-weight:900;font-size:30px;line-height:1;text-transform:uppercase;margin:44px 0 14px;padding-bottom:9px;border-bottom:2px solid var(--ink-border);color:var(--text-hi)}
+h3{font-family:var(--font-display);font-weight:800;font-size:20px;line-height:1.1;text-transform:uppercase;letter-spacing:.02em;margin:30px 0 10px;color:var(--neon-cyan)}
+h4{font-family:var(--font-display);font-weight:800;font-size:14px;letter-spacing:.05em;text-transform:uppercase;margin:0 0 7px;color:var(--text-hi)}
+p{margin:0 0 12px;text-wrap:pretty}
+ul,ol{margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:7px}
+li{text-wrap:pretty}
+strong{color:var(--text-hi);font-weight:600}
+em{color:var(--text-body-muted)}
+code{font-family:var(--font-mono);font-size:12px;color:var(--neon-cyan);background:var(--panel-card);border:1px solid var(--ink-border-faint);border-radius:3px;padding:1px 5px}
+hr{border:0;height:2px;margin:34px 0;background:var(--rainbow-bar-loop)}
+.kick{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-cyan);margin-bottom:14px}
+.lede{font-size:15px;color:var(--text-body);max-width:76ch}
+.sub{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-disabled);margin:0 0 18px}
+/* the prompt block: a lit slab you copy out of */
+.pr{position:relative;margin:0 0 14px;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card);overflow:hidden}
+.pr__bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px 7px 13px;border-bottom:1px solid var(--ink-border-faint);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+.pr__k{font-family:var(--font-display);font-weight:800;font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--neon-cyan)}
+.pr__c{font-family:var(--font-display);font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-lo);background:none;border:1px solid var(--border-strong);border-radius:999px;padding:4px 12px 3px;cursor:pointer;white-space:nowrap}
+.pr__c:hover{color:var(--text-hi);border-color:var(--text-lo)}
+.pr__c.done{color:#050506;background:var(--neon-cyan);border-color:var(--neon-cyan)}
+.pr pre{margin:0;padding:13px 15px 14px;font-family:var(--font-mono);font-size:12px;line-height:1.65;color:var(--text-body);white-space:pre-wrap;word-break:break-word}
+.pr pre b{color:var(--neon-yellow);font-weight:400}
+/* say this / not that */
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--ink-border);border-radius:var(--radius-md);overflow:hidden;margin:0 0 16px}
+@media (max-width:680px){.sw{grid-template-columns:1fr}}
+.sw__h{padding:8px 14px 7px;font-family:var(--font-display);font-weight:800;font-size:11px;letter-spacing:.13em;text-transform:uppercase}
+.sw__h--y{color:var(--neon-green,#39FF14);border-bottom:1px solid var(--ink-border-faint)}
+.sw__h--n{color:var(--neon-orange);border-bottom:1px solid var(--ink-border-faint);border-left:1px solid var(--ink-border-faint)}
+.sw__r{padding:10px 14px;font-size:12.5px;line-height:1.55;border-top:1px solid var(--ink-750);color:var(--text-body)}
+.sw__r--n{border-left:1px solid var(--ink-border-faint);color:var(--text-lo)}
+.sw__r i{display:block;font-style:normal;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-disabled);margin-top:5px}
+/* vocabulary index */
+.vt{width:100%;border-collapse:collapse;margin:0 0 16px}
+.vt th{text-align:left;font-family:var(--font-display);font-weight:800;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-disabled);padding:0 14px 7px 0;border-bottom:1px solid var(--ink-border)}
+.vt td{padding:8px 14px 8px 0;border-bottom:1px solid var(--ink-750);vertical-align:top;font-size:12.5px;line-height:1.5;color:var(--text-lo)}
+.vt td.n{font-family:var(--font-display);font-weight:800;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--text-hi);white-space:nowrap;width:1%}
+.vt td.t{font-family:var(--font-mono);font-size:11px;color:var(--neon-cyan);white-space:nowrap;width:1%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:0 0 16px}
+.cell{padding:15px 17px 16px;border:1px solid var(--ink-border);border-radius:var(--radius-md);background:var(--panel-card)}
+.cell p{margin:0;font-size:12.5px;line-height:1.6;color:var(--text-lo)}
+.flag{margin:0 0 16px;padding:13px 16px;border-left:3px solid var(--neon-orange);background:linear-gradient(90deg,color-mix(in srgb,var(--neon-orange) 7%,transparent),transparent 70%)}
+.flag h4{color:var(--neon-orange)}
+.flag p{margin:0 0 8px;font-size:12.5px;color:var(--text-lo)}
+.flag p:last-child{margin:0}
+</style></head>
+<body><div class="wrap">
+<div class="kick">Zaylist &middot; 00.2</div>
+<h1>Prompts</h1>
+<p class="lede">This system already has names for everything in it. A prompt that uses those names gets the real thing back; a prompt that describes the look gets an imitation of it. This panel is the vocabulary, the phrasings that work, and the guardrails worth pasting into every request.</p>
+<p class="sub">Applies to Claude, to Claude Code, and to any handoff conversation about this system</p>
+
+<hr>
+
+<h2>01 &middot; The one rule</h2>
+<p><strong>Name the thing, do not describe it.</strong> Every colour, shell, effect and component here has a token or a component name. Ask for <code>--day-sat</code> and you get the exact Saturday green with its text pair and calm-mode behaviour. Ask for "a bright green" and you get a new green that belongs to nothing, breaks the day system, and has to be undone.</p>
+<div class="sw">
+  <div class="sw__h sw__h--y">Say this</div>
+  <div class="sw__h sw__h--n">Not this</div>
+  <div class="sw__r">Build it on the deep-glass card shell with <code>--c</code> set to <code>--cat-venues</code>.<i>gets the real shell and accent contract</i></div>
+  <div class="sw__r sw__r--n">Make a dark card with a glowing cyan border.<i>invents a lookalike, no rebind, no sheen</i></div>
+  <div class="sw__r">Use the lit plate and floor bloom.<i>current sticker idiom</i></div>
+  <div class="sw__r sw__r--n">Add a hard drop shadow offset like a sticker.<i>that treatment is retired</i></div>
+  <div class="sw__r">Primary action is <code>--primary</code>; keep yellow for flair only.<i>respects the demotion to flair</i></div>
+  <div class="sw__r sw__r--n">Make the buttons acid yellow, that is the brand colour.<i>true a year ago, not now</i></div>
+  <div class="sw__r">Type is Barlow Condensed display, Inter body, from <code>--font-display</code> and <code>--font-body</code>.<i>two families, already loaded</i></div>
+  <div class="sw__r sw__r--n">Use a bold condensed font.<i>picks something else and pairs it badly</i></div>
+</div>
+
+<h2>02 &middot; Vocabulary index</h2>
+<p>These are the words to reach for. Each row is a thing you can ask for by name, and the token or file that answers.</p>
+<table class="vt"><tr><th>Say</th><th>Where it lives</th><th>What you get</th></tr>
+<tr><td class="n">Deep glass</td><td class="t">tokens/glass.css</td><td>The one card shell: OLED slab, accent border tint, glass sheen, refract seam, floor bloom. Every card, tile, row, ad and board is this.</td></tr>
+<tr><td class="n">The accent contract</td><td class="t">--c</td><td>One custom property drives all chrome on a card. Set <code>--c</code>, add <code>.pdx-glass-rebind</code>, and the border, bloom, sheen and buttons follow.</td></tr>
+<tr><td class="n">Poster well</td><td class="t">--poster-well-*</td><td>The flyer area: radial accent floor, scanline pass, 4px day floor. Art is letterboxed with <code>contain</code>, never cropped.</td></tr>
+<tr><td class="n">Lit plate</td><td class="t">--acid-lit, --*-lit</td><td>The current sticker, tag and marker treatment: lit fill, black keyline, accent blooming on the floor.</td></tr>
+<tr><td class="n">Refract seam</td><td class="t">--refract-seam-gradient</td><td>The rainbow hairline at the top of a card. Also the route loader when it charges.</td></tr>
+<tr><td class="n">Day colours</td><td class="t">--day-mon &hellip; --day-sun</td><td>Seven keys that carry data, not decoration. Each has a text pair. Wednesday is <code>#FFEE00</code>, which is not the acid yellow.</td></tr>
+<tr><td class="n">Board accents</td><td class="t">--board-*</td><td>Missed Connections magenta, Gifting acid yellow, Gigs violet, Housing cyan (queued).</td></tr>
+<tr><td class="n">Category neons</td><td class="t">--cat-*</td><td>Directory place types. Drives the card accent and the map pin, not a top border.</td></tr>
+<tr><td class="n">Context primaries</td><td class="t">[data-context]</td><td>One attribute rebinds <code>--accent</code> and <code>--c</code> for a whole subtree: hub, admin, owner, Rooster Rock, Sauvie Island.</td></tr>
+<tr><td class="n">Calm mode</td><td class="t">html.calm-mode</td><td>The accessibility switch. Flattens bloom and blur, stops animation, keeps colour meaning. Every new effect needs a calm branch.</td></tr>
+<tr><td class="n">Glass buttons</td><td class="t">.pdx-glass-btn</td><td>Default, <code>--solid</code>, <code>--outline</code>. 9px radius. Solid takes the card's accent once rebound.</td></tr>
+<tr><td class="n">The spectrum</td><td class="t">--spectrum-*</td><td>The nine-stop tape. Use it as a run, never as a gradient behind text.</td></tr>
+<tr><td class="n">Utility layer</td><td class="t">--panel-*, --ink-*</td><td>The data-dense register: ink panels, mono kickers, the status ramp. Admin and hub live here.</td></tr>
+<tr><td class="n">Glitch</td><td class="t">guidelines/brand-glitch.html</td><td>The slow RGB offset on the nav and hero wordmark, with its cycle and its off switch.</td></tr>
+</table>
+
+<h2>03 &middot; Prompt recipes</h2>
+<p>Working openers. Replace the highlighted parts. Each one already carries the guardrails, so they can be pasted as-is.</p>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">New surface on the existing shell</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Build a <b>[what it is]</b> on the deep-glass card shell from tokens/glass.css.
+Set --c to <b>[--cat-food / --day-sat / --board-gigs]</b> and put .pdx-glass-rebind on
+the node that sets it. Compose the existing atoms: refract seam, specular sheen,
+poster well for any art, .pdx-glass-btn for actions. Do not hand-roll the stack,
+do not invent a radius, and do not add a colour that is not already a token.
+Include the calm-mode branch.</pre></div>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">A new page or view</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Lay out <b>[the page]</b> using the existing page patterns, not a new one.
+Near-black base, hard 1px borders, warm text. Barlow Condensed for display and
+UI labels in uppercase, Inter for body. Spacing on the 4px scale. Primary action
+is --primary (cyan); acid yellow is flair only, not the default button.
+One neon per element. Show me the empty state and the loading state too.</pre></div>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">Restyle something that already exists</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Change only <b>[the specific thing]</b> on <b>[the component or panel]</b>.
+Leave every other value, layout, spacing and colour exactly as it is. Read the
+current source first and tell me what it actually does before you change it.
+If the change wants something the shell cannot express, say so instead of
+adding a one-off, because that is a change to the shell.</pre></div>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">Match the live product</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Read <b>[client/src/components/ds/[Name].tsx]</b> on master in
+maxmackpdx-pride/pdx-pride-guide and port it verbatim: the same class names, the
+same layers in the same order, the same token references, the same animation and
+fill-mode. The live product is the source of truth, not this guide and not your
+memory of the app. Tell me every place the guide currently contradicts it.</pre></div>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">A new effect or motion</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Add <b>[the effect]</b> using the existing motion vocabulary: the easing and
+duration tokens, the seam charge for loading, the lit-plate press for buttons.
+Give it a calm-mode branch that stops animation and flattens bloom while keeping
+colour meaning. No infinite box-shadow pulses on anything that appears in a
+dense grid, because that thrashes paint on scroll.</pre></div>
+
+<div class="pr"><div class="pr__bar"><span class="pr__k">Audit before you build</span><button class="pr__c" type="button">Copy</button></div>
+<pre>Before writing anything, read <b>[the relevant panel and token file]</b> and the
+component source, then tell me: what already exists that does this, which tokens
+apply, and what in the guide is stale. Do not start until we agree on that.
+Fact-check the panel against the live component and list every drift you find.</pre></div>
+
+<h2>04 &middot; Guardrails worth repeating</h2>
+<p>Paste these into any prompt that touches visual design here. They are the failures that actually happen.</p>
+<div class="grid">
+  <div class="cell"><h4>No new colours</h4><p>Every colour is a token. If a request seems to need a new one, that is a signal the wrong token is being used, not that the palette is short.</p></div>
+  <div class="cell"><h4>One neon per element</h4><p>An element gets one accent. Two neons on one object reads as a bug, not as energy.</p></div>
+  <div class="cell"><h4>No em dashes</h4><p>Not in any copy: UI labels, blurbs, button text, docs. Use a period, comma, colon, parentheses, or "to" for ranges.</p></div>
+  <div class="cell"><h4>Calm mode is not optional</h4><p>Any bloom, blur, pulse or glitch needs its calm branch in the same change, or the accessibility switch silently stops working.</p></div>
+  <div class="cell"><h4>Live product is truth</h4><p>When the guide and the running site disagree, the site wins and the guide gets fixed. Say which one you read.</p></div>
+  <div class="cell"><h4>Compose, do not re-draw</h4><p>Reach for the shell, the atoms and the button classes. A hand-rolled stack that looks right today drifts by the next change.</p></div>
+</div>
+
+<h2>05 &middot; Two different asks</h2>
+<p>Be explicit about which one you are making, because the right answer is opposite in each case.</p>
+<div class="grid">
+  <div class="cell"><h4>Using the system</h4><p>"Build a Housing board card." The answer is the existing shell at a different accent, and nothing new. If it needs something new, that is a red flag to raise, not a licence to invent.</p></div>
+  <div class="cell"><h4>Changing the system</h4><p>"The claim sticker should not be magenta anymore." The answer touches the token layer, the panel that documents it, and every surface that inherits it. Say "this is a change to the system" out loud so all three get updated together.</p></div>
+</div>
+
+<div class="flag"><h4>The stale-guide trap</h4>
+<p>This guide has been wrong before, in ways that read as authoritative: a 3px category top border that was never in the code, a magenta claim sticker that had been retired, a 2px seam that renders at 1.5px. A prompt that says "follow the guide" inherits those errors.</p>
+<p>Ask for the fact-check as part of the work: <em>read the live component, tell me where this panel contradicts it, fix both.</em></p></div>
+
+<h2>06 &middot; Handing the whole thing over</h2>
+<p>To rebuild or extend this system elsewhere, do not paraphrase it. Send the artifacts: the token files, the panel that documents the area, and the live component. The Read me panel has a <strong>Copy the rules block</strong> button that puts the full written standard on the clipboard, which is the fastest correct opener for a fresh conversation.</p>
+<ol>
+<li>Paste the rules block first, before any request.</li>
+<li>Name the panel and the token file the work touches.</li>
+<li>State whether this is <em>using</em> the system or <em>changing</em> it.</li>
+<li>Ask for the drift list before the code.</li>
+</ol>
+</div>
+<script>
+addEventListener("click", async e => {
+  const b = e.target.closest(".pr__c"); if (!b) return;
+  const txt = b.closest(".pr").querySelector("pre").innerText;
+  try { await navigator.clipboard.writeText(txt); b.textContent = "Copied"; b.classList.add("done"); }
+  catch (err) { b.textContent = "Select it"; }
+  setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1800);
+});
+</script>
+</body></html>

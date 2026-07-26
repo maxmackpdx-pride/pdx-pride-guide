@@ -1,0 +1,64 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><script src="_spec.js"></script>
+<style>
+body{margin:0;background:var(--bg-app);padding:22px;font-family:var(--font-body);color:var(--text-body)}
+h2{font-family:var(--font-display);font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 6px;color:var(--text-hi)}
+.lede{font-size:12.5px;line-height:1.55;color:var(--text-lo);margin:0 0 22px;max-width:74ch;text-wrap:pretty}
+.cap{font-family:var(--font-mono);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--neon-cyan);margin:24px 0 12px}
+.stage{display:flex;align-items:center;gap:34px;flex-wrap:wrap}
+.glitch{position:relative;display:inline-block;width:min(380px,100%);line-height:0}
+.glitch img{display:block;width:100%;height:auto}
+.glitch__ghost{position:absolute;inset:0;mix-blend-mode:screen;pointer-events:none}
+.glitch__ghost--a{filter:hue-rotate(150deg) saturate(2.2);animation:pdxGlitchA 3.2s steps(1) infinite}
+.glitch__ghost--b{filter:hue-rotate(-95deg) saturate(2.2);animation:pdxGlitchB 3.2s steps(1) infinite}
+@keyframes pdxGlitchA{0%,86%,100%{transform:none;opacity:0}88%{transform:translate(-3px,1px);opacity:.85}92%{transform:translate(2px,-1px);opacity:.7}96%{transform:none;opacity:0}}
+@keyframes pdxGlitchB{0%,86%,100%{transform:none;opacity:0}89%{transform:translate(3px,-1px);opacity:.85}93%{transform:translate(-2px,2px);opacity:.7}97%{transform:none;opacity:0}}
+:root[data-calm="true"] .glitch__ghost{display:none}
+@media (prefers-reduced-motion:reduce){.glitch__ghost{display:none}}
+.spec{font-size:12px;line-height:1.75;color:var(--text-lo);max-width:44ch;margin:0}
+.spec b{color:var(--text-hi);font-weight:600}
+.spec code{font-family:var(--font-mono);font-size:11px;color:var(--neon-cyan)}
+</style></head><body>
+<h2>Glitch</h2>
+<p class="lede">Two tinted copies of the wordmark sit behind it on screen blend and jump for a handful of frames roughly every three seconds, then rest. It runs on the nav mark and the hero wordmark only. Never on body copy, never on a control, never more than one on screen.</p>
+<div class="cap">Slow RGB glitch, nav and hero wordmark</div>
+<div class="stage">
+  <span class="glitch"><img src="../assets/logo-lockup.png" alt="ZAYLIST wordmark"><img class="glitch__ghost glitch__ghost--a" src="../assets/logo-lockup.png" alt="" aria-hidden="true"><img class="glitch__ghost glitch__ghost--b" src="../assets/logo-lockup.png" alt="" aria-hidden="true"></span>
+  <p class="spec"><b>Cycle</b> 3.2s, <code>steps(1)</code> so the jumps are hard cuts rather than tweens.<br><b>Active window</b> 86 to 97 percent, about 350ms of the cycle.<br><b>Offsets</b> never exceed 3px.<br><b>Ghost A</b> hue-rotate 150deg, <b>ghost B</b> hue-rotate -95deg, both at saturate 2.2 on <code>mix-blend-mode: screen</code>.<br><b>Calm mode</b> and reduced motion remove both ghosts, leaving the clean mark.</p>
+</div>
+<div id="recipe"></div>
+<div id="recipe2"></div>
+<script>
+Spec.recipe("#recipe", `<!-- Three stacked copies of the same image. The two ghosts are decorative. -->
+<span class="pdx-glitch">
+  <img src="assets/logo-lockup.png" alt="ZAYLIST wordmark">
+  <img class="pdx-glitch__ghost pdx-glitch__ghost--a" src="assets/logo-lockup.png" alt="" aria-hidden="true">
+  <img class="pdx-glitch__ghost pdx-glitch__ghost--b" src="assets/logo-lockup.png" alt="" aria-hidden="true">
+</span>`, "The markup");
+Spec.recipe("#recipe2", `.pdx-glitch { position: relative; display: inline-block; line-height: 0; }
+.pdx-glitch img { display: block; width: 100%; height: auto; }
+.pdx-glitch__ghost {
+  position: absolute; inset: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.pdx-glitch__ghost--a { filter: hue-rotate(150deg) saturate(2.2); animation: pdxGlitchA 3.2s steps(1) infinite; }
+.pdx-glitch__ghost--b { filter: hue-rotate(-95deg) saturate(2.2); animation: pdxGlitchB 3.2s steps(1) infinite; }
+
+@keyframes pdxGlitchA {
+  0%, 86%, 100% { transform: none; opacity: 0; }
+  88%  { transform: translate(-3px, 1px); opacity: .85; }
+  92%  { transform: translate(2px, -1px); opacity: .7; }
+  96%  { transform: none; opacity: 0; }
+}
+@keyframes pdxGlitchB {
+  0%, 86%, 100% { transform: none; opacity: 0; }
+  89%  { transform: translate(3px, -1px); opacity: .85; }
+  93%  { transform: translate(-2px, 2px); opacity: .7; }
+  97%  { transform: none; opacity: 0; }
+}
+
+/* Always ship the off switch with it. */
+:root[data-calm="true"] .pdx-glitch__ghost { display: none; }
+@media (prefers-reduced-motion: reduce) { .pdx-glitch__ghost { display: none; } }`, "The CSS");
+</script>
+</body></html>

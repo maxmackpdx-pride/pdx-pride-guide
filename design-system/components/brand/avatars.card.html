@@ -1,0 +1,80 @@
+<!-- @dsCard group="Brand" viewport="700x340" name="Avatars & identity rings" subtitle="Identity ring around the face, plus the brand lockup" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body{ margin:0; background:var(--bg-app); padding:24px; }
+  .row{ display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin-bottom:22px; }
+  .item{ text-align:center; }
+  .cap{ font-family:var(--font-body); font-size:9px; color:var(--text-lo); letter-spacing:.08em;
+        text-transform:uppercase; margin-top:7px; }
+  .note{ font-family:var(--font-body); font-size:11px; color:var(--text-faint); letter-spacing:.05em;
+         text-transform:uppercase; margin:0 0 14px; }
+  .cluster{ display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text-lo); }
+  .cluster .pdxAvatar{ margin-left:-9px; box-shadow:0 0 0 2px var(--ink-800); border-radius:999px; }
+  .cluster .pdxAvatar:first-child{ margin-left:0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Avatar } = window.PDXPrideGuideDesignSystem_b20420;
+  const PHOTOS = ["rose","bigfoot","derby","witch","sasquatch","coffee","skate","rugby","bridge","mthood","cat","yeti"];
+  const PHOTO_RINGS = ["progress","transgender","lesbian","genderfluid","leather","bear","aromantic","agender","nonbinary","pansexual","asexual","chain"];
+  const RINGS = ["progress","rainbow","transgender","lesbian","gay-men","bisexual","nonbinary",
+    "pansexual","genderfluid","genderqueer","intersex","asexual","aromantic","agender",
+    "leather","bear","chain","none"];
+  const NAMES = { progress:"Tucker", rainbow:"Ari", transgender:"Jordan", lesbian:"Max", "gay-men":"Dev",
+    bisexual:"Robin", nonbinary:"Kai", pansexual:"Pat", genderfluid:"Flor", genderqueer:"Quinn",
+    intersex:"Val", asexual:"Sam", aromantic:"Rowan", agender:"Ash",
+    leather:"Lou", bear:"Ben", chain:"Cy", none:"Guest" };
+  function Demo(){
+    return (
+      <div>
+        <p className="note">Flag rings, 4px conic flag donut. Unset defaults to Progress flag. "None" fills the circle.</p>
+        <div className="row" style={{ marginBottom: 22 }}>
+          {PHOTOS.map((p, i) => (
+            <div className="item" key={p}>
+              <Avatar ring={PHOTO_RINGS[i]} src={"../../assets/avatars/" + p + ".webp"} name={p} size="lg" />
+              <span className="lbl">{PHOTO_RINGS[i].replace("-", " ")}</span>
+            </div>
+          ))}
+        </div>
+        <p className="note">With a photo, the ring is the only thing the component draws over the image: the face is never covered. These are the twelve illustrated avatars members can pick from live.</p>
+        <div className="row">
+          {RINGS.map((r) => (
+            <div className="item" key={r}>
+              <Avatar ring={r} name={NAMES[r]} size="lg" />
+              <div className="cap">{r}</div>
+            </div>
+          ))}
+        </div>
+        <p className="note">Sizes + attendance cluster (last = masked guest)</p>
+        <div className="row">
+          <div className="item"><Avatar ring="progress" name="Tucker" size="xl" /><div className="cap">72 profile</div></div>
+          <div className="item"><Avatar ring="progress" name="Tucker" size="md" /><div className="cap">44 default</div></div>
+          <div className="item"><Avatar ring="progress" name="Tucker" size="sm" /><div className="cap">32 nav</div></div>
+          <div className="item" style={{marginLeft:22}}>
+            <div className="cluster">
+              <Avatar ring="rainbow" name="Ari" size="sm" />
+              <Avatar ring="transgender" name="Jordan" size="sm" />
+              <Avatar ring="none" name="" size="sm" />
+              <span>12 going</span>
+            </div>
+            <div className="cap">attendance cluster</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body>
+</html>

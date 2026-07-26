@@ -47,20 +47,21 @@ Railway: project `zaylist`, production, https://www.zaylist.com
 
 ## Design source of truth (hard rule)
 
-**The live site is truth.** Production code on `master` / https://www.zaylist.com beats portable kits, previews, sandboxes, and old handoffs.
+**The design guide is truth for design rules.**  
+**Product code implements it.** Do not keep a second contradictory kit.
 
 | Priority | Location |
 |----------|----------|
-| 1 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
-| 2 | Tokens: `client/src/components/ds/tokens/glass.css` (+ colors/type/layout/effects) |
-| 3 | Portable: `design-system/` (sync only - never invent chrome that fights live) |
+| 1 | Design guide: [`design-system/`](design-system/) · https://maxmackpdx-pride.github.io/zaylist-design-system/ |
+| 2 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
+| 3 | Live token modules: `client/src/components/ds/tokens/` (esp. `glass.css`) |
 | Archive | `docs/handoffs/deep-glass-2026-07-16/` (migration package, not open work orders) |
 
-**Canonical rulebook:** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)
+**Production trap list (must not contradict the guide):** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)
 
-**Do not re-introduce** retired globals: default brutal magenta CTAs, map outer neon bloom, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past.” Full trap list is in the live standard.
+**Do not re-introduce** retired globals: default brutal magenta CTAs, map outer neon bloom, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past.”
 
-When UI chrome changes, update `docs/LIVE_DESIGN_STANDARD.md` in the **same** ship.
+When UI chrome or design rules change, update **`design-system/`** (mirror from the public design-system repo via `npm run sync:design-system`) and the trap list if needed, in the **same** ship.
 
 ## Nav source of truth
 

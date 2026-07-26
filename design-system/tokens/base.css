@@ -1,0 +1,125 @@
+/* ============================================================
+   Zaylist, light base reset + shared primitives.
+   Kept minimal; tokens live in the other files.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-body);
+}
+
+/* Selection = magenta highlighter */
+::selection { background: var(--neon-magenta); color: #000; }
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Focus, cyan ring, never removed */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+img, svg { display: block; max-width: 100%; }
+
+h1, h2, h3, h4 { margin: 0; color: var(--text-heading); }
+p { margin: 0; }
+
+/* Custom scrollbar on dark */
+* { scrollbar-color: var(--ink-border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--ink-border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg-app);
+}
+
+/* ---- Shared brand primitives (usable in raw HTML) -------- */
+
+/* Rainbow rule / bar, the section divider (cyan > yellow > magenta > orange).
+   Animated: colors flow left to right, a white glint sweeps across, a soft
+   rainbow glow pulses. Silenced + flattened to a static bar by calm mode and
+   reduced-motion (see effects.css). */
+.pdx-rainbow-rule {
+  position: relative;
+  height: 3px;
+  border: 0;
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+}
+.pdx-rainbow-rule::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
+}
+
+/* Text stroked in rainbow (headline accent word) */
+.pdx-text-rainbow {
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Marker / kicker chip, the neon marker used for hero kickers
+   ("OUR EVENTS · PORTLAND"). Barlow Condensed 700,
+   with a brutalist cyan offset behind the acid-yellow fill. */
+.pdx-marker {
+  display: inline-block;
+  position: relative;
+  /* A sticker is one line. Wrapping paints the second line outside the pill. */
+  white-space: nowrap;
+  transform: rotate(-1deg);
+  background: var(--cyan-lit);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--chrome-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px 4px;
+  border-radius: var(--chrome-radius-tag);
+  --c: var(--neon-cyan);
+  box-shadow: var(--sticker-lit);
+}
+.pdx-marker--pink   { background: var(--neon-magenta); color: #fff;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-magenta) 90%, transparent); }
+.pdx-marker--cyan   { background: var(--cyan-lit); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-cyan) 90%, transparent); }
+.pdx-marker--rainbow{ background: var(--grad-rainbow); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel); }
+.pdx-marker--yellow { background: var(--acid-lit); color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), 0 12px 26px -14px color-mix(in srgb, var(--neon-yellow) 90%, transparent); }
+
+/* Rainbow seam, the thin gradient line under the header and above the
+   footer. Full flag sweep, animated to match .pdx-rainbow-rule above. */
+.pdx-seam {
+  position: relative;
+  height: 3px;
+  border: 0;
+  overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), var(--neon-yellow), var(--neon-magenta), var(--neon-orange), var(--neon-cyan));
+  background-size: 200% 100%;
+  animation: pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout) infinite;
+}
+.pdx-seam::after {
+  content: "";
+  position: absolute; top: -1px; bottom: -1px; left: 0; width: 24%;
+  transform: translateX(-165%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  mix-blend-mode: screen; pointer-events: none;
+  animation: pdxSeamGlint 3.4s var(--ease-inout) infinite;
+}

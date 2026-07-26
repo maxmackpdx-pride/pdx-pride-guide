@@ -1,0 +1,131 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><script src="_spec.js"></script>
+<style>
+body{margin:0;background:var(--bg-app);padding:22px;font-family:var(--font-body);color:var(--text-body)}
+h2{font-family:var(--font-display);font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 6px;color:var(--text-hi)}
+.lede{font-size:12.5px;line-height:1.55;color:var(--text-lo);margin:0 0 18px;max-width:76ch;text-wrap:pretty}
+.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:28px}
+.btn{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;padding:7px 12px;border:1px solid var(--border-default);background:transparent;color:var(--text-lo);border-radius:3px;cursor:pointer}
+.btn:hover{color:var(--neon-cyan);border-color:var(--neon-cyan)}
+.btn.done{color:var(--status-good);border-color:var(--status-good)}
+.card{border:1px solid var(--border-default);border-radius:var(--radius-lg);background:var(--ink-800);margin-bottom:20px;overflow:hidden}
+.card__head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-faint);flex-wrap:wrap}
+.card__n{font-family:var(--font-mono);font-size:10px;color:var(--neon-magenta);min-width:22px}
+.card__t{font-family:var(--font-display);font-weight:800;font-size:19px;text-transform:uppercase;letter-spacing:.01em;margin:0;line-height:1}
+.card__w{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+.card__acts{margin-left:auto;display:flex;gap:6px}
+.card__body{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:18px;padding:16px}
+@media (max-width:760px){.card__body{grid-template-columns:1fr}}
+.stage{position:relative;min-height:150px;border:1px solid var(--border-faint);border-radius:var(--radius-md);background:var(--ink-1000);overflow:hidden;display:grid;place-items:center;isolation:isolate}
+.meta{font-size:12px;line-height:1.65;color:var(--text-lo);margin:0;text-wrap:pretty}
+.meta b{color:var(--text-hi);font-weight:600}
+.meta code{font-family:var(--font-mono);font-size:11px;color:var(--neon-cyan)}
+.meta .t{display:block;margin-top:8px;font-family:var(--font-mono);font-size:10.5px;color:var(--neon-yellow)}
+
+/* demo rigs */
+.aurora{position:absolute;inset:-20%}
+.aurora i{position:absolute;width:56%;height:66%;border-radius:50%;filter:blur(30px);opacity:.55}
+.aurora i:nth-child(1){left:2%;top:6%;background:#8800FF;animation:auroraA 19s ease-in-out infinite}
+.aurora i:nth-child(2){right:0%;top:22%;background:#00FFFF;animation:auroraB 23s ease-in-out infinite}
+.aurora i:nth-child(3){left:26%;bottom:0%;background:#FF00CC;animation:auroraC 27s ease-in-out infinite}
+@keyframes auroraA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(9%,12%) scale(1.25)}}
+@keyframes auroraB{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-11%,-8%) scale(.9)}}
+@keyframes auroraC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(7%,-10%) scale(1.2)}}
+.wave{width:82%;height:26px;border-radius:var(--radius-sm);background:linear-gradient(90deg,#FF19D6 0%,#FF5319 14.3%,#FFD119 28.6%,#9CFF19 42.9%,#19F7FF 57.1%,#1956FF 71.4%,#E419FF 85.7%,#FF19D6 100%);background-size:288px 100%;background-repeat:repeat-x;animation:spectrumWaveScroll 22s linear infinite}
+@keyframes spectrumWaveScroll{to{background-position:288px 0}}
+.rdiv{width:82%;height:4px;border-radius:2px;background:var(--rainbow-bar-loop),var(--ink-900);background-size:360px 100%,100% 100%;background-repeat:repeat-x,no-repeat;animation:rainbowDividerFlow 6s linear infinite}
+@keyframes rainbowDividerFlow{from{background-position:360px 0}to{background-position:0 0}}
+.gword{font-family:var(--font-display);font-weight:900;font-size:38px;text-transform:uppercase;color:#fff;animation:aboutWordGlitch 5s steps(1) infinite}
+@keyframes aboutWordGlitch{0%,92%,100%{text-shadow:none;transform:none}93%{text-shadow:-2px 0 #19e3ff,2px 0 #ff1fa0;transform:translateX(1px)}95%{text-shadow:2px 0 #19e3ff,-2px 0 #ff1fa0;transform:translateX(-1px)}}
+.float{display:flex;gap:14px}
+.float span{display:inline-block;font-family:var(--font-display);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#07070a;background:var(--acid-lit);padding:9px 13px;border-radius:var(--chrome-radius-tag);--c:var(--neon-yellow);box-shadow:var(--sticker-lit);animation:aboutStickerFloat 3.2s ease-in-out infinite}
+.float span:last-child{background:var(--cyan-lit);--c:var(--neon-cyan);animation:aboutPgStickerFloat 3.4s ease-in-out infinite}
+@keyframes aboutStickerFloat{0%,100%{transform:rotate(3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-6px)}}
+@keyframes aboutPgStickerFloat{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-2deg) translateY(-5px)}}
+.flick{font-family:var(--font-display);font-weight:900;font-size:30px;text-transform:uppercase;color:var(--neon-magenta);animation:boardFlickr 7s linear infinite}
+@keyframes boardFlickr{0%,100%{opacity:1;transform:translateX(0)}92%{opacity:1}93%{opacity:.94;transform:translateX(-2px)}94%{opacity:1;transform:translateX(2px)}95%{opacity:.96}96%{opacity:1;transform:translateX(0)}}
+.stack{display:flex;flex-direction:column;gap:8px;width:78%}
+.stack i{display:block;height:26px;border-radius:var(--radius-sm);background:var(--ink-750);border:1px solid var(--border-faint);animation:scheduleCardIn .3s ease both}
+.stack i:nth-child(2){animation-delay:.07s}.stack i:nth-child(3){animation-delay:.14s}.stack i:nth-child(4){animation-delay:.21s}
+@keyframes scheduleCardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pop{width:44px;height:44px;border-radius:50%;background:var(--acid-lit);animation:attendancePopIn .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes attendancePopIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1);opacity:1}}
+.sheet{position:absolute;left:12%;right:12%;bottom:0;height:64%;border-radius:10px 10px 0 0;background:var(--ink-750);border:1px solid var(--border-default);border-bottom:0;animation:attendanceSheetUp .25s ease-out both}
+@keyframes attendanceSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.overlay{width:74%;height:66%;border-radius:10px;background:#0d1626;border:1px solid #1e3a5f;animation:inboxOverlayIn .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes inboxOverlayIn{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.holo{width:76%;height:88px;border-radius:var(--radius-md);background:linear-gradient(110deg,#0c0c10 0%,#1a1030 18%,#0a2a30 34%,#301028 52%,#0c0c10 70%,#1a1030 88%,#0c0c10 100%);background-size:300% 100%;border:1px solid var(--border-faint);animation:stashHolo 4.5s linear infinite}
+@keyframes stashHolo{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.bub{display:flex;gap:14px;align-items:flex-end}
+.bub i{width:26px;height:26px;border-radius:50%;background:var(--neon-magenta);opacity:.85;animation:mcBubbleFloat 5s ease-in-out infinite}
+.bub i:nth-child(2){background:var(--neon-cyan);animation-duration:6.4s;animation-delay:.4s}
+.bub i:nth-child(3){background:var(--neon-yellow);animation-duration:7.2s;animation-delay:.9s}
+@keyframes mcBubbleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.orb{position:relative;width:100%;height:150px}
+.orb i{position:absolute;left:50%;top:50%;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff,#00FFFF 42%,#8800FF 100%);animation:floatOrb 5s ease-in-out infinite,glowPulse 3.2s ease-in-out infinite,hueSpin 12s linear infinite}
+@keyframes floatOrb{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 15px))}}
+@keyframes glowPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}
+@keyframes hueSpin{to{filter:hue-rotate(360deg)}}
+.orbs{position:absolute;inset:0}
+.orbs i{position:absolute;top:48%;left:var(--x);width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:none !important;opacity:.72;filter:blur(10px);animation:floatOrb 5s ease-in-out infinite,glowPulse 3.2s ease-in-out infinite}
+.orbs i::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle closest-side,var(--o) 0%,color-mix(in srgb,var(--o) 55%,transparent) 42%,transparent 78%)}
+.orbs::after{content:"ZAYLIST";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-weight:900;font-size:34px;letter-spacing:.06em;color:#fff;opacity:.92}
+.plx{position:absolute;inset:0;animation:plxDrift 6s ease-in-out infinite}
+.plx i{position:absolute;left:12%;right:12%;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border-faint)}
+.ovl{position:relative;width:82%;height:110px;border-radius:var(--radius-md);overflow:hidden;background:linear-gradient(135deg,#2a1040,#0a2a30 55%,#301028);display:grid;place-items:center;isolation:isolate}
+.ovl span{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.ovl i{position:absolute;inset:0;pointer-events:none}
+.ovl--leak{mix-blend-mode:screen;opacity:.308;background:radial-gradient(60% 90% at 12% 20%,#FF6600,transparent 60%),radial-gradient(50% 80% at 88% 70%,#00FFFF,transparent 60%);animation:ovlLeak 9s ease-in-out infinite}
+.ovl--grain{mix-blend-mode:overlay;opacity:.202;background:repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 1px,transparent 1px 3px);animation:ovlGrain 5s linear infinite}
+@keyframes ovlLeak{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6%,-5%) scale(1.15)}}
+@keyframes ovlGrain{to{transform:translateY(3px)}}
+.plx i:nth-child(1){top:22%;background:#2a1040;transform:translateY(calc(var(--py,0) * 22px))}
+.plx i:nth-child(2){top:46%;background:#0a2a30;transform:translateY(calc(var(--py,0) * 14px))}
+.plx i:nth-child(3){top:70%;background:#301028;transform:translateY(calc(var(--py,0) * 6px))}
+@keyframes plxDrift{0%,100%{--py:-1}50%{--py:1}}
+@property --py{syntax:"<number>";inherits:true;initial-value:0}
+:root[data-calm="true"] .stage *{animation:none !important}
+@media (prefers-reduced-motion:reduce){.stage *{animation:none !important}}
+</style></head><body>
+<h2>Motion library</h2>
+<p class="lede">The ambient and surface motions that live outside the seam, loader and entrance sets. Every entry below is ported from the live client, with its real keyframes and timing. Each card copies a rules block you can paste straight into Claude, or take the whole library at once.</p>
+<div class="topbar">
+  <button class="btn" id="all">Copy the whole library as rules</button>
+  <span style="font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-disabled)">Calm mode and reduced motion stop every demo on this page</span>
+</div>
+<div id="cards"></div>
+<script src="motion-library.data.js"></script>
+<script>
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function rulesBlock(m){
+  return ["ZAYLIST MOTION \u2014 " + m.t.toUpperCase(),
+    "",
+    "Where it runs: " + m.where,
+    "What it does: " + m.rule,
+    "Timing: " + m.timing,
+    "Off switch: " + (m.off || "Calm mode ([data-calm=\"true\"]) and prefers-reduced-motion must remove it."),
+    "",
+    "CSS:",
+    m.css.trim()].join("\n");
+}
+document.getElementById("cards").innerHTML = MOTIONS.map((m,i) =>
+  '<div class="card"><div class="card__head"><span class="card__n">' + String(i+1).padStart(2,"0") +
+  '</span><h3 class="card__t">' + m.t + '</h3><span class="card__w">' + m.where + '</span>' +
+  '<span class="card__acts"><button class="btn js-rules" data-i="' + i + '">Copy rules</button>' +
+  '<button class="btn js-css" data-i="' + i + '">Copy CSS</button></span></div>' +
+  '<div class="card__body"><div class="stage">' + m.demo + '</div>' +
+  '<p class="meta">' + m.rule + '<span class="t">' + esc(m.timing) + '</span></p></div></div>').join("");
+function flash(b, label){
+  const t = b.textContent; b.textContent = label; b.classList.add("done");
+  setTimeout(() => { b.textContent = t; b.classList.remove("done"); }, 1300);
+}
+addEventListener("click", e => {
+  const r = e.target.closest(".js-rules"), c = e.target.closest(".js-css"), a = e.target.closest("#all");
+  if (r) navigator.clipboard.writeText(rulesBlock(MOTIONS[+r.dataset.i])).then(() => flash(r, "Copied")).catch(() => {});
+  if (c) navigator.clipboard.writeText(MOTIONS[+c.dataset.i].css.trim()).then(() => flash(c, "Copied")).catch(() => {});
+  if (a) navigator.clipboard.writeText(
+    "ZAYLIST MOTION LIBRARY\nEvery ambient and surface motion in the system. All of them must be removed under calm mode and prefers-reduced-motion.\n\n" +
+    MOTIONS.map(rulesBlock).join("\n\n" + "-".repeat(60) + "\n\n")
+  ).then(() => flash(a, "Copied " + MOTIONS.length + " motions")).catch(() => {});
+});
+</script>
+</body></html>

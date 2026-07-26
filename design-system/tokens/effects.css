@@ -1,0 +1,169 @@
+/* ============================================================
+   Zaylist, EFFECTS: shadows, glows, motion
+   Canonical signatures from repo tokens:
+     --brutal-shadow : 4px 4px 0 rgba(255,0,204,0.36)  (magenta offset)
+     --glow          : 0 0 14px color-mix(cyan 18%)      (soft neon)
+     Motion          : 0.15s snappy hovers, ~4s ambient pulse
+   ============================================================ */
+
+:root {
+  /* ---- BRUTALIST OFFSET (RETIRED) ------------------------
+     DEPRECATED. The flat offset has been replaced everywhere by the
+     sticker bloom (tokens/glass.css 1.5b): a lit plate on a black
+     keyline with an accent bloom on the floor. Use --sticker-lit.
+     These are kept only so old markup does not break. */
+  --brutal-shadow:    4px 4px 0 rgba(255,0,204,0.36);
+  --brutal-shadow-lg: 6px 6px 0 rgba(255,0,204,0.50);
+  --brutal-shadow-cyan: 4px 4px 0 rgba(0,255,255,0.32);
+  --brutal-shadow-lime: 4px 4px 0 rgba(204,255,0,0.30);
+
+  /* Generic hard offsets (zine sticker) */
+  --shadow-hard-sm: 3px 3px 0 var(--ink-1000);
+  --shadow-hard:    4px 4px 0 var(--ink-1000);
+  --shadow-hard-lg: 6px 6px 0 var(--ink-1000);
+
+  /* ---- SOFT DEPTH ---------------------------------------- */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --shadow-md:  0 8px 24px -8px rgba(0,0,0,.7);
+  --shadow-lg:  0 14px 30px rgba(0,0,0,.42);
+
+  /* ---- NEON GLOWS (soft, pulse-able) --------------------- */
+  --glow:        0 0 14px color-mix(in srgb, var(--neon-cyan) 18%, transparent);
+  --glow-pink:   0 0 16px color-mix(in srgb, var(--neon-magenta) 26%, transparent);
+  --glow-cyan:   0 0 16px color-mix(in srgb, var(--neon-cyan) 26%, transparent);
+  --glow-lime:   0 0 16px color-mix(in srgb, var(--neon-yellow) 24%, transparent);
+  --glow-violet: 0 0 16px color-mix(in srgb, var(--neon-violet) 30%, transparent);
+
+  /* ---- MOTION -------------------------------------------- */
+  --ease-out:    cubic-bezier(.2,.8,.2,1);      /* @kind other */
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);  /* @kind other */
+  --ease-inout:  cubic-bezier(.65,0,.35,1);     /* @kind other */
+
+  --dur-fast:   150ms;   /* @kind other */ /* snappy hover */
+  --dur-base:   220ms;   /* @kind other */
+  --dur-slow:   360ms;   /* @kind other */
+  --dur-pulse:  4s;      /* @kind other */ /* ambient neon pulse */
+
+  --press-scale: 0.97;   /* @kind other */
+  --hover-lift:  -2px;   /* @kind other */
+
+  /* ---- SEAM / GRAIN / HERO STACK (2026) ------------------ */
+  --seam-h:       2px;    /* rainbow bar, thin @kind other */
+  --seam-h-thick: 2.7px;  /* header / footer seam @kind other */
+  --site-film-grain-opacity:  0.12;   /* @kind other */
+  --board-page-grain-opacity: 0.108;  /* @kind other */
+  --board-promo-grain-opacity: 0.121; /* @kind other */
+  --hero-dot-grid-opacity: 0.072;     /* @kind other */
+  /* Hero stack order: bg (0) -> video overlays (1) -> scrim (2) -> grain (3) -> content (4) */
+  --hero-layer-bg: 0;       /* @kind other */
+  --hero-layer-video: 1;    /* @kind other */
+  --hero-layer-scrim: 2;    /* @kind other */
+  --hero-layer-fx: 3;       /* @kind other */
+  --hero-layer-content: 4;  /* @kind other */
+  /* Legibility scrim over board/promo hero photos (heavier left + bottom) */
+  --board-promo-scrim:
+    linear-gradient(102deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.66) 32%, rgba(0,0,0,0.56) 56%, rgba(0,0,0,0.35) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.64) 0%, rgba(0,0,0,0.32) 42%, rgba(0,0,0,0.04) 72%); /* @kind other */
+}
+
+/* Ambient neon pulse, driven by a per-element --dc (day/accent color) */
+@keyframes pdxPulse {
+  0%, 100% { box-shadow: 0 0 14px color-mix(in srgb, var(--dc, var(--neon-cyan)) 18%, transparent); }
+  50%      { box-shadow: 0 0 24px color-mix(in srgb, var(--dc, var(--neon-cyan)) 32%, transparent); }
+}
+/* Slow magenta glow pulse (Spotted / missed-connections cards) */
+@keyframes pdxSpotPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,0,204,0.25); }
+  50%      { box-shadow: 0 0 24px rgba(255,0,204,0.40); }
+}
+/* Entrance reveal: fade + short rise. Site source: .sch-block (schIn, .28s ease). */
+@keyframes pdxReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Popover / menu entrance: fade + rise + slight scale. Site source: .sch-pop (schPop, .18s ease-out). */
+@keyframes pdxPop {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+/* Live status blink (going dots, "now playing"). Site source: .sch-livedot (schPulse, 1.6s); board live dots run it at 1.8s. */
+@keyframes pdxBlink { 50% { opacity: .35; } }
+/* Utility-page entrance: hero fades up 10px over .48s; stats band follows at +0.07s. Site source: board-hero-in. */
+@keyframes pdxHeroIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Horizontal ticker used by the Marquee component. */
+@keyframes pdxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ============================================================
+   WEB ANIMATION ADD-ONS (zaylist.com, 2026)
+   Six additive motion layers. Each rides an element that is
+   already on the page (never replaces it), and all are silenced
+   by calm mode + the reduced-motion query below.
+   ============================================================ */
+
+/* 01 SEAM CHARGE, the rainbow header seam doubles as the page
+   loader: it charges empty to full, a bright glint races the bar,
+   a flash caps it, then it loops until the page is ready. */
+@keyframes pdxSeamFill  { 0%{ transform: scaleX(0); } 68%{ transform: scaleX(1); } 100%{ transform: scaleX(1); } }
+@keyframes pdxSeamGlint { 0%{ transform: translateX(-165%); } 60%{ transform: translateX(150%); } 100%{ transform: translateX(150%); } }
+@keyframes pdxSeamFlash { 0%,64%{ opacity: 0; } 74%{ opacity: .5; } 88%{ opacity: 0; } 100%{ opacity: 0; } }
+
+/* 03 LIVE WAVE, a neon equalizer bar rides the LIVE NOW strip.
+   Vary duration + delay + color per bar; drops the beat on tap. */
+@keyframes pdxEqBounce { 0%,100%{ transform: scaleY(.22); } 50%{ transform: scaleY(1); } }
+
+/* 04 COUNT IT UP, stat numbers spin up from zero on reveal and
+   pop on each fresh tick while a +1 floats off. */
+@keyframes pdxNumPop  { 0%{ transform: translateY(0) scale(1); } 42%{ transform: translateY(-2px) scale(1.14); } 100%{ transform: translateY(0) scale(1); } }
+@keyframes pdxFloatUp { 0%{ opacity: 1; transform: translateY(0); } 100%{ opacity: 0; transform: translateY(-28px); } }
+
+/* 05 RSVP SPARKS, a tap throws a burst of day-colored confetti.
+   Drive each particle's direction with --tx / --ty. */
+@keyframes pdxSparkFly { to { transform: translate(var(--tx,0), var(--ty,0)) scale(.2); opacity: 0; } }
+
+/* 06 RING SHIMMER, a soft highlight arc orbits an identity ring.
+   Light only (screen blend) so chosen flag colors never shift. */
+@keyframes pdxRingShimmer { to { transform: rotate(360deg); } }
+
+/* 02 SPLIT-FLAP has no shared keyframe, it is a per-cell rotateX
+   transition flip driven in JS (see the Motion "add-ons" card). */
+
+/* ANIMATED RAINBOW DIVIDER, the flowing + glowing seam shared by
+   .pdx-seam, .pdx-rainbow-rule, .pdxSeam and .pdxDivider--rainbow's line.
+   Colors flow left to right and a soft rainbow glow pulses; the traveling
+   highlight reuses pdxSeamGlint above. */
+@keyframes pdxSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+@keyframes pdxSeamGlow { 0%,100% { box-shadow: 0 0 6px rgba(0,255,255,.28); } 50% { box-shadow: 0 0 18px rgba(255,0,204,.5); } }
+
+/* Reduced motion + calm mode both silence glows/animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+:root[data-calm="true"] *,
+.calm * {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Calm mode: rainbow dividers stay visible but static (no flow, glint, glow) */
+:root[data-calm="true"] .pdx-seam,
+:root[data-calm="true"] .pdx-rainbow-rule,
+:root[data-calm="true"] .pdxSeam,
+:root[data-calm="true"] .pdxMap__seam,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line {
+  background: var(--rainbow-bar);
+  background-size: auto;
+}
+:root[data-calm="true"] .pdx-seam::after,
+:root[data-calm="true"] .pdx-rainbow-rule::after,
+:root[data-calm="true"] .pdxSeam::after,
+:root[data-calm="true"] .pdxMap__seam::after,
+:root[data-calm="true"] .pdxDivider--rainbow .pdxDivider__line::after {
+  display: none;
+}
