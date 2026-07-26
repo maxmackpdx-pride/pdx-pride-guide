@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { useTipLinks } from "@/hooks/useTipLinks";
 import "./HomeConstructionNudge.css";
 
-// Bump when the rebrand welcome copy changes so returning visitors see the update once.
-const DISMISS_KEY = "pgpdx:construction-nudge:v2-zaylist";
+// Bump when the rebrand welcome copy or CTA order changes so returning visitors see the update once.
+const DISMISS_KEY = "pgpdx:construction-nudge:v3-zaylist";
 
 /** `?constructNudge=1` force-shows the pop-up for previewing (ignores dismissal). */
 function forcedPreview(): boolean {
@@ -88,24 +88,32 @@ export default function HomeConstructionNudge() {
 
         <div className="pgc-body">
           <p>
-            Thanks for using <strong>Pride Guide</strong> these past years — I hope it helped
+            Thanks for using <strong>Pride Guide</strong> these past years. I hope it helped
             you find your people and your parties. 🌈
           </p>
           <p>
             I&apos;m renaming it <strong>Zaylist</strong>: same home, new name. Year-round
-            for Portland&apos;s LGBTQ+ community — events, boards, directory, and more, all
+            for Portland&apos;s LGBTQ+ community: events, boards, directory, and more, all
             365 days, not just Pride Week.
           </p>
           <p className="pgc-tip">
             Keeping the lights on isn&apos;t free. If this was useful, you&apos;re welcome to
-            toss me a couple bucks toward a coffee or a muffin. Truly no pressure — every
+            toss me a couple bucks toward a coffee or a muffin. Truly no pressure. Every
             little bit helps. 💛
           </p>
         </div>
 
         <div className="pgc-actions">
-          <a
+          <button
+            type="button"
             className="pgc-btn pgc-btn--primary"
+            onClick={dismiss}
+            data-testid="construction-explore-zaylist"
+          >
+            Explore Zaylist
+          </button>
+          <a
+            className="pgc-btn pgc-btn--tip"
             href={venmoUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -114,9 +122,6 @@ export default function HomeConstructionNudge() {
           >
             ☕ Buy me a coffee
           </a>
-          <button type="button" className="pgc-btn pgc-btn--ghost" onClick={dismiss}>
-            Explore Zaylist
-          </button>
         </div>
 
         <p className="pgc-foot">Made with 🖤 in Portland</p>
