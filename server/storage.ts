@@ -6032,6 +6032,29 @@ function runBootMigrationsOnce() {
       .run();
     recordBootMigration("sanctuary_real_flyers_v1");
   }
+
+  /**
+   * Remove Eventbrite/url_ingest off-scene noise that landed LIVE:
+   * Oregon Pro Wrestling, Playmakers (Hazel Dell), Glendoveer golf scramble,
+   * LDS Kellogg Creek Ward Sports Night. Root cause: open-mode ingest without
+   * queer filter; hardened in isOffSceneNoiseDraft.
+   */
+  if (!hasBootMigration("scrub_offscene_eb_noise_v1")) {
+    const byId = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE id IN (374, 375, 383, 384)
+           OR lower(title) LIKE '%advocacy golf scramble%'
+           OR lower(title) LIKE '%kellogg creek ward%'
+           OR lower(title) LIKE '%oregon professional wrestling%'
+           OR (lower(venue_name) LIKE '%playmakers%sports%' AND lower(title) LIKE '%paint%')
+           OR lower(venue_name) LIKE '%church of jesus christ of latter%'
+           OR lower(venue_name) LIKE '%oregon pro wrestling%'
+           OR lower(venue_name) LIKE '%glendoveer golf%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(byId.map(r => r.id));
+    recordBootMigration("scrub_offscene_eb_noise_v1");
+  }
 }
 
 function parseEnvAdminLists() {

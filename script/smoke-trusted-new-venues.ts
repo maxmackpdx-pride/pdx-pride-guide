@@ -266,6 +266,64 @@ assert(
   ).keep,
   "Sports Bra: church 'Sports Night' (wrong venue) is dropped",
 );
+// Open-mode URL paste must ALSO drop off-scene noise (how these went LIVE as url_ingest).
+const openCtx = { sourceId: "paste", label: "paste", url: "https://www.eventbrite.com/e/x", tier: "1" };
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "Kellogg Creek Ward Sports Night",
+      venueName: "The Church of Jesus Christ of Latter-day Saints",
+      address: "13520 Se Ruscliffe Lane, Milwaukie, OR, 97222-2144",
+      description: "pickleball",
+      sourceUrl: null,
+      ticketUrl: "https://www.eventbrite.com/e/kellogg-creek-ward-sports-night-tickets-1",
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: LDS ward sports night is off-scene noise",
+);
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "2026 Advocacy Golf Scramble",
+      venueName: "Glendoveer Golf Course",
+      address: "14015 NE Glisan St, Portland, OR, 97230",
+      description: "Annual Advocacy Golf Scramble",
+      sourceUrl: null,
+      ticketUrl: null,
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: golf scramble is off-scene noise",
+);
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "Oregon Professional Wrestling July 31st",
+      venueName: "Oregon Pro Wrestling School",
+      address: "2092 Northeast Aloclek Drive, Hillsboro, OR",
+      description: "Our second show",
+      sourceUrl: null,
+      ticketUrl: null,
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: pro wrestling school is off-scene noise",
+);
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "Lakeside Sunset Sip & Paint Night",
+      venueName: "Playmakers Sports Bar and Grill",
+      address: "1503 NE 78th St., Hazel Dell, WA, 98604",
+      description: "Unwind with drinks and brushes",
+      sourceUrl: null,
+      ticketUrl: null,
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: Playmakers Hazel Dell paint night is off-scene noise",
+);
 // Junk 2: barbell cert at a different gym → dropped.
 assert(
   !isRelevantScanDraft(

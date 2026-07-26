@@ -146,12 +146,23 @@ export function matchesVenueScope(
     // A single distinctive token can stand in for the venue (e.g. "escape",
     // "sanctuary") - but NOT a generic word like "sports"/"dance"/"night", or
     // every sports/dance/night event city-wide would pass.
+    // Prefer LOCATION fields for the distinctive token (title-only is how
+    // church "Sports Night" used to leak when "sports" was the only match).
     const distinctive = scopeTokens.filter(t => t.length >= 5 && !GENERIC_SCOPE_TOKEN.test(t));
-    if (distinctive.some(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(blob))) return true;
+    if (distinctive.some(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(locBlob))) return true;
+    // EB slug may still name the venue when venueName is empty
+    const urlBlob = [draft.sourceUrl, draft.ticketUrl].filter(Boolean).join(" ").toLowerCase();
+    if (distinctive.some(t => new RegExp(`\\b${escapeRe(t)}\\b`, "i").test(urlBlob))) return true;
     return false;
   }
 
-  if (primary && new RegExp(`\\b${escapeRe(primary)}\\b`, "i").test(blob)) return true;
+  // Single token: never keep on a generic word alone ("sports", "night", …)
+  if (primary && GENERIC_SCOPE_TOKEN.test(primary)) return false;
+  if (primary && new RegExp(`\\b${escapeRe(primary)}\\b`, "i").test(locBlob)) return true;
+  if (primary && new RegExp(`\\b${escapeRe(primary)}\\b`, "i").test(blob)) {
+    // Title-only match for a single distinctive venue token is OK (e.g. "stag")
+    if (primary.length >= 5 && !GENERIC_SCOPE_TOKEN.test(primary)) return true;
+  }
   return false;
 }
 
@@ -230,6 +241,64 @@ export function venueScopeTokens(ctx: SourceRelevanceContext): string[] {
 }
 
 /**
+ * Hard off-scene noise that must never land on Zaylist — even via open-mode
+ * URL paste / generic Eventbrite discovery. Not queer nightlife; not our board.
+ *
+ * How Kellogg / Golf Scramble / Pro Wrestling / Playmakers got LIVE: source
+ * `url_ingest` with open relevance (no queer check). Sports-Bra venue mode
+ * already drops church "Sports Night"; open mode did not.
+ */
+export function isOffSceneNoiseDraft(
+  draft: Pick<
+    IngestEventDraft,
+    "title" | "description" | "venueName" | "address" | "neighborhood"
+  >,
+): { noise: boolean; reason?: string } {
+  const blob = [
+    draft.title,
+    draft.venueName,
+    draft.address,
+    draft.neighborhood,
+    draft.description?.slice(0, 400),
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Faith-org sports nights (LDS ward pickleball, etc.)
+  if (
+    /\b(church of jesus christ|latter[- ]day saints|\blds\b|ward sports|ward pickleball|stake center|kingdom hall)\b/i.test(
+      blob,
+    )
+  ) {
+    return { noise: true, reason: "faith_org_noise" };
+  }
+  // Generic golf fundraisers / municipal courses (not queer league)
+  if (
+    /\b(golf scramble|golf tournament|golf fundraiser|golf course)\b/i.test(blob) &&
+    !hasQueerSignal(draft as IngestEventDraft)
+  ) {
+    return { noise: true, reason: "golf_noise" };
+  }
+  // Indie pro-wrestling schools (not our scene)
+  if (
+    /\b(pro(?:fessional)?\s+wrestling|wrestling school|oregon pro wrestling)\b/i.test(blob) &&
+    !hasQueerSignal(draft as IngestEventDraft)
+  ) {
+    return { noise: true, reason: "wrestling_noise" };
+  }
+  // Random sports bars outside the queer map (Hazel Dell Playmakers sip-n-paint, etc.)
+  if (
+    /\bplaymakers\s+sports\s+bar\b/i.test(blob) ||
+    (/\bhazel\s*dell\b/i.test(blob) &&
+      /\b(sports\s+bar|sip\s*[&+]\s*paint|paint night)\b/i.test(blob) &&
+      !hasQueerSignal(draft as IngestEventDraft))
+  ) {
+    return { noise: true, reason: "off_map_sports_bar" };
+  }
+  return { noise: false };
+}
+
+/**
  * Keep draft for this source? false = drop as noise.
  */
 export function isRelevantScanDraft(
@@ -254,6 +323,12 @@ export function isRelevantScanDraft(
   });
   if (closed) {
     return { keep: false, reason: closed.reason };
+  }
+
+  // Off-scene noise (churches, golf scrambles, pro wrestling, random sports bars)
+  const off = isOffSceneNoiseDraft(draft);
+  if (off.noise) {
+    return { keep: false, reason: off.reason };
   }
 
   const mode = relevanceModeForSource(ctx);
