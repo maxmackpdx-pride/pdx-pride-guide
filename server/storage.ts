@@ -6163,6 +6163,45 @@ function runBootMigrationsOnce() {
     hardDeleteEventIds(rows.map(r => r.id));
     recordBootMigration("remove_romance_womens_sports_book_event_v1");
   }
+
+  // One-off: hide every UPCOMING Sports Bra listing that is NOT a game/watch-party.
+  // Real games carry the auto-generated /api/game-poster image or a matchup /
+  // "watch party" title; everything else at The Sports Bra is leaked non-game
+  // noise (church pickleball, barbell cert, book events, etc.). Past events are
+  // left alone (they no longer show). Reversible: status → HIDDEN with an admin
+  // note, no hard delete, so a mis-caught real game can be flipped back to LIVE.
+  if (!hasBootMigration("hide_sports_bra_non_games_v1")) {
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title FROM events
+          WHERE status = 'LIVE'
+            AND lower(venue_name) LIKE '%sports bra%'
+            AND date_start >= date('now')
+            AND (poster_image_url IS NULL OR lower(poster_image_url) NOT LIKE '%game-poster%')
+            AND lower(title) NOT LIKE '% vs %'
+            AND lower(title) NOT LIKE '% vs. %'
+            AND lower(title) NOT LIKE '%watch party%'`,
+      )
+      .all() as Array<{ id: number; title: string }>;
+    const hide = sqlite.prepare(
+      `UPDATE events SET status = 'HIDDEN',
+         admin_notes = COALESCE(admin_notes || ' | ', '') ||
+           'Hidden: Sports Bra non-game listing (hide_sports_bra_non_games_v1)'
+       WHERE id = ?`,
+    );
+    for (const r of rows) {
+      try {
+        hide.run(r.id);
+      } catch {
+        /* ignore single-row failures */
+      }
+    }
+    console.info(
+      `[boot] hide_sports_bra_non_games_v1: hid ${rows.length} events` +
+        (rows.length ? ` -> ${rows.map(r => `#${r.id} ${r.title}`).join("; ")}` : ""),
+    );
+    recordBootMigration("hide_sports_bra_non_games_v1");
+  }
 }
 
 function parseEnvAdminLists() {
