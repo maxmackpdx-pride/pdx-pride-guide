@@ -4,6 +4,7 @@
  */
 import type { IngestEventDraft } from "./types";
 import { isPortlandEventListing } from "./index";
+import { matchClosedVenue } from "@shared/closedVenues";
 
 const FOREIGN_EB_HOST =
   /eventbrite\.(de|co\.uk|fr|es|it|nl|com\.br|com\.ar|com\.mx|com\.au|ca|at|ch|be|ie|pt|se|dk|fi|no|pl|cz|hu|ro|sg|hk|in|ph|za)\b/i;
@@ -11,8 +12,9 @@ const FOREIGN_EB_HOST =
 const QUEER_SIGNAL =
   /\b(lgbtq?\+?|queer|gay|lesbian|sapphic|bisexual|\bbi\b|trans(?:gender)?|non[- ]?binary|enby|drag|pride|bear\b|cub\b|leather|kink|fetish|dyke|twink|femme|butch|ballroom|vogue|house of|poly(?:am)?|enm\b|t4t|wlw|mlm|same[- ]sex|rainbow|out@|coming out)\b/i;
 
+/** Live queer venues only — never closed bars (Crush etc. would resurrect via EB). */
 const QUEER_VENUE =
-  /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|crush|nest\s*lounge|process|escape\s*bar|sports\s*bra|bar\s*cala|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf[eé]|living\s*room\s*wines)\b/i;
+  /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|nest\s*lounge|process|escape\s*bar|sports\s*bra|bar\s*cala|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf[eé]|living\s*room\s*wines)\b/i;
 
 /** Generic Eventbrite "local events" dumps - never a valid resolved recipe. */
 export function isGenericEventbriteDumpUrl(url: string | null | undefined): boolean {
@@ -242,6 +244,16 @@ export function isRelevantScanDraft(
     if (isGenericEventbriteDumpUrl(u)) {
       return { keep: false, reason: "generic_eb_dump" };
     }
+  }
+
+  // Dead / relocated venues (all modes including open trusted calendars)
+  const closed = matchClosedVenue({
+    venueName: draft.venueName,
+    address: draft.address,
+    title: draft.title,
+  });
+  if (closed) {
+    return { keep: false, reason: closed.reason };
   }
 
   const mode = relevanceModeForSource(ctx);

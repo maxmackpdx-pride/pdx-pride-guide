@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "prepared_at": "2026-07-26",
+    "purpose": "Prevent resurrected events from closed venues - 2 year window + key historic closures",
+    "source": "Wikipedia LGBTQ culture Portland + Portland Mercury + Willamette Week"
+  },
+  "closed_last_2_years_2024_2026": [
+    {
+      "venueName": "Crush Bar",
+      "address": "1400 SE Morrison St, Portland, OR 97214",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2025-01-01",
+      "notes": "Oldest eastside queer bar, established 2001, scheduled close end 2023, employee investment kept open into 2024, closed permanently Jan 1 2025",
+      "provenance": "Wikipedia: 'was a gay bar... closed permanently on January 1, 2025'",
+      "action": "BLACKLIST - never ingest, set place status CLOSED"
+    },
+    {
+      "venueName": "Sissy Bar",
+      "address": "Portland, OR",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2024-10-26",
+      "notes": "Operated 2022-2024, closed after Halloween party Oct 26 2024 citing COVID effects",
+      "provenance": "Wikipedia LGBTQ culture: 'Sissy Bar operated from 2022 to 2024'",
+      "action": "BLACKLIST"
+    },
+    {
+      "venueName": "Doc Marie's",
+      "address": "SE Portland Buckman neighborhood",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2025-10",
+      "notes": "Lesbian bar opened 2022, closed permanently end Oct 2025 - Portland's last lesbian bar at time",
+      "provenance": "Wikipedia LGBTQ culture: 'Doc Marie's... closed permanently in 2025'",
+      "action": "BLACKLIST"
+    },
+    {
+      "venueName": "Misfits Bar and Lounge",
+      "address": "Portland, OR",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2025",
+      "notes": "Laidback queer hangout",
+      "provenance": "Wikipedia LGBTQ culture: 'Misfits Bar and Lounge, which closed in 2025'",
+      "action": "BLACKLIST"
+    },
+    {
+      "venueName": "Embers Avenue",
+      "address": "Old Town Chinatown, Portland, OR",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2024-late",
+      "notes": "Gay bar and nightclub opened 1969, closed late 2024",
+      "provenance": "Search: 'Embers Avenue... opened in 1969, and closed in late 2024'",
+      "action": "BLACKLIST"
+    },
+    {
+      "venueName": "The Uncanny",
+      "address": "Portland, OR",
+      "status": "CLOSED_PERMANENT",
+      "closed_at": "2026-05",
+      "notes": "Established 2023, named one of best new bars in US by Esquire 2024",
+      "provenance": "Wikipedia: 'The Uncanny was a bar... closed permanently in May 2026'",
+      "action": "BLACKLIST"
+    }
+  ],
+  "older_closures_keep_blacklisted": [
+    {
+      "venueName": "Local Lounge",
+      "address": "3536 NE MLK Jr Blvd",
+      "closed_at": "2021",
+      "notes": "Gay bar, closed during COVID"
+    },
+    {
+      "venueName": "Hobo's",
+      "address": "Portland, OR",
+      "closed_at": "2020",
+      "notes": "Gay bar, closed during COVID"
+    },
+    {
+      "venueName": "The Queen's Head",
+      "address": "Portland, OR",
+      "closed_at": "2022",
+      "notes": "English-style pub with drag/burlesque"
+    },
+    {
+      "venueName": "The Roxy",
+      "address": "SW Harvey Milk St",
+      "closed_at": "2022-03",
+      "notes": "LGBTQ-friendly diner, initially opened 1977"
+    },
+    {
+      "venueName": "Shine Distillery and Grill",
+      "address": "Portland, OR",
+      "closed_at": "2023",
+      "notes": "Gay bar and restaurant, drive-through drag during COVID"
+    },
+    {
+      "venueName": "Scandals",
+      "address": "Downtown Portland (moved to NE Portland)",
+      "closed_at": "2025-move",
+      "notes": "Established 1979, announced closure downtown and began operating in NE Portland in 2025 - NOT fully closed, but address changed"
+    }
+  ],
+  "implementation": {
+    "prisma_suggestion": "Add closedVenues table or Venue.status = CLOSED with closedAt date. In url_ingest adapter, check venueName against blacklist case-insensitive, if match -> skip ingest and log.",
+    "sql_example": "CREATE TABLE \"ClosedVenue\" (\"venueName\" TEXT PRIMARY KEY, \"closedAt\" DATE, \"reason\" TEXT, \"action\" TEXT);",
+    "zaylist_specific": [
+      "Add to QSearch: never return events for these venueNames",
+      "Add to Directory Places: set status CLOSED, hide from discovery, keep historical events",
+      "In cleanup script: delete any LIVE events where venueName IN blacklist and dateStart > closedAt"
+    ]
+  }
+}

@@ -57,6 +57,7 @@ import {
   mergeIngestSources,
 } from "@shared/ingestSources";
 import { isTrustedLaneSource } from "@shared/trustedVenues";
+import { matchClosedVenue } from "@shared/closedVenues";
 import {
   attachDirectoryBrandsToCandidates,
   cancelScan,
@@ -5372,6 +5373,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
         if (candidateId) denySkipIds.push(candidateId);
         items.push({ draft: row?.draft, skip: true, candidateId });
         continue;
+      }
+      // Closed venues: never approve into LIVE/HIDDEN unless explicit allowClosedVenue
+      if (!row?.allowClosedVenue && row?.draft) {
+        const closedHit = matchClosedVenue({
+          venueName: row.draft.venueName,
+          address: row.draft.address,
+          title: row.draft.title,
+        });
+        if (closedHit) {
+          if (candidateId) denySkipIds.push(candidateId);
+          items.push({ draft: row.draft, skip: true, candidateId });
+          continue;
+        }
       }
       // Merge: update the existing event in place (keep its id → keep RSVPs).
       // Handled below; NOT sent to commitIngest so no duplicate row is created.

@@ -70,6 +70,12 @@ import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
 import { isPostEventWeekListingCapActive } from "@shared/eventWeek";
+import {
+  CLOSED_PERMANENT_VENUES,
+  closedAtIso,
+  isEventAfterVenueClose,
+  matchClosedVenue,
+} from "@shared/closedVenues";
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -3798,6 +3804,100 @@ function runBootMigrationsOnce() {
       )
       .run();
     recordBootMigration("crush_bar_closed_permanent_2025_01_01_v1");
+  }
+  /**
+   * Expand closed-venue directory seeds + soft-hide LIVE post-close events at blacklisted venues.
+   * List lives in shared/closedVenues.ts (also used by QSearch relevance).
+   */
+  if (!hasBootMigration("closed_venues_blacklist_v1")) {
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`);
+    } catch { /* already present */ }
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`);
+    } catch { /* already present */ }
+
+    const now = new Date().toISOString();
+
+    for (const entry of CLOSED_PERMANENT_VENUES) {
+      if (!entry.seedDirectory) continue;
+      const closedAt = closedAtIso(entry);
+      const existing = sqlite
+        .prepare(`SELECT id FROM businesses WHERE lower(name) = lower(?) LIMIT 1`)
+        .get(entry.label) as { id: number } | undefined;
+      if (existing) {
+        sqlite
+          .prepare(
+            `UPDATE businesses
+             SET status = 'CLOSED', closed_at = ?, active = 0,
+                 description = CASE
+                   WHEN description IS NULL OR trim(description) = '' THEN ?
+                   ELSE description
+                 END,
+                 address = COALESCE(address, ?),
+                 neighborhood = COALESCE(neighborhood, ?)
+             WHERE id = ?`,
+          )
+          .run(
+            closedAt,
+            `${entry.label} permanently closed ${closedAt}. ${entry.note} Historical linkage only — do not scrape.`,
+            entry.address || null,
+            entry.neighborhood || null,
+            existing.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: entry.label,
+            type: "bar",
+            description: `${entry.label} permanently closed ${closedAt}. ${entry.note} Historical linkage only — do not scrape.`,
+            address: entry.address || null,
+            neighborhood: entry.neighborhood || null,
+            website: null,
+            instagram: null,
+            queerOwned: true,
+            queerFriendly: true,
+            active: false,
+            status: "CLOSED",
+            closedAt,
+            isNew: false,
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+
+    // Soft-hide LIVE events at blacklisted venues with start on/after close (no historical purge)
+    const live = sqlite
+      .prepare(`SELECT id, title, venue_name AS venueName, address, date_start AS dateStart FROM events WHERE status = 'LIVE'`)
+      .all() as Array<{ id: number; title: string; venueName: string; address: string | null; dateStart: string }>;
+    let hidden = 0;
+    for (const row of live) {
+      const hit = matchClosedVenue({ venueName: row.venueName, address: row.address, title: row.title });
+      if (!hit) continue;
+      if (!isEventAfterVenueClose(row.dateStart, hit.entry.closedAt)) continue;
+      sqlite
+        .prepare(
+          `UPDATE events SET status = 'HIDDEN',
+             admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+           WHERE id = ? AND status = 'LIVE'`,
+        )
+        .run(`closed_venues_blacklist_v1: ${hit.reason}`, row.id);
+      hidden++;
+    }
+    if (hidden > 0) {
+      console.info(`[boot] closed_venues_blacklist_v1: soft-hid ${hidden} LIVE post-close events`);
+    }
+
+    // Peacock / Scandals East stay open
+    sqlite
+      .prepare(
+        `UPDATE businesses SET status = 'OPEN', closed_at = NULL, active = 1
+         WHERE lower(name) IN ('peacock pdx', 'peacock', 'scandals east')`,
+      )
+      .run();
+
+    recordBootMigration("closed_venues_blacklist_v1");
   }
   if (!hasBootMigration("seed_plus_psychiatry_v1")) {
     const now = new Date().toISOString();

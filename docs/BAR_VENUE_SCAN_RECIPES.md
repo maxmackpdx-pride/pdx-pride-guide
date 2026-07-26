@@ -55,6 +55,9 @@ Research compiled **2026-07-19** for QSearch accuracy.
 | URL | Why |
 |-----|-----|
 | Crush Bar / `@crushbarpdx` / crushbarpdx.com | **CLOSED_PERMANENT_2025-01-01** — space is Peacock PDX (`peacock-pdx` ingest source) |
+| Sissy Bar, Doc Marie's, Misfits, Embers Avenue, The Uncanny | **CLOSED permanent** — see `shared/closedVenues.ts` (QSearch hard-drop by venueName) |
+| Scandals **downtown / Harvey Milk only** | Moved to Scandals East (NE Alberta) — old address blocked, name alone not |
+| Local Lounge, Hobo's, Queen's Head, The Roxy, Shine Distillery | Historic closings — same blacklist |
 | `novapdx.com` | Parked domain |
 | `theautomaticbarpdx.com/events` | 404 |
 | `stagportland.com/events?format=json` | Empty SQS page, not calendar |

@@ -6,50 +6,17 @@
  * `GET /api/admin/events/ingest/sources` so new Places auto-appear in the tool.
  */
 import { normalizeVenueKey, VENUE_WEBSITE_FALLBACKS } from "./venueLinks";
+import {
+  CLOSED_PERMANENT_VENUES,
+  isClosedPermanentScrapeUrl,
+  isClosedPermanentVenueName,
+} from "./closedVenues";
 
-/**
- * Permanently closed venues / dead scrape targets — never auto-chip, never re-add as source_gaps.
- * Keys: lowercase venue name fragments and hostnames.
- * Crush Bar → CLOSED_PERMANENT_2025-01-01 (successor: Peacock PDX).
- */
-export const CLOSED_PERMANENT_VENUES: Array<{
-  id: string;
-  names: string[];
-  hosts: string[];
-  closedAt: string; // YYYY-MM-DD
-  successor?: string;
-  note: string;
-}> = [
-  {
-    id: "crush-bar",
-    names: ["crush bar", "crush bar pdx", "crush"],
-    hosts: ["crushbarpdx.com", "instagram.com/crushbarpdx", "www.instagram.com/crushbarpdx"],
-    closedAt: "2025-01-01",
-    successor: "Peacock PDX",
-    note: "CLOSED_PERMANENT_2025-01-01 — Buckman bar closed; space is Peacock PDX. Do not scrape IG @crushbarpdx.",
-  },
-];
-
-export function isClosedPermanentVenueName(name: string | null | undefined): boolean {
-  const key = normalizeVenueKey(name || "");
-  if (!key) return false;
-  return CLOSED_PERMANENT_VENUES.some(v =>
-    v.names.some(n => {
-      if (key === n) return true;
-      // Longer aliases only (avoid matching "crush" inside unrelated names)
-      if (n.length >= 6 && (key.includes(n) || n.includes(key))) return true;
-      return false;
-    }),
-  );
-}
-
-export function isClosedPermanentScrapeUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return CLOSED_PERMANENT_VENUES.some(v =>
-    v.hosts.some(h => lower.includes(h.toLowerCase())),
-  );
-}
+export {
+  CLOSED_PERMANENT_VENUES,
+  isClosedPermanentScrapeUrl,
+  isClosedPermanentVenueName,
+} from "./closedVenues";
 
 export type IngestSourceTier =
   | "1"
