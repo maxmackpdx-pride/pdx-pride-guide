@@ -5,7 +5,9 @@ import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
-import { RIVER_BRATS_CHAT_CLOSES_AT } from "@shared/riverBrats";
+import { RIVER_BRATS_CHAT_CLOSES_AT, RIVER_BRATS_CHAT_OPENS_COPY } from "@shared/riverBrats";
+
+type GoingChip = { date: string; label: string; dayCode: string };
 
 type ChatMessage = {
   id: number;
@@ -18,6 +20,7 @@ type ChatMessage = {
   photoUrl?: string | null;
   avatarChoice?: number | null;
   avatarRing?: string | null;
+  goingChips?: GoingChip[];
 };
 
 type ChatPayload = {
@@ -95,7 +98,10 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
           <div>
             <h3 className="display event-chat-panel__title">Beach chat</h3>
             <p className="event-chat-panel__meta">
-              {beachLabel} · {chatOpen ? countdown ?? `open until ${RIVER_BRATS_CHAT_CLOSES_AT}` : countdown ?? "Chat closed"}
+              {beachLabel} · group room ·{" "}
+              {chatOpen
+                ? countdown ?? RIVER_BRATS_CHAT_CLOSES_AT
+                : countdown ?? "Chat closed"}
             </p>
           </div>
           <button type="button" className="event-chat-panel__close" onClick={onClose} aria-label="Close">
@@ -108,7 +114,8 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
           {!isLoading && messages.length === 0 && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi - others heading out today can see this until 10pm.
+              You&apos;re in. Chat opens {RIVER_BRATS_CHAT_OPENS_COPY}. Stay until{" "}
+              {RIVER_BRATS_CHAT_CLOSES_AT}.
             </p>
           )}
           {messages.map(msg => (
@@ -129,8 +136,22 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
               )}
               <div className="event-chat-panel__bubble">
                 {!msg.isMine && (
-                  <span className="event-chat-panel__author">
-                    {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
+                  <span className="event-chat-panel__author-block">
+                    <span className="event-chat-panel__author">
+                      {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
+                    </span>
+                    {msg.goingChips && msg.goingChips.length > 0 && (
+                      <span className="rb-going-chips">
+                        {msg.goingChips.map(c => (
+                          <span
+                            key={c.date}
+                            className={`rb-going-chip day-${c.dayCode.toLowerCase()}`}
+                          >
+                            {c.label}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </span>
                 )}
                 <p>{msg.body}</p>

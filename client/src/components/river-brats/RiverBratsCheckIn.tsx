@@ -8,7 +8,6 @@ import {
   RIVER_BRATS_HOUR_END,
   RIVER_BRATS_HOUR_START,
   beachCheckinDateOptions,
-  isRiverBratsChatOpen,
   defaultDepartHour,
   formatBeachCheckinDateLabel,
   formatRiverBratsHour,
@@ -161,13 +160,29 @@ export default function RiverBratsCheckIn({
   );
 
   const mine = user ? rows.find(r => (r.userId ?? r.user_id) === user.id) : undefined;
-  const checkedIn = Boolean(mine);
-  // Anonymous check-ins are counted in "going" but never connected to the group
-  // chat - they can't read or post, since the chat is not anonymous.
+  const checkedInSelectedDay = Boolean(mine);
+  // Anonymous check-ins are counted in "going" but never connected to the group chat.
   const isAnon = Boolean(mine?.isAnonymous);
-  // Day-room opens 48h before the beach day and closes 10pm that day.
-  const chatWindowOpen = isRiverBratsChatOpen(selectedDate);
-  const inChat = checkedIn && !isAnon && chatWindowOpen;
+
+  // Multi-day plans: any active non-anon check-in at this beach unlocks chat immediately.
+  const { data: myPlans = [] } = useQuery<
+    Array<{ beachId: string; calendarDate: string; isAnonymous?: boolean }>
+  >({
+    queryKey: ["/api/river-brats/checkins/mine"],
+    queryFn: () =>
+      apiRequest("GET", "/api/river-brats/checkins/mine").then(r => r.json()).catch(() => []),
+    enabled: Boolean(user),
+    staleTime: 15_000,
+  });
+  const myBeachPlans = useMemo(
+    () =>
+      (Array.isArray(myPlans) ? myPlans : []).filter(
+        p => p.beachId === beachId && !p.isAnonymous,
+      ),
+    [myPlans, beachId],
+  );
+  const inChat = myBeachPlans.length > 0;
+  const checkedIn = checkedInSelectedDay || inChat;
   const goingCount = rows.length;
   /** GPS-verified “I'm here” - independent of chat window (chat is 48h calendar). */
   const onLocationCount = useMemo(
@@ -247,12 +262,14 @@ export default function RiverBratsCheckIn({
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/mine"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat", beachId] });
       const dayLabel = formatBeachCheckinDateLabel(selectedDate);
       toast({
         title: "Checked in",
-        description: chatWindowOpen
-          ? "Beach chat is open until 10pm. Add it to your calendar if you want."
-          : `You're on the ${dayLabel} list. Chat opens 48 hours before that day. Add it to your calendar if you want.`,
+        description:
+          visibility === "anonymous"
+            ? `You're on the ${dayLabel} list anonymously (counted, not in chat).`
+            : `You're on the ${dayLabel} list — group chat is open now. Multi-day plans keep you in longer.`,
       });
       if (row?.id) {
         // Keep local calendar payload id for ICS UID stability after first save.
@@ -433,7 +450,10 @@ export default function RiverBratsCheckIn({
         <span className="rb-checkin__pulse-copy">
           <strong>{isLoading ? "…" : goingCount}</strong>{" "}
           {isViewingToday ? "heading out today" : `planned for ${dayLabel}`}
-          {isViewingToday ? " · pick when you&apos;ll get there" : " · chat opens 48h before that day"}
+          {" · "}
+          {isViewingToday
+            ? "pick when you&apos;ll get there"
+            : "chat opens when you check in · one room for all days"}
         </span>
         {isViewingToday && <OnLocationPill count={onLocationCount} />}
       </div>
@@ -529,21 +549,19 @@ export default function RiverBratsCheckIn({
           <div className="rb-checkin__actions">
             <button
               type="button"
-              className={`rb-checkin__primary${checkedIn ? " rb-checkin__primary--update" : ""}`}
+              className={`rb-checkin__primary${checkedInSelectedDay ? " rb-checkin__primary--update" : ""}`}
               disabled={!canSave}
               onClick={() => requireAuth() && saveMutation.mutate(undefined)}
             >
               {saveMutation.isPending
                 ? "Saving…"
-                : checkedIn
+                : checkedInSelectedDay
                   ? "Update check-in"
                   : visibility === "anonymous"
                     ? "Check in"
-                    : isViewingToday
-                      ? "Check in · join chat"
-                      : "Check in · plan ahead"}
+                    : "Check in · join chat"}
             </button>
-            {checkedIn && calendarPayload && (
+            {checkedInSelectedDay && calendarPayload && (
               <div className="event-link-choice-anchor rb-checkin__cal-wrap">
                 <button
                   type="button"
@@ -585,7 +603,7 @@ export default function RiverBratsCheckIn({
                 {verifying ? "Checking…" : checkedIn ? "I'm here" : "I'm here now"}
               </button>
             )}
-            {checkedIn && mine && (
+            {checkedInSelectedDay && mine && (
               <button
                 type="button"
                 className="rb-checkin__withdraw"
@@ -597,10 +615,12 @@ export default function RiverBratsCheckIn({
             )}
           </div>
           <p className="rb-checkin__fine">
-            Plan up to 7 days ahead. Chat opens 48 hours before that day and clears at 10pm. Be kind, keep exact meetup details to DMs.
+            Plan up to 7 days ahead. Chat opens when you check in — one group room for every day
+            you&apos;re going. You stay until 12 hours after that day ends. Be kind; keep exact
+            meetup details to DMs.
           </p>
 
-          {checkedIn && !isViewingToday && (
+          {checkedInSelectedDay && !isViewingToday && (
             <div className="rb-checkin__plan-next" data-testid="beach-plan-carpool-prompt">
               <div className="rb-checkin__plan-next-kicker">{dayLabel} forecast</div>
               {dayForecast ? (
@@ -644,7 +664,7 @@ export default function RiverBratsCheckIn({
       </div>
 
       <div className="rb-checkin__going-row">
-        {checkedIn && user && mine ? (
+        {checkedInSelectedDay && user && mine ? (
           <div className="rb-checkin__self">
             <UserAvatar
               photoUrl={visibility === "anonymous" ? null : user.photoUrl}

@@ -11,8 +11,14 @@ export const RIVER_BRATS_SHORE_TABS: Array<{ key: RiverBratsShoreTab; label: str
 export const RIVER_BRATS_HOUR_START = 7;
 export const RIVER_BRATS_HOUR_END = 21;
 
-/** Beach group chat closes at 10pm Pacific on its calendar date. */
+/**
+ * Latest planned leave hour on the form (10pm Pacific).
+ * Chat access is separate: open on check-in, close 12h after end of beach day.
+ */
 export const RIVER_BRATS_CHAT_CLOSE_HOUR = 22;
+
+/** Hours after end of calendar beach day that chat access continues. */
+export const RIVER_BRATS_CHAT_LINGER_HOURS = 12;
 
 export const RIVER_BRATS_HOURS = Array.from(
   { length: RIVER_BRATS_HOUR_END - RIVER_BRATS_HOUR_START + 1 },
@@ -114,25 +120,90 @@ export function pacificMidnightIso(dateStr: string): string {
   return new Date(t + 1).toISOString();
 }
 
+/**
+ * Chat access for a beach day ends 12 hours after that calendar day ends
+ * (Pacific midnight → +12h = noon next day). Multi-day check-ins take the max.
+ */
 export function riverBratsChatClosesAtIso(dateStr: string): string {
-  return new Date(`${dateStr}T22:00:00-07:00`).toISOString();
+  // End of beach day = next calendar day 00:00 Pacific, then + linger hours.
+  const nextDay = addCalendarDays(dateStr, 1);
+  const dayEndMs = new Date(`${nextDay}T00:00:00-07:00`).getTime();
+  return new Date(dayEndMs + RIVER_BRATS_CHAT_LINGER_HOURS * 60 * 60 * 1000).toISOString();
 }
 
-/** Beach day-room opens this far before Pacific midnight at the start of the beach day. */
-export const RIVER_BRATS_CHAT_OPENS_BEFORE_MS = 48 * 60 * 60 * 1000;
+/**
+ * Chat opens the moment someone checks in (no 48h wait).
+ * Kept for API shape / inbox countdown; openAt ≈ check-in creation (now).
+ */
+export const RIVER_BRATS_CHAT_OPENS_BEFORE_MS = 0;
 
-/** ISO open time: 48 hours before 00:00 Pacific on the beach calendar date. */
+/** @deprecated Prefer immediate open on check-in; retained for callers. */
 export function riverBratsChatOpensAtIso(dateStr: string): string {
-  const dayStart = new Date(`${dateStr}T00:00:00-07:00`).getTime();
-  return new Date(dayStart - RIVER_BRATS_CHAT_OPENS_BEFORE_MS).toISOString();
+  // Start of beach calendar day Pacific — access is still gated by active check-in.
+  return new Date(`${dateStr}T00:00:00-07:00`).toISOString();
 }
 
-/** True while now is in [opensAt, closesAt) for that beach day room. */
+/**
+ * True while a beach day still contributes chat access (before end-of-day + 12h).
+ * Check-in may be earlier than the day itself — no open delay.
+ */
 export function isRiverBratsChatOpen(dateStr: string, now = Date.now()): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
-  const opens = new Date(riverBratsChatOpensAtIso(dateStr)).getTime();
   const closes = new Date(riverBratsChatClosesAtIso(dateStr)).getTime();
-  return now >= opens && now < closes;
+  return now < closes;
+}
+
+/** User can access beach chat if any of their check-in days is still open. */
+export function riverBratsChatAccessFromDates(
+  calendarDates: string[],
+  now = Date.now(),
+): { open: boolean; closesAt: string | null; opensAt: string | null } {
+  const valid = calendarDates.filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+  if (!valid.length) return { open: false, closesAt: null, opensAt: null };
+  let maxClose = 0;
+  let minOpen = Infinity;
+  for (const d of valid) {
+    const c = new Date(riverBratsChatClosesAtIso(d)).getTime();
+    const o = new Date(riverBratsChatOpensAtIso(d)).getTime();
+    if (c > maxClose) maxClose = c;
+    if (o < minOpen) minOpen = o;
+  }
+  const closesAt = new Date(maxClose).toISOString();
+  const opensAt = Number.isFinite(minOpen) ? new Date(minOpen).toISOString() : null;
+  // Open immediately once they have any check-in day still before its close.
+  const open = now < maxClose;
+  return { open, closesAt, opensAt };
+}
+
+/** Pacific weekday code MON…SUN for a YYYY-MM-DD (for day color tokens). */
+export function pacificWeekdayCode(ymd: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return "MON";
+  const [y, m, d] = ymd.split("-").map(Number);
+  const short = new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString("en-US", {
+    weekday: "short",
+    timeZone: "UTC",
+  });
+  const map: Record<string, string> = {
+    Mon: "MON",
+    Tue: "TUE",
+    Wed: "WED",
+    Thu: "THU",
+    Fri: "FRI",
+    Sat: "SAT",
+    Sun: "SUN",
+  };
+  return map[short] || "MON";
+}
+
+/** Compact day chip: Today / Tom / Mon 28 */
+export function formatBeachGoingChip(dateStr: string, now = Date.now()): string {
+  const today = pacificTodayDate(now);
+  if (dateStr === today) return "Today";
+  if (dateStr === addCalendarDays(today, 1)) return "Tom";
+  const code = pacificWeekdayCode(dateStr);
+  const dayNum = dateStr.slice(8, 10).replace(/^0/, "");
+  const short = code.charAt(0) + code.slice(1).toLowerCase();
+  return `${short} ${dayNum}`;
 }
 
 /** ISO fire time for an arrival-hour prompt on a given calendar date. */
@@ -220,5 +291,6 @@ export function isValidBeachId(id: unknown): id is NudeBeachTab {
   return id === "rooster-rock" || id === "sauvie-island";
 }
 
-/** Beach check-in unlocks the day-room chat until 10pm Pacific. */
-export const RIVER_BRATS_CHAT_CLOSES_AT = "10pm Pacific";
+/** Copy: chat stays open after the beach day ends. */
+export const RIVER_BRATS_CHAT_CLOSES_AT = "12 hours after your beach day ends";
+export const RIVER_BRATS_CHAT_OPENS_COPY = "as soon as you check in";

@@ -1433,14 +1433,62 @@ html.calm-mode .rb-dm-panel {
   color: #fff;
 }
 
+.rb-group-chat__author-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.rb-group-chat__author-block--mine {
+  align-items: flex-end;
+}
+
 .rb-group-chat__author {
   display: block;
   font-family: var(--font-display), sans-serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.07em;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--rb-accent);
-  margin-bottom: 3px;
+  line-height: 1.15;
+}
+
+/* Days going — smaller than username, Pride weekday colors */
+.rb-going-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 14rem;
+}
+
+.rb-going-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  white-space: nowrap;
+}
+
+.rb-group-chat__body {
+  display: block;
+  line-height: 1.35;
+}
+
+.event-chat-panel__author-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  margin-bottom: 4px;
 }
 
 .rb-group-chat__lock {

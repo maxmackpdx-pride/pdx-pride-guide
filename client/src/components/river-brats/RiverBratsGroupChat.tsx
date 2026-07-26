@@ -6,15 +6,19 @@ import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
-import { RIVER_BRATS_CHAT_CLOSES_AT } from "@shared/riverBrats";
+import { RIVER_BRATS_CHAT_CLOSES_AT, RIVER_BRATS_CHAT_OPENS_COPY } from "@shared/riverBrats";
 
-/** 18+ interstitial applies once the viewer is actually in the room; the
- *  locked preview stays gate-free since content is masked anyway. */
+/** 18+ interstitial once the viewer is in the room. */
 function MaybeAdultGate({ gated, children }: { gated: boolean; children: React.ReactNode }) {
   if (!gated) return <>{children}</>;
   return <AdultContentGate>{children}</AdultContentGate>;
 }
 
+type GoingChip = {
+  date: string;
+  label: string;
+  dayCode: string;
+};
 
 type ChatMessage = {
   id: number;
@@ -27,21 +31,26 @@ type ChatMessage = {
   photoUrl?: string | null;
   avatarChoice?: number | null;
   avatarRing?: string | null;
+  goingDates?: string[];
+  goingChips?: GoingChip[];
+};
+
+type ChatMember = {
+  userId: number;
+  username: string;
+  displayName?: string;
+  photoUrl?: string | null;
+  avatarChoice?: number | null;
+  goingDates: string[];
+  goingChips: GoingChip[];
 };
 
 type ChatPayload = {
   messages: ChatMessage[];
   expiresAt: string | null;
   chatOpen: boolean;
-};
-
-type AvatarPreview = {
-  key: string;
-  username: string;
-  displayName?: string | null;
-  photoUrl?: string | null;
-  avatarChoice?: number;
-  masked?: boolean;
+  members?: ChatMember[];
+  goingDates?: string[];
 };
 
 function formatCountdown(expiresAt: string | null): string | null {
@@ -53,6 +62,23 @@ function formatCountdown(expiresAt: string | null): string | null {
   const mins = totalMin % 60;
   if (hours > 0) return `${hours}h ${mins}m left`;
   return `${mins}m left`;
+}
+
+function DayChips({ chips, className = "" }: { chips?: GoingChip[]; className?: string }) {
+  if (!chips?.length) return null;
+  return (
+    <span className={`rb-going-chips${className ? ` ${className}` : ""}`} aria-label="Days going">
+      {chips.map(c => (
+        <span
+          key={c.date}
+          className={`rb-going-chip day-${c.dayCode.toLowerCase()}`}
+          title={c.date}
+        >
+          {c.label}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 type Props = {
@@ -67,7 +93,15 @@ type Props = {
   goingCount: number;
   /** GPS-verified on the sand right now (not the same as chat going count). */
   onLocationCount?: number;
-  headerAvatars: AvatarPreview[];
+  headerAvatars: Array<{
+    key: string;
+    username: string;
+    displayName?: string | null;
+    photoUrl?: string | null;
+    avatarChoice?: number;
+    masked?: boolean;
+    goingChips?: GoingChip[];
+  }>;
 };
 
 export default function RiverBratsGroupChat({
@@ -85,19 +119,21 @@ export default function RiverBratsGroupChat({
   const [body, setBody] = useState("");
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
-  const chatKey = ["/api/river-brats/checkins/chat", beachId, date] as const;
+  // Unified beach room — date only stamps messages; access is multi-day.
+  const chatKey = ["/api/river-brats/checkins/chat", beachId, "room"] as const;
 
   const { data, isLoading } = useQuery<ChatPayload>({
     queryKey: chatKey,
     queryFn: () =>
       apiRequest("GET", `/api/river-brats/checkins/chat?beach=${beachId}&date=${date}`).then(r => r.json()),
     refetchInterval: checkedIn ? 8_000 : false,
-    enabled: !locked,
+    enabled: !locked || checkedIn,
   });
 
   const messages = data?.messages ?? [];
   const expiresAt = data?.expiresAt ?? null;
   const chatOpen = data?.chatOpen ?? false;
+  const members = data?.members ?? [];
   const countdown = useMemo(() => formatCountdown(expiresAt), [expiresAt, tick]);
 
   useEffect(() => {
@@ -121,37 +157,51 @@ export default function RiverBratsGroupChat({
     },
   });
 
+  const roomCount = members.length > 0 ? members.length : goingCount;
   const chatStatus = checkedIn
-    ? `${goingCount} going · ${countdown ?? `open until ${RIVER_BRATS_CHAT_CLOSES_AT}`}`
-    : `${goingCount} going · locked until you check in`;
+    ? `${roomCount} in chat · ${countdown ?? RIVER_BRATS_CHAT_CLOSES_AT}`
+    : `${roomCount} checked in · join when you say you're going`;
 
   return (
     <section
       className={`rb-group-chat${checkedIn ? " rb-group-chat--unlocked" : ""}`}
-      aria-label="Today's group chat"
+      aria-label="Beach group chat"
     >
       <div className="rb-group-chat__head">
         <div className="rb-group-chat__avatar-stack">
-          {headerAvatars.slice(0, 3).map((row, index) => (
-            <span
-              key={row.key}
-              className="rb-group-chat__avatar-wrap"
-              style={{ marginLeft: index === 0 ? 0 : -10 }}
-            >
-              <UserAvatar
-                username={row.masked ? "anonymous" : row.username}
-                displayName={row.masked ? undefined : row.displayName}
-                photoUrl={row.masked ? null : row.photoUrl}
-                avatarChoice={row.masked ? undefined : row.avatarChoice}
-                href={row.masked ? null : memberProfileHref(row.username)}
-                size={34}
-              />
-            </span>
-          ))}
+          {(members.length ? members : headerAvatars).slice(0, 4).map((row, index) => {
+            const key = "userId" in row ? String((row as ChatMember).userId) : (row as { key: string }).key;
+            const username = row.username;
+            const displayName = row.displayName;
+            const photoUrl = "masked" in row && row.masked ? null : row.photoUrl;
+            const avatarChoice = "masked" in row && row.masked ? undefined : row.avatarChoice;
+            const chips = row.goingChips;
+            return (
+              <span
+                key={key}
+                className="rb-group-chat__avatar-wrap"
+                style={{ marginLeft: index === 0 ? 0 : -10 }}
+                title={
+                  chips?.length
+                    ? `${displayName || username}: ${chips.map(c => c.label).join(", ")}`
+                    : undefined
+                }
+              >
+                <UserAvatar
+                  username={"masked" in row && row.masked ? "anonymous" : username}
+                  displayName={"masked" in row && row.masked ? undefined : displayName}
+                  photoUrl={photoUrl}
+                  avatarChoice={avatarChoice ?? undefined}
+                  href={"masked" in row && row.masked ? null : memberProfileHref(username)}
+                  size={34}
+                />
+              </span>
+            );
+          })}
         </div>
         <div className="rb-group-chat__titles">
           <div className="rb-group-chat__title-row">
-            <div className="rb-group-chat__title">{beachShortLabel} · Today</div>
+            <div className="rb-group-chat__title">{beachShortLabel} · Group chat</div>
             {onLocationCount > 0 && (
               <span
                 className="rb-on-site rb-on-site--chat"
@@ -179,12 +229,13 @@ export default function RiverBratsGroupChat({
       <MaybeAdultGate gated={checkedIn}>
       <div className="rb-group-chat__thread" ref={listRef}>
         <div className="rb-group-chat__day-marker">
-          Chat opens 48h early (calendar) · clears 10pm · on-site is separate
+          Opens {RIVER_BRATS_CHAT_OPENS_COPY} · one room for every day you&apos;re going ·{" "}
+          {RIVER_BRATS_CHAT_CLOSES_AT}
         </div>
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}
-        {!isLoading && messages.length === 0 && !locked && (
+        {!isLoading && messages.length === 0 && !locked && checkedIn && (
           <p className="rb-group-chat__empty">
-            You're checked in. Say hi - others heading out today can see this until 10pm.
+            You&apos;re in. Say hi — everyone heading to {beachShortLabel} this week is in this room.
           </p>
         )}
         {messages.map(msg => (
@@ -205,11 +256,20 @@ export default function RiverBratsGroupChat({
             )}
             <div className="rb-group-chat__bubble">
               {!msg.isMine && (
-                <span className="rb-group-chat__author">
-                  {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
+                <span className="rb-group-chat__author-block">
+                  <span className="rb-group-chat__author">
+                    {msg.isAnonymous ? "Anonymous" : `@${msg.username || msg.displayName}`}
+                  </span>
+                  <DayChips chips={msg.goingChips} />
                 </span>
               )}
-              <span>{msg.body}</span>
+              {msg.isMine && msg.goingChips && msg.goingChips.length > 0 && (
+                <span className="rb-group-chat__author-block rb-group-chat__author-block--mine">
+                  <span className="rb-group-chat__author">You</span>
+                  <DayChips chips={msg.goingChips} />
+                </span>
+              )}
+              <span className="rb-group-chat__body">{msg.body}</span>
             </div>
           </div>
         ))}
@@ -219,13 +279,13 @@ export default function RiverBratsGroupChat({
             <Lock size={22} strokeWidth={2} aria-hidden />
             {anonymous ? (
               <p>
-                You're checked in anonymously, so you're counted in <strong>{goingCount}</strong> going
-                but stay off the chat. Switch to your @username to join.
+                You&apos;re checked in anonymously, so you&apos;re counted as going but stay off the
+                chat. Switch to your @username to join the group.
               </p>
             ) : (
               <p>
-                Check in to unlock the chat. You'll see <strong>{goingCount}</strong> people already
-                talking and it'll show up in your Messages.
+                Check in (say you&apos;re going) to unlock the chat. Everyone going any day this week
+                shares one room — multi-day plans keep you in longer.
               </p>
             )}
           </div>
@@ -260,7 +320,7 @@ export default function RiverBratsGroupChat({
         ) : (
           <div className="rb-group-chat__locked-foot">
             <Lock size={15} strokeWidth={2} aria-hidden />
-            <span>Only people checked in today can read and post.</span>
+            <span>Check in to join the group chat — chat starts the moment you say you&apos;re going.</span>
           </div>
         )}
       </div>

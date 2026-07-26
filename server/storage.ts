@@ -59,8 +59,12 @@ import {
   riverBratsChatClosesAtIso,
   riverBratsChatOpensAtIso,
   isRiverBratsChatOpen,
+  riverBratsChatAccessFromDates,
   riverBratsArrivalPromptIso,
   beachVenueLabel,
+  addCalendarDays,
+  formatBeachGoingChip,
+  pacificWeekdayCode,
 } from "@shared/riverBrats";
 import { getEventChatWindow, CHAT_RETENTION_DAYS } from "@shared/eventChatWindow";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
@@ -12308,7 +12312,7 @@ export const storage: IStorage = {
   },
   upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }) {
     const createdAt = new Date().toISOString();
-    // Beach group chat closes at 10pm Pacific on the check-in date.
+    // Chat access: end of beach day + 12h (multi-day check-ins each set their own expires_at).
     const expiresAt = riverBratsChatClosesAtIso(data.calendarDate);
     const isAnonymous = Boolean(data.isAnonymous);
     const existing = sqlite.prepare(`
@@ -12406,9 +12410,8 @@ export const storage: IStorage = {
   purgeExpiredChatMessages(now = Date.now()) {
     // Hard-delete group chat content CHAT_RETENTION_DAYS after the chat closes.
     const retentionMs = CHAT_RETENTION_DAYS * 86_400_000;
-    // Beach rooms close at 10pm on calendar_date, so any date strictly older
-    // than the cutoff date is past close + retention.
-    const beachCutoff = pacificTodayDate(now - retentionMs);
+    // Beach messages: drop rows whose day closed (+ linger) more than retention ago.
+    const beachCutoff = pacificTodayDate(now - retentionMs - 12 * 60 * 60 * 1000);
     sqlite.prepare(`DELETE FROM beach_chat_messages WHERE calendar_date < ?`).run(beachCutoff);
     // Event rooms: window math lives in JS (Pacific-local text dates).
     const eventIds = sqlite.prepare(`SELECT DISTINCT event_id AS eventId FROM event_chat_messages`).all() as Array<{ eventId: number }>;
@@ -12454,47 +12457,77 @@ export const storage: IStorage = {
         href: `/events/${eventId}?chat=1`,
       });
     }
-    // Beach rooms: active non-anon check-in while the day-room window is not
-    // over (BEFORE or OPEN). Opens 48h before beach day; closes 10pm that day.
-    // BEFORE rows still list so the floating inbox can show a countdown.
+    // Beach rooms: one unified group chat per beach. Open the moment you check
+    // in (non-anon); stays until 12h after the end of your last beach day.
     const beachRows = sqlite.prepare(`
       SELECT beach_id AS beachId, calendar_date AS calendarDate FROM beach_checkins
       WHERE user_id = ? AND is_active = 1
         AND COALESCE(is_anonymous, 0) = 0
     `).all(userId) as Array<{ beachId: string; calendarDate: string }>;
+    const byBeach = new Map<string, string[]>();
     for (const { beachId, calendarDate } of beachRows) {
-      const opensAt = riverBratsChatOpensAtIso(calendarDate);
-      const closesAt = riverBratsChatClosesAtIso(calendarDate);
-      if (closesAt <= nowIso) continue;
-      const opensMs = new Date(opensAt).getTime();
-      const state: "BEFORE" | "OPEN" = now < opensMs ? "BEFORE" : "OPEN";
+      const list = byBeach.get(beachId) || [];
+      list.push(calendarDate);
+      byBeach.set(beachId, list);
+    }
+    for (const [beachId, dates] of byBeach) {
+      const access = riverBratsChatAccessFromDates(dates, now);
+      if (!access.open || !access.closesAt) continue;
+      // Prefer today's date in href, else earliest upcoming check-in day.
+      const today = pacificTodayDate(now);
+      const sorted = [...dates].sort();
+      const hrefDate = sorted.find(d => d >= today) || sorted[sorted.length - 1];
       out.push({
         kind: "BEACH",
         id: beachId,
         title: beachVenueLabel(beachId as any),
-        state,
-        opensAt,
-        closesAt,
-        calendarDate,
-        href: `/nude-beaches?tab=${beachId}&chat=1&date=${calendarDate}`,
+        state: "OPEN" as const,
+        opensAt: access.opensAt || nowIso,
+        closesAt: access.closesAt,
+        calendarDate: hrefDate,
+        goingDates: sorted,
+        href: `/nude-beaches?tab=${beachId}&chat=1&date=${hrefDate}`,
       });
     }
     out.sort((a, b) => String(a.closesAt).localeCompare(String(b.closesAt)));
     return out;
   },
+  /** Active non-anon check-in dates for a user at a beach (still in access window). */
+  getBeachChatDatesForUser(beachId: string, userId: number): string[] {
+    storage.expireRiverBratsCheckins();
+    const nowIso = new Date().toISOString();
+    const rows = sqlite.prepare(`
+      SELECT calendar_date AS calendarDate FROM beach_checkins
+      WHERE beach_id = ? AND user_id = ? AND is_active = 1
+        AND COALESCE(is_anonymous, 0) = 0
+        AND (expires_at IS NULL OR expires_at > ?)
+      ORDER BY calendar_date ASC
+    `).all(beachId, userId, nowIso) as Array<{ calendarDate: string }>;
+    return rows.map(r => String(r.calendarDate));
+  },
+  /**
+   * Unified beach group chat: one room per beach for everyone currently checked in
+   * (any day still in access window). Chat opens on check-in; access ends 12h after
+   * the end of each person's last beach day.
+   */
   getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number) {
     storage.expireRiverBratsCheckins();
-    // Window: opens 48h before the beach day (Pacific midnight of that date
-    // minus 48h), closes 10pm Pacific that day.
-    const closesAt = riverBratsChatClosesAtIso(calendarDate);
-    const opensAt = riverBratsChatOpensAtIso(calendarDate);
-    const chatOpen = isRiverBratsChatOpen(calendarDate);
-    const mine = storage.getBeachCheckinByUser(beachId, viewerUserId, calendarDate);
-    // Anonymous check-ins are counted in "going" but are never connected to the
-    // chat. They can neither read nor post.
-    if (!mine || (mine as any).is_anonymous) {
-      return { messages: [], expiresAt: closesAt, opensAt, chatOpen: false };
+    const myDates = storage.getBeachChatDatesForUser(beachId, viewerUserId);
+    const access = riverBratsChatAccessFromDates(myDates);
+    // Anonymous / no check-in: locked (no message history for non-members)
+    if (!myDates.length || !access.open) {
+      return {
+        messages: [],
+        expiresAt: access.closesAt,
+        opensAt: access.opensAt,
+        chatOpen: false,
+        members: [] as any[],
+        goingDates: myDates,
+      };
     }
+
+    // Message history: recent days at this beach (unified room)
+    const historyFrom = addCalendarDays(pacificTodayDate(), -14);
     const rows = sqlite.prepare(`
       SELECT m.id, m.beach_id AS beachId, m.calendar_date AS calendarDate, m.user_id AS userId,
              m.body, m.is_anonymous AS isAnonymous, m.created_at AS createdAt,
@@ -12502,13 +12535,70 @@ export const storage: IStorage = {
              u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM beach_chat_messages m
       LEFT JOIN users u ON u.id = m.user_id
-      WHERE m.beach_id = ? AND m.calendar_date = ?
+      WHERE m.beach_id = ? AND m.calendar_date >= ?
       ORDER BY m.created_at ASC
-      LIMIT 200
-    `).all(beachId, calendarDate) as any[];
+      LIMIT 300
+    `).all(beachId, historyFrom) as any[];
+
+    // Roster: all non-anon users with active access at this beach + their days
+    const nowIso = new Date().toISOString();
+    const rosterRows = sqlite.prepare(`
+      SELECT c.user_id AS userId, c.calendar_date AS calendarDate,
+             u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM beach_checkins c
+      JOIN users u ON u.id = c.user_id
+      WHERE c.beach_id = ? AND c.is_active = 1
+        AND COALESCE(c.is_anonymous, 0) = 0
+        AND (c.expires_at IS NULL OR c.expires_at > ?)
+      ORDER BY c.calendar_date ASC
+    `).all(beachId, nowIso) as any[];
+    const memberMap = new Map<number, {
+      userId: number;
+      username: string;
+      displayName: string;
+      photoUrl: string | null;
+      avatarChoice: number | null;
+      avatarRing: string | null;
+      goingDates: string[];
+    }>();
+    for (const r of rosterRows) {
+      const uid = Number(r.userId);
+      let m = memberMap.get(uid);
+      if (!m) {
+        m = {
+          userId: uid,
+          username: r.username,
+          displayName: r.displayName || r.username,
+          photoUrl: r.photoUrl,
+          avatarChoice: r.avatarChoice,
+          avatarRing: r.avatarRing,
+          goingDates: [],
+        };
+        memberMap.set(uid, m);
+      }
+      const d = String(r.calendarDate);
+      if (!m.goingDates.includes(d)) m.goingDates.push(d);
+    }
+    const members = [...memberMap.values()].map(m => ({
+      ...m,
+      goingChips: m.goingDates.map(d => ({
+        date: d,
+        label: formatBeachGoingChip(d),
+        dayCode: pacificWeekdayCode(d),
+      })),
+    }));
+    const datesByUser = new Map([...memberMap.entries()].map(([id, m]) => [id, m.goingDates]));
+
     const messages = rows.map(row => {
       const isSelf = row.userId === viewerUserId;
       const anonymous = Boolean(row.isAnonymous);
+      const goingDates = datesByUser.get(Number(row.userId)) || [];
+      const goingChips = goingDates.map(d => ({
+        date: d,
+        label: formatBeachGoingChip(d),
+        dayCode: pacificWeekdayCode(d),
+      }));
       if (anonymous && !isSelf) {
         return {
           id: row.id,
@@ -12521,6 +12611,8 @@ export const storage: IStorage = {
           avatarChoice: null,
           avatarRing: null,
           isMine: false,
+          goingDates: [] as string[],
+          goingChips: [] as typeof goingChips,
         };
       }
       return {
@@ -12534,42 +12626,47 @@ export const storage: IStorage = {
         avatarChoice: row.avatarChoice,
         avatarRing: row.avatarRing,
         isMine: isSelf,
+        goingDates,
+        goingChips,
       };
     });
     return {
       messages,
-      expiresAt: closesAt,
-      opensAt,
-      chatOpen,
+      expiresAt: access.closesAt,
+      opensAt: access.opensAt,
+      chatOpen: true,
+      members,
+      goingDates: myDates,
     };
   },
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string) {
-    const mine = storage.getBeachCheckinByUser(beachId, userId, calendarDate);
-    if (!mine) throw new Error("Active check-in required");
-    // Anonymous check-ins stay off the chat and cannot post.
-    if ((mine as any).is_anonymous) throw new Error("Anonymous check-ins can't post to the chat");
-    const nowIso = new Date().toISOString();
-    if (nowIso < riverBratsChatOpensAtIso(calendarDate)) {
-      throw new Error("Beach chat opens 48 hours before that day");
-    }
-    if (riverBratsChatClosesAtIso(calendarDate) <= nowIso) {
-      throw new Error("Beach chat closed at 10pm");
-    }
+    const myDates = storage.getBeachChatDatesForUser(beachId, userId);
+    if (!myDates.length) throw new Error("Active check-in required");
+    const access = riverBratsChatAccessFromDates(myDates);
+    if (!access.open) throw new Error("Beach chat closed — check-in again for an upcoming day");
+    // Stamp message with selected day if they're going that day, else earliest active day
+    const stampDate = myDates.includes(calendarDate) ? calendarDate : myDates[0];
     const createdAt = new Date().toISOString();
     const row = sqlite.prepare(`
       INSERT INTO beach_chat_messages (beach_id, calendar_date, user_id, body, is_anonymous, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(beachId, calendarDate, userId, body, mine.isAnonymous ? 1 : 0, createdAt);
+    `).run(beachId, stampDate, userId, body, 0, createdAt);
     const id = Number(row.lastInsertRowid);
     const user = storage.getUserById(userId);
     return {
       id,
       body,
-      isAnonymous: Boolean(mine.isAnonymous),
+      isAnonymous: false,
       createdAt,
       isMine: true,
-      displayName: mine.isAnonymous ? "Anonymous" : (user?.displayName || user?.username || "You"),
-      username: mine.isAnonymous ? "anonymous" : user?.username,
+      displayName: user?.displayName || user?.username || "You",
+      username: user?.username,
+      goingDates: myDates,
+      goingChips: myDates.map(d => ({
+        date: d,
+        label: formatBeachGoingChip(d),
+        dayCode: pacificWeekdayCode(d),
+      })),
     };
   },
 
