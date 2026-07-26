@@ -39,6 +39,19 @@ export function hasMapCoordinates(fields: MapCoordinateFields): boolean {
   );
 }
 
+/**
+ * Greater Portland metro bounding box (includes Gresham / Beaverton / Vancouver-ish edge).
+ * Used to reject bad third-party pins (e.g. Squarespace defaulting Hawks PDX to NYC).
+ */
+export function isInPortlandMetro(lat: number, lng: number): boolean {
+  return lat >= 45.0 && lat <= 46.1 && lng >= -123.8 && lng <= -121.5;
+}
+
+/** Finite coords that land in PDX metro — safe to show on the map without geocoding again. */
+export function hasUsableMapCoordinates(fields: MapCoordinateFields): boolean {
+  return hasMapCoordinates(fields) && isInPortlandMetro(fields.lat!, fields.lng!);
+}
+
 export function eventMatchesBusiness(
   event: MapCoordinateFields & { venueName: string },
   business: MapCoordinateFields & { name?: string; venueName?: string },
@@ -110,9 +123,15 @@ export function mergeMapCoordinates<T extends MapCoordinateFields>(
   fields: T,
   businesses: Business[] = [],
 ): T {
-  if (hasMapCoordinates(fields)) return fields;
+  if (hasUsableMapCoordinates(fields)) return fields;
   const coords = resolveCoordinatesFromDirectory(fields.venueName, fields.address, businesses);
-  if (!coords) return fields;
+  if (!coords) {
+    // Drop unusable pins so callers don't keep painting NYC / etc.
+    if (hasMapCoordinates(fields) && !isInPortlandMetro(fields.lat!, fields.lng!)) {
+      return { ...fields, lat: null, lng: null };
+    }
+    return fields;
+  }
   return { ...fields, lat: coords.lat, lng: coords.lng };
 }
 
@@ -149,6 +168,8 @@ export async function geocodePortlandLocation(
     const lat = Number(hit.lat);
     const lng = Number(hit.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    // Never accept a "Portland" geocode that lands outside the metro
+    if (!isInPortlandMetro(lat, lng)) return null;
     return { lat, lng };
   } catch {
     return null;
@@ -159,12 +180,14 @@ export async function resolvePersistedMapCoordinates(
   fields: MapCoordinateFields,
   businesses: Business[] = [],
 ): Promise<MapCoordinates | null> {
-  if (hasMapCoordinates(fields)) {
+  if (hasUsableMapCoordinates(fields)) {
     return { lat: fields.lat!, lng: fields.lng! };
   }
 
   const fromDirectory = resolveCoordinatesFromDirectory(fields.venueName, fields.address, businesses);
-  if (fromDirectory) return fromDirectory;
+  if (fromDirectory && isInPortlandMetro(fromDirectory.lat, fromDirectory.lng)) {
+    return fromDirectory;
+  }
 
   return geocodePortlandLocation(fields.address, fields.venueName);
 }

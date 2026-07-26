@@ -20,6 +20,9 @@ import { inferAdmissionFromText } from "../admissionInfer";
 const HAWKS_VENUE = "Hawks PDX";
 const HAWKS_ADDRESS = "335 SE 99th Ave, Portland, OR 97216";
 const HAWKS_NEIGHBORHOOD = "SE Portland";
+/** Known pin — Squarespace mapLat/mapLng for Hawks has been wrong (NYC). */
+const HAWKS_LAT = 45.520175147981;
+const HAWKS_LNG = -122.562357520572;
 /**
  * Schema enum ALL_AGES | 18_PLUS | 21_PLUS. Sex club - never ALL_AGES.
  * Default 21_PLUS (restrictive direction); reviewer adjusts for 18+ nights.
@@ -88,6 +91,9 @@ export function applyHawksPolicy(draft: IngestEventDraft): IngestEventDraft {
     venueName: weakVenue ? HAWKS_VENUE : draft.venueName,
     address: draft.address?.trim() ? draft.address : HAWKS_ADDRESS,
     neighborhood: draft.neighborhood?.trim() ? draft.neighborhood : HAWKS_NEIGHBORHOOD,
+    // Always stamp the PDX pin — ignore Squarespace mapLat/mapLng (was NYC).
+    lat: HAWKS_LAT,
+    lng: HAWKS_LNG,
     ageRequirement: HAWKS_AGE_REQUIREMENT,
     isSexPositive: true,
     nudityOk: true,

@@ -468,6 +468,16 @@ export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): P
       (patch as Record<string, unknown>)[k] = (inc as Record<string, unknown>)[k];
     }
   }
+  // Never let a bad third-party pin (e.g. Hawks Squarespace → NYC) clobber a good PDX pin.
+  // Metro box matches venueCoordinates.isInPortlandMetro.
+  if (typeof patch.lat === "number" && typeof patch.lng === "number") {
+    const inMetro =
+      patch.lat >= 45.0 && patch.lat <= 46.1 && patch.lng >= -123.8 && patch.lng <= -121.5;
+    if (!inMetro) {
+      delete patch.lat;
+      delete patch.lng;
+    }
+  }
   // Placeholder-aware: only take the sync value when it is a real (non-default) value.
   if (inc.eventTypes && inc.eventTypes !== "[]") patch.eventTypes = inc.eventTypes;
   if (inc.admission && inc.admission !== "UNKNOWN") patch.admission = inc.admission;

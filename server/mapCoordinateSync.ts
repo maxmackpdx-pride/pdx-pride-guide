@@ -2,7 +2,7 @@ import type { Business } from "@shared/schema";
 import { storage } from "./storage";
 import {
   geocodePortlandLocation,
-  hasMapCoordinates,
+  hasUsableMapCoordinates,
   mergeMapCoordinates,
   resolvePersistedMapCoordinates,
   type MapCoordinateFields,
@@ -18,7 +18,8 @@ export function enrichEventForMap<T extends MapCoordinateFields>(event: T): T {
 
 export async function fillEventMapCoordinates(eventId: number): Promise<void> {
   const event = storage.getEvent(eventId);
-  if (!event || hasMapCoordinates(event)) return;
+  // Re-fill when missing OR when stored pin is outside Portland metro (bad Squarespace/etc.)
+  if (!event || hasUsableMapCoordinates(event)) return;
 
   const businesses = storage.getBusinesses();
   const coords = await resolvePersistedMapCoordinates(
@@ -35,7 +36,7 @@ export async function fillEventMapCoordinates(eventId: number): Promise<void> {
 }
 
 export async function fillBusinessMapCoordinates(business: Business): Promise<void> {
-  if (hasMapCoordinates(business)) return;
+  if (hasUsableMapCoordinates(business)) return;
   const coords = await geocodePortlandLocation(business.address, business.name);
   if (!coords) return;
   storage.updateBusiness(business.id, { lat: coords.lat, lng: coords.lng });
@@ -44,7 +45,7 @@ export async function fillBusinessMapCoordinates(business: Business): Promise<vo
 export async function fillFieldsMapCoordinates(
   fields: MapCoordinateFields,
 ): Promise<MapCoordinateFields> {
-  if (hasMapCoordinates(fields)) return fields;
+  if (hasUsableMapCoordinates(fields)) return fields;
   const coords = await resolvePersistedMapCoordinates(fields, storage.getBusinesses());
   if (!coords) return fields;
   return { ...fields, lat: coords.lat, lng: coords.lng };
@@ -57,13 +58,20 @@ export function scheduleMapCoordinateBackfill() {
   backfillStarted = true;
 
   void (async () => {
-    const missingEvents = storage.getEvents({ status: "LIVE" }).filter(evt => !hasMapCoordinates(evt));
-    for (const evt of missingEvents) {
+    const live = storage.getEvents({ status: "LIVE" });
+    // Fix out-of-metro pins first (Hawks-in-NYC class bugs), then missing.
+    const needsFix = live.filter(evt => !hasUsableMapCoordinates(evt));
+    needsFix.sort((a, b) => {
+      const aBad = a.lat != null && a.lng != null ? 0 : 1;
+      const bBad = b.lat != null && b.lng != null ? 0 : 1;
+      return aBad - bBad;
+    });
+    for (const evt of needsFix) {
       await fillEventMapCoordinates(evt.id);
       await sleep(1100);
     }
 
-    const missingBusinesses = storage.getBusinesses().filter(biz => !hasMapCoordinates(biz));
+    const missingBusinesses = storage.getBusinesses().filter(biz => !hasUsableMapCoordinates(biz));
     for (const biz of missingBusinesses) {
       await fillBusinessMapCoordinates(biz);
       await sleep(1100);
