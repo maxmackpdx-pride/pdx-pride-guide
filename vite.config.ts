@@ -47,10 +47,15 @@ export default defineConfig({
     // before initialization") when the leaflet chunk evaluated first.
     // Vite's automatic chunking keeps evaluation order correct.
   },
+  // Shared modules may reference process.env on the server; avoid browser TDZ.
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
+  },
   server: {
     fs: {
       strict: true,
       deny: ["**/.*"],
     },
+    // Middleware mode is configured in server/vite.ts (hmr on same HTTP port).
   },
 });

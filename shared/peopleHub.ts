@@ -3,7 +3,19 @@
  * Keep `prideguidepdx` as the live system mailbox username until a deliberate migration.
  * `zaylist` is reserved so it cannot be squatted as a member handle.
  */
-export const GUIDE_SYSTEM_USERNAMES = (process.env.GUIDE_SYSTEM_USERNAMES || "prideguidepdx,zaylist")
+/** Browser-safe env read (shared module is used by client + server). */
+function guideSystemUsernamesRaw(): string {
+  try {
+    if (typeof process !== "undefined" && process.env?.GUIDE_SYSTEM_USERNAMES) {
+      return process.env.GUIDE_SYSTEM_USERNAMES;
+    }
+  } catch {
+    /* browser: process missing */
+  }
+  return "prideguidepdx,zaylist";
+}
+
+export const GUIDE_SYSTEM_USERNAMES = guideSystemUsernamesRaw()
   .split(",")
   .map((s) => s.trim().toLowerCase().replace(/^@/, ""))
   .filter(Boolean);
