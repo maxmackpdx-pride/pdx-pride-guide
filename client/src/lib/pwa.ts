@@ -79,7 +79,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       if (!worker) return;
       worker.addEventListener("statechange", () => {
         // Let a new SW activate when ready so push handlers stay current.
-        // Do NOT force a full page reload — that was flashing / reloading mid-browse
+        // Do NOT force a full page reload  -  that was flashing / reloading mid-browse
         // every time a new worker claimed the tab (seen as controllerchange → reload).
         if (worker.state === "installed" && navigator.serviceWorker.controller) {
           worker.postMessage({ type: "SKIP_WAITING" });

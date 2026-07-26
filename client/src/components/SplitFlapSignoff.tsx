@@ -3,7 +3,7 @@ import { NEON_CYCLE, prefersStillMotion } from "@/lib/motion";
 
 /** Rallying cries for the footer split-flap board. ALL CAPS. No em dashes. */
 export const SPLIT_FLAP_MESSAGES = [
-  "PRIDE IS A PROTEST",
+  "TAKE CARE OF EACH OTHER",
   "TAKE CARE OF EACH OTHER",
   "GO PISS GIRL",
   "FUCK META, YOUR ASS IS PRETTY",

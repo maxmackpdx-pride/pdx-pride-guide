@@ -187,7 +187,7 @@ export default function HubFeedCard({ item }: Props) {
 
   // Board posts glow in SoT §2.4 deep-glass board accents.
   const BOARD_ACCENTS: Record<string, string> = {
-    gig: "#6E3DFF",
+    gig: "var(--board-gigs)",
     gifting: "#CCFF00",
     spotted: "#FF00CC",
   };

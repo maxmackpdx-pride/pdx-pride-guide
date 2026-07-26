@@ -20,7 +20,7 @@ export default function ScheduleHero({ stats }: Props) {
             My <span className="board-hero__title-accent">schedule</span>
           </>
         }
-        lede="The week laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Pride is a protest. Take care of each other."
+        lede="The week laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Take care of each other."
         actions={
           <Link href="/events">
             <Button as="span" variant="neon" accent="cyan" size="lg">

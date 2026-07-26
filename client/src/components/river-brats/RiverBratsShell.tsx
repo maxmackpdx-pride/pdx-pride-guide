@@ -89,7 +89,7 @@ export default function RiverBratsShell({ beachId }: Props) {
         </h2>
         <p className="river-brats__hero-lede">
           Check in up to 7 days ahead, say how long you&apos;ll stay, and add it to your calendar.
-          Chat opens the moment you check in — one room for every day you&apos;re going. Multi-day
+          Chat opens the moment you check in  -  one room for every day you&apos;re going. Multi-day
           plans keep you in until 12 hours after your last beach day ends. No addresses, no drama.
         </p>
         <button

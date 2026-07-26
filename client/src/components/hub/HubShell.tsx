@@ -44,7 +44,7 @@ export const ADMIN_VIEW_META: Record<
     title: "Admin overview",
     kicker: "Control room",
     kickerColor: "var(--lime, #ccff00)",
-    lede: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
+    lede: "Clear the queue, check the pulse, then go live. Take care of each other.",
   },
   qsearch: {
     title: "QSearch",

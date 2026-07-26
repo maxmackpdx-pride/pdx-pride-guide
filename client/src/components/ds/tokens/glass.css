@@ -236,12 +236,9 @@
     #050506 72%
   );
   --poster-well-floor: 4px solid var(--c);
-  --glass-btn-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
-    var(--c);
-  --glass-btn-shadow:
-    0 0 0 1px #000,
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.35);
+  /* rebind solid/outline only - default glass btn stays dark translucent */
+  --glass-btn-solid-bg: var(--c);
+  --glass-btn-outline-color: var(--c);
   --glass-btn-outline-border: 1px solid #000;
   --glass-btn-outline-bg: linear-gradient(
       150deg,

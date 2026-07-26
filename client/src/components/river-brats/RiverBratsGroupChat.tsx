@@ -119,7 +119,7 @@ export default function RiverBratsGroupChat({
   const [body, setBody] = useState("");
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
-  // Unified beach room — date only stamps messages; access is multi-day.
+  // Unified beach room  -  date only stamps messages; access is multi-day.
   const chatKey = ["/api/river-brats/checkins/chat", beachId, "room"] as const;
 
   const { data, isLoading } = useQuery<ChatPayload>({
@@ -235,7 +235,7 @@ export default function RiverBratsGroupChat({
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}
         {!isLoading && messages.length === 0 && !locked && checkedIn && (
           <p className="rb-group-chat__empty">
-            You&apos;re in. Say hi — everyone heading to {beachShortLabel} this week is in this room.
+            You&apos;re in. Say hi  -  everyone heading to {beachShortLabel} this week is in this room.
           </p>
         )}
         {messages.map(msg => (
@@ -285,7 +285,7 @@ export default function RiverBratsGroupChat({
             ) : (
               <p>
                 Check in (say you&apos;re going) to unlock the chat. Everyone going any day this week
-                shares one room — multi-day plans keep you in longer.
+                shares one room  -  multi-day plans keep you in longer.
               </p>
             )}
           </div>
@@ -320,7 +320,7 @@ export default function RiverBratsGroupChat({
         ) : (
           <div className="rb-group-chat__locked-foot">
             <Lock size={15} strokeWidth={2} aria-hidden />
-            <span>Check in to join the group chat — chat starts the moment you say you&apos;re going.</span>
+            <span>Check in to join the group chat  -  chat starts the moment you say you&apos;re going.</span>
           </div>
         )}
       </div>

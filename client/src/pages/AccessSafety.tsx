@@ -20,7 +20,7 @@ export default function AccessSafety() {
         title="Access & Safety"
         titleAccent="magenta"
         kicker="Before you go"
-        lede="Pride is a protest, and it's also six blocks of people, noise, and heat. Both things are true. Here's what to know."
+        lede="Six blocks of people, noise, and heat. Plan for access, water, and each other."
       />
 
       <div className="zine-content" style={{ maxWidth: 720, margin: "0 auto", padding: "28px 20px 64px" }}>

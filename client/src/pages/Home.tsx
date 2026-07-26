@@ -89,7 +89,7 @@ export default function Home() {
           <HomeUpNext events={upNext} posterBackdrop />
         </ScrollReveal>
 
-        {/* Loop-safe site rainbow (cyan bookends) — not the hard orange→cyan seam line */}
+        {/* Loop-safe site rainbow (cyan bookends)  -  not the hard orange→cyan seam line */}
         <div className="rainbow-bar rainbow-bar--thick home-body__seam" aria-hidden="true" />
 
         <section className="home-boards" aria-label="Community boards">
@@ -141,7 +141,7 @@ export default function Home() {
             <Link
               href={COMMUNITY_LINKS.gigs.href}
               className="home-boards__utility home-boards__utility--purple pdx-glass-card pdx-glass-card--left-accent"
-              style={{ ["--c" as string]: "#6E3DFF" }}
+              style={{ ["--c" as string]: "var(--board-gigs)" }}
               data-testid="home-board-gigs"
             >
               <div className="home-boards__utility-name">Gig Board</div>

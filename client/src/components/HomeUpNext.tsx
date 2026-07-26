@@ -46,7 +46,7 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
             <Link
               key={event.id}
               href={href}
-              className="home-up-next__card"
+              className="home-up-next__card pdx-glass-rebind"
               style={{ ["--up-day" as string]: `var(--day-${day})` }}
             >
               {posterBackdrop && poster && (

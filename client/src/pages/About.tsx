@@ -26,8 +26,8 @@ function isYesCoachEvent(title: string): boolean {
 }
 
 const VALUES = [
-  { title: "Free to browse.", text: "No paywall on the list. Tips and labeled sponsors help keep it that way — organic ranking is not for sale." },
-  { title: "Sponsors can buy in.", text: "Labeled featured posts, ads, and other partner spots as they roll out — only for businesses that are part of this community or already show up for us." },
+  { title: "Free to browse.", text: "No paywall on the list. Tips and labeled sponsors help keep it that way  -  organic ranking is not for sale." },
+  { title: "Sponsors can buy in.", text: "Labeled featured posts, ads, and other partner spots as they roll out  -  only for businesses that are part of this community or already show up for us." },
   { title: "Post with a free account.", text: "That is how spam stays out and names stay on." },
   { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
   { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: "How is this different from other event apps?",
-    a: "It is free to browse, run by a person, and built for this city. No corporate feed. No paying to climb the organic list. Promoters post their events and the community shows up. Labeled support may appear as the site grows — always marked, never fake ranking.",
+    a: "It is free to browse, run by a person, and built for this city. No corporate feed. No paying to climb the organic list. Promoters post their events and the community shows up. Labeled support may appear as the site grows  -  always marked, never fake ranking.",
   },
   {
     q: "How do I list my event?",
@@ -53,7 +53,7 @@ const FAQ = [
   },
   {
     q: "Can my business sponsor?",
-    a: "If you are part of the community or already support what we are building, yes. Pitch labeled support (featured posts, ads, and other partner formats as they ship) via Sponsors or message Tucker. Packages will firm up over time — reach out early if you want in.",
+    a: "If you are part of the community or already support what we are building, yes. Pitch labeled support (featured posts, ads, and other partner formats as they ship) via Sponsors or message Tucker. Packages will firm up over time  -  reach out early if you want in.",
   },
 ] as const;
 
@@ -472,7 +472,7 @@ export default function About() {
       <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
       <section className="about-v2-close">
         <div className="about-v2-close__row">
-          <span>Pride is a protest. Take care of each other.</span>
+          <span>Take care of each other.</span>
           <span>zaylist.com</span>
         </div>
       </section>

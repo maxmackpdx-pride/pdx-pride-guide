@@ -97,3 +97,20 @@ body {
   text-transform: uppercase;
   color: var(--text-meta);
 }
+
+/* Mono utility (from design-system) */
+:root {
+  --tracking-mono: 0.2em;
+  --mono-kicker: 0.75rem;
+  --mono-label: 0.6875rem;
+  --mono-micro: 0.625rem;
+  --font-board-display: var(--font-display);
+  --font-board-mono: var(--font-mono);
+}
+.pdx-kicker-mono {
+  font-family: var(--font-mono);
+  font-size: var(--mono-kicker);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+}
+.pdx-kicker-mono--accent { color: var(--c, var(--neon-cyan)); }

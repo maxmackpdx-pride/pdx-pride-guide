@@ -35,7 +35,7 @@ export default function ProfileFooter({ username }: { username: string }) {
       <Divider variant="rainbow" />
       <div className="mp-footer__row">
         <span className="mp-footer__tagline">
-          Pride is a protest. <span className="mp-footer__tagline-accent">Take care of each other.</span>
+          <span className="mp-footer__tagline-accent">Take care of each other.</span>
         </span>
         <button type="button" className="mp-footer__report" onClick={() => void reportProfile()} disabled={sending}>
           Report this profile

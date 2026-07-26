@@ -42,7 +42,7 @@ export default function SponsorsPanel({
         <div className="support-sponsors__copy about-v2-sponsors__copy">
           <h3 className="support-sponsors__title">{kicker}</h3>
           <p>
-            Sponsors can buy labeled support — featured feed posts, site ads, and more partner
+            Sponsors can buy labeled support  -  featured feed posts, site ads, and more partner
             formats as they ship. That is how browsing can stay free. The bar is simple: you need to
             be part of the community or already show up for us. No scrubbing your brand first. No
             random corporate Pride cosplay. Organic ranking is not for sale.

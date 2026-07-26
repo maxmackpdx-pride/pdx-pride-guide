@@ -279,7 +279,7 @@ export default function Submit() {
     {
       key: "suggest",
       title: "Spotted an event",
-      forWho: "Not yours — Zaylist is missing it.",
+      forWho: "Not yours  -  Zaylist is missing it.",
       outcome: "Tip us and we will chase it down.",
       accent: "var(--neon-magenta, #ff00cc)",
       chip: suggestChip,
@@ -468,7 +468,7 @@ export default function Submit() {
       kicker: "Community tip",
       title: "Spotted an event",
       accent: "magenta",
-      lede: "Not yours — Zaylist is missing it. Tip us and we will chase it down. Free account required. No promoter status needed.",
+      lede: "Not yours  -  Zaylist is missing it. Tip us and we will chase it down. Free account required. No promoter status needed.",
     },
     claim: {
       kicker: "Host your listing",

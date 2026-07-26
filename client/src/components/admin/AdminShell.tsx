@@ -65,7 +65,7 @@ const VIEW_KICKERS: Record<AdminView, { label: string; color: string }> = {
 };
 
 const VIEW_LEDES: Record<AdminView, string> = {
-  overview: "Clear the queue, check the pulse, then go live. Pride is a protest. Take care of each other.",
+  overview: "Clear the queue, check the pulse, then go live. Take care of each other.",
   qsearch: "Pull events from venue sites and directory websites. Preview, then commit as HIDDEN.",
   events: "Assign unclaimed listings, edit details, hide stubs. Every live night starts here.",
   users: "Everyone who signed up. Promote scene-makers, fix usernames, protect the owner seat.",

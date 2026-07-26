@@ -5,7 +5,7 @@ import { clearPwaCaches } from "@/lib/pwa";
 // request a chunk that no longer exists. When that happens, clear SW
 // caches and reload once instead of crashing to the error boundary.
 //
-// Do NOT clear the session key on success — clearing it allowed another
+// Do NOT clear the session key on success  -  clearing it allowed another
 // failed lazy import later in the same session to reload again (reload loop).
 export function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
   const key = "bundle-reload";

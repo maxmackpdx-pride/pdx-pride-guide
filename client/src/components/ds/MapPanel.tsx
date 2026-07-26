@@ -49,14 +49,9 @@ const CSS = `
   background:linear-gradient(180deg, rgba(40,60,90,.35), rgba(20,30,50,.28));
   transform:rotate(12deg); filter:blur(2px); pointer-events:none; }
 /* Shared rainbow engine (3px) - not a second seam system */
-.pdxMap__seam{ position:absolute; left:0; right:0; height:3px; z-index:4; overflow:visible;
-  background:var(--rainbow-bar, linear-gradient(90deg,var(--neon-cyan),var(--neon-yellow),var(--neon-magenta),var(--neon-orange),var(--neon-cyan)));
-  background-size:200% 100%;
-  animation:pdxSeamFlow 3.4s linear infinite, pdxSeamGlow 3.4s var(--ease-inout, ease-in-out) infinite; }
-.pdxMap__seam::after{ content:""; position:absolute; top:-1px; bottom:-1px; left:0; width:24%;
-  transform:translateX(-165%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);
-  mix-blend-mode:screen; pointer-events:none; animation:pdxSeamGlint 3.4s var(--ease-inout, ease-in-out) infinite; }
-.pdxMap__seam--top{ top:0; } .pdxMap__seam--bottom{ bottom:0; }
+
+
+ 
 
 .pdxMap__pins{ position:absolute; inset:0; z-index:2; }
 .pdxMap__pin{ position:absolute; width:18px; height:18px; border-radius:var(--radius-pill,999px);
@@ -126,7 +121,7 @@ export function MapPanel({
       <div className="pdxMap__plate" aria-hidden="true" />
       <div className="pdxMap__vignette" aria-hidden="true" />
       <div className="pdxMap__shaft" aria-hidden="true" />
-      <span className="pdxMap__seam pdxMap__seam--top pdx-rainbow-rule" />
+      
       {showCityLabel && <span className="pdxMap__label" style={{ left: "44%", top: "46%" }}>Portland</span>}
       <div className="pdxMap__pins">
         {pins.map((p, i) => (
@@ -143,7 +138,7 @@ export function MapPanel({
           </button>
         : legend && <div className="pdxMap__legend"><MapLegend /></div>}
       <span className="pdxMap__attr">Leaflet | © OpenStreetMap © CARTO</span>
-      <span className="pdxMap__seam pdxMap__seam--bottom pdx-rainbow-rule" />
+      
     </div>
   );
 }

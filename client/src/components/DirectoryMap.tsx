@@ -277,7 +277,7 @@ const POPUP_STYLES = `
   .pdx-dir-popup .leaflet-popup-content-wrapper {
     background: transparent !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
   }

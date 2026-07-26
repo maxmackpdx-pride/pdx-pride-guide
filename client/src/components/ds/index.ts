@@ -1,4 +1,5 @@
 export { Badge } from "./Badge";
+export { IconButton } from "./IconButton";
 export { Button } from "./Button";
 export { Countdown } from "./Countdown";
 export { Divider } from "./Divider";

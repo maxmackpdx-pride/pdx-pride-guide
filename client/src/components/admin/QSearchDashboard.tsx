@@ -2671,7 +2671,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             }}
                           />
                         ) : (
-                          <div className="qsearch__cand-slim-flyer-empty">—</div>
+                          <div className="qsearch__cand-slim-flyer-empty"> - </div>
                         )}
                       </div>
                       <div className="qsearch__cand-slim-main">

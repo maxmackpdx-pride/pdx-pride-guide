@@ -103,10 +103,7 @@ const CSS = `
 @keyframes pdxBlink{ 50%{ opacity:.35; } }
 .pdxBtn__arrow{ font-weight:var(--fw-bold); }
 
-html.calm-mode .pdxBtn,
-:root[data-calm="true"] .pdxBtn{
-  box-shadow:none !important; filter:none !important;
-}
+/* calm: keep chassis keyline; bloom already zero via tokens */
 `;
 if (typeof document !== "undefined") {
   let s = document.getElementById("pdx-btn-css");
