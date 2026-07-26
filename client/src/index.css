@@ -555,9 +555,11 @@ body::before {
 }
 
 @media (min-width: 1024px) {
-  /* Desktop: no logo - nav links flush left; avatar + calm stay on the right */
+  /* Desktop: glitch wordmark top-left, then nav links; avatar + calm on the right */
   .site-brand--desktop {
-    display: none !important;
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    margin-right: clamp(14px, 2vw, 30px);
   }
 
   .site-header-inner {

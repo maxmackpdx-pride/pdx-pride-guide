@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Menu, X, Zap } from "lucide-react";
-import logoWordmark from "@assets/logo-wordmark.png";
+import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "./AuthModal";
@@ -627,13 +627,10 @@ export default function Nav() {
       <header className="site-header site-header--real-seam">
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
-            <img
-              src={logoWordmark}
+            <GlitchLogo
+              src="/brand/kit/wordmark/zaylist-wordmark-color.png"
               alt="Zaylist"
               className="site-brand-lockup"
-              width={1200}
-              height={423}
-              decoding="async"
             />
           </Link>
 
