@@ -881,6 +881,52 @@ html.calm-mode .inbox-overlay--experiment::after,
   background: var(--panel-purple);
 }
 
+/* Owner inbox: design guide (external Pages site; not product data) */
+.inbox-exp-design-guide {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #e8e4ff;
+  background: linear-gradient(105deg, rgba(138, 77, 255, 0.18), rgba(0, 255, 255, 0.08));
+  border: 1px solid rgba(138, 77, 255, 0.45);
+  transition: border-color 0.15s ease, filter 0.15s ease;
+}
+
+.inbox-exp-design-guide:hover {
+  border-color: var(--neon-cyan, #00ffff);
+  filter: brightness(1.06);
+  text-decoration: none;
+  color: #fff;
+}
+
+.inbox-exp-design-guide__label {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ccb8ff;
+}
+
+.inbox-exp-design-guide:hover .inbox-exp-design-guide__label {
+  color: var(--neon-cyan, #00ffff);
+}
+
+.inbox-exp-design-guide__meta {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 228, 255, 0.65);
+  white-space: nowrap;
+}
+
 .inbox-exp-queue-pill__badge {
   min-width: 16px;
   height: 16px;

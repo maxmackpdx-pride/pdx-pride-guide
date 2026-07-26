@@ -450,6 +450,22 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           </div>
         )}
 
+        {/* Owner-only: public design guide (hosted separately; not product logic) */}
+        {inboxActive && account === "owner" && isOwner && !detailOpen && (
+          <div className="inbox-exp-chrome-pad" style={{ paddingTop: 0, paddingBottom: 0 }}>
+            <a
+              href="https://maxmackpdx-pride.github.io/zaylist-design-system/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inbox-exp-design-guide"
+              data-testid="owner-design-guide-link"
+            >
+              <span className="inbox-exp-design-guide__label">Design guide</span>
+              <span className="inbox-exp-design-guide__meta">Full system · share from the page ↗</span>
+            </a>
+          </div>
+        )}
+
         {/* admin/owner queue folder tabs */}
         {inboxActive && (account === "admin" || account === "owner") && !detailOpen && (
           <div className="inbox-exp-chrome-pad inbox-exp-chrome-pad--queue">
