@@ -68,6 +68,16 @@ export function flyerLlmConfigured(): LlmConfig | null {
  */
 export function flyerVisionConfigured(): LlmConfig | null {
   if (llmKilled()) return null;
+  // Free first: Gemini multimodal free tier (same as qsearch/vision.ts)
+  const gemini = process.env.GEMINI_API_KEY?.trim();
+  if (gemini) {
+    return {
+      base: "https://generativelanguage.googleapis.com/v1beta/openai",
+      key: gemini,
+      model: process.env.FLYER_VISION_MODEL?.trim() || "gemini-2.0-flash",
+      label: "gemini-vision",
+    };
+  }
   const groq = process.env.GROQ_API_KEY?.trim();
   if (groq) {
     return {
@@ -84,6 +94,8 @@ export function flyerVisionConfigured(): LlmConfig | null {
   const base =
     process.env.XAI_API_BASE?.trim() ||
     (process.env.XAI_API_KEY ? "https://api.x.ai/v1" : "https://api.openai.com/v1");
+  // Prefer an env override; otherwise use a placeholder that 400s into
+  // discoverVisionModel (grok-2-vision-latest is retired on current xAI).
   const model =
     process.env.FLYER_VISION_MODEL?.trim() ||
     (process.env.XAI_API_KEY ? "grok-2-vision-latest" : "gpt-4o-mini");
@@ -325,20 +337,17 @@ const discoveredVisionModels = new Map<string, string>();
 export function fallbackVisionConfigured(primary: LlmConfig | null): LlmConfig | null {
   if (llmKilled()) return null;
 
-  // Free first: Google Gemini's OpenAI-compatible endpoint reads images on
-  // the free tier - the right price for a community project. Key from
-  // aistudio.google.com/apikey → secret/env GEMINI_API_KEY.
+  // If primary already is Gemini, offer XAI/OpenAI as secondary; otherwise
+  // offer Gemini when not already primary (primary prefers Gemini now).
   const gemini = process.env.GEMINI_API_KEY?.trim();
-  if (gemini) {
-    const base = "https://generativelanguage.googleapis.com/v1beta/openai";
-    if (!primary || primary.base !== base) {
-      return {
-        base,
-        key: gemini,
-        model: process.env.FLYER_VISION_MODEL_FALLBACK?.trim() || "gemini-2.0-flash",
-        label: "gemini-vision",
-      };
-    }
+  const geminiBase = "https://generativelanguage.googleapis.com/v1beta/openai";
+  if (gemini && (!primary || primary.base !== geminiBase)) {
+    return {
+      base: geminiBase,
+      key: gemini,
+      model: process.env.FLYER_VISION_MODEL_FALLBACK?.trim() || "gemini-2.0-flash",
+      label: "gemini-vision",
+    };
   }
 
   const key = process.env.XAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim() || "";
@@ -373,16 +382,23 @@ export async function discoverVisionModel(
       .map((m: any) => String(m?.id || ""))
       .filter(Boolean);
     const clean = (id: string) => id.replace(/^models\//, "");
-    const junk = /embed|tts|audio|live|veo|imagen|whisper|guard|safeguard|orpheus/i;
+    // Drop non-vision / non-chat junk (incl. pure image-gen & video)
+    const junk =
+      /embed|tts|audio|live|veo|whisper|guard|safeguard|orpheus|imagine-video|imagine-image|compound/i;
     const rank = (raw: string) => {
       const id = clean(raw);
       if (junk.test(id)) return 0;
+      // Prefer real vision/multimodal chat models
+      if (/gemini-2\.5-flash(?!-preview-tts)/i.test(id)) return 8;
+      if (/gemini[.-\d]*.*flash/i.test(id) && !/tts|preview-tts/i.test(id)) return 7;
       if (/scout/i.test(id)) return 6;
       if (/maverick/i.test(id)) return 5;
-      if (/gemini[.-\d]*.*flash/i.test(id)) return 4; // all Gemini models are multimodal; flash = free-tier friendly
-      if (/vision|llava|pixtral|\bvl\b|-vl-|4o/i.test(id)) return 3;
-      if (/gemini/i.test(id)) return 2;
-      if (/llama-4/i.test(id)) return 1;
+      if (/grok.*vision|vision.*grok|grok-2-vision|grok-4.*vision/i.test(id)) return 5;
+      if (/vision|llava|pixtral|\bvl\b|-vl-|4o/i.test(id)) return 4;
+      if (/gemini/i.test(id) && !/tts/i.test(id)) return 3;
+      if (/llama-4/i.test(id)) return 2;
+      // Last resort: current Grok chat models sometimes accept images
+      if (/^grok-4/i.test(id) && !/imagine/i.test(id)) return 1;
       return 0;
     };
     const isPreview = (id: string) => (/preview|exp|latest-unstable/i.test(id) ? 1 : 0);

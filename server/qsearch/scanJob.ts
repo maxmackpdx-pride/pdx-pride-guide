@@ -7,6 +7,7 @@ import {
   mergeIngestSources,
   type IngestSource,
 } from "@shared/ingestSources";
+import { isTrustedLaneSource } from "@shared/trustedVenues";
 import type { IngestEventDraft } from "../ingest/types";
 import { isPortlandEventListing } from "../ingest";
 import { isPastEventListing } from "../ingest/dates";
@@ -117,6 +118,10 @@ export function buildLiveSources(businesses: Array<{
     }
   }
 
+  // Trusted lane is a separate custom path (adapters + Trusted board).
+  // QSearch catch-all must not re-scan those venues or their sibling recipes.
+  sources = sources.filter(s => !isTrustedLaneSource({ id: s.id, url: s.url }));
+
   // Soft-deleted sources stay out of scans (and stay disabled across registry sync)
   const disabled = listDisabledSourceIds();
   if (disabled.size) {
@@ -176,7 +181,11 @@ export function syncAndSummarize(
       caution: s.caution,
     })),
   );
-  const health = listSourceHealth();
+  // Health table still holds historical trusted rows - hide them from the
+  // catch-all Sources / Health UI (they live on the Trusted board).
+  const health = listSourceHealth().filter(
+    h => !isTrustedLaneSource({ id: h.sourceId, url: h.url }),
+  );
   const failing = health.filter(
     h =>
       h.lastOk === false ||

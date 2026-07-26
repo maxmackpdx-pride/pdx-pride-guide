@@ -124,6 +124,36 @@ assert(
   "undated series URL matches any occurrence (Jiffy Kink)",
 );
 
+// Sibling nights must not share a page: Pride ≠ Speed Date (live bug 2026-07)
+const siblingEntries = [
+  ...entries,
+  {
+    url: "https://pdxsanctuary.com/events/jiffy-kink-speed-date-4/",
+    slug: "jiffy-kink-speed-date-4",
+    day: null,
+  },
+];
+const prideNotSpeed = matchSanctuaryIndexUrl(
+  { title: "Jiffy Kink: Pride", dateStart: "2026-07-25T21:00:00" },
+  siblingEntries,
+);
+assert(
+  prideNotSpeed === "https://pdxsanctuary.com/events/jiffy-kink-pride-2/",
+  "Jiffy Pride must not match Speed Date page",
+);
+const speedNotPride = matchSanctuaryIndexUrl(
+  { title: "Jiffy Kink: Speed Date", dateStart: "2026-07-25T19:00:00" },
+  siblingEntries,
+);
+assert(
+  speedNotPride === "https://pdxsanctuary.com/events/jiffy-kink-speed-date-4/",
+  "Jiffy Speed Date matches its own slug",
+);
+assert(
+  isSanctuaryLogoPoster("https://pdxsanctuary.com/wp-content/uploads/2025/06/footer_map.png"),
+  "footer_map.png is chrome, not a flyer",
+);
+
 const none = matchSanctuaryIndexUrl(
   { title: "Leather Brunch Takeover", dateStart: "2026-07-25T11:00:00" },
   entries,
@@ -292,9 +322,20 @@ const gbDup = matchSanctuaryIndexUrl(
   { title: "Game Bang!", dateStart: "2026-09-23T19:00:00" },
   smEntries,
 );
+// Bare "Game Bang!" prefers the precise slug (game-bang-2) over a longer
+// themed sibling (game-bang-blanket-forts-…) - same rule that keeps Pride
+// off Speed Date.
 assert(
-  gbDup === "https://pdxsanctuary.com/events/game-bang-blanket-forts-3-2/",
-  "duplicate series slugs tie-break toward newest collision suffix",
+  gbDup === "https://pdxsanctuary.com/events/game-bang-2/",
+  "bare series title prefers precise slug over longer themed sibling",
+);
+const gbTheme = matchSanctuaryIndexUrl(
+  { title: "Game Bang: Blanket Forts", dateStart: "2026-09-23T19:00:00" },
+  smEntries,
+);
+assert(
+  gbTheme === "https://pdxsanctuary.com/events/game-bang-blanket-forts-3-2/",
+  "themed title matches themed slug",
 );
 
 /* ── 4c. fresh-vs-reused flyer coverage ── */

@@ -100,9 +100,12 @@ Peacock (html/JS cards + IG), Back 2 Earth (no events feed), The Nest Lounge
 future `eventbrite` fetchMode). Queer-owned wine bars/cafes (Living Room
 Wines, Stem, Coffee Beer…) excluded as not LGBTQ-exclusive nightlife venues.
 
-**Scrape sources NOT pruned yet** - per migration rule, `darcelle-tribe` /
-`darcelle-ics` / `hawks-json` stay in INGEST_SOURCES until both venues hold
-green (incl. flyer coverage) on the live Trusted board.
+**Trusted lane is excluded from QSearch catch-all** (2026-07-25): any source in
+`TRUSTED_VENUES` (plus sibling recipes like `sanctuary-calendar` / `darcelle-ics`,
+and directory auto-links on the same venue host) is filtered out of scan +
+Sources health UI via `isTrustedLaneSource`. Registry rows may still exist in
+`INGEST_SOURCES` for docs/recipes; the catch-all scan never runs them. Use the
+Trusted board Sync controls instead.
 
 ### Sanctuary flyer fix v2 - sitemap slug map + honest coverage (2026-07-21)
 
@@ -143,7 +146,7 @@ token rules):
 
 These five are **scrape-grade sources on the trusted board** - the flyer
 coverage + yield health is the probation gate. 12h poll (vs 6h for feed-grade).
-Scan-lane entries stay until each holds green.
+They are no longer re-scanned by the QSearch catch-all (same trusted-lane filter).
 
 ## Recurring ↔ duplicate checks
 

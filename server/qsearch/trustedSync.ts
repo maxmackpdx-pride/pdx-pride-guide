@@ -353,11 +353,21 @@ async function fetchDraftsForVenue(
     case "hawks_squarespace":
       return fetchHawksDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "sports_bra_airtable": {
-      // Official Airtable schedule when a token is configured; otherwise fall
-      // back to the (venue-scoped) Eventbrite feed so the venue isn't empty.
+      // Public shared view (no PAT) first; private token optional. Empty →
+      // venue-scoped Eventbrite so the board is never blank.
       if (sportsBraConfigured()) {
-        const { drafts } = await fetchSportsBraDrafts({ includePast: false });
-        return drafts;
+        const { drafts, warnings } = await fetchSportsBraDrafts({ includePast: false });
+        if (drafts.length) {
+          if (warnings.length) {
+            console.log("[trustedSync] sports-bra:", warnings.join(" · "));
+          }
+          return drafts;
+        }
+        console.warn(
+          "[trustedSync] sports-bra empty:",
+          warnings.join(" · ") || "no drafts",
+          "- falling back to generic feed",
+        );
       }
       return fetchGenericDrafts(venue, existingEvents);
     }

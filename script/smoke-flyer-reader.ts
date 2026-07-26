@@ -198,15 +198,36 @@ async function main() {
 
   // Free-tier Gemini fallback config resolves when GEMINI_API_KEY present
   const { fallbackVisionConfigured, flyerVisionConfigured } = await import("../server/flyerReader/parse");
+  // Gemini is preferred primary when set (free tier)
+  const prevXaiForFb = process.env.XAI_API_KEY;
+  const prevGroqForFb = process.env.GROQ_API_KEY;
+  delete process.env.XAI_API_KEY;
+  delete process.env.GROQ_API_KEY;
   process.env.GEMINI_API_KEY = "smoke-gemini-key";
-  const fb = fallbackVisionConfigured(flyerVisionConfigured());
-  assert(fb != null && fb.label === "gemini-vision", "Gemini selected as free vision fallback");
-  assert(fb!.base.includes("generativelanguage.googleapis.com"), "Gemini OpenAI-compat base URL");
+  const primaryGem = flyerVisionConfigured();
+  assert(primaryGem != null && primaryGem.label === "gemini-vision", "Gemini selected as free vision primary");
+  assert(primaryGem!.base.includes("generativelanguage.googleapis.com"), "Gemini OpenAI-compat base URL");
+  // Behind a non-Gemini primary, Gemini is still the free fallback
+  const fb2 = fallbackVisionConfigured({
+    base: "https://api.groq.com/openai/v1",
+    key: "x",
+    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    label: "groq-vision",
+  });
+  assert(fb2 != null && fb2.label === "gemini-vision", "Gemini selected as free vision fallback behind Groq primary");
   delete process.env.GEMINI_API_KEY;
+  if (prevXaiForFb) process.env.XAI_API_KEY = prevXaiForFb;
+  if (prevGroqForFb) process.env.GROQ_API_KEY = prevGroqForFb;
+  else delete process.env.GROQ_API_KEY;
 
   // Gemini path: 429 (zero-quota tier signal) → discovery → retry with a
-  // gemini flash model (models/ prefix stripped, junk filtered)
+  // gemini flash model (models/ prefix stripped, junk filtered).
+  // Clear competing vision keys so Gemini is primary (not XAI residual).
+  const prevXai = process.env.XAI_API_KEY;
+  const prevOpenAi = process.env.OPENAI_API_KEY;
   delete process.env.GROQ_API_KEY;
+  delete process.env.XAI_API_KEY;
+  delete process.env.OPENAI_API_KEY;
   process.env.GEMINI_API_KEY = "smoke-gemini-key";
   let geminiCalls = 0;
   const gemini429Fetch = (async (url: any, init: any) => {
@@ -235,6 +256,8 @@ async function main() {
   assert(gem.model != null && /gemini-2\.5-flash/.test(gem.model), `newest flash discovered, models/ prefix stripped (${gem.model})`);
   assert(gem.warnings.some(w => /auto-discovered gemini-2\.5-flash/.test(w)), "gemini discovery breadcrumb present");
   delete process.env.GEMINI_API_KEY;
+  if (prevXai) process.env.XAI_API_KEY = prevXai;
+  if (prevOpenAi) process.env.OPENAI_API_KEY = prevOpenAi;
   process.env.GROQ_API_KEY = "smoke-test-key";
 
   /* ── real OCR (opt-in: needs network for traineddata) ── */

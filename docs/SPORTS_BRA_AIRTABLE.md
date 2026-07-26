@@ -1,9 +1,18 @@
 # The Sports Bra - official schedule via Airtable
 
 The Sports Bra publishes the games it's showing in an Airtable base, embedded on
-`thesportsbraofficial.com/pages/portland`. We read that base directly with
-Airtable's official REST API instead of the old Eventbrite keyword search, which
-pulled in city-wide "sports" noise (church pickleball, barbell certs, etc.).
+`thesportsbraofficial.com/pages/portland`. We read that schedule in two ways:
+
+1. **Public shared view (default, no secret)** - same embed the bar puts on
+   their site (`appMRorYHS2sB2qeZ` / `shrE7hNEKss87unNp`). No PAT, no collaborator
+   invite. This is the production path.
+2. **Private REST API (optional)** - if `SPORTS_BRA_AIRTABLE_TOKEN` is set **and**
+   the token can access that base, we can use the official API as a secondary
+   path. Many PATs only see the creator's empty workspace - public share still
+   works when private returns 403.
+
+This replaces the old Eventbrite keyword search that pulled city-wide "sports"
+noise (church pickleball, barbell certs, etc.).
 
 Games with no attached flyer get a clean auto-generated poster
 (`server/posters/gamePoster.ts`) - Swedish/Scandinavian minimal, matched to the
@@ -11,22 +20,20 @@ Sports Bra's pink-on-warm-white brand.
 
 ## What you need (one-time)
 
-1. **A Personal Access Token** from Airtable - the bar (or whoever owns the base)
-   creates it at https://airtable.com/create/tokens with:
-   - Scope: `data.records:read` (and `schema.bases:read` so we can auto-find the
-     table).
-   - Access: the Sports Bra base (id `appMRorYHS2sB2qeZ`).
-2. **Set it on Railway** as an environment variable - never commit it to the repo:
+**Nothing required** for the public share path.
 
-   | Variable | Value | Required |
-   | --- | --- | --- |
-   | `SPORTS_BRA_AIRTABLE_TOKEN` | the `pat…` token | yes |
-   | `SPORTS_BRA_AIRTABLE_BASE` | `appMRorYHS2sB2qeZ` | no (default) |
-   | `SPORTS_BRA_AIRTABLE_TABLE` | table name, e.g. `Schedule` | no (auto-discovered) |
-   | `SPORTS_BRA_AIRTABLE_VIEW` | a view name to restrict to | no |
+Optional private API (only if the bar invites your Airtable account onto the base):
 
-That's it. On the next trusted sync, Sports Bra games flow into the Review queue
-with posters attached. Until the token is set, the venue falls back to the
+| Variable | Value | Required |
+| --- | --- | --- |
+| `SPORTS_BRA_AIRTABLE_TOKEN` | the `pat…` token | no |
+| `SPORTS_BRA_AIRTABLE_BASE` | `appMRorYHS2sB2qeZ` | no (default) |
+| `SPORTS_BRA_AIRTABLE_TABLE` | table name, e.g. `Schedule` | no (auto-discovered) |
+| `SPORTS_BRA_AIRTABLE_VIEW` | a view name to restrict to | no |
+| `SPORTS_BRA_AIRTABLE_EMBED` | full embed URL override | no |
+
+On the next trusted sync, Sports Bra games flow into the Review queue with
+posters attached. If both public + private fail, the venue falls back to the
 (now venue-scoped) Eventbrite feed so it's never empty.
 
 ## Field mapping (resilient - no exact config needed)

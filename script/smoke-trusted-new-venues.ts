@@ -18,7 +18,11 @@ import {
   applyHawksPolicy,
   expandHawksJsonUrl,
 } from "../server/ingest/adapters/hawks";
-import { getTrustedVenue, TRUSTED_VENUES } from "../shared/trustedVenues";
+import {
+  getTrustedVenue,
+  isTrustedLaneSource,
+  TRUSTED_VENUES,
+} from "../shared/trustedVenues";
 import { applyDeclaredVenuePolicy } from "../server/ingest/venuePolicy";
 import { isRelevantScanDraft } from "../server/ingest/relevance";
 
@@ -35,6 +39,32 @@ assert(TRUSTED_VENUES.length === 10, `10 trusted venues registered (got ${TRUSTE
 for (const sid of ["stag-eb", "living-room-eb", "camp-bar", "cc-slaughters"]) {
   assert(getTrustedVenue(sid)?.fetchMode === "generic", `${sid} registered as generic mode`);
 }
+// Trusted lane stays off the QSearch catch-all (siblings + own-site hosts)
+assert(isTrustedLaneSource({ id: "sanctuary-ics" }), "sanctuary-ics is trusted lane");
+assert(isTrustedLaneSource({ id: "sanctuary-calendar" }), "sanctuary calendar sibling is trusted lane");
+assert(isTrustedLaneSource({ id: "darcelle-ics" }), "darcelle-ics sibling is trusted lane");
+assert(
+  isTrustedLaneSource({ id: "directory-99", url: "https://pdxsanctuary.com/" }),
+  "directory auto-source on trusted host is trusted lane",
+);
+assert(
+  isTrustedLaneSource({
+    id: "stag-eb",
+    url: "https://www.eventbrite.com/o/stag-pdx-73608204703",
+  }),
+  "trusted Eventbrite org path is trusted lane",
+);
+assert(
+  !isTrustedLaneSource({
+    id: "eb-gay",
+    url: "https://www.eventbrite.com/d/or--portland/gay/",
+  }),
+  "generic Eventbrite city search is NOT trusted lane",
+);
+assert(
+  !isTrustedLaneSource({ id: "steam-events", url: "https://www.steampdx.com/events" }),
+  "non-trusted venue stays on QSearch catch-all",
+);
 assert(
   getTrustedVenue("sports-bra-eb")?.fetchMode === "sports_bra_airtable",
   "sports-bra-eb registered as sports_bra_airtable mode (official schedule, not EB noise)",

@@ -32,10 +32,12 @@ const DEFAULT_FEED =
   getTrustedVenue("sanctuary-ics")?.feedUrl ||
   "https://pdxsanctuary.com/events/calendar/sanctuary/ics/";
 
-/** Site logo / brand art - not a real event flyer. */
+/** Site logo / brand art / chrome - not a real event flyer. */
 export function isSanctuaryLogoPoster(url: string | null | undefined): boolean {
   if (!url || !String(url).trim()) return true;
-  return /logo|cropped-|favicon|t_color_full|trans_color/i.test(url);
+  return /logo|cropped-|favicon|t_color_full|trans_color|footer[_-]?map|site[_-]?map|screenshot|placeholder|spacer|1x1|pixel|wp-includes|gravatar|apple-touch/i.test(
+    url,
+  );
 }
 
 /**
@@ -56,6 +58,30 @@ export function seriesTitleKey(title: string): string {
     .replace(/\b(19|20)\d{2}\b/g, " ")
     .replace(/\b\d{1,2}(st|nd|rd|th)\b/g, " ")
     .replace(/\bpride\b/g, " ")
+    .replace(/\b\d+\b/g, " ")
+    .replace(/[^a-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Page-match key: like seriesTitleKey but KEEPS distinctive subtitle words
+ * (pride, speed, date, apocalypse…). Stripping "pride" was collapsing
+ * "Jiffy Kink: Pride" → "jiffy kink" and matching Speed Date's page.
+ */
+export function matchTitleKey(title: string): string {
+  return String(title || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[''`]/g, "")
+    .replace(/[–-−]/g, " ")
+    .replace(
+      /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/g,
+      " ",
+    )
+    .replace(/\b(19|20)\d{2}\b/g, " ")
+    .replace(/\b\d{1,2}(st|nd|rd|th)\b/g, " ")
     .replace(/\b\d+\b/g, " ")
     .replace(/[^a-z\s]/g, " ")
     .replace(/\s+/g, " ")
@@ -292,10 +318,10 @@ export function boundedEditDistance(a: string, b: string, max = 2): number {
 }
 
 /**
- * Best real event URL for a draft: title-token overlap with the slug, and the
- * occurrence day must match when the URL carries one (wrong-night pages have
- * the wrong flyer). Token overlap is primary; a squashed-form comparison
- * (spaces/hyphens removed) catches word-boundary drift ("EbonyFest" vs
+ * Best real event URL for a draft: title-token coverage of the slug (must
+ * cover nearly all title tokens so "Jiffy Kink: Pride" never lands on
+ * "jiffy-kink-speed-date"), plus day match when the URL carries one.
+ * Squashed-form comparison catches word-boundary drift ("EbonyFest" vs
  * "ebony-fest") and small spelling drift ("Polyitopia" vs "polytopia").
  * Returns null when nothing clears the bar.
  */
@@ -304,39 +330,61 @@ export function matchSanctuaryIndexUrl(
   entries: SanctuaryIndexEntry[],
 ): string | null {
   const day = String(draft.dateStart || "").slice(0, 10);
-  const titleKey = seriesTitleKey(draft.title);
+  // Keep pride / speed / apocalypse etc. - seriesTitleKey strips them and
+  // collapsed sibling nights onto the wrong page.
+  const titleKey = matchTitleKey(draft.title);
   if (!titleKey) return null;
   const tTokens = new Set(titleKey.split(" ").filter(Boolean));
   if (!tTokens.size) return null;
 
   const tSquash = titleKey.replace(/\s+/g, "");
+  // Generic series family words that may appear on many sibling pages
+  const weak = new Set(["night", "party", "event", "the", "and", "with", "presents"]);
 
   let best: { url: string; score: number } | null = null;
   for (const e of entries) {
     if (e.day && day && e.day !== day) continue;
-    const slugKey = sanctuarySlugKey(e.slug);
+    // Slug key via matchTitleKey path (hyphens → spaces, keep distinctive words)
+    const slugKey = matchTitleKey(String(e.slug || "").replace(/-/g, " "));
     const sTokens = new Set(slugKey.split(" ").filter(Boolean));
     if (!sTokens.size) continue;
     let inter = 0;
     tTokens.forEach(t => {
       if (sTokens.has(t)) inter++;
     });
-    const overlap = inter ? inter / Math.min(tTokens.size, sTokens.size) : 0;
+    // Title coverage: almost every title token must appear in the slug.
+    // Precision: slug should not be mostly other-night words (speed date vs pride).
+    const coverage = inter / tTokens.size;
+    const precision = inter / sTokens.size;
+    const missingDistinctive = [...tTokens].filter(
+      t => t.length >= 4 && !weak.has(t) && !sTokens.has(t),
+    );
+    const extraDistinctive = [...sTokens].filter(
+      t => t.length >= 4 && !weak.has(t) && !tTokens.has(t),
+    );
 
     let score: number;
-    if (inter && overlap >= 0.6) {
-      score = overlap * 100 + inter;
+    if (inter && coverage >= 0.85 && missingDistinctive.length === 0) {
+      // Full title coverage - penalize extra distinctive slug tokens lightly
+      // so "jiffy-kink-pride-2" beats "jiffy-kink" root when title has pride.
+      score = coverage * 100 + precision * 40 + inter - extraDistinctive.length * 8;
+    } else if (inter && coverage >= 0.6 && missingDistinctive.length === 0 && precision >= 0.5) {
+      score = coverage * 80 + precision * 30 + inter;
     } else {
-      // Squashed fallback: word-boundary drift + small spelling drift
+      // Squashed fallback: word-boundary drift + small spelling drift only
+      // when token path failed - still require near-equality (not containment
+      // of a short series family into a longer sibling slug).
       const sSquash = slugKey.replace(/\s+/g, "");
       if (!tSquash || tSquash.length < 5 || !sSquash) continue;
       const contains =
         tSquash === sSquash ||
-        (sSquash.length >= 6 && tSquash.includes(sSquash)) ||
-        (tSquash.length >= 6 && sSquash.includes(tSquash));
+        (Math.abs(tSquash.length - sSquash.length) <= 2 &&
+          (tSquash.includes(sSquash) || sSquash.includes(tSquash)));
       const maxEd = Math.min(tSquash.length, sSquash.length) >= 8 ? 2 : 1;
       const fuzzy = !contains && boundedEditDistance(tSquash, sSquash, maxEd) <= maxEd;
       if (!contains && !fuzzy) continue;
+      // Reject when squashed slug is much longer (family name inside sibling)
+      if (sSquash.length > tSquash.length + 4 && !fuzzy) continue;
       score = contains ? 85 : 75;
     }
     if (e.day && e.day === day) score += 50; // exact occurrence beats series root

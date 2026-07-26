@@ -39,6 +39,8 @@ export function visionConfigured(): { url: string; key: string; model: string } 
   const base =
     process.env.XAI_API_BASE?.trim() ||
     (process.env.XAI_API_KEY ? "https://api.x.ai/v1" : "https://api.openai.com/v1");
+  // grok-2-vision-latest is retired; prefer env override or a current multimodal id.
+  // Callers should tolerate 400 → model discovery where implemented.
   const model =
     process.env.QSEARCH_VISION_MODEL?.trim() ||
     (process.env.XAI_API_KEY ? "grok-2-vision-latest" : "gpt-4o-mini");

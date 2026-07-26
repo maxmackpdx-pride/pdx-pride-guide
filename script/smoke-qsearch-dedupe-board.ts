@@ -147,11 +147,13 @@ const allCoveredBoard: Event[] = weeks.map((day, i) => {
 const none = buildScanCandidates(seriesRaw, allCoveredBoard, []);
 assert(none.length === 0, "fully covered series does not enter Review");
 
-// applyCatalogCoverage null for pure dup
+// applyCatalogCoverage null for pure dup (use FUTURE date - past nights are dropped)
+const karaokeFuture = draft({ title: "Karaoke", dateStart: "2026-09-15T20:00:00" });
+const boardFuture = [fakeEvent(132, "Karaoke", "2026-09-15T20:00:00")];
 const pureDup = buildScanCandidates(
   [
     {
-      draft: karaoke,
+      draft: karaokeFuture,
       sourceId: "eagle-events",
       sourceLabel: "Eagle",
       sourceUrl: "https://x",
@@ -160,8 +162,9 @@ const pureDup = buildScanCandidates(
   [],
   [],
 )[0];
-// force coverage against board
-const dropped = applyCatalogCoverage(pureDup, board);
+assert(pureDup != null, "future karaoke one-off produces a candidate against empty catalog");
+// force coverage against board that already has that night
+const dropped = applyCatalogCoverage(pureDup, boardFuture);
 assert(dropped === null, "applyCatalogCoverage drops pure dup");
 
 console.log("\nAll main-board de-dupe smokes passed.");

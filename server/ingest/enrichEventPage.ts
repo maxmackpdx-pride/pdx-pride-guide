@@ -12,7 +12,9 @@ function looksLikeSiteLogo(url: string | null | undefined): boolean {
   if (!url) return true;
   // NB: no bare `elementor` - Sanctuary (WordPress/Elementor) serves some real
   // flyers through Elementor's image optimizer, and that token was nuking them.
-  return /logo|cropped-|favicon|trans_color|t_color_full|apple-touch/i.test(url);
+  return /logo|cropped-|favicon|trans_color|t_color_full|apple-touch|footer[_-]?map|site[_-]?map|screenshot|placeholder|spacer|1x1|pixel|gravatar/i.test(
+    url,
+  );
 }
 
 function metaContent(html: string, prop: string): string | null {

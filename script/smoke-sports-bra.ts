@@ -6,7 +6,12 @@
  * test the pure record→draft mapping against fixtures that mirror plausible
  * Airtable field shapes, plus the Swedish-minimal poster SVG builder.
  */
-import { parseSportsBraRecords, recordToDraft } from "../server/ingest/adapters/sportsBra";
+import {
+  parseMatchupCell,
+  parseSportsBraRecords,
+  parseSportsBraSharedView,
+  recordToDraft,
+} from "../server/ingest/adapters/sportsBra";
 import { buildGamePosterSvg } from "../server/posters/gamePoster";
 
 function assert(cond: unknown, msg: string) {
@@ -88,5 +93,50 @@ assert(svg.includes("<") && !/<script/i.test(svg), "poster has no script (safe)"
 /* ── poster escapes hostile text (no injection) ── */
 const evil = buildGamePosterSvg({ league: "X", away: "<script>alert(1)</script>", dateLabel: "x", timeLabel: "y" });
 assert(!/<script>alert/.test(evil), "hostile team text is escaped in poster");
+
+/* ── public shared-view matchup formula ── */
+const m = parseMatchupCell("July 15, 2026 - 🥎 Blaze vs Bandits");
+assert(m.iso === "2026-07-15", "matchup cell parses ISO date");
+assert(m.away === "Blaze" && m.home === "Bandits", "matchup cell splits teams");
+
+const shared = parseSportsBraSharedView(
+  {
+    data: {
+      table: {
+        columns: [
+          { id: "fldMatch", name: "2025 Matchup" },
+          { id: "fldTime", name: "Time (PT)" },
+          {
+            id: "fldLeague",
+            name: "League",
+            typeOptions: { choices: [{ id: "selNWSL", name: "NWSL" }] },
+          },
+        ],
+        rows: [
+          {
+            id: "r1",
+            cellValuesByColumnId: {
+              fldMatch: "August 1, 2999 - ⚽ Portland Thorns vs Gotham FC",
+              fldTime: "7:30 PM",
+              fldLeague: "selNWSL",
+            },
+          },
+          {
+            id: "r2",
+            cellValuesByColumnId: {
+              fldMatch: "January 1, 2000 - Old Game vs Past",
+              fldTime: "1:00 PM",
+            },
+          },
+        ],
+      },
+    },
+  },
+  {},
+);
+assert(shared.length === 1, "shared view keeps only future games");
+assert(shared[0].title === "Portland Thorns vs Gotham FC", "shared view title from matchup formula");
+assert(shared[0].dateStart === "2999-08-01T19:30", "shared view date+time");
+assert(/league=NWSL/.test(shared[0].posterImageUrl || ""), "shared view league on poster");
 
 console.log("\nAll Sports Bra connector + poster smoke checks passed.");

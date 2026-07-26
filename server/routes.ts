@@ -56,6 +56,7 @@ import {
   expandWebsiteScrapeCandidates,
   mergeIngestSources,
 } from "@shared/ingestSources";
+import { isTrustedLaneSource } from "@shared/trustedVenues";
 import {
   attachDirectoryBrandsToCandidates,
   cancelScan,
@@ -4910,11 +4911,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
         active: b.active,
       })),
     );
-    const sources = mergeIngestSources(INGEST_SOURCES, directory);
+    // Catch-all list only - trusted venues live on the Trusted board
+    const sources = mergeIngestSources(INGEST_SOURCES, directory).filter(
+      s => !isTrustedLaneSource({ id: s.id, url: s.url }),
+    );
     res.json({
       sources,
-      curatedCount: INGEST_SOURCES.length,
-      directoryCount: directory.length,
+      curatedCount: sources.filter(s => s.tier !== "directory").length,
+      directoryCount: sources.filter(s => s.tier === "directory").length,
       total: sources.length,
     });
   });

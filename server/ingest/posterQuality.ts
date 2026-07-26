@@ -242,9 +242,9 @@ export function extractSanctuaryFlyerUrls(html: string, pageUrl = "https://pdxsa
     // Must be WP media image
     if (!/\/wp-content\/uploads\//i.test(u)) return;
     if (!/\.(avif|jpe?g|png|webp|gif)(\?|$)/i.test(u)) return;
-    // Reject chrome / brand marks
+    // Reject chrome / brand marks / site chrome mistaken for flyers
     if (
-      /logo|cropped-|favicon|apple-touch|\.css|\.ttf|\.woff|trans_color_square|t_color_full/i.test(
+      /logo|cropped-|favicon|apple-touch|\.css|\.ttf|\.woff|trans_color_square|t_color_full|footer[_-]?map|site[_-]?map|screenshot|placeholder|spacer|1x1|pixel|gravatar|wp-includes/i.test(
         u,
       )
     ) {

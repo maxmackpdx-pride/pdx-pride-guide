@@ -212,6 +212,106 @@ export function trustedSourceIds(): string[] {
   return TRUSTED_VENUES.map(v => v.sourceId);
 }
 
+/** Hosts where many unrelated venues share a platform - never lane-match by host alone. */
+const TRUSTED_SHARED_PLATFORM_HOSTS = new Set([
+  "eventbrite.com",
+  "eventbrite.ca",
+  "eventbrite.co.uk",
+  "eventbrite.com.au",
+  "facebook.com",
+  "fb.com",
+  "instagram.com",
+  "tixr.com",
+  "ra.co",
+  "dice.fm",
+  "partiful.com",
+  "bandsintown.com",
+]);
+
+function trustedHostKey(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url.includes("://") ? url : `https://${url}`).hostname
+      .replace(/^www\./i, "")
+      .toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function pathKey(url: string): string {
+  try {
+    const u = new URL(url.includes("://") ? url : `https://${url}`);
+    return `${u.hostname.replace(/^www\./i, "").toLowerCase()}${u.pathname.replace(/\/$/, "").toLowerCase()}`;
+  } catch {
+    return String(url || "").toLowerCase();
+  }
+}
+
+/** Own-site hosts for trusted venues (not shared ticket platforms). */
+export function trustedOwnSiteHosts(): Set<string> {
+  const hosts = new Set<string>();
+  for (const v of TRUSTED_VENUES) {
+    for (const raw of [v.feedUrl, v.calendarPageUrl]) {
+      const h = trustedHostKey(raw);
+      if (!h) continue;
+      if (TRUSTED_SHARED_PLATFORM_HOSTS.has(h)) continue;
+      if ([...TRUSTED_SHARED_PLATFORM_HOSTS].some(p => h.endsWith(`.${p}`))) continue;
+      hosts.add(h);
+    }
+  }
+  return hosts;
+}
+
+/**
+ * True when a QSearch catch-all source belongs on the Trusted board instead.
+ * Trusted = custom adapters / dedicated sync; QSearch = everyone else.
+ *
+ * Matches:
+ * - exact trusted sourceId (and siblings like sanctuary-calendar, darcelle-ics)
+ * - directory auto-sources whose website host is a trusted venue site
+ * - Eventbrite org/path when that exact org is the trusted feed
+ */
+export function isTrustedLaneSource(input: {
+  id?: string | null;
+  url?: string | null;
+}): boolean {
+  const id = String(input.id || "").trim().toLowerCase();
+  const url = String(input.url || "").trim();
+
+  if (id && isTrustedSourceId(id)) return true;
+
+  // Sibling curated recipes for the same venues (calendar HTML, ICS fallbacks)
+  if (
+    id &&
+    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters)([-_]|$)/i.test(
+      id,
+    )
+  ) {
+    return true;
+  }
+
+  // Exact / prefix URL match against trusted feeds (covers EB org paths)
+  if (url) {
+    const pk = pathKey(url);
+    for (const v of TRUSTED_VENUES) {
+      for (const raw of [v.feedUrl, v.calendarPageUrl]) {
+        if (!raw) continue;
+        const tp = pathKey(raw);
+        if (pk === tp || pk.startsWith(tp + "/") || tp.startsWith(pk + "/")) return true;
+      }
+    }
+
+    const host = trustedHostKey(url);
+    if (host && !TRUSTED_SHARED_PLATFORM_HOSTS.has(host)) {
+      const own = trustedOwnSiteHosts();
+      if (own.has(host) || [...own].some(h => host.endsWith(`.${h}`))) return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Derive board health from last sync (primary) + optional auto-publish lag.
  * - green: last sync ok within ~2× poll window (zero new creates is still healthy)
