@@ -6055,6 +6055,55 @@ function runBootMigrationsOnce() {
     hardDeleteEventIds(byId.map(r => r.id));
     recordBootMigration("scrub_offscene_eb_noise_v1");
   }
+
+  /**
+   * Sweep remaining Eventbrite url_ingest rows with no LGBTQ signal
+   * (BJJ, beer runs, rock gym, Shriners, Camas art walk, women golf outing, etc.).
+   * Open-mode now requires queer signal for Eventbrite (eb_no_queer_signal).
+   */
+  if (!hasBootMigration("scrub_url_ingest_eb_no_queer_v1")) {
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, address, description, ticket_url, source, admin_notes
+         FROM events
+         WHERE status = 'LIVE'
+           AND (
+             source = 'url_ingest'
+             OR lower(COALESCE(admin_notes, '')) LIKE '%ingested from%eventbrite%'
+           )
+           AND (
+             lower(COALESCE(ticket_url, '')) LIKE '%eventbrite%'
+             OR lower(COALESCE(admin_notes, '')) LIKE '%eventbrite%'
+           )`,
+      )
+      .all() as Array<{
+        id: number;
+        title: string;
+        venue_name: string | null;
+        address: string | null;
+        description: string | null;
+        ticket_url: string | null;
+        source: string | null;
+        admin_notes: string | null;
+      }>;
+
+    const QUEER =
+      /\b(lgbtq?\+?|queer|gay|lesbian|sapphic|bisexual|\bbi\b|trans(?:gender)?|non[- ]?binary|enby|drag|pride|bear\b|cub\b|leather|kink|fetish|dyke|twink|femme|butch|ballroom|vogue|poly(?:am)?|enm\b|t4t|wlw|mlm|same[- ]sex|rainbow|jockstrap|sex[- ]positive|nudity|orgy|munch|pup\b|handler|jiffy kink|sanctuary|darcelle|stag|badlands|hawks|camp bar|cc slaughters|sports bra|q center|rose court|bearracuda|smyrc|werq|prism)\b/i;
+    const QUEER_VENUE =
+      /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|process|escape\s*bar|sports\s*bra|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf|living\s*room\s*wines)\b/i;
+
+    const drop: number[] = [];
+    // Always drop these known noise ids if still present
+    for (const id of [366, 373, 378, 379, 380, 382, 385]) drop.push(id);
+
+    for (const r of rows) {
+      const blob = [r.title, r.venue_name, r.address, (r.description || "").slice(0, 500)].join(" ");
+      if (QUEER.test(blob) || QUEER_VENUE.test(blob)) continue;
+      drop.push(r.id);
+    }
+    hardDeleteEventIds(Array.from(new Set(drop)));
+    recordBootMigration("scrub_url_ingest_eb_no_queer_v1");
+  }
 }
 
 function parseEnvAdminLists() {

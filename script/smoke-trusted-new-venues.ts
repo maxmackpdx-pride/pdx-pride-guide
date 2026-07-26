@@ -324,6 +324,50 @@ assert(
   ).keep,
   "open mode: Playmakers Hazel Dell paint night is off-scene noise",
 );
+// Eventbrite ticket + no LGBTQ signal must fail open mode (city EB dumps).
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "5k Beer Run - Threshold Brewing",
+      venueName: "Threshold Brewing & Blending",
+      address: "Portland, OR",
+      description: "Brewery running series",
+      sourceUrl: null,
+      ticketUrl: "https://www.eventbrite.com/e/5k-beer-run-tickets-1",
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: Eventbrite beer run without queer signal dropped",
+);
+assert(
+  !isRelevantScanDraft(
+    {
+      title: "Girls in Gis Oregon - Portland No-gi Event",
+      venueName: "10th Planet Jiu Jitsu Portland",
+      address: "Portland, OR",
+      description: "BJJ competition",
+      sourceUrl: null,
+      ticketUrl: "https://www.eventbrite.com/e/girls-in-gis-tickets-1",
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: Eventbrite BJJ without queer signal dropped",
+);
+// Queer-signal Eventbrite still allowed in open mode
+assert(
+  isRelevantScanDraft(
+    {
+      title: "LGBTQ+ Community Workout",
+      venueName: "Oregon Park",
+      address: "Portland, OR",
+      description: "Queer fitness meetup",
+      sourceUrl: null,
+      ticketUrl: "https://www.eventbrite.com/e/lgbtq-community-workout-tickets-1",
+    } as any,
+    openCtx,
+  ).keep,
+  "open mode: Eventbrite with LGBTQ signal kept",
+);
 // Junk 2: barbell cert at a different gym → dropped.
 assert(
   !isRelevantScanDraft(

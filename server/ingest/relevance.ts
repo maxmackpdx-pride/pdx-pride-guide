@@ -295,6 +295,15 @@ export function isOffSceneNoiseDraft(
   ) {
     return { noise: true, reason: "off_map_sports_bar" };
   }
+  // Generic fitness / civic EB dumps (jiu-jitsu comps, beer runs, rock gyms, Shriners)
+  if (
+    !hasQueerSignal(draft as IngestEventDraft) &&
+    /\b(jiu[- ]?jitsu|no[- ]?gi|bjj\b|rock gym|climbing experience|beer run|brewery running|shriners|sports consortium|art\s*&\s*wine walk|women\s+golf\s+outing|hosts?\s*&\s*home\s*teams)\b/i.test(
+      blob,
+    )
+  ) {
+    return { noise: true, reason: "generic_civic_fitness_noise" };
+  }
   return { noise: false };
 }
 
@@ -334,6 +343,12 @@ export function isRelevantScanDraft(
   const mode = relevanceModeForSource(ctx);
 
   if (mode === "open") {
+    // Open mode is for trusted venue calendars / paste — but Eventbrite tickets
+    // without any LGBTQ signal are city-wide noise (golf, churches, BJJ, etc.).
+    const ebUrls = urls.filter(u => /eventbrite\./i.test(u));
+    if (ebUrls.length && !hasQueerSignal(draft)) {
+      return { keep: false, reason: "eb_no_queer_signal" };
+    }
     return { keep: true };
   }
 
