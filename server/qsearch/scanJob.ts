@@ -143,6 +143,13 @@ export function buildLiveSources(businesses: Array<{
   // QSearch catch-all must not re-scan those venues or their sibling recipes.
   sources = sources.filter(s => !isTrustedLaneSource({ id: s.id, url: s.url }));
 
+  // Eventbrite is Trusted-lane ONLY now. Trusted venues keep their official
+  // Eventbrite feeds via trustedSync (fetchMode eventbrite_org, e.g. Stag PDX)
+  // which are already excluded above. Drop every remaining Eventbrite scan
+  // source, the broad Portland keyword dumps and the venue-name EB searches,
+  // so the QSearch catch-all never pulls from Eventbrite.
+  sources = sources.filter(s => s.format !== "eventbrite" && s.tier !== "eventbrite");
+
   // Soft-deleted sources stay out of scans (and stay disabled across registry sync)
   const disabled = listDisabledSourceIds();
   if (disabled.size) {

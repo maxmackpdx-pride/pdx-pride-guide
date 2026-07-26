@@ -556,11 +556,12 @@ export const INGEST_SOURCES: IngestSource[] = [
     notes: "Venue-scoped - not generic sports events. Trusted Airtable is primary for games.",
   },
 
-  // ── Eventbrite · Portland-only identity keyword searches ─────────────────
-  // Pattern: https://www.eventbrite.com/d/or--portland/{query}/
-  // Keep these separate - never use /d/local/events/ or bare /events.
-  // Each search is independent so yield/debug stays readable per term.
-  ...buildPortlandEventbriteKeywordSources(),
+  // ── Eventbrite keyword searches: REMOVED from the QSearch scan ───────────
+  // Broad Eventbrite discovery pulled in non-queer / mislabeled noise, so it
+  // no longer feeds QSearch. Eventbrite now lives ONLY in the Trusted lane
+  // (trustedVenues fetchMode "eventbrite_org", e.g. Stag PDX). A guard in
+  // scanJob (buildLiveSources) also drops any Eventbrite-format scan source.
+  // (buildPortlandEventbriteKeywordSources retained but intentionally unused.)
 
   // ── Partiful ────────────────────────────────────────────────────────────
   {
