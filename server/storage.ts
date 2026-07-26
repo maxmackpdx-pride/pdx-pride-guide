@@ -5909,6 +5909,69 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("scrub_noise_and_live_dups_v1");
   }
+
+  /**
+   * Sanctuary LIVE flyers: pull real event art from pdxsanctuary.com event pages
+   * (featured image / uploads). Replaces wrong series art (JKPride leak) and
+   * placeholders for published Sanctuary listings.
+   * Sources: ICS+page enrich + 6 parallel page scrapes of calendar/sitemap URLs.
+   */
+  if (!hasBootMigration("sanctuary_real_flyers_v1")) {
+    const posters: Array<{ id: number; url: string }> = [
+      { id: 14, url: "https://pdxsanctuary.com/wp-content/uploads/2026/04/treasuretrail.avif" },
+      { id: 269, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade.png" },
+      { id: 270, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade-1.png" },
+      { id: 271, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade-1.png" },
+      { id: 272, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/Studio69July26Pricing.jpg" },
+      { id: 274, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/deleapocalypse.webp" },
+      { id: 275, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/back_to_school.jpg" },
+      { id: 277, url: "https://pdxsanctuary.com/wp-content/uploads/2025/08/boot-snow-globe.avif" },
+      { id: 278, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/badsanta.avif" },
+      { id: 279, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/BiteClub-1.jpg" },
+      { id: 280, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/Fempower-2.jpg" },
+      { id: 282, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/sarumanAug23_with_bgc.avif" },
+      { id: 283, url: "https://pdxsanctuary.com/wp-content/uploads/2026/04/SinfulSundayMarket.avif" },
+      { id: 285, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/Screenshot-2026-07-06-170527.avif" },
+      { id: 286, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/PickupMixer.jpg" },
+      { id: 287, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/TranscenDance-1.jpg" },
+      { id: 288, url: "https://pdxsanctuary.com/wp-content/uploads/2025/08/deleenm.avif" },
+      { id: 289, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/BodyLanguageAug.avif" },
+      { id: 291, url: "https://pdxsanctuary.com/wp-content/uploads/2026/02/IMG_5178.jpeg1_.avif" },
+      { id: 292, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/Ball-Busting-Squre-Draft-1-7-16-26.avif" },
+      { id: 359, url: "https://pdxsanctuary.com/wp-content/uploads/2026/01/1f84c461-addd-4a68-8ccf-69ed1933e784.avif" },
+      { id: 360, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/delehorsemarket-e1692985599818.png" },
+      { id: 361, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/delehorsemarket-e1692985599818.png" },
+      { id: 370, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/BiteClub-1.jpg" },
+    ];
+    const note =
+      "Poster set from pdxsanctuary.com event page art (sanctuary_real_flyers_v1)";
+    for (const p of posters) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET poster_image_url = ?,
+               admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+           WHERE id = ?
+             AND (venue_name LIKE '%Sanctuary%' OR address LIKE '%9th%' OR source LIKE '%sanctuary%' OR description LIKE '%Sanctuary%')`,
+        )
+        .run(p.url, note, p.id);
+    }
+    // Also title+day based safety for re-seeded DBs where ids differ:
+    // fix any LIVE Sanctuary row still showing JKPride that is not Jiffy Kink Pride.
+    sqlite
+      .prepare(
+        `UPDATE events
+         SET poster_image_url = NULL,
+             admin_notes = COALESCE(admin_notes || ' | ', '') ||
+               'Cleared wrong JKPride series art (sanctuary_real_flyers_v1) - re-sync Trusted for flyer'
+         WHERE status = 'LIVE'
+           AND poster_image_url LIKE '%JKPride%'
+           AND lower(title) NOT LIKE '%jiffy kink%pride%'
+           AND (lower(venue_name) LIKE '%sanctuary%' OR lower(source) LIKE '%sanctuary%')`,
+      )
+      .run();
+    recordBootMigration("sanctuary_real_flyers_v1");
+  }
 }
 
 function parseEnvAdminLists() {
