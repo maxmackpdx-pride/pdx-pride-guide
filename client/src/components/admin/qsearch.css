@@ -1315,9 +1315,37 @@ button.qsearch__stat.is-active {
 
 /* Candidate row: div card (not label) so nested series controls work */
 .qsearch__cand {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
+}
+.qsearch__cand-x {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--qs-line-2);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.qsearch__cand-x:hover:not(:disabled) {
+  background: rgba(255, 40, 80, 0.25);
+  border-color: rgba(255, 80, 100, 0.55);
+  color: #fff;
+}
+.qsearch__cand-x:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .qsearch__cand-check {
   flex: none;
@@ -1328,6 +1356,38 @@ button.qsearch__stat.is-active {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
+}
+.qsearch__dismiss-selected {
+  border-color: rgba(255, 80, 100, 0.4) !important;
+  color: #ffb0bc !important;
+}
+.qsearch__advanced {
+  margin: 0 0 0.85rem;
+  padding: 0 0 0.25rem;
+}
+.qsearch__advanced-sum {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--qs-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
+  list-style: none;
+}
+.qsearch__advanced-sum::-webkit-details-marker {
+  display: none;
+}
+.qsearch__advanced-sum::before {
+  content: "▸ ";
+  color: var(--qs-cyan);
+}
+.qsearch__advanced[open] .qsearch__advanced-sum::before {
+  content: "▾ ";
+}
+.qsearch__scan-row--nested {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--qs-line);
 }
 
 /* Recurring series expand control (Review queue) */

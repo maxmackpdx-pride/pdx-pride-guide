@@ -257,9 +257,8 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
               <span className="qsearch__panel-count">{venues.length}</span>
             </h2>
             <p className="qsearch__trusted-lede">
-              First-party feeds (Badlands, Sanctuary, …). <strong>Sync now</strong> pulls into the{" "}
-              <strong>Review</strong> queue - approve there before anything goes live.
-              Health shows last successful feed pull.
+              Core venues with known feeds. <strong>Sync</strong> → Review queue → approve or ✕
+              dismiss. Health = last successful pull.
             </p>
           </div>
           <div className="qsearch__trusted-actions">
@@ -340,18 +339,8 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
                       </dd>
                     </div>
                     <div>
-                      <dt>Events last sync</dt>
+                      <dt>Events pulled</dt>
                       <dd>{v.lastEventCount ?? 0}</dd>
-                    </div>
-                    <div>
-                      <dt>Fetch mode</dt>
-                      <dd>
-                        <code className="qsearch__trusted-mode">{v.fetchMode}</code>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Poll</dt>
-                      <dd>every {v.pollHours ?? "-"}h</dd>
                     </div>
                     <div className="qsearch__trusted-meta--wide">
                       <dt>Last published</dt>

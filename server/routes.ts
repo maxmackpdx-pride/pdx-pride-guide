@@ -5193,6 +5193,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(result);
   });
 
+  /** Dismiss one or more Review queue cards (status → skipped). Does not create events. */
+  app.post("/api/admin/qsearch/queue/dismiss", requireAdmin, (req, res) => {
+    const raw = req.body?.ids;
+    const ids = Array.isArray(raw)
+      ? raw.map((id: unknown) => String(id || "").trim()).filter(Boolean)
+      : typeof req.body?.id === "string"
+        ? [req.body.id.trim()].filter(Boolean)
+        : [];
+    if (!ids.length) return res.status(400).json({ error: "ids required" });
+    const capped = ids.slice(0, 200);
+    markCandidatesSkipped(capped);
+    auditAdmin(req, "qsearch_queue_dismiss", {
+      type: "qsearch",
+      detail: { count: capped.length, ids: capped.slice(0, 20) },
+    });
+    res.json({ ok: true, dismissed: capped.length });
+  });
+
   app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {
     markAllNewSeen();
     res.json({ ok: true });

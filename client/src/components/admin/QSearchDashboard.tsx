@@ -782,7 +782,8 @@ function SourceRow({
 export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<Tab>("overview");
+  // Prefer Review when work is waiting; Trusted is the daily path. Sources/Health are secondary.
+  const [tab, setTab] = useState<Tab>("queue");
   const [statFocus, setStatFocus] = useState<StatFocus>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<ScanJobView | null>(null);
@@ -1008,6 +1009,46 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       toast({
         title: "Clear failed",
         description: parseApiError(err, "Could not clear scan"),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Drop card(s) from Review without creating events. */
+  async function dismissFromQueue(ids: string[], opts?: { confirmMulti?: boolean }) {
+    const list = ids.map(id => String(id || "").trim()).filter(Boolean);
+    if (!list.length) return;
+    if (
+      opts?.confirmMulti !== false &&
+      list.length > 1 &&
+      !window.confirm(`Remove ${list.length} items from Review? Nothing will be published.`)
+    ) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/qsearch/queue/dismiss", { ids: list });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Dismiss failed");
+      setSelected(prev => {
+        const next = { ...prev };
+        for (const id of list) delete next[id];
+        return next;
+      });
+      toast({
+        title: "Removed from Review",
+        description: `${data.dismissed ?? list.length} discarded`,
+      });
+      void refetch();
+      void refetchQueue();
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/queue"] });
+      void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
+    } catch (err) {
+      toast({
+        title: "Could not remove",
+        description: parseApiError(err, "Dismiss failed"),
         variant: "destructive",
       });
     } finally {
@@ -1658,13 +1699,12 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   return (
     <div className="qsearch" data-testid="qsearch-dashboard">
       <header className="qsearch__hero">
-        <p className="qsearch__kicker">Nightlife intelligence</p>
+        <p className="qsearch__kicker">Catalog intake</p>
         <h1 className="qsearch__title">QSearch</h1>
         <p className="qsearch__lede">
-          <strong>Scan now</strong> pulls calendars into the Review queue. Use{" "}
-          <strong>Add by hand</strong> only for a single flyer image or Instagram post that Scan
-          missed. In Review, <strong>Approve LIVE</strong> or <strong>Stage HIDDEN</strong>.{" "}
-          <strong>Trusted</strong> Sync also lands in Review first.
+          Daily path: <strong>Trusted</strong> sync (or <strong>Scan</strong>) →{" "}
+          <strong>Review</strong> → Approve LIVE / Stage HIDDEN / <strong>✕ dismiss</strong> junk.
+          Sources &amp; Health are for wiring feeds — not every day.
         </p>
 
         <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">
@@ -1746,62 +1786,11 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           >
             {scanning ? "Scanning…" : "Scan now"}
           </button>
-          <button
-            type="button"
-            className="qsearch__scan-btn is-ghost"
-            disabled={busy || scanning}
-            onClick={() => startScan({ onlyFailing: true })}
-          >
-            Re-scan troubled
-          </button>
-          <button
-            type="button"
-            className="qsearch__scan-btn is-ghost"
-            disabled={busy || scanning}
-            onClick={() => startScan({ onlyNew: true })}
-          >
-            New links only
-          </button>
-          <button
-            type="button"
-            className="qsearch__scan-btn is-ghost"
-            disabled={busy || scanning}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                const res = await apiRequest("POST", "/api/admin/qsearch/scan/nightly-now", {});
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Failed");
-                setJobId(data.jobId);
-                toast({ title: "Nightly priority scan", description: `${data.total} sources` });
-              } catch (err) {
-                toast({
-                  title: "Nightly scan failed",
-                  description: parseApiError(err, "Could not start"),
-                  variant: "destructive",
-                });
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Nightly priority
-          </button>
           {scanning && (
             <button type="button" className="qsearch__scan-btn is-ghost" onClick={cancelScan}>
               Cancel
             </button>
           )}
-          <button
-            type="button"
-            className="qsearch__scan-btn is-ghost"
-            disabled={busy || scanning}
-            title="Drop pending review rows from the most recent scan (bar-crawl noise, etc.)"
-            onClick={() => void clearLastScan("last")}
-            data-testid="qsearch-clear-last-scan"
-          >
-            Clear last scan
-          </button>
           <button
             type="button"
             className="qsearch__scan-btn is-ghost"
@@ -1812,29 +1801,85 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
           >
             Clear review queue
           </button>
-          <label
-            style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
-            title="If a calendar page has no structured events, try reading flyer images on that page (needs AI key)."
-          >
-            <input type="checkbox" checked={tryVision} onChange={e => setTryVision(e.target.checked)} />
-            When a site is empty, try reading flyer images
-          </label>
-          <label
-            style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
-            title="Off by default: only upcoming/current nights. Turn on to include past occurrences from feeds."
-          >
-            <input
-              type="checkbox"
-              checked={includePastEvents}
-              onChange={e => setIncludePastEvents(e.target.checked)}
-              data-testid="qsearch-include-past"
-            />
-            Include past events
-          </label>
           <span style={{ color: "var(--qs-muted)", fontSize: 12 }}>
             Last scan: {fmtWhen(stats?.lastScanAt ?? null)}
           </span>
         </div>
+        <details className="qsearch__advanced">
+          <summary className="qsearch__advanced-sum">More scan options</summary>
+          <div className="qsearch__scan-row qsearch__scan-row--nested">
+            <button
+              type="button"
+              className="qsearch__scan-btn is-ghost"
+              disabled={busy || scanning}
+              onClick={() => startScan({ onlyFailing: true })}
+            >
+              Re-scan troubled
+            </button>
+            <button
+              type="button"
+              className="qsearch__scan-btn is-ghost"
+              disabled={busy || scanning}
+              onClick={() => startScan({ onlyNew: true })}
+            >
+              New links only
+            </button>
+            <button
+              type="button"
+              className="qsearch__scan-btn is-ghost"
+              disabled={busy || scanning}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  const res = await apiRequest("POST", "/api/admin/qsearch/scan/nightly-now", {});
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || "Failed");
+                  setJobId(data.jobId);
+                  toast({ title: "Nightly priority scan", description: `${data.total} sources` });
+                } catch (err) {
+                  toast({
+                    title: "Nightly scan failed",
+                    description: parseApiError(err, "Could not start"),
+                    variant: "destructive",
+                  });
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Nightly priority
+            </button>
+            <button
+              type="button"
+              className="qsearch__scan-btn is-ghost"
+              disabled={busy || scanning}
+              title="Drop pending review rows from the most recent scan"
+              onClick={() => void clearLastScan("last")}
+              data-testid="qsearch-clear-last-scan"
+            >
+              Clear last scan
+            </button>
+            <label
+              style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
+              title="If a calendar page has no structured events, try reading flyer images (needs AI key)."
+            >
+              <input type="checkbox" checked={tryVision} onChange={e => setTryVision(e.target.checked)} />
+              Empty site → try flyer images
+            </label>
+            <label
+              style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
+              title="Off by default: only upcoming/current nights."
+            >
+              <input
+                type="checkbox"
+                checked={includePastEvents}
+                onChange={e => setIncludePastEvents(e.target.checked)}
+                data-testid="qsearch-include-past"
+              />
+              Include past events
+            </label>
+          </div>
+        </details>
         <div className="qsearch__seam" aria-hidden />
       </header>
 
@@ -1858,11 +1903,11 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       <div className="qsearch__tabs" role="tablist">
         {(
           [
-            ["overview", "Health"],
-            ["trusted", "Trusted"],
-            ["venues", `Sources (${venues.length})`],
             ["queue", `Review (${queueCandidates.length})`],
+            ["trusted", "Trusted"],
             ["assist", "Add by hand"],
+            ["overview", "Health"],
+            ["venues", `Sources (${venues.length})`],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -2381,22 +2426,6 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 </button>
                 <button
                   type="button"
-                  disabled={busy || scanning}
-                  onClick={() => void clearLastScan("last")}
-                  title="Discard pending candidates from the last scan"
-                >
-                  Clear last scan
-                </button>
-                <button
-                  type="button"
-                  disabled={busy || scanning}
-                  onClick={() => void clearLastScan("all")}
-                  title="Empty the entire review queue"
-                >
-                  Clear queue
-                </button>
-                <button
-                  type="button"
                   className="is-primary"
                   disabled={busy || selectedCount === 0}
                   onClick={() => void approveSelected("LIVE")}
@@ -2413,6 +2442,30 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   title="Create events staged off the public board"
                 >
                   Stage {selectedCount || ""} HIDDEN
+                </button>
+                <button
+                  type="button"
+                  className="qsearch__dismiss-selected"
+                  disabled={busy || selectedCount === 0}
+                  onClick={() =>
+                    void dismissFromQueue(
+                      Object.entries(selected)
+                        .filter(([, on]) => on)
+                        .map(([id]) => id),
+                    )
+                  }
+                  data-testid="qsearch-dismiss-selected"
+                  title="Remove selected from Review without publishing"
+                >
+                  ✕ Dismiss {selectedCount || ""}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || scanning}
+                  onClick={() => void clearLastScan("all")}
+                  title="Empty the entire review queue"
+                >
+                  Clear all
                 </button>
               </div>
               {filteredCandidates.map(c => {
@@ -2461,6 +2514,21 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             : undefined,
                     }}
                   >
+                    <button
+                      type="button"
+                      className="qsearch__cand-x"
+                      disabled={busy}
+                      title="Remove from Review (do not publish)"
+                      aria-label={`Remove ${c.draft.title || "item"} from Review`}
+                      data-testid={`qsearch-dismiss-${c.id}`}
+                      onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void dismissFromQueue([c.id], { confirmMulti: false });
+                      }}
+                    >
+                      ✕
+                    </button>
                     <label className="qsearch__cand-check" title="Select for approve">
                       <input
                         type="checkbox"
