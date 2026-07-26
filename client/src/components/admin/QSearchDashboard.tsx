@@ -542,6 +542,9 @@ type ScanJobView = {
 };
 
 type Tab = "overview" | "trusted" | "venues" | "queue" | "assist";
+/** Daily = Review + Trusted (+ hand add). Lab = Sources, Health, advanced scans. */
+type WorkspaceMode = "daily" | "lab";
+const QSEARCH_MODE_KEY = "qsearch-workspace-mode-v1";
 /** Which slice of data a hero-stat click should show in the tab below */
 type StatFocus = "scan-urls" | "directory" | "works" | "trouble" | "queue" | "new-links" | null;
 /** Sources tab: all, directory listings only, or general scrape only */
@@ -782,9 +785,31 @@ function SourceRow({
 export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [mode, setMode] = useState<WorkspaceMode>(() => {
+    try {
+      const v = localStorage.getItem(QSEARCH_MODE_KEY);
+      if (v === "lab" || v === "daily") return v;
+    } catch {
+      /* ignore */
+    }
+    return "daily";
+  });
   // Prefer Review when work is waiting; Trusted is the daily path. Sources/Health are secondary.
   const [tab, setTab] = useState<Tab>("queue");
   const [statFocus, setStatFocus] = useState<StatFocus>(null);
+
+  function setWorkspaceMode(next: WorkspaceMode) {
+    setMode(next);
+    try {
+      localStorage.setItem(QSEARCH_MODE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+    if (next === "daily" && (tab === "overview" || tab === "venues")) {
+      setTab("queue");
+      setStatFocus(null);
+    }
+  }
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<ScanJobView | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1659,8 +1684,9 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       }, 50);
       return;
     }
+    // Lab-only surfaces: jump into Lab mode first
+    if (mode === "daily") setWorkspaceMode("lab");
     if (focus === "trouble" || focus === "new-links") {
-      // Overview panels list these; also open Sources filtered for the same slice
       setTab("overview");
       setTimeout(() => {
         const id =
@@ -1696,60 +1722,62 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 ? "Review queue"
                 : null;
 
+  const dailyTabs = [
+    ["queue", `Review (${queueCandidates.length})`],
+    ["trusted", "Trusted"],
+    ["assist", "Add by hand"],
+  ] as const;
+  const labTabs = [
+    ["queue", `Review (${queueCandidates.length})`],
+    ["trusted", "Trusted"],
+    ["assist", "Add by hand"],
+    ["overview", "Health"],
+    ["venues", `Sources (${venues.length})`],
+  ] as const;
+  const visibleTabs = mode === "daily" ? dailyTabs : labTabs;
+
   return (
-    <div className="qsearch" data-testid="qsearch-dashboard">
+    <div className={`qsearch qsearch--${mode}`} data-testid="qsearch-dashboard" data-mode={mode}>
       <header className="qsearch__hero">
-        <p className="qsearch__kicker">Catalog intake</p>
-        <h1 className="qsearch__title">QSearch</h1>
+        <div className="qsearch__hero-top">
+          <div>
+            <p className="qsearch__kicker">Catalog intake</p>
+            <h1 className="qsearch__title">QSearch</h1>
+          </div>
+          <div className="qsearch__mode" role="group" aria-label="Workspace mode">
+            <button
+              type="button"
+              className={`qsearch__mode-btn${mode === "daily" ? " is-on" : ""}`}
+              onClick={() => setWorkspaceMode("daily")}
+              data-testid="qsearch-mode-daily"
+            >
+              Daily
+            </button>
+            <button
+              type="button"
+              className={`qsearch__mode-btn${mode === "lab" ? " is-on" : ""}`}
+              onClick={() => setWorkspaceMode("lab")}
+              data-testid="qsearch-mode-lab"
+            >
+              Lab
+            </button>
+          </div>
+        </div>
         <p className="qsearch__lede">
-          Daily path: <strong>Trusted</strong> sync (or <strong>Scan</strong>) →{" "}
-          <strong>Review</strong> → Approve LIVE / Stage HIDDEN / <strong>✕ dismiss</strong> junk.
-          Sources &amp; Health are for wiring feeds — not every day.
+          {mode === "daily" ? (
+            <>
+              <strong>Trusted</strong> sync or <strong>Scan</strong> → <strong>Review</strong> → LIVE /
+              HIDDEN / ✕. Lab mode is for Sources, Health, and feed wiring.
+            </>
+          ) : (
+            <>
+              Full console: Sources, Health, yield, recipes. Switch to <strong>Daily</strong> when you
+              only need Review + Trusted.
+            </>
+          )}
         </p>
 
         <div className="qsearch__stats" role="navigation" aria-label="QSearch stats shortcuts">
-          <button
-            type="button"
-            className={`qsearch__stat${statFocus === "scan-urls" ? " is-active" : ""}`}
-            onClick={() => openStat("scan-urls")}
-            title="Open Sources - all scan URLs"
-            data-testid="qsearch-stat-urls"
-          >
-            <div className="qsearch__stat-val is-cyan">{stats?.urlCount ?? "-"}</div>
-            <div className="qsearch__stat-label">Scan URLs</div>
-          </button>
-          <button
-            type="button"
-            className={`qsearch__stat${statFocus === "directory" ? " is-active" : ""}`}
-            onClick={() => openStat("directory")}
-            title="Open Sources - directory places with websites"
-            data-testid="qsearch-stat-directory"
-          >
-            <div className="qsearch__stat-val">{stats?.directoryPlaces ?? "-"}</div>
-            <div className="qsearch__stat-label">Directory places</div>
-          </button>
-          <button
-            type="button"
-            className={`qsearch__stat${statFocus === "works" ? " is-active" : ""}`}
-            onClick={() => openStat("works")}
-            title="Open Sources - yield works"
-            data-testid="qsearch-stat-works"
-          >
-            <div className="qsearch__stat-val">{stats?.healthyCount ?? "-"}</div>
-            <div className="qsearch__stat-label">Yield works</div>
-          </button>
-          <button
-            type="button"
-            className={`qsearch__stat${statFocus === "trouble" ? " is-active" : ""}`}
-            onClick={() => openStat("trouble")}
-            title="Open Health - sources having trouble"
-            data-testid="qsearch-stat-trouble"
-          >
-            <div className={`qsearch__stat-val ${(stats?.failingCount || 0) > 0 ? "is-warn" : ""}`}>
-              {stats?.failingCount ?? "-"}
-            </div>
-            <div className="qsearch__stat-label">Trouble</div>
-          </button>
           <button
             type="button"
             className={`qsearch__stat${statFocus === "queue" ? " is-active" : ""}`}
@@ -1760,19 +1788,65 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             <div className={`qsearch__stat-val ${(stats?.pendingReview || 0) > 0 ? "is-warn" : "is-cyan"}`}>
               {stats?.pendingReview ?? queueCandidates.length}
             </div>
-            <div className="qsearch__stat-label">Review queue</div>
+            <div className="qsearch__stat-label">Review</div>
           </button>
+          {mode === "lab" && (
+            <>
+              <button
+                type="button"
+                className={`qsearch__stat${statFocus === "scan-urls" ? " is-active" : ""}`}
+                onClick={() => openStat("scan-urls")}
+                title="Open Sources - all scan URLs"
+                data-testid="qsearch-stat-urls"
+              >
+                <div className="qsearch__stat-val is-cyan">{stats?.urlCount ?? "-"}</div>
+                <div className="qsearch__stat-label">Scan URLs</div>
+              </button>
+              <button
+                type="button"
+                className={`qsearch__stat${statFocus === "directory" ? " is-active" : ""}`}
+                onClick={() => openStat("directory")}
+                title="Open Sources - directory places with websites"
+                data-testid="qsearch-stat-directory"
+              >
+                <div className="qsearch__stat-val">{stats?.directoryPlaces ?? "-"}</div>
+                <div className="qsearch__stat-label">Directory places</div>
+              </button>
+              <button
+                type="button"
+                className={`qsearch__stat${statFocus === "works" ? " is-active" : ""}`}
+                onClick={() => openStat("works")}
+                title="Open Sources - yield works"
+                data-testid="qsearch-stat-works"
+              >
+                <div className="qsearch__stat-val">{stats?.healthyCount ?? "-"}</div>
+                <div className="qsearch__stat-label">Yield works</div>
+              </button>
+              <button
+                type="button"
+                className={`qsearch__stat${statFocus === "new-links" ? " is-active" : ""}`}
+                onClick={() => openStat("new-links")}
+                title="Open Health - new directory auto-links"
+                data-testid="qsearch-stat-new"
+              >
+                <div className={`qsearch__stat-val ${(stats?.newDirectoryCount || 0) > 0 ? "is-warn" : ""}`}>
+                  {stats?.newDirectoryCount ?? "-"}
+                </div>
+                <div className="qsearch__stat-label">New auto-links</div>
+              </button>
+            </>
+          )}
           <button
             type="button"
-            className={`qsearch__stat${statFocus === "new-links" ? " is-active" : ""}`}
-            onClick={() => openStat("new-links")}
-            title="Open Health - new directory auto-links"
-            data-testid="qsearch-stat-new"
+            className={`qsearch__stat${statFocus === "trouble" ? " is-active" : ""}`}
+            onClick={() => openStat("trouble")}
+            title={mode === "daily" ? "Open Lab · Health (trouble)" : "Open Health - sources having trouble"}
+            data-testid="qsearch-stat-trouble"
           >
-            <div className={`qsearch__stat-val ${(stats?.newDirectoryCount || 0) > 0 ? "is-warn" : ""}`}>
-              {stats?.newDirectoryCount ?? "-"}
+            <div className={`qsearch__stat-val ${(stats?.failingCount || 0) > 0 ? "is-warn" : ""}`}>
+              {stats?.failingCount ?? "-"}
             </div>
-            <div className="qsearch__stat-label">New auto-links</div>
+            <div className="qsearch__stat-label">Trouble</div>
           </button>
         </div>
 
@@ -1805,81 +1879,83 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             Last scan: {fmtWhen(stats?.lastScanAt ?? null)}
           </span>
         </div>
-        <details className="qsearch__advanced">
-          <summary className="qsearch__advanced-sum">More scan options</summary>
-          <div className="qsearch__scan-row qsearch__scan-row--nested">
-            <button
-              type="button"
-              className="qsearch__scan-btn is-ghost"
-              disabled={busy || scanning}
-              onClick={() => startScan({ onlyFailing: true })}
-            >
-              Re-scan troubled
-            </button>
-            <button
-              type="button"
-              className="qsearch__scan-btn is-ghost"
-              disabled={busy || scanning}
-              onClick={() => startScan({ onlyNew: true })}
-            >
-              New links only
-            </button>
-            <button
-              type="button"
-              className="qsearch__scan-btn is-ghost"
-              disabled={busy || scanning}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  const res = await apiRequest("POST", "/api/admin/qsearch/scan/nightly-now", {});
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error || "Failed");
-                  setJobId(data.jobId);
-                  toast({ title: "Nightly priority scan", description: `${data.total} sources` });
-                } catch (err) {
-                  toast({
-                    title: "Nightly scan failed",
-                    description: parseApiError(err, "Could not start"),
-                    variant: "destructive",
-                  });
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              Nightly priority
-            </button>
-            <button
-              type="button"
-              className="qsearch__scan-btn is-ghost"
-              disabled={busy || scanning}
-              title="Drop pending review rows from the most recent scan"
-              onClick={() => void clearLastScan("last")}
-              data-testid="qsearch-clear-last-scan"
-            >
-              Clear last scan
-            </button>
-            <label
-              style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
-              title="If a calendar page has no structured events, try reading flyer images (needs AI key)."
-            >
-              <input type="checkbox" checked={tryVision} onChange={e => setTryVision(e.target.checked)} />
-              Empty site → try flyer images
-            </label>
-            <label
-              style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
-              title="Off by default: only upcoming/current nights."
-            >
-              <input
-                type="checkbox"
-                checked={includePastEvents}
-                onChange={e => setIncludePastEvents(e.target.checked)}
-                data-testid="qsearch-include-past"
-              />
-              Include past events
-            </label>
-          </div>
-        </details>
+        {(mode === "lab" || scanning) && (
+          <details className="qsearch__advanced" open={mode === "lab"}>
+            <summary className="qsearch__advanced-sum">More scan options</summary>
+            <div className="qsearch__scan-row qsearch__scan-row--nested">
+              <button
+                type="button"
+                className="qsearch__scan-btn is-ghost"
+                disabled={busy || scanning}
+                onClick={() => startScan({ onlyFailing: true })}
+              >
+                Re-scan troubled
+              </button>
+              <button
+                type="button"
+                className="qsearch__scan-btn is-ghost"
+                disabled={busy || scanning}
+                onClick={() => startScan({ onlyNew: true })}
+              >
+                New links only
+              </button>
+              <button
+                type="button"
+                className="qsearch__scan-btn is-ghost"
+                disabled={busy || scanning}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    const res = await apiRequest("POST", "/api/admin/qsearch/scan/nightly-now", {});
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Failed");
+                    setJobId(data.jobId);
+                    toast({ title: "Nightly priority scan", description: `${data.total} sources` });
+                  } catch (err) {
+                    toast({
+                      title: "Nightly scan failed",
+                      description: parseApiError(err, "Could not start"),
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Nightly priority
+              </button>
+              <button
+                type="button"
+                className="qsearch__scan-btn is-ghost"
+                disabled={busy || scanning}
+                title="Drop pending review rows from the most recent scan"
+                onClick={() => void clearLastScan("last")}
+                data-testid="qsearch-clear-last-scan"
+              >
+                Clear last scan
+              </button>
+              <label
+                style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
+                title="If a calendar page has no structured events, try reading flyer images (needs AI key)."
+              >
+                <input type="checkbox" checked={tryVision} onChange={e => setTryVision(e.target.checked)} />
+                Empty site → try flyer images
+              </label>
+              <label
+                style={{ fontSize: 12, color: "var(--qs-muted)", display: "flex", gap: 6, alignItems: "center" }}
+                title="Off by default: only upcoming/current nights."
+              >
+                <input
+                  type="checkbox"
+                  checked={includePastEvents}
+                  onChange={e => setIncludePastEvents(e.target.checked)}
+                  data-testid="qsearch-include-past"
+                />
+                Include past events
+              </label>
+            </div>
+          </details>
+        )}
         <div className="qsearch__seam" aria-hidden />
       </header>
 
@@ -1901,15 +1977,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       )}
 
       <div className="qsearch__tabs" role="tablist">
-        {(
-          [
-            ["queue", `Review (${queueCandidates.length})`],
-            ["trusted", "Trusted"],
-            ["assist", "Add by hand"],
-            ["overview", "Health"],
-            ["venues", `Sources (${venues.length})`],
-          ] as const
-        ).map(([id, label]) => (
+        {visibleTabs.map(([id, label]) => (
           <button
             key={id}
             type="button"
@@ -1935,6 +2003,7 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
 
       {tab === "trusted" && (
         <QSearchTrusted
+          compact={mode === "daily"}
           onSynced={() => {
             void queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
             onCommitted?.();
@@ -2476,8 +2545,6 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                   c.duplicates?.some(
                     d => d.catalogRecurringStatus === "catalog_one_off_needs_recurring_update",
                   );
-                const catalogAlreadyRecurring =
-                  c.strongDuplicate?.catalogRecurringStatus === "catalog_already_recurring";
                 const brands = c.directoryBrands || [];
                 const groupBrand = brands.find(b => b.role === "group");
                 const venueBrand =
@@ -2536,7 +2603,77 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         onChange={e => setSelected(prev => ({ ...prev, [c.id]: e.target.checked }))}
                       />
                     </label>
-                    {/* Group → Venue → Flyer (directory brand marks, not avatars) */}
+                    {/* Slim daily row: flyer + title/when/venue + badges. Expand for logos/series/dups. */}
+                    <div className="qsearch__cand-slim">
+                      <div className="qsearch__cand-slim-flyer">
+                        {c.draft.posterImageUrl ? (
+                          <img
+                            src={c.draft.posterImageUrl}
+                            alt=""
+                            loading="lazy"
+                            onError={e => {
+                              e.currentTarget.style.opacity = "0.35";
+                            }}
+                          />
+                        ) : (
+                          <div className="qsearch__cand-slim-flyer-empty">—</div>
+                        )}
+                      </div>
+                      <div className="qsearch__cand-slim-main">
+                        <h3 className="qsearch__cand-title" data-testid="qsearch-cand-title">
+                          {c.draft.title || "Untitled event"}
+                        </h3>
+                        <p className="qsearch__cand-slim-meta">
+                          {[
+                            c.draft.dayOfWeek,
+                            formatPartyWhen(c.draft.dateStart, c.draft.dateEnd),
+                            c.draft.venueName,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                        <div className="qsearch__cand-slim-badges">
+                          {c.condensed && c.recurring === "weekly" && (
+                            <span className="qsearch__badge is-week">Weekly · {c.recurringCount}</span>
+                          )}
+                          {c.condensed && c.recurring === "monthly" && (
+                            <span className="qsearch__badge is-month">Monthly · {c.recurringCount}</span>
+                          )}
+                          {c.strongDuplicate && (
+                            <span className="qsearch__badge is-fail">Dup #{c.strongDuplicate.eventId}</span>
+                          )}
+                          {needsRecurringUpdate && (
+                            <span className="qsearch__badge is-new">Needs series update</span>
+                          )}
+                          {!c.draft.posterImageUrl && (
+                            <span className="qsearch__badge is-fail">No flyer</span>
+                          )}
+                          {c.conflicts?.slice(0, 2).map(conf => (
+                            <span key={conf.eventId} className="qsearch__badge is-conflict">
+                              {conf.kind === "likely_replacement" ? "May replace" : "Conflict"} #
+                              {conf.eventId}
+                            </span>
+                          ))}
+                          <span className="qsearch__cand-via" title={c.sourceUrl || undefined}>
+                            via {c.sourceLabel || "source"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <details
+                      className="qsearch__cand-more"
+                      open={
+                        !!(
+                          needsRecurringUpdate ||
+                          c.strongDuplicate ||
+                          (c.conflicts && c.conflicts.length) ||
+                          (c.condensed && (c.recurringCount || 0) >= 2)
+                        )
+                      }
+                    >
+                      <summary className="qsearch__cand-more-sum">Details · series · directory</summary>
+                      <div className="qsearch__cand-more-body">
+                    {/* Group → Venue logos (directory brand marks) */}
                     <div className="qsearch__cand-row" aria-label="Group, venue, flyer">
                       <div className="qsearch__cand-slot">
                         <span className="qsearch__cand-slot-label">Group</span>
@@ -2620,37 +2757,9 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           </span>
                         )}
                       </div>
-                      <div className="qsearch__cand-slot qsearch__cand-slot--flyer">
-                        <span className="qsearch__cand-slot-label">Flyer</span>
-                        {c.draft.posterImageUrl ? (
-                          <img
-                            src={c.draft.posterImageUrl}
-                            alt=""
-                            className="qsearch__cand-flyer"
-                            loading="lazy"
-                            onError={e => {
-                              e.currentTarget.style.opacity = "0.35";
-                              e.currentTarget.title = "Flyer failed to load";
-                            }}
-                          />
-                        ) : (
-                          <div className="qsearch__cand-flyer qsearch__cand-flyer--empty">No flyer</div>
-                        )}
-                      </div>
                     </div>
                     <div className="qsearch__cand-body">
-                      <h3 className="qsearch__cand-title" data-testid="qsearch-cand-title">
-                        {c.draft.title || "Untitled event"}
-                      </h3>
                       <p className="qsearch__cand-party">
-                        <span className="qsearch__cand-party-line">
-                          {[
-                            c.draft.dayOfWeek,
-                            formatPartyWhen(c.draft.dateStart, c.draft.dateEnd),
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </span>
                         <span className="qsearch__cand-party-line">
                           {[c.draft.venueName, c.draft.address].filter(Boolean).join(" · ")}
                         </span>
@@ -2672,8 +2781,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         </span>
                         {c.draft.description?.trim() && (
                           <span className="qsearch__cand-party-desc">
-                            {c.draft.description.trim().replace(/\s+/g, " ").slice(0, 160)}
-                            {c.draft.description.trim().length > 160 ? "…" : ""}
+                            {c.draft.description.trim().replace(/\s+/g, " ").slice(0, 220)}
+                            {c.draft.description.trim().length > 220 ? "…" : ""}
                           </span>
                         )}
                       </p>
@@ -2717,10 +2826,6 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 </a>
                               </>
                             ) : null}
-                            {" · "}
-                            <span title={feed || c.sourceUrl || undefined}>
-                              via {c.sourceLabel || "source"}
-                            </span>
                             {feed ? (
                               <>
                                 {" · "}
@@ -2735,47 +2840,9 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                                 </a>
                               </>
                             ) : null}
-                            {c.draft.parseSource ? ` · ${c.draft.parseSource}` : ""}
-                            {c.draft.confidence != null
-                              ? ` · conf ${(c.draft.confidence * 100).toFixed(0)}%`
-                              : ""}
                           </p>
                         );
                       })()}
-                      <div>
-                        {c.condensed && c.recurring === "weekly" && (
-                          <span className="qsearch__badge is-week">Weekly · {c.recurringCount}</span>
-                        )}
-                        {c.condensed && c.recurring === "monthly" && (
-                          <span className="qsearch__badge is-month">Monthly · {c.recurringCount}</span>
-                        )}
-                        {c.strongDuplicate && (
-                          <span className="qsearch__badge is-fail">
-                            Dup #{c.strongDuplicate.eventId}
-                          </span>
-                        )}
-                        {catalogAlreadyRecurring && (
-                          <span className="qsearch__badge is-ok">Catalog already series</span>
-                        )}
-                        {needsRecurringUpdate && (
-                          <span className="qsearch__badge is-new">Needs recurring update</span>
-                        )}
-                        {!c.draft.posterImageUrl && (
-                          <span className="qsearch__badge is-fail">Missing flyer</span>
-                        )}
-                        {c.draft.posterImageUrl?.startsWith("/uploads/") && (
-                          <span className="qsearch__badge is-ok">Flyer saved</span>
-                        )}
-                        {c.draft.warnings?.some(w => /Flyer reused from prior/i.test(w)) && (
-                          <span className="qsearch__badge is-ok">Prior flyer</span>
-                        )}
-                        {c.conflicts?.map(conf => (
-                          <span key={conf.eventId} className="qsearch__badge is-conflict">
-                            {conf.kind === "likely_replacement" ? "May replace" : "Conflict"} #
-                            {conf.eventId}
-                          </span>
-                        ))}
-                      </div>
                       {(c.recurringDupAction || c.strongDuplicate?.note) && (
                         <p style={{ fontSize: 12, color: "var(--qs-orange)", margin: "6px 0 0" }}>
                           {c.recurringDupAction || c.strongDuplicate?.note}
@@ -2901,6 +2968,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                         );
                       })()}
                     </div>
+                      </div>
+                    </details>
                   </div>
                 );
               })}

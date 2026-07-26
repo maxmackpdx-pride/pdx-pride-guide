@@ -52,12 +52,46 @@
   text-shadow: 2px 2px 0 #000;
 }
 
+.qsearch__hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+.qsearch__mode {
+  display: inline-flex;
+  border: 1px solid var(--qs-line-2);
+  border-radius: 999px;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  flex: none;
+}
+.qsearch__mode-btn {
+  border: none;
+  background: transparent;
+  color: var(--qs-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.qsearch__mode-btn.is-on {
+  background: var(--qs-yellow);
+  color: var(--qs-ink);
+}
 .qsearch__lede {
   color: rgba(255, 255, 255, 0.62);
   font-size: 0.88rem;
   max-width: 44rem;
   margin: 0 0 1.1rem;
   line-height: 1.5;
+}
+.qsearch--daily .qsearch__stats {
+  max-width: 22rem;
 }
 
 .qsearch__lede strong {
@@ -1356,6 +1390,147 @@ button.qsearch__stat.is-active {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
+}
+.qsearch__cand-slim {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  padding-right: 2rem;
+}
+.qsearch__cand-slim-flyer {
+  flex: none;
+  width: 56px;
+  height: 72px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--qs-line);
+  background: rgba(0, 0, 0, 0.35);
+}
+.qsearch__cand-slim-flyer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.qsearch__cand-slim-flyer-empty {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--qs-faint);
+  font-size: 0.75rem;
+}
+.qsearch__cand-slim-main {
+  flex: 1;
+  min-width: 0;
+}
+.qsearch__cand-slim-meta {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.35;
+}
+.qsearch__cand-slim-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+.qsearch__cand-via {
+  font-size: 0.7rem;
+  color: var(--qs-muted);
+  margin-left: 0.15rem;
+}
+.qsearch__cand-more {
+  flex: 1 1 100%;
+  margin: 0.15rem 0 0 1.65rem;
+  border-top: 1px solid var(--qs-line);
+  padding-top: 0.35rem;
+}
+.qsearch__cand-more-sum {
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--qs-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
+  list-style: none;
+}
+.qsearch__cand-more-sum::-webkit-details-marker {
+  display: none;
+}
+.qsearch__cand-more-sum::before {
+  content: "▸ ";
+  color: var(--qs-cyan);
+}
+.qsearch__cand-more[open] .qsearch__cand-more-sum::before {
+  content: "▾ ";
+}
+.qsearch__cand-more-body {
+  margin-top: 0.55rem;
+}
+/* Wrap cand so slim + details stack; checkbox/X stay top row via flex wrap on parent */
+.qsearch__cand {
+  flex-wrap: wrap;
+}
+
+/* Compact trusted rows (Daily mode) */
+.qsearch__trusted-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.qsearch__trusted-row {
+  border: 1px solid var(--qs-line);
+  border-radius: 10px;
+  background: var(--qs-card);
+  overflow: hidden;
+}
+.qsearch__trusted-row.is-bad {
+  border-color: rgba(255, 80, 100, 0.35);
+}
+.qsearch__trusted-row-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.55rem 0.45rem 0.35rem;
+}
+.qsearch__trusted-row-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.25rem 0.35rem;
+}
+.qsearch__trusted-row-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f7f5ee;
+}
+.qsearch__trusted-row-when {
+  font-size: 0.75rem;
+  color: var(--qs-muted);
+  margin-left: auto;
+}
+.qsearch__trusted-row-detail {
+  padding: 0 0.85rem 0.75rem;
+  border-top: 1px solid var(--qs-line);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+.qsearch__trusted-row-detail p {
+  margin: 0.55rem 0 0.35rem;
 }
 .qsearch__dismiss-selected {
   border-color: rgba(255, 80, 100, 0.4) !important;

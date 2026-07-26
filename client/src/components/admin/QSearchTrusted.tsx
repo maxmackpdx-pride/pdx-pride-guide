@@ -72,11 +72,19 @@ function isNotWiredError(err: unknown): boolean {
   return /^404\b/.test(msg) || /not found|not wired|cannot post/i.test(msg);
 }
 
-export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) {
+export default function QSearchTrusted({
+  onSynced,
+  compact = false,
+}: {
+  onSynced?: () => void;
+  /** Daily mode: name · health · sync · last sync only */
+  compact?: boolean;
+}) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const {
     data,
@@ -248,7 +256,10 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
   }
 
   return (
-    <div className="qsearch__trusted" data-testid="qsearch-trusted">
+    <div
+      className={`qsearch__trusted${compact ? " qsearch__trusted--compact" : ""}`}
+      data-testid="qsearch-trusted"
+    >
       <div className="qsearch__panel">
         <div className="qsearch__trusted-header">
           <div>
@@ -257,20 +268,30 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
               <span className="qsearch__panel-count">{venues.length}</span>
             </h2>
             <p className="qsearch__trusted-lede">
-              Core venues with known feeds. <strong>Sync</strong> → Review queue → approve or ✕
-              dismiss. Health = last successful pull.
+              {compact ? (
+                <>
+                  Sync → Review. Expand a row for errors, last published, and feed links.
+                </>
+              ) : (
+                <>
+                  Core venues with known feeds. <strong>Sync</strong> → Review → approve or ✕
+                  dismiss. Health = last successful pull.
+                </>
+              )}
             </p>
           </div>
           <div className="qsearch__trusted-actions">
-            <button
-              type="button"
-              className="qsearch__scan-btn is-ghost"
-              disabled={busy || venues.length === 0}
-              onClick={() => void refetch()}
-              data-testid="qsearch-trusted-refresh"
-            >
-              Refresh
-            </button>
+            {!compact && (
+              <button
+                type="button"
+                className="qsearch__scan-btn is-ghost"
+                disabled={busy || venues.length === 0}
+                onClick={() => void refetch()}
+                data-testid="qsearch-trusted-refresh"
+              >
+                Refresh
+              </button>
+            )}
             <button
               type="button"
               className="qsearch__scan-btn"
@@ -278,13 +299,109 @@ export default function QSearchTrusted({ onSynced }: { onSynced?: () => void }) 
               onClick={() => void syncAll()}
               data-testid="qsearch-trusted-sync-all"
             >
-              {syncingAll ? "Syncing…" : "Sync all trusted"}
+              {syncingAll ? "Syncing…" : "Sync all"}
             </button>
           </div>
         </div>
 
         {venues.length === 0 ? (
           <p className="qsearch__empty">No trusted venues registered yet.</p>
+        ) : compact ? (
+          <ul className="qsearch__trusted-rows" role="list">
+            {venues.map(v => {
+              const health = asHealth(v.health);
+              const syncing = syncingId === v.sourceId;
+              const expanded = openId === v.sourceId;
+              const errSnippet =
+                v.lastSyncOk === false && v.lastSyncError
+                  ? v.lastSyncError.length > 120
+                    ? `${v.lastSyncError.slice(0, 117)}…`
+                    : v.lastSyncError
+                  : null;
+              return (
+                <li
+                  key={v.sourceId}
+                  className={`qsearch__trusted-row${expanded ? " is-open" : ""}${
+                    health === "red" ? " is-bad" : ""
+                  }`}
+                  data-testid={`qsearch-trusted-row-${v.sourceId}`}
+                >
+                  <div className="qsearch__trusted-row-main">
+                    <button
+                      type="button"
+                      className="qsearch__trusted-row-toggle"
+                      aria-expanded={expanded}
+                      onClick={() => setOpenId(expanded ? null : v.sourceId)}
+                    >
+                      <span className="qsearch__trusted-row-name">{v.venueName}</span>
+                      <span
+                        className={`qsearch__health qsearch__health--${health}`}
+                        title={HEALTH_LABEL[health]}
+                      >
+                        <span className="qsearch__health-dot" aria-hidden />
+                        {HEALTH_LABEL[health]}
+                      </span>
+                      <span className="qsearch__trusted-row-when" title={fmtAbsolute(v.lastSyncAt)}>
+                        {fmtRelative(v.lastSyncAt)}
+                        {typeof v.lastEventCount === "number" ? ` · ${v.lastEventCount} evt` : ""}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="qsearch__scan-btn is-ghost qsearch__trusted-sync-one"
+                      disabled={busy}
+                      onClick={() => void syncOne(v.sourceId, v.venueName)}
+                      data-testid={`qsearch-trusted-sync-${v.sourceId}`}
+                    >
+                      {syncing ? "…" : "Sync"}
+                    </button>
+                  </div>
+                  {expanded && (
+                    <div className="qsearch__trusted-row-detail">
+                      {v.lastPublishedTitle ? (
+                        <p>
+                          Last published: <strong>{v.lastPublishedTitle}</strong>
+                          {v.lastPublishedAt ? ` · ${fmtRelative(v.lastPublishedAt)}` : ""}
+                        </p>
+                      ) : (
+                        <p className="qsearch__trusted-muted">No published events tracked yet.</p>
+                      )}
+                      {errSnippet && (
+                        <p className="qsearch__trusted-err" title={v.lastSyncError || undefined}>
+                          {errSnippet}
+                        </p>
+                      )}
+                      <div className="qsearch__trusted-links">
+                        {v.calendarPageUrl ? (
+                          <a
+                            href={v.calendarPageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="qsearch__trusted-link"
+                          >
+                            Calendar ↗
+                          </a>
+                        ) : null}
+                        {v.feedUrl ? (
+                          <a
+                            href={v.feedUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="qsearch__trusted-link qsearch__trusted-link--muted"
+                          >
+                            Feed ↗
+                          </a>
+                        ) : null}
+                        {v.consecutiveFails > 0 && (
+                          <span className="qsearch__badge is-fail">fails ×{v.consecutiveFails}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         ) : (
           <div className="qsearch__trusted-list" role="list">
             {venues.map(v => {
