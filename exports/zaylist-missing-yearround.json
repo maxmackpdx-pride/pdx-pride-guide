@@ -8,9 +8,10 @@
     "source_gaps": [
       {
         "venue": "Q Center",
-        "why_missing": "Weekly groups not on Eventbrite; needs Q Center calendar/site adapter",
-        "suggest_qsearch_source_url": "https://www.pdxqcenter.org/",
-        "confidence": "high gap"
+        "why_missing": "Weekly groups not on Eventbrite; site is Wix events page (Tribe REST 404). Source q-center-events → https://www.pdxqcenter.org/events — verify yield in Lab, not invented listings.",
+        "suggest_qsearch_source_url": "https://www.pdxqcenter.org/events",
+        "suggest_qsearch_source_id": "q-center-events",
+        "confidence": "high gap, scrape readiness medium"
       }
     ],
     "failed_urls": [],

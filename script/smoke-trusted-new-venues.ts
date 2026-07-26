@@ -35,7 +35,16 @@ function assert(cond: unknown, msg: string) {
 }
 
 /* ── registry wiring ── */
-assert(TRUSTED_VENUES.length === 11, `11 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+assert(TRUSTED_VENUES.length === 12, `12 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+assert(getTrustedVenue("peacock-pdx")?.fetchMode === "generic", "peacock-pdx → generic HTML");
+assert(
+  getTrustedVenue("peacock-pdx")?.publishStatus === "HIDDEN",
+  "peacock-pdx defaults HIDDEN for Review gate",
+);
+assert(
+  isTrustedLaneSource({ id: "peacock-pdx", url: "https://peacockpdx.com/" }),
+  "peacock-pdx is trusted lane (off QSearch catch-all)",
+);
 assert(getTrustedVenue("stag-eb")?.fetchMode === "eventbrite_org", "stag-eb → eventbrite_org");
 assert(
   getTrustedVenue("living-room-eb")?.fetchMode === "eventbrite_org",
@@ -230,7 +239,9 @@ assert(braDraft.warnings.some(w => /verify age/i.test(w)), "Sports Bra verify-ag
 assert(braDraft.admission === "FREE", "explicit free text keeps FREE via declared re-infer");
 
 const hawksDef = getTrustedVenue("hawks-json")!;
-assert(hawksDef.venuePolicy == null, "dedicated-adapter venues do not double-stamp via declarative policy");
+// Dedicated adapters still use declarative venuePolicy for age/sex/admission defaults
+assert(hawksDef.venuePolicy?.sexPositive === true, "hawks declarative sex-positive policy present");
+assert(hawksDef.venuePolicy?.ageRequirement === "21_PLUS", "hawks declarative age policy present");
 
 /* ── Sports Bra venue-scope leak: generic title words must NOT scope-match ── */
 const braCtx = {

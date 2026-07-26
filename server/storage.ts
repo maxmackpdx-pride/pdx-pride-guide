@@ -3899,6 +3899,62 @@ function runBootMigrationsOnce() {
 
     recordBootMigration("closed_venues_blacklist_v1");
   }
+  /**
+   * Soft-hide garbage non-queer + dupe LIVE rows from Meta/Grok audit (2026-07-25 export).
+   * Keep oldest of each dupe group; hide beer runs as non-queer.
+   */
+  if (!hasBootMigration("cleanup_prod_garbage_dupes_2026_07_25_v1")) {
+    const garbage = [376, 377, 365, 368, 381]; // StrongFirst, Survival, Loowit×2, Leikam beer run
+    const dupes = [355, 316, 356, 357, 358, 386]; // newer of each dupe group
+    const ids = [...garbage, ...dupes];
+    const stmt = sqlite.prepare(
+      `UPDATE events SET status = 'HIDDEN',
+         admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+       WHERE id = ? AND status = 'LIVE'`,
+    );
+    let n = 0;
+    for (const id of ids) {
+      const r = stmt.run("cleanup_prod_garbage_dupes_2026_07_25_v1", id);
+      n += r.changes;
+    }
+    if (n > 0) console.info(`[boot] cleanup_prod_garbage_dupes: soft-hid ${n} LIVE rows`);
+    recordBootMigration("cleanup_prod_garbage_dupes_2026_07_25_v1");
+  }
+  /** Badlands ticketUrl was worker calendar API — rewrite to public calendar page. */
+  if (!hasBootMigration("badlands_ticket_url_hygiene_v1")) {
+    const r = sqlite
+      .prepare(
+        `UPDATE events
+         SET ticket_url = 'https://www.badlandsportland.com/calendar',
+             admin_notes = COALESCE(admin_notes || ' | ', '') || 'badlands_ticket_url_hygiene_v1'
+         WHERE status = 'LIVE'
+           AND lower(venue_name) LIKE '%badlands%'
+           AND ticket_url IS NOT NULL
+           AND (
+             ticket_url LIKE '%workers.dev%'
+             OR ticket_url LIKE '%/api/calendar%'
+             OR ticket_url LIKE '%/api/drive%'
+           )`,
+      )
+      .run();
+    if (r.changes > 0) {
+      console.info(`[boot] badlands_ticket_url_hygiene_v1: rewrote ${r.changes} ticket URLs`);
+    }
+    recordBootMigration("badlands_ticket_url_hygiene_v1");
+  }
+  /** Seed verified year-round Eventbrite listings into Review queue (once). */
+  if (!hasBootMigration("seed_missing_yearround_review_v1")) {
+    try {
+      const { seedMissingYearroundToReview } = require("./qsearch/seedMissingYearround") as typeof import("./qsearch/seedMissingYearround");
+      const result = seedMissingYearroundToReview();
+      console.info(
+        `[boot] seed_missing_yearround_review_v1: seeded=${result.seeded} skipBoard=${result.skippedBoard} skipPending=${result.skippedPending} path=${result.path}`,
+      );
+    } catch (e) {
+      console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
+    }
+    recordBootMigration("seed_missing_yearround_review_v1");
+  }
   if (!hasBootMigration("seed_plus_psychiatry_v1")) {
     const now = new Date().toISOString();
     const exists = sqlite

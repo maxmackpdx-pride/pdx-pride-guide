@@ -255,6 +255,26 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       ageNote: "Age set to 21_PLUS (Camp TRC is a 21+ LGBTQ+ campground)",
     },
   },
+  {
+    sourceId: "peacock-pdx",
+    venueName: "Peacock PDX",
+    address: "1400 SE Morrison St, Portland, OR",
+    neighborhood: "SE Portland",
+    fetchMode: "generic",
+    feedUrl: "https://peacockpdx.com/",
+    calendarPageUrl: "https://peacockpdx.com/",
+    /** HIDDEN first — Review gate until HTML yield is stable (ex-Crush space). */
+    publishStatus: "HIDDEN",
+    pollHours: 12,
+    notes:
+      "Year-round queer bar at former Crush Bar (CLOSED_PERMANENT_2025-01-01). Generic HTML/JSON-LD discover. Prefer HIDDEN → Review until cards look clean; IG @peacock.pdx for specials.",
+    venuePolicy: {
+      ageRequirement: "21_PLUS",
+      ageNote: "Age set to 21_PLUS (Peacock is a 21+ bar)",
+      defaultDoorFeeWhenUnknown: true,
+      defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (Peacock weekly - verify free nights)",
+    },
+  },
 ];
 
 export function getTrustedVenue(sourceId: string): TrustedVenueDef | undefined {
@@ -341,7 +361,7 @@ export function isTrustedLaneSource(input: {
   // Sibling curated recipes for the same venues (calendar HTML, ICS fallbacks)
   if (
     id &&
-    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters|camp-trc|camptrc)([-_]|$)/i.test(
+    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters|camp-trc|camptrc|peacock)([-_]|$)/i.test(
       id,
     )
   ) {

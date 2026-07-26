@@ -472,11 +472,23 @@ export const INGEST_SOURCES: IngestSource[] = [
     notes: "Slug rolls yearly",
   },
   {
-    id: "q-center-tribe",
-    label: "Q Center (Tribe)",
-    url: "https://www.pdxqcenter.org/wp-json/tribe/events/v1/events",
+    id: "q-center-events",
+    label: "Q Center events",
+    url: "https://www.pdxqcenter.org/events",
     tier: "3",
-    format: "tribe",
+    format: "html",
+    priority: true,
+    notes:
+      "Year-round community gap fill. Site is Wix/Parastorage (old Tribe REST 404s). HTML/JSON-LD discover + list page; weekly groups may need IG. Never invent FREE. Legacy id q-center-tribe retired.",
+  },
+  // Keep old id as alias pointing at same page so health history / disabled flags still resolve
+  {
+    id: "q-center-tribe",
+    label: "Q Center events (legacy id)",
+    url: "https://www.pdxqcenter.org/events",
+    tier: "3",
+    format: "html",
+    notes: "Alias of q-center-events — Tribe REST is dead (404). Prefer q-center-events.",
   },
   {
     id: "osl-calendar",

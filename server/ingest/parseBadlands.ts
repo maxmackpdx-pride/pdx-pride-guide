@@ -6,8 +6,36 @@ const PACIFIC_TZ = "America/Los_Angeles";
 const DEFAULT_VENUE = "Badlands";
 const DEFAULT_ADDRESS = "110 NW Broadway, Portland, OR";
 const DEFAULT_NEIGHBORHOOD = "Old Town";
+/** Public venue calendar - never the worker API or Drive proxy as ticketUrl. */
+const BADLANDS_PUBLIC_CALENDAR = "https://www.badlandsportland.com/calendar";
 /** Badlands is a 21+ bar - never all-ages. */
 const BADLANDS_AGE = "21_PLUS" as const;
+
+/**
+ * Worker calendar / Drive proxy URLs are not human ticket links.
+ * Prefer event `link`, else the public Badlands calendar page.
+ */
+export function sanitizeBadlandsTicketUrl(
+  candidate: string | null | undefined,
+  eventPageUrl?: string | null,
+): string {
+  const page = eventPageUrl && String(eventPageUrl).trim().startsWith("http")
+    ? String(eventPageUrl).trim().slice(0, 500)
+    : null;
+  const raw = candidate ? String(candidate).trim() : "";
+  if (raw && !isBadlandsInternalUrl(raw)) return raw.slice(0, 500);
+  if (page && !isBadlandsInternalUrl(page)) return page;
+  return BADLANDS_PUBLIC_CALENDAR;
+}
+
+export function isBadlandsInternalUrl(url: string): boolean {
+  const u = String(url || "").toLowerCase();
+  if (!u) return true;
+  if (u.includes("badlandsportland.workers.dev")) return true;
+  if (u.includes("/api/drive")) return true;
+  if (u.includes("/api/calendar")) return true;
+  return false;
+}
 
 /**
  * Badlands calendar worker:
@@ -131,8 +159,11 @@ export function parseBadlandsJson(raw: string, sourceUrl: string | null = null):
     }
 
     const link = evt.link ? String(evt.link).trim() : "";
-    const eventPageUrl = link ? link.slice(0, 500) : null;
-    const ticketUrl = eventPageUrl || sourceUrl || null;
+    const eventPageUrl = link && link.startsWith("http") && !isBadlandsInternalUrl(link)
+      ? link.slice(0, 500)
+      : null;
+    // Never stamp worker calendar API as ticketUrl (was ~60 LIVE Badlands rows)
+    const ticketUrl = sanitizeBadlandsTicketUrl(eventPageUrl || sourceUrl, eventPageUrl);
 
     const poster = evt.photoUrl ? String(evt.photoUrl).trim() : "";
 

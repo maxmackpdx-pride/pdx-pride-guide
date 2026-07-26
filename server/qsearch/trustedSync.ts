@@ -20,6 +20,8 @@ import {
 } from "../ingest";
 import { findSubmissionMatches, submissionHasStrongDuplicate } from "@shared/submissionMatch";
 import { isPastEventListing } from "../ingest/dates";
+import { matchClosedVenue } from "@shared/closedVenues";
+import { sanitizeBadlandsTicketUrl } from "../ingest/parseBadlands";
 import { fetchIngestSource } from "../ingest/fetchSource";
 import {
   expandBadlandsCalendarUrl,
@@ -206,7 +208,15 @@ function prepareDrafts(raw: IngestEventDraft[], venue: TrustedVenueDef): IngestE
     if (!d?.title || !d?.dateStart) continue;
     if (isNonEventListing(d)) continue;
     if (isPastEventListing(d)) continue;
-    const draft = applyVenueDefaults(d, venue);
+    // Closed permanent venues never re-enter Trusted publish (Eventbrite cache noise)
+    if (matchClosedVenue({ venueName: d.venueName, address: d.address, title: d.title })) continue;
+    let draft = applyVenueDefaults(d, venue);
+    if (venue.sourceId === "badlands-api" || venue.fetchMode === "badlands_api") {
+      draft = {
+        ...draft,
+        ticketUrl: sanitizeBadlandsTicketUrl(draft.ticketUrl, draft.eventPageUrl),
+      };
+    }
     const day = draft.dateStart.slice(0, 10);
     const key = `${draft.title}|${day}|${draft.venueName}`.toLowerCase();
     if (seen.has(key)) continue;

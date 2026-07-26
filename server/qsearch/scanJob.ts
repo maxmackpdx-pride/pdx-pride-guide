@@ -62,6 +62,9 @@ const live = new Map<
   {
     cancel: boolean;
     candidates: ScanCandidate[];
+    /** Drafts dropped as closed_permanent:* this run (Eventbrite resurrection block). */
+    closedVenueDrops: number;
+    closedVenueReasons: Record<string, number>;
     perSource: Array<{
       sourceId: string;
       label: string;
@@ -72,9 +75,23 @@ const live = new Map<
       ms: number;
       resolvedUrl?: string | null;
       parsers?: string[];
+      closedVenueDrops?: number;
     }>;
   }
 >();
+
+function noteClosedDrop(
+  handle: { closedVenueDrops: number; closedVenueReasons: Record<string, number> },
+  reason: string | undefined,
+  perSourceRow?: { closedVenueDrops?: number },
+) {
+  if (!reason || !reason.startsWith("closed_permanent:")) return;
+  handle.closedVenueDrops += 1;
+  handle.closedVenueReasons[reason] = (handle.closedVenueReasons[reason] || 0) + 1;
+  if (perSourceRow) {
+    perSourceRow.closedVenueDrops = (perSourceRow.closedVenueDrops || 0) + 1;
+  }
+}
 
 export function buildLiveSources(businesses: Array<{
   id: number;
@@ -373,7 +390,13 @@ export function startScan(opts: StartScanOpts): { jobId: string; total: number; 
     kind: opts.kind || "manual",
   });
 
-  live.set(id, { cancel: false, candidates: [], perSource: [] });
+  live.set(id, {
+    cancel: false,
+    candidates: [],
+    closedVenueDrops: 0,
+    closedVenueReasons: {},
+    perSource: [],
+  });
   activeScanId = id;
 
   void runScan(id, sources, opts).finally(() => {
@@ -447,12 +470,25 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         const includePast = opts.includePastEvents === true;
 
         let kept = 0;
+        const perRow: (typeof handle.perSource)[0] = {
+          sourceId: source.id,
+          label: source.label,
+          url: primary,
+          ok: true,
+          eventCount: 0,
+          error: null,
+          ms: 0,
+          closedVenueDrops: 0,
+        };
         for (const draft of sanctuaryDrafts) {
           if (cityAllowlist?.length && !isAllowedCityEventListing(draft, cityAllowlist)) continue;
           if (portlandOnly && !isPortlandEventListing(draft)) continue;
           if (!includePast && isPastEventListing(draft)) continue;
           const rel = isRelevantScanDraft(draft, relevanceCtx);
-          if (!rel.keep) continue;
+          if (!rel.keep) {
+            noteClosedDrop(handle, rel.reason, perRow);
+            continue;
+          }
           kept++;
           const withPoster = await enrichDraftPoster(draft, []);
           raw.push({
@@ -470,13 +506,13 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
           winningParser: "ics",
           yieldStatus: kept > 0 ? "works" : "zero_yield",
         });
+        perRow.eventCount = kept;
+        perRow.error = kept === 0 ? "Zero yield" : null;
+        perRow.ms = ms;
         handle.perSource.push({
-          sourceId: source.id,
-          label: source.label,
-          url: primary,
+          ...perRow,
+          // keep rest of fields filled below if original had more
           ok: true,
-          eventCount: kept,
-          error: kept === 0 ? "Zero yield" : null,
           ms,
           resolvedUrl: source.url,
           parsers: ["ics", "sanctuary"],
@@ -583,12 +619,19 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
       // Drop past listings BEFORE page enrich (Sanctuary ICS is ~400 VEVENTs, mostly history)
       // Also drop Eventbrite dumps / non-queer city noise / venue-mismatched org scrapes
       const includePast = opts.includePastEvents === true;
+      let sourceClosedDrops = 0;
       const upcomingDrafts = hit.drafts.filter(d => {
         if (cityAllowlist?.length && !isAllowedCityEventListing(d, cityAllowlist)) return false;
         if (portlandOnly && !isPortlandEventListing(d)) return false;
         if (!includePast && isPastEventListing(d)) return false;
         const rel = isRelevantScanDraft(d, relevanceCtx);
-        if (!rel.keep) return false;
+        if (!rel.keep) {
+          if (rel.reason?.startsWith("closed_permanent:")) {
+            sourceClosedDrops += 1;
+            noteClosedDrop(handle, rel.reason);
+          }
+          return false;
+        }
         return true;
       });
 
@@ -621,28 +664,27 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         });
       }
 
-      // Reflect city filter in health counts when we dropped out-of-market rows
-      if ((portlandOnly || cityAllowlist?.length) && kept !== hit.eventCount) {
-        const last = handle.perSource[handle.perSource.length - 1];
-        if (last && last.sourceId === source.id) {
+      // Reflect city filter + closed-venue drops in health counts
+      const last = handle.perSource[handle.perSource.length - 1];
+      if (last && last.sourceId === source.id) {
+        last.closedVenueDrops = sourceClosedDrops;
+        if ((portlandOnly || cityAllowlist?.length) && kept !== hit.eventCount) {
           last.eventCount = kept;
-          const market = cityAllowlist?.length
-            ? cityAllowlist.join("+")
-            : "Portland";
+          const market = cityAllowlist?.length ? cityAllowlist.join("+") : "Portland";
           last.error =
             kept === 0
               ? hit.eventCount > 0
                 ? `Zero ${market} yield (${hit.eventCount} out-of-market dropped)`
                 : "Zero yield"
               : last.error;
+          recordScanResult(source.id, {
+            ok: true,
+            eventCount: kept,
+            resolvedUrl: kept > 0 ? hit.url : null,
+            winningParser: hit.parsers[0] || null,
+            yieldStatus: kept > 0 ? "works" : "zero_yield",
+          });
         }
-        recordScanResult(source.id, {
-          ok: true,
-          eventCount: kept,
-          resolvedUrl: kept > 0 ? hit.url : null,
-          winningParser: hit.parsers[0] || null,
-          yieldStatus: kept > 0 ? "works" : "zero_yield",
-        });
       }
 
       updateScanJob({
@@ -715,6 +757,16 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
   );
 
   const cancelled = handle.cancel;
+  // Preserve original filter fields; append closed-venue drop stats for Daily board
+  let filter: Record<string, unknown> = {};
+  try {
+    const row = getScanJobRow(jobId);
+    filter = row?.filterJson ? JSON.parse(row.filterJson) : {};
+  } catch {
+    filter = {};
+  }
+  filter.closedVenueDrops = handle.closedVenueDrops;
+  filter.closedVenueReasons = handle.closedVenueReasons;
   updateScanJob({
     id: jobId,
     status: cancelled ? "cancelled" : "done",
@@ -724,6 +776,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
     etaSeconds: 0,
     completed: sources.length,
     perSourceJson: JSON.stringify(handle.perSource),
+    filterJson: JSON.stringify(filter),
   });
 }
 
@@ -794,6 +847,27 @@ export function attachDirectoryBrandsToCandidates<T extends Record<string, unkno
   });
 }
 
+function closedStatsFromJob(row: { filterJson?: string | null }, handle?: {
+  closedVenueDrops: number;
+  closedVenueReasons: Record<string, number>;
+} | null) {
+  if (handle) {
+    return {
+      closedVenueDrops: handle.closedVenueDrops,
+      closedVenueReasons: handle.closedVenueReasons,
+    };
+  }
+  try {
+    const f = row.filterJson ? JSON.parse(row.filterJson) : {};
+    return {
+      closedVenueDrops: Number(f.closedVenueDrops || 0),
+      closedVenueReasons: (f.closedVenueReasons || {}) as Record<string, number>,
+    };
+  } catch {
+    return { closedVenueDrops: 0, closedVenueReasons: {} as Record<string, number> };
+  }
+}
+
 export function getScanJobView(id: string) {
   const row = getScanJobRow(id);
   if (!row) return null;
@@ -809,6 +883,7 @@ export function getScanJobView(id: string) {
   } catch {
     perSource = handle?.perSource || [];
   }
+  const closed = closedStatsFromJob(row, handle || null);
   return {
     id: row.id,
     status: row.status,
@@ -825,6 +900,8 @@ export function getScanJobView(id: string) {
     candidates,
     candidateCount: candidates.length,
     progress: row.total ? Math.round((row.completed / row.total) * 100) : 0,
+    closedVenueDrops: closed.closedVenueDrops,
+    closedVenueReasons: closed.closedVenueReasons,
   };
 }
 
@@ -843,9 +920,14 @@ export function dashboardSnapshot(businesses: StartScanOpts["businesses"]) {
   } catch {
     /* non-fatal */
   }
+  const latestJob = getLatestScanJob();
   return {
     ...summary,
-    latestJob: getLatestScanJob(),
+    latestJob,
+    /** Convenience for Daily board: closed-permanent drops from latest scan. */
+    closedVenueDrops: (latestJob as { closedVenueDrops?: number } | null)?.closedVenueDrops ?? 0,
+    closedVenueReasons:
+      (latestJob as { closedVenueReasons?: Record<string, number> } | null)?.closedVenueReasons ?? {},
     pendingCandidates: attachDirectoryBrandsToCandidates(
       listCandidates({ status: "pending", limit: 200 }) as any[],
       fullBiz,

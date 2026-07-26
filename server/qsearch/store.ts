@@ -572,7 +572,8 @@ export function updateScanJob(job: Partial<PersistedScanJob> & { id: string }) {
     .prepare(
       `UPDATE qsearch_scan_jobs SET
         status = ?, finished_at = ?, total = ?, completed = ?, current_source_id = ?,
-        current_label = ?, eta_seconds = ?, error = ?, avg_ms = ?, per_source_json = ?
+        current_label = ?, eta_seconds = ?, error = ?, avg_ms = ?, per_source_json = ?,
+        filter_json = ?
       WHERE id = ?`,
     )
     .run(
@@ -586,6 +587,7 @@ export function updateScanJob(job: Partial<PersistedScanJob> & { id: string }) {
       next.error,
       next.avgMs,
       next.perSourceJson,
+      next.filterJson,
       next.id,
     );
 }

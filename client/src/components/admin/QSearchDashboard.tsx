@@ -516,7 +516,15 @@ type Dashboard = {
   };
   failing: SourceHealth[];
   newFromDirectory: SourceHealth[];
-  latestJob: { id: string; status: string } | null;
+  latestJob: {
+    id: string;
+    status: string;
+    closedVenueDrops?: number;
+    closedVenueReasons?: Record<string, number>;
+  } | null;
+  /** Closed permanent venue drafts dropped on latest scan (Eventbrite resurrection block). */
+  closedVenueDrops?: number;
+  closedVenueReasons?: Record<string, number>;
 };
 
 type ScanJobView = {
@@ -1819,6 +1827,24 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
             </div>
             <div className="qsearch__stat-label">Review</div>
           </button>
+          <div
+            className="qsearch__stat"
+            title={
+              dash?.closedVenueReasons && Object.keys(dash.closedVenueReasons).length
+                ? `Closed permanent drops (latest scan):\n${Object.entries(dash.closedVenueReasons)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join("\n")}`
+                : "Drafts dropped as permanently closed venues (Crush, Doc Marie's, …). Prevents Eventbrite cache resurrection."
+            }
+            data-testid="qsearch-stat-closed-drops"
+          >
+            <div
+              className={`qsearch__stat-val ${(dash?.closedVenueDrops || 0) > 0 ? "is-warn" : ""}`}
+            >
+              {dash?.closedVenueDrops ?? dash?.latestJob?.closedVenueDrops ?? 0}
+            </div>
+            <div className="qsearch__stat-label">Closed blocked</div>
+          </div>
           {mode === "lab" && (
             <>
               <button

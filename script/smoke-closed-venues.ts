@@ -7,8 +7,12 @@ import {
   isClosedPermanentScrapeUrl,
   isEventAfterVenueClose,
 } from "../shared/closedVenues";
-import { isRelevantScanDraft } from "../server/ingest/relevance";
+import { isRelevantScanDraft, isGenericEventbriteDumpUrl } from "../server/ingest/relevance";
 import type { IngestEventDraft } from "../server/ingest/types";
+import {
+  sanitizeBadlandsTicketUrl,
+  isBadlandsInternalUrl,
+} from "../server/ingest/parseBadlands";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -103,5 +107,30 @@ assert(!isEventAfterVenueClose("2024-06-01T21:00:00", "2025-01-01"), "before clo
 // The Roxy diner blocked; bare short noise
 assert(matchClosedVenue({ venueName: "The Roxy" })?.entry.id === "the-roxy", "The Roxy blocked");
 assert(matchClosedVenue({ venueName: "Roxy" }) == null, "bare Roxy not blocked");
+
+// City-wide Eventbrite dumps must stay rejected forever
+assert(isGenericEventbriteDumpUrl("https://www.eventbrite.com/d/local/events/"), "local dump blocked");
+assert(isGenericEventbriteDumpUrl("https://www.eventbrite.com/events/"), "bare /events blocked");
+assert(
+  !isGenericEventbriteDumpUrl("https://www.eventbrite.com/d/or--portland/gay/"),
+  "PDX keyword search allowed",
+);
+
+// Badlands ticket hygiene
+assert(
+  isBadlandsInternalUrl("https://badlands-events.badlandsportland.workers.dev/api/calendar?from=x"),
+  "worker calendar is internal",
+);
+assert(
+  sanitizeBadlandsTicketUrl(
+    "https://badlands-events.badlandsportland.workers.dev/api/calendar?from=x",
+  ) === "https://www.badlandsportland.com/calendar",
+  "worker calendar → public calendar ticketUrl",
+);
+assert(
+  sanitizeBadlandsTicketUrl(null, "https://badlandsportland.com/events/foo") ===
+    "https://badlandsportland.com/events/foo",
+  "real event link kept as ticketUrl",
+);
 
 console.log("\nAll closed-venue smokes passed.");
