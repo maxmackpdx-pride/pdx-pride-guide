@@ -253,7 +253,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/sponsors": {
     title: "Sponsors | Zaylist",
-    description: "Local businesses can help keep Zaylist free. Sponsorship is support, not pay-to-rank.",
+    description: "Local businesses can help keep browsing free. Labeled support and ads — never pay-to-rank.",
   },
   "/access": {
     title: "Access & Safety | Zaylist",
