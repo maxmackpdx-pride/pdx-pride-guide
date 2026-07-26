@@ -517,8 +517,9 @@ body::before {
 .site-header-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   flex: 0 0 auto;
+  margin-left: clamp(8px, 1vw, 14px);
 }
 
 .site-nav-toggle {
@@ -723,7 +724,8 @@ body::before {
   align-items: center;
   gap: 0;
   /* No left border on the whole cluster - seam sits between Hub and avatar */
-  margin-left: clamp(6px, 0.8vw, 12px);
+  margin-left: clamp(10px, 1.2vw, 18px);
+  margin-right: clamp(6px, 0.8vw, 12px);
   padding-left: 0;
   border-left: 0;
   flex: 0 0 auto;
@@ -734,6 +736,7 @@ body::before {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
+  padding-right: 2px;
 }
 
 /* Vertical divider - equal space on both sides so it sits 50% between Hub and avatar */
@@ -742,8 +745,8 @@ body::before {
   align-self: center;
   width: 1px;
   height: 1.15em;
-  margin-left: clamp(10px, 1.15vw, 18px);
-  margin-right: clamp(10px, 1.15vw, 18px);
+  margin-left: clamp(16px, 1.6vw, 26px);
+  margin-right: clamp(16px, 1.6vw, 26px);
   background: #333;
 }
 
@@ -1836,7 +1839,7 @@ a.event-host-name.event-host-name--link:hover {
 
   .site-header-controls {
     margin-left: auto;
-    gap: 6px;
+    gap: 12px;
   }
 
   .site-nav-toggle {
@@ -2000,7 +2003,16 @@ a.event-host-name.event-host-name--link:hover {
     background: var(--hub-ink);
     border-bottom: 0;
     padding: 10px 14px;
+    gap: 14px;
+  }
+
+  /* More air: notify · avatar · caret (and calm if present) */
+  .site-hub-mtop .site-profile-menu__cluster {
     gap: 10px;
+  }
+
+  .site-hub-mtop .site-profile-menu {
+    margin-left: 2px;
   }
 
   .site-hub-mtop .hub-mtop__mode {
@@ -5597,7 +5609,7 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 .site-profile-menu__cluster {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
 }
 
 .site-profile-menu__avatar-link {
@@ -5892,10 +5904,11 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   }
 
   /* --- Avatar cluster: lime-tinted chevron circle --- */
-  .site-auth--desktop .site-profile-menu__cluster { gap: 8px; }
+  .site-auth--desktop .site-profile-menu__cluster { gap: 12px; }
   .site-auth--desktop .site-profile-menu__caret {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
+    margin-left: 2px;
     background: rgba(204, 255, 0, .12);
     border: 1px solid rgba(204, 255, 0, .35);
     color: var(--neon-yellow);
