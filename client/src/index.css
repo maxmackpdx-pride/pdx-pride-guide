@@ -41,7 +41,7 @@
   /* Community board identity colors */
   --board-spotted: var(--neon-magenta);
   --board-gifting: var(--neon-yellow);
-  --board-gigs: var(--neon-violet);
+  --board-gigs: #6E3DFF; /* product live gig purple */
 
   /* Day colors - mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
   --day-mon: #8800FF;
