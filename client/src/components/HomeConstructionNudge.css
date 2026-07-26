@@ -59,10 +59,15 @@
 }
 .pgc-x:hover { background: rgba(255, 255, 255, .1); color: #fff; }
 
-.pgc-emoji {
-  font-size: 2.6rem;
-  line-height: 1;
-  margin: 2px 0 10px;
+.pgc-app-icon {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 4px auto 12px;
+  border-radius: 16px; /* soft preview only; source file stays square per App Face */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
+  object-fit: cover;
+  background: #0a0a0a;
 }
 .pgc-kicker {
   margin: 0;

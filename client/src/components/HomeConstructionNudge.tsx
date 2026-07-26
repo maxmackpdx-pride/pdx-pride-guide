@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import { useTipLinks } from "@/hooks/useTipLinks";
 import "./HomeConstructionNudge.css";
 
-const DISMISS_KEY = "pgpdx:construction-nudge:v1";
+// Bump when the rebrand welcome copy changes so returning visitors see the update once.
+const DISMISS_KEY = "pgpdx:construction-nudge:v2-zaylist";
 
 /** `?constructNudge=1` force-shows the pop-up for previewing (ignores dismissal). */
 function forcedPreview(): boolean {
@@ -23,10 +24,9 @@ function alreadyDismissed(): boolean {
 }
 
 /**
- * Friendly "under construction" pop-up for the home screen. Tells visitors the
- * Zaylist is growing into a year-round Portland LGBTQ+ events home, thanks
- * them, and invites an optional tip. Shows on every visit until the visitor
- * dismisses it (localStorage), then stays hidden.
+ * Welcome pop-up for the rebrand: thanks visitors for Pride Guide years,
+ * introduces Zaylist, and invites an optional tip. Shows until dismissed
+ * (localStorage). Preview: ?constructNudge=1
  */
 export default function HomeConstructionNudge() {
   const { venmoUrl } = useTipLinks();
@@ -73,24 +73,33 @@ export default function HomeConstructionNudge() {
           ✕
         </button>
 
-        <div className="pgc-emoji" aria-hidden="true">🚧</div>
-        <p className="pgc-kicker">Under construction</p>
+        <img
+          className="pgc-app-icon"
+          src="/icons/zaylist-192.png"
+          alt=""
+          width={72}
+          height={72}
+          decoding="async"
+        />
+        <p className="pgc-kicker">Same home · new name</p>
         <h2 id="pgc-title" className="pgc-title display">
-          Something bigger is coming
+          Welcome to Zaylist
         </h2>
 
         <div className="pgc-body">
           <p>
-            Thanks for using Zaylist this year - we hope it helped you find your
-            people and your parties. 🌈
+            Thanks for using <strong>Pride Guide</strong> these past years — we hope it
+            helped you find your people and your parties. 🌈
           </p>
           <p>
-            We're rebuilding it into a <strong>year-round</strong> home for Portland's LGBTQ+
-            community - all 365 days, not just Pride Week. Pardon our dust while we make it better.
+            We&apos;re now <strong>Zaylist</strong>: a year-round home for Portland&apos;s
+            LGBTQ+ community — events, boards, directory, and more, all 365 days, not just
+            Pride Week.
           </p>
           <p className="pgc-tip">
-            Keeping the lights on isn't free. If this was useful, you're welcome to toss a couple
-            bucks toward a coffee or a muffin. Truly no pressure - every little bit helps. 💛
+            Keeping the lights on isn&apos;t free. If this was useful, you&apos;re welcome to
+            toss a couple bucks toward a coffee or a muffin. Truly no pressure — every little
+            bit helps. 💛
           </p>
         </div>
 
@@ -106,7 +115,7 @@ export default function HomeConstructionNudge() {
             ☕ Buy me a coffee
           </a>
           <button type="button" className="pgc-btn pgc-btn--ghost" onClick={dismiss}>
-            Maybe later
+            Explore Zaylist
           </button>
         </div>
 
