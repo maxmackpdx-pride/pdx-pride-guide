@@ -12,19 +12,21 @@ import {
 } from "@/lib/mobileNavDismiss";
 import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
-import zMark from "@/assets/z-mark-nav.png";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
 
-/** Center Hub tab: Zaylist Z mark from the brand kit (not a generic home icon). */
+/**
+ * Center Hub tab: monochrome Z + bar (app face / design guide).
+ * Icon only — no “Hub” label under the mark.
+ */
 function HubMark({ active }: { active: boolean }) {
   return (
     <img
-      src={zMark}
+      src="/icons/zaylist-mono.png"
       alt=""
-      width={28}
-      height={28}
+      width={36}
+      height={36}
       className={`hub-mobile-tab__z-mark${active ? " is-active" : ""}`}
       decoding="async"
       aria-hidden
@@ -193,26 +195,26 @@ export default function MobileBottomNav() {
           {user || localDemo ? (
             <Link
               href="/dashboard"
-              className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center`}
+              className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
               aria-label="Hub"
+              title="Hub"
               aria-current={hubActive ? "page" : undefined}
               onClick={handleNavLink}
             >
               <HubMark active={hubActive} />
-              <span>Hub</span>
             </Link>
           ) : (
             <button
               type="button"
-              className={`${tabClass(false, "cyan")} hub-mobile-tab--center`}
+              className={`${tabClass(false, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
               aria-label="Hub"
+              title="Hub"
               onClick={() => {
                 dismissExcept();
                 setShowAuth(true);
               }}
             >
               <HubMark active={false} />
-              <span>Hub</span>
             </button>
           )}
 

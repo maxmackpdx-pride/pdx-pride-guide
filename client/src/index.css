@@ -2254,37 +2254,41 @@ a.event-host-name.event-host-name--link:hover {
     display: none;
   }
 
-  /* Center anchor: Hub - Zaylist Z mark from brand kit */
-  .site-hub-mobile-bar .hub-mobile-tab--center svg,
-  .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
-    width: 28px;
-    height: 28px;
+  /* Center Hub: monochrome Z+bar only (no label), larger than side icons */
+  .site-hub-mobile-bar .hub-mobile-tab--center.hub-mobile-tab--hub-icon {
+    gap: 0;
+    justify-content: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-width: 56px;
   }
 
   .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
     display: block;
+    width: 34px;
+    height: 34px;
     object-fit: contain;
     flex: 0 0 auto;
-    /* Spectrum mark already colored; keep crisp on dark dock */
-    filter: drop-shadow(0 0 6px rgba(25, 227, 255, 0.35));
+    /* Asset is white Z + bar on transparent; stays white on dark dock */
+    filter: none;
   }
 
   .site-hub-mobile-bar .hub-mobile-tab--center.is-active .hub-mobile-tab__z-mark {
     filter:
-      drop-shadow(0 0 8px rgba(25, 227, 255, 0.55))
-      drop-shadow(0 0 14px rgba(255, 25, 214, 0.25));
+      drop-shadow(0 0 8px rgba(255, 255, 255, 0.35))
+      drop-shadow(0 0 14px rgba(25, 227, 255, 0.4));
   }
 
-  .site-hub-mobile-bar .hub-mobile-tab--center span:last-child {
-    font-size: 10px;
-    letter-spacing: 0.08em;
-  }
-
-  /* Hub anchor keeps cyan fill/text; outline stays thin black like other tabs */
+  /* Idle hub: no cyan slab — just the white Z mark */
   .site-hub-mobile-bar .hub-mobile-tab--center:not(.is-active) {
-    color: color-mix(in srgb, var(--hub-cyan, #19e3ff) 72%, #8a8a8a);
-    background: color-mix(in srgb, var(--hub-cyan, #19e3ff) 10%, transparent);
+    color: #fff;
+    background: transparent;
     border-color: #000;
+    box-shadow: none;
+  }
+
+  .site-hub-mobile-bar .hub-mobile-tab--center.is-active {
+    background: color-mix(in srgb, var(--hub-cyan, #19e3ff) 12%, transparent);
   }
 
   /* Hard-lock button outlines + dock rim to opaque black (no cyan edge bleed) */
@@ -17460,22 +17464,7 @@ html.calm-mode .category-constellation__orb {
   .glow-nudge, .glow-nudge__backdrop, .glow-nudge::before { animation: none; }
 }
 
-/* WS7: Hub Z spectrum bar under mark */
-.hub-mobile-tab--hub .hub-mobile-tab__zstack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.hub-mobile-tab__zbar {
-  width: 22px;
-  height: 3px;
-  border-radius: 1px;
-  background: var(--grad-rainbow, linear-gradient(90deg, #00FFFF, #CCFF00, #FF00CC, #FF6600));
-}
-.hub-mobile-tab--center:not(.is-active) {
-  color: #6e6e76 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
+/* Center hub icon-only (label removed; mono Z asset includes bar) */
+.hub-mobile-tab--hub-icon {
+  gap: 0;
 }
