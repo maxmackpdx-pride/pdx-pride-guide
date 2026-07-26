@@ -137,6 +137,47 @@ function directoryHasDeepLink(): boolean {
   );
 }
 
+/** Session keys so closing a place card does not dump you on City View / top of page. */
+const DIR_GRID_KEY = "zaylist.directory.showGrid";
+const DIR_SCROLL_KEY = "zaylist.directory.scrollY";
+
+function readDirectoryShowGrid(): boolean {
+  try {
+    return sessionStorage.getItem(DIR_GRID_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeDirectoryShowGrid(on: boolean) {
+  try {
+    if (on) sessionStorage.setItem(DIR_GRID_KEY, "1");
+    else sessionStorage.removeItem(DIR_GRID_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+function rememberDirectoryScroll() {
+  try {
+    sessionStorage.setItem(DIR_SCROLL_KEY, String(window.scrollY || 0));
+  } catch {
+    /* ignore */
+  }
+}
+
+function consumeDirectoryScroll(): number | null {
+  try {
+    const raw = sessionStorage.getItem(DIR_SCROLL_KEY);
+    if (raw == null) return null;
+    sessionStorage.removeItem(DIR_SCROLL_KEY);
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  } catch {
+    return null;
+  }
+}
+
 const blankDirectoryForm = () => ({
   name: "",
   type: "bar",
@@ -209,11 +250,16 @@ export default function Directory() {
     height: number;
   } | null>(null);
   // Lazy init - function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
-  const [showGrid, setShowGrid] = useState(() => directoryHasDeepLink() || Boolean(routePlaceId));
+  // sessionStorage keeps the grid after place close (route remount /directory/:id → /directory
+  // used to reset to City View constellation and lose scroll).
+  const [showGrid, setShowGrid] = useState(
+    () => directoryHasDeepLink() || Boolean(routePlaceId) || readDirectoryShowGrid(),
+  );
   const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
   const [recentViewed, setRecentViewed] = useState<DirectoryRecentEntry[]>(() => readDirectoryRecent());
   const gridRef = useRef<HTMLDivElement>(null);
+  const restoreScrollOnce = useRef(false);
 
   const recordRecentView = useCallback((biz: Business) => {
     const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || null;
@@ -259,6 +305,8 @@ export default function Directory() {
       recordRecentView(biz);
       setSelectedPlace(biz);
       setShowGrid(true);
+      writeDirectoryShowGrid(true);
+      rememberDirectoryScroll();
       setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
     },
     [setLocation, directoryQuerySuffix, recordRecentView],
@@ -267,8 +315,29 @@ export default function Directory() {
   const closePlace = useCallback(() => {
     setSelectedPlace(null);
     setPlaceOriginRect(null);
+    // Stay on the filtered list (not City View constellation). Route switch
+    // remounts Directory; sessionStorage restores showGrid + scroll.
+    setShowGrid(true);
+    writeDirectoryShowGrid(true);
     setLocation(`/directory${directoryQuerySuffix()}`);
   }, [setLocation, directoryQuerySuffix]);
+
+  // After closing a place (or remounting on the list), put scroll back where the user was.
+  useEffect(() => {
+    if (routePlaceId) {
+      restoreScrollOnce.current = false;
+      return;
+    }
+    if (!showGrid || restoreScrollOnce.current) return;
+    const y = consumeDirectoryScroll();
+    if (y == null) return;
+    restoreScrollOnce.current = true;
+    // Wait for grid paint (constellation → grid, or remount after /directory/:id).
+    const t = window.setTimeout(() => {
+      window.scrollTo({ top: y, left: 0, behavior: "auto" });
+    }, 40);
+    return () => window.clearTimeout(t);
+  }, [routePlaceId, showGrid]);
 
   // Deep link: /directory/:id/:slug or legacy ?place= - open when present, clear when gone (browser back).
   // Origin rect is owned by openPlace (card click). Deep links leave it null for soft enter.
@@ -289,6 +358,7 @@ export default function Directory() {
     }
     setSelectedPlace(match);
     setShowGrid(true);
+    writeDirectoryShowGrid(true);
     recordRecentView(match);
     // Canonicalize legacy ?place= to /directory/:id/:slug (keep type/q query).
     if (!routePlaceId) {
@@ -382,6 +452,7 @@ export default function Directory() {
 
   const revealGrid = () => {
     setShowGrid(true);
+    writeDirectoryShowGrid(true);
     window.setTimeout(() => {
       gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -407,6 +478,12 @@ export default function Directory() {
 
   const handleBackToCategories = () => {
     setShowGrid(false);
+    writeDirectoryShowGrid(false);
+    try {
+      sessionStorage.removeItem(DIR_SCROLL_KEY);
+    } catch {
+      /* ignore */
+    }
     setGrandOpeningOnly(false);
     setMobileMapOpen(false);
     window.setTimeout(() => {

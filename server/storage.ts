@@ -5679,6 +5679,70 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("remove_back_2_earth_v1");
   }
+
+  // Catalog cleanup: drop non-scene noise (Skatecamp, StrongFirst) + collapse LIVE
+  // same-title same-venue same-day duplicates (e.g. Charli XCX album party ×3 from Badlands re-sync).
+  if (!hasBootMigration("scrub_noise_and_live_dups_v1")) {
+    const noise = sqlite
+      .prepare(
+        `SELECT id FROM events
+         WHERE lower(title) LIKE '%skatecamp%'
+            OR lower(title) LIKE '%skate camp%'
+            OR lower(title) LIKE '%strongfirst%'
+            OR lower(title) LIKE '%strong first%'
+            OR (lower(title) LIKE '%sfl %' AND lower(title) LIKE '%barbell%')
+            OR lower(title) LIKE '%barbell instructor certification%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(noise.map(r => r.id));
+
+    // LIVE exact-ish dups: same title + venue + calendar day → keep lowest id, hide rest.
+    const live = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, date_start FROM events WHERE status = 'LIVE' ORDER BY id ASC`,
+      )
+      .all() as Array<{
+        id: number;
+        title: string;
+        venue_name: string | null;
+        date_start: string | null;
+      }>;
+    const seen = new Map<string, number>();
+    const hideIds: number[] = [];
+    for (const row of live) {
+      const key = [
+        String(row.title || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " "),
+        String(row.venue_name || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " "),
+        String(row.date_start || "").slice(0, 10),
+      ].join("|");
+      if (!key.startsWith("|") && key.length > 12) {
+        const keeper = seen.get(key);
+        if (keeper == null) {
+          seen.set(key, row.id);
+        } else {
+          hideIds.push(row.id);
+        }
+      }
+    }
+    for (const id of hideIds) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate LIVE listing (same title+venue+day) - scrub_noise_and_live_dups_v1'
+           WHERE id = ? AND status = 'LIVE'`,
+        )
+        .run(id);
+    }
+    recordBootMigration("scrub_noise_and_live_dups_v1");
+  }
 }
 
 function parseEnvAdminLists() {
