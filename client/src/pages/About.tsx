@@ -69,7 +69,15 @@ export default function About() {
     staleTime: 60_000,
   });
 
-  const eventCount = events.length;
+  // Lifetime counter: every distinct event ever published on the site (not just
+  // the current live board). Falls back to the live count while loading.
+  const { data: eventTotal } = useQuery<{ total: number }>({
+    queryKey: ["/api/events/total"],
+    queryFn: () => apiRequest("GET", "/api/events/total").then(r => r.json()),
+    staleTime: 5 * 60_000,
+  });
+
+  const eventCount = eventTotal?.total ?? events.length;
   const [contactModal, setContactModal] = useState<"message" | "sponsor" | "order" | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 

@@ -3,7 +3,7 @@ import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
-import { dedupeEvents } from "@shared/eventDedupe";
+import { dedupeEvents, eventDedupeKey } from "@shared/eventDedupe";
 import {
   isPostEventWeekListingCapActive,
   prideDayFromDate,
@@ -1321,6 +1321,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const websites = venueWebsiteIndex();
     res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
+  });
+
+  /**
+   * Lifetime event count for the About page — every distinct event the site has
+   * ever published (LIVE now or previously public then REMOVED), de-duped so
+   * same-day/same-time doubles count once. HIDDEN drafts were never public.
+   */
+  app.get("/api/events/total", (_req, res) => {
+    const published = storage
+      .getEvents({})
+      .filter(e => e.status === "LIVE" || e.status === "REMOVED");
+    const total = new Set(published.map(e => eventDedupeKey(e))).size;
+    res.json({ total });
   });
 
   app.get("/api/events/unclaimed", (req, res) => {
