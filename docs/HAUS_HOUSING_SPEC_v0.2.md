@@ -128,7 +128,7 @@ HAÜS is another active board in the feed. Search and filters exist for **refine
 
 Housing cards are introductions, not advertisements. The goal is not to get a click — it's to let someone think "I could see myself here" in five seconds. Three variants on the shared deep-glass card:
 
-- **Offering a Room:** cover photo, rent, neighborhood, move-in date, room type, who's in the household (avatars), a few lifestyle badges, accessibility badges, Save / Share / Chat.
+- **Offering a Room:** cover photo, rent, neighborhood, move-in date, room type, who's in the household (avatars), a few lifestyle badges, accessibility badges, Save / Share / Request to chat.
 - **Looking for Housing:** the person is the listing — avatar, name, move timeline, budget, desired neighborhoods, a short lifestyle line, "looking for."
 - **Forming a HAÜS:** group name, member avatars, combined budget, neighborhood goals, move timeline, "looking for N more."
 
@@ -138,7 +138,7 @@ Instead of "Hosted by Alex," cards say **"Meet the household"** with avatars —
 
 ## 8. Post Detail: conversation-first
 
-The detail view reduces uncertainty so the conversation can be about getting to know each other, not discovering basics. It stays lightweight and modular (sections can be empty and prompt completion): the home, who lives there ("Meet the household"), house culture and rules as structured chips/tables, honest financials (monthly vs. move-in kept separate), accessibility as standard info (never hidden behind a filter), approximate neighborhood (exact address stays private until appropriate), and trust signals. Primary action, always visible: **Chat** (opens a group conversation). No application form stands between interest and a first message.
+The detail view reduces uncertainty so the conversation can be about getting to know each other, not discovering basics. It stays lightweight and modular (sections can be empty and prompt completion): the home, who lives there ("Meet the household"), house culture and rules as structured chips/tables, honest financials (monthly vs. move-in kept separate), accessibility as standard info (never hidden behind a filter), approximate neighborhood (exact address stays private until appropriate), and trust signals. Primary action, always visible: **Request to chat.** First contact is consent-based — it sends a chat request the poster accepts before the conversation opens, so nobody gets cold-DMed. It's a one-tap request, not an application (no forms, no questionnaire); on accept it opens the normal group conversation. This consent gate matters more here than on most boards because it's housing and it's a queer community.
 
 ---
 
@@ -212,9 +212,9 @@ Especially for "Forming a HAÜS," seeing real community overlap makes joining a 
 
 ---
 
-## 12. Connecting: from post to conversation
+## 12. Connecting: request to chat (consent-based)
 
-There is no application pipeline in early versions. Interest → conversation, full stop, using the existing group-conversation + inbox systems. A structured application/tour/decision flow is a *later* addition for households that want it — never a gate that stands between a member and saying hello.
+Connecting is **interest → request to chat → accept → conversation**, using the existing group-conversation + inbox systems. First contact is a request the recipient accepts or declines, not an open DM — so people aren't cold-messaged, which matters a lot for housing in a queer community. That's the one intentional gate, and it's a single tap, not paperwork: there is still **no application, no forms, no questionnaire** between interest and talking. A structured application/tour/decision flow stays a *later* option for households that want it. Design note: a declined request should be quiet and non-punitive (no notification drama), and blocking still works the usual way.
 
 ---
 
@@ -246,7 +246,7 @@ Reuse platform moderation; add housing categories: fake listing, scam, unsafe ho
 
 ## 15. Roadmap
 
-- **v0.1** — three post types, one-question composer, openness flags, feed-first discovery, deep-glass HAÜS cards, "Chat" via group conversations. Concierge matching. No compatibility, no applications, no tours.
+- **v0.1** — three post types, one-question composer, openness flags, feed-first discovery, deep-glass HAÜS cards, request-to-chat (consent-based) via group conversations. Concierge matching. No compatibility, no applications, no tours.
 - **v0.2** — the "Forming a HAÜS" workspace (Lead + member management, shared property shortlist, important dates/reminders); the full-HAÜS waitlist; post-type conversion (Looking for Housing ⇄ Forming a HAÜS); community-context chips (mutual connections, shared events, tenure); verification badges; saved posts/searches; richer detail view.
 - **v0.3** — conversation prompts (soft compatibility); optional structured application + tours for households that want them.
 - **Later** — the compatibility/community-context service generalized to other boards (organizations, volunteer teams, projects). Housing is just the first board to use it.

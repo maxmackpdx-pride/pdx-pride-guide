@@ -69,10 +69,10 @@ Discovery starts in the feed by scrolling, not a blank search page. HAÜS posts 
 Cards are introductions, not ads — a person should grasp "could I live here / with these people?" in ~5 seconds. Variants for each post type. Show the *people* (household avatars, "Meet the household"), not just the property. Cards carry community-context chips (4.9) and the openness chip (4.3) — never a compatibility number. Built as variants of the existing card system.
 
 ### 4.6 Post detail — **Med**
-A lightweight, modular detail view that answers the obvious questions before someone has to ask: the home, who lives there, house culture/rules (as structured chips, not essays), honest finances (monthly vs move-in separated, informational only), accessibility as standard info, approximate neighborhood (exact address private until appropriate), trust signals. One always-visible primary action: **Chat**. No application form between interest and a first message.
+A lightweight, modular detail view that answers the obvious questions before someone has to ask: the home, who lives there, house culture/rules (as structured chips, not essays), honest finances (monthly vs move-in separated, informational only), accessibility as standard info, approximate neighborhood (exact address private until appropriate), trust signals. One always-visible primary action: **Request to chat** (consent-based, see 4.7). No application form between interest and a first message.
 
-### 4.7 Chat with HAÜS — **Low**
-"Chat" opens a conversation using the existing group-conversation/inbox system, with the post attached. No new messaging anything.
+### 4.7 Request to chat (consent-based) — **Low/Med**
+First contact is a **request the recipient accepts or declines**, not an open DM — so people aren't cold-messaged (important for housing + a queer community). On accept, it opens the normal group conversation with the post attached, using the existing messaging/inbox system. It is NOT an application — one tap, no forms. Build it as a light pending-request state on the existing thread model (a message request the poster approves), plus its states: request sent / pending, accepted (thread opens), declined (quiet, non-punitive — no drama notification). Blocking works the usual way. Do not add a second messaging system.
 
 ### 4.8 Forming a HAÜS — the workspace — **High** (this is the flagship and the hardest part)
 Two flavors, picked at creation (a field on the post): **find a place together** (no property yet — form the group, then hunt) or **place in mind** (the founder already has a specific prospected place / is ready to sign a lease, and needs people to fill it and sign together). "Place in mind" attaches a property up front (seeds the shortlist as the target) and leans on the lease deadline in the important dates. Both are still people-first and form the household together; "place in mind" differs from "Offering a Room" because nobody has signed and the household doesn't exist yet.
@@ -98,7 +98,7 @@ Reuse existing moderation; add report categories: fake listing, scam, unsafe hou
 
 ## 5. Build phases
 
-- **v0.1 (ship first, keep it small):** the three post types, one-question composer, openness flags, feed-first discovery, the three card variants, post detail, "Chat with HAÜS." Founder does matching by hand. **No** compatibility, applications, tours, or the full workspace yet.
+- **v0.1 (ship first, keep it small):** the three post types, one-question composer, openness flags, feed-first discovery, the three card variants, post detail, request-to-chat (consent-based). Founder does matching by hand. **No** compatibility, applications, tours, or the full workspace yet.
 - **v0.2:** the Forming-a-HAÜS workspace (Lead + members, shortlist, important dates), the full-HAÜS waitlist, post-type conversion, community-context chips, verification badges, saved posts/searches.
 - **v0.3:** conversation prompts (soft compatibility); optional structured application + tours for households that want them.
 - **Later:** generalize community-context/compatibility as a shared platform service for other boards.
@@ -109,7 +109,7 @@ Reuse existing moderation; add report categories: fake listing, scam, unsafe hou
 
 - A user can post any of the three types in under a minute and see it in the feed.
 - Housing posts render as on-brand card variants (design system), showing the people, not just the property.
-- A post has a detail view with a working "Chat" that opens the existing group conversation.
+- A post has a detail view with a working "Request to chat" that the recipient accepts to open the existing group conversation (declining is quiet).
 - A user can toggle an openness flag and it shows on the card.
 - Posts can be reported into the existing moderation queue.
 - Nothing forks an existing system; all styling comes from the design standards.
@@ -142,12 +142,12 @@ Written for a Claude Code agent working directly in `maxmackpdx-pride/pdx-pride-
 
 **Feed integration (this is where discovery happens).** The home/hub feed is assembled server-side in `getHubFeed` (`server/storage.ts`), typed in `shared/hubFeed.ts`, rendered by `client/src/components/hub/sections/HubFeed.tsx` and `HubFeedCard.tsx`, with the poster-deck card in `FeedEventDeck.tsx`. To make Housing posts discoverable, add a new feed item kind here plus a Housing card variant. Note: the feed candidate query orders by *listing recency* and condenses per author — follow that pattern so new Housing posts actually surface (there was a real bug where ordering by a future date buried new items).
 
-**"Chat with HAÜS" = the existing messaging system.** Message/thread model is in `shared/schema.ts` (`messages`, group `thread_id`); `storage.sendMessage(...)` starts/append threads. See how Gifting, Gig Board, and Missed Connections open a conversation from a post. Floating inbox: `useInboxSheet` / `InboxOverlay`. Reuse this for group chat; do not add a second messaging system.
+**Request-to-chat = the existing messaging system + a consent gate.** Message/thread model is in `shared/schema.ts` (`messages`, group `thread_id`); `storage.sendMessage(...)` starts/appends threads. See how Gifting, Gig Board, and Missed Connections open a conversation from a post — and note Missed Connections is already consent/approval-based, so it's the closest pattern for the accept/decline first-contact gate. Floating inbox: `useInboxSheet` / `InboxOverlay`. Reuse all of this; add only the light pending-request state. Do not add a second messaging system.
 
 **Other integration points.** Media upload: `POST /api/upload/*` (multer) — mirror `/api/upload/gifting`. Moderation: `storage.createModerationRequest(...)`. Primary nav entry: `PRIMARY_NAV` in `client/src/lib/siteNav.ts`. Client routes: `client/src/App.tsx`. Day colors / brand tokens: `shared/eventWeek.ts` + `index.css`.
 
 **Content rule.** No em dashes anywhere in user-facing copy — hard project rule. Match the existing voice.
 
-**Suggested first vertical slice (lowest risk).** Ship **"Looking for Housing"** end to end first — it's single-user, no coordinated state: schema + create/list/read routes + the one-question composer + a feed card variant + a detail view + a "Chat" button that opens a thread. Then add **Offering a Room**, then the **Forming-a-HAÜS** workspace last (the only High-complexity piece). Keep each a small, reviewable PR.
+**Suggested first vertical slice (lowest risk).** Ship **"Looking for Housing"** end to end first — it's single-user, no coordinated state: schema + create/list/read routes + the one-question composer + a feed card variant + a detail view + a "Request to chat" that opens a thread on accept. Then add **Offering a Room**, then the **Forming-a-HAÜS** workspace last (the only High-complexity piece). Keep each a small, reviewable PR.
 
 **Legal guardrail is a build constraint, not just product.** Do not build dropdowns or filters that hide or rank listings by protected characteristics. Preferences stay user-authored free text; "compatibility" (a later phase) is conversation prompts only, never a score or gate.
