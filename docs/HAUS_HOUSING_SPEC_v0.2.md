@@ -121,6 +121,8 @@ Discovery begins in the **feed**, not a blank search page. People find housing b
 
 HAÜS is another active board in the feed. Search and filters exist for **refinement**, but the front door is the feed. (The feed and its poster-deck card rendering already exist — Housing posts are new card variants on that system.)
 
+**Saved posts stay alive in the feed.** When someone saves a post, it becomes something they follow — so when that post is **updated** (rent changes, a room opens or fills, new photos, a forming HAÜS gains a member or sets a tour date), the card **resurfaces in that person's feed/timeline with the update attached**, rather than the change being buried on the detail page or lost to a one-off notification. The saved card reappears in the timeline showing *what changed* ("Rent updated," "1 spot left," "New photos"), so following a post means you actually see its life unfold. This reuses the existing feed + saved-post + notification primitives; it's a surfacing rule, not a new system.
+
 ---
 
 ## 7. The HAÜS Card
