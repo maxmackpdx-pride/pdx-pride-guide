@@ -25,6 +25,7 @@ import {
 import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
 import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
+import { scrubCandidates } from "./scrubLlm";
 import {
   enrichDraftVenueFromSource,
   matchDirectoryBrands,
@@ -744,28 +745,44 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
       c.selected = false;
     }
   }
-  handle.candidates = candidates;
-  saveCandidates(
-    jobId,
-    candidates.map(c => ({
-      id: c.id,
-      sourceId: c.sourceId,
-      sourceLabel: c.sourceLabel,
-      sourceUrl: c.sourceUrl,
-      draft: c.draft,
-      selected: c.selected,
-      recurring: c.recurring,
-      recurringCount: c.recurringCount,
-      condensed: c.condensed,
-      conflicts: c.conflicts,
-      duplicates: c.duplicates,
-      strongDuplicate: c.strongDuplicate,
-      directoryBrands: c.directoryBrands,
-      sourceBundle: c.sourceBundle,
-      fieldConflicts: c.fieldConflicts,
-      memberDrafts: c.memberDrafts || [],
-    })),
-  );
+
+  // AI scrub (QSEARCH_SCRUB_LLM): score relevance, clean fields, stamp safety
+  // flags, and auto-drop clear non-events into a restorable list. No-op + never
+  // throws when disabled/unkeyed.
+  let kept = candidates;
+  let dropped: import("./scrubLlm").ScrubDrop[] = [];
+  try {
+    const outcome = await scrubCandidates(candidates);
+    kept = outcome.kept;
+    dropped = outcome.dropped;
+  } catch (err) {
+    console.warn("[qsearch] scrub failed, keeping all candidates:", err);
+  }
+
+  const toRow = (c: ScanCandidate) => ({
+    id: c.id,
+    sourceId: c.sourceId,
+    sourceLabel: c.sourceLabel,
+    sourceUrl: c.sourceUrl,
+    draft: c.draft,
+    selected: c.selected,
+    recurring: c.recurring,
+    recurringCount: c.recurringCount,
+    condensed: c.condensed,
+    conflicts: c.conflicts,
+    duplicates: c.duplicates,
+    strongDuplicate: c.strongDuplicate,
+    directoryBrands: c.directoryBrands,
+    sourceBundle: c.sourceBundle,
+    fieldConflicts: c.fieldConflicts,
+    memberDrafts: c.memberDrafts || [],
+  });
+
+  handle.candidates = kept;
+  saveCandidates(jobId, kept.map(toRow), "pending");
+  if (dropped.length) {
+    saveCandidates(jobId, dropped.map(d => toRow(d.candidate)), "ai_dropped");
+  }
 
   const cancelled = handle.cancel;
   // Preserve original filter fields; append closed-venue drop stats for Daily board

@@ -75,6 +75,7 @@ import {
   markCandidatesCommitted,
   markCandidatesSkipped,
   prunePendingAgainstCatalog,
+  restoreCandidate,
   setDragpdxOptIn,
   setInstagramHandle,
   setRecipeUrl,
@@ -5210,6 +5211,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
       detail: { count: capped.length, ids: capped.slice(0, 20) },
     });
     res.json({ ok: true, dismissed: capped.length });
+  });
+
+  /** Restore an AI-dropped candidate back into the pending Review queue. */
+  app.post("/api/admin/qsearch/queue/restore", requireAdmin, (req, res) => {
+    const id = String(req.body?.id || "").trim();
+    if (!id) return res.status(400).json({ error: "id required" });
+    const restored = restoreCandidate(id);
+    if (restored) auditAdmin(req, "qsearch_queue_restore", { type: "qsearch", detail: { id } });
+    res.json({ ok: restored, restored });
   });
 
   app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {

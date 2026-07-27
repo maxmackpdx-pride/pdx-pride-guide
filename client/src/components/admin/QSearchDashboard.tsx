@@ -274,6 +274,13 @@ type Candidate = {
     posterImageUrl?: string | null;
     parseSource?: string;
     sourceUrl?: string | null;
+    // AI scrub (server/qsearch/scrubLlm.ts)
+    relevanceScore?: number | null;
+    relevanceReason?: string | null;
+    category?: string | null;
+    aiScrubbed?: boolean;
+    flyerMatch?: number | null;
+    flyerMatchReason?: string | null;
   };
   sourceId: string;
   sourceLabel: string;
@@ -832,6 +839,8 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
   const [addFormat, setAddFormat] = useState("html");
   const [showRemoved, setShowRemoved] = useState(false);
   const [resultFilter, setResultFilter] = useState("");
+  const [worstFirst, setWorstFirst] = useState(false);
+  const [showDropped, setShowDropped] = useState(false);
   const [tryVision, setTryVision] = useState(true);
   /** Default off: only upcoming/current listings in results */
   const [includePastEvents, setIncludePastEvents] = useState(false);
@@ -862,6 +871,25 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     queryKey: ["/api/admin/qsearch/queue"],
     queryFn: () => apiRequest("GET", "/api/admin/qsearch/queue?status=pending&limit=300").then(r => r.json()),
   });
+
+  // Candidates the AI auto-dropped as clear noise — restorable, never deleted.
+  const { data: droppedData, refetch: refetchDropped } = useQuery<{ candidates: Candidate[] }>({
+    queryKey: ["/api/admin/qsearch/queue", "ai_dropped"],
+    queryFn: () =>
+      apiRequest("GET", "/api/admin/qsearch/queue?status=ai_dropped&limit=200").then(r => r.json()),
+  });
+  const droppedCandidates = droppedData?.candidates || [];
+
+  async function restoreDropped(id: string) {
+    try {
+      await apiRequest("POST", "/api/admin/qsearch/queue/restore", { id });
+      toast({ title: "Restored to Review", description: "Candidate is back in the queue." });
+      void refetchDropped();
+      void refetchQueue();
+    } catch (err) {
+      toast({ title: "Restore failed", description: parseApiError(err, "Could not restore"), variant: "destructive" });
+    }
+  }
 
   const pollJob = useCallback(async (id: string) => {
     const res = await apiRequest("GET", `/api/admin/qsearch/scan/${id}`);
@@ -1302,14 +1330,24 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
 
   const filteredCandidates = useMemo(() => {
     const q = resultFilter.trim().toLowerCase();
-    if (!q) return queueCandidates;
-    return queueCandidates.filter(
-      c =>
-        c.draft.title.toLowerCase().includes(q) ||
-        c.draft.venueName.toLowerCase().includes(q) ||
-        (c.sourceLabel || "").toLowerCase().includes(q),
-    );
-  }, [queueCandidates, resultFilter]);
+    let list = q
+      ? queueCandidates.filter(
+          c =>
+            c.draft.title.toLowerCase().includes(q) ||
+            c.draft.venueName.toLowerCase().includes(q) ||
+            (c.sourceLabel || "").toLowerCase().includes(q),
+        )
+      : queueCandidates;
+    if (worstFirst) {
+      // Lowest AI relevance first; un-scored candidates sink to the bottom.
+      list = [...list].sort((a, b) => {
+        const sa = a.draft.relevanceScore ?? 2;
+        const sb = b.draft.relevanceScore ?? 2;
+        return sa - sb;
+      });
+    }
+    return list;
+  }, [queueCandidates, resultFilter, worstFirst]);
 
   const selectedCount = useMemo(() => Object.values(selected).filter(Boolean).length, [selected]);
 
@@ -2526,6 +2564,55 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
       {tab === "queue" && (
         <div id="qsearch-panel-queue">
         <div>
+          {droppedCandidates.length > 0 && (
+            <details
+              className="qsearch__panel"
+              open={showDropped}
+              onToggle={e => setShowDropped((e.target as HTMLDetailsElement).open)}
+              style={{ marginBottom: 12 }}
+            >
+              <summary style={{ cursor: "pointer", listStyle: "none" }}>
+                <span className="qsearch__badge is-fail">AI-dropped</span>{" "}
+                {droppedCandidates.length} candidate{droppedCandidates.length === 1 ? "" : "s"} auto-removed
+                as noise — tap to review &amp; restore
+              </summary>
+              <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                {droppedCandidates.map(c => (
+                  <div
+                    key={c.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      padding: "8px 10px",
+                      border: "1px solid var(--qs-line)",
+                      borderRadius: 8,
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ color: "#fff", fontSize: 14 }}>
+                        {c.draft.title || "Untitled"}
+                        <span style={{ color: "var(--qs-muted)" }}>
+                          {" "}
+                          · {c.draft.venueName || "?"} · via {c.sourceLabel}
+                        </span>
+                      </div>
+                      <div style={{ color: "var(--qs-orange)", fontSize: 12 }}>
+                        {c.draft.relevanceReason || "low relevance"}
+                        {c.draft.relevanceScore != null
+                          ? ` · AI ${Math.round(c.draft.relevanceScore * 100)}%`
+                          : ""}
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => void restoreDropped(c.id)}>
+                      Restore
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
           {!filteredCandidates.length && (
             <p className="qsearch__empty">
               Review queue empty. Run <strong>Scan now</strong>, or use <strong>Add by hand</strong> for
@@ -2547,6 +2634,14 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                 </button>
                 <button type="button" onClick={() => selectAll(false)}>
                   Deselect all
+                </button>
+                <button
+                  type="button"
+                  className={worstFirst ? "is-primary" : ""}
+                  onClick={() => setWorstFirst(v => !v)}
+                  title="Sort lowest AI relevance first"
+                >
+                  {worstFirst ? "Worst first ✓" : "Worst first"}
                 </button>
                 <button
                   type="button"
@@ -2688,6 +2783,20 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                             .join(" · ")}
                         </p>
                         <div className="qsearch__cand-slim-badges">
+                          {c.draft.relevanceScore != null && (
+                            <span
+                              className={`qsearch__badge ${
+                                c.draft.relevanceScore >= 0.66
+                                  ? "is-ok"
+                                  : c.draft.relevanceScore >= 0.4
+                                    ? "is-new"
+                                    : "is-fail"
+                              }`}
+                              title={c.draft.relevanceReason || "AI relevance"}
+                            >
+                              AI {Math.round(c.draft.relevanceScore * 100)}%
+                            </span>
+                          )}
                           {c.condensed && c.recurring === "weekly" && (
                             <span className="qsearch__badge is-week">Weekly · {c.recurringCount}</span>
                           )}

@@ -652,6 +652,8 @@ export function saveCandidates(
     /** Series occurrence drafts for expand-on-approve */
     memberDrafts?: unknown;
   }>,
+  /** Persist status — 'pending' (Review queue) or 'ai_dropped' (restorable list). */
+  status: "pending" | "ai_dropped" = "pending",
 ) {
   ensureTables();
   const now = new Date().toISOString();
@@ -660,7 +662,7 @@ export function saveCandidates(
       id, job_id, source_id, source_label, source_url, draft_json, selected,
       recurring, recurring_count, condensed, conflicts_json, duplicates_json, strong_dup_json,
       brands_json, bundle_json, status, created_at, committed_event_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
   `);
   const tx = sqlite.transaction(() => {
     for (const c of candidates) {
@@ -684,11 +686,21 @@ export function saveCandidates(
           fieldConflicts: c.fieldConflicts || [],
           memberDrafts: Array.isArray(c.memberDrafts) ? c.memberDrafts : [],
         }),
+        status,
         now,
       );
     }
   });
   tx();
+}
+
+/** Restore an AI-dropped candidate back into the pending Review queue. */
+export function restoreCandidate(id: string): boolean {
+  ensureTables();
+  const info = sqlite
+    .prepare(`UPDATE qsearch_candidates SET status = 'pending' WHERE id = ? AND status = 'ai_dropped'`)
+    .run(id);
+  return info.changes > 0;
 }
 
 export function listCandidates(opts?: {

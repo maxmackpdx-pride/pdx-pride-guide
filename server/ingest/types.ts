@@ -47,6 +47,16 @@ export type IngestEventDraft = {
   warnings: string[];
   /** 0–1 when from vision/caption; omit for structured parsers */
   confidence?: number | null;
+  /** ── AI scrub (server/qsearch/scrubLlm.ts) — all optional, additive ──
+   * Set when QSEARCH_SCRUB_LLM ran over this candidate. Ride on the draft so
+   * they round-trip through draft_json → client with no schema change. */
+  relevanceScore?: number | null; // 0–1: "is this a real Portland LGBTQ+ event"
+  relevanceReason?: string | null; // one-line rationale (also the AI-drop reason)
+  category?: string | null; // bar|club|drag|music|market|social|kink|community|other
+  aiScrubbed?: boolean; // true once the scrub pass touched this draft
+  /** ── AI flyer check (server/qsearch/verifyFlyer.ts, Wave B) ── */
+  flyerMatch?: number | null; // 0–1: attached poster matches this event
+  flyerMatchReason?: string | null;
 };
 
 export type IngestPreviewItem = {

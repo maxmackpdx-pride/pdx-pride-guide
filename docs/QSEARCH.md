@@ -149,6 +149,35 @@ Dedicated parsers (2026-07-26): Eventbrite org JSON embed, Camp weekly
 columns, CC homepage nights. No longer rely on generic discover for these.
 They are excluded from the QSearch catch-all (trusted-lane filter).
 
+## AI scrub (LLM candidate cleaning)
+
+A semantic pass over scan candidates *after* the cheap deterministic filters
+(`server/qsearch/scrubLlm.ts`). Reuses the flyer-reader text-LLM chain
+(`flyerLlmConfigured`: Groq → xAI → OpenAI, honoring `FLYER_LLM_DISABLED`) — **no
+new keys**. One classifier call per candidate returns relevance + noise, safety
+flags, category, cleaned fields, and a dedup verdict.
+
+| Env | Effect |
+|-----|--------|
+| `QSEARCH_SCRUB_LLM=1` | Enable the scrub (off ⇒ pure passthrough, scan output identical) |
+| `QSEARCH_SCRUB_MAX` | Max candidates classified per scan (default 60; overflow untouched) |
+| `QSEARCH_NIGHTLY_SCRUB=1` | *(reserved)* allow scrub on nightly runs |
+| `FLYER_LLM_DISABLED=1` | Hard kill — disables scrub (and all paid LLM) |
+
+Behavior:
+- **Relevance 0–1 + reason** on every scrubbed draft (`draft.relevanceScore` /
+  `relevanceReason`); `<0.5` auto-deselects; **`<0.2` AND not-an-event auto-drops**
+  to `status='ai_dropped'` — surfaced in Review as **AI-dropped (N)** with one-tap
+  **Restore** (`POST /api/admin/qsearch/queue/restore {id}`). Never a silent delete.
+- **Safety flags** (`ageRequirement`/`isSexPositive`/`eventTypes` KINK) filled only
+  on catch-all drafts that have none — never overrides a trusted `venuePolicy` stamp.
+- **Field cleanup**: weak `"TBA"` venue / broken title / stub description replaced
+  when the model is confident; original kept in a warning breadcrumb.
+- **Dedup band**: only firms up the uncertain middle (`submissionMatch` score 48–72);
+  a "different" verdict clears the false duplicate flag.
+- Any per-candidate failure leaves that candidate untouched. Smoke:
+  `npx tsx script/smoke-qsearch-scrub.ts` (mocked LLM, offline).
+
 ## Recurring ↔ duplicate checks
 
 When a scrape is weekly/monthly **or** matches catalog:
