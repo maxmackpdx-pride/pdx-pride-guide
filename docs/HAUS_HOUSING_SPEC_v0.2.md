@@ -213,7 +213,9 @@ Especially for "Forming a HAÜS," seeing real community overlap makes joining a 
 
 ## 12. Connecting: request to chat (consent-based)
 
-Connecting is **interest → request to chat → accept → conversation**, using the existing group-conversation + inbox systems. First contact is a request the recipient accepts or declines, not an open DM — so people aren't cold-messaged, which matters a lot for housing in a queer community. That's the one intentional gate, and it's a single tap, not paperwork: there is still **no application, no forms, no questionnaire** between interest and talking. A structured application/tour/decision flow stays a *later* option for households that want it. Design note: a declined request should be quiet and non-punitive (no notification drama), and blocking still works the usual way.
+Connecting is **interest → request to chat → accept → conversation**, using the existing group-conversation + inbox systems. First contact is a request the recipient accepts or declines, not an open DM — so people aren't cold-messaged, which matters a lot for housing in a queer community. That's the one intentional gate, and it's a single tap, not paperwork: there is still **no application, no forms, no questionnaire** between interest and talking. A structured application/tour/decision flow stays a *later* option for households that want it.
+
+**Where chats live:** every chat opens inside the **existing floating inbox** — no separate housing messaging. When someone requests to chat, the conversation appears in both people's floating inbox in a **pending** state at first: the recipient (the Lead, for a HAÜS) sees the pending request and accepts or declines it, and only once accepted does it become an open, active conversation. The requester's side shows "pending" until then, so it's clear the ball is in the other person's court. Design note: a declined request should be quiet and non-punitive (no notification drama), and blocking still works the usual way.
 
 ---
 
