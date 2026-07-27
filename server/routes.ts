@@ -3,6 +3,7 @@ import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
 import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
+import { dedupeEvents } from "@shared/eventDedupe";
 import {
   isPostEventWeekListingCapActive,
   prideDayFromDate,
@@ -1311,7 +1312,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ─── EVENTS ─────────────────────────────────────────────────────────────
   app.get("/api/events", (req, res) => {
     const { day } = req.query;
-    let evts = expandMultiDayEvents(storage.getEvents({ status: "LIVE" }));
+    // Collapse same-day/same-time duplicates so the public board never shows the
+    // same event twice (non-destructive — nothing is deleted from the DB).
+    let evts = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
     if (typeof day === "string" && day.length > 0) {
       evts = evts.filter(evt => evt.dayOfWeek === day);
     }
