@@ -1,13 +1,13 @@
-# ZAYLIST HAÜS — Engineering Handoff
+# ZAYLIST HAÜSING — Engineering Handoff
 
 **For:** the coding agent building the Housing board.
 **How to read this:** this is *what* to build, *how it behaves*, and *how complex* each piece is. It is not a UI design and not an implementation prescription. Use the linked ZAYLIST design standards for all styling and components. Full product rationale lives in `HAUS_HOUSING_SPEC_v0.2.md`; this is the build brief. Repo-specific orientation for the coding agent is in Appendix A.
 
 ---
 
-## 1. What HAÜS is
+## 1. What HAÜSING is
 
-HAÜS is ZAYLIST's Housing board — another community board alongside Events, Marketplace, Gifting, and Missed Connections. It helps queer Portland find rooms, roommates, and households they fit into.
+HAÜSING is ZAYLIST's Housing board — another community board alongside Events, Marketplace, Gifting, and Missed Connections. It helps queer Portland find rooms, roommates, and households they fit into. (**HAÜSING** is the board; **a HAÜS** is a single household formed on it.)
 
 It is **not** a rental marketplace (not Zillow/Roommates.com). The behavioral model is a **trusted Facebook Group**: people post in their own words, discovery happens in the feed, and conversations — not algorithms — do the matching. ZAYLIST is the trusted community layer that makes those posts credible.
 

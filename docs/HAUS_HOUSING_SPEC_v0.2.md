@@ -1,4 +1,4 @@
-# ZAYLIST HAÜS — Housing Board
+# ZAYLIST HAÜSING — Housing Board
 ## Founder Product Specification
 Version 0.2 — Community-board reframe
 
@@ -58,16 +58,16 @@ Everything in ZAYLIST is an **Object** (Event, Gift, Gig, Housing Post, Organiza
 
 ---
 
-## 3. What HAÜS Is
+## 3. What HAÜSING Is
 
-HAÜS is the brand for the **Housing board**. Every housing post lives inside HAÜS, the way every sale lives inside Marketplace.
+**HAÜSING** is the name of the **Housing board**. Every housing post lives inside HAÜSING, the way every sale lives inside Marketplace.
 
-HAÜS means two things at once:
+Two names, two scopes:
 
-1. **The board** — the home for all housing posts.
-2. **A special post type, "Forming a HAÜS"** — where people intentionally build a household *before* finding a property.
+1. **HAÜSING** — the board itself, the home for all housing posts.
+2. **A HAÜS** — a single intentional household, built through the flagship **"Forming a HAÜS"** post type, where people come together *before* finding a property.
 
-Existing roommate houses do **not** have to rebrand themselves "a HAÜS." That was the v0.1 mistake. Forcing every household into a branded identity added friction and felt inauthentic. HAÜS is the board; "Forming a HAÜS" is the flagship post type within it.
+Existing roommate houses do **not** have to rebrand themselves "a HAÜS." That was the v0.1 mistake. Forcing every household into a branded identity added friction and felt inauthentic. HAÜSING is the board; "Forming a HAÜS" is the flagship post type within it.
 
 ---
 
