@@ -161,7 +161,6 @@ flags, category, cleaned fields, and a dedup verdict.
 |-----|--------|
 | `QSEARCH_SCRUB_LLM=1` | Enable the scrub (off ⇒ pure passthrough, scan output identical) |
 | `QSEARCH_SCRUB_MAX` | Max candidates classified per scan (default 60; overflow untouched) |
-| `QSEARCH_NIGHTLY_SCRUB=1` | *(reserved)* allow scrub on nightly runs |
 | `QSEARCH_SCRUB_FLYER_VISION=1` | Enable vision flyer QA (verify + repair, `verifyFlyer.ts`) |
 | `QSEARCH_SCRUB_FLYER_MAX` | Max candidates flyer-checked per scan (default 40) |
 | `QSEARCH_SCRUB_FLYER_PAGES` | Max suspect candidates whose event page is re-fetched for more images (default 15) |
