@@ -232,16 +232,16 @@ export function buildCanonicalUrl(requestPath: string) {
 
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "Zaylist | Portland Pride 2026 Events",
-    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+    title: "Zaylist | Portland Queer Events",
+    description: "Every Portland queer night worth knowing, in one place. Find the party, back the spaces that host it, all year round.",
   },
   "/events": {
-    title: "Portland Pride 2026 Events | Zaylist",
-    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+    title: "Portland Queer Events | Zaylist",
+    description: "Every Portland queer event in one place. Find the party, back the spaces that host it, all year round.",
   },
   "/about": {
-    title: "About Zaylist | Portland Pride 2026",
-    description: "Every Portland Pride 2026 event in one place. Find the party, back the queer spaces that host it, and stick around after July 19.",
+    title: "About Zaylist | Portland's Queer Events Guide",
+    description: "A community-run guide to Portland's queer events, all year. Built by one person for the scene, not a sponsor.",
   },
   "/resume": {
     title: "Tucker Max Resume | Zaylist",
@@ -257,7 +257,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/access": {
     title: "Access & Safety | Zaylist",
-    description: "What Zaylist listings cover, what we can't promise, and how to take care of each other during Pride week.",
+    description: "What Zaylist listings cover, what we can't promise, and how to take care of each other when you go out.",
   },
   "/legal": {
     title: "Legal | Zaylist",
@@ -265,19 +265,19 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/gifting": {
     title: "Gift with Pride | Zaylist",
-    description: "Free queer gifting board for Portland Pride 2026. Post gifts and in-search-of requests in PDX through July 26.",
+    description: "Free queer gifting board for Portland. Post gifts and in-search-of requests across PDX.",
   },
   "/pride-work": {
     title: "Gig Werk: Gigs & Jobs | Zaylist",
-    description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
+    description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
   "/spotted": {
     title: "Missed Connections | Zaylist",
-    description: "Missed connections from Portland Pride 2026 events. Reconnect after PDX Pride weekend.",
+    description: "Missed connections from Portland's queer scene. Reconnect with someone you spotted out.",
   },
   "/submit": {
     title: "Submit an Event | Zaylist",
-    description: "Submit or claim a Portland Pride 2026 event listing on the community-run Zaylist.",
+    description: "Submit or claim a Portland queer event listing on the community-run Zaylist.",
   },
   "/inbox": {
     title: "Inbox | Zaylist",
@@ -292,8 +292,8 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   },
   "/schedule": {
-    title: "Portland Pride Schedule | Zaylist",
-    description: "Your Portland Pride and year-round queer event schedule. Filter by day, save favorites, and plan the week.",
+    title: "Portland Queer Events Schedule | Zaylist",
+    description: "Your Portland queer event schedule. Filter by day, save favorites, and plan your week.",
   },
   "/nude-beaches": {
     title: "Nude Beaches near Portland | Zaylist",
@@ -301,7 +301,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/gigs": {
     title: "Gig Werk: Gigs & Jobs | Zaylist",
-    description: "Portland Pride 2026 gig board and queer work listings. Post gigs or find Pride weekend work in PDX.",
+    description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
 };
 
@@ -498,7 +498,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
   const pageTitle = liveEvent
-    ? `${liveEvent.title} | Portland Pride 2026 | Zaylist`
+    ? `${liveEvent.title} | Portland Queer Events | Zaylist`
     : livePlace
       ? `${livePlace.name} | Queer Portland Directory | Zaylist`
       : liveProfile
@@ -518,7 +518,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       : liveProfile
         ? truncateText(
             liveProfile.bio
-              || `${liveProfile.displayName || liveProfile.username} on Zaylist - Portland Pride member profile.`,
+              || `${liveProfile.displayName || liveProfile.username} on Zaylist - Portland queer community member.`,
             160,
           )
         : routeSeo.description;
