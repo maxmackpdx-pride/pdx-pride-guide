@@ -96,8 +96,7 @@ Housing intent is fuzzy. People often don't know whether they want *a room* or *
 
 **Openness flags** (a chip, not a commitment):
 
-- A **Looking for Housing** post can flag **"Open to forming / joining a HAÜS,"** so household-builders can find people who are game.
-- An **Offering a Room** post can flag **"Open to becoming a HAÜS,"** signaling the household would consider evolving into an intentional household with the right person — and a seeker replying to a roommate post can likewise signal they're **"open to a HAÜS,"** not just a transactional room.
+- A **Looking for Housing** post can flag **"Open to becoming a HAÜS"** — open to forming or joining a household together, not just taking a room — so household-builders can find people who are game. The flag lives on the **seeker side only**; an Offering a Room post is just offering a room and doesn't carry it.
 
 These flags are **user-authored intent**, shown as a small chip on the card (§7). They lower the commitment gradient: someone can start as "looking for a room," mark openness, and grow into "forming a HAÜS" as momentum builds — instead of having to know exactly what they want the moment they post. (It's intent people express about *themselves*, not the platform steering anyone — it stays on the safe side of §0.)
 
@@ -132,7 +131,7 @@ Housing cards are introductions, not advertisements. The goal is not to get a cl
 - **Looking for Housing:** the person is the listing — avatar, name, move timeline, budget, desired neighborhoods, a short lifestyle line, "looking for."
 - **Forming a HAÜS:** group name, member avatars, combined budget, neighborhood goals, move timeline, "looking for N more."
 
-Instead of "Hosted by Alex," cards say **"Meet the household"** with avatars — the people are part of the visual identity. **Open spots show as empty "Open" avatar slots in the stack:** a household with 2 members looking for 2 more renders as 2 filled avatars + 2 empty "Open" placeholders, so "looking for N more" is visible at a glance and a person can picture themselves in one of the gaps. (Same for an Offering a Room card — the open room is an empty slot; a full/"we're full" HAÜS shows no open slots.) Cards carry **community-context** chips (§11) rather than a compatibility score, and an **"Open to a HAÜS"** chip when the poster has flagged that openness (§4). Card states (New, Saved, Filled, etc.) change status, never layout. Badges always pair color with icon/label for accessibility.
+Instead of "Hosted by Alex," cards say **"Meet the household"** with avatars — the people are part of the visual identity. **Open spots show as empty "Open" avatar slots in the stack:** a household with 2 members looking for 2 more renders as 2 filled avatars + 2 empty "Open" placeholders, so "looking for N more" is visible at a glance and a person can picture themselves in one of the gaps. (Same for an Offering a Room card — the open room is an empty slot; a full/"we're full" HAÜS shows no open slots.) **Filling the stack with off-platform roommates:** when offering a room, the poster can add household members who aren't on ZAYLIST by uploading a photo + first name, so "Meet the household" shows everyone who actually lives there, not only members with accounts. These off-platform members are display-only (photo + name, no profile, no account, not clickable) and should only be posted with the roommate's OK. Cards carry **community-context** chips (§11) rather than a compatibility score, and an **"Open to a HAÜS"** chip when the poster has flagged that openness (§4). Card states (New, Saved, Filled, etc.) change status, never layout. Badges always pair color with icon/label for accessibility.
 
 ---
 
