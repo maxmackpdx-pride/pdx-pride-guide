@@ -80,7 +80,8 @@ A forming HAÜS is a small shared workspace, built on existing group-chat + role
 - **Members** — can contribute (post links, comment, react, add dates). Join is by request or invite; requests open a conversation, they don't auto-add.
 - **Shared property shortlist** — members paste **external listing links** (Zillow, Craigslist, a Facebook post, etc.); each becomes a saved card with a thumbnail, group reactions/comments, and a status (Interested → Touring → Applied → Passed/Chosen). These are the group's private bookmarks — ZAYLIST does **not** host or re-list those properties.
 - **Important dates** — target move-in, tours, application deadlines, lease-signing, deposit-due — reusing the existing reminder/notification system so the group gets nudged.
-- **Lifecycle** — create → discover in feed → request/invite → plan together (chat + shortlist + dates) → mark "we're full" → convert to an actual place (the HAÜS persists; can later post "Offering a Room").
+- **Waitlist (full HAÜS)** — when a HAÜS marks itself full, its join action becomes **Join the waitlist** instead of a dead end. Waitlisters queue in the same request-to-join list; the Lead can pull from the waitlist when a spot opens, and waitlisters are notified when one does (or when the HAÜS reopens). Reuses the existing request + notification systems — no new mechanism.
+- **Lifecycle** — create → discover in feed → request/invite → plan together (chat + shortlist + dates) → mark "we're full" (join action becomes the waitlist) → convert to an actual place (the HAÜS persists; can later post "Offering a Room," offered to the waitlist first).
 This is where the product's value concentrates. It's High complexity because it's multi-user coordinated state, but every piece rides an existing system.
 
 ### 4.9 Community context & trust — **Med**
@@ -97,7 +98,7 @@ Reuse existing moderation; add report categories: fake listing, scam, unsafe hou
 ## 5. Build phases
 
 - **v0.1 (ship first, keep it small):** the three post types, one-question composer, openness flags, feed-first discovery, the three card variants, post detail, "Chat with HAÜS." Founder does matching by hand. **No** compatibility, applications, tours, or the full workspace yet.
-- **v0.2:** the Forming-a-HAÜS workspace (Lead + members, shortlist, important dates), post-type conversion, community-context chips, verification badges, saved posts/searches.
+- **v0.2:** the Forming-a-HAÜS workspace (Lead + members, shortlist, important dates), the full-HAÜS waitlist, post-type conversion, community-context chips, verification badges, saved posts/searches.
 - **v0.3:** conversation prompts (soft compatibility); optional structured application + tours for households that want them.
 - **Later:** generalize community-context/compatibility as a shared platform service for other boards.
 

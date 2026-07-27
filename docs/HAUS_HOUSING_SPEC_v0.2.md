@@ -167,8 +167,8 @@ This turns "did anyone see that place on Zillow?" into one organized shortlist t
 2. **Discover** — it appears in the feed as a "Forming a HAÜS" card with community-context signals. People who flagged "open to a HAÜS" (§4) are natural candidates.
 3. **Request to join / invite** — people request in, or the Lead invites; requests open a conversation, they don't auto-add.
 4. **Plan together** — group chat + the shared property shortlist + important dates. This is where fit gets decided *and* where the search actually gets run.
-5. **"We're full"** — the HAÜS marks itself complete; the card updates.
-6. **Convert to a place** — when the group rents somewhere, the HAÜS persists (and can later post "Offering a Room" when someone moves out); the chosen property closes out the shortlist.
+5. **"We're full" + waitlist** — the HAÜS marks itself complete and the card's join action flips from "request to join" to **"Join the waitlist."** Interested people can still add themselves rather than hitting a dead end. The Lead sees the waitlist and can pull from it if a spot opens (a member leaves, or the household decides to grow), and waitlisted people are notified if a spot frees up or the HAÜS reopens. This keeps the household from losing interested people at the exact moment it's most appealing, and it reuses the existing request-to-join list + notification system (no new mechanism).
+6. **Convert to a place** — when the group rents somewhere, the HAÜS persists (and can later post "Offering a Room" when someone moves out — the waitlist is the natural first place to offer it); the chosen property closes out the shortlist.
 
 Hard cases still need answers over time — a member wants to leave a forming group, a dispute over who owns the HAÜS if the Lead departs, a member who ghosts. These ride the platform's roles/permissions model, with **co-lead / hand-off** as the pressure valve.
 
@@ -242,7 +242,7 @@ Reuse platform moderation; add housing categories: fake listing, scam, unsafe ho
 ## 15. Roadmap
 
 - **v0.1** — three post types, one-question composer, openness flags, feed-first discovery, deep-glass HAÜS cards, "Chat" via group conversations. Concierge matching. No compatibility, no applications, no tours.
-- **v0.2** — the "Forming a HAÜS" workspace (Lead + member management, shared property shortlist, important dates/reminders); post-type conversion (Looking for Housing ⇄ Forming a HAÜS); community-context chips (mutual connections, shared events, tenure); verification badges; saved posts/searches; richer detail view.
+- **v0.2** — the "Forming a HAÜS" workspace (Lead + member management, shared property shortlist, important dates/reminders); the full-HAÜS waitlist; post-type conversion (Looking for Housing ⇄ Forming a HAÜS); community-context chips (mutual connections, shared events, tenure); verification badges; saved posts/searches; richer detail view.
 - **v0.3** — conversation prompts (soft compatibility); optional structured application + tours for households that want them.
 - **Later** — the compatibility/community-context service generalized to other boards (organizations, volunteer teams, projects). Housing is just the first board to use it.
 
