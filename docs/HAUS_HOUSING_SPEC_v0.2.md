@@ -132,7 +132,7 @@ Housing cards are introductions, not advertisements. The goal is not to get a cl
 - **Looking for Housing:** the person is the listing — avatar, name, move timeline, budget, desired neighborhoods, a short lifestyle line, "looking for."
 - **Forming a HAÜS:** group name, member avatars, combined budget, neighborhood goals, move timeline, "looking for N more."
 
-Instead of "Hosted by Alex," cards say **"Meet the household"** with avatars — the people are part of the visual identity. Cards carry **community-context** chips (§11) rather than a compatibility score, and an **"Open to a HAÜS"** chip when the poster has flagged that openness (§4). Card states (New, Saved, Filled, etc.) change status, never layout. Badges always pair color with icon/label for accessibility.
+Instead of "Hosted by Alex," cards say **"Meet the household"** with avatars — the people are part of the visual identity. **Open spots show as empty "Open" avatar slots in the stack:** a household with 2 members looking for 2 more renders as 2 filled avatars + 2 empty "Open" placeholders, so "looking for N more" is visible at a glance and a person can picture themselves in one of the gaps. (Same for an Offering a Room card — the open room is an empty slot; a full/"we're full" HAÜS shows no open slots.) Cards carry **community-context** chips (§11) rather than a compatibility score, and an **"Open to a HAÜS"** chip when the poster has flagged that openness (§4). Card states (New, Saved, Filled, etc.) change status, never layout. Badges always pair color with icon/label for accessibility.
 
 ---
 
