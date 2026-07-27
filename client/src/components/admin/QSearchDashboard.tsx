@@ -2797,6 +2797,22 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                               AI {Math.round(c.draft.relevanceScore * 100)}%
                             </span>
                           )}
+                          {c.draft.posterImageUrl &&
+                            c.draft.flyerMatch != null &&
+                            c.draft.flyerMatch < 0.4 &&
+                            !/logo/i.test(c.draft.flyerMatchReason || "") && (
+                              <span
+                                className="qsearch__badge is-fail"
+                                title={c.draft.flyerMatchReason || "Flyer may not match this event"}
+                              >
+                                Flyer mismatch
+                              </span>
+                            )}
+                          {/logo/i.test(c.draft.flyerMatchReason || "") && (
+                            <span className="qsearch__badge is-fail" title={c.draft.flyerMatchReason || ""}>
+                              Looks like a logo
+                            </span>
+                          )}
                           {c.condensed && c.recurring === "weekly" && (
                             <span className="qsearch__badge is-week">Weekly · {c.recurringCount}</span>
                           )}

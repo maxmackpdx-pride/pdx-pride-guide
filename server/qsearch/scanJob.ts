@@ -26,6 +26,7 @@ import { fetchSanctuaryDrafts } from "../ingest/adapters/sanctuary";
 import { storage } from "../storage";
 import { buildScanCandidates, priorFlyerFromCatalog, type ScanCandidate } from "./analyze";
 import { scrubCandidates } from "./scrubLlm";
+import { verifyAndRepairFlyers } from "./verifyFlyer";
 import {
   enrichDraftVenueFromSource,
   matchDirectoryBrands,
@@ -757,6 +758,14 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
     dropped = outcome.dropped;
   } catch (err) {
     console.warn("[qsearch] scrub failed, keeping all candidates:", err);
+  }
+
+  // Vision flyer QA (QSEARCH_SCRUB_FLYER_VISION): verify each poster matches its
+  // event and repair from in-memory alternatives. Mutates drafts in place.
+  try {
+    await verifyAndRepairFlyers(kept);
+  } catch (err) {
+    console.warn("[qsearch] flyer verify failed:", err);
   }
 
   const toRow = (c: ScanCandidate) => ({

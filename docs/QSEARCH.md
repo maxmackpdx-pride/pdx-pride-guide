@@ -162,7 +162,19 @@ flags, category, cleaned fields, and a dedup verdict.
 | `QSEARCH_SCRUB_LLM=1` | Enable the scrub (off ⇒ pure passthrough, scan output identical) |
 | `QSEARCH_SCRUB_MAX` | Max candidates classified per scan (default 60; overflow untouched) |
 | `QSEARCH_NIGHTLY_SCRUB=1` | *(reserved)* allow scrub on nightly runs |
-| `FLYER_LLM_DISABLED=1` | Hard kill — disables scrub (and all paid LLM) |
+| `QSEARCH_SCRUB_FLYER_VISION=1` | Enable vision flyer QA (verify + repair, `verifyFlyer.ts`) |
+| `QSEARCH_SCRUB_FLYER_MAX` | Max candidates flyer-checked per scan (default 40) |
+| `FLYER_LLM_DISABLED=1` | Hard kill — disables scrub, flyer QA, and all paid LLM/vision |
+
+**Vision flyer QA** (`QSEARCH_SCRUB_FLYER_VISION=1`, uses `visionConfigured`):
+- **Verify** — for each candidate with a poster, a vision call reads the flyer and
+  scores how well it matches the event (`draft.flyerMatch` + reason). Flags "Flyer
+  mismatch" / "Looks like a logo" / wrong-date in Review. **Flag-only — never
+  auto-strips** a poster (a wrong flyer is the human's call).
+- **Repair** — when a candidate has no poster or a suspect one, it vision-checks the
+  in-memory alternatives (cross-source bundle + series-mate posters), cheapest-first,
+  and attaches the first that clears the match bar. Never attaches a wrong guess.
+- Smoke: `npx tsx script/smoke-qsearch-flyer.ts` (mocked vision, offline).
 
 Behavior:
 - **Relevance 0–1 + reason** on every scrubbed draft (`draft.relevanceScore` /
