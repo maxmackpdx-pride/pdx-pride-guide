@@ -79,7 +79,12 @@ The board launches with three post types. Everything else is a variation.
 
 **Looking for Housing.** An individual needs a place. They may not know where yet. Typical info: budget, move timeline, neighborhood preferences, room preferences, short description. *(Also easy to seed — it's basically a profile flag.)*
 
-**Forming a HAÜS.** The flagship and the biggest differentiator. Instead of finding a room, people find *each other* first, then rent together. "Two friends looking for one more." "Building a queer household together." The household forms first; the property comes second. Nobody builds this well today. *(Highest halo value, slowest to seed — needs multiple people to coordinate. It's the story, not the day-one volume driver.)*
+**Forming a HAÜS.** The flagship and the biggest differentiator. Instead of finding a room, people find *each other* first, then rent together. "Two friends looking for one more." "Building a queer household together." The household forms first. Nobody builds this well today. *(Highest halo value, slowest to seed — needs multiple people to coordinate. It's the story, not the day-one volume driver.)*
+
+It comes in **two flavors**, chosen when you create it:
+
+- **Find a place together** — no property yet. Form the group, then house-hunt as a team using the shared shortlist. (The pure "form first" case.)
+- **Place in mind** — the founder already has a specific prospected place, or is ready to sign a lease on one, and needs people to fill it and sign together. It's still people-first (the household forms together), but a property is attached from the start and there's usually a lease deadline, so the important dates carry more weight. Think "I found the house, I need roommates to make it real" — distinct from "Offering a Room" because nobody has signed yet and the household doesn't exist.
 
 ### Posts are fluid — convert and signal openness
 
@@ -163,7 +168,7 @@ This turns "did anyone see that place on Zillow?" into one organized shortlist t
 
 **Formation lifecycle:**
 
-1. **Create** — the Lead starts the HAÜS (or converts a "Looking for Housing" post into one): name, goals, budget range, target neighborhoods, timeline, how many more people.
+1. **Create** — the Lead starts the HAÜS (or converts a "Looking for Housing" post into one): name, goals, budget range, target neighborhoods, timeline, how many more people, and the **flavor** (find a place together, or place in mind). If "place in mind," they attach the specific place up front — it seeds the shortlist as the target — and the lease deadline drives the important dates.
 2. **Discover** — it appears in the feed as a "Forming a HAÜS" card with community-context signals. People who flagged "open to a HAÜS" (§4) are natural candidates.
 3. **Request to join / invite** — people request in, or the Lead invites; requests open a conversation, they don't auto-add.
 4. **Plan together** — group chat + the shared property shortlist + important dates. This is where fit gets decided *and* where the search actually gets run.

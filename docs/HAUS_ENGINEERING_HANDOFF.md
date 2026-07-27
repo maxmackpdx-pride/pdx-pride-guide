@@ -75,6 +75,7 @@ A lightweight, modular detail view that answers the obvious questions before som
 "Chat" opens a conversation using the existing group-conversation/inbox system, with the post attached. No new messaging anything.
 
 ### 4.8 Forming a HAÜS — the workspace — **High** (this is the flagship and the hardest part)
+Two flavors, picked at creation (a field on the post): **find a place together** (no property yet — form the group, then hunt) or **place in mind** (the founder already has a specific prospected place / is ready to sign a lease, and needs people to fill it and sign together). "Place in mind" attaches a property up front (seeds the shortlist as the target) and leans on the lease deadline in the important dates. Both are still people-first and form the household together; "place in mind" differs from "Offering a Room" because nobody has signed and the household doesn't exist yet.
 A forming HAÜS is a small shared workspace, built on existing group-chat + roles + reminders + saved-links:
 - **The Lead** — the person who forms it. A responsibility role (reuse existing roles): invite/add/remove members, approve/decline join requests, manage important dates, curate the shortlist, edit the post. Can name a **co-lead** or hand off (so it survives if the founder leaves).
 - **Members** — can contribute (post links, comment, react, add dates). Join is by request or invite; requests open a conversation, they don't auto-add.
