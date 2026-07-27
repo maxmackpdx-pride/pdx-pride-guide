@@ -72,6 +72,7 @@ import {
   enableSource,
   listCandidates,
   markAllNewSeen,
+  clearCandidateFlyer,
   markCandidatesCommitted,
   markCandidatesSkipped,
   prunePendingAgainstCatalog,
@@ -5220,6 +5221,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const restored = restoreCandidate(id);
     if (restored) auditAdmin(req, "qsearch_queue_restore", { type: "qsearch", detail: { id } });
     res.json({ ok: restored, restored });
+  });
+
+  /** Drop a candidate's poster (e.g. AI flagged it as a logo / wrong flyer). */
+  app.post("/api/admin/qsearch/queue/clear-flyer", requireAdmin, (req, res) => {
+    const id = String(req.body?.id || "").trim();
+    if (!id) return res.status(400).json({ error: "id required" });
+    const cleared = clearCandidateFlyer(id);
+    if (cleared) auditAdmin(req, "qsearch_queue_clear_flyer", { type: "qsearch", detail: { id } });
+    res.json({ ok: cleared, cleared });
   });
 
   app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {

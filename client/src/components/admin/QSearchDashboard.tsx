@@ -891,6 +891,16 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
     }
   }
 
+  async function removeFlyer(id: string) {
+    try {
+      await apiRequest("POST", "/api/admin/qsearch/queue/clear-flyer", { id });
+      toast({ title: "Flyer removed", description: "Poster cleared from this candidate." });
+      void refetchQueue();
+    } catch (err) {
+      toast({ title: "Couldn't remove flyer", description: parseApiError(err, "Try again"), variant: "destructive" });
+    }
+  }
+
   const pollJob = useCallback(async (id: string) => {
     const res = await apiRequest("GET", `/api/admin/qsearch/scan/${id}`);
     const data = (await res.json()) as ScanJobView;
@@ -2767,6 +2777,21 @@ export default function QSearchDashboard({ onCommitted }: { onCommitted?: () => 
                           />
                         ) : (
                           <div className="qsearch__cand-slim-flyer-empty"> - </div>
+                        )}
+                        {c.draft.posterImageUrl && /logo/i.test(c.draft.flyerMatchReason || "") && (
+                          <button
+                            type="button"
+                            className="qsearch__add-dir-btn"
+                            style={{ borderColor: "var(--qs-pink)", color: "var(--qs-pink)", background: "transparent" }}
+                            title={c.draft.flyerMatchReason || "AI flagged this as a logo"}
+                            onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void removeFlyer(c.id);
+                            }}
+                          >
+                            Remove flyer
+                          </button>
                         )}
                       </div>
                       <div className="qsearch__cand-slim-main">

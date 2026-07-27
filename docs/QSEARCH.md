@@ -164,6 +164,7 @@ flags, category, cleaned fields, and a dedup verdict.
 | `QSEARCH_NIGHTLY_SCRUB=1` | *(reserved)* allow scrub on nightly runs |
 | `QSEARCH_SCRUB_FLYER_VISION=1` | Enable vision flyer QA (verify + repair, `verifyFlyer.ts`) |
 | `QSEARCH_SCRUB_FLYER_MAX` | Max candidates flyer-checked per scan (default 40) |
+| `QSEARCH_SCRUB_FLYER_PAGES` | Max suspect candidates whose event page is re-fetched for more images (default 15) |
 | `FLYER_LLM_DISABLED=1` | Hard kill — disables scrub, flyer QA, and all paid LLM/vision |
 
 **Vision flyer QA** (`QSEARCH_SCRUB_FLYER_VISION=1`, uses `visionConfigured`):
@@ -172,9 +173,13 @@ flags, category, cleaned fields, and a dedup verdict.
   mismatch" / "Looks like a logo" / wrong-date in Review. **Flag-only — never
   auto-strips** a poster (a wrong flyer is the human's call).
 - **Repair** — when a candidate has no poster or a suspect one, it vision-checks the
-  in-memory alternatives (cross-source bundle + series-mate posters), cheapest-first,
-  and attaches the first that clears the match bar. Never attaches a wrong guess.
-- Smoke: `npx tsx script/smoke-qsearch-flyer.ts` (mocked vision, offline).
+  in-memory alternatives (cross-source bundle + series-mate posters) first, then
+  **re-fetches the event page** (SSRF-guarded, budget-limited) for more images — the deep
+  Sanctuary wrong-day fix. Cheapest-first; attaches the first that clears the match bar.
+  Never attaches a wrong guess.
+- **Remove flyer** — a logo-flagged poster gets a one-tap *Remove flyer* in Review
+  (`POST /api/admin/qsearch/queue/clear-flyer {id}`). Manual, never automatic.
+- Smoke: `npx tsx script/smoke-qsearch-flyer.ts` (mocked vision + page fetch, offline).
 
 Behavior:
 - **Relevance 0–1 + reason** on every scrubbed draft (`draft.relevanceScore` /

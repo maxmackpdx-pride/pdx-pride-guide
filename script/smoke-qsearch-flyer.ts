@@ -89,6 +89,13 @@ async function main() {
   await verifyAndRepairFlyers([noGood], { fetchImpl: mockFetch });
   check("no good alt: stays flyerless", noGood.draft.posterImageUrl == null);
 
+  // 6) No in-memory alt, but the event page has a good flyer ⇒ acquired via page fetch
+  const fromPage = cand("c6", { posterImageUrl: null, eventPageUrl: "https://venue/e/party" });
+  const pageFetch = async () =>
+    `<html><img src="https://venue/img/page-good.jpg"><img src="https://venue/img/nav-logo.png"></html>`;
+  await verifyAndRepairFlyers([fromPage], { fetchImpl: mockFetch, pageFetch });
+  check("page fetch: acquired flyer from event page", fromPage.draft.posterImageUrl === "https://venue/img/page-good.jpg");
+
   console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILED`);
   process.exit(failures === 0 ? 0 : 1);
 }

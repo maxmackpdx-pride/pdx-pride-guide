@@ -14,7 +14,8 @@
 // Gated by QSEARCH_SCRUB_FLYER_VISION=1. Off ⇒ pure passthrough. Never throws.
 
 import type { ScanCandidate } from "./analyze";
-import { visionConfigured, localUploadToDataUrl } from "./vision";
+import { visionConfigured, localUploadToDataUrl, extractFlyerImageUrls } from "./vision";
+import { fetchIngestSource } from "../ingest/fetchSource";
 
 /** Poster clearly matches ⇒ no flag. */
 const MATCH_OK = 0.6;
@@ -147,6 +148,27 @@ function dayOf(iso?: string | null): string | null {
   return m ? m[1] : null;
 }
 
+/** Human event page worth scraping for more images (skip feed/API URLs). */
+function eventPageUrl(c: ScanCandidate): string | null {
+  const urls = [c.draft.eventPageUrl, c.draft.ticketUrl, c.draft.sourceUrl, c.sourceUrl];
+  for (const u of urls) {
+    const s = String(u || "").trim();
+    if (!/^https?:\/\//i.test(s)) continue;
+    if (/format=json|wp-json|\/tribe\/events|\.ics(\?|$)|\/ics\/?/i.test(s)) continue;
+    return s;
+  }
+  return null;
+}
+
+async function defaultPageFetch(url: string): Promise<string | null> {
+  try {
+    const r = await fetchIngestSource(url);
+    return r?.body || null;
+  } catch {
+    return null;
+  }
+}
+
 export type FlyerQaSummary = { checked: number; flagged: number; repaired: number };
 
 /**
@@ -155,15 +177,18 @@ export type FlyerQaSummary = { checked: number; flagged: number; repaired: numbe
  */
 export async function verifyAndRepairFlyers(
   candidates: ScanCandidate[],
-  opts?: { fetchImpl?: typeof fetch },
+  opts?: { fetchImpl?: typeof fetch; pageFetch?: (url: string) => Promise<string | null> },
 ): Promise<FlyerQaSummary> {
   const cfg = visionConfigured();
   if (!flyerVisionEnabled() || !cfg || candidates.length === 0) {
     return { checked: 0, flagged: 0, repaired: 0 };
   }
   const fetchImpl = opts?.fetchImpl ?? fetch;
+  const pageFetch = opts?.pageFetch ?? defaultPageFetch;
   const max = envInt("QSEARCH_SCRUB_FLYER_MAX", 40);
   const perCandidateAlts = 3;
+  // Bound how many suspect candidates we're willing to re-fetch a page for.
+  let pageBudget = envInt("QSEARCH_SCRUB_FLYER_PAGES", 15);
   let checked = 0;
   let flagged = 0;
   let repaired = 0;
@@ -201,18 +226,39 @@ export async function verifyAndRepairFlyers(
 
     if (!suspect) continue;
 
-    // Repair: try the in-memory alternatives, cheapest-first, first match wins.
-    const alts = alternativeImages(c).slice(0, perCandidateAlts);
-    for (const alt of alts) {
-      const chk = await checkImage(alt, event, cfg, fetchImpl);
-      checked++;
-      if (chk && !chk.isLogo && chk.isEventFlyer && chk.match >= ATTACH_MIN) {
-        d.posterImageUrl = alt;
-        d.flyerMatch = chk.match;
-        d.flyerMatchReason = `AI-selected flyer (${chk.reason || "match"})`;
-        warn("AI flyer: replaced with a better-matching image");
-        repaired++;
-        break;
+    // Repair: vision-check candidate images cheapest-first; first confident,
+    // non-logo match wins. Never attach a wrong guess.
+    const tryAttach = async (urls: string[]): Promise<boolean> => {
+      for (const alt of urls) {
+        if (!alt || alt === d.posterImageUrl) continue;
+        const chk = await checkImage(alt, event, cfg, fetchImpl);
+        checked++;
+        if (chk && !chk.isLogo && chk.isEventFlyer && chk.match >= ATTACH_MIN) {
+          d.posterImageUrl = alt;
+          d.flyerMatch = chk.match;
+          d.flyerMatchReason = `AI-selected flyer (${chk.reason || "match"})`;
+          warn("AI flyer: replaced with a better-matching image");
+          repaired++;
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // 1) In-memory alternatives (cross-source bundle + series-mate posters).
+    let fixed = await tryAttach(alternativeImages(c).slice(0, perCandidateAlts));
+
+    // 2) Deeper fix: re-fetch the event page for MORE images (the Sanctuary
+    //    wrong-day case). Budget-limited across the scan.
+    if (!fixed && pageBudget > 0) {
+      const page = eventPageUrl(c);
+      if (page) {
+        pageBudget--;
+        const html = await pageFetch(page);
+        if (html) {
+          const imgs = extractFlyerImageUrls(html, page, 4).slice(0, perCandidateAlts);
+          fixed = await tryAttach(imgs);
+        }
       }
     }
   }

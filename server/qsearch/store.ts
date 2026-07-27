@@ -703,6 +703,28 @@ export function restoreCandidate(id: string): boolean {
   return info.changes > 0;
 }
 
+/** Drop the attached poster from a candidate (e.g. AI flagged it as a logo). */
+export function clearCandidateFlyer(id: string): boolean {
+  ensureTables();
+  const row = sqlite.prepare(`SELECT draft_json FROM qsearch_candidates WHERE id = ?`).get(id) as
+    | { draft_json: string }
+    | undefined;
+  if (!row) return false;
+  let draft: Record<string, unknown>;
+  try {
+    draft = JSON.parse(row.draft_json);
+  } catch {
+    return false;
+  }
+  draft.posterImageUrl = null;
+  draft.flyerMatch = null;
+  draft.flyerMatchReason = null;
+  sqlite
+    .prepare(`UPDATE qsearch_candidates SET draft_json = ? WHERE id = ?`)
+    .run(JSON.stringify(draft), id);
+  return true;
+}
+
 export function listCandidates(opts?: {
   jobId?: string;
   status?: string;
