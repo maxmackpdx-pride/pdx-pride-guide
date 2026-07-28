@@ -3451,6 +3451,121 @@ function seedBusinessesDirectory() {
   }
 }
 
+function seedHousingDemoPosts() {
+  const owner = resolveSiteOwner();
+  if (!owner) return; // no account to attribute to yet
+  const already = sqlite
+    .prepare(`SELECT COUNT(*) AS n FROM housing_posts WHERE name LIKE 'DEMO%' OR headline LIKE 'DEMO %'`)
+    .get() as { n: number };
+  if (already?.n > 0) return; // idempotent guard beyond the boot flag
+
+  const now = new Date().toISOString();
+
+  // Demo verified property manager for the MANAGED listing.
+  let pmId: number | null = null;
+  try {
+    const existingPm = sqlite
+      .prepare(`SELECT id FROM property_managers WHERE email = 'demo-pm@zaylist.local'`)
+      .get() as { id: number } | undefined;
+    if (existingPm) {
+      pmId = existingPm.id;
+    } else {
+      const pmInfo = sqlite
+        .prepare(
+          `INSERT INTO property_managers
+             (user_id, name, email, company, password_hash, site_url, site_domain,
+              status, verified_at, membership_status, first_month_free, founding_partner, created_at)
+           VALUES (?, 'Demo Property Management', 'demo-pm@zaylist.local', 'Demo Property Management',
+              '', 'https://demorentals.com', 'demorentals.com',
+              'active', ?, 'active', 1, 0, ?)`,
+        )
+        .run(owner.id, now, now);
+      pmId = Number(pmInfo.lastInsertRowid);
+    }
+  } catch {
+    pmId = null;
+  }
+
+  const insertPost = sqlite.prepare(`
+    INSERT INTO housing_posts (
+      user_id, type, name, headline, body, photo_urls, areas, tags,
+      budget, move_timeline, living_style, open_to_haus,
+      rent, rent_note, deposit, move_in, room_note, beds, baths, parking, outdoor, culture, access,
+      flavor, seeking, is_full, goals, around_post_id,
+      property_manager_id, source_url, source_domain, badges, last_seen_at,
+      status, created_at, updated_at
+    ) VALUES (
+      @userId, @type, @name, @headline, @body, @photos, @areas, '[]',
+      @budget, @moveTimeline, '[]', @openToHaus,
+      @rent, NULL, NULL, @moveIn, NULL, @beds, @baths, @parking, @outdoor, '[]', '[]',
+      @flavor, @seeking, 0, @goals, NULL,
+      @pmId, @sourceUrl, @sourceDomain, @badges, @lastSeen,
+      'ACTIVE', @now, @now
+    )
+  `);
+  const insertMember = sqlite.prepare(
+    `INSERT INTO housing_members (post_id, kind, user_id, name, photo_url, species, role, sort_order, created_at)
+     VALUES (?, ?, NULL, ?, ?, ?, 'MEMBER', ?, ?)`,
+  );
+
+  // OFFERING a Room
+  const offering = insertPost.run({
+    userId: owner.id, type: "OFFERING", name: "DEMO",
+    headline: "DEMO — Sunny room in a queer household, SE Portland",
+    body: "This is a DEMO Offering a Room listing showing how a room in an existing household looks. Not a real room.",
+    photos: JSON.stringify(["/hausing/demo/room-offering.jpg"]), areas: JSON.stringify(["Southeast"]),
+    budget: null, moveTimeline: null, openToHaus: 0,
+    rent: "$900/mo", moveIn: "Flexible", beds: 3, baths: 1, parking: "STREET_ONLY", outdoor: "SHARED_YARD",
+    flavor: null, seeking: 0, goals: null, pmId: null, sourceUrl: null, sourceDomain: null,
+    badges: "[]", lastSeen: null, now,
+  });
+  const offeringId = Number(offering.lastInsertRowid);
+  insertMember.run(offeringId, "OFFPLATFORM", "Devon", "/hausing/demo/av-1.jpg", null, 0, now);
+  insertMember.run(offeringId, "OFFPLATFORM", "Sam", "/hausing/demo/av-2.jpg", null, 1, now);
+  insertMember.run(offeringId, "PET", "Maple", "/hausing/demo/pet-dog.jpg", "dog", 2, now);
+
+  // LOOKING for Housing
+  insertPost.run({
+    userId: owner.id, type: "LOOKING", name: "DEMO",
+    headline: "DEMO — Looking for a room, moving to PDX in August",
+    body: "This is a DEMO Looking for Housing post. The person is the listing.",
+    photos: JSON.stringify(["/hausing/demo/person-looking.jpg"]), areas: JSON.stringify(["North", "Northeast"]),
+    budget: "$850/mo", moveTimeline: "Aug 1, some flex", openToHaus: 1,
+    rent: null, moveIn: null, beds: null, baths: null, parking: null, outdoor: null,
+    flavor: null, seeking: 0, goals: null, pmId: null, sourceUrl: null, sourceDomain: null,
+    badges: "[]", lastSeen: null, now,
+  });
+
+  // FORMING a HAÜS
+  const forming = insertPost.run({
+    userId: owner.id, type: "FORMING", name: "DEMO",
+    headline: "DEMO — Building a queer household, looking for 2 more",
+    body: "This is a DEMO Forming a HAÜS post. People team up first, then find a place together.",
+    photos: JSON.stringify(["/hausing/demo/room-forming.jpg"]), areas: JSON.stringify(["Southeast", "Northeast"]),
+    budget: null, moveTimeline: null, openToHaus: 0,
+    rent: null, moveIn: null, beds: null, baths: null, parking: null, outdoor: null,
+    flavor: "FIND_TOGETHER", seeking: 2, goals: "3–4 bed by September", pmId: null, sourceUrl: null, sourceDomain: null,
+    badges: "[]", lastSeen: null, now,
+  });
+  const formingId = Number(forming.lastInsertRowid);
+  insertMember.run(formingId, "OFFPLATFORM", "Rae", "/hausing/demo/av-3.jpg", null, 0, now);
+  insertMember.run(formingId, "OFFPLATFORM", "Nico", "/hausing/demo/av-4.jpg", null, 1, now);
+  insertMember.run(formingId, "PET", "Nugget", "/hausing/demo/pet-beagle.jpg", "dog", 2, now);
+
+  // MANAGED Property
+  insertPost.run({
+    userId: owner.id, type: "MANAGED", name: "DEMO Rose City Flats",
+    headline: "DEMO — 1 bed / 1 bath, NE Portland, available now",
+    body: "This is a DEMO Managed Property listing from a verified property manager. Renters inquire on the manager's own site.",
+    photos: JSON.stringify(["/hausing/demo/unit-managed.jpg"]), areas: JSON.stringify(["Northeast"]),
+    budget: null, moveTimeline: null, openToHaus: 0,
+    rent: "$1,450/mo", moveIn: "Now", beds: 1, baths: 1, parking: "OFF_STREET", outdoor: "PATIO_BALCONY",
+    flavor: null, seeking: 0, goals: null, pmId,
+    sourceUrl: "https://demorentals.com/listings/rose-city-flats", sourceDomain: "demorentals.com",
+    badges: JSON.stringify(["ACCESSIBLE"]), lastSeen: now, now,
+  });
+}
+
 function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
   seedData();
@@ -3458,6 +3573,14 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_ads_v1")) {
     seedAdsIfNeeded(sqlite);
     recordBootMigration("seed_ads_v1");
+  }
+  if (!hasBootMigration("seed_housing_demo_v1")) {
+    try {
+      seedHousingDemoPosts();
+    } catch (err) {
+      console.warn("[boot] seed_housing_demo_v1 skipped:", err instanceof Error ? err.message : err);
+    }
+    recordBootMigration("seed_housing_demo_v1");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
