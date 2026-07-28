@@ -334,6 +334,197 @@ sqlite.exec(`
   );
 `);
 
+// HAUSING - the Housing board. See shared/schema.ts for the annotated schema.
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS housing_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    name TEXT NOT NULL DEFAULT '',
+    headline TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL DEFAULT '',
+    photo_urls TEXT NOT NULL DEFAULT '[]',
+    areas TEXT NOT NULL DEFAULT '[]',
+    budget TEXT,
+    move_timeline TEXT,
+    living_style TEXT NOT NULL DEFAULT '[]',
+    open_to_haus INTEGER NOT NULL DEFAULT 0,
+    rent TEXT,
+    rent_note TEXT,
+    deposit TEXT,
+    move_in TEXT,
+    room_note TEXT,
+    beds REAL,
+    baths REAL,
+    parking TEXT,
+    outdoor TEXT,
+    culture TEXT NOT NULL DEFAULT '[]',
+    access TEXT NOT NULL DEFAULT '[]',
+    flavor TEXT,
+    seeking INTEGER NOT NULL DEFAULT 0,
+    is_full INTEGER NOT NULL DEFAULT 0,
+    goals TEXT,
+    around_post_id INTEGER,
+    property_manager_id INTEGER,
+    source_url TEXT,
+    source_domain TEXT,
+    badges TEXT NOT NULL DEFAULT '[]',
+    last_seen_at TEXT,
+    gone INTEGER NOT NULL DEFAULT 0,
+    lat REAL,
+    lng REAL,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    hidden INTEGER NOT NULL DEFAULT 0,
+    hidden_by_user_id INTEGER,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    admin_notes TEXT,
+    archived_workspace TEXT,
+    created_at TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT '',
+    last_change_label TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_posts_type ON housing_posts(type, status);
+  CREATE INDEX IF NOT EXISTS idx_housing_posts_user ON housing_posts(user_id);
+  CREATE INDEX IF NOT EXISTS idx_housing_posts_around ON housing_posts(around_post_id);
+
+  CREATE TABLE IF NOT EXISTS housing_members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'MEMBER',
+    user_id INTEGER,
+    name TEXT NOT NULL DEFAULT '',
+    photo_url TEXT,
+    species TEXT,
+    role TEXT NOT NULL DEFAULT 'MEMBER',
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_members_post ON housing_members(post_id);
+
+  CREATE TABLE IF NOT EXISTS housing_saves (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    seen_updated_at TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_housing_saves_uniq ON housing_saves(post_id, user_id);
+
+  CREATE TABLE IF NOT EXISTS housing_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    requester_user_id INTEGER NOT NULL,
+    recipient_user_id INTEGER NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'CHAT',
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    thread_id TEXT,
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT '',
+    resolved_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_requests_post ON housing_requests(post_id, status);
+  CREATE INDEX IF NOT EXISTS idx_housing_requests_recipient ON housing_requests(recipient_user_id, status);
+
+  CREATE TABLE IF NOT EXISTS housing_places (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    added_by_user_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    title TEXT NOT NULL DEFAULT '',
+    rent TEXT,
+    neighborhood TEXT,
+    source_domain TEXT,
+    thumb_url TEXT,
+    status TEXT NOT NULL DEFAULT 'INTERESTED',
+    is_target INTEGER NOT NULL DEFAULT 0,
+    managed_post_id INTEGER,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_places_post ON housing_places(post_id);
+
+  CREATE TABLE IF NOT EXISTS housing_place_reactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    place_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    emoji TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_place_reactions_place ON housing_place_reactions(place_id);
+
+  CREATE TABLE IF NOT EXISTS housing_place_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    place_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_place_comments_place ON housing_place_comments(place_id);
+
+  CREATE TABLE IF NOT EXISTS housing_dates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    created_by_user_id INTEGER NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'OTHER',
+    label TEXT NOT NULL,
+    date_on TEXT NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    remind_at TEXT,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_dates_post ON housing_dates(post_id);
+
+  CREATE TABLE IF NOT EXISTS property_managers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    company TEXT,
+    password_hash TEXT NOT NULL DEFAULT '',
+    business_id INTEGER,
+    site_url TEXT,
+    site_domain TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    verified_at TEXT,
+    membership_status TEXT NOT NULL DEFAULT 'trialing',
+    first_month_free INTEGER NOT NULL DEFAULT 1,
+    founding_partner INTEGER NOT NULL DEFAULT 0,
+    membership_started_at TEXT,
+    membership_renews_at TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE IF NOT EXISTS property_manager_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    company TEXT NOT NULL,
+    site_url TEXT NOT NULL,
+    domain_proof TEXT NOT NULL DEFAULT '',
+    business_license TEXT NOT NULL DEFAULT '',
+    directory_business_id INTEGER,
+    note TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    owner_notes TEXT,
+    created_property_manager_id INTEGER,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE IF NOT EXISTS housing_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    reporter_user_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    detail TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    admin_notes TEXT,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_housing_reports_post ON housing_reports(post_id);
+`);
+
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN grand_opening_date TEXT`); } catch {}
