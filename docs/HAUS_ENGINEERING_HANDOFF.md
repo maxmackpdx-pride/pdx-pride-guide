@@ -82,6 +82,16 @@ All four share one underlying post object; type controls which fields and card v
 - Verification is the switch: no verified PM account, no scraper. Respect `server/ingest/ssrf.ts` and existing fetch guards. Complexity is Med and **per-site** (each PM site is its own small adapter), same scaling story as trusted venues.
 - **Admin management UI = a new tab in the QSearch dashboard, next to "Trusted."** Manage PM rental sources (add a verified PM's site, map/configure its adapter, run/preview a scan, see what got ingested, disable a source) from a **new tab in `client/src/components/admin/QSearchDashboard.tsx`**, mirroring the existing Trusted tab. Same dashboard, one more tab — don't build a separate admin surface.
 
+**4.1d Managed Property safeguards — required (do not ship auto-ingest without these).**
+- **Fair-housing scan on ingest.** Run every scraped listing's text through a moderation pass for discriminatory / source-of-income language (e.g. "no kids," "no Section 8," "young professionals") *before* it publishes. A hit **holds the listing and files a flag in the owner's review queue** (reuse `storage.createModerationRequest(...)`), rather than auto-publishing raw. In OR/Portland refusing Section 8 is illegal — this is liability control, not nicety.
+- **Scam / legitimacy verification.** The PM application must capture real proof for the owner to approve on: **rental-site domain ownership, business license, and a match to the directory business record.** Store it on the application; surface it in the owner's approval view.
+- **Stale-listing freshness.** Stamp `lastSeenAt` on each scraped listing each scan; when a unit is absent for N consecutive scans, mark it **stale / auto-unpublish** (this fires the Build-a-HAÜS teardown, 4.1b). Show "updated X ago" on the card/detail.
+- **Scraper health.** Track per-source last-success / error state; show it in the QSearch tab (4.1c) and **notify the owner when a source errors** for M runs, so a broken adapter doesn't silently stop the feed. Reuse the existing scan-job status plumbing (`server/qsearch/scanJob.ts` already tracks status/failed).
+- **Geofence to the Portland metro.** Filter ingested units to the metro bounding box (reuse the same Portland bounds as the directory map lock) so statewide inventory doesn't flood the board.
+- **Affordability badges.** Support **"Accepts Section 8 / income-restricted / accessible"** as affirmative badges on Managed Property (positive signals only — never a filter that excludes people, per §2).
+
+*Upside / roadmap (not v0.1):* PM-facing stats on their page (views, saves, groups forming); a **"secured it"** outcome marker on a Build-a-HAÜS (even off-platform) for social proof + match-signal learning; **owner-inbox triage** (admins triage/annotate applications, hide-reviews, and FH flags; owner keeps the final add/remove call).
+
 **4.1b "Build a HAÜS" from a Managed Property — Med.** The bridge between the 4th type and the flagship. A **"Build a HAÜS" button** on every Managed Property listing creates a **Forming a HAÜS** post (4.8) in the *place-in-mind* flavor, **pre-seeded** from the listing (property name, cover photo, rent, beds/baths, neighborhood copied in; the unit auto-added to the new HAÜS's shortlist as the target; availability/lease date → important dates). Key behaviors:
 - **No claim, non-exclusive.** It does NOT reserve or take down the listing — the managed post stays live and rentable, and **multiple** Build-a-HAÜS groups can attach to the same property simultaneously. Model it as a many-to-one link (many forming HAÜS posts → one managed listing), not a status flip on the listing.
 - **Interest indicator on the listing.** The managed listing renders a live "N groups forming to secure this place" indicator, each entry linking to its HAÜS (show Lead + member count + "looking for N more"). Two-way link: the HAÜS shows "Forming around [Property] · managed by [X]" back to the listing.
@@ -134,9 +144,9 @@ Reuse existing moderation; add report categories: fake listing, scam, unsafe hou
 
 ## 5. Build phases
 
-- **v0.1 (ship first, keep it small):** the four post types (incl. Managed Property behind a PM-verification flag), one-question composer, openness flags, feed-first discovery, the four card variants, post detail, request-to-chat (consent-based). Founder does matching by hand. **No** compatibility, applications, tours, or the full workspace yet.
+- **v0.1 (ship first, keep it small):** the four post types (incl. Managed Property behind a PM-verification flag), one-question composer, openness flags, feed-first discovery, the four card variants, post detail, request-to-chat (consent-based). Founder does matching by hand. **Managed Property auto-ingest ships only with its 4.1d safeguards** (FH ingest scan, PM verification proof, stale-listing freshness, scraper health, metro geofence, affordability badges). **No** compatibility, applications, tours, or the full workspace yet.
 - **v0.2:** the Forming-a-HAÜS workspace (Lead + members, shortlist, important dates), the full-HAÜS waitlist, post-type conversion, community-context chips, verification badges, saved posts/searches.
-- **v0.3:** conversation prompts (soft compatibility); optional structured application + tours for households that want them.
+- **v0.3:** conversation prompts (soft compatibility); optional structured application + tours for households that want them; Managed Property stickiness (PM stats, Build-a-HAÜS "secured it" outcome loop, owner-inbox triage — 4.1d).
 - **Later:** generalize community-context/compatibility as a shared platform service for other boards.
 
 ---
