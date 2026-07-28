@@ -6353,6 +6353,18 @@ function runBootMigrationsOnce() {
     recordBootMigration("yes_coach_directory_logo_v1");
   }
 
+  // Pink Ponies — gold/white neon conversion of official mark for directory pack.
+  if (!hasBootMigration("pink_ponies_directory_logo_v1")) {
+    const imageUrl = "/directory-logos/Pink_Ponies.png";
+    sqlite
+      .prepare(
+        `UPDATE businesses SET image_url = ?
+         WHERE LOWER(name) = LOWER('Pink Ponies')`,
+      )
+      .run(imageUrl);
+    recordBootMigration("pink_ponies_directory_logo_v1");
+  }
+
   /**
    * The Secret Warehouse — Kerns warehouse / film + party venue (411 NE 18th).
    * Hosts queer dance & play parties; often listed as "Secret Warehouse Portland".
