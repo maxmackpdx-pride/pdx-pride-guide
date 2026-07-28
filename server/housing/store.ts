@@ -1004,6 +1004,14 @@ export function convertHousingPostType(db: Database, postId: number, to: "LOOKIN
   const now = nowIso();
   if (to === "FORMING") {
     const archived = db.prepare(`SELECT archived_workspace FROM housing_posts WHERE id = ?`).get(postId) as any;
+    // A Looking post has no house name, so a straight conversion would render as
+    // a bare "HAÜS". Seed one from the poster's first name; they can rename it.
+    const current = db.prepare(`SELECT name FROM housing_posts WHERE id = ?`).get(postId) as any;
+    if (!String(current?.name || "").trim()) {
+      const author = db.prepare(`SELECT username, display_name FROM users WHERE id = ?`).get(userId) as any;
+      const seed = String(author?.display_name || author?.username || "").trim().split(/\s+/)[0];
+      if (seed) db.prepare(`UPDATE housing_posts SET name = ? WHERE id = ?`).run(seed, postId);
+    }
     db.prepare(
       `UPDATE housing_posts SET type = 'FORMING', flavor = COALESCE(flavor, 'FIND_TOGETHER'),
         updated_at = ?, last_change_label = 'Now forming a HAÜS', archived_workspace = NULL WHERE id = ?`,

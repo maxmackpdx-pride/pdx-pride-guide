@@ -706,9 +706,12 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
             {post.sourceDomain ? (
               <div className="hz-around" style={{ marginTop: 12 }}>
                 <HousingIcon name="search" size={13} />
+                {/* Only claim a scan when there actually was one. Hand posted
+                    listings carry no lastSeenAt stamp. */}
                 <span>
-                  Pulled from {post.sourceDomain}. Managed listings come in from the manager site scan, so
-                  availability stays current.
+                  {post.lastSeenAt
+                    ? `Pulled from ${post.sourceDomain}. Managed listings come in from the manager site scan, so availability stays current.`
+                    : `Listed on ${post.sourceDomain}. Check there for the current availability.`}
                 </span>
               </div>
             ) : null}
