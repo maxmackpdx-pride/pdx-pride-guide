@@ -1,6 +1,11 @@
 /**
  * Camp Bar PDX - static weekly schedule on campbarpdx.com (#weeklyevents).
  * No ICS/JSON feed. Parse day columns → expand next N weeks of instances.
+ *
+ * Flyer policy: homepage has no per-event art. Leave posterImageUrl null and
+ * warn loudly so prior-flyer / merge paths do not invent art or borrow
+ * Karaoke/Bingo flyers from other venues. Keep source/event URLs on
+ * campbarpdx.com so venue-keyed catalog matches stay Camp-only.
  */
 import type { IngestEventDraft } from "../types";
 import { fetchIngestSource } from "../fetchSource";
@@ -163,17 +168,20 @@ export function weekliesToDrafts(
         eventTypes: "[]",
         admission: adm.admission,
         ticketUrl: null,
+        // Stay on campbarpdx.com so priorFlyerFromCatalog venue key is Camp-only
         eventPageUrl: "https://campbarpdx.com",
         isPublic: true,
         isPrivate: false,
         isHouseParty: false,
         isSexPositive: false,
         nudityOk: false,
+        // Honest null — no inventing; analyze must not fill from other venues
         posterImageUrl: null,
         sourceUrl: "https://campbarpdx.com",
         parseSource: "html",
         warnings: [
           "Camp Bar weekly schedule expanded from homepage",
+          "No flyer from Camp homepage - do not reuse other venue flyers",
           "Age set to 21_PLUS (Camp Bar is a 21+ bar)",
           ...(adm.reason ? [adm.reason] : []),
         ],

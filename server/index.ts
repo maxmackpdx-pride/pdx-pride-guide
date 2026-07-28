@@ -214,6 +214,24 @@ app.use((req, res, next) => {
 
     httpServer.listen(listenOpts, () => {
       log(`serving on port ${listenPort}`);
+      // After cross-venue contamination clear (boot migration), re-pull Sanctuary
+      // flyers from real event pages so nights are not left on day placeholders.
+      void import("./ingest/crossVenueContaminationRepair")
+        .then(async ({ reenrichSanctuaryContaminatedFlyers }) => {
+          const { storage } = await import("./storage");
+          const result = await reenrichSanctuaryContaminatedFlyers(storage, {
+            concurrency: 3,
+            limit: 80,
+          });
+          if (result.attempted > 0) {
+            log(
+              `sanctuary flyer re-enrich: attempted=${result.attempted} fixed=${result.fixed} failed=${result.failed}`,
+            );
+          }
+        })
+        .catch(err => {
+          log(`sanctuary flyer re-enrich skipped: ${err?.message || err}`);
+        });
     });
   };
 

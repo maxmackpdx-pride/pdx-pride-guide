@@ -96,6 +96,15 @@ const TYPE_LABELS = MAP_TYPE_LABELS;
 
 const PIN_HALF = MAP_PIN_SIZE / 2;
 
+/** Keep the directory map framed on the Portland metro. Some listings sit
+    outside Portland, but the map itself never wanders off the city - users
+    can't pan/zoom away from this box. [SW, NE] corners. */
+const PORTLAND_BOUNDS: [[number, number], [number, number]] = [
+  [45.38, -122.90], // SW - Tigard / west side
+  [45.66, -122.45], // NE - toward Gresham / the river
+];
+const PORTLAND_MIN_ZOOM = 11;
+
 function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
   const map = useMap();
   useEffect(() => {
@@ -391,6 +400,9 @@ export default function DirectoryMap({
         center={[45.5231, -122.6765]}
         zoom={13}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
+        maxBounds={isBackdrop ? undefined : PORTLAND_BOUNDS}
+        maxBoundsViscosity={1.0}
+        minZoom={isBackdrop ? undefined : PORTLAND_MIN_ZOOM}
         dragging={isInteractive}
         scrollWheelZoom={isInteractive}
         doubleClickZoom={isInteractive}

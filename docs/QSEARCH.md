@@ -142,7 +142,7 @@ token rules):
 | The Sports Bra | `sports-bra-eb` | `sports_bra_airtable` (public share) | age NOT forced (note-only) |
 | Living Room Wines | `living-room-eb` | `eventbrite_org` | 21_PLUS (empty when org has 0 upcoming) |
 | Camp Bar PDX | `camp-bar` | `camp_bar_html` weeklies → 6 weeks | 21_PLUS |
-| CC Slaughters | `cc-slaughters` | `cc_slaughters_html` + ADVERTICAL poster | 21_PLUS |
+| CC Slaughters | `cc-slaughters` | `cc_slaughters_html` weeklies (ADVERTICAL lineup-only, posters null) | 21_PLUS |
 | Triangle Recreation Camp (Camp TRC) | `camp-trc` | `camp_trc_html` homepage Event Calendar (WA; login-gated WA detail pages) | 21_PLUS |
 
 Dedicated parsers (2026-07-26): Eventbrite org JSON embed, Camp weekly

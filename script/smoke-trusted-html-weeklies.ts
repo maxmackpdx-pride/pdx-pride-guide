@@ -76,6 +76,24 @@ assert(
   campDrafts.every(d => !/^happy hour$/i.test(d.title)),
   "happy hour omitted by default",
 );
+assert(
+  campDrafts.every(d => d.posterImageUrl == null),
+  "camp posters stay null (no inventing)",
+);
+assert(
+  campDrafts.every(d =>
+    (d.warnings || []).some(w => /No flyer from Camp homepage/i.test(w)),
+  ),
+  "camp warns: no flyer — do not reuse other venue flyers",
+);
+assert(
+  campDrafts.every(
+    d =>
+      /campbarpdx\.com/i.test(String(d.eventPageUrl || "")) &&
+      /campbarpdx\.com/i.test(String(d.sourceUrl || "")),
+  ),
+  "camp source/event URLs stay on campbarpdx.com",
+);
 
 const tueDates = nextWeekdayDates(2, 3, new Date("2026-07-20T12:00:00"));
 assert(tueDates[0] === "2026-07-21", `next Tuesday from Mon Jul 20 is 21 (got ${tueDates[0]})`);
@@ -113,7 +131,16 @@ assert(
   ccDrafts.every(d => d.venueName === "CC Slaughters" && d.ageRequirement === "21_PLUS"),
   "cc policy stamps",
 );
-assert(ccDrafts.some(d => d.posterImageUrl?.includes("ADVERTICAL")), "cc drafts carry poster");
+assert(
+  ccDrafts.every(d => d.posterImageUrl == null),
+  "cc per-night posters null (shared ADVERTICAL is lineup-only)",
+);
+assert(
+  ccDrafts.every(d =>
+    (d.warnings || []).some(w => /Shared weekly lineup poster \(not per-night art\)/i.test(w)),
+  ),
+  "cc warns: shared weekly lineup poster (not per-night art)",
+);
 
 /* ── Eventbrite org embed ── */
 const EB_HTML = `

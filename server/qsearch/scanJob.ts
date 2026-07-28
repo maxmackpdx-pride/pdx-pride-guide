@@ -608,6 +608,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
             pageFlyerPool = extractFlyerCandidatesFromHtml(
               listPage.body,
               listPage.url || hit.url || primary,
+              hit.drafts[0]?.title,
             );
           }
         } catch {

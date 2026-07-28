@@ -22,7 +22,6 @@ export type TrustedVenueDef = {
     | "eagle_wix"
     | "darcelle_tribe"
     | "hawks_squarespace"
-    | "sports_bra_airtable"
     | "eventbrite_org"
     | "camp_bar_html"
     | "cc_slaughters_html"
@@ -168,22 +167,6 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       "Eventbrite organizer upcomingEvents embed (dedicated parser). Brunch/specials only - nightly dancers are not discrete rows.",
   },
   {
-    sourceId: "sports-bra-eb",
-    venueName: "The Sports Bra",
-    address: "2512 NE Broadway, Portland, OR",
-    neighborhood: "NE Portland",
-    fetchMode: "sports_bra_airtable",
-    feedUrl: "https://thesportsbraofficial.com/pages/portland",
-    calendarPageUrl: "https://thesportsbraofficial.com/pages/portland",
-    publishStatus: "LIVE",
-    pollHours: 12,
-    venuePolicy: {
-      ageNote: "Verify age - Sports Bra is a bar-restaurant; watch parties often all-ages, late events may be 21+",
-    },
-    notes:
-      "Public Airtable shared view (no PAT) + optional private API. Games only; auto Swedish-minimal posters when no attachment.",
-  },
-  {
     sourceId: "living-room-eb",
     venueName: "Living Room Wines",
     address: "4818 N Lombard St, Portland, OR",
@@ -211,7 +194,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 12,
     notes:
-      "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. IG specials still scan-lane.",
+      "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. No per-event flyers (null + do-not-reuse warning). IG specials still scan-lane.",
     venuePolicy: {
       ageRequirement: "21_PLUS",
       ageNote: "Age set to 21_PLUS (Camp Bar is a 21+ bar)",
@@ -236,7 +219,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (CC weekly - no cover nights re-infer FREE from text)",
     },
     notes:
-      "Homepage Mon-Sun lineup expanded 6 weeks + latest ADVERTICAL weekly poster.",
+      "Homepage Mon-Sun lineup expanded 6 weeks. ADVERTICAL is shared lineup composite only — per-night posters left null (honest null > wrong shared art).",
   },
   {
     sourceId: "camp-trc",

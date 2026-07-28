@@ -18,7 +18,11 @@ import {
   mergeDraftIntoEvent,
   INGEST_MAX_COMMIT,
 } from "../ingest";
-import { findSubmissionMatches, submissionHasStrongDuplicate } from "@shared/submissionMatch";
+import {
+  findSubmissionMatches,
+  submissionHasStrongDuplicate,
+  ticketUrlKey,
+} from "@shared/submissionMatch";
 import { isPastEventListing } from "../ingest/dates";
 import { matchClosedVenue } from "@shared/closedVenues";
 import { sanitizeBadlandsTicketUrl } from "../ingest/parseBadlands";
@@ -40,7 +44,6 @@ import {
   fetchHawksDrafts,
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
-import { fetchSportsBraDrafts, sportsBraConfigured } from "../ingest/adapters/sportsBra";
 import { fetchEventbriteOrgDrafts } from "../ingest/adapters/eventbriteOrg";
 import { fetchCampBarDrafts } from "../ingest/adapters/campBar";
 import { fetchCcSlaughtersDrafts } from "../ingest/adapters/ccSlaughters";
@@ -49,6 +52,7 @@ import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
 import { isRelevantScanDraft } from "../ingest/relevance";
 import type { IngestEventDraft } from "../ingest/types";
+import { normalizeVenueKey } from "@shared/venueLinks";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
 import { discoverAndParse } from "./discover";
@@ -275,6 +279,21 @@ function autoMergeExistingEvents(
     const strong = submissionHasStrongDuplicate(matches);
     const existing = strong ? byId.get(strong.eventId) : undefined;
     if (strong && existing && !usedIds.has(existing.id)) {
+      // Belt-and-suspenders: never auto-merge across clearly different venues,
+      // even if the scorer reports a high-confidence duplicate (title/date).
+      // Exception: identical ticket URL key means same listing (venue rename / alias).
+      const draftVenueKey = normalizeVenueKey(draft.venueName);
+      const existingVenueKey = normalizeVenueKey(existing.venueName);
+      if (draftVenueKey && existingVenueKey && draftVenueKey !== existingVenueKey) {
+        const draftTicket = ticketUrlKey(draft.ticketUrl);
+        const existingTicket = ticketUrlKey(existing.ticketUrl);
+        const sameTicket =
+          !!draftTicket && !!existingTicket && draftTicket === existingTicket;
+        if (!sameTicket) {
+          fresh.push(draft);
+          continue;
+        }
+      }
       try {
         storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft));
         usedIds.add(existing.id);
@@ -366,25 +385,6 @@ async function fetchDraftsForVenue(
       return fetchDarcelleDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "hawks_squarespace":
       return fetchHawksDrafts({ feedUrl: venue.feedUrl, includePast: false });
-    case "sports_bra_airtable": {
-      // Public shared view (no PAT) first; private token optional. Empty →
-      // venue-scoped Eventbrite so the board is never blank.
-      if (sportsBraConfigured()) {
-        const { drafts, warnings } = await fetchSportsBraDrafts({ includePast: false });
-        if (drafts.length) {
-          if (warnings.length) {
-            console.log("[trustedSync] sports-bra:", warnings.join(" · "));
-          }
-          return drafts;
-        }
-        console.warn(
-          "[trustedSync] sports-bra empty:",
-          warnings.join(" · ") || "no drafts",
-          "- falling back to generic feed",
-        );
-      }
-      return fetchGenericDrafts(venue, existingEvents);
-    }
     case "eventbrite_org":
       return fetchEventbriteOrgDrafts({
         feedUrl: venue.feedUrl,

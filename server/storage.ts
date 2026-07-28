@@ -6408,6 +6408,83 @@ function runBootMigrationsOnce() {
     );
     recordBootMigration("hide_sports_bra_non_games_v1");
   }
+
+  // Cross-venue contamination repair:
+  // - Camp Bar rows with Eagle Wix posters / Eagle ticket URLs
+  // - Sanctuary nights with Game Bang flyer art when title is not Game Bang
+  // Poster clear is immediate; Sanctuary re-enrich runs async after boot (see server/index).
+  if (!hasBootMigration("cross_venue_contamination_repair_v1")) {
+    const noteCamp =
+      "Repair cross-venue contamination: cleared foreign (Eagle) poster/ticket on Camp Bar listing.";
+    const noteSanc =
+      "Repair cross-venue contamination: cleared Game Bang flyer on non-Game Bang Sanctuary night.";
+
+    // Camp Bar only (not Triangle Recreation Camp / Camp TRC)
+    const camp = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           poster_image_url = CASE
+             WHEN poster_image_url IS NOT NULL
+               AND (poster_image_url LIKE '%wixstatic.com%' OR poster_image_url LIKE '%wix:image:%')
+             THEN NULL
+             ELSE poster_image_url
+           END,
+           ticket_url = CASE
+             WHEN ticket_url IS NOT NULL
+               AND (
+                 ticket_url LIKE '%eagleportland.com%'
+                 OR ticket_url LIKE '%wixstatic.com%'
+                 OR ticket_url LIKE '%wix:image:%'
+               )
+             THEN 'https://campbarpdx.com'
+             ELSE ticket_url
+           END,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) LIKE '%camp%'
+           AND lower(venue_name) NOT LIKE '%triangle%'
+           AND lower(venue_name) NOT LIKE '%trc%'
+           AND lower(venue_name) NOT LIKE '%recreation%'
+           AND (
+             (poster_image_url IS NOT NULL AND (poster_image_url LIKE '%wixstatic.com%' OR poster_image_url LIKE '%wix:image:%'))
+             OR (ticket_url IS NOT NULL AND (
+               ticket_url LIKE '%eagleportland.com%'
+               OR ticket_url LIKE '%wixstatic.com%'
+               OR ticket_url LIKE '%wix:image:%'
+             ))
+           )`,
+      )
+      .run(noteCamp, noteCamp, noteCamp);
+
+    const sanctuary = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           poster_image_url = NULL,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) LIKE '%sanctuary%'
+           AND poster_image_url IS NOT NULL
+           AND lower(poster_image_url) LIKE '%gamebang%'
+           AND lower(title) NOT LIKE '%game bang%'
+           AND lower(title) NOT LIKE '%gamebang%'`,
+      )
+      .run(noteSanc, noteSanc, noteSanc);
+
+    console.info(
+      `[boot] cross_venue_contamination_repair_v1: camp rows=${camp.changes}, sanctuary rows=${sanctuary.changes}`,
+    );
+    recordBootMigration("cross_venue_contamination_repair_v1");
+  }
 }
 
 function parseEnvAdminLists() {
