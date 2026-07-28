@@ -40,7 +40,6 @@ import {
   fetchHawksDrafts,
   HAWKS_AGE_REQUIREMENT,
 } from "../ingest/adapters/hawks";
-import { fetchSportsBraDrafts, sportsBraConfigured } from "../ingest/adapters/sportsBra";
 import { fetchEventbriteOrgDrafts } from "../ingest/adapters/eventbriteOrg";
 import { fetchCampBarDrafts } from "../ingest/adapters/campBar";
 import { fetchCcSlaughtersDrafts } from "../ingest/adapters/ccSlaughters";
@@ -366,25 +365,6 @@ async function fetchDraftsForVenue(
       return fetchDarcelleDrafts({ feedUrl: venue.feedUrl, includePast: false });
     case "hawks_squarespace":
       return fetchHawksDrafts({ feedUrl: venue.feedUrl, includePast: false });
-    case "sports_bra_airtable": {
-      // Public shared view (no PAT) first; private token optional. Empty →
-      // venue-scoped Eventbrite so the board is never blank.
-      if (sportsBraConfigured()) {
-        const { drafts, warnings } = await fetchSportsBraDrafts({ includePast: false });
-        if (drafts.length) {
-          if (warnings.length) {
-            console.log("[trustedSync] sports-bra:", warnings.join(" · "));
-          }
-          return drafts;
-        }
-        console.warn(
-          "[trustedSync] sports-bra empty:",
-          warnings.join(" · ") || "no drafts",
-          "- falling back to generic feed",
-        );
-      }
-      return fetchGenericDrafts(venue, existingEvents);
-    }
     case "eventbrite_org":
       return fetchEventbriteOrgDrafts({
         feedUrl: venue.feedUrl,
