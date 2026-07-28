@@ -669,6 +669,16 @@ export function HousingComposer({
                   </p>
                 </span>
               </div>
+              <div className="hz-flag hz-flag--note">
+                <span>
+                  <b style={{ color: "var(--text-hi)" }}>Affirming Housing Partner · $30/month</b>
+                  <p>
+                    Listing on the board is a flat $30/month membership, separate from verification.
+                    Your first 30 days are free — and the first 3 managers to sign up get their
+                    first 6 months free.
+                  </p>
+                </span>
+              </div>
               <Notice text={notice} />
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <Btn kind="outline" onClick={backToPicker}>
