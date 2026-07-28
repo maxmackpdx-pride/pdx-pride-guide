@@ -16,6 +16,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
+import FeedAdCard from "@/components/ads/FeedAdCard";
+import type { AdServePayload } from "@/lib/adTypes";
 import {
   HOUSING_FILTERS,
   HOUSING_FILTER_LABEL,
@@ -149,6 +151,26 @@ export default function Housing() {
     () => posts.filter((p: HousingPostView) => p.type !== "FORMING").length % 2 === 1,
     [posts],
   );
+
+  /**
+   * The leftover half slot alternates between a served ad (Mr. S, CockBlock,
+   * whatever is live) and the house post prompt, so the board keeps asking for
+   * supply instead of only ever selling. Decided once per mount so it does not
+   * flicker between renders. The prompt is also the fallback whenever no ad is
+   * eligible, so the slot is never empty.
+   */
+  const [slotPrefersAd] = useState(() => Math.random() < 0.5);
+  const adQuery = useQuery<{ ads: AdServePayload[] }>({
+    queryKey: ["/api/ads/serve", "housing", user?.id ?? "guest"],
+    enabled: oddHalfCards && slotPrefersAd,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const res = await fetch("/api/ads/serve?surface=feed&tab=boards", { credentials: "include" });
+      if (!res.ok) return { ads: [] };
+      return res.json();
+    },
+  });
+  const slotAd = slotPrefersAd ? (adQuery.data?.ads?.[0] ?? null) : null;
 
   const statBlocks = useMemo(
     () => [
@@ -362,17 +384,23 @@ export default function Housing() {
                 another post. Only rendered when the count is genuinely odd.
               */}
               {oddHalfCards ? (
-                <button type="button" className="hz-fill" onClick={() => openCompose("OFFERING")}>
-                  <Mono accent>Post to the board</Mono>
-                  <b>Got a room?</b>
-                  <small>
-                    A room, a search, or a household you are starting. It takes under a minute and it is free.
-                  </small>
-                  <span className="hz-fill__cta">
-                    <HousingIcon name="add" size={15} />
-                    Post it
-                  </span>
-                </button>
+                slotAd ? (
+                  <div className="hz-adslot">
+                    <FeedAdCard ad={slotAd} />
+                  </div>
+                ) : (
+                  <button type="button" className="hz-fill" onClick={() => openCompose("OFFERING")}>
+                    <Mono accent>Post to the board</Mono>
+                    <b>Got a room?</b>
+                    <small>
+                      A room, a search, or a household you are starting. It takes under a minute and it is free.
+                    </small>
+                    <span className="hz-fill__cta">
+                      <HousingIcon name="add" size={15} />
+                      Post it
+                    </span>
+                  </button>
+                )
               ) : null}
             </div>
           )}

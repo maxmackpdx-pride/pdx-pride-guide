@@ -1999,3 +1999,30 @@ html.calm-mode .hz-card:hover {
 html.calm-mode .hz .hz-fill:hover {
   transform: none;
 }
+
+/**
+ * Ad slot in the leftover half cell.
+ *
+ * The served ad is sized to match a Looking, Offering, or Managed card exactly:
+ * same grid cell, same height, same radius. FeedAdCard is built for the single
+ * column hub feed, so it is stretched to fill this cell rather than sitting at
+ * its natural feed width.
+ */
+.hz .hz-adslot {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+}
+
+.hz .hz-adslot > * {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: var(--glass-card-radius);
+}
+
+/* The dismiss control belongs to the hub feed, not to a fixed board slot. */
+.hz .hz-adslot .feed-aff__dismiss {
+  display: none;
+}
