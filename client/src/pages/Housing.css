@@ -1912,3 +1912,90 @@ html.calm-mode .hz-card:hover {
 .hz-feedhead {
   padding-top: 26px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Feed filler slot.
+ *
+ * Fills the leftover half slot when the half width card count is odd. It is
+ * deliberately NOT a .hz-card: dashed rather than solid, board accent rather
+ * than a post-type accent, so it reads as an open invitation and can never be
+ * mistaken for a room listing or a household.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Written as `.hz button.hz-fill` on purpose. `.hz button:has(.hz-ico)` force
+ * centers any button containing an icon, and it carries two classes plus a type
+ * selector, so a plain `.hz .hz-fill` loses to it. Matching that specificity and
+ * landing later in the file is what lets this slot keep its own column layout.
+ */
+.hz button.hz-fill {
+  --c: var(--panel-cyan);
+  --_c: var(--panel-cyan);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  padding: 24px;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--glass-card-radius);
+  border: 2px dashed color-mix(in srgb, var(--c) 42%, #101014);
+  background: color-mix(in srgb, var(--c) 5%, var(--panel-card));
+  color: var(--board-text);
+  transition:
+    border-color var(--dur-fast, 0.15s) var(--ease-out, ease),
+    background var(--dur-fast, 0.15s) var(--ease-out, ease),
+    transform var(--dur-fast, 0.15s) var(--ease-out, ease);
+}
+
+.hz .hz-fill:hover {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 10%, var(--panel-card));
+  transform: translateY(-2px);
+}
+
+.hz .hz-fill:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: 2px;
+}
+
+.hz .hz-fill b {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--title-md);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-hi);
+}
+
+.hz .hz-fill small {
+  color: var(--board-muted);
+  font-size: var(--meta);
+  max-width: 34ch;
+}
+
+.hz .hz-fill__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--c);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hz .hz-fill:hover {
+    transform: none;
+  }
+}
+
+html.calm-mode .hz .hz-fill:hover {
+  transform: none;
+}

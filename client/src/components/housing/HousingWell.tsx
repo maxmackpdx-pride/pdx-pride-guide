@@ -29,6 +29,17 @@ import { HAUS_SUFFIX } from "@shared/housing";
 const BASE_HEIGHT_SHARE = 0.62;
 /** Breathing room between the title block and the caption row, in px. */
 const CAPTION_GAP = 22;
+/**
+ * Horizontal stretch on the name block.
+ *
+ * The height budget is what actually binds the motif, so the only way to give
+ * the title more presence without making it taller or moving it is to widen the
+ * glyphs. This is a deliberate departure from the "scale, never stretch" rule in
+ * TITLE_MOTIF.md, kept small and in one place so it stays a decision rather than
+ * a drift. Height and position are untouched; only the width changes, and the
+ * per-surface width cap still wins.
+ */
+const WIDTH_STRETCH = 1.09;
 /** The SVG design box every line is drawn in. */
 const GLYPH_BOX = 108;
 const GLYPH_BASELINE = 86;
@@ -180,6 +191,7 @@ export function HousingWell({
    * taller, and can never sit under the caption row.
    */
   let nameW = 0;
+  let blockW = 0;
   if (box && lines.length) {
     const share = BASE_HEIGHT_SHARE * Math.min(1.26, Math.max(1, box.w / 390));
     const structural = box.h - box.captionH - CAPTION_GAP;
@@ -189,6 +201,9 @@ export function HousingWell({
     // Never let the floor defeat the width cap: an overflowing motif is worse
     // than a small one.
     nameW = Math.max(Math.min(60, widthCap), nameW);
+    // `nameW` stays the HEIGHT basis so the block keeps its height and its
+    // position. Only the rendered width is stretched, and the cap still wins.
+    blockW = Math.min(nameW * WIDTH_STRETCH, widthCap);
   }
 
   const showName = nameW > 0 && fontsReady;
@@ -215,7 +230,7 @@ export function HousingWell({
       {lines.length ? (
         <div
           className="hz-well__name"
-          style={{ width: nameW || undefined, visibility: showName ? "visible" : "hidden" }}
+          style={{ width: blockW || undefined, visibility: showName ? "visible" : "hidden" }}
         >
           {lines.map((line, i) => (
             <svg

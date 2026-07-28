@@ -144,6 +144,12 @@ export default function Housing() {
     navigate(`/hausing/new?type=${type.toLowerCase()}`);
   };
 
+  // Only Forming cards span both columns, so every other type is a half slot.
+  const oddHalfCards = useMemo(
+    () => posts.filter((p: HousingPostView) => p.type !== "FORMING").length % 2 === 1,
+    [posts],
+  );
+
   const statBlocks = useMemo(
     () => [
       { n: stats?.activePosts ?? 0, l: "Active posts" },
@@ -348,6 +354,26 @@ export default function Housing() {
               {posts.map((p: HousingPostView) => (
                 <HousingCard key={p.id} post={p} h={handlers} />
               ))}
+              {/*
+                Forming cards span both columns, so when the number of half width
+                cards is odd one of them has nothing to pair with. Rather than
+                leave a hole or stretch a room listing to look like a Forming
+                post, fill the slot with the thing the board actually needs:
+                another post. Only rendered when the count is genuinely odd.
+              */}
+              {oddHalfCards ? (
+                <button type="button" className="hz-fill" onClick={() => openCompose("OFFERING")}>
+                  <Mono accent>Post to the board</Mono>
+                  <b>Got a room?</b>
+                  <small>
+                    A room, a search, or a household you are starting. It takes under a minute and it is free.
+                  </small>
+                  <span className="hz-fill__cta">
+                    <HousingIcon name="add" size={15} />
+                    Post it
+                  </span>
+                </button>
+              ) : null}
             </div>
           )}
         </div>
