@@ -22,6 +22,7 @@ import {
   type HousingRequestKind,
   type HousingType,
 } from "../../shared/housing";
+import { parseHousingTagFilter } from "../../shared/housingTags";
 import {
   addHousingDate,
   addHousingMember,
@@ -141,6 +142,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const posts = listHousingPosts(db, {
       type,
       savedOnly,
+      tags: parseHousingTagFilter(String(req.query.tags || "")),
       viewerId: viewerId(req),
       limit: asNum(req.query.limit) ?? 60,
     });
@@ -220,6 +222,10 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       body: asStr(req.body?.body, 4000) || "",
       photos,
       areas: asArray(req.body?.areas),
+      // Validated against the post type in normalizeHousingTags: unknown ids,
+      // conflicting pairs, platform issued verification, and household tags on
+      // a whole unit listing are all dropped here rather than trusted.
+      tags: asArray(req.body?.tags),
       budget: asStr(req.body?.budget, 80),
       moveTimeline: asStr(req.body?.moveTimeline, 80),
       livingStyle: asArray(req.body?.livingStyle),

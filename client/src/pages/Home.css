@@ -2001,10 +2001,15 @@ html.calm-mode .home-up-next__card::before {
   color: var(--text-body-muted, var(--text-mid));
 }
 
+/*
+ * Four boards. Three columns would orphan the fourth on its own row, so the
+ * set reads as a 2x2 block instead. The cards are copy blocks, not tiles, so
+ * the extra width is a gain rather than dead space.
+ */
 .home-boards__utility-grid {
   margin-top: 34px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 18px;
 }
 
@@ -2073,6 +2078,11 @@ a.home-boards__utility--purple:focus .home-boards__utility-name {
   color: #6e3dff !important;
 }
 
+a.home-boards__utility--cyan:hover .home-boards__utility-name,
+a.home-boards__utility--cyan:focus .home-boards__utility-name {
+  color: #00ffff !important;
+}
+
 a.home-boards__utility:hover .home-boards__utility-desc,
 a.home-boards__utility:focus .home-boards__utility-desc {
   color: #f4f1ea !important;
@@ -2103,6 +2113,11 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 .home-boards__utility--purple {
   --util-acc: #6e3dff;
   --c: #6e3dff;
+}
+
+.home-boards__utility--cyan {
+  --util-acc: #00ffff;
+  --c: #00ffff;
 }
 
 .home-boards__utility-name {

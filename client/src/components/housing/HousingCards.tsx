@@ -17,6 +17,7 @@ import {
   type HousingPerson,
   type HousingPostView,
 } from "@shared/housing";
+import { HousingCardTags } from "./HousingTags";
 import { HousingWell } from "./HousingWell";
 import { HousingCluster } from "./HousingCluster";
 import { HousingIcon } from "./HousingIcon";
@@ -32,6 +33,8 @@ import {
 } from "./HousingPrimitives";
 
 export type HousingCardHandlers = {
+  /** Tags the viewer is filtering by, so matches sort forward and read lit. */
+  activeTags?: string[];
   onOpen: (post: HousingPostView) => void;
   onSave: (post: HousingPostView) => void;
   onShare: (post: HousingPostView) => void;
@@ -179,6 +182,8 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
         ))}
       </div>
 
+      <HousingCardTags tags={post.tags} active={h.activeTags} onMore={stop(() => h.onOpen(post))} />
+
       <Trust data={post.trust} />
       <CardActions post={post} h={h} />
     </CardShell>
@@ -220,6 +225,8 @@ export function OfferingCard({ post, h }: { post: HousingPostView; h: HousingCar
           <Chip key={c}>{c}</Chip>
         ))}
       </div>
+
+      <HousingCardTags tags={post.tags} active={h.activeTags} onMore={stop(() => h.onOpen(post))} />
 
       <Trust data={post.trust} />
       <CardActions post={post} h={h} />
@@ -284,6 +291,8 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
         {post.flavor ? <Chip>{FORMING_FLAVOR_LABEL[post.flavor]}</Chip> : null}
       </div>
 
+      <HousingCardTags tags={post.tags} active={h.activeTags} onMore={stop(() => h.onOpen(post))} />
+
       <Trust data={post.trust} />
       <CardActions post={post} h={h} />
     </CardShell>
@@ -345,6 +354,8 @@ export function ManagedCard({
           </Chip>
         ))}
       </div>
+
+      <HousingCardTags tags={post.tags} active={h.activeTags} onMore={stop(() => h.onOpen(post))} />
 
       {groups.length ? (
         <button

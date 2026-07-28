@@ -36,6 +36,7 @@ import {
 } from "@shared/housing";
 import { HousingIcon } from "@/components/housing/HousingIcon";
 import { Btn, Chip, Mono, SectionTitle, accentStyle } from "@/components/housing/HousingPrimitives";
+import { HousingTagPicker } from "@/components/housing/HousingTagPicker";
 
 /** What the composer sends up. Kept loose so the caller can log or refetch. */
 export type ComposerResult = { type: HousingType; [k: string]: unknown };
@@ -63,6 +64,7 @@ type Draft = {
   areas: string[];
   areaInput: string;
   livingStyle: string[];
+  tags: string[];
   livingInput: string;
   openToHaus: boolean;
   beds: string;
@@ -84,6 +86,7 @@ const EMPTY_DRAFT: Draft = {
   areas: [],
   areaInput: "",
   livingStyle: [],
+  tags: [],
   livingInput: "",
   openToHaus: false,
   beds: "",
@@ -363,6 +366,9 @@ export function HousingComposer({
       body: draft.body.trim(),
       photos,
       areas: draft.areas,
+      // The server re-validates these against the post type, so what lands here
+      // is a request, not the final list.
+      tags: draft.tags,
     };
 
     if (postType === "LOOKING") {
@@ -1196,6 +1202,12 @@ export function HousingComposer({
             ) : null}
           </div>
         </div>
+
+        <HousingTagPicker
+          type={type}
+          value={draft.tags}
+          onChange={(tags) => patch({ tags })}
+        />
 
         {/*
           The one hard rule on photos. Zaylist is sex positive everywhere else,

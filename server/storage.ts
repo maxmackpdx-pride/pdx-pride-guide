@@ -355,6 +355,7 @@ sqlite.exec(`
     body TEXT NOT NULL DEFAULT '',
     photo_urls TEXT NOT NULL DEFAULT '[]',
     areas TEXT NOT NULL DEFAULT '[]',
+    tags TEXT NOT NULL DEFAULT '[]',
     budget TEXT,
     move_timeline TEXT,
     living_style TEXT NOT NULL DEFAULT '[]',
@@ -534,6 +535,10 @@ sqlite.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_housing_reports_post ON housing_reports(post_id);
 `);
+
+// housing_posts.tags landed after the table shipped, so existing databases need
+// the column added. CREATE TABLE IF NOT EXISTS above only covers fresh installs.
+try { sqlite.exec(`ALTER TABLE housing_posts ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'`); } catch {}
 
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}

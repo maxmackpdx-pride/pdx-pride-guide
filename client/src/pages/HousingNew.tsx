@@ -57,7 +57,9 @@ export default function HousingNew() {
   }
 
   return (
-    <div className="hz">
+    // The sheet is this page's only content, so it sizes to the viewport rather
+    // than to `.hz`, which has no in-flow children here. See Housing.css.
+    <div className="hz hz--sheetpage">
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
       <HousingComposer

@@ -34,6 +34,7 @@ import {
   type HousingRequestKind,
   type HousingTrust,
 } from "@shared/housing";
+import { HousingDetailTags } from "./HousingTags";
 import { HousingWell } from "./HousingWell";
 import { FORMING_DEFAULT_COVER } from "./HousingCards";
 import { HousingCluster } from "./HousingCluster";
@@ -465,6 +466,7 @@ function LookingDetail({
               {post.headline}
             </p>
             <Trust data={post.trust} />
+            <HousingDetailTags tags={post.tags} />
           </div>
 
           <div className="hz-sect">
@@ -587,6 +589,7 @@ function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHa
               {post.headline}
             </p>
             <Trust data={post.trust} />
+            <HousingDetailTags tags={post.tags} />
           </div>
 
           <div className="hz-sect">
@@ -720,6 +723,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
             <p className="hz-prose" style={{ marginTop: 14 }}>
               {post.headline}
             </p>
+            <HousingDetailTags tags={post.tags} />
           </div>
 
           <div className="hz-sect">
@@ -928,6 +932,7 @@ function FormingDetail({
               {post.headline}
             </p>
             <Trust data={post.trust} />
+            <HousingDetailTags tags={post.tags} />
 
             <div className="hz-people" style={{ marginTop: 16 }}>
               <HousingCluster people={people} size="lg" slots={isFull ? 0 : seeking} onSelect={h.onPerson} />

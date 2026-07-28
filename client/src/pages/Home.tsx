@@ -22,6 +22,7 @@ import {
 import "./Home.css";
 
 const COMMUNITY_LINKS = {
+  hausing: { href: "/hausing", label: "HAÜSING" },
   spotted: { href: "/spotted", label: "Missed Connections" },
   gifting: { href: "/gifting", label: "Gifting" },
   gigs: { href: "/pride-work", label: "Gigs" },
@@ -109,11 +110,24 @@ export default function Home() {
               <span className="home-boards__title-grad">each other</span>
             </h2>
             <p className="home-boards__sub">
-              Miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
+              Find a room, miss a connection, give something away, or line up a gig. The boards where the scene looks out for each other.
             </p>
           </div>
 
           <div className="home-boards__utility-grid">
+            <Link
+              href={COMMUNITY_LINKS.hausing.href}
+              className="home-boards__utility home-boards__utility--cyan pdx-glass-card pdx-glass-card--left-accent"
+              style={{ ["--c" as string]: "#00FFFF" }}
+              data-testid="home-board-hausing"
+            >
+              <div className="home-boards__utility-name">HAÜSING</div>
+              <p className="home-boards__utility-desc">
+                Rooms, roommates, and people building a household together. No fees, no applications, no
+                money through Zaylist.
+              </p>
+              <div className="home-boards__utility-mantra">Find a room · find people · find a home</div>
+            </Link>
             <Link
               href={COMMUNITY_LINKS.spotted.href}
               className="home-boards__utility home-boards__utility--magenta pdx-glass-card pdx-glass-card--left-accent"

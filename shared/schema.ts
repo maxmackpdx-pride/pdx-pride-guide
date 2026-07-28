@@ -800,6 +800,9 @@ export const housingPosts = sqliteTable("housing_posts", {
   body: text("body").notNull().default(""), // longer "own words" text on the detail
   photoUrls: text("photo_urls").notNull().default("[]"), // JSON string[]; [0] is the cover the name sits over
   areas: text("areas").notNull().default("[]"), // JSON string[] of neighborhoods
+  // JSON string[] of tag ids from shared/housingTags.ts. Filters the board and
+  // orders the chips on a card. Never orders the feed.
+  tags: text("tags").notNull().default("[]"),
 
   // LOOKING
   budget: text("budget"), // display text, e.g. "$850/mo"

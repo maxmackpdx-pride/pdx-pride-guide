@@ -8,7 +8,7 @@
  * Spec: docs/HAUS_HOUSING_SPEC_v0.2.md
  * Design: docs/design-handoff-hausing/
  */
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
@@ -29,7 +29,9 @@ import {
   type HousingPostView,
   type HousingType,
 } from "@shared/housing";
+import { parseHousingTagFilter } from "@shared/housingTags";
 import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
+import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
 import { CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
@@ -77,12 +79,40 @@ export default function Housing() {
   const [filter, setFilter] = useState<HousingFilter>("ALL");
   const [showAuth, setShowAuth] = useState(false);
 
+  /*
+   * Tag filters live in the URL, not in component state. Opening a listing and
+   * coming back is a browser navigation, and anything held in state here would
+   * be gone by the time they land. The URL survives back, refresh, and a link
+   * someone pastes to a friend.
+   */
+  const [tags, setTagsState] = useState<string[]>(() =>
+    parseHousingTagFilter(new URLSearchParams(window.location.search).get("tags")),
+  );
+
+  const setTags = useCallback((next: string[]) => {
+    setTagsState(next);
+    const params = new URLSearchParams(window.location.search);
+    if (next.length) params.set("tags", next.join(","));
+    else params.delete("tags");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, []);
+
+  // Back and forward move through filter states, so follow the URL when they do.
+  useEffect(() => {
+    const onPop = () =>
+      setTagsState(parseHousingTagFilter(new URLSearchParams(window.location.search).get("tags")));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   const { data, isLoading, isError } = useQuery<HousingBoardResponse>({
-    queryKey: ["/api/housing", filter],
+    queryKey: ["/api/housing", filter, tags.join(",")],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filter === "SAVED") params.set("filter", "SAVED");
       else if (filter !== "ALL") params.set("type", filter);
+      if (tags.length) params.set("tags", tags.join(","));
       const res = await fetch(`/api/housing?${params.toString()}`, { credentials: "include" });
       if (!res.ok) throw new Error("Could not load the board");
       return res.json();
@@ -108,6 +138,7 @@ export default function Housing() {
   };
 
   const handlers: HousingCardHandlers = {
+    activeTags: tags,
     onOpen: (post) => navigate(`/hausing/${post.id}`),
     onSave: (post) => {
       if (!requireAuth()) return;
@@ -346,6 +377,8 @@ export default function Housing() {
               ))}
             </div>
           </div>
+
+          <HousingTagFilter applied={tags} onApply={setTags} />
         </div>
       </div>
 
@@ -367,9 +400,11 @@ export default function Housing() {
             <div className="hz-panel hz-empty">The board did not load. Try again in a moment.</div>
           ) : posts.length === 0 ? (
             <div className="hz-panel hz-empty">
-              {filter === "SAVED"
-                ? "Nothing saved yet. Tap save on a post and it waits here."
-                : "Nothing here yet. Yas, be the first."}
+              {tags.length
+                ? "No posts match all of those tags. Try dropping one."
+                : filter === "SAVED"
+                  ? "Nothing saved yet. Tap save on a post and it waits here."
+                  : "Nothing here yet. Yas, be the first."}
             </div>
           ) : (
             <div className="hz-feed">

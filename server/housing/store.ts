@@ -31,6 +31,7 @@ import {
   type OutdoorOption,
   type ParkingOption,
 } from "../../shared/housing";
+import { HOUSING_TAG_BY_ID, derivedHousingTags, normalizeHousingTags } from "../../shared/housingTags";
 
 const nowIso = () => new Date().toISOString();
 
@@ -42,6 +43,17 @@ function parseJsonArray(raw: unknown): string[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * A post's stored tags plus the verification tags the platform issues. Identity
+ * and leaseholder verification are facts we hold, not claims a poster types, so
+ * they live in trust and are merged in at read time.
+ */
+function mergeTags(stored: string[], trust: HousingTrust): string[] {
+  const out = [...stored];
+  for (const id of derivedHousingTags(trust)) if (!out.includes(id)) out.push(id);
+  return out;
 }
 
 /** "3 days ago" / "2 hours ago". Plain language, no em dashes. */
@@ -319,6 +331,9 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       body: r.body || "",
       photos: parseJsonArray(r.photo_urls),
       areas: parseJsonArray(r.areas),
+      // Stored tags plus the two the platform issues from trust. Verification
+      // is never self-claimed, so it is merged in here rather than persisted.
+      tags: mergeTags(parseJsonArray(r.tags), trustBase),
       status: r.status,
       saved: savedIds.has(r.id),
       trust: trustBase,
@@ -377,6 +392,7 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       view.gone = !!r.gone;
       view.interestGroups = interestGroups.get(r.id) || [];
       view.trust = { ...trustBase, propertyManagerVerified: !!pm };
+      view.tags = mergeTags(parseJsonArray(r.tags), view.trust);
       // A managed listing is a unit, not a household. No avatar stack.
       view.household = [];
       view.openSlots = 0;
@@ -392,6 +408,8 @@ export type ListOpts = {
   savedOnly?: boolean;
   includeHidden?: boolean;
   limit?: number;
+  /** Tag ids. A post must carry every one of them (AND, not OR). */
+  tags?: string[];
 };
 
 /**
@@ -413,6 +431,25 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
     where.push("EXISTS (SELECT 1 FROM housing_saves s WHERE s.post_id = p.id AND s.user_id = ?)");
     args.push(opts.viewerId);
   }
+
+  /*
+   * Tag filtering. A viewer narrowing the board is choosing what THEY see, so
+   * this is a filter and never an ordering input: whatever survives still comes
+   * back newest first.
+   *
+   * Stored tags filter in SQL. Matching on the quoted id inside the JSON array
+   * is exact, because the surrounding quotes stop "quiet-hours" from matching
+   * "strict-quiet-hours". Derived tags are not in the column, so they filter
+   * after shaping.
+   */
+  const wanted = opts.tags?.filter((t) => HOUSING_TAG_BY_ID[t]) ?? [];
+  const derivedWanted = wanted.filter((t) => HOUSING_TAG_BY_ID[t].derived);
+  for (const id of wanted) {
+    if (HOUSING_TAG_BY_ID[id].derived) continue;
+    where.push("p.tags LIKE ?");
+    args.push(`%"${id}"%`);
+  }
+
   const limit = Math.min(Math.max(opts.limit ?? 60, 1), 200);
   const rows = db
     .prepare(
@@ -422,7 +459,9 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
         LIMIT ${limit}`,
     )
     .all(...args) as PostRow[];
-  return shapePosts(db, rows, { viewerId: opts.viewerId });
+  const shaped = shapePosts(db, rows, { viewerId: opts.viewerId });
+  if (!derivedWanted.length) return shaped;
+  return shaped.filter((p) => derivedWanted.every((t) => p.tags.includes(t)));
 }
 
 export function getHousingPost(db: Database, id: number, viewerId?: number | null): HousingPostView | null {
@@ -460,6 +499,7 @@ export type CreatePostInput = {
   body?: string;
   photos?: string[];
   areas?: string[];
+  tags?: string[];
   budget?: string | null;
   moveTimeline?: string | null;
   livingStyle?: string[];
@@ -491,14 +531,14 @@ export function createHousingPost(db: Database, input: CreatePostInput): number 
   const now = nowIso();
   const stmt = db.prepare(`
     INSERT INTO housing_posts (
-      user_id, type, name, headline, body, photo_urls, areas,
+      user_id, type, name, headline, body, photo_urls, areas, tags,
       budget, move_timeline, living_style, open_to_haus,
       rent, rent_note, deposit, move_in, room_note, beds, baths, parking, outdoor, culture, access,
       flavor, seeking, is_full, goals, around_post_id,
       property_manager_id, source_url, source_domain, badges, lat, lng,
       status, created_at, updated_at
     ) VALUES (
-      @userId, @type, @name, @headline, @body, @photos, @areas,
+      @userId, @type, @name, @headline, @body, @photos, @areas, @tags,
       @budget, @moveTimeline, @livingStyle, @openToHaus,
       @rent, @rentNote, @deposit, @moveIn, @roomNote, @beds, @baths, @parking, @outdoor, @culture, @access,
       @flavor, @seeking, 0, @goals, @aroundPostId,
@@ -514,6 +554,7 @@ export function createHousingPost(db: Database, input: CreatePostInput): number 
     body: (input.body || "").trim(),
     photos: JSON.stringify(input.photos || []),
     areas: JSON.stringify(input.areas || []),
+    tags: JSON.stringify(normalizeHousingTags(input.tags, input.type)),
     budget: input.budget ?? null,
     moveTimeline: input.moveTimeline ?? null,
     livingStyle: JSON.stringify(input.livingStyle || []),
@@ -580,6 +621,7 @@ const EDITABLE_COLUMNS: Record<string, string> = {
 const JSON_COLUMNS: Record<string, string> = {
   photos: "photo_urls",
   areas: "areas",
+  tags: "tags",
   livingStyle: "living_style",
   culture: "culture",
   access: "access",
@@ -605,6 +647,13 @@ export function updateHousingPost(
   for (const [key, col] of Object.entries(JSON_COLUMNS)) {
     if (!(key in patch)) continue;
     sets.push(`${col} = ?`);
+    if (key === "tags") {
+      // Re-validated against this post's own type, so an edit cannot smuggle in
+      // a tag the type is not allowed to carry.
+      const type = (db.prepare(`SELECT type FROM housing_posts WHERE id = ?`).get(id) as any)?.type;
+      args.push(JSON.stringify(normalizeHousingTags(patch[key], type)));
+      continue;
+    }
     args.push(JSON.stringify(Array.isArray(patch[key]) ? patch[key] : []));
   }
   if ("isFull" in patch) {

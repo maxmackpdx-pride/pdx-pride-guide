@@ -272,6 +272,8 @@ export type HousingTrust = {
   mutualConnections?: number;
   eventsTogether?: number;
   memberSince?: number | null;
+  /** Reserved for identity verification. Drives the Identity verified tag. */
+  identityVerified?: boolean;
   leaseholderVerified?: boolean;
   propertyManagerVerified?: boolean;
 };
@@ -298,6 +300,11 @@ export type HousingPostView = {
   body: string;
   photos: string[];
   areas: string[];
+  /**
+   * Tag ids from shared/housingTags.ts, in catalog order. Includes the derived
+   * verification tags, which are issued from trust rather than stored.
+   */
+  tags: string[];
   status: string;
   saved: boolean;
   trust: HousingTrust;

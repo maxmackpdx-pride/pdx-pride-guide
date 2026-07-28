@@ -1379,6 +1379,23 @@
   padding: 10px 12px;
 }
 
+/*
+ * The composer's own page has nothing in it but the sheet.
+ *
+ * `.hz-sheetwrap` is absolute with `inset: 0`, so it sizes to `.hz`. On the
+ * board that is fine, because the feed gives `.hz` thousands of pixels of
+ * in-flow height. On /hausing/new the sheet is the only child and it is out of
+ * flow, so `.hz` collapses to zero, `inset: 0` resolves against nothing, and
+ * `.hz { overflow: hidden }` clips the whole composer. The page rendered blank.
+ *
+ * Sizing to the viewport instead of to a parent that has no height fixes it.
+ * Scoped to this page so the report sheet on a listing, which sits inside a
+ * tall page, keeps behaving exactly as it did.
+ */
+.hz--sheetpage .hz-sheetwrap {
+  position: fixed;
+}
+
 /* composer sheet */
 .hz-sheetwrap {
   position: absolute;
@@ -2025,4 +2042,545 @@ html.calm-mode .hz .hz-fill:hover {
 /* The dismiss control belongs to the hub feed, not to a fixed board slot. */
 .hz .hz-adslot .feed-aff__dismiss {
   display: none;
+}
+
+/* ==========================================================================
+   TAGS
+   Built on shared/housingTags.ts. That file owns which tags show and in what
+   order; this owns how they read. Four registers, all from the approved
+   palette, each distinguishable without relying on color alone:
+
+     urgent      magenta, tight bright glow, alert glyph. One tag also pulses.
+     adult       purple, wide soft glow, no glyph, never animates.
+     verified    cyan hairline, check glyph.
+     restriction orange hairline, shield glyph.
+
+   Urgent and adult must never be confused for each other, so they differ in
+   hue, in glow shape, in whether they carry a glyph, and in motion.
+   ========================================================================== */
+
+.hz-tagrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.hz-tagrow--detail {
+  margin-top: 14px;
+}
+
+.hz-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  /* Floor of 10px. Wrapping beats shrinking a label past legibility. */
+  font-size: var(--mono-micro);
+  line-height: 1.25;
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: var(--chrome-radius-tag);
+  border: 1px solid var(--panel-border-2);
+  background: var(--ink-800);
+  color: var(--board-muted);
+  white-space: nowrap;
+}
+
+/* Matched an active filter: borrow the card's own accent so the reason this
+   post came back is visible without a second legend. */
+.hz-tag--match {
+  color: var(--c);
+  border-color: color-mix(in srgb, var(--c) 45%, #101014);
+  background: color-mix(in srgb, var(--c) 9%, var(--ink-800));
+}
+
+/* ---- Priority 1: urgent ------------------------------------------------- */
+.hz-tag--urgent {
+  color: var(--panel-magenta);
+  border-color: color-mix(in srgb, var(--panel-magenta) 62%, #101014);
+  background: color-mix(in srgb, var(--panel-magenta) 14%, var(--ink-800));
+  font-weight: var(--fw-semibold);
+  /* Tight and bright. Reads as a signal, not as ambience. */
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--panel-magenta) 55%, transparent);
+}
+
+/* The single strongest urgency state on the board. */
+.hz-tag--now {
+  color: var(--text-inverse);
+  background: var(--panel-magenta);
+  border-color: #000;
+  animation: hzUrgentPulse 2.6s var(--ease-inout, ease-in-out) infinite;
+}
+
+@keyframes hzUrgentPulse {
+  0%,
+  100% {
+    box-shadow:
+      var(--chrome-keyline),
+      0 0 12px -2px color-mix(in srgb, var(--panel-magenta) 55%, transparent);
+  }
+  50% {
+    box-shadow:
+      var(--chrome-keyline),
+      0 0 22px 1px color-mix(in srgb, var(--panel-magenta) 78%, transparent);
+  }
+}
+
+/*
+ * Reduced motion and calm mode both drop the pulse. The tag still has to read
+ * as the most urgent thing on the card, so it holds the solid fill and takes
+ * the bright end of the pulse as a static value rather than going quiet.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .hz-tag--now {
+    animation: none;
+    box-shadow:
+      var(--chrome-keyline),
+      0 0 22px 1px color-mix(in srgb, var(--panel-magenta) 78%, transparent);
+  }
+}
+
+html.calm-mode .hz-tag--now {
+  animation: none;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
+}
+
+html.calm-mode .hz-tag--urgent {
+  box-shadow: none;
+}
+
+/* ---- Priority 5: adult household culture -------------------------------- */
+/* Soft, wide, static. Culture and compatibility, never emergency. */
+.hz-tag--adult {
+  color: var(--panel-purple);
+  border-color: color-mix(in srgb, var(--panel-purple) 48%, #101014);
+  background: color-mix(in srgb, var(--panel-purple) 10%, var(--ink-800));
+  box-shadow: 0 0 18px -6px color-mix(in srgb, var(--panel-purple) 60%, transparent);
+}
+
+html.calm-mode .hz-tag--adult {
+  box-shadow: none;
+}
+
+/* ---- Trust and restrictions --------------------------------------------- */
+.hz-tag--verified {
+  color: var(--panel-cyan);
+  border-color: color-mix(in srgb, var(--panel-cyan) 48%, #101014);
+}
+
+.hz-tag--restriction {
+  color: var(--panel-orange);
+  border-color: color-mix(in srgb, var(--panel-orange) 52%, #101014);
+}
+
+/* ---- The overflow control ----------------------------------------------- */
+.hz-tag--more {
+  cursor: pointer;
+  color: var(--board-muted);
+  border-style: dashed;
+  background: transparent;
+}
+
+.hz-tag--more:hover {
+  color: var(--board-text);
+  border-color: color-mix(in srgb, var(--c) 55%, #101014);
+}
+
+/* ---- Selected filter chips (removable) ---------------------------------- */
+.hz-tag--applied {
+  cursor: pointer;
+  color: var(--board-text);
+  border-color: color-mix(in srgb, var(--c) 48%, #101014);
+  background: color-mix(in srgb, var(--c) 10%, var(--ink-800));
+}
+
+.hz-tag--applied .hz-ico {
+  opacity: 0.65;
+}
+
+.hz-tag--applied:hover .hz-ico {
+  opacity: 1;
+}
+
+/* ---- Pickable tags (filter dropdown + composer) -------------------------- */
+.hz-tag--pick {
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast, 150ms) ease,
+    color var(--dur-fast, 150ms) ease,
+    background var(--dur-fast, 150ms) ease;
+}
+
+.hz-tag--pick:hover {
+  color: var(--board-text);
+  border-color: color-mix(in srgb, var(--c) 55%, #101014);
+}
+
+.hz-tag--pick.is-on {
+  color: var(--text-inverse);
+  background: var(--c);
+  border-color: #000;
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel);
+}
+
+/* Urgent and adult keep their own hue when selected, so a picked tag still
+   says which register it belongs to. */
+.hz-tag--urgent.hz-tag--pick.is-on,
+.hz-tag--now.hz-tag--pick.is-on {
+  background: var(--panel-magenta);
+}
+
+.hz-tag--adult.hz-tag--pick.is-on {
+  background: var(--panel-purple);
+}
+
+/*
+ * A tag ruled out by something already picked. Dimmed rather than removed, so
+ * the vocabulary stays where people learned it. Still tappable: taking it
+ * swaps the opposite one out, because someone tapping Unfurnished after
+ * Furnished has changed their mind, not made a mistake.
+ */
+.hz-tag--pick.is-blocked {
+  opacity: 0.34;
+  border-style: dashed;
+}
+
+.hz-tag--pick.is-blocked:hover {
+  opacity: 0.62;
+}
+
+/* ==========================================================================
+   TAG FILTER
+   ========================================================================== */
+
+.hz-tagfilter {
+  position: relative;
+  margin-top: 12px;
+}
+
+.hz-tagfilter__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.hz-tagfilter__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border-radius: var(--chrome-radius-md);
+  border: 1px solid var(--panel-border-2);
+  background: var(--panel-card);
+  color: var(--board-text);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.hz-tagfilter__toggle:hover,
+.hz-tagfilter__toggle[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--c) 55%, #101014);
+  color: var(--c);
+}
+
+/* The active filter count. Has to be legible at a glance on a phone. */
+.hz-tagfilter__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--c);
+  color: var(--text-inverse);
+  font-style: normal;
+  font-weight: var(--fw-semibold);
+  font-size: 10px;
+  letter-spacing: 0;
+  box-shadow: var(--chrome-keyline);
+}
+
+.hz-tagfilter__caret {
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  transition: transform var(--dur-fast, 150ms) ease;
+}
+
+[aria-expanded="true"] > .hz-tagfilter__caret {
+  transform: rotate(180deg);
+}
+
+.hz-tagfilter__applied {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.hz-tagfilter__clear {
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  color: var(--board-muted);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.hz-tagfilter__clear:hover:not(:disabled) {
+  color: var(--board-text);
+}
+
+.hz-tagfilter__clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hz-tagfilter__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 560px);
+  border-radius: var(--chrome-radius-md);
+  border: 1px solid var(--panel-border-2);
+  background: var(--panel-card);
+  box-shadow: var(--shadow-md, 0 8px 24px -8px rgba(0, 0, 0, 0.7));
+  animation: pdxPop 0.18s var(--ease-out, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hz-tagfilter__panel {
+    animation: none;
+  }
+}
+
+.hz-tagfilter__search,
+.hz-tagpick__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--board-muted);
+}
+
+.hz-tagfilter__search input,
+.hz-tagpick__search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--board-text);
+  font-family: var(--font-body);
+  font-size: var(--body-sm, 14px);
+}
+
+.hz-tagfilter__search button,
+.hz-tagpick__search button {
+  background: none;
+  border: none;
+  padding: 2px;
+  color: var(--board-muted);
+  cursor: pointer;
+}
+
+.hz-tagfilter__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 8px;
+  overscroll-behavior: contain;
+}
+
+/* Urgent filters sit above every category so someone who needs a place
+   tonight does not have to scroll or expand anything to find them. */
+.hz-tagfilter__quick {
+  padding: 12px 13px;
+  border-bottom: 1px solid var(--panel-border);
+  background: color-mix(in srgb, var(--panel-magenta) 5%, transparent);
+}
+
+.hz-tagfilter__quick .hz-tagfilter__tags {
+  margin-top: 8px;
+}
+
+.hz-tagfilter__group {
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.hz-tagfilter__group:last-child {
+  border-bottom: none;
+}
+
+.hz-tagfilter__grouphead,
+.hz-tagpick__grouphead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 13px;
+  background: none;
+  border: none;
+  color: var(--board-text);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hz-tagfilter__grouphead:hover,
+.hz-tagpick__grouphead:hover {
+  color: var(--c);
+}
+
+.hz-tagfilter__grouphead > span:first-child,
+.hz-tagpick__grouphead > span:first-child {
+  flex: 1;
+}
+
+.hz-tagfilter__tags,
+.hz-tagpick__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 13px 13px;
+}
+
+.hz-tagfilter__quick .hz-tagfilter__tags {
+  padding: 0;
+}
+
+.hz-tagfilter__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-top: 1px solid var(--panel-border);
+  background: var(--panel-card-2);
+  border-radius: 0 0 var(--chrome-radius-md) var(--chrome-radius-md);
+}
+
+.hz-tagfilter__note {
+  flex: 1;
+  min-width: 0;
+  color: var(--board-muted);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+}
+
+.hz-tagfilter__apply {
+  padding: 9px 15px;
+  border-radius: var(--chrome-radius-tag);
+  border: 1px solid #000;
+  background: var(--c);
+  color: var(--text-inverse);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel);
+}
+
+.hz-tagfilter__apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   TAG PICKER (composer)
+   ========================================================================== */
+
+.hz-tagpick__picked {
+  margin: 8px 0 4px;
+}
+
+.hz-tagpick__search {
+  margin-top: 10px;
+  border: 1px solid var(--panel-border-2);
+  border-radius: var(--chrome-radius-tag);
+}
+
+.hz-tagpick__body {
+  margin-top: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--chrome-radius-md);
+  background: var(--panel-card-2);
+}
+
+.hz-tagpick__group {
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.hz-tagpick__group:last-child {
+  border-bottom: none;
+}
+
+.hz-tagpick__group .hz-hint {
+  display: block;
+  padding: 0 13px 8px;
+  margin-top: -4px;
+}
+
+/* ==========================================================================
+   TAG MOBILE
+   The filter control stays near the top of the board and the count stays
+   readable. Tags wrap rather than shrink, and the dropdown becomes a sheet
+   pinned to the viewport rather than a narrow popover.
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .hz-tagfilter__panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-height: 76vh;
+  }
+
+  .hz-tagfilter__foot {
+    flex-wrap: wrap;
+  }
+
+  .hz-tagfilter__note {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .hz-tagfilter__apply {
+    flex: 1;
+  }
+
+  /* Wrapping keeps the label at full size. Never scale the text down. */
+  .hz-tag {
+    white-space: normal;
+  }
 }
