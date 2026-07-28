@@ -6299,6 +6299,7 @@ function runBootMigrationsOnce() {
       "Portland athletic-fetish and gear-party collective run by Tucker Max (Tucker_PDmaX). Yes Coach nights, collabs (Stank, Pink Ponies), and community play at Sanctuary and partner venues. Consent-forward. Not a leather club — party brand.";
     const website = "https://yescoachparties.com";
     const instagram = "@Tucker_PDmaX";
+    const imageUrl = "/directory-logos/Yes_Coach_Productions.png";
     const existing = sqlite
       .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
       .get(name) as { id?: number } | undefined;
@@ -6310,13 +6311,14 @@ function runBootMigrationsOnce() {
              description = ?,
              website = ?,
              instagram = ?,
+             image_url = COALESCE(NULLIF(TRIM(image_url), ''), ?),
              neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), 'Portland'),
              queer_owned = 1,
              queer_friendly = 1,
              active = 1
            WHERE id = ?`,
         )
-        .run(description, website, instagram, existing.id);
+        .run(description, website, instagram, imageUrl, existing.id);
     } else {
       db.insert(businesses)
         .values({
@@ -6327,6 +6329,7 @@ function runBootMigrationsOnce() {
           neighborhood: "Portland",
           website,
           instagram,
+          imageUrl,
           queerOwned: true,
           queerFriendly: true,
           active: true,
@@ -6336,6 +6339,18 @@ function runBootMigrationsOnce() {
         .run();
     }
     recordBootMigration("seed_yes_coach_productions_directory_v1");
+  }
+
+  // Neon Yes Coach logo for directory listing (after group seed may already have run).
+  if (!hasBootMigration("yes_coach_directory_logo_v1")) {
+    const imageUrl = "/directory-logos/Yes_Coach_Productions.png";
+    sqlite
+      .prepare(
+        `UPDATE businesses SET image_url = ?
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run(imageUrl);
+    recordBootMigration("yes_coach_directory_logo_v1");
   }
 
   /**
