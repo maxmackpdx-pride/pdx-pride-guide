@@ -61,6 +61,11 @@ export function Chip({
 /**
  * The design system Button, pointed at the surface accent instead of root acid.
  * That is this wrapper's only job.
+ *
+ * Both custom properties have to be rebound. The DS Button sets `--_c` AND `--c`
+ * from its own `accent` prop (default lime), and the board's solid-button
+ * gradient reads `--c`, so overriding only `--_c` leaves every primary button
+ * root acid no matter what the card's accent is.
  */
 export function Btn({
   children,
@@ -87,7 +92,7 @@ export function Btn({
       onClick={onClick}
       type={type}
       disabled={disabled}
-      style={{ "--_c": "var(--hz-accent)" } as CSSProperties}
+      style={{ "--_c": "var(--hz-accent)", "--c": "var(--hz-accent)" } as CSSProperties}
     >
       {children}
     </Button>
