@@ -592,6 +592,26 @@
   overflow: visible;
 }
 
+/* Floating DEMO sticker - only on seeded demo posts (hausing_demo author). */
+.hz-demo-sticker {
+  position: absolute;
+  top: 12px;
+  right: -7px;
+  z-index: 7;
+  transform: rotate(6deg);
+  background: var(--neon-yellow, #ffee00);
+  color: #0a0a0a;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  padding: 5px 12px 4px;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 0 2px #0a0a0a;
+  pointer-events: none;
+}
+
 /* merged: prototype declared .hz-cardact twice */
 .hz-cardact {
   margin-top: auto;

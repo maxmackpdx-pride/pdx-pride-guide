@@ -3457,7 +3457,7 @@ function getOrCreateDemoUser(now: string): number | null {
     .get() as { id: number } | undefined;
   if (existing) {
     sqlite
-      .prepare(`UPDATE users SET display_name = 'HAÜSING Demo', photo_url = '/hausing/demo/person-looking.jpg' WHERE id = ?`)
+      .prepare(`UPDATE users SET display_name = 'Rowan', photo_url = '/hausing/demo/person-looking.jpg' WHERE id = ?`)
       .run(existing.id);
     return existing.id;
   }
@@ -3465,7 +3465,7 @@ function getOrCreateDemoUser(now: string): number | null {
     const info = sqlite
       .prepare(
         `INSERT INTO users (username, email, password_hash, display_name, photo_url, pronouns, location, status, created_at)
-         VALUES ('hausing_demo', 'demo@zaylist.local', '', 'HAÜSING Demo', '/hausing/demo/person-looking.jpg', 'they/them', 'Portland, OR', 'active', ?)`,
+         VALUES ('hausing_demo', 'demo@zaylist.local', '', 'Rowan', '/hausing/demo/person-looking.jpg', 'they/them', 'Portland, OR', 'active', ?)`,
       )
       .run(now);
     return Number(info.lastInsertRowid);
@@ -3482,8 +3482,8 @@ function seedHousingDemoPosts() {
   // Remove any prior DEMO posts (including an earlier version attributed to the
   // site owner) so this reseeds cleanly under the demo account.
   const priorIds = sqlite
-    .prepare(`SELECT id FROM housing_posts WHERE name LIKE 'DEMO%' OR headline LIKE 'DEMO %'`)
-    .all() as Array<{ id: number }>;
+    .prepare(`SELECT id FROM housing_posts WHERE user_id = ? OR name LIKE 'DEMO%' OR headline LIKE 'DEMO %'`)
+    .all(demoId) as Array<{ id: number }>;
   for (const row of priorIds) {
     sqlite.prepare(`DELETE FROM housing_members WHERE post_id = ?`).run(row.id);
     sqlite.prepare(`DELETE FROM housing_posts WHERE id = ?`).run(row.id);
@@ -3539,9 +3539,9 @@ function seedHousingDemoPosts() {
 
   // OFFERING a Room
   const offering = insertPost.run({
-    userId: demoId, type: "OFFERING", name: "DEMO",
-    headline: "DEMO — Sunny room in a queer household, SE Portland",
-    body: "This is a DEMO Offering a Room listing showing how a room in an existing household looks. Not a real room.",
+    userId: demoId, type: "OFFERING", name: "Sunnyside",
+    headline: "Sunny room in a queer household off SE Division",
+    body: "Bright room in a chill, queer-run house. We share meals sometimes, keep things low-key, and love a good porch hang. Come as you are.",
     photos: JSON.stringify(["/hausing/demo/room-offering.jpg"]), areas: JSON.stringify(["Southeast"]),
     budget: null, moveTimeline: null, openToHaus: 0,
     rent: "$900/mo", moveIn: "Flexible", beds: 3, baths: 1, parking: "STREET_ONLY", outdoor: "SHARED_YARD",
@@ -3555,9 +3555,9 @@ function seedHousingDemoPosts() {
 
   // LOOKING for Housing
   insertPost.run({
-    userId: demoId, type: "LOOKING", name: "DEMO",
-    headline: "DEMO — Looking for a room, moving to PDX in August",
-    body: "This is a DEMO Looking for Housing post. The person is the listing.",
+    userId: demoId, type: "LOOKING", name: "",
+    headline: "Nurse moving to Portland in August, looking for a room",
+    body: "Relocating for a hospital job and hoping to land somewhere queer and welcoming. Clean, easygoing, love to cook for a house. Open to forming a HAÜS if the people are right.",
     photos: JSON.stringify(["/hausing/demo/looking-bg.jpg"]), areas: JSON.stringify(["North", "Northeast"]),
     budget: "$850/mo", moveTimeline: "Aug 1, some flex", openToHaus: 1,
     rent: null, moveIn: null, beds: null, baths: null, parking: null, outdoor: null,
@@ -3567,9 +3567,9 @@ function seedHousingDemoPosts() {
 
   // FORMING a HAÜS
   const forming = insertPost.run({
-    userId: demoId, type: "FORMING", name: "DEMO",
-    headline: "DEMO — Building a queer household, looking for 2 more",
-    body: "This is a DEMO Forming a HAÜS post. People team up first, then find a place together.",
+    userId: demoId, type: "FORMING", name: "Wildrose",
+    headline: "Building a queer household, looking for 2 more",
+    body: "Two of us ready to sign a lease together and find a bigger place as a household. Looking for two more people who want chosen family, not just roommates.",
     photos: JSON.stringify(["/hausing/demo/room-forming.jpg"]), areas: JSON.stringify(["Southeast", "Northeast"]),
     budget: null, moveTimeline: null, openToHaus: 0,
     rent: null, moveIn: null, beds: null, baths: null, parking: null, outdoor: null,
@@ -3583,9 +3583,9 @@ function seedHousingDemoPosts() {
 
   // MANAGED Property
   insertPost.run({
-    userId: demoId, type: "MANAGED", name: "DEMO Rose City Flats",
-    headline: "DEMO — 1 bed / 1 bath, NE Portland, available now",
-    body: "This is a DEMO Managed Property listing from a verified property manager. Renters inquire on the manager's own site.",
+    userId: demoId, type: "MANAGED", name: "Rose City Flats",
+    headline: "1 bed / 1 bath in NE Portland, available now",
+    body: "Updated one-bedroom near Alberta with a private patio. Managed by a verified, affirming property team. Tour and apply on our site.",
     photos: JSON.stringify(["/hausing/demo/unit-managed.jpg"]), areas: JSON.stringify(["Northeast"]),
     budget: null, moveTimeline: null, openToHaus: 0,
     rent: "$1,450/mo", moveIn: "Now", beds: 1, baths: 1, parking: "OFF_STREET", outdoor: "PATIO_BALCONY",
@@ -3608,12 +3608,16 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_housing_demo_v1");
   }
   if (!hasBootMigration("seed_housing_demo_v2")) {
+    // superseded by v3 (real names + DEMO sticker); record and skip
+    recordBootMigration("seed_housing_demo_v2");
+  }
+  if (!hasBootMigration("seed_housing_demo_v3")) {
     try {
       seedHousingDemoPosts();
     } catch (err) {
-      console.warn("[boot] seed_housing_demo_v2 skipped:", err instanceof Error ? err.message : err);
+      console.warn("[boot] seed_housing_demo_v3 skipped:", err instanceof Error ? err.message : err);
     }
-    recordBootMigration("seed_housing_demo_v2");
+    recordBootMigration("seed_housing_demo_v3");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();

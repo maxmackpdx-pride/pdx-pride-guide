@@ -89,6 +89,9 @@ function CardShell({
       }}
     >
       <span className="pdx-refract-seam" aria-hidden="true" />
+      {post.author?.username === "hausing_demo" ? (
+        <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>
+      ) : null}
       {children}
     </div>
   );
@@ -255,6 +258,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
           pets={pets}
           size="sm"
           scale={1.5}
+          wrap3
           slots={isFull ? 0 : seeking}
           onSelect={h.onPerson}
         />
