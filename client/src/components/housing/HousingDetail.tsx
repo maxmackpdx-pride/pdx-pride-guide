@@ -35,6 +35,7 @@ import {
   type HousingTrust,
 } from "@shared/housing";
 import { HousingWell } from "./HousingWell";
+import { FORMING_DEFAULT_COVER } from "./HousingCards";
 import { HousingCluster } from "./HousingCluster";
 import { HousingIcon, type HousingIconName } from "./HousingIcon";
 import {
@@ -875,7 +876,12 @@ function FormingDetail({
           <Back onBack={h.onBack} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={title} nameCap={0.35}>
+            <HousingWell
+              photos={post.photos}
+              title={title}
+              nameCap={0.35}
+              fallbackPhoto={FORMING_DEFAULT_COVER}
+            >
               <HousingCluster
                 people={people}
                 pets={pets}

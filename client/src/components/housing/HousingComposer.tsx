@@ -682,6 +682,8 @@ export function HousingComposer({
   const isForming = type === "FORMING";
   const isOffering = type === "OFFERING";
   const isLooking = type === "LOOKING";
+  /** A room and a seeker both have to show something. The server enforces it too. */
+  const photoRequired = isOffering || isLooking;
   const suffixed = isOffering || isForming;
   const nameWords = wordCount(draft.name);
 
@@ -1112,10 +1114,14 @@ export function HousingComposer({
           </>
         ) : null}
 
-        {/* Cover photo. Called out on its own, because the name sits over it. */}
+        {/*
+          Cover photo. Called out on its own, because the name sits over it, and
+          required on a room or a seeker post: people are deciding who to live
+          with, and a post with no pictures gives them nothing to go on.
+        */}
         <div className="hz-field">
           <label>
-            <Mono micro>Cover photo</Mono>
+            <Mono micro>Cover photo{photoRequired ? " · required" : ""}</Mono>
           </label>
           <div className="hz-upload__shots">
             {photos[0] ? (
@@ -1126,8 +1132,10 @@ export function HousingComposer({
             <label className="hz-upload__drop">
               <b>{photos[0] ? "Swap the cover" : "Add the cover photo"}</b>
               <small>
-                The first photo is the cover, and the name sits over it. Pick the widest, plainest
-                one you have. Drop a file here or choose one.
+                {isLooking
+                  ? "Show what you are like to live with. Things you do: cooking, your bike, the garden, a show you played. The name sits over this one."
+                  : "The first photo is the cover, and the name sits over it. Pick the widest, plainest one you have."}{" "}
+                Drop a file here or choose one.
               </small>
               <input
                 type="file"
@@ -1171,7 +1179,7 @@ export function HousingComposer({
                       ? "The room, the kitchen, the porch."
                       : isForming
                         ? "The kind of place you are after."
-                        : "Your life, not your face. Your profile picture already shows."}{" "}
+                        : "Things you enjoy. Your profile picture already shows your face."}{" "}
                   Up to {MAX_PHOTOS} in total.
                 </small>
                 <input
@@ -1189,6 +1197,25 @@ export function HousingComposer({
           </div>
         </div>
 
+        {/*
+          The one hard rule on photos. Zaylist is sex positive everywhere else,
+          but housing is where rent-for-sex arrangements get proposed, and that
+          is coercion dressed as a listing. Say it plainly at the moment someone
+          is choosing what to upload, not buried in terms nobody reads.
+        */}
+        {!isManaged ? (
+          <div className="hz-flag hz-flag--note">
+            <span>
+              <b style={{ color: "var(--text-hi)" }}>Keep it to the place and your life</b>
+              <p>
+                No nudity here, and nothing offering or asking for housing in exchange for sex or
+                favors. That is not a listing, and it does not belong on this board. Post the room,
+                the house, or the things you actually do.
+              </p>
+            </span>
+          </div>
+        ) : null}
+
         <Notice text={notice} />
       </div>
 
@@ -1197,7 +1224,11 @@ export function HousingComposer({
           Back
         </Btn>
         <span style={{ marginLeft: "auto" }} />
-        <Btn kind="solid" disabled={busy || !draft.headline.trim()} onClick={() => void submitPost(type)}>
+        <Btn
+          kind="solid"
+          disabled={busy || !draft.headline.trim() || (photoRequired && photos.length === 0)}
+          onClick={() => void submitPost(type)}
+        >
           {busy ? "Working" : "Post to the board"}
         </Btn>
       </div>

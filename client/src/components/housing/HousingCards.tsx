@@ -42,6 +42,13 @@ export type HousingCardHandlers = {
   onPerson?: (person: HousingPerson) => void;
 };
 
+/**
+ * A household forming before it has a house has nothing to photograph, so the
+ * cover falls back to the blueprint illustration rather than a bare gradient.
+ * Swap the file at this path to change the artwork.
+ */
+export const FORMING_DEFAULT_COVER = "/hausing/forming-no-place.svg";
+
 const stop = (fn: () => void) => (e: React.MouseEvent) => {
   e.stopPropagation();
   fn();
@@ -234,6 +241,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
         // With no place picked yet there is nothing to name, so the card asks.
         title={post.photos.length ? post.displayName : "Build a HAÜS"}
         nameCap={0.8}
+        fallbackPhoto={FORMING_DEFAULT_COVER}
       >
         <HousingCluster
           people={people}

@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1504 688" width="1504" height="688" role="img" aria-label="Line drawing of people gathering around tables, for a household that has not found a place yet">
+  <!--
+    HAUSING: the default cover for a Forming a HAUS post with no place yet.
+
+    Blueprint register: acid green and white line art on the ink grid. It reads as
+    a plan rather than a photo, which is the point. A household forming before it
+    has a house has nothing to photograph, so this stands in for the idea instead
+    of pretending to be a room.
+
+    Swap this file to change the artwork. It is referenced by
+    FORMING_DEFAULT_COVER in client/src/components/housing/HousingCards.tsx.
+  -->
+  <defs>
+    <pattern id="hzGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0v16" fill="none" stroke="#2f6b3a" stroke-width="0.5" opacity="0.30" />
+    </pattern>
+    <pattern id="hzGridLg" width="96" height="96" patternUnits="userSpaceOnUse">
+      <path d="M96 0H0v96" fill="none" stroke="#39ff14" stroke-width="0.7" opacity="0.13" />
+    </pattern>
+    <linearGradient id="hzVign" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1016" stop-opacity="0" />
+      <stop offset="1" stop-color="#05070a" stop-opacity="0.85" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1504" height="688" fill="#0a1018" />
+  <rect width="1504" height="688" fill="url(#hzGrid)" />
+  <rect width="1504" height="688" fill="url(#hzGridLg)" />
+
+  <!-- structural rules -->
+  <g stroke="#39ff14" fill="none" opacity="0.55">
+    <path d="M0 104h1504" stroke-width="3" />
+    <path d="M0 118h1504" stroke-width="0.8" opacity="0.5" />
+    <path d="M0 636h1504" stroke-width="1.4" opacity="0.45" />
+  </g>
+  <g stroke="#39ff14" fill="none" opacity="0.22" stroke-width="1">
+    <path d="M636 0v688M968 118v518M176 118v518" />
+    <path d="M60 300h520M968 300h460" />
+  </g>
+
+  <!-- long table, five seats a side -->
+  <g stroke="#39ff14" fill="none" stroke-width="3" opacity="0.9">
+    <rect x="84" y="176" width="326" height="96" rx="6" />
+    <path d="M74 196v56" stroke-width="4" />
+    <g>
+      <rect x="112" y="150" width="38" height="30" rx="9" />
+      <rect x="170" y="150" width="38" height="30" rx="9" />
+      <rect x="228" y="150" width="38" height="30" rx="9" />
+      <rect x="286" y="150" width="38" height="30" rx="9" />
+      <rect x="344" y="150" width="38" height="30" rx="9" />
+      <rect x="112" y="268" width="38" height="30" rx="9" />
+      <rect x="170" y="268" width="38" height="30" rx="9" />
+      <rect x="228" y="268" width="38" height="30" rx="9" />
+      <rect x="286" y="268" width="38" height="30" rx="9" />
+      <rect x="344" y="268" width="38" height="30" rx="9" />
+    </g>
+  </g>
+
+  <!-- table with people, seen from above -->
+  <g fill="none" stroke-width="4">
+    <rect x="676" y="176" width="188" height="152" rx="6" stroke="#39ff14" opacity="0.85" />
+    <g stroke="#ffffff" opacity="0.95">
+      <circle cx="712" cy="200" r="24" />
+      <circle cx="712" cy="258" r="18" />
+      <circle cx="716" cy="308" r="26" />
+      <circle cx="836" cy="204" r="26" />
+      <circle cx="832" cy="262" r="18" />
+      <circle cx="828" cy="312" r="26" />
+    </g>
+    <g stroke="#39ff14" opacity="0.9">
+      <circle cx="772" cy="172" r="24" />
+      <circle cx="770" cy="252" r="12" />
+    </g>
+    <circle cx="824" cy="154" r="13" stroke="#ffffff" opacity="0.9" />
+  </g>
+
+  <!-- a few of them already sitting together -->
+  <g fill="none" stroke-width="4">
+    <g stroke="#ffffff" opacity="0.95">
+      <circle cx="1088" cy="74" r="22" />
+      <path d="M1062 128c0-20 12-30 26-30s26 10 26 30" />
+      <circle cx="1166" cy="64" r="26" />
+      <path d="M1136 124c0-24 14-36 30-36s30 12 30 36" />
+      <circle cx="1244" cy="76" r="22" />
+      <path d="M1218 130c0-20 12-30 26-30s26 10 26 30" />
+      <path d="M1196 232h108a26 26 0 0 0-26-26h-56a26 26 0 0 0-26 26z" />
+      <path d="M1014 150h176v82h-176z" />
+    </g>
+    <g stroke="#39ff14" opacity="0.9">
+      <circle cx="1074" cy="176" r="34" />
+      <circle cx="1164" cy="150" r="30" />
+      <circle cx="1248" cy="164" r="26" />
+      <path d="M986 46h34M986 46v30M1206 150h74" stroke-width="5" />
+      <path d="M1030 60a34 34 0 0 1 0 48" stroke-width="3" opacity="0.7" />
+    </g>
+  </g>
+
+  <!-- the high five -->
+  <g fill="none" stroke="#ffffff" stroke-width="5" opacity="0.97" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="222" cy="390" r="26" />
+    <path d="M222 418v112M190 452l-6-58M254 448l26-56" />
+    <path d="M204 530v52M240 530v52" />
+    <circle cx="328" cy="398" r="26" />
+    <path d="M328 426v104M300 462h56M300 462v-18M356 462v-18" />
+    <path d="M310 530v50M346 530v50" />
+    <circle cx="418" cy="386" r="26" />
+    <path d="M418 414v116M418 430l-24 44M418 430l6-62" />
+    <path d="M400 530v52M436 530v52" />
+    <circle cx="492" cy="392" r="26" />
+    <path d="M492 420v110M492 436l-30 38M492 436l50-4" />
+    <path d="M474 530v52M510 530v52" />
+  </g>
+  <!-- the spark where the hands meet -->
+  <g stroke="#c8fa3c" stroke-width="4" stroke-linecap="round" opacity="0.95">
+    <path d="M420 322v-24M392 334l-14-18M448 334l14-18M376 356l-22-8M466 356l22-8" />
+  </g>
+
+  <!-- a round table, still being filled -->
+  <g fill="none" stroke-width="4">
+    <rect x="644" y="404" width="240" height="196" rx="6" stroke="#39ff14" opacity="0.5" />
+    <g stroke="#39ff14" opacity="0.9">
+      <circle cx="716" cy="490" r="34" />
+      <circle cx="792" cy="470" r="24" />
+      <circle cx="848" cy="510" r="26" />
+      <circle cx="776" cy="552" r="22" />
+    </g>
+  </g>
+
+  <!-- someone still on their own -->
+  <g fill="none" stroke="#39ff14" stroke-width="4" opacity="0.9">
+    <circle cx="1254" cy="404" r="18" />
+    <circle cx="1250" cy="462" r="36" />
+  </g>
+
+  <!-- loose ones, not yet placed -->
+  <g fill="none" stroke="#39ff14" stroke-width="4" opacity="0.85">
+    <circle cx="940" cy="350" r="22" />
+    <circle cx="1038" cy="452" r="18" />
+  </g>
+  <circle cx="1104" cy="404" r="9" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.35" />
+
+  <rect width="1504" height="688" fill="url(#hzVign)" />
+</svg>

@@ -191,6 +191,23 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const headline = asStr(req.body?.headline, 240);
     if (!headline) return res.status(400).json({ error: "Add a line about what you are after" });
 
+    /**
+     * A room and a seeker both need at least one photo.
+     *
+     * People are deciding who to live with, and a post with no pictures gives
+     * them nothing to go on. It also raises the floor against throwaway and
+     * scam posts, which is the cheapest safety win on the board.
+     */
+    const photos = asArray(req.body?.photos);
+    if ((type === "OFFERING" || type === "LOOKING") && photos.length === 0) {
+      return res.status(400).json({
+        error:
+          type === "OFFERING"
+            ? "Add at least one photo of the place. The first one is the cover."
+            : "Add at least one photo. Something you do, not a photo of your body.",
+      });
+    }
+
     // Store the front part only. The locked HAUS suffix is appended on render.
     const rawName = asStr(req.body?.name, 120) || "";
     const name = type === "MANAGED" ? rawName : stripHausSuffix(rawName);
@@ -201,7 +218,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       name,
       headline,
       body: asStr(req.body?.body, 4000) || "",
-      photos: asArray(req.body?.photos),
+      photos,
       areas: asArray(req.body?.areas),
       budget: asStr(req.body?.budget, 80),
       moveTimeline: asStr(req.body?.moveTimeline, 80),
