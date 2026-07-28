@@ -1,7 +1,7 @@
 import type { InboxPartyAvatar } from "@/lib/inboxAvatar";
 import type { MessageReactionCode } from "@shared/messageReactions";
 
-export type Category = "spotted" | "gigs" | "gifting" | "hosts" | "checkins";
+export type Category = "spotted" | "gigs" | "gifting" | "housing" | "hosts" | "checkins";
 export type Folder = "inbox" | "sent" | "deleted";
 /** Admin account sub-views: moderation queue + shared guide-admin mailboxes. */
 export type QueueFolder = "active" | "completed" | "inbox" | "sent";

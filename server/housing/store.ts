@@ -728,3 +728,380 @@ export function listHousingReports(db: Database, status = "PENDING"): any[] {
     .prepare(`SELECT * FROM housing_reports WHERE status = ? ORDER BY created_at DESC`)
     .all(status) as any[];
 }
+
+// --- requests: the consent gate -------------------------------------------
+//
+// First contact is a request the recipient accepts or declines, not an open DM.
+// Asking to chat and asking to join a HAUS are the SAME gesture, which is why one
+// table covers both. Nothing opens until the recipient accepts, and declining is
+// quiet: no notification drama, no second chance to pester.
+
+export type RequestInput = {
+  postId: number;
+  requesterUserId: number;
+  recipientUserId: number;
+  kind: HousingRequestKind;
+  note?: string;
+};
+
+export function getHousingRequest(db: Database, id: number): any | undefined {
+  return db.prepare(`SELECT * FROM housing_requests WHERE id = ?`).get(id) as any;
+}
+
+/** The viewer's own live request against a post, if any. */
+export function getMyHousingRequest(db: Database, postId: number, userId: number): any | undefined {
+  return db
+    .prepare(
+      `SELECT * FROM housing_requests
+        WHERE post_id = ? AND requester_user_id = ?
+        ORDER BY id DESC LIMIT 1`,
+    )
+    .get(postId, userId) as any;
+}
+
+export function createHousingRequest(db: Database, input: RequestInput): { id: number; existing: boolean } {
+  const prior = getMyHousingRequest(db, input.postId, input.requesterUserId);
+  // Re-asking after a decline is not allowed, and re-asking while pending is a
+  // no-op rather than a way to nag.
+  if (prior && (prior.status === "PENDING" || prior.status === "ACCEPTED")) {
+    return { id: prior.id, existing: true };
+  }
+  if (prior && prior.status === "DECLINED") {
+    return { id: prior.id, existing: true };
+  }
+  const info = db
+    .prepare(
+      `INSERT INTO housing_requests (post_id, requester_user_id, recipient_user_id, kind, status, note, created_at)
+       VALUES (?, ?, ?, ?, 'PENDING', ?, ?)`,
+    )
+    .run(
+      input.postId,
+      input.requesterUserId,
+      input.recipientUserId,
+      input.kind,
+      (input.note || "").slice(0, 1000),
+      nowIso(),
+    );
+  return { id: Number(info.lastInsertRowid), existing: false };
+}
+
+export function attachHousingRequestThread(db: Database, id: number, threadId: string): void {
+  db.prepare(`UPDATE housing_requests SET thread_id = ? WHERE id = ?`).run(threadId, id);
+}
+
+export function resolveHousingRequest(
+  db: Database,
+  id: number,
+  status: "ACCEPTED" | "DECLINED" | "WITHDRAWN",
+): void {
+  db.prepare(`UPDATE housing_requests SET status = ?, resolved_at = ? WHERE id = ?`).run(status, nowIso(), id);
+}
+
+/** Pending asks the Lead or poster still has to answer. */
+export function listPendingHousingRequests(db: Database, postId: number): any[] {
+  const rows = db
+    .prepare(
+      `SELECT r.*, u.username, u.display_name, u.photo_url, u.avatar_choice, u.avatar_ring, u.pronouns
+         FROM housing_requests r
+         JOIN users u ON u.id = r.requester_user_id
+        WHERE r.post_id = ? AND r.status = 'PENDING'
+        ORDER BY r.created_at ASC`,
+    )
+    .all(postId) as any[];
+  return rows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    note: r.note,
+    createdAt: r.created_at,
+    threadId: r.thread_id,
+    person: {
+      userId: r.requester_user_id,
+      displayName: r.display_name || r.username,
+      username: r.username,
+      photoUrl: r.photo_url,
+      avatarChoice: r.avatar_choice,
+      avatarRing: r.avatar_ring,
+      pronouns: r.pronouns,
+    },
+  }));
+}
+
+/** Everyone waiting on a full HAUS, in the order they asked. */
+export function listHousingWaitlist(db: Database, postId: number): any[] {
+  return db
+    .prepare(
+      `SELECT r.*, u.username, u.display_name, u.photo_url
+         FROM housing_requests r
+         JOIN users u ON u.id = r.requester_user_id
+        WHERE r.post_id = ? AND r.kind = 'WAITLIST' AND r.status = 'PENDING'
+        ORDER BY r.created_at ASC`,
+    )
+    .all(postId) as any[];
+}
+
+export function countHousingWaitlist(db: Database, postId: number): number {
+  const row = db
+    .prepare(
+      `SELECT COUNT(*) AS n FROM housing_requests
+        WHERE post_id = ? AND kind = 'WAITLIST' AND status = 'PENDING'`,
+    )
+    .get(postId) as { n: number } | undefined;
+  return row?.n ?? 0;
+}
+
+// --- the forming workspace --------------------------------------------------
+
+/**
+ * The shared shortlist. These are external links the group bookmarks for itself.
+ * Zaylist does not host or re-list these properties, which is what keeps the
+ * shortlist a private planning tool rather than a rental listing service.
+ */
+export function listHousingPlaces(db: Database, postId: number): any[] {
+  const places = db
+    .prepare(`SELECT * FROM housing_places WHERE post_id = ? ORDER BY sort_order ASC, id ASC`)
+    .all(postId) as any[];
+  if (!places.length) return [];
+  const ids = places.map((p) => p.id);
+  const ph = ids.map(() => "?").join(",");
+  const reactions = db
+    .prepare(`SELECT place_id, COUNT(*) AS n FROM housing_place_reactions WHERE place_id IN (${ph}) GROUP BY place_id`)
+    .all(...ids) as any[];
+  const comments = db
+    .prepare(`SELECT place_id, COUNT(*) AS n FROM housing_place_comments WHERE place_id IN (${ph}) GROUP BY place_id`)
+    .all(...ids) as any[];
+  const rMap = new Map(reactions.map((r) => [r.place_id, r.n]));
+  const cMap = new Map(comments.map((c) => [c.place_id, c.n]));
+  const users = loadUsers(db, places.map((p) => p.added_by_user_id));
+  return places.map((p) => ({
+    id: p.id,
+    url: p.url,
+    title: p.title,
+    rent: p.rent,
+    neighborhood: p.neighborhood,
+    sourceDomain: p.source_domain,
+    thumbUrl: p.thumb_url,
+    status: p.status,
+    isTarget: !!p.is_target,
+    managedPostId: p.managed_post_id,
+    addedBy: users.get(p.added_by_user_id)?.display_name || users.get(p.added_by_user_id)?.username || "Someone",
+    reactions: rMap.get(p.id) ?? 0,
+    comments: cMap.get(p.id) ?? 0,
+    createdAt: p.created_at,
+  }));
+}
+
+function domainOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+export function addHousingPlace(
+  db: Database,
+  postId: number,
+  userId: number,
+  input: { url: string; title?: string; rent?: string; neighborhood?: string; isTarget?: boolean; managedPostId?: number | null },
+): number {
+  const next = db
+    .prepare(`SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM housing_places WHERE post_id = ?`)
+    .get(postId) as { n: number };
+  const info = db
+    .prepare(
+      `INSERT INTO housing_places
+        (post_id, added_by_user_id, url, title, rent, neighborhood, source_domain, status, is_target, managed_post_id, sort_order, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'INTERESTED', ?, ?, ?, ?)`,
+    )
+    .run(
+      postId,
+      userId,
+      input.url,
+      (input.title || input.url).slice(0, 200),
+      input.rent ?? null,
+      input.neighborhood ?? null,
+      domainOf(input.url),
+      input.isTarget ? 1 : 0,
+      input.managedPostId ?? null,
+      next.n,
+      nowIso(),
+    );
+  return Number(info.lastInsertRowid);
+}
+
+export function setHousingPlaceStatus(db: Database, postId: number, placeId: number, status: string): void {
+  db.prepare(`UPDATE housing_places SET status = ? WHERE id = ? AND post_id = ?`).run(status, placeId, postId);
+}
+
+export function removeHousingPlace(db: Database, postId: number, placeId: number): void {
+  db.prepare(`DELETE FROM housing_place_reactions WHERE place_id = ?`).run(placeId);
+  db.prepare(`DELETE FROM housing_place_comments WHERE place_id = ?`).run(placeId);
+  db.prepare(`DELETE FROM housing_places WHERE id = ? AND post_id = ?`).run(placeId, postId);
+}
+
+export function toggleHousingPlaceReaction(db: Database, placeId: number, userId: number, emoji = "♥"): boolean {
+  const existing = db
+    .prepare(`SELECT id FROM housing_place_reactions WHERE place_id = ? AND user_id = ?`)
+    .get(placeId, userId) as { id: number } | undefined;
+  if (existing) {
+    db.prepare(`DELETE FROM housing_place_reactions WHERE id = ?`).run(existing.id);
+    return false;
+  }
+  db.prepare(`INSERT INTO housing_place_reactions (place_id, user_id, emoji, created_at) VALUES (?, ?, ?, ?)`).run(
+    placeId,
+    userId,
+    emoji,
+    nowIso(),
+  );
+  return true;
+}
+
+/** The dates a real house hunt runs on. Rides the platform reminder system. */
+export function listHousingDates(db: Database, postId: number): any[] {
+  const rows = db
+    .prepare(`SELECT * FROM housing_dates WHERE post_id = ? ORDER BY date_on ASC, sort_order ASC`)
+    .all(postId) as any[];
+  const users = loadUsers(db, rows.map((r) => r.created_by_user_id));
+  return rows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    label: r.label,
+    dateOn: r.date_on,
+    note: r.note,
+    remindAt: r.remind_at,
+    addedBy: users.get(r.created_by_user_id)?.display_name || users.get(r.created_by_user_id)?.username || "Someone",
+  }));
+}
+
+export function addHousingDate(
+  db: Database,
+  postId: number,
+  userId: number,
+  input: { kind?: string; label: string; dateOn: string; note?: string },
+): number {
+  const info = db
+    .prepare(
+      `INSERT INTO housing_dates (post_id, created_by_user_id, kind, label, date_on, note, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(postId, userId, input.kind || "OTHER", input.label.slice(0, 160), input.dateOn, (input.note || "").slice(0, 300), nowIso());
+  return Number(info.lastInsertRowid);
+}
+
+export function removeHousingDate(db: Database, postId: number, dateId: number): void {
+  db.prepare(`DELETE FROM housing_dates WHERE id = ? AND post_id = ?`).run(dateId, postId);
+}
+
+// --- conversion and teardown ------------------------------------------------
+
+/**
+ * Looking for Housing <-> Forming a HAUS. The SAME post, its replies, and its
+ * community context all survive; only the type changes. Converting to a HAUS
+ * makes the poster its Lead. Converting back archives the workspace as JSON so
+ * nothing is lost if they flip again.
+ */
+export function convertHousingPostType(db: Database, postId: number, to: "LOOKING" | "FORMING", userId: number): void {
+  const now = nowIso();
+  if (to === "FORMING") {
+    const archived = db.prepare(`SELECT archived_workspace FROM housing_posts WHERE id = ?`).get(postId) as any;
+    db.prepare(
+      `UPDATE housing_posts SET type = 'FORMING', flavor = COALESCE(flavor, 'FIND_TOGETHER'),
+        updated_at = ?, last_change_label = 'Now forming a HAÜS', archived_workspace = NULL WHERE id = ?`,
+    ).run(now, postId);
+    const lead = db
+      .prepare(`SELECT id FROM housing_members WHERE post_id = ? AND user_id = ?`)
+      .get(postId, userId) as any;
+    if (lead) {
+      db.prepare(`UPDATE housing_members SET role = 'LEAD' WHERE id = ?`).run(lead.id);
+    } else {
+      db.prepare(
+        `INSERT INTO housing_members (post_id, kind, user_id, name, role, sort_order, created_at)
+         VALUES (?, 'MEMBER', ?, '', 'LEAD', 0, ?)`,
+      ).run(postId, userId, now);
+    }
+    // Restore a workspace archived by an earlier flip back to LOOKING.
+    if (archived?.archived_workspace) {
+      try {
+        const snap = JSON.parse(archived.archived_workspace);
+        for (const p of snap.places || []) {
+          addHousingPlace(db, postId, userId, {
+            url: p.url,
+            title: p.title,
+            rent: p.rent,
+            neighborhood: p.neighborhood,
+            isTarget: p.isTarget,
+          });
+        }
+        for (const d of snap.dates || []) {
+          addHousingDate(db, postId, userId, { kind: d.kind, label: d.label, dateOn: d.dateOn, note: d.note });
+        }
+      } catch {
+        /* a corrupt snapshot must not block the conversion */
+      }
+    }
+    return;
+  }
+
+  // Back to LOOKING: snapshot the workspace, then clear it.
+  const snapshot = JSON.stringify({
+    places: listHousingPlaces(db, postId),
+    dates: listHousingDates(db, postId),
+    archivedAt: now,
+  });
+  db.prepare(
+    `UPDATE housing_posts SET type = 'LOOKING', is_full = 0, updated_at = ?,
+      last_change_label = 'Back to looking', archived_workspace = ? WHERE id = ?`,
+  ).run(now, snapshot, postId);
+  const places = db.prepare(`SELECT id FROM housing_places WHERE post_id = ?`).all(postId) as any[];
+  for (const p of places) removeHousingPlace(db, postId, p.id);
+  db.prepare(`DELETE FROM housing_dates WHERE post_id = ?`).run(postId);
+}
+
+/**
+ * A property manager takes a listing down.
+ *
+ * Every HAUS that formed around it is notified and DETACHED, not deleted: the
+ * group survives the listing. Each one converts to find-a-place-together, its
+ * shortlist target flips to Passed, and the seeded manager dates are replaced by
+ * a single "keep hunting together" beat.
+ */
+export function tearDownManagedListing(db: Database, managedPostId: number): number[] {
+  const now = nowIso();
+  db.prepare(`UPDATE housing_posts SET gone = 1, updated_at = ?, last_change_label = 'Off the market' WHERE id = ?`).run(
+    now,
+    managedPostId,
+  );
+  const attached = db
+    .prepare(`SELECT id, areas FROM housing_posts WHERE around_post_id = ? AND type = 'FORMING'`)
+    .all(managedPostId) as any[];
+  for (const g of attached) {
+    db.prepare(
+      `UPDATE housing_posts
+          SET flavor = 'FIND_TOGETHER', around_post_id = NULL, updated_at = ?,
+              last_change_label = 'The place came off the market'
+        WHERE id = ?`,
+    ).run(now, g.id);
+    db.prepare(
+      `UPDATE housing_places SET status = 'PASSED', is_target = 0
+        WHERE post_id = ? AND managed_post_id = ?`,
+    ).run(g.id, managedPostId);
+    db.prepare(`DELETE FROM housing_dates WHERE post_id = ? AND kind IN ('LEASE','APPLICATION')`).run(g.id);
+    db.prepare(
+      `INSERT INTO housing_dates (post_id, created_by_user_id, kind, label, date_on, note, created_at)
+       SELECT ?, user_id, 'OTHER', 'Keep hunting together', ?, 'The listing came off the market', ?
+         FROM housing_posts WHERE id = ?`,
+    ).run(g.id, now.slice(0, 10), now, g.id);
+  }
+  return attached.map((g) => g.id);
+}
+
+/** One Build-a-HAUS per person per property. No spam, no land grab. */
+export function findMyHausForListing(db: Database, managedPostId: number, userId: number): number | null {
+  const row = db
+    .prepare(
+      `SELECT id FROM housing_posts
+        WHERE around_post_id = ? AND user_id = ? AND type = 'FORMING' AND status != 'REMOVED'`,
+    )
+    .get(managedPostId, userId) as { id: number } | undefined;
+  return row?.id ?? null;
+}

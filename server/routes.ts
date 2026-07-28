@@ -6403,6 +6403,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     getUserById: (id) => storage.getUserById(id),
     uploadPhotos: upload.array("photos", 8),
     createModerationRequest: (data) => storage.createModerationRequest(data),
+    sendMessage: (from, to, subject, body, opts) => storage.sendMessage(from, to, subject, body, opts),
   });
 
   scheduleMapCoordinateBackfill();

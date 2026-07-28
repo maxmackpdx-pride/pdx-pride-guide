@@ -35,6 +35,7 @@ const CATC: Record<Category, string> = {
   spotted: "var(--pink)",
   gigs: "var(--cyan)",
   gifting: "var(--neon-yellow, #ccff00)",
+  housing: "var(--panel-cyan, #19e3ff)",
   hosts: "var(--amber)",
   checkins: "var(--green)",
 };
@@ -42,6 +43,7 @@ const BADGE: Record<Category, string> = {
   spotted: "Missed Connections",
   gigs: "Gig",
   gifting: "Gifting",
+  housing: "HAÜSING",
   hosts: "Host",
   checkins: "Check-in",
 };
