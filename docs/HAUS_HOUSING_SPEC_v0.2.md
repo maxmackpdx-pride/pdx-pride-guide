@@ -71,13 +71,21 @@ Existing roommate houses do **not** have to rebrand themselves "a HAÜS." That w
 
 ---
 
-## 4. The Three Post Types
+## 4. The Four Post Types
 
-The board launches with three post types. Everything else is a variation.
+The board launches with four post types. Everything else is a variation.
 
 **Offering a Room.** An existing household has an available room — the traditional roommate listing. The household exists; someone is joining it. *(Carries early liquidity: simplest to post.)*
 
 **Looking for Housing.** An individual needs a place. They may not know where yet. Typical info: budget, move timeline, neighborhood preferences, room preferences, short description. *(Also easy to seed — it's basically a profile flag.)*
+
+**Managed Property.** A **property manager or landlord** posts a whole unit for rent — an apartment, a house, an ADU. This is the one non-peer, non-household type: nobody is joining a household and nobody is forming one; it's a straight rental listing. It exists so queer renters can find affirming *managed* housing in the same place they find rooms, but it is deliberately kept to the side of the board (§0: whole-unit rentals get no special matching treatment). **Purple accent.** Key differences from the roommate types:
+
+- **Full Fair Housing applies.** A landlord/manager listing has *less* latitude to express preferences than shared-living, so this type carries **no compatibility, no openness flags, and no "Meet the household"** preference signals. It's a plain informational listing: unit details, rent, availability, neighborhood, a description.
+- **No forced HAÜS name.** A managed building isn't a household, so it uses its **real property/building name** — it does *not* get the locked "HAÜS" suffix (§7).
+- **It doesn't convert.** Unlike the seeker types, a Managed Property post doesn't flip into "Forming a HAÜS" or carry openness flags — a landlord isn't a household-builder.
+- **Poster is verified.** Property managers should post from a **verified** account with a "Property Manager" badge (ties to the existing directory business verification), so the community can tell a managed listing from a peer offering a room.
+- **Platform still never handles money.** Rent/deposit are informational text only; applications and payment happen off-platform, same as everything else.
 
 **Forming a HAÜS.** The flagship and the biggest differentiator. Instead of finding a room, people find *each other* first, then rent together. "Two friends looking for one more." "Building a queer household together." The household forms first. Nobody builds this well today. *(Highest halo value, slowest to seed — needs multiple people to coordinate. It's the story, not the day-one volume driver.)*
 
@@ -109,7 +117,7 @@ Facebook wins because posting is trivial. No long application before you can par
 The flow opens with one question:
 
 > **What are you looking for?**
-> ○ Offering a Room ○ Looking for Housing ○ Forming a HAÜS
+> ○ Offering a Room ○ Looking for Housing ○ Forming a HAÜS ○ Managed Property *(verified property managers)*
 
 Then: write a description → add photos if it fits → optional structured fields (including the openness flag from §4). Done. Users enrich or convert the post later. **Low friction creates liquidity**, and liquidity is the whole game early on.
 
@@ -127,11 +135,12 @@ HAÜS is another active board in the feed. Search and filters exist for **refine
 
 ## 7. The HAÜS Card
 
-Housing cards are introductions, not advertisements. The goal is not to get a click — it's to let someone think "I could see myself here" in five seconds. Three variants on the shared deep-glass card:
+Housing cards are introductions, not advertisements. The goal is not to get a click — it's to let someone think "I could see myself here" in five seconds. Four variants on the shared deep-glass card:
 
 - **Offering a Room:** cover photo, rent, neighborhood, move-in date, room type, who's in the household (avatars), a few lifestyle badges, accessibility badges, Save / Share / Request to chat.
 - **Looking for Housing:** the person is the listing — avatar, name, move timeline, budget, desired neighborhoods, a short lifestyle line, "looking for."
 - **Forming a HAÜS:** group name, member avatars, combined budget, neighborhood goals, move timeline, "looking for N more."
+- **Managed Property (purple):** same card *shape* as Offering a Room, but **purple accent** and a **"Property Manager" (verified)** badge instead of a household. It shows the unit, not a household — property/building name (real name, no HAÜS suffix), cover photo, rent, beds/baths, availability, neighborhood, a short description. **No avatar stack, no openness chip, no compatibility** (§4). The visual family is the same so it feels native to the board; the purple + badge make it instantly readable as a managed listing, not a peer's room.
 
 **Every house name ends in HAÜS — and it's fixed.** When filling out any **Offering a Room** or **Forming a HAÜS** listing, the name field is **prebuilt to end in "HAÜS"**, and that suffix is **not editable**. The poster only writes the front part — "Rainbow" becomes **Rainbow HAÜS**, "Sunnyside" becomes **Sunnyside HAÜS** — and the composer shows the locked "HAÜS" ending right there so it's obvious the household *is* a HAÜS. This is what ties every household to the board (HAÜSING) without forcing anyone to think about branding: they just name their place, and it comes out a HAÜS.
 
@@ -253,7 +262,7 @@ Reuse platform moderation; add housing categories: fake listing, scam, unsafe ho
 
 ## 15. Roadmap
 
-- **v0.1** — three post types, one-question composer, openness flags, feed-first discovery, deep-glass HAÜS cards, request-to-chat (consent-based) via group conversations. Concierge matching. No compatibility, no applications, no tours.
+- **v0.1** — four post types (Offering a Room, Looking for Housing, Forming a HAÜS, Managed Property), one-question composer, openness flags, feed-first discovery, deep-glass HAÜS cards, request-to-chat (consent-based) via group conversations. Concierge matching. No compatibility, no applications, no tours.
 - **v0.2** — the "Forming a HAÜS" workspace (Lead + member management, shared property shortlist, important dates/reminders); the full-HAÜS waitlist; post-type conversion (Looking for Housing ⇄ Forming a HAÜS); community-context chips (mutual connections, shared events, tenure); verification badges; saved posts/searches; richer detail view.
 - **v0.3** — conversation prompts (soft compatibility); optional structured application + tours for households that want them.
 - **Later** — the compatibility/community-context service generalized to other boards (organizations, volunteer teams, projects). Housing is just the first board to use it.
