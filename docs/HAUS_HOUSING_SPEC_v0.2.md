@@ -115,6 +115,15 @@ Two stickiness features that make managers keep their inventory current (roadmap
 
 > **Legal:** get the Fair Housing attorney's eyes specifically on **republishing third-party landlord ads** (the ingest-scan point) and **source-of-income / voucher handling** — both are Portland-specific hot spots.
 
+**Monetization — the "Affirming Housing Partner" membership.** Property-manager access is monetized, but kept small, flat, and mission-framed — and it is **never a paywall on safety** (verification stays free and mandatory, above). The model:
+
+- **Flat $30/month, no tiers.** Same price for a 3-unit landlord or a 300-unit firm. In a niche, geofenced, queer housing market the value (affirming brand, community belonging, pre-formed households) doesn't scale with portfolio size, and the market is too small to support enterprise tiers. It's framed as **community support** — *"become an Affirming Housing Partner"* — not "buy access to queer renters."
+- **First month always free** for every new property manager.
+- **Founding partners: the first 3 PMs to sign up get 6 months free** — to seed supply and reward the earliest affirming partners.
+- **The membership gates the *service*, not safety.** Paying is what keeps a PM's listings live on the board and their scraper syndicating (plus analytics / featured reach). Verification and the safety layer are never behind it. A lapsed member **stays a verified account**, but their listings go inactive until they resume — you pay to be *published and distributed*, not to be *safe*.
+- **Still B2B; still no rent through the platform.** The membership is the only money ZAYLIST touches here (PM → ZAYLIST). Rent, deposits, and applications still happen off-platform (§0).
+- **Right-sized expectation:** this is a **modest, mission-aligned revenue line that also keeps the board stocked**, not a growth engine. The real revenue lives on the events / venue / promoter / sponsorship side.
+
 **Build a HAÜS from a Managed Property (where the two types meet).** Every Managed Property listing carries a **"Build a HAÜS" button.** Tapping it spins up a **Forming a HAÜS** post in the *place-in-mind* flavor (§4/§9), **pre-seeded from the listing** — property name, cover photo, rent, beds/baths, neighborhood, and a link back to the manager's listing are copied in — so the Lead just names the household and starts gathering roommates to take *this specific place* together. It's the natural bridge: the managed listing is a real, available unit; a HAÜS forms to go get it. This is how a landlord listing ends up serving the mission — queer renters banding together to secure a place as a chosen household.
 
 Crucially, **this does not claim or reserve the listing.** The property manager still owns it; it stays live and rentable. What the listing *gains* is an **interest indicator** — e.g. *"Jordan is putting together roommates to secure this place"* — with a **link to their Build-a-HAÜS card.** And it is **not exclusive: more than one group can form around the same property at once.** The listing shows them all ("3 groups forming here") until the property manager takes the listing down.
