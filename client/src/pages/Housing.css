@@ -1394,6 +1394,13 @@
  */
 .hz--sheetpage .hz-sheetwrap {
   position: fixed;
+  /*
+   * Start below the sticky header. Centering in the full viewport pushed a tall
+   * sheet up underneath it, so the title row and the close button collided with
+   * the header seam. The token is 0 on mobile, where the header scrolls away
+   * and the sheet should have the whole screen.
+   */
+  top: var(--site-header-height, 0px);
 }
 
 /* composer sheet */
@@ -2582,5 +2589,32 @@ html.calm-mode .hz-tag--adult {
   /* Wrapping keeps the label at full size. Never scale the text down. */
   .hz-tag {
     white-space: normal;
+  }
+}
+
+/*
+ * Two fields on one row, e.g. business license beside directory listing. Stacks
+ * on narrow screens: side by side at 390px cut the placeholder off mid word.
+ */
+.hz-field--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .hz-field--split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*
+ * The mobile bottom nav floats over the page, so a full height sheet buries its
+ * own footer buttons underneath it. Pad the sheet's own scroll box, not the
+ * wrapper, so the buttons scroll clear instead of the sheet shrinking.
+ */
+@media (max-width: 1023px) {
+  .hz--sheetpage .hz-sheet {
+    padding-bottom: calc(var(--site-mobile-nav-height, 88px) + env(safe-area-inset-bottom, 0px) + 16px);
   }
 }

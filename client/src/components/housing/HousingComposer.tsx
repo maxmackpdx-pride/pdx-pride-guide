@@ -458,7 +458,7 @@ export function HousingComposer({
         return;
       }
       setPmSent(true);
-      setNotice("Sent to the owner. You will hear back by email.");
+      setNotice("Sent. You will hear back by email.");
     } catch {
       setNotice("We could not send that right now. Your details are still here, so try again.");
     } finally {
@@ -568,8 +568,8 @@ export function HousingComposer({
           <>
             <SectionTitle kicker="Verified">{managerName || "Your company"}</SectionTitle>
             <p style={{ color: "var(--text-lo)", fontSize: "var(--meta)", margin: "8px 0 16px" }}>
-              You can edit the details on your own listings. Adding and removing listings is owner
-              side, so ask the owner when a unit needs to come down.
+              You can edit the details on your own listings. Adding and removing listings is on our
+              side, so send us a note when a unit needs to come down.
             </p>
             <div className="hz-fields">
               <div className="hz-flag hz-flag--note">
@@ -595,10 +595,12 @@ export function HousingComposer({
           </>
         ) : (
           <>
-            <SectionTitle kicker="Apply">List managed units</SectionTitle>
+            {/* The spec calls this a sign up application, modeled on the promoter
+                application. Verification is the whole gate, so name that. */}
+            <SectionTitle kicker="Apply">Get verified</SectionTitle>
             <p style={{ color: "var(--text-lo)", fontSize: "var(--meta)", margin: "8px 0 16px" }}>
               Every property manager on this board is verified. There is no unverified way to list.
-              Applications go to the owner.
+              Every application is reviewed by hand.
             </p>
             <div className="hz-fields">
               <div className="hz-field">
@@ -629,7 +631,7 @@ export function HousingComposer({
                   scan source.
                 </small>
               </div>
-              <div className="hz-field" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="hz-field hz-field--split">
                 <div>
                   <label>
                     <Mono micro>Business license</Mono>
@@ -659,8 +661,8 @@ export function HousingComposer({
                 <span>
                   <b style={{ color: "var(--text-hi)" }}>Verification is free and required</b>
                   <p>
-                    You cannot buy your way onto the board. Applications go to the owner and every
-                    safety step stays outside of payment.
+                    You cannot buy your way onto the board. Every safety step stays outside of
+                    payment.
                   </p>
                 </span>
               </div>
@@ -672,7 +674,7 @@ export function HousingComposer({
                 <span style={{ marginLeft: "auto" }} />
                 <Btn kind="solid" disabled={busy || pmSent} onClick={submitPmApplication}>
                   <HousingIcon name="verified" />
-                  {pmSent ? "Sent" : "Send it to the owner"}
+                  {pmSent ? "Sent" : "Send the application"}
                 </Btn>
               </div>
             </div>
