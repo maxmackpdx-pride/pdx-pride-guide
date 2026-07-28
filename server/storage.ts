@@ -80,6 +80,16 @@ import {
   isEventAfterVenueClose,
   matchClosedVenue,
 } from "@shared/closedVenues";
+import { listHousingPosts } from "./housing/store";
+import { HOUSING_TYPE_LABEL, type HousingType } from "../shared/housing";
+
+/** How a housing post announces itself in the hub feed. */
+const HOUSING_FEED_ACTION: Record<HousingType, string> = {
+  LOOKING: "Looking for housing on HAÜSING",
+  OFFERING: "Has a room open on HAÜSING",
+  FORMING: "Is forming a HAÜS",
+  MANAGED: "New managed unit on HAÜSING",
+};
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -13366,6 +13376,34 @@ export const storage: IStorage = {
         link: `/gifting?post=${post.id}`,
         boardPostId: post.id,
       });
+    }
+
+    // HAUSING. Ordered by listing recency inside listHousingPosts, the same axis
+    // the feed sorts on, so a new post is always a candidate.
+    try {
+      for (const post of listHousingPosts(sqlite, { viewerId: viewerUserId ?? null, limit: 12 })) {
+        items.push({
+          id: `housing-${post.id}`,
+          kind: "housing",
+          badge: HOUSING_TYPE_LABEL[post.type],
+          action: HOUSING_FEED_ACTION[post.type],
+          title: post.displayName || null,
+          text: post.headline || null,
+          createdAt: post.createdAt,
+          author: hubFeedAuthorFromUser({
+            displayName: post.author.displayName,
+            username: post.author.username,
+            photoUrl: post.author.photoUrl,
+            avatarChoice: post.author.avatarChoice,
+            avatarRing: post.author.avatarRing,
+          }),
+          link: `/hausing/${post.id}`,
+          boardPostId: post.id,
+          photoUrl: post.photos[0] || null,
+        });
+      }
+    } catch {
+      // A board that fails to read must never take the whole feed down.
     }
 
     for (const gig of storage.getGigPosts("LIVE").slice(0, 12)) {

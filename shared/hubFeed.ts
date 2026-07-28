@@ -6,6 +6,7 @@ export type HubFeedKind =
   | "gifting"
   | "spotted"
   | "gig"
+  | "housing"
   | "beach"
   | "feedback"
   | "feed_text"
@@ -105,7 +106,7 @@ const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
     || item.kind === "feed_text"
     || item.kind === "feed_photo",
   rsvps: (item) => item.kind === "rsvp",
-  boards: (item) => ["gifting", "spotted", "gig"].includes(item.kind),
+  boards: (item) => ["gifting", "spotted", "gig", "housing"].includes(item.kind),
 };
 
 export function filterHubFeedPinned(items: HubFeedItem[], tab: HubFeedTab): HubFeedItem[] {
@@ -133,6 +134,7 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     gifting: "var(--panel-lime)",
     spotted: "var(--panel-magenta)",
     gig: "var(--panel-purple)",
+    housing: "var(--panel-cyan)",
     beach: "var(--panel-orange)",
     feedback: "var(--panel-lime)",
     feed_text: "var(--panel-cyan)",

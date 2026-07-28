@@ -126,12 +126,14 @@ export default function HubFeedCard({ item }: Props) {
     gig: "var(--board-gigs)",
     gifting: "#CCFF00",
     spotted: "#FF00CC",
+    // HAUSING runs on the board's softened cyan.
+    housing: "var(--panel-cyan)",
   };
   const glow = BOARD_ACCENTS[item.kind];
   const isSpotted = item.kind === "spotted";
   // Board posts with an author (gigs, gifts) show the post title as a bold
   // subject line, matching the board's expanded card.
-  const showSubject = (item.kind === "gig" || item.kind === "gifting") && !!item.title;
+  const showSubject = (item.kind === "gig" || item.kind === "gifting" || item.kind === "housing") && !!item.title;
   // Gig/gift cards open the real board card as an overlay on top of the feed.
   const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
 

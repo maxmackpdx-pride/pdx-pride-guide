@@ -1,0 +1,361 @@
+/**
+ * HAUSING - the Housing board.
+ *
+ * A trusted community board where queer Portland finds rooms, roommates, and
+ * households. Not a rental marketplace: people post in their own words, discovery
+ * happens in the feed, and conversations do the matching.
+ *
+ * Spec: docs/HAUS_HOUSING_SPEC_v0.2.md
+ * Design: docs/design-handoff-hausing/
+ */
+import { useMemo, useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { usePageSeo } from "@/hooks/usePageSeo";
+import AuthModal from "@/components/AuthModal";
+import {
+  HOUSING_FILTERS,
+  HOUSING_FILTER_LABEL,
+  HOUSING_TYPE_BLURB,
+  HOUSING_TYPE_LABEL,
+  HOUSING_ACCENT_VAR,
+  type HousingBoardResponse,
+  type HousingFilter,
+  type HousingPostView,
+  type HousingType,
+} from "@shared/housing";
+import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
+import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
+import { CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
+import "./Housing.css";
+
+/** One neon per step, borrowed from the three peer post types. */
+const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
+  {
+    title: "Say what you need",
+    body: "One question, four answers. Offering a room, looking for housing, forming a HAÜS, or a managed unit.",
+    icon: "add",
+    accent: HOUSING_ACCENT_VAR.OFFERING,
+  },
+  {
+    title: "It lands in the feed",
+    body: "Housing shows up next to events and the other boards. People find you by scrolling.",
+    icon: "boards",
+    accent: HOUSING_ACCENT_VAR.LOOKING,
+  },
+  {
+    title: "Tap chat",
+    body: "No application, no gate. Interest turns straight into a conversation.",
+    icon: "message",
+    accent: HOUSING_ACCENT_VAR.FORMING,
+  },
+];
+
+const SIGNS: Array<{ label: string; cls: string }> = [
+  { label: "FOR RENT", cls: "s1" },
+  { label: "NEED ROOMMATES", cls: "s2" },
+  { label: "FORMING HOUSE", cls: "s3" },
+  { label: "LOOKING FOR ROOM", cls: "s4" },
+];
+
+const POST_OPTIONS: HousingType[] = ["OFFERING", "LOOKING", "FORMING"];
+
+export default function Housing() {
+  usePageSeo(
+    "HAÜSING · Housing board",
+    "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
+  );
+
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const [filter, setFilter] = useState<HousingFilter>("ALL");
+  const [showAuth, setShowAuth] = useState(false);
+
+  const { data, isLoading, isError } = useQuery<HousingBoardResponse>({
+    queryKey: ["/api/housing", filter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filter === "SAVED") params.set("filter", "SAVED");
+      else if (filter !== "ALL") params.set("type", filter);
+      const res = await fetch(`/api/housing?${params.toString()}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Could not load the board");
+      return res.json();
+    },
+  });
+
+  const posts = data?.posts ?? [];
+  const stats = data?.stats;
+
+  const saveMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      const res = await fetch(`/api/housing/${postId}/save`, { method: "POST", credentials: "include" });
+      if (!res.ok) throw new Error("Could not save");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/housing"] }),
+  });
+
+  const requireAuth = (): boolean => {
+    if (user) return true;
+    setShowAuth(true);
+    return false;
+  };
+
+  const handlers: HousingCardHandlers = {
+    onOpen: (post) => navigate(`/hausing/${post.id}`),
+    onSave: (post) => {
+      if (!requireAuth()) return;
+      saveMutation.mutate(post.id);
+    },
+    onShare: (post) => {
+      const url = `${window.location.origin}/hausing/${post.id}`;
+      if (navigator.share) {
+        navigator.share({ title: post.displayName || post.headline, url }).catch(() => undefined);
+        return;
+      }
+      navigator.clipboard?.writeText(url);
+      toast({ title: "Link copied" });
+    },
+    // Asking to chat is asking in, and nothing opens until the other side accepts.
+    onChat: (post) => {
+      if (!requireAuth()) return;
+      navigate(`/hausing/${post.id}?chat=1`);
+    },
+    onJoin: (post) => {
+      if (!requireAuth()) return;
+      navigate(`/hausing/${post.id}?join=1`);
+    },
+    onWaitlist: (post) => {
+      if (!requireAuth()) return;
+      navigate(`/hausing/${post.id}?waitlist=1`);
+    },
+    onBuildHaus: (post) => {
+      if (!requireAuth()) return;
+      navigate(`/hausing/${post.id}?build=1`);
+    },
+  };
+
+  const openCompose = (type: HousingType | "PM") => {
+    if (!requireAuth()) return;
+    navigate(`/hausing/new?type=${type.toLowerCase()}`);
+  };
+
+  const statBlocks = useMemo(
+    () => [
+      { n: stats?.activePosts ?? 0, l: "Active posts" },
+      { n: stats?.roomsOpen ?? 0, l: "Rooms and units" },
+      { n: stats?.formingHouses ?? 0, l: "Forming a HAÜS" },
+    ],
+    [stats],
+  );
+
+  return (
+    <div className="hz">
+      <span className="hz-wash" aria-hidden="true" />
+      <span className="hz-grain" aria-hidden="true" />
+
+      <div className="hz-run">
+        <LiveDot />
+        <Mono accent>HAÜSING · Housing board</Mono>
+      </div>
+      <div className="pdx-seam hz-seam--head" aria-hidden="true" />
+
+      {/* Hero */}
+      <div className="hz-hero">
+        <span className="hz-hero__fx" aria-hidden="true" />
+        <div className="hz-signs" aria-hidden="true">
+          {SIGNS.map(({ label, cls }) => (
+            <svg
+              key={cls}
+              className={`hz-sign hz-sign--${cls}`}
+              viewBox="0 0 240 92"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.4"
+              strokeLinejoin="round"
+            >
+              <rect x="6" y="6" width="228" height="80" rx="7" />
+              <path d="M6 26h228" />
+              <text
+                x="120"
+                y="66"
+                textAnchor="middle"
+                fill="currentColor"
+                stroke="none"
+                fontFamily="var(--font-display)"
+                fontWeight="900"
+                fontSize={label.length > 12 ? 26 : 34}
+                letterSpacing="1.5"
+              >
+                {label}
+              </text>
+            </svg>
+          ))}
+        </div>
+        <span className="hz-hero__dots" aria-hidden="true" />
+        <span className="hz-hero__scrim" aria-hidden="true" />
+        <div className="hz-pad">
+          <div className="hz-wrap">
+            <h1 className="hz-title hz-hero__title">
+              HAÜSING
+              <span className="hz-beta">Beta</span>
+            </h1>
+            <p className="hz-hero__lede">
+              Rooms, roommates, and people building a household together. It is a community board, not a
+              listings site. No fees, no applications, no money through Zaylist. You post, you scroll, you
+              chat.
+            </p>
+            <div className="hz-hero__mantra">
+              <Mono>Find a room · find people · find a home</Mono>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="hz-band">
+        <div className="hz-pad">
+          <div className="hz-wrap">
+            <SectionTitle kicker="How it works">Under a minute</SectionTitle>
+            <div className="hz-steps">
+              {STEPS.map((step, i) => (
+                <div
+                  className="hz-step hz-panel pdx-glass-rebind"
+                  key={step.title}
+                  style={
+                    {
+                      "--c": step.accent,
+                      "--_c": step.accent,
+                      "--hz-accent": step.accent,
+                    } as React.CSSProperties
+                  }
+                >
+                  <div className="hz-step__top">
+                    <Mono accent>{`0${i + 1}`}</Mono>
+                    <HousingIcon name={step.icon} size={16} />
+                  </div>
+                  <b>{step.title}</b>
+                  <p>{step.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pdx-seam" aria-hidden="true" />
+      <div className="hz-stats">
+        {statBlocks.map((s) => (
+          <div key={s.l}>
+            <b>{s.n}</b>
+            <span>
+              <Mono micro>{s.l}</Mono>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Post to the board */}
+      <div className="hz-pad hz-pad--tight">
+        <div className="hz-wrap">
+          <div className="hz-panel">
+            <SectionTitle kicker="Post to the board">What are you looking for?</SectionTitle>
+            <div className="hz-ask">
+              {POST_OPTIONS.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => openCompose(t)}
+                  style={
+                    {
+                      "--c": HOUSING_ACCENT_VAR[t],
+                      "--hz-accent": HOUSING_ACCENT_VAR[t],
+                    } as React.CSSProperties
+                  }
+                >
+                  <b>{HOUSING_TYPE_LABEL[t]}</b>
+                  <small>{HOUSING_TYPE_BLURB[t]}</small>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => openCompose("PM")}
+                style={
+                  {
+                    "--c": HOUSING_ACCENT_VAR.MANAGED,
+                    "--hz-accent": HOUSING_ACCENT_VAR.MANAGED,
+                  } as React.CSSProperties
+                }
+              >
+                <b>Managed property</b>
+                <small>Whole unit for rent. Apply to become a verified property manager.</small>
+              </button>
+            </div>
+            <p className="hz-ask__note">
+              Zaylist never handles rent, deposits, or fees. Money is always arranged directly between
+              people.
+            </p>
+          </div>
+
+          <div className="hz-filter">
+            <Mono micro>Show me</Mono>
+            <div className="hz-tabs" role="tablist">
+              {HOUSING_FILTERS.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  role="tab"
+                  className="hz-tab"
+                  aria-selected={filter === k}
+                  onClick={() => setFilter(k)}
+                >
+                  {HOUSING_FILTER_LABEL[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feed */}
+      <div className="hz-pad">
+        <div className="hz-wrap">
+          <div className="hz-feedhead">
+            <SectionTitle
+              kicker={`${posts.length} ${posts.length === 1 ? "post" : "posts"}`}
+              right={<Mono micro>Newest first</Mono>}
+            >
+              {filter === "SAVED" ? "Saved for later" : "Active on the board"}
+            </SectionTitle>
+          </div>
+
+          {isLoading ? (
+            <div className="hz-panel hz-empty">Loading the board.</div>
+          ) : isError ? (
+            <div className="hz-panel hz-empty">The board did not load. Try again in a moment.</div>
+          ) : posts.length === 0 ? (
+            <div className="hz-panel hz-empty">
+              {filter === "SAVED"
+                ? "Nothing saved yet. Tap save on a post and it waits here."
+                : "Nothing here yet. Yas, be the first."}
+            </div>
+          ) : (
+            <div className="hz-feed">
+              {posts.map((p: HousingPostView) => (
+                <HousingCard key={p.id} post={p} h={handlers} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/hausing" />
+
+      {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
+    </div>
+  );
+}

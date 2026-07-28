@@ -49,6 +49,7 @@ import {
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
+import { registerHousingRoutes } from "./housing/routes";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import { renderGamePosterPng } from "./posters/gamePoster";
 import {
@@ -6391,6 +6392,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     getUserById: (id) => storage.getUserById(id),
     uploadSingle: upload.single("asset"),
     auditAdmin,
+  });
+
+  // HAUSING - the Housing board. See docs/HAUS_ENGINEERING_HANDOFF.md
+  registerHousingRoutes(app, {
+    db: sqlite,
+    requireAuth,
+    requireAdmin,
+    isPrimaryOwner: (user) => storage.isPrimarySiteOwner(user),
+    getUserById: (id) => storage.getUserById(id),
+    uploadPhotos: upload.array("photos", 8),
+    createModerationRequest: (data) => storage.createModerationRequest(data),
   });
 
   scheduleMapCoordinateBackfill();

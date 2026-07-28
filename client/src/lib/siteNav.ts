@@ -24,6 +24,7 @@ export const PRIMARY_NAV: NavEntry[] = [
     items: [
       { href: "/pride-work", label: "Gig Board" },
       { href: "/gifting", label: "Gifting" },
+      { href: "/hausing", label: "HAÜSING" },
       { href: "/spotted", label: "Missed Connections" },
     ],
   },
@@ -41,6 +42,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/schedule": { section: "Events", title: "My Schedule" },
   "/pride-work": { section: "Boards", title: "Gig Board" },
   "/gifting": { section: "Boards", title: "Gifting" },
+  "/hausing": { section: "Boards", title: "HAÜSING" },
   "/spotted": { section: "Boards", title: "Missed Connections" },
   "/directory": { section: "Places", title: "Directory" },
   "/nude-beaches": { section: "Explore", title: "Nude Beaches" },
@@ -58,6 +60,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/pride-work", label: "Gig Board" },
   { href: "/gifting", label: "Gifting" },
+  { href: "/hausing", label: "HAÜSING" },
   { href: "/spotted", label: "Missed Connections" },
 ];
 

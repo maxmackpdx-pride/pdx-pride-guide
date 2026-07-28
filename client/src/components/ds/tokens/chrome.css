@@ -1,0 +1,57 @@
+/**
+ * Utility-layer chrome tokens, adopted from design-system/tokens/.
+ *
+ * The design system runs two registers: the loud zine layer (heroes, events) and
+ * the calmer utility layer (boards, hub, admin). These are the utility layer's
+ * surfaces, hairlines, lit-plate chrome, and seam heights.
+ *
+ * They already existed scoped to `.hub-root` (client/src/components/hub/hub-v2.css)
+ * and `.inbox-overlay--experiment`. Those scoped copies carry identical values and
+ * still win on specificity, so promoting them to :root is additive: it gives every
+ * other surface (HAUSING, future boards) the same vocabulary without a local copy.
+ *
+ * Source of truth: design-system/tokens/colors.css + effects.css + layout.css
+ */
+:root {
+  /* Utility surfaces */
+  --panel-ink: #06060a; /* utility page background */
+  --panel-band: #070708; /* full-bleed band (how it works, stats) */
+  --panel-card: #0c0c0f; /* utility card / hub panel */
+  --panel-card-2: #0d0d10;
+  --panel-border: #1c1c22; /* utility hairline */
+  --panel-border-2: #24242c; /* tile hairline */
+
+  /* Softened neons for the utility layer. One neon per element. */
+  --panel-cyan: #19e3ff;
+  --panel-magenta: #ff1fa0;
+  --panel-orange: #ff8c00;
+  --panel-purple: #b06bff;
+
+  /* Lit-plate chrome: keyline, bevel, and the acid chip fill. */
+  --chrome-radius-md: 10px;
+  --chrome-radius-tag: 7px;
+  --chrome-keyline: 0 0 0 1px #000;
+  --chrome-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --chrome-bevel-dark: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c, #00ffff) 90%, transparent);
+  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom);
+  --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c, #00ffff) 75%, transparent);
+  --acid-lit-chip: linear-gradient(180deg, #e2ff5e, #c4f200);
+  --chrome-ink-fill: radial-gradient(
+    130% 110% at 50% 0%,
+    color-mix(in srgb, var(--c, #00ffff) 17%, transparent),
+    #0b0b0f 62%,
+    #08080b
+  );
+
+  /* Rainbow seam heights. */
+  --seam-h: 2px; /* thin, in-page */
+  --seam-h-thick: 2.7px; /* header and footer seam */
+}
+
+/* Calm mode flattens the lit-plate bloom and keeps the chrome static. */
+html.calm-mode {
+  --sticker-bloom: none;
+  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel-dark);
+  --chrome-bloom: none;
+}
