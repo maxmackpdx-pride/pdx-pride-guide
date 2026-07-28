@@ -13358,6 +13358,26 @@ html.calm-mode .schedule-now-line {
 /* Queer Directory - stable CSS grid (not multi-column).
    Multi-column masonry + entrance animations reflowed on logo load/scroll,
    which made cards vanish and reappear while scrolling. */
+/* Floating DEMO sticker for seeded demo posts across boards (matches HAÜSING). */
+.pdx-demo-sticker {
+  position: absolute;
+  top: 12px;
+  right: -7px;
+  z-index: 7;
+  transform: rotate(6deg);
+  background: var(--neon-yellow, #ffee00);
+  color: #0a0a0a;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  padding: 5px 12px 4px;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 0 2px #0a0a0a;
+  pointer-events: none;
+}
+
 .directory-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

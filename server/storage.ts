@@ -3451,6 +3451,60 @@ function seedBusinessesDirectory() {
   }
 }
 
+let _demoUserIdCache: number | null | undefined;
+function getDemoUserId(): number | null {
+  if (_demoUserIdCache !== undefined) return _demoUserIdCache;
+  const row = sqlite.prepare(`SELECT id FROM users WHERE username = 'hausing_demo'`).get() as { id: number } | undefined;
+  _demoUserIdCache = row ? row.id : null;
+  return _demoUserIdCache;
+}
+
+/** Demo posts for the Gigs, Missed Connections, and Gifting boards. Old
+    created_at so they sit BELOW real user posts in every recency-ordered board. */
+function seedDemoBoardsContent() {
+  const now = new Date().toISOString();
+  const demoId = getOrCreateDemoUser(now);
+  if (!demoId) return;
+  const OLD = "2020-01-01T00:00:00.000Z"; // sinks demos below user posts
+  const FUTURE = "2027-12-31T00:00:00.000Z";
+
+  // GIGS (3)
+  sqlite.prepare(`DELETE FROM gig_posts WHERE user_id = ?`).run(demoId);
+  const gig = sqlite.prepare(
+    `INSERT INTO gig_posts (post_type, title, name, contact_email, description, skills, compensation, location, is_remote, status, user_id, created_at)
+     VALUES (?, ?, ?, 'demo@zaylist.local', ?, ?, ?, ?, 0, 'LIVE', ?, ?)`,
+  );
+  gig.run("POSTING_GIG", "Drag host for a monthly queer trivia night", "Jordan", "Looking for a charismatic host to run our monthly LGBTQ+ trivia. Bring the chaos and the puns.", "hosting, mic work", "$150/night", "SE Portland", demoId, OLD);
+  gig.run("POSTING_GIG", "Photographer for a Pride afterparty", "Sam", "Need a photographer for a 4-hour evening event. Low light, high energy, lots of joy to capture.", "photography, editing", "$300 flat", "Downtown Portland", demoId, OLD);
+  gig.run("LOOKING_FOR_WORK", "Experienced barback looking for weekend shifts", "Alex", "Five years behind the bar, reliable and fast. Available Fri to Sun, queer-owned spots preferred.", "bartending, POS, restocking", "Open to offers", "Portland", demoId, OLD);
+
+  // MISSED CONNECTIONS (4, funny)
+  sqlite.prepare(`DELETE FROM missed_connections WHERE user_id = ?`).run(demoId);
+  const mc = sqlite.prepare(
+    `INSERT INTO missed_connections (user_id, title, body, venue_hint, status, created_at, closes_at)
+     VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`,
+  );
+  mc.run(demoId, "You: reading Judith Butler at the laundromat", "Me: pretending my socks needed another cycle just to keep talking to you. You left with the gender theory and my whole heart.", "A laundromat on Division", OLD, FUTURE);
+  mc.run(demoId, "Cutie who caught my keys on the MAX", "You had a mustache, a tote full of kale, and reflexes like a cat. I said thanks. I meant marry me.", "MAX Blue Line", OLD, FUTURE);
+  mc.run(demoId, "You let my dog say hi outside the coffee shop", "Rufus liked you more than he likes me. Honestly, fair. Coffee sometime? He insists on chaperoning.", "A cafe on Alberta", OLD, FUTURE);
+  mc.run(demoId, "You complimented my carabiner at the climbing gym", "It is not even holding keys, it is purely decorative, and so are my intentions. Belay me sometime?", "The bouldering gym", OLD, FUTURE);
+  try {
+    sqlite.prepare(`UPDATE missed_connections SET admin_reviewed = 1 WHERE user_id = ?`).run(demoId);
+  } catch {
+    /* column may not exist in older DBs */
+  }
+
+  // GIFTING (3)
+  sqlite.prepare(`DELETE FROM gifting_posts WHERE user_id = ?`).run(demoId);
+  const gift = sqlite.prepare(
+    `INSERT INTO gifting_posts (user_id, post_type, title, description, category, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, '[]', 'OPEN', ?, ?)`,
+  );
+  gift.run(demoId, "GIFT", "Free moving boxes (about 20)", "Broken down and clean, all sizes. Great for a move. Porch pickup, first come first served.", "Household", "SE Portland", "Porch pickup", FUTURE, OLD);
+  gift.run(demoId, "GIFT", "Gently used Pride flags and bunting", "Left over from last year and still bright. Would love them to go to someone who will fly them proud.", "Decor", "NE Portland", "Meet up nearby", FUTURE, OLD);
+  gift.run(demoId, "ISO", "ISO: a working mini fridge for a new place", "Just moved into a studio and could really use a small fridge. Can pick up anywhere in town, happy to trade baked goods.", "Appliances", "N Portland", "Can pick up", FUTURE, OLD);
+}
+
 function getOrCreateDemoUser(now: string): number | null {
   const existing = sqlite
     .prepare(`SELECT id FROM users WHERE username = 'hausing_demo'`)
@@ -3618,6 +3672,14 @@ function runBootMigrationsOnce() {
       console.warn("[boot] seed_housing_demo_v3 skipped:", err instanceof Error ? err.message : err);
     }
     recordBootMigration("seed_housing_demo_v3");
+  }
+  if (!hasBootMigration("seed_demo_boards_v1")) {
+    try {
+      seedDemoBoardsContent();
+    } catch (err) {
+      console.warn("[boot] seed_demo_boards_v1 skipped:", err instanceof Error ? err.message : err);
+    }
+    recordBootMigration("seed_demo_boards_v1");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
@@ -6801,8 +6863,10 @@ function archiveExpiredMissedConnections() {
 
 function mapMissedConnectionRow(row: any, viewerUserId?: number) {
   const isMine = viewerUserId != null && row.user_id === viewerUserId;
+  const demoUserId = getDemoUserId();
+  const isDemo = demoUserId != null && row.user_id === demoUserId;
   const { user_id: _uid, eventDateStart: _eds, ...publicRow } = row;
-  return { ...publicRow, isMine, anonymous: !isMine };
+  return { ...publicRow, isMine, anonymous: !isMine && !isDemo, isDemo };
 }
 
 function hubFeedAuthorFromUser(

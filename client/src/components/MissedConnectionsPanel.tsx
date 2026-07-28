@@ -26,6 +26,7 @@ export type MissedConnectionPost = {
   createdAt: string;
   isMine?: boolean;
   anonymous?: boolean;
+  isDemo?: boolean;
 };
 
 export type LinkableMissedConnectionEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart" | "dateEnd"> & {

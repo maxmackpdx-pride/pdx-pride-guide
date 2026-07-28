@@ -216,7 +216,9 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     "--listing-accent": accent,
     "--c": accent,
     "--_c": accent,
+    position: "relative",
   } as CSSProperties;
+  const isDemo = post.username === "hausing_demo";
 
   return (
     <article
@@ -244,6 +246,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
         }
       }}
     >
+      {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <BoardGlassMotif variant={giftingMotifVariant(post)} />
       <div className="board-listing-card__row">
         <div

@@ -66,6 +66,7 @@ export default function SpottedCard({
       "--listing-accent": MC_GLASS,
       "--c": MC_GLASS,
       "--_c": MC_GLASS,
+      position: "relative",
     } as CSSProperties;
     return (
       <article
@@ -81,6 +82,7 @@ export default function SpottedCard({
         role="button"
         tabIndex={0}
       >
+        {post.isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
         <BoardGlassMotif variant="quote" />
         {/* Corner tick marks (design board cards) */}
         <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
@@ -119,8 +121,10 @@ export default function SpottedCard({
         "--c": glassAccent,
         "--_c": glassAccent,
         animationDelay: `${animDelay}ms`,
+        position: "relative",
       } as CSSProperties}
     >
+      {post.isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       {isClosed && <div className="spotted-card__found-stamp" aria-label="Found" />}
 
       <BoardGlassMotif variant="quote" />

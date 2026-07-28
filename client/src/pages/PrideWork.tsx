@@ -743,7 +743,9 @@ export function GigListingCard({
     "--listing-accent": accent,
     "--c": accent,
     "--_c": accent,
+    position: "relative",
   } as CSSProperties;
+  const isDemo = gig.username === "hausing_demo";
 
   return (
     <article
@@ -772,6 +774,7 @@ export function GigListingCard({
         }
       }}
     >
+      {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <BoardGlassMotif variant={isLooking ? "binoculars" : "dollar"} />
       <div className="board-listing-card__row">
         <div
