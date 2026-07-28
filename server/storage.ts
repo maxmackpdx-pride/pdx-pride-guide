@@ -3451,17 +3451,45 @@ function seedBusinessesDirectory() {
   }
 }
 
+function getOrCreateDemoUser(now: string): number | null {
+  const existing = sqlite
+    .prepare(`SELECT id FROM users WHERE username = 'hausing_demo'`)
+    .get() as { id: number } | undefined;
+  if (existing) {
+    sqlite
+      .prepare(`UPDATE users SET display_name = 'HAÜSING Demo', photo_url = '/hausing/demo/person-looking.jpg' WHERE id = ?`)
+      .run(existing.id);
+    return existing.id;
+  }
+  try {
+    const info = sqlite
+      .prepare(
+        `INSERT INTO users (username, email, password_hash, display_name, photo_url, pronouns, location, status, created_at)
+         VALUES ('hausing_demo', 'demo@zaylist.local', '', 'HAÜSING Demo', '/hausing/demo/person-looking.jpg', 'they/them', 'Portland, OR', 'active', ?)`,
+      )
+      .run(now);
+    return Number(info.lastInsertRowid);
+  } catch {
+    return null;
+  }
+}
+
 function seedHousingDemoPosts() {
-  const owner = resolveSiteOwner();
-  if (!owner) return; // no account to attribute to yet
-  const already = sqlite
-    .prepare(`SELECT COUNT(*) AS n FROM housing_posts WHERE name LIKE 'DEMO%' OR headline LIKE 'DEMO %'`)
-    .get() as { n: number };
-  if (already?.n > 0) return; // idempotent guard beyond the boot flag
-
   const now = new Date().toISOString();
+  const demoId = getOrCreateDemoUser(now);
+  if (!demoId) return; // could not create the demo account
 
-  // Demo verified property manager for the MANAGED listing.
+  // Remove any prior DEMO posts (including an earlier version attributed to the
+  // site owner) so this reseeds cleanly under the demo account.
+  const priorIds = sqlite
+    .prepare(`SELECT id FROM housing_posts WHERE name LIKE 'DEMO%' OR headline LIKE 'DEMO %'`)
+    .all() as Array<{ id: number }>;
+  for (const row of priorIds) {
+    sqlite.prepare(`DELETE FROM housing_members WHERE post_id = ?`).run(row.id);
+    sqlite.prepare(`DELETE FROM housing_posts WHERE id = ?`).run(row.id);
+  }
+
+  // Demo verified property manager for the MANAGED listing (owned by the demo user).
   let pmId: number | null = null;
   try {
     const existingPm = sqlite
@@ -3469,6 +3497,7 @@ function seedHousingDemoPosts() {
       .get() as { id: number } | undefined;
     if (existingPm) {
       pmId = existingPm.id;
+      sqlite.prepare(`UPDATE property_managers SET user_id = ? WHERE id = ?`).run(demoId, pmId);
     } else {
       const pmInfo = sqlite
         .prepare(
@@ -3479,7 +3508,7 @@ function seedHousingDemoPosts() {
               '', 'https://demorentals.com', 'demorentals.com',
               'active', ?, 'active', 1, 0, ?)`,
         )
-        .run(owner.id, now, now);
+        .run(demoId, now, now);
       pmId = Number(pmInfo.lastInsertRowid);
     }
   } catch {
@@ -3510,7 +3539,7 @@ function seedHousingDemoPosts() {
 
   // OFFERING a Room
   const offering = insertPost.run({
-    userId: owner.id, type: "OFFERING", name: "DEMO",
+    userId: demoId, type: "OFFERING", name: "DEMO",
     headline: "DEMO — Sunny room in a queer household, SE Portland",
     body: "This is a DEMO Offering a Room listing showing how a room in an existing household looks. Not a real room.",
     photos: JSON.stringify(["/hausing/demo/room-offering.jpg"]), areas: JSON.stringify(["Southeast"]),
@@ -3526,10 +3555,10 @@ function seedHousingDemoPosts() {
 
   // LOOKING for Housing
   insertPost.run({
-    userId: owner.id, type: "LOOKING", name: "DEMO",
+    userId: demoId, type: "LOOKING", name: "DEMO",
     headline: "DEMO — Looking for a room, moving to PDX in August",
     body: "This is a DEMO Looking for Housing post. The person is the listing.",
-    photos: JSON.stringify(["/hausing/demo/person-looking.jpg"]), areas: JSON.stringify(["North", "Northeast"]),
+    photos: JSON.stringify(["/hausing/demo/looking-bg.jpg"]), areas: JSON.stringify(["North", "Northeast"]),
     budget: "$850/mo", moveTimeline: "Aug 1, some flex", openToHaus: 1,
     rent: null, moveIn: null, beds: null, baths: null, parking: null, outdoor: null,
     flavor: null, seeking: 0, goals: null, pmId: null, sourceUrl: null, sourceDomain: null,
@@ -3538,7 +3567,7 @@ function seedHousingDemoPosts() {
 
   // FORMING a HAÜS
   const forming = insertPost.run({
-    userId: owner.id, type: "FORMING", name: "DEMO",
+    userId: demoId, type: "FORMING", name: "DEMO",
     headline: "DEMO — Building a queer household, looking for 2 more",
     body: "This is a DEMO Forming a HAÜS post. People team up first, then find a place together.",
     photos: JSON.stringify(["/hausing/demo/room-forming.jpg"]), areas: JSON.stringify(["Southeast", "Northeast"]),
@@ -3554,7 +3583,7 @@ function seedHousingDemoPosts() {
 
   // MANAGED Property
   insertPost.run({
-    userId: owner.id, type: "MANAGED", name: "DEMO Rose City Flats",
+    userId: demoId, type: "MANAGED", name: "DEMO Rose City Flats",
     headline: "DEMO — 1 bed / 1 bath, NE Portland, available now",
     body: "This is a DEMO Managed Property listing from a verified property manager. Renters inquire on the manager's own site.",
     photos: JSON.stringify(["/hausing/demo/unit-managed.jpg"]), areas: JSON.stringify(["Northeast"]),
@@ -3575,12 +3604,16 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_ads_v1");
   }
   if (!hasBootMigration("seed_housing_demo_v1")) {
+    // superseded by v2 (demo user + cleanup); keep the flag recorded, do nothing
+    recordBootMigration("seed_housing_demo_v1");
+  }
+  if (!hasBootMigration("seed_housing_demo_v2")) {
     try {
       seedHousingDemoPosts();
     } catch (err) {
-      console.warn("[boot] seed_housing_demo_v1 skipped:", err instanceof Error ? err.message : err);
+      console.warn("[boot] seed_housing_demo_v2 skipped:", err instanceof Error ? err.message : err);
     }
-    recordBootMigration("seed_housing_demo_v1");
+    recordBootMigration("seed_housing_demo_v2");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
