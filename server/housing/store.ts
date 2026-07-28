@@ -1105,3 +1105,160 @@ export function findMyHausForListing(db: Database, managedPostId: number, userId
     .get(managedPostId, userId) as { id: number } | undefined;
   return row?.id ?? null;
 }
+
+// --- property managers ------------------------------------------------------
+//
+// A verified property manager is its own account type, modeled on promoters.
+// Verification is MANDATORY and FREE and is never sold: you cannot buy your way
+// onto the board. The Affirming Housing Partner membership gates publishing and
+// distribution only, never verification or any safety step.
+
+export function getPropertyManagerByUser(db: Database, userId: number): any | undefined {
+  return db.prepare(`SELECT * FROM property_managers WHERE user_id = ?`).get(userId) as any;
+}
+
+export function getPropertyManager(db: Database, id: number): any | undefined {
+  return db.prepare(`SELECT * FROM property_managers WHERE id = ?`).get(id) as any;
+}
+
+export function listPropertyManagers(db: Database): any[] {
+  return db.prepare(`SELECT * FROM property_managers ORDER BY created_at DESC`).all() as any[];
+}
+
+export function listManagerListings(db: Database, propertyManagerId: number, viewerId?: number | null) {
+  const rows = db
+    .prepare(
+      `SELECT * FROM housing_posts
+        WHERE property_manager_id = ? AND status != 'REMOVED'
+        ORDER BY created_at DESC`,
+    )
+    .all(propertyManagerId) as PostRow[];
+  return shapePosts(db, rows, { viewerId: viewerId ?? null });
+}
+
+export type PmApplicationInput = {
+  userId: number;
+  name: string;
+  email: string;
+  company: string;
+  siteUrl: string;
+  domainProof?: string;
+  businessLicense?: string;
+  directoryBusinessId?: number | null;
+  note?: string;
+};
+
+export function createPmApplication(db: Database, input: PmApplicationInput): number {
+  const info = db
+    .prepare(
+      `INSERT INTO property_manager_applications
+        (user_id, name, email, company, site_url, domain_proof, business_license, directory_business_id, note, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      input.userId,
+      input.name,
+      input.email,
+      input.company,
+      input.siteUrl,
+      input.domainProof || "",
+      input.businessLicense || "",
+      input.directoryBusinessId ?? null,
+      input.note || "",
+      nowIso(),
+    );
+  return Number(info.lastInsertRowid);
+}
+
+export function getPmApplicationForUser(db: Database, userId: number): any | undefined {
+  return db
+    .prepare(`SELECT * FROM property_manager_applications WHERE user_id = ? ORDER BY id DESC LIMIT 1`)
+    .get(userId) as any;
+}
+
+export function listPmApplications(db: Database, status = "PENDING"): any[] {
+  return db
+    .prepare(`SELECT * FROM property_manager_applications WHERE status = ? ORDER BY created_at ASC`)
+    .all(status) as any[];
+}
+
+/**
+ * Owner-only approval. This is what creates the property-manager account, and it
+ * is the moment verification is granted. Founding partners are the first three
+ * managers on the board and get six months; everyone else gets the first month.
+ */
+export function approvePmApplication(db: Database, applicationId: number): { propertyManagerId: number } | null {
+  const app = db
+    .prepare(`SELECT * FROM property_manager_applications WHERE id = ?`)
+    .get(applicationId) as any;
+  if (!app || app.status !== "PENDING") return null;
+
+  const existingCount = (db.prepare(`SELECT COUNT(*) AS n FROM property_managers`).get() as { n: number }).n;
+  const foundingPartner = existingCount < 3;
+  const now = nowIso();
+  let domain = "";
+  try {
+    domain = new URL(app.site_url.startsWith("http") ? app.site_url : `https://${app.site_url}`).hostname.replace(
+      /^www\./,
+      "",
+    );
+  } catch {
+    domain = String(app.site_url || "").replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+  }
+
+  const info = db
+    .prepare(
+      `INSERT INTO property_managers
+        (user_id, name, email, company, business_id, site_url, site_domain, status, verified_at,
+         membership_status, first_month_free, founding_partner, membership_started_at, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, 'trialing', 1, ?, ?, ?)`,
+    )
+    .run(
+      app.user_id,
+      app.name,
+      app.email,
+      app.company,
+      app.directory_business_id ?? null,
+      app.site_url,
+      domain,
+      now,
+      foundingPartner ? 1 : 0,
+      now,
+      now,
+    );
+  const propertyManagerId = Number(info.lastInsertRowid);
+  db.prepare(
+    `UPDATE property_manager_applications SET status = 'APPROVED', created_property_manager_id = ? WHERE id = ?`,
+  ).run(propertyManagerId, applicationId);
+  return { propertyManagerId };
+}
+
+export function rejectPmApplication(db: Database, applicationId: number, notes?: string): void {
+  db.prepare(`UPDATE property_manager_applications SET status = 'REJECTED', owner_notes = ? WHERE id = ?`).run(
+    notes || null,
+    applicationId,
+  );
+}
+
+/**
+ * Membership gates PUBLISHING, never verification. A lapsed member stays a
+ * verified account; their listings simply stop publishing until they resume.
+ */
+export function setPmMembership(db: Database, propertyManagerId: number, status: "trialing" | "active" | "lapsed"): void {
+  db.prepare(`UPDATE property_managers SET membership_status = ? WHERE id = ?`).run(status, propertyManagerId);
+  const hidden = status === "lapsed" ? 1 : 0;
+  db.prepare(`UPDATE housing_posts SET hidden = ?, updated_at = ? WHERE property_manager_id = ?`).run(
+    hidden,
+    nowIso(),
+    propertyManagerId,
+  );
+}
+
+/** Owner-only removal of a property manager. Their listings unpublish with them. */
+export function removePropertyManager(db: Database, propertyManagerId: number): void {
+  db.prepare(`UPDATE property_managers SET status = 'suspended' WHERE id = ?`).run(propertyManagerId);
+  db.prepare(`UPDATE housing_posts SET hidden = 1, updated_at = ? WHERE property_manager_id = ?`).run(
+    nowIso(),
+    propertyManagerId,
+  );
+}

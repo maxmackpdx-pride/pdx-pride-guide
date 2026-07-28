@@ -43,6 +43,16 @@ import {
   setHousingPlaceStatus,
   tearDownManagedListing,
   toggleHousingPlaceReaction,
+  approvePmApplication,
+  createPmApplication,
+  getPmApplicationForUser,
+  getPropertyManagerByUser,
+  listManagerListings,
+  listPmApplications,
+  listPropertyManagers,
+  rejectPmApplication,
+  removePropertyManager,
+  setPmMembership,
   getHousingPost,
   getHousingPostOwner,
   getHousingPostsByUser,
@@ -715,6 +725,132 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (!mayTakeDown) return res.status(403).json({ error: "Not your listing" });
     const detached = tearDownManagedListing(db, id);
     res.json({ ok: true, detachedGroups: detached.length });
+  });
+
+  // --- property manager accounts ---------------------------------------------
+  //
+  // Verification is mandatory and free and is never sold. The membership below
+  // gates publishing and distribution only, never verification or safety.
+
+  /** What the Managed Property entry point needs to decide what to show. */
+  app.get("/api/housing/pm/me", requireAuth, (req: any, res: any) => {
+    const userId = viewerId(req)!;
+    const pm = getPropertyManagerByUser(db, userId);
+    if (!pm || pm.status !== "active") {
+      const application = getPmApplicationForUser(db, userId);
+      return res.json({
+        approved: false,
+        application: application
+          ? { id: application.id, status: application.status, company: application.company }
+          : null,
+      });
+    }
+    res.json({
+      approved: true,
+      manager: {
+        id: pm.id,
+        name: pm.name,
+        company: pm.company,
+        siteDomain: pm.site_domain,
+        membershipStatus: pm.membership_status,
+        foundingPartner: !!pm.founding_partner,
+        firstMonthFree: !!pm.first_month_free,
+      },
+      listings: listManagerListings(db, pm.id, userId),
+    });
+  });
+
+  app.post("/api/housing/pm-application", requireAuth, (req: any, res: any) => {
+    const userId = viewerId(req)!;
+    if (getPropertyManagerByUser(db, userId)) {
+      return res.status(400).json({ error: "You are already a verified property manager" });
+    }
+    const prior = getPmApplicationForUser(db, userId);
+    if (prior && prior.status === "PENDING") {
+      return res.json({ ok: true, alreadyPending: true, id: prior.id });
+    }
+    const company = asStr(req.body?.company, 160);
+    const siteUrl = asStr(req.body?.siteUrl, 300);
+    if (!company || !siteUrl) {
+      return res.status(400).json({ error: "Company and rental website are both needed" });
+    }
+    const user = deps.getUserById(userId);
+    const id = createPmApplication(db, {
+      userId,
+      name: asStr(req.body?.name, 120) || user?.displayName || user?.username || "Property manager",
+      email: asStr(req.body?.email, 200) || user?.email || "",
+      company,
+      siteUrl,
+      domainProof: asStr(req.body?.domainProof, 500) || "",
+      businessLicense: asStr(req.body?.businessLicense, 200) || "",
+      directoryBusinessId: asNum(req.body?.directoryBusinessId),
+      note: asStr(req.body?.note, 1000) || "",
+    });
+    // Applications go to the owner, same as the promoter application.
+    if (deps.createModerationRequest) {
+      try {
+        deps.createModerationRequest({
+          type: "PROPERTY_MANAGER_APPLICATION",
+          eventId: 0,
+          eventTitle: `Property manager: ${company}`,
+          requesterName: user?.displayName || user?.username || "member",
+          requesterEmail: user?.email || null,
+          proof: [siteUrl, asStr(req.body?.businessLicense, 120), asStr(req.body?.domainProof, 200)]
+            .filter(Boolean)
+            .join(" · ")
+            .slice(0, 500),
+        });
+      } catch {
+        /* the application is recorded either way */
+      }
+    }
+    res.json({ ok: true, id });
+  });
+
+  app.get("/api/admin/housing/pm-applications", requireAdmin, (req: any, res: any) => {
+    res.json({ applications: listPmApplications(db, String(req.query.status || "PENDING")) });
+  });
+
+  app.get("/api/admin/housing/property-managers", requireAdmin, (_req: any, res: any) => {
+    res.json({ managers: listPropertyManagers(db) });
+  });
+
+  /** Owner only: approving is what creates the account and grants verification. */
+  app.post("/api/admin/housing/pm-applications/:id/approve", requireAdmin, (req: any, res: any) => {
+    if (!isOwner(req)) return res.status(403).json({ error: "Owner only" });
+    const id = asNum(req.params.id);
+    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const result = approvePmApplication(db, id);
+    if (!result) return res.status(400).json({ error: "Already answered" });
+    res.json({ ok: true, propertyManagerId: result.propertyManagerId });
+  });
+
+  app.post("/api/admin/housing/pm-applications/:id/reject", requireAdmin, (req: any, res: any) => {
+    if (!isOwner(req)) return res.status(403).json({ error: "Owner only" });
+    const id = asNum(req.params.id);
+    if (!id) return res.status(400).json({ error: "Invalid id" });
+    rejectPmApplication(db, id, asStr(req.body?.notes, 500) || undefined);
+    res.json({ ok: true });
+  });
+
+  /** Owner only: pause or resume publishing. Verification is untouched. */
+  app.post("/api/admin/housing/property-managers/:id/membership", requireAdmin, (req: any, res: any) => {
+    if (!isOwner(req)) return res.status(403).json({ error: "Owner only" });
+    const id = asNum(req.params.id);
+    const status = String(req.body?.status || "").toLowerCase();
+    if (!id || !["trialing", "active", "lapsed"].includes(status)) {
+      return res.status(400).json({ error: "Status must be trialing, active, or lapsed" });
+    }
+    setPmMembership(db, id, status as any);
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/admin/housing/property-managers/:id", requireAdmin, (req: any, res: any) => {
+    if (!isOwner(req)) return res.status(403).json({ error: "Owner only" });
+    const id = asNum(req.params.id);
+    if (!id) return res.status(400).json({ error: "Invalid id" });
+    removePropertyManager(db, id);
+    res.json({ ok: true });
   });
 
   // --- photo upload ---------------------------------------------------------
