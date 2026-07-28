@@ -162,9 +162,11 @@ const CSS = `
   font-family:var(--font-body); font-size:.86rem; color:#c4c0b6; line-height:1.4; }
 .pdxPlace__row svg{ width:14px; height:14px; margin-top:2px; flex:none; opacity:1;
   stroke:var(--c); color:var(--c); }
-/* Body copy - soft grey, not bright white */
+/* Body copy - soft grey, not bright white. Clamp to 3 lines so long blurbs
+   don't blow out card height (uniformity). */
 .pdxPlace__desc{ margin:0; font-family:var(--font-body); font-size:.9rem; line-height:1.5;
-  color:#8e8a82; position:relative; z-index:1; }
+  color:#8e8a82; position:relative; z-index:1;
+  display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .pdxPlace__links{ display:flex; flex-wrap:wrap; gap:14px; margin-top:2px; position:relative; z-index:1; }
 .pdxPlace__link{ display:inline-flex; align-items:center; gap:6px;
   font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.86rem;
@@ -180,6 +182,12 @@ const CSS = `
 .pdxPlace__eventDate{ font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.84rem;
   color:var(--_ec,var(--cyan)); }
 .pdxPlace__eventTitle{ font-family:var(--font-body); font-size:.84rem; color:#fff; }
+/* "+N more events" collapse link - keeps the schedule from running the card long */
+.pdxPlace__eventsMore{ display:inline-block; margin-top:9px; padding-left:12px;
+  font-family:var(--font-body); font-weight:var(--fw-bold,700); font-size:.8rem;
+  color:var(--c); text-decoration:none; }
+a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3px; }
+.pdxPlace__eventsMore--static{ color:#8e8a82; }
 .pdxPlace__promoters{ margin-top:2px; padding-top:12px; border-top:1px solid #1e1e24;
   font-family:var(--font-body); font-size:.82rem; color:#8e8a82; position:relative; z-index:1; }
 .pdxPlace__promotersLabel{ font-family:var(--font-display); font-weight:700; font-size:.72rem;
@@ -253,6 +261,9 @@ const CAMPGROUND_EDGE = "linear-gradient(125deg,#B8FF3C 0%,#39FF14 28%,#0F8A3D 6
 /** White → gold neon for Clubs & Groups cards. */
 const GROUP_EDGE = "linear-gradient(125deg,#FFFFFF 0%,#FFF3C4 32%,#FFD700 68%,#C9A227 100%)";
 const DAY_COLOR = { MON:"var(--day-mon,var(--pink))", TUE:"var(--day-tue,var(--orange))", WED:"var(--day-wed,var(--yellow))", THU:"var(--cyan)", FRI:"var(--pink)", SAT:"var(--green)", SUN:"var(--orange)" };
+/** Max upcoming events shown on a directory card before collapsing to "+N more"
+   (keeps cards a consistent height instead of dumping a full year of schedule). */
+const MAX_CARD_EVENTS = 3;
 
 function Icon({ d }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
@@ -477,8 +488,8 @@ export function PlaceCard({
 
         {events.length > 0 && (
           <div className="pdxPlace__events">
-            <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Pride Events</div>
-            {events.map((ev, i) => {
+            <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Events</div>
+            {events.slice(0, MAX_CARD_EVENTS).map((ev, i) => {
               const row = (
                 <>
                   <div className="pdxPlace__eventDate">{ev.date}</div>
@@ -501,6 +512,21 @@ export function PlaceCard({
                 </div>
               );
             })}
+            {events.length > MAX_CARD_EVENTS && (
+              businessId != null ? (
+                <a
+                  className="pdxPlace__eventsMore"
+                  href={placePath(businessId, name)}
+                  onClick={e => e.stopPropagation()}
+                >
+                  +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
+                </a>
+              ) : (
+                <div className="pdxPlace__eventsMore pdxPlace__eventsMore--static">
+                  +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
+                </div>
+              )
+            )}
           </div>
         )}
 

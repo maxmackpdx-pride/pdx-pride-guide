@@ -13362,15 +13362,24 @@ html.calm-mode .schedule-now-line {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
-  align-items: start;
+  /* Equal-height rows: every card in a row matches the tallest, so the grid
+     reads as one continuous system instead of ragged different-sized cards. */
+  grid-auto-rows: 1fr;
+  align-items: stretch;
 }
 
 .directory-grid .pdxPlace {
   margin: 0;
+  /* Fill the row track so neighbors line up top and bottom */
+  height: 100%;
   /* Kill entrance animation so paint never starts at opacity:0 on reflow */
   animation: none;
   opacity: 1;
   transform: none;
+}
+
+.directory-grid .pdxPlace__body {
+  height: 100%;
 }
 
 @media (max-width: 1100px) {
@@ -16421,7 +16430,7 @@ html.calm-mode .category-constellation__orb {
 }
 
 .directory-grid--browse {
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (min-width: 900px) {
