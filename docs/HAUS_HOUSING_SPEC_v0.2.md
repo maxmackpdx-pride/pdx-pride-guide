@@ -89,6 +89,13 @@ The board launches with four post types. Everything else is a variation.
 - **The manager can see the interest.** Because a verified PM has a real account, they can see the "N groups forming to secure this place" interest (§4 Build-a-HAÜS) and who's in each — useful social proof for a landlord, with no obligation to act.
 - **Platform still never handles money.** Rent/deposit are informational text only; applications and payment happen off-platform on the manager's site, same as everything else.
 
+**Property Manager is its own account type (like promoters), with a clear permission ladder.** A verified property manager is a distinct website user type — modeled on the existing **promoter** account, not the same as a normal member. Who can do what:
+
+- **Property Manager** — can **edit the details of their own listings only.** That's the whole scope: their units, nothing else on the board.
+- **Admins** — can **edit any** listing.
+- **Owner (only)** — can **add or remove property managers**, and **add or remove properties/listings.** Creating and deleting are owner-level; a PM never deletes their account or listings themselves, and an admin doesn't either.
+- **Admins can hide a listing** — a soft action, not a delete. Hiding pulls the listing from public view and drops a **review task into the owner's inbox**, so the owner decides whether it comes back or gets removed. (Since only the owner can actually remove things, hiding is how an admin flags a problem without destroying anything.)
+
 **Build a HAÜS from a Managed Property (where the two types meet).** Every Managed Property listing carries a **"Build a HAÜS" button.** Tapping it spins up a **Forming a HAÜS** post in the *place-in-mind* flavor (§4/§9), **pre-seeded from the listing** — property name, cover photo, rent, beds/baths, neighborhood, and a link back to the manager's listing are copied in — so the Lead just names the household and starts gathering roommates to take *this specific place* together. It's the natural bridge: the managed listing is a real, available unit; a HAÜS forms to go get it. This is how a landlord listing ends up serving the mission — queer renters banding together to secure a place as a chosen household.
 
 Crucially, **this does not claim or reserve the listing.** The property manager still owns it; it stays live and rentable. What the listing *gains* is an **interest indicator** — e.g. *"Jordan is putting together roommates to secure this place"* — with a **link to their Build-a-HAÜS card.** And it is **not exclusive: more than one group can form around the same property at once.** The listing shows them all ("3 groups forming here") until the property manager takes the listing down.
