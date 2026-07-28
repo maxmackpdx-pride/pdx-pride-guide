@@ -566,6 +566,14 @@
 @media (min-width: 768px) {
   .hz .hz-feed {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    /**
+     * Forming cards span both columns, so a half width card landing between two
+     * of them would otherwise sit alone with a hole beside it. Dense packing
+     * pulls the next half width card up into that slot, so every row around a
+     * green card carries two cards. Looking, Offering, and Managed all stay the
+     * same width as each other.
+     */
+    grid-auto-flow: row dense;
   }
 }
 
