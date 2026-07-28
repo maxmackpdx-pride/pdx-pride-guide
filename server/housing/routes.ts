@@ -19,6 +19,7 @@ import {
   PLACE_STATUSES,
   hausNameFromProperty,
   stripHausSuffix,
+  withinHousingBounds,
   type HousingRequestKind,
   type HousingType,
 } from "../../shared/housing";
@@ -105,6 +106,21 @@ const asNum = (v: any): number | null => {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 };
+
+/** Short label for the feed "what changed" chip when an edit omits changeLabel. */
+function deriveHousingChangeLabel(patch: Record<string, any>): string | null {
+  if (!patch || typeof patch !== "object") return null;
+  if ("rent" in patch || "budget" in patch) return "Rent updated";
+  if ("photos" in patch) return "New photos";
+  if ("isFull" in patch) return patch.isFull ? "Now full" : "Open again";
+  if ("seeking" in patch) return "Openings updated";
+  if ("moveIn" in patch || "moveTimeline" in patch) return "Timeline updated";
+  if ("headline" in patch || "body" in patch || "name" in patch) return "Post updated";
+  if ("sourceUrl" in patch) return "Listing link updated";
+  // Any other field still resurfaces the card with a generic label.
+  const keys = Object.keys(patch).filter((k) => !["changeLabel", "type", "propertyManagerId"].includes(k));
+  return keys.length ? "Updated" : null;
+}
 
 export function registerHousingRoutes(app: Express, deps: Deps) {
   const { db, requireAuth, requireAdmin, uploadPhotos } = deps;
@@ -214,6 +230,17 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const rawName = asStr(req.body?.name, 120) || "";
     const name = type === "MANAGED" ? rawName : stripHausSuffix(rawName);
 
+    // Housing geofence is wider than events (metro + Salem corridor). Only
+    // reject when coordinates are present and outside the box — posts without
+    // lat/lng still publish (neighborhood text is enough).
+    const lat = asNum(req.body?.lat);
+    const lng = asNum(req.body?.lng);
+    if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
+      return res.status(400).json({
+        error: "That pin is outside the HAÜSING region (Portland metro through the Willamette Valley to Salem).",
+      });
+    }
+
     const postId = createHousingPost(db, {
       userId,
       type,
@@ -249,8 +276,8 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       sourceUrl: type === "MANAGED" ? asStr(req.body?.sourceUrl, 500) : null,
       sourceDomain: type === "MANAGED" ? asStr(req.body?.sourceDomain, 120) : null,
       badges: type === "MANAGED" ? asArray(req.body?.badges) : [],
-      lat: asNum(req.body?.lat),
-      lng: asNum(req.body?.lng),
+      lat,
+      lng,
     });
 
     res.json(getHousingPost(db, postId, userId));
@@ -276,10 +303,22 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const patch: Record<string, any> = { ...req.body };
     delete patch.type; // conversion has its own route
     delete patch.propertyManagerId;
+    delete patch.changeLabel;
     if ("name" in patch && post.type !== "MANAGED") {
       patch.name = stripHausSuffix(String(patch.name || ""));
     }
-    updateHousingPost(db, id, patch, asStr(req.body?.changeLabel, 60));
+    if ("lat" in patch || "lng" in patch) {
+      const lat = asNum(patch.lat) ?? post.lat ?? null;
+      const lng = asNum(patch.lng) ?? post.lng ?? null;
+      if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
+        return res.status(400).json({
+          error: "That pin is outside the HAÜSING region (Portland metro through the Willamette Valley to Salem).",
+        });
+      }
+    }
+    const changeLabel =
+      asStr(req.body?.changeLabel, 60) || deriveHousingChangeLabel(patch);
+    updateHousingPost(db, id, patch, changeLabel);
     res.json(getHousingPost(db, id, userId));
   });
 

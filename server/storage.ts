@@ -6225,6 +6225,115 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_active_groups_directory_v2");
   }
 
+  /**
+   * Yes Coach Productions — Tucker's party collective (yescoachparties.com).
+   * Must exist as its own directory group so Yes Coach / Coach's Pet nights
+   * attach here, not Portland Leather Alliance (PLA was false-matching "play").
+   */
+  if (!hasBootMigration("seed_yes_coach_productions_directory_v1")) {
+    const now = new Date().toISOString();
+    const name = "Yes Coach Productions";
+    const description =
+      "Portland athletic-fetish and gear-party collective run by Tucker Max (Tucker_PDmaX). Yes Coach nights, collabs (Stank, Pink Ponies), and community play at Sanctuary and partner venues. Consent-forward. Not a leather club — party brand.";
+    const website = "https://yescoachparties.com";
+    const instagram = "@Tucker_PDmaX";
+    const existing = sqlite
+      .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'group',
+             description = ?,
+             website = ?,
+             instagram = ?,
+             neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), 'Portland'),
+             queer_owned = 1,
+             queer_friendly = 1,
+             active = 1
+           WHERE id = ?`,
+        )
+        .run(description, website, instagram, existing.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name,
+          type: "group",
+          description,
+          address: null,
+          neighborhood: "Portland",
+          website,
+          instagram,
+          queerOwned: true,
+          queerFriendly: true,
+          active: true,
+          isNew: true,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_yes_coach_productions_directory_v1");
+  }
+
+  /**
+   * The Secret Warehouse — Kerns warehouse / film + party venue (411 NE 18th).
+   * Hosts queer dance & play parties; often listed as "Secret Warehouse Portland".
+   */
+  if (!hasBootMigration("seed_secret_warehouse_directory_v1")) {
+    const now = new Date().toISOString();
+    const name = "The Secret Warehouse";
+    const description =
+      "Warehouse venue and film production space in Kerns (NE 18th). Hosts private parties, queer dance nights, and community events — often ticketed with location confirmation for guests. Queer-friendly Portland space.";
+    const address = "411 NE 18th Ave, Portland, OR 97232";
+    const neighborhood = "Kerns";
+    const website = "https://www.yelp.com/biz/the-secret-warehouse-portland";
+    const existing = sqlite
+      .prepare(
+        `SELECT id FROM businesses
+         WHERE LOWER(name) = LOWER(?)
+            OR LOWER(name) LIKE '%secret warehouse%'
+            OR LOWER(name) LIKE '%secret wearhouse%'
+         LIMIT 1`,
+      )
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'venue',
+             description = COALESCE(NULLIF(TRIM(description), ''), ?),
+             address = COALESCE(NULLIF(TRIM(address), ''), ?),
+             neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), ?),
+             website = COALESCE(NULLIF(TRIM(website), ''), ?),
+             queer_friendly = 1,
+             active = 1
+           WHERE id = ?`,
+        )
+        .run(description, address, neighborhood, website, existing.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name,
+          type: "venue",
+          description,
+          address,
+          neighborhood,
+          website,
+          instagram: null,
+          queerOwned: false,
+          queerFriendly: true,
+          active: true,
+          isNew: true,
+          lat: 45.5239,
+          lng: -122.6475,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_secret_warehouse_directory_v1");
+  }
+
   // Remove Back 2 Earth from directory (venue no longer listed).
   if (!hasBootMigration("remove_back_2_earth_v1")) {
     const row = sqlite

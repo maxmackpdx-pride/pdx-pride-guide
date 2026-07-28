@@ -92,6 +92,12 @@ function CardShell({
       {post.author?.username === "hausing_demo" ? (
         <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>
       ) : null}
+      {/* Saved-post resurface: only for the follower, not every public card. */}
+      {post.saved && post.lastChangeLabel ? (
+        <span className="hz-change-label" title="What changed on a post you follow">
+          {post.lastChangeLabel}
+        </span>
+      ) : null}
       {children}
     </div>
   );

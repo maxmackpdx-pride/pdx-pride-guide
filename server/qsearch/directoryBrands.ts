@@ -149,9 +149,14 @@ function addressesLooselyMatch(a?: string | null, b?: string | null): boolean {
   return shared.length >= 2;
 }
 
+/** Common venue typos (Wearhouse → Warehouse) so directory match still hits. */
+function foldVenueTypos(s: string): string {
+  return s.replace(/wearhouse/g, "warehouse");
+}
+
 function nameLooselyMatch(a: string, b: string): boolean {
-  const na = normalizeVenueKey(a).replace(/\s+/g, "");
-  const nb = normalizeVenueKey(b).replace(/\s+/g, "");
+  const na = foldVenueTypos(normalizeVenueKey(a).replace(/\s+/g, ""));
+  const nb = foldVenueTypos(normalizeVenueKey(b).replace(/\s+/g, ""));
   if (!na || !nb) return false;
   if (na === nb) return true;
   if (na.length >= 5 && nb.length >= 5 && (na.includes(nb) || nb.includes(na))) return true;
@@ -459,19 +464,21 @@ export function matchDirectoryBrands(
     const aliases = groupAliasesFor(biz.name);
 
     const mentioned =
-      text.includes(nameLow) ||
+      textMentionsPhrase(text, nameLow) ||
       (nameKey.length >= 4 &&
         (titleKey.includes(nameKey) ||
-          text.replace(/[^a-z0-9]+/g, " ").includes(nameKey))) ||
+          textMentionsPhrase(text.replace(/[^a-z0-9]+/g, " "), nameKey))) ||
       nameLooselyMatch(title, biz.name) ||
       aliases.some(a => {
         const ak = normalizeVenueKey(a);
+        // Short aliases (PLA, PAH, OSLC) need a real token match — never "pla" inside "play".
         if (!ak || ak.length < 3) return false;
         return (
-          text.includes(a.toLowerCase()) ||
-          titleKey.includes(ak) ||
+          textMentionsPhrase(text, a) ||
+          titleMentionsAlias(titleKey, ak) ||
           nameLooselyMatch(title, a) ||
-          (sourceLabelKey && (sourceLabelKey.includes(ak) || nameLooselyMatch(sourceLabel, a)))
+          (sourceLabelKey &&
+            (titleMentionsAlias(sourceLabelKey, ak) || nameLooselyMatch(sourceLabel, a)))
         );
       });
 
@@ -482,7 +489,7 @@ export function matchDirectoryBrands(
         (sourceIdKey.includes(nameCompact.slice(0, Math.min(10, nameCompact.length))) ||
           nameCompact.includes(sourceIdKey.replace(/-/g, "").slice(0, 8)))) ||
       (sourceLabelKey &&
-        (sourceLabelKey.includes(nameKey) ||
+        (titleMentionsAlias(sourceLabelKey, nameKey) ||
           nameLooselyMatch(sourceLabel, biz.name) ||
           aliases.some(a => nameLooselyMatch(sourceLabel, a))));
 
@@ -529,6 +536,35 @@ export function matchDirectoryBrands(
   }));
 }
 
+/**
+ * Phrase / alias hit with word boundaries.
+ * Critical for short group aliases: "PLA" must not match the letters inside "play"
+ * (Yes Coach / pet-play copy was wrongly tagging Portland Leather Alliance).
+ */
+function textMentionsPhrase(haystack: string, needle: string): boolean {
+  const h = (haystack || "").toLowerCase();
+  const n = (needle || "").toLowerCase().trim();
+  if (!h || !n) return false;
+  if (n.length >= 6 && n.includes(" ")) {
+    // Multi-word full names: plain includes is fine ("portland leather alliance").
+    return h.includes(n);
+  }
+  const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, "i").test(h);
+}
+
+/** titleKey / sourceLabelKey are already normalized (letters + spaces). */
+function titleMentionsAlias(titleKey: string, aliasKey: string): boolean {
+  const t = (titleKey || "").trim();
+  const a = (aliasKey || "").trim();
+  if (!t || !a) return false;
+  // Whole-token for short keys; longer keys can be substrings of the title key.
+  if (a.length <= 4) {
+    return t.split(/\s+/).includes(a) || t === a;
+  }
+  return t.includes(a);
+}
+
 /** Alias map for Clubs & Groups directory matching (multi-name orgs). */
 function groupAliasesFor(name: string): string[] {
   const key = normalizeVenueKey(name).replace(/\s+/g, "");
@@ -537,7 +573,19 @@ function groupAliasesFor(name: string): string[] {
     pdxpahportlandpetsandhandlers: ["Portland Pets and Handlers", "PDX PAH", "PAH"],
     pdxpah: ["Portland Pets and Handlers", "PDX PAH"],
     oregonstateleathercontest: ["Blackout Leather Productions", "OSLC", "Oregon State Leather"],
-    portlandleatheralliance: ["PLA", "Portland Leather"],
+    // "PLA" is whole-token only (see textMentionsPhrase) — never matches "play".
+    portlandleatheralliance: ["PLA", "Portland Leather Alliance", "Portland Leather"],
+    yescoachproductions: [
+      "Yes Coach",
+      "YesCoach",
+      "Yes Coach Productions",
+      "yescoachparties",
+      "yescoachparty",
+      "Stank Yes Coach",
+      "STANK x Yes Coach",
+      "STANK x YES COACH",
+    ],
+    yescoach: ["Yes Coach", "YesCoach", "Yes Coach Productions"],
     badgirlspdx: ["Bad Girls", "PDX Bad Girls"],
     blackbeyondthebinarycollective: ["Black and Beyond the Binary", "B3C", "Black & Beyond Binary"],
     browngirlrise: ["Brown Girl Rise Portland"],

@@ -445,6 +445,7 @@ function LookingDetail({
                 pets={pets}
                 size="md"
                 scale={1.5}
+                wrap3
                 onSelect={h.onPerson}
               />
               <Mono micro>Meet {first}</Mono>
@@ -568,6 +569,7 @@ function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHa
                 pets={pets}
                 size="md"
                 scale={1.5}
+                wrap3
                 slots={post.openSlots}
                 onSelect={h.onPerson}
               />
@@ -891,6 +893,7 @@ function FormingDetail({
                 pets={pets}
                 size="md"
                 scale={1.5}
+                wrap3
                 slots={isFull ? 0 : seeking}
                 onSelect={h.onPerson}
               />
@@ -935,7 +938,13 @@ function FormingDetail({
             <HousingDetailTags tags={post.tags} />
 
             <div className="hz-people" style={{ marginTop: 16 }}>
-              <HousingCluster people={people} size="lg" slots={isFull ? 0 : seeking} onSelect={h.onPerson} />
+              <HousingCluster
+                people={people}
+                size="lg"
+                wrap3
+                slots={isFull ? 0 : seeking}
+                onSelect={h.onPerson}
+              />
               <Mono micro>
                 {isFull ? "The household" : `${people.length} in, ${seeking} to go`}
               </Mono>

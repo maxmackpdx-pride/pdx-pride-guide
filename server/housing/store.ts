@@ -413,8 +413,9 @@ export type ListOpts = {
 };
 
 /**
- * The board feed. Ordered by recency only. There is deliberately no relevance
- * or compatibility ordering here, and there must never be one.
+ * The board feed. Ordered by activity recency only (created, or last update so
+ * saved-post edits can resurface). There is deliberately no relevance or
+ * compatibility ordering here, and there must never be one.
  */
 export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPostView[] {
   const where: string[] = ["p.status IN ('ACTIVE','FILLED')"];
@@ -450,18 +451,40 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
     args.push(`%"${id}"%`);
   }
 
+  /*
+   * Fetch a bit wide, then shape + condense. Condensation is one post per
+   * (author, type) on the unfiltered board so one person cannot bury the feed
+   * with five rooms of the same type — different types still all show (demo
+   * board: Offering + Looking + Forming + Managed from the same demo user).
+   */
   const limit = Math.min(Math.max(opts.limit ?? 60, 1), 200);
+  const fetchLimit = Math.min(limit * 3, 200);
   const rows = db
     .prepare(
       `SELECT p.* FROM housing_posts p
         WHERE ${where.join(" AND ")}
-        ORDER BY p.created_at DESC, p.id DESC
-        LIMIT ${limit}`,
+        ORDER BY COALESCE(p.updated_at, p.created_at) DESC, p.id DESC
+        LIMIT ${fetchLimit}`,
     )
     .all(...args) as PostRow[];
-  const shaped = shapePosts(db, rows, { viewerId: opts.viewerId });
-  if (!derivedWanted.length) return shaped;
-  return shaped.filter((p) => derivedWanted.every((t) => p.tags.includes(t)));
+  let shaped = shapePosts(db, rows, { viewerId: opts.viewerId });
+  if (derivedWanted.length) {
+    shaped = shaped.filter((p) => derivedWanted.every((t) => p.tags.includes(t)));
+  }
+
+  // Saved filter and single-type filter: show everything the query matched.
+  // Main board: condense same-author same-type duplicates.
+  if (!opts.savedOnly && !opts.type) {
+    const seen = new Set<string>();
+    shaped = shaped.filter((p) => {
+      const key = `${p.author?.userId ?? 0}:${p.type}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  return shaped.slice(0, limit);
 }
 
 export function getHousingPost(db: Database, id: number, viewerId?: number | null): HousingPostView | null {
