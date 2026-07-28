@@ -47,6 +47,8 @@ import Submit from "./pages/Submit";
 import PrideWork from "./pages/PrideWork";
 import Gifting from "./pages/Gifting";
 import Housing from "./pages/Housing";
+import HousingNew from "./pages/HousingNew";
+import HousingPost from "./pages/HousingPost";
 import About from "./pages/About";
 import Resume from "./pages/Resume";
 import Legal from "./pages/Legal";
@@ -105,6 +107,8 @@ function AppLayout() {
               {() => <Redirect to="/pride-work" />}
             </Route>
             <Route path="/gifting" component={Gifting} />
+            <Route path="/hausing/new" component={HousingNew} />
+            <Route path="/hausing/:id" component={HousingPost} />
             <Route path="/hausing" component={Housing} />
             <Route path="/about" component={About} />
             <Route path="/resume" component={Resume} />
