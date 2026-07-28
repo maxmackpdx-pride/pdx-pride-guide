@@ -3,6 +3,8 @@ import {
   findSubmissionMatches,
   submissionHasStrongDuplicate,
 } from "@shared/submissionMatch";
+import { normalizeVenueKey } from "@shared/venueLinks";
+import { isWeakVenueName } from "../qsearch/directoryBrands";
 import { fetchIngestSource } from "./fetchSource";
 import { parseIcs, looksLikeIcs } from "./parseIcs";
 import { parseJsonLdDocument, parseJsonLdFromHtml } from "./parseJsonLd";
@@ -400,15 +402,20 @@ export async function previewIngest(input: {
   // Harvest page-level flyer candidates (og:image, etc.) - ONLY safe to assign when
   // this fetch produced a single event. Multi-event calendars must not share one
   // list-page hero across every night (that stamped the same flyer on all venues).
+  const singleEventPage = drafts.length === 1;
+  const pageTitleHint = singleEventPage ? drafts[0]?.title : undefined;
   const pageFlyerPool: string[] = [];
   for (const b of bodies) {
     if (b.body && /<html|<img|og:image/i.test(b.body)) {
       pageFlyerPool.push(
-        ...extractFlyerCandidatesFromHtml(b.body, b.sourceUrl || sourceUrl || "https://example.com"),
+        ...extractFlyerCandidatesFromHtml(
+          b.body,
+          b.sourceUrl || sourceUrl || "https://example.com",
+          pageTitleHint,
+        ),
       );
     }
   }
-  const singleEventPage = drafts.length === 1;
 
   drafts = drafts.map(d => {
     if (d.posterImageUrl) {
@@ -513,19 +520,53 @@ function hasValue(v: unknown): boolean {
  * does not recompute it. Safety flags (sex-positive / nudity / house-party) are
  * OR-ed so a venue never silently loses a marking on update. Identity, status/
  * visibility, source, claim/ownership, and createdAt are left untouched.
+ *
+ * Cross-venue guard: when both sides have strong, different venue names
+ * (normalizeVenueKey mismatch), do not overwrite venueName/address or take the
+ * draft poster — false-positive merges must not rewrite host or steal flyer art
+ * (e.g. Camp event + Eagle Karaoke draft).
  */
 export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): Partial<InsertEvent> {
   const inc = draftToInsertEvent(draft, { status: existing.status as "HIDDEN" | "LIVE" });
   const patch: Partial<InsertEvent> = {};
 
+  const existingVenueName = String(existing.venueName || "").trim();
+  const draftVenueName = String(inc.venueName || "").trim();
+  const existingVenueKey = normalizeVenueKey(existingVenueName);
+  const draftVenueKey = normalizeVenueKey(draftVenueName);
+  const existingVenueWeak = isWeakVenueName(existingVenueName);
+  const draftVenueWeak = isWeakVenueName(draftVenueName);
+  // Both have a real venue and they disagree → keep existing host + poster.
+  const venuesConflict =
+    Boolean(existingVenueKey) &&
+    Boolean(draftVenueKey) &&
+    existingVenueKey !== draftVenueKey &&
+    !existingVenueWeak &&
+    !draftVenueWeak;
+  // Take draft venue/address only when keys match, or existing is weak/empty/TBA
+  // (including strong draft filling a weak existing). Never when both strong+different.
+  const canTakeVenueFields =
+    !venuesConflict &&
+    (existingVenueWeak || !existingVenueKey || existingVenueKey === draftVenueKey);
+
+  // venueName / address / poster handled separately under the cross-venue guard.
   const newWins: Array<keyof InsertEvent> = [
-    "title", "description", "venueName", "address", "neighborhood",
-    "lat", "lng", "ticketUrl", "posterImageUrl",
+    "title", "description", "neighborhood",
+    "lat", "lng", "ticketUrl",
   ];
   for (const k of newWins) {
     if (hasValue((inc as Record<string, unknown>)[k])) {
       (patch as Record<string, unknown>)[k] = (inc as Record<string, unknown>)[k];
     }
+  }
+  if (canTakeVenueFields) {
+    if (hasValue(inc.venueName)) patch.venueName = inc.venueName;
+    if (hasValue(inc.address)) patch.address = inc.address;
+  }
+  // Poster: same-venue (or no conflict) keeps new-wins for non-empty; never steal on venue conflict.
+  // Empty/null draft poster still never clears an existing poster (hasValue gate).
+  if (hasValue(inc.posterImageUrl) && !venuesConflict) {
+    patch.posterImageUrl = inc.posterImageUrl;
   }
   // Never let a bad third-party pin (e.g. Hawks Squarespace → NYC) clobber a good PDX pin.
   // Metro box matches venueCoordinates.isInPortlandMetro.

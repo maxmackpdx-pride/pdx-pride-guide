@@ -25,7 +25,11 @@ import {
 } from "../server/ingest/adapters/sanctuary";
 import { isRelevantScanDraft } from "../server/ingest/relevance";
 import { countFreshFlyerDrafts, isFreshFlyerDraft } from "../server/ingest/venuePolicy";
-import { preferFullQualityImageUrl } from "../server/ingest/posterQuality";
+import {
+  extractSanctuaryFlyerUrls,
+  preferFullQualityImageUrl,
+  stripSugarCalendarRelatedBlocks,
+} from "../server/ingest/posterQuality";
 import { deriveTrustedHealth } from "../shared/trustedVenues";
 import type { IngestEventDraft } from "../server/ingest/types";
 
@@ -338,6 +342,32 @@ assert(
   "themed title matches themed slug",
 );
 
+/* ── 4b2. title-aware Sanctuary flyer ranking (gamebang related-grid noise) ── */
+const biteClubHtml = `
+<html><body>
+<img src="https://pdxsanctuary.com/wp-content/uploads/2025/07/gamebang-3.jpg" />
+<img src="https://pdxsanctuary.com/wp-content/uploads/2025/07/BiteClub.jpg" />
+<img src="https://pdxsanctuary.com/wp-content/uploads/2025/01/trans_color_square.png" />
+</body></html>`;
+const biteRanked = extractSanctuaryFlyerUrls(
+  biteClubHtml,
+  "https://pdxsanctuary.com/events/creature-feature-bite-club/",
+  "Creature Feature: W/Bite Club",
+);
+assert(
+  biteRanked[0]?.toLowerCase().includes("biteclub"),
+  "title-aware rank: BiteClub beats gamebang related-grid embed",
+);
+assert(
+  !biteRanked.some(u => /trans_color_square/i.test(u)),
+  "title-aware rank: logo chrome still rejected",
+);
+const noTitleRanked = extractSanctuaryFlyerUrls(biteClubHtml);
+assert(
+  noTitleRanked.some(u => /gamebang/i.test(u)) && noTitleRanked.some(u => /biteclub/i.test(u)),
+  "without title both candidates still returned (no bare bang boost required)",
+);
+
 /* ── 4c. fresh-vs-reused flyer coverage ── */
 const freshDraft = { posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/07/X.avif", warnings: ["Flyer from event page og:image"] };
 const reusedDraft = { posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/06/Y.avif", warnings: ["Series flyer reused"] };
@@ -347,6 +377,58 @@ assert(isFreshFlyerDraft(freshDraft), "page-enriched flyer counts as fresh");
 assert(!isFreshFlyerDraft(reusedDraft), "batch-reused flyer does NOT count toward coverage");
 assert(!isFreshFlyerDraft(boardReusedDraft), "board-reused flyer does NOT count toward coverage");
 assert(countFreshFlyerDrafts([freshDraft, reusedDraft, boardReusedDraft, bareDraft]) === 1, "coverage counts only fresh acquisitions");
+
+/* ── 4d. Sugar Calendar related-events grid must not supply flyer candidates ── */
+// Mirrors live detail pages: primary hero/og for THIS event, plus a
+// sugar-calendar-event-list grid whose CSS background-image cells are OTHER nights
+// (e.g. Game Bang on a Bite Club / Pickup Play page).
+const BITE_HERO = "https://pdxsanctuary.com/wp-content/uploads/2026/07/BiteClub.avif";
+const GAMEBANG_GRID = "https://pdxsanctuary.com/wp-content/uploads/2026/06/gamebang-3.avif";
+const KARAOKE_GRID = "https://pdxsanctuary.com/wp-content/uploads/2026/05/NakedKaraoke.avif";
+const RELATED_GRID_HTML = `
+<html><head>
+<meta property="og:image" content="${BITE_HERO}" />
+</head><body>
+<article class="entry-content">
+  <img src="${BITE_HERO}" alt="Bite Club" />
+</article>
+<section class="sugar-calendar-event-list-block">
+  <div class="sugar-calendar-event-list-block__gridview">
+    <div class="sugar-calendar-event-list-block__gridview__event__body__image"
+         style="background-image:url(${GAMEBANG_GRID})"></div>
+    <div class="sugar-calendar-event-list-block__gridview__event__body__image"
+         style="background-image: url('${KARAOKE_GRID}')"></div>
+  </div>
+</section>
+</body></html>`;
+
+const stripped = stripSugarCalendarRelatedBlocks(RELATED_GRID_HTML);
+assert(!/gamebang/i.test(stripped), "strip removes gamebang related-grid thumb");
+assert(!/NakedKaraoke/i.test(stripped), "strip removes karaoke related-grid thumb");
+assert(/BiteClub\.avif/.test(stripped), "strip keeps primary content flyer");
+assert(/og:image/.test(stripped), "strip keeps head meta (og:image)");
+
+const candsNoTitle = extractSanctuaryFlyerUrls(RELATED_GRID_HTML, "https://pdxsanctuary.com/events/bite-club/");
+assert(
+  candsNoTitle.every(u => !/gamebang/i.test(u)),
+  "gamebang only in related grid is absent from candidates (no title needed)",
+);
+assert(
+  candsNoTitle.every(u => !/NakedKaraoke/i.test(u)),
+  "karaoke only in related grid is absent from candidates",
+);
+assert(
+  candsNoTitle[0] === BITE_HERO || candsNoTitle.includes(BITE_HERO),
+  "primary og/hero BiteClub remains a top candidate",
+);
+
+const candsTitled = extractSanctuaryFlyerUrls(
+  RELATED_GRID_HTML,
+  "https://pdxsanctuary.com/events/bite-club/",
+  "Creature Feature: W/Bite Club",
+);
+assert(candsTitled[0] === BITE_HERO, "with title, BiteClub still ranks first");
+assert(candsTitled.every(u => !/gamebang/i.test(u)), "titled path still excludes grid-only gamebang");
 
 /* ── 5. flyer-coverage health gating ── */
 const nowIso = new Date().toISOString();

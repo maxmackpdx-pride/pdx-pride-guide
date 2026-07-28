@@ -94,7 +94,7 @@ export async function enrichDraftFromEventPage(
     if (!hasPoster) {
       const isSanctuary = /pdxsanctuary\.com/i.test(page) || /pdxsanctuary\.com/i.test(fetched.url || "");
       if (isSanctuary) {
-        const sanc = extractSanctuaryFlyerUrls(html, fetched.url || page);
+        const sanc = extractSanctuaryFlyerUrls(html, fetched.url || page, draft.title);
         if (sanc[0] && !looksLikeSiteLogo(sanc[0])) {
           posterImageUrl = sanc[0];
           warnings.push("Flyer from Sanctuary WP uploads (og/avif)");
@@ -111,7 +111,7 @@ export async function enrichDraftFromEventPage(
           posterImageUrl = fromOg;
           warnings.push("Flyer from event page og:image");
         } else {
-          const cands = extractFlyerCandidatesFromHtml(html, fetched.url || page);
+          const cands = extractFlyerCandidatesFromHtml(html, fetched.url || page, draft.title);
           const best = cands.find(u => !looksLikeSiteLogo(u));
           if (best) {
             posterImageUrl = best;

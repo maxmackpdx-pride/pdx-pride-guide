@@ -292,11 +292,12 @@ export function scoreSubmissionAgainstEvent(
   }
 
   // --- Venue / address (0–32) ---
+  const sameAddress = addressesMatch(submission.address, event.address);
   if (sameVenue) {
     score += 28;
     reasons.push("Same venue");
   }
-  if (addressesMatch(submission.address, event.address)) {
+  if (sameAddress) {
     score += sameVenue ? 8 : 18;
     reasons.push("Same address");
   }
@@ -350,11 +351,6 @@ export function scoreSubmissionAgainstEvent(
     }
   }
 
-  // Strong title + same day is enough for high even if venue strings differ slightly
-  if (titleS >= 0.9 && dayDist === 0) {
-    score = Math.max(score, 74);
-  }
-
   // Exact title + same venue is a twin when same/adjacent day or times unknown -
   // NOT across weeks (weekly series nights must not block each other).
   if (
@@ -366,6 +362,7 @@ export function scoreSubmissionAgainstEvent(
   }
 
   // Ticket URL + some title signal is strong (per-occurrence URLs usually differ by date)
+  // and may still be high across slight venue-string drift when the ticket is the same listing.
   if (tA && tB && tA === tB && titleS >= 0.35) {
     score = Math.max(score, 78);
   }
@@ -373,6 +370,16 @@ export function scoreSubmissionAgainstEvent(
   // Same series title at same venue on a different week = sibling night, not a duplicate listing.
   // Cap below "high" so re-scans can still add new dates for recurring shows.
   if (dayDist != null && dayDist >= 3 && !(tA && tB && tA === tB)) {
+    score = Math.min(score, 68);
+  }
+
+  // High confidence requires place or ticket anchor.
+  // Bare exact title + same calendar day across different venues is at most medium
+  // (Karaoke@Camp ≠ Karaoke@Eagle; Happy Hour@X ≠ Happy Hour@Y) so auto-merge
+  // / skip-as-duplicate never treats them as the same listing.
+  const sameTicket = !!(tA && tB && tA === tB);
+  const placeOrTicketAnchored = sameVenue || sameAddress || sameTicket;
+  if (!placeOrTicketAnchored) {
     score = Math.min(score, 68);
   }
 

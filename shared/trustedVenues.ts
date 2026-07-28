@@ -194,7 +194,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     publishStatus: "LIVE",
     pollHours: 12,
     notes:
-      "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. IG specials still scan-lane.",
+      "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. No per-event flyers (null + do-not-reuse warning). IG specials still scan-lane.",
     venuePolicy: {
       ageRequirement: "21_PLUS",
       ageNote: "Age set to 21_PLUS (Camp Bar is a 21+ bar)",
@@ -219,7 +219,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
       defaultDoorFeeNote: "Admission defaulted to DOOR_FEE (CC weekly - no cover nights re-infer FREE from text)",
     },
     notes:
-      "Homepage Mon-Sun lineup expanded 6 weeks + latest ADVERTICAL weekly poster.",
+      "Homepage Mon-Sun lineup expanded 6 weeks. ADVERTICAL is shared lineup composite only — per-night posters left null (honest null > wrong shared art).",
   },
   {
     sourceId: "camp-trc",

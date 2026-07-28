@@ -1,7 +1,13 @@
 /**
  * CC Slaughters - weekly night lineup on homepage HTML + WP ADVERTICAL posters.
  * No events feed URL ( /events/ 404s ). Parse Mon–Sun blurb blocks and expand
- * next N weeks; attach the latest full-size WEEKLYS_*_ADVERTICAL poster.
+ * next N weeks.
+ *
+ * Flyer policy: the homepage WEEKLYS_*_ADVERTICAL is one shared composite for
+ * the whole week — not per-night art. Product preference: honest null on
+ * individual night cards beats stamping the same lineup poster on every
+ * night. We still detect ADVERTICAL so warnings can say lineup art exists
+ * on the source page, but we do not attach it to drafts.
  */
 import type { IngestEventDraft } from "../types";
 import { fetchIngestSource } from "../fetchSource";
@@ -155,9 +161,14 @@ export function parseCcSlaughtersNights(html: string): CcNight[] {
   return nights;
 }
 
+/**
+ * Expand weeklies into dated drafts.
+ * @param lineupPosterUrl - homepage ADVERTICAL if present (lineup composite only).
+ *   Never attached to per-night drafts; used only to shape warnings.
+ */
 export function nightsToDrafts(
   nights: CcNight[],
-  posterUrl: string | null,
+  lineupPosterUrl: string | null,
   opts?: { weeks?: number; now?: Date },
 ): IngestEventDraft[] {
   const weeks = opts?.weeks ?? WEEKS_AHEAD;
@@ -193,7 +204,8 @@ export function nightsToDrafts(
         isHouseParty: false,
         isSexPositive: false,
         nudityOk: false,
-        posterImageUrl: posterUrl,
+        // Honest null — do not stamp shared lineup composite on every night
+        posterImageUrl: null,
         sourceUrl: "https://www.ccslaughterspdx.com/",
         parseSource: "html",
         warnings: [
@@ -201,7 +213,14 @@ export function nightsToDrafts(
           "Age set to 21_PLUS (CC Slaughters is a 21+ bar)",
           ...(n.coverNote ? [`Cover note: ${n.coverNote}`] : []),
           ...(adm.reason ? [adm.reason] : []),
-          ...(posterUrl ? ["Flyer from homepage ADVERTICAL weekly poster"] : []),
+          ...(lineupPosterUrl
+            ? [
+                "Shared weekly lineup poster (not per-night art)",
+                "Homepage lineup flyer left null on per-night cards — do not reuse other night/venue flyers",
+              ]
+            : [
+                "No per-night flyer on CC homepage — do not invent or reuse other venue flyers",
+              ]),
         ],
       });
     }
@@ -218,9 +237,9 @@ export async function fetchCcSlaughtersDrafts(opts?: {
   if (!fetched.body) return [];
   const nights = parseCcSlaughtersNights(fetched.body);
   const posters = extractCcVerticalPosters(fetched.body);
-  // Prefer newest path (later year/month in URL sorts last)
-  const poster = posters.sort().reverse()[0] || null;
-  let drafts = nightsToDrafts(nights, poster);
+  // Prefer newest path (later year/month in URL sorts last) — for warning only
+  const lineupPoster = posters.sort().reverse()[0] || null;
+  let drafts = nightsToDrafts(nights, lineupPoster);
   if (!opts?.includePast) {
     drafts = drafts.filter(d => !isPastEventListing(d));
   }

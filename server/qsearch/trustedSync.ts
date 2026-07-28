@@ -18,7 +18,11 @@ import {
   mergeDraftIntoEvent,
   INGEST_MAX_COMMIT,
 } from "../ingest";
-import { findSubmissionMatches, submissionHasStrongDuplicate } from "@shared/submissionMatch";
+import {
+  findSubmissionMatches,
+  submissionHasStrongDuplicate,
+  ticketUrlKey,
+} from "@shared/submissionMatch";
 import { isPastEventListing } from "../ingest/dates";
 import { matchClosedVenue } from "@shared/closedVenues";
 import { sanitizeBadlandsTicketUrl } from "../ingest/parseBadlands";
@@ -48,6 +52,7 @@ import { inferAdmissionFromText } from "../ingest/admissionInfer";
 import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
 import { isRelevantScanDraft } from "../ingest/relevance";
 import type { IngestEventDraft } from "../ingest/types";
+import { normalizeVenueKey } from "@shared/venueLinks";
 import { storage } from "../storage";
 import { buildScanCandidates } from "./analyze";
 import { discoverAndParse } from "./discover";
@@ -274,6 +279,21 @@ function autoMergeExistingEvents(
     const strong = submissionHasStrongDuplicate(matches);
     const existing = strong ? byId.get(strong.eventId) : undefined;
     if (strong && existing && !usedIds.has(existing.id)) {
+      // Belt-and-suspenders: never auto-merge across clearly different venues,
+      // even if the scorer reports a high-confidence duplicate (title/date).
+      // Exception: identical ticket URL key means same listing (venue rename / alias).
+      const draftVenueKey = normalizeVenueKey(draft.venueName);
+      const existingVenueKey = normalizeVenueKey(existing.venueName);
+      if (draftVenueKey && existingVenueKey && draftVenueKey !== existingVenueKey) {
+        const draftTicket = ticketUrlKey(draft.ticketUrl);
+        const existingTicket = ticketUrlKey(existing.ticketUrl);
+        const sameTicket =
+          !!draftTicket && !!existingTicket && draftTicket === existingTicket;
+        if (!sameTicket) {
+          fresh.push(draft);
+          continue;
+        }
+      }
       try {
         storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft));
         usedIds.add(existing.id);
