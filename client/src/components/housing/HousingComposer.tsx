@@ -596,11 +596,14 @@ export function HousingComposer({
         ) : (
           <>
             {/* The spec calls this a sign up application, modeled on the promoter
-                application. Verification is the whole gate, so name that. */}
-            <SectionTitle kicker="Apply">Get verified</SectionTitle>
+                application. It applies the whole company for an account, not a
+                single listing - say that plainly so it doesn't read as posting a house. */}
+            <SectionTitle kicker="Apply once">Verify your company</SectionTitle>
             <p style={{ color: "var(--text-lo)", fontSize: "var(--meta)", margin: "8px 0 16px" }}>
-              Every property manager on this board is verified. There is no unverified way to list.
-              Every application is reviewed by hand.
+              This is a one-time application for your <b style={{ color: "var(--text-hi)" }}>company</b>, not a single listing.
+              Tell us who you are and the owner reviews it by hand. Once you are approved, your account
+              can post and manage your units. Every manager on this board is verified — there is no
+              unverified way to list.
             </p>
             <div className="hz-fields">
               <div className="hz-field">
@@ -617,18 +620,18 @@ export function HousingComposer({
               </div>
               <div className="hz-field">
                 <label>
-                  <Mono micro>Rental website</Mono>
+                  <Mono micro>Link to your listings</Mono>
                 </label>
                 <input
                   className="hz-input"
                   style={{ width: "100%" }}
                   value={pm.site}
-                  placeholder="yourrentals.com"
+                  placeholder="yourrentals.com/listings"
                   onChange={(e) => setPm((p) => ({ ...p, site: e.target.value }))}
                 />
                 <small className="hz-hint">
-                  We check that you own this domain. Once you are approved it becomes your trusted
-                  scan source.
+                  Where your available units live. We check that you own this domain to confirm you
+                  are the real manager.
                 </small>
               </div>
               <div className="hz-field hz-field--split">
