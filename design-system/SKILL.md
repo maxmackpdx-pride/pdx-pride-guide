@@ -4,7 +4,7 @@ description: Use this skill to generate well-branded interfaces and assets for Z
 user-invocable: true
 ---
 
-Read the `readme.md` file within this skill, and explore the other available files.
+Read the `README.md` file within this skill, and explore the other available files.
 
 If creating visual artifacts (slides, mocks, throwaway prototypes, etc), copy assets
 out and create static HTML files for the user to view. If working on production code,
@@ -15,7 +15,7 @@ build or design, ask a few questions, and act as an expert designer who outputs 
 artifacts or production code, depending on the need.
 
 ## Fast orientation
-- `readme.md` — full design guide: voice, visual foundations, the day-color system,
+- `README.md` — full design guide: voice, visual foundations, the day-color system,
   iconography, component index, and caveats. Read this first.
 - `styles.css` — the single stylesheet to link; it `@import`s everything in `tokens/`.
 - `tokens/` — colors (incl. `--day-mon` .. `--day-sun`), type (Barlow Condensed +

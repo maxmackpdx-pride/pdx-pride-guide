@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HAÜSING · Zaylist housing board</title>
+<link rel="stylesheet" href="_ds/zaylist-design-system-f2a62fa3-7e93-4cdc-a3dc-2fe8f2feff13/styles.css">
+<link rel="stylesheet" href="haus.css">
+<style>
+html,body{height:100%}
+body{margin:0;background:var(--ink-1000);color:var(--text-body);font-family:var(--font-body);overflow:hidden}
+#root{height:100%}
+.shell{height:100%;display:flex;flex-direction:column;background:var(--ink-1000)}
+.shell__bar{display:flex;align-items:center;gap:16px;padding:8px 16px;border-bottom:1px solid var(--panel-border);background:var(--ink-1000)}
+.shell__mark{font-family:var(--font-mono);font-size:var(--mono-micro);letter-spacing:var(--tracking-mono);text-transform:uppercase;color:var(--text-faint)}
+.shell__seg{margin-left:auto;display:flex;gap:2px;border:1px solid var(--panel-border);border-radius:var(--chrome-radius-sm);padding:2px}
+.shell__seg button{font-family:var(--font-mono);font-size:var(--mono-micro);letter-spacing:var(--tracking-kicker);text-transform:uppercase;background:none;border:0;color:var(--text-lo);padding:6px 12px;border-radius:6px;cursor:pointer}
+.shell__seg button[aria-pressed="true"]{background:var(--panel-cyan);color:var(--text-inverse)}
+.shell__view{flex:1;min-height:0}
+.shell__view--mobile{display:flex;align-items:center;justify-content:center;background:#131317;padding:16px 0}
+a{color:var(--panel-cyan)}
+a:hover{color:var(--neon-cyan)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="_ds/zaylist-design-system-f2a62fa3-7e93-4cdc-a3dc-2fe8f2feff13/_ds_bundle.js"></script>
+<script src="haus-data.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="haus-ui.jsx"></script>
+<script type="text/babel" src="haus-feed.jsx"></script>
+<script type="text/babel" src="haus-detail.jsx"></script>
+<script type="text/babel" src="haus-workspace.jsx"></script>
+<script type="text/babel" src="haus-app.jsx"></script>
+</body>
+</html>
