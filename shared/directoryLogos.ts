@@ -13,11 +13,19 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   yescoachparty: "Yes_Coach_Productions",
   stankyescoach: "Yes_Coach_Productions",
   // Adult shops — red-glow neon pack
+  // Foster shop (Tucker's favorite) — separate from the FANTASY chain
   fantasyland: "Fantasy_Land",
   fantasylandadult: "Fantasy_Land",
   fantasylandadultvideo: "Fantasy_Land",
   fantasyonfoster: "Fantasy_Land",
   fantasyonfosterportland: "Fantasy_Land",
+  // FANTASY for Adults Only multi-location chain (Sandy, Burnside, Tigard, Clackamas)
+  fantasyforadultsonly: "Fantasy_Adults_Only",
+  fantasyadultsonly: "Fantasy_Adults_Only",
+  fantasyadults: "Fantasy_Adults_Only",
+  fantasyportland: "Fantasy_Adults_Only",
+  fantasysandy: "Fantasy_Adults_Only",
+  fantasyburnside: "Fantasy_Adults_Only",
   taboovideo: "Taboo_Video",
   taboo: "Taboo_Video",
   tabooadultvideo: "Taboo_Video",

@@ -587,6 +587,14 @@ function groupAliasesFor(name: string): string[] {
     ],
     yescoach: ["Yes Coach", "YesCoach", "Yes Coach Productions"],
     fantasyland: ["Fantasy Land", "Fantasy on Foster", "Fantasyland", "Fantasy Land Adult"],
+    // Chain brand (not Foster Fantasyland)
+    fantasyforadultsonly: [
+      "Fantasy for Adults Only",
+      "Fantasy Adults Only",
+      "FANTASY Portland",
+      "Fantasy Oregon",
+    ],
+    fantasyadultsonly: ["Fantasy for Adults Only", "FANTASY"],
     taboovideo: ["Taboo", "Taboo Video", "Taboo Adult Video", "Taboo PDX"],
     mrpeeps: ["Mr Peeps", "Mr. Peeps", "The Peep Hole", "Peep Hole"],
 

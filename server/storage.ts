@@ -6389,7 +6389,7 @@ function runBootMigrationsOnce() {
       {
         name: "Fantasy Land",
         description:
-          "Fantasy Land (also called Fantasy on Foster) — 24-hour adult shop on SE Foster. Toys, video, and a queer-friendly floor. One Portland location; the Foster Road store is the Fantasyland / Fantasy on Foster address.",
+          "Fantasy Land on SE Foster (Fantasy on Foster / Fantasyland) — 24-hour adult shop. Toys, video, and a queer-friendly floor. One location on Foster Road — not the multi-store FANTASY (Fantasy for Adults Only) chain.",
         address: "5228 SE Foster Rd, Portland, OR 97206",
         neighborhood: "Foster / SE Portland",
         website: null,
@@ -6522,6 +6522,142 @@ function runBootMigrationsOnce() {
     }
 
     recordBootMigration("seed_adult_shops_multi_location_v1");
+  }
+
+  /**
+   * FANTASY (Fantasy for Adults Only) — multi-location inclusive chain.
+   * Separate from Fantasy Land on Foster (seeded above; keep both).
+   */
+  if (!hasBootMigration("seed_fantasy_adults_only_multi_v1")) {
+    const now = new Date().toISOString();
+    const name = "FANTASY";
+    const description =
+      "FANTASY (Fantasy for Adults Only) — Portland & metro inclusive adult shops. Toys, gear, local brands, performer-friendly. Multiple locations on one card:\n" +
+      "• Hollywood — 3137 NE Sandy Blvd, Portland, OR 97232 · (503) 239-6969 · 10am–12am\n" +
+      "• Downtown — 1703 W Burnside St, Portland, OR 97209 · (503) 295-6969 · 12pm–8pm\n" +
+      "• Tigard — 6440 SW Coronado Dr, Portland, OR 97219 · (503) 244-6969 · 10am–12am\n" +
+      "• Clackamas — 15536 SE 82nd Dr, Clackamas, OR 97015 · (503) 203-6969 · 12pm–8pm\n" +
+      "Also Missoula MT. Online: fantasyforadultsonly.com · @fantasy_oregon_portland\n" +
+      "Not the same as Fantasy Land on SE Foster (separate shop).";
+    const address = "3137 NE Sandy Blvd, Portland, OR 97232";
+    const neighborhood = "Hollywood / Downtown / Tigard / Clackamas";
+    const website = "https://www.fantasyforadultsonly.com";
+    const instagram = "@fantasy_oregon_portland";
+    const phone = "(503) 239-6969";
+    const hours =
+      "Sandy & Tigard: 10am–12am · Downtown: 12pm–8pm · Clackamas: 12pm–8pm (confirm per store)";
+    const imageUrl = "/directory-logos/Fantasy_Adults_Only.png";
+    const lat = 45.5328;
+    const lng = -122.6325;
+
+    const existing = sqlite
+      .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'shop',
+             description = ?,
+             address = ?,
+             neighborhood = ?,
+             website = ?,
+             instagram = ?,
+             phone = ?,
+             hours = ?,
+             image_url = ?,
+             lat = ?,
+             lng = ?,
+             queer_friendly = 1,
+             active = 1,
+             status = 'OPEN'
+           WHERE id = ?`,
+        )
+        .run(
+          description,
+          address,
+          neighborhood,
+          website,
+          instagram,
+          phone,
+          hours,
+          imageUrl,
+          lat,
+          lng,
+          existing.id,
+        );
+    } else {
+      // Also match if seeded under a longer legal name
+      const alt = sqlite
+        .prepare(
+          `SELECT id FROM businesses WHERE LOWER(name) IN (
+             lower('Fantasy for Adults Only'),
+             lower('Fantasy Adults Only'),
+             lower('FANTASY Portland')
+           ) LIMIT 1`,
+        )
+        .get() as { id?: number } | undefined;
+      if (alt?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               name = ?,
+               type = 'shop',
+               description = ?,
+               address = ?,
+               neighborhood = ?,
+               website = ?,
+               instagram = ?,
+               phone = ?,
+               hours = ?,
+               image_url = ?,
+               lat = ?,
+               lng = ?,
+               queer_friendly = 1,
+               active = 1,
+               status = 'OPEN'
+             WHERE id = ?`,
+          )
+          .run(
+            name,
+            description,
+            address,
+            neighborhood,
+            website,
+            instagram,
+            phone,
+            hours,
+            imageUrl,
+            lat,
+            lng,
+            alt.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name,
+            type: "shop",
+            description,
+            address,
+            neighborhood,
+            website,
+            instagram,
+            phone,
+            hours,
+            imageUrl,
+            lat,
+            lng,
+            queerOwned: false,
+            queerFriendly: true,
+            active: true,
+            isNew: true,
+            status: "OPEN",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+    recordBootMigration("seed_fantasy_adults_only_multi_v1");
   }
 
   /**
