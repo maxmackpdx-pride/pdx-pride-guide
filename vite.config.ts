@@ -20,6 +20,8 @@ export default defineConfig({
           "icons/*.png",
           "assets/*.{js,css,woff2}",
         ],
+        // Main bundle can exceed the 2 MiB Workbox default after home/directory growth.
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         rollupFormat: "iife",
       },
       devOptions: {
