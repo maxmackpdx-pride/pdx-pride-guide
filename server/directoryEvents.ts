@@ -160,6 +160,7 @@ export function getPastEventsForBusiness(
   businesses: Business[],
   nowMs = Date.now(),
 ): DirectoryEventSummary[] {
+  const isYesCoach = business.name.trim().toLowerCase() === "yes coach productions";
   const livePast = listings
     .filter(listing => isPastListing(listing, nowMs))
     .filter(listing => listingMatchesBusiness(listing, business, businesses))
@@ -179,7 +180,13 @@ export function getPastEventsForBusiness(
       const endMs = parsePacificDateTime(row.dateEnd);
       return endMs != null && endMs < nowMs;
     })
-    .filter(row => listingMatchesBusiness(row, business, businesses))
+    // Tucker's profile archive is the Yes Coach production history. Locker
+    // Room belongs to Eagle Portland, so it stays off the Yes Coach card.
+    .filter(row =>
+      isYesCoach
+        ? !row.slug.startsWith("locker-room-")
+        : listingMatchesBusiness(row, business, businesses),
+    )
     .filter(row => !livePast.some(live => archiveDuplicatesLivePast(row, live)))
     .map(row => ({
       id: row.id,

@@ -6390,6 +6390,104 @@ function runBootMigrationsOnce() {
     recordBootMigration("yes_coach_directory_logo_v1");
   }
 
+  // Yes Coach is based at Sanctuary Club; keep its directory pin/location
+  // aligned with the venue instead of the generic Portland group fallback.
+  if (!hasBootMigration("yes_coach_sanctuary_location_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '33 NW 9th Ave, Portland, OR 97209',
+           neighborhood = 'Pearl District',
+           lat = 45.523244045755,
+           lng = -122.680179337043
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run();
+    recordBootMigration("yes_coach_sanctuary_location_v1");
+  }
+
+  // Directory-wide verified data refresh (official business/org sources,
+  // July 2026). Avoid filling optional fields unless the source is clear.
+  if (!hasBootMigration("directory_verified_details_2026_07_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses SET website = 'https://yescoachparty.com'
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           website = 'https://www.blackbeyondthebinarycollective.org/'
+         WHERE LOWER(name) = LOWER('Black & Beyond the Binary Collective')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '4038 N Mississippi Ave, Portland, OR 97217',
+           neighborhood = 'Mississippi',
+           website = 'https://oriartgallery.org/',
+           hours = 'Thu–Sun 12–5pm',
+           lat = 45.5527108,
+           lng = -122.6753325
+         WHERE LOWER(name) = LOWER('Ori Gallery')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '2046 NE Martin Luther King Jr Blvd, Portland, OR 97212',
+           neighborhood = 'Eliot',
+           website = 'https://ariumbotanicals.com/',
+           hours = 'Daily 11am–6pm',
+           phone = '(503) 719-4763',
+           lat = 45.5377231,
+           lng = -122.6612012
+         WHERE LOWER(name) = LOWER('Arium Botanicals')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '2610 NW Vaughn St, Portland, OR 97210',
+           neighborhood = 'Slabtown',
+           website = 'https://pizzathief.com/',
+           hours = 'Daily 11:30am–9pm',
+           phone = '(503) 719-7778',
+           lat = 45.5366907,
+           lng = -122.7053269
+         WHERE LOWER(name) = LOWER('Pizza Thief')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           name = 'Greenhouse Hair Collective',
+           description = 'LGBTQIA-owned, gender-inclusive Slabtown hair collective (formerly Gold+Grit Barber Co.) offering barbering, styling, and gender-affirming transformations by appointment.',
+           address = '2668 NW Vaughn St, Portland, OR 97210',
+           neighborhood = 'Slabtown',
+           website = 'https://www.greenhousepdx.com/',
+           instagram = NULL,
+           hours = 'By appointment',
+           lat = 45.5366774,
+           lng = -122.7063224
+         WHERE LOWER(name) = LOWER('Gold+Grit Barber Co.')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = 'Eagle Portland, 835 N Lombard St, Portland, OR 97217',
+           neighborhood = 'North Portland',
+           lat = 45.5803,
+           lng = -122.6856
+         WHERE LOWER(name) = LOWER('PDX PAH - Portland Pets & Handlers')`,
+      )
+      .run();
+    recordBootMigration("directory_verified_details_2026_07_v1");
+  }
+
   /**
    * Coach's Pet — Yes Coach production night at Sanctuary Club.
    * Venue = Sanctuary (place card); brand aliases + host claim = Yes Coach.
