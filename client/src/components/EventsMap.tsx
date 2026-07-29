@@ -75,7 +75,13 @@ function buildPinIcon(days: string[], rsvpPulse = false) {
   });
 }
 
+/** Venues to keep OFF the map (kept in the list). Triangle Recreation Camp /
+    Camp TRC sits up in Granite Falls WA, ~150mi north - its pin stretched the
+    map to the whole state. */
+const OFF_MAP_VENUE = /triangle recreation camp|camp\s*trc/i;
+
 function hasMapPin(event: Event) {
+  if (OFF_MAP_VENUE.test(String(event.venueName || ""))) return false;
   return typeof event.lat === "number" && Number.isFinite(event.lat)
     && typeof event.lng === "number" && Number.isFinite(event.lng);
 }
@@ -360,7 +366,7 @@ export function MapView({
       >
         <style>{`${LIVE_MAP_CHROME_CSS}${EVENTS_MAP_EXTRA_CSS}`}</style>
         <div className="pdx-map-live__vignette" aria-hidden="true" />
-        {/* Removed the diagonal light-shaft overlay - read as a "triangle" over the map. */}
+        <div className="pdx-map-live__shaft" aria-hidden="true" />
 
         {expanded && (
           <button
