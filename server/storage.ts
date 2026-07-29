@@ -6390,6 +6390,155 @@ function runBootMigrationsOnce() {
     recordBootMigration("yes_coach_directory_logo_v1");
   }
 
+  /**
+   * Coach's Pet — Yes Coach production night at Sanctuary Club.
+   * Venue = Sanctuary (place card); brand aliases + host claim = Yes Coach.
+   */
+  if (!hasBootMigration("seed_coaches_pet_yes_coach_sanctuary_v1")) {
+    try {
+      const now = new Date().toISOString();
+      const title = "Coach's Pet — Yes Coach";
+      const existing = sqlite
+        .prepare(
+          `SELECT id FROM events
+           WHERE LOWER(title) LIKE '%coach%pet%'
+              OR LOWER(title) = LOWER(?)
+           ORDER BY id ASC LIMIT 1`,
+        )
+        .get(title) as { id?: number } | undefined;
+
+      const description =
+        "Yes Coach Productions pet-play / gear night at Sanctuary Club. Hosted by Tucker Max (Yes Coach). Consent-forward athletic-fetish scene — collars, handlers, pups, and gear welcome. Not a PLA event.";
+      const venueName = "Sanctuary Club";
+      const address = "33 NW 9th Ave, Portland, OR 97209";
+      const neighborhood = "Pearl District";
+      const lat = 45.523244045755;
+      const lng = -122.680179337043;
+      // Next Saturday doors after STANK Pride weekend (seed; admin can move).
+      const dateStart = "2026-08-08T21:00:00";
+      const dateEnd = "2026-08-09T02:00:00";
+      const dayOfWeek = "SAT";
+      const eventTypes = JSON.stringify(["PARTY", "LEATHER", "SPORTS"]);
+      const ticketUrl = "https://members.pdxsanctuary.com/";
+      const owner = resolveSiteOwner();
+      const claimedBy = owner?.username || null;
+
+      if (existing?.id) {
+        sqlite
+          .prepare(
+            `UPDATE events SET
+               title = ?,
+               description = ?,
+               venue_name = ?,
+               address = ?,
+               neighborhood = ?,
+               lat = ?,
+               lng = ?,
+               age_requirement = '21_PLUS',
+               event_types = ?,
+               admission = 'DOOR_FEE',
+               ticket_url = COALESCE(NULLIF(TRIM(ticket_url), ''), ?),
+               is_public = 1,
+               is_sex_positive = 1,
+               status = 'LIVE',
+               claimed_by = COALESCE(claimed_by, ?),
+               is_claimable = 0,
+               admin_notes = COALESCE(admin_notes, 'Yes Coach Productions @ Sanctuary — Coach''s Pet'),
+               updated_at = ?
+             WHERE id = ?`,
+          )
+          .run(
+            title,
+            description,
+            venueName,
+            address,
+            neighborhood,
+            lat,
+            lng,
+            eventTypes,
+            ticketUrl,
+            claimedBy,
+            now,
+            existing.id,
+          );
+      } else {
+        db.insert(events)
+          .values({
+            title,
+            description,
+            venueName,
+            address,
+            neighborhood,
+            lat,
+            lng,
+            dateStart,
+            dateEnd,
+            dayOfWeek,
+            ageRequirement: "21_PLUS",
+            eventTypes,
+            admission: "DOOR_FEE",
+            ticketUrl,
+            isPublic: true,
+            isPrivate: false,
+            isHouseParty: false,
+            isSexPositive: true,
+            nudityOk: false,
+            posterImageUrl: "/posters/stank-yes-coach.jpg",
+            status: "LIVE",
+            source: "admin_seeded",
+            isClaimable: false,
+            claimedBy,
+            submittedBy: null,
+            adminNotes: "Yes Coach Productions @ Sanctuary — Coach's Pet",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+
+      // Primary host: site owner (Tucker / Yes Coach)
+      if (owner) {
+        ensureEventHostsSchema();
+        const row = sqlite
+          .prepare(
+            `SELECT id FROM events
+             WHERE LOWER(title) LIKE '%coach%pet%' OR LOWER(title) = LOWER(?)
+             ORDER BY id DESC LIMIT 1`,
+          )
+          .get(title) as { id?: number } | undefined;
+        if (row?.id) {
+          const hostExists = sqlite
+            .prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`)
+            .get(row.id, owner.id);
+          if (hostExists) {
+            sqlite
+              .prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`)
+              .run(row.id, owner.id);
+          } else {
+            db.insert(eventHosts)
+              .values({
+                eventId: row.id,
+                userId: owner.id,
+                role: "PRIMARY",
+                addedByUserId: null,
+                createdAt: now,
+              } as any)
+              .run();
+          }
+          db.update(events)
+            .set({ claimedBy: owner.username, isClaimable: false })
+            .where(eq(events.id, row.id))
+            .run();
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[boot] seed_coaches_pet_yes_coach_sanctuary_v1 skipped:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+    recordBootMigration("seed_coaches_pet_yes_coach_sanctuary_v1");
+  }
+
   // Pink Ponies — gold/white neon conversion of official mark for directory pack.
   if (!hasBootMigration("pink_ponies_directory_logo_v1")) {
     const imageUrl = "/directory-logos/Pink_Ponies.png";

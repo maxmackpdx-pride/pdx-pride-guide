@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const fieldStyle = {
   width: "100%",
@@ -47,6 +48,21 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
     email: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
 
   const update = (key: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -72,35 +88,52 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  return (
+  // Portal to body: footer/main stacking (main z-index: 2, footer z-index: 1)
+  // trapped fixed overlays on Darkroom and other full-bleed pages.
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Soft launch tech feedback"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{
-        position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(0,0,0,0.82)",
-        display: "flex", alignItems: "center", justifyContent: "center",
+        position: "fixed",
+        inset: 0,
+        zIndex: 10050,
+        background: "rgba(0,0,0,0.88)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: 16,
       }}
     >
       <div style={{
-        background: "#0a0a0a",
+        background: "#0e0e12",
         border: "2px solid #00FFFF",
-        maxWidth: 520, width: "100%",
+        maxWidth: 520,
+        width: "100%",
+        maxHeight: "min(90dvh, 720px)",
+        overflowY: "auto",
         padding: "28px 24px",
         position: "relative",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.65), 0 0 0 1px #000",
       }}>
         <button
+          type="button"
           onClick={onClose}
+          aria-label="Close feedback"
           style={{
             position: "absolute", top: 12, right: 14,
-            background: "none", border: "none", color: "#555",
+            background: "none", border: "none", color: "#888",
             fontSize: "1.2rem", cursor: "pointer", lineHeight: 1,
           }}
         >✕</button>
         <div className="display" style={{ color: "#00FFFF", fontSize: "1.1rem", marginBottom: 6 }}>
           SOFT LAUNCH TECH FEEDBACK
         </div>
-        <p style={{ color: "#888", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 16 }}>
+        <p style={{ color: "#aaa", fontSize: "0.82rem", lineHeight: 1.5, marginBottom: 16 }}>
           Hit a broken button, weird mobile layout, wrong event detail, login issue, or confusing flow?
         </p>
         <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
@@ -153,7 +186,8 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
           {status === "error" && <div className="display" style={{ color: "#FF2400", fontSize: "0.78rem" }}>That did not send. Please try once more.</div>}
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -8,6 +8,7 @@ import {
   TUCKER_HOSTED_ARCHIVE_USERNAME,
 } from "@shared/tuckerHostedArchive";
 import { eventMatchesBusiness, mergeMapCoordinates } from "./venueCoordinates";
+import { eventMentionsDirectoryGroup } from "./qsearch/directoryBrands";
 
 export type DirectoryEventSummary = {
   id: number;
@@ -80,9 +81,18 @@ export function attachUpcomingEventsToBusinesses(
 /**
  * Match an event listing to a directory business via primary row + every
  * multi-location storefront (Taboo / Mr. Peeps / FANTASY addresses).
+ * Groups also match when title/description mentions brand aliases
+ * (Coach's Pet → Yes Coach Productions; venue still Sanctuary).
  */
 function listingMatchesBusiness(
-  listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null },
+  listing: {
+    venueName?: string | null;
+    address?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+    title?: string | null;
+    description?: string | null;
+  },
   business: Business,
   businesses: Business[],
 ): boolean {
@@ -127,14 +137,20 @@ function listingMatchesBusiness(
     }
   }
 
-  return candidates.some(biz =>
-    eventMatchesBusiness(eventFields, {
-      name: biz.name || biz.venueName,
-      address: biz.address,
-      lat: biz.lat,
-      lng: biz.lng,
-    }),
-  );
+  if (
+    candidates.some(biz =>
+      eventMatchesBusiness(eventFields, {
+        name: biz.name || biz.venueName,
+        address: biz.address,
+        lat: biz.lat,
+        lng: biz.lng,
+      }),
+    )
+  ) {
+    return true;
+  }
+
+  return eventMentionsDirectoryGroup(listing, business);
 }
 
 /** Past nights at this venue: LIVE past listings + Tucker profile archive (Sanctuary / Eagle). */

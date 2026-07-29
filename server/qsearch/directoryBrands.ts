@@ -584,8 +584,17 @@ function groupAliasesFor(name: string): string[] {
       "Stank Yes Coach",
       "STANK x Yes Coach",
       "STANK x YES COACH",
+      "Coach's Pet",
+      "Coaches Pet",
+      "Coach Pet",
     ],
-    yescoach: ["Yes Coach", "YesCoach", "Yes Coach Productions"],
+    yescoach: [
+      "Yes Coach",
+      "YesCoach",
+      "Yes Coach Productions",
+      "Coach's Pet",
+      "Coaches Pet",
+    ],
     fantasyland: ["Fantasy Land", "Fantasy on Foster", "Fantasyland", "Fantasy Land Adult"],
     // Chain brand (not Foster Fantasyland)
     fantasyforadultsonly: [
@@ -616,6 +625,22 @@ function groupAliasesFor(name: string): string[] {
     if (key.includes(k) || k.includes(key)) return aliases;
   }
   return [];
+}
+
+/**
+ * True when an event title/body mentions a Clubs & Groups directory brand
+ * (Yes Coach → "Coach's Pet — Yes Coach", Pink Ponies collabs, etc.).
+ * Used so group place cards can show brand nights, not only venue-named listings.
+ */
+export function eventMentionsDirectoryGroup(
+  event: { title?: string | null; description?: string | null },
+  business: { name: string; type?: string | null },
+): boolean {
+  if (business.type !== "group" && business.type !== "nonprofit") return false;
+  const hay = `${event.title || ""} ${event.description || ""}`;
+  if (!hay.trim()) return false;
+  const aliases = [business.name, ...groupAliasesFor(business.name)];
+  return aliases.some(a => textMentionsPhrase(hay, a));
 }
 
 /** Re-resolve logos on stored brands (pack paths may improve after logo map updates). */
