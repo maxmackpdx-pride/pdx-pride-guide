@@ -26,16 +26,23 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { HAUS_SUFFIX } from "@shared/housing";
 
 /**
- * Title motif fills the same *fraction* of every photo well.
- * Absolute size scales with the well (Forming full-width ≈ 2× half → larger type).
- * Photo well size is independent (CSS .hz-well).
+ * Fixed title *frame* (where dynamic text lives) — same on Looking / Offering /
+ * Managed; Forming uses the same height share and a wider width share so type
+ * fills the long banner. Mobile uses the same fractions of the narrower well.
+ *
+ * Red-box guide (desktop half ≈ 580×240 well):
+ *  - half: ~55% width × ~58% height, top-left
+ *  - wide: ~72% width (room for avatars) × same height share
  */
-const TITLE_WIDTH_SHARE = 0.62;
-const TITLE_HEIGHT_SHARE = 0.55;
+const HALF_FRAME_W_SHARE = 0.55;
+const WIDE_FRAME_W_SHARE = 0.72;
+const FRAME_H_SHARE = 0.58;
+/** Well wider than this is treated as Forming full-width. */
+const WIDE_ASPECT = 2.35;
 /** Breathing room between the title block and the caption row, in px. */
-const CAPTION_GAP = 22;
+const CAPTION_GAP = 14;
 /** Slight horizontal stretch on the name block only (height basis stays `nameW`). */
-const WIDTH_STRETCH = 1.04;
+const WIDTH_STRETCH = 1.02;
 /** The SVG design box every line is drawn in. */
 const GLYPH_BOX = 108;
 const GLYPH_BASELINE = 86;
@@ -120,8 +127,8 @@ export type HousingWellProps = {
   /** Caption row content. Sits on the right, dots on the far left. */
   children?: ReactNode;
   /**
-   * Share of well width for the title (default = TITLE_WIDTH_SHARE so all feed
-   * cards match). Detail heads pass ~0.35 for a tighter motif.
+   * Optional width share override. Detail heads pass ~0.35. Feed cards omit
+   * this so Looking / Offering / Managed / Forming share the frame rules above.
    */
   nameCap?: number;
   /** Shown when a post has no photos yet. */
@@ -133,7 +140,7 @@ export function HousingWell({
   photos = [],
   title,
   children,
-  nameCap = TITLE_WIDTH_SHARE,
+  nameCap,
   fallbackPhoto,
   className,
 }: HousingWellProps) {
@@ -178,24 +185,43 @@ export function HousingWell({
 
   const lines = title ? nameLines(title) : [];
   const ratios = lines.map((l) => GLYPH_BOX / measureLine(l));
-  const sumRatios = ratios.reduce((a, b) => a + b, 0) || 1;
+  // Longest word (smallest ratio). Short lines like HAÜS must not inflate height
+  // and collapse the whole motif — all lines share equal height slots in the frame.
+  const longestRatio = ratios.length ? Math.min(...ratios) : 1;
 
   /**
-   * Same relative box on every card: widthCap = nameCap × wellW,
-   * heightBudget = TITLE_HEIGHT_SHARE × wellH (clamped above caption).
-   * Forming’s wider well → larger absolute type; fraction stays the same.
-   * Long names go narrower, never taller.
+   * Red-box frame: same height share on every card; half cards share the same
+   * width share; Forming (wide well) uses a wider share. Text fills the frame.
    */
   let nameW = 0;
   let blockW = 0;
+  let lineH = 0;
   if (box && lines.length) {
-    const structural = Math.max(36, box.h - box.captionH - CAPTION_GAP);
-    const heightBudget = Math.min(box.h * TITLE_HEIGHT_SHARE, structural);
-    const widthCap = box.w * nameCap;
-    nameW = Math.min(widthCap, heightBudget / sumRatios);
-    nameW = Math.max(Math.min(48, widthCap), nameW);
-    nameW = Math.min(nameW, heightBudget / sumRatios, widthCap);
-    blockW = Math.min(nameW * WIDTH_STRETCH, widthCap);
+    const isWide = box.w / Math.max(box.h, 1) >= WIDE_ASPECT;
+    const wShare =
+      typeof nameCap === "number" && nameCap > 0
+        ? nameCap
+        : isWide
+          ? WIDE_FRAME_W_SHARE
+          : HALF_FRAME_W_SHARE;
+    // Frame sits in the photo above the caption; use well height share so half
+    // and Forming get the same vertical band (same share of 240px well).
+    const frameH = Math.max(48, Math.min(box.h * FRAME_H_SHARE, box.h - CAPTION_GAP - 36));
+    const frameW = Math.max(48, box.w * wShare);
+    const n = lines.length;
+
+    // Equal line heights that fill the frame; width from longest word metrics.
+    lineH = frameH / n;
+    nameW = lineH / longestRatio;
+    blockW = nameW * WIDTH_STRETCH;
+    if (blockW > frameW) {
+      blockW = frameW;
+      nameW = blockW / WIDTH_STRETCH;
+      lineH = nameW * longestRatio;
+    }
+    nameW = Math.max(28, nameW);
+    blockW = Math.max(40, Math.min(blockW, frameW));
+    lineH = Math.max(20, nameW * longestRatio);
   }
 
   const showName = nameW > 0 && fontsReady;
@@ -230,7 +256,8 @@ export function HousingWell({
               viewBox={`0 0 ${Math.round(measureLine(line))} ${GLYPH_BOX}`}
               preserveAspectRatio="none"
               aria-hidden="true"
-              style={{ height: nameW ? nameW * ratios[i] : undefined }}
+              // Equal line heights so the block fills the shared frame (not collapsed by HAÜS).
+              style={{ height: lineH || undefined }}
             >
               <text x="0" y={GLYPH_BASELINE} fontSize={GLYPH_SIZE}>
                 {line}
