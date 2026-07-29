@@ -3499,10 +3499,11 @@ function seedDemoBoardsContent() {
     `INSERT INTO missed_connections (user_id, title, body, venue_hint, status, created_at, closes_at)
      VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`,
   );
-  mc.run(demoId, "You: reading Judith Butler at the laundromat", "Me: pretending my socks needed another cycle just to keep talking to you. You left with the gender theory and my whole heart.", "A laundromat on Division", OLD, FUTURE);
-  mc.run(demoId, "Cutie who caught my keys on the MAX", "You had a mustache, a tote full of kale, and reflexes like a cat. I said thanks. I meant marry me.", "MAX Blue Line", OLD, FUTURE);
-  mc.run(demoId, "You let my dog say hi outside the coffee shop", "Rufus liked you more than he likes me. Honestly, fair. Coffee sometime? He insists on chaperoning.", "A cafe on Alberta", OLD, FUTURE);
-  mc.run(demoId, "You complimented my carabiner at the climbing gym", "It is not even holding keys, it is purely decorative, and so are my intentions. Belay me sometime?", "The bouldering gym", OLD, FUTURE);
+  // venue_hint uses real directory brand names so Place modal Missed Connections tabs attach.
+  mc.run(demoId, "You: reading Judith Butler between sets", "Me: pretending I was only here for the drink special just to keep talking to you. You left with the theory and my whole heart.", "Sanctuary Club", OLD, FUTURE);
+  mc.run(demoId, "Cutie who caught my keys on the patio", "You had a mustache, a tote full of kale, and reflexes like a cat. I said thanks. I meant marry me.", "Eagle Portland", OLD, FUTURE);
+  mc.run(demoId, "You let my dog say hi outside the bar", "Rufus liked you more than he likes me. Honestly, fair. Drink sometime? He insists on chaperoning.", "CC Slaughters", OLD, FUTURE);
+  mc.run(demoId, "You complimented my carabiner at karaoke", "It is not even holding keys, it is purely decorative, and so are my intentions. Duet me sometime?", "Badlands", OLD, FUTURE);
   try {
     sqlite.prepare(`UPDATE missed_connections SET admin_reviewed = 1 WHERE user_id = ?`).run(demoId);
   } catch {
@@ -12376,6 +12377,7 @@ export const storage: IStorage = {
         m.user_id,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
+        e.address AS eventAddress,
         e.day_of_week AS eventDay,
         e.date_start AS eventDateStart
       FROM missed_connections m
@@ -12402,6 +12404,7 @@ export const storage: IStorage = {
         m.user_id,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
+        e.address AS eventAddress,
         e.day_of_week AS eventDay,
         e.date_start AS eventDateStart
       FROM missed_connections m
@@ -12428,6 +12431,7 @@ export const storage: IStorage = {
         m.user_id,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
+        e.address AS eventAddress,
         e.day_of_week AS eventDay,
         e.date_start AS eventDateStart
       FROM missed_connections m

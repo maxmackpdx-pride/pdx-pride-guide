@@ -92,9 +92,6 @@ export default function Home() {
           <HomeUpNext events={upNext} posterBackdrop />
         </ScrollReveal>
 
-        {/* Loop-safe site rainbow (cyan bookends)  -  not the hard orange→cyan seam line */}
-        <div className="rainbow-bar rainbow-bar--thick home-body__seam" aria-hidden="true" />
-
         <section className="home-boards" aria-label="Community boards">
           <div className="home-boards__running">
             <div className="home-boards__kicker">

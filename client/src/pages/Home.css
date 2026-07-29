@@ -1753,12 +1753,6 @@ html.calm-mode .home-boards__card {
   padding: 52px 64px 0;
 }
 
-/* Section seam under Up Next - uses .rainbow-bar (loop-safe cyan bookends).
-   Do not redeclare a non-looping gradient here (orange→cyan reads as a hard line). */
-.home-body__seam {
-  margin-bottom: 52px;
-}
-
 /* Up Next */
 .home-up-next {
   margin-bottom: 56px;

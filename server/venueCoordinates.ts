@@ -9,6 +9,11 @@ export type MapCoordinateFields = {
 
 export type MapCoordinates = { lat: number; lng: number };
 
+/**
+ * Venue name key for directory ↔ event matching.
+ * Collapses known Pride aliases first (compound tokens resist strip noise),
+ * so "Darcell XV Showplace" attaches to "Darcelle XV Showplace".
+ */
 function normalizeVenueKey(value: string): string {
   return value
     .toLowerCase()
@@ -16,6 +21,20 @@ function normalizeVenueKey(value: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/^the\s+/, "")
     .replace(/[''`]/g, "")
+    // Compound aliases BEFORE stripping bar/club/pdx (keeps "campbar" ≠ "camp")
+    .replace(/\bdarcells?\b/g, "darcelle")
+    .replace(/\bdarcelle\s*x+v?\b/g, "darcelle")
+    .replace(/\bcc\s*slaughters?\b/g, "ccslaughters")
+    .replace(/\bsanctuary\s*(club|pdx)?\b/g, "sanctuary")
+    .replace(/\beagle\s*(portland|pdx|bar)?\b/g, "eagleportland")
+    .replace(/\bcamp\s*bar(\s*pdx)?\b/g, "campbar")
+    .replace(/\bstag(\s*pdx|\s*portland)?\b/g, "stagpdx")
+    .replace(/\bhawks(\s*pdx|\s*portland)?\b/g, "hawkspdx")
+    .replace(/\bbadlands(\s*portland|\s*pdx)?\b/g, "badlands")
+    .replace(/\bsports\s*bra\b/g, "sportsbra")
+    .replace(/\bq\s*center\b/g, "qcenter")
+    // Drop location fluff that often differs between ingest and directory
+    .replace(/\b(club|bar|theatre|theater|lounge|showplace|pdx|portland|oregon|llc|inc)\b/g, " ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -67,11 +86,16 @@ export function eventMatchesBusiness(
 
   if (eventVenueKey && businessKey) {
     if (eventVenueKey === businessKey) return true;
-    if (eventVenueKey.length >= 4 && businessKey.length >= 4) {
-      if (eventVenueKey.includes(businessKey) || businessKey.includes(eventVenueKey)) return true;
-    }
+    // Containment only when the shorter key is substantial (avoids "camp" ⊂ "triangle recreation camp")
+    const shorter = eventVenueKey.length <= businessKey.length ? eventVenueKey : businessKey;
+    const longer = eventVenueKey.length <= businessKey.length ? businessKey : eventVenueKey;
+    if (shorter.length >= 6 && longer.includes(shorter)) return true;
+    // Named venues that disagree on name must not collapse via nearby pins
+    // (CC Slaughters / Darcelle / Badlands sit within ~30m of each other).
+    return false;
   }
 
+  // Coords only when one side is missing a usable name (address already checked).
   if (hasMapCoordinates(event) && hasMapCoordinates(business)) {
     const latDiff = Math.abs(event.lat! - business.lat!);
     const lngDiff = Math.abs(event.lng! - business.lng!);

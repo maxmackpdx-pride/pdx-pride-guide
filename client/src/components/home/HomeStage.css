@@ -271,7 +271,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 26%;
+  top: calc(26% - 3px);
   z-index: 5;
   font-family: "Caveat", cursive;
   font-weight: 600;

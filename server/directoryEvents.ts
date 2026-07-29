@@ -1,6 +1,7 @@
 import type { Business, Event } from "@shared/schema";
 import { expandMultiDayEvents, type EventListing } from "@shared/multiDayEvents";
-import { parsePacificDateTime } from "@shared/missedConnections";
+import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 import {
   getTuckerHostedArchiveRows,
   archiveDuplicatesLivePast,
@@ -21,14 +22,16 @@ export type DirectoryEventSummary = {
   hostUsername?: string | null;
 };
 
+/**
+ * Align with Events board: missing dateEnd falls back to dateStart
+ * (CC Slaughters / Camp Bar ingest often leave end empty).
+ */
 function isUpcomingListing(listing: EventListing, nowMs = Date.now()): boolean {
-  const endMs = parsePacificDateTime(listing.dateEnd);
-  return endMs != null && endMs >= nowMs;
+  return !isEventSchedulePast(listing.dateStart, listing.dateEnd, nowMs);
 }
 
 function isPastListing(listing: EventListing, nowMs = Date.now()): boolean {
-  const endMs = parsePacificDateTime(listing.dateEnd);
-  return endMs != null && endMs < nowMs;
+  return isEventSchedulePast(listing.dateStart, listing.dateEnd, nowMs);
 }
 
 function toDirectoryEventSummary(
@@ -52,35 +55,9 @@ export function getUpcomingEventsForBusiness(
   listings: EventListing[],
   businesses: Business[],
 ): DirectoryEventSummary[] {
-  const businessCoords = mergeMapCoordinates(
-    {
-      venueName: business.name,
-      address: business.address,
-      lat: business.lat,
-      lng: business.lng,
-    },
-    businesses,
-  );
-
   return listings
     .filter(listing => isUpcomingListing(listing))
-    .filter(listing => eventMatchesBusiness(
-      mergeMapCoordinates(
-        {
-          venueName: listing.venueName,
-          address: listing.address,
-          lat: listing.lat,
-          lng: listing.lng,
-        },
-        businesses,
-      ),
-      {
-        name: business.name,
-        address: business.address,
-        lat: businessCoords.lat,
-        lng: businessCoords.lng,
-      },
-    ))
+    .filter(listing => listingMatchesBusiness(listing, business, businesses))
     .map(listing => toDirectoryEventSummary(listing))
     .sort((a, b) => {
       const at = parsePacificDateTime(a.dateStart) ?? 0;
@@ -100,36 +77,63 @@ export function attachUpcomingEventsToBusinesses(
   }));
 }
 
+/**
+ * Match an event listing to a directory business via primary row + every
+ * multi-location storefront (Taboo / Mr. Peeps / FANTASY addresses).
+ */
 function listingMatchesBusiness(
   listing: { venueName?: string | null; address?: string | null; lat?: number | null; lng?: number | null },
   business: Business,
   businesses: Business[],
 ): boolean {
-  const businessCoords = mergeMapCoordinates(
+  const eventFields = mergeMapCoordinates(
     {
-      venueName: business.name,
-      address: business.address,
-      lat: business.lat,
-      lng: business.lng,
+      venueName: listing.venueName || "",
+      address: listing.address ?? null,
+      lat: listing.lat ?? null,
+      lng: listing.lng ?? null,
     },
     businesses,
   );
-  return eventMatchesBusiness(
+
+  const candidates: Array<{ name?: string; venueName?: string; address?: string | null; lat?: number | null; lng?: number | null }> = [
     mergeMapCoordinates(
       {
-        venueName: listing.venueName || "",
-        address: listing.address ?? null,
-        lat: listing.lat ?? null,
-        lng: listing.lng ?? null,
+        venueName: business.name,
+        address: business.address,
+        lat: business.lat,
+        lng: business.lng,
       },
       businesses,
     ),
-    {
+  ];
+
+  for (const loc of resolveBusinessLocations(business)) {
+    candidates.push({
       name: business.name,
-      address: business.address,
-      lat: businessCoords.lat,
-      lng: businessCoords.lng,
-    },
+      address: loc.address,
+      lat: loc.lat ?? null,
+      lng: loc.lng ?? null,
+    });
+    // Storefront label alone (e.g. "SE 82nd") rarely matches, but full
+    // "Taboo Video SE 82nd" style venue strings can include the brand name.
+    if (loc.label) {
+      candidates.push({
+        name: `${business.name} ${loc.label}`,
+        address: loc.address,
+        lat: loc.lat ?? null,
+        lng: loc.lng ?? null,
+      });
+    }
+  }
+
+  return candidates.some(biz =>
+    eventMatchesBusiness(eventFields, {
+      name: biz.name || biz.venueName,
+      address: biz.address,
+      lat: biz.lat,
+      lng: biz.lng,
+    }),
   );
 }
 
@@ -229,23 +233,52 @@ export type DirectoryGigSummary = {
   createdAt: string;
 };
 
-/** Best-effort fuzzy match: no FK exists on missed_connections, so match the linked
- * event's venue (if any) or the free-text venueHint against the business name/address. */
-function venueTextMatchesBusiness(venueText: string | null | undefined, business: Business): boolean {
-  if (!venueText) return false;
-  return eventMatchesBusiness({ venueName: venueText, address: null, lat: null, lng: null }, {
-    name: business.name, address: business.address, lat: business.lat, lng: business.lng,
-  });
+/**
+ * Best-effort place attach for Missed Connections / gigs:
+ * - event-linked posts: match event venue (+ address when present)
+ * - freeform venueHint: match name against brand + multi-loc storefronts
+ * No business_id FK on missed_connections, so this is fuzzy only.
+ */
+function venueTextMatchesBusiness(
+  venueText: string | null | undefined,
+  business: Business,
+  address?: string | null,
+): boolean {
+  if (!venueText && !address) return false;
+  return listingMatchesBusiness(
+    {
+      venueName: venueText || "",
+      address: address ?? null,
+      lat: null,
+      lng: null,
+    },
+    business,
+    [],
+  );
 }
 
 export function attachSpottedAndGigsToBusinesses<T extends Business>(
   businesses: T[],
-  missedConnections: Array<{ id: number; title: string; body: string; createdAt: string; eventVenue?: string | null; venueHint?: string | null }>,
+  missedConnections: Array<{
+    id: number;
+    title: string;
+    body: string;
+    createdAt: string;
+    eventId?: number | null;
+    eventVenue?: string | null;
+    eventAddress?: string | null;
+    venueHint?: string | null;
+  }>,
   gigs: Array<{ id: number; title: string; postType: string; createdAt: string; location?: string | null; businessId?: number | null }>,
 ): Array<T & { spotted: DirectorySpottedSummary[]; gigs: DirectoryGigSummary[] }> {
   return businesses.map(business => {
     const spotted = missedConnections
-      .filter(mc => venueTextMatchesBusiness(mc.eventVenue || mc.venueHint, business))
+      .filter(mc => {
+        // Prefer linked event venue; also try freeform hint (demo + around-town posts).
+        if (venueTextMatchesBusiness(mc.eventVenue, business, mc.eventAddress)) return true;
+        if (mc.venueHint && venueTextMatchesBusiness(mc.venueHint, business)) return true;
+        return false;
+      })
       .map(mc => ({ id: mc.id, title: mc.title, body: mc.body, createdAt: mc.createdAt }));
     const gigPosts = gigs
       .filter(g => (g.businessId != null ? g.businessId === business.id : venueTextMatchesBusiness(g.location, business)))
