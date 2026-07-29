@@ -18,6 +18,7 @@ import GiftListingCard, { type GiftingPost } from "@/components/board/GiftListin
 import { Button } from "@/components/ds";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { shareCardUrl } from "@shared/shareCards";
 
 const CATEGORIES = [
   "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -64,6 +65,7 @@ export default function Gifting() {
   usePageSeo(
     "Gifting Board | Zaylist | Portland Pride 2026",
     "Give and find free stuff for the scene - Pride week and all year. Gifting and ISO board.",
+    { image: shareCardUrl("gifting"), imageAlt: "Gifting board on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();

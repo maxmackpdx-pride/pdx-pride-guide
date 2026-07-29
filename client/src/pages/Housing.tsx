@@ -35,6 +35,7 @@ import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
 import { CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 /** One neon per step, borrowed from the three peer post types. */
 const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
@@ -71,6 +72,7 @@ export default function Housing() {
   usePageSeo(
     "HAÜSING · Housing board",
     "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
+    { image: shareCardUrl("housing"), imageAlt: "HAÜSING — housing board on Zaylist" },
   );
 
   const { user } = useAuth();

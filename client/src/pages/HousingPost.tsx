@@ -26,6 +26,7 @@ import { HousingDetail, type HousingDetailHandlers } from "@/components/housing/
 import { HousingWorkspace } from "@/components/housing/HousingWorkspace";
 import { Chip, Mono } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 export default function HousingPost() {
   const [, params] = useRoute("/hausing/:id");
@@ -51,6 +52,7 @@ export default function HousingPost() {
   usePageSeo(
     post ? `${post.displayName || post.author.displayName} · HAÜSING` : "HAÜSING",
     post?.headline || "Rooms, roommates, and households in queer Portland.",
+    { image: shareCardUrl("housing"), imageAlt: "HAÜSING — housing board on Zaylist" },
   );
 
   const invalidate = () => {

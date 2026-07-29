@@ -14,6 +14,7 @@ import AuthModal from "@/components/AuthModal";
 import { HOUSING_TYPES, type HousingType } from "@shared/housing";
 import { HousingComposer } from "@/components/housing/HousingComposer";
 import "./Housing.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 type PmMe = {
   approved: boolean;
@@ -21,7 +22,10 @@ type PmMe = {
 };
 
 export default function HousingNew() {
-  usePageSeo("Post to HAÜSING", "Offer a room, look for housing, or start a household.");
+  usePageSeo("Post to HAÜSING", "Offer a room, look for housing, or start a household.", {
+    image: shareCardUrl("housing"),
+    imageAlt: "HAÜSING — housing board on Zaylist",
+  });
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(!user);

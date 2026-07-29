@@ -52,6 +52,7 @@ import { Button } from "@/components/ds";
 import { Download } from "lucide-react";
 import "./Schedule.css";
 import "./ScheduleToolbar.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 // ---- Year-round week model (the grid navigates by real week, not a fixed Jul 13–19) ----
 const SCHED_PACIFIC = "America/Los_Angeles";
@@ -165,7 +166,12 @@ export default function Schedule({
   usePageSeo(
     "Schedule | Zaylist",
     "Portland nights, laid out side by side. Build your week.",
-    { skip: embed },
+    embed
+      ? { skip: true }
+      : {
+          image: shareCardUrl("schedule"),
+          imageAlt: "Events schedule on Zaylist",
+        },
   );
 
   useAttendanceSummariesLive();

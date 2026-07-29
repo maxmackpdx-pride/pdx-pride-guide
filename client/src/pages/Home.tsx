@@ -20,6 +20,7 @@ import {
   eventsUpNext,
 } from "@/lib/homeEvents";
 import "./Home.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 const COMMUNITY_LINKS = {
   hausing: { href: "/hausing", label: "HAÜSING" },
@@ -42,6 +43,7 @@ export default function Home() {
   usePageSeo(
     "Zaylist | Portland Pride 2026 Events",
     "Every Portland night worth knowing, in one place. Find the party, back the rooms that host it, and stick around after July 19.",
+    { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
   );
 
   const { data: events = [] } = useQuery<EventListing[]>({

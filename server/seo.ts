@@ -6,6 +6,7 @@ import { placeUrl } from "@shared/placeSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
+import { defaultShareCardUrl, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
 
@@ -303,6 +304,11 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Gig Werk: Gigs & Jobs | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
+  "/hausing": {
+    title: "HAÜSING · Housing board | Zaylist",
+    description:
+      "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
+  },
 };
 
 function parseEventIdFromPath(requestPath: string): number | null {
@@ -333,7 +339,7 @@ function parseProfileUsernameFromPath(requestPath: string): string | null {
 }
 
 function absoluteAssetUrl(pathOrUrl?: string | null) {
-  if (!pathOrUrl) return `${SITE_URL}/og-preview.jpg`;
+  if (!pathOrUrl) return defaultShareCardUrl();
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
   return `${SITE_URL}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
 }
@@ -494,7 +500,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? "/directory"
         : pathKey.startsWith("/u/")
           ? "/dashboard"
-          : pathKey;
+          : pathKey.startsWith("/hausing")
+            ? "/hausing"
+            : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
   const pageTitle = liveEvent
@@ -532,7 +540,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const placeLogo = livePlace
     ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
     : null;
-  // Branded 1200×630 cards replace raw flyer/logo/avatar as the social share image
+  // Branded 1200×630 cards: per-entity dynamic OG, else static board share art, else home fallback.
+  const boardShareKey =
+    !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(pathKey) : null;
   const pageImage = liveEvent
     ? `${SITE_URL}/api/og/event/${liveEvent.id}`
     : livePlace
@@ -540,8 +550,10 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       : liveProfile
         // v= query busts crawler caches after OG renderer fixes (remote Google avatars, etc.)
         ? `${SITE_URL}/api/og/profile/${encodeURIComponent(liveProfile.username)}?v=2`
-        : `${SITE_URL}/og-preview.jpg`;
-  const pageImageIsCard = !!(liveEvent || livePlace || liveProfile);
+        : boardShareKey
+          ? shareCardUrl(boardShareKey)
+          : defaultShareCardUrl();
+  const pageImageIsCard = !!(liveEvent || livePlace || liveProfile || boardShareKey);
 
   const jsonLdBlocks = [
     buildWebSiteJsonLd(),
@@ -589,8 +601,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
           : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory",
     type: liveEvent || livePlace || liveProfile ? "profile" : "website",
-    // Dynamic OG cards are PNG; shell default is jpeg for og-preview.jpg (1200×630)
-    imageType: pageImageIsCard ? "image/png" : "image/jpeg",
+    // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in
+    imageType: pageImageIsCard || pageImage.includes("/og/") ? "image/png" : "image/jpeg",
     imageWidth: 1200,
     imageHeight: 630,
   });

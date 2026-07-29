@@ -38,6 +38,7 @@ const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => 
 import { DAY_SORT_ORDER } from "@shared/eventWeek";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import "./Events.css";
+import { shareCardUrl } from "@shared/shareCards";
 
 const PACIFIC = "America/Los_Angeles";
 
@@ -395,7 +396,10 @@ export default function Events() {
           imageAlt: shareEvent.title,
           type: "article",
         }
-      : undefined,
+      : {
+          image: shareCardUrl("events"),
+          imageAlt: "Events on Zaylist — Portland queer nights",
+        },
   );
 
   useEffect(() => {

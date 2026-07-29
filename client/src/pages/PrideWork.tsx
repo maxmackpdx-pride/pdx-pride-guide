@@ -27,6 +27,7 @@ import { GIG_BOARD_RULES_SUMMARY, validateGigPostContent } from "@shared/boardMo
 import type { Business } from "@/pages/Directory";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 import type { CSSProperties } from "react";
+import { shareCardUrl } from "@shared/shareCards";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -117,6 +118,7 @@ export default function PrideWork() {
   usePageSeo(
     "Pride Work: Jobs & Gigs | Zaylist",
     "Find gigs and workers for Portland nights. Post or browse the gig board.",
+    { image: shareCardUrl("prideWork"), imageAlt: "Gig Board on Zaylist" },
   );
   const { toast } = useToast();
   const { user } = useAuth();

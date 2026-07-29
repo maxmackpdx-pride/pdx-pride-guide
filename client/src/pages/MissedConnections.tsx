@@ -12,6 +12,7 @@ import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { shareCardUrl } from "@shared/shareCards";
 
 const HOW_IT_WORKS = [
   { title: "Pick a spot", body: "Link a Pride event, name your own spot, or choose around town.", color: "#ff1fa0" },
@@ -24,6 +25,7 @@ export default function MissedConnections() {
   usePageSeo(
     "Missed Connections | Zaylist",
     "Post anonymous missed connections from Portland Pride 2026 events. See someone at PDX Pride? Say hi privately.",
+    { image: shareCardUrl("spotted"), imageAlt: "Missed Connections on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();

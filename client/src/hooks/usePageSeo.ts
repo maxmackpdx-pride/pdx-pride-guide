@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { defaultShareCardUrl } from "@shared/shareCards";
 
 export type PageSeoOptions = {
   url?: string;
@@ -37,9 +38,12 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     meta.setAttribute("content", description);
 
     const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
-    const image = options?.image || "https://www.zaylist.com/og-preview.jpg";
-    const imageAlt = options?.imageAlt || (options?.image ? title : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory");
+    const image = options?.image || defaultShareCardUrl();
+    const imageAlt =
+      options?.imageAlt ||
+      (options?.image ? title : "Zaylist | Portland queer events, boards, and community");
     const type = options?.type || "website";
+    const isPng = /\.png(\?|$)/i.test(image) || image.includes("/api/og/");
 
     const ogKeys = [
       ["property", "og:title", title],
@@ -62,12 +66,11 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     upsertMeta("name", "twitter:image", image);
     upsertMeta("name", "twitter:image:alt", imageAlt);
     upsertMeta("property", "og:site_name", "Zaylist");
-    if (!options?.image) {
-      upsertMeta("property", "og:image:width", "1200");
-      upsertMeta("property", "og:image:height", "630");
-      upsertMeta("property", "og:image:alt", imageAlt);
-      upsertMeta("property", "og:image:secure_url", image);
-    }
+    upsertMeta("property", "og:image:width", "1200");
+    upsertMeta("property", "og:image:height", "630");
+    upsertMeta("property", "og:image:alt", imageAlt);
+    upsertMeta("property", "og:image:secure_url", image);
+    upsertMeta("property", "og:image:type", isPng ? "image/png" : "image/jpeg");
 
     return () => {
       document.title = prevTitle;
