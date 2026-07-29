@@ -12,10 +12,13 @@ import {
 interface AuthModalProps {
   onClose: () => void;
   defaultTab?: "login" | "register";
+  initialNotice?: string;
 }
 
-export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalProps) {
-  const [tab, setTab] = useState<"login" | "register">(defaultTab);
+type AuthView = "login" | "register" | "forgot" | "check-email";
+
+export default function AuthModal({ onClose, defaultTab = "login", initialNotice = "" }: AuthModalProps) {
+  const [tab, setTab] = useState<AuthView>(defaultTab);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,6 +26,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [displayName, setDisplayName] = useState("");
   const [agreedStandards, setAgreedStandards] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(initialNotice);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const handleClose = useCallback(() => onClose(), [onClose]);
@@ -52,7 +56,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
     }
     setLoading(true);
     try {
-      await register(
+      const result = await register(
         username,
         email,
         password,
@@ -71,7 +75,30 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
           /* ignore */
         }
       }
-      onClose();
+      if (result.requiresEmailVerification) {
+        setNotice(`We sent a confirmation link to ${email}.`);
+        setTab("check-email");
+      } else {
+        onClose();
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally { setLoading(false); }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(""); setLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => null) as { message?: string; error?: string } | null;
+      if (!res.ok) throw new Error(data?.error || "Could not send reset email");
+      setNotice(data?.message || "If that account exists, a reset link is on its way.");
+      setTab("check-email");
     } catch (err: any) {
       setError(err.message);
     } finally { setLoading(false); }
@@ -92,7 +119,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={tab === "login" ? "Log in" : "Join"}
+        aria-label={tab === "register" ? "Join" : tab === "forgot" ? "Forgot password" : "Log in"}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
         style={{
@@ -119,9 +146,9 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         </button>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>
+        {(tab === "login" || tab === "register") && <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>
           {(["login", "register"] as const).map(t => (
-            <button key={t} onClick={() => { setTab(t); setError(""); setConfirmPassword(""); }} style={{
+            <button key={t} onClick={() => { setTab(t); setError(""); setNotice(""); setConfirmPassword(""); }} style={{
               flex: 1, fontFamily: "var(--font-display)", fontWeight: 900,
               fontSize: "1rem", letterSpacing: "0.1em", textTransform: "uppercase",
               padding: "10px 0", border: "none", cursor: "pointer",
@@ -130,10 +157,10 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               marginBottom: -2,
             }}>{t === "login" ? "LOG IN" : "JOIN"}</button>
           ))}
-        </div>
+        </div>}
 
         {/* Google CTA is outside <form> so Android Chrome does not treat it as a submit / swallow the nav. */}
-        <a
+        {(tab === "login" || tab === "register") && <><a
           href="/api/auth/google"
           style={googleButtonStyle}
           data-testid="auth-google"
@@ -145,7 +172,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         >
           {tab === "login" ? "CONTINUE WITH GOOGLE" : "JOIN WITH GOOGLE"}
         </a>
-        <div style={dividerStyle}><span>OR</span></div>
+        <div style={dividerStyle}><span>OR</span></div></>}
 
         {tab === "login" ? (
           <form onSubmit={handleLogin}>
@@ -153,9 +180,13 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required placeholder="username or you@example.com" autoComplete="username" />
             <label style={labelStyle}>Password</label>
             <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+            {notice && <div style={noticeStyle}>{notice}</div>}
             {error && <div style={errorStyle}>{error}</div>}
             <button type="submit" disabled={loading} style={submitStyle}>
               {loading ? "LOGGING IN..." : "LOG IN →"}
+            </button>
+            <button type="button" onClick={() => { setTab("forgot"); setError(""); setNotice(""); }} style={textButtonStyle}>
+              Forgot password?
             </button>
             <div style={{ textAlign: "center", marginTop: 16, fontSize: "0.82rem", color: "var(--text-meta)" }}>
               No account?{" "}
@@ -164,7 +195,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               </span>
             </div>
           </form>
-        ) : (
+        ) : tab === "register" ? (
           <form onSubmit={handleRegister}>
             <label style={labelStyle}>Username</label>
             <input style={inputStyle} type="text" value={username} onChange={e => setUsername(e.target.value)} required placeholder="nightowl99" minLength={3} />
@@ -197,6 +228,22 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               </span>
             </div>
           </form>
+        ) : tab === "forgot" ? (
+          <form onSubmit={handleForgotPassword}>
+            <h2 style={modalHeadingStyle}>RESET PASSWORD</h2>
+            <p style={helperTextStyle}>Enter the email or username on your Zaylist account. We’ll send a secure reset link.</p>
+            <label style={labelStyle}>Username or Email</label>
+            <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="username" />
+            {error && <div style={errorStyle}>{error}</div>}
+            <button type="submit" disabled={loading} style={submitStyle}>{loading ? "SENDING..." : "SEND RESET LINK →"}</button>
+            <button type="button" onClick={() => { setTab("login"); setError(""); }} style={textButtonStyle}>Back to log in</button>
+          </form>
+        ) : (
+          <div>
+            <h2 style={modalHeadingStyle}>CHECK YOUR EMAIL</h2>
+            <div style={noticeStyle}>{notice}</div>
+            <button type="button" onClick={() => { setTab("login"); setError(""); }} style={submitStyle}>BACK TO LOG IN →</button>
+          </div>
         )}
       </div>
     </div>,
@@ -236,4 +283,18 @@ const submitStyle: React.CSSProperties = {
 const errorStyle: React.CSSProperties = {
   marginTop: 10, padding: "8px 12px", background: "#FF0040",
   color: "#fff", fontSize: "0.82rem", fontFamily: "var(--font-body)",
+};
+const noticeStyle: React.CSSProperties = {
+  marginTop: 10, padding: "10px 12px", background: "#CCFF00",
+  color: "#000", border: "2px solid #000", fontSize: "0.86rem", fontFamily: "var(--font-body)",
+};
+const textButtonStyle: React.CSSProperties = {
+  display: "block", margin: "14px auto 0", padding: 0, border: 0, background: "transparent",
+  color: "#000", fontWeight: 700, cursor: "pointer", textDecoration: "underline",
+};
+const modalHeadingStyle: React.CSSProperties = {
+  margin: "0 0 10px", fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 900,
+};
+const helperTextStyle: React.CSSProperties = {
+  margin: "0 0 18px", color: "#333", fontSize: "0.9rem", lineHeight: 1.5,
 };

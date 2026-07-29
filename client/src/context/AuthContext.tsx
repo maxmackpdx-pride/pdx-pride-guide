@@ -40,6 +40,8 @@ export type RegisterOptions = {
   communityStandardsVersion?: string;
 };
 
+export type RegisterResult = { requiresEmailVerification: boolean };
+
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
@@ -50,7 +52,7 @@ interface AuthContextType {
     password: string,
     displayName?: string,
     options?: RegisterOptions,
-  ) => Promise<void>;
+  ) => Promise<RegisterResult>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -112,7 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json().catch(() => null) as { error?: string } | null;
       throw new Error(data?.error || "Registration failed");
     }
-    await refreshUser();
+    const data = await res.json().catch(() => ({})) as Partial<RegisterResult>;
+    if (!data.requiresEmailVerification) await refreshUser();
+    return { requiresEmailVerification: data.requiresEmailVerification === true };
   };
 
   const logout = async () => {

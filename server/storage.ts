@@ -232,6 +232,7 @@ sqlite.exec(`
     bio TEXT,
     photo_url TEXT,
     google_id TEXT UNIQUE,
+    email_verified_at TEXT,
     status TEXT NOT NULL DEFAULT 'active',
     created_at TEXT NOT NULL DEFAULT ''
   );
@@ -683,6 +684,14 @@ try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN gig_time TEXT`); } catch(e) 
 try { sqlite.exec(`ALTER TABLE gig_posts ADD COLUMN business_id INTEGER`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN google_id TEXT`); } catch(e) {}
+const usersHadEmailVerifiedAt = (sqlite.prepare(`PRAGMA table_info(users)`).all() as Array<{ name: string }>)
+  .some(column => column.name === "email_verified_at");
+try { sqlite.exec(`ALTER TABLE users ADD COLUMN email_verified_at TEXT`); } catch(e) {}
+// Existing accounts predate email confirmation and remain valid. New password
+// registrations explicitly write NULL until their confirmation link is used.
+if (!usersHadEmailVerifiedAt) {
+  try { sqlite.exec(`UPDATE users SET email_verified_at = COALESCE(NULLIF(created_at, ''), datetime('now'))`); } catch(e) {}
+}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_ring TEXT DEFAULT 'none'`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE users ADD COLUMN avatar_crop TEXT`); } catch(e) {}
 try { sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_unique ON users(google_id)`); } catch(e) {}
@@ -8912,6 +8921,7 @@ export interface IStorage {
     passwordHash: string;
     displayName?: string;
     googleId?: string;
+    emailVerifiedAt?: string | null;
     communityStandardsVersion?: string | null;
     communityStandardsAgreedAt?: string | null;
   }): User;
@@ -8927,7 +8937,7 @@ export interface IStorage {
   }): User | null;
   clearExpiredAccountModeration(userId: number): User | null;
   linkGoogleToUser(id: number, googleId: string): void;
-  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'top8' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'top8' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt' | 'emailVerifiedAt'>>): void;
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   updatePasswordHash(id: number, passwordHash: string): void;
   setPromoterStatus(userId: number, status: string): void;
@@ -11405,6 +11415,7 @@ export const storage: IStorage = {
     passwordHash,
     displayName,
     googleId,
+    emailVerifiedAt,
     communityStandardsVersion,
     communityStandardsAgreedAt,
   }: {
@@ -11413,6 +11424,7 @@ export const storage: IStorage = {
     passwordHash: string;
     displayName?: string;
     googleId?: string;
+    emailVerifiedAt?: string | null;
     communityStandardsVersion?: string | null;
     communityStandardsAgreedAt?: string | null;
   }) {
@@ -11421,6 +11433,7 @@ export const storage: IStorage = {
       username, email, passwordHash: hashed,
       displayName: displayName || null,
       googleId: googleId || null,
+      emailVerifiedAt: emailVerifiedAt || null,
       avatarChoice: 1,
       status: "active",
       communityStandardsVersion: communityStandardsVersion || null,

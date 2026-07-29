@@ -301,6 +301,7 @@ export const users = sqliteTable("users", {
   coverCrop: text("cover_crop"),
   pup: text("pup"), // JSON {name,hood,role,lookingFor} | null - member-only, opt-in pup identity
   googleId: text("google_id").unique(),
+  emailVerifiedAt: text("email_verified_at"),
   status: text("status").notNull().default("active"),
   promoterStatus: text("promoter_status").notNull().default("none"), // none | pending | approved | rejected
   subAdmin: integer("sub_admin", { mode: "boolean" }).default(false),

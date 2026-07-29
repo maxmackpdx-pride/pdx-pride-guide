@@ -116,6 +116,14 @@ import { isEventTalentRole } from "@shared/eventTalent";
 import { parseHubFeedTab } from "@shared/hubFeed";
 import { BOARD_REJECT_REASONS, PROFILE_PHOTO_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
 import { buildTipLinks } from "@shared/tipSupport";
+import {
+  consumeAuthEmailToken,
+  createAuthEmailToken,
+  invalidateAuthEmailTokens,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  transactionalEmailConfigured,
+} from "./authEmail";
 
 import {
   diffSubmissionMerge,
@@ -2452,13 +2460,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedToCommunityStandards) {
         return res.status(400).json({ error: "You must agree to the Community Standards and legal terms to join" });
       }
+      if (!transactionalEmailConfigured()) {
+        return res.status(503).json({ error: "Email signup is temporarily unavailable. Try Google sign-in or come back shortly." });
+      }
+      const normalizedEmail = String(email).trim().toLowerCase();
       // Reserved shared guide-admin identity - not a human signup.
-      if (storage.isSystemGuideAccount({ username, email })) {
+      if (storage.isSystemGuideAccount({ username, email: normalizedEmail })) {
         return res.status(400).json({ error: "That username or email is reserved" });
       }
 
-      const existingEmail = storage.getUserByEmail(email);
-      if (existingEmail) return res.status(409).json({ error: "Email already registered" });
+      const existingEmail = storage.getUserByEmail(normalizedEmail);
+      if (existingEmail) {
+        if (!existingEmail.emailVerifiedAt && !existingEmail.googleId) {
+          const token = createAuthEmailToken(existingEmail.id, "verify_email", 24 * 60 * 60 * 1000);
+          await sendVerificationEmail(existingEmail.email, token, existingEmail.displayName || existingEmail.username);
+          return res.json({ requiresEmailVerification: true });
+        }
+        return res.status(409).json({ error: "Email already registered" });
+      }
 
       const existingUsername = storage.getUserByUsername(username);
       if (existingUsername) return res.status(409).json({ error: "Username already taken" });
@@ -2470,9 +2489,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const now = new Date().toISOString();
       const user = storage.createUser({
         username,
-        email,
+        email: normalizedEmail,
         passwordHash: password,
         displayName,
+        emailVerifiedAt: null,
         ...(COMMUNITY_STANDARDS_GATE_ENABLED
           ? {
               communityStandardsVersion: version,
@@ -2480,22 +2500,46 @@ export function registerRoutes(httpServer: Server, app: Express) {
             }
           : {}),
       });
-      const finishRegister = () => {
-        req.session.userId = user.id;
-        maybeSyncSiteOwnerPortfolio(user);
-        res.json(authUserResponse(req, user));
-      };
-      // Match login: regenerate session before binding the new userId.
-      if (typeof req.session.regenerate === "function") {
-        return req.session.regenerate(err => {
-          if (err) return res.status(500).json({ error: "Session error" });
-          finishRegister();
-        });
-      }
-      finishRegister();
+      const token = createAuthEmailToken(user.id, "verify_email", 24 * 60 * 60 * 1000);
+      await sendVerificationEmail(user.email, token, user.displayName || user.username);
+      res.json({ requiresEmailVerification: true });
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      console.error("Registration email failed", e);
+      res.status(400).json({ error: e.message || "Could not create account" });
     }
+  });
+
+  app.get("/api/auth/verify-email", (req, res) => {
+    const userId = consumeAuthEmailToken(String(req.query.token || ""), "verify_email");
+    if (!userId) return res.redirect(302, "/?auth=email-verification-invalid");
+    storage.updateUser(userId, { emailVerifiedAt: new Date().toISOString() });
+    res.redirect(302, "/?auth=email-verified");
+  });
+
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    const generic = { ok: true, message: "If that account exists, a reset link is on its way." };
+    const identifier = String(req.body?.email || "").trim().toLowerCase();
+    if (!identifier || !transactionalEmailConfigured()) return res.json(generic);
+    const user = storage.getUserByEmail(identifier) || storage.getUserByUsername(identifier);
+    if (!user || storage.isSystemGuideAccount(user) || user.status === "deleted") return res.json(generic);
+    try {
+      const token = createAuthEmailToken(user.id, "reset_password", 60 * 60 * 1000);
+      await sendPasswordResetEmail(user.email, token, user.displayName || user.username);
+    } catch (error) {
+      console.error("Password reset email failed", error);
+    }
+    res.json(generic);
+  });
+
+  app.post("/api/auth/reset-password", (req, res) => {
+    const token = String(req.body?.token || "");
+    const password = String(req.body?.password || "");
+    if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+    const userId = consumeAuthEmailToken(token, "reset_password");
+    if (!userId) return res.status(400).json({ error: "This reset link is invalid or has expired." });
+    storage.updatePasswordHash(userId, hashPassword(password));
+    invalidateAuthEmailTokens(userId, "reset_password");
+    res.json({ ok: true });
   });
 
   app.post("/api/auth/community-standards/agree", requireAuth, (req, res) => {
@@ -2531,13 +2575,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "username/email and password required" });
     // Accept username or email
-    const user = storage.getUserByEmail(email) || storage.getUserByUsername(email);
+    const identifier = String(email).trim().toLowerCase();
+    const user = storage.getUserByEmail(identifier) || storage.getUserByUsername(identifier);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
     // System guide-admin mailbox cannot be signed into as a person.
     if (storage.isSystemGuideAccount(user)) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     if (!verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user.emailVerifiedAt && !user.googleId) {
+      return res.status(403).json({ error: "Confirm your email before logging in. Check your inbox for the Zaylist link.", code: "EMAIL_NOT_VERIFIED" });
+    }
     if (isLegacyPasswordHash(user.passwordHash)) {
       storage.updatePasswordHash(user.id, hashPassword(password));
     }
@@ -2733,10 +2781,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
           passwordHash: crypto.randomBytes(32).toString("hex"),
           displayName: profile.name || profile.email.split("@")[0],
           googleId: profile.sub,
+          emailVerifiedAt: new Date().toISOString(),
         });
         if (profile.picture) storage.updateUser(user.id, { photoUrl: profile.picture });
       } else {
         if (!user.googleId) storage.linkGoogleToUser(user.id, profile.sub);
+        if (!user.emailVerifiedAt) storage.updateUser(user.id, { emailVerifiedAt: new Date().toISOString() });
         if (!user.photoUrl && profile.picture) {
           storage.updateUser(user.id, { photoUrl: profile.picture });
         }

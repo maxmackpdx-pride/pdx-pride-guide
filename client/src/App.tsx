@@ -68,6 +68,7 @@ import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
+import ResetPassword from "./pages/ResetPassword";
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
@@ -126,6 +127,7 @@ function AppLayout() {
             <Route path="/sponsors" component={Sponsors} />
             <Route path="/access" component={AccessSafety} />
             <Route path="/legal" component={Legal} />
+            <Route path="/reset-password" component={ResetPassword} />
             <Route path="/admin" component={Admin} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/settings/notifications" component={NotificationSettings} />

@@ -476,6 +476,7 @@ export default function Nav() {
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<"login" | "register">("login");
+  const [authNotice, setAuthNotice] = useState("");
   /** Ticket gate only when arriving from direct secret-story close (?from=stank-egg). */
   const [showStankTicketGate, setShowStankTicketGate] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -497,6 +498,25 @@ export default function Nav() {
     if (user) return;
     const params = new URLSearchParams(window.location.search);
     const auth = (params.get("auth") || "").toLowerCase();
+    if (auth === "email-verified" || auth === "email-verification-invalid") {
+      setAuthDefaultTab("login");
+      setAuthNotice(auth === "email-verified"
+        ? "Email confirmed. You can log in now."
+        : "That confirmation link is invalid or expired. Register again to receive a fresh link.");
+      setShowAuth(true);
+      params.delete("auth");
+      const qs = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`);
+      return;
+    }
+    if (auth === "login") {
+      setAuthDefaultTab("login");
+      setShowAuth(true);
+      params.delete("auth");
+      const qs = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`);
+      return;
+    }
     if (auth !== "register" && auth !== "join" && auth !== "signup") return;
     const from = (params.get("from") || "").toLowerCase();
     const viaStankEgg = from === "stank-egg" || from === "stank";
@@ -891,8 +911,10 @@ export default function Nav() {
           onClose={() => {
             setShowAuth(false);
             setAuthDefaultTab("login");
+            setAuthNotice("");
           }}
           defaultTab={authDefaultTab}
+          initialNotice={authNotice}
         />
       )}
 
