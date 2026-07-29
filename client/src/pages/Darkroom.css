@@ -1,0 +1,136 @@
+/* Full-viewport Darkroom still + RGB glitch (wordmark-style cycle). */
+
+.darkroom__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.darkroom {
+  position: relative;
+  width: 100%;
+  min-height: calc(100dvh - var(--site-header-height, 96px));
+  margin: 0;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Cover the content column edge-to-edge under the nav */
+.darkroom__stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.darkroom__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.darkroom__img--base {
+  z-index: 1;
+}
+
+.darkroom__img--ghost {
+  z-index: 2;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.darkroom__img--a {
+  filter: saturate(2.2) brightness(1.2) hue-rotate(-35deg);
+  animation: darkroomGlitchA 3.2s steps(1) infinite, darkroomGlitchSlip 3.2s steps(1) infinite;
+}
+
+.darkroom__img--b {
+  filter: saturate(2.3) brightness(1.2) hue-rotate(45deg);
+  animation: darkroomGlitchB 3.2s steps(1) infinite, darkroomGlitchSlip 3.2s steps(1) infinite;
+}
+
+@keyframes darkroomGlitchA {
+  0%,
+  86%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  88% {
+    opacity: 0.85;
+    transform: translate(-3px, 1px);
+  }
+  92% {
+    opacity: 0.7;
+    transform: translate(2px, -1px);
+  }
+  96% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes darkroomGlitchB {
+  0%,
+  86%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  89% {
+    opacity: 0.85;
+    transform: translate(3px, -1px);
+  }
+  93% {
+    opacity: 0.7;
+    transform: translate(-2px, 2px);
+  }
+  97% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes darkroomGlitchSlip {
+  0%,
+  87%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+  88% {
+    clip-path: inset(12% 0 55% 0);
+  }
+  90% {
+    clip-path: inset(48% 0 18% 0);
+  }
+  93% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+:root[data-calm="true"] .darkroom__img--ghost,
+html.calm-mode .darkroom__img--ghost {
+  display: none;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .darkroom__img--ghost {
+    display: none;
+    animation: none;
+  }
+}

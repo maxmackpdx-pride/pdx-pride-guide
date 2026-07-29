@@ -218,6 +218,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/sponsors",
     "/access",
     "/nude-beaches",
+    "/darkroom",
     "/resume",
     "/legal",
     "/submit",
@@ -317,9 +318,13 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Your Portland queer event schedule. Filter by day, save favorites, and plan your week.",
   },
   "/nude-beaches": {
-    title: "RIVERBRATS · Nude Beaches | Zaylist",
+    title: "RIVERBRATS · Beaches | Zaylist",
     description:
       "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
+  },
+  "/darkroom": {
+    title: "Darkroom | Zaylist",
+    description: "Darkroom — full-screen still on Zaylist.",
   },
   "/gigs": {
     title: "Gig Werk: Gigs & Jobs | Zaylist",

@@ -62,6 +62,7 @@ import Inbox from "./pages/Inbox";
 import MissedConnections from "./pages/MissedConnections";
 import Directory from "./pages/Directory";
 import NudeBeaches from "./pages/NudeBeaches";
+import Darkroom from "./pages/Darkroom";
 import DesignSystemSandbox from "./pages/DesignSystemSandbox";
 import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/not-found";
@@ -133,6 +134,7 @@ function AppLayout() {
             <Route path="/directory/:id/:slug?" component={Directory} />
             <Route path="/directory" component={Directory} />
             <Route path="/nude-beaches" component={NudeBeaches} />
+            <Route path="/darkroom" component={Darkroom} />
             <Route path="/design-preview" component={DesignSystemSandbox} />
             <Route path="/u/:username" component={MemberProfile} />
             <Route path="/missed-connections">

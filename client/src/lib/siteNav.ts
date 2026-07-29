@@ -14,9 +14,18 @@ export type NavEntry =
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home" },
   { type: "link", href: "/about", label: "About" },
-  { type: "link", href: "/events", label: "Events" },
+  {
+    type: "dropdown",
+    id: "events",
+    label: "Events",
+    items: [
+      { href: "/events", label: "Events" },
+      { href: "/schedule", label: "My Schedule" },
+      { href: "/submit", label: "Promoters" },
+    ],
+  },
   { type: "link", href: "/directory", label: "Places" },
-  { type: "link", href: "/nude-beaches", label: "Nude Beaches" },
+  { type: "link", href: "/nude-beaches", label: "Beaches" },
   {
     type: "dropdown",
     id: "boards",
@@ -28,7 +37,7 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/spotted", label: "Missed Connections" },
     ],
   },
-  { type: "link", href: "/submit", label: "Promoters" },
+  { type: "link", href: "/darkroom", label: "Darkroom" },
 ];
 
 export type PageHeaderMeta = {
@@ -45,7 +54,8 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/hausing": { section: "Boards", title: "HAÜSING" },
   "/spotted": { section: "Boards", title: "Missed Connections" },
   "/directory": { section: "Places", title: "Directory" },
-  "/nude-beaches": { section: "Explore", title: "Nude Beaches" },
+  "/nude-beaches": { section: "Explore", title: "Beaches" },
+  "/darkroom": { section: "Explore", title: "Darkroom" },
   "/about": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
@@ -68,8 +78,9 @@ export const BOARD_NAV: NavLinkItem[] = [
 export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/events", label: "Events" },
   { href: "/schedule", label: "My Schedule" },
-  { href: "/nude-beaches", label: "Nude Beaches" },
+  { href: "/nude-beaches", label: "Beaches" },
   { href: "/submit", label: "Promoters" },
+  { href: "/darkroom", label: "Darkroom" },
 ];
 
 export function navLinkActive(location: string, href: string) {

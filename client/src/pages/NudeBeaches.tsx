@@ -186,7 +186,7 @@ function SauvieIslandPanel() {
 
 export default function NudeBeaches() {
   usePageSeo(
-    "RIVERBRATS · Nude Beaches | Zaylist",
+    "RIVERBRATS · Beaches | Zaylist",
     "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
     {
       image: shareCardUrl("nudeBeaches"),
