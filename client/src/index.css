@@ -15827,10 +15827,35 @@ html.calm-mode .board-stats-band,
   border-radius: 6px !important;
   border-left: 2px solid #1c1c22 !important;
   border-bottom: 2px solid #1c1c22 !important;
-  padding: 18px 17px 20px !important;
+  /* Cards fit their content instead of a fixed 170px min-height (killed the
+     big empty gaps and cut a lot of scroll). */
+  min-height: 0 !important;
+  padding: 14px 15px 15px !important;
   box-shadow: none !important;
   align-items: stretch !important;
   gap: 0 !important;
+}
+
+/* Tighter "How it works" on phones: smaller header, denser step grid. */
+@media (max-width: 640px) {
+  .board-how--makeover .board-how__title {
+    font-size: 1.55rem !important;
+    line-height: 1 !important;
+  }
+  .board-how--makeover .board-copy {
+    font-size: 0.92rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 16px !important;
+  }
+  .board-steps--makeover {
+    gap: 10px !important;
+  }
+  .board-step--makeover {
+    padding: 12px 13px 13px !important;
+  }
+  .board-step--makeover .board-step__num {
+    font-size: 1.5rem !important;
+  }
 }
 
 .gifting-page .board-how--makeover .board-step--makeover .board-step__num,
