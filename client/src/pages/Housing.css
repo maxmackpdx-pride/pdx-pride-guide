@@ -880,7 +880,8 @@
   overflow: hidden;
   background: radial-gradient(130% 130% at 50% 14%, color-mix(in srgb, var(--c) 32%, #050506), #050506 72%);
   border-bottom: 4px solid var(--c);
-  height: 240px;
+  /* Half cards (Looking / Offering / Managed): 200 tall × ~½ feed wide */
+  height: 200px;
   flex: none;
   display: flex;
   flex-direction: column;
@@ -888,9 +889,17 @@
   padding: 14px;
 }
 
+/* Full Forming cards: shorter photo well (160 tall × full feed wide) */
+.hz-card--wide .hz-well {
+  height: 160px;
+}
+
 @media (max-width: 767px) {
   .hz .hz-well {
-    height: 190px;
+    height: 160px;
+  }
+  .hz .hz-card--wide .hz-well {
+    height: 140px;
   }
 }
 
