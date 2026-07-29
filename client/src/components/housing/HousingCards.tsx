@@ -159,7 +159,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
-      <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.48}>
+      <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.95}>
         <HousingCluster
           people={[self, ...people]}
           pets={pets}
@@ -205,7 +205,7 @@ export function OfferingCard({ post, h }: { post: HousingPostView; h: HousingCar
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.OFFERING} />
-      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.48}>
+      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.95}>
         <HousingCluster
           people={people}
           pets={pets}
@@ -256,7 +256,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
         photos={post.photos}
         // With no place picked yet there is nothing to name, so the card asks.
         title={post.photos.length ? post.displayName : "Build a HAÜS"}
-        nameCap={0.8}
+        nameCap={0.9}
         fallbackPhoto={FORMING_DEFAULT_COVER}
       >
         <HousingCluster
@@ -335,7 +335,7 @@ export function ManagedCard({
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.MANAGED} />
-      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.48}>
+      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.95}>
         <PropertyManagerBadge>
           <HousingIcon name="verified" size={13} />
           Property manager

@@ -26,22 +26,15 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { HAUS_SUFFIX } from "@shared/housing";
 
 /**
- * Share of photo height the title may claim on a ~390px-wide half card.
- * Was 0.62 — that made short names (ROWAN, ROSE CITY FLATS) billboard the whole
- * well after the well dropped to 200px. Keep it a left motif, not a full cover.
+ * Title motif max box (the dynamic text), NOT the photo well.
+ * Half cards (Looking / Offering / Managed): ~200 tall × up to well width (~580).
+ * Full Forming cards: ~160 tall × up to well width (~1180).
  */
-const BASE_HEIGHT_SHARE = 0.4;
-/** Wide short Forming wells need more of the vertical budget so type stays legible. */
-const WIDE_HEIGHT_SHARE = 0.62;
-/** Hard cap: title block must leave photo visible under/around it. */
-const HALF_MAX_BLOCK_SHARE = 0.48;
-const WIDE_MAX_BLOCK_SHARE = 0.7;
+const HALF_TITLE_MAX_H = 200;
+const WIDE_TITLE_MAX_H = 160;
 /** Breathing room between the title block and the caption row, in px. */
 const CAPTION_GAP = 22;
-/**
- * Slight horizontal stretch on the name block only (height basis stays `nameW`).
- * Kept small so short names do not look inflated.
- */
+/** Slight horizontal stretch on the name block only (height basis stays `nameW`). */
 const WIDTH_STRETCH = 1.04;
 /** The SVG design box every line is drawn in. */
 const GLYPH_BOX = 108;
@@ -127,8 +120,8 @@ export type HousingWellProps = {
   /** Caption row content. Sits on the right, dots on the far left. */
   children?: ReactNode;
   /**
-   * Share of the well width the block may span.
-   * Half cards use ~0.48, Forming full-width ~0.8, detail heads 0.35.
+   * Share of the well width the title block may span.
+   * Half cards ~0.95 (≈580px of the half well), Forming ~0.9, detail 0.35.
    */
   nameCap?: number;
   /** Shown when a post has no photos yet. */
@@ -140,7 +133,7 @@ export function HousingWell({
   photos = [],
   title,
   children,
-  nameCap = 0.48,
+  nameCap = 0.95,
   fallbackPhoto,
   className,
 }: HousingWellProps) {
@@ -188,32 +181,22 @@ export function HousingWell({
   const sumRatios = ratios.reduce((a, b) => a + b, 0) || 1;
 
   /**
-   * Size from the well, not the string: claim a share of photo height, cap by
-   * width (`nameCap`), long names get narrower never taller. Wide short Forming
-   * wells use a higher height share so the motif does not go tiny on a banner.
+   * Title box only: fixed max height (half 200 / Forming 160), width up to
+   * nameCap × well. Long names go narrower, never taller than the max.
+   * Photo well size is independent (CSS .hz-well).
    */
   let nameW = 0;
   let blockW = 0;
   if (box && lines.length) {
     const isWideBanner = box.w / Math.max(box.h, 1) >= 2.8;
-    const baseShare = isWideBanner ? WIDE_HEIGHT_SHARE : BASE_HEIGHT_SHARE;
-    // Mild scale with width; half cards stay near 1.0 so ~580px wells do not inflate type.
-    const widthScale = isWideBanner
-      ? Math.min(1.2, Math.max(1, box.w / 700))
-      : Math.min(1.06, Math.max(0.95, box.w / 520));
-    const share = baseShare * widthScale;
-    const maxBlockShare = isWideBanner ? WIDE_MAX_BLOCK_SHARE : HALF_MAX_BLOCK_SHARE;
-    const structural = box.h - box.captionH - CAPTION_GAP;
-    const heightBudget = Math.max(
-      36,
-      Math.min(box.h * share, box.h * maxBlockShare, structural),
-    );
+    const titleMaxH = isWideBanner ? WIDE_TITLE_MAX_H : HALF_TITLE_MAX_H;
+    const structural = Math.max(36, box.h - box.captionH - CAPTION_GAP);
+    // Never taller than the motif max, and never under the caption row.
+    const heightBudget = Math.min(titleMaxH, structural);
     const widthCap = box.w * nameCap;
     nameW = Math.min(widthCap, heightBudget / sumRatios);
-    // Floor keeps tiny names readable; never beat the width cap or height budget.
     nameW = Math.max(Math.min(48, widthCap), nameW);
     nameW = Math.min(nameW, heightBudget / sumRatios, widthCap);
-    // `nameW` stays the HEIGHT basis; only rendered width is stretched slightly.
     blockW = Math.min(nameW * WIDTH_STRETCH, widthCap);
   }
 
