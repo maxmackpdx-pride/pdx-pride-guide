@@ -205,15 +205,21 @@ function MapFitToSelection({
   const map = useMap();
   useEffect(() => {
     const points = events.filter(hasMapPin).map(e => [e.lat as number, e.lng as number] as [number, number]);
-    if (points.length === 0) {
+    // Frame Portland by default: only fit to metro-area pins so a few statewide
+    // outliers don't zoom the whole state out. Outlier pins still render.
+    const inMetro = ([lat, lng]: [number, number]) =>
+      lat >= 45.35 && lat <= 45.70 && lng >= -122.92 && lng <= -122.42;
+    const metroPoints = points.filter(inMetro);
+    const fitPoints = metroPoints.length ? metroPoints : points;
+    if (fitPoints.length === 0) {
       map.setView(defaultCenter, defaultZoom, { animate: true });
       return;
     }
-    if (points.length === 1) {
-      map.flyTo(points[0], Math.max(map.getZoom(), 14), { duration: 0.55 });
+    if (fitPoints.length === 1) {
+      map.flyTo(fitPoints[0], Math.max(map.getZoom(), 14), { duration: 0.55 });
       return;
     }
-    map.fitBounds(points, { padding: [48, 48], maxZoom: 15, animate: true });
+    map.fitBounds(fitPoints, { padding: [48, 48], maxZoom: 15, animate: true });
   }, [selectionKey, map, defaultCenter, defaultZoom]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }
@@ -354,7 +360,7 @@ export function MapView({
       >
         <style>{`${LIVE_MAP_CHROME_CSS}${EVENTS_MAP_EXTRA_CSS}`}</style>
         <div className="pdx-map-live__vignette" aria-hidden="true" />
-        <div className="pdx-map-live__shaft" aria-hidden="true" />
+        {/* Removed the diagonal light-shaft overlay - read as a "triangle" over the map. */}
 
         {expanded && (
           <button

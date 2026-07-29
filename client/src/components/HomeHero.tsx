@@ -307,7 +307,7 @@ export default function HomeHero() {
           Headed to the river? →
         </Link>
         <Link href="/hausing" className="home-hero__btn home-hero__btn--haus" data-testid="hero-cta-hausing">
-          Need to rent out or find a room? →
+          Renting or looking? →
         </Link>
       </div>
 
