@@ -660,6 +660,18 @@
   filter: none;
 }
 
+/* NEED A ROOM? — white default, HAÜSING purple on hover */
+.home-hero__btn--haus {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.home-hero__btn--haus:hover {
+  color: #b06bff;
+  border-color: color-mix(in srgb, #b06bff 45%, rgba(255, 255, 255, 0.2));
+  filter: none;
+}
+
 /* Your Hub - cyan text on same black glass */
 .home-hero__btn--secondary {
   color: #00ffff;

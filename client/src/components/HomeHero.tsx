@@ -306,6 +306,9 @@ export default function HomeHero() {
         <Link href="/nude-beaches" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
           Headed to the river? →
         </Link>
+        <Link href="/hausing" className="home-hero__btn home-hero__btn--haus" data-testid="hero-cta-hausing">
+          Need to rent out or find a room? →
+        </Link>
       </div>
 
       <InstallModal open={installOpen} onClose={() => setInstallOpen(false)} />
