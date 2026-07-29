@@ -3513,11 +3513,11 @@ function seedDemoBoardsContent() {
   sqlite.prepare(`DELETE FROM gifting_posts WHERE user_id = ?`).run(demoId);
   const gift = sqlite.prepare(
     `INSERT INTO gifting_posts (user_id, post_type, title, description, category, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, '[]', 'OPEN', ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?)`,
   );
-  gift.run(demoId, "GIFT", "Free moving boxes (about 20)", "Broken down and clean, all sizes. Great for a move. Porch pickup, first come first served.", "Household", "SE Portland", "Porch pickup", FUTURE, OLD);
-  gift.run(demoId, "GIFT", "Gently used Pride flags and bunting", "Left over from last year and still bright. Would love them to go to someone who will fly them proud.", "Decor", "NE Portland", "Meet up nearby", FUTURE, OLD);
-  gift.run(demoId, "ISO", "ISO: a working mini fridge for a new place", "Just moved into a studio and could really use a small fridge. Can pick up anywhere in town, happy to trade baked goods.", "Appliances", "N Portland", "Can pick up", FUTURE, OLD);
+  gift.run(demoId, "GIFT", "Free moving boxes (about 20)", "Broken down and clean, all sizes. Great for a move. Porch pickup, first come first served.", "Household", "SE Portland", "Porch pickup", JSON.stringify(["/hausing/demo/gift-boxes.jpg"]), FUTURE, OLD);
+  gift.run(demoId, "GIFT", "Gently used Pride flags and bunting", "Left over from last year and still bright. Would love them to go to someone who will fly them proud.", "Decor", "NE Portland", "Meet up nearby", JSON.stringify(["/hausing/demo/gift-flags.jpg"]), FUTURE, OLD);
+  gift.run(demoId, "ISO", "ISO: a working mini fridge for a new place", "Just moved into a studio and could really use a small fridge. Can pick up anywhere in town, happy to trade baked goods.", "Appliances", "N Portland", "Can pick up", JSON.stringify(["/hausing/demo/gift-fridge.jpg"]), FUTURE, OLD);
 }
 
 function getOrCreateDemoUser(now: string): number | null {
@@ -3689,12 +3689,15 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_housing_demo_v3");
   }
   if (!hasBootMigration("seed_demo_boards_v1")) {
+    recordBootMigration("seed_demo_boards_v1"); // superseded by v2 (gifting photos)
+  }
+  if (!hasBootMigration("seed_demo_boards_v2")) {
     try {
       seedDemoBoardsContent();
     } catch (err) {
-      console.warn("[boot] seed_demo_boards_v1 skipped:", err instanceof Error ? err.message : err);
+      console.warn("[boot] seed_demo_boards_v2 skipped:", err instanceof Error ? err.message : err);
     }
-    recordBootMigration("seed_demo_boards_v1");
+    recordBootMigration("seed_demo_boards_v2");
   }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
