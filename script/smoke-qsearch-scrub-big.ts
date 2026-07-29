@@ -79,7 +79,7 @@ async function run() {
       cand("p1", { title: "Leather Play Party" }),
       cand("t1", { title: "TBA Fix Night", venueName: "TBA" }),
     ];
-    const r = await scrubCandidates(input, { fetchImpl: scrubMock() });
+    const r = await scrubCandidates(input, { fetchImpl: scrubMock(), allowPausedForTest: true });
     check("3 noise dropped", r.dropped.length === 3);
     check("golf/strongfirst/hoa are the drops", ["d1", "d2", "d3"].every(id => r.dropped.some(d => d.candidate.id === id)));
     check("5 kept", r.kept.length === 5);
@@ -99,7 +99,7 @@ async function run() {
   section("Scrub: the auto-drop INVARIANT (low score but isEvent=true ⇒ NOT dropped)");
   {
     const c = cand("inv", { title: "Weird But Real" });
-    const r = await scrubCandidates([c], { fetchImpl: scrubMock(() => ({ relevance: 0.1, isEvent: true, noiseReason: "odd" })) });
+    const r = await scrubCandidates([c], { fetchImpl: scrubMock(() => ({ relevance: 0.1, isEvent: true, noiseReason: "odd" })), allowPausedForTest: true });
     check("low-relevance real event kept, not dropped", r.dropped.length === 0 && r.kept.length === 1);
     check("...but deselected", r.kept[0].selected === false);
   }
@@ -108,7 +108,7 @@ async function run() {
   {
     const c = cand("stamp", { title: "Sanctuary Night", ageRequirement: "21_PLUS", isSexPositive: true });
     // Model tries to say ALL_AGES / not sex-positive; must NOT downgrade.
-    const r = await scrubCandidates([c], { fetchImpl: scrubMock(() => ({ relevance: 0.9, isEvent: true, ageFlag: "ALL_AGES", sexPositive: false })) });
+    const r = await scrubCandidates([c], { fetchImpl: scrubMock(() => ({ relevance: 0.9, isEvent: true, ageFlag: "ALL_AGES", sexPositive: false })), allowPausedForTest: true });
     check("existing 21+ preserved", r.kept[0].draft.ageRequirement === "21_PLUS");
     check("existing sex-positive preserved", r.kept[0].draft.isSexPositive === true);
   }
@@ -117,22 +117,22 @@ async function run() {
   {
     const inBand = cand("band-in", { title: "Show A" }, { strongDuplicate: dup(60) });
     const above = cand("band-hi", { title: "Show B" }, { strongDuplicate: dup(85) });
-    await scrubCandidates([inBand], { fetchImpl: scrubMock(() => ({ relevance: 0.8, isEvent: true, dupVerdict: "different" })) });
+    await scrubCandidates([inBand], { fetchImpl: scrubMock(() => ({ relevance: 0.8, isEvent: true, dupVerdict: "different" })), allowPausedForTest: true });
     check("in-band 'different' clears the dup flag", inBand.strongDuplicate === null);
-    await scrubCandidates([above], { fetchImpl: scrubMock(() => ({ relevance: 0.8, isEvent: true, dupVerdict: "different" })) });
+    await scrubCandidates([above], { fetchImpl: scrubMock(() => ({ relevance: 0.8, isEvent: true, dupVerdict: "different" })), allowPausedForTest: true });
     check("above-band dup untouched by LLM", above.strongDuplicate !== null);
   }
 
   section("Scrub: robustness — provider errors & junk leave candidates untouched");
   {
     const c1 = cand("err1", { title: "Golf Scramble" }); // would drop, but provider 500s
-    const r1 = await scrubCandidates([c1], { fetchImpl: scrubMock(() => null) });
+    const r1 = await scrubCandidates([c1], { fetchImpl: scrubMock(() => null), allowPausedForTest: true });
     check("HTTP 500 ⇒ candidate kept (not dropped)", r1.dropped.length === 0 && r1.kept.length === 1);
     check("HTTP 500 ⇒ aiScrubbed false", r1.kept[0].draft.aiScrubbed === false);
 
     const junkFetch = (async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: "sorry, not JSON" } }] }) })) as unknown as typeof fetch;
     const c2 = cand("err2", { title: "Golf Scramble" });
-    const r2 = await scrubCandidates([c2], { fetchImpl: junkFetch });
+    const r2 = await scrubCandidates([c2], { fetchImpl: junkFetch, allowPausedForTest: true });
     check("unparseable reply ⇒ kept + untouched", r2.dropped.length === 0 && r2.kept[0].draft.relevanceScore == null);
   }
 
@@ -140,7 +140,7 @@ async function run() {
   {
     process.env.QSEARCH_SCRUB_MAX = "3";
     const many = Array.from({ length: 6 }, (_, i) => cand(`cap${i}`, { title: i < 3 ? "Golf Scramble" : "Drag Show" }));
-    const r = await scrubCandidates(many, { fetchImpl: scrubMock() });
+    const r = await scrubCandidates(many, { fetchImpl: scrubMock(), allowPausedForTest: true });
     // first 3 (golf) classified → dropped; last 3 untouched & kept
     check("only capped subset classified (3 dropped)", r.dropped.length === 3);
     check("overflow kept untouched (aiScrubbed false)", r.kept.every(c => c.draft.aiScrubbed === false));

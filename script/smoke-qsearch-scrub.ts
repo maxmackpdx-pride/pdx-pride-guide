@@ -105,7 +105,7 @@ async function main() {
   // 2) Enabled with a fake key + mock LLM.
   process.env.QSEARCH_SCRUB_LLM = "1";
   process.env.GROQ_API_KEY = "test-key";
-  const on = await scrubCandidates(input(), { fetchImpl: mockFetch });
+  const on = await scrubCandidates(input(), { fetchImpl: mockFetch, allowPausedForTest: true });
 
   check("enabled: golf scramble dropped", on.dropped.some(d => d.candidate.id === "c2"));
   check("enabled: drop has a reason", on.dropped[0]?.reason?.length > 0);
@@ -120,6 +120,10 @@ async function main() {
   check("play party: 21+ stamped", party.draft.ageRequirement === "21_PLUS");
   check("play party: sex-positive stamped", party.draft.isSexPositive === true);
   check("play party: KINK type stamped", party.draft.eventTypes.includes("KINK"));
+  check(
+    "play party: eventTypes remains valid JSON",
+    Array.isArray(JSON.parse(party.draft.eventTypes)) && JSON.parse(party.draft.eventTypes).includes("KINK"),
+  );
 
   console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILED`);
   process.exit(failures === 0 ? 0 : 1);

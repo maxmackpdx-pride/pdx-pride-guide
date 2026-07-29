@@ -151,6 +151,11 @@ They are excluded from the QSearch catch-all (trusted-lane filter).
 
 ## AI scrub (LLM candidate cleaning)
 
+> **Paused 2026-07-29:** the generic cloud-model scrub is hard-disabled in
+> code while the intended custom fine-tuned QSearch model is rebuilt. Setting
+> `QSEARCH_SCRUB_LLM=1` does not override the pause. Deterministic filtering,
+> scraping, Trusted sync, and human Review continue normally.
+
 A semantic pass over scan candidates *after* the cheap deterministic filters
 (`server/qsearch/scrubLlm.ts`). Reuses the flyer-reader text-LLM chain
 (`flyerLlmConfigured`: Groq → xAI → OpenAI, honoring `FLYER_LLM_DISABLED`) — **no
@@ -320,4 +325,3 @@ PORT=5050 npm run dev
 ```
 
 Login (local smoke DB): `tucker_pdmax` / `smoketest`
-

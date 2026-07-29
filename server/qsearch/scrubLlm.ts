@@ -22,6 +22,13 @@ const DROP_BELOW = 0.2;
 const DUP_BAND_LO = 48;
 const DUP_BAND_HI = 72;
 
+/**
+ * Product pause: the generic cloud classifier is not the intended custom
+ * fine-tuned QSearch model. Keep deterministic ingest + human Review running,
+ * but do not send candidates through this scrub until the custom model returns.
+ */
+export const QSEARCH_AI_SCRUB_PAUSED = true;
+
 export type ScrubDrop = { candidate: ScanCandidate; reason: string };
 export type ScrubOutcome = { kept: ScanCandidate[]; dropped: ScrubDrop[] };
 
@@ -40,7 +47,7 @@ type ScrubVerdict = {
 };
 
 export function scrubLlmEnabled(): boolean {
-  return process.env.QSEARCH_SCRUB_LLM === "1" && flyerLlmConfigured() != null;
+  return !QSEARCH_AI_SCRUB_PAUSED && process.env.QSEARCH_SCRUB_LLM === "1" && flyerLlmConfigured() != null;
 }
 
 function envInt(name: string, dflt: number): number {
@@ -177,9 +184,19 @@ function applyVerdict(c: ScanCandidate, v: ScrubVerdict): void {
     if (v.ageFlag && v.ageFlag !== "ALL_AGES") d.ageRequirement = v.ageFlag;
     if (v.sexPositive) d.isSexPositive = true;
     if (v.kink) {
-      const types = String(d.eventTypes || "").split(",").map(s => s.trim()).filter(Boolean);
+      let types: string[] = [];
+      try {
+        const parsed = JSON.parse(d.eventTypes || "[]");
+        if (Array.isArray(parsed)) types = parsed.map(String).filter(Boolean);
+      } catch {
+        // Legacy malformed values are normalized back to valid JSON here.
+        types = String(d.eventTypes || "")
+          .split(",")
+          .map(s => s.trim())
+          .filter(s => s && s !== "[]");
+      }
       if (!types.includes("KINK")) types.push("KINK");
-      d.eventTypes = types.join(",");
+      d.eventTypes = JSON.stringify(types);
     }
   }
 
@@ -230,10 +247,10 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, i: number
  */
 export async function scrubCandidates(
   candidates: ScanCandidate[],
-  opts?: { fetchImpl?: typeof fetch },
+  opts?: { fetchImpl?: typeof fetch; allowPausedForTest?: boolean },
 ): Promise<ScrubOutcome> {
   const cfg = flyerLlmConfigured();
-  if (!scrubLlmEnabled() || !cfg || candidates.length === 0) {
+  if ((!opts?.allowPausedForTest && !scrubLlmEnabled()) || !cfg || candidates.length === 0) {
     return { kept: candidates, dropped: [] };
   }
   const fetchImpl = opts?.fetchImpl ?? fetch;
