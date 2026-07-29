@@ -13545,11 +13545,19 @@ html.calm-mode .schedule-now-line {
    which made cards vanish and reappear while scrolling. */
 /* Floating DEMO sticker for seeded demo posts across boards (matches HAÜSING). */
 .pdx-demo-sticker {
-  position: absolute;
-  top: 12px;
-  right: -7px;
-  z-index: 7;
-  transform: rotate(6deg);
+  /* Force out of flow so glass-card child rules can't drop it back in and let
+     flex stretch it into a full-width banner. */
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+  left: auto !important;
+  z-index: 8;
+  display: inline-block;
+  width: -moz-max-content;
+  width: max-content !important;
+  max-width: 45%;
+  transform: rotate(-5deg);
+  transform-origin: center;
   background: var(--neon-yellow, #ffee00);
   color: #0a0a0a;
   font-family: var(--font-display, sans-serif);
@@ -13557,7 +13565,8 @@ html.calm-mode .schedule-now-line {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 0.72rem;
-  padding: 5px 12px 4px;
+  line-height: 1;
+  padding: 5px 11px 4px;
   border-radius: 4px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 0 2px #0a0a0a;
   pointer-events: none;
