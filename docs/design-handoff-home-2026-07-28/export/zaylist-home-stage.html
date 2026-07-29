@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zaylist home stage (drop-in)</title>
+
+<!-- PREVIEW ONLY. On zaylist.com these tokens already load from client/src/index.css.
+     Delete these two links when you paste this into the site. -->
+<link rel="stylesheet" href="../_ds/zaylist-design-system-f2a62fa3-7e93-4cdc-a3dc-2fe8f2feff13/styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&amp;display=swap">
+
+<!-- KEEP: stage-only keyframes and calm-mode rules. -->
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #0a0a0a; color: #e6e2d9; font-family: var(--font-body, Inter, sans-serif); -webkit-font-smoothing: antialiased; }
+  a { color: var(--neon-cyan, #00FFFF); text-decoration: underline; text-underline-offset: 3px; }
+  a:hover { color: #7dfbff; }
+  @keyframes zlOrb1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,40px) scale(1.15); } }
+  @keyframes zlOrb2 { 0%, 100% { transform: translate(0,0) scale(1.1); } 50% { transform: translate(-70px,30px) scale(.9); } }
+  @keyframes zlOrb3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-50px) scale(1.2); } }
+  @keyframes zlBlink { 50% { opacity: .28; } }
+  @keyframes enpPulse { 0%, 100% { opacity: 1; } 50% { opacity: .32; } }
+  @keyframes enpMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .enp-marquee--auto { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); }
+  .enp-marquee--auto .enp-track { animation: enpMarquee 40s linear infinite; will-change: transform; }
+  .enp-marquee--auto:hover .enp-track, .enp-marquee--auto:focus-within .enp-track { animation-play-state: paused; }
+  :root[data-calm="true"] .enp-marquee--auto .enp-track { animation: none; }
+  :root[data-calm="true"] .enp-marquee--auto { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .enp-marquee--auto .enp-track { animation: none; }
+    .enp-marquee--auto { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  }
+  @keyframes zlLetterOrb { 0%, 100% { transform: translateY(-50%) scale(.9); opacity: .38; } 50% { transform: translateY(-58%) scale(1.18); opacity: .72; } }
+  @keyframes zlFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  /* Word glitch, per guide: two tinted copies on screen blend, hard steps(1)
+     cuts, 3.2s cycle with ~350ms of activity, offsets never above 3px. */
+  @keyframes zlGlitchA {
+    0%, 88% { transform: translate(0,0); opacity: 0; }
+    89% { transform: translate(-3px,1px); opacity: .85; }
+    92% { transform: translate(2px,-2px); opacity: .7; }
+    95% { transform: translate(-2px,2px); opacity: .8; }
+    98%, 100% { transform: translate(0,0); opacity: 0; }
+  }
+  @keyframes zlGlitchB {
+    0%, 88% { transform: translate(0,0); opacity: 0; }
+    90% { transform: translate(3px,-1px); opacity: .8; }
+    93% { transform: translate(-2px,2px); opacity: .65; }
+    96% { transform: translate(2px,1px); opacity: .75; }
+    99%, 100% { transform: translate(0,0); opacity: 0; }
+  }
+  @keyframes zlGlitchSlip {
+    0%, 88%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+    91% { clip-path: inset(38% 0 44% 0); transform: translateX(-2px); }
+    94% { clip-path: inset(62% 0 18% 0); transform: translateX(2px); }
+  }
+  [data-zl-slide]::-webkit-scrollbar { width: 6px; }
+  [data-zl-slide]::-webkit-scrollbar-thumb { background: #2b2b2b; border-radius: 4px; }
+  @keyframes zlSeamFlow { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+  @keyframes zlHeroIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  :root[data-calm="true"] .zl-orb,
+  :root[data-calm="true"] .zl-dot,
+  :root[data-calm="true"] .zl-glitch,
+  :root[data-calm="true"] .zl-seam { animation: none !important; }
+  :root[data-calm="true"] .zl-glitch { display: none !important; }
+  :root[data-calm="true"] .zl-grain { opacity: 0 !important; }
+  :root[data-calm="true"] .zl-video { display: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .zl-orb, .zl-dot, .zl-seam, .zl-video { animation: none !important; }
+    .zl-glitch { display: none !important; }
+  }
+</style>
+<style>
+  body { margin: 0; background: #0a0a0a; color: #e6e2d9; font-family: var(--font-body, Inter, sans-serif); }
+</style>
+</head>
+<body>
+
+<!-- ==== ZAYLIST HOME STAGE: paste from here ==== -->
+<div data-zl-stage="" id="top" style="position:relative; isolation:isolate; overflow:hidden; background:#050505; height:clamp(396px,69vh,690px)">
+  <video class="zl-video" autoplay="" muted="" loop="" playsinline="" data-zl-video src="assets/hero-loop.mp4" style="position:absolute; inset:0; z-index:0; width:100%; height:100%; object-fit:cover; filter:saturate(1.08) contrast(1.04) brightness(.62)"></video>
+  <div style="position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden">
+    <div class="zl-orb" style="position:absolute; border-radius:50%; opacity:.5; mix-blend-mode:screen; filter:blur(70px); width:33vw; height:33vw; max-width:520px; max-height:520px; top:-8%; left:6%; background:#ff00cc; animation:zlOrb1 14s ease-in-out infinite"></div>
+    <div class="zl-orb" style="position:absolute; border-radius:50%; opacity:.5; mix-blend-mode:screen; filter:blur(70px); width:30vw; height:30vw; max-width:480px; max-height:480px; bottom:-14%; left:32%; background:#00ffff; animation:zlOrb2 18s ease-in-out infinite"></div>
+    <div class="zl-orb" style="position:absolute; border-radius:50%; opacity:.5; mix-blend-mode:screen; filter:blur(70px); width:27vw; height:27vw; max-width:440px; max-height:440px; top:16%; left:58%; background:#8800ff; animation:zlOrb3 16s ease-in-out infinite"></div>
+  </div>
+  <div style="position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(100deg, rgba(6,6,8,.94) 0%, rgba(6,6,8,.8) 40%, rgba(6,6,8,.34) 68%, rgba(6,6,8,.06) 100%), linear-gradient(to top, rgba(6,6,8,.86), rgba(6,6,8,.2) 52%, transparent 78%)"></div>
+  <div class="zl-grain" style="position:absolute; inset:0; z-index:3; pointer-events:none; opacity:.12; background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;); background-size:160px 160px"></div>
+  <div style="position:absolute; inset:0; z-index:3; pointer-events:none; opacity:.072; background-image:radial-gradient(#CCFF00 1px, transparent 1px); background-size:22px 22px"></div>
+
+  <div data-zl-letters="" style="position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); width:min(1100px,92vw); height:min(360px,42vh); z-index:2; pointer-events:none">
+    <div class="zl-orb" style="position:absolute; left:6%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#FF19D6; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:0s"></div>
+    <div class="zl-orb" style="position:absolute; left:19%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#FF5319; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-1.4s"></div>
+    <div class="zl-orb" style="position:absolute; left:32%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#FFD119; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-2.8s"></div>
+    <div class="zl-orb" style="position:absolute; left:45%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#9CFF19; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-4.2s"></div>
+    <div class="zl-orb" style="position:absolute; left:58%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#19F7FF; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-5.6s"></div>
+    <div class="zl-orb" style="position:absolute; left:71%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#1956FF; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-7s"></div>
+    <div class="zl-orb" style="position:absolute; left:84%; top:50%; width:15%; padding-bottom:15%; border-radius:50%; background:#E419FF; filter:blur(46px); opacity:.6; mix-blend-mode:screen; animation:zlLetterOrb 9s ease-in-out infinite; animation-delay:-8.4s"></div>
+  </div>
+  <div style="position:absolute; inset:0; z-index:4">
+    <div data-zl-slide="0" style="position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; display:flex; align-items:center; padding:clamp(14px,2.6vh,30px) 0 clamp(20px,4vh,40px); scrollbar-width:thin; scrollbar-color:#2b2b2b transparent; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+  <div style="position:relative; z-index:4; width:100%; max-width:1200px; margin:0 auto; padding:clamp(26px,5vh,56px) clamp(16px,3vw,28px) 0; text-align:center; animation:zlHeroIn .48s var(--ease-out,ease) both">
+    <div style="display:inline-flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#CCFF00; margin:clamp(10px,2vh,20px) auto clamp(10px,2vh,18px)">
+      <span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:#CCFF00; box-shadow:0 0 10px #CCFF00; animation:zlBlink 1.8s ease-in-out infinite"></span>Portland · all year
+    </div>
+    <div data-zl-wordmark="" style="position:relative; width:min(1310px,99%); margin:clamp(6px,1.4vh,14px) auto clamp(12px,2.4vh,20px); animation:zlFloat 7s ease-in-out infinite">
+      <div style="position:absolute; left:0; right:0; top:26%; z-index:5; font-family:'Caveat',cursive; font-weight:600; font-size:clamp(24px,2.9vw,40px); line-height:1; color:#fff; transform:rotate(-3deg); text-shadow:0 2px 12px rgba(0,0,0,.85); pointer-events:none">Welcome, you're on</div>
+      <img src="assets/zaylist-wordmark-filled.png" alt="Zaylist" style="width:100%; max-height:50vh; height:auto; object-fit:contain; display:block; filter:saturate(1.55) contrast(1.08) brightness(1.12) drop-shadow(0 0 18px rgba(255,0,204,.42)) drop-shadow(0 0 34px rgba(0,255,255,.3))">
+      <img class="zl-glitch" src="assets/zaylist-wordmark-filled.png" alt="" aria-hidden="true" style="position:absolute; inset:0; width:100%; max-height:50vh; height:auto; object-fit:contain; display:block; mix-blend-mode:screen; opacity:0; filter:saturate(2.2) brightness(1.25) hue-rotate(-30deg); animation:zlGlitchA 3.2s steps(1) infinite, zlGlitchSlip 3.2s steps(1) infinite">
+      <img class="zl-glitch" src="assets/zaylist-wordmark-filled.png" alt="" aria-hidden="true" style="position:absolute; inset:0; width:100%; max-height:50vh; height:auto; object-fit:contain; display:block; mix-blend-mode:screen; opacity:0; filter:saturate(2.3) brightness(1.25) hue-rotate(40deg); animation:zlGlitchB 3.2s steps(1) infinite, zlGlitchSlip 3.2s steps(1) infinite">
+    </div>
+    
+  </div>
+    </div>
+    <div data-zl-slide="1" data-zl-fit="" style="position:absolute; inset:0; overflow:hidden; display:flex; align-items:stretch; padding:0; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+<section id="events" data-screen-label="Events" style="position:relative; isolation:isolate; overflow:hidden; width:100%; height:100%; display:flex; align-items:center; background:rgba(6,6,8,.42)">
+  <img src="assets/festival-posters-wall.jpg" alt="" style="position:absolute; inset:0; z-index:0; width:100%; height:100%; object-fit:cover; opacity:.42; filter:saturate(1.08) contrast(1.04)">
+  <div style="position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(102deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.82) 32%, rgba(0,0,0,.62) 56%, rgba(0,0,0,.4) 100%), linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.34) 42%, rgba(0,0,0,.06) 72%)"></div>
+  <div class="zl-grain" style="position:absolute; inset:0; z-index:3; pointer-events:none; opacity:.108; background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;); background-size:160px 160px"></div>
+  <div style="position:relative; z-index:4; width:100%; height:100%; max-width:1400px; margin:0 auto; padding:0 clamp(16px,3vw,28px); display:flex; flex-direction:column; justify-content:center; min-height:0">
+    <div style="flex:none; display:flex; justify-content:flex-end; font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; white-space:nowrap; color:#CCFF00">
+      <span style="display:inline-flex; align-items:center; gap:9px"><span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:#CCFF00; box-shadow:0 0 10px #CCFF00; animation:zlBlink 1.8s ease-in-out infinite"></span>Events · Portland, this week</span>
+    </div>
+    <div style="flex:1 1 auto; min-height:0; display:flex; align-items:center; gap:clamp(18px,3.4vw,52px); justify-content:space-between; margin-top:clamp(6px,1.2vw,12px)">
+      <div>
+        <h2 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(32px,7.4vh,78px); line-height:.9; text-transform:uppercase; color:#fff">Events</h2>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); margin-top:clamp(6px,1vw,10px)">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; text-transform:uppercase; color:#CCFF00">Did you get on</span>
+          <img src="assets/zaylist-wordmark-white.png" alt="Zaylist" style="width:clamp(112px,19vh,196px); height:auto; display:block; filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 6px 14px rgba(0,0,0,.55))">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; color:#fff">?</span>
+        </div>
+        <p style="margin:clamp(7px,1.1vh,11px) 0 clamp(9px,1.5vh,14px); max-width:46ch; font-size:clamp(13.5px,1.9vh,18px); line-height:1.5; color:#e6e2d9; text-wrap:pretty">Here's the week. Every queer party, show, and march on one map.</p>
+        
+      </div>
+      <a data-zl-card href="/events/1042/champagnes-catch-a-rising-star" class="pdx-glass-card pdx-glass-rebind" style="--c:var(--day-fri,#FF00CC); text-decoration:none; color:inherit; position:relative; flex:0 0 auto; width:clamp(232px,31vw,368px); max-height:100%; border-radius:var(--glass-card-radius,14px); padding:clamp(13px,2vh,18px); display:flex; flex-direction:column; gap:clamp(9px,1.5vh,13px); overflow:hidden">
+        <span class="pdx-refract-seam" aria-hidden="true"></span>
+        <div style="display:flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap">
+          <span class="zl-dot" style="width:7px; height:7px; border-radius:50%; background:var(--day-fri,#FF00CC); box-shadow:0 0 8px var(--day-fri,#FF00CC); animation:zlBlink 1.8s ease-in-out infinite"></span>
+          <span style="color:var(--day-fri,#FF00CC)">Happening now</span>
+          <span aria-hidden="true" style="margin-left:auto; transform:rotate(-4deg); padding:3px 8px 2px; border-radius:var(--chrome-radius-tag,7px); background:var(--acid-lit-chip); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:11px; letter-spacing:.08em; line-height:1; box-shadow:var(--sticker-lit)">Demo</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px; min-width:0">
+          <img src="assets/flyers/sasha-colby-live.jpg" alt="" style="flex:none; width:clamp(66px,9vh,86px); height:clamp(66px,9vh,86px); border-radius:9px; object-fit:cover; border:1px solid #000">
+          <div style="min-width:0; display:flex; flex-direction:column; gap:6px">
+            <h4 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,2.6vh,22px); line-height:1.04; text-transform:uppercase; color:#fff">Champagne's catch a rising star</h4>
+            <p style="margin:0; font-size:clamp(12.5px,1.7vh,14px); line-height:1.45; color:var(--board-muted,#bdbab2); text-wrap:pretty">Darcelle XV, Pearl District. Tickets are at the door.</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-top:clamp(7px,1.2vh,11px); border-top:1px solid color-mix(in srgb, var(--day-fri,#FF00CC) 22%, transparent); font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap">
+          <span style="color:#999; overflow:hidden; text-overflow:ellipsis">Fri &middot; 9:00 PM &middot; 12 going</span>
+          <span style="margin-left:auto; color:var(--day-fri,#FF00CC); font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:15px; letter-spacing:.09em">I'm going &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div style="flex:none; margin-top:clamp(8px,1.4vh,16px); padding-top:9px; border-top:1px solid color-mix(in srgb, #CCFF00 22%, transparent); display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between">
+      <a href="#events" style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(18px,2vw,22px); letter-spacing:.05em; text-transform:uppercase; color:#CCFF00; text-decoration:none" data-hover="color:#D8FF3D">Open the events map →</a>
+      <span style="font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#999">Find it · save it · pull up</span>
+    </div>
+  </div>
+</section>
+    </div>
+    <div data-zl-slide="2" data-zl-fit="" style="position:absolute; inset:0; overflow:hidden; display:flex; align-items:stretch; padding:0; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+<section id="hausing" data-screen-label="Hausing" style="position:relative; isolation:isolate; overflow:hidden; width:100%; height:100%; display:flex; align-items:center; background:rgba(6,6,10,.52)">
+  <div style="position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(120% 90% at 8% 0%, color-mix(in srgb, var(--board-housing,#00FFFF) 14%, transparent) 0%, transparent 58%), radial-gradient(100% 80% at 100% 100%, color-mix(in srgb, var(--neon-violet,#8800FF) 12%, transparent) 0%, transparent 60%)"></div>
+  <div style="position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.06; background-image:radial-gradient(#19e3ff 1px, transparent 1px); background-size:22px 22px"></div>
+  <div style="position:relative; z-index:4; width:100%; height:100%; max-width:1400px; margin:0 auto; padding:0 clamp(16px,3vw,28px); display:flex; flex-direction:column; justify-content:center; min-height:0">
+    <div style="flex:none; display:flex; justify-content:flex-end; font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; white-space:nowrap; color:var(--panel-cyan,#19e3ff)">
+      <span style="display:inline-flex; align-items:center; gap:9px"><span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:var(--panel-cyan,#19e3ff); box-shadow:0 0 10px var(--panel-cyan,#19e3ff); animation:zlBlink 1.8s ease-in-out infinite"></span>Haüsing · Housing board</span>
+    </div>
+    <div style="flex:1 1 auto; min-height:0; display:flex; align-items:center; gap:clamp(18px,3.4vw,52px); justify-content:space-between; margin-top:clamp(6px,1.2vw,12px)">
+      <div>
+        <div style="display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap">
+          <h2 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(30px,7vh,72px); line-height:.9; text-transform:uppercase; color:#fff">Haüsing</h2>
+          <span style="--c:var(--green-acid,#39FF14); align-self:center; transform:rotate(-3deg); padding:6px 12px; border-radius:var(--chrome-radius-tag,7px); background:var(--green-acid,#39FF14); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:16px; letter-spacing:.08em; text-transform:uppercase; line-height:1; box-shadow:var(--sticker-lit)">Beta</span>
+        </div>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); margin-top:clamp(6px,1vw,10px)">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; text-transform:uppercase; color:var(--panel-cyan,#19e3ff)">Your home is on</span>
+          <img src="assets/zaylist-wordmark-white.png" alt="Zaylist" style="width:clamp(112px,19vh,196px); height:auto; display:block; filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 6px 14px rgba(0,0,0,.55))">
+        </div>
+        <p style="margin:clamp(7px,1.1vh,11px) 0 clamp(9px,1.5vh,14px); max-width:46ch; font-size:clamp(13.5px,1.9vh,18px); line-height:1.5; color:var(--board-text,#f4f1ea); text-wrap:pretty">Rooms, roommates, and households in the making. No fees, no applications.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px">
+          <a href="#hausing" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-cyan,#19e3ff); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Offering a room</a>
+          <a href="#hausing" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-purple,#b06bff); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Looking for housing</a>
+          <a href="#hausing" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-orange,#ff8c00); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Forming a haüs</a>
+        </div>
+      </div>
+      <a data-zl-card href="/hausing/318/wildrose-haus" class="pdx-glass-card pdx-glass-rebind" style="--c:var(--panel-cyan,#19e3ff); text-decoration:none; color:inherit; position:relative; flex:0 0 auto; width:clamp(232px,31vw,368px); max-height:100%; border-radius:var(--glass-card-radius,14px); padding:clamp(13px,2vh,18px); display:flex; flex-direction:column; gap:clamp(9px,1.5vh,13px); overflow:hidden">
+        <span class="pdx-refract-seam" aria-hidden="true"></span>
+        <div style="display:flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap">
+          <span class="zl-dot" style="width:7px; height:7px; border-radius:50%; background:var(--panel-cyan,#19e3ff); box-shadow:0 0 8px var(--panel-cyan,#19e3ff); animation:zlBlink 1.8s ease-in-out infinite"></span>
+          <span style="color:var(--panel-cyan,#19e3ff)">Forming a haüs</span>
+          <span aria-hidden="true" style="margin-left:auto; transform:rotate(-4deg); padding:3px 8px 2px; border-radius:var(--chrome-radius-tag,7px); background:var(--acid-lit-chip); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:11px; letter-spacing:.08em; line-height:1; box-shadow:var(--sticker-lit)">Demo</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px; min-width:0">
+          <img src="assets/hausing/room-forming.jpg" alt="" style="flex:none; width:clamp(66px,9vh,86px); height:clamp(66px,9vh,86px); border-radius:9px; object-fit:cover; border:1px solid #000">
+          <div style="min-width:0; display:flex; flex-direction:column; gap:6px">
+            <h4 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,2.6vh,22px); line-height:1.04; text-transform:uppercase; color:#fff">Wildrose haüs, 2 in, 2 to go</h4>
+            <p style="margin:0; font-size:clamp(12.5px,1.7vh,14px); line-height:1.45; color:var(--board-muted,#bdbab2); text-wrap:pretty">Southeast. Big kitchen, one very polite beagle.</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-top:clamp(7px,1.2vh,11px); border-top:1px solid color-mix(in srgb, var(--panel-cyan,#19e3ff) 22%, transparent); font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap">
+          <span style="color:#999; overflow:hidden; text-overflow:ellipsis">$850 &middot; Feb 1 &middot; 4 asks</span>
+          <span style="margin-left:auto; color:var(--panel-cyan,#19e3ff); font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:15px; letter-spacing:.09em">Ask to join &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div style="flex:none; margin-top:clamp(8px,1.4vh,16px); padding-top:9px; border-top:1px solid color-mix(in srgb, var(--panel-cyan,#19e3ff) 22%, transparent); display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between">
+      <a href="#hausing" style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(18px,2vw,22px); letter-spacing:.05em; text-transform:uppercase; color:var(--panel-cyan,#19e3ff); text-decoration:none" data-hover="color:#7dfbff">Open the haüsing board →</a>
+      <span style="font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#999">Find a room · find people</span>
+    </div>
+  </div>
+</section>
+    </div>
+    <div data-zl-slide="3" data-zl-fit="" style="position:absolute; inset:0; overflow:hidden; display:flex; align-items:stretch; padding:0; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+<section id="gifting" data-screen-label="Gifting" style="position:relative; isolation:isolate; overflow:hidden; width:100%; height:100%; display:flex; align-items:center; background:rgba(6,6,10,.52); border-top:1px solid var(--panel-border,#1c1c22)">
+  <div style="position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(120% 90% at 8% 0%, color-mix(in srgb, var(--board-gifting,#CCFF00) 12%, transparent) 0%, transparent 58%), radial-gradient(100% 80% at 100% 100%, color-mix(in srgb, var(--green-acid,#39FF14) 10%, transparent) 0%, transparent 60%)"></div>
+  <div style="position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.06; background-image:radial-gradient(#c8fa3c 1px, transparent 1px); background-size:22px 22px"></div>
+  <div style="position:relative; z-index:4; width:100%; height:100%; max-width:1400px; margin:0 auto; padding:0 clamp(16px,3vw,28px); display:flex; flex-direction:column; justify-content:center; min-height:0">
+    <div style="flex:none; display:flex; justify-content:flex-end; font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; white-space:nowrap; color:var(--panel-lime,#c8fa3c)">
+      <span style="display:inline-flex; align-items:center; gap:9px"><span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:var(--panel-lime,#c8fa3c); box-shadow:0 0 10px var(--panel-lime,#c8fa3c); animation:zlBlink 1.8s ease-in-out infinite"></span>Gifting · Everything free</span>
+    </div>
+    <div style="flex:1 1 auto; min-height:0; display:flex; align-items:center; gap:clamp(18px,3.4vw,52px); justify-content:space-between; margin-top:clamp(6px,1.2vw,12px)">
+      <div>
+        <h2 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(30px,7vh,72px); line-height:.9; text-transform:uppercase; color:#fff">Gifting</h2>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); margin-top:clamp(6px,1vw,10px)">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; text-transform:uppercase; color:var(--neon-yellow,#CCFF00)">Give it away on</span>
+          <img src="assets/zaylist-wordmark-white.png" alt="Zaylist" style="width:clamp(112px,19vh,196px); height:auto; display:block; filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 6px 14px rgba(0,0,0,.55))">
+        </div>
+        <p style="margin:clamp(7px,1.1vh,11px) 0 clamp(9px,1.5vh,14px); max-width:46ch; font-size:clamp(13.5px,1.9vh,18px); line-height:1.5; color:var(--board-text,#f4f1ea); text-wrap:pretty">Someone needs the thing you are done with. Nothing is for sale here.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px">
+          <a href="#gifting" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-lime,#c8fa3c); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Giving</a>
+          <a href="#gifting" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--green-acid,#39FF14); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">In search of</a>
+          <a href="#gifting" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-orange,#ff8c00); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">No money, ever</a>
+        </div>
+      </div>
+      <a data-zl-card href="/gifting/2871/free-moving-boxes" class="pdx-glass-card pdx-glass-rebind" style="--c:var(--panel-lime,#c8fa3c); text-decoration:none; color:inherit; position:relative; flex:0 0 auto; width:clamp(232px,31vw,368px); max-height:100%; border-radius:var(--glass-card-radius,14px); padding:clamp(13px,2vh,18px); display:flex; flex-direction:column; gap:clamp(9px,1.5vh,13px); overflow:hidden">
+        <span class="pdx-refract-seam" aria-hidden="true"></span>
+        <div style="display:flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap">
+          <span class="zl-dot" style="width:7px; height:7px; border-radius:50%; background:var(--panel-lime,#c8fa3c); box-shadow:0 0 8px var(--panel-lime,#c8fa3c); animation:zlBlink 1.8s ease-in-out infinite"></span>
+          <span style="color:var(--panel-lime,#c8fa3c)">On the board now</span>
+          <span aria-hidden="true" style="margin-left:auto; transform:rotate(-4deg); padding:3px 8px 2px; border-radius:var(--chrome-radius-tag,7px); background:var(--acid-lit-chip); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:11px; letter-spacing:.08em; line-height:1; box-shadow:var(--sticker-lit)">Demo</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px; min-width:0">
+          <img src="assets/gifting/gift-boxes.jpg" alt="" style="flex:none; width:clamp(66px,9vh,86px); height:clamp(66px,9vh,86px); border-radius:9px; object-fit:cover; border:1px solid #000">
+          <div style="min-width:0; display:flex; flex-direction:column; gap:6px">
+            <h4 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,2.6vh,22px); line-height:1.04; text-transform:uppercase; color:#fff">Free moving boxes (about 20)</h4>
+            <p style="margin:0; font-size:clamp(12.5px,1.7vh,14px); line-height:1.45; color:var(--board-muted,#bdbab2); text-wrap:pretty">SE Portland. Take them all, they are clean and flat.</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-top:clamp(7px,1.2vh,11px); border-top:1px solid color-mix(in srgb, var(--panel-lime,#c8fa3c) 22%, transparent); font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap">
+          <span style="color:#999; overflow:hidden; text-overflow:ellipsis">24m ago &middot; 0 of 3 hands up</span>
+          <span style="margin-left:auto; color:var(--panel-lime,#c8fa3c); font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:15px; letter-spacing:.09em">Raise hand &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div style="flex:none; margin-top:clamp(8px,1.4vh,16px); padding-top:9px; border-top:1px solid color-mix(in srgb, var(--panel-lime,#c8fa3c) 22%, transparent); display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between">
+      <a href="#gifting" style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(18px,2vw,22px); letter-spacing:.05em; text-transform:uppercase; color:var(--panel-lime,#c8fa3c); text-decoration:none" data-hover="color:#D8FF3D">Open the gifting board →</a>
+      <span style="font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#999">Keep it free · keep it moving</span>
+    </div>
+  </div>
+</section>
+    </div>
+    <div data-zl-slide="4" data-zl-fit="" style="position:absolute; inset:0; overflow:hidden; display:flex; align-items:stretch; padding:0; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+<section id="gig-board" data-screen-label="Gig Board" style="position:relative; isolation:isolate; overflow:hidden; width:100%; height:100%; display:flex; align-items:center; background:rgba(6,6,10,.52); border-top:1px solid var(--panel-border,#1c1c22)">
+  <div style="position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(120% 90% at 8% 0%, color-mix(in srgb, var(--board-gigs,#8800FF) 18%, transparent) 0%, transparent 58%), radial-gradient(100% 80% at 100% 100%, color-mix(in srgb, var(--panel-cyan,#19e3ff) 10%, transparent) 0%, transparent 60%)"></div>
+  <div style="position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.06; background-image:radial-gradient(#b06bff 1px, transparent 1px); background-size:22px 22px"></div>
+  <div style="position:relative; z-index:4; width:100%; height:100%; max-width:1400px; margin:0 auto; padding:0 clamp(16px,3vw,28px); display:flex; flex-direction:column; justify-content:center; min-height:0">
+    <div style="flex:none; display:flex; justify-content:flex-end; font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; white-space:nowrap; color:var(--panel-purple,#b06bff)">
+      <span style="display:inline-flex; align-items:center; gap:9px"><span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:var(--green-acid,#39FF14); box-shadow:0 0 10px var(--green-acid,#39FF14); animation:zlBlink 1.8s ease-in-out infinite"></span>Gig board · Hiring both ways</span>
+    </div>
+    <div style="flex:1 1 auto; min-height:0; display:flex; align-items:center; gap:clamp(18px,3.4vw,52px); justify-content:space-between; margin-top:clamp(6px,1.2vw,12px)">
+      <div>
+        <h2 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(30px,7vh,72px); line-height:.9; text-transform:uppercase; color:#fff; max-width:8ch">Gig board</h2>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); margin-top:clamp(6px,1vw,10px)">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; text-transform:uppercase; color:var(--panel-purple,#b06bff)">That gig is on</span>
+          <img src="assets/zaylist-wordmark-white.png" alt="Zaylist" style="width:clamp(112px,19vh,196px); height:auto; display:block; filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 6px 14px rgba(0,0,0,.55))">
+        </div>
+        <p style="margin:clamp(7px,1.1vh,11px) 0 clamp(9px,1.5vh,14px); max-width:46ch; font-size:clamp(13.5px,1.9vh,18px); line-height:1.5; color:var(--board-text,#f4f1ea); text-wrap:pretty">Need work? Need help at your event? Both belong here.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px">
+          <a href="#gig-board" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-purple,#b06bff); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Hiring</a>
+          <a href="#gig-board" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--green-acid,#39FF14); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">For hire</a>
+          <a href="#gig-board" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-cyan,#19e3ff); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Paid or trade</a>
+        </div>
+      </div>
+      <a data-zl-card href="/pride-work/914/coat-check-two-people" class="pdx-glass-card pdx-glass-rebind" style="--c:var(--panel-purple,#b06bff); text-decoration:none; color:inherit; position:relative; flex:0 0 auto; width:clamp(232px,31vw,368px); max-height:100%; border-radius:var(--glass-card-radius,14px); padding:clamp(13px,2vh,18px); display:flex; flex-direction:column; gap:clamp(9px,1.5vh,13px); overflow:hidden">
+        <span class="pdx-refract-seam" aria-hidden="true"></span>
+        <div style="display:flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap">
+          <span class="zl-dot" style="width:7px; height:7px; border-radius:50%; background:var(--panel-purple,#b06bff); box-shadow:0 0 8px var(--panel-purple,#b06bff); animation:zlBlink 1.8s ease-in-out infinite"></span>
+          <span style="color:var(--panel-purple,#b06bff)">Hiring</span>
+          <span aria-hidden="true" style="margin-left:auto; transform:rotate(-4deg); padding:3px 8px 2px; border-radius:var(--chrome-radius-tag,7px); background:var(--acid-lit-chip); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:11px; letter-spacing:.08em; line-height:1; box-shadow:var(--sticker-lit)">Demo</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px; min-width:0">
+          <img src="assets/flyers/certified-freak-block-party.jpg" alt="" style="flex:none; width:clamp(66px,9vh,86px); height:clamp(66px,9vh,86px); border-radius:9px; object-fit:cover; border:1px solid #000">
+          <div style="min-width:0; display:flex; flex-direction:column; gap:6px">
+            <h4 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,2.6vh,22px); line-height:1.04; text-transform:uppercase; color:#fff">Coat check, two people, 9pm to 2am</h4>
+            <p style="margin:0; font-size:clamp(12.5px,1.7vh,14px); line-height:1.45; color:var(--board-muted,#bdbab2); text-wrap:pretty">Paid cash at the end of the night. Tips are yours.</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-top:clamp(7px,1.2vh,11px); border-top:1px solid color-mix(in srgb, var(--panel-purple,#b06bff) 22%, transparent); font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap">
+          <span style="color:#999; overflow:hidden; text-overflow:ellipsis">Sat &middot; Southeast &middot; $25/hr</span>
+          <span style="margin-left:auto; color:var(--panel-purple,#b06bff); font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:15px; letter-spacing:.09em">Say hi &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div style="flex:none; margin-top:clamp(8px,1.4vh,16px); padding-top:9px; border-top:1px solid color-mix(in srgb, var(--panel-purple,#b06bff) 22%, transparent); display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between">
+      <a href="#gig-board" style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(18px,2vw,22px); letter-spacing:.05em; text-transform:uppercase; color:var(--panel-purple,#b06bff); text-decoration:none" data-hover="color:#c9a0ff">Open the gig board →</a>
+      <span style="font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#999">Ask for it · offer it · get paid</span>
+    </div>
+  </div>
+</section>
+    </div>
+    <div data-zl-slide="5" data-zl-fit="" style="position:absolute; inset:0; overflow:hidden; display:flex; align-items:stretch; padding:0; transition:opacity .45s var(--ease-out,ease), transform .45s var(--ease-out,ease)">
+<section id="missed-connections" data-screen-label="Missed Connections" style="position:relative; isolation:isolate; overflow:hidden; width:100%; height:100%; display:flex; align-items:center; background:rgba(6,6,10,.52); border-top:1px solid var(--panel-border,#1c1c22)">
+  <div style="position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(120% 90% at 8% 0%, color-mix(in srgb, var(--board-spotted,#FF00CC) 14%, transparent) 0%, transparent 58%), radial-gradient(100% 80% at 100% 100%, color-mix(in srgb, var(--panel-cyan,#19e3ff) 10%, transparent) 0%, transparent 60%)"></div>
+  <div style="position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.06; background-image:radial-gradient(#ff1fa0 1px, transparent 1px); background-size:22px 22px"></div>
+  <div style="position:relative; z-index:4; width:100%; height:100%; max-width:1400px; margin:0 auto; padding:0 clamp(16px,3vw,28px); display:flex; flex-direction:column; justify-content:center; min-height:0">
+    <div style="flex:none; display:flex; justify-content:flex-end; font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; white-space:nowrap; color:var(--panel-magenta,#ff1fa0)">
+      <span style="display:inline-flex; align-items:center; gap:9px"><span class="zl-dot" style="width:8px; height:8px; border-radius:50%; background:var(--panel-magenta,#ff1fa0); box-shadow:0 0 10px var(--panel-magenta,#ff1fa0); animation:zlBlink 1.8s ease-in-out infinite"></span>Missed connections! · Anonymous</span>
+    </div>
+    <div style="flex:1 1 auto; min-height:0; display:flex; align-items:center; gap:clamp(18px,3.4vw,52px); justify-content:space-between; margin-top:clamp(6px,1.2vw,12px)">
+      <div>
+        <h2 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(28px,6.2vh,66px); line-height:.92; text-transform:uppercase; color:#fff; max-width:11ch">Missed connections<span style="color:var(--neon-magenta,#FF00CC)">!</span></h2>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); margin-top:clamp(6px,1vw,10px)">
+          <span style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,3.1vh,32px); line-height:1; white-space:nowrap; text-transform:uppercase; color:var(--neon-magenta,#FF00CC)">That hottie posted on</span>
+          <img src="assets/zaylist-wordmark-white.png" alt="Zaylist" style="width:clamp(112px,19vh,196px); height:auto; display:block; filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 6px 14px rgba(0,0,0,.55))">
+        </div>
+        <p style="margin:clamp(7px,1.1vh,11px) 0 clamp(9px,1.5vh,14px); max-width:46ch; font-size:clamp(13.5px,1.9vh,18px); line-height:1.5; color:var(--board-text,#f4f1ea); text-wrap:pretty">Post who you saw. Replies open a private thread, never the board.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px">
+          <a href="#missed-connections" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-magenta,#ff1fa0); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">At an event</a>
+          <a href="#missed-connections" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-orange,#ff8c00); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">At the beach</a>
+          <a href="#missed-connections" class="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style="--c:var(--panel-cyan,#19e3ff); font-family:var(--font-mono,ui-monospace,monospace); font-size:11.5px; letter-spacing:.14em; padding:12px 16px; min-height:40px; white-space:nowrap; text-decoration:none">Around town</a>
+        </div>
+      </div>
+      <a data-zl-card href="/spotted/4405/blue-buzzcut-back-patio" class="pdx-glass-card pdx-glass-rebind" style="--c:var(--panel-magenta,#ff1fa0); text-decoration:none; color:inherit; position:relative; flex:0 0 auto; width:clamp(232px,31vw,368px); max-height:100%; border-radius:var(--glass-card-radius,14px); padding:clamp(13px,2vh,18px); display:flex; flex-direction:column; gap:clamp(9px,1.5vh,13px); overflow:hidden">
+        <span class="pdx-refract-seam" aria-hidden="true"></span>
+        <div style="display:flex; align-items:center; gap:9px; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap">
+          <span class="zl-dot" style="width:7px; height:7px; border-radius:50%; background:var(--panel-magenta,#ff1fa0); box-shadow:0 0 8px var(--panel-magenta,#ff1fa0); animation:zlBlink 1.8s ease-in-out infinite"></span>
+          <span style="color:var(--panel-magenta,#ff1fa0)">Missed connections</span>
+          <span aria-hidden="true" style="margin-left:auto; transform:rotate(-4deg); padding:3px 8px 2px; border-radius:var(--chrome-radius-tag,7px); background:var(--acid-lit-chip); color:#101015; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:11px; letter-spacing:.08em; line-height:1; box-shadow:var(--sticker-lit)">Demo</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px; min-width:0">
+          <span aria-hidden="true" style="flex:none; width:clamp(66px,9vh,86px); height:clamp(66px,9vh,86px); border-radius:9px; border:1px solid #000; background:color-mix(in srgb, var(--panel-magenta,#ff1fa0) 14%, #0b0b0e); display:grid; place-items:center; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:52px; line-height:0.7; color:var(--panel-magenta,#ff1fa0); overflow:hidden">&ldquo;</span>
+          <div style="min-width:0; display:flex; flex-direction:column; gap:6px">
+            <h4 style="margin:0; font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(17px,2.6vh,22px); line-height:1.04; text-transform:uppercase; color:#fff">Blue buzzcut, back patio, two waters</h4>
+            <p style="margin:0; font-size:clamp(12.5px,1.7vh,14px); line-height:1.45; color:var(--board-muted,#bdbab2); text-wrap:pretty">You gave one to me. I did not get your name.</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-top:clamp(7px,1.2vh,11px); border-top:1px solid color-mix(in srgb, var(--panel-magenta,#ff1fa0) 22%, transparent); font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap">
+          <span style="color:#999; overflow:hidden; text-overflow:ellipsis">2h ago &middot; Fri &middot; Pearl District</span>
+          <span style="margin-left:auto; color:var(--panel-magenta,#ff1fa0); font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:15px; letter-spacing:.09em">Reply &rarr;</span>
+        </div>
+      </a>
+    </div>
+    <div style="flex:none; margin-top:clamp(8px,1.4vh,16px); padding-top:9px; border-top:1px solid color-mix(in srgb, var(--panel-magenta,#ff1fa0) 22%, transparent); display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between">
+      <a href="#missed-connections" style="font-family:var(--font-display,'Barlow Condensed',sans-serif); font-weight:900; font-size:clamp(18px,2vw,22px); letter-spacing:.05em; text-transform:uppercase; color:var(--panel-magenta,#ff1fa0); text-decoration:none" data-hover="color:#ff6ec7">Open missed connections →</a>
+      <span style="font-family:var(--font-mono,ui-monospace,monospace); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#999">Stay kind · reveal when ready</span>
+    </div>
+  </div>
+</section>
+    </div>
+  </div>
+    <button type="button" aria-label="Previous slide" data-zl-prev="" style="position:absolute; left:clamp(8px,1.6vw,20px); top:50%; transform:translateY(-50%); z-index:8; width:34px; height:34px; border-radius:999px; border:0; background:none; color:rgba(230,226,217,.42); cursor:pointer; display:grid; place-items:center; opacity:.7; transition:color .15s ease, opacity .15s ease" data-hover="color:var(--neon-cyan,#00FFFF); opacity:1">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </button>
+    <button type="button" aria-label="Next slide" data-zl-next="" style="position:absolute; right:clamp(8px,1.6vw,20px); top:50%; transform:translateY(-50%); z-index:8; width:34px; height:34px; border-radius:999px; border:0; background:none; color:rgba(230,226,217,.42); cursor:pointer; display:grid; place-items:center; opacity:.7; transition:color .15s ease, opacity .15s ease" data-hover="color:var(--neon-cyan,#00FFFF); opacity:1">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+    </button>
+</div>
+
+<!-- ==== to here ==== -->
+
+<script>
+/* Zaylist home stage: one wallpaper, seven slides. Vanilla, no deps. */
+(function () {
+  var stage = document.querySelector('[data-zl-stage]');
+  if (!stage) return;
+  var slides = [].slice.call(stage.querySelectorAll('[data-zl-slide]'));
+  var cards = [].slice.call(stage.querySelectorAll('[data-zl-card]'));
+  var mq = window.matchMedia('(min-width: 680px)');
+  var i = 0;
+
+  function paintCards() {
+    cards.forEach(function (el) {
+      el.style.display = mq.matches ? 'flex' : 'none';
+      var copy = el.previousElementSibling;
+      if (copy) { copy.style.flex = '1 1 auto'; copy.style.minWidth = '0'; }
+    });
+  }
+
+  function paint() {
+    slides.forEach(function (el, n) {
+      var on = n === i;
+      el.style.opacity = on ? '1' : '0';
+      el.style.transform = on ? 'none' : (n < i ? 'translateX(-24px)' : 'translateX(24px)');
+      el.style.pointerEvents = on ? 'auto' : 'none';
+      el.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+
+  function go(n) { i = (n + slides.length) % slides.length; paint(); }
+
+  var prev = stage.querySelector('[data-zl-prev]');
+  var next = stage.querySelector('[data-zl-next]');
+  if (prev) prev.addEventListener('click', function () { go(i - 1); });
+  if (next) next.addEventListener('click', function () { go(i + 1); });
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') go(i + 1);
+    if (e.key === 'ArrowLeft') go(i - 1);
+  });
+  mq.addEventListener ? mq.addEventListener('change', paintCards) : mq.addListener(paintCards);
+
+  /* style-hover parity: the DC used a hover attribute, the static build wires it. */
+  [].slice.call(stage.querySelectorAll('[data-hover]')).forEach(function (el) {
+    var base = el.getAttribute('style') || '';
+    var hov = el.getAttribute('data-hover');
+    el.addEventListener('mouseenter', function () { el.setAttribute('style', base + '; ' + hov); });
+    el.addEventListener('mouseleave', function () { el.setAttribute('style', base); });
+  });
+
+  /* Calm mode / reduced motion: drop the wallpaper video, keep the poster black. */
+  var video = stage.querySelector('[data-zl-video]');
+  function calm() {
+    var off = document.documentElement.getAttribute('data-calm') === 'true'
+      || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (video) { if (off) { video.pause(); video.style.display = 'none'; } else { video.style.display = ''; video.play().catch(function () {}); } }
+  }
+  new MutationObserver(calm).observe(document.documentElement, { attributes: true, attributeFilter: ['data-calm'] });
+
+  paintCards(); paint(); calm();
+})();
+</script>
+</body>
+</html>

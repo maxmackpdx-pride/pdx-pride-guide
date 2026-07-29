@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { EventListing } from "@shared/multiDayEvents";
 
 import ScrollReveal from "@/components/ScrollReveal";
-import HomeHero from "@/components/HomeHero";
+import HomeStage from "@/components/home/HomeStage";
 import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeUpNext from "@/components/HomeUpNext";
 import HomeBeachWidget from "@/components/HomeBeachWidget";
@@ -77,7 +77,7 @@ export default function Home() {
   return (
     <div className="home-main-stage">
       <HomeConstructionNudge />
-      <HomeHero />
+      <HomeStage />
       <HomeStatStrip
         eventCount={eventCount}
         placesCount={placesCount}

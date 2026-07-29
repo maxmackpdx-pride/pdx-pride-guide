@@ -218,6 +218,87 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
 .pdxPlace__share:disabled{ opacity:.6; cursor:default; }
+/* Main content column (full + compact share the same wrapper) */
+.pdxPlace__main{
+  display:flex; flex-direction:column; gap:12px; min-width:0;
+  flex:1 1 auto; position:relative; z-index:1;
+}
+/* Compact wide - Directory dock list (design handoff 2026-07-28).
+   Classes: pdxPlace--compact (from prop) and/or pdxPlace--wide (Directory). */
+.pdxPlace--compact,
+.pdxPlace--wide{ margin:0; }
+.pdxPlace--compact .pdxPlace__glow,
+.pdxPlace--wide .pdxPlace__glow{ inset:-3px; border-radius:14px; }
+.pdxPlace--compact .pdxPlace__body,
+.pdxPlace--wide .pdxPlace__body{
+  flex-direction:row; align-items:center; gap:14px;
+  padding:10px 14px 10px 10px; border-radius:12px;
+}
+.pdxPlace--compact .pdxPlace__main,
+.pdxPlace--wide .pdxPlace__main{ gap:5px; }
+.pdxPlace--compact .pdxPlace__media,
+.pdxPlace--wide .pdxPlace__media{
+  flex:0 0 92px; width:92px; min-height:0; height:56px; padding:0; margin:0;
+}
+.pdxPlace--compact .pdxPlace__logo,
+.pdxPlace--wide .pdxPlace__logo{ max-height:52px; }
+.pdxPlace--compact .pdxPlace__logo--fallback,
+.pdxPlace--wide .pdxPlace__logo--fallback{ max-height:48px; max-width:88%; }
+.pdxPlace--compact .pdxPlace__mediaGlow,
+.pdxPlace--wide .pdxPlace__mediaGlow{
+  width:100%; height:118%; filter:blur(16px);
+}
+.pdxPlace--compact .pdxPlace__name,
+.pdxPlace--wide .pdxPlace__name{
+  font-size:1.06rem;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.pdxPlace--compact .pdxPlace__row a,
+.pdxPlace--wide .pdxPlace__row a{
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.pdxPlace--compact .pdxPlace__row,
+.pdxPlace--wide .pdxPlace__row{ min-width:0; }
+.pdxPlace--compact .pdxPlace__cat .pdxBadge,
+.pdxPlace--compact .pdxPlace__cat [class*="Badge"],
+.pdxPlace--compact .pdxPlace__cat > *,
+.pdxPlace--compact .pdxPlace__opening .pdxBadge,
+.pdxPlace--compact .pdxPlace__opening [class*="Badge"],
+.pdxPlace--compact .pdxPlace__opening > *,
+.pdxPlace--wide .pdxPlace__cat .pdxBadge,
+.pdxPlace--wide .pdxPlace__cat [class*="Badge"],
+.pdxPlace--wide .pdxPlace__cat > *,
+.pdxPlace--wide .pdxPlace__opening .pdxBadge,
+.pdxPlace--wide .pdxPlace__opening [class*="Badge"],
+.pdxPlace--wide .pdxPlace__opening > *{
+  font-size:.62rem !important; padding:3px 7px !important; border-radius:5px !important;
+}
+.pdxPlace--compact .pdxPlace__row,
+.pdxPlace--wide .pdxPlace__row{ font-size:.78rem; }
+.pdxPlace--compact .pdxPlace__row svg,
+.pdxPlace--wide .pdxPlace__row svg{ width:12px; height:12px; }
+.pdxPlace--compact .pdxPlace__badges,
+.pdxPlace--wide .pdxPlace__badges{ gap:6px; }
+.pdxPlace--compact .pdxPlace__actions,
+.pdxPlace--wide .pdxPlace__actions{ top:6px; right:8px; }
+/* Upcoming-events flag: card accent + day-color dot (compact only) */
+.pdxPlace__upcoming{
+  flex:none; align-self:center; display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px 5px; border-radius:6px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11.7px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--c);
+  background:color-mix(in srgb, var(--c) 14%, #08080b);
+  border:1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  white-space:nowrap;
+  box-shadow:
+    0 0 0 1px #000,
+    0 6px 14px -10px color-mix(in srgb, var(--c) 80%, transparent);
+  position:relative; z-index:1;
+}
+.pdxPlace__upcomingDot{
+  width:9px; height:9px; border-radius:50%; flex:none;
+}
 @keyframes pgDirCardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 html.calm-mode .pdxPlace,
 :root[data-calm="true"] .pdxPlace{ --dir-gm:0; animation:none !important; }
@@ -234,6 +315,10 @@ html.calm-mode .pdxPlace__body,
 html.calm-mode .pdxPlace__actions,
 :root[data-calm="true"] .pdxPlace__actions{
   opacity:1; pointer-events:auto;
+}
+html.calm-mode .pdxPlace__upcoming,
+:root[data-calm="true"] .pdxPlace__upcoming{
+  box-shadow:0 0 0 1px #000;
 }
 `;
 if (typeof document !== "undefined") {
@@ -277,7 +362,9 @@ const CAL = <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4
 
 /** @typedef {{ day?: string, date?: string, title?: string, href?: string }} PlaceEvent */
 
-/** PlaceCard, the venue / place directory card. */
+/** PlaceCard, the venue / place directory card.
+ *  `variant="compact"` / `layout="compact"` = slim wide dock row (Directory list).
+ *  Default = tall little card (profiles / sandbox). */
 export function PlaceCard({
   name,
   category = "bars",
@@ -301,6 +388,8 @@ export function PlaceCard({
   businessId,
   isFollowing = false,
   onRequireAuth,
+  variant = "full",
+  layout,
   className = "",
   style,
   ...rest
@@ -329,10 +418,15 @@ export function PlaceCard({
   businessId?: number;
   isFollowing?: boolean;
   onRequireAuth?: () => void;
+  /** `compact` = wide dock row; `full` = tall directory little-card. */
+  variant?: "full" | "compact";
+  /** Alias for variant (Directory dock passes layout="compact"). */
+  layout?: "full" | "compact";
   className?: string;
   style?: React.CSSProperties;
   [key: string]: unknown;
 }) {
+  const isCompact = (layout ?? variant) === "compact";
   const isHealthcare = category === "healthcare";
   const isRealEstate = category === "realestate";
   const isCampground = category === "campgrounds";
@@ -355,6 +449,8 @@ export function PlaceCard({
   const [sharing, setSharing] = useState(false);
   const showLogo = logoUrl && !logoFailed;
   const showFallback = !showLogo && fallbackLogoUrl;
+  const nextEventDayCode = (events[0]?.day || "").trim().toUpperCase().slice(0, 3);
+  const upcomingDayColor = (nextEventDayCode && DAY_COLOR[nextEventDayCode]) || accent;
 
   const handleShare = async (e) => {
     e.stopPropagation();
@@ -374,7 +470,7 @@ export function PlaceCard({
 
   return (
     <article
-      className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${className ? ` ${className}` : ""}`}
+      className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${isCompact ? " pdxPlace--compact pdxPlace--wide" : ""}${className ? ` ${className}` : ""}`}
       style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
       {...rest}
     >
@@ -418,127 +514,143 @@ export function PlaceCard({
           )}
         </div>
 
-        <div className="pdxPlace__badges">
-          {grandOpening && (
-            <span className="pdxPlace__opening">
-              <Badge color="yellow" glow size="sm">Grand Opening</Badge>
-            </span>
-          )}
-          <span className="pdxPlace__cat">
-            <Badge
-              category={isNonprofit ? undefined : category}
-              color={isNonprofit ? "paper" : undefined}
-              size="sm"
-            >
-              {categoryLabel}
-            </Badge>
-          </span>
-        </div>
-
-        <div className="pdxPlace__name">{name}</div>
-        {grandOpening && grandOpeningDate && (
-          <div className="pdxPlace__grandDate">{grandOpeningDate}</div>
-        )}
-
-        <div className="pdxPlace__rows">
-          {address && (
-            <div className="pdxPlace__row">
-              <Icon d={PIN} />
-              <a href={placeGoogleMapsUrl({ address, name, lat, lng })} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                {address}
-              </a>
-            </div>
-          )}
-          {hours && <div className="pdxPlace__row"><Icon d={CLOCK} />{hours}</div>}
-          {phone && (
-            <div className="pdxPlace__row">
-              <Icon d={PHONE} />
-              <a href={telHref(phone)} onClick={e => e.stopPropagation()}>{phone}</a>
-            </div>
-          )}
-        </div>
-
-        {description && <p className="pdxPlace__desc">{description}</p>}
-
-        {(website || instagram || donateUrl) && (
-          <div className="pdxPlace__links">
-            {donateUrl && (
-              <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                <Icon d={GLOBE} />Donate
-              </a>
+        <div className="pdxPlace__main">
+          <div className="pdxPlace__badges">
+            {grandOpening && (
+              <span className="pdxPlace__opening">
+                <Badge color="yellow" glow size="sm">Grand Opening</Badge>
+              </span>
             )}
-            {website && (
-              <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                <Icon d={GLOBE} />Website
-              </a>
-            )}
-            {instagram && (
-              <a
-                className="pdxPlace__link"
-                href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
+            <span className="pdxPlace__cat">
+              <Badge
+                category={isNonprofit ? undefined : category}
+                color={isNonprofit ? "paper" : undefined}
+                size="sm"
               >
-                <Icon d={IG} />{instagram}
-              </a>
+                {categoryLabel}
+              </Badge>
+            </span>
+          </div>
+
+          <div className="pdxPlace__name">{name}</div>
+          {!isCompact && grandOpening && grandOpeningDate && (
+            <div className="pdxPlace__grandDate">{grandOpeningDate}</div>
+          )}
+
+          <div className="pdxPlace__rows">
+            {address && (
+              <div className="pdxPlace__row">
+                <Icon d={PIN} />
+                <a href={placeGoogleMapsUrl({ address, name, lat, lng })} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                  {address}
+                </a>
+              </div>
+            )}
+            {!isCompact && hours && <div className="pdxPlace__row"><Icon d={CLOCK} />{hours}</div>}
+            {!isCompact && phone && (
+              <div className="pdxPlace__row">
+                <Icon d={PHONE} />
+                <a href={telHref(phone)} onClick={e => e.stopPropagation()}>{phone}</a>
+              </div>
             )}
           </div>
-        )}
 
-        {events.length > 0 && (
-          <div className="pdxPlace__events">
-            <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Events</div>
-            {events.slice(0, MAX_CARD_EVENTS).map((ev, i) => {
-              const row = (
-                <>
-                  <div className="pdxPlace__eventDate">{ev.date}</div>
-                  <div className="pdxPlace__eventTitle">{ev.title}</div>
-                </>
-              );
-              return ev.href ? (
-                <a
-                  key={i}
-                  className="pdxPlace__event pdxPlace__event--link"
-                  href={ev.href}
-                  onClick={e => e.stopPropagation()}
-                  style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
-                >
-                  {row}
+          {!isCompact && description && <p className="pdxPlace__desc">{description}</p>}
+
+          {!isCompact && (website || instagram || donateUrl) && (
+            <div className="pdxPlace__links">
+              {donateUrl && (
+                <a className="pdxPlace__link pdxPlace__link--donate" href={donateUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                  <Icon d={GLOBE} />Donate
                 </a>
-              ) : (
-                <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
-                  {row}
-                </div>
-              );
-            })}
-            {events.length > MAX_CARD_EVENTS && (
-              businessId != null ? (
+              )}
+              {website && (
+                <a className="pdxPlace__link" href={website} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                  <Icon d={GLOBE} />Website
+                </a>
+              )}
+              {instagram && (
                 <a
-                  className="pdxPlace__eventsMore"
-                  href={placePath(businessId, name)}
+                  className="pdxPlace__link"
+                  href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
                 >
-                  +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
+                  <Icon d={IG} />{instagram}
                 </a>
-              ) : (
-                <div className="pdxPlace__eventsMore pdxPlace__eventsMore--static">
-                  +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
-                </div>
-              )
-            )}
-          </div>
-        )}
-
-        {promoters.length > 0 && (
-          <div className="pdxPlace__promoters">
-            <div className="pdxPlace__promotersLabel">Promoters</div>
-            <div className="pdxPlace__promoterChips">
-              {promoters.map(p => (
-                <span className="pdxPlace__promoterChip" key={p.id}>@{p.username}</span>
-              ))}
+              )}
             </div>
-          </div>
+          )}
+
+          {!isCompact && events.length > 0 && (
+            <div className="pdxPlace__events">
+              <div className="pdxPlace__eventsHead"><Icon d={CAL} />Upcoming Events</div>
+              {events.slice(0, MAX_CARD_EVENTS).map((ev, i) => {
+                const row = (
+                  <>
+                    <div className="pdxPlace__eventDate">{ev.date}</div>
+                    <div className="pdxPlace__eventTitle">{ev.title}</div>
+                  </>
+                );
+                return ev.href ? (
+                  <a
+                    key={i}
+                    className="pdxPlace__event pdxPlace__event--link"
+                    href={ev.href}
+                    onClick={e => e.stopPropagation()}
+                    style={{ "--_ec": DAY_COLOR[ev.day] || accent, textDecoration: "none", color: "inherit", display: "block" }}
+                  >
+                    {row}
+                  </a>
+                ) : (
+                  <div className="pdxPlace__event" key={i} style={{ "--_ec": DAY_COLOR[ev.day] || accent }}>
+                    {row}
+                  </div>
+                );
+              })}
+              {events.length > MAX_CARD_EVENTS && (
+                businessId != null ? (
+                  <a
+                    className="pdxPlace__eventsMore"
+                    href={placePath(businessId, name)}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
+                  </a>
+                ) : (
+                  <div className="pdxPlace__eventsMore pdxPlace__eventsMore--static">
+                    +{events.length - MAX_CARD_EVENTS} more event{events.length - MAX_CARD_EVENTS === 1 ? "" : "s"}
+                  </div>
+                )
+              )}
+            </div>
+          )}
+
+          {!isCompact && promoters.length > 0 && (
+            <div className="pdxPlace__promoters">
+              <div className="pdxPlace__promotersLabel">Promoters</div>
+              <div className="pdxPlace__promoterChips">
+                {promoters.map(p => (
+                  <span className="pdxPlace__promoterChip" key={p.id}>@{p.username}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {isCompact && events.length > 0 && (
+          <span className="pdxPlace__upcoming">
+            <span
+              className="pdxPlace__upcomingDot"
+              aria-hidden="true"
+              style={{
+                background: upcomingDayColor,
+                boxShadow: `0 0 8px ${upcomingDayColor}`,
+              }}
+            />
+            {events.length === 1 ? "1 upcoming event" : `${events.length} upcoming events`}
+          </span>
         )}
       </div>
     </article>

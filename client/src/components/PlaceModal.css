@@ -25,9 +25,10 @@
 }
 
 .place-modal-overlay--open {
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  /* Design handoff: rgba(3,3,5,.72) + blur(6px) */
+  background: rgba(3, 3, 5, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ── Panel shell (deep glass) ─────────────────────────────── */
@@ -36,7 +37,7 @@
   --dir-gm: 60;
   position: relative;
   width: 100%;
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto;
   flex: none;
   border-radius: 14px;
@@ -167,7 +168,15 @@
 
 .place-modal-panel--flip.place-modal-panel--open {
   transform: none;
-  transition: transform 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+  opacity: 1;
+  /* Handoff little→big: 360ms cubic-bezier(.2,.85,.3,1) */
+  transition:
+    transform 0.36s cubic-bezier(0.2, 0.85, 0.3, 1),
+    opacity 0.36s cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+
+.place-modal-panel--flip:not(.place-modal-panel--open) {
+  opacity: 0.45;
 }
 
 /* Deep-link / no origin: soft scale-up entrance */
@@ -209,11 +218,11 @@
 }
 
 .place-modal-panel__close {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(6, 6, 10, 0.82);
+  border: 1px solid #000;
+  background: #0c0c0f;
   backdrop-filter: blur(10px) saturate(1.02);
   -webkit-backdrop-filter: blur(10px) saturate(1.02);
   color: var(--text-hi, #fff);
@@ -223,7 +232,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.75);
+  box-shadow:
+    0 0 0 1px #1c1c22,
+    0 6px 16px rgba(0, 0, 0, 0.55);
 }
 
 .place-modal-panel__share {
@@ -251,10 +262,10 @@
   cursor: default;
 }
 
-/* ── Logo media well (soft orb, matches PlaceCard) ────────── */
+/* ── Logo media well (soft orb, matches open PlaceCard) ───── */
 .place-modal-panel__media {
   position: relative;
-  height: 172px;
+  height: 190px;
   display: grid;
   place-items: center;
   padding: 28px 22px 22px;
@@ -298,7 +309,7 @@
   position: relative;
   z-index: 3;
   max-width: 78%;
-  max-height: 120px;
+  max-height: 150px;
   object-fit: contain;
   mix-blend-mode: screen;
   filter: contrast(1.35) brightness(1.06)
@@ -351,6 +362,84 @@
 .place-modal-panel__link:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* Upcoming events horizontal rail (open card stays put) */
+.place-modal-events {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.place-modal-events__hint {
+  margin: 0 0 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.place-modal-events__rail {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 0 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-border, #2b2b2b) transparent;
+}
+
+.place-modal-events__rail::-webkit-scrollbar {
+  height: 6px;
+}
+
+.place-modal-events__rail::-webkit-scrollbar-thumb {
+  background: var(--ink-border, #2b2b2b);
+  border-radius: 4px;
+}
+
+.place-modal-events__tile {
+  flex: 0 0 224px;
+  width: 224px;
+  scroll-snap-align: start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border-left: 3px solid var(--pm-day, var(--cyan, #19e3ff));
+  background: color-mix(in srgb, var(--pm-day, #19e3ff) 8%, #0b0b0f);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  box-sizing: border-box;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.place-modal-events__tile:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.place-modal-events__tile:focus-visible {
+  outline: 2px solid var(--pm-day, var(--cyan));
+  outline-offset: 2px;
+}
+
+.place-modal-events__when {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--pm-day, var(--cyan, #19e3ff));
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.place-modal-events__title {
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  color: #fff;
+  line-height: 1.35;
 }
 
 /* Past events rail (unchanged structure) */
@@ -508,8 +597,8 @@ html.calm-mode .place-modal-overlay,
 @media (prefers-reduced-motion: reduce) {
   .place-modal-overlay {
     transition: none !important;
-    background: rgba(0, 0, 0, 0.88) !important;
-    backdrop-filter: blur(2px) !important;
+    background: rgba(3, 3, 5, 0.72) !important;
+    backdrop-filter: blur(6px) !important;
   }
 
   .place-modal-panel--flip,

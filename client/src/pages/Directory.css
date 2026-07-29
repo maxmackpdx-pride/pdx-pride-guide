@@ -1,15 +1,14 @@
 /* ============================================================
-   Directory - deep-glass card chrome (Agent 3) + page surfaces.
-   Place cards: OLED slab / black ring / always-on bloom / poster-well
-   (see PlaceCard.tsx). Non-card surfaces still use dir-glass-* until
-   their agents migrate.
+   Directory page structure (2026-07-28 redesign)
+   Hero · stats · category bands · map+key · filters · dock · add
+   Place cards: OLED slab / bloom (see PlaceCard.tsx). Compact
+   wide variant is PlaceCard agent scope; page only wires layout.
    ============================================================ */
 
 .directory-page {
   /* Deep-glass always-on bloom (overrides quieter index.css page value).
      Calm zeros explicitly so we do not fight glass.css root zeroing. */
   --dir-gm: 60;
-  /* Recently-viewed rail: 50% of default card bloom */
   --dir-recent-gm: 30;
   --dir-glass-fill: color-mix(in srgb, #0c0c12 74%, transparent);
   --dir-glass-fill-hot: color-mix(in srgb, #14141c 80%, transparent);
@@ -18,7 +17,6 @@
   --dir-glass-blur: 14px;
   --dir-glass-blur-card: 12px;
   --dir-glass-sat: 1.12;
-  /* Light category wash over dark glass (uses card --c / --_c) */
   --dir-glass-tint: color-mix(in srgb, var(--c, var(--_c, var(--pink))) 10%, transparent);
   --dir-glass-tint-hot: color-mix(in srgb, var(--c, var(--_c, var(--pink))) 14%, transparent);
   --dir-glass-specular: linear-gradient(
@@ -30,155 +28,530 @@
   --dir-glass-shadow:
     0 8px 28px -12px rgba(0, 0, 0, 0.75),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --dir-pad-x: clamp(14px, 4vw, 40px);
+  background: #0a0a0a;
+  overflow-x: clip;
 }
 
-/* Sticky type / neighborhood filter chrome */
-.directory-page .zine-filter-bar {
-  background:
-    var(--dir-glass-specular),
-    color-mix(in srgb, #050508 78%, transparent) !important;
-  border-bottom: 1px solid var(--dir-glass-edge) !important;
-  box-shadow:
-    0 10px 28px -18px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
-  -webkit-backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
+/* ── Hero ─────────────────────────────────────────────────── */
+.directory-hero {
+  position: relative;
+  z-index: 1;
+  padding: clamp(34px, 7vw, 76px) var(--dir-pad-x) clamp(26px, 4vw, 44px);
+  animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
 
-/* ── Recently viewed (top of search / filter strip) ─────────
-   Soft glass chips; bloom at 50% of place-card --dir-gm (30 vs 60). */
-.directory-recent {
-  --dir-gm: var(--dir-recent-gm, 30);
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 4px 16px 10px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.directory-recent__label {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #6e6b64;
-}
-
-.directory-recent__rail {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 2px 2px 6px;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
-
-.directory-recent__chip {
-  --c: var(--neon-cyan, #19e3ff);
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 180px;
-  padding: 5px 11px 5px 5px;
-  border-radius: 999px;
-  cursor: pointer;
-  color: #f4f1ea;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  text-align: left;
-  border: 1px solid color-mix(in srgb, var(--c) 42%, #1c1c22);
-  background:
-    radial-gradient(
-      120% 100% at 20% 0%,
-      color-mix(in srgb, var(--c) 12%, transparent),
-      transparent 55%
-    ),
-    rgba(8, 8, 12, 0.88);
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 14px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 1.1%), transparent),
-    0 0 28px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 0.7%), transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition:
-    transform 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    filter 0.15s ease;
-}
-
-.directory-recent__chip:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--c) 65%, #1c1c22);
-  filter: brightness(1.06);
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 18px -3px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 1.35%), transparent),
-    0 0 32px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 30) * 0.85%), transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.directory-recent__logo {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+.directory-hero__aurora {
+  position: absolute;
+  inset: -10% -5% -20%;
+  z-index: 0;
+  pointer-events: none;
   overflow: hidden;
-  flex: none;
-  background: #0a0a0e;
-  border: 1px solid color-mix(in srgb, var(--c) 40%, #222);
-  display: grid;
-  place-items: center;
 }
 
-.directory-recent__logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Directory hero: match handoff orb colors / blur (HeroAurora shell) */
+.directory-hero__aurora .hero-aurora {
+  inset: 0;
+}
+
+.directory-hero__aurora .hero-aurora__orb {
+  mix-blend-mode: normal;
+  filter: blur(62px);
+  opacity: 1;
+}
+
+.directory-hero__aurora .hero-aurora__orb--a {
+  left: 6%;
+  top: 8%;
+  width: min(42vw, 560px);
+  height: min(42vw, 560px);
+  background: radial-gradient(circle, rgba(136, 0, 255, 0.42), transparent 68%);
+  filter: blur(58px);
+}
+
+.directory-hero__aurora .hero-aurora__orb--b {
+  left: 44%;
+  top: -6%;
+  right: auto;
+  bottom: auto;
+  width: min(38vw, 520px);
+  height: min(38vw, 520px);
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent 68%);
+  filter: blur(64px);
+}
+
+.directory-hero__aurora .hero-aurora__orb--c {
+  left: 22%;
+  top: 40%;
+  width: min(46vw, 600px);
+  height: min(46vw, 600px);
+  background: radial-gradient(circle, rgba(255, 0, 204, 0.26), transparent 70%);
+  filter: blur(70px);
+}
+
+.directory-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+}
+
+.directory-hero__title {
+  margin: 18px 0 0;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(2.2rem, 6.4vw, 4.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+/* Trim large transparent padding on brand wordmark art */
+.directory-hero__wordmark {
   display: block;
+  margin-top: 0.22em;
+  width: min(100%, 560px);
+  height: auto;
+  max-height: clamp(2.4rem, 7vw, 4.8rem);
+  object-fit: contain;
+  object-position: left center;
 }
 
-.directory-recent__logo-fallback {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--c);
+.directory-hero__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(18px, 4vw, 54px);
+  align-items: flex-end;
+  margin-top: 22px;
 }
 
-.directory-recent__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.directory-hero__lede {
+  flex: 1 1 320px;
+  max-width: 56ch;
+  margin: 0;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--board-text, #f4f1ea);
+  text-wrap: pretty;
+}
+
+.directory-hero__mantra {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--panel-magenta, #ff1fa0);
+  text-align: right;
+  margin-left: auto;
+}
+
+/* ── Stats band ───────────────────────────────────────────── */
+.directory-stats-band {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  background: var(--panel-band, #070708);
+  border-block: 1px solid #1c1c22;
+  animation: pdxHeroIn 0.48s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) 0.07s both;
+}
+
+.directory-stats-band__item {
+  padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 32px);
   min-width: 0;
 }
 
-html.calm-mode .directory-recent__chip,
-:root[data-calm="true"] .directory-recent__chip {
-  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  filter: none;
+.directory-stats-band__item--rule {
+  border-right: 1px solid #16161b;
 }
 
-@media (max-width: 560px) {
-  .directory-recent {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  .directory-recent__chip {
-    max-width: 150px;
-    font-size: 0.68rem;
+.directory-stats-band__num {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 7vw, 4.4rem);
+  line-height: 0.82;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  animation: pdxNumPop 0.5s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+.directory-stats-band__label {
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #999;
+}
+
+/* ── Category band rail ───────────────────────────────────── */
+.directory-bands {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 4vw, 40px) 0 0;
+}
+
+.directory-bands__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 0 var(--dir-pad-x) 14px;
+}
+
+.directory-bands__title {
+  margin: 0;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+  line-height: 1;
+  color: #fff;
+}
+
+.directory-bands__hint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.directory-bands__rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 16px 12px;
+  padding: 12px var(--dir-pad-x) 26px;
+}
+
+.directory-band {
+  --_c: #19e3ff;
+  --c: var(--_c);
+  text-align: left;
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  overflow: visible;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.directory-band:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.directory-band:focus-visible {
+  outline: 2px solid var(--_c);
+  outline-offset: 3px;
+}
+
+.directory-band__bar {
+  display: block;
+  height: 3px;
+  margin: 0 0 10px;
+  border-radius: 2px;
+  background: var(--_c);
+  opacity: 0.45;
+}
+
+.directory-band--active .directory-band__bar {
+  opacity: 1;
+}
+
+.directory-band__count {
+  display: block;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  line-height: 0.84;
+  font-variant-numeric: tabular-nums;
+  color: #c4c0b6;
+}
+
+.directory-band--active .directory-band__count {
+  color: var(--_c);
+}
+
+.directory-band__label {
+  display: block;
+  margin-top: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #8e8a82;
+}
+
+.directory-band--active .directory-band__label {
+  color: #fff;
+}
+
+.directory-band--active {
+  animation: pdxPulse 4s ease-in-out infinite;
+}
+
+/* ── Stage: map · key · filters · dock ────────────────────── */
+.directory-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.5vw, 26px);
+  padding: clamp(18px, 3vw, 30px) var(--dir-pad-x) clamp(30px, 5vw, 60px);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.directory-stage__map {
+  width: 100%;
+}
+
+.directory-stage__map-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--map-surface-bg, #06060a);
+  border: 1px solid #000;
+  box-shadow: var(--map-frame-shadow);
+}
+
+.directory-stage__map-frame .directory-map-wrap,
+.directory-stage__map-frame .directory-map {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.directory-stage__map-seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  z-index: 20;
+  pointer-events: none;
+  background: var(
+    --refract-seam-gradient,
+    linear-gradient(90deg, #ff2d5e, #ff9500, #ffee00, #39ff14, #00ffff, #3a6bff, #8800ff, #ff00cc, #ff2d5e)
+  );
+  background-size: 200% 100%;
+  opacity: 0.5;
+  animation: dirRefract 7s linear infinite;
+}
+
+/* Map key under map: compact dock variant */
+.directory-map-key--dock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin: 16px 0 0;
+  padding: 13px 16px;
+  border-radius: 12px;
+  max-width: none;
+}
+
+.directory-map-key--dock .directory-map-key__kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #666;
+  flex: none;
+}
+
+.directory-map-key--dock .directory-map-key__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.directory-map-key--dock .directory-map-key__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.directory-map-key--dock .directory-map-key__label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c8c4bb;
+  font-weight: 500;
+}
+
+.directory-map-key--dock .directory-map-key__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+  background: #000;
+  border: 3px solid #19e3ff;
+  box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+/* ── Filters (not sticky) ─────────────────────────────────── */
+.directory-filters {
+  position: static;
+  width: 100%;
+}
+
+.directory-filters__search-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 6px;
+}
+
+.directory-filters__search {
+  flex: 1 1 100%;
+  min-width: 200px;
+}
+
+.directory-filters__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--panel-lime, #c8fa3c);
+  background: #0c0c0f;
+  border: 1px solid #1c1c22;
+  border-radius: 8px;
+  padding: 8px 11px;
+  white-space: nowrap;
+}
+
+.directory-filters__hoods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 6px 12px;
+}
+
+/* ── The dock ─────────────────────────────────────────────── */
+.directory-dock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.directory-dock__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.directory-dock__title {
+  margin: 0;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: #fff;
+}
+
+.directory-dock__hint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.directory-dock__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 6px 6px 4px;
+}
+
+/* Single column of compact wide place cards */
+.directory-dock__list .pdxPlace {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+}
+
+.directory-dock__list .pdxPlace__body {
+  height: auto;
+}
+
+@media (max-width: 520px) {
+  .directory-dock__list .pdxPlace__upcoming {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 5px 8px 4px;
+    gap: 6px;
   }
 }
 
-/*
- * Place cards - SoT from Directory cards redesign / Card System.html.
- * Full chrome lives in PlaceCard.tsx; page only wires --c and must not
- * reintroduce boxed poster-well or lite-glass fills.
- */
+.directory-inline-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #aaa;
+}
+
+/* ── Add-a-place band ─────────────────────────────────────── */
+.directory-add-band {
+  position: relative;
+  z-index: 1;
+  margin: 0 var(--dir-pad-x) clamp(30px, 5vw, 56px);
+  padding: clamp(22px, 4vw, 34px);
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  max-width: none;
+}
+
+.directory-add-band__copy {
+  flex: 1 1 320px;
+}
+
+.directory-add-band__title {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  line-height: 1;
+  color: #fff;
+}
+
+.directory-add-band__lede {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--board-muted, #bdbab2);
+  max-width: 52ch;
+}
+
+/* ── Place cards (page-level chrome) ──────────────────────── */
 .directory-page .pdxPlace {
   --c: var(--_c, var(--pink));
   --dir-gm: 60;
@@ -196,69 +569,34 @@ html.calm-mode .directory-recent__chip,
   z-index: 5;
 }
 
-/* Reassert little-card OLED + soft bloom if any legacy glass override fights PlaceCard */
-.directory-page .pdxPlace__body {
+/* OLED reassert for standard cards only (edge variants own multi-layer bg) */
+.directory-page .pdxPlace:not(.pdxPlace--edge) .pdxPlace__body {
   background:
     radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
     radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) !important;
 }
 
-/* Map island - debossed well (shared --map-frame-shadow) */
-.directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-.directory-page .directory-browse-layout__map-desktop .directory-map-wrap {
+/* Map island */
+.directory-page .directory-stage__map-frame .directory-map-wrap,
+.directory-page .directory-stage__map-frame .directory-map {
   background: var(--map-surface-bg, #06060a);
-  border: 1px solid #000;
-  border-radius: 16px;
-  box-shadow: var(--map-frame-shadow);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
-/* MAP KEY - spacing only; neutral deep-glass from glass.css (.directory-map-key) */
-.directory-page .directory-map-key {
-  margin: 12px 0 0;
-}
-
-/* Add-place form panel - keep lime neon edge, neutral dark glass fill */
+/* Add-place form panel */
 .directory-page .gifting-form-panel--makeover.directory-form-panel,
 .directory-page .directory-form-panel {
   background:
     var(--dir-glass-specular),
     var(--dir-glass-fill);
-  /* border stays #ccff00 from makeover */
   box-shadow:
     var(--dir-glass-shadow),
     0 0 24px -16px #ccff00;
   backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
   -webkit-backdrop-filter: blur(16px) saturate(var(--dir-glass-sat));
+  margin-left: var(--dir-pad-x);
+  margin-right: var(--dir-pad-x);
 }
 
-/* Legacy directory-card shells (if any remain) */
-.directory-page .directory-card {
-  background:
-    var(--dir-glass-specular),
-    radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--card-accent, #ff00cc) 10%, transparent),
-      transparent 58%
-    ),
-    var(--dir-glass-fill);
-  border-color: var(--dir-glass-edge);
-  box-shadow:
-    var(--dir-glass-shadow),
-    0 0 18px color-mix(in srgb, var(--card-accent, #ff00cc) 12%, transparent);
-  backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
-  -webkit-backdrop-filter: blur(var(--dir-glass-blur-card)) saturate(var(--dir-glass-sat));
-}
-
-.directory-page .directory-card:hover {
-  border-color: var(--card-accent, #ff00cc);
-  box-shadow:
-    var(--dir-glass-shadow),
-    0 0 18px color-mix(in srgb, var(--card-accent, #ff00cc) 30%, transparent);
-}
-
-/* Empty / error islands */
 .directory-page .board-empty {
   background:
     var(--dir-glass-specular),
@@ -270,47 +608,51 @@ html.calm-mode .directory-recent__chip,
   -webkit-backdrop-filter: blur(var(--dir-glass-blur)) saturate(var(--dir-glass-sat));
 }
 
-/* Count banner - light glass chip */
-.directory-page .events-count-banner {
-  background:
-    var(--dir-glass-specular),
-    color-mix(in srgb, #0c0c12 70%, transparent);
-  border: 1px solid var(--dir-glass-edge);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px) saturate(1.15);
-  -webkit-backdrop-filter: blur(10px) saturate(1.15);
-}
-
-/* City-view constellation frame + center hub */
-.directory-page .category-constellation__backdrop {
-  background:
-    var(--dir-glass-specular),
-    color-mix(in srgb, #0a0a0a 70%, transparent);
-  border: 1px solid var(--dir-glass-edge);
-  border-radius: 14px;
-  box-shadow: var(--dir-glass-shadow);
-  backdrop-filter: blur(12px) saturate(1.15);
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
-}
-
-.directory-page .category-constellation__hub-inner {
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.14), transparent 42%),
-    var(--dir-glass-specular),
-    color-mix(in srgb, #0b0b0b 72%, transparent);
-  border: 1px solid var(--dir-glass-edge-hi);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px) saturate(1.3);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-}
-
-/* ── Fallbacks: no blur / calm ── */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .directory-page .zine-filter-bar {
-    background: #050508 !important;
+/* ── Motion tokens (local fallbacks if not in global) ─────── */
+@keyframes pdxHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
-  /* Solid OLED slab when backdrop-filter unsupported - keep edge + black ring */
+@keyframes pdxNumPop {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  42% {
+    transform: translateY(-2px) scale(1.14);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pdxPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 14px color-mix(in srgb, var(--_c, #19e3ff) 18%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px color-mix(in srgb, var(--_c, #19e3ff) 32%, transparent);
+  }
+}
+
+@keyframes dirRefract {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* ── Fallbacks / calm ─────────────────────────────────────── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .directory-page .pdxPlace__body {
     background:
       radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%) padding-box,
@@ -318,84 +660,82 @@ html.calm-mode .directory-recent__chip,
       var(--_edge, linear-gradient(var(--c, var(--_c, var(--pink))), var(--c, var(--_c, var(--pink))))) border-box;
   }
 
-  .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-  .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
   .directory-page .directory-form-panel,
-  .directory-page .board-empty,
-  .directory-page .events-count-banner,
-  .directory-page .directory-card,
-  .directory-page .category-constellation__backdrop {
+  .directory-page .board-empty {
     background: #121218;
   }
-
-  .directory-page .category-constellation__hub-inner {
-    background: #0b0b0b;
-  }
 }
 
-html.calm-mode .directory-page .zine-filter-bar,
-html.calm-mode .directory-page .pdxPlace__body,
-html.calm-mode .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-html.calm-mode .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
-html.calm-mode .directory-page .directory-form-panel,
-html.calm-mode .directory-page .board-empty,
-html.calm-mode .directory-page .events-count-banner,
-html.calm-mode .directory-page .directory-card,
-html.calm-mode .directory-page .category-constellation__backdrop,
-html.calm-mode .directory-page .category-constellation__hub-inner,
-:root[data-calm="true"] .directory-page .zine-filter-bar,
-:root[data-calm="true"] .directory-page .pdxPlace__body,
-:root[data-calm="true"] .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-:root[data-calm="true"] .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
-:root[data-calm="true"] .directory-page .directory-form-panel,
-:root[data-calm="true"] .directory-page .board-empty,
-:root[data-calm="true"] .directory-page .events-count-banner,
-:root[data-calm="true"] .directory-page .directory-card,
-:root[data-calm="true"] .directory-page .category-constellation__backdrop,
-:root[data-calm="true"] .directory-page .category-constellation__hub-inner {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-html.calm-mode .directory-page .zine-filter-bar,
-:root[data-calm="true"] .directory-page .zine-filter-bar {
-  background: #050508 !important;
-}
-
-/* Calm: zero bloom multiplier on the page (and thus cards); keep OLED fill + edge */
 html.calm-mode .directory-page,
 :root[data-calm="true"] .directory-page {
   --dir-gm: 0;
 }
 
-html.calm-mode .directory-page .pdxPlace__body,
-:root[data-calm="true"] .directory-page .pdxPlace__body {
+html.calm-mode .directory-hero,
+html.calm-mode .directory-stats-band,
+:root[data-calm="true"] .directory-hero,
+:root[data-calm="true"] .directory-stats-band {
+  animation: none;
+}
+
+html.calm-mode .directory-hero__aurora,
+:root[data-calm="true"] .directory-hero__aurora {
+  display: none;
+}
+
+html.calm-mode .directory-stats-band__num,
+:root[data-calm="true"] .directory-stats-band__num {
+  animation: none;
+}
+
+html.calm-mode .directory-band--active,
+:root[data-calm="true"] .directory-band--active {
+  animation: none;
+}
+
+html.calm-mode .directory-stage__map-seam,
+:root[data-calm="true"] .directory-stage__map-seam {
+  animation: none;
+  opacity: 0.85;
+  background: color-mix(in srgb, #19e3ff 40%, #2a2a32);
+}
+
+html.calm-mode .directory-page .pdxPlace:not(.pdxPlace--edge) .pdxPlace__body,
+:root[data-calm="true"] .directory-page .pdxPlace:not(.pdxPlace--edge) .pdxPlace__body {
   background:
-    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%) padding-box,
-    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 18%, transparent), transparent 56%) padding-box,
-    var(--_edge, linear-gradient(var(--c, var(--_c, var(--pink))), var(--c, var(--_c, var(--pink))))) border-box;
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 6%, #050408) 100%),
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c, var(--_c, var(--pink))) 18%, transparent), transparent 56%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-html.calm-mode .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-html.calm-mode .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
 html.calm-mode .directory-page .directory-form-panel,
 html.calm-mode .directory-page .board-empty,
-html.calm-mode .directory-page .events-count-banner,
-html.calm-mode .directory-page .directory-card,
-html.calm-mode .directory-page .category-constellation__backdrop,
-:root[data-calm="true"] .directory-page .directory-browse-layout__map-mobile .directory-map-wrap,
-:root[data-calm="true"] .directory-page .directory-browse-layout__map-desktop .directory-map-wrap,
 :root[data-calm="true"] .directory-page .directory-form-panel,
-:root[data-calm="true"] .directory-page .board-empty,
-:root[data-calm="true"] .directory-page .events-count-banner,
-:root[data-calm="true"] .directory-page .directory-card,
-:root[data-calm="true"] .directory-page .category-constellation__backdrop {
+:root[data-calm="true"] .directory-page .board-empty {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   background: #121218;
 }
 
-html.calm-mode .directory-page .category-constellation__hub-inner,
-:root[data-calm="true"] .directory-page .category-constellation__hub-inner {
-  background: #0b0b0b;
+@media (prefers-reduced-motion: reduce) {
+  .directory-hero,
+  .directory-stats-band,
+  .directory-stats-band__num,
+  .directory-band--active,
+  .directory-stage__map-seam,
+  .directory-hero__aurora .hero-aurora__orb {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .directory-hero__mantra {
+    text-align: left;
+    margin-left: 0;
+  }
+
+  .directory-bands__rail {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
 }

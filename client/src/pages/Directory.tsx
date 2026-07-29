@@ -10,36 +10,31 @@ import DirectoryHero from "@/components/DirectoryHero";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import { MapPin, Plus, X } from "lucide-react";
+import CountUpValue from "@/components/CountUpValue";
+import { Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { placePath, placeUrl } from "@shared/placeSlug";
-import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
-import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
-import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import { Button, FilterChip, PlaceCard, SearchInput } from "@/components/ds";
+import { parsePacificDateTime } from "@shared/missedConnections";
+import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
-import { dayAccentToken } from "@/lib/dsColors";
 import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
 } from "@/lib/directoryLogos";
 import {
-  DIRECTORY_RECENT_MAX,
   pushDirectoryRecent,
-  readDirectoryRecent,
-  type DirectoryRecentEntry,
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
-import CategoryConstellation from "@/components/CategoryConstellation";
 import "./Directory.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-/** Browse layout map - desktop sticky map; ~30% taller than prior 570px. */
-const DIRECTORY_MAP_HEIGHT = 741;
+/** Full-width map height per design handoff (~560px). */
+const DIRECTORY_MAP_HEIGHT = 560;
 
 export type DirectoryEventSummary = {
   id: number;
@@ -131,43 +126,35 @@ export const TYPE_COLORS: Record<string, string> = {
   campground: "#39FF14", // lime pole of lime→dark green neon
 };
 
-const NEIGHBORHOODS = [
-  "ALL", "Downtown", "SE", "NE", "N", "NW", "SW", "Pearl", "Alberta", "Hawthorne",
-  "Belmont", "Division", "Mississippi", "Alberta Arts District",
+/** Preferred chip order (design handoff). Extras from data append after. */
+const NEIGHBORHOOD_ORDER = [
+  "ALL",
+  "Downtown",
+  "Old Town",
+  "Pearl",
+  "NW",
+  "N",
+  "NE",
+  "Alberta",
+  "Inner East",
+  "Central Eastside",
+  "SE",
+  "Montavilla",
+  "Multiple",
+  "SW",
+  "Hawthorne",
+  "Belmont",
+  "Division",
+  "Mississippi",
+  "Alberta Arts District",
 ];
 
-const FORM_NEIGHBORHOODS = NEIGHBORHOODS.filter(n => n !== "ALL");
+const FORM_NEIGHBORHOODS = NEIGHBORHOOD_ORDER.filter(n => n !== "ALL");
 
-function directoryHasDeepLink(): boolean {
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get("type");
-  return Boolean(
-    (type && type in TYPE_LABELS) ||
-    params.get("place") ||
-    params.get("q"),
-  );
-}
+const CATEGORY_ORDER = Object.keys(TYPE_LABELS);
 
-/** Session keys so closing a place card does not dump you on City View / top of page. */
-const DIR_GRID_KEY = "zaylist.directory.showGrid";
+/** Session keys so closing a place card does not dump you at top of page. */
 const DIR_SCROLL_KEY = "zaylist.directory.scrollY";
-
-function readDirectoryShowGrid(): boolean {
-  try {
-    return sessionStorage.getItem(DIR_GRID_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writeDirectoryShowGrid(on: boolean) {
-  try {
-    if (on) sessionStorage.setItem(DIR_GRID_KEY, "1");
-    else sessionStorage.removeItem(DIR_GRID_KEY);
-  } catch {
-    /* private mode */
-  }
-}
 
 function rememberDirectoryScroll() {
   try {
@@ -260,28 +247,17 @@ export default function Directory() {
     width: number;
     height: number;
   } | null>(null);
-  // Lazy init - function form so routePlaceId is actually evaluated (Boolean(fn) was a bug).
-  // sessionStorage keeps the grid after place close (route remount /directory/:id → /directory
-  // used to reset to City View constellation and lose scroll).
-  const [showGrid, setShowGrid] = useState(
-    () => directoryHasDeepLink() || Boolean(routePlaceId) || readDirectoryShowGrid(),
-  );
-  const [grandOpeningOnly, setGrandOpeningOnly] = useState(false);
-  const [mobileMapOpen, setMobileMapOpen] = useState(false);
-  const [recentViewed, setRecentViewed] = useState<DirectoryRecentEntry[]>(() => readDirectoryRecent());
-  const gridRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
   const restoreScrollOnce = useRef(false);
 
   const recordRecentView = useCallback((biz: Business) => {
     const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || null;
-    setRecentViewed(
-      pushDirectoryRecent({
-        id: biz.id,
-        name: biz.name,
-        type: biz.type,
-        logoUrl,
-      }),
-    );
+    pushDirectoryRecent({
+      id: biz.id,
+      name: biz.name,
+      type: biz.type,
+      logoUrl,
+    });
   }, []);
 
   const { data: businesses = [], isLoading, isError } = useQuery<Business[]>({
@@ -315,8 +291,6 @@ export default function Directory() {
       }
       recordRecentView(biz);
       setSelectedPlace(biz);
-      setShowGrid(true);
-      writeDirectoryShowGrid(true);
       rememberDirectoryScroll();
       setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
     },
@@ -326,10 +300,6 @@ export default function Directory() {
   const closePlace = useCallback(() => {
     setSelectedPlace(null);
     setPlaceOriginRect(null);
-    // Stay on the filtered list (not City View constellation). Route switch
-    // remounts Directory; sessionStorage restores showGrid + scroll.
-    setShowGrid(true);
-    writeDirectoryShowGrid(true);
     setLocation(`/directory${directoryQuerySuffix()}`);
   }, [setLocation, directoryQuerySuffix]);
 
@@ -339,19 +309,17 @@ export default function Directory() {
       restoreScrollOnce.current = false;
       return;
     }
-    if (!showGrid || restoreScrollOnce.current) return;
+    if (restoreScrollOnce.current) return;
     const y = consumeDirectoryScroll();
     if (y == null) return;
     restoreScrollOnce.current = true;
-    // Wait for grid paint (constellation → grid, or remount after /directory/:id).
     const t = window.setTimeout(() => {
       window.scrollTo({ top: y, left: 0, behavior: "auto" });
     }, 40);
     return () => window.clearTimeout(t);
-  }, [routePlaceId, showGrid]);
+  }, [routePlaceId]);
 
   // Deep link: /directory/:id/:slug or legacy ?place= - open when present, clear when gone (browser back).
-  // Origin rect is owned by openPlace (card click). Deep links leave it null for soft enter.
   useEffect(() => {
     if (!businesses.length) return;
     const queryPlaceId = Number(new URLSearchParams(window.location.search).get("place"));
@@ -368,8 +336,6 @@ export default function Directory() {
       return;
     }
     setSelectedPlace(match);
-    setShowGrid(true);
-    writeDirectoryShowGrid(true);
     recordRecentView(match);
     // Canonicalize legacy ?place= to /directory/:id/:slug (keep type/q query).
     if (!routePlaceId) {
@@ -410,96 +376,65 @@ export default function Directory() {
     }, {});
   }, [businesses]);
 
+  const categoryBands = useMemo(() => {
+    return CATEGORY_ORDER
+      .map(key => ({
+        key,
+        label: TYPE_LABELS[key],
+        color: TYPE_COLORS[key],
+        count: categoryCounts[key] ?? 0,
+      }))
+      .filter(c => c.count > 0);
+  }, [categoryCounts]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    const thisMonth = pacificTodayDate().slice(0, 7);
     return businesses
       .filter(b => {
-        if (grandOpeningOnly) {
-          if (!isGrandOpeningActive(b.grandOpeningDate)) return false;
-          const openMonth = b.grandOpeningDate?.slice(0, 7);
-          if (openMonth && openMonth !== thisMonth) return false;
-        }
         if (activeType !== "ALL" && b.type !== activeType) return false;
         if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
         if (q) {
-          const haystack = `${b.name} ${b.description || ""}`.toLowerCase();
+          const haystack = `${b.name} ${b.description || ""} ${b.neighborhood || ""}`.toLowerCase();
           if (!haystack.includes(q)) return false;
         }
         return true;
       })
       .sort((a, b) => {
-        // Verified grand openings first (grandOpeningDate within 60 days), then A–Z.
+        // Queer-owned first, then verified grand openings, then A–Z.
+        const aQo = a.queerOwned ? 1 : 0;
+        const bQo = b.queerOwned ? 1 : 0;
+        if (bQo !== aQo) return bQo - aQo;
         const aGo = isGrandOpeningActive(a.grandOpeningDate) ? 1 : 0;
         const bGo = isGrandOpeningActive(b.grandOpeningDate) ? 1 : 0;
-        const newDiff = bGo - aGo;
-        if (newDiff !== 0) return newDiff;
+        if (bGo !== aGo) return bGo - aGo;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
-  }, [businesses, activeType, activeNeighborhood, searchQuery, grandOpeningOnly]);
+  }, [businesses, activeType, activeNeighborhood, searchQuery]);
 
   const neighborhoodsInUse = useMemo(() => {
-    const seen = new Set(businesses.map(b => b.neighborhood).filter(Boolean));
-    return NEIGHBORHOODS.filter(n => n === "ALL" || seen.has(n));
-  }, [businesses]);
-
-  const grandOpeningsThisMonth = useMemo(() => {
-    const thisMonth = pacificTodayDate().slice(0, 7);
-    return businesses.filter(b => {
-      if (!isGrandOpeningActive(b.grandOpeningDate)) return false;
-      const openMonth = b.grandOpeningDate?.slice(0, 7);
-      return !openMonth || openMonth === thisMonth;
-    }).length;
+    const seen = new Set(
+      businesses.map(b => b.neighborhood).filter((n): n is string => Boolean(n)),
+    );
+    const ordered = NEIGHBORHOOD_ORDER.filter(n => n === "ALL" || seen.has(n));
+    const extras = [...seen]
+      .filter(n => !NEIGHBORHOOD_ORDER.includes(n))
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    return [...ordered, ...extras];
   }, [businesses]);
 
   const heroStats = useMemo(() => {
-    const hostingPrideEvents = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
+    const queerOwned = businesses.filter(b => b.queerOwned).length;
+    const hostingThisWeek = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
-      { num: businesses.length, label: "Total places", color: "#ff1fa0" },
-      { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
-      { num: hostingPrideEvents, label: "Hosting upcoming events", color: "#19e3ff" },
+      { num: businesses.length, label: "Places listed", color: "#ff1fa0" },
+      { num: queerOwned, label: "Queer-owned", color: "#c8fa3c" },
+      { num: hostingThisWeek, label: "Hosting this week", color: "#19e3ff" },
     ];
-  }, [businesses, grandOpeningsThisMonth]);
-
-  const revealGrid = () => {
-    setShowGrid(true);
-    writeDirectoryShowGrid(true);
-    window.setTimeout(() => {
-      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  };
+  }, [businesses]);
 
   const handleSelectCategory = (key: string) => {
-    setGrandOpeningOnly(false);
     setActiveType(key);
-    revealGrid();
-  };
-
-  const handleSelectGrandOpening = () => {
-    setGrandOpeningOnly(true);
-    setActiveType("ALL");
-    revealGrid();
-  };
-
-  const handleViewAll = () => {
-    setGrandOpeningOnly(false);
-    setActiveType("ALL");
-    revealGrid();
-  };
-
-  const handleBackToCategories = () => {
-    setShowGrid(false);
-    writeDirectoryShowGrid(false);
-    try {
-      sessionStorage.removeItem(DIR_SCROLL_KEY);
-    } catch {
-      /* ignore */
-    }
-    setGrandOpeningOnly(false);
-    setMobileMapOpen(false);
-    window.setTimeout(() => {
-      document.querySelector(".category-constellation")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 20);
+    setSelectedPlace(null);
   };
 
   const directoryMapFallback = (
@@ -647,10 +582,41 @@ export default function Directory() {
     setFormOpen(false);
   };
 
+  const resultLine = isLoading
+    ? "Loading…"
+    : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`;
+
   return (
-    <div className="zine-page directory-page board-page board-page--makeover">
+    <div className="zine-page directory-page board-page board-page--makeover directory-page--v2">
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <DirectoryHero placeCount={businesses.length} stats={heroStats} onAddPlace={openAddForm} />
+      <DirectoryHero placeCount={businesses.length} />
+
+      {/* Stats band */}
+      <section
+        className="directory-stats-band"
+        aria-label="Directory totals"
+      >
+        {heroStats.map((stat, i) => (
+          <div
+            key={stat.label}
+            className={`directory-stats-band__item${i < heroStats.length - 1 ? " directory-stats-band__item--rule" : ""}`}
+          >
+            <div
+              className="directory-stats-band__num"
+              style={{
+                color: stat.color,
+                animationDelay: `${0.3 + i * 0.1}s`,
+              }}
+            >
+              <CountUpValue
+                key={stat.num > 0 ? `stat-${stat.label}-ready` : `stat-${stat.label}-pending`}
+                value={stat.num}
+              />
+            </div>
+            <div className="directory-stats-band__label">{stat.label}</div>
+          </div>
+        ))}
+      </section>
 
       {formOpen && (
         <ScrollReveal>
@@ -787,246 +753,212 @@ export default function Directory() {
         </ScrollReveal>
       )}
 
-      {!showGrid && (
-        isLoading ? (
+      {/* Category band rail */}
+      <section className="directory-bands" aria-label="Categories">
+        <div className="directory-bands__head">
+          <h2 className="directory-bands__title">What do you need today?</h2>
+          <span className="directory-bands__hint">Tap a band to tune the city</span>
+        </div>
+        {isLoading ? (
           <BoardLoadingState label="Loading directory" />
         ) : isError ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
+          <div className="directory-inline-error">Could not load directory.</div>
         ) : (
-          <ScrollReveal>
-            <CategoryConstellation
-              counts={categoryCounts}
-              grandOpeningCount={grandOpeningsThisMonth}
-              totalPlaces={businesses.length}
-              typeLabels={TYPE_LABELS}
-              typeColors={TYPE_COLORS}
-              onSelectCategory={handleSelectCategory}
-              onSelectGrandOpening={handleSelectGrandOpening}
-              onViewAll={handleViewAll}
-            />
-          </ScrollReveal>
-        )
-      )}
+          <div className="directory-bands__rail" role="group" aria-label="Filter by category">
+            <button
+              type="button"
+              className={`directory-band pdx-glass pdx-glass-rebind${activeType === "ALL" ? " directory-band--active" : ""}`}
+              style={{ ["--_c" as string]: "#19e3ff" }}
+              aria-pressed={activeType === "ALL"}
+              onClick={() => handleSelectCategory("ALL")}
+              data-testid="directory-band-all"
+            >
+              <span className="directory-band__bar" aria-hidden="true" />
+              <span className="directory-band__count">{businesses.length}</span>
+              <span className="directory-band__label">All</span>
+            </button>
+            {categoryBands.map(band => {
+              const active = activeType === band.key;
+              return (
+                <button
+                  key={band.key}
+                  type="button"
+                  className={`directory-band pdx-glass pdx-glass-rebind${active ? " directory-band--active" : ""}`}
+                  style={{ ["--_c" as string]: band.color }}
+                  aria-pressed={active}
+                  onClick={() => handleSelectCategory(band.key)}
+                  data-testid={`directory-band-${band.key}`}
+                >
+                  <span className="directory-band__bar" aria-hidden="true" />
+                  <span className="directory-band__count">{band.count}</span>
+                  <span className="directory-band__label">{band.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-      {showGrid && (
-        <>
-          {/* Filter bar */}
-          <ScrollReveal delay={30}>
-          <div className="zine-filter-bar" style={{
-            background: "#000", borderBottom: "1px solid #1a1a1a",
-            position: "sticky", top: "var(--site-header-height)", zIndex: 50,
-          }}>
-            <div className="directory-filter-bar__top">
-              <button
-                type="button"
-                className="directory-back-city"
-                onClick={handleBackToCategories}
-                data-testid="directory-back-city"
-              >
-                ← Back to City View
+      {/* Map + key + filters + dock */}
+      <section className="directory-stage" aria-label="Places">
+        <div className="directory-stage__map">
+          <div className="directory-stage__map-frame">
+            {!isLoading && (
+              <Suspense fallback={directoryMapFallback}>
+                <DirectoryMap
+                  businesses={filtered}
+                  height={DIRECTORY_MAP_HEIGHT}
+                  showKey={false}
+                />
+              </Suspense>
+            )}
+            {isLoading && directoryMapFallback}
+            <div className="directory-stage__map-seam" aria-hidden="true" />
+          </div>
+
+          <div
+            className="directory-map-key directory-map-key--dock pdx-glass pdx-glass--neutral pdx-glass-rebind"
+            role="group"
+            aria-label="Map key"
+          >
+            <span className="directory-map-key__kicker">Key</span>
+            <ul className="directory-map-key__list">
+              {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0).map(type => {
+                const isNonprofit = type === "nonprofit";
+                const color = TYPE_COLORS[type];
+                const label = TYPE_LABELS[type];
+                return (
+                  <li key={type} className="directory-map-key__item">
+                    <span
+                      className={
+                        isNonprofit
+                          ? "directory-map-key__swatch directory-map-key__swatch--rainbow"
+                          : "directory-map-key__swatch"
+                      }
+                      style={
+                        isNonprofit
+                          ? undefined
+                          : {
+                              background: "#000",
+                              border: `3px solid ${color}`,
+                              boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
+                              width: 12,
+                              height: 12,
+                            }
+                      }
+                      aria-hidden="true"
+                    />
+                    <span className="directory-map-key__label">{label}</span>
+                  </li>
+                );
+              })}
+              <li className="directory-map-key__item">
+                <span
+                  className="directory-map-key__swatch directory-map-key__swatch--rainbow"
+                  aria-hidden="true"
+                />
+                <span className="directory-map-key__label">Queer-owned</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Search + neighborhood chips: not sticky */}
+        <div className="directory-filters" id="directory-filters">
+          <div className="directory-filters__search-row">
+            <div className="directory-filters__search">
+              <SearchInput
+                id="directory-search"
+                label={undefined}
+                placeholder="Search the directory…"
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                onClear={() => setSearchQuery("")}
+                data-testid="directory-search"
+                size="sm"
+              />
+            </div>
+            <div className="directory-filters__count" data-testid="directory-result-count">
+              {resultLine}
+            </div>
+          </div>
+          <div
+            className="directory-filters__hoods"
+            role="group"
+            aria-label="Filter by neighborhood"
+          >
+            {neighborhoodsInUse.map(n => {
+              const selected = activeNeighborhood === n;
+              return (
+                <FilterChip
+                  key={n}
+                  selected={selected}
+                  fill={selected}
+                  accent="lime"
+                  onToggle={() => {
+                    setActiveNeighborhood(n);
+                    setSelectedPlace(null);
+                  }}
+                >
+                  {n}
+                </FilterChip>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* The dock */}
+        <div ref={dockRef} className="directory-dock">
+          <div className="directory-dock__head">
+            <h2 className="directory-dock__title">The dock</h2>
+            <span className="directory-dock__hint">Tap to pin it</span>
+          </div>
+
+          {isLoading ? (
+            <BoardLoadingState label="Loading directory" />
+          ) : isError ? (
+            <div className="directory-inline-error">Could not load directory.</div>
+          ) : filtered.length === 0 ? (
+            <div className="board-empty board-empty--prototype directory-dock__empty">
+              <p className="display section-heading">Nothing matches</p>
+              <p className="board-copy-sm">
+                Try a broader filter. If a place you love is genuinely missing, add it and it will be here for the next person.
+              </p>
+              <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
+                <Plus size={16} /> Add your business
               </button>
             </div>
-            <div className="events-filter-row" style={{ flexWrap: "wrap", rowGap: 8 }}>
-              <FilterChip
-                selected={activeType === "ALL" && !grandOpeningOnly}
-                fill={activeType === "ALL" && !grandOpeningOnly}
-                accent={dayAccentToken("ALL")}
-                onToggle={() => {
-                  setGrandOpeningOnly(false);
-                  setActiveType("ALL");
-                }}
-              >
-                ALL
-              </FilterChip>
-              {Object.entries(TYPE_LABELS).map(([key, label]) => {
-                const selected = activeType === key && !grandOpeningOnly;
-                return (
-                  <FilterChip
-                    key={key}
-                    selected={selected}
-                    fill={selected}
-                    accent={TYPE_COLORS[key]}
-                    onToggle={() => {
-                      setGrandOpeningOnly(false);
-                      setActiveType(key);
-                    }}
-                  >
-                    {label}
-                  </FilterChip>
-                );
-              })}
-              <div style={{ flex: 1, minWidth: 12 }} />
-              <div className="events-filter-search">
-                <SearchInput
-                  id="directory-search"
-                  label={undefined}
-                  placeholder="Search the directory..."
-                  value={searchQuery}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                  onClear={() => setSearchQuery("")}
-                  data-testid="directory-search"
-                  size="sm"
+          ) : (
+            <div className="directory-dock__list">
+              {filtered.map(biz => (
+                <DirectoryCard
+                  key={biz.id}
+                  biz={biz}
+                  onClick={(el) => openPlace(biz, el)}
+                  onRequireAuth={() => setShowAuth(true)}
                 />
-              </div>
+              ))}
             </div>
+          )}
+        </div>
+      </section>
 
-            {recentViewed.length > 0 && (
-              <div
-                className="directory-recent"
-                data-testid="directory-recently-viewed"
-                aria-label="Recently viewed places"
-              >
-                <div className="directory-recent__label">Recently viewed</div>
-                <div className="directory-recent__rail" role="list">
-                  {recentViewed.slice(0, DIRECTORY_RECENT_MAX).map(entry => {
-                    const live = businesses.find(b => b.id === entry.id);
-                    const accent = TYPE_COLORS[entry.type] || TYPE_COLORS.venue;
-                    const logo =
-                      (live && resolveDirectoryLogo(live.name, live.imageUrl)) ||
-                      entry.logoUrl ||
-                      directoryFallbackLogo(entry.name);
-                    return (
-                      <button
-                        key={entry.id}
-                        type="button"
-                        role="listitem"
-                        className="directory-recent__chip"
-                        style={{ ["--c" as string]: accent }}
-                        data-testid={`directory-recent-${entry.id}`}
-                        title={entry.name}
-                        onClick={() => {
-                          if (live) {
-                            openPlace(live);
-                            return;
-                          }
-                          // Stale id still on disk - open by path so deep-link can resolve if still live.
-                          setShowGrid(true);
-                          setLocation(`${placePath(entry.id, entry.name)}${directoryQuerySuffix()}`);
-                        }}
-                      >
-                        <span className="directory-recent__logo" aria-hidden>
-                          {logo ? (
-                            <img src={logo} alt="" />
-                          ) : (
-                            <span className="directory-recent__logo-fallback">
-                              {entry.name.slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                        </span>
-                        <span className="directory-recent__name">{entry.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="events-filter-row" style={{ paddingTop: 6, paddingBottom: 10, overflowX: "auto" }}>
-              {neighborhoodsInUse.map(n => {
-                const selected = activeNeighborhood === n;
-                return (
-                  <FilterChip
-                    key={n}
-                    selected={selected}
-                    fill={selected}
-                    accent={n === "ALL" ? dayAccentToken("ALL") : "lime"}
-                    onToggle={() => setActiveNeighborhood(n)}
-                    style={{ fontSize: "0.7rem" }}
-                  >
-                    {n}
-                  </FilterChip>
-                );
-              })}
-            </div>
-          </div>
-          </ScrollReveal>
-
-          <div ref={gridRef} className="directory-browse-layout">
-            <div className="directory-browse-layout__main">
-              <ScrollReveal>
-                <div className="events-count-row">
-                  <div className="events-count-banner">
-                    <MapPin size={13} />
-                    <span>
-                      {isLoading ? "Loading…" : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`}
-                    </span>
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              <div className="directory-map-toolbar">
-                <button
-                  type="button"
-                  className="directory-map-toggle"
-                  data-testid="button-toggle-directory-map"
-                  aria-expanded={mobileMapOpen}
-                  aria-controls="directory-map-mobile"
-                  onClick={() => setMobileMapOpen(open => !open)}
-                >
-                  {mobileMapOpen ? "Hide map" : "Show map"}
-                </button>
-              </div>
-
-              {mobileMapOpen && !isLoading && (
-                <ScrollReveal>
-                  <div id="directory-map-mobile" className="directory-browse-layout__map-mobile">
-                    <Suspense fallback={directoryMapFallback}>
-                      <DirectoryMap
-                        businesses={filtered}
-                        height={DIRECTORY_MAP_HEIGHT}
-                        showKey
-                      />
-                    </Suspense>
-                  </div>
-                </ScrollReveal>
-              )}
-
-              {isLoading ? (
-                <BoardLoadingState label="Loading directory" />
-              ) : isError ? (
-                <div style={{ textAlign: "center", padding: "60px 20px", color: "#aaa" }}>Could not load directory.</div>
-              ) : filtered.length === 0 ? (
-                <div className="board-empty board-empty--prototype">
-                  <p className="display section-heading">Nothing matches</p>
-                  <p className="board-copy-sm">
-                    {businesses.length === 0
-                      ? "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."
-                      : "Try a broader filter. If a place you love is genuinely missing, add it and it'll be here for the next person."}
-                  </p>
-                  <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
-                    <Plus size={16} /> Add your business
-                  </button>
-                </div>
-              ) : (
-                <ScrollReveal delay={50}>
-                  <div className="directory-grid directory-grid--browse">
-                    {filtered.map(biz => (
-                      <DirectoryCard
-                        key={biz.id}
-                        biz={biz}
-                        onClick={(el) => openPlace(biz, el)}
-                        onRequireAuth={() => setShowAuth(true)}
-                      />
-                    ))}
-                  </div>
-                </ScrollReveal>
-              )}
-            </div>
-
-            {!isLoading && (
-              <aside className="directory-browse-layout__map-desktop" aria-label="Directory map">
-                <Suspense fallback={directoryMapFallback}>
-                  <DirectoryMap
-                    businesses={filtered}
-                    height={DIRECTORY_MAP_HEIGHT}
-                    showKey
-                  />
-                </Suspense>
-              </aside>
-            )}
-          </div>
-        </>
-      )}
+      {/* Add-a-place band */}
+      <section
+        className="directory-add-band pdx-glass pdx-glass-rebind"
+        style={{ ["--_c" as string]: "var(--neon-yellow, #ccff00)" }}
+        aria-label="Add a place"
+      >
+        <div className="directory-add-band__copy">
+          <p className="directory-add-band__title">Is your place on Zaylist?</p>
+          <p className="directory-add-band__lede">
+            Members can list spots that are ours or truly for us. Owners can claim a listing and keep the hours honest.
+          </p>
+        </div>
+        <Button variant="solid" accent="yellow" size="lg" arrow onClick={openAddForm} data-testid="directory-add-place">
+          Add a place
+        </Button>
+      </section>
 
       {selectedPlace && (
         <PlaceModal
@@ -1037,11 +969,6 @@ export default function Directory() {
           onRequireAuth={() => setShowAuth(true)}
         />
       )}
-
-      <BoardCloseSeam
-        line="Keep us healthy."
-        url="zaylist.com/directory"
-      />
     </div>
   );
 }
@@ -1079,6 +1006,7 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   campground: "campgrounds",
 };
 
+/** Dock list card: compact wide PlaceCard (logo · chips · name · address · upcoming flag). */
 function DirectoryCard({
   biz,
   onClick,
@@ -1101,12 +1029,12 @@ function DirectoryCard({
     : [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   const isNonprofit = biz.type === "nonprofit";
   const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
-  const grandOpeningDateLabel = grandOpening ? formatGrandOpeningDate(biz.grandOpeningDate) : null;
   const logoUrl = resolveDirectoryLogo(biz.name, biz.imageUrl) || undefined;
   const fallbackLogoUrl = directoryFallbackLogo(biz.type);
   return (
     <PlaceCard
       name={biz.name}
+      variant="compact"
       onClick={(e: React.MouseEvent<HTMLElement>) => {
         onClick?.(e.currentTarget);
       }}
@@ -1115,19 +1043,11 @@ function DirectoryCard({
       isNonprofit={isNonprofit}
       logoUrl={logoUrl}
       fallbackLogoUrl={fallbackLogoUrl}
-      donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}
       lat={multiLoc ? null : biz.lat}
       lng={multiLoc ? null : biz.lng}
-      hours={multiLoc ? undefined : biz.hours || undefined}
-      phone={multiLoc ? undefined : biz.phone || undefined}
-      description={biz.description || undefined}
-      website={biz.website || undefined}
-      instagram={biz.instagram || undefined}
       grandOpening={grandOpening}
-      grandOpeningDate={grandOpeningDateLabel}
-      promoters={biz.promoters}
       businessId={biz.id}
       isFollowing={Boolean(biz.isFollowing)}
       onRequireAuth={onRequireAuth}

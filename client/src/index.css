@@ -16668,8 +16668,22 @@ html.calm-mode .category-constellation__orb {
   outline-offset: 2px;
 }
 
+/* Dock list: single column of compact wide place cards (handoff 2026-07-28) */
 .directory-grid--browse {
+  grid-template-columns: 1fr;
+  grid-auto-rows: auto;
+  gap: 12px;
   align-items: stretch;
+}
+
+.directory-grid--browse .pdxPlace,
+.directory-grid--browse .pdxPlace--compact {
+  height: auto;
+  margin: 0;
+}
+
+.directory-grid--browse .pdxPlace__body {
+  height: auto;
 }
 
 @media (min-width: 900px) {
@@ -16706,32 +16720,6 @@ html.calm-mode .category-constellation__orb {
 
   .directory-map-toolbar {
     display: none;
-  }
-
-  /* Mid desktop: 2 cols until main column has room for 3 */
-  .directory-grid--browse {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-  }
-}
-
-/* Wide desktop: 3 place cards left of the map */
-@media (min-width: 1180px) {
-  .directory-grid--browse {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-}
-
-@media (max-width: 899px) {
-  .directory-grid--browse {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 560px) {
-  .directory-grid--browse {
-    grid-template-columns: 1fr;
   }
 }
 

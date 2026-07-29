@@ -534,7 +534,7 @@ export default function PlaceModal({
             type="button"
             className="place-modal-panel__close"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Close place detail"
           >
             ✕
           </button>
@@ -1017,31 +1017,37 @@ export default function PlaceModal({
               upcomingEvents.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming Pride events matched to this venue yet.</p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {upcomingEvents.map((ev) => {
-                    const dayAccent = (ev.dayOfWeek && DAY_COLOR[ev.dayOfWeek]) || "var(--cyan)";
-                    return (
-                      <Link
-                        key={ev.listingInstanceKey ?? ev.id}
-                        href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
-                        onClick={onClose}
-                        style={{
-                          padding: "8px 0 8px 12px",
-                          borderLeft: `3px solid ${dayAccent}`,
-                          textDecoration: "none",
-                          color: "inherit",
-                          display: "block",
-                        }}
-                      >
-                        <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", color: dayAccent }}>
-                          {formatDirectoryEventWhen(ev)}
-                        </div>
-                        <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)" }}>
-                          {ev.title}
-                        </div>
-                      </Link>
-                    );
-                  })}
+                <div className="place-modal-events">
+                  {upcomingEvents.length > 1 && (
+                    <p className="place-modal-events__hint">
+                      Swipe for the rest · the card stays put
+                    </p>
+                  )}
+                  <div
+                    className="place-modal-events__rail"
+                    role="list"
+                    aria-label={`Upcoming events at ${place.name}`}
+                  >
+                    {upcomingEvents.map((ev) => {
+                      const code = dayCodeFromEvent(ev);
+                      const dayAccent = DAY_COLOR[code] || "var(--cyan)";
+                      return (
+                        <Link
+                          key={ev.listingInstanceKey ?? ev.id}
+                          href={eventPath(ev.id, ev.title, ev.dayOfWeek)}
+                          onClick={onClose}
+                          role="listitem"
+                          className="place-modal-events__tile"
+                          style={{ ["--pm-day" as string]: dayAccent }}
+                        >
+                          <div className="place-modal-events__when">
+                            {formatDirectoryEventWhen(ev)}
+                          </div>
+                          <div className="place-modal-events__title">{ev.title}</div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               )
             )}
