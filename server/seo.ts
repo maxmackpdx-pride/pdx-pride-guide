@@ -253,8 +253,8 @@ export function buildCanonicalUrl(requestPath: string) {
 
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "Zaylist | Portland Queer Events",
-    description: "Every Portland queer night worth knowing, in one place. Find the party, back the spaces that host it, all year round.",
+    title: "Zaylist | Queer Portland, all in one place",
+    description: "Portland's queer community hub — events and nightlife, housing and roommates, gigs, free stuff, missed connections, and a directory of queer-owned spots. All year round.",
   },
   "/events": {
     title: "Portland Queer Events | Zaylist",
