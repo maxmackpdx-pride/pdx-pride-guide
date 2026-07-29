@@ -50,3 +50,12 @@ if [[ -f "script/smoke-admin-ops.mjs" ]] && command -v node >/dev/null 2>&1; the
     echo "predeploy: skip smoke-admin-ops (no node_modules yet)"
   fi
 fi
+
+# QSearch identity rules are production data guards: ordinary venues require
+# explicit LGBTQ+ evidence, dedicated queer venues pass, and Sports Bra stays
+# out of scraper registries until its schedule is reliable.
+if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
+  echo "predeploy: running QSearch identity guards…"
+  node --import tsx script/smoke-qsearch-identity.ts
+  node --import tsx script/smoke-sports-bra.ts
+fi

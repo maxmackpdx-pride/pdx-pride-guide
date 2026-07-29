@@ -65,6 +65,21 @@ export type IngestSource = {
   cityAllowlist?: string[];
 };
 
+/** Direct Sports Bra schedule scraping is paused regardless of registry/custom-source state. */
+export function isSportsBraScrapeSource(
+  source: Pick<IngestSource, "id" | "label" | "url">,
+): boolean {
+  const identity = normalizeVenueKey(`${source.id} ${source.label}`);
+  if (/\bsports bra\b/.test(identity)) return true;
+  try {
+    const url = new URL(source.url.includes("://") ? source.url : `https://${source.url}`);
+    const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+    return host === "thesportsbraofficial.com" || host.endsWith(".thesportsbraofficial.com");
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Portland Eventbrite identity keyword searches.
  * One source per term so Scan health shows which query actually yields.
@@ -547,15 +562,6 @@ export const INGEST_SOURCES: IngestSource[] = [
     format: "eventbrite",
     notes: "Sapphic mixers etc. Venue-scoped; pairs with escape-eb path.",
   },
-  {
-    id: "sports-bra-eb",
-    label: "Sports Bra (Eventbrite venue)",
-    url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
-    tier: "3",
-    format: "eventbrite",
-    notes: "Venue-scoped - not generic sports events. Trusted Airtable is primary for games.",
-  },
-
   // ── Eventbrite keyword searches: REMOVED from the QSearch scan ───────────
   // Broad Eventbrite discovery pulled in non-queer / mislabeled noise, so it
   // no longer feeds QSearch. Eventbrite now lives ONLY in the Trusted lane

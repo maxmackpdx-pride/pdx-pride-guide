@@ -49,7 +49,11 @@ import { fetchCampBarDrafts } from "../ingest/adapters/campBar";
 import { fetchCcSlaughtersDrafts } from "../ingest/adapters/ccSlaughters";
 import { fetchCampTrcDrafts } from "../ingest/adapters/campTrc";
 import { inferAdmissionFromText } from "../ingest/admissionInfer";
-import { applyDeclaredVenuePolicy, countFreshFlyerDrafts } from "../ingest/venuePolicy";
+import {
+  applyDeclaredVenuePolicy,
+  countFreshFlyerDrafts,
+  trustedVenueAcceptsDraft,
+} from "../ingest/venuePolicy";
 import { isRelevantScanDraft } from "../ingest/relevance";
 import type { IngestEventDraft } from "../ingest/types";
 import { normalizeVenueKey } from "@shared/venueLinks";
@@ -212,6 +216,7 @@ function prepareDrafts(raw: IngestEventDraft[], venue: TrustedVenueDef): IngestE
     if (!d?.title || !d?.dateStart) continue;
     if (isNonEventListing(d)) continue;
     if (isPastEventListing(d)) continue;
+    if (!trustedVenueAcceptsDraft(d, venue)) continue;
     // Closed permanent venues never re-enter Trusted publish (Eventbrite cache noise)
     if (matchClosedVenue({ venueName: d.venueName, address: d.address, title: d.title })) continue;
     let draft = applyVenueDefaults(d, venue);

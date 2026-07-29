@@ -33,6 +33,8 @@ export type TrustedVenueDef = {
   calendarPageUrl: string;
   /** Preferred status when approving from Review (or rare publish-mode automation) */
   publishStatus: "LIVE" | "HIDDEN";
+  /** Whether venue identity covers every event or each event needs LGBTQ+ wording. */
+  eventScope: "DEDICATED_QUEER_VENUE" | "EXPLICIT_LGBTQ_EVENT";
   /** Hours between trusted sync runs */
   pollHours: number;
   notes?: string;
@@ -69,6 +71,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://badlands-events.badlandsportland.workers.dev/api/calendar",
     calendarPageUrl: "https://www.badlandsportland.com/calendar",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 6,
     notes: "Worker JSON + photoUrl flyers. Requires ?from=&to= date window.",
     venuePolicy: {
@@ -87,6 +90,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://pdxsanctuary.com/events/calendar/sanctuary/ics/",
     calendarPageUrl: "https://pdxsanctuary.com/calendar/",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 6,
     notes: "ICS for structure; flyers from per-event pages + series reuse.",
   },
@@ -99,6 +103,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://www.eagleportland.com/what-s-happening",
     calendarPageUrl: "https://www.eagleportland.com/what-s-happening",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 6,
     notes:
       "Wix Events via appsWarmupData. 21+ bar - never ALL_AGES; cover UNKNOWN unless listing says free.",
@@ -119,6 +124,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://darcellexv.com/wp-json/tribe/events/v1/events",
     calendarPageUrl: "https://darcellexv.com/events/",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 6,
     notes:
       "Tribe REST JSON, image.url flyers, paginated (next_rest_url); ICS ?ical=1 fallback (ATTACH flyers). Age defaults 21_PLUS - verify all-ages/brunch shows in Review.",
@@ -138,6 +144,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://www.hawkspdx.com/hawks-events?format=json",
     calendarPageUrl: "https://www.hawkspdx.com/hawks-events",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 6,
     notes:
       "Squarespace ?format=json, assetUrl posters, paginated (pagination.nextPageUrl). Sex club - sex-positive + nudity flags always on; age defaults 21_PLUS, verify 18+ nights in Review.",
@@ -158,6 +165,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
     calendarPageUrl: "https://www.eventbrite.com/o/stag-pdx-73608204703",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 12,
     venuePolicy: {
       ageRequirement: "21_PLUS",
@@ -175,6 +183,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://www.eventbrite.com/o/104468106391",
     calendarPageUrl: "https://livingroomwinespdx.com",
     publishStatus: "LIVE",
+    eventScope: "EXPLICIT_LGBTQ_EVENT",
     pollHours: 12,
     venuePolicy: {
       ageRequirement: "21_PLUS",
@@ -192,6 +201,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://campbarpdx.com",
     calendarPageUrl: "https://campbarpdx.com",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 12,
     notes:
       "Homepage #weeklyevents (Game On / Karaoke / Drag Bingo) expanded 6 weeks. Happy Hour omitted. No per-event flyers (null + do-not-reuse warning). IG specials still scan-lane.",
@@ -211,6 +221,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://www.ccslaughterspdx.com/",
     calendarPageUrl: "https://www.ccslaughterspdx.com/",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 12,
     venuePolicy: {
       ageRequirement: "21_PLUS",
@@ -230,6 +241,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     feedUrl: "https://camptrc.org/",
     calendarPageUrl: "https://camptrc.org/",
     publishStatus: "LIVE",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 24,
     notes:
       "LGBTQ+ campground (est. 1975) near Granite Falls WA — important PDX regional destination. Public homepage 2026 Event Calendar (theme weekends). Wild Apricot event pages + Events RSS are login-gated; do not rely on /Events/RSS.",
@@ -248,6 +260,7 @@ export const TRUSTED_VENUES: TrustedVenueDef[] = [
     calendarPageUrl: "https://peacockpdx.com/",
     /** HIDDEN first — Review gate until HTML yield is stable (ex-Crush space). */
     publishStatus: "HIDDEN",
+    eventScope: "DEDICATED_QUEER_VENUE",
     pollHours: 12,
     notes:
       "Year-round queer bar at former Crush Bar (CLOSED_PERMANENT_2025-01-01). Generic HTML/JSON-LD discover. Prefer HIDDEN → Review until cards look clean; IG @peacock.pdx for specials.",
@@ -344,7 +357,7 @@ export function isTrustedLaneSource(input: {
   // Sibling curated recipes for the same venues (calendar HTML, ICS fallbacks)
   if (
     id &&
-    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|sports-bra|living-room|camp-bar|cc-slaughters|camp-trc|camptrc|peacock)([-_]|$)/i.test(
+    /^(sanctuary|darcelle|badlands|eagle|hawks|stag|living-room|camp-bar|cc-slaughters|camp-trc|camptrc|peacock)([-_]|$)/i.test(
       id,
     )
   ) {

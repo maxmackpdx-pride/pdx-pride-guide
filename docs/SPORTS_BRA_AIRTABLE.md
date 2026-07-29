@@ -1,4 +1,10 @@
-# The Sports Bra - official schedule via Airtable
+# The Sports Bra - scraper paused
+
+> **Paused 2026-07-29:** direct Sports Bra scraping is intentionally disabled.
+> Its current schedule technology was not reliable enough to read accurately.
+> Keep this document as historical implementation research only. Events found
+> through other trustworthy sources may still qualify because The Sports Bra is
+> a verified queer venue.
 
 The Sports Bra publishes the games it's showing in an Airtable base, embedded on
 `thesportsbraofficial.com/pages/portland`. We read that schedule in two ways:

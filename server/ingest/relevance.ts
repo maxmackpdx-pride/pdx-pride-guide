@@ -5,16 +5,108 @@
 import type { IngestEventDraft } from "./types";
 import { isPortlandEventListing } from "./index";
 import { matchClosedVenue } from "@shared/closedVenues";
+import { normalizeVenueKey } from "@shared/venueLinks";
 
 const FOREIGN_EB_HOST =
   /eventbrite\.(de|co\.uk|fr|es|it|nl|com\.br|com\.ar|com\.mx|com\.au|ca|at|ch|be|ie|pt|se|dk|fi|no|pl|cz|hu|ro|sg|hk|in|ph|za)\b/i;
 
-const QUEER_SIGNAL =
+const EXPLICIT_QUEER_EVENT_SIGNAL =
   /\b(lgbtq?\+?|queer|gay|lesbian|sapphic|bisexual|\bbi\b|trans(?:gender)?|non[- ]?binary|enby|drag|pride|bear\b|cub\b|leather|kink|fetish|dyke|twink|femme|butch|ballroom|vogue|house of|poly(?:am)?|enm\b|t4t|wlw|mlm|same[- ]sex|rainbow|out@|coming out)\b/i;
 
-/** Live queer venues only — never closed bars (Crush etc. would resurrect via EB). */
-const QUEER_VENUE =
-  /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|nest\s*lounge|process|escape\s*bar|sports\s*bra|bar\s*cala|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf[eé]|living\s*room\s*wines)\b/i;
+/**
+ * Dedicated LGBTQ+ venues where the venue identity itself is sufficient
+ * relevance evidence. These are exact aliases, not a keyword regex: an event
+ * at "Badlands" qualifies, while "Badlands Golf Club" does not.
+ *
+ * General venues (Holocene, The Get Down, etc.) intentionally do not appear
+ * here. Their events need explicit LGBTQ+ wording or an explicit queer host.
+ */
+const DEDICATED_QUEER_VENUE_ALIASES = new Set(
+  [
+    "Badlands",
+    "Badlands Portland",
+    "Camp Bar",
+    "Camp Bar PDX",
+    "CC Slaughters",
+    "Darcelle XV",
+    "Darcelle XV Showplace",
+    "Darcelle XV Plaza",
+    "Eagle",
+    "Eagle Portland",
+    "Hawks",
+    "Hawks PDX",
+    "Peacock PDX",
+    "Q Center",
+    "Sanctuary",
+    "Sanctuary Club",
+    "PDX Sanctuary",
+    "Scandals",
+    "Scandals East",
+    "Silverado",
+    "Stag",
+    "Stag PDX",
+    "Steam",
+    "Steam Portland",
+    "The Meet Rack",
+    "The Meet Rack at Darkroom",
+    "The Nest Lounge",
+    "The Sports Bra",
+    "Triangle Recreation Camp",
+    "Camp TRC",
+  ].map(normalizeVenueKey),
+);
+
+/** Official hosts for dedicated LGBTQ+ venues. Shared ticket platforms never qualify. */
+const DEDICATED_QUEER_VENUE_HOSTS = new Set([
+  "badlandsportland.com",
+  "campbarpdx.com",
+  "camptrc.org",
+  "ccslaughterspdx.com",
+  "darcellexv.com",
+  "eagleportland.com",
+  "hawkspdx.com",
+  "meetrack.org",
+  "pdxqcenter.org",
+  "pdxsanctuary.com",
+  "peacockpdx.com",
+  "scandalspdx.com",
+  "silveradopdx.com",
+  "stagportland.com",
+  "steampdx.com",
+  "thesportsbraofficial.com",
+]);
+
+function urlHost(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value.includes("://") ? value : `https://${value}`).hostname
+      .replace(/^www\./i, "")
+      .toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+export function hasExplicitQueerEventSignal(
+  draft: Pick<IngestEventDraft, "title" | "description">,
+): boolean {
+  return EXPLICIT_QUEER_EVENT_SIGNAL.test(
+    [draft.title, draft.description?.slice(0, 800)].filter(Boolean).join(" "),
+  );
+}
+
+export function isDedicatedQueerVenueListing(
+  draft: Pick<IngestEventDraft, "venueName" | "sourceUrl" | "eventPageUrl">,
+): boolean {
+  const venueKey = normalizeVenueKey(draft.venueName);
+  if (venueKey && DEDICATED_QUEER_VENUE_ALIASES.has(venueKey)) return true;
+
+  for (const value of [draft.sourceUrl, draft.eventPageUrl]) {
+    const host = urlHost(value);
+    if (host && DEDICATED_QUEER_VENUE_HOSTS.has(host)) return true;
+  }
+  return false;
+}
 
 /** Generic Eventbrite "local events" dumps - never a valid resolved recipe. */
 export function isGenericEventbriteDumpUrl(url: string | null | undefined): boolean {
@@ -45,20 +137,12 @@ export function isForeignEventbriteUrl(url: string | null | undefined): boolean 
 }
 
 export function hasQueerSignal(
-  draft: Pick<IngestEventDraft, "title" | "description" | "venueName" | "address" | "neighborhood" | "sourceUrl" | "ticketUrl">,
+  draft: Pick<
+    IngestEventDraft,
+    "title" | "description" | "venueName" | "sourceUrl" | "eventPageUrl"
+  >,
 ): boolean {
-  const blob = [
-    draft.title,
-    draft.venueName,
-    draft.address,
-    draft.neighborhood,
-    draft.description?.slice(0, 500),
-    draft.sourceUrl,
-    draft.ticketUrl,
-  ]
-    .filter(Boolean)
-    .join(" ");
-  return QUEER_SIGNAL.test(blob) || QUEER_VENUE.test(blob);
+  return hasExplicitQueerEventSignal(draft) || isDedicatedQueerVenueListing(draft);
 }
 
 /** Tokens from a venue-ish query: "escape-bar-and-grill" → ["escape","bar","grill"] */
@@ -175,14 +259,27 @@ export type SourceRelevanceContext = {
   label: string;
   url: string;
   tier: string;
+  /** Directory/curated identity; an LGBTQ+ group source is explicit host evidence. */
+  businessType?: string | null;
 };
+
+function sourceHasExplicitQueerIdentity(ctx: SourceRelevanceContext): boolean {
+  const type = String(ctx.businessType || "").toLowerCase();
+  if (type === "group" || type === "nonprofit") return true;
+
+  const labelKey = normalizeVenueKey(ctx.label.replace(/\(.*?\)/g, ""));
+  if (labelKey && DEDICATED_QUEER_VENUE_ALIASES.has(labelKey)) return true;
+
+  const host = urlHost(ctx.url);
+  return Boolean(host && DEDICATED_QUEER_VENUE_HOSTS.has(host));
+}
 
 /**
  * Infer how strict to be for this source.
  * - venue: Eventbrite org or city search named after a place
  * - keyword: city LGBTQ keyword searches (gay, drag, …)
  * - general: aggregators / loose city feeds - queer + Portland
- * - open: trusted venue calendars (Sanctuary HTML, Tribe, …) - only drop foreign EB + non-events
+ * - open: own-site / pasted sources - still require queer event or exact queer venue evidence
  */
 export function relevanceModeForSource(ctx: SourceRelevanceContext): "venue" | "keyword" | "general" | "open" {
   const id = ctx.sourceId.toLowerCase();
@@ -253,6 +350,7 @@ export function isOffSceneNoiseDraft(
     IngestEventDraft,
     "title" | "description" | "venueName" | "address" | "neighborhood"
   >,
+  sourceHasQueerIdentity = false,
 ): { noise: boolean; reason?: string } {
   const blob = [
     draft.title,
@@ -275,14 +373,14 @@ export function isOffSceneNoiseDraft(
   // Generic golf fundraisers / municipal courses (not queer league)
   if (
     /\b(golf scramble|golf tournament|golf fundraiser|golf course)\b/i.test(blob) &&
-    !hasQueerSignal(draft as IngestEventDraft)
+    !sourceHasQueerIdentity && !hasQueerSignal(draft as IngestEventDraft)
   ) {
     return { noise: true, reason: "golf_noise" };
   }
   // Indie pro-wrestling schools (not our scene)
   if (
     /\b(pro(?:fessional)?\s+wrestling|wrestling school|oregon pro wrestling)\b/i.test(blob) &&
-    !hasQueerSignal(draft as IngestEventDraft)
+    !sourceHasQueerIdentity && !hasQueerSignal(draft as IngestEventDraft)
   ) {
     return { noise: true, reason: "wrestling_noise" };
   }
@@ -291,25 +389,19 @@ export function isOffSceneNoiseDraft(
     /\bplaymakers\s+sports\s+bar\b/i.test(blob) ||
     (/\bhazel\s*dell\b/i.test(blob) &&
       /\b(sports\s+bar|sip\s*[&+]\s*paint|paint night)\b/i.test(blob) &&
-      !hasQueerSignal(draft as IngestEventDraft))
+      !sourceHasQueerIdentity && !hasQueerSignal(draft as IngestEventDraft))
   ) {
     return { noise: true, reason: "off_map_sports_bar" };
   }
   // Generic fitness / civic EB dumps (jiu-jitsu comps, beer runs, rock gyms, Shriners)
   if (
+    !sourceHasQueerIdentity &&
     !hasQueerSignal(draft as IngestEventDraft) &&
     /\b(jiu[- ]?jitsu|no[- ]?gi|bjj\b|rock gym|climbing experience|beer run|brewery running|shriners|sports consortium|art\s*&\s*wine walk|women\s+golf\s+outing|hosts?\s*&\s*home\s*teams)\b/i.test(
       blob,
     )
   ) {
     return { noise: true, reason: "generic_civic_fitness_noise" };
-  }
-  // Romance book event at Sports Bra (EB) — not a sports/watch listing we want
-  if (
-    /\bromance\s*x\s*women'?s?\s*sports\s*book\b/i.test(blob) ||
-    (/\banita\s+kelly\b/i.test(blob) && /\bsamantha\s+saldivar\b/i.test(blob))
-  ) {
-    return { noise: true, reason: "sports_bra_romance_book_noise" };
   }
   return { noise: false };
 }
@@ -321,6 +413,8 @@ export function isRelevantScanDraft(
   draft: IngestEventDraft,
   ctx: SourceRelevanceContext,
 ): { keep: boolean; reason?: string } {
+  const sourceHasQueerIdentity = sourceHasExplicitQueerIdentity(ctx);
+  const hasQueerEvidence = hasQueerSignal(draft) || sourceHasQueerIdentity;
   const urls = [draft.ticketUrl, draft.sourceUrl, draft.eventPageUrl].filter(Boolean) as string[];
   for (const u of urls) {
     if (isForeignEventbriteUrl(u)) {
@@ -342,7 +436,7 @@ export function isRelevantScanDraft(
   }
 
   // Off-scene noise (churches, golf scrambles, pro wrestling, random sports bars)
-  const off = isOffSceneNoiseDraft(draft);
+  const off = isOffSceneNoiseDraft(draft, sourceHasQueerIdentity);
   if (off.noise) {
     return { keep: false, reason: off.reason };
   }
@@ -350,11 +444,11 @@ export function isRelevantScanDraft(
   const mode = relevanceModeForSource(ctx);
 
   if (mode === "open") {
-    // Open mode is for trusted venue calendars / paste — but Eventbrite tickets
-    // without any LGBTQ signal are city-wide noise (golf, churches, BJJ, etc.).
-    const ebUrls = urls.filter(u => /eventbrite\./i.test(u));
-    if (ebUrls.length && !hasQueerSignal(draft)) {
-      return { keep: false, reason: "eb_no_queer_signal" };
+    // "Open" used to mean every event on an ordinary venue site passed. That
+    // pulled unrelated concerts/classes into Zaylist. Exact dedicated queer
+    // venues pass by identity; every other venue needs explicit event wording.
+    if (!hasQueerEvidence) {
+      return { keep: false, reason: "no_queer_signal" };
     }
     return { keep: true };
   }
@@ -363,7 +457,7 @@ export function isRelevantScanDraft(
   const title = String(draft.title || "");
   if (
     /\b(bar\s*crawl|santacon|pub\s*crawl|crawl\s*202\d)\b/i.test(title) &&
-    !hasQueerSignal(draft)
+    !hasQueerEvidence
   ) {
     return { keep: false, reason: "bar_crawl_noise" };
   }
@@ -373,15 +467,18 @@ export function isRelevantScanDraft(
     if (tokens.length && !matchesVenueScope(draft, tokens)) {
       return { keep: false, reason: "venue_mismatch" };
     }
+    if (!hasQueerEvidence) {
+      return { keep: false, reason: "no_queer_signal" };
+    }
     // Still require Portland-ish when address claims another city
-    if (draft.address && !isPortlandEventListing(draft) && !hasQueerSignal(draft)) {
+    if (draft.address && !isPortlandEventListing(draft) && !hasQueerEvidence) {
       // Soft: if venue matched "stag" locally, keep; if only random Portland address without venue, already dropped
     }
     return { keep: true };
   }
 
   if (mode === "keyword") {
-    if (!hasQueerSignal(draft)) {
+    if (!hasQueerEvidence) {
       return { keep: false, reason: "no_queer_signal" };
     }
     // Keyword city searches should stay in PDX
@@ -399,7 +496,7 @@ export function isRelevantScanDraft(
   }
 
   // general aggregators
-  if (!hasQueerSignal(draft)) {
+  if (!hasQueerEvidence) {
     return { keep: false, reason: "no_queer_signal" };
   }
   if (!isPortlandEventListing(draft)) {

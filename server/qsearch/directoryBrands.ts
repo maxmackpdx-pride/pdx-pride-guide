@@ -59,8 +59,8 @@ export function directoryVenueAddressConflicts(
 
     // Weak/partial name-only hits without solid venue name match: skip noise
     const nameHit =
-      brand.reasons.some(r => /venue name|source label venue|source id venue/i.test(r)) ||
-      nameLooselyMatch(String(draft.venueName || ""), brand.name);
+      brand.reasons.some(r => /exact (?:source-label )?venue identity/i.test(r)) ||
+      venueNamesExplicitlyMatch(String(draft.venueName || ""), brand.name);
     if (!nameHit) continue;
 
     const warning =
@@ -154,36 +154,30 @@ function foldVenueTypos(s: string): string {
   return s.replace(/wearhouse/g, "warehouse");
 }
 
-function nameLooselyMatch(a: string, b: string): boolean {
-  const na = foldVenueTypos(normalizeVenueKey(a).replace(/\s+/g, ""));
-  const nb = foldVenueTypos(normalizeVenueKey(b).replace(/\s+/g, ""));
+const VENUE_IDENTITY_ALIASES: string[][] = [
+  ["Badlands", "Badlands Portland"],
+  ["Camp Bar", "Camp Bar PDX"],
+  ["Darcelle XV", "Darcelle XV Plaza", "Darcelle XV Showplace"],
+  ["Eagle", "Eagle Portland"],
+  ["Escape Bar", "Escape Bar and Grill"],
+  ["Hawks", "Hawks PDX"],
+  ["Sanctuary", "Sanctuary Club", "PDX Sanctuary"],
+  ["Scandals", "Scandals East"],
+  ["Stag", "Stag PDX"],
+  ["Steam", "Steam Portland"],
+  ["Triangle Recreation Camp", "Camp TRC"],
+].map(group => group.map(normalizeVenueKey));
+
+/** Exact venue identity (including curated aliases), never token overlap. */
+function venueNamesExplicitlyMatch(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
+  const na = foldVenueTypos(normalizeVenueKey(a));
+  const nb = foldVenueTypos(normalizeVenueKey(b));
   if (!na || !nb) return false;
   if (na === nb) return true;
-  if (na.length >= 5 && nb.length >= 5 && (na.includes(nb) || nb.includes(na))) return true;
-  // single-char typo tolerance for short venue names (Darcell vs Darcelle)
-  if (Math.abs(na.length - nb.length) <= 2 && na.length >= 6) {
-    let i = 0;
-    let j = 0;
-    let misses = 0;
-    while (i < na.length && j < nb.length) {
-      if (na[i] === nb[j]) {
-        i++;
-        j++;
-      } else {
-        misses++;
-        if (misses > 2) return false;
-        if (na.length > nb.length) i++;
-        else if (nb.length > na.length) j++;
-        else {
-          i++;
-          j++;
-        }
-      }
-    }
-    misses += na.length - i + (nb.length - j);
-    return misses <= 2;
-  }
-  return false;
+  return VENUE_IDENTITY_ALIASES.some(group => group.includes(na) && group.includes(nb));
 }
 
 export type MatchDirectoryBrandsOpts = {
@@ -258,7 +252,6 @@ export function enrichDraftVenueFromSource(
   }
 
   const label = cleanSourceLabel(opts?.sourceLabel);
-  const sourceId = String(opts?.sourceId || "").toLowerCase();
 
   // Prefer website host (pdxsanctuary.com ICS → Sanctuary Club once website is set)
   let hit =
@@ -269,19 +262,13 @@ export function enrichDraftVenueFromSource(
         hostsMatch(draft.sourceUrl, b.website || undefined),
     ) || null;
 
-  // Source id / label contains venue key
-  if (!hit && (label || sourceId)) {
+  // The cleaned source label must identify the exact venue (or a curated
+  // alias). A shared word in a source id is not enough to rewrite LOCATION.
+  if (!hit && label) {
     hit =
       active.find(b => {
         if (b.type === "group" || b.type === "nonprofit") return false;
-        const bn = normalizeVenueKey(b.name);
-        const core = bn.split(" ")[0] || bn;
-        if (core.length < 4) return false;
-        if (label && (nameLooselyMatch(label, b.name) || normalizeVenueKey(label).includes(core))) {
-          return true;
-        }
-        if (sourceId && sourceId.includes(core.replace(/\s+/g, ""))) return true;
-        return false;
+        return venueNamesExplicitlyMatch(label, b.name);
       }) || null;
   }
 
@@ -357,37 +344,28 @@ export function matchDirectoryBrands(
     let score = 0;
     const reasons: string[] = [];
 
-    if (venueName && !isAddressLikeVenueName(venueName) && nameLooselyMatch(venueName, biz.name)) {
-      score += 55;
-      reasons.push("Venue name match");
-    } else if (venueProbe && nameLooselyMatch(venueProbe, biz.name)) {
-      score += venueWeak ? 50 : 55;
-      reasons.push(venueWeak ? "Source label venue match" : "Venue name match");
-    } else if (venueProbe) {
-      // token overlap
-      const vt = new Set(normalizeVenueKey(venueProbe).split(" ").filter(t => t.length > 2));
-      const bt = normalizeVenueKey(biz.name).split(" ").filter(t => t.length > 2);
-      const shared = bt.filter(t => vt.has(t)).length;
-      if (shared >= 2) {
-        score += 30;
-        reasons.push("Partial venue name");
-      } else if (shared === 1 && bt.some(t => t.length >= 5 && vt.has(t))) {
-        // "Sanctuary" → Sanctuary Club when feed venue is TBA
-        score += venueWeak ? 45 : 28;
-        reasons.push("Venue token match");
-      }
+    if (
+      venueName &&
+      !isAddressLikeVenueName(venueName) &&
+      venueNamesExplicitlyMatch(venueName, biz.name)
+    ) {
+      score += 65;
+      reasons.push("Exact venue identity");
+    } else if (venueProbe && venueNamesExplicitlyMatch(venueProbe, biz.name)) {
+      score += venueWeak ? 60 : 65;
+      reasons.push(venueWeak ? "Exact source-label venue identity" : "Exact venue identity");
     }
 
     if (addressesLooselyMatch(address, biz.address)) {
-      score += 50;
+      score += 70;
       reasons.push("Address match");
     } else if (
       address &&
       biz.address &&
       String(address).trim().length >= 6 &&
       String(biz.address).trim().length >= 6 &&
-      (nameLooselyMatch(venueName, biz.name) ||
-        (venueProbe && nameLooselyMatch(venueProbe, biz.name)))
+      (venueNamesExplicitlyMatch(venueName, biz.name) ||
+        (venueProbe && venueNamesExplicitlyMatch(venueProbe, biz.name)))
     ) {
       // Name matches a known place but street does not — keep match for Review
       // but do not boost score (Sports Bra name + wrong SE 80th address).
@@ -396,21 +374,14 @@ export function matchDirectoryBrands(
     }
     // Street-only venueName is also an address signal
     if (isAddressLikeVenueName(venueName) && addressesLooselyMatch(venueName, biz.address)) {
-      score += 50;
+      score += 70;
       reasons.push("Street LOCATION = directory address");
     }
 
     // Website host overlap (pdxsanctuary.com ICS → Sanctuary Club)
     if (hostsMatch(draft.sourceUrl, biz.website || undefined)) {
-      score += 45;
+      score += 70;
       reasons.push("Website host match");
-    }
-    // Source id hint: sanctuary-ics
-    const sid = String(opts?.sourceId || "").toLowerCase();
-    const bKey = normalizeVenueKey(biz.name).replace(/\s+/g, "");
-    if (sid && bKey.length >= 5 && sid.includes(bKey.slice(0, Math.min(8, bKey.length)))) {
-      score += 40;
-      reasons.push("Source id venue hint");
     }
 
     if (score < 40) continue;
@@ -452,7 +423,9 @@ export function matchDirectoryBrands(
   const text = `${title} ${description}`.toLowerCase();
   const titleKey = normalizeVenueKey(title);
   const sourceLabelKey = normalizeVenueKey(sourceLabel);
-  const sourceIdKey = String(opts?.sourceId || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const sourceIdKey = normalizeVenueKey(
+    String(opts?.sourceId || "").replace(/[-_](events?|calendar|ics|html|json|api)$/i, ""),
+  );
 
   for (const biz of active) {
     if (biz.type !== "group" && biz.type !== "nonprofit") continue;
@@ -460,48 +433,29 @@ export function matchDirectoryBrands(
     const nameKey = normalizeVenueKey(biz.name);
     if (!nameKey || nameKey.length < 3) continue;
     const nameLow = biz.name.toLowerCase();
-    const nameCompact = nameKey.replace(/\s+/g, "");
     const aliases = groupAliasesFor(biz.name);
 
-    const mentioned =
-      textMentionsPhrase(text, nameLow) ||
-      (nameKey.length >= 4 &&
-        (titleKey.includes(nameKey) ||
-          textMentionsPhrase(text.replace(/[^a-z0-9]+/g, " "), nameKey))) ||
-      nameLooselyMatch(title, biz.name) ||
-      aliases.some(a => {
-        const ak = normalizeVenueKey(a);
-        // Short aliases (PLA, PAH, OSLC) need a real token match — never "pla" inside "play".
-        if (!ak || ak.length < 3) return false;
-        return (
-          textMentionsPhrase(text, a) ||
-          titleMentionsAlias(titleKey, ak) ||
-          nameLooselyMatch(title, a) ||
-          (sourceLabelKey &&
-            (titleMentionsAlias(sourceLabelKey, ak) || nameLooselyMatch(sourceLabel, a)))
-        );
-      });
+    const mentioned = [biz.name, ...aliases].some(a => {
+      const ak = normalizeVenueKey(a);
+      if (!ak || ak.length < 3) return false;
+      // "PLA" by itself is too ambiguous in body copy. It is accepted only
+      // when the event title explicitly names it; the full organization name
+      // is accepted anywhere in title/description.
+      if (ak === "pla") return titleMentionsAlias(titleKey, ak);
+      return textMentionsPhrase(text, a);
+    });
 
     // Source-level attach: curated group sources (bearracuda) or source label
-    const fromSource =
-      (sourceIdKey &&
-        nameCompact.length >= 5 &&
-        (sourceIdKey.includes(nameCompact.slice(0, Math.min(10, nameCompact.length))) ||
-          nameCompact.includes(sourceIdKey.replace(/-/g, "").slice(0, 8)))) ||
-      (sourceLabelKey &&
-        (titleMentionsAlias(sourceLabelKey, nameKey) ||
-          nameLooselyMatch(sourceLabel, biz.name) ||
-          aliases.some(a => nameLooselyMatch(sourceLabel, a))));
+    const fromSource = [biz.name, ...aliases].some(a => {
+      const aliasKey = normalizeVenueKey(a);
+      return Boolean(
+        aliasKey &&
+          ((sourceLabelKey && sourceLabelKey === aliasKey) ||
+            (sourceIdKey && sourceIdKey === aliasKey)),
+      );
+    });
 
     if (!mentioned && !fromSource) continue;
-    if (
-      biz.type === "nonprofit" &&
-      !text.includes(nameLow) &&
-      !nameLooselyMatch(title, biz.name) &&
-      !fromSource
-    ) {
-      continue;
-    }
 
     seen.add(biz.id);
     brands.push({
@@ -511,7 +465,7 @@ export function matchDirectoryBrands(
       logoUrl: logoFor(biz),
       color: directoryTypeColor(biz.type),
       role: biz.type === "group" ? "group" : "place",
-      score: text.includes(nameLow) ? 80 : fromSource ? 75 : 55,
+      score: text.includes(nameLow) ? 80 : fromSource ? 75 : 65,
       reasons: [
         mentioned ? "Named in event title/description" : null,
         fromSource ? "Matched scan source (group brand)" : null,
@@ -573,8 +527,9 @@ function groupAliasesFor(name: string): string[] {
     pdxpahportlandpetsandhandlers: ["Portland Pets and Handlers", "PDX PAH", "PAH"],
     pdxpah: ["Portland Pets and Handlers", "PDX PAH"],
     oregonstateleathercontest: ["Blackout Leather Productions", "OSLC", "Oregon State Leather"],
-    // "PLA" is whole-token only (see textMentionsPhrase) — never matches "play".
-    portlandleatheralliance: ["PLA", "Portland Leather Alliance", "Portland Leather"],
+    // "Portland Leather" is intentionally NOT an alias: it attached unrelated
+    // Badlands leather nights to Portland Leather Alliance.
+    portlandleatheralliance: ["PLA", "Portland Leather Alliance"],
     yescoachproductions: [
       "Yes Coach",
       "YesCoach",
@@ -640,7 +595,13 @@ export function eventMentionsDirectoryGroup(
   const hay = `${event.title || ""} ${event.description || ""}`;
   if (!hay.trim()) return false;
   const aliases = [business.name, ...groupAliasesFor(business.name)];
-  return aliases.some(a => textMentionsPhrase(hay, a));
+  return aliases.some(a => {
+    const key = normalizeVenueKey(a);
+    if (key === "pla") {
+      return titleMentionsAlias(normalizeVenueKey(event.title), key);
+    }
+    return textMentionsPhrase(hay, a);
+  });
 }
 
 /** Re-resolve logos on stored brands (pack paths may improve after logo map updates). */

@@ -132,15 +132,12 @@ reuse. Fixes:
 after any dedicated adapter policy): declarative age / sex-positive /
 never-invent-FREE rules - **new venues scale via data, not code**.
 
-Promoted via fetchMode `generic` (existing discover pipeline; relevance guards
-already venue-scope Eventbrite - incl. Stag ≠ Stags' Leap and sports+bra
-token rules):
+Promoted through dedicated Trusted adapters and policies:
 
 | Venue | sourceId | Source | Policy |
 |-------|----------|--------|--------|
 | Stag PDX | `stag-eb` | `eventbrite_org` (upcomingEvents embed) | 21_PLUS |
-| The Sports Bra | `sports-bra-eb` | `sports_bra_airtable` (public share) | age NOT forced (note-only) |
-| Living Room Wines | `living-room-eb` | `eventbrite_org` | 21_PLUS (empty when org has 0 upcoming) |
+| Living Room Wines | `living-room-eb` | `eventbrite_org` | 21_PLUS; each event must explicitly establish LGBTQ+ relevance |
 | Camp Bar PDX | `camp-bar` | `camp_bar_html` weeklies → 6 weeks | 21_PLUS |
 | CC Slaughters | `cc-slaughters` | `cc_slaughters_html` weeklies (ADVERTICAL lineup-only, posters null) | 21_PLUS |
 | Triangle Recreation Camp (Camp TRC) | `camp-trc` | `camp_trc_html` homepage Event Calendar (WA; login-gated WA detail pages) | 21_PLUS |
@@ -148,6 +145,22 @@ token rules):
 Dedicated parsers (2026-07-26): Eventbrite org JSON embed, Camp weekly
 columns, CC homepage nights. No longer rely on generic discover for these.
 They are excluded from the QSearch catch-all (trusted-lane filter).
+
+### Event relevance and identity (2026-07-29)
+
+- An event at an **exact verified LGBTQ+ venue** (for example Badlands) is
+  relevant even when the individual listing does not repeat LGBTQ+ keywords.
+- An event at an **ordinary venue** is relevant only when the title or
+  description explicitly establishes LGBTQ+ relevance or a queer host.
+- Venue/directory attachment requires exact venue identity, an exact directory
+  address, or the official website host. Shared words and partial-name tokens
+  do not attach a venue.
+- Group attachment requires the full organization name, an exact curated alias,
+  or the exact group source identity. `Portland Leather` is not an alias for
+  Portland Leather Alliance; `PLA` alone is accepted only in an event title.
+- Sports Bra direct scraping is disabled until its schedule can be read
+  reliably. Events discovered elsewhere may still qualify because it is a
+  verified queer venue.
 
 ## AI scrub (LLM candidate cleaning)
 
@@ -312,6 +325,12 @@ npx tsx script/smoke-trusted-flyers.ts
 
 # Darcelle + Hawks + wave-3 venues (offline fixtures: parse, policy, declarative venuePolicy)
 npx tsx script/smoke-trusted-new-venues.ts
+
+# QSearch relevance + exact venue/group identity
+npx tsx script/smoke-qsearch-identity.ts
+
+# Regression guard: Sports Bra scraper stays disabled
+npx tsx script/smoke-sports-bra.ts
 
 # QSearch offline + live API (server must be on :5050)
 npx tsx script/smoke-qsearch.ts

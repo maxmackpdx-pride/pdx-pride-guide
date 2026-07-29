@@ -23,7 +23,10 @@ import {
   isTrustedLaneSource,
   TRUSTED_VENUES,
 } from "../shared/trustedVenues";
-import { applyDeclaredVenuePolicy } from "../server/ingest/venuePolicy";
+import {
+  applyDeclaredVenuePolicy,
+  trustedVenueAcceptsDraft,
+} from "../server/ingest/venuePolicy";
 import { isRelevantScanDraft } from "../server/ingest/relevance";
 
 function assert(cond: unknown, msg: string) {
@@ -35,7 +38,7 @@ function assert(cond: unknown, msg: string) {
 }
 
 /* ── registry wiring ── */
-assert(TRUSTED_VENUES.length === 12, `12 trusted venues registered (got ${TRUSTED_VENUES.length})`);
+assert(TRUSTED_VENUES.length === 11, `11 trusted venues registered (got ${TRUSTED_VENUES.length})`);
 assert(getTrustedVenue("peacock-pdx")?.fetchMode === "generic", "peacock-pdx → generic HTML");
 assert(
   getTrustedVenue("peacock-pdx")?.publishStatus === "HIDDEN",
@@ -49,6 +52,31 @@ assert(getTrustedVenue("stag-eb")?.fetchMode === "eventbrite_org", "stag-eb → 
 assert(
   getTrustedVenue("living-room-eb")?.fetchMode === "eventbrite_org",
   "living-room-eb → eventbrite_org",
+);
+const livingRoom = getTrustedVenue("living-room-eb")!;
+assert(
+  livingRoom.eventScope === "EXPLICIT_LGBTQ_EVENT",
+  "queer-owned general venue requires event-level LGBTQ+ evidence",
+);
+assert(
+  !trustedVenueAcceptsDraft(
+    { title: "Wine Tasting 101", description: "Learn the basics of Oregon pinot." },
+    livingRoom,
+  ),
+  "generic wine class at a queer-owned venue is rejected",
+);
+assert(
+  trustedVenueAcceptsDraft(
+    { title: "Sapphic Wine Social", description: "A queer community tasting." },
+    livingRoom,
+  ),
+  "explicit LGBTQ+ event at a general venue is accepted",
+);
+const badlands = getTrustedVenue("badlands-api")!;
+assert(
+  badlands.eventScope === "DEDICATED_QUEER_VENUE" &&
+    trustedVenueAcceptsDraft({ title: "Tuesday Karaoke", description: "" }, badlands),
+  "dedicated gay bar contributes every real event",
 );
 assert(getTrustedVenue("camp-bar")?.fetchMode === "camp_bar_html", "camp-bar → camp_bar_html");
 assert(
@@ -86,10 +114,7 @@ assert(
   !isTrustedLaneSource({ id: "steam-events", url: "https://www.steampdx.com/events" }),
   "non-trusted venue stays on QSearch catch-all",
 );
-assert(
-  getTrustedVenue("sports-bra-eb")?.fetchMode === "sports_bra_airtable",
-  "sports-bra-eb registered as sports_bra_airtable mode (official schedule, not EB noise)",
-);
+assert(getTrustedVenue("sports-bra-eb") == null, "Sports Bra scraping stays disabled");
 assert(getTrustedVenue("darcelle-tribe")?.fetchMode === "darcelle_tribe", "darcelle-tribe registered with fetchMode darcelle_tribe");
 assert(getTrustedVenue("hawks-json")?.fetchMode === "hawks_squarespace", "hawks-json registered with fetchMode hawks_squarespace");
 
@@ -229,44 +254,12 @@ assert(stagDraft.warnings.some(w => /21\+ bar/i.test(w)), "declared age note bre
 assert(stagDraft.isSexPositive === false, "no sex-positive stamp unless declared");
 assert(stagDraft.admission !== "FREE", "ticketed text does not become FREE");
 
-const bra = getTrustedVenue("sports-bra-eb")!;
-const braDraft = applyDeclaredVenuePolicy(
-  { ...uw, ageRequirement: "ALL_AGES", isSexPositive: false, nudityOk: false, eventTypes: "[]", admission: "UNKNOWN", warnings: [], title: "Thorns Watch Party", description: "Free entry, all welcome!" },
-  bra,
-);
-assert(braDraft.ageRequirement === "ALL_AGES", "Sports Bra: age NOT forced (note-only policy)");
-assert(braDraft.warnings.some(w => /verify age/i.test(w)), "Sports Bra verify-age note present");
-assert(braDraft.admission === "FREE", "explicit free text keeps FREE via declared re-infer");
-
 const hawksDef = getTrustedVenue("hawks-json")!;
 // Dedicated adapters still use declarative venuePolicy for age/sex/admission defaults
 assert(hawksDef.venuePolicy?.sexPositive === true, "hawks declarative sex-positive policy present");
 assert(hawksDef.venuePolicy?.ageRequirement === "21_PLUS", "hawks declarative age policy present");
 
-/* ── Sports Bra venue-scope leak: generic title words must NOT scope-match ── */
-const braCtx = {
-  sourceId: "sports-bra-eb",
-  label: "The Sports Bra",
-  url: "https://www.eventbrite.com/d/or--portland/sports-bra/",
-  tier: "1",
-};
-// Real Sports Bra event — venue field names the bar → kept.
-assert(
-  isRelevantScanDraft(
-    { title: "Thorns Watch Party", venueName: "The Sports Bra", address: "2512 NE Broadway, Portland, OR", description: "Come watch!", sourceUrl: null, ticketUrl: null } as any,
-    braCtx,
-  ).keep,
-  "Sports Bra: genuine event AT the bar is kept",
-);
-// Junk 1: church pickleball whose TITLE contains "Sports" → dropped.
-assert(
-  !isRelevantScanDraft(
-    { title: "Kellogg Creek Ward Sports Night", venueName: "The Church of Jesus Christ of Latter-day Saints", address: "13520 SE Ruscliffe Lane, Milwaukie, OR 97222", description: "Please come join us playing pickleball.", sourceUrl: null, ticketUrl: null } as any,
-    braCtx,
-  ).keep,
-  "Sports Bra: church 'Sports Night' (wrong venue) is dropped",
-);
-// Open-mode URL paste must ALSO drop off-scene noise (how these went LIVE as url_ingest).
+/* ── Open-mode relevance: ordinary venues still need LGBTQ+ evidence ── */
 const openCtx = { sourceId: "paste", label: "paste", url: "https://www.eventbrite.com/e/x", tier: "1" };
 assert(
   !isRelevantScanDraft(
@@ -368,21 +361,4 @@ assert(
   ).keep,
   "open mode: Eventbrite with LGBTQ signal kept",
 );
-// Junk 2: barbell cert at a different gym → dropped.
-assert(
-  !isRelevantScanDraft(
-    { title: "SFL StrongFirst Barbell Instructor Certification—Portland, OR, USA", venueName: "Hardstyle Strength", address: "2505 SE 36th Ave, Portland, OR 97202", description: "Dive deep into the powerlifts.", sourceUrl: null, ticketUrl: null } as any,
-    braCtx,
-  ).keep,
-  "Sports Bra: barbell cert at Hardstyle Strength is dropped",
-);
-// Slug fallback: EB event slug carries the venue → kept even if venueName empty.
-assert(
-  isRelevantScanDraft(
-    { title: "Drag Brunch", venueName: null, address: null, description: null, sourceUrl: "https://www.eventbrite.com/e/the-sports-bra-drag-brunch-tickets-123456", ticketUrl: null } as any,
-    braCtx,
-  ).keep,
-  "Sports Bra: event whose own EB slug names the bar is kept",
-);
-
 console.log("\nAll new-venue trusted connector smoke checks passed.");

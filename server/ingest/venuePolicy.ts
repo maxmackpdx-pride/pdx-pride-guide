@@ -7,6 +7,20 @@
 import type { TrustedVenueDef } from "@shared/trustedVenues";
 import type { IngestEventDraft } from "./types";
 import { inferAdmissionFromText } from "./admissionInfer";
+import { hasExplicitQueerEventSignal } from "./relevance";
+
+/**
+ * Dedicated queer venues contribute their whole calendar. A queer-owned or
+ * queer-friendly general venue must prove relevance on each individual event.
+ */
+export function trustedVenueAcceptsDraft(
+  draft: Pick<IngestEventDraft, "title" | "description">,
+  venue: Pick<TrustedVenueDef, "eventScope">,
+): boolean {
+  return (
+    venue.eventScope === "DEDICATED_QUEER_VENUE" || hasExplicitQueerEventSignal(draft)
+  );
+}
 
 /**
  * Fresh-flyer predicate for health coverage: a draft counts toward flyer

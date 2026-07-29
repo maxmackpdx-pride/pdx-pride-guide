@@ -4,6 +4,7 @@ import {
   INGEST_SOURCES,
   buildDirectoryCoverage,
   buildDirectoryIngestSources,
+  isSportsBraScrapeSource,
   mergeIngestSources,
   type IngestSource,
 } from "@shared/ingestSources";
@@ -140,6 +141,11 @@ export function buildLiveSources(businesses: Array<{
       });
     }
   }
+
+  // Explicit product decision: Sports Bra's schedule implementation is not
+  // reliable enough to scrape. Apply after custom sources are merged so an old
+  // admin-added recipe cannot silently re-enable it.
+  sources = sources.filter(source => !isSportsBraScrapeSource(source));
 
   // Trusted lane is a separate custom path (adapters + Trusted board).
   // QSearch catch-all must not re-scan those venues or their sibling recipes.
@@ -479,6 +485,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
           label: source.label,
           url: source.url,
           tier: source.tier,
+          businessType: source.businessType,
         };
         const includePast = opts.includePastEvents === true;
 
@@ -628,6 +635,7 @@ async function runScan(jobId: string, sources: IngestSource[], opts: StartScanOp
         label: source.label,
         url: source.url,
         tier: source.tier,
+        businessType: source.businessType,
       };
 
       // Drop past listings BEFORE page enrich (Sanctuary ICS is ~400 VEVENTs, mostly history)
