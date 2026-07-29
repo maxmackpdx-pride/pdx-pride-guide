@@ -47,38 +47,15 @@ export default function HubAdminKeys({
   const hasOwnerWork = isPrimaryOwner && ownerCount > 0;
 
   if (darkroomMedia) {
+    // Just the Darkroom teaser image - no card, no border, no queue buttons.
     return (
-      <section
-        className="hub-keys hub-keys--darkroom pdx-glass-rebind"
-        aria-label="Admin access and Darkroom"
-        style={{ ["--c" as string]: "var(--panel-magenta, #ff1fa0)" }}
+      <Link
+        href="/darkroom"
+        className="hub-keys__darkroom-link hub-keys__darkroom-link--bare"
+        aria-label="Open Darkroom"
       >
-        <Link href="/darkroom" className="hub-keys__darkroom-link" aria-label="Open Darkroom">
-          <DarkroomStage />
-        </Link>
-        <div className="hub-keys__darkroom-actions">
-          <Button
-            accent="pink"
-            variant="solid"
-            size="sm"
-            arrow
-            onClick={() => openSheet({ view: "inbox", account: "admin" })}
-          >
-            {hasAdminWork ? `Admin queue (${pendingCount})` : "Admin queue"}
-          </Button>
-          {isPrimaryOwner && (
-            <Button
-              accent="purple"
-              variant={hasOwnerWork ? "solid" : "ghost"}
-              size="sm"
-              arrow
-              onClick={() => openSheet({ view: "inbox", account: "owner" })}
-            >
-              {hasOwnerWork ? `Owner desk (${ownerCount})` : "Owner desk"}
-            </Button>
-          )}
-        </div>
-      </section>
+        <DarkroomStage />
+      </Link>
     );
   }
 

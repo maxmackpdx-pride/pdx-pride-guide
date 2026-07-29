@@ -238,6 +238,15 @@
   box-shadow: inset 0 0 0 1px #000;
 }
 
+/* Bare Darkroom teaser: just the image, no card, no border, no buttons. */
+.hub-keys__darkroom-link.hub-keys__darkroom-link--bare {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+}
+
 .hub-keys__darkroom-stage {
   position: absolute;
   inset: 0;
