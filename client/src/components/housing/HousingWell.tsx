@@ -26,12 +26,12 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { HAUS_SUFFIX } from "@shared/housing";
 
 /**
- * Title motif max box (the dynamic text), NOT the photo well.
- * Half cards (Looking / Offering / Managed): ~200 tall × up to well width (~580).
- * Full Forming cards: ~160 tall × up to well width (~1180).
+ * Title motif fills the same *fraction* of every photo well.
+ * Absolute size scales with the well (Forming full-width ≈ 2× half → larger type).
+ * Photo well size is independent (CSS .hz-well).
  */
-const HALF_TITLE_MAX_H = 200;
-const WIDE_TITLE_MAX_H = 160;
+const TITLE_WIDTH_SHARE = 0.62;
+const TITLE_HEIGHT_SHARE = 0.55;
 /** Breathing room between the title block and the caption row, in px. */
 const CAPTION_GAP = 22;
 /** Slight horizontal stretch on the name block only (height basis stays `nameW`). */
@@ -120,8 +120,8 @@ export type HousingWellProps = {
   /** Caption row content. Sits on the right, dots on the far left. */
   children?: ReactNode;
   /**
-   * Share of the well width the title block may span.
-   * Half cards ~0.95 (≈580px of the half well), Forming ~0.9, detail 0.35.
+   * Share of well width for the title (default = TITLE_WIDTH_SHARE so all feed
+   * cards match). Detail heads pass ~0.35 for a tighter motif.
    */
   nameCap?: number;
   /** Shown when a post has no photos yet. */
@@ -133,7 +133,7 @@ export function HousingWell({
   photos = [],
   title,
   children,
-  nameCap = 0.95,
+  nameCap = TITLE_WIDTH_SHARE,
   fallbackPhoto,
   className,
 }: HousingWellProps) {
@@ -181,18 +181,16 @@ export function HousingWell({
   const sumRatios = ratios.reduce((a, b) => a + b, 0) || 1;
 
   /**
-   * Title box only: fixed max height (half 200 / Forming 160), width up to
-   * nameCap × well. Long names go narrower, never taller than the max.
-   * Photo well size is independent (CSS .hz-well).
+   * Same relative box on every card: widthCap = nameCap × wellW,
+   * heightBudget = TITLE_HEIGHT_SHARE × wellH (clamped above caption).
+   * Forming’s wider well → larger absolute type; fraction stays the same.
+   * Long names go narrower, never taller.
    */
   let nameW = 0;
   let blockW = 0;
   if (box && lines.length) {
-    const isWideBanner = box.w / Math.max(box.h, 1) >= 2.8;
-    const titleMaxH = isWideBanner ? WIDE_TITLE_MAX_H : HALF_TITLE_MAX_H;
     const structural = Math.max(36, box.h - box.captionH - CAPTION_GAP);
-    // Never taller than the motif max, and never under the caption row.
-    const heightBudget = Math.min(titleMaxH, structural);
+    const heightBudget = Math.min(box.h * TITLE_HEIGHT_SHARE, structural);
     const widthCap = box.w * nameCap;
     nameW = Math.min(widthCap, heightBudget / sumRatios);
     nameW = Math.max(Math.min(48, widthCap), nameW);
