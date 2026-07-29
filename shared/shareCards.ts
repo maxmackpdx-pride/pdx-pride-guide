@@ -23,6 +23,7 @@ export const SHARE_CARD_FILES = {
   spotted: "zaylist-missed-connections-1200x630.png",
   prideWork: "zaylist-gig-board-1200x630.png",
   gifting: "zaylist-gifting-1200x630.png",
+  nudeBeaches: "zaylist-nude-beaches-1200x630.png",
 } as const;
 
 export type ShareCardKey = keyof typeof SHARE_CARD_FILES;
@@ -50,6 +51,7 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
   if (path === "/spotted") return "spotted";
   if (path === "/pride-work" || path === "/gigs") return "prideWork";
   if (path === "/gifting") return "gifting";
+  if (path === "/nude-beaches" || path.startsWith("/nude-beaches/")) return "nudeBeaches";
   return null;
 }
 

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { shareCardUrl } from "@shared/shareCards";
 import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
@@ -185,8 +186,13 @@ function SauvieIslandPanel() {
 
 export default function NudeBeaches() {
   usePageSeo(
-    "Nude Beaches | Zaylist",
-    "Traveler logistics for Rooster Rock and Collins Beach on Sauvie Island - live river levels, swim status, parking permits, and essential links.",
+    "RIVERBRATS · Nude Beaches | Zaylist",
+    "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
+    {
+      image: shareCardUrl("nudeBeaches"),
+      imageAlt:
+        "RIVERBRATS on Zaylist — Make naked friends on Zaylist. Sun, sand, and a speaker. Clothing optional. JOIN NOW BECAUSE, FUCK META!",
+    },
   );
 
   const [, setLocation] = useLocation();

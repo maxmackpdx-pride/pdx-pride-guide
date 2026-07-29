@@ -18,6 +18,7 @@ Zaylist wink, and gets out.
 | zaylist-missed-connections-1200x630.png | Missed Connections! (/spotted) |
 | zaylist-gig-board-1200x630.png | Gig Board (/pride-work) |
 | zaylist-gifting-1200x630.png | Gifting (/gifting) |
+| zaylist-nude-beaches-1200x630.png | Nude Beaches / River Brats (/nude-beaches) |
 
 The home file is the fallback. If a page has no image of its own, serve that
 one rather than letting the platform pick something out of the page.

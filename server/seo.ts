@@ -317,8 +317,9 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "Your Portland queer event schedule. Filter by day, save favorites, and plan your week.",
   },
   "/nude-beaches": {
-    title: "Nude Beaches near Portland | Zaylist",
-    description: "River Brats guide to nude and clothing-optional beaches near Portland — local intel, not corporate maps.",
+    title: "RIVERBRATS · Nude Beaches | Zaylist",
+    description:
+      "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
   },
   "/gigs": {
     title: "Gig Werk: Gigs & Jobs | Zaylist",
