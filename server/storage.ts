@@ -6366,6 +6366,165 @@ function runBootMigrationsOnce() {
   }
 
   /**
+   * Adult shops with multi-location cards + red-glow neon logos:
+   * Fantasy Land (Foster), Taboo Video (all metro), Mr. Peeps (all metro).
+   * Multiple addresses live on one directory card via description + hours.
+   */
+  if (!hasBootMigration("seed_adult_shops_multi_location_v1")) {
+    const now = new Date().toISOString();
+    type ShopSeed = {
+      name: string;
+      description: string;
+      address: string;
+      neighborhood: string;
+      website: string | null;
+      instagram: string | null;
+      phone: string | null;
+      hours: string | null;
+      imageUrl: string;
+      lat: number;
+      lng: number;
+    };
+    const shops: ShopSeed[] = [
+      {
+        name: "Fantasy Land",
+        description:
+          "Fantasy Land (also called Fantasy on Foster) — 24-hour adult shop on SE Foster. Toys, video, and a queer-friendly floor. One Portland location; the Foster Road store is the Fantasyland / Fantasy on Foster address.",
+        address: "5228 SE Foster Rd, Portland, OR 97206",
+        neighborhood: "Foster / SE Portland",
+        website: null,
+        instagram: null,
+        phone: "(503) 775-0094",
+        hours: "Open 24 hours daily",
+        imageUrl: "/directory-logos/Fantasy_Land.png",
+        lat: 45.4945,
+        lng: -122.6085,
+      },
+      {
+        name: "Taboo Video",
+        description:
+          "All-inclusive adult retail (Taboo / Taboo Video). Multiple locations on one listing:\n• Broadway / Pearl — 311 NW Broadway, Portland, OR 97209 · (503) 227-3443\n• SE 82nd — 2330 SE 82nd Ave, Portland, OR 97216 · (503) 206-4708 · 24 hours\n• MLK — 237 SE MLK Jr Blvd, Portland, OR 97214 · (503) 239-1678\n• Vancouver WA — 4811 NE 94th Ave, Vancouver, WA 98662 · (360) 254-1126 · 24 hours\nWelcomes every orientation, gender, and kink. taboovideo.com · @taboovideopdx",
+        address: "311 NW Broadway, Portland, OR 97209",
+        neighborhood: "Pearl / SE 82nd / MLK / Vancouver",
+        website: "https://www.taboovideo.com",
+        instagram: "@taboovideopdx",
+        phone: "(503) 227-3443",
+        hours:
+          "Broadway: Sun–Mon 11am–midnight, Tue–Sat 11am–2am · 82nd & Vancouver: 24 hours · MLK: Sun–Thu 10am–midnight, Fri–Sat 10am–2am",
+        imageUrl: "/directory-logos/Taboo_Video.png",
+        lat: 45.5255,
+        lng: -122.6785,
+      },
+      {
+        name: "Mr. Peeps",
+        description:
+          "Mr. Peeps Adult Superstores (incl. The Peep Hole). Multi-location card:\n• Portland (The Peep Hole) — 709 SE 122nd Ave, Portland, OR 97233 · (503) 257-8617\n• Beaverton — 13355 SW Henry St, Beaverton, OR 97005 · (503) 643-6645\n• Aloha — 20625 SW Tualatin Valley Hwy, Aloha, OR 97003 · (503) 356-5624\nLocal chain since 1981. Novelties, video, and booths. mrpeeps.com",
+        address: "709 SE 122nd Ave, Portland, OR 97233",
+        neighborhood: "SE 122nd / Beaverton / Aloha",
+        website: "https://www.mrpeeps.com",
+        instagram: null,
+        phone: "(503) 257-8617",
+        hours: "24 hours (check location)",
+        imageUrl: "/directory-logos/Mr_Peeps.png",
+        lat: 45.5178,
+        lng: -122.5378,
+      },
+    ];
+
+    for (const s of shops) {
+      const row = sqlite
+        .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+        .get(s.name) as { id?: number } | undefined;
+      if (row?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               type = 'shop',
+               description = ?,
+               address = ?,
+               neighborhood = ?,
+               website = ?,
+               instagram = ?,
+               phone = ?,
+               hours = ?,
+               image_url = ?,
+               lat = ?,
+               lng = ?,
+               queer_friendly = 1,
+               active = 1,
+               status = 'OPEN'
+             WHERE id = ?`,
+          )
+          .run(
+            s.description,
+            s.address,
+            s.neighborhood,
+            s.website,
+            s.instagram,
+            s.phone,
+            s.hours,
+            s.imageUrl,
+            s.lat,
+            s.lng,
+            row.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: s.name,
+            type: "shop",
+            description: s.description,
+            address: s.address,
+            neighborhood: s.neighborhood,
+            website: s.website,
+            instagram: s.instagram,
+            phone: s.phone,
+            hours: s.hours,
+            imageUrl: s.imageUrl,
+            lat: s.lat,
+            lng: s.lng,
+            queerOwned: false,
+            queerFriendly: true,
+            active: true,
+            isNew: true,
+            status: "OPEN",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+
+    // Aliases as soft-search: if someone already created "Fantasy on Foster" etc.
+    for (const [alias, canonical] of [
+      ["Fantasy on Foster", "Fantasy Land"],
+      ["Fantasyland", "Fantasy Land"],
+      ["Taboo Adult Video", "Taboo Video"],
+      ["Taboo", "Taboo Video"],
+      ["The Peep Hole", "Mr. Peeps"],
+      ["Mr Peeps Adult Superstores", "Mr. Peeps"],
+    ] as const) {
+      try {
+        const aliasRow = sqlite
+          .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+          .get(alias) as { id?: number } | undefined;
+        const canon = sqlite
+          .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+          .get(canonical) as { id?: number } | undefined;
+        if (aliasRow?.id && canon?.id && aliasRow.id !== canon.id) {
+          // Prefer the multi-location card; hide the dupe alias row from discovery
+          sqlite
+            .prepare(`UPDATE businesses SET active = 0, status = 'CLOSED' WHERE id = ?`)
+            .run(aliasRow.id);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    recordBootMigration("seed_adult_shops_multi_location_v1");
+  }
+
+  /**
    * The Secret Warehouse — Kerns warehouse / film + party venue (411 NE 18th).
    * Hosts queer dance & play parties; often listed as "Secret Warehouse Portland".
    */

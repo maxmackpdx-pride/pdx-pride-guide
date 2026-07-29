@@ -586,6 +586,10 @@ function groupAliasesFor(name: string): string[] {
       "STANK x YES COACH",
     ],
     yescoach: ["Yes Coach", "YesCoach", "Yes Coach Productions"],
+    fantasyland: ["Fantasy Land", "Fantasy on Foster", "Fantasyland", "Fantasy Land Adult"],
+    taboovideo: ["Taboo", "Taboo Video", "Taboo Adult Video", "Taboo PDX"],
+    mrpeeps: ["Mr Peeps", "Mr. Peeps", "The Peep Hole", "Peep Hole"],
+
     badgirlspdx: ["Bad Girls", "PDX Bad Girls"],
     blackbeyondthebinarycollective: ["Black and Beyond the Binary", "B3C", "Black & Beyond Binary"],
     browngirlrise: ["Brown Girl Rise Portland"],
