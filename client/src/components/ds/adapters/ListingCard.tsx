@@ -21,7 +21,7 @@ import { admissionEventLinkLabel } from "@shared/admission";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { shareEventLink } from "@/lib/shareEvent";
+import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 
 type EventWithVenue = Event & {
   venueWebsite?: string | null;
@@ -50,16 +50,16 @@ function EventShareButton({ href, title }: { href: string; title: string }) {
   return (
     <button
       type="button"
-      title={`Share ${title}`}
-      aria-label={`Share ${title}`}
+      title="Share this event"
+      aria-label="Share this event"
       onClick={async (e) => {
         e.stopPropagation();
         try {
           const result = await shareEventLink(href, title);
-          toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
+          toast({ title: shareToastTitle(result, "event") });
         } catch (err) {
           if ((err as DOMException)?.name !== "AbortError") {
-            toast({ title: "Could not share", variant: "destructive" });
+            toast({ title: "Could not share event", variant: "destructive" });
           }
         }
       }}

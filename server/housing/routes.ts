@@ -67,6 +67,7 @@ import {
   setHousingPostHidden,
   setHousingPostStatus,
   toggleHousingSave,
+  markHousingSaveSeen,
   updateHousingPost,
 } from "./store";
 
@@ -376,6 +377,14 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (!id) return res.status(400).json({ error: "Invalid id" });
     const saved = toggleHousingSave(db, id, viewerId(req)!);
     res.json({ saved });
+  });
+
+  /** Clear the "what changed" chip for a saved post (viewer opened it). */
+  app.post("/api/housing/:id/seen", requireAuth, (req: any, res: any) => {
+    const id = asNum(req.params.id);
+    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const ok = markHousingSaveSeen(db, id, viewerId(req)!);
+    res.json({ ok });
   });
 
   // --- household members ----------------------------------------------------

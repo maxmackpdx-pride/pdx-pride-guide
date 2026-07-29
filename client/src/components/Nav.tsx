@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { ChevronDown, Menu, X, Zap } from "lucide-react";
+import { ChevronDown, Menu, Search, X, Zap } from "lucide-react";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -9,6 +9,7 @@ import AuthModal from "./AuthModal";
 import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
+import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
 import { Divider } from "@/components/ds";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
@@ -476,6 +477,9 @@ export default function Nav() {
   const [authDefaultTab, setAuthDefaultTab] = useState<"login" | "register">("login");
   /** Ticket gate only when arriving from direct secret-story close (?from=stank-egg). */
   const [showStankTicketGate, setShowStankTicketGate] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const openSearch = useMemo(() => () => setSearchOpen(true), []);
+  useSiteSearchHotkey(openSearch);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
@@ -654,6 +658,18 @@ export default function Nav() {
               </Link>
             </div>
             <div className="hub-mtop__spacer" />
+            <button
+              type="button"
+              className="site-search-trigger site-search-trigger--mobile"
+              onClick={() => {
+                dismissMobileNavOverlays();
+                setSearchOpen(true);
+              }}
+              aria-label="Search events and places"
+              data-testid="site-search-trigger-mobile"
+            >
+              <Search size={18} aria-hidden="true" />
+            </button>
             {user && (
               <MobileNotifyMenu
                 unreadCount={unreadCount}
@@ -824,6 +840,17 @@ export default function Nav() {
           </nav>
 
           <div className="site-header-controls">
+            <button
+              type="button"
+              className="site-search-trigger"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search events and places"
+              title="Search (⌘K)"
+              data-testid="site-search-trigger"
+            >
+              <Search size={18} aria-hidden="true" />
+              <span className="site-search-trigger__label">Search</span>
+            </button>
             <span className="site-header-calm--desktop">
               <CalmModeToggle minimal />
             </span>
@@ -867,6 +894,8 @@ export default function Nav() {
           defaultTab={authDefaultTab}
         />
       )}
+
+      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

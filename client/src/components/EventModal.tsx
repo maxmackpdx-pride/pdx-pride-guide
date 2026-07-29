@@ -19,7 +19,8 @@ import EventTalentPanel from "./EventTalentPanel";
 import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from "@/lib/eventLinks";
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
-import { shareEventLink } from "@/lib/shareEvent";
+import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
+import { timeAgo } from "@/lib/boardFeed";
 import { Lock, Pencil, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
@@ -55,6 +56,41 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
   flag: "var(--neon-orange)",
   transfer: "var(--neon-yellow)",
 };
+
+/** True when updatedAt is meaningfully after createdAt (edits / re-syncs). */
+function hasMeaningfulUpdate(createdAt?: string | null, updatedAt?: string | null): boolean {
+  if (!createdAt || !updatedAt) return false;
+  const c = Date.parse(createdAt);
+  const u = Date.parse(updatedAt);
+  if (!Number.isFinite(c) || !Number.isFinite(u)) return false;
+  return u - c > 5 * 60_000;
+}
+
+/** "Updated 2h ago" for recent, "Updated Jul 12" when older than ~2 days. */
+function formatUpdatedTrustLine(iso: string): string {
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return "";
+  const diff = Date.now() - then;
+  if (diff < 48 * 60 * 60_000) {
+    const rel = timeAgo(iso);
+    return rel ? `Updated ${rel}` : "";
+  }
+  const d = new Date(iso);
+  const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `Updated ${label}`;
+}
+
+/** url_ingest / trusted:* / qsearch* sources are scrape or connector provenance. */
+function isIngestSource(source?: string | null): boolean {
+  if (!source) return false;
+  const s = source.toLowerCase();
+  return (
+    s === "url_ingest" ||
+    s.startsWith("trusted:") ||
+    s.startsWith("qsearch") ||
+    s.includes("ingest")
+  );
+}
 
 export default function EventModal({
   event,
@@ -493,16 +529,16 @@ function EventModalInner({
         <button
           type="button"
           className="event-modal__close"
-          aria-label={`Share ${event.title}`}
-          title="Share event"
+          aria-label="Share this event"
+          title="Share this event"
           style={{ right: 52 }}
           onClick={async () => {
             try {
               const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
-              toast({ title: result === "shared" ? "Shared" : "Link copied to clipboard" });
+              toast({ title: shareToastTitle(result, "event") });
             } catch (err) {
               if ((err as DOMException)?.name !== "AbortError") {
-                toast({ title: "Could not share", variant: "destructive" });
+                toast({ title: "Could not share event", variant: "destructive" });
               }
             }
           }}
@@ -593,6 +629,29 @@ function EventModalInner({
             {event.isPrivate && (
               <div className="event-modal__private-note">Location provided upon RSVP</div>
             )}
+            {(() => {
+              const createdAt = event.createdAt || "";
+              const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
+              const lines: string[] = [];
+              if (hasMeaningfulUpdate(createdAt, updatedAt)) {
+                const updatedLine = formatUpdatedTrustLine(updatedAt);
+                if (updatedLine) lines.push(updatedLine);
+              }
+              // Scrape / connector provenance. No dedicated last_seen column on events
+              // (housing has lastSeenAt). Prefer "First listed" from createdAt.
+              if (isIngestSource(event.source) && createdAt) {
+                const first = timeAgo(createdAt);
+                if (first) lines.push(`First listed ${first}`);
+              }
+              if (lines.length === 0) return null;
+              return (
+                <div className="event-modal__trust" data-testid="event-modal-trust">
+                  {lines.map((line) => (
+                    <div key={line} className="event-modal__trust-line">{line}</div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Flags = day + policy chips; Tags = JSON types - open-event SoT */}

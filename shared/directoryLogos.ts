@@ -1,5 +1,15 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
+/** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
+export const DIRECTORY_LOGO_VERSION = "2026-07-28";
+
+/** Append soft cache-bust query to pack paths. Skip if already has a query string. */
+function withLogoCacheBust(path: string): string {
+  if (!path.startsWith("/directory-logos/")) return path;
+  if (path.includes("?")) return path;
+  return `${path}?v=${DIRECTORY_LOGO_VERSION}`;
+}
+
 const STEM_BY_NORMALIZED: Record<string, string> = {
   albertarosetheatre: "Alberta_Rose_Theatre",
   ariumbotanicals: "Arium_Botanicals",
@@ -187,13 +197,17 @@ export function resolveDirectoryLogo(
       }
     }
   }
-  if (stem) return `/directory-logos/${stem}.png`;
-  if (imageUrl && imageUrl.trim()) return imageUrl.trim();
+  if (stem) return withLogoCacheBust(`/directory-logos/${stem}.png`);
+  if (imageUrl && imageUrl.trim()) {
+    const url = imageUrl.trim();
+    // Only bust our static pack paths; leave external/CDN URLs alone.
+    return url.startsWith("/directory-logos/") ? withLogoCacheBust(url) : url;
+  }
   return null;
 }
 
 export function directoryFallbackLogo(type: string): string {
-  return FALLBACK_BY_TYPE[type] || FALLBACK_BY_TYPE.venue;
+  return withLogoCacheBust(FALLBACK_BY_TYPE[type] || FALLBACK_BY_TYPE.venue);
 }
 
 export function hasDirectoryLogo(name: string, imageUrl?: string | null): boolean {

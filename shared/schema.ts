@@ -33,9 +33,11 @@ export const events = sqliteTable("events", {
   submittedBy: text("submitted_by"),
   adminNotes: text("admin_notes"),
   createdAt: text("created_at").notNull().default(""),
+  /** ISO timestamp; set on create (same as createdAt) and bumped on every updateEvent. */
+  updatedAt: text("updated_at").notNull().default(""),
 });
 
-export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true });
+export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof events.$inferSelect;
 
@@ -135,6 +137,12 @@ export const businesses = sqliteTable("businesses", {
   grandOpeningDate: text("grand_opening_date"),
   hours: text("hours"),
   phone: text("phone"),
+  /**
+   * Optional JSON array of storefronts for multi-location brands.
+   * Shape: BusinessLocation[] from @shared/businessLocations.
+   * When null, resolveBusinessLocations falls back to known chains or primary address.
+   */
+  locations: text("locations"),
   ownerId: integer("owner_id"),
   createdAt: text("created_at").notNull().default(""),
 });
@@ -231,6 +239,9 @@ export const businessLogoRequests = sqliteTable("business_logo_requests", {
 });
 export type BusinessLogoRequest = typeof businessLogoRequests.$inferSelect;
 
+/** Attendance identity privacy: public = anyone RSVPed sees you; friends = mutual follow graph; anonymous = vibe only. */
+export type AttendanceVisibility = "public" | "friends" | "anonymous";
+
 // Attendance (Hey I'll Be There)
 export const attendances = sqliteTable("attendances", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -241,6 +252,8 @@ export const attendances = sqliteTable("attendances", {
   avatarSeed: text("avatar_seed").notNull(), // seed for deterministic avatar color/initials
   photoUrl: text("photo_url"),
   isAnonymous: integer("is_anonymous", { mode: "boolean" }).notNull().default(false),
+  /** public | friends | anonymous — is_anonymous kept in sync (anonymous → 1). */
+  visibility: text("visibility").notNull().default("public"),
   expiresAt: text("expires_at"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(""),

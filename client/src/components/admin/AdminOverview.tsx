@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
 
 export type AttentionItem = {
@@ -21,6 +22,15 @@ type PushStatus = {
   myDeviceSubscriptions: number;
 } | null | undefined;
 
+type LiveHealth = {
+  ok?: boolean;
+  ts?: string;
+  pushConfigured?: boolean;
+  gitSha?: string;
+  railwayEnvironment?: string;
+  deploymentId?: string;
+};
+
 type Props = {
   pendingCount: number;
   attentionItems: AttentionItem[];
@@ -39,6 +49,12 @@ type Props = {
   onSendTestPush?: () => void;
   testPushPending?: boolean;
 };
+
+function shortSha(sha?: string): string {
+  if (!sha) return "";
+  const clean = sha.trim();
+  return clean.length > 7 ? clean.slice(0, 7) : clean;
+}
 
 export default function AdminOverview({
   pendingCount,
@@ -59,8 +75,49 @@ export default function AdminOverview({
 }: Props) {
   const showOwner = isPrimaryOwner && ownerCount > 0 && onOpenOwner;
 
+  const { data: liveHealth, isError: healthError, isFetching: healthFetching } = useQuery<LiveHealth>({
+    queryKey: ["/api/health", "admin-overview"],
+    queryFn: async () => {
+      const r = await fetch("/api/health", { credentials: "include" });
+      if (!r.ok) throw new Error(`health ${r.status}`);
+      return r.json();
+    },
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const healthOk = !healthError && liveHealth?.ok === true;
+  const sha = shortSha(liveHealth?.gitSha);
+  const envLabel = liveHealth?.railwayEnvironment || "";
+
   return (
     <div className="admin-overview">
+      {/* Owner-facing live health / deploy chip */}
+      <section className="admin-health-chip" aria-label="Live deploy health" data-testid="admin-health-chip">
+        <span
+          className={`admin-health-chip__dot${healthOk ? " is-ok" : healthFetching ? "" : " is-bad"}`}
+          aria-hidden="true"
+        />
+        <span className="admin-health-chip__label">
+          {healthFetching && !liveHealth
+            ? "Checking live health…"
+            : healthOk
+              ? "Live /api/health ok"
+              : "Live /api/health down"}
+        </span>
+        {sha ? (
+          <span className="admin-health-chip__meta" title={liveHealth?.gitSha}>
+            {sha}
+          </span>
+        ) : null}
+        {envLabel ? <span className="admin-health-chip__meta">{envLabel}</span> : null}
+        {liveHealth?.ts ? (
+          <span className="admin-health-chip__meta" title={liveHealth.ts}>
+            probed {new Date(liveHealth.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        ) : null}
+      </section>
+
       {/* Owner-only banner (design: Hub.dc.html) */}
       {showOwner && (
         <section className="admin-owner-banner" aria-label="Owner only">

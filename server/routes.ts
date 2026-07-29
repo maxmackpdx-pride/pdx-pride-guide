@@ -9,7 +9,7 @@ import {
   prideDayFromDate,
   EVENT_WEEK_END_DATE,
 } from "@shared/eventWeek";
-import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts } from "./storage";
+import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility } from "./storage";
 import {
   adminSearchForViewer,
   checkAdminMessageRateLimit,
@@ -47,6 +47,7 @@ import {
   scheduleMapCoordinateBackfill,
 } from "./mapCoordinateSync";
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 import { recordPageView } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
@@ -999,11 +1000,28 @@ export function registerRoutes(httpServer: Server, app: Express) {
         console.error("[health] countActivePushSubscriptions failed:", err);
       }
     }
+    const gitShaRaw =
+      process.env.RAILWAY_GIT_COMMIT_SHA ||
+      process.env.RAILWAY_GIT_COMMIT_MESSAGE ||
+      process.env.GIT_COMMIT ||
+      "";
+    // Prefer full SHA when present; fall back to first token of commit message.
+    const gitSha = gitShaRaw.trim()
+      ? (gitShaRaw.match(/^[0-9a-f]{7,40}/i)?.[0] || gitShaRaw.trim().slice(0, 40))
+      : undefined;
+    const railwayEnvironment =
+      process.env.RAILWAY_ENVIRONMENT_NAME ||
+      process.env.RAILWAY_ENVIRONMENT ||
+      undefined;
+    const deploymentId = process.env.RAILWAY_DEPLOYMENT_ID || undefined;
     res.json({
       ok: true,
       ts: new Date().toISOString(),
       pushConfigured: isPushConfigured(),
       pushSubscriptions,
+      ...(gitSha ? { gitSha } : {}),
+      ...(railwayEnvironment ? { railwayEnvironment } : {}),
+      ...(deploymentId ? { deploymentId } : {}),
     });
   });
 
@@ -1676,6 +1694,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  // ─── GLOBAL SEARCH (v0: events + directory) ───────────────────────────────
+  app.get("/api/search", (req, res) => {
+    const q = String(req.query.q || "").trim();
+    if (q.length < 2) {
+      return res.json({ q, events: [], places: [] });
+    }
+    res.json(storage.searchGlobal(q));
+  });
+
   // ─── ATTENDANCE ───────────────────────────────────────────────────────────
   app.get("/api/events/:id/attendance", (req, res) => {
     const list = storage.getAttendances(Number(req.params.id), req.session?.userId);
@@ -1688,9 +1715,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       const message = String(req.body.message || "").trim();
       if (!message) return res.status(400).json({ error: "message required" });
-      const isAnonymous = Boolean(req.body.isAnonymous);
+      // Prefer body.visibility; map legacy isAnonymous / "visible" → public|anonymous|friends.
+      const visibility = normalizeAttendanceVisibility(
+        req.body.visibility,
+        req.body.isAnonymous === true ? true : req.body.isAnonymous === false ? false : undefined,
+      );
       const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message, isAnonymous);
+      const att = storage.upsertAttendance(eventId, user, message, visibility);
       notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
@@ -1770,6 +1801,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const isOwner = userId != null && biz.ownerId === userId;
       return {
         ...biz,
+        /** Resolved storefronts (JSON column, known multi-loc chains, or primary address). */
+        locations: resolveBusinessLocations(biz),
         isOwner,
         canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
         isFollowing: userId != null ? storage.isFollowingBusiness(userId, biz.id) : false,

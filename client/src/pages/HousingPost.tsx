@@ -168,6 +168,35 @@ export default function HousingPost() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post?.id, user?.id]);
 
+  // Saved-post "what changed" chip: mark seen ~400ms after open so a quick
+  // bounce does not clear it, then drop local chip state without a full refetch.
+  useEffect(() => {
+    if (!post || !user || !post.saved) return;
+    const t = window.setTimeout(() => {
+      fetch(`/api/housing/${postId}/seen`, { method: "POST", credentials: "include" })
+        .then((res) => {
+          if (!res.ok) return;
+          queryClient.setQueryData<HousingPostView>(["/api/housing", postId], (old) =>
+            old ? { ...old, lastChangeLabel: null } : old,
+          );
+          queryClient.setQueriesData<{ posts?: HousingPostView[] }>(
+            { queryKey: ["/api/housing"] },
+            (old) => {
+              if (!old || !Array.isArray(old.posts)) return old;
+              return {
+                ...old,
+                posts: old.posts.map((p) =>
+                  p.id === postId ? { ...p, lastChangeLabel: null } : p,
+                ),
+              };
+            },
+          );
+        })
+        .catch(() => undefined);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [post?.id, post?.saved, user?.id, postId]);
+
   if (isLoading) {
     return (
       <div className="hz">
@@ -220,7 +249,7 @@ export default function HousingPost() {
         return;
       }
       navigator.clipboard?.writeText(url);
-      toast({ title: "Link copied" });
+      toast({ title: "Listing link copied" });
     },
     onReport: () => {
       if (!requireAuth()) return;

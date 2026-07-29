@@ -1,11 +1,12 @@
 import type React from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { Badge } from "@/components/ds";
 import { Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
@@ -23,10 +24,11 @@ import {
 } from "@/lib/directoryLogos";
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
 import { placePath } from "@shared/placeSlug";
-import { sharePageLink } from "@/lib/shareEvent";
+import { sharePageLink, shareToastTitle } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 import "./PlaceModal.css";
 
 /** Source-card rect for little→big FLIP expand. */
@@ -220,9 +222,11 @@ export default function PlaceModal({
   const [tab, setTab] = useState<ModalTab>("events");
   const [sharing, setSharing] = useState(false);
   const [open, setOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
   const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const useFlip = Boolean(originRect && originRect.width > 0 && originRect.height > 0);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  // Single ref for a11y + FLIP measure (avoid readonly RefObject.current assign).
+  const panelRef = useModalA11y({ open: !!place, onClose: handleClose, enabled: !!place });
 
   // Fresh tab when opening a different place
   useEffect(() => {
@@ -340,7 +344,15 @@ export default function PlaceModal({
 
   const category = TYPE_TO_DS_CATEGORY[place.type] || "venues";
   const categoryLabel = TYPE_LABELS[place.type] || place.type;
-  const address = [place.address, place.neighborhood].filter(Boolean).join(" · ") || undefined;
+  const locations =
+    Array.isArray(place.locations) && place.locations.length > 0
+      ? place.locations
+      : resolveBusinessLocations(place);
+  const multiLoc = locations.length > 1;
+  const address = multiLoc
+    ? [place.neighborhood, `${locations.length} locations`].filter(Boolean).join(" · ") ||
+      `${locations.length} locations`
+    : [place.address, place.neighborhood].filter(Boolean).join(" · ") || undefined;
   const upcomingEvents = place.upcomingEvents ?? [];
   const pastEvents = place.pastEvents ?? [];
   const spotted = place.spotted ?? [];
@@ -403,12 +415,15 @@ export default function PlaceModal({
   const saveEdits = () => saveMutation.mutate(isOwner ? ownerForm : form);
 
   const requestClaim = () => {
-    if (!user) {
-      onRequireAuth();
+    if (!user || !place) {
+      if (!user) onRequireAuth();
       return;
     }
+    const brandNote = multiLoc
+      ? `\n\nThis listing covers ${locations.length} locations. Claiming means you represent the brand on Zaylist (all locations), not one storefront.`
+      : "";
     const reason = window.prompt(
-      "Tell us about your connection to this business (e.g. \"I own/manage this venue\"):",
+      `Tell us about your connection to this business (e.g. "I own/manage this venue"):${brandNote}`,
       "",
     );
     if (reason == null) return;
@@ -424,12 +439,12 @@ export default function PlaceModal({
     try {
       const result = await sharePageLink(placePath(place.id, place.name), place.name);
       toast({
-        title: result === "shared" ? "Shared" : "Link copied to clipboard",
+        title: shareToastTitle(result, "venue"),
         description: result === "copied" ? placePath(place.id, place.name) : undefined,
       });
     } catch (err) {
       if ((err as DOMException)?.name !== "AbortError") {
-        toast({ title: "Could not share link", variant: "destructive" });
+        toast({ title: "Could not share venue", variant: "destructive" });
       }
     } finally {
       setSharing(false);
@@ -484,6 +499,7 @@ export default function PlaceModal({
         role="dialog"
         aria-modal="true"
         aria-label={place.name}
+        tabIndex={-1}
         className={panelClass}
         style={{
           ["--c" as string]: accent,
@@ -595,19 +611,125 @@ export default function PlaceModal({
           )}
 
           {address && (
-            <div style={{ ...rowStyle, marginBottom: 6, flexWrap: "wrap", gap: 10 }}>
+            <div style={{ ...rowStyle, marginBottom: multiLoc ? 10 : 6, flexWrap: "wrap", gap: 10 }}>
               <span style={{ display: "inline-flex", alignItems: "flex-start", gap: 8 }}>
                 <Icon d={PIN} />
                 {address}
               </span>
-              <span style={{ display: "inline-flex", gap: 12 }}>
-                <a href={placeGoogleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
-                  Google Maps
-                </a>
-                <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
-                  Apple Maps
-                </a>
-              </span>
+              {!multiLoc && (
+                <span style={{ display: "inline-flex", gap: 12 }}>
+                  <a href={placeGoogleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
+                    Google Maps
+                  </a>
+                  <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: "0.8rem" }}>
+                    Apple Maps
+                  </a>
+                </span>
+              )}
+            </div>
+          )}
+
+          {multiLoc && !editing && (
+            <div className="place-modal-locations" style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: accent,
+                  marginBottom: 8,
+                }}
+              >
+                Locations ({locations.length})
+              </div>
+              <ul
+                style={{
+                  listStyle: "none",
+                  margin: 0,
+                  padding: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                {locations.map((loc, i) => (
+                  <li
+                    key={`${loc.label}-${i}`}
+                    style={{
+                      border: "1px solid color-mix(in srgb, var(--c, #19e3ff) 28%, #1c1c22)",
+                      borderRadius: 10,
+                      padding: "10px 12px",
+                      background: "color-mix(in srgb, #0c0c0f 88%, transparent)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 800,
+                        textTransform: "uppercase",
+                        fontSize: "0.85rem",
+                        letterSpacing: "0.03em",
+                        color: "var(--text-hi)",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {loc.label}
+                    </div>
+                    <div style={{ fontSize: "0.85rem", color: "var(--text-mid)", lineHeight: 1.45, marginBottom: 4 }}>
+                      {loc.address}
+                    </div>
+                    {(loc.phone || loc.hours) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 3,
+                          fontSize: "0.8rem",
+                          color: "var(--text-lo)",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {loc.phone && (
+                          <a href={telHref(loc.phone)} style={{ color: "inherit", textDecoration: "none" }}>
+                            {loc.phone}
+                          </a>
+                        )}
+                        {loc.hours && <span>{loc.hours}</span>}
+                      </div>
+                    )}
+                    <span style={{ display: "inline-flex", gap: 12 }}>
+                      <a
+                        href={placeGoogleMapsUrl({
+                          address: loc.address,
+                          name: `${place.name} ${loc.label}`,
+                          lat: loc.lat,
+                          lng: loc.lng,
+                        })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ ...linkStyle, fontSize: "0.78rem" }}
+                      >
+                        Google Maps
+                      </a>
+                      <a
+                        href={placeAppleMapsUrl({
+                          address: loc.address,
+                          name: `${place.name} ${loc.label}`,
+                          lat: loc.lat,
+                          lng: loc.lng,
+                        })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ ...linkStyle, fontSize: "0.78rem" }}
+                      >
+                        Apple Maps
+                      </a>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
@@ -754,22 +876,25 @@ export default function PlaceModal({
             </div>
           ) : (
             <>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 14 }}>
-                {displayed.hours && (
-                  <div style={rowStyle}>
-                    <Icon d={CLOCK} />
-                    {displayed.hours}
-                  </div>
-                )}
-                {displayed.phone && (
-                  <div style={rowStyle}>
-                    <Icon d={PHONE} />
-                    <a href={telHref(displayed.phone)} style={{ color: "inherit", textDecoration: "none" }}>
-                      {displayed.phone}
-                    </a>
-                  </div>
-                )}
-              </div>
+              {/* Primary hours/phone only for single-location; multi-loc lists them per storefront. */}
+              {!multiLoc && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 14 }}>
+                  {displayed.hours && (
+                    <div style={rowStyle}>
+                      <Icon d={CLOCK} />
+                      {displayed.hours}
+                    </div>
+                  )}
+                  {displayed.phone && (
+                    <div style={rowStyle}>
+                      <Icon d={PHONE} />
+                      <a href={telHref(displayed.phone)} style={{ color: "inherit", textDecoration: "none" }}>
+                        {displayed.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {displayed.description && (
                 <p
@@ -824,17 +949,39 @@ export default function PlaceModal({
                   </button>
                 )}
                 {!place.ownerId && (
-                  <button
-                    type="button"
-                    onClick={requestClaim}
-                    disabled={claimMutation.isPending}
-                    style={{
-                      background: "none", border: "none", color: accent, cursor: "pointer",
-                      fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", padding: 0,
-                    }}
-                  >
-                    ↗ {claimMutation.isPending ? "Submitting…" : "Claim this business"}
-                  </button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: "36ch" }}>
+                    <button
+                      type="button"
+                      onClick={requestClaim}
+                      disabled={claimMutation.isPending}
+                      style={{
+                        background: "none", border: "none", color: accent, cursor: "pointer",
+                        fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", padding: 0,
+                        textAlign: "left",
+                      }}
+                    >
+                      ↗{" "}
+                      {claimMutation.isPending
+                        ? "Submitting…"
+                        : multiLoc
+                          ? "Claim this brand listing"
+                          : "Claim this business"}
+                    </button>
+                    {multiLoc ? (
+                      <p
+                        style={{
+                          margin: 0,
+                          fontFamily: "var(--font-body)",
+                          fontSize: "0.78rem",
+                          lineHeight: 1.45,
+                          color: "var(--text-lo)",
+                        }}
+                      >
+                        This listing covers {locations.length} locations. Claiming means you
+                        represent the brand on Zaylist.
+                      </p>
+                    ) : null}
+                  </div>
                 )}
               </div>
             </>

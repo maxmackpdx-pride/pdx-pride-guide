@@ -1,9 +1,10 @@
-import { useState, type CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { Button } from "@/components/ds";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 
@@ -37,6 +38,8 @@ export default function SpottedDetailModal({
 }: SpottedDetailModalProps) {
   const { toast } = useToast();
   const [replyBody, setReplyBody] = useState("");
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
 
   const replyMutation = useMutation({
     mutationFn: () =>
@@ -71,6 +74,11 @@ export default function SpottedDetailModal({
   return createPortal(
     <div className="board-detail-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || "Missed connection"}
+        tabIndex={-1}
         className="board-detail-modal board-detail-modal--spotted board-detail-modal--glass"
         onClick={e => e.stopPropagation()}
         style={glassVars}

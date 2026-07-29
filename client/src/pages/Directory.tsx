@@ -16,6 +16,8 @@ import { placePath, placeUrl } from "@shared/placeSlug";
 import { FilterChip, PlaceCard, SearchInput } from "@/components/ds";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import type { BusinessLocation } from "@shared/businessLocations";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import { dayAccentToken } from "@/lib/dsColors";
@@ -68,6 +70,11 @@ export type Business = {
   imageUrl: string | null;
   lat: number | null;
   lng: number | null;
+  /**
+   * Resolved storefronts for multi-location brands (API attaches via resolveBusinessLocations).
+   * When missing, client falls back to the same shared resolver.
+   */
+  locations?: BusinessLocation[];
   isNew: boolean;
   /** OPEN (default) | CLOSED  -  closed places are not returned by public directory list. */
   status?: string;
@@ -1082,7 +1089,16 @@ function DirectoryCard({
   onRequireAuth?: () => void;
 }) {
   const upcomingEvents = biz.upcomingEvents ?? [];
-  const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
+  const locations =
+    Array.isArray(biz.locations) && biz.locations.length > 0
+      ? biz.locations
+      : resolveBusinessLocations(biz);
+  const multiLoc = locations.length > 1;
+  // Multi-loc cards: neighborhood + "N locations" instead of dumping one address.
+  const address = multiLoc
+    ? [biz.neighborhood, `${locations.length} locations`].filter(Boolean).join(" · ") ||
+      `${locations.length} locations`
+    : [biz.address, biz.neighborhood].filter(Boolean).join(" · ") || undefined;
   const isNonprofit = biz.type === "nonprofit";
   const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
   const grandOpeningDateLabel = grandOpening ? formatGrandOpeningDate(biz.grandOpeningDate) : null;
@@ -1102,10 +1118,10 @@ function DirectoryCard({
       donateUrl={biz.donateUrl || undefined}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}
-      lat={biz.lat}
-      lng={biz.lng}
-      hours={biz.hours || undefined}
-      phone={biz.phone || undefined}
+      lat={multiLoc ? null : biz.lat}
+      lng={multiLoc ? null : biz.lng}
+      hours={multiLoc ? undefined : biz.hours || undefined}
+      phone={multiLoc ? undefined : biz.phone || undefined}
       description={biz.description || undefined}
       website={biz.website || undefined}
       instagram={biz.instagram || undefined}

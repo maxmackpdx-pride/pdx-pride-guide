@@ -10,7 +10,7 @@
  *     text the poster wrote, and the fixed lists are logistics only.
  *  3. Fields start empty. The prototype's demo drafts are not ported.
  */
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   AFFORDABILITY_BADGES,
   AFFORDABILITY_BADGE_LABEL,
@@ -99,8 +99,19 @@ const EMPTY_DRAFT: Draft = {
   seeking: "",
 };
 
-type PmForm = { company: string; site: string; license: string; directory: string };
-const EMPTY_PM: PmForm = { company: "", site: "", license: "", directory: "" };
+/** Keys match the pm-application API body (siteUrl, businessLicense, directoryBusinessId). */
+type PmForm = {
+  company: string;
+  siteUrl: string;
+  businessLicense: string;
+  directoryBusinessId: string;
+};
+const EMPTY_PM: PmForm = {
+  company: "",
+  siteUrl: "",
+  businessLicense: "",
+  directoryBusinessId: "",
+};
 
 /** Board chrome accent for the type picker, which belongs to no single type. */
 const BOARD_STYLE = {
@@ -292,8 +303,18 @@ export function HousingComposer({
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [postedId, setPostedId] = useState<number | null>(null);
+  const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
   const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
+
+  // Focus the first field when a form step opens. Page-level sheet, so no Escape trap.
+  useEffect(() => {
+    if (postedId !== null) return;
+    const id = window.requestAnimationFrame(() => {
+      firstFieldRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [type, postedId]);
 
   const pickType = (next: HousingType | "PM") => {
     setType(next);
@@ -444,6 +465,10 @@ export function HousingComposer({
   };
 
   const submitPmApplication = async () => {
+    if (!pm.company.trim() || !pm.siteUrl.trim()) {
+      setNotice("Company name and company website are both required.");
+      return;
+    }
     setBusy(true);
     setNotice(null);
     try {
@@ -453,22 +478,31 @@ export function HousingComposer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           company: pm.company.trim(),
-          siteUrl: pm.site.trim(),
-          businessLicense: pm.license.trim(),
+          siteUrl: pm.siteUrl.trim(),
+          businessLicense: pm.businessLicense.trim() || undefined,
           directoryBusinessId: (() => {
-            const raw = pm.directory.trim();
+            const raw = pm.directoryBusinessId.trim();
             if (!raw) return null;
             const n = Number(raw);
             return Number.isFinite(n) && n > 0 ? n : null;
           })(),
         }),
       });
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        alreadyPending?: boolean;
+        error?: string;
+      } | null;
       if (!res.ok) {
-        setNotice("We could not send that right now. Your details are still here, so try again.");
+        setNotice(data?.error || "We could not send that right now. Your details are still here, so try again.");
         return;
       }
       setPmSent(true);
-      setNotice("Sent. You will hear back by email.");
+      setNotice(
+        data?.alreadyPending
+          ? "You already have an application pending. We will email you when it is reviewed."
+          : "Application sent. We will review it and email you.",
+      );
     } catch {
       setNotice("We could not send that right now. Your details are still here, so try again.");
     } finally {
@@ -605,69 +639,75 @@ export function HousingComposer({
           </>
         ) : (
           <>
-            {/* The spec calls this a sign up application, modeled on the promoter
-                application. It applies the whole company for an account, not a
-                single listing - say that plainly so it doesn't read as posting a house. */}
+            {/* Company-level application (not a single unit post). Field keys match the API. */}
             <SectionTitle kicker="Apply once">Verify your company</SectionTitle>
             <p style={{ color: "var(--text-lo)", fontSize: "var(--meta)", margin: "8px 0 16px" }}>
-              This is a one-time application for your <b style={{ color: "var(--text-hi)" }}>company</b>, not a single listing.
-              Tell us who you are and the owner reviews it by hand. Once you are approved, your account
-              can post and manage your units. Every manager on this board is verified — there is no
-              unverified way to list.
+              One application for your <b style={{ color: "var(--text-hi)" }}>company</b>, not a single
+              listing. We review by hand. After approval you can post and manage units under that
+              company. Every manager on this board is verified.
             </p>
             <div className="hz-fields">
               <div className="hz-field">
                 <label>
-                  <Mono micro>Company</Mono>
+                  <Mono micro>Company name</Mono>
                 </label>
                 <input
+                  ref={firstFieldRef}
                   className="hz-input"
                   style={{ width: "100%" }}
                   value={pm.company}
-                  placeholder="Your company name"
+                  placeholder="e.g. Rose City Rentals"
+                  autoComplete="organization"
                   onChange={(e) => setPm((p) => ({ ...p, company: e.target.value }))}
                 />
               </div>
               <div className="hz-field">
                 <label>
-                  <Mono micro>Link to your listings</Mono>
+                  <Mono micro>Company website</Mono>
                 </label>
                 <input
                   className="hz-input"
                   style={{ width: "100%" }}
-                  value={pm.site}
-                  placeholder="yourrentals.com/listings"
-                  onChange={(e) => setPm((p) => ({ ...p, site: e.target.value }))}
+                  value={pm.siteUrl}
+                  placeholder="https://yourcompany.com or your listings page"
+                  inputMode="url"
+                  autoComplete="url"
+                  onChange={(e) => setPm((p) => ({ ...p, siteUrl: e.target.value }))}
                 />
                 <small className="hz-hint">
-                  Where your available units live. We check that you own this domain to confirm you
-                  are the real manager.
+                  Required. Public site or listings page for your company. We use the domain to
+                  confirm you manage that brand.
                 </small>
               </div>
               <div className="hz-field hz-field--split">
                 <div>
                   <label>
-                    <Mono micro>Business license</Mono>
+                    <Mono micro>Business license (optional)</Mono>
                   </label>
                   <input
                     className="hz-input"
                     style={{ width: "100%" }}
-                    value={pm.license}
-                    placeholder="License number"
-                    onChange={(e) => setPm((p) => ({ ...p, license: e.target.value }))}
+                    value={pm.businessLicense}
+                    placeholder="License or registration number"
+                    onChange={(e) => setPm((p) => ({ ...p, businessLicense: e.target.value }))}
                   />
+                  <small className="hz-hint">Helps speed up review if you have one.</small>
                 </div>
                 <div>
                   <label>
-                    <Mono micro>Directory listing</Mono>
+                    <Mono micro>Zaylist directory ID (optional)</Mono>
                   </label>
                   <input
                     className="hz-input"
                     style={{ width: "100%" }}
-                    value={pm.directory}
-                    placeholder="Your place on Zaylist"
-                    onChange={(e) => setPm((p) => ({ ...p, directory: e.target.value }))}
+                    value={pm.directoryBusinessId}
+                    placeholder="e.g. 42"
+                    inputMode="numeric"
+                    onChange={(e) => setPm((p) => ({ ...p, directoryBusinessId: e.target.value }))}
                   />
+                  <small className="hz-hint">
+                    Numeric ID of your business card on the Directory, if you already have one.
+                  </small>
                 </div>
               </div>
               <div className="hz-flag hz-flag--note">
@@ -684,8 +724,8 @@ export function HousingComposer({
                   <b style={{ color: "var(--text-hi)" }}>Affirming Housing Partner · $30/month</b>
                   <p>
                     Listing on the board is a flat $30/month membership, separate from verification.
-                    Your first 30 days are free — and the first 3 managers to sign up get their
-                    first 6 months free.
+                    Your first 30 days are free, and the first 3 managers to sign up get their first
+                    6 months free.
                   </p>
                 </span>
               </div>
@@ -746,6 +786,7 @@ export function HousingComposer({
             </label>
             <div className="hz-suffix">
               <input
+                ref={firstFieldRef}
                 className="hz-input"
                 value={draft.name}
                 placeholder="The Overlook"
@@ -769,6 +810,7 @@ export function HousingComposer({
               <Mono micro>Property name</Mono>
             </label>
             <input
+              ref={firstFieldRef}
               className="hz-input"
               style={{ width: "100%" }}
               value={draft.name}
@@ -786,6 +828,7 @@ export function HousingComposer({
             <Mono micro>Headline</Mono>
           </label>
           <input
+            ref={!suffixed && !isManaged ? firstFieldRef : undefined}
             className="hz-input"
             style={{ width: "100%" }}
             value={draft.headline}

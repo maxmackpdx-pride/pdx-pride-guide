@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-export type AttendanceVisibility = "anonymous" | "visible";
+/** Client mirror of shared AttendanceVisibility (+ legacy "visible" accepted server-side). */
+export type AttendanceVisibility = "public" | "friends" | "anonymous";
 
 type AttendanceVibeModalProps = {
   open: boolean;
@@ -15,6 +16,32 @@ type AttendanceVibeModalProps = {
   onRemove?: () => void;
   children: ReactNode;
 };
+
+const VISIBILITY_OPTIONS: Array<{
+  value: AttendanceVisibility;
+  label: string;
+  hint: string;
+  testId: string;
+}> = [
+  {
+    value: "public",
+    label: "Public (@username)",
+    hint: "Others going can see who you are",
+    testId: "attendance-visibility-public",
+  },
+  {
+    value: "friends",
+    label: "Friends only",
+    hint: "People you follow / who follow you see your name",
+    testId: "attendance-visibility-friends",
+  },
+  {
+    value: "anonymous",
+    label: "Anonymous",
+    hint: "Vibe only - no name or photo on the grid",
+    testId: "attendance-visibility-anonymous",
+  },
+];
 
 export default function AttendanceVibeModal({
   open,
@@ -70,30 +97,25 @@ export default function AttendanceVibeModal({
           <fieldset className="attendance-visibility">
             <legend className="attendance-visibility__legend">Show as</legend>
             <div className="attendance-visibility__options">
-              <label className={`attendance-visibility__option${visibility === "visible" ? " attendance-visibility__option--active" : ""}`}>
-                <input
-                  type="radio"
-                  name="attendance-visibility"
-                  value="visible"
-                  checked={visibility === "visible"}
-                  onChange={() => onVisibilityChange("visible")}
-                  data-testid="attendance-visibility-visible"
-                />
-                <span className="attendance-visibility__label">@username visible</span>
-                <span className="attendance-visibility__hint">Others going can see who you are</span>
-              </label>
-              <label className={`attendance-visibility__option${visibility === "anonymous" ? " attendance-visibility__option--active" : ""}`}>
-                <input
-                  type="radio"
-                  name="attendance-visibility"
-                  value="anonymous"
-                  checked={visibility === "anonymous"}
-                  onChange={() => onVisibilityChange("anonymous")}
-                  data-testid="attendance-visibility-anonymous"
-                />
-                <span className="attendance-visibility__label">Stay anonymous</span>
-                <span className="attendance-visibility__hint">Vibe only - no name or photo on the grid</span>
-              </label>
+              {VISIBILITY_OPTIONS.map((opt) => (
+                <label
+                  key={opt.value}
+                  className={`attendance-visibility__option${
+                    visibility === opt.value ? " attendance-visibility__option--active" : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="attendance-visibility"
+                    value={opt.value}
+                    checked={visibility === opt.value}
+                    onChange={() => onVisibilityChange(opt.value)}
+                    data-testid={opt.testId}
+                  />
+                  <span className="attendance-visibility__label">{opt.label}</span>
+                  <span className="attendance-visibility__hint">{opt.hint}</span>
+                </label>
+              ))}
             </div>
           </fieldset>
           <div className="attendance-vibe-modal__actions">

@@ -33,7 +33,7 @@ import {
   type GigPost, type InsertGigPost,
   type Promoter, type InsertPromoter,
   type ModerationRequest, type InsertModerationRequest,
-  type Attendance, type InsertAttendance,
+  type Attendance, type InsertAttendance, type AttendanceVisibility,
   type User, type Message,
   type MissedConnection, type InsertMissedConnection,
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
@@ -48,6 +48,8 @@ import {
 import crypto from "crypto";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
+import { eventPath } from "@shared/eventSlug";
+import { placePath } from "@shared/placeSlug";
 import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
@@ -138,7 +140,8 @@ sqlite.exec(`
     claimed_by TEXT,
     submitted_by TEXT,
     admin_notes TEXT,
-    created_at TEXT NOT NULL DEFAULT ''
+    created_at TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT ''
   );
   CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -540,11 +543,18 @@ sqlite.exec(`
 // the column added. CREATE TABLE IF NOT EXISTS above only covers fresh installs.
 try { sqlite.exec(`ALTER TABLE housing_posts ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'`); } catch {}
 
+// events.updated_at: trust line + "last touched" for admin/edit/sync.
+try { sqlite.exec(`ALTER TABLE events ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''`); } catch {}
+try {
+  sqlite.exec(`UPDATE events SET updated_at = created_at WHERE updated_at IS NULL OR updated_at = ''`);
+} catch {}
+
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN grand_opening_date TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN hours TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN phone TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN locations TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN owner_id INTEGER`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`); } catch {}
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`); } catch {}
@@ -680,6 +690,11 @@ try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN user_id INTEGER`); } catch
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN photo_url TEXT`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`); } catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN is_anonymous INTEGER NOT NULL DEFAULT 0`); } catch(e) {}
+try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN visibility TEXT NOT NULL DEFAULT 'public'`); } catch(e) {}
+try {
+  // Backfill: legacy is_anonymous=1 → visibility anonymous; keep is_anonymous in sync going forward.
+  sqlite.exec(`UPDATE attendances SET visibility = 'anonymous' WHERE COALESCE(is_anonymous, 0) = 1 AND COALESCE(visibility, 'public') = 'public'`);
+} catch(e) {}
 try { sqlite.exec(`ALTER TABLE attendances ADD COLUMN expires_at TEXT`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS event_chat_messages (
@@ -7576,14 +7591,21 @@ function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
 }
 
 function canViewerSeeHubFeedRsvp(
-  row: { userId: number; eventId: number },
+  row: { userId: number; eventId: number; visibility?: string | null; isAnonymous?: number | boolean },
   viewerUserId: number | undefined,
   viewerIsAdmin: boolean,
 ): boolean {
   if (viewerUserId == null) return false;
+  const vis = resolveAttendanceVisibility(row);
+  // Anonymous never surfaces as a named hub card (mask would strip identity anyway).
+  if (vis === "anonymous") return false;
   if (viewerIsAdmin) return true;
   if (row.userId === viewerUserId) return true;
   if (storage.isUserEventHost(row.eventId, viewerUserId)) return true;
+  if (vis === "friends") {
+    return canViewerSeeFriendsAttendance(viewerUserId, row.userId);
+  }
+  // public: followers of the RSVP'er (existing hub graph filter)
   if (storage.isFollowing(viewerUserId, row.userId)) return true;
   return false;
 }
@@ -8381,47 +8403,110 @@ function expireStaleAttendances(eventId?: number) {
   sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE is_active = 1 AND expires_at IS NOT NULL AND expires_at <= ?`).run(now);
 }
 
+/** Normalize API / DB attendance visibility. Maps legacy "visible" → "public". */
+export function normalizeAttendanceVisibility(
+  raw: unknown,
+  isAnonymousFallback?: boolean,
+): AttendanceVisibility {
+  if (isAnonymousFallback === true) return "anonymous";
+  const v = String(raw ?? "").trim().toLowerCase();
+  if (v === "visible" || v === "public") return "public";
+  if (v === "friends" || v === "friends_only" || v === "friends-only") return "friends";
+  if (v === "anonymous" || v === "anon") return "anonymous";
+  if (isAnonymousFallback === false) return "public";
+  return "public";
+}
+
+function resolveAttendanceVisibility(r: any): AttendanceVisibility {
+  const rawVis = r.visibility ?? r.Visibility;
+  const isAnon = Boolean(r.isAnonymous ?? r.is_anonymous);
+  if (rawVis != null && String(rawVis).trim() !== "") {
+    return normalizeAttendanceVisibility(rawVis, isAnon);
+  }
+  return isAnon ? "anonymous" : "public";
+}
+
+function canViewerSeeFriendsAttendance(
+  viewerUserId: number | undefined,
+  attendeeUserId: number | null | undefined,
+): boolean {
+  if (viewerUserId == null || attendeeUserId == null) return false;
+  if (viewerUserId === attendeeUserId) return true;
+  // Either direction: people you follow OR who follow you.
+  return (
+    storage.isFollowing(viewerUserId, attendeeUserId) ||
+    storage.isFollowing(attendeeUserId, viewerUserId)
+  );
+}
+
+function maskAttendanceIdentity(
+  r: any,
+  opts: { handle: string; isAnonymous: boolean; visibility: AttendanceVisibility },
+): any {
+  const expiresAt = r.expiresAt ?? r.expires_at ?? null;
+  return {
+    id: r.id,
+    event_id: r.event_id ?? r.eventId,
+    handle: opts.handle,
+    message: r.message,
+    avatarSeed: r.avatarSeed ?? r.avatar_seed,
+    photoUrl: null,
+    userPhotoUrl: null,
+    username: undefined,
+    displayName: null,
+    created_at: r.created_at,
+    is_active: r.is_active,
+    isAnonymous: opts.isAnonymous,
+    visibility: opts.visibility,
+    expiresAt,
+    masked: true,
+  };
+}
+
 function maskAttendanceRow(viewerUserId: number | undefined, viewerRsvped: boolean, r: any): any {
   const uid = r.userId ?? r.user_id;
   const isSelf = viewerUserId != null && uid === viewerUserId;
-  const isAnonymous = Boolean(r.isAnonymous ?? r.is_anonymous);
+  const visibility = resolveAttendanceVisibility(r);
+  const isAnonymous = visibility === "anonymous";
   const expiresAt = r.expiresAt ?? r.expires_at ?? null;
 
+  // Non-RSVPed strangers only see masked shells (counts still via length).
   if (!viewerRsvped && !isSelf) {
-    return {
-      id: r.id,
-      event_id: r.event_id,
+    if (visibility === "friends") {
+      return maskAttendanceIdentity(r, {
+        handle: "Friends",
+        isAnonymous: false,
+        visibility: "friends",
+      });
+    }
+    return maskAttendanceIdentity(r, {
       handle: "Anonymous",
-      message: r.message,
-      avatarSeed: r.avatarSeed ?? r.avatar_seed,
-      photoUrl: null,
-      created_at: r.created_at,
-      is_active: r.is_active,
       isAnonymous: true,
-      expiresAt,
-      masked: true,
-    };
+      visibility: isAnonymous ? "anonymous" : "public",
+    });
   }
 
   if (isAnonymous && !isSelf) {
-    return {
-      id: r.id,
-      event_id: r.event_id,
+    return maskAttendanceIdentity(r, {
       handle: "Anonymous",
-      message: r.message,
-      avatarSeed: r.avatarSeed ?? r.avatar_seed,
-      photoUrl: null,
-      created_at: r.created_at,
-      is_active: r.is_active,
       isAnonymous: true,
-      expiresAt,
-      masked: true,
-    };
+      visibility: "anonymous",
+    });
+  }
+
+  // Friends-only: full identity only for self or follow-graph peers.
+  if (visibility === "friends" && !isSelf && !canViewerSeeFriendsAttendance(viewerUserId, uid)) {
+    return maskAttendanceIdentity(r, {
+      handle: "Friends",
+      isAnonymous: false,
+      visibility: "friends",
+    });
   }
 
   return {
     ...r,
     isAnonymous,
+    visibility,
     expiresAt,
     masked: false,
   };
@@ -8626,8 +8711,23 @@ export interface IStorage {
   getAttendances(eventId: number, viewerUserId?: number): any[];
   getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
   getAttendancesByUser(userId: number): any[];
-  upsertAttendance(eventId: number, user: User, message: string, isAnonymous?: boolean): Attendance;
+  /**
+   * Upsert RSVP. `visibility` accepts "public"|"friends"|"anonymous" (or legacy "visible"),
+   * or a boolean (true = anonymous) for older callers.
+   */
+  upsertAttendance(
+    eventId: number,
+    user: User,
+    message: string,
+    visibility?: AttendanceVisibility | boolean | string,
+  ): Attendance;
   removeAttendance(eventId: number, userId: number): void;
+  /** Global search v0: LIVE events + active directory places. */
+  searchGlobal(q: string): {
+    q: string;
+    events: Array<{ id: number; title: string; subtitle: string; href: string }>;
+    places: Array<{ id: number; name: string; subtitle: string; href: string }>;
+  };
   getEventChatMessages(eventId: number, viewerUserId: number): {
     messages: any[];
     expiresAt: string | null;
@@ -9023,21 +9123,33 @@ export const storage: IStorage = {
   createEvent(data) {
     // Footgun guard: never inherit a silent LIVE default. Callers that want public
     // must pass status: "LIVE" explicitly (admin seed, approve flows, etc.).
+    const now = new Date().toISOString();
     return db
       .insert(events)
       .values({
         ...data,
         status: data.status ?? "HIDDEN",
-        createdAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
       })
       .returning()
       .get();
   },
   updateEventStatus(id, status) {
-    db.update(events).set({ status }).where(eq(events.id, id)).run();
+    db.update(events)
+      .set({ status, updatedAt: new Date().toISOString() })
+      .where(eq(events.id, id))
+      .run();
   },
   updateEvent(id, data) {
-    db.update(events).set(data as any).where(eq(events.id, id)).run();
+    const { updatedAt: _ignore, createdAt: _c, ...rest } = data as Partial<InsertEvent> & {
+      updatedAt?: string;
+      createdAt?: string;
+    };
+    db.update(events)
+      .set({ ...rest, updatedAt: new Date().toISOString() } as any)
+      .where(eq(events.id, id))
+      .run();
     return db.select().from(events).where(eq(events.id, id)).get();
   },
   toggleClaimable(id, isClaimable) {
@@ -9764,6 +9876,7 @@ export const storage: IStorage = {
       lng: sub.lng,
     }, directoryRows);
     db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
+    const nowIso = new Date().toISOString();
     const created = db.insert(events).values({
       title: sub.title, description: sub.description,
       venueName: sub.venueName, address: sub.address,
@@ -9777,7 +9890,8 @@ export const storage: IStorage = {
       status: "LIVE", source: "user_submitted",
       isClaimable: false, claimedBy: claimedByUsername,
       submittedBy: sub.submitterEmail, adminNotes: null,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
+      updatedAt: nowIso,
     }).returning().get();
     const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
     if (created && submitter) {
@@ -9811,6 +9925,7 @@ export const storage: IStorage = {
           isClaimable: false,
           claimedBy: submitter?.username || sub.submitterEmail,
           adminNotes: null,
+          updatedAt: new Date().toISOString(),
         }).where(eq(events.id, sub.eventId)).run();
         if (submitter) {
           db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
@@ -9825,6 +9940,7 @@ export const storage: IStorage = {
           lng: sub.lng,
         }, directoryRows);
         // Community tip - goes live as unclaimed (anyone can claim it later)
+        const tipNow = new Date().toISOString();
         db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
@@ -9838,7 +9954,8 @@ export const storage: IStorage = {
           status: "LIVE", source: "community_tip",
           isClaimable: true, claimedBy: null,
           submittedBy: sub.submitterEmail, adminNotes: null,
-          createdAt: new Date().toISOString(),
+          createdAt: tipNow,
+          updatedAt: tipNow,
         }).run();
       } else {
         const directoryRows = db.select().from(businesses).all().filter(b => b.active);
@@ -9849,6 +9966,7 @@ export const storage: IStorage = {
           lng: sub.lng,
         }, directoryRows);
         // NEW_EVENT - create event, and if user was pending promoter, approve them too
+        const newNow = new Date().toISOString();
         const created = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
@@ -9862,7 +9980,8 @@ export const storage: IStorage = {
           status: "LIVE", source: "user_submitted",
           isClaimable: false, claimedBy: submitter?.username || null,
           submittedBy: sub.submitterEmail, adminNotes: null,
-          createdAt: new Date().toISOString(),
+          createdAt: newNow,
+          updatedAt: newNow,
         }).returning().get();
         if (submitter) {
           if (submitter.promoterStatus === "pending") {
@@ -10864,7 +10983,8 @@ export const storage: IStorage = {
       expireStaleAttendances(eventId);
       return maskAttendances(viewerUserId, sqlite.prepare(`
       SELECT a.id, a.event_id, a.user_id AS userId, a.handle, a.message, a.avatar_seed AS avatarSeed,
-             a.photo_url AS photoUrl, a.is_anonymous AS isAnonymous, a.expires_at AS expiresAt,
+             a.photo_url AS photoUrl, a.is_anonymous AS isAnonymous, a.visibility AS visibility,
+             a.expires_at AS expiresAt,
              a.is_active, a.created_at, u.username, u.display_name AS displayName,
              u.photo_url AS userPhotoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM attendances a
@@ -10882,6 +11002,7 @@ export const storage: IStorage = {
         a.user_id AS userId,
         a.handle,
         a.is_anonymous AS isAnonymous,
+        a.visibility AS visibility,
         a.avatar_seed AS avatarSeed,
         u.avatar_ring AS avatarRing,
         u.avatar_choice AS avatarChoice,
@@ -10896,6 +11017,7 @@ export const storage: IStorage = {
       userId: number | null;
       handle: string;
       isAnonymous: number | boolean;
+      visibility: string | null;
       avatarSeed: string;
       avatarRing: string | null;
       avatarChoice: number | null;
@@ -10906,15 +11028,17 @@ export const storage: IStorage = {
       if (!map[row.eventId]) map[row.eventId] = { count: 0, preview: [] };
       map[row.eventId].count += 1;
       if (map[row.eventId].preview.length < 8) {
-        const anonymous = Boolean(row.isAnonymous);
+        // Public summaries have no viewer: never leak friends-only or anonymous identity.
+        const vis = resolveAttendanceVisibility(row);
+        const hideIdentity = vis === "anonymous" || vis === "friends" || Boolean(row.isAnonymous);
         map[row.eventId].preview.push({
           id: row.id,
-          initials: anonymous ? "?" : attendanceInitials(row.handle),
-          avatarSeed: anonymous ? `anon-${row.id}` : (row.avatarSeed || row.handle),
-          userId: anonymous ? null : row.userId,
-          avatarRing: anonymous ? null : row.avatarRing,
-          avatarChoice: anonymous ? null : row.avatarChoice,
-          photoUrl: anonymous ? null : row.photoUrl,
+          initials: hideIdentity ? "?" : attendanceInitials(row.handle),
+          avatarSeed: hideIdentity ? `anon-${row.id}` : (row.avatarSeed || row.handle),
+          userId: hideIdentity ? null : row.userId,
+          avatarRing: hideIdentity ? null : row.avatarRing,
+          avatarChoice: hideIdentity ? null : row.avatarChoice,
+          photoUrl: hideIdentity ? null : row.photoUrl,
         });
       }
     }
@@ -10932,6 +11056,7 @@ export const storage: IStorage = {
         a.avatar_seed AS avatarSeed,
         a.photo_url AS photoUrl,
         a.is_anonymous AS isAnonymous,
+        a.visibility AS visibility,
         a.expires_at AS expiresAt,
         a.is_active AS isActive,
         a.created_at AS createdAt,
@@ -10946,7 +11071,7 @@ export const storage: IStorage = {
       ORDER BY e.date_start ASC
     `).all(userId) as any[];
   },
-  upsertAttendance(eventId, user, message, isAnonymous = false) {
+  upsertAttendance(eventId, user, message, visibilityArg: AttendanceVisibility | boolean | string = "public") {
     const handle = user.displayName || user.username;
     const createdAt = new Date().toISOString();
     // Align attendance (and thus roster + chat membership) with the event
@@ -10955,6 +11080,11 @@ export const storage: IStorage = {
     const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
     const expiresAt = win ? new Date(win.closesAt).toISOString() : attendanceChatExpiresAt();
     const existing = sqlite.prepare(`SELECT * FROM attendances WHERE event_id = ? AND user_id = ?`).get(eventId, user.id) as Attendance | undefined;
+    const visibility =
+      typeof visibilityArg === "boolean"
+        ? normalizeAttendanceVisibility(undefined, visibilityArg)
+        : normalizeAttendanceVisibility(visibilityArg);
+    const isAnonymous = visibility === "anonymous";
     const values = {
       eventId,
       userId: user.id,
@@ -10963,6 +11093,7 @@ export const storage: IStorage = {
       avatarSeed: user.username,
       photoUrl: user.photoUrl || null,
       isAnonymous,
+      visibility,
       expiresAt,
       isActive: true,
       createdAt,
@@ -12983,6 +13114,66 @@ export const storage: IStorage = {
     if (opts?.queerOwned) rows = rows.filter(b => b.queerOwned);
     return rows;
   },
+  searchGlobal(q) {
+    const query = String(q || "").trim();
+    if (query.length < 2) {
+      return { q: query, events: [], places: [] };
+    }
+    const like = `%${query.replace(/[%_]/g, "")}%`;
+    // LIVE events: title / venue / description
+    const eventRows = sqlite.prepare(`
+      SELECT id, title, venue_name AS venueName, day_of_week AS dayOfWeek, neighborhood
+      FROM events
+      WHERE status = 'LIVE'
+        AND (
+          title LIKE ? COLLATE NOCASE
+          OR venue_name LIKE ? COLLATE NOCASE
+          OR description LIKE ? COLLATE NOCASE
+        )
+      ORDER BY date_start ASC
+      LIMIT 8
+    `).all(like, like, like) as Array<{
+      id: number;
+      title: string;
+      venueName: string;
+      dayOfWeek: string | null;
+      neighborhood: string | null;
+    }>;
+    // Active directory places: name / neighborhood / description
+    const placeRows = sqlite.prepare(`
+      SELECT id, name, neighborhood, type, description
+      FROM businesses
+      WHERE active = 1
+        AND (
+          name LIKE ? COLLATE NOCASE
+          OR COALESCE(neighborhood, '') LIKE ? COLLATE NOCASE
+          OR description LIKE ? COLLATE NOCASE
+        )
+      ORDER BY name COLLATE NOCASE ASC
+      LIMIT 8
+    `).all(like, like, like) as Array<{
+      id: number;
+      name: string;
+      neighborhood: string | null;
+      type: string;
+      description: string;
+    }>;
+    return {
+      q: query,
+      events: eventRows.map((e) => ({
+        id: e.id,
+        title: e.title,
+        subtitle: [e.venueName, e.dayOfWeek, e.neighborhood].filter(Boolean).join(" · "),
+        href: eventPath(e.id, e.title, e.dayOfWeek),
+      })),
+      places: placeRows.map((p) => ({
+        id: p.id,
+        name: p.name,
+        subtitle: [p.neighborhood, p.type].filter(Boolean).join(" · "),
+        href: placePath(p.id, p.name),
+      })),
+    };
+  },
   getBusiness(id) {
     return db.select().from(businesses).where(eq(businesses.id, id)).get();
   },
@@ -14074,7 +14265,8 @@ export const storage: IStorage = {
     }
 
     const rsvpRows = sqlite.prepare(`
-      SELECT a.id, a.message, a.is_anonymous AS isAnonymous, a.created_at AS createdAt,
+      SELECT a.id, a.message, a.is_anonymous AS isAnonymous, a.visibility AS visibility,
+             a.created_at AS createdAt,
              a.user_id AS userId, a.event_id AS eventId,
              e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
              e.date_start AS dateStart, e.admission, e.poster_image_url AS posterImageUrl,

@@ -273,13 +273,20 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
   const around = loadAround(db, aroundIds);
 
   const savedIds = new Set<number>();
+  /** post_id → seen_updated_at (ISO). Drives per-viewer "what changed" chip. */
+  const saveSeenAt = new Map<number, string | null>();
   const myRequests = new Map<number, { id: number; kind: HousingRequestKind; status: HousingRequestStatus }>();
   if (viewerId) {
     const placeholders = ids.map(() => "?").join(",");
     const saves = db
-      .prepare(`SELECT post_id FROM housing_saves WHERE user_id = ? AND post_id IN (${placeholders})`)
+      .prepare(
+        `SELECT post_id, seen_updated_at FROM housing_saves WHERE user_id = ? AND post_id IN (${placeholders})`,
+      )
       .all(viewerId, ...ids) as any[];
-    for (const s of saves) savedIds.add(s.post_id);
+    for (const s of saves) {
+      savedIds.add(s.post_id);
+      saveSeenAt.set(s.post_id, s.seen_updated_at ?? null);
+    }
     const reqs = db
       .prepare(
         `SELECT id, post_id, kind, status FROM housing_requests
@@ -318,6 +325,16 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
     else if (type === "OFFERING") openSlots = r.status === "FILLED" ? 0 : 1;
 
     const trustBase = trust.get(r.user_id) || {};
+    // "What changed" chip is per-viewer: only for savers who have not yet seen
+    // this updated_at (seen_updated_at < post.updated_at). ISO string compare is fine.
+    let lastChangeLabel: string | null = null;
+    if (savedIds.has(r.id) && r.last_change_label) {
+      const updatedAt = r.updated_at || r.created_at || "";
+      const seenAt = saveSeenAt.get(r.id) ?? null;
+      if (!seenAt || updatedAt > seenAt) {
+        lastChangeLabel = r.last_change_label;
+      }
+    }
     const view: HousingPostView = {
       id: r.id,
       type,
@@ -339,7 +356,7 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       trust: trustBase,
       household,
       openSlots,
-      lastChangeLabel: r.last_change_label ?? null,
+      lastChangeLabel,
       lat: r.lat ?? null,
       lng: r.lng ?? null,
     };
@@ -728,6 +745,20 @@ export function toggleHousingSave(db: Database, postId: number, userId: number):
     userId,
     nowIso(),
     nowIso(),
+  );
+  return true;
+}
+
+/** Mark a saved post's update as seen so the "what changed" chip clears for this viewer. */
+export function markHousingSaveSeen(db: Database, postId: number, userId: number): boolean {
+  const existing = db
+    .prepare(`SELECT id FROM housing_saves WHERE post_id = ? AND user_id = ?`)
+    .get(postId, userId) as { id: number } | undefined;
+  if (!existing) return false;
+  db.prepare(`UPDATE housing_saves SET seen_updated_at = ? WHERE post_id = ? AND user_id = ?`).run(
+    nowIso(),
+    postId,
+    userId,
   );
   return true;
 }

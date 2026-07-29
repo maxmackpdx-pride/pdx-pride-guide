@@ -36,7 +36,19 @@ interface Attendee {
   avatarRing?: string | null;
   masked?: boolean;
   isAnonymous?: boolean;
+  /** public | friends | anonymous — friends-masked rows keep visibility so UI can label "Friends". */
+  visibility?: AttendanceVisibility | string;
   expiresAt?: string | null;
+}
+
+function resolveClientVisibility(a: Pick<Attendee, "visibility" | "isAnonymous"> | null | undefined): AttendanceVisibility {
+  if (!a) return "public";
+  const v = String(a.visibility || "").toLowerCase();
+  if (v === "public" || v === "visible") return "public";
+  if (v === "friends" || v === "friends_only" || v === "friends-only") return "friends";
+  if (v === "anonymous" || v === "anon" || a.isAnonymous) return "anonymous";
+  if (a.isAnonymous) return "anonymous";
+  return "public";
 }
 
 interface ExtraPerson {
@@ -68,7 +80,7 @@ export default function AttendanceCluster({
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedPhraseKey, setSelectedPhraseKey] = useState<AttendancePhraseKey>(DEFAULT_ATTENDANCE_PHRASE_KEY);
-  const [visibility, setVisibility] = useState<AttendanceVisibility>("visible");
+  const [visibility, setVisibility] = useState<AttendanceVisibility>("public");
   const [showChat, setShowChat] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [messageTarget, setMessageTarget] = useState<Attendee | null>(null);
@@ -92,7 +104,7 @@ export default function AttendanceCluster({
   });
 
   const mutation = useMutation({
-    mutationFn: (data: { message: string; isAnonymous: boolean }) =>
+    mutationFn: (data: { message: string; visibility: AttendanceVisibility; isAnonymous: boolean }) =>
       apiRequest("POST", `/api/events/${eventId}/attendance`, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
@@ -102,8 +114,7 @@ export default function AttendanceCluster({
       setShowForm(false);
       if (!pastEvent) {
         setShowChat(true);
-        if (variables.isAnonymous) setVisibility("anonymous");
-        else setVisibility("visible");
+        setVisibility(variables.visibility);
       }
     },
   });
@@ -134,11 +145,14 @@ export default function AttendanceCluster({
   const submitVibe = (btnEl?: HTMLElement | null) => {
     const wasGoing = Boolean(myAttendance);
     if (!wasGoing && btnEl && !pastEvent) spawnRsvpSparks(btnEl);
+    const nextVis: AttendanceVisibility = pastEvent ? "public" : visibility;
     mutation.mutate({
       message: pastEvent
         ? attendancePhraseLabel(PAST_EVENT_ATTENDANCE_PHRASE_KEY)
         : attendancePhraseLabel(selectedPhraseKey),
-      isAnonymous: pastEvent ? false : visibility === "anonymous",
+      visibility: nextVis,
+      // Backward-compat for older API consumers; server prefers visibility.
+      isAnonymous: nextVis === "anonymous",
     });
   };
 
@@ -154,7 +168,7 @@ export default function AttendanceCluster({
   useEffect(() => {
     if (!showForm || !myAttendance) return;
     setSelectedPhraseKey(resolveAttendancePhrase(myAttendance.message).key);
-    setVisibility(myAttendance.isAnonymous ? "anonymous" : "visible");
+    setVisibility(resolveClientVisibility(myAttendance));
   }, [showForm, myAttendance]);
 
   // ?chat=1 deep link (Inbox GROUP row / group-chat push): auto-open the
@@ -199,6 +213,8 @@ export default function AttendanceCluster({
     avatarChoice?: number;
     avatarRing?: string | null;
     masked?: boolean;
+    /** friends-only mask label (not a real profile handle). */
+    maskLabel?: string | null;
     chip?: string;
     chipColor?: string;
     subText?: string;
@@ -219,6 +235,8 @@ export default function AttendanceCluster({
       .filter(a => !extraPeople.some(p => p.userId === a.userId))
       .map(a => {
         const phrase = resolveAttendancePhrase(a.message);
+        const vis = resolveClientVisibility(a);
+        const friendsMasked = Boolean(a.masked) && vis === "friends";
         return {
           key: `att-${a.id}`,
           userId: a.userId,
@@ -228,6 +246,7 @@ export default function AttendanceCluster({
           avatarChoice: a.avatarChoice,
           avatarRing: a.avatarRing,
           masked: a.masked,
+          maskLabel: friendsMasked ? "Friends" : null,
           subText: `"${phrase.label}"`,
           attendeeRef: a,
         };
@@ -367,6 +386,11 @@ export default function AttendanceCluster({
                 {!p.masked && (
                   <span className="attendance-avatar-cell__name">
                     @{p.handle}
+                  </span>
+                )}
+                {p.masked && p.maskLabel && (
+                  <span className="attendance-avatar-cell__name attendance-avatar-cell__name--masked">
+                    {p.maskLabel}
                   </span>
                 )}
                 {p.chip && (

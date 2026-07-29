@@ -44,6 +44,7 @@ function toDsEvent(e: ProfileEvent): Event {
     submittedBy: null,
     adminNotes: null,
     createdAt: "",
+    updatedAt: "",
   };
 }
 

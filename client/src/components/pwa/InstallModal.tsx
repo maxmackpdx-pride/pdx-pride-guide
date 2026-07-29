@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { hasInstallPrompt, isIosDevice, promptInstall } from "@/lib/pwa";
 import { ANDROID_STEPS, InstallSteps, IOS_STEPS } from "@/components/pwa/installSteps";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 /**
  * Shared "Save as Web App" / "Add to Home Screen" modal. Opened by the hub
@@ -11,6 +12,8 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
   const isIos = isIosDevice();
   const [installReady, setInstallReady] = useState(false); // Android native prompt captured
   const [busy, setBusy] = useState(false);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ open, onClose: handleClose, enabled: open });
 
   useEffect(() => {
     if (!open || isIos) return;
@@ -35,9 +38,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="install-modal-title"
+      role="presentation"
       onClick={onClose}
       style={{
         position: "fixed",
@@ -51,6 +52,11 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="install-modal-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(460px, 100%)",
@@ -91,7 +97,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
           className="display"
           style={{ color: "#fff", fontSize: "clamp(1.35rem, 5vw, 1.9rem)", lineHeight: 1.05, marginBottom: 10 }}
         >
-          {isIos ? "SAVE AS WEB APP" : "INSTALL ZAYLIST"}
+          Install Zaylist
         </h2>
 
         <p style={{ color: "#bbb", fontSize: "0.9rem", lineHeight: 1.5, marginBottom: isIos ? 8 : 14 }}>

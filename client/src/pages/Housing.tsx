@@ -141,7 +141,24 @@ export default function Housing() {
 
   const handlers: HousingCardHandlers = {
     activeTags: tags,
-    onOpen: (post) => navigate(`/hausing/${post.id}`),
+    onOpen: (post) => {
+      // Opening a card that shows an update chip counts as seeing it.
+      if (post.saved && post.lastChangeLabel && user) {
+        fetch(`/api/housing/${post.id}/seen`, { method: "POST", credentials: "include" }).catch(
+          () => undefined,
+        );
+        queryClient.setQueriesData<HousingBoardResponse>({ queryKey: ["/api/housing"] }, (old) => {
+          if (!old || !Array.isArray(old.posts)) return old;
+          return {
+            ...old,
+            posts: old.posts.map((p: HousingPostView) =>
+              p.id === post.id ? { ...p, lastChangeLabel: null } : p,
+            ),
+          };
+        });
+      }
+      navigate(`/hausing/${post.id}`);
+    },
     onSave: (post) => {
       if (!requireAuth()) return;
       saveMutation.mutate(post.id);
@@ -153,7 +170,7 @@ export default function Housing() {
         return;
       }
       navigator.clipboard?.writeText(url);
-      toast({ title: "Link copied" });
+      toast({ title: "Listing link copied" });
     },
     // Asking to chat is asking in, and nothing opens until the other side accepts.
     onChat: (post) => {

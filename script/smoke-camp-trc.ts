@@ -9,7 +9,11 @@ import {
 } from "../server/ingest/adapters/campTrc";
 import { getTrustedVenue, isTrustedLaneSource } from "../shared/trustedVenues";
 import { DIRECTORY_TYPE_COLORS } from "../shared/directoryTheme";
-import { resolveDirectoryLogo, directoryFallbackLogo } from "../shared/directoryLogos";
+import {
+  DIRECTORY_LOGO_VERSION,
+  resolveDirectoryLogo,
+  directoryFallbackLogo,
+} from "../shared/directoryLogos";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -26,18 +30,19 @@ assert(
   "camptrc.org host is trusted lane",
 );
 assert(DIRECTORY_TYPE_COLORS.campground === "#39FF14", "campground type accent lime");
+const trcLogo = `/directory-logos/Triangle_Recreation_Camp.png?v=${DIRECTORY_LOGO_VERSION}`;
 assert(
-  resolveDirectoryLogo("Triangle Recreation Camp") ===
-    "/directory-logos/Triangle_Recreation_Camp.png",
-  "logo pack maps Triangle Recreation Camp",
+  resolveDirectoryLogo("Triangle Recreation Camp") === trcLogo,
+  "logo pack maps Triangle Recreation Camp (cache-busted)",
 );
 assert(
-  resolveDirectoryLogo("Camp TRC") === "/directory-logos/Triangle_Recreation_Camp.png",
-  "logo pack maps Camp TRC",
+  resolveDirectoryLogo("Camp TRC") === trcLogo,
+  "logo pack maps Camp TRC (cache-busted)",
 );
 assert(
-  directoryFallbackLogo("campground") === "/directory-logos/fallback_campgrounds.png",
-  "campground fallback logo",
+  directoryFallbackLogo("campground") ===
+    `/directory-logos/fallback_campgrounds.png?v=${DIRECTORY_LOGO_VERSION}`,
+  "campground fallback logo (cache-busted)",
 );
 
 assert(

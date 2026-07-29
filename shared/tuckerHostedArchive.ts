@@ -563,6 +563,7 @@ export function tuckerHostedArchiveAsEvent(row: TuckerHostedArchiveRow): Event {
     submittedBy: null,
     adminNotes: `profile_archive:${row.slug}`,
     createdAt: now,
+    updatedAt: now,
   };
 }
 

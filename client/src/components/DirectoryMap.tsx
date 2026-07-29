@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -11,6 +11,10 @@ import {
   mapPinMultiHtml,
 } from "@/components/ds/mapTheme";
 import { placePath } from "@shared/placeSlug";
+import {
+  resolveBusinessLocations,
+  type BusinessLocation,
+} from "@shared/businessLocations";
 
 type Business = {
   id: number;
@@ -28,6 +32,19 @@ type Business = {
   createdAt?: string;
   lat: number | null;
   lng: number | null;
+  locations?: BusinessLocation[];
+};
+
+/** One map pin: brand + optional storefront label for multi-loc chains. */
+type MapPin = {
+  key: string;
+  biz: Business;
+  lat: number;
+  lng: number;
+  locationLabel?: string;
+  address?: string | null;
+  hours?: string | null;
+  phone?: string | null;
 };
 
 export const MAP_TYPE_COLORS: Record<string, string> = {
@@ -97,14 +114,73 @@ const TYPE_LABELS = MAP_TYPE_LABELS;
 
 const PIN_HALF = MAP_PIN_SIZE / 2;
 
-/** Keep the directory map framed on the Portland metro. Some listings sit
-    outside Portland, but the map itself never wanders off the city - users
-    can't pan/zoom away from this box. [SW, NE] corners. */
+/** Keep the directory map framed on the Portland metro (incl. Vancouver WA,
+    Aloha, Clackamas multi-loc storefronts). Users can't pan/zoom past this box.
+    [SW, NE] corners. */
 const PORTLAND_BOUNDS: [[number, number], [number, number]] = [
-  [45.38, -122.90], // SW - Tigard / west side
-  [45.66, -122.45], // NE - toward Gresham / the river
+  [45.35, -122.92], // SW - Aloha / Tigard / Clackamas
+  [45.70, -122.42], // NE - Vancouver WA / Gresham
 ];
 const PORTLAND_MIN_ZOOM = 11;
+
+/** Expand multi-loc businesses into one pin per storefront with coords. */
+function expandBusinessPins(businesses: Business[]): MapPin[] {
+  const pins: MapPin[] = [];
+  for (const biz of businesses) {
+    const locations =
+      Array.isArray(biz.locations) && biz.locations.length > 0
+        ? biz.locations
+        : resolveBusinessLocations(biz);
+    const withCoords = locations.filter(
+      (loc) =>
+        loc.lat != null &&
+        loc.lng != null &&
+        Number.isFinite(loc.lat) &&
+        Number.isFinite(loc.lng),
+    );
+    if (withCoords.length > 1) {
+      withCoords.forEach((loc, i) => {
+        pins.push({
+          key: `${biz.id}-loc-${i}`,
+          biz,
+          lat: loc.lat!,
+          lng: loc.lng!,
+          locationLabel: loc.label,
+          address: loc.address,
+          hours: loc.hours,
+          phone: loc.phone,
+        });
+      });
+      continue;
+    }
+    if (withCoords.length === 1) {
+      const loc = withCoords[0];
+      pins.push({
+        key: `${biz.id}`,
+        biz,
+        lat: loc.lat!,
+        lng: loc.lng!,
+        address: loc.address || biz.address,
+        hours: loc.hours || biz.hours,
+        phone: loc.phone || biz.phone,
+      });
+      continue;
+    }
+    // Fall back to primary lat/lng on the business row
+    if (biz.lat != null && biz.lng != null) {
+      pins.push({
+        key: `${biz.id}`,
+        biz,
+        lat: biz.lat,
+        lng: biz.lng,
+        address: biz.address,
+        hours: biz.hours,
+        phone: biz.phone,
+      });
+    }
+  }
+  return pins;
+}
 
 function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
   const map = useMap();
@@ -148,8 +224,19 @@ function buildPin(color: string) {
   });
 }
 
-function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
-  const address = [biz.address, biz.neighborhood].filter(Boolean).join(" · ");
+function DirectoryPopup({
+  pin,
+  accent,
+}: {
+  pin: MapPin;
+  accent: string;
+}) {
+  const { biz, locationLabel, address: pinAddress, hours: pinHours } = pin;
+  const address =
+    pinAddress ||
+    [biz.address, biz.neighborhood].filter(Boolean).join(" · ") ||
+    null;
+  const hours = pinHours || (!locationLabel ? biz.hours : null);
   const categoryLabel = TYPE_LABELS[biz.type] || biz.type;
   const grandOpening = isGrandOpeningActive(biz.grandOpeningDate);
   const grandDate = grandOpening ? formatGrandOpeningDate(biz.grandOpeningDate) : null;
@@ -220,11 +307,26 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
           fontSize: "1.125rem",
           lineHeight: 1.05,
           color: "#fff",
-          marginBottom: grandDate ? 2 : 8,
+          marginBottom: locationLabel || grandDate ? 2 : 8,
         }}
       >
         {biz.name}
       </div>
+      {locationLabel && (
+        <div
+          style={{
+            fontFamily: "var(--font-display, sans-serif)",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            fontSize: "0.75rem",
+            letterSpacing: "0.04em",
+            color: accent,
+            marginBottom: grandDate ? 2 : 8,
+          }}
+        >
+          {locationLabel}
+        </div>
+      )}
       {grandDate && (
         <div
           style={{
@@ -246,10 +348,10 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
           {address}
         </div>
       )}
-      {biz.hours && (
-        <div style={{ fontSize: "0.8125rem", color: "var(--text-lo, #aaa)", marginBottom: 6 }}>{biz.hours}</div>
+      {hours && (
+        <div style={{ fontSize: "0.8125rem", color: "var(--text-lo, #aaa)", marginBottom: 6 }}>{hours}</div>
       )}
-      {biz.description && (
+      {!locationLabel && biz.description && (
         <p
           style={{
             fontSize: "0.8125rem",
@@ -371,7 +473,10 @@ export default function DirectoryMap({
   const isBackdrop = backdrop;
   const isInteractive = interactive && !isBackdrop;
   const renderMarkers = showMarkers && !isBackdrop;
-  const mapped = renderMarkers ? businesses.filter(b => b.lat != null && b.lng != null) : [];
+  const mapped = useMemo(
+    () => (renderMarkers ? expandBusinessPins(businesses) : []),
+    [businesses, renderMarkers],
+  );
   const mapHeight = isBackdrop ? "100%" : height;
   const heightStyle = typeof mapHeight === "number" ? `${mapHeight}px` : mapHeight;
   const fillParent = mapHeight === "100%";
@@ -399,7 +504,7 @@ export default function DirectoryMap({
       )}
       <MapContainer
         center={[45.5231, -122.6765]}
-        zoom={13}
+        zoom={12}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
         maxBounds={isBackdrop ? undefined : PORTLAND_BOUNDS}
         maxBoundsViscosity={1.0}
@@ -418,17 +523,17 @@ export default function DirectoryMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
         />
         <MapInvalidateSize enabled={isBackdrop} />
-        {mapped.map(biz => {
-          const accent = TYPE_COLORS[biz.type] || "#FF00CC";
-          const rainbow = biz.type === "nonprofit";
+        {mapped.map(pin => {
+          const accent = TYPE_COLORS[pin.biz.type] || "#FF00CC";
+          const rainbow = pin.biz.type === "nonprofit";
           return (
             <Marker
-              key={biz.id}
-              position={[biz.lat!, biz.lng!]}
+              key={pin.key}
+              position={[pin.lat, pin.lng]}
               icon={rainbow ? buildRainbowPin() : buildPin(accent)}
             >
               <Popup className="pdx-dir-popup" maxWidth={280}>
-                <DirectoryPopup biz={biz} accent={accent} />
+                <DirectoryPopup pin={pin} accent={accent} />
               </Popup>
             </Marker>
           );
