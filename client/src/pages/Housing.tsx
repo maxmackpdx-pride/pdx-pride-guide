@@ -33,7 +33,7 @@ import { parseHousingTagFilter } from "@shared/housingTags";
 import { HousingCard, type HousingCardHandlers } from "@/components/housing/HousingCards";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import { HousingIcon, type HousingIconName } from "@/components/housing/HousingIcon";
-import { CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
+import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 
@@ -108,7 +108,7 @@ export default function Housing() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const { data, isLoading, isError } = useQuery<HousingBoardResponse>({
+  const { data, isLoading, isError, refetch } = useQuery<HousingBoardResponse>({
     queryKey: ["/api/housing", filter, tags.join(",")],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -399,7 +399,14 @@ export default function Housing() {
           {isLoading ? (
             <div className="hz-panel hz-empty">Loading the board.</div>
           ) : isError ? (
-            <div className="hz-panel hz-empty">The board did not load. Try again in a moment.</div>
+            <div className="hz-panel hz-empty">
+              The board did not load. Try again in a moment.
+              <div style={{ marginTop: 12 }}>
+                <Btn kind="neon" onClick={() => void refetch()}>
+                  Try again
+                </Btn>
+              </div>
+            </div>
           ) : posts.length === 0 ? (
             <div className="hz-panel hz-empty">
               {tags.length

@@ -27,8 +27,8 @@ export default function HousingNew() {
     imageAlt: "HAÜSING — housing board on Zaylist",
   });
   const [, navigate] = useLocation();
-  const { user } = useAuth();
-  const [showAuth, setShowAuth] = useState(!user);
+  const { user, loading: authLoading } = useAuth();
+  const [showAuth, setShowAuth] = useState(true);
 
   const search = typeof window !== "undefined" ? window.location.search : "";
   const raw = new URLSearchParams(search).get("type")?.toUpperCase() || "";
@@ -46,6 +46,18 @@ export default function HousingNew() {
       return res.json();
     },
   });
+
+  if (authLoading) {
+    return (
+      <div className="hz">
+        <div className="hz-pad">
+          <div className="hz-wrap">
+            <div className="hz-panel hz-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

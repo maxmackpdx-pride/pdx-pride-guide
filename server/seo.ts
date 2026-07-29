@@ -39,6 +39,17 @@ function escapeHtml(value: string) {
     .replace(/"/g, "&quot;");
 }
 
+/** Decode common entities before re-escaping into meta/title tags. */
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/gi, "'");
+}
+
 export function getLiveEventsForSeo(): SeoEvent[] {
   return expandMultiDayEvents(storage.getEvents({ status: "LIVE" }))
     .map(evt => ({
@@ -201,6 +212,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/gifting",
     "/pride-work",
     "/spotted",
+    "/hausing",
     "/about",
     "/contact",
     "/sponsors",
@@ -213,7 +225,15 @@ export function buildSitemapXml(events: SeoEvent[]) {
   const staticUrls = staticPaths
     .map(path => `  <url><loc>${SITE_URL}${path === "/" ? "/" : path}</loc><changefreq>daily</changefreq><priority>${path === "/" ? "1.0" : "0.8"}</priority></url>`)
     .join("\n");
-  const eventUrls = events
+  // Multi-day expand can emit the same event id once per day; sitemap wants one loc per event.
+  const seenEventIds = new Set<number>();
+  const uniqueEvents: SeoEvent[] = [];
+  for (const evt of events) {
+    if (seenEventIds.has(evt.id)) continue;
+    seenEventIds.add(evt.id);
+    uniqueEvents.push(evt);
+  }
+  const eventUrls = uniqueEvents
     .map(evt => `  <url><loc>${eventUrl(evt.id, evt.title, SITE_URL)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
     .join("\n");
 
@@ -588,19 +608,23 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const crawlerDirectory = buildCrawlerEventDirectory(events);
   const noscript = buildNoscriptEventDirectory(events);
 
+  // og:type: profile only for member pages; events/places are article; generic is website.
+  const ogType = liveProfile ? "profile" : liveEvent || livePlace ? "article" : "website";
   let out = applySocialMeta(html, {
-    title: pageTitle,
-    description: pageDescription,
+    title: decodeHtmlEntities(pageTitle),
+    description: decodeHtmlEntities(pageDescription),
     url: pageUrl,
     image: pageImage,
-    imageAlt: liveEvent
-      ? liveEvent.title
-      : livePlace
-        ? livePlace.name
-        : liveProfile
-          ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-          : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory",
-    type: liveEvent || livePlace || liveProfile ? "profile" : "website",
+    imageAlt: decodeHtmlEntities(
+      liveEvent
+        ? liveEvent.title
+        : livePlace
+          ? livePlace.name
+          : liveProfile
+            ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
+            : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory",
+    ),
+    type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in
     imageType: pageImageIsCard || pageImage.includes("/og/") ? "image/png" : "image/jpeg",
     imageWidth: 1200,

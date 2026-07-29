@@ -82,7 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error((await res.json()).error || "Login failed");
+    if (!res.ok) {
+      const data = await res.json().catch(() => null) as { error?: string } | null;
+      throw new Error(data?.error || "Login failed");
+    }
     await refreshUser();
   };
 
@@ -105,7 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         communityStandardsVersion: options?.communityStandardsVersion,
       }),
     });
-    if (!res.ok) throw new Error((await res.json()).error || "Registration failed");
+    if (!res.ok) {
+      const data = await res.json().catch(() => null) as { error?: string } | null;
+      throw new Error(data?.error || "Registration failed");
+    }
     await refreshUser();
   };
 

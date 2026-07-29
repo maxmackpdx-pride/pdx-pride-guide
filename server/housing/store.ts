@@ -370,7 +370,9 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
       view.seeking = seeking;
       view.isFull = isFull;
       view.goals = r.goals;
-      view.rent = r.rent; // combined budget, display text
+      // Combined budget is often stored in budget while rent stays empty; surface either.
+      view.rent = r.rent || r.budget || null;
+      view.budget = r.budget ?? null;
       view.moveIn = r.move_in;
       view.around = r.around_post_id ? around.get(r.around_post_id) ?? null : null;
       view.myRequest = myRequests.get(r.id) ?? null;

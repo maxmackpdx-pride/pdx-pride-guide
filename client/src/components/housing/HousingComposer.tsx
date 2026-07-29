@@ -350,8 +350,13 @@ export function HousingComposer({
 
   const submitPost = async (postType: HousingType) => {
     const headline = draft.headline.trim();
+    const needsPhoto = postType === "OFFERING" || postType === "LOOKING";
     if (!headline) {
-      setNotice("Add a headline. It is the only thing we need.");
+      setNotice(needsPhoto ? "Add a headline and a cover photo." : "Add a headline.");
+      return;
+    }
+    if (needsPhoto && photos.length === 0) {
+      setNotice("Add a cover photo. It is required for this post type.");
       return;
     }
     setBusy(true);
@@ -448,9 +453,14 @@ export function HousingComposer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           company: pm.company.trim(),
-          site: pm.site.trim(),
-          license: pm.license.trim(),
-          directory: pm.directory.trim(),
+          siteUrl: pm.site.trim(),
+          businessLicense: pm.license.trim(),
+          directoryBusinessId: (() => {
+            const raw = pm.directory.trim();
+            if (!raw) return null;
+            const n = Number(raw);
+            return Number.isFinite(n) && n > 0 ? n : null;
+          })(),
         }),
       });
       if (!res.ok) {
@@ -723,7 +733,9 @@ export function HousingComposer({
     <Sheet title={HOUSING_TYPE_LABEL[type]} onClose={onClose} style={accentStyle(type)}>
       <SectionTitle kicker={HOUSING_TYPE_LABEL[type]}>{heading}</SectionTitle>
       <p style={{ color: "var(--text-lo)", fontSize: "var(--meta)", margin: "8px 0 16px" }}>
-        Only the headline is required. Everything else can wait until later.
+        {photoRequired
+          ? "Headline and a cover photo are required. Everything else can wait until later."
+          : "Only the headline is required. Everything else can wait until later."}
       </p>
 
       <div className="hz-fields">

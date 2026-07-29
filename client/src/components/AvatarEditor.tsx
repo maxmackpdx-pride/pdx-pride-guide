@@ -155,6 +155,7 @@ export default function AvatarEditor({
       const res = await fetch("/api/users/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ photoUrl: null, avatarRing: "none", avatarCrop: null }),
       });
       if (!res.ok) throw new Error("Remove failed");

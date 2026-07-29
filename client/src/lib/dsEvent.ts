@@ -1,13 +1,14 @@
 import type { Event } from "@shared/schema";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { formatPacificDateTime } from "@/lib/countdown";
 
 export function formatListingWhen(event: Event): string {
   const time = event.dateStart
-    ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    ? formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })
     : "";
   const dateLabel = event.dateStart
-    ? new Date(event.dateStart).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })
+    ? formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })
     : "";
   const parts = [dateLabel, time].filter(Boolean);
   if (event.neighborhood) parts.push(event.neighborhood);

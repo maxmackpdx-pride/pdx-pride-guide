@@ -24,6 +24,7 @@ export type MissedConnectionPost = {
   eventDay?: string | null;
   status: string;
   createdAt: string;
+  closesAt?: string | null;
   isMine?: boolean;
   anonymous?: boolean;
   isDemo?: boolean;

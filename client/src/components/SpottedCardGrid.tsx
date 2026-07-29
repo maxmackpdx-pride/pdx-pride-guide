@@ -99,9 +99,13 @@ export default function SpottedCardGrid({
       );
     }
     rows.sort((a, b) => {
-      const ta = new Date(a.createdAt).getTime();
-      const tb = new Date(b.createdAt).getTime();
-      return sort === "CLOSING" ? ta - tb : tb - ta;
+      if (sort === "CLOSING") {
+        const ca = a.closesAt ? new Date(a.closesAt).getTime() : Number.POSITIVE_INFINITY;
+        const cb = b.closesAt ? new Date(b.closesAt).getTime() : Number.POSITIVE_INFINITY;
+        if (ca !== cb) return ca - cb;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
     return rows;
   }, [posts, filter, search, sort]);

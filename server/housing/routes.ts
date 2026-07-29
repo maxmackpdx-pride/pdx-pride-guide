@@ -533,7 +533,12 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (post?.type === "FORMING" && request.kind !== "WAITLIST") {
       addHousingMember(db, request.post_id, { kind: "MEMBER", userId: request.requester_user_id, role: "MEMBER" });
       const seeking = Math.max(0, (post.seeking ?? 0) - 1);
-      updateHousingPost(db, request.post_id, { seeking }, "Someone joined");
+      updateHousingPost(
+        db,
+        request.post_id,
+        seeking === 0 ? { seeking, isFull: true } : { seeking },
+        seeking === 0 ? "Household is full" : "Someone joined",
+      );
     }
     try {
       deps.sendMessage(
@@ -832,7 +837,10 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       return res.json({ ok: true, alreadyPending: true, id: prior.id });
     }
     const company = asStr(req.body?.company, 160);
-    const siteUrl = asStr(req.body?.siteUrl, 300);
+    // Accept short client aliases (site/license/directory) alongside canonical keys.
+    const siteUrl = asStr(req.body?.siteUrl ?? req.body?.site, 300);
+    const businessLicense = asStr(req.body?.businessLicense ?? req.body?.license, 200) || "";
+    const directoryBusinessId = asNum(req.body?.directoryBusinessId ?? req.body?.directory);
     if (!company || !siteUrl) {
       return res.status(400).json({ error: "Company and rental website are both needed" });
     }
@@ -844,8 +852,8 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       company,
       siteUrl,
       domainProof: asStr(req.body?.domainProof, 500) || "",
-      businessLicense: asStr(req.body?.businessLicense, 200) || "",
-      directoryBusinessId: asNum(req.body?.directoryBusinessId),
+      businessLicense,
+      directoryBusinessId,
       note: asStr(req.body?.note, 1000) || "",
     });
     // Applications go to the owner, same as the promoter application.
@@ -857,7 +865,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
           eventTitle: `Property manager: ${company}`,
           requesterName: user?.displayName || user?.username || "member",
           requesterEmail: user?.email || null,
-          proof: [siteUrl, asStr(req.body?.businessLicense, 120), asStr(req.body?.domainProof, 200)]
+          proof: [siteUrl, businessLicense.slice(0, 120) || null, asStr(req.body?.domainProof, 200)]
             .filter(Boolean)
             .join(" · ")
             .slice(0, 500),

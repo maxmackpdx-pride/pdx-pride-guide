@@ -53,6 +53,11 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath, { index: false }));
 
+  // Browsers request /favicon.ico by default; do not serve SPA HTML for it.
+  app.get("/favicon.ico", (_req, res) => {
+    res.redirect(302, "/favicon.png");
+  });
+
   // SPA fallback with server-injected event listings for crawlers and AI fetchers.
   app.use("/{*path}", sendSeoIndex);
 }

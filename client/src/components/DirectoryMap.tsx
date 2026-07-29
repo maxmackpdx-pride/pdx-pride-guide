@@ -10,6 +10,7 @@ import {
   mapPinHtml,
   mapPinMultiHtml,
 } from "@/components/ds/mapTheme";
+import { placePath } from "@shared/placeSlug";
 
 type Business = {
   id: number;
@@ -265,7 +266,7 @@ function DirectoryPopup({ biz, accent }: { biz: Business; accent: string }) {
         </p>
       )}
       <a
-        href="/directory"
+        href={placePath(biz.id, biz.name)}
         style={{
           display: "inline-block",
           marginTop: 12,

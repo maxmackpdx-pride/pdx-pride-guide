@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { counterpartyAvatar, senderAvatar, type InboxPartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf } from "@/lib/inboxContext";
+import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
 import { categoryFromContext, formatThreadTime } from "./mapContext";
 import type { ApiMessageRow, Folder, Thread, ThreadMessage } from "./types";
 
@@ -43,7 +44,9 @@ function displayNameFromParty(party: InboxPartyAvatar): string {
 }
 
 function handleFromParty(party: InboxPartyAvatar): string {
-  return party.username ? `@${party.username}` : "";
+  if (!party.username) return "";
+  if (isGuideSystemUsername(party.username)) return `@${GUIDE_PUBLIC_HANDLE}`;
+  return `@${party.username}`;
 }
 
 function buildListThread(row: ApiMessageRow, folder: Folder, archived: boolean): Thread {
@@ -163,7 +166,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
             avatarChoice: 1,
             avatarRing: "rainbow",
             displayName: "Zaylist",
-            username: "prideguidepdx",
+            username: GUIDE_PUBLIC_HANDLE,
           }
         : senderAvatar(m);
       return {

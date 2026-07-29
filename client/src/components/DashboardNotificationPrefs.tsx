@@ -130,9 +130,7 @@ export default function DashboardNotificationPrefs({
     saveMutation.mutate({ [key]: !prefs[key] });
   };
 
-  if (!supported) return null;
-
-  const showEnableAsk = pushActive === false;
+  const showEnableAsk = supported && pushActive === false;
 
   const rootClass = embedded ? "hub-settings-prefs" : "dashboard-notification-prefs";
   const ledeClass = embedded ? "hub-settings-prefs__lede" : "dashboard-notification-prefs__lede";
@@ -158,9 +156,11 @@ export default function DashboardNotificationPrefs({
         </div>
       )}
       <p className={ledeClass} style={embedded ? undefined : { margin: "0 0 14px", fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
-        {pushActive
-          ? "Push is on for this device. Choose which alerts you want below."
-          : "Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account."}
+        {!supported
+          ? "Choose which email and in-app alerts you want. Push is not available on this browser or device."
+          : pushActive
+            ? "Push is on for this device. Choose which alerts you want below."
+            : "Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account."}
       </p>
 
       {showEnableAsk && (
@@ -197,7 +197,7 @@ export default function DashboardNotificationPrefs({
         </div>
       )}
 
-      {pushActive && (
+      {supported && pushActive && (
         <p className={embedded ? "hub-settings-prefs__status" : undefined} style={embedded ? undefined : { margin: "0 0 16px", fontSize: "0.75rem", color: "#6f736c" }}>
           Push active on this device.{" "}
           <button

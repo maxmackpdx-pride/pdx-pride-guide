@@ -450,7 +450,7 @@ export default function Directory() {
     return [
       { num: businesses.length, label: "Total places", color: "#ff1fa0" },
       { num: grandOpeningsThisMonth, label: "Total grand openings this month", color: "#ccff00" },
-      { num: hostingPrideEvents, label: "Total hosting Pride events", color: "#19e3ff" },
+      { num: hostingPrideEvents, label: "Hosting upcoming events", color: "#19e3ff" },
     ];
   }, [businesses, grandOpeningsThisMonth]);
 

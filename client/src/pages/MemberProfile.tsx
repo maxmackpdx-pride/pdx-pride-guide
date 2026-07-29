@@ -244,7 +244,7 @@ export default function MemberProfile() {
           <p className="mp-notfound__copy">
             {notFound
               ? `No active member named @${username} on Zaylist.`
-              : "The profile API is unavailable right now. Try again in a moment."}
+              : "Could not load this profile. Try again in a moment."}
           </p>
           <a href="/" className="btn-neon solid">
             BACK HOME

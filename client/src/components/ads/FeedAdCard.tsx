@@ -155,16 +155,23 @@ export default function FeedAdCard({ ad, preview = false, className = "" }: Prop
         {ad.body ? <div className="feed-aff__copy">{ad.body}</div> : null}
       </div>
 
-      <a
-        href={preview ? undefined : ad.destUrl || "#"}
-        target={!preview && ad.destUrl?.startsWith("http") ? "_blank" : undefined}
-        rel={!preview && ad.destUrl?.startsWith("http") ? "noopener noreferrer" : undefined}
-        className="feed-aff__cta"
-        onClick={onCtaClick}
-      >
-        <div className="feed-aff__cta-title">{ad.ctaTitle || "Learn more"}</div>
-        {ad.ctaCopy ? <div className="feed-aff__cta-copy">{ad.ctaCopy}</div> : null}
-      </a>
+      {preview || !ad.destUrl ? (
+        <div className="feed-aff__cta" role="presentation">
+          <div className="feed-aff__cta-title">{ad.ctaTitle || "Learn more"}</div>
+          {ad.ctaCopy ? <div className="feed-aff__cta-copy">{ad.ctaCopy}</div> : null}
+        </div>
+      ) : (
+        <a
+          href={ad.destUrl}
+          target={ad.destUrl.startsWith("http") ? "_blank" : undefined}
+          rel={ad.destUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+          className="feed-aff__cta"
+          onClick={onCtaClick}
+        >
+          <div className="feed-aff__cta-title">{ad.ctaTitle || "Learn more"}</div>
+          {ad.ctaCopy ? <div className="feed-aff__cta-copy">{ad.ctaCopy}</div> : null}
+        </a>
+      )}
     </div>
   );
 }

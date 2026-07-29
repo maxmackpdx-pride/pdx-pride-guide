@@ -4,6 +4,8 @@ export type IngestParseSource =
   | "jsonld"
   | "ics"
   | "mixed"
+  | "html"
+  | "eventbrite"
   | "squarespace"
   | "tribe"
   | "wix"

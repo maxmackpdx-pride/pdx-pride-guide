@@ -248,7 +248,7 @@ export default function Gifting() {
           title={<>How Gift with <span className="board-how__title-accent">Pride</span> works</>}
           lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
           steps={HOW_IT_WORKS}
-          footerLine="Keep it free · keep it kind · keep it moving · now through July 26"
+          footerLine="Keep it free · keep it kind · keep it moving · year-round"
         />
       </ScrollReveal>
 
@@ -390,7 +390,7 @@ export default function Gifting() {
             <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />
             <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
             <p className="board-copy-sm">
-              {error instanceof Error ? error.message : "The gifting board API is unavailable right now."}
+              Could not load posts. Try again in a moment.
             </p>
             <Button variant="neon" accent="lime" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gifting"] })}>
               Try again

@@ -990,11 +990,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/health", (_req, res) => {
+    // Health must stay up even if the DB is briefly unavailable.
+    let pushSubscriptions = 0;
+    if (isPushConfigured()) {
+      try {
+        pushSubscriptions = storage.countActivePushSubscriptions();
+      } catch (err) {
+        console.error("[health] countActivePushSubscriptions failed:", err);
+      }
+    }
     res.json({
       ok: true,
       ts: new Date().toISOString(),
       pushConfigured: isPushConfigured(),
-      pushSubscriptions: isPushConfigured() ? storage.countActivePushSubscriptions() : 0,
+      pushSubscriptions,
     });
   });
 
@@ -1501,7 +1510,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const created = storage.getEvents({ status: "LIVE" })
           .filter(evt => evt.submittedBy === user.email && evt.title === sub.title)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-        if (created) void fillEventMapCoordinates(created.id);
+        if (created) {
+          void fillEventMapCoordinates(created.id).catch(err =>
+            console.error("[fillEventMapCoordinates] submit auto-approve failed:", err),
+          );
+        }
         return res.json({ ...sub, autoApproved: true, potentialMatches });
       }
       if (type === "NEW_EVENT" && strongDuplicate) {
@@ -2434,9 +2447,19 @@ export function registerRoutes(httpServer: Server, app: Express) {
             }
           : {}),
       });
-      maybeSyncSiteOwnerPortfolio(user);
-      req.session.userId = user.id;
-      res.json(authUserResponse(req, user));
+      const finishRegister = () => {
+        req.session.userId = user.id;
+        maybeSyncSiteOwnerPortfolio(user);
+        res.json(authUserResponse(req, user));
+      };
+      // Match login: regenerate session before binding the new userId.
+      if (typeof req.session.regenerate === "function") {
+        return req.session.regenerate(err => {
+          if (err) return res.status(500).json({ error: "Session error" });
+          finishRegister();
+        });
+      }
+      finishRegister();
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -2783,7 +2806,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (avatarRing !== undefined) patch.avatarRing = avatarRing || "none";
     if (avatarCrop !== undefined) patch.avatarCrop = avatarCrop || null;
     if (bio !== undefined) patch.bio = bio;
-    if (photoUrl !== undefined) patch.photoUrl = photoUrl || null;
+    if (photoUrl !== undefined) {
+      const cleanPhoto = sanitizeCoverImageUrl(photoUrl);
+      if (cleanPhoto === false) {
+        return res.status(400).json({ error: "Invalid photo URL" });
+      }
+      patch.photoUrl = cleanPhoto;
+    }
     if (coverImageUrl !== undefined) {
       const cleanCover = sanitizeCoverImageUrl(coverImageUrl);
       if (cleanCover === false) {
@@ -3593,10 +3622,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     for (const key of ["messages", "my_events", "account", "admin"] as const) {
       if (typeof body[key] === "boolean") patch[key] = body[key];
     }
+    // Same isAdmin predicate as GET (includes grant-based site admins).
+    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
     const prefs = storage.setNotificationPrefs(
       req.session.userId!,
       patch,
-      Boolean(user?.subAdmin || isMainAdminUser(user)),
+      isAdmin,
     );
     res.json({ prefs });
   });
@@ -4205,7 +4236,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const created = storage.getEvents({ status: "LIVE" })
         .filter(evt => evt.submittedBy === sub.submitterEmail && evt.title === sub.title)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-      if (created) void fillEventMapCoordinates(created.id);
+      if (created) {
+        void fillEventMapCoordinates(created.id).catch(err =>
+          console.error("[fillEventMapCoordinates] admin create failed:", err),
+        );
+      }
     }
     auditAdmin(req, "approve_submission", {
       type: "submission",

@@ -706,7 +706,7 @@ export default function Events() {
           <div className="board-empty board-empty--prototype">
             <p className="display section-heading">Could not load events</p>
             <p className="board-copy-sm">
-              {error instanceof Error ? error.message : "The events API is unavailable right now."}
+              Could not load events. Try again in a moment.
             </p>
             <Button type="button" variant="solid" accent="lime" onClick={() => refetch()} style={{ marginTop: 16 }}>
               Try again

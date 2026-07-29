@@ -692,9 +692,7 @@ export default function RiverBratsCheckIn({
                     {dayLabel} · {formatRiverBratsWindow(mine.arrival_hour, mine.depart_hour)}{" "}
                     {isAnon
                       ? "· off the chat (anonymous)"
-                      : chatWindowOpen
-                        ? "· in the chat"
-                        : "· chat opens 48h before that day"}
+                      : "· in the chat"}
                   </>
                 )}
               </div>

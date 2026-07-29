@@ -4376,16 +4376,24 @@ function runBootMigrationsOnce() {
   }
   /** Seed verified year-round Eventbrite listings into Review queue (once). */
   if (!hasBootMigration("seed_missing_yearround_review_v1")) {
-    try {
-      const { seedMissingYearroundToReview } = require("./qsearch/seedMissingYearround") as typeof import("./qsearch/seedMissingYearround");
-      const result = seedMissingYearroundToReview();
-      console.info(
-        `[boot] seed_missing_yearround_review_v1: seeded=${result.seeded} skipBoard=${result.skippedBoard} skipPending=${result.skippedPending} path=${result.path}`,
-      );
-    } catch (e) {
-      console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
-    }
-    recordBootMigration("seed_missing_yearround_review_v1");
+    // Dynamic import is ESM-safe and avoids a storage↔qsearch circular init.
+    // Record after the attempt so a failed import can still retry next boot.
+    void import("./qsearch/seedMissingYearround")
+      .then(({ seedMissingYearroundToReview }) => {
+        try {
+          const result = seedMissingYearroundToReview();
+          console.info(
+            `[boot] seed_missing_yearround_review_v1: seeded=${result.seeded} skipBoard=${result.skippedBoard} skipPending=${result.skippedPending} path=${result.path}`,
+          );
+        } catch (e) {
+          console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
+        }
+        recordBootMigration("seed_missing_yearround_review_v1");
+      })
+      .catch((e) => {
+        console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
+        recordBootMigration("seed_missing_yearround_review_v1");
+      });
   }
   if (!hasBootMigration("seed_plus_psychiatry_v1")) {
     const now = new Date().toISOString();
@@ -8828,6 +8836,8 @@ export interface IStorage {
   claimDuePrompts(nowIso: string, limit?: number): any[];
   purgeExpiredChatMessages(now?: number): void;
   getMyGroupChats(userId: number): any[];
+  /** Active non-anon check-in dates for a user at a beach (still in access window). */
+  getBeachChatDatesForUser(beachId: string, userId: number): string[];
   getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; opensAt?: string | null; chatOpen: boolean };
   postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string): any;
   expireBeachCarpoolPosts(): void;
@@ -9780,7 +9790,13 @@ export const storage: IStorage = {
   approveSubmission(id, adminName) {
     const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
     if (!sub) return undefined;
-    const approvalList = JSON.parse(sub.approvals || "[]");
+    let approvalList: string[] = [];
+    try {
+      const parsed = JSON.parse(sub.approvals || "[]");
+      approvalList = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      approvalList = [];
+    }
     if (!approvalList.includes(adminName)) approvalList.push(adminName);
     const newStatus = approvalList.length >= 1 ? "APPROVED" : "PENDING";
     db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();

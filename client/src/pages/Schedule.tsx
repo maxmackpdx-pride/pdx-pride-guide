@@ -132,11 +132,19 @@ interface SelRect {
 
 const S = (o: React.CSSProperties) => o; // literal-preserving style helper
 
-/** minutes-past-midnight "now", pushed past 24h for the small-hours tail */
+/** minutes-past-midnight "now" in Pacific time, pushed past 24h for the small-hours tail */
 function nowMinutes(): number {
-  const d = new Date();
-  let t = d.getHours() * 60 + d.getMinutes();
-  if (d.getHours() < 4) t += 1440;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const hour = Number(parts.find((p) => p.type === "hour")?.value || 0);
+  const minute = Number(parts.find((p) => p.type === "minute")?.value || 0);
+  let t = hour * 60 + minute;
+  if (hour < 4) t += 1440;
   return t;
 }
 

@@ -20,6 +20,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/spotted", "Missed Connections"],
       ["/pride-work", "Gig Board"],
       ["/gifting", "Gifting"],
+      ["/hausing", "HAÜSING"],
     ],
   },
   {
@@ -27,7 +28,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
     title: "Participate",
     links: [
       ["/submit", "Submit an Event"],
-      ["/submit", "Claim an Event"],
+      ["/submit?mode=claim", "Claim an Event"],
       ["/pride-work", "Post a Gig"],
       ["/gifting", "Post a Gift / In Search Of"],
       ["/sponsors", "Sponsor Zaylist"],

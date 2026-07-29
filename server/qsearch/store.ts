@@ -1,5 +1,6 @@
 import { sqlite } from "../storage";
 import type { YieldStatus } from "../ingest/types";
+import { applyCatalogCoverage } from "./analyze";
 
 export type QSearchSourceHealth = {
   sourceId: string;
@@ -712,7 +713,9 @@ export function clearCandidateFlyer(id: string): boolean {
   if (!row) return false;
   let draft: Record<string, unknown>;
   try {
-    draft = JSON.parse(row.draft_json);
+    const parsed = JSON.parse(row.draft_json);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+    draft = parsed as Record<string, unknown>;
   } catch {
     return false;
   }
@@ -748,32 +751,36 @@ export function listCandidates(opts?: {
     sql += ` LIMIT ?`;
     params.push(opts.limit);
   }
+  const safeParse = <T>(raw: unknown, fallback: T): T => {
+    if (raw == null || raw === "") return fallback;
+    try {
+      return JSON.parse(String(raw)) as T;
+    } catch {
+      return fallback;
+    }
+  };
+
   return sqlite.prepare(sql).all(...params).map((row: any) => {
-    let bundle: {
+    const bundle = safeParse<{
       sourceBundle?: unknown[];
       fieldConflicts?: unknown[];
       memberDrafts?: unknown[];
-    } = {};
-    try {
-      bundle = JSON.parse(row.bundle_json || "{}") || {};
-    } catch {
-      bundle = {};
-    }
+    }>(row.bundle_json || "{}", {});
     return {
       id: row.id,
       jobId: row.job_id,
       sourceId: row.source_id,
       sourceLabel: row.source_label,
       sourceUrl: row.source_url,
-      draft: JSON.parse(row.draft_json),
+      draft: safeParse(row.draft_json, {}),
       selected: Boolean(row.selected),
       recurring: row.recurring,
       recurringCount: row.recurring_count,
       condensed: Boolean(row.condensed),
-      conflicts: JSON.parse(row.conflicts_json || "[]"),
-      duplicates: JSON.parse(row.duplicates_json || "[]"),
-      strongDuplicate: row.strong_dup_json ? JSON.parse(row.strong_dup_json) : null,
-      directoryBrands: JSON.parse(row.brands_json || "[]"),
+      conflicts: safeParse(row.conflicts_json || "[]", []),
+      duplicates: safeParse(row.duplicates_json || "[]", []),
+      strongDuplicate: row.strong_dup_json ? safeParse(row.strong_dup_json, null) : null,
+      directoryBrands: safeParse(row.brands_json || "[]", []),
       sourceBundle: Array.isArray(bundle.sourceBundle) ? bundle.sourceBundle : [],
       fieldConflicts: Array.isArray(bundle.fieldConflicts) ? bundle.fieldConflicts : [],
       memberDrafts: Array.isArray(bundle.memberDrafts) ? bundle.memberDrafts : [],
@@ -816,8 +823,7 @@ export function prunePendingAgainstCatalog(catalog: import("@shared/schema").Eve
   updated: number;
 } {
   ensureTables();
-  // Lazy import avoids circular init with analyze
-  const { applyCatalogCoverage } = require("./analyze") as typeof import("./analyze");
+  // applyCatalogCoverage is a static import (ESM-safe; analyze does not import store).
   const pending = listCandidates({ status: "pending", limit: 500 });
   let pruned = 0;
   let updated = 0;

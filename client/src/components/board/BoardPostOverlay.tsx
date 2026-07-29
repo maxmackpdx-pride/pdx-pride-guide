@@ -1,7 +1,8 @@
-import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 
@@ -24,6 +25,8 @@ type Props = {
 };
 
 export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
+  const [showAuth, setShowAuth] = useState(false);
+
   const giftQuery = useQuery<GiftingPost[]>({
     queryKey: ["/api/gifting"],
     queryFn: async () => {
@@ -64,7 +67,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
         post={post as GiftingPost}
         expanded
         onToggle={() => {}}
-        onRequireAuth={() => {}}
+        onRequireAuth={() => setShowAuth(true)}
         onDeleted={onClose}
       />
     );
@@ -98,28 +101,31 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   } as CSSProperties;
 
   return createPortal(
-    <div className="board-detail-backdrop" onClick={onClose}>
-      <div
-        className="board-post-overlay board-post-overlay--glass"
-        onClick={e => e.stopPropagation()}
-        style={panelStyle}
-      >
-        <button
-          type="button"
-          className="gifting-close"
-          onClick={onClose}
-          aria-label="Close"
-          style={{ position: "absolute", top: 10, right: 10, zIndex: 3 }}
+    <>
+      <div className="board-detail-backdrop" onClick={onClose}>
+        <div
+          className="board-post-overlay board-post-overlay--glass"
+          onClick={e => e.stopPropagation()}
+          style={panelStyle}
         >
-          <X size={18} />
-        </button>
-        {card ?? (
-          <div className="board-listing-card board-listing-card--makeover" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
-            <p className="board-copy-sm">Loading…</p>
-          </div>
-        )}
+          <button
+            type="button"
+            className="gifting-close"
+            onClick={onClose}
+            aria-label="Close"
+            style={{ position: "absolute", top: 10, right: 10, zIndex: 3 }}
+          >
+            <X size={18} />
+          </button>
+          {card ?? (
+            <div className="board-listing-card board-listing-card--makeover" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
+              <p className="board-copy-sm">Loading…</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>,
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+    </>,
     document.body,
   );
 }

@@ -110,6 +110,15 @@ function AppLayout() {
             <Route path="/hausing/new" component={HousingNew} />
             <Route path="/hausing/:id" component={HousingPost} />
             <Route path="/hausing" component={Housing} />
+            <Route path="/housing/new">
+              {() => <Redirect to="/hausing/new" />}
+            </Route>
+            <Route path="/housing/:id">
+              {(params) => <Redirect to={`/hausing/${params.id}`} />}
+            </Route>
+            <Route path="/housing">
+              {() => <Redirect to="/hausing" />}
+            </Route>
             <Route path="/about" component={About} />
             <Route path="/resume" component={Resume} />
             <Route path="/contact" component={Contact} />

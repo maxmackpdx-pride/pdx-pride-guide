@@ -116,7 +116,7 @@ function thumbGradient(isLooking: boolean) {
 
 export default function PrideWork() {
   usePageSeo(
-    "Pride Work: Jobs & Gigs | Zaylist",
+    "Gig Board: Jobs & Gigs | Zaylist",
     "Find gigs and workers for Portland nights. Post or browse the gig board.",
     { image: shareCardUrl("prideWork"), imageAlt: "Gig Board on Zaylist" },
   );
@@ -647,7 +647,7 @@ export default function PrideWork() {
           <div className="board-empty" style={{ borderColor: "#b06bff" }}>
             <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />
             <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
-            <p className="board-copy-sm">{error instanceof Error ? error.message : "The gig board API is unavailable right now."}</p>
+            <p className="board-copy-sm">Could not load posts. Try again in a moment.</p>
             <Button variant="neon" accent="purple" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>
               Try again
             </Button>

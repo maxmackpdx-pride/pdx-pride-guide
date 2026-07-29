@@ -3,6 +3,7 @@ import type { Event } from "@shared/schema";
 import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
 import ScrollReveal from "./ScrollReveal";
+import { formatPacificDateTime } from "@/lib/countdown";
 
 import { DAY_COLORS } from "@shared/eventWeek";
 
@@ -21,10 +22,10 @@ export default function EventBoardCard({
 }: EventBoardCardProps) {
   const dayColor = DAY_COLORS[event.dayOfWeek as keyof typeof DAY_COLORS] || "#19e3ff";
   const time = event.dateStart
-    ? new Date(event.dateStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    ? formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })
     : "";
   const dateLabel = event.dateStart
-    ? new Date(event.dateStart).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })
+    ? formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })
     : "";
   const soldOut = /\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`);
   const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;

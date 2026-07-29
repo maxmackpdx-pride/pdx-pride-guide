@@ -96,26 +96,26 @@ export default function PosterAdCard({
     if (ad.id) trackAdClick(ad.id, "grid");
   };
 
-  return (
-    <a
-      className={`pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
-      href={preview ? undefined : ad.destUrl || "#"}
-      target={!preview && ad.destUrl?.startsWith("http") ? "_blank" : undefined}
-      rel={!preview && ad.destUrl?.startsWith("http") ? "noopener noreferrer" : undefined}
-      style={
-        {
-          ["--ac" as string]: accent,
-          ["--c" as string]: accent,
-          ["--_day" as string]: accent,
-          cursor: preview ? "default" : undefined,
-          ...style,
-        } as CSSProperties
-      }
-      data-testid={ad.id ? `poster-ad-${ad.id}` : "poster-ad-preview"}
-      data-affiliate-brand={brandProp ?? chrome.brand}
-      aria-label={`Affiliate: ${ad.business || ad.title}. ${ad.ctaTitle || ""}`}
-      onClick={onClick}
-    >
+  const dest = !preview && ad.destUrl ? ad.destUrl : undefined;
+  const cardClass = `pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim();
+  const cardStyle = {
+    ["--ac" as string]: accent,
+    ["--c" as string]: accent,
+    ["--_day" as string]: accent,
+    cursor: preview || !dest ? "default" : undefined,
+    ...style,
+  } as CSSProperties;
+  const cardProps = {
+    className: cardClass,
+    style: cardStyle,
+    "data-testid": ad.id ? `poster-ad-${ad.id}` : "poster-ad-preview",
+    "data-affiliate-brand": brandProp ?? chrome.brand,
+    "aria-label": `Affiliate: ${ad.business || ad.title}. ${ad.ctaTitle || ""}`,
+    onClick,
+  } as const;
+
+  const inner = (
+    <>
       <span className="pdx-glass-sheen" aria-hidden="true" />
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
 
@@ -173,6 +173,25 @@ export default function PosterAdCard({
           </span>
         </div>
       </div>
-    </a>
+    </>
+  );
+
+  if (dest) {
+    return (
+      <a
+        {...cardProps}
+        href={dest}
+        target={dest.startsWith("http") ? "_blank" : undefined}
+        rel={dest.startsWith("http") ? "noopener noreferrer" : undefined}
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  return (
+    <div {...cardProps} role="group">
+      {inner}
+    </div>
   );
 }

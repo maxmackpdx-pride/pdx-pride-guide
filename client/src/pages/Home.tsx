@@ -102,7 +102,7 @@ export default function Home() {
               The Community Boards
             </div>
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__all">
-              All Boards →
+              Missed Connections →
             </Link>
           </div>
 
@@ -119,7 +119,7 @@ export default function Home() {
           <div className="home-boards__utility-grid">
             <Link
               href={COMMUNITY_LINKS.hausing.href}
-              className="home-boards__utility home-boards__utility--cyan pdx-glass-card pdx-glass-card--left-accent"
+              className="home-boards__utility home-boards__utility--cyan pdx-glass-card pdx-glass-card--left-accent pdx-glass-rebind"
               style={{ ["--c" as string]: "#00FFFF" }}
               data-testid="home-board-hausing"
             >
@@ -132,7 +132,7 @@ export default function Home() {
             </Link>
             <Link
               href={COMMUNITY_LINKS.spotted.href}
-              className="home-boards__utility home-boards__utility--magenta pdx-glass-card pdx-glass-card--left-accent"
+              className="home-boards__utility home-boards__utility--magenta pdx-glass-card pdx-glass-card--left-accent pdx-glass-rebind"
               style={{ ["--c" as string]: "#FF00CC" }}
               data-testid="home-board-spotted"
             >
@@ -144,7 +144,7 @@ export default function Home() {
             </Link>
             <Link
               href={COMMUNITY_LINKS.gifting.href}
-              className="home-boards__utility home-boards__utility--lime pdx-glass-card pdx-glass-card--left-accent"
+              className="home-boards__utility home-boards__utility--lime pdx-glass-card pdx-glass-card--left-accent pdx-glass-rebind"
               style={{ ["--c" as string]: "#CCFF00" }}
               data-testid="home-board-gifting"
             >
@@ -156,7 +156,7 @@ export default function Home() {
             </Link>
             <Link
               href={COMMUNITY_LINKS.gigs.href}
-              className="home-boards__utility home-boards__utility--purple pdx-glass-card pdx-glass-card--left-accent"
+              className="home-boards__utility home-boards__utility--purple pdx-glass-card pdx-glass-card--left-accent pdx-glass-rebind"
               style={{ ["--c" as string]: "var(--board-gigs)" }}
               data-testid="home-board-gigs"
             >
@@ -171,7 +171,7 @@ export default function Home() {
           <div className="home-boards__foot">
             <Link href={COMMUNITY_LINKS.spotted.href} className="home-boards__post-link">
               <Button as="span" variant="solid" accent="lime" size="lg" arrow>
-                Post to a Board
+                Post a connection
               </Button>
             </Link>
             <span className="home-boards__foot-note">

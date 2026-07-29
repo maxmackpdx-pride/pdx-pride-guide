@@ -32,6 +32,15 @@ function formatTime(value: string): string {
   }).format(new Date(ms)).replace(" ", "").toLowerCase();
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function makeCard(event: EventListing, accent: string, cardW: number, cardH: number): HTMLElement {
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const card = document.createElement("div");
@@ -63,10 +72,10 @@ function makeCard(event: EventListing, accent: string, cardW: number, cardH: num
       ${formatTime(event.dateStart)}${event.dateEnd ? ` – ${formatTime(event.dateEnd)}` : ""}
     </div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:${cardH < 180 ? 26 : 32}px;color:#fff;line-height:1.08;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
-      ${event.title}
+      ${escapeHtml(event.title || "")}
     </div>
     <div style="font-family:'Inter',sans-serif;font-size:16px;color:rgba(255,255,255,0.6);margin-top:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-      ${event.venueName || ""}
+      ${escapeHtml(event.venueName || "")}
     </div>
   `;
   card.appendChild(content);

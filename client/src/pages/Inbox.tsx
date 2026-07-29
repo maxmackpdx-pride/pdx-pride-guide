@@ -14,7 +14,7 @@ function threadFromQuery() {
 }
 
 export default function Inbox() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(threadFromQuery() || null);
@@ -67,6 +67,16 @@ export default function Inbox() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  if (authLoading) {
+    return (
+      <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
+        <div style={{ maxWidth: 520, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
+          <p style={{ color: "#9d9a92", lineHeight: 1.6 }}>Loading inbox…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

@@ -177,7 +177,9 @@ export function InboxShell({
     const body = (text ?? reply).trim();
     if (!body || !activeId) return;
     setReply("");
-    sendMessage(activeId, body).then(scrollMsgs);
+    sendMessage(activeId, body)
+      .then(scrollMsgs)
+      .catch(() => setReply(body));
   };
 
   /* ---- Derived (ported from Inbox.dc.html renderVals) ---- */
