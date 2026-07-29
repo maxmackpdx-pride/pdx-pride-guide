@@ -3700,6 +3700,16 @@ function runBootMigrationsOnce() {
     }
     recordBootMigration("seed_demo_boards_v2");
   }
+  // Re-seed demo missed connections onto real directory brands so Place modal
+  // Missed Connections tabs attach (v2 used freeform "laundromat / MAX" hints).
+  if (!hasBootMigration("seed_demo_boards_mc_venues_v1")) {
+    try {
+      seedDemoBoardsContent();
+    } catch (err) {
+      console.warn("[boot] seed_demo_boards_mc_venues_v1 skipped:", err instanceof Error ? err.message : err);
+    }
+    recordBootMigration("seed_demo_boards_mc_venues_v1");
+  }
   if (!hasBootMigration("verified_event_overrides_v1")) {
     applyVerifiedEventOverrides();
     recordBootMigration("verified_event_overrides_v1");
