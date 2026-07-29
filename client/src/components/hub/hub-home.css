@@ -216,6 +216,110 @@
   align-items: stretch;
 }
 
+/* Mobile drawer: Darkroom still + glitch fills the old “You hold the keys” space */
+.hub-keys--darkroom {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.hub-keys__darkroom-link {
+  display: block;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #000;
+  min-height: 120px;
+  height: clamp(120px, 28vw, 168px);
+  border: 1px solid color-mix(in srgb, var(--c, #ff1fa0) 35%, #101014);
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.hub-keys__darkroom-stage {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+  background: #000;
+}
+
+.hub-keys__darkroom-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hub-keys__darkroom-img--base {
+  z-index: 1;
+}
+
+.hub-keys__darkroom-img--ghost {
+  z-index: 2;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.hub-keys__darkroom-img--a {
+  filter: saturate(2.2) brightness(1.2) hue-rotate(-35deg);
+  animation: hubKeysDarkroomGlitchA 3.2s steps(1) infinite, hubKeysDarkroomSlip 3.2s steps(1) infinite;
+}
+
+.hub-keys__darkroom-img--b {
+  filter: saturate(2.3) brightness(1.2) hue-rotate(45deg);
+  animation: hubKeysDarkroomGlitchB 3.2s steps(1) infinite, hubKeysDarkroomSlip 3.2s steps(1) infinite;
+}
+
+@keyframes hubKeysDarkroomGlitchA {
+  0%, 86%, 100% { opacity: 0; transform: none; }
+  88% { opacity: 0.85; transform: translate(-2px, 1px); }
+  92% { opacity: 0.7; transform: translate(2px, -1px); }
+  96% { opacity: 0; transform: none; }
+}
+
+@keyframes hubKeysDarkroomGlitchB {
+  0%, 86%, 100% { opacity: 0; transform: none; }
+  89% { opacity: 0.85; transform: translate(2px, -1px); }
+  93% { opacity: 0.7; transform: translate(-2px, 1px); }
+  97% { opacity: 0; transform: none; }
+}
+
+@keyframes hubKeysDarkroomSlip {
+  0%, 87%, 100% { clip-path: inset(0 0 0 0); }
+  88% { clip-path: inset(12% 0 55% 0); }
+  90% { clip-path: inset(48% 0 18% 0); }
+  93% { clip-path: inset(0 0 0 0); }
+}
+
+.hub-keys__darkroom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+html.calm-mode .hub-keys__darkroom-img--ghost,
+:root[data-calm="true"] .hub-keys__darkroom-img--ghost {
+  display: none;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-keys__darkroom-img--ghost {
+    display: none;
+    animation: none;
+  }
+}
+
 /* Calm: solid slab, no blur/bloom */
 html.calm-mode .hub-keys,
 :root[data-calm="true"] .hub-keys {

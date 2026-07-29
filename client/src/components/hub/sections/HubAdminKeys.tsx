@@ -1,23 +1,86 @@
+import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import "../hub-home.css";
+
+const DARKROOM_SRC = "/brand/darkroom.jpg";
 
 type Props = {
   pendingCount: number;
   ownerCount?: number;
   isPrimaryOwner?: boolean;
   compact?: boolean;
+  /**
+   * Mobile hub drawer: replace “You hold the keys” copy block with the
+   * Darkroom still + RGB glitch (same asset as /darkroom). Queue actions stay.
+   */
+  darkroomMedia?: boolean;
 };
+
+function DarkroomStage() {
+  return (
+    <div className="hub-keys__darkroom-stage" aria-hidden="true">
+      <img className="hub-keys__darkroom-img hub-keys__darkroom-img--base" src={DARKROOM_SRC} alt="" />
+      <img
+        className="hub-keys__darkroom-img hub-keys__darkroom-img--ghost hub-keys__darkroom-img--a"
+        src={DARKROOM_SRC}
+        alt=""
+      />
+      <img
+        className="hub-keys__darkroom-img hub-keys__darkroom-img--ghost hub-keys__darkroom-img--b"
+        src={DARKROOM_SRC}
+        alt=""
+      />
+    </div>
+  );
+}
 
 export default function HubAdminKeys({
   pendingCount,
   ownerCount = 0,
   isPrimaryOwner = false,
   compact = false,
+  darkroomMedia = false,
 }: Props) {
   const { openSheet } = useInboxSheet();
   const hasAdminWork = pendingCount > 0;
   const hasOwnerWork = isPrimaryOwner && ownerCount > 0;
+
+  if (darkroomMedia) {
+    return (
+      <section
+        className="hub-keys hub-keys--darkroom pdx-glass-rebind"
+        aria-label="Admin access and Darkroom"
+        style={{ ["--c" as string]: "var(--panel-magenta, #ff1fa0)" }}
+      >
+        <Link href="/darkroom" className="hub-keys__darkroom-link" aria-label="Open Darkroom">
+          <DarkroomStage />
+        </Link>
+        <div className="hub-keys__darkroom-actions">
+          <Button
+            accent="pink"
+            variant="solid"
+            size="sm"
+            arrow
+            onClick={() => openSheet({ view: "inbox", account: "admin" })}
+          >
+            {hasAdminWork ? `Admin queue (${pendingCount})` : "Admin queue"}
+          </Button>
+          {isPrimaryOwner && (
+            <Button
+              accent="purple"
+              variant={hasOwnerWork ? "solid" : "ghost"}
+              size="sm"
+              arrow
+              onClick={() => openSheet({ view: "inbox", account: "owner" })}
+            >
+              {hasOwnerWork ? `Owner desk (${ownerCount})` : "Owner desk"}
+            </Button>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   if (compact) {
     return (

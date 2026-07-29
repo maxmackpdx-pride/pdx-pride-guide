@@ -214,6 +214,9 @@
     .hub-v2-side-extra:has(.hub-keys){
       padding:0;border:none;background:transparent;
     }
+    .hub-v2-side-extra--drawer:has(.hub-keys--darkroom){
+      padding:0;border:none;background:transparent;margin-top:12px;
+    }
     .hub-v2-side-extra .hub-keys,
     .hub-v2-side-extra--drawer .hub-keys{
       --c:var(--panel-magenta,#ff1fa0);

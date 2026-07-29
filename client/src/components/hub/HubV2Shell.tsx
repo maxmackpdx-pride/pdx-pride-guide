@@ -85,6 +85,8 @@ export type HubV2ShellProps = {
   onSearchChange?: (value: string) => void;
   /** Extra block at bottom of left rail (e.g. push status on admin tools). */
   sideExtra?: ReactNode;
+  /** Mobile drawer footer slot (defaults to sideExtra). Use for Darkroom media, etc. */
+  sideExtraDrawer?: ReactNode;
   /** Optional top-of-main toolbar (refresh, etc.) - stays inside the same shell. */
   mainToolbar?: ReactNode;
 };
@@ -108,8 +110,10 @@ export default function HubV2Shell({
   rightRail = null,
   calmMode,
   sideExtra,
+  sideExtraDrawer,
   mainToolbar,
 }: HubV2ShellProps) {
+  const drawerExtra = sideExtraDrawer ?? sideExtra;
   const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -341,7 +345,7 @@ export default function HubV2Shell({
       window.removeEventListener("resize", onResize);
       ro?.disconnect();
     };
-  }, [measureDrawerCollapse, drawerMenuMode, isAdmin, sideExtra]);
+  }, [measureDrawerCollapse, drawerMenuMode, isAdmin, sideExtra, drawerExtra]);
 
   // Remeasure after open/close so the collapse clamp matches laid-out sheet height.
   useEffect(() => {
@@ -586,7 +590,9 @@ export default function HubV2Shell({
                   {drawerMenuMode === "admin" ? "Admin" : "Your hub"}
                 </div>
                 {drawerNav}
-                {sideExtra && <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{sideExtra}</div>}
+                {drawerExtra && (
+                  <div className="hub-v2-side-extra hub-v2-side-extra--drawer">{drawerExtra}</div>
+                )}
               </div>
             </div>
           </>,

@@ -2583,6 +2583,7 @@ a.event-host-name.event-host-name--link:hover {
     animation: floating-inbox-halo-pulse 2.6s ease-in-out infinite;
   }
 
+  /* Glass disc: same deep translucent recipe as mobile dock, neon rim keeps FAB colors */
   .floating-inbox__fab {
     position: relative;
     width: 60px;
@@ -2591,32 +2592,51 @@ a.event-host-name.event-host-name--link:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--fab-neon, #FF00CC);
-    color: #000;
-    border: none;
+    background:
+      radial-gradient(120% 100% at 50% 12%, rgba(255, 255, 255, 0.1), transparent 52%),
+      radial-gradient(90% 80% at 50% 100%, rgb(var(--fab-neon-rgb, 26 77 255) / 0.22), transparent 60%),
+      rgba(8, 8, 12, 0.62);
+    color: #f4f7ff;
+    border: 1.5px solid color-mix(in srgb, var(--fab-neon, #1a4dff) 58%, #000);
     cursor: grab;
     touch-action: none;
     z-index: 1;
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
     box-shadow:
-      0 6px 20px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 0 12px rgb(var(--fab-neon-rgb, 255 0 204) / 0.35);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      0 0 0 1px #000,
+      0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 28%, transparent),
+      0 0 18px rgb(var(--fab-neon-rgb, 26 77 255) / 0.55),
+      0 0 36px rgb(var(--fab-neon-rgb, 26 77 255) / 0.28),
+      0 8px 22px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.35);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
   }
 
   .floating-inbox--attention .floating-inbox__fab {
+    border-color: color-mix(in srgb, var(--fab-neon, #1a4dff) 75%, #fff);
     box-shadow:
-      0 6px 20px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 0 22px rgb(var(--fab-neon-rgb, 255 0 204) / 0.65);
+      0 0 0 1px #000,
+      0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 42%, transparent),
+      0 0 26px rgb(var(--fab-neon-rgb, 26 77 255) / 0.72),
+      0 0 48px rgb(var(--fab-neon-rgb, 26 77 255) / 0.38),
+      0 8px 22px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.45);
   }
 
   .floating-inbox__fab:hover {
     transform: translateY(-2px) scale(1.04);
+    border-color: color-mix(in srgb, var(--fab-neon, #1a4dff) 72%, #fff);
     box-shadow:
-      0 10px 26px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(255, 255, 255, 0.14),
-      0 0 28px rgb(var(--fab-neon-rgb, 255 0 204) / 0.72);
+      0 0 0 1px #000,
+      0 0 0 2px color-mix(in srgb, var(--fab-neon, #1a4dff) 48%, transparent),
+      0 0 32px rgb(var(--fab-neon-rgb, 26 77 255) / 0.78),
+      0 0 52px rgb(var(--fab-neon-rgb, 26 77 255) / 0.4),
+      0 12px 28px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -10px 18px -12px rgb(var(--fab-neon-rgb, 26 77 255) / 0.4);
   }
 
   .floating-inbox__fab--dragging,
@@ -2627,9 +2647,22 @@ a.event-host-name.event-host-name--link:hover {
   }
 
   .floating-inbox__fab--open {
-    background: var(--surface-card, #1a1a1a);
+    background:
+      radial-gradient(120% 100% at 50% 12%, rgba(255, 255, 255, 0.08), transparent 52%),
+      rgba(18, 18, 22, 0.82);
     color: var(--text-primary, #fff);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-primary, #333);
+    border-color: color-mix(in srgb, var(--fab-neon, #1a4dff) 35%, #333);
+    box-shadow:
+      0 0 0 1px #000,
+      0 6px 20px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  html.calm-mode .floating-inbox__fab,
+  :root[data-calm="true"] .floating-inbox__fab {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(10, 10, 14, 0.92);
   }
 
   /* Keep the close FAB above the inbox sheet so panel chrome cannot steal

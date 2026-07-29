@@ -333,6 +333,16 @@ export default function HubV2({
     />
   ) : null;
 
+  /** Mobile lower drawer: Darkroom glitch still in the old “You hold the keys” slot. */
+  const keysExtraDrawer = isAdmin ? (
+    <HubAdminKeys
+      pendingCount={pendingCount}
+      ownerCount={ownerCount}
+      isPrimaryOwner={isPrimaryOwner}
+      darkroomMedia
+    />
+  ) : null;
+
   return (
     <HubV2Shell
       section={section}
@@ -349,6 +359,7 @@ export default function HubV2({
       searchValue={searchQ}
       onSearchChange={setSearchQ}
       sideExtra={keysExtra}
+      sideExtraDrawer={keysExtraDrawer}
       rightRail={
         <HubRightRail
           upcoming={upcoming}
