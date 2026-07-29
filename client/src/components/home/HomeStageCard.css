@@ -3,7 +3,8 @@
 .home-stage-card {
   position: relative;
   flex: 0 0 auto;
-  width: clamp(232px, 31vw, 368px);
+  /* Slightly firmer width so the card holds weight next to centered copy */
+  width: clamp(248px, 28vw, 360px);
   max-height: 100%;
   border-radius: var(--glass-card-radius, 14px);
   padding: clamp(13px, 2vh, 18px);
