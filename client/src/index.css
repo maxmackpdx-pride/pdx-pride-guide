@@ -784,6 +784,20 @@ body::before {
   box-shadow: 0 0 8px rgba(0,255,255,0.45);
 }
 
+/* Darkroom: red hover + red selected (no cyan underline) */
+.site-nav-link.site-nav-link--darkroom:hover {
+  color: #ff1f1f;
+}
+
+.site-nav-link.site-nav-link--darkroom.active {
+  color: #ff1f1f;
+}
+
+.site-nav-link.site-nav-link--darkroom.active::after {
+  background: #ff1f1f;
+  box-shadow: 0 0 10px rgba(255, 31, 31, 0.55);
+}
+
 .site-nav-dropdown {
   position: relative;
   flex: 0 0 auto;

@@ -40,10 +40,11 @@ function NavLink({
   notifyLabel?: string;
   onClick?: () => void;
 }) {
+  const isDarkroom = href === "/darkroom" || href.startsWith("/darkroom?");
   return (
     <Link
       href={href}
-      className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}`}
+      className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}${isDarkroom ? " site-nav-link--darkroom" : ""}`}
       onClick={onClick}
       aria-label={notifyLabel}
     >
