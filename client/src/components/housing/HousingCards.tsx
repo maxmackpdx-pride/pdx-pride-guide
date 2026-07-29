@@ -159,7 +159,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
-      <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.62}>
+      <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.48}>
         <HousingCluster
           people={[self, ...people]}
           pets={pets}
@@ -205,7 +205,7 @@ export function OfferingCard({ post, h }: { post: HousingPostView; h: HousingCar
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.OFFERING} />
-      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.62}>
+      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.48}>
         <HousingCluster
           people={people}
           pets={pets}
@@ -335,7 +335,7 @@ export function ManagedCard({
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.MANAGED} />
-      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.62}>
+      <HousingWell photos={post.photos} title={post.displayName} nameCap={0.48}>
         <PropertyManagerBadge>
           <HousingIcon name="verified" size={13} />
           Property manager

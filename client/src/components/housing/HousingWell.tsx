@@ -25,21 +25,24 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { HAUS_SUFFIX } from "@shared/housing";
 
-/** The share of the photo height the title block may claim on a 390px card. */
-const BASE_HEIGHT_SHARE = 0.62;
+/**
+ * Share of photo height the title may claim on a ~390px-wide half card.
+ * Was 0.62 — that made short names (ROWAN, ROSE CITY FLATS) billboard the whole
+ * well after the well dropped to 200px. Keep it a left motif, not a full cover.
+ */
+const BASE_HEIGHT_SHARE = 0.4;
+/** Wide short Forming wells need more of the vertical budget so type stays legible. */
+const WIDE_HEIGHT_SHARE = 0.62;
+/** Hard cap: title block must leave photo visible under/around it. */
+const HALF_MAX_BLOCK_SHARE = 0.48;
+const WIDE_MAX_BLOCK_SHARE = 0.7;
 /** Breathing room between the title block and the caption row, in px. */
 const CAPTION_GAP = 22;
 /**
- * Horizontal stretch on the name block.
- *
- * The height budget is what actually binds the motif, so the only way to give
- * the title more presence without making it taller or moving it is to widen the
- * glyphs. This is a deliberate departure from the "scale, never stretch" rule in
- * TITLE_MOTIF.md, kept small and in one place so it stays a decision rather than
- * a drift. Height and position are untouched; only the width changes, and the
- * per-surface width cap still wins.
+ * Slight horizontal stretch on the name block only (height basis stays `nameW`).
+ * Kept small so short names do not look inflated.
  */
-const WIDTH_STRETCH = 1.09;
+const WIDTH_STRETCH = 1.04;
 /** The SVG design box every line is drawn in. */
 const GLYPH_BOX = 108;
 const GLYPH_BASELINE = 86;
@@ -125,7 +128,7 @@ export type HousingWellProps = {
   children?: ReactNode;
   /**
    * Share of the well width the block may span.
-   * Cards use 0.62, the full-width Forming card uses 0.8, detail heads use 0.35.
+   * Half cards use ~0.48, Forming full-width ~0.8, detail heads 0.35.
    */
   nameCap?: number;
   /** Shown when a post has no photos yet. */
@@ -137,7 +140,7 @@ export function HousingWell({
   photos = [],
   title,
   children,
-  nameCap = 0.62,
+  nameCap = 0.48,
   fallbackPhoto,
   className,
 }: HousingWellProps) {
@@ -185,24 +188,32 @@ export function HousingWell({
   const sumRatios = ratios.reduce((a, b) => a + b, 0) || 1;
 
   /**
-   * Scale with card width, not content: the block claims a fixed share of the
-   * photo height, so a wide Forming card gets proportionally bigger type while
-   * every card in a column stays consistent. A long name gets NARROWER, never
-   * taller, and can never sit under the caption row.
+   * Size from the well, not the string: claim a share of photo height, cap by
+   * width (`nameCap`), long names get narrower never taller. Wide short Forming
+   * wells use a higher height share so the motif does not go tiny on a banner.
    */
   let nameW = 0;
   let blockW = 0;
   if (box && lines.length) {
-    const share = BASE_HEIGHT_SHARE * Math.min(1.26, Math.max(1, box.w / 390));
+    const isWideBanner = box.w / Math.max(box.h, 1) >= 2.8;
+    const baseShare = isWideBanner ? WIDE_HEIGHT_SHARE : BASE_HEIGHT_SHARE;
+    // Mild scale with width; half cards stay near 1.0 so ~580px wells do not inflate type.
+    const widthScale = isWideBanner
+      ? Math.min(1.2, Math.max(1, box.w / 700))
+      : Math.min(1.06, Math.max(0.95, box.w / 520));
+    const share = baseShare * widthScale;
+    const maxBlockShare = isWideBanner ? WIDE_MAX_BLOCK_SHARE : HALF_MAX_BLOCK_SHARE;
     const structural = box.h - box.captionH - CAPTION_GAP;
-    const heightBudget = Math.max(40, Math.min(box.h * share, structural));
+    const heightBudget = Math.max(
+      36,
+      Math.min(box.h * share, box.h * maxBlockShare, structural),
+    );
     const widthCap = box.w * nameCap;
     nameW = Math.min(widthCap, heightBudget / sumRatios);
-    // Never let the floor defeat the width cap: an overflowing motif is worse
-    // than a small one.
-    nameW = Math.max(Math.min(60, widthCap), nameW);
-    // `nameW` stays the HEIGHT basis so the block keeps its height and its
-    // position. Only the rendered width is stretched, and the cap still wins.
+    // Floor keeps tiny names readable; never beat the width cap or height budget.
+    nameW = Math.max(Math.min(48, widthCap), nameW);
+    nameW = Math.min(nameW, heightBudget / sumRatios, widthCap);
+    // `nameW` stays the HEIGHT basis; only rendered width is stretched slightly.
     blockW = Math.min(nameW * WIDTH_STRETCH, widthCap);
   }
 
