@@ -13,22 +13,33 @@
 }
 
 .darkroom {
+  /* Stay in the content column under the sticky site header — never a
+     full-viewport layer that can paint over the desktop top nav. */
   position: relative;
+  z-index: 0;
+  isolation: isolate;
   width: 100%;
-  min-height: calc(100dvh - var(--site-header-height, 96px));
+  height: calc(100dvh - var(--site-header-height, 120px));
+  min-height: calc(100dvh - var(--site-header-height, 120px));
+  max-height: calc(100dvh - var(--site-header-height, 120px));
   margin: 0;
   padding: 0;
   background: #000;
   overflow: hidden;
+  /* Contain mix-blend / filter glitch layers so they cannot composite over the header */
+  contain: layout paint style;
 }
 
-/* Cover the content column edge-to-edge under the nav */
+/* Fill the content column only (edge-to-edge under the nav, not over it) */
 .darkroom__stage {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  isolation: isolate;
   width: 100%;
   height: 100%;
   background: #000;
+  overflow: hidden;
 }
 
 .darkroom__img {
@@ -36,7 +47,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain keeps the full ZAY DARKROOM mark scaled inside the stage
+     (cover was cropping / over-scaling the wordmark into the nav zone) */
+  object-fit: contain;
   object-position: center;
   display: block;
   pointer-events: none;
@@ -49,6 +62,7 @@
 
 .darkroom__img--ghost {
   z-index: 2;
+  /* Blend only within the isolated stage, not against the sticky header */
   mix-blend-mode: screen;
   opacity: 0;
 }

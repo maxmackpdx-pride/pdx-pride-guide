@@ -188,7 +188,10 @@ body::before {
   box-shadow: 0 8px 30px rgba(0,0,0,0.65);
   position: sticky;
   top: 0;
-  z-index: 100;
+  /* Above app-shell > main (z-index: 2) and full-bleed pages like Darkroom
+     whose mix-blend/filter layers otherwise composite over the hub nav. */
+  z-index: 400;
+  isolation: isolate;
   overflow: visible;
 }
 
@@ -2150,7 +2153,8 @@ a.event-host-name.event-host-name--link:hover {
   .site-header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 400;
+    isolation: isolate;
     background: var(--hub-ink);
     border-bottom: 1px solid var(--hub-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
