@@ -106,13 +106,18 @@
   color: #fff;
 }
 
-/* Trim large transparent padding on brand wordmark art */
+/*
+ * Full rainbow wordmark under the H1 (brand kit: zaylist-wordmark-color.png).
+ * Do not cap max-height to a few rem — that crushed the mark into a postage stamp.
+ * Asset is ~2.84:1 with good ink fill (unlike the square neon canvas).
+ */
 .directory-hero__wordmark {
   display: block;
-  margin-top: 0.22em;
-  width: min(100%, 560px);
+  margin-top: 0.18em;
+  width: min(100%, 42rem);
+  max-width: min(100%, 720px);
   height: auto;
-  max-height: clamp(2.4rem, 7vw, 4.8rem);
+  max-height: none;
   object-fit: contain;
   object-position: left center;
 }
