@@ -51,12 +51,24 @@ export default function Home() {
     <div className="home-main-stage">
       <HomeConstructionNudge />
       <HomeStage />
+
+      {/* The animated rainbow seam, same one that runs under the top nav. It
+          bookends the stat strip; both bars were dropped when the stage landed. */}
+      <div
+        className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
+        aria-hidden="true"
+      />
+
       <HomeStatStrip
         eventCount={eventCount}
         placesCount={placesCount}
         goingCount={goingCount}
       />
 
+      <div
+        className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
+        aria-hidden="true"
+      />
     </div>
   );
 }

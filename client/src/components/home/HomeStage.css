@@ -290,7 +290,8 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(26px, 5vh, 56px) clamp(16px, 3vw, 28px) 0;
+  /* Was clamp(26px, 5vh, 56px) top. The hero reads as mostly empty otherwise. */
+  padding: clamp(8px, 1.6vh, 18px) clamp(16px, 3vw, 28px) 0;
   text-align: center;
   animation: zlHeroIn 0.48s var(--ease-out, ease) both;
 }
@@ -320,7 +321,11 @@
 .home-stage__wordmark {
   position: relative;
   width: min(1310px, 99%);
-  margin: clamp(6px, 1.4vh, 14px) auto clamp(12px, 2.4vh, 20px);
+  /*
+   * The top margin has to clear the script line, which is pulled above this box
+   * by the rule below, or it lands on top of the "Portland - all year" kicker.
+   */
+  margin: clamp(42px, 7vh, 78px) auto clamp(12px, 2.4vh, 20px);
   animation: zlFloat 7s ease-in-out infinite;
 }
 
@@ -328,7 +333,12 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(26% - 3px);
+  /*
+   * Sits just above the letter tops. The old 26% was measured against the
+   * untrimmed PNG, whose ink only began at 33% of the box; against the trimmed
+   * art the box IS the ink, so the line moves above it.
+   */
+  top: -16%;
   z-index: 5;
   font-family: "Caveat", cursive;
   font-weight: 600;
@@ -342,7 +352,13 @@
 
 .home-stage__wordmark-img {
   width: 100%;
-  max-height: 50vh;
+  /*
+   * The 50vh cap plus object-fit: contain used to letterbox the art inside its
+   * own box, so the visible logo was about half the width it had room for. The
+   * trimmed asset is 3.48:1, short enough that the cap is no longer the thing
+   * deciding its size.
+   */
+  max-height: 34vh;
   height: auto;
   object-fit: contain;
   display: block;
@@ -1783,11 +1799,38 @@
   padding: 0;
 }
 
+/*
+ * Glow. They were a flat 42% grey chevron on a dark wallpaper and read as
+ * decoration rather than a control.
+ */
+.home-stage__nav {
+  color: rgba(230, 226, 217, 0.9);
+  opacity: 1;
+  background: radial-gradient(circle, rgba(6, 8, 14, 0.72), rgba(6, 8, 14, 0.24) 70%, transparent);
+  filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.55)) drop-shadow(0 0 14px rgba(0, 255, 255, 0.3));
+}
+
 .home-stage__nav:hover,
 .home-stage__nav:focus-visible {
   color: var(--neon-cyan, #00ffff);
   opacity: 1;
   outline: none;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.85)) drop-shadow(0 0 20px rgba(0, 255, 255, 0.45));
+}
+
+/*
+ * On the hero there is no plate to centre against, so vertically centred put
+ * them straight through the middle of the wordmark. Drop them just below it.
+ */
+.home-stage[data-slide="0"] .home-stage__nav {
+  /*
+   * Just under the logo, about 38px clear of it. The offset has to track the
+   * logo's own height, which scales with viewport width (the wordmark is
+   * min(1310px, 99%) wide at a fixed 3.48:1), so a flat offset from centre sits
+   * right on one breakpoint and through the letters on another. Fitted to land
+   * ~38px below the art at both 440px and 1440px wide.
+   */
+  top: calc(50% + clamp(137px, calc(9.9vw + 93px), 255px));
 }
 
 .home-stage__nav--prev {

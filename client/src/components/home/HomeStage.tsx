@@ -29,7 +29,10 @@ export type { HomeStageBoardKey, HomeStageCardData, HomeStageSamples };
 export { useHomeStageSamples, HomeStageCard };
 
 const SLIDE_COUNT = 8;
-const WORDMARK = "/home/zaylist-wordmark-filled.png";
+// Trimmed of its transparent padding: the shipped PNG is 66% empty box, which
+// left the hero looking mostly blank and shrank the visible logo under
+// object-fit: contain. Same art, 3538x1018 instead of 3750x2800.
+const WORDMARK = "/home/zaylist-wordmark-filled-trim.webp";
 const WORDMARK_WHITE = "/brand/kit/wordmark/zaylist-wordmark-white.png";
 const HERO_VIDEO = "/home/hero-loop.mp4";
 
@@ -281,6 +284,9 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback }:
       className="home-stage"
       data-zl-stage=""
       data-home-stage=""
+      /* Lets CSS move the arrows under the logo on the hero, where there is no
+         plate to centre them against. */
+      data-slide={index}
       id="top"
       aria-roledescription="carousel"
       aria-label="Zaylist home stage"
