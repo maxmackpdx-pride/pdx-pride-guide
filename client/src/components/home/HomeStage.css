@@ -1715,9 +1715,9 @@ html.calm-mode .home-stage__wordmark {
 /* Claude Design handoff, 2026-07-30.
  * One stable 1180px field plate: copy and production-derived utility cards
  * occupy fixed columns instead of resizing the whole composition per slide. */
-@media (min-width: 1100px) {
+@media (min-width: 821px) {
   .home-stage {
-    height: clamp(640px, calc(100svh - 180px), 790px);
+    height: clamp(720px, calc(100svh - 82px), 790px);
   }
 
   .home-stage__board {
