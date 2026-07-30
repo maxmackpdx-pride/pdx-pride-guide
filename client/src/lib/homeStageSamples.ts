@@ -25,6 +25,7 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 import { eventsUpNext, dayColorVar } from "@/lib/homeEvents";
 import { listingPosterUrl, formatListingWhen } from "@/lib/dsEvent";
 import { timeAgo } from "@/lib/boardFeed";
+import type { AttendanceSummaryMap } from "@/components/profile/mapAttendancePreviewToChips";
 
 export type HomeStageBoardKey = "events" | "housing" | "gifting" | "gigs" | "spotted";
 
@@ -48,7 +49,7 @@ export type HomeStageCardData = {
 
 export type HomeStageSamples = Partial<Record<HomeStageBoardKey, HomeStageCardData>>;
 
-type GiftingRow = {
+export type GiftingRow = {
   id: number;
   postType: "GIFT" | "ISO" | string;
   title: string;
@@ -60,7 +61,7 @@ type GiftingRow = {
   interestCount?: number;
 };
 
-type GigRow = {
+export type GigRow = {
   id: number;
   postType: "LOOKING_FOR_WORK" | "POSTING_GIG" | string;
   title: string;
@@ -72,7 +73,7 @@ type GigRow = {
   imageUrl?: string | null;
 };
 
-type SpottedRow = {
+export type SpottedRow = {
   id: number;
   title: string;
   body: string;
@@ -281,7 +282,7 @@ export function buildHomeStageSamples(input: {
   gifting?: GiftingRow[];
   gigs?: GigRow[];
   spotted?: SpottedRow[];
-  attendanceSummaries?: Record<string, { count?: number }>;
+  attendanceSummaries?: AttendanceSummaryMap;
   nowMs?: number;
 }): HomeStageSamples {
   const out: HomeStageSamples = {};
@@ -396,9 +397,11 @@ export function useHomeStageSamples(opts?: { includeDemoFallback?: boolean }) {
   });
 
   const { data: housing } = useQuery<HousingBoardResponse>({
-    queryKey: ["/api/housing", "home-stage"],
+    queryKey: ["/api/housing", "home-stage-forming"],
     queryFn: async () => {
-      const r = await fetch("/api/housing?limit=1", { credentials: "include" });
+      // This slide is about building a household, not browsing managed units.
+      // Ask the board for a real FORMING post so the utility card matches the story.
+      const r = await fetch("/api/housing?type=FORMING&limit=1", { credentials: "include" });
       if (!r.ok) return { posts: [], stats: { activePosts: 0, formingHouses: 0, roomsOpen: 0 } };
       return r.json();
     },
@@ -435,7 +438,7 @@ export function useHomeStageSamples(opts?: { includeDemoFallback?: boolean }) {
     staleTime: 60_000,
   });
 
-  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count?: number }>>({
+  const { data: attendanceSummaries = {} } = useQuery<AttendanceSummaryMap>({
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: () =>
       apiRequest("GET", "/api/events/attendance-summaries").then((r) => r.json()),
@@ -460,7 +463,25 @@ export function useHomeStageSamples(opts?: { includeDemoFallback?: boolean }) {
     [includeDemo, live],
   );
 
-  return { samples, live, events };
+  const stageLists = useMemo(() => {
+    const activeGigs = gigs.filter(isActiveGig);
+    const leadGig = activeGigs[0];
+    const contrastingGig = leadGig
+      ? activeGigs.find((gig) =>
+          gig.id !== leadGig.id &&
+          gig.postType !== leadGig.postType &&
+          gig.title.trim().toLowerCase() !== "anything",
+        )
+      : undefined;
+
+    return {
+      gifting: gifting.filter(isActiveGifting).slice(0, 2).map(mapGiftingSample),
+      gigs: [leadGig, contrastingGig].filter((gig): gig is GigRow => Boolean(gig)).map(mapGigSample),
+      spotted: spotted.slice(0, 1).map(mapSpottedSample),
+    };
+  }, [gifting, gigs, spotted]);
+
+  return { samples, live, events, attendanceSummaries, stageLists };
 }
 
 /** Shared slug helper if a future /board/:id/:slug route lands. */
