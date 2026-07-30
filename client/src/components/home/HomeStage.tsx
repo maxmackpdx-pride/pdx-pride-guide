@@ -14,8 +14,9 @@ import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
 import HomeBeachWidget from "@/components/HomeBeachWidget";
-import HomeUpNext from "@/components/HomeUpNext";
-import { eventsUpNext } from "@/lib/homeEvents";
+import { eventsUpNext, formatUpNextWhen } from "@/lib/homeEvents";
+import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import type { EventListing } from "@shared/multiDayEvents";
 import {
   useHomeStageSamples,
   type HomeStageBoardKey,
@@ -73,6 +74,42 @@ function StageTitle({ title, accentSuffix }: { title: string; accentSuffix?: str
         </span>
       ))}
     </h2>
+  );
+}
+
+/** Design-canvas Events utility: 2×2 flyer cards with day-color rail (no RSVP chrome). */
+function EventsFlyerGrid({ events }: { events: EventListing[] }) {
+  return (
+    <div className="home-stage__events-flyers" aria-label="This week's events">
+      {events.slice(0, 4).map((event) => {
+        const poster = listingPosterUrl(event);
+        const day = listingDay(event).toLowerCase();
+        const dayColor = `var(--day-${day}, #ccff00)`;
+        const locationLine =
+          [event.venueName, event.neighborhood].filter(Boolean).join(" · ") || "Portland";
+        return (
+          <Link
+            key={event.id}
+            href={`/events/${event.id}`}
+            className="home-stage__events-flyer"
+            style={{ ["--ev-day" as string]: dayColor }}
+          >
+            <div className="home-stage__events-flyer-media">
+              {poster ? (
+                <img src={poster} alt="" loading="lazy" decoding="async" />
+              ) : (
+                <div className="home-stage__events-flyer-empty" aria-hidden />
+              )}
+            </div>
+            <div className="home-stage__events-flyer-meta">
+              <div className="home-stage__events-flyer-when">{formatUpNextWhen(event)}</div>
+              <div className="home-stage__events-flyer-title">{event.title}</div>
+              <div className="home-stage__events-flyer-venue">{locationLine}</div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 
@@ -354,10 +391,33 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback }:
                   <p className="home-stage__lede home-stage__lede--events">
                     Here&apos;s the week. Every queer party, show, and march on one map.
                   </p>
+                  <div className="home-stage__chip-row home-stage__chip-row--events">
+                    <Link
+                      href="/events"
+                      className="home-stage__chip home-stage__chip--plate"
+                      style={{ ["--c" as string]: "#CCFF00" }}
+                    >
+                      Find it
+                    </Link>
+                    <Link
+                      href="/events"
+                      className="home-stage__chip home-stage__chip--plate"
+                      style={{ ["--c" as string]: "#CCFF00" }}
+                    >
+                      Save it
+                    </Link>
+                    <Link
+                      href="/events"
+                      className="home-stage__chip home-stage__chip--plate"
+                      style={{ ["--c" as string]: "#CCFF00" }}
+                    >
+                      Pull up
+                    </Link>
+                  </div>
                 </div>
                 {upNextEvents.length ? (
                   <div className="home-stage__event-grid">
-                    <HomeUpNext events={upNextEvents} posterBackdrop />
+                    <EventsFlyerGrid events={upNextEvents} />
                   </div>
                 ) : card("events")}
               </div>
