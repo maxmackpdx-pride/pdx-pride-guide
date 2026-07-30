@@ -2037,8 +2037,19 @@ html.calm-mode .home-stage__wordmark {
 }
 
 @media (max-width: 679px) {
+  /*
+   * Phones have no card column (it is display:none), so the copy is all there
+   * is: about 455px on the tallest slide. A viewport-height stage left the
+   * plate at ~820px, and because the board row is a growing flex item every
+   * one of those spare pixels piled into a single gap between the chips and
+   * the CTA. Size the stage to what the copy actually needs, and stop the row
+   * growing so whatever slack is left centres instead of pooling.
+   *
+   * Slides are position:absolute, so the stage cannot simply be height:auto,
+   * hence a measured clamp rather than intrinsic sizing.
+   */
   .home-stage {
-    height: clamp(660px, calc(100svh - 92px), 820px);
+    height: clamp(500px, calc(100svh - 420px), 540px);
   }
 
   .home-stage__board {
@@ -2049,10 +2060,48 @@ html.calm-mode .home-stage__wordmark {
     height: 100%;
     min-height: 0;
     border-radius: 18px;
+    /* Bottom strip the slide indicator is pinned into. */
+    padding-bottom: 30px;
   }
 
   .home-stage__board-row {
-    margin-top: 28px;
+    margin-top: 18px;
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+
+  /*
+   * The slide indicator. In the copy column it floated mid plate; on a phone it
+   * belongs in the plate's bottom left corner, out of the reading order. The
+   * board body is the positioned ancestor, the copy column is static.
+   */
+  /*
+   * Slide indicator, moved to the plate's bottom left corner.
+   *
+   * It cannot simply be absolutely positioned where it lives, on
+   * .home-stage__board-copy: that element keeps a residual transform from its
+   * slide transition (matrix(1,0,0,1,0.17,0)), and any transform makes it the
+   * containing block, so "bottom" resolves to the bottom of the copy column
+   * rather than the plate. Hanging it off the CTA row instead, which is the
+   * plate's last child and is already position:relative, puts it where it
+   * belongs on every slide regardless of how tall the copy runs.
+   */
+  .home-stage__board-copy::after {
+    display: none;
+  }
+
+  .home-stage__close::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -21px;
+    width: 142px;
+    height: 7px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(90deg, rgba(150, 150, 158, 0.42) 0 16px, transparent 16px 23px);
+    box-shadow: 92px 0 0 -1px var(--stage-accent, #ccff00);
+    opacity: 0.8;
+    pointer-events: none;
   }
 
   .home-stage__board-title {
