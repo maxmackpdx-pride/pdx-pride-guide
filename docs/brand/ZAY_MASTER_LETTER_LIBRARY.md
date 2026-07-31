@@ -10,6 +10,15 @@ constructed from these glyphs, at these proportions, without alteration. When
 building or regenerating the hero wordmark or any ZAY lockup, this file — not an
 approximation — is the reference.
 
+## Scope — NOT a font
+
+> **This is a special-title glyph set, not a typeface.** It does **not** replace
+> any font anywhere. Use it **only** to hand-build ZAY-branded titles and
+> lockups (e.g. `ZAYLIST`, `HAÜS`, `HAÜSING`, product/section wordmarks).
+> All body copy, UI text, buttons, labels, and running text keep the site's
+> normal fonts (Barlow Condensed / display + body stacks). Never set paragraphs,
+> nav, or interface text in these glyphs, and never map these to a `@font-face`.
+
 ## Locked prime ZAY
 
 - The wordmark is **ZAYLIST™** (all caps, trademark where a ™ is used).
