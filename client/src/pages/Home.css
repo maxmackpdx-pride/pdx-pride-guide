@@ -746,9 +746,9 @@ html.calm-mode .home-hero__orb {
   }
 
   .home-hero__wordmark-wrap {
-    /* Drop the mark onto the video's mandala center (~54%) so they read as one
-       and the upper dead space closes up */
-    top: 48%;
+    /* Sit the mark a touch above optical center so it clears the CTA stack
+       below and doesn't drift into the lower half of the panel */
+    top: 42%;
     /* Art fills ~95-100% of the canvas, so keep a margin or it clips the edges */
     width: min(94vw, 936px);
     max-height: 80%;
