@@ -754,9 +754,20 @@ html.calm-mode .home-hero__orb {
     max-height: 80%;
   }
 
-  /* Pull the CTAs up closer to the mark — less empty band below */
+  /* Three CTAs no longer fit on one mobile row — stack them into one tidy
+     column instead of an awkward 2+1 wrap, and lift the anchor so the taller
+     stack clears both the wordmark above and the stats seam below. */
   .home-hero__cta {
-    bottom: max(14%, env(safe-area-inset-bottom, 0px) + 11%);
+    bottom: max(16%, env(safe-area-inset-bottom, 0px) + 13%);
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 9px;
+    width: min(88vw, 340px);
+    max-width: min(88vw, 340px);
+  }
+
+  .home-hero__cta .home-hero__btn {
+    width: 100%;
   }
 
   .home-hero__title {
