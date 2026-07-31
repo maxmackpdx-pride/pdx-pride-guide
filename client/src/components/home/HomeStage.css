@@ -195,8 +195,15 @@
 .home-stage__slide--hero {
   overflow-y: auto;
   overflow-x: hidden;
-  align-items: center;
-  padding: clamp(14px, 2.6vh, 30px) 0 clamp(20px, 4vh, 40px);
+  /*
+   * Stretch, not centre. Centring a 265px-tall block inside a 536px stage put
+   * the whole composition in a clump with a void above and below it. The inner
+   * now owns the full height and places the kicker and the logo itself.
+   * Symmetric padding keeps the inner's midpoint on the stage's midpoint, which
+   * is what the nav-arrow offset below is measured from.
+   */
+  align-items: stretch;
+  padding: clamp(14px, 2.6vh, 30px) 0;
   scrollbar-width: thin;
   scrollbar-color: #2b2b2b transparent;
 }
@@ -290,14 +297,27 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  /* Was clamp(26px, 5vh, 56px) top. The hero reads as mostly empty otherwise. */
-  padding: clamp(8px, 1.6vh, 18px) clamp(16px, 3vw, 28px) 0;
+  padding: 0 clamp(16px, 3vw, 28px);
   text-align: center;
   animation: zlHeroIn 0.48s var(--ease-out, ease) both;
+  /* Only the wordmark is in flow, so it centres on the stage midpoint. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .home-stage__kicker {
-  display: inline-flex;
+  /*
+   * Out of flow, sat near the top of the stage as an eyebrow. In flow it rode
+   * along with the logo and left a 128px dead band above the whole group.
+   */
+  position: absolute;
+  top: clamp(18px, 3.4vh, 40px);
+  left: clamp(16px, 3vw, 28px);
+  right: clamp(16px, 3vw, 28px);
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 9px;
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -305,7 +325,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #ccff00;
-  margin: clamp(10px, 2vh, 20px) auto clamp(10px, 2vh, 18px);
+  margin: 0;
 }
 
 .home-stage__dot {
@@ -320,12 +340,8 @@
 
 .home-stage__wordmark {
   position: relative;
-  width: min(1310px, 99%);
-  /*
-   * The top margin has to clear the script line, which is pulled above this box
-   * by the rule below, or it lands on top of the "Portland - all year" kicker.
-   */
-  margin: clamp(42px, 7vh, 78px) auto clamp(12px, 2.4vh, 20px);
+  width: min(1310px, 100%);
+  margin: 0 auto;
   animation: zlFloat 7s ease-in-out infinite;
 }
 
@@ -334,11 +350,14 @@
   left: 0;
   right: 0;
   /*
-   * Sits just above the letter tops. The old 26% was measured against the
-   * untrimmed PNG, whose ink only began at 33% of the box; against the trimmed
-   * art the box IS the ink, so the line moves above it.
+   * Anchored to the art's top edge, not offset by a percentage of it. A
+   * percentage resolves against the wordmark's height, and the script's own
+   * text box is taller than that offset at every width, so it always landed
+   * inside the letters. Trimming the art made that worse: the box edge is now
+   * the ink edge. bottom: 100% clears the letters whatever the logo scales to.
    */
-  top: -16%;
+  top: auto;
+  bottom: calc(100% + clamp(8px, 1.5vh, 18px));
   z-index: 5;
   font-family: "Caveat", cursive;
   font-weight: 600;
@@ -1824,13 +1843,13 @@
  */
 .home-stage[data-slide="0"] .home-stage__nav {
   /*
-   * Just under the logo, about 38px clear of it. The offset has to track the
-   * logo's own height, which scales with viewport width (the wordmark is
-   * min(1310px, 99%) wide at a fixed 3.48:1), so a flat offset from centre sits
-   * right on one breakpoint and through the letters on another. Fitted to land
-   * ~38px below the art at both 440px and 1440px wide.
+   * Just under the logo, about 30 to 38px clear of it. The offset has to track
+   * the logo's own height, which scales with viewport width (the wordmark is
+   * min(1310px, 100%) wide at a fixed 3.48:1), so a flat offset from centre
+   * sits right on one breakpoint and through the letters on another. Refitted
+   * after the logo moved onto the stage midpoint; measured 390 to 1440.
    */
-  top: calc(50% + clamp(137px, calc(9.9vw + 93px), 255px));
+  top: calc(50% + clamp(79px, calc(12.8vw + 29px), 186px));
 }
 
 .home-stage__nav--prev {
