@@ -3371,23 +3371,9 @@ export default function Admin() {
                         {u.createdAt && (
                           <span className="text-white/35">joined {new Date(u.createdAt).toLocaleString()}</span>
                         )}
-                        {u.communityStandardsAgreedAt ? (
-                          <span style={{ color: "#C8FA3C" }}>
-                            standards: agreed
-                            {u.communityStandardsVersion ? ` (v${u.communityStandardsVersion})` : ""}
-                            {" · "}
-                            {new Date(u.communityStandardsAgreedAt).toLocaleString()}
-                          </span>
-                        ) : u.communityStandardsDeclinedAt ? (
-                          <span style={{ color: "#FF8C00" }}>
-                            standards: declined
-                            {u.communityStandardsVersion ? ` (v${u.communityStandardsVersion})` : ""}
-                            {" · "}
-                            {new Date(u.communityStandardsDeclinedAt).toLocaleString()}
-                          </span>
-                        ) : (
-                          <span style={{ color: "#FF2400" }}>standards: not agreed</span>
-                        )}
+                        {/* Community Standards status readout disconnected for now —
+                            it was informational only (never gated admin promotion),
+                            but the red "not agreed" label read like a block. */}
                         {(u.accountStatus === "suspended" || u.status === "suspended") && (
                           <span style={{ color: "#FF8C00" }}>
                             suspended
