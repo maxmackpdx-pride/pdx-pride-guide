@@ -25,6 +25,34 @@ type PushStatus = {
   myDeviceSubscriptions: number;
 } | null | undefined;
 
+export type QueueBreakdown = {
+  submissions?: number;
+  moderation?: number;
+  promoters?: number;
+  businessClaims?: number;
+  businessSubmissions?: number;
+  giftingReports?: number;
+  giftingFlagged?: number;
+  missedConnections?: number;
+  riverBrats?: number;
+  pendingGigs?: number;
+  guideUnread?: number;
+} | null | undefined;
+
+/** Human labels + colors for each queue bucket (matches QueueView groups). */
+const QUEUE_BUCKETS: Array<{ key: keyof NonNullable<QueueBreakdown>; label: string; color: string }> = [
+  { key: "submissions", label: "Events / claims", color: "#19E3FF" },
+  { key: "promoters", label: "Promoters", color: "#B06BFF" },
+  { key: "businessClaims", label: "Venue claims", color: "#FF8C00" },
+  { key: "businessSubmissions", label: "New venues", color: "#FF8C00" },
+  { key: "moderation", label: "Moderation", color: "#FF1FA0" },
+  { key: "missedConnections", label: "Missed conn.", color: "#FF1FA0" },
+  { key: "giftingReports", label: "Gifting reports", color: "#C8FA3C" },
+  { key: "giftingFlagged", label: "Gifting flagged", color: "#C8FA3C" },
+  { key: "riverBrats", label: "River Brats", color: "#FF8C00" },
+  { key: "pendingGigs", label: "Gig Work", color: "#B06BFF" },
+];
+
 type LiveHealth = {
   ok?: boolean;
   ts?: string;
@@ -51,6 +79,8 @@ type Props = {
   onRefreshPush?: () => void;
   onSendTestPush?: () => void;
   testPushPending?: boolean;
+  /** Per-category counts behind the queue badge, so a "1" is never a mystery. */
+  breakdown?: QueueBreakdown;
 };
 
 function shortSha(sha?: string): string {
@@ -190,8 +220,13 @@ export default function AdminOverview({
   onRefreshPush,
   onSendTestPush,
   testPushPending,
+  breakdown,
 }: Props) {
   const showOwner = isPrimaryOwner && ownerCount > 0 && onOpenOwner;
+  const bucketRows = breakdown
+    ? QUEUE_BUCKETS.map((b) => ({ ...b, count: Number(breakdown[b.key] || 0) })).filter((b) => b.count > 0)
+    : [];
+  const guideUnread = Number(breakdown?.guideUnread || 0);
 
   const { data: liveHealth, isError: healthError, isFetching: healthFetching } = useQuery<LiveHealth>({
     queryKey: ["/api/health", "admin-overview"],
@@ -267,6 +302,61 @@ export default function AdminOverview({
             </button>
           )}
         </div>
+
+        {/* What exactly is in the queue — every non-zero bucket, so a phantom
+            "1" is always traceable to a category (and which group to scroll to). */}
+        {(bucketRows.length > 0 || guideUnread > 0) && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "4px 0 12px" }}>
+            {bucketRows.map((b) => (
+              <button
+                key={b.key}
+                type="button"
+                onClick={() => onOpenInbox(String(b.key))}
+                title={`Open the ${b.label} queue`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 11px",
+                  borderRadius: 99,
+                  border: `1px solid ${b.color}`,
+                  background: "transparent",
+                  color: b.color,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  cursor: "pointer",
+                }}
+              >
+                {b.label}
+                <span style={{ fontFamily: "var(--font-display, sans-serif)", fontWeight: 900 }}>{b.count}</span>
+              </button>
+            ))}
+            {guideUnread > 0 && (
+              <button
+                type="button"
+                onClick={() => onOpenInbox("guide")}
+                title="Open the guide inbox"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 11px",
+                  borderRadius: 99,
+                  border: "1px solid #C8FA3C",
+                  background: "transparent",
+                  color: "#C8FA3C",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Guide inbox
+                <span style={{ fontFamily: "var(--font-display, sans-serif)", fontWeight: 900 }}>{guideUnread}</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {kindPills.length > 0 && (
           <div className="admin-kind-pills">

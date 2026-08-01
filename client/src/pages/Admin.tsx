@@ -23,7 +23,7 @@ import HubV2Shell from "@/components/hub/HubV2Shell";
 import { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdManager from "@/components/admin/ads/AdManager";
 import type { HubSection } from "@/components/hub/types";
-import AdminOverview, { type AttentionItem, type KindPill } from "@/components/admin/AdminOverview";
+import AdminOverview, { type AttentionItem, type KindPill, type QueueBreakdown } from "@/components/admin/AdminOverview";
 import QSearchDashboard from "@/components/admin/QSearchDashboard";
 import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
@@ -529,7 +529,7 @@ export default function Admin() {
 
   const ownerDeskCount = ownerDesk.filter(i => i.status === "OPEN").length;
 
-  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
+  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number; breakdown?: QueueBreakdown }>({
     queryKey: ["/api/admin/pending-count"],
     queryFn: () =>
       fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
@@ -1897,6 +1897,7 @@ export default function Admin() {
             onRefreshPush={canPush ? () => refetchPushStatus() : undefined}
             onSendTestPush={canPush ? () => testPushMutation.mutate() : undefined}
             testPushPending={testPushMutation.isPending}
+            breakdown={pendingAdmin.breakdown}
           />
           <div className="mt-6 p-4 border border-white/10" style={{ background: "#0d0d0d" }} data-testid="admin-activity-log">
             <p className="display text-sm mb-3" style={{ color: "#B06BFF" }}>ACTIVITY LOG</p>
