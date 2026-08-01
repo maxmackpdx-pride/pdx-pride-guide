@@ -3747,6 +3747,87 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
+  // OWNER-ONLY broadcast: send one push announcement to every subscribed device.
+  // Respects each user's "account" notification preference (the category we use
+  // for site/guide announcements). Not rate-limited by the per-message limiter -
+  // this is a deliberate one-shot the primary owner fires by hand.
+  app.post("/api/admin/push/broadcast", requireAdmin, async (req, res) => {
+    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!caller || !storage.isPrimarySiteOwner(caller)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    if (!isPushConfigured()) return res.status(503).json({ error: "VAPID keys not configured on server" });
+
+    const title = String(req.body?.title || "").trim();
+    const body = String(req.body?.body || "").trim();
+    const navigateRaw = String(req.body?.url || req.body?.navigate || "/events").trim();
+    // Only allow same-site relative paths for the deep link.
+    const navigate = navigateRaw.startsWith("/") ? navigateRaw : "/events";
+    if (!title) return res.status(400).json({ error: "Title is required" });
+    if (title.length > 80) return res.status(400).json({ error: "Title must be 80 characters or fewer" });
+    if (body.length > 180) return res.status(400).json({ error: "Body must be 180 characters or fewer" });
+
+    const allSubs = storage.getAllActivePushSubscriptions();
+    // Group devices by user so we can respect each user's announcement pref once.
+    const byUser = new Map<number, typeof allSubs>();
+    for (const sub of allSubs) {
+      const list = byUser.get(sub.userId) || [];
+      list.push(sub);
+      byUser.set(sub.userId, list);
+    }
+
+    const payload = buildDeclarativePayload({
+      title,
+      body: body || undefined,
+      navigate,
+      tag: `pdx-broadcast-${Date.now()}`,
+    });
+
+    let sent = 0;
+    let failed = 0;
+    let deviceTotal = 0;
+    let usersTargeted = 0;
+    let usersOptedOut = 0;
+
+    for (const [userId, subs] of byUser) {
+      // "account" is the announcement/guide-update category. Muted → skip.
+      const prefs = storage.getNotificationPrefs(userId);
+      if (!prefs.account) {
+        usersOptedOut += 1;
+        continue;
+      }
+      usersTargeted += 1;
+      await Promise.all(subs.map(async (sub) => {
+        deviceTotal += 1;
+        const result = await sendPushToSubscription(sub, payload);
+        if (result.ok) {
+          storage.touchPushSubscription(sub.id);
+          sent += 1;
+        } else {
+          failed += 1;
+          if (result.gone) storage.deactivatePushSubscription(sub.id);
+        }
+      }));
+    }
+
+    console.log(
+      `[push] BROADCAST by owner=${caller.id} title=${JSON.stringify(title)} sent=${sent}/${deviceTotal} ` +
+      `usersTargeted=${usersTargeted} optedOut=${usersOptedOut}`,
+    );
+
+    res.json({
+      ok: true,
+      sent,
+      failed,
+      deviceTotal,
+      usersTargeted,
+      usersOptedOut,
+      title,
+      body,
+      navigate,
+    });
+  });
+
   // ─── MESSAGES ────────────────────────────────────────────────────────────
   app.get("/api/messages/unread-count", requireAuth, (req, res) => {
     res.json({ count: storage.getUnreadCount(req.session.userId!) });

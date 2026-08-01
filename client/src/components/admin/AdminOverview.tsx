@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export type AttentionItem = {
   key: string;
@@ -54,6 +57,121 @@ function shortSha(sha?: string): string {
   if (!sha) return "";
   const clean = sha.trim();
   return clean.length > 7 ? clean.slice(0, 7) : clean;
+}
+
+const DEFAULT_BROADCAST_TITLE = "Making weekend plans?";
+const DEFAULT_BROADCAST_BODY =
+  "This weekend's queer events are live — plus fresh updates. Pride Guide is now Zaylist, Portland's queer event hub. 🌈";
+
+/** Owner-only: compose + send one push announcement to every subscribed device. */
+function BroadcastPanel({ reach }: { reach: number }) {
+  const { toast } = useToast();
+  const [title, setTitle] = useState(DEFAULT_BROADCAST_TITLE);
+  const [body, setBody] = useState(DEFAULT_BROADCAST_BODY);
+  const [url, setUrl] = useState("/events");
+  const [sending, setSending] = useState(false);
+
+  const send = async () => {
+    if (!title.trim()) {
+      toast({ title: "Add a title", description: "The notification needs a title.", variant: "destructive" });
+      return;
+    }
+    const ok = window.confirm(
+      `Send this push to EVERYONE?\n\n“${title.trim()}”\n${body.trim()}\n\nThis goes to all ${reach} subscribed device${reach === 1 ? "" : "s"} (minus anyone who muted announcements). This cannot be unsent.`,
+    );
+    if (!ok) return;
+    setSending(true);
+    try {
+      const res = await apiRequest("POST", "/api/admin/push/broadcast", {
+        title: title.trim(),
+        body: body.trim(),
+        url: url.trim() || "/events",
+      });
+      const data = await res.json();
+      toast({
+        title: "Broadcast sent 🎉",
+        description: `Delivered to ${data.sent} device${data.sent === 1 ? "" : "s"} across ${data.usersTargeted} member${data.usersTargeted === 1 ? "" : "s"}${data.usersOptedOut ? ` · ${data.usersOptedOut} muted` : ""}${data.failed ? ` · ${data.failed} failed` : ""}.`,
+      });
+    } catch (err) {
+      toast({ title: "Broadcast failed", description: parseApiError(err, "Could not send broadcast."), variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const titleLeft = 80 - title.length;
+  const bodyLeft = 180 - body.length;
+
+  return (
+    <section className="admin-push-panel" style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 16 }}>
+      <div className="admin-shell__section-head">
+        <span className="admin-shell__section-label">Broadcast to everyone</span>
+        <span style={{ fontSize: 11, color: "#B06BFF", letterSpacing: "0.08em", textTransform: "uppercase" }}>Owner only</span>
+      </div>
+      <p className="admin-push-panel__meta" style={{ marginBottom: 12 }}>
+        Sends one push to all {reach} subscribed device{reach === 1 ? "" : "s"} (people who muted announcements are skipped).
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 520 }}>
+        <label style={{ display: "block" }}>
+          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+            Title · {titleLeft} left
+          </span>
+          <input
+            type="text"
+            value={title}
+            maxLength={80}
+            onChange={(e) => setTitle(e.target.value)}
+            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14 }}
+          />
+        </label>
+        <label style={{ display: "block" }}>
+          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+            Message · {bodyLeft} left
+          </span>
+          <textarea
+            value={body}
+            maxLength={180}
+            rows={3}
+            onChange={(e) => setBody(e.target.value)}
+            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, resize: "vertical" }}
+          />
+        </label>
+        <label style={{ display: "block" }}>
+          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+            Opens (path, e.g. /events)
+          </span>
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="/events"
+            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14 }}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => void send()}
+          disabled={sending || reach === 0 || !title.trim()}
+          style={{
+            alignSelf: "flex-start",
+            padding: "12px 22px",
+            background: sending ? "#5a2e8a" : "#B06BFF",
+            color: "#0a0a0a",
+            border: "none",
+            fontFamily: "var(--font-display, sans-serif)",
+            fontWeight: 900,
+            fontSize: 14,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            cursor: sending || reach === 0 ? "not-allowed" : "pointer",
+            opacity: reach === 0 ? 0.5 : 1,
+          }}
+        >
+          {sending ? "Sending…" : `Send to ${reach} device${reach === 1 ? "" : "s"}`}
+        </button>
+      </div>
+    </section>
+  );
 }
 
 export default function AdminOverview({
@@ -238,6 +356,9 @@ export default function AdminOverview({
             >
               {testPushPending ? "Sending…" : "Send test push"}
             </button>
+          )}
+          {isPrimaryOwner && pushStatus.configured && (
+            <BroadcastPanel reach={pushStatus.totalActiveSubscriptions} />
           )}
         </section>
       )}

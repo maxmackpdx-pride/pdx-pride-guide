@@ -9159,6 +9159,7 @@ export interface IStorage {
   touchPushSubscription(id: number): void;
   getActivePushSubscriptions(userId: number): Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
   countActivePushSubscriptions(): number;
+  getAllActivePushSubscriptions(): Array<{ id: number; userId: number; endpoint: string; p256dh: string; auth: string }>;
   markRead(messageId: number): void;
   markReadForUser(messageId: number, userId: number): boolean;
   getThread(threadId: string): Message[];
@@ -12538,6 +12539,13 @@ export const storage: IStorage = {
   countActivePushSubscriptions() {
     const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM push_subscriptions WHERE active = 1`).get() as { count: number };
     return row?.count || 0;
+  },
+  getAllActivePushSubscriptions() {
+    return sqlite.prepare(`
+      SELECT id, user_id AS userId, endpoint, p256dh, auth
+      FROM push_subscriptions
+      WHERE active = 1
+    `).all() as Array<{ id: number; userId: number; endpoint: string; p256dh: string; auth: string }>;
   },
   markRead(messageId) {
     db.update(messages).set({ isRead: true }).where(eq(messages.id, messageId)).run();
