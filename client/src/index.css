@@ -6058,6 +6058,16 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   color: #888;
 }
 
+.site-profile-menu__item--calm {
+  padding: 8px 10px;
+  cursor: default;
+}
+
+.site-profile-menu__item--calm .calm-mode-toggle {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 .site-profile-menu__item--logout:hover {
   color: var(--neon-magenta);
   background: rgba(255, 0, 204, 0.08);

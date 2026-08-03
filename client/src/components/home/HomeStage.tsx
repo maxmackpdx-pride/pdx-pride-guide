@@ -251,6 +251,10 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     return [...strict, ...nearestScheduled].slice(0, 8);
   }, [events]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number } | null>(null);
+  const [manualRail, setManualRail] = useState(false);
+  const [draggingRail, setDraggingRail] = useState(false);
   const [showVideo, setShowVideo] = useState(() => typeof window === "undefined" || !prefersStillMotion());
 
   useEffect(() => {
@@ -302,7 +306,31 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         <header className="home-front__worlds-head">
           <h2 id="home-worlds-title">What do you need?</h2>
         </header>
-        <div className="home-front__grid">
+        <div
+          ref={railRef}
+          className={`home-front__grid${manualRail ? " home-front__grid--manual" : ""}${draggingRail ? " home-front__grid--dragging" : ""}`}
+          onPointerDown={(event) => {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            const rail = railRef.current;
+            if (!rail) return;
+            setManualRail(true);
+            setDraggingRail(true);
+            dragRef.current = { pointerId:event.pointerId, x:event.clientX, scrollLeft:rail.scrollLeft };
+            rail.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            const drag = dragRef.current;
+            const rail = railRef.current;
+            if (!drag || !rail || drag.pointerId !== event.pointerId) return;
+            rail.scrollLeft = drag.scrollLeft - (event.clientX - drag.x);
+          }}
+          onPointerUp={(event) => {
+            if (dragRef.current?.pointerId !== event.pointerId) return;
+            dragRef.current = null;
+            setDraggingRail(false);
+          }}
+          onPointerCancel={() => { dragRef.current = null; setDraggingRail(false); }}
+        >
           {[false, true].map((duplicate) => (
           <div
             className={`home-front__grid-group${duplicate ? " home-front__grid-group--duplicate" : ""}`}
@@ -335,13 +363,16 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                   </svg>
                 ) : null}
                 {world.key === "directory" ? (
-                  <svg className="home-front__city-map" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                    <path className="home-front__city-river" d="M328-20c-26 72-22 135 13 190 31 49 33 100 7 153-25 50-23 99 7 147" />
-                    <path d="M-20 82h307M378 82h282M-20 146h320M371 146h289M-20 214h330M377 214h283M-20 284h326M374 284h286M-20 352h319M372 352h288" />
-                    <path d="M54-20v480M118-20v480M188-20v480M257-20v480M410-20v480M478-20v480M548-20v480M610-20v480" />
-                    <path d="M-20 30l314 158M385 231l275 139M-10 432L294 272M383 201L650 48" />
-                    <circle cx="269" cy="214" r="8" /><circle cx="434" cy="284" r="7" /><circle cx="188" cy="146" r="6" />
-                  </svg>
+                  <>
+                    <svg className="home-front__city-map" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                      <path className="home-front__city-river" d="M328-20c-26 72-22 135 13 190 31 49 33 100 7 153-25 50-23 99 7 147" />
+                      <path d="M-20 82h307M378 82h282M-20 146h320M371 146h289M-20 214h330M377 214h283M-20 284h326M374 284h286M-20 352h319M372 352h288" />
+                      <path d="M54-20v480M118-20v480M188-20v480M257-20v480M410-20v480M478-20v480M548-20v480M610-20v480" />
+                      <path d="M-20 30l314 158M385 231l275 139M-10 432L294 272M383 201L650 48" />
+                      <circle cx="269" cy="214" r="8" /><circle cx="434" cy="284" r="7" /><circle cx="188" cy="146" r="6" />
+                    </svg>
+                    <img className="home-front__places-blueprint" src="/brand/waypoints/next-blueprint-reference-b.png" alt="" aria-hidden="true" />
+                  </>
                 ) : null}
                 {world.key === "housing" || world.key === "gifting" || world.key === "gigs" || world.key === "spotted" ? (
                   <WorldMotif kind={world.key} />
@@ -358,7 +389,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 ) : null}
                 {world.key === "beaches" ? (
                   <div className="home-front__beach-live">
-                    <HomeBeachWidget showCollins={false} />
+                    <HomeBeachWidget showBoth />
                   </div>
                 ) : null}
                 {world.key === "events" ? <EventPreview events={upcoming} fallback={samples.events} /> : null}

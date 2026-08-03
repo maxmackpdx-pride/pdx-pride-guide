@@ -185,6 +185,9 @@ function ProfileMenuPanel({
       >
         Notification settings
       </Link>
+      <div className="site-profile-menu__item site-profile-menu__item--calm" role="none">
+        <CalmModeToggle compact />
+      </div>
       {isAdmin && canManageTeam && (
         <HubAdminFolder
           variant="menu"
@@ -622,7 +625,6 @@ export default function Nav() {
   const profileActive = Boolean(
     profilePath && (location === profilePath || location.startsWith(`${profilePath}/`)),
   );
-  const homeActive = location === "/";
   const aboutActive = navLinkActive(location, "/about");
 
   const seamLoading = routeLoading || fetching > 0;
@@ -641,14 +643,6 @@ export default function Nav() {
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <div className="hub-mtop__mode" role="group" aria-label="Site sections">
-              <Link
-                href="/"
-                className={`hub-mtop__mode-btn${homeActive ? " is-active is-member" : ""}`}
-                aria-current={homeActive ? "page" : undefined}
-                onClick={() => dismissMobileNavOverlays()}
-              >
-                Home
-              </Link>
               <Link
                 href="/about"
                 className={`hub-mtop__mode-btn${aboutActive ? " is-active is-member" : ""}`}
@@ -764,23 +758,6 @@ export default function Nav() {
 
             {user && (
               <div className="site-auth site-auth--desktop">
-                {/* Hub sits left of the seam; avatar/menu stays right. Seam is
-                    centered in the gap between them (equal pad both sides). */}
-                <span className="site-auth__hub">
-                  <NavLink
-                    href="/dashboard"
-                    label="Hub"
-                    active={hubActive}
-                    showNotify={unreadCount > 0}
-                    notifyLabel={
-                      unreadCount > 0
-                        ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
-                        : undefined
-                    }
-                    onClick={closeMenu}
-                  />
-                </span>
-                <span className="site-auth__seam" aria-hidden="true" />
                 <ProfileMenu
                   user={user}
                   profileOpen={profileOpen}
@@ -804,15 +781,6 @@ export default function Nav() {
             {/* Local demo guest: Hub + public Tucker profile without a session */}
             {!user && localDemo && (
               <div className="site-auth site-auth--desktop site-auth--local-demo">
-                <span className="site-auth__hub">
-                  <NavLink
-                    href="/dashboard"
-                    label="Hub"
-                    active={hubActive}
-                    onClick={closeMenu}
-                  />
-                </span>
-                <span className="site-auth__seam" aria-hidden="true" />
                 <NavLink
                   href={LOCAL_DEMO_PROFILE_PATH}
                   label="@tucker_pdmax"
@@ -852,9 +820,18 @@ export default function Nav() {
               <Search size={18} aria-hidden="true" />
               <span className="site-search-trigger__label">Search</span>
             </button>
-            <span className="site-header-calm--desktop">
-              <CalmModeToggle minimal />
-            </span>
+            {(user || localDemo) && (
+              <span className="site-header-calm--desktop">
+                <NavLink
+                  href="/dashboard"
+                  label="Hub"
+                  active={hubActive}
+                  showNotify={Boolean(user && unreadCount > 0)}
+                  notifyLabel={user && unreadCount > 0 ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}` : undefined}
+                  onClick={closeMenu}
+                />
+              </span>
+            )}
             <button
               type="button"
               className="site-nav-toggle"

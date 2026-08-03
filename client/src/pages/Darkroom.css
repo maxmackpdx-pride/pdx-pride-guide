@@ -162,7 +162,7 @@
   position: sticky;
   top: var(--site-header-height, 120px);
   z-index: 4;
-  min-height: min(368px, calc(100svh - var(--site-header-height, 120px)));
+  min-height: min(210px, calc(100svh - var(--site-header-height, 120px)));
   display: grid;
   align-items: center;
   border-bottom: 1px solid var(--ink-border, #2b2b2b);
@@ -219,7 +219,7 @@
   z-index: 1;
   width: 100%;
   max-width: 1440px;
-  padding: clamp(30px, 3.7vw, 48px) clamp(20px, 3vw, 40px);
+  padding: clamp(15px, 1.8vw, 24px) clamp(20px, 3vw, 40px);
 }
 
 .darkroom-hero__logo {
@@ -260,7 +260,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 15px;
+  margin: 0 0 8px;
   color: var(--neon-cyan);
   font: 700 14px/1.4 var(--font-mono, ui-monospace, monospace);
   letter-spacing: .16em;
@@ -335,10 +335,10 @@
 
 .darkroom-hero__lede {
   max-width: 48ch;
-  margin: 24px 0 0;
+  margin: 10px 0 0;
   color: var(--text-body-muted, #c8c4bb);
-  font-size: clamp(19px, 1.7vw, 23px);
-  line-height: 1.65;
+  font-size: clamp(17px, 1.45vw, 20px);
+  line-height: 1.4;
   text-wrap: pretty;
 }
 
@@ -1736,7 +1736,7 @@
   .darkroom-waypoints,
   .darkroom-horizon,
   .darkroom-boundary { width: min(100% - 28px, 1180px); }
-  .darkroom-hero__inner { padding: 32px 0; }
+  .darkroom-hero__inner { padding: 22px 0; }
   .darkroom-hero__schematic { object-position: 58% center; opacity: .14; }
   .darkroom-hero__portland-sign {
     top: 8%;

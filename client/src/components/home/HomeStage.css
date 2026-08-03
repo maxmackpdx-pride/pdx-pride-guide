@@ -28,7 +28,7 @@
 .home-front__world[data-world="events"] { padding:0; }
 .home-front__world[data-world="events"] .home-front__world-top { position:absolute; z-index:5; top:0; left:0; right:0; padding:22px; background:linear-gradient(180deg,rgba(3,3,4,.82),rgba(3,3,4,.24) 72%,transparent); }
 .home-front__world--feature { grid-column:span 6; min-height:430px; }
-.home-front__world::after { content:""; position:absolute; width:260px; height:260px; right:-120px; bottom:-150px; border-radius:50%; background:var(--c); opacity:.11; filter:blur(42px); pointer-events:none; }
+.home-front__world::after { content:""; position:absolute; width:300px; height:300px; right:-145px; bottom:-185px; border-radius:50%; background:var(--c); opacity:.085; filter:blur(62px); pointer-events:none; }
 .home-front__topo { position:absolute; inset:0; width:100%; height:100%; color:#a7a7ad; opacity:.15; pointer-events:none; }
 .home-front__topo path { fill:none; stroke:currentColor; stroke-width:1.1; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 .home-front__topo .home-front__topo-river { stroke-width:5; opacity:.34; }
@@ -70,6 +70,7 @@
 .home-front__event-dots button.is-active { width:22px; border-radius:999px; background:var(--event-c); }
 .home-front__sample.home-stage-card { width:100%; min-height:0; height:auto; max-height:none; margin:22px 0; padding:10px; background:rgba(2,2,3,.46); box-shadow:none; }
 .home-front__directory-grid { position:relative; z-index:1; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; margin:20px 0; }
+.home-front__places-blueprint { position:absolute; z-index:0; top:16%; right:-9%; width:72%; height:auto; opacity:.105; filter:grayscale(1) contrast(1.45) brightness(1.3); mix-blend-mode:screen; transform:rotate(5deg); pointer-events:none; user-select:none; }
 .home-front__directory-tile { aspect-ratio:1; min-width:0; display:grid; place-items:center; overflow:hidden; border:1px solid color-mix(in srgb,var(--neon-cyan,#19e3ff) 30%,#25252b); border-radius:11px; background:rgba(4,4,6,.78); color:var(--neon-cyan,#19e3ff); font:900 13px/1 var(--font-display,"Barlow Condensed",sans-serif); text-decoration:none; text-transform:uppercase; box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
 .home-front__directory-tile:hover,.home-front__directory-tile:focus-visible { border-color:var(--neon-cyan,#19e3ff); background:color-mix(in srgb,var(--neon-cyan,#19e3ff) 10%,#050506); outline:none; }
 .home-front__directory-tile img { width:78%; height:78%; object-fit:contain; border-radius:7px; }
@@ -79,9 +80,22 @@
 .home-front__beach-live .home-beach-widget__panel { padding:14px; }
 .home-front__beach-live .home-beach-widget__name { margin-bottom:13px; font-size:20px; color:var(--neon-orange,#ff6600); }
 .home-front__beach-live .home-beach-widget__grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:0; }
+.home-front__beach-live .home-beach-widget--stacked .home-beach-widget__grid + .home-beach-widget__name { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.12); color:var(--status-good,#39ff14); }
 .home-front__beach-live .home-beach-widget__stat { font-size:22px; }
 .home-front__beach-live .home-beach-widget__stat-label { font-size:7px; line-height:1.35; }
 .home-front__beach-live .home-beach-widget__link { display:none; }
+
+/* Continuity lock: compact dense worlds internally so every outer card keeps
+   the same bottom action datum and padding. */
+.home-front__world[data-world="beaches"] .home-front__beach-live { margin:12px 0; }
+.home-front__world[data-world="beaches"] .home-beach-widget__panel { padding:10px 12px; }
+.home-front__world[data-world="beaches"] .home-beach-widget__name { margin-bottom:8px; font-size:18px; }
+.home-front__world[data-world="beaches"] .home-beach-widget__grid { gap:6px; }
+.home-front__world[data-world="beaches"] .home-beach-widget__stat { font-size:19px; }
+.home-front__world[data-world="beaches"] .home-beach-widget__stat-label { margin-top:3px; font-size:6.5px; }
+.home-front__world[data-world="beaches"] .home-beach-widget--stacked .home-beach-widget__grid + .home-beach-widget__name { margin-top:8px; padding-top:8px; }
+.home-front__world[data-world="spotted"] .home-front__world-copy { margin-top:34px; }
+.home-front__world[data-world="spotted"] .home-front__sample.home-stage-card { width:106.4%; margin:14px -3.2%; transform:scale(.94); transform-origin:center; }
 
 html.calm-mode .home-front__video,:root[data-calm="true"] .home-front__video { display:none; }
 html.calm-mode .home-front__atmosphere,:root[data-calm="true"] .home-front__atmosphere { background:linear-gradient(#080809,#050506); }

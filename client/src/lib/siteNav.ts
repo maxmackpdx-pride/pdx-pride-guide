@@ -12,7 +12,6 @@ export type NavEntry =
 
 /** Primary nav - labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
-  { type: "link", href: "/", label: "Home" },
   { type: "link", href: "/about", label: "About" },
   {
     type: "dropdown",
@@ -24,8 +23,15 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/submit", label: "Promoters" },
     ],
   },
-  { type: "link", href: "/directory", label: "Places" },
-  { type: "link", href: "/nude-beaches", label: "Beaches" },
+  {
+    type: "dropdown",
+    id: "places",
+    label: "Places",
+    items: [
+      { href: "/directory", label: "Directory" },
+      { href: "/nude-beaches", label: "Beaches" },
+    ],
+  },
   {
     type: "dropdown",
     id: "boards",

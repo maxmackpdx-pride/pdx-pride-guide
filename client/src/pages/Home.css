@@ -1869,8 +1869,14 @@ html.calm-mode .home-boards__card {
 
 .home-next-preview__card:first-child { margin-left: 0; }
 .home-next-preview__card:nth-child(n + 4) { transform:translateX(85vw) translateY(18px) rotate(8deg) scale(.94); }
-.home-next-preview--landed .home-next-preview__card { animation:homeNextCrashLeft .78s cubic-bezier(.18,.88,.22,1.08) both; }
-.home-next-preview--landed .home-next-preview__card:nth-child(n + 4) { animation-name:homeNextCrashRight; }
+.home-next-preview--landed .home-next-preview__card {
+  animation:
+    homeNextCrashLeft .78s cubic-bezier(.18,.88,.22,1.08) both,
+    homeNextSettledFloat 5.8s ease-in-out calc(.95s + var(--stack-index) * .16s) infinite alternate;
+}
+.home-next-preview--landed .home-next-preview__card:nth-child(n + 4) {
+  animation-name:homeNextCrashRight,homeNextSettledFloat;
+}
 .home-next-preview__card[data-tone="red"] { --c: #ff1f1f; }
 .home-next-preview__card[data-tone="cyan"] { --c: var(--neon-cyan, #00ffff); }
 .home-next-preview__card[data-tone="magenta"] { --c: var(--neon-magenta, #ff00cc); }
@@ -1922,6 +1928,11 @@ html.calm-mode .home-boards__card {
   82% { transform:translateX(calc(var(--crash-over,18px) * .42)) translateY(calc((var(--stack-index) - 2.5) * 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .7deg)) scale(.995); }
   92% { transform:translateX(calc(var(--crash-over,18px) * -.16)) translateY(calc((var(--stack-index) - 2.5) * 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg - .25deg)) scale(1.002); }
   to { opacity: 1; transform: translateX(0) translateY(calc((var(--stack-index) - 2.5) * 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg)) scale(1); }
+}
+
+@keyframes homeNextSettledFloat {
+  from { transform:translateY(calc((var(--stack-index) - 2.5) * 2px - 1px)) rotate(calc((var(--stack-index) - 2.5) * .45deg - .08deg)); }
+  to { transform:translateY(calc((var(--stack-index) - 2.5) * 2px + 1.5px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .08deg)); }
 }
 
 @media (max-width: 640px) {
@@ -1996,7 +2007,12 @@ html.calm-mode .home-next-preview__card,
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,.24) transparent;
   -webkit-overflow-scrolling: touch;
+  cursor:grab;
+  touch-action:pan-y;
 }
+
+.home-main-stage .home-front__grid--dragging { cursor:grabbing; user-select:none; scroll-snap-type:none; }
+.home-main-stage .home-front__grid--manual .home-front__grid-group { animation:none; }
 
 .home-main-stage .home-front__grid-group {
   display: flex;
@@ -2050,7 +2066,7 @@ html.calm-mode .home-next-preview__card,
     inset 0 1px 0 rgba(255,255,255,.12),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
-    0 22px 46px -34px color-mix(in srgb, var(--c) 54%, transparent);
+    0 32px 72px -40px color-mix(in srgb, var(--c) 44%, transparent);
 }
 
 .home-main-stage .home-front__world:hover {
@@ -2059,7 +2075,7 @@ html.calm-mode .home-next-preview__card,
     inset 0 1px 0 rgba(255,255,255,.14),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
-    0 26px 52px -34px color-mix(in srgb, var(--c) 62%, transparent);
+    0 36px 82px -42px color-mix(in srgb, var(--c) 52%, transparent);
 }
 
 .home-main-stage .home-front__world::before {
@@ -3302,6 +3318,22 @@ html.calm-mode .home-next-preview__map-wallpaper,
 }
 
 .home-main-stage #home-worlds::before { opacity:.52; }
+
+/* Destination field uses grain/static only; drafting grids belong to NEXT.
+   Each destination remains one isolated moving/lighting object. */
+.home-main-stage #home-worlds::before {
+  background-image:
+    radial-gradient(circle at 22% 28%,rgba(255,255,255,.05) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 74% 66%,rgba(0,255,255,.032) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 48% 82%,rgba(255,255,255,.026) 0 1px,transparent 1.5px);
+  background-size:29px 31px,37px 41px,53px 47px;
+}
+
+.home-main-stage #home-worlds .home-front__world {
+  transform-style:flat;
+  backface-visibility:hidden;
+  will-change:transform,box-shadow;
+}
 .home-next-preview__contours { opacity:.36; }
 
 .home-next-preview__orb {
@@ -3363,6 +3395,7 @@ html.calm-mode .home-next-preview__orb,
 
 /* Counter transparency lock: no surface fill beyond the requested fade. */
 .home-main-stage .home-hero-stats-boundary {
+  margin-top:-94px;
   background-color:transparent;
   background-image:none;
   background-attachment:scroll;
@@ -3392,6 +3425,8 @@ html.calm-mode .home-next-preview__orb,
   .home-main-stage .home-hero-stats-boundary .home-stat-strip__cell {
     background-color:transparent;
   }
+
+  .home-main-stage .home-hero-stats-boundary { margin-top:-88px; }
 
   .home-main-stage .home-hero-stats-boundary .home-stat-strip {
     background-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.8) 100%);

@@ -16,6 +16,7 @@ type ApiPayload = {
 
 type Props = {
   showCollins?: boolean;
+  showBoth?: boolean;
 };
 
 function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
@@ -25,7 +26,7 @@ function parkingStatusTone(label?: string | null): "good" | "warn" | "neutral" {
   return "neutral";
 }
 
-export default function HomeBeachWidget({ showCollins = true }: Props) {
+export default function HomeBeachWidget({ showCollins = true, showBoth = false }: Props) {
   const [tab, setTab] = useState<BeachTab>("rooster");
 
   const { data } = useQuery<ApiPayload>({
@@ -44,13 +45,13 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
   const isStale = Boolean(data?.stale);
 
   return (
-    <div className={`home-beach-widget${tab === "rooster" ? " home-beach-widget--rooster" : " home-beach-widget--sauvie"}`}>
+    <div className={`home-beach-widget${showBoth ? " home-beach-widget--stacked" : tab === "rooster" ? " home-beach-widget--rooster" : " home-beach-widget--sauvie"}`}>
       <div className="home-beach-widget__live">
         <span className="home-beach-widget__live-dot" aria-hidden />
         Live conditions
         {isStale ? <span className="home-beach-widget__stale">· refreshing</span> : null}
       </div>
-      <div className="home-beach-widget__tabs" role="tablist" aria-label="Beach location">
+      {!showBoth && <div className="home-beach-widget__tabs" role="tablist" aria-label="Beach location">
         <button
           type="button"
           role="tab"
@@ -71,9 +72,9 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             Sauvie Island
           </button>
         )}
-      </div>
+      </div>}
       <div className="home-beach-widget__panel">
-        {tab === "rooster" && rooster && (
+        {(showBoth || tab === "rooster") && rooster && (
           <>
             <h3 className="home-beach-widget__name">Rooster Rock</h3>
             <div className="home-beach-widget__grid">
@@ -110,10 +111,9 @@ export default function HomeBeachWidget({ showCollins = true }: Props) {
             </Link>
           </>
         )}
-        {tab === "collins" && sauvie && (
+        {(showBoth || tab === "collins") && sauvie && (
           <>
-            <h3 className="home-beach-widget__name">Collins Beach</h3>
-            <div className="home-beach-widget__sub">Sauvie Island</div>
+            <h3 className="home-beach-widget__name">Sauvie Island</h3>
             <div className="home-beach-widget__grid">
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
