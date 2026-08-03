@@ -152,7 +152,8 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__kicker { margin-bottom:clamp(16px,3.5vh,28px); }
   .home-front__mark { width:100%; max-width:none; }
   .home-front__hero-actions { margin-top:28px; }
-  .home-front__hero-actions .pdx-glass-btn { flex:1 1 140px; min-width:0; padding:0 11px; }
+  /* ~40% smaller CTA buttons: compact content-width pills, shorter, smaller text. */
+  .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:29px; height:29px; padding:0 13px; font-size:9px; }
   .home-front__worlds { padding-top:22px; padding-bottom:34px; }
   .home-front__worlds-head h2 { font-size:48px; }
   /* Mobile: horizontal swipe rail (right-to-left) with scroll-snap + a peeking
