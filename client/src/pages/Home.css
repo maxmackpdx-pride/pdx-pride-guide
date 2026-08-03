@@ -2037,7 +2037,10 @@ html.calm-mode .home-next-preview__card,
   scrollbar-color: rgba(255,255,255,.24) transparent;
   -webkit-overflow-scrolling: touch;
   cursor:grab;
-  touch-action:pan-y;
+  /* pan-x so a horizontal finger swipe scrolls the rail (pan-y was blocking it,
+     leaving auto-scroll as the only way through the cards); vertical gestures
+     still fall through to the page. */
+  touch-action:pan-x;
 }
 
 .home-main-stage .home-front__grid--dragging { cursor:grabbing; user-select:none; scroll-snap-type:none; }
@@ -2192,7 +2195,7 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__grid {
     flex-direction: row;
     gap: 12px;
-    padding: 10px 14px 32px;
+    padding: 12px 14px 12px; /* even top/bottom — was a big 32px bottom gap */
     scroll-padding-inline: 14px;
   }
 
@@ -2219,6 +2222,15 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__world-copy { margin-top: 34px; }
   .home-main-stage .home-front__world-copy h3 { font-size: 40px; }
   .home-main-stage .home-front__directory-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  /* Trim the PLACES tile grid to 2 rows (5 × 2 = 10) on mobile so the card
+     isn't cramped, and let that card hug its content with even padding instead
+     of stretching to the tall fixed card height. */
+  .home-main-stage .home-front__directory-grid > :nth-child(n+11) { display: none; }
+  .home-main-stage .home-front__world[data-world="directory"] {
+    align-self: flex-start;
+    height: auto;
+    min-height: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

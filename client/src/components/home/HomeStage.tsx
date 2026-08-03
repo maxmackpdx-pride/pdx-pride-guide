@@ -306,8 +306,10 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     rail.addEventListener("touchstart", bump, { passive: true });
     rail.addEventListener("wheel", bump, { passive: true });
     const id = window.setInterval(() => {
+      // Desktop (>640px) runs the CSS marquee — don't double-drive it here.
+      if (!window.matchMedia("(max-width: 640px)").matches) return;
       const max = rail.scrollWidth - rail.clientWidth;
-      if (max < 8) return;            // desktop grid — not a horizontal rail
+      if (max < 8) return;            // not a horizontal rail
       if (draggingRail) return;
       if (Date.now() < pausedUntil) return;
       const step = rail.clientWidth * 0.85;
