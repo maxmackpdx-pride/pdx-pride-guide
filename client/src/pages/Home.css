@@ -1960,16 +1960,15 @@ html.calm-mode .home-boards__card {
 }
 
 @media (max-width: 640px) {
-  /* Fix the title flush to the top and shrink the panel ~40% by cutting the
-     vertical air (top pad, kicker gap, h2 line-height, paragraph spacing) —
-     text stays close to the same size. */
-  .home-next-preview { padding-top: 12px; padding-bottom: 20px; }
+  /* Title flush to the very top and the panel ~30% shorter: near-zero top pad,
+     tighter kicker + h2 + paragraph. */
+  .home-next-preview { padding-top: 2px; padding-bottom: 16px; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
-  .home-next-preview__head { margin-bottom: 10px; }
-  .home-next-preview__kicker { margin-bottom: 6px; }
-  .home-next-preview__head h2 { font-size: clamp(36px, 11.5vw, 50px); line-height: .88; }
-  .home-next-preview__head > p:last-child { margin-top: 9px; line-height: 1.36; font-size: 14.5px; }
+  .home-next-preview__head { margin-bottom: 8px; }
+  .home-next-preview__kicker { margin-bottom: 4px; }
+  .home-next-preview__head h2 { font-size: clamp(31px, 9.6vw, 42px); line-height: .86; }
+  .home-next-preview__head > p:last-child { margin-top: 6px; line-height: 1.3; font-size: 13.5px; }
   .home-next-preview__viewport { padding-block: 14px 42px; }
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card {
@@ -2195,8 +2194,8 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__grid {
     flex-direction: row;
     gap: 12px;
-    padding: 12px 14px 12px; /* even top/bottom — was a big 32px bottom gap */
-    scroll-padding-inline: 14px;
+    padding: 12px 18px 12px; /* even top/bottom + a touch more L/R gutter */
+    scroll-padding-inline: 18px;
   }
 
   .home-main-stage .home-front__grid-group {
@@ -2210,8 +2209,8 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__world,
   .home-main-stage .home-front__world--feature,
   .home-main-stage .home-front__world[data-world="events"] {
-    flex-basis: min(86vw, 360px);
-    width: min(86vw, 360px);
+    flex-basis: min(80vw, 340px); /* narrower cards = a bit more L/R breathing room */
+    width: min(80vw, 340px);
     min-height: 440px;
     height: 440px;
     padding: 18px;
@@ -3018,6 +3017,15 @@ html.calm-mode .home-beach-widget,
 }
 
 .home-beach-widget__stat--good { color: var(--status-good, #39ff14); }
+/* Sauvie Island: green heading + a thin divider separating it from the
+   Rooster Rock block above (works in the home card and the standalone widget). */
+.home-beach-widget__name--sauvie,
+.home-front__world[data-world="beaches"] .home-beach-widget__name--sauvie {
+  color: var(--status-good, #39ff14);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--status-good, #39ff14) 32%, transparent);
+}
 .home-beach-widget__stat--orange { color: var(--neon-orange, #ff6600); }
 .home-beach-widget__stat--water {
   color: var(--neon-cyan, #19e3ff);

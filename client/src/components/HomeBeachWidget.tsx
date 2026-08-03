@@ -113,7 +113,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
         )}
         {(showBoth || tab === "collins") && sauvie && (
           <>
-            <h3 className="home-beach-widget__name">Sauvie Island</h3>
+            <h3 className="home-beach-widget__name home-beach-widget__name--sauvie">Sauvie Island</h3>
             <div className="home-beach-widget__grid">
               <div>
                 <div className="home-beach-widget__stat home-beach-widget__stat--good">
