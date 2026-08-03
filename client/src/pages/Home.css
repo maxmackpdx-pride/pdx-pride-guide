@@ -3334,6 +3334,14 @@ html.calm-mode .home-next-preview__map-wallpaper,
   backface-visibility:hidden;
   will-change:transform,box-shadow;
 }
+
+.home-main-stage #home-worlds .home-front__world[data-world="beaches"] .home-front__topo {
+  opacity:.22;
+  color:#c1c5cc;
+  filter:drop-shadow(0 0 10px rgba(255,102,0,.09));
+}
+
+.home-main-stage #home-worlds .home-front__world[data-world="directory"] .home-front__city-map { opacity:.16; }
 .home-next-preview__contours { opacity:.36; }
 
 .home-next-preview__orb {
