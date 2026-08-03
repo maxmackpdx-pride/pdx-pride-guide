@@ -1962,7 +1962,10 @@ html.calm-mode .home-boards__card {
 @media (max-width: 640px) {
   /* Title flush to the very top and the panel ~30% shorter: near-zero top pad,
      tighter kicker + h2 + paragraph. */
-  .home-next-preview { padding-top: 2px; padding-bottom: 16px; }
+  .home-next-preview { padding-top: 16px; padding-bottom: 16px; }
+  /* Pull the rainbow "roof" (seam) up into the empty black band above the NEXT
+     panel so the section sits closer to the rail. */
+  .home-main-stage .home-rainbow-seam--before-next { margin-top: -76px; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
   .home-next-preview__head { margin-bottom: 8px; }
@@ -2097,6 +2100,8 @@ html.calm-mode .home-next-preview__card,
     inset 0 1px 0 rgba(255,255,255,.12),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
+    /* soft accent bloom leaking out from behind every edge (~2%) */
+    0 0 26px 1px color-mix(in srgb,var(--c) 11%,transparent),
     0 58px 148px -78px color-mix(in srgb,var(--c) 5%,transparent);
 }
 
@@ -2225,11 +2230,6 @@ html.calm-mode .home-next-preview__card,
      isn't cramped, and let that card hug its content with even padding instead
      of stretching to the tall fixed card height. */
   .home-main-stage .home-front__directory-grid > :nth-child(n+11) { display: none; }
-  .home-main-stage .home-front__world[data-world="directory"] {
-    align-self: flex-start;
-    height: auto;
-    min-height: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
