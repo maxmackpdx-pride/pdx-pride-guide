@@ -1964,9 +1964,6 @@ html.calm-mode .home-boards__card {
      20px under the ZAYLIST/NEXT eyebrow, and real spacing between the title,
      paragraph, cards and Explore link. */
   .home-next-preview { padding-top: 32px; padding-bottom: 32px; }
-  /* Pull the rainbow "roof" (seam) up into the empty black band above the NEXT
-     panel so the section sits closer to the rail. */
-  .home-main-stage .home-rainbow-seam--before-next { margin-top: -76px; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
   .home-next-preview__head { margin-bottom: 22px; }
