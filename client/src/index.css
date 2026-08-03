@@ -3552,6 +3552,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 /* Events poster grid - denser gap; column count scales with viewport (see below) */
 .events-page .events-poster-grid {
   gap: 12px;
+  padding: clamp(16px, 2vw, 28px);
 }
 
 .events-page .event-type-tag--sm {
@@ -8621,7 +8622,7 @@ footer a:hover { color: #00FFFF !important; }
 
 .events-page .events-poster-grid {
   /* ~2 on narrow phones, then auto-fill as width allows */
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
 }
 
 @media (min-width: 640px) {
@@ -8631,7 +8632,7 @@ footer a:hover { color: #00FFFF !important; }
 
   .events-page .events-poster-grid {
     /* tablet: ~3–4 depending on width */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 176px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr));
   }
 }
 
@@ -8642,7 +8643,7 @@ footer a:hover { color: #00FFFF !important; }
 
   .events-page .events-poster-grid {
     /* desktop: ~4–5 — denser cards so more flyers show */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 188px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 141px), 1fr));
   }
 }
 
@@ -8653,7 +8654,7 @@ footer a:hover { color: #00FFFF !important; }
 
   .events-page .events-poster-grid {
     /* large desktop: ~5–6 */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 196px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 147px), 1fr));
   }
 }
 
@@ -8663,15 +8664,15 @@ footer a:hover { color: #00FFFF !important; }
   }
 
   .events-page .events-poster-grid {
-    /* full-screen / ultrawide: target 6 across */
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    /* full-screen / ultrawide: 25% smaller than the previous six-card rail */
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1920px) {
   .events-page .events-poster-grid {
-    /* keep cards readable past 6 if the board is very wide */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    /* keep the 25% reduction proportional on very wide boards */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr));
     max-width: none;
   }
 }

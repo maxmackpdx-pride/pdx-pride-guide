@@ -134,7 +134,10 @@ function AppLayout() {
             <Route path="/directory/:id/:slug?" component={Directory} />
             <Route path="/directory" component={Directory} />
             <Route path="/nude-beaches" component={NudeBeaches} />
-            <Route path="/darkroom" component={Darkroom} />
+            <Route path="/next" component={Darkroom} />
+            <Route path="/darkroom">
+              {() => <Redirect to="/next" />}
+            </Route>
             <Route path="/design-preview" component={DesignSystemSandbox} />
             <Route path="/u/:username" component={MemberProfile} />
             <Route path="/missed-connections">

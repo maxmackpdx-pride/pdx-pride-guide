@@ -37,7 +37,7 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/spotted", label: "Missed Connections" },
     ],
   },
-  { type: "link", href: "/darkroom", label: "Darkroom" },
+  { type: "link", href: "/next", label: "NEXT" },
 ];
 
 export type PageHeaderMeta = {
@@ -55,7 +55,8 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/spotted": { section: "Boards", title: "Missed Connections" },
   "/directory": { section: "Places", title: "Directory" },
   "/nude-beaches": { section: "Explore", title: "Beaches" },
-  "/darkroom": { section: "Explore", title: "Darkroom" },
+  "/next": { section: "Explore", title: "Next" },
+  "/darkroom": { section: "Explore", title: "Next" },
   "/about": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
@@ -80,7 +81,7 @@ export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/schedule", label: "My Schedule" },
   { href: "/nude-beaches", label: "Beaches" },
   { href: "/submit", label: "Promoters" },
-  { href: "/darkroom", label: "Darkroom" },
+  { href: "/next", label: "Next" },
 ];
 
 export function navLinkActive(location: string, href: string) {

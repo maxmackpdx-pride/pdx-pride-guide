@@ -40,7 +40,7 @@ function NavLink({
   notifyLabel?: string;
   onClick?: () => void;
 }) {
-  const isDarkroom = href === "/darkroom" || href.startsWith("/darkroom?");
+  const isDarkroom = href === "/next" || href.startsWith("/next?");
   return (
     <Link
       href={href}

@@ -218,7 +218,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/sponsors",
     "/access",
     "/nude-beaches",
-    "/darkroom",
+    "/next",
     "/resume",
     "/legal",
     "/submit",
@@ -322,9 +322,13 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description:
       "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
   },
+  "/next": {
+    title: "Next | What Zaylist Is Building",
+    description: "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+  },
   "/darkroom": {
-    title: "Darkroom | Zaylist",
-    description: "Darkroom — full-screen still on Zaylist.",
+    title: "Next | What Zaylist Is Building",
+    description: "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/gigs": {
     title: "Gig Werk: Gigs & Jobs | Zaylist",

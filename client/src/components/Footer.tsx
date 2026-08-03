@@ -17,7 +17,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/schedule", "Schedule"],
       ["/directory", "Directory"],
       ["/nude-beaches", "Beaches"],
-      ["/darkroom", "Darkroom"],
+      ["/next", "Next"],
       ["/spotted", "Missed Connections"],
       ["/pride-work", "Gig Board"],
       ["/gifting", "Gifting"],

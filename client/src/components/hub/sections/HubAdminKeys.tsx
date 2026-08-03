@@ -50,9 +50,9 @@ export default function HubAdminKeys({
     // Just the Darkroom teaser image - no card, no border, no queue buttons.
     return (
       <Link
-        href="/darkroom"
+        href="/next"
         className="hub-keys__darkroom-link hub-keys__darkroom-link--bare"
-        aria-label="Open Darkroom"
+        aria-label="Open Next"
       >
         <DarkroomStage />
       </Link>
