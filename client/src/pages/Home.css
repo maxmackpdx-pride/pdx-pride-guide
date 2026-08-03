@@ -1960,26 +1960,27 @@ html.calm-mode .home-boards__card {
 }
 
 @media (max-width: 640px) {
-  /* Title flush to the very top and the panel ~30% shorter: near-zero top pad,
-     tighter kicker + h2 + paragraph. */
-  .home-next-preview { padding-top: 16px; padding-bottom: 16px; }
+  /* Give the NEXT panel room to breathe (was over-compressed): 32px top/bottom,
+     20px under the ZAYLIST/NEXT eyebrow, and real spacing between the title,
+     paragraph, cards and Explore link. */
+  .home-next-preview { padding-top: 32px; padding-bottom: 32px; }
   /* Pull the rainbow "roof" (seam) up into the empty black band above the NEXT
      panel so the section sits closer to the rail. */
   .home-main-stage .home-rainbow-seam--before-next { margin-top: -76px; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
-  .home-next-preview__head { margin-bottom: 8px; }
-  .home-next-preview__kicker { margin-bottom: 4px; }
-  .home-next-preview__head h2 { font-size: clamp(31px, 9.6vw, 42px); line-height: .86; }
-  .home-next-preview__head > p:last-child { margin-top: 6px; line-height: 1.3; font-size: 13.5px; }
-  .home-next-preview__viewport { padding-block: 14px 42px; }
+  .home-next-preview__head { margin-bottom: 22px; }
+  .home-next-preview__kicker { margin-bottom: 20px; }
+  .home-next-preview__head h2 { font-size: clamp(31px, 9.6vw, 42px); line-height: .94; }
+  .home-next-preview__head > p:last-child { margin-top: 14px; line-height: 1.5; font-size: 14.5px; }
+  .home-next-preview__viewport { padding-block: 8px 34px; }
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card {
     --crash-over: 10px;
     width: calc((100vw + 72px) / 6);
-    height: calc((100vw + 72px) / 7.2);
-    min-height: 62px;
-    max-height: 82px;
+    height: calc((100vw + 66px) / 6.6);
+    min-height: 70px;
+    max-height: 92px;
     margin-left: -20px;
     padding: 7px;
     border-radius: 9px;
