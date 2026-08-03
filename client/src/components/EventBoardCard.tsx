@@ -71,7 +71,6 @@ export default function EventBoardCard({
               <p className="event-board-card__when">
                 {dateLabel}{time ? ` · ${time}` : ""}{event.neighborhood ? ` · ${event.neighborhood}` : ""}
               </p>
-              <span className="event-board-card__details-link">Event details →</span>
             </div>
           </button>
         </header>

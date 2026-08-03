@@ -1,5 +1,5 @@
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
@@ -16,6 +16,7 @@ import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
+import SpectrumLoader from "./components/SpectrumLoader";
 
 /** Mount intro outside RouteBoundary so a page crash cannot kill the popup. */
 function RiverBratsIntroOnBeaches() {
@@ -41,33 +42,34 @@ function ScrollToTop() {
   return null;
 }
 import Home from "./pages/Home";
-import Events from "./pages/Events";
-import Schedule from "./pages/Schedule";
-import Submit from "./pages/Submit";
-import PrideWork from "./pages/PrideWork";
-import Gifting from "./pages/Gifting";
-import Housing from "./pages/Housing";
-import HousingNew from "./pages/HousingNew";
-import HousingPost from "./pages/HousingPost";
-import About from "./pages/About";
-import Resume from "./pages/Resume";
-import Legal from "./pages/Legal";
-import Contact from "./pages/Contact";
-import Sponsors from "./pages/Sponsors";
-import AccessSafety from "./pages/AccessSafety";
-import Admin from "./pages/Admin";
-import Dashboard from "./pages/Dashboard";
-import NotificationSettings from "./pages/NotificationSettings";
-import Inbox from "./pages/Inbox";
-import MissedConnections from "./pages/MissedConnections";
-import Directory from "./pages/Directory";
-import NudeBeaches from "./pages/NudeBeaches";
-import Darkroom from "./pages/Darkroom";
-import DesignSystemSandbox from "./pages/DesignSystemSandbox";
-import MemberProfile from "./pages/MemberProfile";
-import NotFound from "./pages/not-found";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
+
+const Events = lazy(() => import("./pages/Events"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const Submit = lazy(() => import("./pages/Submit"));
+const PrideWork = lazy(() => import("./pages/PrideWork"));
+const Gifting = lazy(() => import("./pages/Gifting"));
+const Housing = lazy(() => import("./pages/Housing"));
+const HousingNew = lazy(() => import("./pages/HousingNew"));
+const HousingPost = lazy(() => import("./pages/HousingPost"));
+const About = lazy(() => import("./pages/About"));
+const Resume = lazy(() => import("./pages/Resume"));
+const Legal = lazy(() => import("./pages/Legal"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Sponsors = lazy(() => import("./pages/Sponsors"));
+const AccessSafety = lazy(() => import("./pages/AccessSafety"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
+const Inbox = lazy(() => import("./pages/Inbox"));
+const MissedConnections = lazy(() => import("./pages/MissedConnections"));
+const Directory = lazy(() => import("./pages/Directory"));
+const NudeBeaches = lazy(() => import("./pages/NudeBeaches"));
+const Darkroom = lazy(() => import("./pages/Darkroom"));
+const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
+const MemberProfile = lazy(() => import("./pages/MemberProfile"));
+const NotFound = lazy(() => import("./pages/not-found"));
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
@@ -89,14 +91,15 @@ function AppLayout() {
   return (
     <div
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
-      style={{ background: "#0a0a0a" }}
+      style={{ background: "var(--ink-800, #0a0a0a)" }}
     >
       <PullToRefresh />
       <Nav />
       {!adminShell && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
-          <Switch>
+          <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>
+            <Switch>
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
@@ -144,7 +147,8 @@ function AppLayout() {
               {() => <Redirect to="/spotted" />}
             </Route>
             <Route component={NotFound} />
-          </Switch>
+            </Switch>
+          </Suspense>
         </RouteBoundary>
       </main>
       <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />

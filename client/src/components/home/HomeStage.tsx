@@ -326,7 +326,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
   }, [draggingRail, calmMode]);
 
   return (
-    <main className="home-front" id="top">
+    <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
         {showVideo ? (
           <video ref={videoRef} className="home-front__video" src={HERO_VIDEO} autoPlay muted loop playsInline aria-hidden />
@@ -471,6 +471,6 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

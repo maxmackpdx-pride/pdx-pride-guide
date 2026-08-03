@@ -594,6 +594,36 @@
 
 /* Calm / reduced motion: skip FLIP, instant open */
 html.calm-mode .place-modal-overlay,
+:root[data-calm="true"] .place-modal-overlay {
+  transition: none !important;
+  background: rgba(3, 3, 5, 0.72) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+html.calm-mode .place-modal-panel--flip,
+html.calm-mode .place-modal-panel--enter,
+html.calm-mode .place-modal-panel--flip.place-modal-panel--open,
+html.calm-mode .place-modal-panel--enter.place-modal-panel--open,
+:root[data-calm="true"] .place-modal-panel--flip,
+:root[data-calm="true"] .place-modal-panel--enter,
+:root[data-calm="true"] .place-modal-panel--flip.place-modal-panel--open,
+:root[data-calm="true"] .place-modal-panel--enter.place-modal-panel--open {
+  transform: none !important;
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+html.calm-mode .place-modal-panel__inner,
+:root[data-calm="true"] .place-modal-panel__inner {
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+html.calm-mode .place-modal-panel__seam,
+:root[data-calm="true"] .place-modal-panel__seam {
+  animation: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .place-modal-overlay {
     transition: none !important;
