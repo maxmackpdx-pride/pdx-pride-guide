@@ -57,8 +57,10 @@ h1{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900
   background:conic-gradient(from 220deg,#FF0018,#FFA52C,#FFFF41,#008018,#0000F9,#86007D,#000,#784F17,#5BCEFA,#F5A9B8,#fff,#FF0018);
   filter:blur(2px) saturate(1.2) brightness(1.12);opacity:.86}
 .caret{width:26px;height:26px;display:grid;place-items:center;color:#8a8a92;background:none;border:0;cursor:pointer}
-.calm{display:inline-flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;margin-left:12px;
-  font-family:var(--font-mono,ui-monospace,monospace);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6a6a72}
+.calm{min-height:44px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-left:12px;padding:9px 12px;
+  border:1px solid #000;border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 46%),rgba(8,8,10,.94);
+  box-shadow:0 0 0 1px #202026,0 8px 18px -14px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.12);
+  font-family:var(--font-mono,ui-monospace,monospace);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#a3a3aa}
 .calm span{width:30px;height:16px;border-radius:99px;background:#141418;border:1px solid #22222a;display:inline-flex;align-items:center;padding:2px}
 .calm i{width:10px;height:10px;border-radius:50%;background:#6a6a72}
 /* Button, solid variant. Same atoms as Button.jsx .pdxBtn--solid. */
@@ -172,6 +174,7 @@ h1{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:900
   <div class="cell"><h4>Link states</h4><p>Idle <code>#aaa</code>, hover white, active acid yellow with a 3px cyan-to-yellow underbar and an 8px cyan glow. Display font 700 at <code>--site-nav-size</code>, .06em, uppercase, never wrapping.</p></div>
   <div class="cell"><h4>Dropdown</h4><p>Chevron rotates 180 degrees when open. The panel is the tab-sheet surface: <code>rgba(8,8,10,.96)</code>, a 1px black edge with a black ring and lift shadow, 18px radius, a display-font heading, and rows on 2% white inside 10px radius hairlines that take the accent on hover. Identical to the mobile Events and Boards sheets, so one component reads the same on both sizes.</p></div>
   <div class="cell"><h4>Right cluster</h4><p>Hub sits left of a 1px <code>#333</code> seam with equal margins, then the avatar and its caret. From 1024px up the cluster is pushed right with <code>margin-left:auto</code>.</p></div>
+  <div class="cell"><h4>Calm and menu controls</h4><p>Both use the current 44px tonal glass control: 14px radius, black edge plus neutral hairline, restrained inset sheen and no brutal offset or neon outline. Their function and placement stay unchanged.</p></div>
   <div class="cell"><h4>Unread dot</h4><p>8px magenta dot on the Hub link with a 1.5px page-colored ring, breathing out to a 6px transparent halo on a 2.2s loop.</p></div>
   <div class="cell"><h4>Join button</h4><p>Signed out, the cluster is replaced by the solid Button: lit acid fill, black keyline, top bevel, floor shade and an acid bloom. Identical atoms to <code>.pdxBtn--solid</code>, so it can never drift from 09.1. The flat magenta offset it used to carry is retired. This is one of the few places the brutal shadow is still correct.</p></div>
   <div class="cell"><h4>Sizing</h4><p>The header scales from the logo: <code>--site-logo-h: clamp(52px,7.5vw,72px)</code> drives nav size, padding and gaps, so the row never breaks between 1024 and 1320px.</p></div>

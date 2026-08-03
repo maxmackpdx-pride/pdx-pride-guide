@@ -23,6 +23,8 @@
     "Fluent acrylic-like depth and one-pixel stroke clarity",
     "Material 3 container hierarchy and interaction state layers",
     "single-owner Fluent material for the open event card and its persistent footer",
+    "Zaylist Event Room hierarchy: poster-first identity, social attendance directly below event facts, and M3 tonal inner sections",
+    "Directory Place Room hierarchy: category-logo identity, tonal place details, and a separate tonal community activity room",
     "18px expressive shared card shape"
   ],
   "preserve": [
@@ -34,6 +36,9 @@
     "rainbow seam and poster-well floor",
     "card anatomy, content hierarchy and actions",
     "black readable ink on bright filled event tags",
+    "high-contrast light day tint for open-event attendance actions",
+    "outer-shell deep glass, day-colour neon edge and restrained ambient bloom",
+    "directory category neon, specialty rainbow edges, logo orb, trust information and related-object tabs",
     "advertiser-owned accent colors, media, logos and offer copy",
     "logo, typography, navigation, maps, pages and accessibility"
   ],

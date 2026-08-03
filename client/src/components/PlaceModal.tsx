@@ -610,6 +610,8 @@ export default function PlaceModal({
             </div>
           )}
 
+          <div className="place-modal-panel__details-room">
+
           {address && (
             <div style={{ ...rowStyle, marginBottom: multiLoc ? 10 : 6, flexWrap: "wrap", gap: 10 }}>
               <span style={{ display: "inline-flex", alignItems: "flex-start", gap: 8 }}>
@@ -987,32 +989,25 @@ export default function PlaceModal({
             </>
           )}
 
-          <div style={{ marginTop: 6, paddingTop: 16, borderTop: "1px solid var(--ink-border)" }}>
-            <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+          </div>
+
+          <div className="place-modal-panel__community-room">
+            <div className="place-modal-panel__tabs" role="tablist" aria-label="Place activity">
               {tabs.map(t => (
                 <button
                   key={t.key}
                   type="button"
+                  role="tab"
+                  aria-selected={tab === t.key}
                   onClick={() => setTab(t.key)}
-                  style={{
-                    padding: "7px 13px",
-                    borderRadius: 999,
-                    border: `1px solid ${tab === t.key ? accent : "var(--ink-border-strong)"}`,
-                    background: tab === t.key ? `color-mix(in srgb, ${accent} 16%, transparent)` : "transparent",
-                    color: tab === t.key ? accent : "var(--text-lo)",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: "0.72rem",
-                    letterSpacing: "0.04em",
-                    textTransform: "uppercase",
-                    cursor: "pointer",
-                  }}
+                  className={`place-modal-panel__tab${tab === t.key ? " active" : ""}`}
                 >
                   {t.label}{t.count > 0 ? ` (${t.count})` : ""}
                 </button>
               ))}
             </div>
 
+            <div className="place-modal-panel__tab-panel" role="tabpanel">
             {tab === "events" && (
               upcomingEvents.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming Pride events matched to this venue yet.</p>
@@ -1157,6 +1152,7 @@ export default function PlaceModal({
                 </div>
               )
             )}
+            </div>
           </div>
           </div>
         </div>

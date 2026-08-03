@@ -57,6 +57,7 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   .board-detail-modal,
   .board-post-overlay,
   .event-modal,
+  .place-modal-panel,
   .pdxPlace,
   .pdxPlace__body,
   .pdxBoard--affiliate,
@@ -102,6 +103,7 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   .board-detail-modal,
   .board-post-overlay,
   .event-modal,
+  .place-modal-panel,
   .pdxPlace__body,
   .pdxBoard--affiliate,
   .affiliate-poster-card,
@@ -130,10 +132,134 @@ html[data-zaylist-cards="fluent2-m3"] :where(
 html[data-zaylist-cards="fluent2-m3"] .event-modal {
   overflow: hidden;
   isolation: isolate;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 24%),
+    radial-gradient(80% 34% at 50% 101%, color-mix(in srgb, var(--c) 20%, transparent), transparent 72%),
+    radial-gradient(65% 42% at 100% 4%, color-mix(in srgb, var(--c) 11%, transparent), transparent 76%),
+    rgba(3, 3, 5, 0.94);
+  border-color: color-mix(in srgb, var(--c) 66%, rgba(255, 255, 255, 0.2));
+  box-shadow:
+    0 3px 7px rgba(0, 0, 0, 0.4),
+    0 34px 80px -34px rgba(0, 0, 0, 0.96),
+    0 28px 76px -42px color-mix(in srgb, var(--c) 78%, transparent),
+    0 0 34px -18px color-mix(in srgb, var(--c) 72%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 color-mix(in srgb, var(--c) 24%, transparent);
 }
 
 html[data-zaylist-cards="fluent2-m3"] .event-modal__scroll {
   background: transparent;
+}
+
+/* Zaylist Event Room: poster first, with neon controls floating over the art. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal__poster-img {
+  height: clamp(360px, 52vh, 520px);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__close {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(3, 3, 5, 0.82);
+  border-color: color-mix(in srgb, var(--c) 72%, rgba(255, 255, 255, 0.2));
+  box-shadow:
+    0 10px 24px -12px rgba(0, 0, 0, 0.94),
+    0 0 18px -10px color-mix(in srgb, var(--c) 80%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__share {
+  right: 68px;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__title {
+  margin-bottom: 18px;
+  text-wrap: balance;
+  text-shadow: 0 0 26px color-mix(in srgb, var(--c) 22%, transparent);
+}
+
+/* Inner hierarchy is M3 tonal, not glass-inside-glass. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal__meta,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__block,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__section,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__glass-panel.event-modal__section,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__section.event-modal__glass-panel,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tab-panel {
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent 42%),
+    color-mix(in srgb, var(--c) 5%, #09090c);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, #24242a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__meta {
+  padding: 17px 18px;
+  border-left: 3px solid var(--c);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__block {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__section,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__glass-panel.event-modal__section,
+html[data-zaylist-cards="fluent2-m3"] .event-modal__section.event-modal__glass-panel {
+  padding: 18px;
+  border-left: 3px solid var(--section-accent, var(--c));
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__social-room {
+  margin: 0 0 16px;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tabs {
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--c) 28%, #24242a);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 5%, #08080a);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tab {
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #aaa8a2;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tab:hover {
+  color: #fff;
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tab.active {
+  color: #050506;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.46), transparent 48%),
+    color-mix(in srgb, var(--c) 34%, #e8e8e4);
+  box-shadow:
+    0 7px 18px -12px color-mix(in srgb, var(--c) 76%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tab-panel {
+  padding: 18px;
+}
+
+@media (min-width: 900px) {
+  html[data-zaylist-cards="fluent2-m3"] .event-modal__poster-img {
+    height: min(60vh, 620px);
+  }
 }
 
 html[data-zaylist-cards="fluent2-m3"] .event-modal__sticky-cta {
@@ -143,6 +269,145 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__sticky-cta {
   box-shadow:
     0 -2px 4px rgba(0, 0, 0, 0.28),
     0 -14px 30px -22px color-mix(in srgb, var(--c) 42%, transparent);
+}
+
+/* Directory card, closed: the compact version of the same category room. */
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace__body {
+  border-radius: var(--f2m3-card-radius);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 29%),
+    radial-gradient(105% 82% at 50% 112%, color-mix(in srgb, var(--c) 20%, transparent), transparent 62%),
+    radial-gradient(90% 70% at 50% 42%, #000 0%, #000 40%, #030304 76%, color-mix(in srgb, var(--c) 7%, #050408) 100%);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace__media {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c) 5%, rgba(5, 5, 7, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace__share {
+  min-height: 44px;
+  border-radius: 999px;
+  background: rgba(3, 3, 5, 0.86);
+  box-shadow:
+    0 8px 20px -14px color-mix(in srgb, var(--c) 74%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Directory card, open: one glass shell containing quiet M3 tonal rooms. */
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel {
+  border-radius: 22px;
+  isolation: isolate;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 24%),
+    radial-gradient(84% 34% at 50% 102%, color-mix(in srgb, var(--c) 20%, transparent), transparent 72%),
+    radial-gradient(70% 48% at 100% 0%, color-mix(in srgb, var(--c) 12%, transparent), transparent 74%),
+    rgba(3, 3, 5, 0.95);
+  border-color: color-mix(in srgb, var(--c) 66%, rgba(255, 255, 255, 0.2));
+  box-shadow:
+    0 3px 7px rgba(0, 0, 0, 0.4),
+    0 34px 80px -34px rgba(0, 0, 0, 0.96),
+    0 28px 76px -42px color-mix(in srgb, var(--c) 78%, transparent),
+    0 0 34px -18px color-mix(in srgb, var(--c) 72%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__media {
+  height: 230px;
+  border-bottom: 3px solid var(--c);
+  background:
+    radial-gradient(75% 88% at 50% 55%, color-mix(in srgb, var(--c) 18%, transparent), transparent 72%),
+    color-mix(in srgb, var(--c) 4%, #050506);
+}
+
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .place-modal-panel__close,
+  .place-modal-panel__share
+) {
+  min-width: 44px;
+  min-height: 44px;
+  border-color: color-mix(in srgb, var(--c) 70%, #24242a);
+  background: rgba(3, 3, 5, 0.84);
+  box-shadow:
+    0 10px 24px -12px rgba(0, 0, 0, 0.94),
+    0 0 18px -10px color-mix(in srgb, var(--c) 80%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .place-modal-panel__details-room,
+  .place-modal-panel__community-room,
+  .place-modal-locations > ul > li
+) {
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent 42%),
+    color-mix(in srgb, var(--c) 5%, #09090c);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, #24242a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__details-room {
+  margin-bottom: 14px;
+  padding: 18px;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__community-room {
+  padding: 5px;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__tab {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #aaa8a2;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__tab:hover {
+  color: #fff;
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__tab.active {
+  color: #050506;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.46), transparent 48%),
+    color-mix(in srgb, var(--c) 34%, #e8e8e4);
+  box-shadow:
+    0 7px 18px -12px color-mix(in srgb, var(--c) 76%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .place-modal-panel__tab-panel {
+  margin-top: 5px;
+  padding: 15px 13px 13px;
+  border-top: 1px solid color-mix(in srgb, var(--c) 18%, #202026);
+}
+
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .place-modal-events__tile,
+  .place-modal-past__card
+) {
+  border-radius: 14px;
 }
 
 /* Filled open-event tags require dark ink against Zaylist's bright fills. */
@@ -155,6 +420,22 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__tags :where(
 ) {
   color: #050506 !important;
   text-shadow: none;
+}
+
+/* Attendance is always discoverable: light day tint, dark ink, solid contrast. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal :where(
+  [data-testid="button-ill-be-there-sticky"],
+  .attendance-cluster-cta__btn
+) {
+  color: #050506 !important;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.5), transparent 44%),
+    color-mix(in srgb, var(--c) 32%, #f4f4f2) !important;
+  border-color: color-mix(in srgb, var(--c) 72%, #050506) !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 8px 20px -14px color-mix(in srgb, var(--c) 66%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76) !important;
 }
 
 /* M3 state layer plus Fluent elevation change; no new color meaning. */

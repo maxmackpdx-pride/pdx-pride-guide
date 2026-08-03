@@ -503,6 +503,55 @@ function EventModalInner({
 
   const modColor = modMode ? modAccent[modMode] : "var(--text-lo)";
 
+  const eventSocialRoom = (
+    <div className="event-modal__social-room">
+      <div
+        ref={socialTabsRef}
+        className="event-modal__tabs"
+        role="tablist"
+        aria-label="Event social"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={socialTab === "attendance"}
+          className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
+          onClick={() => setSocialTab("attendance")}
+        >
+          {isPastEvent ? "Who Was There" : "I'll Be There"}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={socialTab === "missed"}
+          className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
+          onClick={() => setSocialTab("missed")}
+        >
+          Missed Connections
+        </button>
+      </div>
+
+      <section
+        className="event-modal__tab-panel"
+        role="tabpanel"
+        data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
+      >
+        {socialTab === "attendance" ? (
+          <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
+        ) : eventTiming === "upcoming" ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "40px 20px", color: "var(--text-faint)", textAlign: "center" }}>
+            <Lock size={28} style={{ opacity: 0.5 }} />
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", margin: 0 }}>
+              Missed connections unlock when this event starts
+            </p>
+          </div>
+        ) : (
+          <MissedConnectionsPanel mode="event" eventId={event.id} compact />
+        )}
+      </section>
+    </div>
+  );
+
   return createPortal(
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
@@ -528,10 +577,9 @@ function EventModalInner({
         <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
         <button
           type="button"
-          className="event-modal__close"
+          className="event-modal__close event-modal__share"
           aria-label="Share this event"
           title="Share this event"
-          style={{ right: 52 }}
           onClick={async () => {
             try {
               const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
@@ -653,6 +701,8 @@ function EventModalInner({
               );
             })()}
           </div>
+
+          {eventSocialRoom}
 
           {/* Flags = day + policy chips; Tags = JSON types - open-event SoT */}
           {(() => {
@@ -962,51 +1012,6 @@ function EventModalInner({
               Message the Host
             </button>
           </div>
-
-          <div
-            ref={socialTabsRef}
-            className="event-modal__tabs"
-            role="tablist"
-            aria-label="Event social"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={socialTab === "attendance"}
-              className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
-              onClick={() => setSocialTab("attendance")}
-            >
-              {isPastEvent ? "Who Was There" : "I'll Be There"}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={socialTab === "missed"}
-              className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
-              onClick={() => setSocialTab("missed")}
-            >
-              Missed Connections
-            </button>
-          </div>
-
-          <section
-            className="event-modal__tab-panel"
-            role="tabpanel"
-            data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
-          >
-            {socialTab === "attendance" ? (
-              <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
-            ) : eventTiming === "upcoming" ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "40px 20px", color: "var(--text-faint)", textAlign: "center" }}>
-                <Lock size={28} style={{ opacity: 0.5 }} />
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", margin: 0 }}>
-                  Missed connections unlock when this event starts
-                </p>
-              </div>
-            ) : (
-              <MissedConnectionsPanel mode="event" eventId={event.id} compact />
-            )}
-          </section>
 
           {hostDrawer === "compose" && (
             <div className="event-modal__drawer event-modal__drawer--compose">

@@ -127,3 +127,10 @@
   padding: 14px 26px 17px;
   border-bottom-width: 4.3px;
 }
+
+/* Compact pages should close directly into the site footer when content is short. */
+@media (max-width: 640px) {
+  main.flex-1:has(> .events-page) {
+    flex-grow: 0;
+  }
+}

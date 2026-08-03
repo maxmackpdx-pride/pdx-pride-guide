@@ -691,17 +691,41 @@ body::before {
   display: none;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
-  border: 2px solid var(--neon-yellow);
-  background: transparent;
-  color: var(--neon-yellow);
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #000;
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 46%),
+    rgba(8, 8, 10, 0.94);
+  color: #f4f1ea;
   cursor: pointer;
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 1.44rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow:
+    0 0 0 1px #202026,
+    0 8px 18px -14px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.site-nav-toggle:hover,
+.site-nav-toggle[aria-expanded="true"] {
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 46%),
+    #0d0d10;
+  box-shadow:
+    0 0 0 1px #2b2b32,
+    0 10px 22px -15px rgba(0, 0, 0, 0.94),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.site-nav-toggle:focus-visible {
+  outline: 3px solid var(--neon-cyan, #19e3ff);
+  outline-offset: 3px;
 }
 
 .site-nav {
@@ -2023,10 +2047,14 @@ a.event-host-name.event-host-name--link:hover {
 
   .site-nav-toggle {
     display: inline-flex;
-    padding: 6px 10px;
+    min-height: 44px;
+    padding: 9px 13px;
     gap: 6px;
     font-size: 0.78rem;
-    box-shadow: 3px 3px 0 rgba(255, 0, 204, 0.4);
+    box-shadow:
+      0 0 0 1px #202026,
+      0 8px 18px -14px rgba(0, 0, 0, 0.9),
+      inset 0 1px 0 rgba(255,255,255,.12);
   }
 
   .site-nav-toggle svg {
@@ -2464,8 +2492,8 @@ a.event-host-name.event-host-name--link:hover {
 
   .site-hub-mobile-bar .hub-mobile-tab--center .hub-mobile-tab__z-mark {
     display: block;
-    width: 34px;
-    height: 34px;
+    width: 43px;
+    height: 43px;
     object-fit: contain;
     flex: 0 0 auto;
     /* Asset is white Z + bar on transparent; stays white on dark dock */
@@ -11964,21 +11992,29 @@ html.calm-mode .push-notification-toggle--on .push-notification-toggle__thumb {
   font-size: 0.72rem;
 }
 
-/* Nav header: ghost switch + CALM label */
+/* Nav header: current tonal glass control + CALM label. */
 .calm-mode-toggle--minimal {
-  padding: 6px 4px;
-  gap: 6px;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  border-radius: 6px;
-  opacity: 0.72;
+  min-height: 44px;
+  padding: 9px 12px;
+  gap: 8px;
+  border: 1px solid #000;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 46%),
+    rgba(8, 8, 10, 0.94);
+  box-shadow:
+    0 0 0 1px #202026,
+    0 8px 18px -14px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  opacity: 1;
 }
 
 .calm-mode-toggle--minimal:hover {
   opacity: 1;
-  border: none;
-  background: rgba(255, 255, 255, 0.05);
+  border-color: #000;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 46%),
+    #0d0d10;
 }
 
 .calm-mode-toggle--minimal:focus-visible {
@@ -12034,13 +12070,14 @@ html.calm-mode .calm-mode-toggle__label--minimal {
 }
 
 html:not(.calm-mode) .calm-mode-toggle--minimal {
-  border: none;
-  box-shadow: none;
+  border: 1px solid #000;
 }
 
 html:not(.calm-mode) .calm-mode-toggle--minimal:hover {
-  border: none;
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #000;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 46%),
+    #0d0d10;
 }
 
 html.calm-mode .calm-mode-toggle--minimal {

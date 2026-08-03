@@ -452,6 +452,31 @@
   padding: 0 6px 12px;
 }
 
+.directory-filters__more {
+  min-height: 44px;
+  padding: 9px 15px;
+  border: 1px solid color-mix(in srgb, var(--panel-lime, #c8fa3c) 42%, #24242a);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-lime, #c8fa3c) 7%, #09090c);
+  color: var(--panel-lime, #c8fa3c);
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.directory-filters__more:hover {
+  background: color-mix(in srgb, var(--panel-lime, #c8fa3c) 13%, #09090c);
+}
+
+.directory-filters__more:focus-visible {
+  outline: 3px solid var(--neon-cyan, #19e3ff);
+  outline-offset: 3px;
+}
+
 /* ── The dock ─────────────────────────────────────────────── */
 .directory-dock {
   width: 100%;

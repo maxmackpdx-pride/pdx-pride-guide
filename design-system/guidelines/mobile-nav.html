@@ -43,7 +43,7 @@ h2{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800
 .iw{position:relative;display:inline-flex}
 .iw i{position:absolute;top:-8px;right:-12px;font-style:normal;font-size:11px;background:#ff00cc;color:#08080a;font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800;min-width:16px;height:16px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
 .zstack{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:4px}
-.zmark{width:24px;height:24px;display:block;object-fit:contain;filter:brightness(0) invert(1)}
+.zmark{width:43px;height:43px;display:block;object-fit:contain;filter:brightness(0) invert(1)}
 .zbar{width:24px;height:3px;border-radius:2px;background:var(--grad-rainbow);display:block}
 .tab--hub{justify-content:flex-start;padding-top:9px;gap:7px}
 .tab.on .zmark{filter:drop-shadow(0 0 6px rgba(25,227,255,.7))}
@@ -107,7 +107,7 @@ h2{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800
   <div class="bar"><div class="dock">
     <a class="tab on cyan"><span class="iw"><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><span>Places</span></a>
     <button class="tab"><span class="iw"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span>Events</span></button>
-    <a class="tab tab--hub"><span class="zstack"><img class="zmark" src="../app-face/icons/zaylist-mono.png" alt="" width="24" height="24"><span class="zbar"></span></span><span>Hub</span></a>
+    <a class="tab tab--hub"><span class="zstack"><img class="zmark" src="../app-face/icons/zaylist-mono.png" alt="" width="43" height="43"><span class="zbar"></span></span><span>Hub</span></a>
     <button class="tab"><span class="iw"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></span><span>Boards</span></button>
     <button class="tab"><span class="iw"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-11.9 7.6L3 21l1.9-6.1A8.4 8.4 0 1 1 21 11.5Z"/></svg><i>3</i></span><span>Messages</span></button>
   </div></div>
@@ -154,7 +154,7 @@ h2{font-family:var(--font-display,'Barlow Condensed',sans-serif);font-weight:800
   <div class="cell"><h4>Tab</h4><p>Min height 56px, radius 14px, <code>1px solid #000</code> at every state, idle text <code>#6e6e76</code> on 2% white, display font 700 at 10.5px, 0.06em, uppercase. Icons 26px at 2.3 stroke.</p></div>
   <div class="cell"><h4>Active</h4><p>Fill is <code>color-mix(accent 16%, #0a0a0e)</code>, 18% for cyan and violet. Two-stop neon glow at 70 to 75% and 45 to 50%. Border stays black. Never a colored border, never an outer ring.</p></div>
   <div class="cell"><h4>Accents</h4><p>Places cyan <code>#19e3ff</code>, Events orange <code>#ff6600</code>, Hub cyan, Boards lime <code>#ccff00</code>, Messages pink <code>#ff00cc</code>. Green <code>#39ff14</code> and violet exist for hub-shell tabs. Fixed per tab, never day colors.</p></div>
-  <div class="cell"><h4>Center tab</h4><p>Hub is the Z mark at 24px sitting on its own 3px spectrum bar, never a house icon. The mark is nudged down so the gap above it, the gap to the bar and the gap to the HUB label read evenly rather than top-heavy. Signed out it opens the auth modal instead of routing.</p></div>
+  <div class="cell"><h4>Center tab</h4><p>Hub is the Z mark at 43px, 25% larger than its original 34px production size, and never a house icon. It is intentionally larger than the 26px side icons so the center reads as Zaylist's anchor without changing the dock height. Signed out it opens the auth modal instead of routing.</p></div>
   <div class="cell"><h4>Badge</h4><p>Messages carries the attention count: pink chip, dark text, <code>top:-8px right:-12px</code>, capped at <code>9+</code>. It sums unread DMs plus the admin queue plus the owner desk.</p></div>
   <div class="cell"><h4>Calm mode</h4><p>Calm and reduced motion drop the glow on active tabs and hold the fill. Nothing pulses.</p></div>
   <div class="cell no"><h4>Never</h4><p>No sitewide cyan pull above the bar: that was retired. The grip belongs to the hub drawer only. Do not add a sixth tab, and do not give the dock a neon edge.</p></div>
@@ -230,7 +230,7 @@ Spec.recipe("#r-hub", `/* Centre tab. The Z mark sits on its own spectrum bar, a
    bar and label all read evenly. Never a house icon. */
 .hub-mobile-tab--hub { justify-content: flex-start; padding-top: 9px; gap: 7px; }
 .hub-mobile-tab__zstack { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; }
-.hub-mobile-tab__zmark { width: 24px; height: 24px; object-fit: contain; display: block; }
+.hub-mobile-tab__zmark { width: 43px; height: 43px; object-fit: contain; display: block; }
 .hub-mobile-tab__zbar  { width: 24px; height: 3px; border-radius: 2px; background: var(--grad-rainbow); display: block; }
 .hub-mobile-tab.is-active .hub-mobile-tab__zmark { filter: drop-shadow(0 0 6px rgba(25,227,255,.7)); }
 
@@ -239,7 +239,7 @@ Spec.recipe("#r-hub", `/* Centre tab. The Z mark sits on its own spectrum bar, a
 
 <a class="hub-mobile-tab hub-mobile-tab--hub" href="/dashboard">
   <span class="hub-mobile-tab__zstack">
-    <img class="hub-mobile-tab__zmark" src="/assets/z-mark-nav.png" alt="" width="24" height="24">
+    <img class="hub-mobile-tab__zmark" src="/assets/z-mark-nav.png" alt="" width="43" height="43">
     <span class="hub-mobile-tab__zbar"></span>
   </span>
   <span>Hub</span>

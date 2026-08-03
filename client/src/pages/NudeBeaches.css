@@ -780,16 +780,25 @@ html.calm-mode .board-close-seam {
   --c: #39ff14;
 }
 
-/* Primary = glass fill in island accent; edge stays soft white/mix, not solid neon */
+/* Primary = canonical solid glass button: black ring, restrained inset sheen, no outer bloom. */
 .nude-map-btn--primary {
   --c: var(--nb-accent, #ff6600);
   color: #050506;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%), var(--c);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 42%), var(--c);
+  border: 1px solid #000;
   box-shadow:
-    0 0 18px -8px color-mix(in srgb, var(--c) 55%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.3);
+    0 0 0 1px #000,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.nude-map-btn--primary:hover {
+  transform: none;
+  border-color: #000;
+  box-shadow:
+    0 0 0 1px #000,
+    0 3px 6px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
 .nude-beaches-page--sauvie .nude-map-btn--primary {

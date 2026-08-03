@@ -25,8 +25,8 @@ function HubMark({ active }: { active: boolean }) {
     <img
       src="/icons/zaylist-mono.png"
       alt=""
-      width={36}
-      height={36}
+      width={43}
+      height={43}
       className={`hub-mobile-tab__z-mark${active ? " is-active" : ""}`}
       decoding="async"
       aria-hidden

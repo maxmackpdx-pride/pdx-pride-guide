@@ -239,6 +239,7 @@ export default function Directory() {
     return t && t in TYPE_LABELS ? t : "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
+  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [placeOriginRect, setPlaceOriginRect] = useState<{
@@ -421,6 +422,14 @@ export default function Directory() {
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
     return [...ordered, ...extras];
   }, [businesses]);
+
+  const visibleNeighborhoods = useMemo(() => {
+    if (showAllNeighborhoods || neighborhoodsInUse.length <= 5) return neighborhoodsInUse;
+    const firstRow = neighborhoodsInUse.slice(0, 5);
+    return activeNeighborhood !== "ALL" && !firstRow.includes(activeNeighborhood)
+      ? [...firstRow, activeNeighborhood]
+      : firstRow;
+  }, [activeNeighborhood, neighborhoodsInUse, showAllNeighborhoods]);
 
   const heroStats = useMemo(() => {
     const queerOwned = businesses.filter(b => b.queerOwned).length;
@@ -887,7 +896,7 @@ export default function Directory() {
             role="group"
             aria-label="Filter by neighborhood"
           >
-            {neighborhoodsInUse.map(n => {
+            {visibleNeighborhoods.map(n => {
               const selected = activeNeighborhood === n;
               return (
                 <FilterChip
@@ -904,6 +913,18 @@ export default function Directory() {
                 </FilterChip>
               );
             })}
+            {neighborhoodsInUse.length > 5 && (
+              <button
+                type="button"
+                className="directory-filters__more"
+                aria-expanded={showAllNeighborhoods}
+                onClick={() => setShowAllNeighborhoods(value => !value)}
+              >
+                {showAllNeighborhoods
+                  ? "View less"
+                  : `View ${neighborhoodsInUse.length - 5} more`}
+              </button>
+            )}
           </div>
         </div>
 
