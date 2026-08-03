@@ -3531,3 +3531,10 @@ html.calm-mode .home-next-preview__orb,
     background-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.8) 100%);
   }
 }
+
+/* Phones: the hero now hugs its content (no big bottom void), so the -88px pull
+   above would drag the stat strip up over the CTA buttons. Cancel it so the
+   stats sit cleanly just below the buttons. */
+@media (max-width:620px) {
+  .home-main-stage .home-hero-stats-boundary { margin-top:0; }
+}
