@@ -293,6 +293,36 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     return () => observer.disconnect();
   }, [calmMode]);
 
+  // Auto-scroll the "What do you need?" rail on mobile: advance one card every
+  // few seconds and loop back to the start (infinite feel). Only fires when the
+  // rail is actually horizontally scrollable (mobile), respects reduced-motion,
+  // and pauses briefly whenever the user touches/drags so it never fights them.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail || prefersStillMotion()) return;
+    let pausedUntil = 0;
+    const bump = () => { pausedUntil = Date.now() + 6000; };
+    rail.addEventListener("pointerdown", bump);
+    rail.addEventListener("touchstart", bump, { passive: true });
+    rail.addEventListener("wheel", bump, { passive: true });
+    const id = window.setInterval(() => {
+      const max = rail.scrollWidth - rail.clientWidth;
+      if (max < 8) return;            // desktop grid — not a horizontal rail
+      if (draggingRail) return;
+      if (Date.now() < pausedUntil) return;
+      const step = rail.clientWidth * 0.85;
+      let next = rail.scrollLeft + step;
+      if (next >= max - 4) next = 0;  // loop back to the first card
+      rail.scrollTo({ left: next, behavior: "smooth" });
+    }, 3600);
+    return () => {
+      window.clearInterval(id);
+      rail.removeEventListener("pointerdown", bump);
+      rail.removeEventListener("touchstart", bump);
+      rail.removeEventListener("wheel", bump);
+    };
+  }, [draggingRail, calmMode]);
+
   return (
     <main className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">

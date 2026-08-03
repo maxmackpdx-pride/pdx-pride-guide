@@ -144,16 +144,39 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
 }
 
 @media (max-width:620px) {
-  .home-front__welcome { min-height:calc(100svh - 60px); }
-  .home-front__hero { justify-content:flex-start; padding-top:clamp(46px,11vh,88px); padding-bottom:30px; }
-  .home-front__kicker { margin-bottom:clamp(52px,12vh,96px); }
+  .home-front__welcome { min-height:calc(100svh - 96px); }
+  /* Center the hero stack so the space above the kicker and below the buttons
+     is even — no more giant void pinned to the bottom before the stat strip. */
+  .home-front__hero { justify-content:center; padding-top:clamp(24px,5vh,48px); padding-bottom:clamp(24px,5vh,48px); }
+  .home-front__kicker { margin-bottom:clamp(20px,4.5vh,38px); }
   .home-front__mark { width:100%; max-width:none; }
   .home-front__hero-actions { margin-top:42px; }
   .home-front__hero-actions .pdx-glass-btn { flex:1 1 140px; min-width:0; padding:0 11px; }
   .home-front__worlds { padding-top:22px; }
   .home-front__worlds-head h2 { font-size:48px; }
-  .home-front__grid { display:flex; flex-direction:column; gap:12px; }
-  .home-front__world,.home-front__world--feature { min-height:300px; padding:18px; }
+  /* Mobile: horizontal swipe rail (right-to-left) with scroll-snap + a peeking
+     next card, instead of a tall vertical stack. Pairs with the JS auto-scroll
+     in HomeStage.tsx and the pointer-drag handlers on the rail. */
+  .home-front__grid {
+    display:flex; flex-direction:row; flex-wrap:nowrap;
+    gap:12px;
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    scroll-padding-inline:16px;
+    padding-inline:16px;
+    margin-inline:-16px; /* bleed the rail to the screen edges */
+    scrollbar-width:none;
+    touch-action:pan-x pan-y;
+  }
+  .home-front__grid::-webkit-scrollbar { display:none; }
+  .home-front__grid--dragging { cursor:grabbing; scroll-snap-type:none; }
+  .home-front__world,.home-front__world--feature {
+    flex:0 0 85%; max-width:85%;
+    scroll-snap-align:center;
+    min-height:300px; padding:18px;
+  }
   .home-front__world-copy { margin-top:34px; }
   .home-front__world-copy h3 { font-size:42px; }
   .home-front__world[data-world="events"] { min-height:520px; }
