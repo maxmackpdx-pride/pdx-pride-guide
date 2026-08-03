@@ -35,13 +35,21 @@ function NextPreviewCardStack() {
       setLanded(true);
       return;
     }
+    const revealIfVisible = () => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) setLanded(true);
+    };
+    const frame = window.requestAnimationFrame(revealIfVisible);
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       setLanded(true);
       observer.disconnect();
-    }, { threshold: .16, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: .04, rootMargin: "0px 0px 6% 0px" });
     observer.observe(section);
-    return () => observer.disconnect();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
   return (
@@ -88,7 +96,13 @@ function NextPreviewCardStack() {
                 key={card.name}
                 style={{ ["--stack-index" as string]: index }}
               >
-                <img src={card.logo} alt="" loading="lazy" decoding="async" />
+                <img
+                  className={card.name === "ZENEGADES" ? "home-next-preview__logo--zenegades" : undefined}
+                  src={card.logo}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
               </span>
             ))}
           </span>

@@ -756,6 +756,18 @@ export default function Nav() {
               })}
             </div>
 
+            <button
+              type="button"
+              className="site-search-trigger site-search-trigger--desktop-nav"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search events and places"
+              title="Search (⌘K)"
+              data-testid="site-search-trigger"
+            >
+              <Search size={18} aria-hidden="true" />
+              <span className="site-search-trigger__label">Search</span>
+            </button>
+
             {user && (
               <div className="site-auth site-auth--desktop">
                 <ProfileMenu
@@ -809,27 +821,17 @@ export default function Nav() {
           </nav>
 
           <div className="site-header-controls">
-            <button
-              type="button"
-              className="site-search-trigger"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search events and places"
-              title="Search (⌘K)"
-              data-testid="site-search-trigger"
-            >
-              <Search size={18} aria-hidden="true" />
-              <span className="site-search-trigger__label">Search</span>
-            </button>
             {(user || localDemo) && (
               <span className="site-header-calm--desktop">
-                <NavLink
+                <Link
                   href="/dashboard"
-                  label="Hub"
-                  active={hubActive}
-                  showNotify={Boolean(user && unreadCount > 0)}
-                  notifyLabel={user && unreadCount > 0 ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}` : undefined}
+                  className={`site-hub-button${hubActive ? " active" : ""}`}
+                  aria-label={user && unreadCount > 0 ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}` : "Hub"}
                   onClick={closeMenu}
-                />
+                >
+                  Hub
+                  {Boolean(user && unreadCount > 0) && <span className="site-nav-notify-dot" aria-hidden="true" />}
+                </Link>
               </span>
             )}
             <button

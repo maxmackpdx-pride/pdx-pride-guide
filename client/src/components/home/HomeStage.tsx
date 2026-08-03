@@ -251,10 +251,12 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     return [...strict, ...nearestScheduled].slice(0, 8);
   }, [events]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const worldsRef = useRef<HTMLElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number } | null>(null);
   const [manualRail, setManualRail] = useState(false);
   const [draggingRail, setDraggingRail] = useState(false);
+  const [motifsRevealed, setMotifsRevealed] = useState(false);
   const [showVideo, setShowVideo] = useState(() => typeof window === "undefined" || !prefersStillMotion());
 
   useEffect(() => {
@@ -275,6 +277,21 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     videoRef.current.muted = true;
     videoRef.current.play().catch(() => setShowVideo(false));
   }, [showVideo]);
+
+  useEffect(() => {
+    const section = worldsRef.current;
+    if (!section || prefersStillMotion()) {
+      setMotifsRevealed(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setMotifsRevealed(true);
+      observer.disconnect();
+    }, { threshold: .18, rootMargin: "0px 0px -8% 0px" });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [calmMode]);
 
   return (
     <main className="home-front" id="top">
@@ -298,13 +315,17 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>
           </div>
         </div>
+        {afterWelcome}
       </section>
 
-      {afterWelcome}
-
-      <section className="home-front__worlds" id="home-worlds" aria-labelledby="home-worlds-title">
+      <section
+        ref={worldsRef}
+        className={`home-front__worlds${motifsRevealed ? " is-motif-revealed" : ""}`}
+        id="home-worlds"
+        aria-labelledby="home-worlds-title"
+      >
         <header className="home-front__worlds-head">
-          <h2 id="home-worlds-title">What do you need?</h2>
+          <h2 id="home-worlds-title">What do <span>you</span> need?</h2>
         </header>
         <div
           ref={railRef}

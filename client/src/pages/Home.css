@@ -1830,8 +1830,8 @@ html.calm-mode .home-boards__card {
 
 .home-next-preview__viewport {
   display: block;
-  overflow: hidden;
-  padding: 20px 0 28px;
+  overflow: visible;
+  padding: 20px 0 58px;
 }
 
 .home-next-preview__track {
@@ -1853,21 +1853,23 @@ html.calm-mode .home-boards__card {
   margin-left: -52px;
   padding: 18px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
+  border: 3px solid color-mix(in srgb, var(--c) 55%, #101014);
   border-radius: 14px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.09), transparent 30%),
-    radial-gradient(circle at 50% 112%, color-mix(in srgb, var(--c) 17%, transparent), transparent 62%),
-    rgba(4,4,6,.94);
+    linear-gradient(145deg, rgba(255,255,255,.035), transparent 26%),
+    radial-gradient(circle at 50% 118%, color-mix(in srgb, var(--c) 3%, transparent), transparent 72%),
+    rgba(2,2,4,.99);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 0 1px 0 rgba(255,255,255,.052),
     0 0 0 2px #000,
-    0 18px 40px -24px var(--c);
+    0 46px 108px -54px color-mix(in srgb,var(--c) 38%,transparent);
   opacity: .15;
   transform: translateX(-85vw) translateY(18px) rotate(-8deg) scale(.94);
 }
 
 .home-next-preview__card:first-child { margin-left: 0; }
+.home-next-preview__card:nth-child(odd) { --silly-x:1.5px; }
+.home-next-preview__card:nth-child(even) { --silly-x:-1.5px; }
 .home-next-preview__card:nth-child(n + 4) { transform:translateX(85vw) translateY(18px) rotate(8deg) scale(.94); }
 .home-next-preview--landed .home-next-preview__card {
   animation:
@@ -1891,16 +1893,35 @@ html.calm-mode .home-boards__card {
   filter: drop-shadow(0 0 13px color-mix(in srgb, var(--c) 24%, transparent));
 }
 
+.home-next-preview__card img.home-next-preview__logo--zenegades {
+  width: 80%;
+  height: 80%;
+  margin: auto;
+}
+
+.home-next-preview__card.pdx-glass-card::after { background:none; }
+
+.home-next-preview__card.pdx-glass-card.pdx-glass-rebind {
+  background:linear-gradient(145deg,rgba(255,255,255,.008),transparent 24%),#020204;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.052),
+    0 0 0 2px #000,
+    -7px 7px 20px -18px rgba(0,0,0,.88),
+    0 46px 108px -54px color-mix(in srgb,var(--c) 33%,transparent);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
 .home-next-preview__cta {
   width: min(1180px, calc(100% - 40px));
-  min-height: 44px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 9px;
   margin: 0 auto;
   color: #fff;
-  font: 800 17px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  font: 800 18px/1 var(--font-display, "Barlow Condensed", sans-serif);
   letter-spacing: .08em;
   text-transform: uppercase;
   transform: translateY(4px);
@@ -1931,8 +1952,11 @@ html.calm-mode .home-boards__card {
 }
 
 @keyframes homeNextSettledFloat {
-  from { transform:translateY(calc((var(--stack-index) - 2.5) * 2px - 1px)) rotate(calc((var(--stack-index) - 2.5) * .45deg - .08deg)); }
-  to { transform:translateY(calc((var(--stack-index) - 2.5) * 2px + 1.5px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .08deg)); }
+  0% { transform:translate(0,calc((var(--stack-index) - 2.5) * 2px - 1.5px)) rotate(calc((var(--stack-index) - 2.5) * .45deg - .1deg)); }
+  44% { transform:translate(0,calc((var(--stack-index) - 2.5) * 2px + .5px)) rotate(calc((var(--stack-index) - 2.5) * .45deg)); }
+  50% { transform:translate(var(--silly-x),calc((var(--stack-index) - 2.5) * 2px - 2.25px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .14deg)) scale(1.004); }
+  57% { transform:translate(calc(var(--silly-x) * -.35),calc((var(--stack-index) - 2.5) * 2px + 1px)) rotate(calc((var(--stack-index) - 2.5) * .45deg - .05deg)); }
+  100% { transform:translate(0,calc((var(--stack-index) - 2.5) * 2px + 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .1deg)); }
 }
 
 @media (max-width: 640px) {
@@ -1941,7 +1965,7 @@ html.calm-mode .home-boards__card {
   .home-next-preview__cta { width: calc(100% - 28px); }
   .home-next-preview__head { margin-bottom: 14px; }
   .home-next-preview__head h2 { font-size: clamp(39px, 13vw, 56px); }
-  .home-next-preview__viewport { padding-block: 14px 20px; }
+  .home-next-preview__viewport { padding-block: 14px 42px; }
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card {
     --crash-over: 10px;
@@ -1978,7 +2002,7 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__worlds {
   width: 100%;
   max-width: none;
-  padding: clamp(40px, 5vw, 68px) 0 clamp(52px, 7vw, 88px);
+  padding: clamp(36px, 4.5vw, 61px) 0 0;
   border-top: 1px solid var(--ink-border, #2b2b2b);
   border-bottom: 1px solid var(--ink-border, #2b2b2b);
   overflow: hidden;
@@ -1998,7 +2022,7 @@ html.calm-mode .home-next-preview__card,
   gap: 24px;
   width: 100%;
   margin: 0;
-  padding: 14px max(20px, calc((100vw - 1180px) / 2)) 24px;
+  padding: 14px max(20px, calc((100vw - 1180px) / 2)) 58px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
@@ -2060,13 +2084,13 @@ html.calm-mode .home-next-preview__card,
   outline: 0;
   background:
     linear-gradient(145deg, rgba(255,255,255,.085), transparent 28%),
-    radial-gradient(circle at 50% 108%, color-mix(in srgb, var(--c) 13%, transparent), transparent 58%),
-    rgba(4,4,6,.96);
+    radial-gradient(circle at 50% 112%, color-mix(in srgb, var(--c) 5%, transparent), transparent 68%),
+    rgba(4,4,6,.98);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.12),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
-    0 32px 72px -40px color-mix(in srgb, var(--c) 44%, transparent);
+    0 58px 148px -78px color-mix(in srgb,var(--c) 5%,transparent);
 }
 
 .home-main-stage .home-front__world:hover {
@@ -2075,7 +2099,7 @@ html.calm-mode .home-next-preview__card,
     inset 0 1px 0 rgba(255,255,255,.14),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
-    0 36px 82px -42px color-mix(in srgb, var(--c) 52%, transparent);
+    0 58px 148px -78px color-mix(in srgb,var(--c) 5%,transparent);
 }
 
 .home-main-stage .home-front__world::before {
@@ -2151,7 +2175,7 @@ html.calm-mode .home-next-preview__card,
 
 @media (max-width: 640px) {
   .home-main-stage .home-front__worlds {
-    padding: 32px 0 44px;
+    padding: 29px 0 0;
   }
 
   .home-main-stage .home-front__worlds-head {
@@ -2163,7 +2187,7 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__grid {
     flex-direction: row;
     gap: 12px;
-    padding: 10px 14px 20px;
+    padding: 10px 14px 32px;
     scroll-padding-inline: 14px;
   }
 
@@ -3096,8 +3120,39 @@ html.calm-mode .home-main-stage .home-hero__grain {
   border-bottom:0;
 }
 .home-main-stage .home-hero-stats-boundary .home-stat-strip__cell--last { border-right:0; }
-.home-hero-stats-boundary .home-rainbow-seam,.home-rainbow-seam--before-next { position:relative; z-index:4; margin:0; }
-.home-next-preview__head h2 em { color:#ff1f1f; font-style:normal; text-shadow:0 0 22px rgba(255,31,31,.24); }
+.home-hero-stats-boundary .home-rainbow-seam,.home-rainbow-seam--before-next {
+  position:relative;
+  z-index:4;
+  height:3px;
+  margin:0;
+  opacity:.92;
+  box-shadow:0 -1px 0 #000,0 1px 0 #000,0 5px 14px -8px rgba(0,255,255,.42);
+}
+.home-main-stage .home-rainbow-seam::after { opacity:.55; }
+.home-next-preview__head h2 em { color:#ff1f1f; font-style:normal; text-shadow:none; }
+
+#home-worlds-title > span {
+  color:transparent;
+  background:linear-gradient(90deg,#ff2bd6 0%,#ff5a1f 16.666%,#ffe600 33.333%,#9dff00 50%,#00f0ff 66.666%,#7f5cff 83.333%,#ff2bd6 100%);
+  background-size:200% 100%;
+  background-repeat:repeat-x;
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:homeWorldsYouSpectrum 6.8s linear infinite;
+  text-shadow:none;
+}
+
+@keyframes homeWorldsYouSpectrum {
+  from { background-position:0% 50%; }
+  to { background-position:200% 50%; }
+}
+
+html[data-calm="true"] #home-worlds-title > span { animation:none; background-position:22% 50%; }
+
+@media (prefers-reduced-motion:reduce) {
+  #home-worlds-title > span { animation:none; background-position:22% 50%; }
+}
 
 @media (max-width:900px) {
   .home-main-stage .home-hero-stats-boundary .home-stat-strip { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -3125,6 +3180,7 @@ html.calm-mode .home-main-stage .home-hero__grain {
 
 /* NEXT owns a cooler blueprint field than the near-black destination rail. */
 .home-main-stage #next-preview {
+  margin-top:0;
   background-color:#020817;
   background-image:
     linear-gradient(132deg,rgba(10,31,66,.5) 0 22%,transparent 22.2% 58%,rgba(3,15,40,.58) 58.2% 100%),
@@ -3134,11 +3190,12 @@ html.calm-mode .home-main-stage .home-hero__grain {
   background-attachment:scroll;
 }
 
+
 .home-next-preview__ghost {
   width:auto;
   max-width:none;
   object-fit:contain;
-  opacity:.1;
+  opacity:.13;
   filter:grayscale(1) saturate(0) brightness(1.45) contrast(1.5);
 }
 
@@ -3159,7 +3216,7 @@ html.calm-mode .home-main-stage .home-hero__grain {
 }
 
 @media (max-width:640px) {
-  .home-next-preview__ghost { opacity:.075; }
+  .home-next-preview__ghost { opacity:.095; }
   .home-next-preview__ghost--a1 { top:10%; left:-18%; width:44vw; }
   .home-next-preview__ghost--b2 { top:auto; right:-18%; bottom:8%; width:58vw; }
   .home-next-preview__ghost--a2,
@@ -3189,7 +3246,7 @@ html.calm-mode .home-main-stage .home-hero__grain {
     radial-gradient(circle at 18% 20%, rgba(255,0,204,.24), transparent 34%),
     radial-gradient(circle at 78% 58%, rgba(0,255,255,.18), transparent 38%),
     linear-gradient(180deg,rgba(5,5,6,.34),rgba(5,5,6,.7) 64%,#050506);
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 .home-main-stage .home-front__worlds,
@@ -3209,6 +3266,15 @@ html.calm-mode .home-main-stage .home-hero__grain {
 
 /* NEXT is a stable destination panel: its map/blueprint field does not parallax. */
 .home-main-stage .home-next-preview { background-attachment: scroll; }
+
+/* Depth belongs to the NEXT room, never to the card objects. */
+.home-main-stage #next-preview {
+  box-shadow:
+    inset 0 34px 70px -54px rgba(0,0,0,.96),
+    inset 0 -56px 92px -62px rgba(0,0,0,.98),
+    inset 34px 0 92px -78px rgba(0,0,0,.92),
+    inset -34px 0 92px -78px rgba(0,0,0,.92);
+}
 
 @media (max-width:900px) {
   .home-main-stage .home-front__atmosphere,
@@ -3246,8 +3312,8 @@ html.calm-mode .home-main-stage .home-next-preview,
   display:block;
   overflow:hidden;
   pointer-events:none;
-  color:rgba(224,228,236,.22);
-  opacity:.34;
+  color:rgba(224,228,236,.27);
+  opacity:.4;
   mix-blend-mode:screen;
 }
 
@@ -3289,7 +3355,7 @@ html.calm-mode .home-main-stage .home-next-preview,
 .home-next-preview__link { position:relative; z-index:2; }
 
 @media (max-width:640px) {
-  .home-next-preview__map-wallpaper { opacity:.26; }
+  .home-next-preview__map-wallpaper { opacity:.31; }
   .home-next-preview__map-wallpaper svg { inset:0 -44%; width:188%; height:100%; }
   .home-next-preview__ghost { width:78vw; opacity:.09; }
   .home-next-preview__ghost--one { top:-4%; left:-36%; }
@@ -3309,15 +3375,15 @@ html.calm-mode .home-next-preview__map-wallpaper,
 
 /* Final atmosphere tuning. */
 .home-main-stage #home-worlds {
-  background-color:#020203;
+  background-color:#010102;
   background-image:
-    linear-gradient(124deg,transparent 0 20%,rgba(20,20,24,.24) 20.15% 38%,transparent 38.15% 100%),
-    linear-gradient(56deg,rgba(0,0,0,.48) 0 25%,transparent 25.15% 68%,rgba(12,12,15,.2) 68.15% 100%),
-    radial-gradient(ellipse at 22% 16%,rgba(38,38,44,.12),transparent 34rem),
-    radial-gradient(ellipse at 82% 78%,rgba(0,0,0,.62),transparent 38rem);
+    linear-gradient(124deg,transparent 0 20%,rgba(20,20,24,.12) 20.15% 38%,transparent 38.15% 100%),
+    linear-gradient(56deg,rgba(0,0,0,.72) 0 25%,transparent 25.15% 68%,rgba(12,12,15,.1) 68.15% 100%),
+    radial-gradient(ellipse at 22% 16%,rgba(38,38,44,.06),transparent 34rem),
+    radial-gradient(ellipse at 82% 78%,rgba(0,0,0,.78),transparent 38rem);
 }
 
-.home-main-stage #home-worlds::before { opacity:.52; }
+.home-main-stage #home-worlds::before { opacity:.26; }
 
 /* Destination field uses grain/static only; drafting grids belong to NEXT.
    Each destination remains one isolated moving/lighting object. */
