@@ -3,12 +3,10 @@ import { join } from "node:path";
 
 const assetsDir = "dist/public/assets";
 const assets = readdirSync(assetsDir);
-// Vite can emit more than one `index-*.js` chunk (the main entry plus small
-// lazy chunks from dynamically-imported `index.*` modules). Concatenate every
-// index chunk so positive checks pass when the string is in ANY chunk and
-// negative checks only pass when it is in NONE — picking a single "first" file
-// is order-dependent and silently checks the wrong chunk.
-const jsFiles = assets.filter((f) => f.startsWith("index-") && f.endsWith(".js"));
+// Route-level splitting moves page signatures into named lazy chunks. Scan the
+// complete JavaScript build so positive and negative guards describe the whole
+// deploy bundle instead of whichever file happens to be the main entry.
+const jsFiles = assets.filter((f) => f.endsWith(".js"));
 const cssFile = assets.find((f) => f.startsWith("index-") && f.endsWith(".css"));
 
 if (jsFiles.length === 0 || !cssFile) {
