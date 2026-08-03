@@ -626,6 +626,7 @@ export default function Nav() {
     profilePath && (location === profilePath || location.startsWith(`${profilePath}/`)),
   );
   const aboutActive = navLinkActive(location, "/about");
+  const homeActive = location === "/";
 
   const seamLoading = routeLoading || fetching > 0;
 
@@ -643,6 +644,14 @@ export default function Nav() {
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <div className="hub-mtop__mode" role="group" aria-label="Site sections">
+              <Link
+                href="/"
+                className={`hub-mtop__mode-btn${homeActive ? " is-active is-member" : ""}`}
+                aria-current={homeActive ? "page" : undefined}
+                onClick={() => dismissMobileNavOverlays()}
+              >
+                Home
+              </Link>
               <Link
                 href="/about"
                 className={`hub-mtop__mode-btn${aboutActive ? " is-active is-member" : ""}`}

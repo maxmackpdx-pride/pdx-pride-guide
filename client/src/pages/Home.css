@@ -1960,11 +1960,16 @@ html.calm-mode .home-boards__card {
 }
 
 @media (max-width: 640px) {
-  .home-next-preview { padding-top: 34px; }
+  /* Fix the title flush to the top and shrink the panel ~40% by cutting the
+     vertical air (top pad, kicker gap, h2 line-height, paragraph spacing) —
+     text stays close to the same size. */
+  .home-next-preview { padding-top: 12px; padding-bottom: 20px; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
-  .home-next-preview__head { margin-bottom: 14px; }
-  .home-next-preview__head h2 { font-size: clamp(39px, 13vw, 56px); }
+  .home-next-preview__head { margin-bottom: 10px; }
+  .home-next-preview__kicker { margin-bottom: 6px; }
+  .home-next-preview__head h2 { font-size: clamp(36px, 11.5vw, 50px); line-height: .88; }
+  .home-next-preview__head > p:last-child { margin-top: 9px; line-height: 1.36; font-size: 14.5px; }
   .home-next-preview__viewport { padding-block: 14px 42px; }
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card {

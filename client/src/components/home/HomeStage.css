@@ -152,7 +152,7 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__mark { width:100%; max-width:none; }
   .home-front__hero-actions { margin-top:42px; }
   .home-front__hero-actions .pdx-glass-btn { flex:1 1 140px; min-width:0; padding:0 11px; }
-  .home-front__worlds { padding-top:22px; }
+  .home-front__worlds { padding-top:22px; padding-bottom:34px; }
   .home-front__worlds-head h2 { font-size:48px; }
   /* Mobile: horizontal swipe rail (right-to-left) with scroll-snap + a peeking
      next card, instead of a tall vertical stack. Pairs with the JS auto-scroll
@@ -164,16 +164,15 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-x:contain;
-    scroll-padding-inline:16px;
-    padding-inline:16px;
-    margin-inline:-16px; /* bleed the rail to the screen edges */
+    scroll-padding-inline:26px;
+    padding-inline:26px; /* wider left/right gutters so cards inset from edges */
     scrollbar-width:none;
     touch-action:pan-x pan-y;
   }
   .home-front__grid::-webkit-scrollbar { display:none; }
   .home-front__grid--dragging { cursor:grabbing; scroll-snap-type:none; }
   .home-front__world,.home-front__world--feature {
-    flex:0 0 85%; max-width:85%;
+    flex:0 0 80%; max-width:80%;
     scroll-snap-align:center;
     min-height:300px; padding:18px;
   }
