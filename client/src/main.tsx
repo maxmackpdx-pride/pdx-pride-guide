@@ -14,9 +14,9 @@ import "./index.css";
 import "@/components/hub/hub-shell.css";
 import "@/components/ds/tokens/index.css";
 import "@/components/ds/adapters/listing-card.css";
-import "./fluent2-m3-cards-local.css";
+import "./fluent2-m3-cards.css";
 
-// Local card-system trial: Fluent 2 depth + M3 states, Zaylist semantics.
+// Fluent 2 depth + Material 3 states, governed by Zaylist color semantics.
 document.documentElement.dataset.zaylistCards = "fluent2-m3";
 
 // Prevent the browser from restoring a previous scroll position on
