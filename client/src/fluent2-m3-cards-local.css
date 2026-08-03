@@ -1,0 +1,260 @@
+/*
+ * Zaylist card-system treatment.
+ * Fluent 2: stroke clarity, acrylic depth, paired key/ambient elevation.
+ * Material 3: container hierarchy, state layers, expressive shape.
+ * Zaylist: OLED core, semantic --c colors, sheen, rainbow seam, anatomy.
+ */
+
+html[data-zaylist-cards="fluent2-m3"] {
+  --f2m3-card-radius: 18px;
+  --f2m3-card-blur: 18px;
+  --f2m3-state-hover: 8%;
+  --f2m3-state-pressed: 12%;
+  --glass-card-radius: var(--f2m3-card-radius);
+  --glass-card-blur: var(--f2m3-card-blur);
+
+  /* Neutral card keeps the same material without inventing a semantic color. */
+  --glass-card-neutral-bg:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 30%),
+    radial-gradient(100% 80% at 50% 108%, rgba(184, 184, 194, 0.11), transparent 60%),
+    rgba(4, 4, 6, 0.9);
+  --glass-card-neutral-border: 1px solid rgba(184, 184, 194, 0.44);
+  --glass-card-neutral-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 0 4px rgba(0, 0, 0, 0.24),
+    0 20px 48px -32px rgba(184, 184, 194, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* Bind existing board colors into the shared card material; no new semantics. */
+html[data-zaylist-cards="fluent2-m3"] .mp-board-card {
+  --c: var(--_hex);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .board-path-card--talent {
+  --c: #19e3ff;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .board-path-card--host {
+  --c: #b06bff;
+}
+
+/* Rebind the shared accented card contract against each card's own --c. */
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .pdx-glass-rebind,
+  .pdx-glass-card,
+  .pdx-glass,
+  .pdxBoard,
+  .pdxRow,
+  .event-board-card,
+  .board-listing-card,
+  .board-listing-card--makeover,
+  .board-spotted-card,
+  .spotted-card,
+  .mp-board-card,
+  .board-path-card,
+  .board-detail-modal,
+  .board-post-overlay,
+  .event-modal,
+  .pdxPlace,
+  .pdxPlace__body,
+  .pdxBoard--affiliate,
+  .affiliate-poster-card,
+  .feed-aff,
+  .featured-event-ad,
+  .card.fitem.fitem--glow,
+  .fitem--glow,
+  .home-stage__housing-card,
+  .hz-card,
+  .home-stage__chat-card
+) {
+  --glass-card-bg:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.105), transparent 29%),
+    radial-gradient(100% 78% at 50% 108%, color-mix(in srgb, var(--c) 16%, transparent), transparent 61%),
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
+    rgba(4, 4, 6, 0.92);
+  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 58%, rgba(255, 255, 255, 0.18));
+  --glass-card-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 0 4px rgba(0, 0, 0, 0.24),
+    0 26px 58px -36px color-mix(in srgb, var(--c) 68%, transparent),
+    0 0 22px -13px color-mix(in srgb, var(--c) 56%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 color-mix(in srgb, var(--c) 18%, transparent);
+  --poster-well-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 34%),
+    radial-gradient(130% 130% at 50% 14%, color-mix(in srgb, var(--c) 30%, #050506), #050506 72%);
+  --poster-well-floor: 4px solid var(--c);
+}
+
+/* Apply geometry/material only to canonical card containers, never inner glass. */
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .pdx-glass-card,
+  .pdxBoard,
+  .pdxRow,
+  .event-board-card,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .mp-board-card,
+  .board-path-card,
+  .board-detail-modal,
+  .board-post-overlay,
+  .event-modal,
+  .pdxPlace__body,
+  .pdxBoard--affiliate,
+  .affiliate-poster-card,
+  .feed-aff,
+  .featured-event-ad,
+  .card.fitem.fitem--glow,
+  .fitem--glow,
+  .home-stage__housing-card,
+  .hz-card,
+  .home-stage__chat-card
+) {
+  background: var(--glass-card-bg);
+  border: var(--glass-card-border);
+  border-radius: var(--f2m3-card-radius);
+  box-shadow: var(--glass-card-shadow);
+  backdrop-filter: blur(var(--f2m3-card-blur)) saturate(1.18);
+  -webkit-backdrop-filter: blur(var(--f2m3-card-blur)) saturate(1.18);
+  transition:
+    transform 180ms cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 180ms cubic-bezier(0.2, 0, 0, 1),
+    filter 180ms ease,
+    border-color 180ms ease;
+}
+
+/* M3 state layer plus Fluent elevation change; no new color meaning. */
+html[data-zaylist-cards="fluent2-m3"] :where(
+  a.pdx-glass-card,
+  button.pdx-glass-card,
+  .event-board-card,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .mp-board-card,
+  .board-path-card,
+  .pdxBoard--affiliate,
+  .affiliate-poster-card,
+  .feed-aff,
+  .featured-event-ad,
+  .card.fitem.fitem--glow
+):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  border-color: color-mix(in srgb, var(--c) 74%, rgba(255, 255, 255, 0.24));
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.34),
+    0 0 8px rgba(0, 0, 0, 0.28),
+    0 30px 64px -34px color-mix(in srgb, var(--c) 76%, transparent),
+    0 0 28px -12px color-mix(in srgb, var(--c) 64%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 30px -24px color-mix(in srgb, var(--c) var(--f2m3-state-hover), transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] :where(
+  a.pdx-glass-card,
+  button.pdx-glass-card,
+  .event-board-card,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .mp-board-card,
+  .board-path-card,
+  .affiliate-poster-card,
+  .feed-aff,
+  .featured-event-ad,
+  .card.fitem.fitem--glow
+):active {
+  transform: translateY(0) scale(0.995);
+  filter: brightness(0.98);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.36),
+    0 0 3px rgba(0, 0, 0, 0.3),
+    inset 0 0 34px -24px color-mix(in srgb, var(--c) var(--f2m3-state-pressed), transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] :where(
+  a.pdx-glass-card,
+  button.pdx-glass-card,
+  .event-board-card,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .affiliate-poster-card,
+  .feed-aff,
+  .featured-event-ad,
+  .card.fitem.fitem--glow
+):focus-visible {
+  outline: 3px solid var(--neon-cyan);
+  outline-offset: 4px;
+}
+
+/* The existing rainbow seam and semantic poster floor remain fully visible. */
+html[data-zaylist-cards="fluent2-m3"] :where(
+  .pdx-glass-card,
+  .event-board-card,
+  .board-listing-card,
+  .board-spotted-card,
+  .spotted-card,
+  .pdxPlace,
+  .pdxBoard--affiliate,
+  .affiliate-poster-card,
+  .featured-event-ad,
+  .card.fitem.fitem--glow
+)::before {
+  border-radius: var(--f2m3-card-radius) var(--f2m3-card-radius) 0 0;
+}
+
+/* Place-card wrapper owns interaction; its body owns the single glass layer. */
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace:hover .pdxPlace__body {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  border-color: color-mix(in srgb, var(--c) 74%, rgba(255, 255, 255, 0.24));
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.34),
+    0 0 8px rgba(0, 0, 0, 0.28),
+    0 30px 64px -34px color-mix(in srgb, var(--c) 76%, transparent),
+    0 0 28px -12px color-mix(in srgb, var(--c) 64%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 30px -24px color-mix(in srgb, var(--c) var(--f2m3-state-hover), transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace > .pdxPlace__body {
+  background: var(--glass-card-bg);
+  border: var(--glass-card-border);
+  border-radius: var(--f2m3-card-radius);
+  box-shadow: var(--glass-card-shadow);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace:active .pdxPlace__body {
+  transform: translateY(0) scale(0.995);
+  filter: brightness(0.98);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .pdxPlace:focus-visible {
+  outline: 3px solid var(--neon-cyan);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-zaylist-cards="fluent2-m3"] :where(
+    .pdx-glass-card,
+    .event-board-card,
+    .board-listing-card,
+    .board-spotted-card,
+    .spotted-card,
+    .mp-board-card,
+    .board-path-card,
+    .pdxPlace__body,
+    .pdxBoard--affiliate,
+    .affiliate-poster-card,
+    .feed-aff,
+    .featured-event-ad,
+    .card.fitem.fitem--glow
+  ) {
+    transition: none;
+  }
+}
