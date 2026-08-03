@@ -144,13 +144,14 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
 }
 
 @media (max-width:620px) {
-  .home-front__welcome { min-height:calc(100svh - 96px); }
-  /* Center the hero stack so the space above the kicker and below the buttons
-     is even — no more giant void pinned to the bottom before the stat strip. */
-  .home-front__hero { justify-content:center; padding-top:clamp(24px,5vh,48px); padding-bottom:clamp(24px,5vh,48px); }
-  .home-front__kicker { margin-bottom:clamp(20px,4.5vh,38px); }
+  /* Don't force the hero to near-full-screen — that's what created the giant
+     empty bands above and below. Let it hug its content with even, modest
+     top/bottom breathing room so the stat strip sits right under the buttons. */
+  .home-front__welcome { min-height:0; }
+  .home-front__hero { flex:0 0 auto; justify-content:center; padding-top:clamp(26px,7vw,54px); padding-bottom:clamp(26px,7vw,54px); }
+  .home-front__kicker { margin-bottom:clamp(16px,3.5vh,28px); }
   .home-front__mark { width:100%; max-width:none; }
-  .home-front__hero-actions { margin-top:42px; }
+  .home-front__hero-actions { margin-top:28px; }
   .home-front__hero-actions .pdx-glass-btn { flex:1 1 140px; min-width:0; padding:0 11px; }
   .home-front__worlds { padding-top:22px; padding-bottom:34px; }
   .home-front__worlds-head h2 { font-size:48px; }
