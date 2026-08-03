@@ -148,7 +148,7 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
      empty bands above and below. Let it hug its content with even, modest
      top/bottom breathing room so the stat strip sits right under the buttons. */
   .home-front__welcome { min-height:0; }
-  .home-front__hero { flex:0 0 auto; justify-content:center; padding-top:clamp(26px,7vw,54px); padding-bottom:clamp(26px,7vw,54px); }
+  .home-front__hero { flex:0 0 auto; justify-content:center; padding-top:clamp(42px,11vw,86px); padding-bottom:clamp(42px,11vw,86px); }
   .home-front__kicker { margin-bottom:clamp(16px,3.5vh,28px); }
   .home-front__mark { width:100%; max-width:none; }
   .home-front__hero-actions { margin-top:28px; }
