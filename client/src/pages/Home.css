@@ -21,6 +21,14 @@
   );
 }
 
+/* The footer already reserves the mobile dock. Do not add the global second
+   dock-height spacer between the homepage's final seam and the footer. */
+@media (max-width: 640px) {
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main:has(> .home-main-stage) {
+    padding-bottom: 0;
+  }
+}
+
 .home-main-stage .pg-block {
   max-width: 1120px;
   margin: 0 auto;

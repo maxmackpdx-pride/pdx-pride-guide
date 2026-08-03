@@ -87,6 +87,22 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Calm / `prefers-reduced-motion` kill ambient pulses and seam animation (bar may stay static).
 - See archive `GROK_ANIMATION_MIGRATION.md` only for inventory - do not re-migrate.
 
+## Homepage front door
+
+- The homepage is not a carousel. It uses one full-bleed Welcome scene followed by seven responsive Zaylist world cards.
+- Mobile is the governing composition: a vertical reading order with no arrows, dots, clipped utility panels, or hidden product content.
+- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, Gifting, Gig Board, and Missed Connections.
+- The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
+- The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
+- Each world uses the deep-glass shell with one `--c` accent. Calm Mode removes ambient video and bloom while preserving every route and label.
+- Homepage world cards carry only a restrained Fluent 2 undertone: quiet inner highlight, composed corner, low elevation, and one-pixel hover lift. Do not import Fluent palette or replace deep glass.
+- The outer Events world is the flyer stage, with no inset card or reserved bands. The flyer covers the full surface from top edge to bottom edge; header, event information, and position controls overlay that single image. It advances through upcoming events unless Calm Mode or reduced motion is active.
+- The Events flyer stage always shows its active position counter and rail. When local upcoming data is empty, it uses the canonical `HOME_STAGE_DEMO_SAMPLES.events` fallback from the repository.
+- The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
+- Places includes a 40-business square app-tile launcher sourced from `/api/directory`: 8 columns by 5 rows on larger screens and 5 columns by 8 rows on phones.
+- Haüsing, Gifting, Gigs, and Missed Connections use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
+- On mobile, the homepage hands directly into the footer. The footer owns dock clearance; do not insert a second dock-height spacer after the final homepage seam.
+
 ---
 
 ## Source chain for agents

@@ -1,0 +1,36 @@
+<!-- @dsCard group="D Patterns" viewport="1280x1800" name="Homepage front door" subtitle="Mobile-first Welcome scene and seven Zaylist worlds" -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Homepage front door</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body{margin:0;background:var(--bg-app,#080809);color:var(--text-body,#d6d6dc);font-family:var(--font-body,Inter,sans-serif)}
+    main{width:min(100% - 32px,1040px);margin:auto;padding:48px 0 80px} h1,h2,h3{font-family:var(--font-display,"Barlow Condensed",sans-serif);text-transform:uppercase;color:#fff} h1{font-size:clamp(48px,8vw,92px);line-height:.88;margin:0}.meta{color:var(--neon-cyan,#19e3ff);font:700 10px/1 var(--font-mono,monospace);letter-spacing:.18em;text-transform:uppercase}.lede{max-width:70ch;line-height:1.65}.rule{margin-top:30px;padding:22px;border:1px solid var(--ink-border,#28282e);border-radius:14px;background:var(--glass-card-bg,#0b0b0e)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:28px}.card{padding:18px;border:1px solid var(--ink-border,#28282e);border-radius:14px;background:#09090b}.card b{color:var(--neon-cyan,#19e3ff);font:700 10px/1 var(--font-mono,monospace);letter-spacing:.14em;text-transform:uppercase}.card h3{font-size:30px;margin:18px 0 8px}.card p{font-size:13px;line-height:1.5;margin:0}@media(max-width:620px){main{padding-top:32px}.grid{grid-template-columns:1fr}h1{font-size:54px}}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="meta">D · Patterns · Homepage · Founder direction 2026-08-03</p>
+    <h1>Homepage front door</h1>
+    <p class="lede">The homepage is no longer a carousel. It begins with one full-bleed Welcome scene, followed by a responsive collection of seven Zaylist worlds. The same reading order works at every width. Desktop expands the collection into a grid; mobile keeps it as a vertical story.</p>
+    <section class="rule">
+      <h2>Shared contract</h2>
+      <p><strong>Welcome first.</strong> The wordmark and two direct actions occupy the opening viewport. The wordmark keeps the slow RGB glitch, which Calm Mode and reduced motion remove. The real site navigation remains outside this pattern and is never recreated inside it.</p>
+      <p><strong>Nude Beaches leads.</strong> Current founder direction places Nude Beaches first, followed by Events, Places, Haüsing, Gifting, Gig Board and Missed Connections.</p>
+      <p><strong>No hidden mobile content.</strong> Phones do not receive arrows, dots, clipped utility panels or a reduced desktop slide. Every world keeps its title, short explanation and action.</p>
+      <p><strong>One accent per world.</strong> Each world rebinds the deep-glass shell through <code>--c</code>. Bloom stays local to the surface. Calm Mode removes ambient video and bloom without removing content.</p>
+      <p><strong>Fluent 2 is an undertone.</strong> World cards may use a quiet inner highlight, composed 16px corner, low elevation, and a one-pixel hover lift. Zaylist deep glass, color roles, type, seams, and motifs remain dominant.</p>
+    </section>
+    <div class="grid" aria-label="Homepage world anatomy">
+      <article class="card"><b>01 · Orange</b><h3>Nude beaches</h3><p>Live Rooster Rock air, water, wind and river conditions occupy the first product position. A low-contrast neutral gray topographic motif sits behind the utility; orange remains reserved for live state and action.</p></article>
+      <article class="card"><b>02 · Day colour</b><h3>Up next events</h3><p>The outer Events world is the flyer stage. Do not inset another card or reserve separate header and footer bands. The flyer covers the surface from top edge to bottom edge; the world header, event information, counter, and position rail overlay that image. When local event data is empty, use the repository's canonical demo event. Calm Mode and reduced motion stop automatic advance.</p></article>
+      <article class="card"><b>03 · Cyan</b><h3>Places</h3><p>Forty live directory businesses form a square app-tile launcher over the quiet Portland street-and-river map. Larger screens use 8 columns by 5 rows; phones use 5 columns by 8 rows. Tiles show the directory logo or initials and open the business directly.</p></article>
+      <article class="card"><b>04–07 · Object motifs</b><h3>Community worlds</h3><p>Haüsing uses a house floor plan, Gifting uses gift-box construction drawings, Gigs uses a pinned bulletin board, and Missed Connections uses lost/found/looking notices. These four motifs run edge-to-edge across the complete card at a visibly stronger register than the restrained river and Portland map layers.</p></article>
+      <article class="card"><b>Mobile</b><h3>Vertical, not miniature</h3><p>Single-column cards, 44px minimum actions, readable type and no horizontal overflow.</p></article>
+    </div>
+  </main>
+</body>
+</html>
