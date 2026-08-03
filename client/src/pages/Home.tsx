@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import type { EventListing } from "@shared/multiDayEvents";
 
@@ -8,10 +9,85 @@ import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeConstructionNudge from "@/components/HomeConstructionNudge";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { countEventsNext7Days } from "@/lib/homeEvents";
+import { prefersStillMotion } from "@/lib/motion";
 import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
 const PLACES_FALLBACK = 64;
+
+const NEXT_PREVIEW_CARDS = [
+  { name: "ZAYHAÜS", logo: "/brand/waypoints/zayhaus-clean-margin.png", tone: "cyan" },
+  { name: "Z/SPACE", logo: "/brand/waypoints/z-space.png", tone: "acid" },
+  { name: "ZAYDARK", logo: "/brand/waypoints/zaydark-clean-margin.png", tone: "red" },
+  { name: "AFTERZ", logo: "/brand/waypoints/afterz-logo.png", tone: "magenta" },
+  { name: "ZENEGADES", logo: "/brand/waypoints/zenegades-logo.png", tone: "orange" },
+  { name: "TRAVELZ", logo: "/brand/waypoints/travelz-logo.png", tone: "acid" },
+] as const;
+
+function NextPreviewCardStack() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [landed, setLanded] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (prefersStillMotion()) {
+      setLanded(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setLanded(true);
+      observer.disconnect();
+    }, { threshold: .16, rootMargin: "0px 0px -40px 0px" });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} id="next-preview" className={`home-next-preview${landed ? " home-next-preview--landed" : ""}`} aria-labelledby="home-next-preview-title">
+      <span className="home-next-preview__map-wallpaper" aria-hidden="true">
+        <svg viewBox="0 0 1600 760" preserveAspectRatio="xMidYMid slice" focusable="false">
+          <g className="home-next-preview__contours">
+            <path d="M-120 650C80 482 190 666 390 514S704 286 914 378s340 28 806-252" />
+            <path d="M-146 574C42 420 190 584 370 448S680 222 894 312s356 14 798-232" />
+            <path d="M-94 718C112 548 250 742 450 574S760 356 976 448s354 46 776-204" />
+            <path d="M92 810C246 644 394 790 560 650s426-166 602-92 322 24 548-102" />
+          </g>
+          <path className="home-next-preview__trail" d="M-40 622C144 552 186 380 352 424s218 180 394 44 260-254 430-204 236 2 454-164" />
+          <g className="home-next-preview__trail-points">
+            <circle cx="352" cy="424" r="7" /><circle cx="746" cy="468" r="7" /><circle cx="1176" cy="264" r="7" />
+          </g>
+        </svg>
+        <img className="home-next-preview__ghost home-next-preview__ghost--one" src="/brand/waypoints/zayhaus-clean-margin.png" alt="" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--two" src="/brand/waypoints/z-space.png" alt="" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--three" src="/brand/waypoints/zaydark-clean-margin.png" alt="" />
+      </span>
+      <div className="home-next-preview__head">
+        <p className="home-next-preview__kicker"><span aria-hidden="true" /> Zaylist / Next</p>
+        <h2 id="home-next-preview-title">See what I&apos;m building <em>Next.</em></h2>
+        <p>New ways to find your people, make plans, and keep more of queer Portland in one place.</p>
+      </div>
+      <Link className="home-next-preview__link" href="/next" aria-label="Explore what Zaylist is building next">
+        <span className="home-next-preview__viewport" aria-hidden="true">
+          <span className="home-next-preview__track">
+            {NEXT_PREVIEW_CARDS.map((card, index) => (
+              <span
+                className="home-next-preview__card pdx-glass-card pdx-glass-rebind"
+                data-tone={card.tone}
+                key={card.name}
+                style={{ ["--stack-index" as string]: index }}
+              >
+                <img src={card.logo} alt="" loading="lazy" decoding="async" />
+              </span>
+            ))}
+          </span>
+        </span>
+        <span className="home-next-preview__cta">Explore Next <span aria-hidden="true">-&gt;</span></span>
+      </Link>
+    </section>
+  );
+}
 
 export default function Home() {
   usePageSeo(
@@ -50,25 +126,28 @@ export default function Home() {
   return (
     <div className="home-main-stage">
       <HomeConstructionNudge />
-      <HomeStage />
+      <HomeStage
+        afterWelcome={(
+          <div className="home-hero-stats-boundary">
+            <HomeStatStrip
+              eventCount={eventCount}
+              placesCount={placesCount}
+              goingCount={goingCount}
+            />
+            <div
+              className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
+              aria-hidden="true"
+            />
+          </div>
+        )}
+      />
 
-      {/* The animated rainbow seam, same one that runs under the top nav. It
-          bookends the stat strip; both bars were dropped when the stage landed. */}
       <div
-        className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
+        className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam home-rainbow-seam--before-next"
         aria-hidden="true"
       />
 
-      <HomeStatStrip
-        eventCount={eventCount}
-        placesCount={placesCount}
-        goingCount={goingCount}
-      />
-
-      <div
-        className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
-        aria-hidden="true"
-      />
+      <NextPreviewCardStack />
     </div>
   );
 }

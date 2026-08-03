@@ -33,4 +33,25 @@
 
 <div class="cap" style="margin-top:24px">Neon tape (keeps the tilt, swaps the flat offset for a lit bevel and bloom)</div>
 <div class="row"><span class="tape">Neon tape</span><span class="tape tape--acid">Hire me</span></div>
+
+<div class="cap" style="margin-top:30px">NEXT roadmap wallpaper (fixed stage, bold motifs, quiet center)</div>
+<p style="max-width:78ch;margin:0;color:var(--text-lo);font-size:12.5px;line-height:1.6">Roadmap wallpaper belongs to one fixed, pointer-free stage below the card stack. Route art, construction axes, and large Z/app blueprint motifs stay locked to the viewport while cards scroll above them. Use a bold enough contrast register to read as authored wallpaper at the exposed outer gutters, then vignette or mask the central reading lane so motifs never compete with card copy.</p>
+<div class="row" style="margin-top:12px">
+  <span class="mono mono--rule">Fixed stage</span>
+  <span class="mono mono--rule" style="--c:#fff">Bold outer field</span>
+  <span class="mono mono--rule" style="--c:var(--neon-magenta)">Protected copy lane</span>
+</div>
+<p style="max-width:78ch;margin:14px 0 0;color:var(--text-faint);font-size:12px;line-height:1.6">Do not attach the wallpaper to individual cards, repeat/reset it per waypoint, or allow it to scroll with the document. Do not move each card's contained object study onto the wallpaper: global atmosphere and local product object are separate layers. On compact screens, crop deliberately, lower density before lowering legibility, and preserve the same stationary-stage relationship.</p>
+
+<div class="cap" style="margin-top:30px">Homepage wallpaper overlay (transparent static + scan)</div>
+<p style="max-width:78ch;margin:0;color:var(--text-lo);font-size:12.5px;line-height:1.6">The homepage may add one light, transparent static/scan texture over its wallpaper and below every content object. Keep opacity low enough that type, product marks, imagery, status labels, controls, and focus rings preserve their intended contrast. The overlay is decorative, <code>pointer-events:none</code>, excluded from the accessibility tree, and never used to communicate state.</p>
+<p style="max-width:78ch;margin:14px 0 0;color:var(--text-faint);font-size:12px;line-height:1.6">An occasional short, subtle displacement may glitch the texture itself. Do not displace content with it, run it continuously, add a second noise overlay, or multiply it into a marquee-like band. Calm Mode and <code>prefers-reduced-motion</code> retain the light texture as a still image and remove all displacement.</p>
+
+<div class="cap" style="margin-top:30px">Homepage depth planes (below texture, below content)</div>
+<p style="max-width:78ch;margin:0;color:var(--text-lo);font-size:12.5px;line-height:1.6">Use a small set of layered black and dark-gray shadow planes to give the wallpaper depth. Their stacking order is strict: base background, shadow planes, static/scan texture, then every content object. Planes remain low contrast and pointer-free; they may not become panels, compete with card silhouettes, or create false interactive regions.</p>
+<p style="max-width:78ch;margin:14px 0 0;color:var(--text-faint);font-size:12px;line-height:1.6">On capable desktop, planes may drift at subtly different parallax rates with short travel. Never move cards, headings, body text, controls, focus rings, logos, contained objects, or the texture as part of that parallax. Mobile uses a stable lightweight still stack. Calm Mode and <code>prefers-reduced-motion</code> remove parallax while preserving the layered tonal depth.</p>
+
+<div class="cap" style="margin-top:30px">NEXT homepage section field (topography + logo-family ghosts)</div>
+<p style="max-width:78ch;margin:0;color:var(--text-lo);font-size:12.5px;line-height:1.6">The full NEXT homepage section owns one topographic/trail-map blueprint background with a few oversized ghost forms derived from its six approved product marks. Render the field and ghosts in monochrome at low opacity, clip them to the section boundary, and place them behind the exact section heading and the entire card stack. Preserve authored logo silhouettes; do not create a competing seventh identity.</p>
+<p style="max-width:78ch;margin:14px 0 0;color:var(--text-faint);font-size:12px;line-height:1.6">Protect the heading, card faces, status labels, and actions with quiet negative space or a soft mask. Background marks may be large and partially cropped, but they cannot read louder than a contained card object or interfere with focus rings. The NEXT panel field never parallax-transforms: desktop keeps it stable, mobile uses fewer ghosts and one deliberate still crop, and Calm Mode or <code>prefers-reduced-motion</code> preserves that same stationary rule.</p>
 </body></html>

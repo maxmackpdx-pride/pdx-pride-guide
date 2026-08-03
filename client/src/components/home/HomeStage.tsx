@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/context/ThemeContext";
@@ -28,6 +28,7 @@ const HERO_VIDEO = "/home/hero-loop.mp4";
 type Props = {
   samples?: HomeStageSamples;
   includeDemoFallback?: boolean;
+  afterWelcome?: ReactNode;
 };
 
 type World = {
@@ -230,7 +231,7 @@ function WorldMotif({ kind }: { kind: "housing" | "gifting" | "gigs" | "spotted"
   );
 }
 
-export default function HomeStage({ samples: samplesProp, includeDemoFallback }: Props) {
+export default function HomeStage({ samples: samplesProp, includeDemoFallback, afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const { samples: liveSamples, events } = useHomeStageSamples({ includeDemoFallback });
   const samples = samplesProp ?? liveSamples;
@@ -239,7 +240,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback }:
     queryFn: () => apiRequest("GET", "/api/directory").then((response) => response.json()),
     staleTime: 60_000,
   });
-  const directoryTiles = useMemo(() => directoryPlaces.slice(0, 40), [directoryPlaces]);
+  const directoryTiles = useMemo(() => directoryPlaces.slice(0, 24), [directoryPlaces]);
   const upcoming = useMemo(() => {
     const strict = eventsUpNext(events, 8);
     if (strict.length >= 4) return strict;
@@ -295,16 +296,25 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback }:
         </div>
       </section>
 
+      {afterWelcome}
+
       <section className="home-front__worlds" id="home-worlds" aria-labelledby="home-worlds-title">
         <header className="home-front__worlds-head">
           <h2 id="home-worlds-title">What do you need?</h2>
         </header>
         <div className="home-front__grid">
+          {[false, true].map((duplicate) => (
+          <div
+            className={`home-front__grid-group${duplicate ? " home-front__grid-group--duplicate" : ""}`}
+            key={duplicate ? "duplicate" : "primary"}
+            aria-hidden={duplicate || undefined}
+            {...(duplicate ? { inert: "" } : {})}
+          >
           {WORLDS.map((world) => {
             const sample = world.sampleKey ? samples[world.sampleKey] : null;
             return (
               <article
-                key={world.key}
+                key={`${duplicate ? "duplicate" : "primary"}-${world.key}`}
                 data-world={world.key}
                 className={`home-front__world pdx-glass-card pdx-glass-rebind${world.feature ? " home-front__world--feature" : ""}`}
                 style={{ ["--c" as string]: world.accent }}
@@ -373,6 +383,8 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback }:
               </article>
             );
           })}
+          </div>
+          ))}
         </div>
       </section>
     </main>

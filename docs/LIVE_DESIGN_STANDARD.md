@@ -87,10 +87,29 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Calm / `prefers-reduced-motion` kill ambient pulses and seam animation (bar may stay static).
 - See archive `GROK_ANIMATION_MIGRATION.md` only for inventory - do not re-migrate.
 
+## NEXT roadmap cards
+
+- This is a scoped roadmap family, not a new default for event, directory, board, or feed cards.
+- Sequence: **HAÜSING → Z/SPACE → ZAYDARK → AfterZ → Zenegades → TravelZ → submit an idea**. Keep route numbers and DOM reading order synchronized.
+- All product cards share one measured box: top-left status, top-right eyebrow, fixed logo region, contained object region, and lower copy/detail/action seam.
+- Use approved product-logo assets. Do not typeset substitutes, distort marks, trim their authored transparent margins ad hoc, or change spelling.
+- Cards use black deep glass with a black keyline, restrained Fluent 2 undertone, local accent bloom, and a thin rainbow edge/refract seam. Do not use a rainbow fill behind the card.
+- App-specific maps, blueprints, notifications, posts, profiles, and symbols are **contained card objects**: clipped inside the card, behind copy, and clear of protected text/action regions.
+- Route art, construction geometry, and large background motifs belong to one **fixed wallpaper stage** behind the full stack. Keep them bold at exposed gutters and masked through the reading lane. Do not reset wallpaper per card or convert contained objects into global wallpaper.
+- Status labels use the existing small `pdxBlink` dot at top left. Status meaning remains in text; Calm Mode and `prefers-reduced-motion` leave the dot visible but static.
+- The final submission card uses a white accent and visitor-facing idea language. It may route into the owner's inbox, but visitor copy must not disclose that internal destination.
+- Mobile is a single vertical stack: hide the center rail/number medallions, preserve every card and its order, scale or relocate contained objects intentionally, and prevent horizontal overflow.
+- Reduced motion stops the blink, rainbow flow, card glow cycle, route charge, and glitch; preserve static edge color, wallpaper, status text, marks, and all actions.
+
 ## Homepage front door
 
-- The homepage is not a carousel. It uses one full-bleed Welcome scene followed by seven responsive Zaylist world cards.
-- Mobile is the governing composition: a vertical reading order with no arrows, dots, clipped utility panels, or hidden product content.
+- The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
+- The counter strip occupies the seam immediately after the main Zaylist hero and before the destination rail. Its bottom edge aligns exactly with the hero end; do not float it deeper into the hero or leave a separate spacer before the rail.
+- Keep the counter surface transparent over one vertical gradient with exact endpoints: 100% transparent at the top and 80% black (`rgba(0,0,0,.8)`) at the bottom. Place the rainbow divider directly below the counter, with no extra band, gap, or duplicate divider.
+- On mobile, counter cells share the available width equally and keep values and labels readable. Verify cell bounds, hero copy, divider, and the following rail do not overlap at compact widths.
+- The destination rail owns its section padding, modest consistent gaps, top/bottom dividers, and horizontal overflow. On motion-capable desktop it flows slowly and seamlessly from right to left.
+- Keep one semantic seven-card sequence. If seamless looping requires presentational clones, mark them `aria-hidden`, unfocusable, inert, and exclude them from analytics; never add a second visible rail or expose repeated destinations to assistive technology.
+- Mobile, Calm Mode, and `prefers-reduced-motion` disable rail autoplay and keep the same order in a manual touch-scroll rail with card snap points, readable peek, 44px actions, contained overscroll, and no document/page horizontal overflow.
 - Current founder order starts with Nude Beaches, then Events, Places, Haüsing, Gifting, Gig Board, and Missed Connections.
 - The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
 - The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
@@ -99,8 +118,21 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The outer Events world is the flyer stage, with no inset card or reserved bands. The flyer covers the full surface from top edge to bottom edge; header, event information, and position controls overlay that single image. It advances through upcoming events unless Calm Mode or reduced motion is active.
 - The Events flyer stage always shows its active position counter and rail. When local upcoming data is empty, it uses the canonical `HOME_STAGE_DEMO_SAMPLES.events` fallback from the repository.
 - The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
-- Places includes a 40-business square app-tile launcher sourced from `/api/directory`: 8 columns by 5 rows on larger screens and 5 columns by 8 rows on phones.
+- Places uses a reduced app-tile launcher sourced from `/api/directory`, with two fewer rows than the former layout: 8 columns by 3 rows on larger screens and 5 columns by 6 rows on phones. Render only the visible capacity in stable source order so the footer/action aligns with sibling cards.
 - Haüsing, Gifting, Gigs, and Missed Connections use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
+- The homepage NEXT preview uses one six-card set. Three cards enter from the left and three from the right at the same time, converge once, crash-land into a centered overlapping stack, and stay in that final composition.
+- Put the rainbow divider immediately above the NEXT preview section. Its heading is exactly **“SEE WHAT I’M BUILDING NEXT.”** Only **“NEXT.”** is red; keep every preceding word in the standard high-contrast heading color.
+- The full NEXT section uses a clipped topographic/trail-map blueprint field with a restrained set of oversized ghosts derived from the six approved NEXT product-logo families. Keep all background forms monochrome, low opacity, and behind the heading and card stack.
+- Protect the section's copy and card faces with quiet negative space or masking. Logo ghosts may crop at section edges but must not compete with card identities, status labels, actions, or focus rings, and must not imply an additional product.
+- The NEXT panel background has **no parallax at any breakpoint**. Its map and oversized logo ghosts remain stable while cards animate above them. Mobile uses a simplified authored crop with fewer ghosts; Calm Mode and `prefers-reduced-motion` preserve the same still field.
+- The NEXT six-card crash stack is separate from the looping seven-destination rail and never loops, auto-advances, or clones cards.
+- NEXT preview cards retain their individual logos, accents, statuses, and contained objects. Shared dimensions and coordinated motion provide continuity; never clone one product identity across the set or duplicate cards to fake depth.
+- Calm Mode and `prefers-reduced-motion` skip the off-screen arrival and impact, rendering the final six-card stack immediately. The final stack remains fully labeled and does not become a static marquee.
+- A single light transparent static/scan overlay may sit on the homepage wallpaper behind every content object. It is decorative, `pointer-events: none`, hidden from assistive technology, and must not reduce the legibility of type, logos, controls, imagery, statuses, or focus rings.
+- The wallpaper overlay may occasionally make one short, subtle displacement. Move only the texture, never the content; do not run a continuous glitch or add a duplicate noise/marquee layer. Calm Mode and `prefers-reduced-motion` preserve the texture as a still layer and remove displacement.
+- Homepage background depth uses a restrained set of black and dark-gray shadow planes. Stack them behind the static/scan texture and behind every content object; they remain decorative and pointer-free.
+- On capable desktop, only those shadow planes may use subtle, low-distance differential parallax. Never move cards, headings, body text, controls, focus rings, logos, contained objects, or the texture with them.
+- Mobile uses a stable lightweight still version of the shadow planes. Calm Mode and `prefers-reduced-motion` retain the tonal layers but remove all parallax.
 - On mobile, the homepage hands directly into the footer. The footer owns dock clearance; do not insert a second dock-height spacer after the final homepage seam.
 
 ---
@@ -149,4 +181,5 @@ Before inventing a new global rule:
 - [ ] Grid ads/events match live components  
 - [ ] Past events only under PAST  
 - [ ] Nav untouched unless asked  
+- [ ] NEXT cards keep approved order, fixed wallpaper, contained objects, static reduced-motion equivalents, and final white idea card
 - [ ] Docs updated if a global default changes  
