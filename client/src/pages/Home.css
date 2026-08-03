@@ -2183,7 +2183,7 @@ html.calm-mode .home-next-preview__card,
 
 @media (max-width: 640px) {
   .home-main-stage .home-front__worlds {
-    padding: 29px 0 0;
+    padding: 29px 0 22px; /* bottom padding to match the top; pushes NEXT down */
   }
 
   .home-main-stage .home-front__worlds-head {
@@ -2226,6 +2226,13 @@ html.calm-mode .home-next-preview__card,
 
   .home-main-stage .home-front__world[data-world="events"] { padding: 0; }
   .home-main-stage .home-front__world[data-world="events"] .home-front__world-top { padding: 18px; }
+  /* Missed-connections sample was scaled + bled 106.4% wide, unlike every other
+     card's sample. Normalize it so it lines up with the rest on mobile. */
+  .home-main-stage .home-front__world[data-world="spotted"] .home-front__sample.home-stage-card {
+    width: 100%;
+    margin: 14px 0;
+    transform: none;
+  }
   .home-main-stage .home-front__world-copy { margin-top: 34px; }
   .home-main-stage .home-front__world-copy h3 { font-size: 40px; }
   .home-main-stage .home-front__directory-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
