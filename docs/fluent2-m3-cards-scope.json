@@ -6,7 +6,7 @@
     "deep-glass card system"
   ],
   "relatedObjects": [
-    "event cards and event modal",
+    "event cards and the open EventModal card",
     "directory place and business cards",
     "all board cards: poster, listing, spotted, profile-summary and board-path cards",
     "all housing feed cards plus the homepage housing specimen",
@@ -22,6 +22,7 @@
     "Fluent paired key and ambient elevation",
     "Fluent acrylic-like depth and one-pixel stroke clarity",
     "Material 3 container hierarchy and interaction state layers",
+    "single-owner Fluent material for the open event card and its persistent footer",
     "18px expressive shared card shape"
   ],
   "preserve": [
@@ -32,6 +33,7 @@
     "board identity colors and housing type/status colors",
     "rainbow seam and poster-well floor",
     "card anatomy, content hierarchy and actions",
+    "black readable ink on bright filled event tags",
     "advertiser-owned accent colors, media, logos and offer copy",
     "logo, typography, navigation, maps, pages and accessibility"
   ],

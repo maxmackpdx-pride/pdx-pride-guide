@@ -126,6 +126,37 @@ html[data-zaylist-cards="fluent2-m3"] :where(
     border-color 180ms ease;
 }
 
+/* Open event cards keep one Fluent material owner: the shell. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__scroll {
+  background: transparent;
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__sticky-cta {
+  background:
+    linear-gradient(180deg, rgba(5, 5, 6, 0.9), rgba(5, 5, 6, 0.985)),
+    color-mix(in srgb, var(--c) 4%, #050506);
+  box-shadow:
+    0 -2px 4px rgba(0, 0, 0, 0.28),
+    0 -14px 30px -22px color-mix(in srgb, var(--c) 42%, transparent);
+}
+
+/* Filled open-event tags require dark ink against Zaylist's bright fills. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal__tags :where(
+  .event-type-tag,
+  .event-type-tag--sm,
+  .event-type-tag--md,
+  .event-card-day-tag,
+  .event-card-meta-tag
+) {
+  color: #050506 !important;
+  text-shadow: none;
+}
+
 /* M3 state layer plus Fluent elevation change; no new color meaning. */
 html[data-zaylist-cards="fluent2-m3"] :where(
   a.pdx-glass-card,
