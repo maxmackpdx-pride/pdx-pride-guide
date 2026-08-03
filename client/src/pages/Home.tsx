@@ -53,15 +53,25 @@ function NextPreviewCardStack() {
             <path d="M-146 574C42 420 190 584 370 448S680 222 894 312s356 14 798-232" />
             <path d="M-94 718C112 548 250 742 450 574S760 356 976 448s354 46 776-204" />
             <path d="M92 810C246 644 394 790 560 650s426-166 602-92 322 24 548-102" />
+            <path d="M-180 486C32 342 168 486 340 356s414-214 598-132 360 44 786-184" />
+            <path d="M-206 396C14 258 160 388 326 274s406-194 604-116 386 38 824-178" />
+            <path d="M-130 300C72 186 206 304 376 198s404-158 608-76 368 40 776-138" />
+            <path d="M24 208C188 102 320 228 490 132s386-116 560-42 342 30 632-90" />
           </g>
           <path className="home-next-preview__trail" d="M-40 622C144 552 186 380 352 424s218 180 394 44 260-254 430-204 236 2 454-164" />
           <g className="home-next-preview__trail-points">
             <circle cx="352" cy="424" r="7" /><circle cx="746" cy="468" r="7" /><circle cx="1176" cy="264" r="7" />
           </g>
         </svg>
-        <img className="home-next-preview__ghost home-next-preview__ghost--one" src="/brand/waypoints/zayhaus-clean-margin.png" alt="" />
-        <img className="home-next-preview__ghost home-next-preview__ghost--two" src="/brand/waypoints/z-space.png" alt="" />
-        <img className="home-next-preview__ghost home-next-preview__ghost--three" src="/brand/waypoints/zaydark-clean-margin.png" alt="" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--a1" src="/brand/waypoints/next-blueprint-reference-a.png" alt="" loading="lazy" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--a2" src="/brand/waypoints/next-blueprint-reference-a.png" alt="" loading="lazy" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--a3" src="/brand/waypoints/next-blueprint-reference-a.png" alt="" loading="lazy" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--b1" src="/brand/waypoints/next-blueprint-reference-b.png" alt="" loading="lazy" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--b2" src="/brand/waypoints/next-blueprint-reference-b.png" alt="" loading="lazy" />
+        <img className="home-next-preview__ghost home-next-preview__ghost--b3" src="/brand/waypoints/next-blueprint-reference-b.png" alt="" loading="lazy" />
+        <i className="home-next-preview__orb home-next-preview__orb--cyan" />
+        <i className="home-next-preview__orb home-next-preview__orb--navy" />
+        <i className="home-next-preview__orb home-next-preview__orb--orange" />
       </span>
       <div className="home-next-preview__head">
         <p className="home-next-preview__kicker"><span aria-hidden="true" /> Zaylist / Next</p>
