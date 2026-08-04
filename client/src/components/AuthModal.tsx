@@ -24,6 +24,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   const [agreedStandards, setAgreedStandards] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [resetRequested, setResetRequested] = useState(false);
   const { login, register } = useAuth();
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
@@ -77,6 +79,25 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
     } finally { setLoading(false); }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/password/forgot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error("Could not request a reset link. Try again shortly.");
+      setResetRequested(true);
+    } catch (err: any) {
+      setError(err.message || "Could not request a reset link. Try again shortly.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Always portal to body so login is never trapped inside event cards / modals
   // that use transform, overflow, or stacking contexts (claim-this-event flow).
   return createPortal(
@@ -92,7 +113,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={tab === "login" ? "Log in" : "Join"}
+        aria-label={forgotPassword ? "Reset password" : tab === "login" ? "Log in" : "Join"}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
         style={{
@@ -119,7 +140,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         </button>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>
+        {!forgotPassword && <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "2px solid #000" }}>
           {(["login", "register"] as const).map(t => (
             <button key={t} onClick={() => { setTab(t); setError(""); setConfirmPassword(""); }} style={{
               flex: 1, fontFamily: "var(--font-display)", fontWeight: 900,
@@ -130,8 +151,27 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               marginBottom: -2,
             }}>{t === "login" ? "LOG IN" : "JOIN"}</button>
           ))}
-        </div>
+        </div>}
 
+        {forgotPassword ? (
+          resetRequested ? (
+            <div aria-live="polite">
+              <h2 style={{ ...labelStyle, fontSize: "1.5rem", marginTop: 0 }}>CHECK YOUR EMAIL</h2>
+              <p style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>If that address is registered, a one-time reset link is on its way. It expires in 60 minutes.</p>
+              <button type="button" style={submitStyle} onClick={() => { setForgotPassword(false); setResetRequested(false); setError(""); }}>BACK TO LOG IN</button>
+            </div>
+          ) : (
+            <form onSubmit={handleForgotPassword}>
+              <h2 style={{ ...labelStyle, fontSize: "1.5rem", marginTop: 0 }}>RESET YOUR PASSWORD</h2>
+              <p style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>Enter the email on your Zaylist account. We will send a one-time link if it matches.</p>
+              <label style={labelStyle}>Email</label>
+              <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" autoComplete="email" />
+              {error && <div style={errorStyle}>{error}</div>}
+              <button type="submit" disabled={loading} style={submitStyle}>{loading ? "SENDING..." : "SEND RESET LINK →"}</button>
+              <button type="button" onClick={() => { setForgotPassword(false); setError(""); }} style={textButtonStyle}>Back to log in</button>
+            </form>
+          )
+        ) : <>
         {/* Google CTA is outside <form> so Android Chrome does not treat it as a submit / swallow the nav. */}
         <a
           href="/api/auth/google"
@@ -153,6 +193,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             <input style={inputStyle} type="text" value={email} onChange={e => setEmail(e.target.value)} required placeholder="username or you@example.com" autoComplete="username" />
             <label style={labelStyle}>Password</label>
             <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+            <button type="button" onClick={() => { setForgotPassword(true); setResetRequested(false); setError(""); }} style={textButtonStyle}>Forgot password?</button>
             {error && <div style={errorStyle}>{error}</div>}
             <button type="submit" disabled={loading} style={submitStyle}>
               {loading ? "LOGGING IN..." : "LOG IN →"}
@@ -197,7 +238,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               </span>
             </div>
           </form>
-        )}
+        )}</>}
       </div>
     </div>,
     document.body,
@@ -236,4 +277,9 @@ const submitStyle: React.CSSProperties = {
 const errorStyle: React.CSSProperties = {
   marginTop: 10, padding: "8px 12px", background: "#FF0040",
   color: "#fff", fontSize: "0.82rem", fontFamily: "var(--font-body)",
+};
+const textButtonStyle: React.CSSProperties = {
+  display: "block", margin: "12px auto 0", padding: "10px 12px", minHeight: 44,
+  border: 0, background: "transparent", color: "#000", cursor: "pointer",
+  fontFamily: "var(--font-body)", fontWeight: 700, textDecoration: "underline",
 };

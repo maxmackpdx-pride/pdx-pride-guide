@@ -34,6 +34,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Password-reset URLs contain single-use secrets; never leak them through referrers.
+app.use("/reset-password", (_req, res, next) => {
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
+
 // Short, shareable branded links → full destinations. 302 (temporary) so a
 // target can be changed or retired later without browsers caching it forever.
 // Add a slug here and it becomes zaylist.com/<slug>.
@@ -73,6 +80,15 @@ const authLimiter = rateLimit({
 });
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
+const passwordResetRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many reset requests. Please try again later." },
+});
+app.use("/api/auth/password/forgot", passwordResetRequestLimiter);
+app.use("/api/auth/password/reset", authLimiter);
 app.use("/api/promoter/login", authLimiter);
 app.use("/api/admin/login", authLimiter);
 const contactLimiter = rateLimit({

@@ -235,6 +235,17 @@ sqlite.exec(`
     status TEXT NOT NULL DEFAULT 'active',
     created_at TEXT NOT NULL DEFAULT ''
   );
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    used_at TEXT,
+    created_at TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_tokens(user_id, used_at);
+  CREATE INDEX IF NOT EXISTS idx_password_reset_expiry ON password_reset_tokens(expires_at);
   CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     from_user_id INTEGER NOT NULL,
@@ -9039,6 +9050,8 @@ export interface IStorage {
   updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'top8' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
   changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
   updatePasswordHash(id: number, passwordHash: string): void;
+  createPasswordResetToken(userId: number, tokenHash: string, expiresAt: string): void;
+  resetPasswordWithToken(tokenHash: string, newPassword: string): boolean;
   setPromoterStatus(userId: number, status: string): void;
   /** Resolve standalone promoter-application rows when the promoter queue is acted on. */
   resolvePromoterApplicationSubmissions(userId: number, outcome: "approved" | "rejected", adminName?: string, reason?: string): void;
@@ -11714,6 +11727,31 @@ export const storage: IStorage = {
   },
   updatePasswordHash(id, passwordHash) {
     db.update(users).set({ passwordHash }).where(eq(users.id, id)).run();
+  },
+  createPasswordResetToken(userId, tokenHash, expiresAt) {
+    const now = new Date().toISOString();
+    sqlite.prepare(`UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL`).run(now, userId);
+    sqlite.prepare(`DELETE FROM password_reset_tokens WHERE expires_at < ?`).run(now);
+    sqlite.prepare(`
+      INSERT INTO password_reset_tokens (user_id, token_hash, expires_at, created_at)
+      VALUES (?, ?, ?, ?)
+    `).run(userId, tokenHash, expiresAt, now);
+  },
+  resetPasswordWithToken(tokenHash, newPassword) {
+    const now = new Date().toISOString();
+    const apply = sqlite.transaction(() => {
+      const token = sqlite.prepare(`
+        SELECT id, user_id AS userId
+        FROM password_reset_tokens
+        WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?
+        LIMIT 1
+      `).get(tokenHash, now) as { id: number; userId: number } | undefined;
+      if (!token) return false;
+      sqlite.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`).run(hashPassword(newPassword), token.userId);
+      sqlite.prepare(`UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL`).run(now, token.userId);
+      return true;
+    });
+    return apply();
   },
   resolvePromoterApplicationSubmissions(userId, outcome, adminName = "admin", reason = "") {
     const user = storage.getUserById(userId);

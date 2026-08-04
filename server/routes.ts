@@ -10,6 +10,7 @@ import {
   EVENT_WEEK_END_DATE,
 } from "@shared/eventWeek";
 import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility } from "./storage";
+import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
 import {
   adminSearchForViewer,
   checkAdminMessageRateLimit,
@@ -1018,6 +1019,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       ok: true,
       ts: new Date().toISOString(),
       pushConfigured: isPushConfigured(),
+      emailConfigured: isTransactionalEmailConfigured(),
       pushSubscriptions,
       ...(gitSha ? { gitSha } : {}),
       ...(railwayEnvironment ? { railwayEnvironment } : {}),
@@ -1304,6 +1306,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       pageUrl,
     });
     if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
+    void sendOwnerDeskNotification().catch(err => {
+      console.error("[email] owner desk notification failed:", err instanceof Error ? err.message : err);
+    });
     res.json({ ok: true });
   });
 
@@ -2579,6 +2584,44 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
     }
     finishLogin();
+  });
+
+  app.post("/api/auth/password/forgot", async (req, res) => {
+    const response = {
+      ok: true,
+      message: "If that email is registered, a password reset link is on its way.",
+    };
+    const email = String(req.body?.email || "").trim().toLowerCase().slice(0, 200);
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const matchedEmail = email
+      ? (sqlite.prepare(`SELECT email FROM users WHERE LOWER(email) = ? LIMIT 1`).get(email) as { email: string } | undefined)?.email
+      : undefined;
+    const user = matchedEmail ? storage.getUserByEmail(matchedEmail) : undefined;
+
+    if (user && user.status !== "deleted" && !storage.isSystemGuideAccount(user)) {
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      storage.createPasswordResetToken(user.id, tokenHash, expiresAt);
+      const baseUrl = (process.env.PUBLIC_BASE_URL?.trim() || "https://www.zaylist.com").replace(/\/$/, "");
+      const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
+      void sendPasswordResetEmail({ to: user.email, resetUrl }).catch(err => {
+        console.error("[email] password reset delivery failed:", err instanceof Error ? err.message : err);
+      });
+    }
+
+    res.status(202).json(response);
+  });
+
+  app.post("/api/auth/password/reset", (req, res) => {
+    const token = String(req.body?.token || "").trim();
+    const password = String(req.body?.password || "");
+    if (!/^[a-f0-9]{64}$/.test(token) || password.length < 6) {
+      return res.status(400).json({ error: "This reset link is invalid or expired." });
+    }
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const changed = storage.resetPasswordWithToken(tokenHash, password);
+    if (!changed) return res.status(400).json({ error: "This reset link is invalid or expired." });
+    res.json({ ok: true });
   });
 
   app.get("/api/auth/google", (req, res) => {

@@ -44,6 +44,7 @@ function ScrollToTop() {
 import Home from "./pages/Home";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
+import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazy(() => import("./pages/Events"));
 const Schedule = lazy(() => import("./pages/Schedule"));
@@ -141,6 +142,7 @@ function AppLayout() {
             <Route path="/admin" component={Admin} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/settings/notifications" component={NotificationSettings} />
+            <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Inbox} />
             <Route path="/spotted" component={MissedConnections} />
             <Route path="/directory/:id/:slug?" component={Directory} />
