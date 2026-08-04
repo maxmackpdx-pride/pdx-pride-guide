@@ -2115,6 +2115,31 @@ html.calm-mode .home-next-preview__card,
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000,
     0 58px 148px -78px color-mix(in srgb,var(--c) 5%,transparent);
+  transition:
+    transform 190ms cubic-bezier(.2,.8,.2,1),
+    border-color 190ms ease,
+    box-shadow 190ms ease;
+}
+
+/* The complete card is the destination. Nested controls remain independently
+   interactive while the rest of the surface uses this semantic link. */
+.home-main-stage .home-front__world-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+}
+
+.home-main-stage .home-front__world-hit:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--c) 88%, #fff);
+  outline-offset: 4px;
+}
+
+.home-main-stage .home-front__world-content { pointer-events: none; }
+.home-main-stage .home-front__world-content :is(a, button, input, select, textarea) {
+  position: relative;
+  z-index: 4;
+  pointer-events: auto;
 }
 
 /* The shell keeps its exact 17:25 geometry; the complete card composition is
@@ -2153,13 +2178,26 @@ html.calm-mode .home-next-preview__card,
   transform-origin: bottom center;
 }
 
-.home-main-stage .home-front__world:hover {
-  transform: translateY(-2px);
+.home-main-stage .home-front__world:hover,
+.home-main-stage .home-front__world:focus-within {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--c) 84%, #fff 8%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.14),
-    0 2px 4px rgba(0,0,0,.3),
+    0 4px 10px rgba(0,0,0,.42),
     0 0 0 2px #000,
-    0 58px 148px -78px color-mix(in srgb,var(--c) 5%,transparent);
+    0 0 30px 1px color-mix(in srgb,var(--c) 34%,transparent),
+    0 42px 90px -34px color-mix(in srgb,var(--c) 58%,transparent);
+}
+
+/* Events is the wide anchor card at desktop sizes. Its full-bleed poster and
+   controls keep the same component contract; only the outer frame stretches. */
+@media (min-width: 641px) {
+  .home-main-stage .home-front__world[data-world="events"] {
+    flex-basis: clamp(602px, 56.8vw, 738px);
+    width: clamp(602px, 56.8vw, 738px);
+    aspect-ratio: 7 / 5;
+  }
 }
 
 .home-main-stage .home-front__world::before {
@@ -2227,6 +2265,23 @@ html.calm-mode .home-next-preview__card,
 
 .home-main-stage .home-front__world-copy {
   margin-top: 28px;
+}
+
+/* Give the specimen beneath each title/copy block a little more air while
+   preserving the shared bottom action datum across every destination card. */
+.home-main-stage .home-front__world-copy + .home-front__sample {
+  margin-top: 22px;
+  margin-bottom: 6px;
+}
+
+.home-main-stage .home-front__world-copy + .home-front__directory-grid {
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.home-main-stage .home-front__world-copy + .home-front__beach-live {
+  margin-top: 20px;
+  margin-bottom: 6px;
 }
 
 .home-main-stage .home-front__world-copy h3 {
@@ -2360,14 +2415,25 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__grid { scroll-behavior: auto; }
   .home-main-stage .home-front__grid-group { animation: none; transform: none; }
   .home-main-stage .home-front__grid-group--duplicate { display: none; }
+  .home-main-stage .home-front__world { transition: none; }
+  .home-main-stage .home-front__world:hover,
+  .home-main-stage .home-front__world:focus-within { transform: none; }
 }
 
 html.calm-mode .home-main-stage .home-front__world,
 :root[data-calm="true"] .home-main-stage .home-front__world {
+  transition: none;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.08),
     0 2px 4px rgba(0,0,0,.3),
     0 0 0 2px #000;
+}
+
+html.calm-mode .home-main-stage .home-front__world:hover,
+html.calm-mode .home-main-stage .home-front__world:focus-within,
+:root[data-calm="true"] .home-main-stage .home-front__world:hover,
+:root[data-calm="true"] .home-main-stage .home-front__world:focus-within {
+  transform: none;
 }
 
 html.calm-mode .home-main-stage .home-front__grid-group,
@@ -3565,7 +3631,7 @@ html.calm-mode .home-next-preview__map-wallpaper,
   width:clamp(280px,34vw,540px);
   aspect-ratio:1;
   border-radius:50%;
-  opacity:.3;
+  opacity:.18;
   filter:blur(54px);
   pointer-events:none;
   will-change:transform;
@@ -3600,7 +3666,7 @@ html.calm-mode .home-next-preview__map-wallpaper,
 @media (max-width:640px) {
   .home-main-stage #home-worlds::before { opacity:.46; }
   .home-next-preview__contours { opacity:.3; }
-  .home-next-preview__orb { width:72vw; filter:blur(42px); opacity:.22; }
+  .home-next-preview__orb { width:72vw; filter:blur(42px); opacity:.14; }
   .home-next-preview__orb--orange { width:58vw; right:16%; }
 }
 
@@ -3613,7 +3679,7 @@ html.calm-mode .home-next-preview__orb,
   animation:none;
   transform:none;
   will-change:auto;
-  opacity:.2;
+  opacity:.12;
 }
 
 /* Counter transparency lock: no surface fill beyond the requested fade. */

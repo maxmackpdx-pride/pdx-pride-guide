@@ -80,6 +80,21 @@ html.calm-mode .home-front__kicker span,
 .home-front__world[data-world="gifting"] .home-front__object-motif { opacity:.33; filter:drop-shadow(0 0 13px rgba(204,255,0,.11)); }
 .home-front__world[data-world="gigs"] .home-front__object-motif { opacity:.35; filter:drop-shadow(0 0 12px rgba(128,80,255,.13)); }
 .home-front__object-motif--spotted { opacity:.31; filter:drop-shadow(0 0 12px rgba(255,31,160,.12)); }
+.home-front__object-motif--beaches { inset:-3%; width:106%; height:106%; opacity:.24; }
+.home-front__object-motif--events { inset:-4%; width:108%; height:108%; opacity:.18; mix-blend-mode:screen; }
+.home-front__object-motif--directory { inset:-5%; width:110%; height:110%; opacity:.2; }
+
+/* Every destination carries one legible, purpose-specific construction motif.
+   Existing live imagery remains the subject; these drawings sit behind it. */
+.home-front__world[data-world="beaches"] .home-front__topo,
+.home-front__world[data-world="directory"] .home-front__city-map,
+.home-front__world[data-world="directory"] .home-front__places-blueprint {
+  opacity:.08;
+}
+.home-front__world[data-world="events"] .home-front__object-motif { z-index:1; }
+.home-front__world[data-world="events"] .home-front__event-preview { position:relative; z-index:2; }
+.home-front__world[data-world="events"] .home-front__world-top,
+.home-front__world[data-world="events"] .home-front__event-dots { z-index:3; }
 .home-front__world-top,.home-front__world-copy,.home-front__beach-live,.home-front__event-preview,.home-front__sample,.home-front__world-action { position:relative; z-index:1; }
 .home-front__world-top { display:flex; align-items:center; justify-content:space-between; gap:16px; color:var(--c); font:700 9px/1 var(--font-mono,monospace); letter-spacing:.15em; text-transform:uppercase; }
 .home-front__world-number { display:grid; place-items:center; width:34px; height:34px; border:1px solid color-mix(in srgb,var(--c) 46%,#202026); border-radius:50%; }
@@ -172,6 +187,12 @@ html.calm-mode .home-front__world::after,:root[data-calm="true"] .home-front__wo
 html.calm-mode .home-front__object-motif,:root[data-calm="true"] .home-front__object-motif { filter:none; opacity:.22; }
 @media (prefers-reduced-motion:reduce) {
   .home-front__worlds :is(.home-front__topo,.home-front__city-map,.home-front__object-motif) :is(path,rect) { animation:none !important; opacity:1; stroke-dasharray:none; stroke-dashoffset:0; }
+}
+
+@media (max-width:640px) {
+  .home-front__object-motif { inset:-2%; width:104%; height:104%; opacity:.24; }
+  .home-front__object-motif--events { opacity:.12; }
+  .home-front__object-motif--directory { opacity:.16; }
 }
 html.calm-mode .home-front__mark-glitch,:root[data-calm="true"] .home-front__mark-glitch { display:none; }
 html.calm-mode .home-front__world,:root[data-calm="true"] .home-front__world { transition:none; box-shadow:var(--glass-card-shadow),inset 0 1px 0 rgba(255,255,255,.045); }

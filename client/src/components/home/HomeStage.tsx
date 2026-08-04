@@ -192,7 +192,37 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
   );
 }
 
-function WorldMotif({ kind }: { kind: "housing" | "gifting" | "gigs" | "spotted" }) {
+type WorldMotifKind = "beaches" | "events" | "directory" | "housing" | "gifting" | "gigs" | "spotted";
+
+function WorldMotif({ kind }: { kind: WorldMotifKind }) {
+  if (kind === "beaches") {
+    return (
+      <svg className="home-front__object-motif home-front__object-motif--beaches" viewBox="0 0 640 440" aria-hidden="true">
+        <path d="M-30 94c78-35 137-31 195 10 62 44 127 43 194-2 71-48 149-42 311 22M-28 158c83-31 145-24 204 18 62 44 126 43 190 1 76-50 154-42 304 20M-24 228c75-34 140-28 202 14 61 42 126 43 192 2 78-49 155-43 294 13M-28 302c83-33 147-26 207 15 60 42 123 43 190 3 77-46 153-40 297 16" />
+        <path className="detail" d="M86 390c50-55 78-105 84-151 7-53 35-90 85-113 47-22 73-56 78-103M268 420c-13-65 1-116 42-153 37-34 49-74 33-119-15-43-3-82 37-117M456 418c-20-58-11-105 28-142 35-34 45-73 28-116-16-39-7-75 29-108" />
+        <circle cx="170" cy="239" r="8" /><circle cx="343" cy="148" r="7" /><circle cx="512" cy="160" r="6" />
+      </svg>
+    );
+  }
+  if (kind === "events") {
+    return (
+      <svg className="home-front__object-motif home-front__object-motif--events" viewBox="0 0 640 440" aria-hidden="true">
+        <path d="M42 72h556v298H42zM78 112h484v218H78zM102 304h436M130 304V190l54-38 54 38v114M278 304V154h84v150M402 304V190l54-38 54 38v114" />
+        <path className="detail" d="M66 48v344M574 48v344M56 62h20M56 380h20M564 62h20M564 380h20M94 92h452M94 350h452" />
+        <circle cx="320" cy="221" r="58" /><path d="M320 186v70M285 221h70" />
+      </svg>
+    );
+  }
+  if (kind === "directory") {
+    return (
+      <svg className="home-front__object-motif home-front__object-motif--directory" viewBox="0 0 640 440" aria-hidden="true">
+        <path d="M54 72h532v300H54zM120 72v300M208 72v300M310 72v300M430 72v300M520 72v300M54 132h532M54 214h532M54 302h532M64 356l512-268M80 88l486 266" />
+        <path className="detail" d="M310 48v344M290 58h40M290 382h40M34 214h572M44 194v40M596 194v40" />
+        <path d="M176 128c0 42-42 78-42 78s-42-36-42-78a42 42 0 1 1 84 0ZM492 264c0 42-42 78-42 78s-42-36-42-78a42 42 0 1 1 84 0Z" />
+        <circle cx="134" cy="128" r="10" /><circle cx="450" cy="264" r="10" />
+      </svg>
+    );
+  }
   if (kind === "housing") {
     return (
       <svg className="home-front__object-motif" viewBox="0 0 640 440" aria-hidden="true">
@@ -343,7 +373,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             </div>
           </div>
           <div className="home-front__hero-actions">
-            <Link href="/nude-beaches" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)" }}>Check the beaches</Link>
+            <Link href="/nude-beaches" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Check the beaches</Link>
             <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>
           </div>
         </div>
@@ -401,6 +431,11 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 style={{ ["--c" as string]: world.accent }}
               >
                 <span className="pdx-refract-seam" aria-hidden />
+                <Link
+                  href={world.href}
+                  className="home-front__world-hit"
+                  aria-label={`Open ${world.title}`}
+                />
                 <div className="home-front__world-content">
                 {world.key === "beaches" ? (
                   <svg className="home-front__topo" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -428,9 +463,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                     <img className="home-front__places-blueprint" src="/brand/waypoints/next-blueprint-reference-b.png" alt="" aria-hidden="true" />
                   </>
                 ) : null}
-                {world.key === "housing" || world.key === "gifting" || world.key === "gigs" || world.key === "spotted" ? (
-                  <WorldMotif kind={world.key} />
-                ) : null}
+                <WorldMotif kind={world.key as WorldMotifKind} />
                 <div className="home-front__world-top">
                   <span className="home-front__world-number">{world.number}</span>
                   <span className="home-front__world-eyebrow">{world.eyebrow}</span>
