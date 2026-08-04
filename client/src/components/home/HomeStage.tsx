@@ -73,7 +73,6 @@ const WORLDS: World[] = [
     href: "/events",
     accent: "var(--neon-yellow, #ccff00)",
     sampleKey: "events",
-    feature: true,
   },
   {
     key: "directory",
