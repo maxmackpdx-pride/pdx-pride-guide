@@ -31,6 +31,15 @@ Load this when a new AI model starts continuity work on Zaylist.
 - Do not push/deploy/DNS/send outbound billing actions without explicit approval.
 - Use visibility labels on notes and keep private context out of public artifacts.
 
+## AI collaboration doctrine
+
+Operate through the Foundation's human-first, agent-readable layer:
+
+- People first, AI assists. Do not add AI features only because they are possible.
+- External AI output, Claude included, stays recommendation or evidence until Tucker verifies and adopts it.
+- Minimum-necessary context to any external AI, and explicit Tucker approval before sharing NDA, private-finance, secret, recipient, or personal data.
+- Agent actions only after authorization, audit, expiration, revocation, and human confirmation. Tucker retains final say.
+
 ## Canonical project links
 
 - Repo: `/Users/tuckercasey/Documents/Zaylist`

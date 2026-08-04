@@ -8,6 +8,24 @@ Zaylist agents need continuity across chats without turning conversation fragmen
 
 The ledger is an operational memory layer. It is not a second Foundation, a substitute for the canonical Design System, or permission for an agent to approve its own recommendation.
 
+## Human owner, agent helpers
+
+The platform is built for humans first.  
+Agents are support systems, not the primary decision makers for user experience, policy, or publishing.
+
+## Consistency lock
+
+- Use human-first UI and policy as the baseline assumption.
+- Build agent tools as helpers for documented, authorized workflows.
+- Do not promote recommendations into Foundation, production standards, or policy without Tucker approval.
+- Keep continuity for acceleration only; never use it as permission to overstep approvals.
+
+This means:
+
+- UX and copy changes stay oriented to real people.
+- Agent readability and operational tooling should be built in as helpers, not as the default audience.
+- Public agent-facing tools should require authorization and should never weaken member privacy or safety.
+
 ## Always-on skills baseline for continuity work
 
 For continuity and handoff tasks, every replacement model should load these baseline skills:

@@ -23,6 +23,17 @@ Every replacement model should treat these as baseline:
 
 Reading a note does not authorize publishing, deploying, spending, messaging, changing production, or promoting a rule. Permissions come from Tucker's explicit direction and the current task.
 
+### Continuity consistency lock
+
+- Human-first policy and user safety always outrank optimization-only changes.
+- Agent help is welcome, but only through documented, authorized workflows.
+- No continuity recommendation becomes policy, code, or production behavior without Tucker approval.
+- Track what is unknown and what is blocked instead of guessing around missing decisions.
+
+## Product doctrine reminder
+
+This Foundation scope is human-first in design and copy, while maintaining high agent readability. Treat agents as helpers who can use documented interfaces where safe and authorized; do not weaken human pathways, trust, or safety for automation convenience.
+
 ## Write back only when material
 
 Create a checkpoint when founder direction, evidence, status, a conflict, blocker, owner, or next action changed. Otherwise leave the memory untouched.
