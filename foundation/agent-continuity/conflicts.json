@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-04T06:24:02-07:00",
+  "conflicts": [
+    {
+      "id": "CONFLICT-DOWNLOAD-ADOPTION",
+      "status": "resolved",
+      "question": "What exact event counts as a verified download versus adoption?",
+      "affectedWork": ["90-day goal", "marketing conversion", "analytics reporting"],
+      "resolutionOwner": "Tucker",
+      "resolvedBy": "Tucker",
+      "resolvedAt": "2026-08-04T06:24:02-07:00",
+      "resolution": "A verified adoption event is one server-confirmed successful file download with full delivery confirmation. Count it as adoption within a 90-day window. Report no adoption or conversion numbers until this measurement is implemented.",
+      "agentBehavior": "Definition approved. Do not report adoption or conversion figures until the server-confirmed measurement is implemented and verified."
+    },
+    {
+      "id": "CONFLICT-HOMEPAGE-WORDMARK",
+      "status": "resolved",
+      "question": "Is the visually absent homepage wordmark an implementation defect, intentional exception, or canonical identity change?",
+      "affectedWork": ["homepage", "campaign hero identity", "design audit"],
+      "resolutionOwner": "Tucker",
+      "resolvedBy": "Tucker",
+      "resolvedAt": "2026-08-04T06:24:02-07:00",
+      "resolution": "Confirmed as a bug. Restore the existing wordmark treatment and keep it visible. Not an intentional exception and not an identity change.",
+      "agentBehavior": "Treat invisible wordmark as a defect to fix against the existing standard. Do not normalize or reuse the invisible treatment."
+    }
+  ]
+}
