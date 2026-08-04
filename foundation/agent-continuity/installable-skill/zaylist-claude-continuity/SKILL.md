@@ -35,10 +35,11 @@ Load this when a new AI model starts continuity work on Zaylist.
 
 Operate through the Foundation's human-first, agent-readable layer:
 
-- People first, AI assists. Do not add AI features only because they are possible.
+- People come first in every decision and interface. AI supports operations and continuity.
+- Do not keep or add AI features only because they are technically possible.
 - External AI output, Claude included, stays recommendation or evidence until Tucker verifies and adopts it.
 - Minimum-necessary context to any external AI, and explicit Tucker approval before sharing NDA, private-finance, secret, recipient, or personal data.
-- Agent actions only after authorization, audit, expiration, revocation, and human confirmation. Tucker retains final say.
+- Agent actions only after authorization, audit, expiration, revocation, and human confirmation.
 
 ## Canonical project links
 
@@ -85,4 +86,3 @@ Use the four section split in your continuity notes:
 ## Delivery mode
 
 This skill should be paired with the repo packet for local continuity storage and handoff.
-

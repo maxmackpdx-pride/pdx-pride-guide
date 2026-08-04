@@ -64,13 +64,14 @@ Load these first in every replacement model session:
 
 ## AI collaboration doctrine (from the Foundation)
 
-Run every action through the Foundation's human-first, agent-readable layer, not just by loading the baseline skill:
+Run every action through the Foundation's human-first, agent-first-class layer, not just by loading the baseline skill:
 
-- People first, AI assists. People belong; AI helps them discover, understand, and participate. Do not add an AI feature only because it is possible.
-- External AI output, Claude included, is recommendation or evidence until Tucker verifies and adopts it. It never becomes authority on its own.
+- People come first in UI, copy, and policy. AI supports people, operations, and continuity.
+- Do not introduce or keep AI features only because they are technically possible.
+- External AI output, Claude included, is recommendation or evidence until Tucker verifies and adopts it.
 - Send only minimum-necessary context to any external AI. Get explicit Tucker approval before sharing NDA, private-finance, secret, recipient, or personal data.
-- Structure objects for identity, provenance, freshness, relationships, permissions, limitations, and available actions, and expose machine-readable information through stable, documented interfaces.
-- Add agent actions only after authorization, audit, expiration, revocation, and human confirmation. Tucker retains final say over every mutation, policy, and publish.
+- Structure objects for identity, provenance, freshness, relationships, permissions, limitations, and available actions, and expose machine-readable information through stable documented interfaces.
+- Agent actions are enabled only with authorization, audit trail, expiration, revocation, and human confirmation.
 
 ## Scheduled agent program
 
@@ -131,4 +132,3 @@ Use ./scripts/sync-continuity.sh github master --dry-run before any real push to
 - Codex: planning, continuity gates, implementation, and commit/release coordination.
 - Claude: documentation passes, campaign drafts, structured summaries.
 - Tucker: final decisions, approvals, and any production changes.
-
