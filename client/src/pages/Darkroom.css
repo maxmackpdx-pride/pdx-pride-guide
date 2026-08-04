@@ -530,6 +530,37 @@
   .darkroom-waypoint__card:hover { transform: none; }
 }
 
+/* "Excited for this" like button — top-right of each roadmap card. */
+.darkroom-waypoint__card > .darkroom-waypoint__like {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c, #ff2d5e) 42%, transparent);
+  background: rgba(4, 4, 6, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #e8e8ef;
+  font: 800 12px/1 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: transform .16s ease, border-color .18s ease, background .18s ease;
+}
+.darkroom-waypoint__card > .darkroom-waypoint__like:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--c, #ff2d5e) 78%, transparent);
+  background: rgba(6, 6, 9, .82);
+}
+.darkroom-waypoint__like-heart { font-size: 14px; line-height: 1; color: #ff5c8a; transition: transform .18s ease; }
+.darkroom-waypoint__like.is-liked { border-color: #ff5c8a; }
+.darkroom-waypoint__like.is-liked .darkroom-waypoint__like-heart { color: #ff2d5e; transform: scale(1.18); }
+.darkroom-waypoint__like:focus-visible { outline: 2px solid #ff5c8a; outline-offset: 3px; }
+
 .darkroom-waypoint__card > * { position: relative; z-index: 2; }
 .darkroom-waypoint__card .pdx-refract { position: absolute; z-index: 3; }
 

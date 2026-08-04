@@ -110,6 +110,14 @@ const db = drizzle(sqlite);
 ensureAnalyticsTable(sqlite);
 ensureAdsTables(sqlite);
 
+// Waypoint (Next page) likes — anonymous excitement counter per roadmap card.
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS waypoint_likes (
+    waypoint_id TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 0
+  );
+`);
+
 // Initialize tables
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS events (

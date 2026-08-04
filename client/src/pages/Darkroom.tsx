@@ -1,9 +1,57 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "wouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { shareCardUrl } from "@shared/shareCards";
 import "./Darkroom.css";
+
+// Anonymous "excited for this" counter for each roadmap card.
+function WaypointLikeButton({ id }: { id: string }) {
+  const qc = useQueryClient();
+  const { data: likes = {} } = useQuery<Record<string, number>>({
+    queryKey: ["/api/next/likes"],
+    queryFn: () => apiRequest("GET", "/api/next/likes").then((r) => r.json()),
+    staleTime: 60_000,
+  });
+  const [liked, setLiked] = useState(() => {
+    try { return localStorage.getItem(`wp-like-${id}`) === "1"; } catch { return false; }
+  });
+  const count = likes[id] ?? 0;
+
+  const setCount = (next: number) =>
+    qc.setQueryData<Record<string, number>>(["/api/next/likes"], (prev) => ({ ...(prev ?? {}), [id]: Math.max(0, next) }));
+
+  const toggle = async () => {
+    const next = !liked;
+    setLiked(next);
+    try { localStorage.setItem(`wp-like-${id}`, next ? "1" : "0"); } catch { /* ignore */ }
+    setCount(count + (next ? 1 : -1));
+    try {
+      const res = await apiRequest(next ? "POST" : "DELETE", `/api/next/likes/${id}`);
+      const body = await res.json() as { count?: number };
+      if (typeof body.count === "number") setCount(body.count);
+    } catch {
+      setLiked(!next);
+      try { localStorage.setItem(`wp-like-${id}`, !next ? "1" : "0"); } catch { /* ignore */ }
+      qc.invalidateQueries({ queryKey: ["/api/next/likes"] });
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className={`darkroom-waypoint__like${liked ? " is-liked" : ""}`}
+      onClick={toggle}
+      aria-pressed={liked}
+      aria-label={liked ? "Remove your excited vote" : "I'm excited for this"}
+    >
+      <span className="darkroom-waypoint__like-heart" aria-hidden="true">{liked ? "♥" : "♡"}</span>
+      <span className="darkroom-waypoint__like-count">{count}</span>
+    </button>
+  );
+}
 
 const ZAYLIST_ART = "/brand/family/zaylist-primary.svg";
 const DARKROOM_ART = "/brand/family/zaydark.svg";
@@ -237,6 +285,7 @@ function WaypointItem({ waypoint }: { waypoint: Waypoint }) {
           ) : null}
         </div>
         </div>
+        <WaypointLikeButton id={`waypoint-${waypoint.number}`} />
       </article>
     </li>
   );

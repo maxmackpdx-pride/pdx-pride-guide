@@ -1401,6 +1401,34 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getAttendanceSummaries());
   });
 
+  // ── Next-page waypoint likes: anonymous "excited for this" counter ──────────
+  const WAYPOINT_ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
+  const bumpWaypointLike = (id: string, delta: number) => {
+    sqlite.prepare(`INSERT OR IGNORE INTO waypoint_likes (waypoint_id, count) VALUES (?, 0)`).run(id);
+    sqlite.prepare(`UPDATE waypoint_likes SET count = MAX(0, count + ?) WHERE waypoint_id = ?`).run(delta, id);
+    const row = sqlite.prepare(`SELECT count FROM waypoint_likes WHERE waypoint_id = ?`).get(id) as { count: number } | undefined;
+    return row?.count ?? 0;
+  };
+
+  app.get("/api/next/likes", (_req, res) => {
+    const rows = sqlite.prepare(`SELECT waypoint_id AS id, count FROM waypoint_likes`).all() as Array<{ id: string; count: number }>;
+    const out: Record<string, number> = {};
+    for (const r of rows) out[r.id] = r.count;
+    res.json(out);
+  });
+
+  app.post("/api/next/likes/:id", (req, res) => {
+    const id = String(req.params.id || "").toLowerCase();
+    if (!WAYPOINT_ID.test(id)) return res.status(400).json({ error: "bad id" });
+    res.json({ id, count: bumpWaypointLike(id, 1) });
+  });
+
+  app.delete("/api/next/likes/:id", (req, res) => {
+    const id = String(req.params.id || "").toLowerCase();
+    if (!WAYPOINT_ID.test(id)) return res.status(400).json({ error: "bad id" });
+    res.json({ id, count: bumpWaypointLike(id, -1) });
+  });
+
   app.get("/api/nude-beaches", async (_req, res) => {
     try {
       const result = await getNudeBeachesSnapshot();
