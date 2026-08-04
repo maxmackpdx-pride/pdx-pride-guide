@@ -4,7 +4,7 @@
  *
  * Hrefs follow live app routes (not the handoff's aspirational slug paths):
  *   events  → eventPath(id, title, day)
- *   hausing → /hausing/:id
+ *   housing → /the-hauz/:id
  *   gifting → /gifting?post=:id
  *   gigs    → /pride-work?post=:id
  *   spotted → /spotted (no per-post deep link yet)
@@ -105,7 +105,7 @@ export function gigPostPath(id: number): string {
 }
 
 export function housingPostPath(id: number): string {
-  return `/hausing/${id}`;
+  return `/the-hauz/${id}`;
 }
 
 /** Prefer a currently-happening listing; else first live/upcoming. */
@@ -173,12 +173,12 @@ export function mapEventSample(
 }
 
 export function mapHousingSample(post: HousingPostView): HomeStageCardData {
-  const kicker = HOUSING_TYPE_KICKER[post.type] || "HAÜSING";
+  const kicker = HOUSING_TYPE_KICKER[post.type] || "THE HAÜZ";
   const title =
     post.displayName ||
     housingDisplayName(post.type, post.name) ||
     post.headline ||
-    "HAÜSING post";
+    "THE HAÜZ post";
   const area = (post.areas || []).filter(Boolean).slice(0, 2).join(", ");
   const line = clip(post.headline || post.body || area || "Portland");
   const metaParts: string[] = [];
@@ -205,7 +205,7 @@ export function mapHousingSample(post: HousingPostView): HomeStageCardData {
     kicker: kicker.replace(/_/g, " "),
     title,
     line,
-    meta: metaParts.filter(Boolean).join(" · ") || "HAÜSING",
+    meta: metaParts.filter(Boolean).join(" · ") || "THE HAÜZ",
     cta,
     accent: ACCENT.housing,
     thumbUrl: post.photos?.[0] ?? null,
@@ -324,7 +324,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
   },
   housing: {
     key: "housing",
-    href: "/hausing",
+    href: "/the-hauz",
     kicker: "FORMING A HAÜS",
     title: "Wildrose haüs, 2 in, 2 to go",
     line: "Southeast. Big kitchen, one very polite beagle.",

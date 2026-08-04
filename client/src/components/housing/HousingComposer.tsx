@@ -511,7 +511,7 @@ export function HousingComposer({
   };
 
   const sharePost = (id: number) => {
-    const url = `${window.location.origin}/hausing/${id}`;
+    const url = `${window.location.origin}/the-hauz/${id}`;
     if (navigator.share) {
       navigator.share({ url }).catch(() => undefined);
       return;

@@ -4,7 +4,7 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg-app);color:var(--text-body);font-family:var(--font-body);font-size:14px;line-height:1.6}
-.wrap{max-width:980px;margin:0 auto;padding:40px 44px 72px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 44px 24px}
 a{color:var(--neon-cyan)}a:hover{color:var(--neon-yellow)}
 h1{font-family:var(--font-display);font-weight:900;font-size:clamp(40px,6vw,68px);line-height:.92;text-transform:uppercase;margin:0 0 16px;color:var(--text-hi)}
 h2{font-family:var(--font-display);font-weight:900;font-size:30px;line-height:1;text-transform:uppercase;margin:44px 0 14px;padding-bottom:9px;border-bottom:2px solid var(--ink-border);color:var(--text-hi)}
@@ -84,13 +84,16 @@ hr{border:0;height:2px;margin:34px 0;background:var(--rainbow-bar-loop)}
 <tr><td class="n">Lit plate</td><td class="t">--acid-lit, --*-lit</td><td>The current sticker, tag and marker treatment: lit fill, black keyline, accent blooming on the floor.</td></tr>
 <tr><td class="n">Refract seam</td><td class="t">--refract-seam-gradient</td><td>The rainbow hairline at the top of a card. Also the route loader when it charges.</td></tr>
 <tr><td class="n">Day colours</td><td class="t">--day-mon &hellip; --day-sun</td><td>Seven keys that carry data, not decoration. Each has a text pair. Wednesday is <code>#FFEE00</code>, which is not the acid yellow.</td></tr>
-<tr><td class="n">Board accents</td><td class="t">--board-*</td><td>Missed Connections magenta, Gifting acid yellow, Gigs violet, HAÜSING cyan.</td></tr>
-<tr><td class="n">Title motif</td><td class="t">HousingWell · title-motif.html</td><td>HAÜSING dynamic text: name over cover. Shared frame on Looking / Offering / Managed (55% × 58% of the photo well). Forming same height share, 72% width. Equal line heights. Not the photo well height.</td></tr>
+<tr><td class="n">Board accents</td><td class="t">--board-*</td><td>Missed Connections magenta, GIFZ acid yellow, GIGZ violet, THE HAÜZ cyan.</td></tr>
+<tr><td class="n">Living guide</td><td class="t">guidelines/why-living.html</td><td>The operating contract that watches production, normalizes volatile data, archives full snapshots, maps drift to guide sections, and preserves Tucker's authority over standards. Observation is automatic; adoption is not.</td></tr>
+<tr><td class="n">Homepage stage</td><td class="t">guidelines/homepage-stage.html</td><td>The page-level homepage composition: stationary video atmosphere, one shared field plate, running head, datum rail, story hierarchy, action seam, and 11 responsive states. Use it for the supplied homepage direction, not for a generic hero carousel.</td></tr>
+<tr><td class="n">Logo letter library</td><td class="t">guidelines/master-letter-library.html</td><td>The living SVG source family: Prime Z, full wordmarks, product identities, background treatments, current homes, future marks, and candidate status. Use complete supplied artwork rather than inferring a closed alphabet.</td></tr>
+<tr><td class="n">Title motif</td><td class="t">HousingWell · title-motif.html</td><td>THE HAÜZ dynamic text: name over cover. Shared frame on Looking / Offering / Managed (55% × 58% of the photo well). Forming same height share, 72% width. Equal line heights. Not the photo well height.</td></tr>
 <tr><td class="n">Dynamic text</td><td class="t">Title motif</td><td>Same as title motif. All caps, shared width, flush column, fills the title frame. Say this, not “big white words on the image.”</td></tr>
-<tr><td class="n">Photo well</td><td class="t">.hz-well</td><td>Cover image box only (240 desktop / 190 mobile on HAÜSING). Changing well height is not how you resize type.</td></tr>
+<tr><td class="n">Photo well</td><td class="t">.hz-well</td><td>Cover image box only (240 desktop / 190 mobile on THE HAÜZ). Changing well height is not how you resize type.</td></tr>
 <tr><td class="n">Title frame</td><td class="t">HousingWell frame shares</td><td>The red-box region type lives in, top-left of the well. Half cards match each other; Forming is wider, same height band. Mobile uses the same fractions.</td></tr>
-<tr><td class="n">HAÜS</td><td class="t">shared/housing.ts</td><td>A household formed on HAÜSING. Locked name suffix. Board name is HAÜSING; a single household is a HAÜS.</td></tr>
-<tr><td class="n">HAÜSING</td><td class="t">/hausing</td><td>The housing board. Four post types: Looking, Offering, Forming a HAÜS, Managed property.</td></tr>
+<tr><td class="n">HAÜS</td><td class="t">shared/housing.ts</td><td>A household formed on THE HAÜZ. Locked name suffix. Board name is THE HAÜZ; a single household is a HAÜS.</td></tr>
+<tr><td class="n">THE HAÜZ</td><td class="t">/the-hauz</td><td>The housing board. Four post types: Looking, Offering, Forming a HAÜS, Managed property.</td></tr>
 <tr><td class="n">Category neons</td><td class="t">--cat-*</td><td>Directory place types. Drives the card accent and the map pin, not a top border.</td></tr>
 <tr><td class="n">Context primaries</td><td class="t">[data-context]</td><td>One attribute rebinds <code>--accent</code> and <code>--c</code> for a whole subtree: hub, admin, owner, Rooster Rock, Sauvie Island.</td></tr>
 <tr><td class="n">Calm mode</td><td class="t">html.calm-mode</td><td>The accessibility switch. Flattens bloom and blur, stops animation, keeps colour meaning. Every new effect needs a calm branch.</td></tr>
@@ -127,10 +130,11 @@ adding a one-off, because that is a change to the shell.</pre></div>
 
 <div class="pr"><div class="pr__bar"><span class="pr__k">Match the live product</span><button class="pr__c" type="button">Copy</button></div>
 <pre>Read <b>[client/src/components/ds/[Name].tsx]</b> on master in
-maxmackpdx-pride/pdx-pride-guide and port it verbatim: the same class names, the
-same layers in the same order, the same token references, the same animation and
-fill-mode. The live product is the source of truth, not this guide and not your
-memory of the app. Tell me every place the guide currently contradicts it.</pre></div>
+maxmackpdx-pride/pdx-pride-guide as evidence of what is currently shipped. Then
+compare it with <b>design-system/</b> and <b>docs/LIVE_DESIGN_STANDARD.md</b>, which
+remain the acceptance criteria. Tell me every contradiction. Do not silently
+turn production drift into a new standard or port a retired pattern back into
+the guide.</pre></div>
 
 <div class="pr"><div class="pr__bar"><span class="pr__k">A new effect or motion</span><button class="pr__c" type="button">Copy</button></div>
 <pre>Add <b>[the effect]</b> using the existing motion vocabulary: the easing and
@@ -159,7 +163,7 @@ Fact-check the panel against the live component and list every drift you find.</
 <h2>05 &middot; Two different asks</h2>
 <p>Be explicit about which one you are making, because the right answer is opposite in each case.</p>
 <div class="grid">
-  <div class="cell"><h4>Using the system</h4><p>"Build a Housing board card." The answer is the existing shell at a different accent, and nothing new. If it needs something new, that is a red flag to raise, not a licence to invent.</p></div>
+  <div class="cell"><h4>Using the system</h4><p>"Build a THE HAÜZ card." The answer is the existing shell at a different accent, and nothing new. If it needs something new, that is a red flag to raise, not a licence to invent.</p></div>
   <div class="cell"><h4>Changing the system</h4><p>"The claim sticker should not be magenta anymore." The answer touches the token layer, the panel that documents it, and every surface that inherits it. Say "this is a change to the system" out loud so all three get updated together.</p></div>
 </div>
 

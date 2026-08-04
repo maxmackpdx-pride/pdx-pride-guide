@@ -254,6 +254,21 @@
   gap: 14px;
 }
 
+.hz-hero__title--brand {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.hz-hero__brand-logo {
+  display: block;
+  width: min(100%, 620px);
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  object-position: left center;
+}
+
 .hz-beta {
   display: inline-block;
   transform: rotate(-7deg);

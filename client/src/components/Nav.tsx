@@ -636,7 +636,7 @@ export default function Nav() {
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
-              src="/brand/kit/wordmark/zaylist-wordmark-color.png"
+              src="/brand/family/zaylist-primary.svg"
               alt="Zaylist"
               className="site-brand-lockup"
             />

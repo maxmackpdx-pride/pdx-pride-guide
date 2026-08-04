@@ -235,7 +235,7 @@ export default function Gifting() {
         <BoardHero
           accent="lime"
           kicker="Free board · Pride season 2026"
-          title={<>Gift with <span className="board-hero__title-accent">Pride</span></>}
+          title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/gifz.svg" alt="GIFZ" />}
           lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
         />
       </CommunityBoardHeroRow>

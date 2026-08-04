@@ -306,7 +306,7 @@ export default function HomeHero() {
         <Link href="/nude-beaches" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
           Headed to the river? →
         </Link>
-        <Link href="/hausing" className="home-hero__btn home-hero__btn--haus" data-testid="hero-cta-hausing">
+        <Link href="/the-hauz" className="home-hero__btn home-hero__btn--haus" data-testid="hero-cta-hausing">
           Renting or looking? →
         </Link>
       </div>

@@ -75,7 +75,7 @@ export default function HomeConstructionNudge() {
 
         <img
           className="pgc-app-icon"
-          src="/icons/zaylist-192.png"
+          src="/brand/family/prime-z.svg"
           alt=""
           width={72}
           height={72}

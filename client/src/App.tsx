@@ -111,17 +111,26 @@ function AppLayout() {
               {() => <Redirect to="/pride-work" />}
             </Route>
             <Route path="/gifting" component={Gifting} />
-            <Route path="/hausing/new" component={HousingNew} />
-            <Route path="/hausing/:id" component={HousingPost} />
-            <Route path="/hausing" component={Housing} />
+            <Route path="/the-hauz/new" component={HousingNew} />
+            <Route path="/the-hauz/:id" component={HousingPost} />
+            <Route path="/the-hauz" component={Housing} />
+            <Route path="/hausing/new">
+              {() => <Redirect to="/the-hauz/new" />}
+            </Route>
+            <Route path="/hausing/:id">
+              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
+            </Route>
+            <Route path="/hausing">
+              {() => <Redirect to="/the-hauz" />}
+            </Route>
             <Route path="/housing/new">
-              {() => <Redirect to="/hausing/new" />}
+              {() => <Redirect to="/the-hauz/new" />}
             </Route>
             <Route path="/housing/:id">
-              {(params) => <Redirect to={`/hausing/${params.id}`} />}
+              {(params) => <Redirect to={`/the-hauz/${params.id}`} />}
             </Route>
             <Route path="/housing">
-              {() => <Redirect to="/hausing" />}
+              {() => <Redirect to="/the-hauz" />}
             </Route>
             <Route path="/about" component={About} />
             <Route path="/resume" component={Resume} />

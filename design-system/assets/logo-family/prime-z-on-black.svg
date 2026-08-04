@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 874 640" role="img" aria-label="Prime Z logo">
+  <title>Prime Z - on black</title>
+  <metadata>status=owner-directed vector candidate; raster-embedded=false; editable-paths=true; edition=on black</metadata>
+  <defs><linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="640"><stop offset="0.000" stop-color="#ffffff"/><stop offset="0.520" stop-color="#fafafd"/><stop offset="1.000" stop-color="#eeeeF4"/></linearGradient></defs>
+  <rect width="874" height="640" fill="#000000"/>
+  <g><path id="white" d="M 770 63 L 770 113 L 776 113 L 776 80 L 777 79 L 779 79 L 781 81 L 791 98 L 793 98 L 807 78 L 810 79 L 810 113 L 816 113 L 816 63 L 809 63 L 797 81 L 796 86 L 789 88 L 787 86 L 788 80 L 777 63 Z M 722 63 L 722 70 L 736 70 L 737 71 L 737 113 L 744 113 L 745 112 L 745 71 L 746 70 L 760 70 L 760 63 Z M 57 62 L 140 166 L 458 167 L 112 577 L 628 555 L 708 461 L 345 458 L 692 62 Z" fill="url(#white)" fill-rule="evenodd" clip-rule="evenodd"/></g>
+</svg>

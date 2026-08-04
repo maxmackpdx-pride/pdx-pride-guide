@@ -321,7 +321,7 @@ export default function PrideWork() {
         <BoardHero
           accent="purple"
           kicker="Two-way work board · Pride season and beyond"
-          title={<>Gig<span className="board-hero__title-accent">Z</span></>}
+          title={<img className="board-hero__brand-logo board-hero__brand-logo--gigz" src="/brand/family/gigz.svg" alt="GIGZ" />}
           lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
         />
       </CommunityBoardHeroRow>

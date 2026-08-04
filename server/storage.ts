@@ -87,10 +87,10 @@ import { HOUSING_TYPE_LABEL, type HousingType } from "../shared/housing";
 
 /** How a housing post announces itself in the hub feed. */
 const HOUSING_FEED_ACTION: Record<HousingType, string> = {
-  LOOKING: "Looking for housing on HAÜSING",
-  OFFERING: "Has a room open on HAÜSING",
+  LOOKING: "Looking for housing on THE HAÜZ",
+  OFFERING: "Has a room open on THE HAÜZ",
   FORMING: "Is forming a HAÜS",
-  MANAGED: "New managed unit on HAÜSING",
+  MANAGED: "New managed unit on THE HAÜZ",
 };
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
@@ -347,7 +347,7 @@ sqlite.exec(`
   );
 `);
 
-// HAUSING - the HAÜSING. See shared/schema.ts for the annotated schema.
+// HAUSING - THE HAÜZ. See shared/schema.ts for the annotated schema.
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS housing_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

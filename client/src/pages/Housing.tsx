@@ -71,9 +71,9 @@ const POST_OPTIONS: HousingType[] = ["OFFERING", "LOOKING", "FORMING"];
 
 export default function Housing() {
   usePageSeo(
-    "HAÜSING · Housing board",
+    "THE HAÜZ · Housing board",
     "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
-    { image: shareCardUrl("housing"), imageAlt: "HAÜSING — housing board on Zaylist" },
+    { image: shareCardUrl("housing"), imageAlt: "THE HAÜZ - housing board on Zaylist" },
   );
 
   const { user } = useAuth();
@@ -158,14 +158,14 @@ export default function Housing() {
           };
         });
       }
-      navigate(`/hausing/${post.id}`);
+      navigate(`/the-hauz/${post.id}`);
     },
     onSave: (post) => {
       if (!requireAuth()) return;
       saveMutation.mutate(post.id);
     },
     onShare: (post) => {
-      const url = `${window.location.origin}/hausing/${post.id}`;
+      const url = `${window.location.origin}/the-hauz/${post.id}`;
       if (navigator.share) {
         navigator.share({ title: post.displayName || post.headline, url }).catch(() => undefined);
         return;
@@ -176,25 +176,25 @@ export default function Housing() {
     // Asking to chat is asking in, and nothing opens until the other side accepts.
     onChat: (post) => {
       if (!requireAuth()) return;
-      navigate(`/hausing/${post.id}?chat=1`);
+      navigate(`/the-hauz/${post.id}?chat=1`);
     },
     onJoin: (post) => {
       if (!requireAuth()) return;
-      navigate(`/hausing/${post.id}?join=1`);
+      navigate(`/the-hauz/${post.id}?join=1`);
     },
     onWaitlist: (post) => {
       if (!requireAuth()) return;
-      navigate(`/hausing/${post.id}?waitlist=1`);
+      navigate(`/the-hauz/${post.id}?waitlist=1`);
     },
     onBuildHaus: (post) => {
       if (!requireAuth()) return;
-      navigate(`/hausing/${post.id}?build=1`);
+      navigate(`/the-hauz/${post.id}?build=1`);
     },
   };
 
   const openCompose = (type: HousingType | "PM") => {
     if (!requireAuth()) return;
-    navigate(`/hausing/new?type=${type.toLowerCase()}`);
+    navigate(`/the-hauz/new?type=${type.toLowerCase()}`);
   };
 
   // Only Forming cards span both columns, so every other type is a half slot.
@@ -239,7 +239,7 @@ export default function Housing() {
 
       <div className="hz-run">
         <LiveDot />
-        <Mono accent>HAÜSING · Housing board</Mono>
+        <Mono accent>THE HAÜZ · Housing board</Mono>
       </div>
       <div className="pdx-seam hz-seam--head" aria-hidden="true" />
 
@@ -279,8 +279,8 @@ export default function Housing() {
         <span className="hz-hero__scrim" aria-hidden="true" />
         <div className="hz-pad">
           <div className="hz-wrap">
-            <h1 className="hz-title hz-hero__title">
-              HAÜSING
+            <h1 className="hz-title hz-hero__title hz-hero__title--brand">
+              <img className="hz-hero__brand-logo" src="/brand/family/the-hauz.svg" alt="THE HAÜZ" />
               <span className="hz-beta">Beta</span>
             </h1>
             <p className="hz-hero__lede">

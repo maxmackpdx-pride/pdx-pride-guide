@@ -44,7 +44,7 @@ const BADGE: Record<Category, string> = {
   spotted: "Mizzed Connection",
   gigs: "Gig",
   gifting: "GifZ",
-  housing: "HAÜSING",
+  housing: "THE HAÜZ",
   hosts: "Host",
   checkins: "Check-in",
 };

@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import logoWordmark from "@assets/logo-wordmark.png";
 import { FeedbackButton } from "./FeedbackForm";
 import CalmModeToggle from "./CalmModeToggle";
 import PushNotificationToggle from "./PushNotificationToggle";
@@ -21,7 +20,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/spotted", "Mizzed Connection"],
       ["/pride-work", "Gigz"],
       ["/gifting", "GifZ"],
-      ["/hausing", "HAÜSING"],
+      ["/the-hauz", "THE HAÜZ"],
     ],
   },
   {
@@ -55,7 +54,7 @@ export default function Footer() {
         <div className="site-footer__grid">
           <div className="site-footer__brand-col">
             <img
-              src={logoWordmark}
+              src="/brand/family/zaylist-primary.svg"
               alt="Zaylist"
               className="site-footer__logo"
               width={1200}

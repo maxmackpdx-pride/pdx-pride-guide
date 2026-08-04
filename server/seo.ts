@@ -212,7 +212,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/gifting",
     "/pride-work",
     "/spotted",
-    "/hausing",
+    "/the-hauz",
     "/about",
     "/contact",
     "/sponsors",
@@ -324,18 +324,18 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/next": {
     title: "Next | What Zaylist Is Building",
-    description: "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+    description: "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/darkroom": {
     title: "Next | What Zaylist Is Building",
-    description: "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+    description: "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/gigs": {
     title: "Gigz: Gigs & Jobs | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
-  "/hausing": {
-    title: "HAÜSING | Zaylist",
+  "/the-hauz": {
+    title: "THE HAÜZ · Housing board | Zaylist",
     description:
       "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
   },
@@ -530,8 +530,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
         ? "/directory"
         : pathKey.startsWith("/u/")
           ? "/dashboard"
-          : pathKey.startsWith("/hausing")
-            ? "/hausing"
+          : pathKey.startsWith("/the-hauz") || pathKey.startsWith("/hausing")
+            ? "/the-hauz"
             : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 

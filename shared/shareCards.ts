@@ -48,7 +48,7 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
     return null;
   }
   if (path === "/schedule") return "schedule";
-  if (path === "/hausing" || path.startsWith("/hausing/")) return "housing";
+  if (path === "/the-hauz" || path.startsWith("/the-hauz/") || path === "/hausing" || path.startsWith("/hausing/")) return "housing";
   if (path === "/spotted") return "spotted";
   if (path === "/pride-work" || path === "/gigs") return "prideWork";
   if (path === "/gifting") return "gifting";

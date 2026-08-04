@@ -3,7 +3,7 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg-app);color:var(--text-body);font-family:var(--font-body);font-size:14px;line-height:1.6}
-.wrap{max-width:980px;margin:0 auto;padding:40px 44px 72px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 44px 24px}
 a{color:var(--neon-cyan)}a:hover{color:var(--neon-yellow)}
 h1{font-family:var(--font-display);font-weight:900;font-size:clamp(40px,6vw,68px);line-height:.92;text-transform:uppercase;margin:0 0 18px;color:var(--text-hi)}
 h2{font-family:var(--font-display);font-weight:900;font-size:30px;line-height:1;text-transform:uppercase;margin:44px 0 14px;padding-bottom:9px;border-bottom:2px solid var(--ink-border);color:var(--text-hi)}
@@ -24,17 +24,26 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 <body><div class="wrap"><div class="kick">Zaylist &middot; design system</div>
 <h1><strong>Zaylist Design System</strong></h1>
 <p>A high-energy neon zine with a utility backbone: welcoming, scannable, and community-first. Anti-corporate by design, and proudly solo-run: built by one person for the PDX scene, not a sponsor.</p>
-<p>This design system powers <strong>Zaylist</strong> (zaylist.com), a community-run guide to Portland's queer events. It covers the event directory and schedule, the Queer Directory, Nude Beaches, the community boards (Spotted!, Gifting, Gig Board), the promoter hub, member profiles, the member Hub, and the admin dashboard.</p>
+<p>This design system powers <strong>Zaylist</strong> (zaylist.com), a community-run guide to Portland's queer events. It covers the event directory and schedule, the Queer Directory, Nude Beaches, the community boards (Spotted!, GIFZ, GIGZ), the promoter hub, member profiles, the member Hub, and the admin dashboard.</p>
+<h2><strong>Why this is a living guide</strong></h2>
+<p>Zaylist changes in production, so this guide keeps a durable record of that movement instead of pretending the system is frozen. Scheduled checks normalize ordinary timestamp noise, compare meaningful regions such as navigation, typography, cards, maps, feeds, and shared chrome, archive complete normalized snapshots, then map detected drift back to the related guide sections.</p>
+<p>Unreviewed mapped sections can carry a <strong>NEW · 14D</strong> marker for up to 14 days from first detection. Review state and history are stored persistently so the same record appears across browsers and devices.</p>
+<blockquote><strong>Governance boundary:</strong> observation is automatic; standards adoption is not. Production HTML is evidence, not permission to rewrite specifications. “Mark reviewed” acknowledges the record. Tucker decides whether the guide changes, production is corrected, or a pattern remains draft or queued.</blockquote>
+<p>The complete operational contract, storage model, monitored surfaces, review meaning, and static-export boundary live in <strong>Why this guide is living</strong> under Read me.</p>
 <h2><strong>Sources (ground truth)</strong></h2>
 <ul>
 <li><strong>Live site:</strong> <a href="https://www.zaylist.com/" target="_blank" rel="noopener">https://www.zaylist.com</a></li>
 
 <li><strong>Repo:</strong> <code>maxmackpdx-pride/pdx-pride-guide</code> (default branch <code>master</code>). The canonical token + preview bundle lives at <code>design-system/</code> in that repo (<code>tokens/tokens.css</code>, <code>previews/*.html</code>, <code>EVENTS_GUIDE.md</code>, <code>AVATARS_GUIDE.md</code>, <code>ZAYLIST_LOGO_GUIDE.md</code>). Token source of truth is <code>client/src/index.css</code>; day colors and the schedule model mirror <code>shared/eventWeek.ts</code>; profile accents mirror <code>shared/profileConstants.ts</code>. The canonical "live product is truth" chrome standard is <code>docs/LIVE_DESIGN_STANDARD.md</code>.</li>
+
+<li><strong>Logo letter library:</strong> <code>assets/logo-family/</code> contains Prime Z and the supplied editable SVG wordmark family, background editions, display references, and THE HAÜZ candidate. <code>guidelines/master-letter-library.html</code> records each mark's current home and status.</li>
 </ul>
 <p>Assets, fonts, and color values here mirror that repo bundle. Where this project adds components beyond the repo bundle (map, stat cards, place cards, dividers, avatars, marquee), they are enhancements built on the same canonical foundations.</p>
 <hr>
 <h2><strong>SITE MAP (what this system serves)</strong></h2>
-<p><strong>Primary nav:</strong> About · Events · <strong>Places</strong> dropdown (Directory, Beaches) · <strong>Boards</strong> dropdown · NEXT. The wordmark is the home affordance. Labels come from <code>PRIMARY_NAV</code> in <code>client/src/lib/siteNav.ts</code>. Hub occupies the former Calm control position; Calm is inside the avatar menu with profile, inbox, settings and sign-out actions.</p>
+<p><strong>Primary nav:</strong> Home · About · Events · <strong>Places</strong> · Nude Beaches · <strong>Boards</strong> dropdown (GIGZ, GIFZ, Missed Connections!) · Promoters. Labels come from <code>PRIMARY_NAV</code> in <code>client/src/lib/siteNav.ts</code>. Logged in, a Hub link (with unread dot) plus an avatar menu (Edit profile, public profile, Inbox, Notification settings, Sign out); logged out, a LOG IN / JOIN button. A minimal CALM toggle sits in the header controls.</p>
+<p><strong>Product-family naming:</strong> <strong>GIGZ</strong> and <strong>GIFZ</strong> are exact public names and wordmarks. Always render them in full uppercase. Never publish <em>GigZ</em>, <em>GiftZ</em>, <em>Gigs</em>, <em>Gifting</em>, or <em>Gig Board</em> as board labels. Stable internal routes, API names, code identifiers, analytics keys, and asset paths may remain <code>gigs</code> and <code>gifting</code>; those compatibility names must not leak into member-facing copy.</p>
+<p><strong>THE HAÜZ naming:</strong> <strong>THE HAÜZ</strong> is the exact public product name and <code>/the-hauz</code> is its canonical route. Always include <strong>THE</strong>, the space, the Ü umlaut, and terminal Z. <code>/hausing</code> and <code>/housing</code> are compatibility redirects. The stable <code>/api/housing</code> contract and API-facing housing schema remain unchanged. <strong>HAÜS</strong> remains only the noun for one household formed inside THE HAÜZ.</p>
 <ul>
 <li><strong>Events</strong> <code>/events</code> (cards + map + filters; event modal at <code>/events/:id/:slug</code>) and <strong>Schedule</strong> <code>/schedule</code> (week grid + Stories export).</li>
 
@@ -42,7 +51,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 
 <li><strong>Nude Beaches</strong> <code>/nude-beaches</code>: live-conditions utility page (Rooster Rock / Sauvie Island tabs).</li>
 
-<li><strong>Boards:</strong> Gig Board <code>/pride-work</code> (two-way: workers and hosts), Gifting <code>/gifting</code> (free board), Missed Connections! <code>/spotted</code> (anonymous missed connections; <code>/missed-connections</code> redirects).</li>
+<li><strong>Boards:</strong> GIGZ <code>/pride-work</code> (two-way: workers and hosts), GIFZ <code>/gifting</code> (free board), Missed Connections! <code>/spotted</code> (anonymous missed connections; <code>/missed-connections</code> redirects).</li>
 
 <li><strong>Promoter hub</strong> <code>/submit</code>: submit an event, claim an event (<code>/submit/claim/:eventId</code>), become a verified promoter.</li>
 
@@ -68,7 +77,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 
 <li><strong>Kickers come in two registers.</strong> Zine kicker: a lime chip in Barlow ("PORTLAND FEST 2026 · COMMUNITY SUBMISSIONS"). Utility kicker: small monospace, 0.2em tracking, colored per section, often with a blinking live dot.</li>
 
-<li><strong>Three-beat mantras</strong>, separated by "·", are the board tagline pattern: "Keep it free · keep it kind · keep it moving" (Gifting), "Stay kind · stay anonymous · reveal when ready" (Missed Connections), "Need work? Need help? Both belong here." (Gig Board), "Submit it. Claim it. Keep Portland queer." (Promoters).</li>
+<li><strong>Three-beat mantras</strong>, separated by "·", are the board tagline pattern: "Keep it free · keep it kind · keep it moving" (GIFZ), "Stay kind · stay anonymous · reveal when ready" (Missed Connections), "Need work? Need help? Both belong here." (GIGZ), "Submit it. Claim it. Keep Portland queer." (Promoters).</li>
 
 <li><strong>Close seams:</strong> board-style pages end with a thin seam plus a mantra and the page URL, e.g. "Show up. Spend queer. Keep them alive." + <code>zaylist.com/directory</code>.</li>
 
@@ -108,7 +117,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 
 <li><strong>Directory categories:</strong> each place type has a category neon (<code>--cat-bars</code> magenta, <code>--cat-food</code> orange, <code>--cat-cafes</code> acid green, <code>--cat-venues</code> cyan, <code>--cat-services</code> violet, <code>--cat-shops</code> amber, <code>--cat-hotels</code> blue) used as the card's accent and its map pin. It drives the whole deep-glass shell (border tint, bloom, sheen, logo orb), not a 3px top border: that was the old lite-glass card. Nonprofit, healthcare, real estate, campgrounds and groups take a specialty <code>--_edge</code> gradient instead of a flat accent border. The map key adds a rainbow conic swatch for queer-owned.</li>
 
-<li><strong>Community board accents.</strong> Board identity via <code>--board-*</code> tokens: Missed Connections! magenta, <strong>Gifting</strong> acid yellow, <strong>Gigs</strong> violet, and <strong>Housing</strong> softened cyan (<code>--board-housing</code>, queued: the board ships on the same deep-glass shell in a future update, reusing the Gig Board give/ISO pattern). Board accents are identity, so a <code>data-context</code> scope never repaints them. On utility surfaces these soften to <code>#ff1fa0</code> / lime / <code>#b06bff</code> (tab underlines, running heads). Boards also carry warmer paper text: <code>--board-text #f4f1ea</code>, <code>--board-muted #bdbab2</code>.</li>
+<li><strong>Community board accents.</strong> Board identity via <code>--board-*</code> tokens: Missed Connections! magenta, <strong>GIFZ</strong> acid yellow, <strong>GIGZ</strong> violet, and <strong>THE HAÜZ</strong> softened cyan (<code>--board-housing</code>, queued: the board ships on the same deep-glass shell in a future update, reusing the GIGZ give/ISO pattern). Board accents are identity, so a <code>data-context</code> scope never repaints them. On utility surfaces these soften to <code>#ff1fa0</code> / lime / <code>#b06bff</code> (tab underlines, running heads). Boards also carry warmer paper text: <code>--board-text #f4f1ea</code>, <code>--board-muted #bdbab2</code>.</li>
 
 <li><strong>Status ramp</strong> (live-conditions tiles): good <code>#39FF14</code>, warn <code>#FFB347</code>, bad <code>#FF4D4D</code>, neutral <code>#19E3FF</code>, as 3px top borders on data cards.</li>
 
@@ -158,11 +167,11 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 <ul>
 <li><strong>Page chrome (<code>.page-header</code>):</strong> interior pages open with a compact black band: breadcrumb (HOME · section in lime), condensed title with optional neon accent word, lede, optional actions, softened rainbow seam underneath.</li>
 
-<li><strong>Home hero:</strong> full-bleed atmosphere layer runs a muted, looping, poster-fallback background video (<code>client/src/assets/home/hero-loop.mp4</code>), dimmed so the letter-orbs and wordmark read on top. It falls back to a poster still (<code>hero-loop-poster.jpg</code>) when muted autoplay is blocked (iOS Low Power Mode) or in Calm / reduced-motion. The ZAYLIST wordmark image floats above it (<code>hero-wordmark.webp</code>) with a slow bounce, over the seven drifting letter-orbs.</li>
+<li><strong>Home hero and homepage stage:</strong> the full-bleed atmosphere layer runs a muted, looping, poster-fallback background video (<code>client/src/assets/home/hero-loop.mp4</code>), dimmed so the letter-orbs and wordmark read on top. It falls back to a poster still (<code>hero-loop-poster.jpg</code>) when muted autoplay is blocked (iOS Low Power Mode) or in Calm / reduced-motion. The ZAYLIST wordmark image floats above it (<code>hero-wordmark.webp</code>) with a slow bounce, over the seven drifting letter-orbs. The supplied <strong>Homepage stage</strong> direction keeps that atmosphere stationary behind one shared field plate and an 11-state story. Its complete interactive prototype, editable source, responsive contract, and THE HAÜZ handoff live in <code>guidelines/homepage-stage.html</code>.</li>
 
 <li><strong>PageHero:</strong> the photo hero used by boards and promo panels: bg photo + overlay videos + scrim + grain, then a left-aligned panel with a lime kicker chip, a huge (up to 7.5rem, 0.88 line-height) title with an accent or glitch-rainbow word, lede, mono mantra tagline, actions. <code>flush</code> (left panel on scrim) and <code>compact</code> (75% height) variants.</li>
 
-<li><strong>Board anatomy</strong> (Gifting, Gig Board, Missed Connections, and adopted by Directory + Nude Beaches): running head (mono LIVE dot + mono nav) → hero row with tab bar (display tabs, 4px underline in board accent) → full-bleed 3-col <strong>stats band</strong> (huge tabular numerals, mono labels) → "how it works" steps on <code>#070708</code> → compose/form panels → active feed of listing cards → <strong>close seam</strong> (mantra + URL). Gig Board adds talent/host path cards; Missed Connection! renders quote-style cards.</li>
+<li><strong>Board anatomy</strong> (GIFZ, GIGZ, Missed Connections, and adopted by Directory + Nude Beaches): running head (mono LIVE dot + mono nav) → hero row with tab bar (display tabs, 4px underline in board accent) → full-bleed 3-col <strong>stats band</strong> (huge tabular numerals, mono labels) → "how it works" steps on <code>#070708</code> → compose/form panels → active feed of listing cards → <strong>close seam</strong> (mantra + URL). GIGZ adds talent/host path cards; Missed Connection! renders quote-style cards.</li>
 
 <li><strong>Events:</strong> page hero → map strip (day pins, RSVP <code>#CCFF00</code> pulse, legend) → sticky filter bar (day pills fill with day color when active) → poster-card grid or list rows (4px day left border). Cards carry attendance clusters ("12 going") and an RSVP cluster. An <strong>EventsNowPanel</strong> (HAPPENING NOW / UP NEXT rows with a blinking magenta dot and a mini-card marquee) and a live <strong>event ticker</strong> surface what's on right now.</li>
 
@@ -186,7 +195,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 
 <li><strong>Emoji are not used</strong> as UI icons (the "✦" sparkle and the chain ring's padlock charm aside). Meaning is color-coded by day/admission/category, not iconified.</li>
 
-<li>The brand mark is the wordmark lockup and the Z. Nav and footer use the full baked ZAYLIST wordmark <code>assets/logo-lockup.png</code> (<code>Logo variant="full"</code>); the square Z in <code>assets/logo-z.jpg</code> covers watermarks and in-product placements. Home-screen icons and favicons are a separate system: <code>app-face/</code> holds the App face standards and every shipped export (180 iOS, 192 and 512 Android, maskable, monochrome, 1024 master). That package is the only source of truth for the app face, so nothing else here restates its artwork or sizes.</li>
+<li>Tucker has directed the primary website wordmark migration. Use <code>assets/logo-family/zaylist-primary.svg</code> for the main website wordmark and preserve the existing glitch, glow, sizing, calm-mode, and responsive treatments around it. Use Prime Z for compact identity. Keep current, migration, candidate, NEXT, deferred, and library-only family marks visibly distinct. Home-screen icons and favicons remain a separate export system in <code>app-face/</code>.</li>
 </ul>
 <h2><strong>AVATARS &amp; FLAG RINGS (canonical)</strong></h2>
 <p>One component, three layers: a <strong>conic-gradient flag ring</strong> (4px at 48px, scales via <code>--avatar-size</code>), a cover-fit photo (user-cropped) or an initial fallback on one of six neon chips, and an optional charm. <strong>18 rings</strong> (rainbow, progress, lesbian, gay-men, bisexual, transgender, nonbinary, pansexual, genderfluid, genderqueer, intersex, asexual, aromantic, agender, leather, bear, chain + none); <strong>Progress flag is the default</strong> for unset values; <code>chain</code> is metallic with a padlock charm. The ring is <strong>identity, not status</strong>: never repurpose ring colors for roles (the HOST chip is colored by the event's day). Masked/anonymous = no ring. Calm mode keeps rings. Clusters overlap by ~-8px with a 2px <code>#0b0b0b</code> border + "12 going" count. A light-only shimmer may orbit the ring (Ring Shimmer).</p>
@@ -200,7 +209,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 <h2><strong>UI kit</strong></h2>
 <p><code>ui_kits/zaylist/</code> is an interactive recreation of core site surfaces (a representative subset, not every 2026 page). Open <code>ui_kits/zaylist/index.html</code>. Screens: <strong>Home</strong>, <strong>Events</strong>, <strong>Schedule</strong>, <strong>Directory</strong> (venue cards + map), <strong>Hub</strong>, <strong>Admin</strong>, plus an event detail view. Data lives in <code>ui_kits/zaylist/data.js</code>.</p>
 <h2><strong>Foundations (Design System tab)</strong></h2>
-<p>The reference page is banded, in the order you learn the system: <strong>00 Read me</strong>, <strong>A Language</strong> (colour, context primaries, type and space, voice, icons), <strong>B Brand</strong> (treatments, brand guide, app face), <strong>C Surfaces</strong> (glass, components, motion, motion library), <strong>D Patterns</strong> (nav, hub and feed, floating inbox, maps), <strong>E In use</strong> (the live site, Nude Beaches, a public profile). Each entry carries a SHIPPED / QUEUED / DRAFT chip, a copyable import line and a props table read live from its <code>.d.ts</code>, and the sidebar drills into every panel's own sections.</p>
+<p>The reference page is banded, in the order you learn the system: <strong>00 Read me</strong> (the written standard, why the guide is living, and prompts), <strong>A Language</strong> (colour, context primaries, type and space, voice, icons), <strong>B Brand</strong> (treatments, letter system, brand guide, app face), <strong>C Surfaces</strong> (glass, components, motion, motion library), <strong>D Patterns</strong> (homepage stage, nav, hub and feed, floating inbox, maps), <strong>E In use</strong> (the live site, Nude Beaches, a public profile). Each entry carries a SHIPPED / QUEUED / DRAFT chip, a copyable import line and a props table read live from its <code>.d.ts</code>, and the sidebar drills into every panel's own sections.</p>
 <h2><strong>Root manifest</strong></h2>
 <ul>
 <li><code>styles.css</code>: the single entry point consumers link (imports only).</li>
@@ -211,7 +220,7 @@ blockquote{margin:0 0 14px;padding:11px 0 11px 15px;border-left:3px solid var(--
 
 <li><code>ui_kits/zaylist/</code>: the interactive site recreation.</li>
 
-<li><code>assets/</code>: <code>logo-lockup.png</code> (baked wordmark), <code>logo-z.jpg</code> (square Z), <code>icons/</code> (32 line icons), <code>banners/</code> (collage heroes; also the profile banner choices), photos used by About/Resume.</li>
+<li><code>assets/</code>: <code>logo-family/</code> (governed editable SVG family and variants), legacy <code>logo-lockup.png</code> and <code>logo-z.jpg</code>, <code>icons/</code> (32 line icons), <code>banners/</code> (collage heroes; also profile banner choices), and photos used by About/Resume.</li>
 
 <li><code>app-face/</code>: the App face standards plus every home-screen and favicon export. The only source of truth for the app face.</li>
 

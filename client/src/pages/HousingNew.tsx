@@ -1,5 +1,5 @@
 /**
- * Post to HAÜSING.
+ * Post to THE HAÜZ.
  *
  * One question, four answers. Posting has to take under a minute, so only the
  * headline is required and everything else can be filled in later.
@@ -22,9 +22,9 @@ type PmMe = {
 };
 
 export default function HousingNew() {
-  usePageSeo("Post to HAÜSING", "Offer a room, look for housing, or start a household.", {
+  usePageSeo("Post to THE HAÜZ", "Offer a room, look for housing, or start a household.", {
     image: shareCardUrl("housing"),
-    imageAlt: "HAÜSING — housing board on Zaylist",
+    imageAlt: "THE HAÜZ - housing board on Zaylist",
   });
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
@@ -82,10 +82,10 @@ export default function HousingNew() {
         initialType={initialType}
         isPropertyManager={!!pm?.approved}
         managerName={pm?.manager?.company || pm?.manager?.name || null}
-        onClose={() => navigate("/hausing")}
+        onClose={() => navigate("/the-hauz")}
         onPosted={(postId) => {
           queryClient.invalidateQueries({ queryKey: ["/api/housing"] });
-          navigate(`/hausing/${postId}`);
+          navigate(`/the-hauz/${postId}`);
         }}
       />
     </div>

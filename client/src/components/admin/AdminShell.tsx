@@ -13,7 +13,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { Link } from "wouter";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/prime-z.svg";
 import "./admin-panel.css";
 
 export type AdminView =

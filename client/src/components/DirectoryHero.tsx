@@ -22,7 +22,7 @@ export default function DirectoryHero(_props: Props) {
           those of us on
           <img
             className="directory-hero__wordmark"
-            src="/brand/kit/wordmark/zaylist-wordmark-color.png"
+            src="/brand/family/zaylist-primary.svg"
             alt="Zaylist"
             width={1200}
             height={423}

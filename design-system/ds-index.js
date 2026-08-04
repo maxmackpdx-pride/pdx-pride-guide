@@ -7,6 +7,7 @@ window.DS_BANDS = [
 {band:null, groups:[
   {n:"Read me", d:"What this system is, where the ground truth lives, the caveats, and how to ask for any of it.", items:[
     {rules:"handoff/Zaylist Rebrand Prompt.md", f:"guidelines/readme.html", w:980, h:2600, nav:"Read me", t:"Design system read me", s:"The whole written standard: sources, site map, content fundamentals, visual foundations, signature effects, page patterns, iconography, avatars, components, caveats and known code gaps."},
+    {f:"guidelines/why-living.html", w:980, h:1900, nav:"Why it is living", t:"Why this guide is living", s:"Why the guide observes production, keeps full persistent history, maps drift back to standards, and reserves design decisions for Tucker."},
     {f:"guidelines/prompts.html", w:980, h:2400, nav:"Prompts", t:"Prompts", s:"How to ask for anything in this system, in the words the system already uses: the vocabulary index, say-this-not-that, six copyable prompt recipes, the guardrails worth repeating, and the difference between using the system and changing it."}]}]},
 
 {band:"A · Language", c:"--neon-yellow", d:"The measurable layer. Everything downstream is assembled out of these four groups, so they come first.", groups:[
@@ -25,13 +26,15 @@ window.DS_BANDS = [
   {n:"Icons", d:"One drawing standard, 32 glyphs.", items:[
     {f:"guidelines/icons.html", w:880, h:440, nav:"Line icon library", t:"Line icon library", s:"All 32 brand icons on a 24px grid, 2.2 stroke, round caps, spectrum-colored. Inherit currentColor when inlined."}]}]},
 
-{band:"B · Brand", c:"--neon-cyan", d:"The parts that are Zaylist rather than good practice: the treatments, the written standard, and the app face.", groups:[
+{band:"B · Brand", c:"--neon-cyan", d:"The parts that are Zaylist rather than good practice: the treatments, letter system, written standard, and app face.", groups:[
   {n:"Treatments", d:"The card shell every surface shares, plus the three effects that carry the brand without a logo in sight.", items:[
     {f:"guidelines/brand-bloom.html", w:900, h:900, nav:"Lit plate & bloom", t:"Lit plate & floor bloom", s:"The flat 4px magenta offset is retired. Posters, markers, tape and collage now read as a lit plate on a black keyline with the element's own accent blooming on the floor, the same idiom as the seam, chips and tags.", st:"queued"},
     {f:"guidelines/brand-motifs.html", w:700, h:300, nav:"Seam, markers & tags", t:"Seam, markers & tags", s:"Animated flowing seam (route loader), kicker chip, filled sticker tags.", st:"queued"},
     {f:"guidelines/title-motif.html", w:1000, h:2200, nav:"Title motif", t:"Title motif · Dynamic text", s:"HAÜSING name-over-cover: key terms, half vs Forming title frames (55×58 / 72×58), equal line heights, photo well is separate. Live: HousingWell.tsx."},
     {f:"guidelines/card-system.html", w:1180, h:4200, nav:"Card system", t:"Card system, deep glass", c:["data-display/EventCard","data-display/PosterCard","data-display/PlaceCard","data-display/StatCard"], s:"One shell drives Events, the Directory, the ads and every board. The accent contract, the anatomy layer by layer, the four surfaces, the modal as the open state of the same object, motion, and the token table. HAÜSING uses the same shell; its name-over-cover is the title motif panel."},
     {f:"guidelines/brand-glitch.html", w:900, h:820, nav:"Glitch", t:"Glitch", s:"The slow RGB glitch on the nav and hero wordmark: cycle, active window, offsets, ghost filters, and the off switch. Copyable markup and CSS."}]},
+  {n:"Logo library", d:"Living SVG source family for Zaylist symbols, wordmarks, product identities, and variants.", items:[
+    {f:"guidelines/master-letter-library.html", w:1000, h:8000, nav:"Logo letter library", t:"Logo letter library", s:"Prime Z above the complete governed SVG wordmark family: primary ZAYLIST, Portland edition, current product titles, NEXT identities, candidates, variants, provenance, and explicit home/status boundaries. Every supplied SVG file is visibly inventoried and machine-indexed.", st:"migration"}]},
   {n:"Brand guide", d:"The written standard for everything that has no token: the mark, imagery, voice, accessibility, trademark.", items:[
     {f:"brand-guide/Zaylist Brand Guide v2.html", w:1180, h:1400, nav:"Brand guide", t:"Brand guide", s:"Thirteen sections: the mark, the city lockup, clear space, glow, monochrome, backgrounds, misuse, applications, essence, grid, imagery, voice, accessibility and trademark. Scroll inside the frame.", scroll:1}]},
   {n:"App face", d:"The one artifact with its own end-to-end package.", items:[
@@ -53,6 +56,8 @@ window.DS_BANDS = [
     {f:"guidelines/motion-library.html", w:1000, h:2600, nav:"Motion library", t:"Motion library", s:"The fifteen ambient and surface motions outside the seam, loader and entrance sets: the two aurora layers, spectrum wave, divider flow, word glitch, sticker float, board flicker, schedule entrance, attendance pop, sheet up, inbox overlay, holo sheen, the hero parallax, the hero overlay videos and the generic parallax containers. Every card copies a Claude-ready rules block, or take all fifteen at once."}]}]},
 
 {band:"D · Patterns", c:"--neon-orange", d:"Page-level surfaces that are composed rather than componentized. Bigger than a component, smaller than a page.", groups:[
+  {n:"Homepage stage", d:"A stationary atmosphere and one shared field plate carry an 11-state story without turning the homepage into a feed or dashboard.", items:[
+    {f:"guidelines/homepage-stage.html", w:1280, h:2500, nav:"Homepage stage", t:"Homepage stage & slides", s:"The complete supplied homepage direction: welcome, Events, HAÜSING, Gifting, Gig Board, Missed Connections, Nude Beaches, River Brats, Travel, Thirsty and Install. Includes the interactive standalone, editable source, shared stage contract, responsive behavior, interaction rules and the people-first HAÜSING handoff.", scroll:1, st:"draft"}]},
   {n:"Nav bar", d:"Two navigation models: one header row on desktop, two bars on mobile that split identity from movement.", items:[
     {f:"guidelines/nav-desktop.html", w:1400, h:1500, nav:"Desktop", t:"Desktop nav", s:"The header row: wordmark, primary links with the Boards dropdown, Hub with its unread dot, the avatar menu, calm toggle, the signed-out Join button, and the seam. Ported from Nav.tsx and siteNav.ts. The Join button is drawn from the same chrome atoms as 09.1, so it is queued with the rest of the button work.", st:"queued"},
     {f:"guidelines/mobile-nav.html", w:900, h:2100, nav:"Mobile", t:"Mobile nav", s:"Both bars. Top: Home and About segmented pair, alert bolt, avatar cluster or Join. Bottom: the five-tab dock, every active accent, the two tab sheets, and the full spec."}]},
@@ -67,5 +72,11 @@ window.DS_BANDS = [
   {n:"The live site", d:"Interactive. Click through it, then compare any surface against its specimen above.", items:[
     {f:"ui_kits/zaylist/index.html", w:1280, h:860, nav:"Full site", t:"Zaylist, full site", s:"Home, Events, Schedule, Directory, Hub and Admin.", scroll:1},
     {f:"ui_kits/zaylist/index.html#nudebeaches", w:1280, h:860, nav:"Nude Beaches", t:"Nude Beaches", s:"Rooster Rock and Collins Beach: live conditions band, refresh bar, map with the queer-corner legend, and the real trip logistics (fees, checklist, wildlife-area rules, farm stops).", scroll:1},
-    {f:"ui_kits/zaylist/index.html#profile", w:1280, h:860, nav:"Public profile", t:"Public profile", s:"A member profile at /u/handle: hero, Followers / Hosting / Attended / Going strip, accent marquee, hosting rails, Top 8, The Big One, Going, Updates and the flyer stash.", scroll:1}]}]}
+    {f:"ui_kits/zaylist/index.html#profile", w:1280, h:860, nav:"Public profile", t:"Public profile", s:"A member profile at /u/handle: hero, Followers / Hosting / Attended / Going strip, accent marquee, hosting rails, Top 8, The Big One, Going, Updates and the flyer stash.", scroll:1}]}]},
+
+{band:"F · Operations", c:"--panel-cyan", d:"The systems that keep one founder's product understandable, affordable, recoverable, and ready for trusted agents.", groups:[
+  {n:"Tech Stack", d:"Architecture, providers, ownership, secrets, cost, recovery, and the read-only evidence loop that keeps them current.", items:[
+    {f:"guidelines/tech-stack.html", w:1120, h:2400, nav:"Tech Stack", t:"Zaylist Tech Stack", s:"The human-first, agent-readable operating map: production, data, design authority, Microsoft 365, Resend, secret boundaries, costs, recovery, and the recurring Tech Stack Monitor.", scroll:1}
+  ]}
+]}
 ];

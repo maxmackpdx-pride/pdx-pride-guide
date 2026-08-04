@@ -13674,7 +13674,7 @@ html.calm-mode .schedule-now-line {
 /* Queer Directory - stable CSS grid (not multi-column).
    Multi-column masonry + entrance animations reflowed on logo load/scroll,
    which made cards vanish and reappear while scrolling. */
-/* Floating DEMO sticker for seeded demo posts across boards (matches HAÜSING). */
+/* Floating DEMO sticker for seeded demo posts across boards (matches THE HAÜZ). */
 .pdx-demo-sticker {
   /* Force out of flow so glass-card child rules can't drop it back in and let
      flex stretch it into a full-width banner. */
@@ -15680,6 +15680,23 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   font-size: clamp(3rem, 7.5vw, 5.4rem);
   -webkit-text-stroke: 0;
   text-shadow: none;
+}
+
+.board-hero__brand-logo {
+  display: block;
+  width: min(100%, 580px);
+  height: auto;
+  max-height: 168px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.board-hero__brand-logo--gigz {
+  width: min(100%, 520px);
+}
+
+.board-hero__brand-logo--gifz {
+  width: min(100%, 500px);
 }
 
 .board-hero__title-accent {

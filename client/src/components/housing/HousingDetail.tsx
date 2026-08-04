@@ -138,7 +138,7 @@ function leadPerson(group: HousingInterestGroup): HousingPerson {
 function Back({ onBack }: { onBack: () => void }) {
   return (
     <button type="button" className="hz-back" onClick={onBack}>
-      <Mono>&#8592; Back to HAÜSING</Mono>
+      <Mono>&#8592; Back to THE HAÜZ</Mono>
     </button>
   );
 }

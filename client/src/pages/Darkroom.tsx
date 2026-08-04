@@ -5,8 +5,8 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { shareCardUrl } from "@shared/shareCards";
 import "./Darkroom.css";
 
-const ZAYLIST_ART = "/brand/waypoints/zaylist-clean-margin.png";
-const DARKROOM_ART = "/brand/waypoints/zaydark-clean-margin.png";
+const ZAYLIST_ART = "/brand/family/zaylist-primary.svg";
+const DARKROOM_ART = "/brand/family/zaydark.svg";
 const DARKROOM_PROFILE_ART = "/brand/waypoints/zaydark-profile-eggplant.png";
 const DARKROOM_HEAT_MOTIF = "/brand/waypoints/zaydark-heat-motif.jpg";
 const DARKROOM_TONGUE_MOTIF = "/brand/waypoints/zaydark-tongue-motif.jpg";
@@ -36,17 +36,17 @@ const WAYPOINTS: Waypoint[] = [
   {
     number: "01",
     status: "Complete",
-    title: "HAÜSING",
+    title: "THE HAÜZ",
     eyebrow: "Live now / Find your people",
     body: "Build a HAÜS with people you actually want to live with. Post a room, find a room, or start with the people first.",
     detail: "Compare timing, boundaries, access, pets, budgets, and the stuff that matters before anyone signs a lease.",
     tone: "cyan",
     motif: "house-blueprint",
-    href: "/hausing",
+    href: "/the-hauz",
     hrefLabel: "Build your HAÜS",
     art: {
-      src: "/brand/waypoints/zayhaus-clean-margin.png",
-      alt: "ZAYHAÜS",
+      src: "/brand/family/the-hauz.svg",
+      alt: "THE HAÜZ",
     },
   },
   {
@@ -59,7 +59,7 @@ const WAYPOINTS: Waypoint[] = [
     tone: "acid",
     motif: "group-chat",
     art: {
-      src: "/brand/waypoints/z-space.png",
+      src: "/brand/family/z-space.svg",
       alt: "Z/SPACE",
     },
   },
@@ -87,7 +87,7 @@ const WAYPOINTS: Waypoint[] = [
     tone: "magenta",
     motif: "afterz",
     art: {
-      src: "/brand/waypoints/afterz-logo.png",
+      src: "/brand/family/afterz.svg",
       alt: "AFTERZ",
     },
   },
@@ -101,7 +101,7 @@ const WAYPOINTS: Waypoint[] = [
     tone: "orange",
     motif: "secret-map",
     art: {
-      src: "/brand/waypoints/zenegades-logo.png",
+      src: "/brand/family/zenegades.svg",
       alt: "Zenegades",
     },
   },
@@ -115,7 +115,7 @@ const WAYPOINTS: Waypoint[] = [
     tone: "acid",
     motif: "travel",
     art: {
-      src: "/brand/waypoints/travelz-logo.png",
+      src: "/brand/family/travelz.svg",
       alt: "TRAVELZ",
     },
   },
@@ -167,7 +167,7 @@ function IdeaCard() {
         </div>
         <div className="darkroom-idea-intro">
           <div className="darkroom-idea-logo" aria-hidden="true">
-            <img src="/brand/waypoints/idea-z-logo.png" alt="" />
+            <img src="/brand/family/ideaz.svg" alt="" />
           </div>
         </div>
         <h3 className="darkroom-idea-title">What should Zaylist build next?</h3>
@@ -292,7 +292,7 @@ function WaypointMotif({ motif }: { motif: WaypointMotif }) {
         </svg>
         <div className="darkroom-afterz-invite">
           <span className="darkroom-afterz-invite__app">
-            <img src="/brand/waypoints/zaylist-app-face-180.png" alt="" loading="eager" decoding="async" />
+            <img src="/brand/family/prime-z.svg" alt="" loading="eager" decoding="async" />
           </span>
           <div className="darkroom-afterz-invite__body">
           <div className="darkroom-afterz-invite__head">
@@ -493,7 +493,7 @@ function PortlandCardMap() {
 export default function Darkroom() {
   usePageSeo(
     "Next | What Zaylist Is Building",
-    "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
+    "See what is next on Zaylist: THE HAÜZ, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
     {
       image: shareCardUrl("next"),
       imageAlt: "Here’s what’s next on Zaylist — a blueprint roadmap of upcoming products",

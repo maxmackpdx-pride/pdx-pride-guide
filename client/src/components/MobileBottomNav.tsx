@@ -23,7 +23,7 @@ const MOBILE_ICON = 26;
 function HubMark({ active }: { active: boolean }) {
   return (
     <img
-      src="/icons/zaylist-mono.png"
+      src="/brand/family/prime-z.svg"
       alt=""
       width={43}
       height={43}

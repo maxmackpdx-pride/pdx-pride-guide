@@ -238,7 +238,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const lng = asNum(req.body?.lng);
     if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
       return res.status(400).json({
-        error: "That pin is outside the HAÜSING region (Portland metro through the Willamette Valley to Salem).",
+        error: "That pin is outside THE HAÜZ region (Portland metro through the Willamette Valley to Salem).",
       });
     }
 
@@ -313,7 +313,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       const lng = asNum(patch.lng) ?? post.lng ?? null;
       if (lat != null && lng != null && !withinHousingBounds(lat, lng)) {
         return res.status(400).json({
-          error: "That pin is outside the HAÜSING region (Portland metro through the Willamette Valley to Salem).",
+          error: "That pin is outside THE HAÜZ region (Portland metro through the Willamette Valley to Salem).",
         });
       }
     }
@@ -502,7 +502,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
           ? `Waiting list: ${label}`
           : kind === "JOIN"
             ? `Asked to join ${label}`
-            : `HAÜSING: ${label}`;
+            : `THE HAÜZ: ${label}`;
       const msg = deps.sendMessage(userId, recipientId, subject, note || "Asked to chat about this post.", {
         contextType: "HOUSING",
         contextId: id,
@@ -553,7 +553,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       deps.sendMessage(
         userId,
         request.requester_user_id,
-        `Accepted: ${post?.displayName || "HAÜSING"}`,
+        `Accepted: ${post?.displayName || "THE HAÜZ"}`,
         post?.type === "FORMING" ? "You are in. Welcome to the household." : "Happy to chat.",
         {
           threadId: request.thread_id || undefined,

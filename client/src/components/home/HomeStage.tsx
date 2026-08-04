@@ -22,7 +22,7 @@ import "./HomeStage.css";
 export type { HomeStageBoardKey, HomeStageCardData, HomeStageSamples };
 export { useHomeStageSamples, HomeStageCard };
 
-const WORDMARK = "/home/zaylist-wordmark-filled-trim.webp";
+const WORDMARK = "/brand/family/zaylist-primary.svg";
 const HERO_VIDEO = "/home/hero-loop.mp4";
 
 type Props = {
@@ -88,11 +88,11 @@ const WORLDS: World[] = [
   {
     key: "housing",
     number: "04",
-    title: "HAÜSING",
+    title: "THE HAÜZ",
     eyebrow: "Rooms and people",
     body: "Find a room, a roommate or the people to form a home with.",
     action: "Find your people",
-    href: "/hausing",
+    href: "/the-hauz",
     accent: "var(--board-housing, #00ffff)",
     sampleKey: "housing",
   },

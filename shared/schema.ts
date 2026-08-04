@@ -789,7 +789,7 @@ export const adEvents = sqliteTable("ad_events", {
 export type AdEvent = typeof adEvents.$inferSelect;
 
 // ---------------------------------------------------------------------------
-// HAUSING - the HAÜSING
+// HAUSING - THE HAÜZ
 // Spec: docs/HAUS_HOUSING_SPEC_v0.2.md - Build brief: docs/HAUS_ENGINEERING_HANDOFF.md
 //
 // One post object, four types. `type` controls which columns are meaningful and

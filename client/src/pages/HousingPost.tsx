@@ -1,5 +1,5 @@
 /**
- * A single HAÜSING post.
+ * A single THE HAÜZ post.
  *
  * Detail view for all four types, plus the consent-based first contact. Asking
  * to chat and asking to join a HAÜS are the same gesture, and nothing opens
@@ -29,7 +29,7 @@ import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 
 export default function HousingPost() {
-  const [, params] = useRoute("/hausing/:id");
+  const [, params] = useRoute("/the-hauz/:id");
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -50,9 +50,9 @@ export default function HousingPost() {
   });
 
   usePageSeo(
-    post ? `${post.displayName || post.author.displayName} · HAÜSING` : "HAÜSING",
+    post ? `${post.displayName || post.author.displayName} · THE HAÜZ` : "THE HAÜZ",
     post?.headline || "Rooms, roommates, and households in queer Portland.",
-    { image: shareCardUrl("housing"), imageAlt: "HAÜSING — housing board on Zaylist" },
+    { image: shareCardUrl("housing"), imageAlt: "THE HAÜZ - housing board on Zaylist" },
   );
 
   const invalidate = () => {
@@ -133,7 +133,7 @@ export default function HousingPost() {
       } else {
         toast({ title: "HAÜS started", description: "Nothing is reserved. The listing stays live." });
       }
-      navigate(`/hausing/${data.postId}`);
+      navigate(`/the-hauz/${data.postId}`);
     },
   });
 
@@ -163,7 +163,7 @@ export default function HousingPost() {
     else if (q.get("join") === "1") requestMutation.mutate("JOIN");
     else if (q.get("waitlist") === "1") requestMutation.mutate("WAITLIST");
     else if (q.get("build") === "1") buildMutation.mutate();
-    if (q.toString()) window.history.replaceState({}, "", `/hausing/${postId}`);
+    if (q.toString()) window.history.replaceState({}, "", `/the-hauz/${postId}`);
     // Intentionally runs once per post load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post?.id, user?.id]);
@@ -217,7 +217,7 @@ export default function HousingPost() {
             <div className="hz-panel hz-empty">
               That post is not on the board.
               <div style={{ marginTop: 12 }}>
-                <Chip onClick={() => navigate("/hausing")}>Back to HAÜSING</Chip>
+                <Chip onClick={() => navigate("/the-hauz")}>Back to THE HAÜZ</Chip>
               </div>
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function HousingPost() {
   const isOwner = !!user && user.id === post.author.userId;
 
   const handlers: HousingDetailHandlers = {
-    onBack: () => navigate("/hausing"),
+    onBack: () => navigate("/the-hauz"),
     onRequest: (kind) => {
       if (!requireAuth()) return;
       if (post.myRequest?.status === "ACCEPTED") {
@@ -243,7 +243,7 @@ export default function HousingPost() {
       saveMutation.mutate();
     },
     onShare: () => {
-      const url = `${window.location.origin}/hausing/${post.id}`;
+      const url = `${window.location.origin}/the-hauz/${post.id}`;
       if (navigator.share) {
         navigator.share({ title: post.displayName || post.headline, url }).catch(() => undefined);
         return;
@@ -263,7 +263,7 @@ export default function HousingPost() {
       if (!requireAuth()) return;
       buildMutation.mutate();
     },
-    onOpenPost: (id) => navigate(`/hausing/${id}`),
+    onOpenPost: (id) => navigate(`/the-hauz/${id}`),
   };
 
   return (
