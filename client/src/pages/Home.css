@@ -2279,11 +2279,16 @@ html.calm-mode .home-next-preview__card,
   margin-top: 28px;
 }
 
-/* Give the specimen beneath each title/copy block a little more air while
-   preserving the shared bottom action datum across every destination card. */
+/* Drop the post down toward the bottom of the card (away from the title/copy) so
+   it reads as its own object and groups with the action. The post's auto top
+   margin absorbs the free space above it; the action's margin is pinned to a
+   fixed gap below (see the rule after) so it no longer competes for that space. */
 .home-main-stage .home-front__world-copy + .home-front__sample {
-  margin-top: 22px;
-  margin-bottom: 6px;
+  margin-top: auto;
+  margin-bottom: 0;
+}
+.home-main-stage .home-front__sample + .home-front__world-action {
+  margin-top: 16px;
 }
 
 .home-main-stage .home-front__world-copy + .home-front__directory-grid {
