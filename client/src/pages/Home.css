@@ -3,6 +3,9 @@
 .home-main-stage {
   position: relative;
   isolation: isolate;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   background: var(--ink-900);
   overflow-x: clip;
   color: var(--text-mid);
@@ -19,6 +22,18 @@
     #0044ff 86%,
     #00ffff 100%
   );
+}
+
+/* On extra-tall screens the application shell has more vertical room than
+   the homepage content needs. Keep that room inside the final blueprint
+   panel instead of exposing an empty black band before the footer. */
+.app-shell > main:has(> .home-main-stage) {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-main-stage .home-next-preview {
+  flex: 1 0 auto;
 }
 
 /* The footer already reserves the mobile dock. Do not add the global second
@@ -1868,13 +1883,11 @@ html.calm-mode .home-boards__card {
 }
 
 .home-next-preview__card:first-child { margin-left: 0; }
-.home-next-preview__card:nth-child(odd) { --silly-x:1.5px; }
-.home-next-preview__card:nth-child(even) { --silly-x:-1.5px; }
 .home-next-preview__card:nth-child(n + 4) { transform:translateX(85vw) translateY(18px) rotate(8deg) scale(.94); }
 .home-next-preview--landed .home-next-preview__card {
   animation:
     homeNextCrashLeft .78s cubic-bezier(.18,.88,.22,1.08) both,
-    homeNextSettledFloat 5.8s ease-in-out calc(.95s + var(--stack-index) * .16s) infinite alternate;
+    homeNextSettledFloat var(--float-duration,5.8s) ease-in-out calc(.92s + var(--float-delay,.08s)) infinite alternate;
 }
 .home-next-preview--landed .home-next-preview__card:nth-child(n + 4) {
   animation-name:homeNextCrashRight,homeNextSettledFloat;
@@ -2027,7 +2040,7 @@ html.calm-mode .home-next-preview__card,
   gap: 24px;
   width: 100%;
   margin: 0;
-  padding: 14px max(20px, calc((100vw - 1180px) / 2)) 58px;
+  padding: 18px max(20px, calc((100vw - 1180px) / 2)) 82px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
@@ -2080,8 +2093,10 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__world--feature {
   flex: 0 0 clamp(340px, 32vw, 420px);
   width: clamp(340px, 32vw, 420px);
-  min-height: 470px;
-  height: 470px;
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  align-self: flex-start;
   scroll-snap-align: start;
   scroll-snap-stop: normal;
   contain: layout paint;
@@ -2159,19 +2174,74 @@ html.calm-mode .home-next-preview__card,
 
 .home-main-stage .home-front__world-eyebrow {
   max-width: calc(100% - 72px);
-  padding: 7px 9px;
+  min-height: 36px;
+  padding: 10px 14px;
   border: 1px solid color-mix(in srgb, var(--c) 34%, #202026);
   border-radius: 999px;
   background: rgba(3,3,5,.62);
   color: color-mix(in srgb, var(--c) 78%, #fff);
+  font: 700 14px/1 var(--font-mono, monospace);
+  letter-spacing: .12em;
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.home-main-stage .home-front__world-copy {
+  margin-top: 28px;
+}
+
 .home-main-stage .home-front__world-copy h3 {
+  display: flex;
+  align-items: flex-end;
   font-size: clamp(38px, 4vw, 52px);
+  min-height: 1.76em;
+  max-height: 1.76em;
+  overflow: hidden;
+}
+
+.home-main-stage .home-front__world-copy p {
+  display: -webkit-box;
+  min-height: 3.1em;
+  max-height: 3.1em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-main-stage .home-front__sample.home-stage-card {
+  min-height: 126px;
+  height: 126px;
+  max-height: 126px;
+  flex-basis: 126px;
+}
+
+.home-main-stage .home-front__world-action {
+  flex: 0 0 auto;
+}
+
+.home-main-stage .home-front__world[data-world="beaches"] .home-front__beach-live {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  margin: 0 0 18px;
+}
+
+.home-main-stage .home-front__world[data-world="beaches"] .home-beach-widget {
+  width: 100%;
+}
+
+.home-main-stage .home-front__world[data-world="beaches"] .home-beach-widget__panel {
+  padding: 18px 0 10px;
+}
+
+.home-main-stage .home-front__world[data-world="beaches"] .home-beach-widget__name {
+  margin-bottom: 12px;
+}
+
+.home-main-stage .home-front__world[data-world="beaches"] .home-beach-widget__grid {
+  align-items: start;
 }
 
 .home-main-stage .home-front__object-motif,
@@ -2212,8 +2282,9 @@ html.calm-mode .home-next-preview__card,
   .home-main-stage .home-front__world[data-world="events"] {
     flex-basis: min(80vw, 340px); /* narrower cards = a bit more L/R breathing room */
     width: min(80vw, 340px);
-    min-height: 440px;
-    height: 440px;
+    min-height: 0;
+    height: auto;
+    aspect-ratio: 1 / 1;
     padding: 18px;
     /* soft accent bloom leaking out from behind every edge (~2%) — mobile only */
     box-shadow:
@@ -2233,8 +2304,14 @@ html.calm-mode .home-next-preview__card,
     margin: 14px 0;
     transform: none;
   }
-  .home-main-stage .home-front__world-copy { margin-top: 34px; }
+  .home-main-stage .home-front__world-copy { margin-top: 26px; }
   .home-main-stage .home-front__world-copy h3 { font-size: 40px; }
+  .home-main-stage .home-front__world-eyebrow {
+    max-width: calc(100% - 56px);
+    min-height: 34px;
+    padding: 9px 12px;
+    font-size: 12px;
+  }
   .home-main-stage .home-front__directory-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   /* Trim the PLACES tile grid to 2 rows (5 × 2 = 10) on mobile so the card
      isn't cramped, and let that card hug its content with even padding instead
@@ -3504,7 +3581,7 @@ html.calm-mode .home-next-preview__orb,
 
 /* Counter transparency lock: no surface fill beyond the requested fade. */
 .home-main-stage .home-hero-stats-boundary {
-  margin-top:-94px;
+  margin-top:0;
   background-color:transparent;
   background-image:none;
   background-attachment:scroll;
@@ -3535,7 +3612,7 @@ html.calm-mode .home-next-preview__orb,
     background-color:transparent;
   }
 
-  .home-main-stage .home-hero-stats-boundary { margin-top:-88px; }
+  .home-main-stage .home-hero-stats-boundary { margin-top:0; }
 
   .home-main-stage .home-hero-stats-boundary .home-stat-strip {
     background-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.8) 100%);

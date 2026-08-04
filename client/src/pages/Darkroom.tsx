@@ -588,7 +588,7 @@ export default function Darkroom() {
           <div className="darkroom-hero__copy">
             <p className="darkroom-kicker"><span aria-hidden="true" /> Zaylist / Up next</p>
             <h1 id="darkroom-plans-title" className="darkroom-hero__title">
-              Here's what's <em>next.</em>
+              <span>Here's what's</span> <em>next.</em>
               <span className="darkroom-hero__title-blueprint" aria-hidden="true">
                 <svg viewBox="0 0 300 150" focusable="false">
                   <g className="darkroom-hero__title-blueprint-lines">
