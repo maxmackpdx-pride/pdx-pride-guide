@@ -488,7 +488,8 @@
   grid-row: 1;
   height: auto;
   min-height: 0;
-  aspect-ratio: 1 / 1;
+  width: 85%;
+  aspect-ratio: 17 / 25;
   display: flex;
   flex-direction: column;
   padding: clamp(24px, 3vw, 34px);
@@ -517,6 +518,27 @@
 
 .darkroom-waypoint__card > * { position: relative; z-index: 2; }
 .darkroom-waypoint__card .pdx-refract { position: absolute; z-index: 3; }
+
+/* Keep the established card shell and 17:25 ratio locked while treating every
+   logo, motif, form, button, and copy block as one 90% interior composition. */
+.darkroom-card-composition {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  transform: scale(.9);
+  transform-origin: center center;
+}
+
+.darkroom-card-composition--idea {
+  display: grid;
+  grid-template-rows: auto 116px minmax(0, 1fr) auto;
+  height: 100%;
+}
 
 .darkroom-card-datum {
   position: absolute !important;
@@ -590,9 +612,8 @@
   isolation: isolate;
   height: auto;
   min-height: 0;
-  aspect-ratio: 1 / 1;
-  display: grid;
-  grid-template-rows: auto 116px minmax(0, 1fr) auto;
+  aspect-ratio: 17 / 25;
+  display: flex;
   border: 1px solid rgba(255,255,255,.62);
   background: rgba(3,4,7,.99);
   box-shadow:
@@ -1730,10 +1751,12 @@
 
   .darkroom-waypoint__card {
     grid-column: 3;
+    justify-self: start;
   }
 
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__card {
     grid-column: 1;
+    justify-self: end;
   }
 
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__marker::before {
@@ -1796,7 +1819,13 @@
   .darkroom-waypoint__marker { display: none; }
   .darkroom-waypoint__card,
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__card { grid-column: auto; }
-  .darkroom-waypoint__card { width: 100%; height: auto; min-height: 0; aspect-ratio: 1 / 1; }
+  .darkroom-waypoint__card {
+    width: 85%;
+    height: auto;
+    min-height: 0;
+    margin-inline: auto;
+    aspect-ratio: 17 / 25;
+  }
   .darkroom-waypoint__meta { align-items: flex-start; flex-direction: column; }
   .darkroom-waypoint__meta span:last-child { text-align: left; }
   .darkroom-waypoint__card h3 { font-size: clamp(35px, 11vw, 48px); }
@@ -1864,7 +1893,7 @@ html.calm-mode .darkroom-idea-form > button:active { transform: none; }
   .darkroom-card-motif--zaydark-symbols img:last-child { width: min(92%, 160px); margin-right: 16px; }
   .darkroom-profile { width: 38px; height: 38px; margin-left: -11px; }
   .darkroom-card-motif--profiles { align-items: flex-start; flex-direction: column; gap: 8px; }
-  .darkroom-waypoint__card--idea { min-height: 0; height: auto; aspect-ratio: 1 / 1; }
+  .darkroom-waypoint__card--idea { min-height: 0; height: auto; aspect-ratio: 17 / 25; }
   .darkroom-idea-form { grid-template-columns: 1fr; }
   .darkroom-idea-form__idea { grid-column: auto; }
 }

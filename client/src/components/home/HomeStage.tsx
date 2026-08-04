@@ -401,6 +401,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 style={{ ["--c" as string]: world.accent }}
               >
                 <span className="pdx-refract-seam" aria-hidden />
+                <div className="home-front__world-content">
                 {world.key === "beaches" ? (
                   <svg className="home-front__topo" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                     <path d="M-20 58c78-31 152-17 210 19 55 34 108 34 169 4 74-37 153-35 301 18" />
@@ -464,6 +465,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                     <span>{world.action}</span><span aria-hidden>↗</span>
                   </Link>
                 ) : null}
+                </div>
               </article>
             );
           })}

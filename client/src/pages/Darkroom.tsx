@@ -159,6 +159,7 @@ function IdeaCard() {
     <li ref={reveal.ref} className={`darkroom-waypoint darkroom-waypoint--idea darkroom-mobile-reveal${reveal.visible ? " darkroom-mobile-reveal--visible" : ""}`} data-number="07" data-tone="white">
       <div className="darkroom-waypoint__marker" aria-hidden="true"><span>07</span></div>
       <article className="darkroom-waypoint__card darkroom-waypoint__card--idea pdx-glass-card pdx-glass-rebind" aria-label="Submit an idea for Zaylist">
+        <div className="darkroom-card-composition darkroom-card-composition--idea">
         <span className="darkroom-idea-radar" aria-hidden="true"><i /></span>
         <span className="darkroom-idea-radar darkroom-idea-radar--secondary" aria-hidden="true"><i /></span>
         <span className="darkroom-card-datum" aria-hidden="true" />
@@ -199,6 +200,7 @@ function IdeaCard() {
             {status === "error" ? <p className="darkroom-idea-form__error" role="alert">That did not send. Please try once more.</p> : null}
           </form>
         )}
+        </div>
       </article>
     </li>
   );
@@ -213,6 +215,7 @@ function WaypointItem({ waypoint }: { waypoint: Waypoint }) {
         <span>{waypoint.number}</span>
       </div>
       <article className="darkroom-waypoint__card pdx-glass-card pdx-glass-rebind" data-motif={waypoint.motif}>
+        <div className="darkroom-card-composition">
         <span className="pdx-refract" aria-hidden="true" />
         <span className="darkroom-card-datum" aria-hidden="true" />
         {waypoint.motif === "zaydark-profiles" ? <PortlandCardMap /> : null}
@@ -232,6 +235,7 @@ function WaypointItem({ waypoint }: { waypoint: Waypoint }) {
           {waypoint.href && waypoint.hrefLabel ? (
             <Link className="darkroom-waypoint__link" href={waypoint.href}>{waypoint.hrefLabel} <span aria-hidden="true">-&gt;</span></Link>
           ) : null}
+        </div>
         </div>
       </article>
     </li>
