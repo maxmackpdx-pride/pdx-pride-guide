@@ -634,13 +634,12 @@ export default function Nav() {
     <>
       <header className="site-header site-header--real-seam">
         <div className="site-header-inner">
-          <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home (beta)">
+          <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
               src="/brand/family/zaylist-primary.svg"
               alt="Zaylist"
               className="site-brand-lockup"
             />
-            <span className="site-brand__beta-tape" aria-hidden="true">beta</span>
           </Link>
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
