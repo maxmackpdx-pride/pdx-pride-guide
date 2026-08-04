@@ -421,6 +421,7 @@
   --c: var(--neon-cyan);
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: var(--route-rail) minmax(0, 1fr);
   gap: 18px;
@@ -483,6 +484,7 @@
   position: relative;
   isolation: isolate;
   contain: layout style;
+  box-sizing: border-box;
   transform-origin: center center;
   grid-column: 2;
   grid-row: 1;
@@ -524,9 +526,11 @@
 .darkroom-card-composition {
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  height: 100%;
   width: 100%;
   min-width: 0;
   min-height: 0;
@@ -569,6 +573,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  transform: translateY(-3px);
   margin-bottom: 22px;
   color: var(--c);
   font: 700 12.5px/1.4 var(--font-mono, ui-monospace, monospace);
@@ -953,12 +958,12 @@
 
 .darkroom-afterz-invite {
   position: absolute;
-  top: 54%;
+  top: 52%;
   left: 50%;
   z-index: 2;
-  width: min(66%, 380px);
+  width: min(74%, 320px);
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-columns: 46px minmax(0, 1fr);
   padding: 0;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, currentColor 78%, rgba(255,255,255,.18));
@@ -1008,7 +1013,7 @@
 }
 
 .darkroom-afterz-invite__app {
-  width: 52px;
+  width: 46px;
   height: 100%;
   min-height: 104px;
   display: grid;
@@ -1042,9 +1047,9 @@
 .darkroom-travel-post {
   position: absolute;
   left: 50%;
-  top: 54%;
+  top: 52%;
   z-index: 2;
-  width: min(66%, 380px);
+  width: min(74%, 320px);
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr);
   align-items: center;
@@ -1100,12 +1105,12 @@
 
 .darkroom-group-board-post {
   position: absolute;
-  top: 50.5%;
+  top: 52%;
   left: 50%;
   z-index: 2;
-  width: min(66%, 380px);
+  width: min(74%, 320px);
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: 64px minmax(0, 1fr);
   min-height: 100px;
   padding: 0;
   overflow: hidden;
@@ -1143,7 +1148,7 @@
 .darkroom-group-board-post::after { right: 18%; bottom: -5px; }
 
 .darkroom-group-board-post__avatar-rail {
-  width: 76px;
+  width: 64px;
   height: 100%;
   min-height: 100px;
   display: grid;
@@ -1157,8 +1162,8 @@
 }
 
 .darkroom-group-board-post__avatar {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -1167,7 +1172,7 @@
   background: #08080b;
   box-shadow: 0 0 0 3px #050505, 0 0 20px -7px currentColor;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  font-size: 43px;
+  font-size: 37px;
   line-height: 1;
 }
 
@@ -1455,7 +1460,11 @@
   flex-direction: column;
   gap: 10px;
   margin: 20px 0 0;
-  transform: translateY(8px);
+  transform: translateY(24px);
+}
+
+.darkroom-waypoint__card[data-motif="afterz"] .darkroom-waypoint__logo-heading {
+  transform: translateY(16px);
 }
 
 .darkroom-card-motif--zaydark-symbols {
@@ -1519,7 +1528,7 @@
   max-width: none;
   align-self: center;
   margin-inline: auto;
-  transform: translateX(-53%);
+  transform: translate(-53%, 16px);
 }
 
 .darkroom-waypoint__card[data-motif="zaydark-profiles"] .darkroom-waypoint__logo-heading img {
@@ -1810,21 +1819,35 @@
     opacity: .46;
   }
   .darkroom-hero__lede { width: 100%; margin-top: 10px; }
-  .darkroom-route { gap: 30px; }
+  .darkroom-waypoints {
+    width: 100%;
+    max-width: 1180px;
+    padding: 24px 18px 64px;
+  }
+  .darkroom-route { gap: 18px; }
   .darkroom-mobile-reveal { opacity: 0; transform: translateY(22px); }
   .darkroom-mobile-reveal--visible { animation: pgDirCardIn .55s var(--ease-out, ease) both; }
   .darkroom-route::before,
   .darkroom-route::after { display: none; }
-  .darkroom-waypoint { display: block; }
+  .darkroom-waypoint,
+  .darkroom-waypoint:nth-child(even) {
+    width: 100%;
+    display: block;
+    margin: 0;
+    padding: 0;
+    transform: none;
+  }
   .darkroom-waypoint__marker { display: none; }
   .darkroom-waypoint__card,
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__card { grid-column: auto; }
   .darkroom-waypoint__card {
-    width: 85%;
+    width: min(100%, 560px);
+    max-width: 560px;
     height: auto;
     min-height: 0;
     margin-inline: auto;
     aspect-ratio: 17 / 25;
+    transform: none;
   }
   .darkroom-waypoint__meta { align-items: flex-start; flex-direction: column; }
   .darkroom-waypoint__meta span:last-child { text-align: left; }
@@ -1835,6 +1858,19 @@
     white-space: nowrap;
   }
   .darkroom-waypoint__card--idea .darkroom-waypoint__meta { margin-bottom: 12px; }
+  .darkroom-afterz-invite,
+  .darkroom-travel-post,
+  .darkroom-group-board-post {
+    top: 51%;
+    width: min(78%, 300px);
+  }
+  .darkroom-waypoint__card[data-motif="afterz"] .darkroom-waypoint__logo-heading {
+    transform: translateY(10px);
+  }
+  .darkroom-waypoint__card[data-motif="zaydark-profiles"] .darkroom-waypoint__logo-heading {
+    transform: translate(-53%, 12px);
+  }
+  .darkroom-card-motif--profiles { transform: translateY(16px); }
   .darkroom-boundary { grid-template-columns: 1fr; padding: 30px 24px; }
 }
 
@@ -1875,7 +1911,12 @@ html.calm-mode .darkroom-idea-form > button:active { transform: none; }
   .darkroom-waypoints,
   .darkroom-horizon,
   .darkroom-boundary { width: min(100% - 22px, 1180px); }
-  .darkroom-waypoints { padding-block: 32px 66px; }
+  .darkroom-waypoints {
+    width: 100%;
+    max-width: 1180px;
+    padding: 24px 16px 56px;
+  }
+  .darkroom-route { gap: 18px; }
   .darkroom-horizon { padding-block: 66px; }
   .darkroom-waypoint__card { padding: 22px 18px; border-radius: 10px; }
   .darkroom-waypoint__copy > p { font-size: 18px; }
@@ -1891,7 +1932,8 @@ html.calm-mode .darkroom-idea-form > button:active { transform: none; }
   .darkroom-card-motif--zaydark-symbols { inset: 12% -18px 7% auto; width: 62%; gap: 18px; }
   .darkroom-card-motif--zaydark-symbols img { width: min(100%, 180px); opacity: .16; }
   .darkroom-card-motif--zaydark-symbols img:last-child { width: min(92%, 160px); margin-right: 16px; }
-  .darkroom-profile { width: 38px; height: 38px; margin-left: -11px; }
+  .darkroom-profile { width: 38px; height: 38px; margin-left: 0; }
+  .darkroom-profile-stack { gap: 6px; }
   .darkroom-card-motif--profiles { align-items: flex-start; flex-direction: column; gap: 8px; }
   .darkroom-waypoint__card--idea { min-height: 0; height: auto; aspect-ratio: 17 / 25; }
   .darkroom-idea-form { grid-template-columns: 1fr; }
