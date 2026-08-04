@@ -93,3 +93,29 @@ export function trackPageView(path: string, userId?: number | null) {
     keepalive: true,
   }).catch(() => {});
 }
+
+export type ProductEventName =
+  | "time_to_content" | "post_attempt" | "post_completed"
+  | "contact_attempt" | "contact_completed"
+  | "report_control_seen" | "report_opened" | "report_completed"
+  | "counter_mismatch";
+
+export function trackProductEvent(eventName: ProductEventName, surface: string, value?: number) {
+  if (typeof window === "undefined") return;
+  const payload = {
+    eventName,
+    surface: surface.toLowerCase().replace(/[^a-z0-9:_-]/g, "_").slice(0, 60),
+    value: value == null ? null : Math.max(0, Math.round(value)),
+    visitorId: getAnalyticsVisitorId(),
+    sessionId: getAnalyticsSessionId(),
+  };
+  const body = JSON.stringify(payload);
+  if ("sendBeacon" in navigator) {
+    const blob = new Blob([body], { type: "application/json" });
+    if (navigator.sendBeacon("/api/analytics/product-event", blob)) return;
+  }
+  fetch("/api/analytics/product-event", {
+    method: "POST", credentials: "include", keepalive: true,
+    headers: { "Content-Type": "application/json" }, body,
+  }).catch(() => {});
+}

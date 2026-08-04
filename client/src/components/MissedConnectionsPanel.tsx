@@ -10,6 +10,7 @@ import SpottedCardGrid from "./SpottedCardGrid";
 import SpottedCard, { spottedAccent } from "./SpottedCard";
 import ScrollReveal from "./ScrollReveal";
 import type { Event } from "@shared/schema";
+import { trackProductEvent } from "@/lib/analytics";
 
 export type MissedConnectionPost = {
   id: number;
@@ -133,7 +134,9 @@ export default function MissedConnectionsPanel({
   };
 
   const createMutation = useMutation({
-    mutationFn: () => fetch("/api/missed-connections", {
+    mutationFn: () => {
+      trackProductEvent("post_attempt", "mizzed_connection");
+      return fetch("/api/missed-connections", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -146,12 +149,14 @@ export default function MissedConnectionsPanel({
         ...(form.eventLabel ? { eventLabel: form.eventLabel } : {}),
         ...(form.venueHint ? { venueHint: form.venueHint } : {}),
       }),
-    }).then(async r => {
+      }).then(async r => {
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Could not post");
       return data;
-    }),
+      });
+    },
     onSuccess: () => {
+      trackProductEvent("post_completed", "mizzed_connection");
       setForm(f => ({ ...f, title: "", body: "" }));
       queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
       if (eventId) queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "missed-connections"] });
@@ -194,6 +199,7 @@ export default function MissedConnectionsPanel({
       return data;
     }),
     onSuccess: () => {
+      trackProductEvent("report_completed", "mizzed_connection");
       setReplyingTo(null);
       setReplyBody("");
       toast({ title: "Reported", description: "Thanks - our team will review this post." });

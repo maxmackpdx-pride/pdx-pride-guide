@@ -7,6 +7,7 @@ import RoleStickers from "./RoleStickers";
 import AdminProfilePhotoReject from "@/components/admin/AdminProfilePhotoReject";
 import AdminProfileModeration from "@/components/admin/AdminProfileModeration";
 import ReportAccount from "@/components/profile/ReportAccount";
+import BlockMemberButton from "@/components/profile/BlockMemberButton";
 import { useAuth } from "@/context/AuthContext";
 import { coverCropToImgStyle } from "@/lib/coverCrop";
 import type { PublicProfileData } from "./types";
@@ -83,6 +84,7 @@ export default function ProfileHero({
   const isPromoter = !!(data.isPromoter || data.verifiedHost);
   const displayName = data.displayName || data.username;
   const canDeleteAccount = !!viewer?.isPrimaryOwner;
+  const blockStatus = data.blockStatus ?? { blockedByViewer: false, blockedViewer: false, interactionBlocked: false };
   const memberYear =
     data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
       ? new Date(data.memberSince).getFullYear()
@@ -175,7 +177,7 @@ export default function ProfileHero({
                   type="button"
                   className={`pp-btn pp-btn--follow${isFollowing ? " is-on" : ""}`}
                   onClick={onFollow}
-                  disabled={followPending}
+                  disabled={followPending || blockStatus.interactionBlocked}
                   data-testid="profile-follow"
                 >
                   {isFollowing && (
@@ -185,10 +187,16 @@ export default function ProfileHero({
                   )}
                   {isFollowing ? "Following" : "Follow"}
                 </button>
-                {onMessage && (
+                {onMessage && !blockStatus.interactionBlocked && (
                   <button type="button" className="pp-btn pp-btn--message" onClick={onMessage} data-testid="profile-message">
                     Message
                   </button>
+                )}
+                {viewer && !data.viewerIsAdmin && (
+                  <BlockMemberButton username={data.username} blocked={blockStatus.blockedByViewer} />
+                )}
+                {blockStatus.blockedViewer && !blockStatus.blockedByViewer && (
+                  <span className="pp-hero__blocked-note">Contact unavailable</span>
                 )}
               </>
             )}

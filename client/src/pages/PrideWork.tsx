@@ -29,6 +29,7 @@ import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 import type { CSSProperties } from "react";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import { trackProductEvent } from "@/lib/analytics";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -116,6 +117,7 @@ function thumbGradient(isLooking: boolean) {
 }
 
 export default function PrideWork() {
+  const contentStartedAt = useRef(performance.now());
   usePageSeo(
     "Gigz: Jobs & gigs | Zaylist",
     "Find gigs and workers for Portland nights. Post or browse Gigz.",
@@ -148,6 +150,9 @@ export default function PrideWork() {
       return r.json();
     },
   });
+  useEffect(() => {
+    if (!isLoading) trackProductEvent("time_to_content", "gigz", performance.now() - contentStartedAt.current);
+  }, [isLoading]);
 
   // Deep-link from the hub feed: /pride-work?post=<id> opens that gig expanded.
   useEffect(() => {
@@ -227,8 +232,12 @@ export default function PrideWork() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: GigFormData) => apiRequest("POST", "/api/gigs", { ...data, acceptRules: true }),
+    mutationFn: (data: GigFormData) => {
+      trackProductEvent("post_attempt", "gigz");
+      return apiRequest("POST", "/api/gigs", { ...data, acceptRules: true });
+    },
     onSuccess: (_data, variables) => {
+      trackProductEvent("post_completed", "gigz");
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
       toast({
         title: "Posted",

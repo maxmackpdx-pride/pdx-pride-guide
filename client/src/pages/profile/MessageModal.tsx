@@ -3,6 +3,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { MemberProfileData } from "./types";
+import { trackProductEvent } from "@/lib/analytics";
 
 function CloseIcon({ size = 15 }: { size?: number }) {
   return (
@@ -31,8 +32,10 @@ export default function MessageModal({
     const body = msgText.trim();
     if (!body || msgSending) return;
     setMsgSending(true);
+    trackProductEvent("contact_attempt", "profile_message");
     try {
       await apiRequest("POST", `/api/users/${encodeURIComponent(username)}/message`, { body });
+      trackProductEvent("contact_completed", "profile_message");
       setMsgSent(true);
     } catch (err) {
       toast({ title: parseApiError(err, "Could not send message"), variant: "destructive" });

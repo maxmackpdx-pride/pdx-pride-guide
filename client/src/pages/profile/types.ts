@@ -161,6 +161,7 @@ export type MemberProfileData = {
   /** True when the signed-in viewer is a site admin viewing someone else's profile. */
   viewerIsAdmin?: boolean;
   isFollowing?: boolean;
+  blockStatus?: { blockedByViewer: boolean; blockedViewer: boolean; interactionBlocked: boolean };
   activity?: {
     hostedEvents?: ProfileEvent[];
     hostedEventsPast?: ProfileEvent[];

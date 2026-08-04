@@ -48,7 +48,7 @@ import {
 } from "./mapCoordinateSync";
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { recordPageView } from "./analytics";
+import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
@@ -1330,6 +1330,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
         deviceType: data.deviceType,
         userId: data.userId ?? req.session?.userId ?? null,
       });
+      if (!ok) return res.status(204).end();
+      res.json({ ok: true });
+    } catch {
+      res.status(400).json({ error: "Invalid analytics payload" });
+    }
+  });
+
+  app.post("/api/analytics/product-event", (req, res) => {
+    const schema = z.object({
+      eventName: z.enum(PRODUCT_EVENT_NAMES),
+      surface: z.string().trim().min(1).max(60).regex(/^[a-z0-9:_-]+$/),
+      value: z.number().nonnegative().max(3_600_000).optional().nullable(),
+      visitorId: z.string().trim().min(8).max(80),
+      sessionId: z.string().trim().min(8).max(80),
+    });
+    try {
+      const data = schema.parse(req.body);
+      const ok = recordProductEvent(sqlite, { ...data, userId: req.session?.userId ?? null });
       if (!ok) return res.status(204).end();
       res.json({ ok: true });
     } catch {
@@ -3102,6 +3120,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
     if (!profile) return res.status(404).json({ error: "Not found" });
     res.json(profile);
+  });
+
+  app.get("/api/users/me/blocked", requireAuth, (req, res) => {
+    res.json(storage.getBlockedMembers(req.session.userId!));
+  });
+
+  app.post("/api/users/:username/block", requireAuth, (req, res) => {
+    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
+    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
+    if (target.id === req.session.userId) return res.status(400).json({ error: "You cannot block yourself" });
+    if (storage.isGuideAdminUserId(target.id)) return res.status(400).json({ error: "The Zaylist guide account cannot be blocked" });
+    storage.blockMember(req.session.userId!, target.id);
+    res.json(storage.getMemberBlockStatus(req.session.userId!, target.id));
+  });
+
+  app.delete("/api/users/:username/block", requireAuth, (req, res) => {
+    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
+    if (!target) return res.status(404).json({ error: "Not found" });
+    storage.unblockMember(req.session.userId!, target.id);
+    res.json(storage.getMemberBlockStatus(req.session.userId!, target.id));
   });
 
   // Toggle a like on board / hub content shown on public profile Updates.

@@ -51,6 +51,14 @@ type Metrics = {
   rsvpsTrend14d?: number[];
   memberGrowth12h?: MemberGrowthBucket[];
   traffic?: Traffic;
+  productExperience?: {
+    windowDays: number;
+    timeToContent: { medianMs: number | null; samples: number };
+    posting: { attempts: number; completions: number; completionRate: number | null };
+    contact: { attempts: number; completions: number; completionRate: number | null };
+    reportDiscovery: { seen: number; opened: number; discoveryRate: number | null; completed: number };
+    counterMismatches: number;
+  };
 };
 
 function fmtSession(sec: number): string {
@@ -140,16 +148,16 @@ export default function StatsView() {
         [m.liveEvents, "LIVE EVENTS"],
         [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
-        [m.giftingPosts, "GIFTING POSTS"],
-        [m.missedConnections, "MISSED CONNECTIONS"],
+        [m.giftingPosts, "GIFZ POSTS"],
+        [m.missedConnections, "MIZZED CONNECTION"],
         [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
       ]
     : [
         [m.liveEvents, "LIVE EVENTS"],
         [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
-        [m.giftingPosts, "GIFTING POSTS"],
-        [m.missedConnections, "MISSED CONNECTIONS"],
+        [m.giftingPosts, "GIFZ POSTS"],
+        [m.missedConnections, "MIZZED CONNECTION"],
         [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
       ];
 
@@ -157,7 +165,7 @@ export default function StatsView() {
     [
       ["Messages", m.messages],
       ["RSVPs", m.attendances],
-      ["Gig posts", m.gigPosts],
+      ["Gigz", m.gigPosts],
       ["GifZ", m.giftingPosts],
       ["Mizzed Connection", m.missedConnections],
     ],
@@ -239,6 +247,33 @@ export default function StatsView() {
         <>
           <div className="inbox-exp-stats-title">BOARD ACTIVITY</div>
           <HBars rows={board} />
+
+          {m.productExperience && (
+            <>
+              <div className="inbox-exp-stats-title">PRODUCT EXPERIENCE · {m.productExperience.windowDays} DAYS</div>
+              <p className="inbox-exp-stats-copy">Completion rates include their attempt counts so low-volume signals stay honest.</p>
+              <div className="inbox-exp-stats-grid">
+                <Tile
+                  value={m.productExperience.timeToContent.medianMs == null ? "—" : `${(m.productExperience.timeToContent.medianMs / 1000).toFixed(1)}s`}
+                  label={`TIME TO CONTENT · N=${m.productExperience.timeToContent.samples}`}
+                />
+                <Tile
+                  value={m.productExperience.posting.completionRate == null ? "—" : `${m.productExperience.posting.completionRate}%`}
+                  label={`POST COMPLETION · ${m.productExperience.posting.completions}/${m.productExperience.posting.attempts}`}
+                />
+                <Tile
+                  value={m.productExperience.contact.completionRate == null ? "—" : `${m.productExperience.contact.completionRate}%`}
+                  label={`CONTACT COMPLETION · ${m.productExperience.contact.completions}/${m.productExperience.contact.attempts}`}
+                />
+                <Tile
+                  value={m.productExperience.reportDiscovery.discoveryRate == null ? "—" : `${m.productExperience.reportDiscovery.discoveryRate}%`}
+                  label={`REPORT DISCOVERY · ${m.productExperience.reportDiscovery.opened}/${m.productExperience.reportDiscovery.seen}`}
+                />
+                <Tile value={m.productExperience.reportDiscovery.completed} label="REPORTS COMPLETED" />
+                <Tile value={m.productExperience.counterMismatches} label="COUNTER MISMATCHES" />
+              </div>
+            </>
+          )}
 
           <div className="inbox-exp-stats-title">CLAIMED VS UNCLAIMED</div>
           <div className="inbox-exp-stats-donut">

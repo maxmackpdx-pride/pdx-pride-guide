@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
@@ -28,6 +28,7 @@ import FlyerStash from "@/components/profile/FlyerStash";
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
 import SafetyGuide from "@/components/SafetyGuide";
+import { trackProductEvent } from "@/lib/analytics";
 import {
   chipsForEvent,
   summaryForEvent,
@@ -81,6 +82,12 @@ export default function MemberProfile() {
     },
     enabled: !!username && routeMatch,
   });
+  useEffect(() => {
+    if (!apiData?.stats || !apiData.activity) return;
+    const mismatch = apiData.stats.gigs !== (apiData.activity.gigs?.length ?? 0)
+      || apiData.stats.gifting !== (apiData.activity.gifting?.length ?? 0);
+    if (mismatch) trackProductEvent("counter_mismatch", "member_profile");
+  }, [apiData]);
 
   const { data: attendanceSummaries } = useQuery({
     queryKey: ["/api/events/attendance-summaries"],

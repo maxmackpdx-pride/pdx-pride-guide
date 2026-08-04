@@ -1,0 +1,25 @@
+id: ZAY-TRUST-2026-08-03
+status: accepted
+date: 2026-08-03
+decision: >-
+  A member block is a private, one-way safety action that creates a two-way
+  interaction barrier. Neither member can contact the other while the block is
+  active, their direct threads are hidden, and their follow relationship is
+  removed. Unblocking does not restore follows automatically.
+rationale:
+  - Blocking must be enforced below individual UI entry points so every board and conversation path is covered.
+  - Existing messages remain retained for moderation and safety review but are unavailable to either member while blocked.
+  - The blocked member is not notified and cannot infer who initiated the interaction barrier from the API.
+measurement:
+  window_days: 7
+  metrics:
+    - median time-to-content with sample count
+    - posting completion with attempts and completions
+    - contact completion with attempts and completions
+    - report discovery with views, opens, and completed reports
+    - profile counter mismatch occurrences
+  privacy: >-
+    Product events accept only an allowlisted event, a constrained surface,
+    an optional numeric value, and existing anonymous visitor/session IDs. No
+    message body, post content, username, precise location, or report reason is stored.
+surface: Floating inbox Admin Stats

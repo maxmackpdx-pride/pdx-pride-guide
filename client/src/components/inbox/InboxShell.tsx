@@ -92,6 +92,7 @@ export function InboxShell({
     remove,
     revealSelf,
     resolveLineup,
+    blockMember,
   } = useInboxThreads(activeId);
 
   const [folder, setFolder] = useState<Folder>("inbox");
@@ -1099,7 +1100,19 @@ export function InboxShell({
               )}
 
               <div style={{ padding: "0 16px" }}>
-                <SafetyGuide context="conversation" compact />
+                <SafetyGuide
+                  context="conversation"
+                  compact
+                  onBlock={!amasked && at.party.username && at.party.username !== "Anonymous"
+                    ? () => { void blockMember(at.party.username!).then(done => {
+                        if (done) {
+                          setActiveId(null);
+                          onThreadChange?.(null);
+                          setMobileView("list");
+                        }
+                      }); }
+                    : undefined}
+                />
               </div>
 
               {/* Messages */}

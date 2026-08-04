@@ -23,6 +23,7 @@ import {
   type HousingRequestKind,
 } from "@shared/housing";
 import { HousingDetail, type HousingDetailHandlers } from "@/components/housing/HousingDetail";
+import { trackProductEvent } from "@/lib/analytics";
 import { HousingWorkspace } from "@/components/housing/HousingWorkspace";
 import { Chip, Mono } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
@@ -149,6 +150,7 @@ export default function HousingPost() {
       return res.json();
     },
     onSuccess: () => {
+      trackProductEvent("report_completed", "housing");
       setReporting(false);
       toast({ title: "Reported", description: "An admin will take a look." });
     },

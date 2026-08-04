@@ -11,6 +11,36 @@ export type PageViewInput = {
 
 export type TrafficSource = "first_party" | "google_analytics";
 
+export const PRODUCT_EVENT_NAMES = [
+  "time_to_content",
+  "post_attempt",
+  "post_completed",
+  "contact_attempt",
+  "contact_completed",
+  "report_control_seen",
+  "report_opened",
+  "report_completed",
+  "counter_mismatch",
+] as const;
+export type ProductEventName = (typeof PRODUCT_EVENT_NAMES)[number];
+export type ProductEventInput = {
+  eventName: ProductEventName;
+  surface: string;
+  value?: number | null;
+  visitorId: string;
+  sessionId: string;
+  userId?: number | null;
+};
+
+export type ProductExperienceMetrics = {
+  windowDays: number;
+  timeToContent: { medianMs: number | null; samples: number };
+  posting: { attempts: number; completions: number; completionRate: number | null };
+  contact: { attempts: number; completions: number; completionRate: number | null };
+  reportDiscovery: { seen: number; opened: number; discoveryRate: number | null; completed: number };
+  counterMismatches: number;
+};
+
 export type TrafficMetrics = {
   source: TrafficSource;
   gaTrackingEnabled: boolean;
@@ -77,7 +107,73 @@ export function ensureAnalyticsTable(db: Database) {
     CREATE INDEX IF NOT EXISTS idx_apv_path ON analytics_page_views(path);
     CREATE INDEX IF NOT EXISTS idx_apv_visitor ON analytics_page_views(visitor_id);
     CREATE INDEX IF NOT EXISTS idx_apv_session ON analytics_page_views(session_id);
+    CREATE TABLE IF NOT EXISTS analytics_product_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_name TEXT NOT NULL,
+      surface TEXT NOT NULL,
+      value REAL,
+      visitor_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      user_id INTEGER,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_ape_created_at ON analytics_product_events(created_at);
+    CREATE INDEX IF NOT EXISTS idx_ape_event_name ON analytics_product_events(event_name);
   `);
+}
+
+export function recordProductEvent(db: Database, input: ProductEventInput): boolean {
+  if (!PRODUCT_EVENT_NAMES.includes(input.eventName)) return false;
+  const surface = String(input.surface || "").trim().toLowerCase();
+  const visitorId = String(input.visitorId || "").trim();
+  const sessionId = String(input.sessionId || "").trim();
+  if (!/^[a-z0-9:_-]{1,60}$/.test(surface)) return false;
+  if (!visitorId || visitorId.length > 80 || !sessionId || sessionId.length > 80) return false;
+  const value = input.value == null ? null : Number(input.value);
+  if (value != null && (!Number.isFinite(value) || value < 0 || value > 3_600_000)) return false;
+  db.prepare(`
+    INSERT INTO analytics_product_events
+      (event_name, surface, value, visitor_id, session_id, user_id, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(input.eventName, surface, value, visitorId, sessionId, input.userId ?? null, new Date().toISOString());
+  return true;
+}
+
+function rate(completions: number, attempts: number): number | null {
+  return attempts ? Math.round((completions / attempts) * 100) : null;
+}
+
+export function getProductExperienceMetrics(db: Database, windowDays = 7): ProductExperienceMetrics {
+  ensureAnalyticsTable(db);
+  const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
+  const count = (eventName: ProductEventName) =>
+    (db.prepare(`SELECT COUNT(*) AS count FROM analytics_product_events WHERE event_name = ? AND created_at >= ?`)
+      .get(eventName, since) as { count: number } | undefined)?.count ?? 0;
+  const timeRows = db.prepare(`
+    SELECT value FROM analytics_product_events
+    WHERE event_name = 'time_to_content' AND created_at >= ? AND value IS NOT NULL
+    ORDER BY value
+  `).all(since) as Array<{ value: number }>;
+  const midpoint = Math.floor(timeRows.length / 2);
+  const medianMs = timeRows.length === 0 ? null : Math.round(
+    timeRows.length % 2
+      ? timeRows[midpoint].value
+      : (timeRows[midpoint - 1].value + timeRows[midpoint].value) / 2,
+  );
+  const postAttempts = count("post_attempt");
+  const postCompletions = count("post_completed");
+  const contactAttempts = count("contact_attempt");
+  const contactCompletions = count("contact_completed");
+  const reportSeen = count("report_control_seen");
+  const reportOpened = count("report_opened");
+  return {
+    windowDays,
+    timeToContent: { medianMs, samples: timeRows.length },
+    posting: { attempts: postAttempts, completions: postCompletions, completionRate: rate(postCompletions, postAttempts) },
+    contact: { attempts: contactAttempts, completions: contactCompletions, completionRate: rate(contactCompletions, contactAttempts) },
+    reportDiscovery: { seen: reportSeen, opened: reportOpened, discoveryRate: rate(reportOpened, reportSeen), completed: count("report_completed") },
+    counterMismatches: count("counter_mismatch"),
+  };
 }
 
 export function normalizeAnalyticsPath(raw: string): string | null {

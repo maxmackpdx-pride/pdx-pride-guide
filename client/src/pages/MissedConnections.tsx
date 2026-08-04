@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import { trackProductEvent } from "@/lib/analytics";
 
 const HOW_IT_WORKS = [
   { title: "Pick a spot", body: "Link a Pride event, name your own spot, or choose around town.", color: "#ff1fa0" },
@@ -23,6 +24,7 @@ const HOW_IT_WORKS = [
 ];
 
 export default function MissedConnections() {
+  const contentStartedAt = useRef(performance.now());
   usePageSeo(
     "Mizzed Connection | Zaylist",
     "Post an anonymous Mizzed Connection from Portland Pride events. See someone? Say hi privately.",
@@ -35,7 +37,7 @@ export default function MissedConnections() {
   const [editingPost, setEditingPost] = useState<MissedConnectionPost | null>(null);
   const [editForm, setEditForm] = useState({ title: "", body: "" });
 
-  const { data: allPosts = [] } = useQuery<MissedConnectionPost[]>({
+  const { data: allPosts = [], isLoading } = useQuery<MissedConnectionPost[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: async () => {
       const r = await fetch("/api/missed-connections", { credentials: "include" });
@@ -43,6 +45,9 @@ export default function MissedConnections() {
       return r.json();
     },
   });
+  useEffect(() => {
+    if (!isLoading) trackProductEvent("time_to_content", "mizzed_connection", performance.now() - contentStartedAt.current);
+  }, [isLoading]);
 
   const stats = useMemo(() => [
     { num: allPosts.length, label: "Missed connections, live now", color: "#ff1fa0" },

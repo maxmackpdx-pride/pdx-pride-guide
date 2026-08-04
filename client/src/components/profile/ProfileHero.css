@@ -518,3 +518,10 @@
     animation: none;
   }
 }
+.pp-btn--block {
+  border-color: rgba(255, 140, 0, .55);
+  background: transparent;
+  color: #ffd0a0;
+}
+.pp-btn--block.is-on { border-color: #ff8c00; color: #ffb45c; }
+.pp-hero__blocked-note { align-self: center; color: #b8b8c2; font-size: 13px; }

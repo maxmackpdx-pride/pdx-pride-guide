@@ -20,6 +20,7 @@ import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import { trackProductEvent } from "@/lib/analytics";
 
 const CATEGORIES = [
   "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -63,6 +64,7 @@ function isActivePost(p: GiftingPost) {
 
 
 export default function Gifting() {
+  const contentStartedAt = useRef(performance.now());
   usePageSeo(
     "GifZ | Zaylist | Portland Pride 2026",
     "Give and find free stuff for the scene - Pride week and all year on GifZ.",
@@ -89,6 +91,9 @@ export default function Gifting() {
       return r.json();
     },
   });
+  useEffect(() => {
+    if (!isLoading) trackProductEvent("time_to_content", "gifz", performance.now() - contentStartedAt.current);
+  }, [isLoading]);
 
   const stats = useMemo(() => {
     const active = posts.filter(isActivePost);
@@ -158,6 +163,7 @@ export default function Gifting() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      trackProductEvent("post_attempt", "gifz");
       let photoUrls: string[] = [];
       if (photos?.length) {
         const fd = new FormData();
@@ -176,6 +182,7 @@ export default function Gifting() {
       return res;
     },
     onSuccess: async res => {
+      trackProductEvent("post_completed", "gifz");
       const body = await res.json();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });

@@ -339,6 +339,14 @@ export const follows = sqliteTable("follows", {
 });
 export type Follow = typeof follows.$inferSelect;
 
+// Explicit safety blocks. Separate from follow_blocks, which records unfollows.
+export const memberBlocks = sqliteTable("member_blocks", {
+  blockerUserId: integer("blocker_user_id").notNull(),
+  blockedUserId: integer("blocked_user_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+export type MemberBlock = typeof memberBlocks.$inferSelect;
+
 // Pack links (profile "Pack & pup life" card - packmate/handler relations between real users)
 export const packLinks = sqliteTable("pack_links", {
   id: integer("id").primaryKey({ autoIncrement: true }),

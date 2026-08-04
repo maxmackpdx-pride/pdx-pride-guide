@@ -93,6 +93,7 @@ const analyticsLimiter = rateLimit({
   skip: rateLimitSkipDev,
 });
 app.use("/api/analytics/pageview", analyticsLimiter);
+app.use("/api/analytics/product-event", analyticsLimiter);
 const adsTrackLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 400,

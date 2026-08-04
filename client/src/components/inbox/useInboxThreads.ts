@@ -8,6 +8,7 @@ import { EVENT_TALENT_ROLE_LABELS, type EventTalentRole } from "@shared/eventTal
 import { categoryFromContext, formatThreadTime } from "./mapContext";
 import type { ApiMessageRow, Folder, LineupDecision, Thread, ThreadMessage, ThreadReveal } from "./types";
 import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
+import { trackProductEvent } from "@/lib/analytics";
 
 const ARCHIVE_KEY = "pdx-inbox-archived-v1";
 
@@ -129,6 +130,22 @@ export function useInboxThreads(activeThreadId: string | null) {
   const [archivedIds, setArchivedIds] = useState<Set<string>>(() => loadArchived());
   const [forcedUnread, setForcedUnread] = useState<Record<string, boolean>>({});
   const [threadOverrides, setThreadOverrides] = useState<Record<string, Partial<Thread>>>({});
+
+  const blockMember = useCallback(async (username: string) => {
+    if (!username || username === "Anonymous") return false;
+    if (!window.confirm(`Block @${username}? You will no longer be able to contact each other, and this conversation will leave your inbox.`)) return false;
+    const response = await fetch(`/api/users/${encodeURIComponent(username)}/block`, {
+      method: "POST", credentials: "include",
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      toast({ title: body.error || "Could not block member", variant: "destructive" });
+      return false;
+    }
+    await refreshInboxQueries(queryClient);
+    toast({ title: `@${username} blocked`, description: "Neither of you can contact the other. They were not notified." });
+    return true;
+  }, [queryClient, toast]);
 
   const { data: inbox = [], isLoading: inboxLoading } = useQuery<ApiMessageRow[]>({
     queryKey: ["/api/messages/inbox"],
@@ -257,6 +274,7 @@ export function useInboxThreads(activeThreadId: string | null) {
   }, [activeThreadId, activePayload, baseThreads, inbox, sent, talentRequest, talentRequestId, user, userId]);
 
   const sendMessage = useCallback(async (threadId: string, body: string) => {
+    trackProductEvent("contact_attempt", "inbox_reply");
     const r = await fetch(`/api/messages/thread/${encodeURIComponent(threadId)}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -267,6 +285,7 @@ export function useInboxThreads(activeThreadId: string | null) {
       toast({ title: "Reply failed", variant: "destructive" });
       throw new Error("Reply failed");
     }
+    trackProductEvent("contact_completed", "inbox_reply");
     await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", threadId] });
     await refreshInboxQueries(queryClient);
   }, [queryClient, toast]);
@@ -403,5 +422,6 @@ export function useInboxThreads(activeThreadId: string | null) {
     remove,
     revealSelf,
     resolveLineup,
+    blockMember,
   };
 }

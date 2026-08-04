@@ -269,6 +269,7 @@ export function normalizePublicProfile(
     isOwner: api.isOwner,
     viewerIsAdmin: !!api.viewerIsAdmin,
     isFollowing: api.isFollowing,
+    blockStatus: api.blockStatus,
     linkedVenues: api.linkedVenues,
   };
 }

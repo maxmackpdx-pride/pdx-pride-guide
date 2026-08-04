@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ACCOUNT_MOD_REASONS } from "@shared/accountModeration";
+import { trackProductEvent } from "@/lib/analytics";
 
 type Props = {
   username: string;
@@ -29,6 +30,7 @@ export default function ReportAccount({ username }: Props) {
       return res.json();
     },
     onSuccess: () => {
+      trackProductEvent("report_completed", "profile");
       toast({
         title: "Report sent",
         description: "Admins will review this in the moderation queue.",
@@ -47,7 +49,10 @@ export default function ReportAccount({ username }: Props) {
       <button
         type="button"
         className="pp-report-account__toggle"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen((v) => {
+          if (!v) trackProductEvent("report_opened", "profile");
+          return !v;
+        })}
         aria-expanded={open}
       >
         {open ? "Cancel report" : "Report this account"}

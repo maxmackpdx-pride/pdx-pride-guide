@@ -8,7 +8,7 @@
  * Spec: docs/HAUS_HOUSING_SPEC_v0.2.md
  * Design: docs/design-handoff-hausing/
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
@@ -37,6 +37,7 @@ import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housin
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
+import { trackProductEvent } from "@/lib/analytics";
 
 /** One neon per step, borrowed from the three peer post types. */
 const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
@@ -70,6 +71,7 @@ const SIGNS: Array<{ label: string; cls: string }> = [
 const POST_OPTIONS: HousingType[] = ["OFFERING", "LOOKING", "FORMING"];
 
 export default function Housing() {
+  const contentStartedAt = useRef(performance.now());
   usePageSeo(
     "THE HAÜZ · Housing board",
     "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
@@ -123,6 +125,9 @@ export default function Housing() {
   });
 
   const posts = data?.posts ?? [];
+  useEffect(() => {
+    if (!isLoading) trackProductEvent("time_to_content", "housing", performance.now() - contentStartedAt.current);
+  }, [isLoading]);
   const stats = data?.stats;
 
   const saveMutation = useMutation({

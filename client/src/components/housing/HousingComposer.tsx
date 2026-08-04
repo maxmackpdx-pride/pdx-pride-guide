@@ -11,6 +11,7 @@
  *  3. Fields start empty. The prototype's demo drafts are not ported.
  */
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { trackProductEvent } from "@/lib/analytics";
 import {
   AFFORDABILITY_BADGES,
   AFFORDABILITY_BADGE_LABEL,
@@ -423,6 +424,7 @@ export function HousingComposer({
     }
 
     try {
+      trackProductEvent("post_attempt", "housing");
       const res = await fetch("/api/housing", {
         method: "POST",
         credentials: "include",
@@ -434,6 +436,7 @@ export function HousingComposer({
         setNotice(data?.error || "That did not post. Try again in a second.");
         return;
       }
+      trackProductEvent("post_completed", "housing");
 
       // Off-platform housemates and pets attach after the post exists. Best
       // effort: the post is already up, so a hiccup here is not a failure.

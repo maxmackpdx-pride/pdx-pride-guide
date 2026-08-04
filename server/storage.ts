@@ -53,7 +53,7 @@ import { placePath } from "@shared/placeSlug";
 import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
 import { DEFAULT_NOTIFICATION_PREFS, parseNotificationPrefs, type NotificationPrefs } from "@shared/pushCategories";
 import { schedulePushForMessage } from "./push/dispatch";
-import { ensureAnalyticsTable, getTrafficMetrics, type TrafficMetrics } from "./analytics";
+import { ensureAnalyticsTable, getProductExperienceMetrics, getTrafficMetrics, type ProductExperienceMetrics, type TrafficMetrics } from "./analytics";
 import { ensureAdsTables, seedAdsIfNeeded } from "./ads";
 import {
   pacificMidnightIso,
@@ -805,6 +805,16 @@ try { sqlite.exec(`
   )
 `); } catch(e) {}
 try { sqlite.exec(`CREATE INDEX IF NOT EXISTS follow_blocks_blocked_idx ON follow_blocks(blocked_user_id)`); } catch(e) {}
+try { sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS member_blocks (
+    blocker_user_id INTEGER NOT NULL,
+    blocked_user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (blocker_user_id, blocked_user_id),
+    CHECK (blocker_user_id <> blocked_user_id)
+  )
+`); } catch(e) {}
+try { sqlite.exec(`CREATE INDEX IF NOT EXISTS member_blocks_blocked_idx ON member_blocks(blocked_user_id)`); } catch(e) {}
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS business_follows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -8831,6 +8841,7 @@ export type AdminMetricsSnapshot = {
     rsvpsPrevWeek: number;
   };
   traffic: TrafficMetrics;
+  productExperience: ProductExperienceMetrics;
 };
 
 export interface IStorage {
@@ -9109,6 +9120,11 @@ export interface IStorage {
   getInbox(userId: number): Message[];
   getSentMessages(userId: number): Message[];
   getUnreadCount(userId: number): number;
+  getMemberBlockStatus(viewerUserId: number, targetUserId: number): { blockedByViewer: boolean; blockedViewer: boolean; interactionBlocked: boolean };
+  blockMember(blockerUserId: number, blockedUserId: number): void;
+  unblockMember(blockerUserId: number, blockedUserId: number): void;
+  getBlockedMembers(blockerUserId: number): Array<{ id: number; username: string; displayName: string | null; photoUrl: string | null }>;
+  isMemberInteractionBlocked(firstUserId: number, secondUserId: number): boolean;
   /** Toggle a DM reaction. Viewer must be a participant on the message. */
   toggleMessageReaction(
     messageId: number,
@@ -9947,6 +9963,9 @@ export const storage: IStorage = {
       isSiteOwner: storage.isPrimarySiteOwner(user),
       viewerIsAdmin: !!viewerIsAdmin && !isOwner,
       isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
+      blockStatus: viewerUserId != null && !isOwner
+        ? storage.getMemberBlockStatus(viewerUserId, user.id)
+        : { blockedByViewer: false, blockedViewer: false, interactionBlocked: false },
       activity,
       boardPosts,
       linkedVenues: storage.getUserLinkedBusinesses(user.id),
@@ -12349,6 +12368,11 @@ export const storage: IStorage = {
         GROUP BY thread_id
       ) latest ON m.id = latest.latest_id
       WHERE m.to_user_id = ? AND m.deleted_by_to = 0
+        AND NOT EXISTS (
+          SELECT 1 FROM member_blocks b
+          WHERE (b.blocker_user_id = m.from_user_id AND b.blocked_user_id = m.to_user_id)
+             OR (b.blocker_user_id = m.to_user_id AND b.blocked_user_id = m.from_user_id)
+        )
       ORDER BY m.created_at DESC
     `).all(userId, userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
@@ -12367,14 +12391,68 @@ export const storage: IStorage = {
         GROUP BY thread_id
       ) latest ON m.id = latest.latest_id
       WHERE m.from_user_id = ? AND m.deleted_by_from = 0
+        AND NOT EXISTS (
+          SELECT 1 FROM member_blocks b
+          WHERE (b.blocker_user_id = m.from_user_id AND b.blocked_user_id = m.to_user_id)
+             OR (b.blocker_user_id = m.to_user_id AND b.blocked_user_id = m.from_user_id)
+        )
       ORDER BY m.created_at DESC
     `).all(userId, userId).map(row => mapMessageRow(row as Record<string, unknown>)) as Message[];
   },
   getUnreadCount(userId) {
-    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM messages WHERE to_user_id = ? AND is_read = 0 AND deleted_by_to = 0`).get(userId) as any;
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count FROM messages m
+      WHERE m.to_user_id = ? AND m.is_read = 0 AND m.deleted_by_to = 0
+        AND NOT EXISTS (
+          SELECT 1 FROM member_blocks b
+          WHERE (b.blocker_user_id = m.from_user_id AND b.blocked_user_id = m.to_user_id)
+             OR (b.blocker_user_id = m.to_user_id AND b.blocked_user_id = m.from_user_id)
+        )
+    `).get(userId) as any;
     return row?.count || 0;
   },
+  getMemberBlockStatus(viewerUserId, targetUserId) {
+    const rows = sqlite.prepare(`
+      SELECT blocker_user_id AS blockerUserId FROM member_blocks
+      WHERE (blocker_user_id = ? AND blocked_user_id = ?)
+         OR (blocker_user_id = ? AND blocked_user_id = ?)
+    `).all(viewerUserId, targetUserId, targetUserId, viewerUserId) as Array<{ blockerUserId: number }>;
+    const blockedByViewer = rows.some(row => row.blockerUserId === viewerUserId);
+    const blockedViewer = rows.some(row => row.blockerUserId === targetUserId);
+    return { blockedByViewer, blockedViewer, interactionBlocked: blockedByViewer || blockedViewer };
+  },
+  isMemberInteractionBlocked(firstUserId, secondUserId) {
+    if (firstUserId === secondUserId) return false;
+    return storage.getMemberBlockStatus(firstUserId, secondUserId).interactionBlocked;
+  },
+  blockMember(blockerUserId, blockedUserId) {
+    if (blockerUserId === blockedUserId) throw Object.assign(new Error("You cannot block yourself"), { status: 400 });
+    const now = new Date().toISOString();
+    sqlite.transaction(() => {
+      sqlite.prepare(`INSERT OR IGNORE INTO member_blocks (blocker_user_id, blocked_user_id, created_at) VALUES (?, ?, ?)`)
+        .run(blockerUserId, blockedUserId, now);
+      sqlite.prepare(`DELETE FROM follows WHERE (follower_user_id = ? AND following_user_id = ?) OR (follower_user_id = ? AND following_user_id = ?)`)
+        .run(blockerUserId, blockedUserId, blockedUserId, blockerUserId);
+      sqlite.prepare(`INSERT OR IGNORE INTO follow_blocks (blocker_user_id, blocked_user_id, created_at) VALUES (?, ?, ?)`)
+        .run(blockerUserId, blockedUserId, now);
+      sqlite.prepare(`INSERT OR IGNORE INTO follow_blocks (blocker_user_id, blocked_user_id, created_at) VALUES (?, ?, ?)`)
+        .run(blockedUserId, blockerUserId, now);
+    })();
+  },
+  unblockMember(blockerUserId, blockedUserId) {
+    sqlite.prepare(`DELETE FROM member_blocks WHERE blocker_user_id = ? AND blocked_user_id = ?`).run(blockerUserId, blockedUserId);
+  },
+  getBlockedMembers(blockerUserId) {
+    return sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl
+      FROM member_blocks b JOIN users u ON u.id = b.blocked_user_id
+      WHERE b.blocker_user_id = ? ORDER BY b.created_at DESC
+    `).all(blockerUserId) as Array<{ id: number; username: string; displayName: string | null; photoUrl: string | null }>;
+  },
   sendMessage(fromUserId, toUserId, subject, body, opts) {
+    if (storage.isMemberInteractionBlocked(fromUserId, toUserId)) {
+      throw Object.assign(new Error("Member interaction blocked"), { status: 403, code: "MEMBER_BLOCKED" });
+    }
     const threadId = opts?.threadId || `thread_${Date.now()}_${fromUserId}_${toUserId}`;
     const created = db.insert(messages).values({
       fromUserId, toUserId, subject, body,
@@ -12795,6 +12873,12 @@ export const storage: IStorage = {
       LEFT JOIN users u ON u.id = m.from_user_id
       WHERE m.thread_id = ? ORDER BY m.created_at ASC
     `).all(threadId) as any[];
+    const counterpartyIds = new Set<number>();
+    for (const row of thread) {
+      if (row.from_user_id !== viewerUserId) counterpartyIds.add(Number(row.from_user_id));
+      if (row.to_user_id !== viewerUserId) counterpartyIds.add(Number(row.to_user_id));
+    }
+    if ([...counterpartyIds].some(id => storage.isMemberInteractionBlocked(viewerUserId, id))) return [];
     const mcThread = storage.getMissedConnectionThread(threadId);
     const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
     const mapped = thread.map(raw => {
@@ -13367,6 +13451,7 @@ export const storage: IStorage = {
         gaTrackingEnabled: false,
         gaReportingEnabled: false,
       }),
+      productExperience: getProductExperienceMetrics(sqlite),
     };
   },
   resolveOwnerDeskItem(id, source = "desk") {
