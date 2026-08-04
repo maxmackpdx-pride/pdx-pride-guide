@@ -92,7 +92,7 @@ html.calm-mode .home-front__kicker span,
   opacity:.08;
 }
 .home-front__world[data-world="events"] .home-front__object-motif { z-index:1; }
-.home-front__world[data-world="events"] .home-front__event-preview { position:relative; z-index:2; }
+.home-front__world[data-world="events"] .home-front__event-preview { position:absolute; inset:0; z-index:2; }
 .home-front__world[data-world="events"] .home-front__world-top,
 .home-front__world[data-world="events"] .home-front__event-dots { z-index:3; }
 .home-front__world-top,.home-front__world-copy,.home-front__beach-live,.home-front__event-preview,.home-front__sample,.home-front__world-action { position:relative; z-index:1; }
