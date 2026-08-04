@@ -518,6 +518,18 @@
 .darkroom-waypoint:nth-child(5) .darkroom-waypoint__card { animation-delay: -2.8s; }
 .darkroom-waypoint:nth-child(6) .darkroom-waypoint__card { animation-delay: -3.5s; }
 
+/* Life on hover: the card lifts and leans toward you, glow blooms a touch. */
+.darkroom-waypoint__card {
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.darkroom-waypoint__card:hover {
+  transform: translateY(-8px) scale(1.018);
+}
+@media (prefers-reduced-motion: reduce) {
+  .darkroom-waypoint__card { transition: none; }
+  .darkroom-waypoint__card:hover { transform: none; }
+}
+
 .darkroom-waypoint__card > * { position: relative; z-index: 2; }
 .darkroom-waypoint__card .pdx-refract { position: absolute; z-index: 3; }
 

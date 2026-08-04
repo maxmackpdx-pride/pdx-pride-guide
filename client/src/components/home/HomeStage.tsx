@@ -82,7 +82,7 @@ const WORLDS: World[] = [
     body: "Bars, food, shops, venues and services that are ours or truly for us.",
     action: "Spend queer",
     href: "/directory",
-    accent: "var(--neon-cyan, #19e3ff)",
+    accent: "var(--neon-red, #ff2400)",
   },
   {
     key: "housing",
@@ -129,6 +129,16 @@ const WORLDS: World[] = [
     sampleKey: "spotted",
   },
 ];
+
+// Fresh order on every visit — a light shuffle so the front door feels alive.
+function shuffleWorlds(worlds: World[]): World[] {
+  const out = worlds.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUpNext>; fallback?: HomeStageCardData }) {
   const slides = useMemo(() => {
@@ -284,6 +294,8 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
   const railRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number; dragging: boolean } | null>(null);
   const suppressClickRef = useRef(false);
+  // Shuffle once per mount (per page load), shared by both marquee groups.
+  const [orderedWorlds] = useState(() => shuffleWorlds(WORLDS));
   const [manualRail, setManualRail] = useState(false);
   const [draggingRail, setDraggingRail] = useState(false);
   const [motifsRevealed, setMotifsRevealed] = useState(false);
@@ -412,8 +424,9 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             aria-hidden={duplicate || undefined}
             {...(duplicate ? { inert: "" } : {})}
           >
-          {WORLDS.map((world) => {
+          {orderedWorlds.map((world, index) => {
             const sample = world.sampleKey ? samples[world.sampleKey] : null;
+            const displayNumber = String(index + 1).padStart(2, "0");
             return (
               <article
                 key={`${duplicate ? "duplicate" : "primary"}-${world.key}`}
@@ -456,7 +469,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 ) : null}
                 <WorldMotif kind={world.key as WorldMotifKind} />
                 <div className="home-front__world-top">
-                  <span className="home-front__world-number">{world.number}</span>
+                  <span className="home-front__world-number">{displayNumber}</span>
                   <span className="home-front__world-eyebrow">{world.eyebrow}</span>
                 </div>
                 {world.key !== "events" ? (
