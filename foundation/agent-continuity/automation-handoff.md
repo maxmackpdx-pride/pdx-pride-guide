@@ -107,3 +107,17 @@ Purpose:
 
 Create equivalents of these four automations with the same IDs, schedules, prompts, and constraints above, then keep their status as paused until re-enabled.
 
+## Always-on skills for this mix
+
+Any replacement model should load these skills as baseline:
+
+- `zaylist-foundation`
+- `zaylist-design-system`
+- `zay-logo-design`
+- `zaylist-living-guide-builder`
+
+Treat these as shared memory and execution standards for all continuity work:
+
+- Load the relevant `SKILL.md` files first before changes.
+- Read `foundation/agent-continuity/START_HERE.md` before any role action.
+- Keep notes in `foundation/agent-continuity` and only promote to production-facing docs after Tucker approval.
