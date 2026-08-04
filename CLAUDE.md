@@ -14,6 +14,11 @@ If using a GitHub canonical remote in this repo in the future, use:
 
 `./scripts/sync-continuity.sh github master`
 
+To validate remote/branch state before pushing:
+
+`./scripts/sync-continuity.sh --dry-run`  
+`./scripts/sync-continuity.sh sites main --dry-run`
+
 The script is intentionally strict:
 
 - it only rebases and pushes the current branch against the selected remote/branch

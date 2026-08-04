@@ -7,6 +7,15 @@ cd "$ROOT_DIR"
 TARGET_REMOTE="${1:-sites}"
 TARGET_BRANCH="${2:-main}"
 LOCAL_BRANCH="${3:-main}"
+DRY_RUN=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run|--check-only)
+      DRY_RUN=1
+      ;;
+  esac
+done
 
 LOCK_PATH=".git/index.lock"
 LOCK_MAX_AGE_SECONDS=120
@@ -76,6 +85,24 @@ git fetch "$TARGET_REMOTE"
 
 echo "Switching to $LOCAL_BRANCH"
 git checkout "$LOCAL_BRANCH"
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  echo "Dry run enabled. No commits will be pushed."
+  if git rev-parse --verify "$TARGET_REMOTE/$TARGET_BRANCH" >/dev/null 2>&1; then
+    COMMITS_AHEAD=$(git rev-list --count "$TARGET_REMOTE/$TARGET_BRANCH".."$LOCAL_BRANCH")
+    echo "Local commits ahead of $TARGET_REMOTE/$TARGET_BRANCH: $COMMITS_AHEAD"
+  else
+    echo "Could not resolve $TARGET_REMOTE/$TARGET_BRANCH for ahead/behind check."
+  fi
+  if git status --short >/dev/null; then
+    if [[ -n "$(git status --short)" ]]; then
+      echo "Working tree has local changes. Rebase/push should be run from a clean state."
+      exit 1
+    fi
+  fi
+  echo "Dry run complete."
+  exit 0
+fi
 
 echo "Rebasing local $LOCAL_BRANCH onto $TARGET_REMOTE/$TARGET_BRANCH"
 git rebase "$TARGET_REMOTE/$TARGET_BRANCH"
