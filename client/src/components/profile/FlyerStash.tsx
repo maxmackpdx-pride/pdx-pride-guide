@@ -331,7 +331,7 @@ export default function FlyerStash({
           </div>
           <div className="flyer-stash__track">Title track: {stats.domLabel}</div>
           <div>
-            <div className="flyer-stash__section-label">Gigs worked</div>
+            <div className="flyer-stash__section-label">Gigz worked</div>
             <div className="flyer-stash__chips">
               {stats.roleChips.map((rc) => (
                 <span

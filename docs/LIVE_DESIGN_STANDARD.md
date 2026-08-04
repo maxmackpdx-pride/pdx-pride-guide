@@ -103,6 +103,8 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 ## Homepage front door
 
+- Product-family names are exact: always render `Gigz`, `GifZ`, and `Mizzed Connection` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
+
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
 - The counter strip occupies the seam immediately after the main Zaylist hero and before the destination rail. Its bottom edge aligns exactly with the hero end; do not float it deeper into the hero or leave a separate spacer before the rail.
 - Keep the counter strip and every counter cell transparent, with no per-cell fill. Place one vertical gradient behind the full strip with exact endpoints: 100% transparent at the top and 80% black (`rgba(0,0,0,.8)`) at the bottom. Place the rainbow divider directly below the counter, with no extra band, gap, or duplicate divider.
@@ -110,7 +112,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The destination rail owns its section padding, modest consistent gaps, top/bottom dividers, and horizontal overflow. On motion-capable desktop it flows seamlessly from right to left at exactly **68.4 seconds per cycle** (10% faster than the prior timing).
 - Keep one semantic seven-card sequence. If seamless looping requires presentational clones, mark them `aria-hidden`, unfocusable, inert, and exclude them from analytics; never add a second visible rail or expose repeated destinations to assistive technology.
 - Mobile, Calm Mode, and `prefers-reduced-motion` disable rail autoplay and keep the same order in a manual touch-scroll rail with card snap points, readable peek, 44px actions, contained overscroll, and no document/page horizontal overflow.
-- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, Gifting, Gig Board, and Missed Connections.
+- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, GifZ, Gigz, and Mizzed Connection.
 - The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
 - The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
 - Each world uses the deep-glass shell with one `--c` accent. Calm Mode removes ambient video and bloom while preserving every route and label.
@@ -125,7 +127,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The Events flyer stage always shows its active position counter and rail. When local upcoming data is empty, it uses the canonical `HOME_STAGE_DEMO_SAMPLES.events` fallback from the repository.
 - The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
 - Places uses a reduced app-tile launcher sourced from `/api/directory`, with two fewer rows than the former layout: 8 columns by 3 rows on larger screens and 5 columns by 6 rows on phones. Render only the visible capacity in stable source order so the footer/action aligns with sibling cards.
-- Haüsing, Gifting, Gigs, and Missed Connections use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
+- Haüsing, GifZ, Gigz, and Mizzed Connection use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
 - The homepage NEXT preview uses one six-card set. Three cards enter from the left and three from the right at the same time, collide at center, overshoot, rebound once, make one short restrained wiggle, and settle into a centered overlapping stack. After landing, a staggered 1–2px slow float may keep the stack alive; Calm and reduced-motion stay perfectly still.
 - Put the rainbow divider immediately above the NEXT preview section. Its heading is exactly **“SEE WHAT I’M BUILDING NEXT.”** Only **“NEXT.”** is red; keep every preceding word in the standard high-contrast heading color.
 - The full NEXT section uses a distinct cool-navy clipped topographic/trail-map blueprint field plus exactly three scattered copies of each of the two approved drafting references. The six motifs cannot touch. Keep every form monochrome, low opacity, non-parallax, and behind the heading and card stack; mobile may reduce the count.

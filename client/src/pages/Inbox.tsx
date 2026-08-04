@@ -21,7 +21,7 @@ export default function Inbox() {
 
   usePageSeo(
     "Inbox | Zaylist",
-    "Private messages from missed connections, Gig Werk, event hosts, and check-ins.",
+    "Private messages from Mizzed Connection posts, Gigz, event hosts, and check-ins.",
   );
 
   const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({
@@ -83,7 +83,7 @@ export default function Inbox() {
       <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <p style={{ color: "#9d9a92", marginBottom: 24, lineHeight: 1.6 }}>
-            Log in to read private threads from missed connections, Gig Werk, event hosts, and check-ins.
+            Log in to read private threads from Mizzed Connection posts, Gigz, event hosts, and check-ins.
           </p>
           <button type="button" className="btn-neon" onClick={() => setShowAuth(true)}>
             LOG IN / JOIN
@@ -112,7 +112,7 @@ export default function Inbox() {
       kicker="Private messages"
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
-      lede="Your 1:1 threads from Missed Connections, Gig Werk, event hosts, and check-ins. Only you can see these."
+      lede="Your 1:1 threads from Mizzed Connection, Gigz, event hosts, and check-ins. Only you can see these."
       onLogout={() => logout()}
       onMemberNavigate={(view) => {
         if (view === "posts") setLocation("/dashboard?view=posts");

@@ -95,7 +95,7 @@ export default function MissedConnectionsPanel({
           ? `/api/missed-connections?beach=${beachId}`
           : "/api/missed-connections";
       const r = await fetch(url, { credentials: "include" });
-      if (!r.ok) throw new Error("Could not load missed connections");
+      if (!r.ok) throw new Error("Could not load Mizzed Connection posts");
       return r.json();
     },
   });
@@ -254,7 +254,7 @@ export default function MissedConnectionsPanel({
   );
 
   const listings = isLoading ? (
-    <BoardLoadingState label="Loading missed connections" />
+    <BoardLoadingState label="Loading Mizzed Connection posts" />
   ) : isError ? (
     boardLayout ? (
       <div className="board-empty board-empty--prototype">
@@ -263,7 +263,7 @@ export default function MissedConnectionsPanel({
       </div>
     ) : (
       <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
-        <p style={{ color: "#fff", marginBottom: 12 }}>Could not load missed connections.</p>
+        <p style={{ color: "#fff", marginBottom: 12 }}>Could not load Mizzed Connection posts.</p>
         <button className="btn-neon" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
       </div>
     )
@@ -276,10 +276,10 @@ export default function MissedConnectionsPanel({
     ) : (
       <div style={{ color: "#9d9a92", padding: compact ? "12px 0" : "32px 0" }}>
         {mode === "event"
-          ? "No missed connections for this event yet."
+          ? "No Mizzed Connection posts for this event yet."
           : mode === "beach"
-            ? "No missed connections at this beach yet."
-            : "No active missed connections yet."}
+            ? "No Mizzed Connection posts at this beach yet."
+            : "No active Mizzed Connection posts yet."}
       </div>
     )
   ) : (
@@ -342,10 +342,10 @@ export default function MissedConnectionsPanel({
 
       {(mode === "event" || mode === "beach") && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
-          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>Post a missed connection</h3>
+          <h3 className="display" style={{ color: "#FF00CC", fontSize: "1rem", marginBottom: 8 }}>Post a Mizzed Connection</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
             {mode === "beach"
-              ? "Missed connections from the beach · also on the main Missed Connections board · anonymous until you both reveal in inbox."
+              ? "Missed connections from the beach · also on the main Mizzed Connection board · anonymous until you both reveal in inbox."
               : "Missed connections for this event · anonymous on the board until you both reveal in inbox."}
           </p>
           <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" maxLength={80} />

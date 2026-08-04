@@ -234,8 +234,8 @@ export default function Dashboard() {
     myGigsQuery.isError && "gigs",
     myEventsQuery.isError && "claimed events",
     submittedEventsQuery.isError && "submitted events",
-    myMissedQuery.isError && "missed connections",
-    myGiftingQuery.isError && "gifting posts",
+    myMissedQuery.isError && "Mizzed Connection posts",
+    myGiftingQuery.isError && "GifZ posts",
     myCheckInsQuery.isError && "check-ins",
   ].filter(Boolean) as string[];
 

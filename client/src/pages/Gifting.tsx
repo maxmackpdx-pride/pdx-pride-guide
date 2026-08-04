@@ -19,6 +19,7 @@ import { Button } from "@/components/ds";
 import { isOpenGrabPost } from "@/lib/boardFeed";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
+import SafetyGuide from "@/components/SafetyGuide";
 
 const CATEGORIES = [
   "Clothing", "Party Closet", "Costumes and Theme Wear", "Circuit Party Wear", "Drag",
@@ -63,9 +64,9 @@ function isActivePost(p: GiftingPost) {
 
 export default function Gifting() {
   usePageSeo(
-    "Gifting Board | Zaylist | Portland Pride 2026",
-    "Give and find free stuff for the scene - Pride week and all year. Gifting and ISO board.",
-    { image: shareCardUrl("gifting"), imageAlt: "Gifting board on Zaylist" },
+    "GifZ | Zaylist | Portland Pride 2026",
+    "Give and find free stuff for the scene - Pride week and all year on GifZ.",
+    { image: shareCardUrl("gifting"), imageAlt: "GifZ on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -241,11 +242,13 @@ export default function Gifting() {
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
+      <SafetyGuide context="gifts" />
+
       <ScrollReveal>
         <BoardHowItWorks
           className="gifting-how"
           kickerTone="lime"
-          title={<>How Gift with <span className="board-how__title-accent">Pride</span> works</>}
+          title={<>How <span className="board-how__title-accent">GifZ</span> works</>}
           lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
           steps={HOW_IT_WORKS}
           footerLine="Keep it free · keep it kind · keep it moving · year-round"
@@ -384,7 +387,7 @@ export default function Gifting() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading gifting posts" />
+          <BoardLoadingState label="Loading GifZ posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#ccff00" }}>
             <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />

@@ -27,6 +27,7 @@ import GoingRail from "@/components/profile/GoingRail";
 import FlyerStash from "@/components/profile/FlyerStash";
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
+import SafetyGuide from "@/components/SafetyGuide";
 import {
   chipsForEvent,
   summaryForEvent,
@@ -374,6 +375,7 @@ export default function MemberProfile() {
           onEventClick={(e) => openEvent(e.id)}
         />
 
+        {!isOwner && <SafetyGuide context="profile" compact />}
         <ProfileFooter username={data.username} />
       </div>
 

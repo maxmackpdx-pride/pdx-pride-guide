@@ -28,6 +28,7 @@ import type { Business } from "@/pages/Directory";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 import type { CSSProperties } from "react";
 import { shareCardUrl } from "@shared/shareCards";
+import SafetyGuide from "@/components/SafetyGuide";
 
 const gigSchema = z.object({
   postType: z.enum(["LOOKING_FOR_WORK", "POSTING_GIG"]),
@@ -116,9 +117,9 @@ function thumbGradient(isLooking: boolean) {
 
 export default function PrideWork() {
   usePageSeo(
-    "Gig Board: Jobs & Gigs | Zaylist",
-    "Find gigs and workers for Portland nights. Post or browse the gig board.",
-    { image: shareCardUrl("prideWork"), imageAlt: "Gig Board on Zaylist" },
+    "Gigz: Jobs & gigs | Zaylist",
+    "Find gigs and workers for Portland nights. Post or browse Gigz.",
+    { image: shareCardUrl("prideWork"), imageAlt: "Gigz on Zaylist" },
   );
   const { toast } = useToast();
   const { user } = useAuth();
@@ -199,7 +200,7 @@ export default function PrideWork() {
 
   const stats = useMemo(() => [
     { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
-    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigs up for grabs", color: "#b06bff" },
+    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigz up for grabs", color: "#b06bff" },
     { num: gigs.filter(g => g.isRemote).length, label: "Remote friendly", color: "#ff1fa0" },
   ], [gigs]);
 
@@ -250,7 +251,7 @@ export default function PrideWork() {
 
   const submitGig = (data: GigFormData) => {
     if (!acceptRules) {
-      toast({ title: "Board rules", description: "Please agree to the Gig Werk rules before posting.", variant: "destructive" });
+      toast({ title: "Board rules", description: "Please agree to the Gigz rules before posting.", variant: "destructive" });
       return;
     }
     const personalsErr = validateGigPostContent(data);
@@ -320,18 +321,20 @@ export default function PrideWork() {
         <BoardHero
           accent="purple"
           kicker="Two-way work board · Pride season and beyond"
-          title={<>The Gig <span className="board-hero__title-accent">Board</span></>}
+          title={<>Gig<span className="board-hero__title-accent">Z</span></>}
           lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
         />
       </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
+      <SafetyGuide context="gigs" />
+
       <ScrollReveal>
         <BoardHowItWorks
           className="gigs-how"
           kickerTone="cyan"
-          title={<>How the gig <span style={{ color: "#b06bff" }}>board</span> works</>}
+          title={<>How <span style={{ color: "#b06bff" }}>Gigz</span> works</>}
           lede="Same board, two sides. Talent posts what they do. Hosts post what they need. Everyone can browse both. Goes live right away, and every reply stays in a private inbox."
           steps={HOW_IT_WORKS}
           footerLine="Paid, respected, valued · work and gigs only · PG-13"
@@ -472,7 +475,7 @@ export default function PrideWork() {
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
-                    Link this gig to a directory venue (optional). It'll show up on that venue's Gigs tab.
+                    Link this gig to a directory venue (optional). It'll show up on that venue's Gigz tab.
                   </p>
                   {linkedBusiness ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -614,7 +617,7 @@ export default function PrideWork() {
             {([
               { key: "ALL" as const, label: "All", accent: "purple" },
               { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "Gigs open", accent: "purple" },
+              { key: "POSTING_GIG" as const, label: "Gigz open", accent: "purple" },
             ]).map(f => (
               <BoardFilterChip
                 key={f.key}
@@ -642,7 +645,7 @@ export default function PrideWork() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading talent & gig posts" />
+          <BoardLoadingState label="Loading talent & Gigz posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#b06bff" }}>
             <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />

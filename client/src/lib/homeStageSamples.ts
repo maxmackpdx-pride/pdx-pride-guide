@@ -178,7 +178,7 @@ export function mapHousingSample(post: HousingPostView): HomeStageCardData {
     post.displayName ||
     housingDisplayName(post.type, post.name) ||
     post.headline ||
-    "Housing post";
+    "HAÜSING post";
   const area = (post.areas || []).filter(Boolean).slice(0, 2).join(", ");
   const line = clip(post.headline || post.body || area || "Portland");
   const metaParts: string[] = [];
@@ -205,7 +205,7 @@ export function mapHousingSample(post: HousingPostView): HomeStageCardData {
     kicker: kicker.replace(/_/g, " "),
     title,
     line,
-    meta: metaParts.filter(Boolean).join(" · ") || "Haüsing",
+    meta: metaParts.filter(Boolean).join(" · ") || "HAÜSING",
     cta,
     accent: ACCENT.housing,
     thumbUrl: post.photos?.[0] ?? null,

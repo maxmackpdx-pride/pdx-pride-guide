@@ -147,5 +147,5 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
 export async function shareMissedConnectionStory(post: ShareMissedConnection) {
   const canvas = await buildMissedConnectionCanvas(post);
   const filename = `missed-connection-${post.id}.png`;
-  return shareOrDownloadPng(canvas, filename, "Missed Connections | Zaylist");
+  return shareOrDownloadPng(canvas, filename, "Mizzed Connection | Zaylist");
 }

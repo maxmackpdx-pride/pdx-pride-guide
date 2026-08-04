@@ -255,7 +255,7 @@ export function buildCanonicalUrl(requestPath: string) {
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Zaylist | Queer Portland, all in one place",
-    description: "Portland's queer community hub — events and nightlife, housing and roommates, gigs, free stuff, missed connections, and a directory of queer-owned spots. All year round.",
+    description: "Portland's queer community hub — events and nightlife, housing and roommates, Gigz, free stuff, Mizzed Connection, and a directory of queer-owned spots. All year round.",
   },
   "/events": {
     title: "Portland Queer Events | Zaylist",
@@ -287,14 +287,14 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/gifting": {
     title: "Gift with Pride | Zaylist",
-    description: "Free queer gifting board for Portland. Post gifts and in-search-of requests across PDX.",
+    description: "Free queer GifZ board for Portland. Post gifts and in-search-of requests across PDX.",
   },
   "/pride-work": {
-    title: "Gig Werk: Gigs & Jobs | Zaylist",
+    title: "Gigz: Gigs & Jobs | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
   "/spotted": {
-    title: "Missed Connections | Zaylist",
+    title: "Mizzed Connection | Zaylist",
     description: "Missed connections from Portland's queer scene. Reconnect with someone you spotted out.",
   },
   "/submit": {
@@ -303,11 +303,11 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/inbox": {
     title: "Inbox | Zaylist",
-    description: "Private messages from missed connections, Gig Werk, event hosts, and check-ins on Zaylist.",
+    description: "Private messages from Mizzed Connection, Gigz, event hosts, and check-ins on Zaylist.",
   },
   "/dashboard": {
     title: "Dashboard | Zaylist",
-    description: "Your Zaylist profile, submissions, gigs, gifting, and event check-ins.",
+    description: "Your Zaylist profile, submissions, Gigz, GifZ, and event check-ins.",
   },
   "/directory": {
     title: "Queer Portland Directory | Zaylist",
@@ -331,11 +331,11 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     description: "See what is next on Zaylist: HAÜSING, AfterZ, Zenegades, Z/SPACE, Travel, and ZAYDARK.",
   },
   "/gigs": {
-    title: "Gig Werk: Gigs & Jobs | Zaylist",
+    title: "Gigz: Gigs & Jobs | Zaylist",
     description: "Portland queer gig board and work listings. Post a gig or find work in PDX.",
   },
   "/hausing": {
-    title: "HAÜSING · Housing board | Zaylist",
+    title: "HAÜSING | Zaylist",
     description:
       "Rooms, roommates, and people building a household together in queer Portland. A community board, not a listings site.",
   },
@@ -632,7 +632,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? livePlace.name
           : liveProfile
             ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-            : "Zaylist | Portland Pride Week: Events, Gigs, Community, Directory",
+            : "Zaylist | Portland Pride Week: Events, Gigz, Community, Directory",
     ),
     type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in

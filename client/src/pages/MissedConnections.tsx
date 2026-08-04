@@ -13,6 +13,7 @@ import BoardCloseSeam from "@/components/BoardCloseSeam";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
+import SafetyGuide from "@/components/SafetyGuide";
 
 const HOW_IT_WORKS = [
   { title: "Pick a spot", body: "Link a Pride event, name your own spot, or choose around town.", color: "#ff1fa0" },
@@ -23,9 +24,9 @@ const HOW_IT_WORKS = [
 
 export default function MissedConnections() {
   usePageSeo(
-    "Missed Connections | Zaylist",
-    "Post anonymous missed connections from Portland Pride 2026 events. See someone at PDX Pride? Say hi privately.",
-    { image: shareCardUrl("spotted"), imageAlt: "Missed Connections on Zaylist" },
+    "Mizzed Connection | Zaylist",
+    "Post an anonymous Mizzed Connection from Portland Pride events. See someone? Say hi privately.",
+    { image: shareCardUrl("spotted"), imageAlt: "Mizzed Connection on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -113,12 +114,14 @@ export default function MissedConnections() {
       <MissedConnectionsHero onPost={openPost} />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
+      <SafetyGuide context="missed" />
+
       <ScrollReveal delay={40}>
         <BoardHowItWorks
           className="missed-how"
           kickerTone="cyan"
           title={<>Private by <span style={{ color: "#ff1fa0" }}>default</span></>}
-          lede="Missed Connections is our anonymous board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
+          lede="Mizzed Connection is our anonymous board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
           steps={HOW_IT_WORKS}
           footerLine="Stay kind · stay anonymous · reveal when ready"
         />
@@ -128,7 +131,7 @@ export default function MissedConnections() {
         <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Browse missed connections without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
+              Browse Mizzed Connection posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
             </p>
             <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
               Log in / Join

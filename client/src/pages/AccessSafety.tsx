@@ -51,7 +51,26 @@ export default function AccessSafety() {
             Check on the person sitting down. Walk somebody to their car. If a room turns bad, tell staff, tell the organizer, tell us. That's the whole ask.
           </p>
 
-          <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 12 }}>
+          <h2 id="community-rules" className="display panel-heading" style={{ margin: "28px 0 10px" }}>Community rules</h2>
+          <p className="board-copy">
+            Consent is required. Harassment, discrimination, impersonation, doxxing, prohibited items,
+            payment scams, and pressure to disclose private information do not belong here. Board posts
+            may be removed and accounts may be restricted while a report is reviewed.
+          </p>
+
+          <h2 id="block" className="display panel-heading" style={{ margin: "28px 0 10px" }}>Block and step away</h2>
+          <p className="board-copy">
+            You never owe anyone a reply. Use the Block action on the member or conversation when it is
+            available, then report the account if there is harassment, coercion, impersonation, a scam,
+            or an immediate safety concern. Blocking ends contact; reporting sends the issue for review.
+          </p>
+          <p className="board-copy">
+            Housing never handles rent or deposits. GifZ stays free. Gigz posters and workers agree on
+            duties and compensation directly. Mizzed Connection stays anonymous until both people choose
+            otherwise. When something feels wrong, stop the conversation, block the account, and report it.
+          </p>
+
+          <div id="report" style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 12 }}>
             <button type="button" className="btn-neon magenta" onClick={() => setReportOpen(true)}>
               Report a problem
             </button>

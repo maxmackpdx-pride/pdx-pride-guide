@@ -17848,3 +17848,45 @@ html.calm-mode .category-constellation__orb {
 .hub-mobile-tab--hub-icon {
   gap: 0;
 }
+/* Shared trust layer: contextual guidance beside higher-risk community actions. */
+.safety-guide {
+  width: min(1180px, calc(100% - 32px));
+  margin: 18px auto;
+  padding: 18px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  color: var(--text-hi, #fff);
+  background: var(--glass-card-neutral-bg, rgba(10, 10, 13, .92));
+  border: 1px solid var(--glass-card-neutral-border, #2a2a31);
+  border-radius: 12px;
+  box-shadow: var(--glass-card-neutral-shadow, inset 0 1px rgba(255,255,255,.06));
+}
+.safety-guide__icon { color: var(--neon-cyan, #19e3ff); flex: none; }
+.safety-guide__copy { min-width: 0; }
+.safety-guide h2 { margin: 0; font: 800 18px/1.15 var(--font-body, sans-serif); }
+.safety-guide p { margin: 7px 0 0; max-width: 78ch; font-size: 15px; line-height: 1.5; color: var(--text-med, #d2d2d7); }
+.safety-guide__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.safety-guide__actions a, .safety-guide__actions button {
+  min-height: 40px; padding: 8px 11px; display: inline-flex; align-items: center; gap: 6px;
+  color: #fff; background: #101014; border: 1px solid #35353d; border-radius: 8px;
+  font: 700 13px/1 var(--font-body, sans-serif); text-decoration: none; cursor: pointer;
+}
+.safety-guide__actions a:focus-visible, .safety-guide__actions button:focus-visible,
+.board-how__toggle:focus-visible { outline: 3px solid var(--neon-cyan, #19e3ff); outline-offset: 3px; }
+.safety-guide--compact { width: 100%; margin: 12px 0; }
+.board-how__intro { position: relative; }
+.board-how__toggle { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.board-how__toggle svg { transition: transform .2s ease; }
+.board-how.is-expanded .board-how__toggle svg { transform: rotate(180deg); }
+.board-how.is-compact { padding-block: 20px; }
+.board-how.is-compact .board-how__title { margin-bottom: 0; }
+@media (max-width: 640px) {
+  .safety-guide { width: calc(100% - 20px); padding: 15px; }
+  .safety-guide h2 { font-size: 17px; }
+  .safety-guide p { font-size: 14px; }
+  .safety-guide__actions a, .safety-guide__actions button { flex: 1 1 calc(50% - 4px); justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-how__toggle svg { transition: none; }
+}

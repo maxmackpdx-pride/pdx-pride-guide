@@ -158,8 +158,8 @@ export default function About() {
             <div className="about-v2-manifesto__copy">
               <p>
                 Pride starts now, it ends never, and this thing is already loaded: parties,
-                community events, weird little gems, places to eat, spots to shop, gigs,
-                gifting, missed connections, and all the real homosexual infrastructure that
+                community events, weird little gems, places to eat, spots to shop, Gigz,
+                GifZ, Mizzed Connection, and all the real homosexual infrastructure that
                 keeps the scene alive.
               </p>
               <p>

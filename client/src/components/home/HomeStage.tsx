@@ -88,7 +88,7 @@ const WORLDS: World[] = [
   {
     key: "housing",
     number: "04",
-    title: "Haüsing",
+    title: "HAÜSING",
     eyebrow: "Rooms and people",
     body: "Find a room, a roommate or the people to form a home with.",
     action: "Find your people",
@@ -99,10 +99,10 @@ const WORLDS: World[] = [
   {
     key: "gifting",
     number: "05",
-    title: "Gifting",
+    title: "GifZ",
     eyebrow: "Give and ask",
     body: "Useful things move directly between people, without a marketplace.",
-    action: "Open gifting",
+    action: "Open GifZ",
     href: "/gifting",
     accent: "var(--board-gifting, #ccff00)",
     sampleKey: "gifting",

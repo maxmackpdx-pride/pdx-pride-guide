@@ -80,7 +80,7 @@ export const insertSubmissionSchema = createInsertSchema(submissions).omit({ id:
 export type InsertSubmission = z.infer<typeof insertSubmissionSchema>;
 export type Submission = typeof submissions.$inferSelect;
 
-// Gig posts (Pride Work)
+// Gig posts (Gigz)
 export const gigPosts = sqliteTable("gig_posts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   postType: text("post_type").notNull().default("POSTING_GIG"), // LOOKING_FOR_WORK | POSTING_GIG
@@ -396,7 +396,7 @@ export const messages = sqliteTable("messages", {
 });
 export type Message = typeof messages.$inferSelect;
 
-// Missed Connections
+// Mizzed Connection
 export const missedConnections = sqliteTable("missed_connections", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
@@ -789,7 +789,7 @@ export const adEvents = sqliteTable("ad_events", {
 export type AdEvent = typeof adEvents.$inferSelect;
 
 // ---------------------------------------------------------------------------
-// HAUSING - the Housing board
+// HAUSING - the HAÜSING
 // Spec: docs/HAUS_HOUSING_SPEC_v0.2.md - Build brief: docs/HAUS_ENGINEERING_HANDOFF.md
 //
 // One post object, four types. `type` controls which columns are meaningful and

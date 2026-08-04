@@ -527,7 +527,7 @@ function EventModalInner({
           className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
           onClick={() => setSocialTab("missed")}
         >
-          Missed Connections
+          Mizzed Connection
         </button>
       </div>
 

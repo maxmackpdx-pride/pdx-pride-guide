@@ -36,6 +36,7 @@ import { HousingIcon, type HousingIconName } from "@/components/housing/HousingI
 import { Btn, CloseSeam, LiveDot, Mono, SectionTitle } from "@/components/housing/HousingPrimitives";
 import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
+import SafetyGuide from "@/components/SafetyGuide";
 
 /** One neon per step, borrowed from the three peer post types. */
 const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
@@ -293,6 +294,8 @@ export default function Housing() {
           </div>
         </div>
       </div>
+
+      <SafetyGuide context="housing" />
 
       {/* How it works */}
       <div className="hz-band">

@@ -80,6 +80,14 @@ function isSpottedBoardPost(p: { board?: string; contentType?: string }): boolea
   return board === "spotted" || board === "missed connections";
 }
 
+function publicBoardName(board: string): string {
+  const key = board.trim().toLowerCase();
+  if (key === "gigs" || key === "gig board" || key === "gig werk") return "Gigz";
+  if (key === "gifting") return "GifZ";
+  if (key === "spotted" || key === "missed connections") return "Mizzed Connection";
+  return board;
+}
+
 /** Prefer server boardPosts (with likes/replies); fall back to activity merge. */
 export function boardPostsFromActivity(
   activity: MemberProfileData["activity"] | undefined,
@@ -91,7 +99,7 @@ export function boardPostsFromActivity(
       .filter(p => !isSpottedBoardPost(p))
       .map(p => ({
         id: p.id,
-        board: p.board,
+        board: publicBoardName(p.board),
         contentType: p.contentType || contentTypeForBoard(p.board),
         color: p.color || BOARD_COLORS[p.board as keyof typeof BOARD_COLORS] || "var(--neon-cyan)",
         where: p.where || "Portland",
@@ -109,7 +117,7 @@ export function boardPostsFromActivity(
   for (const g of activity.gigs ?? []) {
     posts.push({
       id: g.id,
-      board: "Gigs",
+      board: "Gigz",
       contentType: "GIG",
       color: BOARD_COLORS.Gigs,
       where: g.venueText || "Portland",
@@ -123,7 +131,7 @@ export function boardPostsFromActivity(
   for (const g of activity.gifting ?? []) {
     posts.push({
       id: g.id,
-      board: "Gifting",
+      board: "GifZ",
       contentType: "GIFTING",
       color: BOARD_COLORS.Gifting,
       where: g.neighborhood || "Portland",

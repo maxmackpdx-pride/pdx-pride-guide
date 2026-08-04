@@ -37,10 +37,10 @@ export const PRIMARY_NAV: NavEntry[] = [
     id: "boards",
     label: "Boards",
     items: [
-      { href: "/pride-work", label: "Gig Board" },
-      { href: "/gifting", label: "Gifting" },
+      { href: "/pride-work", label: "Gigz" },
+      { href: "/gifting", label: "GifZ" },
       { href: "/hausing", label: "HAÜSING" },
-      { href: "/spotted", label: "Missed Connections" },
+      { href: "/spotted", label: "Mizzed Connection" },
     ],
   },
   { type: "link", href: "/next", label: "NEXT" },
@@ -55,10 +55,10 @@ export type PageHeaderMeta = {
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/events": { section: "Events", title: "Events" },
   "/schedule": { section: "Events", title: "My Schedule" },
-  "/pride-work": { section: "Boards", title: "Gig Board" },
-  "/gifting": { section: "Boards", title: "Gifting" },
+  "/pride-work": { section: "Boards", title: "Gigz" },
+  "/gifting": { section: "Boards", title: "GifZ" },
   "/hausing": { section: "Boards", title: "HAÜSING" },
-  "/spotted": { section: "Boards", title: "Missed Connections" },
+  "/spotted": { section: "Boards", title: "Mizzed Connection" },
   "/directory": { section: "Places", title: "Directory" },
   "/nude-beaches": { section: "Explore", title: "Beaches" },
   "/next": { section: "Explore", title: "Next" },
@@ -75,10 +75,10 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 };
 
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/pride-work", label: "Gig Board" },
-  { href: "/gifting", label: "Gifting" },
+  { href: "/pride-work", label: "Gigz" },
+  { href: "/gifting", label: "GifZ" },
   { href: "/hausing", label: "HAÜSING" },
-  { href: "/spotted", label: "Missed Connections" },
+  { href: "/spotted", label: "Mizzed Connection" },
 ];
 
 /** Destinations behind the mobile footer "Events" tab sheet (Beaches folded in). */

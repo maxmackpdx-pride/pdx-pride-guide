@@ -347,7 +347,7 @@ sqlite.exec(`
   );
 `);
 
-// HAUSING - the Housing board. See shared/schema.ts for the annotated schema.
+// HAUSING - the HAÜSING. See shared/schema.ts for the annotated schema.
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS housing_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -3474,7 +3474,7 @@ function getDemoUserId(): number | null {
   return _demoUserIdCache;
 }
 
-/** Demo posts for the Gigs, Missed Connections, and Gifting boards. Old
+/** Demo posts for the Gigs, Mizzed Connection, and Gifting boards. Old
     created_at so they sit BELOW real user posts in every recency-ordered board. */
 function seedDemoBoardsContent() {
   const now = new Date().toISOString();
@@ -3499,7 +3499,7 @@ function seedDemoBoardsContent() {
     `INSERT INTO missed_connections (user_id, title, body, venue_hint, status, created_at, closes_at)
      VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`,
   );
-  // venue_hint uses real directory brand names so Place modal Missed Connections tabs attach.
+  // venue_hint uses real directory brand names so Place modal Mizzed Connection tabs attach.
   mc.run(demoId, "You: reading Judith Butler between sets", "Me: pretending I was only here for the drink special just to keep talking to you. You left with the theory and my whole heart.", "Sanctuary Club", OLD, FUTURE);
   mc.run(demoId, "Cutie who caught my keys on the patio", "You had a mustache, a tote full of kale, and reflexes like a cat. I said thanks. I meant marry me.", "Eagle Portland", OLD, FUTURE);
   mc.run(demoId, "You let my dog say hi outside the bar", "Rufus liked you more than he likes me. Honestly, fair. Drink sometime? He insists on chaperoning.", "CC Slaughters", OLD, FUTURE);
@@ -3701,7 +3701,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_demo_boards_v2");
   }
   // Re-seed demo missed connections onto real directory brands so Place modal
-  // Missed Connections tabs attach (v2 used freeform "laundromat / MAX" hints).
+  // Mizzed Connection tabs attach (v2 used freeform "laundromat / MAX" hints).
   if (!hasBootMigration("seed_demo_boards_mc_venues_v1")) {
     try {
       seedDemoBoardsContent();
@@ -8055,7 +8055,7 @@ function buildHubFeedPinnedItems(
         id: `pin-gig-${gig.id}`,
         kind: "gig",
         badge: "Gig",
-        action: "Open on Gig Werk",
+        action: "Open on Gigz",
         title: gig.title,
         text: gig.description || null,
         createdAt: anchorTime,
@@ -9822,7 +9822,7 @@ export const storage: IStorage = {
     const boardPosts = [
       ...gigs.map(g => ({
         id: g.id,
-        board: "Gigs",
+        board: "Gigz",
         contentType: "GIG" as const,
         color: "var(--board-gigs)",
         where: g.venueText || "Portland",
@@ -9834,7 +9834,7 @@ export const storage: IStorage = {
       })),
       ...gifting.map(g => ({
         id: g.id,
-        board: "Gifting",
+        board: "GifZ",
         contentType: "GIFTING" as const,
         color: "var(--board-gifting)",
         where: g.neighborhood || "Portland",
@@ -9861,8 +9861,6 @@ export const storage: IStorage = {
       return tb - ta;
     });
 
-    const checkIns = storage.getAttendancesByUser(user.id).length;
-
     const attendedAll = sqlite.prepare(`
       SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
              e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
@@ -9870,9 +9868,12 @@ export const storage: IStorage = {
              e.ticket_url AS ticketUrl
       FROM attendances a
       JOIN events e ON e.id = a.event_id
-      WHERE a.user_id = ? AND a.is_active = 1 AND e.status = 'LIVE'
+      WHERE a.user_id = ? AND a.is_active = 1 AND COALESCE(e.status, 'LIVE') != 'DELETED'
       ORDER BY e.date_start ASC
     `).all(user.id) as any[];
+    // One authoritative set drives the profile rail and its counters. Closing an
+    // event must not erase a legitimate attendance; only removed events disappear.
+    const checkIns = attendedAll.length;
     const attendedPastLive = attendedAll.filter(isPastEvent);
     // Host nights Tucker archived are nights he ran and was there - surface in
     // both hosting.past and attended past without inventing fake RSVP rows.
@@ -10425,7 +10426,7 @@ export const storage: IStorage = {
     db.update(giftingPosts).set({ status: "REJECTED", adminNotes } as any).where(eq(giftingPosts.id, id)).run();
     const userId = Number(post.user_id ?? post.userId);
     if (userId) {
-      notifyBoardReject(userId, "Gifting", post.title, reasonCode, note, {
+      notifyBoardReject(userId, "GifZ", post.title, reasonCode, note, {
         contextType: "GIFTING",
         contextId: id,
         contextLabel: post.title,
@@ -10439,7 +10440,7 @@ export const storage: IStorage = {
     if (row.status === "REJECTED") return { error: "Already rejected" };
     const adminNotes = formatBoardRejectMessage(reasonCode, note);
     db.update(missedConnections).set({ status: "REJECTED", adminNotes } as any).where(eq(missedConnections.id, id)).run();
-    notifyBoardReject(row.userId, "Missed Connections", row.title, reasonCode, note, {
+    notifyBoardReject(row.userId, "Mizzed Connection", row.title, reasonCode, note, {
       contextType: "MISSED_CONNECTION",
       contextId: id,
       contextLabel: row.title,
@@ -11094,8 +11095,8 @@ export const storage: IStorage = {
         guide_reply: "Replied as guide",
         admin_message: "Sent a guide message",
         resolve_moderation: "Resolved moderation",
-        reject_gifting: "Rejected gifting post",
-        resolve_gifting_report: "Resolved gifting report",
+        reject_gifting: "Rejected GifZ post",
+        resolve_gifting_report: "Resolved GifZ report",
         gig_status: "Updated a gig",
         reject_gig: "Rejected a gig",
       };
@@ -13316,9 +13317,9 @@ export const storage: IStorage = {
     const contentBreakdown = [
       { label: "Events", count: liveEvents.length },
       { label: "Directory", count: directoryPlaces },
-      { label: "Gifting", count: giftingPosts },
-      { label: "Gigs", count: gigPosts },
-      { label: "Missed Connections", count: missedConnections },
+      { label: "GifZ", count: giftingPosts },
+      { label: "Gigz", count: gigPosts },
+      { label: "Mizzed Connection", count: missedConnections },
     ].sort((a, b) => b.count - a.count);
 
     const approvedPromoters = (sqlite.prepare(
@@ -14577,7 +14578,7 @@ export const storage: IStorage = {
       items.push({
         id: `gifting-${post.id}`,
         kind: "gifting",
-        badge: post.postType === "ISO" ? "ISO" : "Gifting",
+        badge: post.postType === "ISO" ? "ISO" : "GifZ",
         action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
         title: post.title,
         text: post.description || null,
@@ -14629,7 +14630,7 @@ export const storage: IStorage = {
         id: `gig-${gig.id}`,
         kind: "gig",
         badge: gig.postType === "LOOKING_FOR_WORK" ? "Looking" : "Gig",
-        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Gig Werk" : "Posted a gig on Gig Werk",
+        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Gigz" : "Posted a gig on Gigz",
         title: gig.title,
         text: gig.description || null,
         createdAt: gig.createdAt,
@@ -14640,7 +14641,7 @@ export const storage: IStorage = {
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        // Deep-link opens Gig Werk with this exact post expanded.
+        // Deep-link opens Gigz with this exact post expanded.
         link: `/pride-work?post=${gig.id}`,
         boardPostId: gig.id,
       });
@@ -14669,15 +14670,15 @@ export const storage: IStorage = {
       items.push({
         id: `spotted-${row.id}`,
         kind: "spotted",
-        badge: "Missed Connection",
+        badge: "Mizzed Connection",
         action: "New missed connection",
         title: subject,
         text: row.body || "",
         place,
         createdAt: row.createdAt,
         // Missed connections are anonymous - the card renders without a person.
-        author: { displayName: "Missed Connection", anonymous: true },
-        // No event embed: tapping opens the Missed Connections detail card
+        author: { displayName: "Mizzed Connection", anonymous: true },
+        // No event embed: tapping opens the Mizzed Connection detail card
         // (see `spotted`), it does not deep-link to an event.
         event: null,
         link: "/spotted",

@@ -19,15 +19,24 @@
 .pp-event-rail__track {
   display: flex;
   gap: 10px;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
-  padding-bottom: 6px;
-  scroll-snap-type: x proximity;
+  padding: 2px 2px 10px;
+  scroll-padding-inline: 2px;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-inline: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  scrollbar-color: var(--pp-accent, var(--neon-cyan)) #16161b;
 }
 
+.pp-event-rail__track::-webkit-scrollbar { height: 8px; }
+.pp-event-rail__track::-webkit-scrollbar-track { background: #16161b; border-radius: 999px; }
+.pp-event-rail__track::-webkit-scrollbar-thumb { background: var(--pp-accent, var(--neon-cyan)); border-radius: 999px; }
+
 .pp-event-rail__card {
-  width: 150px;
+  width: clamp(150px, 72vw, 210px);
   flex: none;
   scroll-snap-align: start;
   background: #0c0c0f;
@@ -97,6 +106,7 @@
     gap: 9px;
     padding-bottom: 0;
     scroll-snap-type: none;
+    scrollbar-width: none;
   }
 
   .pp-event-rail--going .pp-event-rail__card {

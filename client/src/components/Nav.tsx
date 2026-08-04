@@ -808,14 +808,6 @@ export default function Nav() {
                   active={profileActive}
                   onClick={closeMenu}
                 />
-                <button
-                  type="button"
-                  onClick={() => { setShowAuth(true); setMenuOpen(false); }}
-                  className="site-login-button"
-                  style={{ marginLeft: 10 }}
-                >
-                  Join
-                </button>
               </div>
             )}
 

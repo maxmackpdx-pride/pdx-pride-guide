@@ -47,10 +47,10 @@ const QUEUE_BUCKETS: Array<{ key: keyof NonNullable<QueueBreakdown>; label: stri
   { key: "businessSubmissions", label: "New venues", color: "#FF8C00" },
   { key: "moderation", label: "Moderation", color: "#FF1FA0" },
   { key: "missedConnections", label: "Missed conn.", color: "#FF1FA0" },
-  { key: "giftingReports", label: "Gifting reports", color: "#C8FA3C" },
-  { key: "giftingFlagged", label: "Gifting flagged", color: "#C8FA3C" },
+  { key: "giftingReports", label: "GifZ reports", color: "#C8FA3C" },
+  { key: "giftingFlagged", label: "GifZ flagged", color: "#C8FA3C" },
   { key: "riverBrats", label: "River Brats", color: "#FF8C00" },
-  { key: "pendingGigs", label: "Gig Work", color: "#B06BFF" },
+  { key: "pendingGigs", label: "Gigz", color: "#B06BFF" },
 ];
 
 type LiveHealth = {

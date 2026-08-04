@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BoardGlassMotif } from "@/components/board/GiftListingCard";
 
 const ACCENT_CYCLE = ["#19E3FF", "#FF00CC", "#39FF14", "#A855F7", "#FF6600"];
-/** Deep-glass board accent for Missed Connections (SoT §2.4). */
+/** Deep-glass board accent for Mizzed Connection (SoT §2.4). */
 const MC_GLASS = "#FF00CC";
 
 export function spottedAccent(id: number): string {
@@ -87,7 +87,7 @@ export default function SpottedCard({
         {/* Corner tick marks (design board cards) */}
         <span className="board-spotted-card__ticks" aria-hidden="true">”</span>
         <div className="board-spotted-card__meta">
-          <span className="board-spotted-card__kind" style={{ color: MC_GLASS }}>Missed Connections</span>
+          <span className="board-spotted-card__kind" style={{ color: MC_GLASS }}>Mizzed Connection</span>
           <span className="board-spotted-card__time">{spottedTimeAgo(post.createdAt)}</span>
         </div>
         <h4 className="board-spotted-card__title">{displayTitle}</h4>

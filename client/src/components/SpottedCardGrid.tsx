@@ -277,8 +277,8 @@ export default function SpottedCardGrid({
         <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
           <X size={18} />
         </button>
-        <div className="board-section-kicker board-section-kicker--magenta">New missed connections</div>
-        <h2 className="display section-heading">Post a missed connection</h2>
+        <div className="board-section-kicker board-section-kicker--magenta">New Mizzed Connection posts</div>
+        <h2 className="display section-heading">Post a Mizzed Connection</h2>
         <p className="board-copy-sm">
           Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.
         </p>
@@ -307,7 +307,7 @@ export default function SpottedCardGrid({
       {composePanel}
 
       {isLoading ? (
-        <BoardLoadingState label="Loading missed connections" />
+        <BoardLoadingState label="Loading Mizzed Connection posts" />
       ) : isError ? (
         <div className="board-empty board-empty--makeover">
           <p className="display section-heading">Could not load</p>
@@ -325,7 +325,7 @@ export default function SpottedCardGrid({
           {makeover && (
             <div className="board-empty__actions">
               <Button variant="solid" accent="magenta" onClick={() => onRequestCompose?.()}>
-                Post a missed connection
+                Post a Mizzed Connection
               </Button>
               <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
             </div>

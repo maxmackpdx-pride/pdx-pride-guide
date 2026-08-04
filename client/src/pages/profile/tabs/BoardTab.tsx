@@ -16,7 +16,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
   const cards: BoardCard[] = [
     ...(activity.gigs ?? []).map(g => ({
       key: `gig-${g.id}`,
-      board: "Gigs",
+      board: "Gigz",
       hex: "var(--neon-violet)",
       where: g.venueText || "Portland",
       text: g.description || g.title,
@@ -24,7 +24,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
     })),
     ...(activity.gifting ?? []).map(g => ({
       key: `gifting-${g.id}`,
-      board: "Gifting",
+      board: "GifZ",
       hex: "var(--neon-yellow)",
       where: g.neighborhood || "Portland",
       text: g.description || g.title,

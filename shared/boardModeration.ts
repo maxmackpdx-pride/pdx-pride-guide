@@ -23,7 +23,7 @@ export function formatBoardRejectMessage(reasonCode: string, note?: string): str
 }
 
 export const GIG_BOARD_RULES_SUMMARY =
-  "Gig Werk is PG-13 and work-focused: paid gigs, volunteer shifts, and real availability. No personals, dating, hookups, escorting, or adult content.";
+  "Gigz is PG-13 and work-focused: paid gigs, volunteer shifts, and real availability. No personals, dating, hookups, escorting, or adult content.";
 
 /** Shown beside profile photo upload - public-facing images only. */
 export const PROFILE_PHOTO_RULES_SUMMARY =
@@ -109,7 +109,7 @@ export function validateGigPostContent(fields: {
 
   const hit = GIG_PERSONALS_TERMS.find(term => haystack.includes(term));
   if (hit) {
-    return "Gig Werk is for work and gigs only - no personals or dating posts. Keep it PG-13 and job-related.";
+    return "Gigz is for work and gigs only - no personals or dating posts. Keep it PG-13 and job-related.";
   }
 
   return null;

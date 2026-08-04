@@ -155,7 +155,7 @@ const ADMIN_MORE_NAV: Array<{
   { key: "qsearch", label: "QSearch", icon: Search, catalogOnly: true },
   { key: "events", label: "All events", icon: CalendarDays, catalogOnly: true },
   { key: "users", label: "All users", icon: UserCircle, usersOnly: true },
-  { key: "gigs", label: "Gig Werk", icon: Briefcase, catalogOnly: true },
+  { key: "gigs", label: "Gigz", icon: Briefcase, catalogOnly: true },
   { key: "promoters", label: "Promoters", icon: Users },
   { key: "venue-claims", label: "Venue claims", icon: Store },
   { key: "team", label: "My team", icon: Users, teamOnly: true },

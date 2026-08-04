@@ -728,14 +728,14 @@ function assertGigBoardAllowed(body: any, fields: {
   skills?: string | null;
   compensation?: string | null;
 }) {
-  if (!body.acceptRules) throw new Error("You must agree to the Gig Werk board rules.");
+  if (!body.acceptRules) throw new Error("You must agree to the Gigz board rules.");
   const personalsErr = validateGigPostContent(fields);
   if (personalsErr) throw new Error(personalsErr);
 }
 
 function assertGiftingAllowed(body: any) {
   if (Date.now() >= GIFTING_RUN_END && process.env.GIFTING_KEEP_OPEN !== "true") {
-    throw new Error("Public gifting posts are paused after July 26, 2026.");
+    throw new Error("Public GifZ posts are paused after July 26, 2026.");
   }
   if (!body.acceptRules) throw new Error("You must agree to the community rules.");
   const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
@@ -2219,7 +2219,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
     if (moderationGate(res, "Gig board message", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, gig.userId, `Gig Board: ${gig.title}`, body, {
+    const msg = storage.sendMessage(req.session.userId!, gig.userId, `Gigz: ${gig.title}`, body, {
       contextType: "GIG",
       contextId: gig.id,
       contextLabel: gig.title,
@@ -2305,7 +2305,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         photoUrls: JSON.stringify(photoUrls),
       });
       const post = storage.createGiftingPost(data);
-      res.json({ ...post, message: "Your gifting post is live." });
+      res.json({ ...post, message: "Your GifZ post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -3265,7 +3265,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         return res.status(400).json({ error: "Invalid beach" });
       }
 
-      if (moderationGate(res, "Missed Connections", {
+      if (moderationGate(res, "Mizzed Connection", {
         title: req.body.title,
         body: req.body.body,
         eventLabel: req.body.eventLabel,
@@ -3343,7 +3343,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (req.body[k] !== undefined) patch[k] = req.body[k];
     });
     if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
-    if (moderationGate(res, "Missed Connections edit", { title: patch.title, body: patch.body })) return;
+    if (moderationGate(res, "Mizzed Connection edit", { title: patch.title, body: patch.body })) return;
     const updated = storage.updateMissedConnection(Number(req.params.id), req.session.userId!, patch);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
@@ -3360,8 +3360,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Missed Connections reply", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, post.userId, `Missed Connection: ${post.title}`, body, {
+    if (moderationGate(res, "Mizzed Connection reply", { body })) return;
+    const msg = storage.sendMessage(req.session.userId!, post.userId, `Mizzed Connection: ${post.title}`, body, {
       contextType: "MISSED_CONNECTION",
       contextId: post.id,
       contextLabel: post.title,
