@@ -2037,7 +2037,7 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__grid {
   display: flex;
   align-items: stretch;
-  gap: 24px;
+  gap: 34px;
   width: 100%;
   margin: 0;
   padding: 18px max(20px, calc((100vw - 1180px) / 2)) 82px;
@@ -2060,10 +2060,10 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__grid--manual .home-front__grid-group { animation:none; }
 
 .home-main-stage .home-front__grid-group {
-  --rail-gap: 24px;
+  --rail-gap: 34px;
   display: flex;
   align-items: stretch;
-  gap: 24px;
+  gap: 34px;
   flex: 0 0 auto;
   will-change: transform;
 }
@@ -2233,9 +2233,17 @@ html.calm-mode .home-next-preview__card,
 }
 
 .home-main-stage .home-front__world > .pdx-refract-seam {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--c) 16% 84%, transparent);
-  opacity: .72;
+  /* Borrow the Next cards' glass/refract edge: a thin rainbow light-line that
+     sweeps across the top edge. Edge treatment only — no glass surface fill. */
+  height: var(--refract-seam-height, 2px);
+  left: 9px;
+  right: 9px;
+  background: var(--refract-seam-gradient);
+  background-size: 200% 100%;
+  opacity: .55;
+  animation: dirRefract 7s linear infinite;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
 }
 
 .home-main-stage .home-front__world-top {
@@ -2360,7 +2368,7 @@ html.calm-mode .home-next-preview__card,
 
   .home-main-stage .home-front__grid {
     flex-direction: row;
-    gap: 12px;
+    gap: 18px;
     padding: 12px 18px 12px; /* even top/bottom + a touch more L/R gutter */
     scroll-padding-inline: 18px;
   }
@@ -2369,8 +2377,8 @@ html.calm-mode .home-next-preview__card,
      duplicate is shown to seam the loop; touching it hands control to the
      manual drag (see --manual, which stops the animation). */
   .home-main-stage .home-front__grid-group {
-    --rail-gap: 12px;
-    gap: 12px;
+    --rail-gap: 18px;
+    gap: 18px;
     animation: homeDestinationRailFlow 46s linear infinite;
   }
 
