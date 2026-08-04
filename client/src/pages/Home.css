@@ -2194,15 +2194,8 @@ html.calm-mode .home-next-preview__card,
     0 42px 90px -34px color-mix(in srgb,var(--c) 58%,transparent);
 }
 
-/* Events is the wide anchor card at desktop sizes. Its full-bleed poster and
-   controls keep the same component contract; only the outer frame stretches. */
-@media (min-width: 641px) {
-  .home-main-stage .home-front__world[data-world="events"] {
-    flex-basis: clamp(602px, 56.8vw, 738px);
-    width: clamp(602px, 56.8vw, 738px);
-    aspect-ratio: 7 / 5;
-  }
-}
+/* Events uses the same portrait frame as every other card — the full-bleed
+   poster crops to fit (object-fit: cover). */
 
 .home-main-stage .home-front__world::before {
   content: "";
@@ -2233,14 +2226,22 @@ html.calm-mode .home-next-preview__card,
 }
 
 .home-main-stage .home-front__world > .pdx-refract-seam {
-  /* Borrow the Next cards' glass/refract edge: a thin rainbow light-line that
-     sweeps across the top edge. Edge treatment only — no glass surface fill. */
+  /* The Next cards' glass/refract edge, but tuned to each card's own neon accent
+     instead of a rainbow: a thin light-line with a brighter highlight that sweeps
+     across the top edge. Edge treatment only — no glass surface fill. */
   height: var(--refract-seam-height, 2px);
   left: 9px;
   right: 9px;
-  background: var(--refract-seam-gradient);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--c) 24%, transparent),
+    var(--c),
+    color-mix(in srgb, var(--c) 55%, #fff),
+    var(--c),
+    color-mix(in srgb, var(--c) 24%, transparent)
+  );
   background-size: 200% 100%;
-  opacity: .55;
+  opacity: .7;
   animation: dirRefract 7s linear infinite;
   -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
   mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
@@ -2286,10 +2287,25 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__world-copy + .home-front__sample {
   margin-top: auto;
   margin-bottom: 0;
+  /* Little float so the post reads as its own object resting on the card. */
+  animation: homePostFloat 5.6s ease-in-out infinite;
 }
+.home-main-stage .home-front__world:nth-child(3n) .home-front__sample { animation-delay: -1.4s; }
+.home-main-stage .home-front__world:nth-child(3n + 2) .home-front__sample { animation-delay: -2.8s; }
 .home-main-stage .home-front__sample + .home-front__world-action {
   margin-top: 16px;
 }
+
+@keyframes homePostFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-main-stage .home-front__world-copy + .home-front__sample { animation: none; }
+}
+html.calm-mode .home-main-stage .home-front__world-copy + .home-front__sample,
+:root[data-calm="true"] .home-main-stage .home-front__world-copy + .home-front__sample { animation: none; }
 
 .home-main-stage .home-front__world-copy + .home-front__directory-grid {
   margin-top: 28px;
