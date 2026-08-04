@@ -282,7 +282,8 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
   const videoRef = useRef<HTMLVideoElement>(null);
   const worldsRef = useRef<HTMLElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number; dragging: boolean } | null>(null);
+  const suppressClickRef = useRef(false);
   const [manualRail, setManualRail] = useState(false);
   const [draggingRail, setDraggingRail] = useState(false);
   const [motifsRevealed, setMotifsRevealed] = useState(false);
@@ -322,37 +323,9 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     return () => observer.disconnect();
   }, [calmMode]);
 
-  // Auto-scroll the "What do you need?" rail on mobile: advance one card every
-  // few seconds and loop back to the start (infinite feel). Only fires when the
-  // rail is actually horizontally scrollable (mobile), respects reduced-motion,
-  // and pauses briefly whenever the user touches/drags so it never fights them.
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail || prefersStillMotion()) return;
-    let pausedUntil = 0;
-    const bump = () => { pausedUntil = Date.now() + 6000; };
-    rail.addEventListener("pointerdown", bump);
-    rail.addEventListener("touchstart", bump, { passive: true });
-    rail.addEventListener("wheel", bump, { passive: true });
-    const id = window.setInterval(() => {
-      // Desktop (>640px) runs the CSS marquee — don't double-drive it here.
-      if (!window.matchMedia("(max-width: 640px)").matches) return;
-      const max = rail.scrollWidth - rail.clientWidth;
-      if (max < 8) return;            // not a horizontal rail
-      if (draggingRail) return;
-      if (Date.now() < pausedUntil) return;
-      const step = rail.clientWidth * 0.85;
-      let next = rail.scrollLeft + step;
-      if (next >= max - 4) next = 0;  // loop back to the first card
-      rail.scrollTo({ left: next, behavior: "smooth" });
-    }, 3600);
-    return () => {
-      window.clearInterval(id);
-      rail.removeEventListener("pointerdown", bump);
-      rail.removeEventListener("touchstart", bump);
-      rail.removeEventListener("wheel", bump);
-    };
-  }, [draggingRail, calmMode]);
+  // The rail motion is now pure CSS: an infinite marquee on mobile, and a plain
+  // manual left/right scroll on desktop (drag handlers + native scrollbar).
+  // No JS auto-advance — it would fight the CSS marquee on mobile.
 
   return (
     <div className="home-front" id="top">
@@ -395,23 +368,42 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             if (event.pointerType === "mouse" && event.button !== 0) return;
             const rail = railRef.current;
             if (!rail) return;
+            // Pause the marquee, but don't capture the pointer or flag a drag yet —
+            // that's what let a plain click through to the card's link.
             setManualRail(true);
-            setDraggingRail(true);
-            dragRef.current = { pointerId:event.pointerId, x:event.clientX, scrollLeft:rail.scrollLeft };
-            rail.setPointerCapture(event.pointerId);
+            dragRef.current = { pointerId:event.pointerId, x:event.clientX, scrollLeft:rail.scrollLeft, dragging:false };
           }}
           onPointerMove={(event) => {
             const drag = dragRef.current;
             const rail = railRef.current;
             if (!drag || !rail || drag.pointerId !== event.pointerId) return;
-            rail.scrollLeft = drag.scrollLeft - (event.clientX - drag.x);
+            const dx = event.clientX - drag.x;
+            // Only become a drag once the finger/mouse has actually moved. A click
+            // stays under this threshold, so navigation still fires.
+            if (!drag.dragging) {
+              if (Math.abs(dx) < 6) return;
+              drag.dragging = true;
+              setDraggingRail(true);
+              try { rail.setPointerCapture(event.pointerId); } catch { /* no-op */ }
+            }
+            rail.scrollLeft = drag.scrollLeft - dx;
           }}
           onPointerUp={(event) => {
-            if (dragRef.current?.pointerId !== event.pointerId) return;
+            const drag = dragRef.current;
+            if (drag?.pointerId !== event.pointerId) return;
+            // If this turned into a drag, swallow the click it would otherwise fire.
+            suppressClickRef.current = drag.dragging;
             dragRef.current = null;
             setDraggingRail(false);
           }}
           onPointerCancel={() => { dragRef.current = null; setDraggingRail(false); }}
+          onClickCapture={(event) => {
+            if (suppressClickRef.current) {
+              event.preventDefault();
+              event.stopPropagation();
+              suppressClickRef.current = false;
+            }
+          }}
         >
           {[false, true].map((duplicate) => (
           <div

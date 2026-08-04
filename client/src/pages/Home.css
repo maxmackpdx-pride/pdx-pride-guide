@@ -2060,15 +2060,19 @@ html.calm-mode .home-next-preview__card,
 .home-main-stage .home-front__grid--manual .home-front__grid-group { animation:none; }
 
 .home-main-stage .home-front__grid-group {
+  --rail-gap: 24px;
   display: flex;
   align-items: stretch;
   gap: 24px;
   flex: 0 0 auto;
-  animation: homeDestinationRailFlow 68.4s linear infinite;
   will-change: transform;
 }
 
+/* Desktop: a single real set of cards, scrolled left/right by hand (drag +
+   scrollbar). The duplicate set only exists to seam the mobile marquee loop, so
+   it's hidden here — that removes the non-clickable, no-hover ghost cards. */
 .home-main-stage .home-front__grid-group--duplicate {
+  display: none;
   pointer-events: none;
   user-select: none;
 }
@@ -2079,7 +2083,7 @@ html.calm-mode .home-next-preview__card,
 }
 
 @keyframes homeDestinationRailFlow {
-  to { transform: translateX(calc(-100% - 24px)); }
+  to { transform: translateX(calc(-100% - var(--rail-gap, 24px))); }
 }
 
 .home-main-stage .home-front__grid::-webkit-scrollbar { height: 6px; }
@@ -2361,13 +2365,16 @@ html.calm-mode .home-next-preview__card,
     scroll-padding-inline: 18px;
   }
 
+  /* Mobile: one row on an endless loop. Both sets run the marquee and the
+     duplicate is shown to seam the loop; touching it hands control to the
+     manual drag (see --manual, which stops the animation). */
   .home-main-stage .home-front__grid-group {
+    --rail-gap: 12px;
     gap: 12px;
-    animation: none;
-    transform: none;
+    animation: homeDestinationRailFlow 46s linear infinite;
   }
 
-  .home-main-stage .home-front__grid-group--duplicate { display: none; }
+  .home-main-stage .home-front__grid-group--duplicate { display: flex; }
 
   .home-main-stage .home-front__world,
   .home-main-stage .home-front__world--feature,
