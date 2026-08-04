@@ -18,7 +18,8 @@ The script is intentionally strict:
 
 - it only rebases and pushes the current branch against the selected remote/branch
 - it exits if the remote is missing
-- it removes a stale `.git/index.lock` if present
+- it removes a stale `.git/index.lock` only if no git process is running and the lock is older than 120 seconds
 - it does not stage unrelated files
+- it warns clearly on rebase conflicts and tells you how to continue or abort
 
 Do not use network operations from a shell with no outbound access. Use a local shell with normal git permissions for the sync step.
