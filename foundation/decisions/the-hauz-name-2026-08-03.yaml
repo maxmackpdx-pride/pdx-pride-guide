@@ -1,0 +1,35 @@
+id: ZF-THE-HAUZ-NAME-2026-08-03
+title: THE HAÜZ public product name
+date: 2026-08-03
+status: superseded
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  The housing experience previously used HAÜSING in public titles, navigation,
+  metadata, and supporting copy. Tucker directed that its public product name
+  change to THE HAÜZ.
+decision:
+  public_name: THE HAÜZ
+  exact_spelling: >-
+    Always render the public product name as THE HAÜZ, including the umlaut,
+    final Z, leading THE, and full uppercase in functional labels.
+  compatibility: >-
+    Existing /hausing routes, housing identifiers, database fields, API names,
+    and internal code names may remain unchanged until a separate technical
+    migration is justified.
+  artwork: >-
+    Do not use the ZAYHAÜS logo as a substitute for THE HAÜZ. Use accessible
+    text until Tucker approves a dedicated THE HAÜZ mark.
+rationale: >-
+  One exact public name prevents identity drift while preserving stable routes
+  and technical compatibility.
+consequences:
+  - Public titles, navigation, metadata, server-generated labels, and current documentation use THE HAÜZ.
+  - Historical records may retain HAÜSING when clearly labeled as historical.
+  - A future THE HAÜZ logo remains a separate owner-approved identity decision.
+related_decisions:
+  - ZF-BOARD-NAMING-UPPERCASE-2026-08-03
+  - DS-010
+implementation_state: implemented-locally
+review_date: null
+superseded_by: ZF-THE-HAUZ-NAMING-2026-08-03

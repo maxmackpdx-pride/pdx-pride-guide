@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zaylist.com/schemas/agent-context-packet.schema.json",
+  "title": "Zaylist agent context packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packetId", "generatedAt", "fromRole", "toRole", "objective", "visibility", "facts", "unknowns", "permissions", "prohibitedActions", "expectedOutput", "sources"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "packetId": {"type": "string", "minLength": 8},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": ["string", "null"], "format": "date-time"},
+    "canonicalReleaseId": {"type": ["string", "null"]},
+    "productionEvidenceCommit": {"type": ["string", "null"]},
+    "fromRole": {"type": "string"},
+    "toRole": {"type": "string"},
+    "objective": {"type": "string"},
+    "visibility": {"enum": ["internal-shareable", "internal-nda-protected", "public-approved"]},
+    "facts": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "unknowns": {"type": "array", "items": {"type": "string"}},
+    "permissions": {"type": "array", "items": {"type": "string"}},
+    "prohibitedActions": {"type": "array", "items": {"type": "string"}},
+    "expectedOutput": {"type": "string"},
+    "sources": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "status", "source"],
+      "properties": {
+        "id": {"type": "string"},
+        "statement": {"type": "string"},
+        "status": {"enum": ["founder-direction", "accepted", "verified-production", "recommendation", "draft", "unknown", "blocked", "superseded", "internal-context"]},
+        "source": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-04T06:24:02-07:00",
+  "owner": "Tucker_PDmaX",
+  "visibility": "internal-shareable",
+  "activePriority": {
+    "statement": "Reach 1,000 verified Zaylist downloads within a 90-day period by proving meaningful adoption in Portland",
+    "status": "founder-direction",
+    "publicUse": "Goal may be stated publicly without attribution",
+    "measurementStatus": "definition-approved; implementation-pending",
+    "reviewBy": "2026-08-17"
+  },
+  "acceptedFacts": [
+    {
+      "id": "FACT-FOUNDER-OWNERSHIP",
+      "statement": "Zaylist is independently created, built, designed, and directed by Tucker; it is built for and informed by community, not community-built or community-governed",
+      "status": "founder-direction",
+      "visibility": "public-approved"
+    },
+    {
+      "id": "FACT-ORIGIN",
+      "statement": "Pride Guide PDX began on Squarespace after a local Pride guide omitted gay events; four annual Pride Guides evolved into year-round Zaylist",
+      "status": "founder-direction",
+      "visibility": "public-approved"
+    },
+    {
+      "id": "FACT-DOWNLOAD-DEFINITION",
+      "statement": "A verified adoption event is one server-confirmed successful file download with full delivery confirmation, counted within a 90-day window. No adoption or conversion numbers are reported until this measurement is implemented and verified.",
+      "status": "founder-direction",
+      "visibility": "internal-shareable",
+      "decidedBy": "Tucker",
+      "decidedAt": "2026-08-04T06:24:02-07:00"
+    }
+  ],
+  "protectedContext": [
+    {
+      "id": "PRIVATE-FOUNDER-FINANCIAL-REALITY",
+      "status": "internal-context",
+      "visibility": "internal-nda-protected",
+      "location": "foundation/business/private/founder-finance.private.yaml",
+      "handling": "Authorized internal business planning only; public and external outputs use the abstract rule that founder stability is a business-continuity constraint"
+    },
+    {
+      "id": "NDA-STRATEGIC-ADVICE",
+      "status": "internal-context",
+      "visibility": "internal-nda-protected",
+      "location": "private Founder Advisor handoff",
+      "handling": "May be used in authorized internal Zaylist materials labeled INTERNAL / NDA-PROTECTED; never send to external models or public artifacts"
+    },
+    {
+      "id": "PRIVATE-FOUNDER-STORY",
+      "status": "internal-context",
+      "visibility": "internal-nda-protected",
+      "location": "private Founder Advisor handoff",
+      "handling": "Personal details inform care and judgment but require Tucker's explicit approval before any public use"
+    }
+  ],
+  "activeBlockers": [],
+  "resolvedBlockers": [
+    {
+      "id": "BLOCK-DOWNLOAD-DEFINITION",
+      "statement": "Verified download/adoption lacks an approved technical definition and authoritative measurement source",
+      "status": "resolved",
+      "resolvedBy": "Tucker",
+      "resolvedAt": "2026-08-04T06:24:02-07:00",
+      "resolution": "Canonical unit is one server-confirmed successful file download with full delivery confirmation, counted within a 90-day window. Measurement implementation is the remaining follow-up.",
+      "followUp": "Implement and verify the server-confirmed download event before reporting any adoption numbers."
+    },
+    {
+      "id": "BLOCK-HOMEPAGE-WORDMARK",
+      "statement": "Homepage wordmark asset loads and occupies its box but was visually absent in audited desktop and mobile views",
+      "status": "resolved",
+      "resolvedBy": "Tucker",
+      "resolvedAt": "2026-08-04T06:24:02-07:00",
+      "resolution": "Confirmed as a bug. Restore the existing wordmark treatment and keep it visible.",
+      "followUp": "Diagnose the invisibility root cause on the homepage and restore visible rendering against the existing standard."
+    }
+  ],
+  "agentRoles": {
+    "founderAdvisor": "Preserves approved founder context and status boundaries",
+    "marketingAgent": "Creates evidence-backed campaigns of no more than eight slides",
+    "designDriftAuditor": "Checks production and campaigns against canonical design authority",
+    "businessPlanningAgent": "Maintains the sourced living business plan, evidence, assumptions, risks, and business decision queue",
+    "techStackMonitor": "Performs read-only operational checks and routes delivery evidence to Marketing and cost or renewal evidence to Business",
+    "trustSafetyWatcher": "Performs read-only checks of safety-control enforcement, discovery, privacy, consent, accessibility, authoritative state, and denominator-aware product-experience signals; escalates evidence to Tucker without moderating or changing production"
+  },
+  "nextHandoffs": [
+    {
+      "from": "Founder Advisor",
+      "to": "Marketing Agent and Design Drift Auditor",
+      "deliverable": "Approved minimum-necessary founder context packet",
+      "status": "pending"
+    },
+    {
+      "from": "Analytics and Conversion Agent",
+      "to": "Marketing Agent and Founder Advisor",
+      "deliverable": "Server-confirmed download measurement implementation for the approved adoption definition",
+      "status": "definition_approved; implementation_pending"
+    },
+    {
+      "from": "Tech Stack Monitor",
+      "to": "Marketing Agent and Business Planning Agent",
+      "deliverable": "Weekly verified operational, delivery, cost, renewal, and drift findings",
+      "status": "scheduled"
+    },
+    {
+      "from": "Trust & Safety Watcher",
+      "to": "Tucker, Product Engineering, and Design Drift Auditor",
+      "deliverable": "Weekly trust brief plus immediate Critical and High escalations",
+      "status": "defined; recurring schedule pending"
+    }
+  ]
+}

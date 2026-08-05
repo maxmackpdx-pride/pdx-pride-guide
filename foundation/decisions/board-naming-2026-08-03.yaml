@@ -1,0 +1,36 @@
+id: ZF-BOARD-NAMING-2026-08-03
+title: Public names for the community boards
+date: 2026-08-03
+status: superseded
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  Production and planning materials used several competing names for the work,
+  gifting, and anonymous connection boards. The inconsistency weakened account,
+  navigation, activity, and safety-context clarity.
+decision:
+  public_names:
+    work_board: Gigz
+    gifting_board: GifZ
+    anonymous_connection_board: Mizzed Connection
+  compatibility: >-
+    Existing routes, database object names, API names, and analytics identifiers may
+    remain unchanged until a separately planned migration is justified. User-facing
+    labels use the founder-approved names now.
+  artwork: queued; supplied artwork will be integrated when available
+rationale: >-
+  One durable public name per board makes navigation, profiles, inbox context, safety
+  guidance, and member language coherent without risking existing URLs or stored data.
+alternatives:
+  - Keep Gig Board, Gifting, and Missed Connections
+  - Continue using mixed names such as Pride Work or Gig Werk
+consequences:
+  - Public UI and documentation must use Gigz, GifZ, and Mizzed Connection consistently.
+  - Internal identifiers remain legacy-compatible and must not leak into member-facing copy.
+  - New artwork must preserve these spellings.
+related_decisions:
+  - ZF-005
+  - ZF-007
+implementation_state: implemented-locally
+review_date: null
+superseded_by: ZF-BOARD-NAMING-UPPERCASE-2026-08-03

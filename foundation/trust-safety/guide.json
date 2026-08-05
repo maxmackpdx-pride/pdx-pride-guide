@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "zaylist-trust-safety-watch",
+  "title": "Trust & Safety Watch",
+  "status": "current",
+  "authority": "founder-direction",
+  "owner": "Tucker_PDmaX",
+  "operationalSteward": "Trust & Safety Watcher",
+  "lastVerified": "2026-08-04",
+  "decision": "foundation/decisions/trust-safety.yaml",
+  "principles": [
+    "Trust is a platform condition, not a feature",
+    "Safety explanations never substitute for effective controls",
+    "One initiated block creates a two-way interaction barrier",
+    "Consent is contextual and may be withdrawn",
+    "Accessibility and authoritative state are safety requirements",
+    "Collect and retain the minimum evidence necessary"
+  ],
+  "surfaces": ["profiles", "conversations", "Gigz", "GifZ", "Mizzed Connection", "THE HAÜZ"],
+  "metrics": [
+    { "id": "time-to-content", "windowDays": 7, "requires": ["medianMs", "sampleCount"] },
+    { "id": "posting-completion", "windowDays": 7, "requires": ["attempts", "completions", "completionRate"] },
+    { "id": "contact-completion", "windowDays": 7, "requires": ["attempts", "completions", "completionRate"] },
+    { "id": "report-discovery", "windowDays": 7, "requires": ["seen", "opened", "discoveryRate", "completed"] },
+    { "id": "counter-mismatch", "windowDays": 7, "requires": ["occurrences"] }
+  ],
+  "privacyProhibited": ["post text", "message bodies", "report reasons", "usernames", "precise locations", "credentials", "inferred sensitive identity"],
+  "watcher": {
+    "mode": "read-only",
+    "cadence": "weekly and after trust-sensitive changes",
+    "allowed": ["observe approved evidence", "compare invariants", "preserve minimum evidence", "classify severity", "recommend action", "append internal note"],
+    "prohibited": ["moderate", "change blocks", "contact members", "publish policy", "change production", "read unauthorized private content", "promote own recommendations"]
+  },
+  "severity": {
+    "critical": "immediate Tucker alert",
+    "high": "same-day review",
+    "medium": "weekly brief",
+    "low": "tracked backlog"
+  }
+}

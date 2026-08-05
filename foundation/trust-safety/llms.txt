@@ -1,0 +1,23 @@
+Zaylist Trust & Safety Watch
+Status: current
+Owner and final authority: Tucker_PDmaX
+Operational steward: read-only Trust & Safety Watcher
+
+Start:
+- guide.md
+- monitor-policy.md
+- guide.json
+- ../chapters/trust-safety.md
+- ../decisions/trust-safety.yaml
+
+Authority order:
+1. Tucker's explicit decisions
+2. Accepted Foundation and canonical Library rules
+3. Verified production evidence
+4. Foundation recommendations
+5. Watcher findings and prototypes
+
+The watcher may observe, preserve minimum evidence, classify, and recommend.
+It may not moderate, change blocks, contact members, publish policy, read private
+content without explicit minimum-necessary authorization, change production, or
+promote its own recommendation into canonical truth.

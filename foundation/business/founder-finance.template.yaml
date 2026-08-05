@@ -1,0 +1,50 @@
+schemaVersion: 1
+asOf: YYYY-MM-DD
+owner: Tucker_PDmaX
+visibility: internal-nda-protected
+external_model_use: prohibited
+
+# Use exact amounts only when they materially improve a decision. Ranges are acceptable.
+personal:
+  monthly_essential_floor:
+    housing: unknown
+    food: unknown
+    healthcare: unknown
+    transportation: unknown
+    debt_minimums: unknown
+    taxes_or_payment_plans: unknown
+    other_essential: unknown
+  reliable_monthly_income: unknown
+  variable_monthly_income: unknown
+  liquid_emergency_reserve: unknown
+  months_of_personal_runway: unknown
+  benefits_or_programs_that_business_income_could_affect: unknown
+  credit_or_personal_guarantee_constraints: unknown
+
+zaylist:
+  recurring_monthly_costs: unknown
+  annual_or_irregular_costs: unknown
+  founder_cash_contributed_to_date: unknown
+  founder_expenses_eligible_for_reimbursement: unknown
+  business_revenue_to_date: unknown
+  business_debt_or_obligations: unknown
+  months_of_business_runway: unknown
+
+boundaries:
+  maximum_safe_new_monthly_spend: unknown
+  maximum_safe_one_time_formation_spend: unknown
+  personal_guarantee_allowed: unknown
+  founder_salary_needed_by_date: unknown
+  stop_or_reassess_date: unknown
+
+decisions:
+  llc_affordable_now: unknown
+  llc_trigger_present: unknown
+  outside_capital_needed: unknown
+  preferred_funding_path: unknown
+
+professional_questions:
+  attorney: []
+  cpa_or_tax_preparer: []
+  benefits_specialist: []
+  financial_counselor: []

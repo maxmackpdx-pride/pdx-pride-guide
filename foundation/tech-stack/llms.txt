@@ -1,0 +1,9 @@
+Zaylist Tech Stack
+Release: zaylist-tech-stack-2026-08-03.1
+Authority: Tucker decisions > Foundation/Design System > verified production/provider evidence > recommendations.
+Canonical graph: foundation/tech-stack/guide.json
+Human and portable guide: foundation/tech-stack/guide.md
+Monitor policy: foundation/tech-stack/monitor-policy.md
+Business costs: foundation/business/expense-register.json
+Email governance: foundation/business/email-channel.md
+Never expose credentials. Never infer unknown plan, cost, access, backup, deployment, or provider state. Monitoring is read-only unless Tucker explicitly approves a change.

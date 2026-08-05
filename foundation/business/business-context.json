@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-03T00:00:00-07:00",
+  "owner": "Tucker_PDmaX",
+  "visibility": "internal-shareable",
+  "entity": {
+    "currentStatus": "unknown",
+    "intendedJurisdiction": "Oregon",
+    "candidateStructure": "single-member LLC",
+    "decisionStatus": "under-review",
+    "formationAuthorized": false
+  },
+  "finance": {
+    "privateSnapshotStatus": "started-internal-nda-protected",
+    "founderStabilityRisk": "acute-private",
+    "personalRunway": "unknown",
+    "businessRunway": "unknown",
+    "founderContributions": "unknown",
+    "businessDebt": "unknown",
+    "recurringBusinessCosts": "unknown"
+  },
+  "capital": {
+    "fundraisingAuthorized": false,
+    "investorSolicitationAuthorized": false,
+    "fundingReadiness": "not-assessed",
+    "preferredSequence": ["cost discipline", "traction", "revenue", "non-dilutive funding", "repayable debt", "regulated investment"]
+  },
+  "requiredNextDecisions": [
+    "Complete the decision-critical fields in the private founder-finance snapshot",
+    "Establish the immediate personal survival floor and housing timeline",
+    "Confirm current entity and assumed-name status",
+    "Define verified download and 90-day measurement window",
+    "Determine whether an LLC formation trigger is already present",
+    "Confirm privacy-safe registered agent and public address plan",
+    "Select attorney/CPA questions before formation or fundraising"
+  ]
+}

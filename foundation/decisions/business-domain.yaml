@@ -1,0 +1,32 @@
+id: ZF-BUSINESS-2026-08-03
+title: Business and founder-finance planning domain
+date: 2026-08-03
+status: founder-direction
+owner: Tucker_PDmaX
+authority: Tucker's explicit direction
+context: >-
+  Zaylist's legal structure, operating money, founder-funded costs, personal financial
+  constraints, and possible capital paths affect one another but lacked one governed
+  planning domain.
+decision: >-
+  Maintain an internal Business and Founder Finance domain that connects LLC readiness,
+  personal financial constraints, business operations, funding readiness, and capital
+  options. Keep private amounts out of broadly shareable Foundation material.
+rationale: >-
+  Entity and funding choices must reflect Tucker's real financial safety, current
+  traction, one-founder operating capacity, and legal obligations rather than startup
+  appearance or agent-generated optimism.
+consequences:
+  - Personal financial values live only in private ignored files.
+  - The Foundation may record ranges, constraints, and decisions without exposing balances.
+  - Entity formation remains a decision until verified documents confirm implementation.
+  - Investment solicitation requires explicit authorization and qualified legal review.
+  - Agents distinguish revenue, grants, debt, donations, sponsorship, and investment.
+alternatives:
+  - Keep legal structure and finance discussions scattered across chats
+  - Form an LLC immediately without a readiness test
+  - Delay all business planning until after traction
+related_decisions:
+  - ZF-AGENT-CONTINUITY-2026-08-03
+implementation_state: implemented-locally
+review_date: 2026-09-03

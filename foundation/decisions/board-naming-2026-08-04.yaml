@@ -1,0 +1,38 @@
+id: ZF-BOARD-NAMING-2026-08-04
+title: Exact public names for Gigz, GifZ, and Mizzed Connection
+date: 2026-08-04
+status: founder-direction
+owner: Tucker_PDmaX
+authority: Tucker's explicit correction
+context: >-
+  Prior records introduced uppercase GIGZ and GIFZ after Tucker had corrected
+  the public names to Gigz and GifZ and explicitly removed the extra t from
+  GifZ. Current product work uses Gigz, GifZ, and Mizzed Connection.
+decision:
+  public_names:
+    work_board: Gigz
+    gifting_board: GifZ
+    anonymous_connection_board: Mizzed Connection
+  exact_spelling: >-
+    Use Gigz, GifZ, and Mizzed Connection in current member-facing copy and
+    current documentation. GifZ has no t. Historical records may preserve the
+    spelling they documented when clearly labeled as superseded.
+  compatibility: >-
+    Existing routes, database names, code identifiers, asset paths, and
+    analytics surfaces may remain legacy-compatible until a separate migration
+    is justified.
+rationale: >-
+  Exact spelling protects product identity and prevents internal compatibility
+  names from leaking into public language.
+alternatives:
+  - Use uppercase GIGZ and GIFZ
+  - Use Gifting or GiftZ
+  - Use Missed Connections
+consequences:
+  - New Foundation and Library material uses Gigz, GifZ, and Mizzed Connection.
+  - The 2026-08-03 uppercase naming record is superseded.
+related_decisions:
+  - ZF-BOARD-NAMING-2026-08-03
+  - ZF-BOARD-NAMING-UPPERCASE-2026-08-03
+implementation_state: implemented-locally
+review_date: null

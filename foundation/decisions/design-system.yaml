@@ -1,0 +1,62 @@
+domain: design-system
+owner: Tucker_PDmaX
+canonical_guide: public-url-pending
+production_trap_list: /Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md
+last_reviewed: 2026-08-01
+records:
+  - id: DS-001
+    title: One design system
+    status: current
+    decision: Maintain one canonical Zaylist design guide. Product code implements it. Do not create a contradictory kit.
+  - id: DS-002
+    title: Two visual registers
+    status: current
+    decision: Choose the zine or utility register before composing a surface.
+  - id: DS-003
+    title: Deep-glass default
+    status: current
+    decision: Deep-glass is the default card and control language. Lite-glass slabs and brutal magenta offset CTAs are retired as global defaults.
+  - id: DS-004
+    title: Day colors are data
+    status: current
+    decision: Use day tokens for schedule meaning. Acid yellow remains the primary action color and is not an eighth day.
+  - id: DS-005
+    title: Navigation is locked
+    status: current
+    decision: Do not restyle global navigation without Tucker's explicit request.
+  - id: DS-006
+    title: Current identity remains live
+    status: superseded
+    superseded_by: DS-011
+    decision: The current open-contour production logo remained active until an explicit migration decision.
+  - id: DS-007
+    title: Legacy glyph-construction proposal
+    status: superseded
+    superseded_by: DS-011
+    owner: Tucker_PDmaX
+    source_sha256: f69282f5eb0dad071c5bc61d9ca52a1d8ea45355376e62197fa1912d5d2e9c12
+    decision: The closed glyph-inventory proposal was removed. Use the living Logo Letter Library of complete SVG marks and add or redesign forms when a future identity needs them.
+  - id: DS-008
+    title: Motion respects calm mode
+    status: current
+    decision: Ambient pulses, glitches, and moving seams stop or become static under calm or reduced-motion settings.
+  - id: DS-009
+    title: Shared rule changes update both layers
+    status: current
+    decision: A global visual-rule change updates the guide and production trap list in the same product change.
+  - id: DS-010
+    title: Status must be visible
+    status: current
+    decision: Guide content visibly distinguishes current, implemented, migration, queued, draft, legacy, owner-decision, and rejected states.
+  - id: DS-011
+    title: Primary website and logo-family migration
+    status: founder-direction
+    owner: Tucker_PDmaX
+    decision: Use the supplied primary ZAYLIST SVG for website wordmarks, update every NEXT card with its correct family mark, use selected branded title logos where appropriate, and organize the complete family in the canonical Design System without implying every mark has a launched product home.
+    implementation_state: implemented-locally
+  - id: DS-012
+    title: Human-first with agent-first-class access
+    status: founder-direction
+    owner: Tucker_PDmaX
+    decision: The website is human-first in UI and copy, with all interface and editorial decisions prioritized for people. In parallel, the platform must be highly agent-readable, targeting at least 98 percent, with structured and documented machine-readable access to identity, provenance, freshness, relationships, permissions, limitations, and available actions. Agent and scraper traffic should be treated as first-class users, not blocked by default; authentication boundaries remain for protected states and actions, while high-value content stays inviting and discovery-friendly. Internal build and operation remains expert-level and evidence-first, with private data protected and Tucker's explicit approval required before any production push.
+    implementation_state: implemented-locally

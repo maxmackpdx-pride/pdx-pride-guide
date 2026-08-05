@@ -1,0 +1,25 @@
+record_id: ZAY-DEC-TECH-STACK-001
+title: Canonical Tech Stack guide and monitor
+date: 2026-08-03
+status: accepted
+owner: Tucker_PDmaX
+authority: founder-direction
+context: Zaylist needs a recoverable, cost-aware map of its production services, access paths, dependencies, communications systems, and operational risks.
+decision: Maintain a human-first, agent-readable Tech Stack Library section and a recurring read-only Tech Stack Monitor. Keep credentials in provider secret stores and route findings to the responsible recurring agents.
+rationale:
+  - One founder needs continuity without relying on memory or one AI conversation.
+  - Monitoring should surface evidence without silently changing infrastructure.
+  - Business cost, Marketing channel health, and engineering reliability depend on the same service facts.
+alternatives:
+  - Provider dashboards only: rejected because relationships, authority, cost, and recovery context stay fragmented.
+  - Fully autonomous infrastructure agent: rejected because mutations require owner review and can create outages or charges.
+consequences:
+  - The Library gains a Tech Stack section with JSON, Markdown, and llms.txt companions.
+  - A weekly monitor checks evidence and reports decisions needed.
+  - Marketing and Business consume relevant findings but do not inherit unrestricted infrastructure access.
+sources:
+  - foundation/tech-stack/guide.json
+  - foundation/tech-stack/guide.md
+  - foundation/tech-stack/monitor-policy.md
+implementation_state: implemented-locally
+review_date: 2026-11-03

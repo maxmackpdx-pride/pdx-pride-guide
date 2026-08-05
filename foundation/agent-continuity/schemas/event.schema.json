@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zaylist.com/schemas/agent-continuity-event.schema.json",
+  "title": "Zaylist agent continuity event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "eventId", "occurredAt", "type", "actor", "visibility", "subject", "status", "source"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "eventId": {"type": "string"},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "type": {"enum": ["direction_added", "direction_corrected", "decision_changed", "evidence_changed", "campaign_created", "audit_completed", "conflict_opened", "conflict_resolved", "blocker_changed", "handoff_changed"]},
+    "actor": {"type": "string"},
+    "visibility": {"enum": ["internal-shareable", "internal-nda-protected", "public-approved"]},
+    "subject": {"type": "string"},
+    "status": {"type": "string"},
+    "source": {"type": "string"}
+  }
+}

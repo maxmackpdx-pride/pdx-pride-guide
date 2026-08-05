@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "system": "Zaylist Agent Continuity Ledger",
+  "owner": "Tucker_PDmaX",
+  "purpose": "Minimum-necessary operational memory for authorized Zaylist agents",
+  "authorityOrder": [
+    "Tucker explicit decisions",
+    "accepted Foundation and canonical Design System records",
+    "verified production evidence",
+    "Foundation recommendations",
+    "agent recommendations and prototypes",
+    "legacy material"
+  ],
+  "entrypoint": "START_HERE.md",
+  "currentContext": "current-context.json",
+  "conflictRegister": "conflicts.json",
+  "eventStream": "events.jsonl",
+  "visibilityClasses": {
+    "internal-shareable": "Authorized Zaylist workspace and agents only",
+    "internal-nda-protected": "Authorized private workspace only; prohibited from public artifacts and external model inputs",
+    "public-approved": "Explicitly approved by Tucker for public use"
+  },
+  "freshness": {
+    "productionEvidenceDays": 7,
+    "campaignTrendEvidenceDays": 30,
+    "activePriorityReviewDays": 14,
+    "unknownsExpire": false
+  },
+  "routing": {
+    "design": ["foundation/chapters/design-system.md", "foundation/decisions/design-system.yaml"],
+    "marketing": ["zaylist-auditor/docs/marketing-prompt.md", "zaylist-auditor/campaigns/"],
+    "agentContinuity": ["foundation/chapters/agent-continuity.md", "foundation/decisions/agent-continuity.yaml"],
+    "business": ["foundation/chapters/business.md", "foundation/decisions/business-domain.yaml", "foundation/business/business-context.json"],
+    "trustSafety": ["foundation/chapters/trust-safety.md", "foundation/decisions/trust-safety.yaml", "foundation/trust-safety/guide.json", "foundation/trust-safety/monitor-policy.md"],
+    "productionTraps": ["/Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md"]
+  },
+  "promotionGate": "Only Tucker may approve promotion into durable Foundation, Design System, product, policy, or public truth",
+  "prohibited": [
+    "secrets or credentials",
+    "full chat transcript dumps",
+    "silent status promotion",
+    "unlabeled inference",
+    "private material in external model inputs",
+    "automatic publishing or deployment"
+  ]
+}

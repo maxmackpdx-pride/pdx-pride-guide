@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-03T00:00:00-07:00",
+  "currency": "USD",
+  "visibility": "internal-nda-protected",
+  "approvedSafeMonthlyCap": null,
+  "summary": {
+    "confirmedMonthlyRecurring": null,
+    "confirmedAnnualRecurring": null,
+    "monthlyReserveForAnnual": null,
+    "next30DaysDue": null,
+    "status": "not-baselined"
+  },
+  "sources": [
+    {
+      "id": "SOURCE-CHATGPT-FINANCE",
+      "provider": "ChatGPT Budget project / Zaylist Finance Liaison",
+      "purpose": "Minimum necessary personal-affordability handoff",
+      "accessStatus": "liaison-created-setup-pending",
+      "confidentiality": "internal-nda-protected"
+    },
+    {
+      "id": "SOURCE-RAILWAY",
+      "provider": "Railway",
+      "purpose": "Production infrastructure billing and usage",
+      "accessStatus": "operational-tools-available-billing-evidence-unverified",
+      "confidentiality": "internal-shareable"
+    },
+    {
+      "id": "SOURCE-GODADDY",
+      "provider": "GoDaddy",
+      "purpose": "Domains, renewals, privacy, email, certificates, hosting, and add-ons",
+      "accessStatus": "authenticated-browser-access-unverified",
+      "confidentiality": "internal-nda-protected"
+    },
+    {
+      "id": "SOURCE-EMAIL-NOREPLY",
+      "provider": "Resend",
+      "purpose": "Zaylist no-reply and transactional email delivery",
+      "accessStatus": "provider-and-domain-dns-verified-account-plan-and-usage-unverified",
+      "confidentiality": "internal-nda-protected"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXPENSE-RAILWAY-PRODUCTION",
+      "provider": "Railway",
+      "product": "pdx-pride-guide production infrastructure",
+      "amount": null,
+      "cadence": "unknown",
+      "nextDueDate": null,
+      "autoRenew": null,
+      "status": "unverified",
+      "sourceEvidence": null,
+      "checkedAt": null,
+      "notes": "Confirm actual invoice/billing evidence; metrics alone do not establish cost"
+    },
+    {
+      "id": "EXPENSE-GODADDY-ZAYLIST",
+      "provider": "GoDaddy",
+      "product": "Zaylist-related domains and account products",
+      "amount": null,
+      "cadence": "unknown",
+      "nextDueDate": null,
+      "autoRenew": null,
+      "status": "unverified",
+      "sourceEvidence": null,
+      "checkedAt": null,
+      "notes": "Verify which products and domains are actually in the authenticated account"
+    },
+    {
+      "id": "EXPENSE-EMAIL-NOREPLY",
+      "provider": "Resend",
+      "product": "Zaylist no-reply and transactional email delivery",
+      "amount": 0,
+      "cadence": "monthly",
+      "nextDueDate": null,
+      "autoRenew": null,
+      "status": "verified-free",
+      "sourceEvidence": "Authenticated Resend billing: transactional 3,000 emails at $0/month; marketing 1,000 contacts at $0/month; no payment method; no invoices. Domain dashboard: zaylist.com verified in us-east-1. Public DNS independently identifies Resend and Amazon SES delivery records.",
+      "checkedAt": "2026-08-03T00:09:00-07:00",
+      "notes": "Monitor usage against the 3,000 transactional-email and 1,000-contact allowances. Pay-as-you-go is not enabled and no payment method is present. Verify sender identities, forwarding behavior, API integration, and production send status. Keep Microsoft 365/GoDaddy mailbox costs in the GoDaddy expense line."
+    }
+  ],
+  "prohibitedActions": [
+    "purchase",
+    "renew",
+    "cancel",
+    "transfer",
+    "delete infrastructure",
+    "change plan",
+    "change DNS or nameservers",
+    "change payment method",
+    "send or schedule email",
+    "import, upload, buy, or export contact lists",
+    "change sender identity, domain authentication, suppression, or unsubscribe settings",
+    "send private finance data to external models"
+  ]
+}

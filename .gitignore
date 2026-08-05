@@ -11,3 +11,7 @@ dist/
 .design-handoff/
 .design-handoff-tmp/
 **/.DS_Store
+
+# Foundation docs with private context intentionally excluded
+foundation/business/private/
+foundation/**/private/
