@@ -66,10 +66,11 @@ function open(topic, subject) {
 function say(code, from, ...body) {
   const p = findActive(code) || die(`No active tunnel ${code}.`);
   const doPush = body.includes("--push");
-  body = body.filter((b) => b !== "--push");
+  const disposable = body.includes("--disposable");
+  body = body.filter((b) => b !== "--push" && b !== "--disposable");
   const text = body.join(" ").trim();
   if (!text) die("Empty message.");
-  appendFileSync(p, JSON.stringify({ type: "turn", from, at: now(), body: text }) + "\n");
+  appendFileSync(p, JSON.stringify({ type: "turn", from, at: now(), body: text, ...(disposable ? { disposable: true } : {}) }) + "\n");
   console.log(`${pretty(code)} <- ${from}`);
   if (doPush) pushTunnels(`tunnel ${code.slice(0, 3)}: ${from} turn`);
 }
@@ -84,7 +85,7 @@ function read(code) {
   if (!p) die(`No tunnel ${code}.`);
   for (const t of turns(p)) {
     if (t.type === "open") console.log(`\n== ${pretty(t.code)}  ${t.topicName}\n   ${t.subject}\n   opened ${t.openedAt}  (transcript carries no authority)\n`);
-    else if (t.type === "turn") console.log(`[${t.at}] ${t.from}:\n  ${t.body}\n`);
+    else if (t.type === "turn") console.log(`[${t.at}] ${t.from}${t.disposable ? " (disposable)" : ""}:\n  ${t.body}\n`);
     else if (t.type === "close") {
       console.log(`-- closed ${t.at} by ${t.by}\n   outcome: ${t.outcome}`);
       console.log(t.libraryUpdates.length ? `   library: ${t.libraryUpdates.join(", ")}` : `   library: none (${t.noUpdateReason})`);
@@ -132,7 +133,7 @@ else if (cmd === "close") close(rest[0], rest[1], rest.slice(2));
 else console.log(`Live tunnels - topic-scoped agent chat rooms
 
   node scripts/tunnel.mjs open <topic> "<subject>"
-  node scripts/tunnel.mjs say <code> <agent> "<message>" [--push]
+  node scripts/tunnel.mjs say <code> <agent> "<message>" [--push] [--disposable]
   node scripts/tunnel.mjs read <code>
   node scripts/tunnel.mjs list
   node scripts/tunnel.mjs close <code> <agent> --outcome "..." --updated <path>
