@@ -1,0 +1,38 @@
+id: ZF-PLATFORM-SHAPE-2026-08-06
+title: Structural model is Craigslist with Facebook Groups accountability
+date: 2026-08-06
+status: accepted
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  The Z/ naming convention borrows from Reddit, which led to Reddit-shaped
+  assumptions about feeds, ranking, and community structure. Tucker corrected
+  the structural model.
+decision:
+  model: >-
+    Craigslist structure, modernized with Facebook Groups. Category boards under
+    geographic scope, with persistent membership, admins, and group-level rules.
+  reddit_scope: Naming convention only. Not the structure.
+rationale: >-
+  Craigslist had no identity, membership, or admins, so trust never existed and
+  personals became indefensible. Facebook Groups supplies exactly that missing
+  accountability layer.
+consequences:
+  - No voting and no karma. Vote ranking in a single-city market is a popularity
+    contest among a few hundred people.
+  - Listings expire. Expiry is free moderation and nothing accumulates.
+  - Geographic instances match the Portland then Seattle then SF plan, unlike a
+    global feed.
+  - Membership plus admins plus rules is the accountability answer to the personals
+    risk, and is stronger than an open board with age verification added.
+  - z/(club name) is a Facebook Group; the other Z/ categories are Craigslist
+    categories. Two different objects sharing one prefix, needing different creation
+    flows, moderation, and lifespans.
+related_decisions:
+  - ZF-Z-NAMESPACE-2026-08-06
+  - ZF-NO-PAYMENT-RAIL-2026-08-06
+sources:
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-09
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-10
+implementation_state: not-implemented
+review_date: null

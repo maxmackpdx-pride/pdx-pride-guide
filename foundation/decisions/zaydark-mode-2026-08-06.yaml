@@ -1,0 +1,56 @@
+id: ZF-ZAYDARK-MODE-2026-08-06
+title: ZayDark is a platform mode, not a destination product
+date: 2026-08-06
+status: accepted
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  ZayDark appears as waypoint 03 on the Next page, listed like a product beside
+  Z/Space and AfterZ. Tucker clarified it is not a place.
+decision:
+  nature: >-
+    ZayDark Mode is a state the platform enters, not a destination. It unlocks
+    adult content across surfaces that already exist.
+  covers: Adult content already present in existing surfaces, plus a hookup app.
+  personals: >-
+    No personals section will be built. The map serves that purpose instead,
+    functioning more like Sniffies.
+  roadmap_status: >-
+    Remains a Next page waypoint. It is a founder goal requiring its own landing
+    page, significant legal work, and age verification.
+  experience_intent: >-
+    Woven into the fabric of the platform, not quarantined as a separate naughty
+    app. The toggle is situational, switched on and off by context. Turning it on
+    must not produce a visibly different application.
+  ios_test: >-
+    The disqualifier is the legality of the underlying activity, not explicitness.
+    Adult content is permitted on iOS. A map framed around cruising is not.
+rationale: >-
+  A single gate, one verification, and one consent model applied platform-wide is
+  simpler than bolting age checks onto four products. Quarantining the content
+  would contradict the community reality the product is built on.
+alternatives:
+  - A separate adult destination product. Rejected as both wrong on intent and
+    worse for compliance.
+consequences:
+  - The legal boundary and the experience boundary are different objects. Compliance
+    needs a countable line; the experience needs none.
+  - One toggle is likely too blunt. Nude recreation, explicit speech, and adult
+    commerce have different legal profiles and may need content flags beneath the mode.
+  - Nude recreation is legal and should not sit behind the mode at all.
+  - Moderation policy, not age verification, is the larger legal surface. FOSTA-SESTA
+    exposure attaches to facilitating commercial sex. This needs an attorney before
+    the landing page ships.
+  - >-
+    Required to ship, in place before review, not after: a 17+/18+ rating, block
+    and report on every user and every piece of content, a way to act on reports,
+    and the age gate.
+related_decisions:
+  - ZF-GIGZ-IDENTITY-LAYER-2026-08-06
+sources:
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-05
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-06
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-07
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-08
+implementation_state: not-implemented
+review_date: null

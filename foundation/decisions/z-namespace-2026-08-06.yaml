@@ -1,0 +1,46 @@
+id: ZF-Z-NAMESPACE-2026-08-06
+title: Z/ prefix is a container namespace, not a family-wide brand prefix
+date: 2026-08-06
+status: accepted
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  The logo family mixes two naming patterns: a terminal Z (GIFZ, GIGZ, AFTERZ,
+  ZENEGADES, THE HAUZ) and a Z/ prefix (Z/SPACE). Tucker raised treating Z/ the
+  way Reddit treats r/, then narrowed it: the prefix should not go on every
+  product.
+decision:
+  rule: >-
+    A Z/ name marks a container that holds a category. A terminal Z name marks a
+    single-purpose product. The two systems coexist and mean different things.
+  members_confirmed:
+    - Z/Space
+    - Z/Out
+  not_members: >-
+    THE HAUZ, AfterZ, Zenegades, and ZayDark each do one thing and keep their
+    own marks. GifZ, the gig board, and missed connections are boards inside the
+    main app, not namespaces.
+  convention: >-
+    Z/ names are lowercase, single word, no spaces. z/missed, not
+    z/missed connections.
+rationale: >-
+  Containment is the axis that held after forum-shape and map-shape readings
+  both failed. It also explains why Z/Out can hold nude beaches, trails, and
+  camping without any of them becoming products.
+alternatives:
+  - Prefix every product with Z/ and retire the terminal-Z family. Rejected as a
+    larger rewrite with no gain.
+  - Reserve Z/ for forum-shaped products. Rejected by Tucker; the products in
+    question are map and moment shaped, and THE HAUZ resists the category.
+consequences:
+  - Z/ names must be typeset from a system rather than drawn individually, because
+    user-created namespaces cannot each receive a bespoke wordmark.
+  - Z/SPACE currently has a bespoke SVG logo and becomes the exception to that rule.
+    Whether it is demoted to typeset is an open owner decision.
+  - The terminal-Z family is unaffected.
+related_decisions:
+  - ZF-Z-OUT-NAME-2026-08-06
+sources:
+  - foundation/explorations/2026-08-06-z-namespace-and-product-shape.md#E-01
+implementation_state: not-implemented
+review_date: null
