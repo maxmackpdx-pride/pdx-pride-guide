@@ -16,7 +16,7 @@ This folder is the organized source library supplied by Tucker on 2026-08-03. Pr
 
 - `z-space.svg`: Z/SPACE.
 - `afterz.svg`: AFTERZ.
-- `z-out.svg`: Z/OUT.
+- `travelz.svg`: TRAVELZ.
 - `zenegades.svg`: ZENEGADES.
 - `zaydark-dark background-finish-pixel-locked.svg`: ZAYDARK.
 

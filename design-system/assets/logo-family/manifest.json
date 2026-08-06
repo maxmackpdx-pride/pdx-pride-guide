@@ -18,7 +18,7 @@
     { "name": "IDEAZ", "file": "ideaz.svg", "darkVariant": "ideaz-on-black.svg", "status": "current-supporting", "home": "idea submission" },
     { "name": "Z/SPACE", "file": "z-space.svg", "darkVariant": "z-space-on-black.svg", "status": "next", "home": null },
     { "name": "AFTERZ", "file": "afterz.svg", "darkVariant": "afterz-on-black.svg", "status": "next", "home": null },
-    { "name": "Z/OUT", "file": "z-out.svg", "darkVariant": "z-out-on-black.svg", "status": "next", "home": null },
+    { "name": "TRAVELZ", "file": "travelz.svg", "darkVariant": "travelz-on-black.svg", "status": "next", "home": null },
     { "name": "ZENEGADES", "file": "zenegades.svg", "darkVariant": "zenegades-on-black.svg", "status": "next", "home": null },
     { "name": "ZAYDARK", "file": "zaydark-dark background-finish-pixel-locked.svg", "displayVariant": "zaydark-display-finish-pixel-locked.svg", "status": "next", "home": null }
   ],
@@ -27,7 +27,7 @@
     "ZAylist Solid White Dark Short.svg", "ZAylist Solid White Dark.svg",
     "afterz-on-black.svg", "afterz.svg", "gifz-on-black.svg", "gifz.svg",
     "gigz-on-black.svg", "gigz.svg", "ideaz-on-black.svg", "ideaz.svg",
-    "prime-z-on-black.svg", "prime-z.svg", "z-out-on-black.svg", "z-out.svg",
+    "prime-z-on-black.svg", "prime-z.svg", "travelz-on-black.svg", "travelz.svg",
     "z-space-on-black.svg", "z-space.svg",
     "zaydark-dark background-finish-pixel-locked.svg", "zaydark-display-finish-pixel-locked.svg",
     "zaylist-portland-on-black.svg", "zaylist-portland.svg",

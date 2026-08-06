@@ -90,7 +90,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 ## NEXT roadmap cards
 
 - This is a scoped roadmap family, not a new default for event, directory, board, or feed cards.
-- Sequence: **THE HAÜZ → Z/SPACE → ZAYDARK → AfterZ → Zenegades → Z/OUT → submit an idea**. Keep route numbers and DOM reading order synchronized.
+- Sequence: **HAÜSING → Z/SPACE → ZAYDARK → AfterZ → Zenegades → TravelZ → submit an idea**. Keep route numbers and DOM reading order synchronized.
 - All product cards share one measured box: top-left status, top-right eyebrow, fixed logo region, contained object region, and lower copy/detail/action seam.
 - Use approved product-logo assets. Do not typeset substitutes, distort marks, trim their authored transparent margins ad hoc, or change spelling.
 - Cards use black deep glass with a black keyline, restrained Fluent 2 undertone, local accent bloom, and a thin rainbow edge/refract seam. Do not use a rainbow fill behind the card.
