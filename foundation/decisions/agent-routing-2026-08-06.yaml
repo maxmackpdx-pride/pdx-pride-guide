@@ -18,6 +18,12 @@ decision:
   routing_principle: >-
     Route work to the agent that does it well at the lowest cost. Cost includes
     credits, wall-clock time to production, and the risk of doing it twice.
+  cost_definition: >-
+    Cheap means a closed iteration loop against a real environment: reproduce,
+    change one thing, test, verify. It does not mean one agent is always cheaper.
+    Any agent is expensive on token-heavy open-ended work. Routing long-form
+    governance or specimen math to grok to save a claude turn is false economy,
+    and the reverse is true for prod fixes.
   routing:
     grok:
       take: >-
@@ -29,7 +35,9 @@ decision:
         would cost another agent many expensive turns cost him few cheap ones.
       avoid: >-
         Long-form governance writing and design reasoning, where his speed
-        advantage does not apply and the work is token-heavy either way.
+        advantage does not apply and the work is token-heavy either way. Also
+        open-ended library design without a closed ask; his loop only pays off
+        when there is something to verify against.
     claude:
       take: >-
         Decision records, chapters, explorations, onboarding, design system
@@ -41,7 +49,7 @@ decision:
       avoid: >-
         Urgent production fixes, verification loops, and repeated small
         iterations. A five line prod fix routed here is the most expensive way to
-        make that change.
+        make that change. This one is hard, not a preference.
     codex:
       take: >-
         Multi-file refactors, feature build-out, structural work across the
@@ -52,6 +60,17 @@ decision:
     When two agents can both do a task, the cheaper one takes it. When neither is
     obviously cheaper, the one who claims it first takes it, and the other does
     not start a parallel version.
+  debug_boundary: >-
+    Grok owns the debugging loop: reproduce, bisect, fix, verify, deploy check.
+    He pulls claude when stuck on why (architecture, identity, a design system
+    rule conflict, product intent), not when stuck on what (a stacktrace, a
+    missing import, a 500 after deploy). When he opens a tunnel for why, he keeps
+    the claim on the code paths until the fix lands, so nobody starts a parallel
+    patch.
+  staleness: >-
+    12 hours is the default and nothing auto-expires. If the two of us start
+    thrashing, the next step is 6 hours for client/ and server/ while foundation/
+    stays at 12, but that split is not worth making yet.
   handoff_rule: >-
     An agent that finds work outside its lane names it and leaves it claimed by
     nobody rather than doing it badly or expensively. Say what needs doing, in a
@@ -72,6 +91,15 @@ consequences:
     stale claims are a prompt to ask, not permission to take.
   - Routing is a default, not a rule. Tucker can direct any work to any agent.
   - Role and routing never confer authority. See ZF-AGENT-ROLES-2026-08-06.
+amendments:
+  - date: 2026-08-06
+    by: grok, negotiated in tunnel 210495334
+    change: >-
+      Added cost_definition, debug_boundary, and staleness. Grok's correction:
+      the original table could be read as "grok is always cheaper," which he
+      called false economy. Cheap means a closed loop against a real environment,
+      not an agent. Also tightened both avoid lists.
+    status: accepted by owner direction to settle routing between agents
 related_decisions:
   - ZF-AGENT-ROLES-2026-08-06
 sources:
