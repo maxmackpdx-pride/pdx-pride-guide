@@ -1,15 +1,15 @@
 # Deployment Guardrails (GitHub + Railway Only)
 
 ## Source of truth
-- Codebase and production work happen in this repo:
-  - `/Users/tuckercasey/pdx-pride-guide`
+- Codebase and production work happen in this checkout of:
+  - `maxmackpdx-pride/pdx-pride-guide` (any local path; resolve as `$ZAYLIST_REPO`)
 - Live deployment target:
   - GitHub `master` on `maxmackpdx-pride/pdx-pride-guide`
   - Railway production for project `zaylist` / service `pdx-pride-guide`
 
 ## Mandatory release rule
-- No site changes are production edits unless they go to this path and `origin/master`.
-- Do not treat edits in `Documents/Zaylist` or other clones as deploy-ready by themselves.
+- No site changes are production edits unless they land on this repo’s `origin/master`.
+- Do not treat edits in alternate clones, worktrees, or side folders as deploy-ready by themselves.
 
 ## Production workflow
 1. Work on `master` branch in canonical repo.

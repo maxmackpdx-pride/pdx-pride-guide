@@ -1,5 +1,5 @@
 Zaylist Foundation
-Release: zaylist-foundation-2026-08-06.3
+Release: zaylist-foundation-2026-08-06.4
 Authority: Tucker decisions > canonical standards and accepted records > verified production implementation > Foundation recommendations > research, prototypes, exports, migrations, and open questions.
 Decision records: foundation/decisions/ (YAML, one record per file)
 Chapters: foundation/chapters/

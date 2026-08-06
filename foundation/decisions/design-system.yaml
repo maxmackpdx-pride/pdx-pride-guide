@@ -1,7 +1,7 @@
 domain: design-system
 owner: Tucker_PDmaX
 canonical_guide: public-url-pending
-production_trap_list: /Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md
+production_trap_list: docs/LIVE_DESIGN_STANDARD.md
 last_reviewed: 2026-08-01
 records:
   - id: DS-001
