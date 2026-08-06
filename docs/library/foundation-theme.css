@@ -1,0 +1,695 @@
+/*
+ * Zaylist Foundation / Living OLED
+ *
+ * Static extraction of the approved Foundation 8B editorial treatment.
+ * This file contains only the Foundation's fixed presentation contract and
+ * no alternate-style matrix, sandbox rules, or promotion behavior.
+ */
+html[data-foundation-theme="living-oled"] {
+  --tt-bg: #050506;
+  --tt-panel: #0b0c0d;
+  --tt-card: #0d0f10;
+  --tt-text: #fff;
+  --tt-muted: #b9bfbc;
+  --tt-line: #3a3d3e;
+  --tt-accent: #ff6600;
+  --tt-accent2: #00ffff;
+  --tt-radius: 16px;
+  --tt-pad: clamp(24px, 5vw, 72px);
+  color-scheme: dark;
+  background: var(--tt-bg);
+}
+
+html[data-foundation-theme="living-oled"] body,
+html[data-foundation-theme="living-oled"] .shell {
+  background: var(--tt-bg);
+  color: var(--tt-text);
+}
+
+html[data-foundation-theme="living-oled"] body {
+  font-family: Inter, Arial, sans-serif;
+}
+
+html[data-foundation-theme="living-oled"] .section {
+  max-width: 1500px;
+  padding: 80px var(--tt-pad);
+  border-color: var(--tt-line);
+  background-color: var(--tt-bg);
+  background-image: linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 12.5% 100%;
+}
+
+html[data-foundation-theme="living-oled"] .section-head {
+  position: relative;
+  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  border-top: 0;
+  padding-top: 26px;
+  padding-bottom: 25px;
+  margin-bottom: 38px;
+}
+
+html[data-foundation-theme="living-oled"] .section-head::before,
+html[data-foundation-theme="living-oled"] .section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg,#8800ff,#ff00cc,#ff33d6,#ff6600,#ffee00,#8800ff);
+  background-size: 200% 100%;
+  animation: foundationRainbowLoop 8s linear infinite;
+}
+
+html[data-foundation-theme="living-oled"] .section-head::before {
+  top: 0;
+  height: 8px;
+  box-shadow: 0 0 12px rgba(255,102,0,.14);
+}
+
+html[data-foundation-theme="living-oled"] .section-head::after {
+  bottom: 0;
+  height: 2px;
+  box-shadow: 0 0 12px rgba(0,255,255,.12);
+}
+
+@keyframes foundationRainbowLoop {
+  to { background-position: 200% 0; }
+}
+
+html[data-foundation-theme="living-oled"] .section-head h2 {
+  color: var(--tt-text);
+  font-family: Inter, Arial, sans-serif;
+  font-size: clamp(50px, 8vw, 112px);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+html[data-foundation-theme="living-oled"] .section-head > span,
+html[data-foundation-theme="living-oled"] .kicker,
+html[data-foundation-theme="living-oled"] .num,
+html[data-foundation-theme="living-oled"] th {
+  color: var(--tt-accent);
+}
+
+html[data-foundation-theme="living-oled"] .section-head p,
+html[data-foundation-theme="living-oled"] .story,
+html[data-foundation-theme="living-oled"] p {
+  color: var(--tt-muted);
+}
+
+html[data-foundation-theme="living-oled"] .section-head p,
+html[data-foundation-theme="living-oled"] .story {
+  max-width: 68ch;
+}
+
+html[data-foundation-theme="living-oled"] a,
+html[data-foundation-theme="living-oled"] .story a {
+  color: var(--tt-accent2);
+}
+
+html[data-foundation-theme="living-oled"] .hero h1 {
+  font-family: Inter, Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: -.025em;
+  line-height: .9;
+}
+
+html[data-foundation-theme="living-oled"] .hero h1 em {
+  color: var(--tt-accent);
+  font-style: normal;
+}
+
+html[data-foundation-theme="living-oled"] .hero blockquote {
+  border-left-color: var(--tt-accent);
+}
+
+html[data-foundation-theme="living-oled"] h3,
+html[data-foundation-theme="living-oled"] h4,
+html[data-foundation-theme="living-oled"] .callout strong {
+  letter-spacing: .005em;
+  line-height: 1.14;
+}
+
+html[data-foundation-theme="living-oled"] .story,
+html[data-foundation-theme="living-oled"] .lede,
+html[data-foundation-theme="living-oled"] .card p,
+html[data-foundation-theme="living-oled"] td,
+html[data-foundation-theme="living-oled"] .decision p {
+  line-height: 1.78;
+  letter-spacing: .002em;
+}
+
+html[data-foundation-theme="living-oled"] .card h3,
+html[data-foundation-theme="living-oled"] .callout strong,
+html[data-foundation-theme="living-oled"] .priority p {
+  color: #eef0ef;
+  font-weight: 850;
+}
+
+/* The sidebar keeps the approved functional-glass separation. */
+html[data-foundation-theme="living-oled"] #foundation-nav {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  isolation: isolate;
+  background: linear-gradient(155deg,#0c0d0e 0%,#070809 54%,#030405 100%);
+  border-color: rgba(255,255,255,.14);
+  box-shadow: inset -1px 0 rgba(255,255,255,.055), 12px 0 48px rgba(0,0,0,.54);
+  -webkit-backdrop-filter: blur(32px) saturate(1.05);
+  backdrop-filter: blur(32px) saturate(1.05);
+}
+
+html[data-foundation-theme="living-oled"] #foundation-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(120% 48% at 14% 0%,rgba(255,255,255,.075),transparent 42%),linear-gradient(180deg,transparent 0 72%,rgba(255,102,0,.018));
+  border-right: 1px solid rgba(255,102,0,.08);
+}
+
+html[data-foundation-theme="living-oled"] #foundation-nav nav a,
+html[data-foundation-theme="living-oled"] #foundation-nav .tools,
+html[data-foundation-theme="living-oled"] #foundation-nav .state,
+html[data-foundation-theme="living-oled"] #foundation-nav .authority {
+  border-color: var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] #foundation-nav nav a {
+  color: var(--tt-muted);
+}
+
+html[data-foundation-theme="living-oled"] #foundation-nav nav a.on {
+  color: var(--tt-accent);
+  border-left-color: var(--tt-accent);
+  background: linear-gradient(90deg,rgba(255,102,0,.09),transparent 72%);
+}
+
+html[data-foundation-theme="living-oled"] #foundation-nav .tools input,
+html[data-foundation-theme="living-oled"] .nav-toggle {
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(12,13,14,.86);
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+  -webkit-backdrop-filter: blur(20px) saturate(1.05);
+  backdrop-filter: blur(20px) saturate(1.05);
+}
+
+html[data-foundation-theme="living-oled"] :focus-visible {
+  outline-color: var(--tt-accent2);
+}
+
+/* Enclosed evidence retains quiet deep glass. Reading structures stay flat. */
+html[data-foundation-theme="living-oled"] .card,
+html[data-foundation-theme="living-oled"] .callout,
+html[data-foundation-theme="living-oled"] .example,
+html[data-foundation-theme="living-oled"] .priority,
+html[data-foundation-theme="living-oled"] table,
+html[data-foundation-theme="living-oled"] .decision,
+html[data-foundation-theme="living-oled"] .no-list article,
+html[data-foundation-theme="living-oled"] .object-map div,
+html[data-foundation-theme="living-oled"] .journey div,
+html[data-foundation-theme="living-oled"] .flow .node {
+  position: relative;
+  isolation: isolate;
+  border-color: var(--tt-line);
+  border-radius: var(--tt-radius);
+  background: linear-gradient(155deg,#111315 0%,#090b0c 56%,#050607 100%) padding-box,linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,102,0,.3) 42%,rgba(0,255,255,.18) 76%,rgba(255,255,255,.08)) border-box;
+  box-shadow: 0 0 0 1px #000,0 20px 46px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.06),inset 0 -18px 34px -32px rgba(255,255,255,.07);
+  overflow: hidden;
+}
+
+html[data-foundation-theme="living-oled"] .card::before,
+html[data-foundation-theme="living-oled"] .callout::before,
+html[data-foundation-theme="living-oled"] .example::before,
+html[data-foundation-theme="living-oled"] .priority::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 5px;
+  right: 5px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg,#8800ff,#ff00cc,#ff33d6,#ff6600,#ffee00,#8800ff);
+  background-size: 200% 100%;
+  animation: foundationRainbowLoop 8s linear infinite;
+  opacity: .88;
+  box-shadow: 0 2px 8px rgba(255,102,0,.2),0 1px 5px rgba(255,0,204,.14);
+  -webkit-mask-image: linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  mask-image: linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+
+html[data-foundation-theme="living-oled"] .card::after,
+html[data-foundation-theme="living-oled"] .callout::after,
+html[data-foundation-theme="living-oled"] .example::after,
+html[data-foundation-theme="living-oled"] .priority::after,
+html[data-foundation-theme="living-oled"] .no-list article::after {
+  background: linear-gradient(133deg,rgba(255,255,255,.09),rgba(255,255,255,.025) 12%,transparent 34%),radial-gradient(65% 48% at 0 108%,rgba(255,102,0,.055),transparent 66%),radial-gradient(65% 48% at 108% 108%,rgba(0,255,255,.035),transparent 66%);
+}
+
+html[data-foundation-theme="living-oled"] .section .grid,
+html[data-foundation-theme="living-oled"] .section .two {
+  gap: 0;
+  border-block: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .section .grid > .card,
+html[data-foundation-theme="living-oled"] .section .two > .card {
+  min-height: 0;
+  padding: 24px 28px;
+  border: 0;
+  border-right: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-foundation-theme="living-oled"] .section .grid > .card:last-child,
+html[data-foundation-theme="living-oled"] .section .two > .card:last-child {
+  border-right: 0;
+}
+
+html[data-foundation-theme="living-oled"] .section .grid > .card::before,
+html[data-foundation-theme="living-oled"] .section .grid > .card::after,
+html[data-foundation-theme="living-oled"] .section .two > .card::before,
+html[data-foundation-theme="living-oled"] .section .two > .card::after {
+  content: none;
+  display: none;
+}
+
+html[data-foundation-theme="living-oled"] table {
+  border: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-foundation-theme="living-oled"] table th {
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 2px solid var(--tt-line);
+  background: transparent;
+}
+
+html[data-foundation-theme="living-oled"] table td {
+  padding: 18px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-foundation-theme="living-oled"] .object-map {
+  gap: 0;
+  border-top: 1px solid var(--tt-line);
+  border-left: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .object-map div {
+  min-height: 84px;
+  border: 0;
+  border-right: 1px solid var(--tt-line);
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: color-mix(in srgb,var(--tt-panel) 94%,#000);
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .priority {
+  margin-top: 34px;
+  padding: 18px 0 18px 18px;
+  border: 0;
+  border-block: 1px solid var(--tt-line);
+  border-left: 3px solid var(--tt-accent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .priority b {
+  display: block;
+  width: max-content;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--tt-accent);
+}
+
+html[data-foundation-theme="living-oled"] .priority::before,
+html[data-foundation-theme="living-oled"] .priority::after {
+  content: none;
+  display: none;
+}
+
+html[data-foundation-theme="living-oled"] .callout {
+  border: 0;
+  border-left: 3px solid var(--tt-accent);
+  border-radius: 0;
+  background: color-mix(in srgb,var(--tt-accent) 5%,var(--tt-panel));
+  box-shadow: none;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-foundation-theme="living-oled"] .callout::before,
+html[data-foundation-theme="living-oled"] .callout::after {
+  content: none;
+  display: none;
+}
+
+html[data-foundation-theme="living-oled"] .journey {
+  gap: 0;
+  border-top: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .journey div {
+  padding: 16px 0;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .decision {
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .no-list {
+  gap: 0;
+  border-top: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .no-list article,
+html[data-foundation-theme="living-oled"] .no-list article:nth-child(even) {
+  padding: 24px 28px 24px 0;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .no-list article:nth-child(even) {
+  padding-left: 28px;
+  border-left: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .no-list article::before,
+html[data-foundation-theme="living-oled"] .no-list article::after {
+  content: none;
+  display: none;
+}
+
+html[data-foundation-theme="living-oled"] .example .flow .node {
+  border: 0;
+  border-right: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+html[data-foundation-theme="living-oled"] .example .flow .node:last-of-type {
+  border-right: 0;
+}
+
+html[data-foundation-theme="living-oled"] #ai .two > .card {
+  background: var(--tt-card);
+  border: 1px solid var(--tt-line);
+  border-radius: var(--tt-radius);
+  box-shadow: none;
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list,
+html[data-foundation-theme="living-oled"] .principle-list {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 0;
+  border-top: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card,
+html[data-foundation-theme="living-oled"] .principle-list > .card {
+  display: block;
+  min-height: 0;
+  margin: 0;
+  padding: 26px 34px 28px 0;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card:nth-child(even),
+html[data-foundation-theme="living-oled"] .principle-list > .card:nth-child(even) {
+  padding-left: 34px;
+  border-left: 1px solid var(--tt-line);
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card::before,
+html[data-foundation-theme="living-oled"] .editorial-list > .card::after,
+html[data-foundation-theme="living-oled"] .principle-list > .card::before,
+html[data-foundation-theme="living-oled"] .principle-list > .card::after {
+  content: none;
+  display: none;
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card .num,
+html[data-foundation-theme="living-oled"] .principle-list > .card .num {
+  display: block;
+  margin: 0 0 10px;
+  padding: 0;
+  color: var(--tt-accent);
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card h3,
+html[data-foundation-theme="living-oled"] .principle-list > .card h3 {
+  margin: 0 0 10px;
+}
+
+html[data-foundation-theme="living-oled"] .editorial-list > .card p,
+html[data-foundation-theme="living-oled"] .principle-list > .card p {
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* Governed identity candidate intake. Real assets are shown without cropping. */
+.identity-intake {
+  margin: 34px 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--tt-line);
+}
+
+.identity-intake__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.identity-intake__head p {
+  max-width: 62ch;
+  margin: 0;
+}
+
+.identity-intake__manifest,
+.identity-asset__action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 13px;
+  border: 1px solid var(--tt-line);
+  color: var(--tt-accent2);
+  font: 700 9px/1.3 'JetBrains Mono', monospace;
+  letter-spacing: .08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.identity-intake__manifest:hover,
+.identity-intake__manifest:focus-visible,
+.identity-asset__action:hover,
+.identity-asset__action:focus-visible {
+  border-color: var(--tt-accent2);
+  background: rgba(0,255,255,.06);
+}
+
+.identity-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  border-top: 1px solid var(--tt-line);
+  border-left: 1px solid var(--tt-line);
+}
+
+.identity-asset {
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border-right: 1px solid var(--tt-line);
+  border-bottom: 1px solid var(--tt-line);
+  background: #070809;
+}
+
+.identity-asset__preview {
+  min-height: clamp(168px,22vw,260px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #242728;
+  background: #010101;
+}
+
+.identity-asset__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.identity-asset figcaption {
+  padding-top: 15px;
+}
+
+.identity-asset__state {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--tt-accent);
+  font: 700 9px/1.4 'JetBrains Mono', monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.identity-asset h4 {
+  margin-bottom: 7px;
+  color: #fff;
+}
+
+.identity-asset p {
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  html[data-foundation-theme="living-oled"] .editorial-list,
+  html[data-foundation-theme="living-oled"] .principle-list {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-foundation-theme="living-oled"] .editorial-list > .card,
+  html[data-foundation-theme="living-oled"] .principle-list > .card,
+  html[data-foundation-theme="living-oled"] .editorial-list > .card:nth-child(even),
+  html[data-foundation-theme="living-oled"] .principle-list > .card:nth-child(even) {
+    padding: 24px 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-foundation-theme="living-oled"] #foundation-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100dvh;
+  }
+
+  html[data-foundation-theme="living-oled"] table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  html[data-foundation-theme="living-oled"] .section {
+    padding: 58px 18px;
+  }
+
+  html[data-foundation-theme="living-oled"] .section-head {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-foundation-theme="living-oled"] .section .grid > .card,
+  html[data-foundation-theme="living-oled"] .section .two > .card {
+    padding: 20px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--tt-line);
+  }
+
+  html[data-foundation-theme="living-oled"] .no-list article,
+  html[data-foundation-theme="living-oled"] .no-list article:nth-child(even) {
+    padding: 20px 0;
+    border-left: 0;
+  }
+
+  .identity-intake__head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .identity-asset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .identity-asset__preview {
+    min-height: 190px;
+  }
+
+  .identity-intake__manifest,
+  .identity-asset__action {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-foundation-theme="living-oled"] *,
+  html[data-foundation-theme="living-oled"] *::before,
+  html[data-foundation-theme="living-oled"] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-foundation-theme="living-oled"] #foundation-nav,
+  html[data-foundation-theme="living-oled"] #foundation-nav .tools input,
+  html[data-foundation-theme="living-oled"] .nav-toggle {
+    background: #0b0e0f;
+  }
+}
