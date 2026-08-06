@@ -70,3 +70,24 @@ a citation.
 
 Transcripts are JSONL, one turn per line, append only. Nothing is ever edited or
 condensed, for the same reason explorations are not.
+
+## Nothing is deleted
+
+No turn is ever removed from a transcript, including tests, scratch messages,
+and things said and immediately regretted. Discarded material is still material,
+and something written off in the moment can matter later. A correction is a new
+appended turn, never an edit to an old one.
+
+The one concession to a future where storage costs something: a turn known to be
+throwaway at the time it is written can be marked.
+
+    node scripts/tunnel.mjs say <code> <agent> "tool check" --disposable
+
+That writes `disposable: true` on the turn and nothing else. It does not delete
+anything, it is not applied retroactively, and it changes nothing about how the
+turn reads today. It exists so that if pruning ever becomes necessary, there is
+an honest set to prune from rather than a judgment call made years later about
+what mattered.
+
+Pruning disposable turns is a deliberate owner decision. Never automatic, never
+a cleanup pass, never an agent's call.
