@@ -24,6 +24,13 @@ const AREAS = [
   { name: "foundation",   prefix: "foundation/",              llms: "foundation/llms.txt" },
 ];
 
+// Operational state, not published guides. These churn every working session and
+// carry their own schema/freshness fields, so gating them behind a guide release
+// bump would block routine handoff writes for no reader benefit.
+const EXEMPT = [
+  "foundation/agent-continuity/",
+];
+
 const RELEASE_RE = /^Release:\s*(zaylist-[a-z0-9-]+-\d{4}-\d{2}-\d{2}\.\d+)\s*$/m;
 
 const areaFor = (file) => AREAS.find((a) => file.startsWith(a.prefix));
@@ -57,6 +64,7 @@ if (foundationChanges.length === 0) {
 
 const touched = new Map();
 for (const file of foundationChanges) {
+  if (EXEMPT.some((p) => file.startsWith(p))) continue;
   const area = areaFor(file);
   if (!area) continue;
   if (file === area.llms) continue; // the manifest itself is not content
