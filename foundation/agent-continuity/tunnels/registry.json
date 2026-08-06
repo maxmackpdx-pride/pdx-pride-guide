@@ -33,6 +33,13 @@
     "libraryUpdates: paths written or updated as a result, or an explicit empty list with a reason",
     "transcript moves from active/ to archive/YYYY-MM/"
   ],
-  "active": [],
+  "active": [
+    {
+      "code": "200097648",
+      "topic": "foundation-governance",
+      "subject": "ship the new library shell homepage to the Worker",
+      "openedAt": "2026-08-06T23:01:22Z"
+    }
+  ],
   "supersedes": "AGENT_TUNNEL.jsonl (flat global bus, no rooms, no lifecycle, dormant since 2026-06)"
 }
