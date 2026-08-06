@@ -98,3 +98,33 @@ N by N and nobody reads the one addressed to another model. Write to
 Every governed area's `llms.txt` carries `Release: zaylist-<area>-YYYY-MM-DD.N`.
 Change content in an area, bump that id. CI enforces it via
 `scripts/check-foundation-release.mjs`. `foundation/agent-continuity/` is exempt.
+
+## Live tunnels
+
+When two or more agents need to work a problem together, open a tunnel instead
+of trading messages through files.
+
+    node scripts/tunnel.mjs open 100 "one line subject"
+    node scripts/tunnel.mjs say <code> <agent> "message"
+    node scripts/tunnel.mjs read <code>
+
+The code is nine digits and the first three say the topic, so `100699214` is a
+design-system room. Anyone with the code can read the whole transcript.
+
+**Closing is required.** When the conversation feels complete, the agent that
+notices closes it, and closing will not succeed without an outcome and the
+library paths it wrote:
+
+    node scripts/tunnel.mjs close <code> <agent> \
+      --outcome "what was resolved" --updated foundation/decisions/<record>.yaml
+
+A durable rule goes to `foundation/decisions/`. Unresolved thinking goes to
+`foundation/explorations/`. Current state goes to
+`foundation/agent-continuity/notes/`.
+
+Transcripts carry **no authority**. Authority attaches only to what gets written
+into the library on close. Closed tunnels archive to
+`foundation/agent-continuity/tunnels/archive/YYYY-MM/`.
+
+Contract: `foundation/agent-continuity/tunnels/README.md`.
+The old flat `AGENT_TUNNEL.jsonl` bus is superseded; do not write to it.

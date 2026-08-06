@@ -60,6 +60,10 @@
   "explorations": [
    "foundation/explorations/README.md",
    "foundation/explorations/"
+  ],
+  "tunnels": [
+   "foundation/agent-continuity/tunnels/README.md",
+   "foundation/agent-continuity/tunnels/registry.json"
   ]
  },
  "livingLibrary": {
@@ -127,5 +131,6 @@
   "foundationIndex": "foundation/llms.txt",
   "note": "AGENTS.md is the cross-vendor agent front door. foundation/llms.txt is the single Foundation index; this manifest defers to it rather than competing with it."
  },
- "explorationsAuthority": "none - raw session thinking, append-only, never cite as a rule. See foundation/explorations/README.md"
+ "explorationsAuthority": "none - raw session thinking, append-only, never cite as a rule. See foundation/explorations/README.md",
+ "tunnelsAuthority": "none - live transcripts, never cite as a rule. Authority attaches only to library records written on close."
 }
