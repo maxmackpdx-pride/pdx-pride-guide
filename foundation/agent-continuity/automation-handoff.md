@@ -4,7 +4,13 @@ Saved for cross-platform continuity so Claude can recreate the same scheduled ag
 
 ## Scope
 
-- Working repository for all agents: `/Users/tuckercasey/Documents/Zaylist`
+- Working repository for all agents: `$ZAYLIST_REPO`
+
+  `$ZAYLIST_REPO` is the local checkout of `maxmackpdx-pride/pdx-pride-guide`.
+  Resolve it once per machine and substitute it everywhere below. On Tucker's
+  current machine it is `~/Documents/Zaylist`, but nothing should assume that.
+  Anything hardcoding an absolute path only runs on one computer, which defeats
+  the cross-platform continuity this document exists for.
 - Live source of truth for Zaylist operations: `https://github.com/maxmackpdx-pride/pdx-pride-guide`
 - Do not target legacy/old copies.
 
@@ -28,7 +34,7 @@ Saved for cross-platform continuity so Claude can recreate the same scheduled ag
 - Reasoning effort: `high`
 - Execution environment: `local`
 - Target project: `077f5e74-fe3d-48cc-a60c-9531cce4ee2f`
-- CWD: `/Users/tuckercasey/Documents/Zaylist`
+- CWD: `$ZAYLIST_REPO`
 
 Purpose:
 - Run Zaylist business-planning scans and maintain the living plan.
@@ -47,13 +53,14 @@ Purpose:
 - Reasoning effort: `medium`
 - Execution environment: `local`
 - Target project: `077f5e74-fe3d-48cc-a60c-9531cce4ee2f`
-- CWD: `/Users/tuckercasey/Documents/Zaylist`
+- CWD: `$ZAYLIST_REPO`
 
 Purpose:
 - Produce one practical campaign (<= 8 slides) per scheduled run.
 - Use current trend evidence + Zaylist-native direction.
 - Draft campaign artifacts in:
-  - `/Users/tuckercasey/Documents/Zaylist/zaylist-auditor/campaigns/`
+  - `$ZAYLIST_REPO/zaylist-auditor/campaigns/` (untracked; exists in the working
+    tree, not in git)
 - Review Resend/Microsoft 365 delivery and sender/reply policy constraints.
 
 ## Agent 3 — Tech Stack Monitor
@@ -67,7 +74,7 @@ Purpose:
 - Reasoning effort: `high`
 - Execution environment: `local`
 - Target project: `077f5e74-fe3d-48cc-a60c-9531cce4ee2f`
-- CWD: `/Users/tuckercasey/Documents/Zaylist`
+- CWD: `$ZAYLIST_REPO`
 
 Purpose:
 - Read-only health/compliance scan:
@@ -89,7 +96,7 @@ Purpose:
 - Reasoning effort: `high`
 - Execution environment: `local`
 - Target thread id: `019fc94c-ede9-7e23-97da-ccbfdc3103b9`
-- CWD: `/Users/tuckercasey/Documents/Zaylist`
+- CWD: `$ZAYLIST_REPO`
 
 Purpose:
 - Validate design-system and live production alignment.
