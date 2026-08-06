@@ -1,4 +1,14 @@
 {
   "schemaVersion": 1,
-  "claims": []
+  "claims": [
+    {
+      "agent": "claude",
+      "intent": "deferred security hardening record",
+      "paths": [
+        "foundation/decisions/security-hardening-2026-08-06.yaml",
+        "foundation/llms.txt"
+      ],
+      "at": "2026-08-06T19:52:57Z"
+    }
+  ]
 }
