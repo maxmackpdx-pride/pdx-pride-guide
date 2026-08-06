@@ -7,10 +7,16 @@ Saved for cross-platform continuity so Claude can recreate the same scheduled ag
 - Working repository for all agents: `$ZAYLIST_REPO`
 
   `$ZAYLIST_REPO` is the local checkout of `maxmackpdx-pride/pdx-pride-guide`.
-  Resolve it once per machine and substitute it everywhere below. On Tucker's
-  current machine it is `~/Documents/Zaylist`, but nothing should assume that.
+  Resolve it once per machine and substitute it everywhere a runtime CWD is needed.
   Anything hardcoding an absolute path only runs on one computer, which defeats
   the cross-platform continuity this document exists for.
+
+- Out-of-repo campaign / auditor workspace: `$ZAYLIST_AUDITOR`
+
+  Separate workspace for campaign drafts and auditor material. Deliberately **not**
+  inside this git repo. Resolve per machine; see `manifest.json` `outOfRepoPaths`.
+  Do not write `$ZAYLIST_REPO/zaylist-auditor/...` as if auditor lived under the clone.
+
 - Live source of truth for Zaylist operations: `https://github.com/maxmackpdx-pride/pdx-pride-guide`
 - Do not target legacy/old copies.
 
@@ -59,8 +65,7 @@ Purpose:
 - Produce one practical campaign (<= 8 slides) per scheduled run.
 - Use current trend evidence + Zaylist-native direction.
 - Draft campaign artifacts in:
-  - `$ZAYLIST_REPO/zaylist-auditor/campaigns/` (untracked; exists in the working
-    tree, not in git)
+  - `$ZAYLIST_AUDITOR/campaigns/` (out-of-repo; resolve via `outOfRepoPaths` in manifest)
 - Review Resend/Microsoft 365 delivery and sender/reply policy constraints.
 
 ## Agent 3 — Tech Stack Monitor
