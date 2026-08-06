@@ -3,7 +3,7 @@
 Status: Current Foundation domain  
 Owner: Tucker_PDmaX  
 Canonical guide: Design System package and written standards; public URL pending  
-Production trap list: `/Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md`
+Production trap list: `docs/LIVE_DESIGN_STANDARD.md`
 
 Zaylist's Design System is documentation infrastructure. It reduces repeated decisions for one founder today and gives future contributors a coherent visual and interaction language later. The Foundation records why the system exists, who owns its decisions, how its rules change, and which migrations are approved. The canonical guide owns the detailed rules and live specimens. Product code implements them.
 
@@ -72,10 +72,10 @@ Tucker has directed the primary website wordmark migration and the use of suppli
 
 ![Primary ZAYLIST rainbow-outline wordmark](../../assets/logo-family/zaylist-primary.svg)
 
-The complete family includes ZAYLIST Primary, ZAYLIST Portland, Prime Z, GIGZ, GIFZ, THE HAÜZ, Z/SPACE, AFTERZ, IDEAZ, TRAVELZ, ZENEGADES, and ZAYDARK. Their presence in one library does not mean they share one implementation state.
+The complete family includes ZAYLIST Primary, ZAYLIST Portland, Prime Z, GIGZ, GIFZ, THE HAÜZ, Z/SPACE, AFTERZ, IDEAZ, Z/OUT, ZENEGADES, and ZAYDARK. Their presence in one library does not mean they share one implementation state.
 
 - Current or current-title homes: ZAYLIST Primary, Prime Z, GIGZ, GIFZ, THE HAÜZ, and IDEAZ.
-- NEXT or future homes: Z/SPACE, AFTERZ, TRAVELZ, ZENEGADES, and ZAYDARK.
+- NEXT or future homes: Z/SPACE, AFTERZ, Z/OUT, ZENEGADES, and ZAYDARK.
 - Library variant: ZAYLIST Portland.
 - Candidate boundary: the supplied THE HAÜZ corner lockup remains a candidate even when shown in owner-directed previews or titles.
 

@@ -156,15 +156,15 @@ const WAYPOINTS: Waypoint[] = [
   {
     number: "06",
     status: "Planned",
-    title: "Travel",
+    title: "Z/OUT",
     eyebrow: "Find your people outside",
     body: "Find someone for the trail, campground, road trip, or long weekend.",
     detail: "Match on dates, pace, transport, gear, access, and comfort before you head out.",
     tone: "acid",
     motif: "travel",
     art: {
-      src: "/brand/family/travelz.svg",
-      alt: "TRAVELZ",
+      src: "/brand/family/z-out.svg",
+      alt: "Z/OUT",
     },
   },
 ];
@@ -439,8 +439,8 @@ function WaypointMotif({ motif }: { motif: WaypointMotif }) {
           </span>
           <div className="darkroom-travel-post__body">
             <div className="darkroom-travel-post__byline">
-              <strong>Zaylist Travel</strong>
-              <span>@travelz · now</span>
+              <strong>Z/OUT</strong>
+              <span>@zout · now</span>
             </div>
             <strong className="darkroom-travel-post__title">Looking for a tent buddy?</strong>
             <span className="darkroom-travel-post__meta">Portland · 12 replies</span>

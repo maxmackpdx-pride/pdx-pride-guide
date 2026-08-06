@@ -11,35 +11,35 @@ Primary goal: no hidden assumptions, no lost decisions, and no accidental produc
 
 Read in this order:
 
-1. [foundation/agent-continuity/manifest.json](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/manifest.json)
-2. [foundation/agent-continuity/START_HERE.md](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/START_HERE.md)
-3. [foundation/agent-continuity/current-context.json](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/current-context.json)
-4. [foundation/agent-continuity/conflicts.json](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/conflicts.json)
-5. [foundation/agent-continuity/latest.md](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/latest.md)
-6. [foundation/agent-continuity/events.jsonl](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/events.jsonl)
-7. [foundation/agent-continuity/automation-handoff.md](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/automation-handoff.md)
-8. [foundation/agent-continuity/notes/2026-08-04T132402Z-owner-decisions-download-and-wordmark.md](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/notes/2026-08-04T132402Z-owner-decisions-download-and-wordmark.md)
+1. [manifest.json](./manifest.json)
+2. [START_HERE.md](./START_HERE.md)
+3. [current-context.json](./current-context.json)
+4. [conflicts.json](./conflicts.json)
+5. [latest.md](./latest.md)
+6. [events.jsonl](./events.jsonl)
+7. [automation-handoff.md](./automation-handoff.md)
+8. [notes/2026-08-04T132402Z-owner-decisions-download-and-wordmark.md](./notes/2026-08-04T132402Z-owner-decisions-download-and-wordmark.md)
 
 Additional context files:
 
-- [foundation/agent-continuity/README.md](/Users/tuckercasey/Documents/Zaylist/foundation/agent-continuity/README.md)
-- [foundation/chapters/agent-continuity.md](/Users/tuckercasey/Documents/Zaylist/foundation/chapters/agent-continuity.md)
-- [foundation/decisions/agent-continuity.yaml](/Users/tuckercasey/Documents/Zaylist/foundation/decisions/agent-continuity.yaml)
-- [foundation/decisions/tech-stack-guide.yaml](/Users/tuckercasey/Documents/Zaylist/foundation/decisions/tech-stack-guide.yaml)
+- [README.md](./README.md)
+- [../chapters/agent-continuity.md](../chapters/agent-continuity.md)
+- [../decisions/agent-continuity.yaml](../decisions/agent-continuity.yaml)
+- [../decisions/tech-stack-guide.yaml](../decisions/tech-stack-guide.yaml)
 
 ## Required baseline skills
 
 Load these first in every replacement model session:
 
-- [zaylist-foundation](/Users/tuckercasey/.codex/skills/zaylist-foundation/SKILL.md)
-- [zaylist-design-system](/Users/tuckercasey/.codex/skills/zaylist-design-system/SKILL.md)
-- [zay-logo-design](/Users/tuckercasey/.codex/skills/zay-logo-design/SKILL.md)
-- [zaylist-living-guide-builder](/Users/tuckercasey/.codex/skills/zaylist-living-guide-builder/SKILL.md)
+- `zaylist-foundation`
+- `zaylist-design-system`
+- `zay-logo-design`
+- `zaylist-living-guide-builder`
 
 ## Canonical repository context
 
-- Working repo: `/Users/tuckercasey/Documents/Zaylist`
-- Canonical git remote: `github` -> `https://github.com/maxmackpdx-pride/pdx-pride-guide` on `master`
+- Working repo: this checkout of `maxmackpdx-pride/pdx-pride-guide` (any local path)
+- Canonical git remote: `origin` / `github` → `https://github.com/maxmackpdx-pride/pdx-pride-guide` on `master`
 - Deploy remote (legacy): `sites`
 
 ## Run order for every role action
