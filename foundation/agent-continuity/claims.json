@@ -1,14 +1,4 @@
 {
   "schemaVersion": 1,
-  "claims": [
-    {
-      "agent": "claude",
-      "intent": "amend routing record with cost-profile nuance and debug boundary",
-      "paths": [
-        "foundation/decisions/agent-routing-2026-08-06.yaml",
-        "foundation/llms.txt"
-      ],
-      "at": "2026-08-06T19:27:21Z"
-    }
-  ]
+  "claims": []
 }
