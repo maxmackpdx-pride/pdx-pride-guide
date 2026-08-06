@@ -1,0 +1,10 @@
+Zaylist Foundation
+Release: zaylist-foundation-2026-08-06.1
+Authority: Tucker decisions > canonical standards and accepted records > verified production implementation > Foundation recommendations > research, prototypes, exports, migrations, and open questions.
+Decision records: foundation/decisions/ (YAML, one record per file)
+Chapters: foundation/chapters/
+Agent continuity and handoff: foundation/agent-continuity/manifest.json
+Domain guides: foundation/tech-stack/llms.txt, foundation/trust-safety/llms.txt
+Explorations: foundation/explorations/ - raw session thinking, append-only, condensation prohibited. NO AUTHORITY. Sits at the bottom of the authority order with research and open questions. Never cite an exploration as a rule, standard, decision, or plan of record. An enthusiastic idea recorded there is still not founder direction. When only an exploration covers a topic, the correct answer is that no decision exists yet. Ideas leave that folder only by being promoted into a decision record, which is an explicit act.
+Reading a decision: check status before applying it. Accepted and current are authoritative. Recommendation, draft, queued, and deferred are not. Superseded records remain for history and must not be applied.
+Never treat implementation_state: not-implemented as shipped, deployed, or live. Never call a local edit, prototype, export, or recommendation implemented. Preserve unknown as unknown.
