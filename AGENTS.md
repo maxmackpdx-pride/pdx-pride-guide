@@ -137,3 +137,12 @@ status fields, release gate, tunnels, path variables, and the divergence gate.
 
 Roles are in `foundation/decisions/agent-roles-2026-08-06.yaml`. Role describes
 what an agent is best pointed at. It never changes which rules apply.
+
+## Session start
+
+    node scripts/claim.mjs list
+
+Then claim what you are about to touch. Route by cost: urgent production and
+verification loops go to grok, governance writing and design reasoning to claude,
+multi-file implementation to codex. See
+`foundation/decisions/agent-routing-2026-08-06.yaml`.

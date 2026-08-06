@@ -99,7 +99,28 @@ published guide, and it changes every session.
 A release id you have seen before is a guarantee that nothing in that area
 moved. That is the whole point of it.
 
-## 7. Talking to each other
+## 7. Claim before you touch
+
+Run this before your first change, every session:
+
+    node scripts/claim.mjs list
+    node scripts/claim.mjs claim <you> "what you are doing" <path> [path...] --push
+
+It shows what other agents have in flight and refuses your claim if it overlaps.
+A conflicting claim is not a lock you may break. Open a tunnel and settle it.
+
+Release when you are done: `node scripts/claim.mjs release <you> --push`
+
+Route by cost, not by who noticed first. Grok is fastest and cheapest to
+production, so urgent fixes and verification loops go to him. Claude is strong on
+long-form reasoning and expensive per token, so governance writing and design
+analysis go there. Codex takes multi-file implementation. Full table in
+`foundation/decisions/agent-routing-2026-08-06.yaml`.
+
+If a task is outside your lane, name it and leave it unclaimed rather than doing
+it expensively.
+
+## 8. Talking to each other
 
 **Do not write pairwise handoff files.** `X_HANDOFF_FOR_Y.md` grows N by N and
 nobody reads the one addressed to another model. The old ones are in
@@ -125,7 +146,7 @@ tags it and deletes nothing. Pruning is an owner decision, never automatic.
 Transcripts carry no authority. Authority attaches only to what you write into
 the library on close.
 
-## 8. Paths
+## 9. Paths
 
 Absolute paths break every machine but one. That defeats the point of
 cross-model continuity.
@@ -137,14 +158,14 @@ cross-model continuity.
 Doc links are repo-relative. Runtime working directories use the variables. Never
 write a path starting with `/Users/`.
 
-## 9. Design
+## 10. Design
 
 The canonical Design System is the visual and interaction authority. The
 Foundation records why it exists and where its boundaries are. Do not duplicate
 its CSS or component code into the Foundation, and do not invent colors, type,
 radii, spacing, or components anywhere.
 
-## 10. The solo founder test
+## 11. The solo founder test
 
 Before recommending anything, ask whether one person can understand, recover,
 afford, and explain it six months from now. If not, it is the wrong

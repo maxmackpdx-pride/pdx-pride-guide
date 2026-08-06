@@ -1,5 +1,5 @@
 Zaylist Foundation
-Release: zaylist-foundation-2026-08-06.5
+Release: zaylist-foundation-2026-08-06.6
 Authority: Tucker decisions > canonical standards and accepted records > verified production implementation > Foundation recommendations > research, prototypes, exports, migrations, and open questions.
 Decision records: foundation/decisions/ (YAML, one record per file)
 Chapters: foundation/chapters/
@@ -11,3 +11,4 @@ Never treat implementation_state: not-implemented as shipped, deployed, or live.
 Release discipline: every governed area carries a Release id in its llms.txt. Changing content in an area without moving that id is a build failure, enforced by scripts/check-foundation-release.mjs and .github/workflows/foundation-release.yml. Format: zaylist-<area>-YYYY-MM-DD.N. Bump the trailing number, or roll the date and reset to .1. foundation/agent-continuity/ is exempt: it is operational handoff state with its own schema and freshness fields, not a published guide. Treat a release id you have seen before as a guarantee that nothing in that area moved.
 Live tunnels: foundation/agent-continuity/tunnels/ - temporary topic-scoped agent chat rooms. Nine digit codes, first three digits are the topic. Transcripts carry NO AUTHORITY; authority attaches only to what a closing agent writes into the library. Closing requires an outcome and the paths updated. Archived at tunnels/archive/YYYY-MM/. Contract: foundation/agent-continuity/tunnels/README.md
 Agent onboarding: foundation/agent-continuity/onboarding.md - required reading for every agent before its first change. Covers the four floors, authority order, status fields, the release gate, tunnels, path variables, push-is-shipping, and the divergence gate. Roles are recorded in foundation/decisions/agent-roles-2026-08-06.yaml; role never confers authority.
+Work claims: foundation/agent-continuity/claims.json via scripts/claim.mjs. Run `claim.mjs list` at session start and claim paths before touching them. Routing by cost is recorded in foundation/decisions/agent-routing-2026-08-06.yaml: grok takes urgent production and verification loops, claude takes governance writing and design reasoning, codex takes multi-file implementation. A conflicting claim is not a lock to break; open a tunnel.

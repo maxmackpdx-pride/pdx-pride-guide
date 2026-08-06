@@ -68,6 +68,10 @@
   "onboarding": [
    "foundation/agent-continuity/onboarding.md",
    "foundation/decisions/agent-roles-2026-08-06.yaml"
+  ],
+  "claims": [
+   "foundation/agent-continuity/claims.json",
+   "foundation/decisions/agent-routing-2026-08-06.yaml"
   ]
  },
  "livingLibrary": {
@@ -141,5 +145,6 @@
   "$ZAYLIST_AUDITOR": "Separate workspace for campaign drafts and auditor material. Deliberately NOT in maxmackpdx-pride/pdx-pride-guide. Lives beside the checkout on disk. Resolve per machine; never treat it as a repo-relative path.",
   "$ZAYLIST_REPO": "The local checkout of maxmackpdx-pride/pdx-pride-guide."
  },
- "requiredReading": "foundation/agent-continuity/onboarding.md"
+ "requiredReading": "foundation/agent-continuity/onboarding.md",
+ "sessionStart": "node scripts/claim.mjs list, then claim before touching. See foundation/decisions/agent-routing-2026-08-06.yaml"
 }

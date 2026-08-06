@@ -1,0 +1,81 @@
+id: ZF-AGENT-ROUTING-2026-08-06
+title: Work routing between agents, and the session-start claim protocol
+date: 2026-08-06
+status: accepted
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  Several agents share overlapping capabilities. Without a division of labor they
+  duplicate work, overwrite each other's in-flight changes, and spend credits on
+  tasks another agent does faster and cheaper. This happened twice on 2026-08-06:
+  a tunnel commit carried unrelated product WIP, and two agents independently
+  bumped the same release id.
+decision:
+  session_start: >-
+    Every agent runs `node scripts/claim.mjs list` before its first change, and
+    claims what it is about to touch before touching it. A conflicting claim is
+    not a lock to break. Open a tunnel and settle it.
+  routing_principle: >-
+    Route work to the agent that does it well at the lowest cost. Cost includes
+    credits, wall-clock time to production, and the risk of doing it twice.
+  routing:
+    grok:
+      take: >-
+        Live-site bugs, urgent regressions, deploy and verification loops,
+        terminal-side checks against the real filesystem and running service,
+        fast repeated iterations where each cycle is small.
+      why: >-
+        Terminal-resident with the fastest path to Railway. Iteration loops that
+        would cost another agent many expensive turns cost him few cheap ones.
+      avoid: >-
+        Long-form governance writing and design reasoning, where his speed
+        advantage does not apply and the work is token-heavy either way.
+    claude:
+      take: >-
+        Decision records, chapters, explorations, onboarding, design system
+        analysis, contrast and token math, specimen pages, and anything where
+        being wrong slowly costs less than being fast.
+      why: >-
+        Strong at long-form reasoning and structured writing; expensive per token
+        and slow to production.
+      avoid: >-
+        Urgent production fixes, verification loops, and repeated small
+        iterations. A five line prod fix routed here is the most expensive way to
+        make that change.
+    codex:
+      take: >-
+        Multi-file refactors, feature build-out, structural work across the
+        codebase, and migrations.
+      why: Built for sustained implementation across many files.
+      avoid: One-line urgent fixes; route those to grok.
+  overlap_rule: >-
+    When two agents can both do a task, the cheaper one takes it. When neither is
+    obviously cheaper, the one who claims it first takes it, and the other does
+    not start a parallel version.
+  handoff_rule: >-
+    An agent that finds work outside its lane names it and leaves it claimed by
+    nobody rather than doing it badly or expensively. Say what needs doing, in a
+    tunnel or a note, and let it route.
+rationale: >-
+  One founder paying for several models cannot afford the same work done twice,
+  and cannot afford losing in-flight work to an overwrite. Claims make in-flight
+  work visible. Routing by cost makes the spend deliberate rather than accidental.
+alternatives:
+  - Let agents self-select per task. This is the current state and produced both
+    2026-08-06 collisions.
+  - Assign fixed ownership by directory. Rejected as too rigid; the right agent
+    depends on the task, not the path.
+consequences:
+  - claims.json is operational state under agent-continuity, so it is gate-exempt
+    and can be written freely.
+  - Claims older than 12 hours display as stale. Nothing expires automatically;
+    stale claims are a prompt to ask, not permission to take.
+  - Routing is a default, not a rule. Tucker can direct any work to any agent.
+  - Role and routing never confer authority. See ZF-AGENT-ROLES-2026-08-06.
+related_decisions:
+  - ZF-AGENT-ROLES-2026-08-06
+sources:
+  - foundation/agent-continuity/onboarding.md
+  - foundation/agent-continuity/claims.json
+implementation_state: implemented-locally
+review_date: null
