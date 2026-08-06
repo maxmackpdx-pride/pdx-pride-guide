@@ -1,4 +1,5 @@
 Zaylist Trust & Safety Watch
+Release: zaylist-trust-safety-2026-08-06.1
 Status: current
 Owner and final authority: Tucker_PDmaX
 Operational steward: read-only Trust & Safety Watcher
