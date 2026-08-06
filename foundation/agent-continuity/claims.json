@@ -1,4 +1,14 @@
 {
   "schemaVersion": 1,
-  "claims": []
+  "claims": [
+    {
+      "agent": "claude",
+      "intent": "onboarding acknowledgement mechanism",
+      "paths": [
+        "scripts/ack.mjs",
+        "foundation/agent-continuity/acknowledgements.json"
+      ],
+      "at": "2026-08-06T19:31:51Z"
+    }
+  ]
 }
