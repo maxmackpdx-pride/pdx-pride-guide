@@ -1,14 +1,4 @@
 {
   "schemaVersion": 1,
-  "claims": [
-    {
-      "agent": "grok",
-      "intent": "publish foundation library to Pages",
-      "paths": [
-        "docs/library",
-        "gh-pages"
-      ],
-      "at": "2026-08-06T20:39:16Z"
-    }
-  ]
+  "claims": []
 }
