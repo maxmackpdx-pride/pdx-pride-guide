@@ -1,0 +1,61 @@
+id: ZF-LIBRARY-IA-2026-08-06
+title: Library information architecture — launcher, guides, and guide products
+date: 2026-08-06
+status: accepted
+owner: Tucker_PDmaX
+authority: Tucker's explicit decision
+context: >-
+  The Foundation library holds seven guides of very different shapes. A shared
+  top nav was added to every page that looked like a document, including 34
+  specimen pages under design-system/. Opened directly those pages have no index
+  at all, because they were built to be embedded inside the design system shell
+  which supplies one. Tucker reported the result as the index and main content
+  looking flip-flopped on some pages.
+decision:
+  homepage: >-
+    The library homepage is a launcher and nothing more. It gets you to the main
+    things. It does not index the contents of any guide.
+  guides: >-
+    Each guide owns its own index. A guide is a destination and carries the
+    library top nav.
+  guide_products: >-
+    A specimen, component card, thumbnail, or fragment is a PRODUCT of the guide
+    that indexes it, not a library destination. It does not carry the library
+    top nav. The design system is its own living machine and its index is for
+    its products.
+  test: >-
+    Ask who supplies this page's index. If the page supplies its own, it is a
+    guide. If another surface supplies it, the page is that surface's product.
+  carries_nav:
+    - library.html
+    - foundation-v0.2.html
+    - business-guide.html
+    - tech-stack-guide.html
+    - agent-continuity-guide.html
+    - marketing
+    - design-system/index.html
+  does_not_carry_nav: >-
+    Everything under design-system/guidelines/, design-system/components/,
+    thumbnails, and print slides.
+rationale: >-
+  A global nav bar on a fragment implies the page is somewhere you navigate to,
+  when it is something a guide embeds and indexes. Putting a library-level
+  control on a guide's product also blurs which surface owns it, which is the
+  same two-canonical-copies failure the editorial law forbids, expressed in
+  navigation rather than content.
+alternatives:
+  - Promote fragments to standalone pages, each with the design system index
+    alongside the library nav. Rejected as considerably more work that changes
+    what those files are, when the design system shell already solves it.
+  - Leave the nav everywhere. Rejected; it produced the reported layout confusion.
+consequences:
+  - Specimen pages are reached through their guide's index, not linked directly.
+  - New pages need the ownership question answered before they get chrome.
+  - A guide added later carries the nav; its products do not.
+related_decisions:
+  - ZF-AGENT-ROUTING-2026-08-06
+sources:
+  - Reported by Tucker after the 2026-08-06 nav rollout
+  - foundation/agent-continuity/tunnels/archive/ (tunnel 200097648)
+implementation_state: not-implemented
+review_date: null
