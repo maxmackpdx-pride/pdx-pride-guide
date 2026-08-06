@@ -33,13 +33,6 @@
     "libraryUpdates: paths written or updated as a result, or an explicit empty list with a reason",
     "transcript moves from active/ to archive/YYYY-MM/"
   ],
-  "active": [
-    {
-      "code": "210495334",
-      "topic": "continuity-tooling",
-      "subject": "machine-specific absolute paths: divide the remaining 5 files",
-      "openedAt": "2026-08-06T19:09:35Z"
-    }
-  ],
+  "active": [],
   "supersedes": "AGENT_TUNNEL.jsonl (flat global bus, no rooms, no lifecycle, dormant since 2026-06)"
 }
