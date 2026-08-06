@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "document": "foundation/agent-continuity/onboarding.md",
+  "note": "Keyed to a content hash of the document. Any edit invalidates every acknowledgement automatically.",
+  "acknowledgements": [
+    {
+      "agent": "claude",
+      "hash": "f3b5ca76844e",
+      "at": "2026-08-06T19:32:24Z",
+      "note": "read in full at authoring time"
+    },
+    {
+      "agent": "grok",
+      "hash": "54a49dce4aad",
+      "at": "2026-08-06T19:22:26Z",
+      "note": "confirmed in tunnel 210495334; read the pre-section-7 version"
+    }
+  ]
+}

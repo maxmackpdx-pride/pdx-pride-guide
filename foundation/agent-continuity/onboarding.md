@@ -165,7 +165,23 @@ Foundation records why it exists and where its boundaries are. Do not duplicate
 its CSS or component code into the Foundation, and do not invent colors, type,
 radii, spacing, or components anywhere.
 
-## 11. The solo founder test
+## 11. Acknowledge it
+
+When you have read this, record it:
+
+    node scripts/ack.mjs ack <you> --push
+    node scripts/ack.mjs status
+
+The acknowledgement is keyed to a content hash of this file, not a version
+number someone has to remember to bump. Any edit here makes every prior
+acknowledgement stale automatically, and `status` exits 1 while anyone is behind.
+
+Stale means the document changed after you read it. Re-read and acknowledge
+again. It is not a formality: the whole point of writing this down was that
+operating knowledge kept decaying quietly, and an unread update decays the same
+way.
+
+## 12. The solo founder test
 
 Before recommending anything, ask whether one person can understand, recover,
 afford, and explain it six months from now. If not, it is the wrong

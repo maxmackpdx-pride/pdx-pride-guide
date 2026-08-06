@@ -141,6 +141,7 @@ what an agent is best pointed at. It never changes which rules apply.
 ## Session start
 
     node scripts/claim.mjs list
+    node scripts/ack.mjs status
 
 Then claim what you are about to touch. Route by cost: urgent production and
 verification loops go to grok, governance writing and design reasoning to claude,
