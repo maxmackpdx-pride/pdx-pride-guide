@@ -1,14 +1,4 @@
 {
   "schemaVersion": 1,
-  "claims": [
-    {
-      "agent": "claude",
-      "intent": "library IA record",
-      "paths": [
-        "foundation/decisions/library-ia-2026-08-06.yaml",
-        "foundation/llms.txt"
-      ],
-      "at": "2026-08-06T23:19:40Z"
-    }
-  ]
+  "claims": []
 }
