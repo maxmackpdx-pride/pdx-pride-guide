@@ -3,6 +3,7 @@
 // See foundation/agent-continuity/tunnels/README.md
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync, renameSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,6 +17,24 @@ const saveReg = (r) => writeFileSync(REG, JSON.stringify(r, null, 2) + "\n");
 const now = () => new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 const pretty = (c) => `${c.slice(0, 3)}-${c.slice(3, 6)}-${c.slice(6)}`;
 const die = (m) => { console.error(m); process.exit(1); };
+
+const TUNNELS_REL = "foundation/agent-continuity/tunnels";
+// Stage ONLY the tunnels directory and refuse if anything else is already
+// staged. A tunnel turn must never carry product WIP along with it.
+function pushTunnels(msg) {
+  const git = (...a) => execFileSync("git", a, { cwd: ROOT, encoding: "utf8" }).trim();
+  const staged = git("diff", "--cached", "--name-only").split("\n").filter(Boolean);
+  const foreign = staged.filter((f) => !f.startsWith(TUNNELS_REL));
+  if (foreign.length)
+    die(`Refusing to push: ${foreign.length} file(s) already staged outside ${TUNNELS_REL}:\n  ` +
+        foreign.slice(0, 8).join("\n  ") +
+        `\n\nRun: git restore --staged .   then retry. A tunnel turn must not ship product WIP.`);
+  git("add", TUNNELS_REL);
+  if (!git("diff", "--cached", "--name-only")) return console.log("nothing to push");
+  git("commit", "-m", msg);
+  git("push", "origin", "master");
+  console.log("pushed");
+}
 
 function allCodes() {
   const out = new Set();
@@ -46,10 +65,13 @@ function open(topic, subject) {
 
 function say(code, from, ...body) {
   const p = findActive(code) || die(`No active tunnel ${code}.`);
+  const doPush = body.includes("--push");
+  body = body.filter((b) => b !== "--push");
   const text = body.join(" ").trim();
   if (!text) die("Empty message.");
   appendFileSync(p, JSON.stringify({ type: "turn", from, at: now(), body: text }) + "\n");
   console.log(`${pretty(code)} <- ${from}`);
+  if (doPush) pushTunnels(`tunnel ${code.slice(0, 3)}: ${from} turn`);
 }
 
 function read(code) {
@@ -98,6 +120,7 @@ function close(code, by, args) {
   console.log(`closed ${pretty(code)} -> archive/${month}/`);
   console.log(`outcome: ${outcome}`);
   console.log(updated.length ? `library: ${updated.join(", ")}` : `library: none (${reason})`);
+  if (args.includes("--push")) pushTunnels(`tunnel ${code.slice(0, 3)}: closed by ${by}`);
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -109,7 +132,7 @@ else if (cmd === "close") close(rest[0], rest[1], rest.slice(2));
 else console.log(`Live tunnels - topic-scoped agent chat rooms
 
   node scripts/tunnel.mjs open <topic> "<subject>"
-  node scripts/tunnel.mjs say <code> <agent> "<message>"
+  node scripts/tunnel.mjs say <code> <agent> "<message>" [--push]
   node scripts/tunnel.mjs read <code>
   node scripts/tunnel.mjs list
   node scripts/tunnel.mjs close <code> <agent> --outcome "..." --updated <path>

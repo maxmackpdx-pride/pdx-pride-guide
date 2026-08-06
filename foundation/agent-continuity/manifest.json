@@ -32,8 +32,8 @@
    "foundation/decisions/design-system.yaml"
   ],
   "marketing": [
-   "zaylist-auditor/docs/marketing-prompt.md",
-   "zaylist-auditor/campaigns/"
+   "$ZAYLIST_AUDITOR/docs/marketing-prompt.md",
+   "$ZAYLIST_AUDITOR/campaigns/"
   ],
   "agentContinuity": [
    "foundation/chapters/agent-continuity.md",
@@ -132,5 +132,9 @@
   "note": "AGENTS.md is the cross-vendor agent front door. foundation/llms.txt is the single Foundation index; this manifest defers to it rather than competing with it."
  },
  "explorationsAuthority": "none - raw session thinking, append-only, never cite as a rule. See foundation/explorations/README.md",
- "tunnelsAuthority": "none - live transcripts, never cite as a rule. Authority attaches only to library records written on close."
+ "tunnelsAuthority": "none - live transcripts, never cite as a rule. Authority attaches only to library records written on close.",
+ "outOfRepoPaths": {
+  "$ZAYLIST_AUDITOR": "Separate workspace for campaign drafts and auditor material. Deliberately NOT in maxmackpdx-pride/pdx-pride-guide. Lives beside the checkout on disk. Resolve per machine; never treat it as a repo-relative path.",
+  "$ZAYLIST_REPO": "The local checkout of maxmackpdx-pride/pdx-pride-guide."
+ }
 }
