@@ -1,39 +1,41 @@
 {
-  "system": "Zaylist",
-  "version": "2026-08-05",
-  "sourceOfTruth": {
-    "repo": "maxmackpdx-pride/pdx-pride-guide",
-    "branch": "master",
-    "primaryDocs": "foundation/agent-continuity",
-    "liveLibraryPage": "docs/public-site/index.html",
-    "githubPagesWorkflow": ".github/workflows/github-pages.yml"
+ "system": "Zaylist",
+ "version": "2026-08-06",
+ "sourceOfTruth": {
+  "repo": "maxmackpdx-pride/pdx-pride-guide",
+  "branch": "master",
+  "primaryDocs": "foundation",
+  "liveLibraryPage": "docs/public-site/index.html",
+  "frontDoor": "README.md",
+  "agentFrontDoor": "AGENTS.md",
+  "foundationIndex": "foundation/llms.txt"
+ },
+ "apis": {
+  "githubActions": {
+   "railwayDeploy": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/railway-deploy.yml",
+   "foundationRelease": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/foundation-release.yml"
   },
-  "apis": {
-    "githubActions": {
-      "railwayDeploy": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/railway-deploy.yml",
-    "pages": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml"
-    },
-    "railway": {
-      "production": "https://www.zaylist.com",
-      "health": "https://www.zaylist.com/api/health"
-    }
-  },
-  "agents": {
-    "requiredBaselineSkills": [
-      "zaylist-foundation",
-      "zaylist-design-system",
-      "zay-logo-design",
-      "zaylist-living-guide-builder"
-    ],
-    "continuityRoles": [
-      "business-planning",
-      "marketing",
-      "tech-stack-monitor",
-      "design-drift-campaign-watch"
-    ]
-  },
-  "refresh": {
-    "policy": "Update whenever Foundation docs, continuity policy, or API targets change",
-    "lastKnown": "2026-08-05"
+  "railway": {
+   "production": "https://www.zaylist.com",
+   "health": "https://www.zaylist.com/api/health"
   }
+ },
+ "agents": {
+  "requiredBaselineSkills": [
+   "zaylist-foundation",
+   "zaylist-design-system",
+   "zay-logo-design",
+   "zaylist-living-guide-builder"
+  ],
+  "continuityRoles": [
+   "business-planning",
+   "marketing",
+   "tech-stack-monitor",
+   "design-drift-campaign-watch"
+  ]
+ },
+ "refresh": {
+  "policy": "Update whenever Foundation docs, continuity policy, or API targets change",
+  "lastKnown": "2026-08-06"
+ }
 }

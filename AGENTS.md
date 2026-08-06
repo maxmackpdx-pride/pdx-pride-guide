@@ -67,3 +67,34 @@ When UI chrome or design rules change, update **`design-system/`** (mirror from 
 
 Primary nav order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`).
 Do **not** restyle nav unless the user explicitly asks (black outlines; cyan active/handle only).
+
+## The Foundation: read before deciding anything
+
+`foundation/` holds the project's decisions, reasoning, and current state. Read
+it before proposing architecture, naming, product scope, or design direction.
+
+Entry point: **`foundation/llms.txt`**. It lists every governed area, the
+authority order, and how to read a record's status.
+
+- `foundation/decisions/` - one YAML record per durable decision. Check `status`
+  before applying. `accepted` and `current` are authoritative; `recommendation`,
+  `draft`, `queued`, and `deferred` are not. `superseded` is history, never apply it.
+- `foundation/chapters/` - longer explanations of how each area works.
+- `foundation/explorations/` - raw session thinking. **Zero authority.** Never
+  cite an exploration as a rule or a plan. When only an exploration covers a
+  topic, the correct answer is that no decision exists yet.
+- `foundation/agent-continuity/` - current state and handoff. Start at
+  `START_HERE.md`.
+
+`implementation_state: not-implemented` means the decision is made and the code
+has not caught up. Do not describe it as shipped.
+
+Do not write pairwise handoff files (`X_HANDOFF_FOR_Y.md`). That pattern grows
+N by N and nobody reads the one addressed to another model. Write to
+`foundation/agent-continuity/` instead.
+
+### Release ids
+
+Every governed area's `llms.txt` carries `Release: zaylist-<area>-YYYY-MM-DD.N`.
+Change content in an area, bump that id. CI enforces it via
+`scripts/check-foundation-release.mjs`. `foundation/agent-continuity/` is exempt.

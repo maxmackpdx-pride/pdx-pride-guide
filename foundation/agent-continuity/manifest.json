@@ -1,96 +1,131 @@
 {
-  "schemaVersion": 1,
-  "system": "Zaylist Agent Continuity Ledger",
-  "owner": "Tucker_PDmaX",
-  "purpose": "Minimum-necessary operational memory for authorized Zaylist agents",
-  "authorityOrder": [
-    "Tucker explicit decisions",
-    "accepted Foundation and canonical Design System records",
-    "verified production evidence",
-    "Foundation recommendations",
-    "agent recommendations and prototypes",
-    "legacy material"
+ "schemaVersion": 1,
+ "system": "Zaylist Agent Continuity Ledger",
+ "owner": "Tucker_PDmaX",
+ "purpose": "Minimum-necessary operational memory for authorized Zaylist agents",
+ "authorityOrder": [
+  "Tucker explicit decisions",
+  "accepted Foundation and canonical Design System records",
+  "verified production evidence",
+  "Foundation recommendations",
+  "agent recommendations and prototypes",
+  "legacy material"
+ ],
+ "entrypoint": "START_HERE.md",
+ "currentContext": "current-context.json",
+ "conflictRegister": "conflicts.json",
+ "eventStream": "events.jsonl",
+ "visibilityClasses": {
+  "internal-shareable": "Authorized Zaylist workspace and agents only",
+  "internal-nda-protected": "Authorized private workspace only; prohibited from public artifacts and external model inputs",
+  "public-approved": "Explicitly approved by Tucker for public use"
+ },
+ "freshness": {
+  "productionEvidenceDays": 7,
+  "campaignTrendEvidenceDays": 30,
+  "activePriorityReviewDays": 14,
+  "unknownsExpire": false
+ },
+ "routing": {
+  "design": [
+   "foundation/chapters/design-system.md",
+   "foundation/decisions/design-system.yaml"
   ],
-  "entrypoint": "START_HERE.md",
-  "currentContext": "current-context.json",
-  "conflictRegister": "conflicts.json",
-  "eventStream": "events.jsonl",
-  "visibilityClasses": {
-    "internal-shareable": "Authorized Zaylist workspace and agents only",
-    "internal-nda-protected": "Authorized private workspace only; prohibited from public artifacts and external model inputs",
-    "public-approved": "Explicitly approved by Tucker for public use"
-  },
-  "freshness": {
-    "productionEvidenceDays": 7,
-    "campaignTrendEvidenceDays": 30,
-    "activePriorityReviewDays": 14,
-    "unknownsExpire": false
-  },
-  "routing": {
-    "design": ["foundation/chapters/design-system.md", "foundation/decisions/design-system.yaml"],
-    "marketing": ["zaylist-auditor/docs/marketing-prompt.md", "zaylist-auditor/campaigns/"],
-    "agentContinuity": ["foundation/chapters/agent-continuity.md", "foundation/decisions/agent-continuity.yaml"],
-    "business": ["foundation/chapters/business.md", "foundation/decisions/business-domain.yaml", "foundation/business/business-context.json"],
-    "trustSafety": ["foundation/chapters/trust-safety.md", "foundation/decisions/trust-safety.yaml", "foundation/trust-safety/guide.json", "foundation/trust-safety/monitor-policy.md"],
-    "productionTraps": ["/Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md"]
-  },
-  "livingLibrary": {
-    "page": "docs/public-site/index.html",
-    "machineReadableManifest": "docs/public-site/library-state.json",
-    "publishMode": "github-pages-curated"
-  },
-  "agentOrchestration": {
-    "baselineSkills": [
-      "zaylist-foundation",
-      "zaylist-design-system",
-      "zay-logo-design",
-      "zaylist-living-guide-builder"
-    ],
-    "continuityWorkflow": {
-      "requiredReadOrder": [
-        "START_HERE.md",
-        "manifest.json",
-        "current-context.json",
-        "conflicts.json"
-      ],
-      "appendEventTypes": [
-        "direction_added",
-        "direction_corrected",
-        "decision_changed",
-        "evidence_changed",
-        "campaign_created",
-        "audit_completed",
-        "conflict_opened",
-        "conflict_resolved",
-        "blocker_changed",
-        "handoff_changed"
-      ]
-    }
-  },
-  "connectedApis": {
-    "github": {
-      "repo": "maxmackpdx-pride/pdx-pride-guide",
-      "branch": "master",
-      "hostedDocs": {
-        "source": "docs/public-site",
-        "workflow": ".github/workflows/github-pages.yml",
-        "statusPage": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml"
-      }
-    },
-    "railway": {
-      "project": "zaylist",
-      "service": "pdx-pride-guide",
-      "production": "https://www.zaylist.com",
-      "healthEndpoint": "https://www.zaylist.com/api/health"
-    }
-  },
-  "promotionGate": "Only Tucker may approve promotion into durable Foundation, Design System, product, policy, or public truth",
-  "prohibited": [
-    "secrets or credentials",
-    "full chat transcript dumps",
-    "silent status promotion",
-    "unlabeled inference",
-    "private material in external model inputs",
-    "automatic publishing or deployment"
+  "marketing": [
+   "zaylist-auditor/docs/marketing-prompt.md",
+   "zaylist-auditor/campaigns/"
+  ],
+  "agentContinuity": [
+   "foundation/chapters/agent-continuity.md",
+   "foundation/decisions/agent-continuity.yaml"
+  ],
+  "business": [
+   "foundation/chapters/business.md",
+   "foundation/decisions/business-domain.yaml",
+   "foundation/business/business-context.json"
+  ],
+  "trustSafety": [
+   "foundation/chapters/trust-safety.md",
+   "foundation/decisions/trust-safety.yaml",
+   "foundation/trust-safety/guide.json",
+   "foundation/trust-safety/monitor-policy.md"
+  ],
+  "productionTraps": [
+   "docs/LIVE_DESIGN_STANDARD.md"
+  ],
+  "decisions": [
+   "foundation/decisions/",
+   "foundation/llms.txt"
+  ],
+  "explorations": [
+   "foundation/explorations/README.md",
+   "foundation/explorations/"
   ]
+ },
+ "livingLibrary": {
+  "page": "docs/public-site/index.html",
+  "machineReadableManifest": "docs/public-site/library-state.json",
+  "publishMode": "github-pages-curated"
+ },
+ "agentOrchestration": {
+  "baselineSkills": [
+   "zaylist-foundation",
+   "zaylist-design-system",
+   "zay-logo-design",
+   "zaylist-living-guide-builder"
+  ],
+  "continuityWorkflow": {
+   "requiredReadOrder": [
+    "START_HERE.md",
+    "manifest.json",
+    "current-context.json",
+    "conflicts.json"
+   ],
+   "appendEventTypes": [
+    "direction_added",
+    "direction_corrected",
+    "decision_changed",
+    "evidence_changed",
+    "campaign_created",
+    "audit_completed",
+    "conflict_opened",
+    "conflict_resolved",
+    "blocker_changed",
+    "handoff_changed"
+   ]
+  }
+ },
+ "connectedApis": {
+  "github": {
+   "repo": "maxmackpdx-pride/pdx-pride-guide",
+   "branch": "master",
+   "hostedDocs": {
+    "source": "docs/public-site",
+    "workflow": ".github/workflows/github-pages.yml",
+    "statusPage": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml"
+   }
+  },
+  "railway": {
+   "project": "zaylist",
+   "service": "pdx-pride-guide",
+   "production": "https://www.zaylist.com",
+   "healthEndpoint": "https://www.zaylist.com/api/health"
+  }
+ },
+ "promotionGate": "Only Tucker may approve promotion into durable Foundation, Design System, product, policy, or public truth",
+ "prohibited": [
+  "secrets or credentials",
+  "full chat transcript dumps",
+  "silent status promotion",
+  "unlabeled inference",
+  "private material in external model inputs",
+  "automatic publishing or deployment"
+ ],
+ "frontDoor": {
+  "repo": "README.md",
+  "agents": "AGENTS.md",
+  "foundationIndex": "foundation/llms.txt",
+  "note": "AGENTS.md is the cross-vendor agent front door. foundation/llms.txt is the single Foundation index; this manifest defers to it rather than competing with it."
+ },
+ "explorationsAuthority": "none - raw session thinking, append-only, never cite as a rule. See foundation/explorations/README.md"
 }

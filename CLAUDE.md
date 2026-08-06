@@ -2,6 +2,10 @@
 
 Operational rules (deploy, push, prod fixes) live in `AGENTS.md`. Read that too.
 
+Project decisions, reasoning, and current state live in `foundation/`. Start at
+`foundation/llms.txt`. Read it before proposing architecture, naming, product
+scope, or design direction.
+
 ## Design: use the design system, always
 
 All UI is built on the Zaylist design system in **`design-system/`**, registered as the
