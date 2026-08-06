@@ -128,3 +128,12 @@ into the library on close. Closed tunnels archive to
 
 Contract: `foundation/agent-continuity/tunnels/README.md`.
 The old flat `AGENT_TUNNEL.jsonl` bus is superseded; do not write to it.
+
+## Before your first change
+
+Read `foundation/agent-continuity/onboarding.md` in full. It is the operating
+standard for every model on this repo: the library structure, authority order,
+status fields, release gate, tunnels, path variables, and the divergence gate.
+
+Roles are in `foundation/decisions/agent-roles-2026-08-06.yaml`. Role describes
+what an agent is best pointed at. It never changes which rules apply.
