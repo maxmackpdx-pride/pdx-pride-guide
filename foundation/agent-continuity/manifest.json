@@ -34,6 +34,56 @@
     "trustSafety": ["foundation/chapters/trust-safety.md", "foundation/decisions/trust-safety.yaml", "foundation/trust-safety/guide.json", "foundation/trust-safety/monitor-policy.md"],
     "productionTraps": ["/Users/tuckercasey/pdx-pride-guide/docs/LIVE_DESIGN_STANDARD.md"]
   },
+  "livingLibrary": {
+    "page": "docs/public-site/index.html",
+    "machineReadableManifest": "docs/public-site/library-state.json",
+    "publishMode": "github-pages-curated"
+  },
+  "agentOrchestration": {
+    "baselineSkills": [
+      "zaylist-foundation",
+      "zaylist-design-system",
+      "zay-logo-design",
+      "zaylist-living-guide-builder"
+    ],
+    "continuityWorkflow": {
+      "requiredReadOrder": [
+        "START_HERE.md",
+        "manifest.json",
+        "current-context.json",
+        "conflicts.json"
+      ],
+      "appendEventTypes": [
+        "direction_added",
+        "direction_corrected",
+        "decision_changed",
+        "evidence_changed",
+        "campaign_created",
+        "audit_completed",
+        "conflict_opened",
+        "conflict_resolved",
+        "blocker_changed",
+        "handoff_changed"
+      ]
+    }
+  },
+  "connectedApis": {
+    "github": {
+      "repo": "maxmackpdx-pride/pdx-pride-guide",
+      "branch": "master",
+      "hostedDocs": {
+        "source": "docs/public-site",
+        "workflow": ".github/workflows/github-pages.yml",
+        "statusPage": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml"
+      }
+    },
+    "railway": {
+      "project": "zaylist",
+      "service": "pdx-pride-guide",
+      "production": "https://www.zaylist.com",
+      "healthEndpoint": "https://www.zaylist.com/api/health"
+    }
+  },
   "promotionGate": "Only Tucker may approve promotion into durable Foundation, Design System, product, policy, or public truth",
   "prohibited": [
     "secrets or credentials",
