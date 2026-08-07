@@ -25,45 +25,55 @@
       a:hover { text-decoration: underline; }
       ul { line-height: 1.8; }
       .muted { color: var(--muted); }
+      code { color: #9bfafc; }
     </style>
   </head>
   <body>
     <main class="wrap">
       <h1>Zaylist Operating Library</h1>
-      <p class="muted">GitHub-hosted reference for operations, workflow, and continuity.</p>
+      <p class="muted">Canonical live library is now in Cloudflare Workers. This page is an archival bridge only.</p>
 
       <section class="card">
         <h2>Source of truth</h2>
         <ul>
-          <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/tree/master/foundation">foundation/</a> - business, design, tech-stack, trust-safety, and continuity source files</li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/library.html">zaylist-foundation-library</a> - canonical live source</li>
+          <li><a href="https://github.com/maxmackpdx-pride/zaylist-foundation-library">github.com/maxmackpdx-pride/zaylist-foundation-library</a> - canonical repository (private)</li>
+          <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/tree/master/foundation">foundation/</a> - decisions, business, design, tech-stack, trust-safety context</li>
           <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/tree/master/docs">docs/</a> - reference and handoff notes</li>
           <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/blob/master/CLAUDE.md">CLAUDE.md</a> - operating instructions</li>
         </ul>
       </section>
 
       <section class="card">
-        <h2>Deployment</h2>
+        <h2>Canonical guide entry points</h2>
         <ul>
-          <li><a href="/library-state.json">Machine-readable library state</a> (for agents and scripts)</li>
-          <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/blob/master/docs/GITHUB_RAILWAY_GUARDRAILS.md">GitHub + Railway guardrails</a></li>
-          <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/tree/master/.github/workflows">GitHub Actions workflows</a></li>
-          <li>Production app: <a href="https://www.zaylist.com">https://www.zaylist.com</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/foundation-v0.2.html">Foundation guide</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/index.html">Design-system</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/business-guide">Business guide</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/tech-stack-guide">Tech stack guide</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/agent-continuity-guide">Agent continuity</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/marketing">Marketing</a></li>
+          <li><a href="https://zaylist-foundation-library.maxmackpdx.workers.dev/important-people">Important People</a></li>
         </ul>
       </section>
 
       <section class="card">
         <h2>Agent + API connectivity</h2>
         <ul>
-          <li><a href="/library-state.json">Read JSON state</a></li>
-          <li>GitHub Pages workflow: <a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml">deploy status</a></li>
-          <li>Railway deploy workflow: <a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/railway-deploy.yml">deploy status</a></li>
+          <li><a href="/library-state.json">Machine-readable archive state</a> (local file)</li>
+          <li><a href="https://github.com/maxmackpdx-pride/zaylist-foundation-library/actions">GitHub Actions</a> (source-of-truth build/deploy)</li>
+          <li><a href="https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/railway-deploy.yml">Railway deploy status</a> (main product)</li>
           <li>Runtime health check: <a href="https://www.zaylist.com/api/health">https://www.zaylist.com/api/health</a></li>
         </ul>
       </section>
 
       <section class="card">
-        <h2>Want a cleaner docs site later?</h2>
-        <p class="muted">When you want markdown rendering and search, we can switch this page to a Docsify/Docusaurus page and keep this folder public-only.</p>
+        <h2>What changed</h2>
+        <ul>
+          <li>ChatGPT hosted guide is no longer canonical.</li>
+          <li>pdx-pride-guide/docs/public-site is retained for continuity, not production.</li>
+          <li>Cloudflare worker path is now the main destination for all guide surfaces.</li>
+        </ul>
       </section>
     </main>
   </body>

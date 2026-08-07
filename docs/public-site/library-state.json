@@ -1,14 +1,15 @@
 {
  "system": "Zaylist",
  "version": "2026-08-06",
- "sourceOfTruth": {
+  "sourceOfTruth": {
   "repo": "maxmackpdx-pride/pdx-pride-guide",
   "branch": "master",
   "primaryDocs": "foundation",
-  "liveLibraryPage": "docs/public-site/index.html",
+  "liveLibraryPage": "https://zaylist-foundation-library.maxmackpdx.workers.dev/library.html",
   "frontDoor": "README.md",
   "agentFrontDoor": "AGENTS.md",
-  "foundationIndex": "foundation/llms.txt"
+  "foundationIndex": "foundation/llms.txt",
+  "sourceOfTruthBackup": "pdx-pride-guide/docs/public-site/index.html"
  },
  "apis": {
   "githubActions": {

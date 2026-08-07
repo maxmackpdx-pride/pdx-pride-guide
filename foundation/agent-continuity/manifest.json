@@ -75,9 +75,9 @@
   ]
  },
  "livingLibrary": {
-  "page": "docs/public-site/index.html",
+  "page": "https://zaylist-foundation-library.maxmackpdx.workers.dev/library.html",
   "machineReadableManifest": "docs/public-site/library-state.json",
-  "publishMode": "github-pages-curated"
+  "publishMode": "cloudflare-worker"
  },
  "agentOrchestration": {
   "baselineSkills": [
@@ -112,10 +112,16 @@
    "repo": "maxmackpdx-pride/pdx-pride-guide",
    "branch": "master",
    "hostedDocs": {
-    "source": "docs/public-site",
+    "source": "docs/public-site (archive only)",
     "workflow": ".github/workflows/github-pages.yml",
     "statusPage": "https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/workflows/github-pages.yml"
    }
+  },
+  "library": {
+   "source": "maxmackpdx-pride/zaylist-foundation-library",
+   "branch": "main",
+   "entry": "https://zaylist-foundation-library.maxmackpdx.workers.dev/library.html",
+   "status": "private repo + private worker"
   },
   "railway": {
    "project": "zaylist",
