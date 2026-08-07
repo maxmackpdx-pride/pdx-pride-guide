@@ -21,7 +21,7 @@ const NEXT_PREVIEW_CARDS = [
   { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px" },
   { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "magenta", delay: ".08s", duration: "5.94s", drift: "-1.1px" },
   { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "orange", delay: ".21s", duration: "6.56s", drift: "1.6px" },
-  { name: "TRAVELZ", logo: "/brand/family/travelz.svg", tone: "acid", delay: ".12s", duration: "5.76s", drift: "-.8px" },
+  { name: "Z/OUT", logo: "/brand/family/z-out.svg", tone: "acid", delay: ".12s", duration: "5.76s", drift: "-.8px" },
 ] as const;
 
 function NextPreviewCardStack() {
