@@ -2,9 +2,10 @@
 
 Operational rules (deploy, push, prod fixes) live in `AGENTS.md`. Read that too.
 
-Project decisions, reasoning, and current state live in `foundation/`. Start at
-`foundation/llms.txt`. Read it before proposing architecture, naming, product
-scope, or design direction.
+Project decisions, reasoning, and current state live in the private repo
+`maxmackpdx-pride/zaylist-foundation-library`, published at https://zaylist-foundation-library.maxmackpdx.workers.dev/library.
+Read it before proposing architecture, naming, product scope, or design
+direction.
 
 ## Design: use the design system, always
 

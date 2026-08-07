@@ -70,64 +70,29 @@ Do **not** restyle nav unless the user explicitly asks (black outlines; cyan act
 
 ## The Foundation: read before deciding anything
 
-`foundation/` holds the project's decisions, reasoning, and current state. Read
-it before proposing architecture, naming, product scope, or design direction.
+The Foundation is **not in this repo**. It lives in the private repo
+`maxmackpdx-pride/zaylist-foundation-library`, and is published as a library at
 
-Entry point: **`foundation/llms.txt`**. It lists every governed area, the
-authority order, and how to read a record's status.
+  https://zaylist-foundation-library.maxmackpdx.workers.dev/library
 
-- `foundation/decisions/` - one YAML record per durable decision. Check `status`
-  before applying. `accepted` and `current` are authoritative; `recommendation`,
-  `draft`, `queued`, and `deferred` are not. `superseded` is history, never apply it.
-- `foundation/chapters/` - longer explanations of how each area works.
-- `foundation/explorations/` - raw session thinking. **Zero authority.** Never
-  cite an exploration as a rule or a plan. When only an exploration covers a
-  topic, the correct answer is that no decision exists yet.
-- `foundation/agent-continuity/` - current state and handoff. Start at
-  `START_HERE.md`.
+Read it before proposing architecture, naming, product scope, or design
+direction. Decisions, explorations, agent continuity, tunnels, claims, and the
+release gate all live there now.
 
 `implementation_state: not-implemented` means the decision is made and the code
 has not caught up. Do not describe it as shipped.
 
 Do not write pairwise handoff files (`X_HANDOFF_FOR_Y.md`). That pattern grows
-N by N and nobody reads the one addressed to another model. Write to
-`foundation/agent-continuity/` instead.
-
-### Release ids
-
-Every governed area's `llms.txt` carries `Release: zaylist-<area>-YYYY-MM-DD.N`.
-Change content in an area, bump that id. CI enforces it via
-`scripts/check-foundation-release.mjs`. `foundation/agent-continuity/` is exempt.
+N by N and nobody reads the one addressed to another model. Use a tunnel in the
+Foundation repo instead.
 
 ## Live tunnels
 
-When two or more agents need to work a problem together, open a tunnel instead
-of trading messages through files.
+Tunnels moved with the Foundation. Open, read, and close them from the
+`maxmackpdx-pride/zaylist-foundation-library` checkout, not this one.
 
-    node scripts/tunnel.mjs open 100 "one line subject"
-    node scripts/tunnel.mjs say <code> <agent> "message"
-    node scripts/tunnel.mjs read <code>
-
-The code is nine digits and the first three say the topic, so `100699214` is a
-design-system room. Anyone with the code can read the whole transcript.
-
-**Closing is required.** When the conversation feels complete, the agent that
-notices closes it, and closing will not succeed without an outcome and the
-library paths it wrote:
-
-    node scripts/tunnel.mjs close <code> <agent> \
-      --outcome "what was resolved" --updated foundation/decisions/<record>.yaml
-
-A durable rule goes to `foundation/decisions/`. Unresolved thinking goes to
-`foundation/explorations/`. Current state goes to
-`foundation/agent-continuity/notes/`.
-
-Transcripts carry **no authority**. Authority attaches only to what gets written
-into the library on close. Closed tunnels archive to
-`foundation/agent-continuity/tunnels/archive/YYYY-MM/`.
-
-Contract: `foundation/agent-continuity/tunnels/README.md`.
-The old flat `AGENT_TUNNEL.jsonl` bus is superseded; do not write to it.
+Transcripts carry no authority. Authority attaches only to what a closing agent
+writes into the library.
 
 ## Before your first change
 
@@ -140,10 +105,8 @@ what an agent is best pointed at. It never changes which rules apply.
 
 ## Session start
 
-    node scripts/claim.mjs list
-    node scripts/ack.mjs status
+Claims, acknowledgements, and tunnels live in the Foundation repo
+(`maxmackpdx-pride/zaylist-foundation-library`), not here. Run them from that checkout.
 
-Then claim what you are about to touch. Route by cost: urgent production and
-verification loops go to grok, governance writing and design reasoning to claude,
-multi-file implementation to codex. See
-`foundation/decisions/agent-routing-2026-08-06.yaml`.
+Route by cost: urgent production and verification loops go to grok, governance
+writing and design reasoning to claude, multi-file implementation to codex.
