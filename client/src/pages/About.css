@@ -1182,3 +1182,165 @@ html.calm-mode .about-v2-project:hover {
   transform: none;
   box-shadow: none;
 }
+
+/* ── WHY THIS EXISTS ──────────────────────────────────────────
+   The "Not your daddy's Craigslist" block. Lime, so it reads as
+   a separate beat from the pink manifesto above it. */
+.about-v2-why {
+  background: #060607;
+  border-top: 1px solid var(--aw-border);
+  border-bottom: 1px solid var(--aw-border);
+}
+
+.about-v2-why__h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  color: #f4eee1;
+  margin: 0 0 clamp(22px, 3vw, 30px);
+  font-size: clamp(2.35rem, 6vw, 4rem);
+  max-width: 16ch;
+}
+
+.about-v2-why__h2-accent {
+  color: var(--lime, #ccff00);
+  text-shadow: 0 0 34px rgba(204, 255, 0, 0.26);
+}
+
+.about-v2-why__copy {
+  max-width: 62ch;
+  margin-bottom: clamp(32px, 4.5vw, 46px);
+}
+
+.about-v2-why__copy p {
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  line-height: 1.68;
+  color: var(--text-mid, #c8c5bc);
+  margin: 0 0 18px;
+}
+
+.about-v2-why__turn {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem) !important;
+  line-height: 1.22 !important;
+  color: #f4eee1 !important;
+  margin: 26px 0 0 !important;
+}
+
+/* Then / now rows */
+.about-v2-why__rows {
+  list-style: none;
+  margin: 0 0 clamp(30px, 4vw, 42px);
+  padding: 0;
+  border-top: 1px solid var(--aw-border);
+}
+
+.about-v2-why__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 13rem) 1.5rem minmax(8rem, 12rem) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 14px;
+  padding: 16px 2px;
+  border-bottom: 1px solid var(--aw-border);
+}
+
+.about-v2-why__old {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6d6a63;
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 31, 160, 0.55);
+  text-decoration-thickness: 1.5px;
+}
+
+.about-v2-why__arrow {
+  color: #4e4b45;
+  font-size: 0.95rem;
+}
+
+.about-v2-why__now {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(1.02rem, 1.9vw, 1.3rem);
+  letter-spacing: 0.01em;
+  color: var(--lime, #ccff00);
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.about-v2-why__now:hover,
+.about-v2-why__now:focus-visible {
+  border-bottom-color: currentColor;
+}
+
+.about-v2-why__text {
+  font-size: 0.975rem;
+  line-height: 1.6;
+  color: var(--text-mid, #c8c5bc);
+}
+
+/* Close */
+.about-v2-why__close {
+  max-width: 62ch;
+}
+
+.about-v2-why__close p {
+  font-size: clamp(1.02rem, 1.5vw, 1.12rem);
+  line-height: 1.68;
+  color: var(--text-mid, #c8c5bc);
+  margin: 0 0 20px;
+}
+
+.about-v2-why__punch {
+  font-family: var(--font-display) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  font-size: clamp(1.35rem, 3.2vw, 2.15rem) !important;
+  line-height: 1.14 !important;
+  letter-spacing: 0.01em;
+  color: var(--lime, #ccff00) !important;
+  margin: 0 !important;
+  text-shadow: 0 0 32px rgba(204, 255, 0, 0.22);
+}
+
+@media (max-width: 760px) {
+  .about-v2-why__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 18px 2px;
+  }
+
+  .about-v2-why__arrow {
+    display: none;
+  }
+
+  .about-v2-why__old {
+    font-size: 0.76rem;
+  }
+}
+
+
+/* Sub-head inside the close block: the feedback loop. */
+.about-v2-why__sub {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  font-size: clamp(1.3rem, 2.8vw, 1.85rem);
+  color: #f4eee1;
+  margin: 0 0 16px;
+}
+
+.about-v2-why__cta {
+  margin-top: 24px;
+}

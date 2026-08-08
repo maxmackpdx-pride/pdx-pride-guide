@@ -34,10 +34,53 @@ const VALUES = [
   { title: "One person builds this.", text: "Good people help. It is still not a committee." },
 ] as const;
 
+const WHY_ROWS = [
+  {
+    old: "Missed connections",
+    now: "Mizzed Connection",
+    href: "/spotted",
+    text: "Same idea, minus the anonymous stranger. You ask, they accept, then you talk. Nobody gets cold-DMed.",
+  },
+  {
+    old: "Rooms and shares",
+    now: "THE HA\u00DCZ",
+    href: "/the-hauz",
+    text: "Find a room, or build the whole household first and go sign a lease together. Nowhere else lets you do the second one.",
+  },
+  {
+    old: "Gigs",
+    now: "Gigz",
+    href: "/pride-work",
+    text: "Work posted by people in the scene, with a name and a face on it.",
+  },
+  {
+    old: "Free stuff",
+    now: "GifZ",
+    href: "/gifting",
+    text: "Give it to someone who needs it instead of leaving it on the curb.",
+  },
+  {
+    old: "Community calendar",
+    now: "Events",
+    href: "/events",
+    text: "Every queer night in town on one map. Not the three an algorithm decided were advertiser safe.",
+  },
+  {
+    old: "Local services",
+    now: "Directory",
+    href: "/directory",
+    text: "Queer-owned and queer-safe spots. Organic ranking is not for sale.",
+  },
+] as const;
+
 const FAQ = [
   {
     q: "Is this just for Pride Week?",
     a: "Not anymore. It started as the Pride Week guide and now runs all year - parties, drag, marches, community nights, and the quiet stuff too. Pride is every day here.",
+  },
+  {
+    q: "Why does this feel like a classifieds board?",
+    a: "Because that is what it is. Housing, gigs, free stuff, missed connections, a directory, and a calendar, all on one site. We used to run all of that out of Facebook groups and event pages. Now it lives somewhere that belongs to us, and the pieces that get added next are the ones people keep asking for.",
   },
   {
     q: "Where do I find events?",
@@ -46,6 +89,10 @@ const FAQ = [
   {
     q: "How is this different from other event apps?",
     a: "It is free to browse, run by a person, and built for this city. No corporate feed. No paying to climb the organic list. Promoters post their events and the community shows up. Labeled support may appear as the site grows  -  always marked, never fake ranking.",
+  },
+  {
+    q: "Can I ask for a feature?",
+    a: "Yes, and it is the point. Everything people send in gets compiled about once a month, and the asks that keep coming up get built. No voting system, no algorithm, no test group. A lot of what is on the site now started as somebody mentioning it.",
   },
   {
     q: "How do I list my event?",
@@ -59,8 +106,8 @@ const FAQ = [
 
 export default function About() {
   usePageSeo(
-    "About Zaylist | Portland Pride 2026",
-    "Built by one person in Portland. A year-round home for queer nightlife and events, with zero interest in being a sanitized corporate pamphlet.",
+    "Why Zaylist exists | About",
+    "Why Zaylist exists. The community board queer Portland used to run out of Facebook groups, rebuilt somewhere it belongs to us: events, housing, gigs, free stuff, missed connections, and a directory. Feedback gets compiled regularly and the common asks get built.",
   );
 
   const { data: events = [] } = useQuery<EventListing[]>({
@@ -186,6 +233,91 @@ export default function About() {
         </ScrollReveal>
       </section>
 
+      {/* WHY THIS EXISTS */}
+      <section className="about-v2-why" aria-labelledby="about-why-title">
+        <ScrollReveal>
+          <div className="about-v2__inner">
+            <div className="about-v2__kicker about-v2__kicker--lime">Why this exists</div>
+            <h2 id="about-why-title" className="about-v2-why__h2">
+              Not your daddy&apos;s{" "}
+              <span className="about-v2-why__h2-accent">Craigslist</span>
+            </h2>
+
+            <div className="about-v2-why__copy">
+              <p>
+                Every city used to have one ugly, free page where everything got posted. A room. A
+                gig. A couch to give away. The guy you locked eyes with and never saw again. It was
+                the closest thing we had to a public square, and plenty of us found our first
+                apartment, first job, and first everything else on it.
+              </p>
+              <p>
+                Then came Facebook and Instagram, and we did not just move in. We built. Groups
+                turned into real infrastructure. A page was how a bar existed. An event was how a
+                night became real. Mutual aid, sober meetups, leather clubs, house parties, whole
+                organizations with a decade of history behind them, all of it running on somebody
+                else&apos;s land.
+              </p>
+              <p>
+                It worked well. Then it stopped. Accounts switched off with no reason given, pages
+                unpublished, our nights labeled adult content. Appeals went into a form and never
+                came back out. That is not a grudge, it is just what happens when the room belongs
+                to somebody else.
+              </p>
+              <p className="about-v2-why__turn">
+                So the board is back. Same shape. Different owner.
+              </p>
+            </div>
+
+            <ul className="about-v2-why__rows">
+              {WHY_ROWS.map(row => (
+                <li key={row.now} className="about-v2-why__row">
+                  <span className="about-v2-why__old">{row.old}</span>
+                  <span className="about-v2-why__arrow" aria-hidden="true">&rarr;</span>
+                  <Link href={row.href} className="about-v2-why__now">
+                    {row.now}
+                  </Link>
+                  <span className="about-v2-why__text">{row.text}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="about-v2-why__close">
+              <h3 className="about-v2-why__sub">One more option, with one difference</h3>
+              <p>
+                There is no shortage of apps and this is one more of them, I know that. The
+                difference is what happens after you use it. About once a month I sit down with everything
+                people have sent in, compile it, and the things that keep coming up get built into
+                the fabric of the site. No algorithm deciding what counts, no score, no test group.
+                A person reading it and then making the thing. Most of what is already on here
+                arrived exactly that way.
+              </p>
+              <p>
+                I do not see a reason to ever turn that off.
+              </p>
+              <p>
+                The rest of it is simple. You need a name to post, so the spam stays out. Nothing
+                organic is for sale. Your data is not either. And if something ever comes down you
+                get a reason and a person to talk to, and that person is me.
+              </p>
+              <p className="about-v2-why__punch">
+                The roadmap is whatever you keep asking for.
+              </p>
+              <div className="about-v2-why__cta">
+                <Button
+                  type="button"
+                  variant="neon"
+                  accent="lime"
+                  size="md"
+                  onClick={() => setContactModal("message")}
+                >
+                  Tell me what is missing
+                </Button>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
         <ScrollReveal delay={30}>
@@ -260,31 +392,19 @@ export default function About() {
 
               <div className="about-v2-creator__body">
                 <p>
-                  Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
-                  like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
-                  ago I was Oregon State Pet. Right now I&apos;m between full-time gigs. Unemployed, not idle,
-                  pouring everything I have into this and the projects I care about. If you&apos;ve got a role
-                  that deserves that kind of energy, I&apos;m available, and whoever brings me on gets all of it.
-                </p>
-                <p>
-                  I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
-                  and find your place. I&apos;ve loved every minute of it.
+                  Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, and I build
+                  things for this scene when nobody else will. No engineering degree. Just every tool
+                  I could get my hands on and a stupid number of hours.
                 </p>
                 <blockquote className="about-v2-creator__pull">
                   <p>
-                    This community keeps each other going: donating, checking in, keeping the scene alive.
-                    You showed up for me, and I hope this is me doing something for you.
+                    This community keeps each other going. You showed up for me, and this is me doing
+                    something back.
                   </p>
                 </blockquote>
                 <p>
-                  I built this because I&apos;m done being tied down to their platforms. No engineering degree,
-                  just one person with every tool I could get my hands on and a stupid number of hours. Built by a
-                  slutty puppy with a cocky attitude, but run by heart and hopefully the community if it takes off.
-                </p>
-                <p>
-                  I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
-                  the labels, and the way they&apos;ve gutted so many of us. So I made something better. Something
-                  that works for us, with less bullshit for promoters and the people actually running the show.
+                  I&apos;m between full-time gigs and pouring all of it into this. If you have a role
+                  that deserves that kind of energy, I&apos;m available.
                 </p>
               </div>
             </div>
@@ -311,9 +431,8 @@ export default function About() {
                 <span className="about-v2-work__headline-lime">collaborative projects.</span>
               </h3>
               <p className="about-v2-work__support">
-                Looking for partners who want to build with the community: brand work, events, platforms,
-                and joint projects that move real people. If you&apos;ve got a pitch or a half-formed idea,
-                send it.
+                Brand work, events, platforms, and joint projects that move real people. If you have a
+                pitch or a half-formed idea, send it.
               </p>
               <div className="about-v2-work__chips" aria-label="Collaboration focus areas">
                 <span className="about-v2-work__chip">Brand &amp; marketing</span>
@@ -351,7 +470,7 @@ export default function About() {
       <section className="about-v2-projects">
         <ScrollReveal delay={30}>
           <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--pink">What else I&apos;m making</div>
+            <div className="about-v2__kicker about-v2__kicker--pink">Also made in Portland</div>
             <div className="about-v2-projects__list">
               <button
                 type="button"
