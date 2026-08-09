@@ -211,8 +211,8 @@ export default function About() {
                   <div className="about-v2-creator__stickers">
                     <Link href={PROFILE_URL} className="about-v2-creator__pg-sticker">
                       <svg
-                        width="19"
-                        height="19"
+                        width="15"
+                        height="15"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -233,8 +233,8 @@ export default function About() {
                       className="about-v2-creator__ig-sticker"
                     >
                       <svg
-                        width="19"
-                        height="19"
+                        width="15"
+                        height="15"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -260,31 +260,20 @@ export default function About() {
 
               <div className="about-v2-creator__body">
                 <p>
-                  Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, I make disco balls shaped
-                  like naked people tied in shibari, and I produced the Digg&apos;n For Bones podcast. A couple years
-                  ago I was Oregon State Pet. Right now I&apos;m between full-time gigs. Unemployed, not idle,
-                  pouring everything I have into this and the projects I care about. If you&apos;ve got a role
-                  that deserves that kind of energy, I&apos;m available, and whoever brings me on gets all of it.
-                </p>
-                <p>
-                  I&apos;ve watched so many of you grow, figure out what you like, discover what you don&apos;t,
-                  and find your place. I&apos;ve loved every minute of it.
+                  Hi, I&apos;m Tucker. I run Yes Coach, host LockerRoom at The Eagle, make disco balls shaped
+                  like naked people tied in shibari, and produced the Digg&apos;n For Bones podcast. Right now
+                  I&apos;m between full-time gigs and putting the hours into this.
                 </p>
                 <blockquote className="about-v2-creator__pull">
                   <p>
                     This community keeps each other going: donating, checking in, keeping the scene alive.
-                    You showed up for me, and I hope this is me doing something for you.
+                    You showed up for me, and this is me doing something back.
                   </p>
                 </blockquote>
                 <p>
-                  I built this because I&apos;m done being tied down to their platforms. No engineering degree,
-                  just one person with every tool I could get my hands on and a stupid number of hours. Built by a
-                  slutty puppy with a cocky attitude, but run by heart and hopefully the community if it takes off.
-                </p>
-                <p>
-                  I&apos;m tired of Meta deciding what our community gets to see. I&apos;m tired of the censorship,
-                  the labels, and the way they&apos;ve gutted so many of us. So I made something better. Something
-                  that works for us, with less bullshit for promoters and the people actually running the show.
+                  I built it because we needed a place that isn&apos;t theirs to censor. No engineering degree,
+                  just a lot of hours and every tool I could get my hands on. It runs on heart, and hopefully
+                  on the community if it takes off.
                 </p>
               </div>
             </div>

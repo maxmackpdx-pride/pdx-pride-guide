@@ -308,8 +308,8 @@ html.calm-mode .about-v2-hero__inner {
 
 .about-v2-creator__grid {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 52px;
+  grid-template-columns: 240px 1fr;
+  gap: 44px;
   align-items: start;
 }
 
@@ -332,7 +332,7 @@ html.calm-mode .about-v2-hero__inner {
 
 .about-v2-creator__photo-frame img {
   width: 100%;
-  height: 480px;
+  height: 300px;
   object-fit: cover;
   object-position: center top;
   display: block;
@@ -343,10 +343,10 @@ html.calm-mode .about-v2-hero__inner {
   top: -16px;
   right: -10px;
   z-index: 2;
-  max-width: 200px;
+  max-width: 140px;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.8rem;
+  font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
@@ -361,8 +361,8 @@ html.calm-mode .about-v2-hero__inner {
 
 .about-v2-creator__stickers {
   position: absolute;
-  left: 16px;
-  bottom: 16px;
+  left: 12px;
+  bottom: 12px;
   z-index: 4;
   display: flex;
   flex-direction: column;
@@ -374,16 +374,16 @@ html.calm-mode .about-v2-hero__inner {
 .about-v2-creator__ig-sticker {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 0.9rem;
+  font-size: 0.72rem;
   color: #000;
   text-decoration: none;
   border-radius: 4px;
-  padding: 10px 15px 8px;
+  padding: 8px 11px 7px;
   transition: box-shadow 0.15s ease;
 }
 
