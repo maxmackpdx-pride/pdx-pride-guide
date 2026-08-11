@@ -71,6 +71,7 @@ const NudeBeaches = lazy(() => import("./pages/NudeBeaches"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
+const ZIndex = lazy(() => import("./pages/ZIndex"));
 const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -125,6 +126,7 @@ function AppLayout() {
               quietly undone, so it is held for an explicit decision.
               Longest path first so /z/out/nudest is never shadowed.
             */}
+            <Route path="/z" component={ZIndex} />
             {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (
               <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
             ))}

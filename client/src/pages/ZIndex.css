@@ -1,0 +1,181 @@
+/* z/ index: Craigslist density, utility layer. Ink panels, hairline rules,
+   softened neons, mono kickers. No hero, no photography, no rainbow. */
+
+.z-index {
+  min-height: 100vh;
+  background: var(--ink-800, #0a0a0a);
+  padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 48px) 96px;
+}
+
+.z-index__head {
+  max-width: 60ch;
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.z-index__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neon-cyan, #19e3ff);
+  margin: 0 0 10px;
+}
+
+.z-index__head h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(30px, 6vw, 54px);
+  line-height: 0.92;
+  margin: 0 0 12px;
+}
+
+.z-index__lede {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.72;
+  margin: 0;
+}
+
+/* Columns, not cards. Density is the point, so this is real multi-column flow
+   rather than a grid: boards pack down one column and continue in the next,
+   instead of leaving a ragged row whenever one board is much taller. */
+.z-index__grid {
+  columns: 4 260px;
+  column-gap: clamp(18px, 2.4vw, 32px);
+}
+
+.z-index__board {
+  break-inside: avoid;
+  border-top: 2px solid var(--c, var(--neon-cyan, #19e3ff));
+  padding-top: 12px;
+  margin-bottom: clamp(20px, 2.6vw, 34px);
+  min-width: 0;
+}
+
+.z-index__board-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 4px 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.z-index__addr {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--c, var(--neon-cyan, #19e3ff));
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.z-index__board-name {
+  grid-column: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.z-index__count {
+  grid-row: 1;
+  grid-column: 2;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.82;
+}
+
+/* Routeless address: words, not a number, so it reads as a kicker instead. */
+.z-index__count--none {
+  text-align: right;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.42;
+}
+
+.z-index__pending {
+  display: inline-block;
+  width: 1.6em;
+  height: 0.62em;
+  border-radius: 3px;
+  background: var(--border-default);
+  animation: zIndexPending 1.15s ease-in-out infinite;
+}
+
+@keyframes zIndexPending {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.z-index__subs {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--border-default, #1c1c22);
+}
+
+.z-index__subs li + li .z-index__sub {
+  border-top: 1px solid var(--border-default, #1c1c22);
+}
+
+.z-index__sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.14s ease, padding-left 0.14s ease;
+}
+
+.z-index__sub-label {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.3;
+  opacity: 0.82;
+  min-width: 0;
+}
+
+.z-index__sub-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.45;
+  flex: none;
+}
+
+/* Hovering a subcategory picks up its own colour where the taxonomy has one,
+   and the board's accent where it does not. */
+.z-index__sub:hover,
+.z-index__sub:focus-visible {
+  color: var(--sub-c, var(--c, var(--neon-cyan, #19e3ff)));
+  padding-left: 5px;
+}
+
+.z-index__sub:hover .z-index__sub-label,
+.z-index__sub:focus-visible .z-index__sub-label,
+.z-index__sub:hover .z-index__sub-count,
+.z-index__sub:focus-visible .z-index__sub-count {
+  opacity: 1;
+}
+
+.z-index__board-head:hover .z-index__board-name {
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z-index__sub { transition: none; }
+  .z-index__sub:hover,
+  .z-index__sub:focus-visible { padding-left: 0; }
+  .z-index__pending { animation: none; }
+}
+
+.calm-mode .z-index__pending { animation: none; }
