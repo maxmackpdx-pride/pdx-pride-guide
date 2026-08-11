@@ -5711,7 +5711,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       try {
         const existing = storage.getEvent(op.eventId);
         if (!existing || !op.draft?.title || !op.draft?.dateStart) continue;
-        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft));
+        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft), { source: "sync" });
         mergedCand.push({ candidateId: op.candidateId, eventId: op.eventId });
       } catch {
         /* ignore a single bad merge */

@@ -202,7 +202,11 @@ export async function reenrichSanctuaryFlyerFromTicket(row: {
 
 export type StorageLike = {
   getEvents: (opts?: { status?: string }) => Event[];
-  updateEvent: (id: number, data: Partial<Event>) => Event | undefined;
+  updateEvent: (
+    id: number,
+    data: Partial<Event>,
+    opts?: { source?: "sync" | "human" },
+  ) => Event | undefined;
 };
 
 /**
@@ -225,7 +229,7 @@ export function applyContaminationClearPatches(
     if (p.ticketUrl !== undefined) {
       data.ticketUrl = p.ticketUrl;
     }
-    storage.updateEvent(p.id, data);
+    storage.updateEvent(p.id, data, { source: "sync" });
     cleared += 1;
     if (p.reason === "camp_foreign_eagle") camp += 1;
     if (p.reason === "sanctuary_gamebang_wrong_series") sanctuary += 1;
@@ -276,7 +280,7 @@ export async function reenrichSanctuaryContaminatedFlyers(
           storage.updateEvent(row.id, {
             posterImageUrl,
             adminNotes: applyAdminNote(row.adminNotes, note || NOTE_REENRICH),
-          });
+          }, { source: "sync" });
           fixed += 1;
         } else {
           failed += 1;

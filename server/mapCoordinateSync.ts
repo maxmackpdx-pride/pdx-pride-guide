@@ -32,7 +32,7 @@ export async function fillEventMapCoordinates(eventId: number): Promise<void> {
     businesses,
   );
   if (!coords) return;
-  storage.updateEvent(eventId, { lat: coords.lat, lng: coords.lng });
+  storage.updateEvent(eventId, { lat: coords.lat, lng: coords.lng }, { source: "sync" });
 }
 
 export async function fillBusinessMapCoordinates(business: Business): Promise<void> {

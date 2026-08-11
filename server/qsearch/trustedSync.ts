@@ -300,7 +300,7 @@ function autoMergeExistingEvents(
         }
       }
       try {
-        storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft));
+        storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft), { source: "sync" });
         usedIds.add(existing.id);
         updated.push({ id: existing.id, title: existing.title });
         continue;

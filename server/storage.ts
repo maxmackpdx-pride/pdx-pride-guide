@@ -10,6 +10,7 @@ import {
 } from "@shared/missedConnections";
 
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
+import { SYNC_WRITABLE_FIELDS } from "./ingest";
 import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
 import { formatBoardRejectMessage, formatProfilePhotoRejectMessage } from "@shared/boardModeration";
 import {
@@ -567,6 +568,12 @@ try { sqlite.exec(`ALTER TABLE events ADD COLUMN updated_at TEXT NOT NULL DEFAUL
 try {
   sqlite.exec(`UPDATE events SET updated_at = created_at WHERE updated_at IS NULL OR updated_at = ''`);
 } catch {}
+
+// events.locked_fields: JSON array of field names a human has edited by hand.
+// A trusted-venue resync must never revert a human edit, and unclaimed events
+// have no claimedBy to read, so the lock is recorded at the moment of the edit.
+// See mergeDraftIntoEvent in server/ingest/index.ts.
+try { sqlite.exec(`ALTER TABLE events ADD COLUMN locked_fields TEXT NOT NULL DEFAULT '[]'`); } catch {}
 
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
@@ -8871,7 +8878,7 @@ export interface IStorage {
   getPendingClaimEventIds(): number[];
   createEvent(data: InsertEvent): Event;
   updateEventStatus(id: number, status: string): void;
-  updateEvent(id: number, data: Partial<InsertEvent>): Event | undefined;
+  updateEvent(id: number, data: Partial<InsertEvent>, opts?: { source?: "sync" | "human" }): Event | undefined;
   toggleClaimable(id: number, isClaimable: boolean): void;
   // Submissions
   getSubmissions(status?: string): Submission[];
@@ -9440,13 +9447,37 @@ export const storage: IStorage = {
       .where(eq(events.id, id))
       .run();
   },
-  updateEvent(id, data) {
+  updateEvent(id, data, opts) {
     const { updatedAt: _ignore, createdAt: _c, ...rest } = data as Partial<InsertEvent> & {
       updatedAt?: string;
       createdAt?: string;
     };
+    // A human edit locks the fields it touched, so the next trusted-venue resync
+    // leaves them alone. Sync writes pass { source: "sync" } and never lock.
+    // Unclaimed events have no claimedBy to read, so this is what protects an
+    // admin fix. See mergeDraftIntoEvent in server/ingest/index.ts.
+    const patch: Record<string, unknown> = { ...rest };
+    if (opts?.source !== "sync") {
+      const current = db.select().from(events).where(eq(events.id, id)).get();
+      if (current) {
+        let locked: string[] = [];
+        try {
+          const parsed = JSON.parse(String(current.lockedFields || "[]"));
+          if (Array.isArray(parsed)) locked = parsed.filter(f => typeof f === "string");
+        } catch { /* corrupt value: start clean rather than throw mid-edit */ }
+        const before = locked.length;
+        for (const key of Object.keys(rest)) {
+          // Only lock fields a resync could actually clobber, and only when the
+          // value really changed, so a no-op save never freezes the feed out.
+          if (!SYNC_WRITABLE_FIELDS.has(key)) continue;
+          if ((rest as Record<string, unknown>)[key] === (current as Record<string, unknown>)[key]) continue;
+          if (!locked.includes(key)) locked.push(key);
+        }
+        if (locked.length !== before) patch.lockedFields = JSON.stringify(locked);
+      }
+    }
     db.update(events)
-      .set({ ...rest, updatedAt: new Date().toISOString() } as any)
+      .set({ ...patch, updatedAt: new Date().toISOString() } as any)
       .where(eq(events.id, id))
       .run();
     return db.select().from(events).where(eq(events.id, id)).get();

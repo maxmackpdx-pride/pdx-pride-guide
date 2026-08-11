@@ -564,6 +564,8 @@ export function tuckerHostedArchiveAsEvent(row: TuckerHostedArchiveRow): Event {
     adminNotes: `profile_archive:${row.slug}`,
     createdAt: now,
     updatedAt: now,
+    // Archive rows are static and never resynced, so nothing is locked.
+    lockedFields: "[]",
   };
 }
 

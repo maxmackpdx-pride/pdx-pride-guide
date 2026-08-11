@@ -525,10 +525,50 @@ function hasValue(v: unknown): boolean {
  * (normalizeVenueKey mismatch), do not overwrite venueName/address or take the
  * draft poster — false-positive merges must not rewrite host or steal flyer art
  * (e.g. Camp event + Eagle Karaoke draft).
+ *
+ * Claimed events (`claimedBy` set) keep the host's own words: title,
+ * description, poster, admission, and ageRequirement are frozen against later
+ * syncs. Everything else still refreshes, so a moved date, a new pin, or a fresh
+ * ticket link lands as usual. Unclaimed events are unaffected.
  */
+/**
+ * Every field a trusted-venue resync is allowed to write, and therefore every
+ * field a human edit needs to be able to lock. Kept in one place so the write
+ * funnel (storage.updateEvent) and the merge below can never drift apart: if a
+ * field is added to the merge, add it here or a human edit will not protect it.
+ */
+export const SYNC_WRITABLE_FIELDS: ReadonlySet<string> = new Set([
+  "title", "description", "neighborhood", "lat", "lng", "ticketUrl",
+  "venueName", "address", "posterImageUrl",
+  "eventTypes", "admission", "ageRequirement",
+  "dateStart", "dateEnd", "dayOfWeek",
+]);
+
 export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): Partial<InsertEvent> {
   const inc = draftToInsertEvent(draft, { status: existing.status as "HIDDEN" | "LIVE" });
   const patch: Partial<InsertEvent> = {};
+
+  // Claimed events: the host's own words win, the feed's facts still win.
+  // A claim means a real person took responsibility for this listing, so a later
+  // sync must never revert copy they wrote (title, description, poster, door
+  // details). Scheduling and location still refresh, because a moved date is the
+  // whole reason to resync, and the host is not the one publishing the feed.
+  // Unclaimed events are unchanged: the feed keeps them current.
+  const isClaimed = hasValue(existing.claimedBy);
+  // Authored-by-a-human fields, frozen once claimed.
+  const hostOwned = new Set<keyof InsertEvent>([
+    "title", "description", "posterImageUrl", "admission", "ageRequirement",
+  ]);
+  // Fields a human edited by hand, frozen whether or not anyone has claimed the
+  // event. An unclaimed event has no owner to read, so without this an admin fix
+  // is silently reverted by the next scan of that venue's feed.
+  let lockedFields = new Set<string>();
+  try {
+    const parsed = JSON.parse(String((existing as { lockedFields?: string }).lockedFields || "[]"));
+    if (Array.isArray(parsed)) lockedFields = new Set(parsed.filter(f => typeof f === "string"));
+  } catch { /* corrupt value: fall back to no locks rather than block the sync */ }
+  const canTake = (k: keyof InsertEvent) =>
+    !lockedFields.has(k as string) && !(isClaimed && hostOwned.has(k));
 
   const existingVenueName = String(existing.venueName || "").trim();
   const draftVenueName = String(inc.venueName || "").trim();
@@ -555,17 +595,18 @@ export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): P
     "lat", "lng", "ticketUrl",
   ];
   for (const k of newWins) {
+    if (!canTake(k)) continue;
     if (hasValue((inc as Record<string, unknown>)[k])) {
       (patch as Record<string, unknown>)[k] = (inc as Record<string, unknown>)[k];
     }
   }
   if (canTakeVenueFields) {
-    if (hasValue(inc.venueName)) patch.venueName = inc.venueName;
-    if (hasValue(inc.address)) patch.address = inc.address;
+    if (hasValue(inc.venueName) && canTake("venueName")) patch.venueName = inc.venueName;
+    if (hasValue(inc.address) && canTake("address")) patch.address = inc.address;
   }
   // Poster: same-venue (or no conflict) keeps new-wins for non-empty; never steal on venue conflict.
   // Empty/null draft poster still never clears an existing poster (hasValue gate).
-  if (hasValue(inc.posterImageUrl) && !venuesConflict) {
+  if (hasValue(inc.posterImageUrl) && !venuesConflict && canTake("posterImageUrl")) {
     patch.posterImageUrl = inc.posterImageUrl;
   }
   // Never let a bad third-party pin (e.g. Hawks Squarespace → NYC) clobber a good PDX pin.
@@ -579,21 +620,30 @@ export function mergeDraftIntoEvent(existing: Event, draft: IngestEventDraft): P
     }
   }
   // Placeholder-aware: only take the sync value when it is a real (non-default) value.
-  if (inc.eventTypes && inc.eventTypes !== "[]") patch.eventTypes = inc.eventTypes;
-  if (inc.admission && inc.admission !== "UNKNOWN") patch.admission = inc.admission;
-  if (inc.ageRequirement && inc.ageRequirement !== "ALL_AGES") patch.ageRequirement = inc.ageRequirement;
+  if (canTake("eventTypes") && inc.eventTypes && inc.eventTypes !== "[]") {
+    patch.eventTypes = inc.eventTypes;
+  }
+  if (canTake("admission") && inc.admission && inc.admission !== "UNKNOWN") {
+    patch.admission = inc.admission;
+  }
+  if (canTake("ageRequirement") && inc.ageRequirement && inc.ageRequirement !== "ALL_AGES") {
+    patch.ageRequirement = inc.ageRequirement;
+  }
 
   // OR the safety flags so a marking is never lost on update.
   patch.isSexPositive = !!existing.isSexPositive || !!inc.isSexPositive;
   patch.nudityOk = !!existing.nudityOk || !!inc.nudityOk;
   patch.isHouseParty = !!existing.isHouseParty || !!inc.isHouseParty;
 
-  // Date/time always refreshed to the newest sync.
-  patch.dateStart = inc.dateStart;
-  patch.dateEnd = inc.dateEnd;
-  patch.dayOfWeek = inc.dayOfWeek;
+  // Date/time always refreshed to the newest sync, unless a human corrected it.
+  if (canTake("dateStart")) patch.dateStart = inc.dateStart;
+  if (canTake("dateEnd")) patch.dateEnd = inc.dateEnd;
+  if (canTake("dayOfWeek")) patch.dayOfWeek = inc.dayOfWeek;
 
-  const note = `Merged from sync${draft.sourceUrl ? ` (${draft.sourceUrl})` : ""}`;
+  const lockNote = lockedFields.size ? ` · locked: ${[...lockedFields].join(", ")}` : "";
+  const note = `Merged from sync${draft.sourceUrl ? ` (${draft.sourceUrl})` : ""}${
+    isClaimed ? " · claimed: host copy kept" : ""
+  }${lockNote}`;
   patch.adminNotes = [existing.adminNotes?.trim(), note].filter(Boolean).join(" · ").slice(0, 1000);
 
   return patch;

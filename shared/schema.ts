@@ -35,6 +35,13 @@ export const events = sqliteTable("events", {
   createdAt: text("created_at").notNull().default(""),
   /** ISO timestamp; set on create (same as createdAt) and bumped on every updateEvent. */
   updatedAt: text("updated_at").notNull().default(""),
+  /**
+   * JSON array of field names a human edited by hand, e.g. `["title","admission"]`.
+   * A trusted-venue resync skips every locked field, so an admin or host fix is
+   * never reverted. Claimed events get the same protection from `claimedBy`;
+   * this covers the unclaimed case, which has no owner to read.
+   */
+  lockedFields: text("locked_fields").notNull().default("[]"),
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true });
