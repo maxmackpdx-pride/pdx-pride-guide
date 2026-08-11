@@ -1,5 +1,5 @@
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
@@ -42,6 +42,7 @@ function ScrollToTop() {
   return null;
 }
 import Home from "./pages/Home";
+import { Z_ADDRESSES, Z_ENCODED_ALIASES, zUrl } from "@shared/zNamespace";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
 import ResetPassword from "./pages/ResetPassword";
@@ -69,8 +70,23 @@ const Directory = lazy(() => import("./pages/Directory"));
 const NudeBeaches = lazy(() => import("./pages/NudeBeaches"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
+const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
 const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const NotFound = lazy(() => import("./pages/not-found"));
+
+/**
+ * Board page for each existing route, so the `z/` address table drives routing
+ * instead of a second hand-maintained list that can drift from it.
+ */
+const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
+  "/events": Events,
+  "/the-hauz": Housing,
+  "/gifting": Gifting,
+  "/pride-work": PrideWork,
+  "/spotted": MissedConnections,
+  "/directory": Directory,
+  "/nude-beaches": NudeBeaches,
+};
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
@@ -101,6 +117,28 @@ function AppLayout() {
         <RouteBoundary>
           <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
+            {/*
+              z/ address system. Additive on purpose: each address resolves to
+              the board that already exists, and the existing path stays live
+              and canonical. Flipping canonical to z/ means 301ing indexed URLs,
+              which is the one step here that browsers cache and that cannot be
+              quietly undone, so it is held for an explicit decision.
+              Longest path first so /z/out/nudest is never shadowed.
+            */}
+            {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (
+              <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
+            ))}
+            {[...Z_ADDRESSES]
+              .sort((a, b) => b.path.length - a.path.length)
+              .map(address => (
+                <Route
+                  key={address.path}
+                  path={zUrl(address.path)}
+                  component={
+                    (address.route && PAGE_FOR_ROUTE[address.route]) || ZAddressPending
+                  }
+                />
+              ))}
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
