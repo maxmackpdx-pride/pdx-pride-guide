@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ZBoardIcon from "@/components/ZBoardIcon";
+import VenueFollowButton from "@/components/VenueFollowButton";
 import {
   Z_ADDRESSES,
   routedZAddresses,
@@ -189,6 +190,8 @@ type Sub = ZCategoryAddress & {
   count: number | null;
   href?: string;
   displayAddress?: string;
+  businessId?: number;
+  isFollowing?: boolean;
 };
 
 const VISIBLE_SUBS = 4;
@@ -242,7 +245,7 @@ function SubcategoryRows({
   return (
     <ul className="z-index__subs">
       {subs.map(sub => (
-        <li key={sub.key}>
+        <li key={sub.key} className={sub.businessId != null ? "z-index__sub-item z-index__sub-item--listing" : "z-index__sub-item"}>
           <Link
             href={sub.href ?? zUrl(sub.path)}
             className="z-index__sub"
@@ -266,6 +269,14 @@ function SubcategoryRows({
                     : sub.count}
             </span>
           </Link>
+          {sub.businessId != null ? (
+            <VenueFollowButton
+              businessId={sub.businessId}
+              initialFollowing={sub.isFollowing}
+              variant="card"
+              accent={sub.color}
+            />
+          ) : null}
         </li>
       ))}
     </ul>
@@ -313,6 +324,8 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
             displayAddress: name,
             color: ACCENT.spaces,
             count: null,
+            businessId: id,
+            isFollowing: Boolean(row.isFollowing),
           };
         });
     }

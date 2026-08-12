@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * Follow a directory venue (business_follows). Visible on every place card/modal.
+ * Follow a directory listing (business_follows). Visible on every place card/modal.
  */
 export default function VenueFollowButton({
   businessId,
@@ -43,7 +43,7 @@ export default function VenueFollowButton({
       // Hub People → Following includes places (business_follows)
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/people"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/follow-stats"] });
-      toast({ title: data.isFollowing ? "Following venue" : "Unfollowed", duration: 1800 });
+      toast({ title: data.isFollowing ? "Following listing" : "Unfollowed listing", duration: 1800 });
     },
     onError: (err: Error) => {
       toast({ title: "Could not follow", description: err.message, variant: "destructive" });
@@ -56,7 +56,7 @@ export default function VenueFollowButton({
     if (!user) {
       onRequireAuth?.();
       if (!onRequireAuth) {
-        toast({ title: "Log in to follow venues", duration: 2200 });
+        toast({ title: "Log in to follow listings", duration: 2200 });
       }
       return;
     }
@@ -71,7 +71,7 @@ export default function VenueFollowButton({
       onClick={handleClick}
       disabled={mutation.isPending}
       aria-pressed={following}
-      aria-label={following ? "Unfollow venue" : "Follow venue"}
+      aria-label={following ? "Unfollow directory listing" : "Follow directory listing"}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -98,7 +98,7 @@ export default function VenueFollowButton({
         boxShadow: isCard ? undefined : "0 4px 14px -6px rgba(0,0,0,.75)",
       }}
     >
-      {following ? "Following" : "Follow me"}
+      {following ? "Following" : "Follow"}
     </button>
   );
 }
