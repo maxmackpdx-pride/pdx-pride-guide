@@ -46,36 +46,32 @@
   column-gap: clamp(18px, 2.4vw, 32px);
 }
 
+/* Deep-glass card per board. .pdx-glass-card brings the background, border,
+   shadow and blur; only the accent seam and the interior spacing belong here. */
 .z-index__board {
   break-inside: avoid;
-  border-top: 2px solid var(--c, var(--neon-cyan, #19e3ff));
-  padding-top: 12px;
   margin-bottom: clamp(20px, 2.6vw, 34px);
   min-width: 0;
+  border-radius: var(--radius-card, 14px);
+  border-top: 2px solid var(--c, var(--neon-cyan, #19e3ff));
+  padding: clamp(14px, 1.5vw, 20px);
 }
 
-/* Wordmarks render as a tint mask, so the board accent colours them and the
-   owner-directed SVG masters are never edited. Vector all the way down, so it
-   stays crisp at any pixel density. Sized about 3x a normal inline mark. */
+/* Wordmarks are the real vector art. These marks are two-tone and the white
+   prime Z carries the identity, so they are never flattened to one colour.
+   The card's accent seam is what ties the mark to the board. */
 .z-index__logo-link {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .z-index__logo {
   display: block;
   height: clamp(54px, 6.4vw, 84px);
-  width: 100%;
-  max-width: 210px;
-  background-color: var(--c, var(--neon-cyan, #19e3ff));
-  -webkit-mask-image: var(--logo);
-  mask-image: var(--logo);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: left center;
-  mask-position: left center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .z-index__board-head {

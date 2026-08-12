@@ -132,13 +132,15 @@ function BoardColumn({ address }: { address: ZAddress }) {
 
   return (
     <section
-      className="z-index__board pdx-glass-rebind"
+      className="z-index__board pdx-glass-card pdx-glass-rebind"
       style={{ ["--c" as string]: accent }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
     >
       {address.logo && (
         <Link href={zUrl(address.path)} className="z-index__logo-link" tabIndex={-1} aria-hidden="true">
-          <span className="z-index__logo" style={{ ["--logo" as string]: `url("${address.logo}")` }} />
+          {/* Real vector art, not a tint mask. These marks are two-tone and the
+              white prime Z is part of the identity, so flattening them loses it. */}
+          <img className="z-index__logo" src={address.logo} alt="" decoding="async" />
         </Link>
       )}
 

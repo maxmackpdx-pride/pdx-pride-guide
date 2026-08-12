@@ -46,6 +46,12 @@ export type ZAddress = {
   logo?: string;
   /** Board accent. A real token, with the hex HomeStage already pairs with it. */
   accent: string;
+  /**
+   * Kept as a reserved, resolvable address but not given its own column on the
+   * z/ index. z/space is not a section of its own by founder direction on
+   * 2026-08-12; its subject already lives as the Clubs & Groups directory type.
+   */
+  hiddenFromIndex?: boolean;
 };
 
 /**
@@ -77,12 +83,12 @@ export const Z_ADDRESSES: ZAddress[] = [
   { path: "out/beaches", display: "z/out/beaches", board: "Beaches", route: "/nude-beaches",
     parent: "out", accent: "var(--neon-orange, #ff6600)" },
   { path: "space", display: "z/space", board: "Clubs and groups", route: null,
-    logo: `${B}/z-space.svg`, accent: "var(--neon-violet, #8800ff)" },
+    logo: `${B}/z-space.svg`, accent: "var(--neon-violet, #8800ff)", hiddenFromIndex: true },
 ];
 
-/** Top-level addresses, in presentation order. */
+/** Top-level addresses that get their own column, in presentation order. */
 export function rootZAddresses(): ZAddress[] {
-  return Z_ADDRESSES.filter(a => !a.parent);
+  return Z_ADDRESSES.filter(a => !a.parent && !a.hiddenFromIndex);
 }
 
 /** Addresses nested under a parent path. */

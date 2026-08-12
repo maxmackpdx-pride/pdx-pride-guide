@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { CalendarDays, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
+import { CalendarDays, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
@@ -15,6 +15,21 @@ import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 26;
+
+/** The z/ mark for the namespace tab. Real vector art, same prime Z as the hub. */
+function ZSlashMark({ active }: { active: boolean }) {
+  return (
+    <img
+      src="/brand/family/prime-z.svg"
+      alt=""
+      width={MOBILE_ICON}
+      height={MOBILE_ICON}
+      className={`hub-mobile-tab__z-slash${active ? " is-active" : ""}`}
+      decoding="async"
+      aria-hidden
+    />
+  );
+}
 
 /**
  * Center Hub tab: monochrome Z + bar (app face / design guide).
@@ -43,8 +58,9 @@ function tabClass(
 
 /**
  * Mobile bottom navigation (all visitors), a single 5-tab footer used across the
- * whole site: Places / Events / Hub (center) / Boards / Messages. Beaches lives
- * inside the Events sheet (same pattern as Boards). This is the only mobile
+ * whole site: Places / Events / Hub (center) / z/ / Messages. Beaches lives
+ * inside the Events sheet. The z/ tab goes straight to the namespace index
+ * rather than opening a sheet. This is the only mobile
  * bottom bar - hub/admin shells no longer render their own.
  */
 export default function MobileBottomNav() {
@@ -52,13 +68,11 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const [boardsOpen, setBoardsOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
-    if (except !== "boards") setBoardsOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
 
@@ -72,13 +86,13 @@ export default function MobileBottomNav() {
   }, [closeLocalSheets]);
 
   useEffect(() => {
-    setBoardsOpen(false);
     setEventsOpen(false);
   }, [location]);
 
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
+  const zIndexActive = navLinkActive(location, "/z");
   const hubActive = navLinkActive(location, "/dashboard");
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
@@ -93,15 +107,6 @@ export default function MobileBottomNav() {
     }
     dismissExcept("events");
     setEventsOpen(true);
-  };
-
-  const handleBoards = () => {
-    if (boardsOpen) {
-      setBoardsOpen(false);
-      return;
-    }
-    dismissExcept("boards");
-    setBoardsOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -139,25 +144,6 @@ export default function MobileBottomNav() {
                 href={item.href}
                 className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
                 onClick={() => setEventsOpen(false)}
-              >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
-      {boardsOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => setBoardsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet" role="dialog" aria-label="Boards">
-            <h3>Boards</h3>
-            {BOARD_NAV.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
-                onClick={() => setBoardsOpen(false)}
               >
                 <span>{item.label}</span>
               </Link>
@@ -218,17 +204,18 @@ export default function MobileBottomNav() {
             </button>
           )}
 
-          <button
-            type="button"
-            className={tabClass(boardsActive || boardsOpen, "lime")}
-            aria-expanded={boardsOpen}
-            aria-haspopup="dialog"
-            aria-label="Boards"
-            onClick={handleBoards}
+          {/* The boards tab is the namespace now: the z/ mark, straight to /z,
+              where every board and its categories are listed on one page. */}
+          <Link
+            href="/z"
+            className={tabClass(boardsActive || zIndexActive, "lime")}
+            aria-label="z slash, every board"
+            aria-current={zIndexActive ? "page" : undefined}
+            onClick={handleNavLink}
           >
-            <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Boards</span>
-          </button>
+            <ZSlashMark active={boardsActive || zIndexActive} />
+            <span>z/</span>
+          </Link>
 
           <button
             type="button"
