@@ -23,11 +23,16 @@
   --dir-gm: 60; /* resting glow multiplier; calm zeros this */
 
   /* ── 1.1 Master card (accented) ─────────────────────────── */
+  /* Strength of the upward accent bloom under a card. 18% is the canonical
+     default and nothing changes without an explicit override; a dense index of
+     many cards can dial it down locally so a wall of cards does not read as a
+     wall of glow. */
+  --glass-bloom: 18%;
   --glass-card-radius: 14px;
   --glass-card-blur: 12px;
   --glass-card-bg:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
-    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%);
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) var(--glass-bloom, 18%), transparent), transparent 56%);
   --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
   --glass-card-shadow:
     0 0 0 2px #000,
@@ -221,7 +226,7 @@
 .fitem--glow {
   --glass-card-bg:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
-    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) 18%, transparent), transparent 56%);
+    radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) var(--glass-bloom, 18%), transparent), transparent 56%);
   --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
   --glass-card-shadow:
     0 0 0 2px #000,

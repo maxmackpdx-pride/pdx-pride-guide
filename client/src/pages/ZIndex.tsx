@@ -53,9 +53,11 @@ const ACCENT: Record<string, string> = {
  *
  * A board that has a wordmark shows it instead of its name set in type, which is
  * what a wordmark is for. Each file carries its own gradients, so it renders as
- * drawn and is never recoloured to the board accent. Boards with no mark fall
- * back to the name in Barlow Condensed, and every card carries an icon either
- * way, so the row reads the same whether or not a mark exists.
+ * drawn and is never recoloured to the board accent. All five sit in one fixed
+ * height slot at one height, so no mark is optically larger than another and
+ * every card body starts on the same line. Boards with no mark fall back to the
+ * name in Barlow Condensed inside that same slot, and every card carries an icon
+ * either way, so the row reads the same whether or not a mark exists.
  *
  * Marked `next` in the manifest (Z/SPACE, Z/OUT) still get their wordmark here:
  * the address is real and reserved even where the board is not built.
@@ -263,17 +265,19 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           <ZBoardIcon path={address.path} />
           {address.display}
         </h2>
-        {wordmark ? (
-          <img
-            className="z-index__wordmark"
-            src={wordmark.src}
-            alt={wordmark.alt}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <span className="z-index__board-name">{address.board}</span>
-        )}
+        <span className="z-index__wordmark-slot">
+          {wordmark ? (
+            <img
+              className="z-index__wordmark"
+              src={wordmark.src}
+              alt={wordmark.alt}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <span className="z-index__board-name">{address.board}</span>
+          )}
+        </span>
         <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
           {!hasBoard
             ? "not built yet"

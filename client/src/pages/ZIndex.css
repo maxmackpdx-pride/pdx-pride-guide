@@ -15,8 +15,10 @@
   --fx-accel: cubic-bezier(.9, .1, 1, .2);
   --fx-ease: cubic-bezier(.33, 0, .67, 1);
   --fx-1: 100ms; --fx-2: 150ms; --fx-3: 200ms; --fx-4: 300ms; --fx-5: 400ms; --fx-6: 500ms;
-  /* Canonical glass.css ships an 18% under-bloom. The index runs it lower so a
-     wall of cards does not read as a wall of glow. */
+  /* Ten cards at once is a wall of glow, so the index dials the under-bloom
+     down. glass.css reads --glass-bloom with an 18% fallback, so this is a
+     value change and not a copy of the recipe: nothing here can drift from
+     canonical, and every other board still blooms at 18%. */
   --glass-bloom: 5%;
   background: #000;
   padding-bottom: 96px;
@@ -192,19 +194,27 @@
 .z-index__board:hover .z-index__icon { transform: scale(1.12) }
 
 /* Wordmarks carry their own gradients. Never tint, never filter, never
-   recolour: the mark is drawn, not styled. Height only. */
+   recolour: the mark is drawn, not styled.
+
+   All five sit in one fixed height slot at one height, so every card's mark
+   reads at the same optical size and every card's body starts on the same
+   line. Widths differ because the marks differ (2.34:1 to 3.10:1), which is
+   what a wordmark is; heights do not. Boards with no mark get the same slot
+   with the name set in type, so no row is taller than another. */
+.z-index__wordmark-slot {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  margin: 6px 0 11px;
+}
 .z-index__wordmark {
   display: block;
-  height: 15px;
+  height: 18px;
   width: auto;
   max-width: 100%;
-  margin: 6px 0 11px;
   object-fit: contain;
   object-position: left center;
 }
-/* THE HAUZ is a stacked corner lockup rather than a wide wordmark, so it needs
-   more height to read at the same optical size as the others. */
-.z-index__board[data-address="hauz"] .z-index__wordmark { height: 26px }
 
 .z-index__addr {
   margin: 0;
@@ -218,7 +228,6 @@
 }
 .z-index__board-name {
   display: block;
-  margin: 3px 0 11px;
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-weight: 700;
   font-size: 13px;
