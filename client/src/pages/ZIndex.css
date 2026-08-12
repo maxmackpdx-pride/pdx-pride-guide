@@ -351,28 +351,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   column-gap: 22px;
 }
-.z-index__sub-item--clubs {
-  position: relative;
-  padding: 4px 8px 8px;
-  border: 1px solid color-mix(in srgb, #ffd700 58%, transparent);
-  background: linear-gradient(110deg, rgba(255, 215, 0, .11), transparent 70%);
-  box-shadow: inset 3px 0 0 #ffd700;
-}
-.z-index__sub--clubs {
-  min-height: 48px;
-}
-.z-index__clubs-bridge {
-  display: block;
-  max-width: 32ch;
-  padding: 0 9px 5px 28px;
-  color: rgba(255, 255, 255, .62);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 9px;
-  line-height: 1.4;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-
 .z-index__board-head { display: block; text-decoration: none; color: inherit }
 /* ── full bleed photo card ────────────────────────────────
  * Only z/hauz and z/happening carry a photograph. Three stacked layers keep
@@ -633,7 +611,6 @@
   .z-index__board--hub { min-height: 0; padding: 18px 16px 15px }
   .z-index__board--hub .z-index__board-name { font-size: clamp(58px, 22vw, 88px) }
   .z-index__board--hub .z-index__subs { grid-template-columns: 1fr }
-  .z-index__sub-item--clubs { order: -1 }
   .z-index__hub-blueprint { width: 125%; right: -52%; opacity: .07 }
 }
 @media (prefers-reduced-motion: reduce) {

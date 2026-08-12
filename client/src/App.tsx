@@ -138,6 +138,7 @@ function AppLayout() {
                 {() => <Redirect to={categoryAddress.route} />}
               </Route>
             ))}
+            <Route path="/z/spaces">{() => <Redirect to="/directory?type=group" />}</Route>
             {[...Z_ADDRESSES]
               .sort((a, b) => b.path.length - a.path.length)
               .map(address => (

@@ -53,9 +53,14 @@ const gigzCategories = [
   category("gigz", "LOOKING_FOR_WORK", "Talent available", "/pride-work?type=LOOKING_FOR_WORK"),
 ];
 
-const directoryCategories = Object.entries(DIRECTORY_TYPE_LABELS).map(([key, label]) =>
-  category("directory", key, label, `/directory?type=${encodeURIComponent(key)}`),
-);
+const directoryCategories = Object.entries(DIRECTORY_TYPE_LABELS)
+  // Clubs & Groups owns the complete z/spaces board, not a nested Places
+  // category. Directory keeps the underlying `group` filter as an internal
+  // compatibility detail, but it is not a public Z/ category address.
+  .filter(([key]) => key !== "group")
+  .map(([key, label]) =>
+    category("directory", key, label, `/directory?type=${encodeURIComponent(key)}`),
+  );
 
 /** Every real category shown on /z, with one typeable Z/ address and one legacy target. */
 export const Z_CATEGORY_ADDRESSES: ZCategoryAddress[] = [

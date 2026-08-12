@@ -235,10 +235,10 @@ function SubcategoryRows({
   return (
     <ul className="z-index__subs">
       {subs.map(sub => (
-        <li key={sub.key} className={sub.boardPath === "directory" && sub.key === "group" ? "z-index__sub-item--clubs" : undefined}>
+        <li key={sub.key}>
           <Link
             href={zUrl(sub.path)}
-            className={`z-index__sub${sub.boardPath === "directory" && sub.key === "group" ? " z-index__sub--clubs" : ""}`}
+            className="z-index__sub"
             style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
           >
             {sub.color ? <span className="z-index__sub-swatch" aria-hidden="true" /> : null}
@@ -290,7 +290,10 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
         }));
     }
     if (address.path === "directory") {
-      const keys = Object.keys(TYPE_LABELS);
+      // Clubs & Groups owns the complete z/spaces board. Do not duplicate it
+      // as a category inside the Places card even though Directory still uses
+      // the underlying `group` type for compatibility.
+      const keys = Object.keys(TYPE_LABELS).filter(key => key !== "group");
       const counts = countBy(rows, "type", keys);
       return addressSubs(address.path, keys.map(key => ({
         key,
