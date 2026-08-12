@@ -93,7 +93,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   gifz: { src: "/brand/family/gifz.svg", alt: "GifZ" },
   gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
-  spaces: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
+  spaces: { src: "/brand/family/clubs-groups.svg", alt: "Clubs & Groups" },
   out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
   // Glyphs traced out of the real masters rather than redrawn: the letter
   // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFZ for Z. N is
@@ -182,7 +182,7 @@ function rowsOf(payload: unknown): Row[] {
   return [];
 }
 
-type Sub = ZCategoryAddress & { color?: string; count: number };
+type Sub = ZCategoryAddress & { color?: string; count: number | null };
 
 const VISIBLE_SUBS = 4;
 
@@ -243,14 +243,20 @@ function SubcategoryRows({
           >
             {sub.color ? <span className="z-index__sub-swatch" aria-hidden="true" /> : null}
             <span className="z-index__sub-copy">
-              <span className="z-index__sub-address">z/{sub.path}</span>
+              <span className="z-index__sub-address">{sub.path.split("/").at(-1)}</span>
               <span className="z-index__sub-label">{sub.label}</span>
             </span>
             <span
               className="z-index__sub-count"
               aria-label={countState === "loading" ? "Loading count" : countState === "error" ? "Count unavailable" : undefined}
             >
-              {countState === "loading" ? "" : countState === "error" ? "\u2014" : sub.count}
+              {sub.count === null
+                ? null
+                : countState === "loading"
+                  ? ""
+                  : countState === "error"
+                    ? "\u2014"
+                    : sub.count}
             </span>
           </Link>
         </li>
@@ -270,6 +276,19 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
 
   const subs = useMemo<Sub[]>(() => {
     if (!hasBoard) return [];
+    if (address.path === "out") {
+      return Z_ADDRESSES
+        .filter(candidate => candidate.path.startsWith("out/"))
+        .map(candidate => ({
+          boardPath: "out",
+          key: candidate.path.split("/").at(-1) ?? candidate.path,
+          label: candidate.board,
+          path: candidate.path,
+          route: candidate.route ?? zUrl(candidate.path),
+          color: ACCENT[candidate.path],
+          count: null,
+        }));
+    }
     if (address.path === "directory") {
       const keys = Object.keys(TYPE_LABELS);
       const counts = countBy(rows, "type", keys);
@@ -332,7 +351,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   }, [address.path, hasBoard, rows]);
 
   const countable = !!COUNT_ENDPOINT[address.path];
-  const countState = isPending ? "loading" : isError ? "error" : "ready";
+  const countState = !countable ? "ready" : isPending ? "loading" : isError ? "error" : "ready";
   const firstSubs = isDirectoryHub ? subs : subs.slice(0, VISIBLE_SUBS);
   const remainingSubs = isDirectoryHub ? [] : subs.slice(VISIBLE_SUBS);
 
@@ -559,7 +578,7 @@ export default function ZIndex() {
       </nav>
 
       <div className="z-index__grid">
-        {Z_INDEX_ADDRESSES.map((address, index) => (
+        {Z_INDEX_ADDRESSES.filter(address => !address.path.includes("/")).map((address, index) => (
           <BoardColumn key={address.path} address={address} index={index} />
         ))}
       </div>

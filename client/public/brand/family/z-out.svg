@@ -1,11 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 727" role="img" aria-label="Z/OUT logo">
-  <title>Z/OUT - transparent editable master</title>
-  <metadata>status=owner-directed vector master; raster-embedded=false; editable-paths=true; edition=transparent editable master</metadata>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1960 800" role="img" aria-labelledby="title desc">
+  <title id="title">Z/OUT logo</title>
+  <desc id="desc">Z/OUT in the supplied family construction: raised white Prime Z and slash, blaze-orange OUT, and compass details in the O.</desc>
+  <metadata>status=owner-directed production master; source=z-out-logo-orange-2026-08-04/z-out-primary.svg; reference=zay-logo-family-sheet.png; raster-embedded=false; editable-paths=true</metadata>
   <defs>
-    <linearGradient id="acid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="727"><stop offset="0" stop-color="#dcff00"/><stop offset=".52" stop-color="#c7ff00"/><stop offset="1" stop-color="#a9ea00"/></linearGradient>
-    <linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="727"><stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#fafafd"/><stop offset="1" stop-color="#eeeef4"/></linearGradient>
+    <linearGradient id="orange" gradientUnits="userSpaceOnUse" x1="0" y1="150" x2="0" y2="630">
+      <stop offset="0" stop-color="#FFB000"/>
+      <stop offset="0.52" stop-color="#FF7200"/>
+      <stop offset="1" stop-color="#FF3D00"/>
+    </linearGradient>
+    <linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="180" x2="0" y2="630">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#FAFAFD"/>
+      <stop offset="1" stop-color="#ECECF2"/>
+    </linearGradient>
   </defs>
-  <path id="prime-z" d="M138 118H732L407 490h340l-74 87-484 24 325-386H214z" fill="url(#white)"/>
-  <path id="slash" d="M889 70 732 195 614 474h40l151-234z" fill="url(#white)"/>
-  <path id="out" fill="url(#acid)" fill-rule="evenodd" d="M857 234h174l58 67v126l-58 67H857l-58-67V301zm57 60-47 34v72l47 34h60l47-34v-72l-47-34zm206-60h69v169l27 31h48l27-31V234h69v193l-58 67h-124l-58-67zM1382 234H1562v60h-56v200h-69V294h-55z"/>
+  <path id="prime-z" fill="url(#white)" d="M1091 226 1166 320h237l-301 307 379-17 87-101h-269l302-283Z" transform="translate(-847 55) scale(.85)" aria-label="Z"/>
+  <g id="slash" fill="url(#white)" aria-label="slash">
+    <path d="m705 42-37 86-43 282 31-60Z"/>
+    <path d="m656 350-31 60-65 325 67-75Z"/>
+  </g>
+  <g id="out" fill="url(#orange)" transform="translate(660 0)" aria-label="OUT">
+    <path id="glyph-o" fill-rule="evenodd" d="M155 248H410L468 306V532L410 590H155L97 532V306Zm91 82-61 20v138l20 20h155l20-20V350l-20-20Z"/>
+    <path id="glyph-u" d="M500 248h92v236l38 36h42l38-36V248h92v283l-68 59H568l-68-59Z"/>
+    <path id="glyph-t" d="M802 248h300l-60 72h-55v270l-88-74V320h-97Z"/>
+  </g>
+  <g id="o-cardinals" fill="#000000" transform="translate(660 0)" aria-label="N E S W compass directions">
+    <path d="M264 312v-46h12l18 27v-27h12v46h-12l-18-27v27Z"/>
+    <path d="M406 396h40v10h-28v8h24v10h-24v8h28v10h-40Z"/>
+    <path d="M256 526h50v10h-50Zm0 0h10v28h-10Zm0 18h50v10h-50Zm40 0h10v26h-10Zm-40 16h50v10h-50Z"/>
+    <path d="M116 396h12l6 28 8-20h8l8 20 6-28h12l-12 46h-12l-7-20-7 20h-12Z"/>
+  </g>
+  <path id="compass-pointer" fill="url(#white)" d="m339 419-87 30 19-30-19-30Z" transform="translate(660 0)" aria-label="east-pointing compass triangle"/>
+  <g id="tm" fill="#FFFFFF" aria-label="TM" transform="translate(720 15) scale(.72)">
+    <path d="M1515 179h58v15h-20v57h-18v-57h-20Z"/>
+    <path d="M1581 179h18l21 32 21-32h18v72h-17v-43l-19 29h-7l-18-29v43h-17Z"/>
+  </g>
 </svg>

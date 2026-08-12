@@ -1,16 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1790 500" role="img" aria-label="PlaceZ logo">
-  <title>PlaceZ - Zaylist family candidate</title>
-  <metadata>status=owner-requested candidate; family-reference=z-out.svg; editable-paths=true; raster-embedded=false; treatment=flat</metadata>
-  <defs>
-    <linearGradient id="place" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff563d"/><stop offset="1" stop-color="#ff2400"/></linearGradient>
-    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eeeef4"/></linearGradient>
-  </defs>
-  <g fill="url(#place)" fill-rule="evenodd">
-    <path d="M60 410V90h170l70 70v90l-70 70H135v90zm75-245v80h65l25-25v-30l-25-25z"/>
-    <path d="M340 90h75v245h155v75H340z"/>
-    <path d="M595 410 700 90h90l105 320h-82l-20-72h-100l-20 72zm118-143h60l-30-108z"/>
-    <path d="M1160 90H980l-70 70v180l70 70h180v-75h-145l-30-30V195l30-30h145z"/>
-    <path d="M1195 90h245v75h-170v48h140v70h-140v52h170v75h-245z"/>
-  </g>
-  <path fill="url(#white)" d="M1470 90h-245v75h143l-153 170v75h255v-75h-153l153-170z" transform="translate(260)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 500" role="img" aria-labelledby="title desc">
+  <title id="title">PlaceZ</title>
+  <desc id="desc">PlaceZ angular Zay-family wordmark with an oversized terminal Z.</desc>
+  <metadata>status=owner-requested from-scratch revision candidate; date=2026-08-12; editable-paths=true; raster-embedded=false; source-font=Barlow Condensed 900 Italic; treatment=custom outlined lockup</metadata>
+  <path fill="#19E3FF" d="M58 420H620L570 448H58Z"/>
+  <g fill="#19E3FF" transform="translate(70.00 365.00) scale(0.330000 -0.330000)"><path d="M496 512Q496 488 494 475Q486 411 456.5 362.0Q427 313 380.5 286.5Q334 260 278 260H223Q218 260 218 255L188 15Q187 8 182.5 4.0Q178 0 172 0H18Q12 0 8.5 4.0Q5 8 6 15L88 685Q89 692 93.5 696.0Q98 700 104 700H323Q403 700 449.5 648.5Q496 597 496 512ZM311 471Q312 477 312 488Q312 513 301.0 526.0Q290 539 271 539H257Q252 539 252 534L237 410Q235 405 241 405H254Q276 405 291.5 421.5Q307 438 311 471Z" transform="translate(0.00)"/><path d="M8 15 90 685Q91 692 95.5 696.0Q100 700 106 700H260Q266 700 269.5 696.0Q273 692 272 685L209 166Q207 161 213 161H403Q410 161 413.5 157.0Q417 153 416 146L400 15Q397 0 383 0H20Q14 0 10.5 4.0Q7 8 8 15Z" transform="translate(443.00)"/><path d="M298 14 296 90Q297 92 295.0 93.5Q293 95 291 95H204Q199 95 197 90L178 14Q175 0 161 0H9Q-6 0 -2 16L218 687Q222 700 236 700H413Q427 700 428 687L483 16V14Q483 0 468 0H311Q297 0 298 14ZM241 239H288Q291 239 293 244L289 429Q289 433 286.5 432.5Q284 432 284 429L238 244Q236 239 241 239Z" transform="translate(852.00)"/><path d="M23 171Q23 181 25 205L61 497Q73 594 138.0 651.0Q203 708 299 708Q386 708 437.0 660.5Q488 613 488 530Q488 521 486 497L485 492Q484 485 479.5 480.5Q475 476 469 476L315 471Q300 471 302 485L305 510Q307 527 300.0 537.0Q293 547 280 547Q266 547 256.5 537.0Q247 527 245 510L206 189Q204 173 210.5 163.0Q217 153 231 153Q245 153 254.5 162.5Q264 172 266 189L269 216Q270 223 274.5 226.5Q279 230 285 230L438 225Q445 225 448.5 220.5Q452 216 451 209L450 205Q438 108 372.5 50.0Q307 -8 211 -8Q124 -8 73.5 40.0Q23 88 23 171Z" transform="translate(1343.00)"/><path d="M445 539H259Q254 539 254 534L242 436Q240 431 246 431H343Q350 431 353.5 427.0Q357 423 356 416L340 285Q337 270 323 270H226Q221 270 221 265L209 166Q207 161 213 161H399Q406 161 409.5 157.0Q413 153 412 146L396 15Q395 8 390.5 4.0Q386 0 379 0H20Q14 0 10.5 4.0Q7 8 8 15L90 685Q91 692 95.5 696.0Q100 700 106 700H465Q472 700 475.5 696.0Q479 692 478 685L462 554Q461 547 456.5 543.0Q452 539 445 539Z" transform="translate(1781.00)"/></g>
+  <g fill="#FFFFFF" transform="translate(817.96 398.00) scale(0.430000 -0.430000)"><path d="M-6 15 11 151Q13 162 18 170L249 533Q252 539 246 539H73Q66 539 62.5 543.0Q59 547 60 554L76 685Q77 692 81.5 696.0Q86 700 93 700H450Q456 700 459.5 696.0Q463 692 462 685L446 549Q445 542 439 530L206 167Q201 161 209 161H384Q390 161 393.5 157.0Q397 153 396 146L380 15Q379 8 374.5 4.0Q370 0 364 0H7Q0 0 -3.5 4.0Q-7 8 -6 15Z" transform="translate(0.00)"/></g>
+  <path fill="#19E3FF" d="M839.96 54h184l-28 18h-184Z"/>
+  <text x="1510" y="92" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">TM</text>
 </svg>

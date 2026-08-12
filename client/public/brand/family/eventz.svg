@@ -1,16 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1860 500" role="img" aria-label="EventZ logo">
-  <title>EventZ - Zaylist family candidate</title>
-  <metadata>status=owner-requested candidate; family-reference=z-out.svg; editable-paths=true; raster-embedded=false; treatment=flat</metadata>
-  <defs>
-    <linearGradient id="event" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9840"/><stop offset="1" stop-color="#ff6600"/></linearGradient>
-    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eeeef4"/></linearGradient>
-  </defs>
-  <g fill="url(#event)">
-    <path d="M45 90h245v75H120v48h140v70H120v52h170v75H45z"/>
-    <path d="M310 90h82l72 224 72-224h82L510 410h-92z"/>
-    <path d="M645 90h245v75H720v48h140v70H720v52h170v75H645z"/>
-    <path d="M925 410V90h78l137 190V90h75v320h-76l-139-191v191z"/>
-    <path d="M1240 90h270v75h-98v245h-75V165h-97z"/>
-  </g>
-  <path fill="url(#white)" d="M1530 90h-245v75h143l-153 170v75h255v-75h-153l153-170z" transform="translate(270)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 500" role="img" aria-labelledby="title desc">
+  <title id="title">EventZ</title>
+  <desc id="desc">EventZ angular Zay-family wordmark with an oversized terminal Z.</desc>
+  <metadata>status=owner-requested from-scratch revision candidate; date=2026-08-12; editable-paths=true; raster-embedded=false; source-font=Barlow Condensed 900 Italic; treatment=custom outlined lockup</metadata>
+  <path fill="#FF5A1F" d="M58 420H620L570 448H58Z"/>
+  <g fill="#FF5A1F" transform="translate(70.00 365.00) scale(0.325000 -0.325000)"><path d="M445 539H259Q254 539 254 534L242 436Q240 431 246 431H343Q350 431 353.5 427.0Q357 423 356 416L340 285Q337 270 323 270H226Q221 270 221 265L209 166Q207 161 213 161H399Q406 161 409.5 157.0Q413 153 412 146L396 15Q395 8 390.5 4.0Q386 0 379 0H20Q14 0 10.5 4.0Q7 8 8 15L90 685Q91 692 95.5 696.0Q100 700 106 700H465Q472 700 475.5 696.0Q479 692 478 685L462 554Q461 547 456.5 543.0Q452 539 445 539Z" transform="translate(0.00)"/><path d="M133 13 79 684Q79 700 95 700H262Q276 700 275 686V327Q274 324 277.0 324.0Q280 324 281 327L365 686Q368 700 382 700H544Q551 700 554.5 696.0Q558 692 555 684L335 13Q331 0 317 0H147Q133 0 133 13Z" transform="translate(407.00)"/><path d="M445 539H259Q254 539 254 534L242 436Q240 431 246 431H343Q350 431 353.5 427.0Q357 423 356 416L340 285Q337 270 323 270H226Q221 270 221 265L209 166Q207 161 213 161H399Q406 161 409.5 157.0Q413 153 412 146L396 15Q395 8 390.5 4.0Q386 0 379 0H20Q14 0 10.5 4.0Q7 8 8 15L90 685Q91 692 95.5 696.0Q100 700 106 700H465Q472 700 475.5 696.0Q479 692 478 685L462 554Q461 547 456.5 543.0Q452 539 445 539Z" transform="translate(888.00)"/><path d="M388 700H539Q546 700 549.5 696.0Q553 692 552 685L469 15Q468 8 464.0 4.0Q460 0 453 0H280Q268 0 266 13L228 320Q228 323 226.0 323.0Q224 323 224 320L188 15Q187 8 182.5 4.0Q178 0 172 0H20Q14 0 10.5 4.0Q7 8 8 15L90 685Q91 692 95.5 696.0Q100 700 106 700H277Q289 700 291 687L330 378Q330 375 332.0 376.0Q334 377 335 379L371 685Q372 692 376.5 696.0Q381 700 388 700Z" transform="translate(1295.00)"/><path d="M531 685 515 554Q514 547 510.0 543.0Q506 539 499 539H383Q378 539 378 534L314 15Q313 8 309.0 4.0Q305 0 298 0H145Q138 0 134.5 4.0Q131 8 132 15L196 534Q196 539 191 539H79Q72 539 68.5 543.0Q65 547 66 554L82 685Q83 692 87.5 696.0Q92 700 99 700H519Q525 700 528.5 696.0Q532 692 531 685Z" transform="translate(1783.00)"/></g>
+  <g fill="#FFFFFF" transform="translate(824.77 398.00) scale(0.430000 -0.430000)"><path d="M-6 15 11 151Q13 162 18 170L249 533Q252 539 246 539H73Q66 539 62.5 543.0Q59 547 60 554L76 685Q77 692 81.5 696.0Q86 700 93 700H450Q456 700 459.5 696.0Q463 692 462 685L446 549Q445 542 439 530L206 167Q201 161 209 161H384Q390 161 393.5 157.0Q397 153 396 146L380 15Q379 8 374.5 4.0Q370 0 364 0H7Q0 0 -3.5 4.0Q-7 8 -6 15Z" transform="translate(0.00)"/></g>
+  <path fill="#FF5A1F" d="M846.77 54h184l-28 18h-184Z"/>
+  <text x="1510" y="92" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">TM</text>
 </svg>
