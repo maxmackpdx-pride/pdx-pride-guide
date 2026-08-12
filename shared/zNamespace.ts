@@ -73,6 +73,8 @@ export const Z_ENCODED_ALIASES: Record<string, string> = {
   "/z/haüz": "/z/hauz",
   // Singular shipped briefly before Tucker confirmed the plural address.
   "/z/space": "/z/spaces",
+  // Accent normalization shipped after the first HAÜS category slug.
+  "/z/hauz/forming-a-ha-s": "/z/hauz/forming-a-haus",
 };
 
 /**
@@ -106,8 +108,11 @@ export function findZAddress(path: string): ZAddress | undefined {
 
 /** The address that points at an existing app route, for board headers. */
 export function zAddressForRoute(route: string): ZAddress | undefined {
-  const clean = route.split("?")[0].replace(/\/+$/, "") || "/";
-  return Z_ADDRESSES.find(a => a.route === clean);
+  const cleanFull = route.replace(/\/+$/, "") || "/";
+  const exact = Z_ADDRESSES.find(a => a.route === cleanFull);
+  if (exact) return exact;
+  const cleanPath = cleanFull.split("?")[0];
+  return Z_ADDRESSES.find(a => a.route?.split("?")[0] === cleanPath);
 }
 
 /**

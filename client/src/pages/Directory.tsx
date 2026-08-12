@@ -573,7 +573,10 @@ export default function Directory() {
 
   return (
     <div className="zine-page directory-page board-page board-page--makeover directory-page--v2">
-      <ZBoardAddressStrip path="directory" board="Places" />
+      <ZBoardAddressStrip
+        path={activeType === "group" ? "spaces" : "directory"}
+        board={activeType === "group" ? "Clubz & Groupz" : "Places"}
+      />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <DirectoryHero placeCount={businesses.length} />
 

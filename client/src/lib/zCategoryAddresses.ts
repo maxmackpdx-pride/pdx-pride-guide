@@ -13,6 +13,8 @@ export type ZCategoryAddress = {
 function slugifyCategory(value: string): string {
   if (value === "21+") return "21-plus";
   return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/\+/g, " plus ")
