@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,19 +19,46 @@ import "./ZIndex.css";
  * a category. Counts come from the same endpoints the boards themselves use.
  */
 
-/** Board accents, reusing the tokens the home stage already assigns. */
+/**
+ * Board accents. Every value is a real token from client/src/index.css, and no
+ * two boards share one, so the set read together is the rainbow and each board
+ * alone is a single colour. Housing rebinds per post type further down.
+ */
 const ACCENT: Record<string, string> = {
-  happening: "var(--neon-yellow, #ccff00)",
-  hauz: "var(--board-housing, #00ffff)",
-  market: "var(--neon-orange, #ff6600)",
-  gifz: "var(--board-gifting, #ccff00)",
-  gigz: "var(--board-gigs, #b06bff)",
-  mizzed: "var(--board-spotted, #ff1fa0)",
-  directory: "var(--neon-red, #ff2400)",
-  out: "var(--neon-orange, #ff6600)",
-  "out/nudest": "var(--neon-orange, #ff6600)",
-  space: "var(--board-gigs, #b06bff)",
+  happening: "var(--neon-magenta, #ff00cc)",
+  space: "var(--gold, #ffd700)",
+  directory: "var(--neon-orange, #ff6600)",
+  gigz: "var(--board-gigs, #6e3dff)",
+  market: "var(--neon-yellow, #ccff00)",
+  hauz: "var(--panel-cyan, #19e3ff)",
+  gifz: "var(--green-acid, #39ff14)",
+  out: "var(--neon-cyan, #00ffff)",
+  "out/nudest": "var(--neon-cyan, #00ffff)",
+  mizzed: "var(--neon-red, #ff2400)",
 };
+
+/** Housing rebinds per post type, from HOUSING_ACCENT_VAR in shared/housing.ts. */
+const HOUSING_SUB_ACCENT: Record<string, string> = {
+  LOOKING: "var(--panel-cyan, #19e3ff)",
+  OFFERING: "var(--panel-orange, #ff8c00)",
+  FORMING: "var(--green-acid, #39ff14)",
+  MANAGED: "var(--panel-purple, #b06bff)",
+};
+
+/** The set of accents, in index order, for the spectrum rule. */
+const SPECTRUM = [
+  "#ff00cc", "#ff6600", "#ffd700", "#ccff00",
+  "#39ff14", "#19e3ff", "#00ffff", "#6e3dff", "#ff2400",
+];
+
+/** Mote positions for the hero atmosphere, one per letter of the mark. */
+const MOTES: Array<[string, string, string]> = [
+  ["12%", "30%", "#00ffff"],
+  ["30%", "58%", "#ff00cc"],
+  ["50%", "26%", "#ccff00"],
+  ["70%", "60%", "#ff6600"],
+  ["88%", "34%", "#8800ff"],
+];
 
 /**
  * Endpoint each address counts from. Absent means there is no countable list
@@ -84,7 +111,7 @@ function useBoardRows(path: string) {
   });
 }
 
-function BoardColumn({ address }: { address: ZAddress }) {
+function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const { data, isPending } = useBoardRows(address.path);
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
@@ -107,6 +134,7 @@ function BoardColumn({ address }: { address: ZAddress }) {
       return HOUSING_TYPES.map(key => ({
         key,
         label: HOUSING_TYPE_KICKER[key],
+        color: HOUSING_SUB_ACCENT[key],
         count: counts[key],
       }));
     }
@@ -145,10 +173,11 @@ function BoardColumn({ address }: { address: ZAddress }) {
 
   return (
     <section
-      className="z-index__board pdx-glass-rebind"
-      style={{ ["--c" as string]: accent }}
+      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}`}
+      style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
     >
+      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
           {address.display}
@@ -165,6 +194,12 @@ function BoardColumn({ address }: { address: ZAddress }) {
         </span>
       </Link>
 
+      {hasBoard && (
+        <Link href={address.route!} className="z-index__open">
+          Open board <i aria-hidden="true">&rarr;</i>
+        </Link>
+      )}
+
       {subs.length > 0 && (
         <ul className="z-index__subs">
           {subs.map(sub => (
@@ -174,6 +209,7 @@ function BoardColumn({ address }: { address: ZAddress }) {
                 className="z-index__sub"
                 style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
               >
+                {sub.color ? <span className="z-index__sub-swatch" /> : null}
                 <span className="z-index__sub-label">{sub.label}</span>
                 <span className="z-index__sub-count">{isPending ? "" : sub.count}</span>
               </Link>
@@ -187,25 +223,98 @@ function BoardColumn({ address }: { address: ZAddress }) {
 
 export default function ZIndex() {
   usePageSeo(
-    "z/ | Every Zaylist board at one address",
-    "Every Zaylist board and every category, typed out on one page. Events, housing, gigs, free stuff, missed connections, and a directory of queer owned places.",
+    "z/ | Every Zaylist board, one page",
+    "Portland, all at once. Every Zaylist board and every category on one page: events, housing, gigs, free stuff, missed connections, and a directory of queer owned places.",
   );
+
+  const heroRef = useRef<HTMLElement | null>(null);
+
+  /**
+   * Pointer parallax on the wordmark only. Pointer driven rather than scroll
+   * driven so it costs nothing on a phone, where there is no pointer.
+   */
+  const onHeroMove = (e: React.PointerEvent<HTMLElement>) => {
+    const el = heroRef.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--px", String((e.clientX - r.left) / r.width - 0.5));
+    el.style.setProperty("--py", String((e.clientY - r.top) / r.height - 0.5));
+  };
+  const onHeroLeave = () => {
+    const el = heroRef.current;
+    if (!el) return;
+    el.style.setProperty("--px", "0");
+    el.style.setProperty("--py", "0");
+  };
+
+  const words = ["Portland,", "<em>all</em>", "<em>at once.</em>"];
 
   return (
     <div className="z-index">
-      <header className="z-index__head">
-        <p className="z-index__kicker">Zaylist / addresses</p>
-        <h1>Everything, at one address.</h1>
-        <p className="z-index__lede">
-          Every board has a z/ address you can type. This is the whole list, on one page.
-        </p>
-      </header>
+      <section
+        className="z-hero"
+        ref={heroRef}
+        onPointerMove={onHeroMove}
+        onPointerLeave={onHeroLeave}
+      >
+        <span className="z-hero__grain" aria-hidden="true" />
+        <span className="z-hero__motes" aria-hidden="true">
+          {MOTES.map(([left, top, color], i) => (
+            <span
+              key={color + i}
+              className="z-mote"
+              style={{
+                left,
+                top,
+                background: color,
+                animationDelay: `${i * -1.7}s, ${i * -0.9}s`,
+              }}
+            />
+          ))}
+        </span>
+
+        <div className="z-hero__inner">
+          <p className="z-hero__kicker">Portland &middot; every board &middot; one page</p>
+          <div className="z-hero__mark">
+            <h1>
+              {words.map((word, i) => (
+                <span key={word} style={{ ["--d" as string]: `${90 + i * 80}ms` }}>
+                  {word.startsWith("<em>")
+                    ? <em>{word.replace(/<\/?em>/g, "")}</em>
+                    : word}
+                  {i < words.length - 1 ? " " : null}
+                </span>
+              ))}
+            </h1>
+          </div>
+          <div className="z-hero__copy">
+            <p className="z-hero__lede">
+              Every board on one page, in plain words, in the order you read them.
+              Nothing here decides what you see first. Type an address and go.
+            </p>
+            <p className="z-hero__live">
+              <span className="z-hero__dot" aria-hidden="true" />
+              <span>{Z_ADDRESSES.length} addresses live</span>
+            </p>
+          </div>
+        </div>
+      </section>
 
       <div className="z-index__grid">
-        {Z_ADDRESSES.map(address => (
-          <BoardColumn key={address.path} address={address} />
+        {Z_ADDRESSES.map((address, index) => (
+          <BoardColumn key={address.path} address={address} index={index} />
         ))}
       </div>
+
+      <div className="z-index__spectrum" aria-hidden="true">
+        {SPECTRUM.map(color => <i key={color} style={{ background: color }} />)}
+      </div>
+
+      <p className="z-index__note">
+        <b>The boards together are the rainbow.</b> Each board owns one colour, and
+        that is the only place it appears. Counts come from the same endpoints the
+        boards themselves use, so a category with nothing in it stays honestly at zero.
+      </p>
     </div>
   );
 }

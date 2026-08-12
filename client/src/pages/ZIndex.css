@@ -1,181 +1,316 @@
-/* z/ index: Craigslist density, utility layer. Ink panels, hairline rules,
-   softened neons, mono kickers. No hero, no photography, no rainbow. */
+/*
+ * z/ index. OLED-first, deep glass, Fluent motion.
+ *
+ * Surface chrome comes from client/src/components/ds/tokens/glass.css. This file
+ * owns layout, the hero atmosphere, and motion only. Any node that sets its own
+ * --c also carries .pdx-glass-rebind, or the glass recipes fall back to root cyan.
+ *
+ * Real blacks: every pixel outside a lit surface is #000 so an OLED panel
+ * switches it off. Atmosphere lives inside the hero panel, where it is
+ * deliberate, and nowhere else.
+ */
 
 .z-index {
-  min-height: 100vh;
-  background: var(--ink-800, #0a0a0a);
-  padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 48px) 96px;
+  --fx-decel: cubic-bezier(.1, .9, .2, 1);
+  --fx-accel: cubic-bezier(.9, .1, 1, .2);
+  --fx-ease: cubic-bezier(.33, 0, .67, 1);
+  --fx-1: 100ms; --fx-2: 150ms; --fx-3: 200ms; --fx-4: 300ms; --fx-5: 400ms; --fx-6: 500ms;
+  /* Canonical glass.css ships an 18% under-bloom. The index runs it lower so a
+     wall of cards does not read as a wall of glow. */
+  --glass-bloom: 5%;
+  background: #000;
+  padding-bottom: 96px;
 }
 
-.z-index__head {
-  max-width: 60ch;
-  margin-bottom: clamp(28px, 4vw, 44px);
+/* ── hero ─────────────────────────────────────────────────
+ * z0 ground   . true black
+ * z1 grain    . behind everything neon, never over it
+ * z2 motes    . screen blend, drift plus heat haze
+ * z3 wordmark . parallax nearer than the ground
+ * z4 copy
+ */
+.z-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #000;
+  padding: clamp(44px, 9vw, 92px) 0 clamp(28px, 4vw, 46px);
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  --px: 0;
+  --py: 0;
 }
 
-.z-index__kicker {
-  font-family: var(--font-mono);
+.z-hero__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .12;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  animation: zGrain 16s var(--fx-ease) infinite;
+}
+@keyframes zGrain { 0%, 100% { opacity: .09 } 50% { opacity: .14 } }
+
+.z-hero__motes { position: absolute; inset: 0; z-index: 2; pointer-events: none }
+.z-mote {
+  position: absolute;
+  border-radius: 50%;
+  opacity: .34;
+  mix-blend-mode: screen;
+  filter: blur(60px) saturate(1.7);
+  width: 22vw;
+  height: 22vw;
+  max-width: 340px;
+  max-height: 340px;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity, filter;
+  animation: zMoteDrift 11s var(--fx-ease) infinite, zMoteHaze 4.5s var(--fx-ease) infinite;
+}
+@keyframes zMoteDrift {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1) }
+  20% { transform: translate(-50%, -50%) translate(16%, -10%) scale(1.13) }
+  45% { transform: translate(-50%, -50%) translate(-7%, 16%) scale(.85) }
+  70% { transform: translate(-50%, -50%) translate(-16%, -12.5%) scale(1.16) }
+  85% { transform: translate(-50%, -50%) translate(10%, 7%) scale(.92) }
+}
+@keyframes zMoteHaze {
+  0%, 100% { opacity: .29; filter: blur(60px) saturate(1.7) }
+  50% { opacity: .42; filter: blur(46px) saturate(2) }
+}
+
+.z-hero__inner {
+  position: relative;
+  z-index: 4;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(18px, 4vw, 32px);
+}
+.z-hero__kicker {
+  font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--neon-cyan, #19e3ff);
-  margin: 0 0 10px;
+  margin-bottom: 14px;
 }
-
-.z-index__head h1 {
-  font-family: var(--font-display);
+.z-hero__mark {
+  position: relative;
+  z-index: 3;
+  transform: translate3d(0, calc(var(--py) * -10px), 0);
+  transition: transform var(--fx-4) var(--fx-ease);
+}
+.z-hero__mark h1 {
+  margin: 0;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-weight: 900;
   text-transform: uppercase;
-  font-size: clamp(30px, 6vw, 54px);
-  line-height: 0.92;
-  margin: 0 0 12px;
+  font-size: clamp(52px, 13vw, 132px);
+  line-height: .8;
+  letter-spacing: -.045em;
+  text-wrap: balance;
 }
+.z-hero__mark h1 span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(24px);
+  animation: zWordIn var(--fx-6) var(--fx-decel) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.z-hero__mark h1 em { font-style: normal; color: var(--neon-cyan, #19e3ff) }
+@keyframes zWordIn { to { opacity: 1; transform: none } }
 
-.z-index__lede {
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.5;
-  opacity: 0.72;
+.z-hero__copy {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.z-hero__lede {
   margin: 0;
+  max-width: 52ch;
+  color: var(--text-body, #c8c8ce);
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.55;
 }
+.z-hero__live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--text-lo, #999);
+  white-space: nowrap;
+}
+.z-hero__dot {
+  width: 7px; height: 7px; flex: none;
+  border-radius: 50%;
+  background: var(--green-acid, #39ff14);
+  box-shadow: 0 0 0 0 rgba(57, 255, 20, .5);
+  animation: zPulse 2.4s var(--fx-ease) infinite;
+}
+@keyframes zPulse { 50% { box-shadow: 0 0 0 7px rgba(57, 255, 20, 0) } }
 
-/* Columns, not cards. Density is the point, so this is real multi-column flow
-   rather than a grid: boards pack down one column and continue in the next,
-   instead of leaving a ragged row whenever one board is much taller. */
+/* ── grid ───────────────────────────────────────────────── */
 .z-index__grid {
-  columns: 4 260px;
-  column-gap: clamp(18px, 2.4vw, 32px);
-}
-
-.z-index__board {
-  break-inside: avoid;
-  border-top: 2px solid var(--c, var(--neon-cyan, #19e3ff));
-  padding-top: 12px;
-  margin-bottom: clamp(20px, 2.6vw, 34px);
-  min-width: 0;
-}
-
-.z-index__board-head {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 26px clamp(18px, 4vw, 32px) 0;
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: 4px 10px;
-  text-decoration: none;
-  color: inherit;
+  grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));
+  gap: 14px;
 }
 
+/* ── board card: deep glass, real accent per board ──────── */
+.z-index__board {
+  position: relative;
+  padding: 18px 16px 15px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: zCardIn var(--fx-6) var(--fx-decel) forwards;
+  animation-delay: var(--d, 0ms);
+  transition: transform var(--fx-3) var(--fx-decel), filter var(--fx-3) var(--fx-ease);
+}
+@keyframes zCardIn { to { opacity: 1; transform: none } }
+.z-index__board:hover { transform: translateY(-3px); filter: brightness(1.06) }
+.z-index__board > * { position: relative; z-index: 3 }
+/* not built yet: the address is real, the board is not */
+.z-index__board--pending { border-style: dashed }
+
+.z-index__board-head { display: block; text-decoration: none; color: inherit }
 .z-index__addr {
-  font-family: var(--font-mono);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--c, var(--neon-cyan, #19e3ff));
   margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.z-index__board-name {
-  grid-column: 1;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.5;
-}
-
-.z-index__count {
-  grid-row: 1;
-  grid-column: 2;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
   font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.82;
+  color: var(--c);
+  letter-spacing: -.01em;
 }
-
-/* Routeless address: words, not a number, so it reads as a kicker instead. */
-.z-index__count--none {
-  text-align: right;
-  font-size: 10px;
-  letter-spacing: 0.12em;
+.z-index__board-name {
+  display: block;
+  margin: 3px 0 11px;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .07em;
   text-transform: uppercase;
-  opacity: 0.42;
+  color: var(--text-lo, #8d9099);
 }
-
+.z-index__count {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  z-index: 4;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--c);
+  font-variant-numeric: tabular-nums;
+}
+.z-index__count--none { color: var(--text-lo, #5e626c); font-size: 10.5px }
 .z-index__pending {
   display: inline-block;
-  width: 1.6em;
-  height: 0.62em;
+  width: 26px; height: 9px;
   border-radius: 3px;
-  background: var(--border-default);
-  animation: zIndexPending 1.15s ease-in-out infinite;
+  background: rgba(255, 255, 255, .07);
+  position: relative;
+  overflow: hidden;
 }
-
-@keyframes zIndexPending {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
+.z-index__pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .18), transparent);
+  animation: zShimmer 1.6s var(--fx-ease) infinite;
 }
+@keyframes zShimmer { to { transform: translateX(100%) } }
 
-.z-index__subs {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
-  border-top: 1px solid var(--border-default, #1c1c22);
-}
-
-.z-index__subs li + li .z-index__sub {
-  border-top: 1px solid var(--border-default, #1c1c22);
-}
-
+.z-index__subs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column }
 .z-index__sub {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
-  padding: 7px 0;
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.14s ease, padding-left 0.14s ease;
-}
-
-.z-index__sub-label {
-  font-family: var(--font-body);
+  gap: 7px;
+  padding: 3px 7px;
+  margin-left: -7px;
+  border-radius: 4px;
+  color: var(--text-lo, #8d9099);
   font-size: 13.5px;
-  line-height: 1.3;
-  opacity: 0.82;
-  min-width: 0;
+  text-decoration: none;
+  transition: color var(--fx-1) var(--fx-ease), background var(--fx-1) var(--fx-ease);
 }
-
-.z-index__sub-count {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.45;
-  flex: none;
-}
-
-/* Hovering a subcategory picks up its own colour where the taxonomy has one,
-   and the board's accent where it does not. */
 .z-index__sub:hover,
-.z-index__sub:focus-visible {
-  color: var(--sub-c, var(--c, var(--neon-cyan, #19e3ff)));
-  padding-left: 5px;
+.z-index__sub:focus-visible { color: #fff; background: rgba(255, 255, 255, .055); outline: none }
+.z-index__sub-swatch {
+  width: 7px; height: 7px; flex: none;
+  border-radius: 50%;
+  align-self: center;
+  background: var(--sub-c, var(--c));
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .55);
+}
+.z-index__sub-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.z-index__sub-count {
+  margin-left: auto;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--text-lo, #5e626c);
+  font-variant-numeric: tabular-nums;
+}
+.z-index__sub:hover .z-index__sub-count { color: var(--sub-c, var(--c)) }
+
+.z-index__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--c);
+  text-decoration: none;
+}
+.z-index__open i { font-style: normal; transition: transform var(--fx-2) var(--fx-decel) }
+.z-index__board:hover .z-index__open i { transform: translateX(4px) }
+
+/* ── footer note ────────────────────────────────────────── */
+.z-index__note {
+  max-width: 1280px;
+  margin: 34px auto 0;
+  padding: 0 clamp(18px, 4vw, 32px);
+  color: var(--text-lo, #8d9099);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.z-index__note b { color: #fff }
+.z-index__spectrum {
+  display: flex;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 1280px;
+  margin: 34px auto 16px;
+}
+.z-index__spectrum i { flex: 1; transition: flex var(--fx-3) var(--fx-decel) }
+.z-index__spectrum i:hover { flex: 2.4 }
+
+/* Fluent focus stroke: inner dark ring, outer light ring, reads on any surface */
+.z-index__board-head:focus-visible,
+.z-index__open:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 5px #000;
+  border-radius: 4px;
 }
 
-.z-index__sub:hover .z-index__sub-label,
-.z-index__sub:focus-visible .z-index__sub-label,
-.z-index__sub:hover .z-index__sub-count,
-.z-index__sub:focus-visible .z-index__sub-count {
-  opacity: 1;
+@media (max-width: 560px) {
+  .z-index__grid { grid-template-columns: 1fr; gap: 12px }
+  .z-hero__mark h1 { font-size: clamp(46px, 15vw, 80px) }
 }
-
-.z-index__board-head:hover .z-index__board-name {
-  opacity: 0.85;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .z-index__sub { transition: none; }
-  .z-index__sub:hover,
-  .z-index__sub:focus-visible { padding-left: 0; }
-  .z-index__pending { animation: none; }
+  .z-index *, .z-index *::before, .z-index *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+  .z-index__board, .z-hero__mark h1 span { opacity: 1; transform: none }
 }
-
-.calm-mode .z-index__pending { animation: none; }
