@@ -108,17 +108,6 @@ const HOUSING_SUB_ACCENT: Record<string, string> = {
   MANAGED: "var(--panel-purple, #b06bff)",
 };
 
-/** The set of accents, in index order, for the spectrum rule. */
-const SPECTRUM = [
-  "#ff6600", // happening
-  "#ffd700", // space
-  "#ff2400", // directory
-  "#6e3dff", // gigz
-  "#ccff00", // market and gifz
-  "#19e3ff", // hauz
-  "#00ffff", // out
-  "#ff00cc", // mizzed
-];
 
 /** Mote positions for the hero atmosphere, one per letter of the mark. */
 const MOTES: Array<[string, string, string]> = [
@@ -401,9 +390,7 @@ export default function ZIndex() {
         ))}
       </div>
 
-      <div className="z-index__spectrum" aria-hidden="true">
-        {SPECTRUM.map(color => <i key={color} style={{ background: color }} />)}
-      </div>
+      <hr className="pdx-rainbow-rule z-index__rule" aria-hidden="true" />
 
       <p className="z-index__note">
         <b>The boards together are the rainbow.</b> Each board owns one colour, and

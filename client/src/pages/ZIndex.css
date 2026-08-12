@@ -319,16 +319,15 @@
   line-height: 1.6;
 }
 .z-index__note b { color: #fff }
-.z-index__spectrum {
-  display: flex;
-  height: 4px;
-  border-radius: 999px;
-  overflow: hidden;
+/* Section divider is the canonical .pdx-rainbow-rule from ds/tokens/base.css:
+   an animated cyan to yellow to magenta to orange gradient with a glint sweep
+   and a soft bloom under the hard bar. Calm mode and reduced motion flatten it
+   there, not here. This file sets width and rhythm only, never the gradient. */
+.z-index__rule {
   max-width: 1280px;
-  margin: 34px auto 16px;
+  margin: 34px auto 18px;
+  width: calc(100% - clamp(36px, 8vw, 64px));
 }
-.z-index__spectrum i { flex: 1; transition: flex var(--fx-3) var(--fx-decel) }
-.z-index__spectrum i:hover { flex: 2.4 }
 
 /* Fluent focus stroke: inner dark ring, outer light ring, reads on any surface */
 .z-index__board-head:focus-visible,
