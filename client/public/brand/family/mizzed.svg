@@ -1,11 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 500" role="img" aria-labelledby="title desc">
-  <title id="title">MizZed</title>
-  <desc id="desc">MizZed magenta wordmark with one oversized white internal capital Z.</desc>
-  <metadata>status=owner-requested from-scratch revision candidate; date=2026-08-12; editable-paths=true; raster-embedded=false; source-font=Barlow Condensed 900 Italic; treatment=custom outlined lockup</metadata>
-  <path fill="#FF00CC" d="M54 420h520l-48 28H54Z"/>
-  <g fill="#FF00CC" transform="translate(65.00 365.00) scale(0.315000 -0.315000)"><path d="M429 700H581Q587 700 590.5 696.0Q594 692 593 685L511 15Q510 8 505.5 4.0Q501 0 495 0H341Q335 0 331.5 4.0Q328 8 329 15L379 424Q380 428 377.5 428.5Q375 429 373 426L305 328L293 310H292L241 426Q240 429 238.0 428.5Q236 428 235 424L185 15Q184 8 180.0 4.0Q176 0 169 0H16Q9 0 5.5 4.0Q2 8 3 15L85 685Q86 692 90.5 696.0Q95 700 101 700H253Q265 700 269 689L322 559Q324 555 328 559L411 689Q417 700 429 700Z" transform="translate(0.00)"/><path d="M8 15 90 685Q91 692 95.5 696.0Q100 700 106 700H260Q266 700 269.5 696.0Q273 692 272 685L190 15Q189 8 184.5 4.0Q180 0 174 0H20Q14 0 10.5 4.0Q7 8 8 15Z" transform="translate(525.00)"/><path d="M-6 15 11 151Q13 162 18 170L249 533Q252 539 246 539H73Q66 539 62.5 543.0Q59 547 60 554L76 685Q77 692 81.5 696.0Q86 700 93 700H450Q456 700 459.5 696.0Q463 692 462 685L446 549Q445 542 439 530L206 167Q201 161 209 161H384Q390 161 393.5 157.0Q397 153 396 146L380 15Q379 8 374.5 4.0Q370 0 364 0H7Q0 0 -3.5 4.0Q-7 8 -6 15Z" transform="translate(734.00)"/></g>
-  <g fill="#FFFFFF" transform="translate(433.68 402.00) scale(0.425000 -0.425000)"><path d="M-6 15 11 151Q13 162 18 170L249 533Q252 539 246 539H73Q66 539 62.5 543.0Q59 547 60 554L76 685Q77 692 81.5 696.0Q86 700 93 700H450Q456 700 459.5 696.0Q463 692 462 685L446 549Q445 542 439 530L206 167Q201 161 209 161H384Q390 161 393.5 157.0Q397 153 396 146L380 15Q379 8 374.5 4.0Q370 0 364 0H7Q0 0 -3.5 4.0Q-7 8 -6 15Z" transform="translate(0.00)"/></g>
-  <g fill="#FF00CC" transform="translate(600.35 365.00) scale(0.315000 -0.315000)"><path d="M445 539H259Q254 539 254 534L242 436Q240 431 246 431H343Q350 431 353.5 427.0Q357 423 356 416L340 285Q337 270 323 270H226Q221 270 221 265L209 166Q207 161 213 161H399Q406 161 409.5 157.0Q413 153 412 146L396 15Q395 8 390.5 4.0Q386 0 379 0H20Q14 0 10.5 4.0Q7 8 8 15L90 685Q91 692 95.5 696.0Q100 700 106 700H465Q472 700 475.5 696.0Q479 692 478 685L462 554Q461 547 456.5 543.0Q452 539 445 539Z" transform="translate(0.00)"/><path d="M8 15 90 685Q91 692 95.5 696.0Q100 700 106 700H297Q386 700 438.5 653.5Q491 607 491 529Q491 520 489 500L452 200Q445 141 412.5 95.5Q380 50 327.5 25.0Q275 0 211 0H20Q14 0 10.5 4.0Q7 8 8 15ZM213 161 227 162Q243 163 255.5 177.0Q268 191 272 213L305 488L306 499Q306 518 297.0 528.5Q288 539 273 539H259Q254 539 254 534L209 166Q207 161 213 161Z" transform="translate(407.00)"/></g>
-  <path fill="#FFFFFF" d="M451.68 54h178l-27 18h-178Z"/>
-  <text x="1510" y="92" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">TM</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+  <title id="title">MizZed</title><desc id="desc">Custom angular MizZed wordmark with one oversized white featured Z.</desc>
+  <metadata>status=owner-requested custom revision candidate; date=2026-08-12; editable-paths=true; raster-embedded=false; source=Zay-family custom glyph library; font-derived=false</metadata>
+  <g transform="translate(52 54) scale(1.06667 1.92857)" fill="#FF00CC"><path d="M7 140 20 0h27l17 52L91 0h25l-12 140H77l7-80-24 46-17-46-8 80Z"/></g>
+  <g transform="translate(185 54) scale(0.48333 1.92857)" fill="#FF00CC"><path d="M35 0h29L52 140H23Z"/></g>
+  <g transform="translate(248 54) scale(0.90000 1.92857)" fill="#FF00CC"><path d="M4 0 20 25h49L8 140l88-7 17-25-61 2L111 0Z"/></g>
+  <g transform="translate(361 22) scale(1.10000 2.35714)" fill="#FFFFFF"><path d="M4 0 20 25h49L8 140l88-7 17-25-61 2L111 0Z"/></g>
+  <g transform="translate(498 54) scale(0.90000 1.92857)" fill="#FF00CC"><path d="M13 0h80L76 24H37v31h42L65 78H37v38h55l-18 24H13Z"/></g>
+  <g transform="translate(611 54) scale(0.90000 1.92857)" fill="#FF00CC"><path d="M8 0h54l30 29v82l-30 29H8Zm25 25v90h22l13-13V38L55 25Z" fill-rule="evenodd"/></g>
+  <path d="M52 350H694l-42 24H52Z" fill="#FF00CC"/>
+  <text x="1030" y="64" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="700">TM</text>
 </svg>

@@ -93,7 +93,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   gifz: { src: "/brand/family/gifz.svg", alt: "GifZ" },
   gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
-  spaces: { src: "/brand/family/clubs-groups.svg", alt: "Clubs & Groups" },
+  spaces: { src: "/brand/family/clubs-groups.svg", alt: "Clubz & Groupz" },
   out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
   // Glyphs traced out of the real masters rather than redrawn: the letter
   // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFZ for Z. N is

@@ -110,7 +110,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Existing indexed board URLs remain canonical. The additive Z/ address layer is visible as a compact, 44px-tall board marker; it never replaces the primary site navigation or duplicates it inside a hero.
 - The marker links back to `/z`, labels the current lowercase ASCII Z/ address, keeps calm-mode and keyboard focus behavior, and must not create horizontal overflow on compact screens.
 - On the Z/ index, family wordmarks use the owner-approved 144px height. Fallback board names occupy the same structural slot; image alt stays empty where the adjacent heading already names the board.
-- Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. Clubs & Groups is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
+- Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. Clubz & Groupz is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
 - Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and not-built are distinct states.
 
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
