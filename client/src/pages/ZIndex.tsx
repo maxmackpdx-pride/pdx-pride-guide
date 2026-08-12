@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import ZBoardIcon from "@/components/ZBoardIcon";
 import { Z_ADDRESSES, zUrl, type ZAddress } from "@shared/zNamespace";
 import { TYPE_LABELS, TYPE_COLORS } from "@/pages/Directory";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
@@ -44,6 +45,27 @@ const ACCENT: Record<string, string> = {
   out: "var(--neon-cyan, #00ffff)",
   "out/nudest": "var(--neon-cyan, #00ffff)",
   space: "#ffd700",                         // TYPE_COLORS.group, Directory.tsx
+};
+
+/**
+ * Wordmarks from the logo family, `client/public/brand/family/`, matching the
+ * Foundation Library manifest at `design-system/assets/logo-family/`.
+ *
+ * A board that has a wordmark shows it instead of its name set in type, which is
+ * what a wordmark is for. Each file carries its own gradients, so it renders as
+ * drawn and is never recoloured to the board accent. Boards with no mark fall
+ * back to the name in Barlow Condensed, and every card carries an icon either
+ * way, so the row reads the same whether or not a mark exists.
+ *
+ * Marked `next` in the manifest (Z/SPACE, Z/OUT) still get their wordmark here:
+ * the address is real and reserved even where the board is not built.
+ */
+const WORDMARK: Record<string, { src: string; alt: string }> = {
+  gifz: { src: "/brand/family/gifz.svg", alt: "GifZ" },
+  gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
+  hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
+  space: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
+  out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
 };
 
 /**
@@ -160,6 +182,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const { data, isPending } = useBoardRows(address.path);
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
+  const wordmark = WORDMARK[address.path];
   const hasBoard = address.route !== null;
 
   const subs = useMemo<Sub[]>(() => {
@@ -232,13 +255,25 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}`}
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
+      data-address={address.path}
     >
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
+          <ZBoardIcon path={address.path} />
           {address.display}
         </h2>
-        <span className="z-index__board-name">{address.board}</span>
+        {wordmark ? (
+          <img
+            className="z-index__wordmark"
+            src={wordmark.src}
+            alt={wordmark.alt}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span className="z-index__board-name">{address.board}</span>
+        )}
         <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
           {!hasBoard
             ? "not built yet"

@@ -180,8 +180,36 @@
 .z-index__board--pending { border-style: dashed }
 
 .z-index__board-head { display: block; text-decoration: none; color: inherit }
+/* Icon takes the board accent through currentColor, so one colour per board
+   holds for the mark as well as the type. */
+.z-index__icon {
+  flex: none;
+  vertical-align: -3px;
+  margin-right: 7px;
+  opacity: .92;
+  transition: transform var(--fx-3) var(--fx-decel);
+}
+.z-index__board:hover .z-index__icon { transform: scale(1.12) }
+
+/* Wordmarks carry their own gradients. Never tint, never filter, never
+   recolour: the mark is drawn, not styled. Height only. */
+.z-index__wordmark {
+  display: block;
+  height: 15px;
+  width: auto;
+  max-width: 100%;
+  margin: 6px 0 11px;
+  object-fit: contain;
+  object-position: left center;
+}
+/* THE HAUZ is a stacked corner lockup rather than a wide wordmark, so it needs
+   more height to read at the same optical size as the others. */
+.z-index__board[data-address="hauz"] .z-index__wordmark { height: 26px }
+
 .z-index__addr {
   margin: 0;
+  display: flex;
+  align-items: center;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-weight: 600;
   font-size: 15px;
