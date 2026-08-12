@@ -47,6 +47,8 @@ import {
   type BusinessClaim, type BusinessSubmission, type BusinessBlock, type BusinessLogoRequest,
 } from "@shared/schema";
 import crypto from "crypto";
+export { hashPassword, isLegacyPasswordHash, verifyPassword } from "./auth/passwords";
+import { hashPassword } from "./auth/passwords";
 import { buildSubmissionMergePatch } from "@shared/submissionMatch";
 import { mergeMapCoordinates, eventMatchesBusiness } from "./venueCoordinates";
 import { eventPath } from "@shared/eventSlug";
@@ -357,12 +359,21 @@ sqlite.exec(`
     neighborhood TEXT,
     website TEXT,
     instagram TEXT,
+    donate_url TEXT,
     queer_owned INTEGER NOT NULL DEFAULT 0,
     queer_friendly INTEGER NOT NULL DEFAULT 1,
     image_url TEXT,
     lat REAL,
     lng REAL,
     active INTEGER NOT NULL DEFAULT 1,
+    status TEXT NOT NULL DEFAULT 'OPEN',
+    closed_at TEXT,
+    is_new INTEGER NOT NULL DEFAULT 0,
+    grand_opening_date TEXT,
+    hours TEXT,
+    phone TEXT,
+    locations TEXT,
+    owner_id INTEGER,
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -1419,38 +1430,6 @@ function ensureGiftingPostsSchema() {
   }
 }
 ensureGiftingPostsSchema();
-
-const LEGACY_PASSWORD_SALT = "pdxpride_salt";
-const SCRYPT_HASH_PREFIX = "$scrypt$";
-
-function legacyPasswordHash(pw: string) {
-  return crypto.createHash("sha256").update(pw + LEGACY_PASSWORD_SALT).digest("hex");
-}
-
-export function isLegacyPasswordHash(stored: string) {
-  return !stored.startsWith(SCRYPT_HASH_PREFIX);
-}
-
-export function hashPassword(pw: string) {
-  const salt = crypto.randomBytes(16);
-  const hash = crypto.scryptSync(pw, salt, 64);
-  return `${SCRYPT_HASH_PREFIX}${salt.toString("hex")}:${hash.toString("hex")}`;
-}
-
-export function verifyPassword(pw: string, stored: string) {
-  if (stored.startsWith(SCRYPT_HASH_PREFIX)) {
-    const payload = stored.slice(SCRYPT_HASH_PREFIX.length);
-    const [saltHex, hashHex] = payload.split(":");
-    if (!saltHex || !hashHex) return false;
-    const derived = crypto.scryptSync(pw, Buffer.from(saltHex, "hex"), 64);
-    const expected = Buffer.from(hashHex, "hex");
-    if (derived.length !== expected.length) return false;
-    return crypto.timingSafeEqual(derived, expected);
-  }
-  const legacy = legacyPasswordHash(pw);
-  if (legacy.length !== stored.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(legacy), Buffer.from(stored));
-}
 
 // Old fake event titles used to detect stale seed data
 const OLD_SEED_TITLES = ["Queer Dance Party", "Leather Pride Social", "Drag Extravaganza", "Pride Brunch", "Kink & Community Fair", "Trans Joy Dance"];

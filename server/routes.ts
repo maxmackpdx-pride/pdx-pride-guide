@@ -147,6 +147,7 @@ import session from "express-session";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { authenticatedRequestAccess } from "./auth/access";
 
 // ─── File upload setup ────────────────────────────────────────────────────────
 const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
@@ -868,31 +869,16 @@ function maybeSyncSiteOwnerPortfolio(user: { id?: number; email?: string | null;
 }
 
 function requireAuth(req: any, res: any, next: any) {
-  if (!req.session?.userId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  let user = storage.getUserById(req.session.userId);
-  if (!user || user.status === "deleted") {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  user = storage.clearExpiredAccountModeration(user.id) || user;
-  // Suspended accounts may only hit auth/status/appeal endpoints.
-  if (user.status === "suspended") {
-    const path = String(req.path || req.url || "");
-    const allowed =
-      path.includes("/auth/me") ||
-      path.includes("/auth/logout") ||
-      path.includes("/auth/suspension-appeal") ||
-      path.includes("/auth/community-standards");
-    if (!allowed && req.method !== "GET") {
-      return res.status(403).json({
-        error: "Account suspended",
-        suspended: true,
-        suspendReasonLabel: user.suspendReasonLabel || null,
-        suspendUntil: user.suspendUntil || null,
-      });
-    }
-  }
+  const sessionUserId = req.session?.userId;
+  let user = sessionUserId ? storage.getUserById(sessionUserId) : null;
+  if (user) user = storage.clearExpiredAccountModeration(user.id) || user;
+  const decision = authenticatedRequestAccess({
+    sessionUserId,
+    user,
+    method: req.method,
+    path: req.path || req.url,
+  });
+  if (!decision.allowed) return res.status(decision.status).json(decision.body);
   next();
 }
 
