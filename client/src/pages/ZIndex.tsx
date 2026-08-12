@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { Z_ADDRESSES, zUrl, type ZAddress } from "@shared/zNamespace";
+import { childZAddresses, rootZAddresses, zUrl, type ZAddress } from "@shared/zNamespace";
 import { TYPE_LABELS, TYPE_COLORS } from "@/pages/Directory";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
 import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
@@ -19,24 +19,10 @@ import "./ZIndex.css";
  * a category. Counts come from the same endpoints the boards themselves use.
  */
 
-/** Board accents, reusing the tokens the home stage already assigns. */
-const ACCENT: Record<string, string> = {
-  happening: "var(--neon-yellow, #ccff00)",
-  hauz: "var(--board-housing, #00ffff)",
-  market: "var(--neon-orange, #ff6600)",
-  gifz: "var(--board-gifting, #ccff00)",
-  gigz: "var(--board-gigs, #b06bff)",
-  mizzed: "var(--board-spotted, #ff1fa0)",
-  directory: "var(--neon-red, #ff2400)",
-  out: "var(--neon-orange, #ff6600)",
-  "out/nudest": "var(--neon-orange, #ff6600)",
-  space: "var(--board-gigs, #b06bff)",
-};
-
 /**
  * Endpoint each address counts from. Absent means there is no countable list
  * behind the address, so no number is shown rather than a misleading zero.
- * z/out/nudest is deliberately absent: /api/nude-beaches returns live river
+ * z/out/beaches is deliberately absent: /api/nude-beaches returns live river
  * conditions, not a board of posts, so it has no total to report.
  */
 const COUNT_ENDPOINT: Record<string, string> = {
@@ -87,8 +73,9 @@ function useBoardRows(path: string) {
 function BoardColumn({ address }: { address: ZAddress }) {
   const { data, isPending } = useBoardRows(address.path);
   const rows = useMemo(() => rowsOf(data), [data]);
-  const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
+  const accent = address.accent;
   const hasBoard = address.route !== null;
+  const children = childZAddresses(address.path);
 
   const subs = useMemo<Sub[]>(() => {
     if (!hasBoard) return [];
@@ -136,7 +123,7 @@ function BoardColumn({ address }: { address: ZAddress }) {
         count: tagged.filter(tags => tags.includes(label)).length,
       }));
     }
-    // Mizzed and nudest have no taxonomy in the codebase. Show no children
+    // Mizzed has no taxonomy in the codebase. Show no children
     // rather than inventing them.
     return [];
   }, [address.path, hasBoard, rows]);
@@ -149,6 +136,12 @@ function BoardColumn({ address }: { address: ZAddress }) {
       style={{ ["--c" as string]: accent }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
     >
+      {address.logo && (
+        <Link href={zUrl(address.path)} className="z-index__logo-link" tabIndex={-1} aria-hidden="true">
+          <span className="z-index__logo" style={{ ["--logo" as string]: `url("${address.logo}")` }} />
+        </Link>
+      )}
+
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
           {address.display}
@@ -156,7 +149,7 @@ function BoardColumn({ address }: { address: ZAddress }) {
         <span className="z-index__board-name">{address.board}</span>
         <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
           {!hasBoard
-            ? "not built yet"
+            ? (children.length ? null : "not built yet")
             : !countable
               ? null
               : isPending
@@ -164,6 +157,20 @@ function BoardColumn({ address }: { address: ZAddress }) {
                 : rows.length}
         </span>
       </Link>
+
+      {/* Nested addresses. z/out holds beaches rather than sitting beside it. */}
+      {children.length > 0 && (
+        <ul className="z-index__kids">
+          {children.map(kid => (
+            <li key={kid.path}>
+              <Link href={zUrl(kid.path)} className="z-index__kid">
+                <span className="z-index__kid-addr">{kid.display}</span>
+                <span className="z-index__kid-name">{kid.board}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {subs.length > 0 && (
         <ul className="z-index__subs">
@@ -202,7 +209,7 @@ export default function ZIndex() {
       </header>
 
       <div className="z-index__grid">
-        {Z_ADDRESSES.map(address => (
+        {rootZAddresses().map(address => (
           <BoardColumn key={address.path} address={address} />
         ))}
       </div>

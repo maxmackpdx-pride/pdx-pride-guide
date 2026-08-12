@@ -54,6 +54,30 @@
   min-width: 0;
 }
 
+/* Wordmarks render as a tint mask, so the board accent colours them and the
+   owner-directed SVG masters are never edited. Vector all the way down, so it
+   stays crisp at any pixel density. Sized about 3x a normal inline mark. */
+.z-index__logo-link {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.z-index__logo {
+  display: block;
+  height: clamp(54px, 6.4vw, 84px);
+  width: 100%;
+  max-width: 210px;
+  background-color: var(--c, var(--neon-cyan, #19e3ff));
+  -webkit-mask-image: var(--logo);
+  mask-image: var(--logo);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .z-index__board-head {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -112,6 +136,44 @@
 @keyframes zIndexPending {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
+}
+
+/* A nested address, indented under the container that holds it. */
+.z-index__kids {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--c, var(--neon-cyan, #19e3ff));
+}
+
+.z-index__kid {
+  display: block;
+  padding: 5px 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.z-index__kid-addr {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c, var(--neon-cyan, #19e3ff));
+  overflow-wrap: anywhere;
+}
+
+.z-index__kid-name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.z-index__kid:hover .z-index__kid-name,
+.z-index__kid:focus-visible .z-index__kid-name {
+  opacity: 0.9;
 }
 
 .z-index__subs {

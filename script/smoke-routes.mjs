@@ -41,7 +41,7 @@ const ROUTES = [
   ["/z/hauz", "/z/hauz"],
   ["/z/gifz", "/z/gifz"],
   ["/z/directory", "/z/directory"],
-  ["/z/out/nudest", "/z/out/nudest"],
+  ["/z/out/beaches", "/z/out/beaches"],
   // Reserved but unbuilt: an honest state, never the 404 page.
   ["/z/market", "/z/market"],
   // Umlaut form must not live as a second page.

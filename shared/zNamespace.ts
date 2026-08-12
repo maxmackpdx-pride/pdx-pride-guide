@@ -18,7 +18,7 @@ export const Z_PREFIX = "z";
 export type ZAddress = {
   /**
    * Canonical path after `z/`, ASCII and lowercase. Carries one slash for a
-   * nested address (`out/nudest`).
+   * nested address (`out/beaches`).
    */
   path: string;
   /**
@@ -33,6 +33,19 @@ export type ZAddress = {
    * spoken for but no board is built yet.
    */
   route: string | null;
+  /**
+   * Parent address path when this one nests inside another. z/out is a container
+   * holding a category per ZF-Z-OUT-NAME-2026-08-06, and beaches lives under it.
+   */
+  parent?: string;
+  /**
+   * Existing wordmark in client/public/brand/family. Only set where a real file
+   * exists; the typeset address carries the rest. Rendered as a tint mask so the
+   * board accent colours it, which leaves these owner-directed masters untouched.
+   */
+  logo?: string;
+  /** Board accent. A real token, with the hex HomeStage already pairs with it. */
+  accent: string;
 };
 
 /**
@@ -42,18 +55,40 @@ export type ZAddress = {
  * reserved so nobody else takes it, but there is no page behind it yet and none
  * is invented here.
  */
+const B = "/brand/family";
+
 export const Z_ADDRESSES: ZAddress[] = [
-  { path: "happening", display: "z/happening", board: "Events", route: "/events" },
-  { path: "hauz", display: "z/haüz", board: "THE HAÜZ", route: "/the-hauz" },
-  { path: "market", display: "z/market", board: "For sale", route: null },
-  { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting" },
-  { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
-  { path: "mizzed", display: "z/mizzed", board: "Mizzed Connectionz", route: "/spotted" },
-  { path: "directory", display: "z/directory", board: "Directory", route: "/directory" },
-  { path: "out", display: "z/out", board: "Outdoors", route: null },
-  { path: "out/nudest", display: "z/out/nudest", board: "Nude beaches", route: "/nude-beaches" },
-  { path: "space", display: "z/space", board: "Clubs and groups", route: null },
+  { path: "happening", display: "z/happening", board: "Events", route: "/events",
+    accent: "var(--neon-yellow, #ccff00)" },
+  { path: "hauz", display: "z/haüz", board: "THE HAÜZ", route: "/the-hauz",
+    logo: `${B}/the-hauz.svg`, accent: "var(--board-housing, #00ffff)" },
+  { path: "market", display: "z/market", board: "For sale", route: null,
+    accent: "var(--neon-blue, #0044ff)" },
+  { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting",
+    logo: `${B}/gifz.svg`, accent: "var(--board-gifting, #ccff00)" },
+  { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work",
+    logo: `${B}/gigz.svg`, accent: "var(--board-gigs, #6e3dff)" },
+  { path: "mizzed", display: "z/mizzed", board: "Mizzed Connectionz", route: "/spotted",
+    accent: "var(--board-spotted, #ff1fa0)" },
+  { path: "directory", display: "z/directory", board: "Directory", route: "/directory",
+    accent: "var(--neon-red, #ff2400)" },
+  { path: "out", display: "z/out", board: "Outdoors", route: null,
+    logo: `${B}/z-out.svg`, accent: "var(--neon-orange, #ff6600)" },
+  { path: "out/beaches", display: "z/out/beaches", board: "Beaches", route: "/nude-beaches",
+    parent: "out", accent: "var(--neon-orange, #ff6600)" },
+  { path: "space", display: "z/space", board: "Clubs and groups", route: null,
+    logo: `${B}/z-space.svg`, accent: "var(--neon-violet, #8800ff)" },
 ];
+
+/** Top-level addresses, in presentation order. */
+export function rootZAddresses(): ZAddress[] {
+  return Z_ADDRESSES.filter(a => !a.parent);
+}
+
+/** Addresses nested under a parent path. */
+export function childZAddresses(parent: string): ZAddress[] {
+  return Z_ADDRESSES.filter(a => a.parent === parent);
+}
 
 /**
  * `z/haüz` resolves to the ASCII `z/hauz`, and the umlaut is display only.
