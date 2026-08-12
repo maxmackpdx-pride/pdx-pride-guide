@@ -42,14 +42,15 @@ export type ZAddress = {
  * product exists on the public roadmap at /next but has no page yet, so the
  * address resolves and says so.
  *
- * Do not add an address for a product that has not been approved. `z/market`
- * was removed on 2026-08-12 for exactly that reason: it came out of a
- * prototype, not a decision, and shipping it told members Zaylist was building
- * a for-sale board that nobody had agreed to build.
+ * Do not add an address for a product that has not been approved, and never
+ * write copy suggesting an address is reserved, held, or available to acquire.
+ * Zaylist does not sell `z/` addresses and has approved no model in which it
+ * ever would. An unbuilt address says the board is not built. Nothing more.
  */
 export const Z_ADDRESSES: ZAddress[] = [
   { path: "happening", display: "z/happening", board: "Events", route: "/events" },
   { path: "hauz", display: "z/haüz", board: "THE HAÜZ", route: "/the-hauz" },
+  { path: "market", display: "z/market", board: "For sale", route: null },
   { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting" },
   { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "Mizzed Connectionz", route: "/spotted" },

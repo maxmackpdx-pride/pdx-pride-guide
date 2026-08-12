@@ -35,6 +35,7 @@ const ACCENT: Record<string, string> = {
   hauz: "var(--panel-cyan, #19e3ff)",       // HOUSING_BOARD_ACCENT, shared/housing.ts
   gifz: "var(--board-gifting, #ccff00)",    // --board-gifting, index.css
   gigz: "var(--board-gigs, #6e3dff)",       // --board-gigs, index.css
+  market: "var(--neon-yellow, #ccff00)",
   mizzed: "var(--board-spotted, #ff00cc)",  // --board-spotted, index.css
   // The rest have no declared board accent, so each takes one unused Zaylist
   // token. No two boards share a colour: the set read together is the rainbow,

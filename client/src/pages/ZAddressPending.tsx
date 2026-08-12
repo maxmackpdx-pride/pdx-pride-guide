@@ -23,13 +23,21 @@ export default function ZAddressPending() {
     `${display} is a Zaylist address. The board behind it is not built yet.`,
   );
 
+  /*
+   * Say one thing: the board is not built. Nothing about the address being
+   * reserved, held, claimed, or available. Zaylist does not sell z/ addresses
+   * and has approved no model in which it would, so this copy must never imply
+   * otherwise.
+   */
+  const lede = `${address?.board ? `${address.board} is not built yet` : "This board is not built yet"}, so there is nothing here to show you. ${display} will be its address when it is.`;
+
   return (
     <div className="zine-page board-page min-h-screen">
       <PageHero
         flipLightLeaks
         titleLine1="NOT BUILT YET"
         accent="magenta"
-        lede={`${display}${address?.board ? ` is where ${address.board} will live` : " is on the way"}. It is on the roadmap at /next and has not been built yet, so there is nothing here to show you.`}
+        lede={lede}
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 45%"
         actions={(
