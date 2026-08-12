@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
@@ -80,9 +81,11 @@ export default function Gifting() {
     const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
     return type === "GIFT" || type === "ISO" ? type : "ALL";
   });
-  const [category, setCategory] = useState("ALL");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [sort, setSort] = useState("RECENT");
+  const [category, setCategory] = useState(() => new URLSearchParams(window.location.search).get("category") || "ALL");
+  const [neighborhood, setNeighborhood] = useState(() => new URLSearchParams(window.location.search).get("neighborhood") || "");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
+  const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
+  const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
 
@@ -94,6 +97,22 @@ export default function Gifting() {
       return r.json();
     },
   });
+  const { data: giftingStatus, isPending: giftingStatusPending } = useQuery<{ postingOpen: boolean; message: string }>({
+    queryKey: ["/api/gifting/status"],
+  });
+  const postingOpen = giftingStatus?.postingOpen === true;
+  // A filtered board is a shareable place, not disposable component state.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (filter === "ALL") params.delete("type"); else params.set("type", filter);
+    if (category === "ALL") params.delete("category"); else params.set("category", category);
+    if (neighborhood.trim()) params.set("neighborhood", neighborhood.trim()); else params.delete("neighborhood");
+    if (search.trim()) params.set("q", search.trim()); else params.delete("q");
+    if (onlyMine) params.set("mine", "1"); else params.delete("mine");
+    if (sort === "LONGEST") params.set("sort", "oldest"); else params.delete("sort");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [category, filter, neighborhood, onlyMine, search, sort]);
   useEffect(() => {
     if (!isLoading) trackProductEvent("time_to_content", "gifz", performance.now() - contentStartedAt.current);
   }, [isLoading]);
@@ -120,7 +139,7 @@ export default function Gifting() {
     return { ALL: active.length, GIFT: gift, ISO: iso, GRAB: grab };
   }, [posts]);
 
-  // Deep-link from the hub feed: /gifting?post=<id> opens that post expanded.
+  // Deep-links from either /z/gifz or the indexed route open that post expanded.
   useEffect(() => {
     if (deepLinkHandled.current || !posts.length) return;
     const pid = new URLSearchParams(window.location.search).get("post");
@@ -143,6 +162,15 @@ export default function Gifting() {
     if (filter === "ISO") rows = rows.filter(p => p.postType === "ISO");
     if (filter === "GRAB") rows = rows.filter(p => isOpenGrabPost(p));
     if (category !== "ALL") rows = rows.filter(p => p.category === category);
+    if (onlyMine && user) rows = rows.filter(p => p.isMine);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter(p =>
+        [p.title, p.description, p.category, p.neighborhood, p.pickupPreference]
+          .filter(Boolean)
+          .some(value => String(value).toLowerCase().includes(q)),
+      );
+    }
     if (neighborhood.trim()) {
       rows = rows.filter(p => (p.neighborhood || "").toLowerCase().includes(neighborhood.trim().toLowerCase()));
     }
@@ -152,9 +180,17 @@ export default function Gifting() {
       return sort === "LONGEST" ? ta - tb : tb - ta;
     });
     return rows;
-  }, [posts, filter, category, neighborhood, sort]);
+  }, [posts, filter, category, neighborhood, onlyMine, search, sort, user]);
 
   const openForm = (postType: "GIFT" | "ISO") => {
+    if (giftingStatusPending) {
+      toast({ title: "Checking posting availability", description: "The existing GifZ board is still available while this loads." });
+      return;
+    }
+    if (!postingOpen) {
+      toast({ title: "New GifZ posts are paused", description: giftingStatus?.message });
+      return;
+    }
     if (!user) {
       setShowAuth(true);
       return;
@@ -217,6 +253,8 @@ export default function Gifting() {
     setFilter("ALL");
     setCategory("ALL");
     setNeighborhood("");
+    setSearch("");
+    setOnlyMine(false);
     setSort("RECENT");
   };
 
@@ -229,15 +267,16 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
+      <ZBoardAddressStrip path="gifz" board="GifZ" />
       <CommunityBoardHeroRow
         active="gifting"
         actions={
           <>
-            <Button variant="solid" accent="lime" size="lg" arrow onClick={() => openForm("GIFT")}>
-              Post a gift
+            <Button variant="solid" accent="lime" size="lg" arrow disabled={!postingOpen} onClick={() => openForm("GIFT")}>
+              {giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}
             </Button>
-            <Button variant="neon" accent="lime" size="lg" onClick={() => openForm("ISO")}>
-              Post an ISO
+            <Button variant="neon" accent="lime" size="lg" disabled={!postingOpen} onClick={() => openForm("ISO")}>
+              {giftingStatusPending ? "Checking…" : "Post an ISO"}
             </Button>
           </>
         }
@@ -251,6 +290,10 @@ export default function Gifting() {
       </CommunityBoardHeroRow>
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
+
+      {!postingOpen && giftingStatus ? (
+        <p className="gifting-posting-status" role="status">{giftingStatus.message}</p>
+      ) : null}
 
       <SafetyGuide context="gifts" />
 
@@ -388,7 +431,13 @@ export default function Gifting() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </BoardSelectField>
-            <BoardTextField value={neighborhood} onChange={setNeighborhood} placeholder="Neighborhood" />
+            <BoardTextField type="search" value={neighborhood} onChange={setNeighborhood} placeholder="Neighborhood" />
+            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search titles, details, categories" />
+            {user ? (
+              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
+                My posts
+              </BoardFilterChip>
+            ) : null}
             <BoardSelectField value={sort} onChange={setSort}>
               <option value="RECENT">Recently posted</option>
               <option value="LONGEST">Longest up</option>

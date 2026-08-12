@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import FeedAdCard from "@/components/ads/FeedAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
 import {
@@ -82,12 +83,22 @@ export default function Housing() {
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState<HousingFilter>(() => {
-    const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("filter")?.toUpperCase() === "SAVED") return "SAVED";
+    const type = params.get("type")?.toUpperCase();
     return type && HOUSING_FILTERS.includes(type as HousingFilter)
       ? type as HousingFilter
       : "ALL";
   });
   const [showAuth, setShowAuth] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (filter === "ALL") params.delete("type"); else if (filter !== "SAVED") params.set("type", filter);
+    if (filter === "SAVED") params.set("filter", "SAVED"); else params.delete("filter");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [filter]);
 
   /*
    * Tag filters live in the URL, not in component state. Opening a listing and
@@ -244,6 +255,7 @@ export default function Housing() {
 
   return (
     <div className="hz">
+      <ZBoardAddressStrip path="hauz" board="THE HAÜZ" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 

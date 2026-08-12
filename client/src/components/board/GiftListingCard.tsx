@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
+import { HeartHandshake, RefreshCw, Share2, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,7 @@ export type GiftingPost = {
   posterAvatarRing?: string | null;
   avatarChoice?: number;
   interestCount: number;
+  viewerSelected?: boolean;
   isMine?: boolean;
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
@@ -201,6 +202,20 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     deleteMutation.mutate(post.id);
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/z/gifz?post=${post.id}`;
+    const canShare = typeof navigator.share === "function";
+    try {
+      if (canShare) await navigator.share({ title: post.title, url });
+      else await navigator.clipboard.writeText(url);
+      toast({ title: canShare ? "Shared" : "Link copied" });
+    } catch (error) {
+      if ((error as DOMException)?.name !== "AbortError") {
+        toast({ title: "Could not share", variant: "destructive" });
+      }
+    }
+  };
+
   const submitResponse = (endpoint: "interest" | "offer") => {
     if (!user) return onRequireAuth();
     const trimmed = note.trim();
@@ -310,8 +325,19 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
 
       {expanded && (
         <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+          {post.photoUrls?.length ? (
+            <div className="gifting-photo-gallery" aria-label={`${post.photoUrls.length} listing photos`}>
+              {post.photoUrls.map((url, index) => (
+                <img key={`${url}-${index}`} src={url} alt={`${post.title}, photo ${index + 1} of ${post.photoUrls.length}`} />
+              ))}
+            </div>
+          ) : null}
           <p>{post.description}</p>
           <div className="gifting-details">{post.category} · {post.pickupPreference}</div>
+          <div className="gifting-listing-actions">
+            <button type="button" onClick={handleShare}><Share2 size={14} /> Share listing</button>
+            {post.viewerSelected ? <span>Selected · check your inbox to coordinate</span> : null}
+          </div>
           {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
             <div className="gifting-response">
               <textarea

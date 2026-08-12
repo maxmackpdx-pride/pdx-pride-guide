@@ -7,6 +7,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import DirectoryHero from "@/components/DirectoryHero";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
@@ -572,6 +573,7 @@ export default function Directory() {
 
   return (
     <div className="zine-page directory-page board-page board-page--makeover directory-page--v2">
+      <ZBoardAddressStrip path="directory" board="Places" />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <DirectoryHero placeCount={businesses.length} />
 

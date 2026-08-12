@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsHero from "@/components/MissedConnectionsHero";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import MissedConnectionsPanel, { type MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardStatsBar from "@/components/BoardStatsBar";
@@ -116,6 +117,7 @@ export default function MissedConnections() {
 
   return (
     <div className="zine-page missed-page board-page board-page--makeover min-h-screen">
+      <ZBoardAddressStrip path="mizzed" board="Mizzed Connection" />
       <MissedConnectionsHero onPost={openPost} />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 

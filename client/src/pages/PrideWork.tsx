@@ -4,12 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "wouter";
-import { Briefcase, X } from "lucide-react";
+import { Briefcase, CalendarDays, Share2, Trash2, X } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
@@ -41,6 +42,8 @@ const gigSchema = z.object({
   compensation: z.string().optional(),
   location: z.string().optional(),
   isRemote: z.boolean().optional(),
+  gigDate: z.string().optional(),
+  gigTime: z.string().optional(),
   businessId: z.number().nullable().optional(),
 });
 
@@ -84,6 +87,8 @@ export type GigPost = {
   avatarChoice?: number;
   posterAvatarRing?: string | null;
   isMine?: boolean;
+  gigDate?: string | null;
+  gigTime?: string | null;
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -131,9 +136,10 @@ export default function PrideWork() {
     const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
     return type === "LOOKING_FOR_WORK" || type === "POSTING_GIG" ? type : "ALL";
   });
-  const [search, setSearch] = useState("");
-  const [remoteOnly, setRemoteOnly] = useState(false);
-  const [sort, setSort] = useState("RECENT");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
+  const [remoteOnly, setRemoteOnly] = useState(() => new URLSearchParams(window.location.search).get("remote") === "1");
+  const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
+  const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
   const [acceptRules, setAcceptRules] = useState(false);
@@ -154,10 +160,20 @@ export default function PrideWork() {
     },
   });
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (filter === "ALL") params.delete("type"); else params.set("type", filter);
+    if (search.trim()) params.set("q", search.trim()); else params.delete("q");
+    if (remoteOnly) params.set("remote", "1"); else params.delete("remote");
+    if (onlyMine) params.set("mine", "1"); else params.delete("mine");
+    if (sort === "LONGEST") params.set("sort", "oldest"); else params.delete("sort");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [filter, onlyMine, remoteOnly, search, sort]);
+  useEffect(() => {
     if (!isLoading) trackProductEvent("time_to_content", "gigz", performance.now() - contentStartedAt.current);
   }, [isLoading]);
 
-  // Deep-link from the hub feed: /pride-work?post=<id> opens that gig expanded.
+  // Deep-links from either /z/gigz or the indexed route open that gig expanded.
   useEffect(() => {
     if (deepLinkHandled.current || !gigs.length) return;
     const pid = new URLSearchParams(window.location.search).get("post");
@@ -230,6 +246,8 @@ export default function PrideWork() {
       compensation: "",
       location: "",
       isRemote: false,
+      gigDate: "",
+      gigTime: "",
       businessId: null,
     },
   });
@@ -288,6 +306,7 @@ export default function PrideWork() {
     let rows = gigs.slice();
     if (filter !== "ALL") rows = rows.filter(g => g.postType === filter);
     if (remoteOnly) rows = rows.filter(g => !!g.isRemote);
+    if (onlyMine && user) rows = rows.filter(g => g.isMine);
     const q = search.trim().toLowerCase();
     if (q) {
       rows = rows.filter(g =>
@@ -302,7 +321,7 @@ export default function PrideWork() {
       return sort === "LONGEST" ? ta - tb : tb - ta;
     });
     return rows;
-  }, [gigs, filter, remoteOnly, search, sort]);
+  }, [gigs, filter, remoteOnly, onlyMine, search, sort, user]);
 
   const postType = form.watch("postType");
   const formAccent = postType === "LOOKING_FOR_WORK" ? "#19e3ff" : "#b06bff";
@@ -312,11 +331,13 @@ export default function PrideWork() {
     setFilter("ALL");
     setSearch("");
     setRemoteOnly(false);
+    setOnlyMine(false);
     setSort("RECENT");
   };
 
   return (
     <div className="zine-page gigs-page board-page board-page--makeover">
+      <ZBoardAddressStrip path="gigz" board="Gigz" />
       <CommunityBoardHeroRow
         active="gigs"
         actions={
@@ -484,6 +505,19 @@ export default function PrideWork() {
                 />
               </label>
 
+              {postType === "POSTING_GIG" ? (
+                <>
+                  <label>
+                    Gig date
+                    <input className="board-text-field" type="date" {...form.register("gigDate")} />
+                  </label>
+                  <label>
+                    Start time
+                    <input className="board-text-field" type="time" {...form.register("gigTime")} />
+                  </label>
+                </>
+              ) : null}
+
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
@@ -645,10 +679,15 @@ export default function PrideWork() {
         }
         filterRow2={
           <>
-            <BoardTextField value={search} onChange={setSearch} placeholder="Search roles, skills, gigs" />
+            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search roles, skills, gigs" />
             <BoardFilterChip active={remoteOnly} onClick={() => setRemoteOnly(v => !v)} accent="pink">
               Remote only
             </BoardFilterChip>
+            {user ? (
+              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
+                My Gigz
+              </BoardFilterChip>
+            ) : null}
             <BoardSelectField value={sort} onChange={setSort}>
               <option value="RECENT">Recently posted</option>
               <option value="LONGEST">Longest up</option>
@@ -731,8 +770,18 @@ export function GigListingCard({
   onToggle: () => void;
 }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [messageBody, setMessageBody] = useState("");
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/gigs/${gig.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      toast({ title: "Gigz post deleted" });
+    },
+    onError: (error: Error) => toast({ title: "Could not delete post", description: error.message, variant: "destructive" }),
+  });
 
   const messageMutation = useMutation({
     mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
@@ -755,6 +804,21 @@ export function GigListingCard({
   const status = [gig.compensation, gig.location].filter(Boolean).join(" · ")
     || (isLooking ? "Available · message in inbox" : "Open · reply privately");
   const cta = isLooking ? "Say hi" : "Reply";
+  const profileHref = gig.username ? memberProfileHref(gig.username) : null;
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/z/gigz?post=${gig.id}`;
+    const canShare = typeof navigator.share === "function";
+    try {
+      if (canShare) await navigator.share({ title: gig.title, url });
+      else await navigator.clipboard.writeText(url);
+      toast({ title: canShare ? "Shared" : "Link copied" });
+    } catch (error) {
+      if ((error as DOMException)?.name !== "AbortError") {
+        toast({ title: "Could not share", variant: "destructive" });
+      }
+    }
+  };
 
   const glassVars = {
     "--listing-accent": accent,
@@ -844,6 +908,29 @@ export function GigListingCard({
               {[skills.join(", "), gig.compensation, gig.location].filter(Boolean).join(" · ")}
             </div>
           )}
+          {gig.gigDate ? (
+            <div className="gifting-details">
+              <CalendarDays size={14} /> {gig.gigDate}{gig.gigTime ? ` · ${gig.gigTime}` : ""}
+            </div>
+          ) : null}
+          <div className="gifting-listing-actions">
+            <button type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
+            {gig.username && profileHref ? (
+              <Link href={profileHref}>View @{gig.username}&apos;s profile</Link>
+            ) : null}
+            {gig.isMine ? (
+              <button
+                type="button"
+                className="gifting-delete-btn"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (confirm(`Delete "${gig.title}"?`)) deleteMutation.mutate();
+                }}
+              >
+                <Trash2 size={14} /> Delete post
+              </button>
+            ) : null}
+          </div>
           {!gig.isMine && gig.userId !== user?.id && (
             <div className="gifting-response">
               <textarea

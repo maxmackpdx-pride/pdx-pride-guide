@@ -158,6 +158,8 @@
 /* ── address finder + compact index ───────────────────── */
 .z-address-search {
   position: relative;
+  width: 100%;
+  min-width: 0;
   max-width: 720px;
   margin-top: 24px;
 }
@@ -180,6 +182,8 @@
   background: rgba(0, 0, 0, .72);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
   overflow: hidden;
+  width: 100%;
+  min-width: 0;
 }
 .z-address-search__field > span {
   padding-left: 14px;
@@ -189,6 +193,7 @@
   font-weight: 800;
 }
 .z-address-search__field input {
+  width: 100%;
   min-width: 0;
   min-height: 48px;
   padding: 0 10px;
@@ -296,6 +301,77 @@
 .z-index__board > * { position: relative; z-index: 3 }
 /* not built yet: the address is real, the board is not */
 .z-index__board--pending { border-style: dashed }
+
+/* Places is the useful center of the address system: one real directory with
+   all twelve real types radiating from it. The address stays z/directory. */
+.z-index__board--hub {
+  grid-column: 1 / -1;
+  min-height: 430px;
+  padding: 24px;
+  overflow: hidden;
+}
+.z-index__hub-blueprint {
+  position: absolute;
+  z-index: 0;
+  top: -24%;
+  right: -5%;
+  width: min(68%, 760px);
+  height: auto;
+  opacity: .1;
+  filter: grayscale(1) contrast(1.55) brightness(1.4);
+  mix-blend-mode: screen;
+  transform: rotate(5deg);
+  pointer-events: none;
+}
+.z-index__board--hub .z-index__wordmark-slot {
+  min-height: 148px;
+  height: auto;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+}
+.z-index__board--hub .z-index__board-name {
+  color: #fff;
+  font-size: clamp(72px, 11vw, 132px);
+}
+.z-index__hub-label {
+  margin-top: 8px;
+  color: var(--c);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.z-index__board--hub .z-index__categories {
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+.z-index__board--hub .z-index__subs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 22px;
+}
+.z-index__sub-item--clubs {
+  position: relative;
+  padding: 4px 8px 8px;
+  border: 1px solid color-mix(in srgb, #ffd700 58%, transparent);
+  background: linear-gradient(110deg, rgba(255, 215, 0, .11), transparent 70%);
+  box-shadow: inset 3px 0 0 #ffd700;
+}
+.z-index__sub--clubs {
+  min-height: 48px;
+}
+.z-index__clubs-bridge {
+  display: block;
+  max-width: 32ch;
+  padding: 0 9px 5px 28px;
+  color: rgba(255, 255, 255, .62);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
 
 .z-index__board-head { display: block; text-decoration: none; color: inherit }
 /* ── full bleed photo card ────────────────────────────────
@@ -554,6 +630,11 @@
   .z-address-search__results small { text-align: left }
   .z-index__wordmark-slot { height: 118px }
   .z-index__wordmark { height: 114px }
+  .z-index__board--hub { min-height: 0; padding: 18px 16px 15px }
+  .z-index__board--hub .z-index__board-name { font-size: clamp(58px, 22vw, 88px) }
+  .z-index__board--hub .z-index__subs { grid-template-columns: 1fr }
+  .z-index__sub-item--clubs { order: -1 }
+  .z-index__hub-blueprint { width: 125%; right: -52%; opacity: .07 }
 }
 @media (prefers-reduced-motion: reduce) {
   .z-index *, .z-index *::before, .z-index *::after {

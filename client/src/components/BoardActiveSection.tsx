@@ -115,15 +115,19 @@ export function BoardTextField({
   value,
   onChange,
   placeholder,
+  type = "text",
   className = "",
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
+  type?: "text" | "search";
   className?: string;
 }) {
   return (
     <input
+      type={type}
+      aria-label={placeholder}
       className={`board-text-field ${className}`.trim()}
       placeholder={placeholder}
       value={value}

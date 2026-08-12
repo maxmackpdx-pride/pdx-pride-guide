@@ -176,6 +176,14 @@ type Sub = ZCategoryAddress & { color?: string; count: number };
 
 const VISIBLE_SUBS = 4;
 
+/** Put the Places/Directory hub at the center seam without changing canonical address order. */
+const Z_INDEX_ADDRESSES = (() => {
+  const addresses = Z_ADDRESSES.filter(address => address.path !== "directory");
+  const directory = Z_ADDRESSES.find(address => address.path === "directory");
+  if (directory) addresses.splice(4, 0, directory);
+  return addresses;
+})();
+
 /** Count rows by a field, keeping the caller's order and keeping zeroes. */
 function countBy(rows: Row[], field: string, keys: readonly string[]): Record<string, number> {
   const out: Record<string, number> = {};
@@ -217,10 +225,10 @@ function SubcategoryRows({
   return (
     <ul className="z-index__subs">
       {subs.map(sub => (
-        <li key={sub.key}>
+        <li key={sub.key} className={sub.boardPath === "directory" && sub.key === "group" ? "z-index__sub-item--clubs" : undefined}>
           <Link
             href={zUrl(sub.path)}
-            className="z-index__sub"
+            className={`z-index__sub${sub.boardPath === "directory" && sub.key === "group" ? " z-index__sub--clubs" : ""}`}
             style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
           >
             {sub.color ? <span className="z-index__sub-swatch" aria-hidden="true" /> : null}
@@ -235,6 +243,9 @@ function SubcategoryRows({
               {countState === "loading" ? "" : countState === "error" ? "\u2014" : sub.count}
             </span>
           </Link>
+          {sub.boardPath === "directory" && sub.key === "group" ? (
+            <span className="z-index__clubs-bridge">Clubs live in Places now · z/spaces is not built yet</span>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -248,6 +259,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const wordmark = WORDMARK[address.path];
   const photo = CARD_PHOTO[address.path];
   const hasBoard = address.route !== null;
+  const isDirectoryHub = address.path === "directory";
 
   const subs = useMemo<Sub[]>(() => {
     if (!hasBoard) return [];
@@ -314,12 +326,12 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
 
   const countable = !!COUNT_ENDPOINT[address.path];
   const countState = isPending ? "loading" : isError ? "error" : "ready";
-  const firstSubs = subs.slice(0, VISIBLE_SUBS);
-  const remainingSubs = subs.slice(VISIBLE_SUBS);
+  const firstSubs = isDirectoryHub ? subs : subs.slice(0, VISIBLE_SUBS);
+  const remainingSubs = isDirectoryHub ? [] : subs.slice(VISIBLE_SUBS);
 
   return (
     <section
-      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}`}
+      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}${isDirectoryHub ? " z-index__board--hub" : ""}`}
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
       data-address={address.path}
@@ -331,6 +343,16 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           <span className="z-index__photo-tint" />
           <span className="z-index__photo-scrim" />
         </span>
+      ) : null}
+      {isDirectoryHub ? (
+        <img
+          className="z-index__hub-blueprint"
+          src="/brand/waypoints/next-blueprint-reference-b.png"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+        />
       ) : null}
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
@@ -348,8 +370,9 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
               decoding="async"
             />
           ) : (
-            <span className="z-index__board-name">{address.board}</span>
+            <span className="z-index__board-name">{isDirectoryHub ? "Places" : address.board}</span>
           )}
+          {isDirectoryHub ? <span className="z-index__hub-label">Portland community directory</span> : null}
         </span>
         <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
           {!hasBoard
@@ -529,7 +552,7 @@ export default function ZIndex() {
       </nav>
 
       <div className="z-index__grid">
-        {Z_ADDRESSES.map((address, index) => (
+        {Z_INDEX_ADDRESSES.map((address, index) => (
           <BoardColumn key={address.path} address={address} index={index} />
         ))}
       </div>

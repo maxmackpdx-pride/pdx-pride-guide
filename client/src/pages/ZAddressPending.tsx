@@ -30,6 +30,7 @@ export default function ZAddressPending() {
    * otherwise.
    */
   const lede = `${address?.board ? `${address.board} is not built yet` : "This board is not built yet"}, so there is nothing here to show you. ${display} will be its address when it is.`;
+  const clubsLiveInDirectory = address?.path === "spaces";
 
   return (
     <div className="zine-page board-page min-h-screen">
@@ -42,11 +43,22 @@ export default function ZAddressPending() {
         bgPosition="center 45%"
         actions={(
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/"><Button as="span" variant="solid">HOME</Button></Link>
-            <Link href="/events"><Button as="span" accent="cyan">EVENTS</Button></Link>
+            {clubsLiveInDirectory ? (
+              <Link href="/z/directory/clubs-and-groups"><Button as="span" variant="solid">CLUBS IN PLACES</Button></Link>
+            ) : (
+              <Link href="/"><Button as="span" variant="solid">HOME</Button></Link>
+            )}
+            <Link href="/z"><Button as="span" accent="cyan">ALL Z/ ADDRESSES</Button></Link>
           </div>
         )}
       />
+      {clubsLiveInDirectory ? (
+        <section className="board-path-card" style={{ maxWidth: 780, margin: "32px auto", padding: 24 }}>
+          <p className="board-path-card__kicker">REAL DATA, RIGHT NOW</p>
+          <h2>Clubs &amp; Groups already live inside Places.</h2>
+          <p>The standalone z/spaces board is not built. The community directory is the honest central hub for Portland clubs and groups today.</p>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -105,6 +105,14 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 - Product-family names are exact: always render `Gigz`, `GifZ`, and `Mizzed Connection` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
+## Z/ address continuity
+
+- Existing indexed board URLs remain canonical. The additive Z/ address layer is visible as a compact, 44px-tall board marker; it never replaces the primary site navigation or duplicates it inside a hero.
+- The marker links back to `/z`, labels the current lowercase ASCII Z/ address, keeps calm-mode and keyboard focus behavior, and must not create horizontal overflow on compact screens.
+- On the Z/ index, family wordmarks use the owner-approved 144px height. Fallback board names occupy the same structural slot; image alt stays empty where the adjacent heading already names the board.
+- Places is the full-width center hub on the Z/ index. It renders all twelve real Directory types and real counts; Clubs & Groups is highlighted as a real Places category while the standalone `z/spaces` board remains an honest not-built state.
+- Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and not-built are distinct states.
+
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
 - The counter strip occupies the seam immediately after the main Zaylist hero and before the destination rail. Its bottom edge aligns exactly with the hero end; do not float it deeper into the hero or leave a separate spacer before the rail.
 - Keep the counter strip and every counter cell transparent, with no per-cell fill. Place one vertical gradient behind the full strip with exact endpoints: 100% transparent at the top and 80% black (`rgba(0,0,0,.8)`) at the bottom. Place the rainbow divider directly below the counter, with no extra band, gap, or duplicate divider.

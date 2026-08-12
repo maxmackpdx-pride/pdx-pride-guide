@@ -7,6 +7,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
+import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
@@ -258,6 +259,7 @@ export default function NudeBeaches() {
     <div
       className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
+      <ZBoardAddressStrip path="out/nudest" board="Nude beaches" />
       <header className="nude-beaches-header">
         <NudeBeachesHero
           key={activeTab}

@@ -675,10 +675,12 @@ function insertGigPostCompat(payload: InsertGigPost & { status: string; createdA
     const result = sqlite.prepare(`
       INSERT INTO gig_posts (
         type, role, post_type, title, name, contact_email, description,
-        skills, compensation, location, is_remote, status, created_at, user_id, business_id
+        skills, compensation, location, is_remote, status, created_at, user_id,
+        gig_date, gig_time, business_id
       ) VALUES (
         @postType, @role, @postType, @title, @name, @contactEmail, @description,
-        @skills, @compensation, @location, @isRemote, @status, @createdAt, @userId, @businessId
+        @skills, @compensation, @location, @isRemote, @status, @createdAt, @userId,
+        @gigDate, @gigTime, @businessId
       )
     `).run({
       postType: payload.postType,
@@ -694,6 +696,8 @@ function insertGigPostCompat(payload: InsertGigPost & { status: string; createdA
       status: payload.status,
       createdAt: payload.createdAt,
       userId: payload.userId ?? null,
+      gigDate: payload.gigDate ?? null,
+      gigTime: payload.gigTime ?? null,
       businessId: payload.businessId ?? null,
     });
     const row = sqlite.prepare(`SELECT * FROM gig_posts WHERE id = ?`).get(result.lastInsertRowid) as Record<string, unknown>;

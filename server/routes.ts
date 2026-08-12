@@ -658,7 +658,8 @@ function moderationGate(
 function publicGiftingPost(post: any, viewerUserId?: number) {
   const userId = Number(post.userId ?? post.user_id);
   const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
-  const safeInterests = Array.isArray(post.interests) ? post.interests.map((interest: any) => ({
+  const isPoster = !!viewerUserId && userId === viewerUserId;
+  const allSafeInterests = Array.isArray(post.interests) ? post.interests.map((interest: any) => ({
     id: interest.id,
     userId: interest.userId ?? interest.user_id,
     note: interest.note,
@@ -670,6 +671,12 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     avatarRing: interest.avatarRing || "none",
     isMine: viewerUserId ? Number(interest.userId ?? interest.user_id) === viewerUserId : false,
   })) : [];
+  // Response notes and identities are private marketplace handoff data. The
+  // poster can review the response list; everyone else can only see their own.
+  const safeInterests = isPoster
+    ? allSafeInterests
+    : allSafeInterests.filter((interest: any) => interest.isMine);
+  const viewerInterest = allSafeInterests.find((interest: any) => interest.isMine);
   return {
     id: post.id,
     userId,
@@ -681,7 +688,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     pickupPreference: post.pickupPreference ?? post.pickup_preference,
     photoUrls: post.photoUrls || [],
     status: post.status,
-    selectedInterestId,
+    selectedInterestId: isPoster ? selectedInterestId : null,
     renewCount: post.renewCount ?? post.renew_count ?? 0,
     expiresAt: post.expiresAt ?? post.expires_at,
     reportCount: post.reportCount ?? post.report_count ?? 0,
@@ -694,7 +701,26 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     interestCount: Number(post.interestCount || 0),
     interests: safeInterests,
     isMine: viewerUserId ? userId === viewerUserId : false,
-    selectedUserId: safeInterests.find((interest: any) => interest.id === selectedInterestId)?.userId || null,
+    selectedUserId: isPoster
+      ? allSafeInterests.find((interest: any) => interest.id === selectedInterestId)?.userId || null
+      : null,
+    viewerSelected: !!viewerInterest && viewerInterest.id === selectedInterestId,
+  };
+}
+
+function publicGigPost(gig: any, viewerUserId?: number) {
+  // contactEmail and adminNotes are workflow-only fields. Contact happens via
+  // contextual inbox messaging; moderation notes never enter a public payload.
+  const {
+    contactEmail: _contactEmail,
+    contact_email: _contactEmailSnake,
+    adminNotes: _adminNotes,
+    admin_notes: _adminNotesSnake,
+    ...safe
+  } = gig;
+  return {
+    ...safe,
+    isMine: viewerUserId ? gig.userId === viewerUserId : false,
   };
 }
 
@@ -735,13 +761,17 @@ function assertGigBoardAllowed(body: any, fields: {
 }
 
 function assertGiftingAllowed(body: any) {
-  if (Date.now() >= GIFTING_RUN_END && process.env.GIFTING_KEEP_OPEN !== "true") {
+  if (!giftingPostingOpen()) {
     throw new Error("Public GifZ posts are paused after July 26, 2026.");
   }
   if (!body.acceptRules) throw new Error("You must agree to the community rules.");
   const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
   const found = RESTRICTED_GIFTING_TERMS.find(term => haystack.includes(term));
   if (found) throw new Error("This post appears to include a restricted item. Please revise or contact an admin.");
+}
+
+function giftingPostingOpen(): boolean {
+  return Date.now() < GIFTING_RUN_END || process.env.GIFTING_KEEP_OPEN === "true";
 }
 
 function getBaseUrl(req: any) {
@@ -2229,10 +2259,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── Gigs ─────────────────────────────────────────────────────────────────
   app.get("/api/gigs", (req, res) => {
     const viewerId = req.session?.userId;
-    const gigs = storage.getGigPosts("LIVE").map(gig => ({
-      ...gig,
-      isMine: viewerId ? gig.userId === viewerId : false,
-    }));
+    const gigs = storage.getGigPosts("LIVE").map(gig => publicGigPost(gig, viewerId));
     res.json(gigs);
   });
 
@@ -2319,6 +2346,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── OUT OF MY CLOSET: GIFTING ───────────────────────────────────────────
+  app.get("/api/gifting/status", (_req, res) => {
+    const postingOpen = giftingPostingOpen();
+    res.json({
+      postingOpen,
+      message: postingOpen
+        ? "GifZ posting is open."
+        : "New GifZ posts are paused. Existing listings and handoffs stay available.",
+    });
+  });
+
   app.get("/api/gifting", (req: any, res) => {
     const posts = storage.getGiftingPosts({ viewerUserId: req.session?.userId });
     res.json(posts.map(post => publicGiftingPost(post, req.session?.userId)));
