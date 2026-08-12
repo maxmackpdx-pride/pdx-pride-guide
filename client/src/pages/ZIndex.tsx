@@ -94,6 +94,15 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
   spaces: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
   out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
+  // Glyphs traced out of the real masters rather than redrawn: the letter
+  // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFZ for Z. N is
+  // built from the library H, keeping its exact tapered stems and swapping the
+  // crossbar for a diagonal at the same stroke weight, because no mark in the
+  // family contains an N.
+  directory: { src: "/brand/family/placez.svg", alt: "PlaceZ" },
+  mizzed: { src: "/brand/family/mizzed.svg", alt: "MizZed" },
+  market: { src: "/brand/family/marketz.svg", alt: "MarketZ" },
+  happening: { src: "/brand/family/events.svg", alt: "Events" },
 };
 
 /**
