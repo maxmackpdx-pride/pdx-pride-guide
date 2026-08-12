@@ -7,7 +7,6 @@ import ZBoardIcon from "@/components/ZBoardIcon";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import {
   Z_ADDRESSES,
-  routedZAddresses,
   zUrl,
   type ZAddress,
 } from "@shared/zNamespace";
@@ -204,6 +203,8 @@ const Z_INDEX_ADDRESSES = (() => {
   return addresses;
 })();
 
+const TOP_LEVEL_Z_ADDRESSES = Z_ADDRESSES.filter(address => !address.path.includes("/"));
+
 /** Count rows by a field, keeping the caller's order and keeping zeroes. */
 function countBy(rows: Row[], field: string, keys: readonly string[]): Record<string, number> {
   const out: Record<string, number> = {};
@@ -266,7 +267,9 @@ function SubcategoryRows({
                   ? ""
                   : countState === "error"
                     ? "\u2014"
-                    : sub.count}
+                    : sub.count === 0
+                      ? <span className="z-index__sub-empty">none yet</span>
+                      : sub.count}
             </span>
           </Link>
           {sub.businessId != null ? (
@@ -291,6 +294,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const photo = CARD_PHOTO[address.path];
   const hasBoard = address.route !== null;
   const isDirectoryHub = address.path === "directory";
+  const isSpacesBoard = address.path === "spaces";
 
   const subs = useMemo<Sub[]>(() => {
     if (!hasBoard) return [];
@@ -464,12 +468,19 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           <SubcategoryRows subs={firstSubs} countState={countState} />
           {remainingSubs.length > 0 ? (
             <details className="z-index__more">
-              <summary>{remainingSubs.length} more z/ addresses</summary>
+              <summary>
+                {remainingSubs.length} more {isSpacesBoard ? "listings" : "categories"}
+              </summary>
               <SubcategoryRows subs={remainingSubs} countState={countState} />
             </details>
           ) : null}
         </div>
       )}
+      {isSpacesBoard ? (
+        <Link href="/directory?type=group" className="z-index__board-action">
+          Open all Clubz &amp; Groupz listings
+        </Link>
+      ) : null}
     </section>
   );
 }
@@ -483,8 +494,8 @@ export default function ZIndex() {
   const heroRef = useRef<HTMLElement | null>(null);
   const [, setLocation] = useLocation();
   const [addressQuery, setAddressQuery] = useState("");
-  const liveCount = routedZAddresses().length;
-  const heldCount = Z_ADDRESSES.length - liveCount;
+  const liveCount = TOP_LEVEL_Z_ADDRESSES.filter(address => address.route !== null).length;
+  const heldCount = TOP_LEVEL_Z_ADDRESSES.length - liveCount;
 
   const searchEntries = useMemo(() => [
     ...Z_ADDRESSES.map(address => ({
@@ -615,7 +626,7 @@ export default function ZIndex() {
       </section>
 
       <nav className="z-address-index" aria-label="Zaylist board address index">
-        {Z_ADDRESSES.map(address => (
+        {TOP_LEVEL_Z_ADDRESSES.map(address => (
           <Link key={address.path} href={zUrl(address.path)}>
             {address.display}
             {!address.route ? <small>not built</small> : null}

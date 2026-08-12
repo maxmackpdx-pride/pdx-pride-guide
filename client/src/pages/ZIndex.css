@@ -542,7 +542,38 @@
   color: var(--text-lo, #5e626c);
   font-variant-numeric: tabular-nums;
 }
+.z-index__sub-empty {
+  color: var(--text-lo, #8d9099);
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
 .z-index__sub:hover .z-index__sub-count { color: var(--sub-c, var(--c)) }
+.z-index__board-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 8px 13px;
+  border: 1px solid color-mix(in srgb, var(--c) 62%, #111);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--c) 12%, rgba(4, 4, 6, .88));
+  color: #fff;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.z-index__board-action:hover,
+.z-index__board-action:focus-visible {
+  background: color-mix(in srgb, var(--c) 20%, rgba(4, 4, 6, .9));
+  outline: 2px solid var(--c);
+  outline-offset: 2px;
+}
 .z-index__more { margin-top: 3px; border-top: 1px solid rgba(255, 255, 255, .08) }
 .z-index__more summary {
   display: flex;
