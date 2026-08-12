@@ -45,6 +45,8 @@ function toDsEvent(e: ProfileEvent): Event {
     adminNotes: null,
     createdAt: "",
     updatedAt: "",
+    // Display-only projection of a profile event; nothing here is ever synced.
+    lockedFields: "[]",
   };
 }
 
