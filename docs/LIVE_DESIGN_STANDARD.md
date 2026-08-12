@@ -111,6 +111,10 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The marker links back to `/z`, labels the current lowercase ASCII Z/ address, keeps calm-mode and keyboard focus behavior, and must not create horizontal overflow on compact screens.
 - On the Z/ index, family wordmarks use the owner-approved 144px height. Fallback board names occupy the same structural slot; image alt stays empty where the adjacent heading already names the board.
 - Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. Clubz & Groupz is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
+- Z/OUT is one top-level board card. Rooster Rock and Sauvie Island are nested destinations inside it, never peer cards or duplicate top-rail addresses.
+- Board totals and the top address rail count top-level boards only. Nested address labels show only their terminal segment while links retain the full canonical route.
+- `z/spaces` must preserve Directory listing identity end to end: real group records, existing detail pages, and the same persistent follow relationship used elsewhere in Places.
+- User-facing address slugs are lowercase ASCII. When normalization repairs a shipped malformed slug, keep the old path as a compatibility alias rather than breaking saved links.
 - Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and not-built are distinct states.
 
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.

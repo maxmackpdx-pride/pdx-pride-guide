@@ -1,0 +1,46 @@
+id: ZAY-NAV-2026-08-12
+title: Z address board ownership and continuity
+date: 2026-08-12
+status: accepted
+owner: Tucker
+authority: founder direction
+context: >-
+  Z/ is the address board for the product family, not a category inside itself.
+  Places, Clubz & Groupz, and Z/OUT need distinct ownership so the index does
+  not duplicate categories or present nested destinations as peer boards.
+decision:
+  - /z is the complete top-level board index.
+  - Clubz & Groupz owns /z/spaces and reuses the Directory's real group records, detail pages, and follow controls.
+  - Places excludes group records because those records belong to Clubz & Groupz on the Z/ index.
+  - Z/OUT is one top-level card; Rooster Rock and Sauvie Island are nested destination pages on that card.
+  - The top address rail and board totals count top-level boards only.
+  - Nested address labels use their terminal segment while routes retain the full canonical hierarchy.
+  - Public counts report real data; zero is shown honestly and pending boards never receive fabricated inventory.
+  - User-facing Z slugs are lowercase ASCII; malformed previously shipped slugs remain compatibility aliases.
+rationale:
+  - One owner per object prevents the Directory and Z/ index from contradicting each other.
+  - Reusing Directory records keeps listing identity, detail routes, and follows continuous across surfaces.
+  - A shallow top-level index is easier to scan while nested routes preserve clear destination context.
+alternatives:
+  - rejected: Treat Z/SPACE as a single product category rather than the complete board index.
+  - rejected: Show Clubs & Groups inside Places and again as a separate Z/ card.
+  - rejected: Give Rooster Rock and Sauvie Island separate top-level cards.
+consequences:
+  - Directory type=group must identify itself as Clubz & Groupz and z/spaces.
+  - Footer, redirects, aliases, card counts, and address markers must preserve the same ownership model.
+  - New Directory types require an explicit owner before appearing on the Z/ index.
+related_decisions: []
+sources:
+  - Tucker's explicit direction in the Z/ redesign task on 2026-08-12
+  - docs/LIVE_DESIGN_STANDARD.md
+  - shared/zNamespace.ts
+  - client/src/pages/ZIndex.tsx
+implementation_state:
+  state: implemented
+  commits:
+    - a576f364
+    - c6de85cc
+    - aa72e96e
+    - 93a45ff7
+    - b0abb587
+review_date: 2026-11-12

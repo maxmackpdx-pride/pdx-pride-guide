@@ -1,6 +1,6 @@
 {
  "system": "Zaylist",
- "version": "2026-08-06",
+ "version": "2026-08-12",
   "sourceOfTruth": {
   "repo": "maxmackpdx-pride/pdx-pride-guide",
   "branch": "master",
@@ -37,6 +37,6 @@
  },
  "refresh": {
   "policy": "Update whenever Foundation docs, continuity policy, or API targets change",
-  "lastKnown": "2026-08-06"
+  "lastKnown": "2026-08-12"
  }
 }
