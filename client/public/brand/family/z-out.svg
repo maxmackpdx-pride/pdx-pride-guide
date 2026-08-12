@@ -1,11 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 727" role="img" aria-label="Z/OUT logo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 900" role="img" aria-label="Z/OUT logo">
   <title>Z/OUT - transparent editable master</title>
-  <metadata>status=owner-directed vector master; raster-embedded=false; editable-paths=true; edition=transparent editable master</metadata>
+  <metadata>status=owner-directed vector master; raster-embedded=false; editable-paths=true; edition=transparent editable master; colour=orange per founder direction 2026-08-12; compass lockup</metadata>
   <defs>
-    <linearGradient id="acid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="727"><stop offset="0" stop-color="#dcff00"/><stop offset=".52" stop-color="#c7ff00"/><stop offset="1" stop-color="#a9ea00"/></linearGradient>
-    <linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="727"><stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#fafafd"/><stop offset="1" stop-color="#eeeef4"/></linearGradient>
+    <linearGradient id="zoutOrange" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900">
+      <stop offset="0" stop-color="#ff8a1f"/>
+      <stop offset=".52" stop-color="#ff6600"/>
+      <stop offset="1" stop-color="#e05200"/>
+    </linearGradient>
+    <linearGradient id="zoutWhite" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".52" stop-color="#fafafd"/>
+      <stop offset="1" stop-color="#eeeef4"/>
+    </linearGradient>
+    <!-- Ring breaks at each cardinal so the arrow heads read as part of the
+         ring rather than sitting on top of it. -->
+    <mask id="zoutRingGaps">
+      <rect width="1700" height="900" fill="#fff"/>
+      <rect x="454" y="98" width="92" height="44" fill="#000"/>
+      <rect x="454" y="758" width="92" height="44" fill="#000"/>
+      <rect x="146" y="406" width="44" height="88" fill="#000"/>
+    </mask>
   </defs>
-  <path id="prime-z" d="M138 118H732L407 490h340l-74 87-484 24 325-386H214z" fill="url(#white)"/>
-  <path id="slash" d="M889 70 732 195 614 474h40l151-234z" fill="url(#white)"/>
-  <path id="out" fill="url(#acid)" fill-rule="evenodd" d="M857 234h174l58 67v126l-58 67H857l-58-67V301zm57 60-47 34v72l47 34h60l47-34v-72l-47-34zm206-60h69v169l27 31h48l27-31V234h69v193l-58 67h-124l-58-67zM1382 234H1562v60h-56v200h-69V294h-55z"/>
+
+  <!-- ── compass rosette ─────────────────────────────────────── -->
+  <g mask="url(#zoutRingGaps)">
+    <circle cx="500" cy="450" r="332" fill="none" stroke="url(#zoutWhite)" stroke-width="14"/>
+    <circle cx="500" cy="450" r="298" fill="none" stroke="url(#zoutOrange)" stroke-width="10"/>
+  </g>
+  <g fill="url(#zoutOrange)">
+    <path d="M500 82 540 148h-80z"/>
+    <path d="M500 818 460 752h80z"/>
+    <path d="M132 450 198 410v80z"/>
+  </g>
+  <g font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="92" text-anchor="middle">
+    <text x="500" y="66" fill="url(#zoutWhite)">N</text>
+    <text x="66" y="482" fill="url(#zoutWhite)">W</text>
+    <text x="500" y="892" fill="url(#zoutOrange)">S</text>
+  </g>
+
+  <!-- ── Z/ letterform. Geometry unaltered from the prime Z master;
+         translated only, so the mark stays the locked letterform. ── -->
+  <g transform="translate(490 450) scale(.78) translate(-513.5 -335.5)">
+    <path id="prime-z" d="M138 118H732L407 490h340l-74 87-484 24 325-386H214z" fill="url(#zoutWhite)"/>
+    <path id="slash" d="M889 70 732 195 614 474h40l151-234z" fill="url(#zoutWhite)"/>
+  </g>
+
+  <!-- ── OUT. The O is a compass housing with a heading marker. ── -->
+  <g transform="translate(0 115)">
+    <path fill="url(#zoutOrange)" fill-rule="evenodd"
+          d="M857 234h174l58 67v126l-58 67H857l-58-67V301zm57 60-47 34v72l47 34h60l47-34v-72l-47-34z"/>
+    <g font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="30" text-anchor="middle" fill="url(#zoutOrange)">
+      <text x="944" y="325">N</text>
+      <text x="944" y="424">S</text>
+      <text x="884" y="376">W</text>
+      <text x="1004" y="376">E</text>
+    </g>
+    <path d="M927 344 971 366l-44 22z" fill="url(#zoutWhite)"/>
+    <path fill="url(#zoutOrange)"
+          d="M1120 234h69v169l27 31h48l27-31V234h69v193l-58 67h-124l-58-67zM1382 234H1562v60h-56v200h-69V294h-55z"/>
+  </g>
+
+  <text x="1626" y="372" fill="url(#zoutOrange)" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="60" text-anchor="middle">TM</text>
 </svg>

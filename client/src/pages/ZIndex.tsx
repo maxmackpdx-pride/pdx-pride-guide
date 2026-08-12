@@ -94,6 +94,12 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
   spaces: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
   out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
+  // Built to the master letter library geometry, because these four boards had
+  // no mark and were showing grey type instead.
+  mizzed: { src: "/brand/family/mizzed.svg", alt: "MizZed" },
+  directory: { src: "/brand/family/placez.svg", alt: "PlaceZ" },
+  market: { src: "/brand/family/for-zayle.svg", alt: "For Zayle" },
+  happening: { src: "/brand/family/events.svg", alt: "Events" },
 };
 
 /**

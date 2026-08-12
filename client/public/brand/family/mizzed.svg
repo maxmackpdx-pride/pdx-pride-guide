@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 982 300" role="img" aria-label="MIZZED logo">
+  <title>MIZZED - transparent editable master</title>
+  <metadata>status=owner-directed vector master; raster-embedded=false; editable-paths=true; built from ZAY master letter library geometry: 45 degree primary angles, unified heavy stroke, blade terminals</metadata>
+  <defs>
+    <linearGradient id="acc" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="246.0">
+      <stop offset="0" stop-color="#ff45d8"/><stop offset=".52" stop-color="#ff00cc"/><stop offset="1" stop-color="#cc0099"/>
+    </linearGradient>
+    <linearGradient id="wht" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="246.0">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#fafafd"/><stop offset="1" stop-color="#eeeef4"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0 46)">
+    <path d="M0.0 0.0L41.4 0.0L69.0 104.0L96.6 0.0L138.0 0.0L138.0 200.0L92.0 200.0L92.0 84.0L69.0 172.0L46.0 84.0L46.0 200.0L0.0 200.0Z" transform="translate(40.0 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M26.0 0.0L46.0 0.0L46.0 174.0L20.0 200.0L0.0 200.0L0.0 26.0Z" transform="translate(189.0 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M0.0 0.0L138.0 0.0L138.0 28.5L42.3 154.0L138.0 154.0L138.0 200.0L0.0 200.0L0.0 171.5L95.7 46.0L0.0 46.0Z" transform="translate(246.0 0)" fill="url(#acc)" fill-rule="evenodd"/>
+    <path d="M0.0 0.0L138.0 0.0L138.0 28.5L42.3 154.0L138.0 154.0L138.0 200.0L0.0 200.0L0.0 171.5L95.7 46.0L0.0 46.0Z" transform="translate(410.0 0)" fill="url(#wht)" fill-rule="evenodd"/><path d="M26.0 0.0L138.0 0.0L112.0 46.0L46.0 46.0L46.0 83.4L117.2 83.4L101.6 116.6L46.0 116.6L46.0 154.0L132.8 154.0L138.0 200.0L0.0 200.0L0.0 26.0Z" transform="translate(559.0 0)" fill="url(#wht)" fill-rule="evenodd"/><path d="M26.0 0.0L112.0 0.0L138.0 26.0L138.0 174.0L112.0 200.0L0.0 200.0L0.0 26.0ZM46.0 46.0L81.6 46.0L92.0 56.4L92.0 143.6L81.6 154.0L46.0 154.0Z" transform="translate(708.0 0)" fill="url(#wht)" fill-rule="evenodd"/>
+  </g>
+  <text x="880" y="98" fill="url(#acc)" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="54">TM</text>
+</svg>

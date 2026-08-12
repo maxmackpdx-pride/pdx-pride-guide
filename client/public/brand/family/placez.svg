@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1057 300" role="img" aria-label="PLACEZ logo">
+  <title>PLACEZ - transparent editable master</title>
+  <metadata>status=owner-directed vector master; raster-embedded=false; editable-paths=true; built from ZAY master letter library geometry: 45 degree primary angles, unified heavy stroke, blade terminals</metadata>
+  <defs>
+    <linearGradient id="acc" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="246.0">
+      <stop offset="0" stop-color="#ff8a4a"/><stop offset=".52" stop-color="#ff2400"/><stop offset="1" stop-color="#c41c00"/>
+    </linearGradient>
+    <linearGradient id="wht" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="246.0">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#fafafd"/><stop offset="1" stop-color="#eeeef4"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0 46)">
+    <path d="M26.0 0.0L112.0 0.0L138.0 26.0L138.0 66.0L112.0 92.0L46.0 92.0L46.0 174.0L20.0 200.0L0.0 200.0L0.0 26.0ZM46.0 46.0L81.6 46.0L92.0 56.4L92.0 35.6L81.6 46.0L46.0 46.0Z" transform="translate(40.0 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M26.0 0.0L46.0 0.0L46.0 154.0L112.0 154.0L138.0 200.0L0.0 200.0L0.0 26.0Z" transform="translate(189.0 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M58.6 0.0L79.4 0.0L138.0 200.0L92.0 200.0L86.0 147.6L52.0 147.6L46.0 200.0L0.0 200.0ZM69.0 43.7L82.4 116.4L55.6 116.4Z" transform="translate(321.4 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M26.0 0.0L138.0 0.0L112.0 46.0L56.4 46.0L46.0 56.4L46.0 143.6L56.4 154.0L112.0 154.0L138.0 200.0L26.0 200.0L0.0 174.0L0.0 26.0Z" transform="translate(470.4 0)" fill="url(#acc)" fill-rule="evenodd"/><path d="M26.0 0.0L138.0 0.0L112.0 46.0L46.0 46.0L46.0 83.4L117.2 83.4L101.6 116.6L46.0 116.6L46.0 154.0L132.8 154.0L138.0 200.0L0.0 200.0L0.0 26.0Z" transform="translate(619.4 0)" fill="url(#acc)" fill-rule="evenodd"/>
+    <path d="M0.0 0.0L138.0 0.0L138.0 28.5L42.3 154.0L138.0 154.0L138.0 200.0L0.0 200.0L0.0 171.5L95.7 46.0L0.0 46.0Z" transform="translate(783.4 0)" fill="url(#wht)" fill-rule="evenodd"/>
+  </g>
+  <text x="955" y="98" fill="url(#acc)" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="54">TM</text>
+</svg>
