@@ -38,14 +38,18 @@ export type ZAddress = {
 /**
  * The address map. Order is the order the namespace is presented in.
  *
- * `z/market`, `z/out`, and `z/space` are deliberately routeless: the address is
- * reserved so nobody else takes it, but there is no page behind it yet and none
- * is invented here.
+ * Every entry is a board Tucker has approved. A routeless entry means the
+ * product exists on the public roadmap at /next but has no page yet, so the
+ * address resolves and says so.
+ *
+ * Do not add an address for a product that has not been approved. `z/market`
+ * was removed on 2026-08-12 for exactly that reason: it came out of a
+ * prototype, not a decision, and shipping it told members Zaylist was building
+ * a for-sale board that nobody had agreed to build.
  */
 export const Z_ADDRESSES: ZAddress[] = [
   { path: "happening", display: "z/happening", board: "Events", route: "/events" },
   { path: "hauz", display: "z/haüz", board: "THE HAÜZ", route: "/the-hauz" },
-  { path: "market", display: "z/market", board: "For sale", route: null },
   { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting" },
   { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "Mizzed Connectionz", route: "/spotted" },

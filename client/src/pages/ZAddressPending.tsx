@@ -29,7 +29,7 @@ export default function ZAddressPending() {
         flipLightLeaks
         titleLine1="NOT BUILT YET"
         accent="magenta"
-        lede={`${display} is a real Zaylist address${address?.board ? ` for ${address.board}` : ""}. There is no board behind it yet, so there is nothing here to show you. It is held so nobody else takes it.`}
+        lede={`${display}${address?.board ? ` is where ${address.board} will live` : " is on the way"}. It is on the roadmap at /next and has not been built yet, so there is nothing here to show you.`}
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 45%"
         actions={(
