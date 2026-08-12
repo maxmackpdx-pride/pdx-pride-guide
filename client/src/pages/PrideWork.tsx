@@ -127,7 +127,10 @@ export default function PrideWork() {
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [filter, setFilter] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">("ALL");
+  const [filter, setFilter] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">(() => {
+    const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
+    return type === "LOOKING_FOR_WORK" || type === "POSTING_GIG" ? type : "ALL";
+  });
   const [search, setSearch] = useState("");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [sort, setSort] = useState("RECENT");

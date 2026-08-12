@@ -1,4 +1,19 @@
-/** Directory type accent colors - keep in sync with Directory.tsx TYPE_COLORS. */
+/** Canonical directory type labels and accent colors, shared by the board and z/. */
+export const DIRECTORY_TYPE_LABELS: Record<string, string> = {
+  bar: "Bars & Clubs",
+  restaurant: "Restaurants",
+  cafe: "Cafes",
+  venue: "Venues",
+  service: "Services",
+  shop: "Shops",
+  hotel: "Hotels",
+  nonprofit: "Nonprofits",
+  healthcare: "Health & Care",
+  realestate: "Real Estate",
+  group: "Clubs & Groups",
+  campground: "Campgrounds",
+};
+
 export const DIRECTORY_TYPE_COLORS: Record<string, string> = {
   bar: "#FF00CC",
   restaurant: "#FF6600",

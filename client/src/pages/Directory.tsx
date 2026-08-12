@@ -19,6 +19,10 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
 import { resolveBusinessLocations } from "@shared/businessLocations";
+import {
+  DIRECTORY_TYPE_COLORS as TYPE_COLORS,
+  DIRECTORY_TYPE_LABELS as TYPE_LABELS,
+} from "@shared/directoryTheme";
 
 import { lazyWithReload } from "@/lib/lazyWithReload";
 import {
@@ -95,36 +99,7 @@ export type DirectoryPromoter = { id: number; username: string; displayName: str
 export type DirectorySpotted = { id: number; title: string; body: string; createdAt: string };
 export type DirectoryGig = { id: number; title: string; postType: string; createdAt: string };
 
-export const TYPE_LABELS: Record<string, string> = {
-  bar: "Bars & Clubs",
-  restaurant: "Restaurants",
-  cafe: "Cafes",
-  venue: "Venues",
-  service: "Services",
-  shop: "Shops",
-  hotel: "Hotels",
-  nonprofit: "Nonprofits",
-  healthcare: "Health & Care",
-  realestate: "Real Estate",
-  group: "Clubs & Groups",
-  campground: "Campgrounds",
-};
-
-/** Solid pin / accent hex (gradients live on PlaceCard edges). */
-export const TYPE_COLORS: Record<string, string> = {
-  bar: "#FF00CC",
-  restaurant: "#FF6600",
-  cafe: "#39FF14",
-  venue: "#19E3FF",
-  service: "#A855F7",
-  shop: "#FFD700",
-  hotel: "#FF1FA0",
-  nonprofit: "#FFFFFF",
-  healthcare: "#FF00CC", // pink pole of pink→white neon
-  realestate: "#1A4DFF", // neon navy pole of navy→white neon
-  group: "#FFD700", // gold pole of white→gold neon
-  campground: "#39FF14", // lime pole of lime→dark green neon
-};
+export { TYPE_LABELS, TYPE_COLORS };
 
 /** Preferred chip order (design handoff). Extras from data append after. */
 const NEIGHBORHOOD_ORDER = [

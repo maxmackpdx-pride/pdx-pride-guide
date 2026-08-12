@@ -81,7 +81,12 @@ export default function Housing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  const [filter, setFilter] = useState<HousingFilter>("ALL");
+  const [filter, setFilter] = useState<HousingFilter>(() => {
+    const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
+    return type && HOUSING_FILTERS.includes(type as HousingFilter)
+      ? type as HousingFilter
+      : "ALL";
+  });
   const [showAuth, setShowAuth] = useState(false);
 
   /*

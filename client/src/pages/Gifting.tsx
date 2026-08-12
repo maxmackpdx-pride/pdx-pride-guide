@@ -76,7 +76,10 @@ export default function Gifting() {
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<any>(blankForm);
   const [photos, setPhotos] = useState<FileList | null>(null);
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState(() => {
+    const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
+    return type === "GIFT" || type === "ISO" ? type : "ALL";
+  });
   const [category, setCategory] = useState("ALL");
   const [neighborhood, setNeighborhood] = useState("");
   const [sort, setSort] = useState("RECENT");

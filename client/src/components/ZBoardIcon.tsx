@@ -26,7 +26,7 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
     ),
   },
   // 01-community
-  space: {
+  spaces: {
     src: "01-community",
     d: (
       <>

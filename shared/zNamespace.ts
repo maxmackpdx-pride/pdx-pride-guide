@@ -22,8 +22,8 @@ export type ZAddress = {
    */
   path: string;
   /**
-   * How the address is written for a person. May carry characters the URL
-   * does not: `z/haüz` displays with the umlaut, `z/hauz` is the address.
+   * How the address is written for a person. This is the typeable ASCII address;
+   * product identity may still use characters such as the umlaut in THE HAÜZ.
    */
   display: string;
   /** Human board name, matching the label already used in siteNav. */
@@ -49,15 +49,15 @@ export type ZAddress = {
  */
 export const Z_ADDRESSES: ZAddress[] = [
   { path: "happening", display: "z/happening", board: "Events", route: "/events" },
-  { path: "hauz", display: "z/haüz", board: "THE HAÜZ", route: "/the-hauz" },
+  { path: "hauz", display: "z/hauz", board: "THE HAÜZ", route: "/the-hauz" },
   { path: "market", display: "z/market", board: "For sale", route: null },
   { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting" },
   { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
-  { path: "mizzed", display: "z/mizzed", board: "Mizzed Connectionz", route: "/spotted" },
+  { path: "mizzed", display: "z/mizzed", board: "Mizzed Connection", route: "/spotted" },
   { path: "directory", display: "z/directory", board: "Directory", route: "/directory" },
   { path: "out", display: "z/out", board: "Outdoors", route: null },
   { path: "out/nudest", display: "z/out/nudest", board: "Nude beaches", route: "/nude-beaches" },
-  { path: "space", display: "z/space", board: "Clubs and groups", route: null },
+  { path: "spaces", display: "z/spaces", board: "Clubs and groups", route: null },
 ];
 
 /**
@@ -70,6 +70,8 @@ export const Z_ADDRESSES: ZAddress[] = [
 export const Z_ENCODED_ALIASES: Record<string, string> = {
   "/z/ha%C3%BCz": "/z/hauz",
   "/z/haüz": "/z/hauz",
+  // Singular shipped briefly before Tucker confirmed the plural address.
+  "/z/space": "/z/spaces",
 };
 
 /**

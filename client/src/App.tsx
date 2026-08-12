@@ -43,6 +43,7 @@ function ScrollToTop() {
 }
 import Home from "./pages/Home";
 import { Z_ADDRESSES, Z_ENCODED_ALIASES, zUrl } from "@shared/zNamespace";
+import { Z_CATEGORY_ADDRESSES } from "./lib/zCategoryAddresses";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
 import ResetPassword from "./pages/ResetPassword";
@@ -129,6 +130,11 @@ function AppLayout() {
             <Route path="/z" component={ZIndex} />
             {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (
               <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
+            ))}
+            {Z_CATEGORY_ADDRESSES.map(categoryAddress => (
+              <Route key={categoryAddress.path} path={zUrl(categoryAddress.path)}>
+                {() => <Redirect to={categoryAddress.route} />}
+              </Route>
             ))}
             {[...Z_ADDRESSES]
               .sort((a, b) => b.path.length - a.path.length)

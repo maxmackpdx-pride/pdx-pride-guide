@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
-import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
+import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import ListingCard from "@/components/ds/adapters/ListingCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
@@ -306,7 +306,13 @@ export default function Events() {
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
   const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
   const [activeDay, setActiveDay] = useState("ALL");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [activeFilters, setActiveFilters] = useState<string[]>(() => {
+    const raw = readSearchParam("type");
+    return raw
+      .split("|")
+      .map(value => value.trim().toUpperCase())
+      .filter(isEventTypeFilterLabel);
+  });
   /** Past events live in their own board view (chip next to day categories). */
   const [pastView, setPastView] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -491,7 +497,15 @@ export default function Events() {
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
 
   const toggleFilter = (f: string) =>
-    setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+    setActiveFilters(prev => {
+      const next = prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f];
+      const params = new URLSearchParams(window.location.search);
+      if (next.length) params.set("type", next.join("|"));
+      else params.delete("type");
+      const qs = params.toString();
+      window.history.replaceState(null, "", qs ? `/events?${qs}` : "/events");
+      return next;
+    });
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">

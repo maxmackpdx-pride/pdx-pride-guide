@@ -1,11 +1,24 @@
-import { useMemo, useRef } from "react";
-import { Link } from "wouter";
+import { useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import ZBoardIcon from "@/components/ZBoardIcon";
-import { Z_ADDRESSES, zUrl, type ZAddress } from "@shared/zNamespace";
-import { TYPE_LABELS, TYPE_COLORS } from "@/pages/Directory";
+import {
+  Z_ADDRESSES,
+  routedZAddresses,
+  zUrl,
+  type ZAddress,
+} from "@shared/zNamespace";
+import {
+  DIRECTORY_TYPE_COLORS as TYPE_COLORS,
+  DIRECTORY_TYPE_LABELS as TYPE_LABELS,
+} from "@shared/directoryTheme";
+import {
+  Z_CATEGORY_ADDRESSES,
+  findZCategory,
+  type ZCategoryAddress,
+} from "@/lib/zCategoryAddresses";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
 import {
   EVENT_TYPE_FILTERS,
@@ -26,8 +39,9 @@ import "./ZIndex.css";
 
 /**
  * Board accents. Every value is a real token from client/src/index.css, and no
- * two boards share one, so the set read together is the rainbow and each board
- * alone is a single colour. Housing rebinds per post type further down.
+ * the set reads together as the rainbow while each top-level board stays within
+ * one colour family. Nested addresses inherit their parent. Housing rebinds per
+ * post type further down.
  */
 const ACCENT: Record<string, string> = {
   // Boards that already declare an accent keep it, so /z can never disagree
@@ -37,14 +51,12 @@ const ACCENT: Record<string, string> = {
   gigz: "var(--board-gigs, #6e3dff)",       // --board-gigs, index.css
   market: "var(--neon-yellow, #ccff00)",
   mizzed: "var(--board-spotted, #ff00cc)",  // --board-spotted, index.css
-  // The rest have no declared board accent, so each takes one unused Zaylist
-  // token. No two boards share a colour: the set read together is the rainbow,
-  // and a board read alone is one colour.
+  // The rest use Zaylist tokens; a nested address inherits its parent colour.
   happening: "var(--neon-orange, #ff6600)",
   directory: "var(--neon-red, #ff2400)",
-  out: "var(--neon-cyan, #00ffff)",
-  "out/nudest": "var(--neon-cyan, #00ffff)",
-  space: "#ffd700",                         // TYPE_COLORS.group, Directory.tsx
+  out: "var(--neon-orange, #ff6600)",
+  "out/nudest": "var(--neon-orange, #ff6600)",
+  spaces: "#ffd700",                        // TYPE_COLORS.group, directoryTheme.ts
 };
 
 /**
@@ -80,7 +92,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   gifz: { src: "/brand/family/gifz.svg", alt: "GifZ" },
   gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
-  space: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
+  spaces: { src: "/brand/family/z-space.svg", alt: "Z/SPACE" },
   out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
 };
 
@@ -160,7 +172,9 @@ function rowsOf(payload: unknown): Row[] {
   return [];
 }
 
-type Sub = { key: string; label: string; color?: string; count: number };
+type Sub = ZCategoryAddress & { color?: string; count: number };
+
+const VISIBLE_SUBS = 4;
 
 /** Count rows by a field, keeping the caller's order and keeping zeroes. */
 function countBy(rows: Row[], field: string, keys: readonly string[]): Record<string, number> {
@@ -183,8 +197,52 @@ function useBoardRows(path: string) {
   });
 }
 
+function addressSubs(
+  boardPath: string,
+  items: Array<{ key: string; label: string; color?: string; count: number }>,
+): Sub[] {
+  return items.flatMap(item => {
+    const address = findZCategory(boardPath, item.key);
+    return address ? [{ ...address, ...item }] : [];
+  });
+}
+
+function SubcategoryRows({
+  subs,
+  countState,
+}: {
+  subs: Sub[];
+  countState: "loading" | "error" | "ready";
+}) {
+  return (
+    <ul className="z-index__subs">
+      {subs.map(sub => (
+        <li key={sub.key}>
+          <Link
+            href={zUrl(sub.path)}
+            className="z-index__sub"
+            style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
+          >
+            {sub.color ? <span className="z-index__sub-swatch" aria-hidden="true" /> : null}
+            <span className="z-index__sub-copy">
+              <span className="z-index__sub-address">z/{sub.path}</span>
+              <span className="z-index__sub-label">{sub.label}</span>
+            </span>
+            <span
+              className="z-index__sub-count"
+              aria-label={countState === "loading" ? "Loading count" : countState === "error" ? "Count unavailable" : undefined}
+            >
+              {countState === "loading" ? "" : countState === "error" ? "\u2014" : sub.count}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
-  const { data, isPending } = useBoardRows(address.path);
+  const { data, isPending, isError } = useBoardRows(address.path);
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
   const wordmark = WORDMARK[address.path];
@@ -196,32 +254,32 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
     if (address.path === "directory") {
       const keys = Object.keys(TYPE_LABELS);
       const counts = countBy(rows, "type", keys);
-      return keys.map(key => ({
+      return addressSubs(address.path, keys.map(key => ({
         key,
         label: TYPE_LABELS[key],
         color: TYPE_COLORS[key],
         count: counts[key],
-      }));
+      })));
     }
     if (address.path === "hauz") {
       const counts = countBy(rows, "type", HOUSING_TYPES);
-      return HOUSING_TYPES.map(key => ({
+      return addressSubs(address.path, HOUSING_TYPES.map(key => ({
         key,
         label: HOUSING_TYPE_KICKER[key],
         color: HOUSING_SUB_ACCENT[key],
         count: counts[key],
-      }));
+      })));
     }
     if (address.path === "gifz") {
       const counts = countBy(rows, "postType", ["GIFT", "ISO"]);
-      return [
+      return addressSubs(address.path, [
         { key: "GIFT", label: "Offered", color: GIFZ_SUB_ACCENT.GIFT, count: counts.GIFT },
         { key: "ISO", label: "In search of", color: GIFZ_SUB_ACCENT.ISO, count: counts.ISO },
-      ];
+      ]);
     }
     if (address.path === "gigz") {
       const counts = countBy(rows, "postType", ["POSTING_GIG", "LOOKING_FOR_WORK"]);
-      return [
+      return addressSubs(address.path, [
         {
           key: "POSTING_GIG",
           label: "Gigs offered",
@@ -234,7 +292,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           color: GIGZ_SUB_ACCENT.LOOKING_FOR_WORK,
           count: counts.LOOKING_FOR_WORK,
         },
-      ];
+      ]);
     }
     if (address.path === "happening") {
       // Tags are derived from the listing's real fields, not stored on it, so
@@ -242,12 +300,12 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       // can carry several tags, so these deliberately do not sum to the total.
       type TagSource = Parameters<typeof getEventTypeTagsForEvent>[0];
       const tagged = rows.map(row => getEventTypeTagsForEvent(row as unknown as TagSource));
-      return EVENT_TYPE_FILTERS.map(label => ({
+      return addressSubs(address.path, EVENT_TYPE_FILTERS.map(label => ({
         key: label,
         label,
         color: EVENT_TYPE_TAG_COLORS[label]?.color,
         count: tagged.filter(tags => tags.includes(label)).length,
-      }));
+      })));
     }
     // Mizzed and nudest have no taxonomy in the codebase. Show no children
     // rather than inventing them.
@@ -255,6 +313,9 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   }, [address.path, hasBoard, rows]);
 
   const countable = !!COUNT_ENDPOINT[address.path];
+  const countState = isPending ? "loading" : isError ? "error" : "ready";
+  const firstSubs = subs.slice(0, VISIBLE_SUBS);
+  const remainingSubs = subs.slice(VISIBLE_SUBS);
 
   return (
     <section
@@ -282,7 +343,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
             <img
               className="z-index__wordmark"
               src={wordmark.src}
-              alt={wordmark.alt}
+              alt=""
               loading="lazy"
               decoding="async"
             />
@@ -295,34 +356,24 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
             ? "not built yet"
             : !countable
               ? null
-              : isPending
-                ? <i className="z-index__pending" />
-                : rows.length}
+              : countState === "loading"
+                ? <i className="z-index__pending" role="status" aria-label="Loading count" />
+                : countState === "error"
+                  ? <span aria-label="Count unavailable">\u2014</span>
+                  : rows.length}
         </span>
       </Link>
 
-      {hasBoard && (
-        <Link href={address.route!} className="z-index__open">
-          Open board <i aria-hidden="true">&rarr;</i>
-        </Link>
-      )}
-
       {subs.length > 0 && (
-        <ul className="z-index__subs">
-          {subs.map(sub => (
-            <li key={sub.key}>
-              <Link
-                href={address.route!}
-                className="z-index__sub"
-                style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
-              >
-                {sub.color ? <span className="z-index__sub-swatch" /> : null}
-                <span className="z-index__sub-label">{sub.label}</span>
-                <span className="z-index__sub-count">{isPending ? "" : sub.count}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="z-index__categories">
+          <SubcategoryRows subs={firstSubs} countState={countState} />
+          {remainingSubs.length > 0 ? (
+            <details className="z-index__more">
+              <summary>{remainingSubs.length} more z/ addresses</summary>
+              <SubcategoryRows subs={remainingSubs} countState={countState} />
+            </details>
+          ) : null}
+        </div>
       )}
     </section>
   );
@@ -331,10 +382,42 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
 export default function ZIndex() {
   usePageSeo(
     "z/ | Every Zaylist board, one page",
-    "Portland, all at once. Every Zaylist board and every category on one page: events, housing, gigs, free stuff, missed connections, and a directory of queer owned places.",
+    "Portland, all at once. Every Zaylist board and every real category on one page: events, housing, gigs, free stuff, missed connections, and the community directory.",
   );
 
   const heroRef = useRef<HTMLElement | null>(null);
+  const [, setLocation] = useLocation();
+  const [addressQuery, setAddressQuery] = useState("");
+  const liveCount = routedZAddresses().length;
+  const heldCount = Z_ADDRESSES.length - liveCount;
+
+  const searchEntries = useMemo(() => [
+    ...Z_ADDRESSES.map(address => ({
+      path: address.path,
+      label: address.board,
+      detail: address.route ? "Board" : "Not built yet",
+    })),
+    ...Z_CATEGORY_ADDRESSES.map(categoryAddress => ({
+      path: categoryAddress.path,
+      label: categoryAddress.label,
+      detail: "Category",
+    })),
+  ], []);
+
+  const normalizedQuery = addressQuery
+    .trim()
+    .toLowerCase()
+    .replace(/^\/?z\//, "");
+  const addressMatches = normalizedQuery
+    ? searchEntries.filter(entry =>
+        `${entry.path} ${entry.label}`.toLowerCase().includes(normalizedQuery),
+      ).slice(0, 6)
+    : [];
+
+  const submitAddress = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (addressMatches[0]) setLocation(zUrl(addressMatches[0].path));
+  };
 
   /**
    * Pointer parallax on the wordmark only. Pointer driven rather than scroll
@@ -397,15 +480,53 @@ export default function ZIndex() {
           <div className="z-hero__copy">
             <p className="z-hero__lede">
               Every board on one page, in plain words, in the order you read them.
-              Nothing here decides what you see first. Type an address and go.
+              Nothing here decides what you see first. Find an address and go.
             </p>
             <p className="z-hero__live">
               <span className="z-hero__dot" aria-hidden="true" />
-              <span>{Z_ADDRESSES.length} addresses live</span>
+              <span>{liveCount} boards live &middot; {heldCount} not built yet</span>
             </p>
           </div>
+
+          <form className="z-address-search" role="search" onSubmit={submitAddress}>
+            <label htmlFor="z-address-input">Find a z/ address</label>
+            <div className="z-address-search__field">
+              <span aria-hidden="true">z/</span>
+              <input
+                type="search"
+                name="z-address"
+                id="z-address-input"
+                value={addressQuery}
+                onChange={event => setAddressQuery(event.target.value)}
+                placeholder="events, free, cafes, housing..."
+                autoComplete="off"
+              />
+              <button type="submit" disabled={!addressMatches.length}>Go</button>
+            </div>
+            {normalizedQuery ? (
+              <div className="z-address-search__results" id="z-address-results" aria-live="polite">
+                {addressMatches.length ? addressMatches.map(entry => (
+                  <Link key={entry.path} href={zUrl(entry.path)}>
+                    <span>z/{entry.path}</span>
+                    <small>{entry.label} &middot; {entry.detail}</small>
+                  </Link>
+                )) : (
+                  <p>No z/ address matches that search.</p>
+                )}
+              </div>
+            ) : null}
+          </form>
         </div>
       </section>
+
+      <nav className="z-address-index" aria-label="Zaylist board address index">
+        {Z_ADDRESSES.map(address => (
+          <Link key={address.path} href={zUrl(address.path)}>
+            {address.display}
+            {!address.route ? <small>not built</small> : null}
+          </Link>
+        ))}
+      </nav>
 
       <div className="z-index__grid">
         {Z_ADDRESSES.map((address, index) => (
@@ -416,8 +537,8 @@ export default function ZIndex() {
       <hr className="pdx-rainbow-rule z-index__rule" aria-hidden="true" />
 
       <p className="z-index__note">
-        <b>The boards together are the rainbow.</b> Each board owns one colour, and
-        that is the only place it appears. Counts come from the same endpoints the
+        <b>The boards together are the rainbow.</b> Each top-level board keeps one
+        colour, and a nested address inherits its parent. Counts come from the same endpoints the
         boards themselves use, so a category with nothing in it stays honestly at zero.
       </p>
     </div>
