@@ -6,7 +6,11 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { Z_ADDRESSES, zUrl, type ZAddress } from "@shared/zNamespace";
 import { TYPE_LABELS, TYPE_COLORS } from "@/pages/Directory";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
-import { EVENT_TYPE_FILTERS, getEventTypeTagsForEvent } from "@shared/eventTypeTags";
+import {
+  EVENT_TYPE_FILTERS,
+  EVENT_TYPE_TAG_COLORS,
+  getEventTypeTagsForEvent,
+} from "@shared/eventTypeTags";
 import "./ZIndex.css";
 
 /**
@@ -25,16 +29,51 @@ import "./ZIndex.css";
  * alone is a single colour. Housing rebinds per post type further down.
  */
 const ACCENT: Record<string, string> = {
-  happening: "var(--neon-magenta, #ff00cc)",
-  space: "var(--gold, #ffd700)",
-  directory: "var(--neon-orange, #ff6600)",
-  gigz: "var(--board-gigs, #6e3dff)",
+  // Boards that already declare an accent keep it, so /z can never disagree
+  // with the board it links to.
+  hauz: "var(--panel-cyan, #19e3ff)",       // HOUSING_BOARD_ACCENT, shared/housing.ts
+  gifz: "var(--board-gifting, #ccff00)",    // --board-gifting, index.css
+  gigz: "var(--board-gigs, #6e3dff)",       // --board-gigs, index.css
+  mizzed: "var(--board-spotted, #ff00cc)",  // --board-spotted, index.css
+  // The rest have no declared board accent, so each takes one unused Zaylist
+  // token. No two boards share a colour: the set read together is the rainbow,
+  // and a board read alone is one colour.
+  happening: "var(--neon-orange, #ff6600)",
+  directory: "var(--neon-red, #ff2400)",
   market: "var(--neon-yellow, #ccff00)",
-  hauz: "var(--panel-cyan, #19e3ff)",
-  gifz: "var(--green-acid, #39ff14)",
   out: "var(--neon-cyan, #00ffff)",
   "out/nudest": "var(--neon-cyan, #00ffff)",
-  mizzed: "var(--neon-red, #ff2400)",
+  space: "#ffd700",                         // TYPE_COLORS.group, Directory.tsx
+};
+
+/**
+ * Note on calm mode: html.calm-mode remaps every neon and panel token to grey,
+ * so a var() reference desaturates with the rest of the site. The few literal
+ * hexes below come from maps that are literal at their source too (TYPE_COLORS,
+ * EVENT_TYPE_TAG_COLORS), and those already ship on their own boards, so this
+ * page behaves exactly like the board it links to.
+ */
+
+/**
+ * Subcategory accents. Every board already assigns its own colours, so these are
+ * read from where that board defines them rather than restated here:
+ *   directory  TYPE_COLORS in pages/Directory.tsx
+ *   happening  EVENT_TYPE_TAG_COLORS in shared/eventTypeTags.ts
+ *   hauz       HOUSING_ACCENT_VAR in shared/housing.ts
+ *   gifz       the ACCENT map in pages/Gifting.tsx
+ *   gigz       the post type accents in pages/PrideWork.tsx
+ */
+
+/** Gifting: lime for both offered and in search of, per pages/Gifting.tsx. */
+const GIFZ_SUB_ACCENT: Record<string, string> = {
+  GIFT: "#ccff00",
+  ISO: "#ccff00",
+};
+
+/** Gigs: cyan for talent, purple for gigs, per pages/PrideWork.tsx. */
+const GIGZ_SUB_ACCENT: Record<string, string> = {
+  LOOKING_FOR_WORK: "#19e3ff",
+  POSTING_GIG: "#b06bff",
 };
 
 /** Housing rebinds per post type, from HOUSING_ACCENT_VAR in shared/housing.ts. */
@@ -47,8 +86,14 @@ const HOUSING_SUB_ACCENT: Record<string, string> = {
 
 /** The set of accents, in index order, for the spectrum rule. */
 const SPECTRUM = [
-  "#ff00cc", "#ff6600", "#ffd700", "#ccff00",
-  "#39ff14", "#19e3ff", "#00ffff", "#6e3dff", "#ff2400",
+  "#ff6600", // happening
+  "#ffd700", // space
+  "#ff2400", // directory
+  "#6e3dff", // gigz
+  "#ccff00", // market and gifz
+  "#19e3ff", // hauz
+  "#00ffff", // out
+  "#ff00cc", // mizzed
 ];
 
 /** Mote positions for the hero atmosphere, one per letter of the mark. */
@@ -141,15 +186,25 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
     if (address.path === "gifz") {
       const counts = countBy(rows, "postType", ["GIFT", "ISO"]);
       return [
-        { key: "GIFT", label: "Offered", count: counts.GIFT },
-        { key: "ISO", label: "In search of", count: counts.ISO },
+        { key: "GIFT", label: "Offered", color: GIFZ_SUB_ACCENT.GIFT, count: counts.GIFT },
+        { key: "ISO", label: "In search of", color: GIFZ_SUB_ACCENT.ISO, count: counts.ISO },
       ];
     }
     if (address.path === "gigz") {
       const counts = countBy(rows, "postType", ["POSTING_GIG", "LOOKING_FOR_WORK"]);
       return [
-        { key: "POSTING_GIG", label: "Gigs offered", count: counts.POSTING_GIG },
-        { key: "LOOKING_FOR_WORK", label: "Talent available", count: counts.LOOKING_FOR_WORK },
+        {
+          key: "POSTING_GIG",
+          label: "Gigs offered",
+          color: GIGZ_SUB_ACCENT.POSTING_GIG,
+          count: counts.POSTING_GIG,
+        },
+        {
+          key: "LOOKING_FOR_WORK",
+          label: "Talent available",
+          color: GIGZ_SUB_ACCENT.LOOKING_FOR_WORK,
+          count: counts.LOOKING_FOR_WORK,
+        },
       ];
     }
     if (address.path === "happening") {
@@ -161,6 +216,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       return EVENT_TYPE_FILTERS.map(label => ({
         key: label,
         label,
+        color: EVENT_TYPE_TAG_COLORS[label]?.color,
         count: tagged.filter(tags => tags.includes(label)).length,
       }));
     }
