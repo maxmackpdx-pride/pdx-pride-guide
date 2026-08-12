@@ -32,17 +32,14 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/nude-beaches", label: "Beaches" },
     ],
   },
-  {
-    type: "dropdown",
-    id: "boards",
-    label: "Boards",
-    items: [
-      { href: "/pride-work", label: "Gigz" },
-      { href: "/gifting", label: "GifZ" },
-      { href: "/the-hauz", label: "THE HAÜZ" },
-      { href: "/spotted", label: "Mizzed Connection" },
-    ],
-  },
+  /**
+   * Boards is one address, not a dropdown. Every board already has a z/ address
+   * (ZF-Z-NAMESPACE-2026-08-11), and /z lists all of them with live counts, so a
+   * four item menu was a shorter, staler copy of a page that already exists.
+   * navLinkActive matches /z and every /z/... address, so this stays lit on any
+   * board reached through the namespace.
+   */
+  { type: "link", href: "/z", label: "z/" },
   { type: "link", href: "/next", label: "NEXT" },
 ];
 
@@ -72,9 +69,19 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/inbox": { section: "Account", title: "Inbox" },
+  "/z": { section: "Zaylist", title: "z/" },
 };
 
+/**
+ * Destinations behind the mobile footer "Boards" tab sheet.
+ *
+ * The desktop nav collapsed its Boards dropdown into a single /z link. The
+ * mobile bar keeps a sheet, because its tab already opens one, so /z leads the
+ * list rather than replacing it: on a phone a direct tap to a board is worth
+ * keeping, and the namespace still gets a door.
+ */
 export const BOARD_NAV: NavLinkItem[] = [
+  { href: "/z", label: "z/ all boards" },
   { href: "/pride-work", label: "Gigz" },
   { href: "/gifting", label: "GifZ" },
   { href: "/the-hauz", label: "THE HAÜZ" },
