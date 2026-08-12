@@ -20,6 +20,7 @@ import {
   type ZCategoryAddress,
 } from "@/lib/zCategoryAddresses";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
+import { placePath } from "@shared/placeSlug";
 import {
   EVENT_TYPE_FILTERS,
   EVENT_TYPE_TAG_COLORS,
@@ -167,6 +168,7 @@ const COUNT_ENDPOINT: Record<string, string> = {
   gigz: "/api/gigs",
   mizzed: "/api/missed-connections",
   directory: "/api/directory",
+  spaces: "/api/directory",
 };
 
 type Row = Record<string, unknown>;
@@ -182,7 +184,12 @@ function rowsOf(payload: unknown): Row[] {
   return [];
 }
 
-type Sub = ZCategoryAddress & { color?: string; count: number | null };
+type Sub = ZCategoryAddress & {
+  color?: string;
+  count: number | null;
+  href?: string;
+  displayAddress?: string;
+};
 
 const VISIBLE_SUBS = 4;
 
@@ -237,13 +244,13 @@ function SubcategoryRows({
       {subs.map(sub => (
         <li key={sub.key}>
           <Link
-            href={zUrl(sub.path)}
+            href={sub.href ?? zUrl(sub.path)}
             className="z-index__sub"
             style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
           >
             {sub.color ? <span className="z-index__sub-swatch" aria-hidden="true" /> : null}
             <span className="z-index__sub-copy">
-              <span className="z-index__sub-address">{sub.path.split("/").at(-1)}</span>
+              <span className="z-index__sub-address">{sub.displayAddress ?? sub.path.split("/").at(-1)}</span>
               <span className="z-index__sub-label">{sub.label}</span>
             </span>
             <span
@@ -288,6 +295,26 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           color: ACCENT[candidate.path],
           count: null,
         }));
+    }
+    if (address.path === "spaces") {
+      return rows
+        .filter(row => String(row.type ?? "") === "group")
+        .map(row => {
+          const id = Number(row.id);
+          const name = String(row.name ?? "Club or group");
+          const neighborhood = String(row.neighborhood ?? "Portland");
+          return {
+            boardPath: "spaces",
+            key: String(id),
+            label: neighborhood,
+            path: `spaces/${id}`,
+            route: placePath(id, name),
+            href: placePath(id, name),
+            displayAddress: name,
+            color: ACCENT.spaces,
+            count: null,
+          };
+        });
     }
     if (address.path === "directory") {
       // Clubs & Groups owns the complete z/spaces board. Do not duplicate it
@@ -354,6 +381,9 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   }, [address.path, hasBoard, rows]);
 
   const countable = !!COUNT_ENDPOINT[address.path];
+  const boardCount = address.path === "spaces"
+    ? rows.filter(row => String(row.type ?? "") === "group").length
+    : rows.length;
   const countState = !countable ? "ready" : isPending ? "loading" : isError ? "error" : "ready";
   const firstSubs = isDirectoryHub ? subs : subs.slice(0, VISIBLE_SUBS);
   const remainingSubs = isDirectoryHub ? [] : subs.slice(VISIBLE_SUBS);
@@ -412,7 +442,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
                 ? <i className="z-index__pending" role="status" aria-label="Loading count" />
                 : countState === "error"
                   ? <span aria-label="Count unavailable">\u2014</span>
-                  : rows.length}
+                  : boardCount}
         </span>
       </Link>
 
