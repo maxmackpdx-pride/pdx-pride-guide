@@ -41,10 +41,23 @@ const ACCENT: Record<string, string> = {
   // and a board read alone is one colour.
   happening: "var(--neon-orange, #ff6600)",
   directory: "var(--neon-red, #ff2400)",
-  market: "var(--neon-yellow, #ccff00)",
   out: "var(--neon-cyan, #00ffff)",
   "out/nudest": "var(--neon-cyan, #00ffff)",
   space: "#ffd700",                         // TYPE_COLORS.group, Directory.tsx
+};
+
+/**
+ * Full bleed photography behind a card, for the two boards that are about a
+ * place and a night rather than a list. Every other card stays on flat glass, so
+ * these two read as the anchors instead of everything shouting at once.
+ *
+ * Photos are already in the repo and already used by the product. The card tints
+ * them to its own accent and lays a scrim over the bottom two thirds, so the
+ * type sits on near black no matter what the photograph is doing underneath.
+ */
+const CARD_PHOTO: Record<string, string> = {
+  hauz: "/home/hausing/room-forming.jpg",
+  happening: "/home/flyers/sasha-colby-live.jpg",
 };
 
 /**
@@ -174,6 +187,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
   const wordmark = WORDMARK[address.path];
+  const photo = CARD_PHOTO[address.path];
   const hasBoard = address.route !== null;
 
   const subs = useMemo<Sub[]>(() => {
@@ -247,7 +261,15 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
       data-address={address.path}
+      data-photo={photo ? "1" : undefined}
     >
+      {photo ? (
+        <span className="z-index__photo" aria-hidden="true">
+          <img src={photo} alt="" loading="lazy" decoding="async" />
+          <span className="z-index__photo-tint" />
+          <span className="z-index__photo-scrim" />
+        </span>
+      ) : null}
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
