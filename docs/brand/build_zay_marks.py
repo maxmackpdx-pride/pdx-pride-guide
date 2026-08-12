@@ -8,7 +8,7 @@ OUT='/home/claude/zrepo/client/public/brand/family'
 MARKS = [
  ("mizzed",  "MIZ", "ZED",  ("#ff45d8","#ff00cc","#cc0099")),
  ("placez",  "PLACE", "Z",  ("#ff8a4a","#ff2400","#c41c00")),
- ("for-zayle","FOR", "ZAYLE",("#e0ff4a","#ccff00","#a3cc00")),
+ ("marketz", "MARKET", "Z",  ("#e0ff4a","#ccff00","#a3cc00")),
  ("events",  "EVENT", "S",  ("#ffa54a","#ff6600","#cc5200")),
 ]
 

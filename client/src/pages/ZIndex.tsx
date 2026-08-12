@@ -98,7 +98,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   // no mark and were showing grey type instead.
   mizzed: { src: "/brand/family/mizzed.svg", alt: "MizZed" },
   directory: { src: "/brand/family/placez.svg", alt: "PlaceZ" },
-  market: { src: "/brand/family/for-zayle.svg", alt: "For Zayle" },
+  market: { src: "/brand/family/marketz.svg", alt: "MarketZ" },
   happening: { src: "/brand/family/events.svg", alt: "Events" },
 };
 

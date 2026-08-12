@@ -87,6 +87,13 @@ def glyphs():
     # The signature stem: top left and bottom right sheared at 45, which is
     # what makes an upright letter read as forward driving.
     g["I"] = [poly((B, 0), (S, 0), (S, H - B), (S - B, H), (0, H), (0, B))]
+    # K: sheared stem plus two blades meeting at the waist. The library's most
+    # aggressive letter, so the arms carry the full blade angle.
+    g["K"] = [poly((B, 0), (S, 0), (S, H * 0.5 - S * 0.18),
+                   (W - S * 0.92, 0), (W, 0),
+                   (W * 0.46 + S * 0.34, H * 0.5), (W, H), (W - S * 0.92, H),
+                   (S, H * 0.5 + S * 0.18), (S, H - B), (S - B, H),
+                   (0, H), (0, B))]
     g["L"] = [poly((B, 0), (S, 0), (S, H - S), (W - B, H - S), (W, H), (0, H), (0, B))]
     g["M"] = [poly((0, 0), (S * 0.9, 0), (W / 2, H * 0.52), (W - S * 0.9, 0), (W, 0),
                    (W, H), (W - S, H), (W - S, H * 0.42), (W / 2, H * 0.86),
