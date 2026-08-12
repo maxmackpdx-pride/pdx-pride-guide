@@ -44,10 +44,10 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
     accent: "#FF00CC",
   },
   {
-    href: "/nude-beaches",
-    title: "Nude beaches",
+    href: "/z/out/rooster-rock",
+    title: "Z/OUT",
     description:
-      "Want to make new friends at the river or catch a ride there or back? Check out the nude beach section.",
+      "Rooster Rock and Sauvie Island conditions, carpools, check-ins, and River Brats.",
     accent: "#FF6600",
   },
 ] as const;

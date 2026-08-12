@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import type { NudeBeachTab } from "@shared/nudeBeaches";
+import { Z_OUT_BEACH_PATHS, type NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_SHORE_TABS, readRiverBratsShore, type RiverBratsShoreTab } from "@shared/riverBrats";
 import RiverBratsCheckIn from "./RiverBratsCheckIn";
 import RiverBratsCarpool from "./RiverBratsCarpool";
@@ -39,7 +39,8 @@ export default function RiverBratsShell({ beachId }: Props) {
     params.delete("verify");
     params.delete("chat");
     const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `/nude-beaches?${qs}` : "/nude-beaches");
+    const pagePath = Z_OUT_BEACH_PATHS[beachId];
+    window.history.replaceState(null, "", qs ? `${pagePath}?${qs}` : pagePath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -48,8 +49,7 @@ export default function RiverBratsShell({ beachId }: Props) {
       setShoreState(tab);
       if (opts?.date) setCarpoolDate(opts.date);
       const params = new URLSearchParams(window.location.search);
-      if (beachId === "sauvie-island") params.set("tab", "sauvie-island");
-      else params.delete("tab");
+      params.delete("tab");
       if (tab === "checkin") {
         params.delete("shore");
         params.delete("date");
@@ -59,7 +59,8 @@ export default function RiverBratsShell({ beachId }: Props) {
         else if (tab !== "carpool") params.delete("date");
       }
       const qs = params.toString();
-      setLocation(qs ? `/nude-beaches?${qs}` : "/nude-beaches");
+      const pagePath = Z_OUT_BEACH_PATHS[beachId];
+      setLocation(qs ? `${pagePath}?${qs}` : pagePath);
     },
     [beachId, setLocation],
   );

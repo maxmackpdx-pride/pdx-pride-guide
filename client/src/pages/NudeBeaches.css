@@ -583,6 +583,13 @@
   padding: clamp(34px, 5vw, 60px) clamp(20px, 4vw, 44px) clamp(18px, 2.5vw, 24px);
 }
 
+.nude-beaches-hero-row__zout {
+  align-self: flex-start;
+  width: clamp(118px, 15vw, 190px);
+  height: auto;
+  flex: 0 0 auto;
+}
+
 .nude-beaches-hero-row .board-hero {
   flex: 1;
   min-width: 0;
@@ -716,6 +723,10 @@ html.calm-mode .board-close-seam {
   .nude-beaches-hero-row {
     flex-wrap: wrap;
     padding-top: clamp(20px, 4vw, 32px);
+  }
+
+  .nude-beaches-hero-row__zout {
+    width: 132px;
   }
 
   .nude-beaches-page .nude-beaches-tab-bar {

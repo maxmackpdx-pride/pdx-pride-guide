@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,7 +12,6 @@ import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
-  NUDE_BEACH_TABS,
   ROOSTER_ROCK_MAPS,
   ROOSTER_ROCK_PARKING,
   SAUVIE_ISLAND_MAPS,
@@ -32,12 +29,6 @@ type ApiPayload = {
   fromCache: boolean;
   rateLimited?: boolean;
 };
-
-function readTab(search: string): NudeBeachTab {
-  const raw = new URLSearchParams(search).get("tab");
-  if (raw === "sauvie-island" || raw === "sauvie") return "sauvie-island";
-  return "rooster-rock";
-}
 
 function formatFetchedAt(iso?: string) {
   if (!iso) return "Not yet loaded";
@@ -185,10 +176,11 @@ function SauvieIslandPanel() {
   );
 }
 
-export default function NudeBeaches() {
+export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
+  const isRooster = beachId === "rooster-rock";
   usePageSeo(
-    "RIVERBRATS · Beaches | Zaylist",
-    "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
+    `${isRooster ? "Rooster Rock" : "Sauvie Island"} · Z/OUT | Zaylist`,
+    `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on Z/OUT.`,
     {
       image: shareCardUrl("nudeBeaches"),
       imageAlt:
@@ -196,30 +188,8 @@ export default function NudeBeaches() {
     },
   );
 
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTabState] = useState<NudeBeachTab>(() =>
-    readTab(typeof window !== "undefined" ? window.location.search : ""),
-  );
-
-  const setActiveTab = useCallback(
-    (tab: NudeBeachTab) => {
-      setActiveTabState(tab);
-      const params = new URLSearchParams(window.location.search);
-      if (tab === "sauvie-island") params.set("tab", "sauvie-island");
-      else params.delete("tab");
-      const qs = params.toString();
-      setLocation(qs ? `/nude-beaches?${qs}` : "/nude-beaches");
-    },
-    [setLocation],
-  );
-
-  useEffect(() => {
-    const onPopState = () => setActiveTabState(readTab(window.location.search));
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
 
   const { data } = useQuery<ApiPayload>({
     queryKey: ["/api/nude-beaches"],
@@ -253,33 +223,17 @@ export default function NudeBeaches() {
   });
 
   const snapshot = data?.data;
-  const isRooster = activeTab === "rooster-rock";
-
   return (
     <div
       className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
-      <ZBoardAddressStrip path="out/nudest" board="Nude beaches" />
+      <ZBoardAddressStrip path={`out/${beachId}`} board={isRooster ? "Rooster Rock" : "Sauvie Island"} />
       <header className="nude-beaches-header">
         <NudeBeachesHero
-          key={activeTab}
-          activeTab={activeTab}
+          key={beachId}
+          activeTab={beachId}
           snapshot={snapshot}
-          statsKey={`${activeTab}-${snapshot?.fetchedAt ?? "pending"}`}
-          tabs={
-            <nav className="events-tab-bar nude-beaches-tab-bar" aria-label="Beach location">
-              {NUDE_BEACH_TABS.map(tab => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`events-tab events-tab--${tab.key}${activeTab === tab.key ? " active" : ""}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          }
+          statsKey={`${beachId}-${snapshot?.fetchedAt ?? "pending"}`}
         />
       </header>
 
@@ -306,15 +260,15 @@ export default function NudeBeaches() {
         </Button>
       </div>
 
-      <div key={activeTab} className="events-map-row nude-beaches-map-row nude-beaches-map-row--enter">
+      <div key={beachId} className="events-map-row nude-beaches-map-row nude-beaches-map-row--enter">
         <div className="events-map-row__panel">
-          <NudeBeachesHubPanel tab={activeTab} snapshot={snapshot} />
+          <NudeBeachesHubPanel tab={beachId} snapshot={snapshot} />
         </div>
         <div className="events-map-row__map">
-          <NudeBeachesMap tab={activeTab} />
+          <NudeBeachesMap tab={beachId} />
         </div>
       </div>
-      <div key={`${activeTab}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
+      <div key={`${beachId}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
         {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
           <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
             {map.label}
@@ -322,7 +276,7 @@ export default function NudeBeaches() {
         ))}
       </div>
 
-      <RiverBratsShell beachId={activeTab} />
+      <RiverBratsShell beachId={beachId} />
 
       <section className="events-board-feed nude-beach-logistics diag">
         <div className="board-active-feed__inner">

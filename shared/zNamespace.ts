@@ -18,7 +18,7 @@ export const Z_PREFIX = "z";
 export type ZAddress = {
   /**
    * Canonical path after `z/`, ASCII and lowercase. Carries one slash for a
-   * nested address (`out/nudest`).
+   * nested address (`out/rooster-rock`).
    */
   path: string;
   /**
@@ -55,9 +55,10 @@ export const Z_ADDRESSES: ZAddress[] = [
   { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "Mizzed Connection", route: "/spotted" },
   { path: "directory", display: "z/directory", board: "Directory", route: "/directory" },
-  { path: "out", display: "z/out", board: "Outdoors", route: null },
-  { path: "out/nudest", display: "z/out/nudest", board: "Nude beaches", route: "/nude-beaches" },
-  { path: "spaces", display: "z/spaces", board: "Clubs and groups", route: null },
+  { path: "out", display: "z/out", board: "Outdoors", route: "/z/out/rooster-rock" },
+  { path: "out/rooster-rock", display: "z/out/rooster-rock", board: "Rooster Rock", route: "/z/out/rooster-rock" },
+  { path: "out/sauvie-island", display: "z/out/sauvie-island", board: "Sauvie Island", route: "/z/out/sauvie-island" },
+  { path: "spaces", display: "z/spaces", board: "Clubs & Groups", route: "/directory" },
 ];
 
 /**

@@ -29,7 +29,6 @@ export const PRIMARY_NAV: NavEntry[] = [
     label: "Places",
     items: [
       { href: "/directory", label: "Directory" },
-      { href: "/nude-beaches", label: "Beaches" },
     ],
   },
   /**
@@ -57,7 +56,8 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "Mizzed Connection" },
   "/directory": { section: "Places", title: "Directory" },
-  "/nude-beaches": { section: "Explore", title: "Beaches" },
+  "/z/out/rooster-rock": { section: "Z/OUT", title: "Rooster Rock" },
+  "/z/out/sauvie-island": { section: "Z/OUT", title: "Sauvie Island" },
   "/next": { section: "Explore", title: "Next" },
   "/darkroom": { section: "Explore", title: "Next" },
   "/about": { section: "About", title: "About" },
@@ -88,11 +88,10 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/spotted", label: "Mizzed Connection" },
 ];
 
-/** Destinations behind the mobile footer "Events" tab sheet (Beaches folded in). */
+/** Destinations behind the mobile footer "Events" tab sheet. */
 export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/events", label: "Events" },
   { href: "/schedule", label: "My Schedule" },
-  { href: "/nude-beaches", label: "Beaches" },
   { href: "/submit", label: "Promoters" },
   { href: "/next", label: "Next" },
 ];

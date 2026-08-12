@@ -8,7 +8,7 @@ type Props = {
   activeTab: NudeBeachTab;
   snapshot?: NudeBeachesSnapshot | null;
   statsKey?: string;
-  tabs: ReactNode;
+  tabs?: ReactNode;
 };
 
 export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }: Props) {
@@ -62,6 +62,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
   return (
     <>
       <div className="nude-beaches-hero-row">
+        <img className="nude-beaches-hero-row__zout" src="/brand/family/z-out.svg" alt="Z/OUT" />
         <BoardHero
           accent={isRooster ? "orange" : "green"}
           kicker={isRooster ? "Columbia River · Corbett" : "Sauvie Island · Collins Beach"}

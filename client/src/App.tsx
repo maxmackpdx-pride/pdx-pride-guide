@@ -22,7 +22,7 @@ import SpectrumLoader from "./components/SpectrumLoader";
 function RiverBratsIntroOnBeaches() {
   const [location] = useLocation();
   const path = location.split("?")[0] || "";
-  if (path !== "/nude-beaches") return null;
+  if (!path.startsWith("/z/out/")) return null;
   return <RiverBratsIntroPopup />;
 }
 
@@ -68,7 +68,8 @@ const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const Inbox = lazy(() => import("./pages/Inbox"));
 const MissedConnections = lazy(() => import("./pages/MissedConnections"));
 const Directory = lazy(() => import("./pages/Directory"));
-const NudeBeaches = lazy(() => import("./pages/NudeBeaches"));
+const RoosterRock = lazy(() => import("./pages/RoosterRock"));
+const SauvieIsland = lazy(() => import("./pages/SauvieIsland"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
@@ -87,7 +88,8 @@ const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
   "/pride-work": PrideWork,
   "/spotted": MissedConnections,
   "/directory": Directory,
-  "/nude-beaches": NudeBeaches,
+  "/z/out/rooster-rock": RoosterRock,
+  "/z/out/sauvie-island": SauvieIsland,
 };
 
 function isHubPath(path: string) {
@@ -125,7 +127,7 @@ function AppLayout() {
               and canonical. Flipping canonical to z/ means 301ing indexed URLs,
               which is the one step here that browsers cache and that cannot be
               quietly undone, so it is held for an explicit decision.
-              Longest path first so /z/out/nudest is never shadowed.
+              Longest path first so Z/OUT destinations are never shadowed.
             */}
             <Route path="/z" component={ZIndex} />
             {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (
@@ -193,7 +195,12 @@ function AppLayout() {
             <Route path="/spotted" component={MissedConnections} />
             <Route path="/directory/:id/:slug?" component={Directory} />
             <Route path="/directory" component={Directory} />
-            <Route path="/nude-beaches" component={NudeBeaches} />
+            <Route path="/nude-beaches">
+              {() => {
+                const tab = new URLSearchParams(window.location.search).get("tab");
+                return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/z/out/sauvie-island" : "/z/out/rooster-rock"} />;
+              }}
+            </Route>
             <Route path="/next" component={Darkroom} />
             <Route path="/darkroom">
               {() => <Redirect to="/next" />}

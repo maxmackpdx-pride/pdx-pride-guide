@@ -94,7 +94,11 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
     src: "19-navigate",
     d: <path d="M22 2 15 22l-4-9-9-4Z" />,
   },
-  "out/nudest": {
+  "out/rooster-rock": {
+    src: "19-navigate",
+    d: <path d="M22 2 15 22l-4-9-9-4Z" />,
+  },
+  "out/sauvie-island": {
     src: "19-navigate",
     d: <path d="M22 2 15 22l-4-9-9-4Z" />,
   },

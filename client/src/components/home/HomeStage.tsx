@@ -59,7 +59,7 @@ const WORLDS: World[] = [
     eyebrow: "Live river conditions",
     body: "Weather, water, parking, carpools and check-ins from people there now.",
     action: "Check the river",
-    href: "/nude-beaches",
+    href: "/z/out/rooster-rock",
     accent: "var(--neon-orange, #ff6600)",
     feature: true,
   },
@@ -357,7 +357,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             </div>
           </div>
           <div className="home-front__hero-actions">
-            <Link href="/nude-beaches" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Check the beaches</Link>
+            <Link href="/z/out/rooster-rock" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Open Z/OUT</Link>
             <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>
           </div>
         </div>

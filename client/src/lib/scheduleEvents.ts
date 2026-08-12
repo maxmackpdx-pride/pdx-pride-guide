@@ -1,7 +1,7 @@
 import { resolveBeachPosterUrl, resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime, pacificCalendarDate } from "@shared/missedConnections";
 import type { EventListing } from "@shared/multiDayEvents";
-import type { NudeBeachTab } from "@shared/nudeBeaches";
+import { Z_OUT_BEACH_PATHS, type NudeBeachTab } from "@shared/nudeBeaches";
 import {
   EVENT_WEEK_DAY_OPTIONS,
   EVENT_WEEK_DAYS,
@@ -68,7 +68,7 @@ export type ScheduleEvent = PrideEvent & {
   beachId?: NudeBeachTab;
   checkinId?: number;
   calendarDate?: string;
-  /** Deep link for popover “open” (events use eventPath; beaches → nude-beaches). */
+  /** Deep link for popover “open” (events use eventPath; beach plans use Z/OUT). */
   href?: string;
 };
 
@@ -155,7 +155,7 @@ export function beachCheckinToScheduleEvent(row: BeachCheckinScheduleRow): Sched
     beachId: row.beachId,
     checkinId: row.id,
     calendarDate: row.calendarDate,
-    href: `/nude-beaches?tab=${encodeURIComponent(tab)}`,
+    href: Z_OUT_BEACH_PATHS[tab],
   };
 }
 

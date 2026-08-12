@@ -471,7 +471,7 @@
   align-items: center;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-weight: 600;
-  font-size: 15px;
+  font-size: calc(15px + 2pt);
   color: var(--c);
   letter-spacing: -.01em;
 }

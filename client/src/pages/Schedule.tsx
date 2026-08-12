@@ -1074,7 +1074,7 @@ export default function Schedule({
       id: e.id,
       isBeach,
       eventHref: isBeach
-        ? e.href || "/nude-beaches"
+        ? e.href || "/z/out/rooster-rock"
         : eventPath(
             e.id,
             listing?.title ?? e.title,

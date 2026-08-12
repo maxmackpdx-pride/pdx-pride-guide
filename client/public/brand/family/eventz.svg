@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1860 500" role="img" aria-label="EventZ logo">
+  <title>EventZ - Zaylist family candidate</title>
+  <metadata>status=owner-requested candidate; family-reference=z-out.svg; editable-paths=true; raster-embedded=false; treatment=flat</metadata>
+  <defs>
+    <linearGradient id="event" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9840"/><stop offset="1" stop-color="#ff6600"/></linearGradient>
+    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eeeef4"/></linearGradient>
+  </defs>
+  <g fill="url(#event)">
+    <path d="M45 90h245v75H120v48h140v70H120v52h170v75H45z"/>
+    <path d="M310 90h82l72 224 72-224h82L510 410h-92z"/>
+    <path d="M645 90h245v75H720v48h140v70H720v52h170v75H645z"/>
+    <path d="M925 410V90h78l137 190V90h75v320h-76l-139-191v191z"/>
+    <path d="M1240 90h270v75h-98v245h-75V165h-97z"/>
+  </g>
+  <path fill="url(#white)" d="M1530 90h-245v75h143l-153 170v75h255v-75h-153l153-170z" transform="translate(270)"/>
+</svg>

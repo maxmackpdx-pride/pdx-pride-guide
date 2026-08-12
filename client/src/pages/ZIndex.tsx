@@ -55,7 +55,8 @@ const ACCENT: Record<string, string> = {
   happening: "var(--neon-orange, #ff6600)",
   directory: "var(--neon-red, #ff2400)",
   out: "var(--neon-orange, #ff6600)",
-  "out/nudest": "var(--neon-orange, #ff6600)",
+  "out/rooster-rock": "var(--neon-orange, #ff6600)",
+  "out/sauvie-island": "var(--neon-green, #39ff14)",
   spaces: "#ffd700",                        // TYPE_COLORS.group, directoryTheme.ts
 };
 
@@ -102,7 +103,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   directory: { src: "/brand/family/placez.svg", alt: "PlaceZ" },
   mizzed: { src: "/brand/family/mizzed.svg", alt: "MizZed" },
   market: { src: "/brand/family/marketz.svg", alt: "MarketZ" },
-  happening: { src: "/brand/family/events.svg", alt: "Events" },
+  happening: { src: "/brand/family/eventz.svg", alt: "EventZ" },
 };
 
 /**
@@ -156,7 +157,7 @@ const MOTES: Array<[string, string, string]> = [
 /**
  * Endpoint each address counts from. Absent means there is no countable list
  * behind the address, so no number is shown rather than a misleading zero.
- * z/out/nudest is deliberately absent: /api/nude-beaches returns live river
+ * Z/OUT destinations are deliberately absent: /api/nude-beaches returns live river
  * conditions, not a board of posts, so it has no total to report.
  */
 const COUNT_ENDPOINT: Record<string, string> = {
@@ -252,9 +253,6 @@ function SubcategoryRows({
               {countState === "loading" ? "" : countState === "error" ? "\u2014" : sub.count}
             </span>
           </Link>
-          {sub.boardPath === "directory" && sub.key === "group" ? (
-            <span className="z-index__clubs-bridge">Clubs live in Places now · z/spaces is not built yet</span>
-          ) : null}
         </li>
       ))}
     </ul>
@@ -367,7 +365,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
           <ZBoardIcon path={address.path} />
-          {address.display}
+          {address.path.split("/").at(-1)}
         </h2>
         <span className="z-index__wordmark-slot">
           {wordmark ? (
