@@ -45,8 +45,14 @@
         var key = "bundle-reload";
 
         function clearCachesAndReload() {
+          // Arm the one-shot guard and LEAVE it armed across the reload. Clearing
+          // it here meant the reloaded page saw no guard, so a still-stale asset
+          // reloaded again, forever - the home screen loading over and over.
+          // Same key and same rule as lazyWithReload.ts: one auto-reload per tab
+          // session. After that the boot fallback shows and the button below is
+          // the only way to retry.
           var finish = function () {
-            sessionStorage.removeItem(key);
+            try { sessionStorage.setItem(key, "1"); } catch (err) { /* private mode */ }
             window.location.reload();
           };
           if ("serviceWorker" in navigator) {
@@ -67,6 +73,16 @@
           finish();
         }
 
+        function alreadyReloaded() {
+          try {
+            return sessionStorage.getItem(key) === "1";
+          } catch (err) {
+            // Private mode with storage blocked: never auto-reload, because the
+            // guard cannot be remembered and every attempt would repeat.
+            return true;
+          }
+        }
+
         window.addEventListener(
           "error",
           function (e) {
@@ -76,9 +92,8 @@
               el.tagName === "SCRIPT" &&
               el.src &&
               el.src.indexOf("/assets/") !== -1 &&
-              !sessionStorage.getItem(key)
+              !alreadyReloaded()
             ) {
-              sessionStorage.setItem(key, "1");
               clearCachesAndReload();
             }
           },

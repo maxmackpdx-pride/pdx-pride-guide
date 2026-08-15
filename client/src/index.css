@@ -2479,6 +2479,18 @@ a.event-host-name.event-host-name--link:hover {
     background: rgba(255, 255, 255, 0.04);
   }
 
+  .site-hub-mobile-bar .hub-mobile-tab__z-slash {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 26px;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
+
   /* Bar is portaled to <body>, so match from body instead of .app-shell */
   body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
     padding-bottom: calc(var(--site-mobile-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px);

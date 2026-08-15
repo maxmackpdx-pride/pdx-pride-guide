@@ -10,6 +10,19 @@ export type NavEntry =
   | { type: "link"; href: string; label: string }
   | { type: "dropdown"; id: string; label: string; items: NavLinkItem[] };
 
+const Z_NAV: NavLinkItem[] = [
+  { href: "/z", label: "All z/ addresses" },
+  { href: "/z/happening", label: "z/happening · Events" },
+  { href: "/z/hauz", label: "z/hauz · THE HAÜZ" },
+  { href: "/z/market", label: "z/market · For sale" },
+  { href: "/z/gifz", label: "z/gifz · GifZ" },
+  { href: "/z/gigz", label: "z/gigz · Gigz" },
+  { href: "/z/mizzed", label: "z/mizzed · Mizzed Connection" },
+  { href: "/z/directory", label: "z/directory · Directory" },
+  { href: "/z/out", label: "z/out · Outdoor recreation" },
+  { href: "/z/spaces", label: "z/spaces · Clubz & Groupz" },
+];
+
 /** Primary nav - labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/about", label: "About" },
@@ -31,14 +44,12 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/directory", label: "Directory" },
     ],
   },
-  /**
-   * Boards is one address, not a dropdown. Every board already has a z/ address
-   * (ZF-Z-NAMESPACE-2026-08-11), and /z lists all of them with live counts, so a
-   * four item menu was a shorter, staler copy of a page that already exists.
-   * navLinkActive matches /z and every /z/... address, so this stays lit on any
-   * board reached through the namespace.
-   */
-  { type: "link", href: "/z", label: "z/" },
+  {
+    type: "dropdown",
+    id: "z-addresses",
+    label: "z/",
+    items: Z_NAV,
+  },
   { type: "link", href: "/next", label: "NEXT" },
 ];
 

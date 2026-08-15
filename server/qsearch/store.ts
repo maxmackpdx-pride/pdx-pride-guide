@@ -728,6 +728,29 @@ export function clearCandidateFlyer(id: string): boolean {
   return true;
 }
 
+/** Replace only a candidate's flyer URL after it has been mirrored locally. */
+export function updateCandidatePoster(id: string, posterImageUrl: string): boolean {
+  ensureTables();
+  if (!posterImageUrl.startsWith("/uploads/")) return false;
+  const row = sqlite.prepare(`SELECT draft_json FROM qsearch_candidates WHERE id = ?`).get(id) as
+    | { draft_json: string }
+    | undefined;
+  if (!row) return false;
+  let draft: Record<string, unknown>;
+  try {
+    const parsed = JSON.parse(row.draft_json);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+    draft = parsed as Record<string, unknown>;
+  } catch {
+    return false;
+  }
+  draft.posterImageUrl = posterImageUrl;
+  const info = sqlite
+    .prepare(`UPDATE qsearch_candidates SET draft_json = ? WHERE id = ?`)
+    .run(JSON.stringify(draft), id);
+  return info.changes > 0;
+}
+
 export function listCandidates(opts?: {
   jobId?: string;
   status?: string;

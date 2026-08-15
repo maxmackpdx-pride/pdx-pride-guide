@@ -1716,6 +1716,29 @@ html.calm-mode .home-boards__card {
   font-variant-numeric: tabular-nums;
 }
 
+/* Placeholder that holds the number's slot until the API answers. Sized in em
+   so it tracks every responsive font-size override for the value below. */
+.home-stat-strip__pending {
+  display: inline-block;
+  width: 1.15em;
+  height: 0.62em;
+  border-radius: 3px;
+  background: var(--border-default);
+  -webkit-text-fill-color: initial;
+  animation: homeStatPending 1.15s ease-in-out infinite;
+}
+
+@keyframes homeStatPending {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-stat-strip__pending { animation: none; }
+}
+
+.calm-mode .home-stat-strip__pending { animation: none; }
+
 .home-stat-strip__unit {
   font-size: 45px;
 }

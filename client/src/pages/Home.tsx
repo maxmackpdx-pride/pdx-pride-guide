@@ -13,8 +13,6 @@ import { prefersStillMotion } from "@/lib/motion";
 import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
-const PLACES_FALLBACK = 64;
-
 const NEXT_PREVIEW_CARDS = [
   { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px" },
   { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "acid", delay: ".03s", duration: "5.62s", drift: "-1.7px" },
@@ -125,20 +123,20 @@ export default function Home() {
     { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
   );
 
-  const { data: events = [] } = useQuery<EventListing[]>({
+  const { data: events = [], isPending: eventsPending } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
   });
 
-  const { data: businesses = [] } = useQuery<{ id: number }[]>({
+  const { data: businesses = [], isPending: placesPending } = useQuery<{ id: number }[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
     staleTime: 60_000,
   });
 
-  const { data: attendanceSummaries = {} } = useQuery<Record<string, { count?: number }>>({
+  const { data: attendanceSummaries = {}, isPending: goingPending } = useQuery<Record<string, { count?: number }>>({
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
     staleTime: 60_000,
@@ -146,7 +144,7 @@ export default function Home() {
 
   // Rolling next-7-days total (expanded LIVE listings from GET /api/events).
   const eventCount = useMemo(() => countEventsNext7Days(events), [events]);
-  const placesCount = businesses.length > 0 ? businesses.length : PLACES_FALLBACK;
+  const placesCount = businesses.length;
   const goingCount = useMemo(
     () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),
     [attendanceSummaries],
@@ -162,6 +160,7 @@ export default function Home() {
               eventCount={eventCount}
               placesCount={placesCount}
               goingCount={goingCount}
+              pending={{ events: eventsPending, places: placesPending, going: goingPending }}
             />
             <div
               className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"

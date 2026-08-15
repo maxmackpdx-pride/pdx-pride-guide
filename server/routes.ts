@@ -6704,4 +6704,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
   scheduleMapCoordinateBackfill();
   startPromptScheduler();
   startQSearchNightly();
+
+  // Existing events and older QSearch rows predate capture-at-ingest. Mirror
+  // their remote flyers after startup so expiring and third-party URLs become
+  // durable files on the Railway volume without delaying server readiness.
+  if (process.env.NODE_ENV === "production") {
+    setTimeout(() => {
+      void (async () => {
+        try {
+          const { mirrorEventPosters } = await import("./ingest/mirrorEventPosters");
+          const { listCandidates, updateCandidatePoster } = await import("./qsearch/store");
+          const summary = await mirrorEventPosters({
+            events: storage.getEvents({}),
+            pendingCandidates: listCandidates({ status: "pending", limit: 500 }) as any[],
+            updateEventPoster: (id, url) => {
+              storage.updateEvent(id, { posterImageUrl: url }, { source: "sync" });
+            },
+            updateCandidatePoster,
+          });
+          console.log(
+            `[poster-mirror] checked=${summary.checked} captured=${summary.captured} retained_remote=${summary.retainedRemote}`,
+          );
+        } catch (error) {
+          console.error("[poster-mirror] backfill failed", error);
+        }
+      })();
+    }, 15_000);
+  }
 }

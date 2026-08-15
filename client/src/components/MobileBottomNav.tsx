@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { CalendarDays, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
+import { CalendarDays, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
@@ -223,11 +223,11 @@ export default function MobileBottomNav() {
             className={tabClass(boardsActive || boardsOpen, "lime")}
             aria-expanded={boardsOpen}
             aria-haspopup="dialog"
-            aria-label="Boards"
+            aria-label="z/ addresses"
             onClick={handleBoards}
           >
-            <LayoutGrid size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Boards</span>
+            <span className="hub-mobile-tab__z-slash" aria-hidden>z/</span>
+            <span>z/</span>
           </button>
 
           <button

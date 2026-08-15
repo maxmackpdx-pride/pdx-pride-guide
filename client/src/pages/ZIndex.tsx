@@ -337,8 +337,11 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       // Clubs & Groups owns the complete z/spaces board. Do not duplicate it
       // as a category inside the Places card even though Directory still uses
       // the underlying `group` type for compatibility.
-      const keys = Object.keys(TYPE_LABELS).filter(key => key !== "group");
-      const counts = countBy(rows, "type", keys);
+      const availableKeys = Object.keys(TYPE_LABELS).filter(key => key !== "group");
+      const counts = countBy(rows, "type", availableKeys);
+      // Empty directory categories stay out of the public index. The taxonomy
+      // remains defined for future records without advertising an empty lane.
+      const keys = availableKeys.filter(key => counts[key] > 0);
       return addressSubs(address.path, keys.map(key => ({
         key,
         label: TYPE_LABELS[key],
