@@ -10,7 +10,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
+import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 
@@ -22,15 +22,43 @@ const MOBILE_ICON = 26;
  */
 function HubMark({ active }: { active: boolean }) {
   return (
-    <img
-      src="/brand/family/prime-z.svg"
-      alt=""
+    <svg
+      viewBox="0 0 874 640"
       width={43}
       height={43}
       className={`hub-mobile-tab__z-mark${active ? " is-active" : ""}`}
-      decoding="async"
       aria-hidden
-    />
+    >
+      <defs>
+        <linearGradient id="mobile-hub-rainbow" x1="57" y1="62" x2="708" y2="577" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ff19d6" />
+          <stop offset="0.2" stopColor="#ff5319" />
+          <stop offset="0.4" stopColor="#ffd119" />
+          <stop offset="0.58" stopColor="#5bff19" />
+          <stop offset="0.74" stopColor="#19f7ff" />
+          <stop offset="0.88" stopColor="#1956ff" />
+          <stop offset="1" stopColor="#e419ff" />
+        </linearGradient>
+        <linearGradient id="mobile-hub-white" x1="0" y1="0" x2="0" y2="640" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#fff" />
+          <stop offset="0.52" stopColor="#fafafd" />
+          <stop offset="1" stopColor="#eeeef4" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M 57 62 L 140 166 L 458 167 L 112 577 L 628 555 L 708 461 L 345 458 L 692 62 Z"
+        fill="url(#mobile-hub-white)"
+        stroke="url(#mobile-hub-rainbow)"
+        strokeWidth="80"
+        strokeLinejoin="miter"
+        paintOrder="stroke fill"
+      />
+      <path
+        d="M 770 63 L 770 113 L 776 113 L 776 80 L 777 79 L 779 79 L 781 81 L 791 98 L 793 98 L 807 78 L 810 79 L 810 113 L 816 113 L 816 63 L 809 63 L 797 81 L 796 86 L 789 88 L 787 86 L 788 80 L 777 63 Z M 722 63 L 722 70 L 736 70 L 737 71 L 737 113 L 744 113 L 745 112 L 745 71 L 746 70 L 760 70 L 760 63 Z"
+        fill="url(#mobile-hub-white)"
+        fillRule="evenodd"
+      />
+    </svg>
   );
 }
 
@@ -52,13 +80,11 @@ export default function MobileBottomNav() {
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
-  const [boardsOpen, setBoardsOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
-    if (except !== "boards") setBoardsOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
 
@@ -72,13 +98,12 @@ export default function MobileBottomNav() {
   }, [closeLocalSheets]);
 
   useEffect(() => {
-    setBoardsOpen(false);
     setEventsOpen(false);
   }, [location]);
 
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
+  const boardsActive = navLinkActive(location, "/z");
   const hubActive = navLinkActive(location, "/dashboard");
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
@@ -93,15 +118,6 @@ export default function MobileBottomNav() {
     }
     dismissExcept("events");
     setEventsOpen(true);
-  };
-
-  const handleBoards = () => {
-    if (boardsOpen) {
-      setBoardsOpen(false);
-      return;
-    }
-    dismissExcept("boards");
-    setBoardsOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -139,25 +155,6 @@ export default function MobileBottomNav() {
                 href={item.href}
                 className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
                 onClick={() => setEventsOpen(false)}
-              >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
-      {boardsOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => setBoardsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet" role="dialog" aria-label="Boards">
-            <h3>Boards</h3>
-            {BOARD_NAV.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
-                onClick={() => setBoardsOpen(false)}
               >
                 <span>{item.label}</span>
               </Link>
@@ -218,17 +215,31 @@ export default function MobileBottomNav() {
             </button>
           )}
 
-          <button
-            type="button"
-            className={tabClass(boardsActive || boardsOpen, "lime")}
-            aria-expanded={boardsOpen}
-            aria-haspopup="dialog"
-            aria-label="z/ addresses"
-            onClick={handleBoards}
+          <Link
+            href="/z"
+            className={tabClass(boardsActive, "lime")}
+            aria-label="Z/"
+            aria-current={boardsActive ? "page" : undefined}
+            onClick={handleNavLink}
           >
-            <span className="hub-mobile-tab__z-slash" aria-hidden>z/</span>
-            <span>z/</span>
-          </button>
+            <span
+              aria-hidden
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 34,
+                minHeight: 31,
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontWeight: 900,
+                textTransform: "uppercase",
+              }}
+            >
+              <span style={{ fontSize: 21, lineHeight: 0.84, letterSpacing: "-0.06em" }}>Z/</span>
+              <span style={{ marginTop: 3, fontSize: 9, lineHeight: 1, letterSpacing: "0.08em" }}>SPACE</span>
+            </span>
+          </Link>
 
           <button
             type="button"
