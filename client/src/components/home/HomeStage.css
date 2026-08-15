@@ -178,6 +178,22 @@ html.calm-mode .home-front__kicker span,
   font-size:19px;
   letter-spacing:.015em;
 }
+
+/* Let the live beach widget shrink inside the portrait destination card.
+   Flex and grid children otherwise retain their intrinsic width and spill. */
+.home-front__world[data-world="beaches"] .home-front__beach-live,
+.home-front__world[data-world="beaches"] .home-beach-widget,
+.home-front__world[data-world="beaches"] .home-beach-widget__panel,
+.home-front__world[data-world="beaches"] .home-beach-widget__grid,
+.home-front__world[data-world="beaches"] .home-beach-widget__grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.home-front__world[data-world="beaches"] .home-front__beach-live,
+.home-front__world[data-world="beaches"] .home-beach-widget__grid > * {
+  overflow: hidden;
+}
 .home-front__world[data-world="spotted"] .home-front__world-copy { margin-top:34px; }
 .home-front__world[data-world="spotted"] .home-front__sample.home-stage-card { width:106.4%; margin:14px -3.2%; transform:scale(.94); transform-origin:center; }
 

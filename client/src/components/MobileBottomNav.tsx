@@ -17,7 +17,7 @@ import AuthModal from "./AuthModal";
 const MOBILE_ICON = 26;
 
 /**
- * Center Hub tab: monochrome Z + bar (app face / design guide).
+ * Center Hub tab: transparent Prime Z with a rainbow outline.
  * Icon only — no “Hub” label under the mark.
  */
 function HubMark({ active }: { active: boolean }) {
@@ -39,24 +39,13 @@ function HubMark({ active }: { active: boolean }) {
           <stop offset="0.88" stopColor="#1956ff" />
           <stop offset="1" stopColor="#e419ff" />
         </linearGradient>
-        <linearGradient id="mobile-hub-white" x1="0" y1="0" x2="0" y2="640" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#fff" />
-          <stop offset="0.52" stopColor="#fafafd" />
-          <stop offset="1" stopColor="#eeeef4" />
-        </linearGradient>
       </defs>
       <path
         d="M 57 62 L 140 166 L 458 167 L 112 577 L 628 555 L 708 461 L 345 458 L 692 62 Z"
-        fill="url(#mobile-hub-white)"
+        fill="none"
         stroke="url(#mobile-hub-rainbow)"
-        strokeWidth="80"
+        strokeWidth="30.5"
         strokeLinejoin="miter"
-        paintOrder="stroke fill"
-      />
-      <path
-        d="M 770 63 L 770 113 L 776 113 L 776 80 L 777 79 L 779 79 L 781 81 L 791 98 L 793 98 L 807 78 L 810 79 L 810 113 L 816 113 L 816 63 L 809 63 L 797 81 L 796 86 L 789 88 L 787 86 L 788 80 L 777 63 Z M 722 63 L 722 70 L 736 70 L 737 71 L 737 113 L 744 113 L 745 112 L 745 71 L 746 70 L 760 70 L 760 63 Z"
-        fill="url(#mobile-hub-white)"
-        fillRule="evenodd"
       />
     </svg>
   );
