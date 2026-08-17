@@ -140,7 +140,7 @@ export default function AboutTab({ data, isOwner, onBook }: Props) {
               <StatPill count={data.stats?.checkIns ?? 0} color="green">Check-ins</StatPill>
               <StatPill count={data.stats?.saved ?? 0} color="cyan">Saved</StatPill>
               {(data.stats?.gifting ?? 0) > 0 && (
-                <StickerBadge color="lime">GifZ Hero</StickerBadge>
+                <StickerBadge color="lime">GiftZ Hero</StickerBadge>
               )}
             </div>
           </section>

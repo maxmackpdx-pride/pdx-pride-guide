@@ -148,7 +148,7 @@ export default function StatsView() {
         [m.liveEvents, "LIVE EVENTS"],
         [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
-        [m.giftingPosts, "GIFZ POSTS"],
+        [m.giftingPosts, "GIFTZ POSTS"],
         [m.missedConnections, "MIZZED CONNECTION"],
         [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
       ]
@@ -156,7 +156,7 @@ export default function StatsView() {
         [m.liveEvents, "LIVE EVENTS"],
         [places.length || "-", "DIRECTORY PLACES"],
         [m.attendances, "MEMBER RSVPS"],
-        [m.giftingPosts, "GIFZ POSTS"],
+        [m.giftingPosts, "GIFTZ POSTS"],
         [m.missedConnections, "MIZZED CONNECTION"],
         [m.userSubmittedEvents, "UNCLAIMED EVENTS"],
       ];
@@ -166,7 +166,7 @@ export default function StatsView() {
       ["Messages", m.messages],
       ["RSVPs", m.attendances],
       ["Gigz", m.gigPosts],
-      ["GifZ", m.giftingPosts],
+      ["GiftZ", m.giftingPosts],
       ["Mizzed Connection", m.missedConnections],
     ],
     C.purple,

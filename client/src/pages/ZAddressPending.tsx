@@ -55,7 +55,7 @@ export default function ZAddressPending() {
       {clubsLiveInDirectory ? (
         <section className="board-path-card" style={{ maxWidth: 780, margin: "32px auto", padding: 24 }}>
           <p className="board-path-card__kicker">REAL DATA, RIGHT NOW</p>
-          <h2>Clubz &amp; Groupz lives at z/spaces.</h2>
+          <h2>MY SQUADZ lives at z/spaces.</h2>
           <p>The board uses the real group listings and detail pages from the Portland Directory, including persistent follow controls.</p>
         </section>
       ) : null}

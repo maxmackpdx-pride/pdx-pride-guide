@@ -15,7 +15,7 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
   } else if (ctx === "GIG") {
     title = "Gigz message";
   } else if (ctx === "GIFTING") {
-    title = "GifZ update";
+    title = "GiftZ update";
   } else if (ctx === "CHECK_IN") {
     title = "Check-in message";
   } else if (ctx === "EVENT_HOST") {

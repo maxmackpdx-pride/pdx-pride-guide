@@ -24,7 +24,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
     })),
     ...(activity.gifting ?? []).map(g => ({
       key: `gifting-${g.id}`,
-      board: "GifZ",
+      board: "GiftZ",
       hex: "var(--neon-yellow)",
       where: g.neighborhood || "Portland",
       text: g.description || g.title,

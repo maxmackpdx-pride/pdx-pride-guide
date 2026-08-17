@@ -919,7 +919,7 @@ export default function Admin() {
     onSuccess: () => {
       invalidateInboxQueries();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      toast({ title: "GifZ post updated" });
+      toast({ title: "GiftZ post updated" });
     },
   });
 
@@ -1303,9 +1303,9 @@ export default function Admin() {
     for (const g of pendingGiftingFlagged.slice(0, 3)) {
       items.push({
         key: `gifting_post-${g.id}`,
-        title: g.title || "GifZ post",
+        title: g.title || "GiftZ post",
         subtitle: `${g.reportCount || 0} report(s)`,
-        kindLabel: "GifZ report",
+        kindLabel: "GiftZ report",
         color: "#AA66FF",
       });
     }

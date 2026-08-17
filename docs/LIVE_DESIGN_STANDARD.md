@@ -90,7 +90,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 ## NEXT roadmap cards
 
 - This is a scoped roadmap family, not a new default for event, directory, board, or feed cards.
-- Sequence: **THE HAÜZ → Z/SPACE → ZAYDARK → AfterZ → Zenegades → Z/OUT → submit an idea**. Keep route numbers and DOM reading order synchronized.
+- Sequence: **THE HAÜZ → Z/SPACE → ZAYDARK → AfterZ → Zenegades → OUTZ → submit an idea**. Keep route numbers and DOM reading order synchronized.
 - All product cards share one measured box: top-left status, top-right eyebrow, fixed logo region, contained object region, and lower copy/detail/action seam.
 - Use approved product-logo assets. Do not typeset substitutes, distort marks, trim their authored transparent margins ad hoc, or change spelling.
 - Cards use black deep glass with a black keyline, restrained Fluent 2 undertone, local accent bloom, and a thin rainbow edge/refract seam. Do not use a rainbow fill behind the card.
@@ -103,15 +103,15 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 ## Homepage front door
 
-- Product-family names are exact: always render `Gigz`, `GifZ`, and `Mizzed Connection` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
+- Product-family names are exact: always render `Gigz`, `GiftZ`, and `Mizzed Connection` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
 ## Z/ address continuity
 
 - Existing indexed board URLs remain canonical. The additive Z/ address layer is visible as a compact, 44px-tall board marker; it never replaces the primary site navigation or duplicates it inside a hero.
 - The marker links back to `/z`, labels the current lowercase ASCII Z/ address, keeps calm-mode and keyboard focus behavior, and must not create horizontal overflow on compact screens.
 - On the Z/ index, family wordmarks use the owner-approved 144px height. Fallback board names occupy the same structural slot; image alt stays empty where the adjacent heading already names the board.
-- Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. Clubz & Groupz is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
-- Z/OUT is one top-level board card. Rooster Rock and Sauvie Island are nested destinations inside it, never peer cards or duplicate top-rail addresses.
+- Places is the full-width center hub on the Z/ index and renders the public Directory categories with real counts. MY SQUADZ is not a Places category on this surface: the complete board owns `z/spaces`, with its own top-level card and logo, and resolves to the existing group-filtered Directory implementation.
+- OUTZ is one top-level board card. Rooster Rock and Sauvie Island are nested destinations inside it, never peer cards or duplicate top-rail addresses.
 - Board totals and the top address rail count top-level boards only. Nested address labels show only their terminal segment while links retain the full canonical route.
 - `z/spaces` must preserve Directory listing identity end to end: real group records, existing detail pages, and the same persistent follow relationship used elsewhere in Places.
 - User-facing address slugs are lowercase ASCII. When normalization repairs a shipped malformed slug, keep the old path as a compatibility alias rather than breaking saved links.
@@ -124,7 +124,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The destination rail owns its section padding, modest consistent gaps, top/bottom dividers, and horizontal overflow. On motion-capable desktop it flows seamlessly from right to left at exactly **68.4 seconds per cycle** (10% faster than the prior timing).
 - Keep one semantic seven-card sequence. If seamless looping requires presentational clones, mark them `aria-hidden`, unfocusable, inert, and exclude them from analytics; never add a second visible rail or expose repeated destinations to assistive technology.
 - Mobile, Calm Mode, and `prefers-reduced-motion` disable rail autoplay and keep the same order in a manual touch-scroll rail with card snap points, readable peek, 44px actions, contained overscroll, and no document/page horizontal overflow.
-- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, GifZ, Gigz, and Mizzed Connection.
+- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, GiftZ, Gigz, and Mizzed Connection.
 - The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
 - The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
 - Each world uses the deep-glass shell with one `--c` accent. Calm Mode removes ambient video and bloom while preserving every route and label.
@@ -139,7 +139,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - The Events flyer stage always shows its active position counter and rail. When local upcoming data is empty, it uses the canonical `HOME_STAGE_DEMO_SAMPLES.events` fallback from the repository.
 - The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
 - Places uses a reduced app-tile launcher sourced from `/api/directory`, with two fewer rows than the former layout: 8 columns by 3 rows on larger screens and 5 columns by 6 rows on phones. Render only the visible capacity in stable source order so the footer/action aligns with sibling cards.
-- Haüsing, GifZ, Gigz, and Mizzed Connection use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
+- Haüsing, GiftZ, Gigz, and Mizzed Connection use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
 - The homepage NEXT preview uses one six-card set. Three cards enter from the left and three from the right at the same time, collide at center, overshoot, rebound once, make one short restrained wiggle, and settle into a centered overlapping stack. After landing, a staggered 1–2px slow float may keep the stack alive; Calm and reduced-motion stay perfectly still.
 - Put the rainbow divider immediately above the NEXT preview section. Its heading is exactly **“SEE WHAT I’M BUILDING NEXT.”** Only **“NEXT.”** is red; keep every preceding word in the standard high-contrast heading color.
 - The full NEXT section uses a distinct cool-navy clipped topographic/trail-map blueprint field plus exactly three scattered copies of each of the two approved drafting references. The six motifs cannot touch. Keep every form monochrome, low opacity, non-parallax, and behind the heading and card stack; mobile may reduce the count.

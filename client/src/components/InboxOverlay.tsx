@@ -45,7 +45,7 @@ const FILTERS: Array<[string, string, string]> = [
   ["all", "All", C.lime],
   ["spotted", "Mizzed Connection", C.magenta],
   ["gigs", "Gigz", C.purple],
-  ["gifting", "GifZ", C.lime],
+  ["gifting", "GiftZ", C.lime],
   ["hosts", "Hosts", C.cyan],
   ["checkins", "Check-ins", C.green],
 ];

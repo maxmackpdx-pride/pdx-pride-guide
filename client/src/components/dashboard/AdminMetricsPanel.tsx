@@ -29,7 +29,7 @@ const METRICS: { key: keyof AdminMetrics; label: string; color: string; tab?: st
   { key: "messages",           label: "Active messages",                color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "pendingSubmissions", label: "Pending review",                 color: "#FF1FA0", tab: "inbox" },
   { key: "gigPosts",           label: "Live Gigz posts",                 color: "#FF8C00", tab: "gigs",    alwaysClickable: true },
-  { key: "giftingPosts",       label: "Active GifZ posts",           color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
+  { key: "giftingPosts",       label: "Active GiftZ posts",           color: "#19E3FF", tab: "inbox",   alwaysClickable: true },
   { key: "missedConnections",  label: "Active Mizzed Connection posts",      color: "#FF1FA0", tab: "inbox",   alwaysClickable: true },
 
 ];

@@ -48,17 +48,17 @@ export type ZAddress = {
  * ever would. An unbuilt address says the board is not built. Nothing more.
  */
 export const Z_ADDRESSES: ZAddress[] = [
-  { path: "happening", display: "z/happening", board: "Events", route: "/events" },
+  { path: "happening", display: "z/happening", board: "EVENTZ", route: "/events" },
   { path: "hauz", display: "z/hauz", board: "THE HAÜZ", route: "/the-hauz" },
-  { path: "market", display: "z/market", board: "For sale", route: null },
-  { path: "gifz", display: "z/gifz", board: "GifZ", route: "/gifting" },
+  { path: "market", display: "z/market", board: "SELLZ", route: null },
+  { path: "gifz", display: "z/gifz", board: "GiftZ", route: "/gifting" },
   { path: "gigz", display: "z/gigz", board: "Gigz", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "Mizzed Connection", route: "/spotted" },
-  { path: "directory", display: "z/directory", board: "Directory", route: "/directory" },
-  { path: "out", display: "z/out", board: "Outdoor recreation", route: "/z/out/rooster-rock" },
+  { path: "directory", display: "z/directory", board: "OUR PLACEZ", route: "/directory" },
+  { path: "out", display: "z/out", board: "OUTZ", route: "/z/out/rooster-rock" },
   { path: "out/rooster-rock", display: "z/out/rooster-rock", board: "Rooster Rock", route: "/z/out/rooster-rock" },
   { path: "out/sauvie-island", display: "z/out/sauvie-island", board: "Sauvie Island", route: "/z/out/sauvie-island" },
-  { path: "spaces", display: "z/spaces", board: "Clubz & Groupz", route: "/directory?type=group" },
+  { path: "spaces", display: "z/spaces", board: "MY SQUADZ", route: "/directory?type=group" },
 ];
 
 /**

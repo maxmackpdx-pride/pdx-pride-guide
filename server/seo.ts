@@ -287,7 +287,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/gifting": {
     title: "Gift with Pride | Zaylist",
-    description: "Free queer GifZ board for Portland. Post gifts and in-search-of requests across PDX.",
+    description: "Free queer GiftZ board for Portland. Post gifts and in-search-of requests across PDX.",
   },
   "/pride-work": {
     title: "Gigz: Gigs & Jobs | Zaylist",
@@ -307,7 +307,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/dashboard": {
     title: "Dashboard | Zaylist",
-    description: "Your Zaylist profile, submissions, Gigz, GifZ, and event check-ins.",
+    description: "Your Zaylist profile, submissions, Gigz, GiftZ, and event check-ins.",
   },
   "/directory": {
     title: "Queer Portland Directory | Zaylist",

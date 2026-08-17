@@ -3,13 +3,20 @@ import HeroAurora from "@/components/HeroAurora";
 type Props = {
   /** Optional override if a future caller needs to inject stats elsewhere. */
   placeCount?: number;
+  /** The group-filtered directory is publicly branded as MY SQUADZ. */
+  squadz?: boolean;
 };
 
 /**
  * Directory page hero (2026-07-28 redesign).
  * Aurora + H1 lockup + lede + mono mantra. Stats live in the page band below.
  */
-export default function DirectoryHero(_props: Props) {
+export default function DirectoryHero({ squadz = false }: Props) {
+  const brand = squadz ? "MY SQUADZ" : "OUR PLACEZ";
+  const logo = squadz
+    ? "/brand/family/my-squadz.svg"
+    : "/brand/family/our-placez.svg";
+
   return (
     <section className="directory-hero" aria-labelledby="directory-hero-title">
       <div className="directory-hero__aurora" aria-hidden="true">
@@ -17,15 +24,10 @@ export default function DirectoryHero(_props: Props) {
       </div>
       <div className="directory-hero__inner">
         <h1 id="directory-hero-title" className="directory-hero__title">
-          Do business with
-          <br />
-          those of us on
           <img
             className="directory-hero__wordmark"
-            src="/brand/family/zaylist-primary.svg"
-            alt="Zaylist"
-            width={1200}
-            height={423}
+            src={logo}
+            alt={brand}
             decoding="async"
           />
         </h1>

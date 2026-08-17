@@ -179,8 +179,8 @@ function SauvieIslandPanel() {
 export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
   const isRooster = beachId === "rooster-rock";
   usePageSeo(
-    `${isRooster ? "Rooster Rock" : "Sauvie Island"} · Z/OUT | Zaylist`,
-    `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on Z/OUT.`,
+    `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,
+    `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on OUTZ.`,
     {
       image: shareCardUrl("nudeBeaches"),
       imageAlt:

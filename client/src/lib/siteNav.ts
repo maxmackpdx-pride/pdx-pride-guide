@@ -12,15 +12,15 @@ export type NavEntry =
 
 const Z_NAV: NavLinkItem[] = [
   { href: "/z", label: "All z/ addresses" },
-  { href: "/z/happening", label: "z/happening · Events" },
+  { href: "/z/happening", label: "z/happening · EVENTZ" },
   { href: "/z/hauz", label: "z/hauz · THE HAÜZ" },
-  { href: "/z/market", label: "z/market · For sale" },
-  { href: "/z/gifz", label: "z/gifz · GifZ" },
+  { href: "/z/market", label: "z/market · SELLZ" },
+  { href: "/z/gifz", label: "z/gifz · GiftZ" },
   { href: "/z/gigz", label: "z/gigz · Gigz" },
   { href: "/z/mizzed", label: "z/mizzed · Mizzed Connection" },
-  { href: "/z/directory", label: "z/directory · Directory" },
-  { href: "/z/out", label: "z/out · Outdoor recreation" },
-  { href: "/z/spaces", label: "z/spaces · Clubz & Groupz" },
+  { href: "/z/directory", label: "z/directory · OUR PLACEZ" },
+  { href: "/z/out", label: "z/out · OUTZ" },
+  { href: "/z/spaces", label: "z/spaces · MY SQUADZ" },
 ];
 
 /** Primary nav - labels match on-page titles where possible. */
@@ -60,15 +60,15 @@ export type PageHeaderMeta = {
 
 /** Breadcrumb section + H1 title for interior pages. */
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
-  "/events": { section: "Events", title: "Events" },
+  "/events": { section: "Events", title: "EVENTZ" },
   "/schedule": { section: "Events", title: "My Schedule" },
   "/pride-work": { section: "Boards", title: "Gigz" },
-  "/gifting": { section: "Boards", title: "GifZ" },
+  "/gifting": { section: "Boards", title: "GiftZ" },
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "Mizzed Connection" },
-  "/directory": { section: "Places", title: "Directory" },
-  "/z/out/rooster-rock": { section: "Z/OUT", title: "Rooster Rock" },
-  "/z/out/sauvie-island": { section: "Z/OUT", title: "Sauvie Island" },
+  "/directory": { section: "Places", title: "OUR PLACEZ" },
+  "/z/out/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
+  "/z/out/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
   "/next": { section: "Explore", title: "Next" },
   "/darkroom": { section: "Explore", title: "Next" },
   "/about": { section: "About", title: "About" },
@@ -94,7 +94,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/z", label: "z/ all boards" },
   { href: "/pride-work", label: "Gigz" },
-  { href: "/gifting", label: "GifZ" },
+  { href: "/gifting", label: "GiftZ" },
   { href: "/the-hauz", label: "THE HAÜZ" },
   { href: "/spotted", label: "Mizzed Connection" },
 ];

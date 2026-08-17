@@ -9906,7 +9906,7 @@ export const storage: IStorage = {
       })),
       ...gifting.map(g => ({
         id: g.id,
-        board: "GifZ",
+        board: "GiftZ",
         contentType: "GIFTING" as const,
         color: "var(--board-gifting)",
         where: g.neighborhood || "Portland",
@@ -10501,7 +10501,7 @@ export const storage: IStorage = {
     db.update(giftingPosts).set({ status: "REJECTED", adminNotes } as any).where(eq(giftingPosts.id, id)).run();
     const userId = Number(post.user_id ?? post.userId);
     if (userId) {
-      notifyBoardReject(userId, "GifZ", post.title, reasonCode, note, {
+      notifyBoardReject(userId, "GiftZ", post.title, reasonCode, note, {
         contextType: "GIFTING",
         contextId: id,
         contextLabel: post.title,
@@ -11170,8 +11170,8 @@ export const storage: IStorage = {
         guide_reply: "Replied as guide",
         admin_message: "Sent a guide message",
         resolve_moderation: "Resolved moderation",
-        reject_gifting: "Rejected GifZ post",
-        resolve_gifting_report: "Resolved GifZ report",
+        reject_gifting: "Rejected GiftZ post",
+        resolve_gifting_report: "Resolved GiftZ report",
         gig_status: "Updated a gig",
         reject_gig: "Rejected a gig",
       };
@@ -13482,7 +13482,7 @@ export const storage: IStorage = {
     const contentBreakdown = [
       { label: "Events", count: liveEvents.length },
       { label: "Directory", count: directoryPlaces },
-      { label: "GifZ", count: giftingPosts },
+      { label: "GiftZ", count: giftingPosts },
       { label: "Gigz", count: gigPosts },
       { label: "Mizzed Connection", count: missedConnections },
     ].sort((a, b) => b.count - a.count);
@@ -14744,7 +14744,7 @@ export const storage: IStorage = {
       items.push({
         id: `gifting-${post.id}`,
         kind: "gifting",
-        badge: post.postType === "ISO" ? "ISO" : "GifZ",
+        badge: post.postType === "ISO" ? "ISO" : "GiftZ",
         action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
         title: post.title,
         text: post.description || null,

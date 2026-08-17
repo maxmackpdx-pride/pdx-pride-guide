@@ -31,9 +31,9 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
   },
   {
     href: "/gifting",
-    title: "GifZ",
+    title: "GiftZ",
     description:
-      "Need something for Pride week or have old Pride gear collecting dust? Hit GifZ.",
+      "Need something for Pride week or have old Pride gear collecting dust? Hit GiftZ.",
     accent: "#CCFF00",
   },
   {
@@ -45,7 +45,7 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
   },
   {
     href: "/z/out/rooster-rock",
-    title: "Z/OUT",
+    title: "OUTZ",
     description:
       "Rooster Rock and Sauvie Island conditions, carpools, check-ins, and River Brats.",
     accent: "#FF6600",

@@ -762,7 +762,7 @@ function assertGigBoardAllowed(body: any, fields: {
 
 function assertGiftingAllowed(body: any) {
   if (!giftingPostingOpen()) {
-    throw new Error("Public GifZ posts are paused after July 26, 2026.");
+    throw new Error("Public GiftZ posts are paused after July 26, 2026.");
   }
   if (!body.acceptRules) throw new Error("You must agree to the community rules.");
   const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
@@ -2351,8 +2351,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       postingOpen,
       message: postingOpen
-        ? "GifZ posting is open."
-        : "New GifZ posts are paused. Existing listings and handoffs stay available.",
+        ? "GiftZ posting is open."
+        : "New GiftZ posts are paused. Existing listings and handoffs stay available.",
     });
   });
 
@@ -2393,7 +2393,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         photoUrls: JSON.stringify(photoUrls),
       });
       const post = storage.createGiftingPost(data);
-      res.json({ ...post, message: "Your GifZ post is live." });
+      res.json({ ...post, message: "Your GiftZ post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }

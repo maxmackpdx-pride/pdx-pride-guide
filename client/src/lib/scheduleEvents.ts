@@ -68,7 +68,7 @@ export type ScheduleEvent = PrideEvent & {
   beachId?: NudeBeachTab;
   checkinId?: number;
   calendarDate?: string;
-  /** Deep link for popover “open” (events use eventPath; beach plans use Z/OUT). */
+  /** Deep link for popover “open” (events use eventPath; beach plans use OUTZ). */
   href?: string;
 };
 

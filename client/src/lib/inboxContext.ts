@@ -22,7 +22,7 @@ export function notifyContextTag(contextType?: string | null): string {
   if (ctx === "GIG" || ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") {
     return "Gigz";
   }
-  if (ctx === "GIFTING") return "GifZ";
+  if (ctx === "GIFTING") return "GiftZ";
   if (
     ctx === "EVENT_HOST"
     || ctx === "HOST_UPDATE"

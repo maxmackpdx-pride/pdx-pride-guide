@@ -65,7 +65,7 @@ export default function AccessSafety() {
             or an immediate safety concern. Blocking ends contact; reporting sends the issue for review.
           </p>
           <p className="board-copy">
-            Housing never handles rent or deposits. GifZ stays free. Gigz posters and workers agree on
+            Housing never handles rent or deposits. GiftZ stays free. Gigz posters and workers agree on
             duties and compensation directly. Mizzed Connection stays anonymous until both people choose
             otherwise. When something feels wrong, stop the conversation, block the account, and report it.
           </p>

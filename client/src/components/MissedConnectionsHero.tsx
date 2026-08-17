@@ -32,7 +32,13 @@ export default function MissedConnectionsHero({ onPost }: Props) {
       <BoardHero
         accent="magenta"
         kicker="Anonymous board · Pride season 2026"
-        title={<>Mizzed a <span className="board-hero__title-accent">connection?</span></>}
+        title={
+          <img
+            className="board-hero__brand-logo board-hero__brand-logo--mizzed"
+            src="/brand/family/mizzed-connection.svg"
+            alt="MIZZED CONNECTION"
+          />
+        }
         lede="Mizzed Connection posts from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
       />
     </CommunityBoardHeroRow>

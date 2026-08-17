@@ -57,7 +57,7 @@ export default function MemberHubHome({
   const pills: Array<{ key: string; label: string; count: number; color: string }> = [
     { key: "events", label: "Events", count: counts.eventCount, color: "var(--dash-cyan)" },
     { key: "gigs", label: "Gigz", count: counts.gigCount, color: "var(--dash-orange)" },
-    { key: "gifting", label: "GifZ", count: counts.giftingCount, color: "var(--dash-lime)" },
+    { key: "gifting", label: "GiftZ", count: counts.giftingCount, color: "var(--dash-lime)" },
     { key: "spotted", label: "Mizzed Connection", count: counts.spottedCount, color: "var(--dash-magenta)" },
     { key: "checkins", label: "Check-ins", count: counts.checkInCount, color: "var(--dash-lime)" },
   ];

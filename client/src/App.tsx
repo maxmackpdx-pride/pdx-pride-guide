@@ -127,7 +127,7 @@ function AppLayout() {
               and canonical. Flipping canonical to z/ means 301ing indexed URLs,
               which is the one step here that browsers cache and that cannot be
               quietly undone, so it is held for an explicit decision.
-              Longest path first so Z/OUT destinations are never shadowed.
+              Longest path first so OUTZ destinations are never shadowed.
             */}
             <Route path="/z" component={ZIndex} />
             {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (

@@ -190,11 +190,11 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
     },
     {
       key: "gifting",
-      label: "GifZ reports",
+      label: "GiftZ reports",
       accent: "#c9391f",
       count: gifting.length,
       rows: gifting.map((r) => ({
-        head: r.postTitle || `GifZ report #${r.id}`,
+        head: r.postTitle || `GiftZ report #${r.id}`,
         meta: `${r.reason || "Flagged post"} · ${fmt(r.createdAt)}`,
         fields: fields(r.postId && ["Post", `#${r.postId}`]),
         note: cut(r.message),
@@ -202,11 +202,11 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
     },
     {
       key: "giftingFlagged",
-      label: "Flagged GifZ posts",
+      label: "Flagged GiftZ posts",
       accent: "#8a4dff",
       count: giftingFlagged.length,
       rows: giftingFlagged.map((p) => ({
-        head: p.title || `GifZ post #${p.id}`,
+        head: p.title || `GiftZ post #${p.id}`,
         meta: `${p.postType || "POST"} · ${p.reportCount || 0} report(s)`,
         fields: fields(["Status", String(p.status || "-")]),
         note: cut(p.description),

@@ -59,7 +59,7 @@ const ADMIN_QUEUE_BUCKETS: Array<{
   { id: "new_venues", label: "New venues", kinds: ["business_submission"], color: C.orange },
   { id: "moderation", label: "Moderation", kinds: ["moderation"], color: C.magenta },
   { id: "spotted", label: "Missed conn", kinds: ["spotted"], color: C.magenta },
-  { id: "gifting", label: "GifZ", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
+  { id: "gifting", label: "GiftZ", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
   { id: "river_brats", label: "River Brats", kinds: ["river_brats"], color: C.orange },
   { id: "gigs", label: "Gigz", kinds: ["gig_pending"], color: C.purple },
 ];
@@ -172,7 +172,7 @@ function mapGiftingReport(r: any, completed = false): QueueRow | null {
     tag: "GIFT REPORT",
     tagColor: C.red,
     title: r.postTitle || `Report #${r.id}`,
-    meta: String(r.reason || "Flagged GifZ post"),
+    meta: String(r.reason || "Flagged GiftZ post"),
     fields: [["Post", String(r.postTitle || r.postId || "-")]],
     note: r.message || "",
     outcome: completed ? status : undefined,
@@ -195,7 +195,7 @@ function mapGiftingFlagged(p: any, completed = false): QueueRow | null {
     entityId: p.id,
     tag: "FLAGGED GIFT",
     tagColor: C.purple,
-    title: p.title || `GifZ post #${p.id}`,
+    title: p.title || `GiftZ post #${p.id}`,
     meta: `${p.postType || "POST"} · ${p.reportCount} report(s)`,
     fields: [["Status", String(p.status || "-")]],
     note: p.description || "",
@@ -592,7 +592,7 @@ export default function QueueView({
       ? ([aggregateQuery.isError && "admin queue"].filter(Boolean) as string[])
       : ([
           subsQuery.isError && "submissions",
-          giftingQuery.isError && "GifZ",
+          giftingQuery.isError && "GiftZ",
           gigsQuery.isError && "gig work",
           spottedQuery.isError && "Mizzed Connection posts",
           riverBratsQuery.isError && "river brats",

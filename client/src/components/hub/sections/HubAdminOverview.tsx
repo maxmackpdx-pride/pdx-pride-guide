@@ -80,7 +80,7 @@ export default function HubAdminOverview({
         { key: "venues", label: "New venues", n: q.businessSubmissions },
         { key: "mod", label: "Moderation", n: q.moderation },
         { key: "mc", label: "Missed conn", n: q.missedConnections },
-        { key: "gift", label: "GifZ", n: q.giftingReports + q.giftingFlagged },
+        { key: "gift", label: "GiftZ", n: q.giftingReports + q.giftingFlagged },
         { key: "rb", label: "River Brats", n: q.riverBrats },
         { key: "gigs", label: "Gigz", n: q.pendingGigs },
       ]

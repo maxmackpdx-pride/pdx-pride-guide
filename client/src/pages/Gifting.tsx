@@ -67,9 +67,9 @@ function isActivePost(p: GiftingPost) {
 export default function Gifting() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "GifZ | Zaylist | Portland Pride 2026",
-    "Give and find free stuff for the scene - Pride week and all year on GifZ.",
-    { image: shareCardUrl("gifting"), imageAlt: "GifZ on Zaylist" },
+    "GiftZ | Zaylist | Portland Pride 2026",
+    "Give and find free stuff for the scene - Pride week and all year on GiftZ.",
+    { image: shareCardUrl("gifting"), imageAlt: "GiftZ on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -184,11 +184,11 @@ export default function Gifting() {
 
   const openForm = (postType: "GIFT" | "ISO") => {
     if (giftingStatusPending) {
-      toast({ title: "Checking posting availability", description: "The existing GifZ board is still available while this loads." });
+      toast({ title: "Checking posting availability", description: "The existing GiftZ board is still available while this loads." });
       return;
     }
     if (!postingOpen) {
-      toast({ title: "New GifZ posts are paused", description: giftingStatus?.message });
+      toast({ title: "New GiftZ posts are paused", description: giftingStatus?.message });
       return;
     }
     if (!user) {
@@ -267,7 +267,7 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="gifz" board="GifZ" />
+      <ZBoardAddressStrip path="gifz" board="GiftZ" />
       <CommunityBoardHeroRow
         active="gifting"
         actions={
@@ -284,7 +284,7 @@ export default function Gifting() {
         <BoardHero
           accent="lime"
           kicker="Free board · Pride season 2026"
-          title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/gifz.svg" alt="GIFZ" />}
+          title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/giftz.svg" alt="GIFTZ" />}
           lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
         />
       </CommunityBoardHeroRow>
@@ -301,7 +301,7 @@ export default function Gifting() {
         <BoardHowItWorks
           className="gifting-how"
           kickerTone="lime"
-          title={<>How <span className="board-how__title-accent">GifZ</span> works</>}
+          title={<>How <span className="board-how__title-accent">GiftZ</span> works</>}
           lede="Give what you can. Ask for what you need. Keep it local, free, and kind. Posts go live right away; anything that breaks the rules gets pulled."
           steps={HOW_IT_WORKS}
           footerLine="Keep it free · keep it kind · keep it moving · year-round"
@@ -446,7 +446,7 @@ export default function Gifting() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading GifZ posts" />
+          <BoardLoadingState label="Loading GiftZ posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#ccff00" }}>
             <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />

@@ -87,24 +87,24 @@ const CARD_PHOTO: Record<string, string> = {
  * name in Barlow Condensed inside that same slot, and every card carries an icon
  * either way, so the row reads the same whether or not a mark exists.
  *
- * Marked `next` in the manifest (Z/SPACE, Z/OUT) still get their wordmark here:
+ * Marked `next` in the manifest (Z/SPACE, OUTZ) still get their wordmark here:
  * the address is real and reserved even where the board is not built.
  */
 const WORDMARK: Record<string, { src: string; alt: string }> = {
-  gifz: { src: "/brand/family/gifz.svg", alt: "GifZ" },
+  gifz: { src: "/brand/family/giftz.svg", alt: "GiftZ" },
   gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
-  hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAUZ" },
-  spaces: { src: "/brand/family/clubs-groups.svg", alt: "Clubz & Groupz" },
-  out: { src: "/brand/family/z-out.svg", alt: "Z/OUT" },
+  hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAÜZ" },
+  spaces: { src: "/brand/family/my-squadz.svg", alt: "MY SQUADZ" },
+  out: { src: "/brand/family/outz.svg", alt: "OUTZ" },
   // Glyphs traced out of the real masters rather than redrawn: the letter
-  // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFZ for Z. N is
+  // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFTZ for Z. N is
   // built from the library H, keeping its exact tapered stems and swapping the
   // crossbar for a diagonal at the same stroke weight, because no mark in the
   // family contains an N.
-  directory: { src: "/brand/family/placez.svg", alt: "PlaceZ" },
-  mizzed: { src: "/brand/family/mizzed.svg", alt: "MizZed" },
-  market: { src: "/brand/family/marketz.svg", alt: "MarketZ" },
-  happening: { src: "/brand/family/eventz.svg", alt: "EventZ" },
+  directory: { src: "/brand/family/our-placez.svg", alt: "OUR PLACEZ" },
+  mizzed: { src: "/brand/family/mizzed-connection.svg", alt: "MIZZED CONNECTION" },
+  market: { src: "/brand/family/sellz.svg", alt: "SELLZ" },
+  happening: { src: "/brand/family/eventz.svg", alt: "EVENTZ" },
 };
 
 /**
@@ -126,7 +126,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
  */
 
 /** Gifting: lime for both offered and in search of, per pages/Gifting.tsx. */
-const GIFZ_SUB_ACCENT: Record<string, string> = {
+const GIFTZ_SUB_ACCENT: Record<string, string> = {
   GIFT: "#ccff00",
   ISO: "#ccff00",
 };
@@ -158,7 +158,7 @@ const MOTES: Array<[string, string, string]> = [
 /**
  * Endpoint each address counts from. Absent means there is no countable list
  * behind the address, so no number is shown rather than a misleading zero.
- * Z/OUT destinations are deliberately absent: /api/nude-beaches returns live river
+ * OUTZ destinations are deliberately absent: /api/nude-beaches returns live river
  * conditions, not a board of posts, so it has no total to report.
  */
 const COUNT_ENDPOINT: Record<string, string> = {
@@ -361,8 +361,8 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
     if (address.path === "gifz") {
       const counts = countBy(rows, "postType", ["GIFT", "ISO"]);
       return addressSubs(address.path, [
-        { key: "GIFT", label: "Offered", color: GIFZ_SUB_ACCENT.GIFT, count: counts.GIFT },
-        { key: "ISO", label: "In search of", color: GIFZ_SUB_ACCENT.ISO, count: counts.ISO },
+        { key: "GIFT", label: "Offered", color: GIFTZ_SUB_ACCENT.GIFT, count: counts.GIFT },
+        { key: "ISO", label: "In search of", color: GIFTZ_SUB_ACCENT.ISO, count: counts.ISO },
       ]);
     }
     if (address.path === "gigz") {
@@ -481,7 +481,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       )}
       {isSpacesBoard ? (
         <Link href="/directory?type=group" className="z-index__board-action">
-          Open all Clubz &amp; Groupz listings
+          Open all MY SQUADZ listings
         </Link>
       ) : null}
     </section>

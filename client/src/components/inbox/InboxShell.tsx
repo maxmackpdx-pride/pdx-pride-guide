@@ -43,7 +43,7 @@ const CATC: Record<Category, string> = {
 const BADGE: Record<Category, string> = {
   spotted: "Mizzed Connection",
   gigs: "Gig",
-  gifting: "GifZ",
+  gifting: "GiftZ",
   housing: "THE HAÜZ",
   hosts: "Host",
   checkins: "Check-in",
@@ -52,7 +52,7 @@ const CATS: Array<[string, string]> = [
   ["all", "All"],
   ["spotted", "Mizzed Connection"],
   ["gigs", "Gigz"],
-  ["gifting", "GifZ"],
+  ["gifting", "GiftZ"],
   ["hosts", "Hosts"],
   ["checkins", "Check-ins"],
 ];

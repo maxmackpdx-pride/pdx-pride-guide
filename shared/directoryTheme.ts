@@ -10,7 +10,7 @@ export const DIRECTORY_TYPE_LABELS: Record<string, string> = {
   nonprofit: "Nonprofits",
   healthcare: "Health & Care",
   realestate: "Real Estate",
-  group: "Clubz & Groupz",
+  group: "MY SQUADZ",
   campground: "Campgrounds",
 };
 

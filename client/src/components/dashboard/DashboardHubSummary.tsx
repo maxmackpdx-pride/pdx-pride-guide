@@ -44,7 +44,7 @@ export default function DashboardHubSummary({
     },
     {
       key: "gifting",
-      label: "GifZ",
+      label: "GiftZ",
       count: counts.giftingCount,
       section: "gifting",
       color: "var(--dash-lime)",

@@ -123,8 +123,8 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
   const gifting = useMine<any>("/api/gifting/mine", (rows) =>
     rows.map((g) => ({
       key: `gifting-${g.id}`,
-      title: g.title || "GifZ post",
-      meta: `GifZ · ${g.status || "Live"}`,
+      title: g.title || "GiftZ post",
+      meta: `GiftZ · ${g.status || "Live"}`,
       actions: [{ label: "EDIT", href: "/gifting" }],
     })),
   );

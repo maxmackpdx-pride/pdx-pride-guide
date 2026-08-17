@@ -98,10 +98,10 @@ const WORLDS: World[] = [
   {
     key: "gifting",
     number: "05",
-    title: "GifZ",
+    title: "GiftZ",
     eyebrow: "Give and ask",
     body: "Useful things move directly between people, without a marketplace.",
-    action: "Open GifZ",
+    action: "Open GiftZ",
     href: "/gifting",
     accent: "var(--board-gifting, #ccff00)",
     sampleKey: "gifting",
@@ -357,7 +357,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
             </div>
           </div>
           <div className="home-front__hero-actions">
-            <Link href="/z/out/rooster-rock" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Open Z/OUT</Link>
+            <Link href="/z/out/rooster-rock" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Open OUTZ</Link>
             <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>
           </div>
         </div>

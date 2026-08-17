@@ -15766,6 +15766,14 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   width: min(100%, 500px);
 }
 
+.board-hero__brand-logo--eventz {
+  width: min(100%, 560px);
+}
+
+.board-hero__brand-logo--mizzed {
+  width: min(100%, 560px);
+}
+
 .board-hero__title-accent {
   color: #ccff00;
   text-shadow: 0 0 34px rgba(204, 255, 0, 0.4);

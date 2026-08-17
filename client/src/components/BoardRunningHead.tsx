@@ -4,7 +4,7 @@ export type BoardKey = "spotted" | "gifting" | "gigs";
 
 const LINKS: Array<{ key: BoardKey; href: string; label: string }> = [
   { key: "spotted", href: "/spotted", label: "Mizzed Connection" },
-  { key: "gifting", href: "/gifting", label: "GifZ" },
+  { key: "gifting", href: "/gifting", label: "GiftZ" },
   { key: "gigs", href: "/pride-work", label: "Gigz" },
 ];
 

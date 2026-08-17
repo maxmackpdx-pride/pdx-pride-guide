@@ -62,7 +62,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
   return (
     <>
       <div className="nude-beaches-hero-row">
-        <img className="nude-beaches-hero-row__zout" src="/brand/family/z-out.svg" alt="Z/OUT" />
+        <img className="nude-beaches-hero-row__zout" src="/brand/family/outz.svg" alt="OUTZ" />
         <BoardHero
           accent={isRooster ? "orange" : "green"}
           kicker={isRooster ? "Columbia River · Corbett" : "Sauvie Island · Collins Beach"}

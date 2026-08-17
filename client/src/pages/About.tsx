@@ -55,7 +55,7 @@ const WHY_ROWS = [
   },
   {
     old: "Free stuff",
-    now: "GifZ",
+    now: "GiftZ",
     href: "/gifting",
     text: "Give it to someone who needs it instead of leaving it on the curb.",
   },
@@ -206,7 +206,7 @@ export default function About() {
               <p>
                 Pride starts now, it ends never, and this thing is already loaded: parties,
                 community events, weird little gems, places to eat, spots to shop, Gigz,
-                GifZ, Mizzed Connection, and all the real homosexual infrastructure that
+                GiftZ, Mizzed Connection, and all the real homosexual infrastructure that
                 keeps the scene alive.
               </p>
               <p>
