@@ -7,6 +7,21 @@ Project decisions, reasoning, and current state live in the private repo
 Read it before proposing architecture, naming, product scope, or design
 direction.
 
+## Cowork / cloud sessions must include both repos
+
+If this session cannot `git push` (`authorized repository set` / proxy 403),
+it started without the repo as a source. PAT-in-URL will not fix it.
+
+Start (or restart) the session with **both** sources:
+
+- `maxmackpdx-pride/pdx-pride-guide`
+- `maxmackpdx-pride/zaylist-foundation-library`
+
+Direct link:
+https://claude.ai/code?repositories=maxmackpdx-pride/pdx-pride-guide,maxmackpdx-pride/zaylist-foundation-library
+
+Full write-path notes: Foundation skill `zaylist-github-push`.
+
 ## Design: use the design system, always
 
 All UI is built on the Zaylist design system in **`design-system/`**, registered as the

@@ -24,6 +24,11 @@ Local-only edits, stashes, or unpushed branches are **not** done. Do not leave W
 
 **Always keep local `master` synced with `origin/master` before and after shipping** (`git fetch` + `pull --ff-only` when behind). Multi-agent (Claude/etc.) pushes to the same remote - lagging local is how “desync” happens.
 
+Cowork / claude.ai/code sessions that will `git push` must list both
+`maxmackpdx-pride/pdx-pride-guide` and
+`maxmackpdx-pride/zaylist-foundation-library` as session sources. A PAT in
+the remote URL is intercepted and 403s. See `CLAUDE.md`.
+
 ## Deploy / “push” claims (hard rule)
 
 **Never** report a push as fully successful, live, shipped, or “pushes are working” based only on `git push`.
@@ -44,6 +49,11 @@ When the user asks to **push** / **deploy** / **ship** (or after any push to `ma
 
 Repo: `maxmackpdx-pride/pdx-pride-guide`  
 Railway: project `zaylist`, production, https://www.zaylist.com  
+
+Cowork / claude.ai/code sessions that will `git push` must list both
+`maxmackpdx-pride/pdx-pride-guide` and
+`maxmackpdx-pride/zaylist-foundation-library` as session sources. A PAT in
+the remote URL is intercepted and 403s. See `CLAUDE.md`.
 
 ## Design source of truth (hard rule)
 
