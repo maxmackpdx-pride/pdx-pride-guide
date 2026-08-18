@@ -755,14 +755,14 @@ function assertGigBoardAllowed(body: any, fields: {
   skills?: string | null;
   compensation?: string | null;
 }) {
-  if (!body.acceptRules) throw new Error("You must agree to the Gigz board rules.");
+  if (!body.acceptRules) throw new Error("You must agree to the GIGZ board rules.");
   const personalsErr = validateGigPostContent(fields);
   if (personalsErr) throw new Error(personalsErr);
 }
 
 function assertGiftingAllowed(body: any) {
   if (!giftingPostingOpen()) {
-    throw new Error("Public GiftZ posts are paused after July 26, 2026.");
+    throw new Error("Public GIFTZ posts are paused after July 26, 2026.");
   }
   if (!body.acceptRules) throw new Error("You must agree to the community rules.");
   const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
@@ -2297,7 +2297,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
     if (moderationGate(res, "Gig board message", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, gig.userId, `Gigz: ${gig.title}`, body, {
+    const msg = storage.sendMessage(req.session.userId!, gig.userId, `GIGZ: ${gig.title}`, body, {
       contextType: "GIG",
       contextId: gig.id,
       contextLabel: gig.title,
@@ -2351,8 +2351,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       postingOpen,
       message: postingOpen
-        ? "GiftZ posting is open."
-        : "New GiftZ posts are paused. Existing listings and handoffs stay available.",
+        ? "GIFTZ posting is open."
+        : "New GIFTZ posts are paused. Existing listings and handoffs stay available.",
     });
   });
 
@@ -2393,7 +2393,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         photoUrls: JSON.stringify(photoUrls),
       });
       const post = storage.createGiftingPost(data);
-      res.json({ ...post, message: "Your GiftZ post is live." });
+      res.json({ ...post, message: "Your GIFTZ post is live." });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -3411,7 +3411,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         return res.status(400).json({ error: "Invalid beach" });
       }
 
-      if (moderationGate(res, "Mizzed Connection", {
+      if (moderationGate(res, "MIZZED CONNECTION", {
         title: req.body.title,
         body: req.body.body,
         eventLabel: req.body.eventLabel,
@@ -3489,7 +3489,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (req.body[k] !== undefined) patch[k] = req.body[k];
     });
     if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
-    if (moderationGate(res, "Mizzed Connection edit", { title: patch.title, body: patch.body })) return;
+    if (moderationGate(res, "MIZZED CONNECTION edit", { title: patch.title, body: patch.body })) return;
     const updated = storage.updateMissedConnection(Number(req.params.id), req.session.userId!, patch);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
@@ -3506,8 +3506,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
     const body = String(req.body.body || "").trim();
     if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Mizzed Connection reply", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, post.userId, `Mizzed Connection: ${post.title}`, body, {
+    if (moderationGate(res, "MIZZED CONNECTION reply", { body })) return;
+    const msg = storage.sendMessage(req.session.userId!, post.userId, `MIZZED CONNECTION: ${post.title}`, body, {
       contextType: "MISSED_CONNECTION",
       contextId: post.id,
       contextLabel: post.title,

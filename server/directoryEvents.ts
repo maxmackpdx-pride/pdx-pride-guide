@@ -257,7 +257,7 @@ export type DirectoryGigSummary = {
 };
 
 /**
- * Best-effort place attach for Mizzed Connection / gigs:
+ * Best-effort place attach for MIZZED CONNECTION / gigs:
  * - event-linked posts: match event venue (+ address when present)
  * - freeform venueHint: match name against brand + multi-loc storefronts
  * No business_id FK on missed_connections, so this is fuzzy only.

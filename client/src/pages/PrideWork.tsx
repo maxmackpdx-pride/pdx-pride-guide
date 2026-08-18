@@ -124,9 +124,9 @@ function thumbGradient(isLooking: boolean) {
 export default function PrideWork() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "Gigz: Jobs & gigs | Zaylist",
-    "Find gigs and workers for Portland nights. Post or browse Gigz.",
-    { image: shareCardUrl("prideWork"), imageAlt: "Gigz on Zaylist" },
+    "GIGZ: Jobs & gigs | Zaylist",
+    "Find gigs and workers for Portland nights. Post or browse GIGZ.",
+    { image: shareCardUrl("prideWork"), imageAlt: "GIGZ on Zaylist" },
   );
   const { toast } = useToast();
   const { user } = useAuth();
@@ -224,7 +224,7 @@ export default function PrideWork() {
 
   const stats = useMemo(() => [
     { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
-    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "Gigz up for grabs", color: "#b06bff" },
+    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "GIGZ up for grabs", color: "#b06bff" },
     { num: gigs.filter(g => g.isRemote).length, label: "Remote friendly", color: "#ff1fa0" },
   ], [gigs]);
 
@@ -281,7 +281,7 @@ export default function PrideWork() {
 
   const submitGig = (data: GigFormData) => {
     if (!acceptRules) {
-      toast({ title: "Board rules", description: "Please agree to the Gigz rules before posting.", variant: "destructive" });
+      toast({ title: "Board rules", description: "Please agree to the GIGZ rules before posting.", variant: "destructive" });
       return;
     }
     const personalsErr = validateGigPostContent(data);
@@ -337,7 +337,7 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="gigz" board="Gigz" />
+      <ZBoardAddressStrip path="gigz" board="GIGZ" />
       <CommunityBoardHeroRow
         active="gigs"
         actions={
@@ -367,7 +367,7 @@ export default function PrideWork() {
         <BoardHowItWorks
           className="gigs-how"
           kickerTone="cyan"
-          title={<>How <span style={{ color: "#b06bff" }}>Gigz</span> works</>}
+          title={<>How <span style={{ color: "#b06bff" }}>GIGZ</span> works</>}
           lede="Same board, two sides. Talent posts what they do. Hosts post what they need. Everyone can browse both. Goes live right away, and every reply stays in a private inbox."
           steps={HOW_IT_WORKS}
           footerLine="Paid, respected, valued · work and gigs only · PG-13"
@@ -521,7 +521,7 @@ export default function PrideWork() {
               {postType === "POSTING_GIG" && isEligiblePoster && (
                 <div className="span" style={{ border: "1px solid #262626", borderRadius: 8, padding: 14 }}>
                   <p className="board-copy-sm" style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)" }}>
-                    Link this gig to a directory venue (optional). It'll show up on that venue's Gigz tab.
+                    Link this gig to a directory venue (optional). It'll show up on that venue's GIGZ tab.
                   </p>
                   {linkedBusiness ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -663,7 +663,7 @@ export default function PrideWork() {
             {([
               { key: "ALL" as const, label: "All", accent: "purple" },
               { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "Gigz open", accent: "purple" },
+              { key: "POSTING_GIG" as const, label: "GIGZ open", accent: "purple" },
             ]).map(f => (
               <BoardFilterChip
                 key={f.key}
@@ -685,7 +685,7 @@ export default function PrideWork() {
             </BoardFilterChip>
             {user ? (
               <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
-                My Gigz
+                My GIGZ
               </BoardFilterChip>
             ) : null}
             <BoardSelectField value={sort} onChange={setSort}>
@@ -696,7 +696,7 @@ export default function PrideWork() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading talent & Gigz posts" />
+          <BoardLoadingState label="Loading talent & GIGZ posts" />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#b06bff" }}>
             <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />
@@ -778,7 +778,7 @@ export function GigListingCard({
     mutationFn: () => apiRequest("DELETE", `/api/gigs/${gig.id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
-      toast({ title: "Gigz post deleted" });
+      toast({ title: "GIGZ post deleted" });
     },
     onError: (error: Error) => toast({ title: "Could not delete post", description: error.message, variant: "destructive" }),
   });

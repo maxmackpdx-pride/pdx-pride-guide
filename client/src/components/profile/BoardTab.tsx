@@ -15,7 +15,7 @@ export default function BoardTab({ posts }: Props) {
         {posts.map(post => (
           <article
             key={`${post.board}-${post.id}`}
-            className={`pp-board__card ${post.board === "Mizzed Connection" ? "u-spot-pulse" : "u-board-pulse"}`}
+            className={`pp-board__card ${post.board === "MIZZED CONNECTION" ? "u-spot-pulse" : "u-board-pulse"}`}
             style={{
               borderColor: post.color,
               borderLeftColor: post.color,

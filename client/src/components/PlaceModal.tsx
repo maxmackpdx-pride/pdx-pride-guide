@@ -84,7 +84,7 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
    idiom as the Schedule embed popover / AuthModal / MissedConnectionsPanel:
    click the overlay to close, stopPropagation on the panel. Roomier version
    of PlaceCard's content (name, category, address/hours/phone, description,
-   links, upcoming Pride events / Mizzed Connection posts / gigs tabs). */
+   links, upcoming Pride events / MIZZED CONNECTION posts / gigs tabs). */
 
 const DAY_COLOR: Record<string, string> = {
   MON: "var(--day-mon, #ff2d5e)",
@@ -462,15 +462,15 @@ export default function PlaceModal({
   };
 
   // Standard: healthcare (and any category in MISSED_CONNECTIONS_HIDDEN_CATEGORIES)
-  // never surfaces Mizzed Connection in the directory.
+  // never surfaces MIZZED CONNECTION in the directory.
   const hideMissed = categoryHidesMissedConnections(place.type, category);
   const tabs: Array<{ key: ModalTab; label: string; count: number }> = [
     { key: "events", label: "Events", count: upcomingEvents.length },
     { key: "past", label: "Past", count: pastEvents.length },
     ...(hideMissed
       ? []
-      : [{ key: "missed" as ModalTab, label: "Mizzed Connection", count: spotted.length }]),
-    { key: "gigs", label: "Gigz", count: gigs.length },
+      : [{ key: "missed" as ModalTab, label: "MIZZED CONNECTION", count: spotted.length }]),
+    { key: "gigs", label: "GIGZ", count: gigs.length },
   ];
 
   const useSpecialEdge =
@@ -1114,7 +1114,7 @@ export default function PlaceModal({
 
             {tab === "missed" && (
               spotted.length === 0 ? (
-                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No Mizzed Connection posts posted at this venue yet.</p>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No MIZZED CONNECTION posts posted at this venue yet.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {spotted.map(mc => (
@@ -1125,7 +1125,7 @@ export default function PlaceModal({
                     </div>
                   ))}
                   <Link href="/spotted" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View Mizzed Connection board →
+                    View MIZZED CONNECTION board →
                   </Link>
                 </div>
               )
@@ -1147,7 +1147,7 @@ export default function PlaceModal({
                     </div>
                   ))}
                   <Link href="/pride-work" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View Gigz →
+                    View GIGZ →
                   </Link>
                 </div>
               )

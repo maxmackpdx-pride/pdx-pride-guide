@@ -18,11 +18,11 @@ export function inboxContextBadge(contextType?: string | null): string | null {
 
 export function notifyContextTag(contextType?: string | null): string {
   const ctx = String(contextType || "").toUpperCase();
-  if (ctx === "MISSED_CONNECTION") return "Mizzed Connection";
+  if (ctx === "MISSED_CONNECTION") return "MIZZED CONNECTION";
   if (ctx === "GIG" || ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") {
-    return "Gigz";
+    return "GIGZ";
   }
-  if (ctx === "GIFTING") return "GiftZ";
+  if (ctx === "GIFTING") return "GIFTZ";
   if (
     ctx === "EVENT_HOST"
     || ctx === "HOST_UPDATE"

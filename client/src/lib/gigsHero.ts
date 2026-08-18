@@ -2,7 +2,7 @@ import type { PageHeroProps } from "@/components/PageHero";
 
 export const gigsHeroContent = {
   kicker: "Pride season & beyond",
-  titleLine1: "Gigz",
+  titleLine1: "GIGZ",
   lede: "Two-way board for Pride season and beyond. Post your availability, post a gig, or browse both. Workers and hosts in one place.",
   tagline: "Need work? Need help? Both belong here.",
   taglineAccent: "cyan",

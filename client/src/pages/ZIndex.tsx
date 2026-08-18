@@ -91,8 +91,8 @@ const CARD_PHOTO: Record<string, string> = {
  * the address is real and reserved even where the board is not built.
  */
 const WORDMARK: Record<string, { src: string; alt: string }> = {
-  gifz: { src: "/brand/family/giftz.svg", alt: "GiftZ" },
-  gigz: { src: "/brand/family/gigz.svg", alt: "Gigz" },
+  gifz: { src: "/brand/family/giftz.svg", alt: "GIFTZ" },
+  gigz: { src: "/brand/family/gigz.svg", alt: "GIGZ" },
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAÜZ" },
   spaces: { src: "/brand/family/my-squadz.svg", alt: "MY SQUADZ" },
   out: { src: "/brand/family/outz.svg", alt: "OUTZ" },

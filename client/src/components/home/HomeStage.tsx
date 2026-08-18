@@ -98,10 +98,10 @@ const WORLDS: World[] = [
   {
     key: "gifting",
     number: "05",
-    title: "GiftZ",
+    title: "GIFTZ",
     eyebrow: "Give and ask",
     body: "Useful things move directly between people, without a marketplace.",
-    action: "Open GiftZ",
+    action: "Open GIFTZ",
     href: "/gifting",
     accent: "var(--board-gifting, #ccff00)",
     sampleKey: "gifting",

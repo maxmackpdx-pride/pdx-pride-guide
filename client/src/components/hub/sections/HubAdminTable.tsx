@@ -29,9 +29,9 @@ const TABLE_META: Partial<
     actionLabel: "Open users admin",
   },
   "tbl-werk": {
-    title: "Gigz",
+    title: "GIGZ",
     lede: "The gig board: paid and volunteer work.",
-    actionLabel: "Open Gigz admin",
+    actionLabel: "Open GIGZ admin",
   },
   "tbl-promoters": {
     title: "Promoters",

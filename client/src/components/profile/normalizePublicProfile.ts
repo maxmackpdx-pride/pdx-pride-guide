@@ -82,9 +82,9 @@ function isSpottedBoardPost(p: { board?: string; contentType?: string }): boolea
 
 function publicBoardName(board: string): string {
   const key = board.trim().toLowerCase();
-  if (key === "gigs" || key === "gig board" || key === "gig werk") return "Gigz";
-  if (key === "gifting") return "GiftZ";
-  if (key === "spotted" || key === "missed connections") return "Mizzed Connection";
+  if (key === "gigs" || key === "gig board" || key === "gig werk") return "GIGZ";
+  if (key === "gifting") return "GIFTZ";
+  if (key === "spotted" || key === "missed connections") return "MIZZED CONNECTION";
   return board;
 }
 
@@ -117,7 +117,7 @@ export function boardPostsFromActivity(
   for (const g of activity.gigs ?? []) {
     posts.push({
       id: g.id,
-      board: "Gigz",
+      board: "GIGZ",
       contentType: "GIG",
       color: BOARD_COLORS.Gigs,
       where: g.venueText || "Portland",
@@ -131,7 +131,7 @@ export function boardPostsFromActivity(
   for (const g of activity.gifting ?? []) {
     posts.push({
       id: g.id,
-      board: "GiftZ",
+      board: "GIFTZ",
       contentType: "GIFTING",
       color: BOARD_COLORS.Gifting,
       where: g.neighborhood || "Portland",

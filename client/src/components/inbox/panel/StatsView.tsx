@@ -165,9 +165,9 @@ export default function StatsView() {
     [
       ["Messages", m.messages],
       ["RSVPs", m.attendances],
-      ["Gigz", m.gigPosts],
-      ["GiftZ", m.giftingPosts],
-      ["Mizzed Connection", m.missedConnections],
+      ["GIGZ", m.gigPosts],
+      ["GIFTZ", m.giftingPosts],
+      ["MIZZED CONNECTION", m.missedConnections],
     ],
     C.purple,
   );

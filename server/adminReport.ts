@@ -166,7 +166,7 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
     },
     {
       key: "missed",
-      label: "Mizzed Connection to review",
+      label: "MIZZED CONNECTION to review",
       accent: "#ff1fa0",
       count: missed.length,
       rows: missed.map((m) => ({
@@ -190,11 +190,11 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
     },
     {
       key: "gifting",
-      label: "GiftZ reports",
+      label: "GIFTZ reports",
       accent: "#c9391f",
       count: gifting.length,
       rows: gifting.map((r) => ({
-        head: r.postTitle || `GiftZ report #${r.id}`,
+        head: r.postTitle || `GIFTZ report #${r.id}`,
         meta: `${r.reason || "Flagged post"} · ${fmt(r.createdAt)}`,
         fields: fields(r.postId && ["Post", `#${r.postId}`]),
         note: cut(r.message),
@@ -202,11 +202,11 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
     },
     {
       key: "giftingFlagged",
-      label: "Flagged GiftZ posts",
+      label: "Flagged GIFTZ posts",
       accent: "#8a4dff",
       count: giftingFlagged.length,
       rows: giftingFlagged.map((p) => ({
-        head: p.title || `GiftZ post #${p.id}`,
+        head: p.title || `GIFTZ post #${p.id}`,
         meta: `${p.postType || "POST"} · ${p.reportCount || 0} report(s)`,
         fields: fields(["Status", String(p.status || "-")]),
         note: cut(p.description),

@@ -116,15 +116,15 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
     rows.map((g) => ({
       key: `gig-${g.id}`,
       title: g.title || "Gig post",
-      meta: `Gigz · ${g.replyCount ?? g.replies ?? 0} replies`,
+      meta: `GIGZ · ${g.replyCount ?? g.replies ?? 0} replies`,
       actions: [{ label: "EDIT", href: `/dashboard?view=posts&editGig=${g.id}` }],
     })),
   );
   const gifting = useMine<any>("/api/gifting/mine", (rows) =>
     rows.map((g) => ({
       key: `gifting-${g.id}`,
-      title: g.title || "GiftZ post",
-      meta: `GiftZ · ${g.status || "Live"}`,
+      title: g.title || "GIFTZ post",
+      meta: `GIFTZ · ${g.status || "Live"}`,
       actions: [{ label: "EDIT", href: "/gifting" }],
     })),
   );
@@ -132,7 +132,7 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
     rows.map((s) => ({
       key: `spotted-${s.id}`,
       title: s.title || s.body?.slice(0, 40) || "Missed connection post",
-      meta: s.status === "ACTIVE" ? "Mizzed Connection · Live" : "Mizzed Connection · Pending review",
+      meta: s.status === "ACTIVE" ? "MIZZED CONNECTION · Live" : "MIZZED CONNECTION · Pending review",
       actions: [{ label: "EDIT", href: "/spotted" }],
     })),
   );

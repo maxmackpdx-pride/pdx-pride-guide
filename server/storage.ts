@@ -3514,7 +3514,7 @@ function getDemoUserId(): number | null {
   return _demoUserIdCache;
 }
 
-/** Demo posts for the Gigs, Mizzed Connection, and Gifting boards. Old
+/** Demo posts for the Gigs, MIZZED CONNECTION, and Gifting boards. Old
     created_at so they sit BELOW real user posts in every recency-ordered board. */
 function seedDemoBoardsContent() {
   const now = new Date().toISOString();
@@ -3539,7 +3539,7 @@ function seedDemoBoardsContent() {
     `INSERT INTO missed_connections (user_id, title, body, venue_hint, status, created_at, closes_at)
      VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`,
   );
-  // venue_hint uses real directory brand names so Place modal Mizzed Connection tabs attach.
+  // venue_hint uses real directory brand names so Place modal MIZZED CONNECTION tabs attach.
   mc.run(demoId, "You: reading Judith Butler between sets", "Me: pretending I was only here for the drink special just to keep talking to you. You left with the theory and my whole heart.", "Sanctuary Club", OLD, FUTURE);
   mc.run(demoId, "Cutie who caught my keys on the patio", "You had a mustache, a tote full of kale, and reflexes like a cat. I said thanks. I meant marry me.", "Eagle Portland", OLD, FUTURE);
   mc.run(demoId, "You let my dog say hi outside the bar", "Rufus liked you more than he likes me. Honestly, fair. Drink sometime? He insists on chaperoning.", "CC Slaughters", OLD, FUTURE);
@@ -3741,7 +3741,7 @@ function runBootMigrationsOnce() {
     recordBootMigration("seed_demo_boards_v2");
   }
   // Re-seed demo missed connections onto real directory brands so Place modal
-  // Mizzed Connection tabs attach (v2 used freeform "laundromat / MAX" hints).
+  // MIZZED CONNECTION tabs attach (v2 used freeform "laundromat / MAX" hints).
   if (!hasBootMigration("seed_demo_boards_mc_venues_v1")) {
     try {
       seedDemoBoardsContent();
@@ -8095,7 +8095,7 @@ function buildHubFeedPinnedItems(
         id: `pin-gig-${gig.id}`,
         kind: "gig",
         badge: "Gig",
-        action: "Open on Gigz",
+        action: "Open on GIGZ",
         title: gig.title,
         text: gig.description || null,
         createdAt: anchorTime,
@@ -9894,7 +9894,7 @@ export const storage: IStorage = {
     const boardPosts = [
       ...gigs.map(g => ({
         id: g.id,
-        board: "Gigz",
+        board: "GIGZ",
         contentType: "GIG" as const,
         color: "var(--board-gigs)",
         where: g.venueText || "Portland",
@@ -9906,7 +9906,7 @@ export const storage: IStorage = {
       })),
       ...gifting.map(g => ({
         id: g.id,
-        board: "GiftZ",
+        board: "GIFTZ",
         contentType: "GIFTING" as const,
         color: "var(--board-gifting)",
         where: g.neighborhood || "Portland",
@@ -10501,7 +10501,7 @@ export const storage: IStorage = {
     db.update(giftingPosts).set({ status: "REJECTED", adminNotes } as any).where(eq(giftingPosts.id, id)).run();
     const userId = Number(post.user_id ?? post.userId);
     if (userId) {
-      notifyBoardReject(userId, "GiftZ", post.title, reasonCode, note, {
+      notifyBoardReject(userId, "GIFTZ", post.title, reasonCode, note, {
         contextType: "GIFTING",
         contextId: id,
         contextLabel: post.title,
@@ -10515,7 +10515,7 @@ export const storage: IStorage = {
     if (row.status === "REJECTED") return { error: "Already rejected" };
     const adminNotes = formatBoardRejectMessage(reasonCode, note);
     db.update(missedConnections).set({ status: "REJECTED", adminNotes } as any).where(eq(missedConnections.id, id)).run();
-    notifyBoardReject(row.userId, "Mizzed Connection", row.title, reasonCode, note, {
+    notifyBoardReject(row.userId, "MIZZED CONNECTION", row.title, reasonCode, note, {
       contextType: "MISSED_CONNECTION",
       contextId: id,
       contextLabel: row.title,
@@ -11170,8 +11170,8 @@ export const storage: IStorage = {
         guide_reply: "Replied as guide",
         admin_message: "Sent a guide message",
         resolve_moderation: "Resolved moderation",
-        reject_gifting: "Rejected GiftZ post",
-        resolve_gifting_report: "Resolved GiftZ report",
+        reject_gifting: "Rejected GIFTZ post",
+        resolve_gifting_report: "Resolved GIFTZ report",
         gig_status: "Updated a gig",
         reject_gig: "Rejected a gig",
       };
@@ -13482,9 +13482,9 @@ export const storage: IStorage = {
     const contentBreakdown = [
       { label: "Events", count: liveEvents.length },
       { label: "Directory", count: directoryPlaces },
-      { label: "GiftZ", count: giftingPosts },
-      { label: "Gigz", count: gigPosts },
-      { label: "Mizzed Connection", count: missedConnections },
+      { label: "GIFTZ", count: giftingPosts },
+      { label: "GIGZ", count: gigPosts },
+      { label: "MIZZED CONNECTION", count: missedConnections },
     ].sort((a, b) => b.count - a.count);
 
     const approvedPromoters = (sqlite.prepare(
@@ -14744,7 +14744,7 @@ export const storage: IStorage = {
       items.push({
         id: `gifting-${post.id}`,
         kind: "gifting",
-        badge: post.postType === "ISO" ? "ISO" : "GiftZ",
+        badge: post.postType === "ISO" ? "ISO" : "GIFTZ",
         action: post.postType === "ISO" ? "Posted an ISO on the free board" : "New gift on the free board",
         title: post.title,
         text: post.description || null,
@@ -14796,7 +14796,7 @@ export const storage: IStorage = {
         id: `gig-${gig.id}`,
         kind: "gig",
         badge: gig.postType === "LOOKING_FOR_WORK" ? "Looking" : "Gig",
-        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on Gigz" : "Posted a gig on Gigz",
+        action: gig.postType === "LOOKING_FOR_WORK" ? "Posted on GIGZ" : "Posted a gig on GIGZ",
         title: gig.title,
         text: gig.description || null,
         createdAt: gig.createdAt,
@@ -14807,7 +14807,7 @@ export const storage: IStorage = {
           avatarChoice: gig.avatarChoice,
           avatarRing: gig.posterAvatarRing,
         }),
-        // Deep-link opens Gigz with this exact post expanded.
+        // Deep-link opens GIGZ with this exact post expanded.
         link: `/pride-work?post=${gig.id}`,
         boardPostId: gig.id,
       });
@@ -14836,15 +14836,15 @@ export const storage: IStorage = {
       items.push({
         id: `spotted-${row.id}`,
         kind: "spotted",
-        badge: "Mizzed Connection",
+        badge: "MIZZED CONNECTION",
         action: "New missed connection",
         title: subject,
         text: row.body || "",
         place,
         createdAt: row.createdAt,
         // Missed connections are anonymous - the card renders without a person.
-        author: { displayName: "Mizzed Connection", anonymous: true },
-        // No event embed: tapping opens the Mizzed Connection detail card
+        author: { displayName: "MIZZED CONNECTION", anonymous: true },
+        // No event embed: tapping opens the MIZZED CONNECTION detail card
         // (see `spotted`), it does not deep-link to an event.
         event: null,
         link: "/spotted",

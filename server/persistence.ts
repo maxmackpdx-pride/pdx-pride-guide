@@ -88,7 +88,7 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
   },
   {
     id: "gig_board",
-    label: "Gigz gig board",
+    label: "GIGZ gig board",
     tables: ["gig_posts"],
     apiRoutes: [
       "POST /api/gigs",
@@ -110,7 +110,7 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
   },
   {
     id: "gifting",
-    label: "GiftZ board & interests",
+    label: "GIFTZ board & interests",
     tables: ["gifting_posts", "gifting_interests", "gifting_reports"],
     uploadRoutes: ["/api/upload/gifting"],
     apiRoutes: [

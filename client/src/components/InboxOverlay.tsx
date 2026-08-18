@@ -43,9 +43,9 @@ const ACCOUNTS: Array<[Account, string, string]> = [
 
 const FILTERS: Array<[string, string, string]> = [
   ["all", "All", C.lime],
-  ["spotted", "Mizzed Connection", C.magenta],
-  ["gigs", "Gigz", C.purple],
-  ["gifting", "GiftZ", C.lime],
+  ["spotted", "MIZZED CONNECTION", C.magenta],
+  ["gigs", "GIGZ", C.purple],
+  ["gifting", "GIFTZ", C.lime],
   ["hosts", "Hosts", C.cyan],
   ["checkins", "Check-ins", C.green],
 ];

@@ -15,9 +15,9 @@ const Z_NAV: NavLinkItem[] = [
   { href: "/z/happening", label: "z/happening · EVENTZ" },
   { href: "/z/hauz", label: "z/hauz · THE HAÜZ" },
   { href: "/z/market", label: "z/market · SELLZ" },
-  { href: "/z/gifz", label: "z/gifz · GiftZ" },
-  { href: "/z/gigz", label: "z/gigz · Gigz" },
-  { href: "/z/mizzed", label: "z/mizzed · Mizzed Connection" },
+  { href: "/z/gifz", label: "z/gifz · GIFTZ" },
+  { href: "/z/gigz", label: "z/gigz · GIGZ" },
+  { href: "/z/mizzed", label: "z/mizzed · MIZZED CONNECTION" },
   { href: "/z/directory", label: "z/directory · OUR PLACEZ" },
   { href: "/z/out", label: "z/out · OUTZ" },
   { href: "/z/spaces", label: "z/spaces · MY SQUADZ" },
@@ -62,10 +62,10 @@ export type PageHeaderMeta = {
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/events": { section: "Events", title: "EVENTZ" },
   "/schedule": { section: "Events", title: "My Schedule" },
-  "/pride-work": { section: "Boards", title: "Gigz" },
-  "/gifting": { section: "Boards", title: "GiftZ" },
+  "/pride-work": { section: "Boards", title: "GIGZ" },
+  "/gifting": { section: "Boards", title: "GIFTZ" },
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
-  "/spotted": { section: "Boards", title: "Mizzed Connection" },
+  "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "Places", title: "OUR PLACEZ" },
   "/z/out/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
   "/z/out/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
@@ -93,10 +93,10 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
  */
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/z", label: "z/ all boards" },
-  { href: "/pride-work", label: "Gigz" },
-  { href: "/gifting", label: "GiftZ" },
+  { href: "/pride-work", label: "GIGZ" },
+  { href: "/gifting", label: "GIFTZ" },
   { href: "/the-hauz", label: "THE HAÜZ" },
-  { href: "/spotted", label: "Mizzed Connection" },
+  { href: "/spotted", label: "MIZZED CONNECTION" },
 ];
 
 /** Destinations behind the mobile footer "Events" tab sheet. */

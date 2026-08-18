@@ -3,9 +3,9 @@ import { Link } from "wouter";
 export type BoardKey = "spotted" | "gifting" | "gigs";
 
 const LINKS: Array<{ key: BoardKey; href: string; label: string }> = [
-  { key: "spotted", href: "/spotted", label: "Mizzed Connection" },
-  { key: "gifting", href: "/gifting", label: "GiftZ" },
-  { key: "gigs", href: "/pride-work", label: "Gigz" },
+  { key: "spotted", href: "/spotted", label: "MIZZED CONNECTION" },
+  { key: "gifting", href: "/gifting", label: "GIFTZ" },
+  { key: "gigs", href: "/pride-work", label: "GIGZ" },
 ];
 
 const ACCENT: Record<BoardKey, string> = {

@@ -87,7 +87,7 @@ export const insertSubmissionSchema = createInsertSchema(submissions).omit({ id:
 export type InsertSubmission = z.infer<typeof insertSubmissionSchema>;
 export type Submission = typeof submissions.$inferSelect;
 
-// Gig posts (Gigz)
+// Gig posts (GIGZ)
 export const gigPosts = sqliteTable("gig_posts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   postType: text("post_type").notNull().default("POSTING_GIG"), // LOOKING_FOR_WORK | POSTING_GIG
@@ -411,7 +411,7 @@ export const messages = sqliteTable("messages", {
 });
 export type Message = typeof messages.$inferSelect;
 
-// Mizzed Connection
+// MIZZED CONNECTION
 export const missedConnections = sqliteTable("missed_connections", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),

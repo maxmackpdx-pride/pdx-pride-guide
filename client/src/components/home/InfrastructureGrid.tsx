@@ -24,23 +24,23 @@ export type InfraCard = {
 export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
   {
     href: "/pride-work",
-    title: "Gigz",
+    title: "GIGZ",
     description:
       "Do you offer a trade, need work, or want to put your talents out there? Check gigs.",
     accent: "var(--board-gigs)",
   },
   {
     href: "/gifting",
-    title: "GiftZ",
+    title: "GIFTZ",
     description:
-      "Need something for Pride week or have old Pride gear collecting dust? Hit GiftZ.",
+      "Need something for Pride week or have old Pride gear collecting dust? Hit GIFTZ.",
     accent: "#CCFF00",
   },
   {
     href: "/spotted",
     title: "Missed connections",
     description:
-      "Trying to find someone after a Pride event? That's why Mizzed Connection posts exists.",
+      "Trying to find someone after a Pride event? That's why MIZZED CONNECTION posts exists.",
     accent: "#FF00CC",
   },
   {

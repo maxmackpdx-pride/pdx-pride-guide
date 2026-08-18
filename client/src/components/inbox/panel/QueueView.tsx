@@ -45,7 +45,7 @@ type QueueRow = {
 /**
  * Shared Admin · Queue buckets only.
  * Logos are Owner desk only (not shared keyholder queue).
- * Missed conn / River Brats / Gigz = reports & flags → resolve or reject-with-reason.
+ * Missed conn / River Brats / GIGZ = reports & flags → resolve or reject-with-reason.
  */
 const ADMIN_QUEUE_BUCKETS: Array<{
   id: string;
@@ -59,9 +59,9 @@ const ADMIN_QUEUE_BUCKETS: Array<{
   { id: "new_venues", label: "New venues", kinds: ["business_submission"], color: C.orange },
   { id: "moderation", label: "Moderation", kinds: ["moderation"], color: C.magenta },
   { id: "spotted", label: "Missed conn", kinds: ["spotted"], color: C.magenta },
-  { id: "gifting", label: "GiftZ", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
+  { id: "gifting", label: "GIFTZ", kinds: ["gifting_report", "gifting_flagged"], color: C.lime },
   { id: "river_brats", label: "River Brats", kinds: ["river_brats"], color: C.orange },
-  { id: "gigs", label: "Gigz", kinds: ["gig_pending"], color: C.purple },
+  { id: "gigs", label: "GIGZ", kinds: ["gig_pending"], color: C.purple },
 ];
 
 const TYPE_TAG: Record<string, { label: string; color: string }> = {
@@ -172,7 +172,7 @@ function mapGiftingReport(r: any, completed = false): QueueRow | null {
     tag: "GIFT REPORT",
     tagColor: C.red,
     title: r.postTitle || `Report #${r.id}`,
-    meta: String(r.reason || "Flagged GiftZ post"),
+    meta: String(r.reason || "Flagged GIFTZ post"),
     fields: [["Post", String(r.postTitle || r.postId || "-")]],
     note: r.message || "",
     outcome: completed ? status : undefined,
@@ -195,7 +195,7 @@ function mapGiftingFlagged(p: any, completed = false): QueueRow | null {
     entityId: p.id,
     tag: "FLAGGED GIFT",
     tagColor: C.purple,
-    title: p.title || `GiftZ post #${p.id}`,
+    title: p.title || `GIFTZ post #${p.id}`,
     meta: `${p.postType || "POST"} · ${p.reportCount} report(s)`,
     fields: [["Status", String(p.status || "-")]],
     note: p.description || "",
@@ -592,9 +592,9 @@ export default function QueueView({
       ? ([aggregateQuery.isError && "admin queue"].filter(Boolean) as string[])
       : ([
           subsQuery.isError && "submissions",
-          giftingQuery.isError && "GiftZ",
+          giftingQuery.isError && "GIFTZ",
           gigsQuery.isError && "gig work",
-          spottedQuery.isError && "Mizzed Connection posts",
+          spottedQuery.isError && "MIZZED CONNECTION posts",
           riverBratsQuery.isError && "river brats",
           moderationQuery.isError && "moderation",
           claimsQuery.isError && "venue claims",

@@ -203,7 +203,7 @@ export default function HubFeedCard({ item }: Props) {
           <div className="hub-feed-mc__head">
             <span className="hub-feed-mc__dot" />
             <span className="kick hub-feed-mc__kick">
-              Mizzed Connection{when ? ` · ${when}` : ""}
+              MIZZED CONNECTION{when ? ` · ${when}` : ""}
             </span>
           </div>
           {(item.title || item.text) && (

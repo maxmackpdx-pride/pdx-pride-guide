@@ -906,7 +906,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
       setEditingGigId(null);
       setGigEditForm({});
-      toast({ title: "Gig post updated", description: "Changes are live on Gigz." });
+      toast({ title: "Gig post updated", description: "Changes are live on GIGZ." });
     },
     onError: () => {
       toast({ title: "Error", description: "Could not save gig post.", variant: "destructive" });
@@ -919,7 +919,7 @@ export default function Admin() {
     onSuccess: () => {
       invalidateInboxQueries();
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      toast({ title: "GiftZ post updated" });
+      toast({ title: "GIFTZ post updated" });
     },
   });
 
@@ -1303,9 +1303,9 @@ export default function Admin() {
     for (const g of pendingGiftingFlagged.slice(0, 3)) {
       items.push({
         key: `gifting_post-${g.id}`,
-        title: g.title || "GiftZ post",
+        title: g.title || "GIFTZ post",
         subtitle: `${g.reportCount || 0} report(s)`,
-        kindLabel: "GiftZ report",
+        kindLabel: "GIFTZ report",
         color: "#AA66FF",
       });
     }
@@ -2495,11 +2495,11 @@ export default function Admin() {
               Edit gig board posts, including your site admin volunteer listing. Changes go live immediately and are not overwritten on server restart.
             </p>
             {gigsError ? (
-              <AdminLoadError label="Gigz posts" onRetry={() => refetchGigs()} />
+              <AdminLoadError label="GIGZ posts" onRetry={() => refetchGigs()} />
             ) : gigsLoading ? (
               <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-white/5 animate-pulse border border-white/10" />)}</div>
             ) : gigs.length === 0 ? (
-              <p className="text-white/30 text-center py-12">No Gigz posts yet.</p>
+              <p className="text-white/30 text-center py-12">No GIGZ posts yet.</p>
             ) : (
               <div className="space-y-2">
                 {gigs.map(gig => (

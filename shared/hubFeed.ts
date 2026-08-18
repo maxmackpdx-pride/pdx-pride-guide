@@ -62,7 +62,7 @@ export type HubFeedItem = {
   title?: string | null;
   /** Place hint for missed-connection cards (venue or "around town"). */
   place?: string | null;
-  /** Payload for opening the Mizzed Connection detail card from the feed. */
+  /** Payload for opening the MIZZED CONNECTION detail card from the feed. */
   spotted?: {
     id: number;
     kindLabel: string;

@@ -13,9 +13,9 @@ export function buildPushPayloadForMessage(message: Message, unreadCount: number
   } else if (ctx === "MISSED_CONNECTION") {
     title = "Missed connection reply";
   } else if (ctx === "GIG") {
-    title = "Gigz message";
+    title = "GIGZ message";
   } else if (ctx === "GIFTING") {
-    title = "GiftZ update";
+    title = "GIFTZ update";
   } else if (ctx === "CHECK_IN") {
     title = "Check-in message";
   } else if (ctx === "EVENT_HOST") {

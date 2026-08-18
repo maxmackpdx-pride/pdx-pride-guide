@@ -41,18 +41,18 @@ const CATC: Record<Category, string> = {
   checkins: "var(--green)",
 };
 const BADGE: Record<Category, string> = {
-  spotted: "Mizzed Connection",
+  spotted: "MIZZED CONNECTION",
   gigs: "Gig",
-  gifting: "GiftZ",
+  gifting: "GIFTZ",
   housing: "THE HAÜZ",
   hosts: "Host",
   checkins: "Check-in",
 };
 const CATS: Array<[string, string]> = [
   ["all", "All"],
-  ["spotted", "Mizzed Connection"],
-  ["gigs", "Gigz"],
-  ["gifting", "GiftZ"],
+  ["spotted", "MIZZED CONNECTION"],
+  ["gigs", "GIGZ"],
+  ["gifting", "GIFTZ"],
   ["hosts", "Hosts"],
   ["checkins", "Check-ins"],
 ];
@@ -1230,7 +1230,7 @@ export function InboxShell({
                 Pick a thread
               </div>
               <div style={{ maxWidth: "38ch", color: "var(--text-lo)", fontSize: "0.9rem", lineHeight: 1.55 }}>
-                Private threads from Mizzed Connection, Gigz, event hosts, and check-ins land here. Choose one on the left to read and
+                Private threads from MIZZED CONNECTION, GIGZ, event hosts, and check-ins land here. Choose one on the left to read and
                 reply.
               </div>
               <hr className="pdx-rainbow-rule" style={{ width: "120px", margin: "6px 0 0" }} />

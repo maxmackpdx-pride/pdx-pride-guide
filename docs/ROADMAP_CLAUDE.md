@@ -49,7 +49,7 @@ nightlife, casual gathering, travel, and finally community authorship.
 | 03 - ZAYDARK | Support private, consent-led adult self-expression and discovery with progressive disclosure. | Just coming | Put the most trust-sensitive concept early enough to be explicit: privacy is product behavior, not a disclaimer. |
 | 04 - AFTERZ | Share a short-lived next stop when the night moves. | Planned | Extend the live-event moment through a small, expiring signal rather than a permanent feed. |
 | 05 - ZENEGADES | Make a lightweight gathering with time, capacity, and a location that may stay private. | Planned | Turn community intent into a casual plan without forcing a full event listing. |
-| 06 - Z/OUT | Find companions for trails, campgrounds, road trips, and weekends through practical compatibility. | Planned | Carry the people-first matching model outside nightlife and outside Portland. |
+| 06 - OUTZ | Find companions for trails, campgrounds, road trips, and weekends through practical compatibility. | Planned | Carry the people-first matching model outside nightlife and outside Portland. |
 | 07 - Your idea | Submit what Zaylist should build next. | Your turn | End with participation: the roadmap is directional, not closed. |
 
 These cards explain product directions, not delivery commitments. Status copy
@@ -78,7 +78,7 @@ Required boundaries:
 
 ### Product logo family
 
-ZAYHAUS, Z/SPACE, ZAYDARK, AFTERZ, ZENEGADES, and Z/OUT are a related logo
+ZAYHAUS, Z/SPACE, ZAYDARK, AFTERZ, ZENEGADES, and OUTZ are a related logo
 family under Zaylist, not independent brands. Their supplied lockups may give
 each concept a distinct voice, but PRIME ZAY and the approved ZAYLIST master do
 not drift. Secondary wording may vary only inside the identity rules and

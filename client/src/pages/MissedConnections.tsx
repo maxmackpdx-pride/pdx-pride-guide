@@ -27,9 +27,9 @@ const HOW_IT_WORKS = [
 export default function MissedConnections() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "Mizzed Connection | Zaylist",
-    "Post an anonymous Mizzed Connection from Portland Pride events. See someone? Say hi privately.",
-    { image: shareCardUrl("spotted"), imageAlt: "Mizzed Connection on Zaylist" },
+    "MIZZED CONNECTION | Zaylist",
+    "Post an anonymous MIZZED CONNECTION from Portland Pride events. See someone? Say hi privately.",
+    { image: shareCardUrl("spotted"), imageAlt: "MIZZED CONNECTION on Zaylist" },
   );
   const { user } = useAuth();
   const { toast } = useToast();
@@ -117,7 +117,7 @@ export default function MissedConnections() {
 
   return (
     <div className="zine-page missed-page board-page board-page--makeover min-h-screen">
-      <ZBoardAddressStrip path="mizzed" board="Mizzed Connection" />
+      <ZBoardAddressStrip path="mizzed" board="MIZZED CONNECTION" />
       <MissedConnectionsHero onPost={openPost} />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
@@ -128,7 +128,7 @@ export default function MissedConnections() {
           className="missed-how"
           kickerTone="cyan"
           title={<>Private by <span style={{ color: "#ff1fa0" }}>default</span></>}
-          lede="Mizzed Connection is our anonymous board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
+          lede="MIZZED CONNECTION is our anonymous board. Post who you saw, tied to an event or around town. Replies never show on the board. They open a private inbox thread, and you only reveal your profile when you are both ready."
           steps={HOW_IT_WORKS}
           footerLine="Stay kind · stay anonymous · reveal when ready"
         />
@@ -138,7 +138,7 @@ export default function MissedConnections() {
         <div className="board-active-feed" style={{ paddingTop: 0, paddingBottom: 0, background: "transparent" }}>
           <div className="board-active-feed__inner" style={{ textAlign: "center", padding: "0 24px 8px" }}>
             <p className="board-copy-sm" style={{ marginInline: "auto" }}>
-              Browse Mizzed Connection posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
+              Browse MIZZED CONNECTION posts without an account. Log in to post or reply. Threads stay anonymous until you both reveal in inbox.
             </p>
             <Button variant="solid" accent="magenta" style={{ marginTop: 16 }} onClick={() => setShowAuth(true)}>
               Log in / Join

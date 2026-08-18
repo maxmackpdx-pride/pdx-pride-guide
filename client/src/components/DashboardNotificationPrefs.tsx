@@ -14,7 +14,7 @@ import type { NotificationPrefs } from "@shared/pushCategories";
 const LABELS: Record<keyof NotificationPrefs, { title: string; body: string }> = {
   messages: {
     title: "Direct messages",
-    body: "Mizzed Connection, GiftZ, Gigz, check-ins, and event messages.",
+    body: "MIZZED CONNECTION, GIFTZ, GIGZ, check-ins, and event messages.",
   },
   my_events: {
     title: "My events",

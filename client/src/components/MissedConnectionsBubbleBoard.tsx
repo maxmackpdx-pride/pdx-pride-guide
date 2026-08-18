@@ -299,7 +299,7 @@ export default function MissedConnectionsBubbleBoard({
           aria-expanded={composeOpen}
         >
           <span className="mc-compose__badge">Saw someone?</span>
-          <span className="mc-compose__toggle-title">Post a Mizzed Connection</span>
+          <span className="mc-compose__toggle-title">Post a MIZZED CONNECTION</span>
           <span className="mc-compose__toggle-meta">Anonymous · no photo · no name</span>
         </button>
 
@@ -434,7 +434,7 @@ export default function MissedConnectionsBubbleBoard({
       )}
 
       {isLoading ? (
-        <BoardLoadingState label="Loading Mizzed Connection posts" />
+        <BoardLoadingState label="Loading MIZZED CONNECTION posts" />
       ) : isError ? (
         <div className="board-empty board-empty--prototype">
           <p className="display section-heading">Could not load</p>

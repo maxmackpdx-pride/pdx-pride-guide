@@ -19,7 +19,7 @@ export default function MissedConnectionsHero({ onPost }: Props) {
           else document.getElementById("spotted-compose")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }}
       >
-        Post a Mizzed Connection
+        Post a MIZZED CONNECTION
       </Button>
       <Button variant="neon" accent="cyan" size="lg" as="a" href="#feed">
         Browse the board
@@ -39,7 +39,7 @@ export default function MissedConnectionsHero({ onPost }: Props) {
             alt="MIZZED CONNECTION"
           />
         }
-        lede="Mizzed Connection posts from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
+        lede="MIZZED CONNECTION posts from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
       />
     </CommunityBoardHeroRow>
   );

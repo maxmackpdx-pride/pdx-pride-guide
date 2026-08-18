@@ -37,21 +37,21 @@ export default function DashboardHubSummary({
     },
     {
       key: "gigs",
-      label: "Gigz",
+      label: "GIGZ",
       count: counts.gigCount,
       section: "gigs",
       color: "var(--dash-orange)",
     },
     {
       key: "gifting",
-      label: "GiftZ",
+      label: "GIFTZ",
       count: counts.giftingCount,
       section: "gifting",
       color: "var(--dash-lime)",
     },
     {
       key: "spotted",
-      label: "Mizzed Connection",
+      label: "MIZZED CONNECTION",
       count: counts.spottedCount,
       section: "spotted",
       color: "var(--dash-magenta)",
@@ -85,7 +85,7 @@ export default function DashboardHubSummary({
     <section className="dash-hub-summary" aria-label="Hub summary">
       {total === 0 && (
         <p className="dash-hub-summary__lede">
-          Nothing on your boards yet. Submit an event, post on Gigz, or reply on Mizzed Connection to get started.
+          Nothing on your boards yet. Submit an event, post on GIGZ, or reply on MIZZED CONNECTION to get started.
         </p>
       )}
       <div className="dash-hub-summary__chips">

@@ -155,16 +155,16 @@ export function formatCustomSpottedVenue(eventLabel: string, location?: string):
 export const MISSED_CONNECTION_ANON_LABEL = "Anonymous";
 
 /**
- * Standard: some directory categories never surface Mizzed Connection. A
+ * Standard: some directory categories never surface MIZZED CONNECTION. A
  * healthcare provider (clinic, therapist, PrEP, etc.) is not a venue where a
  * "spotted you here" post belongs. This Set is the single source of truth -
- * add a category here to hide the Mizzed Connection tab on every surface.
+ * add a category here to hide the MIZZED CONNECTION tab on every surface.
  */
 export const MISSED_CONNECTIONS_HIDDEN_CATEGORIES: ReadonlySet<string> = new Set([
   "healthcare",
 ]);
 
-/** True when any of the given category/type values should hide Mizzed Connection. */
+/** True when any of the given category/type values should hide MIZZED CONNECTION. */
 export function categoryHidesMissedConnections(
   ...categories: Array<string | null | undefined>
 ): boolean {

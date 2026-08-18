@@ -37,7 +37,7 @@ const VALUES = [
 const WHY_ROWS = [
   {
     old: "Missed connections",
-    now: "Mizzed Connection",
+    now: "MIZZED CONNECTION",
     href: "/spotted",
     text: "Same idea, minus the anonymous stranger. You ask, they accept, then you talk. Nobody gets cold-DMed.",
   },
@@ -49,13 +49,13 @@ const WHY_ROWS = [
   },
   {
     old: "Gigs",
-    now: "Gigz",
+    now: "GIGZ",
     href: "/pride-work",
     text: "Work posted by people in the scene, with a name and a face on it.",
   },
   {
     old: "Free stuff",
-    now: "GiftZ",
+    now: "GIFTZ",
     href: "/gifting",
     text: "Give it to someone who needs it instead of leaving it on the curb.",
   },
@@ -205,8 +205,8 @@ export default function About() {
             <div className="about-v2-manifesto__copy">
               <p>
                 Pride starts now, it ends never, and this thing is already loaded: parties,
-                community events, weird little gems, places to eat, spots to shop, Gigz,
-                GiftZ, Mizzed Connection, and all the real homosexual infrastructure that
+                community events, weird little gems, places to eat, spots to shop, GIGZ,
+                GIFTZ, MIZZED CONNECTION, and all the real homosexual infrastructure that
                 keeps the scene alive.
               </p>
               <p>
