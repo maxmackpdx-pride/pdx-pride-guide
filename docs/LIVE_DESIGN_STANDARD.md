@@ -115,7 +115,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Board totals and the top address rail count top-level boards only. Nested address labels show only their terminal segment while links retain the full canonical route.
 - `z/spaces` must preserve Directory listing identity end to end: real group records, existing detail pages, and the same persistent follow relationship used elsewhere in Places.
 - User-facing address slugs are lowercase ASCII. When normalization repairs a shipped malformed slug, keep the old path as a compatibility alias rather than breaking saved links.
-- Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and not-built are distinct states.
+- Never fabricate listings, member totals, marketplace stock, or counts for pending Z/ boards. Loading, failure, unknown, empty, and queued are distinct states. Visitor-facing queued-board language is **coming next**; never use the retired negative build-status label on a Z/ page or card.
 
 - The homepage uses one full-bleed Welcome scene followed by a single horizontal, no-wrap rail of seven destination cards. It is not a wrapping grid, multi-row gallery, or full-page carousel.
 - The counter strip occupies the seam immediately after the main Zaylist hero and before the destination rail. Its bottom edge aligns exactly with the hero end; do not float it deeper into the hero or leave a separate spacer before the rail.

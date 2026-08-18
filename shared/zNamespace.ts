@@ -45,7 +45,7 @@ export type ZAddress = {
  * Do not add an address for a product that has not been approved, and never
  * write copy suggesting an address is reserved, held, or available to acquire.
  * Zaylist does not sell `z/` addresses and has approved no model in which it
- * ever would. An unbuilt address says the board is not built. Nothing more.
+ * ever would. A queued address says the board is coming next. Nothing more.
  */
 export const Z_ADDRESSES: ZAddress[] = [
   { path: "happening", display: "z/happening", board: "EVENTZ", route: "/events" },

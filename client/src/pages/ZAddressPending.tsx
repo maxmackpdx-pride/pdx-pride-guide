@@ -5,7 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { findZAddress } from "@shared/zNamespace";
 
 /**
- * A `z/` address that is spoken for but has no board behind it yet.
+ * A `z/` address for a board that is coming next.
  *
  * These are reserved, not wrong, so sending a person to the 404 page would be a
  * lie: the address is real and the board is coming. Same shell as not-found so
@@ -20,23 +20,22 @@ export default function ZAddressPending() {
 
   usePageSeo(
     `${display} | Zaylist`,
-    `${display} is a Zaylist address. The board behind it is not built yet.`,
+    `${display} is a Zaylist address for a board coming next.`,
   );
 
   /*
-   * Say one thing: the board is not built. Nothing about the address being
-   * reserved, held, claimed, or available. Zaylist does not sell z/ addresses
-   * and has approved no model in which it would, so this copy must never imply
-   * otherwise.
+   * Say one thing: the board is coming next. Nothing about the address being
+   * reserved, held, claimed, or available. Zaylist does not sell z/ addresses,
+   * so this copy must never imply otherwise or promise a launch date.
    */
-  const lede = `${address?.board ? `${address.board} is not built yet` : "This board is not built yet"}, so there is nothing here to show you. ${display} will be its address when it is.`;
+  const lede = `${address?.board ?? "This board"} is coming next. ${display} is where you will find it on Zaylist.`;
   const clubsLiveInDirectory = address?.path === "spaces";
 
   return (
     <div className="zine-page board-page min-h-screen">
       <PageHero
         flipLightLeaks
-        titleLine1="NOT BUILT YET"
+        titleLine1="COMING NEXT"
         accent="magenta"
         lede={lede}
         bgImage="/motifs/portland-sign.jpg"

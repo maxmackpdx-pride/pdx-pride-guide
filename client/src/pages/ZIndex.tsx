@@ -88,7 +88,7 @@ const CARD_PHOTO: Record<string, string> = {
  * either way, so the row reads the same whether or not a mark exists.
  *
  * Marked `next` in the manifest (Z/SPACE, OUTZ) still get their wordmark here:
- * the address is real and reserved even where the board is not built.
+ * the address is real and part of the product family even where the board is coming next.
  */
 const WORDMARK: Record<string, { src: string; alt: string }> = {
   gifz: { src: "/brand/family/giftz.svg", alt: "GIFTZ" },
@@ -455,7 +455,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
         </span>
         <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
           {!hasBoard
-            ? "not built yet"
+            ? "coming next"
             : !countable
               ? null
               : countState === "loading"
@@ -498,13 +498,13 @@ export default function ZIndex() {
   const [, setLocation] = useLocation();
   const [addressQuery, setAddressQuery] = useState("");
   const liveCount = TOP_LEVEL_Z_ADDRESSES.filter(address => address.route !== null).length;
-  const heldCount = TOP_LEVEL_Z_ADDRESSES.length - liveCount;
+  const comingCount = TOP_LEVEL_Z_ADDRESSES.length - liveCount;
 
   const searchEntries = useMemo(() => [
     ...Z_ADDRESSES.map(address => ({
       path: address.path,
       label: address.board,
-      detail: address.route ? "Board" : "Not built yet",
+      detail: address.route ? "Board" : "Coming next",
     })),
     ...Z_CATEGORY_ADDRESSES.map(categoryAddress => ({
       path: categoryAddress.path,
@@ -599,7 +599,7 @@ export default function ZIndex() {
             </p>
             <p className="z-hero__live">
               <span className="z-hero__dot" aria-hidden="true" />
-              <span>{liveCount} boards live &middot; {heldCount} not built yet</span>
+              <span>{liveCount} boards live &middot; {comingCount} coming next</span>
             </p>
           </div>
 
@@ -638,7 +638,7 @@ export default function ZIndex() {
         {TOP_LEVEL_Z_ADDRESSES.map(address => (
           <Link key={address.path} href={zUrl(address.path)}>
             {address.display}
-            {!address.route ? <small>not built</small> : null}
+            {!address.route ? <small>coming next</small> : null}
           </Link>
         ))}
       </nav>
