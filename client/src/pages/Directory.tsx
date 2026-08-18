@@ -14,7 +14,7 @@ import BoardLoadingState from "@/components/BoardLoadingState";
 import CountUpValue from "@/components/CountUpValue";
 import { Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
-import { placePath, placeUrl } from "@shared/placeSlug";
+import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
 import { Button, FilterChip, PlaceCard, SearchInput } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { isGrandOpeningActive } from "@shared/grandOpening";
@@ -152,9 +152,9 @@ function consumeDirectoryScroll(): number | null {
   }
 }
 
-const blankDirectoryForm = () => ({
+const blankDirectoryForm = (type = "bar") => ({
   name: "",
-  type: "bar",
+  type,
   description: "",
   address: "",
   neighborhood: "SE",
@@ -198,19 +198,37 @@ function directoryMergePayload(form: DirectoryFormState) {
   };
 }
 
-export default function Directory() {
-  const [routeMatch, routeParams] = useRoute("/directory/:id/:slug?");
+type DirectoryProps = {
+  surface?: "directory" | "spaces";
+  /** Wouter supplies params when Directory is mounted through component=. */
+  params?: Record<string, string | undefined>;
+};
+
+export default function Directory({ surface = "directory" }: DirectoryProps) {
+  const isSpaces = surface === "spaces";
+  const [directoryRouteMatch, directoryRouteParams] = useRoute("/directory/:id/:slug?");
+  const [spacesRouteMatch, spacesRouteParams] = useRoute("/z/spaces/:id/:slug?");
   const [, setLocation] = useLocation();
+  const routeMatch = isSpaces ? spacesRouteMatch : directoryRouteMatch;
+  const routeParams = isSpaces ? spacesRouteParams : directoryRouteParams;
   const routePlaceId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
+  const boardPath = isSpaces ? "/z/spaces" : "/directory";
+  const listingPath = useCallback(
+    (biz: Pick<Business, "id" | "name">) => isSpaces
+      ? `${boardPath}/${biz.id}/${slugifyPlaceName(biz.name)}`
+      : placePath(biz.id, biz.name),
+    [boardPath, isSpaces],
+  );
 
   const { user } = useAuth();
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(() => new URLSearchParams(window.location.search).get("add") === "1");
-  const [form, setForm] = useState(blankDirectoryForm);
+  const [form, setForm] = useState(() => blankDirectoryForm(isSpaces ? "group" : "bar"));
   const [submitResult, setSubmitResult] = useState<DirectorySubmitResult | null>(null);
   const [claimingBusinessId, setClaimingBusinessId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState(() => {
+    if (isSpaces) return "group";
     const t = new URLSearchParams(window.location.search).get("type");
     return t && t in TYPE_LABELS ? t : "ALL";
   });
@@ -247,11 +265,11 @@ export default function Directory() {
   /** Keep type/q on the place URL so remount from /directory → /directory/:id doesn't wipe filters. */
   const directoryQuerySuffix = useCallback(() => {
     const params = new URLSearchParams();
-    if (activeType !== "ALL") params.set("type", activeType);
+    if (!isSpaces && activeType !== "ALL") params.set("type", activeType);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     const next = params.toString();
     return next ? `?${next}` : "";
-  }, [activeType, searchQuery]);
+  }, [activeType, isSpaces, searchQuery]);
 
   const openPlace = useCallback(
     (biz: Business, originEl?: HTMLElement | null) => {
@@ -269,16 +287,16 @@ export default function Directory() {
       recordRecentView(biz);
       setSelectedPlace(biz);
       rememberDirectoryScroll();
-      setLocation(`${placePath(biz.id, biz.name)}${directoryQuerySuffix()}`);
+      setLocation(`${listingPath(biz)}${directoryQuerySuffix()}`);
     },
-    [setLocation, directoryQuerySuffix, recordRecentView],
+    [setLocation, directoryQuerySuffix, listingPath, recordRecentView],
   );
 
   const closePlace = useCallback(() => {
     setSelectedPlace(null);
     setPlaceOriginRect(null);
-    setLocation(`/directory${directoryQuerySuffix()}`);
-  }, [setLocation, directoryQuerySuffix]);
+    setLocation(`${boardPath}${directoryQuerySuffix()}`);
+  }, [setLocation, boardPath, directoryQuerySuffix]);
 
   // After closing a place (or remounting on the list), put scroll back where the user was.
   useEffect(() => {
@@ -306,7 +324,7 @@ export default function Directory() {
       setPlaceOriginRect(null);
       return;
     }
-    const match = businesses.find(b => b.id === placeId);
+    const match = businesses.find(b => b.id === placeId && (!isSpaces || b.type === "group"));
     if (!match) {
       setSelectedPlace(null);
       setPlaceOriginRect(null);
@@ -317,15 +335,15 @@ export default function Directory() {
     // Canonicalize legacy ?place= to /directory/:id/:slug (keep type/q query).
     if (!routePlaceId) {
       const qs = window.location.search || "";
-      setLocation(`${placePath(match.id, match.name)}${qs}`);
+      setLocation(`${listingPath(match)}${qs}`);
     }
-  }, [businesses, routePlaceId, setLocation, recordRecentView]);
+  }, [businesses, isSpaces, listingPath, routePlaceId, setLocation, recordRecentView]);
 
   const placeSeo = selectedPlace;
   usePageSeo(
     placeSeo
-      ? `${placeSeo.name} | Portland Directory | Zaylist`
-      : "Portland Directory | Zaylist",
+      ? `${placeSeo.name} | ${isSpaces ? "MY SQUADZ" : "Portland Directory"} | Zaylist`
+      : isSpaces ? "MY SQUADZ | Zaylist" : "Portland Directory | Zaylist",
     placeSeo
       ? [
           placeSeo.neighborhood,
@@ -335,7 +353,9 @@ export default function Directory() {
           .filter(Boolean)
           .join(" · ")
           .slice(0, 160) || `${placeSeo.name} on Zaylist.`
-      : "Bars, restaurants, cafes, venues, and services that are ours - or truly for us - in Portland.",
+      : isSpaces
+        ? "Queer clubs, crews, nonprofits, and community groups in Portland."
+        : "Bars, restaurants, cafes, venues, and services that are ours - or truly for us - in Portland.",
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
@@ -390,14 +410,17 @@ export default function Directory() {
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
-      businesses.map(b => b.neighborhood).filter((n): n is string => Boolean(n)),
+      businesses
+        .filter(b => activeType === "ALL" || b.type === activeType)
+        .map(b => b.neighborhood)
+        .filter((n): n is string => Boolean(n)),
     );
     const ordered = NEIGHBORHOOD_ORDER.filter(n => n === "ALL" || seen.has(n));
     const extras = [...seen]
       .filter(n => !NEIGHBORHOOD_ORDER.includes(n))
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
     return [...ordered, ...extras];
-  }, [businesses]);
+  }, [activeType, businesses]);
 
   const visibleNeighborhoods = useMemo(() => {
     if (showAllNeighborhoods || neighborhoodsInUse.length <= 5) return neighborhoodsInUse;
@@ -408,14 +431,15 @@ export default function Directory() {
   }, [activeNeighborhood, neighborhoodsInUse, showAllNeighborhoods]);
 
   const heroStats = useMemo(() => {
-    const queerOwned = businesses.filter(b => b.queerOwned).length;
-    const hostingThisWeek = businesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
+    const boardBusinesses = isSpaces ? businesses.filter(b => b.type === "group") : businesses;
+    const queerOwned = boardBusinesses.filter(b => b.queerOwned).length;
+    const hostingThisWeek = boardBusinesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
-      { num: businesses.length, label: "Places listed", color: "#ff1fa0" },
-      { num: queerOwned, label: "Queer-owned", color: "#c8fa3c" },
+      { num: boardBusinesses.length, label: isSpaces ? "Squadz listed" : "Places listed", color: "#ff1fa0" },
+      { num: queerOwned, label: isSpaces ? "Community-led" : "Queer-owned", color: "#c8fa3c" },
       { num: hostingThisWeek, label: "Hosting this week", color: "#19e3ff" },
     ];
-  }, [businesses]);
+  }, [businesses, isSpaces]);
 
   const handleSelectCategory = (key: string) => {
     setActiveType(key);
@@ -466,15 +490,18 @@ export default function Directory() {
 
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       const hasMatches = potentialMatches && potentialMatches.length > 0;
-      setForm(blankDirectoryForm());
+      setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
       setSubmitResult({
-        title: "Added to directory",
+        title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
         desc: hasMatches
-          ? "Your place is live on the map and listings. We also spotted similar listings you may want to double-check."
-          : "Your place is live on the map and listings.",
+          ? `Your ${isSpaces ? "squad" : "place"} is live on the map and listings. We also spotted similar listings you may want to double-check.`
+          : `Your ${isSpaces ? "squad" : "place"} is live on the map and listings.`,
         potentialMatches: hasMatches ? potentialMatches : undefined,
       });
-      toast({ title: "Added to directory", description: "Your place is live on the map and listings." });
+      toast({
+        title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
+        description: `Your ${isSpaces ? "squad" : "place"} is live on the map and listings.`,
+      });
     },
     onError: (err: Error) => {
       toast({ title: "Could not add place", description: err.message, variant: "destructive" });
@@ -494,7 +521,7 @@ export default function Directory() {
     },
     onSuccess: () => {
       setClaimingBusinessId(null);
-      setForm(blankDirectoryForm());
+      setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
       setSubmitResult(null);
       setFormOpen(false);
       toast({
@@ -513,7 +540,7 @@ export default function Directory() {
       setShowAuth(true);
       return;
     }
-    setForm(blankDirectoryForm());
+    setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
     setSubmitResult(null);
     setClaimingBusinessId(null);
     setFormOpen(true);
@@ -521,7 +548,7 @@ export default function Directory() {
   };
 
   const resetDirectoryForm = () => {
-    setForm(blankDirectoryForm());
+    setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
     setSubmitResult(null);
     setClaimingBusinessId(null);
   };
@@ -569,16 +596,16 @@ export default function Directory() {
 
   const resultLine = isLoading
     ? "Loading…"
-    : `${filtered.length} place${filtered.length === 1 ? "" : "s"}`;
+    : `${filtered.length} ${isSpaces ? "squad" : "place"}${filtered.length === 1 ? "" : isSpaces ? "z" : "s"}`;
 
   return (
-    <div className="zine-page directory-page board-page board-page--makeover directory-page--v2">
+    <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
       <ZBoardAddressStrip
-        path={activeType === "group" ? "spaces" : "directory"}
-        board={activeType === "group" ? "MY SQUADZ" : "OUR PLACEZ"}
+        path={isSpaces || activeType === "group" ? "spaces" : "directory"}
+        board={isSpaces || activeType === "group" ? "MY SQUADZ" : "OUR PLACEZ"}
       />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <DirectoryHero placeCount={businesses.length} squadz={activeType === "group"} />
+      <DirectoryHero placeCount={businesses.length} squadz={isSpaces || activeType === "group"} />
 
       {/* Stats band */}
       <section
@@ -613,8 +640,12 @@ export default function Directory() {
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>
-            <h2 className="display section-heading">Add to the directory</h2>
-            <p className="board-copy-sm">Logged-in members can list spots that are ours or truly for us - including Clubs &amp; Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it.</p>
+            <h2 className="display section-heading">{isSpaces ? "Add a squad" : "Add to the directory"}</h2>
+            <p className="board-copy-sm">
+              {isSpaces
+                ? "Logged-in members can add queer clubs, crews, nonprofits, and community groups. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Organizers can claim a listing to manage it."
+                : "Logged-in members can list spots that are ours or truly for us - including Clubs & Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it."}
+            </p>
             {submitResult ? (
               <div className="submit-success">
                 <div className="submit-success__title">{submitResult.title}</div>
@@ -682,14 +713,14 @@ export default function Directory() {
                 Place name *
                 <input className="board-text-field" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={120} />
               </label>
-              <label>
+              {!isSpaces && <label>
                 Type *
                 <select className="board-text-field" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
                   {Object.entries(TYPE_LABELS).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
                 </select>
-              </label>
+              </label>}
               <label>
                 Neighborhood
                 <select className="board-text-field" value={form.neighborhood} onChange={e => setForm(f => ({ ...f, neighborhood: e.target.value }))}>
@@ -743,7 +774,7 @@ export default function Directory() {
       )}
 
       {/* Category band rail */}
-      <section className="directory-bands" aria-label="Categories">
+      {!isSpaces && <section className="directory-bands" aria-label="Categories">
         <div className="directory-bands__head">
           <h2 className="directory-bands__title">What do you need today?</h2>
           <span className="directory-bands__hint">Tap a band to tune the city</span>
@@ -786,10 +817,10 @@ export default function Directory() {
             })}
           </div>
         )}
-      </section>
+      </section>}
 
       {/* Map + key + filters + dock */}
-      <section className="directory-stage" aria-label="Places">
+      <section className="directory-stage" aria-label={isSpaces ? "Squadz" : "Places"}>
         <div className="directory-stage__map">
           <div className="directory-stage__map-frame">
             {!isLoading && (
@@ -812,7 +843,7 @@ export default function Directory() {
           >
             <span className="directory-map-key__kicker">Key</span>
             <ul className="directory-map-key__list">
-              {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0).map(type => {
+              {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0 && (!isSpaces || type === "group")).map(type => {
                 const isNonprofit = type === "nonprofit";
                 const color = TYPE_COLORS[type];
                 const label = TYPE_LABELS[type];
@@ -859,7 +890,7 @@ export default function Directory() {
               <SearchInput
                 id="directory-search"
                 label={undefined}
-                placeholder="Search the directory…"
+                placeholder={isSpaces ? "Search MY SQUADZ…" : "Search the directory…"}
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 onClear={() => setSearchQuery("")}
@@ -911,7 +942,7 @@ export default function Directory() {
         {/* The dock */}
         <div ref={dockRef} className="directory-dock">
           <div className="directory-dock__head">
-            <h2 className="directory-dock__title">The dock</h2>
+            <h2 className="directory-dock__title">{isSpaces ? "The squadz" : "The dock"}</h2>
             <span className="directory-dock__hint">Tap to pin it</span>
           </div>
 
@@ -923,10 +954,10 @@ export default function Directory() {
             <div className="board-empty board-empty--prototype directory-dock__empty">
               <p className="display section-heading">Nothing matches</p>
               <p className="board-copy-sm">
-                Try a broader filter. If a place you love is genuinely missing, add it and it will be here for the next person.
+                {isSpaces ? "Try a broader search. If a squad you know is genuinely missing, add it and it will be here for the next person." : "Try a broader filter. If a place you love is genuinely missing, add it and it will be here for the next person."}
               </p>
               <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
-                <Plus size={16} /> Add your business
+                <Plus size={16} /> {isSpaces ? "Add a squad" : "Add your business"}
               </button>
             </div>
           ) : (
@@ -951,13 +982,13 @@ export default function Directory() {
         aria-label="Add a place"
       >
         <div className="directory-add-band__copy">
-          <p className="directory-add-band__title">Is your place on Zaylist?</p>
+          <p className="directory-add-band__title">{isSpaces ? "Is your squad on Zaylist?" : "Is your place on Zaylist?"}</p>
           <p className="directory-add-band__lede">
-            Members can list spots that are ours or truly for us. Owners can claim a listing and keep the hours honest.
+            {isSpaces ? "Members can list queer clubs, crews, nonprofits, and community groups. Organizers can claim a listing and keep it current." : "Members can list spots that are ours or truly for us. Owners can claim a listing and keep the hours honest."}
           </p>
         </div>
         <Button variant="solid" accent="yellow" size="lg" arrow onClick={openAddForm} data-testid="directory-add-place">
-          Add a place
+          {isSpaces ? "Add a squad" : "Add a place"}
         </Button>
       </section>
 

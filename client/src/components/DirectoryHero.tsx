@@ -33,9 +33,13 @@ export default function DirectoryHero({ squadz = false }: Props) {
         </h1>
         <div className="directory-hero__row">
           <p className="directory-hero__lede">
-            Bars, food, cafes, venues, shops, and adult entertainment that are ours, or truly for us. Tune the spectrum, read the city, then go spend money there.
+            {squadz
+              ? "Clubs, crews, nonprofits, and community groups building queer Portland. Find your people, follow their work, and show up for what they make possible."
+              : "Bars, food, cafes, venues, shops, and adult entertainment that are ours, or truly for us. Tune the spectrum, read the city, then go spend money there."}
           </p>
-          <p className="directory-hero__mantra">Show up · spend queer · keep them alive</p>
+          <p className="directory-hero__mantra">
+            {squadz ? "Find your people · follow their work · show up" : "Show up · spend queer · keep them alive"}
+          </p>
         </div>
       </div>
     </section>
