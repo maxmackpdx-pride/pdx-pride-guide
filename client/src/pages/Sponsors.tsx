@@ -23,7 +23,7 @@ export default function Sponsors() {
         lede="This site runs on one person's nights and weekends and a server bill that shows up whether Pride happened or not. Local businesses can help cover it."
       />
 
-      <div className="zine-content" style={{ maxWidth: 720, margin: "0 auto", padding: "28px 20px 64px" }}>
+      <div className="zine-content">
         <ScrollReveal>
           <p className="board-copy">
             Here's the deal. Community listings stay free to browse. Support is{" "}

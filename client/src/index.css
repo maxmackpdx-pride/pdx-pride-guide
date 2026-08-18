@@ -3647,6 +3647,15 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
 .zine-content {
   position: relative;
+  /* Utility pages sit on the same page datum as every other surface;
+     the reading measure is held by the children, not by centring the column. */
+  width: min(100%, var(--zl-frame));
+  margin-inline: auto;
+  padding: 28px var(--zl-gutter) 64px;
+}
+
+.zine-content > * {
+  max-width: 720px;
 }
 
 .zine-callout {
@@ -3958,10 +3967,10 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 }
 
 .page-header__inner {
-  width: 100%;
-  max-width: 1440px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: clamp(20px, 3vw, 28px) clamp(20px, 3vw, 40px) clamp(22px, 3.2vw, 30px);
+  padding: clamp(20px, 3vw, 28px) var(--zl-gutter) clamp(22px, 3.2vw, 30px);
 }
 
 .page-header__crumb {
@@ -11549,9 +11558,10 @@ html.calm-mode .board-detail-backdrop {
 
 .site-footer__inner {
   position: relative;
-  max-width: 1200px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: 28px 20px 18px;
+  padding: 28px var(--zl-gutter) 18px;
 }
 
 /* Main spread: brand | nav cols | coffee */
@@ -15720,9 +15730,10 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 
 /* Hero */
 .board-hero {
-  max-width: 1180px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: clamp(34px, 5vw, 60px) clamp(20px, 4vw, 44px) clamp(28px, 4vw, 40px);
+  padding: clamp(34px, 5vw, 60px) var(--zl-gutter) clamp(28px, 4vw, 40px);
 }
 
 .board-hero__inner {
@@ -15897,7 +15908,8 @@ html.calm-mode .board-stats-band,
 }
 
 .board-stats-band__inner {
-  max-width: 1180px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(var(--board-stats-cols, 3), minmax(0, 1fr));
@@ -15907,6 +15919,10 @@ html.calm-mode .board-stats-band,
   padding: clamp(18px, 2.5vw, 30px) clamp(12px, 2vw, 28px);
   min-width: 0;
 }
+
+/* Outer cells carry the page gutter so the first stat sits on the page datum. */
+.board-stats-band__item:first-child { padding-left: var(--zl-gutter); }
+.board-stats-band__item:last-child { padding-right: var(--zl-gutter); }
 
 .board-stats-band__item--rule {
   border-right: 2px solid #1c1c22;

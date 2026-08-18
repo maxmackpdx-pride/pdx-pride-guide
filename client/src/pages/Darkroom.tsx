@@ -70,7 +70,7 @@ type Waypoint = {
   eyebrow: string;
   body: string;
   detail: string;
-  tone: "red" | "cyan" | "magenta" | "acid" | "violet" | "orange";
+  tone: "red" | "cyan" | "magenta" | "acid" | "violet" | "orange" | "gold" | "scarlet";
   href?: string;
   hrefLabel?: string;
   motif?: WaypointMotif;
@@ -104,7 +104,7 @@ const WAYPOINTS: Waypoint[] = [
     eyebrow: "Your people, one place",
     body: "Give your group a home on Zaylist. Put events, updates, resources, and opportunities where everyone can find them.",
     detail: "Less hunting through five apps. One place your community already knows.",
-    tone: "acid",
+    tone: "violet",
     motif: "group-chat",
     art: {
       src: "/brand/family/z-space.svg",
@@ -132,7 +132,7 @@ const WAYPOINTS: Waypoint[] = [
     eyebrow: "The night keeps moving",
     body: "Party’s not over. Drop the next stop and let everyone around you know where the AfterZ is.",
     detail: "One quick signal. Share it with your people. It disappears when the night is done.",
-    tone: "magenta",
+    tone: "gold",
     motif: "afterz",
     art: {
       src: "/brand/family/afterz.svg",
@@ -146,7 +146,7 @@ const WAYPOINTS: Waypoint[] = [
     eyebrow: "Make the gathering",
     body: "Pick a spot. Invite your people. Make a casual plan without building a full event listing.",
     detail: "Set the time, capacity, and secret location. Keep everyone on the same map when plans move.",
-    tone: "orange",
+    tone: "scarlet",
     motif: "secret-map",
     art: {
       src: "/brand/family/zenegades.svg",
@@ -160,7 +160,7 @@ const WAYPOINTS: Waypoint[] = [
     eyebrow: "Find your people outside",
     body: "Find someone for the trail, campground, road trip, or long weekend.",
     detail: "Match on dates, pace, transport, gear, access, and comfort before you head out.",
-    tone: "acid",
+    tone: "orange",
     motif: "travel",
     art: {
       src: "/brand/family/outz.svg",

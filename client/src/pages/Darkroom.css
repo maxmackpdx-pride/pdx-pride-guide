@@ -220,9 +220,10 @@
 .darkroom-hero__inner {
   position: relative;
   z-index: 1;
-  width: min(1280px, calc(100% - 40px));
+  width: min(100%, var(--zl-frame));
   max-width: none;
-  padding: 20px 0;
+  margin-inline: auto;
+  padding: 20px var(--zl-gutter);
 }
 
 .darkroom-hero__logo {
@@ -435,6 +436,9 @@
 .darkroom-waypoint[data-tone="violet"] { --c: #8f5cff; }
 .darkroom-waypoint[data-tone="orange"] { --c: var(--neon-orange); }
 .darkroom-waypoint[data-tone="white"] { --c: #fff; }
+/* Logo-matched tones (accent sampled from each product mark) */
+.darkroom-waypoint[data-tone="gold"] { --c: #ffb400; }
+.darkroom-waypoint[data-tone="scarlet"] { --c: #ff2d2d; }
 
 .darkroom-waypoint__marker {
   grid-column: 1;

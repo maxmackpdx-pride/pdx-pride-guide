@@ -15,11 +15,11 @@ import { shareCardUrl } from "@shared/shareCards";
 
 const NEXT_PREVIEW_CARDS = [
   { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px" },
-  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "acid", delay: ".03s", duration: "5.62s", drift: "-1.7px" },
+  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px" },
   { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px" },
-  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "magenta", delay: ".08s", duration: "5.94s", drift: "-1.1px" },
-  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "orange", delay: ".21s", duration: "6.56s", drift: "1.6px" },
-  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "acid", delay: ".12s", duration: "5.76s", drift: "-.8px" },
+  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px" },
+  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px" },
+  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px" },
 ] as const;
 
 function NextPreviewCardStack() {

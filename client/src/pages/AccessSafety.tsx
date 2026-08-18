@@ -23,7 +23,7 @@ export default function AccessSafety() {
         lede="Six blocks of people, noise, and heat. Plan for access, water, and each other."
       />
 
-      <div className="zine-content" style={{ maxWidth: 720, margin: "0 auto", padding: "28px 20px 64px" }}>
+      <div className="zine-content">
         <ScrollReveal>
           <h2 className="display panel-heading" style={{ marginBottom: 10 }}>What's on each listing</h2>
           <p className="board-copy">

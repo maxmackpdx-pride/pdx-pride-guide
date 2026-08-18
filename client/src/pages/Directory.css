@@ -28,7 +28,8 @@
   --dir-glass-shadow:
     0 8px 28px -12px rgba(0, 0, 0, 0.75),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --dir-pad-x: clamp(14px, 4vw, 40px);
+  /* Sections here are full-bleed, so the gutter itself carries the page datum. */
+  --dir-pad-x: max(var(--zl-gutter), calc((100% - var(--zl-col)) / 2));
   background: #0a0a0a;
   overflow-x: clip;
 }
@@ -92,7 +93,8 @@
 .directory-hero__inner {
   position: relative;
   z-index: 1;
-  max-width: 1180px;
+  width: min(100%, var(--zl-col));
+  max-width: none;
 }
 
 .directory-hero__title {
@@ -165,6 +167,10 @@
   padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 32px);
   min-width: 0;
 }
+
+/* Outer cells carry the page gutter so the first stat sits on the page datum. */
+.directory-stats-band__item:first-child { padding-left: var(--dir-pad-x); }
+.directory-stats-band__item:last-child { padding-right: var(--dir-pad-x); }
 
 .directory-stats-band__item--rule {
   border-right: 1px solid #16161b;

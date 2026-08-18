@@ -56,3 +56,19 @@
 }
 
 :root { --site-header-height: 120px; --hub-side-w: 266px; }
+
+/* ---- CANONICAL PAGE COLUMN ------------------------------
+   One content datum for the whole site. Any full-width band
+   that holds copy uses this pair so its first text glyph lands
+   on the same x on every page:
+
+     width: min(100%, calc(var(--zl-col) + 2 * var(--zl-gutter)));
+     margin-inline: auto;
+     padding-inline: var(--zl-gutter);
+
+   At 1440 that resolves to a 130px left datum; at 390 to 28px. */
+:root {
+  --zl-col: 1180px;
+  --zl-gutter: clamp(28px, 3.4vw, 48px);
+  --zl-frame: calc(var(--zl-col) + 2 * var(--zl-gutter));
+}

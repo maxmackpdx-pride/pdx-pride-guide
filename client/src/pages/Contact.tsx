@@ -42,7 +42,7 @@ export default function Contact() {
         lede="One inbox, one guy, no ticketing system. I read everything. I answer most of it, eventually, usually at a bad hour."
       />
 
-      <div className="zine-content" style={{ maxWidth: 720, margin: "0 auto", padding: "28px 20px 64px" }}>
+      <div className="zine-content">
         <ScrollReveal>
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             {TOPICS.map(t => (

@@ -29,9 +29,10 @@
 }
 
 .about-v2__inner {
-  max-width: 1120px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: 72px 40px;
+  padding: 72px var(--zl-gutter);
 }
 
 .about-v2__inner--work {
@@ -96,9 +97,10 @@
 
 .about-v2-hero__inner {
   position: relative;
-  max-width: 1120px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: 84px 40px 72px;
+  padding: 84px var(--zl-gutter) 72px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 40px;
@@ -187,12 +189,17 @@ html.calm-mode .about-v2-hero__inner {
 
 /* About: four stats always one row on desktop (shared band uses --board-stats-cols) */
 .about-v2 .board-stats-band[data-cols="4"] .board-stats-band__inner {
-  max-width: 1280px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
 }
 
 .about-v2 .board-stats-band[data-cols="4"] .board-stats-band__item {
   padding-left: clamp(10px, 1.6vw, 22px);
   padding-right: clamp(10px, 1.6vw, 22px);
+}
+
+.about-v2 .board-stats-band[data-cols="4"] .board-stats-band__item:first-child {
+  padding-left: var(--zl-gutter);
 }
 
 @media (min-width: 901px) {
@@ -1063,9 +1070,10 @@ html.calm-mode .about-v2-project:hover {
 }
 
 .about-v2-close__row {
-  max-width: 1120px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: 30px 40px;
+  padding: 30px var(--zl-gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;

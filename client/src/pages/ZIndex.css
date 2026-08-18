@@ -85,9 +85,10 @@
 .z-hero__inner {
   position: relative;
   z-index: 4;
-  max-width: 1280px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   margin: 0 auto;
-  padding: 0 clamp(18px, 4vw, 32px);
+  padding: 0 var(--zl-gutter);
 }
 .z-hero__logo {
   display: block;
