@@ -1506,9 +1506,7 @@
   transform: translateY(24px);
 }
 
-.darkroom-waypoint__card[data-motif="afterz"] .darkroom-waypoint__logo-heading {
-  transform: translateY(16px);
-}
+.darkroom-waypoint__card[data-motif="afterz"] .darkroom-waypoint__logo-heading { transform: none; }
 
 .darkroom-card-motif--zaydark-symbols {
   position: absolute;
@@ -1556,7 +1554,7 @@
 }
 
 .darkroom-waypoint__card[data-motif="secret-map"] .darkroom-waypoint__logo-heading {
-  width: min(84%, 400px);
+  width: min(100%, 473px);
   align-self: center;
   margin-inline: auto;
 }
@@ -1566,12 +1564,12 @@
 }
 
 .darkroom-waypoint__card[data-motif="zaydark-profiles"] .darkroom-waypoint__logo-heading {
-  left: 50%;
-  width: 88%;
-  max-width: none;
+  left: auto;
+  width: min(100%, 473px);
+  max-width: 473px;
   align-self: center;
   margin-inline: auto;
-  transform: translate(-53%, 16px);
+  transform: none;
 }
 
 .darkroom-waypoint__card[data-motif="zaydark-profiles"] .darkroom-waypoint__logo-heading img {

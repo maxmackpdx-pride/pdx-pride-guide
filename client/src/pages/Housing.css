@@ -264,7 +264,6 @@
   display: block;
   width: min(100%, 620px);
   height: auto;
-  max-height: 150px;
   object-fit: contain;
   object-position: left center;
 }

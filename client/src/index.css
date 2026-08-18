@@ -15632,6 +15632,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 /* Community board hero row - nav aligned with lede, above stats band */
 .community-board-hero-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: clamp(16px, 3vw, 32px);
@@ -15641,7 +15642,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 }
 
 .community-board-hero-row .board-hero {
-  flex: 1;
+  flex: 0 0 100%;
   min-width: 0;
   max-width: none;
   margin: 0;
@@ -15667,6 +15668,7 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
   margin: 0;
   padding: 0;
   max-width: none;
+  margin-left: auto;
   border-bottom: none;
 }
 
@@ -15751,28 +15753,16 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 
 .board-hero__brand-logo {
   display: block;
-  width: min(100%, 580px);
+  width: min(100%, 620px);
   height: auto;
-  max-height: 168px;
   object-fit: contain;
   object-position: left center;
 }
 
-.board-hero__brand-logo--gigz {
-  width: min(100%, 520px);
-}
-
-.board-hero__brand-logo--gifz {
-  width: min(100%, 500px);
-}
-
-.board-hero__brand-logo--eventz {
-  width: min(100%, 560px);
-}
-
-.board-hero__brand-logo--mizzed {
-  width: min(100%, 560px);
-}
+.board-hero__brand-logo--gigz,
+.board-hero__brand-logo--gifz,
+.board-hero__brand-logo--eventz,
+.board-hero__brand-logo--mizzed { width: min(100%, 620px); }
 
 .board-hero__title-accent {
   color: #ccff00;

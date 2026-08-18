@@ -114,8 +114,7 @@
 .directory-hero__wordmark {
   display: block;
   margin-top: 0.18em;
-  width: min(100%, 42rem);
-  max-width: min(100%, 720px);
+  width: min(100%, 620px);
   height: auto;
   max-height: none;
   object-fit: contain;

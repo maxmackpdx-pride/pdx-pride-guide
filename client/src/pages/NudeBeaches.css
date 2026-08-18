@@ -577,17 +577,21 @@
 
 .nude-beaches-hero-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: clamp(16px, 3vw, 32px);
   padding: clamp(34px, 5vw, 60px) clamp(20px, 4vw, 44px) clamp(18px, 2.5vw, 24px);
 }
 
+.nude-beaches-hero-row__brand {
+  flex: 0 0 100%;
+}
+
 .nude-beaches-hero-row__zout {
-  align-self: flex-start;
-  width: clamp(118px, 15vw, 190px);
+  display: block;
+  width: min(100%, 620px);
   height: auto;
-  flex: 0 0 auto;
 }
 
 .nude-beaches-hero-row .board-hero {
@@ -726,7 +730,7 @@ html.calm-mode .board-close-seam {
   }
 
   .nude-beaches-hero-row__zout {
-    width: 132px;
+    width: min(100%, 620px);
   }
 
   .nude-beaches-page .nude-beaches-tab-bar {

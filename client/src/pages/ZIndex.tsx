@@ -573,6 +573,12 @@ export default function ZIndex() {
         </span>
 
         <div className="z-hero__inner">
+          <img
+            className="z-hero__logo"
+            src="/brand/family/z-space.svg"
+            alt="Z/SPACE"
+            decoding="async"
+          />
           <p className="z-hero__kicker">Portland &middot; every board &middot; one page</p>
           <div className="z-hero__mark">
             <h1>

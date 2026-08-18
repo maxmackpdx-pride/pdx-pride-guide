@@ -1929,12 +1929,6 @@ html.calm-mode .home-boards__card {
   filter: drop-shadow(0 0 13px color-mix(in srgb, var(--c) 24%, transparent));
 }
 
-.home-next-preview__card img.home-next-preview__logo--zenegades {
-  width: 80%;
-  height: 80%;
-  margin: auto;
-}
-
 .home-next-preview__card.pdx-glass-card::after { background:none; }
 
 .home-next-preview__card.pdx-glass-card.pdx-glass-rebind {

@@ -100,7 +100,6 @@ function NextPreviewCardStack() {
                 }}
               >
                 <img
-                  className={card.name === "ZENEGADES" ? "home-next-preview__logo--zenegades" : undefined}
                   src={card.logo}
                   alt=""
                   loading="lazy"

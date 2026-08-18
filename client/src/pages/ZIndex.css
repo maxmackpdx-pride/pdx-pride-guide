@@ -22,6 +22,7 @@
   --glass-bloom: 5%;
   background: #000;
   padding-bottom: 96px;
+  overflow-x: hidden;
 }
 
 /* ── hero ─────────────────────────────────────────────────
@@ -87,6 +88,14 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 clamp(18px, 4vw, 32px);
+}
+.z-hero__logo {
+  display: block;
+  width: min(100%, 620px);
+  height: auto;
+  margin: 0 0 clamp(20px, 3vw, 30px);
+  object-fit: contain;
+  object-position: left center;
 }
 .z-hero__kicker {
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -324,11 +333,7 @@
   pointer-events: none;
 }
 .z-index__board--hub .z-index__wordmark-slot {
-  min-height: 148px;
-  height: auto;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
+  min-height: 126px;
 }
 .z-index__board--hub .z-index__board-name {
   color: #fff;
@@ -422,23 +427,19 @@
 /* Wordmarks carry their own gradients. Never tint, never filter, never
    recolour: the mark is drawn, not styled.
 
-   All five sit in one fixed height slot at one height, so every card's mark
-   reads at the same optical size and every card's body starts on the same
-   line. Widths differ because the marks differ (2.34:1 to 3.10:1), which is
-   what a wordmark is; heights do not. Boards with no mark get the same slot
-   with the name set in type, so no row is taller than another. */
+   Every approved family asset is normalized to the same 2:1 transparent
+   canvas. Render that canvas through one shared optical frame so authored
+   internal spacing survives while every card carries the same visual scale. */
 .z-index__wordmark-slot {
   display: flex;
   align-items: center;
-  height: 148px;
+  min-height: 126px;
   margin: 10px 0 14px;
 }
 .z-index__wordmark {
   display: block;
-  height: 144px;
-  width: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: min(100%, 460px);
+  height: auto;
   object-fit: contain;
   object-position: left center;
 }
@@ -637,6 +638,8 @@
 @media (max-width: 700px) {
   .z-index__grid { grid-template-columns: 1fr; gap: 12px }
   .z-hero__mark h1 { font-size: clamp(46px, 15vw, 80px) }
+  .z-hero__mark h1 span { display: block }
+  .z-hero__logo { width: 94%; }
   .z-address-search__field { grid-template-columns: auto minmax(0, 1fr) 56px }
   .z-address-search__field button { min-width: 56px }
   .z-address-index { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none }
@@ -644,8 +647,8 @@
   .z-address-index a { flex: 0 0 auto }
   .z-address-search__results a { align-items: flex-start; flex-direction: column; gap: 2px }
   .z-address-search__results small { text-align: left }
-  .z-index__wordmark-slot { height: 118px }
-  .z-index__wordmark { height: 114px }
+  .z-index__wordmark-slot { min-height: 104px }
+  .z-index__wordmark { width: min(100%, 400px) }
   .z-index__board--hub { min-height: 0; padding: 18px 16px 15px }
   .z-index__board--hub .z-index__board-name { font-size: clamp(58px, 22vw, 88px) }
   .z-index__board--hub .z-index__subs { grid-template-columns: 1fr }
