@@ -1,4 +1,3 @@
-import CommunityBoardHeroRow from "./CommunityBoardHeroRow";
 import BoardHero from "./BoardHero";
 import { Button } from "@/components/ds";
 
@@ -28,19 +27,18 @@ export default function MissedConnectionsHero({ onPost }: Props) {
   );
 
   return (
-    <CommunityBoardHeroRow active="spotted" actions={actions}>
-      <BoardHero
-        accent="magenta"
-        kicker="Anonymous board · Pride season 2026"
-        title={
-          <img
-            className="board-hero__brand-logo board-hero__brand-logo--mizzed"
-            src="/brand/family/mizzed-connection.svg"
-            alt="MIZZED CONNECTION"
-          />
-        }
-        lede="MIZZED CONNECTION posts from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
-      />
-    </CommunityBoardHeroRow>
+    <BoardHero
+      accent="magenta"
+      kicker="Anonymous board · Pride season 2026"
+      title={
+        <img
+          className="board-hero__brand-logo board-hero__brand-logo--mizzed"
+          src="/brand/family/mizzed-connection.svg"
+          alt="MIZZED CONNECTION"
+        />
+      }
+      lede="MIZZED CONNECTION posts from Portland Pride. Caught a glance across the dance floor, shared a moment at the parade, or clocked someone cute around town? Post it. You stay anonymous. Replies open a private thread."
+      actions={actions}
+    />
   );
 }

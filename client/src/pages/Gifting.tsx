@@ -6,8 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
-import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -267,9 +265,11 @@ export default function Gifting() {
 
   return (
     <div className="zine-page gifting-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="gifz" board="GIFTZ" />
-      <CommunityBoardHeroRow
-        active="gifting"
+      <BoardHero
+        accent="lime"
+        kicker="Free board · Pride season 2026"
+        title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/giftz.svg" alt="GIFTZ" />}
+        lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
         actions={
           <>
             <Button variant="solid" accent="lime" size="lg" arrow disabled={!postingOpen} onClick={() => openForm("GIFT")}>
@@ -280,14 +280,7 @@ export default function Gifting() {
             </Button>
           </>
         }
-      >
-        <BoardHero
-          accent="lime"
-          kicker="Free board · Pride season 2026"
-          title={<img className="board-hero__brand-logo board-hero__brand-logo--gifz" src="/brand/family/giftz.svg" alt="GIFTZ" />}
-          lede="A free board for closet chaos, event supplies, outfit saves, furniture, gear, tickets, and whatever else needs a new home. Give what you can. Ask for what you need."
-        />
-      </CommunityBoardHeroRow>
+      />
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 

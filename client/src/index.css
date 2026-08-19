@@ -4704,10 +4704,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   color: #0a0a0a;
 }
 
-/* Dark makeover boards (Gigs / Gifting / Spotted): force light text on dark cards */
+/* Dark makeover boards: force light text on shared explainer cells */
 .gigs-page .board-how--makeover .board-step--makeover,
 .gifting-page .board-how--makeover .board-step--makeover,
-.missed-page .board-how--makeover .board-step--makeover {
+.missed-page .board-how--makeover .board-step--makeover,
+.sellz-page .board-how--makeover .board-step--makeover {
   background: #0c0c0f !important;
   color: #e8e4da !important;
   border-color: #1c1c22 !important;
@@ -4719,7 +4720,9 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 .gifting-page .board-how--makeover .board-step--makeover h3,
 .gifting-page .board-how--makeover .board-step--makeover .panel-heading,
 .missed-page .board-how--makeover .board-step--makeover h3,
-.missed-page .board-how--makeover .board-step--makeover .panel-heading {
+.missed-page .board-how--makeover .board-step--makeover .panel-heading,
+.sellz-page .board-how--makeover .board-step--makeover h3,
+.sellz-page .board-how--makeover .board-step--makeover .panel-heading {
   color: #fff !important;
   -webkit-text-stroke: 0 !important;
   text-shadow: none !important;
@@ -4727,14 +4730,16 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
 .gigs-page .board-how--makeover .board-step--makeover p,
 .gifting-page .board-how--makeover .board-step--makeover p,
-.missed-page .board-how--makeover .board-step--makeover p {
+.missed-page .board-how--makeover .board-step--makeover p,
+.sellz-page .board-how--makeover .board-step--makeover p {
   color: #c8c5bc !important;
   font-weight: 500 !important;
 }
 
 .gigs-page .board-how--makeover .board-step--makeover .board-step__num,
 .gifting-page .board-how--makeover .board-step--makeover .board-step__num,
-.missed-page .board-how--makeover .board-step--makeover .board-step__num {
+.missed-page .board-how--makeover .board-step--makeover .board-step__num,
+.sellz-page .board-how--makeover .board-step--makeover .board-step__num {
   background: transparent !important;
   color: #ccff00 !important;
   -webkit-text-stroke: 0 !important;
@@ -17223,8 +17228,15 @@ html.calm-mode .category-constellation__orb {
     radial-gradient(circle at 88% 14%, rgba(25, 227, 255, 0.05), transparent 24rem),
     #06060a;
 }
+.sellz-page.board-page--makeover {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(57, 255, 20, 0.06), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(25, 227, 255, 0.05), transparent 24rem),
+    #06060a;
+}
 .gigs-page.board-page--makeover .board-active-feed,
-.missed-page.board-page--makeover .board-active-feed {
+.missed-page.board-page--makeover .board-active-feed,
+.sellz-page.board-page--makeover .board-active-feed {
   background: #06060a;
 }
 

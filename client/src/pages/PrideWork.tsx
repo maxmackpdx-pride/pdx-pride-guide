@@ -10,8 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
-import CommunityBoardHeroRow from "@/components/CommunityBoardHeroRow";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -337,9 +335,11 @@ export default function PrideWork() {
 
   return (
     <div className="zine-page gigs-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="gigz" board="GIGZ" />
-      <CommunityBoardHeroRow
-        active="gigs"
+      <BoardHero
+        accent="purple"
+        kicker="Two-way work board · Pride season and beyond"
+        title={<img className="board-hero__brand-logo board-hero__brand-logo--gigz" src="/brand/family/gigz.svg" alt="GIGZ" />}
+        lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
         actions={
           <>
             <Button variant="neon" accent="cyan" size="lg" onClick={() => openForm("LOOKING_FOR_WORK")}>
@@ -350,14 +350,7 @@ export default function PrideWork() {
             </Button>
           </>
         }
-      >
-        <BoardHero
-          accent="purple"
-          kicker="Two-way work board · Pride season and beyond"
-          title={<img className="board-hero__brand-logo board-hero__brand-logo--gigz" src="/brand/family/gigz.svg" alt="GIGZ" />}
-          lede="Post your availability, post a gig, or browse both. Stage crew, photographers, bartenders, massage therapists, host homes, designers, producers. Workers and hosts in one place. Need work? Need help? Both belong here."
-        />
-      </CommunityBoardHeroRow>
+      />
 
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 
