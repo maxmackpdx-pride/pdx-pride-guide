@@ -154,6 +154,7 @@ const COUNT_ENDPOINT: Record<string, string> = {
   hauz: "/api/housing",
   gifz: "/api/gifting",
   gigz: "/api/gigs",
+  sellz: "/api/sellz",
   mizzed: "/api/missed-connections",
   placez: "/api/directory",
   squadz: "/api/directory",
@@ -189,7 +190,7 @@ const MANTRA: Record<string, string> = {
   mizzed: "Stay kind · stay anonymous · reveal when ready",
   squadz: "Clubs and groups you can just show up to",
   dark: "Coming soon · the after-dark side of Zaylist",
-  sellz: "The address is real. The board is not built yet.",
+  sellz: "Local stuff · real people · simple handoffs",
 };
 
 const COUNT_LABEL: Record<string, string> = {
@@ -202,14 +203,14 @@ const COUNT_LABEL: Record<string, string> = {
   squadz: "squadz",
   out: "live conditions",
   dark: "coming soon",
-  sellz: "not built yet",
+  sellz: "listings",
 };
 
 const POSTS_LABEL: Record<string, string> = {
   placez: "Recently added",
   out: "Right now",
   dark: "When it opens",
-  sellz: "When it opens",
+  sellz: "Newest listings",
 };
 
 function ageLabel(value: unknown): string {
@@ -259,7 +260,9 @@ function newestPosts(
     if (!title) return [];
     const id = Number(row.id);
     const listing = Number.isFinite(id) && id > 0
-      ? path === "squadz"
+      ? path === "sellz"
+        ? `/sellz?post=${id}`
+        : path === "squadz"
         ? `/z/squadz/${id}/${slugifyPlaceName(title)}`
         : path === "placez"
           ? placePath(id, title)
@@ -274,6 +277,10 @@ function newestPosts(
       path === "gifz" && row.postType === "GIFT" ? "Offered" : "",
       path === "gigz" && row.postType === "POSTING_GIG" ? "Gig" : "",
       path === "gigz" && row.postType === "LOOKING_FOR_WORK" ? "Talent" : "",
+      path === "sellz" && Number.isFinite(Number(row.priceCents ?? row.price_cents))
+        ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number(row.priceCents ?? row.price_cents) / 100)
+        : "",
+      path === "sellz" ? row.condition : "",
     ].map(value => String(value ?? "").trim()).filter(Boolean).join(" · ");
     return [{
       title,
