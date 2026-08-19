@@ -135,7 +135,7 @@ export default function HubFeedCard({ item }: Props) {
   // subject line, matching the board's expanded card.
   const showSubject = (item.kind === "gig" || item.kind === "gifting" || item.kind === "housing") && !!item.title;
   // Gig/gift cards open the real board card as an overlay on top of the feed.
-  const isBoard = (item.kind === "gig" || item.kind === "gifting") && item.boardPostId != null;
+  const isBoard = (item.kind === "gig" || item.kind === "gifting" || item.kind === "sellz") && item.boardPostId != null;
 
   const bundledEvents = eventRowsForItem(item);
   // Events render as the profile-style poster deck: one card for a single event,

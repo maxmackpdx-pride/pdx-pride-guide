@@ -25,7 +25,7 @@ import {
 } from "@shared/hubFeed";
 import {
   events, submissions, gigPosts, promoters, moderationRequests, attendances, eventChatMessages, users, messages, missedConnections,
-  giftingPosts, giftingInterests, giftingReports,
+  giftingPosts, giftingInterests, giftingReports, sellzPosts, sellzInterests, sellzReports, sellzSaves,
   beachCheckins, beachCarpoolPosts, beachCarpoolRequests, riverBratsReports,
   feedbackReports, hostMessages, hubFeedPosts, eventHosts, eventTalent, businesses,
   businessClaims, businessSubmissions, businessBlocks, businessLogoRequests,
@@ -38,6 +38,7 @@ import {
   type User, type Message,
   type MissedConnection, type InsertMissedConnection,
   type GiftingPost, type InsertGiftingPost, type GiftingInterest, type InsertGiftingInterest, type InsertGiftingReport,
+  type SellzPost, type InsertSellzPost, type SellzInterest, type InsertSellzInterest, type InsertSellzReport,
   type BeachCheckin, type InsertBeachCheckin, type BeachCarpoolPost, type InsertBeachCarpoolPost,
   type BeachCarpoolRequest, type InsertBeachCarpoolRequest, type InsertRiverBratsReport,
   type FeedbackReport, type InsertFeedbackReport,
@@ -313,6 +314,47 @@ sqlite.exec(`
     status TEXT NOT NULL DEFAULT 'PENDING',
     admin_notes TEXT,
     created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS sellz_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    condition TEXT NOT NULL,
+    price_cents INTEGER NOT NULL,
+    negotiable INTEGER NOT NULL DEFAULT 0,
+    neighborhood TEXT NOT NULL,
+    pickup_preference TEXT NOT NULL,
+    photo_urls TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    selected_interest_id INTEGER,
+    expires_at TEXT NOT NULL,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS sellz_interests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    note TEXT NOT NULL,
+    offer_cents INTEGER,
+    status TEXT NOT NULL DEFAULT 'INTERESTED',
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS sellz_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    reporter_user_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    created_at TEXT NOT NULL DEFAULT ''
+  );
+  CREATE TABLE IF NOT EXISTS sellz_saves (
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT '',
+    UNIQUE(post_id, user_id)
   );
   CREATE TABLE IF NOT EXISTS feedback_reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -9303,6 +9345,20 @@ export interface IStorage {
   updateGiftingPostStatus(id: number, status: string, adminNotes?: string): void;
   resolveGiftingReport(id: number, adminNotes?: string): void;
   expireGiftingPosts(): void;
+  // SELLZ marketplace
+  getSellzPosts(opts?: { includeInactive?: boolean; userId?: number }): any[];
+  getSellzPost(id: number): any | undefined;
+  getSellzPostsByUser(userId: number): any[];
+  createSellzPost(data: InsertSellzPost): any;
+  updateSellzPost(id: number, userId: number, data: Partial<InsertSellzPost>): any;
+  addSellzInterest(data: InsertSellzInterest): any;
+  chooseSellzInterest(postId: number, interestId: number, ownerUserId: number): any;
+  setSellzStatus(postId: number, userId: number, status: "ACTIVE" | "RESERVED" | "SOLD"): void;
+  renewSellzPost(postId: number, userId: number): void;
+  deleteSellzPost(postId: number, userId: number): void;
+  reportSellzPost(data: InsertSellzReport): void;
+  toggleSellzSave(postId: number, userId: number): boolean;
+  getSellzSavedIds(userId: number): number[];
   // Soft launch feedback (legacy table; new reports land in owner_desk_items)
   createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
   getFeedbackReports(status?: string): FeedbackReport[];
@@ -13223,6 +13279,115 @@ export const storage: IStorage = {
   expireGiftingPosts() {
     expireGiftingPosts();
   },
+  // SELLZ marketplace
+  getSellzPosts(opts = {}) {
+    sqlite.prepare(`UPDATE sellz_posts SET status = 'EXPIRED' WHERE status = 'ACTIVE' AND expires_at < ?`).run(new Date().toISOString());
+    const where: string[] = [];
+    const params: any[] = [];
+    if (!opts.includeInactive) where.push(`p.status IN ('ACTIVE','RESERVED')`);
+    if (opts.userId) { where.push(`p.user_id = ?`); params.push(opts.userId); }
+    return sqlite.prepare(`
+      SELECT p.*, u.username, u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl, u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing,
+             (SELECT COUNT(*) FROM sellz_interests si WHERE si.post_id = p.id AND si.status IN ('INTERESTED','SELECTED')) AS interestCount
+      FROM sellz_posts p JOIN users u ON u.id = p.user_id
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY p.created_at DESC
+    `).all(...params).map((post: any) => ({
+      ...post,
+      photoUrls: safeJson(post.photo_urls || "[]"),
+      interests: this.getSellzPost(post.id)?.interests || [],
+    }));
+  },
+  getSellzPost(id) {
+    const post = sqlite.prepare(`
+      SELECT p.*, u.username, u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl, u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing,
+             (SELECT COUNT(*) FROM sellz_interests si WHERE si.post_id = p.id AND si.status IN ('INTERESTED','SELECTED')) AS interestCount
+      FROM sellz_posts p JOIN users u ON u.id = p.user_id WHERE p.id = ?
+    `).get(id) as any;
+    if (!post) return undefined;
+    const interests = sqlite.prepare(`
+      SELECT si.*, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+      FROM sellz_interests si JOIN users u ON u.id = si.user_id
+      WHERE si.post_id = ? AND si.status != 'WITHDRAWN' ORDER BY si.created_at ASC
+    `).all(id);
+    return { ...post, photoUrls: safeJson(post.photo_urls || "[]"), interests };
+  },
+  getSellzPostsByUser(userId) {
+    return this.getSellzPosts({ includeInactive: true, userId }).filter((post: any) => post.status !== "REMOVED");
+  },
+  createSellzPost(data) {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 30 * 86400000).toISOString();
+    const result = sqlite.prepare(`
+      INSERT INTO sellz_posts (user_id,title,description,category,condition,price_cents,negotiable,neighborhood,pickup_preference,photo_urls,status,expires_at,created_at)
+      VALUES (?,?,?,?,?,?,?,?,?,?,'ACTIVE',?,?)
+    `).run(data.userId, data.title, data.description, data.category, data.condition, data.priceCents,
+      data.negotiable ? 1 : 0, data.neighborhood, data.pickupPreference, data.photoUrls || "[]", expiresAt, now.toISOString());
+    return this.getSellzPost(Number(result.lastInsertRowid));
+  },
+  updateSellzPost(id, userId, data) {
+    const post = this.getSellzPost(id);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+    sqlite.prepare(`UPDATE sellz_posts SET title=?,description=?,category=?,condition=?,price_cents=?,negotiable=?,neighborhood=?,pickup_preference=? WHERE id=?`)
+      .run(data.title, data.description, data.category, data.condition, data.priceCents, data.negotiable ? 1 : 0, data.neighborhood, data.pickupPreference, id);
+    return this.getSellzPost(id);
+  },
+  addSellzInterest(data) {
+    const post = this.getSellzPost(data.postId);
+    if (!post) throw new Error("Listing not found");
+    if (Number(post.user_id) === data.userId) throw new Error("Cannot message your own listing");
+    if (post.status !== "ACTIVE") throw new Error("This listing is not available");
+    const existing = sqlite.prepare(`SELECT id FROM sellz_interests WHERE post_id=? AND user_id=? AND status!='WITHDRAWN'`).get(data.postId, data.userId);
+    if (existing) throw new Error("You already contacted this seller");
+    const result = sqlite.prepare(`INSERT INTO sellz_interests (post_id,user_id,note,offer_cents,status,created_at) VALUES (?,?,?,?,'INTERESTED',?)`)
+      .run(data.postId, data.userId, String(data.note).slice(0, 500), data.offerCents ?? null, new Date().toISOString());
+    return sqlite.prepare(`SELECT * FROM sellz_interests WHERE id=?`).get(Number(result.lastInsertRowid));
+  },
+  chooseSellzInterest(postId, interestId, ownerUserId) {
+    const post = this.getSellzPost(postId);
+    if (!post || Number(post.user_id) !== ownerUserId) throw new Error("Not your listing");
+    const interest = sqlite.prepare(`SELECT * FROM sellz_interests WHERE id=? AND post_id=?`).get(interestId, postId) as any;
+    if (!interest) throw new Error("Buyer response not found");
+    sqlite.prepare(`UPDATE sellz_interests SET status='DECLINED' WHERE post_id=? AND id!=?`).run(postId, interestId);
+    sqlite.prepare(`UPDATE sellz_interests SET status='SELECTED' WHERE id=?`).run(interestId);
+    sqlite.prepare(`UPDATE sellz_posts SET status='RESERVED', selected_interest_id=? WHERE id=?`).run(interestId, postId);
+    return interest;
+  },
+  setSellzStatus(postId, userId, status) {
+    const post = this.getSellzPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+    sqlite.prepare(`UPDATE sellz_posts SET status=?, selected_interest_id=CASE WHEN ?='ACTIVE' THEN NULL ELSE selected_interest_id END WHERE id=?`).run(status, status, postId);
+  },
+  renewSellzPost(postId, userId) {
+    const post = this.getSellzPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+    const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
+    sqlite.prepare(`UPDATE sellz_posts SET status='ACTIVE', expires_at=?, selected_interest_id=NULL WHERE id=?`).run(expiresAt, postId);
+  },
+  deleteSellzPost(postId, userId) {
+    const post = this.getSellzPost(postId);
+    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+    sqlite.prepare(`UPDATE sellz_posts SET status='REMOVED' WHERE id=?`).run(postId);
+  },
+  reportSellzPost(data) {
+    sqlite.prepare(`INSERT INTO sellz_reports (post_id,reporter_user_id,reason,status,created_at) VALUES (?,?,?,'PENDING',?)`)
+      .run(data.postId, data.reporterUserId, data.reason, new Date().toISOString());
+    sqlite.prepare(`UPDATE sellz_posts SET report_count=report_count+1 WHERE id=?`).run(data.postId);
+  },
+  toggleSellzSave(postId, userId) {
+    const existing = sqlite.prepare(`SELECT 1 FROM sellz_saves WHERE post_id=? AND user_id=?`).get(postId, userId);
+    if (existing) sqlite.prepare(`DELETE FROM sellz_saves WHERE post_id=? AND user_id=?`).run(postId, userId);
+    else sqlite.prepare(`INSERT INTO sellz_saves (post_id,user_id,created_at) VALUES (?,?,?)`).run(postId, userId, new Date().toISOString());
+    return !existing;
+  },
+  getSellzSavedIds(userId) {
+    return sqlite.prepare(`SELECT post_id AS postId FROM sellz_saves WHERE user_id=? ORDER BY created_at DESC`).all(userId).map((row: any) => Number(row.postId));
+  },
   createFeedbackReport(data) {
     const createdAt = new Date().toISOString();
     const category = String(data.category || "BUG").toUpperCase();
@@ -14759,6 +14924,22 @@ export const storage: IStorage = {
         // Deep-link opens the free board with this exact post expanded.
         link: `/gifting?post=${post.id}`,
         boardPostId: post.id,
+      });
+    }
+
+    for (const post of storage.getSellzPosts().slice(0, 15)) {
+      items.push({
+        id: `sellz-${post.id}`,
+        kind: "sellz",
+        badge: "SELLZ",
+        action: `Listed for $${(Number(post.price_cents || 0) / 100).toFixed(Number(post.price_cents || 0) % 100 ? 2 : 0)}`,
+        title: post.title,
+        text: post.description || null,
+        createdAt: post.createdAt || post.created_at,
+        author: hubFeedAuthorFromUser({ displayName: post.displayName, username: post.username, photoUrl: post.posterPhotoUrl, avatarChoice: post.avatarChoice, avatarRing: post.posterAvatarRing }),
+        link: `/sellz?post=${post.id}`,
+        boardPostId: post.id,
+        photoUrl: post.photoUrls?.[0] || null,
       });
     }
 

@@ -1,0 +1,30 @@
+id: ZAY-SELLZ-2026-08-18
+title: SELLZ member marketplace boundary
+date: 2026-08-18
+status: founder-direction
+owner: Tucker
+authority: explicit founder direction
+context: >-
+  SELLZ needs Facebook Marketplace-grade listing and buyer/seller plumbing,
+  Buy Nothing-style community trust and handoff, Craigslist simplicity, and
+  Zaylist's visual identity without making Zaylist a payment processor.
+decision:
+  - SELLZ is a member-to-member marketplace with listings, discovery, saved items, messaging, offers, reservation, sold, reopen, expiry, and reporting states.
+  - Listings carry price, condition, category, neighborhood, handoff preference, seller identity, and up to six photos.
+  - Zaylist provides discovery, identity, contextual inbox messaging, and lifecycle state; members coordinate payment and pickup directly.
+  - Restricted and illegal goods are not allowed. Reporting and moderation remain part of the board plumbing.
+  - The interface uses existing Zaylist board and deep-glass primitives, with Craigslist-level posting simplicity rather than a retail checkout funnel.
+rationale:
+  - The useful Marketplace loop is local discovery plus a trustworthy buyer/seller handoff.
+  - Avoiding custody of funds keeps the first version recoverable for one founder and within the platform's current trust boundary.
+consequences:
+  - SELLZ requires durable listing, interest, saved-item, and report records.
+  - Buyer notes and offers are private handoff data, visible only to the buyer and seller.
+  - Payment protection, shipping labels, escrow, fees, and in-app checkout are not part of this release.
+sources:
+  - Tucker's SELLZ brief on 2026-08-18
+  - docs/BOARD_CARD_STANDARD.md
+  - docs/LIVE_DESIGN_STANDARD.md
+implementation_state:
+  state: local-in-progress
+review_date: 2026-10-18

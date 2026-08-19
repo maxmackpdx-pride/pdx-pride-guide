@@ -88,7 +88,7 @@ non-rainbow line. New clickable cards must join this system.
 | Events list | `.pdxRow` (`EventCard`) | `::before` |
 | Schedule cells | `.schedule-event-card` | `::before` |
 | Legacy event board cards | `.event-board-card` | `::before` |
-| Gigs / Gifting boards | `.board-listing-card` | `::before` |
+| Gigs / Gifting / SELLZ boards | `.board-listing-card` | `::before` |
 | Missed Connections boards | `.board-spotted-card` / `.spotted-card` | `::before` |
 | Hub feed **board** cards only | `.card.fitem.fitem--glow` (gig / gift / MC) | `::before` |
 | Featured event ad | `.featured-event-ad` | `::before` |

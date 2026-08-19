@@ -498,6 +498,63 @@ export type GiftingInterest = typeof giftingInterests.$inferSelect;
 export type InsertGiftingReport = z.infer<typeof insertGiftingReportSchema>;
 export type GiftingReport = typeof giftingReports.$inferSelect;
 
+// SELLZ - member-to-member marketplace. Zaylist coordinates discovery and
+// handoff; payment remains between members and is never processed here.
+export const sellzPosts = sqliteTable("sellz_posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  condition: text("condition").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  negotiable: integer("negotiable", { mode: "boolean" }).notNull().default(false),
+  neighborhood: text("neighborhood").notNull(),
+  pickupPreference: text("pickup_preference").notNull(),
+  photoUrls: text("photo_urls").notNull().default("[]"),
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE | RESERVED | SOLD | EXPIRED | REMOVED
+  selectedInterestId: integer("selected_interest_id"),
+  expiresAt: text("expires_at").notNull(),
+  reportCount: integer("report_count").notNull().default(0),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const sellzInterests = sqliteTable("sellz_interests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").notNull(),
+  userId: integer("user_id").notNull(),
+  note: text("note").notNull(),
+  offerCents: integer("offer_cents"),
+  status: text("status").notNull().default("INTERESTED"), // INTERESTED | SELECTED | DECLINED | WITHDRAWN
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const sellzReports = sqliteTable("sellz_reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: integer("post_id").notNull(),
+  reporterUserId: integer("reporter_user_id").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("PENDING"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const sellzSaves = sqliteTable("sellz_saves", {
+  postId: integer("post_id").notNull(),
+  userId: integer("user_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const insertSellzPostSchema = createInsertSchema(sellzPosts).omit({
+  id: true, createdAt: true, status: true, selectedInterestId: true, expiresAt: true, reportCount: true,
+});
+export const insertSellzInterestSchema = createInsertSchema(sellzInterests).omit({ id: true, createdAt: true, status: true });
+export const insertSellzReportSchema = createInsertSchema(sellzReports).omit({ id: true, createdAt: true, status: true });
+export type SellzPost = typeof sellzPosts.$inferSelect;
+export type InsertSellzPost = z.infer<typeof insertSellzPostSchema>;
+export type SellzInterest = typeof sellzInterests.$inferSelect;
+export type InsertSellzInterest = z.infer<typeof insertSellzInterestSchema>;
+export type InsertSellzReport = z.infer<typeof insertSellzReportSchema>;
+
 // River Brats - Nude Beaches social
 export const beachCheckins = sqliteTable("beach_checkins", {
   id: integer("id").primaryKey({ autoIncrement: true }),

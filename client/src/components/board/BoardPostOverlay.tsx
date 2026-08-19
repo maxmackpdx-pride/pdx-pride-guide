@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
+import SellzListingCard, { type SellzPost } from "./SellzListingCard";
 
 /**
  * Opens a board post (gig or gift) as an overlay on top of whatever's behind
@@ -19,7 +20,7 @@ import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 const GIG_ACCENT = { POSTING_GIG: "var(--board-gigs)", LOOKING_FOR_WORK: "var(--board-gigs)" } as const;
 
 type Props = {
-  kind: "gig" | "gifting";
+  kind: "gig" | "gifting" | "sellz";
   postId: number;
   onClose: () => void;
 };
@@ -46,11 +47,22 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     },
     enabled: kind === "gig",
   });
+  const sellzQuery = useQuery<SellzPost[]>({
+    queryKey: ["/api/sellz"],
+    queryFn: async () => {
+      const r = await fetch("/api/sellz", { credentials: "include" });
+      if (!r.ok) return [];
+      return r.json();
+    },
+    enabled: kind === "sellz",
+  });
 
-  const query = kind === "gifting" ? giftQuery : gigQuery;
+  const query = kind === "gifting" ? giftQuery : kind === "sellz" ? sellzQuery : gigQuery;
   const post = kind === "gifting"
     ? giftQuery.data?.find(p => p.id === postId)
-    : gigQuery.data?.find(g => g.id === postId);
+    : kind === "sellz"
+      ? sellzQuery.data?.find(p => p.id === postId)
+      : gigQuery.data?.find(g => g.id === postId);
 
   // If the post is gone after a load (deleted, marked done, expired), close.
   useEffect(() => {
@@ -71,6 +83,9 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
         onDeleted={onClose}
       />
     );
+  } else if (post && kind === "sellz") {
+    accent = "#39ff14";
+    card = <SellzListingCard post={post as SellzPost} expanded saved={false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
   } else if (post && kind === "gig") {
     const gig = post as GigPost;
     const isLooking = gig.postType === "LOOKING_FOR_WORK";

@@ -53,6 +53,7 @@ const Schedule = lazy(() => import("./pages/Schedule"));
 const Submit = lazy(() => import("./pages/Submit"));
 const PrideWork = lazy(() => import("./pages/PrideWork"));
 const Gifting = lazy(() => import("./pages/Gifting"));
+const Sellz = lazy(() => import("./pages/Sellz"));
 const Housing = lazy(() => import("./pages/Housing"));
 const HousingNew = lazy(() => import("./pages/HousingNew"));
 const HousingPost = lazy(() => import("./pages/HousingPost"));
@@ -85,6 +86,7 @@ const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
   "/events": Events,
   "/the-hauz": Housing,
   "/gifting": Gifting,
+  "/sellz": Sellz,
   "/pride-work": PrideWork,
   "/spotted": MissedConnections,
   "/directory": Directory,
@@ -165,6 +167,7 @@ function AppLayout() {
               {() => <Redirect to="/pride-work" />}
             </Route>
             <Route path="/gifting" component={Gifting} />
+            <Route path="/sellz" component={Sellz} />
             <Route path="/the-hauz/new" component={HousingNew} />
             <Route path="/the-hauz/:id" component={HousingPost} />
             <Route path="/the-hauz" component={Housing} />

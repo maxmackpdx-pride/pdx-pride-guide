@@ -29,6 +29,7 @@ import { BetterSqliteSessionStore } from "./sessionStore";
 import {
   insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
   insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema,
+  insertSellzPostSchema, insertSellzInterestSchema, insertSellzReportSchema,
   insertBeachCheckinSchema, insertBeachCarpoolPostSchema, insertRiverBratsReportSchema,
 } from "@shared/schema";
 import { z } from "zod";
@@ -708,6 +709,41 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
   };
 }
 
+function publicSellzPost(post: any, viewerUserId?: number) {
+  const userId = Number(post.userId ?? post.user_id);
+  const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
+  const isMine = !!viewerUserId && userId === viewerUserId;
+  const interests = (Array.isArray(post.interests) ? post.interests : []).map((interest: any) => ({
+    id: interest.id,
+    userId: Number(interest.userId ?? interest.user_id),
+    note: interest.note,
+    offerCents: interest.offerCents ?? interest.offer_cents ?? null,
+    status: interest.status,
+    username: interest.username,
+    displayName: interest.displayName,
+    photoUrl: interest.photoUrl,
+    avatarChoice: interest.avatarChoice,
+    avatarRing: interest.avatarRing || "none",
+  }));
+  const safeInterests = isMine ? interests : interests.filter((interest: any) => interest.userId === viewerUserId);
+  return {
+    id: post.id, userId, title: post.title, description: post.description,
+    category: post.category, condition: post.condition,
+    priceCents: Number(post.priceCents ?? post.price_cents),
+    negotiable: Boolean(post.negotiable), neighborhood: post.neighborhood,
+    pickupPreference: post.pickupPreference ?? post.pickup_preference,
+    photoUrls: post.photoUrls || [], status: post.status,
+    selectedInterestId: isMine ? selectedInterestId : null,
+    expiresAt: post.expiresAt ?? post.expires_at,
+    createdAt: post.createdAt ?? post.created_at,
+    interestCount: Number(post.interestCount || 0), interests: safeInterests,
+    username: post.username, displayName: post.displayName,
+    posterPhotoUrl: post.posterPhotoUrl, avatarChoice: post.avatarChoice,
+    posterAvatarRing: post.posterAvatarRing || "none", isMine,
+    viewerSelected: safeInterests.some((interest: any) => interest.userId === viewerUserId && interest.id === selectedInterestId),
+  };
+}
+
 function publicGigPost(gig: any, viewerUserId?: number) {
   // contactEmail and adminNotes are workflow-only fields. Contact happens via
   // contextual inbox messaging; moderation notes never enter a public payload.
@@ -1280,6 +1316,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const files = Array.isArray(req.files) ? req.files : [];
     if (!files.length) return res.status(400).json({ error: "Upload 1 or 2 image files (jpg/png/gif/webp, max 8MB each)" });
     res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
+  });
+  app.post("/api/upload/sellz", requireAuth, upload.array("photos", 6), (req: any, res: any) => {
+    const files = Array.isArray(req.files) ? req.files : [];
+    if (!files.length) return res.status(400).json({ error: "Upload 1 to 6 image files (jpg/png/gif/webp, max 8MB each)" });
+    res.json({ urls: files.slice(0, 6).map((file: any) => `/uploads/${file.filename}`) });
   });
 
   // Public "Message me" / sponsorship pitch / custom order form - no login required, lands in Owner Desk only.
@@ -2526,6 +2567,125 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const status = e.message === "Not allowed" ? 403 : e.message === "Post not found" ? 404 : 400;
       res.status(status).json({ error: e.message });
     }
+  });
+
+  // ─── SELLZ: MEMBER MARKETPLACE ───────────────────────────────────────────
+  app.get("/api/sellz", (req: any, res) => {
+    res.json(storage.getSellzPosts().map((post: any) => publicSellzPost(post, req.session?.userId)));
+  });
+
+  app.get("/api/sellz/mine", requireAuth, (req, res) => {
+    res.json(storage.getSellzPostsByUser(req.session.userId!).map((post: any) => publicSellzPost(post, req.session.userId!)));
+  });
+  app.get("/api/sellz/saved/ids", requireAuth, (req, res) => {
+    res.json(storage.getSellzSavedIds(req.session.userId!));
+  });
+
+  app.get("/api/sellz/:id", (req: any, res) => {
+    const post = storage.getSellzPost(Number(req.params.id));
+    if (!post) return res.status(404).json({ error: "Listing not found" });
+    res.json(publicSellzPost(post, req.session?.userId));
+  });
+
+  app.post("/api/sellz", requireAuth, (req, res) => {
+    try {
+      if (!req.body.acceptRules) throw new Error("You must agree to the SELLZ marketplace rules.");
+      const priceCents = Math.round(Number(req.body.price) * 100);
+      if (!Number.isFinite(priceCents) || priceCents < 100 || priceCents > 100000000) {
+        throw new Error("Enter a price between $1 and $1,000,000.");
+      }
+      const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
+      if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) {
+        throw new Error("This listing appears to include a restricted item.");
+      }
+      if (moderationGate(res, "SELLZ marketplace", { title: req.body.title, description: req.body.description })) return;
+      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 6) : [];
+      const post = storage.createSellzPost(insertSellzPostSchema.parse({
+        userId: req.session.userId!,
+        title: String(req.body.title || "").trim(),
+        description: String(req.body.description || "").trim(),
+        category: String(req.body.category || "Other").trim(),
+        condition: String(req.body.condition || "Good").trim(),
+        priceCents,
+        negotiable: Boolean(req.body.negotiable),
+        neighborhood: String(req.body.neighborhood || "Portland").trim(),
+        pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
+        photoUrls: JSON.stringify(photoUrls),
+      }));
+      res.json(publicSellzPost(post, req.session.userId!));
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.put("/api/sellz/:id", requireAuth, (req, res) => {
+    try {
+      const priceCents = Math.round(Number(req.body.price) * 100);
+      const post = storage.updateSellzPost(Number(req.params.id), req.session.userId!, {
+        title: String(req.body.title || "").trim(), description: String(req.body.description || "").trim(),
+        category: String(req.body.category || "Other").trim(), condition: String(req.body.condition || "Good").trim(),
+        priceCents, negotiable: Boolean(req.body.negotiable), neighborhood: String(req.body.neighborhood || "Portland").trim(),
+        pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
+      });
+      res.json(publicSellzPost(post, req.session.userId!));
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+  });
+
+  app.post("/api/sellz/:id/interest", requireAuth, (req, res) => {
+    try {
+      const post = storage.getSellzPost(Number(req.params.id));
+      if (!post) return res.status(404).json({ error: "Listing not found" });
+      const note = String(req.body.note || "Is this available?").trim();
+      const offerCents = req.body.offer == null || req.body.offer === "" ? null : Math.round(Number(req.body.offer) * 100);
+      if (offerCents != null && (!Number.isFinite(offerCents) || offerCents < 100)) throw new Error("Enter a valid offer.");
+      if (moderationGate(res, "SELLZ buyer message", { note })) return;
+      const interest = storage.addSellzInterest(insertSellzInterestSchema.parse({
+        postId: Number(req.params.id), userId: req.session.userId!, note, offerCents,
+      }));
+      const buyer = storage.getUserById(req.session.userId!);
+      storage.sendMessage(req.session.userId!, Number(post.user_id), `SELLZ: ${post.title}`,
+        `${buyer?.displayName || buyer?.username || "Someone"}: ${note}${offerCents ? `\nOffer: $${(offerCents / 100).toFixed(2)}` : ""}`,
+        { contextType: "SELLZ", contextId: post.id, contextLabel: post.title });
+      res.json(interest);
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+  });
+
+  app.post("/api/sellz/:id/interests/:interestId/choose", requireAuth, (req, res) => {
+    try {
+      const selected = storage.chooseSellzInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
+      const post = storage.getSellzPost(Number(req.params.id));
+      storage.sendMessage(req.session.userId!, Number(selected.user_id), `Reserved for you: ${post?.title || "SELLZ listing"}`,
+        String(req.body.note || "You are first in line. Coordinate payment and pickup here."),
+        { contextType: "SELLZ", contextId: Number(req.params.id), contextLabel: post?.title || null });
+      res.json(selected);
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+  });
+
+  for (const [path, status] of [["reserve", "RESERVED"], ["sold", "SOLD"], ["reopen", "ACTIVE"]] as const) {
+    app.post(`/api/sellz/:id/${path}`, requireAuth, (req, res) => {
+      try { storage.setSellzStatus(Number(req.params.id), req.session.userId!, status); res.json({ ok: true }); }
+      catch (e: any) { res.status(400).json({ error: e.message }); }
+    });
+  }
+
+  app.post("/api/sellz/:id/renew", requireAuth, (req, res) => {
+    try { storage.renewSellzPost(Number(req.params.id), req.session.userId!); res.json({ ok: true }); }
+    catch (e: any) { res.status(400).json({ error: e.message }); }
+  });
+
+  app.post("/api/sellz/:id/report", requireAuth, (req, res) => {
+    try {
+      storage.reportSellzPost(insertSellzReportSchema.parse({ postId: Number(req.params.id), reporterUserId: req.session.userId!, reason: String(req.body.reason || "").trim() }));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+  });
+  app.post("/api/sellz/:id/save", requireAuth, (req, res) => {
+    res.json({ saved: storage.toggleSellzSave(Number(req.params.id), req.session.userId!) });
+  });
+
+  app.delete("/api/sellz/:id", requireAuth, (req, res) => {
+    try { storage.deleteSellzPost(Number(req.params.id), req.session.userId!); res.json({ ok: true }); }
+    catch (e: any) { res.status(400).json({ error: e.message }); }
   });
 
   // ─── USER AUTH ────────────────────────────────────────────────────────────
