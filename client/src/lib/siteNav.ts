@@ -10,20 +10,6 @@ export type NavEntry =
   | { type: "link"; href: string; label: string }
   | { type: "dropdown"; id: string; label: string; items: NavLinkItem[] };
 
-const Z_NAV: NavLinkItem[] = [
-  { href: "/z", label: "All z/ addresses" },
-  { href: "/z/happening", label: "z/happening · EVENTZ" },
-  { href: "/z/hauz", label: "z/hauz · THE HAÜZ" },
-  { href: "/z/sellz", label: "z/sellz · SELLZ" },
-  { href: "/z/gifz", label: "z/gifz · GIFTZ" },
-  { href: "/z/gigz", label: "z/gigz · GIGZ" },
-  { href: "/z/mizzed", label: "z/mizzed · MIZZED CONNECTION" },
-  { href: "/z/placez", label: "z/placez · OUR PLACEZ" },
-  { href: "/z/out", label: "z/out · OUTZ" },
-  { href: "/z/squadz", label: "z/squadz · MY SQUADZ" },
-  { href: "/z/dark", label: "z/dark · ZAYDARK" },
-];
-
 /** Primary nav - labels match on-page titles where possible. */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/about", label: "About" },
@@ -45,12 +31,7 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/directory", label: "Directory" },
     ],
   },
-  {
-    type: "dropdown",
-    id: "z-addresses",
-    label: "z/",
-    items: Z_NAV,
-  },
+  { type: "link", href: "/z", label: "z/" },
   { type: "link", href: "/next", label: "NEXT" },
 ];
 

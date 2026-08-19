@@ -454,7 +454,20 @@
 }
 @keyframes zCardIn { to { opacity: 1; transform: none } }
 .z-index__board:hover { transform: translateY(-3px); filter: brightness(1.06) }
-.z-index__board > * { position: relative; z-index: 3 }
+.z-index__board > :not(.pdx-rainbow-rule) {
+  position: relative;
+  z-index: 3;
+}
+.z-index__board > .pdx-rainbow-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 6;
+  margin: 0;
+  pointer-events: none;
+}
 /* not built yet: the address is real, the board is not */
 .z-index__board--pending { border-style: dashed }
 

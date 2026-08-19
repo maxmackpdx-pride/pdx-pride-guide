@@ -267,6 +267,10 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const params = new URLSearchParams();
     if (!isSpaces && activeType !== "ALL") params.set("type", activeType);
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    const incomingFrom = new URLSearchParams(window.location.search).get("from") ?? "";
+    if (/^\/(z|directory)(\/|\?|$)/.test(incomingFrom) && !incomingFrom.startsWith("//")) {
+      params.set("from", incomingFrom);
+    }
     const next = params.toString();
     return next ? `?${next}` : "";
   }, [activeType, isSpaces, searchQuery]);
@@ -295,7 +299,9 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const closePlace = useCallback(() => {
     setSelectedPlace(null);
     setPlaceOriginRect(null);
-    setLocation(`${boardPath}${directoryQuerySuffix()}`);
+    const from = new URLSearchParams(window.location.search).get("from") ?? "";
+    const safeFrom = /^\/(z|directory)(\/|\?|$)/.test(from) && !from.startsWith("//");
+    setLocation(safeFrom ? from : `${boardPath}${directoryQuerySuffix()}`);
   }, [setLocation, boardPath, directoryQuerySuffix]);
 
   // After closing a place (or remounting on the list), put scroll back where the user was.

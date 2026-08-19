@@ -19,7 +19,7 @@ import {
   type ZCategoryAddress,
 } from "@/lib/zCategoryAddresses";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
-import { placePath } from "@shared/placeSlug";
+import { placePath, slugifyPlaceName } from "@shared/placeSlug";
 import {
   EVENT_TYPE_FILTERS,
   EVENT_TYPE_TAG_COLORS,
@@ -229,7 +229,14 @@ function directoryRowsForBoard(path: string, rows: Row[]): Row[] {
   return rows;
 }
 
-function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: string; age: string }> {
+function withFrom(href: string, from = "/z"): string {
+  const [path, query] = href.split("?");
+  const params = new URLSearchParams(query || "");
+  params.set("from", from);
+  return `${path}?${params.toString()}`;
+}
+
+function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: string; age: string; href: string }> {
   const scoped = directoryRowsForBoard(path, rows);
   const sorted = [...scoped].sort((left, right) =>
     String(right.createdAt ?? right.updatedAt ?? right.startTime ?? "").localeCompare(
@@ -239,6 +246,14 @@ function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: st
   return sorted.slice(0, 3).flatMap(row => {
     const title = String(row.title ?? row.name ?? row.body ?? "").trim();
     if (!title) return [];
+    const id = Number(row.id);
+    const listing = Number.isFinite(id) && id > 0
+      ? path === "squadz"
+        ? `/z/squadz/${id}/${slugifyPlaceName(title)}`
+        : path === "placez"
+          ? placePath(id, title)
+          : zUrl(path)
+      : zUrl(path);
     const meta = [
       row.venueName,
       row.neighborhood,
@@ -249,7 +264,12 @@ function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: st
       path === "gigz" && row.postType === "POSTING_GIG" ? "Gig" : "",
       path === "gigz" && row.postType === "LOOKING_FOR_WORK" ? "Talent" : "",
     ].map(value => String(value ?? "").trim()).filter(Boolean).join(" · ");
-    return [{ title, meta, age: ageLabel(row.createdAt ?? row.updatedAt ?? row.startTime) }];
+    return [{
+      title,
+      meta,
+      age: ageLabel(row.createdAt ?? row.updatedAt ?? row.startTime),
+      href: withFrom(listing),
+    }];
   });
 }
 
@@ -306,7 +326,7 @@ function SubcategoryRows({
       {subs.map(sub => (
         <li key={sub.key} className={sub.businessId != null ? "z-index__sub-item z-index__sub-item--listing" : "z-index__sub-item"}>
           <Link
-            href={sub.href ?? zUrl(sub.path)}
+            href={withFrom(sub.href ?? zUrl(sub.path))}
             className="z-index__sub"
             style={sub.color ? ({ ["--sub-c" as string]: sub.color }) : undefined}
           >
@@ -381,7 +401,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
             label: neighborhood,
             path: `squadz/${id}`,
             route: placePath(id, name),
-            href: placePath(id, name),
+            href: withFrom(`/z/squadz/${id}/${slugifyPlaceName(name)}`),
             displayAddress: name,
             color: ACCENT.squadz,
             count: null,
@@ -470,12 +490,12 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
 
   return (
     <section
-      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}${address.path === "happening" ? " pdx-glass--rainbow" : ""}`}
+      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}`}
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
       data-address={address.path}
     >
-      <span className="pdx-refract-seam" aria-hidden="true" />
+      <span className="pdx-rainbow-rule" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
         <span className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
           {address.display}
@@ -529,7 +549,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
         <div className="z-index__newest">
           <span className="z-index__newest-label">{POSTS_LABEL[address.path] ?? "Newest"}</span>
           {posts.map(post => (
-            <Link key={post.title} href={zUrl(address.path)} className="z-index__post">
+            <Link key={post.title} href={post.href} className="z-index__post">
               <span className="z-index__post-title">{post.title}</span>
               <span className="z-index__post-age">{post.age}</span>
               {post.meta ? <span className="z-index__post-meta">{post.meta}</span> : null}
