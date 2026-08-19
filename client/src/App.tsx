@@ -90,6 +90,7 @@ const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
   "/directory": Directory,
   "/z/out/rooster-rock": RoosterRock,
   "/z/out/sauvie-island": SauvieIsland,
+  "/next": Darkroom,
 };
 
 function isHubPath(path: string) {
@@ -138,8 +139,10 @@ function AppLayout() {
                 {() => <Redirect to={categoryAddress.route} />}
               </Route>
             ))}
-            <Route path="/z/spaces/:id/:slug?">{() => <Directory surface="spaces" />}</Route>
-            <Route path="/z/spaces">{() => <Directory surface="spaces" />}</Route>
+            <Route path="/z/squadz/:id/:slug?">{() => <Directory surface="spaces" />}</Route>
+            <Route path="/z/squadz">{() => <Directory surface="spaces" />}</Route>
+            <Route path="/z/spaces/:id/:slug?">{() => <Redirect to="/z/squadz" />}</Route>
+            <Route path="/z/spaces">{() => <Redirect to="/z/squadz" />}</Route>
             {[...Z_ADDRESSES]
               .sort((a, b) => b.path.length - a.path.length)
               .map(address => (

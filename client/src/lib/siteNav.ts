@@ -14,13 +14,14 @@ const Z_NAV: NavLinkItem[] = [
   { href: "/z", label: "All z/ addresses" },
   { href: "/z/happening", label: "z/happening · EVENTZ" },
   { href: "/z/hauz", label: "z/hauz · THE HAÜZ" },
-  { href: "/z/market", label: "z/market · SELLZ" },
+  { href: "/z/sellz", label: "z/sellz · SELLZ" },
   { href: "/z/gifz", label: "z/gifz · GIFTZ" },
   { href: "/z/gigz", label: "z/gigz · GIGZ" },
   { href: "/z/mizzed", label: "z/mizzed · MIZZED CONNECTION" },
-  { href: "/z/directory", label: "z/directory · OUR PLACEZ" },
+  { href: "/z/placez", label: "z/placez · OUR PLACEZ" },
   { href: "/z/out", label: "z/out · OUTZ" },
-  { href: "/z/spaces", label: "z/spaces · MY SQUADZ" },
+  { href: "/z/squadz", label: "z/squadz · MY SQUADZ" },
+  { href: "/z/dark", label: "z/dark · ZAYDARK" },
 ];
 
 /** Primary nav - labels match on-page titles where possible. */

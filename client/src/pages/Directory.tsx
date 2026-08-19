@@ -207,12 +207,12 @@ type DirectoryProps = {
 export default function Directory({ surface = "directory" }: DirectoryProps) {
   const isSpaces = surface === "spaces";
   const [directoryRouteMatch, directoryRouteParams] = useRoute("/directory/:id/:slug?");
-  const [spacesRouteMatch, spacesRouteParams] = useRoute("/z/spaces/:id/:slug?");
+  const [spacesRouteMatch, spacesRouteParams] = useRoute("/z/squadz/:id/:slug?");
   const [, setLocation] = useLocation();
   const routeMatch = isSpaces ? spacesRouteMatch : directoryRouteMatch;
   const routeParams = isSpaces ? spacesRouteParams : directoryRouteParams;
   const routePlaceId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
-  const boardPath = isSpaces ? "/z/spaces" : "/directory";
+  const boardPath = isSpaces ? "/z/squadz" : "/directory";
   const listingPath = useCallback(
     (biz: Pick<Business, "id" | "name">) => isSpaces
       ? `${boardPath}/${biz.id}/${slugifyPlaceName(biz.name)}`
@@ -601,7 +601,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   return (
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
       <ZBoardAddressStrip
-        path={isSpaces || activeType === "group" ? "spaces" : "directory"}
+        path={isSpaces || activeType === "group" ? "squadz" : "placez"}
         board={isSpaces || activeType === "group" ? "MY SQUADZ" : "OUR PLACEZ"}
       />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

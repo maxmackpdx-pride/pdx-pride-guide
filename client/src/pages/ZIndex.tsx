@@ -50,15 +50,16 @@ const ACCENT: Record<string, string> = {
   hauz: "var(--panel-cyan, #19e3ff)",       // HOUSING_BOARD_ACCENT, shared/housing.ts
   gifz: "var(--board-gifting, #ccff00)",    // --board-gifting, index.css
   gigz: "var(--board-gigs, #6e3dff)",       // --board-gigs, index.css
-  market: "var(--neon-yellow, #ccff00)",
+  sellz: "var(--neon-green, #39ff14)",
   mizzed: "var(--board-spotted, #ff00cc)",  // --board-spotted, index.css
   // The rest use Zaylist tokens; a nested address inherits its parent colour.
   happening: "var(--neon-orange, #ff6600)",
-  directory: "var(--neon-red, #ff2400)",
+  placez: "var(--neon-blue, #3a6bff)",
   out: "var(--neon-orange, #ff6600)",
   "out/rooster-rock": "var(--neon-orange, #ff6600)",
   "out/sauvie-island": "var(--neon-green, #39ff14)",
-  spaces: "#ffd700",                        // TYPE_COLORS.group, directoryTheme.ts
+  squadz: "#00c2ff",
+  dark: "var(--neon-red, #ff2400)",
 };
 
 /**
@@ -94,16 +95,17 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   gifz: { src: "/brand/family/giftz.svg", alt: "GIFTZ" },
   gigz: { src: "/brand/family/gigz.svg", alt: "GIGZ" },
   hauz: { src: "/brand/family/the-hauz.svg", alt: "THE HAÜZ" },
-  spaces: { src: "/brand/family/my-squadz.svg", alt: "MY SQUADZ" },
+  squadz: { src: "/brand/family/my-squadz.svg", alt: "MY SQUADZ" },
   out: { src: "/brand/family/outz.svg", alt: "OUTZ" },
+  dark: { src: "/brand/family/zaydark.svg", alt: "ZAYDARK" },
   // Glyphs traced out of the real masters rather than redrawn: the letter
   // library PNG for M I D L K R T S V H, Z/SPACE for P A C E, GIFTZ for Z. N is
   // built from the library H, keeping its exact tapered stems and swapping the
   // crossbar for a diagonal at the same stroke weight, because no mark in the
   // family contains an N.
-  directory: { src: "/brand/family/our-placez.svg", alt: "OUR PLACEZ" },
+  placez: { src: "/brand/family/our-placez.svg", alt: "OUR PLACEZ" },
   mizzed: { src: "/brand/family/mizzed-connection.svg", alt: "MIZZED CONNECTION" },
-  market: { src: "/brand/family/sellz.svg", alt: "SELLZ" },
+  sellz: { src: "/brand/family/sellz.svg", alt: "SELLZ" },
   happening: { src: "/brand/family/eventz.svg", alt: "EVENTZ" },
 };
 
@@ -167,8 +169,8 @@ const COUNT_ENDPOINT: Record<string, string> = {
   gifz: "/api/gifting",
   gigz: "/api/gigs",
   mizzed: "/api/missed-connections",
-  directory: "/api/directory",
-  spaces: "/api/directory",
+  placez: "/api/directory",
+  squadz: "/api/directory",
 };
 
 type Row = Record<string, unknown>;
@@ -197,9 +199,9 @@ const VISIBLE_SUBS = 4;
 
 /** Put the Places/Directory hub at the center seam without changing canonical address order. */
 const Z_INDEX_ADDRESSES = (() => {
-  const addresses = Z_ADDRESSES.filter(address => address.path !== "directory");
-  const directory = Z_ADDRESSES.find(address => address.path === "directory");
-  if (directory) addresses.splice(4, 0, directory);
+  const addresses = Z_ADDRESSES.filter(address => address.path !== "placez");
+  const placez = Z_ADDRESSES.find(address => address.path === "placez");
+  if (placez) addresses.splice(2, 0, placez);
   return addresses;
 })();
 
@@ -293,8 +295,8 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const wordmark = WORDMARK[address.path];
   const photo = CARD_PHOTO[address.path];
   const hasBoard = address.route !== null;
-  const isDirectoryHub = address.path === "directory";
-  const isSpacesBoard = address.path === "spaces";
+  const isDirectoryHub = address.path === "placez";
+  const isSpacesBoard = address.path === "squadz";
 
   const subs = useMemo<Sub[]>(() => {
     if (!hasBoard) return [];
@@ -311,7 +313,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           count: null,
         }));
     }
-    if (address.path === "spaces") {
+    if (address.path === "squadz") {
       return rows
         .filter(row => String(row.type ?? "") === "group")
         .map(row => {
@@ -319,22 +321,22 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
           const name = String(row.name ?? "Club or group");
           const neighborhood = String(row.neighborhood ?? "Portland");
           return {
-            boardPath: "spaces",
+            boardPath: "squadz",
             key: String(id),
             label: neighborhood,
-            path: `spaces/${id}`,
+            path: `squadz/${id}`,
             route: placePath(id, name),
             href: placePath(id, name),
             displayAddress: name,
-            color: ACCENT.spaces,
+            color: ACCENT.squadz,
             count: null,
             businessId: id,
             isFollowing: Boolean(row.isFollowing),
           };
         });
     }
-    if (address.path === "directory") {
-      // Clubs & Groups owns the complete z/spaces board. Do not duplicate it
+    if (address.path === "placez") {
+      // Clubs & Groups owns the complete z/squadz board. Do not duplicate it
       // as a category inside the Places card even though Directory still uses
       // the underlying `group` type for compatibility.
       const availableKeys = Object.keys(TYPE_LABELS).filter(key => key !== "group");
@@ -401,7 +403,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   }, [address.path, hasBoard, rows]);
 
   const countable = !!COUNT_ENDPOINT[address.path];
-  const boardCount = address.path === "spaces"
+  const boardCount = address.path === "squadz"
     ? rows.filter(row => String(row.type ?? "") === "group").length
     : rows.length;
   const countState = !countable ? "ready" : isPending ? "loading" : isError ? "error" : "ready";
@@ -480,7 +482,7 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
         </div>
       )}
       {isSpacesBoard ? (
-        <Link href="/directory?type=group" className="z-index__board-action">
+        <Link href="/z/squadz" className="z-index__board-action">
           Open all MY SQUADZ listings
         </Link>
       ) : null}
@@ -579,7 +581,7 @@ export default function ZIndex() {
             alt="Z/SPACE"
             decoding="async"
           />
-          <p className="z-hero__kicker">Portland &middot; every board &middot; one page</p>
+          <p className="z-hero__kicker">the index · every board · one page</p>
           <div className="z-hero__mark">
             <h1>
               {words.map((word, i) => (
@@ -594,8 +596,8 @@ export default function ZIndex() {
           </div>
           <div className="z-hero__copy">
             <p className="z-hero__lede">
-              Every board on one page, in plain words, in the order you read them.
-              Nothing here decides what you see first. Find an address and go.
+              Nine boards, newest posts first. Nothing here decides what you see.
+              Type an address and go.
             </p>
             <p className="z-hero__live">
               <span className="z-hero__dot" aria-hidden="true" />

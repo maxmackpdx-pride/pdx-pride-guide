@@ -50,15 +50,16 @@ export type ZAddress = {
 export const Z_ADDRESSES: ZAddress[] = [
   { path: "happening", display: "z/happening", board: "EVENTZ", route: "/events" },
   { path: "hauz", display: "z/hauz", board: "THE HAÜZ", route: "/the-hauz" },
-  { path: "market", display: "z/market", board: "SELLZ", route: null },
+  { path: "placez", display: "z/placez", board: "OUR PLACEZ", route: "/directory" },
   { path: "gifz", display: "z/gifz", board: "GIFTZ", route: "/gifting" },
   { path: "gigz", display: "z/gigz", board: "GIGZ", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "MIZZED CONNECTION", route: "/spotted" },
-  { path: "directory", display: "z/directory", board: "OUR PLACEZ", route: "/directory" },
+  { path: "squadz", display: "z/squadz", board: "MY SQUADZ", route: "/directory?type=group" },
   { path: "out", display: "z/out", board: "OUTZ", route: "/z/out/rooster-rock" },
   { path: "out/rooster-rock", display: "z/out/rooster-rock", board: "Rooster Rock", route: "/z/out/rooster-rock" },
   { path: "out/sauvie-island", display: "z/out/sauvie-island", board: "Sauvie Island", route: "/z/out/sauvie-island" },
-  { path: "spaces", display: "z/spaces", board: "MY SQUADZ", route: "/directory?type=group" },
+  { path: "dark", display: "z/dark", board: "ZAYDARK", route: "/next" },
+  { path: "sellz", display: "z/sellz", board: "SELLZ", route: null },
 ];
 
 /**
@@ -72,7 +73,15 @@ export const Z_ENCODED_ALIASES: Record<string, string> = {
   "/z/ha%C3%BCz": "/z/hauz",
   "/z/haüz": "/z/hauz",
   // Singular shipped briefly before Tucker confirmed the plural address.
-  "/z/space": "/z/spaces",
+  "/z/space": "/z/squadz",
+  "/z/spaces": "/z/squadz",
+  "/z/squads": "/z/squadz",
+  "/z/market": "/z/sellz",
+  "/z/sell": "/z/sellz",
+  "/z/directory": "/z/placez",
+  "/z/places": "/z/placez",
+  "/z/darkroom": "/z/dark",
+  "/z/zaydark": "/z/dark",
   // Accent normalization shipped after the first HAÜS category slug.
   "/z/hauz/forming-a-ha-s": "/z/hauz/forming-a-haus",
 };
@@ -91,6 +100,8 @@ export const Z_RESERVED_SLUGS: ReadonlySet<string> = new Set([
   // Marketing and static pages.
   "about", "contact", "legal", "access", "sponsors", "next", "darkroom",
   "help", "support",
+  // Retired first segments. Keep reserved so they never become user slugs.
+  "spaces", "market", "directory", "squads", "sell", "places",
   // The brand itself.
   "zaylist", "zay", "z",
 ]);

@@ -30,7 +30,7 @@ export default function ZAddressPending() {
    * otherwise.
    */
   const lede = `${address?.board ? `${address.board} is not built yet` : "This board is not built yet"}, so there is nothing here to show you. ${display} will be its address when it is.`;
-  const clubsLiveInDirectory = address?.path === "spaces";
+  const clubsLiveInDirectory = address?.path === "squadz";
 
   return (
     <div className="zine-page board-page min-h-screen">
@@ -44,7 +44,7 @@ export default function ZAddressPending() {
         actions={(
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {clubsLiveInDirectory ? (
-              <Link href="/z/directory/clubs-and-groups"><Button as="span" variant="solid">CLUBS IN PLACES</Button></Link>
+              <Link href="/z/squadz"><Button as="span" variant="solid">OPEN MY SQUADZ</Button></Link>
             ) : (
               <Link href="/"><Button as="span" variant="solid">HOME</Button></Link>
             )}
@@ -55,7 +55,7 @@ export default function ZAddressPending() {
       {clubsLiveInDirectory ? (
         <section className="board-path-card" style={{ maxWidth: 780, margin: "32px auto", padding: 24 }}>
           <p className="board-path-card__kicker">REAL DATA, RIGHT NOW</p>
-          <h2>MY SQUADZ lives at z/spaces.</h2>
+          <h2>MY SQUADZ lives at z/squadz.</h2>
           <p>The board uses the real group listings and detail pages from the Portland Directory, including persistent follow controls.</p>
         </section>
       ) : null}

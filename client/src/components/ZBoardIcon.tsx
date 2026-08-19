@@ -26,7 +26,7 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
     ),
   },
   // 01-community
-  spaces: {
+  squadz: {
     src: "01-community",
     d: (
       <>
@@ -36,7 +36,7 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
     ),
   },
   // 13-venue
-  directory: {
+  placez: {
     src: "13-venue",
     d: (
       <>
@@ -56,7 +56,7 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
     ),
   },
   // 20-boards
-  market: {
+  sellz: {
     src: "20-boards",
     d: (
       <>
@@ -114,6 +114,10 @@ const PATHS: Record<string, { src: string; d: React.ReactNode }> = {
         <circle cx="16.8" cy="12.3" r="1.7" fill="currentColor" stroke="none" />
       </>
     ),
+  },
+  dark: {
+    src: "25-dark",
+    d: <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5Z" />,
   },
 };
 
