@@ -1,9 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import ZBoardIcon from "@/components/ZBoardIcon";
 import VenueFollowButton from "@/components/VenueFollowButton";
 import {
   Z_ADDRESSES,
@@ -71,11 +70,6 @@ const ACCENT: Record<string, string> = {
  * them to its own accent and lays a scrim over the bottom two thirds, so the
  * type sits on near black no matter what the photograph is doing underneath.
  */
-const CARD_PHOTO: Record<string, string> = {
-  hauz: "/home/hausing/room-forming.jpg",
-  happening: "/home/flyers/sasha-colby-live.jpg",
-};
-
 /**
  * Wordmarks from the logo family, `client/public/brand/family/`, matching the
  * Foundation Library manifest at `design-system/assets/logo-family/`.
@@ -148,15 +142,6 @@ const HOUSING_SUB_ACCENT: Record<string, string> = {
 };
 
 
-/** Mote positions for the hero atmosphere, one per letter of the mark. */
-const MOTES: Array<[string, string, string]> = [
-  ["12%", "30%", "#00ffff"],
-  ["30%", "58%", "#ff00cc"],
-  ["50%", "26%", "#ccff00"],
-  ["70%", "60%", "#ff6600"],
-  ["88%", "34%", "#8800ff"],
-];
-
 /**
  * Endpoint each address counts from. Absent means there is no countable list
  * behind the address, so no number is shown rather than a misleading zero.
@@ -195,7 +180,71 @@ type Sub = ZCategoryAddress & {
   isFollowing?: boolean;
 };
 
-const VISIBLE_SUBS = 4;
+const VISIBLE_SUBS = 6;
+
+const MANTRA: Record<string, string> = {
+  gifz: "Keep it free · keep it kind · keep it moving",
+  gigz: "Need work? Need help? Both belong here.",
+  mizzed: "Stay kind · stay anonymous · reveal when ready",
+  squadz: "Clubs and groups you can just show up to",
+  dark: "Coming soon · the after-dark side of Zaylist",
+  sellz: "The address is real. The board is not built yet.",
+};
+
+const COUNT_LABEL: Record<string, string> = {
+  happening: "events",
+  hauz: "posts",
+  placez: "places",
+  gifz: "posts",
+  gigz: "posts",
+  mizzed: "posts",
+  squadz: "squadz",
+  out: "live conditions",
+  dark: "coming soon",
+  sellz: "not built yet",
+};
+
+const POSTS_LABEL: Record<string, string> = {
+  placez: "Recently added",
+  out: "Right now",
+  dark: "When it opens",
+  sellz: "When it opens",
+};
+
+function ageLabel(value: unknown): string {
+  const raw = String(value ?? "");
+  if (!raw) return "";
+  const then = new Date(raw).getTime();
+  if (!Number.isFinite(then)) return "";
+  const minutes = Math.max(0, Math.round((Date.now() - then) / 60000));
+  if (minutes < 60) return `${Math.max(1, minutes)}m`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(hours / 24)}d`;
+}
+
+function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: string; age: string }> {
+  const sorted = [...rows].sort((left, right) =>
+    String(right.createdAt ?? right.updatedAt ?? right.startTime ?? "").localeCompare(
+      String(left.createdAt ?? left.updatedAt ?? left.startTime ?? ""),
+    ),
+  );
+  return sorted.slice(0, 3).flatMap(row => {
+    const title = String(row.title ?? row.name ?? row.body ?? "").trim();
+    if (!title) return [];
+    const meta = [
+      row.venueName,
+      row.neighborhood,
+      row.location,
+      path === "placez" ? TYPE_LABELS[String(row.type ?? "")] : "",
+      path === "gifz" && row.postType === "ISO" ? "In search of" : "",
+      path === "gifz" && row.postType === "GIFT" ? "Offered" : "",
+      path === "gigz" && row.postType === "POSTING_GIG" ? "Gig" : "",
+      path === "gigz" && row.postType === "LOOKING_FOR_WORK" ? "Talent" : "",
+    ].map(value => String(value ?? "").trim()).filter(Boolean).join(" · ");
+    return [{ title, meta, age: ageLabel(row.createdAt ?? row.updatedAt ?? row.startTime) }];
+  });
+}
 
 /** Put the Places/Directory hub at the center seam without changing canonical address order. */
 const Z_INDEX_ADDRESSES = (() => {
@@ -293,7 +342,6 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
   const wordmark = WORDMARK[address.path];
-  const photo = CARD_PHOTO[address.path];
   const hasBoard = address.route !== null;
   const isDirectoryHub = address.path === "placez";
   const isSpacesBoard = address.path === "squadz";
@@ -410,65 +458,51 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const firstSubs = isDirectoryHub ? subs : subs.slice(0, VISIBLE_SUBS);
   const remainingSubs = isDirectoryHub ? [] : subs.slice(VISIBLE_SUBS);
 
+  const posts = useMemo(() => newestPosts(address.path, rows), [address.path, rows]);
+  const mantra = MANTRA[address.path];
+
   return (
     <section
-      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}${isDirectoryHub ? " z-index__board--hub" : ""}`}
+      className={`z-index__board pdx-glass-card pdx-glass-rebind${hasBoard ? "" : " z-index__board--pending"}${address.path === "happening" ? " pdx-glass--rainbow" : ""}`}
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
       data-address={address.path}
-      data-photo={photo ? "1" : undefined}
     >
-      {photo ? (
-        <span className="z-index__photo" aria-hidden="true">
-          <img src={photo} alt="" loading="lazy" decoding="async" />
-          <span className="z-index__photo-tint" />
-          <span className="z-index__photo-scrim" />
-        </span>
-      ) : null}
-      {isDirectoryHub ? (
-        <img
-          className="z-index__hub-blueprint"
-          src="/brand/waypoints/next-blueprint-reference-b.png"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : null}
-      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+      <span className="pdx-refract-seam" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
-        <h2 className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
-          <ZBoardIcon path={address.path} />
-          {address.path.split("/").at(-1)}
-        </h2>
-        <span className="z-index__wordmark-slot">
-          {wordmark ? (
-            <img
-              className="z-index__wordmark"
-              src={wordmark.src}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <span className="z-index__board-name">{isDirectoryHub ? "Places" : address.board}</span>
-          )}
-          {isDirectoryHub ? <span className="z-index__hub-label">Portland community directory</span> : null}
+        <span className="z-index__addr" id={`z-board-${address.path.replace("/", "-")}`}>
+          {address.display}
         </span>
-        <span className={`z-index__count${hasBoard ? "" : " z-index__count--none"}`}>
-          {!hasBoard
-            ? "not built yet"
-            : !countable
-              ? null
-              : countState === "loading"
-                ? <i className="z-index__pending" role="status" aria-label="Loading count" />
-                : countState === "error"
-                  ? <span aria-label="Count unavailable">\u2014</span>
-                  : boardCount}
+        <span className="z-index__head-row">
+          <span className="z-index__wordmark-slot">
+            {wordmark ? (
+              <img
+                className="z-index__wordmark"
+                src={wordmark.src}
+                alt={wordmark.alt}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <span className="z-index__board-name">{address.board}</span>
+            )}
+          </span>
+          <span className={`z-index__count-block${hasBoard && countable ? "" : " z-index__count-block--muted"}`}>
+            <b>
+              {!hasBoard || !countable
+                ? "—"
+                : countState === "loading"
+                  ? ""
+                  : countState === "error"
+                    ? "—"
+                    : boardCount}
+            </b>
+            <small>{COUNT_LABEL[address.path] ?? "posts"}</small>
+          </span>
         </span>
       </Link>
 
-      {subs.length > 0 && (
+      {subs.length > 0 ? (
         <div className="z-index__categories">
           <SubcategoryRows subs={firstSubs} countState={countState} />
           {remainingSubs.length > 0 ? (
@@ -480,11 +514,21 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
             </details>
           ) : null}
         </div>
-      )}
-      {isSpacesBoard ? (
-        <Link href="/z/squadz" className="z-index__board-action">
-          Open all MY SQUADZ listings
-        </Link>
+      ) : null}
+
+      {mantra ? <p className="z-index__mantra">{mantra}</p> : null}
+
+      {posts.length > 0 ? (
+        <div className="z-index__newest">
+          <span className="z-index__newest-label">{POSTS_LABEL[address.path] ?? "Newest"}</span>
+          {posts.map(post => (
+            <Link key={post.title} href={zUrl(address.path)} className="z-index__post">
+              <span className="z-index__post-title">{post.title}</span>
+              <span className="z-index__post-age">{post.age}</span>
+              {post.meta ? <span className="z-index__post-meta">{post.meta}</span> : null}
+            </Link>
+          ))}
+        </div>
       ) : null}
     </section>
   );
@@ -496,11 +540,11 @@ export default function ZIndex() {
     "Portland, all at once. Every Zaylist board and every real category on one page: events, housing, gigs, free stuff, missed connections, and the community directory.",
   );
 
-  const heroRef = useRef<HTMLElement | null>(null);
   const [, setLocation] = useLocation();
   const [addressQuery, setAddressQuery] = useState("");
   const liveCount = TOP_LEVEL_Z_ADDRESSES.filter(address => address.route !== null).length;
   const heldCount = TOP_LEVEL_Z_ADDRESSES.length - liveCount;
+  const topBoards = Z_INDEX_ADDRESSES.filter(address => !address.path.includes("/"));
 
   const searchEntries = useMemo(() => [
     ...Z_ADDRESSES.map(address => ({
@@ -530,134 +574,66 @@ export default function ZIndex() {
     if (addressMatches[0]) setLocation(zUrl(addressMatches[0].path));
   };
 
-  /**
-   * Pointer parallax on the wordmark only. Pointer driven rather than scroll
-   * driven so it costs nothing on a phone, where there is no pointer.
-   */
-  const onHeroMove = (e: React.PointerEvent<HTMLElement>) => {
-    const el = heroRef.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty("--px", String((e.clientX - r.left) / r.width - 0.5));
-    el.style.setProperty("--py", String((e.clientY - r.top) / r.height - 0.5));
-  };
-  const onHeroLeave = () => {
-    const el = heroRef.current;
-    if (!el) return;
-    el.style.setProperty("--px", "0");
-    el.style.setProperty("--py", "0");
-  };
-
-  const words = ["Portland,", "<em>all</em>", "<em>at once.</em>"];
+  const visibleBoards = normalizedQuery
+    ? topBoards.filter(address =>
+        `${address.display} ${address.board} ${address.path}`.toLowerCase().includes(normalizedQuery),
+      )
+    : topBoards;
 
   return (
     <div className="z-index">
-      <section
-        className="z-hero"
-        ref={heroRef}
-        onPointerMove={onHeroMove}
-        onPointerLeave={onHeroLeave}
-      >
-        <span className="z-hero__grain" aria-hidden="true" />
-        <span className="z-hero__motes" aria-hidden="true">
-          {MOTES.map(([left, top, color], i) => (
-            <span
-              key={color + i}
-              className="z-mote"
-              style={{
-                left,
-                top,
-                background: color,
-                animationDelay: `${i * -1.7}s, ${i * -0.9}s`,
-              }}
-            />
-          ))}
-        </span>
-
-        <div className="z-hero__inner">
-          <img
-            className="z-hero__logo"
-            src="/brand/family/z-space.svg"
-            alt="Z/SPACE"
-            decoding="async"
-          />
-          <p className="z-hero__kicker">the index · every board · one page</p>
-          <div className="z-hero__mark">
-            <h1>
-              {words.map((word, i) => (
-                <span key={word} style={{ ["--d" as string]: `${90 + i * 80}ms` }}>
-                  {word.startsWith("<em>")
-                    ? <em>{word.replace(/<\/?em>/g, "")}</em>
-                    : word}
-                  {i < words.length - 1 ? " " : null}
-                </span>
-              ))}
-            </h1>
+      <header className="z-index__top">
+        <div className="z-index__intro">
+          <div className="z-index__brand">
+            <img src="/brand/family/z-space.svg" alt="Z/SPACE" decoding="async" />
+            <span>
+              <i aria-hidden="true" />
+              the index · every board · one page
+            </span>
           </div>
-          <div className="z-hero__copy">
-            <p className="z-hero__lede">
-              Nine boards, newest posts first. Nothing here decides what you see.
-              Type an address and go.
-            </p>
-            <p className="z-hero__live">
-              <span className="z-hero__dot" aria-hidden="true" />
-              <span>{liveCount} boards live &middot; {heldCount} not built yet</span>
-            </p>
-          </div>
-
-          <form className="z-address-search" role="search" onSubmit={submitAddress}>
-            <label htmlFor="z-address-input">Find a z/ address</label>
-            <div className="z-address-search__field">
-              <span aria-hidden="true">z/</span>
-              <input
-                type="search"
-                name="z-address"
-                id="z-address-input"
-                value={addressQuery}
-                onChange={event => setAddressQuery(event.target.value)}
-                placeholder="events, free, cafes, housing..."
-                autoComplete="off"
-              />
-              <button type="submit" disabled={!addressMatches.length}>Go</button>
-            </div>
-            {normalizedQuery ? (
-              <div className="z-address-search__results" id="z-address-results" aria-live="polite">
-                {addressMatches.length ? addressMatches.map(entry => (
-                  <Link key={entry.path} href={zUrl(entry.path)}>
-                    <span>z/{entry.path}</span>
-                    <small>{entry.label} &middot; {entry.detail}</small>
-                  </Link>
-                )) : (
-                  <p>No z/ address matches that search.</p>
-                )}
-              </div>
-            ) : null}
-          </form>
+          <h1>Portland, <em>all at once.</em></h1>
+          <p>Nine boards, newest posts first. Nothing here decides what you see. Type an address and go.</p>
         </div>
-      </section>
 
-      <nav className="z-address-index" aria-label="Zaylist board address index">
-        {TOP_LEVEL_Z_ADDRESSES.map(address => (
-          <Link key={address.path} href={zUrl(address.path)}>
-            {address.display}
-            {!address.route ? <small>not built</small> : null}
-          </Link>
-        ))}
-      </nav>
+        <div className="z-index__finder">
+          <form className="z-index__search" role="search" onSubmit={submitAddress}>
+            <label htmlFor="z-address-input">Find a z/ address</label>
+            <span aria-hidden="true">z/</span>
+            <input
+              type="search"
+              name="z-address"
+              id="z-address-input"
+              value={addressQuery}
+              onChange={event => setAddressQuery(event.target.value)}
+              placeholder="events, free stuff, housing, gigs, place"
+              autoComplete="off"
+            />
+            <button type="submit">Go</button>
+          </form>
+          <nav className="z-index__chips" aria-label="Board addresses">
+            {topBoards.map(address => (
+              <Link
+                key={address.path}
+                href={zUrl(address.path)}
+                className={!address.route ? "is-pending" : undefined}
+              >
+                {address.display}
+              </Link>
+            ))}
+          </nav>
+          <p className="z-index__stats">
+            {liveCount} boards live · {heldCount} not built yet
+          </p>
+        </div>
+      </header>
+
+      <div className="z-index__seam" aria-hidden="true" />
 
       <div className="z-index__grid">
-        {Z_INDEX_ADDRESSES.filter(address => !address.path.includes("/")).map((address, index) => (
+        {visibleBoards.map((address, index) => (
           <BoardColumn key={address.path} address={address} index={index} />
         ))}
       </div>
-
-      <hr className="pdx-rainbow-rule z-index__rule" aria-hidden="true" />
-
-      <p className="z-index__note">
-        <b>The boards together are the rainbow.</b> Each top-level board keeps one
-        colour, and a nested address inherits its parent. Counts come from the same endpoints the
-        boards themselves use, so a category with nothing in it stays honestly at zero.
-      </p>
     </div>
   );
 }

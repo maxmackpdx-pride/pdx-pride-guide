@@ -25,6 +25,146 @@
   overflow-x: hidden;
 }
 
+.z-index__top {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 22px 26px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, .85fr);
+  gap: 36px;
+  align-items: end;
+}
+.z-index__intro { display: flex; flex-direction: column; gap: 10px; }
+.z-index__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.z-index__brand img {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+.z-index__brand span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #c8fa3c;
+}
+.z-index__brand i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 0 0 10px #39ff14;
+  animation: zBlink 1.8s steps(1) infinite;
+}
+@keyframes zBlink { 0%, 100% { opacity: 1 } 50% { opacity: .2 } }
+.z-index__intro h1 {
+  margin: 0;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: .9;
+  font-size: clamp(38px, 4.4vw, 62px);
+  color: #fff;
+}
+.z-index__intro h1 em {
+  font-style: normal;
+  color: #ff00cc;
+}
+.z-index__intro p {
+  margin: 0;
+  max-width: 56ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c8c4bb;
+}
+.z-index__finder { display: flex; flex-direction: column; gap: 10px; }
+.z-index__search {
+  display: flex;
+  align-items: stretch;
+  background: rgba(0,0,0,.55);
+  border: 1px solid #24242c;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.z-index__search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.z-index__search span {
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 13px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 14px;
+  color: #666;
+}
+.z-index__search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: #fff;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  padding: 12px 6px;
+}
+.z-index__search button {
+  border: 0;
+  background: #19e3ff;
+  color: #050506;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 16px;
+  cursor: pointer;
+}
+.z-index__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.z-index__chips a {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 5px 9px;
+  text-decoration: none;
+  color: #e6e2d9;
+  border: 1px solid #24242c;
+}
+.z-index__chips a.is-pending {
+  color: #666;
+  border-style: dashed;
+}
+.z-index__stats {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #999;
+}
+.z-index__seam {
+  height: 2px;
+  margin: 4px 0 20px;
+  background: linear-gradient(90deg,#19e3ff,#c8fa3c,#ff1fa0,#ff8c00,#19e3ff);
+  background-size: 200% 100%;
+  animation: zSeam 9s linear infinite;
+}
+@keyframes zSeam { from { background-position: 0 0 } to { background-position: 200% 0 } }
+
+@media (max-width: 860px) {
+  .z-index__top { grid-template-columns: 1fr; gap: 18px; padding: 18px 16px 12px; }
+}
+
 /* ── hero ─────────────────────────────────────────────────
  * z0 ground   . true black
  * z1 grain    . behind everything neon, never over it
@@ -299,8 +439,13 @@
 /* ── board card: deep glass, real accent per board ──────── */
 .z-index__board {
   position: relative;
-  align-self: start;
-  padding: 18px 16px 15px;
+  padding: 15px 15px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 14px;
   opacity: 0;
   transform: translateY(16px);
   animation: zCardIn var(--fx-6) var(--fx-decel) forwards;
@@ -316,10 +461,7 @@
 /* Places is the useful center of the address system: one real directory with
    all twelve real types radiating from it. The address stays z/directory. */
 .z-index__board--hub {
-  grid-column: 1 / -1;
-  min-height: 430px;
-  padding: 24px;
-  overflow: hidden;
+  min-height: 0;
 }
 .z-index__hub-blueprint {
   position: absolute;
@@ -358,7 +500,119 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   column-gap: 22px;
 }
-.z-index__board-head { display: block; text-decoration: none; color: inherit }
+.z-index__board-head { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit }
+.z-index__addr {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.z-index__head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.z-index__wordmark-slot {
+  display: flex;
+  align-items: flex-end;
+  min-height: 46px;
+  min-width: 0;
+}
+.z-index__wordmark {
+  height: 38px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: left bottom;
+}
+.z-index__count-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.z-index__count-block b {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  font-size: 30px;
+  line-height: .85;
+  font-variant-numeric: tabular-nums;
+  color: var(--c);
+}
+.z-index__count-block small {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #666;
+}
+.z-index__count-block--muted b { color: #666; }
+.z-index__categories .z-index__subs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z-index__sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #17171c;
+  text-decoration: none;
+  color: #e6e2d9;
+  font-size: 12.5px;
+}
+.z-index__sub-count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  color: #999;
+  font-variant-numeric: tabular-nums;
+}
+.z-index__mantra {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #bdbab2;
+}
+.z-index__newest { display: flex; flex-direction: column; }
+.z-index__newest-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #666;
+  padding-bottom: 5px;
+}
+.z-index__post {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1px 10px;
+  padding: 7px 0;
+  border-top: 1px solid #17171c;
+  color: inherit;
+  text-decoration: none;
+}
+.z-index__post-title { font-size: 13px; color: #fff; line-height: 1.25; }
+.z-index__post-age {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  color: #666;
+}
+.z-index__post-meta {
+  grid-column: 1 / -1;
+  font-size: 11.5px;
+  color: #999;
+}
 /* ── full bleed photo card ────────────────────────────────
  * Only z/hauz and z/happening carry a photograph. Three stacked layers keep
  * the type readable on any image:
