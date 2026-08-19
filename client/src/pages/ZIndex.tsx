@@ -223,8 +223,15 @@ function ageLabel(value: unknown): string {
   return `${Math.round(hours / 24)}d`;
 }
 
+function directoryRowsForBoard(path: string, rows: Row[]): Row[] {
+  if (path === "squadz") return rows.filter(row => String(row.type ?? "") === "group");
+  if (path === "placez") return rows.filter(row => String(row.type ?? "") !== "group");
+  return rows;
+}
+
 function newestPosts(path: string, rows: Row[]): Array<{ title: string; meta: string; age: string }> {
-  const sorted = [...rows].sort((left, right) =>
+  const scoped = directoryRowsForBoard(path, rows);
+  const sorted = [...scoped].sort((left, right) =>
     String(right.createdAt ?? right.updatedAt ?? right.startTime ?? "").localeCompare(
       String(left.createdAt ?? left.updatedAt ?? left.startTime ?? ""),
     ),
