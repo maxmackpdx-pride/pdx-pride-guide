@@ -908,7 +908,9 @@
   .z-index__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
-  .z-index__grid { grid-template-columns: 1fr; gap: 12px }
+  /* Two-up, matching the events poster grid / z/squadz dock treatment
+     elsewhere on mobile - not a single stacked column of boards. */
+  .z-index__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; grid-auto-rows: minmax(0, auto) }
   .z-hero__mark h1 { font-size: clamp(46px, 15vw, 80px) }
   .z-hero__mark h1 span { display: block }
   .z-hero__logo { width: 94%; }
@@ -919,12 +921,43 @@
   .z-address-index a { flex: 0 0 auto }
   .z-address-search__results a { align-items: flex-start; flex-direction: column; gap: 2px }
   .z-address-search__results small { text-align: left }
-  .z-index__wordmark-slot { min-height: 104px }
-  .z-index__wordmark { width: min(100%, 400px) }
-  .z-index__board--hub { min-height: 0; padding: 18px 16px 15px }
-  .z-index__board--hub .z-index__board-name { font-size: clamp(58px, 22vw, 88px) }
+
+  /* Card compaction - a card is now a half-width cell, not the full
+     column, so the roomy desktop type scale has to come down a size. */
+  .z-index__board { padding: 13px 12px 12px; gap: 8px }
+  .z-index__addr { font-size: 9px; letter-spacing: .1em }
+  .z-index__head-row { gap: 8px }
+  .z-index__wordmark-slot { min-height: 56px; margin: 6px 0 6px }
+  .z-index__wordmark { width: min(100%, 220px) }
+  .z-index__board-name { font-size: clamp(24px, 10vw, 38px) }
+  .z-index__count-block b { font-size: 20px }
+  .z-index__count-block small { font-size: 8px }
+
+  /* Stack subs one per row instead of 2-up-within-2-up, which was
+     ellipsis-truncating labels at half width. */
+  .z-index__categories .z-index__subs { grid-template-columns: 1fr; gap: 0 }
+  .z-index__sub { min-height: 36px; padding: 4px 5px; font-size: 12px }
+  .z-index__sub-address { font-size: 9.5px }
+  .z-index__sub-label { font-size: 10px }
+  .z-index__more summary { min-height: 36px; font-size: 10px }
+
+  /* Mantra is a decorative one-liner - drop it at this size so the card
+     spends its height on real content (subs, newest posts). */
+  .z-index__mantra { display: none }
+
+  .z-index__newest-label { font-size: 8.5px }
+  .z-index__post { padding: 5px 0 }
+  .z-index__post-title { font-size: 11.5px }
+  .z-index__post-age { font-size: 9px }
+  .z-index__post-meta { font-size: 10px }
+  .z-index__board-action,
+  .z-index__open { min-height: 36px; font-size: 9.5px }
+
+  .z-index__board--hub { min-height: 0; padding: 14px 12px 13px }
+  .z-index__board--hub .z-index__wordmark-slot { min-height: 0; margin: 4px 0 8px }
+  .z-index__board--hub .z-index__board-name { font-size: clamp(30px, 15vw, 46px) }
   .z-index__board--hub .z-index__subs { grid-template-columns: 1fr }
-  .z-index__hub-blueprint { width: 125%; right: -52%; opacity: .07 }
+  .z-index__hub-blueprint { width: 200%; right: -90%; opacity: .06 }
 }
 @media (prefers-reduced-motion: reduce) {
   .z-index *, .z-index *::before, .z-index *::after {
