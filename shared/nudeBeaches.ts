@@ -112,6 +112,7 @@ export const ROOSTER_ROCK_PARKING = {
   dayUseOutOfState: "$12 / vehicle / day",
   annualOr: "$60 / year",
   annualOutOfState: "$75 / year",
+  hours: "Jun–Aug: 7am–10pm · Sep–May: 6am–dusk",
   note: "Day-use only - Oregon State Parks pass or pay at the fee machine / QR on site.",
 };
 
@@ -417,8 +418,9 @@ export function crossingVerdictFromLevel(ft: number): string {
   return "The water's low - you can likely wade, or even walk, to Sand Island.";
 }
 
-/** Official Sauvie Island beach parking permit portal (Collins, Walton, North Unit). */
-export const SAUVIE_ISLAND_PARKING_URL = "https://sauvieislandparking.com/";
+/** Official ODFW 2026 parking guidance for Collins, Walton, and North Unit beaches. */
+export const SAUVIE_ISLAND_PARKING_URL =
+  "https://myodfw.com/articles/parking-sauvie-island-wildlife-area";
 
 export const SAUVIE_ISLAND_WINDFINDER_URL =
   "https://www.windfinder.com/webcams/reeder_beach_sauvie_island";
@@ -461,7 +463,7 @@ export const SAUVIE_ISLAND_CHECKLIST: SauvieChecklistItem[] = [
   {
     step: "Check permit status",
     detail:
-      "Weekends and holidays through Labor Day need a beaches permit. Seasonal passes may be sold out - buy a daily $10 day pass online for your date (not the same as season sold-out).",
+      "From June 19 through Labor Day, Collins uses a limited Beaches permit on summer weekends and select holidays. Summer weekdays use the Wildlife Area permit instead. Check the official calendar before you drive.",
     href: SAUVIE_ISLAND_PARKING_URL,
     linkLabel: "Sauvie Island Parking",
   },
@@ -483,5 +485,5 @@ export const SAUVIE_ISLAND_RULES = [
   "Alcohol is strictly prohibited on all beaches in the Sauvie Island Wildlife Area.",
   "Day-use hours are 4 a.m. to 10 p.m. in the wildlife area.",
   "Collins Beach is partly clothing-optional - wild, sandy, and on the island's western shore.",
-  "Parking permits are required on busy days through Labor Day - daily day passes are sold online; seasonal sold-out does not mean no parking.",
+  "Parking permits change by date: limited Beaches permits cover summer weekends and select holidays; Wildlife Area permits cover summer weekdays. Seasonal sold-out does not mean daily permits are gone.",
 ];

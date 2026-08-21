@@ -58,7 +58,7 @@ function RoosterRockPanel() {
       <h2 className="nb-log__title">Parking &amp; pass</h2>
       <p className="nb-log__lede">
         {ROOSTER_ROCK_PARKING.location}. Day-use only, pay at the fee machine or the QR on site, or bring
-        an Oregon State Parks pass.
+        an Oregon State Parks pass. {ROOSTER_ROCK_PARKING.hours}.
       </p>
       <div className="nb-log__grid nb-log__grid--fees">
         {fees.map(fee => (
