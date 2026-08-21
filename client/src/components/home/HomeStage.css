@@ -45,6 +45,7 @@ html.calm-mode .home-front__kicker span,
 .home-front__worlds { position:relative; width:min(1280px,100%); margin:0 auto; padding:clamp(34px,5vw,64px) clamp(16px,4vw,48px) clamp(56px,8vw,104px); }
 .home-front__worlds-head { max-width:760px; margin-bottom:clamp(28px,5vw,52px); }
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
+.home-front__worlds-head p { max-width:56ch; margin:18px 0 0; color:var(--text-body,#d6d6dc); font-size:clamp(15px,1.8vw,18px); line-height:1.5; text-wrap:pretty; }
 .home-front__deck { --cf-card:clamp(280px,35vw,420px); --cf-card-h:520px; width:min(100%,1280px); margin:0 auto; padding:24px 0 6px; }
 .home-front__deck .z-deck__slide > .home-front__world,
 .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; height:100%; min-height:0; grid-column:auto; margin:0; }
@@ -234,6 +235,7 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:29px; height:29px; padding:0 13px; font-size:9px; }
   .home-front__worlds { padding-top:22px; padding-bottom:34px; }
   .home-front__worlds-head h2 { font-size:48px; }
+  .home-front__worlds-head p { margin-top:14px; font-size:15px; }
   .home-front__deck { --cf-card:clamp(248px,78vw,340px); --cf-card-h:500px; padding:16px 0 2px; }
   .home-front__deck .z-deck__slide > .home-front__world,
   .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; min-height:0; padding:18px; }

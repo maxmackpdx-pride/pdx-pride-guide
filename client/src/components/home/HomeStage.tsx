@@ -356,14 +356,15 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         aria-labelledby="home-worlds-title"
       >
         <header className="home-front__worlds-head">
-          <h2 id="home-worlds-title">What do <span>you</span> need?</h2>
+          <h2 id="home-worlds-title">You&apos;re not<br />looking for content.</h2>
+          <p>You&apos;re looking for the room, the ride, the person, or the thing that makes tonight feel good and tomorrow even better.</p>
         </header>
         <ZDeck
           total={WORLDS.length}
           selected={selectedWorld}
           onSelect={setSelectedWorld}
           className="home-front__deck"
-          label="What do you need?"
+          label="You&apos;re not looking for content."
         >
           {WORLDS.map((world) => {
             const sample = world.sampleKey ? samples[world.sampleKey] : null;
