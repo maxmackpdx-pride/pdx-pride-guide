@@ -1,4 +1,10 @@
-export type NavLinkItem = { href: string; label: string };
+/**
+ * Nav accent names. Each maps to an existing token pair in index.css, so calm
+ * mode desaturates the nav for free rather than needing its own overrides.
+ */
+export type NavAccent = "lime" | "magenta" | "cyan" | "blue" | "orange" | "violet" | "green";
+
+export type NavLinkItem = { href: string; label: string; accent?: NavAccent };
 
 export type NavDropdownGroup = {
   id: string;
@@ -6,33 +12,78 @@ export type NavDropdownGroup = {
   items: NavLinkItem[];
 };
 
-export type NavEntry =
-  | { type: "link"; href: string; label: string }
-  | { type: "dropdown"; id: string; label: string; items: NavLinkItem[] };
+/** The panel beside a mega dropdown's item column. */
+export type NavFeature = { kicker: string; title: string; body: string; href: string };
 
-/** Primary nav - labels match on-page titles where possible. */
+export type NavEntry =
+  | { type: "link"; href: string; label: string; accent?: NavAccent }
+  | {
+      type: "dropdown";
+      id: string;
+      label: string;
+      accent?: NavAccent;
+      items: NavLinkItem[];
+      /** Mono label above the items, e.g. "Most Visited". */
+      eyebrow?: string;
+      feature?: NavFeature;
+    };
+
+/**
+ * Primary nav - labels match on-page titles where possible.
+ *
+ * Every entry carries its own accent: the current page glows in it, and the
+ * rest are hairline pills that light up in it on hover.
+ */
 export const PRIMARY_NAV: NavEntry[] = [
-  { type: "link", href: "/about", label: "About" },
+  { type: "link", href: "/", label: "Home", accent: "lime" },
+  { type: "link", href: "/about", label: "About", accent: "magenta" },
   {
     type: "dropdown",
     id: "events",
-    label: "Events",
+    label: "Eventz",
+    accent: "cyan",
     items: [
-      { href: "/events", label: "Events" },
-      { href: "/schedule", label: "My Schedule" },
-      { href: "/submit", label: "Promoters" },
+      { href: "/events", label: "All Eventz", accent: "cyan" },
+      { href: "/schedule", label: "My Schedule", accent: "lime" },
+      { href: "/submit", label: "Promoters", accent: "orange" },
+    ],
+  },
+  { type: "link", href: "/directory", label: "Placez", accent: "blue" },
+  {
+    type: "dropdown",
+    id: "outz",
+    label: "Outz",
+    accent: "orange",
+    eyebrow: "Most Visited",
+    /*
+     * The mockup showed three destinations and a "View All Outz" footer. OUTZ
+     * has exactly two addresses and no index page, so the list is the whole
+     * set and the footer link would have nowhere to go.
+     */
+    items: [
+      { href: "/z/out/rooster-rock", label: "Rooster Rock", accent: "orange" },
+      { href: "/z/out/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
   {
     type: "dropdown",
-    id: "places",
-    label: "Places",
+    id: "zspace",
+    label: "Z/Space",
+    accent: "violet",
     items: [
-      { href: "/directory", label: "Directory" },
+      { href: "/the-hauz", label: "Housing", accent: "cyan" },
+      { href: "/pride-work", label: "Gigz", accent: "violet" },
+      { href: "/sellz", label: "Sellz", accent: "green" },
+      { href: "/spotted", label: "Mizzed", accent: "magenta" },
+      { href: "/gifting", label: "Giftz", accent: "lime" },
     ],
+    feature: {
+      kicker: "Featured",
+      title: "Z/Space",
+      body: "Every board, one place",
+      href: "/z",
+    },
   },
-  { type: "link", href: "/z", label: "z/" },
-  { type: "link", href: "/next", label: "NEXT" },
 ];
 
 export type PageHeaderMeta = {

@@ -14,6 +14,7 @@ import { Divider } from "@/components/ds";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import type { NavAccent, NavFeature } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
 import HubAdminFolder from "@/components/hub/HubAdminFolder";
@@ -21,7 +22,7 @@ import { parseHubSection } from "@/components/hub/types";
 import { dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { isLocalDemo, LOCAL_DEMO_PROFILE_PATH } from "@/lib/localDemo";
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; accent?: NavAccent };
 
 const navEntries = PRIMARY_NAV;
 
@@ -29,6 +30,7 @@ function NavLink({
   href,
   label,
   active,
+  accent,
   showNotify,
   notifyLabel,
   onClick,
@@ -36,6 +38,7 @@ function NavLink({
   href: string;
   label: string;
   active: boolean;
+  accent?: NavAccent;
   showNotify?: boolean;
   notifyLabel?: string;
   onClick?: () => void;
@@ -45,6 +48,7 @@ function NavLink({
     <Link
       href={href}
       className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}${isDarkroom ? " site-nav-link--darkroom" : ""}`}
+      data-accent={accent}
       onClick={onClick}
       aria-label={notifyLabel}
     >
@@ -58,6 +62,9 @@ function NavDropdown({
   id,
   label,
   items,
+  accent,
+  eyebrow,
+  feature,
   location,
   open,
   onToggle,
@@ -66,6 +73,9 @@ function NavDropdown({
   id: string;
   label: string;
   items: NavItem[];
+  accent?: NavAccent;
+  eyebrow?: string;
+  feature?: NavFeature;
   location: string;
   open: boolean;
   onToggle: () => void;
@@ -75,10 +85,11 @@ function NavDropdown({
   const panelId = `site-nav-dropdown-${id}`;
 
   return (
-    <div className={`site-nav-dropdown${open ? " open" : ""}`}>
+    <div className={`site-nav-dropdown${open ? " open" : ""}`} data-accent={accent}>
       <button
         type="button"
         className={`site-nav-dropdown__trigger${active ? " active" : ""}`}
+        data-accent={accent}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={panelId}
@@ -87,21 +98,38 @@ function NavDropdown({
         {label}
         <ChevronDown size={16} className="site-nav-dropdown__chevron" aria-hidden="true" />
       </button>
-      <div id={panelId} className="site-nav-dropdown__panel" role="menu">
-        <span className="site-nav-dropdown__section" aria-hidden="true">
-          {label}
-        </span>
-        {items.map(item => (
+      <div
+        id={panelId}
+        className={`site-nav-dropdown__panel${feature ? " site-nav-dropdown__panel--feature" : ""}`}
+        role="menu"
+      >
+        <div className="site-nav-dropdown__column">
+          {eyebrow && <span className="site-nav-dropdown__eyebrow">{eyebrow}</span>}
+          {items.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              role="menuitem"
+              className={`site-nav-dropdown__item${location === item.href ? " active" : ""}`}
+              data-accent={item.accent ?? accent}
+              onClick={onClose}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        {feature && (
           <Link
-            key={item.href}
-            href={item.href}
+            href={feature.href}
             role="menuitem"
-            className={`site-nav-dropdown__item${location === item.href ? " active" : ""}`}
+            className="site-nav-dropdown__feature"
             onClick={onClose}
           >
-            {item.label}
+            <span className="site-nav-dropdown__feature-kicker">{feature.kicker}</span>
+            <span className="site-nav-dropdown__feature-title">{feature.title}</span>
+            <span className="site-nav-dropdown__feature-body">{feature.body}</span>
           </Link>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -744,6 +772,7 @@ export default function Nav() {
                       key={entry.href}
                       href={entry.href}
                       label={entry.label}
+                      accent={entry.accent}
                       active={navLinkActive(location, entry.href)}
                       onClick={closeMenu}
                     />
@@ -756,6 +785,9 @@ export default function Nav() {
                     id={entry.id}
                     label={entry.label}
                     items={entry.items}
+                    accent={entry.accent}
+                    eyebrow={entry.eyebrow}
+                    feature={entry.feature}
                     location={location}
                     open={openDropdown === entry.id}
                     onToggle={() => setOpenDropdown(current => (current === entry.id ? null : entry.id))}

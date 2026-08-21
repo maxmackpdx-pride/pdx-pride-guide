@@ -1030,3 +1030,19 @@ html.calm-mode .hub-mobile-tab.is-active {
     animation: none !important;
   }
 }
+
+/*
+ * Placez tab accent. Claude Design handoff "Top Nav Bar Mockups", 2026-08-21:
+ * the bottom bar carries the same per-destination accents as the desktop
+ * pills. #0044ff is too dark to read as label ink, so the glow keeps the
+ * token and the text lifts to a tint of it.
+ */
+.hub-mobile-tab.is-active.is-blue {
+  color: #5a8bff;
+  background: color-mix(in srgb, var(--neon-blue, #0044ff) 20%, #0a0a0e);
+  border-color: #000;
+  box-shadow:
+    0 0 18px -2px color-mix(in srgb, var(--neon-blue, #0044ff) 70%, transparent),
+    0 0 36px -8px color-mix(in srgb, var(--neon-blue, #0044ff) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}

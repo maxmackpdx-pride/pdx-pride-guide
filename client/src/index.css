@@ -305,6 +305,16 @@ body::before {
   object-position: left center;
 }
 
+/*
+ * Between 1024 and 1439 the lockup gives width back to the nav. Six bordered
+ * pills need it, and the mark still reads at 150px.
+ */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .site-brand--desktop .site-brand-lockup {
+    max-width: clamp(132px, 13vw, 176px);
+  }
+}
+
 .glitch-logo {
   position: relative;
   display: inline-block;
@@ -584,7 +594,11 @@ body::before {
   color:#fff;
   outline:none;
 }
-@media (min-width: 1100px) {
+/*
+ * The six glow pills need the room between 1024 and 1365, so the search
+ * trigger goes icon-only there and takes its label back on wider screens.
+ */
+@media (min-width: 1366px) {
   .site-search-trigger__label {
     display: inline;
   }
@@ -799,6 +813,8 @@ body::before {
     flex: 0 1 auto;
     flex-wrap: nowrap;
     justify-content: flex-start;
+    /* Tighter than --site-nav-gap: the pills carry their own visual spacing. */
+    gap: clamp(6px, 0.85vw, 14px);
     /* Keep overflow visible so absolutely positioned dropdown panels aren't clipped. */
     overflow: visible;
   }
@@ -809,95 +825,107 @@ body::before {
   }
 }
 
-.site-nav-link {
+/* ── Glow-pill nav ────────────────────────────────────────────
+   Claude Design handoff "Top Nav Bar Mockups", 2026-08-21.
+   Every pill is a hairline until it is the current page or hovered,
+   and then it lights in its own accent. Accents resolve to the shared
+   tokens, so calm mode desaturates the whole nav without its own rules. */
+[data-accent="lime"] { --nav-c: var(--panel-lime, #c8fa3c); --nav-c-ink: var(--panel-lime, #c8fa3c); }
+[data-accent="magenta"] { --nav-c: var(--panel-magenta, #ff1fa0); --nav-c-ink: var(--panel-magenta, #ff1fa0); }
+[data-accent="cyan"] { --nav-c: var(--panel-cyan, #19e3ff); --nav-c-ink: var(--panel-cyan, #19e3ff); }
+[data-accent="orange"] { --nav-c: var(--neon-orange, #ff6600); --nav-c-ink: var(--neon-orange, #ff6600); }
+[data-accent="green"] { --nav-c: var(--green-acid, #39ff14); --nav-c-ink: var(--green-acid, #39ff14); }
+/* Blue and violet are too dark to read as label ink, so the glow keeps the
+   token and the text lifts to a tint of it. */
+[data-accent="blue"] { --nav-c: var(--neon-blue, #0044ff); --nav-c-ink: #5a8bff; }
+[data-accent="violet"] { --nav-c: var(--neon-violet, #8800ff); --nav-c-ink: #c9a3ff; }
+
+.site-nav-link,
+.site-nav-dropdown__trigger {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  padding: var(--site-nav-pad-y) var(--site-nav-pad-x);
-  color: #aaa;
+  /*
+   * The handoff specifies .88rem pills. These used to inherit --site-nav-size
+   * (16.8 to 21.6px), which is fine for bare text links but makes six bordered
+   * pills overrun the bar below 1440. Both size and padding stay fluid so the
+   * whole set fits from 1024 up without the nav needing to scroll.
+   */
+  padding: clamp(9px, 0.8vw, 11px) clamp(11px, 1.05vw, 18px);
+  border: 2px solid #333;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-body, #e6e2d9);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--site-nav-size);
-  letter-spacing: 0.06em;
+  font-size: clamp(0.76rem, 0.55vw + 0.34rem, 0.88rem);
+  letter-spacing: 0.05em;
   line-height: 1;
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: color 0.1s;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.site-nav-link.active {
-  color: var(--neon-yellow);
+.site-nav-link:hover,
+.site-nav-dropdown__trigger:hover,
+.site-nav-dropdown.open .site-nav-dropdown__trigger {
+  border-color: var(--nav-c, var(--neon-cyan));
+  box-shadow:
+    0 0 6px var(--nav-c, var(--neon-cyan)),
+    0 0 14px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 55%, transparent),
+    inset 0 0 6px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 25%, transparent);
+  color: var(--nav-c-ink, var(--neon-cyan));
 }
 
-.site-nav-link.active::after {
-  content: "";
-  position: absolute;
-  left: var(--site-nav-pad-x);
-  right: var(--site-nav-pad-x);
-  bottom: 4px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow));
-  box-shadow: 0 0 8px rgba(0,255,255,0.45);
+/* Only the current page holds the glow, and it breathes. */
+.site-nav-link.active,
+.site-nav-dropdown__trigger.active {
+  border-color: var(--nav-c, var(--neon-cyan));
+  color: var(--nav-c-ink, var(--neon-cyan));
+  animation: siteNavPillPulse 2.6s ease-in-out infinite;
 }
 
-/* Darkroom: red hover + red selected (no cyan underline) */
-.site-nav-link.site-nav-link--darkroom:hover {
-  color: #ff1f1f;
+@keyframes siteNavPillPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 6px var(--nav-c, var(--neon-cyan)),
+      0 0 14px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 55%, transparent),
+      inset 0 0 6px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 25%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 10px var(--nav-c, var(--neon-cyan)),
+      0 0 20px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 80%, transparent),
+      inset 0 0 8px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 40%, transparent);
+  }
 }
 
-.site-nav-link.site-nav-link--darkroom.active {
-  color: #ff1f1f;
+/* Full handoff scale once there is room for it. */
+@media (min-width: 1440px) {
+  .site-nav-link,
+  .site-nav-dropdown__trigger {
+    padding: 11px 22px;
+    font-size: 0.88rem;
+  }
 }
 
-.site-nav-link.site-nav-link--darkroom.active::after {
-  background: #ff1f1f;
-  box-shadow: 0 0 10px rgba(255, 31, 31, 0.55);
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-link.active,
+  .site-nav-dropdown__trigger.active { animation: none; }
 }
+
+html.calm-mode .site-nav-link.active,
+html.calm-mode .site-nav-dropdown__trigger.active,
+:root[data-calm="true"] .site-nav-link.active,
+:root[data-calm="true"] .site-nav-dropdown__trigger.active { animation: none; }
 
 .site-nav-dropdown {
   position: relative;
   flex: 0 0 auto;
-}
-
-.site-nav-dropdown__trigger {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: 0 0 auto;
-  padding: var(--site-nav-pad-y) var(--site-nav-pad-x);
-  border: 0;
-  background: transparent;
-  color: #aaa;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--site-nav-size);
-  letter-spacing: 0.06em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.1s;
-}
-
-.site-nav-dropdown__trigger:hover,
-.site-nav-dropdown__trigger.active,
-.site-nav-dropdown.open .site-nav-dropdown__trigger {
-  color: var(--neon-yellow);
-}
-
-.site-nav-dropdown__trigger.active::after {
-  content: "";
-  position: absolute;
-  left: var(--site-nav-pad-x);
-  right: var(--site-nav-pad-x);
-  bottom: 4px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-yellow));
-  box-shadow: 0 0 8px rgba(0,255,255,0.45);
 }
 
 .site-nav-dropdown__chevron {
@@ -910,25 +938,59 @@ body::before {
 }
 
 .site-nav-dropdown__panel {
-  background: rgba(8, 8, 10, 0.96);
-  border: 1px solid #1c1c22;
-  border-radius: 16px;
-  box-shadow: 0 24px 48px -20px rgba(0,0,0,.9), 0 0 0 1px #000;
-  
   display: none;
 }
 
 .site-nav-dropdown.open .site-nav-dropdown__panel {
-  display: block;
+  display: grid;
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 0;
   z-index: 120;
-  min-width: 188px;
-  padding: 6px 0;
-  background: rgba(5, 5, 5, 0.98);
-  border: 1.5px solid var(--neon-yellow);
-  box-shadow: 6px 6px 0 rgba(255, 0, 204, 0.45), 0 16px 36px rgba(0, 0, 0, 0.75);
+  min-width: 230px;
+  padding: 8px;
+  overflow: hidden;
+  background: #0d0d10;
+  border: 1px solid #24242c;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.85);
+  animation: siteNavMenuDrop 0.3s ease-out;
+}
+
+/* The mega panel puts its items beside a featured card. */
+.site-nav-dropdown.open .site-nav-dropdown__panel--feature {
+  grid-template-columns: minmax(0, 1fr) 210px;
+  min-width: 540px;
+  padding: 0;
+}
+
+@keyframes siteNavMenuDrop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-dropdown.open .site-nav-dropdown__panel { animation: none; }
+}
+
+html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
+:root[data-calm="true"] .site-nav-dropdown.open .site-nav-dropdown__panel { animation: none; }
+
+.site-nav-dropdown__column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.site-nav-dropdown__panel--feature .site-nav-dropdown__column { padding: 12px; }
+
+.site-nav-dropdown__eyebrow {
+  padding: 9px 14px 4px;
+  color: var(--text-faint, #666);
+  font: 11px var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .site-nav-dropdown__section {
@@ -937,21 +999,59 @@ body::before {
 
 .site-nav-dropdown__item {
   display: block;
-  padding: 10px 14px;
-  color: #ccc;
+  padding: 11px 14px;
+  border: 2px solid #2b2b2b;
+  border-radius: 999px;
+  color: #fff;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
-  transition: color 0.1s, background 0.1s;
+  transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .site-nav-dropdown__item:hover,
 .site-nav-dropdown__item.active {
-  color: var(--neon-yellow);
-  background: rgba(204, 255, 0, 0.08);
+  border-color: var(--nav-c, var(--neon-cyan));
+  box-shadow:
+    0 0 5px var(--nav-c, var(--neon-cyan)),
+    0 0 11px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 50%, transparent);
+  color: var(--nav-c-ink, var(--neon-cyan));
+}
+
+.site-nav-dropdown__feature {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  padding: 18px;
+  border-left: 1px solid #24242c;
+  background: radial-gradient(120% 120% at 50% 0%, #160c1e 0%, #0a0610 70%);
+  text-decoration: none;
+}
+
+.site-nav-dropdown__feature-kicker {
+  color: var(--panel-lime, #c8fa3c);
+  font: 11px var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.site-nav-dropdown__feature-title {
+  color: #fff;
+  font: 700 1.2rem/1.1 var(--font-display, sans-serif);
+  text-transform: uppercase;
+}
+
+.site-nav-dropdown__feature-body {
+  color: var(--text-dim, #c8c4bb);
+  font: 12px/1.5 var(--font-mono, ui-monospace, monospace);
+}
+
+.site-nav-dropdown__feature:hover .site-nav-dropdown__feature-title {
+  color: var(--panel-lime, #c8fa3c);
 }
 
 .site-auth {
@@ -6206,67 +6306,21 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 }
 
 @media (min-width: 1024px) {
-  /* --- BOARDS: bordered pill trigger --- */
-  .site-nav-scroll .site-nav-dropdown__trigger {
-    gap: 7px;
-    padding: 7px 13px;
-    border-radius: 9px;
-    border: 1.5px solid transparent;
-    transition: color .13s ease, background .13s ease, border-color .13s ease;
-  }
-  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__trigger {
-    background: rgba(0, 255, 255, 0.06);
-    border-color: var(--neon-cyan);
-    color: var(--neon-yellow);
-  }
-  /* pill has no underline accent */
-  .site-nav-scroll .site-nav-dropdown__trigger.active::after { display: none; }
-
-  /* --- BOARDS: floating dark panel with rainbow seam + colored rails --- */
+  /*
+   * The board-folder treatment that used to live here (9px pill trigger,
+   * 236px panel with a rainbow seam and per-index hover rails) is replaced by
+   * the glow-pill system above. Only the panel's anchoring stays local, since
+   * that depends on where the trigger sits in the bar.
+   */
   .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel {
     top: calc(100% + 12px);
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 236px;
-    padding: 14px 8px 10px;
-    background: #0b0b0b;
-    border: 1px solid #24242c;
-    border-radius: 16px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 26px rgba(204, 255, 0, .12), 0 0 40px rgba(255, 0, 204, .08);
-    overflow: hidden;
   }
-  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
-    background-size: 200% 100%;
-    animation: navSeamFlow 4s linear infinite;
-    opacity: .7;
-    -webkit-mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-    mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+
+  /* Z/Space is the last pill, so its wide panel opens leftward to stay on screen. */
+  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel--feature {
+    left: auto;
+    right: 0;
   }
-  .site-nav-scroll .site-nav-dropdown__item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 12px;
-    border-radius: 10px;
-    color: #e6e2d9;
-    font-size: 0.95rem;
-    letter-spacing: .06em;
-    transition: color .13s ease, background .13s ease, box-shadow .13s ease, transform .13s ease;
-  }
-  .site-nav-scroll .site-nav-dropdown__item:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, .05);
-    transform: translateX(2px);
-  }
-  /* per-board hover rail: gig purple, gifting lime, missed pink */
-  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(1):hover { box-shadow: inset 3px 0 0 #b06bff; }
-  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(2):hover { box-shadow: inset 3px 0 0 #ccff00; }
-  .site-nav-scroll .site-nav-dropdown__item:nth-of-type(3):hover { box-shadow: inset 3px 0 0 #ff1fa0; }
 
   /* --- HUB: pulsing cyan status dot (only when there is no unread dot) --- */
   .site-auth--desktop .site-auth__hub .site-nav-link { position: relative; }

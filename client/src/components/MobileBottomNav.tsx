@@ -53,7 +53,7 @@ function HubMark({ active }: { active: boolean }) {
 
 function tabClass(
   active: boolean,
-  accent: "cyan" | "green" | "lime" | "orange" | "pink" | "more",
+  accent: "cyan" | "green" | "lime" | "orange" | "pink" | "purple" | "blue" | "more",
 ) {
   return `hub-mobile-tab${active ? ` is-active is-${accent}` : ""}`;
 }
@@ -157,25 +157,25 @@ export default function MobileBottomNav() {
           {/* No decorative pull on the site-wide dock - hub drawer grip is only on /dashboard */}
           <Link
             href="/directory"
-            className={tabClass(placesActive, "cyan")}
-            aria-label="Places"
+            className={tabClass(placesActive, "blue")}
+            aria-label="Placez"
             aria-current={placesActive ? "page" : undefined}
             onClick={handleNavLink}
           >
             <MapPin size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Places</span>
+            <span>Placez</span>
           </Link>
 
           <button
             type="button"
-            className={tabClass(eventsActive || eventsOpen, "orange")}
+            className={tabClass(eventsActive || eventsOpen, "cyan")}
             aria-expanded={eventsOpen}
             aria-haspopup="dialog"
-            aria-label="Events"
+            aria-label="Eventz"
             onClick={handleEvents}
           >
             <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Events</span>
+            <span>Eventz</span>
           </button>
 
           {user || localDemo ? (
@@ -206,7 +206,7 @@ export default function MobileBottomNav() {
 
           <Link
             href="/z"
-            className={tabClass(boardsActive, "lime")}
+            className={tabClass(boardsActive, "purple")}
             aria-label="Z/"
             aria-current={boardsActive ? "page" : undefined}
             onClick={handleNavLink}
