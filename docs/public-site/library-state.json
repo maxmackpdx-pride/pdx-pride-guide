@@ -5,7 +5,7 @@
   "repo": "maxmackpdx-pride/pdx-pride-guide",
   "branch": "master",
   "primaryDocs": "foundation",
-  "liveLibraryPage": "https://zaylist-foundation-library.maxmackpdx.workers.dev/library.html",
+  "liveLibraryPage": "https://zaylist-foundation-library.maxmackpdx.workers.dev/agent-continuity-guide",
   "frontDoor": "README.md",
   "agentFrontDoor": "AGENTS.md",
   "foundationIndex": "foundation/llms.txt",
