@@ -31,7 +31,8 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Mr. S ad primary `#ff0033` (red) | Mr. S = **cyan** `#19e3ff`; CockBlock = **red** `#ff1f1f` |
 | Ads that don’t match grid/feed | Builder must use **`PosterAdCard` / `FeedAdCard`** + live templates in `lib/adTypes.ts` |
 | Day color on primary RSVP | RSVP / primary action accent stays **lime** `#CCFF00` where reserved; day colors are data only |
-| Touch nav chrome without explicit ask | **Nav locked** unless user requests - black outlines; cyan for active/handle only |
+| Touch nav chrome without explicit ask | **Nav locked** unless user requests. When it is requested, ship the glow-pill standard below, not a new treatment |
+| Nav links as bare text with a gradient underline; board-folder dropdown (9px pill trigger, 236px panel, rainbow seam, per-index hover rails) | **Glow pills** - see *Site navigation* |
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
@@ -87,6 +88,20 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Calm / `prefers-reduced-motion` kill ambient pulses and seam animation (bar may stay static).
 - See archive `GROK_ANIMATION_MIGRATION.md` only for inventory - do not re-migrate.
 
+## Site navigation
+
+Source: Claude Design handoff *Top Nav Bar Mockups*, project `8c680e88`, 2026-08-21.
+Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.tsx`,
+`.site-nav-link` / `.site-nav-dropdown__*` in `client/src/index.css`.
+
+- Every entry is a **hairline pill** (`999px`, `2px solid #333`) on a plain dark bar. It lights in **its own accent** on hover. **Only the current page** holds the glow, and only that pill pulses.
+- Accents are per destination and live in the nav model, not in CSS forks: Home lime, About magenta, Eventz cyan, Placez blue, Outz orange, Z/Space violet. Board items inside Z/Space carry their own board accent.
+- Accents resolve through the shared tokens (`--panel-*`, `--neon-*`, `--green-acid`) via a `data-accent` attribute, so Calm Mode desaturates the nav with no nav-specific overrides. `#0044ff` and `#8800ff` are too dark to read as label ink: the glow keeps the token and the text lifts to a tint (`--nav-c` vs `--nav-c-ink`).
+- Pills are `.88rem`. They must **not** inherit `--site-nav-size` (16.8 to 21.6px) - six bordered pills at that size run off the bar. Padding, pill gap, brand lockup width, and the search trigger's label all step down between 1024 and 1439 so the full set fits without the nav scrolling.
+- Dropdowns are dark rounded panels of the same pills. A list may carry a mono **eyebrow** (Outz: "Most Visited"). A **mega** panel adds a featured card beside the item column and opens leftward, since its trigger is the last pill.
+- The bottom bar carries the same names and accents: Placez blue, Eventz cyan, Space violet, Messages magenta. The Space tab keeps its two-line `Z/` lockup rather than a generic grid icon.
+- Reduced motion and Calm Mode drop the active pulse and the menu drop-in; the static glow, colors, and all destinations stay.
+
 ## NEXT roadmap cards
 
 - This is a scoped roadmap family, not a new default for event, directory, board, or feed cards.
@@ -98,7 +113,12 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 - Route art, construction geometry, and large background motifs belong to one **fixed wallpaper stage** behind the full stack. Keep them bold at exposed gutters and masked through the reading lane. Do not reset wallpaper per card or convert contained objects into global wallpaper.
 - Status labels use the existing small `pdxBlink` dot at top left. Status meaning remains in text; Calm Mode and `prefers-reduced-motion` leave the dot visible but static.
 - The final submission card uses a white accent and visitor-facing idea language. It may route into the owner's inbox, but visitor copy must not disclose that internal destination.
-- Mobile is a single vertical stack: hide the center rail/number medallions, preserve every card and its order, scale or relocate contained objects intentionally, and prevent horizontal overflow.
+- The roadmap is **two columns of cards along the timeline** at every width, not one card per row. Alternating sides left the opposite half of every row empty and ran the section past 5000px.
+- At **721px and up** the centre spine stays and the cards flank it, with the markers lifted into the gutter. Two cards share one rail, so the second marker drops to its card's midpoint; level with the first it lands on top of it and only the later number shows.
+- **Below 721px** there is no room for a spine: the rail is hidden, the tiles go two-up (matching Spaces and the z/ index), and the step number moves to the tile's top-left corner. That badge is an outlined ring with the digit in the accent, because the blob backdrop is too small to knock a digit out of at 24px.
+- The card is drawn for a 490px column. Two-up it is 155 to 205px wide, so chip, mark, and copy step down a register, copy clamps to three lines, and contained card objects (phone mockups, maps, profile stacks) are dropped as illegible at that size. The tablet band needs its own scale: card height is locked by the 17/25 poster ratio, so fixed-size copy runs out the bottom.
+- The submission card cannot work in a half-width tile: it takes the full row and sizes to its content.
+- Preserve every card and its order, and prevent horizontal overflow at every width.
 - Reduced motion stops the blink, rainbow flow, card glow cycle, route charge, and glitch; preserve static edge color, wallpaper, status text, marks, and all actions.
 
 ## Homepage front door
