@@ -11,6 +11,7 @@ import { formatListingWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { ZDeck, ZDeckDots } from "@/components/ZDeck";
 import {
   useHomeStageSamples,
   type HomeStageBoardKey,
@@ -129,16 +130,6 @@ const WORLDS: World[] = [
     sampleKey: "spotted",
   },
 ];
-
-// Fresh order on every visit — a light shuffle so the front door feels alive.
-function shuffleWorlds(worlds: World[]): World[] {
-  const out = worlds.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
 
 function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUpNext>; fallback?: HomeStageCardData }) {
   const slides = useMemo(() => {
@@ -291,13 +282,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
   }, [events]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const worldsRef = useRef<HTMLElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ pointerId: number; x: number; scrollLeft: number; dragging: boolean } | null>(null);
-  const suppressClickRef = useRef(false);
-  // Shuffle once per mount (per page load), shared by both marquee groups.
-  const [orderedWorlds] = useState(() => shuffleWorlds(WORLDS));
-  const [manualRail, setManualRail] = useState(false);
-  const [draggingRail, setDraggingRail] = useState(false);
+  const [selectedWorld, setSelectedWorld] = useState(0);
   const [motifsRevealed, setMotifsRevealed] = useState(false);
   const [showVideo, setShowVideo] = useState(() => typeof window === "undefined" || !prefersStillMotion());
 
@@ -373,63 +358,18 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         <header className="home-front__worlds-head">
           <h2 id="home-worlds-title">What do <span>you</span> need?</h2>
         </header>
-        <div
-          ref={railRef}
-          className={`home-front__grid${manualRail ? " home-front__grid--manual" : ""}${draggingRail ? " home-front__grid--dragging" : ""}`}
-          onPointerDown={(event) => {
-            if (event.pointerType === "mouse" && event.button !== 0) return;
-            const rail = railRef.current;
-            if (!rail) return;
-            // Pause the marquee, but don't capture the pointer or flag a drag yet —
-            // that's what let a plain click through to the card's link.
-            setManualRail(true);
-            dragRef.current = { pointerId:event.pointerId, x:event.clientX, scrollLeft:rail.scrollLeft, dragging:false };
-          }}
-          onPointerMove={(event) => {
-            const drag = dragRef.current;
-            const rail = railRef.current;
-            if (!drag || !rail || drag.pointerId !== event.pointerId) return;
-            const dx = event.clientX - drag.x;
-            // Only become a drag once the finger/mouse has actually moved. A click
-            // stays under this threshold, so navigation still fires.
-            if (!drag.dragging) {
-              if (Math.abs(dx) < 6) return;
-              drag.dragging = true;
-              setDraggingRail(true);
-              try { rail.setPointerCapture(event.pointerId); } catch { /* no-op */ }
-            }
-            rail.scrollLeft = drag.scrollLeft - dx;
-          }}
-          onPointerUp={(event) => {
-            const drag = dragRef.current;
-            if (drag?.pointerId !== event.pointerId) return;
-            // If this turned into a drag, swallow the click it would otherwise fire.
-            suppressClickRef.current = drag.dragging;
-            dragRef.current = null;
-            setDraggingRail(false);
-          }}
-          onPointerCancel={() => { dragRef.current = null; setDraggingRail(false); }}
-          onClickCapture={(event) => {
-            if (suppressClickRef.current) {
-              event.preventDefault();
-              event.stopPropagation();
-              suppressClickRef.current = false;
-            }
-          }}
+        <ZDeck
+          total={WORLDS.length}
+          selected={selectedWorld}
+          onSelect={setSelectedWorld}
+          className="home-front__deck"
+          label="What do you need?"
         >
-          {[false, true].map((duplicate) => (
-          <div
-            className={`home-front__grid-group${duplicate ? " home-front__grid-group--duplicate" : ""}`}
-            key={duplicate ? "duplicate" : "primary"}
-            aria-hidden={duplicate || undefined}
-            {...(duplicate ? { inert: "" } : {})}
-          >
-          {orderedWorlds.map((world, index) => {
+          {WORLDS.map((world) => {
             const sample = world.sampleKey ? samples[world.sampleKey] : null;
-            const displayNumber = String(index + 1).padStart(2, "0");
             return (
               <article
-                key={`${duplicate ? "duplicate" : "primary"}-${world.key}`}
+                key={world.key}
                 data-world={world.key}
                 className={`home-front__world pdx-glass-card pdx-glass-rebind${world.feature ? " home-front__world--feature" : ""}`}
                 style={{ ["--c" as string]: world.accent }}
@@ -469,7 +409,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 ) : null}
                 <WorldMotif kind={world.key as WorldMotifKind} />
                 <div className="home-front__world-top">
-                  <span className="home-front__world-number">{displayNumber}</span>
+                  <span className="home-front__world-number">{world.number}</span>
                   <span className="home-front__world-eyebrow">{world.eyebrow}</span>
                 </div>
                 {world.key !== "events" ? (
@@ -506,9 +446,15 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
               </article>
             );
           })}
-          </div>
-          ))}
-        </div>
+        </ZDeck>
+        <ZDeckDots
+          total={WORLDS.length}
+          selected={selectedWorld}
+          onSelect={setSelectedWorld}
+          labelOf={index => WORLDS[index].title}
+          accentOf={index => WORLDS[index].accent}
+          className="home-front__deck-dots"
+        />
       </section>
     </div>
   );

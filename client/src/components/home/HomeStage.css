@@ -45,8 +45,11 @@ html.calm-mode .home-front__kicker span,
 .home-front__worlds { position:relative; width:min(1280px,100%); margin:0 auto; padding:clamp(34px,5vw,64px) clamp(16px,4vw,48px) clamp(56px,8vw,104px); }
 .home-front__worlds-head { max-width:760px; margin-bottom:clamp(28px,5vw,52px); }
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
-.home-front__grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
-.home-front__world { grid-column:span 4; position:relative; min-height:340px; padding:22px; display:flex; flex-direction:column; overflow:hidden; text-decoration:none; border-radius:max(var(--glass-card-radius,14px),16px); outline:1px solid rgba(255,255,255,.045); outline-offset:-2px; box-shadow:var(--glass-card-shadow),0 12px 28px -22px color-mix(in srgb,var(--c) 34%,transparent),inset 0 1px 0 rgba(255,255,255,.075); transition:transform .18s var(--ease-out,ease),box-shadow .18s var(--ease-out,ease),border-color .18s var(--ease-out,ease); }
+.home-front__deck { --cf-card:clamp(280px,35vw,420px); --cf-card-h:520px; width:min(100%,1280px); margin:0 auto; padding:24px 0 6px; }
+.home-front__deck .z-deck__slide > .home-front__world,
+.home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; height:100%; min-height:0; grid-column:auto; margin:0; }
+.home-front__deck-dots { margin:4px 0 0; }
+.home-front__world { position:relative; min-height:340px; padding:22px; display:flex; flex-direction:column; overflow:hidden; text-decoration:none; border-radius:max(var(--glass-card-radius,14px),16px); outline:1px solid rgba(255,255,255,.045); outline-offset:-2px; box-shadow:var(--glass-card-shadow),0 12px 28px -22px color-mix(in srgb,var(--c) 34%,transparent),inset 0 1px 0 rgba(255,255,255,.075); transition:transform .18s var(--ease-out,ease),box-shadow .18s var(--ease-out,ease),border-color .18s var(--ease-out,ease); }
 .home-front__world:hover { transform:translateY(-1px); box-shadow:var(--glass-card-shadow),0 16px 34px -22px color-mix(in srgb,var(--c) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.09); }
 .home-front__world[data-world="events"] { border-color:color-mix(in srgb,var(--neon-yellow,#ccff00) 72%,#101014); }
 .home-front__world[data-world="events"] { padding:0; }
@@ -215,7 +218,7 @@ html.calm-mode .home-front__world,:root[data-calm="true"] .home-front__world { t
 html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__world:hover { transform:none; }
 
 @media (max-width:900px) {
-  .home-front__world,.home-front__world--feature { grid-column:span 6; }
+  .home-front__deck { --cf-card:clamp(248px,52vw,360px); --cf-card-h:500px; }
 }
 
 @media (max-width:620px) {
@@ -231,31 +234,12 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:29px; height:29px; padding:0 13px; font-size:9px; }
   .home-front__worlds { padding-top:22px; padding-bottom:34px; }
   .home-front__worlds-head h2 { font-size:48px; }
-  /* Mobile: horizontal swipe rail (right-to-left) with scroll-snap + a peeking
-     next card, instead of a tall vertical stack. Pairs with the JS auto-scroll
-     in HomeStage.tsx and the pointer-drag handlers on the rail. */
-  .home-front__grid {
-    display:flex; flex-direction:row; flex-wrap:nowrap;
-    gap:12px;
-    overflow-x:auto; overflow-y:hidden;
-    scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;
-    scroll-padding-inline:26px;
-    padding-inline:26px; /* wider left/right gutters so cards inset from edges */
-    scrollbar-width:none;
-    touch-action:pan-x pan-y;
-  }
-  .home-front__grid::-webkit-scrollbar { display:none; }
-  .home-front__grid--dragging { cursor:grabbing; scroll-snap-type:none; }
-  .home-front__world,.home-front__world--feature {
-    flex:0 0 80%; max-width:80%;
-    scroll-snap-align:center;
-    min-height:300px; padding:18px;
-  }
+  .home-front__deck { --cf-card:clamp(248px,78vw,340px); --cf-card-h:500px; padding:16px 0 2px; }
+  .home-front__deck .z-deck__slide > .home-front__world,
+  .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; min-height:0; padding:18px; }
   .home-front__world-copy { margin-top:34px; }
   .home-front__world-copy h3 { font-size:42px; }
-  .home-front__world[data-world="events"] { min-height:520px; }
+  .home-front__world[data-world="events"] { min-height:0; }
   .home-front__world[data-world="events"] .home-front__world-top { padding:18px; }
   .home-front__directory-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
   .home-front__beach-live .home-beach-widget__grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
