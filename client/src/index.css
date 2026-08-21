@@ -16309,6 +16309,151 @@ html.calm-mode .board-stats-band,
   grid-column: 1 / -1;
 }
 
+/* GIGZ talent availability card: person first, with the post details kept in the expand panel. */
+.board-listing-card--talent {
+  min-height: 292px;
+  padding: 22px 22px 0;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(176, 107, 255, 0.18), transparent 36%),
+    radial-gradient(circle at 86% 100%, rgba(110, 61, 255, 0.13), transparent 42%),
+    #0c0c10;
+}
+
+.board-listing-card--talent .board-listing-card__expand {
+  margin: 22px 0 0;
+  padding: 18px 0 20px;
+}
+
+.gig-talent-card__topline,
+.gig-talent-card__identity,
+.gig-talent-card__actions {
+  position: relative;
+  z-index: 1;
+}
+
+.gig-talent-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-board-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.gig-talent-card__availability { color: #c1a2ff; }
+.gig-talent-card__availability i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: #a87bff;
+  box-shadow: 0 0 14px #a87bff;
+}
+.gig-talent-card__time { color: #8d8a93; white-space: nowrap; }
+
+.gig-talent-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 30px 0 26px;
+}
+
+.gig-talent-card__identity .user-avatar {
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 7px rgba(176, 107, 255, 0.16), 0 0 28px rgba(110, 61, 255, 0.32);
+}
+
+.gig-talent-card__name {
+  max-width: 11ch;
+  margin: 0;
+  font-family: var(--font-board-display);
+  font-size: clamp(1.8rem, 2.7vw, 2.7rem);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.gig-talent-card__role,
+.gig-talent-card__location {
+  margin: 8px 0 0;
+  font-family: var(--font-board-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #b6b1bd;
+}
+.gig-talent-card__location { margin-top: 3px; color: #8e8995; }
+
+.gig-talent-card__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(116px, 0.85fr);
+  gap: 12px;
+}
+
+.gig-talent-card__actions button {
+  min-height: 48px;
+  border: 1px solid #a87bff;
+  border-radius: 12px;
+  background: rgba(18, 14, 28, 0.74);
+  color: #c9adff;
+  font-family: var(--font-board-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.gig-talent-card__actions button + button {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #e7e4e9;
+}
+.gig-talent-card__actions button:hover {
+  background: #a87bff;
+  color: #120d1d;
+  transform: translateY(-1px);
+}
+
+.gig-talent-card__footer {
+  position: relative;
+  z-index: 1;
+  width: calc(100% - 42px);
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 22px auto -30px;
+  padding: 12px 16px;
+  border-radius: 0 0 24px 24px;
+  background: #9b70ff;
+  box-shadow: 0 20px 34px -20px rgba(125, 75, 255, 0.78);
+  color: #161021;
+  font-family: var(--font-board-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  .board-listing-card--talent { min-height: 0; padding: 18px 16px 0; }
+  .gig-talent-card__identity { gap: 13px; margin: 24px 0 22px; }
+  .gig-talent-card__identity .user-avatar { --avatar-size: 62px !important; }
+  .gig-talent-card__name { font-size: 1.85rem; }
+  .gig-talent-card__actions { grid-template-columns: 1fr; gap: 8px; }
+  .gig-talent-card__footer { width: calc(100% - 28px); margin-top: 16px; }
+}
+
 /* Empty state */
 .board-empty--makeover {
   text-align: center;

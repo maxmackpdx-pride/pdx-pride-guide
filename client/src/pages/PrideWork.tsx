@@ -805,6 +805,14 @@ export function GigListingCard({
     || (isLooking ? "Available · message in inbox" : "Open · reply privately");
   const cta = isLooking ? "Say hi" : "Reply";
   const profileHref = gig.username ? memberProfileHref(gig.username) : null;
+  const talentName = gig.displayName || gig.name;
+  const talentFirstName = talentName.trim().split(/\s+/)[0] || "them";
+  const availabilityDetail = gig.skills || gig.compensation || locationLabel;
+
+  const openTalentReply = (prefill?: string) => {
+    if (!expanded) onToggle();
+    if (prefill) setMessageBody(prefill);
+  };
 
   const handleShare = async () => {
     const url = `${window.location.origin}/z/gigz?post=${gig.id}`;
@@ -834,7 +842,7 @@ export function GigListingCard({
       data-testid={`card-gig-${gig.id}`}
       className={[
         "board-listing-card board-listing-card--makeover board-listing-card--glass",
-        isLooking ? "is-looking is-dashed" : "is-offering",
+        isLooking ? "board-listing-card--talent" : "is-offering",
         expanded ? "is-expanded" : "",
       ]
         .filter(Boolean)
@@ -856,49 +864,82 @@ export function GigListingCard({
       }}
     >
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
-      <BoardGlassMotif variant={isLooking ? "binoculars" : "dollar"} />
-      <div className="board-listing-card__row">
-        <div
-          className="board-listing-card__thumb"
-          style={gig.imageUrl ? undefined : { background: thumbGradient(isLooking) }}
-        >
-          {gig.imageUrl ? (
-            <img src={gig.imageUrl} alt="" />
-          ) : (
-            <>
-              <span className="board-listing-card__ghost" aria-hidden="true">{ghostLetter(gig.title)}</span>
-              <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
-            </>
-          )}
-          {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "#ff1fa0" }}>Remote</span>}
-        </div>
-        <div className="board-listing-card__main">
-          <div className="board-listing-card__tags">
-            <span className="board-listing-card__kind board-listing-card__kind--text">{TYPE_LABELS[gig.postType]}</span>
-            <span className="board-listing-card__time">{timeAgo(gig.createdAt)}</span>
+      {isLooking ? (
+        <>
+          <div className="gig-talent-card__topline">
+            <span className="gig-talent-card__availability"><i aria-hidden="true" /> Available for gigs</span>
+            <span className="gig-talent-card__time">Posted {timeAgo(gig.createdAt)}</span>
           </div>
-          <h4 className="board-listing-card__title">{gig.title}</h4>
-          <div className="board-listing-card__poster">
-            {gig.username ? (
-              <UserAvatar
-                photoUrl={gig.posterPhotoUrl}
-                avatarChoice={gig.avatarChoice}
-                avatarRing={gig.posterAvatarRing}
-                displayName={gig.displayName}
-                username={gig.username}
-                href={memberProfileHref(gig.username)}
-                onClick={e => e.stopPropagation()}
-                size={18}
-              />
-            ) : null}
-            <span>{posterLabel} · {locationLabel}</span>
+          <div className="gig-talent-card__identity">
+            <UserAvatar
+              photoUrl={gig.posterPhotoUrl}
+              avatarChoice={gig.avatarChoice}
+              avatarRing={gig.posterAvatarRing}
+              displayName={gig.displayName || gig.name}
+              username={gig.username}
+              href={profileHref}
+              onClick={e => e.stopPropagation()}
+              size={76}
+            />
+            <div>
+              <h4 className="gig-talent-card__name">{talentName}</h4>
+              <p className="gig-talent-card__role">{gig.title}</p>
+              <p className="gig-talent-card__location">{locationLabel}{gig.isRemote ? " · remote" : ""}</p>
+            </div>
           </div>
-          <div className="board-listing-card__footer">
-            <span className="board-listing-card__status">{status}</span>
-            <span className="board-listing-card__cta">{cta} →</span>
+          <div className="gig-talent-card__actions" onClick={e => e.stopPropagation()}>
+            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} ↗</button>
+            <button type="button" onClick={() => openTalentReply()}>Message</button>
           </div>
-        </div>
-      </div>
+          <div className="gig-talent-card__footer"><span aria-hidden="true">✦</span>{availabilityDetail}</div>
+        </>
+      ) : (
+        <>
+          <BoardGlassMotif variant="dollar" />
+          <div className="board-listing-card__row">
+            <div
+              className="board-listing-card__thumb"
+              style={gig.imageUrl ? undefined : { background: thumbGradient(false) }}
+            >
+              {gig.imageUrl ? (
+                <img src={gig.imageUrl} alt="" />
+              ) : (
+                <>
+                  <span className="board-listing-card__ghost" aria-hidden="true">{ghostLetter(gig.title)}</span>
+                  <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
+                </>
+              )}
+              {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "#ff1fa0" }}>Remote</span>}
+            </div>
+            <div className="board-listing-card__main">
+              <div className="board-listing-card__tags">
+                <span className="board-listing-card__kind board-listing-card__kind--text">{TYPE_LABELS[gig.postType]}</span>
+                <span className="board-listing-card__time">{timeAgo(gig.createdAt)}</span>
+              </div>
+              <h4 className="board-listing-card__title">{gig.title}</h4>
+              <div className="board-listing-card__poster">
+                {gig.username ? (
+                  <UserAvatar
+                    photoUrl={gig.posterPhotoUrl}
+                    avatarChoice={gig.avatarChoice}
+                    avatarRing={gig.posterAvatarRing}
+                    displayName={gig.displayName}
+                    username={gig.username}
+                    href={memberProfileHref(gig.username)}
+                    onClick={e => e.stopPropagation()}
+                    size={18}
+                  />
+                ) : null}
+                <span>{posterLabel} · {locationLabel}</span>
+              </div>
+              <div className="board-listing-card__footer">
+                <span className="board-listing-card__status">{status}</span>
+                <span className="board-listing-card__cta">{cta} →</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {expanded && (
         <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
