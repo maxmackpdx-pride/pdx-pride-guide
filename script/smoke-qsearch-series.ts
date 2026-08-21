@@ -44,7 +44,7 @@ function baseDraft(over: Partial<IngestEventDraft> & { title: string; dateStart:
 }
 
 // Mondays 9pm for 4 weeks
-const weeks = ["2026-08-03", "2026-08-10", "2026-08-17", "2026-08-24"];
+const weeks = ["2099-08-03", "2099-08-10", "2099-08-17", "2099-08-24"];
 const raw = weeks.map(day => ({
   draft: baseDraft({
     title: "Musical Mondays",

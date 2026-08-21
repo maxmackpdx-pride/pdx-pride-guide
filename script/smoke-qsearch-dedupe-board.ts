@@ -104,7 +104,7 @@ assert(cands.length === 1, `only new one-off queued (got ${cands.length})`);
 assert(cands[0].draft.title === "Brand New Night", "queued card is the new night");
 
 // --- series: 4 Mondays, 2 already on board → only 2 new dates ---
-const weeks = ["2026-08-03", "2026-08-10", "2026-08-17", "2026-08-24"];
+const weeks = ["2099-08-03", "2099-08-10", "2099-08-17", "2099-08-24"];
 const seriesRaw = weeks.map(day => ({
   draft: draft({
     title: "Musical Mondays",
@@ -119,8 +119,8 @@ const seriesRaw = weeks.map(day => ({
   sourceUrl: "https://example.com/cal",
 }));
 const seriesBoard: Event[] = [
-  fakeEvent(200, "Musical Mondays", "2026-08-03T21:00:00", "LIVE"),
-  fakeEvent(201, "Musical Mondays", "2026-08-10T21:00:00", "HIDDEN"),
+  fakeEvent(200, "Musical Mondays", "2099-08-03T21:00:00", "LIVE"),
+  fakeEvent(201, "Musical Mondays", "2099-08-10T21:00:00", "HIDDEN"),
 ];
 // fix venue on board
 seriesBoard[0].venueName = "Badlands";
@@ -134,7 +134,7 @@ const seriesCands = buildScanCandidates(seriesRaw, seriesBoard, [], { includePas
 assert(seriesCands.length === 1, "one series card after prune");
 assert(seriesCands[0].memberDrafts.length === 2, `2 new series nights (got ${seriesCands[0].memberDrafts.length})`);
 assert(
-  seriesCands[0].memberDrafts.every(m => !m.dateStart.startsWith("2026-08-03") && !m.dateStart.startsWith("2026-08-10")),
+  seriesCands[0].memberDrafts.every(m => !m.dateStart.startsWith("2099-08-03") && !m.dateStart.startsWith("2099-08-10")),
   "kept only Aug 17 + Aug 24",
 );
 assert(seriesCands[0].alreadyOnBoard?.length === 2, "reports 2 already on board");

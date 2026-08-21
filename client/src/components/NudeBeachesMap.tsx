@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { divIcon, latLngBounds } from "leaflet";
+import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { BEACH_MAP_LOCATIONS, BEACH_POIS, type NudeBeachTab } from "@shared/nudeBeaches";
+import { BEACH_MAP_LOCATIONS, type NudeBeachTab } from "@shared/nudeBeaches";
 import {
   MAP_PIN_SIZE,
   MAP_SURFACE_BG,
   LIVE_MAP_CHROME_CSS,
   mapPinHtml,
-  mapPinMultiHtml,
 } from "@/components/ds/mapTheme";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -47,56 +46,6 @@ function buildPin(color: string) {
   });
 }
 
-const DANGER_RED = "#ff1f1f";
-
-/** Smaller solid dot for points of interest so they read as secondary to the
- *  beach anchor. Rainbow = our hangouts; red = out-of-bounds warning. */
-function buildPoiPin(color: string, variant: "accent" | "rainbow" | "red" = "accent") {
-  if (variant === "rainbow") {
-    return divIcon({
-      className: "",
-      html: mapPinMultiHtml(),
-      iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
-      iconAnchor: [PIN_HALF, PIN_HALF],
-      popupAnchor: [0, -PIN_HALF - 2],
-    });
-  }
-  const pinColor = variant === "red" ? DANGER_RED : color;
-  // POIs: black core + color ring, inward only (no outer neon bloom)
-  const size = 15;
-  const half = size / 2;
-  return divIcon({
-    className: "",
-    html: `<div style="width:${size}px;height:${size}px;border-radius:999px;background:#000;border:2px solid ${pinColor};box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85);"></div>`,
-    iconSize: [size, size],
-    iconAnchor: [half, half],
-    popupAnchor: [0, -half - 2],
-  });
-}
-
-function PoiPopup({ title, accent }: { title: string; accent: string }) {
-  return (
-    <div
-      style={{
-        border: "1px solid #000",
-        boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
-        outline: `1px solid ${accent}`,
-        outlineOffset: -2,
-        background: "#050505",
-        color: "#fff",
-        padding: "11px 14px",
-        fontFamily: "var(--font-body, sans-serif)",
-        fontSize: "0.8125rem",
-        lineHeight: 1.4,
-        minWidth: 150,
-        maxWidth: 240,
-      }}
-    >
-      {title}
-    </div>
-  );
-}
-
 function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: string; accent: string }) {
   return (
     <div
@@ -131,20 +80,6 @@ function BeachPopup({ label, subtitle, accent }: { label: string; subtitle: stri
       </div>
     </div>
   );
-}
-
-function FitToPois({ tab }: { tab: NudeBeachTab }) {
-  const map = useMap();
-  useEffect(() => {
-    const location = BEACH_MAP_LOCATIONS[tab];
-    const pois = BEACH_POIS[tab] ?? [];
-    if (pois.length === 0) return;
-    const bounds = latLngBounds(
-      [[location.lat, location.lng], ...pois.map(p => [p.lat, p.lng] as [number, number])],
-    );
-    map.fitBounds(bounds, { padding: [36, 36], maxZoom: 16 });
-  }, [map, tab]);
-  return null;
 }
 
 function MapResizer({ tab }: { tab: NudeBeachTab }) {
@@ -228,7 +163,6 @@ export default function NudeBeachesMap({ tab, height }: Props) {
             subdomains="abcd"
           />
           <MapResizer tab={tab} />
-          <FitToPois tab={tab} />
           <Marker position={[location.lat, location.lng]} icon={buildPin(location.pinColor)}>
             <Popup className="pdx-beach-popup" maxWidth={280}>
               <BeachPopup
@@ -238,21 +172,6 @@ export default function NudeBeachesMap({ tab, height }: Props) {
               />
             </Popup>
           </Marker>
-          {(BEACH_POIS[tab] ?? []).map((poi, i) => {
-            const variant = poi.marker === "rainbow" || poi.marker === "red" ? poi.marker : "accent";
-            const popupAccent = variant === "red" ? DANGER_RED : location.pinColor;
-            return (
-              <Marker
-                key={`${poi.lat},${poi.lng},${i}`}
-                position={[poi.lat, poi.lng]}
-                icon={buildPoiPin(location.pinColor, variant)}
-              >
-                <Popup className="pdx-beach-popup" maxWidth={260}>
-                  <PoiPopup title={poi.title} accent={popupAccent} />
-                </Popup>
-              </Marker>
-            );
-          })}
         </MapContainer>
       </div>
     </div>

@@ -14272,8 +14272,11 @@ export const storage: IStorage = {
       WHERE c.beach_id = ? AND c.calendar_date = ? AND c.is_active = 1
       ORDER BY c.arrival_hour ASC, c.created_at ASC
     `).all(beachId, calendarDate) as any[];
-    const viewerCheckedIn = viewerUserId != null && rows.some((r: any) => r.userId === viewerUserId);
-    return rows.map((r: any) => {
+    const visibleRows = viewerUserId == null
+      ? rows
+      : rows.filter((r: any) => r.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, r.userId));
+    const viewerCheckedIn = viewerUserId != null && visibleRows.some((r: any) => r.userId === viewerUserId);
+    return visibleRows.map((r: any) => {
       const isSelf = viewerUserId != null && r.userId === viewerUserId;
       const isAnonymous = Boolean(r.isAnonymous);
       if (!viewerCheckedIn && !isSelf) {
@@ -14609,7 +14612,8 @@ export const storage: IStorage = {
     }));
     const datesByUser = new Map([...memberMap.entries()].map(([id, m]) => [id, m.goingDates]));
 
-    const messages = rows.map(row => {
+    const visibleRows = rows.filter(row => row.userId === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.userId));
+    const messages = visibleRows.map(row => {
       const isSelf = row.userId === viewerUserId;
       const anonymous = Boolean(row.isAnonymous);
       const goingDates = datesByUser.get(Number(row.userId)) || [];
@@ -14654,7 +14658,7 @@ export const storage: IStorage = {
       expiresAt: access.closesAt,
       opensAt: access.opensAt,
       chatOpen: true,
-      members,
+      members: members.filter(member => !storage.isMemberInteractionBlocked(viewerUserId, member.userId)),
       goingDates: myDates,
     };
   },
@@ -14702,7 +14706,10 @@ export const storage: IStorage = {
       WHERE p.beach_id = ? AND p.trip_date = ? AND p.status = 'OPEN'
       ORDER BY p.leave_hour ASC, p.created_at DESC
     `).all(beachId, tripDate) as any[];
-    return rows.map(row => ({
+    const visibleRows = viewerUserId == null
+      ? rows
+      : rows.filter(row => row.user_id === viewerUserId || !storage.isMemberInteractionBlocked(viewerUserId, row.user_id));
+    return visibleRows.map(row => ({
       ...row,
       direction: row.direction || "TO_BEACH",
       isMine: viewerUserId != null && row.user_id === viewerUserId,
@@ -14734,6 +14741,9 @@ export const storage: IStorage = {
     const post = storage.getBeachCarpoolPost(postId);
     if (!post || post.status !== "OPEN") throw new Error("Post not found");
     if (post.user_id === userId) throw new Error("Cannot request your own post");
+    if (storage.isMemberInteractionBlocked(userId, post.user_id)) {
+      throw Object.assign(new Error("Member interaction blocked"), { status: 403, code: "MEMBER_BLOCKED" });
+    }
     const count = sqlite.prepare(`SELECT COUNT(*) AS c FROM beach_carpool_requests WHERE post_id = ? AND status = 'INTERESTED'`).get(postId) as { c: number };
     if (count.c >= 3) throw new Error("This ride already has 3 requests");
     const dup = sqlite.prepare(`SELECT id FROM beach_carpool_requests WHERE post_id = ? AND user_id = ? AND status = 'INTERESTED'`).get(postId, userId);
@@ -14765,13 +14775,14 @@ export const storage: IStorage = {
   getBeachCarpoolRequests(postId: number, posterUserId: number) {
     const post = storage.getBeachCarpoolPost(postId);
     if (!post || post.user_id !== posterUserId) throw new Error("Not your post");
-    return sqlite.prepare(`
+    const rows = sqlite.prepare(`
       SELECT r.*, u.username, u.display_name AS displayName
       FROM beach_carpool_requests r
       JOIN users u ON u.id = r.user_id
       WHERE r.post_id = ? AND r.status = 'INTERESTED'
       ORDER BY r.created_at ASC
-    `).all(postId);
+    `).all(postId) as any[];
+    return rows.filter(row => !storage.isMemberInteractionBlocked(posterUserId, row.user_id));
   },
 
   reportRiverBrats(data: InsertRiverBratsReport) {

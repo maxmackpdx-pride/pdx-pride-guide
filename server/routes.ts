@@ -3922,7 +3922,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const targetType = String(req.body.targetType || "");
       const targetId = Number(req.body.targetId);
       if (!reason) return res.status(400).json({ error: "reason required" });
-      if (!["CHECKIN", "CARPOOL", "MISSED_CONNECTION"].includes(targetType)) {
+      if (!["CHECKIN", "CARPOOL", "CHAT_MESSAGE", "MISSED_CONNECTION"].includes(targetType)) {
         return res.status(400).json({ error: "Invalid target" });
       }
       storage.reportRiverBrats(insertRiverBratsReportSchema.parse({

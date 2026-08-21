@@ -276,7 +276,7 @@ export const RIVER_BRATS_REPORT_REASONS = [
   "Other",
 ] as const;
 
-export type RiverBratsReportTarget = "CHECKIN" | "CARPOOL" | "MISSED_CONNECTION";
+export type RiverBratsReportTarget = "CHECKIN" | "CARPOOL" | "CHAT_MESSAGE" | "MISSED_CONNECTION";
 
 export function readRiverBratsShore(raw: string | null | undefined): RiverBratsShoreTab {
   if (raw === "carpool" || raw === "spotted") return raw;

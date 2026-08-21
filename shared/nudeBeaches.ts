@@ -144,105 +144,11 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
   },
 };
 
-/** Points of interest dropped on the beach map.
- *  - `rainbow` - Pride ring (queer hangout areas)
- *  - `red` - out-of-bounds / do-not-go warning pin
- *  - default - beach accent color */
-export type BeachPoi = {
-  lat: number;
-  lng: number;
-  title: string;
-  marker?: "accent" | "rainbow" | "red";
-};
-
-export const BEACH_POIS: Record<NudeBeachTab, BeachPoi[]> = {
-  "rooster-rock": [
-    { lat: 45.54688, lng: -122.2364, title: "Park it here. Leave the car; everything good is on foot." },
-    {
-      lat: 45.54901,
-      lng: -122.22716,
-      title: "The shortcut to Sand Island. Insider move, fewer steps, same payoff.",
-    },
-    {
-      lat: 45.54846,
-      lng: -122.22653,
-      title:
-        "Naked Guy In A Chair - not sure if it's the same guy or they work shifts. Maybe a trap door behind the sign to a house. Head this way to skip Sand Island for a quieter day.",
-    },
-    { lat: 45.54975, lng: -122.22741, title: "Turn right here. Trust us - left is a whole different weekend." },
-    {
-      lat: 45.55144,
-      lng: -122.22405,
-      title: "The crossing. You can post up, but it's family central - plan your towel placement accordingly.",
-    },
-    { lat: 45.55258, lng: -122.22276, title: "Keep walking. The good part is always a little farther than you think." },
-    {
-      lat: 45.5526,
-      lng: -122.21769,
-      title: "One of the queer corners. The trees give zero shade out here, so pack an umbrella and SPF.",
-      marker: "rainbow",
-    },
-    { lat: 45.55338, lng: -122.21663, title: "Very hot sand. Sandals aren't a fashion statement here - they're survival gear." },
-    {
-      lat: 45.55049,
-      lng: -122.21691,
-      title: "Every trail leads to water except the one behind you.",
-    },
-    {
-      lat: 45.55521,
-      lng: -122.21643,
-      title: "Prime photo real estate, especially at golden hour. Your feed will thank you.",
-    },
-    { lat: 45.55152, lng: -122.21923, title: "Straight-people headquarters. No notes - just a heads-up." },
-    { lat: 45.55262, lng: -122.22011, title: "Family favorite. Keep it PG until you're past this point." },
-    { lat: 45.55169, lng: -122.2143, title: "Watch your step - the trail's a little crumbly here. Grace, not gravity." },
-    { lat: 45.54931, lng: -122.22077, title: "A shortcut, technically. The mosquitos know about it too - bring spray." },
-    { lat: 45.55028, lng: -122.21031, title: "A fork in the road. Choose wisely, or don't - both ways end at the water." },
-    {
-      lat: 45.55085,
-      lng: -122.2115,
-      title: "Popular gay hangout. If you spot a bear, no need to play dead - just say hi.",
-      marker: "rainbow",
-    },
-    {
-      lat: 45.54978,
-      lng: -122.20488,
-      // Soft location note only - no IYKYK / cruising copy (rangers read maps too).
-      title: "Far end of the sand. Quieter, more cover, longer walk back - bring water.",
-    },
-    {
-      lat: 45.55445,
-      lng: -122.18733,
-      title: "That's beyond our borders. You must never go there, Simba.",
-      marker: "red",
-    },
-    {
-      lat: 45.55356,
-      lng: -122.20114,
-      title: "Does anyone know what's here?",
-    },
-  ],
-  "sauvie-island": [
-    {
-      lat: 45.76949,
-      lng: -122.7705,
-      title: "See stairs? Wrong beach. The clothing-optional crowd doesn't do staircases.",
-    },
-    { lat: 45.7831, lng: -122.78479, title: "Sorry, gay - not our stretch of sand. Keep it moving, cutie." },
-    { lat: 45.78893, lng: -122.7903, title: "Queers park here. Consider it valet, minus the valet." },
-    {
-      lat: 45.79136,
-      lng: -122.78876,
-      title: "Cool, calm, shaded, and quiet - just you and roughly a thousand mosquitos. Bring spray.",
-    },
-    {
-      lat: 45.79339,
-      lng: -122.79009,
-      title: "Wander through the trees. Plenty of trails, so get a little lost - that's the point.",
-    },
-    { lat: 45.79587, lng: -122.79003, title: "Welcome to gay beach. You made it, baby.", marker: "rainbow" },
-  ],
-};
+/**
+ * The public map intentionally shows the official place anchor only. It must
+ * not publish unverified shortcuts, informal hangouts, or precise location
+ * claims about visitors or queer community activity.
+ */
 
 /** GPS presence anchors. Radius is generous - both beaches are 1–2km
  *  shorelines and the anchor sits mid-beach. Client coordinates are checked

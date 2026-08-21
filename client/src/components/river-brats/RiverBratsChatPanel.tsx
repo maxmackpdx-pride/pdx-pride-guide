@@ -6,6 +6,7 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT, RIVER_BRATS_CHAT_OPENS_COPY } from "@shared/riverBrats";
+import RiverBratsReportButton from "./RiverBratsReportButton";
 
 type GoingChip = { date: string; label: string; dayCode: string };
 
@@ -155,6 +156,7 @@ export default function RiverBratsChatPanel({ beachId, date, beachLabel, onClose
                   </span>
                 )}
                 <p>{msg.body}</p>
+                {!msg.isMine && <RiverBratsReportButton targetType="CHAT_MESSAGE" targetId={msg.id} />}
               </div>
             </div>
           ))}

@@ -7,6 +7,7 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import AdultContentGate from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT, RIVER_BRATS_CHAT_OPENS_COPY } from "@shared/riverBrats";
+import RiverBratsReportButton from "./RiverBratsReportButton";
 
 /** 18+ interstitial once the viewer is in the room. */
 function MaybeAdultGate({ gated, children }: { gated: boolean; children: React.ReactNode }) {
@@ -270,6 +271,7 @@ export default function RiverBratsGroupChat({
                 </span>
               )}
               <span className="rb-group-chat__body">{msg.body}</span>
+              {!msg.isMine && <RiverBratsReportButton targetType="CHAT_MESSAGE" targetId={msg.id} />}
             </div>
           </div>
         ))}
