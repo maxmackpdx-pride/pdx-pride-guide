@@ -120,16 +120,18 @@ assert(
 );
 assert(
   nights.find(n => n.dayName === "Saturday")?.title === "BLACK MAGIC" &&
-    nights.find(n => n.dayName === "Saturday")?.timeHhmm === "21:00",
-  "cc Black Magic keeps its named title and 9pm schedule",
+    nights.find(n => n.dayName === "Saturday")?.timeHhmm === "21:00" &&
+    nights.find(n => n.dayName === "Saturday")?.weekOfMonth === 2,
+  "cc Black Magic keeps its named title, 9pm, and second-Saturday schedule",
 );
 assert(
   nights.find(n => n.dayName === "Friday")?.title === "THE QUEENS KEYS",
   "cc Friday keeps its named title instead of body copy",
 );
 assert(
-  nights.find(n => n.title === "GEAR")?.timeHhmm === "21:00",
-  "cc Gear ignores its fourth-Saturday ordinal and keeps 9pm",
+  nights.find(n => n.title === "GEAR")?.timeHhmm === "21:00" &&
+    nights.find(n => n.title === "GEAR")?.weekOfMonth === 4,
+  "cc Gear keeps its fourth-Saturday schedule and 9pm start",
 );
 assert(
   nights.find(n => n.dayName === "Thursday")?.timeHhmm === "21:00",
@@ -141,10 +143,24 @@ assert(
   "cc prefers full ADVERTICAL not resized",
 );
 const ccDrafts = nightsToDrafts(nights, posters[0], {
-  weeks: 2,
-  now: new Date("2026-07-20T12:00:00"),
+  weeks: 6,
+  now: new Date("2026-08-21T12:00:00"),
 });
-assert(ccDrafts.length >= 10, `cc expands nights (got ${ccDrafts.length})`);
+assert(ccDrafts.length >= 35, `cc expands nights (got ${ccDrafts.length})`);
+const blackMagicDates = ccDrafts
+  .filter(d => d.title === "BLACK MAGIC")
+  .map(d => d.dateStart.slice(0, 10));
+const gearDates = ccDrafts
+  .filter(d => d.title === "GEAR")
+  .map(d => d.dateStart.slice(0, 10));
+assert(
+  JSON.stringify(blackMagicDates) === JSON.stringify(["2026-09-12"]),
+  `cc Black Magic expands only second Saturdays (got ${blackMagicDates.join(", ")})`,
+);
+assert(
+  JSON.stringify(gearDates) === JSON.stringify(["2026-08-22", "2026-09-26"]),
+  `cc Gear expands only fourth Saturdays (got ${gearDates.join(", ")})`,
+);
 assert(
   ccDrafts.every(d => d.venueName === "CC Slaughters" && d.ageRequirement === "21_PLUS"),
   "cc policy stamps",

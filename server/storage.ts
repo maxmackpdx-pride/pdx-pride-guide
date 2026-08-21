@@ -7515,6 +7515,94 @@ function runBootMigrationsOnce() {
     );
     recordBootMigration("cross_venue_contamination_repair_v1");
   }
+
+  // CC Slaughters' old free-text parser shifted titles/times and stamped its
+  // shared weekly composite on every current card. Repair only its known
+  // malformed future rows; the trusted adapter now produces the canonical
+  // schedule and leaves shared lineup art off individual event cards.
+  if (!hasBootMigration("cc_slaughters_weekly_metadata_repair_v1")) {
+    const note =
+      "Repair CC Slaughters weekly metadata from official schedule; cleared shared lineup flyer.";
+    const normal = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           title = CASE lower(title)
+             WHEN 'drag queen bingo with nicole onoscopi' THEN 'Monday Game-Day'
+             WHEN 'tuesday at cc slaughters' THEN 'Rager'
+             WHEN 'amateur night at cc''s' THEN 'Hump Wednesday'
+             WHEN 'night' THEN 'Trans-UHH-Licious'
+             WHEN 'live piano and singing no cover 21+' THEN 'The Queens Keys'
+             WHEN 'sunday at cc slaughters' THEN 'Keyed Up Karaoke!'
+             ELSE title
+           END,
+           date_start = CASE
+             WHEN lower(title) = 'night' AND substr(date_start, 12, 5) = '02:00'
+             THEN substr(date_start, 1, 10) || 'T21:00'
+             ELSE date_start
+           END,
+           poster_image_url = NULL,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) IN (
+             'drag queen bingo with nicole onoscopi',
+             'tuesday at cc slaughters',
+             'amateur night at cc''s',
+             'night',
+             'live piano and singing no cover 21+',
+             'sunday at cc slaughters'
+           )`,
+      )
+      .run(note, note, note);
+
+    const correctBlackMagic = sqlite
+      .prepare(
+        `UPDATE events
+         SET title = 'Black Magic',
+             date_start = substr(date_start, 1, 10) || 'T21:00',
+             poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) LIKE '! starring rogue storm safari%'
+           AND (CAST((CAST(strftime('%d', date_start) AS INTEGER) - 1) / 7 AS INTEGER) + 1) = 2`,
+      )
+      .run(note, note, note);
+
+    const hideWrongBlackMagic = sqlite
+      .prepare(
+        `UPDATE events
+         SET status = 'HIDDEN',
+             poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE status = 'LIVE'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) LIKE '! starring rogue storm safari%'
+           AND (CAST((CAST(strftime('%d', date_start) AS INTEGER) - 1) / 7 AS INTEGER) + 1) != 2`,
+      )
+      .run(note, note, note);
+
+    console.info(
+      `[boot] cc_slaughters_weekly_metadata_repair_v1: normal=${normal.changes}, blackMagic=${correctBlackMagic.changes}, hidden=${hideWrongBlackMagic.changes}`,
+    );
+    recordBootMigration("cc_slaughters_weekly_metadata_repair_v1");
+  }
 }
 
 function parseEnvAdminLists() {

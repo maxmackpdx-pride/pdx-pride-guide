@@ -48,11 +48,26 @@ const DOW: Record<(typeof DAYS)[number], number> = {
 export type CcNight = {
   dayName: (typeof DAYS)[number];
   dow: number;
+  /** 1–5 when the source says "Every 2nd Saturday"; null for weekly nights. */
+  weekOfMonth: number | null;
   title: string;
   description: string;
   timeHhmm: string;
   coverNote: string | null;
 };
+
+function ordinalWeekOfMonth(text: string): number | null {
+  const ordinal = String(text || "").match(
+    /\bevery\s+(\d+)(?:st|nd|rd|th)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+  )?.[1];
+  if (!ordinal) return null;
+  const value = Number(ordinal);
+  return value >= 1 && value <= 5 ? value : null;
+}
+
+function weekOfMonth(date: string): number {
+  return Math.floor((Number(date.slice(8, 10)) - 1) / 7) + 1;
+}
 
 function decodeEntities(s: string): string {
   return s
@@ -127,6 +142,7 @@ export function parseCcSlaughtersNights(html: string): CcNight[] {
     widgetNights.push({
       dayName,
       dow: DOW[dayName],
+      weekOfMonth: ordinalWeekOfMonth(blob),
       title,
       description: blob.slice(0, 800),
       timeHhmm: parseTime(blob),
@@ -205,6 +221,7 @@ export function parseCcSlaughtersNights(html: string): CcNight[] {
     nights.push({
       dayName: day,
       dow: DOW[day],
+      weekOfMonth: ordinalWeekOfMonth(blob),
       title,
       description: blob.slice(0, 800),
       timeHhmm,
@@ -229,7 +246,9 @@ export function nightsToDrafts(
   const drafts: IngestEventDraft[] = [];
 
   for (const n of nights) {
-    const dates = nextWeekdayDates(n.dow, weeks, now);
+    const dates = nextWeekdayDates(n.dow, weeks, now).filter(
+      day => n.weekOfMonth == null || weekOfMonth(day) === n.weekOfMonth,
+    );
     for (const day of dates) {
       const dateStart = `${day}T${n.timeHhmm}`;
       const adm = inferAdmissionFromText(
