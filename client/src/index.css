@@ -16483,6 +16483,8 @@ html.calm-mode .board-stats-band,
   margin: 30px 0 26px;
 }
 
+.gig-talent-card__identity > div { min-width: 0; }
+
 .gig-talent-card__identity .user-avatar {
   flex: 0 0 auto;
   box-shadow: 0 0 0 7px rgba(176, 107, 255, 0.16), 0 0 28px rgba(110, 61, 255, 0.32);
@@ -16498,6 +16500,7 @@ html.calm-mode .board-stats-band,
   letter-spacing: 0.015em;
   text-transform: uppercase;
   color: #fff;
+  overflow-wrap: anywhere;
 }
 
 .gig-talent-card__role,
@@ -16511,6 +16514,8 @@ html.calm-mode .board-stats-band,
   color: #b6b1bd;
 }
 .gig-talent-card__location { margin-top: 3px; color: #8e8995; }
+.gig-talent-card__role,
+.gig-talent-card__location { overflow-wrap: anywhere; }
 
 .gig-talent-card__actions {
   display: grid;
