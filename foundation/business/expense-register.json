@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-21T09:09:18-07:00",
+  "currency": "USD",
+  "visibility": "internal-nda-protected",
+  "approvedSafeMonthlyCap": null,
+  "summary": {
+    "confirmedMonthlyRecurring": null,
+    "confirmedAnnualRecurring": null,
+    "monthlyReserveForAnnual": null,
+    "next30DaysDue": null,
+    "status": "not-baselined"
+  },
+  "sources": [
+    {
+      "id": "SOURCE-CHATGPT-FINANCE",
+      "provider": "ChatGPT Budget project / Zaylist Finance Liaison",
+      "purpose": "Minimum necessary personal-affordability handoff",
+      "accessStatus": "minimum-necessary-handoff-requested-2026-08-21-codex-thread-connector-timed-out",
+      "confidentiality": "internal-nda-protected"
+    },
+    {
+      "id": "SOURCE-RAILWAY",
+      "provider": "Railway",
+      "purpose": "Production infrastructure billing and usage",
+      "accessStatus": "production-health-deployment-domain-and-usage-verified-billing-evidence-unavailable",
+      "confidentiality": "internal-shareable"
+    },
+    {
+      "id": "SOURCE-GODADDY",
+      "provider": "GoDaddy",
+      "purpose": "Domains, renewals, privacy, email, certificates, hosting, and add-ons",
+      "accessStatus": "previous-domain-api-evidence-retained-current-cli-auth-expired-no-authenticated-browser-session",
+      "confidentiality": "internal-nda-protected"
+    },
+    {
+      "id": "SOURCE-EMAIL-NOREPLY",
+      "provider": "Resend",
+      "purpose": "Zaylist no-reply and transactional email delivery",
+      "accessStatus": "current-authenticated-dashboard-evidence-reported-by-tech-stack-monitor",
+      "confidentiality": "internal-nda-protected"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXPENSE-RAILWAY-PRODUCTION",
+      "provider": "Railway",
+      "product": "pdx-pride-guide production infrastructure",
+      "amount": null,
+      "currency": "USD",
+      "cadence": "unknown",
+      "nextDueDate": null,
+      "autoRenew": null,
+      "status": "usage-and-plan-partially-verified-billing-unverified",
+      "sourceEvidence": "Railway production read-only check 2026-08-21: current SUCCESS deployment b937149a-1ef5-47d9-8128-f07424ebbf1f and live health both report revision 844d6c7981c18e7439d9a85720defd99de5f9826. The service's active custom domains are www.zaylist.com and www.prideguidepdx.com. Current disk use is 0.6656 GB. Railway metrics are usage evidence, not invoice evidence.",
+      "checkedAt": "2026-08-21T09:09:18-07:00",
+      "confidence": "verified-operational-not-billing",
+      "taxTreatment": "unknown",
+      "notes": "Current cost, billing cycle, invoice, tax, and payment status remain unverified because read-only account billing evidence was not accessible. The current metric surface does not establish persistent-volume capacity, backup freshness, or recovery evidence; no capacity percentage is inferred."
+    },
+    {
+      "id": "EXPENSE-GODADDY-ZAYLIST",
+      "provider": "GoDaddy",
+      "product": "Zaylist-related domains and account products",
+      "amount": null,
+      "currency": "USD",
+      "cadence": "unknown",
+      "nextDueDate": "2027-06-30",
+      "autoRenew": true,
+      "status": "historical-domain-metadata-verified-current-product-and-billing-access-blocked",
+      "sourceEvidence": "Authenticated GoDaddy domain API read on 2026-08-21: zaylist.com, zaylis.com, pdxpg.com, and pdxprideguide.com are ACTIVE, privacy-protected, transfer-locked, and auto-renew enabled. Expiration dates: 2027-07-23 for zaylist.com and zaylis.com; 2027-06-30 for pdxpg.com and pdxprideguide.com. zaylist.com uses Cloudflare nameservers, so GoDaddy DNS returned ZONE_NOT_FOUND as expected.",
+      "checkedAt": "2026-08-21T09:09:18-07:00",
+      "confidence": "historical-verified-current-access-blocked",
+      "taxTreatment": "unknown",
+      "notes": "The prior verified dates do not indicate a renewal within 30 days, but the current GoDaddy CLI authorization expired at 2026-08-21T08:12:17Z and no authenticated browser session is available. Microsoft 365, certificates, hosting, add-ons, prices, tax, invoices, payment state, and current renewal settings remain unknown."
+    },
+    {
+      "id": "EXPENSE-EMAIL-NOREPLY",
+      "provider": "Resend",
+      "product": "Zaylist no-reply and transactional email delivery",
+      "amount": null,
+      "historicalAmount": 0,
+      "currency": "USD",
+      "cadence": "monthly",
+      "nextDueDate": null,
+      "autoRenew": null,
+      "status": "current-free-subscriptions-verified-detailed-limits-and-delivery-unverified",
+      "sourceEvidence": "Authenticated Resend dashboard evidence reported by the 2026-08-21 Tech Stack Monitor: free transactional and marketing subscriptions, no payment method or invoices, and no sent-email records, delivery logs, or suppressions. Historical authenticated billing (2026-08-03) reported transactional 3,000 emails and marketing 1,000 contacts at $0/month. Public DNS independently identifies Resend DKIM and Amazon SES delivery records.",
+      "checkedAt": "2026-08-21T09:09:18-07:00",
+      "confidence": "current-account-metadata-verified-detailed-limits-unverified",
+      "taxTreatment": "unknown",
+      "notes": "Current free subscriptions and no payment method or invoices are verified, but exact allowance, overage terms, sender identities, API-key last use, integration behavior, tax treatment, and a successful production send or delivery remain unverified. Production health reports emailConfigured=true, which confirms configuration only."
+    }
+  ],
+  "prohibitedActions": [
+    "purchase",
+    "renew",
+    "cancel",
+    "transfer",
+    "delete infrastructure",
+    "change plan",
+    "change DNS or nameservers",
+    "change payment method",
+    "send or schedule email",
+    "import, upload, buy, or export contact lists",
+    "change sender identity, domain authentication, suppression, or unsubscribe settings",
+    "send private finance data to external models"
+  ]
+}

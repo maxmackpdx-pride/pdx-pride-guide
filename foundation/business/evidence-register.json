@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-21T09:09:18-07:00",
+  "evidence": [
+    {
+      "id": "EVIDENCE-OR-LLC-STRUCTURE",
+      "topic": "Oregon LLC structure and liability",
+      "sourceType": "official-government",
+      "url": "https://sos.oregon.gov/business/Pages/obr-business-types.aspx",
+      "checkedAt": "2026-08-03",
+      "freshUntil": "2026-09-03",
+      "supports": "Oregon LLCs file Articles of Organization and annual reports; members generally have limited liability for LLC debts",
+      "limitations": "Does not determine whether an LLC is right for Tucker or eliminate personal exposure"
+    },
+    {
+      "id": "EVIDENCE-OR-LLC-FEES-PRIVACY",
+      "topic": "Oregon LLC fees and public records",
+      "sourceType": "official-government",
+      "url": "https://sos.oregon.gov/business/register/pages/domestic-limited-liability-companies-forms.aspx",
+      "checkedAt": "2026-08-03",
+      "freshUntil": "2026-09-03",
+      "supports": "Oregon LLC filing information is generally public and the Articles processing fee is currently $100",
+      "limitations": "Fees and filing practices can change"
+    },
+    {
+      "id": "EVIDENCE-IRS-SMLLC",
+      "topic": "Single-member LLC federal tax treatment",
+      "sourceType": "official-government",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/single-member-limited-liability-companies",
+      "checkedAt": "2026-08-03",
+      "freshUntil": "2026-09-03",
+      "supports": "A one-owner LLC is generally disregarded for federal income tax unless another classification is elected; EIN requirements depend on circumstances",
+      "limitations": "Not individualized tax advice"
+    },
+    {
+      "id": "EVIDENCE-SEC-CAPITAL-PATHS",
+      "topic": "Capital raising pathways",
+      "sourceType": "official-government",
+      "url": "https://www.sec.gov/resources-small-businesses/capital-raising-building-blocks/smallbiz-essentials-what-pathways-are-available-raise-capital-investors",
+      "checkedAt": "2026-08-03",
+      "freshUntil": "2026-09-03",
+      "supports": "Selling investment interests implicates securities rules; exemptions and regulated crowdfunding have specific requirements",
+      "limitations": "Counsel is required for an actual offering"
+    },
+    {
+      "id": "EVIDENCE-RAILWAY-PRODUCTION-2026-08-21",
+      "topic": "Railway production operational capacity and plan metadata",
+      "sourceType": "authenticated-provider-read-only",
+      "url": "https://railway.com/",
+      "checkedAt": "2026-08-21",
+      "freshUntil": "2026-08-28",
+      "supports": "pdx-pride-guide production has a SUCCESS deployment and live health response matching revision 844d6c7981c18e7439d9a85720defd99de5f9826; the service's current disk metric is 0.6656 GB and its custom domains are active.",
+      "limitations": "Does not reveal invoices, price, taxes, billing cycle, payment method, persistent-volume capacity, backups, recovery evidence, or future usage."
+    },
+    {
+      "id": "EVIDENCE-GODADDY-DOMAINS-2026-08-21",
+      "topic": "Zaylist-related domain ownership and renewal metadata",
+      "sourceType": "authenticated-provider-read-only",
+      "url": "https://account.godaddy.com/products",
+      "checkedAt": "2026-08-21",
+      "freshUntil": "2026-09-21",
+      "supports": "The account lists active, privacy-protected, transfer-locked, auto-renew-enabled zaylist.com, zaylis.com, pdxpg.com, and pdxprideguide.com. The earliest verified expiration is 2027-06-30.",
+      "limitations": "Read-only domain API scope does not establish product bundles, Microsoft 365, certificates, hosting, add-ons, invoice totals, tax, or payment state."
+    },
+    {
+      "id": "EVIDENCE-OR-HB4088-2026",
+      "topic": "Oregon protections for legally protected gender-affirming care",
+      "sourceType": "official-government",
+      "url": "https://olis.oregonlegislature.gov/liz/2026R1/Measures/Overview/HB4088",
+      "checkedAt": "2026-08-21",
+      "freshUntil": "2026-11-21",
+      "supports": "HB 4088 became Oregon Laws 2026 chapter 52 and strengthened state protections and confidentiality concerning legally protected reproductive and gender-affirming health care activities.",
+      "limitations": "This is local legal context, not legal advice and not evidence that Zaylist should provide health services or make health claims."
+    },
+    {
+      "id": "EVIDENCE-RESEND-ACCOUNT-2026-08-21",
+      "topic": "Resend current plan and delivery-state metadata",
+      "sourceType": "authenticated-provider-read-only",
+      "url": "https://resend.com/",
+      "checkedAt": "2026-08-21",
+      "freshUntil": "2026-08-28",
+      "supports": "The account has free transactional and marketing subscriptions, no payment method or invoices, and no sent-email records, delivery logs, or suppressions.",
+      "limitations": "Does not establish exact allowance, overage pricing, sender identities, API-key last use, production integration behavior, or successful delivery."
+    },
+    {
+      "id": "EVIDENCE-PBOT-PRIDE-PLAZA-2026-08-10",
+      "topic": "Pride Plaza and Darcelle XV Promenade construction",
+      "sourceType": "official-government",
+      "url": "https://www.portland.gov/transportation/news/2026/8/10/news-release-pbot-upgrades-pride-plaza-starting-week-colorful-artwork",
+      "checkedAt": "2026-08-21",
+      "freshUntil": "2026-09-21",
+      "supports": "PBOT began work in August 2026; SW Ninth Avenue is closed to motor vehicles between SW Harvey Milk and Washington during construction, sidewalks generally remain open, and completion is expected this year.",
+      "limitations": "It does not establish the status of a particular event, venue, organizer, business hours, or accessibility accommodation at a given time."
+    }
+  ]
+}
