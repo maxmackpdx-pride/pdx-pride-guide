@@ -303,7 +303,7 @@ export default function HomeHero() {
         <Link href="/events" className="home-hero__btn home-hero__btn--primary" data-testid="hero-cta-events">
           View all events →
         </Link>
-        <Link href="/z/out/rooster-rock" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
+        <Link href="/z/out" className="home-hero__btn home-hero__btn--river" data-testid="hero-cta-river">
           Headed to the river? →
         </Link>
         <Link href="/the-hauz" className="home-hero__btn home-hero__btn--haus" data-testid="hero-cta-hausing">

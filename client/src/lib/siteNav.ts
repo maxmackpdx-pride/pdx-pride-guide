@@ -56,11 +56,11 @@ export const PRIMARY_NAV: NavEntry[] = [
     accent: "orange",
     eyebrow: "Most Visited",
     /*
-     * The mockup showed three destinations and a "View All Outz" footer. OUTZ
-     * has exactly two addresses and no index page, so the list is the whole
-     * set and the footer link would have nowhere to go.
+     * OUTZ has an index plus two named outdoor destinations, so the group
+     * provides a clear way to browse all currently published spots.
      */
     items: [
+      { href: "/z/out", label: "All OUTZ", accent: "orange" },
       { href: "/z/out/rooster-rock", label: "Rooster Rock", accent: "orange" },
       { href: "/z/out/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
@@ -100,6 +100,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "Places", title: "OUR PLACEZ" },
+  "/z/out": { section: "OUTZ", title: "Outdoors" },
   "/z/out/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
   "/z/out/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
   "/next": { section: "Explore", title: "Next" },
@@ -131,7 +132,7 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/sellz", label: "Sellz", accent: "green" },
   { href: "/spotted", label: "Mizzed", accent: "magenta" },
   { href: "/gifting", label: "Giftz", accent: "lime" },
-  { href: "/z/out/rooster-rock", label: "Outz", accent: "orange" },
+  { href: "/z/out", label: "Outz", accent: "orange" },
 ];
 
 /** Destinations behind the mobile footer "Events" tab sheet. */

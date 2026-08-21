@@ -71,6 +71,7 @@ const MissedConnections = lazy(() => import("./pages/MissedConnections"));
 const Directory = lazy(() => import("./pages/Directory"));
 const RoosterRock = lazy(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazy(() => import("./pages/SauvieIsland"));
+const Outz = lazy(() => import("./pages/Outz"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));

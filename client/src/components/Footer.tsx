@@ -18,6 +18,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
       ["/z/squadz", "MY SQUADZ"],
       ["/z/placez", "OUR PLACEZ"],
       ["/z/dark", "ZAYDARK"],
+      ["/z/out", "OUTZ"],
       ["/z/out/rooster-rock", "OUTZ · Rooster Rock"],
       ["/z/out/sauvie-island", "OUTZ · Sauvie Island"],
       ["/next", "Next"],
