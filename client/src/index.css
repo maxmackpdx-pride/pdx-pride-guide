@@ -2344,6 +2344,8 @@ a.event-host-name.event-host-name--link:hover {
   .site-hub-mtop {
     display: flex;
     width: 100%;
+    min-height: 76px;
+    box-sizing: border-box;
     position: static;
     background: var(--hub-ink);
     border-bottom: 0;
