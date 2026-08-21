@@ -1785,8 +1785,20 @@
   to { height: 38%; opacity: 1; }
 }
 
-@media (min-width: 1024px) {
-  .darkroom-route { gap: 46px; }
+/*
+ * Two columns of cards flanking the spine. This used to be one card per row
+ * alternating sides, which left the opposite half of every row empty and ran
+ * the section to ~5300px. Both columns now carry a card at each step, so the
+ * cards keep their size and the section is roughly half as tall.
+ */
+@media (min-width: 721px) {
+  .darkroom-route {
+    --route-gutter: clamp(74px, 7vw, 108px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--route-gutter);
+    row-gap: clamp(26px, 3vw, 46px);
+    align-items: start;
+  }
 
   .darkroom-route::before,
   .darkroom-route::after {
@@ -1794,28 +1806,58 @@
     transform: translateX(-1px);
   }
 
+  /* The li is now one grid cell; the marker is lifted into the gutter. */
   .darkroom-waypoint {
-    grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1fr);
-    gap: 0 22px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .darkroom-waypoint:nth-child(odd) { justify-items: end; }
+  .darkroom-waypoint:nth-child(even) { justify-items: start; }
+
+  .darkroom-waypoint__card {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(100%, 500px);
   }
 
   .darkroom-waypoint__marker {
-    grid-column: 2;
-  }
-
-  .darkroom-waypoint__card {
-    grid-column: 3;
-    justify-self: start;
-  }
-
-  .darkroom-waypoint:nth-child(even) .darkroom-waypoint__card {
+    position: absolute;
+    top: 22px;
     grid-column: 1;
-    justify-self: end;
+    grid-row: 1;
+    justify-self: auto;
+    margin-top: 0;
+  }
+
+  /*
+   * Centred in the gutter: half the gutter, less half the 54px marker.
+   * Both cards in a row share one rail, so the second node drops to its
+   * card's midpoint. Level with the first it would sit exactly on top of
+   * it and only the later number would be visible.
+   */
+  .darkroom-waypoint:nth-child(odd) .darkroom-waypoint__marker {
+    left: calc(100% + (var(--route-gutter) - 54px) / 2);
+  }
+
+  .darkroom-waypoint:nth-child(even) .darkroom-waypoint__marker {
+    top: calc(50% - 27px);
+    right: calc(100% + (var(--route-gutter) - 54px) / 2);
+  }
+
+  /* The connector reaches back to its own card, so it flips with the column. */
+  .darkroom-waypoint__marker::before {
+    width: calc((var(--route-gutter) - 54px) / 2);
+  }
+
+  .darkroom-waypoint:nth-child(odd) .darkroom-waypoint__marker::before {
+    right: 100%;
+    left: auto;
   }
 
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__marker::before {
-    right: 100%;
-    left: auto;
+    left: 100%;
+    right: auto;
   }
 }
 
@@ -1869,7 +1911,16 @@
     max-width: 1180px;
     padding: 24px 18px 64px;
   }
-  .darkroom-route { gap: 18px; }
+  /*
+   * Two-up poster tiles, same move already shipped on Spaces and the z/ index.
+   * There is no room for a centre spine at this width, so the rail stays hidden
+   * and the step number rides the tile's top-left corner instead.
+   */
+  .darkroom-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+    align-items: start;
+  }
   .darkroom-mobile-reveal { opacity: 0; transform: translateY(22px); }
   .darkroom-mobile-reveal--visible { animation: pgDirCardIn .55s var(--ease-out, ease) both; }
   .darkroom-route::before,
@@ -1882,15 +1933,34 @@
     padding: 0;
     transform: none;
   }
-  .darkroom-waypoint__marker { display: none; }
+  .darkroom-waypoint__marker {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    z-index: 4;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    font-size: 9px;
+    box-shadow: 0 0 0 3px #050505, 0 0 14px -4px var(--c);
+  }
+  /*
+   * The blob behind the digit is what the number is knocked out of. At 24px
+   * it is too small to read against, so the badge goes to an outlined ring
+   * with the digit in the accent instead.
+   */
+  .darkroom-waypoint__marker::after { display: none; }
+  .darkroom-waypoint__marker::before { display: none; }
+  .darkroom-waypoint__marker span { color: var(--c); }
   .darkroom-waypoint__card,
   .darkroom-waypoint:nth-child(even) .darkroom-waypoint__card { grid-column: auto; }
   .darkroom-waypoint__card {
-    width: min(100%, 560px);
-    max-width: 560px;
+    width: 100%;
+    max-width: none;
     height: auto;
     min-height: 0;
-    margin-inline: auto;
+    margin-inline: 0;
+    padding: 30px 11px 12px;
     aspect-ratio: 17 / 25;
     transform: none;
   }
@@ -2069,4 +2139,123 @@ html.calm-mode .darkroom-construction-layer svg { display: none; }
       0 44px 84px -48px #000;
     will-change: auto;
   }
+}
+
+/* ── /next roadmap: two-up tile density ───────────────────────
+   The waypoint card was drawn for a 490px column. At two-up it is
+   ~155 to 205px wide, so the chip, logo, and copy all have to come
+   down a register. Last in the file so it settles the earlier
+   720px and 430px blocks, which were tuned for the full-width card. */
+@media (max-width: 720px) {
+  .darkroom-route { gap: 12px 10px; }
+
+  .darkroom-waypoint__card {
+    padding: 32px 10px 11px;
+    border-radius: 12px;
+  }
+
+  .darkroom-waypoint__card > .darkroom-waypoint__like {
+    top: 8px;
+    right: 8px;
+    gap: 3px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  .darkroom-waypoint__like-heart { font-size: 10px; }
+
+  /* Chip only. The eyebrow is the first thing to go at this width. */
+  .darkroom-waypoint__meta {
+    margin-bottom: 8px;
+    gap: 0;
+    transform: none;
+  }
+  .darkroom-waypoint .darkroom-waypoint__meta span:first-child {
+    gap: 5px;
+    padding: 4px 8px;
+    border-width: 1px;
+    font-size: 9px;
+    letter-spacing: .08em;
+    box-shadow: 0 0 12px -7px var(--c);
+  }
+  .darkroom-waypoint__meta span:last-child { display: none; }
+  .darkroom-waypoint__status-dot {
+    width: 5px;
+    height: 5px;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  /* The product mark is the poster block. */
+  .darkroom-waypoint__logo-heading {
+    width: 100%;
+    margin-block: auto;
+  }
+  .darkroom-waypoint__logo-heading img { max-height: clamp(66px, 21vw, 96px); }
+  .darkroom-waypoint__card h3 { font-size: clamp(19px, 6vw, 26px); }
+
+  /* Phone mockups, maps, and profile stacks are illegible at tile size. */
+  .darkroom-card-motif,
+  .darkroom-portland-map { display: none; }
+
+  /* Those offsets nudged the mark clear of a motif that is no longer drawn. */
+  .darkroom-waypoint__card[data-motif] .darkroom-waypoint__logo-heading {
+    left: auto;
+    transform: none;
+    margin-inline: auto;
+  }
+
+  .darkroom-waypoint__copy > p {
+    font-size: 10.5px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+  .darkroom-waypoint__detail { display: none; }
+  .darkroom-waypoint__link {
+    margin-top: 7px;
+    font-size: 9px;
+    letter-spacing: .06em;
+  }
+
+  /*
+   * The last waypoint carries the idea form, which cannot work in a
+   * half-width tile. It takes the full row and sizes to its content,
+   * which also lands it flush instead of dangling as an odd tile.
+   */
+  .darkroom-waypoint--idea { grid-column: 1 / -1; }
+  .darkroom-waypoint--idea .darkroom-waypoint__card {
+    aspect-ratio: auto;
+    padding: 34px 16px 18px;
+  }
+  .darkroom-waypoint--idea .darkroom-waypoint__copy > p {
+    -webkit-line-clamp: none;
+    font-size: 13px;
+  }
+}
+
+/* ── /next roadmap: two-up density, tablet band ───────────────
+   Same two-column spine as desktop, but the card lands between
+   ~310 and ~455px wide. The card height is locked by its 17/25
+   poster ratio, so the type has to track the width or the copy
+   runs out the bottom. Values meet the desktop sizes at 1024px. */
+@media (min-width: 721px) and (max-width: 1023px) {
+  .darkroom-waypoint__card { padding: clamp(16px, 2.2vw, 24px); }
+
+  .darkroom-waypoint__meta { margin-bottom: clamp(10px, 1.6vw, 16px); }
+  .darkroom-waypoint .darkroom-waypoint__meta span:first-child {
+    gap: 8px;
+    padding: 7px 13px;
+    border-width: 1px;
+    font-size: clamp(13px, 1.75vw, 19px);
+  }
+  .darkroom-waypoint__meta span:last-child { font-size: clamp(9px, 1.15vw, 12px); }
+  .darkroom-waypoint__status-dot { width: 7px; height: 7px; }
+
+  .darkroom-waypoint__logo-heading img { max-height: clamp(112px, 16vw, 168px); }
+  .darkroom-waypoint__card h3 { font-size: clamp(26px, 3.9vw, 40px); }
+
+  .darkroom-waypoint__copy > p { font-size: clamp(12px, 1.5vw, 16px); line-height: 1.5; }
+  .darkroom-waypoint__detail { font-size: clamp(10px, 1.2vw, 12.5px); }
+  .darkroom-waypoint__link { font-size: clamp(10px, 1.2vw, 13px); }
 }
