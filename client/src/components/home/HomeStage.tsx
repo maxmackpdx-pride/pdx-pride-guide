@@ -158,12 +158,6 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
   }, [events, fallback]);
   const [active, setActive] = useState(0);
 
-  useEffect(() => {
-    if (slides.length < 2 || prefersStillMotion()) return;
-    const timer = window.setInterval(() => setActive((index) => (index + 1) % slides.length), 5200);
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
-
   if (!slides.length) return null;
   const event = slides[active] ?? slides[0];
 
