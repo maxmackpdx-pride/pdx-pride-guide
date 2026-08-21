@@ -10,7 +10,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 
@@ -70,10 +70,12 @@ export default function MobileBottomNav() {
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [spaceOpen, setSpaceOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
+    if (except !== "boards") setSpaceOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
 
@@ -88,6 +90,7 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     setEventsOpen(false);
+    setSpaceOpen(false);
   }, [location]);
 
   const placesActive = navLinkActive(location, "/directory");
@@ -107,6 +110,15 @@ export default function MobileBottomNav() {
     }
     dismissExcept("events");
     setEventsOpen(true);
+  };
+
+  const handleSpace = () => {
+    if (spaceOpen) {
+      setSpaceOpen(false);
+      return;
+    }
+    dismissExcept("boards");
+    setSpaceOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -144,6 +156,26 @@ export default function MobileBottomNav() {
                 href={item.href}
                 className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
                 onClick={() => setEventsOpen(false)}
+              >
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
+      {spaceOpen && (
+        <>
+          <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
+          <div className="hub-more-sheet" role="dialog" aria-label="Z/Space">
+            <h3>Z/Space</h3>
+            {BOARD_NAV.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
+                data-accent={item.accent}
+                onClick={() => setSpaceOpen(false)}
               >
                 <span>{item.label}</span>
               </Link>
@@ -204,12 +236,13 @@ export default function MobileBottomNav() {
             </button>
           )}
 
-          <Link
-            href="/z"
-            className={tabClass(boardsActive, "purple")}
-            aria-label="Z/"
-            aria-current={boardsActive ? "page" : undefined}
-            onClick={handleNavLink}
+          <button
+            type="button"
+            className={tabClass(boardsActive || spaceOpen, "purple")}
+            aria-expanded={spaceOpen}
+            aria-haspopup="dialog"
+            aria-label="Z/Space"
+            onClick={handleSpace}
           >
             <span
               aria-hidden
@@ -228,7 +261,7 @@ export default function MobileBottomNav() {
               <span style={{ fontSize: 21, lineHeight: 0.84, letterSpacing: "-0.06em" }}>Z/</span>
               <span style={{ marginTop: 3, fontSize: 9, lineHeight: 1, letterSpacing: "0.08em" }}>SPACE</span>
             </span>
-          </Link>
+          </button>
 
           <button
             type="button"

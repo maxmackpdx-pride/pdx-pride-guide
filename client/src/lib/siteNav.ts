@@ -117,19 +117,21 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 };
 
 /**
- * Destinations behind the mobile footer "Boards" tab sheet.
+ * Destinations behind the mobile footer Z/Space tab sheet.
  *
- * The desktop nav collapsed its Boards dropdown into a single /z link. The
- * mobile bar keeps a sheet, because its tab already opens one, so /z leads the
- * list rather than replacing it: on a phone a direct tap to a board is worth
- * keeping, and the namespace still gets a door.
+ * Mirrors the desktop Z/Space menu and, per the nav handoff, carries Outz too:
+ * the phone bar has no Outz tab of its own, so this sheet is the only door to
+ * it. /z leads the list rather than being replaced by it, standing in for the
+ * featured card on the desktop panel.
  */
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/z", label: "z/ all boards" },
-  { href: "/pride-work", label: "GIGZ" },
-  { href: "/gifting", label: "GIFTZ" },
-  { href: "/the-hauz", label: "THE HAÜZ" },
-  { href: "/spotted", label: "MIZZED CONNECTION" },
+  { href: "/z", label: "z/ all boards", accent: "violet" },
+  { href: "/the-hauz", label: "Housing", accent: "cyan" },
+  { href: "/pride-work", label: "Gigz", accent: "violet" },
+  { href: "/sellz", label: "Sellz", accent: "green" },
+  { href: "/spotted", label: "Mizzed", accent: "magenta" },
+  { href: "/gifting", label: "Giftz", accent: "lime" },
+  { href: "/z/out/rooster-rock", label: "Outz", accent: "orange" },
 ];
 
 /** Destinations behind the mobile footer "Events" tab sheet. */
