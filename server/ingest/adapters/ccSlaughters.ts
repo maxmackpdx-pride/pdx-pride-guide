@@ -65,7 +65,18 @@ function decodeEntities(s: string): string {
 }
 
 function parseTime(text: string): string {
-  const m = String(text || "").match(/(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?/i);
+  const raw = String(text || "");
+  // The source's descriptive copy can mention ordinal dates (for example,
+  // “Every 2nd Saturday”) before its actual start time. Prefer the explicit
+  // weekly schedule line so Black Magic is 9pm, not 2pm.
+  const directScheduled = raw.match(
+    /\bevery\s+(?:(?:\d+(?:st|nd|rd|th)\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\s*\|\s*(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)/i,
+  );
+  const ordinalScheduled = raw.match(
+    /\bevery\s+\d+(?:st|nd|rd|th)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b[\s\S]{0,220}?(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)/i,
+  );
+  const scheduled = directScheduled || ordinalScheduled;
+  const m = scheduled || raw.match(/(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?/i);
   if (!m) return "21:00";
   let h = Number(m[1]);
   const min = m[2] ? Number(m[2]) : 0;
@@ -91,6 +102,41 @@ export function extractCcVerticalPosters(html: string): string[] {
  * with panel markup; we cut on day headers.
  */
 export function parseCcSlaughtersNights(html: string): CcNight[] {
+  // The live WordPress page has one explicit widget per night. Parse those
+  // structural headings before falling back to prose, because body copy can
+  // mention other weekdays and a shared slider can otherwise shift every
+  // heading by one card.
+  const widgetNights: CcNight[] = [];
+  const widgetRe =
+    /<h3\b[^>]*\bclass=["'][^"']*\bwidget-title\b[^"']*["'][^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3\b[^>]*\bclass=["'][^"']*\bwidget-title\b[^"']*["'][^>]*>|$)/gi;
+  for (const match of String(html || "").matchAll(widgetRe)) {
+    const title = decodeEntities(match[1].replace(/<[^>]+>/g, " ")).slice(0, 100);
+    const blob = decodeEntities(
+      match[2]
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<[^>]+>/g, " "),
+    );
+    const day = blob.match(
+      /\bevery\s+(?:(?:\d+(?:st|nd|rd|th)\s+)?)(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+    )?.[1];
+    if (!title || !day) continue;
+    const dayName = `${day[0].toUpperCase()}${day.slice(1).toLowerCase()}` as CcNight["dayName"];
+    widgetNights.push({
+      dayName,
+      dow: DOW[dayName],
+      title,
+      description: blob.slice(0, 800),
+      timeHhmm: parseTime(blob),
+      coverNote: /\bno\s*cover\b/i.test(blob)
+        ? "No cover"
+        : blob.match(/\$\d+\s*cover/i)?.[0] || null,
+    });
+  }
+  if (widgetNights.length >= 5) return widgetNights;
+
   const text = decodeEntities(
     String(html || "")
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -118,6 +164,13 @@ export function parseCcSlaughtersNights(html: string): CcNight[] {
     // Prefer explicit named nights (order = specificity; Bingo before Game-Day)
     let title = "";
     const namedPatterns = [
+      /\bRager\b/i,
+      /\bHump Wednesday\b/i,
+      /\bTrans-Uhh-Licious\b/i,
+      /\bThe Queens Keys\b/i,
+      /\bKeyed Up Karaoke\b/i,
+      /\bBlack Magic\b/i,
+      /\bGear\b/i,
       /Drag Queen Bingo[^.|]{0,50}/i,
       /Amateur Night[^.|]{0,40}/i,
       /Hump [Nn]ight[^.|]{0,40}/i,

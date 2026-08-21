@@ -84,7 +84,10 @@ const oneOnly = [c.draft];
 assert(oneOnly.length === 1, "one mode is single draft");
 
 // buildScanCandidates preserves memberDrafts
-const cands = buildScanCandidates(raw, [], []);
+// These are fixed historical fixture dates. Include them deliberately so this
+// test remains about preserving series members; smoke-qsearch.ts covers the
+// production default that drops past events.
+const cands = buildScanCandidates(raw, [], [], { includePastEvents: true });
 const seriesCand = cands.find(x => x.recurring === "weekly");
 assert(!!seriesCand, "scan candidate has weekly series");
 assert((seriesCand!.memberDrafts || []).length === 4, "candidate memberDrafts length 4");

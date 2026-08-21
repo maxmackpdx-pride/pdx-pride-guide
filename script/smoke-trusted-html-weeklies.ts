@@ -100,13 +100,14 @@ assert(tueDates[0] === "2026-07-21", `next Tuesday from Mon Jul 20 is 21 (got ${
 
 /* ── CC Slaughters ── */
 const CC_HTML = `
-Monday Game-Day CC's Community Foundation presents Drag Queen Bingo with Nicole Onoscopi. Join the fun every Monday night at 7pm for drinks.
-Tuesday | 9pm Feat. DJ Mawmie No Cover 21+ | no exceptions
-Wednesday It's amateur night at CC's.. Hump night is your chance to strip at CC's and earn some extra cash in your jocks
-Thursday night. Featuring music by DJ ROBB. Afterwards we welcome DJ Lyta Blunt
-Friday | 7pm Feat. live piano and singing No Cover 21+
-Saturday! Starring Rogue Storm Safari. Every 2nd Saturday | 9pm Featuring DJ Queer Cub $10 Cover 21+
-Sunday | 7pm Featuring Saint Syndrome & Kevin Hutman No Cover 21+
+<h3 class="widget-title">Monday Game-Day</h3> CC's Community Foundation presents Drag Queen Bingo with Nicole Onoscopi. Every Monday | 7pm No Cover
+<h3 class="widget-title">RAGER</h3> Queer-centered EDM night. Every Tuesday | 9pm Feat. DJ Mawmie No Cover 21+ | no exceptions
+<h3 class="widget-title">HUMP WEDNESDAY</h3> It's amateur night at CC's. Every Wednesday | 7pm No Cover
+<h3 class="widget-title">TRANS-UHH-LICIOUS</h3> A night dedicated to the trans community. Every Thursday | 9pm Featuring music by DJ ROBB.
+<h3 class="widget-title">THE QUEENS KEYS</h3> Every Friday | 7pm Feat. live piano and singing No Cover 21+
+<h3 class="widget-title">BLACK MAGIC</h3> Starring Rogue Storm Safari. Every 2nd Saturday | 9pm Featuring DJ Queer Cub $10 Cover 21+
+<h3 class="widget-title">GEAR</h3> Hosted by PDX Collar Guard. Every 4th Saturday Feat. DJ Sorcery $10 Cover 9pm-2am 21+
+<h3 class="widget-title">KEYED UP KARAOKE</h3> Every Sunday | 7pm Featuring Saint Syndrome & Kevin Hutman No Cover 21+
 <img src="https://ccslaughterspdx.com/wp-content/uploads/2026/07/WEEKLYS_2026_ADVERTICAL_ONLINE.png" />
 <img src="https://ccslaughterspdx.com/wp-content/uploads/2026/07/WEEKLYS_2026_ADVERTICAL_ONLINE-350x623.png" />
 `;
@@ -116,6 +117,23 @@ assert(nights.length >= 5, `cc parses most weeknights (got ${nights.length})`);
 assert(
   nights.some(n => /bingo|game-?day/i.test(n.title) && n.dow === 1),
   "cc Monday bingo/game-day night",
+);
+assert(
+  nights.find(n => n.dayName === "Saturday")?.title === "BLACK MAGIC" &&
+    nights.find(n => n.dayName === "Saturday")?.timeHhmm === "21:00",
+  "cc Black Magic keeps its named title and 9pm schedule",
+);
+assert(
+  nights.find(n => n.dayName === "Friday")?.title === "THE QUEENS KEYS",
+  "cc Friday keeps its named title instead of body copy",
+);
+assert(
+  nights.find(n => n.title === "GEAR")?.timeHhmm === "21:00",
+  "cc Gear ignores its fourth-Saturday ordinal and keeps 9pm",
+);
+assert(
+  nights.find(n => n.dayName === "Thursday")?.timeHhmm === "21:00",
+  "cc Thursday keeps its 9pm schedule over a descriptive 2am close",
 );
 const posters = extractCcVerticalPosters(CC_HTML);
 assert(

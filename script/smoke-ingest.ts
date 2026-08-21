@@ -191,7 +191,13 @@ const cands = buildScanCandidates(
       sourceUrl: "https://x.test",
     },
   ],
-  weeklyCatalog.map(e => ({ ...e, title: "Karaoke", venueName: "Scandals", dayOfWeek: "MON" })),
+  // Catalog recurring classification is covered above. Keep this fixture
+  // catalog-free so it asserts series condensation rather than coverage prune.
+  [],
+  [],
+  // Fixed fixture dates are intentionally historical; the separate assertions
+  // below cover the default path that excludes past events.
+  { includePastEvents: true },
 );
 assert(cands[0]?.recurring === "weekly", "scan condenses weekly");
 assert(!!cands[0]?.recurringDupAction || !!cands[0]?.strongDuplicate, "recurring dup action or strong dup set");

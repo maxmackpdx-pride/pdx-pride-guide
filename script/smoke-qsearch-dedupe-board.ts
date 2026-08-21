@@ -128,7 +128,9 @@ seriesBoard[0].address = "110 NW Broadway, Portland, OR";
 seriesBoard[1].venueName = "Badlands";
 seriesBoard[1].address = "110 NW Broadway, Portland, OR";
 
-const seriesCands = buildScanCandidates(seriesRaw, seriesBoard, []);
+// Fixed fixture dates must remain eligible so this checks partial series
+// coverage rather than the separate production past-event filter.
+const seriesCands = buildScanCandidates(seriesRaw, seriesBoard, [], { includePastEvents: true });
 assert(seriesCands.length === 1, "one series card after prune");
 assert(seriesCands[0].memberDrafts.length === 2, `2 new series nights (got ${seriesCands[0].memberDrafts.length})`);
 assert(
@@ -144,7 +146,7 @@ const allCoveredBoard: Event[] = weeks.map((day, i) => {
   e.address = "110 NW Broadway, Portland, OR";
   return e;
 });
-const none = buildScanCandidates(seriesRaw, allCoveredBoard, []);
+const none = buildScanCandidates(seriesRaw, allCoveredBoard, [], { includePastEvents: true });
 assert(none.length === 0, "fully covered series does not enter Review");
 
 // applyCatalogCoverage null for pure dup (use FUTURE date - past nights are dropped)
@@ -161,6 +163,7 @@ const pureDup = buildScanCandidates(
   ],
   [],
   [],
+  { includePastEvents: true },
 )[0];
 assert(pureDup != null, "future karaoke one-off produces a candidate against empty catalog");
 // force coverage against board that already has that night
