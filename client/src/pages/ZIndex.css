@@ -944,6 +944,13 @@
   /* Mantra is a decorative one-liner - drop it at this size so the card
      spends its height on real content (subs, newest posts). */
   .z-index__mantra { display: none }
+  /* SELLZ has no board content yet, so its status stays visible rather than
+     leaving the reserved card blank. */
+  .z-index__board--pending[data-address="sellz"] .z-index__mantra {
+    display: block;
+    margin-top: auto;
+    color: var(--c);
+  }
 
   .z-index__newest-label { font-size: 8.5px }
   .z-index__post { padding: 5px 0 }
@@ -1169,4 +1176,3 @@ html.calm-mode .z-index__pending::after { animation: none }
   .z-index--rail .z-index__rail { --cf-card: clamp(210px, 74vw, 300px); --cf-card-h: 380px; }
   .z-index__feed-row { grid-template-columns: 1fr; gap: 2px 10px; }
 }
-

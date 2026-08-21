@@ -190,7 +190,7 @@ const MANTRA: Record<string, string> = {
   mizzed: "Stay kind · stay anonymous · reveal when ready",
   squadz: "Clubs and groups you can just show up to",
   dark: "Coming soon · the after-dark side of Zaylist",
-  sellz: "Local stuff · real people · simple handoffs",
+  sellz: "Coming soon",
 };
 
 const COUNT_LABEL: Record<string, string> = {
@@ -203,7 +203,7 @@ const COUNT_LABEL: Record<string, string> = {
   squadz: "squadz",
   out: "live conditions",
   dark: "coming soon",
-  sellz: "listings",
+  sellz: "coming soon",
 };
 
 const POSTS_LABEL: Record<string, string> = {
