@@ -75,6 +75,7 @@ const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
 const ZIndex = lazy(() => import("./pages/ZIndex"));
+const Outz = lazy(() => import("./pages/Outz"));
 const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -90,6 +91,7 @@ const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
   "/pride-work": PrideWork,
   "/spotted": MissedConnections,
   "/directory": Directory,
+  "/z/out": Outz,
   "/z/out/rooster-rock": RoosterRock,
   "/z/out/sauvie-island": SauvieIsland,
   "/next": Darkroom,
@@ -209,6 +211,7 @@ function AppLayout() {
                 return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/z/out/sauvie-island" : "/z/out/rooster-rock"} />;
               }}
             </Route>
+            <Route path="/outz" component={Outz} />
             <Route path="/next" component={Darkroom} />
             <Route path="/darkroom">
               {() => <Redirect to="/next" />}

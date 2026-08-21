@@ -55,7 +55,7 @@ export const Z_ADDRESSES: ZAddress[] = [
   { path: "gigz", display: "z/gigz", board: "GIGZ", route: "/pride-work" },
   { path: "mizzed", display: "z/mizzed", board: "MIZZED CONNECTION", route: "/spotted" },
   { path: "squadz", display: "z/squadz", board: "MY SQUADZ", route: "/directory?type=group" },
-  { path: "out", display: "z/out", board: "OUTZ", route: "/z/out/rooster-rock" },
+  { path: "out", display: "z/out", board: "OUTZ", route: "/z/out" },
   { path: "out/rooster-rock", display: "z/out/rooster-rock", board: "Rooster Rock", route: "/z/out/rooster-rock" },
   { path: "out/sauvie-island", display: "z/out/sauvie-island", board: "Sauvie Island", route: "/z/out/sauvie-island" },
   { path: "dark", display: "z/dark", board: "ZAYDARK", route: "/next" },

@@ -1,0 +1,30 @@
+.outz-page { background: #06060a; }
+.outz-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.outz-refresh, .outz-section, .outz-map-section, .outz-error { max-width: 1180px; margin-inline: auto; padding-inline: clamp(20px, 4vw, 44px); }
+.outz-refresh { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; color: #a7a7b1; font-size: 12px; letter-spacing: .04em; }
+.outz-error { color: #ffc266; padding-block: 16px; }
+.outz-section { padding-block: clamp(28px, 5vw, 64px); }
+.outz-section__head { margin-bottom: 20px; }
+.outz-section__head p { color: #ff8a1f; letter-spacing: .12em; font-size: 11px; font-weight: 800; margin: 0 0 8px; }
+.outz-section__head h2 { color: #fff; font-family: var(--font-display, sans-serif); font-size: clamp(1.8rem, 4vw, 3.2rem); line-height: .95; margin: 0; text-transform: uppercase; }
+.outz-section__head > span { color: #a7a7b1; display: block; margin-top: 10px; max-width: 720px; }
+.outz-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.outz-feature-card, .outz-catalog-card { background: var(--glass-card-bg, #0c0c11); border: 1px solid #292931; box-shadow: var(--glass-card-shadow, 0 12px 35px rgba(0,0,0,.28)); padding: 20px; }
+.outz-feature-card__eyebrow, .outz-catalog-card > span { color: #19e3ff; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.outz-feature-card h3, .outz-catalog-card h3 { color: #fff; font-family: var(--font-display, sans-serif); font-size: 1.5rem; line-height: 1; margin: 10px 0 8px; text-transform: uppercase; }
+.outz-feature-card p, .outz-catalog-card p { color: #b7b7bf; line-height: 1.45; margin: 0; }
+.outz-condition-row { border-block: 1px solid #27272e; display: grid; gap: 8px; grid-template-columns: auto 1fr; margin: 16px 0 12px; padding-block: 12px; color: #dedee4; font-size: 13px; }
+.outz-condition-row span:first-child { color: #ff8a1f; font-size: 1.25rem; font-weight: 800; grid-row: span 2; }
+.outz-source-status, .outz-no-alert, .outz-alert { color: #acacb7; font-size: 12px; line-height: 1.4; margin-top: 9px; }
+.outz-alert { color: #ffc266; }
+.outz-feature-card a, .outz-catalog-card a { color: #19e3ff; display: inline-block; font-size: 12px; font-weight: 800; margin-top: 16px; text-decoration: none; }
+.outz-map-section { padding-bottom: 12px; }
+.outz-map__canvas { height: clamp(320px, 48vw, 550px); position: relative; }
+.outz-map__chip { background: #06060a; border: 1px solid #000; box-shadow: inset 0 0 0 1px #ff8a1f; color: #fff; font-size: 11px; font-weight: 800; left: 14px; letter-spacing: .07em; padding: 9px 11px; position: absolute; text-transform: uppercase; top: 14px; z-index: 500; }
+.outz-map__chip span { background: #000; border: 2px solid #ff8a1f; border-radius: 50%; display: inline-block; height: 9px; margin-right: 7px; width: 9px; }
+.outz-map-popup { background: #09090c; border: 1px solid #000; box-shadow: inset 0 0 0 1px #19e3ff; color: #fff; display: grid; gap: 6px; max-width: 220px; padding: 14px; }
+.outz-map-popup span { color: #b7b7bf; font-size: 12px; }.outz-map-popup a { color: #19e3ff; font-size: 12px; font-weight: 800; text-decoration: none; }
+.outz-catalog-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.outz-catalog-card { min-height: 150px; padding: 16px; }.outz-catalog-card small { color: #858590; display: block; font-size: 11px; margin-top: 14px; }
+.outz-section--sources { border-top: 1px solid #25252d; }.outz-source-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }.outz-source-grid a { background: #0b0b10; border: 1px solid #292931; color: #bdbdc7; display: grid; gap: 7px; padding: 16px; text-decoration: none; }.outz-source-grid strong { color: #fff; }.outz-source-grid em { color: #ff8a1f; font-size: 10px; font-style: normal; font-weight: 800; letter-spacing: .08em; }
+@media (max-width: 800px) { .outz-feature-grid, .outz-catalog-grid { grid-template-columns: 1fr; }.outz-source-grid { grid-template-columns: 1fr; }.outz-refresh { align-items: flex-start; flex-direction: column; } }

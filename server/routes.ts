@@ -105,6 +105,7 @@ import {
 import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
+import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
 import { isProfileAccentColor, isProfileBanner } from "@shared/profileTheme";
 import {
   formatCustomSpottedVenue,
@@ -1522,6 +1523,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (err) {
       console.error("POST /api/nude-beaches/refresh failed:", err);
       res.status(502).json({ error: "Could not refresh beach conditions" });
+    }
+  });
+
+  // ─── Z/OUT (official outdoor conditions + catalog) ──────────────────────
+  app.get("/api/outz", async (_req, res) => {
+    try {
+      res.json(await getOutzSnapshot());
+    } catch (err) {
+      console.error("GET /api/outz failed:", err);
+      res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
+    }
+  });
+
+  app.post("/api/outz/refresh", async (_req, res) => {
+    try {
+      const result = await forceRefreshOutzSnapshot();
+      res.json(result);
+    } catch (err) {
+      console.error("POST /api/outz/refresh failed:", err);
+      res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
     }
   });
 
