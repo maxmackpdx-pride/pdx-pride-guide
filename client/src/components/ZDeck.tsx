@@ -43,6 +43,7 @@ export function ZDeck({
   className,
   label,
   autoplay = true,
+  autoplayMs = Z_DECK_AUTOPLAY_MS,
   showNav = true,
 }: {
   total: number;
@@ -53,6 +54,7 @@ export function ZDeck({
   className?: string;
   label: string;
   autoplay?: boolean;
+  autoplayMs?: number;
   showNav?: boolean;
 }) {
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -146,9 +148,9 @@ export function ZDeck({
     if (!autoplay || total === 0 || prefersReducedMotion()) return;
     const timer = window.setInterval(() => {
       if (!drag.current && !hovering.current) onSelect((selected + 1) % total);
-    }, Z_DECK_AUTOPLAY_MS);
+    }, autoplayMs);
     return () => window.clearInterval(timer);
-  }, [selected, total, onSelect, autoplay]);
+  }, [selected, total, onSelect, autoplay, autoplayMs]);
 
   useEffect(() => () => {
     if (raf.current) cancelAnimationFrame(raf.current);
