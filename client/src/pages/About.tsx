@@ -110,7 +110,11 @@ export default function About() {
     "Why Zaylist exists. The community board queer Portland used to run out of Facebook groups, rebuilt somewhere it belongs to us: events, housing, gigs, free stuff, missed connections, and a directory. Feedback gets compiled regularly and the common asks get built.",
   );
 
-  const { data: events = [] } = useQuery<EventListing[]>({
+  const {
+    data: events = [],
+    isLoading: eventsLoading,
+    isError: eventsError,
+  } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
@@ -118,13 +122,23 @@ export default function About() {
 
   // Lifetime counter: every distinct event ever published on the site (not just
   // the current live board). Falls back to the live count while loading.
-  const { data: eventTotal } = useQuery<{ total: number }>({
+  const {
+    data: eventTotal,
+    isLoading: eventTotalLoading,
+    isError: eventTotalError,
+  } = useQuery<{ total: number }>({
     queryKey: ["/api/events/total"],
     queryFn: () => apiRequest("GET", "/api/events/total").then(r => r.json()),
     staleTime: 5 * 60_000,
   });
 
   const eventCount = eventTotal?.total ?? events.length;
+  const hasVerifiedEventCount =
+    !eventsLoading &&
+    !eventTotalLoading &&
+    !eventsError &&
+    !eventTotalError &&
+    eventCount > 0;
   const [contactModal, setContactModal] = useState<"message" | "sponsor" | "order" | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -152,12 +166,16 @@ export default function About() {
 
   const heroStats = useMemo(
     () => [
-      { num: eventCount, label: "Events, and counting", color: "#ccff00" },
-      { num: 7, label: "Days, one list", color: "#19e3ff" },
-      { num: 0, label: "To browse. Always. ($0)", color: "#ff1fa0" },
-      { num: 1, label: "Zaylist - room for more", color: "#ffb020" },
+      {
+        num: hasVerifiedEventCount ? eventCount : "—",
+        label: hasVerifiedEventCount ? "Events, and counting" : "Events syncing",
+        color: "#ccff00",
+      },
+      { num: "ALL", label: "Year round, one list", color: "#19e3ff" },
+      { num: "FREE", label: "To browse. Always.", color: "#ff1fa0" },
+      { num: "1", label: "Zaylist. Room for more.", color: "#ffb020" },
     ],
-    [eventCount],
+    [eventCount, hasVerifiedEventCount],
   );
 
   return (
@@ -173,11 +191,13 @@ export default function About() {
             </div>
             <h1 className="about-v2-hero__h1">
               <span className="about-v2-hero__stat" data-testid="about-events-count">
-                <CountUpValue
-                  key={eventCount > 0 ? "events-ready" : "events-pending"}
-                  value={eventCount}
-                />{" "}
-                events.
+                {hasVerifiedEventCount ? (
+                  <>
+                    <CountUpValue key="events-ready" value={eventCount} /> events.
+                  </>
+                ) : (
+                  "The whole city."
+                )}
               </span>
               <span className="about-v2-hero__lede">
                 And approximately zero interest in being a sanitized corporate Pride pamphlet.
@@ -186,7 +206,7 @@ export default function About() {
             <div className="about-v2-hero__actions">
               <Link href="/events">
                 <Button as="span" variant="neon" accent="cyan" size="lg">
-                  Browse the {eventCount || "list"}
+                  Browse events
                 </Button>
               </Link>
             </div>
@@ -237,35 +257,39 @@ export default function About() {
       <section className="about-v2-why" aria-labelledby="about-why-title">
         <ScrollReveal>
           <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--lime">Why this exists</div>
-            <h2 id="about-why-title" className="about-v2-why__h2">
-              Not your daddy&apos;s{" "}
-              <span className="about-v2-why__h2-accent">Craigslist</span>
-            </h2>
+            <div className="about-v2-why__intro">
+              <div className="about-v2-why__heading">
+                <div className="about-v2__kicker about-v2__kicker--lime">Why this exists</div>
+                <h2 id="about-why-title" className="about-v2-why__h2">
+                  Not your daddy&apos;s{" "}
+                  <span className="about-v2-why__h2-accent">Craigslist</span>
+                </h2>
+              </div>
 
-            <div className="about-v2-why__copy">
-              <p>
-                Every city used to have one ugly, free page where everything got posted. A room. A
-                gig. A couch to give away. The guy you locked eyes with and never saw again. It was
-                the closest thing we had to a public square, and plenty of us found our first
-                apartment, first job, and first everything else on it.
-              </p>
-              <p>
-                Then came Facebook and Instagram, and we did not just move in. We built. Groups
-                turned into real infrastructure. A page was how a bar existed. An event was how a
-                night became real. Mutual aid, sober meetups, leather clubs, house parties, whole
-                organizations with a decade of history behind them, all of it running on somebody
-                else&apos;s land.
-              </p>
-              <p>
-                It worked well. Then it stopped. Accounts switched off with no reason given, pages
-                unpublished, our nights labeled adult content. Appeals went into a form and never
-                came back out. That is not a grudge, it is just what happens when the room belongs
-                to somebody else.
-              </p>
-              <p className="about-v2-why__turn">
-                So the board is back. Same shape. Different owner.
-              </p>
+              <div className="about-v2-why__copy">
+                <p>
+                  Every city used to have one ugly, free page where everything got posted. A room. A
+                  gig. A couch to give away. The guy you locked eyes with and never saw again. It was
+                  the closest thing we had to a public square, and plenty of us found our first
+                  apartment, first job, and first everything else on it.
+                </p>
+                <p>
+                  Then came Facebook and Instagram, and we did not just move in. We built. Groups
+                  turned into real infrastructure. A page was how a bar existed. An event was how a
+                  night became real. Mutual aid, sober meetups, leather clubs, house parties, whole
+                  organizations with a decade of history behind them, all of it running on somebody
+                  else&apos;s land.
+                </p>
+                <p>
+                  It worked well. Then it stopped. Accounts switched off with no reason given, pages
+                  unpublished, our nights labeled adult content. Appeals went into a form and never
+                  came back out. That is not a grudge, it is just what happens when the room belongs
+                  to somebody else.
+                </p>
+                <p className="about-v2-why__turn">
+                  So the board is back. Same shape. Different owner.
+                </p>
+              </div>
             </div>
 
             <ul className="about-v2-why__rows">
@@ -576,20 +600,24 @@ export default function About() {
       <section className="about-v2-faq">
         <ScrollReveal>
           <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--cyan">FAQ</div>
-            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-              Good questions
-            </h2>
-            <div className="about-v2-faq__list">
-              {FAQ.map(item => (
-                <details key={item.q} className="about-v2-faq__item">
-                  <summary>
-                    {item.q}
-                    <span className="ico" aria-hidden="true">+</span>
-                  </summary>
-                  <div className="answer">{item.a}</div>
-                </details>
-              ))}
+            <div className="about-v2-faq__grid">
+              <div className="about-v2-faq__heading">
+                <div className="about-v2__kicker about-v2__kicker--cyan">FAQ</div>
+                <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
+                  Good questions
+                </h2>
+              </div>
+              <div className="about-v2-faq__list">
+                {FAQ.map(item => (
+                  <details key={item.q} className="about-v2-faq__item">
+                    <summary>
+                      {item.q}
+                      <span className="ico" aria-hidden="true">+</span>
+                    </summary>
+                    <div className="answer">{item.a}</div>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </ScrollReveal>
