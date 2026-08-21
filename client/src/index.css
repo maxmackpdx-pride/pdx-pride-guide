@@ -932,6 +932,26 @@ html.calm-mode .site-nav-dropdown__trigger.active,
   flex: 0 0 auto;
 }
 
+/*
+ * The handoff bounces the Z/Space chevron as an "open me" hint. It is the
+ * only menu with a second column behind it, so it is the only one that gets it.
+ */
+@keyframes siteNavChevronBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.site-nav-dropdown[data-accent="violet"]:not(.open) .site-nav-dropdown__chevron {
+  animation: siteNavChevronBounce 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-dropdown[data-accent="violet"]:not(.open) .site-nav-dropdown__chevron { animation: none; }
+}
+
+html.calm-mode .site-nav-dropdown[data-accent="violet"]:not(.open) .site-nav-dropdown__chevron,
+:root[data-calm="true"] .site-nav-dropdown[data-accent="violet"]:not(.open) .site-nav-dropdown__chevron { animation: none; }
+
 .site-nav-dropdown__chevron {
   opacity: 0.75;
   transition: transform 0.15s ease;

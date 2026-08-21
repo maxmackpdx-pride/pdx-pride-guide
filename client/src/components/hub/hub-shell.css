@@ -1331,3 +1331,55 @@ html.calm-mode .hub-more-sheet.hub-more-sheet--site,
 :root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
 :root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
 :root[data-calm="true"] .hub-more-sheet.hub-more-sheet--site { animation: none; }
+
+/* ── Site mobile top bar: Home / About as glow pills ───────────
+   Claude Design handoff "Top Nav Bar Mockups", mobile frame: the two
+   section toggles read as the same hairline pills as the desktop nav,
+   each lighting in its own accent, rather than a segmented capsule.
+
+   Scoped to .site-hub-mtop. HubShell's own mtop uses this group for the
+   MEMBER/ADMIN switch, which stays a segmented control. */
+.site-hub-mtop .hub-mtop__mode {
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.site-hub-mtop .hub-mtop__mode-btn {
+  padding: 7px 14px;
+  border: 2px solid #333;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-body, #e6e2d9);
+  font-size: .68rem;
+  letter-spacing: .04em;
+  transition: color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="lime"] { --mtop-c: var(--panel-lime, #c8fa3c); --mtop-ink: var(--panel-lime, #c8fa3c); }
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="magenta"] { --mtop-c: var(--panel-magenta, #ff1fa0); --mtop-ink: var(--panel-magenta, #ff1fa0); }
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="cyan"] { --mtop-c: var(--panel-cyan, #19e3ff); --mtop-ink: var(--panel-cyan, #19e3ff); }
+.site-hub-mtop .hub-mtop__mode-btn[data-accent="violet"] { --mtop-c: var(--neon-violet, #8800ff); --mtop-ink: #c9a3ff; }
+
+.site-hub-mtop .hub-mtop__mode-btn:hover,
+.site-hub-mtop .hub-mtop__mode-btn:active {
+  border-color: var(--mtop-c, var(--panel-cyan, #19e3ff));
+  box-shadow:
+    0 0 5px var(--mtop-c, var(--panel-cyan, #19e3ff)),
+    0 0 11px color-mix(in srgb, var(--mtop-c, var(--panel-cyan, #19e3ff)) 50%, transparent);
+  color: var(--mtop-ink, var(--panel-cyan, #19e3ff));
+}
+
+/* Current section holds the glow; the filled chip is retired here. */
+.site-hub-mtop .hub-mtop__mode-btn.is-active.is-member,
+.site-hub-mtop .hub-mtop__mode-btn.is-active.is-admin {
+  background: transparent;
+  border-color: var(--mtop-c, var(--panel-cyan, #19e3ff));
+  box-shadow:
+    0 0 5px var(--mtop-c, var(--panel-cyan, #19e3ff)),
+    0 0 11px color-mix(in srgb, var(--mtop-c, var(--panel-cyan, #19e3ff)) 50%, transparent);
+  color: var(--mtop-ink, var(--panel-cyan, #19e3ff));
+}

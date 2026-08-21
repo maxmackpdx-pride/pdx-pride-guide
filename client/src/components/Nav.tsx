@@ -676,6 +676,7 @@ export default function Nav() {
               <Link
                 href="/"
                 className={`hub-mtop__mode-btn${homeActive ? " is-active is-member" : ""}`}
+                data-accent="lime"
                 aria-current={homeActive ? "page" : undefined}
                 onClick={() => dismissMobileNavOverlays()}
               >
@@ -684,6 +685,7 @@ export default function Nav() {
               <Link
                 href="/about"
                 className={`hub-mtop__mode-btn${aboutActive ? " is-active is-member" : ""}`}
+                data-accent="magenta"
                 aria-current={aboutActive ? "page" : undefined}
                 onClick={() => dismissMobileNavOverlays()}
               >
@@ -745,6 +747,7 @@ export default function Nav() {
                 <Link
                   href="/dashboard"
                   className={`hub-mtop__mode-btn${hubActive ? " is-active is-member" : ""}`}
+                  data-accent="cyan"
                   onClick={() => dismissMobileNavOverlays()}
                 >
                   Hub
@@ -752,6 +755,7 @@ export default function Nav() {
                 <Link
                   href={LOCAL_DEMO_PROFILE_PATH}
                   className={`hub-mtop__mode-btn${profileActive ? " is-active is-member" : ""}`}
+                  data-accent="violet"
                   onClick={() => dismissMobileNavOverlays()}
                 >
                   Profile
