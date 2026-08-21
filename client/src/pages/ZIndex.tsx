@@ -385,6 +385,7 @@ function SubcategoryRows({
 
 function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
   const { data, isPending, isError } = useBoardRows(address.path);
+  const [, navigate] = useLocation();
   const rows = useMemo(() => rowsOf(data), [data]);
   const accent = ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)";
   const wordmark = WORDMARK[address.path];
@@ -513,6 +514,20 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
       style={{ ["--c" as string]: accent, ["--d" as string]: `${index * 40}ms` }}
       aria-labelledby={`z-board-${address.path.replace("/", "-")}`}
       data-address={address.path}
+      role="link"
+      tabIndex={0}
+      onClick={event => {
+        if ((event.target as HTMLElement).closest("a,button,summary,input,textarea,select,label")) return;
+        navigate(zUrl(address.path));
+      }}
+      onKeyDown={event => {
+        if (event.key === "Enter" || event.key === " ") {
+          const target = event.target as HTMLElement;
+          if (target.matches("a,button,summary,input,textarea,select,label")) return;
+          event.preventDefault();
+          navigate(zUrl(address.path));
+        }
+      }}
     >
       <span className="pdx-rainbow-rule" aria-hidden="true" />
       <Link href={zUrl(address.path)} className="z-index__board-head">
