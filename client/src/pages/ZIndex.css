@@ -1064,7 +1064,9 @@ html.calm-mode .z-index__pending::after { animation: none }
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--panel-border, #1c1c22);
+  /* Feed chrome runs at half weight: the rows carry the reading, not the
+     lines between them. See the matching halves below. */
+  border-bottom: 1px solid rgba(255, 255, 255, .055);
   padding-bottom: 10px;
   margin-bottom: 4px;
 }
@@ -1088,7 +1090,7 @@ html.calm-mode .z-index__pending::after { animation: none }
   padding: 5px 9px;
   background: transparent;
   color: var(--text-lo, #999);
-  border: 1px solid var(--panel-border-2, #24242c);
+  border: 1px solid rgba(255, 255, 255, .07);
   cursor: pointer;
 }
 .z-index__feed-filters button.is-on {
@@ -1099,7 +1101,7 @@ html.calm-mode .z-index__pending::after { animation: none }
 .z-index__feed-filters button:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
 
 .z-index__feed-list { list-style: none; margin: 0; padding: 0; }
-.z-index__feed-list > li { border-bottom: 1px solid #15151a; }
+.z-index__feed-list > li { border-bottom: 1px solid rgba(255, 255, 255, .041); }
 
 .z-index__feed-row {
   display: grid;
@@ -1110,7 +1112,7 @@ html.calm-mode .z-index__pending::after { animation: none }
   color: inherit;
   text-decoration: none;
 }
-.z-index__feed-row:hover { background: rgba(255, 255, 255, .02); }
+.z-index__feed-row:hover { background: rgba(255, 255, 255, .01); }
 
 .z-index__feed-tag {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
