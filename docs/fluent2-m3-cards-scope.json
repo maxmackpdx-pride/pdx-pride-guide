@@ -1,3 +1,14 @@
 {
+  "source": "Zaylist Card System Guide.zip",
+  "sourceFiles": [
+    "github.md",
+    "Zaylist Card System and Deep Glass (standalone).html",
+    "Zaylist Card System and Deep Glass (standalone-src).html",
+    "Zaylist Card System and Deep Glass.dc.html"
+  ],
+  "lastSync": "2026-08-21T14:09:26Z",
+  "repo": "maxmackpdx-pride/pdx-pride-guide",
+  "branch": "master",
+  "path": "client/src, docs",
   "placeholder": "card system"
 }
