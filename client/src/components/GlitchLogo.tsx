@@ -8,9 +8,32 @@ type GlitchLogoProps = {
 export default function GlitchLogo({ src, alt, className = "" }: GlitchLogoProps) {
   return (
     <span className={`glitch-logo${className ? ` ${className}` : ""}`}>
-      <img src={src} alt={alt} className="glitch-logo__main" />
-      <img src={src} alt="" aria-hidden="true" className="glitch-logo__ghost glitch-logo__ghost--cyan" />
-      <img src={src} alt="" aria-hidden="true" className="glitch-logo__ghost glitch-logo__ghost--magenta" />
+      <img
+        src={src}
+        alt={alt}
+        className="glitch-logo__main"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
+      />
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        className="glitch-logo__ghost glitch-logo__ghost--cyan"
+        loading="eager"
+        decoding="async"
+        fetchPriority="low"
+      />
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        className="glitch-logo__ghost glitch-logo__ghost--magenta"
+        loading="eager"
+        decoding="async"
+        fetchPriority="low"
+      />
     </span>
   );
 }
