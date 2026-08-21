@@ -59,6 +59,8 @@ export type GiftingRow = {
   status?: string;
   createdAt: string;
   interestCount?: number;
+  /** Seeded records are displayed with an explicit demo treatment elsewhere. */
+  username?: string | null;
 };
 
 export type GigRow = {
@@ -71,6 +73,8 @@ export type GigRow = {
   status?: string;
   createdAt: string;
   imageUrl?: string | null;
+  /** Seeded records are displayed with an explicit demo treatment elsewhere. */
+  username?: string | null;
 };
 
 export type SpottedRow = {
@@ -85,6 +89,7 @@ export type SpottedRow = {
   beachId?: string | null;
   createdAt: string;
   status?: string;
+  isDemo?: boolean;
 };
 
 const ACCENT: Record<HomeStageBoardKey, string> = {
@@ -130,15 +135,17 @@ function clip(s: string, max = 110): string {
 }
 
 function isActiveGifting(p: GiftingRow): boolean {
-  return !["GIFTED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN"].includes(
-    (p.status || "").toUpperCase(),
-  );
+  return p.username !== "hausing_demo" &&
+    !["GIFTED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN"].includes(
+      (p.status || "").toUpperCase(),
+    );
 }
 
 function isActiveGig(p: GigRow): boolean {
-  return !["FILLED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN", "CLOSED"].includes(
-    (p.status || "").toUpperCase(),
-  );
+  return p.username !== "hausing_demo" &&
+    !["FILLED", "FOUND", "EXPIRED", "PENDING", "REJECTED", "HIDDEN", "CLOSED"].includes(
+      (p.status || "").toUpperCase(),
+    );
 }
 
 export function mapEventSample(
@@ -293,7 +300,7 @@ export function buildHomeStageSamples(input: {
     out.events = mapEventSample(first, going);
   }
 
-  const housing = input.housingPosts?.[0];
+  const housing = input.housingPosts?.find((post) => post.author?.username !== "hausing_demo");
   if (housing) out.housing = mapHousingSample(housing);
 
   const gift = (input.gifting ?? []).find(isActiveGifting);
@@ -302,7 +309,7 @@ export function buildHomeStageSamples(input: {
   const gig = (input.gigs ?? []).find(isActiveGig);
   if (gig) out.gigs = mapGigSample(gig);
 
-  const spotted = input.spotted?.[0];
+  const spotted = input.spotted?.find((post) => !post.isDemo);
   if (spotted) out.spotted = mapSpottedSample(spotted);
 
   return out;
