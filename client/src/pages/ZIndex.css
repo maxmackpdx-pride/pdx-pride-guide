@@ -974,3 +974,259 @@ html.calm-mode .z-index__photo img { filter: grayscale(1); opacity: .28 }
 html.calm-mode .z-index__board,
 html.calm-mode .z-index__board:hover { filter: grayscale(1); transform: none }
 html.calm-mode .z-index__pending::after { animation: none }
+
+/* ═══════════════════════════════════════════════════════════
+   Z INDEX REDESIGN, listing-forward rail + mixed feed
+   The board cards are unchanged; the rail only positions them.
+   ═══════════════════════════════════════════════════════════ */
+
+.z-index--rail .z-index__top {
+  /* The grid header stacks in rail mode: its two-column split would otherwise
+     drop the kicker and the rail into separate columns. */
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 22px clamp(16px, 4vw, 26px) 0;
+}
+
+/* The rail is a direct child of .z-index, which is full width, so it bleeds
+   edge to edge on its own. Doing this with 100vw and negative margins instead
+   would overhang by the scrollbar width and sit off-centre. */
+.z-index--rail .z-index__rail {
+  width: 100%;
+}
+
+/* Dots and the finder come back to the readable column under the bleed. */
+.z-index__rail-controls {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 26px) 4px;
+}
+
+.z-index--rail .z-index__finder {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.z-index--rail .z-index__chips { justify-content: center; }
+.z-index--rail .z-index__stats { text-align: center; }
+
+.z-index--rail .z-index__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+/* ── coverflow rail ──────────────────────────────────────── */
+.z-index__rail {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 0;
+  cursor: grab;
+  outline: none;
+  touch-action: pan-y;
+  --cf-card: clamp(230px, 22vw, 320px);
+  --cf-card-h: 400px;
+  perspective: calc(var(--cf-card) * 2.6);
+}
+.z-index__rail:active { cursor: grabbing; }
+
+.z-index__track {
+  position: relative;
+  height: var(--cf-card-h);
+  width: 100%;
+  transform-style: preserve-3d;
+  user-select: none;
+}
+
+.z-index__slide {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--cf-card);
+  height: var(--cf-card-h);
+  will-change: transform, opacity;
+}
+
+/* The rail owns reveal and depth. The grid's staggered entry animation would
+   fight the transform written every frame, so it is neutralised in here. */
+.z-index__slide > .z-index__board {
+  height: 100%;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+/* Only the front card is interactive, so it is the only one that reads lit. */
+.z-index__slide[aria-hidden="false"] > .z-index__board {
+  border-width: 2px;
+}
+.z-index__slide[aria-hidden="true"] > .z-index__board {
+  cursor: pointer;
+}
+
+.z-index__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .6);
+  border: 1px solid var(--panel-border-2, #24242c);
+  color: var(--text-body, #e6e2d9);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.z-index__nav:hover { background: rgba(0, 0, 0, .82); }
+.z-index__nav:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
+.z-index__nav--prev { left: 8px; }
+.z-index__nav--next { right: 8px; }
+
+.z-index__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+.z-index__dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #333;
+  opacity: .6;
+  cursor: pointer;
+}
+.z-index__dots button.is-on {
+  background: var(--c, var(--neon-cyan, #19e3ff));
+  opacity: 1;
+}
+.z-index__dots button:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
+
+/* ── everything, newest first ────────────────────────────── */
+.z-index__feed {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 8px clamp(16px, 4vw, 26px) 34px;
+}
+
+.z-index__feed-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--panel-border, #1c1c22);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.z-index__feed-head h2 {
+  margin: 0;
+  font-family: var(--font-display, "Barlow Condensed", "Arial Narrow", sans-serif);
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text-hi, #fff);
+}
+
+.z-index__feed-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+.z-index__feed-filters button {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--text-lo, #999);
+  border: 1px solid var(--panel-border-2, #24242c);
+  cursor: pointer;
+}
+.z-index__feed-filters button.is-on {
+  background: var(--c, var(--panel-lime, #c8fa3c));
+  border-color: var(--c, var(--panel-lime, #c8fa3c));
+  color: #050506;
+}
+.z-index__feed-filters button:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
+
+.z-index__feed-list { list-style: none; margin: 0; padding: 0; }
+.z-index__feed-list > li { border-bottom: 1px solid #15151a; }
+
+.z-index__feed-row {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 9px 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.z-index__feed-row:hover { background: rgba(255, 255, 255, .02); }
+
+.z-index__feed-tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--c, var(--neon-cyan, #19e3ff));
+}
+.z-index__feed-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+.z-index__feed-title { font-size: 13.5px; color: var(--text-hi, #fff); }
+.z-index__feed-meta { font-size: 11.5px; color: var(--text-lo, #999); }
+.z-index__feed-age {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  color: var(--text-faint, #666);
+  font-variant-numeric: tabular-nums;
+}
+.z-index__feed-empty {
+  margin: 14px 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-faint, #666);
+}
+
+.z-index__footer {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 16px clamp(16px, 4vw, 26px) 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.z-index__footer p {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--board-muted, #bdbab2);
+}
+.z-index__footer p + p { color: var(--text-faint, #666); }
+
+@media (max-width: 640px) {
+  .z-index__rail { --cf-card: clamp(210px, 74vw, 300px); --cf-card-h: 380px; }
+  .z-index__feed-row { grid-template-columns: 1fr; gap: 2px 10px; }
+}
+
+/* Calm mode and reduced motion: the rail still works, it just does not drift. */
+@media (prefers-reduced-motion: reduce) {
+  .z-index__slide { transition: none; }
+}
