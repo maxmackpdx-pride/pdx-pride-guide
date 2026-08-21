@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { EventListing } from "@shared/multiDayEvents";
 
 import HomeStage from "@/components/home/HomeStage";
+import { ZDeck, ZDeckDots } from "@/components/ZDeck";
 import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeConstructionNudge from "@/components/HomeConstructionNudge";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -14,17 +15,18 @@ import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
 const NEXT_PREVIEW_CARDS = [
-  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px" },
-  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px" },
-  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px" },
-  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px" },
-  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px" },
-  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px" },
+  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan" },
+  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet" },
+  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red" },
+  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold" },
+  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet" },
+  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange" },
 ] as const;
 
 function NextPreviewCardStack() {
   const sectionRef = useRef<HTMLElement>(null);
   const [landed, setLanded] = useState(false);
+  const [selected, setSelected] = useState(0);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -84,31 +86,32 @@ function NextPreviewCardStack() {
         <h2 id="home-next-preview-title">See what I&apos;m building <em>Next.</em></h2>
         <p>New ways to find your people, make plans, and keep more of queer Portland in one place.</p>
       </div>
-      <Link className="home-next-preview__link" href="/next" aria-label="Explore what Zaylist is building next">
-        <span className="home-next-preview__viewport" aria-hidden="true">
-          <span className="home-next-preview__track">
-            {NEXT_PREVIEW_CARDS.map((card, index) => (
-              <span
-                className="home-next-preview__card pdx-glass-card pdx-glass-rebind"
-                data-tone={card.tone}
-                key={card.name}
-                style={{
-                  ["--stack-index" as string]: index,
-                  ["--float-delay" as string]: card.delay,
-                  ["--float-duration" as string]: card.duration,
-                  ["--silly-x" as string]: card.drift,
-                }}
-              >
-                <img
-                  src={card.logo}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-            ))}
+      <ZDeck
+        total={NEXT_PREVIEW_CARDS.length}
+        selected={selected}
+        onSelect={setSelected}
+        className="home-next-preview__deck"
+        label="What Zaylist is building next"
+      >
+        {NEXT_PREVIEW_CARDS.map(card => (
+          <span
+            className="home-next-preview__card pdx-glass-card pdx-glass-rebind"
+            data-tone={card.tone}
+            key={card.name}
+          >
+            <img src={card.logo} alt={card.name} loading="lazy" decoding="async" />
           </span>
-        </span>
+        ))}
+      </ZDeck>
+
+      <ZDeckDots
+        total={NEXT_PREVIEW_CARDS.length}
+        selected={selected}
+        onSelect={setSelected}
+        labelOf={index => NEXT_PREVIEW_CARDS[index].name}
+      />
+
+      <Link className="home-next-preview__link" href="/next" aria-label="Explore what Zaylist is building next">
         <span className="home-next-preview__cta">Explore Next <span aria-hidden="true">-&gt;</span></span>
       </Link>
     </section>

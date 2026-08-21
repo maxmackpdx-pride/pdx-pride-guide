@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -25,6 +25,7 @@ import {
   EVENT_TYPE_TAG_COLORS,
   getEventTypeTagsForEvent,
 } from "@shared/eventTypeTags";
+import { ZDeck, ZDeckDots } from "@/components/ZDeck";
 import "./ZIndex.css";
 
 /**
@@ -573,237 +574,6 @@ function BoardColumn({ address, index }: { address: ZAddress; index: number }) {
 }
 
 /**
- * Coverflow rail.
- *
- * `selected` is the only source of truth; this component animates a floating
- * position toward it and reports drag-driven changes back up, so chips, dots,
- * search and autoplay all steer the same value and cannot disagree.
- *
- * The card DOM is untouched: each child is positioned by a wrapper, so
- * BoardColumn keeps its live counts, follow buttons and headings.
- */
-const CF_ROTATE = 26;
-const CF_DEPTH = 0.5;
-const CF_FALLOFF = 0.6;
-const CF_FADE = 0.24;
-const CF_GAP = 0.1;
-const CF_AUTOPLAY_MS = 2600;
-
-function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined"
-    && typeof window.matchMedia === "function"
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function ZCoverflow({
-  total,
-  selected,
-  onSelect,
-  children,
-}: {
-  total: number;
-  selected: number;
-  onSelect: (index: number) => void;
-  children: React.ReactNode[];
-}) {
-  const frameRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const pos = useRef(0);
-  const target = useRef(0);
-  const width = useRef(0);
-  const raf = useRef<number | null>(null);
-  const drag = useRef<
-    { id: number; x: number; startX: number; v: number; t: number; moved: boolean } | null
-  >(null);
-  const hovering = useRef(false);
-  const justDragged = useRef(false);
-
-  const paint = useCallback(() => {
-    const cardWidth = width.current;
-    if (!cardWidth || total === 0) return;
-    const pitch = cardWidth * (1 + CF_GAP);
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
-      let offset = index - pos.current;
-      offset = ((offset % total) + total) % total;
-      if (offset > total / 2) offset -= total;
-      const distance = Math.abs(offset);
-      const ramp = Math.pow(distance, CF_FALLOFF);
-      const tilt = Math.min(CF_ROTATE * ramp, 82) * Math.sign(offset);
-      card.style.transform =
-        `translateX(calc(-50% + ${offset * pitch}px))`
-        + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
-        + ` rotateY(${-tilt}deg)`;
-      const edge = Math.min(1, Math.max(0, total / 2 - distance));
-      card.style.opacity = String(Math.max(0, 1 - CF_FADE * distance) * edge);
-      card.style.zIndex = String(100 - Math.round(distance));
-      card.setAttribute("aria-hidden", distance >= 1 ? "true" : "false");
-      card.inert = distance >= 1;
-    });
-  }, [total]);
-
-  const measure = useCallback(() => {
-    const card = cardRefs.current[0];
-    if (!card) return;
-    width.current = card.offsetWidth;
-    paint();
-  }, [paint]);
-
-  const settle = useCallback((to: number) => {
-    if (raf.current) cancelAnimationFrame(raf.current);
-    target.current = to;
-    if (prefersReducedMotion()) {
-      pos.current = to;
-      paint();
-      raf.current = null;
-      return;
-    }
-    const step = () => {
-      const remaining = to - pos.current;
-      if (Math.abs(remaining) < 0.0004) {
-        pos.current = to;
-        paint();
-        raf.current = null;
-        return;
-      }
-      pos.current += remaining * 0.16;
-      paint();
-      raf.current = requestAnimationFrame(step);
-    };
-    raf.current = requestAnimationFrame(step);
-  }, [paint]);
-
-  // Animate to whichever wrap of `selected` is nearest, so 9 -> 0 slides
-  // forward across the seam instead of rewinding the whole rail.
-  useEffect(() => {
-    if (total === 0) return;
-    const nearest = selected + Math.round((target.current - selected) / total) * total;
-    settle(nearest);
-  }, [selected, total, settle]);
-
-  useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(frame);
-    measure();
-    return () => observer.disconnect();
-  }, [measure]);
-
-  useEffect(() => {
-    if (total === 0 || prefersReducedMotion()) return;
-    const timer = window.setInterval(() => {
-      if (!drag.current && !hovering.current) onSelect((selected + 1) % total);
-    }, CF_AUTOPLAY_MS);
-    return () => window.clearInterval(timer);
-  }, [selected, total, onSelect]);
-
-  useEffect(() => () => {
-    if (raf.current) cancelAnimationFrame(raf.current);
-  }, []);
-
-  const indexAt = (value: number) => ((Math.round(value) % total) + total) % total;
-
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (raf.current) {
-      cancelAnimationFrame(raf.current);
-      raf.current = null;
-    }
-    event.currentTarget.setPointerCapture(event.pointerId);
-    target.current = pos.current;
-    drag.current = {
-      id: event.pointerId,
-      x: event.clientX,
-      startX: event.clientX,
-      v: 0,
-      t: performance.now(),
-      moved: false,
-    };
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const current = drag.current;
-    if (!current || current.id !== event.pointerId) return;
-    const pitch = width.current * (1 + CF_GAP);
-    if (!pitch) return;
-    const now = performance.now();
-    const previous = pos.current;
-    if (Math.abs(event.clientX - current.startX) > 4) current.moved = true;
-    pos.current = pos.current - (event.clientX - current.x) / pitch;
-    current.x = event.clientX;
-    current.v = ((pos.current - previous) / Math.max(now - current.t, 1)) * 1000;
-    current.t = now;
-    paint();
-    const next = indexAt(pos.current);
-    if (next !== selected) onSelect(next);
-  };
-
-  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    const current = drag.current;
-    if (!current || current.id !== event.pointerId) return;
-    drag.current = null;
-    justDragged.current = current.moved;
-    const carried = Math.max(-2, Math.min(2, current.v * 0.18));
-    onSelect(indexAt(pos.current + carried));
-  };
-
-  return (
-    <div
-      className="z-index__rail"
-      ref={frameRef}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onMouseEnter={() => { hovering.current = true; }}
-      onMouseLeave={() => { hovering.current = false; }}
-    >
-      <div className="z-index__track">
-        {children.map((child, index) => (
-          <div
-            key={index}
-            className="z-index__slide"
-            ref={node => { cardRefs.current[index] = node; }}
-            onClickCapture={event => {
-              // A drag that ends on a card must not also follow its link.
-              if (justDragged.current) {
-                justDragged.current = false;
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-              }
-              if (index !== selected) {
-                event.preventDefault();
-                event.stopPropagation();
-                onSelect(index);
-              }
-            }}
-          >
-            {child}
-          </div>
-        ))}
-      </div>
-      <button
-        type="button"
-        className="z-index__nav z-index__nav--prev"
-        aria-label="Previous board"
-        onClick={() => onSelect((selected - 1 + total) % total)}
-      >
-        &#8249;
-      </button>
-      <button
-        type="button"
-        className="z-index__nav z-index__nav--next"
-        aria-label="Next board"
-        onClick={() => onSelect((selected + 1) % total)}
-      >
-        &#8250;
-      </button>
-    </div>
-  );
-}
-
-/**
  * Everything, newest first.
  *
  * The mixed feed reads the same endpoints the cards do, so react-query serves
@@ -977,31 +747,26 @@ export default function ZIndex() {
         </div>
       </header>
 
-      <ZCoverflow
+      <ZDeck
+        total={topBoards.length}
+        selected={selected}
+        onSelect={setSelected}
+        className="z-index__rail"
+        label="Zaylist boards"
+      >
+        {topBoards.map((address, index) => (
+          <BoardColumn key={address.path} address={address} index={index} />
+        ))}
+      </ZDeck>
+
+      <div className="z-index__rail-controls">
+        <ZDeckDots
           total={topBoards.length}
           selected={selected}
           onSelect={setSelected}
-        >
-          {topBoards.map((address, index) => (
-            <BoardColumn key={address.path} address={address} index={index} />
-          ))}
-        </ZCoverflow>
-
-      <div className="z-index__rail-controls">
-        <div className="z-index__dots" role="tablist" aria-label="Boards">
-          {topBoards.map((address, index) => (
-            <button
-              key={address.path}
-              type="button"
-              role="tab"
-              aria-selected={index === selected}
-              aria-label={address.display}
-              className={index === selected ? "is-on" : undefined}
-              style={{ ["--c" as string]: ACCENT[address.path] ?? "var(--neon-cyan, #19e3ff)" }}
-              onClick={() => setSelected(index)}
-            />
-          ))}
-        </div>
+          labelOf={index => topBoards[index].display}
+          accentOf={index => ACCENT[topBoards[index].path] ?? "var(--neon-cyan, #19e3ff)"}
+        />
 
         <div className="z-index__finder">
           <form className="z-index__search" role="search" onSubmit={submitAddress}>

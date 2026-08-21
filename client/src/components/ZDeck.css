@@ -1,0 +1,89 @@
+/* ============================================================
+   Z/DECK, shared coverflow deck
+   Sizing is the caller's job: set --cf-card and --cf-card-h on
+   the deck (or a modifier class). Nothing here is page-specific.
+   ============================================================ */
+
+.z-deck {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 0;
+  cursor: grab;
+  outline: none;
+  touch-action: pan-y;
+  --cf-card: clamp(230px, 22vw, 320px);
+  --cf-card-h: 400px;
+  perspective: calc(var(--cf-card) * 2.6);
+}
+.z-deck:active { cursor: grabbing; }
+
+.z-deck__track {
+  position: relative;
+  height: var(--cf-card-h);
+  width: 100%;
+  transform-style: preserve-3d;
+  user-select: none;
+}
+
+.z-deck__slide {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--cf-card);
+  height: var(--cf-card-h);
+  will-change: transform, opacity;
+}
+.z-deck__slide > * { height: 100%; }
+
+/* Buried cards are not clickable targets in their own right; clicking one
+   brings it forward instead of following whatever link it contains. */
+.z-deck__slide[aria-hidden="true"] { cursor: pointer; }
+
+.z-deck__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .6);
+  border: 1px solid var(--panel-border-2, #24242c);
+  color: var(--text-body, #e6e2d9);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.z-deck__nav:hover { background: rgba(0, 0, 0, .82); }
+.z-deck__nav:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
+.z-deck__nav--prev { left: 8px; }
+.z-deck__nav--next { right: 8px; }
+
+.z-deck__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+.z-deck__dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #333;
+  opacity: .6;
+  cursor: pointer;
+}
+.z-deck__dots button.is-on {
+  background: var(--c, var(--neon-cyan, #19e3ff));
+  opacity: 1;
+}
+.z-deck__dots button:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
+
+/* The deck still works with motion off; it just does not drift on its own.
+   Autoplay is disabled in the component, so this only freezes the settle. */
+@media (prefers-reduced-motion: reduce) {
+  .z-deck__slide { transition: none; }
+}

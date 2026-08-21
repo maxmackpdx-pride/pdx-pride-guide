@@ -3785,3 +3785,46 @@ html.calm-mode .home-next-preview__orb,
 @media (max-width:620px) {
   .home-main-stage .home-hero-stats-boundary { margin-top:0; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Z/DECK on the Next preview
+   The cards were a fanned flex row that crashed in from the left and
+   then floated. In a deck the transform is rewritten every frame, so
+   the stack offset, the crash and the float all have to stand down or
+   they fight it. Base deck styling lives in components/ZDeck.css.
+   ═══════════════════════════════════════════════════════════ */
+
+.home-next-preview__deck {
+  --cf-card: clamp(184px, 18vw, 238px);
+  --cf-card-h: clamp(108px, 10vw, 138px);
+  padding: 18px 0 6px;
+  margin-inline: auto;
+}
+
+.home-next-preview__deck .z-deck__slide > .home-next-preview__card,
+.home-next-preview--landed .home-next-preview__deck .z-deck__slide > .home-next-preview__card {
+  width: 100%;
+  height: 100%;
+  margin-left: 0;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+.home-next-preview__deck .z-deck__slide > .home-next-preview__card img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* The dots sit under the deck, above the CTA. */
+.home-next-preview .z-deck__dots { margin: 4px 0 14px; }
+.home-next-preview .z-deck__dots button.is-on { background: var(--neon-cyan, #00ffff); }
+
+@media (max-width: 640px) {
+  .home-next-preview__deck {
+    --cf-card: clamp(150px, 52vw, 210px);
+    --cf-card-h: clamp(92px, 30vw, 124px);
+  }
+}

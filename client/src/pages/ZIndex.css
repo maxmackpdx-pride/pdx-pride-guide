@@ -1018,40 +1018,28 @@ html.calm-mode .z-index__pending::after { animation: none }
   margin-bottom: 14px;
 }
 
-/* ── coverflow rail ──────────────────────────────────────── */
-.z-index__rail {
-  position: relative;
-  overflow: hidden;
-  padding: 30px 0;
-  cursor: grab;
-  outline: none;
-  touch-action: pan-y;
-  --cf-card: clamp(230px, 22vw, 320px);
-  --cf-card-h: 400px;
-  perspective: calc(var(--cf-card) * 2.6);
-}
-.z-index__rail:active { cursor: grabbing; }
+/* ── coverflow rail ──────────────────────────────────────
+   Base deck lives in components/ZDeck.css. .z-index__rail is the
+   modifier: sizing, bleed, and how a board card sits in a slide. */
 
-.z-index__track {
-  position: relative;
-  height: var(--cf-card-h);
+/* The rail is a direct child of .z-index, which is full width, so it bleeds
+   edge to edge on its own. Doing this with 100vw and negative margins from
+   inside the 1200px header would overhang by the scrollbar width and sit
+   off-centre. */
+.z-index--rail .z-index__rail {
   width: 100%;
-  transform-style: preserve-3d;
-  user-select: none;
 }
 
-.z-index__slide {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: var(--cf-card);
-  height: var(--cf-card-h);
-  will-change: transform, opacity;
+/* Dots and the finder come back to the readable column under the bleed. */
+.z-index__rail-controls {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 26px) 4px;
 }
 
-/* The rail owns reveal and depth. The grid's staggered entry animation would
+/* The deck owns reveal and depth. The grid's staggered entry animation would
    fight the transform written every frame, so it is neutralised in here. */
-.z-index__slide > .z-index__board {
+.z-index__rail .z-deck__slide > .z-index__board {
   height: 100%;
   opacity: 1;
   transform: none;
@@ -1059,55 +1047,9 @@ html.calm-mode .z-index__pending::after { animation: none }
 }
 
 /* Only the front card is interactive, so it is the only one that reads lit. */
-.z-index__slide[aria-hidden="false"] > .z-index__board {
+.z-index__rail .z-deck__slide[aria-hidden="false"] > .z-index__board {
   border-width: 2px;
 }
-.z-index__slide[aria-hidden="true"] > .z-index__board {
-  cursor: pointer;
-}
-
-.z-index__nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 200;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, .6);
-  border: 1px solid var(--panel-border-2, #24242c);
-  color: var(--text-body, #e6e2d9);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-}
-.z-index__nav:hover { background: rgba(0, 0, 0, .82); }
-.z-index__nav:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
-.z-index__nav--prev { left: 8px; }
-.z-index__nav--next { right: 8px; }
-
-.z-index__dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 10px 0 16px;
-}
-.z-index__dots button {
-  width: 7px;
-  height: 7px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: #333;
-  opacity: .6;
-  cursor: pointer;
-}
-.z-index__dots button.is-on {
-  background: var(--c, var(--neon-cyan, #19e3ff));
-  opacity: 1;
-}
-.z-index__dots button:focus-visible { box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55)); }
 
 /* ── everything, newest first ────────────────────────────── */
 .z-index__feed {
@@ -1222,11 +1164,7 @@ html.calm-mode .z-index__pending::after { animation: none }
 .z-index__footer p + p { color: var(--text-faint, #666); }
 
 @media (max-width: 640px) {
-  .z-index__rail { --cf-card: clamp(210px, 74vw, 300px); --cf-card-h: 380px; }
+  .z-index--rail .z-index__rail { --cf-card: clamp(210px, 74vw, 300px); --cf-card-h: 380px; }
   .z-index__feed-row { grid-template-columns: 1fr; gap: 2px 10px; }
 }
 
-/* Calm mode and reduced motion: the rail still works, it just does not drift. */
-@media (prefers-reduced-motion: reduce) {
-  .z-index__slide { transition: none; }
-}
