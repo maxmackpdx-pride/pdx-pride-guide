@@ -84,6 +84,11 @@
           }
         }
 
+        function appAlreadyBooted() {
+          var root = document.getElementById("root");
+          return !!(root && root.childElementCount > 0);
+        }
+
         window.addEventListener(
           "error",
           function (e) {
@@ -93,7 +98,8 @@
               el.tagName === "SCRIPT" &&
               el.src &&
               el.src.indexOf("/assets/") !== -1 &&
-              !alreadyReloaded()
+              !alreadyReloaded() &&
+              !appAlreadyBooted()
             ) {
               clearCachesAndReload();
             }

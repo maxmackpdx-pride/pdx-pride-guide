@@ -1,15 +1,13 @@
 /// <reference lib="webworker" />
-import { clientsClaim } from "workbox-core";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
-import { NavigationRoute, registerRoute } from "workbox-routing";
-import { NetworkFirst } from "workbox-strategies";
 import { PUSH_NOTIFICATION_BADGE, PUSH_NOTIFICATION_ICON } from "@shared/pushAssets";
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<string | { url: string; revision: string | null }>;
 };
 
-// Never precache index.html - a stale shell breaks installed PWA launches after deploy.
+// Never precache index.html or the JS bundle - a stale shell 404s hashed assets
+// and the boot script full-reloads the page a few seconds after first paint.
 const precacheManifest = self.__WB_MANIFEST.filter(entry => {
   const url = typeof entry === "string" ? entry : entry.url;
   return url !== "index.html" && !url.endsWith("/index.html");
@@ -17,17 +15,15 @@ const precacheManifest = self.__WB_MANIFEST.filter(entry => {
 
 precacheAndRoute(precacheManifest);
 cleanupOutdatedCaches();
-clientsClaim();
 
-// Always try the network for navigations so the installed app gets fresh HTML + bundle hashes.
-registerRoute(
-  new NavigationRoute(
-    new NetworkFirst({
-      cacheName: "zaylist-navigations",
-      networkTimeoutSeconds: 5,
-    }),
-  ),
-);
+self.addEventListener("activate", (event) => {
+  // Drop the old NetworkFirst HTML cache (5s timeout → stale shell → boot reload).
+  event.waitUntil(caches.delete("zaylist-navigations"));
+});
+
+// Do not clientsClaim() or skipWaiting on install. Taking over a visible tab is
+// what users feel as "the site refreshed a few seconds after it loaded."
+// The page client may SKIP_WAITING only after the tab is hidden.
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {

@@ -51,7 +51,14 @@ export function serveStatic(app: Express) {
     fallthrough: false,
   }));
 
-  app.use(express.static(distPath, { index: false }));
+  app.use(express.static(distPath, {
+    index: false,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(`${path.sep}sw.js`)) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      }
+    },
+  }));
 
   // Browsers request /favicon.ico by default; do not serve SPA HTML for it.
   app.get("/favicon.ico", (_req, res) => {

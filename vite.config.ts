@@ -14,11 +14,11 @@ export default defineConfig({
       manifest: false,
       injectManifest: {
         globPatterns: [
-          // index.html is served network-first only — precaching it strands PWA users on stale bundles.
+          // Icons + manifest only. Precaching hashed JS/CSS made SW updates
+          // take seconds, then skipWaiting stole the open tab.
           "manifest.webmanifest",
           "favicon.png",
           "icons/*.png",
-          "assets/*.{js,css,woff2}",
         ],
         // Main bundle can exceed the 2 MiB Workbox default after home/directory growth.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,

@@ -69,26 +69,32 @@ export async function clearPwaCaches(): Promise<void> {
   }
 }
 
+function activateWaitingWorker(registration: ServiceWorkerRegistration): void {
+  // Only take over while this tab is in the background. skipWaiting on a visible
+  // page is the 3-7s "it loaded, then refreshed" flash.
+  if (document.visibilityState !== "hidden") return;
+  const waiting = registration.waiting;
+  if (waiting) waiting.postMessage({ type: "SKIP_WAITING" });
+}
+
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) return null;
   try {
-    const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    const registration = await navigator.serviceWorker.register("/sw.js", {
+      scope: "/",
+      updateViaCache: "none",
+    });
 
     registration.addEventListener("updatefound", () => {
       const worker = registration.installing;
       if (!worker) return;
       worker.addEventListener("statechange", () => {
-        // Let a new SW activate when ready so push handlers stay current.
-        // Do NOT force a full page reload  -  that was flashing / reloading mid-browse
-        // every time a new worker claimed the tab (seen as controllerchange → reload).
-        if (worker.state === "installed" && navigator.serviceWorker.controller) {
-          worker.postMessage({ type: "SKIP_WAITING" });
-        }
+        if (worker.state === "installed") activateWaitingWorker(registration);
       });
     });
 
-    // Intentionally no controllerchange → location.reload().
-    // Next navigation / hard refresh picks up the new shell; stay on this page.
+    document.addEventListener("visibilitychange", () => activateWaitingWorker(registration));
+    activateWaitingWorker(registration);
 
     return registration;
   } catch (error) {
