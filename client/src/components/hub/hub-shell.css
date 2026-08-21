@@ -1046,3 +1046,288 @@ html.calm-mode .hub-mobile-tab.is-active {
     0 0 36px -8px color-mix(in srgb, var(--neon-blue, #0044ff) 45%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Site mobile bottom bar
+   Claude Design handoff "Zaylist mobile bottom nav bar", 2026-08-21.
+
+   Scoped to .site-hub-mobile-bar throughout: HubShell renders its own
+   plain .hub-mobile-bar on /dashboard and must keep the floating dock.
+   Specificity is doubled up so these settle the earlier rules in this
+   file and the .site-hub-mobile-bar block in index.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes navPillPulseCyan {
+  0%, 100% { box-shadow: 0 0 6px #19e3ff, 0 0 14px rgba(25, 227, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .1); }
+  50% { box-shadow: 0 0 10px #19e3ff, 0 0 20px rgba(25, 227, 255, .8), inset 0 1px 0 rgba(255, 255, 255, .1); }
+}
+
+@keyframes navSheetUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes navGlitchA {
+  0%, 45%, 52%, 100% { opacity: 0; transform: translate(0, 0); }
+  46% { opacity: .85; transform: translate(-2px, 1px); }
+  49% { opacity: .7; transform: translate(2px, -1px); }
+  51% { opacity: .4; transform: translate(-1px, 0); }
+}
+
+@keyframes navGlitchB {
+  0%, 45%, 52%, 100% { opacity: 0; transform: translate(0, 0); }
+  47% { opacity: .85; transform: translate(2px, -1px); }
+  49.5% { opacity: .6; transform: translate(-2px, 1px); }
+  51% { opacity: .35; transform: translate(1px, 0); }
+}
+
+/* ── Bar shell ─────────────────────────────────────────────── */
+.hub-mobile-bar.site-hub-mobile-bar {
+  /*
+   * The handoff's 22px bottom pad covers the home indicator on most phones,
+   * but not a 34px inset, so the larger of the two wins.
+   */
+  padding: 16px 12px max(22px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  background: radial-gradient(120% 140% at 50% 0%, #12121a 0%, #050506 72%);
+  border-top: 1px solid #000;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    inset 0 0 34px -10px rgba(0, 0, 0, .95),
+    0 -30px 60px -20px rgba(0, 0, 0, .8),
+    0 0 40px -10px rgba(25, 227, 255, .18);
+  overflow: hidden;
+}
+
+/* Animated rainbow seam riding the top edge. */
+.hub-mobile-bar.site-hub-mobile-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  z-index: 2;
+  background: linear-gradient(90deg, #19e3ff, #c8fa3c, #ff1fa0, #ff8c00, #19e3ff);
+  background-size: 200% 100%;
+  animation: navSeamFlow 6s linear infinite;
+  pointer-events: none;
+}
+
+/* Glass sheen just under the seam. */
+.hub-mobile-bar.site-hub-mobile-bar::after {
+  content: "";
+  position: absolute;
+  top: 1.5px;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), transparent);
+  pointer-events: none;
+}
+
+/* The dock was the chrome; the bar carries it now, so this is just the row. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-bar__dock {
+  position: relative;
+  z-index: 3;
+  max-width: 560px;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────── */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab {
+  flex: 1;
+  gap: 5px;
+  min-height: 0;
+  padding: 10px 4px 8px;
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #888;
+  font-size: .55rem;
+  letter-spacing: .03em;
+  transition: color .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+/*
+ * One accent contract for the whole bar: idle is a hairline, and the tab
+ * lights in its own colour when hovered, pressed, or current. --tab-c is the
+ * glow, --tab-ink the label, since #0044ff and #8800ff are too dark to read.
+ */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-cyan { --tab-c: #19e3ff; --tab-ink: #19e3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-blue { --tab-c: #0044ff; --tab-ink: #5a8bff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-purple { --tab-c: #8800ff; --tab-ink: #c9a3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-pink { --tab-c: #ff1fa0; --tab-ink: #ff1fa0; }
+
+/* Idle tabs still need their accent for hover, so it is keyed off the label. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Placez"] { --tab-c: #0044ff; --tab-ink: #5a8bff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Eventz"] { --tab-c: #19e3ff; --tab-ink: #19e3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[aria-label="Z/Space"] { --tab-c: #8800ff; --tab-ink: #c9a3ff; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab[data-inbox-open-trigger="messages"] { --tab-c: #ff1fa0; --tab-ink: #ff1fa0; }
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab:not(.is-active):hover,
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab:not(.is-active):active {
+  border-color: color-mix(in srgb, var(--tab-c, #19e3ff) 55%, transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .01));
+  box-shadow:
+    0 0 6px var(--tab-c, #19e3ff),
+    0 0 14px color-mix(in srgb, var(--tab-c, #19e3ff) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .1);
+  color: var(--tab-ink, #19e3ff);
+}
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active {
+  border-color: color-mix(in srgb, var(--tab-c, #19e3ff) 55%, transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .01));
+  box-shadow:
+    0 0 6px var(--tab-c, #19e3ff),
+    0 0 14px color-mix(in srgb, var(--tab-c, #19e3ff) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .1);
+  color: var(--tab-ink, #19e3ff);
+}
+
+/* Only the current Eventz tab breathes. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan:not(.hub-mobile-tab--center) {
+  animation: navPillPulseCyan 2.6s ease-in-out infinite;
+}
+
+/* Hub keeps a faint glass tint and never carries a persistent glow. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center,
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center.is-active {
+  background: rgba(25, 227, 255, .07);
+  border-color: rgba(255, 255, 255, .08);
+  box-shadow: none;
+  color: #e6e2d9;
+  animation: none;
+}
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch svg {
+  position: absolute;
+  inset: 0;
+}
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b {
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a { animation: navGlitchA 3.2s steps(1) infinite; }
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b { animation: navGlitchB 3.2s steps(1) infinite; }
+
+/* Unread badge, top-right of the messages glyph. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__icon-wrap > i {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 99px;
+  background: #ff1fa0;
+  color: #fff;
+  font: 700 9px/1 var(--font-mono, ui-monospace, monospace);
+  font-style: normal;
+  box-shadow: 0 0 6px #ff1fa0;
+}
+
+/* ── Sheets ────────────────────────────────────────────────── */
+.hub-more-sheet.hub-more-sheet--site {
+  /* Floats just above the bar rather than filling to the bottom edge. */
+  top: auto;
+  bottom: calc(var(--site-mobile-nav-height, 92px) + 8px);
+  left: 12px;
+  right: 12px;
+  max-height: min(60vh, 460px);
+  padding: 14px;
+  background: radial-gradient(120% 140% at 50% 0%, #12121a 0%, #0c0c0f 70%);
+  border: 1px solid #000;
+  border-radius: 18px 18px 12px 12px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 -14px 40px -10px rgba(0, 0, 0, .7),
+    0 0 30px -10px color-mix(in srgb, var(--sheet-c, #8800ff) 40%, transparent);
+  animation: navSheetUp .3s ease-out;
+}
+
+.hub-more-sheet.hub-more-sheet--site[data-accent="violet"] { --sheet-c: #8800ff; }
+.hub-more-sheet.hub-more-sheet--site[data-accent="cyan"] { --sheet-c: #19e3ff; }
+.hub-more-sheet.hub-more-sheet--site[data-accent="orange"] { --sheet-c: #ff6600; }
+
+.hub-more-sheet.hub-more-sheet--site h3 {
+  margin: 2px 4px 10px;
+  color: var(--text-faint, #666);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .14em;
+}
+
+/* Items are the same pills as the desktop menus. */
+.hub-more-sheet.hub-more-sheet--site .hub-more-item {
+  margin-bottom: 6px;
+  padding: 11px 14px;
+  border: 2px solid #2b2b2b;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .82rem;
+  letter-spacing: .04em;
+  transition: color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.hub-more-sheet.hub-more-sheet--site .hub-more-item:last-child { margin-bottom: 0; }
+
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="cyan"] { --item-c: #19e3ff; --item-ink: #19e3ff; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="violet"] { --item-c: #b06bff; --item-ink: #b06bff; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="green"] { --item-c: #39ff14; --item-ink: #39ff14; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="magenta"] { --item-c: #ff1fa0; --item-ink: #ff1fa0; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="lime"] { --item-c: #c8fa3c; --item-ink: #c8fa3c; }
+.hub-more-sheet.hub-more-sheet--site .hub-more-item[data-accent="orange"] { --item-c: #ff6600; --item-ink: #ff6600; }
+
+.hub-more-sheet.hub-more-sheet--site .hub-more-item:hover,
+.hub-more-sheet.hub-more-sheet--site .hub-more-item.is-active {
+  border-color: var(--item-c, var(--sheet-c, #19e3ff));
+  box-shadow:
+    0 0 5px var(--item-c, var(--sheet-c, #19e3ff)),
+    0 0 11px color-mix(in srgb, var(--item-c, var(--sheet-c, #19e3ff)) 50%, transparent);
+  color: var(--item-ink, var(--sheet-c, #19e3ff));
+}
+
+/* ── Calm mode and reduced motion ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hub-mobile-bar.site-hub-mobile-bar::before,
+  .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan,
+  .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
+  .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
+  .hub-more-sheet.hub-more-sheet--site { animation: none; }
+}
+
+html.calm-mode .hub-mobile-bar.site-hub-mobile-bar::before,
+html.calm-mode .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan,
+html.calm-mode .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
+html.calm-mode .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
+html.calm-mode .hub-more-sheet.hub-more-sheet--site,
+:root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar::before,
+:root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan,
+:root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
+:root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
+:root[data-calm="true"] .hub-more-sheet.hub-more-sheet--site { animation: none; }

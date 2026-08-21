@@ -139,8 +139,12 @@ body::before {
 }
 
 :root {
-  /* Floating dock: pad + dock (~72) + safe-area headroom */
-  --site-mobile-nav-height: 88px;
+  /*
+   * Full-width bar: 16px top pad + ~59px tabs + 22px bottom pad. Consumers
+   * add env(safe-area-inset-bottom) on top of this, so it stays the
+   * no-inset height. Was 88px for the old floating dock.
+   */
+  --site-mobile-nav-height: 98px;
 }
 
 #root {

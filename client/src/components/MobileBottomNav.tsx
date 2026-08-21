@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { CalendarDays, MapPin, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { useInboxAttentionCount } from "@/hooks/useInboxAttentionCount";
@@ -14,40 +13,48 @@ import { BOARD_NAV, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import AuthModal from "./AuthModal";
 
-const MOBILE_ICON = 26;
+const MOBILE_ICON = 19;
+const HUB_Z_PATH = "M4 4h16v3.2L8.4 17H20v3H4v-3.2L15.6 7H4V4z";
 
 /**
- * Center Hub tab: transparent Prime Z with a rainbow outline.
- * Icon only — no “Hub” label under the mark.
+ * Shared tab glyph. The handoff draws every tab at 19px, stroke 2.2, so the
+ * icons are inline paths rather than a mix of icon-library defaults.
  */
-function HubMark({ active }: { active: boolean }) {
+function TabIcon({ children }: { children: ReactNode }) {
   return (
     <svg
-      viewBox="0 0 874 640"
-      width={43}
-      height={43}
-      className={`hub-mobile-tab__z-mark${active ? " is-active" : ""}`}
+      width={MOBILE_ICON}
+      height={MOBILE_ICON}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden
     >
-      <defs>
-        <linearGradient id="mobile-hub-rainbow" x1="57" y1="62" x2="708" y2="577" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#ff19d6" />
-          <stop offset="0.2" stopColor="#ff5319" />
-          <stop offset="0.4" stopColor="#ffd119" />
-          <stop offset="0.58" stopColor="#5bff19" />
-          <stop offset="0.74" stopColor="#19f7ff" />
-          <stop offset="0.88" stopColor="#1956ff" />
-          <stop offset="1" stopColor="#e419ff" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M 57 62 L 140 166 L 458 167 L 112 577 L 628 555 L 708 461 L 345 458 L 692 62 Z"
-        fill="none"
-        stroke="url(#mobile-hub-rainbow)"
-        strokeWidth="30.5"
-        strokeLinejoin="miter"
-      />
+      {children}
     </svg>
+  );
+}
+
+/**
+ * Center Hub tab: the glitch Z. Three stacked copies of the mark, the two
+ * colour plates screened over a white base and offset on their own cycles.
+ */
+function HubMark() {
+  return (
+    <span className="hub-mobile-tab__z-glitch" aria-hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        <path d={HUB_Z_PATH} fill="#e6e2d9" />
+      </svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" className="hub-mobile-tab__z-glitch-a">
+        <path d={HUB_Z_PATH} fill="#19e3ff" />
+      </svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" className="hub-mobile-tab__z-glitch-b">
+        <path d={HUB_Z_PATH} fill="#ff00cc" />
+      </svg>
+    </span>
   );
 }
 
@@ -148,7 +155,7 @@ export default function MobileBottomNav() {
       {eventsOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setEventsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet" role="dialog" aria-label="Events">
+          <div className="hub-more-sheet hub-more-sheet--site" data-accent="cyan" role="dialog" aria-label="Events">
             <h3>Events</h3>
             {EVENTS_NAV.map(item => (
               <Link
@@ -167,7 +174,7 @@ export default function MobileBottomNav() {
       {spaceOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet" role="dialog" aria-label="Z/Space">
+          <div className="hub-more-sheet hub-more-sheet--site" data-accent="violet" role="dialog" aria-label="Z/Space">
             <h3>Z/Space</h3>
             {BOARD_NAV.map(item => (
               <Link
@@ -187,17 +194,6 @@ export default function MobileBottomNav() {
       <nav className="hub-mobile-bar site-hub-mobile-bar" aria-label="Site mobile navigation">
         <div className="hub-mobile-bar__dock">
           {/* No decorative pull on the site-wide dock - hub drawer grip is only on /dashboard */}
-          <Link
-            href="/directory"
-            className={tabClass(placesActive, "blue")}
-            aria-label="Placez"
-            aria-current={placesActive ? "page" : undefined}
-            onClick={handleNavLink}
-          >
-            <MapPin size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
-            <span>Placez</span>
-          </Link>
-
           <button
             type="button"
             className={tabClass(eventsActive || eventsOpen, "cyan")}
@@ -206,9 +202,26 @@ export default function MobileBottomNav() {
             aria-label="Eventz"
             onClick={handleEvents}
           >
-            <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+            <TabIcon>
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M3 9h18M8 2v4M16 2v4" />
+            </TabIcon>
             <span>Eventz</span>
           </button>
+
+          <Link
+            href="/directory"
+            className={tabClass(placesActive, "blue")}
+            aria-label="Placez"
+            aria-current={placesActive ? "page" : undefined}
+            onClick={handleNavLink}
+          >
+            <TabIcon>
+              <path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </TabIcon>
+            <span>Placez</span>
+          </Link>
 
           {user || localDemo ? (
             <Link
@@ -219,7 +232,8 @@ export default function MobileBottomNav() {
               aria-current={hubActive ? "page" : undefined}
               onClick={handleNavLink}
             >
-              <HubMark active={hubActive} />
+              <HubMark />
+              <span>Hub</span>
             </Link>
           ) : (
             <button
@@ -232,7 +246,8 @@ export default function MobileBottomNav() {
                 setShowAuth(true);
               }}
             >
-              <HubMark active={false} />
+              <HubMark />
+              <span>Hub</span>
             </button>
           )}
 
@@ -244,23 +259,13 @@ export default function MobileBottomNav() {
             aria-label="Z/Space"
             onClick={handleSpace}
           >
-            <span
-              aria-hidden
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                minHeight: 31,
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontWeight: 900,
-                textTransform: "uppercase",
-              }}
-            >
-              <span style={{ fontSize: 21, lineHeight: 0.84, letterSpacing: "-0.06em" }}>Z/</span>
-              <span style={{ marginTop: 3, fontSize: 9, lineHeight: 1, letterSpacing: "0.08em" }}>SPACE</span>
-            </span>
+            <TabIcon>
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </TabIcon>
+            <span>Z/Space</span>
           </button>
 
           <button
@@ -276,7 +281,10 @@ export default function MobileBottomNav() {
             }
           >
             <span className="hub-mobile-tab__icon-wrap">
-              <MessageCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
+              <TabIcon>
+                <path d="M21 8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h5" />
+                <path d="M3 8l9 6 9-6" />
+              </TabIcon>
               {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
             </span>
             <span>Messages</span>
