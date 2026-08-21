@@ -101,7 +101,7 @@ const WORDMARK: Record<string, { src: string; alt: string }> = {
   placez: { src: "/brand/family/our-placez.svg", alt: "OUR PLACEZ" },
   mizzed: { src: "/brand/family/mizzed-connection.svg", alt: "MIZZED CONNECTION" },
   sellz: { src: "/brand/family/sellz.svg", alt: "SELLZ" },
-  happening: { src: "/brand/family/eventz.svg", alt: "EVENTZ" },
+  happening: { src: "/brand/family/eventz.png", alt: "EVENTZ" },
 };
 
 /**

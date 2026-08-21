@@ -19,7 +19,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
           <img
             key={eventCount > 0 ? "eventz-hero-ready" : "eventz-hero-pending"}
             className="board-hero__brand-logo board-hero__brand-logo--eventz"
-            src="/brand/family/eventz.svg"
+            src="/brand/family/eventz.png"
             alt="EVENTZ"
           />
         }
