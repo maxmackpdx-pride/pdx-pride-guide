@@ -54,8 +54,10 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
     else { await navigator.clipboard.writeText(url); toast({ title: "Link copied" }); }
   };
   const style = { "--listing-accent": ACCENT, "--c": ACCENT, "--_c": ACCENT } as CSSProperties;
+  const isDemo = post.username === "hausing_demo";
   return (
     <article id={`sellz-post-${post.id}`} className={`board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""}`} style={style} onClick={onToggle} role="button" tabIndex={0} onKeyDown={e => { if ((e.key === "Enter" || e.key === " ") && !(e.target as HTMLElement).matches("input,textarea,select,button")) { e.preventDefault(); onToggle(); } }}>
+      {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <div className="board-listing-card__row">
         <div className="board-listing-card__thumb" style={!post.photoUrls?.[0] ? { background: "linear-gradient(135deg,#39ff14,#0044ff)" } : undefined}>
           {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <Tag size={54} aria-hidden="true" />}

@@ -3601,6 +3601,17 @@ function seedDemoBoardsContent() {
   gift.run(demoId, "GIFT", "Free moving boxes (about 20)", "Broken down and clean, all sizes. Great for a move. Porch pickup, first come first served.", "Household", "SE Portland", "Porch pickup", JSON.stringify(["/hausing/demo/gift-boxes.jpg"]), FUTURE, OLD);
   gift.run(demoId, "GIFT", "Gently used Pride flags and bunting", "Left over from last year and still bright. Would love them to go to someone who will fly them proud.", "Decor", "NE Portland", "Meet up nearby", JSON.stringify(["/hausing/demo/gift-flags.jpg"]), FUTURE, OLD);
   gift.run(demoId, "ISO", "ISO: a working mini fridge for a new place", "Just moved into a studio and could really use a small fridge. Can pick up anywhere in town, happy to trade baked goods.", "Appliances", "N Portland", "Can pick up", JSON.stringify(["/hausing/demo/gift-fridge.jpg"]), FUTURE, OLD);
+
+  // SELLZ (3). Marked demo in the card chrome, with product photography so
+  // the market board shows its intended populated state.
+  sqlite.prepare(`DELETE FROM sellz_posts WHERE user_id = ?`).run(demoId);
+  const sellz = sqlite.prepare(
+    `INSERT INTO sellz_posts (user_id, title, description, category, condition, price_cents, negotiable, neighborhood, pickup_preference, photo_urls, status, expires_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)`,
+  );
+  sellz.run(demoId, "Black leather harness, size M", "Clean and well cared for. Adjustable straps, worn a handful of times, and ready for a new night out.", "Leather and gear", "Like new", 4500, 1, "Inner SE", "Public meetup", JSON.stringify(["/sellz/demo/leather-harness.webp"]), FUTURE, OLD);
+  sellz.run(demoId, "Pair of solid wood bar stools", "Two matching counter-height stools with a few honest scuffs. Stable, comfortable, and perfect for a small kitchen or home bar.", "Furniture", "Good", 6000, 1, "North Portland", "Porch pickup", JSON.stringify(["/sellz/demo/walnut-stools.webp"]), FUTURE, OLD);
+  sellz.run(demoId, "Queer zine bundle, 12 issues", "A mixed stack of art, culture, and nightlife zines. Selling together, not splitting the set. Great reading for the porch or a gift.", "Collectibles", "Good", 2500, 0, "Buckman", "Event handoff", JSON.stringify(["/sellz/demo/queer-zines.webp"]), FUTURE, OLD);
 }
 
 function getOrCreateDemoUser(now: string): number | null {
