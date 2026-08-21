@@ -655,6 +655,7 @@ export default function Nav() {
   );
   const aboutActive = navLinkActive(location, "/about");
   const homeActive = location === "/";
+  const nextActive = navLinkActive(location, "/next");
 
   const seamLoading = routeLoading || fetching > 0;
 
@@ -687,6 +688,14 @@ export default function Nav() {
                 onClick={() => dismissMobileNavOverlays()}
               >
                 About
+              </Link>
+              <Link
+                href="/next"
+                className={`hub-mtop__mode-btn${nextActive ? " is-active is-member" : ""}`}
+                aria-current={nextActive ? "page" : undefined}
+                onClick={() => dismissMobileNavOverlays()}
+              >
+                Next
               </Link>
             </div>
             <div className="hub-mtop__spacer" />
