@@ -340,6 +340,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       <div
         className="inbox-overlay inbox-overlay--experiment"
         role="dialog"
+        aria-modal="true"
         aria-label="Inbox"
         ref={panelRef}
       >
