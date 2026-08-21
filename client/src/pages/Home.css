@@ -1753,6 +1753,7 @@ html.calm-mode .home-boards__card {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 
 .home-stat-strip__label--stack {

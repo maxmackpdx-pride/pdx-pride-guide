@@ -9008,8 +9008,9 @@ footer a:hover { color: #00FFFF !important; }
 .event-board-card__title {
   margin: 0;
   font-size: clamp(1rem, 2.2vw, 1.35rem);
-  line-height: 1.05;
+  line-height: 1.15;
   color: #fff;
+  overflow-wrap: anywhere;
 }
 
 /* Sold-out badge - prominent red label on cards + modal */
