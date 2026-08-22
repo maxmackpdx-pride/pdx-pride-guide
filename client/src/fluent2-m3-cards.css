@@ -151,9 +151,15 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__scroll {
   background: transparent;
 }
 
-/* Zaylist Event Room: poster first, with neon controls floating over the art. */
+html[data-zaylist-cards="fluent2-m3"] .event-modal__chrome {
+  background: rgba(3, 3, 5, 0.92);
+  border-bottom-color: color-mix(in srgb, var(--c) 28%, #24242a);
+}
+
+/* Poster lives in the scroll region. Cap height so 360px + dock still has
+   a usable overflow remainder (the 52vh min-360 rule ate the viewport). */
 html[data-zaylist-cards="fluent2-m3"] .event-modal__poster-img {
-  height: clamp(360px, 52vh, 520px);
+  height: clamp(120px, 22vh, 200px);
 }
 
 html[data-zaylist-cards="fluent2-m3"] .event-modal__close {
@@ -172,13 +178,17 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__close {
 }
 
 html[data-zaylist-cards="fluent2-m3"] .event-modal__share {
-  right: 68px;
+  right: auto;
 }
 
 html[data-zaylist-cards="fluent2-m3"] .event-modal__title {
   margin-bottom: 18px;
   text-wrap: balance;
   text-shadow: 0 0 26px color-mix(in srgb, var(--c) 22%, transparent);
+}
+
+html[data-zaylist-cards="fluent2-m3"] .event-modal__chrome .event-modal__title {
+  margin-bottom: 10px;
 }
 
 /* Inner hierarchy is M3 tonal, not glass-inside-glass. */
@@ -258,7 +268,7 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__tab-panel {
 
 @media (min-width: 900px) {
   html[data-zaylist-cards="fluent2-m3"] .event-modal__poster-img {
-    height: min(60vh, 620px);
+    height: min(40vh, 380px);
   }
 }
 

@@ -32,8 +32,46 @@ import {
 } from "@/lib/eventEditForm";
 import { admissionEventLinkLabel } from "@shared/admission";
 import { resolveVenueWebsite } from "@shared/venueLinks";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
+import { DAY_TEXT_COLORS } from "@shared/eventWeek";
+
+type EventWithLinks = Event & {
+  venueWebsite?: string | null;
+  sourceUrl?: string | null;
+};
+
+function isFeedOrApiUrl(url: string): boolean {
+  return /format=json|wp-json|\/tribe\/events\/v1|\.ics(\?|$)|\/ics\/?(\?|$)|\/api\/calendar|ical=1|\/feed(?:\/|$|\?)/i.test(
+    url,
+  );
+}
+
+/** Public http(s) page only. Drops relative paths, javascript:, feeds, and APIs. */
+function externalPageUrl(value: unknown): string | null {
+  const href = publicHttpUrl(value);
+  if (!href || !/^https?:\/\//i.test(href)) return null;
+  if (isFeedOrApiUrl(href)) return null;
+  return href;
+}
+
+function resolveEventPrimaryLink(event: EventWithLinks): { href: string; label: string } | null {
+  const ticketHref = externalPageUrl(event.ticketUrl);
+  if (ticketHref) {
+    return { href: ticketHref, label: admissionEventLinkLabel(event.admission) };
+  }
+  const venueHref =
+    externalPageUrl(event.venueWebsite) || externalPageUrl(resolveVenueWebsite(event.venueName));
+  if (venueHref) {
+    return { href: venueHref, label: "Visit venue" };
+  }
+  const sourceHref = externalPageUrl(event.sourceUrl) || externalPageUrl(event.source);
+  if (sourceHref) {
+    return { href: sourceHref, label: "Event page" };
+  }
+  return null;
+}
 
 type EventHostProfile = {
   userId: number;
@@ -44,8 +82,6 @@ type EventHostProfile = {
   avatarRing?: string | null;
   role: string;
 };
-
-import { DAY_TEXT_COLORS } from "@shared/eventWeek";
 
 type ModerationMode = null | "remove" | "flag" | "transfer";
 
@@ -173,6 +209,10 @@ function EventModalInner({
   // Border + glow accent: the day color, or a neutral neon for events with no
   // weekday (so they don't get a stark white frame).
   const accentColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
+  const eventWithLinks = event as EventWithLinks;
+  const primaryLink = resolveEventPrimaryLink(eventWithLinks);
+  const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;
+  const soldOut = /\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`);
 
   const extraPeople = [
     ...eventHosts.map(h => ({
@@ -269,11 +309,9 @@ function EventModalInner({
     onError: (err: Error & { code?: string; ticketUrl?: string | null; venueWebsite?: string | null }) => {
       if (err.code === "NO_CONTACT" || err.code === "NO_HOST") {
         const fallbackUrl =
-          err.ticketUrl
-          || err.venueWebsite
-          || event.ticketUrl
-          || (event as Event & { venueWebsite?: string | null }).venueWebsite
-          || resolveVenueWebsite(event.venueName)
+          externalPageUrl(err.ticketUrl)
+          || externalPageUrl(err.venueWebsite)
+          || primaryLink?.href
           || null;
         setNoContactUrl(fallbackUrl);
         setHostDrawer("noHost");
@@ -556,7 +594,7 @@ function EventModalInner({
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className="event-modal"
+        className="event-modal pdx-glass-rebind"
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -574,25 +612,46 @@ function EventModalInner({
         <span className="event-modal__sheen pdx-glass-sheen" aria-hidden="true" />
         <span className="event-modal__sheen event-modal__sheen--specular pdx-glass-sheen--specular" aria-hidden="true" />
 
-        <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
-        <button
-          type="button"
-          className="event-modal__close event-modal__share"
-          aria-label="Share this event"
-          title="Share this event"
-          onClick={async () => {
-            try {
-              const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
-              toast({ title: shareToastTitle(result, "event") });
-            } catch (err) {
-              if ((err as DOMException)?.name !== "AbortError") {
-                toast({ title: "Could not share event", variant: "destructive" });
-              }
-            }
-          }}
-        >
-          <Share2 size={18} strokeWidth={2.3} aria-hidden />
-        </button>
+        <div className="event-modal__chrome">
+          <div className="event-modal__chrome-tools">
+            <button
+              type="button"
+              className="event-modal__close event-modal__share"
+              aria-label="Share this event"
+              title="Share this event"
+              onClick={async () => {
+                try {
+                  const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
+                  toast({ title: shareToastTitle(result, "event") });
+                } catch (err) {
+                  if ((err as DOMException)?.name !== "AbortError") {
+                    toast({ title: "Could not share event", variant: "destructive" });
+                  }
+                }
+              }}
+            >
+              <Share2 size={18} strokeWidth={2.3} aria-hidden />
+            </button>
+            <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
+          </div>
+          {soldOut && (
+            <div className="event-sold-out-badge event-sold-out-badge--modal" role="status">SOLD OUT</div>
+          )}
+          <h2 className="display event-modal__title">
+            {displayTitle}
+          </h2>
+          {primaryLink && !editing ? (
+            <a
+              href={primaryLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
+              data-testid="button-event-tickets-primary"
+            >
+              {primaryLink.label}
+            </a>
+          ) : null}
+        </div>
 
         <div className="event-modal__scroll">
         <div className="event-modal__poster pdx-poster-well">
@@ -601,12 +660,6 @@ function EventModalInner({
         </div>
 
         <div className="event-modal__body">
-          {/\bsold\s*out\b/i.test(`${event.title} ${event.description || ""}`) && (
-            <div className="event-sold-out-badge event-sold-out-badge--modal" role="status">SOLD OUT</div>
-          )}
-          <h2 className="display event-modal__title">
-            {event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title}
-          </h2>
 
           {editing && eventForm ? (
             <DashboardEventEditForm
@@ -634,9 +687,8 @@ function EventModalInner({
             <div className="event-modal__venue">
               {(() => {
                 const venueHref =
-                  (event as any).venueWebsite
-                  || resolveVenueWebsite(event.venueName)
-                  || null;
+                  externalPageUrl(eventWithLinks.venueWebsite)
+                  || externalPageUrl(resolveVenueWebsite(event.venueName));
                 const label = `${event.venueName || "Venue"}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
                 return venueHref ? (
                   <a
@@ -757,18 +809,6 @@ function EventModalInner({
               <div className="event-modal__kicker">About</div>
               <p className="event-modal__description">{event.description}</p>
             </div>
-          )}
-
-          {event.ticketUrl && !isPastEvent && (
-            <a
-              href={event.ticketUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
-              data-testid="button-event-tickets-mid"
-            >
-              {admissionEventLinkLabel(event.admission)}
-            </a>
           )}
 
           {eventHosts.length > 0 && (
@@ -1028,7 +1068,7 @@ function EventModalInner({
                   type="button"
                   onClick={() => hostMutation.mutate(hostMessage)}
                   disabled={!hostMessage.trim() || hostMutation.isPending}
-                  className="pdx-glass-btn pdx-glass-btn--solid event-modal__btn-solid"
+                  className="pdx-glass-btn pdx-glass-btn--solid event-modal__btn-solid pdx-glass-rebind"
                   style={{ "--c": "var(--neon-cyan, #19e3ff)" } as React.CSSProperties}
                 >
                   {hostMutation.isPending ? "Sending…" : "Send"}
@@ -1191,15 +1231,15 @@ function EventModalInner({
 
         {!editing && (
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
-            {event.ticketUrl ? (
+            {primaryLink ? (
               <a
-                href={event.ticketUrl}
+                href={primaryLink.href}
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary"
                 data-testid="button-event-tickets-sticky"
               >
-                {admissionEventLinkLabel(event.admission)} →
+                {primaryLink.label}
               </a>
             ) : null}
             <button
