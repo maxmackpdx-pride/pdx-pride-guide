@@ -229,7 +229,9 @@ export function ZDeck({
                 event.stopPropagation();
                 return;
               }
-              if (index !== selected) {
+              const target = event.target as HTMLElement;
+              const clickedLink = target.closest("a[href]");
+              if (index !== selected && !clickedLink) {
                 event.preventDefault();
                 event.stopPropagation();
                 onSelect(index);

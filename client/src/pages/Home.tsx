@@ -15,12 +15,12 @@ import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
 const NEXT_PREVIEW_CARDS = [
-  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan" },
-  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet" },
-  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red" },
-  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold" },
-  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet" },
-  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange" },
+  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", href: "/the-hauz" },
+  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", href: "/z" },
+  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", href: "/next" },
+  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", href: "/next" },
+  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", href: "/next" },
+  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", href: "/outz" },
 ] as const;
 
 function NextPreviewCardStack() {
@@ -94,13 +94,15 @@ function NextPreviewCardStack() {
         label="What Zaylist is building next"
       >
         {NEXT_PREVIEW_CARDS.map(card => (
-          <span
+          <Link
+            key={card.name}
+            href={card.href}
             className="home-next-preview__card pdx-glass-card pdx-glass-rebind"
             data-tone={card.tone}
-            key={card.name}
+            aria-label={`Open ${card.name}`}
           >
             <img src={card.logo} alt={card.name} loading="lazy" decoding="async" />
-          </span>
+          </Link>
         ))}
       </ZDeck>
 
