@@ -348,6 +348,9 @@
     .hub-events-tabs{display:flex;gap:22px;border-bottom:1px solid var(--panel-border);margin:20px 0 22px}
     .hub-events-list{padding:0;overflow:hidden}
     .hub-events-empty{text-align:center}
+    .hub-events-empty__actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
+    .hub-events-empty__link{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--panel-cyan);text-decoration:none}
+    .hub-events-empty__link:hover{text-decoration:underline}
     .hub-root .hub-empty{padding:22px 18px;font-size:13px;color:var(--board-muted);line-height:1.5}
     .hub-events-list .hub-thread{display:flex;align-items:center;gap:15px;width:100%;padding:16px 18px;border:none;border-bottom:1px solid var(--panel-border);background:transparent;text-align:left;color:inherit}
     .hub-events-list .hub-thread:hover{background:rgba(255,255,255,.02)}
