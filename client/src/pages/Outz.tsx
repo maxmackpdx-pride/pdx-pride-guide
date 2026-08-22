@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { CSSProperties } from "react";
 import { Link } from "wouter";
 import PageHero from "@/components/PageHero";
 import OutzMap from "@/components/OutzMap";
@@ -9,6 +10,31 @@ import type { OutzSnapshot } from "@shared/outz";
 import "./Outz.css";
 
 type OutzPayload = { data: OutzSnapshot; stale?: boolean; fromCache?: boolean };
+
+type OutzCrew = {
+  name: string;
+  place: string;
+  detail: string;
+  href: string;
+  accent: string;
+};
+
+const OUTZ_CREWS: OutzCrew[] = [
+  {
+    name: "River Brats",
+    place: "Rooster Rock",
+    detail: "River conditions, crossing notes, parking, carpools, and the beach chat before you head east.",
+    href: "/z/out/rooster-rock",
+    accent: "#19e3ff",
+  },
+  {
+    name: "Sauvie Sirens",
+    place: "Sauvie Island · Collins Beach",
+    detail: "Water quality, parking permits, island weather, and the practical intel for a good day on the sand.",
+    href: "/z/out/sauvie-island",
+    accent: "#39ff14",
+  },
+];
 
 function timeLabel(value?: string) {
   if (!value) return "Loading official sources";
@@ -32,10 +58,10 @@ export default function Outz() {
     <div className="zine-page board-page outz-page">
       <PageHero
         kicker="Z/OUT · LIVE FIELD DESK"
-        titleLine1="CAMP. HIKE."
-        titleLine2="GET OUT."
+        titleLine1="PITCH A TENT."
+        titleLine2="FIND YOUR PEOPLE."
         accent="cyan"
-        lede="Camping, hiking, trails, weather, alerts, and practical access notes from the agencies that manage the places. Nude beaches are one part of the map."
+        lede="Camping, hiking, trails, weather, alerts, and practical access notes from the agencies that manage the places — plus the people who make the trip better."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 44%"
         actions={<div className="outz-hero-actions"><Link href="/z/out/rooster-rock"><Button as="span" variant="solid">BEACH CONDITIONS</Button></Link><a href="#official-catalog"><Button as="span" accent="cyan">OFFICIAL CATALOG</Button></a></div>}
@@ -47,6 +73,34 @@ export default function Outz() {
       </section>
 
       {query.isError ? <div className="outz-error">Official outdoor conditions are temporarily unavailable. Try the direct agency links below.</div> : null}
+
+      <section className="outz-section outz-crews" aria-labelledby="outz-crews-heading">
+        <div className="outz-section__head">
+          <p>LOCAL CREWS</p>
+          <h2 id="outz-crews-heading">Pick your spot. Find your people.</h2>
+          <span>Two outdoor home bases for the river, the island, and the group chat that gets you there.</span>
+        </div>
+        <div className="outz-crew-grid">
+          {OUTZ_CREWS.map(crew => (
+            <article className="outz-crew-card pdx-glass-card pdx-glass-rebind" key={crew.href} style={{ "--c": crew.accent } as CSSProperties}>
+              <svg className="outz-crew-card__motif" viewBox="0 0 240 160" aria-hidden="true">
+                <path d="M12 137 78 61l30 37 31-50 90 89" />
+                <path d="M37 137 92 79l56 58" />
+                <path d="M102 137v-35l18-26 19 26v35" />
+                <path d="M120 76v61" />
+              </svg>
+              <div className="outz-crew-card__content">
+                <p className="outz-crew-card__eyebrow">{crew.place}</p>
+                <h3>{crew.name}</h3>
+                <p>{crew.detail}</p>
+                <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind outz-crew-card__action" href={crew.href} style={{ "--c": crew.accent } as CSSProperties}>
+                  OPEN SPOT
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section className="outz-section">
         <div className="outz-section__head"><p>PLAN A TRIP</p><h2>Featured camp + hike destinations</h2></div>

@@ -76,7 +76,6 @@ const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
 const ZIndex = lazy(() => import("./pages/ZIndex"));
-const Outz = lazy(() => import("./pages/Outz"));
 const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const NotFound = lazy(() => import("./pages/not-found"));
 
