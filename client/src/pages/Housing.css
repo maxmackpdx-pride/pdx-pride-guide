@@ -672,7 +672,7 @@
 }
 
 /* transform:scale replaces the prototype's non-standard zoom */
-.hz-well .hz-cluster {
+.hz-well .pdx-household-stack {
   transform: scale(var(--hz-av-scale, 1));
   transform-origin: right bottom;
   margin-bottom: 5px;
@@ -813,40 +813,6 @@
   gap: 10px;
 }
 
-.hz-cluster {
-  display: flex;
-  align-items: flex-end;
-}
-
-.hz-cluster > * {
-  margin-left: -14px;
-  border-radius: var(--radius-pill, 999px);
-  box-shadow: 0 0 0 2px var(--ink-800);
-}
-
-.hz-cluster > *:first-child {
-  margin-left: 0;
-}
-
-.hz-cluster--wrap {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: end;
-  align-items: end;
-}
-
-.hz-cluster--wrap > * {
-  margin-left: -14px;
-}
-
-.hz-cluster--wrap > *:nth-child(3n + 1) {
-  margin-left: 0;
-}
-
-.hz-cluster--wrap > *:nth-child(n + 4) {
-  margin-top: -12px;
-}
-
 .hz-pet {
   display: grid;
   place-items: center;
@@ -875,17 +841,6 @@
   font-size: 18px;
   margin-left: 0;
   align-self: auto;
-}
-
-.hz-slot {
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-pill, 999px);
-  border: 2px dashed color-mix(in srgb, var(--c) 50%, #101014);
-  color: var(--c);
-  font-family: var(--font-mono);
-  font-size: var(--mono-micro);
-  background: var(--ink-1000);
 }
 
 .hz-well {
@@ -1052,22 +1007,31 @@
   flex: 1 1 auto;
 }
 
-.hz-well__cap .hz-cluster {
+.hz-well__cap .pdx-household-stack {
   flex: none;
+  max-width: 100%;
 }
 
-.hz-more {
-  display: grid;
-  place-items: center;
-  margin-left: -8px;
-  border-radius: var(--radius-pill, 999px);
-  background: var(--ink-850);
-  border: 2px solid color-mix(in srgb, var(--c) 45%, #101014);
-  box-shadow: 0 0 0 2px var(--ink-800);
-  color: var(--board-text);
-  font-family: var(--font-display);
-  font-weight: var(--fw-black);
-  flex: none;
+/*
+ * Forming wells: stack sits on the photo, not in the title flex fight.
+ * Extra JS scale + wrap3 rows used to paint past 240/190px and clip.
+ */
+.hz-well--contain-stack .hz-well__label {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  width: auto;
+}
+
+.hz-well--contain-stack .hz-well__cap {
+  overflow: visible;
+  align-items: flex-end;
+}
+
+.hz-well--contain-stack .pdx-household-stack {
+  transform: none;
+  max-width: 100%;
 }
 
 .hz-well__scan {
@@ -1857,6 +1821,12 @@
 .hz-interest span {
   flex: 1;
   min-width: 0;
+}
+
+.hz-interest .pdx-household-stack,
+.hz-group .pdx-household-stack,
+.hz-people .pdx-household-stack {
+  flex: none;
 }
 
 .hz-groups {

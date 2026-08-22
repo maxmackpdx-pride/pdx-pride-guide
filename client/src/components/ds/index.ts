@@ -6,6 +6,8 @@ export { Divider } from "./Divider";
 export { EventCard } from "./EventCard";
 export { FilterChip } from "./FilterChip";
 export { HeroBanner } from "./HeroBanner";
+export { HouseholdStack } from "./HouseholdStack";
+export type { HouseholdStackProps, HouseholdStackSize } from "./HouseholdStack";
 export { Logo } from "./Logo";
 export { MapLegend } from "./MapLegend";
 export { MapPanel } from "./MapPanel";
