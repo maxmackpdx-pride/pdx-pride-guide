@@ -1174,5 +1174,60 @@ html.calm-mode .z-index__pending::after { animation: none }
 
 @media (max-width: 640px) {
   .z-index--rail .z-index__rail { --cf-card: clamp(210px, 74vw, 300px); --cf-card-h: 380px; }
-  .z-index__feed-row { grid-template-columns: 1fr; gap: 2px 10px; }
+  .z-index__feed {
+    padding: 16px 12px 44px;
+  }
+
+  .z-index__feed-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .z-index__feed-list > li {
+    border: 0;
+  }
+
+  .z-index__feed-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "tag age"
+      "copy copy";
+    gap: 8px 12px;
+    align-items: start;
+    min-height: 112px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .025);
+  }
+
+  .z-index__feed-tag {
+    grid-area: tag;
+    font-size: 10px;
+  }
+
+  .z-index__feed-copy {
+    grid-area: copy;
+    display: block;
+  }
+
+  .z-index__feed-title {
+    display: block;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.08;
+  }
+
+  .z-index__feed-meta {
+    display: block;
+    margin-top: 7px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .z-index__feed-age {
+    grid-area: age;
+    padding-top: 1px;
+    font-size: 11px;
+  }
 }

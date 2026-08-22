@@ -140,7 +140,6 @@ export const EVENTS_NAV: NavLinkItem[] = [
   { href: "/events", label: "Events" },
   { href: "/schedule", label: "My Schedule" },
   { href: "/submit", label: "Promoters" },
-  { href: "/next", label: "Next" },
 ];
 
 export function navLinkActive(location: string, href: string) {
