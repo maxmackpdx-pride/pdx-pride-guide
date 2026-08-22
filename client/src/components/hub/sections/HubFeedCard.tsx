@@ -277,7 +277,7 @@ export default function HubFeedCard({ item }: Props) {
                 </button>
               )}
               <span
-                className="kick hub-feed-card__badge"
+                className="kick hub-feed-card__badge pdx-glass-rebind"
                 style={{ "--hub-feed-accent": badgeColor, "--c": badgeColor } as CSSProperties}
               >
                 {item.badge}

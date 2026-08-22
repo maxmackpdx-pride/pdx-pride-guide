@@ -1028,7 +1028,7 @@ function EventModalInner({
                   type="button"
                   onClick={() => hostMutation.mutate(hostMessage)}
                   disabled={!hostMessage.trim() || hostMutation.isPending}
-                  className="pdx-glass-btn pdx-glass-btn--solid event-modal__btn-solid"
+                  className="pdx-glass-btn pdx-glass-btn--solid event-modal__btn-solid pdx-glass-rebind"
                   style={{ "--c": "var(--neon-cyan, #19e3ff)" } as React.CSSProperties}
                 >
                   {hostMutation.isPending ? "Sending…" : "Send"}

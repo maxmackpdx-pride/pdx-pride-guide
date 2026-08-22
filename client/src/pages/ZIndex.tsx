@@ -653,7 +653,7 @@ function ZFeed({ boards }: { boards: ZAddress[] }) {
             <button
               key={filter.path}
               type="button"
-              className={filter.path === board ? "is-on" : undefined}
+              className={filter.path === board ? "pdx-glass-rebind is-on" : "pdx-glass-rebind"}
               style={
                 filter.path === "all"
                   ? ({ ["--c" as string]: "var(--panel-lime, #c8fa3c)" })
@@ -678,7 +678,7 @@ function ZFeed({ boards }: { boards: ZAddress[] }) {
             <li key={`${row.path}-${row.href}-${row.title}`}>
               <Link href={row.href} className="z-index__feed-row">
                 <span
-                  className="z-index__feed-tag"
+                  className="z-index__feed-tag pdx-glass-rebind"
                   style={{ ["--c" as string]: ACCENT[row.path] ?? "var(--neon-cyan, #19e3ff)" }}
                 >
                   {`z/${row.path}`}

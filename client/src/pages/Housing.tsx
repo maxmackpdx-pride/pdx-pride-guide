@@ -254,7 +254,7 @@ export default function Housing() {
   );
 
   return (
-    <div className="hz">
+    <div className="hz pdx-glass-rebind">
       <ZBoardAddressStrip path="hauz" board="THE HAÜZ" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
@@ -372,6 +372,7 @@ export default function Housing() {
                 <button
                   key={t}
                   type="button"
+                  className="pdx-glass-rebind"
                   onClick={() => openCompose(t)}
                   style={
                     {
@@ -386,6 +387,7 @@ export default function Housing() {
               ))}
               <button
                 type="button"
+                className="pdx-glass-rebind"
                 onClick={() => openCompose("PM")}
                 style={
                   {

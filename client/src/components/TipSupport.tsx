@@ -71,7 +71,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             href={stripePaymentLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--sm pdx-glass-btn"
+            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--sm pdx-glass-btn pdx-glass-rebind"
             style={{ ["--c" as string]: "var(--neon-cyan, #19e3ff)" }}
             aria-label="Tip with card or Apple Pay"
           >
@@ -100,7 +100,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             href={stripePaymentLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--lg pdx-glass-btn"
+            className="tip-support__btn tip-support__btn--cyan-glass tip-support__btn--lg pdx-glass-btn pdx-glass-rebind"
             style={{ ["--c" as string]: "var(--neon-cyan, #19e3ff)" }}
             data-testid="link-donate-stripe"
             aria-label="Tip with card or Apple Pay"

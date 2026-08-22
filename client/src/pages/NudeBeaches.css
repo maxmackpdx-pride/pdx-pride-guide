@@ -1420,8 +1420,9 @@ html.calm-mode .nude-map-btn--primary {
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Explicitly kill cyan on any button / chip control in this page */
-.nude-beaches-page button,
+/* Explicitly kill cyan on any button / chip control in this page.
+   Bare `button` is omitted so unclassed controls do not set --c without a
+   rebind class; named glass / chip classes below are in the glass.css group. */
 .nude-beaches-page .pdxBtn,
 .nude-beaches-page .btn-neon,
 .nude-beaches-page .nude-map-btn,

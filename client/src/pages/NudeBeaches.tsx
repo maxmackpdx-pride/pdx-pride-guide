@@ -225,7 +225,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
   const snapshot = data?.data;
   return (
     <div
-      className={`zine-page nude-beaches-page board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
+      className={`zine-page nude-beaches-page pdx-glass-rebind board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
       <ZBoardAddressStrip path={`out/${beachId}`} board={isRooster ? "Rooster Rock" : "Sauvie Island"} />
       <header className="nude-beaches-header">

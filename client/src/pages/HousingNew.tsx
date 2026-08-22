@@ -49,7 +49,7 @@ export default function HousingNew() {
 
   if (authLoading) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">Loading…</div>
@@ -61,7 +61,7 @@ export default function HousingNew() {
 
   if (!user) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">Sign in to post to the board.</div>
