@@ -77,7 +77,7 @@ export default function RiverBratsShell({ beachId }: Props) {
   const beachChatName = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
 
   return (
-    <section className={`river-brats river-brats--${accent}`}>
+    <section className={`river-brats river-brats--${accent} pdx-glass-rebind`}>
       <div className="river-brats__head">
         <div className={`river-brats__kicker river-brats__kicker--${accent}`}>
           River Brats · {beachName}

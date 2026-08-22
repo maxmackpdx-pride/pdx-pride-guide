@@ -79,7 +79,7 @@ export default function MessageModal({
               <button type="button" className="mp-modal__cancel" onClick={onClose}>Cancel</button>
               <button
                 type="button"
-                className="btn-neon solid"
+                className="btn-neon solid pdx-glass-rebind"
                 onClick={() => void sendMessage()}
                 disabled={!msgText.trim() || msgSending}
                 data-testid="profile-message-send"
@@ -93,7 +93,7 @@ export default function MessageModal({
             <div className="mp-sent-check" aria-hidden="true">✓</div>
             <div className="display mp-modal__sent-title">Message sent</div>
             <p>{displayName} will get back to you in the Hub inbox. Take care of each other.</p>
-            <button type="button" className="btn-neon cyan" onClick={onClose}>Done</button>
+            <button type="button" className="btn-neon cyan pdx-glass-rebind" onClick={onClose}>Done</button>
           </div>
         )}
       </div>

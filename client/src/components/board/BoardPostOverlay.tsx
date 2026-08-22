@@ -133,7 +133,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
             <X size={18} />
           </button>
           {card ?? (
-            <div className="board-listing-card board-listing-card--makeover" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
+            <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
               <p className="board-copy-sm">Loading…</p>
             </div>
           )}

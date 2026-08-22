@@ -27,7 +27,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
             href={venmoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="site-footer__coffee-btn tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass"
+            className="site-footer__coffee-btn tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass pdx-glass-rebind"
             data-testid="footer-buy-coffee-venmo"
             aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
           >
@@ -38,7 +38,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
               href={stripePaymentLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="site-footer__coffee-btn tip-support__btn tip-support__btn--lime-glass tip-support__btn--stripe-footer"
+              className="site-footer__coffee-btn tip-support__btn tip-support__btn--lime-glass tip-support__btn--stripe-footer pdx-glass-rebind"
               data-testid="footer-buy-coffee-stripe"
               aria-label="Tip with card or Apple Pay"
             >
@@ -61,7 +61,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
           href={venmoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--sm"
+          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--sm pdx-glass-rebind"
           aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
         >
           Coffee · Venmo
@@ -89,7 +89,7 @@ export default function TipSupport({ variant = "about", className = "" }: Props)
           href={venmoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--lg"
+          className="tip-support__btn tip-support__btn--coffee-grad tip-support__btn--lime-glass tip-support__btn--lg pdx-glass-rebind"
           data-testid="link-donate-venmo"
           aria-label={`Buy me a coffee on Venmo @${venmoHandle}`}
         >

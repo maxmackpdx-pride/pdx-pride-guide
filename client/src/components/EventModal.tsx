@@ -556,7 +556,7 @@ function EventModalInner({
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className="event-modal"
+        className="event-modal pdx-glass-rebind"
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -764,7 +764,7 @@ function EventModalInner({
               href={event.ticketUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
+              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind"
               data-testid="button-event-tickets-mid"
             >
               {admissionEventLinkLabel(event.admission)}
@@ -851,7 +851,7 @@ function EventModalInner({
                         <button
                           type="submit"
                           disabled={addCoHostMutation.isPending || !coHostUsername.trim()}
-                          className="event-modal__btn-outline event-modal__btn-outline--accent"
+                          className="event-modal__btn-outline event-modal__btn-outline--accent pdx-glass-rebind"
                         >
                           {addCoHostMutation.isPending ? "Adding…" : "Add co-host"}
                         </button>
@@ -921,7 +921,7 @@ function EventModalInner({
               />
               <button
                 type="button"
-                className="event-modal__btn-outline event-modal__btn-outline--accent"
+                className="event-modal__btn-outline event-modal__btn-outline--accent pdx-glass-rebind"
                 disabled={inviteAudienceMutation.isPending || (!invitePast && !inviteFollowers)}
                 onClick={() => inviteAudienceMutation.mutate()}
               >
@@ -961,7 +961,7 @@ function EventModalInner({
                 type="button"
                 data-testid="button-edit-event"
                 onClick={startEditing}
-                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__action-btn--edit"
+                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__action-btn--edit pdx-glass-rebind"
               >
                 <Pencil size={16} aria-hidden="true" />
                 Edit event
@@ -973,7 +973,7 @@ function EventModalInner({
                   type="button"
                   data-testid="button-add-to-calendar"
                   onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
-                  className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn"
+                  className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn pdx-glass-rebind"
                 >
                   Add to Calendar
                 </button>
@@ -1007,7 +1007,7 @@ function EventModalInner({
                 setNoContactUrl(null);
                 setHostDrawer("compose");
               }}
-              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn"
+              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn pdx-glass-rebind"
             >
               Message the Host
             </button>
@@ -1048,7 +1048,7 @@ function EventModalInner({
                 {event.venueName || "this listing"}. For the latest info, check the event website.
               </p>
               {noContactUrl ? (
-                <a href={noContactUrl} target="_blank" rel="noopener" className="pdx-glass-btn event-modal__action-btn">
+                <a href={noContactUrl} target="_blank" rel="noopener" className="pdx-glass-btn event-modal__action-btn pdx-glass-rebind">
                   Visit event website →
                 </a>
               ) : (
@@ -1163,7 +1163,7 @@ function EventModalInner({
                     type="submit"
                     data-testid="button-submit-mod"
                     disabled={modMutation.isPending || transferMutation.isPending}
-                    className="event-modal__btn-outline event-modal__btn-outline--mod"
+                    className="event-modal__btn-outline event-modal__btn-outline--mod pdx-glass-rebind"
                   >
                     {(modMutation.isPending || transferMutation.isPending) ? "Submitting…" : "Submit request"}
                   </button>
@@ -1196,7 +1196,7 @@ function EventModalInner({
                 href={event.ticketUrl}
                 target="_blank"
                 rel="noopener"
-                className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary"
+                className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary pdx-glass-rebind"
                 data-testid="button-event-tickets-sticky"
               >
                 {admissionEventLinkLabel(event.admission)} →
@@ -1204,7 +1204,7 @@ function EventModalInner({
             ) : null}
             <button
               type="button"
-              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary"
+              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >

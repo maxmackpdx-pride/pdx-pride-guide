@@ -71,7 +71,7 @@ export default function HubAdminTable({ section, title, lede, actionLabel }: Pro
       <p style={{ margin: "12px 0 20px", fontSize: 14, color: "var(--board-muted)", maxWidth: 480, lineHeight: 1.55 }}>
         {lede} Live data and actions live in the full admin panel. This hub view no longer shows demo rows.
       </p>
-      <div className="card" style={{ padding: 22 }}>
+      <div className="card pdx-glass-rebind" style={{ padding: 22 }}>
         <Link href={href}>
           <Button variant="neon" accent="cyan" size="lg" arrow>
             {actionLabel}

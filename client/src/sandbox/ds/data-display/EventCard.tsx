@@ -134,14 +134,14 @@ export function EventCard({
 
   if (href) {
     return (
-      <a className={`pdxRow ${className}`} href={href} style={cssStyle}>
+      <a className={`pdxRow ${className} pdx-glass-rebind`} href={href} style={cssStyle}>
         {content}
       </a>
     );
   }
 
   return (
-    <div className={`pdxRow ${className}`} style={cssStyle}>
+    <div className={`pdxRow ${className} pdx-glass-rebind`} style={cssStyle}>
       {content}
     </div>
   );

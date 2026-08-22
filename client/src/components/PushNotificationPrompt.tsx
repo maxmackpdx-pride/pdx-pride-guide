@@ -232,7 +232,7 @@ export default function PushNotificationPrompt() {
         {installMode === "android" && installReady && (
           <button
             type="button"
-            className="btn-neon solid"
+            className="btn-neon solid pdx-glass-rebind"
             disabled={busy}
             onClick={installNative}
             style={{ borderColor: "#19E3FF", background: "#19E3FF", color: "#000", width: "100%", marginBottom: 16 }}
@@ -254,7 +254,7 @@ export default function PushNotificationPrompt() {
           {(!installFirst) && (
             <button
               type="button"
-              className="btn-neon solid"
+              className="btn-neon solid pdx-glass-rebind"
               disabled={busy}
               onClick={allow}
               style={{ borderColor: "#19E3FF", background: "#19E3FF", color: "#000" }}
@@ -262,7 +262,7 @@ export default function PushNotificationPrompt() {
               {busy ? "ENABLING…" : "ALLOW NOTIFICATIONS"}
             </button>
           )}
-          <button type="button" className="btn-neon" onClick={dismiss} style={{ color: "#aaa", borderColor: "#444" }}>
+          <button type="button" className="btn-neon pdx-glass-rebind" onClick={dismiss} style={{ color: "#aaa", borderColor: "#444" }}>
             {installFirst ? "GOT IT" : "NOT NOW"}
           </button>
         </div>

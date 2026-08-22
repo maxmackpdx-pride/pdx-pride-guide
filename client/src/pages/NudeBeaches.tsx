@@ -62,7 +62,7 @@ function RoosterRockPanel() {
       </p>
       <div className="nb-log__grid nb-log__grid--fees">
         {fees.map(fee => (
-          <div className="nb-log-fee" key={fee.label}>
+          <div className="nb-log-fee pdx-glass-rebind" key={fee.label}>
             <div className="nb-log-fee__label">{fee.label}</div>
             <div className="nb-log-fee__value">{fee.value}</div>
           </div>
@@ -70,7 +70,7 @@ function RoosterRockPanel() {
       </div>
       <div className="nb-log__actions">
         <a
-          className="nude-map-btn nude-map-btn--primary"
+          className="nude-map-btn nude-map-btn--primary pdx-glass-rebind"
           href="https://stateparks.oregon.gov/index.cfm?do=visit.day-use"
           target="_blank"
           rel="noopener noreferrer"
@@ -78,7 +78,7 @@ function RoosterRockPanel() {
           Buy day-use permit
         </a>
         <a
-          className="nude-map-btn"
+          className="nude-map-btn pdx-glass-rebind"
           href="https://stateparks.oregon.gov/index.cfm?do=v.page&id=30"
           target="_blank"
           rel="noopener noreferrer"
@@ -86,7 +86,7 @@ function RoosterRockPanel() {
           Where to buy passes
         </a>
         <a
-          className="nude-map-btn"
+          className="nude-map-btn pdx-glass-rebind"
           href="https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126"
           target="_blank"
           rel="noopener noreferrer"
@@ -109,7 +109,7 @@ function SauvieIslandPanel() {
       </p>
       <div className="nb-log__grid nb-log__grid--3">
         {SAUVIE_ISLAND_CHECKLIST.map((step, i) => (
-          <div className="nb-log-step" key={step.step}>
+          <div className="nb-log-step pdx-glass-rebind" key={step.step}>
             <div className="nb-log-step__num">{i + 1}</div>
             <div className="nb-log-step__title">{step.step}</div>
             <p className="nb-log-step__detail">{step.detail}</p>
@@ -130,7 +130,7 @@ function SauvieIslandPanel() {
       <div className="nb-log__kicker nb-log__kicker--green nb-log__kicker--section">Know the rules</div>
       <div className="nb-log__grid nb-log__grid--2">
         {SAUVIE_ISLAND_RULES.map(rule => (
-          <div className="nb-log-rule" key={rule}>
+          <div className="nb-log-rule pdx-glass-rebind" key={rule}>
             <svg
               className="nb-log-rule__icon"
               width="16"
@@ -158,7 +158,7 @@ function SauvieIslandPanel() {
       <div className="nb-log__grid nb-log__grid--2">
         {SAUVIE_ISLAND_FARM_STORES.map(store => (
           <a
-            className="nb-log-farm"
+            className="nb-log-farm pdx-glass-rebind"
             key={store.href}
             href={store.href}
             target="_blank"
@@ -270,7 +270,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
       </div>
       <div key={`${beachId}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
         {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
-          <a key={map.href} className="nude-map-btn" href={map.href} target="_blank" rel="noopener noreferrer">
+          <a key={map.href} className="nude-map-btn pdx-glass-rebind" href={map.href} target="_blank" rel="noopener noreferrer">
             {map.label}
           </a>
         ))}

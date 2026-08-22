@@ -40,7 +40,7 @@ export default function HubPersonRow({
           <div className="hub-thread__body">
             <div className="hub-people-row__rail-id">
               {person.verifiedHost && (
-                <span className="hub-thread__badge" title="Verified host">
+                <span className="hub-thread__badge pdx-glass-rebind" title="Verified host">
                   Host
                 </span>
               )}
@@ -54,7 +54,7 @@ export default function HubPersonRow({
         {showFollow && onToggleFollow && (
           <button
             type="button"
-            className={`foll hub-people-row__foll${person.isFollowing ? " on" : ""}`}
+            className={`foll hub-people-row__foll${person.isFollowing ? " on" : ""} pdx-glass-rebind`}
             disabled={followPending}
             onClick={(e) => {
               e.preventDefault();
@@ -85,7 +85,7 @@ export default function HubPersonRow({
             <div className="hub-thread__id">
               <span className="hub-thread__name">{name}</span>
               {person.verifiedHost && (
-                <span className="hub-thread__badge" title="Verified host">
+                <span className="hub-thread__badge pdx-glass-rebind" title="Verified host">
                   Host
                 </span>
               )}
@@ -102,7 +102,7 @@ export default function HubPersonRow({
       {showFollow && onToggleFollow && (
         <button
           type="button"
-          className={`foll${person.isFollowing ? " on" : ""}`}
+          className={`foll${person.isFollowing ? " on" : ""} pdx-glass-rebind`}
           disabled={followPending}
           onClick={(e) => {
             e.preventDefault();

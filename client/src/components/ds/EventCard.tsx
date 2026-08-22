@@ -205,7 +205,7 @@ export function EventCard({
         )}
         {address && <div className="pdxRow__address">{address}</div>}
         {ticketHref && (
-          <a className="pdxRow__ticket pdx-glass-btn pdx-glass-btn--solid" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
+          <a className="pdxRow__ticket pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
             {ticketLabel} →
           </a>
         )}

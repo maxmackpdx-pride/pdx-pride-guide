@@ -366,7 +366,7 @@ export default function PrideWork() {
           footerLine="Paid, respected, valued · work and gigs only · PG-13"
           beforeSteps={
             <div className="board-path-cards">
-              <article className="board-path-card board-path-card--talent">
+              <article className="board-path-card board-path-card--talent pdx-glass-rebind">
                 <div className="board-path-card__label">For talent</div>
                 <h3>Looking for Pride work?</h3>
                 <p>
@@ -377,7 +377,7 @@ export default function PrideWork() {
                   Post availability
                 </Button>
               </article>
-              <article className="board-path-card board-path-card--host">
+              <article className="board-path-card board-path-card--host pdx-glass-rebind">
                 <div className="board-path-card__label">For hosts</div>
                 <h3>Need extra hands?</h3>
                 <p>
@@ -397,7 +397,7 @@ export default function PrideWork() {
         <ScrollReveal>
           <section
             id="gigs-form"
-            className="gifting-form-panel gifting-form-panel--makeover"
+            className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind"
             data-testid="form-pride-work"
             style={{ borderColor: formAccent, boxShadow: `0 0 30px -14px ${formAccent}` }}
           >

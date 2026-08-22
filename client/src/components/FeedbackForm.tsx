@@ -177,7 +177,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={status === "sending"}
-            className="btn-neon"
+            className="btn-neon pdx-glass-rebind"
             style={{ justifyContent: "center", color: "#00FFFF", borderColor: "#00FFFF", opacity: status === "sending" ? 0.65 : 1 }}
           >
             {status === "sending" ? "SENDING..." : "SUBMIT FEEDBACK"}

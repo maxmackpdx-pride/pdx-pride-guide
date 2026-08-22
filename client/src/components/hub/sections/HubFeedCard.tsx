@@ -151,7 +151,7 @@ export default function HubFeedCard({ item }: Props) {
   const ctaBlock = item.ctaAction === "feedback" && item.ctaLabel ? (
     <button
       type="button"
-      className="hub-feed-card__cta"
+      className="hub-feed-card__cta pdx-glass-rebind"
       onClick={() => setFeedbackOpen(true)}
     >
       {item.ctaLabel}
@@ -264,7 +264,7 @@ export default function HubFeedCard({ item }: Props) {
               {showFollowShortcut && (
                 <button
                   type="button"
-                  className={`foll hub-feed-card__foll${isFollowing ? " on" : ""}`}
+                  className={`foll hub-feed-card__foll${isFollowing ? " on" : ""} pdx-glass-rebind`}
                   disabled={followMutation.isPending}
                   data-testid="feed-follow-shortcut"
                   onClick={(e) => {

@@ -65,7 +65,7 @@ export default function PromoterIntake({
 
       {isVerified && (
         <div
-          className="pi-verified"
+          className="pi-verified pdx-glass-rebind"
           data-testid="promoter-verified-banner"
         >
           <div className="pi-verified__inner">

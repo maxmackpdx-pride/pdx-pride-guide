@@ -303,7 +303,7 @@ export default function Gifting() {
 
       {formOpen && (
         <ScrollReveal>
-          <section id="gifting-form" className="gifting-form-panel gifting-form-panel--makeover">
+          <section id="gifting-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>

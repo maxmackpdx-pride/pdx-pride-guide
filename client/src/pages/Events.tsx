@@ -761,7 +761,7 @@ export default function Events() {
                 return (
                   <div
                     key={item.key}
-                    className="ds-listing-card ds-listing-card--grid"
+                    className="ds-listing-card ds-listing-card--grid pdx-glass-rebind"
                   >
                     {item.ad ? (
                       <PosterAdCard
@@ -816,7 +816,7 @@ export default function Events() {
         )}
 
         <ScrollReveal delay={60}>
-          <div className="events-submit-panel board-path-card board-path-card--host">
+          <div className="events-submit-panel board-path-card board-path-card--host pdx-glass-rebind">
             <div className="board-path-card__label">Promoters</div>
             <h3>Not seeing your event?</h3>
             <p>Submit a new listing or claim one that is already on Zaylist.</p>

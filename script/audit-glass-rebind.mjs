@@ -24,8 +24,9 @@ const STYLE_EXTS = new Set([".css", ".ts", ".tsx"]);
  * Known exceptions (keep short). Prefer adding .pdx-glass-rebind at the source.
  *
  * - :root / html / body: global default --c (the cyan fallback itself).
- * - Official grouped selectors in tokens/glass.css (parsed, not hardcoded),
- *   including BEM `--` modifiers of those classes.
+ * - Official grouped SELECTORS in tokens/glass.css (parsed from the recipe
+ *   block, not a list of product offenders). That group is the card contract.
+ *   Do not grow it to make this audit pass.
  * - client/src/components/ds/glass.ts: glass() / glassNeutral() bake fill,
  *   edge, and bloom inline with the same accent, so they do not consume
  *   inherited --glass-card-* recipes.

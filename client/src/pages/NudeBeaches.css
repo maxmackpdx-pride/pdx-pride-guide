@@ -137,7 +137,7 @@
   }
 }
 
-.nude-rooster-status {
+.nude-rooster-status.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
   --nb-rim: var(--nb-accent, #ff6600);
   position: relative;
@@ -231,7 +231,7 @@
   }
 }
 
-.nude-metric-tile {
+.nude-metric-tile.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
   --nb-rim: var(--nb-accent, #ff6600);
   position: relative;
@@ -292,7 +292,7 @@
 .nude-panel__kicker--orange { color: var(--neon-orange, #FF6600); }
 .nude-panel__kicker--lime { color: #ccff00; }
 
-.nude-live-card {
+.nude-live-card.pdx-glass-rebind {
   /* Top-rim island; status modifiers recolor --nb-rim only */
   --c: var(--nb-accent, #ff6600);
   --nb-rim: var(--nb-accent, #ff6600);
@@ -396,7 +396,7 @@
   }
 }
 
-.nude-resource-link {
+.nude-resource-link.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
   --nb-rim: var(--nb-accent, #ff6600);
   position: relative;
@@ -418,7 +418,7 @@
   filter: brightness(1.06) saturate(1.06);
 }
 
-.nude-resource-link--primary {
+.nude-resource-link--primary.pdx-glass-rebind {
   --c: #ff6600;
   border-left: 4px solid #ff6600;
 }
@@ -756,9 +756,7 @@ html.calm-mode .board-close-seam {
   margin-top: 14px;
 }
 
-/* Beach buttons: island accent only (orange Rooster / green Sauvie).
-   Soft charcoal+tint edge - never cyan, never solid neon border. */
-.nude-map-btn {
+/* Beach buttons: island accent only (orange Rooster / green Sauvie). Soft charcoal+tint edge - never cyan.pdx-glass-rebind, never solid neon border. */ .nude-map-btn.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
   display: inline-flex;
   align-items: center;
@@ -787,16 +785,15 @@ html.calm-mode .board-close-seam {
   border-color: color-mix(in srgb, var(--c) 55%, #2a2a32);
 }
 
-.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-map-btn {
+.nude-beaches-page:not(.nude-beaches-page--sauvie) .nude-map-btn.pdx-glass-rebind {
   --c: #ff6600;
 }
 
-.nude-beaches-page--sauvie .nude-map-btn {
+.nude-beaches-page--sauvie .nude-map-btn.pdx-glass-rebind {
   --c: #39ff14;
 }
 
-/* Primary = canonical solid glass button: black ring, restrained inset sheen, no outer bloom. */
-.nude-map-btn--primary {
+/* Primary = canonical solid glass button: black ring.pdx-glass-rebind, restrained inset sheen.pdx-glass-rebind, no outer bloom. */ .nude-map-btn--primary.pdx-glass-rebind {
   --c: var(--nb-accent, #ff6600);
   color: #050506;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 42%), var(--c);
@@ -816,7 +813,7 @@ html.calm-mode .board-close-seam {
     inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
-.nude-beaches-page--sauvie .nude-map-btn--primary {
+.nude-beaches-page--sauvie .nude-map-btn--primary.pdx-glass-rebind {
   --c: #39ff14;
 }
 
@@ -884,8 +881,7 @@ html.calm-mode .board-close-seam {
   }
 }
 
-/* Step cards (numbered "Before you go") */
-.nb-log-step {
+/* Step cards (numbered "Before you go") */ .nb-log-step.pdx-glass-rebind {
   --c: #39ff14;
   --nb-rim: #39ff14;
   position: relative;
@@ -943,8 +939,7 @@ html.calm-mode .board-close-seam {
 }
 .nb-log-step__link:hover { text-decoration: underline; }
 
-/* Rule tiles (checkmark) - top-rim green; keep left accent stripe */
-.nb-log-rule {
+/* Rule tiles (checkmark) - top-rim green; keep left accent stripe */ .nb-log-rule.pdx-glass-rebind {
   --c: #39ff14;
   --nb-rim: #39ff14;
   position: relative;
@@ -973,8 +968,7 @@ html.calm-mode .board-close-seam {
   line-height: 1.5;
 }
 
-/* Farm-stop link cards */
-.nb-log-farm {
+/* Farm-stop link cards */ .nb-log-farm.pdx-glass-rebind {
   --c: #ff8c00;
   --nb-rim: #ff8c00;
   position: relative;
@@ -1017,8 +1011,7 @@ html.calm-mode .board-close-seam {
   line-height: 1.45;
 }
 
-/* Rooster fee tiles */
-.nb-log-fee {
+/* Rooster fee tiles */ .nb-log-fee.pdx-glass-rebind {
   --c: #ff6600;
   --nb-rim: #ff6600;
   position: relative;
@@ -1157,20 +1150,13 @@ html.calm-mode .nude-beaches-map__chip-dot {
   --_shx: transparent;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Islands · Nude Beaches - top-rim neon only (10-islands.png)
-     Rooster → orange #FF6600 · Sauvie → green #39FF14
-     River level → cyan #19E3FF top rim
-   Discrete stacked islands; no full-perimeter bloom shell.
-   ═══════════════════════════════════════════════════════════ */
-
-.nude-beaches-page:not(.nude-beaches-page--sauvie) {
+/* ═══════════════════════════════════════════════════════════ Islands · Nude Beaches - top-rim neon only (10-islands.png) Rooster → orange #FF6600 · Sauvie → green #39FF14 River level → cyan #19E3FF top rim Discrete stacked islands; no full-perimeter bloom shell. ═══════════════════════════════════════════════════════════ */ .nude-beaches-page.pdx-glass-rebind:not(.nude-beaches-page--sauvie) {
   --nb-accent: #ff6600;
   --nb-rim: #ff6600;
   --c: #ff6600;
 }
 
-.nude-beaches-page--sauvie {
+.nude-beaches-page--sauvie.pdx-glass-rebind {
   --nb-accent: #39ff14;
   --nb-rim: #39ff14;
   --c: #39ff14;
@@ -1238,15 +1224,14 @@ html.calm-mode .nude-beaches-map__chip-dot {
   border-top-color: color-mix(in srgb, #ff8c00 70%, #2a2a32) !important;
 }
 
-/* Soften glass fill so OLED tint is island-colored but not neon-hot */
-.nude-beaches-page .nude-live-card,
-.nude-beaches-page .nude-metric-tile,
-.nude-beaches-page .nude-rooster-status,
-.nude-beaches-page .nude-resource-link,
-.nude-beaches-page .nb-log-fee,
-.nude-beaches-page .nb-log-step,
-.nude-beaches-page .nb-log-rule,
-.nude-beaches-page .nb-log-farm {
+/* Soften glass fill so OLED tint is island-colored but not neon-hot */ .nude-beaches-page .nude-live-card.pdx-glass-rebind,
+.nude-beaches-page .nude-metric-tile.pdx-glass-rebind,
+.nude-beaches-page .nude-rooster-status.pdx-glass-rebind,
+.nude-beaches-page .nude-resource-link.pdx-glass-rebind,
+.nude-beaches-page .nb-log-fee.pdx-glass-rebind,
+.nude-beaches-page .nb-log-step.pdx-glass-rebind,
+.nude-beaches-page .nb-log-rule.pdx-glass-rebind,
+.nude-beaches-page .nb-log-farm.pdx-glass-rebind {
   --c: var(--nb-rim, var(--nb-accent));
   --nb-rim: var(--nb-accent);
   background: var(--nb-island-bg) !important;
@@ -1286,13 +1271,13 @@ html.calm-mode .nude-beaches-map__chip-dot {
   -webkit-backdrop-filter: none !important;
 }
 
-.nb-log--rooster .nb-log-fee,
-.nb-log--rooster .nude-map-btn--primary {
+.nb-log--rooster .nb-log-fee.pdx-glass-rebind,
+.nb-log--rooster .nude-map-btn--primary.pdx-glass-rebind {
   --c: #ff6600;
 }
 
-.nb-log--sauvie .nb-log-step,
-.nb-log--sauvie .nb-log-rule {
+.nb-log--sauvie .nb-log-step.pdx-glass-rebind,
+.nb-log--sauvie .nb-log-rule.pdx-glass-rebind {
   --c: #39ff14;
 }
 
@@ -1354,10 +1339,9 @@ html.calm-mode .nude-map-btn--primary {
   --nb-btn: #39ff14;
 }
 
-/* DS brutal buttons (Refresh, carpool, etc.): soft glass outline, island accent */
-.nude-beaches-page .pdxBtn,
-.nude-beaches-page .btn-neon,
-.nude-beaches-page button.pdxBtn {
+/* DS brutal buttons (Refresh, carpool, etc.): soft glass outline.pdx-glass-rebind, island accent */ .nude-beaches-page .pdxBtn.pdx-glass-rebind,
+.nude-beaches-page .btn-neon.pdx-glass-rebind,
+.nude-beaches-page button.pdxBtn.pdx-glass-rebind {
   --_c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
   --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
   color: var(--_c) !important;
@@ -1420,21 +1404,18 @@ html.calm-mode .nude-map-btn--primary {
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Explicitly kill cyan on any button / chip control in this page.
-   Bare `button` is omitted so unclassed controls do not set --c without a
-   rebind class; named glass / chip classes below are in the glass.css group. */
-.nude-beaches-page .pdxBtn,
-.nude-beaches-page .btn-neon,
-.nude-beaches-page .nude-map-btn,
-.nude-beaches-page .rb-checkin__primary,
-.nude-beaches-page .rb-checkin__withdraw,
-.nude-beaches-page .rb-checkin__plan-next-btn,
-.nude-beaches-page .rb-group-chat__send,
-.nude-beaches-page .rb-link-btn,
-.nude-beaches-page .rb-date-chip.active,
-.nude-beaches-page .rb-hour-chip.active,
-.nude-beaches-page .cv-chip.active,
-.nude-beaches-page .rb-checkin__seg--active {
+/* Explicitly kill cyan on any button / chip control in this page. Bare `button` is omitted so unclassed controls do not set --c without a rebind class; named glass / chip classes below are in the glass.css group. */ .nude-beaches-page .pdxBtn.pdx-glass-rebind,
+.nude-beaches-page .btn-neon.pdx-glass-rebind,
+.nude-beaches-page .nude-map-btn.pdx-glass-rebind,
+.nude-beaches-page .rb-checkin__primary.pdx-glass-rebind,
+.nude-beaches-page .rb-checkin__withdraw.pdx-glass-rebind,
+.nude-beaches-page .rb-checkin__plan-next-btn.pdx-glass-rebind,
+.nude-beaches-page .rb-group-chat__send.pdx-glass-rebind,
+.nude-beaches-page .rb-link-btn.pdx-glass-rebind,
+.nude-beaches-page .rb-date-chip.pdx-glass-rebind.active,
+.nude-beaches-page .rb-hour-chip.pdx-glass-rebind.active,
+.nude-beaches-page .cv-chip.pdx-glass-rebind.active,
+.nude-beaches-page .rb-checkin__seg--active.pdx-glass-rebind {
   --c: var(--nb-btn, var(--nb-accent, #ff6600));
 }
 
@@ -1461,10 +1442,9 @@ html.calm-mode .nude-map-btn--primary {
   box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* River Brats primary / send - glass fill, black rim, no outer bloom */
-.nude-beaches-page .rb-checkin__primary,
-.nude-beaches-page .rb-checkin__plan-next-btn,
-.nude-beaches-page .rb-group-chat__send {
+/* River Brats primary / send - glass fill.pdx-glass-rebind, black rim.pdx-glass-rebind, no outer bloom */ .nude-beaches-page .rb-checkin__primary.pdx-glass-rebind,
+.nude-beaches-page .rb-checkin__plan-next-btn.pdx-glass-rebind,
+.nude-beaches-page .rb-group-chat__send.pdx-glass-rebind {
   --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
   border: 1px solid #000 !important;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%),
@@ -1476,8 +1456,8 @@ html.calm-mode .nude-map-btn--primary {
     inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
 }
 
-.nude-beaches-page .rb-checkin__primary--update,
-.nude-beaches-page .rb-checkin__withdraw {
+.nude-beaches-page .rb-checkin__primary--update.pdx-glass-rebind,
+.nude-beaches-page .rb-checkin__withdraw.pdx-glass-rebind {
   --c: var(--nb-btn, var(--nb-accent, #ff6600)) !important;
   color: var(--c) !important;
   background:

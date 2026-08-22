@@ -37,8 +37,7 @@
     .seg{cursor:pointer;border:none;background:transparent;color:var(--board-muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:6px 2px;transition:.15s;white-space:nowrap}
     .seg:hover{color:#fff}
     .seg.on{color:#fff;box-shadow:inset 0 -2px 0 var(--panel-cyan)}
-    /* Follow - cyan glass-btn (§2.13 / §1.5); .on = outlined glass (following) */
-    .foll{
+    /* Follow - cyan glass-btn (§2.13 / §1.5); .on = outlined glass (following) */ .foll.pdx-glass-rebind{
       --c:var(--panel-cyan,#19e3ff);
       cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
       padding:7px 15px;border-radius:99px;transition:filter .15s,box-shadow .15s,background .15s,border-color .15s,color .15s,transform .12s;
@@ -217,8 +216,8 @@
     .hub-v2-side-extra--drawer:has(.hub-keys--darkroom){
       padding:0;border:none;background:transparent;margin-top:12px;
     }
-    .hub-v2-side-extra .hub-keys,
-    .hub-v2-side-extra--drawer .hub-keys{
+    .hub-v2-side-extra .hub-keys.pdx-glass-rebind,
+    .hub-v2-side-extra--drawer .hub-keys.pdx-glass-rebind{
       --c:var(--panel-magenta,#ff1fa0);
       margin:0;flex-direction:column;align-items:stretch;
       border:1px solid color-mix(in srgb,var(--panel-magenta,#ff1fa0) 70%,#101014) !important;
@@ -386,8 +385,7 @@
     .hub-people-empty__cta{text-decoration:none;padding:10px 16px}
     .hub-people-empty__cta--primary{border:1px solid var(--panel-cyan);border-radius:8px;color:var(--panel-cyan)}
     .hub-people-empty__cta--ghost{border:1px solid var(--panel-border-2);border-radius:99px;color:var(--board-muted)}
-    /* Who-to-follow rail - neutral OLED glass (§2.13) */
-    .hub-people-rail{
+    /* Who-to-follow rail - neutral OLED glass (§2.13) */ .hub-people-rail.pdx-glass-rebind{
       --c:var(--glass-neutral-c2,#b8b8c2);
       padding:0;overflow:hidden;
     }
@@ -429,7 +427,7 @@
     .hub-thread.hub-people-row .hub-thread__name{font-size:14px}
     .hub-thread.hub-people-row .hub-thread__sub,.hub-thread.hub-people-row .hub-thread__meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .hub-thread.hub-people-row .hub-thread__sub{font-family:var(--font-body);font-size:12.5px;letter-spacing:normal;text-transform:none;color:var(--board-muted);margin-top:2px}
-    .hub-thread__badge{
+    .hub-thread__badge.pdx-glass-rebind{
       --c:var(--panel-cyan);
       font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
       color:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:4px;padding:1px 5px;flex:none;line-height:1.3;
@@ -604,7 +602,7 @@
        Board accent rows keep accent glass; Looking gets full rainbow top.
        Layout/padding/type unchanged. Keyframes (fitem, segSlide, etc.) untouched. */
     .hub-feed-card-link{text-decoration:none;color:inherit;display:block}
-    .hub-feed-card{
+    .hub-feed-card.pdx-glass-rebind{
       --c:var(--hub-feed-accent,var(--glass-neutral-c2,#b8b8c2));
       padding:16px 18px;border-radius:16px;position:relative;
       background:
@@ -625,12 +623,9 @@
     }
     .hub-feed-card--clickable{cursor:pointer}
     .hub-feed-card--pin{border-color:color-mix(in srgb,var(--glass-neutral-c2,#b8b8c2) 62%,#101014)}
-    /* Board / accent cards - accented glass keyed to --hub-feed-accent.
-       !important beats tokens/glass.css `.fitem--glow` so sheen stays a *bg*
-       layer (text-legible) rather than an absolute wash. */
-    .hub-root .hub-feed-card--accent,
-    .hub-root .hub-feed-card.fitem--glow,
-    .hub-root .card.fitem.fitem--glow.hub-feed-card{
+    /* Board / accent cards - accented glass keyed to --hub-feed-accent. !important beats tokens/glass.css `.fitem--glow` so sheen stays a *bg* layer (text-legible) rather than an absolute wash. */ .hub-root .hub-feed-card--accent.pdx-glass-rebind,
+    .hub-root .hub-feed-card.pdx-glass-rebind.fitem--glow,
+    .hub-root .card.pdx-glass-rebind.fitem.fitem--glow.hub-feed-card{
       --c:var(--hub-feed-accent,var(--panel-cyan));
       background:
         var(--glass-sheen,linear-gradient(133deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 12%,transparent 34%)),
@@ -647,15 +642,13 @@
         inset 0 1px 0 color-mix(in srgb,var(--c) 55%,rgba(255,255,255,.12)),
         inset 0 0 34px -26px color-mix(in srgb,var(--c) 40%,transparent));
     }
-    /* Looking posts - full rainbow top bar (shared seam via fitem--glow::before) */
-    .hub-feed-card--looking{
+    /* Looking posts - full rainbow top bar (shared seam via fitem--glow::before) */ .hub-feed-card--looking.pdx-glass-rebind{
       --c:var(--hub-feed-accent,var(--panel-purple));
     }
-    /* Right-rail next-moves + who-to-follow - neutral glass dock (design rails) */
-    .rrail > .card.hub-rail-card,
-    .rrail > .hub-rail-card,
-    .rrail > .card.hub-people-rail,
-    .rrail > .hub-people-rail{
+    /* Right-rail next-moves + who-to-follow - neutral glass dock (design rails) */ .rrail > .card.pdx-glass-rebind.hub-rail-card,
+    .rrail > .hub-rail-card.pdx-glass-rebind,
+    .rrail > .card.pdx-glass-rebind.hub-people-rail,
+    .rrail > .hub-people-rail.pdx-glass-rebind{
       --c:var(--glass-neutral-c2,#b8b8c2);
       background:
         linear-gradient(133deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 12%,transparent 34%),
@@ -730,8 +723,7 @@
     .hub-feed-card__meta{font-size:10.5px;letter-spacing:.06em;margin-top:5px}
     .hub-feed-card__postedby{display:flex;align-items:center;gap:6px;margin-top:7px}
     .hub-feed-card__postedby-name{font-size:10.5px;letter-spacing:.05em;color:var(--text-lo,#8c8980);margin:0}
-    /* Status badges - outlined-glass pills in status color (RSVP/Submitted/Looking/Check-in/Event) */
-    .hub-feed-card__badge{
+    /* Status badges - outlined-glass pills in status color (RSVP/Submitted/Looking/Check-in/Event) */ .hub-feed-card__badge.pdx-glass-rebind{
       --c:var(--hub-feed-accent,var(--panel-cyan));
       flex:none;font-size:10px;letter-spacing:.1em;
       color:var(--c);
@@ -750,7 +742,7 @@
     .hub-feed-card__body{margin:12px 0 0;font-size:14.5px;line-height:1.55;color:var(--board-text)}
     .hub-feed-card__photo{display:block;margin-top:12px;max-width:100%;max-height:360px;border-radius:11px;border:1px solid var(--panel-border-2);object-fit:cover}
     .hub-feed-card__beach{margin-top:10px;letter-spacing:.08em;color:var(--panel-cyan)}
-    .hub-feed-card__cta{
+    .hub-feed-card__cta.pdx-glass-rebind{
       --c:var(--panel-lime);
       margin-top:14px;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
       color:var(--c);border:1px solid #000;border-radius:8px;padding:9px 16px;cursor:pointer;
@@ -913,7 +905,7 @@
         box-shadow:0 0 8px var(--panel-cyan,#19e3ff);
         animation:pdxBlink 1.8s var(--ease-inout) infinite;
       }
-      .hub-next-rsvp__card{
+      .hub-next-rsvp__card.pdx-glass-rebind{
         --c:var(--hub-rsvp-day,var(--day-fri,#ff8c00));
         position:relative;overflow:hidden;display:block;
         background:
@@ -982,7 +974,7 @@
       .hub-next-rsvp__tag--donation{--tag-c:var(--panel-lime,#c8fa3c)}
       .hub-next-rsvp__tag--ticketed{--tag-c:var(--panel-magenta,#ff1fa0)}
       .hub-next-rsvp__tag--door{--tag-c:var(--panel-cyan,#19e3ff)}
-      .hub-next-rsvp__going{
+      .hub-next-rsvp__going.pdx-glass-rebind{
         --c:var(--panel-cyan,#19e3ff);
         font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;
         text-transform:uppercase;color:#050506;

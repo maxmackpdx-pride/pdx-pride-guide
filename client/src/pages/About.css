@@ -497,7 +497,7 @@ html.calm-mode .about-v2-hero__stat {
   border-top: 1px solid var(--aw-border);
 }
 
-.about-v2-work__card {
+.about-v2-work__card.pdx-glass-rebind {
   --c: var(--cyan, #19e3ff);
   --dir-gm: 60;
   position: relative;
@@ -660,9 +660,8 @@ html.calm-mode .about-v2-hero__stat {
   margin-left: auto;
 }
 
-/* Glass pill CTAs - View resume solid cyan, Pitch me outline */
-.about-v2-work__ctas .pdxBtn,
-.about-v2-work__ctas .btn-neon {
+/* Glass pill CTAs - View resume solid cyan.pdx-glass-rebind, Pitch me outline */ .about-v2-work__ctas .pdxBtn.pdx-glass-rebind,
+.about-v2-work__ctas .btn-neon.pdx-glass-rebind {
   --_c: var(--cyan, #19e3ff) !important;
   --c: var(--cyan, #19e3ff) !important;
   border-radius: 999px !important;

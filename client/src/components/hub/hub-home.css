@@ -89,10 +89,7 @@
   text-decoration: none;
 }
 
-/* Admin keys banner (desktop rail + mobile admin drawer)
-   Deep-glass §2.13: MAGENTA outline/bloom (never hub cyan).
-   Re-declare glass recipes on this node so --c = magenta wins. */
-.hub-keys {
+/* Admin keys banner (desktop rail + mobile admin drawer) Deep-glass §2.13: MAGENTA outline/bloom (never hub cyan). Re-declare glass recipes on this node so --c = magenta wins. */ .hub-keys.pdx-glass-rebind {
   --c: var(--panel-magenta, var(--neon-magenta, #ff1fa0));
   --glass-card-bg:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 8%, #050408) 100%),

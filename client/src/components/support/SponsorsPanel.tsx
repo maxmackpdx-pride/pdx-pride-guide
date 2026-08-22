@@ -56,7 +56,7 @@ export default function SponsorsPanel({
             <>
               <button
                 type="button"
-                className="support-sponsors__pitch"
+                className="support-sponsors__pitch pdx-glass-rebind"
                 onClick={onPitch}
                 data-testid="support-pitch-sponsorship"
               >
@@ -68,7 +68,7 @@ export default function SponsorsPanel({
         </div>
         <div className="support-sponsors__checks about-v2-sponsors__checks">
           {SPONSOR_CHECKS.map(item => (
-            <div key={item} className="support-sponsors__check about-v2-sponsors__check">
+            <div key={item} className="support-sponsors__check about-v2-sponsors__check pdx-glass-rebind">
               <span className="mark" aria-hidden="true">
                 ✓
               </span>

@@ -1503,8 +1503,7 @@ h2.display,
   background-size: 18px 18px, 100% 100%;
 }
 
-/* Neon button → deep-glass CTA (Card System §16). --c drives accent rim. */
-.btn-neon {
+/* Neon button → deep-glass CTA (Card System §16). --c drives accent rim. */ .btn-neon.pdx-glass-rebind {
   --c: var(--neon-yellow);
   display: inline-flex;
   align-items: center;
@@ -3361,16 +3360,16 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   }
 }
 
-.btn-neon.cyan {
+.btn-neon.pdx-glass-rebind.cyan {
   --c: var(--neon-cyan);
 }
-.btn-neon.magenta {
+.btn-neon.pdx-glass-rebind.magenta {
   --c: var(--neon-magenta);
 }
-.btn-neon.orange {
+.btn-neon.pdx-glass-rebind.orange {
   --c: var(--neon-orange);
 }
-.btn-neon.green {
+.btn-neon.pdx-glass-rebind.green {
   --c: var(--neon-green);
 }
 /* Section divider - torn paper effect */
@@ -9917,7 +9916,7 @@ footer a:hover { color: #00FFFF !important; }
   cursor: pointer;
 }
 
-.event-modal__btn-outline--accent {
+.event-modal__btn-outline--accent.pdx-glass-rebind {
   --c: var(--neon-yellow, #ccff00);
   border: var(--glass-btn-outline-border);
   color: var(--c);
@@ -9925,7 +9924,7 @@ footer a:hover { color: #00FFFF !important; }
   box-shadow: var(--glass-btn-outline-shadow);
 }
 
-.event-modal__btn-outline--mod {
+.event-modal__btn-outline--mod.pdx-glass-rebind {
   --c: var(--mod-accent, #888);
   border: var(--glass-btn-outline-border);
   color: var(--c);
@@ -9944,7 +9943,7 @@ footer a:hover { color: #00FFFF !important; }
   cursor: pointer;
 }
 
-.event-modal__btn-solid--cyan {
+.event-modal__btn-solid--cyan.pdx-glass-rebind {
   --c: var(--neon-cyan, #19e3ff);
   color: #050506;
   background: var(--glass-btn-bg);
@@ -12342,14 +12341,7 @@ html:not(.calm-mode) .calm-mode-toggle__label {
   color: #e8e8e8;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CALM MODE - high-contrast grayscale dark
-   Toggled via html.calm-mode (ThemeContext).
-   Everything greyscale (chrome, neons, rings, badges).
-   KEEP COLOR: photos only (flyers, portraits, map tiles, video).
-   ═══════════════════════════════════════════════════════════ */
-
-html.calm-mode {
+/* ═══════════════════════════════════════════════════════════ CALM MODE - high-contrast grayscale dark Toggled via html.calm-mode (ThemeContext). Everything greyscale (chrome, neons, rings, badges). KEEP COLOR: photos only (flyers, portraits, map tiles, video). ═══════════════════════════════════════════════════════════ */ html.calm-mode.pdx-glass-rebind {
   /* Calm palette */
   --calm-bg: #000000;
   --calm-surface: #0a0a0a;
@@ -12781,26 +12773,25 @@ html.calm-mode .schedule-event-card {
   filter: none !important;
 }
 
-/* Force accent contract grey even when components set inline --c / --_day */
-html.calm-mode .pdxBoard,
-html.calm-mode .pdxRow,
-html.calm-mode .ds-listing-card,
-html.calm-mode .hub-feed-card,
-html.calm-mode .event-modal,
-html.calm-mode .hub-keys,
-html.calm-mode .hub-rail-card,
-html.calm-mode .hub-people-rail,
-html.calm-mode .feed-aff,
-html.calm-mode .featured-event-ad,
-html.calm-mode .pdx-glass-btn,
-html.calm-mode .pdxBtn,
-html.calm-mode .foll,
-html.calm-mode .hub-mobile-tab,
-html.calm-mode .board-listing-card,
-html.calm-mode .board-spotted-card,
-html.calm-mode .spotted-card,
-html.calm-mode .pdxPlace,
-html.calm-mode .pdxPlace__body {
+/* Force accent contract grey even when components set inline --c / --_day */ html.calm-mode .pdxBoard.pdx-glass-rebind,
+html.calm-mode .pdxRow.pdx-glass-rebind,
+html.calm-mode .ds-listing-card.pdx-glass-rebind,
+html.calm-mode .hub-feed-card.pdx-glass-rebind,
+html.calm-mode .event-modal.pdx-glass-rebind,
+html.calm-mode .hub-keys.pdx-glass-rebind,
+html.calm-mode .hub-rail-card.pdx-glass-rebind,
+html.calm-mode .hub-people-rail.pdx-glass-rebind,
+html.calm-mode .feed-aff.pdx-glass-rebind,
+html.calm-mode .featured-event-ad.pdx-glass-rebind,
+html.calm-mode .pdx-glass-btn.pdx-glass-rebind,
+html.calm-mode .pdxBtn.pdx-glass-rebind,
+html.calm-mode .foll.pdx-glass-rebind,
+html.calm-mode .hub-mobile-tab.pdx-glass-rebind,
+html.calm-mode .board-listing-card.pdx-glass-rebind,
+html.calm-mode .board-spotted-card.pdx-glass-rebind,
+html.calm-mode .spotted-card.pdx-glass-rebind,
+html.calm-mode .pdxPlace.pdx-glass-rebind,
+html.calm-mode .pdxPlace__body.pdx-glass-rebind {
   --c: #a3a3a3 !important;
   --_c: #a3a3a3 !important;
   --_day: #a3a3a3 !important;

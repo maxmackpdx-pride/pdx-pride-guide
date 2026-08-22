@@ -465,7 +465,7 @@ export default function HubShell({
           <span className="pull-handle hub-mobile-bar__pull" aria-hidden="true" />
           <button
             type="button"
-            className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""}`}
+            className={`hub-mobile-tab${adminView === "overview" ? " is-active is-lime" : ""} pdx-glass-rebind`}
             onClick={() => goAdmin("overview")}
           >
             <LayoutDashboard size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
@@ -473,7 +473,7 @@ export default function HubShell({
           </button>
           <button
             type="button"
-            className={`hub-mobile-tab${adminView === "events" ? " is-active is-orange" : ""}`}
+            className={`hub-mobile-tab${adminView === "events" ? " is-active is-orange" : ""} pdx-glass-rebind`}
             onClick={() => goAdmin("events")}
           >
             <CalendarDays size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
@@ -481,13 +481,13 @@ export default function HubShell({
           </button>
           <button
             type="button"
-            className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""}`}
+            className={`hub-mobile-tab${moreOpen || moreViews.includes(adminView) ? " is-active is-more" : ""} pdx-glass-rebind`}
             onClick={() => onMoreOpenChange?.(!moreOpen)}
           >
             <MoreHorizontal size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
             <span>More</span>
           </button>
-          <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan">
+          <Link href="/dashboard" className="hub-mobile-tab is-switch is-cyan pdx-glass-rebind">
             <UserCircle size={MOBILE_ICON} strokeWidth={2.3} aria-hidden />
             <span>Me</span>
           </Link>

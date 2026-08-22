@@ -98,19 +98,19 @@ export default function HubEvents({
 
       <div className="hub-events-panel" id={tab === "going" ? "checkins" : "events"}>
         {loading && (
-          <div className="card hub-empty hub-events-empty">
+          <div className="card hub-empty hub-events-empty pdx-glass-rebind">
             <span className="kick">Loading events…</span>
           </div>
         )}
 
         {!loading && eventList.length === 0 && (
-          <div className="card hub-empty hub-events-empty">
+          <div className="card hub-empty hub-events-empty pdx-glass-rebind">
             <span className="kick">{emptyMessage}</span>
           </div>
         )}
 
         {!loading && eventList.length > 0 && (
-          <div className="card hub-events-list">
+          <div className="card hub-events-list pdx-glass-rebind">
             {eventList.map((e) => (
               <article key={e.id} className="hub-thread rowin hub-event-thread">
                 <span className={`hub-event-thread__dot dot ${dayDotClass(e.dayOfWeek)}`} aria-hidden />

@@ -71,10 +71,10 @@ export default function AccessSafety() {
           </p>
 
           <div id="report" style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <button type="button" className="btn-neon magenta" onClick={() => setReportOpen(true)}>
+            <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={() => setReportOpen(true)}>
               Report a problem
             </button>
-            <Link href="/contact" className="btn-neon">
+            <Link href="/contact" className="btn-neon pdx-glass-rebind">
               Contact
             </Link>
           </div>

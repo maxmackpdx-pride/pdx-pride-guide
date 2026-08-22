@@ -83,7 +83,7 @@ export default function HubProfile({ user, stats, postsCount, profileEditor, onE
           <div className="kick" style={{ marginBottom: 16 }}>
             Your posts
           </div>
-          <div className="card hub-v2-profile__empty">
+          <div className="card hub-v2-profile__empty pdx-glass-rebind">
             <p>
               {postsCount > 0
                 ? "Your posts will show here."

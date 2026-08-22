@@ -60,7 +60,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
   const cardStyle = { "--c": CYAN } as CSSProperties;
 
   return (
-    <div className="dvs-work-card" style={cardStyle}>
+    <div className="dvs-work-card pdx-glass-rebind" style={cardStyle}>
       <span className="dvs-work-card__seam pdx-refract-seam" aria-hidden="true" />
       <span className="dvs-work-card__sheen" aria-hidden="true" />
 
@@ -71,7 +71,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
         </div>
         <button
           type="button"
-          className={`dvs-glass-btn${expanded ? " dvs-glass-btn--outline" : ""}`}
+          className={`dvs-glass-btn${expanded ? " dvs-glass-btn--outline" : ""} pdx-glass-rebind`}
           onClick={() => setExpanded(v => !v)}
         >
           {expanded ? "Hide details" : "Manage venue"}
@@ -86,7 +86,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
               <p className="dvs-empty">No upcoming events matched to this venue yet.</p>
             ) : (
               upcomingEvents.map(evt => (
-                <div key={evt.id} className="dvs-project-row">
+                <div key={evt.id} className="dvs-project-row pdx-glass-rebind">
                   <span className="dvs-project-row__seam pdx-refract-seam" aria-hidden="true" />
                   <span className="dvs-project-row__sheen" aria-hidden="true" />
                   <div className="dvs-project-row__inner">
@@ -105,7 +105,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
               <p className="dvs-empty">No promoters linked to this venue yet.</p>
             ) : (
               promoters.map(p => (
-                <div key={p.id} className="dvs-project-row">
+                <div key={p.id} className="dvs-project-row pdx-glass-rebind">
                   <span className="dvs-project-row__seam pdx-refract-seam" aria-hidden="true" />
                   <span className="dvs-project-row__sheen" aria-hidden="true" />
                   <div className="dvs-project-row__inner">
@@ -116,7 +116,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
                       actions={
                         <button
                           type="button"
-                          className="dvs-glass-btn dvs-glass-btn--danger"
+                          className="dvs-glass-btn dvs-glass-btn--danger pdx-glass-rebind"
                           disabled={blockMutation.isPending}
                           onClick={() => {
                             const ok = window.confirm(
@@ -150,7 +150,7 @@ function VenueOwnerCard({ business, upcomingEvents }: { business: OwnedBusiness;
             {logoCandidate && (
               <button
                 type="button"
-                className="dvs-glass-btn"
+                className="dvs-glass-btn pdx-glass-rebind"
                 style={{ marginTop: 8 }}
                 disabled={logoRequestMutation.isPending}
                 onClick={() => logoRequestMutation.mutate(logoCandidate)}

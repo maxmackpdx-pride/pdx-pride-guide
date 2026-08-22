@@ -18,7 +18,7 @@
  * (components/ds/tokens/*). Nothing is redefined in this file.
  */
 
-.hz {
+.hz.pdx-glass-rebind {
   --c: var(--panel-cyan);
   --_c: var(--panel-cyan);
   --hz-accent: var(--panel-cyan);
@@ -2025,7 +2025,7 @@ html.calm-mode .hz-card:hover {
  * selector, so a plain `.hz .hz-fill` loses to it. Matching that specificity and
  * landing later in the file is what lets this slot keep its own column layout.
  */
-.hz button.hz-fill {
+.hz.pdx-glass-rebind button.hz-fill.pdx-glass-rebind {
   --c: var(--panel-cyan);
   --_c: var(--panel-cyan);
   display: flex;

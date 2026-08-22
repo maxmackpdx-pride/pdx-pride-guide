@@ -396,7 +396,7 @@ export default function MissedConnectionsBubbleBoard({
               </div>
               <button
                 type="button"
-                className="mc-compose__submit btn-neon solid"
+                className="mc-compose__submit btn-neon solid pdx-glass-rebind"
                 disabled={!canSubmit || createMutation.isPending}
                 onClick={() => createMutation.mutate()}
               >
@@ -438,7 +438,7 @@ export default function MissedConnectionsBubbleBoard({
       ) : isError ? (
         <div className="board-empty board-empty--prototype">
           <p className="display section-heading">Could not load</p>
-          <button type="button" className="btn-neon" style={{ marginTop: 16 }} onClick={() => refetch()}>
+          <button type="button" className="btn-neon pdx-glass-rebind" style={{ marginTop: 16 }} onClick={() => refetch()}>
             Try again
           </button>
         </div>
@@ -496,7 +496,7 @@ export default function MissedConnectionsBubbleBoard({
                     {!post.isMine && (
                       <button
                         type="button"
-                        className="mc-bubble__reply btn-neon solid"
+                        className="mc-bubble__reply btn-neon solid pdx-glass-rebind"
                         onClick={() => {
                           if (!canInteract) {
                             onRequireAuth?.();
@@ -546,7 +546,7 @@ export default function MissedConnectionsBubbleBoard({
             />
             <button
               type="button"
-              className="btn-neon solid mc-reply-drawer__send"
+              className="btn-neon solid mc-reply-drawer__send pdx-glass-rebind"
               disabled={!replyBody.trim() || replyMutation.isPending}
               onClick={() => replyMutation.mutate()}
             >

@@ -252,7 +252,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
   );
 
   return (
-    <div className="rb-panel">
+    <div className="rb-panel pdx-glass-rebind">
       <div className="rb-panel__head">
         <p className="rb-panel__lede">
           Plan rides up to 7 days out. Meet at public lots only. Share exact details in private messages.
@@ -265,7 +265,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
           <button
             key={d}
             type="button"
-            className={`rb-date-chip${selectedDate === d ? " active" : ""}`}
+            className={`rb-date-chip${selectedDate === d ? " active" : ""} pdx-glass-rebind`}
             onClick={() => {
               setSelectedDate(d);
               setComposeOpen(false);
@@ -277,7 +277,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
       </div>
 
       {!composeOpen ? (
-        <div className="rb-carpool-start">
+        <div className="rb-carpool-start pdx-glass-rebind">
           <p className="rb-carpool-start__prompt">
             {isToday ? "What do you need today?" : `What do you need for ${dayLabel}?`}
           </p>
@@ -294,7 +294,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
               <p className="rb-carpool-start__hint">Already at the beach? Offer seats home.</p>
               <button
                 type="button"
-                className="rb-link-btn rb-carpool-start__back-btn"
+                className="rb-link-btn rb-carpool-start__back-btn pdx-glass-rebind"
                 onClick={() => startCompose("OFFERING_RIDE", "FROM_BEACH")}
               >
                 Offer a ride back
@@ -303,7 +303,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
           )}
         </div>
       ) : (
-        <div className="rb-compose">
+        <div className="rb-compose pdx-glass-rebind">
           {typeToggle}
           <div className="rb-compose__label">Direction</div>
           {directionToggle}
@@ -349,7 +349,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
             >
               {isToday ? "Post for today" : `Post for ${dayLabel}`}
             </Button>
-            <button type="button" className="rb-link-btn" onClick={() => setComposeOpen(false)}>
+            <button type="button" className="rb-link-btn pdx-glass-rebind" onClick={() => setComposeOpen(false)}>
               Cancel
             </button>
           </div>
@@ -368,7 +368,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
             const dir = (row.direction || "TO_BEACH") as string;
             const offering = row.post_type === "OFFERING_RIDE";
             return (
-              <li key={row.id} className="rb-card rb-card--carpool">
+              <li key={row.id} className="rb-card rb-card--carpool pdx-glass-rebind">
                 <UserAvatar
                   username={row.username}
                   displayName={row.displayName}
@@ -396,10 +396,10 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
                   <div className="rb-card__actions">
                     {row.isMine ? (
                       <>
-                        <button type="button" className="rb-link-btn" onClick={() => setActivePostId(row.id)}>
+                        <button type="button" className="rb-link-btn pdx-glass-rebind" onClick={() => setActivePostId(row.id)}>
                           Requests ({row.requestCount ?? 0})
                         </button>
-                        <button type="button" className="rb-link-btn" onClick={() => deleteMutation.mutate(row.id)}>
+                        <button type="button" className="rb-link-btn pdx-glass-rebind" onClick={() => deleteMutation.mutate(row.id)}>
                           Remove
                         </button>
                       </>
@@ -446,14 +446,14 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
 
       {activePostId && (
         <div className="rb-modal-backdrop" onClick={() => setActivePostId(null)}>
-          <div className="rb-modal" onClick={e => e.stopPropagation()}>
+          <div className="rb-modal pdx-glass-rebind" onClick={e => e.stopPropagation()}>
             <h3 className="rb-modal__title">Ride requests</h3>
             {requests.length === 0 ? (
               <p className="rb-empty">No requests yet.</p>
             ) : (
               <ul className="rb-feed">
                 {requests.map((req: any) => (
-                  <li key={req.id} className="rb-card">
+                  <li key={req.id} className="rb-card pdx-glass-rebind">
                     <div className="rb-card__body">
                       <div className="rb-card__title">{req.displayName || req.username}</div>
                       <p className="rb-card__note">{req.note}</p>

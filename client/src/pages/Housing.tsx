@@ -477,7 +477,7 @@ export default function Housing() {
                     <FeedAdCard ad={slotAd} />
                   </div>
                 ) : (
-                  <button type="button" className="hz-fill" onClick={() => openCompose("OFFERING")}>
+                  <button type="button" className="hz-fill pdx-glass-rebind" onClick={() => openCompose("OFFERING")}>
                     <Mono accent>Post to the board</Mono>
                     <b>Got a room?</b>
                     <small>

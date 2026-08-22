@@ -53,7 +53,7 @@ export default function HubNextRsvpTile() {
       </div>
       <Link
         href={href}
-        className="hub-next-rsvp__card"
+        className="hub-next-rsvp__card pdx-glass-rebind"
         style={{ ["--hub-rsvp-day" as string]: `var(--day-${day})` }}
       >
         {poster && (
@@ -68,7 +68,7 @@ export default function HubNextRsvpTile() {
           <div className="hub-next-rsvp__venue">{locationLine}</div>
           <div className="hub-next-rsvp__foot">
             <span className={`hub-next-rsvp__tag ${typePillClass(tag)}`}>{tag}</span>
-            <span className="hub-next-rsvp__going">Going ✓</span>
+            <span className="hub-next-rsvp__going pdx-glass-rebind">Going ✓</span>
           </div>
         </div>
       </Link>

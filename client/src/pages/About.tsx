@@ -440,7 +440,7 @@ export default function About() {
       <section className="about-v2-work">
         <ScrollReveal>
           <div className="about-v2__inner about-v2__inner--work">
-            <div className="about-v2-work__card">
+            <div className="about-v2-work__card pdx-glass-rebind">
               <div className="about-v2-work__top">
                 <span className="about-v2-work__badge">
                   <span className="dot" aria-hidden="true" />

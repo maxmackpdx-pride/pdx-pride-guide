@@ -52,7 +52,7 @@ export default function BoardHowItWorks({
         {expanded && <p className="board-copy">{lede}</p>}
         <button
           type="button"
-          className="board-how__toggle pdx-glass-btn"
+          className="board-how__toggle pdx-glass-btn pdx-glass-rebind"
           aria-expanded={expanded}
           aria-controls={`${id}-details`}
           onClick={() => setExpanded(value => !value)}

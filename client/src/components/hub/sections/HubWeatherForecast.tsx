@@ -71,7 +71,7 @@ export default function HubWeatherForecast() {
       : weather?.tempContext ?? "";
 
   return (
-    <section className="card hub-v2-weather" aria-label="Portland, Oregon 7-day forecast">
+    <section className="card hub-v2-weather pdx-glass-rebind" aria-label="Portland, Oregon 7-day forecast">
       <div className="hub-v2-weather__top">
         <div className="hub-v2-weather__titles">
           <div className="kick hub-v2-weather__kick">7-day forecast</div>

@@ -31,8 +31,7 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* ── Panel shell (deep glass) ─────────────────────────────── */
-.place-modal-panel {
+/* ── Panel shell (deep glass) ─────────────────────────────── */ .place-modal-panel.pdx-glass-rebind {
   --c: var(--pink, #ff00cc);
   --dir-gm: 60;
   position: relative;

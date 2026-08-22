@@ -203,6 +203,10 @@
 /* ═══════════════════════════════════════════════════════════
    Per-instance rebind: recompute recipes against local --c
    (event day color, board accent, category, etc.)
+
+   This list is the glass CARD recipe contract, not an offender dump.
+   A product rule that sets --c must include .pdx-glass-rebind on that
+   same selector / element. Do not add page classes here to silence CI.
    ═══════════════════════════════════════════════════════════ */
 .pdx-glass-rebind,
 .pdx-glass-card,
@@ -223,93 +227,7 @@
 .feed-aff,
 .featured-event-ad,
 .card.fitem.fitem--glow,
-.fitem--glow,
-/* Product surfaces that set a local --c. Grouped here so recipes recompute
-   against that accent instead of inheriting root cyan. */
-.pdx-glass-btn,
-.pdxBtn,
-.btn-neon,
-.pdx-map-key,
-.map-legend,
-.directory-map-key,
-.pdxLegend,
-.place-modal-panel,
-.support-keepalive,
-.gifting-form,
-.gifting-form-panel,
-.directory-band,
-.inbox-shell-root,
-.hz,
-.hz-fill,
-.nude-beaches-page,
-.nb-hub,
-.nb-hub__section,
-.nb-hub__level,
-.nb-hub__swim,
-.nb-log-step,
-.nb-log-rule,
-.nb-log-farm,
-.nb-log-fee,
-.nude-live-card,
-.nude-metric-tile,
-.nude-rooster-status,
-.nude-resource-link,
-.nude-map-btn,
-.river-brats,
-.rb-card,
-.rb-panel,
-.rb-modal,
-.rb-compose,
-.rb-carpool-start,
-.rb-arrival-banner,
-.rb-checkin__hero-card,
-.rb-checkin__pulse,
-.rb-checkin__form,
-.rb-checkin__primary,
-.rb-checkin__withdraw,
-.rb-checkin__plan-next,
-.rb-checkin__plan-next-btn,
-.rb-checkin__going-row,
-.rb-checkin__seg,
-.rb-group-chat,
-.rb-group-chat__send,
-.rb-link-btn,
-.rb-date-chip,
-.rb-hour-chip,
-.cv-chip,
-.darkroom-waypoint,
-.hub-keys,
-.hub-people-rail,
-.hub-rail-card,
-.hub-feed-card,
-.hub-feed-card__badge,
-.hub-feed-card__cta,
-.hub-thread__badge,
-.hub-next-rsvp__card,
-.hub-next-rsvp__going,
-.hub-mobile-tab,
-.foll,
-.home-up-next__card,
-.home-boards__utility,
-.mp-board-card,
-.board-path-card,
-.ds-listing-card,
-.dvs-work-card,
-.dvs-project-row,
-.dvs-glass-btn,
-.pi-verified,
-.pi-action-row,
-.event-modal__btn-outline,
-.event-modal__btn-solid,
-.about-v2-donate,
-.about-v2-partners,
-.about-v2-work__card,
-.support-affiliate,
-.support-sponsors,
-.support-sponsors__check,
-.support-sponsors__pitch,
-.site-footer__coffee-btn,
-.tip-support__btn {
+.fitem--glow {
   --glass-card-bg:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
     radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) var(--glass-bloom, 18%), transparent), transparent 56%);
@@ -409,10 +327,10 @@
    stay in component CSS; this is panel chrome only.
    docs/LIVE_DESIGN_STANDARD.md
    ═══════════════════════════════════════════════════════════ */
-.pdx-map-key,
-.map-legend,
-.directory-map-key,
-.pdxLegend {
+.pdx-map-key.pdx-glass-rebind,
+.map-legend.pdx-glass-rebind,
+.directory-map-key.pdx-glass-rebind,
+.pdxLegend.pdx-glass-rebind {
   --c: var(--glass-neutral-c2, #b8b8c2);
   /* Do not set position here - .map-legend is absolute over the map */
   overflow: hidden;
@@ -712,8 +630,8 @@ html.calm-mode .pdxLegend,
 }
 
 /* Keep-alive panel: neutral glass (Agent 12) - not accented */
-.about-v2-donate--panel.support-keepalive,
-.support-keepalive {
+.about-v2-donate--panel.support-keepalive.pdx-glass-rebind,
+.support-keepalive.pdx-glass-rebind {
   --c: var(--glass-neutral-c2);
   background: var(--glass-card-neutral-bg) !important;
   border: var(--glass-card-neutral-border) !important;
@@ -1063,7 +981,7 @@ html.calm-mode .pdxRow::before,
   mask: none;
 }
 
-.gifting-form-panel--makeover {
+.gifting-form-panel--makeover.pdx-glass-rebind {
   --c: #ccff00;
   box-shadow: var(--glass-card-shadow) !important;
 }

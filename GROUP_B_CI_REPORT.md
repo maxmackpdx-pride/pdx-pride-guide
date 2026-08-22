@@ -45,15 +45,18 @@ CI: same `typecheck.yml` job `glass-rebind` (plain Node, no `npm ci`) plus the R
 
 **TSX.** An opening tag that assigns `"--c"` / `["--c" as string]` in `style` must include `pdx-glass-rebind` (or a rebind-group class) in `className`. Simple `className={ident}` is resolved to the preceding `const ident = ...`.
 
-First pass on origin/master: **200 findings** (185 CSS, 15 TSX) across 31 files. Not left as a ratchet-from-baseline list; product surfaces were fixed so CI is strict at 0.
+First pass on origin/master: **200 findings** (185 CSS, 15 TSX) across 31 files.
 
-### Fixes (no restyle)
+An earlier attempt stuffed ~80 product classes into the `glass.css` recipe group so the audit went green. That is an allowlist of known offenders: it would pass today and catch nothing tomorrow, and it applied card recipes to page roots. Reverted. The recipe group is back to the original 20 card selectors.
 
-- Added product classes that already set `--c` to the official rebind group in `glass.css`, so recipes recompute against the local accent (same contract as `.event-modal`).
-- Added `.pdx-glass-rebind` on TSX hosts that set inline `--c` (`Button`, Housing ask buttons, Z-index filters/tags, ZDeck dots, hub feed badge, inbox demo login, event-modal send, TipSupport Apple Pay, page roots `.hz` / `.nude-beaches-page` / `.inbox-shell-root`).
-- Dropped the bare `.nude-beaches-page button { --c }` catch-all so unclassed buttons cannot set `--c` without a rebind class. Named chips / `pdxBtn` / river-brats controls in that rule stay (they are in the group).
+### Fixes (no type/nav restyle)
 
-After: `glass-rebind audit: 0 violations (552 files, 104 rebind-group selectors)`.
+- CSS rules that assign `--c` now include `.pdx-glass-rebind` on the **same subject**. Tomorrow's `.foo { --c }` fails unless that selector carries the class.
+- TSX hosts for those subjects got `.pdx-glass-rebind` on the element (not a skip list).
+- Inline `--c` hosts from the first pass stay (`Button`, Housing, Z-index, ZDeck, hub feed badge, inbox, event-modal send, TipSupport, page roots).
+- Dropped the bare `.nude-beaches-page button { --c }` catch-all.
+
+After: `glass-rebind audit: 0 violations (552 files, 20 rebind-group selectors)`.
 
 ### Remaining allowlist (scanner exceptions)
 
@@ -62,7 +65,7 @@ Keep short. Prefer adding `.pdx-glass-rebind` at the source.
 | Exception | Why |
 |-----------|-----|
 | `:root` / `html` / `body` | Global default `--c` (the cyan fallback itself). |
-| Official group in `tokens/glass.css` | Parsed from the `.pdx-glass-rebind, … { --glass-card-bg: … }` rule, not hardcoded. Includes the product surfaces listed there. |
+| Official group in `tokens/glass.css` | Parsed from the card recipe block (20 selectors). Not a product-offender dump. |
 | `client/src/components/ds/glass.ts` | `glass()` / `glassNeutral()` bake fill, edge, and bloom inline with the same accent. |
 | `<Button>` | Always attaches `.pdxBtn.pdx-glass-rebind` on the host node. |
 

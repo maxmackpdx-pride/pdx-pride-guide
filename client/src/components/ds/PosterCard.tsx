@@ -247,7 +247,7 @@ export function PosterCard({
         {/* Dense grid: neighborhood is already in `when`  -  skip street address to free vertical space */}
         {!dense && address ? <div className="pdxBoard__address">{address}</div> : null}
         {ticketHref && (
-          <a className="pdxBoard__ticket pdx-glass-btn pdx-glass-btn--solid" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
+          <a className="pdxBoard__ticket pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={ticketHref} target="_blank" rel="noopener noreferrer" onClick={stop}>
             {ticketLabel} →
           </a>
         )}
@@ -262,7 +262,7 @@ export function PosterCard({
             {going != null
               ? <span className="pdxBoard__going"><span className="dot" />{going} Going</span>
               : <span />}
-            {onRsvp && <button type="button" className="pdxBoard__rsvp pdx-glass-btn pdx-glass-btn--solid"
+            {onRsvp && <button type="button" className="pdxBoard__rsvp pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRsvp(); }}>I'll be there</button>}
           </div>
         )}

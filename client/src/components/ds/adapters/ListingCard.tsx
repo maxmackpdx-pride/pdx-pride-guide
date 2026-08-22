@@ -135,7 +135,7 @@ export default function ListingCard({
     return (
       <ScrollReveal delay={revealDelay}>
         <div
-          className="ds-listing-card ds-listing-card--list"
+          className="ds-listing-card ds-listing-card--list pdx-glass-rebind"
           data-testid={`event-card-${event.id}`}
           style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
           {...eventCardA11yProps(onClick)}
@@ -168,7 +168,7 @@ export default function ListingCard({
   return (
     <ScrollReveal delay={revealDelay}>
       <div
-        className="ds-listing-card ds-listing-card--grid"
+        className="ds-listing-card ds-listing-card--grid pdx-glass-rebind"
         data-testid={`event-card-${event.id}`}
         style={{ ["--i" as string]: Math.round((revealDelay || 0) / 40) }}
         {...eventCardA11yProps(onClick)}
