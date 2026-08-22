@@ -95,6 +95,18 @@ const FEATURED: FeaturedConfig[] = [
     sourceName: "Washington State Parks",
     statePark: "washington",
   },
+  {
+    id: "stub-stewart",
+    name: 'L.L. "Stub" Stewart State Park',
+    subtitle: "Camping · Multi-use trails · Oregon Coast Range",
+    kind: "camp-hike",
+    // Center of the official Oregon Parks boundary, not a claimed trailhead.
+    lat: 45.728645,
+    lng: -123.186849,
+    officialUrl: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
+    sourceName: "Oregon Parks and Recreation Department",
+    statePark: "oregon",
+  },
 ];
 
 type NwsPoints = { properties?: { forecast?: string } };
@@ -174,7 +186,7 @@ async function fetchUsfsCatalog(): Promise<OutzCatalogPlace[]> {
 async function fetchStateParkStatuses(): Promise<Map<string, string>> {
   const statuses = new Map<string, string>();
   const oregonQuery = new URLSearchParams({
-    f: "json", where: "FULL_NAME IN ('Silver Falls State Park','Cape Lookout State Park')",
+    f: "json", where: `FULL_NAME IN ('Silver Falls State Park','Cape Lookout State Park','L.L. "Stub" Stewart State Park')`,
     outFields: "FULL_NAME,USE_TYPE", returnGeometry: "false",
   });
   const washingtonQuery = new URLSearchParams({
