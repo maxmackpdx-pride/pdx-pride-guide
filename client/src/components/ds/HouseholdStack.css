@@ -1,0 +1,84 @@
+/* HouseholdStack: overlapping avatar rows (people, pets one size down, dashed Open, +N). */
+
+.pdx-household-stack {
+  display: flex;
+  align-items: flex-end;
+  max-width: 100%;
+}
+
+.pdx-household-stack > * {
+  margin-left: -14px;
+  border-radius: var(--radius-pill, 999px);
+  box-shadow: 0 0 0 2px var(--ink-800);
+}
+
+.pdx-household-stack > *:first-child {
+  margin-left: 0;
+}
+
+.pdx-household-stack--wrap {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: end;
+  align-items: end;
+  max-width: 100%;
+}
+
+.pdx-household-stack--wrap > * {
+  margin-left: -14px;
+}
+
+.pdx-household-stack--wrap > *:nth-child(3n + 1) {
+  margin-left: 0;
+}
+
+.pdx-household-stack--wrap > *:nth-child(n + 4) {
+  margin-top: -12px;
+}
+
+.pdx-household-stack__pet {
+  display: grid;
+  place-items: center;
+  margin-left: -8px;
+  border-radius: var(--radius-pill, 999px);
+  overflow: hidden;
+  background: var(--ink-850);
+  border: 2px solid color-mix(in srgb, var(--c) 45%, #101014);
+  box-shadow: 0 0 0 2px var(--ink-800);
+  color: var(--board-muted);
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  flex: none;
+  align-self: flex-end;
+}
+
+.pdx-household-stack__pet img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pdx-household-stack__slot {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill, 999px);
+  border: 2px dashed color-mix(in srgb, var(--c) 50%, #101014);
+  color: var(--c);
+  font-family: var(--font-mono);
+  font-size: var(--mono-micro);
+  background: var(--ink-1000);
+}
+
+.pdx-household-stack__more {
+  display: grid;
+  place-items: center;
+  margin-left: -8px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--ink-850);
+  border: 2px solid color-mix(in srgb, var(--c) 45%, #101014);
+  box-shadow: 0 0 0 2px var(--ink-800);
+  color: var(--board-text);
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  flex: none;
+}

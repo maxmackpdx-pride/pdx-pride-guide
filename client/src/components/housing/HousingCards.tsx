@@ -17,9 +17,9 @@ import {
   type HousingPerson,
   type HousingPostView,
 } from "@shared/housing";
+import { HouseholdStack } from "@/components/ds";
 import { HousingCardTags } from "./HousingTags";
 import { HousingWell } from "./HousingWell";
-import { HousingCluster } from "./HousingCluster";
 import { HousingIcon } from "./HousingIcon";
 import {
   Btn,
@@ -160,7 +160,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
       <HousingWell photos={post.photos} title={post.author.displayName}>
-        <HousingCluster
+        <HouseholdStack
           people={[self, ...people]}
           pets={pets}
           size="sm"
@@ -206,7 +206,7 @@ export function OfferingCard({ post, h }: { post: HousingPostView; h: HousingCar
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.OFFERING} />
       <HousingWell photos={post.photos} title={post.displayName}>
-        <HousingCluster
+        <HouseholdStack
           people={people}
           pets={pets}
           size="sm"
@@ -257,12 +257,12 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
         // With no place picked yet there is nothing to name, so the card asks.
         title={post.photos.length ? post.displayName : "Build a HAÜS"}
         fallbackPhoto={FORMING_DEFAULT_COVER}
+        className="hz-well--contain-stack"
       >
-        <HousingCluster
+        <HouseholdStack
           people={people}
           pets={pets}
           size="sm"
-          scale={1.5}
           wrap3
           slots={isFull ? 0 : seeking}
           onSelect={h.onPerson}
@@ -373,7 +373,11 @@ export function ManagedCard({
           onClick={stop(() => h.onOpen(post))}
           title="Renters organizing to secure this place"
         >
-          <HousingCluster people={groups.map((g) => leadPerson(g.lead, g.postId))} size="sm" />
+          <HouseholdStack
+            people={groups.map((g) => leadPerson(g.lead, g.postId))}
+            size="sm"
+            wrap3={false}
+          />
           <span>
             {groups.length === 1
               ? `${groups[0].lead.displayName.split(" ")[0]} is putting together roommates to secure this place`

@@ -20,7 +20,7 @@
  */
 import type { CSSProperties, ReactNode } from "react";
 import UserAvatar from "@/components/UserAvatar";
-import { Button } from "@/components/ds";
+import { Button, HouseholdStack } from "@/components/ds";
 import {
   AFFORDABILITY_BADGE_LABEL,
   FORMING_FLAVOR_LABEL,
@@ -37,7 +37,6 @@ import {
 import { HousingDetailTags } from "./HousingTags";
 import { HousingWell } from "./HousingWell";
 import { FORMING_DEFAULT_COVER } from "./HousingCards";
-import { HousingCluster } from "./HousingCluster";
 import { HousingIcon, type HousingIconName } from "./HousingIcon";
 import {
   Btn,
@@ -440,7 +439,7 @@ function LookingDetail({
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35}>
-              <HousingCluster
+              <HouseholdStack
                 people={[self, ...people]}
                 pets={pets}
                 size="md"
@@ -564,7 +563,7 @@ function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHa
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
-              <HousingCluster
+              <HouseholdStack
                 people={people}
                 pets={pets}
                 size="md"
@@ -776,7 +775,12 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
               <div className="hz-groups">
                 {groups.map((g) => (
                   <div className="hz-group" key={g.postId}>
-                    <HousingCluster people={[leadPerson(g)]} size="md" slots={g.seeking} />
+                    <HouseholdStack
+                      people={[leadPerson(g)]}
+                      size="md"
+                      slots={g.seeking}
+                      wrap3={false}
+                    />
                     <div className="hz-group__txt">
                       <b>{g.name}</b>
                       <Mono micro>
@@ -887,12 +891,12 @@ function FormingDetail({
               title={title}
               nameCap={0.35}
               fallbackPhoto={FORMING_DEFAULT_COVER}
+              className="hz-well--contain-stack"
             >
-              <HousingCluster
+              <HouseholdStack
                 people={people}
                 pets={pets}
                 size="md"
-                scale={1.5}
                 wrap3
                 slots={isFull ? 0 : seeking}
                 onSelect={h.onPerson}
@@ -938,7 +942,7 @@ function FormingDetail({
             <HousingDetailTags tags={post.tags} />
 
             <div className="hz-people" style={{ marginTop: 16 }}>
-              <HousingCluster
+              <HouseholdStack
                 people={people}
                 size="lg"
                 wrap3
