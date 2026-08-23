@@ -6,7 +6,7 @@ import OutzMap from "@/components/OutzMap";
 import { Button } from "@/components/ds";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import type { OutzSnapshot } from "@shared/outz";
+import { OUTZ_COMMUNITY_STAYS, type OutzSnapshot } from "@shared/outz";
 import "./Outz.css";
 
 type OutzPayload = { data: OutzSnapshot; stale?: boolean; fromCache?: boolean };
@@ -73,6 +73,30 @@ export default function Outz() {
       </section>
 
       {query.isError ? <div className="outz-error">Official outdoor conditions are temporarily unavailable. Try the direct agency links below.</div> : null}
+
+      <section id="outz-stays" className="outz-section outz-section--stays" aria-labelledby="outz-stays-heading">
+        <div className="outz-section__head">
+          <p>QUEER STAYS + TRIP LEADS</p>
+          <h2 id="outz-stays-heading">More places to pitch a tent</h2>
+          <span>Operator details are reviewed separately from official conditions. A directory lead is not an endorsement or an access guarantee.</span>
+        </div>
+        <div className="outz-stays-grid">
+          {(snapshot?.communityStays ?? OUTZ_COMMUNITY_STAYS).map(stay => (
+            <article className="outz-stay-card pdx-glass-card pdx-glass-rebind" key={stay.id} style={{ "--c": "#ff6600" } as CSSProperties}>
+              <p className="outz-stay-card__type">{stay.kind === "campground" ? "CAMPGROUND" : "OUTDOOR STAY"}</p>
+              <h3>{stay.name}</h3>
+              <p className="outz-stay-card__region">{stay.region}</p>
+              <p>{stay.detail}</p>
+              <p className="outz-stay-card__access"><strong>Before you go:</strong> {stay.accessNote}</p>
+              <p className="outz-stay-card__source">{stay.inclusionNote} · Operator details checked {stay.reviewedAt}.</p>
+              <div className="outz-stay-card__actions">
+                <a className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={stay.officialUrl} target="_blank" rel="noreferrer" style={{ "--c": "#ff6600" } as CSSProperties}>OPERATOR DETAILS ↗</a>
+                <a href={stay.discoverySource.href} target="_blank" rel="noreferrer">Research source ↗</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section className="outz-section outz-crews" aria-labelledby="outz-crews-heading">
         <div className="outz-section__head">

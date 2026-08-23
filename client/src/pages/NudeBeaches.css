@@ -1483,3 +1483,16 @@ html.calm-mode .nude-map-btn--primary {
   border-bottom-color: var(--nb-btn, var(--nb-accent)) !important;
   color: var(--nb-btn, var(--nb-accent)) !important;
 }
+
+.nude-outz-link {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: clamp(28px, 4vw, 52px) auto 0;
+  max-width: 1180px;
+  padding: clamp(20px, 4vw, 32px);
+}
+.nude-outz-link > p { color: var(--c); font-size: 11px; font-weight: 800; letter-spacing: .12em; margin: 0; }
+.nude-outz-link > h2 { color: #fff; font-family: var(--font-display, sans-serif); font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: .94; margin: 0; max-width: 26rem; text-transform: uppercase; }
+.nude-outz-link .pdx-glass-btn { min-height: 44px; }

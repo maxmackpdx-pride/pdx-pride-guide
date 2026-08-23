@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { CSSProperties } from "react";
 import { RefreshCw } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
@@ -277,6 +279,14 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
       </div>
 
       <RiverBratsShell beachId={beachId} />
+
+      <section className="nude-outz-link pdx-glass-card pdx-glass-rebind" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+        <p>BEYOND THE BEACH</p>
+        <h2>Camping, trails, and practical trip leads live in OUTZ.</h2>
+        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/z/out#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+          MORE OUTZ
+        </Link>
+      </section>
 
       <section className="events-board-feed nude-beach-logistics diag">
         <div className="board-active-feed__inner">

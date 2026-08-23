@@ -1,5 +1,5 @@
 import { sqlite } from "./storage";
-import { OUTZ_SOURCES, type OutzAlert, type OutzCatalogPlace, type OutzDestination, type OutzSnapshot } from "@shared/outz";
+import { OUTZ_COMMUNITY_STAYS, OUTZ_SOURCES, type OutzAlert, type OutzCatalogPlace, type OutzDestination, type OutzSnapshot } from "@shared/outz";
 
 const CACHE_ID = 1;
 const CACHE_TTL_MS = 20 * 60 * 1000;
@@ -27,6 +27,7 @@ function readCache(): OutzSnapshot | null {
   try {
     const snapshot = JSON.parse(row.payload) as OutzSnapshot;
     snapshot.fetchedAt ||= row.fetchedAt;
+    snapshot.communityStays ||= OUTZ_COMMUNITY_STAYS;
     return snapshot;
   } catch {
     return null;
@@ -223,6 +224,7 @@ export async function refreshOutzSnapshot(): Promise<OutzSnapshot> {
       sourceStatus: stateStatuses.get(destination.name) ?? null,
     })),
     catalog,
+    communityStays: OUTZ_COMMUNITY_STAYS,
     sources: OUTZ_SOURCES,
   };
   writeCache(snapshot);

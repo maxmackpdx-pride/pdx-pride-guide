@@ -39,6 +39,27 @@ export type OutzCatalogPlace = {
   sourceName: string;
 };
 
+/**
+ * A reviewed operator listing is useful trip-planning context, but it is never
+ * an official access or conditions source. Community-directory inclusion is a
+ * discovery lead, not proof of ownership, inclusion policy, or availability.
+ */
+export type OutzCommunityStay = {
+  id: string;
+  name: string;
+  region: string;
+  kind: "campground" | "outdoor-stay";
+  detail: string;
+  accessNote: string;
+  inclusionNote: string;
+  officialUrl: string;
+  discoverySource: {
+    name: string;
+    href: string;
+  };
+  reviewedAt: string;
+};
+
 export type OutzSource = {
   id: string;
   name: string;
@@ -51,8 +72,42 @@ export type OutzSnapshot = {
   fetchedAt: string;
   destinations: OutzDestination[];
   catalog: OutzCatalogPlace[];
+  communityStays: OutzCommunityStay[];
   sources: OutzSource[];
 };
+
+export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
+  {
+    id: "triangle-recreation-camp",
+    name: "Triangle Recreation Camp",
+    region: "Granite Falls, WA · Pacific Northwest",
+    kind: "campground",
+    detail: "Private queer-centered campground with tent and RV camping in the Cascade foothills.",
+    accessNote: "LGBTQ+ adults 21+; membership and reservation details are on the operator site. Seasonal access is operator-controlled.",
+    inclusionNote: "Queer-centered status is stated by the operator.",
+    officialUrl: "https://www.camptrc.org/",
+    discoverySource: {
+      name: "Gay Camping Friends directory",
+      href: "https://gaycampingfriends.com/campground/triangle-recreation-camp",
+    },
+    reviewedAt: "2026-08-22",
+  },
+  {
+    id: "umpquas-last-resort",
+    name: "Umpqua's Last Resort",
+    region: "Dry Creek · North Umpqua River, OR",
+    kind: "outdoor-stay",
+    detail: "Private RV park and campground with RV sites, glamping tents, cabins, and river access.",
+    accessNote: "Confirm reservations, seasonal conditions, and local access directly with the operator before driving.",
+    inclusionNote: "Listed as a community-directory lead; the operator site does not make a queer-specific claim.",
+    officialUrl: "https://www.golastresort.com/about-us",
+    discoverySource: {
+      name: "Gay Camping Friends directory",
+      href: "https://gaycampingfriends.com/campground/umpquas-last-resort",
+    },
+    reviewedAt: "2026-08-22",
+  },
+];
 
 export const OUTZ_SOURCES: OutzSource[] = [
   {
