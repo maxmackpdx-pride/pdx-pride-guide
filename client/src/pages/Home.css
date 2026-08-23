@@ -343,6 +343,23 @@
   object-position: center center;
 }
 
+/* Hero-only red flash: rare, harder glitch on the wordmark itself. */
+.home-hero__wordmark-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: hue-rotate(-18deg) saturate(3) brightness(1.18) contrast(1.1) drop-shadow(0 0 24px rgba(255, 38, 38, .7));
+  animation: homeHeroRedFlash 7.2s steps(1, end) infinite;
+}
+
 /* Crisp core sits on top and defines the sign's box */
 .home-hero__wordmark--core {
   position: relative;
@@ -386,6 +403,31 @@
     opacity: 0.7;
     filter: saturate(1.2) brightness(1.12);
     transform: translate(7px, -3px) scale(1.11);
+  }
+}
+
+@keyframes homeHeroRedFlash {
+  0%,
+  83%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  84% {
+    opacity: 0.98;
+    transform: translate(-3px, 1px);
+  }
+  86% {
+    opacity: 0.42;
+    transform: translate(4px, -1px);
+  }
+  88% {
+    opacity: 1;
+    transform: translate(-2px, 0);
+  }
+  90% {
+    opacity: 0;
+    transform: none;
   }
 }
 
@@ -762,6 +804,7 @@ html.calm-mode .home-hero--parallax .home-hero__wordmark-wrap {
 html.calm-mode .home-hero__wordmark-sign,
 html.calm-mode .home-hero__wordmark,
 html.calm-mode .home-hero__wordmark-glitch,
+html.calm-mode .home-hero__wordmark-flash,
 html.calm-mode .home-hero__wordmark-glitch .glitch-logo__main,
 html.calm-mode .home-hero__bg {
   animation: none !important;
@@ -876,6 +919,7 @@ html.calm-mode .home-hero__orb {
   .home-hero__wordmark-sign,
   .home-hero__wordmark,
   .home-hero__wordmark-glitch,
+  .home-hero__wordmark-flash,
   .home-hero__bg {
     animation: none !important;
   }

@@ -241,6 +241,14 @@ export default function HomeHero() {
             alt=""
             className="home-hero__wordmark home-hero__wordmark-glitch"
           />
+          <img
+            src={heroWordmark}
+            alt=""
+            aria-hidden="true"
+            className="home-hero__wordmark-flash"
+            loading="eager"
+            decoding="async"
+          />
         </div>
       </div>
 
