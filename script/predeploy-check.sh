@@ -11,7 +11,7 @@ HEAD="$(git rev-parse HEAD)"
 SHORT="$(git rev-parse --short HEAD)"
 
 on_master_lineage() {
-  if [[ "$BRANCH" == "master" ]]; then
+  if [[ "$BRANCH" == "master" || "$BRANCH" == "staging" ]]; then
     return 0
   fi
 

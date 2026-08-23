@@ -48,7 +48,10 @@ When the user asks to **push** / **deploy** / **ship** (or after any push to `ma
 - **BUILDING / DEPLOYING** → in progress only; do not declare done.
 
 Repo: `maxmackpdx-pride/pdx-pride-guide`  
-Railway: project `zaylist`, production, https://www.zaylist.com  
+Railway: project `pdx-pride-guide` (also called zaylist), production, https://www.zaylist.com
+
+**Staging** (not production): branch `staging` → Railway environment `staging` → https://pdx-pride-guide-staging.up.railway.app  
+Own variables, own SQLite volume at `/data`. Do not fast-forward `staging` to `master` without an explicit yes. Title contract and type snap stay parked until that yes and a look at staging.
 
 Cowork / claude.ai/code sessions that will `git push` must list both
 `maxmackpdx-pride/pdx-pride-guide` and
