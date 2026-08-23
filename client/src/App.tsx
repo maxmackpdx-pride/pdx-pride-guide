@@ -197,6 +197,9 @@ function AppLayout() {
             <Route path="/contact" component={Contact} />
             <Route path="/sponsors" component={Sponsors} />
             <Route path="/access" component={AccessSafety} />
+            <Route path="/access-safety">
+              {() => <Redirect to="/access" />}
+            </Route>
             <Route path="/legal" component={Legal} />
             <Route path="/admin" component={Admin} />
             <Route path="/dashboard" component={Dashboard} />

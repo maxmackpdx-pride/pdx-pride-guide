@@ -180,7 +180,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 ## Homepage front door
 
-- Product-family names are exact: always render `GIGZ`, `GIFTZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
+- Product-family names are exact: always render `EVENTZ`, `PLACEZ` (page title `OUR PLACEZ`), `OUTZ`, `THE HAÜZ`, `GIGZ`, `GIFTZ`, `SELLZ`, and `MIZZED CONNECTION` with this capitalization in public UI, metadata, accessibility labels, and current documentation. Existing lowercase routes, APIs, code identifiers, analytics keys, and asset paths remain compatibility internals unless a separate migration is approved.
 
 ## Z/ address continuity
 
@@ -201,7 +201,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - The destination rail owns its section padding, modest consistent gaps, top/bottom dividers, and horizontal overflow. On motion-capable desktop it flows seamlessly from right to left at exactly **68.4 seconds per cycle** (10% faster than the prior timing).
 - Keep one semantic seven-card sequence. If seamless looping requires presentational clones, mark them `aria-hidden`, unfocusable, inert, and exclude them from analytics; never add a second visible rail or expose repeated destinations to assistive technology.
 - Mobile, Calm Mode, and `prefers-reduced-motion` disable rail autoplay and keep the same order in a manual touch-scroll rail with card snap points, readable peek, 44px actions, contained overscroll, and no document/page horizontal overflow.
-- Current founder order starts with Nude Beaches, then Events, Places, Haüsing, GIFTZ, GIGZ, and MIZZED CONNECTION.
+- Current founder order starts with OUTZ, then EVENTZ, PLACEZ, THE HAÜZ, GIFTZ, GIGZ, and MIZZED CONNECTION.
 - The Nude Beaches world shows live Rooster Rock air, water, wind, and river conditions over its neutral gray topographic motif.
 - The existing site navigation remains outside the homepage pattern and must not be duplicated inside it.
 - Each world uses the deep-glass shell with one `--c` accent. Calm Mode removes ambient video and bloom while preserving every route and label.

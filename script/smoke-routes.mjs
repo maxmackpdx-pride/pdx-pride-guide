@@ -53,6 +53,7 @@ const ROUTES = [
   ["/hausing", "/the-hauz"],
   ["/darkroom", "/next"],
   ["/missed-connections", "/spotted"],
+  ["/access-safety", "/access"],
   // Unknown path must reach the 404 page without crashing.
   ["/definitely-not-a-real-page", null],
 ];

@@ -46,14 +46,47 @@ app.use("/reset-password", (_req, res, next) => {
 // Add a slug here and it becomes zaylist.com/<slug>.
 const SHORT_LINKS: Record<string, string> = {
   stank: "/events/7/stank-x-yes-coach-pride-weekend?day=SAT",
-  // Marketing alias for Gig Board (copy still says zaylist.com/gigs)
-  gigs: "/pride-work",
 };
 app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();
   const slug = req.path.toLowerCase().replace(/^\/+|\/+$/g, "");
   const dest = SHORT_LINKS[slug];
   if (dest) return res.redirect(302, dest);
+  next();
+});
+
+// Retired public paths → canonical boards. 301 so crawlers and old links
+// collapse. Do not rewrite static files under /hausing/demo.
+const PATH_ALIASES: Record<string, string> = {
+  "/gigs": "/pride-work",
+  "/missed-connections": "/spotted",
+  "/access-safety": "/access",
+  "/darkroom": "/next",
+  "/hausing": "/the-hauz",
+  "/housing": "/the-hauz",
+};
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const raw = (req.path || "/").split("?")[0] || "/";
+  const path = raw.replace(/\/+$/, "") || "/";
+  const lower = path.toLowerCase();
+  if (lower.startsWith("/hausing/demo") || lower.startsWith("/housing/demo")) return next();
+
+  const qsIndex = (req.originalUrl || "").indexOf("?");
+  const qs = qsIndex >= 0 ? req.originalUrl.slice(qsIndex) : "";
+
+  if (lower === "/nude-beaches") {
+    const tab = new URLSearchParams(qs.startsWith("?") ? qs.slice(1) : "").get("tab");
+    const dest = tab === "sauvie-island" || tab === "sauvie" ? "/z/out/sauvie-island" : "/z/out/rooster-rock";
+    return res.redirect(301, dest);
+  }
+
+  const exact = PATH_ALIASES[lower];
+  if (exact) return res.redirect(301, exact + qs);
+
+  const nested = lower.match(/^\/(hausing|housing)\/(.+)$/);
+  if (nested) return res.redirect(301, `/the-hauz/${nested[2]}${qs}`);
+
   next();
 });
 
