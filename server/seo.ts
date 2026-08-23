@@ -577,10 +577,20 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           : defaultShareCardUrl();
   const pageImageIsCard = !!(liveEvent || livePlace || liveProfile || boardShareKey);
 
+  // Home used to inline the whole LIVE catalog (~500 events) as JSON-LD + a
+  // hidden HTML feed. That made `/` a 700KB+ document and the app looked
+  // like it never loaded. Keep the full catalog on /events, sitemap, llms.txt.
+  const catalogEvents =
+    pathKey === "/events"
+      ? events
+      : liveEvent
+        ? events.filter(event => event.id === liveEvent.id)
+        : events.slice(0, 12);
+
   const jsonLdBlocks = [
     buildWebSiteJsonLd(),
     buildFaqJsonLd(),
-    liveEvent ? buildSingleEventJsonLd(liveEvent) : buildEventsJsonLd(events),
+    liveEvent ? buildSingleEventJsonLd(liveEvent) : buildEventsJsonLd(catalogEvents),
     livePlace
       ? {
           "@context": "https://schema.org",
@@ -607,8 +617,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     buildGoogleAnalyticsHead(),
   ].filter(Boolean).join("\n    ");
 
-  const crawlerDirectory = buildCrawlerEventDirectory(events);
-  const noscript = buildNoscriptEventDirectory(events);
+  const crawlerDirectory = buildCrawlerEventDirectory(catalogEvents);
+  const noscript = buildNoscriptEventDirectory(catalogEvents);
 
   // og:type: profile only for member pages; events/places are article; generic is website.
   const ogType = liveProfile ? "profile" : liveEvent || livePlace ? "article" : "website";
