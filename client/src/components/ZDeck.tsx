@@ -46,6 +46,8 @@ export function ZDeck({
   autoplayMs = Z_DECK_AUTOPLAY_MS,
   showNav = true,
   fade = CF_FADE,
+  gap = CF_GAP,
+  rotate = CF_ROTATE,
 }: {
   total: number;
   selected: number;
@@ -59,6 +61,9 @@ export function ZDeck({
   showNav?: boolean;
   /** Per-card opacity drop with coverflow distance. */
   fade?: number;
+  /** Extra space between card centers, as a fraction of card width. */
+  gap?: number;
+  rotate?: number;
 }) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -75,7 +80,7 @@ export function ZDeck({
   const paint = useCallback(() => {
     const cardWidth = width.current;
     if (!cardWidth || total === 0) return;
-    const pitch = cardWidth * (1 + CF_GAP);
+    const pitch = cardWidth * (1 + gap);
     cardRefs.current.forEach((card, index) => {
       if (!card) return;
       let offset = index - pos.current;
@@ -83,7 +88,7 @@ export function ZDeck({
       if (offset > total / 2) offset -= total;
       const distance = Math.abs(offset);
       const ramp = Math.pow(distance, CF_FALLOFF);
-      const tilt = Math.min(CF_ROTATE * ramp, 82) * Math.sign(offset);
+      const tilt = Math.min(rotate * ramp, 82) * Math.sign(offset);
       card.style.transform =
         `translateX(calc(-50% + ${offset * pitch}px))`
         + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
@@ -97,7 +102,7 @@ export function ZDeck({
       card.setAttribute("aria-hidden", buried ? "true" : "false");
       card.inert = buried;
     });
-  }, [total, fade]);
+  }, [total, fade, gap, rotate]);
 
   const measure = useCallback(() => {
     const card = cardRefs.current[0];
