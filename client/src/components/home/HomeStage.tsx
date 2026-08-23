@@ -281,7 +281,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         aria-labelledby="home-worlds-title"
       >
         <header className="home-front__worlds-head">
-          <h2 id="home-worlds-title">You&apos;re not<br />looking for content.</h2>
+          <h2 id="home-worlds-title"><span>You&apos;re</span> not<br />looking for content.</h2>
           <p>You&apos;re looking for the room, the ride, the person, or the thing that makes tonight feel good and tomorrow even better.</p>
         </header>
         <ZDeck
