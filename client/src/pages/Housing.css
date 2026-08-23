@@ -941,26 +941,26 @@
   min-height: 0;
   max-width: 100%;
   margin-top: 0;
+  overflow: hidden;
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)) drop-shadow(0 0 26px rgba(0, 0, 0, .8));
 }
 
-.hz-well__name svg {
+.hz-well__name-line {
   display: block;
   width: 100%;
-  height: auto;
-  overflow: visible;
   flex: none;
-}
-
-.hz-well__name text {
+  color: var(--text-hi);
   font-family: var(--font-display);
   font-weight: var(--fw-black);
-  fill: var(--text-hi);
+  font-size: 1rem;
+  line-height: .82;
+  letter-spacing: -.035em;
+  white-space: nowrap;
 }
 
 .hz-well .hz-mono {
