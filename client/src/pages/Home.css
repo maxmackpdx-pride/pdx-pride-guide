@@ -1722,10 +1722,66 @@ html.calm-mode .home-boards__card {
   font-variant-numeric: tabular-nums;
 }
 
-/* Placeholder that holds the number's slot until the API answers. Sized in em
-   so it tracks every responsive font-size override for the valu…6449 tokens truncated…tage .home-front__world { transition: none; }
-  .home-main-stage .home-front__world:hover,
-  .home-main-stage .home-front__world:focus-within { transform: none; }
+.home-stat-strip__pending {
+  display: inline-block;
+  width: 1.15em;
+  height: 0.62em;
+  border-radius: 3px;
+  background: var(--border-default);
+  -webkit-text-fill-color: initial;
+  animation: homeStatPending 1.15s ease-in-out infinite;
+}
+
+@keyframes homeStatPending {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-stat-strip__pending { animation: none; }
+}
+
+.calm-mode .home-stat-strip__pending { animation: none; }
+
+.home-stat-strip__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+/* L→R text gradients on number + label */
+.home-stat-strip__grad {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.home-stat-strip__grad--events {
+  background-image: linear-gradient(90deg, #ff19d6 0%, #ff6600 100%);
+}
+
+.home-stat-strip__grad--places {
+  background-image: linear-gradient(90deg, #ffee00 0%, #39ff14 100%);
+}
+
+.home-stat-strip__grad--going {
+  background-image: linear-gradient(90deg, #00ffff 0%, #0033aa 100%);
+}
+
+.home-stat-strip__grad .pdxCountUp,
+.home-stat-strip__grad .pdxCountUp__num {
+  background-image: inherit;
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 html.calm-mode .home-main-stage .home-front__world,
@@ -2895,6 +2951,51 @@ html.calm-mode .home-next-preview__orb,
   margin-inline: auto;
 }
 
+.home-next-preview__card.pdx-glass-card,
+.home-next-preview__card {
+  --c: var(--neon-cyan, #00ffff);
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow: hidden;
+  border: 3px solid color-mix(in srgb, var(--c) 55%, #101014);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.035), transparent 26%),
+    radial-gradient(circle at 50% 118%, color-mix(in srgb, var(--c) 3%, transparent), transparent 72%),
+    #020204;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.052),
+    0 0 0 2px #000,
+    0 46px 108px -54px color-mix(in srgb, var(--c) 38%, transparent);
+}
+
+.home-next-preview__card[data-tone="red"] { --c: #ff1f1f; }
+.home-next-preview__card[data-tone="cyan"] { --c: var(--neon-cyan, #00ffff); }
+.home-next-preview__card[data-tone="magenta"] { --c: var(--neon-magenta, #ff00cc); }
+.home-next-preview__card[data-tone="acid"] { --c: var(--neon-yellow, #ccff00); }
+.home-next-preview__card[data-tone="orange"] { --c: var(--neon-orange, #ff6600); }
+.home-next-preview__card[data-tone="violet"] { --c: #8f5cff; }
+.home-next-preview__card[data-tone="gold"] { --c: #ffb400; }
+.home-next-preview__card[data-tone="scarlet"] { --c: #ff2d2d; }
+
+.home-next-preview__card.pdx-glass-card::after { background: none; }
+
+.home-next-preview__card.pdx-glass-card.pdx-glass-rebind {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.008), transparent 24%),
+    #020204;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.052),
+    0 0 0 2px #000,
+    -7px 7px 20px -18px rgba(0,0,0,.88),
+    0 46px 108px -54px color-mix(in srgb, var(--c) 33%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .home-next-preview__deck .z-deck__slide > .home-next-preview__card,
 .home-next-preview--landed .home-next-preview__deck .z-deck__slide > .home-next-preview__card {
   width: 100%;
@@ -2910,6 +3011,8 @@ html.calm-mode .home-next-preview__orb,
   max-height: 100%;
   width: auto;
   height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 13px color-mix(in srgb, var(--c) 24%, transparent));
 }
 
 /* The dots sit under the deck, above the CTA. */
