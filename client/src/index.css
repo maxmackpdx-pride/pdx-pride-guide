@@ -589,6 +589,7 @@ body::before {
  * version it replaces was the drift the chrome audit called out.
  */
 .site-hub-button {
+  --c: var(--panel-cyan, #19e3ff);
   position:relative;
   display:inline-flex;
   align-items:center;
@@ -602,7 +603,8 @@ body::before {
   box-shadow:
     var(--chrome-keyline),
     var(--chrome-bevel),
-    var(--chrome-floor);
+    var(--chrome-floor),
+    var(--neon-bloom);
   font:800 .82rem/1 var(--font-display);
   letter-spacing:.06em;
   text-decoration:none;
@@ -1337,15 +1339,45 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   }
 }
 
+/*
+ * Log in / Join is the signed-out primary, sitting in the slot Hub occupies
+ * once you are signed in - so it is built exactly like Hub: pill geometry from
+ * the nav, solid accent plate, dark ink, chrome atoms for the shell, and the
+ * 8% bloom. It used to be the one square, weight-900, solid-filled element in
+ * a bar of 999px hairline pills, still sized off the retired --site-nav-size.
+ */
 .site-login-button {
+  --c: var(--neon-yellow, #ccff00);
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   margin-left: clamp(4px, 0.5vw, 8px);
-  padding: var(--site-nav-pad-y) calc(var(--site-nav-pad-x) * 1.4);
-  border: 2px solid var(--neon-yellow);
-  background: var(--neon-yellow);
-  color: #000;
+  padding: clamp(9px, 0.8vw, 11px) clamp(14px, 1.3vw, 22px);
+  border: 0;
+  border-radius: 999px;
+  background: var(--neon-yellow, #ccff00);
+  color: #050506;
   cursor: pointer;
-  font-size: calc(var(--site-nav-size) * 0.95);
-  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgba(255,255,255,.45), 0 10px 22px -12px rgba(0,0,0,.75);
+  font-weight: 800;
+  font-size: clamp(0.76rem, 0.55vw + 0.34rem, 0.88rem);
+  letter-spacing: 0.06em;
+  box-shadow:
+    var(--chrome-keyline),
+    var(--chrome-bevel),
+    var(--chrome-floor),
+    var(--neon-bloom);
+  transition: filter 0.16s ease;
+}
+
+.site-login-button:hover,
+.site-login-button:focus-visible {
+  filter: brightness(1.08);
+  outline: none;
+}
+
+.site-login-button:focus-visible {
+  outline: 2px solid var(--neon-yellow, #ccff00);
+  outline-offset: 3px;
 }
 
 .site-logout-button {
