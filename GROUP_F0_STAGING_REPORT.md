@@ -17,4 +17,12 @@ SITE_URL / PUBLIC_SITE_URL / GOOGLE_REDIRECT_URI point at the staging Railway do
 
 Do not delete volume `d824af22-9a4b-4e1f-8f76-8be45f93886b`. That is production data.
 
-Staging `railway.json` omits the platform healthcheck so a slow first boot on an empty volume is not killed at 60s. Restore the production healthcheck fields before fast-forwarding `staging` to `master`.
+## Boot failure (resolved)
+
+`dist/` was never missing. Production uses the same Nixpacks V3 `COPY . /app` after build; Docker COPY merges and does not delete `dist/`. Diagnostic start printed `STAGING_BOOT cwd=/app` and `index.cjs` at 2.4mb, then:
+
+`SqliteError: no such column: "donate_url"`
+
+Empty volume created `businesses` without `donate_url`. Drizzle seed inserted that column before the ALTER. Production already had the column. Fix: ALTER businesses columns immediately after CREATE TABLE. `railway.json` restored to production values (`npm start`, healthcheck 60s).
+
+Staging `/api/health` is 200. SHA `04278c44`.
