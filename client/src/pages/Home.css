@@ -219,6 +219,26 @@
   animation: homeBgFloat 12s ease-in-out infinite;
 }
 
+/* z0.5 - asymmetrical stage-light wash behind the wordmark.
+   Dark and light beams intentionally offset so the hero reads like a lit stage
+   instead of a flat panel. */
+.home-hero__stage-lights {
+  position: absolute;
+  inset: -8% -10% -18%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .92;
+  background:
+    linear-gradient(114deg, rgba(255,255,255,.18) 0 2%, transparent 2.2% 38%, rgba(255,255,255,.02) 38.2% 100%),
+    linear-gradient(66deg, rgba(0,0,0,.48) 0 22%, transparent 22.2% 66%, rgba(0,0,0,.12) 66.2% 100%),
+    linear-gradient(126deg, rgba(255,255,255,.08) 0 9%, transparent 9.2% 52%, rgba(0,0,0,.18) 52.2% 100%),
+    radial-gradient(ellipse at 19% 26%, rgba(255,255,255,.12), transparent 34%),
+    radial-gradient(ellipse at 78% 42%, rgba(0,0,0,.46), transparent 38%);
+  mix-blend-mode: screen;
+  filter: blur(1px) contrast(1.08) saturate(1.04);
+  transform: translate3d(calc(var(--px, 0) * 4px), calc(var(--py, 0) * 8px), 0);
+}
+
 /* Kill iOS Safari's inline-video play button / native media controls on the
    background video — it renders above page content and buries the overlays. */
 .home-hero__bg::-webkit-media-controls,

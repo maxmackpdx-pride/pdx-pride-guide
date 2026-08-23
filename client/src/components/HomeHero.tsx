@@ -101,6 +101,7 @@ export default function HomeHero() {
     if (!v) return;
     // React's `muted` attribute doesn't always set the DOM property  -  force it.
     v.muted = true;
+    v.playbackRate = 0.4;
     let cancelled = false;
     const toPoster = () => {
       if (!cancelled) setShowVideo(false);
@@ -202,12 +203,15 @@ export default function HomeHero() {
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
           />
         ) : (
           <img className="home-hero__bg" src={heroLoopPoster} alt="" decoding="async" />
         )}
       </div>
+
+      {/* z0.5 - asymmetric stage lights behind the mark */}
+      <div className="home-hero__stage-lights" aria-hidden />
 
       {/* z1  -  film grain (behind orbs + wordmark so it never washes neon) */}
       <div className="home-hero__grain" aria-hidden />
