@@ -3029,6 +3029,15 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
 }
 
+/* Calm collapses --neon-bloom to `none`, which is not a valid shadow list
+   item, so calm re-states the depth on its own. */
+html.calm-mode .inbox-overlay,
+:root[data-calm="true"] .inbox-overlay {
+  box-shadow:
+    0 40px 90px -20px rgba(0, 0, 0, 0.85),
+    0 8px 28px -12px rgba(0, 0, 0, 0.7);
+}
+
 /* Group chat thread chrome (lives inside .inbox-overlay, not a side drawer). */
 .inbox-group-chat {
   display: flex;
@@ -3388,6 +3397,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
     border-radius: 18px;
     border-left-width: 2px;
     box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55)), var(--neon-bloom);
+  }
+
+  html.calm-mode .inbox-sheet-host .inbox-overlay,
+  :root[data-calm="true"] .inbox-sheet-host .inbox-overlay {
+    box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55));
   }
 }
 
@@ -9443,6 +9457,11 @@ html.calm-mode .attendance-cluster-cta__btn,
   text-decoration: none !important;
 }
 
+html.calm-mode .event-modal__tickets-mid,
+:root[data-calm="true"] .event-modal__tickets-mid {
+  box-shadow: var(--glass-btn-solid-shadow) !important;
+}
+
 .event-modal__tickets-mid:hover {
   filter: brightness(1.06);
   transform: translateY(-1px);
@@ -9992,6 +10011,17 @@ html.calm-mode .event-modal__sticky-cta,
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: #050506 !important;
+}
+
+/* --neon-bloom collapses to `none` under calm, which is not a valid shadow
+   list item, so calm re-states the slab chrome on its own. */
+html.calm-mode .event-modal,
+:root[data-calm="true"] .event-modal {
+  box-shadow:
+    0 0 0 2px #000,
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 color-mix(in srgb, var(--c) 50%, rgba(255, 255, 255, 0.12)),
+    inset 0 0 40px -18px color-mix(in srgb, var(--c) 22%, transparent);
 }
 
 html.calm-mode .event-modal,

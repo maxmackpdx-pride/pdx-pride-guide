@@ -227,6 +227,29 @@
 .featured-event-ad,
 .card.fitem.fitem--glow,
 .fitem--glow {
+  /*
+   * The bloom family has to be re-declared here, not just at :root. CSS
+   * substitutes var(--c) into a custom property at DECLARATION time, so a
+   * :root --neon-bloom bakes in the root cyan fallback and inherits down
+   * already-resolved. Every accent on the site was blooming cyan because of
+   * it: Hub with --c #19e3ff, the yellow Log in button, the magenta MIZZED
+   * card, all of them. Re-declaring inside the rebind is what lets the bloom
+   * pick up the element's own accent, which is exactly why the recipes below
+   * are re-declared here too.
+   */
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg:
+    radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--c) 16%, transparent), transparent 60%),
+    #000;
+  --btn-glow-shadow:
+    0 2px 0 color-mix(in srgb, var(--c) 40%, #000),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px -8px rgba(255, 255, 255, 0.06),
+    inset 0 10px 16px -12px rgba(0, 0, 0, 0.9),
+    var(--neon-bloom);
+  --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c) 90%, transparent);
+  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom), var(--neon-bloom);
+  --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c) 75%, transparent);
   --glass-card-bg:
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 6%, #050408) 100%),
     radial-gradient(120% 78% at 50% 122%, color-mix(in srgb, var(--c) var(--glass-bloom, 18%), transparent), transparent 56%);

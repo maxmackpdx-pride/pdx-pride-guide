@@ -44,7 +44,16 @@
    * full-strength halo; the glow proposal wanted bloom back. 8% is the
    * settled value: the accent reads as lit, never as a glow frame.
    */
-  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c, #00ffff) 8%, transparent);
+  /*
+   * The strength lives in its own plain-valued variable. A token containing
+   * var(--c) resolves at declaration time, so it has to be re-declared per
+   * element in .pdx-glass-rebind to pick up the local accent, which then beats
+   * any ancestor calm override. --bloom-alpha carries no var(--c), so it
+   * inherits normally and calm mode can still flatten every bloom from the
+   * root by setting it to 0%.
+   */
+  --bloom-alpha: 8%;
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c, #00ffff) var(--bloom-alpha), transparent);
 
   /*
    * Glow-proposal button: dark plate, accent rim and ink, a lit top edge and
@@ -95,6 +104,7 @@ html.calm-mode {
   --sticker-bloom: none;
   --sticker-lit: var(--chrome-keyline), var(--chrome-bevel-dark);
   --chrome-bloom: none;
-  --neon-bloom: none;
+  --bloom-alpha: 0%;
+  --neon-bloom: 0 0 0 transparent;
   --btn-glow-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
 }

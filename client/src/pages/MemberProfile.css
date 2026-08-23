@@ -194,9 +194,16 @@
   box-shadow: none;
 }
 
+/* Accent stays on the ring; the outer light is the composed 8% bloom. The
+   22px full-strength accent halo was the retired glow frame. */
 .pp-hero__avatar--promo {
   border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--ink-900), 0 0 22px -4px var(--profile-acc);
+  box-shadow: 0 0 0 3px var(--ink-900), var(--neon-bloom);
+}
+
+html.calm-mode .pp-hero__avatar--promo,
+:root[data-calm="true"] .pp-hero__avatar--promo {
+  box-shadow: 0 0 0 3px var(--ink-900);
 }
 
 .pp-hero__avatar--promo .user-avatar[data-ring="none"] .user-avatar__inner {
@@ -226,7 +233,12 @@
   font-size: 1.65rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  box-shadow: 0 0 0 3px var(--ink-900), 0 0 22px -4px var(--profile-acc);
+  box-shadow: 0 0 0 3px var(--ink-900), var(--neon-bloom);
+}
+
+html.calm-mode .pp-hero__monogram,
+:root[data-calm="true"] .pp-hero__monogram {
+  box-shadow: 0 0 0 3px var(--ink-900);
 }
 
 .pp-hero__chips {

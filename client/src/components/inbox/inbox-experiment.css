@@ -1381,7 +1381,7 @@ html.calm-mode .inbox-overlay--experiment::after,
 
 .inbox-exp-post-section.is-open {
   border-color: var(--inbox-exp-post-accent, var(--panel-cyan));
-  box-shadow: 0 0 22px color-mix(in srgb, var(--inbox-exp-post-accent, var(--panel-cyan)) 13%, transparent);
+  box-shadow: var(--neon-bloom);
 }
 
 .inbox-exp-post-section__head {

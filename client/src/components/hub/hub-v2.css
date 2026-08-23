@@ -435,7 +435,10 @@
       font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
       color:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:4px;padding:1px 5px;flex:none;line-height:1.3;
       background:linear-gradient(150deg,color-mix(in srgb,var(--c) 14%,transparent),color-mix(in srgb,var(--c) 2%,transparent) 46%),rgba(255,255,255,.015);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 10px -8px var(--c);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.1),var(--neon-bloom);
+    }
+    html.calm-mode .hub-thread__badge.pdx-glass-rebind{
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
     }
     .hub-thread__meta{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--board-muted);margin-top:4px}
 
@@ -818,8 +821,10 @@
 
     /* Inline feed affiliate cards */
     .feed-aff{position:relative;border-radius:16px;overflow:hidden;background:#0d0d0d}
-    .feed-aff--cockblock{border:2px solid #ff1f1f;box-shadow:0 0 40px -14px #ff1f1f}
-    .feed-aff--mrs{border:2px solid var(--panel-cyan);box-shadow:0 0 40px -14px var(--panel-cyan)}
+    /* Brand identity is the 2px rim. The outer light is the composed 8%
+       bloom - the 40px full-strength brand halo was the retired glow frame. */
+    .feed-aff--cockblock{border:2px solid #ff1f1f;box-shadow:var(--neon-bloom)}
+    .feed-aff--mrs{border:2px solid var(--panel-cyan);box-shadow:var(--neon-bloom)}
     .feed-aff__dismiss{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:999px;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:1;cursor:pointer}
     .feed-aff__dismiss:hover{background:rgba(0,0,0,.78)}
     .feed-aff__media{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#000}
@@ -973,7 +978,10 @@
         color:var(--tag-c);
         border:1px solid color-mix(in srgb,var(--tag-c) 55%,transparent);
         background:linear-gradient(150deg,color-mix(in srgb,var(--tag-c) 14%,transparent),color-mix(in srgb,var(--tag-c) 2%,transparent) 46%),rgba(255,255,255,.015);
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 10px -8px var(--tag-c);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.12),var(--neon-bloom);
+      }
+      html.calm-mode .hub-next-rsvp__tag{
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
       }
       .hub-next-rsvp__tag--donation{--tag-c:var(--panel-lime,#c8fa3c)}
       .hub-next-rsvp__tag--ticketed{--tag-c:var(--panel-magenta,#ff1fa0)}
