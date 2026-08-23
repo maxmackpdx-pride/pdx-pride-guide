@@ -3389,15 +3389,25 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
    header. */
 @media (max-width: 640px) {
   .inbox-sheet-host .inbox-overlay {
-    left: 8px;
-    right: 8px;
-    /* Clear the bottom nav AND the hub drawer grab pill (plus a gap) so the
-       search / reply bar sits fully above them, not tucked underneath. */
-    bottom: calc(
+    /*
+     * 98% of the screen. The inbox is the whole task on a phone, so it takes
+     * the screen rather than floating as a 74vh card. The 1% side inset and
+     * the top gap are what keep it reading as a layer over the page instead
+     * of a route change.
+     */
+    left: 1vw;
+    right: 1vw;
+    top: max(1vh, env(safe-area-inset-top, 0px));
+    bottom: auto;
+    width: auto;
+    height: 98vh;
+    max-height: 98vh;
+    /* Keep the reply / search bar clear of the bottom nav and the hub grab
+       pill, which now sit under the sheet rather than beside it. */
+    padding-bottom: calc(
       var(--site-mobile-nav-height, 88px) + var(--hub-mobile-drawer-collapsed, 36px)
       + 14px + env(safe-area-inset-bottom, 0px)
     );
-    height: min(74vh, 660px);
   }
 }
 
