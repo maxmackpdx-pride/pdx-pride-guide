@@ -364,7 +364,14 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         ) : null}
         <div className="home-front__atmosphere" aria-hidden />
         <div className="home-front__hero">
-          <p className="home-front__kicker"><span /> made in Portland · still in <em className="home-front__kicker-beta">beta</em></p>
+          <p className="home-front__kicker">
+            <span className="home-front__kicker-row">
+              <span className="home-front__kicker-live" aria-hidden="true" />
+              <span className="home-front__kicker-line">made in Portland</span>
+            </span>
+            <span className="home-front__kicker-dot" aria-hidden="true">·</span>
+            <span className="home-front__kicker-line">still in <em className="home-front__kicker-beta">beta</em></span>
+          </p>
           <h1 id="home-front-title" className="sr-only">Zaylist</h1>
           <div className="home-front__mark">
             <div className="home-front__mark-art">
