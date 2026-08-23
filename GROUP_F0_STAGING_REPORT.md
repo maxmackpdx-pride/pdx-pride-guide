@@ -16,3 +16,5 @@ SITE_URL / PUBLIC_SITE_URL / GOOGLE_REDIRECT_URI point at the staging Railway do
 4. Remove `.github/workflows/railway-staging.yml`.
 
 Do not delete volume `d824af22-9a4b-4e1f-8f76-8be45f93886b`. That is production data.
+
+Staging `railway.json` omits the platform healthcheck so a slow first boot on an empty volume is not killed at 60s. Restore the production healthcheck fields before fast-forwarding `staging` to `master`.
