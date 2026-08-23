@@ -80,8 +80,10 @@ function NextPreviewCardStack() {
         <i className="home-next-preview__orb home-next-preview__orb--orange" />
       </span>
       <div className="home-next-preview__head">
-        <p className="home-next-preview__kicker"><span aria-hidden="true" /> Zaylist / Next</p>
-        <h2 id="home-next-preview-title">See what I&apos;m building <span className="hl">Next.</span></h2>
+        <p className="home-next-preview__kicker pdx-kicker"><span aria-hidden="true" /> Zaylist / Next</p>
+        <h2 id="home-next-preview-title" className="pdx-display">
+          See what I&apos;m building <span className="hl">Next.</span>
+        </h2>
         <p>New ways to find your people, make plans, and keep more of queer Portland in one place.</p>
       </div>
       <Link className="home-next-preview__link" href="/next" aria-label="Explore what Zaylist is building next">
