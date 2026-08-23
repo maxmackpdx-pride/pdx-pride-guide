@@ -9,7 +9,7 @@ export default function NotFound() {
         flipLightLeaks
         titleLine1="404"
         accent="magenta"
-        lede="This page is not on the Zaylist map. Head back to events, GIFTZ, or GIGZ."
+        lede="This page is not on the Zaylist map. Head back to EVENTZ, GIFTZ, or GIGZ."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 45%"
         actions={(

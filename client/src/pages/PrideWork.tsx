@@ -99,7 +99,7 @@ const HOW_IT_WORKS = [
   { title: "Serve the details", body: "Skills, rates, dates, remote or on-site. Vague posts get scrolled past.", color: "#19e3ff" },
   { title: "Get seen", body: "Goes live immediately. The board is public, replies stay in inbox.", color: "#ff1fa0" },
   { title: "Connect", body: "Reply through the site inbox. Private and direct.", color: "#b06bff" },
-  { title: "Do the work", body: "Show up, get paid, keep Pride season moving.", color: "#19e3ff" },
+  { title: "Do the work", body: "Show up, get paid, keep the work moving.", color: "#19e3ff" },
   { title: "Stamp it done", body: "Mark filled or found when the match wraps.", color: "#ff1fa0" },
 ];
 

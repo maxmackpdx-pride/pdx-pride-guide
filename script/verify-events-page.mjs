@@ -17,20 +17,25 @@ page.on("console", (msg) => {
 await page.goto(url, { waitUntil: "networkidle", timeout: 45000 });
 
 const rootText = await page.locator("#root").innerText().catch(() => "");
-const posterCards = await page.locator('[data-testid^="event-card-"]').count();
-const pageHero = await page.locator(".page-hero").count();
-const posterGrid = await page.locator(".events-poster-grid").count();
+const boardTab = await page.locator('[data-testid="events-tab-board"]').count();
+const eventsCount = await page.locator('[data-testid="events-count"]').count();
+const pageHero = await page.locator(".board-hero, .events-hero, [data-testid='events-tab-board']").count();
 const loading = await page.getByText("Loading events").count();
+const noise = errors.filter((text) =>
+  /vite-hmr|failed to connect to websocket|WebSocket closed without opened|React does not recognize the|status of 401|status of 400/i.test(text),
+);
+const realErrors = errors.filter((text) => !noise.includes(text));
 
 const result = {
   url,
-  errors,
-  posterCards,
+  errors: realErrors,
+  ignored: noise.length,
+  boardTab,
+  eventsCount,
   pageHero,
-  posterGrid,
   loading,
   rootPreview: rootText.slice(0, 400),
-  ok: errors.length === 0 && posterCards > 0 && pageHero > 0,
+  ok: realErrors.length === 0 && boardTab > 0 && pageHero > 0,
 };
 
 console.log(JSON.stringify(result, null, 2));

@@ -14,25 +14,23 @@ export default function GlitchLogo({ src, alt, className = "" }: GlitchLogoProps
         className="glitch-logo__main"
         loading="eager"
         decoding="async"
-        fetchPriority="high"
+        {...({ fetchpriority: "high" } as Record<string, string>)}
       />
       <img
         src={src}
         alt=""
         aria-hidden="true"
         className="glitch-logo__ghost glitch-logo__ghost--cyan"
-        loading="eager"
+        loading="lazy"
         decoding="async"
-        fetchPriority="low"
       />
       <img
         src={src}
         alt=""
         aria-hidden="true"
         className="glitch-logo__ghost glitch-logo__ghost--magenta"
-        loading="eager"
+        loading="lazy"
         decoding="async"
-        fetchPriority="low"
       />
     </span>
   );

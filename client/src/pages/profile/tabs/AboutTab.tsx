@@ -195,7 +195,7 @@ export default function AboutTab({
                 instagram={business.instagram || undefined}
               />
               <Link href={`/directory?q=${encodeURIComponent(business.name)}`} className="mp-about__directory-link">
-                See in Places directory →
+                See in PLACEZ →
               </Link>
             </section>
           )}

@@ -31,6 +31,11 @@
   top: 0;
   width: var(--cf-card);
   height: var(--cf-card-h);
+  contain: layout style;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.z-deck--busy .z-deck__slide {
   will-change: transform, opacity;
 }
 .z-deck__slide > * { height: 100%; }

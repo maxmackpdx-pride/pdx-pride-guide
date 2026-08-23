@@ -51,10 +51,10 @@ html.calm-mode .home-front__kicker span,
 
 .home-front__worlds { position:relative; isolation:isolate; width:100%; margin:0; padding:calc(clamp(34px,5vw,64px) - 2px) 0 calc(clamp(56px,8vw,104px) + 2px); overflow:hidden; background:#000; }
 .home-front__worlds-fx { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-.home-front__worlds-orb { position:absolute; display:block; width:clamp(280px,36vw,560px); aspect-ratio:1; border-radius:50%; opacity:.16; filter:blur(64px); will-change:transform; }
-.home-front__worlds-orb--a { top:-18%; left:6%; background:#ff00cc; animation:homeWorldsOrbA 18s ease-in-out infinite alternate; }
-.home-front__worlds-orb--b { right:4%; bottom:-22%; background:#00ffff; animation:homeWorldsOrbB 22s ease-in-out infinite alternate; }
-.home-front__worlds-orb--c { top:38%; left:42%; width:clamp(180px,22vw,360px); background:#ccff00; animation:homeWorldsOrbC 16s ease-in-out infinite alternate; }
+.home-front__worlds-orb { position:absolute; display:block; width:clamp(280px,36vw,560px); aspect-ratio:1; border-radius:50%; opacity:.55; pointer-events:none; }
+.home-front__worlds-orb--a { top:-18%; left:6%; background:radial-gradient(circle, #ff00cc 0%, transparent 68%); animation:homeWorldsOrbA 18s ease-in-out infinite alternate; }
+.home-front__worlds-orb--b { right:4%; bottom:-22%; background:radial-gradient(circle, #00ffff 0%, transparent 68%); animation:homeWorldsOrbB 22s ease-in-out infinite alternate; }
+.home-front__worlds-orb--c { top:38%; left:42%; width:clamp(180px,22vw,360px); background:radial-gradient(circle, #ccff00 0%, transparent 68%); animation:homeWorldsOrbC 16s ease-in-out infinite alternate; }
 @keyframes homeWorldsOrbA { to { transform:translate(40px,26px) scale(1.08); } }
 @keyframes homeWorldsOrbB { to { transform:translate(-36px,-22px) scale(.94); } }
 @keyframes homeWorldsOrbC { to { transform:translate(22px,-30px) scale(1.06); } }
@@ -97,13 +97,19 @@ html.calm-mode .home-front__kicker span,
     radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
     rgba(4, 4, 6, 0.96);
   background: var(--glass-card-bg);
+  /* Floor is already ~96% opaque. Live backdrop-filter on seven 3D slides
+     is what made the home worlds rail lag and shimmer. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
-.home-front__world:hover { transform:translateY(-1px); box-shadow:var(--glass-card-shadow),0 16px 34px -22px color-mix(in srgb,var(--c) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.09); }
+.home-front__world:hover { box-shadow:var(--glass-card-shadow),0 16px 34px -22px color-mix(in srgb,var(--c) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.09); }
+.home-front__deck .home-front__world:hover { transform: none; }
+.home-front__deck .z-deck__slide[aria-hidden="true"] .home-front__world::after { display: none; }
 .home-front__world[data-world="events"] { border-color:color-mix(in srgb,var(--neon-yellow,#ccff00) 72%,#101014); }
 .home-front__world[data-world="events"] { padding:0; }
 .home-front__world[data-world="events"] .home-front__world-top { position:absolute; z-index:5; top:0; left:0; right:0; padding:22px; background:linear-gradient(180deg,rgba(3,3,4,.82),rgba(3,3,4,.24) 72%,transparent); }
 .home-front__world--feature { grid-column:span 6; min-height:430px; }
-.home-front__world::after { content:""; position:absolute; width:340px; height:340px; right:-165px; bottom:-215px; border-radius:50%; background:var(--c); opacity:.052; filter:blur(82px); pointer-events:none; }
+.home-front__world::after { content:""; position:absolute; width:340px; height:340px; right:-165px; bottom:-215px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--c) 55%, transparent), transparent 70%); opacity:.22; pointer-events:none; }
 .home-front__topo { position:absolute; inset:0; width:100%; height:100%; color:#a7a7ad; opacity:.15; pointer-events:none; }
 .home-front__topo path { fill:none; stroke:currentColor; stroke-width:1.1; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 .home-front__topo .home-front__topo-river { stroke-width:5; opacity:.34; }
@@ -111,7 +117,7 @@ html.calm-mode .home-front__kicker span,
 .home-front__city-map path,.home-front__city-map circle { fill:none; stroke:currentColor; stroke-width:1; vector-effect:non-scaling-stroke; }
 .home-front__city-map .home-front__city-river { stroke:var(--neon-cyan,#19e3ff); stroke-width:12; opacity:.34; }
 .home-front__city-map circle { fill:var(--neon-cyan,#19e3ff); stroke:none; }
-.home-front__object-motif { position:absolute; inset:-8%; width:116%; height:116%; color:color-mix(in srgb,var(--c) 30%,#c6c8cf); opacity:.34; pointer-events:none; transform:scale(1.08); transform-origin:center; filter:drop-shadow(0 0 11px color-mix(in srgb,var(--c) 14%,transparent)); }
+.home-front__object-motif { position:absolute; inset:-8%; width:116%; height:116%; color:color-mix(in srgb,var(--c) 30%,#c6c8cf); opacity:.34; pointer-events:none; transform:scale(1.08); transform-origin:center; }
 .home-front__object-motif path,.home-front__object-motif rect,.home-front__object-motif circle { fill:none; stroke:currentColor; stroke-width:1.45; vector-effect:non-scaling-stroke; }
 .home-front__object-motif .detail { stroke-width:.85; stroke-dasharray:5 5; opacity:.82; }
 .home-front__object-motif circle { fill:currentColor; stroke:none; }
@@ -130,9 +136,7 @@ html.calm-mode .home-front__kicker span,
 /* One motif weight for every world. The .33/.35/.36 spread was invisible as
    an intent and only made the set harder to keep aligned. */
 .home-front__world .home-front__object-motif { opacity:.35; }
-.home-front__world[data-world="gifting"] .home-front__object-motif { filter:drop-shadow(0 0 13px rgba(204,255,0,.11)); }
-.home-front__world[data-world="gigs"] .home-front__object-motif { filter:drop-shadow(0 0 12px rgba(128,80,255,.13)); }
-.home-front__object-motif--spotted { opacity:.31; filter:drop-shadow(0 0 12px rgba(255,31,160,.12)); }
+.home-front__object-motif--spotted { opacity:.31; }
 .home-front__object-motif--beaches { inset:-3%; width:106%; height:106%; opacity:.24; }
 .home-front__object-motif--events { inset:-4%; width:108%; height:108%; opacity:.18; mix-blend-mode:screen; }
 .home-front__object-motif--directory { inset:-5%; width:110%; height:110%; opacity:.2; }

@@ -61,13 +61,13 @@ const WHY_ROWS = [
   },
   {
     old: "Community calendar",
-    now: "Events",
+    now: "EVENTZ",
     href: "/events",
     text: "Every queer night in town on one map. Not the three an algorithm decided were advertiser safe.",
   },
   {
     old: "Local services",
-    now: "Directory",
+    now: "PLACEZ",
     href: "/directory",
     text: "Queer-owned and queer-safe spots. Organic ranking is not for sale.",
   },

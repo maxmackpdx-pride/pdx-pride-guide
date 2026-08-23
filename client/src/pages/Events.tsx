@@ -389,13 +389,13 @@ export default function Events() {
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
     shareEvent
-      ? `${shareEvent.title} | Portland Pride 2026 | Zaylist`
-      : "Portland Pride 2026 Events | Zaylist",
+      ? `${shareEvent.title} | EVENTZ | Zaylist`
+      : "EVENTZ | Zaylist",
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
         )
-      : "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
+      : "Browse every live Portland night on EVENTZ. Filter by day, type, and neighborhood.",
     shareEvent
       ? {
           url: eventUrl(shareEvent.id, shareEvent.title),
@@ -510,7 +510,7 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="happening" board="Events" />
+      <ZBoardAddressStrip path="happening" board="EVENTZ" />
       <EventsHero eventCount={upcomingCount} stats={heroStats} />
 
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />

@@ -207,8 +207,8 @@ export default function MobileBottomNav() {
       {eventsOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setEventsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site" data-accent="cyan" role="dialog" aria-label="Events">
-            <h3>Events</h3>
+          <div className="hub-more-sheet hub-more-sheet--site" data-accent="cyan" role="dialog" aria-label="Eventz">
+            <h3>Eventz</h3>
             {EVENTS_NAV.map(item => (
               <Link
                 key={item.href}

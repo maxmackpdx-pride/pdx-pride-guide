@@ -65,8 +65,8 @@ function isActivePost(p: GiftingPost) {
 export default function Gifting() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "GIFTZ | Zaylist | Portland Pride 2026",
-    "Give and find free stuff for the scene - Pride week and all year on GIFTZ.",
+    "GIFTZ | Zaylist",
+    "Give and find free stuff for the scene - all year on GIFTZ.",
     { image: shareCardUrl("gifting"), imageAlt: "GIFTZ on Zaylist" },
   );
   const { user } = useAuth();

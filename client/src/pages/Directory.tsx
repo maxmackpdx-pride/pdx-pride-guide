@@ -348,8 +348,8 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const placeSeo = selectedPlace;
   usePageSeo(
     placeSeo
-      ? `${placeSeo.name} | ${isSpaces ? "MY SQUADZ" : "Portland Directory"} | Zaylist`
-      : isSpaces ? "MY SQUADZ | Zaylist" : "Portland Directory | Zaylist",
+      ? `${placeSeo.name} | ${isSpaces ? "MY SQUADZ" : "OUR PLACEZ"} | Zaylist`
+      : isSpaces ? "MY SQUADZ | Zaylist" : "OUR PLACEZ | Zaylist",
     placeSeo
       ? [
           placeSeo.neighborhood,
@@ -441,7 +441,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const queerOwned = boardBusinesses.filter(b => b.queerOwned).length;
     const hostingThisWeek = boardBusinesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
     return [
-      { num: boardBusinesses.length, label: isSpaces ? "Squadz listed" : "Places listed", color: "#ff1fa0" },
+      { num: boardBusinesses.length, label: isSpaces ? "Squadz listed" : "PLACEZ listed", color: "#ff1fa0" },
       { num: queerOwned, label: isSpaces ? "Community-led" : "Queer-owned", color: "#c8fa3c" },
       { num: hostingThisWeek, label: "Hosting this week", color: "#19e3ff" },
     ];
@@ -602,7 +602,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const resultLine = isLoading
     ? "Loading…"
-    : `${filtered.length} ${isSpaces ? "squad" : "place"}${filtered.length === 1 ? "" : isSpaces ? "z" : "s"}`;
+    : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : "PLACEZ"}`;
 
   return (
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
@@ -616,7 +616,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       {/* Stats band */}
       <section
         className="directory-stats-band"
-        aria-label="Directory totals"
+        aria-label={isSpaces ? "MY SQUADZ totals" : "PLACEZ totals"}
       >
         {heroStats.map((stat, i) => (
           <div
@@ -646,7 +646,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>
-            <h2 className="display section-heading">{isSpaces ? "Add a squad" : "Add to the directory"}</h2>
+            <h2 className="display section-heading">{isSpaces ? "Add a squad" : "Add to PLACEZ"}</h2>
             <p className="board-copy-sm">
               {isSpaces
                 ? "Logged-in members can add queer clubs, crews, nonprofits, and community groups. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Organizers can claim a listing to manage it."
@@ -826,7 +826,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       </section>}
 
       {/* Map + key + filters + dock */}
-      <section className="directory-stage" aria-label={isSpaces ? "Squadz" : "Places"}>
+      <section className="directory-stage" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
         <div className="directory-stage__map">
           <div className="directory-stage__map-frame">
             {!isLoading && (
@@ -896,7 +896,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <SearchInput
                 id="directory-search"
                 label={undefined}
-                placeholder={isSpaces ? "Search MY SQUADZ…" : "Search the directory…"}
+                placeholder={isSpaces ? "Search MY SQUADZ…" : "Search PLACEZ…"}
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 onClear={() => setSearchQuery("")}

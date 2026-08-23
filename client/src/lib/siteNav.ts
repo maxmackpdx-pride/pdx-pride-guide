@@ -90,13 +90,13 @@ export type PageHeaderMeta = {
 
 /** Breadcrumb section + H1 title for interior pages. */
 export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
-  "/events": { section: "Events", title: "EVENTZ" },
-  "/schedule": { section: "Events", title: "My Schedule" },
+  "/events": { section: "EVENTZ", title: "EVENTZ" },
+  "/schedule": { section: "EVENTZ", title: "My Schedule" },
   "/pride-work": { section: "Boards", title: "GIGZ" },
   "/gifting": { section: "Boards", title: "GIFTZ" },
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
-  "/directory": { section: "Places", title: "OUR PLACEZ" },
+  "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
   "/z/out": { section: "OUTZ", title: "Outdoors" },
   "/z/out/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
   "/z/out/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },

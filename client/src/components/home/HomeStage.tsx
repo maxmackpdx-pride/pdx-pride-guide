@@ -56,7 +56,7 @@ const WORLDS: World[] = [
   {
     key: "beaches",
     number: "01",
-    title: "Nude beaches",
+    title: "OUTZ",
     eyebrow: "Live river conditions",
     body: "Weather, water, parking, carpools and check-ins from people there now.",
     action: "Check the river",
@@ -67,7 +67,7 @@ const WORLDS: World[] = [
   {
     key: "events",
     number: "02",
-    title: "Up next events",
+    title: "EVENTZ",
     eyebrow: "Flyers · Portland",
     body: "Every queer party, show, gathering and march in one place.",
     action: "Find the party",
@@ -78,7 +78,7 @@ const WORLDS: World[] = [
   {
     key: "directory",
     number: "03",
-    title: "Places",
+    title: "PLACEZ",
     eyebrow: "The directory for us",
     body: "Bars, food, shops, venues and services that are ours or truly for us.",
     action: "Spend queer",
@@ -110,7 +110,7 @@ const WORLDS: World[] = [
   {
     key: "gigs",
     number: "06",
-    title: "Gig board",
+    title: "GIGZ",
     eyebrow: "Hiring both ways",
     body: "Find paid work or find the queer talent your event needs.",
     action: "Find a gig",
@@ -121,7 +121,7 @@ const WORLDS: World[] = [
   {
     key: "spotted",
     number: "07",
-    title: "Missed connections",
+    title: "MIZZED CONNECTION",
     eyebrow: "Say the thing",
     body: "Post who you saw. Replies stay private and consent comes first.",
     action: "See who got spotted",
@@ -131,7 +131,7 @@ const WORLDS: World[] = [
   },
 ];
 
-function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUpNext>; fallback?: HomeStageCardData }) {
+function EventPreview({ events, fallback, playing = true }: { events: ReturnType<typeof eventsUpNext>; fallback?: HomeStageCardData; playing?: boolean }) {
   const slides = useMemo(() => {
     if (events.length) {
       return events.map((event) => ({
@@ -164,13 +164,13 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
    * reduced motion, and resets whenever the slide set changes.
    */
   useEffect(() => {
-    if (slides.length < 2 || prefersStillMotion()) return;
+    if (!playing || slides.length < 2 || prefersStillMotion()) return;
     const id = window.setInterval(
       () => setActive((i) => (i + 1) % slides.length),
       4200,
     );
     return () => window.clearInterval(id);
-  }, [slides.length]);
+  }, [playing, slides.length]);
 
   useEffect(() => {
     setActive(0);
@@ -182,9 +182,8 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
   return (
     <div className="home-front__event-preview" aria-label="Upcoming event flyers" style={{ ["--event-c" as string]: event.color }}>
       <Link className="home-front__event-feature" href={event.href}>
-        {event.poster ? <img className="home-front__event-backdrop" src={event.poster} alt="" aria-hidden="true" /> : null}
         <span className="home-front__event-poster pdx-poster-well">
-          {event.poster ? <img src={event.poster} alt={`${event.title} flyer`} /> : <strong>{event.title}</strong>}
+          {event.poster ? <img src={event.poster} alt={`${event.title} flyer`} loading={playing ? "eager" : "lazy"} decoding="async" /> : <strong>{event.title}</strong>}
         </span>
         <span className="home-front__event-info">
           <span className="home-front__event-when">{event.when}{event.demo ? " · Demo" : ""}</span>
@@ -282,7 +281,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
     queryFn: () => apiRequest("GET", "/api/directory").then((response) => response.json()),
     staleTime: 60_000,
   });
-  const directoryTiles = useMemo(() => directoryPlaces.slice(0, 24), [directoryPlaces]);
+  const directoryTiles = useMemo(() => directoryPlaces.slice(0, 9), [directoryPlaces]);
   const upcoming = useMemo(() => {
     const strict = eventsUpNext(events, 8);
     if (strict.length >= 4) return strict;
@@ -418,7 +417,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
           gap={0.12}
           rotate={12}
         >
-          {WORLDS.map((world) => {
+          {WORLDS.map((world, index) => {
             /*
              * Two postings read as a board; one blown-up posting reads as an
              * advert. stageLists already carries up to two per board, so use
@@ -429,6 +428,11 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
               : undefined;
             const single = world.sampleKey ? samples[world.sampleKey] : null;
             const postings = (listed?.length ? listed : single ? [single] : []).slice(0, 2);
+            const dist = Math.min(
+              Math.abs(index - selectedWorld),
+              WORLDS.length - Math.abs(index - selectedWorld),
+            );
+            const hot = dist <= 1;
             return (
               <article
                 key={world.key}
@@ -480,13 +484,13 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                     {world.key !== "beaches" ? <p>{world.body}</p> : null}
                   </div>
                 ) : null}
-                {world.key === "beaches" ? (
+                {world.key === "beaches" && hot ? (
                   <div className="home-front__beach-live">
                     <HomeBeachWidget showBoth />
                   </div>
                 ) : null}
-                {world.key === "events" ? <EventPreview events={upcoming} fallback={samples.events} /> : null}
-                {world.key === "directory" && directoryTiles.length ? (
+                {world.key === "events" ? <EventPreview events={upcoming} fallback={samples.events} playing={hot && selectedWorld === index} /> : null}
+                {world.key === "directory" && hot && directoryTiles.length ? (
                   <div className="home-front__directory-grid" aria-label="Local businesses in the Zaylist directory">
                     {directoryTiles.map((place) => {
                       const logo = resolveDirectoryLogo(place.name, place.imageUrl || undefined)

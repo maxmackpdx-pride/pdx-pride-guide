@@ -74,7 +74,7 @@ export default function AboutTab({ data, isOwner, onBook }: Props) {
 
       {isPromoter && data.businessPlace && (
         <section>
-          <SectionHeader kicker="Directory" title="Business card" />
+          <SectionHeader kicker="PLACEZ" title="Business card" />
           <PlaceCard
             name={data.businessPlace.name}
             category={data.businessPlace.type || "venue"}
@@ -88,7 +88,7 @@ export default function AboutTab({ data, isOwner, onBook }: Props) {
             phone={data.businessPlace.phone || undefined}
           />
           <Link href={`/directory?place=${data.businessPlace.id}`} className="pp-directory-link display">
-            See in Places directory →
+            See in PLACEZ →
           </Link>
         </section>
       )}

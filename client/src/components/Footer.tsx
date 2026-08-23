@@ -12,9 +12,9 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
     id: "explore",
     title: "Explore",
     links: [
-      ["/events", "Events"],
+      ["/events", "EVENTZ"],
       ["/schedule", "Schedule"],
-      ["/directory", "Directory"],
+      ["/directory", "PLACEZ"],
       ["/z/squadz", "MY SQUADZ"],
       ["/z/placez", "OUR PLACEZ"],
       ["/z/dark", "ZAYDARK"],

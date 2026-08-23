@@ -120,8 +120,8 @@ function NextPreviewCardStack() {
 
 export default function Home() {
   usePageSeo(
-    "Zaylist | Portland Pride 2026 Events",
-    "Every Portland night worth knowing, in one place. Find the party, back the rooms that host it, and stick around after July 19.",
+    "Zaylist | Queer Portland, all in one place",
+    "Every Portland night worth knowing, in one place. Find the party, the room, the gig, and the people.",
     { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
   );
 

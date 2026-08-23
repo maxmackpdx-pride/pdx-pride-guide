@@ -76,6 +76,14 @@ export function ZDeck({
   >(null);
   const hovering = useRef(false);
   const justDragged = useRef(false);
+  const inView = useRef(true);
+  const selectedRef = useRef(selected);
+  const buriedRef = useRef<boolean[]>([]);
+  selectedRef.current = selected;
+
+  const setBusy = (busy: boolean) => {
+    frameRef.current?.classList.toggle("z-deck--busy", busy);
+  };
 
   const paint = useCallback(() => {
     const cardWidth = width.current;
@@ -88,19 +96,28 @@ export function ZDeck({
       if (offset > total / 2) offset -= total;
       const distance = Math.abs(offset);
       const ramp = Math.pow(distance, CF_FALLOFF);
-      const tilt = Math.min(rotate * ramp, 82) * Math.sign(offset);
-      card.style.transform =
-        `translateX(calc(-50% + ${offset * pitch}px))`
-        + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
-        + ` rotateY(${-tilt}deg)`;
+      // Far cards are already faded. Keep rotateY/translateZ on the front pair
+      // only — 3D + backdrop-filter on seven glass slides is what felt glitchy.
+      if (distance >= 2) {
+        card.style.transform = `translateX(calc(-50% + ${offset * pitch}px))`;
+      } else {
+        const tilt = Math.min(rotate * ramp, 82) * Math.sign(offset);
+        card.style.transform =
+          `translateX(calc(-50% + ${offset * pitch}px))`
+          + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
+          + ` rotateY(${-tilt}deg)`;
+      }
       const edge = Math.min(1, Math.max(0, total / 2 - distance));
       card.style.opacity = String(Math.max(0, 1 - fade * distance) * edge);
       card.style.zIndex = String(100 - Math.round(distance));
       // Only the front card is reachable: the rest are visually stacked behind
       // it, so leaving them focusable would tab into cards nobody can see.
       const buried = distance >= 1;
-      card.setAttribute("aria-hidden", buried ? "true" : "false");
-      card.inert = buried;
+      if (buriedRef.current[index] !== buried) {
+        buriedRef.current[index] = buried;
+        card.setAttribute("aria-hidden", buried ? "true" : "false");
+        card.inert = buried;
+      }
     });
   }, [total, fade, gap, rotate]);
 
@@ -118,14 +135,17 @@ export function ZDeck({
       pos.current = to;
       paint();
       raf.current = null;
+      setBusy(false);
       return;
     }
+    setBusy(true);
     const step = () => {
       const remaining = to - pos.current;
       if (Math.abs(remaining) < 0.0004) {
         pos.current = to;
         paint();
         raf.current = null;
+        setBusy(false);
         return;
       }
       pos.current += remaining * 0.16;
@@ -153,12 +173,24 @@ export function ZDeck({
   }, [measure]);
 
   useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      inView.current = Boolean(entry?.isIntersecting);
+    }, { threshold: 0.12 });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (!autoplay || total === 0 || prefersReducedMotion()) return;
     const timer = window.setInterval(() => {
-      if (!drag.current && !hovering.current) onSelect((selected + 1) % total);
+      if (!drag.current && !hovering.current && inView.current) {
+        onSelect((selectedRef.current + 1) % total);
+      }
     }, autoplayMs);
     return () => window.clearInterval(timer);
-  }, [selected, total, onSelect, autoplay, autoplayMs]);
+  }, [total, onSelect, autoplay, autoplayMs]);
 
   useEffect(() => () => {
     if (raf.current) cancelAnimationFrame(raf.current);
@@ -179,6 +211,7 @@ export function ZDeck({
       cancelAnimationFrame(raf.current);
       raf.current = null;
     }
+    setBusy(true);
     event.currentTarget.setPointerCapture(event.pointerId);
     target.current = pos.current;
     drag.current = {
