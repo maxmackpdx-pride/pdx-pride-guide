@@ -92,7 +92,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
               ))}
             </div>
           ) : (
-            <div className="mp-empty"><p>No upcoming shows on the books.</p></div>
+            <div className="mp-empty"><p>No upcoming shows on the books.{data.isOwner ? <> Submit on the <Link href="/submit">promoter form</Link>.</> : null}</p></div>
           )
         ) : (
           <>
@@ -101,7 +101,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
                 {hostedPast.map(evt => <EventCard key={evt.id} {...eventRowProps(evt, goingCount(evt.id))} />)}
               </div>
             ) : (
-              <div className="mp-empty"><p>No past shows yet.</p></div>
+              <div className="mp-empty"><p>No past shows yet.{data.isOwner ? <> Browse the <Link href="/events">events board</Link>.</> : null}</p></div>
             )}
             {hostedPastAll.length > 2 && (
               <button type="button" className="mp-showall-btn" onClick={() => setPastExpanded(v => !v)}>
@@ -148,7 +148,7 @@ export default function EventsTab({ data }: { data: MemberProfileData }) {
           <p>
             {memFilter === "upcoming"
               ? (data.isOwner ? <>No RSVPs yet, browse the <Link href="/events">events board</Link>.</> : "Nothing shared here yet.")
-              : "No past events yet."}
+              : (data.isOwner ? <>No past events yet. Browse the <Link href="/events">events board</Link>.</> : "No past events yet.")}
           </p>
         </div>
       )}

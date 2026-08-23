@@ -9192,8 +9192,9 @@ footer a:hover { color: #00FFFF !important; }
   text-shadow: 0 2px 0 #000, 0 0 18px rgba(204, 255, 0, 0.35);
 }
 
-/* Event modal - single panel, one scroll, one sticky footer.
-   Overlay must NOT scroll (that stacked a second copy of the card mid-viewport). */
+/* Event modal - fixed chrome + independent body scroll + sticky footer.
+   Overlay must NOT scroll (that stacked a second copy of the card mid-viewport).
+   Bottom pad clears the site dock on phones; desktop media query drops it. */
 .event-modal-overlay {
   position: fixed;
   inset: 0;
@@ -9202,13 +9203,24 @@ footer a:hover { color: #00FFFF !important; }
   align-items: center;
   justify-content: center;
   overflow: hidden; /* only .event-modal__scroll moves */
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) 12px
-    calc(env(safe-area-inset-bottom, 0px) + 16px);
+  overscroll-behavior: none;
+  box-sizing: border-box;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px
+    calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px) + 8px);
   background: rgba(0, 0, 0, 0.92);
 }
 
+@media (min-width: 641px) {
+  .event-modal-overlay {
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 24px
+      calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
 /* Deep-glass open-event panel - day-accent neon edge + black ring + OLED fill.
-   Base sizes are mobile-first. Desktop bumps width + height below. */
+   Base sizes are mobile-first. Desktop bumps width + height below.
+   Height is capped by the overlay content box (100%) so a 360px phone with
+   the dock still leaves a real scroll remainder. */
 .event-modal {
   --c: var(--event-accent, #19e3ff);
   position: relative;
@@ -9216,8 +9228,9 @@ footer a:hover { color: #00FFFF !important; }
   flex-direction: column;
   width: 100%;
   max-width: 660px;
-  max-height: min(92dvh, 920px);
-  height: min(92dvh, 920px);
+  min-height: 0;
+  max-height: min(92dvh, 920px, 100%);
+  height: min(92dvh, 920px, 100%);
   margin: 0;
   overflow: hidden;
   border-radius: 18px;
@@ -9236,19 +9249,52 @@ footer a:hover { color: #00FFFF !important; }
   isolation: isolate;
 }
 
+/* Fixed chrome: close/share, title, primary URL. Does not scroll. */
+.event-modal__chrome {
+  position: relative;
+  z-index: 6;
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 8px 14px 12px;
+  background: #050506;
+  border-bottom: 1px solid color-mix(in srgb, var(--c, var(--event-accent, #19e3ff)) 22%, #1f1f1f);
+}
+
+.event-modal__chrome-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.event-modal__chrome .event-modal__title {
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-modal__chrome .event-modal__tickets-mid {
+  margin: 0;
+}
+
 .event-modal__scroll {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   background: #050506;
 }
 
-/* One footer only - opaque, never mid-scroll ghost */
+/* One footer only - opaque, never mid-scroll ghost.
+   Overlay already clears the dock; do not double-pad safe-area here. */
 .event-modal__sticky-cta {
   position: relative;
   z-index: 4;
@@ -9257,7 +9303,7 @@ footer a:hover { color: #00FFFF !important; }
   gap: 10px;
   flex-wrap: nowrap;
   align-items: stretch;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 16px;
   border-top: 1px solid color-mix(in srgb, var(--c, var(--event-accent, #19e3ff)) 28%, #1f1f1f);
   background: #050506;
   box-shadow: 0 -12px 28px -16px rgba(0, 0, 0, 0.9);
@@ -9296,6 +9342,7 @@ footer a:hover { color: #00FFFF !important; }
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  flex-shrink: 0;
   border-radius: 0;
   overflow: hidden;
   background: var(--poster-well-bg);
@@ -9307,28 +9354,24 @@ footer a:hover { color: #00FFFF !important; }
   z-index: 1;
   display: block;
   width: 100%;
-  height: min(48vh, 480px);
+  /* Cap so the scroll region always has remainder at 360px + dock. */
+  height: clamp(120px, 22vh, 200px);
+  flex-shrink: 0;
   object-fit: cover;
   object-position: top center;
 }
 
-/* Desktop: wider + 30% taller than mobile (mobile sizes above stay perfect).
-   Mobile height cap 920px → 1196px; poster 480px → 624px. */
+/* Desktop: wider + taller. Overlay dock pad already dropped at 641px. */
 @media (min-width: 900px) {
-  .event-modal-overlay {
-    padding: calc(env(safe-area-inset-top, 0px) + 12px) 24px
-      calc(env(safe-area-inset-bottom, 0px) + 12px);
-  }
-
   .event-modal {
     max-width: min(920px, 92vw);
     width: min(920px, 92vw);
-    max-height: min(98dvh, 1196px);
-    height: min(98dvh, 1196px);
+    max-height: min(98dvh, 1196px, 100%);
+    height: min(98dvh, 1196px, 100%);
   }
 
   .event-modal__poster-img {
-    height: min(62.4vh, 624px);
+    height: min(40vh, 380px);
   }
 
   .event-modal__body {
@@ -9342,6 +9385,10 @@ footer a:hover { color: #00FFFF !important; }
   .event-modal__sticky-cta {
     padding: 14px 24px 16px;
   }
+
+  .event-modal__chrome {
+    padding: 10px 24px 14px;
+  }
 }
 
 .event-modal__poster .pdx-poster-well__scan {
@@ -9349,15 +9396,14 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .event-modal__close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+  position: relative;
+  flex: 0 0 auto;
   z-index: 6;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: 1px solid color-mix(in srgb, var(--c, #fff) 28%, #333);
   background: rgba(0, 0, 0, 0.75);
   color: var(--text-meta);

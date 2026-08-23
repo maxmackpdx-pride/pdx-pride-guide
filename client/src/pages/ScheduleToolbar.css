@@ -119,6 +119,18 @@
   padding: 18px clamp(20px, 4vw, 44px) 40px;
 }
 
+@media (max-width: 640px) {
+  .schedule-grid-shell {
+    padding: 14px 12px 124px;
+  }
+  .schedule-empty-banner {
+    padding: 0 12px;
+  }
+  .schedule-empty-banner__inner {
+    padding: 16px 14px;
+  }
+}
+
 .schedule-page.board-page--makeover .sch-scroll {
   border-color: #1c1c22;
   border-radius: 8px;

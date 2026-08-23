@@ -10,7 +10,7 @@
    being loaded globally via client/src/index.css.
    ============================================================ */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
@@ -81,6 +81,10 @@ function mondayOf(ymd: string): string {
 /** "JUL 20" style label for a YYYY-MM-DD. */
 function ymdDayLabel(ymd: string): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short", day: "numeric" }).format(new Date(ymdMs(ymd))).toUpperCase();
+}
+/** Day-of-month number ("20") for a YYYY-MM-DD. */
+function ymdDayNum(ymd: string): string {
+  return String(Number(ymd.slice(8, 10)));
 }
 type WeekColumn = { key: string; short: string; date: string; ymd: string; color: string; text: string };
 /** The 7 columns (Mon→Sun) for the week starting `weekStartYmd`, colored by weekday. */
@@ -307,20 +311,8 @@ export default function Schedule({
     return () => window.removeEventListener('keydown', onKey);
   }, [closeEvent]);
 
-  // Open on Friday afternoon - the packed part of the grid (3pm, FRI column).
-  useEffect(() => {
-    const id = setTimeout(() => {
-      const el = scrollElRef.current;
-      if (!el) return;
-      const compact = density === 'Compact';
-      const HH = embed ? 42 : compact ? 58 : 74;
-      const BASE = embed ? 156 : compact ? 230 : 290;
-      el.scrollTop = Math.max(0, (15 - 10) * HH - 8);
-      el.scrollLeft = Math.round(3.15 * BASE);
-    }, 80);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Grid scroll-to-now lives after the day columns are built (year-round
+  // week, not a hardcoded Pride-week Friday).
 
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -800,6 +792,59 @@ export default function Schedule({
     toggleRsvp,
   ]);
 
+  const todayYmd = pacificTodayDate(Date.now());
+  const thisWeekStart = mondayOf(todayYmd);
+  const isThisWeek = activeWeekStart === thisWeekStart;
+  const weekEventCount = days.reduce((n, d) => n + d.blocks.length, 0);
+
+  const daysRef = useRef(days);
+  daysRef.current = days;
+  const weekColumnsRef = useRef(weekColumns);
+  weekColumnsRef.current = weekColumns;
+
+  const scrollDayIntoView = useCallback((idx: number) => {
+    const el = scrollElRef.current;
+    if (!el) return;
+    const ds = daysRef.current;
+    let left = AXIS_W;
+    for (let i = 0; i < idx; i++) left += ds[i]?.width ?? BASE_DAY;
+    el.scrollTo({ left: Math.max(0, left - 8), behavior: "smooth" });
+  }, [AXIS_W, BASE_DAY]);
+
+  const goThisWeek = useCallback(() => {
+    const start = mondayOf(pacificTodayDate(Date.now()));
+    if (activeWeekStart !== start) setWeekStart(start);
+    const today = pacificTodayDate(Date.now());
+    const idx = weekColumnsRef.current.findIndex((c) => c.ymd === today);
+    requestAnimationFrame(() => {
+      if (idx >= 0) scrollDayIntoView(idx);
+    });
+  }, [activeWeekStart, scrollDayIntoView]);
+
+  // Open on today when this week is on screen; otherwise the first busy day
+  // (year-round). Pride-week prototype always jumped to Friday 3pm.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const el = scrollElRef.current;
+      if (!el) return;
+      const cols = weekColumnsRef.current;
+      const ds = daysRef.current;
+      const today = pacificTodayDate(Date.now());
+      const todayIdx = cols.findIndex((c) => c.ymd === today);
+      const firstBusy = ds.findIndex((d) => d.blocks.length > 0);
+      const idx = todayIdx >= 0 ? todayIdx : (firstBusy >= 0 ? firstBusy : 0);
+      let left = AXIS_W;
+      for (let i = 0; i < idx; i++) left += ds[i]?.width ?? BASE_DAY;
+      el.scrollLeft = Math.max(0, left - 8);
+      if (todayIdx >= 0) {
+        el.scrollTop = Math.max(0, ((nowMinutes() / 60) - START) * HOUR_H - 8);
+      } else {
+        el.scrollTop = Math.max(0, (15 - START) * HOUR_H - 8);
+      }
+    }, 80);
+    return () => clearTimeout(id);
+  }, [activeWeekStart, AXIS_W, BASE_DAY, HOUR_H]);
+
   /* ---- now line --------------------------------------------------- */
 
   const nowShown = now != null && now >= START * 60 && now <= END * 60;
@@ -946,14 +991,80 @@ export default function Schedule({
 
   /* ---- empty banner ----------------------------------------------- */
 
-  let emptyBanner: string | false = false;
-  if (view === 'mine' && !user)
-    emptyBanner =
-      'Sign in and tap “I’ll be there” on events to build your schedule.';
-  else if (view === 'mine' && myCount === 0)
-    emptyBanner =
-      'Your week is wide open. Tap the heart on events - or plan a River Brats beach day - and it lands here.';
-  else if (totalVisible === 0) emptyBanner = 'Nothing found. Check the spelling, or drop a word.';
+  type EmptyBanner = { copy: string; actions: ReactNode };
+  let emptyBanner: EmptyBanner | null = null;
+  if (view === "mine" && !user) {
+    emptyBanner = {
+      copy: "Sign in and tap “I’ll be there” on events to build your schedule.",
+      actions: (
+        <>
+          <Button type="button" variant="solid" accent="cyan" size="sm" className="pdx-glass-rebind" onClick={() => setShowAuth(true)}>
+            Sign in
+          </Button>
+          <Link href="/events">
+            <Button as="span" variant="neon" accent="cyan" size="sm" className="pdx-glass-rebind">
+              Browse events
+            </Button>
+          </Link>
+        </>
+      ),
+    };
+  } else if (view === "mine" && myCount === 0) {
+    emptyBanner = {
+      copy: "Your week is wide open. Tap the heart on events - or plan a River Brats beach day - and it lands here.",
+      actions: (
+        <>
+          <Link href="/events">
+            <Button as="span" variant="solid" accent="cyan" size="sm" className="pdx-glass-rebind">
+              Browse events
+            </Button>
+          </Link>
+          <Link href="/submit">
+            <Button as="span" variant="neon" accent="cyan" size="sm" className="pdx-glass-rebind">
+              Submit
+            </Button>
+          </Link>
+        </>
+      ),
+    };
+  } else if (totalVisible === 0) {
+    emptyBanner = {
+      copy: "Nothing found. Check the spelling, or drop a word.",
+      actions: (
+        <>
+          <Button type="button" variant="solid" accent="cyan" size="sm" className="pdx-glass-rebind" onClick={clearFilters}>
+            Clear filters
+          </Button>
+          <Link href="/events">
+            <Button as="span" variant="neon" accent="cyan" size="sm" className="pdx-glass-rebind">
+              Browse events
+            </Button>
+          </Link>
+        </>
+      ),
+    };
+  } else if (weekEventCount === 0) {
+    emptyBanner = {
+      copy: view === "mine" ? "Nothing of yours this week." : "Quiet week on the grid.",
+      actions: (
+        <>
+          {!isThisWeek && (
+            <Button type="button" variant="solid" accent="cyan" size="sm" className="pdx-glass-rebind" onClick={goThisWeek}>
+              This week
+            </Button>
+          )}
+          <Button type="button" variant="neon" accent="cyan" size="sm" className="pdx-glass-rebind" onClick={() => shiftWeek(1)}>
+            Next week
+          </Button>
+          <Link href="/events">
+            <Button as="span" variant="neon" accent="cyan" size="sm" className="pdx-glass-rebind">
+              Browse events
+            </Button>
+          </Link>
+        </>
+      ),
+    };
+  }
 
   /* ---- selected popover ------------------------------------------- */
 
@@ -1437,24 +1548,63 @@ export default function Schedule({
       {!embed && emptyBanner && (
         <div className="schedule-empty-banner">
           <div className="schedule-empty-banner__inner board-empty board-empty--prototype" style={{ marginTop: 0 }}>
-            {emptyBanner}
+            <p className="board-copy-sm">{emptyBanner.copy}</p>
+            <div className="board-empty__actions">{emptyBanner.actions}</div>
           </div>
         </div>
       )}
 
       {/* ---- Week navigator ---- */}
       {!embed && (
-        <div className="sch-weeknav" role="group" aria-label="Week">
-          <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(-1)} aria-label="Previous week">‹</button>
-          <div className="sch-weeknav__label">
-            <span className="sch-weeknav__range">{weekRangeLabel(activeWeekStart)}</span>
-            {activeWeekStart !== mondayOf(pacificTodayDate(Date.now())) && (
-              <button type="button" className="sch-weeknav__today" onClick={() => setWeekStart(mondayOf(pacificTodayDate(Date.now())))}>
-                This week
-              </button>
-            )}
+        <div className="sch-weeknav" role="navigation" aria-label="Schedule week">
+          <div className="sch-weeknav__period">
+            <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(-1)} aria-label="Previous week">‹</button>
+            <div className="sch-weeknav__label">
+              <span className="sch-weeknav__range">{weekRangeLabel(activeWeekStart)}</span>
+            </div>
+            <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(1)} aria-label="Next week">›</button>
+            <button
+              type="button"
+              className={`sch-weeknav__today${isThisWeek ? " is-current" : ""}`}
+              onClick={goThisWeek}
+              aria-current={isThisWeek ? "date" : undefined}
+            >
+              This week
+            </button>
           </div>
-          <button type="button" className="sch-weeknav__arrow" onClick={() => shiftWeek(1)} aria-label="Next week">›</button>
+          <div className="sch-weeknav__days" role="group" aria-label="Days this week">
+            {weekColumns.map((col, i) => {
+              const count = days[i]?.blocks.length ?? 0;
+              const isToday = col.ymd === todayYmd;
+              const dc = calm ? "#7d7d82" : col.color;
+              const dt = calm ? "#c8c8cc" : col.text;
+              return (
+                <button
+                  key={col.ymd}
+                  type="button"
+                  className={`sch-weeknav__day${count ? " has-events" : ""}${isToday ? " is-today" : ""}`}
+                  style={{
+                    color: dt,
+                    borderColor: count || isToday ? dc : "#2a2a32",
+                    background: count ? hexA(dc, 0.22) : "transparent",
+                  }}
+                  onClick={() => scrollDayIntoView(i)}
+                  aria-label={`${col.short} ${col.date}${isToday ? ", today" : ""}${count ? `, ${count} event${count === 1 ? "" : "s"}` : ", no events"}`}
+                  aria-current={isToday ? "date" : undefined}
+                >
+                  <span className="sch-weeknav__dow">{col.short.slice(0, 1)}</span>
+                  <span className="sch-weeknav__dom">{ymdDayNum(col.ymd)}</span>
+                  <span className="sch-weeknav__mark" aria-hidden>
+                    {count > 0 ? (
+                      <span className="sch-weeknav__count">{count}</span>
+                    ) : (
+                      <span className="sch-weeknav__idle" />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -1592,26 +1742,7 @@ export default function Schedule({
 
       {/* ---- Toast ---- */}
       {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            left: '50%',
-            bottom: '28px',
-            transform: 'translateX(-50%)',
-            zIndex: 130,
-            background: 'var(--ink-850)',
-            border: '2px solid var(--green)',
-            color: 'var(--text-hi)',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            letterSpacing: '.04em',
-            textTransform: 'uppercase',
-            fontSize: '13.5px',
-            padding: '12px 20px',
-            borderRadius: '10px',
-            boxShadow: '0 0 24px -4px rgba(57,255,20,.6)',
-          }}
-        >
+        <div className="sch-toast">
           {toast}
         </div>
       )}

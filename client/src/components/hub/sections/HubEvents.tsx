@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { Link } from "wouter";
 
 export type HubEventRow = {
   id: string | number;
@@ -106,6 +107,16 @@ export default function HubEvents({
         {!loading && eventList.length === 0 && (
           <div className="card hub-empty hub-events-empty">
             <span className="kick">{emptyMessage}</span>
+            <div className="hub-events-empty__actions">
+              {tab === "hosting" ? (
+                <Link href="/submit" className="hub-events-empty__link">Submit an event</Link>
+              ) : (
+                <>
+                  <Link href="/events" className="hub-events-empty__link">Browse events</Link>
+                  <Link href="/schedule" className="hub-events-empty__link">Open My Schedule</Link>
+                </>
+              )}
+            </div>
           </div>
         )}
 
