@@ -5,9 +5,9 @@
     "buildCommand": "npm install --include=dev && npm run build"
   },
   "deploy": {
-    "startCommand": "sh -c 'ls dist/index.cjs || npm run build; exec node dist/index.cjs'",
+    "startCommand": "sh -c 'echo STAGING_BOOT cwd=$(pwd); ls -la dist || echo NO_DIST; exec npm start'",
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 300,
+    "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
