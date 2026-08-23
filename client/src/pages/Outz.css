@@ -3,7 +3,7 @@
 .outz-page__terrain { background: linear-gradient(124deg, rgba(255,138,31,.11), transparent 27%), repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 88px), repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 88px); inset: 0; opacity: .8; pointer-events: none; position: absolute; z-index: 0; }
 .outz-page__topo { color: #ff8a1f; fill: none; inset: 0 auto auto 0; opacity: .16; pointer-events: none; position: absolute; stroke: currentColor; stroke-width: 1.4; width: 100%; z-index: 0; }
 .outz-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.outz-refresh, .outz-section, .outz-map-section, .outz-error { max-width: 1180px; margin-inline: auto; padding-inline: clamp(20px, 4vw, 44px); }
+.outz-refresh, .outz-section, .outz-map-section, .outz-error { max-width: var(--zl-col, 1180px); margin-inline: auto; padding-inline: var(--zl-gutter); }
 .outz-refresh { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; color: #a7a7b1; font-size: 12px; letter-spacing: .04em; }
 .outz-error { color: #ffc266; padding-block: 16px; }
 .outz-section { border-top: 1px solid rgba(255,255,255,.1); padding-block: clamp(28px, 5vw, 64px); }

@@ -60,7 +60,7 @@ html.calm-mode .home-front__kicker span,
 @keyframes homeWorldsOrbC { to { transform:translate(22px,-30px) scale(1.06); } }
 .home-front__worlds-grid { position:absolute; inset:-48px; opacity:.08; background-image:linear-gradient(rgba(255,255,255,.85) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.85) 1px, transparent 1px); background-size:48px 48px; animation:homeWorldsGrid 28s linear infinite; }
 @keyframes homeWorldsGrid { to { background-position:48px 48px; } }
-.home-front__worlds-head, .home-front__deck-dots { position:relative; z-index:1; width:min(1280px, 100%); margin-inline:auto; padding-inline:clamp(16px,4vw,48px); box-sizing:border-box; }
+.home-front__worlds-head, .home-front__deck-dots { position:relative; z-index:1; width:min(100%, var(--zl-frame, 1280px)); margin-inline:auto; padding-inline:var(--zl-gutter, clamp(16px,4vw,48px)); box-sizing:border-box; }
 .home-front__worlds-head { margin-bottom:clamp(28px,5vw,52px); }
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
 .home-front__worlds-head p { max-width:56ch; margin:18px 0 0; color:var(--text-body,#d6d6dc); font-size:clamp(15px,1.8vw,18px); line-height:1.5; text-wrap:pretty; }

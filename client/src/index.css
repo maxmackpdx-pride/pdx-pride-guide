@@ -109,6 +109,8 @@ html {
   scrollbar-gutter: stable both-edges;
   /* Prevent sideways rubber-band that leaves the page off-center after zoom */
   overscroll-behavior-x: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -121,6 +123,8 @@ body {
   overflow-x: clip;
   overscroll-behavior-x: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body::before {
@@ -279,11 +283,11 @@ body::before {
   --site-nav-gap: clamp(4px, calc(var(--site-logo-h) * 0.08), 10px);
   --site-brand-gap: 0;
   --site-wordmark-size: clamp(1.35rem, calc(var(--site-logo-h) * 0.24), 1.9rem);
-  width: 100%;
-  max-width: 1440px;
+  width: min(100%, var(--zl-frame));
+  max-width: none;
   min-height: var(--site-header-height);
   margin: 0 auto;
-  padding: 0 clamp(20px, 3vw, 40px);
+  padding: 0 var(--zl-gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1393,8 +1397,10 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   font-weight: 800;
   font-stretch: condensed;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.015em;
   line-height: 0.92;
+  text-wrap: balance;
+  font-kerning: normal;
   text-shadow: 0 1px 0 #000, 0 0 18px rgba(255,255,255,0.05);
 }
 
@@ -3012,12 +3018,14 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
   background: var(--surface-card);
   border: 2px solid var(--neon-blue);
   border-radius: 22px;
-  /* Navy-blue neon glow to match the glowing cards, over the depth shadow.
-     The long, soft drop is what makes it read as a layer above the page
-     rather than a panel pinned into it. */
-  box-shadow: 0 0 46px -8px var(--neon-blue), 0 0 14px -4px var(--neon-blue),
+  /* The long, soft drop is what makes it read as a layer above the page
+     rather than a panel pinned into it. The accent lives on the 2px rim and
+     the 8% --neon-bloom; the 46px + 14px full-strength blue halo it replaced
+     was the retired glow frame. */
+  box-shadow:
     0 40px 90px -20px rgba(0, 0, 0, 0.85),
-    0 8px 28px -12px rgba(0, 0, 0, 0.7);
+    0 8px 28px -12px rgba(0, 0, 0, 0.7),
+    var(--neon-bloom);
   animation: inbox-overlay-in 0.2s var(--ease-out, ease-out);
 }
 
@@ -3379,7 +3387,7 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
     border: 2px solid var(--neon-cyan);
     border-radius: 18px;
     border-left-width: 2px;
-    box-shadow: 0 0 40px -10px var(--neon-cyan), var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55));
+    box-shadow: var(--shadow-lg, 0 20px 60px rgba(0, 0, 0, 0.55)), var(--neon-bloom);
   }
 }
 
@@ -8036,6 +8044,12 @@ footer a:hover { color: #00FFFF !important; }
   margin-bottom: 22px;
 }
 
+/*
+ * "I'll be there" is the one primary action in the cluster, so it keeps the
+ * solid accent plate. Its chrome is the shared solid-CTA recipe plus the 8%
+ * bloom; it used to hand-roll a 40px full-strength lime halo, which is the
+ * retired glow frame.
+ */
 .attendance-cluster-cta__btn {
   background: var(--neon-yellow);
   color: #000;
@@ -8046,7 +8060,14 @@ footer a:hover { color: #00FFFF !important; }
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 0 40px -6px rgba(200, 250, 60, 0.6);
+  box-shadow: var(--glass-btn-solid-shadow), var(--neon-bloom);
+}
+
+/* Calm collapses --neon-bloom to `none`, which is not a valid shadow list
+   item, so calm re-states the plate recipe on its own. */
+html.calm-mode .attendance-cluster-cta__btn,
+:root[data-calm="true"] .attendance-cluster-cta__btn {
+  box-shadow: var(--glass-btn-solid-shadow);
 }
 
 .attendance-cluster-cta__status {
@@ -9124,10 +9145,9 @@ footer a:hover { color: #00FFFF !important; }
   box-shadow:
     0 0 0 2px #000,
     0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 48px -8px color-mix(in srgb, var(--c) 55%, transparent),
-    0 0 90px -16px color-mix(in srgb, var(--c) 35%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--c) 50%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 40px -18px color-mix(in srgb, var(--c) 22%, transparent);
+    inset 0 0 40px -18px color-mix(in srgb, var(--c) 22%, transparent),
+    var(--neon-bloom);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   animation: pgDirCardIn 0.55s var(--ease-out, ease) both;
@@ -9419,11 +9439,7 @@ footer a:hover { color: #00FFFF !important; }
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
     var(--c, var(--event-accent, #39ff14)) !important;
   border: 1px solid #000 !important;
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 28px -4px color-mix(in srgb, var(--c, #39ff14) 70%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+  box-shadow: var(--glass-btn-solid-shadow), var(--neon-bloom) !important;
   text-decoration: none !important;
 }
 
@@ -9511,10 +9527,39 @@ footer a:hover { color: #00FFFF !important; }
     radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #050508 100%),
     radial-gradient(100% 80% at 0% 50%, color-mix(in srgb, var(--c, var(--section-accent)) 12%, transparent), transparent 55%);
   border: 1px solid color-mix(in srgb, var(--c, var(--section-accent, #39ff14)) 45%, #1a1a14);
+  position: relative;
   box-shadow:
-    0 0 0 1px #000,
+    var(--chrome-keyline),
     0 16px 36px -16px rgba(0, 0, 0, 0.9),
-    0 0 28px -10px color-mix(in srgb, var(--c, var(--section-accent)) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    var(--neon-bloom);
+}
+
+/*
+ * The glow proposal pairs the outer bloom with an inner glass sheen: bright
+ * at the top edge, falling away to a dark floor. --glow-sheen is that
+ * gradient; it mounts behind the panel's own content.
+ */
+.event-modal__glass-panel.event-modal__section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glow-sheen);
+}
+
+.event-modal__glass-panel.event-modal__section > * {
+  position: relative;
+  z-index: 1;
+}
+
+html.calm-mode .event-modal__glass-panel.event-modal__section,
+:root[data-calm="true"] .event-modal__glass-panel.event-modal__section {
+  box-shadow:
+    var(--chrome-keyline),
+    0 16px 36px -16px rgba(0, 0, 0, 0.9),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
@@ -9543,11 +9588,14 @@ footer a:hover { color: #00FFFF !important; }
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%),
     var(--c, #39ff14) !important;
   border: 1px solid #000 !important;
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 24px -4px color-mix(in srgb, var(--c) 65%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
+  box-shadow: var(--glass-btn-solid-shadow), var(--neon-bloom) !important;
+}
+
+html.calm-mode .event-modal .event-modal__cta--primary.pdx-glass-btn--solid,
+html.calm-mode .event-modal .event-modal__sticky-cta-btn.pdx-glass-btn--solid,
+:root[data-calm="true"] .event-modal .event-modal__cta--primary.pdx-glass-btn--solid,
+:root[data-calm="true"] .event-modal .event-modal__sticky-cta-btn.pdx-glass-btn--solid {
+  box-shadow: var(--glass-btn-solid-shadow) !important;
 }
 
 .event-modal .event-modal__cta--secondary.pdx-glass-btn--outline,
@@ -10883,7 +10931,7 @@ html.calm-mode .board-detail-backdrop {
 
 .spotted-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--spotted-accent, #FF00CC) 55%, transparent);
+  box-shadow: var(--neon-bloom);
 }
 
 .spotted-card__found-stamp {
@@ -11953,7 +12001,7 @@ html.calm-mode .footer-coffee__btn:hover {
 
 @media (max-width: 640px) {
   .site-footer__inner {
-    padding: 22px 16px 14px;
+    padding: 22px var(--zl-gutter) 14px;
   }
 
   .site-footer__grid {
@@ -13459,25 +13507,27 @@ html.calm-mode .schedule-now-line {
   border-radius: 12px;
   padding: 16px 24px;
   cursor: pointer;
-  box-shadow: 0 0 18px var(--neon-magenta), 0 0 36px color-mix(in srgb, var(--neon-magenta) 45%, transparent);
-  animation: exportGlow 2.2s ease-in-out infinite;
+  /* Solid accent plate for the one primary action on the page: the shared
+     solid-CTA recipe plus the 8% bloom. The 18px + 36px full-strength magenta
+     halo it replaced, and the exportGlow pulse that drove it, were the retired
+     glow frame. */
+  box-shadow: var(--glass-btn-solid-shadow), var(--neon-bloom);
   transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
-}
-
-@keyframes exportGlow {
-  0%, 100% { box-shadow: 0 0 18px var(--neon-magenta), 0 0 36px color-mix(in srgb, var(--neon-magenta) 45%, transparent); }
-  50%       { box-shadow: 0 0 30px var(--neon-magenta), 0 0 60px color-mix(in srgb, var(--neon-magenta) 55%, transparent); }
 }
 
 .schedule-export-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 40px var(--neon-magenta), 0 0 80px color-mix(in srgb, var(--neon-magenta) 60%, transparent);
+  filter: brightness(1.06);
 }
 
 .schedule-export-btn:disabled {
   opacity: 0.55;
   cursor: default;
-  animation: none;
+}
+
+html.calm-mode .schedule-export-btn,
+:root[data-calm="true"] .schedule-export-btn {
+  box-shadow: var(--glass-btn-solid-shadow);
 }
 
 .schedule-empty-banner {
@@ -16293,6 +16343,7 @@ html.calm-mode .board-stats-band,
   text-transform: uppercase;
   color: #8c8980;
   padding-bottom: 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Listing cards - design density */
@@ -16790,7 +16841,7 @@ html.calm-mode .board-stats-band,
 .events-page.board-page--makeover .events-page__body--schedule {
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(20px, 3vw, 32px) clamp(20px, 4vw, 44px) clamp(40px, 6vw, 72px);
+  padding: clamp(20px, 3vw, 32px) var(--zl-gutter) clamp(40px, 6vw, 72px);
 }
 
 .events-page.board-page--makeover .events-board-feed {
@@ -16799,15 +16850,15 @@ html.calm-mode .board-stats-band,
 }
 
 .events-page.board-page--makeover .events-board-feed .board-active-feed__inner {
-  padding-inline: clamp(20px, 4vw, 44px);
+  padding-inline: var(--zl-gutter);
 }
 
 .events-page.board-page--makeover .events-board-feed__sticky {
   position: sticky;
   top: var(--site-header-height);
   z-index: 50;
-  margin: 0 calc(-1 * clamp(20px, 4vw, 44px));
-  padding: 14px clamp(20px, 4vw, 44px) 12px;
+  margin: 0 calc(-1 * var(--zl-gutter));
+  padding: 14px var(--zl-gutter) 12px;
   background: rgba(6, 6, 10, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -17375,8 +17426,30 @@ html.calm-mode .category-constellation__orb {
   max-width: 600px;
   max-height: 90vh;
   overflow: auto;
-  box-shadow: 0 0 50px -10px var(--listing-accent, #ff1fa0);
+  /* Accent stays on the 2px rim; depth carries the layer and the 8% bloom
+     lights it. The 50px full-strength accent halo was the retired frame. */
+  box-shadow:
+    var(--chrome-keyline),
+    0 34px 66px -24px rgba(0, 0, 0, 0.95),
+    var(--neon-bloom);
   padding: 28px 28px 26px;
+}
+
+/* Inner glass sheen from the glow proposal. Every child of this modal is
+   already z-lifted, so the sheen sits behind the content. */
+.board-detail-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glow-sheen);
+}
+
+html.calm-mode .board-detail-modal,
+:root[data-calm="true"] .board-detail-modal {
+  box-shadow: var(--chrome-keyline), 0 34px 66px -24px rgba(0, 0, 0, 0.95);
 }
 
 .board-detail-modal__meta {

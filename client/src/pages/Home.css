@@ -266,7 +266,7 @@
   left: 50%;
   top: 44%;
   z-index: 3;
-  width: min(100vw, 1274px);
+  width: min(100%, 1274px);
   max-height: 75%;
   pointer-events: none;
   user-select: none;
@@ -3122,8 +3122,8 @@ html.calm-mode .home-next-preview__orb,
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card.pdx-glass-card.pdx-glass-rebind {
     --crash-over: 10px;
-    width: calc((100vw + 94px) * 0.7 / 6);
-    height: calc((100vw + 86px) * 0.7 / 6.6);
+    width: calc((100% + 94px) * 0.7 / 6);
+    height: calc((100% + 86px) * 0.7 / 6.6);
     min-height: 64px;
     max-height: 84px;
     margin-left: -18px;

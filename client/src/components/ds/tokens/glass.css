@@ -436,8 +436,12 @@ html.calm-mode .pdxLegend,
   border-radius: var(--glass-btn-radius, 9px);
   color: var(--glass-btn-color, #fff);
   border: var(--glass-btn-border);
-  background: var(--glass-btn-bg);
-  box-shadow: var(--glass-btn-shadow);
+  /* Glow treatment (chrome.css): dark plate, accent rim, lit top edge, dark
+     inner floor, 8% outer bloom. Composed, never restated here. The older
+     --glass-btn-bg / --glass-btn-shadow pair said the same thing minus the
+     bloom, and is kept only for the surfaces that still read those tokens. */
+  background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow);
   cursor: pointer;
   text-decoration: none;
   transition:
@@ -450,9 +454,10 @@ html.calm-mode .pdxLegend,
 
 .pdx-glass-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  filter: brightness(1.06);
-  background: var(--glass-btn-hover-bg);
-  box-shadow: var(--glass-btn-hover-shadow);
+  /* Hover lifts the same plate rather than swapping to a second recipe. */
+  filter: brightness(1.14);
+  background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow);
   text-decoration: none;
   color: var(--glass-btn-color, #fff);
 }

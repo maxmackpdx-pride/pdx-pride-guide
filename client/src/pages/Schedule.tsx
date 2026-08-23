@@ -1222,18 +1222,14 @@ export default function Schedule({
         textTransform: "uppercase",
         cursor: "pointer",
         padding: "11px 18px",
-        borderRadius: "8px",
-        border: "2px solid " + (isBeach ? "var(--neon-magenta)" : rsvp ? dc : "var(--neon-yellow)"),
-        color: "var(--text-inverse)",
-        background: isBeach ? "transparent" : rsvp ? dc : "var(--neon-yellow)",
-        boxShadow: calm
+        borderRadius: "var(--chrome-radius-md, 10px)",
+        border: "2px solid " + (isBeach ? "var(--neon-magenta)" : "var(--rsvp, var(--neon-yellow))"),
+        color: isBeach ? "var(--text-inverse)" : "#050506",
+        background: isBeach ? "transparent" : "var(--rsvp, var(--neon-yellow))",
+        boxShadow: calm || isBeach
           ? "none"
-          : isBeach
-            ? "none"
-            : rsvp
-              ? "0 0 16px -4px " + hexA(dc, 0.8)
-              : "4px 4px 0 rgba(255,0,204,.3)",
-      }),
+          : "0 2px 0 color-mix(in srgb, var(--rsvp, var(--neon-yellow)) 40%, #000), var(--neon-bloom)",
+      } as React.CSSProperties),
       dc,
       detailLinkLabel: isBeach ? "Beach page →" : "Event page →",
       goingLabel: isBeach ? "On your list" : null as string | null,
@@ -1384,7 +1380,7 @@ export default function Schedule({
               if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);
             }}
-            style={{ ...selected.rsvpBtnStyle, position: "relative", overflow: "visible" }}
+            style={{ ...selected.rsvpBtnStyle, position: "relative", overflow: "visible", ["--c"]: "var(--rsvp, var(--neon-yellow))" } as React.CSSProperties}
             disabled={
               (selected.isBeach && withdrawBeachMutation.isPending)
               || (!selected.isBeach && isRsvpPending(selected.id))

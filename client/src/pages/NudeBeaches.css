@@ -25,7 +25,7 @@
 }
 
 .nude-beaches-page .events-board-feed .board-active-feed__inner {
-  padding-inline: clamp(20px, 4vw, 44px);
+  padding-inline: var(--zl-gutter);
 }
 
 /* Trip-logistics content sits in the same 1180px column as every other section
@@ -45,7 +45,7 @@
 .nude-beaches-page .nude-refresh-bar {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 44px) 12px;
+  padding: 0 var(--zl-gutter) 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
