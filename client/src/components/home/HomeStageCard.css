@@ -173,3 +173,89 @@ html.calm-mode .home-stage-card__dot {
     display: none;
   }
 }
+
+/* ── Media cards: the image is the card, not a chip beside it ──────────
+   The 62px side thumb cost ~74px of the copy column on a 248px card, which
+   is what squeezed titles onto three lines and clipped the body line. With
+   the image full-bleed the copy gets the whole width, and the scrim keeps
+   it legible over any photograph. */
+.home-stage-card--media .home-stage-card__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Bottom-weighted so the title, line and foot all sit on dark ground while
+   the top of the image stays readable as an image. */
+.home-stage-card--media .home-stage-card__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 3, 4, 0.42) 0%,
+      rgba(3, 3, 4, 0.28) 26%,
+      rgba(3, 3, 4, 0.78) 62%,
+      rgba(3, 3, 4, 0.94) 100%
+    ),
+    radial-gradient(120% 80% at 50% 100%, color-mix(in srgb, var(--c) 18%, transparent), transparent 62%);
+}
+
+/* Content above the image and the scrim. */
+.home-stage-card--media .home-stage-card__kicker-row,
+.home-stage-card--media .home-stage-card__body,
+.home-stage-card--media .home-stage-card__foot {
+  position: relative;
+  z-index: 2;
+}
+
+/* Copy owns the full width now. */
+.home-stage-card--media .home-stage-card__body {
+  align-items: flex-end;
+  flex: 1;
+  min-height: 0;
+}
+
+.home-stage-card--media .home-stage-card__copy {
+  width: 100%;
+  margin-top: auto;
+}
+
+.home-stage-card--media .home-stage-card__title,
+.home-stage-card--media .home-stage-card__line {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
+}
+
+.home-stage-card--media .home-stage-card__line {
+  color: #d9d6cf;
+}
+
+/* The foot rule reads as a hairline on a photo, so lift it slightly. */
+.home-stage-card--media .home-stage-card__foot {
+  border-top-color: color-mix(in srgb, var(--c) 40%, rgba(255, 255, 255, 0.16));
+}
+
+/* ── Stop clipping copy mid-sentence ──────────────────────────────────
+   The card is a fixed 216px box with overflow:hidden, so a long line was
+   sliced through the middle of a word. Clamp instead, so it ends cleanly. */
+.home-stage-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.home-stage-card__line {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

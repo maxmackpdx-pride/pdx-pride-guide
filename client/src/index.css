@@ -599,15 +599,11 @@ body::before {
   gap:8px;
   min-height:40px;
   padding:10px 20px;
-  border:0;
+  border:2px solid var(--c);
   border-radius:999px;
-  background:var(--panel-cyan,#19e3ff);
-  color:#050506;
-  box-shadow:
-    var(--chrome-keyline),
-    var(--chrome-bevel),
-    var(--chrome-floor),
-    var(--neon-bloom);
+  background:var(--btn-glow-bg);
+  color:var(--c);
+  box-shadow:var(--btn-glow-shadow);
   font:800 .82rem/1 var(--font-display);
   letter-spacing:.06em;
   text-decoration:none;
@@ -628,13 +624,13 @@ body::before {
   outline-offset:3px;
 }
 
-/* Unread dot reads against the cyan plate, so it keeps a dark rim. */
+/* Dot rides the dark plate, so it keeps the bar's own ground as its rim. */
 .site-hub-button .site-nav-notify-dot {
   top:5px;
   right:6px;
   width:7px;
   height:7px;
-  border-color:#050506;
+  border-color:#0a0a0a;
 }
 /*
  * The six glow pills need the room between 1024 and 1365, so the search
@@ -1359,19 +1355,15 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   min-height: 40px;
   margin-left: clamp(4px, 0.5vw, 8px);
   padding: clamp(9px, 0.8vw, 11px) clamp(14px, 1.3vw, 22px);
-  border: 0;
+  border: 2px solid var(--c);
   border-radius: 999px;
-  background: var(--neon-yellow, #ccff00);
-  color: #050506;
+  background: var(--btn-glow-bg);
+  color: var(--c);
   cursor: pointer;
   font-weight: 800;
   font-size: clamp(0.76rem, 0.55vw + 0.34rem, 0.88rem);
   letter-spacing: 0.06em;
-  box-shadow:
-    var(--chrome-keyline),
-    var(--chrome-bevel),
-    var(--chrome-floor),
-    var(--neon-bloom);
+  box-shadow: var(--btn-glow-shadow);
   transition: filter 0.16s ease;
 }
 

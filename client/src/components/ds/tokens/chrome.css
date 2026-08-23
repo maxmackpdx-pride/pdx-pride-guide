@@ -45,6 +45,22 @@
    * settled value: the accent reads as lit, never as a glow frame.
    */
   --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c, #00ffff) 8%, transparent);
+
+  /*
+   * Glow-proposal button: dark plate, accent rim and ink, a lit top edge and
+   * a dark floor inside, and the 8% bloom outside. This is the button
+   * treatment, not the solid accent plate - that stays reserved for the one
+   * primary action the card standard allows it on.
+   */
+  --btn-glow-bg:
+    radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--c, #00ffff) 16%, transparent), transparent 60%),
+    #000;
+  --btn-glow-shadow:
+    0 2px 0 color-mix(in srgb, var(--c, #00ffff) 40%, #000),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px -8px rgba(255, 255, 255, 0.06),
+    inset 0 10px 16px -12px rgba(0, 0, 0, 0.9),
+    var(--neon-bloom);
   /*
    * The glow proposal pairs that bloom with a soft internal glass sheen
    * (bright at the top edge, falling to a dark floor). Mount as a ::before
@@ -80,4 +96,5 @@ html.calm-mode {
   --sticker-lit: var(--chrome-keyline), var(--chrome-bevel-dark);
   --chrome-bloom: none;
   --neon-bloom: none;
+  --btn-glow-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
 }
