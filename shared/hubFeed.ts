@@ -82,6 +82,11 @@ export type HubFeedItem = {
    * unless they unfollowed). Used for Unfollow / Follow on feed cards.
    */
   viewerFollowsAuthor?: boolean | null;
+  /**
+   * Viewer-scoped “what changed” on a saved post. Null for everyone else.
+   * Events / GIFTZ / GIGZ have no generic save table yet.
+   */
+  changeLabel?: string | null;
 };
 
 export type HubFeedResponse = {

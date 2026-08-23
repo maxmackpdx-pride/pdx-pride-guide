@@ -1,5 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import {
+  applyGiftingRaise,
+  beginInFlight,
+  endInFlight,
+  GIFTING_KEY,
+  restoreQueries,
+  snapshotQueries,
+} from "@/lib/optimisticCache";
 import { HeartHandshake, RefreshCw, Share2, ShieldAlert, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -131,6 +139,8 @@ export function giftingMotifVariant(post: GiftingPost): "gift" | "search" {
 
 function cardStatus(post: GiftingPost) {
   if (post.status === "PENDING") return "Pending admin review";
+  if (post.viewerSelected && post.postType === "GIFT") return "Hand raised";
+  if (post.viewerSelected && post.postType === "ISO") return "Offer sent";
   if (post.postType === "ISO") return "Open · make an offer";
   if (isOpenGrabPost(post)) return "First come · grab it";
   if (post.interestCount >= 3) return "3 of 3 hands up";
@@ -138,6 +148,8 @@ function cardStatus(post: GiftingPost) {
 }
 
 function cardCta(post: GiftingPost) {
+  if (post.viewerSelected && post.postType === "GIFT") return "Hand raised";
+  if (post.viewerSelected && post.postType === "ISO") return "Offer sent";
   if (post.postType === "ISO") return "Offer it";
   if (isOpenGrabPost(post)) return "Grab it";
   if (post.interestCount >= 3) return "Full";
@@ -158,6 +170,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
   const { toast } = useToast();
   const [note, setNote] = useState("");
   const [reportText, setReportText] = useState("");
+  const raisePendingRef = useRef(new Set<number>());
 
   const accent = cardAccent(post);
   const showDots = post.postType === "GIFT" && !isOpenGrabPost(post);
@@ -174,12 +187,22 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
       if (!res.ok) throw new Error((await res.text()) || res.statusText);
       return res;
     },
-    onSuccess: () => {
+    onMutate: async ({ url }) => {
+      const isRaise = /\/(interest|offer)$/.test(url);
+      if (!isRaise) return { isRaise: false };
+      const snap = await snapshotQueries(queryClient, GIFTING_KEY);
+      applyGiftingRaise(queryClient, post.id);
+      return { isRaise: true, snap };
+    },
+    onError: (err: any, _vars, ctx) => {
+      if (ctx?.snap) restoreQueries(queryClient, ctx.snap);
+      toast({ title: "Could not update", description: err.message, variant: "destructive" });
+    },
+    onSettled: (_data, _err, vars) => {
+      if (/\/(interest|offer)$/.test(vars.url)) endInFlight(raisePendingRef.current, post.id);
       queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      toast({ title: "Updated" });
     },
-    onError: (err: any) => toast({ title: "Could not update", description: err.message, variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -223,6 +246,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
     if (!isOpenGrabPost(post) && !trimmed) {
       return toast({ title: "Add a short note first", variant: "destructive" });
     }
+    if (!beginInFlight(raisePendingRef.current, post.id)) return;
     actionMutation.mutate({ url: `/api/gifting/${post.id}/${endpoint}`, data: { note: trimmed } });
     setNote("");
   };
@@ -354,15 +378,21 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
               />
               <button
                 onClick={() => submitResponse(post.postType === "GIFT" ? "interest" : "offer")}
-                disabled={!grab && post.postType === "GIFT" && post.interestCount >= 3}
+                disabled={
+                  actionMutation.isPending
+                  || post.viewerSelected
+                  || (!grab && post.postType === "GIFT" && post.interestCount >= 3)
+                }
               >
-                {grab
-                  ? "On my way, grab it"
-                  : post.postType === "GIFT" && post.interestCount >= 3
-                    ? "Full, poster is choosing"
-                    : post.postType === "GIFT"
-                      ? "I'm interested"
-                      : "I have this"}
+                {post.viewerSelected
+                  ? post.postType === "GIFT" ? "Hand raised" : "Offer sent"
+                  : grab
+                    ? "On my way, grab it"
+                    : post.postType === "GIFT" && post.interestCount >= 3
+                      ? "Full, poster is choosing"
+                      : post.postType === "GIFT"
+                        ? "I'm interested"
+                        : "I have this"}
               </button>
             </div>
           )}

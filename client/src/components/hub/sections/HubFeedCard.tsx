@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/boardFeed";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { eventPath } from "@shared/eventSlug";
 import { hubFeedBadgeColor, type HubFeedEventEmbed, type HubFeedItem } from "@shared/hubFeed";
+import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import type { Event } from "@shared/schema";
 import FeedEventDeck from "./FeedEventDeck";
 
@@ -261,6 +262,7 @@ export default function HubFeedCard({ item }: Props) {
               )}
             </div>
             <div className="hub-feed-card__head-actions">
+              <ChangeBadge label={item.changeLabel} className="hub-feed-card__change" />
               {showFollowShortcut && (
                 <button
                   type="button"

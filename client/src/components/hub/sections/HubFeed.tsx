@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import BoardLoadingState from "@/components/BoardLoadingState";
+import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import {
   HUB_FEED_TABS,
   parseHubFeedTab,
@@ -317,7 +317,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
 
       {loading && (
         <div className="card hub-empty hub-feed-empty hub-feed-empty--load">
-          <BoardLoadingState label="Loading scene feed" />
+          <BoardFeedSkeleton label="Loading scene feed" shape="feed" count={4} />
         </div>
       )}
 

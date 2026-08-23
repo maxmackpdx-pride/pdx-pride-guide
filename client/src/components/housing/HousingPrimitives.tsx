@@ -37,16 +37,18 @@ export function Chip({
   tone = "",
   onClick,
   title,
+  disabled,
 }: {
   children: ReactNode;
   tone?: ChipTone;
   onClick?: (e: React.MouseEvent) => void;
   title?: string;
+  disabled?: boolean;
 }) {
   const cls = `hz-chip${tone ? ` hz-chip--${tone}` : ""}${onClick ? " hz-chip--btn" : ""}`;
   if (onClick) {
     return (
-      <button type="button" className={cls} onClick={onClick} title={title}>
+      <button type="button" className={cls} onClick={onClick} title={title} disabled={disabled}>
         {children}
       </button>
     );

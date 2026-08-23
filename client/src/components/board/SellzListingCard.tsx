@@ -1,5 +1,13 @@
-import { useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
+import {
+  applySellzSavedToggle,
+  beginInFlight,
+  endInFlight,
+  restoreQueries,
+  SELLZ_SAVED_KEY,
+  snapshotQueries,
+} from "@/lib/optimisticCache";
 import { Bookmark, MessageCircle, Share2, ShieldAlert, Tag } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -29,6 +37,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
   const [offer, setOffer] = useState("");
   const [report, setReport] = useState("");
   const [editing, setEditing] = useState(false);
+  const savePendingRef = useRef(new Set<number>());
   const [edit, setEdit] = useState({ title: post.title, description: post.description, category: post.category, condition: post.condition, price: String(post.priceCents / 100), negotiable: post.negotiable, neighborhood: post.neighborhood, pickupPreference: post.pickupPreference });
   const mutate = useMutation({
     mutationFn: async ({ path, method = "POST", body }: { path: string; method?: string; body?: any }) => {
@@ -37,15 +46,28 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
       if (!r.ok) throw new Error(data.error || r.statusText);
       return data;
     },
-    onSuccess: () => {
+    onMutate: async (vars) => {
+      const isSave = /\/save$/.test(vars.path);
+      if (!isSave) return { isSave: false };
+      const snap = await snapshotQueries(queryClient, SELLZ_SAVED_KEY);
+      applySellzSavedToggle(queryClient, post.id);
+      return { isSave: true, snap };
+    },
+    onError: (error: any, _vars, ctx) => {
+      if (ctx?.snap) restoreQueries(queryClient, ctx.snap);
+      toast({ title: "Could not update", description: error.message, variant: "destructive" });
+    },
+    onSettled: (_data, _err, vars) => {
+      if (/\/save$/.test(vars.path)) endInFlight(savePendingRef.current, post.id);
       queryClient.invalidateQueries({ queryKey: ["/api/sellz"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sellz/saved/ids"] });
-      toast({ title: "SELLZ updated" });
     },
-    onError: (error: any) => toast({ title: "Could not update", description: error.message, variant: "destructive" }),
   });
   const act = (path: string, body?: any, method?: string) => {
     if (!user) return onRequireAuth();
+    if (/\/save$/.test(path)) {
+      if (!beginInFlight(savePendingRef.current, post.id)) return;
+    }
     mutate.mutate({ path, body, method });
   };
   const share = async () => {
@@ -55,6 +77,10 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
   };
   const style = { "--listing-accent": ACCENT, "--c": ACCENT, "--_c": ACCENT } as CSSProperties;
   const isDemo = post.username === "hausing_demo";
+  useEffect(() => {
+    if (!expanded || !saved || !user) return;
+    fetch(`/api/sellz/${post.id}/seen`, { method: "POST", credentials: "include" }).catch(() => undefined);
+  }, [expanded, saved, user, post.id]);
   return (
     <article id={`sellz-post-${post.id}`} className={`board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""}`} style={style} onClick={onToggle} role="button" tabIndex={0} onKeyDown={e => { if ((e.key === "Enter" || e.key === " ") && !(e.target as HTMLElement).matches("input,textarea,select,button")) { e.preventDefault(); onToggle(); } }}>
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
@@ -77,7 +103,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
         <div className="gifting-details">{post.condition} · {post.pickupPreference} · {post.neighborhood}</div>
         <div className="gifting-listing-actions">
           <button type="button" onClick={share}><Share2 size={14} /> Share</button>
-          <button type="button" onClick={() => act(`/api/sellz/${post.id}/save`)}><Bookmark size={14} fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}</button>
+          <button type="button" disabled={mutate.isPending && savePendingRef.current.has(post.id)} onClick={() => act(`/api/sellz/${post.id}/save`)}><Bookmark size={14} fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}</button>
         </div>
         {!post.isMine && post.status === "ACTIVE" ? <div className="gifting-response">
           <textarea value={note} onChange={e => setNote(e.target.value)} maxLength={500} aria-label="Message to seller" />

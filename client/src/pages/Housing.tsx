@@ -12,6 +12,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
+import {
+  applyHousingSavedToggle,
+  beginInFlight,
+  endInFlight,
+  HOUSING_KEY,
+  restoreQueries,
+  snapshotQueries,
+} from "@/lib/optimisticCache";
+import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -82,6 +91,8 @@ export default function Housing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  const savePendingRef = useRef(new Set<number>());
+  const [savePendingIds, setSavePendingIds] = useState<Set<number>>(() => new Set());
   const [filter, setFilter] = useState<HousingFilter>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("filter")?.toUpperCase() === "SAVED") return "SAVED";
@@ -145,6 +156,18 @@ export default function Housing() {
     if (!isLoading) trackProductEvent("time_to_content", "housing", performance.now() - contentStartedAt.current);
   }, [isLoading]);
   const stats = data?.stats;
+  const boardEmpty = !isLoading && !isError && posts.length === 0;
+  const showDemoSeed = boardEmpty && filter === "ALL" && tags.length === 0;
+  const { data: demoBoard } = useQuery<HousingBoardResponse>({
+    queryKey: ["/api/housing", "demo"],
+    enabled: showDemoSeed,
+    queryFn: async () => {
+      const res = await fetch("/api/housing?demo=1", { credentials: "include" });
+      if (!res.ok) throw new Error("Could not load demo posts");
+      return res.json();
+    },
+  });
+  const demoPosts = demoBoard?.posts ?? [];
 
   const saveMutation = useMutation({
     mutationFn: async (postId: number) => {
@@ -152,7 +175,19 @@ export default function Housing() {
       if (!res.ok) throw new Error("Could not save");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/housing"] }),
+    onMutate: async (postId: number) => {
+      const snap = await snapshotQueries(queryClient, HOUSING_KEY);
+      applyHousingSavedToggle(queryClient, postId);
+      return { snap };
+    },
+    onError: (_err, _postId, ctx) => {
+      restoreQueries(queryClient, ctx?.snap);
+    },
+    onSettled: (_data, _err, postId) => {
+      endInFlight(savePendingRef.current, postId);
+      setSavePendingIds(new Set(savePendingRef.current));
+      queryClient.invalidateQueries({ queryKey: [...HOUSING_KEY] });
+    },
   });
 
   const requireAuth = (): boolean => {
@@ -183,6 +218,8 @@ export default function Housing() {
     },
     onSave: (post) => {
       if (!requireAuth()) return;
+      if (!beginInFlight(savePendingRef.current, post.id)) return;
+      setSavePendingIds(new Set(savePendingRef.current));
       saveMutation.mutate(post.id);
     },
     onShare: (post) => {
@@ -211,6 +248,7 @@ export default function Housing() {
       if (!requireAuth()) return;
       navigate(`/the-hauz/${post.id}?build=1`);
     },
+    savePendingIds,
   };
 
   const openCompose = (type: HousingType | "PM") => {
@@ -439,7 +477,7 @@ export default function Housing() {
           </div>
 
           {isLoading ? (
-            <div className="hz-panel hz-empty">Loading the board.</div>
+            <BoardFeedSkeleton label="Loading the board" shape="housing" count={4} />
           ) : isError ? (
             <div className="hz-panel hz-empty">
               The board did not load. Try again in a moment.
@@ -450,12 +488,31 @@ export default function Housing() {
               </div>
             </div>
           ) : posts.length === 0 ? (
-            <div className="hz-panel hz-empty">
-              {tags.length
-                ? "No posts match all of those tags. Try dropping one."
-                : filter === "SAVED"
-                  ? "Nothing saved yet. Tap save on a post and it waits here."
-                  : "Nothing here yet. Yas, be the first."}
+            <div>
+              <div className="hz-panel hz-empty">
+                {tags.length
+                  ? "No posts match all of those tags. Try dropping one."
+                  : filter === "SAVED"
+                    ? "Nothing saved yet. Tap save on a post and it waits here."
+                    : "Nothing here yet. Be the first, or look at the DEMO posts from @hausing_demo."}
+                {filter !== "SAVED" ? (
+                  <div style={{ marginTop: 12 }}>
+                    <Btn kind="solid" onClick={() => {
+                      if (!requireAuth()) return;
+                      navigate("/the-hauz/new");
+                    }}>
+                      Post to THE HAÜZ
+                    </Btn>
+                  </div>
+                ) : null}
+              </div>
+              {showDemoSeed && demoPosts.length ? (
+                <div className="hz-feed" style={{ paddingTop: 8 }}>
+                  {demoPosts.map((p: HousingPostView) => (
+                    <HousingCard key={`demo-${p.id}`} post={p} h={handlers} />
+                  ))}
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="hz-feed">

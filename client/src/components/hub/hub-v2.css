@@ -722,6 +722,7 @@
     .hub-feed-card__main{flex:1;min-width:0}
     .hub-feed-card__head{display:flex;align-items:flex-start;gap:10px}
     .hub-feed-card__head-actions{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto}
+    .hub-feed-card__change{flex:none;max-width:9rem}
     .hub-feed-card__foll.foll{
       flex:none;padding:5px 11px;font-size:10px;letter-spacing:.08em;color:#fff;font-weight:700;
     }

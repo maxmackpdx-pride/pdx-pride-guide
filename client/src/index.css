@@ -10283,6 +10283,81 @@ html.calm-mode .event-modal,
   padding: 48px 20px;
 }
 
+.change-badge {
+  display: inline-block;
+  max-width: min(70%, 14rem);
+  padding: 4px 9px 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c, var(--panel-cyan)) 22%, #101014);
+  border: 1px solid color-mix(in srgb, var(--c, var(--panel-cyan)) 55%, transparent);
+  color: var(--text-hi, #f4f4f5);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.board-feed-skeleton {
+  width: 100%;
+}
+
+.board-feed-skeleton--feed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.board-feed-skeleton__card {
+  pointer-events: none;
+}
+
+.board-feed-skeleton__bone {
+  display: block;
+  background: color-mix(in srgb, var(--c, var(--panel-cyan)) 16%, #1a1a1e);
+  border-radius: 6px;
+  animation: board-skel-pulse 1.4s ease-in-out infinite;
+}
+
+.board-feed-skeleton__thumb {
+  position: relative;
+  min-height: 96px;
+  overflow: hidden;
+}
+
+.board-feed-skeleton__thumb-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  height: 100%;
+}
+
+.board-feed-skeleton__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-feed-skeleton__avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.board-feed-skeleton__avatar--lg {
+  width: 44px;
+  height: 44px;
+}
+
+@keyframes board-skel-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 .board-loading-state__label {
   margin: 0;
   color: var(--text-meta);

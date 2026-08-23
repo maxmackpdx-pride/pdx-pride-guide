@@ -8,6 +8,7 @@
  * Ported from docs/design-handoff-hausing/haus-feed.jsx.
  */
 import type { ReactNode } from "react";
+import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import {
   AFFORDABILITY_BADGE_LABEL,
   FORMING_FLAVOR_LABEL,
@@ -43,6 +44,8 @@ export type HousingCardHandlers = {
   onWaitlist: (post: HousingPostView) => void;
   onBuildHaus: (post: HousingPostView) => void;
   onPerson?: (person: HousingPerson) => void;
+  savePendingIds?: Set<number>;
+  requestPendingIds?: Set<number>;
 };
 
 /**
@@ -92,11 +95,8 @@ function CardShell({
       {post.author?.username === "hausing_demo" ? (
         <span className="hz-demo-sticker" aria-hidden="true">DEMO</span>
       ) : null}
-      {/* Saved-post resurface: only for the follower, not every public card. */}
       {post.saved && post.lastChangeLabel ? (
-        <span className="hz-change-label" title="What changed on a post you follow">
-          {post.lastChangeLabel}
-        </span>
+        <ChangeBadge label={post.lastChangeLabel} className="hz-change-label" />
       ) : null}
       {children}
     </div>
@@ -108,10 +108,12 @@ function CardActions({ post, h }: { post: HousingPostView; h: HousingCardHandler
   const isFull = post.type === "FORMING" && !!post.isFull;
   const requested = post.myRequest?.status === "PENDING";
   const waitlisted = post.myRequest?.kind === "WAITLIST" && post.myRequest.status === "PENDING";
+  const saveBusy = h.savePendingIds?.has(post.id);
+  const requestBusy = h.requestPendingIds?.has(post.id) || requested;
 
   return (
     <div className="hz-cardact">
-      <Chip onClick={stop(() => h.onSave(post))}>
+      <Chip disabled={saveBusy} onClick={stop(() => h.onSave(post))}>
         <HousingIcon name="favorite" />
         {post.saved ? "Saved" : "Save"}
       </Chip>
@@ -122,16 +124,16 @@ function CardActions({ post, h }: { post: HousingPostView; h: HousingCardHandler
       <span className="hz-spacer" />
       {post.type === "FORMING" ? (
         isFull ? (
-          <Btn size="sm" kind="outline" onClick={stop(() => h.onWaitlist(post))}>
+          <Btn size="sm" kind="outline" disabled={requestBusy} onClick={stop(() => h.onWaitlist(post))}>
             {waitlisted ? "On the waiting list" : "Join the waiting list"}
           </Btn>
         ) : (
-          <Btn size="sm" kind="solid" onClick={stop(() => h.onJoin(post))}>
+          <Btn size="sm" kind="solid" disabled={requestBusy} onClick={stop(() => h.onJoin(post))}>
             {requested ? "Request sent" : "Ask to join"}
           </Btn>
         )
       ) : (
-        <Btn size="sm" kind="solid" onClick={stop(() => h.onChat(post))}>
+        <Btn size="sm" kind="solid" disabled={requestBusy} onClick={stop(() => h.onChat(post))}>
           <HousingIcon name="message" />
           {requested ? "Request sent" : "Chat"}
         </Btn>
