@@ -99,11 +99,11 @@ export function ZDeck({
       // Far cards are already faded. Keep rotateY/translateZ on the front pair
       // only — 3D + backdrop-filter on seven glass slides is what felt glitchy.
       if (distance >= 2) {
-        card.style.transform = `translateX(calc(-50% + ${offset * pitch}px))`;
+        card.style.transform = `translate3d(calc(-50% + ${offset * pitch}px), 0, 0)`;
       } else {
         const tilt = Math.min(rotate * ramp, 82) * Math.sign(offset);
         card.style.transform =
-          `translateX(calc(-50% + ${offset * pitch}px))`
+          `translate3d(calc(-50% + ${offset * pitch}px), 0, 0)`
           + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
           + ` rotateY(${-tilt}deg)`;
       }

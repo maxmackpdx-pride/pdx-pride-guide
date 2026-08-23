@@ -120,21 +120,41 @@ html.calm-mode .home-front__kicker-live,
 .home-front__city-map path,.home-front__city-map circle { fill:none; stroke:currentColor; stroke-width:1; vector-effect:non-scaling-stroke; }
 .home-front__city-map .home-front__city-river { stroke:var(--neon-cyan,#19e3ff); stroke-width:12; opacity:.34; }
 .home-front__city-map circle { fill:var(--neon-cyan,#19e3ff); stroke:none; }
+/* ── Map motifs ────────────────────────────────────────────────────────
+   Four of the seven worlds carry a map, because on those four a map is the
+   subject and not wallpaper. Two shipped already (OUTZ topo, OUR PLACEZ city
+   grid); THE HAÜZ adds a plat and MIZZED CONNECTION adds the corner. All four
+   are drawn the same way: a full bleed line layer behind the card content,
+   sitting in the debossed well composed from --map-frame-shadow in glass.css.
+   Thin black rim, inward hole, and no bloom of any kind. Outer bloom and thick
+   glow frames on maps are retired, so nothing below may add a glow. */
+.home-front__plat-map,.home-front__street-map { position:absolute; inset:0; width:100%; height:100%; color:#a7a7ad; pointer-events:none; }
+.home-front__plat-map :is(path,circle),.home-front__street-map :is(path,circle) { fill:none; stroke:currentColor; stroke-width:1; vector-effect:non-scaling-stroke; }
+.home-front__plat-map .home-front__plat-lot,.home-front__street-map .home-front__street-diag { stroke-dasharray:6 7; opacity:.7; }
+.home-front__plat-map .home-front__plat-roof { stroke-width:1.4; opacity:.92; }
+.home-front__plat-map .home-front__plat-here,.home-front__street-map .home-front__street-here { stroke:var(--c); stroke-width:1.7; opacity:.62; }
+.home-front__street-map .home-front__street-pin { fill:var(--c); stroke:none; opacity:.7; }
+/* The well is a shadow, never a light. It paints after the lines so the rim
+   and the inward hole close over the map edge, and it stays below the z-index:1
+   content layer, so copy, actions and focus rings all sit above it. */
+.home-front__map-well {
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  border-radius:max(var(--glass-card-radius,14px),16px);
+  box-shadow:var(--map-frame-shadow);
+}
 .home-front__object-motif { position:absolute; inset:-8%; width:116%; height:116%; color:color-mix(in srgb,var(--c) 30%,#c6c8cf); opacity:.34; pointer-events:none; transform:scale(1.08); transform-origin:center; }
 .home-front__object-motif path,.home-front__object-motif rect,.home-front__object-motif circle { fill:none; stroke:currentColor; stroke-width:1.45; vector-effect:non-scaling-stroke; }
 .home-front__object-motif .detail { stroke-width:.85; stroke-dasharray:5 5; opacity:.82; }
 .home-front__object-motif circle { fill:currentColor; stroke:none; }
 .home-front__object-motif text { fill:currentColor; font:900 26px var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:.12em; }
-.home-front__worlds:not(.is-motif-revealed) .home-front__topo path,
-.home-front__worlds:not(.is-motif-revealed) .home-front__city-map path,
+.home-front__worlds:not(.is-motif-revealed) :is(.home-front__topo,.home-front__city-map,.home-front__plat-map,.home-front__street-map) path,
 .home-front__worlds:not(.is-motif-revealed) .home-front__object-motif path,
 .home-front__worlds:not(.is-motif-revealed) .home-front__object-motif rect { opacity:0; stroke-dasharray:900; stroke-dashoffset:900; }
-.home-front__worlds.is-motif-revealed .home-front__topo path,
-.home-front__worlds.is-motif-revealed .home-front__city-map path,
+.home-front__worlds.is-motif-revealed :is(.home-front__topo,.home-front__city-map,.home-front__plat-map,.home-front__street-map) path,
 .home-front__worlds.is-motif-revealed .home-front__object-motif path,
 .home-front__worlds.is-motif-revealed .home-front__object-motif rect { animation:homeMotifTrace .62s var(--ease-out,ease) both; }
-.home-front__world:nth-child(2n) :is(.home-front__topo,.home-front__city-map,.home-front__object-motif) :is(path,rect) { animation-delay:.06s; }
-.home-front__world:nth-child(3n) :is(.home-front__topo,.home-front__city-map,.home-front__object-motif) :is(path,rect) { animation-delay:.12s; }
+.home-front__world:nth-child(2n) :is(.home-front__topo,.home-front__city-map,.home-front__plat-map,.home-front__street-map,.home-front__object-motif) :is(path,rect) { animation-delay:.06s; }
+.home-front__world:nth-child(3n) :is(.home-front__topo,.home-front__city-map,.home-front__plat-map,.home-front__street-map,.home-front__object-motif) :is(path,rect) { animation-delay:.12s; }
 @keyframes homeMotifTrace { from { opacity:0; stroke-dasharray:900; stroke-dashoffset:900; } to { opacity:1; stroke-dasharray:900; stroke-dashoffset:0; } }
 /* One motif weight for every world. The .33/.35/.36 spread was invisible as
    an intent and only made the set harder to keep aligned. */
@@ -151,6 +171,10 @@ html.calm-mode .home-front__kicker-live,
 .home-front__world[data-world="directory"] .home-front__places-blueprint {
   opacity:.08;
 }
+.home-front__world[data-world="housing"] .home-front__plat-map,
+.home-front__world[data-world="spotted"] .home-front__street-map {
+  opacity:.13;
+}
 .home-front__world[data-world="events"] .home-front__object-motif { z-index:1; }
 .home-front__world[data-world="events"] .home-front__event-preview { position:absolute; inset:0; z-index:2; }
 .home-front__world[data-world="events"] .home-front__world-top,
@@ -159,9 +183,26 @@ html.calm-mode .home-front__kicker-live,
 .home-front__world-top { display:flex; align-items:center; justify-content:space-between; gap:16px; color:var(--c); font:700 9px/1 var(--font-mono,monospace); letter-spacing:.15em; text-transform:uppercase; }
 .home-front__world-number { display:grid; place-items:center; width:34px; height:34px; border:1px solid color-mix(in srgb,var(--c) 46%,#202026); border-radius:50%; }
 .home-front__world-eyebrow { text-align:right; }
-.home-front__world-copy { margin-top:clamp(30px,5vw,54px); }
+/* The mark carries its own top and bottom air inside its canvas, so the gap
+   above it is smaller than it was when the name was set in type. */
+.home-front__world-copy { margin-top:clamp(12px,2.2vw,24px); }
 /* No character cap: a word longer than the cap (CONNECTIONS, BEACHES) could not fit it and overflowed the card, where overflow:hidden then sliced it. It wraps inside the card now, and the size is capped to what the widest word can hold. */
 .home-front__world-copy h3 { margin:0; color:#fff; font:900 clamp(38px,5vw,58px)/.88 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.015em; text-transform:uppercase; text-wrap:balance; overflow-wrap:break-word; hyphens:auto; }
+/* One optical frame for every product mark. The family assets are normalised
+   to the same 2:1 transparent canvas with the ink at one width, so sizing by
+   width (never by height) puts all seven at one scale and starts every card
+   body on the same line. Each file carries its own gradients and is never
+   recoloured to the board accent. The h3 above stays as the fallback for a
+   world with no wordmark; all seven have one today. */
+.home-front__world-copy h3:has(.home-front__world-mark) { line-height:0; }
+.home-front__world-mark { display:block; width:min(100%,268px); height:auto; object-fit:contain; object-position:left center; }
+/* Events keeps the MEDIA archetype: it has no copy column, so its mark is a
+   bug on the top band. The flex basis only wraps it onto its own line, and
+   object-fit keeps the artwork at its true 2:1 and anchors it left. */
+.home-front__world-mark--bug { flex:0 0 100%; height:52px; margin-top:10px; object-position:left center; }
+/* The band holds its dark further down now that it carries the mark, so the
+   bug sits on near black instead of on whatever the flyer is doing. */
+.home-front__world[data-world="events"] .home-front__world-top { flex-wrap:wrap; background:linear-gradient(180deg,rgba(3,3,4,.95),rgba(3,3,4,.9) 62%,rgba(3,3,4,.74) 80%,rgba(3,3,4,.3) 93%,transparent); }
 .home-front__world-copy p { max-width:42ch; margin:16px 0 0; color:var(--text-body,#d6d6dc); font-size:14px; line-height:1.55; text-wrap:pretty; }
 .home-front__world-action { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:48px; margin-top:auto; padding-top:18px; border-top:1px solid color-mix(in srgb,var(--c) 30%,transparent); color:var(--c); font:900 14px/1 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:.06em; text-transform:uppercase; text-decoration:none; }
 .home-front__world-action span:last-child { font-size:20px; transition:transform .18s ease; }
@@ -299,7 +340,7 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 html.calm-mode .home-front__world::after,:root[data-calm="true"] .home-front__world::after { display:none; }
 html.calm-mode .home-front__object-motif,:root[data-calm="true"] .home-front__object-motif { filter:none; opacity:.22; }
 @media (prefers-reduced-motion:reduce) {
-  .home-front__worlds :is(.home-front__topo,.home-front__city-map,.home-front__object-motif) :is(path,rect) { animation:none !important; opacity:1; stroke-dasharray:none; stroke-dashoffset:0; }
+  .home-front__worlds :is(.home-front__topo,.home-front__city-map,.home-front__plat-map,.home-front__street-map,.home-front__object-motif) :is(path,rect) { animation:none !important; opacity:1; stroke-dasharray:none; stroke-dashoffset:0; }
 }
 
 @media (max-width:640px) {
@@ -317,7 +358,7 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
 }
 
 @media (max-width:620px) {
-  /* Don't force the hero to near-full-screen — that's what created the giant
+  /* Don't force the hero to near-full-screen. That is what created the giant
      empty bands above and below. Let it hug its content with even, modest
      top/bottom breathing room so the stat strip sits right under the buttons. */
   .home-front__welcome { min-height:0; }
@@ -350,7 +391,13 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__deck { --cf-card:clamp(300px,92vw,412px); --cf-card-h:540px; padding:16px 0 2px; }
   .home-front__deck .z-deck__slide > .home-front__world,
   .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; min-height:0; padding:18px; }
-  .home-front__world-copy { margin-top:34px; }
+  /* The phone card is the shortest box in the deck, so the mark, the gap above
+     it and the posting gutters all come in together. Two postings at their
+     104px floor plus the action row still have to fit inside --cf-card-h. */
+  .home-front__world-copy { margin-top:10px; }
+  .home-front__world-mark { width:min(100%,220px); }
+  .home-front__world-mark--bug { height:40px; }
+  .home-front__samples { margin:8px 0; }
   .home-front__world-copy h3 { font-size:48px; }
   .home-front__world[data-world="events"] { min-height:0; }
   .home-front__world[data-world="events"] .home-front__world-top { padding:18px; }

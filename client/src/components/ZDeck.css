@@ -31,7 +31,7 @@
   top: 0;
   width: var(--cf-card);
   height: var(--cf-card-h);
-  contain: layout style;
+  contain: layout paint style;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
