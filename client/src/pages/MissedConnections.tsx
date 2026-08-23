@@ -115,7 +115,7 @@ export default function MissedConnections() {
   };
 
   return (
-    <div className="zine-page missed-page board-page board-page--makeover min-h-screen">
+    <div className="zine-page missed-page board-page board-page--makeover">
       <MissedConnectionsHero onPost={openPost} />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />
 

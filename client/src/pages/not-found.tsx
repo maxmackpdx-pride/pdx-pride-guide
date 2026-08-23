@@ -4,7 +4,7 @@ import { Button } from "@/components/ds";
 
 export default function NotFound() {
   return (
-    <div className="zine-page board-page min-h-screen">
+    <div className="zine-page board-page">
       <PageHero
         flipLightLeaks
         titleLine1="404"

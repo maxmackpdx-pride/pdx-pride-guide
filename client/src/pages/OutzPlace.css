@@ -1,4 +1,4 @@
-.outz-place { background: #050506; min-height: 100vh; padding-bottom: 72px; }
+.outz-place { background: #050506; }
 .outz-place--missing { color: #fff; padding: 180px 24px; text-align: center; }
 .outz-place--missing a { color: #19e3ff; }
 .outz-place__hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }

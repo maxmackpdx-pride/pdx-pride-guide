@@ -1,0 +1,44 @@
+/*
+ * Close every public page into the site footer.
+ *
+ * The shell is min-height 100vh + flex column. main.flex-1 used to grow and
+ * leave a dead band of grain between the last content and the footer.
+ * Inner pages also used min-height: 100vh, which is a full viewport ON TOP OF
+ * the header, so short boards always ended in empty space.
+ *
+ * Footer keeps the one mobile-dock spacer. Main does not.
+ */
+
+.app-shell:not(.app-shell--hub) > main.flex-1 {
+  flex-grow: 0;
+}
+
+.app-shell:not(.app-shell--hub) > footer {
+  margin-top: auto;
+}
+
+.about-page,
+.missed-page,
+.gigs-page,
+.gifting-page,
+.mp-page {
+  min-height: 0;
+}
+
+.zine-content {
+  padding-bottom: 32px;
+}
+
+@media (max-width: 640px) {
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) main {
+    padding-bottom: 0;
+  }
+
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer {
+    padding-bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer__legal {
+    padding-bottom: 0;
+  }
+}

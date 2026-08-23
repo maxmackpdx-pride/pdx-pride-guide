@@ -11,6 +11,7 @@ import { captureInstallPrompt, registerServiceWorker } from "./lib/pwa";
 import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
 import "./fonts.css";
 import "./index.css";
+import "./layout-end.css";
 import "@/components/hub/hub-shell.css";
 import "@/components/ds/tokens/index.css";
 import "@/components/ds/adapters/listing-card.css";

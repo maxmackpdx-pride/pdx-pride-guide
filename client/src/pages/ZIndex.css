@@ -21,7 +21,7 @@
      canonical, and every other board still blooms at 18%. */
   --glass-bloom: 5%;
   background: #000;
-  padding-bottom: 96px;
+  padding-bottom: 32px;
   overflow-x: hidden;
 }
 

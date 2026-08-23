@@ -38,7 +38,7 @@ export default function ZAddressPending() {
   const clubsLiveInDirectory = address?.path === "squadz";
 
   return (
-    <div className="zine-page board-page min-h-screen">
+    <div className="zine-page board-page">
       <PageHero
         flipLightLeaks
         titleLine1={isSellz ? "LIVE NOW" : "NOT BUILT YET"}
