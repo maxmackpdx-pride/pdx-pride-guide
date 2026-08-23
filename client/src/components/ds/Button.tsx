@@ -16,10 +16,12 @@ const CSS = `
   background:
     radial-gradient(120% 100% at 50% 0%, color-mix(in srgb,var(--_c) 15%,#0b0b0d), #060608) padding-box,
     linear-gradient(#000,#000) border-box;
+  --c:var(--_c);
   box-shadow:
-    0 0 0 1px #000,
+    var(--chrome-keyline),
     inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -6px 12px -8px rgba(0,0,0,.55);
+    inset 0 -6px 12px -8px rgba(0,0,0,.55),
+    var(--neon-bloom);
   transition:background .15s ease, color .15s ease, transform .15s ease,
              box-shadow .15s ease, filter .15s ease, opacity .15s ease;
 }

@@ -10,7 +10,8 @@ const CSS = `
   padding:10px 16px 8px; border-radius:var(--radius-sm);
   background:var(--_bg); color:var(--_fg);
   border:var(--bw-chunk) solid var(--ink-1000);
-  box-shadow:var(--shadow-hard);
+  --c:var(--_bg);
+  box-shadow:var(--shadow-hard), var(--neon-bloom);
   transition:transform var(--dur-base) var(--ease-spring);
   will-change:transform;
 }

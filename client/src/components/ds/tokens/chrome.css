@@ -45,8 +45,21 @@
    * settled value: the accent reads as lit, never as a glow frame.
    */
   --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c, #00ffff) 8%, transparent);
+  /*
+   * The glow proposal pairs that bloom with a soft internal glass sheen
+   * (bright at the top edge, falling to a dark floor). Mount as a ::before
+   * on anything wearing the bloom.
+   */
+  --glow-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.03) 42%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
   --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c, #00ffff) 90%, transparent);
-  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom);
+  /* Lit plate: keyline, bevel, its floor bloom, and the 8% outer bloom. */
+  --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom), var(--neon-bloom);
   --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c, #00ffff) 75%, transparent);
   --acid-lit-chip: linear-gradient(180deg, #e2ff5e, #c4f200);
   --chrome-ink-fill: radial-gradient(
