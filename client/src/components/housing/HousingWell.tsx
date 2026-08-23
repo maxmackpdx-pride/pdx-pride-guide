@@ -41,12 +41,9 @@ const FRAME_H_SHARE = 0.58;
 const WIDE_ASPECT = 2.35;
 /** Breathing room between the title block and the caption row, in px. */
 const CAPTION_GAP = 14;
-/** Slight horizontal stretch on the name block only (height basis stays `nameW`). */
-const WIDTH_STRETCH = 1.02;
-/** The SVG design box every line is drawn in. */
-const GLYPH_BOX = 108;
-const GLYPH_BASELINE = 86;
-const GLYPH_SIZE = 100;
+const MAX_DYNAMIC_ROWS = 3;
+const MIN_DYNAMIC_SIZE = 24;
+const MAX_DYNAMIC_SIZE = 220;
 
 const MEASURE_FONT = `900 ${GLYPH_SIZE}px 'Barlow Condensed', 'Arial Narrow', sans-serif`;
 
@@ -71,30 +68,77 @@ function measureLine(text: string): number {
 }
 
 /**
- * Split into at most two lines, as evenly as possible by character count, so the
- * type stays large. A trailing HAUS always takes the second line by itself.
+ * Public helper retained for callers that need a simple preview split.
+ * The component uses dynamicLayout below because it has the actual frame size.
  */
 export function nameLines(title: string): string[] {
   const words = String(title).toUpperCase().split(/\s+/).filter(Boolean);
   if (words.length < 2) return words;
-
   const suffix = HAUS_SUFFIX.toUpperCase();
-  if (words[words.length - 1] === suffix) {
-    return [words.slice(0, -1).join(" "), suffix];
-  }
-
+  if (words[words.length - 1] === suffix) return [words.slice(0, -1).join(" "), suffix];
   let best = 1;
   let bestScore = Infinity;
   for (let i = 1; i < words.length; i++) {
-    const a = words.slice(0, i).join(" ").length;
-    const b = words.slice(i).join(" ").length;
-    const score = Math.abs(a - b);
+    const a = words.slice(0, i).join(" ");
+    const b = words.slice(i).join(" ");
+    const score = Math.abs(a.length - b.length);
     if (score < bestScore) {
-      bestScore = score;
       best = i;
+      bestScore = score;
     }
   }
   return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
+}
+
+type DynamicLayout = { lines: string[]; sizes: number[]; outOfRange: boolean };
+
+function scoreLayout(lines: string[], frameW: number, frameH: number): DynamicLayout & { score: number } {
+  const sizes = lines.map((line) => (frameW / measureLine(line)) * 100);
+  const usedHeight = sizes.reduce((sum, size) => sum + size * 0.82, 0);
+  const outOfRange =
+    sizes.some((size) => size < MIN_DYNAMIC_SIZE || size > MAX_DYNAMIC_SIZE) || usedHeight > frameH;
+  const singletonPenalty = lines
+    .slice(0, -1)
+    .reduce((sum, line) => sum + (line.split(" ").length === 1 ? 80 : 0), 0);
+  return {
+    lines,
+    sizes,
+    outOfRange,
+    score: Math.abs(frameH - usedHeight) + singletonPenalty + (outOfRange ? 100000 : 0),
+  };
+}
+
+/**
+ * Adobe-style Dynamic Text solver.
+ * Each row is measured and gets its own uniform font size. No glyph is stretched,
+ * no spacing is injected, and every completed row fills the same fixed width.
+ */
+function dynamicLayout(title: string, frameW: number, frameH: number): DynamicLayout {
+  const manualRows = String(title).trim().split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  if (manualRows.length > 1) return scoreLayout(manualRows.map((line) => line.toUpperCase()), frameW, frameH);
+
+  const words = String(title).trim().toUpperCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return { lines: [], sizes: [], outOfRange: false };
+
+  const suffix = HAUS_SUFFIX.toUpperCase();
+  if (words.length > 1 && words[words.length - 1] === suffix) {
+    return scoreLayout([words.slice(0, -1).join(" "), suffix], frameW, frameH);
+  }
+
+  const candidates: string[][] = [];
+  const visit = (start: number, rows: string[]) => {
+    if (rows.length > MAX_DYNAMIC_ROWS || candidates.length > 5000) return;
+    if (start === words.length) {
+      candidates.push(rows);
+      return;
+    }
+    for (let end = start + 1; end <= Math.min(words.length, start + 4); end++) {
+      visit(end, [...rows, words.slice(start, end).join(" ")]);
+    }
+  };
+  visit(0, []);
+  return candidates.map((rows) => scoreLayout(rows, frameW, frameH)).sort((a, b) => a.score - b.score)[0]
+    ?? scoreLayout([words.join(" ")], frameW, frameH);
 }
 
 /** Re-render once webfonts resolve, and drop metrics measured against fallbacks. */
@@ -183,20 +227,10 @@ export function HousingWell({
     [count],
   );
 
-  const lines = title ? nameLines(title) : [];
-  const ratios = lines.map((l) => GLYPH_BOX / measureLine(l));
-  // Longest word (smallest ratio). Short lines like HAÜS must not inflate height
-  // and collapse the whole motif — all lines share equal height slots in the frame.
-  const longestRatio = ratios.length ? Math.min(...ratios) : 1;
-
-  /**
-   * Red-box frame: same height share on every card; half cards share the same
-   * width share; Forming (wide well) uses a wider share. Text fills the frame.
-   */
-  let nameW = 0;
-  let blockW = 0;
-  let lineH = 0;
-  if (box && lines.length) {
+  let frameW = 0;
+  let frameH = 0;
+  let layout: DynamicLayout | null = null;
+  if (box && title) {
     const isWide = box.w / Math.max(box.h, 1) >= WIDE_ASPECT;
     const wShare =
       typeof nameCap === "number" && nameCap > 0
@@ -204,27 +238,13 @@ export function HousingWell({
         : isWide
           ? WIDE_FRAME_W_SHARE
           : HALF_FRAME_W_SHARE;
-    // Frame sits in the photo above the caption; use well height share so half
-    // and Forming get the same vertical band (same share of 240px well).
-    const frameH = Math.max(48, Math.min(box.h * FRAME_H_SHARE, box.h - CAPTION_GAP - 36));
-    const frameW = Math.max(48, box.w * wShare);
-    const n = lines.length;
-
-    // Equal line heights that fill the frame; width from longest word metrics.
-    lineH = frameH / n;
-    nameW = lineH / longestRatio;
-    blockW = nameW * WIDTH_STRETCH;
-    if (blockW > frameW) {
-      blockW = frameW;
-      nameW = blockW / WIDTH_STRETCH;
-      lineH = nameW * longestRatio;
-    }
-    nameW = Math.max(28, nameW);
-    blockW = Math.max(40, Math.min(blockW, frameW));
-    lineH = Math.max(20, nameW * longestRatio);
+    frameH = Math.max(48, Math.min(box.h * FRAME_H_SHARE, box.h - CAPTION_GAP - 36));
+    frameW = Math.max(48, box.w * wShare);
+    layout = dynamicLayout(title, frameW, frameH);
   }
 
-  const showName = nameW > 0 && fontsReady;
+  const showName = Boolean(layout?.lines.length) && fontsReady;
+
 
   return (
     <div className={className ? `hz-well ${className}` : "hz-well"} ref={wellRef}>
@@ -245,24 +265,24 @@ export function HousingWell({
         </>
       ) : null}
 
-      {lines.length ? (
+      {layout?.lines.length ? (
         <div
           className="hz-well__name"
-          style={{ width: blockW || undefined, visibility: showName ? "visible" : "hidden" }}
+          style={{
+            width: frameW || undefined,
+            height: frameH || undefined,
+            visibility: showName ? "visible" : "hidden",
+          }}
+          aria-label={title || undefined}
         >
-          {lines.map((line, i) => (
-            <svg
-              key={`${line}-${i}`}
-              viewBox={`0 0 ${Math.round(measureLine(line))} ${GLYPH_BOX}`}
-              preserveAspectRatio="none"
-              aria-hidden="true"
-              // Equal line heights so the block fills the shared frame (not collapsed by HAÜS).
-              style={{ height: lineH || undefined }}
+          {layout.lines.map((line, i) => (
+            <span
+              key={line + "-" + i}
+              className="hz-well__name-line"
+              style={{ fontSize: layout.sizes[i] }}
             >
-              <text x="0" y={GLYPH_BASELINE} fontSize={GLYPH_SIZE}>
-                {line}
-              </text>
-            </svg>
+              {line}
+            </span>
           ))}
         </div>
       ) : null}
