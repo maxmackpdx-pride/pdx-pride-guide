@@ -3134,3 +3134,46 @@ html.calm-mode .home-next-preview__orb,
     transform: none;
   }
 }
+
+/* Beta sticker on the Next cards for boards that are built but still settling.
+   Same language as .hz-beta on Housing (acid plate, slight rotation, lit
+   chassis), scaled down for a ~300px card.
+
+   Placement note: the cards fan with margin-left -68px (-26px on mobile) and
+   carry no z-index, so each card's rightmost 68px is painted over by the next
+   one. Pinning the tag to the true corner buries it — that is exactly what
+   happened to THE HAUZ under Z/SPACE. It sits at the card's *visible* top-right
+   corner instead, which is where a viewer reads the corner as being, and the
+   fan's stacking order is left alone. */
+.home-next-preview__card .home-next-preview__beta {
+  position: absolute;
+  top: 7px;
+  right: 75px;
+  z-index: 4;
+  transform: rotate(-7deg);
+  padding: 3px 8px 2px;
+  border-radius: 3px;
+  background: var(--green-acid, #39ff14);
+  color: var(--text-inverse, #000);
+  font-family: var(--font-display, "Barlow Condensed", "Arial Narrow", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+  box-shadow:
+    var(--chrome-keyline, 0 0 0 1px #000),
+    var(--chrome-bevel, inset 0 1px 0 rgba(255, 255, 255, .72)),
+    0 10px 22px -14px color-mix(in srgb, var(--green-acid, #39ff14) 90%, transparent);
+  pointer-events: none;
+}
+
+/* Nothing covers the last card, so its tag sits in the real corner. */
+.home-next-preview__card:last-child .home-next-preview__beta { right: 7px; }
+
+@media (max-width: 640px) {
+  .home-next-preview__card .home-next-preview__beta {
+    top: 5px; right: 33px; padding: 2px 6px 1px; font-size: 8.5px;
+  }
+  .home-next-preview__card:last-child .home-next-preview__beta { right: 5px; }
+}

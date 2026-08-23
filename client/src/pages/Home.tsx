@@ -13,13 +13,18 @@ import { prefersStillMotion } from "@/lib/motion";
 import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
 
+/**
+ * `beta` marks a board that is built and reachable but still settling. Set on
+ * every card so the `as const` union keeps the field and card.beta stays
+ * type-safe on all six.
+ */
 const NEXT_PREVIEW_CARDS = [
-  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px" },
-  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px" },
-  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px" },
-  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px" },
-  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px" },
-  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px" },
+  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px", beta: true },
+  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px", beta: true },
+  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px", beta: false },
+  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px", beta: false },
+  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px", beta: false },
+  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px", beta: true },
 ] as const;
 
 function NextPreviewCardStack() {
@@ -101,6 +106,7 @@ function NextPreviewCardStack() {
                   ["--silly-x" as string]: card.drift,
                 }}
               >
+                {card.beta ? <span className="home-next-preview__beta">Beta</span> : null}
                 <img src={card.logo} alt="" loading="lazy" decoding="async" />
               </span>
             ))}
