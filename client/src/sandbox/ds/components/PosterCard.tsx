@@ -93,7 +93,7 @@ export function PosterCard({
   const dayt = DAY_TEXT[day] || "#fff";
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   return (
-    <Tag className={`pdxBoard ${className}`} href={href}
+    <Tag className={`pdxBoard ${className} pdx-glass-rebind`} href={href}
       style={{ "--_day": base, "--_dayt": dayt, ...style }} {...rest}>
       <div className="pdxBoard__poster">
         {image

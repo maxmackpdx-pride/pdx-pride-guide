@@ -201,7 +201,7 @@ export default function HousingPost() {
 
   if (isLoading) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">Loading.</div>
@@ -213,7 +213,7 @@ export default function HousingPost() {
 
   if (isError || !post) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">
@@ -269,7 +269,7 @@ export default function HousingPost() {
   };
 
   return (
-    <div className="hz">
+    <div className="hz pdx-glass-rebind">
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 

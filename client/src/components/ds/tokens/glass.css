@@ -203,6 +203,10 @@
 /* ═══════════════════════════════════════════════════════════
    Per-instance rebind: recompute recipes against local --c
    (event day color, board accent, category, etc.)
+
+   This list is the glass CARD recipe contract, not an offender dump.
+   A product rule that sets --c must include .pdx-glass-rebind on that
+   same selector / element. Do not add page classes here to silence CI.
    ═══════════════════════════════════════════════════════════ */
 .pdx-glass-rebind,
 .pdx-glass-card,
@@ -323,10 +327,10 @@
    stay in component CSS; this is panel chrome only.
    docs/LIVE_DESIGN_STANDARD.md
    ═══════════════════════════════════════════════════════════ */
-.pdx-map-key,
-.map-legend,
-.directory-map-key,
-.pdxLegend {
+.pdx-map-key.pdx-glass-rebind,
+.map-legend.pdx-glass-rebind,
+.directory-map-key.pdx-glass-rebind,
+.pdxLegend.pdx-glass-rebind {
   --c: var(--glass-neutral-c2, #b8b8c2);
   /* Do not set position here - .map-legend is absolute over the map */
   overflow: hidden;
@@ -626,8 +630,8 @@ html.calm-mode .pdxLegend,
 }
 
 /* Keep-alive panel: neutral glass (Agent 12) - not accented */
-.about-v2-donate--panel.support-keepalive,
-.support-keepalive {
+.about-v2-donate--panel.support-keepalive.pdx-glass-rebind,
+.support-keepalive.pdx-glass-rebind {
   --c: var(--glass-neutral-c2);
   background: var(--glass-card-neutral-bg) !important;
   border: var(--glass-card-neutral-border) !important;
@@ -977,7 +981,7 @@ html.calm-mode .pdxRow::before,
   mask: none;
 }
 
-.gifting-form-panel--makeover {
+.gifting-form-panel--makeover.pdx-glass-rebind {
   --c: #ccff00;
   box-shadow: var(--glass-card-shadow) !important;
 }

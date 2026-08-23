@@ -24,7 +24,7 @@ export function MapLegend({
   style,
 }: MapLegendProps) {
   return (
-    <div className={`pdxLegend ${className}`} style={style}>
+    <div className={`pdxLegend ${className} pdx-glass-rebind`} style={style}>
       {days.map((d) => (
         <div className="pdxLegend__row" key={d.label}>
           <span

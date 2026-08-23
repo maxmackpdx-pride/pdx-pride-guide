@@ -273,7 +273,7 @@ export default function SpottedCardGrid({
 
   const composeSection = makeover && composeOpen && (
     <ScrollReveal>
-      <section id="spotted-form" className="gifting-form-panel gifting-form-panel--makeover" style={{ borderColor: "#ff1fa0", boxShadow: "0 0 30px -14px #ff1fa0" }}>
+      <section id="spotted-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind" style={{ borderColor: "#ff1fa0", boxShadow: "0 0 30px -14px #ff1fa0" }}>
         <button type="button" className="gifting-close" onClick={() => setComposeOpen(false)} aria-label="Close form">
           <X size={18} />
         </button>

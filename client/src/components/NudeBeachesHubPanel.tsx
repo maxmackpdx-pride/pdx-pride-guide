@@ -82,8 +82,8 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
   const swimBand = live.riverLevelFt != null && live.riverLevelFt >= 15;
 
   return (
-    <div className="nb-hub nb-hub--rooster">
-      <section className="nb-hub__section nb-hub__section--pulse">
+    <div className="nb-hub nb-hub--rooster pdx-glass-rebind">
+      <section className="nb-hub__section nb-hub__section--pulse pdx-glass-rebind">
         <WeatherSectionHead summary={live.weatherSummary} forecastDays={live.forecastDays} />
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
@@ -122,7 +122,7 @@ function RoosterHub({ live }: { live: NudeBeachesSnapshot["roosterRock"] }) {
       <section
         className={`nb-hub__section nb-hub__level${
           swimBand ? " nb-hub__level--bad" : live.riverLevelFt != null ? " nb-hub__level--good" : ""
-        }`}
+        } pdx-glass-rebind`}
       >
         <div className="nb-hub__level-head">
           <div className="nb-hub__kicker">River level</div>
@@ -178,8 +178,8 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
   const swimColor = swimStatusColor(live.swimStatus);
 
   return (
-    <div className="nb-hub nb-hub--sauvie">
-      <section className="nb-hub__section nb-hub__section--pulse">
+    <div className="nb-hub nb-hub--sauvie pdx-glass-rebind">
+      <section className="nb-hub__section nb-hub__section--pulse pdx-glass-rebind">
         <WeatherSectionHead summary={live.weatherSummary} forecastDays={live.forecastDays} />
         <div className="nb-hub__weather-grid">
           <div className="nb-hub__weather-main">
@@ -211,7 +211,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
       </section>
 
       <section
-        className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water`}
+        className={`nb-hub__section nb-hub__swim nb-hub__swim--${swimClass} nb-hub__section--water pdx-glass-rebind`}
         style={{ ["--nb-rim" as string]: swimColor }}
       >
         <div className="nb-hub__kicker">Water quality</div>
@@ -235,7 +235,7 @@ function SauvieHub({ live }: { live: NudeBeachesSnapshot["sauvieIsland"] }) {
         </a>
       </section>
 
-      <section className="nb-hub__section">
+      <section className="nb-hub__section pdx-glass-rebind">
         <div className="nb-hub__kicker">Parking permits</div>
         <p className="nb-hub__summary">
           {live.parkingNote ||
@@ -257,7 +257,7 @@ type Props = {
 export default function NudeBeachesHubPanel({ tab, snapshot }: Props) {
   if (!snapshot) {
     return (
-      <div className="nb-hub nb-hub--loading" aria-hidden>
+      <div className="nb-hub nb-hub--loading pdx-glass-rebind" aria-hidden>
         <div className="nb-hub__kicker">Loading conditions…</div>
       </div>
     );

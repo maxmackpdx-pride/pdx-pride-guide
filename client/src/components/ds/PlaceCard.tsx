@@ -475,7 +475,7 @@ export function PlaceCard({
       {...rest}
     >
       <div className="pdxPlace__glow" aria-hidden="true" />
-      <div className="pdxPlace__body">
+      <div className="pdxPlace__body pdx-glass-rebind">
         <div className="pdxPlace__sheen" aria-hidden="true" />
         <div className="pdxPlace__seam dir-refract" aria-hidden="true" />
         <div className="pdxPlace__actions">

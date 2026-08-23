@@ -166,7 +166,7 @@ export default function PortfolioContactModal({
                   ? "It's on my Owner Desk. I'll review the space details and get back to you about timing and custom options."
                   : "It's on my Owner Desk. I'll get back to you."}
             </p>
-            <button type="button" className="btn-neon magenta" onClick={onClose}>
+            <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={onClose}>
               Close
             </button>
           </div>
@@ -398,7 +398,7 @@ export default function PortfolioContactModal({
 
             <button
               type="submit"
-              className={`btn-neon ${isSponsor ? "solid" : isOrder ? "cyan" : "magenta"}`}
+              className={`btn-neon ${isSponsor ? "solid" : isOrder ? "cyan" : "magenta"} pdx-glass-rebind`}
               disabled={status === "sending"}
             >
               {status === "sending"

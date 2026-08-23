@@ -455,7 +455,7 @@ export function MapView({
           </button>
         )}
 
-        <div className={`map-legend${variant === "home" ? " map-legend--home" : ""}`} aria-label="Map key">
+        <div className={`map-legend${variant === "home" ? " map-legend--home" : ""} pdx-glass-rebind`} aria-label="Map key">
           <div className="map-legend-items">
             {(legendDays.length > 0 ? legendDays : EVENT_WEEK_DAYS).map((day) => {
               const color = DAY_COLORS[day as keyof typeof DAY_COLORS] || UNKNOWN_DAY_COLOR;

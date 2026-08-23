@@ -40,7 +40,7 @@ export default function BoardTab({ data }: { data: MemberProfileData }) {
       {cards.length > 0 ? (
         <div className="mp-board-list">
           {cards.map(c => (
-            <div key={c.key} className="mp-board-card" style={{ "--_hex": c.hex } as React.CSSProperties}>
+            <div key={c.key} className="mp-board-card pdx-glass-rebind" style={{ "--_hex": c.hex } as React.CSSProperties}>
               <div className="mp-board-card__head">
                 <span className="mp-board-card__pill" style={{ background: c.hex }}>{c.board}</span>
                 <span className="mp-board-card__where">{c.where}</span>

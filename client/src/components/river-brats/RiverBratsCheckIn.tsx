@@ -427,7 +427,7 @@ export default function RiverBratsCheckIn({
 
   return (
     <div className={`rb-checkin rb-checkin--${accent}`} ref={rootRef}>
-      <div className="rb-checkin__hero-card">
+      <div className="rb-checkin__hero-card pdx-glass-rebind">
         <img
           src={posterUrl}
           alt=""
@@ -445,7 +445,7 @@ export default function RiverBratsCheckIn({
         </div>
       </div>
 
-      <div className="rb-checkin__pulse">
+      <div className="rb-checkin__pulse pdx-glass-rebind">
         <span className="rb-checkin__pulse-dot" aria-hidden />
         <span className="rb-checkin__pulse-copy">
           <strong>{isLoading ? "…" : goingCount}</strong>{" "}
@@ -459,13 +459,13 @@ export default function RiverBratsCheckIn({
       </div>
 
       {arrivalDue && (
-        <div className={`rb-arrival-banner rb-arrival-banner--${accent}`} role="status">
+        <div className={`rb-arrival-banner rb-arrival-banner--${accent} pdx-glass-rebind`} role="status">
           <span className="rb-arrival-banner__copy">
             You planned {formatRiverBratsHour(mine!.arrival_hour)} - are you at {beachShortLabel}?
           </span>
           <button
             type="button"
-            className="rb-checkin__primary"
+            className="rb-checkin__primary pdx-glass-rebind"
             disabled={verifying}
             onClick={imHere}
           >
@@ -475,14 +475,14 @@ export default function RiverBratsCheckIn({
       )}
 
       <div className="rb-checkin__grid">
-        <section className="rb-checkin__form">
+        <section className="rb-checkin__form pdx-glass-rebind">
           <div className="rb-checkin__field-label">Day</div>
           <div className="rb-date-chips" role="group" aria-label="Check-in day">
             {dateOptions.map(d => (
               <button
                 key={d}
                 type="button"
-                className={`rb-date-chip${selectedDate === d ? " active" : ""}`}
+                className={`rb-date-chip${selectedDate === d ? " active" : ""} pdx-glass-rebind`}
                 onClick={() => {
                   setSelectedDate(d);
                   setShowCalPicker(false);
@@ -549,7 +549,7 @@ export default function RiverBratsCheckIn({
           <div className="rb-checkin__actions">
             <button
               type="button"
-              className={`rb-checkin__primary${checkedInSelectedDay ? " rb-checkin__primary--update" : ""}`}
+              className={`rb-checkin__primary${checkedInSelectedDay ? " rb-checkin__primary--update" : ""} pdx-glass-rebind`}
               disabled={!canSave}
               onClick={() => requireAuth() && saveMutation.mutate(undefined)}
             >
@@ -565,7 +565,7 @@ export default function RiverBratsCheckIn({
               <div className="event-link-choice-anchor rb-checkin__cal-wrap">
                 <button
                   type="button"
-                  className="rb-checkin__withdraw"
+                  className="rb-checkin__withdraw pdx-glass-rebind"
                   data-testid="button-beach-add-to-calendar"
                   onClick={() => openCalendarForPlan()}
                 >
@@ -595,7 +595,7 @@ export default function RiverBratsCheckIn({
             {isViewingToday && !iAmHere && (
               <button
                 type="button"
-                className="rb-checkin__withdraw"
+                className="rb-checkin__withdraw pdx-glass-rebind"
                 disabled={verifying || saveMutation.isPending}
                 onClick={imHere}
                 title="GPS-confirm you're on the beach"
@@ -606,7 +606,7 @@ export default function RiverBratsCheckIn({
             {checkedInSelectedDay && mine && (
               <button
                 type="button"
-                className="rb-checkin__withdraw"
+                className="rb-checkin__withdraw pdx-glass-rebind"
                 disabled={withdrawMutation.isPending}
                 onClick={uncheckIn}
               >
@@ -621,7 +621,7 @@ export default function RiverBratsCheckIn({
           </p>
 
           {checkedInSelectedDay && !isViewingToday && (
-            <div className="rb-checkin__plan-next" data-testid="beach-plan-carpool-prompt">
+            <div className="rb-checkin__plan-next pdx-glass-rebind" data-testid="beach-plan-carpool-prompt">
               <div className="rb-checkin__plan-next-kicker">{dayLabel} forecast</div>
               {dayForecast ? (
                 <p className="rb-checkin__plan-next-weather">
@@ -640,7 +640,7 @@ export default function RiverBratsCheckIn({
               <p className="rb-checkin__plan-next-ask">Interested in carpooling that day?</p>
               <button
                 type="button"
-                className="rb-checkin__plan-next-btn"
+                className="rb-checkin__plan-next-btn pdx-glass-rebind"
                 onClick={() => onGoToCarpool?.(selectedDate)}
               >
                 Open carpool for {dayLabel}
@@ -663,7 +663,7 @@ export default function RiverBratsCheckIn({
         />
       </div>
 
-      <div className="rb-checkin__going-row">
+      <div className="rb-checkin__going-row pdx-glass-rebind">
         {checkedInSelectedDay && user && mine ? (
           <div className="rb-checkin__self">
             <UserAvatar

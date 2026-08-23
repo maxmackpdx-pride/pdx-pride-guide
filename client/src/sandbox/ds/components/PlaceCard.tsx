@@ -80,7 +80,7 @@ export function PlaceCard({
 }) {
   const accent = CAT_COLOR[category] || "var(--pink)";
   return (
-    <div className={`pdxPlace ${className}`} style={{ "--_c": accent }} {...rest}>
+    <div className={`pdxPlace ${className} pdx-glass-rebind`} style={{ "--_c": accent }} {...rest}>
       {grandOpening && <span className="pdxPlace__opening"><Badge color="yellow" glow size="sm">Grand Opening</Badge></span>}
       <span className="pdxPlace__cat"><Badge category={category} size="sm">{categoryLabel}</Badge></span>
       <div className="pdxPlace__name">{name}</div>

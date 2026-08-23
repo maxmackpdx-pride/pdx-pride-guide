@@ -245,9 +245,9 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
                 <strong>{row.displayName || row.username}</strong> · {EVENT_TALENT_ROLE_LABELS[row.role as EventTalentRole]}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="button" className="btn-neon solid" style={{ fontSize: "0.65rem", padding: "6px 10px" }}
+                <button type="button" className="btn-neon solid pdx-glass-rebind" style={{ fontSize: "0.65rem", padding: "6px 10px" }}
                   onClick={() => approveMutation.mutate(row.id)} disabled={approveMutation.isPending}>APPROVE</button>
-                <button type="button" className="btn-neon" style={{ fontSize: "0.65rem", padding: "6px 10px", borderColor: "#FF2400", color: "#FF2400" }}
+                <button type="button" className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.65rem", padding: "6px 10px", borderColor: "#FF2400", color: "#FF2400" }}
                   onClick={() => rejectMutation.mutate(row.id)} disabled={rejectMutation.isPending}>DENY</button>
               </div>
             </div>
@@ -275,7 +275,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
               style={{ flex: 1, minWidth: 140 }}
               inputStyle={{ width: "100%", padding: "8px 10px", background: "#0a0a0a", border: "1px solid #333", color: "#fff", fontSize: "0.82rem" }}
             />
-            <button type="button" className="btn-neon solid" style={{ fontSize: "0.72rem", padding: "8px 14px" }}
+            <button type="button" className="btn-neon solid pdx-glass-rebind" style={{ fontSize: "0.72rem", padding: "8px 14px" }}
               disabled={addMutation.isPending || !hostUsername.trim() || !hostRole}
               onClick={() => hostRole && addMutation.mutate()}>
               {addMutation.isPending ? "ADDING..." : hostRole ? `ADD ${EVENT_TALENT_ROLE_LABELS[hostRole].toUpperCase()} →` : "PICK ROLE ↑"}
@@ -303,7 +303,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
               />
             ))}
           </div>
-          <button type="button" className="btn-neon" style={{ fontSize: "0.72rem", padding: "8px 14px", borderColor: dayColor, color: dayColor, marginTop: 10 }}
+          <button type="button" className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.72rem", padding: "8px 14px", borderColor: dayColor, color: dayColor, marginTop: 10 }}
             disabled={selfMutation.isPending || !selfRole || (selfRole ? roleTaken(selfRole) : false)}
             onClick={() => selfRole && selfMutation.mutate(selfRole)}>
             {selfMutation.isPending

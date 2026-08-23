@@ -70,7 +70,7 @@ export default function SpottedCard({
     } as CSSProperties;
     return (
       <article
-        className="board-spotted-card board-spotted-card--glass"
+        className="board-spotted-card board-spotted-card--glass pdx-glass-rebind"
         style={glassVars}
         onClick={onReply}
         onKeyDown={e => {
@@ -115,7 +115,7 @@ export default function SpottedCard({
   const glassAccent = accentColor || MC_GLASS;
   return (
     <article
-      className="spotted-card spotted-card--glass"
+      className="spotted-card spotted-card--glass pdx-glass-rebind"
       style={{
         "--spotted-accent": glassAccent,
         "--c": glassAccent,

@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Audit glass --c rebind
+        run: npm run audit:glass-rebind
+
       - name: Pre-ship design and bundle guards
         run: npm run ship
 

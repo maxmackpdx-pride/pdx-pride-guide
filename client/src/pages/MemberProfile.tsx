@@ -254,7 +254,7 @@ export default function MemberProfile() {
               ? `No active member named @${username} on Zaylist.`
               : "Could not load this profile. Try again in a moment."}
           </p>
-          <a href="/" className="btn-neon solid">
+          <a href="/" className="btn-neon solid pdx-glass-rebind">
             BACK HOME
           </a>
         </div>

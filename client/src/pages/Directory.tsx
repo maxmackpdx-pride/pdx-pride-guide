@@ -642,7 +642,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
       {formOpen && (
         <ScrollReveal>
-          <section id="directory-form" className="gifting-form-panel gifting-form-panel--makeover directory-form-panel">
+          <section id="directory-form" className="gifting-form-panel gifting-form-panel--makeover directory-form-panel pdx-glass-rebind">
             <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
               <X size={18} />
             </button>
@@ -675,7 +675,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                           {submitResult.heldForReview && (
                             <button
                               type="button"
-                              className="btn-neon"
+                              className="btn-neon pdx-glass-rebind"
                               style={{ display: "block", marginTop: 6, fontSize: "0.78rem" }}
                               disabled={claimMatchMutation.isPending && claimingBusinessId === match.businessId}
                               onClick={() => requestOwnershipForMatch(match)}
@@ -691,7 +691,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                     {submitResult.heldForReview && (
                       <button
                         type="button"
-                        className="btn-neon solid"
+                        className="btn-neon solid pdx-glass-rebind"
                         disabled={createMutation.isPending}
                         onClick={publishDespiteMatches}
                         style={{ width: "100%", justifyContent: "center" }}
@@ -703,7 +703,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {!submitResult.heldForReview && (
-                    <button type="button" className="btn-neon solid" onClick={openAddForm} style={{ width: "100%", justifyContent: "center" }}>
+                    <button type="button" className="btn-neon solid pdx-glass-rebind" onClick={openAddForm} style={{ width: "100%", justifyContent: "center" }}>
                       Add another place →
                     </button>
                   )}
@@ -770,7 +770,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 </label>
               </label>
             </div>
-            <button type="button" className="btn-neon solid" disabled={createMutation.isPending} onClick={submitDirectoryForm}>
+            <button type="button" className="btn-neon solid pdx-glass-rebind" disabled={createMutation.isPending} onClick={submitDirectoryForm}>
               {createMutation.isPending ? "Adding…" : "Add to directory →"}
             </button>
             </>
@@ -962,7 +962,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               <p className="board-copy-sm">
                 {isSpaces ? "Try a broader search. If a squad you know is genuinely missing, add it and it will be here for the next person." : "Try a broader filter. If a place you love is genuinely missing, add it and it will be here for the next person."}
               </p>
-              <button type="button" className="btn-neon magenta" onClick={openAddForm} style={{ marginTop: 16 }}>
+              <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={openAddForm} style={{ marginTop: 16 }}>
                 <Plus size={16} /> {isSpaces ? "Add a squad" : "Add your business"}
               </button>
             </div>
@@ -1077,7 +1077,7 @@ function DirectoryCard({
         onClick?.(e.currentTarget);
       }}
       category={TYPE_TO_DS_CATEGORY[biz.type] || "venues"}
-      className="pdxPlace--clickable"
+      className="pdxPlace--clickable pdx-glass-rebind"
       isNonprofit={isNonprofit}
       logoUrl={logoUrl}
       fallbackLogoUrl={fallbackLogoUrl}

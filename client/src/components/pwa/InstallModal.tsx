@@ -115,7 +115,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
         {!isIos && installReady && (
           <button
             type="button"
-            className="btn-neon solid"
+            className="btn-neon solid pdx-glass-rebind"
             disabled={busy}
             onClick={installNative}
             style={{ borderColor: "#19E3FF", background: "#19E3FF", color: "#000", width: "100%", marginBottom: 14 }}
@@ -135,7 +135,7 @@ export default function InstallModal({ open, onClose }: { open: boolean; onClose
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
           <button
             type="button"
-            className="btn-neon"
+            className="btn-neon pdx-glass-rebind"
             onClick={onClose}
             style={{ color: "#aaa", borderColor: "#444" }}
           >

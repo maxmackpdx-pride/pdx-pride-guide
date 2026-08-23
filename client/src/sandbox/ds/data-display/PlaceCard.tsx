@@ -109,7 +109,7 @@ export function PlaceCard({
   const cssStyle: CssVarStyle = { "--_c": accent, ...style };
 
   return (
-    <div className={`pdxPlace ${className}`} style={cssStyle}>
+    <div className={`pdxPlace ${className} pdx-glass-rebind`} style={cssStyle}>
       {grandOpening && (
         <span className="pdxPlace__opening">
           <Badge color="yellow" glow size="sm">

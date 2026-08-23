@@ -117,13 +117,13 @@ export default function HubPeople() {
       </div>
 
       {isLoading && (
-        <div className="card hub-people-list hub-people-loading">
+        <div className="card hub-people-list hub-people-loading pdx-glass-rebind">
           <BoardLoadingState label="Loading people" />
         </div>
       )}
 
       {isError && (
-        <div className="card hub-empty hub-people-empty" role="alert">
+        <div className="card hub-empty hub-people-empty pdx-glass-rebind" role="alert">
           Could not load your people list. Try refreshing the page.
         </div>
       )}
@@ -131,7 +131,7 @@ export default function HubPeople() {
       {!isLoading && !isError && places.length > 0 && (
         <section className="hub-people-places" aria-label="Places you follow">
           <div className="kick hub-people-places__kick">Places you follow</div>
-          <div className="card hub-people-list">
+          <div className="card hub-people-list pdx-glass-rebind">
             {places.map((place) => {
               const logo = resolveDirectoryLogo(place.name, place.imageUrl);
               return (
@@ -154,7 +154,7 @@ export default function HubPeople() {
                       <div className="hub-thread__top">
                         <div className="hub-thread__id">
                           <span className="hub-thread__name">{place.name}</span>
-                          <span className="hub-thread__badge">Place</span>
+                          <span className="hub-thread__badge pdx-glass-rebind">Place</span>
                         </div>
                       </div>
                       <span className="hub-thread__sub">
@@ -167,7 +167,7 @@ export default function HubPeople() {
                   </Link>
                   <button
                     type="button"
-                    className={`foll${place.isFollowing ? " on" : ""}`}
+                    className={`foll${place.isFollowing ? " on" : ""} pdx-glass-rebind`}
                     disabled={pendingPlaceId === place.id}
                     onClick={(e) => {
                       e.preventDefault();
@@ -192,7 +192,7 @@ export default function HubPeople() {
           {places.length > 0 && tab === "following" && (
             <div className="kick hub-people-places__kick">People you follow</div>
           )}
-          <div className="card hub-people-list">
+          <div className="card hub-people-list pdx-glass-rebind">
             {people.map((person) => (
               <HubPersonRow
                 key={person.id}
@@ -209,7 +209,7 @@ export default function HubPeople() {
       )}
 
       {empty && (
-        <div className="card hub-empty hub-people-empty">
+        <div className="card hub-empty hub-people-empty pdx-glass-rebind">
           <div className="kick hub-people-empty__kick">{emptyCopy.title}</div>
           <p className="hub-people-empty__copy">{emptyCopy.body}</p>
           <div className="hub-people-empty__actions">

@@ -58,9 +58,7 @@
   padding-top: 4px;
 }
 
-/* ── Verified banner - dark glass + soft lime rim (design image) ─ */
-
-.pi-verified {
+/* ── Verified banner - dark glass + soft lime rim (design image) ─ */ .pi-verified.pdx-glass-rebind {
   --c: var(--neon-yellow, #ccff00);
   --dir-gm: 42;
   position: relative;
@@ -163,9 +161,7 @@
   gap: 14px;
 }
 
-/* ── Action row - accent glass + strong neon rim (design) ── */
-
-.pi-action-row {
+/* ── Action row - accent glass + strong neon rim (design) ── */ .pi-action-row.pdx-glass-rebind {
   --c: var(--neon-yellow, #ccff00);
   --badge-c: var(--c);
   --dir-gm: 72;

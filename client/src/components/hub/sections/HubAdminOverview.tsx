@@ -162,7 +162,7 @@ export default function HubAdminOverview({
         </div>
       )}
 
-      <div className="card" style={{ padding: "18px 20px" }}>
+      <div className="card pdx-glass-rebind" style={{ padding: "18px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
           <span className="ld" />
           <span className="kick" style={{ letterSpacing: ".16em", color: "var(--panel-cyan)" }}>
@@ -216,7 +216,7 @@ export default function HubAdminOverview({
         </div>
       </div>
 
-      <div className="card" style={{ padding: "18px 20px", marginTop: 16 }}>
+      <div className="card pdx-glass-rebind" style={{ padding: "18px 20px", marginTop: 16 }}>
         <div className="kick" style={{ letterSpacing: ".16em", marginBottom: 12 }}>
           Recent admin activity
         </div>
@@ -258,7 +258,7 @@ export default function HubAdminOverview({
         </div>
       </div>
 
-      <div className="card" style={{ padding: "18px 20px", marginTop: 16 }}>
+      <div className="card pdx-glass-rebind" style={{ padding: "18px 20px", marginTop: 16 }}>
         <div className="kick" style={{ letterSpacing: ".16em", marginBottom: 12 }}>
           Manage sections
         </div>

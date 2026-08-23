@@ -153,14 +153,14 @@ export function PosterCard({
 
   if (href) {
     return (
-      <a className={`pdxBoard ${className}`} href={href} style={cssStyle}>
+      <a className={`pdxBoard ${className} pdx-glass-rebind`} href={href} style={cssStyle}>
         {content}
       </a>
     );
   }
 
   return (
-    <div className={`pdxBoard ${className}`} style={cssStyle}>
+    <div className={`pdxBoard ${className} pdx-glass-rebind`} style={cssStyle}>
       {content}
     </div>
   );

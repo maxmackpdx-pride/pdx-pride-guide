@@ -291,7 +291,7 @@ export function ZDeckDots({
           role="tab"
           aria-selected={index === selected}
           aria-label={labelOf(index)}
-          className={index === selected ? "is-on" : undefined}
+          className={index === selected ? "pdx-glass-rebind is-on" : "pdx-glass-rebind"}
           style={accentOf ? ({ ["--c" as string]: accentOf(index) }) : undefined}
           onClick={() => onSelect(index)}
         />

@@ -865,13 +865,13 @@ export default function PlaceModal({
               <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
                 <button
                   type="button"
-                  className="btn-neon solid"
+                  className="btn-neon solid pdx-glass-rebind"
                   disabled={saveMutation.isPending}
                   onClick={saveEdits}
                 >
                   {saveMutation.isPending ? "Saving…" : "Save changes"}
                 </button>
-                <button type="button" className="btn-neon" onClick={cancelEditing}>
+                <button type="button" className="btn-neon pdx-glass-rebind" onClick={cancelEditing}>
                   Cancel
                 </button>
               </div>
@@ -946,7 +946,7 @@ export default function PlaceModal({
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
                 {canEditVenue && (
-                  <button type="button" className="btn-neon" onClick={startEditing}>
+                  <button type="button" className="btn-neon pdx-glass-rebind" onClick={startEditing}>
                     Edit venue info
                   </button>
                 )}

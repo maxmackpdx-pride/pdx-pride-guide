@@ -22,7 +22,7 @@ export default function RiverBratsHourChips({
         <button
           key={hour}
           type="button"
-          className={`rb-hour-chip cv-chip${value === hour ? " active" : ""}`}
+          className={`rb-hour-chip cv-chip${value === hour ? " active" : ""} pdx-glass-rebind`}
           onClick={() => onChange(hour)}
         >
           {formatRiverBratsHour(hour)}

@@ -7,7 +7,7 @@ type Props = {
 
 export default function RiverBratsSpotted({ beachId }: Props) {
   return (
-    <div className="rb-panel rb-panel--spotted">
+    <div className="rb-panel rb-panel--spotted pdx-glass-rebind">
       <div className="rb-panel__intro">
         <h3 className="rb-panel__title">MIZZED CONNECTION</h3>
         <p className="rb-panel__lede">

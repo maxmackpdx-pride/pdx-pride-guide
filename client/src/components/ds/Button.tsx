@@ -5,7 +5,7 @@ import React from "react";
    Default: near-black fill + thin black ring + inward sheen (no outer bloom).
    solid: filled accent primary · outline: secondary · gradient: rainbow special. */
 const CSS = `
-.pdxBtn{
+.pdxBtn.pdx-glass-rebind{
   --_c: var(--neon-yellow);
   --c: var(--_c);
   display:inline-flex; align-items:center; justify-content:center; gap:.5em;
@@ -147,7 +147,7 @@ export function Button({
 }: any) {
   const Tag = as;
   const a = ACCENTS[accent] || ACCENTS.lime;
-  const cls = ["pdxBtn", `pdxBtn--${variant}`, `pdxBtn--${size}`,
+  const cls = ["pdxBtn", "pdx-glass-rebind", `pdxBtn--${variant}`, `pdxBtn--${size}`,
     block ? "pdxBtn--block" : "", className].filter(Boolean).join(" ");
   return (
     <Tag className={cls} style={{ "--_c": a.c, "--c": a.c, ...style }} {...rest}>

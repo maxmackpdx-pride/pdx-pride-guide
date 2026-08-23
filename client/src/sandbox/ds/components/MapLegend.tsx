@@ -40,7 +40,7 @@ const WEEK = [
 /** MapLegend, the day-color key for the map. */
 export function MapLegend({ days = WEEK, multi = true, className = "", ...rest }) {
   return (
-    <div className={`pdxLegend ${className}`} {...rest}>
+    <div className={`pdxLegend ${className} pdx-glass-rebind`} {...rest}>
       {days.map((d) => (
         <div className="pdxLegend__row" key={d.label}>
           <span className="pdxLegend__dot" style={{ "--_c": d.c }} />

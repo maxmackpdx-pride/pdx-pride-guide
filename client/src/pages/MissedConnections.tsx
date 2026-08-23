@@ -169,7 +169,7 @@ export default function MissedConnections() {
                 {myPosts.filter(p => p.status === "ACTIVE").map(post => (
                   <div
                     key={post.id}
-                    className="board-listing-card board-listing-card--makeover"
+                    className="board-listing-card board-listing-card--makeover pdx-glass-rebind"
                     style={{ "--listing-accent": "#ff1fa0", cursor: "default", padding: 16 } as React.CSSProperties}
                   >
                     <div className="board-listing-card__main" style={{ padding: 0 }}>
@@ -180,8 +180,8 @@ export default function MissedConnections() {
                     </div>
                     <div className="board-listing-card__expand" style={{ borderTop: "none", paddingTop: 0, marginTop: 12, marginLeft: 0, marginRight: 0 }}>
                       <div className="gifting-actions">
-                        <button onClick={() => startEdit(post)} className="btn-neon" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Edit</button>
-                        <button onClick={() => deleteMutation.mutate(post.id)} className="btn-neon magenta" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Delete</button>
+                        <button onClick={() => startEdit(post)} className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Edit</button>
+                        <button onClick={() => deleteMutation.mutate(post.id)} className="btn-neon magenta pdx-glass-rebind" style={{ fontSize: "0.78rem", padding: "6px 12px" }}>Delete</button>
                       </div>
                     </div>
                   </div>
@@ -212,10 +212,10 @@ export default function MissedConnections() {
               maxLength={500}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <button onClick={() => editMutation.mutate()} disabled={!editForm.title.trim() || !editForm.body.trim() || editMutation.isPending} className="btn-neon solid" style={{ opacity: !editForm.title.trim() || !editForm.body.trim() || editMutation.isPending ? 0.55 : 1 }}>
+              <button onClick={() => editMutation.mutate()} disabled={!editForm.title.trim() || !editForm.body.trim() || editMutation.isPending} className="btn-neon solid pdx-glass-rebind" style={{ opacity: !editForm.title.trim() || !editForm.body.trim() || editMutation.isPending ? 0.55 : 1 }}>
                 {editMutation.isPending ? "SAVING..." : "SAVE"}
               </button>
-              <button onClick={() => setEditingPost(null)} className="btn-neon">Cancel</button>
+              <button onClick={() => setEditingPost(null)} className="btn-neon pdx-glass-rebind">Cancel</button>
             </div>
           </div>
         </div>

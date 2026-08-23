@@ -43,12 +43,8 @@
   border-radius: 8px;
 }
 
-/*
- * Buy me a coffee = same solid lime glass as .support-sponsors__pitch
- * (never orange/magenta gradient; never cyan).
- */
-.tip-support__btn--lime-glass,
-.tip-support__btn--coffee-grad {
+/* * Buy me a coffee = same solid lime glass as .support-sponsors__pitch * (never orange/magenta gradient; never cyan). */ .tip-support__btn--lime-glass.pdx-glass-rebind,
+.tip-support__btn--coffee-grad.pdx-glass-rebind {
   --c: var(--lime, #ccff00);
   position: relative;
   color: #050506 !important;
@@ -64,8 +60,7 @@
   overflow: hidden;
 }
 
-/* Cyan glass (Stripe / Apple Pay secondary) - unchanged secondary */
-.tip-support__btn--cyan-glass {
+/* Cyan glass (Stripe / Apple Pay secondary) - unchanged secondary */ .tip-support__btn--cyan-glass.pdx-glass-rebind {
   --c: var(--neon-cyan, #19e3ff);
   color: #050506 !important;
   background: var(--glass-btn-bg) !important;
@@ -131,7 +126,7 @@
     inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28) !important;
 }
 
-.tip-support--footer .site-footer__coffee-btn.tip-support__btn--stripe-footer {
+.tip-support--footer .site-footer__coffee-btn.pdx-glass-rebind.tip-support__btn--stripe-footer {
   --c: var(--neon-cyan, #19e3ff);
   color: #050506 !important;
   background: var(--glass-btn-bg) !important;

@@ -85,7 +85,7 @@ export default function Inbox() {
           <p style={{ color: "#9d9a92", marginBottom: 24, lineHeight: 1.6 }}>
             Log in to read private threads from MIZZED CONNECTION posts, GIGZ, event hosts, and check-ins.
           </p>
-          <button type="button" className="btn-neon" onClick={() => setShowAuth(true)}>
+          <button type="button" className="btn-neon pdx-glass-rebind" onClick={() => setShowAuth(true)}>
             LOG IN / JOIN
           </button>
         </div>

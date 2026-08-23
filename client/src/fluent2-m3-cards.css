@@ -27,16 +27,15 @@ html[data-zaylist-cards="fluent2-m3"] {
     inset 0 -1px 0 rgba(255, 255, 255, 0.035);
 }
 
-/* Bind existing board colors into the shared card material; no new semantics. */
-html[data-zaylist-cards="fluent2-m3"] .mp-board-card {
+/* Bind existing board colors into the shared card material; no new semantics. */ html[data-zaylist-cards="fluent2-m3"] .mp-board-card.pdx-glass-rebind {
   --c: var(--_hex);
 }
 
-html[data-zaylist-cards="fluent2-m3"] .board-path-card--talent {
+html[data-zaylist-cards="fluent2-m3"] .board-path-card--talent.pdx-glass-rebind {
   --c: #19e3ff;
 }
 
-html[data-zaylist-cards="fluent2-m3"] .board-path-card--host {
+html[data-zaylist-cards="fluent2-m3"] .board-path-card--host.pdx-glass-rebind {
   --c: #b06bff;
 }
 

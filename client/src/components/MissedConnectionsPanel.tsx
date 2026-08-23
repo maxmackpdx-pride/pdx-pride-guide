@@ -227,7 +227,7 @@ export default function MissedConnectionsPanel({
         <p style={{ color: "#aaa", lineHeight: 1.6, marginBottom: 14 }}>
           Log in to read or post. Replies stay anonymous until you both choose to reveal in inbox.
         </p>
-        <button className="btn-neon solid" onClick={() => requireAuth()}>Log in / Join</button>
+        <button className="btn-neon solid pdx-glass-rebind" onClick={() => requireAuth()}>Log in / Join</button>
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       </div>
     );
@@ -251,7 +251,7 @@ export default function MissedConnectionsPanel({
       <button
         onClick={() => createMutation.mutate()}
         disabled={!form.body.trim() || createMutation.isPending}
-        className="btn-neon solid"
+        className="btn-neon solid pdx-glass-rebind"
         style={{ marginTop: 14, opacity: !form.body.trim() || createMutation.isPending ? 0.55 : 1 }}
       >
         {createMutation.isPending ? "POSTING..." : "POST ANONYMOUSLY"}
@@ -265,12 +265,12 @@ export default function MissedConnectionsPanel({
     boardLayout ? (
       <div className="board-empty board-empty--prototype">
         <p className="display section-heading">Could not load</p>
-        <button className="btn-neon" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
+        <button className="btn-neon pdx-glass-rebind" style={{ marginTop: 16 }} onClick={() => refetch()}>Try again</button>
       </div>
     ) : (
       <div style={{ textAlign: "center", padding: "24px 0", border: "2px dashed #FF00CC" }}>
         <p style={{ color: "#fff", marginBottom: 12 }}>Could not load MIZZED CONNECTION posts.</p>
-        <button className="btn-neon" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
+        <button className="btn-neon pdx-glass-rebind" style={{ fontSize: "0.78rem", padding: "8px 14px" }} onClick={() => refetch()}>TRY AGAIN</button>
       </div>
     )
   ) : posts.length === 0 ? (

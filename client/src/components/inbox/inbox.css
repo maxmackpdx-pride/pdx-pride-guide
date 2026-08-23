@@ -1,8 +1,4 @@
-/* Inbox shell - hover states + composer primitives
-   Agent 6 / deep-glass §2.6 - shell surface + FAB glossy chrome.
-   Overlay enter keyframes stay in index.css (inbox-overlay-in / fade). */
-
-.inbox-shell-root {
+/* Inbox shell - hover states + composer primitives Agent 6 / deep-glass §2.6 - shell surface + FAB glossy chrome. Overlay enter keyframes stay in index.css (inbox-overlay-in / fade). */ .inbox-shell-root.pdx-glass-rebind {
   --border-faint: var(--ink-border-faint);
   /* Dark blue → bright blue (shared with floating drawer) */
   --inbox-blue-deep: #061a66;

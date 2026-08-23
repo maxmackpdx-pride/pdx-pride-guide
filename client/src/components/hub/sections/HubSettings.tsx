@@ -37,7 +37,7 @@ export default function HubSettings({ onLogout }: Props) {
       <div className="kick hub-settings__hero-kick">Make it yours</div>
       <h1 className="h1">Settings</h1>
 
-      <div className="card hub-settings__card hub-settings__card--tight">
+      <div className="card hub-settings__card hub-settings__card--tight pdx-glass-rebind">
         <div className="kick hub-settings__section-kick">Notifications</div>
         <p className="hub-settings__lede">
           These save to your account - push alerts for messages, events, and account updates.
@@ -47,7 +47,7 @@ export default function HubSettings({ onLogout }: Props) {
         </div>
       </div>
 
-      <div className="card hub-settings__card hub-settings__card--tight">
+      <div className="card hub-settings__card hub-settings__card--tight pdx-glass-rebind">
         <div className="kick hub-settings__section-kick">Appearance</div>
         <div className="hub-settings__row">
           <div className="hub-settings__row-copy">
@@ -60,7 +60,7 @@ export default function HubSettings({ onLogout }: Props) {
         </div>
       </div>
 
-      <div className="card hub-settings__card hub-settings__card--comfortable">
+      <div className="card hub-settings__card hub-settings__card--comfortable pdx-glass-rebind">
         <div className="kick hub-settings__section-kick hub-settings__section-kick--privacy">Privacy</div>
         <p className="hub-settings__note">
           Public profile visibility, RSVP visibility, and check-in privacy are not live yet. We removed the
@@ -68,7 +68,7 @@ export default function HubSettings({ onLogout }: Props) {
         </p>
       </div>
 
-      <div className="card hub-settings__card hub-settings__card--roomy">
+      <div className="card hub-settings__card hub-settings__card--roomy pdx-glass-rebind">
         <div className="kick hub-settings__section-kick hub-settings__section-kick--account">Account</div>
         <div className="hub-settings__actions">
           <Button variant="ghost" accent="cyan" onClick={onLogout}>

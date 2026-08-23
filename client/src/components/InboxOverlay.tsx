@@ -250,7 +250,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
             </p>
             <button
               type="button"
-              className="pdx-glass-btn"
+              className="pdx-glass-btn pdx-glass-rebind"
               data-testid="inbox-demo-login"
               onClick={() => setShowAuth(true)}
               style={{

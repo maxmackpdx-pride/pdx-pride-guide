@@ -49,7 +49,7 @@ export default function HousingNew() {
 
   if (authLoading) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">Loading…</div>
@@ -61,7 +61,7 @@ export default function HousingNew() {
 
   if (!user) {
     return (
-      <div className="hz">
+      <div className="hz pdx-glass-rebind">
         <div className="hz-pad">
           <div className="hz-wrap">
             <div className="hz-panel hz-empty">Sign in to post to the board.</div>
@@ -75,7 +75,7 @@ export default function HousingNew() {
   return (
     // The sheet is this page's only content, so it sizes to the viewport rather
     // than to `.hz`, which has no in-flow children here. See Housing.css.
-    <div className="hz hz--sheetpage">
+    <div className="hz hz--sheetpage pdx-glass-rebind">
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
       <HousingComposer

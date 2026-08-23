@@ -132,7 +132,7 @@ function HubRightRail({
 
   return (
     <>
-      <div className="card hub-rail-card hub-rail-card--moves">
+      <div className="card hub-rail-card hub-rail-card--moves pdx-glass-rebind">
         <div className="kick hub-rail-card__kick hub-rail-card__kick--cyan">Your next moves</div>
         {moveRows.length === 0 && (
           <div className="kick hub-rail-card__empty">
@@ -160,7 +160,7 @@ function HubRightRail({
           All your events →
         </button>
       </div>
-      <div className={`card hub-people-rail${suggestions.length === 0 ? " hub-people-rail--empty" : ""}`}>
+      <div className={`card hub-people-rail${suggestions.length === 0 ? " hub-people-rail--empty" : ""} pdx-glass-rebind`}>
         <div className="hub-people-rail__head">
           <div className={`kick hub-people-rail__kick${suggestions.length === 0 ? " hub-people-rail__kick--solo" : ""}`}>
             Who to follow

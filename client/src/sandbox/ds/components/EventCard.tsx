@@ -79,7 +79,7 @@ export function EventCard({
   const metaBits = [admission && ADM_LABEL[admission], age && AGE_LABEL[age]].filter(Boolean).join(" · ");
   const whenLine = when || [venue].filter(Boolean).join("");
   return (
-    <Tag className={`pdxRow ${className}`} href={href} style={{ "--_day": base, ...style }} {...rest}>
+    <Tag className={`pdxRow ${className} pdx-glass-rebind`} href={href} style={{ "--_day": base, ...style }} {...rest}>
       <div className="pdxRow__thumb">
         {image ? <img src={image} alt="" /> : <span className="pdxRow__thumbPh">{(title || "?").charAt(0)}</span>}
       </div>

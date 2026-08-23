@@ -9,7 +9,7 @@
 }
 .sellz-card__price small { color: var(--panel-lime, #c8fa3c); font-size: .72rem; letter-spacing: .08em; }
 .sellz-page .board-listing-card__thumb > svg { color: #050506; margin: auto; }
-.sellz-page .gifting-form { --c: #39ff14; border-color: color-mix(in srgb, #39ff14 60%, #000); }
+.sellz-page .gifting-form.pdx-glass-rebind { --c: #39ff14; border-color: color-mix(in srgb, #39ff14 60%, #000); }
 .sellz-page .gifting-response input { width: 100%; margin-top: 8px; }
 .sellz-page .gifting-interest { align-items: flex-start; }
 @media (max-width: 700px) {

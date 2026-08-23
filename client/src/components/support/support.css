@@ -1,15 +1,5 @@
-/* ============================================================
-   Support surfaces - deep-glass / OLED-neon (§2.12)
-   Keep-alive + Sponsors = neutral glass
-   Affiliate = cyan left accent + neutral glow
-   CTAs = lime glass buttons
-   Partner logos = #050506 wells
-   Layout/spacing preserved from About support block.
-   ============================================================ */
-
-/* ── Keep-this-guide-alive (neutral glass) ───────────────── */
-.support-keepalive,
-.about-v2-donate--panel.support-keepalive {
+/* ============================================================ Support surfaces - deep-glass / OLED-neon (§2.12) Keep-alive + Sponsors = neutral glass Affiliate = cyan left accent + neutral glow CTAs = lime glass buttons Partner logos = #050506 wells Layout/spacing preserved from About support block. ============================================================ */ /* ── Keep-this-guide-alive (neutral glass) ───────────────── */ .support-keepalive.pdx-glass-rebind,
+.about-v2-donate--panel.pdx-glass-rebind.support-keepalive {
   position: relative;
   display: flex;
   align-items: center;
@@ -83,9 +73,8 @@
   max-width: 100%;
 }
 
-/* ── Affiliate partners (cyan left + neutral glow) ───────── */
-.support-affiliate,
-.about-v2-partners.support-affiliate {
+/* ── Affiliate partners (cyan left + neutral glow) ───────── */ .support-affiliate.pdx-glass-rebind,
+.about-v2-partners.pdx-glass-rebind.support-affiliate {
   position: relative;
   padding: 28px 36px;
   border-radius: var(--glass-card-radius, 14px);
@@ -260,8 +249,7 @@
   align-items: center;
 }
 
-/* Outer neutral glass wrap (default on About + Sponsors) */
-.support-sponsors--card {
+/* Outer neutral glass wrap (default on About + Sponsors) */ .support-sponsors--card.pdx-glass-rebind {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -326,8 +314,7 @@
   z-index: 1;
 }
 
-/* Qualifier rows - OLED glass, soft lime left edge only (no cyan) */
-.support-sponsors__check {
+/* Qualifier rows - OLED glass.pdx-glass-rebind, soft lime left edge only (no cyan) */ .support-sponsors__check.pdx-glass-rebind {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -359,8 +346,7 @@
   text-shadow: 0 0 12px color-mix(in srgb, var(--lime, #ccff00) 55%, transparent);
 }
 
-/* Pitch CTA - solid lime glass, no outer bloom (never cyan) */
-.support-sponsors__pitch {
+/* Pitch CTA - solid lime glass.pdx-glass-rebind, no outer bloom (never cyan) */ .support-sponsors__pitch.pdx-glass-rebind {
   --c: var(--lime, #ccff00);
   display: inline-flex;
   align-items: center;

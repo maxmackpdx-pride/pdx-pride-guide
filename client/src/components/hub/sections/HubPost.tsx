@@ -148,7 +148,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   if (optionsQuery.isLoading) {
     return (
       <div className="reveal">
-        <div className="card hub-post__empty">
+        <div className="card hub-post__empty pdx-glass-rebind">
           <p className="hub-post__copy">Loading...</p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
   if (!optionsQuery.data?.canPost) {
     return (
       <div className={embedded ? undefined : "reveal"}>
-        <div className={`card hub-post__card${embedded ? " hub-post__card--compact" : ""}`}>
+        <div className={`card hub-post__card${embedded ? " hub-post__card--compact" : ""} pdx-glass-rebind`}>
           <div className="kick hub-post__kick">Post to the feed</div>
           <p className="hub-post__copy">
             Sign in to share with the scene. Posts are public to members by default.
@@ -176,7 +176,7 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
           <h1 className="h1">Post to the feed</h1>
         </>
       )}
-      <div className={`card hub-post__card${embedded ? " hub-post__card--embedded" : ""}`}>
+      <div className={`card hub-post__card${embedded ? " hub-post__card--embedded" : ""} pdx-glass-rebind`}>
         {embedded && (
           <div className="kick hub-post__kick">Post to the feed</div>
         )}
@@ -373,19 +373,19 @@ export default function HubPost({ initialType = "text", embedded = false }: Prop
       </div>
       )}
       {!embedded && mineQuery.isLoading && (
-        <div className="card hub-post__empty">
+        <div className="card hub-post__empty pdx-glass-rebind">
           <p className="hub-post__copy">Loading...</p>
         </div>
       )}
       {!embedded && !mineQuery.isLoading && (mineQuery.data?.length ?? 0) === 0 && (
-        <div className="card hub-post__empty">
+        <div className="card hub-post__empty pdx-glass-rebind">
           <p className="hub-post__copy">
             Nothing posted yet. What you share will show up here and in the scene feed.
           </p>
         </div>
       )}
       {!embedded && (mineQuery.data ?? []).map((post) => (
-        <div key={post.id} className="card hub-post__mine">
+        <div key={post.id} className="card hub-post__mine pdx-glass-rebind">
           <div className="hub-post__mine-row">
             <div className="hub-feed-card__main">
               <div className="kick hub-post__mine-meta">

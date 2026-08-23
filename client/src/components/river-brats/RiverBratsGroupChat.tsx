@@ -165,7 +165,7 @@ export default function RiverBratsGroupChat({
 
   return (
     <section
-      className={`rb-group-chat${checkedIn ? " rb-group-chat--unlocked" : ""}`}
+      className={`rb-group-chat${checkedIn ? " rb-group-chat--unlocked" : ""} pdx-glass-rebind`}
       aria-label="Beach group chat"
     >
       <div className="rb-group-chat__head">
@@ -312,7 +312,7 @@ export default function RiverBratsGroupChat({
             />
             <button
               type="button"
-              className={`rb-group-chat__send rb-group-chat__send--${accent}`}
+              className={`rb-group-chat__send rb-group-chat__send--${accent} pdx-glass-rebind`}
               disabled={!chatOpen || !body.trim() || postMutation.isPending}
               onClick={() => postMutation.mutate(body.trim())}
             >

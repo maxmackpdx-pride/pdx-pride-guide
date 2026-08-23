@@ -583,7 +583,7 @@ export default function Submit() {
 
         {/* ── SUBMIT (one page) ── */}
         {mode === "submit" && (
-          <section className="gifting-form-panel gifting-form-panel--makeover">
+          <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             {eventSubmitSuccess ? (
               <div className="submit-success submit-success--lime">
                 <div className="submit-success__check" aria-hidden="true">✓</div>
@@ -847,7 +847,7 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
-          <section className="gifting-form-panel gifting-form-panel--makeover">
+          <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
             <div className="board-section-kicker" style={{ color: "var(--panel-purple, #b06bff)" }}>Promoter verification</div>
             <h2 className="display section-heading">Apply as promoter</h2>
@@ -913,7 +913,7 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
-          <section className="gifting-form-panel gifting-form-panel--makeover">
+          <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
             <div className="board-section-kicker board-section-kicker--magenta">Community tip</div>
             <h2 className="display section-heading">Spotted an event</h2>
@@ -988,7 +988,7 @@ export default function Submit() {
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
-          <section className="gifting-form-panel gifting-form-panel--makeover">
+          <section className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
             <button type="button" className="submit-hub-link" style={{ marginBottom: 20 }} onClick={backToLanding}>← Back to hub</button>
             <div className="board-section-kicker board-section-kicker--cyan">Host your listing</div>
             <h2 className="display section-heading">Claim an event</h2>

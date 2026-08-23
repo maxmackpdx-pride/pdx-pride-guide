@@ -204,7 +204,7 @@ function IdeaCard() {
   };
 
   return (
-    <li ref={reveal.ref} className={`darkroom-waypoint darkroom-waypoint--idea darkroom-mobile-reveal${reveal.visible ? " darkroom-mobile-reveal--visible" : ""}`} data-number="07" data-tone="white">
+    <li ref={reveal.ref} className={`darkroom-waypoint darkroom-waypoint--idea darkroom-mobile-reveal${reveal.visible ? " darkroom-mobile-reveal--visible" : ""} pdx-glass-rebind`} data-number="07" data-tone="white">
       <div className="darkroom-waypoint__marker" aria-hidden="true"><span>07</span></div>
       <article className="darkroom-waypoint__card darkroom-waypoint__card--idea pdx-glass-card pdx-glass-rebind" aria-label="Submit an idea for Zaylist">
         <div className="darkroom-card-composition darkroom-card-composition--idea">
@@ -258,7 +258,7 @@ function WaypointItem({ waypoint }: { waypoint: Waypoint }) {
   const reveal = useScrollReveal<HTMLLIElement>();
 
   return (
-    <li ref={reveal.ref} className={`darkroom-waypoint darkroom-mobile-reveal${reveal.visible ? " darkroom-mobile-reveal--visible" : ""}`} data-number={waypoint.number} data-tone={waypoint.tone}>
+    <li ref={reveal.ref} className={`darkroom-waypoint darkroom-mobile-reveal${reveal.visible ? " darkroom-mobile-reveal--visible" : ""} pdx-glass-rebind`} data-number={waypoint.number} data-tone={waypoint.tone}>
       <div className="darkroom-waypoint__marker" aria-hidden="true">
         <span>{waypoint.number}</span>
       </div>

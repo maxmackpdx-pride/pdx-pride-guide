@@ -1,12 +1,4 @@
-/*
- * Nude beaches hub - stacked top-rim islands (SoT: 10-islands.png)
- *
- * Right column = discrete cards (Live / River / Parking), NOT one outer shell
- * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet
- * charcoal. Orange #FF6600 default · cyan #19E3FF river · green #39FF14 Sauvie.
- */
-
-.nb-hub {
+/* * Nude beaches hub - stacked top-rim islands (SoT: 10-islands.png) * * Right column = discrete cards (Live / River / Parking).pdx-glass-rebind, NOT one outer shell * with flat inner sections. Neon lives on the TOP rim only; sides stay quiet * charcoal. Orange #FF6600 default · cyan #19E3FF river · green #39FF14 Sauvie. */ .nb-hub.pdx-glass-rebind {
   --nb-accent: #ff6600;
   --nb-rim: var(--nb-accent, #ff6600);
   --c: var(--nb-rim);
@@ -53,13 +45,13 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.nb-hub--rooster {
+.nb-hub--rooster.pdx-glass-rebind {
   --nb-accent: #ff6600;
   --nb-rim: #ff6600;
   --c: #ff6600;
 }
 
-.nb-hub--sauvie {
+.nb-hub--sauvie.pdx-glass-rebind {
   --nb-accent: #39ff14;
   --nb-rim: #39ff14;
   --c: #39ff14;
@@ -80,10 +72,7 @@
   padding: 24px 16px;
 }
 
-/*
- * Each section = discrete top-rim island card.
- */
-.nb-hub__section {
+/* * Each section = discrete top-rim island card. */ .nb-hub__section.pdx-glass-rebind {
   --c: var(--nb-rim, var(--nb-accent, #ff6600));
   position: relative;
   flex-shrink: 0;
@@ -259,21 +248,19 @@
   text-shadow: 0 0 10px rgba(25, 227, 255, 0.16);
 }
 
-/* Live / weather island - accent top rim (orange or green) */
-.nb-hub--rooster .nb-hub__section--pulse {
+/* Live / weather island - accent top rim (orange or green) */ .nb-hub--rooster .nb-hub__section--pulse.pdx-glass-rebind {
   --nb-rim: #ff6600;
   --c: #ff6600;
   --dc: #ff6600;
   animation: none;
 }
 
-.nb-hub--sauvie .nb-hub__section {
+.nb-hub--sauvie .nb-hub__section.pdx-glass-rebind {
   --nb-rim: #39ff14;
   --c: #39ff14;
 }
 
-/* River level island - cyan top rim (text values already cyan) */
-.nb-hub__level {
+/* River level island - cyan top rim (text values already cyan) */ .nb-hub__level.pdx-glass-rebind {
   --nb-rim: #19e3ff;
   --c: #19e3ff;
   display: flex;
@@ -287,7 +274,7 @@
   border-top-color: color-mix(in srgb, #19e3ff 70%, #2a2a32);
 }
 
-.nb-hub__level--bad {
+.nb-hub__level--bad.pdx-glass-rebind {
   --nb-rim: #ff8c00;
   --c: #ff8c00;
   border-top-color: color-mix(in srgb, #ff8c00 70%, #2a2a32);
@@ -302,35 +289,34 @@
   }
 }
 
-/* Swim / water quality island (Sauvie) - green rim; status can recolor */
-.nb-hub__swim {
+/* Swim / water quality island (Sauvie) - green rim; status can recolor */ .nb-hub__swim.pdx-glass-rebind {
   --nb-rim: #39ff14;
   --c: #39ff14;
 }
 
-.nb-hub__section--water.nb-hub__swim--pass,
-.nb-hub__swim--pass {
+.nb-hub__section--water.pdx-glass-rebind.nb-hub__swim--pass,
+.nb-hub__swim--pass.pdx-glass-rebind {
   --nb-rim: #39ff14;
   --c: #39ff14;
   --dc: #39ff14;
   border-top-color: color-mix(in srgb, #39ff14 70%, #2a2a32);
 }
 
-.nb-hub__swim--fail {
+.nb-hub__swim--fail.pdx-glass-rebind {
   --nb-rim: #ff4d4d;
   --c: #ff4d4d;
   --dc: #ff4d4d;
   border-top-color: color-mix(in srgb, #ff4d4d 70%, #2a2a32);
 }
 
-.nb-hub__swim--warning {
+.nb-hub__swim--warning.pdx-glass-rebind {
   --nb-rim: #ffb347;
   --c: #ffb347;
   --dc: #ffb347;
   border-top-color: color-mix(in srgb, #ffb347 70%, #2a2a32);
 }
 
-.nb-hub__swim--unknown {
+.nb-hub__swim--unknown.pdx-glass-rebind {
   --nb-rim: #39ff14;
   --c: #39ff14;
   --dc: #39ff14;

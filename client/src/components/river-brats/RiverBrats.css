@@ -1,4 +1,4 @@
-.river-brats {
+.river-brats.pdx-glass-rebind {
   /* Top-rim islands: Rooster #FF6600 · Sauvie #39FF14 · river #19E3FF */
   --rb-accent: #ff6600;
   --rb-accent-rgb: 255, 102, 0;
@@ -30,14 +30,14 @@
   padding: clamp(22px, 4vw, 48px) clamp(20px, 4vw, 44px) clamp(40px, 6vw, 72px);
 }
 
-.river-brats--orange {
+.river-brats--orange.pdx-glass-rebind {
   --rb-accent: #ff6600;
   --rb-accent-rgb: 255, 102, 0;
   --rb-rim: #ff6600;
   --c: #ff6600;
 }
 
-.river-brats--green {
+.river-brats--green.pdx-glass-rebind {
   --rb-accent: #39ff14;
   --rb-accent-rgb: 57, 255, 20;
   --rb-rim: #39ff14;
@@ -196,7 +196,7 @@
   color: #ff1fa0;
 }
 
-.rb-carpool-start {
+.rb-carpool-start.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -239,7 +239,7 @@
   font-size: 0.78rem;
 }
 
-.rb-compose {
+.rb-compose.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -392,7 +392,7 @@
   gap: 10px;
 }
 
-.rb-card {
+.rb-card.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -467,8 +467,7 @@
   box-shadow: 0 0 12px rgba(204, 255, 0, 0.35);
 }
 
-/* "You planned 4pm - are you here?" nudge above the compose card. */
-.rb-arrival-banner {
+/* "You planned 4pm - are you here?" nudge above the compose card. */ .rb-arrival-banner.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   position: relative;
   display: flex;
@@ -485,12 +484,12 @@
   box-shadow: var(--glass-card-shadow);
 }
 
-.rb-arrival-banner--orange {
+.rb-arrival-banner--orange.pdx-glass-rebind {
   --c: #ff6600;
   border-left-color: #ff6600;
 }
 
-.rb-arrival-banner--green {
+.rb-arrival-banner--green.pdx-glass-rebind {
   --c: #39ff14;
   border-left-color: #39ff14;
 }
@@ -794,7 +793,7 @@ html.calm-mode .rb-dm-panel {
   padding: 20px;
 }
 
-.rb-modal {
+.rb-modal.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -827,9 +826,7 @@ html.calm-mode .rb-dm-panel {
   margin-top: 12px;
 }
 
-/* ---- Check-in v2 (two-column + embedded chat) ---- */
-
-.rb-checkin__hero-card {
+/* ---- Check-in v2 (two-column + embedded chat) ---- */ .rb-checkin__hero-card.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -921,7 +918,7 @@ html.calm-mode .rb-dm-panel {
   position: relative;
 }
 
-.rb-checkin__pulse {
+.rb-checkin__pulse.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -1031,7 +1028,7 @@ html.calm-mode .rb-dm-panel {
   align-items: start;
 }
 
-.rb-checkin__form {
+.rb-checkin__form.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -1154,7 +1151,7 @@ html.calm-mode .rb-dm-panel {
   margin-top: 22px;
 }
 
-.rb-checkin__primary {
+.rb-checkin__primary.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   font-family: var(--font-display), sans-serif;
   font-weight: 800;
@@ -1190,7 +1187,7 @@ html.calm-mode .rb-dm-panel {
   filter: none;
 }
 
-.rb-checkin__primary--update {
+.rb-checkin__primary--update.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   color: var(--c);
   background:
@@ -1204,7 +1201,7 @@ html.calm-mode .rb-dm-panel {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.rb-checkin__withdraw {
+.rb-checkin__withdraw.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   font-family: ui-monospace, monospace;
   font-size: 11px;
@@ -1232,7 +1229,7 @@ html.calm-mode .rb-dm-panel {
   filter: brightness(1.05);
 }
 
-.rb-checkin__plan-next {
+.rb-checkin__plan-next.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -1274,7 +1271,7 @@ html.calm-mode .rb-dm-panel {
   color: #b8b4aa;
 }
 
-.rb-checkin__plan-next-btn {
+.rb-checkin__plan-next-btn.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   display: inline-flex;
   align-items: center;
@@ -1309,7 +1306,7 @@ html.calm-mode .rb-dm-panel {
   color: #6a675f;
 }
 
-.rb-group-chat {
+.rb-group-chat.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -1574,7 +1571,7 @@ html.calm-mode .rb-dm-panel {
   box-sizing: border-box;
 }
 
-.rb-group-chat__send {
+.rb-group-chat__send.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   flex: none;
   font-family: var(--font-display), sans-serif;
@@ -1593,13 +1590,13 @@ html.calm-mode .rb-dm-panel {
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
-.rb-group-chat__send--orange {
+.rb-group-chat__send--orange.pdx-glass-rebind {
   --c: #ff6600;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%), #ff6600;
   color: #050506;
 }
 
-.rb-group-chat__send--green {
+.rb-group-chat__send--green.pdx-glass-rebind {
   --c: #39ff14;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 42%), #39ff14;
   color: #050506;
@@ -1618,7 +1615,7 @@ html.calm-mode .rb-dm-panel {
   font-size: 12.5px;
 }
 
-.rb-checkin__going-row {
+.rb-checkin__going-row.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
   --rb-rim: var(--rb-accent, #ff6600);
   position: relative;
@@ -1766,25 +1763,19 @@ html.calm-mode .river-brats__hero-accent--green {
   text-shadow: none;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Deep-glass / OLED-neon (Agent 9 - Islands · River Brats)
-   Surfaces only: glass-card fill + black ring + sheen + glass CTAs.
-   Layout / rb-* keyframes preserved (rb-dm-in, rb-pulse-blink,
-   rb-on-site-pop, rb-checkin-in, rb-msg-in, rb-join-pop).
-   ═══════════════════════════════════════════════════════════ */
-
-.rb-panel,
-.rb-compose,
-.rb-card,
-.rb-carpool-start,
-.rb-checkin__hero-card,
-.rb-checkin__form,
-.rb-checkin__pulse,
-.rb-checkin__plan-next,
-.rb-checkin__going-row,
-.rb-group-chat,
-.rb-arrival-banner,
-.rb-modal {
+/* ═══════════════════════════════════════════════════════════ Deep-glass / OLED-neon (Agent 9 - Islands · River Brats) Surfaces only: glass-card fill + black ring + sheen + glass CTAs. Layout / rb-* keyframes preserved (rb-dm-in, rb-pulse-blink,
+   rb-on-site-pop, rb-checkin-in, rb-msg-in, rb-join-pop). ═══════════════════════════════════════════════════════════ */ .rb-panel.pdx-glass-rebind,
+.rb-compose.pdx-glass-rebind,
+.rb-card.pdx-glass-rebind,
+.rb-carpool-start.pdx-glass-rebind,
+.rb-checkin__hero-card.pdx-glass-rebind,
+.rb-checkin__form.pdx-glass-rebind,
+.rb-checkin__pulse.pdx-glass-rebind,
+.rb-checkin__plan-next.pdx-glass-rebind,
+.rb-checkin__going-row.pdx-glass-rebind,
+.rb-group-chat.pdx-glass-rebind,
+.rb-arrival-banner.pdx-glass-rebind,
+.rb-modal.pdx-glass-rebind {
   --c: var(--rb-accent, #ff6600);
 }
 

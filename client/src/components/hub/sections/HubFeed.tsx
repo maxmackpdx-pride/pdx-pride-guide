@@ -285,7 +285,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       {canPost ? (
         <HubPost embedded />
       ) : (
-        <div className="card hub-feed-panel">
+        <div className="card hub-feed-panel pdx-glass-rebind">
           <div className="kick hub-feed-panel__kick">Post to the feed</div>
           <p className="hub-feed-panel__copy">
             Coming soon for members. Admins, event hosts, and directory venue owners can post now.
@@ -293,7 +293,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
         </div>
       )}
 
-      <div className="card hub-feed-panel">
+      <div className="card hub-feed-panel pdx-glass-rebind">
         <div className="kick hub-feed-panel__kick">Scene feed</div>
         <p className="hub-feed-panel__copy">
           New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
@@ -316,13 +316,13 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       {featuredAd}
 
       {loading && (
-        <div className="card hub-empty hub-feed-empty hub-feed-empty--load">
+        <div className="card hub-empty hub-feed-empty hub-feed-empty--load pdx-glass-rebind">
           <BoardLoadingState label="Loading scene feed" />
         </div>
       )}
 
       {error && !loading && (
-        <div className="card hub-empty hub-feed-empty">
+        <div className="card hub-empty hub-feed-empty pdx-glass-rebind">
           <p className="hub-feed-empty__msg">Could not load the feed.</p>
           <button
             type="button"
@@ -335,7 +335,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       )}
 
       {!loading && !error && !hasContent && (
-        <div className="card hub-empty hub-feed-empty">
+        <div className="card hub-empty hub-feed-empty pdx-glass-rebind">
           <p className="hub-feed-empty__msg">{emptyCopy(filter)}</p>
         </div>
       )}
