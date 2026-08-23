@@ -122,25 +122,25 @@ function NextPreviewCardStack() {
 
 export default function Home() {
   usePageSeo(
-    "Zaylist | Portland Pride 2026 Events",
-    "Every Portland night worth knowing, in one place. Find the party, back the rooms that host it, and stick around after July 19.",
-    { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
+    "Zaylist | Queer Portland, all in one place",
+    "Portland's queer community hub: events and nightlife, housing and roommates, GIGZ, free stuff, MIZZED CONNECTION, and a directory of queer-owned spots. All year round.",
+    { image: shareCardUrl("home"), imageAlt: "Zaylist: Portland queer events, housing, gigs, free stuff, and community directory" },
   );
 
-  const { data: events = [], isPending: eventsPending } = useQuery<EventListing[]>({
+  const { data: events = [], isPending: eventsPending, isError: eventsError } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
   });
 
-  const { data: businesses = [], isPending: placesPending } = useQuery<{ id: number }[]>({
+  const { data: businesses = [], isPending: placesPending, isError: placesError } = useQuery<{ id: number }[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
     staleTime: 60_000,
   });
 
-  const { data: attendanceSummaries = {}, isPending: goingPending } = useQuery<Record<string, { count?: number }>>({
+  const { data: attendanceSummaries = {}, isPending: goingPending, isError: goingError } = useQuery<Record<string, { count?: number }>>({
     queryKey: ["/api/events/attendance-summaries"],
     queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
     staleTime: 60_000,
@@ -164,7 +164,7 @@ export default function Home() {
               eventCount={eventCount}
               placesCount={placesCount}
               goingCount={goingCount}
-              pending={{ events: eventsPending, places: placesPending, going: goingPending }}
+              pending={{ events: eventsPending || eventsError, places: placesPending || placesError, going: goingPending || goingError }}
             />
             <div
               className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"

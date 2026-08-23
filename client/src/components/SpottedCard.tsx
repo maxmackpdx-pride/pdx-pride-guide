@@ -70,6 +70,7 @@ export default function SpottedCard({
     } as CSSProperties;
     return (
       <article
+        id={`board-post-${post.id}`}
         className="board-spotted-card board-spotted-card--glass"
         style={glassVars}
         onClick={onReply}
@@ -115,6 +116,7 @@ export default function SpottedCard({
   const glassAccent = accentColor || MC_GLASS;
   return (
     <article
+      id={`board-post-${post.id}`}
       className="spotted-card spotted-card--glass"
       style={{
         "--spotted-accent": glassAccent,

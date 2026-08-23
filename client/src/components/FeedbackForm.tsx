@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 const fieldStyle = {
   width: "100%",
@@ -49,20 +50,12 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [mounted, setMounted] = useState(false);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose, enabled: mounted });
 
   useEffect(() => {
     setMounted(true);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
+  }, []);
 
   const update = (key: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -94,10 +87,8 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Soft launch tech feedback"
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      role="presentation"
+      onClick={e => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: "fixed",
         inset: 0,
@@ -109,7 +100,13 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
         padding: 16,
       }}
     >
-      <div style={{
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Soft launch tech feedback"
+        tabIndex={-1}
+        style={{
         background: "#0e0e12",
         border: "2px solid #00FFFF",
         maxWidth: 520,
@@ -122,7 +119,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
       }}>
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close feedback"
           style={{
             position: "absolute", top: 12, right: 14,

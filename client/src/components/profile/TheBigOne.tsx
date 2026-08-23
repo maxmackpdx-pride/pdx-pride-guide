@@ -3,6 +3,7 @@ import { dayAccentToken } from "@/lib/dsColors";
 import { formatPacificDateTime, parsePacificEventTime, useCountdown } from "@/lib/countdown";
 import UserAvatar from "@/components/UserAvatar";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./TheBigOne.css";
 
@@ -145,7 +146,7 @@ export default function TheBigOne({
   const dayColor = dayAccentToken(day || "SAT");
   const whenLine = formatWhenLine(event);
   const count = goingCount ?? event.goingCount ?? 0;
-  const ticketUrl = event.ticketUrl || null;
+  const ticketUrl = publicHttpUrl(event.ticketUrl);
   const targetMs = parsePacificEventTime(event.dateStart);
 
   const rsvpLabel = isGoing ? "You're in" : "RSVP";

@@ -91,7 +91,7 @@ function shortSha(sha?: string): string {
 
 const DEFAULT_BROADCAST_TITLE = "Making weekend plans?";
 const DEFAULT_BROADCAST_BODY =
-  "This weekend's queer events are live — plus fresh updates. Pride Guide is now Zaylist, Portland's queer event hub. 🌈";
+  "This weekend's queer events are live, plus fresh updates. Zaylist is Portland's queer event hub. 🌈";
 
 /** Owner-only: compose + send one push announcement to every subscribed device. */
 function BroadcastPanel({ reach }: { reach: number }) {

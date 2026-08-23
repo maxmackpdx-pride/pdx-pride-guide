@@ -133,6 +133,8 @@ export type HousingWellProps = {
   nameCap?: number;
   /** Shown when a post has no photos yet. */
   fallbackPhoto?: string;
+  /** Seeded demo posts (hausing_demo). Sticker CSS already lives on the board. */
+  demo?: boolean;
   className?: string;
 };
 
@@ -142,6 +144,7 @@ export function HousingWell({
   children,
   nameCap,
   fallbackPhoto,
+  demo,
   className,
 }: HousingWellProps) {
   const fontsReady = useFontsReady();
@@ -228,6 +231,11 @@ export function HousingWell({
 
   return (
     <div className={className ? `hz-well ${className}` : "hz-well"} ref={wellRef}>
+      {demo ? (
+        <span className="hz-demo-sticker" aria-hidden="true">
+          DEMO
+        </span>
+      ) : null}
       {shots.map((src, i) => (
         <img key={`${src}-${i}`} className={`hz-well__img${i === index ? " is-on" : ""}`} src={src} alt="" />
       ))}

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type React from "react";
 import { useLocation } from "wouter";
 import type { AdmissionType } from "@shared/admission";
 import type { Event } from "@shared/schema";
@@ -18,10 +17,12 @@ import {
   listingTypeTags,
 } from "@/lib/dsEvent";
 import { admissionEventLinkLabel } from "@shared/admission";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
+import { cardActivateProps } from "@/lib/a11y";
 
 type EventWithVenue = Event & {
   venueWebsite?: string | null;
@@ -32,17 +33,7 @@ type EventWithVenue = Event & {
 };
 
 function eventCardA11yProps(onClick: () => void) {
-  return {
-    role: "button" as const,
-    tabIndex: 0,
-    onClick,
-    onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onClick();
-      }
-    },
-  };
+  return cardActivateProps(onClick);
 }
 
 function EventShareButton({ href, title }: { href: string; title: string }) {
@@ -103,8 +94,8 @@ export default function ListingCard({
   // Public API strips claimedBy; isClaimable is the public signal for unclaimed listings.
   const claimable = Boolean(event.isClaimable && !event.claimedBy && !claimPending);
   const showAttendance = attendanceSummary && attendanceSummary.count > 0;
-  const venueHref = event.venueWebsite || resolveVenueWebsite(event.venueName) || undefined;
-  const ticketHref = event.ticketUrl?.trim() || undefined;
+  const venueHref = publicHttpUrl(event.venueWebsite || resolveVenueWebsite(event.venueName)) || undefined;
+  const ticketHref = publicHttpUrl(event.ticketUrl) || undefined;
   const ticketLabel = admissionEventLinkLabel(event.admission || "");
   const address = !event.isPrivate && event.address ? event.address : undefined;
 

@@ -49,11 +49,27 @@ const SHORT_LINKS: Record<string, string> = {
   // Marketing alias for Gig Board (copy still says zaylist.com/gigs)
   gigs: "/pride-work",
 };
+const LEGACY_PREFIX_REDIRECTS: Array<[RegExp, string]> = [
+  [/^\/housing(\/.*)?$/i, "/the-hauz"],
+  [/^\/hausing(\/.*)?$/i, "/the-hauz"],
+  [/^\/darkroom\/?$/i, "/next"],
+  [/^\/missed-connections\/?$/i, "/spotted"],
+  [/^\/access-safety\/?$/i, "/access"],
+];
 app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();
   const slug = req.path.toLowerCase().replace(/^\/+|\/+$/g, "");
   const dest = SHORT_LINKS[slug];
   if (dest) return res.redirect(302, dest);
+  for (const [pattern, target] of LEGACY_PREFIX_REDIRECTS) {
+    const match = req.path.match(pattern);
+    if (!match) continue;
+    // Demo photos and other static files still live under /hausing/.
+    if (/\.[a-z0-9]{2,8}$/i.test(req.path)) continue;
+    const rest = match[1] || "";
+    const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+    return res.redirect(302, `${target}${rest}${query}`);
+  }
   next();
 });
 

@@ -3,7 +3,7 @@ import ImageUploader from "@/components/ImageUploader";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
@@ -73,6 +73,15 @@ function StatusChipEl({ chip }: { chip: StatusChip }) {
   );
 }
 
+function FormSubmitError({ message }: { message: string }) {
+  if (!message) return null;
+  return (
+    <p className="board-form-error" role="alert">
+      {message}
+    </p>
+  );
+}
+
 type PathDef = {
   key: PageMode;
   title: string;
@@ -114,7 +123,7 @@ export default function Submit() {
     potentialMatches?: Array<{ title: string; venueName: string; confidence: string }>;
   } | null>(null);
   const [flowSuccess, setFlowSuccess] = useState<FlowSuccess | null>(null);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
   const initialMode: PageMode = (claimPathEventId || params.get("mode") === "claim")
@@ -162,6 +171,7 @@ export default function Submit() {
     appReason: venueForApply ? `I want to promote/manage events at ${venueForApply}. ` : "",
   });
   const [submitterOrg, setSubmitterOrg] = useState("");
+  const [formError, setFormError] = useState("");
 
   const promoterStatus = user?.promoterStatus || "none";
   const isApproved = promoterStatus === "approved" || !!user?.isAdmin;
@@ -207,6 +217,7 @@ export default function Submit() {
   useEffect(() => {
     setFlowSuccess(null);
     setEventSubmitSuccess(null);
+    setFormError("");
     if (mode === "landing") setAuthDismissed(false);
   }, [mode]);
 
@@ -220,12 +231,20 @@ export default function Submit() {
   }, [loading, user, mode, authDismissed]);
 
   useEffect(() => {
-    const eventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1];
-    if (eventId) {
+    const pathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1];
+    if (pathEventId) {
       setMode("claim");
-      setPromoterForm(f => ({ ...f, claimEventId: eventId }));
+      setPromoterForm(f => ({ ...f, claimEventId: pathEventId }));
+      return;
     }
-  }, [location]);
+    const params = new URLSearchParams(window.location.search);
+    const queryEventId = params.get("eventId");
+    if (params.get("mode") === "claim" && queryEventId && /^\d+$/.test(queryEventId)) {
+      setLocation(`/submit/claim/${queryEventId}`);
+      setMode("claim");
+      setPromoterForm(f => ({ ...f, claimEventId: queryEventId }));
+    }
+  }, [location, setLocation]);
 
   const toggleType = (t: string) => setEventForm(f => ({
     ...f, selectedTypes: f.selectedTypes.includes(t) ? f.selectedTypes.filter(x => x !== t) : [...f.selectedTypes, t],
@@ -322,9 +341,14 @@ export default function Submit() {
       toast({ title: "Application submitted!", description: "Admins will review your promoter request and be in touch." });
       setPromoterForm(emptyPromoterForm());
       setSubmitterOrg("");
+      setFormError("");
       setFlowSuccess("apply");
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => {
+      const message = parseApiError(err, "Could not submit promoter application. Please try again.");
+      setFormError(message);
+      toast({ title: "Error", description: message, variant: "destructive" });
+    },
   });
 
   // Event submission mutation
@@ -361,6 +385,7 @@ export default function Submit() {
       return payload;
     },
     onSuccess: (payload, vars) => {
+      setFormError("");
       const autoApproved = !!payload.autoApproved;
       const heldForReview = !!payload.heldForReview;
       const msgs: Record<string, { title: string; desc: string }> = {
@@ -410,7 +435,11 @@ export default function Submit() {
       setSubmitStep("promoter_app");
       setFlowSuccess(vars.type === "SUGGEST" ? "suggest" : "claim");
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => {
+      const message = parseApiError(err, "Submission failed. Please try again.");
+      setFormError(message);
+      toast({ title: "Error", description: message, variant: "destructive" });
+    },
   });
 
   const startAnotherEvent = () => {
@@ -428,17 +457,20 @@ export default function Submit() {
 
   const handleSubmitWithEvent = async () => {
     if (!user) { openAuth(); return; }
+    setFormError("");
     if (!isApproved) {
       // Fire promoter application first - bail out if it fails
-      const r = await apiRequest("POST", "/api/submit", {
-        type: "PROMOTER_APPLICATION",
-        submitterOrg,
-        ticketUrl: promoterForm.proofUrl,
-        claimReason: promoterForm.appReason,
-      });
-      if (!r.ok) {
-        const payload = await r.json().catch(() => ({}));
-        toast({ title: "Error", description: payload.error || "Could not submit promoter application. Please try again.", variant: "destructive" });
+      try {
+        await apiRequest("POST", "/api/submit", {
+          type: "PROMOTER_APPLICATION",
+          submitterOrg,
+          ticketUrl: promoterForm.proofUrl,
+          claimReason: promoterForm.appReason,
+        });
+      } catch (err) {
+        const message = parseApiError(err, "Could not submit promoter application. Please try again.");
+        setFormError(message);
+        toast({ title: "Error", description: message, variant: "destructive" });
         return;
       }
     }
@@ -813,6 +845,7 @@ export default function Submit() {
                   </ScrollReveal>
 
                   <ScrollReveal delay={100}>
+                    <FormSubmitError message={formError} />
                     <Button
                       type="submit"
                       disabled={eventMutation.isPending}
@@ -861,7 +894,7 @@ export default function Submit() {
               <StatusChipEl chip={applyChip} />
               <span className="submit-chip-note__text">One-time review. No event to post yet.</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } setFormError(""); applyMutation.mutate(); }}>
               <div className="gifting-form-grid">
                 <label>
                   Your name
@@ -892,6 +925,7 @@ export default function Submit() {
                   />
                 </label>
               </div>
+              <FormSubmitError message={formError} />
               <Button type="submit" disabled={applyMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block>
                 {applyMutation.isPending ? "Submitting..." : "Submit application"}
               </Button>
@@ -924,7 +958,7 @@ export default function Submit() {
               <StatusChipEl chip={suggestChip} />
               <span className="submit-chip-note__text">Free account required. No promoter status needed.</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } setFormError(""); eventMutation.mutate({ type: "SUGGEST" }); }}>
               <div className="gifting-form-grid">
                 <label className="span">
                   Event name *
@@ -965,6 +999,7 @@ export default function Submit() {
                   />
                 </label>
               </div>
+              <FormSubmitError message={formError} />
               <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="pink" size="lg" arrow block>
                 {eventMutation.isPending ? "Sending..." : "Send tip"}
               </Button>
@@ -996,7 +1031,7 @@ export default function Submit() {
               <StatusChipEl chip={claimChip} />
               <span className="submit-chip-note__text">{claimNote}</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}>
+            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } setFormError(""); eventMutation.mutate({ type: "CLAIM" }); }}>
               <div className="gifting-form-grid">
                 <label className="span">
                   Event to claim *
@@ -1034,6 +1069,7 @@ export default function Submit() {
                   />
                 </label>
               </div>
+              <FormSubmitError message={formError} />
               <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block data-testid="submit-button">
                 {eventMutation.isPending
                   ? "Submitting..."

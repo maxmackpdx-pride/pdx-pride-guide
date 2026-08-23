@@ -39,6 +39,7 @@ import "./Housing.css";
 import { shareCardUrl } from "@shared/shareCards";
 import SafetyGuide from "@/components/SafetyGuide";
 import { trackProductEvent } from "@/lib/analytics";
+import { handleTabListKeyDown } from "@/lib/a11y";
 
 /** One neon per step, borrowed from the three peer post types. */
 const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
@@ -246,11 +247,11 @@ export default function Housing() {
 
   const statBlocks = useMemo(
     () => [
-      { n: stats?.activePosts ?? 0, l: "Active posts" },
-      { n: stats?.roomsOpen ?? 0, l: "Rooms and units" },
-      { n: stats?.formingHouses ?? 0, l: "Forming a HAÜS" },
+      { n: isError ? "—" : isLoading ? "…" : (stats?.activePosts ?? 0), l: "Active posts" },
+      { n: isError ? "—" : isLoading ? "…" : (stats?.roomsOpen ?? 0), l: "Rooms and units" },
+      { n: isError ? "—" : isLoading ? "…" : (stats?.formingHouses ?? 0), l: "Forming a HAÜS" },
     ],
-    [stats],
+    [stats, isError, isLoading],
   );
 
   return (
@@ -406,7 +407,18 @@ export default function Housing() {
 
           <div className="hz-filter">
             <Mono micro>Show me</Mono>
-            <div className="hz-tabs" role="tablist">
+            <div
+              className="hz-tabs"
+              role="tablist"
+              aria-label="Show me"
+              onKeyDown={e => {
+                const i = HOUSING_FILTERS.indexOf(filter);
+                handleTabListKeyDown(e, HOUSING_FILTERS.length, i < 0 ? 0 : i, n => {
+                  const next = HOUSING_FILTERS[n];
+                  if (next) setFilter(next);
+                });
+              }}
+            >
               {HOUSING_FILTERS.map((k) => (
                 <button
                   key={k}
@@ -414,6 +426,7 @@ export default function Housing() {
                   role="tab"
                   className="hz-tab"
                   aria-selected={filter === k}
+                  tabIndex={filter === k ? 0 : -1}
                   onClick={() => setFilter(k)}
                 >
                   {HOUSING_FILTER_LABEL[k]}
@@ -431,7 +444,7 @@ export default function Housing() {
         <div className="hz-wrap">
           <div className="hz-feedhead">
             <SectionTitle
-              kicker={`${posts.length} ${posts.length === 1 ? "post" : "posts"}`}
+              kicker={isError ? "Could not load" : isLoading ? "Loading" : `${posts.length} ${posts.length === 1 ? "post" : "posts"}`}
               right={<Mono micro>Newest first</Mono>}
             >
               {filter === "SAVED" ? "Saved for later" : "Active on the board"}
@@ -493,7 +506,7 @@ export default function Housing() {
         </div>
       </div>
 
-      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/hausing" />
+      <CloseSeam line="Post it. Scroll it. Chat." url="zaylist.com/the-hauz" />
 
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>

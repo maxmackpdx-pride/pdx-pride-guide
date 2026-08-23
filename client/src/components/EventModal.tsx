@@ -30,7 +30,9 @@ import {
   userCanEditEvent,
   type EventEditFormState,
 } from "@/lib/eventEditForm";
+import { handleTabListKeyDown } from "@/lib/a11y";
 import { admissionEventLinkLabel } from "@shared/admission";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
@@ -168,6 +170,7 @@ function EventModalInner({
 
   const eventTiming = getEventScheduleTiming(event.dateStart, event.dateEnd);
   const isPastEvent = eventTiming === "past";
+  const ticketHref = publicHttpUrl(event.ticketUrl);
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
@@ -510,11 +513,21 @@ function EventModalInner({
         className="event-modal__tabs"
         role="tablist"
         aria-label="Event social"
+        onKeyDown={e => {
+          const keys = ["attendance", "missed"] as const;
+          handleTabListKeyDown(e, keys.length, keys.indexOf(socialTab), i => {
+            const next = keys[i];
+            if (next) setSocialTab(next);
+          });
+        }}
       >
         <button
           type="button"
           role="tab"
+          id="event-modal-tab-attendance"
+          aria-controls="event-modal-social-panel"
           aria-selected={socialTab === "attendance"}
+          tabIndex={socialTab === "attendance" ? 0 : -1}
           className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
           onClick={() => setSocialTab("attendance")}
         >
@@ -523,7 +536,10 @@ function EventModalInner({
         <button
           type="button"
           role="tab"
+          id="event-modal-tab-missed"
+          aria-controls="event-modal-social-panel"
           aria-selected={socialTab === "missed"}
+          tabIndex={socialTab === "missed" ? 0 : -1}
           className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
           onClick={() => setSocialTab("missed")}
         >
@@ -534,6 +550,8 @@ function EventModalInner({
       <section
         className="event-modal__tab-panel"
         role="tabpanel"
+        id="event-modal-social-panel"
+        aria-labelledby={socialTab === "attendance" ? "event-modal-tab-attendance" : "event-modal-tab-missed"}
         data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
       >
         {socialTab === "attendance" ? (
@@ -574,7 +592,7 @@ function EventModalInner({
         <span className="event-modal__sheen pdx-glass-sheen" aria-hidden="true" />
         <span className="event-modal__sheen event-modal__sheen--specular pdx-glass-sheen--specular" aria-hidden="true" />
 
-        <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
+        <button type="button" className="event-modal__close" onClick={handleClose} aria-label="Close event">✕</button>
         <button
           type="button"
           className="event-modal__close event-modal__share"
@@ -759,9 +777,9 @@ function EventModalInner({
             </div>
           )}
 
-          {event.ticketUrl && !isPastEvent && (
+          {ticketHref && !isPastEvent && (
             <a
-              href={event.ticketUrl}
+              href={ticketHref}
               target="_blank"
               rel="noopener noreferrer"
               className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
@@ -1191,9 +1209,9 @@ function EventModalInner({
 
         {!editing && (
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
-            {event.ticketUrl ? (
+            {ticketHref ? (
               <a
-                href={event.ticketUrl}
+                href={ticketHref}
                 target="_blank"
                 rel="noopener"
                 className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary"

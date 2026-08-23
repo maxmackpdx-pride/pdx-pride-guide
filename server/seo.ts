@@ -1,14 +1,28 @@
 import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import { storage } from "./storage";
-import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { isEventPlaceholderUrl, resolveEventPosterUrl } from "@shared/eventPoster";
 import { eventUrl } from "@shared/eventSlug";
 import { placeUrl } from "@shared/placeSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
-import { defaultShareCardUrl, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
+import { canonicalizeSiteOrigin, defaultShareCardUrl, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
 
-const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
+const SITE_URL = canonicalizeSiteOrigin(process.env.SITE_URL);
+
+const NOINDEX_PATH_PREFIXES = [
+  "/admin",
+  "/dashboard",
+  "/inbox",
+  "/design-preview",
+  "/reset-password",
+  "/settings",
+];
+
+export function isNoindexPath(requestPath: string): boolean {
+  const path = (requestPath.split("?")[0] || "/").replace(/\/$/, "") || "/";
+  return NOINDEX_PATH_PREFIXES.some(prefix => path === prefix || path.startsWith(`${prefix}/`));
+}
 
 type SeoEvent = {
   id: number;
@@ -73,8 +87,8 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Portland Pride 2026 Events | Zaylist",
-    description: "Community-run directory of Portland Pride Week and year-round queer events.",
+    name: "Portland Queer Events | Zaylist",
+    description: "Community-run directory of Portland queer events, Pride Week, and year-round nights.",
     numberOfItems: events.length,
     itemListElement: events.map((evt, index) => ({
       "@type": "ListItem",
@@ -96,7 +110,7 @@ export function buildEventsJsonLd(events: SeoEvent[]) {
           ? { "@type": "Offer", price: evt.admission === "FREE" ? "0" : undefined, priceCurrency: "USD" }
           : undefined,
         url: eventUrl(evt.id, evt.title, SITE_URL),
-        image: absoluteAssetUrl(resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek)),
+        image: jsonLdEventImage(evt),
       },
     })),
   };
@@ -111,7 +125,7 @@ export function buildSeoHeadExtras(eventCount: number) {
 }
 
 function formatEventLine(evt: SeoEvent) {
-  const when = [evt.dateStart, evt.dateEnd].filter(Boolean).join(" – ");
+  const when = [evt.dateStart, evt.dateEnd].filter(Boolean).join(" to ");
   const where = [evt.venueName, evt.neighborhood].filter(Boolean).join(", ");
   return {
     when,
@@ -127,14 +141,14 @@ const CRAWLER_FEED_HIDDEN_STYLE =
 
 export function buildCrawlerEventDirectory(events: SeoEvent[]) {
   if (events.length === 0) {
-    return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}"><p>No live events are listed yet. Visit ${SITE_URL}/api/events for the JSON feed or ${SITE_URL}/llms.txt for a plain-text listing.</p></section>`;
+    return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland queer events" style="${CRAWLER_FEED_HIDDEN_STYLE}"><p>No live events are listed yet. Visit ${SITE_URL}/api/events for the JSON feed or ${SITE_URL}/llms.txt for a plain-text listing.</p></section>`;
   }
 
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
-  return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland Pride 2026 events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
-      <h1>Zaylist | Portland Pride 2026 Events</h1>
-      <p>${events.length} live events listed for Portland Pride Week and summer 2026. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
+  return `<section id="pdx-pride-event-directory" data-crawler-feed="true" aria-label="Portland queer events" style="${CRAWLER_FEED_HIDDEN_STYLE}">
+      <h1>Zaylist | Queer Portland, all in one place</h1>
+      <p>${events.length} live events listed on Zaylist. Machine-readable feeds: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a> · <a href="${SITE_URL}/llms.txt">${SITE_URL}/llms.txt</a></p>
       <ul>
       ${items}
       </ul>
@@ -149,9 +163,9 @@ export function buildNoscriptEventDirectory(events: SeoEvent[]) {
   const items = events.map(evt => formatEventLine(evt).html).join("\n      ");
 
   return `<noscript>
-    <section aria-label="Portland Pride 2026 events" style="max-width:960px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif;color:#f5f5f0;background:#0a0a0a">
-      <h1>Zaylist | Portland Pride 2026 Events</h1>
-      <p>${events.length} live events listed for Portland Pride Week and summer 2026. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
+    <section aria-label="Portland queer events" style="max-width:960px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif;color:#f5f5f0;background:#0a0a0a">
+      <h1>Zaylist | Queer Portland, all in one place</h1>
+      <p>${events.length} live events listed on Zaylist. Full JSON API: <a href="${SITE_URL}/api/events">${SITE_URL}/api/events</a></p>
       <ul>
       ${items}
       </ul>
@@ -170,12 +184,12 @@ export function buildLlmsTxt(events: SeoEvent[]) {
     `- Live events JSON API: ${SITE_URL}/api/events`,
     `- Event count: ${events.length}`,
     "",
-    "## Portland Pride 2026: Live events",
+    "## Live events",
     "",
   ];
 
   for (const evt of events) {
-    const when = [evt.dateStart, evt.dateEnd].filter(Boolean).join(" – ");
+    const when = [evt.dateStart, evt.dateEnd].filter(Boolean).join(" to ");
     const where = [evt.venueName, evt.neighborhood, evt.address].filter(Boolean).join(", ");
     lines.push(`### ${evt.title}`);
     lines.push(`- When: ${when || "TBA"}`);
@@ -197,6 +211,9 @@ Allow: /llms.txt
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /inbox
+Disallow: /design-preview
+Disallow: /reset-password
+Disallow: /settings
 Disallow: /api/admin
 
 Sitemap: ${SITE_URL}/sitemap.xml
@@ -255,15 +272,15 @@ export function buildCanonicalUrl(requestPath: string) {
 const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Zaylist | Queer Portland, all in one place",
-    description: "Portland's queer community hub — events and nightlife, housing and roommates, GIGZ, free stuff, MIZZED CONNECTION, and a directory of queer-owned spots. All year round.",
+    description: "Portland's queer community hub: events and nightlife, housing and roommates, GIGZ, free stuff, MIZZED CONNECTION, and a directory of queer-owned spots. All year round.",
   },
   "/events": {
     title: "Portland Queer Events | Zaylist",
     description: "Every Portland queer event in one place. Find the party, back the spaces that host it, all year round.",
   },
   "/about": {
-    title: "About Zaylist | Portland's Queer Events Guide",
-    description: "A community-run guide to Portland's queer events, all year. Built by one person for the scene, not a sponsor.",
+    title: "About Zaylist",
+    description: "A community-run hub for Portland's queer events, all year. Built by one person for the scene, not a sponsor.",
   },
   "/resume": {
     title: "Tucker Max Resume | Zaylist",
@@ -275,7 +292,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   },
   "/sponsors": {
     title: "Sponsors | Zaylist",
-    description: "Local businesses can help keep browsing free. Labeled support and ads — never pay-to-rank.",
+    description: "Local businesses can help keep browsing free. Labeled support and ads, never pay-to-rank.",
   },
   "/access": {
     title: "Access & Safety | Zaylist",
@@ -320,7 +337,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/nude-beaches": {
     title: "RIVERBRATS · Beaches | Zaylist",
     description:
-      "Make naked friends on Zaylist. Sun, sand, and a speaker — Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
+      "Make naked friends on Zaylist. Sun, sand, and a speaker. Rooster Rock and Sauvie Island logistics, live conditions, and the people heading out. Pull up, bring water, pack it out.",
   },
   "/next": {
     title: "Next | What Zaylist Is Building",
@@ -374,6 +391,12 @@ function absoluteAssetUrl(pathOrUrl?: string | null) {
   return `${SITE_URL}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
+function jsonLdEventImage(evt: { id: number; posterImageUrl?: string | null; dayOfWeek?: string | null }) {
+  const resolved = resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek);
+  if (isEventPlaceholderUrl(resolved)) return undefined;
+  return absoluteAssetUrl(resolved);
+}
+
 function truncateText(text: string, max: number) {
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
@@ -399,7 +422,7 @@ function buildSingleEventJsonLd(evt: Event) {
       ? { "@type": "Offer", price: evt.admission === "FREE" ? "0" : undefined, priceCurrency: "USD" }
       : undefined,
     url: eventUrl(evt.id, evt.title, SITE_URL),
-    image: absoluteAssetUrl(resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek)),
+    image: jsonLdEventImage(evt),
   };
 }
 
@@ -410,7 +433,7 @@ export function buildWebSiteJsonLd() {
     name: "Zaylist",
     alternateName: ["Portland Zaylist", "PDX Pride 2026"],
     url: SITE_URL,
-    description: "Community-run Portland Pride 2026 event directory for PDX.",
+    description: "Portland's queer community hub: events, housing, gigs, free stuff, missed connections, and a directory of queer-owned spots.",
     potentialAction: {
       "@type": "SearchAction",
       target: `${SITE_URL}/events?q={search_term_string}`,
@@ -429,7 +452,7 @@ export function buildFaqJsonLd() {
         name: "When is Portland Pride 2026?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Portland Pride Week 2026 runs July 13–19, 2026 (Monday through Sunday). Zaylist lists events across the full week and related summer listings.",
+          text: "Portland Pride Week 2026 runs July 13 to 19, 2026 (Monday through Sunday). Zaylist lists events across the full week and related summer listings.",
         },
       },
       {
@@ -445,7 +468,7 @@ export function buildFaqJsonLd() {
         name: "What is Zaylist?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Zaylist is a free, community-run directory of Portland Pride 2026 events, queer parties, festivals, and year-round PDX listings, independent from corporate Pride apps.",
+          text: "Zaylist is a free, community-run hub for Portland queer events, housing, gigs, free stuff, missed connections, and a directory of queer-owned spots, independent from corporate Pride apps.",
         },
       },
       {
@@ -465,9 +488,10 @@ function replaceTitle(html: string, title: string) {
 }
 
 function replaceMeta(html: string, attr: "name" | "property", key: string, content: string) {
-  const pattern = new RegExp(`<meta ${attr}="${key}" content="[^"]*" */?>`, "i");
+  const pattern = new RegExp(`<meta ${attr}="${key}" content="[^"]*" */?>`, "gi");
   const tag = `<meta ${attr}="${key}" content="${escapeHtml(content)}" />`;
-  if (pattern.test(html)) return html.replace(pattern, tag);
+  const next = html.replace(pattern, tag);
+  if (next !== html) return next;
   return html.replace("</head>", `    ${tag}\n  </head>`);
 }
 
@@ -482,7 +506,7 @@ function applySocialMeta(
     type?: string;
     imageWidth?: number;
     imageHeight?: number;
-    /** When set, overrides shell default (index.html hardcodes image/jpeg for og-preview.jpg). */
+    /** When set, overrides the index.html default image type. */
     imageType?: string;
   },
 ) {
@@ -632,7 +656,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? livePlace.name
           : liveProfile
             ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-            : "Zaylist | Portland Pride Week: Events, GIGZ, Community, Directory",
+            : "Zaylist: Portland queer events, housing, gigs, free stuff, and community directory",
     ),
     type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in
@@ -640,6 +664,10 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     imageWidth: 1200,
     imageHeight: 630,
   });
+
+  if (isNoindexPath(requestPath)) {
+    out = replaceMeta(out, "name", "robots", "noindex, nofollow");
+  }
 
   if (!out.includes("zaylist:event-count")) {
     out = out.replace("</head>", `    ${headExtras}\n  </head>`);

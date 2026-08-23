@@ -13,6 +13,7 @@
  *  2. Declining someone is quiet. The row goes away and nothing else happens.
  */
 import { useState, type CSSProperties, type FormEvent } from "react";
+import { handleTabListKeyDown } from "@/lib/a11y";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
@@ -615,7 +616,18 @@ export function HousingWorkspace({
 
   return (
     <div className="hz-ws pdx-glass-rebind" style={accentStyle(post.type) as CSSProperties}>
-      <div className="hz-wstabs" role="tablist" aria-label="The house hunt">
+      <div
+        className="hz-wstabs"
+        role="tablist"
+        aria-label="The house hunt"
+        onKeyDown={e => {
+          const i = TABS.findIndex(([key]) => key === tab);
+          handleTabListKeyDown(e, TABS.length, i < 0 ? 0 : i, n => {
+            const next = TABS[n];
+            if (next) setTab(next[0]);
+          });
+        }}
+      >
         {TABS.map(([key, label, icon]) => (
           <button
             key={key}
@@ -623,6 +635,7 @@ export function HousingWorkspace({
             role="tab"
             className="hz-wstab"
             aria-selected={tab === key}
+            tabIndex={tab === key ? 0 : -1}
             onClick={() => setTab(key)}
           >
             <HousingIcon name={icon} />

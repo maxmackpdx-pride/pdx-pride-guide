@@ -42,6 +42,7 @@ import {
   tuckerHostedArchiveAsEvent,
 } from "@shared/tuckerHostedArchive";
 import { buildVenueWebsiteIndex, resolveVenueWebsite } from "@shared/venueLinks";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import {
   enrichEventForMap,
   fillEventMapCoordinates,
@@ -222,9 +223,10 @@ function publicEvent(
     || null;
   return {
     ...safe,
+    ticketUrl: publicHttpUrl(safe.ticketUrl),
     posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
     hasPendingClaim: pendingClaimIds.has(evt.id),
-    venueWebsite,
+    venueWebsite: publicHttpUrl(venueWebsite),
   };
 }
 
@@ -1434,12 +1436,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── EVENTS ─────────────────────────────────────────────────────────────
   app.get("/api/events", (req, res) => {
-    const { day } = req.query;
+    const { day, limit } = req.query;
     // Collapse same-day/same-time duplicates so the public board never shows the
     // same event twice (non-destructive — nothing is deleted from the DB).
     let evts = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
     if (typeof day === "string" && day.length > 0) {
       evts = evts.filter(evt => evt.dayOfWeek === day);
+    }
+    if (typeof limit === "string" && /^\d+$/.test(limit)) {
+      evts = evts.slice(0, Math.min(500, Math.max(1, Number(limit))));
     }
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const websites = venueWebsiteIndex();

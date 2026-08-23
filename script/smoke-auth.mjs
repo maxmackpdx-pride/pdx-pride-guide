@@ -49,5 +49,14 @@ export async function waitForAppStable(page) {
   await page
     .waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 })
     .catch(() => {});
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(900);
+  const overlayClose = page.locator(
+    ".glow-nudge__later, .glow-nudge__x, .pgc-x, [data-testid='construction-explore-zaylist']",
+  );
+  if (await overlayClose.first().isVisible().catch(() => false)) {
+    await overlayClose.first().click({ timeout: 3000 }).catch(() => {});
+    await page.locator(".glow-nudge__backdrop, .pgc-backdrop").first()
+      .waitFor({ state: "hidden", timeout: 3000 })
+      .catch(() => {});
+  }
 }

@@ -22,6 +22,7 @@ export default function Inbox() {
   usePageSeo(
     "Inbox | Zaylist",
     "Private messages from MIZZED CONNECTION posts, GIGZ, event hosts, and check-ins.",
+    { noindex: true },
   );
 
   const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({

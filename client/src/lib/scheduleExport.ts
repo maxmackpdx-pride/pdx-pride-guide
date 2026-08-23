@@ -47,7 +47,7 @@ function makeCard(event: EventListing, accent: string, cardW: number, cardH: num
   card.style.cssText = `
     position: relative; width: ${cardW}px; height: ${cardH}px; border-radius: 10px;
     overflow: hidden; background: #111; flex-shrink: 0;
-    background-image: url(${posterUrl});
+    background-image: url(${JSON.stringify(posterUrl)});
     background-size: cover; background-position: center;
   `;
   // dark gradient overlay
@@ -186,7 +186,7 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
       windowHeight: 1920,
     });
     const link = document.createElement("a");
-    link.download = "my-pdx-pride-schedule.png";
+    link.download = "my-zaylist-schedule.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   } finally {

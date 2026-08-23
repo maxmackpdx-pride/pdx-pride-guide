@@ -2,7 +2,7 @@ import express from 'express';
 import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
-import { injectSeoIntoHtml } from "./seo";
+import { injectSeoIntoHtml, isNoindexPath } from "./seo";
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "public");
@@ -23,6 +23,9 @@ export function serveStatic(app: Express) {
         "<head>",
         '<head><script>window.__PDX_LOCAL_PREVIEW__=1</script>',
       );
+    }
+    if (isNoindexPath(requestPath)) {
+      res.set("X-Robots-Tag", "noindex, nofollow");
     }
     res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
@@ -65,7 +66,8 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const [activeGroup, setActiveGroup] = useState<InboxGroupChatTarget | null>(null);
   const [reply, setReply] = useState("");
   const [showAuth, setShowAuth] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const panelRef = useModalA11y({ open, onClose: handleClose, enabled: open });
   const filterRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
@@ -118,13 +120,6 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     enabled: isAdmin,
     refetchInterval: 90_000,
   });
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
 
   // Close on outside press - but never on the same gesture that opened the
   // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open
@@ -214,6 +209,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
           role="dialog"
           aria-modal="true"
           aria-label="Inbox demo"
+          tabIndex={-1}
           ref={panelRef}
           data-testid="inbox-overlay-guest-demo"
         >
@@ -342,6 +338,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         role="dialog"
         aria-modal="true"
         aria-label="Inbox"
+        tabIndex={-1}
         ref={panelRef}
       >
         <div className="inbox-exp-handle">

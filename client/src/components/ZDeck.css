@@ -6,14 +6,17 @@
 
 .z-deck {
   position: relative;
+  /* Clip here, perspective on the track: same-element overflow+perspective
+     lets 3D slides inflate the page scrollWidth (home ~390px P1). */
   overflow: hidden;
+  overflow: clip;
+  isolation: isolate;
   padding: 30px 0;
   cursor: grab;
   outline: none;
   touch-action: pan-y;
   --cf-card: clamp(230px, 22vw, 320px);
   --cf-card-h: 400px;
-  perspective: calc(var(--cf-card) * 2.6);
 }
 .z-deck:active { cursor: grabbing; }
 
@@ -21,6 +24,8 @@
   position: relative;
   height: var(--cf-card-h);
   width: 100%;
+  max-width: 100%;
+  perspective: calc(var(--cf-card) * 2.6);
   transform-style: preserve-3d;
   user-select: none;
 }

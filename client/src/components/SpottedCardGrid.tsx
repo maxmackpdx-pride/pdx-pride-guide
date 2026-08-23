@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
@@ -56,6 +56,27 @@ export default function SpottedCardGrid({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("RECENT");
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
+  const deepLinkHandled = useRef(false);
+
+  useEffect(() => {
+    if (deepLinkHandled.current || !posts.length) return;
+    const pid = Number(new URLSearchParams(window.location.search).get("post"));
+    if (!pid) {
+      deepLinkHandled.current = true;
+      return;
+    }
+    const post = posts.find(p => p.id === pid);
+    deepLinkHandled.current = true;
+    if (post) {
+      setReplyingTo(post);
+      window.setTimeout(() => {
+        document.getElementById(`board-post-${post.id}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 350);
+    }
+  }, [posts]);
 
   const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
   const [draftEventId, setDraftEventId] = useState("");

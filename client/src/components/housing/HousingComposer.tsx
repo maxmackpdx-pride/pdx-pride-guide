@@ -10,7 +10,8 @@
  *     text the poster wrote, and the fixed lists are logistics only.
  *  3. Fields start empty. The prototype's demo drafts are not ported.
  */
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { trackProductEvent } from "@/lib/analytics";
 import {
   AFFORDABILITY_BADGES,
@@ -190,19 +191,23 @@ function Sheet({
   style?: CSSProperties;
   children: ReactNode;
 }) {
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
   return (
-    <div className="hz-sheetwrap" onClick={onClose}>
+    <div className="hz-sheetwrap" onClick={handleClose}>
       <div
+        ref={dialogRef}
         className="hz-sheet pdx-glass-rebind"
         style={style}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
       >
         <div className="hz-sheet__head">
           <Mono accent>{title}</Mono>
-          <button type="button" className="hz-x" onClick={onClose} aria-label="Close">
+          <button type="button" className="hz-x" onClick={handleClose} aria-label="Close">
             <HousingIcon name="close" size={18} />
           </button>
         </div>

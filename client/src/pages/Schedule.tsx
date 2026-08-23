@@ -1141,6 +1141,9 @@ export default function Schedule({
         : rsvp
           ? "You’re going ✓"
           : "I’ll be there",
+      rsvpBtnClass: isBeach
+        ? "pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind"
+        : "pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind",
       rsvpBtnStyle: S({
         fontFamily: "var(--font-display)",
         fontWeight: 900,
@@ -1150,17 +1153,9 @@ export default function Schedule({
         cursor: "pointer",
         padding: "11px 18px",
         borderRadius: "8px",
-        border: "2px solid " + (isBeach ? "var(--neon-magenta)" : rsvp ? dc : "var(--neon-yellow)"),
-        color: "var(--text-inverse)",
-        background: isBeach ? "transparent" : rsvp ? dc : "var(--neon-yellow)",
-        boxShadow: calm
-          ? "none"
-          : isBeach
-            ? "none"
-            : rsvp
-              ? "0 0 16px -4px " + hexA(dc, 0.8)
-              : "4px 4px 0 rgba(255,0,204,.3)",
-      }),
+        // RSVP stays reserved lime; beach withdraw is outline magenta, not the CTA offset.
+        ["--c"]: isBeach ? "var(--neon-magenta)" : "var(--neon-yellow, #CCFF00)",
+      } as React.CSSProperties),
       dc,
       detailLinkLabel: isBeach ? "Beach page →" : "Event page →",
       goingLabel: isBeach ? "On your list" : null as string | null,
@@ -1307,6 +1302,8 @@ export default function Schedule({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
           <button
+            type="button"
+            className={selected.rsvpBtnClass}
             onClick={(e) => {
               if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);

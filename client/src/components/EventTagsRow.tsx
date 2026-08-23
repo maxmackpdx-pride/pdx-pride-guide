@@ -70,7 +70,12 @@ export default function EventTagsRow({
         <span
           className={`event-card-meta-tag event-card-meta-tag--claim${onClaimClick ? " event-card-meta-tag--clickable" : ""}`}
           onClick={onClaimClick}
-          onKeyDown={onClaimClick ? e => e.key === "Enter" && onClaimClick() : undefined}
+          onKeyDown={onClaimClick ? e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClaimClick();
+            }
+          } : undefined}
           role={onClaimClick ? "button" : undefined}
           tabIndex={onClaimClick ? 0 : undefined}
         >

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 /**
  * Hard gate for suspended accounts: no dismiss. Appeal goes to Owner Desk queue.
@@ -10,8 +11,16 @@ export default function SuspendedAccountGate() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const open = Boolean(!loading && user && user.accountStatus === "suspended");
+  const holdGate = useCallback(() => {}, []);
+  const dialogRef = useModalA11y({
+    open,
+    onClose: holdGate,
+    enabled: open,
+    closeOnEscape: false,
+  });
 
-  if (loading || !user || user.accountStatus !== "suspended") return null;
+  if (!open || !user) return null;
 
   const until =
     user.suspendUntil && Number.isFinite(Date.parse(user.suspendUntil))
@@ -44,9 +53,11 @@ export default function SuspendedAccountGate() {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="suspend-gate-title"
+      tabIndex={-1}
       style={{
         position: "fixed",
         inset: 0,

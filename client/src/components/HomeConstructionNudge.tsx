@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useTipLinks } from "@/hooks/useTipLinks";
 import "./HomeConstructionNudge.css";
 
@@ -33,6 +34,12 @@ export default function HomeConstructionNudge() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (
+      typeof window !== "undefined"
+      && (window as Window & { __PDX_LOCAL_PREVIEW__?: number }).__PDX_LOCAL_PREVIEW__
+    ) {
+      return;
+    }
     const forced = forcedPreview();
     if (!forced && alreadyDismissed()) return;
     const t = window.setTimeout(() => setOpen(true), forced ? 0 : 650);
@@ -40,33 +47,27 @@ export default function HomeConstructionNudge() {
   }, []);
 
   // Dismiss = remember it so it never nags again.
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     try {
       localStorage.setItem(DISMISS_KEY, "1");
     } catch {
       /* ignore */
     }
     setOpen(false);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, []);
+  const dialogRef = useModalA11y({ open, onClose: dismiss, enabled: open });
 
   if (!open) return null;
 
   return createPortal(
     <div className="pgc-backdrop" role="presentation" onClick={dismiss}>
       <div
+        ref={dialogRef}
         className="pgc-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="pgc-title"
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
       >
         <button type="button" className="pgc-x" onClick={dismiss} aria-label="Close">

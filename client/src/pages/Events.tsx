@@ -366,6 +366,21 @@ export default function Events() {
     refetchOnMount: "always",
   });
 
+  // Legacy admin / ops links used /events?event=ID. Canonical is /events/:id/:slug.
+  useEffect(() => {
+    if (routeMatch) return;
+    const raw = new URLSearchParams(window.location.search).get("event");
+    if (!raw) return;
+    const legacyId = Number(raw);
+    if (!Number.isFinite(legacyId) || legacyId <= 0) return;
+    const match = events.find(e => e.id === legacyId);
+    if (match) {
+      setLocation(eventPath(match.id, match.title, match.dayOfWeek));
+      return;
+    }
+    if (events.length > 0) setLocation(`/events/${legacyId}`);
+  }, [routeMatch, events, setLocation]);
+
   useAttendanceSummariesLive();
 
   const { data: attendanceSummaries = {} } = useQuery<Record<string, AttendanceSummary>>({
@@ -389,13 +404,13 @@ export default function Events() {
   const shareEvent = selectedEvent || routeEvent || null;
   usePageSeo(
     shareEvent
-      ? `${shareEvent.title} | Portland Pride 2026 | Zaylist`
-      : "Portland Pride 2026 Events | Zaylist",
+      ? `${shareEvent.title} | Portland Queer Events | Zaylist`
+      : "Portland Queer Events | Zaylist",
     shareEvent
       ? truncateSeo(
           `${shareEvent.venueName || "Portland"}${shareEvent.neighborhood ? ` · ${shareEvent.neighborhood}` : ""}. ${shareEvent.description || ""}`,
         )
-      : "Browse every live Portland Pride 2026 event on the map and board. Filter PDX Pride events by day, type, and neighborhood.",
+      : "Every Portland queer event in one place. Find the party, back the spaces that host it, all year round.",
     shareEvent
       ? {
           url: eventUrl(shareEvent.id, shareEvent.title),
@@ -405,7 +420,7 @@ export default function Events() {
         }
       : {
           image: shareCardUrl("events"),
-          imageAlt: "Events on Zaylist — Portland queer nights",
+          imageAlt: "Events on Zaylist: Portland queer nights",
         },
   );
 
@@ -487,12 +502,19 @@ export default function Events() {
     const unclaimedIds = new Set(
       liveEvents.filter(e => e.isClaimable && !e.claimedBy).map(e => e.id),
     );
+    if (isError) {
+      return [
+        { num: "—", label: "Upcoming events", color: "#19e3ff" },
+        { num: "—", label: "Total unclaimed", color: "#ccff00" },
+        { num: "—", label: "Total dance parties", color: "#ff8c00" },
+      ];
+    }
     return [
       { num: upcomingCount, label: "Upcoming events", color: "#19e3ff" },
       { num: unclaimedIds.size, label: "Total unclaimed", color: "#ccff00" },
       { num: liveEvents.filter(isDanceParty).length, label: "Total dance parties", color: "#ff8c00" },
     ];
-  }, [liveEvents, upcomingCount]);
+  }, [liveEvents, upcomingCount, isError]);
 
   const hasActiveFilters =
     activeDay !== "ALL" || activeFilters.length > 0 || searchQuery.trim().length > 0 || pastView;
@@ -537,6 +559,8 @@ export default function Events() {
                   <span className="board-active-feed__count" data-testid="events-count">
                     {isLoading ? (
                       "Loading…"
+                    ) : isError ? (
+                      "Could not load"
                     ) : hasActiveFilters && filtered.length !== poolEvents.length ? (
                       <>
                         <CountUpValue value={filtered.length} /> of{" "}

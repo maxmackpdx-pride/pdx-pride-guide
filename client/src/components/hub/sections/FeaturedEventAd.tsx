@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { DAY_TEXT_COLORS } from "@shared/eventWeek";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import EventModal from "@/components/EventModal";
 import type { Event } from "@shared/schema";
 import "./FeaturedEventAd.css";
@@ -372,9 +373,9 @@ export default function FeaturedEventAd({
 
       {/* Rows 2–3 - tickets (green) + RSVP (orange); outside egg zone */}
       <div className="featured-event-ad__actions">
-        {event.ticketUrl && (
+        {publicHttpUrl(event.ticketUrl) && (
           <a
-            href={event.ticketUrl}
+            href={publicHttpUrl(event.ticketUrl)!}
             target="_blank"
             rel="noopener noreferrer"
             className="featured-event-ad__row"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { handleTabListKeyDown } from "@/lib/a11y";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -51,11 +52,23 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
         Live conditions
         {isStale ? <span className="home-beach-widget__stale">· refreshing</span> : null}
       </div>
-      {!showBoth && <div className="home-beach-widget__tabs" role="tablist" aria-label="Beach location">
+      {!showBoth && <div
+        className="home-beach-widget__tabs"
+        role="tablist"
+        aria-label="Beach location"
+        onKeyDown={e => {
+          const keys = (showCollins ? ["rooster", "collins"] : ["rooster"]) as BeachTab[];
+          handleTabListKeyDown(e, keys.length, Math.max(0, keys.indexOf(tab)), i => {
+            const next = keys[i];
+            if (next) setTab(next);
+          });
+        }}
+      >
         <button
           type="button"
           role="tab"
           aria-selected={tab === "rooster"}
+          tabIndex={tab === "rooster" ? 0 : -1}
           className={`home-beach-widget__tab${tab === "rooster" ? " home-beach-widget__tab--active home-beach-widget__tab--orange" : ""}`}
           onClick={() => setTab("rooster")}
         >
@@ -66,6 +79,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
             type="button"
             role="tab"
             aria-selected={tab === "collins"}
+            tabIndex={tab === "collins" ? 0 : -1}
             className={`home-beach-widget__tab${tab === "collins" ? " home-beach-widget__tab--active home-beach-widget__tab--orange" : ""}`}
             onClick={() => setTab("collins")}
           >

@@ -67,7 +67,7 @@ function hubSectionFromSearch(params: URLSearchParams): HubSection {
 }
 
 export default function Dashboard() {
-  usePageSeo("Your Hub | Zaylist", "Your Zaylist hub: events, feed, people, and more.");
+  usePageSeo("Your Hub | Zaylist", "Your Zaylist hub: events, feed, people, and more.", { noindex: true });
   const { user, logout, refreshUser, loading } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();

@@ -3,6 +3,7 @@
  * Not used by public member surfaces.
  */
 import { storage, sqlite } from "./storage";
+import { eventUrl } from "@shared/eventSlug";
 
 export const ADMIN_QUEUE_KINDS = [
   "submission",
@@ -335,7 +336,7 @@ export function publicPreviewLinks(opts: {
     if (evt) {
       out.push({
         type: "event",
-        url: `${site}/events?event=${evt.id}`,
+        url: eventUrl(evt.id, evt.title, site, evt.dayOfWeek),
         label: evt.title,
       });
     }

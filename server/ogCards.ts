@@ -17,10 +17,11 @@ import {
   isTuckerHostedArchiveId,
   tuckerHostedArchiveAsEvent,
 } from "@shared/tuckerHostedArchive";
+import { canonicalizeSiteOrigin } from "@shared/shareCards";
 
 const W = 1200;
 const H = 630;
-const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
+const SITE_URL = canonicalizeSiteOrigin(process.env.SITE_URL);
 
 const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
 

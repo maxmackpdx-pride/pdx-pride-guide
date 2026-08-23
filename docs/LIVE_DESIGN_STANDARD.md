@@ -33,6 +33,10 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Day color on primary RSVP | RSVP / primary action accent stays **lime** `#CCFF00` where reserved; day colors are data only |
 | Touch nav chrome without explicit ask | **Nav locked** unless user requests. When it is requested, ship the glow-pill standard below, not a new treatment |
 | Nav links as bare text with a gradient underline; board-folder dropdown (9px pill trigger, 236px panel, rainbow seam, per-index hover rails) | **Glow pills** - see *Site navigation* |
+| Persistent glow on the current nav pill (`siteNavPillPulse`) | **Glow is hover only.** The current page holds its accent on rim and label, with no bloom and no pulse |
+| Z/Space "mega" dropdown with a Featured card beside the item column | **One plain column** of pills under a line of descriptive copy; `z/ all boards` carries the `/z` link |
+| Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor`, **no outer bloom** |
+| Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
@@ -94,13 +98,24 @@ Source: Claude Design handoff *Top Nav Bar Mockups*, project `8c680e88`, 2026-08
 Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.tsx`,
 `.site-nav-link` / `.site-nav-dropdown__*` in `client/src/index.css`.
 
-- Every entry is a **hairline pill** (`999px`, `2px solid #333`) on a plain dark bar. It lights in **its own accent** on hover. **Only the current page** holds the glow, and only that pill pulses.
+- Every entry is a **hairline pill** (`999px`, `2px solid #333`) on a plain dark bar. It lights in **its own accent** on hover, and **on hover only**. The current page keeps its accent on the rim and the label but carries **no standing glow and no pulse**: glow is an affordance, not a state.
 - Accents are per destination and live in the nav model, not in CSS forks: Home lime, About magenta, Eventz cyan, Placez blue, Outz orange, Z/Space violet. Board items inside Z/Space carry their own board accent.
 - Accents resolve through the shared tokens (`--panel-*`, `--neon-*`, `--green-acid`) via a `data-accent` attribute, so Calm Mode desaturates the nav with no nav-specific overrides. `#0044ff` and `#8800ff` are too dark to read as label ink: the glow keeps the token and the text lifts to a tint (`--nav-c` vs `--nav-c-ink`).
 - Pills are `.88rem`. They must **not** inherit `--site-nav-size` (16.8 to 21.6px) - six bordered pills at that size run off the bar. Padding, pill gap, brand lockup width, and the search trigger's label all step down between 1024 and 1439 so the full set fits without the nav scrolling.
-- Dropdowns are dark rounded panels of the same pills. A list may carry a mono **eyebrow** (Outz: "Most Visited"). A **mega** panel adds a featured card beside the item column and opens leftward, since its trigger is the last pill.
-- The bottom bar carries the same names and accents: Placez blue, Eventz cyan, Space violet, Messages magenta. The Space tab keeps its two-line `Z/` lockup rather than a generic grid icon.
-- Reduced motion and Calm Mode drop the active pulse and the menu drop-in; the static glow, colors, and all destinations stay.
+- Dropdowns are dark rounded panels of the same pills, **one plain column each**. A list may carry a mono **eyebrow**, used either as a section label (Outz: "Most Visited") or as plain descriptive copy (Z/Space: "Every board, one place"). There is no featured card. Z/Space opens leftward because its trigger is the last pill.
+- Outz lists `All OUTZ` (`/z/out`, a real index page) above the two OUTZ addresses. Z/Space leads with `z/ all boards`, which carries the `/z` link the retired featured card used to own, then `THE HAÜZ`, `Gigz`, `Sellz`, `Mizzed`, `Giftz`.
+- The desktop right cluster reads **search → notifications bolt → Hub → seam → avatar + caret**, in that order. The bolt is the same component as the mobile top bar's, so its panel styles are global, not trapped in a phone media query.
+- **Hub is the one primary action** in the bar, so it takes the solid fill the standard reserves for primary: cyan plate, dark ink, and `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` composed as the whole shadow. No outer bloom, no border, no standing dot.
+- The wordmark keeps the glitch treatment: the real logo asset plus two RGB-split ghost layers (cyan and magenta, `screen` blend) flashing briefly on a 3.2s loop. Never typeset it.
+
+### Mobile bar and sheets
+
+- Five tabs: **Eventz, Placez, Hub, Z/Space, Messages**, on deep glass with the flowing rainbow seam on the top edge. There is **no pull handle** on the site-wide bar; that remains retired, and the grip belongs to the hub drawer only.
+- Tab glow is accent-coloured and **hover/active only**. **Hub is the exception: its glow is white**, never a colour, because it is the centre mark and reads as neutral chrome.
+- **Outz opens a drawer, not a navigation.** The phone bar has no Outz tab, so the trigger is the Outz row inside the Z/Space sheet. The drawer pins above the bar with a mono `Outz · Most Visited` kicker, numbered rows, and a `View All Outz →` footer to `/z/out`. It lists the OUTZ addresses that exist; do not pad it with places that have no page.
+- **Hub opens a slide-up sheet** with its top edge at 30%, stopping above the bar so the tab stays tappable (a little under 60% of the screen; taller reads as a full-screen takeover, not a sheet): Member/Admin toggle, a `Your Hub` kicker, then Feed / Profile / Events / People / Settings and Messages with its badge. The current `/dashboard` section is the highlighted row.
+- **Signed out, Hub opens the log-in sheet**, which is the same `AuthModal` component presented bottom-anchored and full-bleed below 640px (`24px` top corners, ~82vh). One auth component, one Google path, one reset path: do not fork a second login form for phones.
+- Reduced motion and Calm Mode drop the sheet drop-in and the seam flow; colors, glow, and every destination stay.
 
 ## NEXT roadmap cards
 

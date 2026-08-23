@@ -6,6 +6,9 @@
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: var(--ink-900);
   overflow-x: clip;
   color: var(--text-mid);
@@ -259,7 +262,7 @@
   left: 50%;
   top: 44%;
   z-index: 3;
-  width: min(100vw, 1274px);
+  width: min(100%, 1274px);
   max-height: 75%;
   pointer-events: none;
   user-select: none;
@@ -773,7 +776,7 @@ html.calm-mode .home-hero__orb {
        below and doesn't drift into the lower half of the panel */
     top: 42%;
     /* Art fills ~95-100% of the canvas, so keep a margin or it clips the edges */
-    width: min(94vw, 936px);
+    width: min(94%, 936px);
     max-height: 80%;
   }
 
@@ -785,8 +788,8 @@ html.calm-mode .home-hero__orb {
     flex-direction: column;
     flex-wrap: nowrap;
     gap: 9px;
-    width: min(88vw, 340px);
-    max-width: min(88vw, 340px);
+    width: min(88%, 340px);
+    max-width: min(88%, 340px);
   }
 
   .home-hero__cta .home-hero__btn {
@@ -1850,6 +1853,7 @@ html.calm-mode .home-boards__card {
   letter-spacing: -.025em;
   text-transform: uppercase;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .home-next-preview__head > p:last-child {
@@ -1869,7 +1873,7 @@ html.calm-mode .home-boards__card {
 
 .home-next-preview__viewport {
   display: block;
-  overflow: visible;
+  overflow: hidden;
   padding: 20px 0 58px;
 }
 
@@ -2009,11 +2013,7 @@ html.calm-mode .home-boards__card {
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card {
     --crash-over: 10px;
-    width: calc((100vw + 72px) / 6);
-    height: calc((100vw + 66px) / 6.6);
-    min-height: 70px;
-    max-height: 92px;
-    margin-left: -20px;
+    margin-left: 0;
     padding: 7px;
     border-radius: 9px;
   }
@@ -2062,12 +2062,12 @@ html.calm-mode .home-next-preview__card,
   gap: 34px;
   width: 100%;
   margin: 0;
-  padding: 18px max(20px, calc((100vw - 1180px) / 2)) 82px;
+  padding: 18px max(20px, calc((100% - 1180px) / 2)) 82px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
   scroll-snap-type: inline mandatory;
-  scroll-padding-inline: max(20px, calc((100vw - 1180px) / 2));
+  scroll-padding-inline: max(20px, calc((100% - 1180px) / 2));
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,.24) transparent;
   -webkit-overflow-scrolling: touch;
@@ -3798,6 +3798,10 @@ html.calm-mode .home-next-preview__orb,
 .home-next-preview__deck {
   --cf-card: clamp(184px, 18vw, 238px);
   --cf-card-h: clamp(108px, 10vw, 138px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: clip;
   padding: 18px 0 6px;
   margin-inline: auto;
 }
@@ -3825,7 +3829,7 @@ html.calm-mode .home-next-preview__orb,
 
 @media (max-width: 640px) {
   .home-next-preview__deck {
-    --cf-card: clamp(150px, 52vw, 210px);
+    --cf-card: clamp(150px, 72%, 210px);
     --cf-card-h: clamp(92px, 30vw, 124px);
   }
 }

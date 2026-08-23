@@ -11,6 +11,13 @@ export default function ResetPassword() {
 
   useEffect(() => {
     document.title = "Reset password · Zaylist";
+    let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!robots) {
+      robots = document.createElement("meta");
+      robots.name = "robots";
+      document.head.appendChild(robots);
+    }
+    robots.setAttribute("content", "noindex, nofollow");
   }, []);
 
   const submit = async (event: React.FormEvent) => {

@@ -2,7 +2,7 @@ import BoardHero from "@/components/BoardHero";
 import BoardExploreActions from "@/components/BoardExploreActions";
 import BoardStatsBar from "@/components/BoardStatsBar";
 
-type Stat = { num: number; label: string; color: string };
+type Stat = { num: string | number; label: string; color: string };
 
 type Props = {
   eventCount: number;

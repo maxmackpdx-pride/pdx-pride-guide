@@ -37,11 +37,11 @@ export default function MissedConnections() {
   const [editingPost, setEditingPost] = useState<MissedConnectionPost | null>(null);
   const [editForm, setEditForm] = useState({ title: "", body: "" });
 
-  const { data: allPosts = [], isLoading } = useQuery<MissedConnectionPost[]>({
+  const { data: allPosts = [], isLoading, isError } = useQuery<MissedConnectionPost[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: async () => {
       const r = await fetch("/api/missed-connections", { credentials: "include" });
-      if (!r.ok) return [];
+      if (!r.ok) throw new Error(`${r.status}: ${(await r.text()) || r.statusText}`);
       return r.json();
     },
   });
@@ -50,11 +50,11 @@ export default function MissedConnections() {
   }, [isLoading]);
 
   const stats = useMemo(() => [
-    { num: allPosts.length, label: "Missed connections, live now", color: "#ff1fa0" },
-    { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
-    { num: allPosts.filter(p => p.beachId != null).length, label: "At the beach", color: "#ff6600" },
-    { num: allPosts.filter(p => p.eventId == null && !p.beachId).length, label: "Around town", color: "#ff8c00" },
-  ], [allPosts]);
+    { num: isError ? "—" : allPosts.length, label: "Missed connections, live now", color: "#ff1fa0" },
+    { num: isError ? "—" : allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },
+    { num: isError ? "—" : allPosts.filter(p => p.beachId != null).length, label: "At the beach", color: "#ff6600" },
+    { num: isError ? "—" : allPosts.filter(p => p.eventId == null && !p.beachId).length, label: "Around town", color: "#ff8c00" },
+  ], [allPosts, isError]);
 
   const { data: myPosts = [] } = useQuery<MissedConnectionPost[]>({
     queryKey: ["/api/missed-connections/mine"],

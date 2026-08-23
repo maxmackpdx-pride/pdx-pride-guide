@@ -83,7 +83,10 @@ export default function DesignSystemSandbox() {
   usePageSeo(
     "Design System Sandbox",
     "Isolated preview of Zaylist design tokens and components. Not production.",
-    { url: typeof window !== "undefined" ? `${window.location.origin}/design-preview` : undefined },
+    {
+      url: typeof window !== "undefined" ? `${window.location.origin}/design-preview` : undefined,
+      noindex: true,
+    },
   );
 
   const [calm, setCalm] = useState(false);

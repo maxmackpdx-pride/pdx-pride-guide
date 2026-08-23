@@ -8,6 +8,7 @@
  *
  * Ported from docs/design-handoff-hausing/haus-ui.jsx.
  */
+import type { ReactNode } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import type { HousingPerson } from "@shared/housing";
 
@@ -33,6 +34,18 @@ export type HousingClusterProps = {
   onSelect?: (person: HousingPerson) => void;
 };
 
+type ClusterSlot =
+  | { kind: "person"; key: string; person: HousingPerson; index: number }
+  | { kind: "extra"; key: string; extra: number }
+  | { kind: "pet"; key: string; pet: HousingPerson }
+  | { kind: "open"; key: string; index: number };
+
+function chunk3<T>(items: T[]): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += 3) rows.push(items.slice(i, i + 3));
+  return rows;
+}
+
 export function HousingCluster({
   people,
   pets = [],
@@ -40,7 +53,7 @@ export function HousingCluster({
   slots = 0,
   scale = 1,
   max = 6,
-  wrap3 = false,
+  wrap3 = true,
   onSelect,
 }: HousingClusterProps) {
   const base = Math.round(SIZES[size] * scale);
@@ -58,36 +71,61 @@ export function HousingCluster({
     return i < 3 ? px : Math.round(px * Math.pow(ROW_STEP, i - 2));
   };
 
-  return (
-    <div className={wrap3 ? "hz-cluster hz-cluster--wrap" : "hz-cluster"}>
-      {shown.map((p, i) => (
+  const items: ClusterSlot[] = [
+    ...shown.map((p, i) => ({
+      kind: "person" as const,
+      key: `person-${p.id}`,
+      person: p,
+      index: i,
+    })),
+    ...(extra > 0 ? [{ kind: "extra" as const, key: "extra", extra }] : []),
+    ...pets.map((pet) => ({
+      kind: "pet" as const,
+      key: `pet-${pet.id}`,
+      pet,
+    })),
+    ...Array.from({ length: openSlots }, (_, i) => ({
+      kind: "open" as const,
+      key: `open-${i}`,
+      index: i,
+    })),
+  ];
+
+  const renderSlot = (slot: ClusterSlot): ReactNode => {
+    if (slot.kind === "person") {
+      const p = slot.person;
+      return (
         <UserAvatar
-          key={p.id}
+          key={slot.key}
           photoUrl={p.photoUrl}
           avatarChoice={p.avatarChoice}
           displayName={p.name}
           username={p.username || undefined}
-          // Off-platform housemates have no account, so no flag ring.
           avatarRing={p.kind === "MEMBER" ? p.avatarRing : "none"}
-          size={sizeAt(i)}
+          size={sizeAt(slot.index)}
           title={p.kind === "OFFPLATFORM" ? `${p.name}, not on Zaylist yet` : p.name}
           onClick={onSelect ? () => onSelect(p) : undefined}
         />
-      ))}
-
-      {extra > 0 ? (
+      );
+    }
+    if (slot.kind === "extra") {
+      return (
         <span
+          key={slot.key}
           className="hz-more"
-          title={people.slice(max).map((p) => p.name).join(", ")}
+          title={people.slice(max).map((p) => p.name).filter(Boolean).join(", ")}
           style={{ width: px, height: px, fontSize: Math.round(px * 0.34) }}
         >
-          +{extra}
+          +{slot.extra}
         </span>
-      ) : null}
-
-      {pets.map((pet) => (
+      );
+    }
+    if (slot.kind === "pet") {
+      const pet = slot.pet;
+      const initial = (pet.name || "?").trim().charAt(0) || "?";
+      return (
         <button
-          key={pet.id}
+          key={slot.key}
           type="button"
           className="hz-pet"
           title={pet.species ? `${pet.name}, ${pet.species}` : pet.name}
@@ -101,19 +139,32 @@ export function HousingCluster({
               : undefined
           }
         >
-          {pet.photoUrl ? <img src={pet.photoUrl} alt={pet.name} /> : <span>{pet.name.charAt(0)}</span>}
+          {pet.photoUrl ? <img src={pet.photoUrl} alt={pet.name || "Pet"} /> : <span>{initial}</span>}
         </button>
-      ))}
+      );
+    }
+    return (
+      <span
+        key={slot.key}
+        className="hz-slot"
+        title="Open spot"
+        style={{ width: px, height: px, fontSize: px >= 56 ? 11 : 12 }}
+      >
+        {px >= 56 ? "Open" : "+"}
+      </span>
+    );
+  };
 
-      {Array.from({ length: openSlots }).map((_, i) => (
-        <span
-          key={`open-${i}`}
-          className="hz-slot"
-          title="Open spot"
-          style={{ width: px, height: px, marginLeft: -8, fontSize: px >= 56 ? 11 : 12 }}
-        >
-          {px >= 56 ? "Open" : "+"}
-        </span>
+  if (!wrap3) {
+    return <div className="hz-cluster">{items.map(renderSlot)}</div>;
+  }
+
+  return (
+    <div className="hz-cluster hz-cluster--wrap">
+      {chunk3(items).map((row, ri) => (
+        <div key={`row-${ri}`} className="hz-cluster__row">
+          {row.map(renderSlot)}
+        </div>
       ))}
     </div>
   );

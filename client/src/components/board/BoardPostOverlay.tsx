@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -6,6 +6,7 @@ import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
 import SellzListingCard, { type SellzPost } from "./SellzListingCard";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 /**
  * Opens a board post (gig or gift) as an overlay on top of whatever's behind
@@ -27,6 +28,8 @@ type Props = {
 
 export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const [showAuth, setShowAuth] = useState(false);
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
 
   const giftQuery = useQuery<GiftingPost[]>({
     queryKey: ["/api/gifting"],
@@ -117,16 +120,21 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
 
   return createPortal(
     <>
-      <div className="board-detail-backdrop" onClick={onClose}>
+      <div className="board-detail-backdrop" onClick={handleClose}>
         <div
+          ref={dialogRef}
           className="board-post-overlay board-post-overlay--glass"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Board post"
+          tabIndex={-1}
           onClick={e => e.stopPropagation()}
           style={panelStyle}
         >
           <button
             type="button"
             className="gifting-close"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             style={{ position: "absolute", top: 10, right: 10, zIndex: 3 }}
           >

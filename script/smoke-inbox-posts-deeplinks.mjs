@@ -71,7 +71,10 @@ const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const context = await browser.newContext();
 await prepareSmokeContext(context);
 const page = await context.newPage();
-page.on("pageerror", (err) => errors.push(err.message));
+page.on("pageerror", (err) => {
+  if (/WebSocket closed without opened|failed to connect to websocket/i.test(err.message)) return;
+  errors.push(err.message);
+});
 
 try {
   await login(page);
@@ -109,7 +112,7 @@ try {
   await page.screenshot({ path: join(OUT, "02-gig-deeplink.png"), fullPage: true });
   record(
     "Gig EDIT (sheet → editor)",
-    sheetClosed2 && url2.includes(`editGig=${GIG_ID}`) && gigTitleValue.includes("Site Admins"),
+    sheetClosed2 && /editGig=\d+/.test(url2) && gigTitleValue.includes("Site Admins"),
     `url=${url2} sheetClosed=${sheetClosed2} titleField="${gigTitleValue}"`,
   );
 

@@ -220,7 +220,7 @@ export default function MemberProfile() {
   const profileUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/u/${username}`
-      : `https://zaylist.com/u/${username}`;
+      : `https://www.zaylist.com/u/${username}`;
 
   const onCopy = useCallback(async () => {
     const ok = await copyTextToClipboard(profileUrl);

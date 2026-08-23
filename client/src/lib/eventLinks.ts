@@ -8,6 +8,8 @@ import {
   riverBratsWallIso,
 } from "@shared/riverBrats";
 import { parsePacificEventTime } from "@/lib/countdown";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
+import { eventUrl } from "@shared/eventSlug";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -49,8 +51,9 @@ function buildEventDetails(event: Pick<Event, "description" | "venueName" | "add
   if (event.description?.trim()) lines.push(event.description.trim());
   if (event.venueName) lines.push(`Venue: ${event.venueName}`);
   if (event.address) lines.push(`Address: ${event.address}`);
-  if (event.ticketUrl) lines.push(`Tickets: ${event.ticketUrl}`);
-  lines.push("via Zaylist at zaylist.com");
+  const ticketUrl = publicHttpUrl(event.ticketUrl);
+  if (ticketUrl) lines.push(`Tickets: ${ticketUrl}`);
+  lines.push("via Zaylist at www.zaylist.com");
   return lines.join("\n");
 }
 
@@ -111,7 +114,9 @@ export function downloadIcsFile(
     `SUMMARY:${icsEscape(event.title)}`,
     `DESCRIPTION:${icsEscape(details)}`,
     `LOCATION:${icsEscape(location)}`,
-    ...(event.ticketUrl ? [`URL:${event.ticketUrl}`] : []),
+    ...(publicHttpUrl(event.ticketUrl)
+      ? [`URL:${icsEscape(publicHttpUrl(event.ticketUrl)!)}`]
+      : [`URL:${eventUrl(event.id, event.title)}`]),
     "END:VEVENT",
     "END:VCALENDAR",
   ];
@@ -176,7 +181,7 @@ export function beachCheckinCalendarEvent(input: {
     `River Brats check-in · ${window}`,
     input.note?.trim() || null,
     `Maps: https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`,
-    `via Zaylist at zaylist.com/z/out/${input.beachId}`,
+    `via Zaylist at www.zaylist.com/z/out/${input.beachId}`,
   ].filter(Boolean) as string[];
   const numericId =
     typeof input.id === "number"

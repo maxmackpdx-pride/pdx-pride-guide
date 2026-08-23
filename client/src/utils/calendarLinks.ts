@@ -57,6 +57,7 @@ export function getICSContent(event: {
     `SUMMARY:${sanitize(event.title)}`,
     `DESCRIPTION:${sanitize(event.description)}`,
     `LOCATION:${sanitize(location)}`,
+    "URL:https://www.zaylist.com",
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

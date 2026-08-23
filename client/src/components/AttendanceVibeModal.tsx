@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 /** Client mirror of shared AttendanceVisibility (+ legacy "visible" accepted server-side). */
 export type AttendanceVisibility = "public" | "friends" | "anonymous";
@@ -56,19 +57,23 @@ export default function AttendanceVibeModal({
   onRemove,
   children,
 }: AttendanceVibeModalProps) {
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ open, onClose: handleClose, enabled: open });
   if (!open) return null;
 
   return (
     <>
       <div
         className="attendance-vibe-backdrop"
-        onClick={onClose}
+        onClick={handleClose}
         data-testid="attendance-vibe-backdrop"
       />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="attendance-vibe-title"
+        tabIndex={-1}
         data-testid="attendance-vibe-modal"
         className={`attendance-vibe-modal${isMobile ? " attendance-vibe-modal--sheet" : ""}`}
       >
@@ -79,7 +84,7 @@ export default function AttendanceVibeModal({
           <button
             type="button"
             className="attendance-vibe-modal__close"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
           >
             ×

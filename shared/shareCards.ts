@@ -3,15 +3,56 @@
  * Files live in client/public/og/ — absolute URLs only for crawlers.
  */
 
+export const CANONICAL_SITE_ORIGIN = "https://www.zaylist.com";
+
+const LEGACY_PUBLIC_HOSTS = new Set([
+  "zaylist.com",
+  "prideguidepdx.com",
+  "www.prideguidepdx.com",
+  "pdxpg.com",
+  "www.pdxpg.com",
+  "pdxprideguide.com",
+  "www.pdxprideguide.com",
+]);
+
+/** Force www.zaylist.com when SITE_URL still points at a retired brand host. */
+export function canonicalizeSiteOrigin(raw?: string | null): string {
+  const fallback = CANONICAL_SITE_ORIGIN;
+  const value = String(raw || fallback).trim().replace(/\/$/, "");
+  try {
+    const u = new URL(value.includes("://") ? value : `https://${value}`);
+    if (LEGACY_PUBLIC_HOSTS.has(u.hostname.toLowerCase())) return fallback;
+  } catch {
+    return fallback;
+  }
+  return value || fallback;
+}
+
+/** Rewrite apex / Pride Guide hosts on a full public URL. Leaves preview hosts alone. */
+export function canonicalizePublicUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (LEGACY_PUBLIC_HOSTS.has(u.hostname.toLowerCase())) {
+      u.protocol = "https:";
+      u.hostname = "www.zaylist.com";
+      u.port = "";
+    }
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function siteBase(): string {
   try {
     if (typeof process !== "undefined" && process.env?.SITE_URL) {
-      return String(process.env.SITE_URL).replace(/\/$/, "");
+      return canonicalizeSiteOrigin(process.env.SITE_URL);
     }
   } catch {
     /* browser / edge without process */
   }
-  return "https://www.zaylist.com";
+  return CANONICAL_SITE_ORIGIN;
 }
 
 /** Filename under /og/ (no leading slash in the map values beyond path). */

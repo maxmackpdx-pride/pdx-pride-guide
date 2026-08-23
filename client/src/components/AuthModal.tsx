@@ -37,6 +37,7 @@ function Field({
   focused: boolean;
   trailing?: ReactNode;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
+  const invalid = input["aria-invalid"] === true || input["aria-invalid"] === "true";
   return (
     <div className="relative flex items-center overflow-hidden rounded-xl">
       <span
@@ -50,7 +51,7 @@ function Field({
         {...input}
         className="h-11 w-full rounded-xl border-2 bg-white/[0.04] pl-10 pr-10 text-[0.95rem] text-white outline-none transition-all duration-300 placeholder:text-white/30 focus:bg-white/[0.07]"
         style={{
-          borderColor: focused ? accent : "rgba(255,255,255,.09)",
+          borderColor: focused ? accent : invalid ? "#ff8c00" : "rgba(255,255,255,.09)",
           boxShadow: focused
             ? `0 0 5px ${accent}, 0 0 12px color-mix(in srgb, ${accent} 45%, transparent)`
             : "none",
@@ -110,6 +111,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
       setError(err.message);
     } finally { setLoading(false); }
   };
+
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +188,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   // that use transform, overflow, or stacking contexts (claim-this-event flow).
   return createPortal(
     <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-[6px]"
+      className="pdx-auth-scrim fixed inset-0 z-[100000] flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-[6px]"
       onClick={handleClose}
     >
       {/* Zaylist ground: cyan above, magenta below, instead of one flat scrim. */}
@@ -202,7 +205,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         initial={still ? false : { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-[440px]"
+        className="pdx-auth-shell relative z-10 w-full max-w-[440px]"
         style={{ perspective: 1500 }}
         onClick={e => e.stopPropagation()}
       >
@@ -248,7 +251,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             aria-modal="true"
             aria-label={forgotPassword ? "Reset password" : tab === "login" ? "Log in" : "Join"}
             tabIndex={-1}
-            className="relative max-h-[92vh] overflow-y-auto rounded-2xl border border-white/[0.07] p-7 backdrop-blur-xl"
+            className="pdx-auth-panel relative max-h-[92vh] overflow-y-auto rounded-2xl border border-white/[0.07] p-7 backdrop-blur-xl"
             style={{
               background: "radial-gradient(120% 140% at 50% 0%, rgba(18,18,26,.94) 0%, rgba(5,5,6,.97) 72%)",
               boxShadow:
@@ -502,12 +505,21 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                       onBlur={() => setFocusedInput(null)}
                       type={showPassword ? "text" : "password"}
                       value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
+                      onChange={e => {
+                        setConfirmPassword(e.target.value);
+                        if (error === "Passwords do not match.") setError("");
+                      }}
                       required
                       placeholder="Repeat password"
                       minLength={6}
                       autoComplete="new-password"
+                      aria-invalid={passwordMismatch || error === "Passwords do not match." || undefined}
                     />
+                    {passwordMismatch ? (
+                      <p className="m-0 text-[0.78rem]" style={{ color: "#ffb070" }} role="alert">
+                        Passwords do not match.
+                      </p>
+                    ) : null}
                     {COMMUNITY_STANDARDS_GATE_ENABLED ? (
                       <div className="pt-1 [&_a]:text-[color:var(--panel-cyan,#19e3ff)]">
                         <CommunityStandardsSignupBlock
@@ -520,7 +532,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                     <SubmitButton
                       type="submit"
                       accent="#c8fa3c"
-                      disabled={loading || (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
+                      disabled={loading || passwordMismatch || (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedStandards)}
                     >
                       {submitLabel("Join Zaylist", "Joining...")}
                     </SubmitButton>

@@ -1,3 +1,4 @@
+import { cardActivateProps } from "@/lib/a11y";
 import type { EventListing } from "@shared/multiDayEvents";
 import { DAY_COLORS, DAY_TEXT_COLORS, fmtClock, hexA } from "@shared/eventWeek";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
@@ -84,7 +85,7 @@ export default function RailCard({
   if (variant === "compact") {
     return (
       <div
-        onClick={() => onOpen(listing)}
+        {...cardActivateProps(() => onOpen(listing), event.title)}
         style={{
           display: "flex",
           gap: 9,
@@ -138,7 +139,7 @@ export default function RailCard({
 
   return (
     <div
-      onClick={() => onOpen(listing)}
+      {...cardActivateProps(() => onOpen(listing), event.title)}
       style={{
         position: "relative",
         flex: fill ? undefined : "none",

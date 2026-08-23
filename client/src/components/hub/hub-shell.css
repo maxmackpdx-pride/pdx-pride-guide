@@ -1312,13 +1312,294 @@ html.calm-mode .hub-mobile-tab.is-active {
   color: var(--item-ink, var(--sheet-c, #19e3ff));
 }
 
+/* ── Hub tab: white, never a colour ────────────────────────────
+   Every other tab lights in its own accent. Hub is the centre mark and
+   reads as neutral chrome, so its hover and current states glow white. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center:hover,
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center.is-active {
+  border-color: rgba(255, 255, 255, .28);
+  box-shadow:
+    0 0 6px rgba(255, 255, 255, .55),
+    0 0 14px rgba(255, 255, 255, .28),
+    inset 0 1px 0 rgba(255, 255, 255, .12);
+  color: #fff;
+}
+
+/* ── Outz most-visited drawer ──────────────────────────────────
+   Opened from the Outz row in the Z/Space sheet. Sits above the bar
+   rather than navigating away, so the bar stays put underneath. */
+.hub-outz-drawer {
+  position: fixed;
+  z-index: 1002;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--site-mobile-nav-height, 92px) + 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: radial-gradient(120% 140% at 50% 0%, #12121a 0%, #0c0c0f 70%);
+  border: 1px solid #000;
+  border-radius: 18px 18px 12px 12px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 -14px 40px -10px rgba(0, 0, 0, .7),
+    0 0 30px -10px rgba(255, 102, 0, .2);
+  animation: navSheetUp .3s ease-out;
+}
+
+.hub-outz-drawer__kicker {
+  padding: 2px 4px 8px;
+  color: var(--text-faint, #666);
+  font: 11px var(--font-mono, ui-monospace, monospace);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.hub-outz-drawer__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #0c0c0f;
+  text-decoration: none;
+}
+
+.hub-outz-drawer__row:hover {
+  background: #121216;
+}
+
+.hub-outz-drawer__num {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border: 1px solid var(--neon-orange, #ff6600);
+  border-radius: 99px;
+  background: rgba(255, 102, 0, .15);
+  color: var(--neon-orange, #ff6600);
+  font: 700 11px var(--font-mono, ui-monospace, monospace);
+}
+
+.hub-outz-drawer__name {
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: .82rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.hub-outz-drawer__all {
+  padding: 10px 12px 2px;
+  color: var(--neon-orange, #ff6600);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: .78rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+/* The Outz row in the Z/Space sheet is a drawer trigger, not a link. */
+.hub-more-sheet.hub-more-sheet--site .hub-more-item--drawer {
+  border-bottom: 2px solid #2b2b2b;
+}
+
+/* ── Hub slide-up sheet ────────────────────────────────────────
+   Roughly 70% of the screen, stopping above the bar so the Hub tab
+   stays visible and tappable while the sheet is open. */
+.hub-sheet {
+  position: fixed;
+  z-index: 1002;
+  left: 0;
+  right: 0;
+  /*
+   * The handoff frame puts the sheet's top edge at 30% with the bar below it,
+   * which lands it at a little under 60% of the screen. Taller than that and
+   * it reads as a full-screen takeover rather than a sheet.
+   */
+  top: 30%;
+  bottom: var(--site-mobile-nav-height, 92px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0a0a0c;
+  border-radius: 24px 24px 0 0;
+  box-shadow:
+    0 0 0 1px #000,
+    0 -20px 50px -20px rgba(0, 0, 0, .9);
+  animation: navSheetUp .3s ease-out;
+}
+
+/*
+ * Grip, deliberately neutral. A cyan bottom-nav pull handle is a retired
+ * pattern, so nothing in this bar area reintroduces one.
+ */
+.hub-sheet__grip {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 36px;
+  height: 3px;
+  border-radius: 99px;
+  background: #2a2a32;
+  transform: translateX(-50%);
+}
+
+.hub-sheet__body {
+  flex: 1;
+  padding: 16px 12px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hub-sheet__switch {
+  display: flex;
+  padding: 3px;
+  border: 1px solid #1c1c22;
+  border-radius: 11px;
+  background: #000;
+}
+
+.hub-sheet__switch-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 9px;
+  color: var(--text-meta, #9a9aa2);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: .68rem;
+  letter-spacing: .05em;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.hub-sheet__switch-btn.is-on {
+  background: var(--panel-cyan, #19e3ff);
+  color: #000;
+}
+
+.hub-sheet__switch-btn.is-off {
+  opacity: .4;
+}
+
+.hub-sheet__kicker {
+  margin: 12px 0 6px;
+  color: var(--text-faint, #666);
+  font: 9px var(--font-mono, ui-monospace, monospace);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.hub-sheet__list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hub-sheet__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: none;
+  color: var(--text-body, #e6e2d9);
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  text-decoration: none;
+}
+
+.hub-sheet__row svg {
+  flex: none;
+  color: var(--text-meta, #9a9aa2);
+}
+
+.hub-sheet__row-label {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: .72rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+/* Current section: cyan plate with a left rail, per the handoff frame. */
+.hub-sheet__row.is-current {
+  border-color: rgba(25, 227, 255, .4);
+  background: rgba(25, 227, 255, .08);
+  color: var(--panel-cyan, #19e3ff);
+}
+
+.hub-sheet__row.is-current svg {
+  color: var(--panel-cyan, #19e3ff);
+}
+
+.hub-sheet__row.is-current::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--panel-cyan, #19e3ff);
+}
+
+.hub-sheet__row-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--panel-cyan, #19e3ff);
+  color: #000;
+  font: 700 10px var(--font-mono, ui-monospace, monospace);
+}
+
+/* ── Log in / Join as a phone sheet ────────────────────────────
+   Same component as the desktop modal, so the auth flow, the Google
+   button and the reset path stay in one place. On a phone it slides up
+   from the bottom edge and fills the lower ~82% instead of floating in
+   the middle, which is what the mobile nav handoff draws. */
+@media (max-width: 640px) {
+  .pdx-auth-scrim {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .pdx-auth-shell {
+    max-width: none;
+  }
+
+  .pdx-auth-panel {
+    max-height: 82vh;
+    padding: 16px 18px calc(env(safe-area-inset-bottom, 0px) + 18px);
+    border-width: 0;
+    border-radius: 24px 24px 0 0;
+  }
+}
+
 /* ── Calm mode and reduced motion ──────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .hub-mobile-bar.site-hub-mobile-bar::before,
   .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan,
   .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
   .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
-  .hub-more-sheet.hub-more-sheet--site { animation: none; }
+  .hub-more-sheet.hub-more-sheet--site,
+  .hub-outz-drawer,
+  .hub-sheet { animation: none; }
 }
 
 html.calm-mode .hub-mobile-bar.site-hub-mobile-bar::before,
@@ -1330,7 +1611,11 @@ html.calm-mode .hub-more-sheet.hub-more-sheet--site,
 :root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab.is-active.is-cyan,
 :root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a,
 :root[data-calm="true"] .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b,
-:root[data-calm="true"] .hub-more-sheet.hub-more-sheet--site { animation: none; }
+:root[data-calm="true"] .hub-more-sheet.hub-more-sheet--site,
+html.calm-mode .hub-outz-drawer,
+html.calm-mode .hub-sheet,
+:root[data-calm="true"] .hub-outz-drawer,
+:root[data-calm="true"] .hub-sheet { animation: none; }
 
 /* ── Site mobile top bar: Home / About as glow pills ───────────
    Claude Design handoff "Top Nav Bar Mockups", mobile frame: the two

@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { EventCard, PosterCard } from "@/components/ds";
 import { eventPath } from "@shared/eventSlug";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import { fmtEventWhen } from "../helpers";
@@ -36,7 +37,7 @@ function eventRowProps(evt: ProfileEvent, going?: number) {
     day: evt.dayOfWeek || undefined,
     admission: evt.admission || undefined,
     href: eventPath(evt.id, evt.title, evt.dayOfWeek),
-    ticketHref: evt.ticketUrl || undefined,
+    ticketHref: publicHttpUrl(evt.ticketUrl) || undefined,
     going,
   };
 }

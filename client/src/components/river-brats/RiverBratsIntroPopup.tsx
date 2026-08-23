@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import "./RiverBratsIntroPopup.css";
 
 /** Bump to re-show for everyone after a broken ship. */
@@ -57,19 +57,7 @@ export default function RiverBratsIntroPopup() {
     return () => window.removeEventListener(RIVER_BRATS_INTRO_OPEN_EVENT, openNow);
   }, []);
 
-  // Escape + body scroll lock
-  useEffect(() => {
-    if (!open) return;
-    lockBodyScroll();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      unlockBodyScroll();
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, dismiss]);
+  const dialogRef = useModalA11y({ open, onClose: dismiss, enabled: open });
 
   if (!open) return null;
 
@@ -114,11 +102,13 @@ export default function RiverBratsIntroPopup() {
       onClick={dismiss}
     >
       <div
+        ref={dialogRef}
         className="rbi-card"
         style={cardStyle}
         role="dialog"
         aria-modal="true"
         aria-labelledby="rbi-title"
+        tabIndex={-1}
         data-testid="river-brats-intro-dialog"
         onClick={e => e.stopPropagation()}
       >

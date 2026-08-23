@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -97,12 +98,13 @@ export default function PushNotificationPrompt() {
     };
   }, [user]);
 
-  if (!visible) return null;
-
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     sessionStorage.setItem(DISMISS_KEY, "1");
     setVisible(false);
-  };
+  }, []);
+  const dialogRef = useModalA11y({ open: visible, onClose: dismiss, enabled: visible });
+
+  if (!visible) return null;
 
   // Android one-tap install via the captured beforeinstallprompt.
   const installNative = async () => {
@@ -163,9 +165,11 @@ export default function PushNotificationPrompt() {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="push-prompt-title"
+      tabIndex={-1}
       style={{
         position: "fixed",
         inset: 0,

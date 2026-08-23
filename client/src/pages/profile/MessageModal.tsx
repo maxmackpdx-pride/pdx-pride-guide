@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import UserAvatar from "@/components/UserAvatar";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,8 @@ export default function MessageModal({
   onClose: () => void;
 }) {
   const { toast } = useToast();
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
   const [msgText, setMsgText] = useState("");
   const [msgSent, setMsgSent] = useState(false);
   const [msgSending, setMsgSending] = useState(false);
@@ -45,8 +48,16 @@ export default function MessageModal({
   };
 
   return (
-    <div className="mp-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={`Message ${displayName}`}>
-      <div className="mp-modal" onClick={e => e.stopPropagation()}>
+    <div className="mp-modal-overlay" onClick={handleClose} role="presentation">
+      <div
+        ref={dialogRef}
+        className="mp-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Message ${displayName}`}
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+      >
         <div className="mp-modal__head">
           <UserAvatar
             photoUrl={data.photoUrl}
@@ -60,7 +71,7 @@ export default function MessageModal({
             <div className="display mp-modal__title">Message {displayName}</div>
             <div className="mp-modal__sub">Replies land in your Hub inbox.</div>
           </div>
-          <button type="button" className="mp-embed-remove" onClick={onClose} aria-label="Close">
+          <button type="button" className="mp-embed-remove" onClick={handleClose} aria-label="Close">
             <CloseIcon size={16} />
           </button>
         </div>
@@ -76,7 +87,7 @@ export default function MessageModal({
               data-testid="profile-message-input"
             />
             <div className="mp-modal__actions">
-              <button type="button" className="mp-modal__cancel" onClick={onClose}>Cancel</button>
+              <button type="button" className="mp-modal__cancel" onClick={handleClose}>Cancel</button>
               <button
                 type="button"
                 className="btn-neon solid"

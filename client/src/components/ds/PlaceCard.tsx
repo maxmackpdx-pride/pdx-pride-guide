@@ -392,6 +392,7 @@ export function PlaceCard({
   layout,
   className = "",
   style,
+  onClick,
   ...rest
 }: {
   name: string;
@@ -467,11 +468,22 @@ export function PlaceCard({
 
   const useSpecialEdge =
     isNonprofit || isHealthcare || isRealEstate || isCampground || isGroup;
+  const clickable = typeof onClick === "function";
 
   return (
     <article
       className={`pdxPlace pdx-glass-rebind${useSpecialEdge ? " pdxPlace--edge" : ""}${isCompact ? " pdxPlace--compact pdxPlace--wide" : ""}${className ? ` ${className}` : ""}`}
       style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      aria-label={clickable ? name : undefined}
+      onClick={onClick}
+      onKeyDown={clickable ? (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(e);
+        }
+      } : undefined}
       {...rest}
     >
       <div className="pdxPlace__glow" aria-hidden="true" />

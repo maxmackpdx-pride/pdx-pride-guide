@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
@@ -67,6 +68,12 @@ export default function PrideGlowNudge() {
   // Decide whether to show, and seed the editor from the member's current state.
   useEffect(() => {
     if (loading || !user) return;
+    if (
+      typeof window !== "undefined"
+      && (window as Window & { __PDX_LOCAL_PREVIEW__?: number }).__PDX_LOCAL_PREVIEW__
+    ) {
+      return;
+    }
     const forced = forcedPreview();
     if (!forced) {
       if (!needsRing && !needsAvatar) return;
@@ -92,15 +99,10 @@ export default function PrideGlowNudge() {
     return () => window.clearTimeout(t);
   }, [loading, user, seenKey, needsRing, needsAvatar]);
 
-  // Escape to dismiss.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  const handleClose = useCallback(() => {
+    if (!saving) setOpen(false);
+  }, [saving]);
+  const dialogRef = useModalA11y({ open, onClose: handleClose, enabled: open });
 
   // Redraw the crop canvas as the staged image / crop changes.
   useEffect(() => {
@@ -210,15 +212,17 @@ export default function PrideGlowNudge() {
   const previewPhoto = mode === "photo" ? previewUrl || user.photoUrl : null;
 
   return createPortal(
-    <div className="glow-nudge__backdrop" role="presentation" onClick={() => !saving && setOpen(false)}>
+    <div className="glow-nudge__backdrop" role="presentation" onClick={handleClose}>
       <div
+        ref={dialogRef}
         className="glow-nudge"
         role="dialog"
         aria-modal="true"
         aria-labelledby="glow-nudge-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="glow-nudge__x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+        <button type="button" className="glow-nudge__x" onClick={handleClose} aria-label="Close">✕</button>
 
         <div className="glow-nudge__preview" aria-hidden="true">
           <UserAvatar
@@ -325,7 +329,7 @@ export default function PrideGlowNudge() {
           <button type="button" className="glow-nudge__cta display" onClick={() => void save()} disabled={saving}>
             {saving ? "Saving…" : "Save my look"}
           </button>
-          <button type="button" className="glow-nudge__later" onClick={() => setOpen(false)} disabled={saving}>
+          <button type="button" className="glow-nudge__later" onClick={handleClose} disabled={saving}>
             Maybe later
           </button>
         </div>

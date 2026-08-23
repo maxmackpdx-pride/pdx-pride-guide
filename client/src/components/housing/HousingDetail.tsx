@@ -99,6 +99,10 @@ function firstNameOf(name: string): string {
   return (name || "").trim().split(/\s+/)[0] || name;
 }
 
+function isDemoPost(post: HousingPostView): boolean {
+  return post.author?.username === "hausing_demo";
+}
+
 /** The one verification worth stating in the head chip row, if there is one. */
 function verificationLabel(trust: HousingTrust): string | null {
   if (trust.propertyManagerVerified) return "Property manager verified";
@@ -439,7 +443,7 @@ function LookingDetail({
           <Back onBack={h.onBack} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35}>
+            <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35} demo={isDemoPost(post)}>
               <HousingCluster
                 people={[self, ...people]}
                 pets={pets}
@@ -563,7 +567,7 @@ function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHa
           <Back onBack={h.onBack} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
+            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35} demo={isDemoPost(post)}>
               <HousingCluster
                 people={people}
                 pets={pets}
@@ -682,7 +686,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
           <Back onBack={h.onBack} />
 
           <div className="hz-dhead">
-            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
+            <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35} demo={isDemoPost(post)}>
               <PropertyManagerBadge>
                 <HousingIcon name="verified" size={14} />
                 Property manager
@@ -887,6 +891,7 @@ function FormingDetail({
               title={title}
               nameCap={0.35}
               fallbackPhoto={FORMING_DEFAULT_COVER}
+              demo={isDemoPost(post)}
             >
               <HousingCluster
                 people={people}

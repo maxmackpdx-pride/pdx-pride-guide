@@ -7,6 +7,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import { handleTabListKeyDown } from "@/lib/a11y";
 import { Badge } from "@/components/ds";
 import { Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
@@ -992,13 +993,25 @@ export default function PlaceModal({
           </div>
 
           <div className="place-modal-panel__community-room">
-            <div className="place-modal-panel__tabs" role="tablist" aria-label="Place activity">
+            <div
+              className="place-modal-panel__tabs"
+              role="tablist"
+              aria-label="Place activity"
+              onKeyDown={e => {
+                const i = tabs.findIndex(t => t.key === tab);
+                handleTabListKeyDown(e, tabs.length, i < 0 ? 0 : i, n => {
+                  const next = tabs[n];
+                  if (next) setTab(next.key);
+                });
+              }}
+            >
               {tabs.map(t => (
                 <button
                   key={t.key}
                   type="button"
                   role="tab"
                   aria-selected={tab === t.key}
+                  tabIndex={tab === t.key ? 0 : -1}
                   onClick={() => setTab(t.key)}
                   className={`place-modal-panel__tab${tab === t.key ? " active" : ""}`}
                 >

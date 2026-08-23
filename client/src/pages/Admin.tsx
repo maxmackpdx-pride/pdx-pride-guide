@@ -29,6 +29,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
+import { eventPath } from "@shared/eventSlug";
 import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
 import "@/components/admin/admin-panel.css";
@@ -224,7 +225,7 @@ function adminTabFromQuery(
 }
 
 export default function Admin() {
-  usePageSeo("Admin | Zaylist", "Site administration panel.");
+  usePageSeo("Admin | Zaylist", "Site administration panel.", { noindex: true });
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const { openSheet } = useInboxSheet();
@@ -1854,7 +1855,7 @@ export default function Admin() {
                 {(adminGlobalSearchResults.events || []).slice(0, 6).map((ev: any) => (
                   <div key={`e-${ev.id}`} className="flex flex-wrap items-center justify-between gap-2 text-sm text-white/80">
                     <span>{ev.title} · {ev.status}</span>
-                    <a href={`/events?event=${ev.id}`} target="_blank" rel="noopener noreferrer" className="display text-xs px-2 py-1 border" style={{ borderColor: "#19E3FF", color: "#19E3FF" }}>VIEW PUBLIC</a>
+                    <a href={eventPath(ev.id, ev.title || "event", ev.dayOfWeek)} target="_blank" rel="noopener noreferrer" className="display text-xs px-2 py-1 border" style={{ borderColor: "#19E3FF", color: "#19E3FF" }}>VIEW PUBLIC</a>
                   </div>
                 ))}
                 {(adminGlobalSearchResults.queue || []).slice(0, 6).map((q: any, i: number) => (
@@ -2193,7 +2194,7 @@ export default function Admin() {
                           {ev.status}
                         </Badge>
                         <a
-                          href={`/events?event=${ev.id}`}
+                          href={eventPath(ev.id, ev.title || "event", ev.dayOfWeek)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="display text-xs px-3 py-1 border transition-all"

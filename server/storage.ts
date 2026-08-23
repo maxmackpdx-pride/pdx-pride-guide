@@ -11224,7 +11224,7 @@ export const storage: IStorage = {
       return {
         count: Number(row?.cnt) || 0,
         mode: "native" as const,
-        nativeHref: "/spotted",
+        nativeHref: `/spotted?post=${id}`,
       };
     }
     // GIFTING: interest counts are not public reply bodies.

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { handleTabListKeyDown } from "@/lib/a11y";
 import "./ZDeck.css";
 
 /**
@@ -283,13 +284,18 @@ export function ZDeckDots({
   className?: string;
 }) {
   return (
-    <div className={className ? `z-deck__dots ${className}` : "z-deck__dots"} role="tablist">
+    <div
+      className={className ? `z-deck__dots ${className}` : "z-deck__dots"}
+      role="tablist"
+      onKeyDown={e => handleTabListKeyDown(e, total, selected, onSelect)}
+    >
       {Array.from({ length: total }, (_, index) => (
         <button
           key={index}
           type="button"
           role="tab"
           aria-selected={index === selected}
+          tabIndex={index === selected ? 0 : -1}
           aria-label={labelOf(index)}
           className={index === selected ? "is-on" : undefined}
           style={accentOf ? ({ ["--c" as string]: accentOf(index) }) : undefined}

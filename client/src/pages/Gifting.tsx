@@ -65,8 +65,8 @@ function isActivePost(p: GiftingPost) {
 export default function Gifting() {
   const contentStartedAt = useRef(performance.now());
   usePageSeo(
-    "GIFTZ | Zaylist | Portland Pride 2026",
-    "Give and find free stuff for the scene - Pride week and all year on GIFTZ.",
+    "Gift with Pride | Zaylist",
+    "Free queer GIFTZ board for Portland. Post gifts and in-search-of requests across PDX.",
     { image: shareCardUrl("gifting"), imageAlt: "GIFTZ on Zaylist" },
   );
   const { user } = useAuth();
@@ -85,6 +85,7 @@ export default function Gifting() {
   const [onlyMine, setOnlyMine] = useState(() => new URLSearchParams(window.location.search).get("mine") === "1");
   const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [formError, setFormError] = useState("");
   const deepLinkHandled = useRef(false);
 
   const { data: posts = [], isLoading, isError, error } = useQuery<GiftingPost[]>({
@@ -116,13 +117,20 @@ export default function Gifting() {
   }, [isLoading]);
 
   const stats = useMemo(() => {
+    if (isError) {
+      return [
+        { num: "—", label: "Gifts up now", color: ACCENT.GIFT },
+        { num: "—", label: "In search of, open", color: ACCENT.ISO },
+        { num: "—", label: "Homes found this season", color: "#ff1fa0" },
+      ];
+    }
     const active = posts.filter(isActivePost);
     return [
       { num: active.filter(p => p.postType === "GIFT").length, label: "Gifts up now", color: ACCENT.GIFT },
       { num: active.filter(p => p.postType === "ISO").length, label: "In search of, open", color: ACCENT.ISO },
       { num: posts.filter(p => p.status === "GIFTED" || p.status === "FOUND").length, label: "Homes found this season", color: "#ff1fa0" },
     ];
-  }, [posts]);
+  }, [posts, isError]);
 
   const filterCounts = useMemo(() => {
     const active = posts.filter(isActivePost);
@@ -226,24 +234,33 @@ export default function Gifting() {
       toast({ title: "Posted", description: body.message });
       setForm(blankForm);
       setPhotos(null);
+      setFormError("");
       setFormOpen(false);
     },
-    onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
+    onError: (err: any) => {
+      const message = err?.message || "Could not post. Try again.";
+      setFormError(message);
+      toast({ title: "Could not post", description: message, variant: "destructive" });
+    },
   });
 
   const submitPost = () => {
     if (!form.acceptRules) {
+      setFormError("Accept the community rules first.");
       toast({ title: "Accept the community rules first", variant: "destructive" });
       return;
     }
     if (!form.title.trim()) {
+      setFormError("Add a title.");
       toast({ title: "Add a title", variant: "destructive" });
       return;
     }
     if (!form.description.trim()) {
+      setFormError("Add a description.");
       toast({ title: "Add a description", variant: "destructive" });
       return;
     }
+    setFormError("");
     createMutation.mutate();
   };
 
@@ -380,6 +397,7 @@ export default function Gifting() {
               />
               I agree: keep it free, keep it kind, keep it moving.
             </label>
+            {formError ? <p className="board-form-error" role="alert">{formError}</p> : null}
             <Button
               variant="solid"
               accent="lime"
@@ -400,7 +418,7 @@ export default function Gifting() {
         stickerTone="lime"
         stickerStyle="mono"
         title="Gifts & in search of"
-        resultCount={`${filtered.length} showing`}
+        resultCount={isError ? "Could not load" : `${filtered.length} showing`}
         filters={
           <>
             {chipDefs.map(f => (

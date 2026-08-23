@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { defaultShareCardUrl } from "@shared/shareCards";
+import { canonicalizePublicUrl, defaultShareCardUrl } from "@shared/shareCards";
 
 export type PageSeoOptions = {
   url?: string;
@@ -8,6 +8,8 @@ export type PageSeoOptions = {
   type?: "website" | "article";
   /** When true, leaves the parent page's title/meta untouched (e.g. embedded schedule on Home). */
   skip?: boolean;
+  /** Private shells (admin, hub, design-preview, inbox). */
+  noindex?: boolean;
 };
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
@@ -37,7 +39,9 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     }
     meta.setAttribute("content", description);
 
-    const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
+    const url = canonicalizePublicUrl(
+      options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : ""),
+    );
     const image = options?.image || defaultShareCardUrl();
     const imageAlt =
       options?.imageAlt ||
@@ -72,6 +76,12 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     upsertMeta("property", "og:image:secure_url", image);
     upsertMeta("property", "og:image:type", isPng ? "image/png" : "image/jpeg");
 
+    const robotsEl = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    const prevRobots = robotsEl?.getAttribute("content") ?? "";
+    if (options?.noindex) {
+      upsertMeta("name", "robots", "noindex, nofollow");
+    }
+
     return () => {
       document.title = prevTitle;
       if (meta) meta.setAttribute("content", prevDescription);
@@ -79,6 +89,11 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
         const el = document.querySelector(`meta[property="${key}"]`) as HTMLMetaElement | null;
         if (el && value) el.setAttribute("content", value);
       }
+      const robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+      if (options?.noindex && robots) {
+        if (prevRobots) robots.setAttribute("content", prevRobots);
+        else robots.remove();
+      }
     };
-  }, [title, description, options?.url, options?.image, options?.imageAlt, options?.type, options?.skip]);
+  }, [title, description, options?.url, options?.image, options?.imageAlt, options?.type, options?.skip, options?.noindex]);
 }

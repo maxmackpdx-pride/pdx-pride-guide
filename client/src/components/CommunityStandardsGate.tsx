@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import {
   COMMUNITY_STANDARDS_BLOCKS,
   COMMUNITY_STANDARDS_DECLINE_URL,
@@ -145,22 +146,30 @@ export default function CommunityStandardsGate() {
     }
   }, [user, logout]);
 
+  const needsGate =
+    COMMUNITY_STANDARDS_GATE_ENABLED &&
+    !loading &&
+    (user ? !userHasCurrentCommunityStandards(user) : !guestOk);
+  const holdGate = useCallback(() => {}, []);
+  const dialogRef = useModalA11y({
+    open: needsGate,
+    onClose: holdGate,
+    enabled: needsGate,
+    closeOnEscape: false,
+  });
+
   // Feature flag off: never show the full-screen agreement modal.
   if (!COMMUNITY_STANDARDS_GATE_ENABLED) return null;
-
-  const needsGate = (() => {
-    if (loading) return false;
-    if (user) return !userHasCurrentCommunityStandards(user);
-    return !guestOk;
-  })();
 
   if (!needsGate) return null;
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="cs-gate-title"
+      tabIndex={-1}
       style={{
         position: "fixed",
         inset: 0,

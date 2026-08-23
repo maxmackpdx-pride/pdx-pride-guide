@@ -221,10 +221,10 @@ export default function PrideWork() {
   });
 
   const stats = useMemo(() => [
-    { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
-    { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "GIGZ up for grabs", color: "#b06bff" },
-    { num: gigs.filter(g => g.isRemote).length, label: "Remote friendly", color: "#ff1fa0" },
-  ], [gigs]);
+    { num: isError ? "—" : gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
+    { num: isError ? "—" : gigs.filter(g => g.postType === "POSTING_GIG").length, label: "GIGZ up for grabs", color: "#b06bff" },
+    { num: isError ? "—" : gigs.filter(g => g.isRemote).length, label: "Remote friendly", color: "#ff1fa0" },
+  ], [gigs, isError]);
 
   const filterCounts = useMemo(() => ({
     ALL: gigs.length,
@@ -421,6 +421,11 @@ export default function PrideWork() {
                 : "Tell hosts what you do, when you are free, and what you are looking for. Goes live so organizers can find you on the board."}
             </p>
             <form onSubmit={form.handleSubmit(submitGig)} className="gifting-form-grid">
+              {mutation.isError ? (
+                <p className="board-form-error span" role="alert">
+                  {mutation.error instanceof Error ? mutation.error.message : "Could not submit post. Try again."}
+                </p>
+              ) : null}
               <label className="span">
                 Post type
                 <select
@@ -650,7 +655,7 @@ export default function PrideWork() {
         stickerTone="purple"
         stickerStyle="mono"
         title="Open gigs & available talent"
-        resultCount={`${filtered.length} showing`}
+        resultCount={isError ? "Could not load" : `${filtered.length} showing`}
         filters={
           <>
             {([

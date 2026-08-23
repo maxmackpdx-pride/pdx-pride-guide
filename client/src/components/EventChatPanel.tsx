@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
@@ -60,6 +61,8 @@ type Props = {
 };
 
 export default function EventChatPanel({ eventId, onClose }: Props) {
+  const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useModalA11y({ onClose: handleClose });
   const [body, setBody] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [showAnnounce, setShowAnnounce] = useState(false);
@@ -121,13 +124,15 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
         : "Chat closed";
 
   return (
-    <div className="event-chat-backdrop" data-testid="event-chat-backdrop" onClick={onClose}>
+    <div className="event-chat-backdrop" data-testid="event-chat-backdrop" onClick={handleClose}>
       <div
+        ref={dialogRef}
         className="event-chat-panel"
         data-testid="event-chat-panel"
         role="dialog"
         aria-modal="true"
         aria-label="Event chat"
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
       >
         <header className="event-chat-panel__head">
@@ -135,12 +140,12 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
             <h3 className="display event-chat-panel__title">Event chat</h3>
             <p className="event-chat-panel__meta">{metaLine}</p>
           </div>
-          <button type="button" className="event-chat-panel__close" onClick={onClose} aria-label="Close">
+          <button type="button" className="event-chat-panel__close" onClick={handleClose} aria-label="Close">
             ×
           </button>
         </header>
 
-        <AdultContentGate onDecline={onClose}>
+        <AdultContentGate onDecline={handleClose}>
         {pinned && (
           <div className="event-chat-panel__pin" data-testid="event-chat-pin">
             <span className="event-chat-panel__pin-label">Pinned · host</span>
