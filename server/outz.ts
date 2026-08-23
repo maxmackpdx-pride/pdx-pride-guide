@@ -108,6 +108,18 @@ const FEATURED: FeaturedConfig[] = [
     sourceName: "Oregon Parks and Recreation Department",
     statePark: "oregon",
   },
+  {
+    id: "memaloose",
+    name: "Memaloose State Park",
+    subtitle: "Campground · Columbia River Gorge · Near The Dalles, OR",
+    kind: "camp-hike",
+    // Center of the official Oregon Parks boundary, not a claimed campsite or trailhead.
+    lat: 45.695376,
+    lng: -121.332886,
+    officialUrl: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
+    sourceName: "Oregon Parks and Recreation Department",
+    statePark: "oregon",
+  },
 ];
 
 type NwsPoints = { properties?: { forecast?: string } };
@@ -187,7 +199,7 @@ async function fetchUsfsCatalog(): Promise<OutzCatalogPlace[]> {
 async function fetchStateParkStatuses(): Promise<Map<string, string>> {
   const statuses = new Map<string, string>();
   const oregonQuery = new URLSearchParams({
-    f: "json", where: `FULL_NAME IN ('Silver Falls State Park','Cape Lookout State Park','L.L. "Stub" Stewart State Park')`,
+    f: "json", where: `FULL_NAME IN ('Silver Falls State Park','Cape Lookout State Park','L.L. "Stub" Stewart State Park','Memaloose State Park')`,
     outFields: "FULL_NAME,USE_TYPE", returnGeometry: "false",
   });
   const washingtonQuery = new URLSearchParams({
