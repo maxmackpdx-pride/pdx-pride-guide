@@ -360,6 +360,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
           className="home-front__deck"
           label="You&apos;re not looking for content."
           autoplayMs={3250}
+          fade={0.168}
         >
           {WORLDS.map((world) => {
             const sample = world.sampleKey ? samples[world.sampleKey] : null;

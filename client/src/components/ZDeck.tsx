@@ -45,6 +45,7 @@ export function ZDeck({
   autoplay = true,
   autoplayMs = Z_DECK_AUTOPLAY_MS,
   showNav = true,
+  fade = CF_FADE,
 }: {
   total: number;
   selected: number;
@@ -56,6 +57,8 @@ export function ZDeck({
   autoplay?: boolean;
   autoplayMs?: number;
   showNav?: boolean;
+  /** Per-card opacity drop with coverflow distance. */
+  fade?: number;
 }) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -86,7 +89,7 @@ export function ZDeck({
         + ` translateZ(${-CF_DEPTH * cardWidth * ramp}px)`
         + ` rotateY(${-tilt}deg)`;
       const edge = Math.min(1, Math.max(0, total / 2 - distance));
-      card.style.opacity = String(Math.max(0, 1 - CF_FADE * distance) * edge);
+      card.style.opacity = String(Math.max(0, 1 - fade * distance) * edge);
       card.style.zIndex = String(100 - Math.round(distance));
       // Only the front card is reachable: the rest are visually stacked behind
       // it, so leaving them focusable would tab into cards nobody can see.
@@ -94,7 +97,7 @@ export function ZDeck({
       card.setAttribute("aria-hidden", buried ? "true" : "false");
       card.inert = buried;
     });
-  }, [total]);
+  }, [total, fade]);
 
   const measure = useCallback(() => {
     const card = cardRefs.current[0];
@@ -159,6 +162,14 @@ export function ZDeck({
   const indexAt = (value: number) => ((Math.round(value) % total) + total) % total;
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    // Nav (and flyer-dot buttons inside a card) must keep their click.
+    // Pointer capture on the deck retargets pointerup/click to the deck, so
+    // the arrows look alive and do nothing.
+    const origin = event.target instanceof Element
+      ? event.target
+      : (event.target as Node | null)?.parentElement;
+    if (origin?.closest(".z-deck__nav, button")) return;
+    if (event.button !== 0) return;
     if (raf.current) {
       cancelAnimationFrame(raf.current);
       raf.current = null;
@@ -248,7 +259,11 @@ export function ZDeck({
             type="button"
             className="z-deck__nav z-deck__nav--prev"
             aria-label="Previous"
-            onClick={() => onSelect((selected - 1 + total) % total)}
+            onPointerDown={event => event.stopPropagation()}
+            onClick={event => {
+              event.stopPropagation();
+              onSelect((selected - 1 + total) % total);
+            }}
           >
             &#8249;
           </button>
@@ -256,7 +271,11 @@ export function ZDeck({
             type="button"
             className="z-deck__nav z-deck__nav--next"
             aria-label="Next"
-            onClick={() => onSelect((selected + 1) % total)}
+            onPointerDown={event => event.stopPropagation()}
+            onClick={event => {
+              event.stopPropagation();
+              onSelect((selected + 1) % total);
+            }}
           >
             &#8250;
           </button>

@@ -41,7 +41,7 @@ html.calm-mode .home-front__mark,
 html.calm-mode .home-front__kicker span,
 :root[data-calm="true"] .home-front__kicker span { animation:none; }
 
-.home-front__worlds { position:relative; width:min(1280px,100%); margin:0 auto; padding:clamp(34px,5vw,64px) clamp(16px,4vw,48px) clamp(56px,8vw,104px); }
+.home-front__worlds { position:relative; width:min(1280px,100%); margin:0 auto; padding:calc(clamp(34px,5vw,64px) - 2px) clamp(16px,4vw,48px) calc(clamp(56px,8vw,104px) + 2px); }
 .home-front__worlds-head { max-width:760px; margin-bottom:clamp(28px,5vw,52px); }
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
 .home-front__worlds-head p { max-width:56ch; margin:18px 0 0; color:var(--text-body,#d6d6dc); font-size:clamp(15px,1.8vw,18px); line-height:1.5; text-wrap:pretty; }
@@ -50,6 +50,15 @@ html.calm-mode .home-front__kicker span,
 .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; height:100%; min-height:0; grid-column:auto; margin:0; }
 .home-front__deck-dots { margin:4px 0 0; }
 .home-front__world { position:relative; min-height:340px; padding:22px; display:flex; flex-direction:column; overflow:hidden; text-decoration:none; border-radius:max(var(--glass-card-radius,14px),16px); outline:1px solid rgba(255,255,255,.045); outline-offset:-2px; box-shadow:var(--glass-card-shadow),0 12px 28px -22px color-mix(in srgb,var(--c) 34%,transparent),inset 0 1px 0 rgba(255,255,255,.075); transition:transform .18s var(--ease-out,ease),box-shadow .18s var(--ease-out,ease),border-color .18s var(--ease-out,ease); }
+/* 30% less transparent than the fluent 0.92 glass floor (remaining 8% hole × 0.7). */
+.home-front__world.pdx-glass-card {
+  --glass-card-bg:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.105), transparent 29%),
+    radial-gradient(100% 78% at 50% 108%, color-mix(in srgb, var(--c) 16%, transparent), transparent 61%),
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
+    rgba(4, 4, 6, 0.944);
+  background: var(--glass-card-bg);
+}
 .home-front__world:hover { transform:translateY(-1px); box-shadow:var(--glass-card-shadow),0 16px 34px -22px color-mix(in srgb,var(--c) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.09); }
 .home-front__world[data-world="events"] { border-color:color-mix(in srgb,var(--neon-yellow,#ccff00) 72%,#101014); }
 .home-front__world[data-world="events"] { padding:0; }
@@ -232,7 +241,7 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__hero-actions { margin-top:42px; margin-bottom:24px; }
   /* ~40% smaller CTA buttons: compact content-width pills, shorter, smaller text. */
   .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:29px; height:29px; padding:0 13px; font-size:9px; }
-  .home-front__worlds { padding-top:22px; padding-bottom:34px; }
+  .home-front__worlds { padding-top:20px; padding-bottom:36px; }
   .home-front__worlds-head h2 { font-size:48px; }
   .home-front__worlds-head p { margin-top:14px; font-size:15px; }
   .home-front__deck { --cf-card:clamp(248px,78vw,340px); --cf-card-h:500px; padding:16px 0 2px; }
