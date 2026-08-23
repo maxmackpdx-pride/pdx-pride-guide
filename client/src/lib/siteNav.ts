@@ -12,9 +12,6 @@ export type NavDropdownGroup = {
   items: NavLinkItem[];
 };
 
-/** The panel beside a mega dropdown's item column. */
-export type NavFeature = { kicker: string; title: string; body: string; href: string };
-
 export type NavEntry =
   | { type: "link"; href: string; label: string; accent?: NavAccent }
   | {
@@ -25,7 +22,6 @@ export type NavEntry =
       items: NavLinkItem[];
       /** Mono label above the items, e.g. "Most Visited". */
       eyebrow?: string;
-      feature?: NavFeature;
     };
 
 /**
@@ -70,19 +66,20 @@ export const PRIMARY_NAV: NavEntry[] = [
     id: "zspace",
     label: "Z/Space",
     accent: "violet",
+    /*
+     * The featured card is retired: the panel is one plain column of pills
+     * under a line of descriptive copy. "z/ all boards" carries the /z link
+     * the card used to own.
+     */
+    eyebrow: "Every board, one place",
     items: [
-      { href: "/the-hauz", label: "Housing", accent: "cyan" },
+      { href: "/z", label: "z/ all boards", accent: "violet" },
+      { href: "/the-hauz", label: "THE HAÜZ", accent: "cyan" },
       { href: "/pride-work", label: "Gigz", accent: "violet" },
       { href: "/sellz", label: "Sellz", accent: "green" },
       { href: "/spotted", label: "Mizzed", accent: "magenta" },
       { href: "/gifting", label: "Giftz", accent: "lime" },
     ],
-    feature: {
-      kicker: "Featured",
-      title: "Z/Space",
-      body: "Every board, one place",
-      href: "/z",
-    },
   },
 ];
 
@@ -120,10 +117,9 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 /**
  * Destinations behind the mobile footer Z/Space tab sheet.
  *
- * Mirrors the desktop Z/Space menu and, per the nav handoff, carries Outz too:
- * the phone bar has no Outz tab of its own, so this sheet is the only door to
- * it. /z leads the list rather than being replaced by it, standing in for the
- * featured card on the desktop panel.
+ * Mirrors the desktop Z/Space menu. The phone bar has no Outz tab of its own,
+ * so this sheet is also the door to OUTZ - but Outz is not in this list: it is
+ * a drawer trigger the sheet renders itself, not a plain link.
  */
 export const BOARD_NAV: NavLinkItem[] = [
   { href: "/z", label: "z/ all boards", accent: "violet" },
@@ -132,8 +128,23 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/sellz", label: "Sellz", accent: "green" },
   { href: "/spotted", label: "Mizzed", accent: "magenta" },
   { href: "/gifting", label: "Giftz", accent: "lime" },
-  { href: "/z/out", label: "Outz", accent: "orange" },
 ];
+
+/**
+ * OUTZ destinations for the mobile most-visited drawer, in list order.
+ *
+ * The handoff mock numbered three beaches, two of which are the same place
+ * (the Sauvie Island page's beach is Collins Beach) and one of which has no
+ * page at all. These are the OUTZ addresses that exist; the drawer numbers
+ * them and closes with a link to the index.
+ */
+export const OUTZ_NAV: NavLinkItem[] = [
+  { href: "/z/out/rooster-rock", label: "Rooster Rock", accent: "orange" },
+  { href: "/z/out/sauvie-island", label: "Sauvie Island", accent: "orange" },
+];
+
+/** Where the drawer's "View All Outz" footer goes. */
+export const OUTZ_INDEX = "/z/out";
 
 /** Destinations behind the mobile footer "Events" tab sheet. */
 export const EVENTS_NAV: NavLinkItem[] = [

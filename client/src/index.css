@@ -582,9 +582,11 @@ body::before {
 }
 
 /*
- * Hub is the standout action in the right cluster, so it carries the pill
- * shape at a heavier weight with a standing cyan glow. It used to be a thin
- * 9px chip that read lighter than the nav pills beside it.
+ * Hub is the one primary action in the right cluster, so it takes the solid
+ * fill the standard reserves for primary: cyan plate, dark ink, thin black
+ * keyline, inward bevel and floor. Composed from the chrome atoms rather than
+ * hand-rolled, and with no outer bloom - the outlined-with-a-standing-glow
+ * version it replaces was the drift the chrome audit called out.
  */
 .site-hub-button {
   position:relative;
@@ -593,31 +595,41 @@ body::before {
   gap:8px;
   min-height:40px;
   padding:10px 20px;
-  border:2px solid var(--panel-cyan,#19e3ff);
+  border:0;
   border-radius:999px;
-  background:color-mix(in srgb,var(--panel-cyan,#19e3ff) 7%,#050506);
-  color:var(--panel-cyan,#19e3ff);
+  background:var(--panel-cyan,#19e3ff);
+  color:#050506;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 0 5px var(--panel-cyan,#19e3ff),
-    0 0 11px color-mix(in srgb,var(--panel-cyan,#19e3ff) 45%,transparent);
+    var(--chrome-keyline),
+    var(--chrome-bevel),
+    var(--chrome-floor);
   font:800 .82rem/1 var(--font-display);
   letter-spacing:.06em;
   text-decoration:none;
   text-transform:uppercase;
+  transition:filter .16s ease;
 }
 
 .site-hub-button:hover,
 .site-hub-button:focus-visible,
 .site-hub-button.active {
-  border-color:var(--panel-cyan,#19e3ff);
-  background:color-mix(in srgb,var(--panel-cyan,#19e3ff) 15%,#050506);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.1),
-    0 0 9px var(--panel-cyan,#19e3ff),
-    0 0 20px color-mix(in srgb,var(--panel-cyan,#19e3ff) 70%,transparent);
-  color:#fff;
+  filter:brightness(1.08);
+  color:#050506;
   outline:none;
+}
+
+.site-hub-button:focus-visible {
+  outline:2px solid var(--panel-cyan,#19e3ff);
+  outline-offset:3px;
+}
+
+/* Unread dot reads against the cyan plate, so it keeps a dark rim. */
+.site-hub-button .site-nav-notify-dot {
+  top:5px;
+  right:6px;
+  width:7px;
+  height:7px;
+  border-color:#050506;
 }
 /*
  * The six glow pills need the room between 1024 and 1365, so the search
@@ -906,27 +918,15 @@ body::before {
   color: var(--nav-c-ink, var(--neon-cyan));
 }
 
-/* Only the current page holds the glow, and it breathes. */
+/*
+ * Glow is a hover affordance only. The current page still has to be findable,
+ * so it holds its accent on the rim and the label - but no standing bloom and
+ * no pulse, which is what the glow-pill direction retires.
+ */
 .site-nav-link.active,
 .site-nav-dropdown__trigger.active {
   border-color: var(--nav-c, var(--neon-cyan));
   color: var(--nav-c-ink, var(--neon-cyan));
-  animation: siteNavPillPulse 2.6s ease-in-out infinite;
-}
-
-@keyframes siteNavPillPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 6px var(--nav-c, var(--neon-cyan)),
-      0 0 14px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 55%, transparent),
-      inset 0 0 6px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 25%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 0 10px var(--nav-c, var(--neon-cyan)),
-      0 0 20px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 80%, transparent),
-      inset 0 0 8px color-mix(in srgb, var(--nav-c, var(--neon-cyan)) 40%, transparent);
-  }
 }
 
 /* Full handoff scale once there is room for it. */
@@ -937,16 +937,6 @@ body::before {
     font-size: 0.88rem;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .site-nav-link.active,
-  .site-nav-dropdown__trigger.active { animation: none; }
-}
-
-html.calm-mode .site-nav-link.active,
-html.calm-mode .site-nav-dropdown__trigger.active,
-:root[data-calm="true"] .site-nav-link.active,
-:root[data-calm="true"] .site-nav-dropdown__trigger.active { animation: none; }
 
 .site-nav-dropdown {
   position: relative;
@@ -1002,13 +992,6 @@ html.calm-mode .site-nav-dropdown[data-accent="violet"]:not(.open) .site-nav-dro
   animation: siteNavMenuDrop 0.3s ease-out;
 }
 
-/* The mega panel puts its items beside a featured card. */
-.site-nav-dropdown.open .site-nav-dropdown__panel--feature {
-  grid-template-columns: minmax(0, 1fr) 210px;
-  min-width: 540px;
-  padding: 0;
-}
-
 @keyframes siteNavMenuDrop {
   from { opacity: 0; transform: translateY(-8px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -1027,8 +1010,6 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   gap: 2px;
   min-width: 0;
 }
-
-.site-nav-dropdown__panel--feature .site-nav-dropdown__column { padding: 12px; }
 
 .site-nav-dropdown__eyebrow {
   padding: 9px 14px 4px;
@@ -1057,8 +1038,7 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.site-nav-dropdown__item:hover,
-.site-nav-dropdown__item.active {
+.site-nav-dropdown__item:hover {
   border-color: var(--nav-c, var(--neon-cyan));
   box-shadow:
     0 0 5px var(--nav-c, var(--neon-cyan)),
@@ -1066,37 +1046,10 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   color: var(--nav-c-ink, var(--neon-cyan));
 }
 
-.site-nav-dropdown__feature {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: center;
-  padding: 18px;
-  border-left: 1px solid #24242c;
-  background: radial-gradient(120% 120% at 50% 0%, #160c1e 0%, #0a0610 70%);
-  text-decoration: none;
-}
-
-.site-nav-dropdown__feature-kicker {
-  color: var(--panel-lime, #c8fa3c);
-  font: 11px var(--font-mono, ui-monospace, monospace);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.site-nav-dropdown__feature-title {
-  color: #fff;
-  font: 700 1.2rem/1.1 var(--font-display, sans-serif);
-  text-transform: uppercase;
-}
-
-.site-nav-dropdown__feature-body {
-  color: var(--text-dim, #c8c4bb);
-  font: 12px/1.5 var(--font-mono, ui-monospace, monospace);
-}
-
-.site-nav-dropdown__feature:hover .site-nav-dropdown__feature-title {
-  color: var(--panel-lime, #c8fa3c);
+/* Current item: accent, no standing glow. Same rule as the bar above it. */
+.site-nav-dropdown__item.active {
+  border-color: var(--nav-c, var(--neon-cyan));
+  color: var(--nav-c-ink, var(--neon-cyan));
 }
 
 .site-auth {
@@ -1136,6 +1089,197 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
   .site-login-button {
     margin-left: auto;
   }
+}
+
+/* Notifications panel internals - shared by the mobile top bar and the
+   desktop cluster. These used to sit inside a max-width:640px block,
+   which left the desktop panel completely unstyled. */
+.site-mobile-notify__head {
+  padding: 12px 14px 10px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e8e5dc;
+  border-bottom: 1px solid var(--hub-border);
+}
+
+.site-mobile-notify__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.site-mobile-notify__empty {
+  margin: 0;
+  padding: 18px 14px;
+  color: #8a8a8a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.site-mobile-notify__row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  padding: 11px 14px 11px 28px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-mobile-notify__row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-mobile-notify__row.is-unread {
+  background: rgba(255, 0, 204, 0.04);
+}
+
+.site-mobile-notify__dot {
+  position: absolute;
+  left: 12px;
+  top: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hub-pink);
+  animation: hubNotifyBlink 1.6s ease-in-out infinite;
+}
+
+.site-mobile-notify__row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.site-mobile-notify__sender {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #e8e5dc;
+}
+
+.site-mobile-notify__time {
+  flex: none;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #8a8a8a;
+  text-transform: uppercase;
+}
+
+.site-mobile-notify__tag {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hub-cyan);
+}
+
+.site-mobile-notify__subject {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #b8b5ac;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.site-mobile-notify__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px solid var(--hub-border);
+}
+
+.site-mobile-notify__foot-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: #b8b5ac;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.site-mobile-notify__foot-btn:hover {
+  color: var(--hub-cyan);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Desktop notifications bolt: a round hairline that lights magenta on hover,
+   matching the nav pills beside it. */
+.site-auth--desktop .site-mobile-notify {
+  position: relative;
+  flex: 0 0 auto;
+  --nav-c: var(--neon-magenta, #ff00cc);
+  --nav-c-ink: var(--neon-magenta, #ff00cc);
+}
+
+.site-auth--desktop .hub-notify-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #2a2a32;
+  color: var(--text-meta, #9a9aa2);
+  transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.site-auth--desktop .hub-notify-btn:hover,
+.site-auth--desktop .hub-notify-btn[aria-expanded="true"] {
+  border-color: var(--nav-c);
+  color: var(--nav-c-ink);
+  box-shadow:
+    0 0 6px var(--nav-c),
+    0 0 14px color-mix(in srgb, var(--nav-c) 55%, transparent);
+}
+
+.site-auth--desktop .hub-notify-btn__badge {
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border: 1.5px solid #0a0a0a;
+  background: var(--neon-magenta, #ff00cc);
+  color: #000;
+  font: 700 8px/1 var(--font-mono, ui-monospace, monospace);
+  animation: none;
+}
+
+.site-auth--desktop .site-mobile-notify__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-height: min(70vh, 420px);
+  overflow: hidden;
+  background: #0d0d10;
+  border: 1px solid #24242c;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.85);
 }
 
 .site-nav-link--notify {
@@ -2375,7 +2519,6 @@ a.event-host-name.event-host-name--link:hover {
   .site-brand--desktop,
   .site-nav,
   .site-nav-toggle,
-  .site-header-calm--desktop,
   .site-header-rainbow-seam,
   .site-header-controls {
     display: none !important;
@@ -2477,138 +2620,6 @@ a.event-host-name.event-host-name--link:hover {
     overflow: hidden;
   }
 
-  .site-mobile-notify__head {
-    padding: 12px 14px 10px;
-    font-family: var(--font-display), sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #e8e5dc;
-    border-bottom: 1px solid var(--hub-border);
-  }
-
-  .site-mobile-notify__list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 0;
-  }
-
-  .site-mobile-notify__empty {
-    margin: 0;
-    padding: 18px 14px;
-    color: #8a8a8a;
-    font-size: 13px;
-    line-height: 1.45;
-  }
-
-  .site-mobile-notify__row {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-    width: 100%;
-    padding: 11px 14px 11px 28px;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-  }
-
-  .site-mobile-notify__row:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .site-mobile-notify__row.is-unread {
-    background: rgba(255, 0, 204, 0.04);
-  }
-
-  .site-mobile-notify__dot {
-    position: absolute;
-    left: 12px;
-    top: 16px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--hub-pink);
-    animation: hubNotifyBlink 1.6s ease-in-out infinite;
-  }
-
-  .site-mobile-notify__row-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .site-mobile-notify__sender {
-    font-family: var(--font-display), sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: #e8e5dc;
-  }
-
-  .site-mobile-notify__time {
-    flex: none;
-    font-family: var(--font-mono), monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    color: #8a8a8a;
-    text-transform: uppercase;
-  }
-
-  .site-mobile-notify__tag {
-    font-family: var(--font-display), sans-serif;
-    font-weight: 800;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--hub-cyan);
-  }
-
-  .site-mobile-notify__subject {
-    font-size: 12px;
-    line-height: 1.35;
-    color: #b8b5ac;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .site-mobile-notify__foot {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 0;
-    border-top: 1px solid var(--hub-border);
-  }
-
-  .site-mobile-notify__foot-btn {
-    display: block;
-    width: 100%;
-    padding: 10px 14px;
-    border: none;
-    background: transparent;
-    color: #b8b5ac;
-    font-family: var(--font-display), sans-serif;
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .site-mobile-notify__foot-btn:hover {
-    color: var(--hub-cyan);
-    background: rgba(255, 255, 255, 0.04);
-  }
 
   .site-hub-mobile-bar {
     display: flex;
@@ -6351,10 +6362,6 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
    menu keep their existing styling untouched.
    ============================================================ */
 @keyframes navSeamFlow { to { background-position: 200% 0; } }
-@keyframes navHubDot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--neon-cyan); }
-  50% { opacity: .35; box-shadow: 0 0 2px var(--neon-cyan); }
-}
 
 @media (min-width: 1024px) {
   /*
@@ -6367,25 +6374,14 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
     top: calc(100% + 12px);
   }
 
-  /* Z/Space is the last pill, so its wide panel opens leftward to stay on screen. */
-  .site-nav-scroll .site-nav-dropdown.open .site-nav-dropdown__panel--feature {
+  /*
+   * Z/Space is the last pill, so its panel opens leftward to stay on screen.
+   * This used to key off the retired --feature modifier; it keys off the
+   * menu's own accent now that every panel is one plain column.
+   */
+  .site-nav-scroll .site-nav-dropdown[data-accent="violet"].open .site-nav-dropdown__panel {
     left: auto;
     right: 0;
-  }
-
-  /* --- HUB: pulsing cyan status dot (only when there is no unread dot) --- */
-  .site-auth--desktop .site-auth__hub .site-nav-link { position: relative; }
-  .site-auth--desktop .site-auth__hub .site-nav-link:not(.site-nav-link--notify)::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    right: -1px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--neon-cyan);
-    animation: navHubDot 1.8s ease-in-out infinite;
-    pointer-events: none;
   }
 
   /* --- Avatar cluster: lime-tinted chevron circle --- */

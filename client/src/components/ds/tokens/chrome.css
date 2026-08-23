@@ -33,6 +33,12 @@
   --chrome-keyline: 0 0 0 1px #000;
   --chrome-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   --chrome-bevel-dark: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  /*
+   * The third chrome atom. The standard has always listed it beside the
+   * keyline and the bevel, but it was never declared, so solid-fill buttons
+   * had nothing to compose and hand-rolled their own shading instead.
+   */
+  --chrome-floor: inset 0 -9px 14px -9px rgba(0, 0, 0, 0.32);
   --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c, #00ffff) 90%, transparent);
   --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom);
   --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c, #00ffff) 75%, transparent);

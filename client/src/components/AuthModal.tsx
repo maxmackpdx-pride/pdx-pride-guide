@@ -185,7 +185,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   // that use transform, overflow, or stacking contexts (claim-this-event flow).
   return createPortal(
     <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-[6px]"
+      className="pdx-auth-scrim fixed inset-0 z-[100000] flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-[6px]"
       onClick={handleClose}
     >
       {/* Zaylist ground: cyan above, magenta below, instead of one flat scrim. */}
@@ -202,7 +202,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         initial={still ? false : { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-[440px]"
+        className="pdx-auth-shell relative z-10 w-full max-w-[440px]"
         style={{ perspective: 1500 }}
         onClick={e => e.stopPropagation()}
       >
@@ -248,7 +248,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
             aria-modal="true"
             aria-label={forgotPassword ? "Reset password" : tab === "login" ? "Log in" : "Join"}
             tabIndex={-1}
-            className="relative max-h-[92vh] overflow-y-auto rounded-2xl border border-white/[0.07] p-7 backdrop-blur-xl"
+            className="pdx-auth-panel relative max-h-[92vh] overflow-y-auto rounded-2xl border border-white/[0.07] p-7 backdrop-blur-xl"
             style={{
               background: "radial-gradient(120% 140% at 50% 0%, rgba(18,18,26,.94) 0%, rgba(5,5,6,.97) 72%)",
               boxShadow:

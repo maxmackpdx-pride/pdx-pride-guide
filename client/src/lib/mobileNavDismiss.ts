@@ -4,6 +4,8 @@ export type MobileNavDismissExcept =
   | "events"
   | "boards"
   | "inbox"
+  | "outz"
+  | "hub-sheet"
   | "hub-drawer"
   | "profile"
   | "notify";

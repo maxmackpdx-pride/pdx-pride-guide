@@ -128,7 +128,7 @@ export function PosterCard({
         <h3 className="pdxBoard__title">{title}</h3>
         {venue && <div className="pdxBoard__venue">{venue}</div>}
         {when && <div className="pdxBoard__when">{when}</div>}
-        <span className="pdxBoard__link">Event details &rarr;</span>
+        {/* Retired pattern: a dead "Event details" row. The card click opens the modal. */}
 
         {(going != null || onRsvp) && (
           <div className="pdxBoard__foot">

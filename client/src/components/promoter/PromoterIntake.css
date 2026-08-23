@@ -181,55 +181,14 @@
   -webkit-appearance: none;
   isolation: isolate;
   overflow: visible;
-  /* Explicit OLED glass so bloom always tracks local --c */
-  background:
-    radial-gradient(
-      90% 70% at 50% 46%,
-      #000 0%,
-      #000 34%,
-      #030304 70%,
-      color-mix(in srgb, var(--c) 6%, #050408) 100%
-    ),
-    radial-gradient(
-      120% 78% at 50% 122%,
-      color-mix(in srgb, var(--c) 18%, transparent),
-      transparent 56%
-    ) !important;
-  border: 1.5px solid color-mix(in srgb, var(--c) 62%, #101014) !important;
-  box-shadow:
-    0 0 0 1px #000,
-    0 28px 52px -22px rgba(0, 0, 0, 0.94),
-    0 0 28px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.35%), transparent),
-    0 0 48px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 0.85%), transparent),
-    0 0 14px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.1%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 32px -24px color-mix(in srgb, var(--c) 38%, transparent) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-
-/* Corner sheen (override generic ::after so we own stacking) */
-.pi-action-row.pdx-glass-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 2;
-  background:
-    linear-gradient(
-      133deg,
-      rgba(255, 255, 255, 0.14),
-      rgba(255, 255, 255, 0.03) 14%,
-      transparent 36%
-    ),
-    radial-gradient(
-      70% 55% at 108% 112%,
-      rgba(255, 255, 255, 0.08),
-      color-mix(in srgb, var(--c) 12%, transparent) 40%,
-      transparent 70%
-    );
+  /*
+   * Shell, sheen and bloom all come from .pdx-glass-card / --glass-card-shadow.
+   * The row used to restate the whole stack here behind !important, which is
+   * the "hand-rolled parallel shadow stack" the card standard forbids and is
+   * what let an outer bloom drift in on hover. Only the accent and the bloom
+   * multiplier are set locally, and both are documented inputs to the token.
+   */
+  transition: transform 0.15s ease, filter 0.15s ease;
 }
 
 .pi-action-row:hover,
@@ -237,14 +196,6 @@
   outline: none;
   transform: translateY(-2px);
   filter: brightness(1.06) saturate(1.06);
-  border-color: color-mix(in srgb, var(--c) 78%, #101014) !important;
-  box-shadow:
-    0 0 0 1px #000,
-    0 32px 56px -20px rgba(0, 0, 0, 0.95),
-    0 0 36px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.55%), transparent),
-    0 0 56px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 72) * 1.05%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 60%, rgba(255, 255, 255, 0.14)),
-    inset 0 0 32px -20px color-mix(in srgb, var(--c) 45%, transparent) !important;
 }
 
 .pi-action-row:focus-visible {

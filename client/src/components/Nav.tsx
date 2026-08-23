@@ -14,7 +14,7 @@ import { Divider } from "@/components/ds";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
-import type { NavAccent, NavFeature } from "@/lib/siteNav";
+import type { NavAccent } from "@/lib/siteNav";
 import type { AuthUser } from "@/context/AuthContext";
 import type { ApiMessageRow } from "@/components/inbox/types";
 import HubAdminFolder from "@/components/hub/HubAdminFolder";
@@ -64,7 +64,6 @@ function NavDropdown({
   items,
   accent,
   eyebrow,
-  feature,
   location,
   open,
   onToggle,
@@ -75,7 +74,6 @@ function NavDropdown({
   items: NavItem[];
   accent?: NavAccent;
   eyebrow?: string;
-  feature?: NavFeature;
   location: string;
   open: boolean;
   onToggle: () => void;
@@ -100,7 +98,7 @@ function NavDropdown({
       </button>
       <div
         id={panelId}
-        className={`site-nav-dropdown__panel${feature ? " site-nav-dropdown__panel--feature" : ""}`}
+        className="site-nav-dropdown__panel"
         role="menu"
       >
         <div className="site-nav-dropdown__column">
@@ -118,18 +116,6 @@ function NavDropdown({
             </Link>
           ))}
         </div>
-        {feature && (
-          <Link
-            href={feature.href}
-            role="menuitem"
-            className="site-nav-dropdown__feature"
-            onClick={onClose}
-          >
-            <span className="site-nav-dropdown__feature-kicker">{feature.kicker}</span>
-            <span className="site-nav-dropdown__feature-title">{feature.title}</span>
-            <span className="site-nav-dropdown__feature-body">{feature.body}</span>
-          </Link>
-        )}
       </div>
     </div>
   );
@@ -363,7 +349,12 @@ function notifyHeadline(row: ApiMessageRow): string {
   return label ? `${tag}: ${label.toUpperCase()}` : tag;
 }
 
-function MobileNotifyMenu({
+/**
+ * Notifications bolt with its pending count, plus the panel behind it. Sits in
+ * the mobile top bar and in the desktop right cluster, so it is not "mobile"
+ * anything - the class names stay for the styles that already target them.
+ */
+function NotifyMenu({
   unreadCount,
   adminPending,
   openSheet,
@@ -714,7 +705,7 @@ export default function Nav() {
               <Search size={18} aria-hidden="true" />
             </button>
             {user && (
-              <MobileNotifyMenu
+              <NotifyMenu
                 unreadCount={unreadCount}
                 adminPending={adminPending}
                 openSheet={openSheet}
@@ -800,7 +791,6 @@ export default function Nav() {
                     items={entry.items}
                     accent={entry.accent}
                     eyebrow={entry.eyebrow}
-                    feature={entry.feature}
                     location={location}
                     open={openDropdown === entry.id}
                     onToggle={() => setOpenDropdown(current => (current === entry.id ? null : entry.id))}
@@ -822,8 +812,38 @@ export default function Nav() {
               <span className="site-search-trigger__label">Search</span>
             </button>
 
-            {user && (
+            {(user || localDemo) && (
               <div className="site-auth site-auth--desktop">
+                {user && (
+                  <NotifyMenu
+                    unreadCount={unreadCount}
+                    adminPending={adminPending}
+                    openSheet={openSheet}
+                    onCloseOthers={() => {
+                      setProfileOpen(false);
+                      dismissMobileNavOverlays("notify");
+                    }}
+                  />
+                )}
+                <span className="site-auth__hub">
+                  <Link
+                    href="/dashboard"
+                    className={`site-hub-button${hubActive ? " active" : ""}`}
+                    aria-label={
+                      user && unreadCount > 0
+                        ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                        : "Hub"
+                    }
+                    onClick={closeMenu}
+                  >
+                    Hub
+                    {Boolean(user && unreadCount > 0) && (
+                      <span className="site-nav-notify-dot" aria-hidden="true" />
+                    )}
+                  </Link>
+                </span>
+                <span className="site-auth__seam" aria-hidden="true" />
+                {user && (
                 <ProfileMenu
                   user={user}
                   profileOpen={profileOpen}
@@ -841,10 +861,11 @@ export default function Nav() {
                   canManageTeam={canManageTeam}
                   isPrimaryOwner={isPrimaryOwner}
                 />
+                )}
               </div>
             )}
 
-            {/* Local demo guest: Hub + public Tucker profile without a session */}
+            {/* Local demo guest: public Tucker profile without a session */}
             {!user && localDemo && (
               <div className="site-auth site-auth--desktop site-auth--local-demo">
                 <NavLink
@@ -867,19 +888,6 @@ export default function Nav() {
           </nav>
 
           <div className="site-header-controls">
-            {(user || localDemo) && (
-              <span className="site-header-calm--desktop">
-                <Link
-                  href="/dashboard"
-                  className={`site-hub-button${hubActive ? " active" : ""}`}
-                  aria-label={user && unreadCount > 0 ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}` : "Hub"}
-                  onClick={closeMenu}
-                >
-                  Hub
-                  {Boolean(user && unreadCount > 0) && <span className="site-nav-notify-dot" aria-hidden="true" />}
-                </Link>
-              </span>
-            )}
             <button
               type="button"
               className="site-nav-toggle"
