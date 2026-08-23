@@ -48,6 +48,7 @@ export function ZDeck({
   fade = CF_FADE,
   gap = CF_GAP,
   rotate = CF_ROTATE,
+  settleEase = 0.16,
 }: {
   total: number;
   selected: number;
@@ -64,6 +65,8 @@ export function ZDeck({
   /** Extra space between card centers, as a fraction of card width. */
   gap?: number;
   rotate?: number;
+  /** Lerp toward the selected card each frame. Lower is slower. */
+  settleEase?: number;
 }) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -148,12 +151,12 @@ export function ZDeck({
         setBusy(false);
         return;
       }
-      pos.current += remaining * 0.16;
+      pos.current += remaining * settleEase;
       paint();
       raf.current = requestAnimationFrame(step);
     };
     raf.current = requestAnimationFrame(step);
-  }, [paint]);
+  }, [paint, settleEase]);
 
   // Animate to whichever wrap of `selected` is nearest, so last -> first slides
   // forward across the seam instead of rewinding the whole deck.

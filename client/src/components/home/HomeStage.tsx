@@ -419,7 +419,8 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
           onSelect={setSelectedWorld}
           className="home-front__deck"
           label="You&apos;re not looking for content."
-          autoplayMs={3250}
+          autoplayMs={5600}
+          settleEase={0.08}
           fade={0.12}
           gap={0.12}
           rotate={12}
