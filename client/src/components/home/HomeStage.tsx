@@ -158,11 +158,26 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
   }, [events, fallback]);
   const [active, setActive] = useState(0);
 
+  /*
+   * The flyer cycles on its own. It only advanced on a dot click before, so a
+   * visitor who never touched it saw one event. Pauses under calm mode and
+   * reduced motion, and resets whenever the slide set changes.
+   */
+  useEffect(() => {
+    if (slides.length < 2 || prefersStillMotion()) return;
+    const id = window.setInterval(
+      () => setActive((i) => (i + 1) % slides.length),
+      4200,
+    );
+    return () => window.clearInterval(id);
+  }, [slides.length]);
+
+  useEffect(() => {
+    setActive(0);
+  }, [slides.length]);
+
   if (!slides.length) return null;
   const event = slides[active] ?? slides[0];
-  // Two companion flyers stay on fixed events. They do not follow the
-  // featured slider, because those sequences cannot stay in the same order.
-  const satellites = slides.filter((_, index) => index !== 0).slice(0, 2);
 
   return (
     <div className="home-front__event-preview" aria-label="Upcoming event flyers" style={{ ["--event-c" as string]: event.color }}>
@@ -177,21 +192,6 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
           <span>{event.venue}</span>
         </span>
       </Link>
-      {satellites.length ? (
-        <div className="home-front__event-sats">
-          {satellites.map((sat) => (
-            <Link
-              key={sat.id}
-              className="home-front__event-sat"
-              href={sat.href}
-              aria-label={sat.title}
-              style={{ ["--event-c" as string]: sat.color }}
-            >
-              {sat.poster ? <img src={sat.poster} alt="" /> : <strong>{sat.title}</strong>}
-            </Link>
-          ))}
-        </div>
-      ) : null}
       <div className="home-front__event-dots" aria-label="Choose event flyer">
         <span className="home-front__event-count">{String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span>
         <div>
