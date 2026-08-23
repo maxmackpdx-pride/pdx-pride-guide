@@ -7,8 +7,9 @@ in the hub feed, and a tap-to-open overlay that shows the real, interactive
 card on top of the feed (close = back to your exact scroll spot).
 
 **Surface chrome (fill / edge / bloom / CTA):** owned by the **live design
-standard** - [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md) and
-`client/src/components/ds/tokens/glass.css`. The deep-glass handoff under
+standard** - [`docs/LIVE_DESIGN_STANDARD.md`](./LIVE_DESIGN_STANDARD.md),
+`client/src/components/ds/tokens/glass.css`, and `chrome.css` (8% `--neon-bloom`,
+`--btn-glow-bg` / `--btn-glow-shadow`). The deep-glass handoff under
 `docs/handoffs/deep-glass-2026-07-16/` is **historical migration** only.
 
 This doc still owns structure (board triad, feed vs glowing cards, `?post=`,
@@ -55,8 +56,9 @@ PlaceCard implements it as an explicit element:
 <div class="pdxPlace__seam pdx-rainbow-rule" aria-hidden="true" />
 ```
 
-(`client/src/components/ds/PlaceCard.tsx` · preview
-`design-system/previews/place-card.html`)
+(`client/src/components/ds/PlaceCard.tsx` · specimen
+`zaylist-foundation-library` `public/design-system/guidelines/card-system.html`.
+The old `design-system/previews/*.html` portable kit is removed; do not recreate it.)
 
 Place detail uses the same class on the modal logo well (`PlaceModal`).
 

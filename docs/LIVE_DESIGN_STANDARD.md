@@ -1,17 +1,53 @@
 # Live design standard (implementation checklist)
 
-**Design guide (written standard + specimens):** [`design-system/`](../design-system/) and the public site [Zaylist Design System](https://maxmackpdx-pride.github.io/zaylist-design-system/). That package is the **source of truth for design rules**. Do not maintain a second kit.
+**Design guide (written standard + specimens):** it is **not in this repo.** There is no
+`design-system/` directory here. The guide lives in `maxmackpdx-pride/zaylist-foundation-library`
+under `public/design-system/`, published at
+https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/. That package is the
+**source of truth for design rules**. Do not maintain a second kit.
 
-**This file** is the **production trap list** for agents shipping React/CSS: what not to re-introduce, and where chrome lives in code. It must **not contradict** `design-system/`. If it does, fix this file (or product), not invent a third guide.
+**This file** is the **production trap list** for agents shipping React/CSS: what not to re-introduce, and where chrome lives in code. It must **not contradict** the design guide. If it does, fix this file (or product), not invent a third guide.
 
 | Priority | What | Path |
 |----------|------|------|
-| **1 - Design guide** | Written standard + specimens | `design-system/` · https://maxmackpdx-pride.github.io/zaylist-design-system/ |
+| **1 - Design guide** | Written standard + specimens | `zaylist-foundation-library` `public/design-system/` · https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ |
 | **2 - Implementation** | Production React + CSS | `client/src/components/ds/**`, page CSS, adapters |
-| **3 - Token modules (code)** | Live token files used by the app | `client/src/components/ds/tokens/` especially **`glass.css`** |
+| **3 - Token modules (code)** | Live token files used by the app | `client/src/components/ds/tokens/` especially **`glass.css`** and **`chrome.css`** |
 | **Archive** | Migration package + screenshots | `docs/handoffs/deep-glass-2026-07-16/` |
 
 If an old handoff, sandbox, or removed portable preview **disagrees with the design guide**, **the design guide wins**. If product code disagrees with the guide, either ship product to match or mark the guide panel **queued**.
+
+### The guide lives in two repos and must match
+
+The design guide has two checked-in homes plus a published surface, and they are one
+document. Change one, change the other in the same ship.
+
+| Copy | Where |
+|------|-------|
+| Trap list (this file) | `pdx-pride-guide` `docs/LIVE_DESIGN_STANDARD.md` |
+| Written guide + specimens | `zaylist-foundation-library` `public/design-system/` |
+| Published guide | https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ (Cloudflare Worker, deployed from that repo) |
+| Design surface | the Zaylist Claude Design project |
+
+**Branches differ.** `pdx-pride-guide` ships on `master`. `zaylist-foundation-library`
+ships on `main`. Check the branch before every push. Pushing to the wrong one is a live risk.
+
+### The five sources of truth
+
+For design work these five win, in addition to Tucker's current instructions. Paths are
+relative to `zaylist-foundation-library` `public/design-system/`.
+
+| # | Source of truth | Path |
+|---|-----------------|------|
+| 1 | Card system and deep glass | `guidelines/card-system.html` + `guidelines/card-system-authority.md` |
+| 2 | Glow treatment proposal | `templates/glow-proposal/GlowProposal.dc.html` |
+| 3 | Desktop nav, corrected | `templates/nav-compliance/DesktopNav.dc.html` |
+| 4 | Mobile nav, corrected | `templates/mobile-nav-compliance/MobileNav.dc.html` |
+| 5 | Logo letter library | `guidelines/master-letter-library.html` |
+
+Where a specimen page disagrees with one of these, the source of truth wins and the page
+is stale. Where a source of truth disagrees with what ships and has been verified live,
+the live implementation wins and the source of truth needs correcting.
 
 ---
 
@@ -21,7 +57,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 | Retired default | Live rule instead |
 |-----------------|-------------------|
-| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glass buttons** - `.pdx-glass-btn` / `.pdxBtn` / solid fill, black ring, inward sheen, and the **8% outer bloom** (`--neon-bloom`) |
+| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glow-treatment buttons** - `.pdx-glass-btn` / `.pdxBtn`: dark plate, accent rim and ink, lit top edge, dark inner floor, and the **8% outer bloom**, composed from `--btn-glow-bg` + `--btn-glow-shadow` (which carries `--neon-bloom`). The solid accent fill is reserved for the one primary action |
 | Lite-glass translucent cards + hard `#2b2b2b` only | **Deep-glass** - `--glass-card*`, black ring + neon edge, sheen, poster-well |
 | Map outer neon bloom / thick glow frame | **Debossed map well** - thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
 | Sitewide cyan “pull” above bottom nav | **Removed**; hub drawer grip only |
@@ -38,10 +74,11 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
 
-**Outer neon bloom is 8%.** The card guide retired the full-strength halo and the glow
-proposal wanted bloom back; 8% is the settled value, carried by `--neon-bloom` and
-composed (never hand-rolled) by tags, tape, kickers, pills, badges, seams and buttons.
-Maps are the exception and keep the debossed well with no bloom at all.
+**Outer neon bloom is 8%, and it is NOT retired.** The card guide retired the
+full-strength halo and the glow proposal wanted bloom back; 8% is the settled value,
+carried by `--neon-bloom` (`client/src/components/ds/tokens/chrome.css`) and composed,
+never hand-rolled, by tags, tape, kickers, pills, badges, seams and buttons. **Maps are
+the sole exception** and keep the debossed well with no bloom at all.
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
@@ -54,8 +91,8 @@ Maps are the exception and keep the debossed well with no bloom at all.
 | Accented card | `--glass-card-*` + `.pdx-glass-rebind` + local `--c` | Event board, places, boards, ads |
 | Neutral card | `--glass-card-neutral-*` | Work rows, neutral panels |
 | Poster media | `--poster-well-*` / `.pdx-poster-well` | Flyer wells, ad media |
-| Primary CTA | `.pdx-glass-btn--solid` or `.pdxBtn--solid` | Tickets, Shop Now, filled actions |
-| Default glass CTA | `.pdx-glass-btn` / `.pdxBtn` | Secondary glass controls |
+| Primary CTA (one per surface) | `.pdx-glass-btn--solid` or `.pdxBtn--solid` | Tickets, Shop Now, filled actions |
+| Default glow-treatment button | `.pdx-glass-btn` / `.pdxBtn` (`--btn-glow-bg` + `--btn-glow-shadow`) | Every other control |
 | Map frame | `--map-frame-shadow`, mapTheme | Events / directory / beach maps |
 | Map key / legend | `.map-legend` / `.directory-map-key` / `.pdxLegend` → **neutral deep-glass** (`--glass-card-neutral-*`) | All maps; pin swatches unchanged; no lime/cyan panel bloom |
 | Claim sticker | `.pdxBoard__claim-tag` / `.event-card-meta-tag--claim` | Unclaimed listings only |
@@ -201,22 +238,28 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 ## Source chain for agents
 
 ```
-design-system/  (+ public Pages guide)
+zaylist-foundation-library  public/design-system/   (branch: main)
         = written standard + specimens (SoT for design)
+        published at .../design-system/ by the Cloudflare Worker
         ↓  implement in product
-client/src/components/ds/tokens/*   ← live token modules (glass, colors, …)
+pdx-pride-guide  docs/LIVE_DESIGN_STANDARD.md       (branch: master)
+        = this trap list, kept in step with the guide
+        ↓
+client/src/components/ds/tokens/*   ← live token modules (glass, chrome, colors, …)
 client/src/components/ds/*          ← React components
 client/src/pages/*.css              ← page chrome
         ↑  if product drifts, fix product or mark guide "queued"
-npm run sync:design-system          ← mirror from zaylist-design-system checkout only
 ```
+
+There is no mirror script and no `design-system/` directory in this repo. Read the guide
+from the `zaylist-foundation-library` checkout or the published site.
 
 Before inventing a new global rule:
 
-1. Check **`design-system/guidelines/`** and **`design-system/tokens/`**.
+1. Check **`public/design-system/guidelines/`** and **`public/design-system/tokens/`** in `zaylist-foundation-library`, starting with the five sources of truth above.
 2. Look at **production component CSS** for that surface.
-3. Prefer a token in `glass.css` / `effects.css` over a one-off.
-4. If you change a global default, update the **design guide** (and this trap list if needed) in the same ship.
+3. Prefer a token in `glass.css` / `chrome.css` / `effects.css` over a one-off.
+4. If you change a global default, update the **design guide** in `zaylist-foundation-library` and this trap list in the same ship.
 
 ---
 
@@ -224,7 +267,7 @@ Before inventing a new global rule:
 
 | Doc | Role |
 |-----|------|
-| `design-system/` | **Design guide** - source of truth for the system |
+| `zaylist-foundation-library` `public/design-system/` | **Design guide** - source of truth for the system (not in this repo) |
 | `docs/LIVE_DESIGN_STANDARD.md` | **This file** - production trap list / implementation notes |
 | `docs/DESIGN_SYSTEM_INTEGRATION.md` | How product maps to the guide |
 | `docs/BOARD_CARD_STANDARD.md` | Board triad / rainbow seam / feed structure |
@@ -235,12 +278,13 @@ Before inventing a new global rule:
 
 ## Quick agent checklist
 
-- [ ] CTA uses glass-btn / pdxBtn - **not** default brutal offset  
+- [ ] CTA uses the glow treatment (`--btn-glow-bg` / `--btn-glow-shadow`) - **not** default brutal offset; solid accent fill only on the one primary action  
 - [ ] Card uses glass-card + sheen + rebind - **not** flat `#0b0b0b` + only `#2b2b2b`  
-- [ ] Map frame debossed - **no** outer bloom  
+- [ ] 8% `--neon-bloom` composed, never hand-rolled  
+- [ ] Map frame debossed - **no** outer bloom (maps are the sole exception)  
 - [ ] Claim sticker cyan soft-offset - **no** yellow rim  
 - [ ] Grid ads/events match live components  
 - [ ] Past events only under PAST  
-- [ ] Nav untouched unless asked  
+- [ ] Nav untouched unless asked; if asked, glow is **hover only** and there is no bottom-nav pull handle  
 - [ ] NEXT cards keep approved order, fixed wallpaper, contained objects, static reduced-motion equivalents, and final white idea card
 - [ ] Docs updated if a global default changes  

@@ -24,15 +24,27 @@ Full write-path notes: Foundation skill `zaylist-github-push`.
 
 ## Design: use the design system, always
 
-All UI is built on the Zaylist design system in **`design-system/`**, registered as the
-`zaylist-design` skill. Invoke it (or read `design-system/README.md`) before writing any
-UI. Do not invent colors, type, radii, spacing, or components.
+All UI is built on the Zaylist design system. The written guide is **not in this repo**.
+It lives in `maxmackpdx-pride/zaylist-foundation-library` under `public/design-system/`,
+published at https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/.
+Read it before writing any UI. Do not invent colors, type, radii, spacing, or components.
 
-- tokens: `client/src/index.css` + `design-system/tokens/`
-- deep-glass card system: `client/src/components/ds/tokens/glass.css`
-- reusable components: `client/src/components/ds/`
-- live-is-truth rule: `docs/LIVE_DESIGN_STANDARD.md`
+There is no `design-system/` directory in this repo. Any instruction to read, sync, or
+serve one is stale.
+
+- design guide (guide repo): `zaylist-foundation-library` `public/design-system/`
+  (`guidelines/`, `tokens/`, `bundles/`, `guide.json`, `llms.txt`)
+- card authority + the five sources of truth:
+  `zaylist-foundation-library` `public/design-system/guidelines/card-system-authority.md`
+- live-is-truth rule (this repo, must not contradict the guide): `docs/LIVE_DESIGN_STANDARD.md`
 - board card rules: `docs/BOARD_CARD_STANDARD.md`
+- tokens: `client/src/index.css` + `client/src/components/ds/tokens/`
+- deep-glass card system: `client/src/components/ds/tokens/glass.css`
+- chrome tokens (`--neon-bloom`, `--btn-glow-bg`, `--btn-glow-shadow`): `client/src/components/ds/tokens/chrome.css`
+- reusable components: `client/src/components/ds/`
+
+**Outer neon bloom is 8%,** carried by `--neon-bloom` and composed, never hand-rolled.
+It is not retired. Maps are the sole exception: debossed well, no bloom.
 
 **Pick the layer first.** Two registers: the loud **zine layer** (heroes, events) and the
 calmer **utility layer** (boards, hub, admin: ink `#0c0c0f` panels, `#1c1c22` hairlines,

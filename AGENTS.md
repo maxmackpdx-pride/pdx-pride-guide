@@ -63,23 +63,43 @@ the remote URL is intercepted and 403s. See `CLAUDE.md`.
 **The design guide is truth for design rules.**  
 **Product code implements it.** Do not keep a second contradictory kit.
 
+The guide is **not in this repo**. There is no `design-system/` directory here.
+
 | Priority | Location |
 |----------|----------|
-| 1 | Design guide: [`design-system/`](design-system/) · https://maxmackpdx-pride.github.io/zaylist-design-system/ |
+| 1 | Design guide: `zaylist-foundation-library` `public/design-system/` · https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ |
 | 2 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
-| 3 | Live token modules: `client/src/components/ds/tokens/` (esp. `glass.css`) |
+| 3 | Live token modules: `client/src/components/ds/tokens/` (esp. `glass.css`, `chrome.css`) |
 | Archive | `docs/handoffs/deep-glass-2026-07-16/` (migration package, not open work orders) |
 
 **Production trap list (must not contradict the guide):** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)
 
-**Do not re-introduce** retired globals: default brutal magenta CTAs, map outer neon bloom, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past.”
+**Do not re-introduce** retired globals: default brutal magenta CTAs, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past,” the Z/Space “Featured” dropdown panel, and the sitewide cyan bottom-nav pull handle.
 
-When UI chrome or design rules change, update **`design-system/`** (mirror from the public design-system repo via `npm run sync:design-system`) and the trap list if needed, in the **same** ship.
+**Outer neon bloom is 8% and is NOT retired.** It is carried by `--neon-bloom`
+(`client/src/components/ds/tokens/chrome.css`) and composed, never hand-rolled, by tags,
+tape, kickers, pills, badges, seams and buttons. **Maps are the sole exception:** debossed
+well (`--map-frame-shadow`), no bloom at all.
+
+**Buttons use the glow treatment:** dark plate, accent rim and ink, lit top edge, dark
+inner floor, 8% bloom, composed from `--btn-glow-bg` and `--btn-glow-shadow`. The solid
+accent fill is reserved for the one primary action on a surface.
+
+When UI chrome or design rules change, update the design guide in
+`zaylist-foundation-library` `public/design-system/` **and** the trap list here, in the
+**same** ship. There is no `npm run sync:design-system` script in this repo.
 
 ## Nav source of truth
 
 Primary nav order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`).
-Do **not** restyle nav unless the user explicitly asks (black outlines; cyan active/handle only).
+Do **not** restyle nav unless the user explicitly asks. When they do ask, ship the
+standard in the **Site navigation** section of
+[`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md), not a new treatment.
+
+Two things that section retires, so never restore them: **nav pill glow is hover only**
+(the current page keeps its accent on rim and label, with no standing glow and no pulse),
+and the **sitewide cyan pull handle above the bottom nav is gone** (the grip belongs to
+the hub drawer only).
 
 ## The Foundation: read before deciding anything
 
