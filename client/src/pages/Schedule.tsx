@@ -28,14 +28,11 @@ import {
 import type { EventListing } from "@shared/multiDayEvents";
 import { eventPath } from "@shared/eventSlug";
 import { pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
-import {
-  DEFAULT_ATTENDANCE_PHRASE_KEY,
-  attendancePhraseLabel,
-} from "@shared/attendancePhrases";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
+import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   buildScheduleEvents,
@@ -168,7 +165,7 @@ export default function Schedule({
   const [now, setNow] = useState<number>(nowMinutes);
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState('');
-  const [showAuth, setShowAuth] = useState(false);
+  const { myEventIds, toggleRsvp: toggleEventRsvp, showAuth, setShowAuth, isRsvpPending } = useEventRsvp();
   // Selected week (Monday YYYY-MM-DD); null = follow the auto default (week of next event).
   const [weekStart, setWeekStart] = useState<string | null>(null);
 
@@ -200,22 +197,11 @@ export default function Schedule({
     refetchInterval: 120_000,
   });
 
-  const { data: myCheckIns = [] } = useQuery<{ eventId: number }[]>({
-    queryKey: ["/api/events/mine/check-ins"],
-    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
-    enabled: !!user,
-  });
-
   const { data: myBeachCheckIns = [] } = useQuery<BeachCheckinScheduleRow[]>({
     queryKey: ["/api/river-brats/checkins/mine"],
     queryFn: () => apiRequest("GET", "/api/river-brats/checkins/mine").then(r => r.json()),
     enabled: !!user,
   });
-
-  const myEventIds = useMemo(
-    () => new Set(myCheckIns.map(c => c.eventId)),
-    [myCheckIns],
-  );
 
   /** Beach blocks always count as “mine” (personal River Brats plans). */
   const myScheduleIds = useMemo(() => {
@@ -246,27 +232,6 @@ export default function Schedule({
     (deltaWeeks: number) => setWeekStart(msYmd(ymdMs(activeWeekStart) + deltaWeeks * 7 * 86400000)),
     [activeWeekStart],
   );
-
-  const rsvpMutation = useMutation({
-    mutationFn: (eventId: number) =>
-      apiRequest("POST", `/api/events/${eventId}/attendance`, {
-        message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-    },
-  });
-
-  const unrsvpMutation = useMutation({
-    mutationFn: (eventId: number) =>
-      apiRequest("DELETE", `/api/events/${eventId}/attendance`),
-    onSuccess: (_data, eventId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
-    },
-  });
 
   const withdrawBeachMutation = useMutation({
     mutationFn: (checkinId: number) =>
@@ -337,12 +302,8 @@ export default function Schedule({
       if (checkinId > 0) withdrawBeachMutation.mutate(checkinId);
       return;
     }
-    if (myEventIds.has(eventId)) {
-      unrsvpMutation.mutate(eventId);
-      return;
-    }
-    rsvpMutation.mutate(eventId);
-  }, [user, myEventIds, rsvpMutation, unrsvpMutation, withdrawBeachMutation]);
+    toggleEventRsvp(eventId);
+  }, [user, setShowAuth, toggleEventRsvp, withdrawBeachMutation]);
 
   const toggleFilter = useCallback((group: 'fAdm' | 'fType' | 'fAge', key: string) => {
     const setter = group === 'fAdm' ? setFAdm : group === 'fType' ? setFType : setFAge;
@@ -616,6 +577,7 @@ export default function Schedule({
           onClick: (ev) => openEvent(e.scheduleKey, ev.currentTarget.getBoundingClientRect()),
           onQuick: (ev) => {
             ev.stopPropagation();
+            if (isRsvpPending(e.id)) return;
             toggleRsvp(e.id);
           },
           style,
@@ -1423,7 +1385,10 @@ export default function Schedule({
               toggleRsvp(selected.id);
             }}
             style={{ ...selected.rsvpBtnStyle, position: "relative", overflow: "visible" }}
-            disabled={selected.isBeach && withdrawBeachMutation.isPending}
+            disabled={
+              (selected.isBeach && withdrawBeachMutation.isPending)
+              || (!selected.isBeach && isRsvpPending(selected.id))
+            }
           >
             {selected.isBeach && withdrawBeachMutation.isPending
               ? "Removing…"

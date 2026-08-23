@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { X, SlidersHorizontal, ChevronDown, Search, ChevronLeft, Archive } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -46,13 +46,25 @@ const FILTERS: Array<[string, string, string]> = [
   ["spotted", "MIZZED CONNECTION", C.magenta],
   ["gigs", "GIGZ", C.purple],
   ["gifting", "GIFTZ", C.lime],
+  ["housing", "THE HAÜZ", C.cyan],
   ["hosts", "Hosts", C.cyan],
   ["checkins", "Check-ins", C.green],
 ];
 
+type HousingThreadGate = {
+  requestId: number;
+  kind: string;
+  role: "requester" | "recipient";
+  accepted: boolean;
+  pending: boolean;
+  awaiting: boolean;
+  canNudge: boolean;
+};
+
 export default function InboxOverlay({ open, onClose, initialView, initialAccount }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [view, setView] = useState<View>("inbox");
   const [account, setAccount] = useState<Account>("personal");
   const [folder, setFolder] = useState<Folder>("inbox");
@@ -102,6 +114,23 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
         ? adminThreads.find((t) => t.id === activeId)
         : threads.find((t) => t.id === activeId)) ?? null
     : null;
+
+  const housingThread = Boolean(
+    activeThread && !adminMailActive && (activeThread.cat === "housing" || activeThread.contextType === "HOUSING"),
+  );
+  const { data: housingGate = null, isLoading: housingGateLoading } = useQuery<HousingThreadGate | null>({
+    queryKey: ["/api/housing/requests/by-thread", activeId],
+    enabled: housingThread && !!activeId,
+    queryFn: async () => {
+      const r = await fetch(`/api/housing/requests/by-thread/${encodeURIComponent(activeId!)}`, { credentials: "include" });
+      if (r.status === 404) return null;
+      if (!r.ok) throw new Error("Could not load housing request");
+      return r.json();
+    },
+  });
+  const housingComposerLocked = Boolean(
+    housingThread && (housingGateLoading || (housingGate && !housingGate.accepted)),
+  );
 
   const { data: pendingAdmin = { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 } } = useQuery<{
     count: number;
@@ -321,6 +350,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
   const send = async () => {
     const body = reply.trim();
     if (!body || !activeId) return;
+    if (housingComposerLocked) return;
     setReply("");
     try {
       if (adminMailActive) await sendAdminGuideMessage(activeId, body);
@@ -531,6 +561,30 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
               reply={reply}
               onReplyChange={setReply}
               onSend={send}
+              housingGate={housingThread ? housingGate : null}
+              housingComposerLocked={housingComposerLocked}
+              onHousingAccept={async () => {
+                if (!housingGate) return;
+                const r = await fetch(`/api/housing/requests/${housingGate.requestId}/accept`, { method: "POST", credentials: "include" });
+                if (!r.ok) return;
+                await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
+                await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeId] });
+                await queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+              }}
+              onHousingDecline={async () => {
+                if (!housingGate) return;
+                const r = await fetch(`/api/housing/requests/${housingGate.requestId}/decline`, { method: "POST", credentials: "include" });
+                if (!r.ok) return;
+                await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
+                await queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
+              }}
+              onHousingNudge={async () => {
+                if (!housingGate) return;
+                const r = await fetch(`/api/housing/requests/${housingGate.requestId}/nudge`, { method: "POST", credentials: "include" });
+                if (!r.ok) return;
+                await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
+                await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeId] });
+              }}
               onBack={closeThread}
               readOnly={activeThread.archived}
               onReact={async (messageId, code) => {
@@ -676,6 +730,7 @@ const CAT_ACCENT: Record<string, string> = {
   spotted: C.magenta,
   gigs: C.purple,
   gifting: C.lime,
+  housing: C.cyan,
   hosts: C.cyan,
   checkins: C.green,
 };
@@ -694,6 +749,11 @@ type ThreadDetailProps = {
   onResolveLineup: (decision: LineupDecision) => void;
   onOpenEvent?: (eventId: number) => void;
   onReact?: (messageId: string, code: MessageReactionCode) => void | Promise<void>;
+  housingGate?: HousingThreadGate | null;
+  housingComposerLocked?: boolean;
+  onHousingAccept?: () => void;
+  onHousingDecline?: () => void;
+  onHousingNudge?: () => void;
 };
 
 // Full thread view rendered in place inside the floating inbox - no navigation.
@@ -712,12 +772,18 @@ function ThreadDetail({
   onResolveLineup,
   onOpenEvent,
   onReact,
+  housingGate = null,
+  housingComposerLocked = false,
+  onHousingAccept,
+  onHousingDecline,
+  onHousingNudge,
 }: ThreadDetailProps) {
   const accent = isAdminGuide ? C.magenta : (CAT_ACCENT[thread.cat] ?? C.cyan);
   const showReveal = thread.anonymous && thread.reveal && !thread.reveal.iRevealed;
   const lineupPending = thread.lineup?.status === "PENDING" && thread.lineupRequestId != null;
   const openEventId = eventIdFromInboxContext(thread.contextType, thread.contextId);
-  const canSend = Boolean(reply.trim());
+  const housingLocked = housingComposerLocked || Boolean(housingGate && !housingGate.accepted);
+  const canSend = Boolean(reply.trim()) && !housingLocked;
 
   return (
     <div
@@ -782,6 +848,35 @@ function ThreadDetail({
         </div>
       )}
 
+      {housingGate?.awaiting && housingGate.role === "requester" && (
+        <div className="inbox-exp-thread__panel">
+          <div className="inbox-exp-thread__panel-copy">Waiting on them</div>
+          {housingGate.canNudge && onHousingNudge ? (
+            <button type="button" className="inbox-exp-thread__cta" onClick={onHousingNudge}>
+              Send one nudge
+            </button>
+          ) : (
+            <div className="inbox-exp-thread__panel-copy">The chat opens if they say yes. One nudge after 48 hours.</div>
+          )}
+        </div>
+      )}
+
+      {housingGate?.pending && housingGate.role === "recipient" && (
+        <div className="inbox-exp-thread__panel inbox-exp-thread__panel--lineup">
+          <div className="inbox-exp-thread__panel-copy inbox-exp-thread__panel-copy--actions">
+            Asked to chat about this HAÜZ post. Nothing opens until you accept.
+          </div>
+          <div className="inbox-exp-thread__panel-actions">
+            <button type="button" className="inbox-exp-thread__btn-approve" onClick={onHousingAccept}>
+              Accept
+            </button>
+            <button type="button" className="inbox-exp-thread__btn-decline" onClick={onHousingDecline}>
+              Not right now
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="inbox-exp-thread__messages">
         {thread.messages.map((m) => (
           <MessageBubbleWithReactions
@@ -800,7 +895,7 @@ function ThreadDetail({
         ))}
       </div>
 
-      {!readOnly && (
+      {!readOnly && !housingLocked && (
         <div className="inbox-exp-composer">
           <textarea
             className="inbox-exp-composer__input"
@@ -823,6 +918,11 @@ function ThreadDetail({
           >
             Send
           </button>
+        </div>
+      )}
+      {!readOnly && housingLocked && (
+        <div className="inbox-exp-thread__readonly">
+          {housingGate?.role === "requester" ? "Waiting on them to accept" : "Accept to open the chat"}
         </div>
       )}
       {readOnly && (

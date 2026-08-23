@@ -5,7 +5,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AuthModal from "@/components/AuthModal";
-import BoardLoadingState from "@/components/BoardLoadingState";
+import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import BoardHero from "@/components/BoardHero";
 import BoardHowItWorks from "@/components/BoardHowItWorks";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -439,7 +439,7 @@ export default function Gifting() {
         }
       >
         {isLoading ? (
-          <BoardLoadingState label="Loading GIFTZ posts" />
+          <BoardFeedSkeleton label="Loading GIFTZ posts" shape="board" count={6} />
         ) : isError ? (
           <div className="board-empty" style={{ borderColor: "#ccff00" }}>
             <Gift size={40} style={{ color: "#ccff00", margin: "0 auto" }} />

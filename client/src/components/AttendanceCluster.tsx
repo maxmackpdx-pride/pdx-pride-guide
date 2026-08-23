@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import {
+  applyRsvpQueryData,
+  restoreRsvp,
+  snapshotRsvp,
+} from "@/lib/optimisticCache";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal, { type AttendanceVisibility } from "./AttendanceVibeModal";
@@ -106,22 +111,56 @@ export default function AttendanceCluster({
   const mutation = useMutation({
     mutationFn: (data: { message: string; visibility: AttendanceVisibility; isAnonymous: boolean }) =>
       apiRequest("POST", `/api/events/${eventId}/attendance`, data),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+      const prevAttendees = queryClient.getQueryData<Attendee[]>(["/api/events", eventId, "attendance"]);
+      const rsvpSnap = await snapshotRsvp(queryClient);
+      applyRsvpQueryData(queryClient, eventId, true);
+      return { prevAttendees, rsvpSnap };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevAttendees) {
+        queryClient.setQueryData(["/api/events", eventId, "attendance"], ctx.prevAttendees);
+      }
+      restoreRsvp(queryClient, ctx?.rsvpSnap);
+    },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
       setShowForm(false);
       if (!pastEvent) {
         setShowChat(true);
         setVisibility(variables.visibility);
       }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
   });
 
   const removeMutation = useMutation({
     mutationFn: () => apiRequest("DELETE", `/api/events/${eventId}/attendance`),
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["/api/events", eventId, "attendance"] });
+      const prevAttendees = queryClient.getQueryData<Attendee[]>(["/api/events", eventId, "attendance"]);
+      const rsvpSnap = await snapshotRsvp(queryClient);
+      applyRsvpQueryData(queryClient, eventId, false);
+      if (prevAttendees && user) {
+        queryClient.setQueryData(
+          ["/api/events", eventId, "attendance"],
+          prevAttendees.filter((a) => a.userId !== user.id),
+        );
+      }
+      return { prevAttendees, rsvpSnap };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevAttendees) {
+        queryClient.setQueryData(["/api/events", eventId, "attendance"], ctx.prevAttendees);
+      }
+      restoreRsvp(queryClient, ctx?.rsvpSnap);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/attendance-summaries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
@@ -300,7 +339,7 @@ export default function AttendanceCluster({
                     type="button"
                     data-testid="button-remove-was-here"
                     onClick={() => removeMutation.mutate()}
-                    disabled={removeMutation.isPending}
+                    disabled={removeMutation.isPending || mutation.isPending}
                     className="attendance-cluster-cta__withdraw"
                   >
                     {removeMutation.isPending ? "Removing…" : "Remove from profile"}
@@ -313,9 +352,10 @@ export default function AttendanceCluster({
               <button
                 data-testid="button-ill-be-there"
                 onClick={() => user ? setShowForm(true) : setShowAuth(true)}
+                disabled={mutation.isPending || removeMutation.isPending}
                 className="display attendance-cluster-cta__btn"
               >
-                {myAttendance ? "Change phrase →" : "I'll be there →"}
+                {myAttendance ? "Going ✓" : "I'll be there →"}
               </button>
               {myAttendance && myPhrase && (
                 <span className="attendance-cluster-cta__status">
@@ -339,7 +379,7 @@ export default function AttendanceCluster({
                       setShowChat(false);
                       removeMutation.mutate();
                     }}
-                    disabled={removeMutation.isPending}
+                    disabled={removeMutation.isPending || mutation.isPending}
                     className="attendance-cluster-cta__withdraw"
                   >
                     {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}

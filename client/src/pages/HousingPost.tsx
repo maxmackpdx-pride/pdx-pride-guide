@@ -7,10 +7,19 @@
  *
  * Spec: docs/HAUS_HOUSING_SPEC_v0.2.md
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { queryClient } from "@/lib/queryClient";
+import {
+  applyHousingRequest,
+  applyHousingSavedToggle,
+  beginInFlight,
+  endInFlight,
+  HOUSING_KEY,
+  restoreQueries,
+  snapshotQueries,
+} from "@/lib/optimisticCache";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -37,6 +46,8 @@ export default function HousingPost() {
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const savePendingRef = useRef(new Set<number>());
+  const requestPendingRef = useRef(new Set<number>());
 
   const postId = Number(params?.id);
 
@@ -78,22 +89,19 @@ export default function HousingPost() {
       if (!res.ok) throw new Error((await res.json())?.error || "Could not send that");
       return res.json();
     },
-    onSuccess: (data) => {
-      invalidate();
-      if (data?.alreadySent) {
-        toast({ title: "Already sent", description: "They have this one already." });
-        return;
-      }
-      const kind = data?.request?.kind;
-      toast({
-        title: kind === "WAITLIST" ? "You are on the waiting list" : "Asked",
-        description:
-          kind === "WAITLIST"
-            ? "The Lead hears about it if a spot opens."
-            : "They accept before the chat opens.",
-      });
+    onMutate: async (kind: HousingRequestKind) => {
+      const snap = await snapshotQueries(queryClient, HOUSING_KEY);
+      applyHousingRequest(queryClient, postId, { id: -1, kind, status: "PENDING" });
+      return { snap };
     },
-    onError: (e: Error) => toast({ title: "Did not send", description: e.message, variant: "destructive" }),
+    onError: (e: Error, _kind, ctx) => {
+      restoreQueries(queryClient, ctx?.snap);
+      toast({ title: "Did not send", description: e.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      endInFlight(requestPendingRef.current, postId);
+      invalidate();
+    },
   });
 
   const saveMutation = useMutation({
@@ -102,7 +110,18 @@ export default function HousingPost() {
       if (!res.ok) throw new Error("Could not save");
       return res.json();
     },
-    onSuccess: invalidate,
+    onMutate: async () => {
+      const snap = await snapshotQueries(queryClient, HOUSING_KEY);
+      applyHousingSavedToggle(queryClient, postId);
+      return { snap };
+    },
+    onError: (_e, _v, ctx) => {
+      restoreQueries(queryClient, ctx?.snap);
+    },
+    onSettled: () => {
+      endInFlight(savePendingRef.current, postId);
+      invalidate();
+    },
   });
 
   const convertMutation = useMutation({
@@ -238,10 +257,13 @@ export default function HousingPost() {
         openSheet({ view: "inbox" });
         return;
       }
+      if (post.myRequest?.status === "PENDING") return;
+      if (!beginInFlight(requestPendingRef.current, postId)) return;
       requestMutation.mutate(kind);
     },
     onSave: () => {
       if (!requireAuth()) return;
+      if (!beginInFlight(savePendingRef.current, postId)) return;
       saveMutation.mutate();
     },
     onShare: () => {

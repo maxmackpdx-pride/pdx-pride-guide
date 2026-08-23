@@ -633,33 +633,23 @@
   pointer-events: none;
 }
 
-/* Saved-post / edit resurface chip — "what changed" on the card */
-.hz-change-label {
+/* Saved-post / edit resurface chip — shared ChangeBadge, housing position */
+.hz-card .change-badge.hz-change-label {
   position: absolute;
   top: 12px;
   left: 12px;
   z-index: 6;
-  max-width: min(70%, 14rem);
-  padding: 4px 9px 3px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--c, var(--panel-cyan)) 22%, #101014);
-  border: 1px solid color-mix(in srgb, var(--c, var(--panel-cyan)) 55%, transparent);
-  color: var(--text-hi, #f4f4f5);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
 }
 
-/* When DEMO sticker is also present, keep change label from colliding */
-.hz-card:has(.hz-demo-sticker) .hz-change-label {
+.hz-card:has(.hz-demo-sticker) .change-badge.hz-change-label {
   right: 4.5rem;
   left: 12px;
   max-width: calc(100% - 6.5rem);
+}
+
+.hz-chip--btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* merged: prototype declared .hz-cardact twice */

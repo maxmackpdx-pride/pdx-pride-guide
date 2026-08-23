@@ -9,7 +9,7 @@ import type { Event } from "@shared/schema";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
-import BoardLoadingState from "@/components/BoardLoadingState";
+import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import ListingCard from "@/components/ds/adapters/ListingCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
@@ -717,7 +717,7 @@ export default function Events() {
 
           <div className="board-active-feed__body">
         {isLoading ? (
-          <BoardLoadingState label="Loading events" />
+          <BoardFeedSkeleton label="Loading events" shape="board" count={6} />
         ) : isError ? (
           <div className="board-empty board-empty--prototype">
             <p className="display section-heading">Could not load events</p>

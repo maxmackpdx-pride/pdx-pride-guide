@@ -53,6 +53,7 @@ const CATS: Array<[string, string]> = [
   ["spotted", "MIZZED CONNECTION"],
   ["gigs", "GIGZ"],
   ["gifting", "GIFTZ"],
+  ["housing", "THE HAÜZ"],
   ["hosts", "Hosts"],
   ["checkins", "Check-ins"],
 ];

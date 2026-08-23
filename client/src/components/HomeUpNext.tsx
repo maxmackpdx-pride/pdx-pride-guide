@@ -19,7 +19,7 @@ function typePillClass(label: string): string {
 }
 
 export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
-  const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
+  const { myEventIds, toggleRsvp, showAuth, setShowAuth, isRsvpPending } = useEventRsvp();
 
   if (events.length === 0) return null;
 
@@ -64,9 +64,11 @@ export default function HomeUpNext({ events, posterBackdrop = true }: Props) {
                   <button
                     type="button"
                     className={`home-up-next__rsvp${rsvped ? " home-up-next__rsvp--going" : ""}`}
+                    disabled={isRsvpPending(event.id)}
                     onClick={e => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (isRsvpPending(event.id)) return;
                       if (!rsvped) spawnRsvpSparks(e.currentTarget);
                       toggleRsvp(event.id);
                     }}

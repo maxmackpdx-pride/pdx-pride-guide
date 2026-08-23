@@ -86,6 +86,7 @@ import {
 } from "@shared/closedVenues";
 import { listHousingPosts } from "./housing/store";
 import { HOUSING_TYPE_LABEL, type HousingType } from "../shared/housing";
+import { shouldCoalesceChange } from "../shared/changeCoalesce";
 
 /** How a housing post announces itself in the hub feed. */
 const HOUSING_FEED_ACTION: Record<HousingType, string> = {
@@ -331,7 +332,10 @@ sqlite.exec(`
     selected_interest_id INTEGER,
     expires_at TEXT NOT NULL,
     report_count INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT ''
+    created_at TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT '',
+    last_change_label TEXT,
+    last_change_at TEXT
   );
   CREATE TABLE IF NOT EXISTS sellz_interests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -354,6 +358,7 @@ sqlite.exec(`
     post_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT '',
+    seen_updated_at TEXT,
     UNIQUE(post_id, user_id)
   );
   CREATE TABLE IF NOT EXISTS feedback_reports (
@@ -457,7 +462,8 @@ sqlite.exec(`
     archived_workspace TEXT,
     created_at TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL DEFAULT '',
-    last_change_label TEXT
+    last_change_label TEXT,
+    last_change_at TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_housing_posts_type ON housing_posts(type, status);
   CREATE INDEX IF NOT EXISTS idx_housing_posts_user ON housing_posts(user_id);
@@ -496,7 +502,8 @@ sqlite.exec(`
     thread_id TEXT,
     note TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT '',
-    resolved_at TEXT
+    resolved_at TEXT,
+    nudge_sent_at TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_housing_requests_post ON housing_requests(post_id, status);
   CREATE INDEX IF NOT EXISTS idx_housing_requests_recipient ON housing_requests(recipient_user_id, status);
@@ -604,6 +611,12 @@ sqlite.exec(`
 // housing_posts.tags landed after the table shipped, so existing databases need
 // the column added. CREATE TABLE IF NOT EXISTS above only covers fresh installs.
 try { sqlite.exec(`ALTER TABLE housing_posts ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'`); } catch {}
+try { sqlite.exec(`ALTER TABLE housing_posts ADD COLUMN last_change_at TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE housing_requests ADD COLUMN nudge_sent_at TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE sellz_posts ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''`); } catch {}
+try { sqlite.exec(`ALTER TABLE sellz_posts ADD COLUMN last_change_label TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE sellz_posts ADD COLUMN last_change_at TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE sellz_saves ADD COLUMN seen_updated_at TEXT`); } catch {}
 
 // events.updated_at: trust line + "last touched" for admin/edit/sync.
 try { sqlite.exec(`ALTER TABLE events ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''`); } catch {}
@@ -7656,6 +7669,103 @@ function mapMissedConnectionRow(row: any, viewerUserId?: number) {
   return { ...publicRow, isMine, anonymous: !isMine && !isDemo, isDemo };
 }
 
+function firstPhoto(raw: unknown): string | null {
+  if (Array.isArray(raw) && raw.length && typeof raw[0] === "string") return raw[0];
+  if (typeof raw !== "string" || !raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && typeof parsed[0] === "string" ? parsed[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+function upsertHubFeedBump(items: HubFeedItem[], item: HubFeedItem): void {
+  const i = items.findIndex((row) => row.id === item.id);
+  if (i >= 0) {
+    items[i] = { ...items[i], changeLabel: item.changeLabel, createdAt: item.createdAt };
+    return;
+  }
+  items.push(item);
+}
+
+/** Viewer-scoped: saved housing (and sellz) resurface when updated_at > seen. */
+function bumpSavedHubFeedItems(items: HubFeedItem[], viewerUserId: number): void {
+  try {
+    const housingRows = sqlite.prepare(`
+      SELECT p.id, p.type, p.name, p.headline, p.created_at AS createdAt, p.updated_at AS updatedAt,
+             p.last_change_label AS lastChangeLabel, p.last_change_at AS lastChangeAt, p.photo_urls AS photoUrls,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing,
+             s.seen_updated_at AS seenUpdatedAt
+      FROM housing_saves s
+      JOIN housing_posts p ON p.id = s.post_id
+      JOIN users u ON u.id = p.user_id
+      WHERE s.user_id = ?
+        AND p.status IN ('ACTIVE','FILLED') AND p.hidden = 0 AND p.gone = 0
+        AND p.last_change_label IS NOT NULL AND TRIM(p.last_change_label) != ''
+    `).all(viewerUserId) as any[];
+    for (const row of housingRows) {
+      const bumpedAt = row.lastChangeAt || row.updatedAt || row.createdAt;
+      if (row.seenUpdatedAt && bumpedAt <= row.seenUpdatedAt) continue;
+      const type = row.type as HousingType;
+      upsertHubFeedBump(items, {
+        id: `housing-${row.id}`,
+        kind: "housing",
+        badge: HOUSING_TYPE_LABEL[type] || "THE HAÜZ",
+        action: HOUSING_FEED_ACTION[type] || "Updated a HAÜZ post",
+        title: row.name || null,
+        text: row.headline || null,
+        createdAt: bumpedAt,
+        changeLabel: row.lastChangeLabel,
+        author: hubFeedAuthorFromUser(row),
+        link: `/hausing/${row.id}`,
+        boardPostId: row.id,
+        photoUrl: firstPhoto(row.photoUrls),
+      });
+    }
+  } catch {
+    /* a housing bump failure must never take the feed down */
+  }
+
+  try {
+    const sellzRows = sqlite.prepare(`
+      SELECT p.id, p.title, p.description, p.created_at AS createdAt, p.updated_at AS updatedAt,
+             p.last_change_label AS lastChangeLabel, p.last_change_at AS lastChangeAt, p.photo_urls AS photoUrls,
+             p.price_cents AS priceCents,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing,
+             s.seen_updated_at AS seenUpdatedAt
+      FROM sellz_saves s
+      JOIN sellz_posts p ON p.id = s.post_id
+      JOIN users u ON u.id = p.user_id
+      WHERE s.user_id = ?
+        AND p.status IN ('ACTIVE','RESERVED')
+        AND p.last_change_label IS NOT NULL AND TRIM(p.last_change_label) != ''
+    `).all(viewerUserId) as any[];
+    for (const row of sellzRows) {
+      const bumpedAt = row.lastChangeAt || row.updatedAt || row.createdAt;
+      if (row.seenUpdatedAt && bumpedAt <= row.seenUpdatedAt) continue;
+      upsertHubFeedBump(items, {
+        id: `sellz-${row.id}`,
+        kind: "sellz",
+        badge: "SELLZ",
+        action: `Listed for $${(Number(row.priceCents || 0) / 100).toFixed(Number(row.priceCents || 0) % 100 ? 2 : 0)}`,
+        title: row.title,
+        text: row.description || null,
+        createdAt: bumpedAt,
+        changeLabel: row.lastChangeLabel,
+        author: hubFeedAuthorFromUser(row),
+        link: `/sellz?post=${row.id}`,
+        boardPostId: row.id,
+        photoUrl: firstPhoto(row.photoUrls),
+      });
+    }
+  } catch {
+    /* sellz bump is optional */
+  }
+}
+
 function hubFeedAuthorFromUser(
   u: {
     displayName?: string | null;
@@ -9457,6 +9567,7 @@ export interface IStorage {
   deleteSellzPost(postId: number, userId: number): void;
   reportSellzPost(data: InsertSellzReport): void;
   toggleSellzSave(postId: number, userId: number): boolean;
+  markSellzSaveSeen(postId: number, userId: number): boolean;
   getSellzSavedIds(userId: number): number[];
   // Soft launch feedback (legacy table; new reports land in owner_desk_items)
   createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
@@ -13432,8 +13543,13 @@ export const storage: IStorage = {
   updateSellzPost(id, userId, data) {
     const post = this.getSellzPost(id);
     if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
-    sqlite.prepare(`UPDATE sellz_posts SET title=?,description=?,category=?,condition=?,price_cents=?,negotiable=?,neighborhood=?,pickup_preference=? WHERE id=?`)
-      .run(data.title, data.description, data.category, data.condition, data.priceCents, data.negotiable ? 1 : 0, data.neighborhood, data.pickupPreference, id);
+    const now = new Date().toISOString();
+    const prev = sqlite.prepare(`SELECT last_change_at, updated_at FROM sellz_posts WHERE id=?`).get(id) as { last_change_at?: string | null; updated_at?: string | null } | undefined;
+    const coalesceFrom = prev?.last_change_at || prev?.updated_at || null;
+    const label = Number(data.priceCents) !== Number(post.price_cents) ? "Price updated" : "Listing updated";
+    const bumpAt = shouldCoalesceChange(coalesceFrom, Date.parse(now)) ? coalesceFrom : now;
+    sqlite.prepare(`UPDATE sellz_posts SET title=?,description=?,category=?,condition=?,price_cents=?,negotiable=?,neighborhood=?,pickup_preference=?,updated_at=?,last_change_label=?,last_change_at=? WHERE id=?`)
+      .run(data.title, data.description, data.category, data.condition, data.priceCents, data.negotiable ? 1 : 0, data.neighborhood, data.pickupPreference, now, label, bumpAt || now, id);
     return this.getSellzPost(id);
   },
   addSellzInterest(data) {
@@ -13481,8 +13597,17 @@ export const storage: IStorage = {
   toggleSellzSave(postId, userId) {
     const existing = sqlite.prepare(`SELECT 1 FROM sellz_saves WHERE post_id=? AND user_id=?`).get(postId, userId);
     if (existing) sqlite.prepare(`DELETE FROM sellz_saves WHERE post_id=? AND user_id=?`).run(postId, userId);
-    else sqlite.prepare(`INSERT INTO sellz_saves (post_id,user_id,created_at) VALUES (?,?,?)`).run(postId, userId, new Date().toISOString());
+    else {
+      const now = new Date().toISOString();
+      sqlite.prepare(`INSERT INTO sellz_saves (post_id,user_id,created_at,seen_updated_at) VALUES (?,?,?,?)`).run(postId, userId, now, now);
+    }
     return !existing;
+  },
+  markSellzSaveSeen(postId: number, userId: number) {
+    const existing = sqlite.prepare(`SELECT 1 FROM sellz_saves WHERE post_id=? AND user_id=?`).get(postId, userId);
+    if (!existing) return false;
+    sqlite.prepare(`UPDATE sellz_saves SET seen_updated_at=? WHERE post_id=? AND user_id=?`).run(new Date().toISOString(), postId, userId);
+    return true;
   },
   getSellzSavedIds(userId) {
     return sqlite.prepare(`SELECT post_id AS postId FROM sellz_saves WHERE user_id=? ORDER BY created_at DESC`).all(userId).map((row: any) => Number(row.postId));
@@ -15197,6 +15322,10 @@ export const storage: IStorage = {
       }
       if (!canViewerSeeHubFeedPost(row, viewerUserId, viewerRsvpEventIds, viewerIsAdmin, hosted)) continue;
       items.push(hubFeedPostToItem(row, goingCounts, businesses, viewerUserId));
+    }
+
+    if (viewerUserId != null) {
+      bumpSavedHubFeedItems(items, viewerUserId);
     }
 
     const sorted = items

@@ -32,6 +32,7 @@ import {
   type ParkingOption,
 } from "../../shared/housing";
 import { HOUSING_TAG_BY_ID, derivedHousingTags, normalizeHousingTags } from "../../shared/housingTags";
+import { shouldCoalesceChange } from "../../shared/changeCoalesce";
 
 const nowIso = () => new Date().toISOString();
 
@@ -429,6 +430,8 @@ export type ListOpts = {
   limit?: number;
   /** Tag ids. A post must carry every one of them (AND, not OR). */
   tags?: string[];
+  /** Seeded @hausing_demo posts only. Used for empty-board liquidity. */
+  demoOnly?: boolean;
 };
 
 /**
@@ -450,6 +453,9 @@ export function listHousingPosts(db: Database, opts: ListOpts = {}): HousingPost
     if (!opts.viewerId) return [];
     where.push("EXISTS (SELECT 1 FROM housing_saves s WHERE s.post_id = p.id AND s.user_id = ?)");
     args.push(opts.viewerId);
+  }
+  if (opts.demoOnly) {
+    where.push("p.user_id = (SELECT id FROM users WHERE username = 'hausing_demo')");
   }
 
   /*
@@ -703,10 +709,19 @@ export function updateHousingPost(
     args.push(patch.isFull ? 1 : 0);
   }
   if (!sets.length) return;
+  const now = nowIso();
+  const prev = db
+    .prepare(`SELECT last_change_at, updated_at FROM housing_posts WHERE id = ?`)
+    .get(id) as { last_change_at?: string | null; updated_at?: string | null } | undefined;
+  const coalesceFrom = prev?.last_change_at || prev?.updated_at || null;
   sets.push(`updated_at = ?`);
-  args.push(nowIso());
+  args.push(now);
   sets.push(`last_change_label = ?`);
   args.push(changeLabel ?? null);
+  if (!shouldCoalesceChange(coalesceFrom, Date.parse(now))) {
+    sets.push(`last_change_at = ?`);
+    args.push(now);
+  }
   args.push(id);
   db.prepare(`UPDATE housing_posts SET ${sets.join(", ")} WHERE id = ?`).run(...args);
 }
@@ -851,6 +866,16 @@ export type RequestInput = {
 
 export function getHousingRequest(db: Database, id: number): any | undefined {
   return db.prepare(`SELECT * FROM housing_requests WHERE id = ?`).get(id) as any;
+}
+
+export function getHousingRequestByThread(db: Database, threadId: string): any | undefined {
+  const id = String(threadId || "").trim();
+  if (!id) return undefined;
+  return db.prepare(`SELECT * FROM housing_requests WHERE thread_id = ?`).get(id) as any;
+}
+
+export function markHousingRequestNudged(db: Database, id: number): void {
+  db.prepare(`UPDATE housing_requests SET nudge_sent_at = ? WHERE id = ? AND nudge_sent_at IS NULL`).run(nowIso(), id);
 }
 
 /** The viewer's own live request against a post, if any. */

@@ -12,7 +12,8 @@
  *     here, only a door into the floating inbox.
  *  2. Declining someone is quiet. The row goes away and nothing else happens.
  */
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { beginInFlight, endInFlight } from "@/lib/optimisticCache";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
@@ -473,18 +474,37 @@ function PeopleTab({
   // Declining is quiet, so the row leaves the moment it is answered and nothing
   // else on the page reacts.
   const [answered, setAnswered] = useState<number[]>([]);
+  const pendingRef = useRef(new Set<number>());
   const requests = workspace.requests.filter((r) => !answered.includes(r.id));
 
   const accept = useMutation({
     mutationFn: (requestId: number) => send("POST", `/api/housing/requests/${requestId}/accept`),
-    onMutate: (requestId: number) => setAnswered((prev) => [...prev, requestId]),
-    onSuccess: refresh,
+    onMutate: (requestId: number) => {
+      setAnswered((prev) => (prev.includes(requestId) ? prev : [...prev, requestId]));
+      return { requestId };
+    },
+    onError: (_err, requestId) => {
+      setAnswered((prev) => prev.filter((id) => id !== requestId));
+    },
+    onSettled: (_data, _err, requestId) => {
+      endInFlight(pendingRef.current, requestId);
+      refresh();
+    },
   });
 
   const decline = useMutation({
     mutationFn: (requestId: number) => send("POST", `/api/housing/requests/${requestId}/decline`),
-    onMutate: (requestId: number) => setAnswered((prev) => [...prev, requestId]),
-    onSuccess: refresh,
+    onMutate: (requestId: number) => {
+      setAnswered((prev) => (prev.includes(requestId) ? prev : [...prev, requestId]));
+      return { requestId };
+    },
+    onError: (_err, requestId) => {
+      setAnswered((prev) => prev.filter((id) => id !== requestId));
+    },
+    onSettled: (_data, _err, requestId) => {
+      endInFlight(pendingRef.current, requestId);
+      refresh();
+    },
   });
 
   const setFull = useMutation({
@@ -543,10 +563,25 @@ function PeopleTab({
                 {r.person.pronouns ? <Mono micro>{r.person.pronouns}</Mono> : null}
                 {r.note ? <p>{r.note}</p> : null}
                 <div className="hz-chiprow" style={{ marginTop: 10 }}>
-                  <Chip tone="accent" onClick={() => accept.mutate(r.id)}>
+                  <Chip
+                    tone="accent"
+                    disabled={pendingRef.current.has(r.id)}
+                    onClick={() => {
+                      if (!beginInFlight(pendingRef.current, r.id)) return;
+                      accept.mutate(r.id);
+                    }}
+                  >
                     Accept and open the chat
                   </Chip>
-                  <Chip onClick={() => decline.mutate(r.id)}>Not right now</Chip>
+                  <Chip
+                    disabled={pendingRef.current.has(r.id)}
+                    onClick={() => {
+                      if (!beginInFlight(pendingRef.current, r.id)) return;
+                      decline.mutate(r.id);
+                    }}
+                  >
+                    Not right now
+                  </Chip>
                 </div>
               </div>
             </div>

@@ -24,6 +24,7 @@ import {
   type HousingType,
 } from "../../shared/housing";
 import { parseHousingTagFilter } from "../../shared/housingTags";
+import { canSendHousingNudge } from "../../shared/changeCoalesce";
 import {
   addHousingDate,
   addHousingMember,
@@ -68,6 +69,8 @@ import {
   setHousingPostStatus,
   toggleHousingSave,
   markHousingSaveSeen,
+  getHousingRequestByThread,
+  markHousingRequestNudged,
   updateHousingPost,
 } from "./store";
 
@@ -156,9 +159,11 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const rawType = String(req.query.type || "").toUpperCase();
     const type = HOUSING_TYPES.includes(rawType as HousingType) ? (rawType as HousingType) : null;
     const savedOnly = String(req.query.filter || "").toUpperCase() === "SAVED";
+    const demoOnly = String(req.query.demo || "") === "1";
     const posts = listHousingPosts(db, {
       type,
       savedOnly,
+      demoOnly,
       tags: parseHousingTagFilter(String(req.query.tags || "")),
       viewerId: viewerId(req),
       limit: asNum(req.query.limit) ?? 60,
@@ -589,6 +594,62 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (!request) return res.status(404).json({ error: "Not found" });
     if (request.requester_user_id !== viewerId(req)) return res.status(403).json({ error: "Not your request" });
     resolveHousingRequest(db, requestId, "WITHDRAWN");
+    res.json({ ok: true });
+  });
+
+  app.get("/api/housing/requests/by-thread/:threadId", requireAuth, (req: any, res: any) => {
+    const threadId = String(req.params.threadId || "").trim();
+    if (!threadId) return res.status(400).json({ error: "Invalid thread" });
+    const userId = viewerId(req)!;
+    const request = getHousingRequestByThread(db, threadId);
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isRequester = request.requester_user_id === userId;
+    const isRecipient = request.recipient_user_id === userId;
+    if (!isRequester && !isRecipient && !isAdmin(req)) {
+      return res.status(403).json({ error: "Not your request" });
+    }
+    const pending = request.status === "PENDING";
+    const accepted = request.status === "ACCEPTED";
+    res.json({
+      requestId: request.id,
+      kind: request.kind,
+      role: isRequester ? "requester" : "recipient",
+      accepted,
+      pending,
+      awaiting: isRequester && !accepted && request.status !== "WITHDRAWN",
+      canNudge: isRequester && canSendHousingNudge(request.created_at, request.nudge_sent_at, Date.now()),
+    });
+  });
+
+  app.post("/api/housing/requests/:requestId/nudge", requireAuth, (req: any, res: any) => {
+    const requestId = asNum(req.params.requestId);
+    if (!requestId) return res.status(400).json({ error: "Invalid id" });
+    const userId = viewerId(req)!;
+    const request = getHousingRequest(db, requestId);
+    if (!request) return res.status(404).json({ error: "Not found" });
+    if (request.requester_user_id !== userId) return res.status(403).json({ error: "Not your request" });
+    if (request.status !== "PENDING") return res.status(400).json({ error: "Not waiting" });
+    if (!canSendHousingNudge(request.created_at, request.nudge_sent_at, Date.now())) {
+      return res.status(400).json({ error: "Nudge is not available yet" });
+    }
+    markHousingRequestNudged(db, requestId);
+    const post = getHousingPost(db, request.post_id, userId);
+    try {
+      deps.sendMessage(
+        userId,
+        request.recipient_user_id,
+        `Still hoping to connect: ${post?.displayName || "THE HAÜZ"}`,
+        "Just a nudge. Still interested when you have a moment.",
+        {
+          threadId: request.thread_id || undefined,
+          contextType: "HOUSING",
+          contextId: request.post_id,
+          contextLabel: post?.displayName || null,
+        },
+      );
+    } catch {
+      /* nudge stamp stands even if the stub message fails */
+    }
     res.json({ ok: true });
   });
 

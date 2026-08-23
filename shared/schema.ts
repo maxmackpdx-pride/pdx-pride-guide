@@ -517,6 +517,9 @@ export const sellzPosts = sqliteTable("sellz_posts", {
   expiresAt: text("expires_at").notNull(),
   reportCount: integer("report_count").notNull().default(0),
   createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
+  lastChangeLabel: text("last_change_label"),
+  lastChangeAt: text("last_change_at"),
 });
 
 export const sellzInterests = sqliteTable("sellz_interests", {
@@ -542,6 +545,7 @@ export const sellzSaves = sqliteTable("sellz_saves", {
   postId: integer("post_id").notNull(),
   userId: integer("user_id").notNull(),
   createdAt: text("created_at").notNull().default(""),
+  seenUpdatedAt: text("seen_updated_at"),
 });
 
 export const insertSellzPostSchema = createInsertSchema(sellzPosts).omit({
@@ -937,6 +941,7 @@ export const housingPosts = sqliteTable("housing_posts", {
   createdAt: text("created_at").notNull().default(""),
   updatedAt: text("updated_at").notNull().default(""),
   lastChangeLabel: text("last_change_label"), // e.g. "Rent updated" - drives the saved-post resurface in the feed
+  lastChangeAt: text("last_change_at"), // coalesced bump time (~20 min); last label wins
 });
 
 // The avatar stack: real members, off-platform housemates, and pets.
@@ -975,6 +980,7 @@ export const housingRequests = sqliteTable("housing_requests", {
   note: text("note").notNull().default(""),
   createdAt: text("created_at").notNull().default(""),
   resolvedAt: text("resolved_at"),
+  nudgeSentAt: text("nudge_sent_at"),
 });
 
 // The shared house-hunt shortlist. These are external links the group bookmarks

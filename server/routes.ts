@@ -2703,6 +2703,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/sellz/:id/save", requireAuth, (req, res) => {
     res.json({ saved: storage.toggleSellzSave(Number(req.params.id), req.session.userId!) });
   });
+  app.post("/api/sellz/:id/seen", requireAuth, (req, res) => {
+    res.json({ ok: storage.markSellzSaveSeen(Number(req.params.id), req.session.userId!) });
+  });
 
   app.delete("/api/sellz/:id", requireAuth, (req, res) => {
     try { storage.deleteSellzPost(Number(req.params.id), req.session.userId!); res.json({ ok: true }); }
