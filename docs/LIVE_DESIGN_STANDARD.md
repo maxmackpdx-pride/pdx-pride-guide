@@ -21,7 +21,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 
 | Retired default | Live rule instead |
 |-----------------|-------------------|
-| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glass buttons** - `.pdx-glass-btn` / `.pdxBtn` / solid fill, black ring, **no outer neon bloom** |
+| Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glass buttons** - `.pdx-glass-btn` / `.pdxBtn` / solid fill, black ring, inward sheen, and the **8% outer bloom** (`--neon-bloom`) |
 | Lite-glass translucent cards + hard `#2b2b2b` only | **Deep-glass** - `--glass-card*`, black ring + neon edge, sheen, poster-well |
 | Map outer neon bloom / thick glow frame | **Debossed map well** - thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
 | Sitewide cyan “pull” above bottom nav | **Removed**; hub drawer grip only |
@@ -35,8 +35,13 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Nav links as bare text with a gradient underline; board-folder dropdown (9px pill trigger, 236px panel, rainbow seam, per-index hover rails) | **Glow pills** - see *Site navigation* |
 | Persistent glow on the current nav pill (`siteNavPillPulse`) | **Glow is hover only.** The current page holds its accent on rim and label, with no bloom and no pulse |
 | Z/Space "mega" dropdown with a Featured card beside the item column | **One plain column** of pills under a line of descriptive copy; `z/ all boards` carries the `/z` link |
-| Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor`, **no outer bloom** |
+| Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
+
+**Outer neon bloom is 8%.** The card guide retired the full-strength halo and the glow
+proposal wanted bloom back; 8% is the settled value, carried by `--neon-bloom` and
+composed (never hand-rolled) by tags, tape, kickers, pills, badges, seams and buttons.
+Maps are the exception and keep the debossed well with no bloom at all.
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
@@ -105,7 +110,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - Dropdowns are dark rounded panels of the same pills, **one plain column each**. A list may carry a mono **eyebrow**, used either as a section label (Outz: "Most Visited") or as plain descriptive copy (Z/Space: "Every board, one place"). There is no featured card. Z/Space opens leftward because its trigger is the last pill.
 - Outz lists `All OUTZ` (`/z/out`, a real index page) above the two OUTZ addresses. Z/Space leads with `z/ all boards`, which carries the `/z` link the retired featured card used to own, then `THE HAÜZ`, `Gigz`, `Sellz`, `Mizzed`, `Giftz`.
 - The desktop right cluster reads **search → notifications bolt → Hub → seam → avatar + caret**, in that order. The bolt is the same component as the mobile top bar's, so its panel styles are global, not trapped in a phone media query.
-- **Hub is the one primary action** in the bar, so it takes the solid fill the standard reserves for primary: cyan plate, dark ink, and `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` composed as the whole shadow. No outer bloom, no border, no standing dot.
+- **Hub is the one primary action** in the bar, so it takes the solid fill the standard reserves for primary: cyan plate, dark ink, and `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` composed as the whole shadow. No border, no standing dot. Log in / Join is the signed-out control in the same slot and is built the same way.
 - The wordmark keeps the glitch treatment: the real logo asset plus two RGB-split ghost layers (cyan and magenta, `screen` blend) flashing briefly on a 3.2s loop. Never typeset it.
 
 ### Mobile bar and sheets
