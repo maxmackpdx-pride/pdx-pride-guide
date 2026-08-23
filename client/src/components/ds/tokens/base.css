@@ -7,6 +7,15 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+@media (max-width: 640px) {
+  /* iOS zooms the page when a focused field is under 16px. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg-app);

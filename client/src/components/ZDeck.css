@@ -66,6 +66,16 @@
 .z-deck__nav--prev { left: 8px; }
 .z-deck__nav--next { right: 8px; }
 
+@media (max-width: 640px) {
+  .z-deck__nav {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+  .z-deck__nav--prev { left: 10px; }
+  .z-deck__nav--next { right: 10px; }
+}
+
 .z-deck__dots {
   display: flex;
   align-items: center;

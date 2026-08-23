@@ -2743,7 +2743,7 @@ html[data-calm="true"] #home-worlds-title > span:not(.home-front__content-word) 
   .home-main-stage .home-hero-stats-boundary .home-stat-strip__label {
     max-width:13ch;
     margin:8px auto 0;
-    font-size:clamp(8px,2.25vw,10px);
+    font-size:clamp(9px,2.25vw,10px);
     line-height:1.25;
     letter-spacing:.08em;
     overflow-wrap:anywhere;
@@ -2798,9 +2798,9 @@ html[data-calm="true"] #home-worlds-title > span:not(.home-front__content-word) 
 }
 
 @media (max-width:380px) {
-  .home-main-stage .home-hero-stats-boundary .home-stat-strip__cell { min-height:82px; padding-inline:5px; }
+  .home-main-stage .home-hero-stats-boundary .home-stat-strip__cell { min-height:82px; padding-inline:6px; }
   .home-main-stage .home-hero-stats-boundary .home-stat-strip__value { font-size:29px; }
-  .home-main-stage .home-hero-stats-boundary .home-stat-strip__label { font-size:7.5px; }
+  .home-main-stage .home-hero-stats-boundary .home-stat-strip__label { font-size:9px; letter-spacing:.06em; }
 }
 
 /* Depth belongs to the NEXT room, never to the card objects. */
@@ -3111,7 +3111,7 @@ html.calm-mode .home-next-preview__orb,
   100% { transform:translate(0,calc((var(--stack-index) - 2.5) * 2px + 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .1deg)); }
 }
 @media (max-width: 640px) {
-  .home-next-preview { padding-top: 42px; padding-bottom: 42px; }
+  .home-next-preview { padding-top: 42px; padding-bottom: 42px; overflow-x: clip; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
   .home-next-preview__head { margin-bottom: 28px; }

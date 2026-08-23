@@ -321,7 +321,12 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
      empty bands above and below. Let it hug its content with even, modest
      top/bottom breathing room so the stat strip sits right under the buttons. */
   .home-front__welcome { min-height:0; }
-  .home-front__hero { flex:0 0 auto; justify-content:center; padding-top:clamp(42px,11vw,86px); padding-bottom:clamp(42px,11vw,86px); }
+  .home-front__hero {
+    flex:0 0 auto;
+    justify-content:center;
+    padding-top:calc(clamp(42px,11vw,86px) + env(safe-area-inset-top, 0px));
+    padding-bottom:clamp(42px,11vw,86px);
+  }
   .home-front__kicker {
     flex-direction:column;
     gap:7px;
@@ -336,12 +341,13 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__kicker-beta { font-size:1.18em; letter-spacing:.1em; }
   .home-front__mark { width:100%; max-width:none; }
   .home-front__hero-actions { margin-top:42px; margin-bottom:24px; }
-  /* ~40% smaller CTA buttons: compact content-width pills, shorter, smaller text. */
-  .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:29px; height:29px; padding:0 13px; font-size:9px; }
+  /* Compact vs desktop, but still a thumb target. 9px / 29px was unreadable. */
+  .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:44px; height:44px; padding:0 16px; font-size:12px; }
   .home-front__worlds { padding-top:20px; padding-bottom:36px; }
-  .home-front__worlds-head h2 { font-size:48px; }
-  .home-front__worlds-head p { margin-top:14px; font-size:15px; }
-  .home-front__deck { --cf-card:clamp(300px,92vw,412px); --cf-card-h:620px; padding:16px 0 2px; }
+  .home-front__worlds-head { margin-bottom:20px; }
+  .home-front__worlds-head h2 { font-size:clamp(34px, 9vw, 42px); }
+  .home-front__worlds-head p { margin-top:12px; font-size:14px; }
+  .home-front__deck { --cf-card:clamp(300px,92vw,412px); --cf-card-h:540px; padding:16px 0 2px; }
   .home-front__deck .z-deck__slide > .home-front__world,
   .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; min-height:0; padding:18px; }
   .home-front__world-copy { margin-top:34px; }
