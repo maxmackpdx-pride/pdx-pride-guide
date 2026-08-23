@@ -24,7 +24,7 @@ const CSS = `
   mix-blend-mode:screen; pointer-events:none;
   animation:pdxSeamGlint 3.4s var(--ease-inout, ease-in-out) infinite;
 }
-.pdxDivider--glow .pdxDivider__line{ --c:var(--_c,var(--lime)); background:var(--_c,var(--lime));
+.pdxDivider--glow .pdxDivider__line.pdx-glass-rebind{ --c:var(--_c,var(--lime)); background:var(--_c,var(--lime));
   box-shadow:var(--neon-bloom); }
 .pdxDivider--faint .pdxDivider__line{ height:1px; background:var(--border-default); }
 

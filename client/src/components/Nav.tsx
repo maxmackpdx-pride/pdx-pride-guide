@@ -828,7 +828,7 @@ export default function Nav() {
                 <span className="site-auth__hub">
                   <Link
                     href="/dashboard"
-                    className={`site-hub-button${hubActive ? " active" : ""}`}
+                    className={`site-hub-button pdx-glass-rebind${hubActive ? " active" : ""}`}
                     aria-label={
                       user && unreadCount > 0
                         ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
@@ -880,7 +880,7 @@ export default function Nav() {
             {!user && !localDemo && (
               <button
                 onClick={() => { setShowAuth(true); setMenuOpen(false); }}
-                className="site-login-button"
+                className="site-login-button pdx-glass-rebind"
               >
                 LOG IN / JOIN
               </button>

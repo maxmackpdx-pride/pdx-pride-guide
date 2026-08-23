@@ -588,8 +588,11 @@ body::before {
  * hand-rolled, and with no outer bloom - the outlined-with-a-standing-glow
  * version it replaces was the drift the chrome audit called out.
  */
-.site-hub-button {
+.site-hub-button.pdx-glass-rebind {
   --c: var(--panel-cyan, #19e3ff);
+}
+
+.site-hub-button {
   position:relative;
   display:inline-flex;
   align-items:center;
@@ -1346,8 +1349,11 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
  * 8% bloom. It used to be the one square, weight-900, solid-filled element in
  * a bar of 999px hairline pills, still sized off the retired --site-nav-size.
  */
-.site-login-button {
+.site-login-button.pdx-glass-rebind {
   --c: var(--neon-yellow, #ccff00);
+}
+
+.site-login-button {
   display: inline-flex;
   align-items: center;
   min-height: 40px;

@@ -22,7 +22,7 @@ const CSS = `
 .pdxChip:active{ transform:scale(var(--press-scale)); }
 
 /* selected, outline look (like "ALL") */
-.pdxChip[aria-pressed="true"]{
+.pdxChip[aria-pressed="true"].pdx-glass-rebind{
   --c:var(--_c,var(--lime));
   color:var(--_c,var(--lime)); border-color:var(--_c,var(--lime));
   box-shadow:var(--chrome-keyline), var(--chrome-bevel-dark), var(--neon-bloom);

@@ -22,7 +22,7 @@ const CSS = `
 /* paper fill (white-ish, black text) for day + neutral status */
 .pdxBadge--paper{ background:var(--paper); color:var(--paper-ink); border-color:var(--paper); }
 /* glow (GRAND OPENING) */
-.pdxBadge--glow{ --c:var(--_c,var(--yellow)); box-shadow:var(--neon-bloom); }
+.pdxBadge--glow.pdx-glass-rebind{ --c:var(--_c,var(--yellow)); box-shadow:var(--neon-bloom); }
 
 .pdxBadge__dot{ width:7px; height:7px; border-radius:var(--radius-pill); background:currentColor; }
 `;

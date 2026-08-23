@@ -2,7 +2,7 @@
 import React from "react";
 
 const CSS = `
-.pdxSticker{
+.pdxSticker.pdx-glass-rebind{
   --_bg:var(--lime); --_fg:var(--text-inverse); --_rot:-4deg;
   display:inline-block; transform:rotate(var(--_rot));
   font-family:var(--font-display); font-weight:900; text-transform:uppercase;

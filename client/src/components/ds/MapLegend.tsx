@@ -9,7 +9,7 @@ const CSS = `
 .pdxLegend__row{ display:flex; align-items:center; gap:11px;
   font-family:var(--font-display); font-weight:700; font-size:var(--chrome-sm);
   letter-spacing:.06em; text-transform:uppercase; color:#c8c5bc; }
-.pdxLegend__dot{ width:15px; height:15px; border-radius:var(--radius-pill);
+.pdxLegend__dot.pdx-glass-rebind{ width:15px; height:15px; border-radius:var(--radius-pill);
   --c:var(--_c);
   background:#000; border:3px solid var(--_c); box-sizing:border-box;
   box-shadow:var(--chrome-keyline), inset 0 1px 2px rgba(0,0,0,.85), var(--neon-bloom); flex:none; }

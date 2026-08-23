@@ -27,7 +27,7 @@ const CSS = `
 .pdxStatPill--solid .pdxStatPill__num{ background:none; }
 
 .pdxStatPill--sm{ font-size:var(--chrome-xs); padding:4px 10px 3px; }
-.pdxStatPill--glow{ --c:var(--_c,var(--lime)); box-shadow:var(--neon-bloom); }
+.pdxStatPill--glow.pdx-glass-rebind{ --c:var(--_c,var(--lime)); box-shadow:var(--neon-bloom); }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-statpill-css")) {
   const s = document.createElement("style");
