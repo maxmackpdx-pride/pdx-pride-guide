@@ -13,8 +13,10 @@
   flex-grow: 0;
 }
 
+/* Do not pin the footer with margin-top: auto. That recreates a dead band
+   between the last content and the footer on short pages. */
 .app-shell:not(.app-shell--hub) > footer {
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .about-page,
@@ -26,7 +28,7 @@
 }
 
 .zine-content {
-  padding-bottom: 32px;
+  padding-bottom: 24px;
 }
 
 @media (max-width: 640px) {
@@ -35,10 +37,19 @@
   }
 
   body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer {
-    padding-bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px) + 8px);
+    padding-bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px));
   }
 
   body:has(.site-hub-mobile-bar) .app-shell:not(.app-shell--hub) .site-footer__legal {
     padding-bottom: 0;
+  }
+
+  .zine-content {
+    padding-bottom: 16px;
+  }
+
+  .board-close__inner {
+    padding-top: 18px;
+    padding-bottom: 18px;
   }
 }

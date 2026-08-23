@@ -3175,7 +3175,7 @@ html.calm-mode .home-next-preview__orb,
   100% { transform:translate(0,calc((var(--stack-index) - 2.5) * 2px + 2px)) rotate(calc((var(--stack-index) - 2.5) * .45deg + .1deg)); }
 }
 @media (max-width: 640px) {
-  .home-next-preview { padding-top: 42px; padding-bottom: 42px; overflow-x: clip; }
+  .home-next-preview { padding-top: 28px; padding-bottom: 24px; overflow-x: clip; }
   .home-next-preview__head,
   .home-next-preview__cta { width: calc(100% - 28px); }
   .home-next-preview__head { margin-bottom: 28px; }
