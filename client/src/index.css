@@ -3765,8 +3765,11 @@ html.calm-mode .floating-inbox--attention .floating-inbox__halo {
 
 /* Events poster grid - denser gap; column count scales with viewport (see below) */
 .events-page .events-poster-grid {
-  gap: 12px;
+  gap: 14px;
   padding: clamp(16px, 2vw, 28px);
+  width: 100%;
+  max-width: 920px;
+  margin-inline: auto;
 }
 
 .events-page .event-type-tag--sm {
@@ -8842,9 +8845,8 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 /*
- * Events poster grid - scales with window width.
- * Fluid auto-fill so wide desktops get more columns (≈6 full-screen),
- * not a hard 4 that leaves huge tiles.
+ * Events poster grid: 4 across on desktop, never 5–8.
+ * Grid is 30% narrower than the board and centered so tiles stay smaller.
  */
 .events-poster-grid {
   display: grid;
@@ -8853,59 +8855,20 @@ footer a:hover { color: #00FFFF !important; }
 }
 
 .events-page .events-poster-grid {
-  /* ~2 on narrow phones, then auto-fill as width allows */
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (min-width: 640px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
+  .events-poster-grid,
   .events-page .events-poster-grid {
-    /* tablet: ~3–4 depending on width */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 960px) {
-  .events-poster-grid {
+  .events-poster-grid,
+  .events-page .events-poster-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .events-page .events-poster-grid {
-    /* desktop: ~4–5 — denser cards so more flyers show */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 141px), 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .events-page .events-poster-grid {
-    /* large desktop: ~5–6 */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 147px), 1fr));
-  }
-}
-
-@media (min-width: 1600px) {
-  .events-poster-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .events-page .events-poster-grid {
-    /* full-screen / ultrawide: 25% smaller than the previous six-card rail */
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1920px) {
-  .events-page .events-poster-grid {
-    /* keep the 25% reduction proportional on very wide boards */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr));
-    max-width: none;
   }
 }
 

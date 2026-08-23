@@ -2999,7 +2999,8 @@ html.calm-mode .home-next-preview__orb,
   text-decoration: none;
 }
 .home-next-preview__viewport {
-  display: block;
+  display: flex;
+  justify-content: center;
   overflow: visible;
   padding: 26px 0 75px;
 }
@@ -3007,20 +3008,21 @@ html.calm-mode .home-next-preview__orb,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(1180px, calc(100% - 40px));
+  width: max-content;
+  max-width: 100%;
   margin-inline: auto;
 }
 .home-next-preview__card.pdx-glass-card.pdx-glass-rebind {
   --c: var(--neon-cyan, #00ffff);
   box-sizing: border-box;
   position: relative;
-  width: clamp(239px, 23.4vw, 309px);
-  height: clamp(140px, 13vw, 179px);
+  width: clamp(167px, 16.4vw, 216px);
+  height: clamp(98px, 9.1vw, 125px);
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  margin-left: -68px;
-  padding: 23px;
+  margin-left: -48px;
+  padding: 16px;
   overflow: hidden;
   border: 3px solid color-mix(in srgb, var(--c) 55%, #101014);
   border-radius: 14px;
@@ -3116,13 +3118,13 @@ html.calm-mode .home-next-preview__orb,
   .home-next-preview__track { width: calc(100% - 28px); }
   .home-next-preview__card.pdx-glass-card.pdx-glass-rebind {
     --crash-over: 10px;
-    width: calc((100vw + 94px) / 6);
-    height: calc((100vw + 86px) / 6.6);
-    min-height: 91px;
-    max-height: 120px;
-    margin-left: -26px;
-    padding: 9px;
-    border-radius: 9px;
+    width: calc((100vw + 94px) * 0.7 / 6);
+    height: calc((100vw + 86px) * 0.7 / 6.6);
+    min-height: 64px;
+    max-height: 84px;
+    margin-left: -18px;
+    padding: 6px;
+    border-radius: 8px;
   }
   .home-next-preview__cta { justify-content: flex-start; font-size: 20px; min-height: 50px; }
 }
