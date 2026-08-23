@@ -76,6 +76,76 @@ export type OutzSnapshot = {
   sources: OutzSource[];
 };
 
+export type OutzPlaceKind = OutzDestinationKind | OutzCatalogPlace["kind"] | OutzCommunityStay["kind"];
+
+/** A current OUTZ listing with a stable human-readable Z/ address. */
+export type OutzPlace = {
+  id: string;
+  name: string;
+  slug: string;
+  kind: OutzPlaceKind;
+  detail: string;
+  officialUrl: string | null;
+  sourceName: string;
+  sourceStatus: string | null;
+};
+
+function outzSlugPart(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
+}
+
+export function outzPlaceSlug(place: Pick<OutzPlace, "id" | "name">) {
+  return `${outzSlugPart(place.name) || "outz-place"}--${outzSlugPart(place.id)}`;
+}
+
+export function outzPlaceHref(place: Pick<OutzPlace, "id" | "name">) {
+  return `/z/out/${outzPlaceSlug(place)}`;
+}
+
+export function outzPlacesFromSnapshot(snapshot: OutzSnapshot): OutzPlace[] {
+  const featured = snapshot.destinations.map(place => ({
+    id: place.id,
+    name: place.name,
+    slug: outzPlaceSlug(place),
+    kind: place.kind,
+    detail: place.subtitle,
+    officialUrl: place.officialUrl,
+    sourceName: place.sourceName,
+    sourceStatus: place.sourceStatus,
+  }));
+  const catalog = snapshot.catalog.map(place => ({
+    id: place.id,
+    name: place.name,
+    slug: outzPlaceSlug(place),
+    kind: place.kind,
+    detail: place.statusReason || "Official USFS recreation-site listing.",
+    officialUrl: place.officialUrl,
+    sourceName: place.sourceName,
+    sourceStatus: place.status,
+  }));
+  const stays = snapshot.communityStays.map(place => ({
+    id: place.id,
+    name: place.name,
+    slug: outzPlaceSlug(place),
+    kind: place.kind,
+    detail: place.detail,
+    officialUrl: place.officialUrl,
+    sourceName: place.discoverySource.name,
+    sourceStatus: `Operator details reviewed ${place.reviewedAt}`,
+  }));
+  return [...featured, ...catalog, ...stays];
+}
+
+export function outzPlaceFromSlug(snapshot: OutzSnapshot, slug: string | null | undefined) {
+  return outzPlacesFromSnapshot(snapshot).find(place => place.slug === slug) ?? null;
+}
+
 export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
   {
     id: "triangle-recreation-camp",

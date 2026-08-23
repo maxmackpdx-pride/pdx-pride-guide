@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { OutzCatalogPlace, OutzDestination } from "@shared/outz";
+import { outzPlaceHref, type OutzCatalogPlace, type OutzDestination } from "@shared/outz";
 import { LIVE_MAP_CHROME_CSS, MAP_PIN_SIZE, MAP_SURFACE_BG, mapPinHtml } from "@/components/ds/mapTheme";
 
 const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{y}{x}{r}.png".replace("{z}/{y}{x}", "{z}/{x}/{y}");
@@ -32,11 +32,12 @@ function MapResizer() {
   return null;
 }
 
-function PopupCard({ name, detail, href }: { name: string; detail: string; href?: string | null }) {
+function PopupCard({ name, detail, href, zHref }: { name: string; detail: string; href?: string | null; zHref: string }) {
   return (
     <div className="outz-map-popup">
       <strong>{name}</strong>
       <span>{detail}</span>
+      <a href={zHref}>Check in + chat</a>
       {href ? <a href={href} target="_blank" rel="noreferrer">Official details</a> : null}
     </div>
   );
@@ -60,12 +61,12 @@ export default function OutzMap({ destinations, catalog }: { destinations: OutzD
           <MapResizer />
           {destinations.map(place => (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={pin("#ff8a1f")}>
-              <Popup><PopupCard name={place.name} detail={place.subtitle} href={place.officialUrl} /></Popup>
+              <Popup><PopupCard name={place.name} detail={place.subtitle} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
             </Marker>
           ))}
           {catalog.slice(0, 35).map(place => (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={pin("#19e3ff")}>
-              <Popup><PopupCard name={place.name} detail={`${place.kind} · ${place.status ?? "Check official details"}`} href={place.officialUrl} /></Popup>
+              <Popup><PopupCard name={place.name} detail={`${place.kind} · ${place.status ?? "Check official details"}`} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
             </Marker>
           ))}
         </MapContainer>

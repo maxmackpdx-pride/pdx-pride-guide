@@ -6,7 +6,7 @@ import OutzMap from "@/components/OutzMap";
 import { Button } from "@/components/ds";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { OUTZ_COMMUNITY_STAYS, type OutzSnapshot } from "@shared/outz";
+import { OUTZ_COMMUNITY_STAYS, outzPlaceHref, outzPlacesFromSnapshot, type OutzSnapshot } from "@shared/outz";
 import "./Outz.css";
 
 type OutzPayload = { data: OutzSnapshot; stale?: boolean; fromCache?: boolean };
@@ -53,9 +53,19 @@ export default function Outz() {
     onSuccess: payload => queryClient.setQueryData(["/api/outz"], payload),
   });
   const snapshot = query.data?.data;
+  const allPlaces = snapshot ? outzPlacesFromSnapshot(snapshot) : [];
 
   return (
     <div className="zine-page board-page outz-page">
+      <div className="outz-page__terrain" aria-hidden="true" />
+      <svg className="outz-page__topo" viewBox="0 0 1440 1100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M-80 186c170-154 340 94 501-31 149-116 241 17 395-58 142-70 302 80 698-71" />
+        <path d="M-52 246c151-134 330 81 472-20 155-111 256 35 406-31 167-74 340 70 656-80" />
+        <path d="M-45 315c134-123 322 59 472-8 162-72 259 70 407 3 175-79 337 71 659-75" />
+        <path d="M-50 742c157-150 311 58 481-44 164-99 258 40 414-32 160-75 311 75 644-66" />
+        <path d="M-72 820c153-132 318 80 501-22 150-83 252 31 415-33 157-62 314 86 622-49" />
+        <path d="M-41 898c125-115 296 79 475-8 154-75 245 64 403 3 175-68 308 83 614-51" />
+      </svg>
       <PageHero
         kicker="Z/OUT · LIVE FIELD DESK"
         titleLine1="PITCH A TENT."
@@ -64,7 +74,7 @@ export default function Outz() {
         lede="Camping, hiking, trails, weather, alerts, and practical access notes from the agencies that manage the places — plus the people who make the trip better."
         bgImage="/motifs/portland-sign.jpg"
         bgPosition="center 44%"
-        actions={<div className="outz-hero-actions"><Link href="/z/out/rooster-rock"><Button as="span" variant="solid">BEACH CONDITIONS</Button></Link><a href="#official-catalog"><Button as="span" accent="cyan">OFFICIAL CATALOG</Button></a></div>}
+        actions={<div className="outz-hero-actions"><Link href="/z/out/rooster-rock"><Button as="span" variant="solid">BEACH CONDITIONS</Button></Link><a href="#outz-directory"><Button as="span" accent="cyan">ALL LISTINGS</Button></a></div>}
       />
 
       <section className="outz-refresh" aria-live="polite">
@@ -90,7 +100,8 @@ export default function Outz() {
               <p className="outz-stay-card__access"><strong>Before you go:</strong> {stay.accessNote}</p>
               <p className="outz-stay-card__source">{stay.inclusionNote} · Operator details checked {stay.reviewedAt}.</p>
               <div className="outz-stay-card__actions">
-                <a className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={stay.officialUrl} target="_blank" rel="noreferrer" style={{ "--c": "#ff6600" } as CSSProperties}>OPERATOR DETAILS ↗</a>
+                <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={outzPlaceHref(stay)} style={{ "--c": "#ff6600" } as CSSProperties}>CHECK IN + CHAT</Link>
+                <a href={stay.officialUrl} target="_blank" rel="noreferrer">Operator details ↗</a>
                 <a href={stay.discoverySource.href} target="_blank" rel="noreferrer">Research source ↗</a>
               </div>
             </article>
@@ -141,7 +152,7 @@ export default function Outz() {
               </div>
               {place.sourceStatus ? <div className="outz-source-status">{place.sourceStatus}</div> : null}
               {place.alerts.length ? <div className="outz-alert"><strong>Alert:</strong> {place.alerts[0].headline}</div> : <div className="outz-no-alert">No active NWS alert returned for this point.</div>}
-              <a href={place.officialUrl} target="_blank" rel="noreferrer">Open official park page ↗</a>
+              <div className="outz-feature-card__actions"><Link href={outzPlaceHref(place)}>CHECK IN + CHAT</Link><a href={place.officialUrl} target="_blank" rel="noreferrer">Open official park page ↗</a></div>
             </article>
           ))}
         </div>
@@ -149,13 +160,16 @@ export default function Outz() {
 
       {snapshot ? <section className="outz-map-section"><OutzMap destinations={snapshot.destinations} catalog={snapshot.catalog} /></section> : null}
 
-      <section id="official-catalog" className="outz-section outz-section--catalog">
-        <div className="outz-section__head"><p>USFS LIVE CATALOG</p><h2>Campgrounds and trailheads</h2><span>Current agency status is a planning signal, not a reservation. Confirm access before driving.</span></div>
-        <div className="outz-catalog-grid">
-          {(snapshot?.catalog ?? []).slice(0, 30).map(place => (
-            <article className="outz-catalog-card" key={place.id}>
-              <span>{place.kind}</span><h3>{place.name}</h3>
-              <p>{place.status ?? "Status unavailable"}{place.statusReason ? ` · ${place.statusReason}` : ""}</p>
+      <section id="outz-directory" className="outz-section outz-section--directory">
+        <div className="outz-section__head"><p>FULL FIELD DIRECTORY</p><h2>Every OUTZ listing, one trailhead at a time</h2><span>Each address has its own check-in, short-lived group chat, ratings, and trip board. Official details stay linked to their source.</span></div>
+        <div className="outz-directory__count">{allPlaces.length || "—"} CURRENT DESTINATIONS · CAMPGROUNDS · TRAILHEADS · STAYS</div>
+        <div className="outz-directory-grid">
+          {allPlaces.map(place => (
+            <article className="outz-directory-card pdx-glass-card pdx-glass-rebind" key={place.id} style={{ "--c": place.kind === "beach" ? "#19e3ff" : "#ff8a1f" } as CSSProperties}>
+              <div><span>{place.kind.replace(/-/g, " ")}</span><b>{place.sourceName}</b></div>
+              <h3>{place.name}</h3>
+              <p>{place.sourceStatus || place.detail}</p>
+              <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href={outzPlaceHref(place)} style={{ "--c": place.kind === "beach" ? "#19e3ff" : "#ff8a1f" } as CSSProperties}>OPEN Z/ PAGE</Link>
               {place.officialUrl ? <a href={place.officialUrl} target="_blank" rel="noreferrer">Official details ↗</a> : <small>Official source has no direct visitor page.</small>}
             </article>
           ))}

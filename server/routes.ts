@@ -106,6 +106,18 @@ import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } fr
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
+import {
+  deleteOutzCheckin,
+  createOutzWallComment,
+  createOutzWallPost,
+  getOutzPlaceRating,
+  getOutzWallPosts,
+  getOutzChatMessages,
+  getOutzCheckins,
+  postOutzChatMessage,
+  upsertOutzPlaceRating,
+  upsertOutzCheckin,
+} from "./outzSocial";
 import { isProfileAccentColor, isProfileBanner } from "@shared/profileTheme";
 import {
   formatCustomSpottedVenue,
@@ -1543,6 +1555,141 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (err) {
       console.error("POST /api/outz/refresh failed:", err);
       res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
+    }
+  });
+
+  const knownOutzPlace = async (value: unknown) => {
+    const placeId = String(value || "").trim();
+    if (!placeId || placeId.length > 180) return null;
+    const snapshot = (await getOutzSnapshot()).data;
+    const known = [
+      ...snapshot.destinations.map(place => place.id),
+      ...snapshot.catalog.map(place => place.id),
+      ...snapshot.communityStays.map(place => place.id),
+    ];
+    return known.includes(placeId) ? placeId : null;
+  };
+
+  app.get("/api/outz/checkins", async (req: any, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.query.place);
+      const date = String(req.query.date || pacificTodayDate());
+      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
+      res.json(getOutzCheckins(placeId, date, req.session?.userId));
+    } catch (error) {
+      console.error("GET /api/outz/checkins failed:", error);
+      res.status(502).json({ error: "Could not load OUTZ check-ins" });
+    }
+  });
+
+  app.post("/api/outz/checkins", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      const date = String(req.body.date || pacificTodayDate());
+      const arrivalHour = Number(req.body.arrivalHour);
+      const departHour = Number(req.body.departHour);
+      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
+      if (!isValidRiverBratsHour(arrivalHour) || !isValidRiverBratsDepartHour(departHour, arrivalHour)) {
+        return res.status(400).json({ error: "Choose an arrival between 7am and 9pm and a later departure by 10pm" });
+      }
+      const note = String(req.body.note || "").trim().slice(0, 80) || null;
+      if (moderationGate(res, "OUTZ check-in", { note: note || "" })) return;
+      res.json(upsertOutzCheckin({
+        userId: req.session.userId!, placeId, arrivalHour, departHour, note, calendarDate: date,
+        isAnonymous: Boolean(req.body.isAnonymous),
+      }));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Could not save OUTZ check-in" });
+    }
+  });
+
+  app.delete("/api/outz/checkins/:id", requireAuth, (req, res) => {
+    if (!deleteOutzCheckin(Number(req.params.id), req.session.userId!)) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  app.get("/api/outz/chat", requireAuth, async (req: any, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.query.place);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
+      res.json(getOutzChatMessages(placeId, req.session.userId!));
+    } catch (error) {
+      console.error("GET /api/outz/chat failed:", error);
+      res.status(502).json({ error: "Could not load OUTZ chat" });
+    }
+  });
+
+  app.post("/api/outz/chat", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      const date = String(req.body.date || pacificTodayDate());
+      const body = String(req.body.body || "").trim();
+      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
+      if (!body || body.length > 500) return res.status(400).json({ error: "Message must be 1 to 500 characters" });
+      if (moderationGate(res, "OUTZ group chat", { body })) return;
+      res.json(postOutzChatMessage(placeId, date, req.session.userId!, body));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Could not send message" });
+    }
+  });
+
+  app.get("/api/outz/rating", async (req: any, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.query.place);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
+      res.json(getOutzPlaceRating(placeId, req.session?.userId));
+    } catch (error) {
+      console.error("GET /api/outz/rating failed:", error);
+      res.status(502).json({ error: "Could not load rating" });
+    }
+  });
+
+  app.post("/api/outz/rating", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      const rating = Number(req.body.rating);
+      if (!placeId || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ error: "Choose a rating from 1 to 5" });
+      res.json(upsertOutzPlaceRating(placeId, req.session.userId!, rating));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Could not save rating" });
+    }
+  });
+
+  app.get("/api/outz/wall", async (req: any, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.query.place);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
+      res.json(getOutzWallPosts(placeId, req.session?.userId));
+    } catch (error) {
+      console.error("GET /api/outz/wall failed:", error);
+      res.status(502).json({ error: "Could not load destination wall" });
+    }
+  });
+
+  app.post("/api/outz/wall", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      const postKind = String(req.body.postKind || "");
+      const body = String(req.body.body || "").trim();
+      const tripDate = req.body.tripDate ? String(req.body.tripDate) : null;
+      if (!placeId || !["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
+      if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
+      if (tripDate && !isAllowedBeachCheckinDate(tripDate)) return res.status(400).json({ error: "Choose a trip day in the next week" });
+      if (moderationGate(res, "OUTZ trip board post", { body })) return;
+      res.json(createOutzWallPost({ placeId, userId: req.session.userId!, postKind, body, tripDate }));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Could not post to destination wall" });
+    }
+  });
+
+  app.post("/api/outz/wall/:id/comments", requireAuth, (req, res) => {
+    try {
+      const body = String(req.body.body || "").trim();
+      if (!body || body.length > 300) return res.status(400).json({ error: "Comment must be 1 to 300 characters" });
+      if (moderationGate(res, "OUTZ destination comment", { body })) return;
+      res.json(createOutzWallComment({ postId: Number(req.params.id), userId: req.session.userId!, body }));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Could not post comment" });
     }
   });
 

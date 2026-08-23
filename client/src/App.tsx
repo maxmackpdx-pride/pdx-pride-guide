@@ -72,6 +72,7 @@ const Directory = lazy(() => import("./pages/Directory"));
 const RoosterRock = lazy(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazy(() => import("./pages/SauvieIsland"));
 const Outz = lazy(() => import("./pages/Outz"));
+const OutzPlace = lazy(() => import("./pages/OutzPlace"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
@@ -212,6 +213,7 @@ function AppLayout() {
               }}
             </Route>
             <Route path="/outz" component={Outz} />
+            <Route path="/z/out/:placeSlug" component={OutzPlace} />
             <Route path="/next" component={Darkroom} />
             <Route path="/darkroom">
               {() => <Redirect to="/next" />}

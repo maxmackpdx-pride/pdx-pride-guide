@@ -61,7 +61,13 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      retry: false,
+      // A transient deploy/startup or upstream failure should not become a
+      // visible page error on first load. Never retry deliberate client errors.
+      retry: (failureCount, error) => {
+        const status = Number(String(error).match(/^(\d{3}):/)?.[1]);
+        return failureCount < 2 && (!status || status >= 500);
+      },
+      retryDelay: attempt => Math.min(250 * 2 ** attempt, 1_000),
     },
     mutations: {
       retry: false,
