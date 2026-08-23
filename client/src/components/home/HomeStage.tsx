@@ -10,7 +10,7 @@ import { eventsUpNext, formatUpNextWhen } from "@/lib/homeEvents";
 import { formatListingWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
-import { resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { directoryFallbackLogo, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { ZDeck, ZDeckDots } from "@/components/ZDeck";
 import {
   useHomeStageSamples,
@@ -160,6 +160,9 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
 
   if (!slides.length) return null;
   const event = slides[active] ?? slides[0];
+  // Two companion flyers stay on fixed events. They do not follow the
+  // featured slider, because those sequences cannot stay in the same order.
+  const satellites = slides.filter((_, index) => index !== 0).slice(0, 2);
 
   return (
     <div className="home-front__event-preview" aria-label="Upcoming event flyers" style={{ ["--event-c" as string]: event.color }}>
@@ -174,6 +177,21 @@ function EventPreview({ events, fallback }: { events: ReturnType<typeof eventsUp
           <span>{event.venue}</span>
         </span>
       </Link>
+      {satellites.length ? (
+        <div className="home-front__event-sats">
+          {satellites.map((sat) => (
+            <Link
+              key={sat.id}
+              className="home-front__event-sat"
+              href={sat.href}
+              aria-label={sat.title}
+              style={{ ["--event-c" as string]: sat.color }}
+            >
+              {sat.poster ? <img src={sat.poster} alt="" /> : <strong>{sat.title}</strong>}
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <div className="home-front__event-dots" aria-label="Choose event flyer">
         <span className="home-front__event-count">{String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span>
         <div>
@@ -441,10 +459,11 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                 {world.key === "directory" && directoryTiles.length ? (
                   <div className="home-front__directory-grid" aria-label="Local businesses in the Zaylist directory">
                     {directoryTiles.map((place) => {
-                      const logo = resolveDirectoryLogo(place.name, place.imageUrl || undefined);
+                      const logo = resolveDirectoryLogo(place.name, place.imageUrl || undefined)
+                        || directoryFallbackLogo(place.type || "venue");
                       return (
                         <Link key={place.id} href={placePath(place.id, place.name)} className="home-front__directory-tile" title={place.name} aria-label={place.name}>
-                          {logo ? <img src={logo} alt="" loading="lazy" /> : <span>{place.name.slice(0, 2)}</span>}
+                          <img src={logo} alt="" loading="lazy" />
                         </Link>
                       );
                     })}
