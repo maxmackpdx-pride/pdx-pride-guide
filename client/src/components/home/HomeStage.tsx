@@ -275,7 +275,7 @@ function WorldMotif({ kind }: { kind: WorldMotifKind }) {
 
 export default function HomeStage({ samples: samplesProp, includeDemoFallback, afterWelcome }: Props) {
   const { calmMode } = useTheme();
-  const { samples: liveSamples, events } = useHomeStageSamples({ includeDemoFallback });
+  const { samples: liveSamples, events, stageLists } = useHomeStageSamples({ includeDemoFallback });
   const samples = samplesProp ?? liveSamples;
   const { data: directoryPlaces = [] } = useQuery<HomeDirectoryPlace[]>({
     queryKey: ["/api/directory"],
@@ -365,7 +365,7 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
         ) : null}
         <div className="home-front__atmosphere" aria-hidden />
         <div className="home-front__hero">
-          <p className="home-front__kicker"><span /> made in Portland · still in beta</p>
+          <p className="home-front__kicker"><span /> made in Portland · still in <em className="home-front__kicker-beta">beta</em></p>
           <h1 id="home-front-title" className="sr-only">Zaylist</h1>
           <div className="home-front__mark">
             <div className="home-front__mark-art">
@@ -419,7 +419,16 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
           rotate={12}
         >
           {WORLDS.map((world) => {
-            const sample = world.sampleKey ? samples[world.sampleKey] : null;
+            /*
+             * Two postings read as a board; one blown-up posting reads as an
+             * advert. stageLists already carries up to two per board, so use
+             * it and fall back to the single sample where it does not.
+             */
+            const listed = world.sampleKey
+              ? (stageLists as Record<string, HomeStageCardData[] | undefined>)[world.sampleKey]
+              : undefined;
+            const single = world.sampleKey ? samples[world.sampleKey] : null;
+            const postings = (listed?.length ? listed : single ? [single] : []).slice(0, 2);
             return (
               <article
                 key={world.key}
@@ -490,7 +499,13 @@ export default function HomeStage({ samples: samplesProp, includeDemoFallback, a
                     })}
                   </div>
                 ) : null}
-                {sample && world.key !== "events" ? <HomeStageCard card={sample} className="home-front__sample" /> : null}
+                {postings.length && world.key !== "events" ? (
+                  <div className={`home-front__samples home-front__samples--${postings.length}`}>
+                    {postings.map((post) => (
+                      <HomeStageCard key={post.href + post.title} card={post} className="home-front__sample" />
+                    ))}
+                  </div>
+                ) : null}
                 {world.key !== "events" ? (
                   <Link href={world.href} className="home-front__world-action">
                     <span>{world.action}</span><span aria-hidden>↗</span>

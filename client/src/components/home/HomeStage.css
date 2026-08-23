@@ -2,9 +2,13 @@
 
 .home-front__welcome { position:relative; min-height:min(760px,calc(100svh - 76px)); display:flex; flex-direction:column; isolation:isolate; overflow:hidden; background:#050506; }
 .home-front__video { position: absolute; inset: 0; z-index: -4; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.08) contrast(1.06) brightness(.56); }
-.home-front__atmosphere { position: absolute; inset: 0; z-index: -3; background: linear-gradient(180deg, rgba(5,5,6,.34), rgba(5,5,6,.66) 64%, #050506); }
-.home-front__hero { box-sizing:border-box; width:min(1120px,100%); min-width:0; min-height:0; flex:1 1 auto; margin-inline:auto; padding:clamp(32px,6vw,72px) clamp(20px,5vw,64px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+/* Was a flat wash (.34 -> .66 -> solid) across the whole panel, which is what
+   made the logo read matte. Now it only feathers the bottom edge into the
+   seam, leaving the middle clear so the mark stays sharp and vibrant. */
+.home-front__atmosphere { position: absolute; inset: 0; z-index: -3; background: linear-gradient(180deg, transparent 0%, transparent 58%, rgba(5,5,6,.55) 84%, #050506 100%); }
+.home-front__hero { position:relative; z-index:2; box-sizing:border-box; width:min(1120px,100%); min-width:0; min-height:0; flex:1 1 auto; margin-inline:auto; padding:clamp(32px,6vw,72px) clamp(20px,5vw,64px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
 .home-front__kicker { margin:0 0 clamp(32px,7vh,72px); display:flex; align-items:center; gap:10px; color:var(--status-good,#39ff14); font:700 15.2px/1 var(--font-mono,monospace); letter-spacing:.2em; text-transform:uppercase; }
+.home-front__kicker-beta { font-size:1.3em; font-style:normal; font-weight:700; letter-spacing:.16em; }
 .home-front__kicker span { width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 12px currentColor; animation:homeFrontKickerBlink 1.15s steps(2,end) infinite; }
 .home-front__mark { position:relative; width:min(1100px,98vw); animation:homeFrontMarkFloat 6.4s ease-in-out infinite alternate; }
 .home-front__mark-art { position:relative; }
@@ -61,11 +65,12 @@ html.calm-mode .home-front__kicker span,
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
 .home-front__worlds-head p { max-width:56ch; margin:18px 0 0; color:var(--text-body,#d6d6dc); font-size:clamp(15px,1.8vw,18px); line-height:1.5; text-wrap:pretty; }
 .home-front__content-word { position:relative; display:inline-block; }
-.home-front__content-word-core { position:relative; z-index:1; }
+/* Heading white, and the fill reset so no inherited transparent fill can hide it. */
+.home-front__content-word-core { position:relative; z-index:1; color:#fff; -webkit-text-fill-color:currentColor; }
 .home-front__content-word-a, .home-front__content-word-b { position:absolute; inset:0; opacity:0; pointer-events:none; mix-blend-mode:screen; }
 .home-front__content-word-a { color:#00ffff; animation:homeFrontGlitchA 3.4s steps(1,end) infinite; }
 .home-front__content-word-b { color:#ff00cc; animation:homeFrontGlitchB 3.4s steps(1,end) infinite; }
-.home-front__deck { position:relative; z-index:1; /* One box for every slide: ZDeck sizes each slide to --cf-card x --cf-card-h and stretches its child to 100%, so widening these keeps all cards identical. The old 248px cap could not fit an 11-character word at the title size. */ --cf-card:clamp(240px,20vw,304px); --cf-card-h:600px; width:100%; margin:0 auto; padding:24px 0 6px; }
+.home-front__deck { position:relative; z-index:1; /* One box for every slide: ZDeck sizes each slide to --cf-card x --cf-card-h and stretches its child to 100%, so widening these keeps all cards identical. The old 248px cap could not fit an 11-character word at the title size. */ --cf-card:clamp(312px,26vw,396px); --cf-card-h:648px; width:100%; margin:0 auto; padding:24px 0 6px; }
 .home-front__deck .z-deck__slide > .home-front__world,
 .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; height:100%; min-height:0; grid-column:auto; margin:0; }
 .home-front__deck-dots { margin:4px 0 0; }
@@ -149,7 +154,7 @@ html.calm-mode .home-front__kicker span,
 .home-front__world-eyebrow { text-align:right; }
 .home-front__world-copy { margin-top:clamp(30px,5vw,54px); }
 /* No character cap: a word longer than the cap (CONNECTIONS, BEACHES) could not fit it and overflowed the card, where overflow:hidden then sliced it. It wraps inside the card now, and the size is capped to what the widest word can hold. */
-.home-front__world-copy h3 { margin:0; color:#fff; font:900 clamp(30px,4.2vw,46px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.015em; text-transform:uppercase; text-wrap:balance; overflow-wrap:break-word; hyphens:auto; }
+.home-front__world-copy h3 { margin:0; color:#fff; font:900 clamp(38px,5vw,58px)/.88 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.015em; text-transform:uppercase; text-wrap:balance; overflow-wrap:break-word; hyphens:auto; }
 .home-front__world-copy p { max-width:42ch; margin:16px 0 0; color:var(--text-body,#d6d6dc); font-size:14px; line-height:1.55; text-wrap:pretty; }
 .home-front__world-action { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:48px; margin-top:auto; padding-top:18px; border-top:1px solid color-mix(in srgb,var(--c) 30%,transparent); color:var(--c); font:900 14px/1 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:.06em; text-transform:uppercase; text-decoration:none; }
 .home-front__world-action span:last-child { font-size:20px; transition:transform .18s ease; }
@@ -184,6 +189,31 @@ html.calm-mode .home-front__kicker span,
  * now; the card's own box is still fixed by --cf-card-h, so every card in the
  * deck stays exactly the same size.
  */
+/* Two postings stack and share the preview slot. A board reads as a board when
+   it shows more than one thing; one posting blown up reads as an advert. */
+.home-front__samples {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 14px 0;
+}
+
+.home-front__samples .home-front__sample.home-stage-card {
+  flex: 1 1 0;
+  min-height: 104px;
+  margin: 0;
+  max-height: none;
+}
+
+/* A single posting holds its own size instead of stretching to fill the slot.
+   One posting blown up to twice the height is the thing this replaces. */
+.home-front__samples--1 .home-front__sample.home-stage-card {
+  flex: 0 0 auto;
+  max-height: 232px;
+}
+
 .home-front__sample.home-stage-card {
   width:100%;
   flex:1 1 auto;
@@ -279,7 +309,7 @@ html.calm-mode .home-front__world,:root[data-calm="true"] .home-front__world { t
 html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__world:hover { transform:none; }
 
 @media (max-width:900px) {
-  .home-front__deck { --cf-card:clamp(216px,31vw,272px); --cf-card-h:560px; }
+  .home-front__deck { --cf-card:clamp(280px,40vw,354px); --cf-card-h:612px; }
 }
 
 @media (max-width:620px) {
@@ -296,11 +326,11 @@ html.calm-mode .home-front__world:hover,:root[data-calm="true"] .home-front__wor
   .home-front__worlds { padding-top:20px; padding-bottom:36px; }
   .home-front__worlds-head h2 { font-size:48px; }
   .home-front__worlds-head p { margin-top:14px; font-size:15px; }
-  .home-front__deck { --cf-card:clamp(240px,84vw,332px); --cf-card-h:568px; padding:16px 0 2px; }
+  .home-front__deck { --cf-card:clamp(300px,92vw,412px); --cf-card-h:620px; padding:16px 0 2px; }
   .home-front__deck .z-deck__slide > .home-front__world,
   .home-front__deck .z-deck__slide > .home-front__world--feature { width:100%; max-width:none; min-height:0; padding:18px; }
   .home-front__world-copy { margin-top:34px; }
-  .home-front__world-copy h3 { font-size:40px; }
+  .home-front__world-copy h3 { font-size:48px; }
   .home-front__world[data-world="events"] { min-height:0; }
   .home-front__world[data-world="events"] .home-front__world-top { padding:18px; }
   .home-front__directory-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }

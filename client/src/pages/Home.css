@@ -2699,7 +2699,14 @@ html.calm-mode .home-main-stage .home-hero__grain {
   line-height: var(--lh-body, 1.55);
 }
 
-#home-worlds-title > span {
+/*
+ * The spectrum belongs to "You're", whose text is a direct child so the
+ * background-clip:text gradient paints on it. The glitch word is also a direct
+ * child but keeps its text one level deeper (core + two ghost layers), so it
+ * inherited -webkit-text-fill-color:transparent with no gradient behind it and
+ * rendered invisible. It is excluded here and keeps the heading's own white.
+ */
+#home-worlds-title > span:not(.home-front__content-word) {
   color:transparent;
   background:linear-gradient(90deg,#ff2bd6 0%,#ff5a1f 16.666%,#ffe600 33.333%,#9dff00 50%,#00f0ff 66.666%,#7f5cff 83.333%,#ff2bd6 100%);
   background-size:200% 100%;
@@ -2716,10 +2723,10 @@ html.calm-mode .home-main-stage .home-hero__grain {
   to { background-position:200% 50%; }
 }
 
-html[data-calm="true"] #home-worlds-title > span { animation:none; background-position:22% 50%; }
+html[data-calm="true"] #home-worlds-title > span:not(.home-front__content-word) { animation:none; background-position:22% 50%; }
 
 @media (prefers-reduced-motion:reduce) {
-  #home-worlds-title > span { animation:none; background-position:22% 50%; }
+  #home-worlds-title > span:not(.home-front__content-word) { animation:none; background-position:22% 50%; }
 }
 
 @media (max-width:900px) {
