@@ -413,6 +413,27 @@ sqlite.exec(`
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
+try {
+  const bcols = new Set(
+    sqlite.prepare(`PRAGMA table_info(businesses)`).all().map((c: any) => c.name),
+  );
+  const businessAlters: Array<[string, string]> = [
+    ["donate_url", "TEXT"],
+    ["status", "TEXT NOT NULL DEFAULT 'OPEN'"],
+    ["closed_at", "TEXT"],
+    ["is_new", "INTEGER NOT NULL DEFAULT 0"],
+    ["grand_opening_date", "TEXT"],
+    ["hours", "TEXT"],
+    ["phone", "TEXT"],
+    ["locations", "TEXT"],
+    ["owner_id", "INTEGER"],
+  ];
+  for (const [name, spec] of businessAlters) {
+    if (!bcols.has(name)) sqlite.exec(`ALTER TABLE businesses ADD COLUMN ${name} ${spec}`);
+  }
+} catch (e) {
+  console.error("[businesses] column migration failed:", e);
+}
 
 // HAUSING - THE HAÜZ. See shared/schema.ts for the annotated schema.
 sqlite.exec(`
