@@ -213,7 +213,6 @@
 .pdx-glass,
 .pdxBoard,
 .pdxRow,
-.event-board-card,
 .board-listing-card,
 .board-listing-card--makeover,
 .board-spotted-card,
@@ -602,7 +601,6 @@ html.calm-mode .pdxLegend,
 .board-detail-modal,
 .board-post-overlay,
 /* .event-modal - shell chrome lives in index.css (opaque; no backdrop-filter double) */
-.event-board-card,
 .pdxBoard,
 .pdxRow,
 .board-stats-bar,
@@ -701,10 +699,6 @@ html.calm-mode .pdxLegend,
     inset 0 0 40px -22px color-mix(in srgb, var(--c) 36%, transparent) !important;
 }
 
-.event-board-card {
-  --c: var(--card-day-color, var(--_day, #19e3ff));
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
-}
 
 /*
  * Stacking (bottom → top):
@@ -718,27 +712,6 @@ html.calm-mode .pdxLegend,
 .spotted-card::after,
 .board-detail-modal::after,
 .board-post-overlay::after,
-.event-board-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    linear-gradient(
-      133deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(255, 255, 255, 0.04) 14%,
-      transparent 40%
-    ),
-    radial-gradient(
-      70% 55% at 108% 112%,
-      rgba(255, 255, 255, 0.08),
-      color-mix(in srgb, var(--c) 12%, transparent) 40%,
-      transparent 70%
-    );
-}
 
 /* Decorative board motifs - line SVGs, board accent, top-right watermark (§17) */
 .board-glass-motif {
@@ -821,10 +794,6 @@ html.calm-mode .pdxLegend,
 .board-spotted-card > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap):not(.board-spotted-card__ticks),
 .spotted-card > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap):not(.spotted-card__found-stamp),
 .board-detail-modal > :not(.board-glass-motif):not(.board-glass-motif--quote-wrap),
-.event-board-card > * {
-  position: relative;
-  z-index: 2;
-}
 
 /* Ensure card is a positioning context for absolute motifs */
 .board-listing-card--makeover,
@@ -1001,7 +970,6 @@ html.calm-mode .pdxRow::before,
 .board-listing-card.is-expanded,
 .board-spotted-card:hover,
 .spotted-card:hover,
-.event-board-card:hover,
 a.pdxRow:hover,
 .ds-listing-card--list:hover .pdxRow {
   filter: brightness(1.06) saturate(1.06);
@@ -1032,7 +1000,6 @@ html.calm-mode .board-spotted-card,
 html.calm-mode .spotted-card,
 html.calm-mode .board-detail-modal,
 html.calm-mode .board-post-overlay,
-html.calm-mode .event-board-card,
 html.calm-mode .pdxBoard,
 html.calm-mode .pdxRow,
 html.calm-mode .zine-filter-bar,
@@ -1065,7 +1032,6 @@ html.calm-mode .pdx-glass-card--neutral,
 :root[data-calm="true"] .spotted-card,
 :root[data-calm="true"] .board-detail-modal,
 :root[data-calm="true"] .board-post-overlay,
-:root[data-calm="true"] .event-board-card,
 :root[data-calm="true"] .pdxBoard,
 :root[data-calm="true"] .pdxRow,
 :root[data-calm="true"] .zine-filter-bar,
@@ -1105,7 +1071,6 @@ html.calm-mode .pdx-glass-card--neutral,
   .spotted-card,
   .board-detail-modal,
   .board-post-overlay,
-  .event-board-card,
   .pdxBoard,
   .pdxRow,
   .nude-live-card,

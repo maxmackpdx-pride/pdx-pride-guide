@@ -117,7 +117,6 @@ p { margin: 0; }
 .pdxBoard,
 .pdxRow,
 .board-listing-card,
-.event-board-card,
 .board-spotted-card,
 .spotted-card,
 .schedule-event-card,
@@ -133,7 +132,6 @@ p { margin: 0; }
 .board-listing-card::before,
 .board-spotted-card::before,
 .spotted-card::before,
-.event-board-card::before,
 .schedule-event-card::before,
 .card.fitem.fitem--glow::before,
 .featured-event-ad::before {

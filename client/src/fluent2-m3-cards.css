@@ -46,7 +46,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   .pdx-glass,
   .pdxBoard,
   .pdxRow,
-  .event-board-card,
   .board-listing-card,
   .board-listing-card--makeover,
   .board-spotted-card,
@@ -93,7 +92,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   .pdx-glass-card,
   .pdxBoard,
   .pdxRow,
-  .event-board-card,
   .board-listing-card,
   .board-spotted-card,
   .spotted-card,
@@ -451,7 +449,6 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal :where(
 html[data-zaylist-cards="fluent2-m3"] :where(
   a.pdx-glass-card,
   button.pdx-glass-card,
-  .event-board-card,
   .board-listing-card,
   .board-spotted-card,
   .spotted-card,
@@ -478,7 +475,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
 html[data-zaylist-cards="fluent2-m3"] :where(
   a.pdx-glass-card,
   button.pdx-glass-card,
-  .event-board-card,
   .board-listing-card,
   .board-spotted-card,
   .spotted-card,
@@ -500,7 +496,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
 html[data-zaylist-cards="fluent2-m3"] :where(
   a.pdx-glass-card,
   button.pdx-glass-card,
-  .event-board-card,
   .board-listing-card,
   .board-spotted-card,
   .spotted-card,
@@ -516,7 +511,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
 /* The existing rainbow seam and semantic poster floor remain fully visible. */
 html[data-zaylist-cards="fluent2-m3"] :where(
   .pdx-glass-card,
-  .event-board-card,
   .board-listing-card,
   .board-spotted-card,
   .spotted-card,
@@ -563,7 +557,6 @@ html[data-zaylist-cards="fluent2-m3"] .pdxPlace:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html[data-zaylist-cards="fluent2-m3"] :where(
     .pdx-glass-card,
-    .event-board-card,
     .board-listing-card,
     .board-spotted-card,
     .spotted-card,
