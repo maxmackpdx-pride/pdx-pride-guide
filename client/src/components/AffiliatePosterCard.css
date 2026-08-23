@@ -315,15 +315,15 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--glass-card-bg) !important;
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
-  /* Hot rim like the affiliate mock: black ring + outer neon halo */
-  box-shadow:
-    0 0 0 2px #000,
-    0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 40px -8px color-mix(in srgb, var(--c) 55%, transparent),
-    0 0 80px -18px color-mix(in srgb, var(--c) 32%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent) !important;
+  border: var(--glass-card-border) !important;
+  /*
+   * The rule already rebinds --c, so the shell is just the rebound recipe.
+   * The old !important stack restated it and swapped the floor bloom for a
+   * 55%/32% accent halo, which is the retired thick glow frame. Deleted; the
+   * shared --glass-card-shadow (black ring, floor, inset sheen) comes through.
+   * !important is only here to beat the flat .feed-aff surface in hub-v2.css.
+   */
+  box-shadow: var(--glass-card-shadow) !important;
   backdrop-filter: blur(var(--glass-card-blur));
   -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }

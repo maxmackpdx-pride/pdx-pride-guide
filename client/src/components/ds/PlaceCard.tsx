@@ -8,9 +8,11 @@ import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
 
 /* PlaceCard = directory card - Card System.html "DIRECTORY CARDS" SoT
-   (Directory cards redesign.zip). OLED glass(c) by category, dual sheen,
-   thin dir-refract seam, soft logo orb (not boxed poster floor), neon logo,
-   6px hover lift. Nonprofit keeps rainbow --_edge. */
+   (Directory cards redesign.zip). Shell composed from .pdx-glass-card +
+   --glass-card-* keyed to the category accent, dual sheen (card ::after +
+   .pdx-glass-sheen--specular), shared .pdx-refract-seam, 8% --neon-bloom,
+   soft logo orb (not boxed poster floor), neon logo, 6px hover lift.
+   Nonprofit keeps rainbow --_edge. */
 const CSS = `
 /* Little directory cards - SoT: 03-directory-cards / design image
    OLED near-black slab, soft category bloom, solid cat chip, neon logo.
@@ -22,82 +24,37 @@ const CSS = `
   --c: var(--_c, var(--pink));
   --dir-gm: 60;
 }
-/* Soft outer neon cloud (always-on) - pink/cyan halo around the little card */
-.pdxPlace__glow{
-  position:absolute; inset:-6px; border-radius:20px; pointer-events:none; z-index:0;
-  box-shadow:
-    0 0 18px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.15%), transparent),
-    0 0 42px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .95%), transparent),
-    0 0 78px -12px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .55%), transparent);
-}
-/* Master OLED glass slab */
-.pdxPlace__body{
+/* Master deep-glass slab - COMPOSED, not restated.
+   The node carries .pdx-glass-card .pdx-glass-rebind, so fill, keyline, blur,
+   corner sheen and floor bloom all come from --glass-card-* recomputed against
+   the category accent (--c). The only outer glow is the 8% --neon-bloom.
+   The old .pdxPlace__glow three-layer neon cloud (a retired thick glow frame)
+   and the two hand-rolled shadow stacks are gone. */
+.pdxPlace .pdxPlace__body{
   position:relative; z-index:1; border-radius:16px; overflow:hidden;
-  background:
-    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
-    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%);
-  border:1.5px solid color-mix(in srgb, var(--c) 62%, #14141a);
-  box-shadow:
-    0 0 0 1px #000,
-    0 28px 56px -22px rgba(0,0,0,.92),
-    0 0 22px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.1%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 48%, rgba(255,255,255,.1)),
-    inset 0 0 28px -20px color-mix(in srgb, var(--c) 28%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow:var(--glass-card-shadow), var(--neon-bloom);
   padding:18px 16px 16px;
   display:flex; flex-direction:column; gap:12px;
   transition:filter .16s ease, box-shadow .16s ease, border-color .16s ease;
 }
-/* Rainbow / specialty edge (nonprofit, healthcare, realestate) */
+/* Rainbow / specialty edge (nonprofit, healthcare, realestate).
+   Same --glass-card-bg, clipped to the padding box so the gradient border
+   shows through the transparent 2px rim. */
 .pdxPlace--edge .pdxPlace__body{
-  background:
-    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%) padding-box,
-    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) padding-box,
-    var(--_edge, linear-gradient(var(--c), var(--c))) border-box;
+  background:var(--glass-card-bg), var(--_edge, linear-gradient(var(--c), var(--c)));
+  background-origin:border-box;
+  background-clip:padding-box, padding-box, border-box;
   border:2px solid transparent;
 }
-/* Dual sheen - quiet so type stays readable */
-.pdxPlace__sheen{
-  position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
-  background:
-    linear-gradient(133deg, rgba(255,255,255,.12), rgba(255,255,255,.02) 14%, transparent 36%),
-    radial-gradient(70% 55% at 108% 112%, rgba(255,255,255,.08), color-mix(in srgb, var(--c) 10%, transparent) 34%, transparent 66%);
-}
-/* Very thin top refract - design reads as soft edge glow, not a thick bar */
-.pdxPlace__seam{
-  position:absolute; top:0; left:10px; right:10px; height:1.5px; margin:0; z-index:5;
-  border-radius:0; pointer-events:none; overflow:visible;
-  background:linear-gradient(90deg,#ff2d5e,#ff9500,#ffee00,#39ff14,#00ffff,#3a6bff,#8800ff,#ff00cc,#ff2d5e);
-  background-size:200% 100%;
-  opacity:.55; filter:blur(.35px);
-  animation:dirRefract 7s linear infinite;
-  -webkit-mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);
-  mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);
-}
-.pdxPlace__seam.pdx-rainbow-rule{
-  height:1.5px; left:10px; right:10px;
-  box-shadow:none !important;
-}
+/* Second sheen: the corner sheen is .pdx-glass-card::after, the specular
+   lower-right lobe is the shared .pdx-glass-sheen--specular primitive. */
+/* Refract seam: shared .pdx-refract-seam. Only the inset is tightened here. */
+.pdxPlace__seam{ left:10px; right:10px; }
+.pdxPlace__seam.pdx-rainbow-rule{ left:10px; right:10px; box-shadow:none !important; }
 .pdxPlace--clickable{ cursor:pointer; transition:transform .16s ease; }
 .pdxPlace--clickable:hover{ transform:translateY(-6px) !important; }
 .pdxPlace--clickable:hover .pdxPlace__body{
   filter:brightness(1.06) saturate(1.08);
-  border-color:color-mix(in srgb, var(--c) 78%, #14141a);
-  box-shadow:
-    0 0 0 1px #000,
-    0 28px 56px -22px rgba(0,0,0,.92),
-    0 0 32px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.4%), transparent),
-    0 0 14px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.2%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255,255,255,.12)),
-    inset 0 0 28px -18px color-mix(in srgb, var(--c) 36%, transparent),
-    0 20px 44px -20px rgba(0,0,0,.85);
-}
-.pdxPlace--clickable:hover .pdxPlace__glow{
-  box-shadow:
-    0 0 24px -2px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.4%), transparent),
-    0 0 56px -6px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * 1.1%), transparent),
-    0 0 90px -10px color-mix(in srgb, var(--c) calc(var(--dir-gm,60) * .7%), transparent);
 }
 /* Logo well - soft category orb under neon mark */
 .pdxPlace__media{
@@ -227,8 +184,6 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
    Classes: pdxPlace--compact (from prop) and/or pdxPlace--wide (Directory). */
 .pdxPlace--compact,
 .pdxPlace--wide{ margin:0; }
-.pdxPlace--compact .pdxPlace__glow,
-.pdxPlace--wide .pdxPlace__glow{ inset:-3px; border-radius:14px; }
 .pdxPlace--compact .pdxPlace__body,
 .pdxPlace--wide .pdxPlace__body{
   flex-direction:row; align-items:center; gap:14px;
@@ -302,15 +257,13 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
 @keyframes pgDirCardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 html.calm-mode .pdxPlace,
 :root[data-calm="true"] .pdxPlace{ --dir-gm:0; animation:none !important; }
-html.calm-mode .pdxPlace__seam,
-:root[data-calm="true"] .pdxPlace__seam{
-  animation:none !important; filter:none;
-  background:color-mix(in srgb, var(--c) 55%, #2a2a32);
-  background-size:auto; -webkit-mask:none; mask:none; opacity:.9;
-}
+/* Calm seam behavior comes from the shared .pdx-refract-seam calm rules. */
 html.calm-mode .pdxPlace__body,
 :root[data-calm="true"] .pdxPlace__body{
   backdrop-filter:none; -webkit-backdrop-filter:none;
+  /* --neon-bloom collapses to none under calm, which is not a valid
+     box-shadow list item, so calm re-states the token on its own. */
+  box-shadow:var(--glass-card-shadow);
 }
 html.calm-mode .pdxPlace__actions,
 :root[data-calm="true"] .pdxPlace__actions{
@@ -474,10 +427,9 @@ export function PlaceCard({
       style={{ "--_c": accent, "--c": accent, "--_edge": edge, ...(style || {}) }}
       {...rest}
     >
-      <div className="pdxPlace__glow" aria-hidden="true" />
-      <div className="pdxPlace__body pdx-glass-rebind">
-        <div className="pdxPlace__sheen" aria-hidden="true" />
-        <div className="pdxPlace__seam dir-refract" aria-hidden="true" />
+      <div className="pdxPlace__body pdx-glass-card pdx-glass-rebind">
+        <div className="pdxPlace__sheen pdx-glass-sheen--specular" aria-hidden="true" />
+        <div className="pdxPlace__seam pdx-refract-seam" aria-hidden="true" />
         <div className="pdxPlace__actions">
           {businessId != null && (
             <VenueFollowButton

@@ -6,7 +6,8 @@ import LiveWave from "@/components/LiveWave";
    Deep-glass / OLED-neon (docs/handoffs/deep-glass-2026-07-16/ §2.1):
    --glass-card with --c = day color; sheen; rainbow top seam (base ::before);
    thumb in --poster-well treatment; primary CTA = .pdx-glass-btn.
-   Claim keeps brutal sticker. Layout / spacing / type scale unchanged.
+   Claim = cyan sticker, pending = the same family tinted (no magenta
+   offset). Layout / spacing / type scale unchanged.
    Entrance: pgDirCardIn. */
 const CSS = `
 .pdxRow{
@@ -113,9 +114,13 @@ a.pdxRow:hover{
   cursor:pointer; white-space:nowrap;
 }
 .pdxRow__claim:hover{ filter:brightness(1.06); }
+/* Pending = same cyan claim family, secondary treatment. Not a CTA, so no
+   solid accent fill and no offset sticker shadow. The retired magenta-fill +
+   magenta-offset chip is gone. */
 .pdxRow__claim--pending{
-  color:var(--claim-sticker-fg,#050506); background:var(--neon-magenta,#FF00CC); cursor:default;
-  box-shadow:3px 3px 0 rgba(255,0,204,.35);
+  color:var(--claim-sticker-bg,#00FFFF); cursor:default;
+  background:color-mix(in srgb, var(--claim-sticker-bg,#00FFFF) 10%, #050506);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--claim-sticker-bg,#00FFFF) 45%, #101014);
 }
 .pdxRow__claim--pending:hover{ filter:none; }
 

@@ -5,7 +5,8 @@ import React from "react";
    Deep-glass / OLED-neon (docs/handoffs/deep-glass-2026-07-16/ §2.1):
    --glass-card with --c = day color; sheen; rainbow top seam (base ::before /
    pdx-rainbow-rule engine); poster in --poster-well (radial + 4px day floor +
-   scanline); primary CTAs = .pdx-glass-btn. Claim keeps brutal sticker.
+   scanline); primary CTAs = .pdx-glass-btn. Claim = cyan sticker,
+   pending = the same family tinted (no magenta offset).
    Layout / spacing / type scale unchanged. Entrance: pgDirCardIn. */
 const CSS = `
 .pdxBoard{
@@ -126,9 +127,13 @@ a.pdxBoard:hover{
   border-radius:0; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
 }
 .pdxBoard__claim-tag:hover{ filter:brightness(1.06); }
+/* Pending = same cyan claim family, secondary treatment. Not a CTA, so no
+   solid accent fill and no offset sticker shadow. The retired magenta-fill +
+   magenta-offset chip is gone. */
 .pdxBoard__claim-tag--pending{
-  color:var(--claim-sticker-fg,#050506); background:var(--neon-magenta,#FF00CC); cursor:default;
-  box-shadow:3px 3px 0 rgba(255,0,204,.35);
+  color:var(--claim-sticker-bg,#00FFFF); cursor:default;
+  background:color-mix(in srgb, var(--claim-sticker-bg,#00FFFF) 10%, #050506);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--claim-sticker-bg,#00FFFF) 45%, #101014);
 }
 .pdxBoard__claim-tag--pending:hover{ filter:none; }
 
