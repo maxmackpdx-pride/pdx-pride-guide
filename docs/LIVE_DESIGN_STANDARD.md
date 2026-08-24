@@ -123,6 +123,15 @@ the sole exception** and keep the debossed well with no bloom at all.
 - Chrome = deep-glass (not old flat zine slabs).
 - Motifs sit **above** sheen, visible; ISO/Looking dashed edges per live CSS.
 
+## Dynamic Text (title-over-photo motif)
+
+- Canonical spec: `zaylist-foundation-library/public/design-system/guidelines/dynamic-text.html`. This section is the product mirror, not the source — if the two disagree, treat it as drift to resolve, not a choice to make silently.
+- Implementation: `client/src/lib/dynamicText.ts` (general-purpose, any surface can adopt it) + `client/src/components/housing/HousingWell.tsx` (the one current caller). Full contract, algorithm, and gotchas: the `zaylist-dynamic-text` skill.
+- **Readable band is 24-220px, not 28-180.** Height math includes a diacritic-gap term (`rowGapAbove`) — an accented row needs more headroom than a plain one, or it clips.
+- **Three HAÜZ-only opt-ins, all default off:** `HOUSING_FIT_WITHIN_FRAME` (shrink to fit, exact, down to the floor only if required), `HOUSING_PREFER_TWO_ROWS` ("almost always two lines except with one word"), `HOUSING_MAX_NEIGHBOR_RATIO` (3x - softly discourages an extreme size gap between adjacent rows, verified against the real regression set before shipping). Do not assume these transfer to a new surface without the same verification.
+- **Never use letter-spacing, `scaleX()`, or per-character positioning as a fitting mechanism.** Tracking is fixed and uniform (`-.02em`), folded into the width measurement so measured and rendered widths match - it never varies to force a row to fit.
+- Scope: short authored display names and title motifs that own a fixed visual field. Not event names, interface copy, paragraphs, controls, or changing system titles - those get the normal type scale. An exception needs an explicit decision, the same way HAÜZ earned its opt-ins.
+
 ## Maps
 
 - Debossed OLED frame; keys = OLED panel chrome, pin **shapes** preserved.
