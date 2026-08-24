@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <title>Canyon Overlook Adventure Map</title>
+  <g fill="none" stroke="#FF6600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M70 142L147 108L194 151L238 116V374M362 374V116L411 151L459 108L531 142"></path>
+    <path d="M70 142L96 369L172 410L238 374M531 142L505 369L430 410L362 374"></path>
+    <path d="M111 194L170 225L238 183M489 194L430 225L362 183"></path>
+    <path d="M278 520C232 481 239 444 290 415C334 389 329 355 287 330C261 314 269 286 303 263"></path>
+    <path d="M332 520C286 483 295 448 339 419C383 390 375 354 334 329C310 314 313 287 343 264"></path>
+    <path d="M98 461C175 420 240 425 291 462M509 459C448 420 393 422 346 458" stroke-dasharray="14 15"></path>
+    <path d="M112 483C87 453 93 419 112 419S137 453 112 483Z"></path>
+    <circle cx="112" cy="443" r="8"></circle>
+    <path d="M303 484C278 454 284 420 303 420S328 454 303 484Z"></path>
+    <circle cx="303" cy="444" r="8"></circle>
+    <path d="M492 481C467 451 473 417 492 417S517 451 492 481Z"></path>
+    <circle cx="492" cy="441" r="8"></circle>
+    <path d="M93 327l18-55 18 55-12-10 9 32-15-12-15 12 9-32ZM470 327l18-55 18 55-12-10 9 32-15-12-15 12 9-32Z"></path>
+  </g>
+</svg>

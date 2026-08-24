@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <title>Alpine Lake Loop Adventure Map</title>
+  <g fill="none" stroke="#39FF14" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M45 284L148 161L229 237L316 92L403 225L472 158L558 280"></path>
+    <path d="M109 270L149 213L192 259M270 215L316 148L360 217M434 237L473 202L520 262"></path>
+    <path d="M148 398C174 334 244 307 307 326C373 302 444 340 460 398C438 466 373 493 304 474C235 494 171 463 148 398Z"></path>
+    <path d="M188 397C214 355 257 351 304 363C351 349 403 363 423 398C395 434 352 443 304 429C257 444 212 433 188 397Z"></path>
+    <path d="M116 440C139 505 214 535 303 515C398 538 477 500 491 430" stroke-dasharray="14 15"></path>
+    <path d="M130 467C105 437 111 403 130 403S155 437 130 467Z"></path>
+    <circle cx="130" cy="427" r="8"></circle>
+    <path d="M304 542C279 512 285 478 304 478S329 512 304 542Z"></path>
+    <circle cx="304" cy="502" r="8"></circle>
+    <path d="M477 457C452 427 458 393 477 393S502 427 477 457Z"></path>
+    <circle cx="477" cy="417" r="8"></circle>
+    <path d="M81 376l19-59 19 59-13-11 10 35-16-13-16 13 10-35ZM485 365l19-59 19 59-13-11 10 35-16-13-16 13 10-35Z"></path>
+  </g>
+</svg>
