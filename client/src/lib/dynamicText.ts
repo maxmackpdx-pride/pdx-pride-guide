@@ -142,6 +142,40 @@ export const HOUSING_FIT_WITHIN_FRAME = true;
  */
 export const HOUSING_PREFER_TWO_ROWS = true;
 
+/**
+ * When set, penalizes (does not hard-reject) a candidate whose adjacent rows
+ * differ in size by more than this ratio — informed by the Adobe Express
+ * Dynamic Text reconstruction research (extremeScaleRatioPenalty /
+ * clampNeighborRatios), which flags an unconstrained short-line-dominates
+ * failure mode as a known risk of pure per-row width-fill sizing.
+ *
+ * Tested before shipping, not assumed: across the full HAÜZ regression set
+ * (12 real names x 3 real widths = 36 cases), the worst adjacent-row ratio
+ * the unconstrained algorithm ever produces is 2.89x ("Cully Kitchen HAÜS").
+ * A cap set at or below that (tried at 2.5x) starts changing real,
+ * already-good HAÜZ output for the worse — it broke "Cully Kitchen" apart
+ * from its own name to chase a better ratio, which read worse, not better.
+ * 3.0 sits safely above that observed max: verified to change ZERO of the
+ * 36 real HAÜZ cases, while fixing a genuine failure on a differently-shaped
+ * synthetic surface (a portrait event-card mockup) where a lone short final
+ * word solved to 128px against 31px on the row above it (4.16x) — owner-
+ * approved 2026-08-24 after seeing that comparison directly, not asserted.
+ *
+ * This is a soft preference, not a hard constraint: it adds to a
+ * candidate's score the same way singletonPenalty does, so a grouping that
+ * violates it can still win if every alternative is worse on other grounds
+ * (natural height-fit, singleton avoidance). It does not by itself mark a
+ * result outOfRange — an extreme ratio is a "could look better," not a
+ * "does not fit."
+ *
+ * NOT a site-wide default. Like the two opt-ins above, this is HAÜZ's own
+ * decision, passed explicitly at its one call site. Another surface has to
+ * verify its own regression set the same way before adopting this — there
+ * is no guarantee 3.0 is the right number for content shaped differently
+ * than HAÜZ titles.
+ */
+export const HOUSING_MAX_NEIGHBOR_RATIO = 3;
+
 /** 1 to 3 rows, per the contract. */
 const MAX_ROWS = 3;
 /** Candidate rows may group up to 4 consecutive words. Keeps the search bounded. */
@@ -236,7 +270,7 @@ export type DynamicTextResult = {
 
 type ScoredResult = DynamicTextResult & { score: number };
 
-function scoreRows(lines: string[], frameW: number, frameH: number): ScoredResult {
+function scoreRows(lines: string[], frameW: number, frameH: number, maxNeighborRatio: number | null = null): ScoredResult {
   const sizes = lines.map((line) => (frameW / measureLine(line)) * MEASURE_BASIS_PX);
   const usedHeight = sizes.reduce(
     (sum, size, i) => sum + size * ROW_HEIGHT_WEIGHT + (i > 0 ? rowGapAbove(lines[i], size) : 0),
@@ -249,6 +283,16 @@ function scoreRows(lines: string[], frameW: number, frameH: number): ScoredResul
   const singletonPenalty = lines
     .slice(0, -1)
     .reduce((sum, line) => sum + (line.split(" ").length === 1 ? 80 : 0), 0);
+  // Soft preference, not a hard constraint — see HOUSING_MAX_NEIGHBOR_RATIO.
+  // Same penalty tier as singletonPenalty, not outOfRange: an extreme ratio
+  // can still win if every alternative is worse on other grounds.
+  let neighborRatioPenalty = 0;
+  if (maxNeighborRatio !== null) {
+    for (let i = 1; i < sizes.length; i++) {
+      const ratio = Math.max(sizes[i] / sizes[i - 1], sizes[i - 1] / sizes[i]);
+      if (ratio > maxNeighborRatio) neighborRatioPenalty += 60;
+    }
+  }
   return {
     lines,
     sizes,
@@ -260,7 +304,7 @@ function scoreRows(lines: string[], frameW: number, frameH: number): ScoredResul
     // technically rescuable — verified: it flipped a clean single-row
     // "WHISKEY TOWN HAÜS" (37px) into an unforced two-row split. The search
     // must never know a fit mode exists, regardless of what the caller passed.
-    score: Math.abs(frameH - usedHeight) + singletonPenalty + (outOfRange ? 100000 : 0),
+    score: Math.abs(frameH - usedHeight) + singletonPenalty + neighborRatioPenalty + (outOfRange ? 100000 : 0),
   };
 }
 
@@ -340,6 +384,13 @@ function recoverToFit(result: ScoredResult, frameH: number, fitWithinFrame: bool
  *                        first for a 2+-word title, falling back to the
  *                        full search only if none work. Also a per-caller
  *                        decision, not a site-wide default.
+ * @param maxNeighborRatio Defaults to null (no cap) — the strict, canonical
+ *                        behavior. Pass a number (e.g. HOUSING_MAX_NEIGHBOR_RATIO)
+ *                        to softly penalize (not reject) a candidate whose
+ *                        adjacent rows differ in size by more than that
+ *                        ratio. Also a per-caller decision, not a default —
+ *                        verify against a real regression set before
+ *                        adopting a specific threshold elsewhere.
  */
 export function solveDynamicText(
   source: string,
@@ -347,6 +398,7 @@ export function solveDynamicText(
   frameH: number,
   fitWithinFrame: boolean = false,
   preferTwoRows: boolean = false,
+  maxNeighborRatio: number | null = null,
 ): DynamicTextResult {
   const manualRows = String(source)
     .trim()
@@ -355,7 +407,7 @@ export function solveDynamicText(
     .filter(Boolean);
   if (manualRows.length > 1) {
     return recoverToFit(
-      scoreRows(manualRows.map((line) => line.toUpperCase()), frameW, frameH),
+      scoreRows(manualRows.map((line) => line.toUpperCase()), frameW, frameH, maxNeighborRatio),
       frameH,
       fitWithinFrame,
     );
@@ -370,7 +422,7 @@ export function solveDynamicText(
       twoRowCandidates.push([words.slice(0, i).join(" "), words.slice(i).join(" ")]);
     }
     const bestTwoRow = twoRowCandidates
-      .map((rows) => scoreRows(rows, frameW, frameH))
+      .map((rows) => scoreRows(rows, frameW, frameH, maxNeighborRatio))
       .sort((a, b) => a.score - b.score)[0];
     const recovered = recoverToFit(bestTwoRow, frameH, fitWithinFrame);
     if (!recovered.outOfRange) return recovered;
@@ -392,6 +444,12 @@ export function solveDynamicText(
   };
   visit(0, []);
 
-  const best = candidates.map((rows) => scoreRows(rows, frameW, frameH)).sort((a, b) => a.score - b.score)[0];
-  return recoverToFit(best ?? scoreRows([words.join(" ")], frameW, frameH), frameH, fitWithinFrame);
+  const best = candidates
+    .map((rows) => scoreRows(rows, frameW, frameH, maxNeighborRatio))
+    .sort((a, b) => a.score - b.score)[0];
+  return recoverToFit(
+    best ?? scoreRows([words.join(" ")], frameW, frameH, maxNeighborRatio),
+    frameH,
+    fitWithinFrame,
+  );
 }

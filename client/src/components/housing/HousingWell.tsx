@@ -13,6 +13,7 @@ import {
   clearDynamicTextCache,
   HOUSING_FIT_WITHIN_FRAME,
   HOUSING_PREFER_TWO_ROWS,
+  HOUSING_MAX_NEIGHBOR_RATIO,
   rowGapAbove,
   solveDynamicText,
   type DynamicTextResult,
@@ -137,10 +138,17 @@ export function HousingWell({
     // via ResizeObserver below), not a hardcoded estimate — gives up exactly
     // what the caption row needs, nothing more.
     frameH = Math.max(48, contentH - CAPTION_GAP - box.captionH);
-    // HAÜZ-specific opt-ins — see HOUSING_FIT_WITHIN_FRAME and
-    // HOUSING_PREFER_TWO_ROWS in dynamicText.ts. Every other caller of
-    // solveDynamicText defaults to strict/agnostic (false), not these.
-    layout = solveDynamicText(title, frameW, frameH, HOUSING_FIT_WITHIN_FRAME, HOUSING_PREFER_TWO_ROWS);
+    // HAÜZ-specific opt-ins — see HOUSING_FIT_WITHIN_FRAME, HOUSING_PREFER_TWO_ROWS,
+    // and HOUSING_MAX_NEIGHBOR_RATIO in dynamicText.ts. Every other caller of
+    // solveDynamicText defaults to strict/agnostic/uncapped, not these.
+    layout = solveDynamicText(
+      title,
+      frameW,
+      frameH,
+      HOUSING_FIT_WITHIN_FRAME,
+      HOUSING_PREFER_TWO_ROWS,
+      HOUSING_MAX_NEIGHBOR_RATIO,
+    );
   }
 
   const showName = Boolean(layout?.lines.length) && fontsReady;

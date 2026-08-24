@@ -952,7 +952,11 @@
   flex-direction: column;
   justify-content: center;
   gap: 0;
-  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)) drop-shadow(0 0 26px rgba(0, 0, 0, .8));
+  /* Third layer added 2026-08-24, owner-approved: a tight, low-opacity
+     shadow for subtle grounding depth. The first two layers are unchanged —
+     that 26px glow does real legibility work (contrast against unpredictable
+     user photos), not just style, so it stays as-is. */
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)) drop-shadow(0 0 26px rgba(0, 0, 0, .8)) drop-shadow(0 1px 2px rgba(0, 0, 0, .28));
 }
 
 .hz-well__name-line {
