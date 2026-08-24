@@ -82,6 +82,7 @@ export default function HousingNew() {
         initialType={initialType}
         isPropertyManager={!!pm?.approved}
         managerName={pm?.manager?.company || pm?.manager?.name || null}
+        viewerDisplayName={user?.displayName ?? null}
         onClose={() => navigate("/the-hauz")}
         onPosted={(postId) => {
           queryClient.invalidateQueries({ queryKey: ["/api/housing"] });

@@ -936,6 +936,11 @@
 .hz-well__name {
   position: relative;
   z-index: 4;
+  /* Owner direction, 2026-08-23: box moves left — its right edge sits at the
+     well's horizontal center (frameW computed in HousingWell.tsx), left half
+     carries the name, right half stays clear for the photo. justify-content
+     still centers the lines vertically within the frame's own height when
+     fewer lines are needed than the max allows. */
   align-self: flex-start;
   flex: 0 0 auto;
   min-height: 0;
@@ -961,6 +966,10 @@
   line-height: .82;
   letter-spacing: -.035em;
   white-space: nowrap;
+  /* Rows normally span the full frame width already (the core Dynamic Text
+     contract), so this is a no-op in the common case — it only matters when
+     a row is held at the readable floor and can't reach both edges. */
+  text-align: center;
 }
 
 .hz-well .hz-mono {

@@ -36,6 +36,7 @@ import {
   type ParkingOption,
 } from "@shared/housing";
 import { HousingIcon } from "@/components/housing/HousingIcon";
+import { HousingWell } from "@/components/housing/HousingWell";
 import { Btn, Chip, Mono, SectionTitle, accentStyle } from "@/components/housing/HousingPrimitives";
 import { HousingTagPicker } from "@/components/housing/HousingTagPicker";
 
@@ -288,12 +289,15 @@ export function HousingComposer({
   onPosted,
   isPropertyManager,
   managerName,
+  viewerDisplayName,
 }: {
   initialType?: HousingType | "PM" | null;
   onClose: () => void;
   onPosted: (postId: number) => void;
   isPropertyManager: boolean;
   managerName?: string | null;
+  /** Current user's display name — the title motif for a Looking post preview. */
+  viewerDisplayName?: string | null;
 }): JSX.Element {
   const [type, setType] = useState<HousingType | "PM" | null>(initialType ?? null);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -761,6 +765,16 @@ export function HousingComposer({
   const suffixed = isOffering || isForming;
   const nameWords = wordCount(draft.name);
 
+  // What the title motif preview shows, mirroring exactly what each card
+  // variant passes to HousingWell once posted (HousingCards.tsx).
+  const previewTitle = suffixed
+    ? draft.name.trim()
+      ? `${draft.name.trim()} ${HAUS_SUFFIX}`
+      : ""
+    : isManaged
+      ? draft.name.trim()
+      : viewerDisplayName || "";
+
   const heading = isManaged
     ? "Tell people about the unit"
     : isForming
@@ -780,6 +794,11 @@ export function HousingComposer({
           ? "Headline and a cover photo are required. Everything else can wait until later."
           : "Only the headline is required. Everything else can wait until later."}
       </p>
+
+      <div className="hz-field" style={{ marginBottom: 16 }}>
+        <Mono micro>The name over your cover photo</Mono>
+        <HousingWell photos={photos.length ? [photos[0]] : []} title={previewTitle || null} />
+      </div>
 
       <div className="hz-fields">
         {suffixed ? (
