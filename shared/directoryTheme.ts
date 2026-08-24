@@ -1,3 +1,44 @@
+/**
+ * Canonical ordered category list. One source of truth for admin pickers and
+ * server-side validation so a new category cannot drift between the two.
+ */
+export const DIRECTORY_TYPES = [
+  "bar",
+  "restaurant",
+  "cafe",
+  "venue",
+  "service",
+  "shop",
+  "hotel",
+  "nonprofit",
+  "healthcare",
+  "realestate",
+  "group",
+  "campground",
+] as const;
+
+export type DirectoryType = (typeof DIRECTORY_TYPES)[number];
+
+/**
+ * Plain-English category names for admin surfaces. These stay literal on
+ * purpose: the public board can brand a category (group reads "MY SQUADZ" on
+ * the board), but an admin picking a category needs the unbranded name.
+ */
+export const DIRECTORY_TYPE_ADMIN_LABELS: Record<string, string> = {
+  bar: "Bars & Clubs",
+  restaurant: "Restaurants",
+  cafe: "Cafes",
+  venue: "Venues",
+  service: "Services",
+  shop: "Shops",
+  hotel: "Hotels",
+  nonprofit: "Nonprofits",
+  healthcare: "Health & Care",
+  realestate: "Real Estate",
+  group: "Clubs & Groups",
+  campground: "Campgrounds",
+};
+
 /** Canonical directory type labels and accent colors, shared by the board and z/. */
 export const DIRECTORY_TYPE_LABELS: Record<string, string> = {
   bar: "Bars & Clubs",

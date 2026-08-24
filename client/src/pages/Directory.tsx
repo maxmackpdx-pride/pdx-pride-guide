@@ -164,6 +164,13 @@ const blankDirectoryForm = (type = "bar") => ({
   phone: "",
   queerOwned: false,
   queerFriendly: true,
+  /**
+   * Whether the submitter runs this place or is just adding it to the map.
+   * "runs" files an ownership claim alongside the listing; "adding" does not.
+   */
+  relationship: "adding" as "runs" | "adding",
+  /** Only used when relationship is "runs": how they're connected. */
+  relationshipNote: "",
 });
 
 type DirectoryFormState = ReturnType<typeof blankDirectoryForm>;
@@ -496,12 +503,17 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       const hasMatches = potentialMatches && potentialMatches.length > 0;
+      const noun = isSpaces ? "squad" : "place";
+      // Ownership was requested, so say what happens next instead of implying it's settled.
+      const claimLine = payload.ownershipRequested
+        ? " We passed your ownership request to an admin, and you'll hear back once it's reviewed."
+        : "";
       setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
       setSubmitResult({
         title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
         desc: hasMatches
-          ? `Your ${isSpaces ? "squad" : "place"} is live on the map and listings. We also spotted similar listings you may want to double-check.`
-          : `Your ${isSpaces ? "squad" : "place"} is live on the map and listings.`,
+          ? `Your ${noun} is live on the map and listings.${claimLine} We also spotted similar listings you may want to double-check.`
+          : `Your ${noun} is live on the map and listings.${claimLine}`,
         potentialMatches: hasMatches ? potentialMatches : undefined,
       });
       toast({
@@ -585,6 +597,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     }
     if (!form.description.trim()) {
       toast({ title: "Add a description", variant: "destructive" });
+      return;
+    }
+    if (form.relationship === "runs" && form.relationshipNote.trim().length < 10) {
+      toast({
+        title: "Tell us how you're connected",
+        description: "At least 10 characters so an admin can verify it before handing you the listing.",
+        variant: "destructive",
+      });
       return;
     }
     setSubmitResult(null);
@@ -769,6 +789,49 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                   For our crowd
                 </label>
               </label>
+              <div className="span">
+                <span className="board-copy-sm" style={{ display: "block", marginBottom: 8 }}>
+                  {isSpaces ? "Do you run this squad?" : "Do you run this place?"}
+                </span>
+                <label className="gifting-rules" style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <input
+                    type="radio"
+                    name="directory-relationship"
+                    checked={form.relationship === "adding"}
+                    onChange={() => setForm(f => ({ ...f, relationship: "adding" }))}
+                  />
+                  {isSpaces
+                    ? "No, I'm just adding it so people can find it"
+                    : "No, I'm just adding it to the directory"}
+                </label>
+                <label className="gifting-rules" style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 6 }}>
+                  <input
+                    type="radio"
+                    name="directory-relationship"
+                    checked={form.relationship === "runs"}
+                    onChange={() => setForm(f => ({ ...f, relationship: "runs" }))}
+                  />
+                  {isSpaces
+                    ? "Yes, I run or help run it and want to manage the listing"
+                    : "Yes, I own or manage it and want to manage the listing"}
+                </label>
+                {form.relationship === "runs" && (
+                  <label style={{ display: "block", marginTop: 10 }}>
+                    How you're connected *
+                    <textarea
+                      className="board-text-field"
+                      value={form.relationshipNote}
+                      onChange={e => setForm(f => ({ ...f, relationshipNote: e.target.value }))}
+                      rows={2}
+                      maxLength={500}
+                      placeholder="e.g. I'm the board chair, or I book the events here"
+                    />
+                    <span className="board-copy-sm" style={{ display: "block", marginTop: 6 }}>
+                      Your listing goes live either way. An admin reviews this before handing you the keys.
+                    </span>
+                  </label>
+                )}
+              </div>
             </div>
             <button type="button" className="btn-neon solid pdx-glass-rebind" disabled={createMutation.isPending} onClick={submitDirectoryForm}>
               {createMutation.isPending ? "Adding…" : "Add to directory →"}
@@ -949,7 +1012,17 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <div ref={dockRef} className="directory-dock">
           <div className="directory-dock__head">
             <h2 className="directory-dock__title">{isSpaces ? "The squadz" : "The dock"}</h2>
-            <span className="directory-dock__hint">Tap to pin it</span>
+            <div className="directory-dock__head-right">
+              <span className="directory-dock__hint">Tap to pin it</span>
+              <button
+                type="button"
+                className="directory-dock__add"
+                onClick={openAddForm}
+                data-testid="directory-dock-add"
+              >
+                <Plus size={13} /> {isSpaces ? "Add a squad" : "Add a place"}
+              </button>
+            </div>
           </div>
 
           {isLoading ? (

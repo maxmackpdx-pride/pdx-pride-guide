@@ -20,6 +20,65 @@ export const ADMIN_QUEUE_KINDS = [
 
 export type AdminQueueKind = (typeof ADMIN_QUEUE_KINDS)[number];
 
+/**
+ * NEW PLACE queue rows carry the directory listing they announce so an admin can
+ * fix its category and hand it to its owner without leaving the inbox.
+ *
+ * Older rows were filed with eventId 0 (the businessId was never recorded), so
+ * fall back to matching on the "Name · type" title those rows were built from.
+ * New rows file the real businessId, which is the path that should win.
+ */
+export function attachDirectoryListing(m: any) {
+  if (!m || String(m.type || "") !== "NEW_DIRECTORY_LISTING") return m;
+
+  const byId = Number(m.eventId) > 0 ? storage.getBusiness(Number(m.eventId)) : undefined;
+  let place = byId;
+
+  if (!place) {
+    const title = String(m.eventTitle || "");
+    const sep = title.lastIndexOf(" · ");
+    const name = (sep > 0 ? title.slice(0, sep) : title).trim().toLowerCase();
+    if (name) {
+      place = storage.getBusinesses().find((b) => String(b.name || "").trim().toLowerCase() === name);
+    }
+  }
+
+  if (!place) return { ...m, place: null };
+
+  const owner = place.ownerId ? storage.getUserById(place.ownerId) : null;
+  const submitter = m.requesterEmail ? storage.getUserByEmail(String(m.requesterEmail)) : null;
+
+  // Did the submitter say they run this? That arrives as a normal pending
+  // business claim, so read it back rather than storing the answer twice.
+  const submitterClaimPending = submitter
+    ? storage
+        .getPendingBusinessClaims()
+        .some((c: any) => c.businessId === place!.id && c.userId === submitter.id)
+    : false;
+
+  return {
+    ...m,
+    place: {
+      id: place.id,
+      name: place.name,
+      type: place.type,
+      active: !!place.active,
+      ownerId: place.ownerId ?? null,
+      ownerUsername: owner?.username ?? null,
+      ownerDisplayName: owner?.displayName ?? owner?.username ?? null,
+    },
+    /** Who filed the listing - the usual person to hand ownership to. */
+    submitter: submitter
+      ? {
+          id: submitter.id,
+          username: submitter.username,
+          displayName: submitter.displayName || submitter.username,
+        }
+      : null,
+    submitterClaimPending,
+  };
+}
+
 const CLAIM_STALE_HOURS = Math.max(1, Number(process.env.ADMIN_QUEUE_CLAIM_STALE_HOURS) || 8);
 const BULK_MAX = 40;
 const MSG_RATE_WINDOW_MS = 60_000;
@@ -264,7 +323,7 @@ export function getAdminQueueAggregate() {
   const promoters = storage.getPendingPromoterRequests();
   const businessClaims = storage.getPendingBusinessClaims();
   const businessSubmissions = storage.getPendingBusinessSubmissions();
-  const moderation = storage.getModerationRequests("PENDING");
+  const moderation = storage.getModerationRequests("PENDING").map(attachDirectoryListing);
   const missedConnections = storage.getAdminMissedConnections();
   const giftingReports = storage.getGiftingReports("PENDING");
   const giftingPostsAll = storage.getGiftingPosts({ includeInactive: true });

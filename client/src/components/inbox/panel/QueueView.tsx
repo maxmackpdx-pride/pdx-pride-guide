@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
+import { DIRECTORY_TYPES, DIRECTORY_TYPE_ADMIN_LABELS } from "@shared/directoryTheme";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
 import "../inbox-experiment.css";
@@ -39,6 +40,24 @@ type QueueRow = {
   outcome?: string;
   completedAt?: string;
   readOnly?: boolean;
+  /** Moderation rows only: the underlying moderation_requests.type. */
+  modType?: string;
+  /** NEW PLACE rows only: the live directory listing this row announced. */
+  place?: QueuePlace | null;
+  /** NEW PLACE rows only: who filed it, the usual owner to hand it to. */
+  submitter?: { id: number; username: string; displayName: string } | null;
+  /** NEW PLACE rows only: the submitter said they run it and is awaiting review. */
+  submitterClaimPending?: boolean;
+};
+
+type QueuePlace = {
+  id: number;
+  name: string;
+  type: string;
+  active: boolean;
+  ownerId: number | null;
+  ownerUsername: string | null;
+  ownerDisplayName: string | null;
 };
 
 /** Every admin queue surface - always shown in floating inbox, even at 0. */
@@ -267,6 +286,10 @@ function mapModerationRequest(m: any, completed = false): QueueRow | null {
     meta: `${t.label}${m.createdAt ? " · " + ts(m.createdAt) : ""}`,
     fields,
     note: String(m.proof || ""),
+    modType: type,
+    place: m.place ?? null,
+    submitter: m.submitter ?? null,
+    submitterClaimPending: !!m.submitterClaimPending,
     outcome: completed ? status : undefined,
     completedAt: completed ? String(m.createdAt || "") : undefined,
     readOnly: completed,
@@ -427,6 +450,7 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/admin/queue-claims"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/submissions"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/pulse"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/gifting"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/missed-connections"] });
@@ -436,6 +460,8 @@ function invalidateAdminQueue(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["/api/admin/business-claims"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/business-submissions"] });
   qc.invalidateQueries({ queryKey: ["/api/admin/business-logo-requests"] });
+  qc.invalidateQueries({ queryKey: ["/api/admin/directory"] });
+  qc.invalidateQueries({ queryKey: ["/api/directory"] });
   qc.invalidateQueries({ queryKey: ["/api/gifting"] });
   qc.invalidateQueries({ queryKey: ["/api/missed-connections"] });
 }
@@ -461,6 +487,8 @@ export default function QueueView({
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({});
+  /** NEW PLACE rows: typed @handle when the owner isn't the submitter. */
+  const [ownerInputs, setOwnerInputs] = useState<Record<string, string>>({});
   /** "all" | "mine" | bucket id from ADMIN_QUEUE_BUCKETS */
   const [bucketFilter, setBucketFilter] = useState<string>("all");
   const accent = mode === "admin" ? C.magenta : C.purple;
@@ -665,6 +693,21 @@ export default function QueueView({
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/moderation/${id}/resolve`, { status: "APPROVED" }),
     onSuccess: onQueueSuccess,
   });
+  /** NEW PLACE rows: fix the listing in place, without leaving the queue. */
+  const setPlaceType = useMutation({
+    mutationFn: ({ placeId, type }: { placeId: number; type: string }) =>
+      apiRequest("PATCH", `/api/admin/directory/${placeId}/type`, { type }),
+    onSuccess: onQueueSuccess,
+  });
+  const assignPlaceOwner = useMutation({
+    mutationFn: ({ placeId, username }: { placeId: number; username: string }) =>
+      apiRequest("POST", `/api/admin/directory/${placeId}/owner`, { username }),
+    onSuccess: onQueueSuccess,
+  });
+  const clearPlaceOwner = useMutation({
+    mutationFn: (placeId: number) => apiRequest("DELETE", `/api/admin/directory/${placeId}/owner`),
+    onSuccess: onQueueSuccess,
+  });
   const adminName = user?.displayName || user?.username || "Admin";
   const approvePromoter = useMutation({
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/promoter-requests/${id}/approve`, {}),
@@ -848,6 +891,7 @@ export default function QueueView({
     || approveClaim.isPending || denyClaim.isPending || approveBizSub.isPending
     || denyBizSub.isPending || approveLogo.isPending || denyLogo.isPending
     || approveGig.isPending || rejectGig.isPending
+    || setPlaceType.isPending || assignPlaceOwner.isPending || clearPlaceOwner.isPending
     || claimMutation.isPending || releaseClaimMutation.isPending;
 
   const displayCount = bucketFilter === "mine" || bucketFilter === "all" || mode === "owner"
@@ -884,6 +928,216 @@ export default function QueueView({
       {label}
     </button>
   );
+
+  /**
+   * NEW PLACE rows announce a listing that already went live. The two things
+   * that are almost always wrong on arrival are the category the member picked
+   * and the fact that nobody owns it yet, so both are fixable here rather than
+   * sending you to /admin to find the venue again.
+   */
+  const renderPlaceControls = (q: QueueRow) => {
+    const place = q.place;
+    if (!place) {
+      return (
+        <div
+          style={{
+            width: "100%",
+            marginBottom: 10,
+            padding: "9px 12px",
+            borderRadius: 10,
+            border: `1px solid ${C.border2}`,
+            background: C.inset2,
+            fontFamily: MONO,
+            fontSize: 10,
+            letterSpacing: ".04em",
+            color: C.faint,
+            lineHeight: 1.5,
+          }}
+        >
+          Listing not found in the directory. It may have been renamed or removed.
+        </div>
+      );
+    }
+
+    const typed = (ownerInputs[q.id] ?? "").trim().replace(/^@/, "");
+    const submitterHandle = q.submitter?.username || "";
+    const ownedBySubmitter =
+      !!place.ownerId && !!q.submitter && place.ownerId === q.submitter.id;
+
+    const label = (text: string) => (
+      <span
+        style={{
+          fontFamily: MONO,
+          fontSize: 9,
+          letterSpacing: ".1em",
+          textTransform: "uppercase",
+          color: C.faint,
+        }}
+      >
+        {text}
+      </span>
+    );
+
+    return (
+      <div
+        style={{
+          width: "100%",
+          marginBottom: 10,
+          padding: "11px 12px 12px",
+          borderRadius: 12,
+          border: `1px solid ${C.border2}`,
+          background: C.inset2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          {label("This listing")}
+          <a
+            href={`/directory/${place.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontFamily: MONO,
+              fontSize: 9.5,
+              letterSpacing: ".06em",
+              color: C.cyan,
+              textDecoration: "none",
+            }}
+          >
+            OPEN ↗
+          </a>
+        </div>
+
+        <div>
+          {label("Category")}
+          <select
+            value={place.type}
+            disabled={pending}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.stopPropagation();
+              setPlaceType.mutate({ placeId: place.id, type: e.target.value });
+            }}
+            style={{
+              display: "block",
+              width: "100%",
+              marginTop: 5,
+              padding: "8px 10px",
+              borderRadius: 9,
+              border: `1px solid ${C.border3}`,
+              background: C.inset,
+              color: C.body,
+              fontFamily: MONO,
+              fontSize: 11,
+              letterSpacing: ".04em",
+              cursor: pending ? "wait" : "pointer",
+            }}
+          >
+            {DIRECTORY_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {DIRECTORY_TYPE_ADMIN_LABELS[t] || t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          {label("Owner")}
+          <div style={{ marginTop: 4, fontSize: 12.5, color: place.ownerId ? C.body : C.faint }}>
+            {place.ownerId
+              ? `${place.ownerDisplayName || "Member"}${place.ownerUsername ? ` · @${place.ownerUsername}` : ""}`
+              : "Nobody owns this yet"}
+          </div>
+
+          {submitterHandle && !place.ownerId && (
+            <div
+              style={{
+                marginTop: 6,
+                fontFamily: MONO,
+                fontSize: 9.5,
+                letterSpacing: ".04em",
+                lineHeight: 1.5,
+                color: q.submitterClaimPending ? C.limeSoft : C.faint,
+              }}
+            >
+              {q.submitterClaimPending
+                ? `@${submitterHandle} says they run this and asked to manage it. Full claim is in Venue claims.`
+                : `@${submitterHandle} said they were just adding it, not running it.`}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+            {submitterHandle && !ownedBySubmitter
+              ? btn(
+                  `ASSIGN TO @${submitterHandle}`.toUpperCase(),
+                  C.green,
+                  () => assignPlaceOwner.mutate({ placeId: place.id, username: submitterHandle }),
+                  // Outlined unless they actually asked to run it, so handing a
+                  // listing to a passer-by is never the loudest button here.
+                  !q.submitterClaimPending,
+                )
+              : null}
+            {place.ownerId
+              ? btn("REMOVE OWNER", C.red, () => clearPlaceOwner.mutate(place.id), true)
+              : null}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <input
+              value={ownerInputs[q.id] ?? ""}
+              placeholder="Or assign another @handle"
+              disabled={pending}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const v = e.target.value;
+                setOwnerInputs((p) => ({ ...p, [q.id]: v }));
+              }}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: "8px 10px",
+                borderRadius: 9,
+                border: `1px solid ${C.border3}`,
+                background: C.inset,
+                color: C.body,
+                fontFamily: MONO,
+                fontSize: 11,
+                letterSpacing: ".04em",
+              }}
+            />
+            <button
+              type="button"
+              disabled={pending || !typed}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!typed) return;
+                assignPlaceOwner.mutate({ placeId: place.id, username: typed });
+                setOwnerInputs((p) => ({ ...p, [q.id]: "" }));
+              }}
+              style={{
+                padding: "8px 14px",
+                borderRadius: 999,
+                border: `1.5px solid ${typed ? C.green : C.border3}`,
+                background: "none",
+                color: typed ? C.green : C.dim,
+                fontFamily: MONO,
+                fontSize: 9.5,
+                letterSpacing: ".07em",
+                fontWeight: 700,
+                cursor: pending || !typed ? "default" : "pointer",
+                opacity: pending ? 0.6 : 1,
+              }}
+            >
+              ASSIGN
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderQueueRow = (q: QueueRow) => {
     const isOpen = !!open[q.id];
@@ -1022,6 +1276,7 @@ export default function QueueView({
                     </div>
                   </>
                 )}
+                {q.kind === "moderation" && q.modType === "NEW_DIRECTORY_LISTING" && renderPlaceControls(q)}
                 {q.kind === "moderation" && btn("MARK REVIEWED", C.limeSoft, () => resolveModeration.mutate(q.entityId))}
                 {q.kind === "promoter_request" && (
                   <>

@@ -13,6 +13,7 @@ import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, ge
 import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
 import {
   adminSearchForViewer,
+  attachDirectoryListing,
   checkAdminMessageRateLimit,
   claimAdminQueueItem,
   executeBulkEvents,
@@ -50,6 +51,7 @@ import {
 } from "./mapCoordinateSync";
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { resolveBusinessLocations } from "@shared/businessLocations";
+import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
@@ -341,7 +343,7 @@ function enrichDirectoryMatches(listing: {
 function enrichModerationForAdmin(req: any) {
   const user = storage.getUserByEmail(req.requesterEmail);
   return {
-    ...req,
+    ...attachDirectoryListing(req),
     requesterProfile: user ? adminUserSummary(user) : null,
   };
 }
@@ -2139,6 +2141,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   const directorySubmitSchema = memberBusinessSchema.extend({
     confirmDistinct: z.boolean().optional().default(false),
+    /**
+     * Does the submitter run this place, or are they just putting it on the map?
+     * Adding a listing never confers ownership on its own - "runs" files a normal
+     * business claim an admin still has to approve.
+     */
+    relationship: z.enum(["runs", "adding"]).optional().default("adding"),
+    relationshipNote: z.string().trim().max(500).optional().default(""),
   });
 
   const directoryMatchPreviewSchema = z.object({
@@ -2176,8 +2185,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
         venueName: data.name,
         address: data.address ?? undefined,
       });
+      const { confirmDistinct: _confirmDistinct, relationship, relationshipNote, ...bizFields } = data;
       const biz = storage.createBusiness({
-        ...data,
+        ...bizFields,
         address: data.address ?? null,
         neighborhood: data.neighborhood ?? null,
         website: data.website ?? null,
@@ -2197,13 +2207,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const actor = storage.getUserById(req.session.userId!);
       storage.createModerationRequest({
         type: "NEW_DIRECTORY_LISTING",
-        eventId: 0,
+        // The listing's own id, so the queue row can act on the real venue
+        // (set its category, assign its owner) instead of guessing by name.
+        eventId: biz.id,
         eventTitle: `${biz.name} · ${biz.type}`,
         requesterName: actor?.displayName || actor?.username || "member",
         requesterEmail: actor?.email || null,
         proof: [biz.neighborhood, biz.address, biz.description].filter(Boolean).join(" · ").slice(0, 500),
       } as any);
-      res.status(201).json({ ...biz, potentialMatches });
+
+      // Adding a listing is not the same as owning it. When the submitter says
+      // they run the place, file a normal business claim so it lands in the
+      // Venue claims queue and an admin still has to approve ownership.
+      let ownershipRequested = false;
+      if (relationship === "runs") {
+        const reason = (relationshipNote || "").trim() || "Submitted this listing and says they run it.";
+        const claim = storage.createBusinessClaim(biz.id, req.session.userId!, reason);
+        ownershipRequested = !("error" in claim);
+      }
+
+      res.status(201).json({ ...biz, potentialMatches, ownershipRequested });
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Invalid directory listing" });
     }
@@ -5066,6 +5089,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
       console.error("[admin] assign venue owner failed:", err);
       res.status(500).json({ error: "Could not assign venue owner" });
     }
+  });
+
+  // Recategorise a listing (e.g. a community org filed under "nonprofit" that
+  // really belongs in Clubs & Groups). Narrow on purpose: validates against the
+  // canonical category list and audits, unlike the broad PUT above.
+  app.patch("/api/admin/directory/:id/type", requireAdmin, (req, res) => {
+    const businessId = Number(req.params.id);
+    const before = storage.getBusiness(businessId);
+    if (!before) return res.status(404).json({ error: "Venue not found" });
+    const type = String(req.body?.type || "").trim();
+    if (!(DIRECTORY_TYPES as readonly string[]).includes(type)) {
+      return res.status(400).json({ error: "Unknown category" });
+    }
+    const updated = storage.updateBusiness(businessId, { type } as any);
+    if (!updated) return res.status(404).json({ error: "Venue not found" });
+    auditAdmin(req, "set_business_type", {
+      type: "business",
+      id: businessId,
+      detail: { from: before.type, to: type },
+    });
+    res.json(updated);
   });
 
   app.delete("/api/admin/directory/:id/owner", requireAdmin, (req, res) => {
