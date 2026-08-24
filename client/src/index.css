@@ -42,6 +42,7 @@
   --board-spotted: var(--neon-magenta);
   --board-gifting: var(--neon-yellow);
   --board-gigs: #6E3DFF; /* product live gig purple */
+  --board-zspace: #8F5CFF; /* z/ index violet, one step lighter than gigs */
 
   /* Day colors - mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */
   --day-mon: #8800FF;
@@ -12454,6 +12455,7 @@ html:not(.calm-mode) .calm-mode-toggle__label {
   --panel-orange: #a3a3a3;
   --panel-purple: #8a8a8a;
   --panel-pink: #a3a3a3;
+  --board-zspace: #8a8a8a;
   --status-good: #b0b0b0;
   --status-warn: #a3a3a3;
   --status-bad: #888;

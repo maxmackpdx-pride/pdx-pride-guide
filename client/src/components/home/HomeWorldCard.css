@@ -1,0 +1,815 @@
+/* ── World card ────────────────────────────────────────────────────────────
+   Ten cards, one anatomy, ported from the World Cards design project.
+
+   Shared by every card: the rainbow top seam, the number ring and eyebrow, the
+   product wordmark, one full-bleed pattern with a few line objects over it, one
+   slot, one action row. The slot is the only thing that differs.
+
+   Two deliberate departures from the design file, both for the deck:
+     - No backdrop-filter. Ten 3D coverflow slides with live blur is what made
+       this rail lag; the glass floor is composed opaque instead.
+     - The outer bloom is the design's 8% radial, which is also the house
+       --neon-bloom value. It is not hand-tuned per card.
+
+   The accent arrives as --c from the component. Every card carries
+   .pdx-glass-rebind, or --c silently falls back to root cyan. */
+
+@keyframes homeWorldSeam { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+@keyframes homeWorldBlink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes homeWorldScan { 0% { background-position: 0 0; } 100% { background-position: 0 8px; } }
+@keyframes homeWorldGlitchShift {
+  0%, 92%, 100% { transform: translate(0, 0); }
+  93% { transform: translate(-3px, 1px); }
+  94% { transform: translate(3px, -1px); }
+  95% { transform: translate(-2px, 0); }
+}
+@keyframes homeWorldGlitchFade { 0%, 92%, 100% { opacity: 0; } 93% { opacity: .5; } 95% { opacity: 0; } }
+
+.home-world {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: max(var(--glass-card-radius, 14px), 16px);
+  outline: 1px solid rgba(255, 255, 255, .08);
+  outline-offset: -2px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c) 42%, #1c1c20),
+    0 14px 30px -22px color-mix(in srgb, var(--c) 30%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .1),
+    inset 0 0 40px -20px color-mix(in srgb, var(--c) 40%, transparent);
+}
+
+.home-world.pdx-glass-card {
+  --glass-card-bg:
+    linear-gradient(145deg, rgba(255, 255, 255, .105), transparent 29%),
+    radial-gradient(100% 78% at 50% 108%, color-mix(in srgb, var(--c) 16%, transparent), transparent 61%),
+    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
+    rgba(6, 6, 9, .96);
+  background: var(--glass-card-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Outer bloom, 8%. Composed, never hand-rolled per card. */
+.home-world::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  border-radius: 30px;
+  background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--c) 8%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.home-world__seam {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+  opacity: .85;
+  background: linear-gradient(90deg, transparent, var(--c) 12%, #ff2400, #ccff00, #19e3ff, #b06bff, var(--c) 88%, transparent);
+  background-size: 200% 100%;
+  animation: homeWorldSeam 6s linear infinite;
+  pointer-events: none;
+}
+
+/* Full-bleed pattern, one per card, set by [data-world] below. */
+.home-world__pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .16;
+  pointer-events: none;
+}
+
+.home-world__motif {
+  position: absolute;
+  z-index: 0;
+  color: var(--c);
+  pointer-events: none;
+}
+.home-world__motif path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.home-world__bloom {
+  position: absolute;
+  right: -150px;
+  bottom: -190px;
+  z-index: 0;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  opacity: .22;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 60%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.home-world__hit { position: absolute; inset: 0; z-index: 2; }
+
+.home-world__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  pointer-events: none;
+}
+.home-world__content :is(a, button) { position: relative; z-index: 4; pointer-events: auto; }
+
+.home-world__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-world__number {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--c) 46%, #202026);
+  border-radius: 50%;
+  color: var(--c);
+  font: 700 11px/1 var(--font-mono, monospace);
+}
+
+.home-world__eyebrow {
+  max-width: 190px;
+  overflow: hidden;
+  color: var(--c);
+  font: 700 10px/1.3 var(--font-mono, monospace);
+  letter-spacing: .13em;
+  text-align: right;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-world__head { position: relative; z-index: 2; margin-top: 16px; }
+
+/* The family marks are normalised to one canvas, so sizing by height puts all
+   of them at one optical scale and starts every card body on the same line. */
+.home-world__mark {
+  display: block;
+  width: 100%;
+  height: 76px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.home-world__headline {
+  margin: 0;
+  color: #fff;
+  font: 900 clamp(34px, 3.4vw, 46px)/.86 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.home-world__body {
+  max-width: 42ch;
+  margin: 10px 0 0;
+  color: var(--text-body, #d6d6dc);
+  font-size: 13px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.home-world__slot {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 14px 0;
+}
+
+.home-world__action {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 46px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--c) 32%, transparent);
+  color: var(--c);
+  font: 900 13px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .05em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.home-world__action span:last-child { transition: transform .2s ease; }
+.home-world__action:hover span:last-child,
+.home-world__action:focus-visible span:last-child { transform: translate(3px, -3px); }
+
+/* Shared chrome: the blinking live dot and the DEMO sticker. */
+.home-world__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  animation: homeWorldBlink 1.6s ease-in-out infinite;
+}
+
+.home-world__demo {
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--neon-yellow, #ccff00);
+  color: #050506;
+  font: 800 8px/1 var(--font-mono, monospace);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+}
+.home-world__demo--pin { position: absolute; top: 7px; right: 7px; z-index: 2; margin: 0; }
+.home-world__demo--inline { align-self: flex-end; margin: 2px 0 0; }
+
+/* ── 01 OUTZ: address rows ─────────────────────────────────────────────── */
+.home-world__rows { display: flex; flex-direction: column; gap: 8px; height: 100%; }
+
+.home-world__row {
+  flex: 1 1 0;
+  min-height: 0;
+  /* The three rows share a fixed slot, so the rhythm is tuned to fit the
+     tallest content (2-line name, stats, 2-line blurb, chips) inside the row
+     box. overflow:hidden is the backstop: a longer place name clips rather
+     than pushing the action row off the bottom of the card. */
+  overflow: hidden;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--c) 26%, #16161a);
+  border-radius: 8px;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, .92) 0%, rgba(3, 3, 4, .96) 60%, color-mix(in srgb, var(--c) 6%, #050408) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 8px 18px -14px color-mix(in srgb, var(--c) 35%, transparent);
+  text-decoration: none;
+}
+.home-world__row:hover { border-color: color-mix(in srgb, var(--c) 55%, #16161a); }
+
+.home-world__row-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+.home-world__row-name {
+  display: -webkit-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #fff;
+  font: 800 14px/1.15 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-world__row-tag {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  color: var(--c);
+  font: 700 9px/1 var(--font-mono, monospace);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.home-world__row-stats {
+  display: block;
+  margin-top: 3px;
+  color: var(--c);
+  font: 700 9.5px/1.3 var(--font-mono, monospace);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.home-world__row-sub {
+  display: -webkit-box;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-lo, #9a9aa2);
+  font-size: 11.5px;
+  line-height: 1.32;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-world__row-chips { display: flex; gap: 6px; margin-top: 3px; }
+
+.home-world__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, #202026);
+  border-radius: 999px;
+  color: var(--c);
+  font: 800 9px/1 var(--font-mono, monospace);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── 02 EVENTZ: the flyer is the card ──────────────────────────────────── */
+.home-world[data-slot="flyer"] { padding: 0; }
+.home-world[data-slot="flyer"] .home-world__top { position: absolute; top: 14px; left: 14px; right: 14px; z-index: 5; }
+.home-world[data-slot="flyer"] .home-world__number { background: rgba(0, 0, 0, .5); }
+.home-world[data-slot="flyer"] .home-world__eyebrow { display: none; }
+.home-world[data-slot="flyer"] .home-world__slot { margin: 0; }
+
+.home-world__flyer { position: relative; display: flex; flex-direction: column; height: 100%; border-radius: inherit; overflow: hidden; }
+.home-world__flyer-hit { position: relative; flex: 1 1 auto; min-height: 0; display: block; text-decoration: none; }
+.home-world__flyer-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.home-world__flyer-photo--empty { background: color-mix(in srgb, var(--c) 10%, #050506); }
+.home-world__flyer-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(3, 3, 4, .7) 70%, rgba(3, 3, 4, .95) 100%);
+}
+.home-world__flyer-body { position: absolute; left: 18px; right: 18px; bottom: 16px; z-index: 2; display: block; }
+
+.home-world__flyer-chip {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: var(--day-c, var(--c));
+  color: #050506;
+  font: 800 9px/1 var(--font-mono, monospace);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.home-world__flyer-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #fff;
+  font: 900 clamp(26px, 2.6vw, 34px)/.94 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.home-world__flyer-when { display: block; margin-top: 4px; color: var(--text-lo, #d6d6dc); font-size: 11.5px; }
+
+.home-world__flyer-dots {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  border-top: 1px solid color-mix(in srgb, var(--c) 32%, transparent);
+  background: rgba(3, 3, 4, .9);
+}
+.home-world__flyer-dots > div { display: flex; align-items: center; gap: 6px; }
+.home-world__flyer-count { position: absolute; left: 11px; color: var(--c); font: 700 8px/1 var(--font-mono, monospace); letter-spacing: .12em; }
+.home-world__flyer-dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: #484850; cursor: pointer; }
+.home-world__flyer-dots button.is-active { width: 20px; border-radius: 999px; background: var(--c); }
+
+/* ── 03 OUR PLACEZ: lit marquee ────────────────────────────────────────── */
+.home-world__marquee { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+.home-world__marquee-grid {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: center;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  min-height: 0;
+}
+.home-world__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 6px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c) 35%, #1c1c20);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .05);
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--c) 50%, transparent);
+  text-decoration: none;
+  transition: opacity .4s ease;
+}
+.home-world__panel img { width: 100%; height: 100%; object-fit: contain; }
+.home-world__marquee-honor {
+  margin: 0;
+  color: var(--text-faint, #8a8a92);
+  font: 700 10px/1.4 var(--font-mono, monospace);
+  letter-spacing: .03em;
+  text-align: center;
+}
+
+/* ── 04 / 05 / 06 / 08: postings ───────────────────────────────────────── */
+.home-world__posts { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+
+.home-world__post {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.home-world__post-photo { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
+/* A slot with no photo reads as flat fill, geometry identical to the rest. */
+.home-world__post-photo--empty { background: color-mix(in srgb, var(--c) 22%, #050506); opacity: .22; }
+.home-world__post-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, transparent 30%, rgba(3, 3, 4, .5) 60%, rgba(3, 3, 4, .94) 100%),
+    radial-gradient(120% 60% at 50% 100%, color-mix(in srgb, var(--c) 24%, transparent), transparent);
+}
+.home-world__post-seam {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(90deg, var(--c), #ff2400, #ccff00, #19e3ff, var(--c));
+  background-size: 200% 100%;
+  animation: homeWorldSeam 6s linear infinite;
+}
+.home-world__post-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px;
+}
+.home-world__post-kicker-row { display: flex; align-items: center; gap: 6px; }
+.home-world__post-kicker { color: var(--c); font: 700 9px/1 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; }
+
+/* The title fills the band it is given. Standard cards use 60% of the width so
+   the copy stacks; MIZZED reads as a quote and takes the full band. */
+.home-world__post-title-box { display: block; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.home-world__post-tail { display: block; flex: none; }
+/* One solved Dynamic Text row. Tracking must match the value the solver folds
+   into its width measurement (-.02em), or measured and rendered widths drift. */
+.home-world__post-row {
+  display: block;
+  width: 100%;
+  flex: none;
+  margin-top: 0;
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-weight: 900;
+  line-height: .82;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, .35), 0 0 26px rgba(0, 0, 0, .8), 0 1px 2px rgba(0, 0, 0, .28);
+  white-space: nowrap;
+}
+.home-world__post-title-box > .home-world__post-row:first-child { margin-top: 6px; }
+
+/* Fallback when no grouping fits the readable band: plain clamped title, per
+   the standard's "flag it, do not clip or shrink silently". */
+.home-world__post-title {
+  margin: 6px 0 0;
+  color: #fff;
+  font: 900 15px/.86 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, .35), 0 0 26px rgba(0, 0, 0, .8), 0 1px 2px rgba(0, 0, 0, .28);
+}
+
+.home-world__post-line {
+  display: -webkit-box;
+  margin-top: 4px;
+  min-height: 31px;
+  overflow: hidden;
+  color: var(--text-lo, #c8c8ce);
+  font-size: 11px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.home-world__post-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+}
+.home-world__post-meta { color: var(--text-faint, #8a8a92); font: 700 9px/1 var(--font-mono, monospace); letter-spacing: .04em; }
+.home-world__post-action { color: var(--c); font: 800 10px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+
+/* ── 07 SELLZ: item grid ───────────────────────────────────────────────── */
+.home-world__items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 100%; }
+.home-world__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c) 30%, #1c1c20);
+  border-radius: 10px;
+  box-shadow: 0 8px 18px -14px color-mix(in srgb, var(--c) 45%, transparent);
+  text-decoration: none;
+}
+.home-world__item-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.home-world__item-photo--empty { background: color-mix(in srgb, var(--c) 14%, #050506); opacity: .5; }
+.home-world__item-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 38%, rgba(3, 3, 4, .55) 72%, rgba(3, 3, 4, .94) 100%);
+}
+.home-world__item-reserved {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 2;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .75);
+  color: var(--c);
+  font: 800 8px/1 var(--font-mono, monospace);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.home-world__item-foot { position: relative; z-index: 1; margin-top: auto; padding: 5px 9px 7px; }
+.home-world__item-price {
+  display: block;
+  color: #fff;
+  font: 900 26px/.86 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .4), 0 0 14px rgba(0, 0, 0, .8);
+}
+.home-world__item-cond { display: block; margin-top: 3px; color: var(--c); font: 700 9px/1.3 var(--font-mono, monospace); letter-spacing: .03em; }
+
+/* ── 09 Z/SPACE: today's calendar ──────────────────────────────────────── */
+/* The slot is named, because a bare list of times does not say what it is.
+   Five entries stretch to fill the slot; ten pack down and scroll inside it.
+   Either way the card box is the same 648px as the other nine. */
+.home-world__today { display: flex; flex-direction: column; gap: 9px; height: 100%; }
+
+.home-world__today-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--c) 26%, transparent);
+}
+.home-world__today-label {
+  color: var(--c);
+  font: 700 10px/1 var(--font-mono, monospace);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.home-world__today-count {
+  margin-left: auto;
+  color: var(--text-faint, #8a8a92);
+  font: 700 10px/1 var(--font-mono, monospace);
+  letter-spacing: .08em;
+}
+/* The DEMO sticker sits in the head row here, so it must not push right. */
+.home-world__today-head .home-world__demo { margin-left: 0; }
+
+.home-world__pills {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--c) 45%, transparent) transparent;
+}
+.home-world__pills[data-dense="1"] {
+  mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent 100%);
+}
+
+.home-world__pill {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 40px;
+  max-height: 62px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 10px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--pill-c) 12%, #08080a), rgba(8, 8, 10, .85));
+  box-shadow: inset 3px 0 0 var(--pill-c), 0 8px 16px -14px color-mix(in srgb, var(--pill-c) 50%, transparent);
+  color: #fff;
+  font: 800 14px/1.15 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.home-world__pills[data-dense="1"] .home-world__pill { min-height: 34px; max-height: 44px; font-size: 12.5px; }
+.home-world__pill:hover { border-color: color-mix(in srgb, var(--pill-c) 55%, transparent); }
+/* Two lines before it truncates: a venue suffix should not cost the title. */
+.home-world__pill-label {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.home-world__pills[data-dense="1"] .home-world__pill-label { -webkit-line-clamp: 1; }
+.home-world__pill-time {
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--pill-c) 40%, transparent);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .5);
+  color: var(--pill-c);
+  font: 800 11px/1 var(--font-mono, monospace);
+  white-space: nowrap;
+}
+
+/* ── 10 NEXT: the blueprint ────────────────────────────────────────────── */
+/* The three marks are spaced by the box, not by hand-typed percentages, so
+   none of them can clip off the bottom when the card height changes. */
+.home-world__roadmap { position: absolute; inset: -14px -20px; overflow: hidden; border-radius: 10px; }
+.home-world__roadmap-dim { position: absolute; inset: 0; z-index: 5; background: rgba(0, 0, 0, .45); pointer-events: none; }
+.home-world__roadmap-marks {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 18px 20px;
+  pointer-events: none;
+}
+/* Width per mark, because the three logos do not share an aspect ratio and a
+   single width would leave the squarest of them reading half the size. */
+.home-world__roadmap-mark {
+  display: block;
+  width: var(--mark-w, 84%);
+  max-height: 28%;
+  object-fit: contain;
+}
+.home-world__roadmap-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .14) 0 2px, transparent 2px 7px);
+  mix-blend-mode: overlay;
+  animation: homeWorldScan .25s linear infinite;
+  pointer-events: none;
+}
+.home-world__roadmap-glitch {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: linear-gradient(90deg, rgba(255, 60, 60, .7), transparent 40%, transparent 60%, rgba(60, 180, 255, .7));
+  mix-blend-mode: screen;
+  animation: homeWorldGlitchShift 2.4s steps(1) infinite, homeWorldGlitchFade 2.4s steps(1) infinite;
+  pointer-events: none;
+}
+/* The blueprint runs the full face, so the copy above it needs its own ground
+   or it reads as grey on grey. The plate is the card's own ink, not a new one. */
+.home-world[data-world="next"] .home-world__top,
+.home-world[data-world="next"] .home-world__head {
+  position: relative;
+  z-index: 9;
+}
+.home-world[data-world="next"] .home-world__head::before {
+  content: "";
+  position: absolute;
+  inset: -14px -20px -18px;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(4, 4, 6, .98) 0 84%, rgba(4, 4, 6, .62) 93%, transparent);
+}
+.home-world[data-world="next"] .home-world__headline { letter-spacing: .04em; }
+.home-world[data-world="next"] .home-world__body { color: var(--text-body-muted, #c8c4bb); }
+.home-world[data-world="next"] .home-world__action {
+  position: relative;
+  z-index: 9;
+  background: linear-gradient(0deg, rgba(4, 4, 6, .96) 60%, transparent);
+}
+
+/* ── Per-card full-bleed patterns ──────────────────────────────────────── */
+.home-world[data-world="outz"] .home-world__pattern {
+  background-image: repeating-radial-gradient(circle at 70% 65%, transparent 0, transparent 16px, color-mix(in srgb, var(--c) 70%, transparent) 17px, transparent 18px);
+}
+.home-world[data-world="eventz"] .home-world__pattern {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--c) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 60%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.home-world[data-world="placez"] .home-world__pattern {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--c) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 40%, transparent) 2px, transparent 2px);
+  background-size: 100% 22px, 44px 100%;
+}
+.home-world[data-world="hauz"] .home-world__pattern {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--c) 50%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 50%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.home-world[data-world="giftz"] .home-world__pattern {
+  background-image: repeating-conic-gradient(from 45deg, color-mix(in srgb, var(--c) 55%, transparent) 0deg 8deg, transparent 8deg 90deg);
+  background-size: 46px 46px;
+}
+.home-world[data-world="gigz"] .home-world__pattern {
+  background-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 55%, transparent) 0 1px, transparent 1px 26px);
+}
+.home-world[data-world="sellz"] .home-world__pattern {
+  background-image: repeating-linear-gradient(60deg, color-mix(in srgb, var(--c) 55%, transparent) 0 1px, transparent 1px 34px);
+}
+.home-world[data-world="mizzed"] .home-world__pattern {
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 50%, transparent) 1px, transparent 1px),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--c) 40%, transparent) 0 1px, transparent 1px 10px);
+  background-size: 33.33% 100%, 100% 100%;
+}
+.home-world[data-world="zspace"] .home-world__pattern {
+  background-image:
+    radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--c) 65%, transparent) 0 2px, transparent 2px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 30%, transparent) 0 1px, transparent 1px 54px);
+}
+/* NEXT is the one card whose pattern is a photograph: the blueprint it is
+   drawn on. It sits at full strength under the roadmap's own dimmer. */
+.home-world[data-world="next"] {
+  background:
+    linear-gradient(rgba(0, 0, 0, .93), rgba(0, 0, 0, .93)),
+    var(--glass-card-bg);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #3a3a40);
+}
+.home-world[data-world="next"] .home-world__pattern {
+  opacity: .9;
+  background-image: url("/brand/waypoints/z-blueprint-wallpaper.png");
+  background-position: center;
+  background-size: cover;
+}
+.home-world[data-world="next"] .home-world__bloom { opacity: .1; }
+
+/* ── Calm mode and reduced motion ──────────────────────────────────────── */
+html.calm-mode .home-world__seam,
+:root[data-calm="true"] .home-world__seam,
+html.calm-mode .home-world__post-seam,
+:root[data-calm="true"] .home-world__post-seam {
+  background: color-mix(in srgb, var(--c) 55%, transparent);
+  animation: none;
+}
+html.calm-mode .home-world__dot,
+:root[data-calm="true"] .home-world__dot,
+html.calm-mode .home-world__roadmap-scan,
+:root[data-calm="true"] .home-world__roadmap-scan,
+html.calm-mode .home-world__roadmap-glitch,
+:root[data-calm="true"] .home-world__roadmap-glitch { animation: none; }
+html.calm-mode .home-world__roadmap-glitch,
+:root[data-calm="true"] .home-world__roadmap-glitch { display: none; }
+html.calm-mode .home-world::before,
+:root[data-calm="true"] .home-world::before { display: none; }
+html.calm-mode .home-world__demo,
+:root[data-calm="true"] .home-world__demo { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-world__seam,
+  .home-world__post-seam,
+  .home-world__dot,
+  .home-world__roadmap-scan,
+  .home-world__roadmap-glitch { animation: none; }
+  .home-world__roadmap-glitch { display: none; }
+  .home-world__action span:last-child { transition: none; }
+}
+
+/* ── Phone ─────────────────────────────────────────────────────────────── */
+@media (max-width: 620px) {
+  .home-world { padding: 18px; }
+  .home-world__mark { height: 58px; }
+  .home-world__head { margin-top: 12px; }
+  .home-world__body { margin-top: 8px; font-size: 12.5px; }
+  .home-world__slot { margin: 10px 0; }
+  .home-world__motif { display: none; }
+  .home-world__row-chips { display: none; }
+  .home-world__item-price { font-size: 22px; }
+  .home-world__headline { font-size: 34px; }
+}

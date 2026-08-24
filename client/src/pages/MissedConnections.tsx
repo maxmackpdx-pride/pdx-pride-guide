@@ -49,6 +49,21 @@ export default function MissedConnections() {
     if (!isLoading) trackProductEvent("time_to_content", "mizzed_connection", performance.now() - contentStartedAt.current);
   }, [isLoading]);
 
+  // Deep-links from /z/mizzed, the home rail, or a shared URL scroll to that
+  // post. Same contract as Gifting, GIGZ and SELLZ: /spotted?post=:id.
+  const deepLinkHandled = useRef(false);
+  useEffect(() => {
+    if (deepLinkHandled.current || !allPosts.length) return;
+    const pid = new URLSearchParams(window.location.search).get("post");
+    if (!pid) { deepLinkHandled.current = true; return; }
+    const id = Number(pid);
+    deepLinkHandled.current = true;
+    if (!Number.isFinite(id) || !allPosts.some(post => post.id === id)) return;
+    window.setTimeout(() => {
+      document.getElementById(`board-post-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350);
+  }, [allPosts]);
+
   const stats = useMemo(() => [
     { num: allPosts.length, label: "Missed connections, live now", color: "#ff1fa0" },
     { num: allPosts.filter(p => p.eventId != null).length, label: "At an event", color: "#19e3ff" },

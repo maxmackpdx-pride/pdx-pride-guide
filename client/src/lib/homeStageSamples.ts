@@ -7,7 +7,7 @@
  *   housing → /the-hauz/:id
  *   gifting → /gifting?post=:id
  *   gigs    → /pride-work?post=:id
- *   spotted → /spotted (no per-post deep link yet)
+ *   spotted → /spotted?post=:id
  */
 
 import { useMemo } from "react";
@@ -107,6 +107,10 @@ export function giftingPostPath(id: number): string {
 
 export function gigPostPath(id: number): string {
   return `/pride-work?post=${id}`;
+}
+
+export function spottedPostPath(id: number): string {
+  return `/spotted?post=${id}`;
 }
 
 export function housingPostPath(id: number): string {
@@ -270,7 +274,7 @@ export function mapSpottedSample(post: SpottedRow): HomeStageCardData {
   const day = post.eventDay || post.dayOfWeek || null;
   return {
     key: "spotted",
-    href: "/spotted",
+    href: spottedPostPath(post.id),
     kicker: "Missed connections",
     title: post.title,
     line: clip(post.body),

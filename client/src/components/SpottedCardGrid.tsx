@@ -334,14 +334,18 @@ export default function SpottedCardGrid({
       ) : (
         <div className={makeover ? "board-spotted-grid" : "spotted-card-grid"}>
           {filteredPosts.map((post, i) => (
+            /* `board-post-${id}` is the deep-link anchor the other boards use,
+               so /spotted?post=:id lands the same way /gifting?post=:id does. */
             <ScrollReveal key={post.id} delay={Math.min(i * 60, 360)}>
-              <SpottedCard
-                post={post}
-                accentColor={spottedKind(post).color}
-                animDelay={i * 400}
-                makeover={makeover}
-                onReply={() => handleReply(post)}
-              />
+              <div id={`board-post-${post.id}`}>
+                <SpottedCard
+                  post={post}
+                  accentColor={spottedKind(post).color}
+                  animDelay={i * 400}
+                  makeover={makeover}
+                  onReply={() => handleReply(post)}
+                />
+              </div>
             </ScrollReveal>
           ))}
         </div>
