@@ -82,6 +82,25 @@ const MAX_ROW_SIZE = 220;
 const ROW_HEIGHT_WEIGHT = 0.82;
 
 /**
+ * Fixed tracking applied to every row, matching the shipped
+ * `.hz-well__name-line{letter-spacing:-.02em}` (Housing.css). This is NOT a
+ * fitting lever — it never changes per row or per candidate, only font-size
+ * does. It exists here purely so the width-fill measurement matches what
+ * actually renders: CSS `letter-spacing` is em-relative to each row's own
+ * font-size, so its pixel contribution scales the same way glyph width does.
+ * Folded into `measureLine` below at the 100px reference so it scales
+ * correctly once a row is solved to its final size.
+ *
+ * Owner direction, 2026-08-24: the previous -.035em read as letters
+ * touching at the large sizes titles actually solve to. Loosened to -.02em.
+ * If this is ever loosened further (or removed), update this constant and
+ * the CSS value together — a mismatch between the two means the solver measures
+ * one width and the browser renders another, and rows will over- or
+ * undershoot the frame edge instead of landing on it exactly.
+ */
+const LETTER_SPACING_EM = -0.02;
+
+/**
  * A row is normally sized to exactly fill frameW. When a grouping's natural
  * combined height overflows frameH, a caller can opt into letting every row
  * in the block shrink UNIFORMLY (same ratio, so the relationship between
@@ -141,7 +160,7 @@ function ensureCtx(): void {
   }
 }
 
-/** Advance width of one line at the reference size. Cached per exact string. */
+/** Advance width of one line at the reference size, tracking included. Cached per exact string. */
 function measureLine(text: string): number {
   const cached = measureCache.get(text);
   if (cached !== undefined) return cached;
@@ -151,6 +170,12 @@ function measureLine(text: string): number {
     measureCtx.font = MEASURE_FONT;
     width = Math.max(1, measureCtx.measureText(text).width);
   }
+  // Canvas measureText doesn't know about CSS letter-spacing — add its
+  // contribution at this same 100px reference so it scales proportionally
+  // once a row is solved to its final font-size, matching how em-relative
+  // tracking actually renders.
+  width += LETTER_SPACING_EM * MEASURE_BASIS_PX * text.length;
+  width = Math.max(1, width);
   measureCache.set(text, width);
   return width;
 }

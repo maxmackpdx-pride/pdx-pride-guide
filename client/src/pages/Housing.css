@@ -964,7 +964,7 @@
   font-weight: var(--fw-black);
   font-size: 1rem;
   line-height: .82;
-  letter-spacing: -.035em;
+  letter-spacing: -.02em;
   white-space: nowrap;
   /* Rows normally span the full frame width already (the core Dynamic Text
      contract), so this is a no-op in the common case — it only matters when
