@@ -25,6 +25,11 @@
 }
 @keyframes homeWorldGlitchFade { 0%, 92%, 100% { opacity: 0; } 93% { opacity: .5; } 95% { opacity: 0; } }
 
+/* The edge is the card system's, not this card's. The live Fluent 2 / M3 shell
+   (`fluent2-m3-cards.css`, always on) owns fill, neon edge, radius and the
+   paired key/ambient elevation for every `.pdx-glass-card`, and the card
+   authority forbids hand-rolling a parallel shell or shadow stack. So this
+   rule sets geometry only. */
 .home-world {
   position: relative;
   display: flex;
@@ -35,54 +40,31 @@
   min-height: 0;
   padding: 20px;
   overflow: hidden;
-  border-radius: max(var(--glass-card-radius, 14px), 16px);
-  outline: 1px solid rgba(255, 255, 255, .08);
-  outline-offset: -2px;
+  /* Fallback for the non-fluent2 path; the shell overrides it when on. */
+  border-radius: var(--glass-card-radius, 14px);
   text-decoration: none;
   color: inherit;
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--c) 42%, #1c1c20),
-    0 14px 30px -22px color-mix(in srgb, var(--c) 30%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, .1),
-    inset 0 0 40px -20px color-mix(in srgb, var(--c) 40%, transparent);
 }
 
+/*
+ * Two things have to out-specify the shell's own `:where(.pdx-glass-card)`
+ * rule, which is why they sit on the compound selector:
+ *   - the 8% outer bloom, composed from --neon-bloom the way StatCard and
+ *     PlaceCard do. Declared on `.home-world` alone it loses the cascade and
+ *     the bloom silently disappears.
+ *   - no live blur. Ten 3D coverflow slides with backdrop-filter is what made
+ *     this rail lag, and --glass-card-bg is already opaque, so it costs nothing.
+ */
 .home-world.pdx-glass-card {
-  --glass-card-bg:
-    linear-gradient(145deg, rgba(255, 255, 255, .105), transparent 29%),
-    radial-gradient(100% 78% at 50% 108%, color-mix(in srgb, var(--c) 16%, transparent), transparent 61%),
-    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
-    rgba(6, 6, 9, .96);
-  background: var(--glass-card-bg);
+  box-shadow: var(--glass-card-shadow), var(--neon-bloom);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* Outer bloom, 8%. Composed, never hand-rolled per card. */
-.home-world::before {
-  content: "";
-  position: absolute;
-  inset: -24px;
-  z-index: -1;
-  border-radius: 30px;
-  background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--c) 8%, transparent), transparent 70%);
-  pointer-events: none;
-}
-
-.home-world__seam {
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: 3;
-  height: 3px;
-  border-radius: 16px 16px 0 0;
-  opacity: .85;
-  background: linear-gradient(90deg, transparent, var(--c) 12%, #ff2400, #ccff00, #19e3ff, #b06bff, var(--c) 88%, transparent);
-  background-size: 200% 100%;
-  animation: homeWorldSeam 6s linear infinite;
-  pointer-events: none;
-}
+.home-world .pdx-refract-seam { top: 0; z-index: 5; }
 
 /* Full-bleed pattern, one per card, set by [data-world] below. */
+
 .home-world__pattern {
   position: absolute;
   inset: 0;
@@ -102,6 +84,22 @@
   stroke: currentColor;
   stroke-width: 2.5;
   vector-effect: non-scaling-stroke;
+}
+
+/* OUTZ terrain. Stroke scales with the box on purpose, so a 300px map and a
+   180px one read as the same survey drawn at two zooms. */
+.home-world__topo {
+  position: absolute;
+  z-index: 0;
+  color: var(--c);
+  pointer-events: none;
+}
+.home-world__topo path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .home-world__bloom {
@@ -563,33 +561,7 @@
 .home-world__item-cond { display: block; margin-top: 3px; color: var(--c); font: 700 9px/1.3 var(--font-mono, monospace); letter-spacing: .03em; }
 
 /* ── 09 Z/SPACE: today's calendar ──────────────────────────────────────── */
-/* The slot is named, because a bare list of times does not say what it is.
-   Five entries stretch to fill the slot; ten pack down and scroll inside it.
-   Either way the card box is the same 648px as the other nine. */
-.home-world__today { display: flex; flex-direction: column; gap: 9px; height: 100%; }
 
-.home-world__today-head {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 6px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--c) 26%, transparent);
-}
-.home-world__today-label {
-  color: var(--c);
-  font: 700 10px/1 var(--font-mono, monospace);
-  letter-spacing: .13em;
-  text-transform: uppercase;
-}
-.home-world__today-count {
-  margin-left: auto;
-  color: var(--text-faint, #8a8a92);
-  font: 700 10px/1 var(--font-mono, monospace);
-  letter-spacing: .08em;
-}
-/* The DEMO sticker sits in the head row here, so it must not push right. */
-.home-world__today-head .home-world__demo { margin-left: 0; }
 
 .home-world__pills {
   display: flex;
@@ -712,9 +684,9 @@
 }
 
 /* ── Per-card full-bleed patterns ──────────────────────────────────────── */
-.home-world[data-world="outz"] .home-world__pattern {
-  background-image: repeating-radial-gradient(circle at 70% 65%, transparent 0, transparent 16px, color-mix(in srgb, var(--c) 70%, transparent) 17px, transparent 18px);
-}
+/* No full-bleed pattern on OUTZ: the contour maps above are the motif, and a
+   second ring pattern behind them just read as moire. */
+.home-world[data-world="outz"] .home-world__pattern { display: none; }
 .home-world[data-world="eventz"] .home-world__pattern {
   background-image:
     linear-gradient(color-mix(in srgb, var(--c) 60%, transparent) 1px, transparent 1px),
@@ -756,11 +728,12 @@
 }
 /* NEXT is the one card whose pattern is a photograph: the blueprint it is
    drawn on. It sits at full strength under the roadmap's own dimmer. */
+/* NEXT knocks its fill back so the blueprint reads through, but the edge stays
+   the shared --glass-card-border like every other card in the rail. */
 .home-world[data-world="next"] {
   background:
     linear-gradient(rgba(0, 0, 0, .93), rgba(0, 0, 0, .93)),
     var(--glass-card-bg);
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #3a3a40);
 }
 .home-world[data-world="next"] .home-world__pattern {
   opacity: .9;
@@ -771,8 +744,6 @@
 .home-world[data-world="next"] .home-world__bloom { opacity: .1; }
 
 /* ── Calm mode and reduced motion ──────────────────────────────────────── */
-html.calm-mode .home-world__seam,
-:root[data-calm="true"] .home-world__seam,
 html.calm-mode .home-world__post-seam,
 :root[data-calm="true"] .home-world__post-seam {
   background: color-mix(in srgb, var(--c) 55%, transparent);
@@ -792,7 +763,6 @@ html.calm-mode .home-world__demo,
 :root[data-calm="true"] .home-world__demo { transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-world__seam,
   .home-world__post-seam,
   .home-world__dot,
   .home-world__roadmap-scan,

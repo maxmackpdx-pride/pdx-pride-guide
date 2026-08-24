@@ -46,8 +46,6 @@ export type WorldSpec = {
   body?: string;
   /** Stands in for the wordmark on a card with no family mark (NEXT). */
   headline?: string;
-  /** Small label heading the slot, when the slot needs naming (Z/SPACE). */
-  slotLabel?: string;
   action: string;
   href: string;
   accent: string;
@@ -240,12 +238,14 @@ export const WORLDS: WorldSpec[] = [
     number: "09",
     title: "Z/SPACE",
     eyebrow: "Every board, one place",
+    /* No wordmark by request: the headline carries this card, and the list
+       below it is the subject. The eyebrow already names the destination. */
+    headline: "Happening today",
     body: "Every address in the namespace, and everything on it today.",
-    slotLabel: "Happening today",
     action: "Open Z/SPACE",
     href: "/z",
     accent: "var(--board-zspace, #8f5cff)",
-    mark: "/brand/family/z-space.svg",
+    mark: null,
     slot: "pills",
   },
   {

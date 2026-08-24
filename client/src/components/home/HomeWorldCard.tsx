@@ -20,7 +20,7 @@ import {
   solveDynamicText,
   type DynamicTextResult,
 } from "@/lib/dynamicText";
-import { WORLD_MOTIFS } from "@/components/home/homeWorldMotifs";
+import { OUTZ_TOPO, WORLD_MOTIFS } from "@/components/home/homeWorldMotifs";
 import {
   ROADMAP_MARKS,
   type WorldFlyer,
@@ -316,8 +316,33 @@ export default function HomeWorldCard({
       data-slot={world.slot}
       style={{ ["--c" as string]: world.accent }}
     >
-      <span className="home-world__seam" aria-hidden="true" />
+      {/* The card system's rainbow refract seam, composed not hand-rolled. */}
+      <span className="pdx-refract-seam" aria-hidden="true" />
       <span className="home-world__pattern" aria-hidden="true" />
+      {/* OUTZ carries real terrain instead of line objects: the contour map is
+          the subject of the board, not a decoration standing in for it. */}
+      {world.key === "outz"
+        ? OUTZ_TOPO.map(topo => (
+            <svg
+              key={topo.name}
+              className="home-world__topo"
+              viewBox="0 0 600 600"
+              aria-hidden="true"
+              style={{
+                top: topo.top,
+                left: topo.left,
+                width: topo.size,
+                height: topo.size,
+                opacity: topo.opacity,
+                transform: `rotate(${topo.rotate})`,
+              }}
+            >
+              {topo.paths.map((d, i) => (
+                <path key={i} d={d} />
+              ))}
+            </svg>
+          ))
+        : null}
       {motifs.map((motif, index) => (
         <svg
           key={index}
@@ -416,27 +441,24 @@ export default function HomeWorldCard({
           ) : null}
 
           {world.slot === "pills" ? (
-            <div className="home-world__today">
-              <div className="home-world__today-head">
-                <span className="home-world__dot" aria-hidden="true" />
-                <span className="home-world__today-label">{world.slotLabel}</span>
-                {pills.length && !pills[0].isLive ? <span className="home-world__demo">Demo</span> : null}
-                <span className="home-world__today-count">{String(pills.length).padStart(2, "0")}</span>
-              </div>
-              {/* Five fill the slot, ten scroll inside it. The card box never grows. */}
-              <div className="home-world__pills" data-dense={pills.length > 6 ? "1" : undefined}>
-                {pills.map(pill => (
-                  <Link
-                    key={pill.id}
-                    href={pill.href}
-                    className="home-world__pill"
-                    style={{ ["--pill-c" as string]: pill.accent }}
-                  >
-                    <span className="home-world__pill-label">{pill.label}</span>
-                    <span className="home-world__pill-time">{pill.time}</span>
-                  </Link>
-                ))}
-              </div>
+            /* The headline names this slot, so it carries no header of its own.
+               Five pills fill the slot, ten pack down and scroll inside it, and
+               the card box is the same 648px either way. */
+            <div className="home-world__pills" data-dense={pills.length > 6 ? "1" : undefined}>
+              {pills.map(pill => (
+                <Link
+                  key={pill.id}
+                  href={pill.href}
+                  className="home-world__pill"
+                  style={{ ["--pill-c" as string]: pill.accent }}
+                >
+                  <span className="home-world__pill-label">{pill.label}</span>
+                  <span className="home-world__pill-time">{pill.time}</span>
+                </Link>
+              ))}
+              {pills.length && !pills[0].isLive ? (
+                <span className="home-world__demo home-world__demo--inline">Demo</span>
+              ) : null}
             </div>
           ) : null}
 
