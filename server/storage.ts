@@ -7637,6 +7637,148 @@ function runBootMigrationsOnce() {
     );
     recordBootMigration("cc_slaughters_weekly_metadata_repair_v1");
   }
+
+  // Production event-data repair from the 2026-08-25 QSearch/flyer audit.
+  // Keep the richest exact duplicate LIVE row and hide the others so RSVP and
+  // moderation history remain recoverable. This is deliberately narrower than
+  // same-day matching: two separately scheduled shows can share a title/venue.
+  if (!hasBootMigration("qsearch_event_flyer_audit_2026_08_25_v1")) {
+    type ExactEventRow = {
+      id: number;
+      title: string;
+      venue_name: string | null;
+      date_start: string;
+      poster_image_url: string | null;
+      description: string | null;
+      ticket_url: string | null;
+    };
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, date_start, poster_image_url, description, ticket_url
+         FROM events
+         WHERE status = 'LIVE'
+         ORDER BY id ASC`,
+      )
+      .all() as ExactEventRow[];
+    const norm = (value: string | null | undefined) =>
+      String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    const keyFor = (row: ExactEventRow) =>
+      `${norm(row.title)}|${norm(row.venue_name)}|${String(row.date_start || "").slice(0, 16)}`;
+    const richness = (row: ExactEventRow) =>
+      (row.poster_image_url ? 1000 : 0) +
+      Math.min(500, String(row.description || "").length) +
+      (row.ticket_url ? 50 : 0);
+    const keepers = new Map<string, ExactEventRow>();
+    const hideIds: number[] = [];
+    for (const row of rows) {
+      const key = keyFor(row);
+      const current = keepers.get(key);
+      if (!current) {
+        keepers.set(key, row);
+        continue;
+      }
+      const nextWins =
+        richness(row) > richness(current) ||
+        (richness(row) === richness(current) && row.id < current.id);
+      if (nextWins) {
+        hideIds.push(current.id);
+        keepers.set(key, row);
+      } else {
+        hideIds.push(row.id);
+      }
+    }
+    const duplicateNote =
+      "Hidden: exact duplicate LIVE event (title, venue, and start time) - qsearch_event_flyer_audit_2026_08_25_v1";
+    const hide = sqlite.prepare(
+      `UPDATE events
+       SET status = 'HIDDEN',
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+       WHERE id = ? AND status = 'LIVE'`,
+    );
+    for (const id of hideIds) hide.run(duplicateNote, duplicateNote, duplicateNote, id);
+
+    // TranscenDance: Pool Party was visibly paired with Ball-Busting art. The
+    // official Sanctuary calendar confirms a different event at this slot, so
+    // honest no-art is safer than keeping a wrong poster.
+    const posterNote =
+      "Cleared unrelated Ball-Busting poster from TranscenDance listing - qsearch_event_flyer_audit_2026_08_25_v1";
+    const cleared = sqlite
+      .prepare(
+        `UPDATE events
+         SET poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE lower(title) LIKE '%transcendance%'
+           AND lower(venue_name) LIKE '%sanctuary%'
+           AND lower(COALESCE(poster_image_url, '')) LIKE '%ball-busting%'`,
+      )
+      .run(posterNote, posterNote, posterNote);
+
+    // Primary Q Center evidence scheduled this public listing for Aug 26,
+    // noon-4pm. Add it only when its canonical ticket URL is absent, so a
+    // subsequent source refresh remains the authority and cannot create a copy.
+    const qCenterUrl =
+      "https://www.pdxqcenter.org/events-1/hand-up-peoples-pantry-2026-08-26-13-30";
+    const exists = sqlite
+      .prepare(`SELECT id FROM events WHERE ticket_url = ? LIMIT 1`)
+      .get(qCenterUrl) as { id: number } | undefined;
+    let added = 0;
+    if (!exists) {
+      const now = new Date().toISOString();
+      added = sqlite
+        .prepare(
+          `INSERT INTO events (
+             title, description, venue_name, address, neighborhood, lat, lng,
+             date_start, date_end, day_of_week, age_requirement, event_types,
+             admission, ticket_url, is_public, is_private, is_house_party,
+             is_sex_positive, nudity_ok, poster_image_url, status, source,
+             is_claimable, admin_notes, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          "Hand Up People's Pantry",
+          "Verified from the Q Center event page. Confirm current availability before attending.",
+          "Q Center",
+          "4115 N Mississippi Ave Suite D, Portland, OR 97217, USA",
+          "N Portland",
+          45.5535426,
+          -122.6759558,
+          "2026-08-26T12:00:00",
+          "2026-08-26T16:00:00",
+          "WED",
+          "ALL_AGES",
+          "[]",
+          "UNKNOWN",
+          qCenterUrl,
+          1,
+          0,
+          0,
+          0,
+          0,
+          null,
+          "LIVE",
+          "verified_qsearch_audit",
+          1,
+          "Verified Q Center source repair - qsearch_event_flyer_audit_2026_08_25_v1",
+          now,
+          now,
+        ).changes;
+    }
+    console.info(
+      `[boot] qsearch_event_flyer_audit_2026_08_25_v1: hid ${hideIds.length} exact duplicate(s), cleared ${cleared.changes} wrong flyer(s), added ${added} Q Center event(s)`,
+    );
+    recordBootMigration("qsearch_event_flyer_audit_2026_08_25_v1");
+  }
 }
 
 function parseEnvAdminLists() {
