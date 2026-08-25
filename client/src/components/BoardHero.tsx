@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 type BoardHeroProps = {
-  kicker: string;
+  /** Usually a mono strapline. A detail page can pass a breadcrumb node instead. */
+  kicker: ReactNode;
   title: ReactNode;
   lede: string;
   actions?: ReactNode;

@@ -161,3 +161,33 @@
 @media (max-width: 860px) {
   .outz-section__art { display: none; }
 }
+
+/* ---------- hero ----------
+   Both /z/out and /z/out/:placeSlug open with BoardHero over section art, the
+   same way About, NEXT, and Placez open. The destination page used PageHeader,
+   the utility header Contact and Legal use, so tapping a card on the board
+   dropped you onto a page that opened like a legal notice. One recipe now. */
+.outz-hero { overflow: hidden; position: relative; }
+.outz-hero > .board-hero { background: transparent; position: relative; z-index: 1; }
+/* Full bleed across the hero panel rather than a corner sticker. Anchored top
+   right so the illustration's ridgeline stays with the wordmark, and masked
+   away toward the bottom left so the kicker and lede sit on clean ground. */
+.outz-hero__art {
+  -webkit-mask-image: linear-gradient(to bottom left, #000 18%, transparent 76%);
+  mask-image: linear-gradient(to bottom left, #000 18%, transparent 76%);
+  height: 100%; inset: 0; object-fit: cover; object-position: right top;
+  opacity: .32; pointer-events: none; position: absolute; width: 100%; z-index: 0;
+}
+/* Joins the board-hero brand-logo sizing group. Kept section-local because
+   index.css is mid-refactor in another branch of work. */
+.board-hero__brand-logo--outz { width: min(100%, 620px); }
+
+/* Detail-page breadcrumb, sitting in the board-hero kicker slot so it inherits
+   the mono strapline metrics and the section accent. */
+.outz-hero__crumb { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
+.outz-hero__crumb a { color: var(--text-lo, #7a7870); text-decoration: none; transition: color .12s ease; }
+.outz-hero__crumb a:hover { color: var(--text-hi, #fff); }
+/* The current section stays lit, the same convention the site header breadcrumb
+   uses. `inherit` picks up the board-hero accent colour. */
+.outz-hero__crumb a:last-child { color: inherit; }
+.outz-hero__crumb-sep { color: var(--ink-border, #333); }

@@ -7,9 +7,7 @@
 .outz-place--missing { color: var(--text-hi, #fff); padding: 180px 24px; text-align: center; }
 .outz-place--missing a { color: var(--cyan, #00ffff); }
 
-/* ---------- hero ---------- */
-.outz-place__hero { background: #050505; overflow: hidden; position: relative; }
-.outz-place__hero > .page-header { background: linear-gradient(180deg, rgba(255, 255, 255, .04), transparent 55%); position: relative; z-index: 1; }
+/* The hero is .outz-hero from outz-shared.css, the same one the board home uses. */
 
 /* ---------- facts band + locator ---------- */
 /* Compact band, not a full section: it carries less vertical air than the

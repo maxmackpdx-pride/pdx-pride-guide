@@ -4,18 +4,8 @@
 
 @import "./outz-shared.css";
 
-/* ---------- hero ---------- */
-.outz-hero { overflow: hidden; position: relative; }
-.outz-hero > .board-hero { background: transparent; position: relative; z-index: 1; }
-.outz-hero__art {
-  -webkit-mask-image: linear-gradient(135deg, #000 30%, transparent 78%);
-  mask-image: linear-gradient(135deg, #000 30%, transparent 78%);
-  opacity: .55; pointer-events: none; position: absolute;
-  right: clamp(-140px, -6vw, -40px); top: -70px; width: min(560px, 52vw); z-index: 0;
-}
-/* Joins the board-hero brand-logo sizing group. Kept page-local because
-   index.css is mid-refactor in another branch of work. */
-.board-hero__brand-logo--outz { width: min(100%, 620px); }
+/* The hero recipe (.outz-hero, .outz-hero__art) lives in outz-shared.css so the
+   homepage and the destination page open the same way. */
 
 /* ---------- live bar ---------- */
 .outz-livebar {
@@ -55,9 +45,16 @@
 /* ---------- map ---------- */
 /* Leads the page with no section title, so it needs less air above than a
    titled section and no top margin of its own. */
-.outz-section--map { padding-block: clamp(24px, 3vw, 36px); }
+/* Extra headroom is deliberate: it is the band the motif shows through. */
+.outz-section--map { padding-block: clamp(64px, 6.5vw, 92px) clamp(24px, 3vw, 36px); }
 .outz-map-frame { position: relative; }
-.outz-map-frame__art { opacity: .45; pointer-events: none; position: absolute; right: -30px; top: -34px; width: 200px; z-index: 2; }
+/* Behind the panel, not on the tiles. The map is real data and the motif was
+   drawing over it; now it reads as a ridgeline the map is cut out of. */
+.outz-map-frame__art {
+  opacity: .5; pointer-events: none; position: absolute;
+  right: clamp(-70px, -4vw, -30px); top: -60px; width: min(520px, 64vw); z-index: 0;
+}
+.outz-map-frame > .outz-map { position: relative; z-index: 1; }
 .outz-map__chip {
   background: #06060a; border: 1px solid #000; box-shadow: inset 0 0 0 1px var(--neon-orange, #ff6600);
   color: #fff; font-size: 11px; font-weight: 800; left: 14px; letter-spacing: .07em; padding: 9px 11px;

@@ -4,8 +4,8 @@ import { Link, useRoute } from "wouter";
 import { Lock, MessageCircle } from "lucide-react";
 import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
+import BoardHero from "@/components/BoardHero";
 import OutzMap from "@/components/OutzMap";
-import PageHeader from "@/components/PageHeader";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
@@ -191,11 +191,18 @@ export default function OutzPlace() {
       <div className="outz-surface__terrain" aria-hidden="true" />
       <img className="outz-surface__topo" src={`${OUTZ_MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
 
-      <div className="outz-place__hero">
-        <PageHeader
-          section="OUTZ"
-          title={place?.name || "LOADING PLACE"}
-          titleAccent="cyan"
+      <div className="outz-hero">
+        <img className="outz-hero__art" src={`${OUTZ_MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />
+        <BoardHero
+          accent="orange"
+          kicker={
+            <span className="outz-hero__crumb">
+              <Link href="/">Zaylist</Link>
+              <span className="outz-hero__crumb-sep" aria-hidden="true">/</span>
+              <Link href="/z/out">Z/OUT</Link>
+            </span>
+          }
+          title={place?.name || "Loading place"}
           lede={place?.detail || "Loading official destination details."}
         />
       </div>
