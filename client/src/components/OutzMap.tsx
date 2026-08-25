@@ -43,15 +43,25 @@ function PopupCard({ name, detail, href, zHref }: { name: string; detail: string
   );
 }
 
-export default function OutzMap({ destinations, catalog }: { destinations: OutzDestination[]; catalog: OutzCatalogPlace[] }) {
+type OutzMapProps = {
+  destinations: OutzDestination[];
+  catalog: OutzCatalogPlace[];
+  /** Frame a single place instead of the whole region. */
+  center?: [number, number];
+  zoom?: number;
+  /** Locator mode: no source chip, no zoom control. Attribution always stays. */
+  minimal?: boolean;
+};
+
+export default function OutzMap({ destinations, catalog, center, zoom, minimal = false }: OutzMapProps) {
   return (
     <div className="directory-map-wrap outz-map">
       <div className="directory-map outz-map__canvas pdx-map-live pdx-map-surface">
         <style>{LIVE_MAP_CHROME_CSS}</style>
         <div className="pdx-map-live__vignette" aria-hidden="true" />
         <div className="pdx-map-live__shaft" aria-hidden="true" />
-        <div className="outz-map__chip" aria-hidden="true"><span /> Live official sources</div>
-        <MapContainer center={[45.2, -122.6]} zoom={7} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
+        {minimal ? null : <div className="outz-map__chip" aria-hidden="true"><span /> Live official sources</div>}
+        <MapContainer center={center ?? [45.2, -122.6]} zoom={zoom ?? 7} zoomControl={!minimal} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
           <TileLayer
             url={DARK_TILE}
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'

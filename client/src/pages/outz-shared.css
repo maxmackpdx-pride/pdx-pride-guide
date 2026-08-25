@@ -1,0 +1,163 @@
+/* Z/OUT shared surface primitives.
+   Single source of truth for the section's card, panel, status, and conditions
+   recipes so /z/out and /z/out/:placeSlug cannot drift apart again. Imported by
+   Outz.css and OutzPlace.css; page-specific layout stays in those files.
+
+   Source design: "Outz Homepage.dc.html" + "Outz Place.dc.html" (claude.ai/design). */
+
+.outz-surface {
+  /* Page-local accent channel. Deliberately not the DS `--c` token: these are the
+     design's own card recipes, not the deep-glass card system. */
+  --outz-c: var(--cyan, #00ffff);
+  --outz-good: var(--green, #39ff14);
+  --outz-warn: var(--amber, #ffb23d);
+  --outz-bad: var(--neon-orange, #ff6600);
+  background: var(--bg-app, #06060a);
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ambient terrain wash + full-bleed topo motif, behind everything. */
+.outz-surface__terrain {
+  background:
+    linear-gradient(124deg, rgba(255, 138, 31, .11), transparent 27%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 88px);
+  inset: 0; opacity: .8; pointer-events: none; position: absolute; z-index: 0;
+}
+.outz-surface__topo {
+  height: 100%; inset: 0; object-fit: cover; opacity: .06;
+  pointer-events: none; position: absolute; width: 100%; z-index: 0;
+}
+.outz-surface > :not(.outz-surface__terrain):not(.outz-surface__topo) { position: relative; z-index: 1; }
+
+/* ---------- section shell ---------- */
+.outz-section {
+  margin-inline: auto; max-width: var(--zl-col, 1180px); overflow: hidden;
+  padding: clamp(40px, 5.5vw, 72px) var(--zl-gutter); position: relative;
+}
+/* Anchors must clear the sticky site header. */
+.outz-section[id] { scroll-margin-top: 138px; }
+.outz-section__art {
+  -webkit-mask-image: radial-gradient(circle at center, #000 30%, transparent 72%);
+  mask-image: radial-gradient(circle at center, #000 30%, transparent 72%);
+  opacity: .13; pointer-events: none; position: absolute; z-index: 0;
+}
+.outz-section__art--left { left: -100px; top: -40px; width: min(520px, 48vw); }
+.outz-section__art--right { right: -110px; top: -30px; width: min(540px, 50vw); }
+.outz-section__art--corner { left: -140px; opacity: .1; top: 0; width: min(400px, 38vw); }
+.outz-section__art--bottom { bottom: -40px; left: -80px; opacity: .14; width: min(280px, 30vw); }
+.outz-section > *:not(.outz-section__art) { position: relative; z-index: 1; }
+
+.outz-seam { margin-inline: auto; max-width: var(--zl-col, 1180px); padding-inline: var(--zl-gutter); }
+.outz-empty { color: var(--text-lo, #999); font-size: 14px; grid-column: 1 / -1; margin: 0; padding: 20px 0; }
+
+/* ---------- card ---------- */
+.outz-card {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .01)),
+    rgba(10, 10, 10, .55);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--ink-border, #2b2b2b);
+  border-radius: var(--radius-tile, 10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 8px 30px rgba(0, 0, 0, .35);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: border-color .15s ease;
+}
+.outz-card:hover { border-color: var(--outz-c); }
+.outz-card__body { display: flex; flex: 1; flex-direction: column; gap: 12px; padding: 18px; }
+.outz-card__band { border-bottom: 1px solid var(--ink-border, #2b2b2b); height: 150px; overflow: hidden; position: relative; }
+.outz-card__band::after {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--outz-c) 16%, transparent), transparent 62%);
+  content: ""; inset: 0; position: absolute;
+}
+.outz-card__band img { height: 190%; left: 50%; object-fit: cover; opacity: .5; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 118%; }
+.outz-card__head { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; }
+.outz-card__head > div { min-width: 0; }
+.outz-card__eyebrow {
+  color: var(--text-lo, #999); font-family: var(--font-mono, monospace); font-size: 11px;
+  letter-spacing: var(--tracking-mono, .04em); margin: 0; text-transform: uppercase;
+}
+.outz-card h3 {
+  color: var(--text-hi, #fff); font-family: var(--font-display, sans-serif); font-size: 1.4rem;
+  font-weight: 900; line-height: 1; margin: 6px 0 0; text-transform: uppercase;
+}
+.outz-card__detail { color: var(--text-body, #b7b7bf); font-size: 14px; line-height: 1.45; margin: 0; }
+.outz-card__source { color: var(--text-faint, #666); font-size: 11px; line-height: 1.45; margin: 0; }
+.outz-card__actions { align-items: center; display: flex; flex-wrap: wrap; gap: 14px; margin-top: auto; padding-top: 6px; }
+.outz-card__actions > a:not([class]) { color: var(--cyan, #00ffff); font-size: 12px; font-weight: 800; text-decoration: none; }
+.outz-card__actions > a:not([class]):hover { color: var(--text-hi, #fff); }
+.outz-card__cta { margin-top: auto; padding-top: 8px; }
+
+/* ---------- panel (place page's working surfaces) ---------- */
+.outz-panel {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .01)),
+    rgba(10, 10, 10, .55);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--ink-border, #2b2b2b);
+  border-radius: var(--radius-panel, 14px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 8px 30px rgba(0, 0, 0, .35);
+  padding: clamp(20px, 3vw, 26px);
+}
+
+/* ---------- status + conditions ---------- */
+.outz-conditions {
+  color: var(--text-lo, #999); display: flex; flex-wrap: wrap; font-family: var(--font-mono, monospace);
+  font-size: 13px; gap: 8px 16px;
+}
+.outz-conditions span:first-child { color: var(--outz-c); font-weight: 700; }
+.outz-status { font-size: 13px; line-height: 1.45; margin: 0; }
+.outz-status--good { color: var(--outz-good); }
+.outz-status--warn { color: var(--outz-warn); }
+.outz-status--bad { color: var(--outz-bad); }
+.outz-status strong { color: var(--text-hi, #fff); }
+
+/* ---------- map surface (both the region map and the place locator) ---------- */
+.outz-map__canvas { height: clamp(320px, 48vw, 550px); position: relative; }
+.outz-map-popup {
+  background: #09090c; border: 1px solid #000; box-shadow: inset 0 0 0 1px var(--cyan, #19e3ff);
+  color: #fff; display: grid; gap: 6px; max-width: 220px; padding: 14px;
+}
+.outz-map-popup span { color: #b7b7bf; font-size: 12px; }
+.outz-map-popup a { color: var(--cyan, #19e3ff); font-size: 12px; font-weight: 800; text-decoration: none; }
+
+/* ---------- form controls shared by check-in, chat, and wall ---------- */
+.outz-field { display: flex; flex-direction: column; gap: 6px; }
+.outz-field > span,
+.outz-panel label > span:not(.sr-only) {
+  color: var(--text-lo, #999); font-family: var(--font-mono, monospace); font-size: 11px;
+  letter-spacing: var(--tracking-mono, .04em); text-transform: uppercase;
+}
+.outz-panel input[type="text"],
+.outz-panel input:not([type]),
+.outz-panel select,
+.outz-panel textarea {
+  background: var(--ink-850, #111); border: 1px solid var(--ink-border, #2b2b2b);
+  border-radius: var(--radius-md, 8px); color: var(--text-hi, #fff);
+  font-family: var(--font-body, sans-serif); font-size: 14px; padding: 10px 12px; width: 100%;
+}
+.outz-panel textarea { min-height: 70px; resize: vertical; }
+.outz-panel input:focus-visible,
+.outz-panel select:focus-visible,
+.outz-panel textarea:focus-visible { border-color: var(--outz-c); outline: 2px solid var(--outz-c); outline-offset: 1px; }
+
+/* Pill toggles: date picker on check-in, post type on the wall. */
+.outz-pillrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.outz-pillrow button {
+  background: transparent; border: 1px solid var(--ink-border, #2b2b2b);
+  border-radius: var(--radius-pill, 999px); color: var(--text-lo, #999); cursor: pointer;
+  font-family: var(--font-mono, monospace); font-size: 12px; letter-spacing: var(--tracking-mono, .04em);
+  padding: 8px 14px; text-transform: uppercase; transition: border-color .15s ease, color .15s ease;
+}
+.outz-pillrow button:hover { border-color: var(--outz-c); color: var(--text-hi, #fff); }
+.outz-pillrow button.is-active { background: color-mix(in srgb, var(--outz-c) 8%, transparent); border-color: var(--outz-c); color: var(--outz-c); }
+.outz-pillrow--display button { font-family: var(--font-display, sans-serif); font-weight: 700; }
+.outz-pillrow--lime button.is-active { background: color-mix(in srgb, var(--green-acid, #39ff14) 8%, transparent); border-color: var(--green-acid, #39ff14); color: var(--green-acid, #39ff14); }
+
+@media (max-width: 860px) {
+  .outz-section__art { display: none; }
+}

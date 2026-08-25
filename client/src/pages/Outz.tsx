@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "wouter";
-import PageHeader from "@/components/PageHeader";
+import BoardHero from "@/components/BoardHero";
+import BoardStatsBar from "@/components/BoardStatsBar";
 import OutzMap from "@/components/OutzMap";
-import { Badge, Button, Divider, SectionHeader, StatPill } from "@/components/ds";
+import { Badge, Button, Divider, SectionHeader } from "@/components/ds";
 import { apiRequest } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import {
@@ -15,33 +16,13 @@ import {
   type OutzSnapshot,
 } from "@shared/outz";
 import type { NudeBeachesSnapshot } from "@shared/nudeBeaches";
+import { OUTZ_BUTTON_ACCENT, OUTZ_KIND_META, OUTZ_MOTIF, outzBandArt, outzTempLabel } from "@/lib/outzKinds";
 import "./Outz.css";
 
 type OutzPayload = { data: OutzSnapshot; stale?: boolean; fromCache?: boolean };
 type BeachesPayload = { data: NudeBeachesSnapshot };
 
-const MOTIF = "/motifs/outz";
-
-/** Badge label + accent per listing kind. Accents are the DS neon set. */
-const KIND_META: Record<OutzPlaceKind, { label: string; color: string; accent: string }> = {
-  beach: { label: "Beach", color: "cyan", accent: "var(--cyan)" },
-  "camp-hike": { label: "Camp + Hike", color: "lime", accent: "var(--lime)" },
-  campground: { label: "Camp", color: "green", accent: "var(--green)" },
-  trailhead: { label: "Hike", color: "orange", accent: "var(--orange)" },
-  "outdoor-stay": { label: "Stay", color: "amber", accent: "var(--amber)" },
-};
-
-/** Button accent tokens are a narrower set than badge colors. */
-const BUTTON_ACCENT: Record<string, string> = { amber: "orange", green: "green", cyan: "cyan", lime: "lime", orange: "orange" };
-
 const LEGEND: OutzPlaceKind[] = ["beach", "camp-hike", "campground", "trailhead", "outdoor-stay"];
-
-const QUICK_LINKS = [
-  { href: "#outz-beaches", label: "Nude Beaches" },
-  { href: "#outz-destinations", label: "Destinations" },
-  { href: "#outz-map", label: "Map" },
-  { href: "#outz-directory", label: "Directory" },
-];
 
 type BeachCard = {
   key: "roosterRock" | "sauvieIsland";
@@ -79,10 +60,6 @@ function timeLabel(value?: string) {
   return `Updated ${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(value))}`;
 }
 
-function tempLabel(value: number | null | undefined) {
-  return value == null ? "—" : `${Math.round(value)}°F`;
-}
-
 /** Conditions strip: the same three-slot mono row on every card in the design. */
 function ConditionRow({ items }: { items: Array<string | null | undefined> }) {
   return (
@@ -102,21 +79,6 @@ function MotifBand({ src, accent }: { src: string; accent: string }) {
       <img src={src} alt="" loading="lazy" />
     </div>
   );
-}
-
-/** Deterministic band art so a card keeps the same motif between renders. */
-const BAND_ART = [
-  `${MOTIF}/ridge-loop-cyan.svg`,
-  `${MOTIF}/canyon-overlook-orange.svg`,
-  `${MOTIF}/alpine-lake-loop-lime.svg`,
-  `${MOTIF}/waterfall-crossing-lime.svg`,
-  `${MOTIF}/topographic-ridge-basin-amber.svg`,
-];
-
-function bandArt(id: string) {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  return BAND_ART[hash % BAND_ART.length];
 }
 
 export default function Outz() {
@@ -144,55 +106,56 @@ export default function Outz() {
   const legendKinds = LEGEND.filter(kind => allPlaces.some(place => place.kind === kind));
 
   return (
-    <div className="zine-page board-page outz-page">
-      <div className="outz-page__terrain" aria-hidden="true" />
-      <img className="outz-page__topo" src={`${MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
+    <div className="zine-page board-page outz-surface outz-page">
+      <div className="outz-surface__terrain" aria-hidden="true" />
+      <img className="outz-surface__topo" src={`${OUTZ_MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
 
       <div className="outz-hero">
-        <img className="outz-hero__art" src={`${MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />
-        <PageHeader
-          section="OUTZ"
-          kicker="LIVE FIELD DESK"
-          title="PITCH A TENT. FIND YOUR PEOPLE."
-          titleAccent="cyan"
-          lede="Camping, hiking, trails, weather, and alerts from the agencies that manage the places, plus the people who make the trip better."
-          actions={
-            <div className="outz-hero-actions">
-              <a href="#outz-beaches"><Button as="span" variant="solid" accent="lime" size="lg">BEACH CONDITIONS</Button></a>
-              <a href="#outz-directory"><Button as="span" accent="orange" size="lg">ALL LISTINGS</Button></a>
-            </div>
-          }
+        <img className="outz-hero__art" src={`${OUTZ_MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />
+        <BoardHero
+        accent="orange"
+        kicker="Z/OUT · live field desk"
+        title={<img className="board-hero__brand-logo board-hero__brand-logo--outz" src="/brand/family/outz.svg" alt="OUTZ" />}
+        lede="Camping, hiking, trails, weather, alerts, and practical access notes from the agencies that manage the places, plus the people who make the trip better."
         />
       </div>
 
-      <nav className="outz-quicklinks" aria-label="Z/OUT sections">
-        <img className="outz-quicklinks__mark" src="/brand/family/outz.svg" alt="OUTZ" />
-        {QUICK_LINKS.map(link => <a key={link.href} href={link.href}>{link.label}</a>)}
-        {/* No OUTZ spot-submission flow exists yet; /contact is the real intake. */}
-        <Link className="outz-quicklinks__cta" href="/contact">
-          <Button as="span" variant="solid" accent="orange" size="sm">SUBMIT A SPOT</Button>
-        </Link>
-      </nav>
+      {/* Same counter the rest of the site uses (Rooster Rock, Eventz, Sellz...). */}
+      <BoardStatsBar
+        key={snapshot?.fetchedAt ?? "pending"}
+        stats={[
+          { num: allPlaces.length, label: "Destinations", color: "#19e3ff" },
+          { num: alertCount, label: "Active alerts", color: "#ff6600" },
+          { num: stays.length, label: "Community stays", color: "#ccff00" },
+        ]}
+        variant="band"
+        showLive={false}
+      />
 
       <section className="outz-livebar" aria-live="polite">
-        <img className="outz-livebar__art" src={`${MOTIF}/alpine-lake-loop-lime.svg`} alt="" aria-hidden="true" />
+        <img className="outz-livebar__art" src={`${OUTZ_MOTIF}/alpine-lake-loop-lime.svg`} alt="" aria-hidden="true" />
         <span className="outz-livebar__stamp">
           {timeLabel(snapshot?.fetchedAt)} · Live NWS + agency feeds{query.data?.stale ? " · Refreshing in background" : ""}
         </span>
-        <div className="outz-livebar__stats">
-          <StatPill count={allPlaces.length || "—"} color="cyan">Destinations</StatPill>
-          <StatPill count={alertCount} color="orange">Active Alerts</StatPill>
-          <StatPill count={stays.length} color="lime">Community Stays</StatPill>
-          <Button size="sm" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
-            {refresh.isPending ? "REFRESHING" : "REFRESH LIVE DATA"}
-          </Button>
-        </div>
+        <Button size="sm" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
+          {refresh.isPending ? "REFRESHING" : "REFRESH LIVE DATA"}
+        </Button>
       </section>
 
       {query.isError ? <div className="outz-error">Official outdoor conditions are temporarily unavailable. Try the direct agency links below.</div> : null}
 
+      <section id="outz-map" className="outz-section outz-section--map">
+        <div className="outz-map-frame">
+          <img className="outz-map-frame__art" src={`${OUTZ_MOTIF}/ridge-loop-cyan.svg`} alt="" aria-hidden="true" />
+          {snapshot
+            ? <OutzMap destinations={snapshot.destinations} catalog={snapshot.catalog} />
+            : <p className="outz-empty">Map loads once the official sources respond.</p>}
+        </div>
+      </section>
+
       <section id="outz-beaches" className="outz-section outz-section--beaches" aria-labelledby="outz-beaches-heading">
-        <img className="outz-section__art outz-section__art--left" src={`${MOTIF}/adventure-map-waterfall-route.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--left" src={`${OUTZ_MOTIF}/adventure-map-waterfall-route.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--corner" src={`${OUTZ_MOTIF}/topographic-twin-summits.svg`} alt="" aria-hidden="true" />
         <SectionHeader
           kicker="Featured · Seasonal"
           title={<span id="outz-beaches-heading">Nude Beaches</span>}
@@ -213,10 +176,10 @@ export default function Outz() {
                 </div>
                 <h3>{beach.name}</h3>
                 <p className="outz-card__detail">{beach.detail}</p>
-                <ConditionRow items={[tempLabel(live?.airTempF), live?.weatherSummary, live?.wind]} />
+                <ConditionRow items={[outzTempLabel(live?.airTempF), live?.weatherSummary, live?.wind]} />
                 <StatusLine tone="good">{status || "Seasonal access. Open in season, conditions change daily."}</StatusLine>
                 <Link className="outz-card__cta" href={beach.href}>
-                  <Button as="span" variant="solid" accent={BUTTON_ACCENT[beach.color]} size="sm">OPEN SPOT</Button>
+                  <Button as="span" variant="solid" accent={OUTZ_BUTTON_ACCENT[beach.color]} size="sm">OPEN SPOT</Button>
                 </Link>
               </article>
             );
@@ -225,8 +188,8 @@ export default function Outz() {
       </section>
 
       <section id="outz-destinations" className="outz-section outz-section--destinations">
-        <img className="outz-section__art outz-section__art--right" src={`${MOTIF}/adventure-map-twin-falls.svg`} alt="" aria-hidden="true" />
-        <img className="outz-section__art outz-section__art--corner" src={`${MOTIF}/canyon-overlook-orange.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--right" src={`${OUTZ_MOTIF}/adventure-map-twin-falls.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--corner" src={`${OUTZ_MOTIF}/canyon-overlook-orange.svg`} alt="" aria-hidden="true" />
         <SectionHeader
           kicker="Plan a Trip"
           title="Featured camp + hike destinations"
@@ -236,16 +199,16 @@ export default function Outz() {
         {legendKinds.length ? (
           <div className="outz-legend">
             {legendKinds.map(kind => (
-              <span key={kind}><i style={{ background: KIND_META[kind].accent }} />{KIND_META[kind].label}</span>
+              <span key={kind}><i style={{ background: OUTZ_KIND_META[kind].accent }} />{OUTZ_KIND_META[kind].label}</span>
             ))}
           </div>
         ) : null}
         <div className="outz-card-grid">
           {destinations.map(place => {
-            const meta = KIND_META[place.kind];
+            const meta = OUTZ_KIND_META[place.kind];
             return (
               <article className="outz-card outz-card--tall" key={place.id} style={{ "--outz-c": meta.accent } as CSSProperties}>
-                <MotifBand src={bandArt(place.id)} accent={meta.accent} />
+                <MotifBand src={outzBandArt(place.id)} accent={meta.accent} />
                 <div className="outz-card__body">
                   <div className="outz-card__head">
                     <div>
@@ -255,14 +218,14 @@ export default function Outz() {
                     <Badge color={meta.color} variant="outline">{meta.label}</Badge>
                   </div>
                   <p className="outz-card__detail">{place.subtitle}</p>
-                  <ConditionRow items={[tempLabel(place.airTempF), place.forecast, place.wind]} />
+                  <ConditionRow items={[outzTempLabel(place.airTempF), place.forecast, place.wind]} />
                   {place.alerts.length
                     ? <StatusLine tone="bad"><strong>Alert:</strong> {place.alerts[0].headline}</StatusLine>
                     : <StatusLine tone="good">No active NWS alert.</StatusLine>}
                   {place.sourceStatus ? <p className="outz-card__source">{place.sourceStatus}</p> : null}
                   <div className="outz-card__actions">
                     <Link href={outzPlaceHref(place)}>
-                      <Button as="span" variant="solid" accent={BUTTON_ACCENT[meta.color]} size="sm">CHECK IN + CHAT</Button>
+                      <Button as="span" variant="solid" accent={OUTZ_BUTTON_ACCENT[meta.color]} size="sm">CHECK IN + CHAT</Button>
                     </Link>
                     <a href={place.officialUrl} target="_blank" rel="noreferrer">Official park page ↗</a>
                   </div>
@@ -312,24 +275,9 @@ export default function Outz() {
 
       <div className="outz-seam"><Divider variant="faint" /></div>
 
-      <section id="outz-map" className="outz-section outz-section--map">
-        <SectionHeader
-          kicker="Where To Go"
-          title="All destinations on one map"
-          subtitle="Every pin is a place with a check-in, a chat, and a wall."
-          accent="cyan"
-        />
-        <div className="outz-map-frame">
-          <img className="outz-map-frame__art" src={`${MOTIF}/ridge-loop-cyan.svg`} alt="" aria-hidden="true" />
-          {snapshot
-            ? <OutzMap destinations={snapshot.destinations} catalog={snapshot.catalog} />
-            : <p className="outz-empty">Map loads once the official sources respond.</p>}
-        </div>
-      </section>
-
       <section id="outz-directory" className="outz-section outz-section--directory">
-        <img className="outz-section__art outz-section__art--right" src={`${MOTIF}/adventure-map-river-pass.svg`} alt="" aria-hidden="true" />
-        <img className="outz-section__art outz-section__art--bottom" src={`${MOTIF}/waterfall-crossing-lime.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--right" src={`${OUTZ_MOTIF}/adventure-map-river-pass.svg`} alt="" aria-hidden="true" />
+        <img className="outz-section__art outz-section__art--bottom" src={`${OUTZ_MOTIF}/waterfall-crossing-lime.svg`} alt="" aria-hidden="true" />
         <SectionHeader
           kicker="Full Field Directory"
           title="Every OUTZ listing, one trailhead at a time"
@@ -343,7 +291,7 @@ export default function Outz() {
           {allPlaces.map(place => (
             <div className="outz-dir-row" key={place.id}>
               <b>{place.name}</b>
-              <span className="outz-dir-row__kind" style={{ color: KIND_META[place.kind].accent }}>{KIND_META[place.kind].label}</span>
+              <span className="outz-dir-row__kind" style={{ color: OUTZ_KIND_META[place.kind].accent }}>{OUTZ_KIND_META[place.kind].label}</span>
               <span className="outz-dir-row__source">{place.sourceName}</span>
               <Link className="outz-dir-row__open" href={outzPlaceHref(place)}>Open Z/ Page →</Link>
             </div>

@@ -18,11 +18,15 @@ import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
 
+/** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
+ *  on those two routes only, not on every /z/out/ destination page. */
+const RIVER_BRATS_INTRO_PATHS = new Set(["/z/out/rooster-rock", "/z/out/sauvie-island"]);
+
 /** Mount intro outside RouteBoundary so a page crash cannot kill the popup. */
 function RiverBratsIntroOnBeaches() {
   const [location] = useLocation();
   const path = location.split("?")[0] || "";
-  if (!path.startsWith("/z/out/")) return null;
+  if (!RIVER_BRATS_INTRO_PATHS.has(path)) return null;
   return <RiverBratsIntroPopup />;
 }
 

@@ -2,13 +2,15 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
 import { Lock, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ds";
+import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
-import PageHero from "@/components/PageHero";
+import OutzMap from "@/components/OutzMap";
+import PageHeader from "@/components/PageHeader";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { OUTZ_BUTTON_ACCENT, OUTZ_KIND_META, OUTZ_MOTIF, outzTempLabel } from "@/lib/outzKinds";
 import {
   beachCheckinDateOptions,
   defaultDepartHour,
@@ -81,8 +83,19 @@ export default function OutzPlace() {
     queryKey: ["/api/outz"],
     queryFn: () => apiRequest("GET", "/api/outz").then(r => r.json()),
   });
-  const place = snapshotQuery.data?.data ? outzPlaceFromSlug(snapshotQuery.data.data, slug) : null;
+  const snapshot = snapshotQuery.data?.data;
+  const place = snapshot ? outzPlaceFromSlug(snapshot, slug) : null;
   const placeId = place?.id ?? null;
+
+  /* The place contract carries no conditions or coordinates, so pull the full
+     record when this listing is a featured destination or a catalog site. */
+  const destination = snapshot?.destinations.find(entry => entry.id === placeId) ?? null;
+  const catalogSite = snapshot?.catalog.find(entry => entry.id === placeId) ?? null;
+  const coords: [number, number] | null = destination
+    ? [destination.lat, destination.lng]
+    : catalogSite ? [catalogSite.lat, catalogSite.lng] : null;
+  const meta = place ? OUTZ_KIND_META[place.kind] : null;
+
   const checkinKey = ["/api/outz/checkins", placeId, date] as const;
   const checkinsQuery = useQuery<Checkin[]>({
     queryKey: checkinKey,
@@ -165,92 +178,151 @@ export default function OutzPlace() {
   );
 
   if (!snapshotQuery.isLoading && !place) {
-    return <div className="outz-place outz-place--missing"><h1>That OUTZ address isn’t current.</h1><Link href="/z/out">Back to OUTZ</Link></div>;
+    return <div className="outz-surface outz-place--missing"><h1>That OUTZ address isn’t current.</h1><Link href="/z/out">Back to OUTZ</Link></div>;
   }
 
+  const alert = destination?.alerts[0] ?? null;
+
   return (
-    <div className="outz-place board-page">
-      <PageHero
-        kicker={place ? `Z/OUT/${place.slug}` : "Z/OUT"}
-        titleLine1={place?.name || "LOADING PLACE"}
-        titleLine2="CHECK IN. FIND YOUR PEOPLE."
-        accent="cyan"
-        lede={place?.detail || "Loading official destination details."}
-        bgImage="/motifs/portland-sign.jpg"
-        bgPosition="center 44%"
-        actions={<div className="outz-place__hero-actions"><Link href="/z/out"><Button as="span">ALL OUTZ</Button></Link>{place?.officialUrl ? <a href={place.officialUrl} target="_blank" rel="noreferrer"><Button as="span" variant="solid">OFFICIAL DETAILS ↗</Button></a> : null}</div>}
-      />
+    <div
+      className="zine-page board-page outz-surface outz-place"
+      style={meta ? ({ "--outz-c": meta.accent } as React.CSSProperties) : undefined}
+    >
+      <div className="outz-surface__terrain" aria-hidden="true" />
+      <img className="outz-surface__topo" src={`${OUTZ_MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
 
-      {place ? <section className="outz-place__facts pdx-glass-card pdx-glass-rebind">
-        <span>{place.kind.replace(/-/g, " ")}</span>
-        <strong>{place.sourceName}</strong>
-        <p>{place.sourceStatus || "Official status not currently available. Confirm before driving."}</p>
-      </section> : null}
+      <div className="outz-place__hero">
+        <PageHeader
+          section="OUTZ"
+          title={place?.name || "LOADING PLACE"}
+          titleAccent="cyan"
+          lede={place?.detail || "Loading official destination details."}
+        />
+      </div>
 
-      <section className="outz-place__social" aria-labelledby="outz-checkin-heading">
-        <div className="outz-place__section-head"><p>YOUR TRIP</p><h2 id="outz-checkin-heading">Check in. You’re in the chat.</h2><span>Pick your day and time. Non-anonymous check-ins open this destination’s group chat.</span></div>
+      {/* One facts band. Everything a trip decision needs, said once: what it is,
+          who runs it, what the weather is doing, and where it sits. */}
+      <section className="outz-section outz-place__brief" aria-label="Before you go">
+        <img className="outz-section__art outz-section__art--right" src={`${OUTZ_MOTIF}/topographic-canyon-pass.svg`} alt="" aria-hidden="true" />
+        <div className="outz-place__facts">
+          <div className="outz-place__tags">
+            {meta ? <Badge color={meta.color} variant="outline">{meta.label}</Badge> : null}
+            <Badge variant="paper">{place?.sourceName}</Badge>
+          </div>
+
+          {destination ? (
+            <dl className="outz-place__readings">
+              <div><dt>Temp</dt><dd>{outzTempLabel(destination.airTempF)}</dd></div>
+              <div><dt>Forecast</dt><dd>{destination.forecast || "—"}</dd></div>
+              <div><dt>Wind</dt><dd>{destination.wind || "—"}</dd></div>
+            </dl>
+          ) : null}
+
+          {alert
+            ? <div className="outz-place__alert outz-place__alert--bad"><strong>⚠ Alert:</strong><span>{alert.headline}</span></div>
+            : destination
+              ? <div className="outz-place__alert outz-place__alert--good"><strong>No active NWS alert.</strong><span>Conditions change fast. Confirm on the official page before you drive.</span></div>
+              : <div className="outz-place__alert outz-place__alert--warn"><strong>No live conditions for this listing.</strong><span>Confirm access, reservations, and closures on the official page before you drive.</span></div>}
+
+          <p className="outz-place__official">
+            {place?.sourceStatus ? <><span>Official status</span> {place.sourceStatus}</> : null}
+            {place?.officialUrl
+              ? <a href={place.officialUrl} target="_blank" rel="noreferrer">Official details ↗</a>
+              : <em>Official source has no direct visitor page.</em>}
+          </p>
+        </div>
+
+        <div className="outz-place__where">
+          {coords && snapshot
+            ? <div className="outz-place__map">
+                <OutzMap
+                  destinations={destination ? [destination] : []}
+                  catalog={catalogSite ? [catalogSite] : []}
+                  center={coords}
+                  zoom={11}
+                  minimal
+                />
+              </div>
+            : null}
+          <p className="outz-place__map-note">
+            {coords
+              ? "Pin is the official record's published point, not a guaranteed trailhead or parking entrance."
+              : "This listing has no published coordinates. Use the official page for directions and parking."}
+          </p>
+        </div>
+      </section>
+
+      <section className="outz-section" aria-labelledby="outz-checkin-heading">
+        <div className="outz-place__section-head">
+          <p>Your trip</p>
+          <h2 id="outz-checkin-heading">Check in. You’re in the chat.</h2>
+          <span>Pick your day and time. Non-anonymous check-ins open this destination’s group chat.</span>
+        </div>
         <div className="outz-place__social-grid">
-          <div className="outz-checkin pdx-glass-card pdx-glass-rebind">
+          <div className="outz-checkin outz-panel">
             <div className="outz-checkin__eyebrow">{checkins.length} going {formatBeachCheckinDateLabel(date).toLowerCase()}</div>
-            <div className="outz-checkin__dates" aria-label="Check-in day">
+            <div className="outz-pillrow" aria-label="Check-in day">
               {dates.map(value => <button type="button" key={value} className={date === value ? "is-active" : ""} onClick={() => setDate(value)}>{formatBeachCheckinDateLabel(value)}</button>)}
             </div>
             {mine ? <div className="outz-checkin__mine"><strong>{mine.isAnonymous ? "Anonymous" : "You"} · {formatRiverBratsWindow(mine.arrivalHour, mine.departHour)}</strong><button type="button" onClick={() => uncheck.mutate()} disabled={uncheck.isPending}>Uncheck in</button></div> : <>
-              <label>Arrival
-                <select value={arrivalHour} onChange={event => { const hour = Number(event.target.value); setArrivalHour(hour); setDepartHour(current => Math.max(current, defaultDepartHour(hour))); }}>
-                  {Array.from({ length: 15 }, (_, index) => index + 7).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
-                </select>
-              </label>
-              <label>Leaving about
-                <select value={departHour} onChange={event => setDepartHour(Number(event.target.value))}>
-                  {Array.from({ length: 15 }, (_, index) => index + 8).filter(hour => hour > arrivalHour).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
-                </select>
-              </label>
-              <label>Optional note<input value={note} maxLength={80} placeholder="e.g. bringing a stove" onChange={event => setNote(event.target.value)} /></label>
+              <div className="outz-checkin__grid">
+                <label className="outz-field"><span>Arrival</span>
+                  <select value={arrivalHour} onChange={event => { const hour = Number(event.target.value); setArrivalHour(hour); setDepartHour(current => Math.max(current, defaultDepartHour(hour))); }}>
+                    {Array.from({ length: 15 }, (_, index) => index + 7).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
+                  </select>
+                </label>
+                <label className="outz-field"><span>Leaving about</span>
+                  <select value={departHour} onChange={event => setDepartHour(Number(event.target.value))}>
+                    {Array.from({ length: 15 }, (_, index) => index + 8).filter(hour => hour > arrivalHour).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
+                  </select>
+                </label>
+              </div>
+              <label className="outz-field"><span>Optional note</span><input type="text" value={note} maxLength={80} placeholder="e.g. bringing a stove" onChange={event => setNote(event.target.value)} /></label>
               <label className="outz-checkin__anonymous"><input type="checkbox" checked={anonymous} onChange={event => setAnonymous(event.target.checked)} /> Count me anonymously (no chat)</label>
-              <Button variant="solid" disabled={saveCheckin.isPending} onClick={() => user ? saveCheckin.mutate() : setShowAuth(true)}>{saveCheckin.isPending ? "CHECKING IN" : "CHECK IN · JOIN CHAT"}</Button>
+              <Button variant="solid" accent={OUTZ_BUTTON_ACCENT[meta?.color || "cyan"]} disabled={saveCheckin.isPending} onClick={() => user ? saveCheckin.mutate() : setShowAuth(true)}>{saveCheckin.isPending ? "CHECKING IN" : "CHECK IN · JOIN CHAT"}</Button>
             </>}
             <div className="outz-checkin__people">{checkins.map(checkin => <span key={checkin.id}>{checkin.masked ? "Anonymous" : checkin.displayName || checkin.username || "Member"}</span>)}</div>
           </div>
 
-          <section className={`outz-group-chat pdx-glass-card pdx-glass-rebind${chatOpenForMe ? " outz-group-chat--open" : ""}`} aria-label={`${place?.name || "OUTZ"} group chat`}>
+          <section className={`outz-group-chat outz-panel${chatOpenForMe ? " outz-group-chat--open" : ""}`} aria-label={`${place?.name || "OUTZ"} group chat`}>
             <div className="outz-group-chat__head"><MessageCircle size={18} /><div><strong>{place?.name || "OUTZ"} · Group chat</strong><span>{chatOpenForMe ? formatChatClose(chatQuery.data?.expiresAt ?? null) : "Check in to enter"}</span></div></div>
             {!chatOpenForMe ? <div className="outz-group-chat__locked"><Lock size={22} /><p>Your group chat opens as soon as you check in with your profile.</p></div> : <>
               <div className="outz-group-chat__members">{chatQuery.data?.members.length ? `${chatQuery.data.members.length} in chat` : "You’re first in the room"}</div>
               <div className="outz-group-chat__thread">{chatQuery.data?.messages.length ? chatQuery.data.messages.map(chat => <p key={chat.id} className={chat.isMine ? "is-mine" : ""}><strong>{chat.isMine ? "You" : chat.displayName || chat.username || "Member"}</strong>{chat.body}</p>) : <p className="outz-group-chat__empty">You’re in. Say hi to everyone heading here this week.</p>}</div>
-              <form onSubmit={event => { event.preventDefault(); if (message.trim()) sendMessage.mutate(); }}><label><span className="sr-only">Message the group</span><input value={message} maxLength={500} placeholder="Say hi to the group" onChange={event => setMessage(event.target.value)} /></label><Button type="submit" variant="solid" disabled={sendMessage.isPending || !message.trim()}>SEND</Button></form>
+              <form onSubmit={event => { event.preventDefault(); if (message.trim()) sendMessage.mutate(); }}><label><span className="sr-only">Message the group</span><input type="text" value={message} maxLength={500} placeholder="Say hi to the group" onChange={event => setMessage(event.target.value)} /></label><Button type="submit" variant="solid" accent="cyan" size="sm" disabled={sendMessage.isPending || !message.trim()}>SEND</Button></form>
             </>}
           </section>
         </div>
       </section>
 
-      <section className="outz-place__wall" aria-labelledby="outz-wall-heading">
-        <div className="outz-place__section-head">
-          <p>DESTINATION WALL</p>
+      <section className="outz-section" aria-labelledby="outz-wall-heading">
+        <img className="outz-section__art outz-section__art--right" src={`${OUTZ_MOTIF}/adventure-map-river-pass.svg`} alt="" aria-hidden="true" />
+        <div className="outz-place__section-head outz-place__section-head--wall">
+          <p>Destination wall</p>
           <h2 id="outz-wall-heading">Find your ride. Find your people.</h2>
-          <span>Use the wall for trip plans, trail partners, and carpools. It is community context — never official access or safety information.</span>
+          <span>Trip plans, trail partners, and carpools. Community context, never official access or safety information.</span>
         </div>
         <div className="outz-place__wall-grid">
-          <div className="outz-place__wall-main">
-            <div className="outz-wall-composer pdx-glass-card pdx-glass-rebind">
-              <div className="outz-wall-composer__types" role="group" aria-label="Post type">
+          <div>
+            <div className="outz-wall-composer outz-panel">
+              <div className="outz-pillrow outz-pillrow--display outz-pillrow--lime" role="group" aria-label="Post type">
                 {(["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"] as const).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
               </div>
               <label><span className="sr-only">Your destination post</span><textarea value={postBody} maxLength={500} placeholder={postKind === "CARPOOL" ? "Where are you leaving from, and when?" : postKind === "LOOKING_FOR_COMPANY" ? "What kind of company are you looking for?" : "Share a useful trip note."} onChange={event => setPostBody(event.target.value)} /></label>
-              <div><span>For {formatBeachCheckinDateLabel(date)}</span><Button variant="solid" disabled={createWallPost.isPending || !postBody.trim()} onClick={() => user ? createWallPost.mutate() : setShowAuth(true)}>{createWallPost.isPending ? "POSTING" : "POST TO WALL"}</Button></div>
+              <div className="outz-wall-composer__foot"><span>For {formatBeachCheckinDateLabel(date)}</span><Button variant="solid" accent="lime" size="sm" disabled={createWallPost.isPending || !postBody.trim()} onClick={() => user ? createWallPost.mutate() : setShowAuth(true)}>{createWallPost.isPending ? "POSTING" : "POST TO WALL"}</Button></div>
             </div>
             <div className="outz-wall-feed">
-              {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post pdx-glass-card pdx-glass-rebind" key={post.id}>
+              {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post outz-panel" key={post.id}>
                 <header><span>{post.postKind.replaceAll("_", " ")}</span><time dateTime={post.createdAt}>{post.tripDate ? formatBeachCheckinDateLabel(post.tripDate) : "Trip note"}</time></header>
                 <p>{post.body}</p>
                 <small>{post.isMine ? "You" : post.displayName || post.username || "Member"}</small>
-                <div className="outz-wall-post__comments">{post.comments.map(comment => <p key={comment.id}><strong>{comment.isMine ? "You" : comment.displayName || comment.username || "Member"}</strong>{comment.body}</p>)}</div>
-                <form onSubmit={event => { event.preventDefault(); const body = commentDrafts[post.id]?.trim(); if (body) user ? createComment.mutate({ postId: post.id, body }) : setShowAuth(true); }}><label><span className="sr-only">Reply to this post</span><input value={commentDrafts[post.id] || ""} maxLength={300} placeholder="Reply" onChange={event => setCommentDrafts(current => ({ ...current, [post.id]: event.target.value }))} /></label><Button type="submit" disabled={createComment.isPending || !(commentDrafts[post.id] || "").trim()}>REPLY</Button></form>
+                {post.comments.length ? <div className="outz-wall-post__comments">{post.comments.map(comment => <p key={comment.id}><strong>{comment.isMine ? "You" : comment.displayName || comment.username || "Member"}</strong>{comment.body}</p>)}</div> : null}
+                <form onSubmit={event => { event.preventDefault(); const body = commentDrafts[post.id]?.trim(); if (body) user ? createComment.mutate({ postId: post.id, body }) : setShowAuth(true); }}><label><span className="sr-only">Reply to this post</span><input type="text" value={commentDrafts[post.id] || ""} maxLength={300} placeholder="Reply" onChange={event => setCommentDrafts(current => ({ ...current, [post.id]: event.target.value }))} /></label><Button type="submit" size="sm" disabled={createComment.isPending || !(commentDrafts[post.id] || "").trim()}>REPLY</Button></form>
               </article>) : <div className="outz-wall-empty">No trip posts yet. Be the one who gets the plan moving.</div>}
             </div>
           </div>
-          <aside className="outz-rating pdx-glass-card pdx-glass-rebind" aria-label="Destination rating">
-            <p>TRIP SIGNAL</p>
+          <aside className="outz-rating outz-panel" aria-label="Destination rating">
+            <p>Trip signal</p>
             <strong>{ratingQuery.data?.average == null ? "—" : ratingQuery.data.average.toFixed(1)}<small>/5</small></strong>
             <span>{ratingQuery.data?.count || 0} community ratings</span>
             <div className="outz-rating__stars" aria-label="Rate this destination from one to five">
