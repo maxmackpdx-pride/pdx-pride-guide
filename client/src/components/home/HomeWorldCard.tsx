@@ -62,11 +62,22 @@ export type HomeWorldCardProps = {
  * says flag it rather than clip or shrink silently, so the card drops back to
  * the plain clamped title instead of forcing a row that would break the slot.
  */
-function useDynamicTitle(text: string, wide?: boolean) {
+function useDynamicTitle(text: string) {
   const bodyRef = useRef<HTMLSpanElement>(null);
   const kickerRef = useRef<HTMLSpanElement>(null);
   const tailRef = useRef<HTMLSpanElement>(null);
-  const [frame, setFrame] = useState<{ w: number; h: number } | null>(null);
+  const idRef = useRef<string>();
+  if (!idRef.current) idRef.current = `dt-${nextFrameId++}`;
+  const [frame, setFrame] = useState<Frame | null>(sharedFrame);
+
+  // Subscribe to the shared frame: any card measuring smaller re-solves all of them.
+  useEffect(() => {
+    const fn = (f: Frame) => setFrame(f);
+    frameListeners.add(fn);
+    return () => {
+      frameListeners.delete(fn);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const body = bodyRef.current;
@@ -83,23 +94,35 @@ function useDynamicTitle(text: string, wide?: boolean) {
      */
     const measure = () => {
       const rect = body.getBoundingClientRect();
-      const inner = rect.width - BODY_PADDING * 2;
-      const h = rect.height - BODY_PADDING * 2 - kicker.offsetHeight - tail.offsetHeight - TITLE_GAP;
-      // Standard cards give the title 60% of the band and stack the copy beside
-      // it; MIZZED reads as a quote and takes the band edge to edge.
-      const w = inner * (wide ? 1 : 0.6);
+      // Padding is read, not assumed: the breakpoints below 900px tighten it,
+      // and a hardcoded 10 would put the frame ~4px off exactly where the band
+      // is already tightest.
+      const cs = getComputedStyle(body);
+      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      // The whole band, for every card. No per-card fraction: a 0.6 on some
+      // cards and 1.0 on others is exactly the per-brand multiplier that made
+      // the rail's type scale disagree with itself.
+      const w = rect.width - padX;
+      const h = rect.height - padY - kicker.offsetHeight - tail.offsetHeight - TITLE_GAP;
       if (w <= 0 || h <= 0) return;
-      setFrame(prev => (prev && Math.abs(prev.w - w) < 1 && Math.abs(prev.h - h) < 1 ? prev : { w, h }));
+      publishFrame(idRef.current!, { w, h });
     };
 
     raf = window.requestAnimationFrame(measure);
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
     observer?.observe(body);
+    const onResize = () => {
+      resetFrameReports();
+      measure();
+    };
+    window.addEventListener("resize", onResize);
     return () => {
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
+      window.removeEventListener("resize", onResize);
     };
-  }, [wide]);
+  }, []);
 
   // Fallback-font metrics would otherwise stick, so re-solve once Barlow lands.
   const [fontsReady, setFontsReady] = useState(() => Boolean(document.fonts?.status === "loaded"));
@@ -145,12 +168,57 @@ function useDynamicTitle(text: string, wide?: boolean) {
   return { bodyRef, kickerRef, tailRef, frame, layout };
 }
 
-/** `.home-world__post-body` padding, and the title's own top margin. */
-const BODY_PADDING = 10;
+/**
+ * One shared title frame for the whole rail.
+ *
+ * Dynamic Text sizes every row to exactly fill the frame it is given, so two
+ * cards with different frames get different type scale — that is what broke
+ * optical continuity here: the rail was measuring a frame per posting and
+ * running five different ones (181x80, 181x83, 181x75, 302x80 ...), so no two
+ * cards agreed on how big a title should be.
+ *
+ * Every posting still measures its own band, but they all publish into this
+ * store and every card solves against the SMALLEST width and height any of
+ * them reported. Smallest, not first: the shared frame has to fit inside every
+ * card, or the tightest card clips. One frame for all ten means one type scale
+ * and one set of left/right edges, which is the continuity the card system
+ * asks for ("equal row heights are not the rule; equal left and right edges
+ * are").
+ */
+type Frame = { w: number; h: number };
+
+const frameReports = new Map<string, Frame>();
+const frameListeners = new Set<(f: Frame) => void>();
+let sharedFrame: Frame | null = null;
+
+function publishFrame(id: string, f: Frame) {
+  const prev = frameReports.get(id);
+  if (prev && Math.abs(prev.w - f.w) < 0.5 && Math.abs(prev.h - f.h) < 0.5) return;
+  frameReports.set(id, f);
+  let w = Infinity;
+  let h = Infinity;
+  for (const r of frameReports.values()) {
+    w = Math.min(w, r.w);
+    h = Math.min(h, r.h);
+  }
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return;
+  if (sharedFrame && Math.abs(sharedFrame.w - w) < 0.5 && Math.abs(sharedFrame.h - h) < 0.5) return;
+  sharedFrame = { w, h };
+  frameListeners.forEach(fn => fn(sharedFrame!));
+}
+
+/** Card widths change on resize, so a stale minimum must not stick. */
+function resetFrameReports() {
+  frameReports.clear();
+}
+
+let nextFrameId = 0;
+
+/** The title box's own top margin, matched in CSS. */
 const TITLE_GAP = 6;
 
 function Posting({ post, wide }: { post: WorldPosting; wide?: boolean }) {
-  const { bodyRef, kickerRef, tailRef, frame, layout } = useDynamicTitle(post.title, wide);
+  const { bodyRef, kickerRef, tailRef, frame, layout } = useDynamicTitle(post.title);
   return (
     <Link href={post.href} className="home-world__post" data-wide={wide ? "1" : undefined}>
       {post.photo ? (

@@ -161,14 +161,14 @@
   white-space: nowrap;
 }
 
-.home-world__head { position: relative; z-index: 2; margin-top: 16px; }
+.home-world__head { position: relative; z-index: 2; margin-top: 12px; }
 
 /* The family marks are normalised to one canvas, so sizing by height puts all
    of them at one optical scale and starts every card body on the same line. */
 .home-world__mark {
   display: block;
   width: 100%;
-  height: 76px;
+  height: 56px;
   object-fit: contain;
   object-position: left center;
 }
@@ -182,12 +182,17 @@
 }
 
 .home-world__body {
+  display: -webkit-box;
   max-width: 42ch;
+  height: calc(13px * 1.55 * 2);
   margin: 10px 0 0;
+  overflow: hidden;
   color: var(--text-body, #d6d6dc);
   font-size: 13px;
   line-height: 1.55;
   text-wrap: pretty;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .home-world__slot {
@@ -195,7 +200,9 @@
   z-index: 1;
   flex: 1 1 auto;
   min-height: 0;
-  margin: 14px 0;
+  /* 9px, not 14: the 10px reclaimed here is what makes each of the two posting
+     cards 5px taller without changing the card box. */
+  margin: 9px 0;
 }
 
 .home-world__action {
@@ -461,7 +468,10 @@
 
 /* The title fills the band it is given. Standard cards use 60% of the width so
    the copy stacks; MIZZED reads as a quote and takes the full band. */
-.home-world__post-title-box { display: block; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+/* flex:none — the box is sized by the shared frame, not by leftover space.
+   With flex:1 1 auto it grew past the height it was handed and every card
+   ended up a different size again. */
+.home-world__post-title-box { display: block; flex: none; min-height: 0; margin-top: 6px; overflow: hidden; }
 .home-world__post-tail { display: block; flex: none; }
 /* One solved Dynamic Text row. Tracking must match the value the solver folds
    into its width measurement (-.02em), or measured and rendered widths drift. */
@@ -480,7 +490,6 @@
   text-shadow: 0 3px 0 rgba(0, 0, 0, .35), 0 0 26px rgba(0, 0, 0, .8), 0 1px 2px rgba(0, 0, 0, .28);
   white-space: nowrap;
 }
-.home-world__post-title-box > .home-world__post-row:first-child { margin-top: 6px; }
 
 /* Fallback when no grouping fits the readable band: plain clamped title, per
    the standard's "flag it, do not clip or shrink silently". */
@@ -496,13 +505,13 @@
 .home-world__post-line {
   display: -webkit-box;
   margin-top: 4px;
-  min-height: 31px;
+  min-height: 15px;
   overflow: hidden;
   color: var(--text-lo, #c8c8ce);
   font-size: 11px;
   line-height: 1.4;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 .home-world__post-foot {
   display: flex;
@@ -769,6 +778,22 @@ html.calm-mode .home-world__demo,
   .home-world__roadmap-glitch { animation: none; }
   .home-world__roadmap-glitch { display: none; }
   .home-world__action span:last-child { transition: none; }
+}
+
+/* ── Keeping the title band alive on the shorter card boxes ─────────────
+   The 900px and phone breakpoints run a 560px / 568px card, which leaves the
+   shared title frame around 49px — too short for two rows, so titles silently
+   dropped to one line and the rail lost its continuity. The head is what pays
+   for it: a smaller wordmark and a one-line blurb, so the band stays tall
+   enough to stack everywhere. */
+@media (max-width: 900px) {
+  .home-world__mark { height: 46px; }
+  .home-world__head { margin-top: 8px; }
+  .home-world__body {
+    height: calc(13px * 1.55 * 1);
+    -webkit-line-clamp: 1;
+  }
+  .home-world__post-body { padding: 8px; }
 }
 
 /* ── Phone ─────────────────────────────────────────────────────────────── */
