@@ -51,11 +51,9 @@ export type HomeWorldCardProps = {
 /**
  * Solve a posting title into rows that fill its measured band.
  *
- * Strict canonical defaults, no HAÜZ opt-ins: `HOUSING_FIT_WITHIN_FRAME`,
- * `HOUSING_PREFER_TWO_ROWS` and `HOUSING_MAX_NEIGHBOR_RATIO` were verified
- * against the housing regression set and do not transfer to a new surface
- * without the same work, per the Dynamic Text section of
- * docs/LIVE_DESIGN_STANDARD.md.
+ * Dynamic Text stacks: two rows unless the title is a single word. That is the
+ * owner rule, so `preferTwoRows` and the `fitWithinFrame` it requires are both
+ * on here. See the solve below for why the pair travels together.
  *
  * Scope here is posting titles only. The EVENTZ flyer keeps the normal type
  * scale, because the published standard excludes event names.
@@ -123,23 +121,21 @@ function useDynamicTitle(text: string, wide?: boolean) {
   const layout = useMemo(() => {
     if (!frame) return null;
     /*
-     * One opt-in, verified against a 12-title regression set taken from the
-     * live boards rather than assumed to transfer:
+     * Dynamic Text stacks. Owner rule, approved 2026-08-23: "almost always two
+     * lines except with one word." One word is the only single-row case, and
+     * the solver already handles it by skipping the two-row search when there
+     * is nothing to split.
      *
-     *   fitWithinFrame  ON.  A posting well is short and fixed, so a two-row
-     *     title routinely solves taller than the frame ("Left at the bar on
-     *     12th" wants 69/68px in an 80px band) and strict mode then drops the
-     *     whole thing to plain type. That put two different title treatments
-     *     on one card. Shrinking the winning grouping to fit gives 49/49 and
-     *     changed no other title in the set.
-     *   preferTwoRows   OFF. It costs 5 of 6 single-line titles here, breaking
-     *     "Cully Room Open" into CULLY ROOM / OPEN at 29/68. HAUZ wants that
-     *     for house names in a big well; a posting card does not.
-     *   maxNeighborRatio OFF. At the HAUZ value of 3 it is a no-op on this
-     *     set, and the uneven pairs people notice (26/44) are the motif's own
-     *     fill-the-frame contract, not something a cap should override.
+     *   preferTwoRows   ON, per that rule.
+     *   fitWithinFrame  ON, and required alongside it rather than optional: a
+     *     posting well is short and fixed, so a forced two-row title routinely
+     *     solves taller than the band, and without the fit pass strict mode
+     *     drops the whole title to plain type. That is what put two different
+     *     title treatments on one MIZZED card.
+     *   maxNeighborRatio OFF. At the housing value of 3 it is a no-op here, and
+     *     tightening it is a threshold decision that has not been made.
      */
-    const solved = solveDynamicText(text, frame.w, frame.h, true);
+    const solved = solveDynamicText(text, frame.w, frame.h, true, true);
     return solved.outOfRange ? null : solved;
     // fontsReady is a dependency on purpose: the same inputs measure
     // differently before and after the webfont resolves.
