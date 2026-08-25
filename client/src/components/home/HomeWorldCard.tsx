@@ -122,10 +122,24 @@ function useDynamicTitle(text: string, wide?: boolean) {
 
   const layout = useMemo(() => {
     if (!frame) return null;
-    // Strict canonical defaults: no fit-within-frame, no two-row preference, no
-    // neighbour-ratio cap. Those three are HAÜZ opt-ins, verified against the
-    // housing regression set, and do not transfer to a new surface for free.
-    const solved = solveDynamicText(text, frame.w, frame.h);
+    /*
+     * One opt-in, verified against a 12-title regression set taken from the
+     * live boards rather than assumed to transfer:
+     *
+     *   fitWithinFrame  ON.  A posting well is short and fixed, so a two-row
+     *     title routinely solves taller than the frame ("Left at the bar on
+     *     12th" wants 69/68px in an 80px band) and strict mode then drops the
+     *     whole thing to plain type. That put two different title treatments
+     *     on one card. Shrinking the winning grouping to fit gives 49/49 and
+     *     changed no other title in the set.
+     *   preferTwoRows   OFF. It costs 5 of 6 single-line titles here, breaking
+     *     "Cully Room Open" into CULLY ROOM / OPEN at 29/68. HAUZ wants that
+     *     for house names in a big well; a posting card does not.
+     *   maxNeighborRatio OFF. At the HAUZ value of 3 it is a no-op on this
+     *     set, and the uneven pairs people notice (26/44) are the motif's own
+     *     fill-the-frame contract, not something a cap should override.
+     */
+    const solved = solveDynamicText(text, frame.w, frame.h, true);
     return solved.outOfRange ? null : solved;
     // fontsReady is a dependency on purpose: the same inputs measure
     // differently before and after the webfont resolves.
