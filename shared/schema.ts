@@ -131,6 +131,11 @@ export const businesses = sqliteTable("businesses", {
   lng: real("lng"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   /**
+   * Directory resources can be useful to discover without being event sources.
+   * Keep false for grants, job boards, and other non-calendar organizations.
+   */
+  ingestEvents: integer("ingest_events", { mode: "boolean" }).notNull().default(true),
+  /**
    * Place lifecycle: OPEN (default) | CLOSED.
    * CLOSED places stay in DB for historical event linkage but must set active=false
    * so they drop from discovery, directory auto-ingest, and SEO place pages.

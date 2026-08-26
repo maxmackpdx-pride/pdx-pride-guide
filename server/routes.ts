@@ -5599,6 +5599,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         website: b.website,
         type: b.type,
         active: b.active,
+        ingestEvents: b.ingestEvents,
       })),
     );
     // Catch-all list only - trusted venues live on the Trusted board

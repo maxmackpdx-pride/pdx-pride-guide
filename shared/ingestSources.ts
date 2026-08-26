@@ -689,6 +689,7 @@ export type DirectoryBusinessForIngest = {
   website?: string | null;
   type?: string | null;
   active?: boolean | null;
+  ingestEvents?: boolean | null;
 };
 
 export type DirectoryWebsiteResolution = {
@@ -786,6 +787,7 @@ export function buildDirectoryIngestSources(
       b =>
         b &&
         b.active !== false &&
+        b.ingestEvents !== false &&
         !isClosedPermanentVenueName(b.name) &&
         // status CLOSED (when present on row) never auto-scrapes
         String((b as { status?: string }).status || "OPEN").toUpperCase() !== "CLOSED",

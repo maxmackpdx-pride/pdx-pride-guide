@@ -410,6 +410,7 @@ sqlite.exec(`
     lat REAL,
     lng REAL,
     active INTEGER NOT NULL DEFAULT 1,
+    ingest_events INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
@@ -427,6 +428,7 @@ try {
     ["phone", "TEXT"],
     ["locations", "TEXT"],
     ["owner_id", "INTEGER"],
+    ["ingest_events", "INTEGER NOT NULL DEFAULT 1"],
   ];
   for (const [name, spec] of businessAlters) {
     if (!bcols.has(name)) sqlite.exec(`ALTER TABLE businesses ADD COLUMN ${name} ${spec}`);
@@ -7127,6 +7129,87 @@ function runBootMigrationsOnce() {
         .run();
     }
     recordBootMigration("seed_secret_warehouse_directory_v1");
+  }
+
+  /**
+   * Portland Queer Arts Foundation resource guide, reviewed 2026-08-26.
+   * These are directory resources, not event feeds. Their websites therefore
+   * stay out of automated event ingestion while remaining discoverable in
+   * Places. Alberta Rose Theatre and New Avenues / SMYRC already have active
+   * directory records and are intentionally not duplicated here.
+   */
+  if (!hasBootMigration("seed_pqa_resource_directory_2026_08_26_v1")) {
+    const now = new Date().toISOString();
+    const resources: Array<Record<string, unknown>> = [
+      { name: "Portland Queer Arts Foundation", type: "nonprofit", description: "Portland nonprofit that funds queer artists and projects, and maintains a resource guide for grants, services, spaces, and community organizations.", neighborhood: "Portland", website: "https://portlandqueerarts.foundation", queerOwned: true },
+      { name: "Business Oregon", type: "service", description: "Oregon's economic development agency, with grant and fellowship programs for artists and creative businesses.", neighborhood: "Oregon", website: "https://www.oregon.gov/biz", queerOwned: false },
+      { name: "Foundation for Contemporary Arts", type: "nonprofit", description: "Emergency grants and opportunity grants for experimental and contemporary artists.", neighborhood: "National", website: "https://foundationforcontemporaryarts.org", queerOwned: false },
+      { name: "Future Prairie", type: "nonprofit", description: "Nonprofit queer artist collective supporting LGBTQIA+ Oregon-based working-class artists.", neighborhood: "Oregon", website: "https://futureprairie.com", queerOwned: true },
+      { name: "Multnomah County Cultural Coalition", type: "nonprofit", description: "Cultural-enrichment organization supporting Multnomah County residents and local arts work.", neighborhood: "Multnomah County", website: "https://www.multculturalcoalition.org", queerOwned: false },
+      { name: "Oregon Arts Commission", type: "nonprofit", description: "State grants for Oregon artists and organizations, including individual artist fellowships.", neighborhood: "Oregon", website: "https://www.oregonartscommission.org", queerOwned: false },
+      { name: "Regional Arts & Culture Council", type: "nonprofit", description: "Portland arts funder, including the Portland Arts Project Grant for individual artists and arts organizations.", neighborhood: "Portland", website: "https://racc.org", queerOwned: false },
+      { name: "Backstage", type: "service", description: "Casting calls and performance opportunities for working artists.", neighborhood: "Online", website: "https://www.backstage.com", queerOwned: false },
+      { name: "Fertile Ground Festival", type: "group", description: "Portland platform for new and developing performance work.", neighborhood: "Portland", website: "https://fertilegroundpdx.org", queerOwned: false },
+      { name: "PDXBackstage", type: "group", description: "Portland theatre community listserv for opportunities and discussion.", neighborhood: "Portland", website: "https://groups.io", queerOwned: false },
+      { name: "Portland Area Theatre Alliance", type: "group", description: "Auditions, listings, and theatre events for the Portland area.", neighborhood: "Portland", website: "https://portlandtheatre.com", queerOwned: false },
+      { name: "Lesbian Culture Club", type: "group", description: "Queer community for lesbians, trans people, nonbinary people, and anyone who feels at home there.", neighborhood: "Portland", website: "https://lesbiancultureclub.com", queerOwned: true },
+      { name: "Ori Gallery", type: "nonprofit", description: "Trans and queer artists of color gallery and organizing space offering free and low-cost classes and workshops.", neighborhood: "Portland", website: "https://oriartgallery.org", queerOwned: true },
+      { name: "Q Center", type: "nonprofit", description: "2SLGBTQIA+ community center with an art gallery, library, support groups, resource hub, emergency assistance, and space rentals.", neighborhood: "Portland", website: "https://www.pdxqcenter.org", queerOwned: false },
+      { name: "Queer Social Club", type: "group", description: "Community-driven event calendars for queer happenings in Portland and the greater Pacific Northwest.", neighborhood: "Portland", website: "https://queersocialclub.com", queerOwned: true },
+      { name: "Radical Faerie Arts Fest", type: "group", description: "Artist-centered market and audience-creation model for queer artists.", neighborhood: "Portland", website: "https://www.radfaf.org", queerOwned: false },
+      { name: "CASH Oregon", type: "service", description: "Free tax preparation services for people earning $70,000 or less.", neighborhood: "Portland", website: "https://cashoregon.org", queerOwned: false },
+      { name: "Oregon Pride in Business", type: "group", description: "Business education and networking for LGBTQ+ entrepreneurs.", neighborhood: "Oregon", website: "https://www.orpib.com", queerOwned: false },
+      { name: "Portland Small Business Development Center", type: "service", description: "Small-business advising and training for Portland-area entrepreneurs.", neighborhood: "Portland", website: "https://oregonsbdc.org", queerOwned: false },
+      { name: "Prosper Portland", type: "service", description: "City-backed programs supporting Portland small businesses and creatives.", neighborhood: "Portland", website: "https://prosperportland.us", queerOwned: false },
+      { name: "SCORE Portland", type: "service", description: "Free small-business mentoring and workshops for Portland-area entrepreneurs.", neighborhood: "Portland", website: "https://www.score.org", queerOwned: false },
+      { name: "Open Space Dance", type: "venue", description: "Inclusive dance and movement studio with limited rentals for rehearsal, choreography, and creative projects.", neighborhood: "Portland", website: "https://openspace.dance", queerOwned: false },
+      { name: "Echo Theater", type: "venue", description: "Versatile Portland venue for aerial work, acrobatics, dance, theatre, live music, and film shoots.", neighborhood: "Portland", website: "https://echotheaterpdx.org", queerOwned: false },
+      { name: "Independent Publishing Resource Center", type: "nonprofit", description: "Printmaking, publishing, and literary arts center.", neighborhood: "Portland", website: "https://www.iprc.org", queerOwned: false },
+      { name: "MakeWithPDX", type: "shop", description: "Queer-owned DIY education and maker space.", neighborhood: "Portland", website: "https://makewithpdx.com", queerOwned: true },
+      { name: "Sincere Studio", type: "nonprofit", description: "Sewing-focused nonprofit with tools and classes.", neighborhood: "Portland", website: "https://sincerestudiopdx.org", queerOwned: false },
+      { name: "SymbiOp", type: "shop", description: "Queer-friendly garden center and community-oriented space.", neighborhood: "Portland", website: "https://symbiop.com", queerOwned: false },
+      { name: "IL Youth 2 Youth", type: "service", description: "Youth programming at Lloyd Center, listed by PQA as a non-queer-specific resource.", neighborhood: "Portland", website: "https://www.ilyouth2.com", queerOwned: false },
+      { name: "P:EAR", type: "nonprofit", description: "Arts programming and mentorship for unhoused and at-risk youth.", neighborhood: "Portland", website: "https://www.pearmentor.org", queerOwned: false },
+      { name: "Portland Playhouse", type: "nonprofit", description: "Theatre apprenticeship and education, including its Apprentice Program.", neighborhood: "Portland", website: "https://www.portlandplayhouse.org", queerOwned: false },
+    ];
+    const findExisting = sqlite.prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`);
+    const updateExisting = sqlite.prepare(`
+      UPDATE businesses
+      SET type = ?,
+          description = ?,
+          neighborhood = ?,
+          website = ?,
+          queer_owned = ?,
+          queer_friendly = 1,
+          active = 1,
+          status = 'OPEN',
+          ingest_events = 0
+      WHERE id = ?
+    `);
+    for (const resource of resources) {
+      const existing = findExisting.get(resource.name) as { id?: number } | undefined;
+      if (existing?.id) {
+        updateExisting.run(
+          resource.type,
+          resource.description,
+          resource.neighborhood,
+          resource.website,
+          resource.queerOwned ? 1 : 0,
+          existing.id,
+        );
+      } else {
+        db.insert(businesses).values({
+          ...resource,
+          queerFriendly: true,
+          active: true,
+          ingestEvents: false,
+          isNew: true,
+          status: "OPEN",
+          createdAt: now,
+        } as any).run();
+      }
+    }
+    recordBootMigration("seed_pqa_resource_directory_2026_08_26_v1");
   }
 
   // Remove Back 2 Earth from directory (venue no longer listed).
