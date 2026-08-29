@@ -89,6 +89,8 @@ import {
   setRecipeUrl,
 } from "./qsearch/store";
 import { startQSearchNightly, triggerNightlyPriorityScan } from "./qsearch/nightly";
+import { shouldMirrorPostersOnStart, shouldRunBackgroundJobs } from "./backgroundJobs";
+import { logRuntimeMemory } from "./runtimeMemory";
 import { getTrustedDashboard } from "./qsearch/trustedHealth";
 import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
 import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
@@ -7077,17 +7079,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     sendMessage: (from, to, subject, body, opts) => storage.sendMessage(from, to, subject, body, opts),
   });
 
-  scheduleMapCoordinateBackfill();
-  startPromptScheduler();
-  startQSearchNightly();
+  if (shouldRunBackgroundJobs()) {
+    scheduleMapCoordinateBackfill();
+    startPromptScheduler();
+    startQSearchNightly();
+  } else {
+    console.log("[background-jobs] disabled for this environment");
+  }
 
   // Existing events and older QSearch rows predate capture-at-ingest. Mirror
   // their remote flyers after startup so expiring and third-party URLs become
   // durable files on the Railway volume without delaying server readiness.
-  if (process.env.NODE_ENV === "production") {
+  if (shouldMirrorPostersOnStart()) {
     setTimeout(() => {
       void (async () => {
         try {
+          logRuntimeMemory("poster-mirror-start");
           const { mirrorEventPosters } = await import("./ingest/mirrorEventPosters");
           const { listCandidates, updateCandidatePoster } = await import("./qsearch/store");
           const summary = await mirrorEventPosters({
@@ -7101,10 +7108,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
           console.log(
             `[poster-mirror] checked=${summary.checked} captured=${summary.captured} retained_remote=${summary.retainedRemote}`,
           );
+          logRuntimeMemory("poster-mirror-finish");
         } catch (error) {
           console.error("[poster-mirror] backfill failed", error);
         }
       })();
     }, 15_000);
+  } else if (shouldRunBackgroundJobs()) {
+    console.log("[poster-mirror] startup backfill disabled; set POSTER_MIRROR_ON_START=1 for maintenance");
   }
 }

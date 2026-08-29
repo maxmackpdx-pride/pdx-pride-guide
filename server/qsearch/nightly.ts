@@ -5,7 +5,7 @@
  * Trusted venue auto-publish sync also runs once per day at 3am Pacific
  * (fire-and-forget after scan start; requires Agent C trustedSync.ts).
  *
- * Enable: QSEARCH_NIGHTLY=1 (or production default on)
+ * Enable: QSEARCH_NIGHTLY=1 (or primary production default on)
  * Disable: QSEARCH_NIGHTLY=0
  *
  * Railway: single dyno runs setInterval tick; also safe if multiple ticks
@@ -14,6 +14,7 @@
 import { storage } from "../storage";
 import { startScan, getLatestScanJob } from "./scanJob";
 import { recoverOrphanScans } from "./scanJob";
+import { shouldRunBackgroundJobs } from "../backgroundJobs";
 
 const CHECK_MS = 60_000;
 let started = false;
@@ -40,12 +41,13 @@ function pacificNowParts(d = new Date()) {
   };
 }
 
-function nightlyEnabled(): boolean {
+export function nightlyEnabled(): boolean {
   const v = process.env.QSEARCH_NIGHTLY?.trim();
   if (v === "0" || v === "false") return false;
   if (v === "1" || v === "true") return true;
-  // Default on in production, off in local dev unless set
-  return process.env.NODE_ENV === "production";
+  // Staging also uses NODE_ENV=production. It must not duplicate the primary
+  // production scan unless explicitly opted in with QSEARCH_NIGHTLY=1.
+  return shouldRunBackgroundJobs();
 }
 
 export function startQSearchNightly() {

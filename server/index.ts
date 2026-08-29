@@ -7,6 +7,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "node:http";
 import { platform } from "node:os";
+import { logRuntimeMemory, startRuntimeMemoryDiagnostics } from "./runtimeMemory";
 
 const app = express();
 const httpServer = createServer(app);
@@ -210,7 +211,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  logRuntimeMemory("startup-before-routes");
   await registerRoutes(httpServer, app);
+  logRuntimeMemory("startup-after-routes");
+  startRuntimeMemoryDiagnostics();
 
   // Unknown /api/* must return JSON, never the SPA HTML shell.
   app.use("/api", (_req: Request, res: Response) => {
