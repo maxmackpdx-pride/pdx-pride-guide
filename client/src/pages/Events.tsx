@@ -635,18 +635,24 @@ export default function Events() {
                   )}
                   <div className="events-view-toggle">
                     <button
+                      type="button"
                       data-testid="toggle-grid-view"
                       onClick={() => setViewMode("grid")}
                       className={`events-view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
                       title="Grid view"
+                      aria-label="Show events as a grid"
+                      aria-pressed={viewMode === "grid"}
                     >
                       <Grid size={22} />
                     </button>
                     <button
+                      type="button"
                       data-testid="toggle-list-view"
                       onClick={() => setViewMode("list")}
                       className={`events-view-toggle__btn${viewMode === "list" ? " active" : ""}`}
                       title="List view"
+                      aria-label="Show events as a list"
+                      aria-pressed={viewMode === "list"}
                     >
                       <List size={22} />
                     </button>
