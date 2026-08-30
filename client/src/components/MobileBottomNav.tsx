@@ -30,10 +30,6 @@ const HUB_SHEET_LINKS = [
   { section: "settings", label: "Settings", icon: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9 2 2 0 1 1-2.8 2.8 1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6 2 2 0 1 1-4 0 1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3 2 2 0 1 1-2.8-2.8 1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1 2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9 2 2 0 1 1 2.8-2.8 1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6 2 2 0 1 1 4 0 1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3 2 2 0 1 1 2.8 2.8 1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1 2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z" /></> },
 ] as const;
 
-/**
- * Shared tab glyph. The handoff draws every tab at 19px, stroke 2.2, so the
- * icons are inline paths rather than a mix of icon-library defaults.
- */
 function TabIcon({ children }: { children: ReactNode }) {
   return (
     <svg
@@ -52,10 +48,6 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Center Hub tab: the glitch Z. Three stacked copies of the mark, the two
- * colour plates screened over a white base and offset on their own cycles.
- */
 function HubMark() {
   return (
     <span className="hub-mobile-tab__z-glitch" aria-hidden>
@@ -79,14 +71,8 @@ function tabClass(
   return `hub-mobile-tab${active ? ` is-active is-${accent}` : ""}`;
 }
 
-/**
- * Mobile bottom navigation (all visitors), a single 5-tab footer used across the
- * whole site: Places / Events / Hub (center) / Boards / Messages. Beaches lives
- * inside the Events sheet (same pattern as Boards). This is the only mobile
- * bottom bar - hub/admin shells no longer render their own.
- */
 export default function MobileBottomNav() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
@@ -125,7 +111,6 @@ export default function MobileBottomNav() {
   const boardsActive = navLinkActive(location, "/z");
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  /* Which Hub section is showing, so the sheet can mark the current row. */
   const hubSection = hubActive ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
@@ -151,11 +136,6 @@ export default function MobileBottomNav() {
     setSpaceOpen(true);
   };
 
-  /*
-   * Outz opens its most-visited drawer instead of navigating away. The phone
-   * bar has no Outz tab of its own, so the trigger is the Outz row inside the
-   * Z/Space sheet, which is where Outz already lived.
-   */
   const handleOutz = () => {
     if (outzOpen) {
       setOutzOpen(false);
@@ -167,23 +147,19 @@ export default function MobileBottomNav() {
 
   const localDemo = isLocalDemo();
 
-  /* Hub opens a sheet rather than navigating; signed-out visitors get auth. */
+  /* Hub is navigation. Admin controls remain inside the Hub, never on the tab itself. */
   const handleHub = () => {
     if (!user && !localDemo) {
       dismissExcept();
       setShowAuth(true);
       return;
     }
-    if (hubOpen) {
-      setHubOpen(false);
-      return;
-    }
-    dismissExcept("hub-sheet");
-    setHubOpen(true);
+    dismissExcept();
+    setHubOpen(false);
+    setLocation("/dashboard");
   };
 
   const handleMessages = () => {
-    // Local demo: open guest glass inbox without forcing login first.
     if (!user && !localDemo) {
       setShowAuth(true);
       return;
@@ -200,8 +176,6 @@ export default function MobileBottomNav() {
     dismissExcept();
   };
 
-  // Portaled to <body>: position:fixed breaks on iOS Safari when any ancestor
-  // clips overflow (#root/.app-shell do), so the bar must live outside them.
   return createPortal(
     <>
       {eventsOpen && (
@@ -354,7 +328,6 @@ export default function MobileBottomNav() {
 
       <nav className="hub-mobile-bar site-hub-mobile-bar" aria-label="Site mobile navigation">
         <div className="hub-mobile-bar__dock">
-          {/* No decorative pull on the site-wide dock - hub drawer grip is only on /dashboard */}
           <button
             type="button"
             className={tabClass(eventsActive || eventsOpen, "cyan")}
@@ -386,11 +359,10 @@ export default function MobileBottomNav() {
 
           <button
             type="button"
-            className={`${tabClass(hubActive || hubOpen, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
+            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
             aria-label="Hub"
             title="Hub"
-            aria-expanded={user || localDemo ? hubOpen : undefined}
-            aria-haspopup="dialog"
+            aria-current={hubActive ? "page" : undefined}
             onClick={handleHub}
           >
             <HubMark />
