@@ -59,6 +59,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 |-----------------|-------------------|
 | Brutal magenta offset as **default CTA** (`4px 4px 0` magenta) | **Glow-treatment buttons** - `.pdx-glass-btn` / `.pdxBtn`: dark plate, accent rim and ink, lit top edge, dark inner floor, and the **8% outer bloom**, composed from `--btn-glow-bg` + `--btn-glow-shadow` (which carries `--neon-bloom`). The solid accent fill is reserved for the one primary action |
 | Lite-glass translucent cards + hard `#2b2b2b` only | **Deep-glass** - `--glass-card*`, black ring + neon edge, sheen, poster-well |
+| Cardifying ordinary prose, headings, or document metadata because content needs visual separation | **Editorial composition first** - related writing stays in one continuous document bundle; use type, rules, spacing, and chapter bands. A card exists only when the content is an independent object |
 | Map outer neon bloom / thick glow frame | **Debossed map well** - thin black rim + inward hole (`--map-frame-shadow`); no outer bloom |
 | Sitewide cyan “pull” above bottom nav | **Removed**; hub drawer grip only |
 | Claim chip = yellow rim + magenta offset brutal sticker | **Claim this event** = pure `#00FFFF` fill, dark type `#050506`, soft cyan offset `3px 3px 0 rgba(0,255,255,.35)` (no yellow border) |
@@ -72,6 +73,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Persistent glow on the current nav pill (`siteNavPillPulse`) | **Glow is hover only.** The current page holds its accent on rim and label, with no bloom and no pulse |
 | Z/Space "mega" dropdown with a Featured card beside the item column | **One plain column** of pills under a line of descriptive copy; `z/ all boards` carries the `/z` link |
 | Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
+| Global Hub tab opening a Member/Admin or administration drawer | **Hub is navigation** - signed-in Hub goes directly to `/dashboard`; admin controls live inside the Hub experience |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
 
 **Outer neon bloom is 8%, and it is NOT retired.** The card guide retired the
@@ -99,6 +101,8 @@ the sole exception** and keep the debossed well with no bloom at all.
 | Rainbow top seam | `.pdx-rainbow-rule` / card `::before` | Clickable cards (see board standard) |
 
 **Accent contract:** set `--c` (and rebind with `.pdx-glass-rebind`) per instance. Day colors → event cards; board accents → gigs/gifts/spotted; brand accents → ads.
+
+**Composition contract:** the card recipe applies only after an independent object boundary exists. Related prose and document structure remain continuous until meaning, action, comparison, selection, or state creates a real object boundary.
 
 ---
 
@@ -161,12 +165,12 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 ### Mobile bar and sheets
 
-- Five tabs: **Eventz, Placez, Hub, Z/Space, Messages**, on deep glass with the flowing rainbow seam on the top edge. There is **no pull handle** on the site-wide bar; that remains retired, and the grip belongs to the hub drawer only.
+- Five tabs: **Eventz, Placez, Hub, Z/Space, Messages**, on deep glass with the flowing rainbow seam on the top edge. There is **no pull handle** on the site-wide bar; that remains retired. Any grip belongs to an in-Hub drawer, never the global site bar.
 - Tab glow is accent-coloured and **hover/active only**. **Hub is the exception: its glow is white**, never a colour, because it is the centre mark and reads as neutral chrome.
 - **Outz opens a drawer, not a navigation.** The phone bar has no Outz tab, so the trigger is the Outz row inside the Z/Space sheet. The drawer pins above the bar with a mono `Outz · Most Visited` kicker, numbered rows, and a `View All Outz →` footer to `/z/out`. It lists the OUTZ addresses that exist; do not pad it with places that have no page.
-- **Hub opens a slide-up sheet** with its top edge at 30%, stopping above the bar so the tab stays tappable (a little under 60% of the screen; taller reads as a full-screen takeover, not a sheet): Member/Admin toggle, a `Your Hub` kicker, then Feed / Profile / Events / People / Settings and Messages with its badge. The current `/dashboard` section is the highlighted row.
+- **Hub is navigation, not a drawer trigger.** Tapping Hub takes a signed-in visitor directly to `/dashboard`. Admin remains an explicit destination inside the Hub experience. The global Hub tab must never open Member/Admin or administration sheets.
 - **Signed out, Hub opens the log-in sheet**, which is the same `AuthModal` component presented bottom-anchored and full-bleed below 640px (`24px` top corners, ~82vh). One auth component, one Google path, one reset path: do not fork a second login form for phones.
-- Reduced motion and Calm Mode drop the sheet drop-in and the seam flow; colors, glow, and every destination stay.
+- Reduced motion and Calm Mode drop sheet entrances and the seam flow; colors, glow, and every destination stay.
 
 ## NEXT roadmap cards
 
@@ -289,11 +293,12 @@ Before inventing a new global rule:
 
 - [ ] CTA uses the glow treatment (`--btn-glow-bg` / `--btn-glow-shadow`) - **not** default brutal offset; solid accent fill only on the one primary action  
 - [ ] Card uses glass-card + sheen + rebind - **not** flat `#0b0b0b` + only `#2b2b2b`  
+- [ ] Related writing stays continuous; cards are reserved for independent objects  
 - [ ] 8% `--neon-bloom` composed, never hand-rolled  
 - [ ] Map frame debossed - **no** outer bloom (maps are the sole exception)  
 - [ ] Claim sticker cyan soft-offset - **no** yellow rim  
 - [ ] Grid ads/events match live components  
 - [ ] Past events only under PAST  
-- [ ] Nav untouched unless asked; if asked, glow is **hover only** and there is no bottom-nav pull handle  
+- [ ] Nav untouched unless asked; if asked, glow is **hover only**, there is no bottom-nav pull handle, and Hub navigates to `/dashboard` instead of opening an admin/member drawer  
 - [ ] NEXT cards keep approved order, fixed wallpaper, contained objects, static reduced-motion equivalents, and final white idea card
 - [ ] Docs updated if a global default changes  
