@@ -148,6 +148,21 @@ export function outzPlaceFromSlug(snapshot: OutzSnapshot, slug: string | null | 
 
 export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
   {
+    id: "bamboo-acres",
+    name: "Bamboo Acres",
+    region: "Talent, OR · Southern Oregon",
+    kind: "outdoor-stay",
+    detail: "Private, clothing-optional getaway in Talent with lodging, glamping, tent camping, and limited dry RV space.",
+    accessNote: "For men 21+; make reservations with the operator and confirm availability, arrival details, and dry-camping limits before driving.",
+    inclusionNote: "The operator describes Bamboo Acres as a private, clothing-optional getaway for men 21 and over.",
+    officialUrl: "https://www.bambooacres.org/",
+    discoverySource: {
+      name: "Gay Camping Friends directory",
+      href: "https://gaycampingfriends.com/campground-category/gay-campgrounds",
+    },
+    reviewedAt: "2026-08-30",
+  },
+  {
     id: "triangle-recreation-camp",
     name: "Triangle Recreation Camp",
     region: "Granite Falls, WA · Pacific Northwest",
