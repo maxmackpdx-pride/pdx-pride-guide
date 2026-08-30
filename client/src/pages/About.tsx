@@ -13,6 +13,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import { SupportPanel, AffiliatePartners, SponsorsPanel } from "@/components/support";
 import InfrastructureGrid from "@/components/home/InfrastructureGrid";
+import ProductRoadmap from "@/components/ProductRoadmap";
 import "./About.css";
 
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
@@ -167,7 +168,7 @@ export default function About() {
   const heroStats = useMemo(
     () => [
       {
-        num: hasVerifiedEventCount ? eventCount : "—",
+        num: hasVerifiedEventCount ? eventCount : "...",
         label: hasVerifiedEventCount ? "Events, and counting" : "Events syncing",
         color: "#ccff00",
       },
@@ -341,6 +342,8 @@ export default function About() {
           </div>
         </ScrollReveal>
       </section>
+
+      <ProductRoadmap />
 
       {/* MADE BY TUCKER */}
       <section className="about-v2-creator">
