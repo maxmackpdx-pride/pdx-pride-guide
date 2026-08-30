@@ -1,520 +1,78 @@
 import { useEffect, useMemo, useState } from "react";
 import "./ProductRoadmap.css";
 
-type RoadmapStatus = "complete" | "live" | "building" | "active" | "next" | "planned" | "horizon";
-type RoadmapSide = "left" | "right" | "center";
+type Status = "done" | "progress" | "queued";
+type Trail = "product" | "system" | "crossing";
 
-type RoadmapWaypoint = {
-  id: number;
+type Point = {
+  id: string;
+  n: string;
+  trail: Trail;
+  status: Status;
   title: string;
-  era: string;
-  status: RoadmapStatus;
-  statusLabel: string;
+  eyebrow: string;
   summary: string;
-  wins?: string[];
   goals: string[];
-  side: RoadmapSide;
+  x: number;
+  y: number;
+  labelX: number;
+  labelY: number;
 };
 
-const WAYPOINTS: readonly RoadmapWaypoint[] = [
-  {
-    id: 1,
-    title: "PDX Pride Guide",
-    era: "ORIGIN",
-    status: "complete",
-    statusLabel: "Complete",
-    summary: "The original seasonal guide, built on Squarespace, proved there was demand for one place to find queer Portland.",
-    wins: [
-      "Created the original community guide",
-      "Built a real audience around useful local information",
-      "Established events as the product's strongest recurring need",
-    ],
-    goals: [
-      "Preserve the useful history without carrying old platform assumptions forward",
-      "Finish any remaining Pride Guide migration cleanup",
-    ],
-    side: "left",
-  },
-  {
-    id: 2,
-    title: "React Rebuild",
-    era: "TECHNICAL RESET",
-    status: "complete",
-    statusLabel: "Complete",
-    summary: "The move off Squarespace turned the guide into a custom React application and created room for a real product architecture.",
-    wins: [
-      "Moved from hosted-page constraints to a custom application",
-      "Created reusable routes, components, data flows, and application state",
-      "Made year-round expansion technically possible",
-    ],
-    goals: ["Continue retiring assumptions and code that only made sense in the old guide era"],
-    side: "right",
-  },
-  {
-    id: 3,
-    title: "Modern Event Platform",
-    era: "PRE-ZAYLIST",
-    status: "live",
-    statusLabel: "Live before Zaylist",
-    summary: "Events were already a mature, useful system before the Zaylist identity arrived. Zaylist inherited a working event product rather than starting from zero.",
-    wins: [
-      "Modern event experience established in the React era",
-      "Event discovery became a durable year-round capability",
-      "Events became a proven foundation for the broader platform",
-    ],
-    goals: [
-      "Complete event-curation security",
-      "Harden authorization, validation, moderation, abuse prevention, and auditability",
-      "Keep event data compatible with future shared platform objects and API contracts",
-    ],
-    side: "left",
-  },
-  {
-    id: 4,
-    title: "Zaylist Launch",
-    era: "PLATFORM EXPANSION",
-    status: "live",
-    statusLabel: "Live",
-    summary: "The Pride Guide became Zaylist: a year-round product with room for events, housing, gigs, gifting, places, connection, outdoors, community, and future services.",
-    wins: [
-      "Expanded beyond the original Pride Guide concept",
-      "Created a broader product family instead of endlessly stretching one guide",
-      "Started treating Zaylist as a platform rather than a seasonal publication",
-    ],
-    goals: [
-      "Finish Pride Guide migration cleanup",
-      "Retire remaining legacy naming, routing, content, and product assumptions",
-    ],
-    side: "right",
-  },
-  {
-    id: 5,
-    title: "THE HAÜZ",
-    era: "SHIPPED PRODUCT",
-    status: "live",
-    statusLabel: "Live",
-    summary: "Housing moved from concept to a real Zaylist product surface.",
-    wins: ["THE HAÜZ is shipped and usable"],
-    goals: [
-      "Continue production QA and safety review",
-      "Keep housing behavior aligned with shared account, search, and future API rules",
-    ],
-    side: "left",
-  },
-  {
-    id: 6,
-    title: "GIFTZ",
-    era: "SHIPPED PRODUCT",
-    status: "live",
-    statusLabel: "Live",
-    summary: "The gifting section is shipped as part of the Zaylist product family.",
-    wins: ["GIFTZ is shipped and usable"],
-    goals: ["Continue production QA", "Keep moderation and object behavior aligned with the rest of Zaylist"],
-    side: "right",
-  },
-  {
-    id: 7,
-    title: "Foundation + Design System",
-    era: "SYSTEM OF RECORD",
-    status: "active",
-    statusLabel: "Established / evolving",
-    summary: "Zaylist now has governing product principles and a living visual system, so future work does not have to reinvent the product every time it is generated.",
-    wins: [
-      "Zaylist Foundation established",
-      "Living Design Guide and design-system baseline established",
-      "Product language, visual rules, and implementation guidance now have a source of truth",
-      "Future AI-generated work can inherit rules instead of freelancing the architecture",
-    ],
-    goals: [
-      "Expand, operationalize, and enforce the Foundation",
-      "Keep tokens, typography, components, states, accessibility, and production examples synchronized",
-      "Use the Foundation and Design Guide to govern every new build",
-    ],
-    side: "center",
-  },
-  {
-    id: 8,
-    title: "OUR PLACEZ",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish the places and directory experience as a first-class Zaylist section.",
-    goals: [
-      "Complete remaining product build",
-      "Resolve product-versus-guide drift",
-      "Finish QA, navigation, search, and launch readiness",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "left",
-  },
-  {
-    id: 9,
-    title: "GIGZ",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish the gigs and work surface and bring it fully into the shared Zaylist product model.",
-    goals: [
-      "Complete remaining product build",
-      "Finish posting, discovery, moderation, and QA",
-      "Align accounts and future shared listing schemas",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "right",
-  },
-  {
-    id: 10,
-    title: "MIZZED CONNECTION",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish the consent-aware connection surface without recreating anonymous cold-message dynamics.",
-    goals: [
-      "Complete remaining product build",
-      "Finish consent, acceptance, privacy, reporting, and moderation behavior",
-      "Finish QA and launch readiness",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "left",
-  },
-  {
-    id: 11,
-    title: "MY SQUADZ",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish the social and membership surface while keeping future community architecture in view.",
-    goals: [
-      "Complete remaining product build",
-      "Define membership, privacy, discovery, and moderation behavior",
-      "Avoid duplicating logic that should move into the future Z/ community model",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "right",
-  },
-  {
-    id: 12,
-    title: "OUTZ",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish outdoor discovery, conditions, check-ins, carpools, and related local utility without locking it to the old Z/ structure.",
-    goals: [
-      "Complete remaining product build",
-      "Finish location, conditions, check-in, safety, and discovery behavior",
-      "Prepare routes and data for the upcoming Z/ restructure",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "left",
-  },
-  {
-    id: 13,
-    title: "SELLZ",
-    era: "CURRENT PRODUCTION",
-    status: "building",
-    statusLabel: "In production",
-    summary: "Finish the marketplace surface with clear safety, moderation, and shared listing behavior.",
-    goals: [
-      "Complete remaining product build",
-      "Finish listing lifecycle, discovery, reporting, and moderation",
-      "Prepare for shared listing objects and future API access",
-      "Complete section identity and logo if still outstanding",
-    ],
-    side: "right",
-  },
-  {
-    id: 14,
-    title: "Identity + Communications",
-    era: "DURABILITY",
-    status: "active",
-    statusLabel: "Active",
-    summary: "Make accounts and communications dependable enough for a platform that people can trust.",
-    goals: [
-      "Finish email and communications setup",
-      "Add Google Sign-In",
-      "Add Forgot Password",
-      "Build secure account recovery",
-      "Handle account linking and duplicate-account cases",
-      "Finish verification and recovery email flows",
-      "Configure deliverability and domain authentication",
-      "Rate-limit and protect recovery flows from abuse",
-    ],
-    side: "left",
-  },
-  {
-    id: 15,
-    title: "Cloudflare + Production Hardening",
-    era: "DURABILITY",
-    status: "active",
-    statusLabel: "Active / migration",
-    summary: "Move from a site that works to infrastructure that is resilient, observable, secure, and inexpensive to operate.",
-    goals: [
-      "Set up Cloudflare hosting and infrastructure where it is the right production target",
-      "Define the migration path from the current Railway deployment footprint without breaking production",
-      "Configure DNS, CDN, caching, edge security, headers, and abuse controls",
-      "Harden deployment and rollback reliability",
-      "Continue bug testing and error handling",
-      "Continue performance and security review",
-      "Complete event-curation security",
-      "Add production monitoring and alerting",
-      "Track errors, performance, redirect failures, security failures, and platform health",
-    ],
-    side: "right",
-  },
-  {
-    id: 16,
-    title: "Governance + Synchronization",
-    era: "DURABILITY",
-    status: "active",
-    statusLabel: "Ongoing",
-    summary: "Keep the product, code, Foundation, Design Guide, and generated work from drifting into separate versions of Zaylist.",
-    goals: [
-      "Keep GitHub, production, Foundation, and guides synchronized",
-      "Resolve product-versus-guide drift",
-      "Automate Foundation, Design Guide, GitHub, and production consistency checks",
-      "Make the repository increasingly authoritative for implementation",
-      "Complete any remaining new-section logos and keep them inside the shared visual system",
-      "Build coordinated AI-agent roles, validation, and handoffs around the same governing rules",
-    ],
-    side: "left",
-  },
-  {
-    id: 17,
-    title: "Z/ Becomes Communities",
-    era: "MAJOR NEXT MIGRATION",
-    status: "next",
-    statusLabel: "Major next migration",
-    summary: "Give Z/ one clear purpose: the Zaylist community layer, with a subtle Reddit-like mental model but its own local, visual, real-world identity.",
-    goals: [
-      "Audit every current Z/ route, component, data model, navigation reference, search behavior, and alias",
-      "Classify what actually belongs in Communities and what belongs elsewhere",
-      "Create the Community domain model",
-      "Add memberships, moderators, rules, visibility, posts, and related content",
-      "Create consistent Z/ routing and discovery",
-      "Connect communities to Events, SELLZ, GIGZ, Places, Guides, and other shared objects without duplicating records",
-      "Build redirect and compatibility maps for old routes",
-      "Roll out behind feature flags with explicit rollback capability",
-    ],
-    side: "center",
-  },
-  {
-    id: 18,
-    title: "ZayDark + Legacy Contraction",
-    era: "MAJOR NEXT MIGRATION",
-    status: "next",
-    statusLabel: "Next",
-    summary: "Separate adult-content policy from navigation, then use the migration to remove architecture Zaylist no longer needs.",
-    goals: [
-      "Formalize ZayDark as a platform-wide content and access layer",
-      "Create shared content classification and authorization policy",
-      "Enforce ZayDark consistently across web, search, API, agents, media, and notifications",
-      "Audit unused routes, stale components, abandoned feature flags, duplicate logic, and unused dependencies",
-      "Remove obsolete schema fields only after proving they are unused",
-      "Preserve redirects and compatibility records even when runtime code is deleted",
-      "Require tests, instrumentation, and rollback plans before destructive cleanup",
-    ],
-    side: "right",
-  },
-  {
-    id: 19,
-    title: "Platform Core + API v1",
-    era: "PLATFORMIZATION",
-    status: "planned",
-    statusLabel: "Planned",
-    summary: "Turn Zaylist from a website with features into a platform with shared objects, relationships, permissions, search, and machine interfaces.",
-    goals: [
-      "Define Zaylist Platform Architecture v1",
-      "Treat the website as one client of the platform rather than the entire platform",
-      "Create stable IDs and shared schemas",
-      "Build shared domain objects for Events, Communities, Listings, Gigs, Places, Guides, Profiles, Organizations, and Media",
-      "Build cross-object relationships instead of section-specific copies",
-      "Build unified Zaylist search with typed results",
-      "Stand up an internal, versioned /api/v1 foundation",
-      "Design permissions, scopes, capability rules, and auditability before external writes",
-      "Reserve clean exit ramps for developers, integrations, apps, APIs, and agents without cluttering the current UX",
-      "Add machine-readable discovery only when the current standard is verified and useful",
-      "Add API, search, migration, and adoption observability",
-    ],
-    side: "left",
-  },
-  {
-    id: 20,
-    title: "Agent Landing Pad",
-    era: "HORIZON",
-    status: "horizon",
-    statusLabel: "Horizon",
-    summary: "Let humans and authorized software use the same underlying Zaylist instead of building a separate AI version of the product.",
-    wins: [
-      "Agent readiness is being designed at the platform level rather than bolted onto individual pages",
-      "The Foundation and Design Guide already create governance for coordinated AI work",
-    ],
-    goals: [
-      "Build coordinated Zaylist agents with defined roles, shared rules, validation, and handoffs",
-      "Expose read, search, discovery, and recommendation capabilities first",
-      "Add scoped save, follow, join, and RSVP actions only after permissions are proven",
-      "Add create, submit, and update capabilities later with appropriate human confirmation",
-      "Make external agents discover Zaylist capabilities through supported machine-readable interfaces",
-      "Keep humans, the website, APIs, integrations, and agents on the same underlying product model",
-    ],
-    side: "right",
-  },
+const POINTS: readonly Point[] = [
+  { id:"pride-guide", n:"01", trail:"product", status:"done", title:"PDX Pride Guide", eyebrow:"ORIGIN", summary:"The seasonal guide that proved queer Portland needed one useful place to find what was happening.", goals:["Preserve the useful history","Finish remaining legacy-guide cleanup"], x:620,y:130,labelX:69,labelY:3 },
+  { id:"react", n:"02", trail:"crossing", status:"done", title:"React rebuild + event platform", eyebrow:"TECHNICAL RESET", summary:"Moving off Squarespace created the custom app and the modern event system before Zaylist existed.", goals:["React app foundation established","Modern Events system established","Retire remaining Squarespace-era assumptions"], x:470,y:330,labelX:55,labelY:9 },
+  { id:"zaylist", n:"03", trail:"product", status:"done", title:"Zaylist launch", eyebrow:"PLATFORM EXPANSION", summary:"The Pride Guide became a year-round platform instead of a seasonal publication.", goals:["Broader product family established","Year-round platform identity shipped"], x:650,y:520,labelX:70,labelY:15 },
+  { id:"foundation", n:"S1", trail:"system", status:"done", title:"Foundation + Design System", eyebrow:"SYSTEM OF RECORD", summary:"Product doctrine, institutional memory, and the living visual authority were established.", goals:["Operationalize the Foundation","Keep Design Guide and production synchronized","Make every agent inherit the same rules"], x:285,y:560,labelX:6,labelY:17 },
+  { id:"hauz", n:"04", trail:"product", status:"done", title:"THE HAÜZ", eyebrow:"SHIPPED", summary:"Housing moved from concept to a real Zaylist product.", goals:["Continue QA and safety review","Align with shared identity and search"], x:575,y:760,labelX:66,labelY:23 },
+  { id:"giftz", n:"05", trail:"product", status:"done", title:"GIFTZ", eyebrow:"SHIPPED", summary:"Community gifting is live as part of the Zaylist product family.", goals:["Continue production QA","Align moderation with shared platform rules"], x:440,y:930,labelX:52,labelY:29 },
+  { id:"identity", n:"S2", trail:"system", status:"progress", title:"Identity + communications", eyebrow:"DURABILITY", summary:"Accounts and communications become dependable enough for a real platform.", goals:["Google Sign-In","Forgot Password","Secure account recovery","Transactional email and deliverability","Account linking and duplicate handling"], x:240,y:910,labelX:5,labelY:29 },
+  { id:"placez", n:"06", trail:"product", status:"progress", title:"OUR PLACEZ", eyebrow:"IN PRODUCTION", summary:"Finish the places and directory experience as a first-class section.", goals:["Finish product build","Resolve product-versus-guide drift","QA navigation and search","Finish section identity where needed"], x:535,y:1110,labelX:64,labelY:35 },
+  { id:"gigz", n:"07", trail:"product", status:"progress", title:"GIGZ", eyebrow:"IN PRODUCTION", summary:"Finish the work and opportunity surface around verified people.", goals:["Posting and discovery","Moderation and QA","Shared listing compatibility"], x:650,y:1280,labelX:70,labelY:41 },
+  { id:"hardening", n:"S3", trail:"system", status:"progress", title:"Production hardening + Cloudflare", eyebrow:"DURABILITY", summary:"Security, reliability, monitoring, cost control, and the migration path beyond the current Railway footprint.", goals:["Cloudflare hosting/infrastructure plan","DNS, CDN, caching and edge security","Deployment and rollback reliability","Monitoring and alerting","Event-curation security","Performance and error handling"], x:300,y:1250,labelX:3,labelY:41 },
+  { id:"mizzed", n:"08", trail:"product", status:"progress", title:"MIZZED CONNECTION", eyebrow:"IN PRODUCTION", summary:"Consent-aware connection without anonymous cold-message dynamics.", goals:["Finish consent and acceptance flow","Privacy, reporting and moderation","Launch QA"], x:560,y:1460,labelX:63,labelY:47 },
+  { id:"squadz", n:"09", trail:"product", status:"progress", title:"MY SQUADZ", eyebrow:"IN PRODUCTION", summary:"Finish the social and membership surface without duplicating the future community layer.", goals:["Membership and privacy","Discovery and moderation","Avoid duplicating Z/ community logic"], x:450,y:1640,labelX:51,labelY:53 },
+  { id:"outz", n:"10", trail:"product", status:"progress", title:"OUTZ", eyebrow:"IN PRODUCTION", summary:"Outdoor discovery, conditions, check-ins, carpools, and local utility.", goals:["Finish location and conditions behavior","Safety and discovery","Prepare routes/data for Z/ migration"], x:600,y:1810,labelX:67,labelY:59 },
+  { id:"sellz", n:"11", trail:"product", status:"progress", title:"SELLZ", eyebrow:"IN PRODUCTION", summary:"Finish the marketplace surface with clear safety and listing lifecycle rules.", goals:["Listing lifecycle and discovery","Reporting and moderation","Shared listing object compatibility"], x:520,y:1990,labelX:61,labelY:65 },
+  { id:"governance", n:"S4", trail:"system", status:"progress", title:"Governance + synchronization", eyebrow:"SYSTEM", summary:"Keep GitHub, production, Foundation, Design Guide, and AI-generated work from drifting apart.", goals:["Automate guide/production checks","Resolve product-guide drift","Keep repo implementation authoritative","Coordinated agent roles and validation"], x:275,y:1860,labelX:4,labelY:61 },
+  { id:"z-rebuild", n:"12", trail:"crossing", status:"queued", title:"Z/ rebuild → Communities", eyebrow:"MAJOR NEXT MIGRATION", summary:"The major crossing: give Z/ one clear job as the community layer while rebuilding the architecture underneath it.", goals:["Audit every Z/ route, component, data model and alias","Classify community vs product vs category vs legacy","Create Community domain object","Memberships, moderators, rules, posts and visibility","Connect Events, SELLZ, GIGZ, Places and Guides","Redirect legacy URLs","Feature-flag rollout and rollback","Remove obsolete Z/ runtime architecture safely"], x:430,y:2210,labelX:49,labelY:72 },
+  { id:"zaydark", n:"S5", trail:"system", status:"queued", title:"ZayDark policy layer", eyebrow:"PLATFORM POLICY", summary:"ZayDark becomes shared classification and authorization across the whole platform, not a community or separate app.", goals:["Shared content classification","Shared authorization policy","Web/search/API/agent/notification enforcement","Legacy adult-routing contraction"], x:255,y:2360,labelX:3,labelY:77 },
+  { id:"zenegades", n:"13", trail:"product", status:"queued", title:"ZENEGADES", eyebrow:"FUTURE PRODUCT", summary:"Lightweight real-world gatherings and plans without requiring a full event listing.", goals:["Define product behavior after Z/ migration","Use shared identity, location and permission layers"], x:560,y:2460,labelX:64,labelY:80 },
+  { id:"afterz", n:"14", trail:"product", status:"queued", title:"AFTERZ", eyebrow:"FUTURE PRODUCT", summary:"A temporary continuation of the night that uses the same people, place, safety, and sharing substrate.", goals:["Define ephemeral lifecycle","Location/privacy rules","Shared event and community relationships"], x:665,y:2640,labelX:70,labelY:86 },
+  { id:"platform", n:"S6", trail:"system", status:"queued", title:"Platform Core + unified search", eyebrow:"PLATFORMIZATION", summary:"Shared objects, stable IDs, relationships, typed search, permissions, and one domain layer beneath the site.", goals:["Platform Architecture v1","Stable IDs and shared schemas","Cross-object relationships","Unified typed search","Capability and permission model"], x:315,y:2630,labelX:4,labelY:86 },
+  { id:"api", n:"S7", trail:"system", status:"queued", title:"API v1 + integrations", eyebrow:"PLATFORM INTERFACE", summary:"A versioned machine interface for the same Zaylist humans use.", goals:["Internal /api/v1 foundation","Versioned object contracts","Scopes and auditability","Developer/integration exit ramps","Machine-readable discovery when verified"], x:360,y:2830,labelX:7,labelY:92 },
+  { id:"agent", n:"15", trail:"crossing", status:"queued", title:"Agent-ready Zaylist", eyebrow:"DESTINATION", summary:"Humans, software, integrations, and authorized agents use the same underlying platform model.", goals:["Read/search/discover/recommend first","Scoped save/follow/join/RSVP later","Create/update with human confirmation","Coordinated internal agents","External agent landing pad"], x:520,y:3050,labelX:60,labelY:97 },
 ] as const;
 
-const STATUS_LABELS: Record<RoadmapStatus, string> = {
-  complete: "Complete",
-  live: "Live",
-  building: "In production",
-  active: "Active",
-  next: "Major next",
-  planned: "Planned",
-  horizon: "Horizon",
-};
+const productPath = "M620 130 C520 210 430 240 470 330 C510 420 700 410 650 520 C610 610 530 650 575 760 C620 850 420 850 440 930 C470 1020 560 1000 535 1110 C510 1200 690 1190 650 1280 C610 1380 520 1370 560 1460 C610 1560 410 1540 450 1640 C490 1730 630 1710 600 1810 C570 1900 480 1900 520 1990 C560 2090 470 2130 430 2210 C420 2310 600 2340 560 2460 C530 2540 700 2540 665 2640 C620 2760 500 2860 520 3050";
+const systemPath = "M470 330 C350 400 250 430 285 560 C330 700 190 770 240 910 C290 1040 220 1140 300 1250 C350 1370 220 1540 275 1860 C315 2020 330 2120 430 2210 C320 2270 235 2290 255 2360 C270 2470 280 2530 315 2630 C360 2740 320 2780 360 2830 C420 2910 470 2950 520 3050";
 
-function WaypointDetail({ waypoint, onClose }: { waypoint: RoadmapWaypoint; onClose: () => void }) {
-  return (
-    <section className="product-roadmap__detail" aria-label={`${waypoint.title} goals`}>
-      <div className="product-roadmap__detail-top">
-        <div>
-          <span className={`product-roadmap__status product-roadmap__status--${waypoint.status}`}>
-            {waypoint.statusLabel}
-          </span>
-          <p className="product-roadmap__detail-id">{String(waypoint.id).padStart(2, "0")} / {waypoint.era}</p>
-        </div>
-        <button type="button" className="product-roadmap__detail-close" onClick={onClose} aria-label="Close waypoint details">
-          ×
-        </button>
-      </div>
-      <h3>{waypoint.title}</h3>
-      <p className="product-roadmap__detail-summary">{waypoint.summary}</p>
-      {waypoint.wins?.length ? (
-        <div className="product-roadmap__detail-group">
-          <h4>Already earned</h4>
-          <ul>
-            {waypoint.wins.map(win => <li key={win} className="is-win">{win}</li>)}
-          </ul>
-        </div>
-      ) : null}
-      <div className="product-roadmap__detail-group">
-        <h4>{waypoint.status === "complete" || waypoint.status === "live" ? "Keep moving" : "Sub-goals"}</h4>
-        <ul>
-          {waypoint.goals.map(goal => <li key={goal}>{goal}</li>)}
-        </ul>
-      </div>
-    </section>
-  );
+const statusLabel: Record<Status,string> = { done:"Done", progress:"In progress", queued:"Not started" };
+
+function TrailMap({ interactive = true }: { interactive?: boolean }) {
+  const [selectedId, setSelectedId] = useState("z-rebuild");
+  const selected = useMemo(() => POINTS.find(p => p.id === selectedId) ?? POINTS[0], [selectedId]);
+  return <div className="success-map">
+    <svg className="success-map__svg" viewBox="0 0 1000 3200" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+      <g className="success-map__contours"><path d="M-80 420C160 250 290 470 500 330S800 180 1090 330"/><path d="M-100 520C170 340 320 560 520 430S820 290 1100 430"/><path d="M-80 1500C140 1320 310 1550 500 1420S820 1280 1100 1450"/><path d="M-100 1620C160 1430 330 1680 540 1520S830 1390 1110 1560"/><path d="M-50 2500C150 2300 330 2550 520 2410S820 2280 1080 2440"/></g>
+      <path className="success-map__product-shadow" d={productPath}/><path className="success-map__product-line" d={productPath}/><path className="success-map__system-shadow" d={systemPath}/><path className="success-map__system-line" d={systemPath}/>
+      {POINTS.map(p => <g key={p.id} className={`success-map__node success-map__node--${p.status} success-map__node--${p.trail}`} transform={`translate(${p.x} ${p.y})`}><circle className="ring" r={p.trail === "crossing" ? 28 : 21}/><circle className="dot" r={p.trail === "crossing" ? 9 : 7}/><text y="-32">{p.n}</text></g>)}
+    </svg>
+    <div className="success-map__labels">
+      {POINTS.map(p => <button key={p.id} type="button" className={`success-map__label success-map__label--${p.status} success-map__label--${p.trail}${selectedId===p.id?" is-selected":""}`} style={{left:`${p.labelX}%`,top:`${p.labelY}%`}} onClick={() => interactive && setSelectedId(p.id)} aria-pressed={selectedId===p.id}>
+        <span>{p.n} / {p.eyebrow}</span><strong>{p.title}</strong><small>{p.summary}</small>
+      </button>)}
+    </div>
+    {interactive && <aside className="success-map__detail" aria-live="polite">
+      <div><span className={`success-map__status success-map__status--${selected.status}`}>{statusLabel[selected.status]}</span><button type="button" onClick={() => setSelectedId(POINTS[0].id)} aria-label="Reset selected waypoint">×</button></div>
+      <p className="success-map__detail-meta">{selected.trail.toUpperCase()} TRAIL / {selected.n}</p><h3>{selected.title}</h3><p>{selected.summary}</p><h4>{selected.status==="done"?"Keep moving":"Goals"}</h4><ul>{selected.goals.map(g=><li key={g}>{g}</li>)}</ul>
+    </aside>}
+  </div>;
 }
 
-export default function ProductRoadmap() {
-  const [expanded, setExpanded] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | null>(17);
-  const selected = useMemo(
-    () => WAYPOINTS.find(waypoint => waypoint.id === selectedId) ?? null,
-    [selectedId],
-  );
-
-  useEffect(() => {
-    if (!expanded) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setExpanded(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [expanded]);
-
-  const openWaypoint = (id: number) => {
-    setSelectedId(current => current === id ? null : id);
-  };
-
-  return (
-    <section className="product-roadmap" aria-labelledby="product-roadmap-title">
-      <div className="product-roadmap__shell">
-        <div className="product-roadmap__eyebrow">PRODUCT ROADMAP / LIVE OPERATING VIEW</div>
-        <div className="product-roadmap__heading-row">
-          <div>
-            <h2 id="product-roadmap-title">THE ROUTE FROM<br /><span>LIVE TO DURABLE.</span></h2>
-            <p>Zaylist is already live. This is the route from a working product to a durable platform.</p>
-          </div>
-          <button type="button" className="product-roadmap__expand" onClick={() => setExpanded(true)}>
-            Expand roadmap <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-
-        <button type="button" className="product-roadmap__preview" onClick={() => setExpanded(true)} aria-label="Open full product roadmap">
-          <span className="product-roadmap__preview-line" aria-hidden="true" />
-          {WAYPOINTS.map(waypoint => (
-            <span
-              key={waypoint.id}
-              className={`product-roadmap__preview-dot product-roadmap__preview-dot--${waypoint.status}`}
-              title={`${waypoint.id}. ${waypoint.title}`}
-            />
-          ))}
-          <span className="product-roadmap__preview-start">ORIGIN</span>
-          <span className="product-roadmap__preview-now">NOW</span>
-          <span className="product-roadmap__preview-end">AGENT READY</span>
-        </button>
-
-        <div className="product-roadmap__legend" aria-label="Roadmap status legend">
-          {(["complete", "live", "building", "active", "next", "planned", "horizon"] as RoadmapStatus[]).map(status => (
-            <span key={status}><i className={`product-roadmap__legend-dot product-roadmap__legend-dot--${status}`} />{STATUS_LABELS[status]}</span>
-          ))}
-        </div>
-      </div>
-
-      {expanded ? (
-        <div className="product-roadmap__overlay" role="dialog" aria-modal="true" aria-labelledby="product-roadmap-full-title">
-          <div className="product-roadmap__overlay-topbar">
-            <div>
-              <span>PRODUCT ROADMAP / LIVE OPERATING VIEW</span>
-              <strong id="product-roadmap-full-title">THE ROUTE FROM LIVE TO DURABLE.</strong>
-            </div>
-            <button type="button" onClick={() => setExpanded(false)} aria-label="Close full roadmap">Close ×</button>
-          </div>
-
-          <div className="product-roadmap__overlay-scroll">
-            <div className="product-roadmap__map-intro">
-              <p className="product-roadmap__map-kicker">20 WAYPOINTS / ONE OPERATING VIEW</p>
-              <h3>Built in public.<br />Hardened on purpose.</h3>
-              <p>Completed work stays on the map. Current production stays visible. The major Z/ migration is the turning point into platform architecture.</p>
-            </div>
-
-            <div className="product-roadmap__map">
-              <div className="product-roadmap__trail" aria-hidden="true" />
-              {WAYPOINTS.map(waypoint => (
-                <div key={waypoint.id} className={`product-roadmap__row product-roadmap__row--${waypoint.side}`}>
-                  <button
-                    type="button"
-                    className={`product-roadmap__waypoint product-roadmap__waypoint--${waypoint.status} ${selectedId === waypoint.id ? "is-selected" : ""}`}
-                    onClick={() => openWaypoint(waypoint.id)}
-                    aria-expanded={selectedId === waypoint.id}
-                  >
-                    <span className="product-roadmap__waypoint-number">{String(waypoint.id).padStart(2, "0")}</span>
-                    <span className="product-roadmap__waypoint-copy">
-                      <small>{waypoint.era}</small>
-                      <strong>{waypoint.title}</strong>
-                      <em>{waypoint.statusLabel}</em>
-                    </span>
-                    <span className="product-roadmap__waypoint-open" aria-hidden="true">+</span>
-                  </button>
-                  {selectedId === waypoint.id && selected ? (
-                    <WaypointDetail waypoint={selected} onClose={() => setSelectedId(null)} />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-
-            <div className="product-roadmap__destination">
-              <span>DESTINATION</span>
-              <h3>DURABLE PLATFORM.</h3>
-              <p>Humans use Zaylist. Software can understand Zaylist. Authorized agents can act through Zaylist. All of them use the same underlying system.</p>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </section>
-  );
+export default function ProductRoadmap({ page = false }: { page?: boolean }) {
+  const [expanded,setExpanded]=useState(false);
+  useEffect(()=>{ if(!expanded)return; const old=document.body.style.overflow; document.body.style.overflow="hidden"; const key=(e:KeyboardEvent)=>{if(e.key==="Escape")setExpanded(false)}; window.addEventListener("keydown",key); return()=>{document.body.style.overflow=old;window.removeEventListener("keydown",key)} },[expanded]);
+  if(page) return <section className="product-roadmap product-roadmap--page"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>THE PATH FROM<br/>LIVE TO DURABLE.</h1><p>The product trail is what people use. The system trail is what makes it durable. Where they cross, the platform changes shape.</p><div className="product-roadmap__legend"><b><i className="trail-product"/>Product</b><b><i className="trail-system"/>System</b><b><i className="done"/>Done</b><b><i className="progress"/>In progress</b><b><i className="queued"/>Not started</b></div></header><TrailMap/></section>;
+  return <section className="product-roadmap"><div className="product-roadmap__preview-head"><div><span>PRODUCT + SYSTEM / LIVE OPERATING VIEW</span><h2>THE PATH FROM LIVE TO DURABLE.</h2><p>Two trails. One platform.</p></div><button type="button" onClick={()=>setExpanded(true)}>Expand roadmap ↗</button></div><button className="product-roadmap__mini" type="button" onClick={()=>setExpanded(true)} aria-label="Open interactive roadmap"><svg viewBox="0 0 1000 250" aria-hidden="true"><path className="mini-product" d="M20 160C170 45 250 210 390 120S610 45 740 130 900 200 980 80"/><path className="mini-system" d="M20 210C160 120 260 230 390 120S570 220 740 130 870 70 980 80"/></svg><span>PRODUCT</span><span>SYSTEM</span></button>{expanded&&<div className="product-roadmap__overlay" role="dialog" aria-modal="true"><button className="product-roadmap__overlay-close" type="button" onClick={()=>setExpanded(false)}>Close ×</button><div className="product-roadmap__overlay-scroll"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>THE PATH FROM<br/>LIVE TO DURABLE.</h1></header><TrailMap/></div></div>}</section>;
 }
