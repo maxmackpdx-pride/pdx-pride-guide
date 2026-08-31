@@ -20,6 +20,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
 import EventModal from "../components/EventModal";
+import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
 import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
@@ -321,6 +322,7 @@ export default function Events() {
     return new URLSearchParams(window.location.search).get("q")?.trim() || "";
   });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [eventOriginRect, setEventOriginRect] = useState<EventModalOriginRect | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortMode, setSortMode] = useState<SortMode>("start_time");
   const [mapExpanded, setMapExpanded] = useState(false);
@@ -337,12 +339,14 @@ export default function Events() {
     const qs = params.toString();
     setLocation(qs ? `/events?${qs}` : "/events");
   }, [setLocation]);
-  const openEvent = useCallback((event: EventListing) => {
+  const openEvent = useCallback((event: EventListing, originRect: EventModalOriginRect | null = null) => {
+    setEventOriginRect(originRect);
     setSelectedEvent(event);
     setLocation(eventPath(event.id, event.title, event.dayOfWeek));
   }, [setLocation]);
   const closeEvent = useCallback(() => {
     setSelectedEvent(null);
+    setEventOriginRect(null);
     const q = searchQuery.trim();
     setLocation(q ? `/events?q=${encodeURIComponent(q)}` : "/events");
   }, [setLocation, searchQuery]);
@@ -789,7 +793,7 @@ export default function Events() {
                 <ListingCard
                   key={listingKey(e)}
                   event={e}
-                  onClick={() => openEvent(e)}
+                  onClick={(originRect) => openEvent(e, originRect)}
                   viewMode="grid"
                   revealDelay={(i % 8) * 70}
                   attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
@@ -808,7 +812,7 @@ export default function Events() {
               <ListingCard
                 key={listingKey(e)}
                 event={e}
-                onClick={() => openEvent(e)}
+                onClick={(originRect) => openEvent(e, originRect)}
                 viewMode="list"
                 revealDelay={(i % 8) * 55}
                 attendanceSummary={attendanceSummaries[e.id] ?? attendanceSummaries[String(e.id)]}
@@ -841,6 +845,7 @@ export default function Events() {
           event={selectedEvent}
           onClose={closeEvent}
           onEventUpdated={updated => setSelectedEvent(updated)}
+          originRect={eventOriginRect}
         />
       )}
 

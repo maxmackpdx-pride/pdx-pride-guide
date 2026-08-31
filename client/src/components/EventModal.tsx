@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
@@ -41,6 +41,12 @@ type EventWithLinks = Event & {
   venueWebsite?: string | null;
   sourceUrl?: string | null;
 };
+
+export type EventModalOriginRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 function isFeedOrApiUrl(url: string): boolean {
   return /format=json|wp-json|\/tribe\/events\/v1|\.ics(\?|$)|\/ics\/?(\?|$)|\/api\/calendar|ical=1|\/feed(?:\/|$|\?)/i.test(
@@ -132,23 +138,27 @@ export default function EventModal({
   event,
   onClose,
   onEventUpdated,
+  originRect = null,
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
+  originRect?: EventModalOriginRect | null;
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} />;
+  return <EventModalInner event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} />;
 }
 
 function EventModalInner({
   event,
   onClose,
   onEventUpdated,
+  originRect,
 }: {
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
+  originRect: EventModalOriginRect | null;
 }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -172,9 +182,49 @@ function EventModalInner({
   const [invitePast, setInvitePast] = useState(true);
   const [inviteFollowers, setInviteFollowers] = useState(true);
   const [inviteNote, setInviteNote] = useState("");
+  const [flipOpen, setFlipOpen] = useState(false);
+  const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const socialTabsRef = useRef<HTMLDivElement>(null);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+    setFlipOpen(false);
+    const panel = dialogRef.current;
+    const calm = document.documentElement.classList.contains("calm-mode") ||
+      document.documentElement.dataset.calm === "true";
+
+    const openAfterPaint = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!cancelled) setFlipOpen(true);
+        });
+      });
+    };
+
+    if (!panel || !originRect || prefersReducedMotion() || calm) {
+      setFlipVars(null);
+      openAfterPaint();
+      return () => { cancelled = true; };
+    }
+
+    const finalRect = panel.getBoundingClientRect();
+    if (finalRect.width < 8 || finalRect.height < 8 || originRect.width < 8 || originRect.height < 8) {
+      setFlipVars(null);
+      openAfterPaint();
+      return () => { cancelled = true; };
+    }
+
+    setFlipVars({
+      ["--em-sx" as string]: String(originRect.width / finalRect.width),
+      ["--em-sy" as string]: String(originRect.height / finalRect.height),
+      ["--em-tx" as string]: `${originRect.left - finalRect.left}px`,
+      ["--em-ty" as string]: `${originRect.top - finalRect.top}px`,
+    });
+    openAfterPaint();
+    return () => { cancelled = true; };
+  }, [event.id, originRect, dialogRef]);
 
   useEffect(() => {
     setEditing(false);
@@ -594,7 +644,7 @@ function EventModalInner({
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className="event-modal pdx-glass-rebind"
+        className={`event-modal pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -604,6 +654,7 @@ function EventModalInner({
         style={{
           "--event-accent": accentColor,
           "--c": accentColor,
+          ...flipVars,
         } as React.CSSProperties}
       >
         {/* Shared animated rainbow top seam (§6: pdx-rainbow-rule, not a second engine) */}

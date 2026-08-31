@@ -31,15 +31,22 @@ type EventWithVenue = Event & {
   hasPendingClaim?: boolean;
 };
 
-function eventCardA11yProps(onClick: () => void) {
+export type ListingCardOriginRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
+
+function cardOriginRect(element: HTMLElement): ListingCardOriginRect {
+  const { left, top, width, height } = element.getBoundingClientRect();
+  return { left, top, width, height };
+}
+
+function eventCardA11yProps(onClick: (originRect: ListingCardOriginRect) => void) {
   return {
     role: "button" as const,
     tabIndex: 0,
-    onClick,
+    onClick: (e: React.MouseEvent<HTMLDivElement>) => onClick(cardOriginRect(e.currentTarget)),
     onKeyDown: (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        onClick();
+        onClick(cardOriginRect(e.currentTarget as HTMLElement));
       }
     },
   };
@@ -72,7 +79,7 @@ function EventShareButton({ href, title }: { href: string; title: string }) {
 
 type Props = {
   event: EventWithVenue;
-  onClick: () => void;
+  onClick: (originRect: ListingCardOriginRect) => void;
   viewMode: "grid" | "list";
   revealDelay?: number;
   attendanceSummary?: AttendanceSummary | null;
