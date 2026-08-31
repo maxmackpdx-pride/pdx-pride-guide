@@ -56,6 +56,7 @@ import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analy
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
 import { registerCommunityRoutes, searchCommunities } from "./communities";
+import { registerPlatformV1 } from "./platformV1";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import { renderGamePosterPng } from "./posters/gamePoster";
 import {
@@ -1280,6 +1281,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     },
   }));
   registerCommunityRoutes(app, requireAuth);
+  registerPlatformV1(app);
 
   // ─── FILE UPLOADS ───────────────────────────────────────────────────────
   // Poster image upload (event submit / claim edit)

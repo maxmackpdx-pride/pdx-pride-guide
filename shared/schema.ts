@@ -231,6 +231,36 @@ export const communityModerationAudit = sqliteTable("community_moderation_audit"
   createdAt: text("created_at").notNull().default(""),
 });
 
+// Platform Architecture v1 identity and relationship compatibility layer.
+// Typed IDs are additive aliases; legacy product primary keys remain intact.
+export const platformIdentities = sqliteTable("platform_identities", {
+  typedId: text("typed_id").primaryKey(),
+  resourceType: text("resource_type").notNull(),
+  legacyTable: text("legacy_table").notNull(),
+  legacyId: text("legacy_id").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const platformRelationships = sqliteTable("platform_relationships", {
+  id: text("id").primaryKey(),
+  fromId: text("from_id").notNull(),
+  toId: text("to_id").notNull(),
+  relationshipType: text("relationship_type").notNull(),
+  provenance: text("provenance").notNull().default("platform"),
+  visibility: text("visibility").notNull().default("public"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const platformRequestMetrics = sqliteTable("platform_request_metrics", {
+  requestId: text("request_id").primaryKey(),
+  method: text("method").notNull(),
+  path: text("path").notNull(),
+  status: integer("status").notNull(),
+  latencyMs: integer("latency_ms").notNull(),
+  userId: integer("user_id"),
+  createdAt: text("created_at").notNull(),
+});
+
 // Promoter accounts (session-based, simple)
 export const promoters = sqliteTable("promoters", {
   id: integer("id").primaryKey({ autoIncrement: true }),

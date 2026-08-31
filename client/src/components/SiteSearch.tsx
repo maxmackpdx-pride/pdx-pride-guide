@@ -11,14 +11,14 @@ import { useLocation } from "wouter";
 import { Search, X } from "lucide-react";
 
 type SearchEventHit = {
-  id: number;
+  id: string | number;
   title: string;
   subtitle: string;
   href: string;
 };
 
 type SearchPlaceHit = {
-  id: number;
+  id: string | number;
   name: string;
   subtitle: string;
   href: string;
@@ -98,13 +98,20 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
     const ac = new AbortController();
     abortRef.current = ac;
     setLoading(true);
-    fetch(`/api/search?q=${encodeURIComponent(debouncedQ)}`, {
+    fetch(`/api/v1/search?q=${encodeURIComponent(debouncedQ)}&types=event,place,community&limit=24`, {
       credentials: "include",
       signal: ac.signal,
     })
-      .then((r) => (r.ok ? r.json() : { q: debouncedQ, events: [], places: [], communities: [] }))
-      .then((json: SearchResponse) => {
+      .then((r) => (r.ok ? r.json() : { data: [] }))
+      .then((payload: any) => {
         if (ac.signal.aborted) return;
+        const objects = Array.isArray(payload?.data) ? payload.data : [];
+        const json: SearchResponse = {
+          q: debouncedQ,
+          events: objects.filter((item: any) => item.type === "event").map((item: any) => ({ id: item.id, title: item.name, subtitle: [item.venueName, item.neighborhood].filter(Boolean).join(" · "), href: item.url })),
+          places: objects.filter((item: any) => item.type === "place").map((item: any) => ({ id: item.id, name: item.name, subtitle: [item.neighborhood, item.placeType].filter(Boolean).join(" · "), href: item.url })),
+          communities: objects.filter((item: any) => item.type === "community").map((item: any) => ({ id: item.id, name: item.name, subtitle: [item.neighborhood, `${item.memberCount} members`].filter(Boolean).join(" · "), href: item.url })),
+        };
         setData(json);
         setActiveIndex(0);
       })
