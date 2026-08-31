@@ -31,8 +31,7 @@ export function bannerPathToThemeKey(path: string | null | undefined): ProfileBa
   for (const [key, img] of Object.entries(PROFILE_BANNER_IMAGES)) {
     if (img === path) return key as ProfileBanner;
   }
-  // profileConstants short paths (collage/stickers/social) already match theme images
-  if (path.includes("hero-collage")) return "neon-collage";
+  // Legacy sticker/social paths already match theme images.
   if (path.includes("banner-stickers")) return "sticker-wall";
   if (path.includes("banner-social")) return "pride-guide-social";
   return "accent-gradient";

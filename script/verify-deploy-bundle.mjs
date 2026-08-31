@@ -23,13 +23,13 @@ const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css
 const checks = {
   posterGrid: js.includes("events-poster-grid"),
   noEventBoardCard: !js.includes("EventBoardCard"),
-  pageHeroPanel: sourceCss.includes(".page-hero__panel"),
+  noLegacyPageHeroCss: !sourceCss.includes(".page-hero") && !sourceCss.includes(".zine-hero"),
   noRainbowButtonHover: !sourceCss.includes("linear-gradient(90deg, #E40303"),
   barlowFonts:
     sourceCss.includes("--font-board-display: 'Barlow Condensed'") &&
     !sourceCss.includes("Anton") &&
     !dashboardCss.includes("DM Mono"),
-  hiddenBoardKicker: sourceCss.includes(".page-hero .board-kicker") && sourceCss.includes("display: none"),
+  noLegacyHeroOverlays: !js.includes("hero-video-overlays") && !js.includes("home-hero-glitch"),
   noPageHeroKickers: !js.includes("PRIDE WEEKEND 2026") && !js.includes("ABOUT THIS GUIDE"),
 };
 

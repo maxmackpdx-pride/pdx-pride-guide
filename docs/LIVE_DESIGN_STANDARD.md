@@ -75,6 +75,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Hub as an outlined pill with a standing cyan glow (plus a decorative pulsing cyan dot) | **Solid fill primary** - cyan plate, dark ink, composed from `--chrome-keyline` + `--chrome-bevel` + `--chrome-floor` + `--neon-bloom` |
 | Global Hub tab opening a Member/Admin or administration drawer | **Hub is navigation** - signed-in Hub goes directly to `/dashboard`; admin controls live inside the Hub experience |
 | Hand-rolled glass shells that restate `--glass-card-shadow` behind `!important` (promoter ActionRow) | **Compose `.pdx-glass-card`**; set only `--c` and `--dir-gm` locally |
+| Generic `PageHero` billboard on new pages (wallpaper, giant centered title, boxed lede, decorative slug, automatic CTA row) | **Use the closest existing product composition.** For ordinary utility, detail, legal, empty, and error pages use the compact nav-aligned `PageHeader`; a large authored hero is an explicit page-specific decision, never the default scaffold. |
 
 **Outer neon bloom is 8%, and it is NOT retired.** The card guide retired the
 full-strength halo and the glow proposal wanted bloom back; 8% is the settled value,

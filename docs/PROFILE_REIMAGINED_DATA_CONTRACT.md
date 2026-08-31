@@ -172,13 +172,12 @@ Legacy fallback synthesizes from `profileEmbeds` when no `profile_media` row.
 ### Banner (live validation)
 
 - **Write path:** `PUT /api/users/me` validates with `isProfileBanner` from `@shared/profileTheme`.
-- **Allowed values:** `"accent-gradient" | "neon-collage" | "sticker-wall" | "pride-guide-social"`.
+- **Allowed values:** `"accent-gradient" | "sticker-wall" | "pride-guide-social"`.
 - **Default:** `"accent-gradient"` (`DEFAULT_PROFILE_BANNER` in `shared/profileTheme.ts`).
 - **Image map** (`PROFILE_BANNER_IMAGES`):
 
   | Key | Path |
   |-----|------|
-  | `neon-collage` | `/sandbox-ds/banners/hero-collage.png` |
   | `sticker-wall` | `/sandbox-ds/banners/banner-stickers.png` |
   | `pride-guide-social` | `/sandbox-ds/banners/banner-social.png` |
 

@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import { Link } from "wouter";
 import GlitchWord from "@/components/GlitchWord";
 import CountUpValue from "@/components/CountUpValue";
-import type { PageHeroAccent } from "@/components/PageHero";
+export type PageHeaderAccent = "lime" | "magenta" | "rainbow" | "cyan";
 
 export type PageHeaderProps = {
   section: string;
   title: string;
   titlePrefix?: ReactNode;
-  titleAccent?: PageHeroAccent;
+  titleAccent?: PageHeaderAccent;
   kicker?: string;
   lede?: string;
   tagline?: ReactNode;

@@ -157,7 +157,6 @@ export const sampleStickers = [
 
 /** Preview-page aliases (DesignSystemSandbox.tsx) */
 export const SANDBOX_BANNERS = {
-  collage: "/sandbox-ds/banners/hero-collage.png",
   gifting: "/sandbox-ds/banners/banner-gifting.png",
   gigs: "/sandbox-ds/banners/banner-gigs.png",
   social: "/sandbox-ds/banners/banner-social.png",

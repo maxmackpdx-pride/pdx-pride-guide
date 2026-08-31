@@ -24,11 +24,10 @@ export function profileAccentTextColor(hex: string): string {
 
 export const DEFAULT_PROFILE_ACCENT = "#FF00CC";
 
-export type ProfileBanner = "accent-gradient" | "neon-collage" | "sticker-wall" | "pride-guide-social";
+export type ProfileBanner = "accent-gradient" | "sticker-wall" | "pride-guide-social";
 
 export const PROFILE_BANNERS: ProfileBanner[] = [
   "accent-gradient",
-  "neon-collage",
   "sticker-wall",
   "pride-guide-social",
 ];
@@ -37,7 +36,6 @@ export const DEFAULT_PROFILE_BANNER: ProfileBanner = "accent-gradient";
 
 /** Static banner image paths for the non-gradient options (already-deployed design assets). */
 export const PROFILE_BANNER_IMAGES: Record<Exclude<ProfileBanner, "accent-gradient">, string> = {
-  "neon-collage": "/sandbox-ds/banners/hero-collage.png",
   "sticker-wall": "/sandbox-ds/banners/banner-stickers.png",
   "pride-guide-social": "/sandbox-ds/banners/banner-social.png",
 };
