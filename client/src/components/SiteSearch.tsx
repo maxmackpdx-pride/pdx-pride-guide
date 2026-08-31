@@ -28,11 +28,13 @@ type SearchResponse = {
   q: string;
   events: SearchEventHit[];
   places: SearchPlaceHit[];
+  communities: Array<{ id: string; name: string; subtitle: string; href: string }>;
 };
 
 type FlatResult =
   | { kind: "event"; key: string; label: string; subtitle: string; href: string }
-  | { kind: "place"; key: string; label: string; subtitle: string; href: string };
+  | { kind: "place"; key: string; label: string; subtitle: string; href: string }
+  | { kind: "community"; key: string; label: string; subtitle: string; href: string };
 
 type SiteSearchProps = {
   open: boolean;
@@ -49,7 +51,7 @@ function useDebouncedValue<T>(value: T, ms: number): T {
 }
 
 /**
- * Global site search (v0): events + directory places.
+ * Global site search: EVENTZ + directory places + Communities.
  * Open via prop, Cmd/Ctrl+K from Nav, or the header search button.
  */
 export default function SiteSearch({ open, onClose }: SiteSearchProps) {
@@ -100,7 +102,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
       credentials: "include",
       signal: ac.signal,
     })
-      .then((r) => (r.ok ? r.json() : { q: debouncedQ, events: [], places: [] }))
+      .then((r) => (r.ok ? r.json() : { q: debouncedQ, events: [], places: [], communities: [] }))
       .then((json: SearchResponse) => {
         if (ac.signal.aborted) return;
         setData(json);
@@ -108,7 +110,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
       })
       .catch((err) => {
         if (err?.name === "AbortError") return;
-        setData({ q: debouncedQ, events: [], places: [] });
+        setData({ q: debouncedQ, events: [], places: [], communities: [] });
       })
       .finally(() => {
         if (!ac.signal.aborted) setLoading(false);
@@ -136,6 +138,9 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
         subtitle: p.subtitle,
         href: p.href,
       });
+    }
+    for (const community of data.communities || []) {
+      out.push({ kind: "community", key: `community-${community.id}`, label: community.name, subtitle: community.subtitle, href: community.href });
     }
     return out;
   }, [data]);
@@ -171,6 +176,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   const showEmpty = debouncedQ.length >= 2 && !loading && flat.length === 0;
   const events = data?.events || [];
   const places = data?.places || [];
+  const communities = data?.communities || [];
 
   return (
     <div className="site-search" role="presentation">
@@ -188,7 +194,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
             ref={inputRef}
             type="search"
             className="site-search__input"
-            placeholder="Search events and places…"
+            placeholder="Search EVENTZ, Places, and Communities…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
@@ -213,14 +219,14 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
 
         <div id={listId} className="site-search__body" role="listbox">
           {debouncedQ.length < 2 && (
-            <p className="site-search__hint">Type at least 2 characters. Events and places only.</p>
+            <p className="site-search__hint">Type at least 2 characters. Search EVENTZ, Places, and Communities.</p>
           )}
           {loading && <p className="site-search__hint">Searching…</p>}
           {showEmpty && <p className="site-search__hint">No matches for “{debouncedQ}”.</p>}
 
           {events.length > 0 && (
             <section className="site-search__group">
-              <h3 className="site-search__group-title">Events</h3>
+              <h3 className="site-search__group-title">EVENTZ</h3>
               <ul className="site-search__list">
                 {events.map((e) => {
                   const idx = flat.findIndex((f) => f.key === `event-${e.id}`);
@@ -273,6 +279,18 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
                       </button>
                     </li>
                   );
+                })}
+              </ul>
+            </section>
+          )}
+          {communities.length > 0 && (
+            <section className="site-search__group">
+              <h3 className="site-search__group-title">Communities</h3>
+              <ul className="site-search__list">
+                {communities.map((community) => {
+                  const idx = flat.findIndex((item) => item.key === `community-${community.id}`);
+                  const active = idx === activeIndex;
+                  return <li key={community.id}><button type="button" role="option" aria-selected={active} className={`site-search__item${active ? " is-active" : ""}`} onMouseEnter={() => setActiveIndex(idx)} onClick={() => go(community.href)}><span className="site-search__item-label">{community.name}</span>{community.subtitle ? <span className="site-search__item-sub">{community.subtitle}</span> : null}</button></li>;
                 })}
               </ul>
             </section>

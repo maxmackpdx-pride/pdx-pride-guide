@@ -19,6 +19,8 @@ export type CommunitySummary = {
   membershipPolicy: CommunityMembershipPolicy;
   memberCount: number;
   viewerRole: CommunityRole | null;
+  viewerMembershipStatus: "active" | "pending" | "left" | "removed" | "rejected" | null;
+  canManage: boolean;
   sourcePlaceId: number | null;
 };
 
@@ -26,6 +28,9 @@ export type CommunityPost = {
   id: number;
   body: string;
   createdAt: string;
+  updatedAt: string | null;
+  canEdit: boolean;
+  canModerate: boolean;
   author: {
     id: number;
     username: string;
@@ -36,12 +41,9 @@ export type CommunityPost = {
 
 export type CommunityDetail = CommunitySummary & {
   rules: string[];
-  moderators: Array<{ id: number; username: string; displayName: string | null }>;
+  moderators: Array<{ id: number; username: string; displayName: string | null; role: CommunityRole }>;
   posts: CommunityPost[];
-  related: {
-    place: { id: number; name: string; url: string } | null;
-    events: Array<{ id: number; title: string; dateStart: string; url: string }>;
-  };
+  related: Array<{ type: "event" | "sellz" | "gig" | "place" | "guide"; relationshipType: string; id: string | number; name: string; meta: string | null; url: string }>;
 };
 
 export function communitySlug(value: string): string {

@@ -55,7 +55,7 @@ import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
-import { registerCommunityRoutes } from "./communities";
+import { registerCommunityRoutes, searchCommunities } from "./communities";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import { renderGamePosterPng } from "./posters/gamePoster";
 import {
@@ -2042,13 +2042,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  // ─── GLOBAL SEARCH (v0: events + directory) ───────────────────────────────
+  // ─── GLOBAL SEARCH: EVENTZ + Places + Communities ─────────────────────────
   app.get("/api/search", (req, res) => {
     const q = String(req.query.q || "").trim();
     if (q.length < 2) {
-      return res.json({ q, events: [], places: [] });
+      return res.json({ q, events: [], places: [], communities: [] });
     }
-    res.json(storage.searchGlobal(q));
+    res.json({ ...storage.searchGlobal(q), communities: searchCommunities(q, req.session?.userId) });
   });
 
   // ─── ATTENDANCE ───────────────────────────────────────────────────────────

@@ -196,6 +196,7 @@ export const communityPosts = sqliteTable("community_posts", {
   body: text("body").notNull(),
   status: text("status").notNull().default("published"),
   createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
 });
 
 export const communityRelationships = sqliteTable("community_relationships", {
@@ -203,6 +204,30 @@ export const communityRelationships = sqliteTable("community_relationships", {
   targetType: text("target_type").notNull(),
   targetId: text("target_id").notNull(),
   relationshipType: text("relationship_type").notNull().default("related"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const communityReports = sqliteTable("community_reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  communityId: text("community_id").notNull(),
+  postId: integer("post_id"),
+  reporterUserId: integer("reporter_user_id").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("pending"),
+  resolutionNote: text("resolution_note"),
+  resolvedBy: integer("resolved_by"),
+  createdAt: text("created_at").notNull().default(""),
+  resolvedAt: text("resolved_at"),
+});
+
+export const communityModerationAudit = sqliteTable("community_moderation_audit", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  communityId: text("community_id").notNull(),
+  actorUserId: integer("actor_user_id").notNull(),
+  action: text("action").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id"),
+  detail: text("detail").notNull().default("{}"),
   createdAt: text("created_at").notNull().default(""),
 });
 

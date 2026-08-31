@@ -1,220 +1,73 @@
 import type { Express, RequestHandler } from "express";
+import { randomUUID } from "node:crypto";
 import { sqlite } from "./storage";
-import { COMMUNITY_RULES, communitySlug } from "@shared/community";
+import { COMMUNITY_RULES, communitySlug, type CommunityRole } from "@shared/community";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 
 const now = () => new Date().toISOString();
+const VISIBILITY = new Set(["public", "discoverable", "private"]);
+const POLICY = new Set(["open", "request", "invite"]);
+const TARGETS = new Set(["event", "sellz", "gig", "place", "guide"]);
+const RESERVED = new Set(["new", "events", "eventz", "sellz", "gigz", "outz", "guides", "dark", "zaydark", "space", "spaces"]);
 
 export function ensureCommunityTables() {
   sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS communities (
-      id TEXT PRIMARY KEY,
-      slug TEXT NOT NULL UNIQUE,
-      name TEXT NOT NULL,
-      description TEXT NOT NULL DEFAULT '',
-      image_url TEXT,
-      neighborhood TEXT,
-      visibility TEXT NOT NULL DEFAULT 'public',
-      membership_policy TEXT NOT NULL DEFAULT 'open',
-      rules TEXT NOT NULL DEFAULT '[]',
-      source_business_id INTEGER UNIQUE,
-      created_at TEXT NOT NULL DEFAULT '',
-      updated_at TEXT NOT NULL DEFAULT ''
-    );
-    CREATE TABLE IF NOT EXISTS community_memberships (
-      community_id TEXT NOT NULL,
-      user_id INTEGER NOT NULL,
-      role TEXT NOT NULL DEFAULT 'member',
-      status TEXT NOT NULL DEFAULT 'active',
-      rules_version TEXT NOT NULL DEFAULT '1',
-      joined_at TEXT NOT NULL DEFAULT '',
-      PRIMARY KEY (community_id, user_id)
-    );
-    CREATE INDEX IF NOT EXISTS idx_community_memberships_user
-      ON community_memberships(user_id, status);
-    CREATE TABLE IF NOT EXISTS community_posts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      community_id TEXT NOT NULL,
-      user_id INTEGER NOT NULL,
-      body TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'published',
-      created_at TEXT NOT NULL DEFAULT ''
-    );
-    CREATE INDEX IF NOT EXISTS idx_community_posts_feed
-      ON community_posts(community_id, status, created_at DESC);
-    CREATE TABLE IF NOT EXISTS community_relationships (
-      community_id TEXT NOT NULL,
-      target_type TEXT NOT NULL,
-      target_id TEXT NOT NULL,
-      relationship_type TEXT NOT NULL DEFAULT 'related',
-      created_at TEXT NOT NULL DEFAULT '',
-      PRIMARY KEY (community_id, target_type, target_id, relationship_type)
-    );
+    CREATE TABLE IF NOT EXISTS communities (id TEXT PRIMARY KEY,slug TEXT NOT NULL UNIQUE,name TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',image_url TEXT,neighborhood TEXT,visibility TEXT NOT NULL DEFAULT 'public',membership_policy TEXT NOT NULL DEFAULT 'open',rules TEXT NOT NULL DEFAULT '[]',source_business_id INTEGER UNIQUE,created_at TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT '');
+    CREATE TABLE IF NOT EXISTS community_memberships (community_id TEXT NOT NULL,user_id INTEGER NOT NULL,role TEXT NOT NULL DEFAULT 'member',status TEXT NOT NULL DEFAULT 'active',rules_version TEXT NOT NULL DEFAULT '1',joined_at TEXT NOT NULL DEFAULT '',PRIMARY KEY (community_id,user_id));
+    CREATE INDEX IF NOT EXISTS idx_community_memberships_user ON community_memberships(user_id,status);
+    CREATE TABLE IF NOT EXISTS community_posts (id INTEGER PRIMARY KEY AUTOINCREMENT,community_id TEXT NOT NULL,user_id INTEGER NOT NULL,body TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'published',created_at TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT '');
+    CREATE INDEX IF NOT EXISTS idx_community_posts_feed ON community_posts(community_id,status,created_at DESC);
+    CREATE TABLE IF NOT EXISTS community_relationships (community_id TEXT NOT NULL,target_type TEXT NOT NULL,target_id TEXT NOT NULL,relationship_type TEXT NOT NULL DEFAULT 'related',created_at TEXT NOT NULL DEFAULT '',PRIMARY KEY (community_id,target_type,target_id,relationship_type));
+    CREATE TABLE IF NOT EXISTS community_reports (id INTEGER PRIMARY KEY AUTOINCREMENT,community_id TEXT NOT NULL,post_id INTEGER,reporter_user_id INTEGER NOT NULL,reason TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',resolution_note TEXT,resolved_by INTEGER,created_at TEXT NOT NULL DEFAULT '',resolved_at TEXT);
+    CREATE INDEX IF NOT EXISTS idx_community_reports_queue ON community_reports(community_id,status,created_at DESC);
+    CREATE TABLE IF NOT EXISTS community_moderation_audit (id INTEGER PRIMARY KEY AUTOINCREMENT,community_id TEXT NOT NULL,actor_user_id INTEGER NOT NULL,action TEXT NOT NULL,target_type TEXT NOT NULL,target_id TEXT,detail TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL DEFAULT '');
   `);
-
-  const groups = sqlite.prepare(`
-    SELECT id, name, description, image_url, neighborhood, owner_id, created_at
-    FROM businesses
-    WHERE type = 'group' AND active = 1 AND COALESCE(status, 'OPEN') != 'CLOSED'
-    ORDER BY id
-  `).all() as any[];
-  const used = new Set((sqlite.prepare("SELECT slug FROM communities").all() as any[]).map(row => row.slug));
-  const insert = sqlite.prepare(`
-    INSERT OR IGNORE INTO communities
-      (id, slug, name, description, image_url, neighborhood, visibility,
-       membership_policy, rules, source_business_id, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'public', 'open', ?, ?, ?, ?)
-  `);
-  const addOwner = sqlite.prepare(`
-    INSERT OR IGNORE INTO community_memberships
-      (community_id, user_id, role, status, rules_version, joined_at)
-    VALUES (?, ?, 'owner', 'active', '1', ?)
-  `);
-  const relatePlace = sqlite.prepare(`
-    INSERT OR IGNORE INTO community_relationships
-      (community_id, target_type, target_id, relationship_type, created_at)
-    VALUES (?, 'place', ?, 'source', ?)
-  `);
-  const tx = sqlite.transaction(() => {
-    for (const group of groups) {
-      let slug = communitySlug(group.name);
-      let suffix = 2;
-      while (used.has(slug)) slug = `${communitySlug(group.name)}-${suffix++}`;
-      const id = `com_${group.id}`;
-      const stamp = group.created_at || now();
-      const result = insert.run(id, slug, group.name, group.description || "", group.image_url || null,
-        group.neighborhood || null, JSON.stringify(COMMUNITY_RULES), group.id, stamp, stamp);
-      if (result.changes) used.add(slug);
-      relatePlace.run(id, String(group.id), stamp);
-      if (group.owner_id) addOwner.run(id, group.owner_id, stamp);
-    }
-  });
-  tx();
+  const cols = sqlite.prepare("PRAGMA table_info(community_posts)").all() as any[];
+  if (!cols.some(c => c.name === "updated_at")) sqlite.exec("ALTER TABLE community_posts ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''");
+  const groups = sqlite.prepare("SELECT id,name,description,image_url,neighborhood,owner_id,created_at FROM businesses WHERE type='group' AND active=1 AND COALESCE(status,'OPEN')!='CLOSED' ORDER BY id").all() as any[];
+  const used = new Set((sqlite.prepare("SELECT slug FROM communities").all() as any[]).map(r => r.slug));
+  const insert = sqlite.prepare("INSERT OR IGNORE INTO communities (id,slug,name,description,image_url,neighborhood,visibility,membership_policy,rules,source_business_id,created_at,updated_at) VALUES (?,?,?,?,?,?,'public','open',?,?,?,?)");
+  const owner = sqlite.prepare("INSERT OR IGNORE INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at) VALUES (?,?,'owner','active','1',?)");
+  const place = sqlite.prepare("INSERT OR IGNORE INTO community_relationships (community_id,target_type,target_id,relationship_type,created_at) VALUES (?,'place',?,'source',?)");
+  sqlite.transaction(() => { for (const g of groups) { let slug=communitySlug(g.name), n=2; while(used.has(slug)) slug=`${communitySlug(g.name)}-${n++}`; const id=`com_${g.id}`, stamp=g.created_at||now(); const result=insert.run(id,slug,g.name,g.description||"",g.image_url||null,g.neighborhood||null,JSON.stringify(COMMUNITY_RULES),g.id,stamp,stamp); if(result.changes) used.add(slug); place.run(id,String(g.id),stamp); if(g.owner_id) owner.run(id,g.owner_id,stamp); } })();
 }
 
-function parseRules(value: unknown): string[] {
-  try {
-    const parsed = JSON.parse(String(value || "[]"));
-    return Array.isArray(parsed) ? parsed.map(String) : [...COMMUNITY_RULES];
-  } catch {
-    return [...COMMUNITY_RULES];
-  }
-}
+function rules(value: unknown): string[] { try { const x=JSON.parse(String(value||"[]")); return Array.isArray(x)?x.map(String):[...COMMUNITY_RULES]; } catch { return [...COMMUNITY_RULES]; } }
+function bySlug(value: unknown) { return sqlite.prepare("SELECT * FROM communities WHERE slug=?").get(String(value||"").toLowerCase()) as any; }
+function member(id:string,userId?:number){ return userId ? sqlite.prepare("SELECT role,status FROM community_memberships WHERE community_id=? AND user_id=?").get(id,userId) as any : null; }
+function role(id:string,userId?:number):CommunityRole|null { const m=member(id,userId); return m?.status==="active"?m.role:null; }
+function isMod(id:string,userId?:number){ const r=role(id,userId); return r==="owner"||r==="moderator"; }
+function readable(row:any,userId?:number){ return row.visibility!=="private"||Boolean(role(row.id,userId)); }
+function text(value:unknown,max:number){ return String(value||"").trim().slice(0,max); }
+function audit(id:string,actor:number,action:string,targetType:string,targetId?:string|number|null,detail:any={}){ sqlite.prepare("INSERT INTO community_moderation_audit (community_id,actor_user_id,action,target_type,target_id,detail,created_at) VALUES (?,?,?,?,?,?,?)").run(id,actor,action,targetType,targetId==null?null:String(targetId),JSON.stringify(detail),now()); }
+function moderator(req:any,res:any,row:any){ if(!isMod(row.id,req.session?.userId)){res.status(403).json({error:"Community moderator access required"});return false;} return true; }
+function allowed(fields:Record<string,string>,res:any){ const m=moderateFields(fields); if(m.verdict==="ALLOW")return true; res.status(400).json({error:moderationMessage(m.reasons[0]?.category||"OTHER")}); return false; }
+function limited(id:string,userId:number,table:"community_posts"|"community_reports",limit:number){ const col=table==="community_posts"?"user_id":"reporter_user_id"; const r=sqlite.prepare(`SELECT COUNT(*) count FROM ${table} WHERE community_id=? AND ${col}=? AND created_at>=datetime('now','-1 hour')`).get(id,userId) as any; return Number(r?.count||0)>=limit; }
 
-function summary(row: any, viewerId?: number) {
-  const role = viewerId ? sqlite.prepare(`
-    SELECT role FROM community_memberships
-    WHERE community_id = ? AND user_id = ? AND status = 'active'
-  `).get(row.id, viewerId) as any : null;
-  const count = sqlite.prepare(`
-    SELECT COUNT(*) AS count FROM community_memberships
-    WHERE community_id = ? AND status = 'active'
-  `).get(row.id) as any;
-  return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    description: row.description,
-    imageUrl: row.image_url || null,
-    neighborhood: row.neighborhood || null,
-    visibility: row.visibility,
-    membershipPolicy: row.membership_policy,
-    memberCount: Number(count?.count || 0),
-    viewerRole: role?.role || null,
-    sourcePlaceId: row.source_business_id || null,
-  };
-}
+function summary(row:any,viewerId?:number){ const count=sqlite.prepare("SELECT COUNT(*) count FROM community_memberships WHERE community_id=? AND status='active'").get(row.id) as any; return {id:row.id,slug:row.slug,name:row.name,description:row.description,imageUrl:row.image_url||null,neighborhood:row.neighborhood||null,visibility:row.visibility,membershipPolicy:row.membership_policy,memberCount:Number(count?.count||0),viewerRole:role(row.id,viewerId),viewerMembershipStatus:member(row.id,viewerId)?.status||null,canManage:isMod(row.id,viewerId),sourcePlaceId:row.source_business_id||null}; }
+function relationships(id:string){ const rels=sqlite.prepare("SELECT target_type targetType,target_id targetId,relationship_type relationshipType FROM community_relationships WHERE community_id=? ORDER BY target_type,created_at").all(id) as any[]; return rels.map(rel=>{ let item:any=null; if(rel.targetType==="event"){item=sqlite.prepare("SELECT id,title name,date_start meta FROM events WHERE id=? AND status='LIVE'").get(Number(rel.targetId));if(item)item.url=eventPath(item.id,item.name);} if(rel.targetType==="place"){item=sqlite.prepare("SELECT id,name,neighborhood meta FROM businesses WHERE id=? AND active=1").get(Number(rel.targetId));if(item)item.url=placePath(item.id,item.name);} if(rel.targetType==="sellz"){item=sqlite.prepare("SELECT id,title name,neighborhood meta FROM sellz_posts WHERE id=? AND status IN ('ACTIVE','RESERVED')").get(Number(rel.targetId));if(item)item.url=`/sellz?post=${item.id}`;} if(rel.targetType==="gig"){item=sqlite.prepare("SELECT id,title name,location meta FROM gig_posts WHERE id=? AND status='LIVE'").get(Number(rel.targetId));if(item)item.url=`/pride-work?post=${item.id}`;} if(rel.targetType==="guide"){const path=text(rel.targetId,120).replace(/^\//,"");if(path)item={id:path,name:path.split("/").pop()!.replace(/[-_]/g," ").replace(/\b\w/g,c=>c.toUpperCase()),meta:"Guide",url:`/${path}`};} return item?{type:rel.targetType,relationshipType:rel.relationshipType,...item}:null; }).filter(Boolean); }
+function detail(row:any,viewerId?:number){ const mod=isMod(row.id,viewerId); const moderators=sqlite.prepare("SELECT u.id,u.username,u.display_name displayName,cm.role FROM community_memberships cm JOIN users u ON u.id=cm.user_id WHERE cm.community_id=? AND cm.status='active' AND cm.role IN ('owner','moderator') ORDER BY CASE cm.role WHEN 'owner' THEN 0 ELSE 1 END,u.username").all(row.id); const posts=sqlite.prepare("SELECT cp.id,cp.body,cp.created_at createdAt,cp.updated_at updatedAt,u.id userId,u.username,u.display_name displayName,u.photo_url photoUrl FROM community_posts cp JOIN users u ON u.id=cp.user_id WHERE cp.community_id=? AND cp.status='published' ORDER BY cp.created_at DESC LIMIT 50").all(row.id).map((p:any)=>({id:p.id,body:p.body,createdAt:p.createdAt,updatedAt:p.updatedAt||null,canEdit:viewerId===p.userId,canModerate:mod,author:{id:p.userId,username:p.username,displayName:p.displayName,photoUrl:p.photoUrl}})); return {...summary(row,viewerId),rules:rules(row.rules),moderators,posts,related:relationships(row.id)}; }
+function validRelationship(type:string,id:string){ if(!TARGETS.has(type))return false; if(type==="guide")return /^[-a-z0-9/]{1,120}$/.test(id.replace(/^\//,"")); const table=type==="event"?"events":type==="place"?"businesses":type==="sellz"?"sellz_posts":"gig_posts"; return Boolean(sqlite.prepare(`SELECT 1 FROM ${table} WHERE id=?`).get(Number(id))); }
+export function searchCommunities(q:string,viewerId?:number){ const like=`%${q.replace(/[%_]/g,"")}%`; const rows=sqlite.prepare("SELECT * FROM communities WHERE visibility IN ('public','discoverable') AND (name LIKE ? COLLATE NOCASE OR description LIKE ? COLLATE NOCASE OR COALESCE(neighborhood,'') LIKE ? COLLATE NOCASE) ORDER BY name COLLATE NOCASE LIMIT 8").all(like,like,like) as any[]; return rows.map(row=>({id:row.id,name:row.name,subtitle:[row.neighborhood,`${summary(row,viewerId).memberCount} members`].filter(Boolean).join(" · "),href:`/z/${row.slug}`})); }
 
-function communityDetail(row: any, viewerId?: number) {
-  const moderators = sqlite.prepare(`
-    SELECT u.id, u.username, u.display_name AS displayName
-    FROM community_memberships cm JOIN users u ON u.id = cm.user_id
-    WHERE cm.community_id = ? AND cm.status = 'active' AND cm.role IN ('owner', 'moderator')
-    ORDER BY CASE cm.role WHEN 'owner' THEN 0 ELSE 1 END, u.username
-  `).all(row.id);
-  const posts = sqlite.prepare(`
-    SELECT cp.id, cp.body, cp.created_at AS createdAt, u.id AS userId,
-           u.username, u.display_name AS displayName, u.photo_url AS photoUrl
-    FROM community_posts cp JOIN users u ON u.id = cp.user_id
-    WHERE cp.community_id = ? AND cp.status = 'published'
-    ORDER BY cp.created_at DESC LIMIT 50
-  `).all(row.id).map((post: any) => ({
-    id: post.id, body: post.body, createdAt: post.createdAt,
-    author: { id: post.userId, username: post.username, displayName: post.displayName, photoUrl: post.photoUrl },
-  }));
-  const events = sqlite.prepare(`
-    SELECT e.id, e.title, e.date_start AS dateStart
-    FROM community_relationships cr JOIN events e ON e.id = CAST(cr.target_id AS INTEGER)
-    WHERE cr.community_id = ? AND cr.target_type = 'event' AND e.status = 'LIVE'
-    ORDER BY e.date_start ASC LIMIT 12
-  `).all(row.id).map((event: any) => ({ ...event, url: eventPath(event.id, event.title) }));
-  return {
-    ...summary(row, viewerId),
-    rules: parseRules(row.rules),
-    moderators,
-    posts,
-    related: {
-      place: row.source_business_id
-        ? { id: row.source_business_id, name: row.name, url: placePath(row.source_business_id, row.name) }
-        : null,
-      events,
-    },
-  };
-}
-
-export function registerCommunityRoutes(app: Express, requireAuth: RequestHandler) {
+export function registerCommunityRoutes(app:Express,requireAuth:RequestHandler){
   ensureCommunityTables();
-
-  app.get("/api/communities", (req: any, res) => {
-    const rows = sqlite.prepare(`
-      SELECT * FROM communities WHERE visibility = 'public' ORDER BY name COLLATE NOCASE
-    `).all();
-    res.json(rows.map(row => summary(row, req.session?.userId)));
-  });
-
-  app.get("/api/communities/:slug", (req: any, res) => {
-    const row = sqlite.prepare("SELECT * FROM communities WHERE slug = ?").get(String(req.params.slug).toLowerCase()) as any;
-    if (!row || (row.visibility !== "public" && !req.session?.userId)) return res.status(404).json({ error: "Community not found" });
-    res.json(communityDetail(row, req.session?.userId));
-  });
-
-  app.post("/api/communities/:slug/join", requireAuth, (req: any, res) => {
-    const row = sqlite.prepare("SELECT * FROM communities WHERE slug = ?").get(String(req.params.slug).toLowerCase()) as any;
-    if (!row) return res.status(404).json({ error: "Community not found" });
-    if (row.membership_policy !== "open") return res.status(409).json({ error: "This community requires an invitation or approval" });
-    sqlite.prepare(`
-      INSERT INTO community_memberships (community_id, user_id, role, status, rules_version, joined_at)
-      VALUES (?, ?, 'member', 'active', '1', ?)
-      ON CONFLICT(community_id, user_id) DO UPDATE SET status = 'active'
-    `).run(row.id, req.session.userId, now());
-    res.json(communityDetail(row, req.session.userId));
-  });
-
-  app.delete("/api/communities/:slug/membership", requireAuth, (req: any, res) => {
-    const row = sqlite.prepare("SELECT * FROM communities WHERE slug = ?").get(String(req.params.slug).toLowerCase()) as any;
-    if (!row) return res.status(404).json({ error: "Community not found" });
-    const membership = sqlite.prepare("SELECT role FROM community_memberships WHERE community_id = ? AND user_id = ?").get(row.id, req.session.userId) as any;
-    if (membership?.role === "owner") return res.status(409).json({ error: "A community owner cannot leave until ownership is transferred" });
-    sqlite.prepare("UPDATE community_memberships SET status = 'left' WHERE community_id = ? AND user_id = ?").run(row.id, req.session.userId);
-    res.status(204).end();
-  });
-
-  app.post("/api/communities/:slug/posts", requireAuth, (req: any, res) => {
-    const row = sqlite.prepare("SELECT * FROM communities WHERE slug = ?").get(String(req.params.slug).toLowerCase()) as any;
-    if (!row) return res.status(404).json({ error: "Community not found" });
-    const member = sqlite.prepare(`SELECT 1 FROM community_memberships WHERE community_id = ? AND user_id = ? AND status = 'active'`).get(row.id, req.session.userId);
-    if (!member) return res.status(403).json({ error: "Join this community before posting" });
-    const body = String(req.body?.body || "").trim();
-    if (body.length < 1 || body.length > 2000) return res.status(400).json({ error: "Posts must be between 1 and 2,000 characters" });
-    const moderation = moderateFields({ post: body });
-    if (moderation.verdict !== "ALLOW") {
-      const category = moderation.reasons[0]?.category || "OTHER";
-      return res.status(400).json({ error: moderationMessage(category) });
-    }
-    sqlite.prepare("INSERT INTO community_posts (community_id, user_id, body, status, created_at) VALUES (?, ?, ?, 'published', ?)")
-      .run(row.id, req.session.userId, body, now());
-    res.status(201).json(communityDetail(row, req.session.userId));
-  });
+  app.get("/api/communities",(req:any,res)=>{const rows=sqlite.prepare("SELECT * FROM communities WHERE visibility IN ('public','discoverable') OR id IN (SELECT community_id FROM community_memberships WHERE user_id=? AND status='active') ORDER BY name COLLATE NOCASE").all(req.session?.userId||-1);res.json(rows.map(row=>summary(row,req.session?.userId)));});
+  app.post("/api/communities",requireAuth,(req:any,res)=>{const owned=sqlite.prepare("SELECT COUNT(*) count FROM community_memberships WHERE user_id=? AND role='owner' AND joined_at>=datetime('now','-1 day')").get(req.session.userId) as any;if(Number(owned?.count||0)>=3)return res.status(429).json({error:"Community creation limit reached. Try again tomorrow."});const name=text(req.body?.name,100),description=text(req.body?.description,1200),slug=communitySlug(req.body?.slug||name);if(name.length<3||description.length<10)return res.status(400).json({error:"Name and a meaningful description are required"});if(RESERVED.has(slug)||bySlug(slug))return res.status(409).json({error:"That community address is reserved or already used"});if(!allowed({name,description},res))return;const visibility=VISIBILITY.has(req.body?.visibility)?req.body.visibility:"public",policy=POLICY.has(req.body?.membershipPolicy)?req.body.membershipPolicy:"open",id=`com_${randomUUID()}`,stamp=now();sqlite.transaction(()=>{sqlite.prepare("INSERT INTO communities (id,slug,name,description,image_url,neighborhood,visibility,membership_policy,rules,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(id,slug,name,description,text(req.body?.imageUrl,500)||null,text(req.body?.neighborhood,100)||null,visibility,policy,JSON.stringify(COMMUNITY_RULES),stamp,stamp);sqlite.prepare("INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at) VALUES (?,?,'owner','active','1',?)").run(id,req.session.userId,stamp);audit(id,req.session.userId,"community_created","community",id,{visibility,policy});})();res.status(201).json(detail(bySlug(slug),req.session.userId));});
+  app.get("/api/communities/:slug",(req:any,res)=>{const row=bySlug(req.params.slug);if(!row||!readable(row,req.session?.userId))return res.status(404).json({error:"Community not found"});res.json(detail(row,req.session?.userId));});
+  app.patch("/api/communities/:slug",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;const name=req.body?.name===undefined?row.name:text(req.body.name,100),description=req.body?.description===undefined?row.description:text(req.body.description,1200);if(name.length<3||description.length<10)return res.status(400).json({error:"Name and a meaningful description are required"});if(!allowed({name,description},res))return;const visibility=VISIBILITY.has(req.body?.visibility)?req.body.visibility:row.visibility,policy=POLICY.has(req.body?.membershipPolicy)?req.body.membershipPolicy:row.membership_policy,newRules=Array.isArray(req.body?.rules)?req.body.rules.map((x:unknown)=>text(x,240)).filter(Boolean).slice(0,12):rules(row.rules);sqlite.prepare("UPDATE communities SET name=?,description=?,image_url=?,neighborhood=?,visibility=?,membership_policy=?,rules=?,updated_at=? WHERE id=?").run(name,description,req.body?.imageUrl===undefined?row.image_url:text(req.body.imageUrl,500)||null,req.body?.neighborhood===undefined?row.neighborhood:text(req.body.neighborhood,100)||null,visibility,policy,JSON.stringify(newRules),now(),row.id);audit(row.id,req.session.userId,"community_updated","community",row.id,{visibility,policy});res.json(detail(bySlug(req.params.slug),req.session.userId));});
+  app.post("/api/communities/:slug/join",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(row.membership_policy==="invite")return res.status(409).json({error:"This community is invite only"});const status=row.membership_policy==="request"?"pending":"active";sqlite.prepare("INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at) VALUES (?,?,'member',?,'1',?) ON CONFLICT(community_id,user_id) DO UPDATE SET status=excluded.status,role='member',joined_at=excluded.joined_at").run(row.id,req.session.userId,status,now());audit(row.id,req.session.userId,status==="active"?"member_joined":"membership_requested","membership",req.session.userId);res.json(detail(row,req.session.userId));});
+  app.delete("/api/communities/:slug/membership",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});const m=member(row.id,req.session.userId);if(m?.role==="owner")return res.status(409).json({error:"Transfer ownership before leaving"});sqlite.prepare("UPDATE community_memberships SET status='left' WHERE community_id=? AND user_id=?").run(row.id,req.session.userId);audit(row.id,req.session.userId,"member_left","membership",req.session.userId);res.status(204).end();});
+  app.get("/api/communities/:slug/manage",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;const members=sqlite.prepare("SELECT u.id,u.username,u.display_name displayName,cm.role,cm.status,cm.joined_at joinedAt FROM community_memberships cm JOIN users u ON u.id=cm.user_id WHERE cm.community_id=? ORDER BY CASE cm.status WHEN 'pending' THEN 0 ELSE 1 END,cm.joined_at").all(row.id);const reports=sqlite.prepare("SELECT cr.*,u.username reporterUsername FROM community_reports cr JOIN users u ON u.id=cr.reporter_user_id WHERE cr.community_id=? ORDER BY CASE cr.status WHEN 'pending' THEN 0 ELSE 1 END,cr.created_at DESC LIMIT 100").all(row.id);const log=sqlite.prepare("SELECT a.*,u.username actorUsername FROM community_moderation_audit a JOIN users u ON u.id=a.actor_user_id WHERE a.community_id=? ORDER BY a.created_at DESC LIMIT 100").all(row.id);res.json({members,reports,audit:log,relationships:relationships(row.id)});});
+  app.patch("/api/communities/:slug/members/:userId",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;const actor=role(row.id,req.session.userId),targetId=Number(req.params.userId),target=member(row.id,targetId);if(!target)return res.status(404).json({error:"Membership not found"});const status=["active","removed","rejected"].includes(req.body?.status)?req.body.status:target.status,nextRole=["member","moderator"].includes(req.body?.role)?req.body.role:target.role;if(target.role==="owner"||(nextRole==="moderator"&&actor!=="owner"))return res.status(403).json({error:"Only the owner can change moderator roles"});sqlite.prepare("UPDATE community_memberships SET status=?,role=? WHERE community_id=? AND user_id=?").run(status,nextRole,row.id,targetId);audit(row.id,req.session.userId,"membership_updated","membership",targetId,{status,role:nextRole});res.json({ok:true});});
+  app.post("/api/communities/:slug/transfer-ownership",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(role(row.id,req.session.userId)!=="owner")return res.status(403).json({error:"Only the owner can transfer ownership"});const targetId=Number(req.body?.userId),target=member(row.id,targetId);if(!target||target.status!=="active")return res.status(409).json({error:"New owner must be an active member"});sqlite.transaction(()=>{sqlite.prepare("UPDATE community_memberships SET role='moderator' WHERE community_id=? AND user_id=?").run(row.id,req.session.userId);sqlite.prepare("UPDATE community_memberships SET role='owner' WHERE community_id=? AND user_id=?").run(row.id,targetId);audit(row.id,req.session.userId,"ownership_transferred","membership",targetId);})();res.json({ok:true});});
+  app.post("/api/communities/:slug/relationships",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;const targetType=text(req.body?.targetType,20).toLowerCase(),targetId=text(req.body?.targetId,120);if(!validRelationship(targetType,targetId))return res.status(400).json({error:"Choose a valid EVENTZ, SELLZ, GIGZ, Place, or Guide object"});sqlite.prepare("INSERT OR IGNORE INTO community_relationships (community_id,target_type,target_id,relationship_type,created_at) VALUES (?,?,?,'related',?)").run(row.id,targetType,targetId,now());audit(row.id,req.session.userId,"relationship_added",targetType,targetId);res.status(201).json(relationships(row.id));});
+  app.delete("/api/communities/:slug/relationships/:targetType/:targetId",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;sqlite.prepare("DELETE FROM community_relationships WHERE community_id=? AND target_type=? AND target_id=? AND relationship_type='related'").run(row.id,req.params.targetType,req.params.targetId);audit(row.id,req.session.userId,"relationship_removed",req.params.targetType,req.params.targetId);res.status(204).end();});
+  app.post("/api/communities/:slug/posts",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row||!readable(row,req.session.userId))return res.status(404).json({error:"Community not found"});if(!role(row.id,req.session.userId))return res.status(403).json({error:"Join this community before posting"});if(limited(row.id,req.session.userId,"community_posts",12))return res.status(429).json({error:"Posting limit reached. Try again later."});const body=text(req.body?.body,2000);if(!body)return res.status(400).json({error:"Post body is required"});if(!allowed({post:body},res))return;const stamp=now(),result=sqlite.prepare("INSERT INTO community_posts (community_id,user_id,body,status,created_at,updated_at) VALUES (?,?,?,'published',?,?)").run(row.id,req.session.userId,body,stamp,stamp);audit(row.id,req.session.userId,"post_created","post",Number(result.lastInsertRowid));res.status(201).json(detail(row,req.session.userId));});
+  app.patch("/api/communities/:slug/posts/:postId",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug),post=sqlite.prepare("SELECT * FROM community_posts WHERE id=? AND community_id=?").get(Number(req.params.postId),row?.id) as any;if(!row||!post)return res.status(404).json({error:"Post not found"});if(post.user_id!==req.session.userId)return res.status(403).json({error:"Only the author can edit this post"});const body=text(req.body?.body,2000);if(!body)return res.status(400).json({error:"Post body is required"});if(!allowed({post:body},res))return;sqlite.prepare("UPDATE community_posts SET body=?,updated_at=? WHERE id=?").run(body,now(),post.id);audit(row.id,req.session.userId,"post_edited","post",post.id);res.json(detail(row,req.session.userId));});
+  app.delete("/api/communities/:slug/posts/:postId",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug),post=sqlite.prepare("SELECT * FROM community_posts WHERE id=? AND community_id=?").get(Number(req.params.postId),row?.id) as any;if(!row||!post)return res.status(404).json({error:"Post not found"});if(post.user_id!==req.session.userId&&!isMod(row.id,req.session.userId))return res.status(403).json({error:"Post author or moderator access required"});sqlite.prepare("UPDATE community_posts SET status='removed',updated_at=? WHERE id=?").run(now(),post.id);audit(row.id,req.session.userId,"post_removed","post",post.id);res.status(204).end();});
+  app.post("/api/communities/:slug/posts/:postId/report",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug),post=sqlite.prepare("SELECT id FROM community_posts WHERE id=? AND community_id=? AND status='published'").get(Number(req.params.postId),row?.id) as any;if(!row||!post)return res.status(404).json({error:"Post not found"});if(limited(row.id,req.session.userId,"community_reports",8))return res.status(429).json({error:"Reporting limit reached. Try again later."});const reason=text(req.body?.reason,500);if(reason.length<5)return res.status(400).json({error:"Tell moderators what is wrong"});sqlite.prepare("INSERT INTO community_reports (community_id,post_id,reporter_user_id,reason,status,created_at) VALUES (?,?,?,?,'pending',?)").run(row.id,post.id,req.session.userId,reason,now());audit(row.id,req.session.userId,"post_reported","post",post.id);res.status(201).json({ok:true});});
+  app.patch("/api/communities/:slug/reports/:reportId",requireAuth,(req:any,res)=>{const row=bySlug(req.params.slug);if(!row)return res.status(404).json({error:"Community not found"});if(!moderator(req,res,row))return;const status=req.body?.status==="actioned"?"actioned":"dismissed";sqlite.prepare("UPDATE community_reports SET status=?,resolution_note=?,resolved_by=?,resolved_at=? WHERE id=? AND community_id=?").run(status,text(req.body?.note,500)||null,req.session.userId,now(),Number(req.params.reportId),row.id);audit(row.id,req.session.userId,"report_resolved","report",req.params.reportId,{status});res.json({ok:true});});
 }
