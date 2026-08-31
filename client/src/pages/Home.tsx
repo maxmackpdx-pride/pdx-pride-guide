@@ -19,12 +19,12 @@ import { shareCardUrl } from "@shared/shareCards";
  * type-safe on all six.
  */
 const NEXT_PREVIEW_CARDS = [
-  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px", beta: true },
-  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px", beta: true },
-  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px", beta: false },
-  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px", beta: false },
-  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px", beta: false },
-  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px", beta: true },
+  { name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", tone: "cyan", delay: ".17s", duration: "6.35s", drift: "1.2px", y: "15px", mobileY: "6px", angle: "-3deg", beta: true },
+  { name: "Z/SPACE", logo: "/brand/family/z-space.svg", tone: "violet", delay: ".03s", duration: "5.62s", drift: "-1.7px", y: "32px", mobileY: "14px", angle: "-1.6deg", beta: true },
+  { name: "ZAYDARK", logo: "/brand/family/zaydark.svg", tone: "red", delay: ".26s", duration: "6.78s", drift: ".9px", y: "8px", mobileY: "2px", angle: "-.5deg", beta: false },
+  { name: "AFTERZ", logo: "/brand/family/afterz.svg", tone: "gold", delay: ".08s", duration: "5.94s", drift: "-1.1px", y: "22px", mobileY: "10px", angle: ".65deg", beta: false },
+  { name: "ZENEGADES", logo: "/brand/family/zenegades.svg", tone: "scarlet", delay: ".21s", duration: "6.56s", drift: "1.6px", y: "44px", mobileY: "18px", angle: "1.8deg", beta: false },
+  { name: "OUTZ", logo: "/brand/family/outz.svg", tone: "orange", delay: ".12s", duration: "5.76s", drift: "-.8px", y: "18px", mobileY: "7px", angle: "3deg", beta: true },
 ] as const;
 
 function NextPreviewCardStack() {
@@ -104,6 +104,9 @@ function NextPreviewCardStack() {
                   ["--float-delay" as string]: card.delay,
                   ["--float-duration" as string]: card.duration,
                   ["--silly-x" as string]: card.drift,
+                  ["--gallery-y" as string]: card.y,
+                  ["--gallery-y-mobile" as string]: card.mobileY,
+                  ["--gallery-angle" as string]: card.angle,
                 }}
               >
                 {card.beta ? <span className="home-next-preview__beta">Beta</span> : null}

@@ -6,6 +6,7 @@ import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
 import { placePath } from "@shared/placeSlug";
 import { sharePageLink } from "@/lib/shareEvent";
 import VenueFollowButton from "@/components/VenueFollowButton";
+import { PlaceCardMap } from "./PlaceCardMap";
 
 /* PlaceCard = directory card - Card System.html "DIRECTORY CARDS" SoT
    (Directory cards redesign.zip). Shell composed from .pdx-glass-card +
@@ -186,8 +187,14 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
 .pdxPlace--wide{ margin:0; }
 .pdxPlace--compact .pdxPlace__body,
 .pdxPlace--wide .pdxPlace__body{
-  flex-direction:row; align-items:center; gap:14px;
+  flex-direction:column; align-items:stretch; gap:0;
   padding:10px 14px 10px 10px; border-radius:12px;
+}
+.pdxPlace__compactRow{ display:contents; }
+.pdxPlace--compact .pdxPlace__compactRow,
+.pdxPlace--wide .pdxPlace__compactRow{
+  display:grid; grid-template-columns:92px minmax(0,1fr) auto auto;
+  align-items:center; gap:14px; min-width:0;
 }
 .pdxPlace--compact .pdxPlace__main,
 .pdxPlace--wide .pdxPlace__main{ gap:5px; }
@@ -236,6 +243,61 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
 .pdxPlace--wide .pdxPlace__badges{ gap:6px; }
 .pdxPlace--compact .pdxPlace__actions,
 .pdxPlace--wide .pdxPlace__actions{ top:6px; right:8px; }
+.pdxPlaceMap{ display:contents; }
+.pdxPlaceMap__toggle{
+  min-width:76px; min-height:44px; padding:8px 10px;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  border-radius:999px; cursor:pointer; color:var(--c);
+  font-family:var(--font-display); font-weight:800; font-size:.72rem;
+  letter-spacing:.06em; text-transform:uppercase;
+}
+.pdxPlaceMap__toggle:focus-visible{ outline:3px solid var(--chrome-focus,var(--cyan)); outline-offset:3px; }
+.pdxPlaceMap__chevron{ transition:transform .24s var(--ease-out,ease); }
+.pdxPlaceMap--expanded .pdxPlaceMap__chevron{ transform:rotate(180deg); }
+.pdxPlaceMap__reveal{
+  grid-column:1 / -1;
+  display:grid; grid-template-rows:0fr; opacity:0;
+  transition:grid-template-rows .34s var(--ease-out,ease), opacity .2s ease, margin-top .34s var(--ease-out,ease);
+}
+.pdxPlaceMap--expanded .pdxPlaceMap__reveal{ grid-template-rows:1fr; opacity:1; margin-top:10px; }
+.pdxPlaceMap__well{
+  position:relative; min-height:0; overflow:hidden; border-radius:10px;
+  background:var(--map-surface-bg,#06060a); border:1px solid #000;
+  box-shadow:var(--map-frame-shadow); isolation:isolate;
+}
+.pdxPlaceMap--expanded .pdxPlaceMap__well{ min-height:clamp(176px,24vw,230px); }
+.pdxPlaceMap__tiles{ position:absolute; inset:0; opacity:0; transition:opacity .24s ease; }
+.pdxPlaceMap__tiles--ready{ opacity:.76; }
+.pdxPlaceMap__tiles img{ position:absolute; width:256px; height:256px; max-width:none; user-select:none; }
+.pdxPlaceMap__loading{
+  position:absolute; inset:0;
+  background:linear-gradient(105deg,#08080b 20%,#15151c 38%,#08080b 56%);
+  background-size:200% 100%; animation:pdxPlaceMapLoad 1.2s linear infinite;
+}
+.pdxPlaceMap__well::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.18),transparent 42%,rgba(0,0,0,.86));
+}
+.pdxPlaceMap__pin{
+  position:absolute; z-index:3; left:50%; top:46%; transform:translate(-50%,-50%);
+  display:grid; place-items:center; color:var(--c);
+  filter:drop-shadow(0 3px 5px #000) drop-shadow(0 0 7px color-mix(in srgb,var(--c) 48%,transparent));
+  animation:pdxPlaceMapPin .38s var(--ease-out,ease) both;
+}
+.pdxPlaceMap__caption{
+  position:absolute; z-index:3; left:14px; right:14px; bottom:12px;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+}
+.pdxPlaceMap__caption strong{
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font-display); font-size:1rem; text-transform:uppercase; color:#fff;
+}
+.pdxPlaceMap__caption span{
+  flex:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.62rem; letter-spacing:.06em; color:#aaa;
+}
+@keyframes pdxPlaceMapLoad{to{background-position:-200% 0}}
+@keyframes pdxPlaceMapPin{from{opacity:0;transform:translate(-50%,-75%) scale(.72)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 /* Upcoming-events flag: card accent + day-color dot (compact only) */
 .pdxPlace__upcoming{
   flex:none; align-self:center; display:inline-flex; align-items:center; gap:8px;
@@ -272,6 +334,29 @@ html.calm-mode .pdxPlace__actions,
 html.calm-mode .pdxPlace__upcoming,
 :root[data-calm="true"] .pdxPlace__upcoming{
   box-shadow:0 0 0 1px #000;
+}
+html.calm-mode .pdxPlaceMap__reveal,
+html.calm-mode .pdxPlaceMap__chevron,
+html.calm-mode .pdxPlaceMap__tiles,
+:root[data-calm="true"] .pdxPlaceMap__reveal,
+:root[data-calm="true"] .pdxPlaceMap__chevron,
+:root[data-calm="true"] .pdxPlaceMap__tiles{ transition:none !important; }
+html.calm-mode .pdxPlaceMap__pin,
+html.calm-mode .pdxPlaceMap__loading,
+:root[data-calm="true"] .pdxPlaceMap__pin,
+:root[data-calm="true"] .pdxPlaceMap__loading{ animation:none !important; }
+@media (prefers-reduced-motion:reduce){
+  .pdxPlaceMap__reveal,.pdxPlaceMap__chevron,.pdxPlaceMap__tiles{ transition:none !important; }
+  .pdxPlaceMap__pin,.pdxPlaceMap__loading{ animation:none !important; }
+}
+@media (max-width:620px){
+  .pdxPlace--compact .pdxPlace__compactRow,.pdxPlace--wide .pdxPlace__compactRow{
+    grid-template-columns:64px minmax(0,1fr) auto auto; gap:9px;
+  }
+  .pdxPlace--compact .pdxPlace__media,.pdxPlace--wide .pdxPlace__media{ flex-basis:64px; width:64px; }
+  .pdxPlaceMap__toggle{ min-width:44px; width:44px; padding:0; }
+  .pdxPlaceMap__toggle span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .pdxPlaceMap__caption{ align-items:flex-start; flex-direction:column; gap:3px; }
 }
 `;
 if (typeof document !== "undefined") {
@@ -400,6 +485,7 @@ export function PlaceCard({
             : `linear-gradient(${accent},${accent})`;
   const [logoFailed, setLogoFailed] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [mapExpanded, setMapExpanded] = useState(false);
   const showLogo = logoUrl && !logoFailed;
   const showFallback = !showLogo && fallbackLogoUrl;
   const nextEventDayCode = (events[0]?.day || "").trim().toUpperCase().slice(0, 3);
@@ -444,6 +530,7 @@ export function PlaceCard({
             <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
           </button>
         </div>
+        <div className="pdxPlace__compactRow">
         <div className="pdxPlace__media">
           <div className="pdxPlace__mediaGlow" aria-hidden="true" />
           <div className="pdxPlace__mediaScan" aria-hidden="true" />
@@ -604,6 +691,16 @@ export function PlaceCard({
             {events.length === 1 ? "1 upcoming event" : `${events.length} upcoming events`}
           </span>
         )}
+        {isCompact && lat != null && lng != null && (
+          <PlaceCardMap
+            name={name}
+            latitude={lat}
+            longitude={lng}
+            expanded={mapExpanded}
+            onToggle={() => setMapExpanded((value) => !value)}
+          />
+        )}
+        </div>
       </div>
     </article>
   );
