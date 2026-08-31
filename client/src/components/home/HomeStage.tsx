@@ -91,9 +91,38 @@ export default function HomeStage({ afterWelcome }: Props) {
           <h1 id="home-front-title" className="sr-only">Zaylist</h1>
           <div className="home-front__mark">
             <div className="home-front__mark-art">
-              <img className="home-front__mark-core" src={WORDMARK} alt="Zaylist" />
-              <img className="home-front__mark-glitch home-front__mark-glitch--a" src={WORDMARK} alt="" aria-hidden="true" />
-              <img className="home-front__mark-glitch home-front__mark-glitch--b" src={WORDMARK} alt="" aria-hidden="true" />
+              <img
+                className="home-front__mark-core"
+                src={WORDMARK}
+                alt="Zaylist"
+                width="2393"
+                height="824"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+              />
+              <img
+                className="home-front__mark-glitch home-front__mark-glitch--a"
+                src={WORDMARK}
+                alt=""
+                aria-hidden="true"
+                width="2393"
+                height="824"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <img
+                className="home-front__mark-glitch home-front__mark-glitch--b"
+                src={WORDMARK}
+                alt=""
+                aria-hidden="true"
+                width="2393"
+                height="824"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
           </div>
           <div className="home-front__hero-actions">
