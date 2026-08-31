@@ -10,16 +10,6 @@ const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 
-const PRODUCTS = [
-  { old: "Community calendar", now: "EVENTZ", href: "/events", text: "Queer Portland events on one map and one board." },
-  { old: "Local services", now: "PLACEZ", href: "/directory", text: "Queer-owned and queer-safe places, with organic ranking that is not for sale." },
-  { old: "Gigs", now: "GIGZ", href: "/pride-work", text: "Work posted by people in the scene, with a name and a face on it." },
-  { old: "Free stuff", now: "GIFTZ", href: "/gifting", text: "Give it to someone who needs it instead of leaving it on the curb." },
-  { old: "Rooms and shares", now: "THE HAÜZ", href: "/the-hauz", text: "Find a room, or find your people and build a household together." },
-  { old: "Missed connections", now: "MIZZED CONNECTION", href: "/spotted", text: "You ask, they accept, then you talk. Nobody gets cold-DMed." },
-  { old: "The outdoors", now: "OUTZ", href: "/z/out", text: "Local destinations, live conditions, and the information that helps us get there." },
-] as const;
-
 const VALUES = [
   { title: "Free to browse.", text: "No paywall on the list. Tips and labeled sponsors help keep it that way." },
   { title: "Organic ranking is not for sale.", text: "Paid placements are labeled, never disguised as community preference." },
@@ -110,8 +100,6 @@ export default function About() {
             <p className="about-v2-why__turn">So the board is back. Same purpose. Different owner.</p>
           </div>
         </div>
-        <div className="about-v2__kicker about-v2__kicker--cyan">What you can do here</div>
-        <ul className="about-v2-why__rows">{PRODUCTS.map(product => <li key={product.now} className="about-v2-why__row"><span className="about-v2-why__old">{product.old}</span><span className="about-v2-why__arrow" aria-hidden="true">&rarr;</span><Link href={product.href} className="about-v2-why__now">{product.now}</Link><span className="about-v2-why__text">{product.text}</span></li>)}</ul>
         <div className="about-v2-why__close">
           <h3 className="about-v2-why__sub">Built with the people who use it</h3>
           <p>About once a month I sit down with everything people have sent in. The things that keep coming up get built into the fabric of the site. No algorithm deciding what counts, no score, no test group. A person reads it and then makes the thing.</p>
