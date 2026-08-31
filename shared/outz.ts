@@ -148,6 +148,21 @@ export function outzPlaceFromSlug(snapshot: OutzSnapshot, slug: string | null | 
 
 export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
   {
+    id: "we-moon-land",
+    name: "We'Moon Land",
+    region: "Oregon · about an hour outside Portland",
+    kind: "outdoor-stay",
+    detail: "Private residential womyn's land community on 52 acres of forests and fields, hosting visitors, camping, retreats, workshops, and land workdays.",
+    accessNote: "This is a private residential community, not a walk-in campground. Contact the operator before planning a visit; its public site does not publish an exact visitor address.",
+    inclusionNote: "The operator says the land has been held by and for womyn since 1973, with generations of womyn, primarily lesbians, among its residents and extended network.",
+    officialUrl: "https://wemoonland.org/",
+    discoverySource: {
+      name: "We'Moon Land operator site",
+      href: "https://wemoonland.org/",
+    },
+    reviewedAt: "2026-08-31",
+  },
+  {
     id: "bamboo-acres",
     name: "Bamboo Acres",
     region: "Talent, OR · Southern Oregon",
@@ -205,7 +220,7 @@ export const OUTZ_SOURCES: OutzSource[] = [
   {
     id: "usfs",
     name: "US Forest Service Recreation Sites",
-    href: "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer",
+    href: "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer",
     detail: "Official campground and trailhead catalog for Oregon and southern Washington.",
     live: true,
   },
