@@ -158,37 +158,40 @@ async function fetchConditions(destination: FeaturedConfig): Promise<Pick<OutzDe
 type ArcGisFeature<T> = { attributes?: T };
 type ArcGisResponse<T> = { features?: Array<ArcGisFeature<T>> };
 
-const USFS_QUERY = "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0/query";
+// The newer RecInfra layer currently returns a 404 for spatial-envelope
+// queries. The Forest Service's maintained INFRA layer carries the public
+// recreation-site records, including coordinates and official visitor links.
+const USFS_QUERY = "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0/query";
 
 async function fetchUsfsCatalog(): Promise<OutzCatalogPlace[]> {
   try {
     const query = new URLSearchParams({
       f: "json",
-      where: "site_type IN ('CAMPGROUND','TRAILHEAD')",
-      geometry: "-124.8,42,-120,46.5",
-      geometryType: "esriGeometryEnvelope",
-      inSR: "4326",
-      spatialRel: "esriSpatialRelIntersects",
-      outFields: "site_cn,site_name,site_type,seasonal_operational_status,op_status_reason,rec1stop_url,usda_portal_url,latitude,longitude",
+      // ArcGIS's spatial-envelope endpoint is currently unavailable on this
+      // official service. These coordinate attributes are part of the same
+      // published record and preserve the Oregon + southern Washington scope.
+      where: "site_subtype IN ('CAMPGROUND','TRAILHEAD') AND latitude >= 42 AND latitude <= 46.5 AND longitude >= -124.8 AND longitude <= -120",
+      outFields: "site_cn,site_name,site_subtype,development_status,recarea_status,rec1stop_url,usda_portal_url,latitude,longitude",
       returnGeometry: "false",
       resultRecordCount: "80",
       orderByFields: "site_name",
     });
-    type Attrs = { site_cn?: string; site_name?: string; site_type?: string; seasonal_operational_status?: string; op_status_reason?: string; rec1stop_url?: string; usda_portal_url?: string; latitude?: number; longitude?: number };
+    type Attrs = { site_cn?: string; site_name?: string; site_subtype?: string; development_status?: string; recarea_status?: string; rec1stop_url?: string; usda_portal_url?: string; latitude?: number; longitude?: number };
     const data = await fetchJson<ArcGisResponse<Attrs>>(`${USFS_QUERY}?${query}`);
     return (data.features ?? []).flatMap(feature => {
       const place = feature.attributes;
       if (!place?.site_name || !Number.isFinite(place.latitude) || !Number.isFinite(place.longitude)) return [];
-      const kind = place.site_type === "CAMPGROUND" ? "campground" : place.site_type === "TRAILHEAD" ? "trailhead" : null;
+      const kind = place.site_subtype === "CAMPGROUND" ? "campground" : place.site_subtype === "TRAILHEAD" ? "trailhead" : null;
       if (!kind) return [];
+      const accessStatus = place.recarea_status && place.recarea_status !== "None" ? place.recarea_status : null;
       return [{
         id: `usfs-${place.site_cn ?? `${place.latitude}-${place.longitude}`}`,
         name: place.site_name.replace(/\s+/g, " ").trim(),
         kind,
         lat: place.latitude!,
         lng: place.longitude!,
-        status: place.seasonal_operational_status ?? null,
-        statusReason: place.op_status_reason ?? null,
+        status: accessStatus ?? place.development_status ?? null,
+        statusReason: accessStatus,
         officialUrl: place.usda_portal_url ?? place.rec1stop_url ?? null,
         sourceName: "US Forest Service Recreation Sites",
       }];
