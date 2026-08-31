@@ -27,10 +27,12 @@ function readCache(): OutzSnapshot | null {
   try {
     const snapshot = JSON.parse(row.payload) as OutzSnapshot;
     snapshot.fetchedAt ||= row.fetchedAt;
-    // Community stays are reviewed source data shipped with the app, not a
-    // remote feed. Keep cached live conditions and catalog records, but never
-    // let an older serialized stay list hide a verified correction after deploy.
+    // Community stays and the source ledger are reviewed data shipped with the
+    // app, not remote feeds. Keep cached live conditions and catalog records,
+    // but never let an older serialized payload hide a verified correction
+    // after deploy.
     snapshot.communityStays = OUTZ_COMMUNITY_STAYS;
+    snapshot.sources = OUTZ_SOURCES;
     return snapshot;
   } catch {
     return null;
