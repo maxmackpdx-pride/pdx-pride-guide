@@ -124,7 +124,7 @@ import {
   upsertOutzPlaceRating,
   upsertOutzCheckin,
 } from "./outzSocial";
-import { isProfileAccentColor, isProfileBanner } from "@shared/profileTheme";
+import { isProfileAccentColor, isProfileBanner, normalizeProfileAccentColor } from "@shared/profileTheme";
 import {
   formatCustomSpottedVenue,
   generalSpottedClosesAt,
@@ -3400,7 +3400,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
     // Marquee is promoter-only - silently ignored for everyone else rather than erroring,
     // since the field simply doesn't apply to a member's own profile.
     if (marquee !== undefined && user?.promoterStatus === "approved") patch.marquee = sanitizeMarquee(marquee);
-    if (accentColor !== undefined) patch.accentColor = accentColor;
+    if (accentColor !== undefined) patch.accentColor = accentColor === null
+      ? null
+      : normalizeProfileAccentColor(String(accentColor));
     if (banner !== undefined) patch.banner = banner;
     if (pup !== undefined) patch.pup = sanitizePup(pup);
     // Top 8: up to 8 ordered refs to real people (k:"u") or venues (k:"b").

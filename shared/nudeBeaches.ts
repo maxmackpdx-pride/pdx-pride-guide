@@ -140,7 +140,7 @@ export const BEACH_MAP_LOCATIONS: Record<NudeBeachTab, BeachMapLocation> = {
     lat: 45.793,
     lng: -122.789,
     zoom: 14,
-    pinColor: "#00EE44",
+    pinColor: "#39FF14",
   },
 };
 

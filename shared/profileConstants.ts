@@ -7,7 +7,7 @@ export const PROFILE_ACCENT_COLORS = [
   "#CCFF00",
   "#FF6600",
   "#8800FF",
-  "#00EE44", // neon-green - must match profileTheme (not day-sat #39FF14)
+  "#39FF14", // Acid Green - the only general-purpose green
   "#0044FF",
   "#FF2400",
 ] as const;
@@ -16,6 +16,11 @@ export type ProfileAccentColor = (typeof PROFILE_ACCENT_COLORS)[number];
 
 export const DEFAULT_PROFILE_ACCENT: ProfileAccentColor = "#FF00CC";
 
+export function normalizeProfileAccent(hex: string): string {
+  const upper = hex.toUpperCase();
+  return upper === "#00EE44" ? "#39FF14" : upper;
+}
+
 /** Lighter text-safe variants on dark backgrounds. */
 export const PROFILE_ACCENT_TEXT: Partial<Record<ProfileAccentColor, string>> = {
   "#8800FF": "#AA66FF",
@@ -23,12 +28,12 @@ export const PROFILE_ACCENT_TEXT: Partial<Record<ProfileAccentColor, string>> = 
 };
 
 export function profileAccentText(hex: string): string {
-  const key = hex.toUpperCase() as ProfileAccentColor;
+  const key = normalizeProfileAccent(hex) as ProfileAccentColor;
   return PROFILE_ACCENT_TEXT[key] || hex;
 }
 
 export function isValidProfileAccent(hex: unknown): hex is ProfileAccentColor {
-  return typeof hex === "string" && PROFILE_ACCENT_COLORS.includes(hex.toUpperCase() as ProfileAccentColor);
+  return typeof hex === "string" && PROFILE_ACCENT_COLORS.includes(normalizeProfileAccent(hex) as ProfileAccentColor);
 }
 
 /**

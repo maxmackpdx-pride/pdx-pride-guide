@@ -387,7 +387,8 @@ export async function renderProfileOgCard(usernameRaw: string): Promise<Buffer |
 
   const display = String(user.displayName || user.username || username).trim();
   const handle = `@${user.username || username}`;
-  const accent = String(user.accentColor || "#FF00CC").trim() || "#FF00CC";
+  const rawAccent = String(user.accentColor || "#FF00CC").trim() || "#FF00CC";
+  const accent = rawAccent.toUpperCase() === "#00EE44" ? "#39FF14" : rawAccent;
 
   // Edge ring: thick outer stroke + blurred inward glow (rect frame, not circle)
   const edgeGlow = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>

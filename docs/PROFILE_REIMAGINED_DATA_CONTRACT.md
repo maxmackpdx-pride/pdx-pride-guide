@@ -662,10 +662,12 @@ Server sets both booleans from the same expression. Prefer reading either flag; 
 `shared/profileConstants.ts` / `shared/profileTheme.ts` (prefer **profileTheme** for live write validation):
 
 ```
-#FF00CC #00FFFF #CCFF00 #FF6600 #8800FF #00EE44|#39FF14 #0044FF #FF2400
+#FF00CC #00FFFF #CCFF00 #FF6600 #8800FF #39FF14 #0044FF #FF2400
 ```
 
 Text-safe overrides: `#8800FF→#AA66FF`, `#0044FF→#4488FF` (also `--day-mon-text` / `--day-tue-text`).
+
+Acid Green `#39FF14` is the sole selectable green. The API accepts retired `#00EE44` only to normalize legacy saved profiles.
 
 ### Day tokens (`--day-*`)
 

@@ -183,7 +183,7 @@ export function normalizePublicProfile(
     isAdmin: !!api.isAdmin,
     isSiteOwner: !!api.isSiteOwner,
     roles: api.roles,
-    accentColor: api.accentColor || "#FF00CC",
+    accentColor: api.accentColor?.toUpperCase() === "#00EE44" ? "#39FF14" : (api.accentColor || "#FF00CC"),
     profileBanner: resolveProfileBannerSrc(api.banner),
     coverImageUrl: api.coverImageUrl ?? null,
     coverCrop: api.coverCrop ?? null,

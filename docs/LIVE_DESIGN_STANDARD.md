@@ -68,6 +68,7 @@ These used to be “the rules.” They are **retired** as defaults. Agents must 
 | Mr. S ad primary `#ff0033` (red) | Mr. S = **cyan** `#19e3ff`; CockBlock = **red** `#ff1f1f` |
 | Ads that don’t match grid/feed | Builder must use **`PosterAdCard` / `FeedAdCard`** + live templates in `lib/adTypes.ts` |
 | Day color on primary RSVP | RSVP / primary action accent stays **lime** `#CCFF00` where reserved; day colors are data only |
+| General-purpose green | **Acid Green `#39FF14` only.** `--green` and legacy `--neon-green` resolve to `--green-acid`; retired `#00EE44` is accepted only as legacy profile input and normalized on save/read. |
 | Touch nav chrome without explicit ask | **Nav locked** unless user requests. When it is requested, ship the glow-pill standard below, not a new treatment |
 | Nav links as bare text with a gradient underline; board-folder dropdown (9px pill trigger, 236px panel, rainbow seam, per-index hover rails) | **Glow pills** - see *Site navigation* |
 | Persistent glow on the current nav pill (`siteNavPillPulse`) | **Glow is hover only.** The current page holds its accent on rim and label, with no bloom and no pulse |

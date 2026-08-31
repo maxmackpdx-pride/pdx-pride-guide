@@ -5,7 +5,7 @@ export const PROFILE_ACCENT_COLORS = [
   "#CCFF00", // neon-yellow
   "#FF6600", // neon-orange
   "#8800FF", // neon-violet
-  "#00EE44", // neon-green
+  "#39FF14", // Acid Green (canonical green)
   "#0044FF", // neon-blue
   "#FF2400", // neon-red
 ] as const;
@@ -23,6 +23,14 @@ export function profileAccentTextColor(hex: string): string {
 }
 
 export const DEFAULT_PROFILE_ACCENT = "#FF00CC";
+
+/** Retired green accepted at the API boundary so existing profiles upgrade safely. */
+export const LEGACY_PROFILE_GREEN = "#00EE44";
+
+export function normalizeProfileAccentColor(value: string): string {
+  const upper = value.toUpperCase();
+  return upper === LEGACY_PROFILE_GREEN ? "#39FF14" : upper;
+}
 
 export type ProfileBanner = "accent-gradient" | "sticker-wall" | "pride-guide-social";
 
@@ -43,7 +51,7 @@ export const PROFILE_BANNER_IMAGES: Record<Exclude<ProfileBanner, "accent-gradie
 export function isProfileAccentColor(value: unknown): value is ProfileAccentColor {
   if (typeof value !== "string") return false;
   const upper = value.toUpperCase();
-  return (PROFILE_ACCENT_COLORS as readonly string[]).includes(upper);
+  return upper === LEGACY_PROFILE_GREEN || (PROFILE_ACCENT_COLORS as readonly string[]).includes(upper);
 }
 
 export function isProfileBanner(value: unknown): value is ProfileBanner {

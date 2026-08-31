@@ -24,7 +24,7 @@
   --neon-violet:  #8800FF;  /* MON */
   --neon-red:     #FF2400;  /* protest red / rose red */
   --green-acid: #39FF14;
-  --neon-green:   var(--green-acid); /* #39FF14 */  /* general neon green */
+  --neon-green:   var(--green-acid); /* compatibility alias; Acid Green is canonical */
   --neon-blue:    #0044FF;  /* TUE */
   --accent-pop:   var(--neon-cyan);
 
@@ -36,7 +36,7 @@
   --pink:    var(--neon-magenta);
   --pink-hot:#FF33D6;
   --cyan:    var(--neon-cyan);
-  --green:   #39FF14;              /* SAT day green (brighter than neon-green) */
+  --green:   var(--green-acid);
   --orange:  var(--neon-orange);
   --purple:  var(--neon-violet);
   --blue:    var(--neon-blue);
@@ -48,7 +48,7 @@
   --lime-soft:  #CCFF0022;
   --pink-soft:  #FF00CC22;
   --cyan-soft:  #00FFFF22;
-  --green-soft: #39FF1422;
+  --green-soft: color-mix(in srgb, var(--green-acid) 13%, transparent);
   --orange-soft:#FF660022;
   --purple-soft:#8800FF22;
 

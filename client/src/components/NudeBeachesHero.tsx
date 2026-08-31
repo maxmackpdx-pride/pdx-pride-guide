@@ -45,12 +45,12 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
               snapshot?.sauvieIsland.swimStatus,
             ) || "-",
           label: "Collins swim",
-          color: "var(--neon-green, #00EE44)",
+          color: "var(--green-acid, #39FF14)",
         },
         {
           num: snapshot?.sauvieIsland.airTempF != null ? `${snapshot.sauvieIsland.airTempF}°` : "-",
           label: "air temp",
-          color: "var(--neon-green, #00EE44)",
+          color: "var(--green-acid, #39FF14)",
         },
         {
           num: sauvieWind.value,

@@ -29,7 +29,7 @@ const NEON_SWATCHES = [
   { name: "Orange", var: "--neon-orange", hex: "#FF6600" },
   { name: "Violet", var: "--neon-violet", hex: "#8800FF" },
   { name: "Blue", var: "--neon-blue", hex: "#0044FF" },
-  { name: "Green", var: "--neon-green", hex: "#00EE44" },
+  { name: "Acid Green", var: "--green-acid", hex: "#39FF14" },
   { name: "Red", var: "--neon-red", hex: "#FF2400" },
 ] as const;
 

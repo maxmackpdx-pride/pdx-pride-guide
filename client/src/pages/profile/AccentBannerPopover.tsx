@@ -25,7 +25,8 @@ export default function AccentBannerPopover({
   onSave: (patch: { accentColor?: string; banner?: ProfileBanner; coverImageUrl?: null; coverCrop?: null }) => void;
 }) {
   const [saving, setSaving] = useState(false);
-  const currentAccent = (accentColor || "#FF00CC").toUpperCase();
+  const rawAccent = (accentColor || "#FF00CC").toUpperCase();
+  const currentAccent = rawAccent === "#00EE44" ? "#39FF14" : rawAccent;
   const currentBanner = banner || "accent-gradient";
   const solidOn = currentBanner === "accent-gradient";
 

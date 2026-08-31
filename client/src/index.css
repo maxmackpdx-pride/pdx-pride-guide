@@ -35,7 +35,7 @@
   --neon-violet: #8800FF;
   --neon-red: #FF2400;
   --green-acid: #39FF14;
-  --neon-green: var(--green-acid); /* was #39FF14 */
+  --neon-green: var(--green-acid); /* compatibility alias; Acid Green is canonical */
   --neon-blue: #0044FF;
 
   /* Community board identity colors */
