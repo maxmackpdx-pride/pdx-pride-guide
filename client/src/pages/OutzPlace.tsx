@@ -185,8 +185,8 @@ export default function OutzPlace() {
 
   return (
     <div
-      className="zine-page board-page outz-surface outz-place"
-      style={meta ? ({ "--outz-c": meta.accent } as React.CSSProperties) : undefined}
+      className="zine-page board-page outz-surface outz-place pdx-glass-rebind"
+      style={meta ? ({ "--c": meta.accent, "--outz-c": meta.accent } as React.CSSProperties) : undefined}
     >
       <div className="outz-surface__terrain" aria-hidden="true" />
       <img className="outz-surface__topo" src={`${OUTZ_MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
@@ -266,7 +266,7 @@ export default function OutzPlace() {
           <span>Pick your day and time. Non-anonymous check-ins open this destination’s group chat.</span>
         </div>
         <div className="outz-place__social-grid">
-          <div className="outz-checkin outz-panel">
+          <div className="outz-checkin outz-panel pdx-glass-card pdx-glass-rebind">
             <div className="outz-checkin__eyebrow">{checkins.length} going {formatBeachCheckinDateLabel(date).toLowerCase()}</div>
             <div className="outz-pillrow" aria-label="Check-in day">
               {dates.map(value => <button type="button" key={value} className={date === value ? "is-active" : ""} onClick={() => setDate(value)}>{formatBeachCheckinDateLabel(value)}</button>)}
@@ -291,7 +291,7 @@ export default function OutzPlace() {
             <div className="outz-checkin__people">{checkins.map(checkin => <span key={checkin.id}>{checkin.masked ? "Anonymous" : checkin.displayName || checkin.username || "Member"}</span>)}</div>
           </div>
 
-          <section className={`outz-group-chat outz-panel${chatOpenForMe ? " outz-group-chat--open" : ""}`} aria-label={`${place?.name || "OUTZ"} group chat`}>
+          <section className={`outz-group-chat outz-panel pdx-glass-card pdx-glass-rebind${chatOpenForMe ? " outz-group-chat--open" : ""}`} aria-label={`${place?.name || "OUTZ"} group chat`}>
             <div className="outz-group-chat__head"><MessageCircle size={18} /><div><strong>{place?.name || "OUTZ"} · Group chat</strong><span>{chatOpenForMe ? formatChatClose(chatQuery.data?.expiresAt ?? null) : "Check in to enter"}</span></div></div>
             {!chatOpenForMe ? <div className="outz-group-chat__locked"><Lock size={22} /><p>Your group chat opens as soon as you check in with your profile.</p></div> : <>
               <div className="outz-group-chat__members">{chatQuery.data?.members.length ? `${chatQuery.data.members.length} in chat` : "You’re first in the room"}</div>
@@ -311,7 +311,7 @@ export default function OutzPlace() {
         </div>
         <div className="outz-place__wall-grid">
           <div>
-            <div className="outz-wall-composer outz-panel">
+            <div className="outz-wall-composer outz-panel pdx-glass-card pdx-glass-rebind">
               <div className="outz-pillrow outz-pillrow--display outz-pillrow--lime" role="group" aria-label="Post type">
                 {(["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"] as const).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
               </div>
@@ -319,7 +319,7 @@ export default function OutzPlace() {
               <div className="outz-wall-composer__foot"><span>For {formatBeachCheckinDateLabel(date)}</span><Button variant="solid" accent="lime" size="sm" disabled={createWallPost.isPending || !postBody.trim()} onClick={() => user ? createWallPost.mutate() : setShowAuth(true)}>{createWallPost.isPending ? "POSTING" : "POST TO WALL"}</Button></div>
             </div>
             <div className="outz-wall-feed">
-              {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post outz-panel" key={post.id}>
+              {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post outz-panel pdx-glass-card pdx-glass-rebind" key={post.id}>
                 <header><span>{post.postKind.replaceAll("_", " ")}</span><time dateTime={post.createdAt}>{post.tripDate ? formatBeachCheckinDateLabel(post.tripDate) : "Trip note"}</time></header>
                 <p>{post.body}</p>
                 <small>{post.isMine ? "You" : post.displayName || post.username || "Member"}</small>
@@ -328,7 +328,7 @@ export default function OutzPlace() {
               </article>) : <div className="outz-wall-empty">No trip posts yet. Be the one who gets the plan moving.</div>}
             </div>
           </div>
-          <aside className="outz-rating outz-panel" aria-label="Destination rating">
+          <aside className="outz-rating outz-panel pdx-glass-card pdx-glass-rebind" aria-label="Destination rating">
             <p>Trip signal</p>
             <strong>{ratingQuery.data?.average == null ? "—" : ratingQuery.data.average.toFixed(1)}<small>/5</small></strong>
             <span>{ratingQuery.data?.count || 0} community ratings</span>

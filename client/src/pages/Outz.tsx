@@ -75,7 +75,7 @@ function StatusLine({ tone, children }: { tone: "good" | "warn" | "bad"; childre
 
 function MotifBand({ src, accent }: { src: string; accent: string }) {
   return (
-    <div className="outz-card__band" style={{ "--outz-c": accent } as CSSProperties} aria-hidden="true">
+    <div className="outz-card__band" style={{ "--c": accent, "--outz-c": accent } as CSSProperties} aria-hidden="true">
       <img src={src} alt="" loading="lazy" />
     </div>
   );
@@ -169,7 +169,7 @@ export default function Outz() {
               ? beachSnapshot?.roosterRock.crossingAdvice ?? beachSnapshot?.roosterRock.crossingBand
               : beachSnapshot?.sauvieIsland.swimStatusLabel ?? beachSnapshot?.sauvieIsland.parkingStatusLabel;
             return (
-              <article className="outz-card outz-beach-card" key={beach.key} style={{ "--outz-c": beach.accent } as CSSProperties}>
+              <article className="outz-card outz-beach-card pdx-glass-card pdx-glass-rebind" key={beach.key} style={{ "--c": beach.accent, "--outz-c": beach.accent } as CSSProperties}>
                 <div className="outz-card__head">
                   <p className="outz-card__eyebrow">{beach.region}</p>
                   <Badge color={beach.color} variant="outline" size="md">Seasonal</Badge>
@@ -207,7 +207,7 @@ export default function Outz() {
           {destinations.map(place => {
             const meta = OUTZ_KIND_META[place.kind];
             return (
-              <article className="outz-card outz-card--tall" key={place.id} style={{ "--outz-c": meta.accent } as CSSProperties}>
+              <article className="outz-card outz-card--tall pdx-glass-card pdx-glass-rebind" key={place.id} style={{ "--c": meta.accent, "--outz-c": meta.accent } as CSSProperties}>
                 <MotifBand src={outzBandArt(place.id)} accent={meta.accent} />
                 <div className="outz-card__body">
                   <div className="outz-card__head">
@@ -227,7 +227,9 @@ export default function Outz() {
                     <Link href={outzPlaceHref(place)}>
                       <Button as="span" variant="solid" accent={OUTZ_BUTTON_ACCENT[meta.color]} size="sm">CHECK IN + CHAT</Button>
                     </Link>
-                    <a href={place.officialUrl} target="_blank" rel="noreferrer">Official park page ↗</a>
+                    <a href={place.officialUrl} target="_blank" rel="noreferrer">
+                      <Button as="span" variant="outline" accent={OUTZ_BUTTON_ACCENT[meta.color]} size="sm">Official details ↗</Button>
+                    </a>
                   </div>
                 </div>
               </article>
@@ -248,7 +250,7 @@ export default function Outz() {
         />
         <div className="outz-card-grid outz-card-grid--stays">
           {stays.map((stay: OutzCommunityStay) => (
-            <article className="outz-card" key={stay.id} style={{ "--outz-c": "var(--amber)" } as CSSProperties}>
+            <article className="outz-card pdx-glass-card pdx-glass-rebind" key={stay.id} style={{ "--c": "var(--amber)", "--outz-c": "var(--amber)" } as CSSProperties}>
               <div className="outz-card__body">
                 <div className="outz-card__head">
                   <div>
@@ -264,8 +266,12 @@ export default function Outz() {
                   <Link href={outzPlaceHref(stay)}>
                     <Button as="span" variant="solid" accent="orange" size="sm">CHECK IN + CHAT</Button>
                   </Link>
-                  <a href={stay.officialUrl} target="_blank" rel="noreferrer">Operator details ↗</a>
-                  <a href={stay.discoverySource.href} target="_blank" rel="noreferrer">Research source ↗</a>
+                  <a href={stay.officialUrl} target="_blank" rel="noreferrer">
+                    <Button as="span" variant="outline" accent="orange" size="sm">Operator details ↗</Button>
+                  </a>
+                  <a href={stay.discoverySource.href} target="_blank" rel="noreferrer">
+                    <Button as="span" variant="ghost" accent="orange" size="sm">Research source ↗</Button>
+                  </a>
                 </div>
               </div>
             </article>

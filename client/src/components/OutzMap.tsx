@@ -60,7 +60,7 @@ export default function OutzMap({ destinations, catalog, center, zoom, minimal =
         <style>{LIVE_MAP_CHROME_CSS}</style>
         <div className="pdx-map-live__vignette" aria-hidden="true" />
         <div className="pdx-map-live__shaft" aria-hidden="true" />
-        {minimal ? null : <div className="outz-map__chip" aria-hidden="true"><span /> Live official sources</div>}
+        {minimal ? null : <div className="outz-map__chip pdx-glass-rebind" aria-hidden="true"><span /> Live official sources</div>}
         <MapContainer center={center ?? [45.2, -122.6]} zoom={zoom ?? 7} zoomControl={!minimal} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
           <TileLayer
             url={DARK_TILE}
