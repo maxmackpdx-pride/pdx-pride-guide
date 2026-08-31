@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./ProductRoadmap.css";
 
 type Status = "done" | "progress" | "queued";
@@ -44,35 +44,59 @@ const POINTS: readonly Point[] = [
   { id:"agent", n:"15", trail:"crossing", status:"queued", title:"Agent-ready Zaylist", eyebrow:"DESTINATION", summary:"Humans, software, integrations, and authorized agents use the same underlying platform model.", goals:["Read/search/discover/recommend first","Scoped save/follow/join/RSVP later","Create/update with human confirmation","Coordinated internal agents","External agent landing pad"], x:520,y:3050,labelX:60,labelY:97 },
 ] as const;
 
-const productPath = "M620 130 C520 210 430 240 470 330 C510 420 700 410 650 520 C610 610 530 650 575 760 C620 850 420 850 440 930 C470 1020 560 1000 535 1110 C510 1200 690 1190 650 1280 C610 1380 520 1370 560 1460 C610 1560 410 1540 450 1640 C490 1730 630 1710 600 1810 C570 1900 480 1900 520 1990 C560 2090 470 2130 430 2210 C420 2310 600 2340 560 2460 C530 2540 700 2540 665 2640 C620 2760 500 2860 520 3050";
-const systemPath = "M470 330 C350 400 250 430 285 560 C330 700 190 770 240 910 C290 1040 220 1140 300 1250 C350 1370 220 1540 275 1860 C315 2020 330 2120 430 2210 C320 2270 235 2290 255 2360 C270 2470 280 2530 315 2630 C360 2740 320 2780 360 2830 C420 2910 470 2950 520 3050";
+const HORIZONTAL_POINTS: readonly Point[] = [
+  { ...POINTS[0], x:120,y:460,labelX:2,labelY:70 }, { ...POINTS[1], x:260,y:350,labelX:7,labelY:33 },
+  { ...POINTS[2], x:390,y:470,labelX:12,labelY:72 }, { ...POINTS[3], x:340,y:185,labelX:10,labelY:7 },
+  { ...POINTS[4], x:535,y:555,labelX:18,labelY:84 }, { ...POINTS[5], x:680,y:430,labelX:24,labelY:63 },
+  { ...POINTS[6], x:585,y:190,labelX:20,labelY:8 }, { ...POINTS[7], x:825,y:525,labelX:30,labelY:80 },
+  { ...POINTS[8], x:965,y:390,labelX:36,labelY:55 }, { ...POINTS[9], x:870,y:175,labelX:32,labelY:6 },
+  { ...POINTS[10], x:1105,y:515,labelX:43,labelY:78 }, { ...POINTS[11], x:1240,y:385,labelX:49,labelY:54 },
+  { ...POINTS[12], x:1375,y:520,labelX:55,labelY:79 }, { ...POINTS[13], x:1510,y:390,labelX:61,labelY:55 },
+  { ...POINTS[14], x:1320,y:180,labelX:51,labelY:7 }, { ...POINTS[15], x:1650,y:345,labelX:66,labelY:30 },
+  { ...POINTS[16], x:1715,y:175,labelX:67,labelY:5 }, { ...POINTS[17], x:1850,y:500,labelX:75,labelY:76 },
+  { ...POINTS[18], x:1990,y:395,labelX:81,labelY:57 }, { ...POINTS[19], x:1930,y:170,labelX:78,labelY:5 },
+  { ...POINTS[20], x:2140,y:205,labelX:87,labelY:9 }, { ...POINTS[21], x:2320,y:350,labelX:92,labelY:42 },
+] as const;
+
+const productPath = "M120 460C175 420 210 390 260 350S335 425 390 470 485 590 535 555 625 390 680 430 770 570 825 525 915 350 965 390 1050 560 1105 515 1185 345 1240 385 1320 560 1375 520 1450 350 1510 390 1580 410 1650 345 1760 420 1850 500 1930 455 1990 395 2130 300 2320 350";
+const systemPath = "M260 350C280 265 300 210 340 185S510 170 585 190 790 200 870 175 1160 155 1320 180 1510 205 1650 345C1690 260 1685 205 1715 175S1850 155 1930 170 2070 180 2140 205 2250 285 2320 350";
 
 const statusLabel: Record<Status,string> = { done:"Done", progress:"In progress", queued:"Not started" };
 
-function TrailMap({ interactive = true }: { interactive?: boolean }) {
+const READ_STEPS = ["pride-guide","react","zaylist","foundation","hardening","z-rebuild","zenegades","platform","agent"] as const;
+
+function TrailMap() {
   const [selectedId, setSelectedId] = useState("z-rebuild");
-  const selected = useMemo(() => POINTS.find(p => p.id === selectedId) ?? POINTS[0], [selectedId]);
-  return <div className="success-map">
-    <svg className="success-map__svg" viewBox="0 0 1000 3200" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
-      <g className="success-map__contours"><path d="M-80 420C160 250 290 470 500 330S800 180 1090 330"/><path d="M-100 520C170 340 320 560 520 430S820 290 1100 430"/><path d="M-80 1500C140 1320 310 1550 500 1420S820 1280 1100 1450"/><path d="M-100 1620C160 1430 330 1680 540 1520S830 1390 1110 1560"/><path d="M-50 2500C150 2300 330 2550 520 2410S820 2280 1080 2440"/></g>
+  const [view,setView]=useState<"map"|"index">("map");
+  const [readStep,setReadStep]=useState<number|null>(null);
+  const wrapRef=useRef<HTMLDivElement>(null);
+  const selected = useMemo(() => HORIZONTAL_POINTS.find(p => p.id === selectedId) ?? HORIZONTAL_POINTS[0], [selectedId]);
+  const choose=(id:string)=>{setSelectedId(id);setView("map")};
+  useEffect(()=>{const p=HORIZONTAL_POINTS.find(point=>point.id===selectedId);const wrap=wrapRef.current;if(!p||!wrap)return;wrap.scrollTo({left:Math.max(0,p.x-wrap.clientWidth/2),behavior:"smooth"})},[selectedId]);
+  const startRead=()=>{setReadStep(0);choose(READ_STEPS[0])};
+  const advance=(amount:number)=>{const next=Math.max(0,Math.min(READ_STEPS.length-1,(readStep??0)+amount));setReadStep(next);choose(READ_STEPS[next])};
+  return <div className="success-map-shell">
+    <div className="success-map__toolbar"><div role="group" aria-label="Roadmap view"><button className={view==="map"?"is-active":""} onClick={()=>setView("map")}>Map</button><button className={view==="index"?"is-active":""} onClick={()=>setView("index")}>Index</button></div><button onClick={startRead}>Read the map →</button></div>
+    {view==="map" ? <div className="success-map__wrap" ref={wrapRef}><div className="success-map">
+    <svg className="success-map__svg" viewBox="0 0 2480 720" preserveAspectRatio="none" aria-hidden="true">
+      <g className="success-map__mountains"><path d="M0 560L210 310l115 140 190-260 185 280 155-190 165 255 210-300 190 270 160-205 210 245 175-280 210 295 165-220 260 300V720H0Z"/></g>
+      <g className="success-map__contours"><path d="M-80 130C260 20 440 190 710 90S1190 30 1510 135 2010 195 2550 65"/><path d="M-100 205C250 90 450 270 730 160S1200 100 1530 205 2040 270 2560 135"/><path d="M-80 645C300 525 490 710 760 610S1240 535 1570 650 2080 720 2560 575"/><path d="M-80 590C280 470 470 650 740 550S1220 480 1550 590 2060 650 2560 520"/></g>
       <path className="success-map__product-shadow" d={productPath}/><path className="success-map__product-line" d={productPath}/><path className="success-map__system-shadow" d={systemPath}/><path className="success-map__system-line" d={systemPath}/>
-      {POINTS.map(p => <g key={p.id} className={`success-map__node success-map__node--${p.status} success-map__node--${p.trail}`} transform={`translate(${p.x} ${p.y})`}><circle className="ring" r={p.trail === "crossing" ? 28 : 21}/><circle className="dot" r={p.trail === "crossing" ? 9 : 7}/><text y="-32">{p.n}</text></g>)}
+      {HORIZONTAL_POINTS.map(p => <g key={p.id} className={`success-map__node success-map__node--${p.status} success-map__node--${p.trail}`} transform={`translate(${p.x} ${p.y})`}><circle className="ring" r={p.id==="z-rebuild"?36:p.trail === "crossing" ? 28 : 21}/><circle className="dot" r={p.id==="z-rebuild"?12:p.trail === "crossing" ? 9 : 7}/><text y={p.id==="z-rebuild"?-45:"-32"}>{p.id==="z-rebuild"?"NOW":p.n}</text></g>)}
     </svg>
     <div className="success-map__labels">
-      {POINTS.map(p => <button key={p.id} type="button" className={`success-map__label success-map__label--${p.status} success-map__label--${p.trail}${selectedId===p.id?" is-selected":""}`} style={{left:`${p.labelX}%`,top:`${p.labelY}%`}} onClick={() => interactive && setSelectedId(p.id)} aria-pressed={selectedId===p.id}>
-        <span>{p.n} / {p.eyebrow}</span><strong>{p.title}</strong><small>{p.summary}</small>
+      {HORIZONTAL_POINTS.map(p => <button key={p.id} type="button" className={`success-map__label success-map__label--${p.status} success-map__label--${p.trail}${selectedId===p.id?" is-selected":""}`} style={{left:`${p.labelX}%`,top:`${p.labelY}%`}} onClick={() => choose(p.id)} aria-pressed={selectedId===p.id}>
+        <span>{p.id==="z-rebuild"?"NOW":p.n} / {p.eyebrow}</span><strong>{p.title}</strong>
       </button>)}
     </div>
-    {interactive && <aside className="success-map__detail" aria-live="polite">
-      <div><span className={`success-map__status success-map__status--${selected.status}`}>{statusLabel[selected.status]}</span><button type="button" onClick={() => setSelectedId(POINTS[0].id)} aria-label="Reset selected waypoint">×</button></div>
-      <p className="success-map__detail-meta">{selected.trail.toUpperCase()} TRAIL / {selected.n}</p><h3>{selected.title}</h3><p>{selected.summary}</p><h4>{selected.status==="done"?"Keep moving":"Goals"}</h4><ul>{selected.goals.map(g=><li key={g}>{g}</li>)}</ul>
-    </aside>}
+    </div></div> : <div className="success-map__index">{(["done","progress","queued"] as Status[]).map(status=><section key={status}><h2>{statusLabel[status]}</h2><ol>{HORIZONTAL_POINTS.filter(p=>p.status===status).map(p=><li key={p.id}><button onClick={()=>choose(p.id)}><span>{p.n} · {p.trail}</span><strong>{p.title}</strong><small>{p.summary}</small></button></li>)}</ol></section>)}</div>}
+    <aside className="success-map__detail" aria-live="polite"><div><span className={`success-map__status success-map__status--${selected.status}`}>{statusLabel[selected.status]}</span><span>{selected.trail.toUpperCase()} TRAIL / {selected.n}</span></div><h3>{selected.title}</h3><p>{selected.summary}</p><h4>{selected.status==="done"?"Accomplished / keep moving":"Goals"}</h4><ul>{selected.goals.map(g=><li key={g}>{g}</li>)}</ul>{readStep!==null&&<nav aria-label="Guided roadmap reading"><button disabled={readStep===0} onClick={()=>advance(-1)}>← Previous</button><span>{readStep+1} / {READ_STEPS.length}</span><button disabled={readStep===READ_STEPS.length-1} onClick={()=>advance(1)}>Next →</button><button onClick={()=>setReadStep(null)}>Exit</button></nav>}</aside>
   </div>;
 }
 
 export default function ProductRoadmap({ page = false }: { page?: boolean }) {
   const [expanded,setExpanded]=useState(false);
   useEffect(()=>{ if(!expanded)return; const old=document.body.style.overflow; document.body.style.overflow="hidden"; const key=(e:KeyboardEvent)=>{if(e.key==="Escape")setExpanded(false)}; window.addEventListener("keydown",key); return()=>{document.body.style.overflow=old;window.removeEventListener("keydown",key)} },[expanded]);
-  if(page) return <section className="product-roadmap product-roadmap--page"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>THE PATH FROM<br/>LIVE TO DURABLE.</h1><p>The product trail is what people use. The system trail is what makes it durable. Where they cross, the platform changes shape.</p><div className="product-roadmap__legend"><b><i className="trail-product"/>Product</b><b><i className="trail-system"/>System</b><b><i className="done"/>Done</b><b><i className="progress"/>In progress</b><b><i className="queued"/>Not started</b></div></header><TrailMap/></section>;
-  return <section className="product-roadmap"><div className="product-roadmap__preview-head"><div><span>PRODUCT + SYSTEM / LIVE OPERATING VIEW</span><h2>THE PATH FROM LIVE TO DURABLE.</h2><p>Two trails. One platform.</p></div><button type="button" onClick={()=>setExpanded(true)}>Expand roadmap ↗</button></div><button className="product-roadmap__mini" type="button" onClick={()=>setExpanded(true)} aria-label="Open interactive roadmap"><svg viewBox="0 0 1000 250" aria-hidden="true"><path className="mini-product" d="M20 160C170 45 250 210 390 120S610 45 740 130 900 200 980 80"/><path className="mini-system" d="M20 210C160 120 260 230 390 120S570 220 740 130 870 70 980 80"/></svg><span>PRODUCT</span><span>SYSTEM</span></button>{expanded&&<div className="product-roadmap__overlay" role="dialog" aria-modal="true"><button className="product-roadmap__overlay-close" type="button" onClick={()=>setExpanded(false)}>Close ×</button><div className="product-roadmap__overlay-scroll"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>THE PATH FROM<br/>LIVE TO DURABLE.</h1></header><TrailMap/></div></div>}</section>;
+  if(page) return <section className="product-roadmap product-roadmap--page"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>TWO STORIES AT<br/>THE SAME TIME.</h1><p><strong>Product trail</strong> is what people get. <strong>System trail</strong> is what makes it hold together. At the purple crossings, Zaylist changes shape.</p><div className="product-roadmap__legend"><b><i className="trail-product"/>Product</b><b><i className="trail-system"/>System</b><b><i className="done"/>Done</b><b><i className="progress"/>In progress</b><b><i className="queued"/>Not started</b></div></header><TrailMap/></section>;
+  return <section className="product-roadmap"><div className="product-roadmap__preview-head"><div><span>PRODUCT + SYSTEM / LIVE OPERATING VIEW</span><h2>TWO STORIES AT THE SAME TIME.</h2><p>Two trails. One platform.</p></div><button type="button" onClick={()=>setExpanded(true)}>Expand roadmap ↗</button></div><button className="product-roadmap__mini" type="button" onClick={()=>setExpanded(true)} aria-label="Open interactive roadmap"><svg viewBox="0 0 1000 250" aria-hidden="true"><path className="mini-product" d="M20 160C170 45 250 210 390 120S610 45 740 130 900 200 980 80"/><path className="mini-system" d="M20 210C160 120 260 230 390 120S570 220 740 130 870 70 980 80"/></svg><span>PRODUCT</span><span>SYSTEM</span></button>{expanded&&<div className="product-roadmap__overlay" role="dialog" aria-modal="true"><button className="product-roadmap__overlay-close" type="button" onClick={()=>setExpanded(false)}>Close ×</button><div className="product-roadmap__overlay-scroll"><header className="product-roadmap__hero"><span>PRODUCT + SYSTEM / LIVE OPERATING MAP</span><h1>TWO STORIES AT<br/>THE SAME TIME.</h1></header><TrailMap/></div></div>}</section>;
 }
