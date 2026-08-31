@@ -486,8 +486,8 @@ html.calm-mode .about-v2-hero__stat {
   line-height: 1.7;
 }
 
-.about-v2-ideas__form,
-.about-v2-ideas__sent {
+.about-v2-ideas__form.pdx-glass-rebind,
+.about-v2-ideas__sent.pdx-glass-rebind {
   --c: var(--lime, #ccff00);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
