@@ -1,651 +1,167 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
-import CountUpValue from "@/components/CountUpValue";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import type { EventListing } from "@shared/multiDayEvents";
-import type { Event } from "@shared/schema";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
-import EventModal from "@/components/EventModal";
 import ScrollReveal from "@/components/ScrollReveal";
-import BoardStatsBar from "@/components/BoardStatsBar";
-import { SupportPanel, AffiliatePartners, SponsorsPanel } from "@/components/support";
-import InfrastructureGrid from "@/components/home/InfrastructureGrid";
 import "./About.css";
 
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
 const PROFILE_URL = "/u/tucker_pdmax";
 const DIGGN_URL = "https://open.spotify.com/search/Digg%27n%20For%20Bones";
 
-/** Match Yes Coach / Stank by title - never hardcode event ids (they differ local vs prod). */
-function isYesCoachEvent(title: string): boolean {
-  const t = title.toLowerCase();
-  return t.includes("yes coach") || /stank\W*yes\W*coach|yes\W*coach\W*stank/i.test(title);
-}
+const PRODUCTS = [
+  { old: "Community calendar", now: "EVENTZ", href: "/events", text: "Queer Portland events on one map and one board." },
+  { old: "Local services", now: "PLACEZ", href: "/directory", text: "Queer-owned and queer-safe places, with organic ranking that is not for sale." },
+  { old: "Gigs", now: "GIGZ", href: "/pride-work", text: "Work posted by people in the scene, with a name and a face on it." },
+  { old: "Free stuff", now: "GIFTZ", href: "/gifting", text: "Give it to someone who needs it instead of leaving it on the curb." },
+  { old: "Rooms and shares", now: "THE HAÜZ", href: "/the-hauz", text: "Find a room, or find your people and build a household together." },
+  { old: "Missed connections", now: "MIZZED CONNECTION", href: "/spotted", text: "You ask, they accept, then you talk. Nobody gets cold-DMed." },
+  { old: "The outdoors", now: "OUTZ", href: "/z/out", text: "Local destinations, live conditions, and the information that helps us get there." },
+] as const;
 
 const VALUES = [
-  { title: "Free to browse.", text: "No paywall on the list. Tips and labeled sponsors help keep it that way  -  organic ranking is not for sale." },
-  { title: "Sponsors can buy in.", text: "Labeled featured posts, ads, and other partner spots as they roll out  -  only for businesses that are part of this community or already show up for us." },
+  { title: "Free to browse.", text: "No paywall on the list. Tips and labeled sponsors help keep it that way." },
+  { title: "Organic ranking is not for sale.", text: "Paid placements are labeled, never disguised as community preference." },
   { title: "Post with a free account.", text: "That is how spam stays out and names stay on." },
   { title: "Your data is not for sale.", text: "Not now, not later, not for a nice offer." },
-  { title: "We moderate the clearly over the line stuff.", text: "The rest of the community runs free." },
+  { title: "Moderation comes with a reason.", text: "If something comes down, there is a person to talk to." },
   { title: "One person builds this.", text: "Good people help. It is still not a committee." },
 ] as const;
 
-const WHY_ROWS = [
-  {
-    old: "Missed connections",
-    now: "MIZZED CONNECTION",
-    href: "/spotted",
-    text: "Same idea, minus the anonymous stranger. You ask, they accept, then you talk. Nobody gets cold-DMed.",
-  },
-  {
-    old: "Rooms and shares",
-    now: "THE HA\u00DCZ",
-    href: "/the-hauz",
-    text: "Find a room, or build the whole household first and go sign a lease together. Nowhere else lets you do the second one.",
-  },
-  {
-    old: "Gigs",
-    now: "GIGZ",
-    href: "/pride-work",
-    text: "Work posted by people in the scene, with a name and a face on it.",
-  },
-  {
-    old: "Free stuff",
-    now: "GIFTZ",
-    href: "/gifting",
-    text: "Give it to someone who needs it instead of leaving it on the curb.",
-  },
-  {
-    old: "Community calendar",
-    now: "EVENTZ",
-    href: "/events",
-    text: "Every queer night in town on one map. Not the three an algorithm decided were advertiser safe.",
-  },
-  {
-    old: "Local services",
-    now: "PLACEZ",
-    href: "/directory",
-    text: "Queer-owned and queer-safe spots. Organic ranking is not for sale.",
-  },
-] as const;
-
 const FAQ = [
-  {
-    q: "Is this just for Pride Week?",
-    a: "Not anymore. It started as the Pride Week guide and now runs all year - parties, drag, marches, community nights, and the quiet stuff too. Pride is every day here.",
-  },
-  {
-    q: "Why does this feel like a classifieds board?",
-    a: "Because that is what it is. Housing, gigs, free stuff, missed connections, a directory, and a calendar, all on one site. We used to run all of that out of Facebook groups and event pages. Now it lives somewhere that belongs to us, and the pieces that get added next are the ones people keep asking for.",
-  },
-  {
-    q: "Where do I find events?",
-    a: "The Events page. Every live listing on a map and a board. Filter by day, type, or neighborhood, then open anything for times, venue, and tickets.",
-  },
-  {
-    q: "How is this different from other event apps?",
-    a: "It is free to browse, run by a person, and built for this city. No corporate feed. No paying to climb the organic list. Promoters post their events and the community shows up. Labeled support may appear as the site grows  -  always marked, never fake ranking.",
-  },
-  {
-    q: "Can I ask for a feature?",
-    a: "Yes, and it is the point. Everything people send in gets compiled about once a month, and the asks that keep coming up get built. No voting system, no algorithm, no test group. A lot of what is on the site now started as somebody mentioning it.",
-  },
-  {
-    q: "How do I list my event?",
-    a: "Make an account, then submit a new event or claim one that is already listed. Head to Submit. Once you are a verified promoter, you skip the line.",
-  },
-  {
-    q: "Can my business sponsor?",
-    a: "If you are part of the community or already support what we are building, yes. Pitch labeled support (featured posts, ads, and other partner formats as they ship) via Sponsors or message Tucker. Packages will firm up over time  -  reach out early if you want in.",
-  },
+  { q: "Why does this feel like a classifieds board?", a: "Because that is part of what it is: housing, gigs, free stuff, missed connections, a directory, outdoor life, and a calendar on one locally built platform." },
+  { q: "How is this different from other event apps?", a: "It is free to browse, run by a person, and built for this city. There is no paying to climb the organic list. Paid placement stays labeled." },
+  { q: "How do I list my event?", a: "Make an account, then submit a new event or claim one that is already listed. Verified promoters can publish without waiting in the review line." },
+  { q: "Can my business sponsor?", a: "If you are part of the community or already support it, yes. Message Tucker to talk about clearly labeled sponsorship and partner formats." },
 ] as const;
 
 export default function About() {
-  usePageSeo(
-    "Why Zaylist exists | About",
-    "Why Zaylist exists. The community board queer Portland used to run out of Facebook groups, rebuilt somewhere it belongs to us: events, housing, gigs, free stuff, missed connections, and a directory. Feedback gets compiled regularly and the common asks get built.",
-  );
+  usePageSeo("Why Zaylist exists | About", "Our Portland, all in one place. Learn why Zaylist exists, explore what is built here, meet Tucker, and submit an idea for what comes next.");
 
-  const {
-    data: events = [],
-    isLoading: eventsLoading,
-    isError: eventsError,
-  } = useQuery<EventListing[]>({
-    queryKey: ["/api/events"],
-    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
-    staleTime: 60_000,
-  });
+  const [contactModal, setContactModal] = useState<"message" | "order" | null>(null);
+  const [idea, setIdea] = useState({ name: "", email: "", message: "", website: "" });
+  const [ideaStatus, setIdeaStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-  // Lifetime counter: every distinct event ever published on the site (not just
-  // the current live board). Falls back to the live count while loading.
-  const {
-    data: eventTotal,
-    isLoading: eventTotalLoading,
-    isError: eventTotalError,
-  } = useQuery<{ total: number }>({
-    queryKey: ["/api/events/total"],
-    queryFn: () => apiRequest("GET", "/api/events/total").then(r => r.json()),
-    staleTime: 5 * 60_000,
-  });
-
-  const eventCount = eventTotal?.total ?? events.length;
-  const hasVerifiedEventCount =
-    !eventsLoading &&
-    !eventTotalLoading &&
-    !eventsError &&
-    !eventTotalError &&
-    eventCount > 0;
-  const [contactModal, setContactModal] = useState<"message" | "sponsor" | "order" | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-
-  const yesCoachEvent = useMemo(
-    () => events.find(e => isYesCoachEvent(e.title)) ?? null,
-    [events],
-  );
-
-  const openYesCoachCard = useCallback(async () => {
-    if (yesCoachEvent) {
-      setSelectedEvent(yesCoachEvent);
+  const submitIdea = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIdeaStatus("sending");
+    if (idea.website) {
+      setIdeaStatus("sent");
       return;
     }
-    // Fallback: list may still be loading or title variant differs - fetch by search among all events
     try {
-      const res = await apiRequest("GET", "/api/events");
-      if (!res.ok) return;
-      const list = (await res.json()) as EventListing[];
-      const match = list.find(e => isYesCoachEvent(e.title));
-      if (match) setSelectedEvent(match);
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "IDEA",
+          severity: "LOW",
+          message: idea.message,
+          steps: idea.name ? `Submitted by ${idea.name}` : "Submitted from the About page",
+          email: idea.email,
+          website: idea.website,
+          pageUrl: window.location.href,
+          userAgent: navigator.userAgent,
+        }),
+      });
+      if (!response.ok) throw new Error("Idea submission failed");
+      setIdea({ name: "", email: "", message: "", website: "" });
+      setIdeaStatus("sent");
     } catch {
-      // Stay on About if the event cannot be resolved
+      setIdeaStatus("error");
     }
-  }, [yesCoachEvent]);
-
-  const heroStats = useMemo(
-    () => [
-      {
-        num: hasVerifiedEventCount ? eventCount : "...",
-        label: hasVerifiedEventCount ? "Events, and counting" : "Events syncing",
-        color: "#ccff00",
-      },
-      { num: "ALL", label: "Year round, one list", color: "#19e3ff" },
-      { num: "FREE", label: "To browse. Always.", color: "#ff1fa0" },
-      { num: "1", label: "Zaylist. Room for more.", color: "#ffb020" },
-    ],
-    [eventCount, hasVerifiedEventCount],
-  );
+  };
 
   return (
     <div className="about-v2 board-page--makeover">
-      {/* Poster-wall hero (pride-posters-wall.jpg) - restored */}
-      <section className="about-v2-hero" aria-label="About">
+      <section className="about-v2-hero" aria-labelledby="about-title">
         <div className="about-v2-hero__scrim" aria-hidden="true" />
-        <div className="about-v2-hero__inner">
-          <div>
-            <div className="about-v2-hero__kicker">
-              <span className="about-v2-hero__dot" aria-hidden="true" />
-              About · Portland nights · all year
-            </div>
-            <h1 className="about-v2-hero__h1">
-              <span className="about-v2-hero__stat" data-testid="about-events-count">
-                {hasVerifiedEventCount ? (
-                  <>
-                    <CountUpValue key="events-ready" value={eventCount} /> events.
-                  </>
-                ) : (
-                  "The whole city."
-                )}
-              </span>
-              <span className="about-v2-hero__lede">
-                And approximately zero interest in being a sanitized corporate Pride pamphlet.
-              </span>
-            </h1>
-            <div className="about-v2-hero__actions">
-              <Link href="/events">
-                <Button as="span" variant="neon" accent="cyan" size="lg">
-                  Browse events
-                </Button>
-              </Link>
-            </div>
+        <div className="about-v2-hero__inner"><div>
+          <div className="about-v2-hero__kicker"><span className="about-v2-hero__dot" aria-hidden="true" />About · Built in Portland · for Portland</div>
+          <h1 id="about-title" className="about-v2-hero__h1"><span className="about-v2-hero__stat">Our Portland.</span><span className="about-v2-hero__lede">All in one place.</span></h1>
+          <div className="about-v2-hero__actions">
+            <Link href="/events"><Button as="span" variant="solid" accent="cyan" size="lg">Explore Zaylist</Button></Link>
+            <a href="#submit-an-idea"><Button as="span" variant="neon" accent="pink" size="lg">Tell me what is missing</Button></a>
+          </div>
+        </div></div>
+      </section>
+
+      <section className="about-v2-manifesto" aria-labelledby="about-manifesto-title"><ScrollReveal><div className="about-v2__inner">
+        <div className="about-v2__kicker about-v2__kicker--pink">What Zaylist is</div>
+        <h2 id="about-manifesto-title" className="about-v2-manifesto__h2">Portland&apos;s queer life, <span className="about-v2-manifesto__h2-accent">together.</span></h2>
+        <div className="about-v2-manifesto__copy">
+          <p>Pride starts now, it ends never. Zaylist brings Portland&apos;s queer events, places, housing, work, free stuff, missed connections, and outdoor life into one community-built home.</p>
+          <p>This is for people who want the whole city, not only the sanitized version that makes it through a corporate feed.</p>
+        </div>
+        <div className="about-v2-manifesto__shout">
+          <p><span className="about-v2-manifesto__glitch">Fuck Meta.</span></p>
+          <p>Stop censoring our community.<br />Stop pretending our nights only matter once they have been scrubbed clean.</p>
+          <p>This app is really gay. This app really is <span className="about-v2-manifesto__glitch">ours.</span></p>
+        </div>
+      </div></ScrollReveal></section>
+
+      <section className="about-v2-why" aria-labelledby="about-why-title"><ScrollReveal><div className="about-v2__inner">
+        <div className="about-v2-why__intro">
+          <div className="about-v2-why__heading"><div className="about-v2__kicker about-v2__kicker--lime">Why this exists</div><h2 id="about-why-title" className="about-v2-why__h2">The public square, <span className="about-v2-why__h2-accent">back on our ground.</span></h2></div>
+          <div className="about-v2-why__copy">
+            <p>Every city used to have one ugly, free page where everything got posted: a room, a gig, a couch to give away, or the guy you locked eyes with and never saw again. It was the closest thing we had to a public square.</p>
+            <p>We rebuilt that square inside Facebook and Instagram. Then accounts were switched off, pages disappeared, and queer nights were labeled adult content. That is what happens when the room belongs to somebody else.</p>
+            <p className="about-v2-why__turn">So the board is back. Same purpose. Different owner.</p>
           </div>
         </div>
-      </section>
-      <BoardStatsBar stats={heroStats} variant="band" showLive={false} />
+        <div className="about-v2__kicker about-v2__kicker--cyan">What you can do here</div>
+        <ul className="about-v2-why__rows">{PRODUCTS.map(product => <li key={product.now} className="about-v2-why__row"><span className="about-v2-why__old">{product.old}</span><span className="about-v2-why__arrow" aria-hidden="true">&rarr;</span><Link href={product.href} className="about-v2-why__now">{product.now}</Link><span className="about-v2-why__text">{product.text}</span></li>)}</ul>
+        <div className="about-v2-why__close">
+          <h3 className="about-v2-why__sub">Built with the people who use it</h3>
+          <p>About once a month I sit down with everything people have sent in. The things that keep coming up get built into the fabric of the site. No algorithm deciding what counts, no score, no test group. A person reads it and then makes the thing.</p>
+          <p>You need a name to post, so the spam stays out. Nothing organic is for sale. Your data is not either. If something comes down, you get a reason and a person to talk to.</p>
+          <p className="about-v2-why__punch">The roadmap is whatever you keep asking for.</p>
+        </div>
+      </div></ScrollReveal></section>
 
-      {/* MANIFESTO */}
-      <section className="about-v2-manifesto" aria-labelledby="about-manifesto-title">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <h2 id="about-manifesto-title" className="about-v2-manifesto__h2">
-              What this <span className="about-v2-manifesto__h2-accent">actually is</span>
-            </h2>
-            <div className="about-v2-manifesto__copy">
-              <p>
-                Pride starts now, it ends never, and this thing is already loaded: parties,
-                community events, weird little gems, places to eat, spots to shop, GIGZ,
-                GIFTZ, MIZZED CONNECTION, and all the real homosexual infrastructure that
-                keeps the scene alive.
-              </p>
-              <p>
-                The family-friendly newspaper roundups are cute. The local moms&apos; Pride
-                lists have their place. But this is for the people who want the whole city, not
-                the sanitized version corporations can sell back to us.
-              </p>
-            </div>
-            <div className="about-v2-manifesto__shout">
-              <p>
-                <span className="about-v2-manifesto__glitch">Fuck Meta.</span>
-              </p>
-              <p>
-                Stop censoring our community.
-                <br />
-                Stop pretending our nights only matter once they&apos;ve been scrubbed clean.
-              </p>
-              <p>
-                This app is really gay. This app really is{" "}
-                <span className="about-v2-manifesto__glitch">ours.</span>
-              </p>
-            </div>
+      <section className="about-v2-creator" aria-labelledby="about-creator-title"><ScrollReveal delay={30}><div className="about-v2__inner">
+        <div className="about-v2__kicker about-v2__kicker--lime">Who&apos;s behind it</div>
+        <h2 id="about-creator-title" className="about-v2__title about-v2__title--xl">Built by <span className="hl">Tucker in Portland</span></h2>
+        <div className="about-v2-creator__grid">
+          <div className="about-v2-creator__photo-col"><div className="about-v2-creator__photo">
+            <div className="about-v2-creator__photo-frame"><img src="/about/tucker-portrait.jpg" alt="Tucker in Portland" width={864} height={1152} decoding="async" /></div>
+            <div className="about-v2-creator__stickers"><Link href={PROFILE_URL} className="about-v2-creator__pg-sticker">Follow Tucker on Zaylist</Link><a href={IG_URL} target="_blank" rel="noopener noreferrer" className="about-v2-creator__ig-sticker">Follow @tucker_pdmax</a></div>
+          </div><div className="about-v2-creator__credits">Artist · Yes Coach · Brand promoter<br />Digg&apos;n For Bones · Former Oregon State Pet</div></div>
+          <div className="about-v2-creator__body">
+            <p>Hi, I&apos;m Tucker. I run Yes Coach, host LockerRoom at The Eagle, and build things for this scene when nobody else will. No engineering degree. Just every tool I could get my hands on and a stupid number of hours.</p>
+            <blockquote className="about-v2-creator__pull"><p>This community keeps each other going. You showed up for me, and this is me doing something back.</p></blockquote>
+            <p>I&apos;m between full-time gigs and pouring all of it into this. If you have a role or project that deserves that kind of energy, I&apos;m available.</p>
+            <div className="about-v2-work__chips" aria-label="Tucker's work"><span className="about-v2-work__chip">Brand &amp; marketing</span><span className="about-v2-work__chip">Events &amp; community</span><span className="about-v2-work__chip">Platforms &amp; product</span></div>
+            <div className="about-v2-creator__actions"><Link href="/resume"><Button as="span" variant="solid" accent="cyan" size="md" arrow>View resume</Button></Link><Button type="button" variant="neon" accent="cyan" size="md" onClick={() => setContactModal("message")}>Work with Tucker</Button></div>
           </div>
-        </ScrollReveal>
-      </section>
+        </div>
+        <div className="about-v2-projects__list about-v2-creator__projects">
+          <a className="about-v2-project" href={DIGGN_URL} target="_blank" rel="noopener noreferrer"><img src="/about/diggn-for-bones.jpg" alt="" width={120} height={120} /><div><div className="about-v2-project__meta">Podcast · Season 3</div><h3 className="about-v2-project__title">Digg&apos;n For Bones</h3><p className="about-v2-project__desc">Produced by Tucker · new episodes on Spotify</p></div><span className="about-v2-project__go">Listen →</span></a>
+          <button type="button" className="about-v2-project about-v2-project--button" onClick={() => setContactModal("order")}><img src="/about/disco/card-thumb.jpg" alt="Constrained and Sparkling Bro, shibari disco body sculptures" width={120} height={120} /><div><div className="about-v2-project__meta">Art · Made to order</div><h3 className="about-v2-project__title">Constrained and Sparkling Bro</h3><p className="about-v2-project__desc">Disco bodies in shibari · custom mirror mosaic · made in Portland</p></div><span className="about-v2-project__go">Order →</span></button>
+        </div>
+      </div></ScrollReveal></section>
 
-      {/* WHY THIS EXISTS */}
-      <section className="about-v2-why" aria-labelledby="about-why-title">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <div className="about-v2-why__intro">
-              <div className="about-v2-why__heading">
-                <div className="about-v2__kicker about-v2__kicker--lime">Why this exists</div>
-                <h2 id="about-why-title" className="about-v2-why__h2">
-                  Not your daddy&apos;s{" "}
-                  <span className="about-v2-why__h2-accent">Craigslist</span>
-                </h2>
-              </div>
+      <section className="about-v2-values" aria-labelledby="about-values-title"><ScrollReveal><div className="about-v2__inner"><div className="about-v2__kicker about-v2__kicker--pink">Transparency</div><h2 id="about-values-title" className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>Values &amp; the <span className="hl">rules</span></h2><div className="about-v2-values__grid">{VALUES.map(item => <div key={item.title} className="about-v2-values__item"><span className="mark" aria-hidden="true">✓</span><span><strong>{item.title}</strong> {item.text}</span></div>)}</div></div></ScrollReveal></section>
 
-              <div className="about-v2-why__copy">
-                <p>
-                  Every city used to have one ugly, free page where everything got posted. A room. A
-                  gig. A couch to give away. The guy you locked eyes with and never saw again. It was
-                  the closest thing we had to a public square, and plenty of us found our first
-                  apartment, first job, and first everything else on it.
-                </p>
-                <p>
-                  Then came Facebook and Instagram, and we did not just move in. We built. Groups
-                  turned into real infrastructure. A page was how a bar existed. An event was how a
-                  night became real. Mutual aid, sober meetups, leather clubs, house parties, whole
-                  organizations with a decade of history behind them, all of it running on somebody
-                  else&apos;s land.
-                </p>
-                <p>
-                  It worked well. Then it stopped. Accounts switched off with no reason given, pages
-                  unpublished, our nights labeled adult content. Appeals went into a form and never
-                  came back out. That is not a grudge, it is just what happens when the room belongs
-                  to somebody else.
-                </p>
-                <p className="about-v2-why__turn">
-                  So the board is back. Same shape. Different owner.
-                </p>
-              </div>
-            </div>
+      <section className="about-v2-faq" aria-labelledby="about-faq-title"><ScrollReveal><div className="about-v2__inner"><div className="about-v2-faq__grid"><div className="about-v2-faq__heading"><div className="about-v2__kicker about-v2__kicker--cyan">FAQ</div><h2 id="about-faq-title" className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>Good questions</h2></div><div className="about-v2-faq__list">{FAQ.map(item => <details key={item.q} className="about-v2-faq__item"><summary>{item.q}<span className="ico" aria-hidden="true">+</span></summary><div className="answer">{item.a}</div></details>)}</div></div></div></ScrollReveal></section>
 
-            <ul className="about-v2-why__rows">
-              {WHY_ROWS.map(row => (
-                <li key={row.now} className="about-v2-why__row">
-                  <span className="about-v2-why__old">{row.old}</span>
-                  <span className="about-v2-why__arrow" aria-hidden="true">&rarr;</span>
-                  <Link href={row.href} className="about-v2-why__now">
-                    {row.now}
-                  </Link>
-                  <span className="about-v2-why__text">{row.text}</span>
-                </li>
-              ))}
-            </ul>
+      <section id="submit-an-idea" className="about-v2-ideas" aria-labelledby="about-ideas-title"><ScrollReveal><div className="about-v2__inner about-v2-ideas__grid">
+        <div className="about-v2-ideas__intro"><div className="about-v2__kicker about-v2__kicker--lime">Help shape Zaylist</div><h2 id="about-ideas-title" className="about-v2__title" style={{ ["--_c" as string]: "var(--lime)" }}>Tell me what&apos;s <span className="hl">missing.</span></h2><p>Need a feature, a board, a better flow, or something Portland does not have yet? Send the idea here. The requests that keep coming up shape what gets built next.</p><Link href="/events"><Button as="span" variant="solid" accent="lime" size="lg" arrow>Explore Zaylist</Button></Link></div>
+        {ideaStatus === "sent" ? <div className="about-v2-ideas__sent" role="status"><strong>Idea received.</strong><span>Thank you for helping build what Portland needs next.</span><Button type="button" variant="neon" accent="lime" size="md" onClick={() => setIdeaStatus("idle")}>Send another idea</Button></div> :
+          <form className="about-v2-ideas__form pdx-glass-rebind" onSubmit={submitIdea}>
+            <label><span>Your name <small>optional</small></span><input value={idea.name} onChange={event => setIdea(current => ({ ...current, name: event.target.value }))} autoComplete="name" /></label>
+            <label><span>Email <small>optional</small></span><input type="email" value={idea.email} onChange={event => setIdea(current => ({ ...current, email: event.target.value }))} autoComplete="email" /></label>
+            <label className="about-v2-ideas__message"><span>What should Zaylist add or make better?</span><textarea required rows={5} value={idea.message} onChange={event => setIdea(current => ({ ...current, message: event.target.value }))} /></label>
+            <label className="about-v2-ideas__trap" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={idea.website} onChange={event => setIdea(current => ({ ...current, website: event.target.value }))} /></label>
+            <Button type="submit" variant="neon" accent="lime" size="md" disabled={ideaStatus === "sending"}>{ideaStatus === "sending" ? "Sending..." : "Submit idea"}</Button>
+            {ideaStatus === "error" && <p className="about-v2-ideas__error" role="alert">That did not send. Please try again.</p>}
+          </form>}
+      </div></ScrollReveal></section>
 
-            <div className="about-v2-why__close">
-              <h3 className="about-v2-why__sub">One more option, with one difference</h3>
-              <p>
-                There is no shortage of apps and this is one more of them, I know that. The
-                difference is what happens after you use it. About once a month I sit down with everything
-                people have sent in, compile it, and the things that keep coming up get built into
-                the fabric of the site. No algorithm deciding what counts, no score, no test group.
-                A person reading it and then making the thing. Most of what is already on here
-                arrived exactly that way.
-              </p>
-              <p>
-                I do not see a reason to ever turn that off.
-              </p>
-              <p>
-                The rest of it is simple. You need a name to post, so the spam stays out. Nothing
-                organic is for sale. Your data is not either. And if something ever comes down you
-                get a reason and a person to talk to, and that person is me.
-              </p>
-              <p className="about-v2-why__punch">
-                The roadmap is whatever you keep asking for.
-              </p>
-              <div className="about-v2-why__cta">
-                <Button
-                  type="button"
-                  variant="neon"
-                  accent="lime"
-                  size="md"
-                  onClick={() => setContactModal("message")}
-                >
-                  Tell me what is missing
-                </Button>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* MADE BY TUCKER */}
-      <section className="about-v2-creator">
-        <ScrollReveal delay={30}>
-          <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--lime">Who&apos;s behind it</div>
-            <h2 className="about-v2__title about-v2__title--xl">
-              Made by <span className="hl">Tucker Max</span>
-            </h2>
-
-            <div className="about-v2-creator__grid">
-              <div className="about-v2-creator__photo-col">
-                <div className="about-v2-creator__photo">
-                  <div className="about-v2-creator__photo-frame">
-                    <img
-                      src="/about/tucker-portrait.jpg"
-                      alt="Tucker Max"
-                      width={864}
-                      height={1152}
-                      decoding="async"
-                    />
-                  </div>
-                  <span className="about-v2-creator__hire">Available for hire · full time</span>
-                  <div className="about-v2-creator__stickers">
-                    <Link href={PROFILE_URL} className="about-v2-creator__pg-sticker">
-                      <svg
-                        width="19"
-                        height="19"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                      </svg>
-                      Follow Me On Zaylist
-                    </Link>
-                    <a
-                      href={IG_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="about-v2-creator__ig-sticker"
-                    >
-                      <svg
-                        width="19"
-                        height="19"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <rect x="2" y="2" width="20" height="20" rx="5.5" />
-                        <circle cx="12" cy="12" r="4.2" />
-                        <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
-                      </svg>
-                      Follow @tucker_pdmax
-                    </a>
-                  </div>
-                </div>
-                <div className="about-v2-creator__credits">
-                  Artist · Yes Coach · Brand promoter
-                  <br />
-                  Digg&apos;n For Bones · Former Oregon State Pet
-                </div>
-              </div>
-
-              <div className="about-v2-creator__body">
-                <p>
-                  Hi, I&apos;m Tucker. I run Yes Coach, I host LockerRoom at The Eagle, and I build
-                  things for this scene when nobody else will. No engineering degree. Just every tool
-                  I could get my hands on and a stupid number of hours.
-                </p>
-                <blockquote className="about-v2-creator__pull">
-                  <p>
-                    This community keeps each other going. You showed up for me, and this is me doing
-                    something back.
-                  </p>
-                </blockquote>
-                <p>
-                  I&apos;m between full-time gigs and pouring all of it into this. If you have a role
-                  that deserves that kind of energy, I&apos;m available.
-                </p>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* OPEN FOR BUSINESS + COLLABORATIVE PROJECTS */}
-      <section className="about-v2-work">
-        <ScrollReveal>
-          <div className="about-v2__inner about-v2__inner--work">
-            <div className="about-v2-work__card pdx-glass-rebind">
-              <div className="about-v2-work__top">
-                <span className="about-v2-work__badge">
-                  <span className="dot" aria-hidden="true" />
-                  Open for business
-                </span>
-                <span className="about-v2-work__loc">Portland, OR · Collabs welcome</span>
-              </div>
-              <h3 className="about-v2-work__headline">
-                Open for{" "}
-                <span className="about-v2-work__headline-cyan">business</span>
-                {" "}and{" "}
-                <span className="about-v2-work__headline-lime">collaborative projects.</span>
-              </h3>
-              <p className="about-v2-work__support">
-                Brand work, events, platforms, and joint projects that move real people. If you have a
-                pitch or a half-formed idea, send it.
-              </p>
-              <div className="about-v2-work__chips" aria-label="Collaboration focus areas">
-                <span className="about-v2-work__chip">Brand &amp; marketing</span>
-                <span className="about-v2-work__chip">Events &amp; community</span>
-                <span className="about-v2-work__chip">Collaborative projects</span>
-              </div>
-              <div className="about-v2-work__footer">
-                <span className="about-v2-work__foot-note">
-                  Business inquiries, collabs, and a good handshake on request.
-                </span>
-                <div className="about-v2-work__ctas">
-                  <Link href="/resume" className="about-v2-work__cta-link">
-                    <Button as="span" variant="solid" accent="cyan" size="md" arrow className="about-v2-work__btn">
-                      View resume
-                    </Button>
-                  </Link>
-                  <Button
-                    type="button"
-                    variant="neon"
-                    accent="cyan"
-                    size="md"
-                    className="about-v2-work__btn"
-                    onClick={() => setContactModal("message")}
-                  >
-                    Pitch me
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* PROJECT CARDS */}
-      <section className="about-v2-projects">
-        <ScrollReveal delay={30}>
-          <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--pink">Also made in Portland</div>
-            <div className="about-v2-projects__list">
-              <button
-                type="button"
-                className="about-v2-project about-v2-project--button"
-                onClick={() => void openYesCoachCard()}
-              >
-                <img src="/posters/stank-yes-coach.jpg" alt="" width={120} height={120} />
-                <div>
-                  <div className="about-v2-project__meta">Yes Coach · Stank</div>
-                  <h3 className="about-v2-project__title">Stank: Yes Coach!</h3>
-                  <p className="about-v2-project__desc">Hosted by Tucker Max and Spencer Stanks · Sat, Sanctuary Club · Pride Week 2026</p>
-                </div>
-                <span className="about-v2-project__go">Open event →</span>
-              </button>
-
-              <a
-                className="about-v2-project"
-                href={DIGGN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="/about/diggn-for-bones.jpg" alt="" width={120} height={120} />
-                <div>
-                  <div className="about-v2-project__meta">Podcast · Season 3</div>
-                  <h3 className="about-v2-project__title">Digg&apos;n For Bones</h3>
-                  <p className="about-v2-project__desc">Produced by Tucker Max · new episodes out now on Spotify</p>
-                </div>
-                <span className="about-v2-project__go">Listen →</span>
-              </a>
-
-              <button
-                type="button"
-                className="about-v2-project about-v2-project--button"
-                onClick={() => setContactModal("order")}
-              >
-                <img
-                  src="/about/disco/card-thumb.jpg"
-                  alt="Constrained and Sparkling Bro, shibari disco body sculptures"
-                  width={120}
-                  height={120}
-                />
-                <div>
-                  <div className="about-v2-project__meta">Art · Made to order · $1600 for 18″</div>
-                  <h3 className="about-v2-project__title">Constrained and Sparkling Bro</h3>
-                  <p className="about-v2-project__desc">
-                    Disco bodies in shibari · custom mirror mosaic · ~1 month · 14″ · 18″ · 24″ + bigger
-                  </p>
-                </div>
-                <span className="about-v2-project__go">Order →</span>
-              </button>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* SUPPORT: donate + sponsors merged */}
-      <section className="about-v2-support">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <SupportPanel />
-            <AffiliatePartners />
-            <SponsorsPanel onPitch={() => setContactModal("sponsor")} />
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* INFRASTRUCTURE */}
-      <section className="about-v2-infra">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--cyan">Necessary homosexual infrastructure</div>
-            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-              The whole city, <span className="hl">not the sanitized bits</span>
-            </h2>
-            <InfrastructureGrid />
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* VALUES */}
-      <section className="about-v2-values">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <div className="about-v2__kicker about-v2__kicker--pink">Transparency</div>
-            <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--pink)" }}>
-              Values &amp; the <span className="hl">rules</span>
-            </h2>
-            <div className="about-v2-values__grid">
-              {VALUES.map(item => (
-                <div key={item.title} className="about-v2-values__item">
-                  <span className="mark" aria-hidden="true">✓</span>
-                  <span>
-                    <strong>{item.title}</strong> {item.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* FAQ */}
-      <section className="about-v2-faq">
-        <ScrollReveal>
-          <div className="about-v2__inner">
-            <div className="about-v2-faq__grid">
-              <div className="about-v2-faq__heading">
-                <div className="about-v2__kicker about-v2__kicker--cyan">FAQ</div>
-                <h2 className="about-v2__title" style={{ ["--_c" as string]: "var(--cyan)" }}>
-                  Good questions
-                </h2>
-              </div>
-              <div className="about-v2-faq__list">
-                {FAQ.map(item => (
-                  <details key={item.q} className="about-v2-faq__item">
-                    <summary>
-                      {item.q}
-                      <span className="ico" aria-hidden="true">+</span>
-                    </summary>
-                    <div className="answer">{item.a}</div>
-                  </details>
-                ))}
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      {/* CLOSE */}
       <hr className="pdx-rainbow-rule about-v2-seam" aria-hidden="true" />
-      <section className="about-v2-close">
-        <div className="about-v2-close__row">
-          <span>Take care of each other.</span>
-          <span>zaylist.com</span>
-        </div>
-      </section>
-
-      {contactModal && (
-        <PortfolioContactModal
-          variant={contactModal}
-          onClose={() => setContactModal(null)}
-        />
-      )}
-
-      {selectedEvent && (
-        <EventModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          onEventUpdated={updated => setSelectedEvent(updated)}
-        />
-      )}
+      <section className="about-v2-close"><div className="about-v2-close__row"><span>Take care of each other.</span><span>zaylist.com</span></div></section>
+      {contactModal && <PortfolioContactModal variant={contactModal} onClose={() => setContactModal(null)} />}
     </div>
   );
 }
