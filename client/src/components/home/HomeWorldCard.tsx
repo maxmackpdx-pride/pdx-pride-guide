@@ -26,7 +26,7 @@ import {
   type WorldFlyer,
   type WorldItem,
   type WorldPanel,
-  type WorldPill,
+  type WorldTodayItem,
   type WorldPosting,
   type WorldRow,
   type WorldSpec,
@@ -45,7 +45,7 @@ export type HomeWorldCardProps = {
   panels?: WorldPanel[];
   postings?: WorldPosting[];
   items?: WorldItem[];
-  pills?: WorldPill[];
+  today?: WorldTodayItem[];
 };
 
 /**
@@ -382,7 +382,7 @@ export default function HomeWorldCard({
   panels = [],
   postings = [],
   items = [],
-  pills = [],
+  today = [],
 }: HomeWorldCardProps) {
   const motifs = WORLD_MOTIFS[world.key] ?? [];
   const isFlyerCard = world.slot === "flyer";
@@ -518,23 +518,36 @@ export default function HomeWorldCard({
             </div>
           ) : null}
 
-          {world.slot === "pills" ? (
+          {world.slot === "today" ? (
             /* The headline names this slot, so it carries no header of its own.
-               Five pills fill the slot, ten pack down and scroll inside it, and
-               the card box is the same 648px either way. */
-            <div className="home-world__pills" data-dense={pills.length > 6 ? "1" : undefined}>
-              {pills.map(pill => (
+               Five rows fill the slot, ten pack down and scroll inside it, and
+               the card box is the same 648px either way.
+
+               The day is read down the times, not across five identical
+               buttons, so the time leads each row in one right-aligned mono
+               column and the spine joins them. Row zero is the next thing by
+               construction: the feed is filtered to what is still to come and
+               sorted earliest first, so it gets the filled node rather than a
+               separate "next" label the other nine cards have no room for. */
+            <div className="home-world__today" data-dense={today.length > 6 ? "1" : undefined}>
+              {today.map((entry, index) => (
                 <Link
-                  key={pill.id}
-                  href={pill.href}
-                  className="home-world__pill"
-                  style={{ ["--pill-c" as string]: pill.accent }}
+                  key={entry.id}
+                  href={entry.href}
+                  className="home-world__today-row"
+                  data-next={index === 0 ? "1" : undefined}
+                  style={{ ["--row-c" as string]: entry.accent }}
                 >
-                  <span className="home-world__pill-label">{pill.label}</span>
-                  <span className="home-world__pill-time">{pill.time}</span>
+                  <span className="home-world__today-time">{entry.time}</span>
+                  <span className="home-world__today-copy">
+                    <span className="home-world__today-title">{entry.label}</span>
+                    {entry.sub ? (
+                      <span className="home-world__today-sub">{entry.sub}</span>
+                    ) : null}
+                  </span>
                 </Link>
               ))}
-              {pills.length && !pills[0].isLive ? (
+              {today.length && !today[0].isLive ? (
                 <span className="home-world__demo home-world__demo--inline">Demo</span>
               ) : null}
             </div>

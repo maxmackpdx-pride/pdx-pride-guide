@@ -10,7 +10,7 @@
  * Two feeds are deliberately capped rather than paged:
  *   EVENTZ  - the next 10 events, so the flyer rotation is tonight and soon,
  *             never the whole calendar.
- *   Z/SPACE - the next 10 things still to come today, so "Happening today"
+ *   Z/SPACE - the next 10 things still to come today, so "Today, in order"
  *             cannot drift into tomorrow.
  */
 
@@ -42,16 +42,16 @@ import {
   DEMO_FLYER,
   DEMO_ITEMS,
   DEMO_OUTZ_ROWS,
-  DEMO_PILLS,
   DEMO_PLACE_LOGOS,
   DEMO_POSTINGS,
+  DEMO_TODAY,
   WORLD_FEED_LIMITS,
   type WorldFlyer,
   type WorldItem,
   type WorldPanel,
-  type WorldPill,
   type WorldPosting,
   type WorldRow,
+  type WorldTodayItem,
 } from "@/lib/homeWorlds";
 
 const PACIFIC_TZ = "America/Los_Angeles";
@@ -72,11 +72,11 @@ type SellzRow = {
 type BeachCheckin = { id: number };
 
 /**
- * Pill colours rotate through the board tokens so a day's worth of events reads
- * as the rainbow. Using the day token instead would paint the whole column one
- * colour, because every pill is the same day by definition.
+ * Row colours rotate through the board tokens so a day's worth of events reads
+ * as the rainbow down the spine. Using the day token instead would paint the
+ * whole column one colour, because every row is the same day by definition.
  */
-const PILL_ACCENTS = [
+const TODAY_ACCENTS = [
   "var(--day-thu, #00ffff)",
   "var(--board-gigs, #6e3dff)",
   "var(--neon-green, #39ff14)",
@@ -138,7 +138,7 @@ export type HomeWorldsData = {
   panels: WorldPanel[];
   postings: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPosting[]>;
   items: WorldItem[];
-  pills: WorldPill[];
+  today: WorldTodayItem[];
 };
 
 export function useHomeWorlds(): HomeWorldsData {
@@ -397,7 +397,7 @@ export function useHomeWorlds(): HomeWorldsData {
   /* ── 09 Z/SPACE ─────────────────────────────────────────────────────────
      Today only, and only the next ten. An event that already ended is not
      happening today any more, and tomorrow is not today. */
-  const pills = useMemo<WorldPill[]>(() => {
+  const today = useMemo<WorldTodayItem[]>(() => {
     const now = Date.now();
     const todayKey = pacificCalendarDate(new Date(now).toISOString());
     const live = events
@@ -410,16 +410,17 @@ export function useHomeWorlds(): HomeWorldsData {
         (a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0),
       )
       .slice(0, WORLD_FEED_LIMITS.today)
-      .map<WorldPill>((event, index) => ({
-        id: `pill-${event.id}`,
+      .map<WorldTodayItem>((event, index) => ({
+        id: `today-${event.id}`,
         href: eventPath(event.id, event.title, event.dayOfWeek),
-        label: [event.title, event.venueName].filter(Boolean).join(" · "),
+        label: event.title,
+        sub: event.venueName || null,
         time: clockLabel(event.dateStart),
-        accent: PILL_ACCENTS[index % PILL_ACCENTS.length],
+        accent: TODAY_ACCENTS[index % TODAY_ACCENTS.length],
         isLive: true,
       }));
-    return live.length ? live : DEMO_PILLS;
+    return live.length ? live : DEMO_TODAY;
   }, [events]);
 
-  return { outzRows, flyers, panels, postings, items, pills };
+  return { outzRows, flyers, panels, postings, items, today };
 }
