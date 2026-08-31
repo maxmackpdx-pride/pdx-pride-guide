@@ -94,6 +94,7 @@ export function HouseholdStack({
           type="button"
           className="pdx-household-stack__pet"
           title={pet.species ? `${pet.name}, ${pet.species}` : pet.name}
+          aria-label={pet.species ? `View ${pet.name}, ${pet.species}` : `View ${pet.name}`}
           style={{ width: petPx, height: petPx, fontSize: Math.round(petPx * 0.4) }}
           onClick={
             onSelect

@@ -607,6 +607,8 @@ export default function Events() {
                   ))}
                   <div className="events-filter-search">
                     <SearchInput
+                      id="event-search"
+                      aria-label={pastView ? "Search past events" : "Search events"}
                       placeholder={pastView ? "Search past events..." : "Search events..."}
                       value={searchQuery}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}

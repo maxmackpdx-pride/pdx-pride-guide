@@ -953,7 +953,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             <div className="directory-filters__search">
               <SearchInput
                 id="directory-search"
-                label={undefined}
+                aria-label={isSpaces ? "Search MY SQUADZ" : "Search PLACEZ"}
                 placeholder={isSpaces ? "Search MY SQUADZ…" : "Search PLACEZ…"}
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}

@@ -167,12 +167,21 @@ export const LIVE_MAP_CHROME_CSS = `
 }
 .pdx-map-live .leaflet-control-attribution a{ color:var(--text-meta, #aaa) !important; }
 .pdx-map-live .leaflet-control-zoom a{
+  width:44px !important;
+  height:44px !important;
+  line-height:42px !important;
   background:#111 !important;
   color:var(--lime, #CCFF00) !important;
   border:1px solid #000 !important;
   box-shadow:inset 0 1px 2px rgba(0,0,0,.7) !important;
 }
 .pdx-map-live .leaflet-control-zoom a:hover{ background:#222 !important; }
+.pdx-map-live .leaflet-control-zoom a:focus-visible{
+  outline:3px solid var(--chrome-focus, rgba(0,255,255,.55)) !important;
+  outline-offset:2px;
+  position:relative;
+  z-index:2;
+}
 /* Map key panel: OLED glass well (swatches stay ring-pin shapes) */
 .pdx-map-live .map-legend{
   color:#c8c5bc;

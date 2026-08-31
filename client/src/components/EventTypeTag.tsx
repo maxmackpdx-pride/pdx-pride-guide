@@ -48,6 +48,8 @@ export default function EventTypeTag({
         data-type={label}
         onClick={onClick}
         data-testid={testId}
+        aria-label={`Filter events by ${label}`}
+        aria-pressed={active}
         style={activeStyle}
       >
         {label}

@@ -3547,7 +3547,11 @@ html.calm-mode .inbox-overlay,
   align-items: center;
 }
 
-.events-page .zine-filter-bar .filter-tag {
+.events-page .event-type-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   font-size: 0.88rem;
   padding: 2px 12px;
   letter-spacing: 0.07em;
@@ -5362,7 +5366,7 @@ html.calm-mode .inbox-overlay,
     padding: 9px 44px 9px 14px;
   }
 
-  .events-page .zine-filter-bar .filter-tag {
+  .events-page .event-type-filter {
     font-size: 0.72rem;
     padding: 1px 9px;
     line-height: 1.1;
