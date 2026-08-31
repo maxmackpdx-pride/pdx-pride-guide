@@ -1,5 +1,5 @@
 /**
- * Z/OUT public data contract. Locations arrive from named government sources;
+ * OUTZ public data contract. Locations arrive from named government sources;
  * community posts are deliberately a separate layer and never rewrite official
  * access or safety information.
  */
@@ -78,7 +78,7 @@ export type OutzSnapshot = {
 
 export type OutzPlaceKind = OutzDestinationKind | OutzCatalogPlace["kind"] | OutzCommunityStay["kind"];
 
-/** A current OUTZ listing with a stable human-readable Z/ address. */
+/** A current OUTZ listing with a stable human-readable product address. */
 export type OutzPlace = {
   id: string;
   name: string;
@@ -105,7 +105,7 @@ export function outzPlaceSlug(place: Pick<OutzPlace, "id" | "name">) {
 }
 
 export function outzPlaceHref(place: Pick<OutzPlace, "id" | "name">) {
-  return `/z/out/${outzPlaceSlug(place)}`;
+  return `/outz/${outzPlaceSlug(place)}`;
 }
 
 export function outzPlacesFromSnapshot(snapshot: OutzSnapshot): OutzPlace[] {

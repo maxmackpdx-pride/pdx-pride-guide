@@ -163,6 +163,49 @@ export const insertBusinessSchema = createInsertSchema(businesses).omit({ id: tr
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
 export type Business = typeof businesses.$inferSelect;
 
+// Z/ Communities. Products remain separate objects and routes; only actual
+// communities receive a z/ identity.
+export const communities = sqliteTable("communities", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  imageUrl: text("image_url"),
+  neighborhood: text("neighborhood"),
+  visibility: text("visibility").notNull().default("public"),
+  membershipPolicy: text("membership_policy").notNull().default("open"),
+  rules: text("rules").notNull().default("[]"),
+  sourceBusinessId: integer("source_business_id").unique(),
+  createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
+});
+
+export const communityMemberships = sqliteTable("community_memberships", {
+  communityId: text("community_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").notNull().default("member"),
+  status: text("status").notNull().default("active"),
+  rulesVersion: text("rules_version").notNull().default("1"),
+  joinedAt: text("joined_at").notNull().default(""),
+});
+
+export const communityPosts = sqliteTable("community_posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  communityId: text("community_id").notNull(),
+  userId: integer("user_id").notNull(),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("published"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
+export const communityRelationships = sqliteTable("community_relationships", {
+  communityId: text("community_id").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  relationshipType: text("relationship_type").notNull().default("related"),
+  createdAt: text("created_at").notNull().default(""),
+});
+
 // Promoter accounts (session-based, simple)
 export const promoters = sqliteTable("promoters", {
   id: integer("id").primaryKey({ autoIncrement: true }),

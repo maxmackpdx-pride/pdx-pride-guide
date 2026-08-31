@@ -171,7 +171,7 @@ export default function PrideWork() {
     if (!isLoading) trackProductEvent("time_to_content", "gigz", performance.now() - contentStartedAt.current);
   }, [isLoading]);
 
-  // Deep-links from either /z/gigz or the indexed route open that gig expanded.
+  // Canonical product deep-links open the requested gig expanded.
   useEffect(() => {
     if (deepLinkHandled.current || !gigs.length) return;
     const pid = new URLSearchParams(window.location.search).get("post");
@@ -808,7 +808,7 @@ export function GigListingCard({
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/z/gigz?post=${gig.id}`;
+    const url = `${window.location.origin}/pride-work?post=${gig.id}`;
     const canShare = typeof navigator.share === "function";
     try {
       if (canShare) await navigator.share({ title: gig.title, url });

@@ -217,7 +217,8 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/contact",
     "/sponsors",
     "/access",
-    "/z/out",
+    "/z",
+    "/outz",
     "/next",
     "/resume",
     "/legal",
@@ -312,6 +313,14 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
   "/directory": {
     title: "OUR PLACEZ | Zaylist",
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
+  },
+  "/z": {
+    title: "Z/ Communities | Zaylist",
+    description: "Portland queer communities with real memberships, rules, moderators, posts, and related events.",
+  },
+  "/outz": {
+    title: "OUTZ | Zaylist",
+    description: "Outdoor recreation destinations, live conditions, and community updates from Zaylist.",
   },
   "/schedule": {
     title: "Portland Queer Events Schedule | Zaylist",

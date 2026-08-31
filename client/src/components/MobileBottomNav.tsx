@@ -200,8 +200,8 @@ export default function MobileBottomNav() {
       {spaceOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site" data-accent="violet" role="dialog" aria-label="Z/Space">
-            <h3>Z/Space</h3>
+          <div className="hub-more-sheet hub-more-sheet--site" data-accent="violet" role="dialog" aria-label="Z/ Communities">
+            <h3>Z/ Communities</h3>
             {BOARD_NAV.map(item => (
               <Link
                 key={item.href}
@@ -374,7 +374,7 @@ export default function MobileBottomNav() {
             className={tabClass(boardsActive || spaceOpen || outzOpen, "purple")}
             aria-expanded={spaceOpen}
             aria-haspopup="dialog"
-            aria-label="Z/Space"
+            aria-label="Z/ Communities"
             onClick={handleSpace}
           >
             <TabIcon>
@@ -383,7 +383,7 @@ export default function MobileBottomNav() {
               <rect x="3" y="14" width="7" height="7" rx="1" />
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </TabIcon>
-            <span>Z/Space</span>
+            <span>Z/</span>
           </button>
 
           <button

@@ -137,7 +137,7 @@ export default function Gifting() {
     return { ALL: active.length, GIFT: gift, ISO: iso, GRAB: grab };
   }, [posts]);
 
-  // Deep-links from either /z/gifz or the indexed route open that post expanded.
+  // Canonical product deep-links open the requested post expanded.
   useEffect(() => {
     if (deepLinkHandled.current || !posts.length) return;
     const pid = new URLSearchParams(window.location.search).get("post");

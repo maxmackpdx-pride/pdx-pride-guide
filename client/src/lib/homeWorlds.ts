@@ -152,7 +152,7 @@ export const WORLDS: WorldSpec[] = [
     eyebrow: "Join the chat",
     body: "Camping, hiking, trailheads and beaches, with the access notes and the people who make the trip better. Every address has a check-in chat, plus a planning chat for a day you're booking ahead.",
     action: "Join the chat",
-    href: "/z/out",
+    href: "/outz",
     accent: "var(--neon-orange, #ff6600)",
     mark: "/brand/family/outz.svg",
     slot: "rows",
@@ -243,10 +243,10 @@ export const WORLDS: WorldSpec[] = [
   {
     key: "zspace",
     number: "09",
-    title: "Z/SPACE",
+    title: "Z/ COMMUNITIES",
     /* Kept inside the eyebrow's one nowrap line: "Every board, one address"
        was the only kicker on the rail that ran past its box and ellipsed. */
-    eyebrow: "Every board at once",
+    eyebrow: "Find your people",
     /* No wordmark by request: the headline carries this card, and the list
        below it is the subject. The eyebrow already names the destination.
 
@@ -255,12 +255,12 @@ export const WORLDS: WorldSpec[] = [
        eyebrow and the action row. The old copy said "every address in the
        namespace, and everything on it today" over a list that is today's
        events, and a card should not promise more than it shows. */
-    headline: "Today, in order",
+    headline: "Where people belong",
     /* Two lines is the whole body box on this rail, and at rail card width
        that is about sixty characters, so this says one thing and stops. The
        whole-namespace promise is the eyebrow's and the action row's. */
-    body: "What is left of today, earliest first.",
-    action: "Open Z/SPACE",
+    body: "Memberships, rules, posts, and the gatherings around them.",
+    action: "Open Communities",
     href: "/z",
     accent: "var(--board-zspace, #8f5cff)",
     mark: null,
@@ -290,7 +290,7 @@ export const WORLDS: WorldSpec[] = [
 export const DEMO_OUTZ_ROWS: WorldRow[] = [
   {
     id: "rooster-rock",
-    href: "/z/out/rooster-rock",
+    href: "/outz/rooster-rock",
     name: "Rooster Rock",
     stats: "EASY · RIVER BEACH · THE GORGE",
     sub: "The River Brats crew. NUDE BEACH. Join today's group chat here.",
@@ -299,7 +299,7 @@ export const DEMO_OUTZ_ROWS: WorldRow[] = [
   },
   {
     id: "sauvie-island",
-    href: "/z/out/sauvie-island",
+    href: "/outz/sauvie-island",
     name: "Sauvie Island · Collins Beach",
     stats: "EASY · ISLAND BEACH · 0.5 MI WALK-IN",
     sub: "The Sauvie Sirens crew. NUDE BEACH. Join today's group chat here.",
@@ -308,7 +308,7 @@ export const DEMO_OUTZ_ROWS: WorldRow[] = [
   },
   {
     id: "angels-rest",
-    href: "/z/out",
+    href: "/outz",
     name: "Angel's Rest Trailhead",
     stats: "MODERATE · 4.8 MI · 1,500 FT GAIN",
     sub: "Columbia Gorge. Views over the river at the top. Join today's group chat here.",

@@ -226,7 +226,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/z/gifz?post=${post.id}`;
+    const url = `${window.location.origin}/gifting?post=${post.id}`;
     const canShare = typeof navigator.share === "function";
     try {
       if (canShare) await navigator.share({ title: post.title, url });

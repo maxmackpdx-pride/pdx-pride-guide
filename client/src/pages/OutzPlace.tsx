@@ -63,7 +63,7 @@ function formatChatClose(expiresAt: string | null) {
 }
 
 export default function OutzPlace() {
-  const [, params] = useRoute("/z/out/:placeSlug");
+  const [, params] = useRoute("/outz/:placeSlug");
   const slug = params?.placeSlug;
   const { user } = useAuth();
   const { toast } = useToast();
@@ -173,12 +173,12 @@ export default function OutzPlace() {
   });
 
   usePageSeo(
-    place ? `${place.name} · Z/OUT | Zaylist` : "OUTZ place | Zaylist",
-    place ? `${place.detail} Check in and join the group chat for this Z/OUT destination.` : "OUTZ destination check-in and group chat.",
+    place ? `${place.name} · OUTZ | Zaylist` : "OUTZ place | Zaylist",
+    place ? `${place.detail} Check in and join the group chat for this OUTZ destination.` : "OUTZ destination check-in and group chat.",
   );
 
   if (!snapshotQuery.isLoading && !place) {
-    return <div className="outz-surface outz-place--missing"><h1>That OUTZ address isn’t current.</h1><Link href="/z/out">Back to OUTZ</Link></div>;
+    return <div className="outz-surface outz-place--missing"><h1>That OUTZ address isn’t current.</h1><Link href="/outz">Back to OUTZ</Link></div>;
   }
 
   const alert = destination?.alerts[0] ?? null;
@@ -199,7 +199,7 @@ export default function OutzPlace() {
             <span className="outz-hero__crumb">
               <Link href="/">Zaylist</Link>
               <span className="outz-hero__crumb-sep" aria-hidden="true">/</span>
-              <Link href="/z/out">Z/OUT</Link>
+              <Link href="/outz">OUTZ</Link>
             </span>
           }
           title={place?.name || "Loading place"}

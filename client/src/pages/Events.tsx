@@ -10,7 +10,6 @@ import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import { admissionFromFilterTag } from "@shared/admission";
 import { EVENT_TYPE_FILTERS, isEventTypeFilterLabel } from "@shared/eventTypeTags";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
-import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import ListingCard from "@/components/ds/adapters/ListingCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import PosterAdCard from "@/components/ads/PosterAdCard";
@@ -514,7 +513,6 @@ export default function Events() {
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">
-      <ZBoardAddressStrip path="happening" board="EVENTZ" />
       <EventsHero eventCount={upcomingCount} stats={heroStats} />
 
       <EventsTabBar activeTab={activeTab} onSelect={setActiveTab} />

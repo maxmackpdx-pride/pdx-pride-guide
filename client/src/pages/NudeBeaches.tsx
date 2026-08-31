@@ -7,7 +7,6 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { shareCardUrl } from "@shared/shareCards";
 import { useToast } from "@/hooks/use-toast";
 import NudeBeachesHero from "@/components/NudeBeachesHero";
-import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
@@ -229,7 +228,6 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
     <div
       className={`zine-page nude-beaches-page pdx-glass-rebind board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
     >
-      <ZBoardAddressStrip path={`out/${beachId}`} board={isRooster ? "Rooster Rock" : "Sauvie Island"} />
       <header className="nude-beaches-header">
         <NudeBeachesHero
           key={beachId}
@@ -283,7 +281,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
       <section className="nude-outz-link pdx-glass-card pdx-glass-rebind" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
         <p>BEYOND THE BEACH</p>
         <h2>Camping, trails, and practical trip leads live in OUTZ.</h2>
-        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/z/out#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/outz#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
           MORE OUTZ
         </Link>
       </section>

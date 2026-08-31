@@ -1,5 +1,5 @@
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
@@ -19,8 +19,8 @@ import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup"
 import SpectrumLoader from "./components/SpectrumLoader";
 
 /** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
- *  on those two routes only, not on every /z/out/ destination page. */
-const RIVER_BRATS_INTRO_PATHS = new Set(["/z/out/rooster-rock", "/z/out/sauvie-island"]);
+ *  on those two routes only, not on every OUTZ destination page. */
+const RIVER_BRATS_INTRO_PATHS = new Set(["/outz/rooster-rock", "/outz/sauvie-island"]);
 
 /** Mount intro outside RouteBoundary so a page crash cannot kill the popup. */
 function RiverBratsIntroOnBeaches() {
@@ -46,8 +46,7 @@ function ScrollToTop() {
   return null;
 }
 import Home from "./pages/Home";
-import { Z_ADDRESSES, Z_ENCODED_ALIASES, zUrl } from "@shared/zNamespace";
-import { Z_CATEGORY_ADDRESSES } from "./lib/zCategoryAddresses";
+import { LEGACY_Z_PRODUCT_REDIRECTS } from "@shared/zNamespace";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
 import ResetPassword from "./pages/ResetPassword";
@@ -79,28 +78,10 @@ const Outz = lazy(() => import("./pages/Outz"));
 const OutzPlace = lazy(() => import("./pages/OutzPlace"));
 const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
-const ZAddressPending = lazy(() => import("./pages/ZAddressPending"));
 const ZIndex = lazy(() => import("./pages/ZIndex"));
+const Community = lazy(() => import("./pages/Community"));
 const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const NotFound = lazy(() => import("./pages/not-found"));
-
-/**
- * Board page for each existing route, so the `z/` address table drives routing
- * instead of a second hand-maintained list that can drift from it.
- */
-const PAGE_FOR_ROUTE: Record<string, ComponentType<any>> = {
-  "/events": Events,
-  "/the-hauz": Housing,
-  "/gifting": Gifting,
-  "/sellz": Sellz,
-  "/pride-work": PrideWork,
-  "/spotted": MissedConnections,
-  "/directory": Directory,
-  "/z/out": Outz,
-  "/z/out/rooster-rock": RoosterRock,
-  "/z/out/sauvie-island": SauvieIsland,
-  "/next": Darkroom,
-};
 
 function isHubPath(path: string) {
   const bare = path.split("?")[0];
@@ -131,38 +112,12 @@ function AppLayout() {
         <RouteBoundary>
           <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
-            {/*
-              z/ address system. Additive on purpose: each address resolves to
-              the board that already exists, and the existing path stays live
-              and canonical. Flipping canonical to z/ means 301ing indexed URLs,
-              which is the one step here that browsers cache and that cannot be
-              quietly undone, so it is held for an explicit decision.
-              Longest path first so OUTZ destinations are never shadowed.
-            */}
+            {/* Z/ is Communities only. Old product addresses remain redirects. */}
             <Route path="/z" component={ZIndex} />
-            {Object.entries(Z_ENCODED_ALIASES).map(([from, to]) => (
+            {Object.entries(LEGACY_Z_PRODUCT_REDIRECTS).map(([from, to]) => (
               <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
             ))}
-            {Z_CATEGORY_ADDRESSES.map(categoryAddress => (
-              <Route key={categoryAddress.path} path={zUrl(categoryAddress.path)}>
-                {() => <Redirect to={categoryAddress.route} />}
-              </Route>
-            ))}
-            <Route path="/z/squadz/:id/:slug?">{() => <Directory surface="spaces" />}</Route>
-            <Route path="/z/squadz">{() => <Directory surface="spaces" />}</Route>
-            <Route path="/z/spaces/:id/:slug?">{() => <Redirect to="/z/squadz" />}</Route>
-            <Route path="/z/spaces">{() => <Redirect to="/z/squadz" />}</Route>
-            {[...Z_ADDRESSES]
-              .sort((a, b) => b.path.length - a.path.length)
-              .map(address => (
-                <Route
-                  key={address.path}
-                  path={zUrl(address.path)}
-                  component={
-                    (address.route && PAGE_FOR_ROUTE[address.route]) || ZAddressPending
-                  }
-                />
-              ))}
+            <Route path="/z/:communitySlug" component={Community} />
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
@@ -216,11 +171,13 @@ function AppLayout() {
             <Route path="/nude-beaches">
               {() => {
                 const tab = new URLSearchParams(window.location.search).get("tab");
-                return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/z/out/sauvie-island" : "/z/out/rooster-rock"} />;
+                return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/outz/sauvie-island" : "/outz/rooster-rock"} />;
               }}
             </Route>
             <Route path="/outz" component={Outz} />
-            <Route path="/z/out/:placeSlug" component={OutzPlace} />
+            <Route path="/outz/rooster-rock" component={RoosterRock} />
+            <Route path="/outz/sauvie-island" component={SauvieIsland} />
+            <Route path="/outz/:placeSlug" component={OutzPlace} />
             <Route path="/next" component={Darkroom} />
             <Route path="/darkroom">
               {() => <Redirect to="/next" />}

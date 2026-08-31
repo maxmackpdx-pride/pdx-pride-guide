@@ -106,7 +106,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
                 </div>
               </div>
             </div>
-            <Link href="/z/out/rooster-rock" className="home-beach-widget__link home-beach-widget__link--orange">
+            <Link href="/outz/rooster-rock" className="home-beach-widget__link home-beach-widget__link--orange">
               Full conditions →
             </Link>
           </>
@@ -142,7 +142,7 @@ export default function HomeBeachWidget({ showCollins = true, showBoth = false }
                 <div className="home-beach-widget__stat-label">Parking permits</div>
               </div>
             </div>
-            <Link href="/z/out/sauvie-island" className="home-beach-widget__link home-beach-widget__link--orange">
+            <Link href="/outz/sauvie-island" className="home-beach-widget__link home-beach-widget__link--orange">
               Full conditions →
             </Link>
           </>

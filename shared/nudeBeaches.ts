@@ -1,8 +1,8 @@
 export type NudeBeachTab = "rooster-rock" | "sauvie-island";
 
 export const Z_OUT_BEACH_PATHS: Record<NudeBeachTab, string> = {
-  "rooster-rock": "/z/out/rooster-rock",
-  "sauvie-island": "/z/out/sauvie-island",
+  "rooster-rock": "/outz/rooster-rock",
+  "sauvie-island": "/outz/sauvie-island",
 };
 
 export type SwimGuideStatus = "pass" | "fail" | "warning" | "unknown";

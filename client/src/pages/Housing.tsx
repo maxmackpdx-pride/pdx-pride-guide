@@ -25,7 +25,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import AuthModal from "@/components/AuthModal";
-import ZBoardAddressStrip from "@/components/ZBoardAddressStrip";
 import FeedAdCard from "@/components/ads/FeedAdCard";
 import type { AdServePayload } from "@/lib/adTypes";
 import {
@@ -293,7 +292,6 @@ export default function Housing() {
 
   return (
     <div className="hz pdx-glass-rebind">
-      <ZBoardAddressStrip path="hauz" board="THE HAÜZ" />
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />
 

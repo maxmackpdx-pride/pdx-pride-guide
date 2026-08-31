@@ -55,6 +55,7 @@ import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
+import { registerCommunityRoutes } from "./communities";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import { renderGamePosterPng } from "./posters/gamePoster";
 import {
@@ -1278,6 +1279,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   }));
+  registerCommunityRoutes(app, requireAuth);
 
   // ─── FILE UPLOADS ───────────────────────────────────────────────────────
   // Poster image upload (event submit / claim edit)

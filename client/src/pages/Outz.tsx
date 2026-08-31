@@ -39,7 +39,7 @@ const BEACHES: BeachCard[] = [
     key: "roosterRock",
     name: "Rooster Rock",
     region: "Columbia River · Corbett, OR",
-    href: "/z/out/rooster-rock",
+    href: "/outz/rooster-rock",
     detail: "River conditions, crossing notes, parking, carpools, and the beach chat before you head east.",
     color: "cyan",
     accent: "var(--cyan)",
@@ -48,7 +48,7 @@ const BEACHES: BeachCard[] = [
     key: "sauvieIsland",
     name: "Sauvie Island",
     region: "Collins Beach · Sauvie Island, OR",
-    href: "/z/out/sauvie-island",
+    href: "/outz/sauvie-island",
     detail: "Water quality, parking permits, island weather, and the practical intel for a good day on the sand.",
     color: "green",
     accent: "var(--green)",
@@ -82,7 +82,7 @@ function MotifBand({ src, accent }: { src: string; accent: string }) {
 }
 
 export default function Outz() {
-  usePageSeo("Z/OUT | Camping, hiking, trails and conditions | Zaylist", "Official-source camping, hiking, trail, weather and access information across Oregon and southern Washington.");
+  usePageSeo("OUTZ | Camping, hiking, trails and conditions | Zaylist", "Official-source camping, hiking, trail, weather and access information across Oregon and southern Washington.");
   const queryClient = useQueryClient();
   const query = useQuery<OutzPayload>({
     queryKey: ["/api/outz"],
@@ -114,7 +114,7 @@ export default function Outz() {
         <img className="outz-hero__art" src={`${OUTZ_MOTIF}/adventure-map-alpine-waypoints.svg`} alt="" aria-hidden="true" />
         <BoardHero
         accent="orange"
-        kicker="Z/OUT · live field desk"
+        kicker="OUTZ · live field desk"
         title={<img className="board-hero__brand-logo board-hero__brand-logo--outz" src="/brand/family/outz.svg" alt="OUTZ" />}
         lede="Camping, hiking, trails, weather, alerts, and practical access notes from the agencies that manage the places, plus the people who make the trip better."
         />

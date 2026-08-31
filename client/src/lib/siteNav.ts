@@ -56,29 +56,23 @@ export const PRIMARY_NAV: NavEntry[] = [
      * provides a clear way to browse all currently published spots.
      */
     items: [
-      { href: "/z/out", label: "All OUTZ", accent: "orange" },
-      { href: "/z/out/rooster-rock", label: "Rooster Rock", accent: "orange" },
-      { href: "/z/out/sauvie-island", label: "Sauvie Island", accent: "orange" },
+      { href: "/outz", label: "All OUTZ", accent: "orange" },
+      { href: "/outz/rooster-rock", label: "Rooster Rock", accent: "orange" },
+      { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
   {
     type: "dropdown",
-    id: "zspace",
-    label: "Z/Space",
+    id: "communities",
+    label: "Z/ Communities",
     accent: "violet",
     /*
      * The featured card is retired: the panel is one plain column of pills
-     * under a line of descriptive copy. "z/ all boards" carries the /z link
-     * the card used to own.
+     * under a line of descriptive copy. Z/ now opens Communities only.
      */
-    eyebrow: "Every board, one place",
+    eyebrow: "Find your people",
     items: [
-      { href: "/z", label: "z/ all boards", accent: "violet" },
-      { href: "/the-hauz", label: "THE HAÜZ", accent: "cyan" },
-      { href: "/pride-work", label: "Gigz", accent: "violet" },
-      { href: "/sellz", label: "Sellz", accent: "green" },
-      { href: "/spotted", label: "Mizzed", accent: "magenta" },
-      { href: "/gifting", label: "Giftz", accent: "lime" },
+      { href: "/z", label: "All Communities", accent: "violet" },
     ],
   },
 ];
@@ -97,9 +91,9 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
-  "/z/out": { section: "OUTZ", title: "Outdoors" },
-  "/z/out/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
-  "/z/out/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
+  "/outz": { section: "OUTZ", title: "Outdoors" },
+  "/outz/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
+  "/outz/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
   "/next": { section: "Explore", title: "Next" },
   "/darkroom": { section: "Explore", title: "Next" },
   "/about": { section: "About", title: "About" },
@@ -115,19 +109,14 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 };
 
 /**
- * Destinations behind the mobile footer Z/Space tab sheet.
+ * Destinations behind the mobile footer Z/ Communities tab sheet.
  *
- * Mirrors the desktop Z/Space menu. The phone bar has no Outz tab of its own,
+ * Mirrors the desktop Communities menu. The phone bar has no Outz tab of its own,
  * so this sheet is also the door to OUTZ - but Outz is not in this list: it is
  * a drawer trigger the sheet renders itself, not a plain link.
  */
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/z", label: "z/ all boards", accent: "violet" },
-  { href: "/the-hauz", label: "Housing", accent: "cyan" },
-  { href: "/pride-work", label: "Gigz", accent: "violet" },
-  { href: "/sellz", label: "Sellz", accent: "green" },
-  { href: "/spotted", label: "Mizzed", accent: "magenta" },
-  { href: "/gifting", label: "Giftz", accent: "lime" },
+  { href: "/z", label: "All Communities", accent: "violet" },
 ];
 
 /**
@@ -139,12 +128,12 @@ export const BOARD_NAV: NavLinkItem[] = [
  * them and closes with a link to the index.
  */
 export const OUTZ_NAV: NavLinkItem[] = [
-  { href: "/z/out/rooster-rock", label: "Rooster Rock", accent: "orange" },
-  { href: "/z/out/sauvie-island", label: "Sauvie Island", accent: "orange" },
+  { href: "/outz/rooster-rock", label: "Rooster Rock", accent: "orange" },
+  { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
 ];
 
 /** Where the drawer's "View All Outz" footer goes. */
-export const OUTZ_INDEX = "/z/out";
+export const OUTZ_INDEX = "/outz";
 
 /** Destinations behind the mobile footer "Events" tab sheet. */
 export const EVENTS_NAV: NavLinkItem[] = [
