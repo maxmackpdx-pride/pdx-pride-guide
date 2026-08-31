@@ -66,11 +66,11 @@ const statusLabel: Record<Status,string> = { done:"Done", progress:"In progress"
 const READ_STEPS = ["pride-guide","react","zaylist","foundation","hardening","z-rebuild","zenegades","platform","agent"] as const;
 
 function TrailMap() {
-  const [selectedId, setSelectedId] = useState("z-rebuild");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view,setView]=useState<"map"|"index">("map");
   const [readStep,setReadStep]=useState<number|null>(null);
   const wrapRef=useRef<HTMLDivElement>(null);
-  const selected = useMemo(() => HORIZONTAL_POINTS.find(p => p.id === selectedId) ?? HORIZONTAL_POINTS[0], [selectedId]);
+  const selected = useMemo(() => HORIZONTAL_POINTS.find(p => p.id === selectedId) ?? null, [selectedId]);
   const choose=(id:string)=>{setSelectedId(id);setView("map")};
   useEffect(()=>{const p=HORIZONTAL_POINTS.find(point=>point.id===selectedId);const wrap=wrapRef.current;if(!p||!wrap)return;wrap.scrollTo({left:Math.max(0,p.x-wrap.clientWidth/2),behavior:"smooth"})},[selectedId]);
   const startRead=()=>{setReadStep(0);choose(READ_STEPS[0])};
@@ -86,11 +86,11 @@ function TrailMap() {
     </svg>
     <div className="success-map__labels">
       {HORIZONTAL_POINTS.map(p => <button key={p.id} type="button" className={`success-map__label success-map__label--${p.status} success-map__label--${p.trail}${selectedId===p.id?" is-selected":""}`} style={{left:`${p.labelX}%`,top:`${p.labelY}%`}} onClick={() => choose(p.id)} aria-pressed={selectedId===p.id}>
-        <span>{p.id==="z-rebuild"?"NOW":p.n} / {p.eyebrow}</span><strong>{p.title}</strong>
+        <span>{p.id==="z-rebuild"?"NOW":p.n} / {p.eyebrow}</span><strong>{p.title}</strong><small>See info →</small>
       </button>)}
     </div>
     </div></div> : <div className="success-map__index">{(["done","progress","queued"] as Status[]).map(status=><section key={status}><h2>{statusLabel[status]}</h2><ol>{HORIZONTAL_POINTS.filter(p=>p.status===status).map(p=><li key={p.id}><button onClick={()=>choose(p.id)}><span>{p.n} · {p.trail}</span><strong>{p.title}</strong><small>{p.summary}</small></button></li>)}</ol></section>)}</div>}
-    <aside className="success-map__detail" aria-live="polite"><div><span className={`success-map__status success-map__status--${selected.status}`}>{statusLabel[selected.status]}</span><span>{selected.trail.toUpperCase()} TRAIL / {selected.n}</span></div><h3>{selected.title}</h3><p>{selected.summary}</p><h4>{selected.status==="done"?"Accomplished / keep moving":"Goals"}</h4><ul>{selected.goals.map(g=><li key={g}>{g}</li>)}</ul>{readStep!==null&&<nav aria-label="Guided roadmap reading"><button disabled={readStep===0} onClick={()=>advance(-1)}>← Previous</button><span>{readStep+1} / {READ_STEPS.length}</span><button disabled={readStep===READ_STEPS.length-1} onClick={()=>advance(1)}>Next →</button><button onClick={()=>setReadStep(null)}>Exit</button></nav>}</aside>
+    {selected ? <aside className="success-map__detail" aria-live="polite"><button className="success-map__detail-close" type="button" onClick={()=>setSelectedId(null)} aria-label="Close roadmap information">Close ×</button><div><span className={`success-map__status success-map__status--${selected.status}`}>{statusLabel[selected.status]}</span><span>{selected.trail.toUpperCase()} TRAIL / {selected.n}</span></div><h3>{selected.title}</h3><p>{selected.summary}</p><h4>{selected.status==="done"?"Accomplished / keep moving":"Goals"}</h4><ul>{selected.goals.map(g=><li key={g}>{g}</li>)}</ul>{readStep!==null&&<nav aria-label="Guided roadmap reading"><button disabled={readStep===0} onClick={()=>advance(-1)}>← Previous</button><span>{readStep+1} / {READ_STEPS.length}</span><button disabled={readStep===READ_STEPS.length-1} onClick={()=>advance(1)}>Next →</button><button onClick={()=>setReadStep(null)}>Exit</button></nav>}</aside> : <p className="success-map__prompt">Choose any labeled waypoint to see its <strong>status, story, and goals.</strong></p>}
   </div>;
 }
 

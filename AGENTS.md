@@ -146,6 +146,12 @@ Read it before proposing architecture, naming, product scope, or design
 direction. Decisions, explorations, agent continuity, tunnels, claims, and the
 release gate all live there now.
 
+Every agent that updates the Foundation Library must verify the corresponding
+Cloudflare deployment succeeded and the live release ID/content updated before
+calling the work complete, current, published, or shipped. A local change, commit,
+or GitHub push alone is insufficient. Without push or deploy authorization, report
+the Foundation change as local/ready and Cloudflare verification as pending.
+
 `implementation_state: not-implemented` means the decision is made and the code
 has not caught up. Do not describe it as shipped.
 
