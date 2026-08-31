@@ -76,22 +76,6 @@ Cowork / claude.ai/code sessions that will `git push` must list both
 `maxmackpdx-pride/zaylist-foundation-library` as session sources. A PAT in
 the remote URL is intercepted and 403s. See `CLAUDE.md`.
 
-## Railway break-glass fallback (exception only)
-
-When Railway billing is unpaid/restricted, Railway's manual/API deploy path is unavailable, or the user explicitly says Railway is down, read and follow:
-
-`.claude/skills/railway-break-glass/SKILL.md`
-
-This is an **incident-only fallback**, not the normal ship path. The observed 2026-08-30 behavior showed that the custom GitHub Action could fail with `Not Authorized` while Railway's native GitHub integration independently deployed the same `master` commit successfully.
-
-Hard constraints:
-
-- Do not invoke this skill during normal Railway operation.
-- Do not disable either deploy path while the billing/service incident is active.
-- Do not call a failed custom GitHub Action proof that production failed. Check Railway's native commit status and the live site.
-- Do not call a Git push proof that production succeeded.
-- Once Railway is healthy again, test both paths on one harmless approved change before deciding which path to keep.
-
 ## Design source of truth (hard rule)
 
 **The design guide is truth for design rules.**  
