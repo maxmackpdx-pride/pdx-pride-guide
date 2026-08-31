@@ -64,12 +64,13 @@ const CSS = `
 
 .pdxMap__legend{ position:absolute; top:16px; right:16px; z-index:5; }
 .pdxMap__expand{ position:absolute; top:16px; right:16px; z-index:6;
-  display:inline-flex; align-items:center; gap:7px; padding:8px 14px 6px;
+  display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:8px 14px 6px;
   font-family:var(--font-display); font-weight:700; font-size:var(--chrome-sm);
   letter-spacing:.06em; text-transform:uppercase; color:var(--lime);
   background:rgba(5,5,7,.88); border:1px solid #000; border-radius:4px; cursor:pointer;
   box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.75);
   outline:1px solid color-mix(in srgb, var(--lime) 70%, #000); outline-offset:-2px; }
+.pdxMap__expand:focus-visible{ outline:3px solid var(--chrome-focus, rgba(0,255,255,.72)); outline-offset:3px; }
 .pdxMap__expand svg{ width:14px; height:14px; }
 .pdxMap__attr{ position:absolute; bottom:8px; right:12px; z-index:5;
   font-family:var(--font-body); font-size:11px; color:var(--text-faint); }
@@ -131,7 +132,7 @@ export function MapPanel({
         ))}
       </div>
       {expandable
-        ? <button type="button" className="pdxMap__expand" onClick={onExpand}>
+        ? <button type="button" className="pdxMap__expand" onClick={onExpand} aria-label="Expand map">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
             Expand

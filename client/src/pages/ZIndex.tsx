@@ -27,9 +27,9 @@ export default function ZIndex() {
       <p className="z-communities__eyebrow">ZAYLIST COMMUNITIES</p>
       <h1><span>Z/</span> IS WHERE PEOPLE BELONG</h1>
       <p>Products help you find things. Communities connect you with the people, rules, conversations, and gatherings around them.</p>
-      {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)}>{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
+      {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
     </header>
-    {creating ? <form className="z-community-panel z-community-create" onSubmit={event => { event.preventDefault(); create.mutate(); }}>
+    {creating ? <form id="z-community-create" className="z-community-panel z-community-create" onSubmit={event => { event.preventDefault(); create.mutate(); }} aria-busy={create.isPending}>
       <h2>CREATE A COMMUNITY</h2><p>The creator becomes the owner and is responsible for rules and moderation.</p>
       <label>Name<input value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} minLength={3} maxLength={100} required /></label>
       <label>Description<textarea value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} minLength={10} maxLength={1200} required /></label>

@@ -132,9 +132,9 @@ export default function Outz() {
         showLive={false}
       />
 
-      <section className="outz-livebar" aria-live="polite">
+      <section className="outz-livebar">
         <img className="outz-livebar__art" src={`${OUTZ_MOTIF}/alpine-lake-loop-lime.svg`} alt="" aria-hidden="true" />
-        <span className="outz-livebar__stamp">
+        <span className="outz-livebar__stamp" role="status" aria-live="polite" aria-atomic="true">
           {timeLabel(snapshot?.fetchedAt)} · Live NWS + agency feeds{query.data?.stale ? " · Refreshing in background" : ""}
         </span>
         <Button size="sm" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
@@ -142,7 +142,7 @@ export default function Outz() {
         </Button>
       </section>
 
-      {query.isError ? <div className="outz-error">Official outdoor conditions are temporarily unavailable. Try the direct agency links below.</div> : null}
+      {query.isError ? <div className="outz-error" role="alert">Official outdoor conditions are temporarily unavailable. Try the direct agency links below.</div> : null}
 
       <section id="outz-map" className="outz-section outz-section--map">
         <div className="outz-map-frame">

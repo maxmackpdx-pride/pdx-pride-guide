@@ -8,7 +8,7 @@ const CSS = `
 .pdxBtn.pdx-glass-rebind{
   --_c: var(--neon-yellow);
   --c: var(--_c);
-  display:inline-flex; align-items:center; justify-content:center; gap:.5em;
+  display:inline-flex; align-items:center; justify-content:center; gap:.5em; min-height:44px;
   font-family:var(--font-display); font-weight:var(--fw-bold);
   text-transform:uppercase; letter-spacing:.08em; line-height:1;
   border:2px solid #000; color:#fff;
@@ -24,6 +24,10 @@ const CSS = `
     var(--neon-bloom);
   transition:background .15s ease, color .15s ease, transform .15s ease,
              box-shadow .15s ease, filter .15s ease, opacity .15s ease;
+}
+.pdxBtn:focus-visible{
+  outline:3px solid var(--chrome-focus, rgba(0,255,255,.72));
+  outline-offset:3px;
 }
 .pdxBtn:hover:not(:disabled){ text-decoration:none; color:#fff;
   transform:translateY(-1px); filter:brightness(1.06);

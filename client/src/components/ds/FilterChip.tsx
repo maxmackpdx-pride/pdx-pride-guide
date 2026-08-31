@@ -6,7 +6,7 @@ import React from "react";
    Matches the events-page filter row and the places category row. */
 const CSS = `
 .pdxChip{
-  display:inline-flex; align-items:center; gap:8px;
+  display:inline-flex; align-items:center; gap:8px; min-height:44px;
   padding:9px 15px 7px;
   font-family:var(--font-display); font-weight:700; font-size:var(--chrome-sm);
   letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;
@@ -17,6 +17,10 @@ const CSS = `
              background var(--dur-base) var(--ease-out),
              color var(--dur-base) var(--ease-out),
              box-shadow var(--dur-base) var(--ease-out);
+}
+.pdxChip:focus-visible{
+  outline:3px solid var(--chrome-focus, rgba(0,255,255,.72));
+  outline-offset:3px;
 }
 .pdxChip:hover{ border-color:var(--_c,var(--lime)); color:var(--text-hi); }
 .pdxChip:active{ transform:scale(var(--press-scale)); }

@@ -24,9 +24,11 @@ const CSS = `
 .pdxSearch input::placeholder{ color:var(--text-faint); }
 .pdxSearch__clear{
   border:0; background:transparent; color:var(--text-meta); cursor:pointer;
-  display:flex; padding:4px; border-radius:var(--radius-pill);
+  display:flex; align-items:center; justify-content:center; flex:none;
+  min-width:44px; min-height:44px; padding:4px; border-radius:var(--radius-pill);
 }
 .pdxSearch__clear:hover{ color:var(--pink); }
+.pdxSearch__clear:focus-visible{ outline:3px solid var(--chrome-focus, rgba(0,255,255,.72)); outline-offset:1px; }
 .pdxSearch--sm{ height:40px; }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-search-css")) {

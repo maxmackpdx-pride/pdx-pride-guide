@@ -12,7 +12,7 @@ const CSS = `
 .pdxLegend__dot.pdx-glass-rebind{ width:15px; height:15px; border-radius:var(--radius-pill);
   --c:var(--_c);
   background:#000; border:3px solid var(--_c); box-sizing:border-box;
-  box-shadow:var(--chrome-keyline), inset 0 1px 2px rgba(0,0,0,.85), var(--neon-bloom); flex:none; }
+  box-shadow:var(--chrome-keyline), inset 0 1px 2px rgba(0,0,0,.85); flex:none; }
 .pdxLegend__dot--multi{ border:2px solid #000;
   background:conic-gradient(var(--purple),var(--blue),var(--cyan),var(--green),var(--yellow),var(--orange),var(--pink),var(--purple));
   box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85); }
