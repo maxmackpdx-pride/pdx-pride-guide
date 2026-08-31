@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import GlitchLogo from "@/components/GlitchLogo";
+import HeroConstellation from "@/components/home/HeroConstellation";
 import InstallModal from "@/components/pwa/InstallModal";
 import { isAndroidDevice, isIosDevice, isStandalonePwa } from "@/lib/pwa";
 import { prefersStillMotion } from "@/lib/motion";
@@ -235,6 +236,7 @@ export default function HomeHero() {
 
       {/* z3  -  ZAYLIST wordmark (GlitchLogo ghosts; sign wrapper keeps the float bounce) */}
       <div className="home-hero__wordmark-wrap" aria-hidden>
+        <HeroConstellation />
         <div className="home-hero__wordmark-sign">
           <GlitchLogo
             src={heroWordmark}
