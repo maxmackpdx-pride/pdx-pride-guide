@@ -24,7 +24,6 @@ import { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdManager from "@/components/admin/ads/AdManager";
 import type { HubSection } from "@/components/hub/types";
 import AdminOverview, { type AttentionItem, type KindPill, type QueueBreakdown } from "@/components/admin/AdminOverview";
-import QSearchDashboard from "@/components/admin/QSearchDashboard";
 import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
@@ -178,7 +177,7 @@ const EVENT_SORT_OPTIONS: Array<{ key: EventSort; label: string }> = [
   { key: "id_desc", label: "Newest id first" },
 ];
 
-const ADMIN_VIEWS: AdminTab[] = ["overview", "qsearch", "events", "gigs", "promoters", "venue-claims", "users", "team", "ads"];
+const ADMIN_VIEWS: AdminTab[] = ["overview", "events", "gigs", "promoters", "venue-claims", "users", "team", "ads"];
 
 function inboxSheetOptsFromLegacyTab(rawTab: string | null): InboxSheetOpenOpts | null {
   if (!rawTab) return null;
@@ -217,7 +216,8 @@ function adminTabFromQuery(
   if (tab === "owner" && !canAccessOwner) tab = "overview";
   if (tab === "team" && !canManageTeam) tab = "overview";
   if (tab === "users" && !canViewUsers) tab = "overview";
-  if ((tab === "qsearch" || tab === "events" || tab === "gigs") && !canManageCatalog) tab = "overview";
+  if (tab === "qsearch") tab = "overview";
+  if ((tab === "events" || tab === "gigs") && !canManageCatalog) tab = "overview";
   if (tab === "ads" && !isPrimaryOwner) tab = "overview";
   if (tab && ADMIN_VIEWS.includes(tab as AdminTab)) return tab as AdminTab;
   return null;
@@ -363,7 +363,8 @@ export default function Admin() {
     if (
       (rawTab === "team" && !canManageTeam)
       || (rawTab === "users" && !canViewUsers)
-      || ((rawTab === "qsearch" || rawTab === "events" || rawTab === "gigs") && !canManageCatalog)
+      || rawTab === "qsearch"
+      || ((rawTab === "events" || rawTab === "gigs") && !canManageCatalog)
       || (rawTab === "ads" && !isPrimaryOwner)
     ) {
       const url = new URL(window.location.href);
@@ -1725,7 +1726,6 @@ export default function Admin() {
   const hubSectionFromTab = (tab: AdminTab): HubSection => {
     const map: Record<string, HubSection> = {
       overview: "admin",
-      qsearch: "tbl-qsearch",
       events: "tbl-events",
       users: "tbl-users",
       gigs: "tbl-werk",
@@ -1740,7 +1740,6 @@ export default function Admin() {
   const tabFromHubSection = (section: HubSection): AdminTab | null => {
     if (section === "admin") return "overview";
     const map: Partial<Record<HubSection, AdminTab>> = {
-      "tbl-qsearch": "qsearch",
       "tbl-events": "events",
       "tbl-users": "users",
       "tbl-werk": "gigs",
@@ -1930,21 +1929,6 @@ export default function Admin() {
             </button>
           </div>
           </>
-        )}
-
-        {/* ── QSEARCH ── */}
-        {activeTab === "qsearch" && canManageCatalog && (
-          <div data-testid="admin-qsearch-tab">
-            <QSearchDashboard
-              onCommitted={() => {
-                queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/admin/qsearch/dashboard"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/admin/events/ingest/sources"] });
-                void refetchEvents();
-              }}
-            />
-          </div>
         )}
 
         {/* ── MANAGE EVENTS ── */}

@@ -152,7 +152,6 @@ const ADMIN_MORE_NAV: Array<{
   usersOnly?: boolean;
   catalogOnly?: boolean;
 }> = [
-  { key: "qsearch", label: "QSearch", icon: Search, catalogOnly: true },
   { key: "events", label: "All events", icon: CalendarDays, catalogOnly: true },
   { key: "users", label: "All users", icon: UserCircle, usersOnly: true },
   { key: "gigs", label: "GIGZ", icon: Briefcase, catalogOnly: true },
@@ -161,7 +160,7 @@ const ADMIN_MORE_NAV: Array<{
   { key: "team", label: "My team", icon: Users, teamOnly: true },
 ];
 
-const MORE_VIEWS: AdminViewKey[] = ["qsearch", "events", "users", "gigs", "promoters", "venue-claims", "team"];
+const MORE_VIEWS: AdminViewKey[] = ["events", "users", "gigs", "promoters", "venue-claims", "team"];
 
 const MOBILE_ICON = 26;
 
@@ -212,7 +211,7 @@ export default function HubShell({
   const moreViews = MORE_VIEWS.filter(v => {
     if (v === "team") return canManageTeam;
     if (v === "users") return canViewUsers;
-    if (v === "qsearch" || v === "events" || v === "gigs") return canManageCatalog;
+    if (v === "events" || v === "gigs") return canManageCatalog;
     return true;
   });
   const moreNav = ADMIN_MORE_NAV.filter(item => {

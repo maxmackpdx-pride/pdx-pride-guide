@@ -11,7 +11,6 @@ export type HubAdminNavItem = {
 
 export const HUB_ADMIN_NAV: HubAdminNavItem[] = [
   { section: "admin", label: "Overview" },
-  { section: "tbl-qsearch", label: "QSearch" },
   { section: "tbl-events", label: "All Events" },
   // "All Users" is primary-owner only; folder itself is owner-gated in nav.
   { section: "tbl-users", label: "All Users", teamOnly: true },

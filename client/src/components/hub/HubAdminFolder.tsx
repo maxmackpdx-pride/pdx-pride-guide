@@ -15,7 +15,6 @@ import {
 
 const ADMIN_ICONS: Partial<Record<HubSection, ReactNode>> = {
   admin: <HubIconAdmin size={16} />,
-  "tbl-qsearch": <HubIconEvents size={16} />,
   "tbl-events": <HubIconEvents size={16} />,
   "tbl-users": <HubIconProfile size={16} />,
   "tbl-werk": <HubIconWerk size={16} />,

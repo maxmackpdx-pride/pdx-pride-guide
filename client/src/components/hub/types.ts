@@ -6,7 +6,6 @@ export type HubSection =
   | "people"
   | "settings"
   | "admin"
-  | "tbl-qsearch"
   | "tbl-events"
   | "tbl-users"
   | "tbl-werk"
@@ -23,7 +22,6 @@ export const HUB_SECTIONS: HubSection[] = [
   "people",
   "settings",
   "admin",
-  "tbl-qsearch",
   "tbl-events",
   "tbl-users",
   "tbl-werk",
@@ -34,7 +32,6 @@ export const HUB_SECTIONS: HubSection[] = [
 ];
 
 export const HUB_ADMIN_TABLE_SECTIONS: HubSection[] = [
-  "tbl-qsearch",
   "tbl-events",
   "tbl-users",
   "tbl-werk",
@@ -46,7 +43,6 @@ export const HUB_ADMIN_TABLE_SECTIONS: HubSection[] = [
 
 export function hubSectionToAdminTab(section: HubSection): string | null {
   const map: Partial<Record<HubSection, string>> = {
-    "tbl-qsearch": "qsearch",
     "tbl-events": "events",
     "tbl-users": "users",
     "tbl-werk": "gigs",

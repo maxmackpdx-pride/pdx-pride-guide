@@ -13,11 +13,6 @@ type Props = {
 const TABLE_META: Partial<
   Record<HubSection, { title: string; lede: string; actionLabel: string }>
 > = {
-  "tbl-qsearch": {
-    title: "QSearch",
-    lede: "Ingest events from venue sites and directory websites.",
-    actionLabel: "Open QSearch",
-  },
   "tbl-events": {
     title: "All Events",
     lede: "Every event across Zaylist, live and pending.",

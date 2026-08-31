@@ -88,7 +88,7 @@ import {
   setInstagramHandle,
   setRecipeUrl,
 } from "./qsearch/store";
-import { startQSearchNightly, triggerNightlyPriorityScan } from "./qsearch/nightly";
+import { triggerNightlyPriorityScan } from "./qsearch/nightly";
 import { getTrustedDashboard } from "./qsearch/trustedHealth";
 import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
 import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
@@ -108,6 +108,10 @@ import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } fr
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
+import {
+  getEventResearchSourceMemory,
+  recordEventResearchPath,
+} from "./eventResearchMemory";
 import {
   deleteOutzCheckin,
   createOutzWallComment,
@@ -1054,6 +1058,56 @@ function notifyAttendanceUpdate(eventId: number) {
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   assertProductionSecrets();
+
+  // QSEARCH was archived on 2026-08-30. Keep its code and database records for
+  // possible future recovery, but make every legacy action inert in production.
+  // Event research now runs as a Codex agent workflow, not this scraper/model.
+  app.all(
+    ["/api/admin/qsearch", "/api/admin/qsearch/*path"],
+    requireAdmin,
+    (_req, res) =>
+      res.status(410).json({
+        error: "QSEARCH is archived",
+        archived: true,
+        replacement: "QSearch 2.0",
+      }),
+  );
+
+  // The agent can read every old source pathway without reviving QSEARCH.
+  app.get("/api/admin/event-research/source-memory", requireAdmin, (_req, res) => {
+    res.json(getEventResearchSourceMemory());
+  });
+
+  app.post("/api/admin/event-research/source-memory/path", requireAdmin, (req, res) => {
+    const result = recordEventResearchPath({
+      sourceKey: String(req.body?.sourceKey || ""),
+      label: String(req.body?.label || ""),
+      url: String(req.body?.url || ""),
+      pathType: req.body?.pathType != null ? String(req.body.pathType) : undefined,
+      outcome: String(req.body?.outcome || "candidate") as "candidate" | "success" | "failure",
+      discoveredFrom:
+        req.body?.discoveredFrom != null ? String(req.body.discoveredFrom) : null,
+      navigationRecipe:
+        req.body?.navigationRecipe != null ? String(req.body.navigationRecipe) : null,
+      fieldsFound: Array.isArray(req.body?.fieldsFound) ? req.body.fieldsFound : null,
+      requiresLogin:
+        typeof req.body?.requiresLogin === "boolean" ? req.body.requiresLogin : null,
+      evidenceNote:
+        req.body?.evidenceNote != null ? String(req.body.evidenceNote) : null,
+      error: req.body?.error != null ? String(req.body.error) : null,
+    });
+    if (!result.ok) return res.status(400).json(result);
+    auditAdmin(req, "event_research_source_memory", {
+      type: "event_research_source",
+      id: String((result.path as any)?.id || ""),
+      detail: {
+        sourceKey: req.body?.sourceKey,
+        outcome: req.body?.outcome,
+        pathType: req.body?.pathType,
+      },
+    });
+    res.json(result);
+  });
 
   // Lightweight probe for Railway healthchecks - must not hit the DB.
   // Public tip links (Venmo + optional Stripe Payment Link for Apple Pay / cards).
@@ -7079,24 +7133,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   scheduleMapCoordinateBackfill();
   startPromptScheduler();
-  startQSearchNightly();
 
-  // Existing events and older QSearch rows predate capture-at-ingest. Mirror
-  // their remote flyers after startup so expiring and third-party URLs become
-  // durable files on the Railway volume without delaying server readiness.
+  // Existing events predate capture-at-ingest. Mirror their remote flyers after
+  // startup; archived QSEARCH candidate rows are deliberately left untouched.
   if (process.env.NODE_ENV === "production") {
     setTimeout(() => {
       void (async () => {
         try {
           const { mirrorEventPosters } = await import("./ingest/mirrorEventPosters");
-          const { listCandidates, updateCandidatePoster } = await import("./qsearch/store");
           const summary = await mirrorEventPosters({
             events: storage.getEvents({}),
-            pendingCandidates: listCandidates({ status: "pending", limit: 500 }) as any[],
+            pendingCandidates: [],
             updateEventPoster: (id, url) => {
               storage.updateEvent(id, { posterImageUrl: url }, { source: "sync" });
             },
-            updateCandidatePoster,
+            updateCandidatePoster: () => false,
           });
           console.log(
             `[poster-mirror] checked=${summary.checked} captured=${summary.captured} retained_remote=${summary.retainedRemote}`,

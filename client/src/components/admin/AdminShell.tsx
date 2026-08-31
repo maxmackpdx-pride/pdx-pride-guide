@@ -136,7 +136,6 @@ export default function AdminShell({
 }: Props) {
   const navItems: AdminNavItem[] = [
     { key: "overview", label: "Overview" },
-    { key: "qsearch", label: "QSearch" },
     { key: "events", label: "All events", count: navCounts.events },
     { key: "team", label: "My team", count: navCounts.team },
     { key: "users", label: "All users", count: navCounts.users },
@@ -147,13 +146,11 @@ export default function AdminShell({
 
   const mobilePrimary: Array<{ key: AdminView | "more"; label: string; alert?: number }> = [
     { key: "overview", label: "Home" },
-    { key: "qsearch", label: "QSearch" },
     { key: "events", label: "Events" },
     { key: "more", label: "More" },
   ];
 
   const moreItems: AdminNavItem[] = [
-    { key: "qsearch", label: "QSearch" },
     { key: "users", label: "All users", count: navCounts.users },
     { key: "gigs", label: "GIGZ", count: navCounts.gigs },
     { key: "promoters", label: "Promoters", count: navCounts.promoters },
@@ -161,7 +158,7 @@ export default function AdminShell({
     { key: "team", label: "My team", count: navCounts.team },
   ];
 
-  const moreViews: AdminView[] = ["qsearch", "users", "gigs", "promoters", "venue-claims", "team"];
+  const moreViews: AdminView[] = ["users", "gigs", "promoters", "venue-claims", "team"];
   const kicker = VIEW_KICKERS[view];
   const pushOk = !!pushStatus?.configured;
 
