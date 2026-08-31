@@ -33,7 +33,7 @@ export type WorldSlotKind =
   | "marquee"
   | "postings"
   | "items"
-  | "pills"
+  | "today"
   | "roadmap";
 
 export type WorldSpec = {
@@ -112,11 +112,18 @@ export type WorldItem = {
   isLive: boolean;
 };
 
-/** Z/SPACE: one thing happening today. */
-export type WorldPill = {
+/**
+ * Z/SPACE: one thing still to come today.
+ *
+ * `label` is the thing and `sub` is where it is, kept apart rather than joined
+ * into one string, because the row sets them at two different sizes: the title
+ * carries the reading and the venue is the second line under it.
+ */
+export type WorldTodayItem = {
   id: string;
   href: string;
   label: string;
+  sub: string | null;
   time: string;
   accent: string;
   isLive: boolean;
@@ -237,16 +244,27 @@ export const WORLDS: WorldSpec[] = [
     key: "zspace",
     number: "09",
     title: "Z/SPACE",
-    eyebrow: "Every board, one place",
+    /* Kept inside the eyebrow's one nowrap line: "Every board, one address"
+       was the only kicker on the rail that ran past its box and ellipsed. */
+    eyebrow: "Every board at once",
     /* No wordmark by request: the headline carries this card, and the list
-       below it is the subject. The eyebrow already names the destination. */
-    headline: "Happening today",
-    body: "Every address in the namespace, and everything on it today.",
+       below it is the subject. The eyebrow already names the destination.
+
+       The body describes the list that is actually there, which is what is
+       still to come today, and leaves the whole-namespace promise to the
+       eyebrow and the action row. The old copy said "every address in the
+       namespace, and everything on it today" over a list that is today's
+       events, and a card should not promise more than it shows. */
+    headline: "Today, in order",
+    /* Two lines is the whole body box on this rail, and at rail card width
+       that is about sixty characters, so this says one thing and stops. The
+       whole-namespace promise is the eyebrow's and the action row's. */
+    body: "What is left of today, earliest first.",
     action: "Open Z/SPACE",
     href: "/z",
     accent: "var(--board-zspace, #8f5cff)",
     mark: null,
-    slot: "pills",
+    slot: "today",
   },
   {
     key: "next",
@@ -439,12 +457,12 @@ export const DEMO_ITEMS: WorldItem[] = [
   { id: "demo-sellz-4", href: "/sellz", price: "$8", cond: "Good · N Portland", photo: null, reserved: false, isLive: false },
 ];
 
-export const DEMO_PILLS: WorldPill[] = [
-  { id: "demo-pill-1", href: "/z", label: "Drag brunch · Darcelle XV", time: "11 AM", accent: "var(--day-thu, #00ffff)", isLive: false },
-  { id: "demo-pill-2", href: "/z", label: "Vendor setup · Block Party", time: "2 PM", accent: "var(--board-gigs, #6e3dff)", isLive: false },
-  { id: "demo-pill-3", href: "/z", label: "Sasha Colby Live", time: "9 PM", accent: "var(--neon-green, #39ff14)", isLive: false },
-  { id: "demo-pill-4", href: "/z", label: "Afterparty · CC Slaughters", time: "11 PM", accent: "var(--board-spotted, #ff00cc)", isLive: false },
-  { id: "demo-pill-5", href: "/z", label: "Late skate · Oaks Park", time: "12 AM", accent: "var(--board-gifting, #ccff00)", isLive: false },
+export const DEMO_TODAY: WorldTodayItem[] = [
+  { id: "demo-today-1", href: "/z", label: "Drag brunch", sub: "Darcelle XV", time: "11 AM", accent: "var(--day-thu, #00ffff)", isLive: false },
+  { id: "demo-today-2", href: "/z", label: "Vendor setup", sub: "Block Party", time: "2 PM", accent: "var(--board-gigs, #6e3dff)", isLive: false },
+  { id: "demo-today-3", href: "/z", label: "Sasha Colby Live", sub: "Darcelle XV Showplace", time: "9 PM", accent: "var(--neon-green, #39ff14)", isLive: false },
+  { id: "demo-today-4", href: "/z", label: "Afterparty", sub: "CC Slaughters", time: "11 PM", accent: "var(--board-spotted, #ff00cc)", isLive: false },
+  { id: "demo-today-5", href: "/z", label: "Late skate", sub: "Oaks Park", time: "12 AM", accent: "var(--board-gifting, #ccff00)", isLive: false },
 ];
 
 /**

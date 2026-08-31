@@ -335,7 +335,7 @@ export default function DesignSystemSandbox() {
             )}
 
             {C.HeroBanner ? (
-              <C.HeroBanner image={SANDBOX_BANNERS.collage} minHeight={320}>
+              <C.HeroBanner image={SANDBOX_BANNERS.gifting} minHeight={320}>
                 {C.SectionHeader ? (
                   <C.SectionHeader
                     kicker="Hero banner"

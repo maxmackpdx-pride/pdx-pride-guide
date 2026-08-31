@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHeader from "@/components/PageHeader";
-import type { PageHeroAccent } from "@/components/PageHero";
+import type { PageHeaderAccent } from "@/components/PageHeader";
 import BoardHero from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import { BoardFilterChip } from "@/components/BoardActiveSection";
@@ -445,7 +445,7 @@ export default function Submit() {
     eventMutation.mutate({ type: "NEW_EVENT" });
   };
 
-  const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeroAccent; lede: string }> = {
+  const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeaderAccent; lede: string }> = {
     landing: {
       kicker: "HOME · PROMOTERS",
       title: "Promoter hub",

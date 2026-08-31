@@ -34,7 +34,7 @@ export function isValidProfileAccent(hex: unknown): hex is ProfileAccentColor {
 /**
  * Solid / gradient banner presets only (day-flyer aesthetic, no photo collages).
  * `path: null` = CSS accent gradient. Custom upload uses coverImageUrl separately.
- * Legacy collage/sticker/social paths remain accepted so existing profiles still load.
+ * Legacy sticker/social paths remain accepted so existing profiles still load.
  */
 export const PROFILE_BANNERS = [
   { key: "accent", label: "Accent gradient", path: null },
@@ -42,7 +42,6 @@ export const PROFILE_BANNERS = [
 
 /** Legacy image paths still accepted by validators / old profile rows. */
 export const LEGACY_PROFILE_BANNER_PATHS = [
-  "/sandbox-ds/banners/hero-collage.png",
   "/sandbox-ds/banners/banner-stickers.png",
   "/sandbox-ds/banners/banner-social.png",
 ] as const;

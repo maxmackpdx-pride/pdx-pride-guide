@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { findZAddress } from "@shared/zNamespace";
@@ -39,13 +39,11 @@ export default function ZAddressPending() {
 
   return (
     <div className="zine-page board-page">
-      <PageHero
-        flipLightLeaks
-        titleLine1={isSellz ? "LIVE NOW" : "NOT BUILT YET"}
-        accent="magenta"
+      <PageHeader
+        section={display}
+        title={isSellz ? "LIVE NOW" : "NOT BUILT YET"}
+        titleAccent="magenta"
         lede={lede}
-        bgImage="/motifs/portland-sign.jpg"
-        bgPosition="center 45%"
         actions={(
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {isSellz ? (

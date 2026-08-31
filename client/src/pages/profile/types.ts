@@ -140,7 +140,7 @@ export type MemberProfileData = {
   affiliatedVenues?: ProfileVenue[];
   ownedBusiness?: OwnedBusiness | null;
   accentColor?: string | null;
-  banner?: "accent-gradient" | "neon-collage" | "sticker-wall" | "pride-guide-social";
+  banner?: "accent-gradient" | "sticker-wall" | "pride-guide-social";
   coverImageUrl?: string | null;
   coverCrop?: string | null;
   marquee?: ProfileMarquee | null;

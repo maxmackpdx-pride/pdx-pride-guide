@@ -47,18 +47,26 @@
 }
 
 /*
- * Two things have to out-specify the shell's own `:where(.pdx-glass-card)`
+ * Three things have to out-specify the shell's own `:where(.pdx-glass-card)`
  * rule, which is why they sit on the compound selector:
  *   - the 8% outer bloom, composed from --neon-bloom the way StatCard and
  *     PlaceCard do. Declared on `.home-world` alone it loses the cascade and
  *     the bloom silently disappears.
  *   - no live blur. Ten 3D coverflow slides with backdrop-filter is what made
  *     this rail lag, and --glass-card-bg is already opaque, so it costs nothing.
+ *   - the clip. `.home-world` above already asks for `overflow: hidden`, but
+ *     the shell's `.pdx-glass-card { overflow: visible }` loads later at equal
+ *     specificity and wins, so every decoration escapes its card: the OUTZ
+ *     terrain (authored at top:-6% to bleed off the card edge) floated above
+ *     the card instead, drew over its neighbour, and had its top sliced flat
+ *     by the deck's own overflow. Same for the corner bloom at
+ *     right:-150px/bottom:-190px. The card clips its own decorations.
  */
 .home-world.pdx-glass-card {
   box-shadow: var(--glass-card-shadow), var(--neon-bloom);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  overflow: hidden;
 }
 
 .home-world .pdx-refract-seam { top: 0; z-index: 5; }
@@ -569,64 +577,129 @@
 }
 .home-world__item-cond { display: block; margin-top: 3px; color: var(--c); font: 700 9px/1.3 var(--font-mono, monospace); letter-spacing: .03em; }
 
-/* ── 09 Z/SPACE: today's calendar ──────────────────────────────────────── */
+/* ── 09 Z/SPACE: the day on a spine ────────────────────────────────────── */
+/* The subject is a day, so it is set as a schedule, not as five buttons: one
+   right-aligned mono time column, a hairline spine beside it, and the thing
+   itself to the right of the spine. Times in a column can be compared at a
+   glance; a time chip parked on the right of each row cannot.
 
+   The spine is drawn as a border on each row's copy column rather than as one
+   absolute line down the container. The list scrolls once there are more than
+   six rows, and an absolutely positioned line inside a scroll box is sized to
+   the visible box and then scrolls away from it. Per-row borders meet, so the
+   line stays whole at any length.
 
-.home-world__pills {
+   Colour still rotates through the board tokens (see TODAY_ACCENTS), but it is
+   spent on the time and the node instead of washing the whole row, so the
+   titles read as one list and the rainbow reads as the spine. */
+
+/* Five rows divide the slot and never scroll: at that count a scrollbar is
+   sub-pixel rounding, not a list that continues. Scrolling belongs to the
+   dense case, which is the only one with more rows than box. */
+.home-world__today {
   display: flex;
+  /* The slot is a block, so height:100% is what actually fills it; flex here
+     only matters if a future slot wrapper becomes a flex container. Without it
+     the five rows sit at their content height and leave the bottom third of
+     the slot empty on a phone, where the card is tallest. */
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 6px;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
+}
+.home-world__today[data-dense="1"] {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--c) 45%, transparent) transparent;
-}
-.home-world__pills[data-dense="1"] {
   mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent 100%);
 }
 
-.home-world__pill {
-  display: flex;
+/* min-height:0 on purpose. Five rows have to divide the slot exactly, and a
+   floor of 44px each is more than the slot gives them on a phone, so the rows
+   stopped shrinking and the list grew a scrollbar over five items. The dense
+   rule below puts the floor back for ten, which is where scrolling is the
+   intended behaviour. */
+.home-world__today-row {
+  display: grid;
   flex: 1 1 0;
+  grid-template-columns: 52px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 40px;
-  max-height: 62px;
-  padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, .07);
-  border-radius: 10px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--pill-c) 12%, #08080a), rgba(8, 8, 10, .85));
-  box-shadow: inset 3px 0 0 var(--pill-c), 0 8px 16px -14px color-mix(in srgb, var(--pill-c) 50%, transparent);
-  color: #fff;
-  font: 800 14px/1.15 var(--font-display, "Barlow Condensed", sans-serif);
-  letter-spacing: .04em;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-.home-world__pills[data-dense="1"] .home-world__pill { min-height: 34px; max-height: 44px; font-size: 12.5px; }
-.home-world__pill:hover { border-color: color-mix(in srgb, var(--pill-c) 55%, transparent); }
-/* Two lines before it truncates: a venue suffix should not cost the title. */
-.home-world__pill-label {
-  display: -webkit-box;
-  min-width: 0;
+  min-height: 0;
+  max-height: 74px;
+  padding: 6px 0;
   overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-world__today-time {
+  padding-right: 12px;
+  color: var(--row-c);
+  font: 800 11px/1 var(--font-mono, monospace);
+  letter-spacing: .04em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* The spine, plus the node that marks this row's stop on it. */
+.home-world__today-copy {
+  position: relative;
+  display: block;
+  min-width: 0;
+  padding-left: 15px;
+  border-left: 1px solid rgba(255, 255, 255, .11);
+}
+.home-world__today-copy::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: #08080a;
+  box-shadow: inset 0 0 0 1.5px var(--row-c);
+}
+/* Row zero is the next thing, so its node is filled and lit. */
+.home-world__today-row[data-next="1"] .home-world__today-copy::before {
+  background: var(--row-c);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--row-c) 70%, transparent);
+}
+
+/* Two lines before it truncates: a long title should not cost the venue. */
+.home-world__today-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #fff;
+  font: 800 15px/1.08 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .03em;
+  text-transform: uppercase;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
-.home-world__pills[data-dense="1"] .home-world__pill-label { -webkit-line-clamp: 1; }
-.home-world__pill-time {
-  flex: none;
-  padding: 4px 8px;
-  border: 1px solid color-mix(in srgb, var(--pill-c) 40%, transparent);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, .5);
-  color: var(--pill-c);
-  font: 800 11px/1 var(--font-mono, monospace);
+.home-world__today-sub {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--text-lo, #9a9aa4);
+  font: 600 10px/1.2 var(--font-mono, monospace);
+  letter-spacing: .05em;
+  text-transform: uppercase;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
+
+.home-world__today-row:hover .home-world__today-title { color: var(--row-c); }
+.home-world__today-row:hover .home-world__today-copy { border-left-color: var(--row-c); }
+
+/* Ten rows in the same box: the venue line is the first thing to go, because
+   the time and the title are what the list is for. */
+.home-world__today[data-dense="1"] .home-world__today-row { min-height: 34px; max-height: 46px; padding: 4px 0; }
+.home-world__today[data-dense="1"] .home-world__today-title { font-size: 13px; -webkit-line-clamp: 1; }
+.home-world__today[data-dense="1"] .home-world__today-sub { display: none; }
 
 /* ── 10 NEXT: the blueprint ────────────────────────────────────────────── */
 /* The three marks are spaced by the box, not by hand-typed percentages, so

@@ -160,7 +160,7 @@ export default function HomeStage({ afterWelcome }: Props) {
                     : undefined
                 }
                 items={worldData.items}
-                pills={worldData.pills}
+                today={worldData.today}
               />
             );
           })}

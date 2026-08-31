@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import PageHero from "@/components/PageHero";
+import PageHeader from "@/components/PageHeader";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
 import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -22,15 +22,11 @@ export default function Legal() {
 
   return (
     <div className="zine-page about-page board-page">
-      <PageHero
-        flush
-        kicker="Legal"
-        titleLine1="TERMS &"
-        titleLine2="STANDARDS"
-        accent="cyan"
+      <PageHeader
+        section="LEGAL"
+        title="TERMS & STANDARDS"
+        titleAccent="cyan"
         lede="How Zaylist works, what we collect, and the Community Standards everyone agrees to."
-        bgImage="/motifs/hero-about.png"
-        bgPosition="40% center"
         actions={
           <>
             <Link href="/about">

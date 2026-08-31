@@ -12,6 +12,24 @@ When the user reports a **live-site bug** or asks to **fix** something on the pr
 
 Default bias: **fix for prod, ask once, then ship.** Not “fixed” until they approved the push and deploy succeeded.
 
+## Dead code and asset deletion release gate (hard rule)
+
+After deleting dead code, CSS, media, fonts, icons, or other assets, **always complete this gate before saying the cleanup is ready to push**:
+
+1. **Prove it is dead first.** Check imports, exports, lazy routes, dynamic paths, CSS URLs/selectors, manifests, server/shared code, scripts, tests, documentation, and persisted compatibility values. A filename-only search is not enough when paths can be assembled dynamically.
+2. **Remove the whole orphaned graph.** Delete dependent helpers, styles, media, obsolete validators/types/docs, empty directories, and tests or deployment checks that incorrectly require the retired system. Preserve or add negative regression guards when they prevent the dead pattern from returning.
+3. **Scan deleted names again.** Search the complete product source for every deleted filename, symbol, selector, route key, and persisted enum value. Any surviving reference must be resolved or explicitly justified.
+4. **Run the full technical gate.** At minimum: `git diff --check`, TypeScript check, production build, deployment-bundle verification, and the repo predeploy/smoke checks. Do not treat one passing command as sufficient.
+5. **Visually verify UI-affecting deletion.** Test every affected route at representative desktop and mobile widths. Check the intended replacement, missing/broken images, console errors, horizontal overflow, responsive layout, and relevant interaction states. CSS compilation alone does not prove a visual deletion is safe.
+6. **Fail closed when visual testing is blocked.** If the browser, preview, authentication, fixtures, or environment prevents the visual pass, report that limitation and **do not call the cleanup ready to push** until the visual check is completed.
+7. **Review scope and clean test side effects.** Compare `git status` before and after testing. Revert only database/files created or modified by the agent's checks, leave unrelated user or agent work untouched, and confirm the final diff contains only the intended cleanup and required guardrail updates.
+
+Final language bar:
+
+- Technical checks pass but visual verification is incomplete: **“Technical checks pass; visual verification is still required before push.”**
+- The complete gate passes: **“Dead-code deletion verified locally - ready to push.”**
+- Never call dead code or assets safely removed merely because references were not found or the build succeeded.
+
 ## What “deploy / fix the website / ship” means (hard rule)
 
 When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**, or similar, they mean **the real product**:

@@ -90,8 +90,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Security headers
-app.use(helmet({ contentSecurityPolicy: false }));
+// Security headers. On local HTTP, skip HSTS / COOP / CORP — Helmet's HSTS
+// (or Chrome HTTPS-First upgrading localhost to https://) makes the browser
+// refuse the origin until the pin expires.
+const isLocalDev =
+  process.env.NODE_ENV === "development" || process.env.LOCAL_PREVIEW === "1";
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    ...(isLocalDev
+      ? {
+          strictTransportSecurity: false,
+          crossOriginOpenerPolicy: false,
+          crossOriginResourcePolicy: false,
+          originAgentCluster: false,
+        }
+      : {}),
+  }),
+);
 
 // Rate limiting (skipped for local dev + preview:local smoke so repeated runs do not 429)
 const rateLimitSkipDev = () =>
