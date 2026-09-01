@@ -1,69 +1,84 @@
 
 ▸ flyers/gaylabration-radiance.jpg
-  ✓ title: expected "Gaylabration: Radiance" got "Gaylabration: Radiance"
-  ✓ start_date: expected "2026-07-18" got "2026-07-18"
-  ✓ end_date: expected "2026-07-19" got "2026-07-19"
-  ✓ time: expected "21:00" got "21:00"
-  ✓ venue: expected "Crystal Ballroom" got "Crystal Ballroom"
-  model: gemini-vision:gemini-flash-lite-latest
-  ! Vision model gemini-2.0-flash unavailable (HTTP …) - auto-discovered gemini-flash-lite-latest
+  ✗ title: expected "Gaylabration: Radiance" got "REORDER TR"
+  ✗ start_date: expected "2026-07-18" got null
+  ✗ end_date: expected "2026-07-19" got null
+  ✗ time: expected "21:00" got null
+  ✗ venue: expected "Crystal Ballroom" got null
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/spellman-spectacle.webp
-  ✓ title: expected "A Spellman Spectacle" got "A Spellman Spectacle: A 30th Anniversary Special"
+  ✗ title: expected "A Spellman Spectacle" got "! = © Raa Rad A"
   ✓ start_date: expected "2026-07-16" got "2026-07-16"
-  ✓ venue: expected "The Get Down" got "The Get Down"
-  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6th Ave, Portland OR 97214"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ venue: expected "The Get Down" got null
+  ✓ address: expected "680 SE 6th Ave, Portland OR 97214" got "680 SE 6TH AVE"
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/sports-bra-pride-block-party.jpg
-  ✓ title: expected "The Sports Bra Pride 5th Annual Block Party" got "Sports Bra Pride 5th Annual Block Party"
-  ✓ venue: expected "The Sports Bra" got "The Sports Bra"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ title: expected "The Sports Bra Pride 5th Annual Block Party" got null
+  ✗ venue: expected "The Sports Bra" got null
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/stank-yes-coach.jpg
-  ✓ title: expected "Stank: Yes Coach — PDX Pride" got "Stank Yes Coach"
+  ✗ title: expected "Stank: Yes Coach — PDX Pride" got "JUMPR (SF) - BRO HOE - LAKE EVERETT ay"
   ✓ start_date: expected "2026-07-18" got "2026-07-18"
-  ✓ end_date: expected "2026-07-19" got "2026-07-19"
+  ✗ end_date: expected "2026-07-19" got null
   ✓ time: expected "20:00" got "20:00"
-  ✓ venue: expected "Sanctuary" got "Sanctuary"
-  ✓ address: expected "33 NW 9th Ave" got "33 NW 9th Ave, Portland, OR"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ venue: expected "Sanctuary" got null
+  ✓ address: expected "33 NW 9th Ave" got "33 NW ITHAVE"
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/stfu-femdom-play-party.jpg
-  ✓ title: expected "Mistress Viola's Femdom Play Party" got "Mistress Viola's Femdom Play Party"
+  ✗ title: expected "Mistress Viola's Femdom Play Party" got "VI 4+ J-3 0 ~ . . ."
   ✗ start_date: expected "2026-07-16" got "2027-07-16"
-  ✓ venue: expected "The Den" got "The Den"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ venue: expected "The Den" got null
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/treasure-trail-bearracuda.jpg
-  ✓ title: expected "Treasure Trail" got "Treasure Trail"
-  ✓ start_date: expected "2026-07-17" got "2026-07-17"
+  ✗ title: expected "Treasure Trail" got "MATT BEARRACUDA & JP HARDY PRESENT"
+  ✗ start_date: expected "2026-07-17" got "2027-07-17"
   ✓ time: expected "20:00" got "20:00"
-  ✓ address: expected "33 NW 9th, Portland, OR" got "33 NW 9th, Portland, OR"
-  ✓ url: expected "https://www.bearracuda.com" got "https://www.bearracuda.com"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ address: expected "33 NW 9th, Portland, OR" got null
+  ✓ url: expected "https://www.bearracuda.com" got "WWW.BEARRACUDA.COM"
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/yes-sir-pride-closer.jpg
-  ✓ title: expected "Yes Sir: Portland Pride Closer" got "Portland Pride Closer"
+  ✗ title: expected "Yes Sir: Portland Pride Closer" got "oN VESyp"
   ✓ start_date: expected "2026-07-19" got "2026-07-19"
-  ✓ end_date: expected "2026-07-20" got "2026-07-20"
-  ✓ time: expected "21:00" got "21:00"
-  ✓ venue: expected "Realm PDX" got "Realm PDX"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ end_date: expected "2026-07-20" got null
+  ✗ time: expected "21:00" got null
+  ✗ venue: expected "Realm PDX" got null
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ▸ flyers/sasha-colby-live.jpg
-  ✓ title: expected "Sasha Colby Live" got "Sasha Colby Live: Portland Pride"
-  model: gemini-vision:gemini-flash-lite-latest
+  ✗ title: expected "Sasha Colby Live" got "\\ |"
+  ! Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)
+  ! All vision providers failed - text fallback
+  ! LLM parse failed (LLM HTTP 404) - heuristic fallback
 
 ══ Field accuracy ══
-  title       8/8  (100%)
-  start_date  5/6  (83%)
-  end_date    3/3  (100%)
-  time        4/4  (100%)
-  venue       6/6  (100%)
-  address     3/3  (100%)
+  title       0/8  (0%)
+  start_date  3/6  (50%)
+  end_date    0/3  (0%)
+  time        2/4  (50%)
+  venue       0/6  (0%)
+  address     2/3  (67%)
   url         1/1  (100%)
 
-  OVERALL     30/31  (97%)
+  OVERALL     8/31  (26%)
   Flyers: 8/8 processed
   Report written: reports/flyer-validation-latest.json

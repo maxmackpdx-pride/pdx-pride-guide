@@ -1,28 +1,28 @@
 {
-  "overall": 97,
+  "overall": 26,
   "perField": {
     "title": {
-      "hit": 8,
+      "hit": 0,
       "scored": 8
     },
     "start_date": {
-      "hit": 5,
+      "hit": 3,
       "scored": 6
     },
     "end_date": {
-      "hit": 3,
+      "hit": 0,
       "scored": 3
     },
     "time": {
-      "hit": 4,
+      "hit": 2,
       "scored": 4
     },
     "venue": {
-      "hit": 6,
+      "hit": 0,
       "scored": 6
     },
     "address": {
-      "hit": 3,
+      "hit": 2,
       "scored": 3
     },
     "url": {
@@ -35,36 +35,38 @@
       "path": "flyers/gaylabration-radiance.jpg",
       "ok": true,
       "ocrConfidence": 47,
-      "parseConfidence": 95,
-      "model": "gemini-vision:gemini-flash-lite-latest",
+      "parseConfidence": 25,
+      "model": null,
       "warnings": [
-        "Vision model gemini-2.0-flash unavailable (HTTP …) - auto-discovered gemini-flash-lite-latest"
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
       ],
       "fields": {
         "title": {
           "expected": "Gaylabration: Radiance",
-          "actual": "Gaylabration: Radiance",
-          "hit": true
+          "actual": "REORDER TR",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-18",
-          "actual": "2026-07-18",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": "2026-07-19",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "time": {
           "expected": "21:00",
-          "actual": "21:00",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "venue": {
           "expected": "Crystal Ballroom",
-          "actual": "Crystal Ballroom",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": null,
@@ -82,14 +84,18 @@
       "path": "flyers/spellman-spectacle.webp",
       "ok": true,
       "ocrConfidence": 63,
-      "parseConfidence": 95,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "A Spellman Spectacle",
-          "actual": "A Spellman Spectacle: A 30th Anniversary Special",
-          "hit": true
+          "actual": "! = © Raa Rad A",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-16",
@@ -98,7 +104,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": "2026-07-16",
+          "actual": null,
           "hit": null
         },
         "time": {
@@ -108,12 +114,12 @@
         },
         "venue": {
           "expected": "The Get Down",
-          "actual": "The Get Down",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": "680 SE 6th Ave, Portland OR 97214",
-          "actual": "680 SE 6th Ave, Portland OR 97214",
+          "actual": "680 SE 6TH AVE",
           "hit": true
         },
         "url": {
@@ -127,14 +133,18 @@
       "path": "flyers/sports-bra-pride-block-party.jpg",
       "ok": true,
       "ocrConfidence": 0,
-      "parseConfidence": 60,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "The Sports Bra Pride 5th Annual Block Party",
-          "actual": "Sports Bra Pride 5th Annual Block Party",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "start_date": {
           "expected": null,
@@ -153,8 +163,8 @@
         },
         "venue": {
           "expected": "The Sports Bra",
-          "actual": "The Sports Bra",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": null,
@@ -172,14 +182,18 @@
       "path": "flyers/stank-yes-coach.jpg",
       "ok": true,
       "ocrConfidence": 41,
-      "parseConfidence": 95,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Stank: Yes Coach — PDX Pride",
-          "actual": "Stank Yes Coach",
-          "hit": true
+          "actual": "JUMPR (SF) - BRO HOE - LAKE EVERETT ay",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-18",
@@ -188,8 +202,8 @@
         },
         "end_date": {
           "expected": "2026-07-19",
-          "actual": "2026-07-19",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "time": {
           "expected": "20:00",
@@ -198,12 +212,12 @@
         },
         "venue": {
           "expected": "Sanctuary",
-          "actual": "Sanctuary",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": "33 NW 9th Ave",
-          "actual": "33 NW 9th Ave, Portland, OR",
+          "actual": "33 NW ITHAVE",
           "hit": true
         },
         "url": {
@@ -217,14 +231,18 @@
       "path": "flyers/stfu-femdom-play-party.jpg",
       "ok": true,
       "ocrConfidence": 33,
-      "parseConfidence": 90,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Mistress Viola's Femdom Play Party",
-          "actual": "Mistress Viola's Femdom Play Party",
-          "hit": true
+          "actual": "VI 4+ J-3 0 ~ . . .",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-16",
@@ -233,7 +251,7 @@
         },
         "end_date": {
           "expected": null,
-          "actual": "2027-07-16",
+          "actual": null,
           "hit": null
         },
         "time": {
@@ -243,8 +261,8 @@
         },
         "venue": {
           "expected": "The Den",
-          "actual": "The Den",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": null,
@@ -262,23 +280,27 @@
       "path": "flyers/treasure-trail-bearracuda.jpg",
       "ok": true,
       "ocrConfidence": 32,
-      "parseConfidence": 95,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Treasure Trail",
-          "actual": "Treasure Trail",
-          "hit": true
+          "actual": "MATT BEARRACUDA & JP HARDY PRESENT",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-17",
-          "actual": "2026-07-17",
-          "hit": true
+          "actual": "2027-07-17",
+          "hit": false
         },
         "end_date": {
           "expected": null,
-          "actual": "2026-07-18",
+          "actual": null,
           "hit": null
         },
         "time": {
@@ -293,12 +315,12 @@
         },
         "address": {
           "expected": "33 NW 9th, Portland, OR",
-          "actual": "33 NW 9th, Portland, OR",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "url": {
           "expected": "https://www.bearracuda.com",
-          "actual": "https://www.bearracuda.com",
+          "actual": "WWW.BEARRACUDA.COM",
           "hit": true
         }
       }
@@ -307,14 +329,18 @@
       "path": "flyers/yes-sir-pride-closer.jpg",
       "ok": true,
       "ocrConfidence": 46,
-      "parseConfidence": 95,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Yes Sir: Portland Pride Closer",
-          "actual": "Portland Pride Closer",
-          "hit": true
+          "actual": "oN VESyp",
+          "hit": false
         },
         "start_date": {
           "expected": "2026-07-19",
@@ -323,18 +349,18 @@
         },
         "end_date": {
           "expected": "2026-07-20",
-          "actual": "2026-07-20",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "time": {
           "expected": "21:00",
-          "actual": "21:00",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "venue": {
           "expected": "Realm PDX",
-          "actual": "Realm PDX",
-          "hit": true
+          "actual": null,
+          "hit": false
         },
         "address": {
           "expected": null,
@@ -343,7 +369,7 @@
         },
         "url": {
           "expected": null,
-          "actual": "https://www.shotgun.live",
+          "actual": null,
           "hit": null
         }
       }
@@ -352,14 +378,18 @@
       "path": "flyers/sasha-colby-live.jpg",
       "ok": true,
       "ocrConfidence": 58,
-      "parseConfidence": 70,
-      "model": "gemini-vision:gemini-flash-lite-latest",
-      "warnings": [],
+      "parseConfidence": 25,
+      "model": null,
+      "warnings": [
+        "Vision via gemini-vision failed (Vision HTTP 429; tried [gemini-2.0-flash, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-2.5-flash, gemini-omni-1.1-flash]. /models ok: 53 models, sample=[models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.5-flash-preview-tts, models/gemini-2.5-pro-preview-tts, models/gemma-4-26b)",
+        "All vision providers failed - text fallback",
+        "LLM parse failed (LLM HTTP 404) - heuristic fallback"
+      ],
       "fields": {
         "title": {
           "expected": "Sasha Colby Live",
-          "actual": "Sasha Colby Live: Portland Pride",
-          "hit": true
+          "actual": "\\ |",
+          "hit": false
         },
         "start_date": {
           "expected": null,
@@ -388,7 +418,7 @@
         },
         "url": {
           "expected": null,
-          "actual": "https://flippphoneevents.com/portland",
+          "actual": null,
           "hit": null
         }
       }
