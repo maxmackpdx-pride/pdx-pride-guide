@@ -79,8 +79,12 @@ function DynamicEventTitle({ title }: { title: string }) {
 }
 
 const SHINE_STEPS = ["base", "medium", "shoulder", "mid", "high", "crest", "prepeak", "peak"];
+const BLOOM_STEPS = ["prepeak", "peak"];
 export function EdgeLight() {
-  return <>{SHINE_STEPS.map(step => <span key={step} className={`pdxBoard__shine pdxBoard__shine--${step}`} aria-hidden="true" />)}</>;
+  return <>
+    {BLOOM_STEPS.map(step => <span key={`bloom-${step}`} className={`pdxBoard__shine pdxBoard__shine--${step} pdxBoard__bloom`} aria-hidden="true" />)}
+    {SHINE_STEPS.map(step => <span key={step} className={`pdxBoard__shine pdxBoard__shine--${step}`} aria-hidden="true" />)}
+  </>;
 }
 
 /** Approved Standard / Today-Events grid card (`event-card-grid`). */
