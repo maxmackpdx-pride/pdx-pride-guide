@@ -52,8 +52,9 @@ if [[ -f "script/smoke-admin-ops.mjs" ]] && command -v node >/dev/null 2>&1; the
 fi
 
 # QSearch identity rules are production data guards: ordinary venues require
-# explicit LGBTQ+ evidence, dedicated queer venues pass, and Sports Bra stays
-# out of scraper registries until its schedule is reliable.
+# explicit LGBTQ+ evidence, dedicated queer venues pass, The Sports Bra remains
+# founder-locked as a dedicated lesbian/LGBTQ+ venue, and its unreliable direct
+# schedule stays out of scraper registries.
 if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
   echo "predeploy: running QSearch identity guards…"
   node --import tsx script/smoke-qsearch-identity.ts

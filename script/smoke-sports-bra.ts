@@ -2,12 +2,13 @@
  * Regression guard: Sports Bra scraping stays disabled.
  *
  * Their schedule technology is not reliable enough for QSearch. Events found
- * through another trustworthy source can still qualify because The Sports Bra
- * is a dedicated queer venue; this only prevents a direct scraper/source from
- * being registered.
+ * through another trustworthy source qualify because The Sports Bra is a
+ * founder-locked dedicated lesbian/LGBTQ+ venue; this only prevents a direct
+ * scraper/source from being registered.
  */
 import { INGEST_SOURCES, isSportsBraScrapeSource } from "../shared/ingestSources";
 import { getTrustedVenue, isTrustedLaneSource } from "../shared/trustedVenues";
+import { isDedicatedQueerVenueListing } from "../server/ingest/relevance";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) {
@@ -22,6 +23,14 @@ assert(
   "Sports Bra is absent from QSearch scan sources",
 );
 assert(getTrustedVenue("sports-bra-eb") == null, "Sports Bra is absent from trusted sync");
+assert(
+  isDedicatedQueerVenueListing({
+    venueName: "The Sports Bra",
+    sourceUrl: "https://thesportsbraofficial.com/pages/portland",
+    eventPageUrl: null,
+  }),
+  "Sports Bra is permanently classified as a dedicated lesbian/LGBTQ+ venue",
+);
 assert(
   isSportsBraScrapeSource({
     id: "custom-sports-bra",

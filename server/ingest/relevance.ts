@@ -33,6 +33,8 @@ const DEDICATED_QUEER_VENUE_ALIASES = new Set(
     "Darcelle XV Plaza",
     "Eagle",
     "Eagle Portland",
+    "The Eagle",
+    "Portland Eagle",
     "Hawks",
     "Hawks PDX",
     "Peacock PDX",
@@ -50,6 +52,8 @@ const DEDICATED_QUEER_VENUE_ALIASES = new Set(
     "The Meet Rack",
     "The Meet Rack at Darkroom",
     "The Nest Lounge",
+    // Founder-locked identity: The Sports Bra is a dedicated lesbian/LGBTQ+
+    // venue, so its official calendar establishes event relevance.
     "The Sports Bra",
     "Triangle Recreation Camp",
     "Camp TRC",

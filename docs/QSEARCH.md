@@ -150,6 +150,13 @@ They are excluded from the QSearch catch-all (trusted-lane filter).
 
 - An event at an **exact verified LGBTQ+ venue** (for example Badlands) is
   relevant even when the individual listing does not repeat LGBTQ+ keywords.
+- Founder-locked trusted dedicated LGBTQ+ venues are Sanctuary Club, Eagle
+  Portland, Badlands, The Sports Bra, Q Center, Steam Portland, Camp Bar PDX,
+  Darcelle XV Showplace, CC Slaughters, and Hawks PDX. Their official calendars
+  establish LGBTQ+ relevance for every verified event there. Do not require
+  separate event-specific LGBTQ+ proof; publish after the exact identity and
+  normal date/time/link/duplicate/artwork evidence gates pass. Tucker's shorthand
+  `the Eagle` means Eagle Portland and `Camp` means Camp Bar PDX.
 - An event at an **ordinary venue** is relevant only when the title or
   description explicitly establishes LGBTQ+ relevance or a queer host.
 - Venue/directory attachment requires exact venue identity, an exact directory
@@ -158,9 +165,12 @@ They are excluded from the QSearch catch-all (trusted-lane filter).
 - Group attachment requires the full organization name, an exact curated alias,
   or the exact group source identity. `Portland Leather` is not an alias for
   Portland Leather Alliance; `PLA` alone is accepted only in an event title.
-- Sports Bra direct scraping is disabled until its schedule can be read
-  reliably. Events discovered elsewhere may still qualify because it is a
-  verified queer venue.
+- The Sports Bra is a founder-locked dedicated lesbian/LGBTQ+ venue. Its
+  official calendar establishes LGBTQ+ relevance for every event there; never
+  require separate event-specific LGBTQ+ proof or downgrade the classification.
+  Keep exact Portland identity/address checks. Direct scraping remains disabled
+  until its schedule can be read reliably, so use official-site and authorized
+  signed-in browser research.
 
 ## AI scrub (LLM candidate cleaning)
 

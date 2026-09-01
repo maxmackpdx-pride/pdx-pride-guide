@@ -3,8 +3,10 @@
 > **Paused 2026-07-29:** direct Sports Bra scraping is intentionally disabled.
 > Its current schedule technology was not reliable enough to read accurately.
 > Keep this document as historical implementation research only. Events found
-> through other trustworthy sources may still qualify because The Sports Bra is
-> a verified queer venue.
+> through other trustworthy sources qualify because The Sports Bra is a
+> founder-locked dedicated lesbian/LGBTQ+ venue. Its official calendar
+> establishes LGBTQ+ relevance for every event there; exact Portland
+> identity/address verification still prevents unrelated name matches.
 
 The Sports Bra publishes the games it's showing in an Airtable base, embedded on
 `thesportsbraofficial.com/pages/portland`. We read that schedule in two ways:

@@ -7499,47 +7499,25 @@ function runBootMigrationsOnce() {
     recordBootMigration("scrub_url_ingest_eb_no_queer_v2");
   }
 
-  // One-off: Romance x Women's Sports Book Event (EB / Sports Bra noise) — remove LIVE listing.
-  if (!hasBootMigration("remove_romance_womens_sports_book_event_v1")) {
-    const rows = sqlite
-      .prepare(
-        `SELECT id FROM events
-         WHERE id = 143
-            OR (
-              lower(title) LIKE '%romance%x%women%sports%book%'
-              OR lower(title) LIKE '%romance x women%sports book%'
-              OR lower(title) LIKE '%anita kelly%samatha saldivar%'
-              OR lower(title) LIKE '%anita kelly%samantha saldivar%'
-            )`,
-      )
-      .all() as Array<{ id: number }>;
-    hardDeleteEventIds(rows.map(r => r.id));
-    recordBootMigration("remove_romance_womens_sports_book_event_v1");
-  }
-
-  // One-off: hide every UPCOMING Sports Bra listing that is NOT a game/watch-party.
-  // Real games carry the auto-generated /api/game-poster image or a matchup /
-  // "watch party" title; everything else at The Sports Bra is leaked non-game
-  // noise (church pickleball, barbell cert, book events, etc.). Past events are
-  // left alone (they no longer show). Reversible: status → HIDDEN with an admin
-  // note, no hard delete, so a mis-caught real game can be flipped back to LIVE.
-  if (!hasBootMigration("hide_sports_bra_non_games_v1")) {
+  // The Sports Bra is a founder-locked dedicated lesbian/LGBTQ+ venue. All real
+  // events there meet the relevance rule, not only games/watch parties. Keep the
+  // identity guard: an event using the name with a different explicit address is
+  // a bad join and remains reversible in HIDDEN review.
+  if (!hasBootMigration("hide_sports_bra_address_mismatch_v2")) {
     const rows = sqlite
       .prepare(
         `SELECT id, title FROM events
           WHERE status = 'LIVE'
             AND lower(venue_name) LIKE '%sports bra%'
             AND date_start >= date('now')
-            AND (poster_image_url IS NULL OR lower(poster_image_url) NOT LIKE '%game-poster%')
-            AND lower(title) NOT LIKE '% vs %'
-            AND lower(title) NOT LIKE '% vs. %'
-            AND lower(title) NOT LIKE '%watch party%'`,
+            AND trim(COALESCE(address, '')) <> ''
+            AND lower(address) NOT LIKE '%2512 ne broadway%'`,
       )
       .all() as Array<{ id: number; title: string }>;
     const hide = sqlite.prepare(
       `UPDATE events SET status = 'HIDDEN',
          admin_notes = COALESCE(admin_notes || ' | ', '') ||
-           'Hidden: Sports Bra non-game listing (hide_sports_bra_non_games_v1)'
+           'Hidden: Sports Bra exact-address mismatch (hide_sports_bra_address_mismatch_v2)'
        WHERE id = ?`,
     );
     for (const r of rows) {
@@ -7550,10 +7528,10 @@ function runBootMigrationsOnce() {
       }
     }
     console.info(
-      `[boot] hide_sports_bra_non_games_v1: hid ${rows.length} events` +
+      `[boot] hide_sports_bra_address_mismatch_v2: hid ${rows.length} events` +
         (rows.length ? ` -> ${rows.map(r => `#${r.id} ${r.title}`).join("; ")}` : ""),
     );
-    recordBootMigration("hide_sports_bra_non_games_v1");
+    recordBootMigration("hide_sports_bra_address_mismatch_v2");
   }
 
   // Cross-venue contamination repair:

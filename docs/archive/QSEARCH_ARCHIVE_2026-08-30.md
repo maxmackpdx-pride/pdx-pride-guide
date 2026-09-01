@@ -1,5 +1,11 @@
 # QSEARCH archive
 
+> **Superseded venue rule, 2026-09-01:** Tucker classified The Sports Bra as a
+> founder-locked dedicated lesbian/LGBTQ+ venue. Its official calendar now
+> establishes LGBTQ+ relevance for every verified event there. Any older rule
+> below requiring event-specific LGBTQ+ proof for The Sports Bra is historical
+> and must not be applied.
+
 QSEARCH was retired from the live Zaylist product on August 30, 2026.
 
 The complete pre-retirement implementation is preserved on the GitHub branch:

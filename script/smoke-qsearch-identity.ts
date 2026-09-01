@@ -58,6 +58,38 @@ assert(
     .keep,
   "all events at an exact dedicated queer venue are eligible",
 );
+for (const venueName of [
+  "Sanctuary Club",
+  "Eagle Portland",
+  "Badlands",
+  "The Sports Bra",
+  "Q Center",
+  "Steam Portland",
+  "Camp Bar PDX",
+  "Darcelle XV Showplace",
+  "CC Slaughters",
+  "Hawks PDX",
+]) {
+  assert(
+    isRelevantScanDraft(
+      draft({ title: "Weekly Community Event", venueName }),
+      ordinarySource,
+    ).keep,
+    `${venueName} needs no separate event-specific LGBTQ+ wording`,
+  );
+}
+assert(
+  isRelevantScanDraft(
+    draft({
+      title: "Community Book Night",
+      venueName: "The Sports Bra",
+      address: "2512 NE Broadway, Portland, OR 97232",
+      sourceUrl: "https://thesportsbraofficial.com/pages/portland",
+    }),
+    ordinarySource,
+  ).keep,
+  "Sports Bra events do not need separate event-specific LGBTQ+ wording",
+);
 assert(
   !isRelevantScanDraft(
     draft({ title: "Business Mixer", venueName: "Badlands Golf Club" }),
