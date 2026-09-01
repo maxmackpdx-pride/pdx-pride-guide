@@ -48,6 +48,11 @@
    backdrop-filter only costs scroll FPS (no visible glass through the slab).
    No contain:paint - that clips day bloom + hover lift.
    Intrinsic size ≈ poster + slim dense meta. */
+.events-poster-grid > .scroll-reveal {
+  min-width: 0;
+  container-type: inline-size;
+}
+
 .events-poster-grid > .ds-listing-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
@@ -58,17 +63,56 @@
   -webkit-backdrop-filter: none !important;
 }
 
-/* Quiet top-seam scroll while the grid is dense (background-position thrash) */
-.events-poster-grid .pdxBoard::before {
-  animation: none !important;
-  background-size: auto;
-  background-position: 0 50%;
+/* Founder override: fill the full 2:3 frame; cropping is preferable to bars. */
+.events-poster-grid .pdxBoard--event-grid .pdxBoard__img {
+  object-fit: cover;
+  object-position: center;
 }
 
-/* Grid thumbnails - fill the 2:3 poster frame (modal shows full flyer) */
-.events-poster-grid .pdxBoard__img {
-  object-fit: cover;
-  object-position: center top;
+/* The prototype locks every closed card to one universal silhouette. Its
+   540 x 1112 source card is displayed at 80%, yielding 432 x 889.6 here. */
+.events-poster-grid .ds-listing-card--grid {
+  height: auto;
+}
+.events-poster-grid .ds-listing-card--grid .pdxBoard--event-grid {
+  flex: none;
+  height: auto !important;
+  min-height: 0;
+  aspect-ratio: 432 / 889.6;
+}
+
+.events-poster-grid .ds-listing-card--grid .ds-listing-share {
+  top: 9px;
+  right: 9px;
+  z-index: 10;
+  width: 29px;
+  height: 29px;
+  border-color: rgba(255,255,255,.18);
+  background: rgba(5,5,7,.74);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.events-poster-grid .ds-listing-card--grid .ds-listing-share svg {
+  width: 14px;
+  height: 14px;
+}
+
+@container (max-width: 220px) {
+  .events-poster-grid .ds-listing-card--grid .pdxBoard--event-grid {
+    height: 378px !important;
+    aspect-ratio: auto;
+  }
+  .events-poster-grid .ds-listing-card--grid .ds-listing-share {
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+  }
+  .events-poster-grid .ds-listing-card--grid .ds-listing-share svg {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 /* Dense grid: less meta chrome; extras hug the card */

@@ -8,18 +8,6 @@ const DAY_BASE = {
 };
 const DAY_CONTRAST = { MON: "#fff", TUE: "#fff", WED: "#050506", THU: "#050506", FRI: "#050506", SAT: "#050506", SUN: "#050506" };
 const DAY_SECONDARY = { MON: "#ccff00", TUE: "#ff7a00", WED: "#8f5cff", THU: "#ff7a00", FRI: "#ccff00", SAT: "#ff2d3d", SUN: "#00ffff" };
-const ADM_LABEL = { FREE: "Free", TICKETED: "Ticketed", DOOR_FEE: "Door fee", SUGGESTED_DONATION: "Donation" };
-const AGE_LABEL = { ALL_AGES: "All ages", "18_PLUS": "18+", "21_PLUS": "21+" };
-
-function tagKey(value: string) { return String(value).toLowerCase().replace(/[^a-z0-9+]/g, ""); }
-function buildMetaBits(admission?: string, age?: string, types: string[] = []) {
-  const covered = new Set(types.map(tagKey));
-  const bits: string[] = [];
-  if (admission && ADM_LABEL[admission] && !covered.has(tagKey(ADM_LABEL[admission]))) bits.push(ADM_LABEL[admission]);
-  if (age && AGE_LABEL[age] && !covered.has(tagKey(AGE_LABEL[age]))) bits.push(AGE_LABEL[age]);
-  return bits.join(" · ");
-}
-
 const measureCanvas = typeof document !== "undefined" ? document.createElement("canvas") : null;
 const measureContext = measureCanvas?.getContext("2d") || null;
 function measureTitle(value: string) {
@@ -29,7 +17,7 @@ function measureTitle(value: string) {
 }
 function solveTitle(value: string, width: number) {
   const words = String(value).trim().toUpperCase().split(/\s+/).filter(Boolean);
-  if (words.length <= 1) return [{ text: words[0] || "", size: Math.min(220, width / measureTitle(words[0] || "") * 100) }];
+  if (words.length <= 1) return [{ text: words[0] || "", size: width / measureTitle(words[0] || "") * 100 }];
   const candidates = Array.from({ length: words.length - 1 }, (_, index) => [words.slice(0, index + 1).join(" "), words.slice(index + 1).join(" ")]);
   let winner: { lines: string[]; sizes: number[]; score: number } | null = null;
   for (const lines of candidates) {
@@ -49,17 +37,21 @@ function DynamicEventTitle({ title }: { title: string }) {
     const fit = () => {
       const poster = node.closest(".pdxBoard__poster") as HTMLElement | null;
       if (!poster) return;
-      const compact = solveTitle(title, Math.max(1, poster.clientWidth / 2 - 17));
-      const expanded = compact.some(line => line.size < 42);
+      const nodeStyles = getComputedStyle(node);
+      const inset = Number.parseFloat(nodeStyles.getPropertyValue("--event-title-inset")) || 17;
+      const floor = Number.parseFloat(nodeStyles.getPropertyValue("--event-title-floor")) || 24;
+      const expandAt = Number.parseFloat(nodeStyles.getPropertyValue("--event-title-expand-at")) || 42;
+      const compact = solveTitle(title, Math.max(1, poster.clientWidth / 2 - inset));
+      const expanded = compact.some(line => line.size < expandAt);
       node.classList.toggle("is-expanded", expanded);
-      const width = Math.max(1, expanded ? poster.clientWidth - 25 : poster.clientWidth / 2 - 34);
+      const width = Math.max(1, expanded ? poster.clientWidth - (inset * 2) : poster.clientWidth / 2 - inset);
       const result = solveTitle(title, width);
       const lines = result.map(({ text, size }) => {
         const line = document.createElement("span");
         line.className = "pdxBoard__titleLine";
         line.dataset.shadowText = text;
         line.textContent = text;
-        line.style.fontSize = `${Math.max(36, Math.min(220, size)).toFixed(2)}px`;
+        line.style.fontSize = `${Math.max(floor, Math.min(176, size)).toFixed(2)}px`;
         return line;
       });
       node.replaceChildren(...lines);
@@ -68,8 +60,11 @@ function DynamicEventTitle({ title }: { title: string }) {
       lines.forEach((line) => {
         const paintedWidth = line.getBoundingClientRect().width;
         if (paintedWidth > width) {
-          const current = Number.parseFloat(line.style.fontSize) || 36;
-          line.style.fontSize = `${Math.max(36, current * (width / paintedWidth) * 0.975).toFixed(2)}px`;
+          const current = Number.parseFloat(line.style.fontSize) || floor;
+          // The two-column mobile override can make an unusually long row
+          // wider than the poster even at the preferred floor. Containment
+          // wins in that exceptional case; keep both title rows intact.
+          line.style.fontSize = `${Math.max(8, current * (width / paintedWidth) * 0.975).toFixed(2)}px`;
         }
       });
       node.setAttribute("aria-label", title);
@@ -99,8 +94,7 @@ export function PosterCard({
   const base = DAY_BASE[day] || "#fff";
   const contrast = DAY_CONTRAST[day] || "#050506";
   const secondary = DAY_SECONDARY[day] || "#00ffff";
-  const metaBits = buildMetaBits(admission, age, types);
-  const visibleTypes = types.slice(0, metaBits ? 2 : 3);
+  const visibleTypes = types.slice(0, 3);
   const stop = (event: React.SyntheticEvent) => { event.preventDefault(); event.stopPropagation(); };
   const open = (event: React.MouseEvent) => {
     stop(event);
@@ -108,7 +102,7 @@ export function PosterCard({
   };
   const claim = (event: React.MouseEvent) => { stop(event); onClaimClick?.(); };
   return (
-    <article className={`pdxBoard pdx-glass-rebind${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, ...style }} {...rest}>
+    <article className={`pdxBoard pdxBoard--event-grid${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, ...style }} {...rest}>
       <EdgeLight />
       <div className="pdxBoard__poster">
         {image ? <img className="pdxBoard__img" src={image} alt="" /> : <div className="pdxBoard__ph" aria-hidden="true" />}
@@ -124,11 +118,10 @@ export function PosterCard({
         <div className="pdxBoard__tags" aria-label="Event tags">
           <span className="pdxTag pdxTag--day">{day}</span>
           {visibleTypes.map((type: string, index: number) => <span className="pdxTag pdxTag--type" key={`${type}-${index}`}>{type}</span>)}
-          {metaBits && <span className="pdxTag pdxTag--details">{metaBits}</span>}
         </div>
         <div className="pdxBoard__actions">
-          <button type="button" className="pdxBoard__action pdxBoard__action--more" onClick={open}>More Info</button>
-          {claimPending ? <span className="pdxBoard__action pdxBoard__action--pending">Claim Pending</span> : <button type="button" className="pdxBoard__action pdxBoard__action--claim" onClick={claim} disabled={!claimable}>Claim Event</button>}
+          <button type="button" className="pdxBoard__action pdxBoard__action--more" onClick={open}><span className="pdxBoard__actionLabel">More Info</span></button>
+          {claimPending ? <span className="pdxBoard__action pdxBoard__action--pending"><span className="pdxBoard__actionLabel">Claim Pending</span></span> : <button type="button" className="pdxBoard__action pdxBoard__action--claim" onClick={claim} disabled={!claimable}><span className="pdxBoard__actionLabel">Claim Event</span></button>}
         </div>
       </div>
     </article>

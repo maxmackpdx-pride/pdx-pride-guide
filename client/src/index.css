@@ -3707,7 +3707,7 @@ html.calm-mode .inbox-overlay,
   gap: 14px;
   padding: clamp(16px, 2vw, 28px);
   width: 100%;
-  max-width: 920px;
+  max-width: 980px;
   margin-inline: auto;
 }
 
@@ -8348,19 +8348,19 @@ html.calm-mode .attendance-cluster-cta__btn,
 }
 
 /*
- * Events poster grid: 4 across on desktop, never 5–8.
- * Grid is 30% narrower than the board and centered so tiles stay smaller.
+ * Approved event poster grid: two columns at every viewport. Desktop tracks
+ * resolve to 432px, matching the visible prototype card width.
  */
 .events-poster-grid {
   display: grid;
   gap: 28px;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   max-width: 1100px;
   margin-inline: auto;
 }
 
 .events-page .events-poster-grid {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (min-width: 800px) {

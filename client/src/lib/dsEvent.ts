@@ -15,6 +15,25 @@ export function formatListingWhen(event: Event): string {
   return parts.join(" · ");
 }
 
+/** Full date and start/end time used by the approved closed event-grid card.
+ * Neighborhood belongs in the open card, not on the closed grid face.
+ */
+export function formatGridCardWhen(event: Event): string {
+  if (!event.dateStart) return "";
+  const clock = (value: string) => formatPacificDateTime(value, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).replace(/:00(?=\s*[AP]M)/i, "");
+  const dateLabel = formatPacificDateTime(event.dateStart, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const start = clock(event.dateStart);
+  const end = event.dateEnd ? clock(event.dateEnd) : "";
+  return [dateLabel, [start, end].filter(Boolean).join("–")].filter(Boolean).join(" · ");
+}
+
 export function listingTypeTags(event: Event, max = 2): string[] {
   return getEventTypeTagsForEvent(event).slice(0, max);
 }

@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { AttendanceSummary } from "@/lib/attendanceBubble";
 import type { UserEventTalentCard } from "@shared/eventTalent";
 import {
+  formatGridCardWhen,
   formatListingWhen,
   listingDay,
   listingPosterUrl,
@@ -103,8 +104,8 @@ export default function ListingCard({
   const [showAuth, setShowAuth] = useState(false);
 
   const day = listingDay(event);
-  const when = formatListingWhen(event);
-  const types = listingTypeTags(event);
+  const when = viewMode === "grid" ? formatGridCardWhen(event) : formatListingWhen(event);
+  const types = listingTypeTags(event, viewMode === "grid" ? 3 : 2);
   const image = listingPosterUrl(event);
   const claimPending = Boolean(event.hasPendingClaim);
   // Public API strips claimedBy; isClaimable is the public signal for unclaimed listings.
@@ -200,10 +201,9 @@ export default function ListingCard({
           onOpen={(card: HTMLElement | null) => {
             if (card) onClick(cardOriginRect(card));
           }}
-          style={{ cursor: "pointer", height: "100%" }}
+          style={{ cursor: "pointer" }}
           {...claimProps}
         />
-        {extras}
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       </div>
     </ScrollReveal>
