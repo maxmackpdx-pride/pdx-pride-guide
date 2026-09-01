@@ -197,7 +197,9 @@ export default function ListingCard({
           going={showAttendance ? attendanceSummary!.count : undefined}
           showLink={false}
           showDetailsLink={false}
-          dense
+          onOpen={(card: HTMLElement | null) => {
+            if (card) onClick(cardOriginRect(card));
+          }}
           style={{ cursor: "pointer", height: "100%" }}
           {...claimProps}
         />

@@ -8353,25 +8353,21 @@ html.calm-mode .attendance-cluster-cta__btn,
  */
 .events-poster-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1100px;
+  margin-inline: auto;
 }
 
 .events-page .events-poster-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 800px) {
   .events-poster-grid,
   .events-page .events-poster-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 960px) {
-  .events-poster-grid,
-  .events-page .events-poster-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 60px;
   }
 }
 

@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import type { Event } from "@shared/schema";
-import EventTagsRow from "./EventTagsRow";
 import AttendanceCluster from "./AttendanceCluster";
 import MissedConnectionsPanel from "./MissedConnectionsPanel";
 import EventLinkChoiceMenu from "./EventLinkChoiceMenu";
@@ -35,7 +34,8 @@ import { resolveVenueWebsite } from "@shared/venueLinks";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
-import { DAY_TEXT_COLORS } from "@shared/eventWeek";
+import { DAY_COLORS, DAY_TEXT_COLORS } from "@shared/eventWeek";
+import "./EventModal.approved.css";
 
 type EventWithLinks = Event & {
   venueWebsite?: string | null;
@@ -98,6 +98,40 @@ const modAccent: Record<Exclude<ModerationMode, null>, string> = {
   flag: "var(--neon-orange)",
   transfer: "var(--neon-yellow)",
 };
+
+const DAY_INK: Record<string, string> = {
+  MON: "#FFFFFF",
+  TUE: "#FFFFFF",
+  WED: "#050506",
+  THU: "#050506",
+  FRI: "#050506",
+  SAT: "#050506",
+  SUN: "#050506",
+};
+
+const ADMISSION_LABELS: Record<string, string> = {
+  FREE: "Free",
+  TICKETED: "Ticketed",
+  DOOR_FEE: "Door fee",
+  SUGGESTED_DONATION: "Donation",
+};
+
+const AGE_LABELS: Record<string, string> = {
+  ALL_AGES: "All ages",
+  "18_PLUS": "18+",
+  "21_PLUS": "21+",
+};
+
+function eventTypeLabels(event: Event): string[] {
+  try {
+    const value = JSON.parse(event.eventTypes || "[]");
+    return Array.isArray(value)
+      ? value.map(String).map((label) => label.trim()).filter(Boolean)
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 /** True when updatedAt is meaningfully after createdAt (edits / re-syncs). */
 function hasMeaningfulUpdate(createdAt?: string | null, updatedAt?: string | null): boolean {
@@ -185,6 +219,12 @@ function EventModalInner({
   const [flipOpen, setFlipOpen] = useState(false);
   const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const socialTabsRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const dateRef = useRef<HTMLSpanElement>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
+  const venueRef = useRef<HTMLElement | null>(null);
+  const addressRef = useRef<HTMLElement | null>(null);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
 
@@ -235,6 +275,67 @@ function EventModalInner({
     setInviteNote("");
   }, [event.id]);
 
+  useLayoutEffect(() => {
+    const host = heroContentRef.current;
+    const title = titleRef.current;
+    if (!host || !title) return;
+
+    let cancelled = false;
+    const fitLine = (line: HTMLElement | null, min: number, max: number) => {
+      if (!line?.parentElement) return;
+      const targetWidth = line.parentElement.clientWidth;
+      if (!targetWidth) return;
+      const styles = getComputedStyle(line);
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.font = `${styles.fontStyle} ${styles.fontWeight} 100px ${styles.fontFamily}`;
+      const source = line.textContent?.trim() || "";
+      const currentSize = Number.parseFloat(styles.fontSize) || 100;
+      const trackingAtBasis = (Number.parseFloat(styles.letterSpacing) || 0) / currentSize * 100;
+      const measured = Math.max(1, context.measureText(source).width + Math.max(0, source.length - 1) * trackingAtBasis);
+      let size = Math.max(min, Math.min(max, targetWidth / measured * 100));
+      line.style.fontSize = `${size.toFixed(2)}px`;
+      const range = document.createRange();
+      range.selectNodeContents(line);
+      const rendered = range.getBoundingClientRect().width;
+      if (rendered > 0) size = Math.max(min, Math.min(max, size * targetWidth / rendered));
+      line.style.fontSize = `${size.toFixed(2)}px`;
+    };
+
+    const fit = () => {
+      if (cancelled) return;
+      const maxTitle = Math.min(86, Math.max(54, host.clientWidth * 0.16));
+      let low = 30;
+      let high = maxTitle;
+      for (let i = 0; i < 12; i += 1) {
+        const size = (low + high) / 2;
+        title.style.fontSize = `${size}px`;
+        const lineHeight = size * 0.86;
+        const fits = title.scrollHeight <= lineHeight * 2 + 2 && title.scrollWidth <= title.clientWidth + 1;
+        if (fits) low = size;
+        else high = size;
+      }
+      title.style.fontSize = `${low.toFixed(2)}px`;
+      title.dataset.dynamicOutOfRange = String(low <= 30.1);
+
+      const detailMax = Math.max(18, low / 2);
+      fitLine(dateRef.current, 15, detailMax);
+      fitLine(timeRef.current, 15, detailMax);
+      fitLine(venueRef.current, 13, detailMax * 0.9);
+      fitLine(addressRef.current, 13, detailMax * 0.9);
+    };
+
+    const ready = document.fonts?.ready || Promise.resolve();
+    void ready.then(() => requestAnimationFrame(fit));
+    const observer = new ResizeObserver(fit);
+    observer.observe(host);
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [event]);
+
   const jumpToAttendance = () => {
     setSocialTab("attendance");
     requestAnimationFrame(() => {
@@ -255,10 +356,12 @@ function EventModalInner({
   const eventTiming = getEventScheduleTiming(event.dateStart, event.dateEnd);
   const isPastEvent = eventTiming === "past";
   const posterUrl = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
-  const dayColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
+  const dayCode = String(event.dayOfWeek || "").toUpperCase().slice(0, 3);
+  const dayColor = DAY_TEXT_COLORS[dayCode as keyof typeof DAY_TEXT_COLORS] || "var(--text-hi)";
   // Border + glow accent: the day color, or a neutral neon for events with no
   // weekday (so they don't get a stark white frame).
-  const accentColor = DAY_TEXT_COLORS[event.dayOfWeek as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
+  const accentColor = DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#19E3FF";
+  const dayInk = DAY_INK[dayCode] || "#050506";
   const eventWithLinks = event as EventWithLinks;
   const primaryLink = resolveEventPrimaryLink(eventWithLinks);
   const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;
@@ -305,6 +408,18 @@ function EventModalInner({
     weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
   const endTime = formatPacificDateTime(event.dateEnd, { hour: "2-digit", minute: "2-digit" });
+  const dateLine = formatPacificDateTime(event.dateStart, {
+    weekday: "long", month: "long", day: "numeric",
+  });
+  const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })}–${endTime}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
+  const venueHref =
+    externalPageUrl(eventWithLinks.venueWebsite)
+    || externalPageUrl(resolveVenueWebsite(event.venueName));
+  const typeLabels = eventTypeLabels(event).slice(0, 4);
+  const detailLabel = [
+    ADMISSION_LABELS[String(event.admission || "")],
+    AGE_LABELS[String(event.ageRequirement || "")],
+  ].filter(Boolean).join(" · ");
 
   const modMutation = useMutation({
     mutationFn: (data: { type: string; eventId: number; eventTitle: string; requesterName: string; requesterEmail: string; proof: string }) =>
@@ -591,60 +706,71 @@ function EventModalInner({
 
   const modColor = modMode ? modAccent[modMode] : "var(--text-lo)";
 
-  const eventSocialRoom = (
-    <div className="event-modal__social-room">
-      <div
-        ref={socialTabsRef}
-        className="event-modal__tabs"
-        role="tablist"
-        aria-label="Event social"
+  const eventSocialTabs = (
+    <div
+      ref={socialTabsRef}
+      className="event-modal__tabs"
+      role="tablist"
+      aria-label="Event social"
+    >
+      <button
+        type="button"
+        role="tab"
+        aria-selected={socialTab === "attendance"}
+        className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
+        onClick={() => setSocialTab("attendance")}
       >
+        {isPastEvent ? "Who Was There" : "I'll Be There"}
+      </button>
+      {!isPastEvent && (
         <button
           type="button"
           role="tab"
-          aria-selected={socialTab === "attendance"}
-          className={`event-modal__tab${socialTab === "attendance" ? " active" : ""}`}
-          onClick={() => setSocialTab("attendance")}
+          aria-selected="false"
+          aria-disabled="true"
+          disabled
+          className="event-modal__tab event-modal__tab--interested"
+          title="Interested scheduling is not connected to a production account state yet"
         >
-          {isPastEvent ? "Who Was There" : "I'll Be There"}
+          Interested
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={socialTab === "missed"}
-          className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
-          onClick={() => setSocialTab("missed")}
-        >
-          MIZZED CONNECTION
-        </button>
-      </div>
-
-      <section
-        className="event-modal__tab-panel"
-        role="tabpanel"
-        data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
+      )}
+      <button
+        type="button"
+        role="tab"
+        aria-selected={socialTab === "missed"}
+        className={`event-modal__tab${socialTab === "missed" ? " active" : ""}`}
+        onClick={() => setSocialTab("missed")}
       >
-        {socialTab === "attendance" ? (
-          <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
-        ) : eventTiming === "upcoming" ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "40px 20px", color: "var(--text-faint)", textAlign: "center" }}>
-            <Lock size={28} style={{ opacity: 0.5 }} />
-            <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", margin: 0 }}>
-              Missed connections unlock when this event starts
-            </p>
-          </div>
-        ) : (
-          <MissedConnectionsPanel mode="event" eventId={event.id} compact />
-        )}
-      </section>
+        MIZZED CONNECTION
+      </button>
     </div>
+  );
+
+  const eventSocialPanel = (
+    <section
+      className="event-modal__tab-panel"
+      role="tabpanel"
+      data-testid={socialTab === "attendance" ? "event-modal-attendance" : "event-modal-missed"}
+    >
+      {socialTab === "attendance" ? (
+        <AttendanceCluster eventId={event.id} embedded extraPeople={extraPeople} pastEvent={isPastEvent} />
+      ) : eventTiming === "upcoming" ? (
+        <div className="event-modal__locked-panel">
+          <Lock size={28} aria-hidden="true" />
+          <p>Missed connections unlock when this event starts</p>
+        </div>
+      ) : (
+        <MissedConnectionsPanel mode="event" eventId={event.id} compact />
+      )}
+    </section>
   );
 
   return createPortal(
     <div className="event-modal-overlay" onClick={handleClose}>
       <div
         ref={dialogRef}
-        className={`event-modal pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
+        className={`event-modal event-modal--approved pdx-glass-rebind${flipVars ? " event-modal--flip" : ""}${flipOpen ? " event-modal--open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={event.title}
@@ -654,15 +780,10 @@ function EventModalInner({
         style={{
           "--event-accent": accentColor,
           "--c": accentColor,
+          "--event-ink": dayInk,
           ...flipVars,
         } as React.CSSProperties}
       >
-        {/* Shared animated rainbow top seam (§6: pdx-rainbow-rule, not a second engine) */}
-        <div className="event-modal__bar pdx-rainbow-rule" aria-hidden="true" />
-        {/* Deep-glass corner sheen (tokens: --glass-sheen / --glass-sheen-specular) */}
-        <span className="event-modal__sheen pdx-glass-sheen" aria-hidden="true" />
-        <span className="event-modal__sheen event-modal__sheen--specular pdx-glass-sheen--specular" aria-hidden="true" />
-
         <div className="event-modal__chrome">
           <div className="event-modal__chrome-tools">
             <button
@@ -682,33 +803,116 @@ function EventModalInner({
               }}
             >
               <Share2 size={18} strokeWidth={2.3} aria-hidden />
+              <span>Share</span>
             </button>
             <button type="button" className="event-modal__close" onClick={onClose} aria-label="Close event">✕</button>
           </div>
-          {soldOut && (
-            <div className="event-sold-out-badge event-sold-out-badge--modal" role="status">SOLD OUT</div>
-          )}
-          <h2 className="display event-modal__title">
-            {displayTitle}
-          </h2>
-          {primaryLink && !editing ? (
-            <a
-              href={primaryLink.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
-              data-testid="button-event-tickets-primary"
-            >
-              {primaryLink.label}
-            </a>
-          ) : null}
         </div>
 
         <div className="event-modal__scroll">
-        <div className="event-modal__poster pdx-poster-well">
-          <img src={posterUrl} alt={event.title} className="event-modal__poster-img" />
-          <span className="pdx-poster-well__scan" aria-hidden="true" />
-        </div>
+        <section className="event-modal__poster event-modal__hero" aria-labelledby="event-modal-title">
+          <img src={posterUrl} alt="" className="event-modal__poster-img" />
+          <span className="event-modal__poster-fade" aria-hidden="true" />
+          <span className="event-modal__poster-scan" aria-hidden="true" />
+          <div className="event-modal__hero-content" ref={heroContentRef}>
+            {soldOut && (
+              <div className="event-sold-out-badge event-sold-out-badge--modal" role="status">SOLD OUT</div>
+            )}
+            <h2 className="display event-modal__title" id="event-modal-title" ref={titleRef}>
+              {displayTitle}
+            </h2>
+            <div className="event-modal__hero-date" aria-label={`${startTime} to ${endTime}`}>
+              <span ref={dateRef}>{dateLine}</span>
+              <span ref={timeRef}>{timeLine}</span>
+            </div>
+            <div className="event-modal__hero-location">
+              <div className="event-modal__hero-location-copy">
+                {venueHref ? (
+                  <a ref={(node) => { venueRef.current = node; }} href={venueHref} target="_blank" rel="noopener noreferrer" data-testid="link-venue-website">
+                    {event.venueName || "Venue"}{event.neighborhood ? ` · ${event.neighborhood}` : ""} ↗
+                  </a>
+                ) : (
+                  <span ref={(node) => { venueRef.current = node; }}>{event.venueName || "Venue"}{event.neighborhood ? ` · ${event.neighborhood}` : ""}</span>
+                )}
+                {!event.isPrivate && (event.address || event.venueName) ? (
+                  <button
+                    ref={(node) => { addressRef.current = node; }}
+                    type="button"
+                    onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
+                    data-testid="button-open-maps"
+                  >
+                    {event.address || event.venueName} ↗
+                  </button>
+                ) : (
+                  <span ref={(node) => { addressRef.current = node; }}>Location provided upon RSVP</span>
+                )}
+              </div>
+              <EventLinkChoiceMenu
+                open={showMapsPicker}
+                onClose={() => setShowMapsPicker(false)}
+                title="Open in maps"
+                options={[
+                  { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                  { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
+                ]}
+              />
+            </div>
+            {primaryLink && !editing ? (
+              <a
+                href={primaryLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="event-modal__tickets-mid pdx-glass-btn pdx-glass-btn--solid"
+                data-testid="button-event-tickets-primary"
+              >
+                {primaryLink.label}
+              </a>
+            ) : null}
+            {(() => {
+              const createdAt = event.createdAt || "";
+              const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
+              const lines: string[] = [];
+              if (hasMeaningfulUpdate(createdAt, updatedAt)) {
+                const updatedLine = formatUpdatedTrustLine(updatedAt);
+                if (updatedLine) lines.push(updatedLine);
+              }
+              if (isIngestSource(event.source) && createdAt) {
+                const first = timeAgo(createdAt);
+                if (first) lines.push(`First listed ${first}`);
+              }
+              return lines.length ? (
+                <div className="event-modal__trust" data-testid="event-modal-trust">
+                  {lines.map((line) => <span key={line}>{line}</span>)}
+                </div>
+              ) : null;
+            })()}
+
+            <section className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
+              <div className="event-modal__kicker" id="event-modal-tags-label">Tags</div>
+              <div className="event-modal__approved-tags">
+                {dayCode && (
+                  <span className="event-modal__approved-tag event-modal__approved-tag--day">{dayCode}</span>
+                )}
+                {typeLabels.map((label, index) => (
+                  <span className="event-modal__approved-tag event-modal__approved-tag--type" key={`${label}-${index}`}>{label}</span>
+                ))}
+                {detailLabel && (
+                  <span className="event-modal__approved-tag event-modal__approved-tag--details">
+                    <span className="event-modal__approved-tag-dot" aria-hidden="true" />
+                    {detailLabel}
+                  </span>
+                )}
+              </div>
+            </section>
+            {event.description && (
+              <section className="event-modal__hero-block" aria-labelledby="event-modal-about-label">
+                <div className="event-modal__kicker" id="event-modal-about-label">About</div>
+                <p className="event-modal__description">{event.description}</p>
+              </section>
+            )}
+            {eventSocialTabs}
+          </div>
+        </section>
 
         <div className="event-modal__body">
 
@@ -731,136 +935,9 @@ function EventModalInner({
             />
           ) : (
           <>
-          <div className="event-modal__meta" style={{ borderLeftColor: dayColor }}>
-            <div className="event-modal__datetime">
-              {startTime} – {endTime}
-            </div>
-            <div className="event-modal__venue">
-              {(() => {
-                const venueHref =
-                  externalPageUrl(eventWithLinks.venueWebsite)
-                  || externalPageUrl(resolveVenueWebsite(event.venueName));
-                const label = `${event.venueName || "Venue"}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
-                return venueHref ? (
-                  <a
-                    href={venueHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="event-modal__venue-link"
-                    data-testid="link-venue-website"
-                  >
-                    {label} ↗
-                  </a>
-                ) : (
-                  label
-                );
-              })()}
-            </div>
-            {!event.isPrivate && (event.address || event.venueName) && (
-              <div className="event-modal__address-wrap">
-                <button
-                  type="button"
-                  onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
-                  data-testid="button-open-maps"
-                  className="event-modal__address"
-                >
-                  {event.address || event.venueName} ↗
-                </button>
-                <EventLinkChoiceMenu
-                  open={showMapsPicker}
-                  onClose={() => setShowMapsPicker(false)}
-                  title="Open in maps"
-                  options={[
-                    { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                    { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                  ]}
-                />
-              </div>
-            )}
-            {event.isPrivate && (
-              <div className="event-modal__private-note">Location provided upon RSVP</div>
-            )}
-            {(() => {
-              const createdAt = event.createdAt || "";
-              const updatedAt = (event as Event & { updatedAt?: string }).updatedAt || "";
-              const lines: string[] = [];
-              if (hasMeaningfulUpdate(createdAt, updatedAt)) {
-                const updatedLine = formatUpdatedTrustLine(updatedAt);
-                if (updatedLine) lines.push(updatedLine);
-              }
-              // Scrape / connector provenance. No dedicated last_seen column on events
-              // (housing has lastSeenAt). Prefer "First listed" from createdAt.
-              if (isIngestSource(event.source) && createdAt) {
-                const first = timeAgo(createdAt);
-                if (first) lines.push(`First listed ${first}`);
-              }
-              if (lines.length === 0) return null;
-              return (
-                <div className="event-modal__trust" data-testid="event-modal-trust">
-                  {lines.map((line) => (
-                    <div key={line} className="event-modal__trust-line">{line}</div>
-                  ))}
-                </div>
-              );
-            })()}
+          <div className="event-modal__social-room">
+            {eventSocialPanel}
           </div>
-
-          {eventSocialRoom}
-
-          {/* Flags = day + policy chips; Tags = JSON types - open-event SoT */}
-          {(() => {
-            const flagsRow = (
-              <EventTagsRow
-                event={event}
-                size="md"
-                showFlags
-                showJsonTypes={false}
-                onClaimClick={() => (user ? claimEvent(event.id) : setShowAuth(true))}
-                className="event-modal__tags"
-              />
-            );
-            // Always show Flags when day or policy tags exist (row nulls if empty)
-            if (!event.dayOfWeek && !event.admission && !event.ageRequirement && !event.isHouseParty && !event.isSexPositive && !event.nudityOk && !event.isClaimable) {
-              return null;
-            }
-            return (
-              <div className="event-modal__block">
-                <div className="event-modal__kicker">Flags</div>
-                {flagsRow}
-              </div>
-            );
-          })()}
-
-          {(() => {
-            let types: string[] = [];
-            try {
-              const parsed = JSON.parse(event.eventTypes || "[]");
-              types = Array.isArray(parsed) ? parsed.map(String) : [];
-            } catch {
-              types = [];
-            }
-            if (types.length === 0) return null;
-            return (
-              <div className="event-modal__block">
-                <div className="event-modal__kicker">Tags</div>
-                <EventTagsRow
-                  event={event}
-                  size="md"
-                  showFlags={false}
-                  showJsonTypes
-                  showClaim={false}
-                  className="event-modal__tags event-modal__tags--types"
-                />
-              </div>
-            );
-          })()}
-
-          {event.description && (
-            <div className="event-modal__block">
-              <div className="event-modal__kicker">About</div>
-              <p className="event-modal__description">{event.description}</p>
-            </div>
-          )}
 
           {eventHosts.length > 0 && (
             <div className="event-modal__section event-modal__glass-panel event-hosts-panel" style={{ "--section-accent": dayColor } as React.CSSProperties}>
@@ -1157,15 +1234,6 @@ function EventModalInner({
             {hasPendingClaim && (
               <span className="event-modal__footer-pending">Claim pending admin review</span>
             )}
-            {!hasPendingClaim && event.isClaimable && (
-              <button
-                data-testid="button-claim-event"
-                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
-                className="event-modal__footer-link event-modal__footer-link--cyan"
-              >
-                ↗ Request to claim this event
-              </button>
-            )}
             {modMode !== "remove" && (
               <button
                 data-testid="button-remove-event"
@@ -1282,17 +1350,6 @@ function EventModalInner({
 
         {!editing && (
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
-            {primaryLink ? (
-              <a
-                href={primaryLink.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--primary pdx-glass-rebind"
-                data-testid="button-event-tickets-sticky"
-              >
-                {primaryLink.label}
-              </a>
-            ) : null}
             <button
               type="button"
               className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
@@ -1301,6 +1358,17 @@ function EventModalInner({
             >
               {isPastEvent ? "I Was Here" : "I'll Be There"}
             </button>
+            {(event.isClaimable || hasPendingClaim) && (
+              <button
+                type="button"
+                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
+                data-testid="button-claim-event"
+                disabled={hasPendingClaim}
+                onClick={() => user ? claimEvent(event.id) : setShowAuth(true)}
+              >
+                {hasPendingClaim ? "Claim Pending" : "Claim This Event"}
+              </button>
+            )}
           </div>
         )}
       </div>

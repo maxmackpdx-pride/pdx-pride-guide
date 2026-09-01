@@ -91,8 +91,11 @@ function HostingCard({
   const status = statusLine(event, past);
   const interactive = typeof onEventClick === "function";
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
+  const category = event.eventTypes?.find(Boolean)?.replaceAll("_", " ").toUpperCase() || null;
+  const admission = admissionChrome(event.admission);
+  const dayInk = code === "MON" || code === "TUE" ? "#fff" : "#050506";
 
-  const style = { "--hp-day": color } as CSSProperties;
+  const style = { "--hp-day": color, "--hp-day-ink": dayInk, "--c": color } as CSSProperties;
 
   const activate = () => {
     if (interactive) onEventClick!(event);
@@ -108,7 +111,7 @@ function HostingCard({
 
   return (
     <article
-      className={`hp-card${interactive ? " is-clickable" : ""}`}
+      className={`hp-card pdx-glass-rebind${interactive ? " is-clickable" : ""}`}
       style={style}
       role={interactive ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
@@ -121,14 +124,19 @@ function HostingCard({
           <img className="hp-card__poster" src={poster} alt="" decoding="async" loading="lazy" />
         )}
         <div className="hp-card__banner-scrim" aria-hidden="true" />
-        <span className="hp-card__day">{past ? "PAST" : code}</span>
       </div>
       <div className="hp-card__body">
+        <div className="hp-card__tags" aria-label="Event tags">
+          <span className="hp-card__tag hp-card__tag--day">{past ? "PAST" : code}</span>
+          {category ? <span className="hp-card__tag hp-card__tag--neutral">{category}</span> : null}
+          {admission ? <span className="hp-card__tag hp-card__tag--detail">{admission}</span> : null}
+        </div>
         <h3 className="hp-card__title display">{event.title}</h3>
         {when && <div className="hp-card__when">{when}</div>}
         {event.venueName && <div className="hp-card__venue">{event.venueName}</div>}
         {status && <div className="hp-card__stat">{status}</div>}
       </div>
+      {interactive ? <span className="hp-card__action" aria-hidden="true">More info</span> : null}
     </article>
   );
 }

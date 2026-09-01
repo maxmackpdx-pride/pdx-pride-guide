@@ -498,6 +498,7 @@ export default function Schedule({
 
   type BlockVM = {
     id: number;
+    rsvp: boolean;
     onClick: (ev: React.MouseEvent<HTMLDivElement>) => void;
     onQuick: (ev: React.MouseEvent<HTMLButtonElement>) => void;
     style: React.CSSProperties;
@@ -553,27 +554,27 @@ export default function Schedule({
         const showVenue = height >= (embed ? 56 : 74) && width >= (embed ? 96 : 116);
         const showQuick = !embed && !isBeach && height >= 56 && width >= 100;
         const style = S({
+          ["--sch-day" as string]: dc,
           position: 'absolute',
           top: top + 'px',
           left: left + 'px',
           width: width + 'px',
           height: height + 'px',
-          borderRadius: '6px',
+          borderRadius: embed ? '7px' : '12px',
           overflow: 'hidden',
           cursor: 'pointer',
-          border: '1px solid ' + hexA(dc, rsvp ? 0.6 : 0.22),
-          borderLeft: '3px solid ' + dc,
+          border: '1px solid ' + hexA(dc, rsvp ? 0.72 : 0.48),
+          borderLeft: (embed ? '4px' : '6px') + ' solid ' + dc,
           backgroundColor: 'var(--ink-800)',
           backgroundImage: 'url(' + e.posterUrl + ')',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow:
-            rsvp && !calm ? '0 0 16px -3px ' + hexA(dc, 0.75) : '0 2px 10px -5px rgba(0,0,0,.7)',
         });
         return {
           id: e.id,
+          rsvp,
           onClick: (ev) => openEvent(e.scheduleKey, ev.currentTarget.getBoundingClientRect()),
           onQuick: (ev) => {
             ev.stopPropagation();
@@ -593,7 +594,7 @@ export default function Schedule({
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, rgba(11,11,14,0.78) 100%)',
+              'linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.22) 20%, rgba(0,0,0,.94) 100%)',
             pointerEvents: 'none',
             zIndex: 1,
           }),
@@ -604,7 +605,7 @@ export default function Schedule({
             color: dt,
             whiteSpace: 'nowrap',
             letterSpacing: '.01em',
-            textShadow: calm ? 'none' : '0 0 8px ' + hexA(dc, 0.4),
+            textShadow: calm ? 'none' : '0 1px 5px #000, 0 0 12px #000',
           }),
           titleStyle: S({
             fontFamily: 'var(--font-display)',
@@ -620,7 +621,9 @@ export default function Schedule({
             overflow: 'hidden',
             wordBreak: 'break-word',
             marginTop: '1px',
-            textShadow: '0 1px 8px rgba(0,0,0,.75)',
+            WebkitTextStroke: calm ? undefined : '1.25px #000',
+            paintOrder: 'stroke fill',
+            textShadow: calm ? 'none' : '0 2px 4px #000, 0 0 12px #000, 0 0 24px rgba(0,0,0,.96)',
           }),
           venueStyle: S({
             fontFamily: 'var(--font-body)',
@@ -680,6 +683,7 @@ export default function Schedule({
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
+            justifyContent: 'flex-end',
             gap: '1px',
           }),
         };
@@ -1621,7 +1625,21 @@ export default function Schedule({
                     <div style={{ position: 'relative', height: TOTAL_H + 'px', backgroundImage: hourBg }}>
                       {nowShown && <div style={nowLineStyle} />}
                       {day.blocks.map((b) => (
-                        <div key={b.id} className="sch-block" onClick={b.onClick} style={b.style}>
+                        <div
+                          key={b.id}
+                          className={`sch-block sch-event-card${b.rsvp ? " is-rsvp" : ""}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={b.onClick}
+                          onKeyDown={(ev) => {
+                            if (ev.target !== ev.currentTarget) return;
+                            if (ev.key === "Enter" || ev.key === " ") {
+                              ev.preventDefault();
+                              b.onClick(ev as unknown as React.MouseEvent<HTMLDivElement>);
+                            }
+                          }}
+                          style={b.style}
+                        >
                           <div style={b.overlayStyle} aria-hidden />
                           {b.showQuick && (
                             <button onClick={b.onQuick} style={b.quickStyle}>

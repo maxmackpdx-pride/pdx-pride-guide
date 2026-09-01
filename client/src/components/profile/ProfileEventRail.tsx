@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import UserAvatar from "@/components/UserAvatar";
+import { admissionDisplayLabel } from "@shared/admission";
+import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./ProfileEventRail.css";
 
@@ -99,16 +101,37 @@ type GoingCardProps = {
 
 export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardProps) {
   const day = eventDayCssVar(event);
+  const code = eventDayCode(event);
   const when = fmtRailWhen(event);
-  const style = { ["--pp-day" as string]: day } as CSSProperties;
+  const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
+  const category = event.eventTypes?.find(Boolean)?.replaceAll("_", " ").toUpperCase() || null;
+  const admission = event.admission ? admissionDisplayLabel(event.admission)?.toUpperCase() : null;
+  const detail = admission || event.ageRequirement?.toUpperCase() || null;
+  const dayInk = code === "MON" || code === "TUE" ? "#fff" : "#050506";
+  const style = {
+    ["--pp-day" as string]: day,
+    ["--pp-day-ink" as string]: dayInk,
+    ["--c" as string]: day,
+  } as CSSProperties;
   const clickable = typeof onClick === "function";
 
   const inner = (
     <>
-      {when ? <div className="pp-event-rail__when">{when}</div> : null}
-      <div className="display pp-event-rail__title">{event.title}</div>
-      {event.venueName ? <div className="pp-event-rail__venue">{event.venueName}</div> : null}
-      <RailFacepile avatars={goingAvatars} />
+      <span className="pp-event-rail__art" aria-hidden="true">
+        <img src={poster} alt="" loading="lazy" decoding="async" />
+      </span>
+      <span className="pp-event-rail__scrim" aria-hidden="true" />
+      <span className="pp-event-rail__content">
+        <span className="pp-event-rail__tags" aria-label="Event tags">
+          {code ? <span className="pp-event-rail__tag pp-event-rail__tag--day">{code}</span> : null}
+          {category ? <span className="pp-event-rail__tag pp-event-rail__tag--neutral">{category}</span> : null}
+          {detail ? <span className="pp-event-rail__tag pp-event-rail__tag--detail">{detail}</span> : null}
+        </span>
+        {when ? <span className="pp-event-rail__when">{when}</span> : null}
+        <span className="display pp-event-rail__title">{event.title}</span>
+        {event.venueName ? <span className="pp-event-rail__venue">{event.venueName}</span> : null}
+        <RailFacepile avatars={goingAvatars} />
+      </span>
     </>
   );
 
@@ -117,7 +140,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
       <button
         type="button"
         role="listitem"
-        className="pp-event-rail__card pp-event-rail__card--btn"
+        className="pp-event-rail__card pp-event-rail__card--btn pdx-glass-rebind"
         style={style}
         onClick={() => onClick(event)}
       >
@@ -127,7 +150,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
   }
 
   return (
-    <article role="listitem" className="pp-event-rail__card" style={style}>
+    <article role="listitem" className="pp-event-rail__card pdx-glass-rebind" style={style}>
       {inner}
     </article>
   );

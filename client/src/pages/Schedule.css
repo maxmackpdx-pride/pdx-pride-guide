@@ -29,7 +29,41 @@
 }
 
 .sch-block { animation: schIn .28s ease both; }
-.sch-block:hover { filter: brightness(1.16); z-index: 20 !important; }
+
+/* event-card-schedule: the approved poster-backed calendar block. Every
+   clickable event carries its weekday bloom; RSVP changes state without being
+   the only card allowed to glow. */
+.sch-event-card {
+  isolation: isolate;
+  box-shadow:
+    0 0 0 2px #000,
+    inset 0 -18px 34px rgba(0, 0, 0, .58),
+    0 8px 22px -8px rgba(0, 0, 0, .86),
+    0 0 22px -5px color-mix(in srgb, var(--sch-day, #19e3ff) 52%, transparent),
+    0 0 12px -3px color-mix(in srgb, var(--sch-day, #19e3ff) 40%, transparent);
+  transition: filter .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.sch-event-card.is-rsvp {
+  box-shadow:
+    0 0 0 2px #000,
+    inset 0 -18px 34px rgba(0, 0, 0, .58),
+    0 8px 22px -8px rgba(0, 0, 0, .86),
+    0 0 30px -3px color-mix(in srgb, var(--sch-day, #19e3ff) 66%, transparent),
+    0 0 16px -2px color-mix(in srgb, var(--sch-day, #19e3ff) 50%, transparent);
+}
+.sch-block:hover,
+.sch-event-card:focus-visible {
+  filter: brightness(1.12) saturate(1.08);
+  z-index: 20 !important;
+  outline: none;
+  box-shadow:
+    0 0 0 2px #000,
+    0 0 0 3px color-mix(in srgb, var(--sch-day, #19e3ff) 86%, transparent),
+    inset 0 -18px 34px rgba(0, 0, 0, .58),
+    0 12px 28px -8px rgba(0, 0, 0, .88),
+    0 0 36px -2px color-mix(in srgb, var(--sch-day, #19e3ff) 72%, transparent),
+    0 0 22px -1px color-mix(in srgb, var(--sch-day, #19e3ff) 58%, transparent);
+}
 .sch-export { animation: schGlow 2.6s ease-in-out infinite; transition: transform .14s ease; }
 .sch-export:hover { transform: translateY(-2px); }
 .sch-export:active { transform: translateY(1px); }

@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { dayAccentToken } from "@/lib/dsColors";
 import { formatPacificDateTime, parsePacificEventTime, useCountdown } from "@/lib/countdown";
 import UserAvatar from "@/components/UserAvatar";
+import { admissionDisplayLabel } from "@shared/admission";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./TheBigOne.css";
@@ -142,11 +143,15 @@ export default function TheBigOne({
 }: TheBigOneProps) {
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   const day = (event.dayOfWeek || "").toUpperCase();
+  const dayCode = day.slice(0, 3);
   const dayColor = dayAccentToken(day || "SAT");
   const whenLine = formatWhenLine(event);
   const count = goingCount ?? event.goingCount ?? 0;
   const ticketUrl = event.ticketUrl || null;
   const targetMs = parsePacificEventTime(event.dateStart);
+  const category = event.eventTypes?.find(Boolean)?.replaceAll("_", " ").toUpperCase() || null;
+  const admission = event.admission ? admissionDisplayLabel(event.admission)?.toUpperCase() : null;
+  const dayInk = dayCode === "MON" || dayCode === "TUE" ? "#fff" : "#050506";
 
   const rsvpLabel = isGoing ? "You're in" : "RSVP";
   const rsvpCaption = isGoing ? "See you on the floor" : "Secure your spot";
@@ -154,7 +159,7 @@ export default function TheBigOne({
   return (
     <section
       className={`tbo${className ? ` ${className}` : ""}`}
-      style={{ "--tbo-day": dayColor } as CSSProperties}
+      style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--c": dayColor } as CSSProperties}
       aria-label={`The Big One: ${event.title}`}
     >
       <div className="tbo__kicker">
@@ -165,7 +170,7 @@ export default function TheBigOne({
         <span className="tbo__kicker-sub">Up next</span>
       </div>
 
-      <div className="tbo__card">
+      <div className={`tbo__card pdx-glass-rebind${onOpen ? " tbo__card--clickable" : ""}`}>
         {/* Poster: top-anchored, crop bottom not sides */}
         <button
           type="button"
@@ -182,6 +187,11 @@ export default function TheBigOne({
           />
           <div className="tbo__poster-scrim" aria-hidden="true" />
           <div className="tbo__poster-title">
+            <div className="tbo__tags" aria-label="Event tags">
+              {dayCode ? <span className="tbo__tag tbo__tag--day">{dayCode}</span> : null}
+              {category ? <span className="tbo__tag tbo__tag--neutral">{category}</span> : null}
+              {admission ? <span className="tbo__tag tbo__tag--detail">{admission}</span> : null}
+            </div>
             <h3 className="tbo__title display">{event.title}</h3>
             {whenLine ? <p className="tbo__when">{whenLine}</p> : null}
           </div>
