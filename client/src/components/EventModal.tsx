@@ -219,7 +219,11 @@ function EventModalInner({
   const [flipOpen, setFlipOpen] = useState(false);
   const [flipVars, setFlipVars] = useState<React.CSSProperties | null>(null);
   const socialTabsRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const posterImageRef = useRef<HTMLImageElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
+  const tagsRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const dateRef = useRef<HTMLSpanElement>(null);
   const timeRef = useRef<HTMLSpanElement>(null);
@@ -283,7 +287,10 @@ function EventModalInner({
     let cancelled = false;
     const fitLine = (line: HTMLElement | null, min: number, max: number) => {
       if (!line?.parentElement) return;
-      const targetWidth = line.parentElement.clientWidth;
+      const parentStyles = getComputedStyle(line.parentElement);
+      const targetWidth = line.parentElement.clientWidth
+        - (Number.parseFloat(parentStyles.paddingLeft) || 0)
+        - (Number.parseFloat(parentStyles.paddingRight) || 0);
       if (!targetWidth) return;
       const styles = getComputedStyle(line);
       const canvas = document.createElement("canvas");
@@ -298,7 +305,12 @@ function EventModalInner({
       line.style.fontSize = `${size.toFixed(2)}px`;
       const range = document.createRange();
       range.selectNodeContents(line);
-      const rendered = range.getBoundingClientRect().width;
+      let rendered = range.getBoundingClientRect().width;
+      const panelTransform = getComputedStyle(line.closest(".event-modal") || line).transform;
+      if (panelTransform !== "none") {
+        const matrix = new DOMMatrixReadOnly(panelTransform);
+        rendered /= Math.hypot(matrix.a, matrix.b) || 1;
+      }
       if (rendered > 0) size = Math.max(min, Math.min(max, size * targetWidth / rendered));
       line.style.fontSize = `${size.toFixed(2)}px`;
     };
@@ -306,24 +318,49 @@ function EventModalInner({
     const fit = () => {
       if (cancelled) return;
       const maxTitle = Math.min(86, Math.max(54, host.clientWidth * 0.16));
-      let low = 30;
-      let high = maxTitle;
-      for (let i = 0; i < 12; i += 1) {
-        const size = (low + high) / 2;
+      delete title.dataset.dynamicOutOfRange;
+      const titleFits = (size: number) => {
         title.style.fontSize = `${size}px`;
         const lineHeight = size * 0.86;
-        const fits = title.scrollHeight <= lineHeight * 2 + 2 && title.scrollWidth <= title.clientWidth + 1;
-        if (fits) low = size;
-        else high = size;
+        return title.scrollHeight <= lineHeight * 2 + 2 && title.scrollWidth <= title.clientWidth + 1;
+      };
+      const solveTitle = (minimum: number) => {
+        let low = minimum;
+        let high = maxTitle;
+        for (let i = 0; i < 12; i += 1) {
+          const size = (low + high) / 2;
+          if (titleFits(size)) low = size;
+          else high = size;
+        }
+        return low;
+      };
+      let titleSize = solveTitle(24);
+      if (!titleFits(titleSize)) {
+        title.dataset.dynamicOutOfRange = "true";
+        titleSize = solveTitle(20);
+      } else {
+        title.dataset.dynamicOutOfRange = "false";
       }
-      title.style.fontSize = `${low.toFixed(2)}px`;
-      title.dataset.dynamicOutOfRange = String(low <= 30.1);
+      title.style.fontSize = `${titleSize.toFixed(2)}px`;
 
-      const detailMax = Math.max(18, low / 2);
-      fitLine(dateRef.current, 15, detailMax);
-      fitLine(timeRef.current, 15, detailMax);
-      fitLine(venueRef.current, 13, detailMax * 0.9);
-      fitLine(addressRef.current, 13, detailMax * 0.9);
+      const detailMax = Math.max(18, titleSize / 2);
+      fitLine(dateRef.current, 8, detailMax);
+      fitLine(timeRef.current, 8, detailMax);
+      fitLine(venueRef.current, 8, detailMax * 0.9);
+      fitLine(addressRef.current, 8, detailMax * 0.9);
+
+      const hero = heroRef.current;
+      const tags = tagsRef.current;
+      if (hero && tags) {
+        let tagsTop = 0;
+        let node: HTMLElement | null = tags;
+        while (node && node !== hero) {
+          tagsTop += node.offsetTop;
+          node = node.offsetParent as HTMLElement | null;
+        }
+        const fadeStart = Math.max(0, Math.min(hero.clientHeight - 160, tagsTop));
+        hero.style.setProperty("--event-open-fade-start", `${fadeStart.toFixed(2)}px`);
+      }
     };
 
     const ready = document.fonts?.ready || Promise.resolve();
@@ -335,6 +372,54 @@ function EventModalInner({
       observer.disconnect();
     };
   }, [event]);
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const poster = posterImageRef.current;
+    if (!scroller || !poster) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+    let current = -24;
+    let target = -24;
+    let progress = 0;
+
+    const motionOff = () => reducedMotion.matches
+      || document.documentElement.classList.contains("calm-mode")
+      || document.documentElement.dataset.calm === "true";
+
+    const readTarget = () => {
+      const travel = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      progress = motionOff() || travel === 0 ? 0 : Math.min(1, scroller.scrollTop / travel);
+      target = motionOff() ? 0 : -24 * (1 - progress);
+    };
+
+    const render = () => {
+      const delta = target - current;
+      current = motionOff() || Math.abs(delta) < 0.04 ? target : current + delta * 0.38;
+      poster.style.setProperty("--event-open-parallax-y", `${current.toFixed(2)}px`);
+      poster.dataset.parallaxProgress = progress.toFixed(3);
+      if (current !== target) frame = window.requestAnimationFrame(render);
+      else frame = 0;
+    };
+
+    const requestParallax = () => {
+      readTarget();
+      if (!frame) frame = window.requestAnimationFrame(render);
+    };
+
+    scroller.addEventListener("scroll", requestParallax, { passive: true });
+    reducedMotion.addEventListener("change", requestParallax);
+    requestParallax();
+
+    return () => {
+      scroller.removeEventListener("scroll", requestParallax);
+      reducedMotion.removeEventListener("change", requestParallax);
+      if (frame) window.cancelAnimationFrame(frame);
+      poster.style.removeProperty("--event-open-parallax-y");
+      delete poster.dataset.parallaxProgress;
+    };
+  }, [event.id]);
 
   const jumpToAttendance = () => {
     setSocialTab("attendance");
@@ -809,9 +894,9 @@ function EventModalInner({
           </div>
         </div>
 
-        <div className="event-modal__scroll">
-        <section className="event-modal__poster event-modal__hero" aria-labelledby="event-modal-title">
-          <img src={posterUrl} alt="" className="event-modal__poster-img" />
+        <div className="event-modal__scroll" ref={scrollRef}>
+        <section ref={heroRef} className="event-modal__poster event-modal__hero" aria-labelledby="event-modal-title">
+          <img ref={posterImageRef} src={posterUrl} alt="" className="event-modal__poster-img" />
           <span className="event-modal__poster-fade" aria-hidden="true" />
           <span className="event-modal__poster-scan" aria-hidden="true" />
           <div className="event-modal__hero-content" ref={heroContentRef}>
@@ -887,7 +972,7 @@ function EventModalInner({
               ) : null;
             })()}
 
-            <section className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
+            <section ref={tagsRef} className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
               <div className="event-modal__kicker" id="event-modal-tags-label">Tags</div>
               <div className="event-modal__approved-tags">
                 {dayCode && (

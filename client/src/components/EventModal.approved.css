@@ -144,8 +144,11 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   width: 100% !important;
   height: 100% !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center top !important;
+  transform: translate3d(0, var(--event-open-parallax-y, -24px), 0);
+  backface-visibility: hidden;
+  will-change: transform;
   filter: saturate(1.04) contrast(1.02);
 }
 
@@ -157,9 +160,10 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   background:
     linear-gradient(180deg,
       rgba(5, 5, 6, 0.02) 0%,
-      rgba(5, 5, 6, 0.04) 30%,
-      rgba(5, 5, 6, 0.38) 54%,
-      rgba(5, 5, 6, 0.82) 72%,
+      rgba(5, 5, 6, 0.03) var(--event-open-fade-start, 54%),
+      rgba(5, 5, 6, 0.38) calc(var(--event-open-fade-start, 54%) + 48px),
+      rgba(5, 5, 6, 0.82) calc(var(--event-open-fade-start, 54%) + 104px),
+      #050506 calc(100% - 10pt),
       #050506 100%),
     linear-gradient(90deg,
       #050506 0%,
@@ -206,13 +210,19 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   letter-spacing: 0.025em;
   text-transform: uppercase;
   text-wrap: balance;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
   -webkit-text-stroke: 3px #000;
   paint-order: stroke fill;
   text-shadow:
     0 0 22px #000,
     0 9px 30px rgba(0, 0, 0, 0.98),
     5px 7px 14px #000;
+}
+
+.event-modal--approved .event-modal__title[data-dynamic-out-of-range="true"] {
+  overflow-wrap: anywhere;
 }
 
 .event-modal--approved .event-modal__hero-date {
@@ -279,6 +289,7 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   text-transform: uppercase;
   text-shadow: 0 2px 8px #000;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .event-modal--approved .event-modal__hero-location-copy button {
@@ -506,8 +517,18 @@ html.calm-mode .event-modal.event-modal--approved::before,
   animation: none;
 }
 
+html.calm-mode .event-modal--approved .event-modal__poster-img,
+:root[data-calm="true"] .event-modal--approved .event-modal__poster-img {
+  transform: none;
+  will-change: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .event-modal.event-modal--approved::before { animation: none; }
+  .event-modal--approved .event-modal__poster-img {
+    transform: none;
+    will-change: auto;
+  }
 }
 
 @media (max-width: 640px) {
