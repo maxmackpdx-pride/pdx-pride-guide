@@ -79,7 +79,7 @@ function DynamicEventTitle({ title }: { title: string }) {
 }
 
 const SHINE_STEPS = ["base", "medium", "shoulder", "mid", "high", "crest", "prepeak", "peak"];
-function EdgeLight() {
+export function EdgeLight() {
   return <>{[true, false].flatMap(bloom => SHINE_STEPS.map(step => <span key={`${bloom}-${step}`} className={`pdxBoard__shine pdxBoard__shine--${step}${bloom ? " pdxBoard__bloom" : ""}`} aria-hidden="true" />))}</>;
 }
 

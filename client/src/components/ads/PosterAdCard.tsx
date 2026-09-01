@@ -6,8 +6,7 @@ import {
   resolveAdChrome,
   type AffiliateBrand,
 } from "@/lib/affiliateCards";
-/** Injects base .pdxBoard layout/chrome (same as event grid cards). */
-import "@/components/ds/PosterCard";
+import { EdgeLight } from "@/components/ds/PosterCard";
 import "@/components/AffiliatePosterCard.css";
 
 type AdLike = AdDraft | AdServePayload;
@@ -97,11 +96,13 @@ export default function PosterAdCard({
   };
 
   const dest = !preview && ad.destUrl ? ad.destUrl : undefined;
-  const cardClass = `pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim();
+  const cardClass = `pdxBoard pdxBoard--event-grid pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim();
   const cardStyle = {
     ["--ac" as string]: accent,
     ["--c" as string]: accent,
     ["--_day" as string]: accent,
+    ["--day-c" as string]: accent,
+    ["--on-c" as string]: "#050506",
     cursor: preview || !dest ? "default" : undefined,
     ...style,
   } as CSSProperties;
@@ -116,8 +117,7 @@ export default function PosterAdCard({
 
   const inner = (
     <>
-      <span className="pdx-glass-sheen" aria-hidden="true" />
-      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+      <EdgeLight />
 
       <div className="pdxBoard__poster pdx-poster-well">
         <span className="pdx-poster-well__scan" aria-hidden="true" />
@@ -143,25 +143,29 @@ export default function PosterAdCard({
           </div>
         )}
         <span className="pdxBoard__affChip">{ad.pillLabel || "Affiliate"}</span>
+        <h3 className="pdxBoard__title pdxBoard__affTitle">
+          {ad.title || ad.business || "Ad"}
+        </h3>
       </div>
 
       <div className="pdxBoard__meta">
+        <span className="pdxBoard__divider" aria-hidden="true" />
+        <div className="pdxBoard__facts pdxBoard__affFacts">
+          {ad.body ? <div className="pdxBoard__venue">{ad.body}</div> : null}
+          {ad.ctaTitle ? (
+            <div
+              className={`pdxBoard__affMeta${isCodeMeta(ad.ctaTitle) ? " pdxBoard__affMeta--code" : ""}`}
+            >
+              {ad.ctaTitle}
+            </div>
+          ) : null}
+        </div>
         <div className="pdxBoard__tags">
           {ad.tag1 ? (
             <span className="pdxTag pdxTag--day pdxBoard__affTag--fill">{ad.tag1}</span>
           ) : null}
           {ad.tag2 ? <span className="pdxTag pdxTag--type">{ad.tag2}</span> : null}
         </div>
-
-        <h3 className="pdxBoard__title">{ad.title || ad.business || "Ad"}</h3>
-        {ad.body ? <div className="pdxBoard__venue">{ad.body}</div> : null}
-        {ad.ctaTitle ? (
-          <div
-            className={`pdxBoard__affMeta${isCodeMeta(ad.ctaTitle) ? " pdxBoard__affMeta--code" : ""}`}
-          >
-            {ad.ctaTitle}
-          </div>
-        ) : null}
 
         <div className="pdxBoard__foot">
           <span className="pdxBoard__affAd">

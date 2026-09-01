@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import type { AffiliateBrand } from "@/lib/affiliateCards";
 import { accentForAffiliateBrand, AFFILIATE_LINKS } from "@/lib/affiliateCards";
+import { EdgeLight } from "@/components/ds/PosterCard";
 import "./AffiliatePosterCard.css";
 
 const CB_SLIDES = [
@@ -63,7 +64,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
 
   return (
     <a
-      className={`pdxBoard pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
+      className={`pdxBoard pdxBoard--event-grid pdxBoard--affiliate pdx-glass-rebind ${brandClass} ${className}`.trim()}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -72,6 +73,8 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
           ["--ac" as string]: accent,
           ["--c" as string]: accent,
           ["--_day" as string]: accent,
+          ["--day-c" as string]: accent,
+          ["--on-c" as string]: "#050506",
           ...style,
         } as CSSProperties
       }
@@ -83,8 +86,7 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
           : "Affiliate: CockBlock Toys. Code TUCKERMAX for 10% off."
       }
     >
-      <span className="pdx-glass-sheen" aria-hidden="true" />
-      <span className="pdx-glass-sheen--specular" aria-hidden="true" />
+      <EdgeLight />
 
       <div className="pdxBoard__poster pdx-poster-well">
         <span className="pdx-poster-well__scan" aria-hidden="true" />
@@ -98,9 +100,27 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
           <CockBlockSlides />
         )}
         <span className="pdxBoard__affChip">Affiliate</span>
+        <h3 className="pdxBoard__title pdxBoard__affTitle">
+          {isMrs ? "Mr. S Leather" : "CockBlock Toys"}
+        </h3>
       </div>
 
       <div className="pdxBoard__meta">
+        <span className="pdxBoard__divider" aria-hidden="true" />
+        <div className="pdxBoard__facts pdxBoard__affFacts">
+          <div className="pdxBoard__venue">
+            {isMrs
+              ? "Harnesses, restraints & fetish gear, made in SF"
+              : "The original frot toy, made for two"}
+          </div>
+          {isMrs ? (
+            <div className="pdxBoard__affMeta">Shop the link, support Zaylist</div>
+          ) : (
+            <div className="pdxBoard__affMeta pdxBoard__affMeta--code">
+              Code TUCKERMAX for 10% off
+            </div>
+          )}
+        </div>
         <div className="pdxBoard__tags">
           {isMrs ? (
             <>
@@ -114,24 +134,6 @@ export default function AffiliatePosterCard({ brand, className = "", style }: Pr
             </>
           )}
         </div>
-
-        <h3 className="pdxBoard__title">
-          {isMrs ? "Mr. S Leather" : "CockBlock Toys"}
-        </h3>
-
-        <div className="pdxBoard__venue">
-          {isMrs
-            ? "Harnesses, restraints & fetish gear, made in SF"
-            : "The original frot toy, made for two"}
-        </div>
-
-        {isMrs ? (
-          <div className="pdxBoard__affMeta">Shop the link, support Zaylist</div>
-        ) : (
-          <div className="pdxBoard__affMeta pdxBoard__affMeta--code">
-            Code TUCKERMAX for 10% off
-          </div>
-        )}
 
         <div className="pdxBoard__foot">
           <span className="pdxBoard__affAd">
