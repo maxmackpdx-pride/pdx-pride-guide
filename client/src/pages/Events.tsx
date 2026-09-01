@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -42,6 +42,8 @@ import "./Events.css";
 import { shareCardUrl } from "@shared/shareCards";
 
 const PACIFIC = "America/Los_Angeles";
+const GRID_RENDER_BATCH = 40;
+const LIST_RENDER_BATCH = 60;
 
 /** Pacific YYYY-MM-DD for an epoch-ms. */
 function pacDate(ms: number): string {
@@ -323,6 +325,8 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventOriginRect, setEventOriginRect] = useState<EventModalOriginRect | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [visibleItemCount, setVisibleItemCount] = useState(GRID_RENDER_BATCH);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [sortMode, setSortMode] = useState<SortMode>("start_time");
   const [mapExpanded, setMapExpanded] = useState(false);
   /** Map stays open by default; visitors can hide it to free vertical space. */
@@ -471,6 +475,38 @@ export default function Events() {
     }
     return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
   }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
+
+  const visibleGridItems = useMemo(
+    () => gridItems.slice(0, visibleItemCount),
+    [gridItems, visibleItemCount],
+  );
+  const visibleListEvents = useMemo(
+    () => filtered.slice(0, visibleItemCount),
+    [filtered, visibleItemCount],
+  );
+  const hasMoreVisibleItems = viewMode === "grid"
+    ? visibleGridItems.length < gridItems.length
+    : visibleListEvents.length < filtered.length;
+
+  useEffect(() => {
+    setVisibleItemCount(viewMode === "grid" ? GRID_RENDER_BATCH : LIST_RENDER_BATCH);
+  }, [viewMode, activeDay, activeFilters, searchQuery, sortMode, pastView]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || !hasMoreVisibleItems) return;
+    const batch = viewMode === "grid" ? GRID_RENDER_BATCH : LIST_RENDER_BATCH;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleItemCount(count => count + batch);
+        }
+      },
+      { rootMargin: "900px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMoreVisibleItems, viewMode, visibleItemCount]);
 
   // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;
@@ -766,7 +802,7 @@ export default function Events() {
         ) : viewMode === "grid" ? (
           <ScrollReveal delay={50}>
           <div className="events-poster-grid">
-            {gridItems.map((item, i) => {
+            {visibleGridItems.map((item, i) => {
               if (item.kind === "affiliate") {
                 return (
                   <div
@@ -808,7 +844,7 @@ export default function Events() {
         ) : (
           <ScrollReveal delay={50}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {filtered.map((e, i) => (
+            {visibleListEvents.map((e, i) => (
               <ListingCard
                 key={listingKey(e)}
                 event={e}
@@ -823,6 +859,15 @@ export default function Events() {
             ))}
           </div>
           </ScrollReveal>
+        )}
+
+        {hasMoreVisibleItems && (
+          <div
+            ref={loadMoreRef}
+            className="events-progressive-loader"
+            role="status"
+            aria-label="Loading more events"
+          />
         )}
 
         <ScrollReveal delay={60}>
