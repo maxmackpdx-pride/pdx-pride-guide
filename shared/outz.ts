@@ -172,10 +172,10 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     inclusionNote: "The operator describes Bamboo Acres as a private, clothing-optional getaway for men 21 and over.",
     officialUrl: "https://www.bambooacres.org/",
     discoverySource: {
-      name: "Gay Camping Friends directory",
-      href: "https://gaycampingfriends.com/campground-category/gay-campgrounds",
+      name: "Bamboo Acres operator site",
+      href: "https://www.bambooacres.org/",
     },
-    reviewedAt: "2026-08-30",
+    reviewedAt: "2026-09-01",
   },
   {
     id: "triangle-recreation-camp",
@@ -187,10 +187,10 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     inclusionNote: "Queer-centered status is stated by the operator.",
     officialUrl: "https://www.camptrc.org/",
     discoverySource: {
-      name: "Gay Camping Friends directory",
-      href: "https://gaycampingfriends.com/campground/triangle-recreation-camp",
+      name: "Triangle Recreation Camp operator site",
+      href: "https://wildapricot.camptrc.org/",
     },
-    reviewedAt: "2026-08-22",
+    reviewedAt: "2026-09-01",
   },
   {
     id: "umpquas-last-resort",
