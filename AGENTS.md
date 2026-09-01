@@ -1,169 +1,84 @@
 # Agent rules - Zaylist
 
-## Prod fixes: ready-to-ship + confirm before push (hard rule)
+The global instructions in `/Users/tuckercasey/.codex/AGENTS.md` define Tucker's workflow,
+shipping language, production identity, and approval boundaries. This file contains only
+repository-specific facts and safeguards.
 
-When the user reports a **live-site bug** or asks to **fix** something on the product (reload glitch, broken UI, wrong data, etc.):
+## Scope and authority
 
-1. **Destination is production**, not a local-only patch. Implement the fix on `master` (or a clean commit that will land on `master`) with **only the fix** - leave unrelated feature WIP unstaged.
-2. **Never imply the site is fixed** while the change is still local/unpushed. Say clearly: *“Fixed locally - ready to push”* (or equivalent).
-3. **Always confirm before `git push`** (and before any Railway deploy). Show short summary: commit subject, files, that prod will update. Wait for an explicit yes (e.g. “push,” “ship,” “do it,” “go”).
-4. **After they confirm:** `git push origin master` → poll Railway until **SUCCESS** → live probe when useful. Same bar as “ship.”
-5. **Local / preview testing only when they explicitly ask.** Don’t default to “test this first” and leave it there.
+- Implement exactly the requested change. Do not expand it into design-system work,
+  Foundation governance, cleanup, refactoring, or deployment without Tucker's approval.
+- A request to **fix/change/build** authorizes local implementation, not a push.
+- A request to **push/ship/deploy/go live** authorizes the complete production pipeline;
+  do not pause for a redundant second confirmation.
+- Keep unrelated user and agent work unstaged and untouched.
 
-Default bias: **fix for prod, ask once, then ship.** Not “fixed” until they approved the push and deploy succeeded.
+## Repository and production
 
-## Dead code and asset deletion release gate (hard rule)
+| Thing | Value |
+|---|---|
+| Checkout | `/Users/tuckercasey/pdx-pride-guide` |
+| Repository | `maxmackpdx-pride/pdx-pride-guide` |
+| Production branch | `master` |
+| Railway project | `pdx-pride-guide` |
+| Railway service | `pdx-pride-guide` |
+| Railway environment | `production` |
+| Live site | `https://www.zaylist.com` |
+| Health endpoint | `/api/health` |
 
-After deleting dead code, CSS, media, fonts, icons, or other assets, **always complete this gate before saying the cleanup is ready to push**:
+Production deploys use GitHub `master` -> GitHub Actions -> Railway. Do not use
+`railway up`, create a replacement Railway project, or upload the application tree from
+the CLI. Before shipping, synchronize safely with `origin/master`, commit only the
+intended diff, push, wait for Railway `SUCCESS`, and probe the affected live path when
+useful.
 
-1. **Prove it is dead first.** Check imports, exports, lazy routes, dynamic paths, CSS URLs/selectors, manifests, server/shared code, scripts, tests, documentation, and persisted compatibility values. A filename-only search is not enough when paths can be assembled dynamically.
-2. **Remove the whole orphaned graph.** Delete dependent helpers, styles, media, obsolete validators/types/docs, empty directories, and tests or deployment checks that incorrectly require the retired system. Preserve or add negative regression guards when they prevent the dead pattern from returning.
-3. **Scan deleted names again.** Search the complete product source for every deleted filename, symbol, selector, route key, and persisted enum value. Any surviving reference must be resolved or explicitly justified.
-4. **Run the full technical gate.** At minimum: `git diff --check`, TypeScript check, production build, deployment-bundle verification, and the repo predeploy/smoke checks. Do not treat one passing command as sufficient.
-5. **Visually verify UI-affecting deletion.** Test every affected route at representative desktop and mobile widths. Check the intended replacement, missing/broken images, console errors, horizontal overflow, responsive layout, and relevant interaction states. CSS compilation alone does not prove a visual deletion is safe.
-6. **Fail closed when visual testing is blocked.** If the browser, preview, authentication, fixtures, or environment prevents the visual pass, report that limitation and **do not call the cleanup ready to push** until the visual check is completed.
-7. **Review scope and clean test side effects.** Compare `git status` before and after testing. Revert only database/files created or modified by the agent's checks, leave unrelated user or agent work untouched, and confirm the final diff contains only the intended cleanup and required guardrail updates.
+Staging is branch `staging`, Railway environment `staging`, at
+`https://pdx-pride-guide-staging.up.railway.app`. Do not merge or fast-forward staging
+without explicit authorization.
 
-Final language bar:
+## Verification
 
-- Technical checks pass but visual verification is incomplete: **“Technical checks pass; visual verification is still required before push.”**
-- The complete gate passes: **“Dead-code deletion verified locally - ready to push.”**
-- Never call dead code or assets safely removed merely because references were not found or the build succeeded.
+Verification must be proportional to the change:
 
-## What “deploy / fix the website / ship” means (hard rule)
+- Run focused checks for the affected files and behavior.
+- Use broader typecheck/build/smoke coverage when the change crosses systems or has
+  meaningful production risk.
+- For UI-affecting work, visually inspect the affected route and representative state
+  when practical.
+- For broad asset/code deletion, check static and plausible dynamic references, remove
+  genuinely orphaned dependents, and run the relevant technical and visual checks.
+- Minor deletion does not automatically require an exhaustive whole-product audit.
+- If a meaningful verification step is unavailable, report the limitation and judge
+  readiness based on the actual risk; do not fail closed by default.
 
-When the user says **deploy**, **ship**, **push**, **go live**, **fix the site**, or similar, they mean **the real product**:
+## Product and design sources
 
-1. **GitHub `master`** on `maxmackpdx-pride/pdx-pride-guide` (commit + push)
-2. **Railway production** for project `zaylist` (auto-deploys from `master`) until status is **SUCCESS**
-3. Prefer a live probe (`/api/health` or the fixed path)
+- Primary navigation order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`). Do not
+  restyle navigation unless Tucker asks.
+- Product code implements the current design standard. The durable design/Foundation
+  source is the private `maxmackpdx-pride/zaylist-foundation-library` repository and its
+  published Cloudflare library.
+- `docs/LIVE_DESIGN_STANDARD.md` is the repository's production trap list.
+- Consult Foundation onboarding or durable decisions only when a task actually touches
+  architecture, product scope, naming, permissions, privacy, safety, cross-product
+  behavior, or a design-system rule. It is not a prerequisite for every first edit.
+- A local product change does not automatically require a Foundation change. If the two
+  would materially diverge, explain the discrepancy and ask Tucker before expanding
+  scope.
+- Never describe a Foundation update as published until its Cloudflare deployment and
+  live release content are verified.
 
-Local-only edits, stashes, or unpushed branches are **not** done. Do not leave WIP stashed after a “ship” request without saying so and finishing the ship.
+## Current design traps
 
-**Always keep local `master` synced with `origin/master` before and after shipping** (`git fetch` + `pull --ff-only` when behind). Multi-agent (Claude/etc.) pushes to the same remote - lagging local is how “desync” happens.
+Do not reintroduce retired treatments unless Tucker explicitly requests a new direction:
+default brutal-magenta CTAs, yellow-rim claim stickers, dead "Event details" on grid
+cards, Mr. S red ads, MC seven-day-window-as-past behavior, the Z/Space Featured dropdown,
+or the sitewide cyan bottom-nav pull handle. Maps use the debossed well without outer
+bloom. Check `docs/LIVE_DESIGN_STANDARD.md` when the requested work touches these rules.
 
-Cowork / claude.ai/code sessions that will `git push` must list both
-`maxmackpdx-pride/pdx-pride-guide` and
-`maxmackpdx-pride/zaylist-foundation-library` as session sources. A PAT in
-the remote URL is intercepted and 403s. See `CLAUDE.md`.
+## Accurate completion language
 
-## Deploy / “push” claims (hard rule)
-
-**Never** report a push as fully successful, live, shipped, or “pushes are working” based only on `git push`.
-
-When the user asks to **push** / **deploy** / **ship** (or after any push to `master`):
-
-| Step | Required | Language if this is all you have |
-|------|----------|----------------------------------|
-| 0. `git fetch` + sync local with `origin/master` | Always before starting | “Behind remote - pulled first” |
-| 1. `git push` + local `HEAD` == `origin/master` | Always | “On GitHub / remote has the commit” |
-| 2. GitHub commit on `master` confirmed | Always | Same - still not “live” |
-| 3. Railway production deploy **SUCCESS** (poll until terminal) | Always before “shipped/live” | Building/deploying → “deploy in progress” |
-| 4. Live probe when relevant (`/api/health`, asset, or JS string) | Preferred | Note cache risk if asset looks stale |
-
-- **SUCCESS** → may say production is updated.
-- **FAILED / CRASHED** → report failure + logs; never success.
-- **BUILDING / DEPLOYING** → in progress only; do not declare done.
-
-Repo: `maxmackpdx-pride/pdx-pride-guide`  
-Railway: project `pdx-pride-guide` (also called zaylist), production, https://www.zaylist.com
-
-**Staging** (not production): branch `staging` → Railway environment `staging` → https://pdx-pride-guide-staging.up.railway.app  
-Own variables, own SQLite volume at `/data`. Do not fast-forward `staging` to `master` without an explicit yes. Title contract and type snap stay parked until that yes and a look at staging.
-
-Cowork / claude.ai/code sessions that will `git push` must list both
-`maxmackpdx-pride/pdx-pride-guide` and
-`maxmackpdx-pride/zaylist-foundation-library` as session sources. A PAT in
-the remote URL is intercepted and 403s. See `CLAUDE.md`.
-
-## Design source of truth (hard rule)
-
-**The design guide is truth for design rules.**  
-**Product code implements it.** Do not keep a second contradictory kit.
-
-The guide is **not in this repo**. There is no `design-system/` directory here.
-
-| Priority | Location |
-|----------|----------|
-| 1 | Design guide: `zaylist-foundation-library` `public/design-system/` · https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/ |
-| 2 | Live React + CSS (`client/src/components/ds/**`, page/component CSS) |
-| 3 | Live token modules: `client/src/components/ds/tokens/` (esp. `glass.css`, `chrome.css`) |
-| Archive | `docs/handoffs/deep-glass-2026-07-16/` (migration package, not open work orders) |
-
-**Production trap list (must not contradict the guide):** [`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md)
-
-**Do not re-introduce** retired globals: default brutal magenta CTAs, yellow-rim claim stickers, dead “Event details” on grid cards, Mr. S red ads, MC 7-day window as board “past,” the Z/Space “Featured” dropdown panel, and the sitewide cyan bottom-nav pull handle.
-
-**Outer neon bloom is 8% and is NOT retired.** It is carried by `--neon-bloom`
-(`client/src/components/ds/tokens/chrome.css`) and composed, never hand-rolled, by tags,
-tape, kickers, pills, badges, seams and buttons. **Maps are the sole exception:** debossed
-well (`--map-frame-shadow`), no bloom at all.
-
-**Buttons use the glow treatment:** dark plate, accent rim and ink, lit top edge, dark
-inner floor, 8% bloom, composed from `--btn-glow-bg` and `--btn-glow-shadow`. The solid
-accent fill is reserved for the one primary action on a surface.
-
-When UI chrome or design rules change, update the design guide in
-`zaylist-foundation-library` `public/design-system/` **and** the trap list here, in the
-**same** ship. There is no `npm run sync:design-system` script in this repo.
-
-## Nav source of truth
-
-Primary nav order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`).
-Do **not** restyle nav unless the user explicitly asks. When they do ask, ship the
-standard in the **Site navigation** section of
-[`docs/LIVE_DESIGN_STANDARD.md`](docs/LIVE_DESIGN_STANDARD.md), not a new treatment.
-
-Two things that section retires, so never restore them: **nav pill glow is hover only**
-(the current page keeps its accent on rim and label, with no standing glow and no pulse),
-and the **sitewide cyan pull handle above the bottom nav is gone** (the grip belongs to
-the hub drawer only).
-
-## The Foundation: read before deciding anything
-
-The Foundation is **not in this repo**. It lives in the private repo
-`maxmackpdx-pride/zaylist-foundation-library`, and is published as a library at
-
-  https://zaylist-foundation-library.maxmackpdx.workers.dev/library
-
-Read it before proposing architecture, naming, product scope, or design
-direction. Decisions, explorations, agent continuity, tunnels, claims, and the
-release gate all live there now.
-
-Every agent that updates the Foundation Library must verify the corresponding
-Cloudflare deployment succeeded and the live release ID/content updated before
-calling the work complete, current, published, or shipped. A local change, commit,
-or GitHub push alone is insufficient. Without push or deploy authorization, report
-the Foundation change as local/ready and Cloudflare verification as pending.
-
-`implementation_state: not-implemented` means the decision is made and the code
-has not caught up. Do not describe it as shipped.
-
-Do not write pairwise handoff files (`X_HANDOFF_FOR_Y.md`). That pattern grows
-N by N and nobody reads the one addressed to another model. Use a tunnel in the
-Foundation repo instead.
-
-## Live tunnels
-
-Tunnels moved with the Foundation. Open, read, and close them from the
-`maxmackpdx-pride/zaylist-foundation-library` checkout, not this one.
-
-Transcripts carry no authority. Authority attaches only to what a closing agent
-writes into the library.
-
-## Before your first change
-
-Read `foundation/agent-continuity/onboarding.md` in full. It is the operating
-standard for every model on this repo: the library structure, authority order,
-status fields, release gate, tunnels, path variables, and the divergence gate.
-
-Roles are in `foundation/decisions/agent-roles-2026-08-06.yaml`. Role describes
-what an agent is best pointed at. It never changes which rules apply.
-
-## Session start
-
-Claims, acknowledgements, and tunnels live in the Foundation repo
-(`maxmackpdx-pride/zaylist-foundation-library`), not here. Run them from that checkout.
-
-Route by cost: urgent production and verification loops go to grok, governance
-writing and design reasoning to claude, multi-file implementation to codex.
+- Local only: **"Fixed locally - ready to push."**
+- Pushed while Railway runs: **"On GitHub; deploy in progress."**
+- Railway `SUCCESS`: **"Production updated."**
+- Failed or crashed: report the failure and relevant logs; never call it shipped.
