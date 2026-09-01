@@ -132,6 +132,10 @@
   filter: brightness(1.06) saturate(1.08);
 }
 
+.ds-listing-card:hover .pdxBoard--event-grid {
+  filter: none !important;
+}
+
 .ds-listing-card--list:hover .pdxRow {
   transform: translateY(-2px) !important;
   filter: brightness(1.06) saturate(1.08);

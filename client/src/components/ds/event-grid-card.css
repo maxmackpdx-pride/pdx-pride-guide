@@ -16,10 +16,10 @@
     0 14.4px 33.6px rgba(0,0,0,.72),0 0 27.2px -3.2px color-mix(in srgb,var(--day-c) 62%,transparent),
     0 0 14.4px -1.6px color-mix(in srgb,var(--day-c) 48%,transparent)!important;
   cursor:pointer;backdrop-filter:blur(9.6px);-webkit-backdrop-filter:blur(9.6px);
-  transition:transform 180ms ease,filter 180ms ease,box-shadow 180ms ease
+  transition:transform 180ms ease,box-shadow 180ms ease
 }
 .pdxBoard.pdxBoard--event-grid:hover{
-  transform:translateY(-3.2px)!important;filter:brightness(1.06) saturate(1.08);
+  transform:translateY(-3.2px)!important;filter:none!important;
   border-color:#18181d!important;
   box-shadow:0 0 0 1.6px #000,inset 0 -14.4px 27.2px rgba(0,0,0,.58),
     0 14.4px 33.6px rgba(0,0,0,.72),0 0 36.8px -.8px color-mix(in srgb,var(--day-c) 72%,transparent),
@@ -43,8 +43,8 @@
   background:conic-gradient(from var(--event-edge-angle),var(--shine-1) 0%,var(--shine-2) 33%,var(--shine-3) 66%,var(--shine-1) 100%);
   -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
   -webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  mask-composite:exclude;animation:event-edge-orbit 22s linear infinite;opacity:.38;
-  pointer-events:none;will-change:--event-edge-angle
+  mask-composite:exclude;animation:none;opacity:.38;
+  pointer-events:none;will-change:auto
 }
 .pdxBoard__shine--medium{
   --bloom-strength:18%;padding:calc(1.072px * var(--event-edge-scale));opacity:.68;
@@ -110,15 +110,7 @@
     color-mix(in srgb,var(--day-c) 22%,transparent) 71%,color-mix(in srgb,var(--day-c) 8%,transparent) 78%,
     transparent 83%,#efffff 100%)
 }
-.pdxBoard__bloom{z-index:1;opacity:var(--bloom-strength);filter:blur(8px);transition:opacity 180ms ease}
-.pdxBoard:hover .pdxBoard__shine{--bloom-strength:24%}
-.pdxBoard:hover .pdxBoard__shine--medium{--bloom-strength:36%}
-.pdxBoard:hover .pdxBoard__shine--shoulder{--bloom-strength:48%}
-.pdxBoard:hover .pdxBoard__shine--mid{--bloom-strength:60%}
-.pdxBoard:hover .pdxBoard__shine--high{--bloom-strength:72%}
-.pdxBoard:hover .pdxBoard__shine--crest{--bloom-strength:78%}
-.pdxBoard:hover .pdxBoard__shine--prepeak{--bloom-strength:81%}
-.pdxBoard:hover .pdxBoard__shine--peak{--bloom-strength:84%}
+.pdxBoard__shine--peak{animation:event-edge-orbit 22s linear infinite;will-change:--event-edge-angle}
 
 .pdxBoard__poster{
   position:relative;z-index:3;aspect-ratio:2/3;overflow:visible;
@@ -143,7 +135,7 @@
 .pdxBoard__titleLine::before{
   position:absolute;z-index:-1;inset:0;color:transparent;content:attr(data-shadow-text);
   -webkit-text-stroke:1.2px #000;clip-path:inset(0 -38.4px -41.6px -38.4px);
-  text-shadow:0 0 9.6px #000,0 0 20px rgba(0,0,0,.96),0 0 33.6px rgba(0,0,0,.76);pointer-events:none
+  text-shadow:0 0 9.6px rgba(0,0,0,.6),0 0 20px rgba(0,0,0,.576),0 0 33.6px rgba(0,0,0,.456);pointer-events:none
 }
 
 .pdxBoard__meta{
@@ -246,7 +238,6 @@
 
 html.calm-mode .pdxBoard--event-grid,:root[data-calm="true"] .pdxBoard--event-grid{backdrop-filter:none;-webkit-backdrop-filter:none}
 html.calm-mode .pdxBoard--event-grid .pdxBoard__shine,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__shine{animation:none}
-html.calm-mode .pdxBoard--event-grid .pdxBoard__bloom,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__bloom{display:none}
 html.calm-mode .pdxBoard--event-grid .pdxBoard__divider,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__divider{animation:none;filter:none}
 
 /* Two-column mobile keeps the approved composition and scales its internal
@@ -262,7 +253,7 @@ html.calm-mode .pdxBoard--event-grid .pdxBoard__divider,:root[data-calm="true"] 
   }
   .pdxBoard__shine{inset:-3px;border-radius:calc(var(--event-radius) + 3px)}
   .pdxBoard__titleLine{-webkit-text-stroke-width:.8px;text-shadow:0 2px 4px rgba(0,0,0,.94)}
-  .pdxBoard__titleLine::before{-webkit-text-stroke-width:.8px;text-shadow:0 0 7px #000,0 0 13px rgba(0,0,0,.96),0 0 21px rgba(0,0,0,.76)}
+  .pdxBoard__titleLine::before{-webkit-text-stroke-width:.8px;text-shadow:0 0 7px rgba(0,0,0,.6),0 0 13px rgba(0,0,0,.576),0 0 21px rgba(0,0,0,.456)}
   .pdxBoard__meta{min-height:126px;padding:7px 7px 8px}
   .pdxBoard__facts{gap:2px 4px;padding-top:4px}
   .pdxBoard__venue{font-size:12px;line-height:1.12}
