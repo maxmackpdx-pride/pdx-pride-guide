@@ -22,19 +22,32 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         roadmapInsertionMarker = document.createComment("roadmap phases");
       roadmapInsertionAnchor.before(roadmapInsertionMarker);
 
+      function isPhaseOpen(phase) {
+        return phase.classList.contains("is-open");
+      }
+      function setPhaseOpen(phase, open) {
+        phase.classList.toggle("is-open", open);
+        phase.querySelector(".roadmap-phase__summary")?.setAttribute("aria-expanded", open ? "true" : "false");
+      }
       function createRoadmapPhase(index, id, title, accent, nodes, open = false) {
-        const phase = document.createElement("details"),
-          summary = document.createElement("summary"),
+        const phase = document.createElement("section"),
+          summary = document.createElement("button"),
           content = document.createElement("div");
         phase.className = `roadmap-phase roadmap-phase--${id}`;
         phase.dataset.phase = id;
         phase.style.setProperty("--phase-accent", accent);
-        phase.open = open;
+        summary.type = "button";
         summary.className = "roadmap-phase__summary";
+        summary.setAttribute("aria-expanded", open ? "true" : "false");
         summary.innerHTML = `<span class="roadmap-phase__index">${String(index + 1).padStart(2, "0")}</span><span class="roadmap-phase__title">${title}</span><span class="roadmap-phase__state" aria-hidden="true"></span><span class="roadmap-phase__rails" aria-hidden="true"><i></i><i></i><i></i></span>`;
         content.className = "roadmap-phase__content";
         nodes.forEach((node) => content.append(node));
         phase.append(summary, content);
+        setPhaseOpen(phase, open);
+        summary.addEventListener("click", () => {
+          setPhaseOpen(phase, !isPhaseOpen(phase));
+          phase.dispatchEvent(new Event("toggle"));
+        });
         return phase;
       }
 
@@ -80,7 +93,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           stickyTop = Number.parseFloat(getComputedStyle(summary).top) || 0;
         preservePhaseAnchor(summary, () => {
           roadmapPhases.forEach((item, itemIndex) => {
-            item.open = itemIndex === index;
+            setPhaseOpen(item, itemIndex === index);
             if (itemIndex <= index) item.classList.remove("is-teasing");
           });
         }, stickyTop);
@@ -112,7 +125,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           if (roadmapFinishArmed && !roadmapFinished && techStack.getBoundingClientRect().top <= triggerY) {
             roadmapFinished = true;
             preservePhaseAnchor(techStack, () => roadmapPhases.forEach((phase) => {
-              phase.open = false;
+              setPhaseOpen(phase, false);
               phase.classList.remove("is-teasing");
             }));
           }
@@ -120,7 +133,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       }
       window.addEventListener("scroll", syncRoadmapPhases, { passive: true, signal });
       roadmapPhases.forEach((phase) => phase.addEventListener("toggle", () => {
-        if (phase.open) phase.classList.remove("is-teasing");
+        if (isPhaseOpen(phase)) phase.classList.remove("is-teasing");
         window.dispatchEvent(new Event("resize"));
       }, { signal }));
       const roadmapEndObserver = new IntersectionObserver((entries) => {
@@ -129,7 +142,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           if (entry.target.getBoundingClientRect().top > roadmapPhaseTriggerY()) return;
           roadmapFinished = true;
           preservePhaseAnchor(entry.target, () => roadmapPhases.forEach((phase) => {
-            phase.open = false;
+            setPhaseOpen(phase, false);
             phase.classList.remove("is-teasing");
           }));
         });
@@ -665,7 +678,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           if (!target) return;
           event.preventDefault();
           const owningPhase = target.closest(".roadmap-phase");
-          if (owningPhase) owningPhase.open = true;
+          if (owningPhase) setPhaseOpen(owningPhase, true);
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         }, { signal });
       });
