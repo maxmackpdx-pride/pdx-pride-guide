@@ -51,6 +51,7 @@ import {
 } from "./mapCoordinateSync";
 import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { resolveBusinessLocations } from "@shared/businessLocations";
+import { parsePacificDateTime } from "@shared/missedConnections";
 import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
@@ -1667,6 +1668,28 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/events/attendance-summaries", (_req, res) => {
     res.json(storage.getAttendanceSummaries());
+  });
+
+  // Homepage counters need three numbers, not the full event, directory, and
+  // attendance payloads. In particular, /api/directory enriches every place
+  // with events, promoters, boards, followers, and viewer state; using it for
+  // a count made the strip wait several seconds on otherwise unnecessary work.
+  app.get("/api/home/stats", (_req, res) => {
+    const now = Date.now();
+    const windowEnd = now + 7 * 24 * 60 * 60 * 1000;
+    const liveEvents = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
+    const eventCount = liveEvents.filter(event => {
+      const start = parsePacificDateTime(event.dateStart);
+      if (start == null) return false;
+      const end = parsePacificDateTime(event.dateEnd) ?? start;
+      return end >= now && start <= windowEnd;
+    }).length;
+    const placesCount = storage.getBusinesses().length;
+    const goingCount = Object.values(storage.getAttendanceSummaries())
+      .reduce((sum, summary) => sum + (summary?.count ?? 0), 0);
+
+    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=120");
+    res.json({ eventCount, placesCount, goingCount });
   });
 
   // ── Next-page waypoint likes: anonymous "excited for this" counter ──────────

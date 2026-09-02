@@ -30,53 +30,35 @@ export default function HomeStage({ afterWelcome }: Props) {
   const worldData = useHomeWorlds();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedWorld, setSelectedWorld] = useState(0);
-  const [showVideo, setShowVideo] = useState(() => typeof window === "undefined" || !prefersStillMotion());
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
-    const sync = () => setShowVideo(!prefersStillMotion());
+    const desktop = window.matchMedia("(min-width: 621px)");
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setShowVideo(desktop.matches && !prefersStillMotion());
     sync();
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    media.addEventListener("change", sync);
+    desktop.addEventListener("change", sync);
+    motion.addEventListener("change", sync);
     const observer = new MutationObserver(sync);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });
     return () => {
-      media.removeEventListener("change", sync);
+      desktop.removeEventListener("change", sync);
+      motion.removeEventListener("change", sync);
       observer.disconnect();
     };
   }, [calmMode]);
 
-  /*
-   * The hero loop is purely decorative, sitting behind the gradient
-   * atmosphere. Two rules keep it off the critical path: never fetch it on
-   * phones (CSS hides it there, but the element still downloaded it), and on
-   * wider screens only mount it once the browser is idle, so it never competes
-   * with first paint. Until then the hero renders its gradient, as before.
-   */
-  const [videoReady, setVideoReady] = useState(false);
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(min-width: 621px)").matches) return;
-    const start = () => setVideoReady(true);
-    const ric = (window as any).requestIdleCallback;
-    if (typeof ric === "function") {
-      const id = ric(start, { timeout: 2500 });
-      return () => (window as any).cancelIdleCallback?.(id);
-    }
-    const t = window.setTimeout(start, 800);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (!showVideo || !videoReady || !videoRef.current) return;
+    if (!showVideo || !videoRef.current) return;
     videoRef.current.muted = true;
     videoRef.current.play().catch(() => setShowVideo(false));
-  }, [showVideo, videoReady]);
+  }, [showVideo]);
 
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        {showVideo && videoReady ? (
-          <video ref={videoRef} className="home-front__video" src={HERO_VIDEO} preload="none" autoPlay muted loop playsInline aria-hidden />
+        {showVideo ? (
+          <video ref={videoRef} className="home-front__video" src={HERO_VIDEO} preload="metadata" autoPlay muted loop playsInline aria-hidden />
         ) : null}
         <div className="home-front__atmosphere" aria-hidden />
         <div className="home-front__hero">

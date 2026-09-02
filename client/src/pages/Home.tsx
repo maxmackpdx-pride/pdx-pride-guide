@@ -1,15 +1,18 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { EventListing } from "@shared/multiDayEvents";
 
 import HomeStage from "@/components/home/HomeStage";
 import HomeStatStrip from "@/components/HomeStatStrip";
 import HomeConstructionNudge from "@/components/HomeConstructionNudge";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { countEventsNext7Days } from "@/lib/homeEvents";
 import "./Home.css";
 import { shareCardUrl } from "@shared/shareCards";
+
+type HomeStats = {
+  eventCount: number;
+  placesCount: number;
+  goingCount: number;
+};
 
 /**
  * `beta` marks a board that is built and reachable but still settling. Set on
@@ -23,32 +26,16 @@ export default function Home() {
     { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
   );
 
-  const { data: events = [], isPending: eventsPending } = useQuery<EventListing[]>({
-    queryKey: ["/api/events"],
-    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+  const { data: stats, isPending: statsPending } = useQuery<HomeStats>({
+    queryKey: ["/api/home/stats"],
+    queryFn: () => apiRequest("GET", "/api/home/stats").then(r => r.json()),
     staleTime: 60_000,
     refetchOnMount: "always",
   });
 
-  const { data: businesses = [], isPending: placesPending } = useQuery<{ id: number }[]>({
-    queryKey: ["/api/directory"],
-    queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  const { data: attendanceSummaries = {}, isPending: goingPending } = useQuery<Record<string, { count?: number }>>({
-    queryKey: ["/api/events/attendance-summaries"],
-    queryFn: () => apiRequest("GET", "/api/events/attendance-summaries").then(r => r.json()),
-    staleTime: 60_000,
-  });
-
-  // Rolling next-7-days total (expanded LIVE listings from GET /api/events).
-  const eventCount = useMemo(() => countEventsNext7Days(events), [events]);
-  const placesCount = businesses.length;
-  const goingCount = useMemo(
-    () => Object.values(attendanceSummaries).reduce((sum, s) => sum + (s?.count ?? 0), 0),
-    [attendanceSummaries],
-  );
+  const eventCount = stats?.eventCount ?? 0;
+  const placesCount = stats?.placesCount ?? 0;
+  const goingCount = stats?.goingCount ?? 0;
 
   return (
     <div className="home-main-stage">
@@ -60,7 +47,7 @@ export default function Home() {
               eventCount={eventCount}
               placesCount={placesCount}
               goingCount={goingCount}
-              pending={{ events: eventsPending, places: placesPending, going: goingPending }}
+              pending={{ events: statsPending, places: statsPending, going: statsPending }}
             />
             <div
               className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
