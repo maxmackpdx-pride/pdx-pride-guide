@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
+import L from "leaflet";
 import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   CARTO_ATTRIBUTION,
+  cartoDarkTileUrl,
   cartoDarkVectorStyleUrl,
+  cartoTransformRequest,
   mixHex,
 } from "@/lib/mapTiles";
 
@@ -20,9 +23,17 @@ export default function CartoVectorBasemap({ accent }: Props) {
   const map = useMap();
 
   useEffect(() => {
+    const raster = L.tileLayer(cartoDarkTileUrl(), {
+      attribution: CARTO_ATTRIBUTION,
+      subdomains: "abcd",
+      maxZoom: 20,
+    });
+    raster.addTo(map);
+
     const layer = maplibreGL({
       style: cartoDarkVectorStyleUrl(),
       minZoom: 1,
+      transformRequest: cartoTransformRequest,
     });
     Object.assign(layer.options, { attribution: CARTO_ATTRIBUTION });
     layer.addTo(map);
@@ -39,11 +50,17 @@ export default function CartoVectorBasemap({ accent }: Props) {
       if (gl.getLayer("watername_lake")) gl.setPaintProperty("watername_lake", "text-color", mixHex("#8a8a8a", accent, 0.45));
     };
 
-    if (gl.loaded()) applyAccent();
-    else gl.once("load", applyAccent);
+    const onVectorLoad = () => {
+      applyAccent();
+      map.removeLayer(raster);
+    };
+    if (gl.loaded()) onVectorLoad();
+    else gl.once("load", onVectorLoad);
 
     return () => {
+      gl.off("load", onVectorLoad);
       map.removeLayer(layer);
+      if (map.hasLayer(raster)) map.removeLayer(raster);
     };
   }, [map, accent]);
 
