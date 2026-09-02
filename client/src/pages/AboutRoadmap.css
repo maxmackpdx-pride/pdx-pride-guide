@@ -2787,8 +2787,12 @@
          roadmap, invitation, and editorial appendix. */
 :host {
         --page-gutter: 22px;
-        --section-space: clamp(64px, 7vw, 96px);
-        --chapter-space: clamp(42px, 5vw, 68px);
+        --content-measure: 1220px;
+        --section-space: clamp(72px, 8vw, 108px);
+        --chapter-space: clamp(38px, 4.5vw, 60px);
+        --display-size: clamp(64px, 10vw, 132px);
+        --section-title-size: clamp(44px, 6vw, 76px);
+        --subhead-size: clamp(28px, 3.6vw, 50px);
         --display-track: -0.018em;
         --heading-track: -0.008em;
         --label-track: 0.12em;
@@ -2799,7 +2803,16 @@
       .tech-stack-panel,
       .ending,
       .founder-story {
-        width: min(1220px, calc(100% - (var(--page-gutter) * 2)));
+        width: min(var(--content-measure), calc(100% - (var(--page-gutter) * 2)));
+      }
+
+      .hero-manifesto__heading,
+      .hero h1,
+      .launch-era .launch-line span,
+      .ending h2,
+      .founder-title {
+        font-size: var(--display-size);
+        line-height: .78;
       }
 
       .hero h1,
@@ -2819,6 +2832,37 @@
       .founder-section-title,
       .founder-faq summary {
         letter-spacing: var(--heading-track);
+      }
+
+      .premise h2,
+      .tech-stack-panel h2,
+      .founder-section-title {
+        font-size: var(--section-title-size);
+        line-height: .88;
+      }
+
+      .stop h3,
+      .crossing h3,
+      .future-goal h3,
+      .founder-project h3 {
+        font-size: var(--subhead-size);
+        line-height: .9;
+      }
+
+      .hero > .eyebrow,
+      .founder-kicker,
+      .founder-open__status,
+      .founder-project__meta,
+      .founder-faq__kicker,
+      .future-goal small {
+        font-size: 10px;
+        line-height: 1.25;
+        letter-spacing: var(--label-track);
+      }
+
+      .founder-kicker,
+      .founder-faq__kicker {
+        margin-bottom: 14px;
       }
 
       .mono,
@@ -2856,6 +2900,14 @@
 
       .legend {
         padding: 20px 0 18px;
+      }
+
+      .hero > .analytics-counter {
+        margin-bottom: 0;
+      }
+
+      .launch-era {
+        padding-top: clamp(92px, 11vw, 156px);
       }
 
       .lane-heads {
@@ -2944,8 +2996,58 @@
         line-height: 1.04;
       }
 
+      /* Portrait desktop is still a desktop composition, but it needs a
+         calmer measure and less exaggerated whitespace than a wide display. */
+      @media (min-width: 721px) and (max-width: 1500px) {
+        :host {
+          --page-gutter: 24px;
+          --section-space: 76px;
+          --chapter-space: 40px;
+          --display-size: clamp(66px, 10.5vw, 104px);
+          --section-title-size: clamp(40px, 5.6vw, 58px);
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 64px;
+        }
+
+        .hero-manifesto {
+          column-gap: 54px;
+          row-gap: 18px;
+          margin-bottom: 44px;
+        }
+
+        .hero h1 {
+          margin-top: 24px;
+          margin-bottom: 40px;
+        }
+
+        .hero > .analytics-counter {
+          margin-bottom: 0;
+        }
+
+        .launch-era {
+          padding-top: 92px;
+          margin-bottom: 30px;
+        }
+
+        .premise article,
+        .premise article + article {
+          padding-top: 40px;
+          padding-bottom: 40px;
+        }
+
+        .founder-grid,
+        .founder-open,
+        .founder-principles,
+        .founder-faq {
+          column-gap: 52px;
+        }
+      }
+
       @media (max-width: 720px) {
-        :root {
+        :host {
           --page-gutter: 18px;
           --section-space: 64px;
           --chapter-space: 32px;
