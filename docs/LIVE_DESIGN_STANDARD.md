@@ -86,6 +86,21 @@ the sole exception** and keep the debossed well with no bloom at all.
 
 `--brutal-shadow*` tokens may remain for **intentional stickers** only. Never wire them as the default for buttons, tickets, Shop Now, or “I’ll be there.”
 
+### First-panel hero headline default
+
+When a new authored page genuinely opens with a large first-panel hero, its headline starts
+from the approved `WHAT'S / NEXT.` treatment now implemented by the shared `BoardHero`:
+Barlow Condensed 900, uppercase, responsive oversized scale, approximately `0.78` line
+height, slightly negative tracking, a solid high-contrast lead phrase, and a transparent
+continuation outlined in the hero's one approved accent. Layer near-black shadows behind
+both treatments for legibility and depth without creating a neon halo. Use no more than two
+deliberate lines, preserve a semantic heading, and verify wide and compact wraps without
+horizontal clipping.
+
+This is a headline default, not a mandatory hero scaffold. Compact utility, legal, detail,
+error, and empty-state pages still use `PageHeader`. Product heroes led by approved logo
+artwork keep the artwork instead of replacing it with typeset text.
+
 ---
 
 ## Canonical surface recipes (implementation)
