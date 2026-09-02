@@ -134,26 +134,28 @@
   font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
+  line-height: 0.78;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .about-v2-hero__stat {
   display: block;
-  font-size: clamp(3.5rem, 11vw, 7rem);
-  line-height: 0.8;
-  color: var(--lime, #ccff00);
-  text-shadow: 0 0 22px rgba(204, 255, 0, 0.28), 0 3px 16px rgba(0, 0, 0, 0.7);
+  font-size: clamp(3.6rem, 10vw, 9.5rem);
+  line-height: 0.78;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.96), 0 8px 24px rgba(0, 0, 0, 0.88), 0 24px 56px rgba(0, 0, 0, 0.72);
   font-variant-numeric: tabular-nums;
 }
 
 .about-v2-hero__lede {
   display: block;
-  font-size: clamp(1.25rem, 2.8vw, 1.9rem);
-  line-height: 1.05;
-  color: #fff;
-  margin-top: 16px;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
-  max-width: 24ch;
+  width: max-content;
+  max-width: 100%;
+  font-size: clamp(3.6rem, 10vw, 9.5rem);
+  line-height: 0.78;
+  color: #070708;
+  margin-top: 0.08em;
 }
 
 .about-v2-hero__actions {

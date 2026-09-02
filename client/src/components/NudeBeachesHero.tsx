@@ -71,11 +71,11 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           title={
             isRooster ? (
               <>
-                Rooster <span className="board-hero__title-accent">Rock</span>
+                Rooster <span className="board-hero__title-local-accent">Rock</span>
               </>
             ) : (
               <>
-                Sauvie <span className="board-hero__title-accent">Island</span>
+                Sauvie <span className="board-hero__title-local-accent">Island</span>
               </>
             )
           }

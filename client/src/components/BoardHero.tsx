@@ -11,6 +11,26 @@ type BoardHeroProps = {
   className?: string;
 };
 
+type RainbowHeroWordProps = {
+  children: string;
+  className?: string;
+};
+
+/** The canonical animated outline used for emphasized first-panel hero words. */
+export function RainbowHeroWord({
+  children,
+  className = "",
+}: RainbowHeroWordProps) {
+  return (
+    <span
+      className={`board-hero__title-accent ${className}`.trim()}
+      data-text={children}
+    >
+      {children}
+    </span>
+  );
+}
+
 export default function BoardHero({
   kicker,
   title,

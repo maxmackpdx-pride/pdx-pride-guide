@@ -15295,6 +15295,46 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
 .board-hero__brand-logo--mizzed { width: min(100%, 620px); }
 
 .board-hero__title-accent {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  color: #070708;
+  -webkit-text-stroke: 0;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.98),
+    0 8px 24px rgba(0, 0, 0, 0.9),
+    0 20px 46px rgba(0, 0, 0, 0.76);
+}
+
+.board-hero__title-accent::before {
+  content: attr(data-text);
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  color: transparent;
+  -webkit-text-stroke: clamp(3px, 0.22vw, 5px) transparent;
+  paint-order: stroke fill;
+  background: linear-gradient(
+    90deg,
+    #ff2d5e,
+    #ff9500,
+    #ffee00,
+    #39ff14,
+    #00ffff,
+    #3a6bff,
+    #8800ff,
+    #ff00cc,
+    #ff2d5e
+  );
+  background-size: 300% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.1));
+  animation: board-hero-rgb-outline 5.6s linear infinite;
+}
+
+.board-hero__title-local-accent {
   color: transparent;
   -webkit-text-stroke: clamp(1.5px, 0.12vw, 2.5px) var(--board-hero-accent, #ccff00);
   paint-order: stroke fill;
@@ -15303,6 +15343,12 @@ html.calm-mode .page-header__count { animation: none; text-shadow: none; }
     0 8px 24px rgba(0, 0, 0, 0.9),
     0 20px 46px rgba(0, 0, 0, 0.76),
     0 0 28px color-mix(in srgb, var(--board-hero-accent, #ccff00) 24%, transparent);
+}
+
+@keyframes board-hero-rgb-outline {
+  to {
+    background-position: 300% 50%;
+  }
 }
 
 .board-hero__title-accent--glitch {
@@ -15401,6 +15447,17 @@ html.calm-mode .board-page--makeover .board-running,
 html.calm-mode .gifting-form-panel--makeover,
 html.calm-mode .board-detail-modal {
   animation: none;
+}
+
+html.calm-mode .board-hero__title-accent::before,
+:root[data-calm="true"] .board-hero__title-accent::before {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-hero__title-accent::before {
+    animation: none;
+  }
 }
 
 /*

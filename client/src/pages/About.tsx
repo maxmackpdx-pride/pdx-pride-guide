@@ -4,6 +4,7 @@ import { Button } from "@/components/ds";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import PortfolioContactModal from "@/components/PortfolioContactModal";
 import ScrollReveal from "@/components/ScrollReveal";
+import { RainbowHeroWord } from "@/components/BoardHero";
 import "./About.css";
 
 const IG_URL = "https://www.instagram.com/tucker_pdmax";
@@ -69,7 +70,7 @@ export default function About() {
         <div className="about-v2-hero__scrim" aria-hidden="true" />
         <div className="about-v2-hero__inner"><div>
           <div className="about-v2-hero__kicker"><span className="about-v2-hero__dot" aria-hidden="true" />About · Built in Portland · for Portland</div>
-          <h1 id="about-title" className="about-v2-hero__h1"><span className="about-v2-hero__stat">Our Portland.</span><span className="about-v2-hero__lede">All in one place.</span></h1>
+          <h1 id="about-title" className="about-v2-hero__h1"><span className="about-v2-hero__stat">Our Portland.</span><RainbowHeroWord className="about-v2-hero__lede">All in one place.</RainbowHeroWord></h1>
           <div className="about-v2-hero__actions">
             <Link href="/events"><Button as="span" variant="solid" accent="cyan" size="lg">Explore Zaylist</Button></Link>
             <a href="#submit-an-idea"><Button as="span" variant="neon" accent="pink" size="lg">Tell me what is missing</Button></a>

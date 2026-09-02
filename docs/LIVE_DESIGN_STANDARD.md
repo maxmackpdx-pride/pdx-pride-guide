@@ -91,11 +91,17 @@ the sole exception** and keep the debossed well with no bloom at all.
 When a new authored page genuinely opens with a large first-panel hero, its headline starts
 from the approved `WHAT'S / NEXT.` treatment now implemented by the shared `BoardHero`:
 Barlow Condensed 900, uppercase, responsive oversized scale, approximately `0.78` line
-height, slightly negative tracking, a solid high-contrast lead phrase, and a transparent
-continuation outlined in the hero's one approved accent. Layer near-black shadows behind
-both treatments for legibility and depth without creating a neon halo. Use no more than two
+height, slightly negative tracking, a solid high-contrast lead phrase, and a dark-cutout
+continuation edged by the animated Zaylist RGB spectrum. The spectrum travels through the
+outline only; it does not fill the word or become a fuzzy halo. Calm Mode and
+`prefers-reduced-motion` keep the complete rainbow edge but stop its travel. Layer near-black
+shadows behind both treatments for legibility and depth. Use no more than two
 deliberate lines, preserve a semantic heading, and verify wide and compact wraps without
 horizontal clipping.
+
+Owner-directed product or place identities keep their established local accent when that
+identity is the point of the headline. ROOSTER ROCK remains orange and SAUVIE ISLAND remains
+green; neither inherits the default RGB continuation.
 
 This is a headline default, not a mandatory hero scaffold. Compact utility, legal, detail,
 error, and empty-state pages still use `PageHeader`. Product heroes led by approved logo

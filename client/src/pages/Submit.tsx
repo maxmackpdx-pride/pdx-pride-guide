@@ -10,7 +10,7 @@ import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHeader from "@/components/PageHeader";
 import type { PageHeaderAccent } from "@/components/PageHeader";
-import BoardHero from "@/components/BoardHero";
+import BoardHero, { RainbowHeroWord } from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import { BoardFilterChip } from "@/components/BoardActiveSection";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
@@ -490,7 +490,7 @@ export default function Submit() {
         <BoardHero
           accent="lime"
           kicker={hero.kicker}
-          title={<>Promoter <span className="board-hero__title-accent">hub</span></>}
+          title={<>Promoter <RainbowHeroWord>hub</RainbowHeroWord></>}
           lede={hero.lede}
           actions={
             <>

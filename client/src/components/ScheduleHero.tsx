@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import BoardHero from "@/components/BoardHero";
+import BoardHero, { RainbowHeroWord } from "@/components/BoardHero";
 import BoardStatsBar from "@/components/BoardStatsBar";
 import { Button } from "@/components/ds";
 
@@ -17,7 +17,7 @@ export default function ScheduleHero({ stats }: Props) {
         kicker="Portland nights · all year"
         title={
           <>
-            My <span className="board-hero__title-accent">schedule</span>
+            My <RainbowHeroWord>schedule</RainbowHeroWord>
           </>
         }
         lede="The week laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Take care of each other."
