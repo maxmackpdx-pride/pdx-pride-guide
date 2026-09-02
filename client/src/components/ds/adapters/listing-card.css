@@ -50,6 +50,7 @@
    Intrinsic size ≈ poster + slim dense meta. */
 .events-poster-grid > .scroll-reveal {
   min-width: 0;
+  height: 100%;
   container-type: inline-size;
 }
 
@@ -69,16 +70,18 @@
   object-position: center;
 }
 
-/* The prototype locks every closed card to one universal silhouette. Its
-   540 x 1112 source card is displayed at 80%, yielding 432 x 889.6 here. */
+/* Let the approved poster and metadata establish the card's natural height.
+   The grid equalizes those natural silhouettes; forcing the prototype ratio
+   onto narrower multi-column tracks makes flex children shrink and clips the
+   tags/actions. */
 .events-poster-grid .ds-listing-card--grid {
-  height: auto;
+  height: 100%;
 }
 .events-poster-grid .ds-listing-card--grid .pdxBoard--event-grid {
-  flex: none;
-  height: auto !important;
+  flex: 1 1 auto;
+  height: 100% !important;
   min-height: 0;
-  aspect-ratio: 432 / 889.6;
+  aspect-ratio: auto;
 }
 
 .events-poster-grid .ds-listing-card--grid .ds-listing-share {
@@ -100,7 +103,7 @@
 
 @container (max-width: 220px) {
   .events-poster-grid .ds-listing-card--grid .pdxBoard--event-grid {
-    height: 378px !important;
+    height: 100% !important;
     aspect-ratio: auto;
   }
   .events-poster-grid .ds-listing-card--grid .ds-listing-share {

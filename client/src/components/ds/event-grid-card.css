@@ -116,7 +116,7 @@
 .pdxBoard--event-grid .pdxBoard__shine--prepeak,.pdxBoard--event-grid .pdxBoard__shine--peak{animation:event-edge-orbit 22s linear infinite;will-change:--event-edge-angle}
 
 .pdxBoard__poster{
-  position:relative;z-index:3;aspect-ratio:2/3;overflow:visible;
+  position:relative;z-index:3;flex:0 0 auto;aspect-ratio:2/3;overflow:visible;
   border-radius:calc(var(--event-radius) - .8px);
   background:radial-gradient(circle at 50% 70%,color-mix(in srgb,var(--day-c) 18%,transparent),#030304 72%)
 }
@@ -142,7 +142,7 @@
 }
 
 .pdxBoard__meta{
-  position:relative;z-index:3;display:flex;min-height:128px;flex:1 1 auto;flex-direction:column;
+  position:relative;z-index:3;display:flex;min-height:128px;flex:1 0 auto;flex-direction:column;
   justify-content:flex-start;padding:12.8px 13.6px 14.4px;overflow:hidden;
   border-radius:0 0 calc(var(--event-radius) - .8px) calc(var(--event-radius) - .8px);
   background:radial-gradient(120% 95% at 82% -14%,color-mix(in srgb,var(--day-c) 10%,transparent),transparent 58%),
