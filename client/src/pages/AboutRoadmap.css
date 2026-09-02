@@ -309,7 +309,7 @@
       .hero-next__gradient {
         transform-box: fill-box;
         transform-origin: center;
-        animation: none;
+        animation: next-rgb-travel 4.8s linear infinite;
       }
       .hero-z-halo {
         position: relative;
