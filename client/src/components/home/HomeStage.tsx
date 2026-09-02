@@ -46,7 +46,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   }, [calmMode]);
 
   /*
-   * The hero loop is 3.7MB and purely decorative, sitting behind the gradient
+   * The hero loop is purely decorative, sitting behind the gradient
    * atmosphere. Two rules keep it off the critical path: never fetch it on
    * phones (CSS hides it there, but the element still downloaded it), and on
    * wider screens only mount it once the browser is idle, so it never competes
