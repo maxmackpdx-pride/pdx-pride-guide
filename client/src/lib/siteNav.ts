@@ -95,6 +95,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/outz/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
   "/outz/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
   "/about": { section: "About", title: "About" },
+  "/aboutz": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
   "/contact": { section: "About", title: "Contact" },
   "/sponsors": { section: "About", title: "Sponsors" },
