@@ -1,8 +1,8 @@
 :host {
         color-scheme: dark;
         /* Radix Slate dark neutrals; product neon remains intentionally custom. */
-        --slate-1: #111113;
-        --slate-2: #18191b;
+        --slate-1: #0a0a0c;
+        --slate-2: #111113;
         --slate-3: #212225;
         --slate-4: #272a2d;
         --slate-5: #2e3135;
@@ -35,6 +35,10 @@
         box-sizing: border-box;
       }
       :host {
+        display: block;
+        position: relative;
+        z-index: 0;
+        contain: paint;
         scroll-behavior: smooth;
         overflow-x: clip;
         background: var(--bg);
@@ -205,7 +209,7 @@
         position: relative;
         isolation: isolate;
         width: min(1220px, calc(100% - 44px));
-        min-height: 84vh;
+        min-height: 80vh;
         margin: auto;
         padding: 0 0 22px;
         display: grid;
@@ -251,7 +255,7 @@
         column-gap: clamp(34px, 6vw, 84px);
         row-gap: 22px;
         margin: 0 0 clamp(34px, 4vw, 52px);
-        padding: clamp(28px, 3.5vw, 42px) 0;
+        padding: clamp(12px, 1.6vw, 20px) 0 clamp(28px, 3.5vw, 42px);
         border: 0;
       }
       .hero-manifesto article {
@@ -262,7 +266,7 @@
         grid-column: 1 / -1;
         margin: 0 0 -8px;
         color: var(--slate-12);
-        font: 900 clamp(38px, 5vw, 64px)/.88 Barlow Condensed, sans-serif;
+        font: 900 clamp(78px, 16vw, 205px)/.76 Barlow Condensed, sans-serif;
         letter-spacing: var(--heading-track, -.008em);
         text-transform: uppercase;
       }
@@ -307,7 +311,7 @@
       .hero-next__stroke {
         fill: none;
         stroke: url(#next-rgb);
-        stroke-width: 3;
+        stroke-width: 2;
         vector-effect: non-scaling-stroke;
         paint-order: stroke;
       }
@@ -1597,9 +1601,9 @@
         overflow: visible;
       }
       .idea-title-outline__stroke {
-        fill: #08090b;
+        fill: var(--slate-1);
         stroke: url(#idea-rgb);
-        stroke-width: 3;
+        stroke-width: 2;
         vector-effect: non-scaling-stroke;
         paint-order: stroke fill;
       }
@@ -2376,10 +2380,14 @@
           grid-template-columns: 1fr;
           grid-template-rows: auto;
           gap: 18px;
-          margin: 34px 0 32px;
-          padding: 28px 0;
+          margin: 0 0 32px;
+          padding: 16px 0 28px;
         }
         .hero-manifesto__label { margin-bottom: 2px; }
+        .hero-manifesto__heading {
+          font-size: clamp(68px, 20vw, 96px);
+          line-height: .74;
+        }
         .hero-manifesto p { font-size: 16px; }
         .launch-era {
           position: relative;

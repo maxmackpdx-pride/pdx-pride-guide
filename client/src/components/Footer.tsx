@@ -76,18 +76,23 @@ export default function Footer() {
 
           <nav className="site-footer__nav" aria-label="Footer">
             {FOOTER_FOLDERS.map((folder) => (
-              <div key={folder.id} className="site-footer__col">
-                <div className="site-footer__col-title display">{folder.title}</div>
-                <ul className="site-footer__list">
-                  {folder.links.map(([href, label]) => (
-                    <li key={`${folder.id}-${label}`}>
-                      <Link href={href} className="site-footer__link">
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <details key={folder.id} className="site-footer__col">
+                <summary className="site-footer__col-title display">
+                  {folder.title}
+                  <span className="site-footer__col-toggle" aria-hidden="true">+</span>
+                </summary>
+                <div className="site-footer__dropup">
+                  <ul className="site-footer__list">
+                    {folder.links.map(([href, label]) => (
+                      <li key={`${folder.id}-${label}`}>
+                        <Link href={href} className="site-footer__link">
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </details>
             ))}
           </nav>
 

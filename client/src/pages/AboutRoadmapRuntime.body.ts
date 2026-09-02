@@ -59,7 +59,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
               float triangleWave = abs(fract(n * 10.0) - 0.5) * 2.0;
               float topoLines = smoothstep(0.065, 0.00, triangleWave) * 0.32;
 
-              vec3 radixSlate1 = vec3(0.067, 0.067, 0.075);
+              vec3 radixSlate1 = vec3(0.039, 0.039, 0.047);
               vec3 radixSlate12 = vec3(0.929, 0.933, 0.941);
               float lines = clamp(gridLines + topoLines, 0.0, 1.0);
               vec3 color = mix(radixSlate1, radixSlate12, lines);
@@ -158,6 +158,24 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         }, { signal });
         reduceTopoMotion.addEventListener("change", startTopoField, { signal });
         startTopoField();
+
+        const founderBoundary = pageRoot.querySelector("#tucker"),
+          topoFieldTint = pageRoot.querySelector(".field");
+        function syncTopoToRoadmap() {
+          if (!founderBoundary) return;
+          const roadmapIsVisible = founderBoundary.getBoundingClientRect().top > innerHeight;
+          topoCanvas.style.visibility = roadmapIsVisible ? "visible" : "hidden";
+          if (topoFieldTint) topoFieldTint.style.visibility = roadmapIsVisible ? "visible" : "hidden";
+          if (roadmapIsVisible) startTopoField();
+          else if (topoFrameRequest) {
+            cancelAnimationFrame(topoFrameRequest);
+            topoFrameRequest = 0;
+          }
+        }
+        window.addEventListener("scroll", syncTopoToRoadmap, { passive: true, signal });
+        window.addEventListener("resize", syncTopoToRoadmap, { signal });
+        syncTopoToRoadmap();
+
         stopTopoField = () => {
           if (topoFrameRequest) cancelAnimationFrame(topoFrameRequest);
           topoFrameRequest = 0;

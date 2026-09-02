@@ -11145,11 +11145,14 @@ html.calm-mode .board-detail-backdrop {
 
 .site-footer {
   position: relative;
+  z-index: 20;
   isolation: isolate;
-  background: #000;
+  background: #08080a;
   border-top: 1px solid #1c1c22;
   background-image: none;
 }
+
+.app-shell > footer.site-footer { z-index: 20; }
 
 .site-footer__inner {
   position: relative;
@@ -11204,17 +11207,62 @@ html.calm-mode .board-detail-backdrop {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px 20px;
+  align-items: end;
+  min-width: 0;
+}
+
+.site-footer__col {
+  position: relative;
   min-width: 0;
 }
 
 .site-footer__col-title {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
   font-size: 0.7rem;
-  color: var(--text-meta, #8c8980);
+  color: var(--text-strong, #edeef0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-bottom: 8px;
-  padding-bottom: 6px;
+  margin: 0;
+  padding: 10px 2px 9px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  list-style: none;
+}
+
+.site-footer__col-title::-webkit-details-marker { display: none; }
+
+.site-footer__col-title:focus-visible {
+  outline: 2px solid var(--cyan, #00ffff);
+  outline-offset: 3px;
+}
+
+.site-footer__col-toggle {
+  color: var(--cyan, #00ffff);
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.site-footer__col[open] .site-footer__col-toggle { transform: rotate(45deg); }
+
+.site-footer__dropup {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  max-height: min(52vh, 430px);
+  overflow-y: auto;
+  padding: 12px;
+  background: #111113;
+  border: 1px solid #2e3135;
+  border-radius: 10px;
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.58);
 }
 
 .site-footer__list {
@@ -11223,14 +11271,16 @@ html.calm-mode .board-detail-backdrop {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 }
 
 .site-footer__link {
-  color: #8a8a8a;
+  display: block;
+  color: #b0b4ba;
   font-size: 0.8rem;
   text-decoration: none;
-  line-height: 1.3;
+  line-height: 1.35;
+  padding: 3px 1px;
 }
 
 .site-footer__link:hover {
@@ -11434,6 +11484,8 @@ html.calm-mode .footer-coffee__btn:hover {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px 12px;
   }
+
+  .site-footer__dropup { max-height: 40vh; }
 
   .site-footer__link {
     font-size: 0.75rem;
