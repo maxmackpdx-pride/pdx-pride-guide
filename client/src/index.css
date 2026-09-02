@@ -11147,7 +11147,7 @@ html.calm-mode .board-detail-backdrop {
   position: relative;
   z-index: 20;
   isolation: isolate;
-  background: #08080a;
+  background: var(--z-black, #050506);
   border-top: 1px solid #1c1c22;
   background-image: none;
 }

@@ -197,6 +197,7 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 
 ## About + roadmap direct reference
 
+- The default Zaylist page black is `--z-black: #050506`. Pure OLED black (`--z-oled: #000000`) is reserved for buttons and deep-glass cores; ordinary page bands and backgrounds do not use OLED black.
 - The live `/about` page is the owner-approved implementation reference for the combined About, history, product/system roadmap, future goals, technology, idea submission, founder, trust, and FAQ experience.
 - `/next` and `/darkroom` are compatibility redirects to `/about`; do not recreate a separate NEXT destination, nav tab, footer link, homepage slide, or homepage preview.
 - The page-local quick navigation is not global site navigation. It uses unboxed Barlow Condensed labels, the seven approved day colors on hover, and a seamless mobile rail. Calm Mode and `prefers-reduced-motion` stop that rail.

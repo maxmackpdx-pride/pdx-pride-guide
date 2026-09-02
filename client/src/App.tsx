@@ -102,7 +102,7 @@ function AppLayout() {
   return (
     <div
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
-      style={{ background: "var(--ink-800, #0a0a0a)" }}
+      style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
       <Nav />

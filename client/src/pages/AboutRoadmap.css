@@ -1,7 +1,7 @@
 :host {
         color-scheme: dark;
         /* Radix Slate dark neutrals; product neon remains intentionally custom. */
-        --slate-1: #0a0a0c;
+        --slate-1: #050506;
         --slate-2: #111113;
         --slate-3: #212225;
         --slate-4: #272a2d;
@@ -169,22 +169,7 @@
         background: var(--slate-1);
       }
       .field {
-        background:
-          radial-gradient(
-            circle at 8% 22%,
-            rgba(25, 227, 255, 0.08),
-            transparent 24%
-          ),
-          radial-gradient(
-            circle at 52% 46%,
-            rgba(24, 47, 92, 0.1),
-            transparent 34%
-          ),
-          radial-gradient(
-            circle at 91% 45%,
-            rgba(255, 106, 0, 0.07),
-            transparent 26%
-          );
+        background: transparent;
       }
       .mono,
       .eyebrow,
@@ -242,7 +227,7 @@
         position: relative;
         isolation: isolate;
         font:
-          900 clamp(78px, 16vw, 205px)/0.76 Barlow Condensed,
+          900 clamp(47px, 9.6vw, 123px)/0.76 Barlow Condensed,
           sans-serif;
         letter-spacing: -0.015em;
         text-transform: uppercase;
@@ -304,12 +289,17 @@
         width: min(4.25em, 100%);
         height: 0.9em;
         overflow: hidden;
-        filter:
-          drop-shadow(0 3px 0 rgba(0, 0, 0, 0.82))
-          drop-shadow(0 8px 18px rgba(0, 0, 0, 0.82));
+        filter: none;
+      }
+      .hero-next,
+      .hero-z-halo,
+      .idea-title-outline,
+      .founder-faq__questions {
+        text-shadow: none;
+        filter: none;
       }
       .hero-next__stroke {
-        fill: none;
+        fill: var(--slate-1);
         stroke: url(#next-rgb);
         stroke-width: 2;
         vector-effect: non-scaling-stroke;
@@ -318,20 +308,15 @@
       .hero-next__gradient {
         transform-box: fill-box;
         transform-origin: center;
-        animation: next-rgb-travel 4.8s linear infinite;
+        animation: none;
       }
       .hero-z-halo {
-        position: absolute;
-        z-index: -1;
-        top: 50%;
-        left: calc(
-          75vw - ((100vw - min(1220px, calc(100vw - 44px))) / 2)
-        );
-        width: auto;
-        height: 1.292em;
-        aspect-ratio: 790 / 530;
-        transform: translate(-50%, -50%);
-        display: block;
+        position: relative;
+        display: inline-flex;
+        width: .86em;
+        height: .76em;
+        margin-left: .015em;
+        vertical-align: -.035em;
         pointer-events: none;
       }
       .hero-z-halo svg {
@@ -341,7 +326,7 @@
         overflow: visible;
       }
       .hero-z-halo__z {
-        fill: none;
+        fill: var(--slate-1);
         stroke: url(#hero-z-rgb);
         stroke-width: 2;
         vector-effect: non-scaling-stroke;
@@ -366,9 +351,6 @@
       .hero-z-halo__ghost--magenta {
         stroke: var(--day-fri);
         animation: hero-z-glitch-magenta 2.35s steps(1, end) infinite;
-      }
-      .hero-z-halo__tm {
-        fill: rgba(237, 238, 240, 0.76);
       }
       .sr-only {
         position: absolute;
@@ -665,6 +647,94 @@
         color: var(--system);
         stroke: currentColor;
       }
+      .roadmap-phase {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+      }
+      .roadmap-phase__summary {
+        position: sticky;
+        top: 72px;
+        z-index: 12;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        min-height: 82px;
+        align-items: center;
+        gap: 18px;
+        padding: 10px 22px;
+        color: var(--slate-12);
+        background: color-mix(in srgb, var(--slate-1) 96%, transparent);
+        border-top: 1px solid var(--slate-4);
+        border-bottom: 1px solid var(--slate-4);
+        cursor: pointer;
+        list-style: none;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+      }
+      .roadmap-phase__summary::-webkit-details-marker { display: none; }
+      .roadmap-phase__summary:focus-visible {
+        outline: 2px solid var(--phase-accent);
+        outline-offset: -4px;
+      }
+      .roadmap-phase__index {
+        color: var(--phase-accent);
+        font: 700 10px/1 JetBrains Mono, monospace;
+        letter-spacing: .14em;
+      }
+      .roadmap-phase__title {
+        font: 900 clamp(42px, 6vw, 74px)/.82 Barlow Condensed, sans-serif;
+        letter-spacing: .005em;
+        text-transform: uppercase;
+        text-shadow: 0 3px 0 rgba(0,0,0,.82), 0 8px 24px rgba(0,0,0,.72);
+      }
+      .roadmap-phase__state {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--slate-6);
+        border-radius: 50%;
+      }
+      .roadmap-phase__state::before,
+      .roadmap-phase__state::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 15px;
+        height: 2px;
+        background: var(--phase-accent);
+        transform: translate(-50%, -50%);
+        transition: transform .22s ease;
+      }
+      .roadmap-phase__state::after { transform: translate(-50%, -50%) rotate(90deg); }
+      .roadmap-phase[open] .roadmap-phase__state::after { transform: translate(-50%, -50%) rotate(0); }
+      .roadmap-phase__rails {
+        position: absolute;
+        right: 50%;
+        bottom: -18px;
+        width: 28px;
+        height: 36px;
+        transform: translateX(50%);
+        pointer-events: none;
+      }
+      .roadmap-phase__rails i {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: currentColor;
+        filter: drop-shadow(0 0 5px currentColor);
+      }
+      .roadmap-phase__rails i:nth-child(1) { left: 0; color: var(--product); }
+      .roadmap-phase__rails i:nth-child(2) { left: 13px; color: var(--system); }
+      .roadmap-phase__rails i:nth-child(3) { right: 0; color: var(--cross); opacity: 0; }
+      .roadmap-phase--possible .roadmap-phase__rails i:nth-child(-n + 2) { opacity: .35; }
+      .roadmap-phase--possible .roadmap-phase__rails i:nth-child(3) { opacity: 1; }
+      .roadmap-phase__content {
+        position: relative;
+        min-width: 0;
+      }
+      .roadmap-phase:not([open]) .roadmap-phase__content { display: none; }
       .chapter {
         position: relative;
         display: grid;
@@ -2311,6 +2381,7 @@
         height: auto;
         overflow: visible;
       }
+      .founder-faq__questions text { fill: var(--slate-1); }
       .founder-faq details { border-top: 1px solid var(--slate-5); }
       .founder-faq details:last-child { border-bottom: 1px solid var(--slate-5); }
       .founder-faq summary {
@@ -2372,7 +2443,7 @@
           line-height: 1.7;
         }
         .hero h1 {
-          font-size: clamp(68px, 20vw, 96px);
+          font-size: clamp(41px, 12vw, 58px);
           line-height: 0.74;
           margin: 24px 0 42px;
         }
@@ -2470,6 +2541,17 @@
         .routes {
           display: none;
         }
+        .roadmap-phase__summary {
+          top: 44px;
+          min-height: 70px;
+          gap: 12px;
+          padding: 8px 10px;
+        }
+        .roadmap-phase__title {
+          font-size: clamp(34px, 11vw, 46px);
+          line-height: .84;
+        }
+        .roadmap-phase__state { width: 44px; height: 44px; }
         .mobile-routes {
           position: absolute;
           inset: 0;

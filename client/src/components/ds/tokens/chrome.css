@@ -14,7 +14,7 @@
  */
 :root {
   /* Utility surfaces */
-  --panel-ink: #06060a; /* utility page background */
+  --panel-ink: var(--z-black, #050506); /* utility page background */
   --panel-band: #070708; /* full-bleed band (how it works, stats) */
   --panel-card: #0c0c0f; /* utility card / hub panel */
   --panel-card-2: #0d0d10;

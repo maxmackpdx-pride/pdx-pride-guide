@@ -7,8 +7,10 @@
 
 :root {
   /* ---- SURFACES (exact) ---------------------------------- */
-  --ink-1000: #050505;   /* deepest, ring shadows / full bleed */
-  --ink-900:  #0a0a0a;   /* app background (always near-black) */
+  --z-black:  #050506;   /* default Zaylist page/background black */
+  --z-oled:   #000000;   /* reserved for buttons and deep glass */
+  --ink-1000: var(--z-black); /* full-bleed stage */
+  --ink-900:  var(--z-black); /* app background */
   --ink-850:  #111111;   /* inset chips / inputs */
   --ink-800:  #0b0b0b;   /* card surface */
   --ink-750:  #141414;   /* raised surface / hover */

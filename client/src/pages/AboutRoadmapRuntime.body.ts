@@ -2,6 +2,111 @@
 export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       const controller = new AbortController(),
         signal = controller.signal;
+
+      const reduceRgbMotion = matchMedia("(prefers-reduced-motion: reduce)");
+      function syncRgbOutlineMotion() {
+        pageRoot.querySelectorAll(".hero-next, .hero-z-halo svg, .idea-title-outline, .founder-faq__questions svg").forEach((svg) => {
+          if (reduceRgbMotion.matches) svg.pauseAnimations?.();
+          else svg.unpauseAnimations?.();
+        });
+      }
+      reduceRgbMotion.addEventListener("change", syncRgbOutlineMotion, { signal });
+      syncRgbOutlineMotion();
+
+      const roadmapStory = pageRoot.querySelector(".story"),
+        roadmapChapters = [...roadmapStory.querySelectorAll(":scope > .chapter")],
+        roadmapInsertionAnchor = roadmapChapters[0],
+        crossingOneIndex = roadmapChapters.findIndex((chapter) => chapter.textContent.includes("CROSSING 01")),
+        futureChapter = roadmapStory.querySelector(":scope > .future-convergence");
+      const roadmapInsertionMarker = document.createComment("roadmap phases");
+      roadmapInsertionAnchor.before(roadmapInsertionMarker);
+
+      function createRoadmapPhase(index, id, title, accent, nodes, open = false) {
+        const phase = document.createElement("details"),
+          summary = document.createElement("summary"),
+          content = document.createElement("div");
+        phase.className = `roadmap-phase roadmap-phase--${id}`;
+        phase.dataset.phase = id;
+        phase.style.setProperty("--phase-accent", accent);
+        phase.open = open;
+        summary.className = "roadmap-phase__summary";
+        summary.innerHTML = `<span class="roadmap-phase__index">${String(index + 1).padStart(2, "0")}</span><span class="roadmap-phase__title">${title}</span><span class="roadmap-phase__state" aria-hidden="true"></span><span class="roadmap-phase__rails" aria-hidden="true"><i></i><i></i><i></i></span>`;
+        content.className = "roadmap-phase__content";
+        nodes.forEach((node) => content.append(node));
+        phase.append(summary, content);
+        return phase;
+      }
+
+      const completedNodes = roadmapChapters.slice(0, crossingOneIndex),
+        nextNodes = roadmapChapters.slice(crossingOneIndex),
+        completedPhase = createRoadmapPhase(0, "completed", "Completed", "var(--done)", completedNodes, true),
+        nextPhase = createRoadmapPhase(1, "next", "What’s Next", "var(--system)", nextNodes),
+        possiblePhase = createRoadmapPhase(2, "possible", "What Can Be", "var(--cross)", [futureChapter]);
+      roadmapInsertionMarker.replaceWith(completedPhase, nextPhase, possiblePhase);
+
+      const roadmapPhases = [completedPhase, nextPhase, possiblePhase],
+        activatedPhases = new Set([0]);
+      let lastRoadmapScrollY = window.scrollY,
+        roadmapTransitionFrame = 0,
+        roadmapFinished = false;
+
+      function preservePhaseAnchor(anchor, mutate) {
+        const before = anchor.getBoundingClientRect().top;
+        mutate();
+        requestAnimationFrame(() => {
+          const after = anchor.getBoundingClientRect().top;
+          window.scrollBy(0, after - before);
+          window.dispatchEvent(new Event("resize"));
+        });
+      }
+
+      function activateRoadmapPhase(index) {
+        if (activatedPhases.has(index)) return;
+        activatedPhases.add(index);
+        const phase = roadmapPhases[index],
+          summary = phase.querySelector(".roadmap-phase__summary");
+        preservePhaseAnchor(summary, () => {
+          roadmapPhases.forEach((item, itemIndex) => { item.open = itemIndex === index; });
+        });
+      }
+
+      function syncRoadmapPhases() {
+        if (roadmapTransitionFrame) return;
+        roadmapTransitionFrame = requestAnimationFrame(() => {
+          roadmapTransitionFrame = 0;
+          const scrollingDown = window.scrollY >= lastRoadmapScrollY;
+          lastRoadmapScrollY = window.scrollY;
+          if (!scrollingDown) return;
+          const triggerY = innerHeight * .72;
+          if (!activatedPhases.has(1) && nextPhase.querySelector("summary").getBoundingClientRect().top <= triggerY) {
+            activateRoadmapPhase(1);
+            return;
+          }
+          if (!activatedPhases.has(2) && possiblePhase.querySelector("summary").getBoundingClientRect().top <= triggerY) {
+            activateRoadmapPhase(2);
+            return;
+          }
+          const techStack = pageRoot.querySelector("#tech-stack");
+          if (!roadmapFinished && techStack.getBoundingClientRect().top <= innerHeight * .78) {
+            roadmapFinished = true;
+            const anchor = techStack;
+            preservePhaseAnchor(anchor, () => roadmapPhases.forEach((phase) => { phase.open = false; }));
+          }
+        });
+      }
+      window.addEventListener("scroll", syncRoadmapPhases, { passive: true, signal });
+      roadmapPhases.forEach((phase) => {
+        phase.addEventListener("toggle", () => window.dispatchEvent(new Event("resize")), { signal });
+      });
+      const roadmapEndObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting || roadmapFinished || !activatedPhases.has(2)) return;
+          roadmapFinished = true;
+          preservePhaseAnchor(entry.target, () => roadmapPhases.forEach((phase) => { phase.open = false; }));
+        });
+      }, { threshold: .04 });
+      roadmapEndObserver.observe(pageRoot.querySelector("#tech-stack"));
+
       let stopTopoField = () => {};
       const topoCanvas = pageRoot.querySelector("#topo-field"),
         topoGl = topoCanvas.getContext("webgl", {
@@ -52,17 +157,17 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
               vec2 gridFract = fract(gl_FragCoord.xy / gridSize);
               float lineThickness = 1.0 / gridSize;
               float gridLines = step(1.0 - lineThickness, gridFract.x) + step(1.0 - lineThickness, gridFract.y);
-              gridLines = clamp(gridLines, 0.0, 1.0) * 0.08;
+              gridLines = clamp(gridLines, 0.0, 1.0) * 0.12;
 
               vec2 noisePos = st * 1.4 + vec2(u_time * 0.015, u_time * 0.025);
               float n = snoise(noisePos) * 0.5 + 0.5;
               float triangleWave = abs(fract(n * 10.0) - 0.5) * 2.0;
-              float topoLines = smoothstep(0.065, 0.00, triangleWave) * 0.32;
+              float topoLines = smoothstep(0.02, 0.00, triangleWave) * 0.45;
 
-              vec3 radixSlate1 = vec3(0.039, 0.039, 0.047);
-              vec3 radixSlate12 = vec3(0.929, 0.933, 0.941);
+              vec3 zaylistBlack = vec3(0.0196, 0.0196, 0.0235);
+              vec3 contourInk = vec3(0.929, 0.933, 0.941);
               float lines = clamp(gridLines + topoLines, 0.0, 1.0);
-              vec3 color = mix(radixSlate1, radixSlate12, lines);
+              vec3 color = mix(zaylistBlack, contourInk, lines);
               gl_FragColor = vec4(color, 1.0);
             }
           `;
@@ -199,6 +304,13 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         mobileSystemRoute = pageRoot.querySelector("#mobile-route-system"),
         mobileRouteQuery = matchMedia("(max-width: 720px)");
 
+      function futureOffsetTop() {
+        const target = possiblePhase.open
+          ? futureConvergence
+          : possiblePhase.querySelector(".roadmap-phase__summary");
+        return target.getBoundingClientRect().top - story.getBoundingClientRect().top;
+      }
+
       function mobileRoutePath(selector, railX, storyRect) {
         const points = [...pageRoot.querySelectorAll(selector)]
           .map((node) => {
@@ -222,14 +334,14 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           d += ` Q ${railX} ${point.y} ${point.x} ${point.y}`;
           d += ` Q ${railX} ${point.y} ${railX} ${point.y + bend}`;
         });
-        d += ` L ${railX} ${futureConvergence.offsetTop}`;
+        d += ` L ${railX} ${futureOffsetTop()}`;
         return d;
       }
 
       function sizeDesktopRoutes() {
         const counterHeight = pageRoot.querySelector(".analytics-counter").offsetHeight,
           routeTop = pageRoot.querySelector(".lane-heads").offsetTop + pageRoot.querySelector(".lane-heads").offsetHeight,
-          height = Math.max(0, futureConvergence.offsetTop - routeTop);
+          height = Math.max(0, futureOffsetTop() - routeTop);
         styleRoot.style.setProperty("--counter-height", `${counterHeight}px`);
         styleRoot.style.setProperty("--routes-top", `${routeTop}px`);
         styleRoot.style.setProperty("--routes-height", `${height}px`);
@@ -346,7 +458,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         .forEach((logo) => (logo.alt = ""));
       function update() {
         const r = story.getBoundingClientRect(),
-          routeHeight = Math.max(1, futureConvergence.offsetTop),
+          routeHeight = Math.max(1, futureOffsetTop()),
           travel = Math.max(0, Math.min(routeHeight, innerHeight * 0.58 - r.top));
         styleRoot.style.setProperty("--progress", (travel / routeHeight).toFixed(4));
         setMobileRouteProgress(mobileProductRoute, travel);
@@ -520,6 +632,8 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           const target = pageRoot.querySelector(link.getAttribute("href"));
           if (!target) return;
           event.preventDefault();
+          const owningPhase = target.closest(".roadmap-phase");
+          if (owningPhase) owningPhase.open = true;
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         }, { signal });
       });
@@ -530,6 +644,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         roadmapResizeObserver.disconnect();
         o.disconnect();
         futureGoalObserver.disconnect();
+        roadmapEndObserver.disconnect();
         if (analyticsInterval) window.clearInterval(analyticsInterval);
       };
 }
