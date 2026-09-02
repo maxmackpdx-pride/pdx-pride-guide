@@ -99,6 +99,7 @@
 
 .hp-card__tag--day { border-color: var(--hp-day, var(--day-sat)); background: var(--hp-day, var(--day-sat)); color: var(--hp-day-ink, #050506); }
 .hp-card__tag--detail { border-color: color-mix(in srgb, var(--hp-day, var(--day-sat)) 72%, #202027); background: color-mix(in srgb, var(--hp-day, var(--day-sat)) 14%, #0d0d11); color: #fff; }
+.hp-card__tag--complementary { border-color: color-mix(in srgb,var(--hp-opposite) 72%,#202027); background: color-mix(in srgb,var(--hp-opposite) 14%,#0d0d11); color: var(--hp-opposite); }
 .hp-card__title {
   display: -webkit-box;
   margin: 0;

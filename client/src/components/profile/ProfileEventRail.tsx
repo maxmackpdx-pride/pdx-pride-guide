@@ -7,6 +7,7 @@ import "./ProfileEventRail.css";
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 const WEEKDAY_FROM_JS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
 /** Resolve MON to SUN for day tokens; falls back from dateStart when dayOfWeek is missing. */
 export function eventDayCode(event: ProfileEvent): string {
@@ -111,6 +112,7 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
   const style = {
     ["--pp-day" as string]: day,
     ["--pp-day-ink" as string]: dayInk,
+    ["--pp-opposite" as string]: DAY_OPPOSITE[code] || "#CCFF00",
     ["--c" as string]: day,
   } as CSSProperties;
   const clickable = typeof onClick === "function";
@@ -124,8 +126,8 @@ export function GoingEventCard({ event, onClick, goingAvatars = [] }: GoingCardP
       <span className="pp-event-rail__content">
         <span className="pp-event-rail__tags" aria-label="Event tags">
           {code ? <span className="pp-event-rail__tag pp-event-rail__tag--day">{code}</span> : null}
-          {category ? <span className="pp-event-rail__tag pp-event-rail__tag--neutral">{category}</span> : null}
-          {detail ? <span className="pp-event-rail__tag pp-event-rail__tag--detail">{detail}</span> : null}
+          {category ? <span className={`pp-event-rail__tag pp-event-rail__tag--neutral${/^SEX[ _-]?POSITIVE$/i.test(category) ? " pp-event-rail__tag--complementary" : ""}`}>{category}</span> : null}
+          {detail ? <span className={`pp-event-rail__tag pp-event-rail__tag--detail${event.admission === "DOOR_FEE" ? " pp-event-rail__tag--complementary" : ""}`}>{detail}</span> : null}
         </span>
         {when ? <span className="pp-event-rail__when">{when}</span> : null}
         <span className="display pp-event-rail__title">{event.title}</span>

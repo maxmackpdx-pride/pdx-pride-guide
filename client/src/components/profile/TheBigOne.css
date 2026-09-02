@@ -134,6 +134,7 @@
   background: color-mix(in srgb, var(--tbo-day) 14%, #0d0d11);
   color: #fff;
 }
+.tbo__tag--complementary { border-color: color-mix(in srgb,var(--tbo-opposite) 72%,#202027); background: color-mix(in srgb,var(--tbo-opposite) 14%,#0d0d11); color: var(--tbo-opposite); }
 
 .tbo__title {
   max-width: 100%;

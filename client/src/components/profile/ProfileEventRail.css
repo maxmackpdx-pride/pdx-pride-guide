@@ -159,6 +159,7 @@
   background: color-mix(in srgb, var(--pp-day, #fff) 14%, #0d0d11);
   color: #fff;
 }
+.pp-event-rail__tag--complementary { border-color: color-mix(in srgb,var(--pp-opposite) 72%,#202027); background: color-mix(in srgb,var(--pp-opposite) 14%,#0d0d11); color: var(--pp-opposite); }
 
 .pp-event-rail__when {
   color: var(--pp-day, #fff);

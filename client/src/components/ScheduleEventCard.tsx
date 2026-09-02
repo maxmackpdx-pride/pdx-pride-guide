@@ -47,6 +47,7 @@ export default function ScheduleEventCard({
       className="schedule-event-card"
       data-testid={`schedule-event-card-${event.id}`}
       style={{
+        ["--schedule-day" as string]: accentColor,
         position: "absolute",
         top,
         height,

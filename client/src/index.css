@@ -13075,19 +13075,19 @@ html.calm-mode .schedule-export-btn,
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  /* Full flyer on the card face - letterbox instead of cropping */
-  background-size: contain;
+  /* Event-card poster treatment: the art owns the full frame; crop, never letterbox. */
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #0a0a0a;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5), 0 0 18px -6px color-mix(in srgb, var(--schedule-day, #19e3ff) 48%, transparent);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .schedule-event-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.65), 0 0 28px -3px color-mix(in srgb, var(--schedule-day, #19e3ff) 64%, transparent);
 }
 
 .schedule-event-card__overlay {

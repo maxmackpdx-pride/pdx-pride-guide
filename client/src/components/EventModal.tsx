@@ -15,7 +15,7 @@ import EventLinkChoiceMenu from "./EventLinkChoiceMenu";
 import AuthModal from "./AuthModal";
 import UserAvatar from "./UserAvatar";
 import EventTalentPanel from "./EventTalentPanel";
-import { appleMapsUrl, downloadIcsFile, googleCalendarUrl, googleMapsUrl } from "@/lib/eventLinks";
+import { downloadIcsFile, googleCalendarUrl } from "@/lib/eventLinks";
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
@@ -35,6 +35,8 @@ import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 import { DAY_COLORS, DAY_TEXT_COLORS } from "@shared/eventWeek";
+import EventLocationMap from "./EventLocationMap";
+import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
 
 type EventWithLinks = Event & {
@@ -107,6 +109,16 @@ const DAY_INK: Record<string, string> = {
   FRI: "#050506",
   SAT: "#050506",
   SUN: "#050506",
+};
+
+const DAY_OPPOSITE: Record<string, string> = {
+  MON: "#CCFF00",
+  TUE: "#FF6600",
+  WED: "#8800FF",
+  THU: "#FF6600",
+  FRI: "#CCFF00",
+  SAT: "#FF3030",
+  SUN: "#00FFFF",
 };
 
 const ADMISSION_LABELS: Record<string, string> = {
@@ -198,6 +210,7 @@ function EventModalInner({
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const rsvp = useEventRsvp();
   const claimEvent = (eventId: number) => setLocation(`/submit/claim/${eventId}`);
   const [modMode, setModMode] = useState<ModerationMode>(null);
   const [modForm, setModForm] = useState({ name: "", email: "", proof: "" });
@@ -208,7 +221,6 @@ function EventModalInner({
   const [coHostUsername, setCoHostUsername] = useState("");
   const [showAddCoHost, setShowAddCoHost] = useState(false);
   const [showCalPicker, setShowCalPicker] = useState(false);
-  const [showMapsPicker, setShowMapsPicker] = useState(false);
   const [socialTab, setSocialTab] = useState<"attendance" | "missed">("attendance");
   const [editing, setEditing] = useState(false);
   const [eventForm, setEventForm] = useState<EventEditFormState | null>(null);
@@ -227,8 +239,6 @@ function EventModalInner({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const dateRef = useRef<HTMLSpanElement>(null);
   const timeRef = useRef<HTMLSpanElement>(null);
-  const venueRef = useRef<HTMLElement | null>(null);
-  const addressRef = useRef<HTMLElement | null>(null);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
 
@@ -346,19 +356,10 @@ function EventModalInner({
       const detailMax = Math.max(18, titleSize / 2);
       fitLine(dateRef.current, 8, detailMax);
       fitLine(timeRef.current, 8, detailMax);
-      fitLine(venueRef.current, 8, detailMax * 0.9);
-      fitLine(addressRef.current, 8, detailMax * 0.9);
 
       const hero = heroRef.current;
-      const tags = tagsRef.current;
-      if (hero && tags) {
-        let tagsTop = 0;
-        let node: HTMLElement | null = tags;
-        while (node && node !== hero) {
-          tagsTop += node.offsetTop;
-          node = node.offsetParent as HTMLElement | null;
-        }
-        const fadeStart = Math.max(0, Math.min(hero.clientHeight - 160, tagsTop));
+      if (hero) {
+        const fadeStart = Math.max(0, hero.clientHeight - 170);
         hero.style.setProperty("--event-open-fade-start", `${fadeStart.toFixed(2)}px`);
       }
     };
@@ -447,6 +448,7 @@ function EventModalInner({
   // weekday (so they don't get a stark white frame).
   const accentColor = DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#19E3FF";
   const dayInk = DAY_INK[dayCode] || "#050506";
+  const oppositeColor = DAY_OPPOSITE[dayCode] || "#CCFF00";
   const eventWithLinks = event as EventWithLinks;
   const primaryLink = resolveEventPrimaryLink(eventWithLinks);
   const displayTitle = event.title.replace(/^\s*SOLD\s*OUT\s*[·\-:|]*\s*/i, "").trim() || event.title;
@@ -866,6 +868,7 @@ function EventModalInner({
           "--event-accent": accentColor,
           "--c": accentColor,
           "--event-ink": dayInk,
+          "--event-opposite": oppositeColor,
           ...flipVars,
         } as React.CSSProperties}
       >
@@ -910,38 +913,14 @@ function EventModalInner({
               <span ref={dateRef}>{dateLine}</span>
               <span ref={timeRef}>{timeLine}</span>
             </div>
-            <div className="event-modal__hero-location">
-              <div className="event-modal__hero-location-copy">
-                {venueHref ? (
-                  <a ref={(node) => { venueRef.current = node; }} href={venueHref} target="_blank" rel="noopener noreferrer" data-testid="link-venue-website">
-                    {event.venueName || "Venue"}{event.neighborhood ? ` · ${event.neighborhood}` : ""} ↗
-                  </a>
-                ) : (
-                  <span ref={(node) => { venueRef.current = node; }}>{event.venueName || "Venue"}{event.neighborhood ? ` · ${event.neighborhood}` : ""}</span>
-                )}
-                {!event.isPrivate && (event.address || event.venueName) ? (
-                  <button
-                    ref={(node) => { addressRef.current = node; }}
-                    type="button"
-                    onClick={() => { setShowCalPicker(false); setShowMapsPicker(v => !v); }}
-                    data-testid="button-open-maps"
-                  >
-                    {event.address || event.venueName} ↗
-                  </button>
-                ) : (
-                  <span ref={(node) => { addressRef.current = node; }}>Location provided upon RSVP</span>
-                )}
-              </div>
-              <EventLinkChoiceMenu
-                open={showMapsPicker}
-                onClose={() => setShowMapsPicker(false)}
-                title="Open in maps"
-                options={[
-                  { label: "Google Maps", hint: "Works on all devices", onClick: () => window.open(googleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                  { label: "Apple Maps", hint: "Best on iPhone / Mac", onClick: () => window.open(appleMapsUrl(event), "_blank", "noopener,noreferrer") },
-                ]}
-              />
-            </div>
+            <EventLocationMap
+              event={event}
+              primary={accentColor}
+              complementary={oppositeColor}
+              scheduled={rsvp.myEventIds.has(event.id)}
+              schedulePending={rsvp.isRsvpPending(event.id)}
+              onSchedule={() => rsvp.toggleRsvp(event.id)}
+            />
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}
@@ -972,34 +951,33 @@ function EventModalInner({
               ) : null;
             })()}
 
-            <section ref={tagsRef} className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
-              <div className="event-modal__kicker" id="event-modal-tags-label">Tags</div>
-              <div className="event-modal__approved-tags">
-                {dayCode && (
-                  <span className="event-modal__approved-tag event-modal__approved-tag--day">{dayCode}</span>
-                )}
-                {typeLabels.map((label, index) => (
-                  <span className="event-modal__approved-tag event-modal__approved-tag--type" key={`${label}-${index}`}>{label}</span>
-                ))}
-                {detailLabel && (
-                  <span className="event-modal__approved-tag event-modal__approved-tag--details">
-                    <span className="event-modal__approved-tag-dot" aria-hidden="true" />
-                    {detailLabel}
-                  </span>
-                )}
-              </div>
-            </section>
-            {event.description && (
-              <section className="event-modal__hero-block" aria-labelledby="event-modal-about-label">
-                <div className="event-modal__kicker" id="event-modal-about-label">About</div>
-                <p className="event-modal__description">{event.description}</p>
-              </section>
-            )}
-            {eventSocialTabs}
           </div>
         </section>
 
         <div className="event-modal__body">
+          <section ref={tagsRef} className="event-modal__hero-block" aria-labelledby="event-modal-tags-label">
+            <div className="event-modal__kicker" id="event-modal-tags-label">Tags</div>
+            <div className="event-modal__approved-tags">
+              {dayCode && <span className="event-modal__approved-tag event-modal__approved-tag--day">{dayCode}</span>}
+              {typeLabels.map((label, index) => (
+                <span className={`event-modal__approved-tag event-modal__approved-tag--type${/^SEX[ _-]?POSITIVE$/i.test(label) ? " event-modal__approved-tag--complementary" : ""}`} key={`${label}-${index}`}>{label}</span>
+              ))}
+              {detailLabel && (
+                <span className={`event-modal__approved-tag event-modal__approved-tag--details${String(event.admission) === "DOOR_FEE" ? " event-modal__approved-tag--complementary" : ""}`}>
+                  <span className="event-modal__approved-tag-dot" aria-hidden="true" />
+                  {detailLabel}
+                </span>
+              )}
+            </div>
+          </section>
+          {event.description && (
+            <section className="event-modal__hero-block" aria-labelledby="event-modal-about-label">
+              <div className="event-modal__kicker" id="event-modal-about-label">About</div>
+              <p className="event-modal__description">{event.description}</p>
+            </section>
+          )}
+          {eventSocialTabs}
+          <div className="event-modal__social-room">{eventSocialPanel}</div>
 
           {editing && eventForm ? (
             <DashboardEventEditForm
@@ -1020,10 +998,6 @@ function EventModalInner({
             />
           ) : (
           <>
-          <div className="event-modal__social-room">
-            {eventSocialPanel}
-          </div>
-
           {eventHosts.length > 0 && (
             <div className="event-modal__section event-modal__glass-panel event-hosts-panel" style={{ "--section-accent": dayColor } as React.CSSProperties}>
               <div className="event-modal__section-label event-hosts-label">
@@ -1225,7 +1199,7 @@ function EventModalInner({
                 <button
                   type="button"
                   data-testid="button-add-to-calendar"
-                  onClick={() => { setShowMapsPicker(false); setShowCalPicker(v => !v); }}
+                  onClick={() => setShowCalPicker(v => !v)}
                   className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn pdx-glass-rebind"
                 >
                   Add to Calendar
@@ -1441,8 +1415,19 @@ function EventModalInner({
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >
-              {isPastEvent ? "I Was Here" : "I'll Be There"}
+              {isPastEvent ? "I Was There" : "I'll Be There"}
             </button>
+            {!isPastEvent && (
+              <button
+                type="button"
+                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
+                aria-pressed={rsvp.myEventIds.has(event.id)}
+                disabled={rsvp.isRsvpPending(event.id)}
+                onClick={() => rsvp.toggleRsvp(event.id)}
+              >
+                {rsvp.myEventIds.has(event.id) ? "Interested ✓" : "I Am Interested"}
+              </button>
+            )}
             {(event.isClaimable || hasPendingClaim) && (
               <button
                 type="button"
@@ -1454,10 +1439,22 @@ function EventModalInner({
                 {hasPendingClaim ? "Claim Pending" : "Claim This Event"}
               </button>
             )}
+            {isPastEvent && (
+              <button
+                type="button"
+                className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--mizzed pdx-glass-rebind"
+                onClick={() => {
+                  setSocialTab("missed");
+                  requestAnimationFrame(() => socialTabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+                }}
+              >
+                MIZZED CONNECTION
+              </button>
+            )}
           </div>
         )}
       </div>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {(showAuth || rsvp.showAuth) && <AuthModal onClose={() => { setShowAuth(false); rsvp.setShowAuth(false); }} />}
     </div>,
     document.body,
   );

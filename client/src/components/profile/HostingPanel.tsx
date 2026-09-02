@@ -13,6 +13,7 @@ type Props = {
 
 const DAY_CODES = new Set(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]);
 const WEEKDAY_FROM_JS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
 
 function dayCode(event: ProfileEvent): string {
   const raw = (event.dayOfWeek || "").trim().toUpperCase();
@@ -95,7 +96,7 @@ function HostingCard({
   const admission = admissionChrome(event.admission);
   const dayInk = code === "MON" || code === "TUE" ? "#fff" : "#050506";
 
-  const style = { "--hp-day": color, "--hp-day-ink": dayInk, "--c": color } as CSSProperties;
+  const style = { "--hp-day": color, "--hp-day-ink": dayInk, "--hp-opposite": DAY_OPPOSITE[code] || "#CCFF00", "--c": color } as CSSProperties;
 
   const activate = () => {
     if (interactive) onEventClick!(event);
@@ -128,15 +129,15 @@ function HostingCard({
       <div className="hp-card__body">
         <div className="hp-card__tags" aria-label="Event tags">
           <span className="hp-card__tag hp-card__tag--day">{past ? "PAST" : code}</span>
-          {category ? <span className="hp-card__tag hp-card__tag--neutral">{category}</span> : null}
-          {admission ? <span className="hp-card__tag hp-card__tag--detail">{admission}</span> : null}
+          {category ? <span className={`hp-card__tag hp-card__tag--neutral${/^SEX[ _-]?POSITIVE$/i.test(category) ? " hp-card__tag--complementary" : ""}`}>{category}</span> : null}
+          {admission ? <span className={`hp-card__tag hp-card__tag--detail${event.admission === "DOOR_FEE" ? " hp-card__tag--complementary" : ""}`}>{admission}</span> : null}
         </div>
         <h3 className="hp-card__title display">{event.title}</h3>
         {when && <div className="hp-card__when">{when}</div>}
         {event.venueName && <div className="hp-card__venue">{event.venueName}</div>}
         {status && <div className="hp-card__stat">{status}</div>}
       </div>
-      {interactive ? <span className="hp-card__action" aria-hidden="true">More info</span> : null}
+      {interactive ? <span className="hp-card__action" aria-hidden="true">Manage</span> : null}
     </article>
   );
 }

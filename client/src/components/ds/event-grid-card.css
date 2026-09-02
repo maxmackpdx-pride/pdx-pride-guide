@@ -187,6 +187,7 @@
   letter-spacing:.12em;text-transform:uppercase;white-space:nowrap
 }
 .pdxTag--day{border-color:var(--day-c);color:var(--on-c);background:var(--day-c);box-shadow:inset 0 .8px 0 rgba(255,255,255,.32),0 0 12.8px -7.2px var(--day-c)}
+.pdxTag--complementary{border-color:color-mix(in srgb,var(--opposite-neon) 68%,#34343c);color:var(--opposite-neon);background:color-mix(in srgb,var(--opposite-neon) 12%,#0b0b0e)}
 
 .pdxBoard__actions{
   display:grid;width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));

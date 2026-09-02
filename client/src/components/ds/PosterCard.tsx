@@ -122,11 +122,11 @@ export function PosterCard({
         </div>
         <div className="pdxBoard__tags" aria-label="Event tags">
           <span className="pdxTag pdxTag--day">{day}</span>
-          {visibleTypes.map((type: string, index: number) => <span className="pdxTag pdxTag--type" key={`${type}-${index}`}>{type}</span>)}
+          {visibleTypes.map((type: string, index: number) => <span className={`pdxTag pdxTag--type${/^(?:DOOR[ _-]?FEE|SEX[ _-]?POSITIVE)$/i.test(type) ? " pdxTag--complementary" : ""}`} key={`${type}-${index}`}>{type}</span>)}
         </div>
         <div className={`pdxBoard__actions${showMoreInfo ? "" : " pdxBoard__actions--claim-only"}`}>
           {showMoreInfo && <button type="button" className="pdxBoard__action pdxBoard__action--more" onClick={open}><span className="pdxBoard__actionLabel">More Info</span></button>}
-          {claimPending ? <span className="pdxBoard__action pdxBoard__action--pending"><span className="pdxBoard__actionLabel">Claim Pending</span></span> : <button type="button" className="pdxBoard__action pdxBoard__action--claim" onClick={claim} disabled={!claimable}><span className="pdxBoard__actionLabel">Claim Event</span></button>}
+          {claimPending ? <span className="pdxBoard__action pdxBoard__action--pending"><span className="pdxBoard__actionLabel">Claim Pending</span></span> : <button type="button" className="pdxBoard__action pdxBoard__action--claim" onClick={claim} disabled={!claimable}><span className="pdxBoard__actionLabel">Claim</span></button>}
         </div>
       </div>
     </article>

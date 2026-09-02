@@ -84,6 +84,7 @@ a.pdxRow:hover,
 .pdxRowTag--day{ border:1px solid var(--_day); background:var(--_day); color:var(--_day-ink); box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
 .pdxRowTag--type{ border:1px solid #2b2b33; color:#d8d5de; background:#111117; }
 .pdxRowTag--meta{ border:1px solid color-mix(in srgb,var(--_day) 68%,#202027); color:var(--_day); background:color-mix(in srgb,var(--_day) 11%,#111117); }
+.pdxRowTag--complementary{ border-color:color-mix(in srgb,var(--opposite-neon) 68%,#202027); color:var(--opposite-neon); background:color-mix(in srgb,var(--opposite-neon) 11%,#111117); }
 .pdxRow__title{ font-family:var(--font-display); font-weight:var(--fw-black); text-transform:uppercase;
   font-size:clamp(1.75rem,3vw,2.875rem); line-height:.9; color:var(--text-hi); margin:2px 0 1px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -173,6 +174,8 @@ const DAY_BASE = { MON:"var(--day-mon)", TUE:"var(--day-tue)", WED:"var(--day-we
   THU:"var(--day-thu)", FRI:"var(--day-fri)", SAT:"var(--day-sat)", SUN:"var(--day-sun)" };
 const DAY_INK = { MON:"#fff", TUE:"#fff", WED:"#050506", THU:"#050506",
   FRI:"#050506", SAT:"#050506", SUN:"#050506" };
+const DAY_OPPOSITE = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600",
+  FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
 const ADM_LABEL = { FREE:"Free", TICKETED:"Ticketed", DOOR_FEE:"Door fee", SUGGESTED_DONATION:"Donation" };
 const AGE_LABEL = { ALL_AGES:"All ages", "18_PLUS":"18+", "21_PLUS":"21+" };
 
@@ -207,13 +210,14 @@ export function EventCard({
   const Tag = href ? "a" : "div";
   const base = DAY_BASE[day] || "#fff";
   const dayInk = DAY_INK[day] || "#050506";
+  const opposite = DAY_OPPOSITE[day] || "#CCFF00";
   const typeSlice = types.slice(0, 2);
   const metaBits = buildMetaBits(admission, age, typeSlice);
   const stop = (e) => { e.preventDefault(); e.stopPropagation(); };
   const showClaim = claimPending || claimable;
   return (
     <Tag className={`pdxRow pdx-glass-rebind ${className}`} href={href}
-      style={{ "--_day": base, "--_day-ink": dayInk, "--c": base, "--dc": base, ...style }} {...rest}>
+      style={{ "--_day": base, "--_day-ink": dayInk, "--opposite-neon": opposite, "--c": base, "--dc": base, ...style }} {...rest}>
       <span className="pdxRow__sheenSpec" aria-hidden="true" />
       <div className="pdxRow__thumb">
         <span className="pdxRow__scan" aria-hidden="true" />
@@ -223,8 +227,8 @@ export function EventCard({
       <div className="pdxRow__main">
         <div className="pdxRow__tags">
           <span className="pdxRowTag pdxRowTag--day">{day}</span>
-          {typeSlice.map((t, i) => <span className="pdxRowTag pdxRowTag--type" key={i}>{t}</span>)}
-          {metaBits && <span className="pdxRowTag pdxRowTag--meta">{metaBits}</span>}
+          {typeSlice.map((t, i) => <span className={`pdxRowTag pdxRowTag--type${/^SEX[ _-]?POSITIVE$/i.test(t) ? " pdxRowTag--complementary" : ""}`} key={i}>{t}</span>)}
+          {metaBits && <span className={`pdxRowTag pdxRowTag--meta${admission === "DOOR_FEE" ? " pdxRowTag--complementary" : ""}`}>{metaBits}</span>}
         </div>
         <h3 className="pdxRow__title">{title}</h3>
         {venue && (
@@ -243,7 +247,6 @@ export function EventCard({
         {when && <div className="pdxRow__when">{when}</div>}
       </div>
       <div className="pdxRow__aside">
-        <span className="pdxRow__more">More Info</span>
         {onSave && (
           <button type="button" className="pdxRow__save" aria-pressed={saved}
             aria-label={saved ? "Saved" : "Save event"} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSave(); }}>

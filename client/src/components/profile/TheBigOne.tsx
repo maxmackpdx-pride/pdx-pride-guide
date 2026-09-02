@@ -7,6 +7,8 @@ import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent, ProfileUserChip } from "./types";
 import "./TheBigOne.css";
 
+const DAY_OPPOSITE: Record<string, string> = { MON:"#CCFF00", TUE:"#FF6600", WED:"#8800FF", THU:"#FF6600", FRI:"#CCFF00", SAT:"#FF3030", SUN:"#00FFFF" };
+
 export type TheBigOneEvent = ProfileEvent & {
   ticketUrl?: string | null;
   posterImageUrl?: string | null;
@@ -159,7 +161,7 @@ export default function TheBigOne({
   return (
     <section
       className={`tbo${className ? ` ${className}` : ""}`}
-      style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--c": dayColor } as CSSProperties}
+      style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--tbo-opposite": DAY_OPPOSITE[dayCode] || "#CCFF00", "--c": dayColor } as CSSProperties}
       aria-label={`The Big One: ${event.title}`}
     >
       <div className="tbo__kicker">
@@ -189,8 +191,8 @@ export default function TheBigOne({
           <div className="tbo__poster-title">
             <div className="tbo__tags" aria-label="Event tags">
               {dayCode ? <span className="tbo__tag tbo__tag--day">{dayCode}</span> : null}
-              {category ? <span className="tbo__tag tbo__tag--neutral">{category}</span> : null}
-              {admission ? <span className="tbo__tag tbo__tag--detail">{admission}</span> : null}
+              {category ? <span className={`tbo__tag tbo__tag--neutral${/^SEX[ _-]?POSITIVE$/i.test(category) ? " tbo__tag--complementary" : ""}`}>{category}</span> : null}
+              {admission ? <span className={`tbo__tag tbo__tag--detail${event.admission === "DOOR_FEE" ? " tbo__tag--complementary" : ""}`}>{admission}</span> : null}
             </div>
             <h3 className="tbo__title display">{event.title}</h3>
             {whenLine ? <p className="tbo__when">{whenLine}</p> : null}

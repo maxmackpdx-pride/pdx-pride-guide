@@ -144,7 +144,7 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   width: 100% !important;
   height: 100% !important;
   max-height: none !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center top !important;
   transform: translate3d(0, var(--event-open-parallax-y, -24px), 0);
   backface-visibility: hidden;
@@ -241,6 +241,100 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
 }
 
 .event-modal--approved .event-modal__hero-date > span { white-space: nowrap; }
+
+.event-modal--approved .event-location-map {
+  position: relative;
+  width: min(100%, 470px);
+  min-height: 230px;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c) 72%, #2b2b31);
+  border-radius: 9px;
+  background: #050506;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 13px 26px -18px #000;
+}
+
+.event-modal--approved .event-location-map__canvas { position: absolute; z-index: 0; inset: 0; }
+.event-modal--approved .event-location-map__canvas--fallback {
+  background-color: #07070a;
+  background-image:
+    linear-gradient(32deg,transparent 47%,color-mix(in srgb,var(--c) 28%,transparent) 48% 48.5%,transparent 49.5%),
+    linear-gradient(148deg,transparent 42%,color-mix(in srgb,var(--c) 22%,transparent) 43% 43.5%,transparent 44.5%),
+    linear-gradient(90deg,color-mix(in srgb,var(--c) 10%,transparent) 1px,transparent 1px),
+    linear-gradient(color-mix(in srgb,var(--c) 10%,transparent) 1px,transparent 1px);
+  background-size: 100% 100%,100% 100%,28px 28px,28px 28px;
+}
+.event-modal--approved .event-location-map__canvas .maplibregl-canvas { outline: none; }
+.event-modal--approved .event-location-map__canvas .maplibregl-ctrl-attrib {
+  margin: 0 4px 3px 0;
+  color: #c5c1ca;
+  background: rgba(5,5,6,.84);
+  font: 600 8px/1.25 var(--font-body);
+}
+.event-modal--approved .event-location-map__canvas .maplibregl-ctrl-attrib a { color: var(--event-opposite, #ccff00); }
+.event-modal--approved .event-location-map__veil {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,rgba(5,5,6,.72),transparent 30%,transparent 55%,rgba(5,5,6,.82)),linear-gradient(90deg,rgba(5,5,6,.44),transparent 23%,transparent 77%,rgba(5,5,6,.44));
+}
+.event-modal--approved .event-location-map__header {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--event-opposite, #ccff00);
+  pointer-events: none;
+}
+.event-modal--approved .event-location-map__header svg { width: 20px; height: 20px; stroke-width: 2; }
+.event-modal--approved .event-location-map__header span { display: inline-flex; align-items: center; gap: 6px; font: 700 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.event-modal--approved .event-location-map__header i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+.event-modal--approved .event-location-map__copy {
+  position: absolute;
+  z-index: 3;
+  right: 14px;
+  bottom: 61px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  text-shadow: 0 2px 8px #000;
+}
+.event-modal--approved .event-location-map__copy strong { color: #f5f3f7; font: 800 16px/1.1 var(--font-display); letter-spacing: .035em; text-transform: uppercase; }
+.event-modal--approved .event-location-map__copy span { margin-top: 4px; overflow: hidden; color: #aaa6b0; font: 600 11px/1.25 var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
+.event-modal--approved .event-location-map__actions { position: absolute; z-index: 4; right: 12px; bottom: 14px; left: 12px; display: flex; gap: 7px; }
+.event-modal--approved .event-location-map__actions button,
+.event-modal--approved .event-location-map__actions a {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb,var(--c) 64%,#222);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(5,5,7,.92);
+  cursor: pointer;
+  font: 800 10px/1 var(--font-display);
+  letter-spacing: .05em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.event-modal--approved .event-location-map__actions button:hover,
+.event-modal--approved .event-location-map__actions a:hover { color: var(--event-opposite, #ccff00); border-color: var(--event-opposite, #ccff00); }
+.event-modal--approved .event-location-map__actions svg { width: 16px; height: 16px; }
+.event-modal--approved .event-location-map__directions { position: relative; min-width: 0; flex: 1 1 auto; }
+.event-modal--approved .event-location-map__directions > button { width: 100%; }
+.event-modal--approved .event-location-map__directions-menu { position: absolute; right: 0; bottom: 43px; left: 0; display: grid; gap: 6px; padding: 7px; border: 1px solid color-mix(in srgb,var(--c) 68%,#222); border-radius: 9px; background: rgba(5,5,7,.97); box-shadow: 0 12px 28px rgba(0,0,0,.72); }
+.event-modal--approved .event-location-map__directions-menu a { width: 100%; }
+.event-location-map__pin { display:block; width:24px; height:24px; border:4px solid var(--pin-primary); border-radius:50% 50% 50% 0; background:var(--pin-complementary); box-shadow:0 2px 8px #000; transform:rotate(-45deg); }
 
 .event-modal--approved .event-modal__hero-location {
   position: relative;
@@ -377,6 +471,18 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   border: 1px solid color-mix(in srgb, var(--c) 60%, #17171b);
   color: color-mix(in srgb, var(--c) 78%, #fff);
   background: color-mix(in srgb, var(--c) 13%, #111116);
+}
+
+.event-modal--approved .event-modal__approved-tag--complementary {
+  border-color: color-mix(in srgb, var(--event-opposite) 76%, #222);
+  color: var(--event-opposite);
+  background: color-mix(in srgb, var(--event-opposite) 13%, #111116);
+}
+
+/* Solid yellow event chips always use black ink for legibility. */
+.event-modal--approved[style*="--c: #FFEE00"] .event-modal__approved-tag--day,
+.event-modal--approved[style*="--c:#FFEE00"] .event-modal__approved-tag--day {
+  color: #050506;
 }
 
 .event-modal--approved .event-modal__approved-tag-dot {
