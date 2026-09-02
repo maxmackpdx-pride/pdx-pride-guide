@@ -11159,30 +11159,35 @@ html.calm-mode .board-detail-backdrop {
   width: min(100%, var(--zl-frame));
   max-width: none;
   margin: 0 auto;
-  padding: 28px var(--zl-gutter) 18px;
+  padding: clamp(38px, 5vw, 64px) var(--zl-gutter) 24px;
 }
 
-/* Main spread: brand | nav cols | coffee */
+/* Main spread: a 12-column editorial grid keeps each footer zone optically
+   balanced without turning the footer into another card system. */
 .site-footer__grid {
   display: grid;
-  grid-template-columns: minmax(180px, 1.1fr) minmax(0, 2.2fr) minmax(160px, 0.95fr);
-  gap: 24px 32px;
-  align-items: start;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(18px, 2.4vw, 36px);
+  row-gap: 32px;
+  align-items: stretch;
 }
 
 .site-footer__brand-col {
+  grid-column: span 4;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 16px;
   min-width: 0;
+  padding-right: clamp(6px, 1.2vw, 18px);
 }
 
 .site-footer__logo {
   display: block;
-  height: clamp(40px, 7vw, 56px);
+  height: clamp(48px, 6vw, 68px);
   width: auto;
-  max-width: min(240px, 100%);
+  max-width: min(286px, 100%);
   object-fit: contain;
   margin: 0;
 }
@@ -11190,25 +11195,30 @@ html.calm-mode .board-detail-backdrop {
 .site-footer__tagline {
   margin: 0;
   color: var(--text-meta, #8c8980);
-  font-size: 0.78rem;
-  line-height: 1.45;
-  max-width: 240px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  max-width: 34ch;
 }
 
 .site-footer__controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
-  margin-top: 2px;
+  gap: 10px 12px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .site-footer__nav {
+  grid-column: span 5;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 20px;
-  align-items: end;
+  gap: 0 clamp(16px, 2vw, 30px);
+  align-items: start;
   min-width: 0;
+  padding: 0 clamp(12px, 2vw, 30px);
+  border-right: 1px solid var(--slate-4, #272a2d);
+  border-left: 1px solid var(--slate-4, #272a2d);
 }
 
 .site-footer__col {
@@ -11219,18 +11229,18 @@ html.calm-mode .board-detail-backdrop {
 .site-footer__col-title {
   display: flex;
   width: 100%;
-  min-height: 42px;
+  min-height: 48px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.76rem;
   color: var(--text-strong, #edeef0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin: 0;
-  padding: 10px 2px 9px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 0 13px;
+  border-bottom: 1px solid var(--slate-5, #2e3135);
   list-style: none;
 }
 
@@ -11242,11 +11252,17 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__col-toggle {
-  color: var(--cyan, #00ffff);
+  color: var(--footer-folder-accent, var(--cyan, #00ffff));
   font-size: 1.05rem;
   line-height: 1;
   transition: transform 160ms ease;
 }
+
+.site-footer__col:nth-child(1) { --footer-folder-accent: var(--cyan, #00ffff); }
+.site-footer__col:nth-child(2) { --footer-folder-accent: var(--orange, #ff6600); }
+.site-footer__col:nth-child(3) { --footer-folder-accent: var(--purple, #ad74ff); }
+
+.site-footer__col-title:hover { color: var(--footer-folder-accent); }
 
 .site-footer__col[open] .site-footer__col-toggle { transform: rotate(45deg); }
 
@@ -11254,15 +11270,15 @@ html.calm-mode .board-detail-backdrop {
   position: absolute;
   z-index: 4;
   right: 0;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 12px);
   left: 0;
   max-height: min(52vh, 430px);
   overflow-y: auto;
-  padding: 12px;
-  background: #111113;
-  border: 1px solid #2e3135;
-  border-radius: 10px;
-  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.58);
+  padding: 16px;
+  background: var(--slate-2, #111113);
+  border: 1px solid var(--slate-5, #2e3135);
+  border-radius: 12px;
+  box-shadow: 0 -20px 48px rgba(0, 0, 0, 0.68);
 }
 
 .site-footer__list {
@@ -11271,16 +11287,17 @@ html.calm-mode .board-detail-backdrop {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
 }
 
 .site-footer__link {
   display: block;
   color: #b0b4ba;
-  font-size: 0.8rem;
+  min-height: 32px;
+  font-size: 0.82rem;
   text-decoration: none;
   line-height: 1.35;
-  padding: 3px 1px;
+  padding: 6px 2px;
 }
 
 .site-footer__link:hover {
@@ -11288,12 +11305,18 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__support {
+  grid-column: span 3;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  justify-content: center;
   gap: 8px;
   min-width: 0;
+  padding-left: clamp(6px, 1vw, 14px);
 }
+
+.site-footer__support .tip-support__btns--footer,
+.site-footer__support .site-footer__coffee-btn { max-width: none; }
 
 .site-footer__coffee-note {
   margin: 0;
@@ -11361,20 +11384,20 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__bottom {
-  margin-top: 20px;
-  padding-top: 14px;
+  margin-top: clamp(30px, 4vw, 50px);
+  padding-top: 22px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
 .site-footer__flap {
-  flex: 1 1 220px;
   min-width: 0;
-  max-width: 640px;
+  width: 100%;
+  max-width: none;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .site-footer__flap .pdxFlap__cell {
@@ -11384,16 +11407,17 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__legal {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px 10px;
+  gap: 10px 18px;
   color: var(--text-faint, #666);
   font-size: 0.72rem;
   line-height: 1.4;
-  justify-content: flex-end;
-  text-align: right;
+  text-align: left;
 }
+
+.site-footer__legal > :nth-child(3) { text-align: right; }
 
 .site-footer__legal-sep {
   opacity: 0.5;
@@ -11453,21 +11477,28 @@ html.calm-mode .footer-coffee__btn:hover {
 
 @media (max-width: 900px) {
   .site-footer__grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px clamp(22px, 4vw, 42px);
   }
 
+  .site-footer__brand-col { grid-column: 1; }
   .site-footer__support {
+    grid-column: 2;
+    grid-row: 1;
+    padding-left: 0;
+  }
+  .site-footer__nav {
     grid-column: 1 / -1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 14px;
+    grid-row: 2;
+    padding: 26px 0 0;
+    border-top: 1px solid var(--slate-4, #272a2d);
+    border-right: 0;
+    border-left: 0;
   }
 
-  .site-footer__coffee-btn {
-    max-width: 220px;
-  }
+  .site-footer__legal { grid-template-columns: 1fr auto; }
+  .site-footer__legal-sep { display: none; }
+  .site-footer__legal > :nth-child(3) { text-align: left; }
 }
 
 @media (max-width: 640px) {
@@ -11477,18 +11508,43 @@ html.calm-mode .footer-coffee__btn:hover {
 
   .site-footer__grid {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 28px;
+  }
+
+  .site-footer__brand-col,
+  .site-footer__support,
+  .site-footer__nav {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .site-footer__nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 12px;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 20px;
   }
 
-  .site-footer__dropup { max-height: 40vh; }
+  .site-footer__col + .site-footer__col { border-top: 1px solid rgba(255,255,255,.055); }
+  .site-footer__col-title { min-height: 52px; padding: 8px 2px; }
+
+  .site-footer__dropup {
+    position: static;
+    max-height: none;
+    margin: 0 0 10px;
+    padding: 8px 2px 14px;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
 
   .site-footer__link {
-    font-size: 0.75rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: 0.82rem;
+    padding: 8px 2px;
   }
 
   .site-footer__support {
@@ -11497,8 +11553,7 @@ html.calm-mode .footer-coffee__btn:hover {
   }
 
   .site-footer__bottom {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   /* In the column layout, the flap's `flex: 1 1 220px` basis was being read
@@ -11515,9 +11570,12 @@ html.calm-mode .footer-coffee__btn:hover {
   }
 
   .site-footer__legal {
-    justify-content: flex-start;
+    grid-template-columns: 1fr;
+    gap: 8px;
     text-align: left;
   }
+
+  .site-footer__legal > :nth-child(3) { text-align: left; }
 
   .site-footer__bottom {
     margin-top: 14px;
