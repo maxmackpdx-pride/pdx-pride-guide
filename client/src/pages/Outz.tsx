@@ -41,8 +41,8 @@ const BEACHES: BeachCard[] = [
     region: "Columbia River · Corbett, OR",
     href: "/outz/rooster-rock",
     detail: "River conditions, crossing notes, parking, carpools, and the beach chat before you head east.",
-    color: "cyan",
-    accent: "var(--cyan)",
+    color: "orange",
+    accent: "#FF6600",
   },
   {
     key: "sauvieIsland",
@@ -51,7 +51,7 @@ const BEACHES: BeachCard[] = [
     href: "/outz/sauvie-island",
     detail: "Water quality, parking permits, island weather, and the practical intel for a good day on the sand.",
     color: "green",
-    accent: "var(--green)",
+    accent: "#39FF14",
   },
 ];
 
@@ -148,7 +148,7 @@ export default function Outz() {
         <div className="outz-map-frame">
           <img className="outz-map-frame__art" src={`${OUTZ_MOTIF}/ridge-loop-cyan.svg`} alt="" aria-hidden="true" />
           {snapshot
-            ? <OutzMap destinations={snapshot.destinations} catalog={snapshot.catalog} />
+            ? <OutzMap destinations={snapshot.destinations} catalog={snapshot.catalog} stays={snapshot.communityStays} />
             : <p className="outz-empty">Map loads once the official sources respond.</p>}
         </div>
       </section>

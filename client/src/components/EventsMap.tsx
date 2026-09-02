@@ -7,7 +7,7 @@ import { listingKey } from "@shared/multiDayEvents";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { EventTypeTagList } from "./EventTypeTag";
 import { ArrowLeft, Maximize2, Minimize2, Navigation } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -19,6 +19,7 @@ import {
   mapPinHtml,
   mapPinMultiHtml,
 } from "@/components/ds/mapTheme";
+import CartoVectorBasemap from "@/components/CartoVectorBasemap";
 
 /** Pin color when an event has no recognizable day - neutral so it can't read as a day. */
 const UNKNOWN_DAY_COLOR = "#FFFFFF";
@@ -41,8 +42,6 @@ const MAP_VIEWS = {
     zoom: 13,
   },
 } as const;
-
-const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
 const PIN_HALF = MAP_PIN_SIZE / 2;
 
@@ -391,13 +390,9 @@ export function MapView({
             style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
             zoomControl={true}
             attributionControl={true}
+            minZoom={1}
           >
-            <TileLayer
-              url={DARK_TILE}
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              maxZoom={19}
-              subdomains="abcd"
-            />
+            <CartoVectorBasemap />
             <MarkersLayer
               key={selectionKey}
               events={events}

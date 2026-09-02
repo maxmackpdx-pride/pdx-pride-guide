@@ -1,4 +1,5 @@
 import { buildGoogleAnalyticsHead } from "./gaSnippet";
+import { buildCartoBasemapHead } from "./cartoSnippet";
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { eventUrl } from "@shared/eventSlug";
@@ -624,6 +625,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       ? `<meta name="msvalidate.01" content="${escapeHtml(process.env.BING_SITE_VERIFICATION)}" />`
       : "",
     buildGoogleAnalyticsHead(),
+    buildCartoBasemapHead(),
   ].filter(Boolean).join("\n    ");
 
   const crawlerDirectory = buildCrawlerEventDirectory(catalogEvents);

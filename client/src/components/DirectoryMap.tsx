@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
+import CartoVectorBasemap from "@/components/CartoVectorBasemap";
 import {
   MAP_PIN_SIZE,
   MAP_SURFACE_BG,
@@ -518,10 +519,7 @@ export default function DirectoryMap({
         zoomControl={isInteractive}
         attributionControl={isInteractive}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        />
+        <CartoVectorBasemap />
         <MapInvalidateSize enabled={isBackdrop} />
         {mapped.map(pin => {
           const accent = TYPE_COLORS[pin.biz.type] || "#FF00CC";

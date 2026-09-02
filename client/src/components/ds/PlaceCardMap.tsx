@@ -1,24 +1,9 @@
-import React, { useEffect, useId, useMemo, useState } from "react";
+import { useId } from "react";
 import { ChevronDown, MapPinned } from "lucide-react";
-
-type MapTile = {
-  key: string;
-  url: string;
-  left: number;
-  top: number;
-};
-
-function toWorldTile(latitude: number, longitude: number, zoom: number) {
-  const scale = 2 ** zoom;
-  const latitudeRadians = (latitude * Math.PI) / 180;
-  return {
-    x: ((longitude + 180) / 360) * scale,
-    y:
-      ((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) /
-        2) *
-      scale,
-  };
-}
+import { MapContainer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import CartoVectorBasemap from "@/components/CartoVectorBasemap";
+import { MAP_SURFACE_BG } from "@/components/ds/mapTheme";
 
 function formatCoordinates(latitude: number, longitude: number) {
   const latitudeDirection = latitude >= 0 ? "N" : "S";
@@ -41,38 +26,7 @@ export function PlaceCardMap({
   onToggle: () => void;
   zoom?: number;
 }) {
-  const [settledTiles, setSettledTiles] = useState(0);
   const mapId = `place-map-${useId().replace(/:/g, "")}`;
-
-  const tiles = useMemo<MapTile[]>(() => {
-    const world = toWorldTile(latitude, longitude, zoom);
-    const centerX = Math.floor(world.x);
-    const centerY = Math.floor(world.y);
-    const markerX = (1 + world.x - centerX) * 256;
-    const markerY = (1 + world.y - centerY) * 256;
-    const nextTiles: MapTile[] = [];
-
-    for (let yOffset = -1; yOffset <= 1; yOffset += 1) {
-      for (let xOffset = -1; xOffset <= 1; xOffset += 1) {
-        const x = centerX + xOffset;
-        const y = centerY + yOffset;
-        nextTiles.push({
-          key: `${zoom}-${x}-${y}`,
-          url: `https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/${zoom}/${x}/${y}.png`,
-          left: (xOffset + 1) * 256 - markerX,
-          top: (yOffset + 1) * 256 - markerY,
-        });
-      }
-    }
-
-    return nextTiles;
-  }, [latitude, longitude, zoom]);
-
-  useEffect(() => {
-    setSettledTiles(0);
-  }, [tiles]);
-
-  const tilesReady = settledTiles >= tiles.length;
 
   return (
     <div
@@ -103,21 +57,21 @@ export function PlaceCardMap({
         <div className="pdxPlaceMap__well">
           {expanded && (
             <>
-              <div className={`pdxPlaceMap__tiles${tilesReady ? " pdxPlaceMap__tiles--ready" : ""}`} aria-hidden="true">
-                {tiles.map((tile) => (
-                  <img
-                    key={tile.key}
-                    src={tile.url}
-                    alt=""
-                    draggable={false}
-                    loading="lazy"
-                    onLoad={() => setSettledTiles((count) => count + 1)}
-                    onError={() => setSettledTiles((count) => count + 1)}
-                    style={{ left: `calc(50% + ${tile.left}px)`, top: `calc(50% + ${tile.top}px)` }}
-                  />
-                ))}
+              <div className="pdxPlaceMap__live">
+                <MapContainer
+                  center={[latitude, longitude]}
+                  zoom={zoom}
+                  minZoom={1}
+                  zoomControl={false}
+                  attributionControl={false}
+                  dragging={false}
+                  scrollWheelZoom={false}
+                  doubleClickZoom={false}
+                  style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
+                >
+                  <CartoVectorBasemap />
+                </MapContainer>
               </div>
-              {!tilesReady && <div className="pdxPlaceMap__loading" aria-hidden="true" />}
               <span className="pdxPlaceMap__pin" aria-hidden="true">
                 <MapPinned size={27} strokeWidth={2.5} />
               </span>

@@ -2,6 +2,7 @@ import type { Express } from 'express';
 import { createServer as createViteServer, createLogger } from "vite";
 import type { Server } from 'node:http';
 import { buildGoogleAnalyticsHead } from "./gaSnippet";
+import { buildCartoBasemapHead } from "./cartoSnippet";
 import viteConfig from "../vite.config";
 import fs from "node:fs";
 import path from "node:path";
@@ -72,6 +73,10 @@ export async function setupVite(server: Server, app: Express) {
       const gaHead = buildGoogleAnalyticsHead();
       if (gaHead && !page.includes("__PDX_GA_ID__")) {
         page = page.replace("</head>", `    ${gaHead}\n  </head>`);
+      }
+      const cartoHead = buildCartoBasemapHead();
+      if (cartoHead && !page.includes("__PDX_CARTO_KEY__")) {
+        page = page.replace("</head>", `    ${cartoHead}\n  </head>`);
       }
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {

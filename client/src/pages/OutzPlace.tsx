@@ -5,7 +5,7 @@ import { Lock, MessageCircle } from "lucide-react";
 import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
 import BoardHero from "@/components/BoardHero";
-import OutzMap from "@/components/OutzMap";
+import OutzMap, { outzAccentForName } from "@/components/OutzMap";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
@@ -91,9 +91,14 @@ export default function OutzPlace() {
      record when this listing is a featured destination or a catalog site. */
   const destination = snapshot?.destinations.find(entry => entry.id === placeId) ?? null;
   const catalogSite = snapshot?.catalog.find(entry => entry.id === placeId) ?? null;
+  const stay = snapshot?.communityStays.find(entry => entry.id === placeId) ?? null;
   const coords: [number, number] | null = destination
     ? [destination.lat, destination.lng]
-    : catalogSite ? [catalogSite.lat, catalogSite.lng] : null;
+    : catalogSite
+      ? [catalogSite.lat, catalogSite.lng]
+      : stay?.lat != null && stay.lng != null
+        ? [stay.lat, stay.lng]
+        : null;
   const meta = place ? OUTZ_KIND_META[place.kind] : null;
 
   const checkinKey = ["/api/outz/checkins", placeId, date] as const;
@@ -245,9 +250,11 @@ export default function OutzPlace() {
                 <OutzMap
                   destinations={destination ? [destination] : []}
                   catalog={catalogSite ? [catalogSite] : []}
+                  stays={stay ? [stay] : []}
                   center={coords}
-                  zoom={11}
+                  zoom={stay && !destination && !catalogSite ? 9 : 11}
                   minimal
+                  accent={place ? outzAccentForName(place.name, place.kind) : null}
                 />
               </div>
             : null}

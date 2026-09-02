@@ -53,6 +53,9 @@ export type OutzCommunityStay = {
   accessNote: string;
   inclusionNote: string;
   officialUrl: string;
+  /** Public town/region point for the locator map. Never a private driveway. */
+  lat?: number;
+  lng?: number;
   discoverySource: {
     name: string;
     href: string;
@@ -156,6 +159,8 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     accessNote: "This is a private residential community, not a walk-in campground. Contact the operator before planning a visit; its public site does not publish an exact visitor address.",
     inclusionNote: "The operator says the land has been held by and for womyn since 1973, with generations of womyn, primarily lesbians, among its residents and extended network.",
     officialUrl: "https://wemoonland.org/",
+    lat: 45.289,
+    lng: -122.333,
     discoverySource: {
       name: "We'Moon Land operator site",
       href: "https://wemoonland.org/",
@@ -171,6 +176,8 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     accessNote: "For men 21+; make reservations with the operator and confirm availability, arrival details, and dry-camping limits before driving.",
     inclusionNote: "The operator describes Bamboo Acres as a private, clothing-optional getaway for men 21 and over.",
     officialUrl: "https://www.bambooacres.org/",
+    lat: 42.2457,
+    lng: -122.7884,
     discoverySource: {
       name: "Bamboo Acres operator site",
       href: "https://www.bambooacres.org/",
@@ -186,6 +193,8 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     accessNote: "LGBTQ+ adults 21+; membership and reservation details are on the operator site. Seasonal access is operator-controlled.",
     inclusionNote: "Queer-centered status is stated by the operator.",
     officialUrl: "https://www.camptrc.org/",
+    lat: 48.0835,
+    lng: -121.851,
     discoverySource: {
       name: "Triangle Recreation Camp operator site",
       href: "https://wildapricot.camptrc.org/",
@@ -201,6 +210,8 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     accessNote: "Confirm reservations, seasonal conditions, and local access directly with the operator before driving.",
     inclusionNote: "Listed as a community-directory lead; the operator site does not make a queer-specific claim.",
     officialUrl: "https://www.golastresort.com/about-us",
+    lat: 43.304,
+    lng: -122.804,
     discoverySource: {
       name: "Gay Camping Friends directory",
       href: "https://gaycampingfriends.com/campground/umpquas-last-resort",

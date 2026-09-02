@@ -4,13 +4,21 @@ import type { OutzPlaceKind } from "@shared/outz";
  * Badge label and accent per OUTZ listing kind. Shared by the OUTZ homepage and
  * the destination page so a kind reads the same colour and label on both.
  */
-export const OUTZ_KIND_META: Record<OutzPlaceKind, { label: string; color: string; accent: string }> = {
-  beach: { label: "Beach", color: "cyan", accent: "var(--cyan)" },
-  "camp-hike": { label: "Camp + Hike", color: "lime", accent: "var(--lime)" },
-  campground: { label: "Camp", color: "green", accent: "var(--green)" },
-  trailhead: { label: "Hike", color: "orange", accent: "var(--orange)" },
-  "outdoor-stay": { label: "Stay", color: "amber", accent: "var(--amber)" },
+export const OUTZ_KIND_META: Record<OutzPlaceKind, { label: string; color: string; accent: string; pin: string }> = {
+  beach: { label: "Beach", color: "cyan", accent: "var(--cyan)", pin: "#19E3FF" },
+  "camp-hike": { label: "Camp + Hike", color: "lime", accent: "var(--lime)", pin: "#CCFF00" },
+  campground: { label: "Camp", color: "green", accent: "var(--green)", pin: "#39FF14" },
+  trailhead: { label: "Hike", color: "orange", accent: "var(--orange)", pin: "#FF6600" },
+  "outdoor-stay": { label: "Stay", color: "amber", accent: "var(--amber)", pin: "#FFB000" },
 };
+
+/** Rooster = orange, Sauvie/Collins = acid green; everything else follows kind. */
+export function outzPinHex(name: string, kind: OutzPlaceKind): string {
+  const n = name.toLowerCase();
+  if (n.includes("rooster")) return "#FF6600";
+  if (n.includes("sauvie") || n.includes("collins")) return "#39FF14";
+  return OUTZ_KIND_META[kind].pin;
+}
 
 /** Button accent tokens are a narrower set than badge colours. */
 export const OUTZ_BUTTON_ACCENT: Record<string, string> = {

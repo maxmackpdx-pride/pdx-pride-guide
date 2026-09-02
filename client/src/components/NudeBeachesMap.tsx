@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { BEACH_MAP_LOCATIONS, type NudeBeachTab } from "@shared/nudeBeaches";
@@ -9,8 +9,7 @@ import {
   LIVE_MAP_CHROME_CSS,
   mapPinHtml,
 } from "@/components/ds/mapTheme";
-
-const DARK_TILE = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+import CartoVectorBasemap from "@/components/CartoVectorBasemap";
 
 const PIN_HALF = MAP_PIN_SIZE / 2;
 
@@ -156,12 +155,7 @@ export default function NudeBeachesMap({ tab, height }: Props) {
           scrollWheelZoom={false}
           zoomControl
         >
-          <TileLayer
-            url={DARK_TILE}
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-            maxZoom={19}
-            subdomains="abcd"
-          />
+          <CartoVectorBasemap accent={location.pinColor} />
           <MapResizer tab={tab} />
           <Marker position={[location.lat, location.lng]} icon={buildPin(location.pinColor)}>
             <Popup className="pdx-beach-popup" maxWidth={280}>
