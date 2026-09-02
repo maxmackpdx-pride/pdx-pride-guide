@@ -192,6 +192,7 @@
   display:grid;width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:9.6px;margin-top:auto;padding-top:10.4px;border-top:.8px solid #25252c
 }
+.pdxBoard__actions--claim-only .pdxBoard__action{grid-column:2}
 .pdxBoard__action{
   --event-button-bg:radial-gradient(130% 140% at 50% -10%,color-mix(in srgb,var(--day-c) 16%,transparent),transparent 60%),#000;
   --event-button-shadow:0 1.6px 0 color-mix(in srgb,var(--day-c) 40%,#000),inset 0 .8px 0 rgba(255,255,255,.28),

@@ -8366,7 +8366,7 @@ html.calm-mode .attendance-cluster-cta__btn,
 @media (min-width: 800px) {
   .events-poster-grid,
   .events-page .events-poster-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 28px;
   }
 }
