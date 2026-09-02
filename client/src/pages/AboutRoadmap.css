@@ -3465,6 +3465,12 @@
         }
       }
 
+      /* Phone hub top bar is sticky again (76px + rainbow seam). Sit under it. */
+      @media (max-width: 640px) {
+        :host { --phase-sticky-top: 80px; }
+        .roadmap-phase__summary { top: var(--phase-sticky-top); }
+      }
+
       /* Absolute accessibility floor: legacy compact-roadmap selectors are
          intentionally prevented from reducing readable text below 16px. */
       .quick-nav a,
