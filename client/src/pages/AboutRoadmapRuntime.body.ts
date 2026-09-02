@@ -2,6 +2,7 @@
 export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       const controller = new AbortController(),
         signal = controller.signal;
+      const styleRoot = pageRoot.host;
 
       const reduceRgbMotion = matchMedia("(prefers-reduced-motion: reduce)");
       function syncRgbOutlineMotion() {
@@ -17,8 +18,8 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         roadmapChapters = [...roadmapStory.querySelectorAll(":scope > .chapter")],
         roadmapInsertionAnchor = roadmapChapters[0],
         crossingOneIndex = roadmapChapters.findIndex((chapter) => chapter.textContent.includes("CROSSING 01")),
-        futureChapter = roadmapStory.querySelector(":scope > .future-convergence");
-      const roadmapInsertionMarker = document.createComment("roadmap phases");
+        futureChapter = roadmapStory.querySelector(":scope > .future-convergence"),
+        roadmapInsertionMarker = document.createComment("roadmap phases");
       roadmapInsertionAnchor.before(roadmapInsertionMarker);
 
       function createRoadmapPhase(index, id, title, accent, nodes, open = false) {
@@ -37,37 +38,58 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         return phase;
       }
 
-      const completedNodes = roadmapChapters.slice(0, crossingOneIndex),
-        nextNodes = roadmapChapters.slice(crossingOneIndex),
-        completedPhase = createRoadmapPhase(0, "completed", "Completed", "var(--done)", completedNodes, true),
-        nextPhase = createRoadmapPhase(1, "next", "What’s Next", "var(--system)", nextNodes),
+      const completedPhase = createRoadmapPhase(0, "completed", "Completed", "var(--done)", roadmapChapters.slice(0, crossingOneIndex), true),
+        nextPhase = createRoadmapPhase(1, "next", "What’s Next", "var(--system)", roadmapChapters.slice(crossingOneIndex)),
         possiblePhase = createRoadmapPhase(2, "possible", "What Can Be", "var(--cross)", [futureChapter]);
       roadmapInsertionMarker.replaceWith(completedPhase, nextPhase, possiblePhase);
+      nextPhase.classList.add("is-teasing");
+      possiblePhase.classList.add("is-teasing");
 
       const roadmapPhases = [completedPhase, nextPhase, possiblePhase],
         activatedPhases = new Set([0]);
       let lastRoadmapScrollY = window.scrollY,
         roadmapTransitionFrame = 0,
-        roadmapFinished = false;
+        roadmapFinished = false,
+        roadmapFinishArmed = false;
 
-      function preservePhaseAnchor(anchor, mutate) {
+      function preservePhaseAnchor(anchor, mutate, targetTop = null) {
         const before = anchor.getBoundingClientRect().top;
+        const desiredTop = targetTop ?? before;
+        const pageEl = document.documentElement;
+        pageEl.style.overflowAnchor = "none";
+        const previousScrollBehavior = pageEl.style.scrollBehavior;
+        pageEl.style.scrollBehavior = "auto";
         mutate();
         requestAnimationFrame(() => {
           const after = anchor.getBoundingClientRect().top;
-          window.scrollBy(0, after - before);
-          window.dispatchEvent(new Event("resize"));
+          window.scrollTo(0, Math.max(0, window.scrollY + after - desiredTop));
+          requestAnimationFrame(() => {
+            pageEl.style.overflowAnchor = "";
+            pageEl.style.scrollBehavior = previousScrollBehavior;
+            window.dispatchEvent(new Event("resize"));
+          });
         });
       }
 
       function activateRoadmapPhase(index) {
         if (activatedPhases.has(index)) return;
         activatedPhases.add(index);
+        if (index === 2) roadmapFinishArmed = true;
         const phase = roadmapPhases[index],
-          summary = phase.querySelector(".roadmap-phase__summary");
+          summary = phase.querySelector("summary"),
+          stickyTop = Number.parseFloat(getComputedStyle(summary).top) || 0;
         preservePhaseAnchor(summary, () => {
-          roadmapPhases.forEach((item, itemIndex) => { item.open = itemIndex === index; });
-        });
+          roadmapPhases.forEach((item, itemIndex) => {
+            item.open = itemIndex === index;
+            if (itemIndex <= index) item.classList.remove("is-teasing");
+          });
+        }, stickyTop);
+      }
+
+      function roadmapPhaseTriggerY() {
+        const summary = completedPhase.querySelector(".roadmap-phase__summary"),
+          stickyTop = Number.parseFloat(getComputedStyle(summary).top) || 0;
+        return stickyTop + summary.getBoundingClientRect().height;
       }
 
       function syncRoadmapPhases() {
@@ -77,7 +99,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           const scrollingDown = window.scrollY >= lastRoadmapScrollY;
           lastRoadmapScrollY = window.scrollY;
           if (!scrollingDown) return;
-          const triggerY = innerHeight * .72;
+          const triggerY = roadmapPhaseTriggerY();
           if (!activatedPhases.has(1) && nextPhase.querySelector("summary").getBoundingClientRect().top <= triggerY) {
             activateRoadmapPhase(1);
             return;
@@ -87,22 +109,29 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
             return;
           }
           const techStack = pageRoot.querySelector("#tech-stack");
-          if (!roadmapFinished && techStack.getBoundingClientRect().top <= innerHeight * .78) {
+          if (roadmapFinishArmed && !roadmapFinished && techStack.getBoundingClientRect().top <= triggerY) {
             roadmapFinished = true;
-            const anchor = techStack;
-            preservePhaseAnchor(anchor, () => roadmapPhases.forEach((phase) => { phase.open = false; }));
+            preservePhaseAnchor(techStack, () => roadmapPhases.forEach((phase) => {
+              phase.open = false;
+              phase.classList.remove("is-teasing");
+            }));
           }
         });
       }
       window.addEventListener("scroll", syncRoadmapPhases, { passive: true, signal });
-      roadmapPhases.forEach((phase) => {
-        phase.addEventListener("toggle", () => window.dispatchEvent(new Event("resize")), { signal });
-      });
+      roadmapPhases.forEach((phase) => phase.addEventListener("toggle", () => {
+        if (phase.open) phase.classList.remove("is-teasing");
+        window.dispatchEvent(new Event("resize"));
+      }, { signal }));
       const roadmapEndObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting || roadmapFinished || !activatedPhases.has(2)) return;
+          if (!entry.isIntersecting || !roadmapFinishArmed || roadmapFinished || !activatedPhases.has(2)) return;
+          if (entry.target.getBoundingClientRect().top > roadmapPhaseTriggerY()) return;
           roadmapFinished = true;
-          preservePhaseAnchor(entry.target, () => roadmapPhases.forEach((phase) => { phase.open = false; }));
+          preservePhaseAnchor(entry.target, () => roadmapPhases.forEach((phase) => {
+            phase.open = false;
+            phase.classList.remove("is-teasing");
+          }));
         });
       }, { threshold: .04 });
       roadmapEndObserver.observe(pageRoot.querySelector("#tech-stack"));
@@ -287,8 +316,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         };
       }
 
-      const styleRoot = pageRoot.host,
-        story = pageRoot.querySelector(".story"),
+      const story = pageRoot.querySelector(".story"),
         desktopRoutes = pageRoot.querySelector(".routes"),
         futureConvergence = pageRoot.querySelector(".future-convergence"),
         futureRouteRevealRect = pageRoot.querySelector("#future-route-reveal-rect"),
@@ -304,13 +332,6 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         mobileSystemRoute = pageRoot.querySelector("#mobile-route-system"),
         mobileRouteQuery = matchMedia("(max-width: 720px)");
 
-      function futureOffsetTop() {
-        const target = possiblePhase.open
-          ? futureConvergence
-          : possiblePhase.querySelector(".roadmap-phase__summary");
-        return target.getBoundingClientRect().top - story.getBoundingClientRect().top;
-      }
-
       function mobileRoutePath(selector, railX, storyRect) {
         const points = [...pageRoot.querySelectorAll(selector)]
           .map((node) => {
@@ -318,8 +339,10 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
             return {
               x: rect.left + rect.width / 2 - storyRect.left,
               y: rect.top + rect.height / 2 - storyRect.top,
+              visible: rect.width > 0 && rect.height > 0,
             };
           })
+          .filter((point) => point.visible && point.y >= 0 && point.y <= storyRect.height)
           .sort((a, b) => a.y - b.y);
         if (!points.length) return "";
 
@@ -334,14 +357,20 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           d += ` Q ${railX} ${point.y} ${point.x} ${point.y}`;
           d += ` Q ${railX} ${point.y} ${railX} ${point.y + bend}`;
         });
-        d += ` L ${railX} ${futureOffsetTop()}`;
+        const futureRect = futureConvergence.getBoundingClientRect(),
+          futureY = futureRect.top - storyRect.top,
+          lastY = points[points.length - 1].y,
+          endY = futureRect.height > 0 && futureY > lastY
+            ? Math.min(storyRect.height, futureY)
+            : Math.min(storyRect.height, lastY + 32);
+        d += ` L ${railX} ${endY}`;
         return d;
       }
 
       function sizeDesktopRoutes() {
         const counterHeight = pageRoot.querySelector(".analytics-counter").offsetHeight,
           routeTop = pageRoot.querySelector(".lane-heads").offsetTop + pageRoot.querySelector(".lane-heads").offsetHeight,
-          height = Math.max(0, futureOffsetTop() - routeTop);
+          height = Math.max(0, futureConvergence.offsetTop - routeTop);
         styleRoot.style.setProperty("--counter-height", `${counterHeight}px`);
         styleRoot.style.setProperty("--routes-top", `${routeTop}px`);
         styleRoot.style.setProperty("--routes-height", `${height}px`);
@@ -453,12 +482,14 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           Math.max(0, Math.min(1, high / length)).toFixed(5),
         );
       }
-      document
-        .querySelectorAll(".stop .brand-mark, .stop .brand-rail img")
+      pageRoot.querySelectorAll(".stop .brand-mark, .stop .brand-rail img")
         .forEach((logo) => (logo.alt = ""));
       function update() {
         const r = story.getBoundingClientRect(),
-          routeHeight = Math.max(1, futureOffsetTop()),
+          futureRoadmapY = futureConvergence.getBoundingClientRect().top - r.top,
+          routeHeight = Math.max(1, mobileRouteQuery.matches
+            ? r.height
+            : futureRoadmapY > 0 ? futureRoadmapY : r.height),
           travel = Math.max(0, Math.min(routeHeight, innerHeight * 0.58 - r.top));
         styleRoot.style.setProperty("--progress", (travel / routeHeight).toFixed(4));
         setMobileRouteProgress(mobileProductRoute, travel);
@@ -537,7 +568,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           detail.inert = !v;
           b.textContent = b.textContent.replace(v ? "+" : "−", v ? "−" : "+");
           requestAnimationFrame(drawMobileRoutes);
-        });
+        }, { signal });
       });
       const analyticsTotalNodes = [...pageRoot.querySelectorAll("[data-analytics-total]")],
         analyticsLiveLabel = pageRoot.querySelector(".analytics-counter__live");
@@ -587,13 +618,13 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       ideaForm.addEventListener("submit", () => {
         ideaPending = true;
         ideaStatus.textContent = "Sending your idea…";
-      });
+      }, { signal });
       ideaFrame.addEventListener("load", () => {
         if (!ideaPending) return;
         ideaPending = false;
         ideaStatus.textContent = "Idea submitted for private review.";
         ideaForm.reset();
-      });
+      }, { signal });
       const founderContactToggle = pageRoot.querySelector("[data-founder-contact-toggle]"),
         founderContactForm = pageRoot.querySelector(".founder-contact-form"),
         founderContactStatus = founderContactForm.querySelector(".idea-status"),
@@ -603,17 +634,17 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         const isOpen = founderContactForm.classList.toggle("is-open");
         founderContactToggle.setAttribute("aria-expanded", String(isOpen));
         if (isOpen) founderContactForm.querySelector("input:not([type=hidden])").focus();
-      });
+      }, { signal });
       founderContactForm.addEventListener("submit", () => {
         founderContactPending = true;
         founderContactStatus.textContent = "Sending to Tucker…";
-      });
+      }, { signal });
       founderContactFrame.addEventListener("load", () => {
         if (!founderContactPending) return;
         founderContactPending = false;
         founderContactStatus.textContent = "Sent directly to Tucker’s inbox.";
         founderContactForm.reset();
-      });
+      }, { signal });
       pageRoot.querySelector("[data-message-tucker]").addEventListener("click", async (event) => {
         if (location.protocol === "file:") return;
         event.preventDefault();
@@ -625,7 +656,8 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         } catch {
           location.href = "/u/tucker_pdmax";
         }
-      });
+      }, { signal });
+    
 
       pageRoot.querySelectorAll('.quick-nav a[href^="#"]').forEach((link) => {
         link.addEventListener("click", (event) => {

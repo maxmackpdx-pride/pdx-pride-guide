@@ -137,13 +137,12 @@
         .quick-nav:focus-within .quick-nav__inner,
         .quick-nav:hover .quick-nav__inner { animation-play-state: paused; }
       }
-
       @media (prefers-reduced-motion: reduce) {
         .quick-nav__inner { animation: none; transform: none; }
         .quick-nav__group[aria-hidden="true"] { display: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .quick-nav__inner { animation: none; transform: none; }
-      :host-context(:host-context(html.calm-mode)) .quick-nav__group[aria-hidden="true"] { display: none; }
+      :host-context(html.calm-mode) .quick-nav__inner { animation: none; transform: none; }
+      :host-context(html.calm-mode) .quick-nav__group[aria-hidden="true"] { display: none; }
       #about,
       #whats-next,
       #roadmap,
@@ -1081,8 +1080,8 @@
         .profile-avatar::before,
         .profile-avatar__shimmer { animation: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .profile-avatar::before,
-      :host-context(:host-context(html.calm-mode)) .profile-avatar__shimmer { animation: none; }
+      :host-context(html.calm-mode) .profile-avatar::before,
+      :host-context(html.calm-mode) .profile-avatar__shimmer { animation: none; }
       .live-logo-stack {
         display: block;
         width: 100%;
@@ -1128,11 +1127,11 @@
         }
         .live-logo-group[aria-hidden="true"] { display: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .live-logo-track {
+      :host-context(html.calm-mode) .live-logo-track {
         transform: none;
         animation: none;
       }
-      :host-context(:host-context(html.calm-mode)) .live-logo-group[aria-hidden="true"] { display: none; }
+      :host-context(html.calm-mode) .live-logo-group[aria-hidden="true"] { display: none; }
       .app-identity {
         display: flex;
         align-items: center;
@@ -1635,7 +1634,7 @@
         }
         .analytics-counter__live::before { animation: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .future-goal__we { animation: none; }
+      :host-context(html.calm-mode) .future-goal__we { animation: none; }
       .ending {
         position: relative;
         isolation: isolate;
@@ -1694,6 +1693,7 @@
       .hero h1,
       .premise h2,
       .stop h3,
+      .chapter:has(.stop.done) .stop h3,
       .crossing h3,
       .ending h2 {
         text-shadow:
@@ -1902,8 +1902,8 @@
         .tech-stack-track { animation: none; transform: none; }
         .tech-stack-group[aria-hidden="true"] { display: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .tech-stack-track { animation: none; transform: none; }
-      :host-context(:host-context(html.calm-mode)) .tech-stack-group[aria-hidden="true"] { display: none; }
+      :host-context(html.calm-mode) .tech-stack-track { animation: none; transform: none; }
+      :host-context(html.calm-mode) .tech-stack-group[aria-hidden="true"] { display: none; }
       .founder-story {
         position: relative;
         isolation: isolate;
@@ -2415,11 +2415,60 @@
         color: var(--slate-10);
         line-height: 1.6;
       }
+
+      /* Full-bleed visual layers; content and divider rules stay on the page grid. */
+      .roadmap-phase__summary {
+        isolation: isolate;
+        background: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+      .roadmap-phase__summary::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100vw;
+        transform: translateX(-50%);
+        background: color-mix(in srgb, var(--slate-1) 96%, transparent);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        pointer-events: none;
+      }
+      .crossing-bloom {
+        width: 100vw;
+        max-width: none;
+      }
+      .founder-faq {
+        isolation: isolate;
+        background: transparent;
+      }
+      .founder-faq::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset-block: 0;
+        left: 50%;
+        width: 100vw;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, rgba(0,255,255,.045), rgba(17,17,19,.98) 38%, var(--slate-1));
+        pointer-events: none;
+      }
+
+      /* Rainbow strokes reveal the page underneath instead of simulating transparency. */
+      .hero-next__stroke,
+      .hero-z-halo__z,
+      .idea-title-outline__stroke,
+      .founder-faq__questions text {
+        fill: transparent;
+      }
       @media (prefers-reduced-motion: reduce) {
         .founder-open::after,
         .founder-open__status::before { animation: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .founder-open {
+      :host-context(html.calm-mode) .founder-open {
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
         box-shadow:
@@ -2427,8 +2476,8 @@
           0 18px 40px -24px rgba(0, 0, 0, .95),
           inset 0 1px 0 rgba(255,255,255,.12);
       }
-      :host-context(:host-context(html.calm-mode)) .founder-open::after,
-      :host-context(:host-context(html.calm-mode)) .founder-open__status::before { animation: none; }
+      :host-context(html.calm-mode) .founder-open::after,
+      :host-context(html.calm-mode) .founder-open__status::before { animation: none; }
       @media (max-width: 900px) {
         .founder-grid,
         .founder-open {
@@ -2769,7 +2818,7 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-      :host {
+        :host {
           scroll-behavior: auto;
         }
         .founder-avatar__face::before,
@@ -2790,12 +2839,12 @@
         .hero-z-halo__ghost { animation: none; opacity: 0; }
         .hero-z-halo__z { animation: none; }
       }
-      :host-context(:host-context(html.calm-mode)) .hero-z-halo__ghost { animation: none; opacity: 0; }
-      :host-context(:host-context(html.calm-mode)) .hero-z-halo__z { animation: none; }
+      :host-context(html.calm-mode) .hero-z-halo__ghost { animation: none; opacity: 0; }
+      :host-context(html.calm-mode) .hero-z-halo__z { animation: none; }
 
       /* Page continuity pass: one typographic and spacing rhythm across the
          roadmap, invitation, and editorial appendix. */
-:host {
+      :host {
         --page-gutter: 22px;
         --content-measure: 1220px;
         --section-space: clamp(72px, 8vw, 108px);
@@ -3006,8 +3055,6 @@
         line-height: 1.04;
       }
 
-      /* Portrait desktop is still a desktop composition, but it needs a
-         calmer measure and less exaggerated whitespace than a wide display. */
       @media (min-width: 721px) and (max-width: 1500px) {
         :host {
           --page-gutter: 24px;
@@ -3033,9 +3080,7 @@
           margin-bottom: 40px;
         }
 
-        .hero > .analytics-counter {
-          margin-bottom: 0;
-        }
+        .hero > .analytics-counter { margin-bottom: 0; }
 
         .launch-era {
           padding-top: 92px;
@@ -3115,55 +3160,370 @@
         }
       }
 
-      /* Full-bleed visual layers; the content and divider grid stays aligned. */
+      /* Enhanced AboutZ demo — page-wide hierarchy, rhythm, and legibility. */
+      :host {
+        --demo-shell: 1240px;
+        --demo-gutter: clamp(20px, 4vw, 56px);
+        --demo-section: clamp(76px, 9vw, 128px);
+        --demo-rule: 1px solid var(--slate-4);
+        --type-display: clamp(64px, 9vw, 118px);
+        --type-section: clamp(44px, 6vw, 76px);
+        --type-subhead: clamp(32px, 4vw, 50px);
+        --type-body: clamp(17px, 1.35vw, 19px);
+        --type-meta: 16px;
+        --phase-sticky-top: 52px;
+      }
+
+      /* Five reusable type roles. Font, size, weight, line-height, and
+         tracking now follow the role instead of the individual section. */
+      .hero-manifesto__heading,
+      .hero h1,
+      .launch-era .launch-line span,
+      .ending h2,
+      .founder-title {
+        font: 900 var(--type-display)/.78 "Barlow Condensed", sans-serif;
+        letter-spacing: -.018em;
+      }
+      .premise h2,
+      .roadmap-phase__title,
+      .tech-stack-panel h2,
+      .founder-open h3,
+      .founder-section-title {
+        font: 900 var(--type-section)/.86 "Barlow Condensed", sans-serif;
+        letter-spacing: -.008em;
+      }
+      .stop h3,
+      .crossing h3,
+      .future-goal h3,
+      .founder-project h3,
+      .lane-head b,
+      .founder-faq summary {
+        font: 900 var(--type-subhead)/.92 "Barlow Condensed", sans-serif;
+        letter-spacing: -.008em;
+      }
+      .hero-manifesto p,
+      .premise p,
+      .stop p,
+      .crossing p,
+      .future-goal p,
+      .story-system-intro p,
+      .ending-copy p,
+      .founder-copy > p,
+      .founder-open__body p,
+      .founder-project p,
+      .founder-value,
+      .founder-faq__answer {
+        font: 400 var(--type-body)/1.65 Barlow, system-ui, sans-serif;
+        letter-spacing: .012em;
+      }
+      .eyebrow,
+      .mono,
+      .hero-manifesto__label,
+      .status,
+      .kind,
+      .chapter-no,
+      .roadmap-phase__index,
+      .analytics-counter__label,
+      .analytics-counter__live,
+      .idea-field label,
+      .founder-kicker,
+      .founder-open__status,
+      .founder-project__meta,
+      .founder-values__mark,
+      .founder-faq__kicker {
+        font: 700 var(--type-meta)/1.3 "JetBrains Mono", monospace;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .quick-nav a,
+      .launch-era,
+      .launch-era small,
+      .lane-tag,
+      .lane-head small,
+      .legend,
+      .detail li,
+      .brand-context,
+      .ring,
+      .platform-logo,
+      .tech-stack-item,
+      .idea-note,
+      .idea-field label,
+      .founder-avatar__handle,
+      .founder-links a,
+      .founder-credits,
+      .founder-skills,
+      .founder-action {
+        font-size: 16px;
+      }
+
+      .quick-nav {
+        border-bottom: 1px solid var(--slate-3);
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+        mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+      }
+      .quick-nav__group { gap: clamp(2px, .6vw, 10px); }
+      .quick-nav a {
+        min-height: 52px;
+        padding-inline: clamp(12px, 1.6vw, 20px);
+        font-size: 12px;
+        letter-spacing: .11em;
+      }
+
+      .hero,
+      .story,
+      .tech-stack-panel,
+      .ending,
+      .founder-story {
+        width: min(var(--demo-shell), calc(100% - (var(--demo-gutter) * 2)));
+      }
+
+      .hero {
+        min-height: 0;
+        padding-top: clamp(70px, 8vw, 112px);
+      }
+      .hero-manifesto {
+        column-gap: clamp(54px, 7vw, 96px);
+        row-gap: 18px;
+        margin-bottom: clamp(74px, 8vw, 108px);
+        padding-top: 0;
+      }
+      .hero-manifesto__heading {
+        max-width: 9ch;
+        margin-bottom: 2px;
+      }
+      .hero-manifesto__label {
+        margin-bottom: 14px;
+        color: var(--slate-11);
+      }
+      .hero-manifesto p {
+        max-width: 52ch;
+      }
+      .hero > .eyebrow {
+        display: block;
+        margin-bottom: 22px;
+      }
+      .hero h1 { margin: 0 0 clamp(52px, 6vw, 78px); }
+
+      .analytics-counter {
+        border-top: var(--demo-rule);
+        border-bottom: var(--demo-rule);
+      }
+      .analytics-counter__inner { padding: 48px 0 30px; }
+      .analytics-counter__item { padding-inline: clamp(16px, 3vw, 38px); }
+      .analytics-counter__value { line-height: .82; }
+      .analytics-counter__label { margin-top: 11px; }
+
+      .launch-era {
+        padding-top: clamp(214px, 18vw, 250px);
+        margin-bottom: 44px;
+      }
+      .launch-era .launch-line span { bottom: clamp(58px, 6vw, 78px); }
+      .premise { border-bottom: var(--demo-rule); }
+      .premise article,
+      .premise article + article { padding-block: clamp(42px, 5vw, 62px); }
+      .premise h2 { max-width: 15ch; }
+      .premise p { max-width: 48ch; }
+      .premise-system-tag { margin-top: clamp(24px, 3vw, 38px); }
+      .legend { padding-block: 22px; }
+
+      .lane-heads { padding: 24px 0 32px; }
+      .story-system-intro {
+        display: grid;
+        grid-template-columns: minmax(190px, .42fr) minmax(0, 1.58fr);
+        align-items: start;
+        gap: clamp(28px, 5vw, 72px);
+        width: 100%;
+        margin: 0;
+        padding: clamp(26px, 3vw, 38px) 0;
+        border-bottom: 1px solid var(--slate-4);
+      }
+      .story-system-tag {
+        justify-content: flex-start;
+        margin: 2px 0 0;
+      }
+      .story-system-intro p {
+        max-width: 68ch;
+        margin: 0;
+        color: var(--slate-11);
+      }
+      .roadmap-phase { border-bottom: 1px solid var(--slate-3); }
       .roadmap-phase__summary {
-        isolation: isolate;
-        background: transparent;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
+        top: var(--phase-sticky-top);
+        min-height: 96px;
+        padding-inline: clamp(16px, 2.5vw, 30px);
+        box-shadow: 0 14px 24px -22px rgba(0, 0, 0, .95);
+      }
+      .roadmap-phase__content { padding-bottom: 18px; }
+      .chapter { min-height: 500px; }
+      .chapter:has(.stop.done) { min-height: 390px; }
+      .stop p { max-width: 48ch; line-height: 1.66; }
+      .chapter:has(.stop.done) .stop p {
+        max-width: 38ch;
+        font-size: var(--type-body);
+        line-height: 1.55;
       }
 
-      .roadmap-phase__summary::before {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        width: 100vw;
-        transform: translateX(-50%);
-        background: color-mix(in srgb, var(--slate-1) 96%, transparent);
-        -webkit-backdrop-filter: blur(12px);
-        backdrop-filter: blur(12px);
-        pointer-events: none;
+      .tech-stack-panel {
+        padding-top: var(--demo-section);
+        padding-bottom: clamp(28px, 3vw, 40px);
       }
-
-      .crossing-bloom {
-        width: 100vw;
-        max-width: none;
+      .tech-stack-panel h2 {
+        margin-inline: 0;
+        margin-bottom: 48px;
       }
+      .tech-stack-window { padding-block: 8px 10px; }
+      .tech-stack-group { gap: 30px; padding-right: 30px; }
+      .tech-stack-item { width: 88px; gap: 12px; }
+      .tech-stack-item img { width: 54px; height: 54px; }
 
+      .ending {
+        grid-template-columns: minmax(280px, .85fr) minmax(420px, 1.15fr);
+        gap: clamp(58px, 8vw, 112px);
+        padding-block: var(--demo-section);
+      }
+      .ending-copy p { max-width: 38ch; }
+      .idea-form { gap: 28px 24px; }
+      .idea-field { gap: 12px; }
+      .idea-field input,
+      .idea-field textarea { font-size: 17px; }
+
+      .founder-story { padding-block: var(--demo-section); }
+      .founder-title { margin-bottom: clamp(58px, 7vw, 90px); }
+      .founder-grid { grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr); }
+      .founder-copy > p { max-width: 62ch; }
+      .founder-open,
+      .founder-projects,
+      .founder-principles,
+      .founder-faq { margin-top: var(--demo-section); }
+      .founder-principles,
       .founder-faq {
-        isolation: isolate;
-        background: transparent;
+        grid-template-columns: minmax(260px, .58fr) minmax(0, 1.42fr);
+      }
+      .founder-faq { padding-block: clamp(54px, 6vw, 76px); }
+      .founder-faq summary { min-height: 72px; }
+
+      @media (min-width: 721px) and (max-width: 980px) {
+        :host { --demo-gutter: 26px; --demo-section: 84px; }
+        .hero-manifesto { column-gap: 48px; }
+        .analytics-counter__inner { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        .analytics-counter__item { padding-inline: 12px; }
+        .founder-grid,
+        .founder-open,
+        .founder-principles,
+        .founder-faq { column-gap: 44px; }
       }
 
-      .founder-faq::before {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        inset-block: 0;
-        left: 50%;
-        width: 100vw;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, rgba(0,255,255,.045), rgba(17,17,19,.98) 38%, var(--slate-1));
+      @media (max-width: 720px) {
+        :host {
+          --demo-gutter: 18px;
+          --demo-section: 68px;
+          --type-display: 64px;
+          --type-section: 44px;
+          --type-subhead: 32px;
+          --type-body: 17px;
+          --phase-sticky-top: 46px;
+        }
+        .quick-nav a { min-height: 46px; }
+        .hero { padding-top: 54px; }
+        .hero-manifesto {
+          grid-template-columns: 1fr;
+          margin-bottom: 66px;
+        }
+        .hero-manifesto article { grid-column: 1; }
+        .hero-manifesto p { max-width: none; }
+        .hero h1 { margin-bottom: 48px; }
+        .analytics-counter__inner { padding-block: 38px 24px; }
+        .launch-era { padding-top: 174px; }
+        .story-system-intro {
+          width: 100%;
+          padding-block: 30px 24px;
+        }
+        .story-system-tag { justify-content: flex-start; }
+        .roadmap-phase__summary { top: var(--phase-sticky-top); min-height: 82px; }
+        .tech-stack-panel h2 { margin-bottom: 36px; }
+        .ending { grid-template-columns: 1fr; gap: 52px; }
+        .founder-grid,
+        .founder-open,
+        .founder-principles,
+        .founder-faq { grid-template-columns: 1fr; }
+        .founder-projects { grid-template-columns: 1fr; }
+        .founder-project + .founder-project {
+          padding-left: 0;
+          border-left: 0;
+          border-top: 1px solid var(--slate-5);
+        }
+      }
+
+      /* Absolute accessibility floor: legacy compact-roadmap selectors are
+         intentionally prevented from reducing readable text below 16px. */
+      .quick-nav a,
+      .eyebrow,
+      .hero-manifesto__label,
+      .analytics-counter__live,
+      .analytics-counter__label,
+      .launch-era,
+      .launch-era small,
+      .launch-brand span,
+      .lane-tag,
+      .legend,
+      .roadmap-phase__index,
+      .chapter-no,
+      .status,
+      .kind,
+      .detail li,
+      .brand-context,
+      .ring,
+      .crossing .mono,
+      .future-goal small,
+      .platform-logo,
+      .tech-stack-item,
+      .idea-note,
+      .idea-field label,
+      .founder-kicker,
+      .founder-title small,
+      .founder-avatar__handle,
+      .founder-links a,
+      .founder-credits,
+      .founder-open__status,
+      .founder-skills,
+      .founder-action,
+      .founder-project__meta,
+      .founder-values__mark,
+      .founder-faq__kicker {
+        font-size: 16px !important;
+      }
+
+      /* Upcoming roadmap chapters reveal only a short, inviting preview.
+         Once reached they open fully; completed chapters close behind. */
+      .roadmap-phase.is-teasing:not([open]) .roadmap-phase__content {
+        position: relative;
+        display: block;
+        max-height: 92px;
+        overflow: hidden;
+        opacity: .78;
+        animation: roadmap-teaser-bounce .72s cubic-bezier(.2, .82, .24, 1) both;
+        -webkit-mask-image: linear-gradient(to bottom, #000 0 34%, rgba(0,0,0,.72) 64%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0 34%, rgba(0,0,0,.72) 64%, transparent 100%);
         pointer-events: none;
       }
-
-      /* RGB outlines expose the live page behind them. */
-      .hero-next__stroke,
-      .hero-z-halo__z,
-      .idea-title-outline__stroke,
-      .founder-faq__questions text {
-        fill: transparent;
+      .roadmap-phase.is-teasing .roadmap-phase__state {
+        box-shadow: 0 0 18px -5px var(--phase-accent);
       }
+      @keyframes roadmap-teaser-bounce {
+        0% { max-height: 60px; transform: translateY(-5px); opacity: .38; }
+        58% { max-height: 112px; transform: translateY(2px); opacity: .86; }
+        78% { max-height: 84px; transform: translateY(-1px); }
+        100% { max-height: 92px; transform: translateY(0); opacity: .78; }
+      }
+      @media (max-width: 720px) {
+        .roadmap-phase.is-teasing:not([open]) .roadmap-phase__content {
+          max-height: 76px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .roadmap-phase.is-teasing:not([open]) .roadmap-phase__content {
+          animation: none;
+        }
+      }
+    
