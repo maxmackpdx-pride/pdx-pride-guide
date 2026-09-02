@@ -43,11 +43,10 @@ function NavLink({
   notifyLabel?: string;
   onClick?: () => void;
 }) {
-  const isDarkroom = href === "/next" || href.startsWith("/next?");
   return (
     <Link
       href={href}
-      className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}${isDarkroom ? " site-nav-link--darkroom" : ""}`}
+      className={`site-nav-link${active ? " active" : ""}${showNotify ? " site-nav-link--notify" : ""}`}
       data-accent={accent}
       onClick={onClick}
       aria-label={notifyLabel}
@@ -646,7 +645,6 @@ export default function Nav() {
   );
   const aboutActive = navLinkActive(location, "/about");
   const homeActive = location === "/";
-  const nextActive = navLinkActive(location, "/next");
 
   const seamLoading = routeLoading || fetching > 0;
 
@@ -681,14 +679,6 @@ export default function Nav() {
                 onClick={() => dismissMobileNavOverlays()}
               >
                 About
-              </Link>
-              <Link
-                href="/next"
-                className={`hub-mtop__mode-btn${nextActive ? " is-active is-member" : ""}`}
-                aria-current={nextActive ? "page" : undefined}
-                onClick={() => dismissMobileNavOverlays()}
-              >
-                Next
               </Link>
             </div>
             <div className="hub-mtop__spacer" />

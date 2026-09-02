@@ -76,7 +76,6 @@ const RoosterRock = lazy(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazy(() => import("./pages/SauvieIsland"));
 const Outz = lazy(() => import("./pages/Outz"));
 const OutzPlace = lazy(() => import("./pages/OutzPlace"));
-const Darkroom = lazy(() => import("./pages/Darkroom"));
 const DesignSystemSandbox = lazy(() => import("./pages/DesignSystemSandbox"));
 const ZIndex = lazy(() => import("./pages/ZIndex"));
 const Community = lazy(() => import("./pages/Community"));
@@ -178,9 +177,11 @@ function AppLayout() {
             <Route path="/outz/rooster-rock" component={RoosterRock} />
             <Route path="/outz/sauvie-island" component={SauvieIsland} />
             <Route path="/outz/:placeSlug" component={OutzPlace} />
-            <Route path="/next" component={Darkroom} />
+            <Route path="/next">
+              {() => <Redirect to="/about" />}
+            </Route>
             <Route path="/darkroom">
-              {() => <Redirect to="/next" />}
+              {() => <Redirect to="/about" />}
             </Route>
             <Route path="/design-preview" component={DesignSystemSandbox} />
             <Route path="/u/:username" component={MemberProfile} />

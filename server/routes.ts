@@ -106,7 +106,11 @@ import {
   accountModReasonLabel,
   untilIsoFromHours,
 } from "@shared/accountModeration";
-import { getGoogleAnalyticsTrafficMetrics, isGoogleAnalyticsAdminConfigured } from "./googleAnalytics";
+import {
+  getGoogleAnalyticsPublicTotals,
+  getGoogleAnalyticsTrafficMetrics,
+  isGoogleAnalyticsAdminConfigured,
+} from "./googleAnalytics";
 import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
@@ -6713,6 +6717,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({
       links: publicPreviewLinks({ eventId, businessId, username }),
     });
+  });
+
+  app.get("/api/analytics/totals", async (_req, res) => {
+    const totals = await getGoogleAnalyticsPublicTotals();
+    if (!totals) {
+      return res.status(503).json({ error: "Analytics totals are temporarily unavailable" });
+    }
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+    const members = storage.getAllUsers().filter(user => user.status === "active").length;
+    return res.json({ ...totals, members });
   });
 
   app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {

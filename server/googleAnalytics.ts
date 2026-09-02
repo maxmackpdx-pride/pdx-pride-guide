@@ -105,6 +105,52 @@ function bucketPercents(
 let cache: { at: number; data: TrafficMetrics } | null = null;
 const CACHE_MS = 60_000;
 
+export type PublicAnalyticsTotals = {
+  users: number;
+  sessions: number;
+  pageViews: number;
+  engagedSessions: number;
+  updatedAt: string;
+};
+
+let publicTotalsCache: { at: number; data: PublicAnalyticsTotals } | null = null;
+const PUBLIC_TOTALS_CACHE_MS = 5 * 60_000;
+
+export async function getGoogleAnalyticsPublicTotals(): Promise<PublicAnalyticsTotals | null> {
+  const gaClient = await getClient();
+  const propertyId = parsePropertyId();
+  if (!gaClient || !propertyId) return null;
+  if (publicTotalsCache && Date.now() - publicTotalsCache.at < PUBLIC_TOTALS_CACHE_MS) {
+    return publicTotalsCache.data;
+  }
+
+  try {
+    const [report] = await gaClient.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate: "2024-01-01", endDate: "today" }],
+      metrics: [
+        { name: "totalUsers" },
+        { name: "sessions" },
+        { name: "screenPageViews" },
+        { name: "engagedSessions" },
+      ],
+    });
+    const row = report.rows?.[0];
+    const data: PublicAnalyticsTotals = {
+      users: metricValue(row, 0),
+      sessions: metricValue(row, 1),
+      pageViews: metricValue(row, 2),
+      engagedSessions: metricValue(row, 3),
+      updatedAt: new Date().toISOString(),
+    };
+    publicTotalsCache = { at: Date.now(), data };
+    return data;
+  } catch (err) {
+    console.warn("[ga] Public Analytics totals request failed:", err);
+    return null;
+  }
+}
+
 export async function getGoogleAnalyticsTrafficMetrics(): Promise<TrafficMetrics | null> {
   const gaClient = await getClient();
   const propertyId = parsePropertyId();

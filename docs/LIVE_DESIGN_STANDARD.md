@@ -195,24 +195,15 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - **Signed out, Hub opens the log-in sheet**, which is the same `AuthModal` component presented bottom-anchored and full-bleed below 640px (`24px` top corners, ~82vh). One auth component, one Google path, one reset path: do not fork a second login form for phones.
 - Reduced motion and Calm Mode drop sheet entrances and the seam flow; colors, glow, and every destination stay.
 
-## NEXT roadmap cards
+## About + roadmap direct reference
 
-- This is a scoped roadmap family, not a new default for event, directory, board, or feed cards.
-- Sequence: **THE HAÜZ → Z/SPACE → ZAYDARK → AfterZ → Zenegades → OUTZ → submit an idea**. Keep route numbers and DOM reading order synchronized.
-- All product cards share one measured box: top-left status, top-right eyebrow, fixed logo region, contained object region, and lower copy/detail/action seam.
-- Use approved product-logo assets. Do not typeset substitutes, distort marks, trim their authored transparent margins ad hoc, or change spelling.
-- Cards use black deep glass with a black keyline, restrained Fluent 2 undertone, local accent bloom, and a thin rainbow edge/refract seam. Do not use a rainbow fill behind the card.
-- App-specific maps, blueprints, notifications, posts, profiles, and symbols are **contained card objects**: clipped inside the card, behind copy, and clear of protected text/action regions.
-- Route art, construction geometry, and large background motifs belong to one **fixed wallpaper stage** behind the full stack. Keep them bold at exposed gutters and masked through the reading lane. Do not reset wallpaper per card or convert contained objects into global wallpaper.
-- Status labels use the existing small `pdxBlink` dot at top left. Status meaning remains in text; Calm Mode and `prefers-reduced-motion` leave the dot visible but static.
-- The final submission card uses a white accent and visitor-facing idea language. It may route into the owner's inbox, but visitor copy must not disclose that internal destination.
-- The roadmap is **two columns of cards along the timeline** at every width, not one card per row. Alternating sides left the opposite half of every row empty and ran the section past 5000px.
-- At **721px and up** the centre spine stays and the cards flank it, with the markers lifted into the gutter. Two cards share one rail, so the second marker drops to its card's midpoint; level with the first it lands on top of it and only the later number shows.
-- **Below 721px** there is no room for a spine: the rail is hidden, the tiles go two-up (matching Spaces and the z/ index), and the step number moves to the tile's top-left corner. That badge is an outlined ring with the digit in the accent, because the blob backdrop is too small to knock a digit out of at 24px.
-- The card is drawn for a 490px column. Two-up it is 155 to 205px wide, so chip, mark, and copy step down a register, copy clamps to three lines, and contained card objects (phone mockups, maps, profile stacks) are dropped as illegible at that size. The tablet band needs its own scale: card height is locked by the 17/25 poster ratio, so fixed-size copy runs out the bottom.
-- The submission card cannot work in a half-width tile: it takes the full row and sizes to its content.
-- Preserve every card and its order, and prevent horizontal overflow at every width.
-- Reduced motion stops the blink, rainbow flow, card glow cycle, route charge, and glitch; preserve static edge color, wallpaper, status text, marks, and all actions.
+- The live `/about` page is the owner-approved implementation reference for the combined About, history, product/system roadmap, future goals, technology, idea submission, founder, trust, and FAQ experience.
+- `/next` and `/darkroom` are compatibility redirects to `/about`; do not recreate a separate NEXT destination, nav tab, footer link, homepage slide, or homepage preview.
+- The page-local quick navigation is not global site navigation. It uses unboxed Barlow Condensed labels, the seven approved day colors on hover, and a seamless mobile rail. Calm Mode and `prefers-reduced-motion` stop that rail.
+- Page backgrounds use Radix Slate dark neutrals. Approved Zaylist neon remains reserved for identity, trails, metrics, outlines, status, and seven-day hover color.
+- The large `WHAT S / NEXT.` headline, outlined Prime Z, product/system routes, responsive waypoints, and stronger page-local RGB glitch belong to this approved page pattern. Reduced motion preserves the static identity while stopping travel, glitch, and ambient motion.
+- Card-system authority applies to actual cards and deep-glass objects inside the page, not to the page wireframe, editorial chapters, route geometry, or typography.
+- Production source lives in `client/src/pages/About.tsx`, `AboutRoadmap.css`, `about-roadmap.fragment.html`, and `AboutRoadmapRuntime.body.ts`. The former `ProductRoadmap` and old About page are retired.
 
 ## Homepage front door
 
@@ -253,15 +244,6 @@ Code: `client/src/lib/siteNav.ts` (model + accents), `client/src/components/Nav.
 - The Places world uses a low-contrast Portland street-and-river map motif behind the directory story.
 - Places uses a reduced app-tile launcher sourced from `/api/directory`, with two fewer rows than the former layout: 8 columns by 3 rows on larger screens and 5 columns by 6 rows on phones. Render only the visible capacity in stable source order so the footer/action aligns with sibling cards.
 - Haüsing, GIFTZ, GIGZ, and MIZZED CONNECTION use full-card object motifs at a stronger register than the river and Places maps: house floor plan, gift-box blueprint, pinned bulletin board, and lost/found/looking notices respectively.
-- The homepage NEXT preview uses one six-card set. Three cards enter from the left and three from the right at the same time, collide at center, overshoot, rebound once, make one short restrained wiggle, and settle into a centered overlapping stack. After landing, a staggered 1–2px slow float may keep the stack alive; Calm and reduced-motion stay perfectly still.
-- Put the rainbow divider immediately above the NEXT preview section. Its heading is exactly **“SEE WHAT I’M BUILDING NEXT.”** Only **“NEXT.”** is red; keep every preceding word in the standard high-contrast heading color.
-- The full NEXT section uses a distinct cool-navy clipped topographic/trail-map blueprint field plus exactly three scattered copies of each of the two approved drafting references. The six motifs cannot touch. Keep every form monochrome, low opacity, non-parallax, and behind the heading and card stack; mobile may reduce the count.
-- Add exactly three low-opacity ambient orbs behind all NEXT content: cyan, navy, and orange. They may drift independently but never move the map/logo field or create scroll-linked parallax. Mobile may hold them still; Calm Mode and `prefers-reduced-motion` always freeze them.
-- Protect the section's copy and card faces with quiet negative space or masking. Logo ghosts may crop at section edges but must not compete with card identities, status labels, actions, or focus rings, and must not imply an additional product.
-- The NEXT panel background has **no parallax at any breakpoint**. Its map and oversized logo ghosts remain stable while cards animate above them. Mobile uses a simplified authored crop with fewer ghosts; Calm Mode and `prefers-reduced-motion` preserve the same still field.
-- The NEXT six-card crash stack is separate from the looping seven-destination rail and never loops, auto-advances, or clones cards.
-- NEXT preview cards retain their individual logos, accents, statuses, and contained objects. Shared dimensions and coordinated motion provide continuity; never clone one product identity across the set or duplicate cards to fake depth.
-- Calm Mode and `prefers-reduced-motion` skip the off-screen arrival and impact, rendering the final six-card stack immediately. The final stack remains fully labeled and does not become a static marquee.
 - A single light transparent static/scan overlay may sit on the homepage wallpaper behind every content object. It is decorative, `pointer-events: none`, hidden from assistive technology, and must not reduce the legibility of type, logos, controls, imagery, statuses, or focus rings.
 - The wallpaper overlay may occasionally make one short, subtle displacement. Move only the texture, never the content; do not run a continuous glitch or add a duplicate noise/marquee layer. Calm Mode and `prefers-reduced-motion` preserve the texture as a still layer and remove displacement.
 - Homepage background depth uses a restrained set of black and dark-gray shadow planes. Stack them behind the static/scan texture and behind every content object; they remain decorative and pointer-free.

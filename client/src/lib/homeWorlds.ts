@@ -266,21 +266,6 @@ export const WORLDS: WorldSpec[] = [
     mark: null,
     slot: "today",
   },
-  {
-    key: "next",
-    number: "10",
-    title: "NEXT",
-    /* No family wordmark exists for NEXT, so the headline carries the name and
-       the card keeps the same lead-with-identity anatomy as the other nine. */
-    headline: "Next",
-    eyebrow: "What's coming",
-    body: "Three more products in the family. Not built yet, shown as roadmap.",
-    action: "See what's next",
-    href: "/next",
-    accent: "#ffffff",
-    mark: null,
-    slot: "roadmap",
-  },
 ];
 
 /* ── Demo fallbacks ──────────────────────────────────────────────────────

@@ -1,0 +1,1763 @@
+    <div class="rainbow"></div>
+    <nav class="quick-nav" aria-label="Quick navigation">
+      <div class="quick-nav__inner">
+        <div class="quick-nav__group">
+          <a href="#about">About</a>
+          <a href="#whats-next">What’s Next</a>
+          <a href="#roadmap">Roadmap</a>
+          <a href="#future">Future</a>
+          <a href="#tech-stack">Tech Stack</a>
+          <a href="#submit-an-idea">Submit an Idea</a>
+          <a href="#tucker">Tucker</a>
+          <a href="#trust">Trust</a>
+          <a href="#questions">Questions</a>
+        </div>
+        <div class="quick-nav__group" aria-hidden="true">
+          <a href="#about" tabindex="-1">About</a>
+          <a href="#whats-next" tabindex="-1">What’s Next</a>
+          <a href="#roadmap" tabindex="-1">Roadmap</a>
+          <a href="#future" tabindex="-1">Future</a>
+          <a href="#tech-stack" tabindex="-1">Tech Stack</a>
+          <a href="#submit-an-idea" tabindex="-1">Submit an Idea</a>
+          <a href="#tucker" tabindex="-1">Tucker</a>
+          <a href="#trust" tabindex="-1">Trust</a>
+          <a href="#questions" tabindex="-1">Questions</a>
+        </div>
+      </div>
+    </nav>
+    <canvas class="topo-field" id="topo-field" aria-hidden="true"></canvas>
+    <div class="field"></div>
+    <header class="hero">
+      <section class="hero-manifesto" id="about" aria-label="Why Zaylist exists">
+        <h2 class="hero-manifesto__heading">About</h2>
+        <div class="hero-manifesto__label">Not your daddies Craigslist</div>
+        <article>
+          <p>
+            Every city used to have one ugly, free <strong class="day-mon">public square</strong>
+            for a room, a gig,
+            something to give away or sell, a community looking for its people,
+            or the person you locked eyes with and never saw again. Then that
+            square moved onto <strong class="day-tue">Facebook and Instagram</strong>,
+            where accounts get shut down, pages disappear, and
+            <strong class="day-wed">queer nights</strong> are labeled adult content.
+            That is what happens when the room belongs to somebody else.
+          </p>
+        </article>
+        <article>
+          <p>
+            Zaylist brings it back to <strong class="day-thu">our ground</strong> as one community-built home for
+            <strong class="day-fri">Portland’s queer life</strong>: EVENTZ, OUR PLACEZ,
+            OUTZ, THE HAÜZ, GIFTZ, GIGZ, SELLZ, MIZZED CONNECTION, and Z/ COMMUNITIES.
+          </p>
+          <p>
+            <strong class="day-sat">Pride never ends.</strong>
+            This is for people who want the whole city, not the sanitized version
+            that survives a corporate feed. <strong class="day-sun">Fuck Meta.</strong>
+            Stop censoring our community. This app is really gay, and it really is ours.
+          </p>
+        </article>
+      </section>
+      <span class="eyebrow">ZAYLIST / FROM FIRST GUIDE TO WHAT'S NEXT</span>
+      <h1 id="whats-next">
+        WHAT'S<span class="sr-only"> NEXT.</span>
+        <svg
+          class="hero-next"
+          viewBox="0 0 920 210"
+          role="presentation"
+          aria-hidden="true"
+          preserveAspectRatio="xMinYMid meet"
+        >
+          <defs>
+            <linearGradient
+              id="next-rgb"
+              class="hero-next__gradient"
+              x1="-920"
+              y1="0"
+              x2="0"
+              y2="0"
+              gradientUnits="userSpaceOnUse"
+              spreadMethod="repeat"
+            >
+              <stop offset="0" stop-color="#ff2d5e" />
+              <stop offset="0.125" stop-color="#ff9500" />
+              <stop offset="0.25" stop-color="#ffee00" />
+              <stop offset="0.375" stop-color="#39ff14" />
+              <stop offset="0.5" stop-color="#00ffff" />
+              <stop offset="0.625" stop-color="#3a6bff" />
+              <stop offset="0.75" stop-color="#8800ff" />
+              <stop offset="0.875" stop-color="#ff00cc" />
+              <stop offset="1" stop-color="#ff2d5e" />
+            </linearGradient>
+          </defs>
+          <text
+            class="hero-next__stroke"
+            x="2"
+            y="172"
+            font-family="Barlow Condensed, sans-serif"
+            font-size="218"
+            font-weight="900"
+            letter-spacing="-3"
+          >NEXT.</text>
+        </svg>
+        <span class="hero-z-halo" aria-hidden="true">
+          <svg viewBox="40 55 790 530" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="hero-z-rgb" class="hero-next__gradient" x1="-920" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+                <stop offset="0" stop-color="#ff2d5e"/><stop offset=".125" stop-color="#ff9500"/><stop offset=".25" stop-color="#ffee00"/><stop offset=".375" stop-color="#39ff14"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".625" stop-color="#3a6bff"/><stop offset=".75" stop-color="#8800ff"/><stop offset=".875" stop-color="#ff00cc"/><stop offset="1" stop-color="#ff2d5e"/>
+              </linearGradient>
+            </defs>
+            <path class="hero-z-halo__ghost hero-z-halo__ghost--cyan" d="M57 62L140 166 458 167 112 577 628 555 708 461 345 458 692 62Z" />
+            <path class="hero-z-halo__ghost hero-z-halo__ghost--magenta" d="M57 62L140 166 458 167 112 577 628 555 708 461 345 458 692 62Z" />
+            <path
+              class="hero-z-halo__z"
+              d="M57 62L140 166 458 167 112 577 628 555 708 461 345 458 692 62Z"
+            />
+            <path
+              class="hero-z-halo__tm"
+              d="M770 63V113H776V80L777 79H779L781 81 791 98H793L807 78 810 79V113H816V63H809L797 81 796 86 789 88 787 86 788 80 777 63ZM722 63V70H736L737 71V113H744L745 112V71L746 70H760V63Z"
+            />
+          </svg>
+        </span>
+      </h1>
+      <section class="analytics-counter" aria-label="Live site and membership totals">
+        <span class="analytics-counter__live">GA4 + Zaylist · updated live</span>
+        <div class="analytics-counter__inner" aria-live="polite">
+          <div class="analytics-counter__item" style="--metric-color:#19e3ff">
+            <strong class="analytics-counter__value" data-analytics-total="users">1,995</strong>
+            <span class="analytics-counter__label">Unique visitors</span>
+          </div>
+          <div class="analytics-counter__item" style="--metric-color:#ff6a00">
+            <strong class="analytics-counter__value" data-analytics-total="sessions">4,140</strong>
+            <span class="analytics-counter__label">Total sessions</span>
+          </div>
+          <div class="analytics-counter__item" style="--metric-color:#a855f7">
+            <strong class="analytics-counter__value" data-analytics-total="pageViews">23,037</strong>
+            <span class="analytics-counter__label">Page views</span>
+          </div>
+          <div class="analytics-counter__item" style="--metric-color:#39ff14">
+            <strong class="analytics-counter__value" data-analytics-total="engagedSessions">2,788</strong>
+            <span class="analytics-counter__label">Engaged sessions</span>
+          </div>
+          <div class="analytics-counter__item" style="--metric-color:#ff2db2">
+            <strong class="analytics-counter__value" data-analytics-total="members">123</strong>
+            <span class="analytics-counter__label">Registered members</span>
+          </div>
+        </div>
+      </section>
+      <div
+        class="launch-era"
+        aria-label="Built from 2024 to the 2026 Zaylist launch"
+      >
+        <div class="launch-date">
+          <strong>2024</strong><small>It starts</small>
+        </div>
+        <div class="launch-line"><span><b>Two years</b><b>building</b></span></div>
+        <div class="launch-date">
+          <strong>2026</strong>
+          <small class="launch-brand">
+            <img
+              src="/brand/family/zaylist-primary.svg"
+              alt="Zaylist"
+            />
+            <span>Launches</span>
+          </small>
+        </div>
+      </div>
+      <div class="premise">
+        <article>
+          <div class="lane-tag product">Product trail</div>
+          <h2>What people can discover, use, and belong to.</h2>
+          <p>
+            The visible Zaylist: the useful experiences people receive and the
+            adoption those experiences earn.
+          </p>
+        </article>
+        <article>
+          <div class="lane-tag system">System trail</div>
+          <h2>What makes the whole thing trustworthy and durable.</h2>
+          <p>
+            The structure underneath: technology, measurement, distribution,
+            business readiness, permissions, and trust.
+          </p>
+        </article>
+      </div>
+      <div class="legend">
+        <span class="d"><i></i>shipped</span
+        ><span class="m"><i></i>in progress</span
+        ><span class="q"><i></i>not shipped</span>
+      </div>
+    </header>
+    <main class="story" id="roadmap">
+      <div class="lane-heads">
+        <div class="lane-head product">
+          <b>Product</b><small>What people get</small>
+        </div>
+        <div class="lane-head system">
+          <small>What makes it hold</small><b>System</b>
+        </div>
+      </div>
+      <svg class="mobile-routes" id="mobile-routes" aria-hidden="true">
+        <path class="mobile-route mobile-route--product" id="mobile-route-product" pathLength="1" />
+        <path class="mobile-route mobile-route--system" id="mobile-route-system" pathLength="1" />
+      </svg>
+      <svg
+        class="routes"
+        viewBox="0 0 1220 3800"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          class="route-base"
+          d="M530 0C530 350 495 430 530 760S565 1160 530 1450C490 1700 610 1770 610 1900S490 2080 530 2300 530 3180 610 3330 610 3570 610 3800"
+        />
+        <path
+          class="route-base"
+          d="M690 0C690 350 725 430 690 760S655 1160 690 1450C730 1700 610 1770 610 1900S730 2080 690 2300 690 3180 610 3330 610 3570 610 3800"
+        />
+        <path
+          class="route-live route-product"
+          pathLength="1"
+          d="M530 0C530 350 495 430 530 760S565 1160 530 1450C490 1700 610 1770 610 1900S490 2080 530 2300 530 3180 610 3330 610 3570 610 3800"
+        />
+        <path
+          class="route-live route-system"
+          pathLength="1"
+          d="M690 0C690 350 725 430 690 760S655 1160 690 1450C730 1700 610 1770 610 1900S730 2080 690 2300 690 3180 610 3330 610 3570 610 3800"
+        />
+      </svg>
+      <section class="chapter">
+        <span class="chapter-no">01 / 2024</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>Why the PDX Pride Guide started</h3>
+          <p>
+            When the newspaper's Pride guide left out many gay events, a new
+            guide gathered 40 queer events so they would be included and easy
+            to find.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>A public guide centered on queer Portland</li>
+              <li>Coverage for events the newspaper guide left out</li>
+              <li>
+                The founding proof that Portland's queer community needed its
+                own source
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <img
+            class="system-mark"
+            src="https://cdn.simpleicons.org/squarespace/FFFFFF"
+            alt="Squarespace"
+          />
+          <h3>Start the record from scratch</h3>
+          <p>
+            The first 40-event guide was built on Squarespace. Every listing,
+            venue detail, flyer, correction, and update was handled manually.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Manual event and venue research</li>
+              <li>40 events published in the first Squarespace guide</li>
+              <li>Flyer, date, time, and link collection</li>
+              <li>A correction and publishing workflow</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">02 / 2025</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>Pride Guide 2.0</h3>
+          <p>
+            Community help doubled the second guide to 80 events, but it
+            remained seasonal and every listing still had to be managed by hand.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>80 events published in the second-year guide</li>
+              <li>Community help expanding coverage</li>
+              <li>More evidence that the guide should outlive Pride</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Every event still managed by hand</h3>
+          <p>
+            Community help expanded the guide, but every event still had to be
+            found, interpreted, entered, corrected, and maintained manually.
+          </p>
+          <button class="open">What this revealed +</button>
+          <div class="detail">
+            <ul>
+              <li>Manual entry could not support a year-round platform</li>
+              <li>Businesses already had websites they needed to maintain</li>
+              <li>Zaylist should absorb the work, not create more of it</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">03 / 2026</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div class="builder-rail" aria-label="Built with Codex, Claude, and Grok">
+            <img src="/about-roadmap/assets/codex-white.png" alt="Codex" />
+            <img src="/about-roadmap/assets/claude-white.png" alt="Claude" />
+            <img src="/about-roadmap/assets/grok-white.png" alt="Grok" />
+          </div>
+          <h3>The homegrown Pride Guide app</h3>
+          <p>
+            The 2026 guide carried 160 Pride events—four times the first
+            guide—and became the low-key beta test for a year-round platform.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Custom Eventz board, schedules, maps, details, and sharing
+              </li>
+              <li>160 Pride events in the custom app</li>
+              <li>RSVPs, personal schedules, submissions, and claims</li>
+              <li>
+                A real product tested through Pride before the larger launch
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <div class="system-mark-row" aria-label="GitHub and Railway">
+            <img
+              class="system-mark"
+              src="https://cdn.simpleicons.org/github/FFFFFF"
+              alt="GitHub"
+            />
+            <img
+              class="system-mark"
+              src="https://cdn.simpleicons.org/railway/FFFFFF"
+              alt="Railway"
+            />
+          </div>
+          <h3>Off Squarespace</h3>
+          <p>
+            The guide moved to a custom React application, server, database,
+            deployment pipeline, administration system, and assisted
+            event-research workflow.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Custom application and production database</li>
+              <li>Research, ingest, review, and correction workflows</li>
+              <li>No longer entering every event by hand</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">04 / EVENTZ</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark"
+            src="/brand/family/eventz.png"
+            alt="Eventz"
+          />
+          <h3>One trusted place for queer events</h3>
+          <p>
+            EVENTZ gives queer Portland one place to trust instead of chasing
+            events across eight platforms, private groups, and invite-only apps.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Year-round event discovery in one public place</li>
+              <li>Maps, filters, schedules, RSVPs, details, and sharing</li>
+              <li>Coverage that persists even before an organizer claims it</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Publish once. Manage where you already work.</h3>
+          <p>
+            Businesses keep posting to their normal websites. Zaylist discovers
+            and verifies the event. Promoters they hire can claim and manage it
+            without making the business adopt another platform.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Website and trusted-source event discovery</li>
+              <li>
+                Identity, duplicate, relevance, artwork, and freshness checks
+              </li>
+              <li>
+                Promoter claim and management without removing unclaimed events
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">05 / AFTER PRIDE WEEKEND</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark brand-mark--wide"
+            src="/brand/family/zaylist-primary.svg"
+            alt="Zaylist"
+          />
+          <h3>Launches</h3>
+          <p>
+            When Pride weekend ended, the guide did not. It became Zaylist: a
+            year-round Portland platform for more of queer life. The Pride Guide
+            chapter closed at the end of Pride weekend. As of today, GA4 has
+            recorded 476 users since Zaylist launched.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Zaylist name, domains, identity, and Z/ app mark</li>
+              <li>One parent brand for a growing product family</li>
+              <li>A year-round promise instead of a seasonal guide</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <img
+            class="app-face-mark"
+            src="/brand/kit/app-icons/zaylist-app-icon-1024.png"
+            alt="Zaylist app icon"
+          />
+          <h3>Web app launch + installable PWA</h3>
+          <p>
+            Zaylist launched as a year-round web app that could also be
+            installed on phones and desktops, update like an app, and send web
+            push notifications.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Production launch of the Zaylist web app</li>
+              <li>iOS, Android, and desktop PWA installation</li>
+              <li>Service worker, cold-open recovery, and pull to refresh</li>
+              <li>Web Push subscriptions and notifications</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">06 / PEOPLE</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div class="profile-stack" aria-label="Four Zaylist profiles with Progress Pride, transgender, lesbian, and nonbinary flag rings">
+            <span class="profile-avatar profile-avatar--progress">
+              <span class="profile-avatar__inner"><img src="/avatars/rose.webp" alt="Portland Rose default avatar with Progress Pride ring" /></span>
+              <span class="profile-avatar__shimmer" aria-hidden="true"></span>
+            </span>
+            <span class="profile-avatar profile-avatar--trans">
+              <span class="profile-avatar__inner"><img src="/avatars/bridge.webp" alt="St. Johns Bridge default avatar with transgender flag ring" /></span>
+              <span class="profile-avatar__shimmer" aria-hidden="true"></span>
+            </span>
+            <span class="profile-avatar profile-avatar--lesbian">
+              <span class="profile-avatar__inner"><img src="/avatars/bigfoot.webp" alt="Pride Bigfoot default avatar with lesbian flag ring" /></span>
+              <span class="profile-avatar__shimmer" aria-hidden="true"></span>
+            </span>
+            <span class="profile-avatar profile-avatar--nonbinary">
+              <span class="profile-avatar__inner"><img src="/avatars/coffee.webp" alt="Coffee default avatar with nonbinary flag ring" /></span>
+              <span class="profile-avatar__shimmer" aria-hidden="true"></span>
+            </span>
+          </div>
+          <h3>Accounts, profiles + floating inbox</h3>
+          <p>
+            People can have an identity on Zaylist, manage a profile, build a
+            schedule, RSVP, follow activity, choose a Pride-flag effect for
+            their avatar ring, and open messages from the floating inbox
+            anywhere on the website.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Public profiles, themes, photos, flag avatar rings, history,
+                and social context
+              </li>
+              <li>
+                Personal schedules, RSVPs, attendance controls, and
+                notifications
+              </li>
+              <li>
+                Sitewide floating inbox for event, venue, promoter, and member
+                messaging
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Admin system + account infrastructure</h3>
+          <p>
+            A deep private administration system launched alongside the inbox:
+            shared queues, account controls, moderation, reporting, analytics,
+            and the tools needed to operate Zaylist.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Sign in with Google plus email-and-password accounts</li>
+              <li>Forgot-password recovery sent from noreply@zaylist.com</li>
+              <li>
+                Owner and admin controls for people, events, places, promoters,
+                claims, reports, moderation, and audit history
+              </li>
+              <li>Private administration, shared queues, and inbox triage</li>
+              <li>
+                First-party product analytics and Google Analytics reporting
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">07 / OUR PLACEZ</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark brand-mark--wide"
+            src="/brand/family/our-placez.svg"
+            alt="Our Placez"
+          />
+          <h3>Our Placez + local directory</h3>
+          <p>
+            Venues, organizations, services, and queer-friendly places gained
+            searchable pages, details, events, ownership, and map context.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Directory search, category browsing, place details, and claims
+              </li>
+              <li>
+                Venue events, owner editing, submissions, and recently viewed
+                places
+              </li>
+              <li>
+                Current map experiences across Eventz, directory, beaches, and
+                OUTZIDE
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Place, map + provenance systems</h3>
+          <p>
+            Location records, map rendering, directory relationships, source
+            evidence, geofencing, and owner workflows support local place
+            discovery.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Coordinates, map pins, metro framing, and external navigation
+              </li>
+              <li>Place-event and owner relationships</li>
+              <li>Source tracking and correction workflows</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">08 / THE HAÜZ</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark"
+            src="/brand/family/the-hauz.svg"
+            alt="The Haüz"
+          />
+          <h3>Queer housing beyond Facebook groups</h3>
+          <p>
+            THE HAÜZ gives queer people a dedicated place to offer housing, look
+            for housing, and build a household without depending on a scattered
+            Facebook group.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Offering, Looking, Forming, and Managed housing paths</li>
+              <li>Housing discovery grounded in real member identity</li>
+              <li>A purpose-built queer housing experience</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>FORM A HAÜS</h3>
+          <p>
+            Instead of waiting for an existing room to open, people can form a
+            compatible household first. That is the distinctive housing idea
+            Facebook groups do not provide.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Household formation as its own housing object</li>
+              <li>Goals, identity, members, pets, and shared fit context</li>
+              <li>Housing-specific privacy, safety, and lifecycle behavior</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">09 / OUTZIDE</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark brand-mark--outz"
+            src="/brand/family/outz.svg"
+            alt="Outz"
+          />
+          <span class="brand-context"
+            >Current identity / OutZide mark in development</span
+          >
+          <h3>Queer outdoor recreation beyond Facebook groups</h3>
+          <p>
+            OUTZIDE puts queer outdoor places, conditions, practical details,
+            and community coordination in one durable place instead of making
+            people find the right Facebook group first.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Outdoor destinations, beaches, stays, maps, and field details
+              </li>
+              <li>
+                Conditions, parking, safety, access, and community context
+              </li>
+              <li>Check-ins, planning, and coordination around real places</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <img
+            class="system-mark system-mark--nps"
+            src="https://npgallery.nps.gov/GetAsset/aae63e87-d073-4420-8bc1-85ed4a765302/thumbxlarge.png"
+            alt="National Park Service"
+          />
+          <h3>Verified outdoor information</h3>
+          <p>
+            Maps, official sources, community evidence, freshness, conditions,
+            and privacy-aware coordination keep OUTZIDE useful without turning
+            it into another unverified social feed.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Source-backed destination and access records</li>
+              <li>Map, conditions, check-in, chat, and expiration systems</li>
+              <li>Precise-location and community-safety boundaries</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">10 / GIFTZ</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <img
+            class="brand-mark"
+            src="/brand/family/giftz.svg"
+            alt="Giftz"
+          />
+          <h3>Queer giving beyond Buy Nothing groups</h3>
+          <p>
+            GIFTZ gives queer Portland a direct place to offer useful things for
+            free without depending on Facebook or finding the right Buy Nothing
+            group.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Offer and discover free local goods</li>
+              <li>Member identity and direct Zaylist messaging</li>
+              <li>
+                A queer community context instead of a generic social group
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Accountable local exchange</h3>
+          <p>
+            Listing status, expiration, reporting, member identity, and direct
+            coordination keep giving local and accountable without adding a
+            payment rail.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Creation, discovery, claims, status, and expiration</li>
+              <li>Reporting, moderation, and shared inbox coordination</li>
+              <li>Free exchange with no platform-held payments</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">11 / MORE COMMUNITY UTILITIES</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div
+            class="brand-rail"
+            aria-label="Gigz, Mizzed Connection, and Sellz"
+          >
+            <img src="/brand/family/gigz.svg" alt="Gigz" />
+            <img
+              src="/brand/family/mizzed-connection.svg"
+              alt="Mizzed Connection"
+            />
+            <img src="/brand/family/sellz.svg" alt="Sellz" />
+          </div>
+          <h3>GIGZ, MIZZED CONNECTION + SELLZ</h3>
+          <p>
+            Zaylist also built dedicated ways to find work, reconnect, and
+            exchange locally instead of forcing every need through a generic
+            social feed.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Work and opportunity through GIGZ</li>
+              <li>Consent-aware reconnection through MIZZED CONNECTION</li>
+              <li>Local member exchange through SELLZ</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Shared listing + safety operations</h3>
+          <p>
+            Reusable listing, media, expiration, moderation, privacy, safety,
+            and relationship systems keep the utilities connected to Zaylist.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Shared member identity and inbox</li>
+              <li>Listing creation, status, reporting, and moderation</li>
+              <li>Explicit product boundaries and no platform-held payments</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">12 / CURRENT INFORMATION</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>A living Portland guide</h3>
+          <p>
+            Zaylist is no longer a static editorial snapshot; events, flyers,
+            venues, schedules, conditions, and corrections can keep moving.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Recurring event and flyer handling</li>
+              <li>Trusted venue coverage and current-source workflows</li>
+              <li>OUTZIDE conditions and community-source evidence</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>QSearch + trusted research</h3>
+          <p>
+            The research, verification, deduplication, flyer, source-health,
+            review, and correction machinery became an operating system for
+            current information.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Trusted-source and venue research lanes</li>
+              <li>
+                Identity, duplicate, relevance, artwork, and correction checks
+              </li>
+              <li>Admin review, provenance, and source memory</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">13 / THE RULES</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div class="live-logo-stack" aria-label="Live Zaylist product family: Zaylist, Eventz, Our Placez, The Haüz, Outz, and Giftz">
+            <div class="live-logo-track">
+              <div class="live-logo-group">
+                <img src="/brand/family/zaylist-primary.svg" alt="Zaylist" />
+                <img src="/brand/family/eventz.png" alt="Eventz" />
+                <img src="/brand/family/our-placez.svg" alt="Our Placez" />
+                <img src="/brand/family/the-hauz.svg" alt="The Haüz" />
+                <img src="/brand/family/outz.svg" alt="Outz" />
+                <img src="/brand/family/giftz.svg" alt="Giftz" />
+              </div>
+              <div class="live-logo-group" aria-hidden="true">
+                <img src="/brand/family/zaylist-primary.svg" alt="" />
+                <img src="/brand/family/eventz.png" alt="" />
+                <img src="/brand/family/our-placez.svg" alt="" />
+                <img src="/brand/family/the-hauz.svg" alt="" />
+                <img src="/brand/family/outz.svg" alt="" />
+                <img src="/brand/family/giftz.svg" alt="" />
+              </div>
+            </div>
+          </div>
+          <h3>One coherent product family</h3>
+          <p>
+            Zaylist gained a deliberate visual language, product naming system,
+            navigation model, accessibility posture, and shared interaction
+            vocabulary.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Product-family identities and approved marks</li>
+              <li>
+                Shared navigation, typography, motion, accessibility, and chrome
+              </li>
+              <li>
+                Living implementation standards instead of one-off redesigns
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Foundation + Design System</h3>
+          <p>
+            Product doctrine, durable decisions, institutional memory, design
+            authority, agent continuity, and deployment rules became systems of
+            record.
+          </p>
+          <a
+            class="foundation-link"
+            href="https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Design System</a>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Living Foundation Library</li>
+              <li>Canonical Design System and product trap list</li>
+              <li>
+                Decision records, continuity, and governed agent workflows
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">14 / PLATFORM V1</span>
+        <article class="stop product done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>Typed search + connected objects</h3>
+          <p>
+            The website can search across events, places, and communities and
+            represent products as related parts of one platform.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>Typed cross-product search</li>
+              <li>Stable object identities and relationships</li>
+              <li>Visibility-aware public discovery</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system done" style="--c: #39ff14">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <img
+            class="system-mark"
+            src="https://cdn.simpleicons.org/cloudflare/F38020"
+            alt="Cloudflare"
+          />
+          <h3>Architecture v1 + live API v1</h3>
+          <p>
+            Platform Architecture v1 and the production API now expose typed
+            objects, search, relationships, capabilities, metadata, and OpenAPI
+            documentation.
+          </p>
+          <button class="open">What shipped +</button>
+          <div class="detail">
+            <ul>
+              <li>API v1 is live in production</li>
+              <li>
+                Events, communities, listings, gigs, places, guides, profiles,
+                organizations, and media
+              </li>
+              <li>
+                Versioned envelopes, visibility, metrics, capabilities, and
+                OpenAPI
+              </li>
+              <li>
+                Page-view and product-action measurement feeding admin analytics
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">CROSSING 01 / IN PROGRESS</span>
+        <div class="crossing">
+          <div class="crossing-bloom" aria-hidden="true"></div>
+          <div class="ring">X / 01</div>
+          <h3>Z/ Communities</h3>
+          <p>
+            Z/ is becoming a home for real communities to gather, share posts,
+            set their own rules, stay visible, build relationships, and know
+            who is responsible for what.
+          </p>
+          <span class="mono">Product × System / in progress</span>
+        </div>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">15 / COMPLETE THE CURRENT PLATFORM</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>One connected Zaylist</h3>
+          <p>
+            Finish the current family so every product feels like a different
+            door into the same useful Portland platform.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Finish Z/ Communities</li>
+              <li>
+                Unify search, identity, navigation, object relationships, and
+                return journeys
+              </li>
+              <li>
+                Resolve unfinished product behavior before adding the next
+                products
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Complete API coverage</h3>
+          <p>
+            API v1 is live. The next job is assigning and completing consistent
+            API coverage across every existing area of the website.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Cover every current product and shared object</li>
+              <li>
+                Align permissions, errors, capabilities, and relationships
+              </li>
+              <li>
+                Keep API v1 stable while product routes remain authoritative
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">16 / MAP-BASED DISCOVERY</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>Discover Portland on the map</h3>
+          <p>
+            Make the city itself the interface: one map for discovering what is
+            happening, where people gather, and what is useful nearby.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Explore Eventz, Placez, OUTZIDE, Communities, housing, work, and
+                listings spatially
+              </li>
+              <li>
+                Move naturally between map, list, filters, and object details
+              </li>
+              <li>
+                Make nearby discovery useful without exposing sensitive
+                locations
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Shared location intelligence</h3>
+          <p>
+            Existing maps become one governed geospatial layer instead of
+            separate map behavior and location truth in each area.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Canonical coordinates, geocoding, freshness, and provenance
+              </li>
+              <li>Shared spatial search, filters, clustering, and map APIs</li>
+              <li>
+                Privacy rules, mobile performance, accessibility, and safe
+                fallbacks
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">17 / NEXT PRODUCTS</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div
+            class="brand-rail brand-rail--future"
+            aria-label="Zenegades and AfterZ"
+          >
+            <img
+              src="/brand/family/zenegades.svg"
+              alt="Zenegades"
+            />
+            <img src="/brand/family/afterz.svg" alt="AfterZ" />
+          </div>
+          <h3>Zenegades + AfterZ</h3>
+          <p>
+            Build lightweight plans and ephemeral continuations after connected
+            discovery has established the people, place, privacy, and safety
+            foundation they need.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Validate the human need and public promise</li>
+              <li>Define gathering and expiration behavior</li>
+              <li>
+                Reuse shared identity, location, privacy, and safety systems
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <img
+            class="brand-mark"
+            src="/brand/family/zaydark.svg"
+            alt="ZayDark"
+          />
+          <h3>Trust, safety + ZayDark policy</h3>
+          <p>
+            Complete the privacy, moderation, accessibility, adult-content,
+            classification, authorization, and legal rules required for
+            responsible growth.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Public privacy, consent, moderation, and accessibility rules
+              </li>
+              <li>Legal and age-access decisions for ZayDark</li>
+              <li>
+                AI, when used, remains labeled, optional, bounded, and
+                accountable
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">18 / FINAL PLATFORM STEP</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <h3>One release-ready platform</h3>
+          <p>
+            Lock the complete web product before native packaging: connected
+            products, shared discovery, stable behavior, and no separate
+            unfinished worlds.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Finish the web experience and regression pass</li>
+              <li>Confirm native scope against the proven web product</li>
+              <li>Freeze the contracts the native apps will depend on</li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>API v2</h3>
+          <p>
+            Ship the final platform interface only after API coverage, map
+            discovery, Communities, and the next product contracts are
+            understood.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Finalize versioned contracts for the complete platform</li>
+              <li>
+                Complete write scopes, permissions, auditability, and migration
+              </li>
+              <li>Make API v2 the stable interface for the native apps</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">19 / NATIVE APP</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div class="app-identity" aria-label="Zaylist native app">
+            <img
+              class="brand-mark brand-mark--wide"
+              src="/brand/family/zaylist-primary.svg"
+              alt="Zaylist"
+            />
+            <img
+              class="app-face"
+              src="https://zaylist-foundation-library.maxmackpdx.workers.dev/design-system/app-face/icons/zaylist-512.png"
+              alt="Approved Zaylist app face"
+            />
+          </div>
+          <h3>Zaylist for iPhone + Android</h3>
+          <p>
+            Turn the proven platform into real native apps without splitting
+            Zaylist into separate products.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Define and build the first native release</li>
+              <li>Connect the apps through API v2</li>
+              <li>Complete real-device beta testing</li>
+            </ul>
+          </div>
+          <div class="platform-logos" aria-label="Planned native platforms">
+            <span class="platform-logo">
+              <img src="/about-roadmap/assets/apple-platform.svg" alt="" />Apple iOS
+            </span>
+            <span class="platform-logo">
+              <img src="/about-roadmap/assets/android-platform.svg" alt="" />Android
+            </span>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Native app foundation</h3>
+          <p>
+            Add the mobile release, authentication, deep-link, notification,
+            crash-reporting, privacy, and update systems that do not exist in
+            the PWA today.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>Native project and build pipeline</li>
+              <li>
+                Secure authentication, deep links, push, and app lifecycle
+              </li>
+              <li>
+                Beta distribution, device QA, crash and performance monitoring
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">20 / APP STORES</span>
+        <article class="stop product queued" style="--c: #ff6a00">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">Product</span>
+          </div>
+          <div class="platform-logos platform-logos--store" aria-label="Made for iPhone and Android">
+            <span class="platform-logo">
+              <img src="/about-roadmap/assets/apple-platform.svg" alt="" />Made for iPhone
+            </span>
+            <span class="platform-logo">
+              <img src="/about-roadmap/assets/android-platform.svg" alt="" />Made for Android
+            </span>
+          </div>
+          <h3>Launch in both stores</h3>
+          <p>
+            Publish a truthful, useful Zaylist story through Apple App Store and
+            Google Play, with a clear reason to install now.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Store identity, screenshots, descriptions, onboarding, and
+                launch release
+              </li>
+              <li>Apple and Google review approval</li>
+              <li>
+                Honest positioning that leads with Portland usefulness, not AI
+              </li>
+            </ul>
+          </div>
+        </article>
+        <article class="stop system queued" style="--c: #19e3ff">
+          <i class="node"></i>
+          <div class="top">
+            <span class="status">Not shipped</span
+            ><span class="kind mono">System</span>
+          </div>
+          <h3>Store + business readiness</h3>
+          <p>
+            Complete the distribution, compliance, measurement, financial, and
+            operational work needed to support a public app launch.
+          </p>
+          <button class="open">What completes this +</button>
+          <div class="detail">
+            <ul>
+              <li>
+                Developer accounts, privacy disclosures, age ratings, and store
+                compliance
+              </li>
+              <li>
+                Verified-download, activation, return-use, attribution, and
+                release measurement
+              </li>
+              <li>
+                Entity, banking, bookkeeping, trademark, contracts, and one
+                trust-aligned revenue test
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <section class="chapter">
+        <span class="chapter-no">CROSSING 02 / WIN PORTLAND</span>
+        <div class="crossing crossing--no-bloom">
+          <div class="ring">X / 02</div>
+          <h3>1,000 verified downloads in 90 days</h3>
+          <p>
+            The app earns a clear reason to install. The system proves each
+            download, activation, and return. Partnerships, community trust, and
+            repeated usefulness make Zaylist a Portland habit.
+          </p>
+          <span class="mono"
+            >Native App × App Stores × Portland / not shipped</span
+          >
+        </div>
+      </section>
+      <section class="future-convergence" id="future" aria-label="Unified Zaylist goals after winning Portland">
+        <canvas class="future-confetti" aria-hidden="true"></canvas>
+        <svg class="future-routes" viewBox="0 0 900 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <clipPath id="future-route-reveal">
+              <rect id="future-route-reveal-rect" x="0" y="0" width="900" height="0" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#future-route-reveal)">
+            <path id="future-route-product" class="future-route future-route--product" d="M450 0 C450 34 440 62 440 96 V1000" />
+            <path id="future-route-unified" class="future-route future-route--unified" d="M450 96 V1000" />
+            <path id="future-route-system" class="future-route future-route--system" d="M450 0 C450 34 460 62 460 96 V1000" />
+          </g>
+        </svg>
+        <article class="future-goal">
+          <span class="future-goal__node" aria-hidden="true"></span>
+          <div class="future-goal__copy"><small>Unified goal 01</small><h3>Secure funding</h3></div>
+        </article>
+        <article class="future-goal">
+          <span class="future-goal__node" aria-hidden="true"></span>
+          <div class="future-goal__copy"><small>Unified goal 02</small><h3>Grow the team</h3></div>
+        </article>
+        <article class="future-goal">
+          <span class="future-goal__node" aria-hidden="true"></span>
+          <div class="future-goal__copy"><small>Expansion 01</small><h3>Seattle + San Francisco</h3></div>
+        </article>
+        <article class="future-goal">
+          <span class="future-goal__node" aria-hidden="true"></span>
+          <div class="future-goal__copy"><small>Expansion 02</small><h3>Dallas · Chicago · Miami · New York City</h3></div>
+        </article>
+        <article class="future-goal future-goal--final">
+          <span class="future-goal__node" aria-hidden="true"></span>
+          <div class="future-goal__copy"><small>Queer independence</small><h3>Meta, <span class="future-goal__we">WE</span> don’t <span class="future-goal__need">need<svg viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 8 C22 4, 39 11, 58 7 S96 4, 117 7" /></svg></span> you.</h3></div>
+        </article>
+      </section>
+    </main>
+    <section class="tech-stack-panel" id="tech-stack" aria-labelledby="tech-stack-title">
+      <h2 id="tech-stack-title">Current Tech Stack</h2>
+      <div class="tech-stack-window">
+        <div class="tech-stack-track">
+          <div class="tech-stack-group">
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/react.svg" alt="" />React</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/typescript.svg" alt="" />TypeScript</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/vite.svg" alt="" />Vite</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/nodedotjs.svg" alt="" />Node.js</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/express.svg" alt="" />Express</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/sqlite.svg" alt="" />SQLite</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/drizzle.svg" alt="" />Drizzle</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/github.svg" alt="" />GitHub</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/railway.svg" alt="" />Railway</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/cloudflare.svg" alt="" />Cloudflare</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/resend.svg" alt="" />Resend</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/googleanalytics.svg" alt="" />Google Analytics</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/godaddy.svg" alt="" />GoDaddy</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/outlook.svg" alt="" />Outlook</span>
+          </div>
+          <div class="tech-stack-group" aria-hidden="true">
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/react.svg" alt="" />React</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/typescript.svg" alt="" />TypeScript</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/vite.svg" alt="" />Vite</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/nodedotjs.svg" alt="" />Node.js</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/express.svg" alt="" />Express</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/sqlite.svg" alt="" />SQLite</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/drizzle.svg" alt="" />Drizzle</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/github.svg" alt="" />GitHub</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/railway.svg" alt="" />Railway</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/cloudflare.svg" alt="" />Cloudflare</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/resend.svg" alt="" />Resend</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/googleanalytics.svg" alt="" />Google Analytics</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/godaddy.svg" alt="" />GoDaddy</span>
+            <span class="tech-stack-item"><img src="/about-roadmap/assets/tech/outlook.svg" alt="" />Outlook</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="ending" id="submit-an-idea">
+      <div class="ending-copy">
+        <span class="eyebrow">YOUR TURN / SUBMIT AN IDEA</span>
+        <h2>
+          SUBMIT<span class="sr-only"> AN IDEA.</span>
+          <svg class="idea-title-outline" viewBox="0 0 760 180" role="presentation" aria-hidden="true" preserveAspectRatio="xMinYMid meet">
+            <defs>
+              <linearGradient id="idea-rgb" class="hero-next__gradient" x1="-920" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+                <stop offset="0" stop-color="#ff2d5e" />
+                <stop offset="0.125" stop-color="#ff9500" />
+                <stop offset="0.25" stop-color="#ffee00" />
+                <stop offset="0.375" stop-color="#39ff14" />
+                <stop offset="0.5" stop-color="#00ffff" />
+                <stop offset="0.625" stop-color="#3a6bff" />
+                <stop offset="0.75" stop-color="#8800ff" />
+                <stop offset="0.875" stop-color="#ff00cc" />
+                <stop offset="1" stop-color="#ff2d5e" />
+              </linearGradient>
+            </defs>
+            <text class="idea-title-outline__solid" x="2" y="148" font-family="Barlow Condensed, sans-serif" font-size="176" font-weight="900" letter-spacing="-2">AN</text>
+            <text class="idea-title-outline__stroke" x="206" y="148" font-family="Barlow Condensed, sans-serif" font-size="176" font-weight="900" letter-spacing="-2">IDEA.</text>
+          </svg>
+        </h2>
+        <p>
+          What should Zaylist build, fix, or understand next? This goes directly
+          to Zaylist for private review - not to a public post or discussion
+          board.
+        </p>
+        <span class="idea-note mono">No account required.</span>
+      </div>
+      <form
+        class="idea-form"
+        action="https://www.zaylist.com/api/contact/message"
+        method="post"
+        enctype="multipart/form-data"
+        target="idea-response"
+      >
+        <input type="hidden" name="kind" value="message" /><input
+          type="hidden"
+          name="pageUrl"
+          value="/about#submit-an-idea"
+        />
+        <div class="idea-field">
+          <label for="idea-name">Your name</label
+          ><input
+            id="idea-name"
+            name="name"
+            autocomplete="name"
+            maxlength="120"
+            placeholder="Name or nickname"
+            required
+          />
+        </div>
+        <div class="idea-field">
+          <label for="idea-email">Your email</label
+          ><input
+            id="idea-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength="200"
+            placeholder="Where replies should go"
+            required
+          />
+        </div>
+        <div class="idea-field idea-field--wide">
+          <label for="idea-message">Your idea</label
+          ><textarea
+            id="idea-message"
+            name="message"
+            maxlength="4000"
+            placeholder="Describe what Zaylist should do, who it would help, or what is getting in the way."
+            required
+          ></textarea>
+        </div>
+        <label class="idea-hp" for="idea-company">Company</label
+        ><input
+          class="idea-hp"
+          id="idea-company"
+          name="company"
+          tabindex="-1"
+          autocomplete="off"
+        /><button class="idea-submit" type="submit">Submit idea →</button>
+        <p class="idea-status" role="status" aria-live="polite"></p>
+      </form>
+      <iframe
+        class="idea-frame"
+        name="idea-response"
+        title="Idea submission response"
+      ></iframe>
+    </section>
+    <section class="founder-story" id="tucker" aria-labelledby="founder-story-title">
+      <img class="founder-motif founder-motif--community" src="/brand/line-icons/01-community.svg" alt="" aria-hidden="true" />
+      <img class="founder-motif founder-motif--safety" src="/brand/line-icons/06-safety.svg" alt="" aria-hidden="true" />
+      <div class="founder-kicker founder-section-kicker">Who’s behind it / about Tucker</div>
+      <h2 class="founder-title" id="founder-story-title">
+        Built by <span>Tucker</span><small>in Portland</small>
+      </h2>
+      <div class="founder-grid">
+        <div>
+          <div class="founder-avatar">
+            <a class="founder-avatar__face" href="https://www.zaylist.com/u/tucker_pdmax" aria-label="Tucker_PDmaX on Zaylist">
+              <img src="/about/tucker-portrait.jpg" alt="Tucker_PDmaX" width="864" height="1152" />
+            </a>
+            <span class="founder-avatar__handle">Tucker_PDmaX</span>
+          </div>
+          <div class="founder-links">
+            <a href="https://www.zaylist.com/u/tucker_pdmax">Follow Tucker on Zaylist</a>
+            <a href="https://www.instagram.com/tucker_pdmax" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.zaylist.com/u/tucker_pdmax" data-message-tucker>Message Tucker</a>
+          </div>
+          <div class="founder-credits">
+            Artist · Yes Coach · Brand promoter<br />
+            Digg’n For Bones · Former Oregon State Pet
+          </div>
+        </div>
+        <div class="founder-copy">
+          <p>
+            Hi, I’m Tucker. I run Yes Coach, host LockerRoom at The Eagle, and
+            build tools for this scene when a need is going unmet. No engineering
+            degree. Just every tool I could get my hands on and a stupid number
+            of hours.
+          </p>
+          <blockquote class="founder-pull">
+            <p>
+              This community keeps each other going. You showed up for me, and
+              this is me doing something back.
+            </p>
+          </blockquote>
+          <p>
+            I’m between full-time gigs and pouring all of it into this. If you
+            have a role or project that deserves that kind of energy, I’m
+            available.
+          </p>
+        </div>
+      </div>
+
+      <section class="founder-open pdx-glass-rebind" aria-labelledby="founder-open-title">
+        <img class="founder-open__motif" src="/brand/line-icons/25-energy.svg" alt="" aria-hidden="true" />
+        <div>
+          <div class="founder-open__status">Open to work</div>
+          <h3 id="founder-open-title">Available for <span>collaborations.</span></h3>
+        </div>
+        <div class="founder-open__body">
+          <p>
+            Full-time roles, ambitious projects, and collaborations are all on
+            the table. The common thread is work that needs brand instinct,
+            community fluency, product thinking, and the energy to make the
+            thing real.
+          </p>
+          <div class="founder-skills" aria-label="Tucker’s work">
+            <span>Brand &amp; marketing</span>
+            <span>Events &amp; community</span>
+            <span>Platforms &amp; product</span>
+          </div>
+          <div class="founder-actions">
+            <a class="founder-action founder-action--solid" href="https://www.zaylist.com/resume">View resume →</a>
+            <button class="founder-action" type="button" data-founder-contact-toggle aria-expanded="false" aria-controls="work-with-tucker-form">Work with Tucker</button>
+          </div>
+          <form class="founder-contact-form" id="work-with-tucker-form" action="https://www.zaylist.com/api/contact/message" method="post" enctype="multipart/form-data" target="collab-response">
+            <input type="hidden" name="kind" value="message" />
+            <input type="hidden" name="pageUrl" value="/about#work-with-tucker" />
+            <div class="idea-field"><label for="collab-name">Your name</label><input id="collab-name" name="name" autocomplete="name" maxlength="120" placeholder="Name or organization" required /></div>
+            <div class="idea-field"><label for="collab-email">Your email</label><input id="collab-email" name="email" type="email" autocomplete="email" maxlength="200" placeholder="Where Tucker should reply" required /></div>
+            <div class="idea-field idea-field--wide"><label for="collab-message">Collaboration</label><textarea id="collab-message" name="message" maxlength="4000" placeholder="Tell Tucker what you are working on and what kind of collaboration you have in mind." required></textarea></div>
+            <button class="idea-submit" type="submit">Send to Tucker →</button>
+            <p class="idea-status" role="status" aria-live="polite">No Zaylist account required.</p>
+          </form>
+          <iframe class="idea-frame" name="collab-response" title="Collaboration message response"></iframe>
+        </div>
+      </section>
+
+      <div class="founder-projects" aria-label="More work by Tucker">
+        <a class="founder-project" href="https://open.spotify.com/search/Digg%27n%20For%20Bones" target="_blank" rel="noopener noreferrer">
+          <img src="/about/diggn-for-bones.jpg" alt="" width="120" height="120" loading="lazy" />
+          <div>
+            <div class="founder-project__meta">Podcast · Season 3</div>
+            <h3>Digg’n For Bones</h3>
+            <p>Produced by Tucker · new episodes on Spotify</p>
+          </div>
+          <span class="founder-project__go">Listen →</span>
+        </a>
+        <a class="founder-project" href="https://www.zaylist.com/contact" target="_blank" rel="noopener noreferrer">
+          <img src="/about/disco/card-thumb.jpg" alt="Constrained and Sparkling Bro, shibari disco body sculptures" width="120" height="120" loading="lazy" />
+          <div>
+            <div class="founder-project__meta">Art · Made to order</div>
+            <h3>Constrained and Sparkling Bro</h3>
+            <p>Disco bodies in shibari · custom mirror mosaic · made in Portland</p>
+          </div>
+          <span class="founder-project__go">Order →</span>
+        </a>
+      </div>
+
+      <section class="founder-principles" id="trust" aria-labelledby="founder-values-title">
+        <div>
+          <div class="founder-kicker founder-section-kicker">How it operates</div>
+          <h3 class="founder-section-title" id="founder-values-title">Trust &amp; <span>boundaries</span></h3>
+        </div>
+        <div class="founder-values">
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>Community utility, not a creator platform.</strong> Zaylist organizes useful information and member listings instead of manufacturing content for engagement.</span></div>
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>Paid products stay in their lane.</strong> Clearly labeled commercial placement may appear in SELLZ. THE HAÜZ can charge property managers for professional housing tools and services. Events, places, community posts, and organic search are not pay-to-rank.</span></div>
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>Access before extraction.</strong> Future revenue should add value without turning basic discovery into a content paywall.</span></div>
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>An account protects participation.</strong> Names and accountability help keep spam out when someone posts or manages information.</span></div>
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>Personal data is not inventory.</strong> Monetization should come from useful products and services, not selling member information.</span></div>
+          <div class="founder-value"><span class="founder-values__mark">✓</span><span><strong>ZayDark is opt-in, not shame-driven.</strong> The community will not be sanitized by pretending consenting adults do not do what consenting adults do. Adult-oriented visibility lives behind a clear toggle that each person can turn on or off.</span></div>
+        </div>
+      </section>
+
+      <section class="founder-faq" id="questions" aria-labelledby="founder-faq-title">
+        <div>
+          <div class="founder-faq__kicker founder-section-kicker">FAQ</div>
+          <h3 class="founder-section-title" id="founder-faq-title">
+            <span class="founder-faq__good">Good</span>
+            <span class="founder-faq__questions" aria-label="Questions">
+              <svg viewBox="0 0 590 105" role="presentation" aria-hidden="true" preserveAspectRatio="xMinYMid meet">
+                <defs>
+                  <linearGradient id="faq-rgb" class="hero-next__gradient" x1="-920" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+                    <stop offset="0" stop-color="#ff2d5e"/><stop offset=".125" stop-color="#ff9500"/><stop offset=".25" stop-color="#ffee00"/><stop offset=".375" stop-color="#39ff14"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".625" stop-color="#3a6bff"/><stop offset=".75" stop-color="#8800ff"/><stop offset=".875" stop-color="#ff00cc"/><stop offset="1" stop-color="#ff2d5e"/>
+                  </linearGradient>
+                </defs>
+                <text x="4" y="88" fill="none" stroke="url(#faq-rgb)" stroke-width="3.5" paint-order="stroke" font-family="Barlow Condensed, sans-serif" font-size="96" font-weight="900" letter-spacing="1">QUESTIONS</text>
+              </svg>
+            </span>
+          </h3>
+        </div>
+        <div>
+          <details>
+            <summary>Why does this feel like a classifieds board?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Because useful queer life is bigger than an event feed. Zaylist brings together events, housing, gigs, free stuff, missed connections, outdoor plans, places, and community posts so people do not have to hunt across eight platforms.</div>
+          </details>
+          <details>
+            <summary>How is this different from other event apps?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Businesses can keep posting events on their own websites instead of managing another platform. Zaylist gathers those events into one place people can trust, and promoters can claim an event when they need to update it.</div>
+          </details>
+          <details>
+            <summary>How do I list my event?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Put it on your normal public event page first. Zaylist may find it automatically, or an account holder can submit it directly. Promoters can also claim an existing event and verified promoters can keep their own listings current.</div>
+          </details>
+          <details>
+            <summary>Where can businesses pay?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Commercial placement may be sold inside SELLZ, and property managers may pay for professional tools in THE HAÜZ. Payment does not move a business, event, place, or community post higher in the ordinary results.</div>
+          </details>
+          <details>
+            <summary>Do I need an account to use Zaylist?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Not to browse. An account is needed when someone wants to post, claim, manage, message, or otherwise participate. That keeps names attached to actions and makes spam harder.</div>
+          </details>
+          <details>
+            <summary>Is Zaylist trying to replace Facebook groups?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">It is trying to make them less necessary. Housing, outdoor recreation, gifting, events, and local exchange should not disappear because someone missed an invite, left Facebook, or could not find the right group.</div>
+          </details>
+          <details>
+            <summary>What is ZayDark?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">ZayDark is an optional view for adult-oriented parts of queer life. It stays behind a clear on-and-off control, so adults can choose what they see without asking the whole community to pretend it does not exist.</div>
+          </details>
+          <details>
+            <summary>Is this staying in Portland?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Portland comes first. The goal is to make Zaylist genuinely useful and trusted here before taking the model to other cities. Expansion comes after the local product works.</div>
+          </details>
+          <details>
+            <summary>Who decides what comes down?<span aria-hidden="true">+</span></summary>
+            <div class="founder-faq__answer">Zaylist does, using the community rules, the context of what happened, and the safety of the people involved. Removal should come with a reason, and there should be a person to contact when the decision needs another look.</div>
+          </details>
+        </div>
+      </section>
+    </section>

@@ -1,9 +1,6 @@
-import { Link } from "wouter";
 import { Button } from "@/components/ds";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import "../hub-home.css";
-
-const DARKROOM_SRC = "/brand/darkroom.jpg";
 
 type Props = {
   pendingCount: number;
@@ -11,29 +8,10 @@ type Props = {
   isPrimaryOwner?: boolean;
   compact?: boolean;
   /**
-   * Mobile hub drawer: replace “You hold the keys” copy block with the
-   * Darkroom still + RGB glitch (same asset as /darkroom). Queue actions stay.
+   * Legacy compact media slot. NEXT is now part of the About page.
    */
   darkroomMedia?: boolean;
 };
-
-function DarkroomStage() {
-  return (
-    <div className="hub-keys__darkroom-stage" aria-hidden="true">
-      <img className="hub-keys__darkroom-img hub-keys__darkroom-img--base" src={DARKROOM_SRC} alt="" />
-      <img
-        className="hub-keys__darkroom-img hub-keys__darkroom-img--ghost hub-keys__darkroom-img--a"
-        src={DARKROOM_SRC}
-        alt=""
-      />
-      <img
-        className="hub-keys__darkroom-img hub-keys__darkroom-img--ghost hub-keys__darkroom-img--b"
-        src={DARKROOM_SRC}
-        alt=""
-      />
-    </div>
-  );
-}
 
 export default function HubAdminKeys({
   pendingCount,
@@ -47,16 +25,7 @@ export default function HubAdminKeys({
   const hasOwnerWork = isPrimaryOwner && ownerCount > 0;
 
   if (darkroomMedia) {
-    // Just the Darkroom teaser image - no card, no border, no queue buttons.
-    return (
-      <Link
-        href="/next"
-        className="hub-keys__darkroom-link hub-keys__darkroom-link--bare"
-        aria-label="Open Next"
-      >
-        <DarkroomStage />
-      </Link>
-    );
+    return null;
   }
 
   if (compact) {
