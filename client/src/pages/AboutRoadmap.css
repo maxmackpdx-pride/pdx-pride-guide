@@ -326,6 +326,15 @@
         height: 100%;
         overflow: visible;
       }
+      .hero-z-tm {
+        position: absolute;
+        top: -.08em;
+        right: -.34em;
+        color: var(--slate-12);
+        font: 700 .12em/1 JetBrains Mono, monospace;
+        letter-spacing: .08em;
+        -webkit-text-stroke: 0;
+      }
       .hero-z-halo__z {
         fill: var(--slate-1);
         stroke: url(#hero-z-rgb);
