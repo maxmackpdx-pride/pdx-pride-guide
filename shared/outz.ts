@@ -159,8 +159,6 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     accessNote: "This is a private residential community, not a walk-in campground. Contact the operator before planning a visit; its public site does not publish an exact visitor address.",
     inclusionNote: "The operator says the land has been held by and for womyn since 1973, with generations of womyn, primarily lesbians, among its residents and extended network.",
     officialUrl: "https://wemoonland.org/",
-    lat: 45.289,
-    lng: -122.333,
     discoverySource: {
       name: "We'Moon Land operator site",
       href: "https://wemoonland.org/",
