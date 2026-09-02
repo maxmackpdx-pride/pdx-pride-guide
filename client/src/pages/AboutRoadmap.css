@@ -137,6 +137,7 @@
         .quick-nav:focus-within .quick-nav__inner,
         .quick-nav:hover .quick-nav__inner { animation-play-state: paused; }
       }
+
       @media (prefers-reduced-motion: reduce) {
         .quick-nav__inner { animation: none; transform: none; }
         .quick-nav__group[aria-hidden="true"] { display: none; }
@@ -3103,4 +3104,57 @@
         .founder-faq summary {
           min-height: 64px;
         }
+      }
+
+      /* Full-bleed visual layers; the content and divider grid stays aligned. */
+      .roadmap-phase__summary {
+        isolation: isolate;
+        background: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      .roadmap-phase__summary::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100vw;
+        transform: translateX(-50%);
+        background: color-mix(in srgb, var(--slate-1) 96%, transparent);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        pointer-events: none;
+      }
+
+      .crossing-bloom {
+        width: 100vw;
+        max-width: none;
+      }
+
+      .founder-faq {
+        isolation: isolate;
+        background: transparent;
+      }
+
+      .founder-faq::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset-block: 0;
+        left: 50%;
+        width: 100vw;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, rgba(0,255,255,.045), rgba(17,17,19,.98) 38%, var(--slate-1));
+        pointer-events: none;
+      }
+
+      /* RGB outlines expose the live page behind them. */
+      .hero-next__stroke,
+      .hero-z-halo__z,
+      .idea-title-outline__stroke,
+      .founder-faq__questions text {
+        fill: transparent;
       }
