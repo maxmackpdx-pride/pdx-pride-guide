@@ -1,6 +1,13 @@
 # QSearch
 
-Admin event intelligence for Zaylist. **Discover + draft only.** Review supports **Approve LIVE** or **Stage HIDDEN**. Never auto-LIVE without human approve.
+The original QSEARCH scraper and fine-tuned model are archived. The historical
+implementation notes below remain available as source-path and failure-pattern
+memory only; its scheduler and AI scrub must not be restarted.
+
+QSearch 2.0 is the current agent-led workflow. It researches broadly and may
+publish narrowly under its evidence, identity, lock, mistake-test, and rollback
+contract. The legacy admin queue described below remains **discover + draft
+only** and never auto-publishes.
 
 **Route:** `/admin?tab=qsearch`  
 **Branch work:** `feature/phase4-ingest`
@@ -35,6 +42,48 @@ Admin event intelligence for Zaylist. **Discover + draft only.** Review supports
 | Vision | `server/qsearch/vision.ts` |
 | IG assist | `server/qsearch/instagram.ts` |
 | UI | `client/src/components/admin/QSearchDashboard.tsx` |
+
+## QSearch 2.0 scoped agent access
+
+QSearch 2.0 does not borrow a Tucker/admin browser session. It authenticates
+with one dedicated, revocable bearer credential that is accepted only by
+`/api/admin/event-research/*`. That credential does **not** create an admin
+session and cannot open unrelated admin routes.
+
+- Railway stores `QSEARCH_AGENT_TOKEN` for the production API.
+- The local runner reads the same credential from `QSEARCH_AGENT_TOKEN` or the
+  macOS Keychain service `zaylist-qsearch-agent-api`, account `qsearch-2`.
+- The token must never appear in prompts, source memory, URLs, command
+  arguments, logs, reports, or repository files.
+- A missing credential or a `401` stops production writes and is reported as an
+  access failure; it is not a reason to fall back to cookies or weaken admin
+  authentication.
+
+Use the scoped client so the credential is added internally:
+
+```bash
+node script/qsearch-agent-api.mjs source-memory
+node script/qsearch-agent-api.mjs events 2026-09-01
+node script/qsearch-agent-api.mjs changes 50
+```
+
+Mutation commands accept JSON from a file or standard input:
+
+```bash
+node script/qsearch-agent-api.mjs record-path -
+node script/qsearch-agent-api.mjs create-event -
+node script/qsearch-agent-api.mjs change-event EVENT_ID -
+node script/qsearch-agent-api.mjs rollback ROLLBACK_TOKEN
+```
+
+Event creation/correction requires current field-level evidence receipts, a
+specific reason, passed mistake tests, and—for corrections—the exact
+`updatedAt` value read before the write. Claimed or human-submitted events and
+human-locked fields are rejected. Every accepted mutation receives an
+append-only change record and rollback token. QSearch may revise a lock created
+by its own prior correction, but never a human-owned lock. A `LIVE` event must
+also have its exact address and complete publication fields; incomplete
+candidates stay `HIDDEN` for review.
 
 ## Nightly schedule
 
@@ -152,11 +201,15 @@ They are excluded from the QSearch catch-all (trusted-lane filter).
   relevant even when the individual listing does not repeat LGBTQ+ keywords.
 - Founder-locked trusted dedicated LGBTQ+ venues are Sanctuary Club, Eagle
   Portland, Badlands, The Sports Bra, Q Center, Steam Portland, Camp Bar PDX,
-  Darcelle XV Showplace, CC Slaughters, and Hawks PDX. Their official calendars
-  establish LGBTQ+ relevance for every verified event there. Do not require
-  separate event-specific LGBTQ+ proof; publish after the exact identity and
-  normal date/time/link/duplicate/artwork evidence gates pass. Tucker's shorthand
-  `the Eagle` means Eagle Portland and `Camp` means Camp Bar PDX.
+  Darcelle XV Showplace, CC Slaughters, Hawks PDX, and Scandals East. Their
+  official calendars establish LGBTQ+ relevance for every verified event there.
+  Do not require separate event-specific LGBTQ+ proof; publish after the exact
+  identity and normal date/time/link/duplicate/artwork evidence gates pass.
+  Tucker's shorthand `the Eagle` means Eagle Portland and `Camp` means Camp Bar
+  PDX.
+- Scandals East's current trusted identity is `827 NE Alberta St, Portland, OR
+  97211`. Its former downtown/Harvey Milk location stays blocked and must never
+  be reattached through a shared-word or stale-address match.
 - An event at an **ordinary venue** is relevant only when the title or
   description explicitly establishes LGBTQ+ relevance or a queer host.
 - Venue/directory attachment requires exact venue identity, an exact directory

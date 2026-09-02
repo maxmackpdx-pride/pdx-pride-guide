@@ -1,7 +1,7 @@
 import type { OutzPlaceKind } from "@shared/outz";
 
 /**
- * Badge label and accent per Z/OUT listing kind. Shared by the OUTZ homepage and
+ * Badge label and accent per OUTZ listing kind. Shared by the OUTZ homepage and
  * the destination page so a kind reads the same colour and label on both.
  */
 export const OUTZ_KIND_META: Record<OutzPlaceKind, { label: string; color: string; accent: string }> = {

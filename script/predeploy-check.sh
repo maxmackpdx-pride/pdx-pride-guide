@@ -59,4 +59,15 @@ if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
   echo "predeploy: running QSearch identity guards…"
   node --import tsx script/smoke-qsearch-identity.ts
   node --import tsx script/smoke-sports-bra.ts
+  node --import tsx script/smoke-qsearch-agent-auth.ts
+  qsearch_test_dir="$(mktemp -d "${TMPDIR:-/tmp}/qsearch-event-change.XXXXXX")"
+  cp data.db "$qsearch_test_dir/data.db"
+  qsearch_test_status=0
+  ALLOW_QSEARCH_TEST_DB=1 DATABASE_PATH="$qsearch_test_dir/data.db" \
+    node --import tsx script/smoke-event-research-change.ts || qsearch_test_status=$?
+  unlink "$qsearch_test_dir/data.db"
+  rmdir "$qsearch_test_dir"
+  if [[ "$qsearch_test_status" -ne 0 ]]; then
+    exit "$qsearch_test_status"
+  fi
 fi

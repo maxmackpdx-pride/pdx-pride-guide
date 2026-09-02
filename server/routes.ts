@@ -111,9 +111,18 @@ import { readGaMeasurementId } from "./gaSnippet";
 import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
 import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
 import {
+  applyEventResearchEventChange,
+  createEventFromResearch,
+  eventForResearchAgent,
   getEventResearchSourceMemory,
+  listEventResearchChanges,
   recordEventResearchPath,
+  rollbackEventResearchChange,
 } from "./eventResearchMemory";
+import {
+  allowAdminOrEventResearchAgent,
+  eventResearchActor,
+} from "./eventResearchAuth";
 import {
   deleteOutzCheckin,
   createOutzWallComment,
@@ -991,6 +1000,8 @@ function requireAdmin(req: any, res: any, next: any) {
   return res.status(401).json({ error: "Not authenticated" });
 }
 
+const requireEventResearchAccess = allowAdminOrEventResearchAgent(requireAdmin);
+
 function getSessionAdminUser(req: any) {
   if (!req.session?.userId) return null;
   const user = storage.getUserById(req.session.userId);
@@ -1051,6 +1062,29 @@ function auditAdmin(
   });
 }
 
+function auditEventResearch(
+  req: any,
+  action: string,
+  target?: {
+    type?: string | null;
+    id?: string | number | null;
+    label?: string | null;
+    detail?: Record<string, unknown> | null;
+  },
+) {
+  const actor = eventResearchActor(req);
+  if (!actor) return auditAdmin(req, action, target);
+  storage.logAdminAction({
+    actorUserId: null,
+    actorUsername: actor,
+    action,
+    targetType: target?.type ?? null,
+    targetId: target?.id ?? null,
+    targetLabel: target?.label ?? null,
+    detail: target?.detail ?? null,
+  });
+}
+
 let attendanceHub: ReturnType<typeof initAttendanceWs> | null = null;
 
 function notifyAttendanceUpdate(eventId: number) {
@@ -1076,11 +1110,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   );
 
   // The agent can read every old source pathway without reviving QSEARCH.
-  app.get("/api/admin/event-research/source-memory", requireAdmin, (_req, res) => {
+  app.get("/api/admin/event-research/source-memory", requireEventResearchAccess, (_req, res) => {
     res.json(getEventResearchSourceMemory());
   });
 
-  app.post("/api/admin/event-research/source-memory/path", requireAdmin, (req, res) => {
+  app.post("/api/admin/event-research/source-memory/path", requireEventResearchAccess, (req, res) => {
     const result = recordEventResearchPath({
       sourceKey: String(req.body?.sourceKey || ""),
       label: String(req.body?.label || ""),
@@ -1099,7 +1133,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       error: req.body?.error != null ? String(req.body.error) : null,
     });
     if (!result.ok) return res.status(400).json(result);
-    auditAdmin(req, "event_research_source_memory", {
+    auditEventResearch(req, "event_research_source_memory", {
       type: "event_research_source",
       id: String((result.path as any)?.id || ""),
       detail: {
@@ -1110,6 +1144,92 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
     res.json(result);
   });
+
+  /**
+   * Narrow machine catalog for QSearch 2.0. Unlike /api/admin/events, this
+   * omits member/admin profiles and accepts only the dedicated agent token or
+   * a live admin session.
+   */
+  app.get("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
+    const from = String(req.query.from || "").trim();
+    const events = storage
+      .getEvents({})
+      .filter(event => event.status === "LIVE" || event.status === "HIDDEN")
+      .filter(event => !from || String(event.dateEnd || event.dateStart || "") >= from)
+      .map(event => eventForResearchAgent(event as any));
+    res.json({ generatedAt: new Date().toISOString(), events });
+  });
+
+  app.get("/api/admin/event-research/changes", requireEventResearchAccess, (req, res) => {
+    res.json({
+      generatedAt: new Date().toISOString(),
+      changes: listEventResearchChanges(Number(req.query.limit) || 100),
+    });
+  });
+
+  app.post("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
+    const result = createEventFromResearch({
+      event: req.body?.event,
+      evidenceReceipts: req.body?.evidenceReceipts,
+      reason: req.body?.reason,
+      mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
+    });
+    if (!result.ok) return res.status(result.status).json(result);
+    auditEventResearch(req, "event_research_event_create", {
+      type: "event",
+      id: result.event.id,
+      label: result.event.title,
+      detail: {
+        evidenceReceiptCount: result.evidenceReceipts.length,
+        rollbackAvailable: result.rollback.available,
+      },
+    });
+    res.status(201).json(result);
+  });
+
+  app.post("/api/admin/event-research/events/:id/change", requireEventResearchAccess, (req, res) => {
+    const result = applyEventResearchEventChange(Number(req.params.id), {
+      expectedUpdatedAt: String(req.body?.expectedUpdatedAt || ""),
+      patch: req.body?.patch,
+      evidenceReceipts: req.body?.evidenceReceipts,
+      reason: req.body?.reason,
+      mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
+    });
+    if (!result.ok) return res.status(result.status).json(result);
+    auditEventResearch(req, "event_research_event_change", {
+      type: "event",
+      id: result.event.id,
+      label: result.event.title,
+      detail: {
+        changedFields: result.changedFields,
+        evidenceReceiptCount: result.evidenceReceipts.length,
+        rollbackAvailable: result.rollback.available,
+      },
+    });
+    res.json(result);
+  });
+
+  app.post(
+    "/api/admin/event-research/changes/:rollbackToken/rollback",
+    requireEventResearchAccess,
+    (req, res) => {
+      if (req.body?.confirm !== true) {
+        return res.status(400).json({ error: "confirm: true is required" });
+      }
+      const result = rollbackEventResearchChange(String(req.params.rollbackToken || ""));
+      if (!result.ok) return res.status(result.status).json(result);
+      auditEventResearch(req, "event_research_event_rollback", {
+        type: "event",
+        id: result.eventId,
+        detail: {
+          operation: result.operation,
+          alreadyRolledBack: result.alreadyRolledBack === true,
+          rolledBackAt: result.rolledBackAt,
+        },
+      });
+      res.json(result);
+    },
+  );
 
   // Lightweight probe for Railway healthchecks - must not hit the DB.
   // Public tip links (Venmo + optional Stripe Payment Link for Apple Pay / cards).
@@ -1598,7 +1718,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  // ─── Z/OUT (official outdoor conditions + catalog) ──────────────────────
+  // OUTZ (official outdoor conditions + catalog)
   app.get("/api/outz", async (_req, res) => {
     try {
       res.json(await getOutzSnapshot());

@@ -6,13 +6,13 @@ owner: Tucker
 authority: founder direction
 context: >-
   Z/ is the address board for the product family, not a category inside itself.
-  Places, Clubz & Groupz, and Z/OUT need distinct ownership so the index does
+  Places, Clubz & Groupz, and OUTZ need distinct ownership so the index does
   not duplicate categories or present nested destinations as peer boards.
 decision:
   - /z is the complete top-level board index.
   - Clubz & Groupz owns /z/spaces and reuses the Directory's real group records, detail pages, and follow controls.
   - Places excludes group records because those records belong to Clubz & Groupz on the Z/ index.
-  - Z/OUT is one top-level card; Rooster Rock and Sauvie Island are nested destination pages on that card.
+  - OUTZ is one top-level card; Rooster Rock and Sauvie Island are nested destination pages on that card.
   - The top address rail and board totals count top-level boards only.
   - Nested address labels use their terminal segment while routes retain the full canonical hierarchy.
   - Public counts report real data; zero is shown honestly and pending boards never receive fabricated inventory.

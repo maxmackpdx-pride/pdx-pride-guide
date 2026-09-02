@@ -1,4 +1,4 @@
-/* Z/OUT shared surface primitives.
+/* OUTZ shared surface primitives.
    Single source of truth for the section's card, panel, status, and conditions
    recipes so /z/out and /z/out/:placeSlug cannot drift apart again. Imported by
    Outz.css and OutzPlace.css; page-specific layout stays in those files.

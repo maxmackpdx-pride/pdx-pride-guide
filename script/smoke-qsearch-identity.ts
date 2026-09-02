@@ -69,6 +69,7 @@ for (const venueName of [
   "Darcelle XV Showplace",
   "CC Slaughters",
   "Hawks PDX",
+  "Scandals East",
 ]) {
   assert(
     isRelevantScanDraft(
