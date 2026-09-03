@@ -4,7 +4,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
 import HomeWorldCard from "@/components/home/HomeWorldCard";
-import { ZDeck, ZDeckDots } from "@/components/ZDeck";
+import { WorldFanCarousel } from "@/components/home/WorldFanCarousel";
 import { WORLDS } from "@/lib/homeWorlds";
 import { useHomeWorlds } from "@/lib/useHomeWorlds";
 import {
@@ -135,17 +135,15 @@ export default function HomeStage({ afterWelcome }: Props) {
           </h2>
           <p>You&apos;re looking for the room, the ride, the person, or the thing that makes tonight feel good and tomorrow even better.</p>
         </header>
-        <ZDeck
+        <WorldFanCarousel
           total={WORLDS.length}
           selected={selectedWorld}
           onSelect={setSelectedWorld}
           className="home-front__deck"
           label="You&apos;re not looking for content."
           autoplayMs={5600}
-          settleEase={0.08}
-          fade={0.12}
-          gap={0.12}
-          rotate={12}
+          labelOf={index => WORLDS[index].title}
+          accentOf={index => WORLDS[index].accent}
         >
           {WORLDS.map((world, index) => {
             /*
@@ -175,15 +173,7 @@ export default function HomeStage({ afterWelcome }: Props) {
               />
             );
           })}
-        </ZDeck>
-        <ZDeckDots
-          total={WORLDS.length}
-          selected={selectedWorld}
-          onSelect={setSelectedWorld}
-          labelOf={index => WORLDS[index].title}
-          accentOf={index => WORLDS[index].accent}
-          className="home-front__deck-dots"
-        />
+        </WorldFanCarousel>
       </section>
     </div>
   );

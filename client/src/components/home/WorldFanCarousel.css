@@ -1,0 +1,152 @@
+/* Fanned-arc carousel. Sizing is the caller's job via --fan-card / --fan-card-h. */
+
+.world-fan {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 0 0;
+  outline: none;
+  touch-action: pan-y;
+  user-select: none;
+  --fan-card: clamp(230px, 18vw, 272px);
+  --fan-card-h: 540px;
+  --fan-origin: 146%;
+  --fan-dip: 72px;
+}
+
+.world-fan:focus-visible {
+  box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55));
+}
+
+.world-fan__stage {
+  position: relative;
+  width: 100%;
+  height: calc(var(--fan-card-h) + var(--fan-dip));
+  overflow: visible;
+}
+
+.world-fan__track {
+  position: relative;
+  width: 100%;
+  height: var(--fan-card-h);
+}
+
+.world-fan__slide {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--fan-card);
+  height: var(--fan-card-h);
+  transform-origin: 50% var(--fan-origin);
+  transform: translate3d(-50%, 0, 0);
+  will-change: transform, opacity;
+  cursor: pointer;
+}
+
+.world-fan__slide.is-front { cursor: grab; }
+.world-fan:active .world-fan__slide.is-front { cursor: grabbing; }
+
+.world-fan__body {
+  width: 100%;
+  height: 100%;
+}
+
+.world-fan__slide > .world-fan__body > .home-world,
+.world-fan__body > .home-world {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+}
+
+.world-fan__pager {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px 0 0;
+  padding-inline: var(--zl-gutter, clamp(16px, 4vw, 48px));
+}
+
+.world-fan__nav {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(10, 10, 14, .78);
+  color: #f2f2f6;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.world-fan__nav:hover {
+  background: rgba(18, 18, 24, .92);
+  border-color: rgba(255, 255, 255, .28);
+}
+
+.world-fan__nav:focus-visible {
+  box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55));
+}
+
+.world-fan__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.world-fan__dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #3a3a42;
+  opacity: .7;
+  cursor: pointer;
+}
+
+.world-fan__dots button.is-on {
+  width: 8px;
+  height: 8px;
+  background: var(--c, var(--neon-cyan, #19e3ff));
+  opacity: 1;
+}
+
+.world-fan__dots button:focus-visible {
+  box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55));
+}
+
+@media (max-width: 900px) {
+  .world-fan {
+    --fan-card: clamp(210px, 30vw, 250px);
+    --fan-card-h: 500px;
+    --fan-dip: 56px;
+  }
+}
+
+@media (max-width: 620px) {
+  .world-fan {
+    --fan-card: clamp(220px, 72vw, 280px);
+    --fan-card-h: 520px;
+    --fan-origin: 132%;
+    --fan-dip: 36px;
+    padding: 4px 0 0;
+  }
+  .world-fan__nav {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-fan__slide { will-change: auto; }
+}
