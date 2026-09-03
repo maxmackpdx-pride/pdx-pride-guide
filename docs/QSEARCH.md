@@ -67,7 +67,7 @@ node script/qsearch-agent-api.mjs events 2026-09-01
 node script/qsearch-agent-api.mjs changes 50
 ```
 
-### Evidence control plane (local, activation pending deployment)
+### Evidence control plane (production active)
 
 QSearch 2.0 now has a backward-compatible evidence control plane. The existing
 source-memory and event commands remain valid; the additions make an agent run
@@ -96,9 +96,10 @@ The decision gate blocks on missing field evidence, open material conflicts,
 unpassed active mistake tests, and (when requested) fewer than two independent
 sources per field.
 
-Do not add these commands to the active heartbeat prompt until this code has
-deployed successfully and the live scoped endpoints have been probed. This
-section describes implemented local code, not a production-activated agent.
+These commands are deployed in product commit `9679555a`; Railway deployment
+`ae309828-0f40-4d40-880a-9606afa91d11` reached `SUCCESS`, and the live scoped
+control endpoint passed its least-privilege probe. The active heartbeat may use
+the control plane while retaining the same dedicated credential boundary.
 
 Mutation commands accept JSON from a file or standard input:
 
