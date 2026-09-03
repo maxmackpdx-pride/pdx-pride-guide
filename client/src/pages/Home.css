@@ -758,27 +758,15 @@
   filter: none;
 }
 
-/* HEADED TO THE RIVER? — white default, orange on hover */
-.home-hero__btn--river {
+/* MIZZED CONNECTION — white default, board magenta on hover */
+.home-hero__btn--mizzed {
   color: #fff;
   background: rgba(0, 0, 0, 0.72);
 }
 
-.home-hero__btn--river:hover {
-  color: #ff6600;
-  border-color: color-mix(in srgb, #ff6600 45%, rgba(255, 255, 255, 0.2));
-  filter: none;
-}
-
-/* NEED A ROOM? — white default, THE HAÜZ purple on hover */
-.home-hero__btn--haus {
-  color: #fff;
-  background: rgba(0, 0, 0, 0.72);
-}
-
-.home-hero__btn--haus:hover {
-  color: #b06bff;
-  border-color: color-mix(in srgb, #b06bff 45%, rgba(255, 255, 255, 0.2));
+.home-hero__btn--mizzed:hover {
+  color: #ff00cc;
+  border-color: color-mix(in srgb, #ff00cc 45%, rgba(255, 255, 255, 0.2));
   filter: none;
 }
 
