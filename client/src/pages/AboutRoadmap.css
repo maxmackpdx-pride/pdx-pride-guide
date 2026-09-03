@@ -3434,6 +3434,7 @@
           --type-body: 17px;
           --phase-sticky-top: 46px;
         }
+        .roadmap-phase__rails { display: none; }
         .quick-nav a { min-height: 46px; }
         .hero { padding-top: 54px; }
         .hero-manifesto {
