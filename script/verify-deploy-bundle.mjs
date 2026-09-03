@@ -17,6 +17,7 @@ if (jsFiles.length === 0 || !cssFile) {
 const jsFile = jsFiles.join(", ");
 const js = jsFiles.map((f) => readFileSync(join(assetsDir, f), "utf8")).join("\n");
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
+const serverBundle = readFileSync("dist/index.cjs", "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
 const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
 
@@ -31,6 +32,7 @@ const checks = {
     !dashboardCss.includes("DM Mono"),
   noLegacyHeroOverlays: !js.includes("hero-video-overlays") && !js.includes("home-hero-glitch"),
   noPageHeroKickers: !js.includes("PRIDE WEEKEND 2026") && !js.includes("ABOUT THIS GUIDE"),
+  noSashaColbyDefaults: !/sasha[ -]colby/i.test(js) && !/sasha[ -]colby/i.test(serverBundle),
 };
 
 const failed = Object.entries(checks).filter(([, ok]) => !ok).map(([name]) => name);

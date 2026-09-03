@@ -330,7 +330,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
     meta: "Fri · 9:00 PM",
     cta: "I'm going →",
     accent: "var(--day-fri, #FF00CC)",
-    thumbUrl: "/home/flyers/sasha-colby-live.jpg",
+    thumbUrl: "/posters/darcelle-xv-cars-rising-star.jpg",
     isLive: false,
   },
   housing: {

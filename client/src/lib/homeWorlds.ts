@@ -305,9 +305,9 @@ export const DEMO_OUTZ_ROWS: WorldRow[] = [
 export const DEMO_FLYER: WorldFlyer = {
   id: "demo-eventz-flyer",
   href: "/events",
-  title: "Sasha Colby Live",
+  title: "Champagne's Catch a Rising Star",
   when: "Darcelle XV Showplace · Fri 9:00 PM",
-  poster: "/home/flyers/sasha-colby-live.jpg",
+  poster: "/posters/darcelle-xv-cars-rising-star.jpg",
   dayColor: "var(--day-fri, #ff00cc)",
   isLive: false,
 };
@@ -445,7 +445,7 @@ export const DEMO_ITEMS: WorldItem[] = [
 export const DEMO_TODAY: WorldTodayItem[] = [
   { id: "demo-today-1", href: "/z", label: "Drag brunch", sub: "Darcelle XV", time: "11 AM", accent: "var(--day-thu, #00ffff)", isLive: false },
   { id: "demo-today-2", href: "/z", label: "Vendor setup", sub: "Block Party", time: "2 PM", accent: "var(--board-gigs, #6e3dff)", isLive: false },
-  { id: "demo-today-3", href: "/z", label: "Sasha Colby Live", sub: "Darcelle XV Showplace", time: "9 PM", accent: "var(--neon-green, #39ff14)", isLive: false },
+  { id: "demo-today-3", href: "/z", label: "Catch a Rising Star", sub: "Darcelle XV Showplace", time: "9 PM", accent: "var(--neon-green, #39ff14)", isLive: false },
   { id: "demo-today-4", href: "/z", label: "Afterparty", sub: "CC Slaughters", time: "11 PM", accent: "var(--board-spotted, #ff00cc)", isLive: false },
   { id: "demo-today-5", href: "/z", label: "Late skate", sub: "Oaks Park", time: "12 AM", accent: "var(--board-gifting, #ccff00)", isLive: false },
 ];
