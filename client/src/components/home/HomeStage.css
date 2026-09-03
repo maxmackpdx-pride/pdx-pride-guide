@@ -6,14 +6,14 @@
    made the logo read matte. Now it only feathers the bottom edge into the
    seam, leaving the middle clear so the mark stays sharp and vibrant. */
 .home-front__atmosphere { position: absolute; inset: 0; z-index: -3; background: linear-gradient(180deg, transparent 0%, transparent 58%, rgba(5,5,6,.55) 84%, #050506 100%); }
-.home-front__hero { position:relative; z-index:2; box-sizing:border-box; width:min(1120px,100%); min-width:0; min-height:0; flex:1 1 auto; margin-inline:auto; padding:clamp(32px,6vw,72px) clamp(20px,5vw,64px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+.home-front__hero { position:relative; z-index:2; box-sizing:border-box; width:min(100%,var(--zl-frame,1280px)); min-width:0; min-height:0; flex:1 1 auto; margin-inline:auto; padding-block:clamp(32px,6vw,72px); padding-inline:var(--zl-gutter,clamp(28px,3.4vw,48px)); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
 .home-front__kicker { margin:0 0 clamp(32px,7vh,72px); display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 10px; max-width:100%; min-width:0; box-sizing:border-box; padding-inline:4px; color:var(--status-good,#39ff14); font:700 15.2px/1 var(--font-mono,monospace); letter-spacing:.2em; text-transform:uppercase; }
 .home-front__kicker-row { display:inline-flex; align-items:center; gap:10px; min-width:0; }
 .home-front__kicker-line { min-width:0; }
 .home-front__kicker-dot { flex:none; letter-spacing:0; opacity:.85; }
 .home-front__kicker-beta { font-size:1.3em; font-style:normal; font-weight:700; letter-spacing:.16em; }
 .home-front__kicker-live { flex:none; width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 12px currentColor; animation:homeFrontKickerBlink 1.15s steps(2,end) infinite; }
-.home-front__mark { position:relative; width:min(1100px,98vw); animation:homeFrontMarkFloat 6.4s ease-in-out infinite alternate; }
+.home-front__mark { position:relative; width:min(100%,1000px); animation:homeFrontMarkFloat 6.4s ease-in-out infinite alternate; }
 .home-front__mark-art { position:relative; }
 .home-front__mark img { display:block; width:100%; height:auto; filter:saturate(1.35) brightness(1.08) drop-shadow(0 20px 18px rgba(0,0,0,.72)) drop-shadow(0 0 24px rgba(255,0,204,.3)) drop-shadow(0 0 34px rgba(0,255,255,.22)); }
 .home-front__mark-glitch { position:absolute; inset:0; opacity:0; mix-blend-mode:screen; pointer-events:none; }

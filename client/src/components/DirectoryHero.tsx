@@ -8,8 +8,8 @@ type Props = {
 };
 
 /**
- * Directory page hero (2026-07-28 redesign).
- * Aurora + H1 lockup + lede + mono mantra. Stats live in the page band below.
+ * Directory-first hero. The approved wordmark and Zaylist atmosphere stay in
+ * place while the composition follows the named directory-template reference.
  */
 export default function DirectoryHero({ squadz = false }: Props) {
   const brand = squadz ? "MY SQUADZ" : "OUR PLACEZ";

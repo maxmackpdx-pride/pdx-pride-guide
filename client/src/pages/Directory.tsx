@@ -37,8 +37,8 @@ import "./Directory.css";
 
 const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
 
-/** Full-width map height per design handoff (~560px). */
-const DIRECTORY_MAP_HEIGHT = 560;
+/** Directory-preview map: large enough to browse without overpowering the listings. */
+const DIRECTORY_MAP_HEIGHT = 460;
 
 export type DirectoryEventSummary = {
   id: number;
@@ -628,6 +628,65 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
       <DirectoryHero placeCount={businesses.length} squadz={isSpaces || activeType === "group"} />
 
+      <section className="directory-discovery" aria-label={isSpaces ? "Find a squad" : "Find a place"}>
+        <div className="directory-discovery__panel pdx-glass-card pdx-glass-rebind">
+          <label className="directory-discovery__field directory-discovery__field--search">
+            <span>What are you looking for?</span>
+            <SearchInput
+              id="directory-hero-search"
+              aria-label={isSpaces ? "Search MY SQUADZ" : "Search OUR PLACEZ"}
+              placeholder={isSpaces ? "Name, group, or keyword" : "Name, food, nightlife, care…"}
+              value={searchQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery("")}
+              data-testid="directory-hero-search"
+            />
+          </label>
+          {!isSpaces && (
+            <label className="directory-discovery__field">
+              <span>Category</span>
+              <select
+                value={activeType}
+                onChange={e => handleSelectCategory(e.target.value)}
+                aria-label="Filter by category"
+              >
+                <option value="ALL">All categories</option>
+                {CATEGORY_ORDER.map(type => (
+                  <option key={type} value={type}>{TYPE_LABELS[type]}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className="directory-discovery__field">
+            <span>Neighborhood</span>
+            <select
+              value={activeNeighborhood}
+              onChange={e => setActiveNeighborhood(e.target.value)}
+              aria-label="Filter by neighborhood"
+            >
+              {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="directory-discovery__submit"
+            onClick={() => document.getElementById("directory-results")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          >
+            Explore {isSpaces ? "squadz" : "places"}
+          </button>
+        </div>
+        {!isSpaces && (
+          <div className="directory-discovery__quick" aria-label="Popular categories">
+            <span>Popular:</span>
+            {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0).slice(0, 5).map(type => (
+              <button key={type} type="button" onClick={() => handleSelectCategory(type)}>
+                {TYPE_LABELS[type]}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Stats band */}
       <section
         className="directory-stats-band"
@@ -884,7 +943,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       </section>}
 
       {/* Map + key + filters + dock */}
-      <section className="directory-stage" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
+      <section id="directory-results" className="directory-stage" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
         <div className="directory-stage__map">
           <div className="directory-stage__map-frame">
             {!isLoading && (
@@ -1112,7 +1171,7 @@ export const TYPE_TO_DS_CATEGORY: Record<string, string> = {
   campground: "campgrounds",
 };
 
-/** Dock list card: compact wide PlaceCard (logo · chips · name · address · upcoming flag). */
+/** Image-led directory tile adapted from the approved PlaceCard primitive. */
 function DirectoryCard({
   biz,
   onClick,
@@ -1140,7 +1199,7 @@ function DirectoryCard({
   return (
     <PlaceCard
       name={biz.name}
-      variant="compact"
+      variant="full"
       onClick={(e: React.MouseEvent<HTMLElement>) => {
         onClick?.(e.currentTarget);
       }}
@@ -1151,12 +1210,19 @@ function DirectoryCard({
       fallbackLogoUrl={fallbackLogoUrl}
       categoryLabel={TYPE_LABELS[biz.type] || biz.type}
       address={address}
+      description={biz.description}
+      hours={multiLoc ? undefined : biz.hours || undefined}
+      phone={multiLoc ? undefined : biz.phone || undefined}
+      website={biz.website || undefined}
+      instagram={biz.instagram || undefined}
+      donateUrl={biz.donateUrl || undefined}
       lat={multiLoc ? null : biz.lat}
       lng={multiLoc ? null : biz.lng}
       grandOpening={grandOpening}
       businessId={biz.id}
       isFollowing={Boolean(biz.isFollowing)}
       onRequireAuth={onRequireAuth}
+      promoters={biz.promoters || []}
       events={upcomingEvents.map(event => ({
         day: event.dayOfWeek || undefined,
         date: formatDirectoryEventWhen(event),
