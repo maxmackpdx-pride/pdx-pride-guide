@@ -125,6 +125,24 @@ import {
   rollbackEventResearchChange,
 } from "./eventResearchMemory";
 import {
+  beginResearchRun,
+  enqueueResearchReview,
+  evaluateDecisionGate,
+  finishResearchRun,
+  getResearchControlState,
+  markRunSource,
+  recordConflict,
+  recordFieldEvidence,
+  recordMediaProvenance,
+  recordDecisionOutcome,
+  recordMistakeTestResult,
+  resolveResearchItem,
+  setSourceSchedule,
+  upsertEntityIdentity,
+  upsertEventSeries,
+  upsertMistakeTest,
+} from "./eventResearchControl";
+import {
   allowAdminOrEventResearchAgent,
   eventResearchActor,
 } from "./eventResearchAuth";
@@ -1119,8 +1137,78 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(getEventResearchSourceMemory());
   });
 
+  app.get("/api/admin/event-research/control", requireEventResearchAccess, (_req, res) => {
+    res.json(getResearchControlState());
+  });
+
+  const sendResearchControlResult = (res: any, result: any, successStatus = 200) => {
+    if (!result.ok) return res.status(result.status || 400).json(result);
+    return res.status(successStatus).json(result);
+  };
+
+  app.post("/api/admin/event-research/runs", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, beginResearchRun(req.body || {}), 201);
+  });
+
+  app.post("/api/admin/event-research/runs/:id/source", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, markRunSource({ runId: req.params.id, ...req.body }));
+  });
+
+  app.post("/api/admin/event-research/source-memory/schedule", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, setSourceSchedule(req.body));
+  });
+
+  app.post("/api/admin/event-research/runs/:id/finish", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, finishResearchRun({ runId: req.params.id, ...req.body }));
+  });
+
+  app.post("/api/admin/event-research/evidence", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, recordFieldEvidence(req.body), 201);
+  });
+
+  app.post("/api/admin/event-research/identities", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, upsertEntityIdentity(req.body));
+  });
+
+  app.post("/api/admin/event-research/conflicts", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, recordConflict(req.body), 201);
+  });
+
+  app.post("/api/admin/event-research/review", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, enqueueResearchReview(req.body), 201);
+  });
+
+  app.post("/api/admin/event-research/media", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, recordMediaProvenance(req.body), 201);
+  });
+
+  app.post("/api/admin/event-research/mistake-tests", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, upsertMistakeTest(req.body));
+  });
+
+  app.post("/api/admin/event-research/mistake-tests/result", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, recordMistakeTestResult(req.body));
+  });
+
+  app.post("/api/admin/event-research/decision-gate", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, evaluateDecisionGate(req.body));
+  });
+
+  app.post("/api/admin/event-research/series", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, upsertEventSeries(req.body));
+  });
+
+  app.post("/api/admin/event-research/outcomes", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, recordDecisionOutcome(req.body), 201);
+  });
+
+  app.post("/api/admin/event-research/resolve", requireEventResearchAccess, (req, res) => {
+    sendResearchControlResult(res, resolveResearchItem(req.body));
+  });
+
   app.post("/api/admin/event-research/source-memory/path", requireEventResearchAccess, (req, res) => {
     const result = recordEventResearchPath({
+      runId: req.body?.runId != null ? String(req.body.runId) : null,
       sourceKey: String(req.body?.sourceKey || ""),
       label: String(req.body?.label || ""),
       url: String(req.body?.url || ""),
@@ -1178,6 +1266,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       evidenceReceipts: req.body?.evidenceReceipts,
       reason: req.body?.reason,
       mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
+      runId: req.body?.runId,
+      idempotencyKey: req.body?.idempotencyKey,
+      dryRun: req.body?.dryRun === true,
     });
     if (!result.ok) return res.status(result.status).json(result);
     auditEventResearch(req, "event_research_event_create", {
@@ -1199,6 +1290,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       evidenceReceipts: req.body?.evidenceReceipts,
       reason: req.body?.reason,
       mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
+      runId: req.body?.runId,
+      idempotencyKey: req.body?.idempotencyKey,
+      dryRun: req.body?.dryRun === true,
     });
     if (!result.ok) return res.status(result.status).json(result);
     auditEventResearch(req, "event_research_event_change", {

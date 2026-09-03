@@ -76,8 +76,24 @@ function usage() {
     "",
     "Commands:",
     "  source-memory",
+    "  control",
     "  events [from-date]",
     "  changes [limit]",
+    "  begin-run [json|-]",
+    "  mark-source <run-id> <json|->",
+    "  schedule-source <json|->",
+    "  finish-run <run-id> <json|->",
+    "  record-evidence <json|->",
+    "  upsert-identity <json|->",
+    "  record-conflict <json|->",
+    "  queue-review <json|->",
+    "  record-media <json|->",
+    "  upsert-mistake-test <json|->",
+    "  record-mistake-result <json|->",
+    "  decision-gate <json|->",
+    "  upsert-series <json|->",
+    "  record-outcome <json|->",
+    "  resolve-item <json|->",
     "  record-path <json|->",
     "  create-event <json|->",
     "  change-event <event-id> <json|->",
@@ -92,6 +108,9 @@ async function main() {
     case "source-memory":
       payload = await request("GET", "/api/admin/event-research/source-memory");
       break;
+    case "control":
+      payload = await request("GET", "/api/admin/event-research/control");
+      break;
     case "events": {
       const query = first ? `?from=${encodeURIComponent(first)}` : "";
       payload = await request("GET", `/api/admin/event-research/events${query}`);
@@ -102,6 +121,53 @@ async function main() {
       payload = await request("GET", `/api/admin/event-research/changes${limit}`);
       break;
     }
+    case "begin-run":
+      payload = await request("POST", "/api/admin/event-research/runs", first ? jsonInput(first) : {});
+      break;
+    case "mark-source":
+      if (!first) throw new Error("A run id is required.");
+      payload = await request("POST", `/api/admin/event-research/runs/${encodeURIComponent(first)}/source`, jsonInput(second));
+      break;
+    case "schedule-source":
+      payload = await request("POST", "/api/admin/event-research/source-memory/schedule", jsonInput(first));
+      break;
+    case "finish-run":
+      if (!first) throw new Error("A run id is required.");
+      payload = await request("POST", `/api/admin/event-research/runs/${encodeURIComponent(first)}/finish`, jsonInput(second));
+      break;
+    case "record-evidence":
+      payload = await request("POST", "/api/admin/event-research/evidence", jsonInput(first));
+      break;
+    case "upsert-identity":
+      payload = await request("POST", "/api/admin/event-research/identities", jsonInput(first));
+      break;
+    case "record-conflict":
+      payload = await request("POST", "/api/admin/event-research/conflicts", jsonInput(first));
+      break;
+    case "queue-review":
+      payload = await request("POST", "/api/admin/event-research/review", jsonInput(first));
+      break;
+    case "record-media":
+      payload = await request("POST", "/api/admin/event-research/media", jsonInput(first));
+      break;
+    case "upsert-mistake-test":
+      payload = await request("POST", "/api/admin/event-research/mistake-tests", jsonInput(first));
+      break;
+    case "record-mistake-result":
+      payload = await request("POST", "/api/admin/event-research/mistake-tests/result", jsonInput(first));
+      break;
+    case "decision-gate":
+      payload = await request("POST", "/api/admin/event-research/decision-gate", jsonInput(first));
+      break;
+    case "upsert-series":
+      payload = await request("POST", "/api/admin/event-research/series", jsonInput(first));
+      break;
+    case "record-outcome":
+      payload = await request("POST", "/api/admin/event-research/outcomes", jsonInput(first));
+      break;
+    case "resolve-item":
+      payload = await request("POST", "/api/admin/event-research/resolve", jsonInput(first));
+      break;
     case "record-path":
       payload = await request(
         "POST",

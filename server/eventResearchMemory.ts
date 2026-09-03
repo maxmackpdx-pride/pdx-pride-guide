@@ -1,8 +1,9 @@
 import { INGEST_SOURCES } from "@shared/ingestSources";
 import { eventDedupeKey } from "@shared/eventDedupe";
 import { TRUSTED_VENUES } from "@shared/trustedVenues";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
+import { ensureEventResearchControlTables, markRunSource, persistMutationEvidence } from "./eventResearchControl";
 
 type ArchivedHealthRow = {
   source_id: string;
@@ -22,6 +23,7 @@ type ArchivedHealthRow = {
 };
 
 export type EventResearchPathObservation = {
+  runId?: string | null;
   sourceKey: string;
   label: string;
   url: string;
@@ -48,6 +50,9 @@ export type EventResearchChangeInput = {
   evidenceReceipts: EventResearchEvidenceReceipt[];
   reason: string;
   mistakeTestsPassed: boolean;
+  runId?: string | null;
+  idempotencyKey?: string | null;
+  dryRun?: boolean;
 };
 
 export type EventResearchCreateInput = {
@@ -55,6 +60,9 @@ export type EventResearchCreateInput = {
   evidenceReceipts: EventResearchEvidenceReceipt[];
   reason: string;
   mistakeTestsPassed: boolean;
+  runId?: string | null;
+  idempotencyKey?: string | null;
+  dryRun?: boolean;
 };
 
 const EVENT_RESEARCH_MUTABLE_FIELDS = new Set([
@@ -116,6 +124,34 @@ function ensureEventResearchChangeTable() {
 
 function eventResearchError(status: number, error: string, detail?: Record<string, unknown>) {
   return { ok: false as const, status, error, ...(detail || {}) };
+}
+
+function mutationHash(operation: string, input: unknown) {
+  return createHash("sha256").update(`${operation}:${JSON.stringify(input)}`).digest("hex");
+}
+
+function existingIdempotentResult(idempotencyKey: string | null | undefined, operation: string, requestHash: string) {
+  if (!idempotencyKey) return null;
+  ensureEventResearchControlTables();
+  const row = sqlite.prepare(`
+    SELECT operation, request_hash, response_json
+    FROM agent_mutation_idempotency WHERE idempotency_key = ?
+  `).get(idempotencyKey) as { operation: string; request_hash: string; response_json: string } | undefined;
+  if (!row) return null;
+  if (row.operation !== operation || row.request_hash !== requestHash) {
+    return eventResearchError(409, "idempotency key was already used for a different mutation");
+  }
+  return { ...JSON.parse(row.response_json), idempotentReplay: true };
+}
+
+function saveIdempotentResult(idempotencyKey: string | null | undefined, operation: string, requestHash: string, response: unknown) {
+  if (!idempotencyKey) return;
+  ensureEventResearchControlTables();
+  sqlite.prepare(`
+    INSERT INTO agent_mutation_idempotency (
+      idempotency_key, operation, request_hash, response_json, created_at
+    ) VALUES (?, ?, ?, ?, ?)
+  `).run(idempotencyKey, operation, requestHash, JSON.stringify(response), new Date().toISOString());
 }
 
 function parseLockedFields(raw: unknown): string[] {
@@ -446,6 +482,10 @@ export function applyEventResearchEventChange(
   eventId: number,
   input: EventResearchChangeInput,
 ) {
+  const operation = `change:${eventId}`;
+  const requestHash = mutationHash(operation, input);
+  const replay = existingIdempotentResult(input.idempotencyKey, operation, requestHash);
+  if (replay) return replay;
   const event = storage.getEvent(eventId) as Record<string, any> | undefined;
   if (!event) return eventResearchError(404, "event not found");
   if (!input?.mistakeTestsPassed) {
@@ -495,34 +535,68 @@ export function applyEventResearchEventChange(
     const dayOfWeek = derivedDayOfWeek(String(changed.dateStart));
     if (dayOfWeek) changed.dayOfWeek = dayOfWeek;
   }
+  if (input.dryRun) {
+    return {
+      ok: true as const,
+      operation: "update_preview" as const,
+      dryRun: true,
+      event: eventForResearchAgent({ ...event, ...changed }),
+      changedFields: Object.keys(changed),
+      beforeValues: eventChangeValues(event, Object.keys(changed)),
+      afterValues: eventChangeValues({ ...event, ...changed }, Object.keys(changed)),
+      evidenceReceipts: receipts.receipts,
+      rollback: { available: false },
+    };
+  }
   const before = { ...event };
-  const after = storage.updateEvent(eventId, changed as any, { source: "human" }) as
-    | Record<string, unknown>
-    | undefined;
-  if (!after) return eventResearchError(500, "event update failed");
-  const changedFields = Object.keys(changed);
-  const rollbackToken = recordEventResearchChange({
-    operation: "update",
-    eventId,
-    before: eventChangeSnapshot(before, changedFields),
-    after: eventChangeSnapshot(after, changedFields),
-    patch: changed,
-    receipts: receipts.receipts,
-    reason,
+  const response = sqlite.transaction(() => {
+    const after = storage.updateEvent(eventId, changed as any, { source: "human" }) as
+      | Record<string, unknown>
+      | undefined;
+    if (!after) throw new Error("event update failed");
+    const changedFields = Object.keys(changed);
+    const rollbackToken = recordEventResearchChange({
+      operation: "update",
+      eventId,
+      before: eventChangeSnapshot(before, changedFields),
+      after: eventChangeSnapshot(after, changedFields),
+      patch: changed,
+      receipts: receipts.receipts,
+      reason,
+    });
+    const evidenceReceiptIds = persistMutationEvidence({
+      runId: input.runId,
+      eventId,
+      values: changed,
+      receipts: receipts.receipts,
+    });
+    const result = {
+      ok: true as const,
+      operation: "update" as const,
+      runId: input.runId || null,
+      event: eventForResearchAgent(after),
+      changedFields,
+      beforeValues: eventChangeValues(before, changedFields),
+      afterValues: eventChangeValues(after, changedFields),
+      evidenceReceipts: receipts.receipts,
+      evidenceReceiptIds,
+      rollback: { token: rollbackToken, available: true },
+    };
+    saveIdempotentResult(input.idempotencyKey, operation, requestHash, result);
+    return result;
   });
-  return {
-    ok: true as const,
-    operation: "update" as const,
-    event: eventForResearchAgent(after),
-    changedFields,
-    beforeValues: eventChangeValues(before, changedFields),
-    afterValues: eventChangeValues(after, changedFields),
-    evidenceReceipts: receipts.receipts,
-    rollback: { token: rollbackToken, available: true },
-  };
+  try {
+    return response();
+  } catch {
+    return eventResearchError(500, "event update and rollback ledger transaction failed");
+  }
 }
 
 export function createEventFromResearch(input: EventResearchCreateInput) {
+  const operation = "create";
+  const requestHash = mutationHash(operation, input);
+  const replay = existingIdempotentResult(input.idempotencyKey, operation, requestHash);
+  if (replay) return replay;
   if (!input?.mistakeTestsPassed) {
     return eventResearchError(400, "mistakeTestsPassed: true is required");
   }
@@ -556,36 +630,65 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   if (duplicate) {
     return eventResearchError(409, "duplicate event already exists", { eventId: duplicate.id });
   }
+  if (input.dryRun) {
+    return {
+      ok: true as const,
+      operation: "create_preview" as const,
+      dryRun: true,
+      event: eventForResearchAgent({ ...event, id: null, source: "qsearch-2", lockedFields: "[]" }),
+      beforeValues: null,
+      afterValues: event,
+      evidenceReceipts: receipts.receipts,
+      rollback: { available: false },
+    };
+  }
   const lockedFields = Object.keys(event).filter(field => EVENT_RESEARCH_MUTABLE_FIELDS.has(field));
-  const created = storage.createEvent({
-    ...event,
-    source: "qsearch-2",
-    isClaimable: false,
-    lockedFields: JSON.stringify(lockedFields),
-  } as any) as Record<string, unknown>;
-  const createdFields = Object.keys(event);
-  const rollbackToken = recordEventResearchChange({
-    operation: "create",
-    eventId: Number(created.id),
-    before: null,
-    after: eventChangeSnapshot(created, createdFields),
-    patch: event,
-    receipts: receipts.receipts,
-    reason,
+  const response = sqlite.transaction(() => {
+    const created = storage.createEvent({
+      ...event,
+      source: "qsearch-2",
+      isClaimable: false,
+      lockedFields: JSON.stringify(lockedFields),
+    } as any) as Record<string, unknown>;
+    const createdFields = Object.keys(event);
+    const rollbackToken = recordEventResearchChange({
+      operation: "create",
+      eventId: Number(created.id),
+      before: null,
+      after: eventChangeSnapshot(created, createdFields),
+      patch: event,
+      receipts: receipts.receipts,
+      reason,
+    });
+    const evidenceReceiptIds = persistMutationEvidence({
+      runId: input.runId,
+      eventId: Number(created.id),
+      values: event,
+      receipts: receipts.receipts,
+    });
+    const result = {
+      ok: true as const,
+      operation: "create" as const,
+      runId: input.runId || null,
+      event: eventForResearchAgent(created),
+      beforeValues: null,
+      afterValues: eventChangeValues(created, createdFields),
+      evidenceReceipts: receipts.receipts,
+      evidenceReceiptIds,
+      rollback: {
+        token: rollbackToken,
+        available: true,
+        mode: "hide_created_event",
+      },
+    };
+    saveIdempotentResult(input.idempotencyKey, operation, requestHash, result);
+    return result;
   });
-  return {
-    ok: true as const,
-    operation: "create" as const,
-    event: eventForResearchAgent(created),
-    beforeValues: null,
-    afterValues: eventChangeValues(created, createdFields),
-    evidenceReceipts: receipts.receipts,
-    rollback: {
-      token: rollbackToken,
-      available: true,
-      mode: "hide_created_event",
-    },
-  };
+  try {
+    return response();
+  } catch {
+    return eventResearchError(500, "event creation and rollback ledger transaction failed");
+  }
 }
 
 export function rollbackEventResearchChange(rollbackToken: string) {
@@ -883,6 +986,9 @@ export function recordEventResearchPath(observation: EventResearchPathObservatio
   const row = sqlite
     .prepare(`SELECT * FROM agent_event_source_paths WHERE source_key = ? AND url = ?`)
     .get(sourceKey, url);
+  if (observation.runId && (outcome === "success" || outcome === "failure")) {
+    markRunSource({ runId: observation.runId, sourceKey, url, outcome });
+  }
   return { ok: true as const, path: row };
 }
 

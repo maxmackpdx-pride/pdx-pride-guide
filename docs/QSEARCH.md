@@ -67,6 +67,39 @@ node script/qsearch-agent-api.mjs events 2026-09-01
 node script/qsearch-agent-api.mjs changes 50
 ```
 
+### Evidence control plane (local, activation pending deployment)
+
+QSearch 2.0 now has a backward-compatible evidence control plane. The existing
+source-memory and event commands remain valid; the additions make an agent run
+measurable, individually reversible, and reviewable without reviving the
+archived scraper.
+
+| Capability | Scoped client command |
+|---|---|
+| Begin/finish an auditable run | `begin-run`, `finish-run` |
+| Record source coverage and cadence | `mark-source`, `schedule-source` |
+| Store field-level provenance | `record-evidence` |
+| Maintain canonical identities | `upsert-identity` |
+| Preserve material disagreement | `record-conflict`, `resolve-item` |
+| Queue durable uncertainty | `queue-review`, `resolve-item` |
+| Track exact-event artwork | `record-media` |
+| Model recurring series/occurrences | `upsert-series` |
+| Maintain and run mistake cases | `upsert-mistake-test`, `record-mistake-result` |
+| Evaluate the publication gate | `decision-gate` |
+| Learn from accepted/rejected outcomes | `record-outcome` |
+| Inspect the control state | `control` |
+
+Event create/change payloads also support `dryRun`, `idempotencyKey`, and
+`runId`. The event write, field-evidence receipts, rollback ledger, and
+idempotency response are one SQLite transaction: partial success rolls back.
+The decision gate blocks on missing field evidence, open material conflicts,
+unpassed active mistake tests, and (when requested) fewer than two independent
+sources per field.
+
+Do not add these commands to the active heartbeat prompt until this code has
+deployed successfully and the live scoped endpoints have been probed. This
+section describes implemented local code, not a production-activated agent.
+
 Mutation commands accept JSON from a file or standard input:
 
 ```bash

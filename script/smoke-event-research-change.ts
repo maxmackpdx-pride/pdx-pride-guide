@@ -43,7 +43,22 @@ const base = storage.createEvent({
   lockedFields: "[]",
 });
 
-const changed = applyEventResearchEventChange(base.id, {
+const preview = applyEventResearchEventChange(base.id, {
+  expectedUpdatedAt: base.updatedAt,
+  patch: { venueName: "QSearch Preview Venue" },
+  evidenceReceipts: [
+    { field: "venueName", sourceUrl, checkedAt, note: "Dry-run exact identity." },
+  ],
+  reason: "Preview the exact venue correction without writing it.",
+  mistakeTestsPassed: true,
+  dryRun: true,
+});
+assert.equal(preview.ok, true);
+if (!preview.ok) throw new Error(preview.error);
+assert.equal(preview.dryRun, true);
+assert.equal(storage.getEvent(base.id)?.venueName, "QSearch Test Venue", "dry-run leaves storage unchanged");
+
+const firstChangeInput = {
   expectedUpdatedAt: base.updatedAt,
   patch: { venueName: "QSearch Corrected Venue" },
   evidenceReceipts: [
@@ -51,7 +66,9 @@ const changed = applyEventResearchEventChange(base.id, {
   ],
   reason: "Correct the exact venue identity from its official event page.",
   mistakeTestsPassed: true,
-});
+  idempotencyKey: "smoke-change-venue-1",
+};
+const changed = applyEventResearchEventChange(base.id, firstChangeInput);
 assert.equal(changed.ok, true);
 if (!changed.ok) throw new Error(changed.error);
 assert.equal(changed.event.venueName, "QSearch Corrected Venue");
@@ -59,6 +76,18 @@ assert.deepEqual(changed.event.lockedFields, ["venueName"]);
 assert.equal(changed.rollback.available, true);
 assert.deepEqual(changed.beforeValues, { venueName: "QSearch Test Venue" });
 assert.deepEqual(changed.afterValues, { venueName: "QSearch Corrected Venue" });
+const replayed = applyEventResearchEventChange(base.id, firstChangeInput);
+assert.equal(replayed.ok, true);
+if (!replayed.ok) throw new Error(replayed.error);
+assert.equal(replayed.idempotentReplay, true);
+assert.equal(replayed.rollback.token, changed.rollback.token);
+const reusedForDifferentMutation = applyEventResearchEventChange(base.id, {
+  ...firstChangeInput,
+  expectedUpdatedAt: changed.event.updatedAt,
+  patch: { venueName: "Different Mutation" },
+});
+assert.equal(reusedForDifferentMutation.ok, false);
+if (!reusedForDifferentMutation.ok) assert.equal(reusedForDifferentMutation.status, 409);
 
 const changedAgain = applyEventResearchEventChange(base.id, {
   expectedUpdatedAt: changed.event.updatedAt,

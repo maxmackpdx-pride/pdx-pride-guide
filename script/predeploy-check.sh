@@ -65,6 +65,10 @@ if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
   qsearch_test_status=0
   ALLOW_QSEARCH_TEST_DB=1 DATABASE_PATH="$qsearch_test_dir/data.db" \
     node --import tsx script/smoke-event-research-change.ts || qsearch_test_status=$?
+  if [[ "$qsearch_test_status" -eq 0 ]]; then
+    ALLOW_QSEARCH_TEST_DB=1 DATABASE_PATH="$qsearch_test_dir/data.db" \
+      node --import tsx script/smoke-event-research-control.ts || qsearch_test_status=$?
+  fi
   unlink "$qsearch_test_dir/data.db"
   rmdir "$qsearch_test_dir"
   if [[ "$qsearch_test_status" -ne 0 ]]; then
