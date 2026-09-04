@@ -1,4 +1,4 @@
-/** Z/ is the Communities namespace. Products keep their own routes and names. */
+/** Z/ is the namespace for communities and discussion topics. Products keep their own routes and names. */
 export const Z_PREFIX = "z";
 
 /** Compatibility map for links from the retired catch-all product namespace. */
