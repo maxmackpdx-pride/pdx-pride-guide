@@ -9,6 +9,64 @@
 
 /* The hero is .outz-hero from outz-shared.css, the same one the board home uses. */
 
+/* ---------- community-stay identity hero ---------- */
+.outz-stay-hero {
+  isolation: isolate; overflow: hidden; padding: clamp(112px, 13vw, 164px) var(--page-gutter, 24px) clamp(42px, 6vw, 78px);
+  position: relative;
+}
+.outz-stay-hero::before {
+  background:
+    radial-gradient(52% 90% at 82% 18%, color-mix(in srgb, var(--outz-c) 18%, transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--outz-c) 5%, #050506), #050506 88%);
+  content: ""; inset: 0; position: absolute; z-index: -2;
+}
+.outz-stay-hero__terrain {
+  filter: saturate(1.12); height: 112%; inset: -6% -4% auto auto; opacity: .18; position: absolute;
+  width: min(760px, 66vw); z-index: -1;
+}
+.outz-stay-hero__copy { margin: 0 auto; max-width: 1180px; }
+.outz-stay-hero__crumb {
+  align-items: center; color: var(--text-faint, #666); display: flex; flex-wrap: wrap; font-family: var(--font-mono, monospace);
+  font-size: 11px; gap: 8px; letter-spacing: .1em; margin-bottom: 18px; text-transform: uppercase;
+}
+.outz-stay-hero__crumb a { color: var(--outz-c); text-decoration: none; }
+.outz-stay-hero__brand {
+  align-items: stretch; display: grid; gap: 0; grid-template-columns: minmax(230px, .7fr) minmax(0, 1.3fr);
+  min-height: 320px; overflow: hidden; position: relative;
+}
+.outz-stay-hero__brand::before {
+  background: var(--refract-seam-gradient); content: ""; height: 2px; inset: 0 0 auto; position: absolute; z-index: 3;
+}
+.outz-stay-hero__logo-well,
+.outz-stay-hero__wordmark {
+  align-items: center; background: var(--poster-well-bg); border-right: 1px solid color-mix(in srgb, var(--outz-c) 44%, #15151a);
+  display: flex; justify-content: center; min-width: 0; overflow: hidden; padding: clamp(24px, 4vw, 48px); position: relative;
+}
+.outz-stay-hero__logo-well::after,
+.outz-stay-hero__wordmark::after { background: var(--poster-well-scan); content: ""; inset: 0; pointer-events: none; position: absolute; }
+.outz-stay-hero__logo-well img {
+  filter: grayscale(1) contrast(1.14) drop-shadow(0 0 15px color-mix(in srgb, var(--outz-c) 42%, transparent));
+  height: 210px; max-width: 100%; object-fit: contain;
+}
+.outz-stay-hero__wordmark {
+  color: var(--outz-c); font-family: var(--font-display, sans-serif); font-size: clamp(2.25rem, 5.4vw, 5rem);
+  font-weight: 900; letter-spacing: -.045em; line-height: .82; text-align: center; text-shadow: 0 0 22px color-mix(in srgb, var(--outz-c) 32%, transparent);
+  text-transform: uppercase;
+}
+.outz-stay-hero__identity { align-self: center; padding: clamp(30px, 5vw, 64px); }
+.outz-stay-hero__identity > span {
+  color: var(--outz-c); font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+}
+.outz-stay-hero__identity h1 {
+  color: #fff; font-family: var(--font-display, sans-serif); font-size: clamp(3rem, 6.2vw, 6.6rem); font-weight: 900;
+  letter-spacing: -.045em; line-height: .82; margin: 12px 0 22px; max-width: 9ch; text-transform: uppercase;
+}
+.outz-stay-hero__identity p { color: var(--text-body, #b7b7bf); font-size: clamp(.98rem, 1.5vw, 1.12rem); line-height: 1.55; margin: 0; max-width: 58ch; }
+.outz-stay-hero__meta { align-items: center; display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 18px 4px 0; }
+.outz-stay-hero__meta span,
+.outz-stay-hero__meta a { align-items: center; color: var(--text-lo, #999); display: inline-flex; font-size: 13px; gap: 7px; text-decoration: none; }
+.outz-stay-hero__meta a { color: var(--outz-c); font-weight: 700; }
+
 /* ---------- facts band + locator ---------- */
 /* Compact band, not a full section: it carries less vertical air than the
    check-in and wall sections below it. */
@@ -17,6 +75,14 @@
   padding-block: clamp(26px, 3vw, 40px);
 }
 .outz-place__facts { display: flex; flex-direction: column; gap: 16px; }
+.outz-place__facts--stay { grid-column: auto; }
+.outz-stay-facts { display: grid; gap: 12px; }
+.outz-stay-facts article {
+  background: color-mix(in srgb, var(--outz-c) 5%, #070708); border: 1px solid color-mix(in srgb, var(--outz-c) 30%, #19191f);
+  border-radius: 10px; padding: 15px 17px;
+}
+.outz-stay-facts span { color: var(--outz-c); font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; }
+.outz-stay-facts p { color: var(--text-body, #b7b7bf); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }
 .outz-place__tags { display: flex; flex-wrap: wrap; gap: 10px; }
 .outz-place__readings { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0; }
 .outz-place__readings dt {
@@ -66,12 +132,37 @@
 .outz-place__section-head--wall p { color: var(--green-acid, #39ff14); }
 
 /* ---------- check-in + chat ---------- */
+.outz-community { position: relative; }
+.outz-community--stay {
+  background:
+    radial-gradient(62% 90% at 50% 0%, color-mix(in srgb, var(--outz-c) 8%, transparent), transparent 72%),
+    #050506;
+}
+.outz-community__head { margin-bottom: 22px; max-width: 850px; }
+.outz-community__head > p {
+  color: var(--outz-c); font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .16em; margin: 0 0 10px; text-transform: uppercase;
+}
+.outz-community__head h2 {
+  color: #fff; font-family: var(--font-display, sans-serif); font-size: clamp(2.8rem, 6vw, 6.3rem); font-weight: 900;
+  letter-spacing: -.045em; line-height: .86; margin: 0; text-transform: uppercase;
+}
+.outz-community__head h2 span {
+  color: var(--outz-c); display: inline; text-shadow: 0 0 20px color-mix(in srgb, var(--outz-c) 20%, transparent);
+}
+.outz-community__lede { color: var(--text-lo, #999); font-size: 15px; line-height: 1.6; margin-top: 18px; max-width: 72ch; }
+.outz-community__pulse {
+  align-items: center; background: var(--glass-card-bg); border: 1px solid color-mix(in srgb, var(--outz-c) 48%, #24242c);
+  border-radius: 10px; box-shadow: var(--glass-card-shadow); color: var(--text-lo, #999); display: flex; font-family: var(--font-mono, monospace);
+  font-size: 11px; gap: 10px; letter-spacing: .06em; margin: 0 0 20px; padding: 11px 14px; text-transform: uppercase;
+}
+.outz-community__pulse i { background: var(--green-acid, #39ff14); border-radius: 50%; box-shadow: 0 0 10px color-mix(in srgb, var(--green-acid, #39ff14) 65%, transparent); flex: 0 0 8px; height: 8px; width: 8px; }
 .outz-place__social-grid { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; }
-.outz-checkin { display: flex; flex-direction: column; gap: 14px; }
+.outz-checkin { border-top-color: color-mix(in srgb, var(--outz-c) 72%, #2a2a32); display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
 .outz-checkin__eyebrow {
   color: var(--text-lo, #999); font-family: var(--font-mono, monospace); font-size: 12px;
   letter-spacing: var(--tracking-mono, .04em); text-transform: uppercase;
 }
+.outz-checkin__day-help { color: var(--text-faint, #666); font-size: 12px; line-height: 1.45; margin: -6px 0 0; }
 .outz-checkin__grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
 .outz-checkin__anonymous { align-items: center; color: var(--text-lo, #999); display: flex; font-size: 13px; gap: 8px; }
 .outz-checkin__anonymous input { width: auto; }
@@ -84,7 +175,7 @@
   color: var(--text-lo, #999); font-size: 12px; padding: 4px 12px;
 }
 
-.outz-group-chat { display: flex; flex-direction: column; }
+.outz-group-chat { border-top-color: color-mix(in srgb, var(--outz-c) 72%, #2a2a32); display: flex; flex-direction: column; overflow: hidden; }
 .outz-group-chat__head { align-items: center; display: flex; gap: 10px; margin-bottom: 16px; }
 .outz-group-chat__head strong { color: var(--text-hi, #fff); display: block; font-family: var(--font-display, sans-serif); font-weight: 800; text-transform: uppercase; }
 .outz-group-chat__head span { color: var(--outz-c); font-size: 12px; }
@@ -142,4 +233,22 @@
   .outz-place__wall-grid,
   .outz-checkin__grid { grid-template-columns: 1fr; }
   .outz-place__conditions { align-items: flex-start; flex-direction: column; }
+  .outz-stay-hero__brand { grid-template-columns: 1fr; }
+  .outz-stay-hero__logo-well,
+  .outz-stay-hero__wordmark { border-bottom: 1px solid color-mix(in srgb, var(--outz-c) 44%, #15151a); border-right: 0; min-height: 210px; }
+  .outz-stay-hero__logo-well img { height: 150px; }
+  .outz-stay-hero__identity h1 { max-width: 12ch; }
+}
+
+@media (max-width: 560px) {
+  .outz-stay-hero { padding-inline: 14px; }
+  .outz-stay-hero__identity { padding: 28px 22px 32px; }
+  .outz-stay-hero__identity h1 { font-size: clamp(2.65rem, 15vw, 4.5rem); }
+  .outz-stay-hero__wordmark { font-size: clamp(2.5rem, 13vw, 4rem); }
+  .outz-community__head h2 span { display: block; }
+  .outz-community__pulse { align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outz-community__pulse i { box-shadow: none; }
 }

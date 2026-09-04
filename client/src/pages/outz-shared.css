@@ -139,9 +139,10 @@
   background: transparent; border: 1px solid var(--ink-border, #2b2b2b);
   border-radius: var(--radius-pill, 999px); color: var(--text-lo, #999); cursor: pointer;
   font-family: var(--font-mono, monospace); font-size: 12px; letter-spacing: var(--tracking-mono, .04em);
-  padding: 8px 14px; text-transform: uppercase; transition: border-color .15s ease, color .15s ease;
+  min-height: 44px; padding: 8px 14px; text-transform: uppercase; transition: border-color .15s ease, color .15s ease;
 }
 .outz-pillrow button:hover { border-color: var(--outz-c); color: var(--text-hi, #fff); }
+.outz-pillrow button:focus-visible { outline: 2px solid var(--outz-c); outline-offset: 2px; }
 .outz-pillrow button.is-active { background: color-mix(in srgb, var(--outz-c) 8%, transparent); border-color: var(--outz-c); color: var(--outz-c); }
 .outz-pillrow--display button { font-family: var(--font-display, sans-serif); font-weight: 700; }
 .outz-pillrow--lime button.is-active { background: color-mix(in srgb, var(--green-acid, #39ff14) 8%, transparent); border-color: var(--green-acid, #39ff14); color: var(--green-acid, #39ff14); }

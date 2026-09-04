@@ -1886,19 +1886,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/outz/checkins", requireAuth, async (req, res) => {
     try {
       const placeId = await knownOutzPlace(req.body.placeId);
-      const date = String(req.body.date || pacificTodayDate());
+      const requestedDates: unknown[] = Array.isArray(req.body.dates) ? req.body.dates : [req.body.date || pacificTodayDate()];
+      const dates: string[] = [...new Set(requestedDates.map((value: unknown) => String(value)))];
       const arrivalHour = Number(req.body.arrivalHour);
       const departHour = Number(req.body.departHour);
-      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
+      if (!placeId || dates.length === 0 || dates.length > 7 || dates.some(date => !isAllowedBeachCheckinDate(date))) {
+        return res.status(400).json({ error: "Choose one or more valid OUTZ check-in days" });
+      }
       if (!isValidRiverBratsHour(arrivalHour) || !isValidRiverBratsDepartHour(departHour, arrivalHour)) {
         return res.status(400).json({ error: "Choose an arrival between 7am and 9pm and a later departure by 10pm" });
       }
       const note = String(req.body.note || "").trim().slice(0, 80) || null;
       if (moderationGate(res, "OUTZ check-in", { note: note || "" })) return;
-      res.json(upsertOutzCheckin({
+      const checkins = dates.map(date => upsertOutzCheckin({
         userId: req.session.userId!, placeId, arrivalHour, departHour, note, calendarDate: date,
         isAnonymous: Boolean(req.body.isAnonymous),
       }));
+      res.json({ checkins });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Could not save OUTZ check-in" });
     }
