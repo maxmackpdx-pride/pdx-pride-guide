@@ -767,6 +767,7 @@
 }
 
 .hz-chip--btn {
+  min-height: 44px;
   cursor: pointer;
 }
 
@@ -2250,6 +2251,7 @@ html.calm-mode .hz-tag--adult {
 
 /* ---- The overflow control ----------------------------------------------- */
 .hz-tag--more {
+  min-height: 44px;
   cursor: pointer;
   color: var(--board-muted);
   border-style: dashed;
@@ -2279,6 +2281,7 @@ html.calm-mode .hz-tag--adult {
 
 /* ---- Pickable tags (filter dropdown + composer) -------------------------- */
 .hz-tag--pick {
+  min-height: 44px;
   cursor: pointer;
   transition:
     border-color var(--dur-fast, 150ms) ease,
@@ -2354,6 +2357,7 @@ html.calm-mode .hz-tag--adult {
   font-size: var(--mono-micro);
   letter-spacing: var(--tracking-kicker);
   text-transform: uppercase;
+  min-height: 44px;
   cursor: pointer;
 }
 

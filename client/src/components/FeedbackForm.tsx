@@ -24,6 +24,7 @@ export function FeedbackButton() {
           border: "1px solid #333",
           color: "#00FFFF",
           padding: "8px 18px",
+          minHeight: "44px",
           fontSize: "0.78rem",
           letterSpacing: "0.08em",
           cursor: "pointer",

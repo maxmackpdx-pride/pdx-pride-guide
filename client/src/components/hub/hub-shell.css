@@ -401,6 +401,10 @@
   color: #777;
   cursor: pointer;
   text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hub-mtop__mode-btn.is-active.is-member {
@@ -1642,6 +1646,7 @@ html.calm-mode .hub-sheet,
   font-size: .68rem;
   letter-spacing: .04em;
   transition: color .16s ease, border-color .16s ease, box-shadow .16s ease;
+  min-height: 44px;
 }
 
 .site-hub-mtop .hub-mtop__mode-btn[data-accent="lime"] { --mtop-c: var(--panel-lime, #c8fa3c); --mtop-ink: var(--panel-lime, #c8fa3c); }

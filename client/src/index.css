@@ -561,6 +561,8 @@ body::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1;
+  min-height: 44px;
+  min-width: 44px;
 }
 .site-search-trigger:hover,
 .site-search-trigger:focus-visible {
@@ -580,7 +582,7 @@ body::before {
   flex:0 0 auto;
   margin-left:clamp(8px,1.2vw,18px);
   gap:9px;
-  min-height:40px;
+  min-height:44px;
   padding:9px clamp(15px,1.5vw,24px);
   border-width:2px;
   font-size:0.78rem;
@@ -602,7 +604,7 @@ body::before {
   display:inline-flex;
   align-items:center;
   gap:8px;
-  min-height:40px;
+  min-height:44px;
   padding:10px 20px;
   border:2px solid var(--c);
   border-radius:999px;
@@ -909,6 +911,7 @@ body::before {
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
+  min-height: 44px;
   cursor: pointer;
   transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
@@ -1030,7 +1033,9 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
 }
 
 .site-nav-dropdown__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   padding: 11px 14px;
   border: 2px solid #2b2b2b;
   border-radius: 999px;
@@ -1243,8 +1248,8 @@ html.calm-mode .site-nav-dropdown.open .site-nav-dropdown__panel,
 }
 
 .site-auth--desktop .hub-notify-btn {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: 1px solid #2a2a32;
   color: var(--text-meta, #9a9aa2);
   transition: color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
@@ -1662,6 +1667,7 @@ h2.display,
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1;
+  min-height: 44px;
   padding: 11px 20px;
   border-radius: 9px;
   border: 2px solid #000;
@@ -3552,6 +3558,7 @@ html.calm-mode .inbox-overlay,
   align-items: center;
   justify-content: center;
   min-height: 44px;
+  min-width: 44px;
   font-size: 0.88rem;
   padding: 2px 12px;
   letter-spacing: 0.07em;
@@ -3611,6 +3618,8 @@ html.calm-mode .inbox-overlay,
 }
 
 .events-view-toggle__btn {
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px 16px;
   background: transparent;
   border: none;
@@ -3987,6 +3996,10 @@ html.calm-mode .inbox-overlay,
 }
 
 .page-header__crumb-home {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -13px;
   color: #7a7870;
   text-decoration: none;
   transition: color 0.12s;
@@ -6757,6 +6770,7 @@ footer a:hover { color: #00FFFF !important; }
 
 .board-filter-chip {
   font-family: var(--font-board-display);
+  min-height: 44px;
   font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -11291,9 +11305,10 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__link {
-  display: block;
+  display: flex;
+  align-items: center;
   color: #b0b4ba;
-  min-height: 32px;
+  min-height: 44px;
   font-size: 0.82rem;
   text-decoration: none;
   line-height: 1.35;
@@ -11424,6 +11439,9 @@ html.calm-mode .board-detail-backdrop {
 }
 
 .site-footer__legal-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--text-faint, #666);
   text-decoration: underline;
 }
@@ -17840,9 +17858,17 @@ html.calm-mode .board-detail-modal,
 .safety-guide p { margin: 7px 0 0; max-width: 78ch; font-size: 15px; line-height: 1.5; color: var(--text-med, #d2d2d7); }
 .safety-guide__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .safety-guide__actions a, .safety-guide__actions button {
-  min-height: 40px; padding: 8px 11px; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 8px 11px; display: inline-flex; align-items: center; gap: 6px;
   color: #fff; background: #101014; border: 1px solid #35353d; border-radius: 8px;
   font: 700 13px/1 var(--font-body, sans-serif); text-decoration: none; cursor: pointer;
+}
+
+/* Route jump links are navigation controls, not inline prose. Keep their
+   visible treatment compact while giving each one a complete touch target. */
+.outz-page .outz-discovery__jumps a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .safety-guide__actions a:focus-visible, .safety-guide__actions button:focus-visible,
 .board-how__toggle:focus-visible { outline: 3px solid var(--neon-cyan, #19e3ff); outline-offset: 3px; }

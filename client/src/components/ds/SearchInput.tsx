@@ -19,6 +19,7 @@ const CSS = `
 .pdxSearch__icon svg{ width:18px; height:18px; }
 .pdxSearch input{
   flex:1; min-width:0; border:0; outline:0; background:transparent;
+  height:100%; min-height:44px;
   font-family:var(--font-body); font-size:var(--body-md); color:var(--text-hi);
 }
 .pdxSearch input::placeholder{ color:var(--text-faint); }
@@ -29,7 +30,7 @@ const CSS = `
 }
 .pdxSearch__clear:hover{ color:var(--pink); }
 .pdxSearch__clear:focus-visible{ outline:3px solid var(--chrome-focus, rgba(0,255,255,.72)); outline-offset:1px; }
-.pdxSearch--sm{ height:40px; }
+.pdxSearch--sm{ height:44px; }
 `;
 if (typeof document !== "undefined" && !document.getElementById("pdx-search-css")) {
   const s = document.createElement("style");
