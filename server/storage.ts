@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 175038)
-Total output lines: 15733
-
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
@@ -4066,7 +4063,6923 @@ function runBootMigrationsOnce() {
   if (!hasBootMigration("seed_businesses_directory_v7")) {
     const now = new Date().toISOString();
     const venues = [
-      { name: "Holocene", type: "venue", description: "Beloved Portland nightclub and event space in SE. Regularly hosts LGBTQ+ nights, drag shows, and Pride events.", address: "1001 SE Morrison St", neighborhood: "SE Portland", lat: 45.5173, lng: -122.6556, queerOwned: false, queerFri…75038 tokens truncated…g_date,
+      { name: "Holocene", type: "venue", description: "Beloved Portland nightclub and event space in SE. Regularly hosts LGBTQ+ nights, drag shows, and Pride events.", address: "1001 SE Morrison St", neighborhood: "SE Portland", lat: 45.5173, lng: -122.6556, queerOwned: false, queerFriendly: true },
+      { name: "Alberta Rose Theatre", type: "venue", description: "Historic 300-seat theater on Alberta hosting music, burlesque, comedy, and community events with a strong queer presence.", address: "3000 NE Alberta St", neighborhood: "Alberta Arts District", lat: 45.5581, lng: -122.6478, queerOwned: false, queerFriendly: true },
+      { name: "Jackie's", type: "bar", description: "Laid-back queer-friendly bar on SE Sandy. Regular host of LGBTQ+ community nights and Pride events.", address: "930 SE Sandy Blvd", neighborhood: "SE Portland", lat: 45.5192, lng: -122.6478, queerOwned: false, queerFriendly: true },
+      { name: "Sanctuary Club", type: "venue", description: "LGBTQ+-centered event space and club in the Pearl. Hosts drag, dance parties, and community gatherings.", address: "33 NW 9th Ave", neighborhood: "Pearl District", lat: 45.5232, lng: -122.6802, queerOwned: false, queerFriendly: true },
+      { name: "Seagrape Apothecary", type: "shop", description: "Herb-forward apothecary and wellness shop on NE Sandy. Holistic remedies, tinctures, and botanical goods in a welcoming space.", address: "2823 NE Sandy Blvd", neighborhood: "NE Portland", lat: 45.5330, lng: -122.6327, queerOwned: false, queerFriendly: true },
+      { name: "REALM PDX", type: "venue", description: "SE Portland event space and club hosting LGBTQ+ dance nights, kink-positive events, and community parties.", address: "615 SE Alder St", neighborhood: "SE Portland", lat: 45.5180, lng: -122.6595, queerOwned: false, queerFriendly: true },
+      { name: "Nova PDX", type: "venue", description: "Inner East music and event venue. Queer-welcoming space hosting Pride events and community nights.", address: "722 E Burnside St", neighborhood: "Inner East", lat: 45.5234, lng: -122.6574, queerOwned: false, queerFriendly: true },
+      { name: "Star Theater", type: "venue", description: "Old Town concert venue and nightclub. Hosts drag shows, LGBTQ+ parties, and music events throughout Pride season.", address: "13 NW 6th Ave", neighborhood: "Old Town", lat: 45.5232, lng: -122.6765, queerOwned: false, queerFriendly: true },
+      { name: "The Get Down", type: "venue", description: "Central Eastside venue and bar hosting a rotating lineup of queer nights, drag, dancing, and community events.", address: "680 SE 6th Ave", neighborhood: "Central Eastside", lat: 45.5181, lng: -122.6596, queerOwned: false, queerFriendly: true },
+      { name: "Happylucky No. 1", type: "bar", description: "Central Eastside bar and gathering spot. Queer-friendly with a cozy neighborhood vibe and community programming.", address: "330 SE 6th Ave", neighborhood: "Central Eastside", lat: 45.5205, lng: -122.6596, queerOwned: false, queerFriendly: true },
+      { name: "Escape Bar & Grill", type: "bar", description: "NE Portland bar and grill hosting community events including LGBTQ+ nights and Pride programming.", address: "9004 NE Sandy Blvd", neighborhood: "NE Portland", lat: 45.5559, lng: -122.5700, queerOwned: false, queerFriendly: true },
+    ];
+    for (const v of venues) {
+      db.insert(businesses).values({ ...v, active: true, isNew: false, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v7");
+  }
+  try {
+    const bcols = new Set(sqlite.prepare(`PRAGMA table_info(businesses)`).all().map((c: any) => c.name));
+    if (!bcols.has("donate_url")) sqlite.exec(`ALTER TABLE businesses ADD COLUMN donate_url TEXT`);
+  } catch (e) { console.error("[businesses] donate_url migration failed:", e); }
+  if (!hasBootMigration("seed_businesses_directory_v8")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "The Lodge Bar and Grill",
+      type: "bar",
+      description:
+        "Neighborhood dive bar and grill on SE Powell with comfort-food hits, eggs benedict, fries, poutine, and collard greens, plus a heated enclosed dog-friendly patio, karaoke Saturdays, pool, darts, and pinball.",
+      address: "6605 SE Powell Blvd",
+      neighborhood: "SE Portland",
+      website: "https://thelodgebarandgrill.shop/",
+      instagram: "@lodgebarandgrill",
+      queerOwned: false,
+      queerFriendly: true,
+      lat: 45.4977,
+      lng: -122.5955,
+      hours: "Sun 9am–2am, Mon–Thu 11am–2am, Fri 11am–2:30am, Sat 9am–2:30am",
+      phone: "(503) 788-9677",
+      active: true,
+      isNew: false,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_businesses_directory_v8");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v9_gay_pages_process_prism")) {
+    const now = new Date().toISOString();
+    const wave: Array<Record<string, unknown>> = [
+      {
+        name: "Process",
+        type: "bar",
+        description:
+          "Underground bar and event space inside the Watershed on SE Milwaukie. Seasonal craft cocktails, strong NA options, and a sound-treated room with a 4-point Danley system. Safer-space community guidelines; hosts ticketed and free nights all week.",
+        address: "5040 SE Milwaukie Ave",
+        neighborhood: "SE Portland",
+        website: "https://www.processpdx.club",
+        instagram: "@process.pdx",
+        lat: 45.4869,
+        lng: -122.6484,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Prism Health",
+        type: "healthcare",
+        description:
+          "Portland LGBTQ+ community health clinic offering primary care, HIV and STI services, gender-affirming care, behavioral health, and specialty programs for queer and trans communities across the metro.",
+        address: "2236 SE Belmont St",
+        neighborhood: "SE Portland",
+        website: "https://www.prismhealth.org",
+        instagram: "@prismhealth",
+        phone: "(503) 445-7699",
+        lat: 45.5165,
+        lng: -122.6430,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "The Automatic Bar",
+        type: "bar",
+        description:
+          "Neighborhood bar on SE Division with a full bar, snacks, and a welcoming queer-friendly room in the Richmond / Clinton pocket.",
+        address: "3652 SE Division St",
+        neighborhood: "SE Portland",
+        website: "https://www.theautomaticbarpdx.com/",
+        phone: "(503) 206-5371",
+        lat: 45.5047,
+        lng: -122.6265,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Montavilla Station",
+        type: "bar",
+        description:
+          "Friendly Montavilla tavern with karaoke, live music, pool, pub food, and late hours. A neighborhood hang listed in the PDX Gay Pages bars directory.",
+        address: "417 SE 80th Ave",
+        neighborhood: "Montavilla",
+        website: "https://montavillastation.com/",
+        phone: "(503) 252-3240",
+        hours: "Daily 11am–2am",
+        lat: 45.5195,
+        lng: -122.5820,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Covert Café",
+        type: "bar",
+        description:
+          "Intimate Montavilla live-music bar with comedy, community nights, and a small-room calendar built around local artists.",
+        address: "803 SE 82nd Ave",
+        neighborhood: "Montavilla",
+        website: "https://www.thecovertcafe.com/",
+        instagram: "@covertcafepdx",
+        phone: "(503) 254-8277",
+        lat: 45.5170,
+        lng: -122.5785,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Hunny Beez",
+        type: "restaurant",
+        description:
+          "American Filipino fusion restaurant and bar near PSU with adobo wings, brunch, happy hour, and late weekend nights.",
+        address: "1434 SW Park Ave",
+        neighborhood: "Downtown",
+        website: "https://hunnybeezpdx.com/",
+        instagram: "@hunnybeezpdx",
+        phone: "(971) 404-6845",
+        hours: "Mon–Wed 11am–10pm, Thu 11am–12am, Fri 11am–2am, Sat 10am–2am, Sun 10am–7pm",
+        lat: 45.5128,
+        lng: -122.6845,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Q Restaurant & Bar",
+        type: "restaurant",
+        description:
+          "Family-owned downtown restaurant with imaginative Pacific Northwest cuisine, lunch and dinner service, and a modern queer-friendly dining room.",
+        address: "828 SW 2nd Ave",
+        neighborhood: "Downtown",
+        website: "https://q-portland.com/",
+        instagram: "@q_portland",
+        phone: "(503) 850-8915",
+        hours: "Tue–Fri lunch and dinner, Sat dinner, closed Sun–Mon",
+        lat: 45.5175,
+        lng: -122.6765,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "GiGi's Cafe",
+        type: "cafe",
+        description:
+          "Hillsdale neighborhood cafe known for waffles, brunch plates, and a friendly daytime room open daily.",
+        address: "6320 SW Capitol Hwy",
+        neighborhood: "SW Portland",
+        website: "https://gigiscafepdx.com/",
+        instagram: "@gigiscafepdx",
+        phone: "(503) 977-2233",
+        hours: "Daily 8am–3pm",
+        lat: 45.4805,
+        lng: -122.7035,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Backstory Books & Yarn",
+        type: "shop",
+        description:
+          "Independent woman-owned bookstore and yarn shop on Hawthorne Boulevard with trade programs and community browsing.",
+        address: "3129 SE Hawthorne Blvd",
+        neighborhood: "SE Hawthorne",
+        website: "https://www.backstorybooksandyarn.com/",
+        instagram: "@BackstoryPDX",
+        phone: "(971) 282-3332",
+        lat: 45.5122,
+        lng: -122.6325,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Bridge City Mentors",
+        type: "nonprofit",
+        description:
+          "Black and LGBTQ-affiliated mentoring and advocacy organization supporting individuals and communities across the Portland metro since 2016.",
+        address: "2636 NE Sandy Blvd Suite E",
+        neighborhood: "NE Portland",
+        website: "https://bridgecitymentors.com/",
+        instagram: "@bridgecitymentors",
+        phone: "(503) 473-3306",
+        lat: 45.5345,
+        lng: -122.6385,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Rebel Heart Therapy",
+        type: "healthcare",
+        description:
+          "Queer-staffed, identity-forward therapy practice for LGBTQIA+, poly, kinky, neurodivergent, and nonconforming people in Portland.",
+        address: "1111 NE MLK Blvd",
+        neighborhood: "NE Portland",
+        website: "https://www.rebelheartpdx.com/",
+        instagram: "@rebelheartpdx",
+        lat: 45.5310,
+        lng: -122.6615,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Full Spectrum Therapy",
+        type: "healthcare",
+        description:
+          "Portland group therapy practice with clinicians dedicated to LGBTQ+ affirming care, gender-competent counseling, and community support.",
+        address: "1219 SE Lafayette St",
+        neighborhood: "SE Portland",
+        website: "https://www.fullspectrumpdx.com/",
+        instagram: "@fullspectrumtherapy",
+        phone: "(503) 765-5733",
+        lat: 45.5065,
+        lng: -122.6535,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "Sprout Therapy PDX",
+        type: "healthcare",
+        description:
+          "Inclusive counseling for individuals, kids, families, and relationships of any kind, with Portland offices and Oregon telehealth. LGBTQ+ welcoming and insurance-friendly.",
+        address: "6011 NE Oregon St",
+        neighborhood: "NE Portland",
+        website: "https://sprouttherapypdx.com/",
+        instagram: "@sprouttherapypdx",
+        lat: 45.5275,
+        lng: -122.6015,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+      {
+        name: "The Center for Couples & Sex Therapy",
+        type: "healthcare",
+        description:
+          "Sex-positive, gender-affirming therapy for individuals and partners covering desire, communication, identity, and relationship care in Portland and online.",
+        address: "2923 NE Broadway St",
+        neighborhood: "NE Portland",
+        website: "https://www.thecenterportland.com/",
+        instagram: "@thecenterportland",
+        phone: "(503) 941-0856",
+        lat: 45.5350,
+        lng: -122.6355,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+      },
+    ];
+    for (const entry of wave) {
+      const exists = sqlite.prepare(`SELECT id FROM businesses WHERE lower(name) = lower(?)`).get(entry.name as string);
+      if (exists) continue;
+      db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+    }
+    recordBootMigration("seed_businesses_directory_v9_gay_pages_process_prism");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v10_sold_by_scott")) {
+    const now = new Date().toISOString();
+    const exists = sqlite.prepare(`SELECT id FROM businesses WHERE lower(name) = lower(?)`).get("Sold By Scott");
+    if (!exists) {
+      db.insert(businesses).values({
+        name: "Sold By Scott",
+        type: "realestate",
+        description:
+          "Bay Area and Pacific Northwest queer-friendly real estate team. Scott Edelman (scotte@soldxscott.com, 415-481-2962) and Scott Gunner Friesen (scottf@soldxscott.com, 415-961-0281). The one real estate listing in Zaylist.",
+        address: null,
+        neighborhood: "Portland / Bay Area",
+        website: "https://soldxscott.com",
+        instagram: null,
+        phone: "(415) 481-2962",
+        hours: null,
+        lat: null,
+        lng: null,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+        active: true,
+        createdAt: now,
+      } as any).run();
+    }
+    // Ensure Bridge City Mentors stays nonprofit (correct pin + rainbow treatment).
+    sqlite.prepare(`UPDATE businesses SET type = 'nonprofit', queer_owned = 1, queer_friendly = 1 WHERE lower(name) = 'bridge city mentors'`).run();
+    recordBootMigration("seed_businesses_directory_v10_sold_by_scott");
+  }
+  if (!hasBootMigration("seed_businesses_directory_v11_type_accents")) {
+    // Reclassify Sold By Scott under realestate (green→white neon) if an older seed used service.
+    sqlite.prepare(`UPDATE businesses SET type = 'realestate' WHERE lower(name) = 'sold by scott'`).run();
+    recordBootMigration("seed_businesses_directory_v11_type_accents");
+  }
+  /**
+   * Crush Bar permanently closed 2025-01-01 — same address as Peacock PDX (successor).
+   * Keep a CLOSED inactive row for historical venue linkage; never QSearch-scrape @crushbarpdx.
+   * Peacock remains the live directory + year-round ingest slot.
+   */
+  if (!hasBootMigration("crush_bar_closed_permanent_2025_01_01_v1")) {
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`);
+    } catch { /* already present */ }
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`);
+    } catch { /* already present */ }
+
+    const now = new Date().toISOString();
+    const existingCrush = sqlite
+      .prepare(`SELECT id FROM businesses WHERE lower(name) IN ('crush bar', 'crush bar pdx', 'crush') LIMIT 1`)
+      .get() as { id: number } | undefined;
+    if (existingCrush) {
+      sqlite
+        .prepare(
+          `UPDATE businesses
+           SET status = 'CLOSED', closed_at = '2025-01-01', active = 0,
+               description = COALESCE(NULLIF(trim(description), ''),
+                 'Former Buckman queer bar at 1400 SE Morrison. Permanently closed 2025-01-01; space reopened as Peacock PDX. Kept for historical event linkage only — do not scrape.'),
+               address = COALESCE(address, '1400 SE Morrison St'),
+               neighborhood = COALESCE(neighborhood, 'SE Portland')
+           WHERE id = ?`,
+        )
+        .run(existingCrush.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name: "Crush Bar",
+          type: "bar",
+          description:
+            "Former Buckman queer bar at 1400 SE Morrison. Permanently closed 2025-01-01; space reopened as Peacock PDX. Kept for historical event linkage only — do not scrape.",
+          address: "1400 SE Morrison St",
+          neighborhood: "SE Portland",
+          website: null,
+          instagram: null,
+          queerOwned: true,
+          queerFriendly: true,
+          lat: 45.5169,
+          lng: -122.6490,
+          active: false,
+          status: "CLOSED",
+          closedAt: "2025-01-01",
+          isNew: false,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    // Ensure successor Peacock is OPEN/active for discovery + directory ingest
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET status = 'OPEN', closed_at = NULL, active = 1,
+             website = COALESCE(website, 'https://peacockpdx.com'),
+             instagram = COALESCE(instagram, '@peacock.pdx')
+         WHERE lower(name) IN ('peacock pdx', 'peacock')`,
+      )
+      .run();
+    recordBootMigration("crush_bar_closed_permanent_2025_01_01_v1");
+  }
+  /**
+   * Expand closed-venue directory seeds + soft-hide LIVE post-close events at blacklisted venues.
+   * List lives in shared/closedVenues.ts (also used by QSearch relevance).
+   */
+  if (!hasBootMigration("closed_venues_blacklist_v1")) {
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN status TEXT NOT NULL DEFAULT 'OPEN'`);
+    } catch { /* already present */ }
+    try {
+      sqlite.exec(`ALTER TABLE businesses ADD COLUMN closed_at TEXT`);
+    } catch { /* already present */ }
+
+    const now = new Date().toISOString();
+
+    for (const entry of CLOSED_PERMANENT_VENUES) {
+      if (!entry.seedDirectory) continue;
+      const closedAt = closedAtIso(entry);
+      const existing = sqlite
+        .prepare(`SELECT id FROM businesses WHERE lower(name) = lower(?) LIMIT 1`)
+        .get(entry.label) as { id: number } | undefined;
+      if (existing) {
+        sqlite
+          .prepare(
+            `UPDATE businesses
+             SET status = 'CLOSED', closed_at = ?, active = 0,
+                 description = CASE
+                   WHEN description IS NULL OR trim(description) = '' THEN ?
+                   ELSE description
+                 END,
+                 address = COALESCE(address, ?),
+                 neighborhood = COALESCE(neighborhood, ?)
+             WHERE id = ?`,
+          )
+          .run(
+            closedAt,
+            `${entry.label} permanently closed ${closedAt}. ${entry.note} Historical linkage only — do not scrape.`,
+            entry.address || null,
+            entry.neighborhood || null,
+            existing.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: entry.label,
+            type: "bar",
+            description: `${entry.label} permanently closed ${closedAt}. ${entry.note} Historical linkage only — do not scrape.`,
+            address: entry.address || null,
+            neighborhood: entry.neighborhood || null,
+            website: null,
+            instagram: null,
+            queerOwned: true,
+            queerFriendly: true,
+            active: false,
+            status: "CLOSED",
+            closedAt,
+            isNew: false,
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+
+    // Soft-hide LIVE events at blacklisted venues with start on/after close (no historical purge)
+    const live = sqlite
+      .prepare(`SELECT id, title, venue_name AS venueName, address, date_start AS dateStart FROM events WHERE status = 'LIVE'`)
+      .all() as Array<{ id: number; title: string; venueName: string; address: string | null; dateStart: string }>;
+    let hidden = 0;
+    for (const row of live) {
+      const hit = matchClosedVenue({ venueName: row.venueName, address: row.address, title: row.title });
+      if (!hit) continue;
+      if (!isEventAfterVenueClose(row.dateStart, hit.entry.closedAt)) continue;
+      sqlite
+        .prepare(
+          `UPDATE events SET status = 'HIDDEN',
+             admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+           WHERE id = ? AND status = 'LIVE'`,
+        )
+        .run(`closed_venues_blacklist_v1: ${hit.reason}`, row.id);
+      hidden++;
+    }
+    if (hidden > 0) {
+      console.info(`[boot] closed_venues_blacklist_v1: soft-hid ${hidden} LIVE post-close events`);
+    }
+
+    // Peacock / Scandals East stay open
+    sqlite
+      .prepare(
+        `UPDATE businesses SET status = 'OPEN', closed_at = NULL, active = 1
+         WHERE lower(name) IN ('peacock pdx', 'peacock', 'scandals east')`,
+      )
+      .run();
+
+    recordBootMigration("closed_venues_blacklist_v1");
+  }
+  /**
+   * Soft-hide garbage non-queer + dupe LIVE rows from Meta/Grok audit (2026-07-25 export).
+   * Keep oldest of each dupe group; hide beer runs as non-queer.
+   */
+  if (!hasBootMigration("cleanup_prod_garbage_dupes_2026_07_25_v1")) {
+    const garbage = [376, 377, 365, 368, 381]; // StrongFirst, Survival, Loowit×2, Leikam beer run
+    const dupes = [355, 316, 356, 357, 358, 386]; // newer of each dupe group
+    const ids = [...garbage, ...dupes];
+    const stmt = sqlite.prepare(
+      `UPDATE events SET status = 'HIDDEN',
+         admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+       WHERE id = ? AND status = 'LIVE'`,
+    );
+    let n = 0;
+    for (const id of ids) {
+      const r = stmt.run("cleanup_prod_garbage_dupes_2026_07_25_v1", id);
+      n += r.changes;
+    }
+    if (n > 0) console.info(`[boot] cleanup_prod_garbage_dupes: soft-hid ${n} LIVE rows`);
+    recordBootMigration("cleanup_prod_garbage_dupes_2026_07_25_v1");
+  }
+  /** Badlands ticketUrl was worker calendar API — rewrite to public calendar page. */
+  if (!hasBootMigration("badlands_ticket_url_hygiene_v1")) {
+    const r = sqlite
+      .prepare(
+        `UPDATE events
+         SET ticket_url = 'https://www.badlandsportland.com/calendar',
+             admin_notes = COALESCE(admin_notes || ' | ', '') || 'badlands_ticket_url_hygiene_v1'
+         WHERE status = 'LIVE'
+           AND lower(venue_name) LIKE '%badlands%'
+           AND ticket_url IS NOT NULL
+           AND (
+             ticket_url LIKE '%workers.dev%'
+             OR ticket_url LIKE '%/api/calendar%'
+             OR ticket_url LIKE '%/api/drive%'
+           )`,
+      )
+      .run();
+    if (r.changes > 0) {
+      console.info(`[boot] badlands_ticket_url_hygiene_v1: rewrote ${r.changes} ticket URLs`);
+    }
+    recordBootMigration("badlands_ticket_url_hygiene_v1");
+  }
+  /** Seed verified year-round Eventbrite listings into Review queue (once). */
+  if (!hasBootMigration("seed_missing_yearround_review_v1")) {
+    // Dynamic import is ESM-safe and avoids a storage↔qsearch circular init.
+    // Record after the attempt so a failed import can still retry next boot.
+    void import("./qsearch/seedMissingYearround")
+      .then(({ seedMissingYearroundToReview }) => {
+        try {
+          const result = seedMissingYearroundToReview();
+          console.info(
+            `[boot] seed_missing_yearround_review_v1: seeded=${result.seeded} skipBoard=${result.skippedBoard} skipPending=${result.skippedPending} path=${result.path}`,
+          );
+        } catch (e) {
+          console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
+        }
+        recordBootMigration("seed_missing_yearround_review_v1");
+      })
+      .catch((e) => {
+        console.warn("[boot] seed_missing_yearround_review_v1 failed:", e);
+        recordBootMigration("seed_missing_yearround_review_v1");
+      });
+  }
+  if (!hasBootMigration("seed_plus_psychiatry_v1")) {
+    const now = new Date().toISOString();
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE lower(name) IN ('plus psychiatry', '+psychiatry', 'pluspsychiatry') LIMIT 1`)
+      .get() as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses).values({
+        name: "Plus Psychiatry",
+        type: "healthcare",
+        description:
+          "LGBTQIA2S+ affirming psychiatric care with Jermiah Floyd, PMHNP-BC. Trauma-informed, person-centered psychotherapy and medication management in Portland, in-person and telehealth.",
+        address: "1110 SE Alder St Suite 301",
+        neighborhood: "SE Portland",
+        website: "https://www.pluspsychiatry.com",
+        instagram: null,
+        phone: "(541) 414-4277",
+        hours: null,
+        lat: 45.5176,
+        lng: -122.6545,
+        queerOwned: true,
+        queerFriendly: true,
+        isNew: false,
+        active: true,
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_plus_psychiatry_v1");
+  }
+  // Grand openings: ONLY verified doors-open dates - never "just added to directory".
+  // Clear bad is_new flags from seed/add waves (Hawks, underU, Meet Rack, therapy, etc.).
+  if (!hasBootMigration("grand_opening_verified_dates_v1")) {
+    try {
+      sqlite.prepare(`UPDATE businesses SET is_new = 0, grand_opening_date = NULL`).run();
+      // Camp Bar PDX - verified grand opening Sat Jul 11, 2026 (KOIN / OregonLive / IG).
+      sqlite
+        .prepare(
+          `UPDATE businesses
+           SET is_new = 1, grand_opening_date = '2026-07-11',
+               description = 'Modern inclusive gay bar in downtown Portland''s Gayborhood, taking over the historic former Scandals space on Harvey Milk Street. Grand opening July 11, 2026.'
+           WHERE lower(name) IN ('camp bar pdx', 'camp bar', 'camp')`,
+        )
+        .run();
+      recordBootMigration("grand_opening_verified_dates_v1");
+    } catch (e) {
+      console.warn("[businesses] grand opening verified dates migration failed:", e);
+    }
+  }
+  // Expire is_new when verified opening day is older than 60 days.
+  try {
+    const rows = sqlite
+      .prepare(`SELECT id, grand_opening_date FROM businesses WHERE is_new = 1 AND grand_opening_date IS NOT NULL`)
+      .all() as Array<{ id: number; grand_opening_date: string }>;
+    const now = Date.now();
+    const windowMs = 60 * 24 * 60 * 60 * 1000;
+    for (const row of rows) {
+      const iso = /^\d{4}-\d{2}-\d{2}$/.test(row.grand_opening_date)
+        ? `${row.grand_opening_date}T12:00:00-07:00`
+        : row.grand_opening_date;
+      const t = Date.parse(iso);
+      if (!Number.isFinite(t)) continue;
+      if (now - t >= windowMs) {
+        sqlite.prepare(`UPDATE businesses SET is_new = 0 WHERE id = ?`).run(row.id);
+      }
+    }
+  } catch (e) {
+    console.warn("[businesses] grand opening expiry cleanup failed:", e);
+  }
+  if (!hasBootMigration("seed_business_bowery_bagels_v1")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "Bowery Bagels",
+      type: "cafe",
+      description:
+        "Portland's premier New York-style handcrafted kosher bagels-boiled & baked fresh daily, with delicious schmears, sandwiches, vegan options, and Stumptown coffee. Active Pride participant with rainbow schmear specials.",
+      address: "310 NW Broadway",
+      neighborhood: "Old Town Chinatown",
+      website: "https://www.bowerybagels.com/",
+      instagram: "@bowerybagels",
+      queerOwned: false,
+      queerFriendly: true,
+      lat: 45.5257,
+      lng: -122.6758,
+      hours: "Old Town: Mon–Fri 7am–1pm, Sat–Sun 8am–2pm (PSU location also available)",
+      phone: "(503) 227-6674",
+      active: true,
+      isNew: false,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_business_bowery_bagels_v1");
+  }
+    if (!hasBootMigration("seed_nonprofits_directory_v9")) {
+    const now = new Date().toISOString();
+    const orgs = [
+      { name: "Cascade AIDS Project (CAP) & Our House", type: "nonprofit", description: "The Northwest's leading HIV services org since 1983, prevention, testing, supportive housing, and LGBTQ+ health care, plus Our House residential care for people living with HIV.", website: "https://www.capnw.org/", donateUrl: "https://www.capnw.org/donate", neighborhood: "Old Town" },
+      { name: "Pride Northwest", type: "nonprofit", description: "The organizers of Portland Pride. Year-round programs celebrating and supporting the LGBTQ2SIA+ community, including Trans Unity and Pride Days of Service.", website: "https://www.pridenw.org/", donateUrl: "https://www.pridenw.org/donate" },
+      { name: "Basic Rights Oregon", type: "nonprofit", description: "Oregon's statewide LGBTQ2SIA+ advocacy organization, political, legal, and grassroots work to ensure all Oregonians experience equality.", website: "https://www.basicrights.org/", donateUrl: "https://www.basicrights.org/donate" },
+      { name: "New Avenues for Youth / SMYRC", type: "nonprofit", description: "SMYRC, a program of New Avenues for Youth, has served LGBTQIA2S+ youth ages 13–24 since 1998, a drop-in space with food, clothing, gender-affirming garments, counseling, and community events.", website: "https://newavenues.org/smyrc/", donateUrl: "https://newavenues.org/donate/give-lgbtqia2s/", address: "1220 SW Columbia St", neighborhood: "Downtown" },
+      { name: "Outside In", type: "nonprofit", description: "Health care and social services for young people experiencing homelessness since 1968, including the QueerZone drop-in, an LGBTQ-affirming clinic with gender-affirming care, meals, showers, and housing help.", website: "https://outsidein.org/", donateUrl: "https://outsidein.org/about-us/donate-now/", address: "1132 SW 13th Ave", neighborhood: "Downtown" },
+      { name: "The Marie Equi Center", type: "nonprofit", description: "Trauma-informed, culturally affirming health and social services for trans, queer, intersex, and gender-diverse communities, peer support, harm reduction, and housing advocacy from their Brooklyn service center.", website: "https://www.marieequi.center/", donateUrl: "https://www.marieequi.center/donate", neighborhood: "SE Portland" },
+      { name: "WERQ Together", type: "nonprofit", description: "Trans-led org providing relocation assistance, emergency shelter, peer support, and economic justice for two-spirit, trans, non-binary, and gender non-conforming people in Oregon.", website: "https://werqt.org/", donateUrl: "https://werqt.org/donate" },
+      { name: "Portland Gay Men's Chorus", type: "nonprofit", description: "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980, concerts, community performances, and queer joy in four-part harmony.", website: "https://www.pdxgmc.org/", donateUrl: "https://www.pdxgmc.org/support/donate/", imageUrl: "https://www.pdxgmc.org/wp-content/uploads/2017/04/PGMC-Logo.png" },
+    ];
+    for (const o of orgs) {
+      db.insert(businesses).values({ queerOwned: true, queerFriendly: true, active: true, isNew: false, createdAt: now, ...o } as any).run();
+    }
+    recordBootMigration("seed_nonprofits_directory_v9");
+  }
+    if (!hasBootMigration("seed_underu4men_v10")) {
+    const now = new Date().toISOString();
+    db.insert(businesses).values({
+      name: "underU4men",
+      type: "shop",
+      description: "Men's underwear, swimwear, gymwear, and apothecary boutique, a longtime queer Portland staple, now at its new downtown home on SW Morrison.",
+      address: "1013 SW Morrison St",
+      neighborhood: "Downtown",
+      website: "https://shop.underu4men.com",
+      phone: "(503) 274-2555",
+      hours: "Mon–Sat 10am–7pm, Sun 11am–6pm",
+      queerOwned: true,
+      queerFriendly: true,
+      active: true,
+      isNew: false,
+      createdAt: now,
+    } as any).run();
+    recordBootMigration("seed_underu4men_v10");
+  }
+  if (!hasBootMigration("seed_meetrack_directory_v11")) {
+    const now = new Date().toISOString();
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = ? LIMIT 1`)
+      .get("The Meet Rack at Darkroom") as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses).values({
+        name: "The Meet Rack at Darkroom",
+        type: "venue",
+        description:
+          "Portland's private event club for men, hosted at Darkroom. Regular in-person events at the intersection of community, social life, kink, body positivity, and mutual respect. Details and calendar at meetrack.org.",
+        address: null,
+        neighborhood: "Portland",
+        website: "https://meetrack.org",
+        instagram: null,
+        queerOwned: false,
+        queerFriendly: true,
+        isNew: false,
+        active: true,
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_meetrack_directory_v11");
+  }
+  if (!hasBootMigration("sync_event_map_coordinates_v1")) {
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const missing = sqlite.prepare(`
+      SELECT id, venue_name AS venueName, address, lat, lng
+      FROM events
+      WHERE status = 'LIVE' AND (lat IS NULL OR lng IS NULL)
+    `).all() as Array<{ id: number; venueName: string; address: string | null; lat: number | null; lng: number | null }>;
+    for (const row of missing) {
+      const merged = mergeMapCoordinates(row, directoryRows);
+      if (merged.lat != null && merged.lng != null) {
+        sqlite.prepare(`UPDATE events SET lat = ?, lng = ? WHERE id = ?`).run(merged.lat, merged.lng, row.id);
+      }
+    }
+    recordBootMigration("sync_event_map_coordinates_v1");
+  }
+
+  // Squarespace (and similar) sometimes ship map pins outside PDX (Hawks → NYC).
+  // Rewrite LIVE pins that fall outside greater Portland using directory match.
+  if (!hasBootMigration("fix_out_of_metro_event_coords_v1")) {
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const rows = sqlite.prepare(`
+      SELECT id, venue_name AS venueName, address, lat, lng
+      FROM events
+      WHERE status = 'LIVE' AND lat IS NOT NULL AND lng IS NOT NULL
+        AND NOT (lat >= 45.0 AND lat <= 46.1 AND lng >= -123.8 AND lng <= -121.5)
+    `).all() as Array<{ id: number; venueName: string; address: string | null; lat: number | null; lng: number | null }>;
+    for (const row of rows) {
+      const merged = mergeMapCoordinates(
+        { venueName: row.venueName, address: row.address, lat: null, lng: null },
+        directoryRows,
+      );
+      if (merged.lat != null && merged.lng != null) {
+        sqlite.prepare(`UPDATE events SET lat = ?, lng = ? WHERE id = ?`).run(merged.lat, merged.lng, row.id);
+      }
+    }
+    recordBootMigration("fix_out_of_metro_event_coords_v1");
+  }
+
+  // Fix brohoejams talent row: the DJ credit on yes_coach event has tucker's user_id instead of brohoejams'
+  if (!hasBootMigration("fix_brohoejams_talent_v1")) {
+    const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    const yesCoachEvt = sqlite.prepare(`SELECT id FROM events WHERE LOWER(title) LIKE '%yes coach%' LIMIT 1`).get() as { id: number } | undefined;
+    if (tucker && brohoe && yesCoachEvt) {
+      sqlite.prepare(`UPDATE event_talent SET user_id = ? WHERE event_id = ? AND user_id = ?`).run(brohoe.id, yesCoachEvt.id, tucker.id);
+    }
+    if (brohoe) {
+      const bh = sqlite.prepare(`SELECT display_name FROM users WHERE id = ?`).get(brohoe.id) as { display_name: string | null } | undefined;
+      if (!bh?.display_name) {
+        sqlite.prepare(`UPDATE users SET display_name = 'Bro Hoe' WHERE id = ?`).run(brohoe.id);
+      }
+    }
+    recordBootMigration("fix_brohoejams_talent_v1");
+  }
+
+  // Force brohoejams display name to "Bro Hoe" regardless of prior value
+  if (!hasBootMigration("fix_brohoejams_displayname_v2")) {
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    if (brohoe) {
+      sqlite.prepare(`UPDATE users SET display_name = 'Bro Hoe' WHERE id = ?`).run(brohoe.id);
+    }
+    recordBootMigration("fix_brohoejams_displayname_v2");
+  }
+
+  // Sanctuary events were never free - door fee / ticketed only.
+  if (!hasBootMigration("sanctuary_never_free_v1")) {
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status = 'LIVE'
+        AND UPPER(COALESCE(admission, '')) IN ('FREE', '')
+        AND (
+          LOWER(venue_name) LIKE '%sanctuary%'
+          OR LOWER(title) LIKE '%yes coach%'
+          OR LOWER(title) LIKE '%stank%'
+        )
+    `).run();
+    recordBootMigration("sanctuary_never_free_v1");
+  }
+
+  // Year-round trusted club pulls often leave admission UNKNOWN (thin feed text).
+  // Re-tag from title+description when clear; else door fee for known club venues.
+  if (!hasBootMigration("retag_unknown_admission_v1")) {
+    // Explicit free / no cover
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'FREE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(title || ' ' || COALESCE(description, '')) LIKE '%no cover%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free entry%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free admission%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%free show%'
+        )
+    `).run();
+    // Ticket language or Eventbrite ticket URL
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'TICKETED'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(COALESCE(ticket_url, '')) LIKE '%eventbrite.com/e/%'
+          OR LOWER(COALESCE(ticket_url, '')) LIKE '%ticketmaster%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%ticket%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%get tix%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%buy tickets%'
+        )
+    `).run();
+    // Cover / door fee signals
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(title || ' ' || COALESCE(description, '')) LIKE '%cover%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%door fee%'
+          OR LOWER(title || ' ' || COALESCE(description, '')) LIKE '%at the door%'
+        )
+    `).run();
+    // Club weeklies from Trusted adapters with no text signal → DOOR_FEE (not FREE)
+    sqlite.prepare(`
+      UPDATE events
+      SET admission = 'DOOR_FEE'
+      WHERE status IN ('LIVE', 'HIDDEN')
+        AND UPPER(COALESCE(admission, 'UNKNOWN')) IN ('UNKNOWN', '')
+        AND (
+          LOWER(venue_name) LIKE '%badlands%'
+          OR LOWER(venue_name) LIKE '%hawks%'
+          OR LOWER(venue_name) LIKE '%darcelle%'
+          OR LOWER(venue_name) LIKE '%eagle%'
+          OR LOWER(venue_name) LIKE '%sanctuary%'
+          OR LOWER(venue_name) LIKE '%cc slaughter%'
+          OR LOWER(venue_name) LIKE '%camp bar%'
+          OR LOWER(venue_name) LIKE '%stag%'
+        )
+    `).run();
+    recordBootMigration("retag_unknown_admission_v1");
+  }
+
+  // Clubs & Groups directory section (claimable like other businesses).
+  if (!hasBootMigration("seed_directory_clubs_groups_v1")) {
+    const now = new Date().toISOString();
+    const clubs = [
+      {
+        name: "The Imperial Sovereign Rose Court of Oregon",
+        type: "group",
+        description:
+          "Portland's Imperial Sovereign Rose Court - the oldest continuously operating court system organization in the world. Coronations, fundraisers, and community service for LGBTQ+ causes across Oregon.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://rosecourt.org",
+        instagram: "@rosecourtpdx",
+        queerOwned: true,
+        queerFriendly: true,
+      },
+      {
+        name: "Pink Ponies",
+        type: "group",
+        description:
+          "Portland queer social and party collective - Western nights, fundraisers, and scene-building collabs (including Yes Coach × Pink Ponies). Community first, boots optional.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@pinkponiespdx",
+        queerOwned: true,
+        queerFriendly: true,
+      },
+    ];
+    for (const entry of clubs) {
+      const exists = sqlite.prepare(
+        `SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`,
+      ).get(entry.name) as { id: number } | undefined;
+      if (!exists) {
+        db.insert(businesses).values({ ...entry, active: true, createdAt: now } as any).run();
+      }
+    }
+    recordBootMigration("seed_directory_clubs_groups_v1");
+  }
+
+  // Flyer-confirmed live events: add @brohoejams as DJ + COHOST (idempotent).
+  // Archive nights (Locker Room series, Stank 2025, Cozy, Camp Honey, Hyde, Overtime)
+  // are credited via mergeTuckerHostedArchivePast - not rows in event_*.
+  if (!hasBootMigration("credit_brohoejams_flyer_events_v1")) {
+    ensureEventHostsSchema();
+    ensureEventTalentSchema();
+    const brohoe = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'brohoejams'`).get() as { id: number } | undefined;
+    const tucker = sqlite.prepare(`SELECT id FROM users WHERE LOWER(username) = 'tucker_pdmax'`).get() as { id: number } | undefined;
+    if (brohoe) {
+      const now = new Date().toISOString();
+      const liveMatches = sqlite.prepare(`
+        SELECT id, title FROM events
+        WHERE status = 'LIVE'
+          AND (
+            (LOWER(title) LIKE '%stank%' AND (LOWER(title) LIKE '%coach%' OR LOWER(title) LIKE '%yes%'))
+            OR LOWER(title) LIKE '%locker room%'
+            OR LOWER(title) LIKE '%camp honey%'
+            OR (LOWER(title) = 'cozy' OR LOWER(title) LIKE 'cozy %' OR LOWER(title) LIKE '% cozy')
+            OR (LOWER(title) LIKE '%hyde%' AND LOWER(title) NOT LIKE '%hyde park%')
+            OR LOWER(title) LIKE '%overtime%'
+          )
+      `).all() as Array<{ id: number; title: string }>;
+      for (const evt of liveMatches) {
+        const hostExists = sqlite.prepare(
+          `SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`,
+        ).get(evt.id, brohoe.id);
+        if (!hostExists) {
+          const hostCount = (sqlite.prepare(
+            `SELECT COUNT(*) AS c FROM event_hosts WHERE event_id = ?`,
+          ).get(evt.id) as { c: number }).c;
+          if (hostCount < 3) {
+            sqlite.prepare(`
+              INSERT INTO event_hosts (event_id, user_id, role, added_by_user_id, created_at)
+              VALUES (?, ?, 'COHOST', ?, ?)
+            `).run(evt.id, brohoe.id, tucker?.id ?? null, now);
+          }
+        }
+        const talentExists = sqlite.prepare(
+          `SELECT id FROM event_talent WHERE event_id = ? AND user_id = ? AND role = 'DJ' AND status IN ('LIVE', 'PENDING')`,
+        ).get(evt.id, brohoe.id);
+        if (!talentExists) {
+          sqlite.prepare(`
+            INSERT INTO event_talent (event_id, user_id, role, status, added_by_user_id, created_at)
+            VALUES (?, ?, 'DJ', 'LIVE', ?, ?)
+          `).run(evt.id, brohoe.id, tucker?.id ?? null, now);
+        }
+      }
+    }
+    recordBootMigration("credit_brohoejams_flyer_events_v1");
+  }
+
+  // syncOwnerDisplayName mistakenly renamed granted admins to Tucker_PDmaX - undo + fix Sugar Pill.
+  if (!hasBootMigration("fix_owner_displayname_clobber_v1")) {
+    const ownerDisplay = (
+      process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX"
+    ).trim();
+    const owner = resolveSiteOwner();
+    if (owner) {
+      sqlite.prepare(`
+        UPDATE users SET display_name = NULL
+        WHERE display_name = ? AND id != ?
+      `).run(ownerDisplay, owner.id);
+    }
+    const heygirl = sqlite.prepare(`
+      SELECT id FROM users
+      WHERE LOWER(username) = 'heygirl' OR LOWER(email) = 'heygirl@sugarpillpdx.com'
+      LIMIT 1
+    `).get() as { id: number } | undefined;
+    if (heygirl) {
+      sqlite.prepare(`UPDATE users SET display_name = 'Sugar Pill' WHERE id = ?`).run(heygirl.id);
+    }
+    recordBootMigration("fix_owner_displayname_clobber_v1");
+  }
+
+  // v1 migration could run then syncOwnerDisplayName re-clobbered env-listed admins on login.
+  if (!hasBootMigration("fix_heygirl_displayname_v2")) {
+    const owner = resolveSiteOwner();
+    const ownerDisplay = (process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX").trim();
+    if (owner) {
+      sqlite.prepare(`
+        UPDATE users SET display_name = NULL
+        WHERE display_name = ? AND id != ?
+      `).run(ownerDisplay, owner.id);
+    }
+    sqlite.prepare(`
+      UPDATE users SET display_name = 'Sugar Pill'
+      WHERE id = 15
+         OR LOWER(username) = 'heygirl'
+         OR LOWER(email) = 'heygirl@sugarpillpdx.com'
+    `).run();
+    recordBootMigration("fix_heygirl_displayname_v2");
+  }
+  if (!hasBootMigration("remove_pre_pride_week_events_v1")) {
+    removePrePrideWeekEvents();
+    recordBootMigration("remove_pre_pride_week_events_v1");
+  }
+  if (!hasBootMigration("sanctuary_sex_positive_v1")) {
+    sqlite.prepare(`
+      UPDATE events
+      SET is_sex_positive = 1
+      WHERE LOWER(TRIM(venue_name)) LIKE '%sanctuary%'
+    `).run();
+    recordBootMigration("sanctuary_sex_positive_v1");
+  }
+  if (!hasBootMigration("seed_pdxpah_events_v1")) {
+    seedPdxPahJuly2026Events();
+    recordBootMigration("seed_pdxpah_events_v1");
+  }
+  if (!hasBootMigration("seed_camp_bar_pride_week_2026_v1")) {
+    seedCampBarPrideWeek2026Events();
+    recordBootMigration("seed_camp_bar_pride_week_2026_v1");
+  }
+  if (!hasBootMigration("lumbertwink_world_cup_time_v1")) {
+    // 3–8pm → 4–9pm for World Cup (confirmed Jul 2026)
+    sqlite.prepare(`
+      UPDATE events SET
+        date_start = '2026-07-19T16:00:00',
+        date_end = '2026-07-19T21:00:00',
+        description = 'Lumbertwink Plaid Patio Pride at Jackie''s, 4–9pm (shifted from 3–8 for the World Cup). DJs Not That Jennifer and Orographic, sexy lumber go-gos, photo booth by Matty Hoffman. $18.69 plaid / $29.45 non-plaid.',
+        admin_notes = COALESCE(admin_notes, 'Time shifted 3–8 → 4–9 for World Cup')
+      WHERE title = 'Lumbertwink Plaid Patio Pride'
+    `).run();
+    recordBootMigration("lumbertwink_world_cup_time_v1");
+  }
+  if (!hasBootMigration("seed_missing_wweek_pride_events_v1")) {
+    seedMissingWweekPrideEvents2026();
+    recordBootMigration("seed_missing_wweek_pride_events_v1");
+  }
+  if (!hasBootMigration("seed_checking_portland_events_july_2026_v1")) {
+    seedCheckingPortlandEventsJuly2026();
+    recordBootMigration("seed_checking_portland_events_july_2026_v1");
+  }
+  if (!hasBootMigration("delete_unverified_checking_portland_events_v1")) {
+    deleteUnverifiedCheckingPortlandEvents();
+    recordBootMigration("delete_unverified_checking_portland_events_v1");
+  }
+  if (!hasBootMigration("hide_unverified_checking_portland_events_v1")) {
+    // Scandals downtown closed; unverified GLOW/specials stay hidden.
+    const titles = [
+      "Scandals PDX Pride Karaoke",
+      "CC Slaughters GLOW: Trans-Uhh-Licious",
+      "CC Slaughters GLOW: RuPaul's Drag Race Viewing + Bolivia Carmichaels",
+      "CC Slaughters GLOW: Birdcage Matinee",
+      "Red Cap Garage Pride BBQ",
+      "Lavender Rain Afterparty",
+      "QTBIPOC Pride Picnic",
+      "CC Slaughters GLOW: Parade Day Viewing + Bloody Mary Bar",
+      "Gaylabration Pool Party",
+      "Pride Tea Dance: Silver Foxes",
+    ];
+    const hide = sqlite.prepare(`
+      UPDATE events SET
+        status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden: Checking-Portland-events-July-2026 batch unverified (Scandals address wrong; do not show until confirmed).'
+      WHERE title = ?
+    `);
+    for (const title of titles) hide.run(title);
+    recordBootMigration("hide_unverified_checking_portland_events_v1");
+  }
+  if (!hasBootMigration("verify_checking_portland_events_v2")) {
+    // Restore only source-verified listings from that batch; rest stay HIDDEN.
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Trans-UHH-Licious',
+        description = 'Weekly residency dedicated to the trans community at CC Slaughters, local and regional trans talent, hosted by Sheniqua Volt. DJ ROBB, then DJ Lyta Blunt (hip-hop) until late. Pride Week Thursday edition. No cover.',
+        venue_name = 'CC Slaughters',
+        address = '219 NW Davis St, Portland, OR 97209',
+        neighborhood = 'Old Town',
+        date_start = '2026-07-16T21:00:00',
+        date_end = '2026-07-17T02:00:00',
+        day_of_week = 'THU',
+        age_requirement = '21_PLUS',
+        admission = 'FREE',
+        ticket_url = 'https://ccslaughterspdx.com/',
+        event_types = '["DRAG","TRANS","PERFORMANCE","NIGHTLIFE"]',
+        is_sex_positive = 0,
+        nudity_ok = 0,
+        status = 'LIVE',
+        admin_notes = 'Verified via ccslaughterspdx.com weeklys + Queer Social Club. FREE weekly residency (not a ticketed special).'
+      WHERE title IN ('Trans-UHH-Licious', 'CC Slaughters GLOW: Trans-Uhh-Licious')
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Lavender Rain: Pride Edition (Queer Strip Club Pop-Up)',
+        description = 'The Gay Barn''s queer strip club pop-up at Peacock PDX for Pride Weekend. Sliding-scale tickets $17–$28 (door tickets also available). For dykes, lesbians, and dyke-adjacent queers 21+; respectful allies welcome. POC discount codes via TheGayBarn@proton.me.',
+        venue_name = 'Peacock PDX',
+        address = '1400 SE Morrison St, Portland, OR 97214',
+        neighborhood = 'SE Portland',
+        date_start = '2026-07-18T21:00:00',
+        date_end = '2026-07-19T01:00:00',
+        day_of_week = 'SAT',
+        age_requirement = '21_PLUS',
+        admission = 'TICKETED',
+        ticket_url = 'https://forbiddentickets.com/events/the-gay-barn/2026-07-18-lavender-rain-pride-edition',
+        poster_image_url = 'https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png',
+        event_types = '["PERFORMANCE","PARTY","BURLESQUE"]',
+        is_sex_positive = 1,
+        nudity_ok = 1,
+        status = 'LIVE',
+        admin_notes = 'Verified Forbidden Tickets + Gay Barn flyer. WW misnamed as Purple Rain.'
+      WHERE title LIKE 'Lavender Rain%'
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET
+        status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Hidden as duplicate of Lavender Rain Pride Edition (Gay Barn / Peacock Jul 18) - WW used Purple Rain name.'
+      WHERE title LIKE 'Purple Rain%'
+    `).run();
+    recordBootMigration("verify_checking_portland_events_v2");
+  }
+  if (!hasBootMigration("cc_slaughters_glow_pride_2026_v1")) {
+    // Official CC Slaughters "GLOW Pride 2026" poster (Jul 16–19). One shared
+    // poster for the whole run, repeated across each day's event.
+    const now = new Date().toISOString();
+    const POSTER = "/posters/cc-slaughters-glow-2026.jpg";
+    const DJ_LINE =
+      "Feat. DJ Robb, DJ Mawmie, Lyta Blunt, Chelsea Starr, DJ Ragnarok, and special guest DJ Pup Sam.";
+    // Thursday (Trans-UHH-Licious) already exists - align it to the poster and
+    // attach the shared GLOW artwork.
+    sqlite.prepare(`
+      UPDATE events SET
+        poster_image_url = ?,
+        admission = 'TICKETED',
+        description = 'GLOW Pride 2026 edition of Trans-Uhh-Licious at CC Slaughters - the residency dedicated to the trans community, hosted by Sheniqua Volt with DJ Robb. Live show 9–11pm. $10 cover. 21+.',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Updated from official CC Slaughters GLOW Pride 2026 poster: $10 cover, DJ Robb, poster attached.'
+      WHERE title = 'Trans-UHH-Licious' AND venue_name = 'CC Slaughters'
+    `).run(POSTER);
+    const glowBase = {
+      venueName: "CC Slaughters",
+      address: "219 NW Davis St, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5246801,
+      lng: -122.6729454,
+      ticketUrl: "https://ccslaughterspdx.com/",
+      posterImageUrl: POSTER,
+      ageRequirement: "21_PLUS",
+      isPublic: true,
+      isPrivate: false,
+      isHouseParty: false,
+      isSexPositive: false,
+      nudityOk: false,
+      status: "LIVE",
+      source: "admin_seeded",
+      isClaimable: true,
+      claimedBy: null,
+      submittedBy: null,
+      createdAt: now,
+    };
+    const glowEvents = [
+      {
+        title: "CC Slaughters GLOW: Pride Weekend Kick-Off Party",
+        description:
+          "Pride Weekend Kick-Off Party at CC Slaughters for GLOW Pride 2026, hosted by Bolivia Carmichaels with live DJs (9pm–2am). Earlier in the Rainbow Room: The Queens Keys (7–9pm) and a RuPaul's Drag Race All Stars viewing (8–9pm). $15 cover beginning at 8pm. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-17T21:00:00",
+        dateEnd: "2026-07-18T02:00:00",
+        dayOfWeek: "FRI",
+        admission: "TICKETED",
+        eventTypes: JSON.stringify(["DRAG", "DANCE", "NIGHTLIFE", "PERFORMANCE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Pride Party",
+        description:
+          "The GLOW Pride Party at CC Slaughters - glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). Earlier: a Gay Cinema Matinee (3–9pm) screening The Birdcage, Fire Island, and To Wong Foo. $20 cover beginning at 8pm. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-18T21:00:00",
+        dateEnd: "2026-07-19T02:00:00",
+        dayOfWeek: "SAT",
+        admission: "TICKETED",
+        eventTypes: JSON.stringify(["DANCE", "DRAG", "NIGHTLIFE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Parade Day Party",
+        description:
+          "GLOW Pride 2026 parade day at CC Slaughters - front-row NW Pride Parade viewing, a self-serve bloody mary bar, live DJs, and a puppy mosh. No cover. 21+. " +
+          DJ_LINE,
+        dateStart: "2026-07-19T10:00:00",
+        dateEnd: "2026-07-20T02:00:00",
+        dayOfWeek: "SUN",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["PARTY", "DJ", "SOCIAL"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+    ];
+    const glowExists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+    for (const ev of glowEvents) {
+      if (glowExists.get(ev.title)) continue;
+      db.insert(events).values({ ...glowBase, ...ev } as any).run();
+    }
+    recordBootMigration("cc_slaughters_glow_pride_2026_v1");
+  }
+  if (!hasBootMigration("cc_slaughters_glow_pride_2026_v2")) {
+    // Per the poster, each listing is its own event. Break the Friday and
+    // Saturday add-ons out of the party descriptions into standalone events.
+    const now = new Date().toISOString();
+    const POSTER = "/posters/cc-slaughters-glow-2026.jpg";
+    const DJ_LINE =
+      "Feat. DJ Robb, DJ Mawmie, Lyta Blunt, Chelsea Starr, DJ Ragnarok, and special guest DJ Pup Sam.";
+    // Trim the now-standalone sub-events out of the two party descriptions.
+    sqlite.prepare(`
+      UPDATE events SET description = ?
+      WHERE title = 'CC Slaughters GLOW: Pride Weekend Kick-Off Party'
+    `).run(
+      "Pride Weekend Kick-Off Party at CC Slaughters for GLOW Pride 2026, hosted by Bolivia Carmichaels with live DJs (9pm–2am). $15 cover beginning at 8pm. 21+. " +
+        DJ_LINE,
+    );
+    sqlite.prepare(`
+      UPDATE events SET description = ?
+      WHERE title = 'CC Slaughters GLOW: Pride Party'
+    `).run(
+      "The GLOW Pride Party at CC Slaughters - glow with pride and dance your queer ass off. Hosted by Bolivia Carmichaels with live DJs and glow party favors (9pm–2am). $20 cover beginning at 8pm. 21+. " +
+        DJ_LINE,
+    );
+    const glowBase = {
+      venueName: "CC Slaughters",
+      address: "219 NW Davis St, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5246801,
+      lng: -122.6729454,
+      ticketUrl: "https://ccslaughterspdx.com/",
+      posterImageUrl: POSTER,
+      ageRequirement: "21_PLUS",
+      isPublic: true,
+      isPrivate: false,
+      isHouseParty: false,
+      isSexPositive: false,
+      nudityOk: false,
+      status: "LIVE",
+      source: "admin_seeded",
+      isClaimable: true,
+      claimedBy: null,
+      submittedBy: null,
+      createdAt: now,
+    };
+    const subEvents = [
+      {
+        title: "CC Slaughters GLOW: The Queens Keys",
+        description:
+          "The Queens Keys in the Rainbow Room at CC Slaughters, part of GLOW Pride 2026. 7–9pm. 21+.",
+        dateStart: "2026-07-17T19:00:00",
+        dateEnd: "2026-07-17T21:00:00",
+        dayOfWeek: "FRI",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["PERFORMANCE", "DRAG", "NIGHTLIFE"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: RuPaul's Drag Race All Stars Viewing",
+        description:
+          "RuPaul's Drag Race All Stars viewing party at CC Slaughters, part of GLOW Pride 2026. 8–9pm. 21+.",
+        dateStart: "2026-07-17T20:00:00",
+        dateEnd: "2026-07-17T21:00:00",
+        dayOfWeek: "FRI",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["SOCIAL", "DRAG"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+      {
+        title: "CC Slaughters GLOW: Gay Cinema Matinee",
+        description:
+          "Gay Cinema Matinee at CC Slaughters for GLOW Pride 2026 - a triple bill of The Birdcage, Fire Island, and To Wong Foo. 3–9pm. 21+.",
+        dateStart: "2026-07-18T15:00:00",
+        dateEnd: "2026-07-18T21:00:00",
+        dayOfWeek: "SAT",
+        admission: "FREE",
+        eventTypes: JSON.stringify(["FILM", "SOCIAL"]),
+        adminNotes: "From official CC Slaughters GLOW Pride 2026 poster (Jul 16–19).",
+      },
+    ];
+    const glowExists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1");
+    for (const ev of subEvents) {
+      if (glowExists.get(ev.title)) continue;
+      db.insert(events).values({ ...glowBase, ...ev } as any).run();
+    }
+    recordBootMigration("cc_slaughters_glow_pride_2026_v2");
+  }
+  if (!hasBootMigration("seed_fridays_are_a_drag_pride_2026_v1")) {
+    const exists = sqlite.prepare("SELECT id FROM events WHERE title = ? LIMIT 1").get(
+      "Fridays Are A DRAG, Pride Weekend",
+    );
+    if (!exists) {
+      const now = new Date().toISOString();
+      db.insert(events).values({
+        title: "Fridays Are A DRAG - Pride Weekend",
+        description:
+          "Portland Pride Weekend edition of Fridays Are A DRAG at Badlands. Drag showtime 9:30pm with hot gogos, then Friday night dance party with Haute Toddy. Cast: Jay Colby, Mija (LA), Glenn Coco (Seattle), April Rition (Dallas), Seven (PDX), Harlow (PDX). No cover before 9pm. 21+.",
+        venueName: "Badlands",
+        address: "110 NW Broadway, Portland, OR 97209",
+        neighborhood: "Old Town",
+        lat: 45.5239294,
+        lng: -122.677178,
+        dateStart: "2026-07-17T21:30:00",
+        dateEnd: "2026-07-18T02:00:00",
+        dayOfWeek: "FRI",
+        ageRequirement: "21_PLUS",
+        eventTypes: JSON.stringify(["DRAG", "PERFORMANCE", "NIGHTLIFE", "PARTY"]),
+        admission: "DOOR_FEE",
+        ticketUrl: "https://www.instagram.com/p/DZ_oQ3jPygT/",
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: false,
+        nudityOk: false,
+        posterImageUrl: null,
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes:
+          "Verified Jay Colby IG post DZ_oQ3jPygT + Badlands (110 NW Broadway). Pride weekend Fri Jul 17 2026.",
+        createdAt: now,
+      } as any).run();
+    }
+    recordBootMigration("seed_fridays_are_a_drag_pride_2026_v1");
+  }
+  if (!hasBootMigration("lavender_rain_forbidden_tickets_v3")) {
+    sqlite.prepare(`
+      UPDATE events SET
+        title = 'Lavender Rain: Pride Edition (Queer Strip Club Pop-Up)',
+        description = 'The Gay Barn''s queer strip club pop-up at Peacock PDX for Pride Weekend. Sliding-scale tickets $17–$28 (door tickets also available). For dykes, lesbians, and dyke-adjacent queers 21+; respectful allies welcome. POC discount codes via TheGayBarn@proton.me.',
+        date_start = '2026-07-18T21:00:00',
+        date_end = '2026-07-19T01:00:00',
+        admission = 'TICKETED',
+        ticket_url = 'https://forbiddentickets.com/events/the-gay-barn/2026-07-18-lavender-rain-pride-edition',
+        poster_image_url = 'https://forbiddentickets.com/media/pages/events/the-gay-barn/96a1607597/a0f76a30e9-1779389095/lavender-rain-july.png',
+        is_sex_positive = 1,
+        nudity_ok = 1,
+        status = 'LIVE',
+        admin_notes = 'Verified Forbidden Tickets (The Gay Barn) 2026-07-18 9pm–1am. Flyer hosted on Forbidden Tickets CDN.'
+      WHERE title LIKE 'Lavender Rain%'
+    `).run();
+    sqlite.prepare(`
+      UPDATE events SET status = 'HIDDEN',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Superseded by Lavender Rain Pride Edition ticket listing.'
+      WHERE title LIKE 'Purple Rain%'
+    `).run();
+    recordBootMigration("lavender_rain_forbidden_tickets_v3");
+  }
+  if (!hasBootMigration("badlands_pride_week_calendar_2026_v1")) {
+    // Official Badlands calendar feed: https://www.badlandsportland.com/calendar
+    // Source: badlands-events.badlandsportland.workers.dev/api/calendar?from=2026-07-13&to=2026-07-19
+    const venue = {
+      venueName: "Badlands",
+      address: "110 NW Broadway, Portland, OR 97209",
+      neighborhood: "Old Town",
+      lat: 45.5239294,
+      lng: -122.677178,
+    };
+    const now = new Date().toISOString();
+    const dowFromLocal = (dateStart: string) =>
+      ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][new Date(`${dateStart.slice(0, 10)}T12:00:00`).getDay()];
+    const upsert = (row: {
+      title: string;
+      description: string;
+      dateStart: string;
+      dateEnd: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      posterImageUrl: string;
+      ageRequirement?: string;
+    }) => {
+      const existing = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start = ? LIMIT 1")
+        .get(row.title, row.dateStart) as { id: number } | undefined;
+      if (existing) {
+        sqlite
+          .prepare(
+            `UPDATE events SET
+              description = ?,
+              ticket_url = ?,
+              poster_image_url = ?,
+              date_end = ?,
+              admission = ?,
+              age_requirement = ?,
+              event_types = ?,
+              venue_name = ?,
+              address = ?,
+              neighborhood = ?,
+              lat = ?,
+              lng = ?,
+              status = 'LIVE',
+              admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar Pride week 2026-07-13..19'
+            WHERE id = ?`,
+          )
+          .run(
+            row.description,
+            row.ticketUrl,
+            row.posterImageUrl,
+            row.dateEnd,
+            row.admission,
+            row.ageRequirement || "21_PLUS",
+            JSON.stringify(row.eventTypes),
+            venue.venueName,
+            venue.address,
+            venue.neighborhood,
+            venue.lat,
+            venue.lng,
+            existing.id,
+          );
+        return;
+      }
+      // Match known alternate title for Fridays Are A DRAG
+      if (row.title.includes("Fridays Are A DRAG") || row.title.includes("Fridays Are A Drag")) {
+        const fri = sqlite
+          .prepare(
+            "SELECT id FROM events WHERE title LIKE 'Fridays Are A DRAG%' AND date_start LIKE '2026-07-17%' LIMIT 1",
+          )
+          .get() as { id: number } | undefined;
+        if (fri) {
+          sqlite
+            .prepare(
+              `UPDATE events SET
+                title = ?, description = ?, ticket_url = ?, poster_image_url = ?,
+                date_start = ?, date_end = ?, admission = ?, status = 'LIVE',
+                venue_name = ?, address = ?,
+                admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar'
+              WHERE id = ?`,
+            )
+            .run(
+              row.title,
+              row.description,
+              row.ticketUrl,
+              row.posterImageUrl,
+              row.dateStart,
+              row.dateEnd,
+              row.admission,
+              venue.venueName,
+              venue.address,
+              fri.id,
+            );
+          return;
+        }
+      }
+      if (row.title.startsWith("Y2GAY")) {
+        const y2 = sqlite
+          .prepare("SELECT id FROM events WHERE title LIKE 'Y2GAY%' AND date_start LIKE '2026-07-16%' LIMIT 1")
+          .get() as { id: number } | undefined;
+        if (y2) {
+          sqlite
+            .prepare(
+              `UPDATE events SET
+                title = ?, description = ?, ticket_url = ?, poster_image_url = ?,
+                date_start = ?, date_end = ?, admission = ?, status = 'LIVE',
+                venue_name = ?, address = ?,
+                admin_notes = COALESCE(admin_notes || ' | ', '') || 'Synced from badlandsportland.com/calendar'
+              WHERE id = ?`,
+            )
+            .run(
+              row.title,
+              row.description,
+              row.ticketUrl,
+              row.posterImageUrl,
+              row.dateStart,
+              row.dateEnd,
+              row.admission,
+              venue.venueName,
+              venue.address,
+              y2.id,
+            );
+          return;
+        }
+      }
+      db.insert(events)
+        .values({
+          title: row.title,
+          description: row.description,
+          ...venue,
+          dateStart: row.dateStart,
+          dateEnd: row.dateEnd,
+          dayOfWeek: dowFromLocal(row.dateStart),
+          ageRequirement: row.ageRequirement || "21_PLUS",
+          eventTypes: JSON.stringify(row.eventTypes),
+          admission: row.admission,
+          ticketUrl: row.ticketUrl,
+          isPublic: true,
+          isPrivate: false,
+          isHouseParty: false,
+          isSexPositive: false,
+          nudityOk: false,
+          posterImageUrl: row.posterImageUrl,
+          status: "LIVE",
+          source: "admin_seeded",
+          isClaimable: true,
+          claimedBy: null,
+          submittedBy: null,
+          adminNotes: "Seeded from official Badlands calendar API (Pride week Jul 13–19 2026).",
+          createdAt: now,
+        } as any)
+        .run();
+    };
+
+    const cal = "https://www.badlandsportland.com/calendar";
+
+    const rows: Array<Parameters<typeof upsert>[0]> = [
+      {
+        title: "Musical Mondays at Badlands",
+        description:
+          "Musical Mondays at Badlands, songs from stage and screen on Broadway St, hosted by Quesa D'Mondays and Dieter Davis. 9pm–2am. 21+.",
+        dateStart: "2026-07-13T21:00:00",
+        dateEnd: "2026-07-14T02:00:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "MUSIC"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-musical-mondays.png",
+      },
+      {
+        title: "Fresh Paint at Badlands",
+        description:
+          "An open-call drag show where anything can (and often does) happen. Hosted by Rio Diehl Volt, Portland entertainers get their wings. 10pm–2am. 21+.",
+        dateStart: "2026-07-13T22:00:00",
+        dateEnd: "2026-07-14T02:00:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "OPEN_MIC"],
+        admission: "DOOR_FEE",
+        ticketUrl: "https://instagram.com/freshpaintportland",
+        posterImageUrl: "/posters/badlands-fresh-paint.jpg",
+      },
+      {
+        title: "Karaoke at Badlands - Tuesday",
+        description: "Karaoke at Badlands. 9pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-14T21:00:00",
+        dateEnd: "2026-07-15T02:00:00",
+        eventTypes: ["KARAOKE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-karaoke.jpg",
+      },
+      {
+        title: "Request Night at Badlands",
+        description: "Request Night at Badlands. 10pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-14T22:00:00",
+        dateEnd: "2026-07-15T02:00:00",
+        eventTypes: ["DANCE", "NIGHTLIFE", "PARTY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-request-night.jpg",
+      },
+      {
+        title: "Karaoke at Badlands - Wednesday",
+        description: "Karaoke at Badlands. 9:30pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-15T21:30:00",
+        dateEnd: "2026-07-16T02:00:00",
+        eventTypes: ["KARAOKE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-karaoke.jpg",
+      },
+      {
+        title: "Woman Crush Wednesdays PRIDE",
+        description:
+          "Woman Crush Wednesdays PRIDE at Badlands, a night for the girlies in all of us. Harlow Quinzel hosts a femmetastic drag show; 55x DJs the afterparty for the girls, gays, and theys. 10pm–2am. 21+.",
+        dateStart: "2026-07-15T22:00:00",
+        dateEnd: "2026-07-16T02:00:00",
+        eventTypes: ["DRAG", "DANCE", "PARTY", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-wcw-pride.jpg",
+      },
+      {
+        title: "Trivia at Badlands",
+        description: "Trivia at Badlands. 7pm–9pm. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-16T19:00:00",
+        dateEnd: "2026-07-16T21:00:00",
+        eventTypes: ["TRIVIA", "COMMUNITY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-trivia.jpg",
+      },
+      {
+        title: "Y2GAY Pride Edition",
+        description:
+          "Y2GAY Pride Edition at Badlands, Y2K nostalgia meets Pride. Official Badlands calendar listing. 10pm–2am. 21+.",
+        dateStart: "2026-07-16T22:00:00",
+        dateEnd: "2026-07-17T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "DRAG", "PRIDE"],
+        admission: "TICKETED",
+        ticketUrl: "https://ma.to/event/y2gay-pride-edition-16-july-2026",
+        posterImageUrl: "/posters/badlands-y2gay-pride.jpg",
+      },
+      {
+        title: "Thirsty Thursdays at Badlands",
+        description: "Thirsty Thursdays at Badlands. 10pm–2am. 21+. Official Badlands calendar listing for Pride week.",
+        dateStart: "2026-07-16T22:00:00",
+        dateEnd: "2026-07-17T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-thirsty-thursdays.jpg",
+      },
+      {
+        title: "RuPaul's Drag Race All-Stars 11 + Untucked",
+        description:
+          "Watch party: RuPaul's Drag Race All-Stars 11 + Untucked at Badlands. 7:30pm–9:30pm. Official Badlands calendar listing. 21+.",
+        dateStart: "2026-07-17T19:30:00",
+        dateEnd: "2026-07-17T21:30:00",
+        eventTypes: ["WATCH_PARTY", "DRAG", "COMMUNITY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-rupauls-all-stars.jpg",
+      },
+      {
+        title: "Fridays Are A DRAG - Pride Weekend",
+        description:
+          "Fridays Are A Drag PRIDE with Jay Colby at Badlands (official calendar). Showcase of Portland drag excellence into the Friday dance party with hot gogos and Haute Toddy. Showtime 9:30pm. 21+.",
+        dateStart: "2026-07-17T21:30:00",
+        dateEnd: "2026-07-18T02:15:00",
+        eventTypes: ["DRAG", "PERFORMANCE", "NIGHTLIFE", "PARTY"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-fridays-are-a-drag-pride.jpg",
+      },
+      {
+        title: "PRIDE Saturday Dance Party at Badlands",
+        description:
+          "PRIDE Saturday Dance Party at Badlands with Jules Liesl and DJ Cisco. 9pm–2:15am. Official Badlands calendar listing. 21+.",
+        dateStart: "2026-07-18T21:00:00",
+        dateEnd: "2026-07-19T02:15:00",
+        eventTypes: ["PARTY", "DANCE", "PRIDE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-pride-saturday-dance.jpg",
+      },
+      {
+        title: "Industry Night at Badlands",
+        description: "Industry Night at Badlands. 8:30pm–2am. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-19T20:30:00",
+        dateEnd: "2026-07-20T02:00:00",
+        eventTypes: ["PARTY", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-industry-night.jpg",
+      },
+      {
+        title: "Noche Kaliente at Badlands",
+        description: "Noche Kaliente at Badlands. 10pm–2am. Official Badlands calendar listing for Pride week. 21+.",
+        dateStart: "2026-07-19T22:00:00",
+        dateEnd: "2026-07-20T02:00:00",
+        eventTypes: ["PARTY", "DANCE", "NIGHTLIFE"],
+        admission: "DOOR_FEE",
+        ticketUrl: cal,
+        posterImageUrl: "/posters/badlands-noche-kaliente.jpg",
+      },
+    ];
+    for (const row of rows) upsert(row);
+    recordBootMigration("badlands_pride_week_calendar_2026_v1");
+  }
+  // FetLife Pride Week gap fill (Jul 13–19 2026): venue munches + STFU + PLA booth.
+  // Scrubbed from FetLife via logged-in Chrome; STFU cross-checked with The Den / Eventim.
+  if (!hasBootMigration("seed_fetlife_pride_week_gaps_2026_v1")) {
+    const now = new Date().toISOString();
+    const insertIfMissing = (row: {
+      title: string;
+      description: string;
+      venueName: string;
+      address: string;
+      neighborhood: string;
+      lat: number | null;
+      lng: number | null;
+      dateStart: string;
+      dateEnd: string;
+      dayOfWeek: string;
+      ageRequirement: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      isSexPositive: boolean;
+      nudityOk: boolean;
+      posterImageUrl: string | null;
+      adminNotes: string;
+    }) => {
+      const exists = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start LIKE ? LIMIT 1")
+        .get(row.title, `${row.dateStart.slice(0, 10)}%`);
+      if (exists) return;
+      db.insert(events).values({
+        title: row.title,
+        description: row.description,
+        venueName: row.venueName,
+        address: row.address,
+        neighborhood: row.neighborhood,
+        lat: row.lat,
+        lng: row.lng,
+        dateStart: row.dateStart,
+        dateEnd: row.dateEnd,
+        dayOfWeek: row.dayOfWeek,
+        ageRequirement: row.ageRequirement,
+        eventTypes: JSON.stringify(row.eventTypes),
+        admission: row.admission,
+        ticketUrl: row.ticketUrl,
+        isPublic: true,
+        isPrivate: false,
+        isHouseParty: false,
+        isSexPositive: row.isSexPositive,
+        nudityOk: row.nudityOk,
+        posterImageUrl: row.posterImageUrl,
+        status: "LIVE",
+        source: "admin_seeded",
+        isClaimable: true,
+        claimedBy: null,
+        submittedBy: null,
+        adminNotes: row.adminNotes,
+        createdAt: now,
+      } as any).run();
+    };
+
+    insertIfMissing({
+      title: "Eastsiders Munch",
+      description:
+        "Laid-back kink community munch for folks on the far east side of the PDX metro. Good food and conversation at Spinella's Off the Wall in Gresham, they usually aren't busy Tuesday evenings, so the group tends to take over. Ask for the Eastsiders table if you're not sure which group is ours. Vanilla dress code: no obvious collars, leashes, or fetishwear (day collars / discrete gear OK). ~6:30–8:30pm or until close.",
+      venueName: "Spinella's Off the Wall",
+      address: "436 N Main Ave, Gresham, OR 97030",
+      neighborhood: "Gresham",
+      lat: 45.4992,
+      lng: -122.4305,
+      dateStart: "2026-07-14T18:30:00",
+      dateEnd: "2026-07-14T20:30:00",
+      dayOfWeek: "TUE",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "KINK"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/14/eastsiders-munch-sfuqa8",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: null,
+      adminNotes:
+        "FetLife Eastsiders Munch (miss_spunky). Venue https://www.spinellasoffthewall.com/ · 436 N Main Ave Gresham. Vanilla dress code at restaurant.",
+    });
+
+    insertIfMissing({
+      title: "PDX Nerd Munch",
+      description:
+        "Kinky nerds unite, weekly board-game munch at Lucky Labrador Beer Hall on NW Quimby. Meet around 5:30 for food and drinks, games from ~6:00, official end 8:00pm (people often stay until Lucky Lab closes ~9:30, or head to Sanctuary for Game Bang). Look for the pile of board games on a long table. Food available for purchase. Streetwear / Portland vanilla dress. Free entry.",
+      venueName: "Lucky Labrador Beer Hall (NW Quimby)",
+      address: "1945 NW Quimby St, Portland, OR 97209",
+      neighborhood: "NW Portland",
+      lat: 45.5345,
+      lng: -122.6902,
+      dateStart: "2026-07-15T17:30:00",
+      dateEnd: "2026-07-15T20:00:00",
+      dayOfWeek: "WED",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "KINK"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/15/pdx-nerd-munch-y0ozd3",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: null,
+      adminNotes:
+        "FetLife PDX Nerd Munch (Chantilly-Lace). Lucky Lab 1945 NW Quimby. FetLife group https://fetlife.com/groups/233694.",
+    });
+
+    insertIfMissing({
+      title: "STFU at The Den!",
+      description:
+        "Pride Week edition of STFU, the infamous FemDom BDSM play party (formerly 50 Shades of STFU), hosted by Mistress Viola. Pop-up takeover of The Den (SE Industrial): play stations, equipment, multi-domme foot worship/massage, hard point for suspension, vendors, full bar, snacks, security + dungeon monitors. Explicitly Pride Week–framed and LGBTQIA+/queer inclusive for femme/them dommes and submissives who love femdom. 21+ · ADA accessible · sliding-scale tickets $15–45 · dress code enforced (subs/men: no plain street clothes). Consent-forward house rules; no phones in club.",
+      venueName: "The Den PDX",
+      address: "116 SE Yamhill St, Portland, OR 97214",
+      neighborhood: "SE Industrial",
+      lat: 45.5157,
+      lng: -122.6635,
+      dateStart: "2026-07-16T20:00:00",
+      dateEnd: "2026-07-17T01:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "21_PLUS",
+      eventTypes: ["KINK", "SEX_POSITIVE", "NIGHTLIFE", "PARTY", "SOCIAL"],
+      admission: "TICKETED",
+      ticketUrl: "https://wl.eventim.us/event/stfu/693171?afflky=TheDenPDX",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/stfu-the-den-pride-2026.jpg",
+      adminNotes:
+        "FetLife https://fetlife.com/events/2026/07/16/stfu-at-the-den-hjhyfx + The Den https://www.thedenpdx.com/events/stfu (Thu Jul 16 8pm–1am). Flyer from The Den Squarespace.",
+    });
+
+    insertIfMissing({
+      title: "PLA @ Portland Pride Waterfront Festival (Saturday)",
+      description:
+        "Portland Leather Alliance hosts a community presence at the official Portland Pride Waterfront Festival. Meet PLA, learn about kink education, classes, workshops, and membership, consent-forward, KECC-aligned educators. Festival is donation-based ($10 suggested by Pride Northwest; no one turned away). Free to visit the PLA booth/space during Saturday festival hours. More PLA events: forbiddentickets.com/events/portland-leather-alliance · portlandleather.org.",
+      venueName: "Tom McCall Waterfront Park",
+      address: "Naito Pkwy, Portland, OR 97204",
+      neighborhood: "Waterfront",
+      lat: 45.5126,
+      lng: -122.675,
+      dateStart: "2026-07-18T12:00:00",
+      dateEnd: "2026-07-18T20:00:00",
+      dayOfWeek: "SAT",
+      ageRequirement: "ALL_AGES",
+      eventTypes: ["SOCIAL", "EDUCATION", "KINK", "FAIR"],
+      admission: "FREE",
+      ticketUrl: "https://fetlife.com/events/2026/07/18/pla-portland-pride-waterfront-festival-saturday-ts12wf",
+      isSexPositive: false,
+      nudityOk: false,
+      posterImageUrl: "/posters/portland-pride-waterfront.png",
+      adminNotes:
+        "FetLife PLA listing (The-PLA). Distinct from general Waterfront Festival listing, leather/kink education org presence. education@portlandleather.org.",
+    });
+
+    recordBootMigration("seed_fetlife_pride_week_gaps_2026_v1");
+  }
+  // Hawks PDX Pride week (Jul 13–19 2026) - weekly programming from hawkspdx.com/hawks-events.
+  // Replaces HIDDEN weekend placeholders with real LIVE listings + official flyers.
+  if (!hasBootMigration("seed_hawks_pride_week_2026_v1")) {
+    const now = new Date().toISOString();
+    const venue = {
+      venueName: "Hawks PDX",
+      address: "335 SE 99th Ave, Portland, OR 97216",
+      neighborhood: "SE Portland",
+      lat: 45.520175147981,
+      lng: -122.562357520572,
+    };
+    const insertIfMissing = (row: {
+      title: string;
+      description: string;
+      dateStart: string;
+      dateEnd: string;
+      dayOfWeek: string;
+      ageRequirement: string;
+      eventTypes: string[];
+      admission: string;
+      ticketUrl: string;
+      isSexPositive: boolean;
+      nudityOk: boolean;
+      posterImageUrl: string | null;
+      adminNotes: string;
+    }) => {
+      const exists = sqlite
+        .prepare("SELECT id FROM events WHERE title = ? AND date_start LIKE ? LIMIT 1")
+        .get(row.title, `${row.dateStart.slice(0, 10)}%`);
+      if (exists) return;
+      db.insert(events)
+        .values({
+          title: row.title,
+          description: row.description,
+          ...venue,
+          dateStart: row.dateStart,
+          dateEnd: row.dateEnd,
+          dayOfWeek: row.dayOfWeek,
+          ageRequirement: row.ageRequirement,
+          eventTypes: JSON.stringify(row.eventTypes),
+          admission: row.admission,
+          ticketUrl: row.ticketUrl,
+          isPublic: true,
+          isPrivate: false,
+          isHouseParty: false,
+          isSexPositive: row.isSexPositive,
+          nudityOk: row.nudityOk,
+          posterImageUrl: row.posterImageUrl,
+          status: "LIVE",
+          source: "admin_seeded",
+          isClaimable: true,
+          claimedBy: null,
+          submittedBy: null,
+          adminNotes: row.adminNotes,
+          createdAt: now,
+        } as any)
+        .run();
+    };
+
+    // Keep old TBD weekend placeholders off public listings
+    sqlite
+      .prepare(
+        `UPDATE events SET status = 'HIDDEN',
+          admin_notes = COALESCE(admin_notes || ' | ', '') || 'Superseded by seed_hawks_pride_week_2026_v1 real weekly listings'
+        WHERE title = 'Hawks PDX Pride Weekend Placeholder'`,
+      )
+      .run();
+
+    insertIfMissing({
+      title: "Jock Mondays! at Hawks",
+      description:
+        "Step into your jock and step into community. Mondays at Hawks are all about sporty vibes, playful energy, and showing up just as you are. Wear a jockstrap and get $5 off your visit (not valid with Happy Hour locker pricing). Open til 2AM. Sex-positive spa, body-positive, nudity-friendly space.",
+      dateStart: "2026-07-13T10:00:00",
+      dateEnd: "2026-07-14T02:00:00",
+      dayOfWeek: "MON",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/jockmonday-94yem-3nfnt-55wgd-2mxrd-exng5-x9g72-h4stw-6e4tn-nlpws-w8a7t-zl7sz-hfxg9-9tc75-zxwdd-gk2hg-j3nfk-gltr7-r3b8m",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-jock-mondays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Jock Mondays Pride week 2026-07-13. Locker/door fee; jock $5 off. Open til 2AM.",
+    });
+
+    insertIfMissing({
+      title: "OMEN Wednesdays! (M4M) at Hawks",
+      description:
+        "Wednesdays at Hawks feature OMEN Nights for men and men-identifying guests, plus Sexy Senior Social from 10 AM–4 PM for members 65+. Discounts available for both events. Sex-positive spa with lockers, hot tub, and play-friendly community vibes.",
+      dateStart: "2026-07-15T15:00:00",
+      dateEnd: "2026-07-16T08:00:00",
+      dayOfWeek: "WED",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK", "M4M"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/omenwednesday-acby8-5j7ts-bt222-p4cb7-zjfpt-84c7m-sbpkd-xh42n-d5dnl-4prxn-lhkla-wzp4y-4hy57-twrmm-ryr56-w2pry-yfrej-92btf-zk2yn-rhh3x-zzbn2-82l88-jjzls-d45b2-a6pal-4fe9f-eb5be-jhd9w",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-omen-wednesdays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events OMEN Wednesdays (M4M) 2026-07-15. Sexy Senior Social 10am–4pm for 65+ members; OMEN evening for men / men-identifying.",
+    });
+
+    insertIfMissing({
+      title: "Sapphic Takeover Thursday! Women's Day at Hawks",
+      description:
+        "A dedicated Sapphic-centered day at Hawks for women, trans, nonbinary, and gender-expansive folks across the Sapphic spectrum, spa, hot tub, connect, touch, be sensual, be playful. Spearheaded with PNW Poly Sapphics. Space shifts to all-women's day from 10am; PNW Poly Sapphic group concentrates around 6:30pm, but you're welcome anytime day and night. Sex-positive, body-positive.",
+      dateStart: "2026-07-16T10:00:00",
+      dateEnd: "2026-07-17T08:00:00",
+      dayOfWeek: "THU",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "SEX_POSITIVE", "NUDITY_OK", "WELLNESS", "COMMUNITY"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/2026/4/15/sapphic-takeover-thursday-woomens-day-at-hawks-3xg6b-ln269-m5a29-rjtcg-f38rl",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-sapphic-takeover.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Sapphic Takeover Thursday 2026-07-16. PNW Poly Sapphics ~6:30pm concentration; all-day welcome from 10am.",
+    });
+
+    insertIfMissing({
+      title: "Gender Glow Fridays with Karaoke at Hawks",
+      description:
+        "Friday Mixxxers are all-gender nights celebrating the full LGBTQIA2S+ spectrum, blacklight, glow sticks, draw on each other with glow pens, plus karaoke. Whether you're queer or questioning, come connect, explore, and celebrate community in a welcoming, body-positive, sex-positive spa space.",
+      dateStart: "2026-07-17T10:00:00",
+      dateEnd: "2026-07-18T08:00:00",
+      dayOfWeek: "FRI",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "KARAOKE", "NIGHTLIFE", "SEX_POSITIVE", "NUDITY_OK", "ALL-GENDER"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/mixxxerfriday-xzaex-t7b7g-g5t6k-ty2nj-x5h7k-ekayd-3dfyx-x9rgm-rjk6s-3bxmn-c6a76-jjdbj-zayn9-pxy6j-8ydy6-frjak-kyyj3-7pttm-xwy2j-nwfx8-wk92m-d4z26",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-gender-glow-fridays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Gender Glow Fridays + Karaoke 2026-07-17. Blacklight / glow sticks / glow pens; all-gender Mixxxer Friday.",
+    });
+
+    insertIfMissing({
+      title: "Bi Sundays & Nude Yoga at Hawks",
+      description:
+        "Sundays at Hawks are all-gender and body-positive, friendly vibes through the day, a restorative 4 PM Nude Yoga class in the courtyard, then Bi Night as the evening heats up. Come unwind, reconnect, and enjoy a little post-weekend aftercare. Sex-positive spa; nudity OK.",
+      dateStart: "2026-07-19T10:00:00",
+      dateEnd: "2026-07-20T08:00:00",
+      dayOfWeek: "SUN",
+      ageRequirement: "18_PLUS",
+      eventTypes: ["SOCIAL", "WELLNESS", "SEX_POSITIVE", "NUDITY_OK", "ALL-GENDER", "BI"],
+      admission: "DOOR_FEE",
+      ticketUrl:
+        "https://hawkspdx.com/hawks-events/bisundays-acby8-5j7ts-bt222-5es84-nxbk5-mg3wy-zk6mg-p8dpd-whn6d-et6tn-g85je-d2xhj-ekefc",
+      isSexPositive: true,
+      nudityOk: true,
+      posterImageUrl: "/posters/hawks-bi-sundays.png",
+      adminNotes:
+        "hawkspdx.com/hawks-events Bi Sundays & Nude Yoga 2026-07-19. Nude yoga 4pm courtyard; Bi Night evening.",
+    });
+
+    recordBootMigration("seed_hawks_pride_week_2026_v1");
+  }
+  // Hawks PDX directory listing + neon logo path (venue cyan pack).
+  if (!hasBootMigration("seed_hawks_directory_v12")) {
+    const now = new Date().toISOString();
+    const logo = "/directory-logos/Hawks_PDX.png";
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = ? OR name = ? LIMIT 1`)
+      .get("Hawks PDX", "Hawks") as { id: number } | undefined;
+    if (!exists) {
+      db.insert(businesses)
+        .values({
+          name: "Hawks PDX",
+          type: "venue",
+          description:
+            "Portland's LGBTQ+ community spa and social space in SE, hot tub, sauna, lockers, themed nights (Jock Mondays, OMEN Wednesdays, Sapphic Takeover, Gender Glow Fridays, Bi Sundays & Nude Yoga), and body-positive, sex-positive hospitality.",
+          address: "335 SE 99th Ave, Portland, OR 97216",
+          neighborhood: "SE Portland",
+          website: "https://hawkspdx.com/",
+          instagram: "@hawkspdx",
+          queerOwned: true,
+          queerFriendly: true,
+          imageUrl: logo,
+          lat: 45.520175147981,
+          lng: -122.562357520572,
+          isNew: false,
+          active: true,
+          hours: "Mon–Thu 10am–2am, Fri 10am–6am, Sat 10am–6am, Sun 10am–4am",
+          phone: "(503) 946-8659",
+          createdAt: now,
+        } as any)
+        .run();
+    } else {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+            type = 'venue',
+            description = COALESCE(NULLIF(description, ''), ?),
+            address = COALESCE(NULLIF(address, ''), ?),
+            neighborhood = COALESCE(NULLIF(neighborhood, ''), 'SE Portland'),
+            website = COALESCE(NULLIF(website, ''), 'https://hawkspdx.com/'),
+            instagram = COALESCE(NULLIF(instagram, ''), '@hawkspdx'),
+            image_url = ?,
+            lat = COALESCE(lat, ?),
+            lng = COALESCE(lng, ?),
+            phone = COALESCE(NULLIF(phone, ''), '(503) 946-8659'),
+            hours = COALESCE(NULLIF(hours, ''), ?),
+            active = 1,
+            queer_friendly = 1
+          WHERE id = ?`,
+        )
+        .run(
+          "Portland's LGBTQ+ community spa and social space in SE, hot tub, sauna, lockers, themed nights, and body-positive hospitality.",
+          "335 SE 99th Ave, Portland, OR 97216",
+          logo,
+          45.520175147981,
+          -122.562357520572,
+          "Mon–Thu 10am–2am, Fri 10am–6am, Sat 10am–6am, Sun 10am–4am",
+          exists.id,
+        );
+    }
+    recordBootMigration("seed_hawks_directory_v12");
+  }
+  if (!hasBootMigration("prune_post_pride_week_v1")) {
+    prunePostPrideWeekEvents();
+    recordBootMigration("prune_post_pride_week_v1");
+  }
+  // Keep migration id for install history, but never re-seed post-Pride events.
+  if (!hasBootMigration("restore_pruned_pride_events_v1")) {
+    recordBootMigration("restore_pruned_pride_events_v1");
+  }
+
+  // Permanent: wipe post-Jul-19 listings on every boot (seeds keep trying to revive them).
+  prunePostPrideWeekEvents();
+  if (!hasBootMigration("prune_post_pride_week_permanent_v2")) {
+    // One-shot title wipe for known revivals (OSLC Aug contest).
+    const oscl = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE title = 'Oregon State Leather Contest 2026' OR title LIKE 'Oregon State Leather%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(oscl.map(r => r.id));
+    sqlite
+      .prepare(
+        `UPDATE events SET date_end = '2026-07-19T20:00:00' WHERE title = 'Midtown Beer Garden Pride' AND date_end >= '2026-07-20'`,
+      )
+      .run();
+    recordBootMigration("prune_post_pride_week_permanent_v2");
+  }
+  // Iced Tea Pride closing party: flyer + merc tickets confirm 3pm–10pm (was wrongly 9pm–10pm).
+  // Source: icedteapdx IG https://www.instagram.com/p/DaZjSntlIFV/ + merctickets.com/events/185486634
+  if (!hasBootMigration("fix_iced_tea_pride_2026_time_v1")) {
+    sqlite.prepare(`
+      UPDATE events SET
+        date_start = '2026-07-19T15:00:00',
+        date_end = '2026-07-19T22:00:00',
+        day_of_week = 'SUN',
+        description = '3rd annual Pride Closing Party tea dance at White Owl Social Club. Sunday July 19, 3pm–10pm. DJs: Tripwire, JRX, Bro Hoe. Featuring multiple DJ sets and entertainment including Angel Darko, gogo dancing, and more. 21+.',
+        ticket_url = 'https://www.merctickets.com/events/185486634/iced-tea-dance-pride-2026',
+        admission = 'TICKETED',
+        event_types = '["DANCE","PARTY","TEA DANCE","SOCIAL"]',
+        lat = 45.5134484,
+        lng = -122.6579941,
+        neighborhood = 'SE Portland',
+        admin_notes = COALESCE(admin_notes || ' | ', '') || 'Verified icedteapdx flyer + merc tickets: Sun Jul 19 3pm–10pm White Owl (not 9pm). 2026-07-12.'
+      WHERE title = 'Iced Tea'
+        AND date_start LIKE '2026-07-19%'
+    `).run();
+    recordBootMigration("fix_iced_tea_pride_2026_time_v1");
+  }
+
+  // Locker Room series: drop Jan/Feb/Jul/Sep (any year) and June 2026 from live events.
+  // Archive dates are filtered in shared/tuckerHostedArchive.ts - this cleans any seeded/live rows.
+  if (!hasBootMigration("scrub_locker_room_excluded_months_v1")) {
+    sqlite.prepare(`
+      DELETE FROM events
+      WHERE LOWER(title) LIKE '%locker room%'
+        AND (
+          substr(date_start, 6, 2) IN ('01', '02', '07', '09')
+          OR date_start LIKE '2026-06%'
+        )
+    `).run();
+    recordBootMigration("scrub_locker_room_excluded_months_v1");
+  }
+
+  // Catalog cleanup: LIVE exact title+start duplicates + leftover Midtown HIDDEN twin.
+  if (!hasBootMigration("dedupe_pid_night1_midtown_hidden_v1")) {
+    // Pride in Demand Night 1: two LIVE rows same title + start (admin_seeded + user_submitted).
+    // Keep the lowest id; hide the rest with a clear note.
+    const pidKeeper = sqlite
+      .prepare(
+        `SELECT MIN(id) AS id FROM events
+         WHERE status = 'LIVE'
+           AND title = 'Pride in Demand - Portland Queer Takeover - Night 1'
+           AND substr(date_start, 1, 16) = '2026-07-17T21:00'`,
+      )
+      .get() as { id: number | null } | undefined;
+    if (pidKeeper?.id != null) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate LIVE Pride in Demand Night 1 - keeper id ' || ?
+           WHERE status = 'LIVE'
+             AND title = 'Pride in Demand - Portland Queer Takeover - Night 1'
+             AND substr(date_start, 1, 16) = '2026-07-17T21:00'
+             AND id != ?`,
+        )
+        .run(String(pidKeeper.id), pidKeeper.id);
+      // Clarify the keeper note (was mixed "old Friday" / "consolidated" copy).
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
+             'Canonical LIVE Pride in Demand Night 1 (Fri Jul 17). Twin LIVE rows deduped 2026-07-14.'
+           WHERE id = ?`,
+        )
+        .run(pidKeeper.id);
+    }
+
+    // Midtown: LIVE multi-day listing is the public one; older HIDDEN twin is a leftover.
+    sqlite
+      .prepare(
+        `UPDATE events
+         SET admin_notes = COALESCE(NULLIF(trim(admin_notes), '') || ' | ', '') ||
+           'Duplicate leftover of LIVE Midtown Beer Garden Pride multi-day listing - not a missing public event.'
+         WHERE status = 'HIDDEN' AND title = 'Midtown Beer Garden Pride'`,
+      )
+      .run();
+
+    // If any extra LIVE Midtown rows ever exist, keep the lowest LIVE id only.
+    const midtownKeeper = sqlite
+      .prepare(
+        `SELECT MIN(id) AS id FROM events WHERE status = 'LIVE' AND title = 'Midtown Beer Garden Pride'`,
+      )
+      .get() as { id: number | null } | undefined;
+    if (midtownKeeper?.id != null) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate Midtown Beer Garden Pride - LIVE keeper id ' || ?
+           WHERE status = 'LIVE'
+             AND title = 'Midtown Beer Garden Pride'
+             AND id != ?`,
+        )
+        .run(String(midtownKeeper.id), midtownKeeper.id);
+    }
+
+    recordBootMigration("dedupe_pid_night1_midtown_hidden_v1");
+  }
+
+  // Community correction: Either/Or was sold; no longer queer-owned (still queer-friendly).
+  if (!hasBootMigration("either_or_not_queer_owned_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET queer_owned = 0,
+             queer_friendly = 1,
+             description = 'Coffee bar known for creative coffee cocktails and zero-proof mocktails. A queer-friendly neighborhood cafe on N Williams (no longer queer-owned after a change in ownership).'
+         WHERE name = 'Either/Or'`,
+      )
+      .run();
+    recordBootMigration("either_or_not_queer_owned_v1");
+  }
+
+  // Sanctuary Club: ensure website so QSearch host-match + publish link work (ICS often TBA LOCATION).
+  if (!hasBootMigration("sanctuary_club_website_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET website = COALESCE(NULLIF(TRIM(website), ''), 'https://www.pdxsanctuary.com/'),
+             address = COALESCE(NULLIF(TRIM(address), ''), '33 NW 9th Ave')
+         WHERE name = 'Sanctuary Club' OR name LIKE 'Sanctuary%'`,
+      )
+      .run();
+    recordBootMigration("sanctuary_club_website_v1");
+  }
+
+  // Triangle Recreation Camp (Camp TRC) — LGBTQ+ campground outside Portland, important to locals.
+  if (!hasBootMigration("seed_camp_trc_directory_v1")) {
+    const exists = sqlite
+      .prepare(
+        `SELECT id FROM businesses WHERE lower(name) LIKE '%triangle recreation camp%' OR lower(name) = 'camp trc' OR website LIKE '%camptrc.org%' LIMIT 1`,
+      )
+      .get() as { id?: number } | undefined;
+    if (!exists?.id) {
+      const now = new Date().toISOString();
+      db.insert(businesses)
+        .values({
+          name: "Triangle Recreation Camp",
+          type: "campground",
+          description:
+            "Camp TRC — the Northwest's premier LGBTQ+ owned and operated recreational campground (est. 1975). 80 acres of trails, river, tent sites, and RVs in the Cascade foothills near Granite Falls, WA (about 4 hours from Portland). 21+ only; open mid-April through early October. Theme weekends, day use, and overnight camping.",
+          address: "47715 Mountain Loop Highway, Granite Falls, WA 98252",
+          neighborhood: "Granite Falls, WA",
+          website: "https://camptrc.org/",
+          instagram: null,
+          hours: "Seasonal mid-April through early October · reservations recommended",
+          phone: null,
+          queerOwned: true,
+          queerFriendly: true,
+          lat: 48.0745268,
+          lng: -121.5901687,
+          imageUrl: "/directory-logos/Triangle_Recreation_Camp.png",
+          active: true,
+          isNew: true,
+          createdAt: now,
+        } as any)
+        .run();
+    } else {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET type = 'campground',
+             website = COALESCE(NULLIF(TRIM(website), ''), 'https://camptrc.org/'),
+             address = COALESCE(NULLIF(TRIM(address), ''), '47715 Mountain Loop Highway, Granite Falls, WA 98252'),
+             imageUrl = COALESCE(NULLIF(TRIM(imageUrl), ''), '/directory-logos/Triangle_Recreation_Camp.png')
+           WHERE id = ?`,
+        )
+        .run(exists.id);
+    }
+    recordBootMigration("seed_camp_trc_directory_v1");
+  }
+
+  // Bearracuda: nightlife brand / promoter as directory group (events at partner venues).
+  if (!hasBootMigration("seed_bearracuda_group_v1")) {
+    const exists = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = 'Bearracuda' LIMIT 1`)
+      .get() as { id?: number } | undefined;
+    if (!exists?.id) {
+      db.insert(businesses)
+        .values({
+          name: "Bearracuda",
+          type: "group",
+          description:
+            "Multi-city bear dance party / nightlife brand. Portland + Seattle events only on Zaylist (hosts at Nova, Sanctuary, and partner venues). National calendar also runs SF/LA — those cities are filtered out of QSearch.",
+          address: null,
+          neighborhood: "Portland / Seattle",
+          website: "https://bearracuda.com",
+          instagram: "@bearracudapdx",
+          queerOwned: true,
+          queerFriendly: true,
+          active: true,
+          isNew: false,
+          createdAt: new Date().toISOString(),
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_bearracuda_group_v1");
+  }
+
+  // Active Clubs & Groups from directory audit (data/directory-active-groups.json).
+  // Idempotent upsert by name; type=group with white→gold card accent.
+  if (!hasBootMigration("seed_active_groups_directory_v2")) {
+    const now = new Date().toISOString();
+    type GroupSeed = {
+      name: string;
+      description: string;
+      address?: string | null;
+      neighborhood?: string | null;
+      website?: string | null;
+      instagram?: string | null;
+    };
+    const groups: GroupSeed[] = [
+      {
+        name: "Pink Ponies",
+        description:
+          "Queer-identifying Burning Man camp + Portland party collective (501(c)(3)). Ethical creative expression, sex positivity, gender fluidity, radical inclusion. Also known as Burning Man Pink Ponies.",
+        address: "904 NW Couch St, Portland, OR 97209",
+        neighborhood: "NW Portland",
+        website: "https://events.humanitix.com/host/pink-ponies",
+        instagram: "@burningmanpinkponies",
+      },
+      {
+        name: "PDX PAH - Portland Pets & Handlers",
+        description:
+          "Human-pet play community in Portland: education, socials, and monthly mosh (often at Eagle Portland). Welcomes pets, pups, handlers, and the curious — all shapes, sizes, colors, genders, orientations.",
+        address: "Eagle Portland, 3444 N Williams Ave",
+        neighborhood: "North Portland",
+        website: "https://www.pdxpah.com",
+        instagram: "@pdxpah",
+      },
+      {
+        name: "Oregon State Leather Contest",
+        description:
+          "Largest leather title contest in Oregon since 1997 (formerly Blackout Leather Productions; renamed 2021). Celebrates BDSM, Leather, Pup/Pet, Mx. Draws contestants from Oregon + SW Washington. Often partners with Badlands and other clubs.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@oregonstateleather",
+      },
+      {
+        name: "Portland Leather Alliance",
+        description:
+          "All-volunteer 501(c)3 (est. 1998) — education and awareness for alternative lifestyles. Largest membership-based BDSM org in Portland Metro + SW Washington. Consent in Kink, KinkFest, Black and Blue.",
+        address: "4110 SE Hawthorne Blvd #611, Portland OR 97214",
+        neighborhood: "SE Portland",
+        website: "http://www.portlandleather.org",
+        instagram: null,
+      },
+      {
+        name: "Bad Girls PDX",
+        description:
+          "Kinky women's group — BDSM Safety & Etiquette class + new member orientation (often at Q Center).",
+        address: "Q Center, 4115 N Mississippi Ave, Portland OR 97217",
+        neighborhood: "N Portland",
+        website: "http://www.pdxbadgirls.net",
+        instagram: "@pdxbadgirls",
+      },
+      {
+        name: "Black & Beyond the Binary Collective",
+        description:
+          "Leadership, healing, and safety for Black-African transgender, queer, nonbinary, two-spirit, intersex (TQN2SI+) Oregonians. Community at SE Uplift / Tabor Commons and citywide.",
+        address: "5633 SE Division St, Portland OR 97206",
+        neighborhood: "SE Portland",
+        website: "https://www.blackbeyondthebinary.org",
+        instagram: "@blackandbeyondthebinary",
+      },
+      {
+        name: "Brown Girl Rise",
+        description:
+          "501(c)(3) radical sisterhood of girls and non-binary youth of the global majority — camps, menstrual kit actions, zine workshops, connection to body, community, land, and creativity.",
+        address: "7707 SE 70th Ave, Portland OR 97206",
+        neighborhood: "SE Portland",
+        website: "https://browngirlriseportland.org",
+        instagram: "@browngirlrise",
+      },
+      {
+        name: "TranzGuys PDX",
+        description:
+          "Inclusive peer-support / discussion / social group for AFAB folks who identify as trans, MTO, genderfluid, transman, genderqueer, boi, FTM, male, butch, two-spirit, and more. 3rd Sunday 6–8pm at Q Center.",
+        address: "Q Center, Portland, OR",
+        neighborhood: "N Portland",
+        website: null,
+        instagram: "@tranzguyspdx",
+      },
+      {
+        name: "Ori Gallery",
+        description:
+          "QTBIPOC art gallery and workshop space — art + activism, fundraisers for Black and trans causes.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.origallery.org",
+        instagram: "@origallery_pdx",
+      },
+      {
+        name: "Portland Frontrunners",
+        description:
+          "Running/walking club for LGBTQIA+ and friends. Weekly runs + annual Portland Pride Run & Walk and Bridge to Bridge.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.meetup.com/Portland-Frontrunners/",
+        instagram: "@portlandfrontrunners",
+      },
+      {
+        name: "Lavender League",
+        description:
+          "Portland soccer league for queer women and nonbinary or trans people (200+ members).",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: "@lavenderleaguepdx",
+      },
+      {
+        name: "PDX Gaymers",
+        description: "Queer gamers — screenings, board games, socials.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://www.meetup.com/PDX-Gaymers/",
+        instagram: "@pdxgaymers",
+      },
+      {
+        name: "Sankofa Collective",
+        description:
+          "Formerly Portland African-American/Black PFLAG — health and well-being for gay, lesbian, bisexual, and transgender persons, their families and friends.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: null,
+        instagram: null,
+      },
+      {
+        name: "Bearracuda",
+        description:
+          "Multi-city bear dance party brand. Zaylist shows Portland + Seattle only (events at partner venues like Nova PDX and Sanctuary). SF/LA and other tour cities are filtered out of QSearch.",
+        address: null,
+        neighborhood: "Portland / Seattle",
+        website: "https://bearracuda.com",
+        instagram: "@bearracudapdx",
+      },
+      {
+        name: "The Imperial Sovereign Rose Court of Oregon",
+        description:
+          "Portland's Imperial Sovereign Rose Court — oldest continuously operating court system organization in the world. Coronations, fundraisers, community service for LGBTQ+ causes across Oregon.",
+        address: "Portland, OR",
+        neighborhood: "Portland",
+        website: "https://rosecourt.org",
+        instagram: "@rosecourtpdx",
+      },
+    ];
+
+    for (const g of groups) {
+      const row = sqlite
+        .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+        .get(g.name) as { id?: number } | undefined;
+      if (row?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               type = 'group',
+               description = COALESCE(NULLIF(TRIM(description), ''), ?),
+               address = COALESCE(NULLIF(TRIM(address), ''), ?),
+               neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), ?),
+               website = COALESCE(NULLIF(TRIM(website), ''), ?),
+               instagram = COALESCE(NULLIF(TRIM(instagram), ''), ?),
+               queer_owned = 1,
+               queer_friendly = 1,
+               active = 1
+             WHERE id = ?`,
+          )
+          .run(
+            g.description,
+            g.address ?? null,
+            g.neighborhood ?? null,
+            g.website ?? null,
+            g.instagram ?? null,
+            row.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: g.name,
+            type: "group",
+            description: g.description,
+            address: g.address ?? null,
+            neighborhood: g.neighborhood ?? null,
+            website: g.website ?? null,
+            instagram: g.instagram ?? null,
+            queerOwned: true,
+            queerFriendly: true,
+            active: true,
+            isNew: false,
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+    // Soft-deactivate known closed groups if present
+    for (const closed of ["Darklady Productions", "Oregon Bears", "Collar Guard"]) {
+      try {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET active = 0 WHERE LOWER(name) = LOWER(?) AND type = 'group'`,
+          )
+          .run(closed);
+      } catch {
+        /* ignore */
+      }
+    }
+    recordBootMigration("seed_active_groups_directory_v2");
+  }
+
+  /**
+   * Yes Coach Productions — Tucker's party collective (yescoachparties.com).
+   * Must exist as its own directory group so Yes Coach / Coach's Pet nights
+   * attach here, not Portland Leather Alliance (PLA was false-matching "play").
+   */
+  if (!hasBootMigration("seed_yes_coach_productions_directory_v1")) {
+    const now = new Date().toISOString();
+    const name = "Yes Coach Productions";
+    const description =
+      "Portland athletic-fetish and gear-party collective run by Tucker Max (Tucker_PDmaX). Yes Coach nights, collabs (Stank, Pink Ponies), and community play at Sanctuary and partner venues. Consent-forward. Not a leather club — party brand.";
+    const website = "https://yescoachparties.com";
+    const instagram = "@Tucker_PDmaX";
+    const imageUrl = "/directory-logos/Yes_Coach_Productions.png";
+    const existing = sqlite
+      .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'group',
+             description = ?,
+             website = ?,
+             instagram = ?,
+             image_url = COALESCE(NULLIF(TRIM(image_url), ''), ?),
+             neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), 'Portland'),
+             queer_owned = 1,
+             queer_friendly = 1,
+             active = 1
+           WHERE id = ?`,
+        )
+        .run(description, website, instagram, imageUrl, existing.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name,
+          type: "group",
+          description,
+          address: null,
+          neighborhood: "Portland",
+          website,
+          instagram,
+          imageUrl,
+          queerOwned: true,
+          queerFriendly: true,
+          active: true,
+          isNew: true,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_yes_coach_productions_directory_v1");
+  }
+
+  // Neon Yes Coach logo for directory listing (after group seed may already have run).
+  if (!hasBootMigration("yes_coach_directory_logo_v1")) {
+    const imageUrl = "/directory-logos/Yes_Coach_Productions.png";
+    sqlite
+      .prepare(
+        `UPDATE businesses SET image_url = ?
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run(imageUrl);
+    recordBootMigration("yes_coach_directory_logo_v1");
+  }
+
+  // Yes Coach is based at Sanctuary Club; keep its directory pin/location
+  // aligned with the venue instead of the generic Portland group fallback.
+  if (!hasBootMigration("yes_coach_sanctuary_location_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '33 NW 9th Ave, Portland, OR 97209',
+           neighborhood = 'Pearl District',
+           lat = 45.523244045755,
+           lng = -122.680179337043
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run();
+    recordBootMigration("yes_coach_sanctuary_location_v1");
+  }
+
+  // Directory-wide verified data refresh (official business/org sources,
+  // July 2026). Avoid filling optional fields unless the source is clear.
+  if (!hasBootMigration("directory_verified_details_2026_07_v1")) {
+    sqlite
+      .prepare(
+        `UPDATE businesses SET website = 'https://yescoachparty.com'
+         WHERE LOWER(name) = LOWER('Yes Coach Productions')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           website = 'https://www.blackbeyondthebinarycollective.org/'
+         WHERE LOWER(name) = LOWER('Black & Beyond the Binary Collective')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '4038 N Mississippi Ave, Portland, OR 97217',
+           neighborhood = 'Mississippi',
+           website = 'https://oriartgallery.org/',
+           hours = 'Thu–Sun 12–5pm',
+           lat = 45.5527108,
+           lng = -122.6753325
+         WHERE LOWER(name) = LOWER('Ori Gallery')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '2046 NE Martin Luther King Jr Blvd, Portland, OR 97212',
+           neighborhood = 'Eliot',
+           website = 'https://ariumbotanicals.com/',
+           hours = 'Daily 11am–6pm',
+           phone = '(503) 719-4763',
+           lat = 45.5377231,
+           lng = -122.6612012
+         WHERE LOWER(name) = LOWER('Arium Botanicals')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = '2610 NW Vaughn St, Portland, OR 97210',
+           neighborhood = 'Slabtown',
+           website = 'https://pizzathief.com/',
+           hours = 'Daily 11:30am–9pm',
+           phone = '(503) 719-7778',
+           lat = 45.5366907,
+           lng = -122.7053269
+         WHERE LOWER(name) = LOWER('Pizza Thief')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           name = 'Greenhouse Hair Collective',
+           description = 'LGBTQIA-owned, gender-inclusive Slabtown hair collective (formerly Gold+Grit Barber Co.) offering barbering, styling, and gender-affirming transformations by appointment.',
+           address = '2668 NW Vaughn St, Portland, OR 97210',
+           neighborhood = 'Slabtown',
+           website = 'https://www.greenhousepdx.com/',
+           instagram = NULL,
+           hours = 'By appointment',
+           lat = 45.5366774,
+           lng = -122.7063224
+         WHERE LOWER(name) = LOWER('Gold+Grit Barber Co.')`,
+      )
+      .run();
+    sqlite
+      .prepare(
+        `UPDATE businesses SET
+           address = 'Eagle Portland, 835 N Lombard St, Portland, OR 97217',
+           neighborhood = 'North Portland',
+           lat = 45.5803,
+           lng = -122.6856
+         WHERE LOWER(name) = LOWER('PDX PAH - Portland Pets & Handlers')`,
+      )
+      .run();
+    recordBootMigration("directory_verified_details_2026_07_v1");
+  }
+
+  /**
+   * Coach's Pet — Yes Coach production night at Sanctuary Club.
+   * Venue = Sanctuary (place card); brand aliases + host claim = Yes Coach.
+   */
+  if (!hasBootMigration("seed_coaches_pet_yes_coach_sanctuary_v1")) {
+    try {
+      const now = new Date().toISOString();
+      const title = "Coach's Pet — Yes Coach";
+      const existing = sqlite
+        .prepare(
+          `SELECT id FROM events
+           WHERE LOWER(title) LIKE '%coach%pet%'
+              OR LOWER(title) = LOWER(?)
+           ORDER BY id ASC LIMIT 1`,
+        )
+        .get(title) as { id?: number } | undefined;
+
+      const description =
+        "Yes Coach Productions pet-play / gear night at Sanctuary Club. Hosted by Tucker Max (Yes Coach). Consent-forward athletic-fetish scene — collars, handlers, pups, and gear welcome. Not a PLA event.";
+      const venueName = "Sanctuary Club";
+      const address = "33 NW 9th Ave, Portland, OR 97209";
+      const neighborhood = "Pearl District";
+      const lat = 45.523244045755;
+      const lng = -122.680179337043;
+      // Next Saturday doors after STANK Pride weekend (seed; admin can move).
+      const dateStart = "2026-08-08T21:00:00";
+      const dateEnd = "2026-08-09T02:00:00";
+      const dayOfWeek = "SAT";
+      const eventTypes = JSON.stringify(["PARTY", "LEATHER", "SPORTS"]);
+      const ticketUrl = "https://members.pdxsanctuary.com/";
+      const owner = resolveSiteOwner();
+      const claimedBy = owner?.username || null;
+
+      if (existing?.id) {
+        sqlite
+          .prepare(
+            `UPDATE events SET
+               title = ?,
+               description = ?,
+               venue_name = ?,
+               address = ?,
+               neighborhood = ?,
+               lat = ?,
+               lng = ?,
+               age_requirement = '21_PLUS',
+               event_types = ?,
+               admission = 'DOOR_FEE',
+               ticket_url = COALESCE(NULLIF(TRIM(ticket_url), ''), ?),
+               is_public = 1,
+               is_sex_positive = 1,
+               status = 'LIVE',
+               claimed_by = COALESCE(claimed_by, ?),
+               is_claimable = 0,
+               admin_notes = COALESCE(admin_notes, 'Yes Coach Productions @ Sanctuary — Coach''s Pet'),
+               updated_at = ?
+             WHERE id = ?`,
+          )
+          .run(
+            title,
+            description,
+            venueName,
+            address,
+            neighborhood,
+            lat,
+            lng,
+            eventTypes,
+            ticketUrl,
+            claimedBy,
+            now,
+            existing.id,
+          );
+      } else {
+        db.insert(events)
+          .values({
+            title,
+            description,
+            venueName,
+            address,
+            neighborhood,
+            lat,
+            lng,
+            dateStart,
+            dateEnd,
+            dayOfWeek,
+            ageRequirement: "21_PLUS",
+            eventTypes,
+            admission: "DOOR_FEE",
+            ticketUrl,
+            isPublic: true,
+            isPrivate: false,
+            isHouseParty: false,
+            isSexPositive: true,
+            nudityOk: false,
+            posterImageUrl: "/posters/stank-yes-coach.jpg",
+            status: "LIVE",
+            source: "admin_seeded",
+            isClaimable: false,
+            claimedBy,
+            submittedBy: null,
+            adminNotes: "Yes Coach Productions @ Sanctuary — Coach's Pet",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+
+      // Primary host: site owner (Tucker / Yes Coach)
+      if (owner) {
+        ensureEventHostsSchema();
+        const row = sqlite
+          .prepare(
+            `SELECT id FROM events
+             WHERE LOWER(title) LIKE '%coach%pet%' OR LOWER(title) = LOWER(?)
+             ORDER BY id DESC LIMIT 1`,
+          )
+          .get(title) as { id?: number } | undefined;
+        if (row?.id) {
+          const hostExists = sqlite
+            .prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`)
+            .get(row.id, owner.id);
+          if (hostExists) {
+            sqlite
+              .prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`)
+              .run(row.id, owner.id);
+          } else {
+            db.insert(eventHosts)
+              .values({
+                eventId: row.id,
+                userId: owner.id,
+                role: "PRIMARY",
+                addedByUserId: null,
+                createdAt: now,
+              } as any)
+              .run();
+          }
+          db.update(events)
+            .set({ claimedBy: owner.username, isClaimable: false })
+            .where(eq(events.id, row.id))
+            .run();
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[boot] seed_coaches_pet_yes_coach_sanctuary_v1 skipped:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+    recordBootMigration("seed_coaches_pet_yes_coach_sanctuary_v1");
+  }
+
+  // Pink Ponies — gold/white neon conversion of official mark for directory pack.
+  if (!hasBootMigration("pink_ponies_directory_logo_v1")) {
+    const imageUrl = "/directory-logos/Pink_Ponies.png";
+    sqlite
+      .prepare(
+        `UPDATE businesses SET image_url = ?
+         WHERE LOWER(name) = LOWER('Pink Ponies')`,
+      )
+      .run(imageUrl);
+    recordBootMigration("pink_ponies_directory_logo_v1");
+  }
+
+  /**
+   * Adult shops with multi-location cards + red-glow neon logos:
+   * Fantasy Land (Foster), Taboo Video (all metro), Mr. Peeps (all metro).
+   * Multiple addresses live on one directory card via description + hours.
+   */
+  if (!hasBootMigration("seed_adult_shops_multi_location_v1")) {
+    const now = new Date().toISOString();
+    type ShopSeed = {
+      name: string;
+      description: string;
+      address: string;
+      neighborhood: string;
+      website: string | null;
+      instagram: string | null;
+      phone: string | null;
+      hours: string | null;
+      imageUrl: string;
+      lat: number;
+      lng: number;
+    };
+    const shops: ShopSeed[] = [
+      {
+        name: "Fantasy Land",
+        description:
+          "Fantasy Land on SE Foster (Fantasy on Foster / Fantasyland) — 24-hour adult shop. Toys, video, and a queer-friendly floor. One location on Foster Road — not the multi-store FANTASY (Fantasy for Adults Only) chain.",
+        address: "5228 SE Foster Rd, Portland, OR 97206",
+        neighborhood: "Foster / SE Portland",
+        website: null,
+        instagram: null,
+        phone: "(503) 775-0094",
+        hours: "Open 24 hours daily",
+        imageUrl: "/directory-logos/Fantasy_Land.png",
+        lat: 45.4945,
+        lng: -122.6085,
+      },
+      {
+        name: "Taboo Video",
+        description:
+          "All-inclusive adult retail (Taboo / Taboo Video). Multiple locations on one listing:\n• Broadway / Pearl — 311 NW Broadway, Portland, OR 97209 · (503) 227-3443\n• SE 82nd — 2330 SE 82nd Ave, Portland, OR 97216 · (503) 206-4708 · 24 hours\n• MLK — 237 SE MLK Jr Blvd, Portland, OR 97214 · (503) 239-1678\n• Vancouver WA — 4811 NE 94th Ave, Vancouver, WA 98662 · (360) 254-1126 · 24 hours\nWelcomes every orientation, gender, and kink. taboovideo.com · @taboovideopdx",
+        address: "311 NW Broadway, Portland, OR 97209",
+        neighborhood: "Pearl / SE 82nd / MLK / Vancouver",
+        website: "https://www.taboovideo.com",
+        instagram: "@taboovideopdx",
+        phone: "(503) 227-3443",
+        hours:
+          "Broadway: Sun–Mon 11am–midnight, Tue–Sat 11am–2am · 82nd & Vancouver: 24 hours · MLK: Sun–Thu 10am–midnight, Fri–Sat 10am–2am",
+        imageUrl: "/directory-logos/Taboo_Video.png",
+        lat: 45.5255,
+        lng: -122.6785,
+      },
+      {
+        name: "Mr. Peeps",
+        description:
+          "Mr. Peeps Adult Superstores (incl. The Peep Hole). Multi-location card:\n• Portland (The Peep Hole) — 709 SE 122nd Ave, Portland, OR 97233 · (503) 257-8617\n• Beaverton — 13355 SW Henry St, Beaverton, OR 97005 · (503) 643-6645\n• Aloha — 20625 SW Tualatin Valley Hwy, Aloha, OR 97003 · (503) 356-5624\nLocal chain since 1981. Novelties, video, and booths. mrpeeps.com",
+        address: "709 SE 122nd Ave, Portland, OR 97233",
+        neighborhood: "SE 122nd / Beaverton / Aloha",
+        website: "https://www.mrpeeps.com",
+        instagram: null,
+        phone: "(503) 257-8617",
+        hours: "24 hours (check location)",
+        imageUrl: "/directory-logos/Mr_Peeps.png",
+        lat: 45.5178,
+        lng: -122.5378,
+      },
+    ];
+
+    for (const s of shops) {
+      const row = sqlite
+        .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+        .get(s.name) as { id?: number } | undefined;
+      if (row?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               type = 'shop',
+               description = ?,
+               address = ?,
+               neighborhood = ?,
+               website = ?,
+               instagram = ?,
+               phone = ?,
+               hours = ?,
+               image_url = ?,
+               lat = ?,
+               lng = ?,
+               queer_friendly = 1,
+               active = 1,
+               status = 'OPEN'
+             WHERE id = ?`,
+          )
+          .run(
+            s.description,
+            s.address,
+            s.neighborhood,
+            s.website,
+            s.instagram,
+            s.phone,
+            s.hours,
+            s.imageUrl,
+            s.lat,
+            s.lng,
+            row.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name: s.name,
+            type: "shop",
+            description: s.description,
+            address: s.address,
+            neighborhood: s.neighborhood,
+            website: s.website,
+            instagram: s.instagram,
+            phone: s.phone,
+            hours: s.hours,
+            imageUrl: s.imageUrl,
+            lat: s.lat,
+            lng: s.lng,
+            queerOwned: false,
+            queerFriendly: true,
+            active: true,
+            isNew: true,
+            status: "OPEN",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+
+    // Aliases as soft-search: if someone already created "Fantasy on Foster" etc.
+    for (const [alias, canonical] of [
+      ["Fantasy on Foster", "Fantasy Land"],
+      ["Fantasyland", "Fantasy Land"],
+      ["Taboo Adult Video", "Taboo Video"],
+      ["Taboo", "Taboo Video"],
+      ["The Peep Hole", "Mr. Peeps"],
+      ["Mr Peeps Adult Superstores", "Mr. Peeps"],
+    ] as const) {
+      try {
+        const aliasRow = sqlite
+          .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+          .get(alias) as { id?: number } | undefined;
+        const canon = sqlite
+          .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+          .get(canonical) as { id?: number } | undefined;
+        if (aliasRow?.id && canon?.id && aliasRow.id !== canon.id) {
+          // Prefer the multi-location card; hide the dupe alias row from discovery
+          sqlite
+            .prepare(`UPDATE businesses SET active = 0, status = 'CLOSED' WHERE id = ?`)
+            .run(aliasRow.id);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    recordBootMigration("seed_adult_shops_multi_location_v1");
+  }
+
+  /**
+   * FANTASY (Fantasy for Adults Only) — multi-location inclusive chain.
+   * Separate from Fantasy Land on Foster (seeded above; keep both).
+   */
+  if (!hasBootMigration("seed_fantasy_adults_only_multi_v1")) {
+    const now = new Date().toISOString();
+    const name = "FANTASY";
+    const description =
+      "FANTASY (Fantasy for Adults Only) — Portland & metro inclusive adult shops. Toys, gear, local brands, performer-friendly. Multiple locations on one card:\n" +
+      "• Hollywood — 3137 NE Sandy Blvd, Portland, OR 97232 · (503) 239-6969 · 10am–12am\n" +
+      "• Downtown — 1703 W Burnside St, Portland, OR 97209 · (503) 295-6969 · 12pm–8pm\n" +
+      "• Tigard — 6440 SW Coronado Dr, Portland, OR 97219 · (503) 244-6969 · 10am–12am\n" +
+      "• Clackamas — 15536 SE 82nd Dr, Clackamas, OR 97015 · (503) 203-6969 · 12pm–8pm\n" +
+      "Also Missoula MT. Online: fantasyforadultsonly.com · @fantasy_oregon_portland\n" +
+      "Not the same as Fantasy Land on SE Foster (separate shop).";
+    const address = "3137 NE Sandy Blvd, Portland, OR 97232";
+    const neighborhood = "Hollywood / Downtown / Tigard / Clackamas";
+    const website = "https://www.fantasyforadultsonly.com";
+    const instagram = "@fantasy_oregon_portland";
+    const phone = "(503) 239-6969";
+    const hours =
+      "Sandy & Tigard: 10am–12am · Downtown: 12pm–8pm · Clackamas: 12pm–8pm (confirm per store)";
+    const imageUrl = "/directory-logos/Fantasy_Adults_Only.png";
+    const lat = 45.5328;
+    const lng = -122.6325;
+
+    const existing = sqlite
+      .prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`)
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'shop',
+             description = ?,
+             address = ?,
+             neighborhood = ?,
+             website = ?,
+             instagram = ?,
+             phone = ?,
+             hours = ?,
+             image_url = ?,
+             lat = ?,
+             lng = ?,
+             queer_friendly = 1,
+             active = 1,
+             status = 'OPEN'
+           WHERE id = ?`,
+        )
+        .run(
+          description,
+          address,
+          neighborhood,
+          website,
+          instagram,
+          phone,
+          hours,
+          imageUrl,
+          lat,
+          lng,
+          existing.id,
+        );
+    } else {
+      // Also match if seeded under a longer legal name
+      const alt = sqlite
+        .prepare(
+          `SELECT id FROM businesses WHERE LOWER(name) IN (
+             lower('Fantasy for Adults Only'),
+             lower('Fantasy Adults Only'),
+             lower('FANTASY Portland')
+           ) LIMIT 1`,
+        )
+        .get() as { id?: number } | undefined;
+      if (alt?.id) {
+        sqlite
+          .prepare(
+            `UPDATE businesses SET
+               name = ?,
+               type = 'shop',
+               description = ?,
+               address = ?,
+               neighborhood = ?,
+               website = ?,
+               instagram = ?,
+               phone = ?,
+               hours = ?,
+               image_url = ?,
+               lat = ?,
+               lng = ?,
+               queer_friendly = 1,
+               active = 1,
+               status = 'OPEN'
+             WHERE id = ?`,
+          )
+          .run(
+            name,
+            description,
+            address,
+            neighborhood,
+            website,
+            instagram,
+            phone,
+            hours,
+            imageUrl,
+            lat,
+            lng,
+            alt.id,
+          );
+      } else {
+        db.insert(businesses)
+          .values({
+            name,
+            type: "shop",
+            description,
+            address,
+            neighborhood,
+            website,
+            instagram,
+            phone,
+            hours,
+            imageUrl,
+            lat,
+            lng,
+            queerOwned: false,
+            queerFriendly: true,
+            active: true,
+            isNew: true,
+            status: "OPEN",
+            createdAt: now,
+          } as any)
+          .run();
+      }
+    }
+    recordBootMigration("seed_fantasy_adults_only_multi_v1");
+  }
+
+  /**
+   * The Secret Warehouse — Kerns warehouse / film + party venue (411 NE 18th).
+   * Hosts queer dance & play parties; often listed as "Secret Warehouse Portland".
+   */
+  if (!hasBootMigration("seed_secret_warehouse_directory_v1")) {
+    const now = new Date().toISOString();
+    const name = "The Secret Warehouse";
+    const description =
+      "Warehouse venue and film production space in Kerns (NE 18th). Hosts private parties, queer dance nights, and community events — often ticketed with location confirmation for guests. Queer-friendly Portland space.";
+    const address = "411 NE 18th Ave, Portland, OR 97232";
+    const neighborhood = "Kerns";
+    const website = "https://www.yelp.com/biz/the-secret-warehouse-portland";
+    const existing = sqlite
+      .prepare(
+        `SELECT id FROM businesses
+         WHERE LOWER(name) = LOWER(?)
+            OR LOWER(name) LIKE '%secret warehouse%'
+            OR LOWER(name) LIKE '%secret wearhouse%'
+         LIMIT 1`,
+      )
+      .get(name) as { id?: number } | undefined;
+    if (existing?.id) {
+      sqlite
+        .prepare(
+          `UPDATE businesses SET
+             type = 'venue',
+             description = COALESCE(NULLIF(TRIM(description), ''), ?),
+             address = COALESCE(NULLIF(TRIM(address), ''), ?),
+             neighborhood = COALESCE(NULLIF(TRIM(neighborhood), ''), ?),
+             website = COALESCE(NULLIF(TRIM(website), ''), ?),
+             queer_friendly = 1,
+             active = 1
+           WHERE id = ?`,
+        )
+        .run(description, address, neighborhood, website, existing.id);
+    } else {
+      db.insert(businesses)
+        .values({
+          name,
+          type: "venue",
+          description,
+          address,
+          neighborhood,
+          website,
+          instagram: null,
+          queerOwned: false,
+          queerFriendly: true,
+          active: true,
+          isNew: true,
+          lat: 45.5239,
+          lng: -122.6475,
+          createdAt: now,
+        } as any)
+        .run();
+    }
+    recordBootMigration("seed_secret_warehouse_directory_v1");
+  }
+
+  /**
+   * Portland Queer Arts Foundation resource guide, reviewed 2026-08-26.
+   * These are directory resources, not event feeds. Their websites therefore
+   * stay out of automated event ingestion while remaining discoverable in
+   * Places. Alberta Rose Theatre and New Avenues / SMYRC already have active
+   * directory records and are intentionally not duplicated here.
+   */
+  if (!hasBootMigration("seed_pqa_resource_directory_2026_08_26_v1")) {
+    const now = new Date().toISOString();
+    const resources: Array<Record<string, unknown>> = [
+      { name: "Portland Queer Arts Foundation", type: "nonprofit", description: "Portland nonprofit that funds queer artists and projects, and maintains a resource guide for grants, services, spaces, and community organizations.", neighborhood: "Portland", website: "https://portlandqueerarts.foundation", queerOwned: true },
+      { name: "Business Oregon", type: "service", description: "Oregon's economic development agency, with grant and fellowship programs for artists and creative businesses.", neighborhood: "Oregon", website: "https://www.oregon.gov/biz", queerOwned: false },
+      { name: "Foundation for Contemporary Arts", type: "nonprofit", description: "Emergency grants and opportunity grants for experimental and contemporary artists.", neighborhood: "National", website: "https://foundationforcontemporaryarts.org", queerOwned: false },
+      { name: "Future Prairie", type: "nonprofit", description: "Nonprofit queer artist collective supporting LGBTQIA+ Oregon-based working-class artists.", neighborhood: "Oregon", website: "https://futureprairie.com", queerOwned: true },
+      { name: "Multnomah County Cultural Coalition", type: "nonprofit", description: "Cultural-enrichment organization supporting Multnomah County residents and local arts work.", neighborhood: "Multnomah County", website: "https://www.multculturalcoalition.org", queerOwned: false },
+      { name: "Oregon Arts Commission", type: "nonprofit", description: "State grants for Oregon artists and organizations, including individual artist fellowships.", neighborhood: "Oregon", website: "https://www.oregonartscommission.org", queerOwned: false },
+      { name: "Regional Arts & Culture Council", type: "nonprofit", description: "Portland arts funder, including the Portland Arts Project Grant for individual artists and arts organizations.", neighborhood: "Portland", website: "https://racc.org", queerOwned: false },
+      { name: "Backstage", type: "service", description: "Casting calls and performance opportunities for working artists.", neighborhood: "Online", website: "https://www.backstage.com", queerOwned: false },
+      { name: "Fertile Ground Festival", type: "group", description: "Portland platform for new and developing performance work.", neighborhood: "Portland", website: "https://fertilegroundpdx.org", queerOwned: false },
+      { name: "PDXBackstage", type: "group", description: "Portland theatre community listserv for opportunities and discussion.", neighborhood: "Portland", website: "https://groups.io", queerOwned: false },
+      { name: "Portland Area Theatre Alliance", type: "group", description: "Auditions, listings, and theatre events for the Portland area.", neighborhood: "Portland", website: "https://portlandtheatre.com", queerOwned: false },
+      { name: "Lesbian Culture Club", type: "group", description: "Queer community for lesbians, trans people, nonbinary people, and anyone who feels at home there.", neighborhood: "Portland", website: "https://lesbiancultureclub.com", queerOwned: true },
+      { name: "Ori Gallery", type: "nonprofit", description: "Trans and queer artists of color gallery and organizing space offering free and low-cost classes and workshops.", neighborhood: "Portland", website: "https://oriartgallery.org", queerOwned: true },
+      { name: "Q Center", type: "nonprofit", description: "2SLGBTQIA+ community center with an art gallery, library, support groups, resource hub, emergency assistance, and space rentals.", neighborhood: "Portland", website: "https://www.pdxqcenter.org", queerOwned: false },
+      { name: "Queer Social Club", type: "group", description: "Community-driven event calendars for queer happenings in Portland and the greater Pacific Northwest.", neighborhood: "Portland", website: "https://queersocialclub.com", queerOwned: true },
+      { name: "Radical Faerie Arts Fest", type: "group", description: "Artist-centered market and audience-creation model for queer artists.", neighborhood: "Portland", website: "https://www.radfaf.org", queerOwned: false },
+      { name: "CASH Oregon", type: "service", description: "Free tax preparation services for people earning $70,000 or less.", neighborhood: "Portland", website: "https://cashoregon.org", queerOwned: false },
+      { name: "Oregon Pride in Business", type: "group", description: "Business education and networking for LGBTQ+ entrepreneurs.", neighborhood: "Oregon", website: "https://www.orpib.com", queerOwned: false },
+      { name: "Portland Small Business Development Center", type: "service", description: "Small-business advising and training for Portland-area entrepreneurs.", neighborhood: "Portland", website: "https://oregonsbdc.org", queerOwned: false },
+      { name: "Prosper Portland", type: "service", description: "City-backed programs supporting Portland small businesses and creatives.", neighborhood: "Portland", website: "https://prosperportland.us", queerOwned: false },
+      { name: "SCORE Portland", type: "service", description: "Free small-business mentoring and workshops for Portland-area entrepreneurs.", neighborhood: "Portland", website: "https://www.score.org", queerOwned: false },
+      { name: "Open Space Dance", type: "venue", description: "Inclusive dance and movement studio with limited rentals for rehearsal, choreography, and creative projects.", neighborhood: "Portland", website: "https://openspace.dance", queerOwned: false },
+      { name: "Echo Theater", type: "venue", description: "Versatile Portland venue for aerial work, acrobatics, dance, theatre, live music, and film shoots.", neighborhood: "Portland", website: "https://echotheaterpdx.org", queerOwned: false },
+      { name: "Independent Publishing Resource Center", type: "nonprofit", description: "Printmaking, publishing, and literary arts center.", neighborhood: "Portland", website: "https://www.iprc.org", queerOwned: false },
+      { name: "MakeWithPDX", type: "shop", description: "Queer-owned DIY education and maker space.", neighborhood: "Portland", website: "https://makewithpdx.com", queerOwned: true },
+      { name: "Sincere Studio", type: "nonprofit", description: "Sewing-focused nonprofit with tools and classes.", neighborhood: "Portland", website: "https://sincerestudiopdx.org", queerOwned: false },
+      { name: "SymbiOp", type: "shop", description: "Queer-friendly garden center and community-oriented space.", neighborhood: "Portland", website: "https://symbiop.com", queerOwned: false },
+      { name: "IL Youth 2 Youth", type: "service", description: "Youth programming at Lloyd Center, listed by PQA as a non-queer-specific resource.", neighborhood: "Portland", website: "https://www.ilyouth2.com", queerOwned: false },
+      { name: "P:EAR", type: "nonprofit", description: "Arts programming and mentorship for unhoused and at-risk youth.", neighborhood: "Portland", website: "https://www.pearmentor.org", queerOwned: false },
+      { name: "Portland Playhouse", type: "nonprofit", description: "Theatre apprenticeship and education, including its Apprentice Program.", neighborhood: "Portland", website: "https://www.portlandplayhouse.org", queerOwned: false },
+    ];
+    const findExisting = sqlite.prepare(`SELECT id FROM businesses WHERE LOWER(name) = LOWER(?) LIMIT 1`);
+    const updateExisting = sqlite.prepare(`
+      UPDATE businesses
+      SET type = ?,
+          description = ?,
+          neighborhood = ?,
+          website = ?,
+          queer_owned = ?,
+          queer_friendly = 1,
+          active = 1,
+          status = 'OPEN',
+          ingest_events = 0
+      WHERE id = ?
+    `);
+    for (const resource of resources) {
+      const existing = findExisting.get(resource.name) as { id?: number } | undefined;
+      if (existing?.id) {
+        updateExisting.run(
+          resource.type,
+          resource.description,
+          resource.neighborhood,
+          resource.website,
+          resource.queerOwned ? 1 : 0,
+          existing.id,
+        );
+      } else {
+        db.insert(businesses).values({
+          ...resource,
+          queerFriendly: true,
+          active: true,
+          ingestEvents: false,
+          isNew: true,
+          status: "OPEN",
+          createdAt: now,
+        } as any).run();
+      }
+    }
+    recordBootMigration("seed_pqa_resource_directory_2026_08_26_v1");
+  }
+
+  // Remove Back 2 Earth from directory (venue no longer listed).
+  if (!hasBootMigration("remove_back_2_earth_v1")) {
+    const row = sqlite
+      .prepare(`SELECT id FROM businesses WHERE name = 'Back 2 Earth' OR website LIKE '%back2earth%' LIMIT 1`)
+      .get() as { id?: number } | undefined;
+    const bizId = row?.id;
+    if (bizId != null) {
+      try {
+        sqlite.prepare(`DELETE FROM business_claims WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* table may not exist in all envs */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_submissions WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_blocks WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      try {
+        sqlite.prepare(`DELETE FROM business_logo_requests WHERE business_id = ?`).run(bizId);
+      } catch {
+        /* ignore */
+      }
+      sqlite.prepare(`DELETE FROM businesses WHERE id = ?`).run(bizId);
+    } else {
+      sqlite
+        .prepare(
+          `DELETE FROM businesses WHERE name = 'Back 2 Earth' OR website LIKE '%back2earth%' OR instagram LIKE '%back2earth%'`,
+        )
+        .run();
+    }
+    try {
+      sqlite
+        .prepare(
+          `DELETE FROM qsearch_source_health WHERE source_id LIKE '%back2earth%' OR label LIKE '%Back 2 Earth%' OR url LIKE '%back2earth%'`,
+        )
+        .run();
+    } catch {
+      /* qsearch tables may not exist yet */
+    }
+    recordBootMigration("remove_back_2_earth_v1");
+  }
+
+  // Catalog cleanup: drop non-scene noise (Skatecamp, StrongFirst) + collapse LIVE
+  // same-title same-venue same-day duplicates (e.g. Charli XCX album party ×3 from Badlands re-sync).
+  if (!hasBootMigration("scrub_noise_and_live_dups_v1")) {
+    const noise = sqlite
+      .prepare(
+        `SELECT id FROM events
+         WHERE lower(title) LIKE '%skatecamp%'
+            OR lower(title) LIKE '%skate camp%'
+            OR lower(title) LIKE '%strongfirst%'
+            OR lower(title) LIKE '%strong first%'
+            OR (lower(title) LIKE '%sfl %' AND lower(title) LIKE '%barbell%')
+            OR lower(title) LIKE '%barbell instructor certification%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(noise.map(r => r.id));
+
+    // LIVE exact-ish dups: same title + venue + calendar day → keep lowest id, hide rest.
+    const live = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, date_start FROM events WHERE status = 'LIVE' ORDER BY id ASC`,
+      )
+      .all() as Array<{
+        id: number;
+        title: string;
+        venue_name: string | null;
+        date_start: string | null;
+      }>;
+    const seen = new Map<string, number>();
+    const hideIds: number[] = [];
+    for (const row of live) {
+      const key = [
+        String(row.title || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " "),
+        String(row.venue_name || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " "),
+        String(row.date_start || "").slice(0, 10),
+      ].join("|");
+      if (!key.startsWith("|") && key.length > 12) {
+        const keeper = seen.get(key);
+        if (keeper == null) {
+          seen.set(key, row.id);
+        } else {
+          hideIds.push(row.id);
+        }
+      }
+    }
+    for (const id of hideIds) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET status = 'HIDDEN',
+               admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                 'Hidden: duplicate LIVE listing (same title+venue+day) - scrub_noise_and_live_dups_v1'
+           WHERE id = ? AND status = 'LIVE'`,
+        )
+        .run(id);
+    }
+    recordBootMigration("scrub_noise_and_live_dups_v1");
+  }
+
+  /**
+   * Sanctuary LIVE flyers: pull real event art from pdxsanctuary.com event pages
+   * (featured image / uploads). Replaces wrong series art (JKPride leak) and
+   * placeholders for published Sanctuary listings.
+   * Sources: ICS+page enrich + 6 parallel page scrapes of calendar/sitemap URLs.
+   */
+  if (!hasBootMigration("sanctuary_real_flyers_v1")) {
+    const posters: Array<{ id: number; url: string }> = [
+      { id: 14, url: "https://pdxsanctuary.com/wp-content/uploads/2026/04/treasuretrail.avif" },
+      { id: 269, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade.png" },
+      { id: 270, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade-1.png" },
+      { id: 271, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/CirqueDeSade-1.png" },
+      { id: 272, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/Studio69July26Pricing.jpg" },
+      { id: 274, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/deleapocalypse.webp" },
+      { id: 275, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/back_to_school.jpg" },
+      { id: 277, url: "https://pdxsanctuary.com/wp-content/uploads/2025/08/boot-snow-globe.avif" },
+      { id: 278, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/badsanta.avif" },
+      { id: 279, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/BiteClub-1.jpg" },
+      { id: 280, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/Fempower-2.jpg" },
+      { id: 282, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/sarumanAug23_with_bgc.avif" },
+      { id: 283, url: "https://pdxsanctuary.com/wp-content/uploads/2026/04/SinfulSundayMarket.avif" },
+      { id: 285, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/Screenshot-2026-07-06-170527.avif" },
+      { id: 286, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/PickupMixer.jpg" },
+      { id: 287, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/TranscenDance-1.jpg" },
+      { id: 288, url: "https://pdxsanctuary.com/wp-content/uploads/2025/08/deleenm.avif" },
+      { id: 289, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/BodyLanguageAug.avif" },
+      { id: 291, url: "https://pdxsanctuary.com/wp-content/uploads/2026/02/IMG_5178.jpeg1_.avif" },
+      { id: 292, url: "https://pdxsanctuary.com/wp-content/uploads/2026/07/Ball-Busting-Squre-Draft-1-7-16-26.avif" },
+      { id: 359, url: "https://pdxsanctuary.com/wp-content/uploads/2026/01/1f84c461-addd-4a68-8ccf-69ed1933e784.avif" },
+      { id: 360, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/delehorsemarket-e1692985599818.png" },
+      { id: 361, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/delehorsemarket-e1692985599818.png" },
+      { id: 370, url: "https://pdxsanctuary.com/wp-content/uploads/2025/07/BiteClub-1.jpg" },
+    ];
+    const note =
+      "Poster set from pdxsanctuary.com event page art (sanctuary_real_flyers_v1)";
+    for (const p of posters) {
+      sqlite
+        .prepare(
+          `UPDATE events
+           SET poster_image_url = ?,
+               admin_notes = COALESCE(admin_notes || ' | ', '') || ?
+           WHERE id = ?
+             AND (venue_name LIKE '%Sanctuary%' OR address LIKE '%9th%' OR source LIKE '%sanctuary%' OR description LIKE '%Sanctuary%')`,
+        )
+        .run(p.url, note, p.id);
+    }
+    // Also title+day based safety for re-seeded DBs where ids differ:
+    // fix any LIVE Sanctuary row still showing JKPride that is not Jiffy Kink Pride.
+    sqlite
+      .prepare(
+        `UPDATE events
+         SET poster_image_url = NULL,
+             admin_notes = COALESCE(admin_notes || ' | ', '') ||
+               'Cleared wrong JKPride series art (sanctuary_real_flyers_v1) - re-sync Trusted for flyer'
+         WHERE status = 'LIVE'
+           AND poster_image_url LIKE '%JKPride%'
+           AND lower(title) NOT LIKE '%jiffy kink%pride%'
+           AND (lower(venue_name) LIKE '%sanctuary%' OR lower(source) LIKE '%sanctuary%')`,
+      )
+      .run();
+    recordBootMigration("sanctuary_real_flyers_v1");
+  }
+
+  /**
+   * Remove Eventbrite/url_ingest off-scene noise that landed LIVE:
+   * Oregon Pro Wrestling, Playmakers (Hazel Dell), Glendoveer golf scramble,
+   * LDS Kellogg Creek Ward Sports Night. Root cause: open-mode ingest without
+   * queer filter; hardened in isOffSceneNoiseDraft.
+   */
+  if (!hasBootMigration("scrub_offscene_eb_noise_v1")) {
+    const byId = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE id IN (374, 375, 383, 384)
+           OR lower(title) LIKE '%advocacy golf scramble%'
+           OR lower(title) LIKE '%kellogg creek ward%'
+           OR lower(title) LIKE '%oregon professional wrestling%'
+           OR (lower(venue_name) LIKE '%playmakers%sports%' AND lower(title) LIKE '%paint%')
+           OR lower(venue_name) LIKE '%church of jesus christ of latter%'
+           OR lower(venue_name) LIKE '%oregon pro wrestling%'
+           OR lower(venue_name) LIKE '%glendoveer golf%'`,
+      )
+      .all() as Array<{ id: number }>;
+    hardDeleteEventIds(byId.map(r => r.id));
+    recordBootMigration("scrub_offscene_eb_noise_v1");
+  }
+
+  /**
+   * Sweep remaining Eventbrite url_ingest rows with no LGBTQ signal
+   * (BJJ, beer runs, rock gym, Shriners, Camas art walk, women golf outing, etc.).
+   * Open-mode now requires queer signal for Eventbrite (eb_no_queer_signal).
+   */
+  if (!hasBootMigration("scrub_url_ingest_eb_no_queer_v2")) {
+    const drop = new Set<number>();
+    // Known noise ids (live audit 2026-07-26)
+    for (const id of [366, 373, 378, 379, 380, 382, 385, 365, 368, 374, 375, 383, 384]) {
+      drop.add(id);
+    }
+    // Title / venue patterns (id-independent)
+    const patterned = sqlite
+      .prepare(
+        `SELECT id FROM events WHERE
+           lower(title) LIKE '%girls in gis%'
+           OR lower(title) LIKE '%no-gi event%'
+           OR lower(title) LIKE '%women golf outing%'
+           OR lower(title) LIKE '%hosts & home teams%'
+           OR lower(title) LIKE '%hosts and home teams%'
+           OR lower(title) LIKE '%5k beer run%'
+           OR lower(title) LIKE '%brewery running series%'
+           OR lower(title) LIKE '%camas art%wine%'
+           OR lower(title) LIKE '%shriners%sports consortium%'
+           OR lower(title) LIKE '%rock gym%climbing%'
+           OR lower(venue_name) LIKE '%10th planet jiu%'
+           OR lower(venue_name) LIKE '%portland rock gym%'
+           OR lower(venue_name) LIKE '%shriners children%'
+           OR lower(venue_name) LIKE '%patricia reser center%'
+           OR (lower(COALESCE(ticket_url,'')) LIKE '%eventbrite%'
+               AND lower(COALESCE(source,'')) = 'url_ingest'
+               AND lower(title) LIKE '%golf outing%')`,
+      )
+      .all() as Array<{ id: number }>;
+    for (const r of patterned) drop.add(r.id);
+
+    // Broader: LIVE url_ingest + Eventbrite ticket, no LGBTQ signal in text
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, address, description, ticket_url, source
+         FROM events
+         WHERE status = 'LIVE'
+           AND lower(COALESCE(source, '')) = 'url_ingest'
+           AND lower(COALESCE(ticket_url, '')) LIKE '%eventbrite%'`,
+      )
+      .all() as Array<{
+        id: number;
+        title: string;
+        venue_name: string | null;
+        address: string | null;
+        description: string | null;
+        ticket_url: string | null;
+        source: string | null;
+      }>;
+
+    const QUEER =
+      /\b(lgbtq?\+?|queer|gay|lesbian|sapphic|bisexual|\bbi\b|trans(?:gender)?|non[- ]?binary|enby|drag|pride|bear\b|cub\b|leather|kink|fetish|dyke|twink|femme|butch|ballroom|vogue|poly(?:am)?|enm\b|t4t|wlw|mlm|same[- ]sex|rainbow|jockstrap|sex[- ]positive|nudity|orgy|munch|pup\b|handler|jiffy kink|sanctuary|darcelle|stag|badlands|hawks|camp bar|cc slaughters|sports bra|q center|rose court|bearracuda|smyrc|werq|prism)\b/i;
+    const QUEER_VENUE =
+      /\b(darcelle|stag(?:\s*pdx)?|badlands|eagle(?:\s*portland)?|silverado|cc\s*slaughters|nova(?:\s*pdx)?|holocene|sanctuary|hawks|camp\s*bar|scandals|get\s*down|meet\s*rack|peacock|process|escape\s*bar|sports\s*bra|q\s*center|rose\s*court|bearracuda|steam(?:\s*pdx)?|montavilla\s*station|automatic\s*bar|covert\s*caf|living\s*room\s*wines)\b/i;
+
+    for (const r of rows) {
+      const blob = [r.title, r.venue_name, r.address, (r.description || "").slice(0, 500)].join(" ");
+      if (QUEER.test(blob) || QUEER_VENUE.test(blob)) continue;
+      drop.add(r.id);
+    }
+
+    const ids = Array.from(drop);
+    try {
+      hardDeleteEventIds(ids);
+    } catch (e) {
+      console.error("[boot] scrub_url_ingest_eb_no_queer_v2 hardDelete failed, soft-hiding:", e);
+      for (const id of ids) {
+        try {
+          sqlite
+            .prepare(
+              `UPDATE events SET status = 'HIDDEN',
+                 admin_notes = COALESCE(admin_notes || ' | ', '') ||
+                   'Hidden: Eventbrite url_ingest without LGBTQ signal (scrub_url_ingest_eb_no_queer_v2)'
+               WHERE id = ?`,
+            )
+            .run(id);
+        } catch {
+          /* ignore single-row failures */
+        }
+      }
+    }
+    console.info(`[boot] scrub_url_ingest_eb_no_queer_v2: removed/hid ${ids.length} events`);
+    recordBootMigration("scrub_url_ingest_eb_no_queer_v2");
+  }
+
+  // The Sports Bra is a founder-locked dedicated lesbian/LGBTQ+ venue. All real
+  // events there meet the relevance rule, not only games/watch parties. Keep the
+  // identity guard: an event using the name with a different explicit address is
+  // a bad join and remains reversible in HIDDEN review.
+  if (!hasBootMigration("hide_sports_bra_address_mismatch_v2")) {
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title FROM events
+          WHERE status = 'LIVE'
+            AND lower(venue_name) LIKE '%sports bra%'
+            AND date_start >= date('now')
+            AND trim(COALESCE(address, '')) <> ''
+            AND lower(address) NOT LIKE '%2512 ne broadway%'`,
+      )
+      .all() as Array<{ id: number; title: string }>;
+    const hide = sqlite.prepare(
+      `UPDATE events SET status = 'HIDDEN',
+         admin_notes = COALESCE(admin_notes || ' | ', '') ||
+           'Hidden: Sports Bra exact-address mismatch (hide_sports_bra_address_mismatch_v2)'
+       WHERE id = ?`,
+    );
+    for (const r of rows) {
+      try {
+        hide.run(r.id);
+      } catch {
+        /* ignore single-row failures */
+      }
+    }
+    console.info(
+      `[boot] hide_sports_bra_address_mismatch_v2: hid ${rows.length} events` +
+        (rows.length ? ` -> ${rows.map(r => `#${r.id} ${r.title}`).join("; ")}` : ""),
+    );
+    recordBootMigration("hide_sports_bra_address_mismatch_v2");
+  }
+
+  // Cross-venue contamination repair:
+  // - Camp Bar rows with Eagle Wix posters / Eagle ticket URLs
+  // - Sanctuary nights with Game Bang flyer art when title is not Game Bang
+  // Poster clear is immediate; Sanctuary re-enrich runs async after boot (see server/index).
+  if (!hasBootMigration("cross_venue_contamination_repair_v1")) {
+    const noteCamp =
+      "Repair cross-venue contamination: cleared foreign (Eagle) poster/ticket on Camp Bar listing.";
+    const noteSanc =
+      "Repair cross-venue contamination: cleared Game Bang flyer on non-Game Bang Sanctuary night.";
+
+    // Camp Bar only (not Triangle Recreation Camp / Camp TRC)
+    const camp = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           poster_image_url = CASE
+             WHEN poster_image_url IS NOT NULL
+               AND (poster_image_url LIKE '%wixstatic.com%' OR poster_image_url LIKE '%wix:image:%')
+             THEN NULL
+             ELSE poster_image_url
+           END,
+           ticket_url = CASE
+             WHEN ticket_url IS NOT NULL
+               AND (
+                 ticket_url LIKE '%eagleportland.com%'
+                 OR ticket_url LIKE '%wixstatic.com%'
+                 OR ticket_url LIKE '%wix:image:%'
+               )
+             THEN 'https://campbarpdx.com'
+             ELSE ticket_url
+           END,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) LIKE '%camp%'
+           AND lower(venue_name) NOT LIKE '%triangle%'
+           AND lower(venue_name) NOT LIKE '%trc%'
+           AND lower(venue_name) NOT LIKE '%recreation%'
+           AND (
+             (poster_image_url IS NOT NULL AND (poster_image_url LIKE '%wixstatic.com%' OR poster_image_url LIKE '%wix:image:%'))
+             OR (ticket_url IS NOT NULL AND (
+               ticket_url LIKE '%eagleportland.com%'
+               OR ticket_url LIKE '%wixstatic.com%'
+               OR ticket_url LIKE '%wix:image:%'
+             ))
+           )`,
+      )
+      .run(noteCamp, noteCamp, noteCamp);
+
+    const sanctuary = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           poster_image_url = NULL,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) LIKE '%sanctuary%'
+           AND poster_image_url IS NOT NULL
+           AND lower(poster_image_url) LIKE '%gamebang%'
+           AND lower(title) NOT LIKE '%game bang%'
+           AND lower(title) NOT LIKE '%gamebang%'`,
+      )
+      .run(noteSanc, noteSanc, noteSanc);
+
+    console.info(
+      `[boot] cross_venue_contamination_repair_v1: camp rows=${camp.changes}, sanctuary rows=${sanctuary.changes}`,
+    );
+    recordBootMigration("cross_venue_contamination_repair_v1");
+  }
+
+  // CC Slaughters' old free-text parser shifted titles/times and stamped its
+  // shared weekly composite on every current card. Repair only its known
+  // malformed future rows; the trusted adapter now produces the canonical
+  // schedule and leaves shared lineup art off individual event cards.
+  if (!hasBootMigration("cc_slaughters_weekly_metadata_repair_v1")) {
+    const note =
+      "Repair CC Slaughters weekly metadata from official schedule; cleared shared lineup flyer.";
+    const normal = sqlite
+      .prepare(
+        `UPDATE events
+         SET
+           title = CASE lower(title)
+             WHEN 'drag queen bingo with nicole onoscopi' THEN 'Monday Game-Day'
+             WHEN 'tuesday at cc slaughters' THEN 'Rager'
+             WHEN 'amateur night at cc''s' THEN 'Hump Wednesday'
+             WHEN 'night' THEN 'Trans-UHH-Licious'
+             WHEN 'live piano and singing no cover 21+' THEN 'The Queens Keys'
+             WHEN 'sunday at cc slaughters' THEN 'Keyed Up Karaoke!'
+             ELSE title
+           END,
+           date_start = CASE
+             WHEN lower(title) = 'night' AND substr(date_start, 12, 5) = '02:00'
+             THEN substr(date_start, 1, 10) || 'T21:00'
+             ELSE date_start
+           END,
+           poster_image_url = NULL,
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) IN (
+             'drag queen bingo with nicole onoscopi',
+             'tuesday at cc slaughters',
+             'amateur night at cc''s',
+             'night',
+             'live piano and singing no cover 21+',
+             'sunday at cc slaughters'
+           )`,
+      )
+      .run(note, note, note);
+
+    const correctBlackMagic = sqlite
+      .prepare(
+        `UPDATE events
+         SET title = 'Black Magic',
+             date_start = substr(date_start, 1, 10) || 'T21:00',
+             poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE status != 'REMOVED'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) LIKE '! starring rogue storm safari%'
+           AND (CAST((CAST(strftime('%d', date_start) AS INTEGER) - 1) / 7 AS INTEGER) + 1) = 2`,
+      )
+      .run(note, note, note);
+
+    const hideWrongBlackMagic = sqlite
+      .prepare(
+        `UPDATE events
+         SET status = 'HIDDEN',
+             poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE status = 'LIVE'
+           AND lower(venue_name) = 'cc slaughters'
+           AND date_start >= date('now')
+           AND lower(title) LIKE '! starring rogue storm safari%'
+           AND (CAST((CAST(strftime('%d', date_start) AS INTEGER) - 1) / 7 AS INTEGER) + 1) != 2`,
+      )
+      .run(note, note, note);
+
+    console.info(
+      `[boot] cc_slaughters_weekly_metadata_repair_v1: normal=${normal.changes}, blackMagic=${correctBlackMagic.changes}, hidden=${hideWrongBlackMagic.changes}`,
+    );
+    recordBootMigration("cc_slaughters_weekly_metadata_repair_v1");
+  }
+
+  // Production event-data repair from the 2026-08-25 QSearch/flyer audit.
+  // Keep the richest exact duplicate LIVE row and hide the others so RSVP and
+  // moderation history remain recoverable. This is deliberately narrower than
+  // same-day matching: two separately scheduled shows can share a title/venue.
+  if (!hasBootMigration("qsearch_event_flyer_audit_2026_08_25_v1")) {
+    type ExactEventRow = {
+      id: number;
+      title: string;
+      venue_name: string | null;
+      date_start: string;
+      poster_image_url: string | null;
+      description: string | null;
+      ticket_url: string | null;
+    };
+    const rows = sqlite
+      .prepare(
+        `SELECT id, title, venue_name, date_start, poster_image_url, description, ticket_url
+         FROM events
+         WHERE status = 'LIVE'
+         ORDER BY id ASC`,
+      )
+      .all() as ExactEventRow[];
+    const norm = (value: string | null | undefined) =>
+      String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    const keyFor = (row: ExactEventRow) =>
+      `${norm(row.title)}|${norm(row.venue_name)}|${String(row.date_start || "").slice(0, 16)}`;
+    const richness = (row: ExactEventRow) =>
+      (row.poster_image_url ? 1000 : 0) +
+      Math.min(500, String(row.description || "").length) +
+      (row.ticket_url ? 50 : 0);
+    const keepers = new Map<string, ExactEventRow>();
+    const hideIds: number[] = [];
+    for (const row of rows) {
+      const key = keyFor(row);
+      const current = keepers.get(key);
+      if (!current) {
+        keepers.set(key, row);
+        continue;
+      }
+      const nextWins =
+        richness(row) > richness(current) ||
+        (richness(row) === richness(current) && row.id < current.id);
+      if (nextWins) {
+        hideIds.push(current.id);
+        keepers.set(key, row);
+      } else {
+        hideIds.push(row.id);
+      }
+    }
+    const duplicateNote =
+      "Hidden: exact duplicate LIVE event (title, venue, and start time) - qsearch_event_flyer_audit_2026_08_25_v1";
+    const hide = sqlite.prepare(
+      `UPDATE events
+       SET status = 'HIDDEN',
+           admin_notes = CASE
+             WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+             WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+             ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+           END
+       WHERE id = ? AND status = 'LIVE'`,
+    );
+    for (const id of hideIds) hide.run(duplicateNote, duplicateNote, duplicateNote, id);
+
+    // TranscenDance: Pool Party was visibly paired with Ball-Busting art. The
+    // official Sanctuary calendar confirms a different event at this slot, so
+    // honest no-art is safer than keeping a wrong poster.
+    const posterNote =
+      "Cleared unrelated Ball-Busting poster from TranscenDance listing - qsearch_event_flyer_audit_2026_08_25_v1";
+    const cleared = sqlite
+      .prepare(
+        `UPDATE events
+         SET poster_image_url = NULL,
+             admin_notes = CASE
+               WHEN admin_notes IS NULL OR trim(admin_notes) = '' THEN ?
+               WHEN instr(admin_notes, ?) > 0 THEN admin_notes
+               ELSE substr(admin_notes || ' | ' || ?, 1, 1000)
+             END
+         WHERE lower(title) LIKE '%transcendance%'
+           AND lower(venue_name) LIKE '%sanctuary%'
+           AND lower(COALESCE(poster_image_url, '')) LIKE '%ball-busting%'`,
+      )
+      .run(posterNote, posterNote, posterNote);
+
+    // Primary Q Center evidence scheduled this public listing for Aug 26,
+    // noon-4pm. Add it only when its canonical ticket URL is absent, so a
+    // subsequent source refresh remains the authority and cannot create a copy.
+    const qCenterUrl =
+      "https://www.pdxqcenter.org/events-1/hand-up-peoples-pantry-2026-08-26-13-30";
+    const exists = sqlite
+      .prepare(`SELECT id FROM events WHERE ticket_url = ? LIMIT 1`)
+      .get(qCenterUrl) as { id: number } | undefined;
+    let added = 0;
+    if (!exists) {
+      const now = new Date().toISOString();
+      added = sqlite
+        .prepare(
+          `INSERT INTO events (
+             title, description, venue_name, address, neighborhood, lat, lng,
+             date_start, date_end, day_of_week, age_requirement, event_types,
+             admission, ticket_url, is_public, is_private, is_house_party,
+             is_sex_positive, nudity_ok, poster_image_url, status, source,
+             is_claimable, admin_notes, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          "Hand Up People's Pantry",
+          "Verified from the Q Center event page. Confirm current availability before attending.",
+          "Q Center",
+          "4115 N Mississippi Ave Suite D, Portland, OR 97217, USA",
+          "N Portland",
+          45.5535426,
+          -122.6759558,
+          "2026-08-26T12:00:00",
+          "2026-08-26T16:00:00",
+          "WED",
+          "ALL_AGES",
+          "[]",
+          "UNKNOWN",
+          qCenterUrl,
+          1,
+          0,
+          0,
+          0,
+          0,
+          null,
+          "LIVE",
+          "verified_qsearch_audit",
+          1,
+          "Verified Q Center source repair - qsearch_event_flyer_audit_2026_08_25_v1",
+          now,
+          now,
+        ).changes;
+    }
+    console.info(
+      `[boot] qsearch_event_flyer_audit_2026_08_25_v1: hid ${hideIds.length} exact duplicate(s), cleared ${cleared.changes} wrong flyer(s), added ${added} Q Center event(s)`,
+    );
+    recordBootMigration("qsearch_event_flyer_audit_2026_08_25_v1");
+  }
+}
+
+function parseEnvAdminLists() {
+  const emails = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
+    .split(",")
+    .map(value => value.trim().toLowerCase())
+    .filter(Boolean);
+  const usernames = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucker_pdmax")
+    .split(",")
+    .map(value => value.trim().replace(/^@/, "").toLowerCase())
+    .filter(Boolean);
+  return { emails, usernames };
+}
+
+function isEnvListedSiteAdmin(user: { email?: string | null; username?: string | null }) {
+  const { emails, usernames } = parseEnvAdminLists();
+  const email = String(user.email || "").trim().toLowerCase();
+  const username = String(user.username || "").trim().replace(/^@/, "").toLowerCase();
+  return emails.includes(email) || usernames.includes(username);
+}
+
+function seedSiteAdminGrantsFromEnv() {
+  const { emails, usernames } = parseEnvAdminLists();
+  const now = new Date().toISOString();
+  for (const email of emails) {
+    const user = storage.getUserByEmail(email);
+    if (user) storage.ensureSiteAdminGrant(user.id, null, "Owner admin (env)", now);
+  }
+  for (const username of usernames) {
+    const user = storage.getUserByUsername(username);
+    if (user) storage.ensureSiteAdminGrant(user.id, null, "Owner admin (env)", now);
+  }
+}
+
+function archiveExpiredMissedConnections() {
+  const now = new Date().toISOString();
+  sqlite.prepare(`
+    UPDATE missed_connections
+    SET status = 'ARCHIVED'
+    WHERE status = 'ACTIVE'
+      AND closes_at IS NOT NULL
+      AND datetime(closes_at) <= datetime(?)
+  `).run(now);
+}
+
+function mapMissedConnectionRow(row: any, viewerUserId?: number) {
+  const isMine = viewerUserId != null && row.user_id === viewerUserId;
+  const demoUserId = getDemoUserId();
+  const isDemo = demoUserId != null && row.user_id === demoUserId;
+  const { user_id: _uid, eventDateStart: _eds, ...publicRow } = row;
+  return { ...publicRow, isMine, anonymous: !isMine && !isDemo, isDemo };
+}
+
+function firstPhoto(raw: unknown): string | null {
+  if (Array.isArray(raw) && raw.length && typeof raw[0] === "string") return raw[0];
+  if (typeof raw !== "string" || !raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && typeof parsed[0] === "string" ? parsed[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+function upsertHubFeedBump(items: HubFeedItem[], item: HubFeedItem): void {
+  const i = items.findIndex((row) => row.id === item.id);
+  if (i >= 0) {
+    items[i] = { ...items[i], changeLabel: item.changeLabel, createdAt: item.createdAt };
+    return;
+  }
+  items.push(item);
+}
+
+/** Viewer-scoped: saved housing (and sellz) resurface when updated_at > seen. */
+function bumpSavedHubFeedItems(items: HubFeedItem[], viewerUserId: number): void {
+  try {
+    const housingRows = sqlite.prepare(`
+      SELECT p.id, p.type, p.name, p.headline, p.created_at AS createdAt, p.updated_at AS updatedAt,
+             p.last_change_label AS lastChangeLabel, p.last_change_at AS lastChangeAt, p.photo_urls AS photoUrls,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing,
+             s.seen_updated_at AS seenUpdatedAt
+      FROM housing_saves s
+      JOIN housing_posts p ON p.id = s.post_id
+      JOIN users u ON u.id = p.user_id
+      WHERE s.user_id = ?
+        AND p.status IN ('ACTIVE','FILLED') AND p.hidden = 0 AND p.gone = 0
+        AND p.last_change_label IS NOT NULL AND TRIM(p.last_change_label) != ''
+    `).all(viewerUserId) as any[];
+    for (const row of housingRows) {
+      const bumpedAt = row.lastChangeAt || row.updatedAt || row.createdAt;
+      if (row.seenUpdatedAt && bumpedAt <= row.seenUpdatedAt) continue;
+      const type = row.type as HousingType;
+      upsertHubFeedBump(items, {
+        id: `housing-${row.id}`,
+        kind: "housing",
+        badge: HOUSING_TYPE_LABEL[type] || "THE HAÜZ",
+        action: HOUSING_FEED_ACTION[type] || "Updated a HAÜZ post",
+        title: row.name || null,
+        text: row.headline || null,
+        createdAt: bumpedAt,
+        changeLabel: row.lastChangeLabel,
+        author: hubFeedAuthorFromUser(row),
+        link: `/hausing/${row.id}`,
+        boardPostId: row.id,
+        photoUrl: firstPhoto(row.photoUrls),
+      });
+    }
+  } catch {
+    /* a housing bump failure must never take the feed down */
+  }
+
+  try {
+    const sellzRows = sqlite.prepare(`
+      SELECT p.id, p.title, p.description, p.created_at AS createdAt, p.updated_at AS updatedAt,
+             p.last_change_label AS lastChangeLabel, p.last_change_at AS lastChangeAt, p.photo_urls AS photoUrls,
+             p.price_cents AS priceCents,
+             u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing,
+             s.seen_updated_at AS seenUpdatedAt
+      FROM sellz_saves s
+      JOIN sellz_posts p ON p.id = s.post_id
+      JOIN users u ON u.id = p.user_id
+      WHERE s.user_id = ?
+        AND p.status IN ('ACTIVE','RESERVED')
+        AND p.last_change_label IS NOT NULL AND TRIM(p.last_change_label) != ''
+    `).all(viewerUserId) as any[];
+    for (const row of sellzRows) {
+      const bumpedAt = row.lastChangeAt || row.updatedAt || row.createdAt;
+      if (row.seenUpdatedAt && bumpedAt <= row.seenUpdatedAt) continue;
+      upsertHubFeedBump(items, {
+        id: `sellz-${row.id}`,
+        kind: "sellz",
+        badge: "SELLZ",
+        action: `Listed for $${(Number(row.priceCents || 0) / 100).toFixed(Number(row.priceCents || 0) % 100 ? 2 : 0)}`,
+        title: row.title,
+        text: row.description || null,
+        createdAt: bumpedAt,
+        changeLabel: row.lastChangeLabel,
+        author: hubFeedAuthorFromUser(row),
+        link: `/sellz?post=${row.id}`,
+        boardPostId: row.id,
+        photoUrl: firstPhoto(row.photoUrls),
+      });
+    }
+  } catch {
+    /* sellz bump is optional */
+  }
+}
+
+function hubFeedAuthorFromUser(
+  u: {
+    displayName?: string | null;
+    username?: string | null;
+    photoUrl?: string | null;
+    avatarChoice?: number | null;
+    avatarRing?: string | null;
+  } | null | undefined,
+  anonymous = false,
+): HubFeedAuthor {
+  if (anonymous || !u) {
+    return { displayName: "Someone in the scene", anonymous: true };
+  }
+  return {
+    displayName: u.displayName || u.username || "Member",
+    username: u.username ?? null,
+    photoUrl: u.photoUrl ?? null,
+    avatarChoice: u.avatarChoice ?? 1,
+    avatarRing: u.avatarRing ?? "none",
+  };
+}
+
+function hubFeedResolveBusinessForEvent(
+  evt: Event | Record<string, unknown>,
+  businesses: Business[],
+): Business | null {
+  const eventLike = {
+    venueName: String((evt as any).venueName ?? (evt as any).venue_name ?? ""),
+    address: ((evt as any).address ?? null) as string | null,
+    lat: ((evt as any).lat ?? null) as number | null,
+    lng: ((evt as any).lng ?? null) as number | null,
+  };
+  for (const biz of businesses) {
+    if (eventMatchesBusiness(eventLike, biz)) return biz;
+  }
+  return null;
+}
+
+function hubFeedVenueAuthor(venueName: string, evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
+  const biz = hubFeedResolveBusinessForEvent(evt, businesses);
+  const name = biz?.name || venueName;
+  // Prefer static neon pack (/directory-logos), then DB imageUrl, then type fallback -
+  // same resolution the Directory UI uses (Camp Bar PDX, etc.).
+  const logo =
+    resolveDirectoryLogo(String(name), biz?.imageUrl)
+    || (biz ? directoryFallbackLogo(biz.type) : null)
+    || resolveDirectoryLogo(String(venueName), null);
+  const businessId = biz?.id ?? null;
+  if (logo) {
+    return {
+      displayName: String(venueName || name),
+      photoUrl: logo,
+      venueLogo: true,
+      businessId,
+    };
+  }
+  return { displayName: String(venueName), venueLogo: !!biz, businessId };
+}
+
+/** Feed author for a directory venue posting under its own name. */
+function hubFeedBusinessAuthor(biz: Business): HubFeedAuthor {
+  const logo = resolveDirectoryLogo(String(biz.name), biz.imageUrl) || directoryFallbackLogo(biz.type) || null;
+  return {
+    displayName: biz.name,
+    photoUrl: logo,
+    venueLogo: true,
+    businessId: biz.id,
+  };
+}
+
+/** Resolve a stored Top 8 (JSON [{k:"u"|"b",id}]) into display tiles, dropping dead refs. */
+function resolveProfileTop8(raw: string | null | undefined): any[] {
+  let list: any[] = [];
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    if (Array.isArray(parsed)) list = parsed;
+  } catch { /* ignore malformed */ }
+  const out: any[] = [];
+  for (const entry of list.slice(0, 8)) {
+    const id = Number(entry?.id);
+    if (!Number.isInteger(id) || id <= 0) continue;
+    if (entry.k === "u") {
+      const u = storage.getUserById(id);
+      if (u && String(u.status || "").toUpperCase() !== "SUSPENDED") {
+        out.push({
+          kind: "user",
+          id: u.id,
+          username: u.username,
+          displayName: u.displayName || u.username,
+          photoUrl: u.photoUrl || null,
+          avatarChoice: u.avatarChoice,
+          avatarRing: u.avatarRing,
+        });
+      }
+    } else if (entry.k === "b") {
+      const b = storage.getBusiness(id);
+      if (b) {
+        out.push({
+          kind: "place",
+          id: b.id,
+          name: b.name,
+          logoUrl: resolveDirectoryLogo(String(b.name), b.imageUrl) || directoryFallbackLogo(b.type) || null,
+        });
+      }
+    }
+  }
+  return out;
+}
+
+function hubFeedEventEmbed(evt: any, goingCount?: number, poster?: HubFeedAuthor | null): HubFeedEventEmbed {
+  return {
+    id: Number(evt.id ?? evt.eventId),
+    title: evt.title,
+    venueName: evt.venueName ?? evt.venue_name ?? "",
+    dayOfWeek: evt.dayOfWeek ?? evt.day_of_week ?? null,
+    dateStart: evt.dateStart ?? evt.date_start ?? "",
+    admission: evt.admission ?? "FREE",
+    goingCount,
+    posterImageUrl: evt.posterImageUrl ?? evt.poster_image_url ?? null,
+    poster: poster ?? null,
+  };
+}
+
+function hubFeedEventPoster(evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor | null {
+  const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
+  const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
+  if (claimedBy) {
+    const u = storage.getUserByUsername(String(claimedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+    return { displayName: String(claimedBy), username: String(claimedBy) };
+  }
+  if (submittedBy) {
+    const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
+    if (u) return hubFeedAuthorFromUser(u);
+  }
+  const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
+  if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
+  return null;
+}
+
+function hubFeedEventAuthor(evt: Event | Record<string, unknown>, businesses: Business[]): HubFeedAuthor {
+  const claimedBy = (evt as Event).claimedBy ?? (evt as any).claimed_by;
+  const submittedBy = (evt as Event).submittedBy ?? (evt as any).submitted_by;
+  const venueName = (evt as Event).venueName ?? (evt as any).venue_name;
+  // Prefer directory venue logo for venue-attributed event cards when there is
+  // no real member photo (common for unclaimed or venue-named listings).
+  if (claimedBy) {
+    const u = storage.getUserByUsername(String(claimedBy));
+    if (u?.photoUrl) return hubFeedAuthorFromUser(u);
+    if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
+    if (u) return hubFeedAuthorFromUser(u);
+    return { displayName: String(claimedBy), username: String(claimedBy) };
+  }
+  if (submittedBy) {
+    const u = storage.getUserByUsername(String(submittedBy)) || storage.getUserByEmail(String(submittedBy));
+    if (u?.photoUrl) return hubFeedAuthorFromUser(u);
+    if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
+    if (u) return hubFeedAuthorFromUser(u);
+  }
+  if (venueName) return hubFeedVenueAuthor(String(venueName), evt, businesses);
+  return { displayName: "The scene" };
+}
+
+/** Same-venue same-window window for bundling multi-night drops. */
+const HUB_FEED_EVENT_CONDENSE_MS = 2 * 60 * 60 * 1000;
+
+function hubFeedAuthorKey(author: HubFeedAuthor): string {
+  return (author.username || author.displayName || "unknown").toLowerCase();
+}
+
+function hubFeedNormalizeVenueKey(name: string | null | undefined): string {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+/**
+ * Feed sort/time for event cards.
+ * Bulk-seeded venue parties share one created_at second - that piles the whole
+ * guide into "just now". Prefer the party date_start so the feed spreads across
+ * the week. User submissions keep their real listing timestamp.
+ */
+function hubFeedEventActivityAt(evt: {
+  source?: string | null;
+  submittedBy?: string | null;
+  claimedBy?: string | null;
+  createdAt?: string | null;
+  dateStart?: string | null;
+}): string {
+  // News-feed order is chronological by when the event was listed/posted - NOT
+  // by the (often future) party date. Sorting by party start floats every
+  // upcoming party to the top and buries real-time posts, host updates, and
+  // RSVPs beneath the whole week's catalog. Prefer the created/listed time for
+  // all events; only fall back to the party date when no created time exists.
+  const created = hubFeedCreatedAt(evt);
+  if (created) return created;
+
+  const start = typeof evt.dateStart === "string" ? evt.dateStart : "";
+  if (start) {
+    const startMs = parsePacificDateTime(start);
+    if (startMs != null) return new Date(startMs).toISOString();
+    return start;
+  }
+  return created;
+}
+
+function hubFeedEventCondenseKey(item: HubFeedItem): string {
+  const venue =
+    item.event?.venueName
+    || item.events?.[0]?.venueName
+    || (item.author.venueLogo ? item.author.displayName : "")
+    || "";
+  const venueKey = hubFeedNormalizeVenueKey(venue);
+  if (venueKey) return `venue:${venueKey}`;
+  return `author:${hubFeedAuthorKey(item.author)}`;
+}
+
+/** Normalize titles so "Jiffy Kink" / "Jiffy Kink!" / "jiffy  kink" series-match. */
+function hubFeedNormalizeSeriesTitle(title: string | null | undefined): string {
+  return String(title || "")
+    .toLowerCase()
+    .replace(/\b(part|week|night|ep|episode)\s*#?\d+\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+/**
+ * Recurring bulk adds: same venue + same show title across many nights.
+ * Falls back to venue/author key when title is missing.
+ */
+function hubFeedSeriesKey(item: HubFeedItem): string {
+  const title = hubFeedNormalizeSeriesTitle(item.event?.title);
+  const venue =
+    item.event?.venueName
+    || item.events?.[0]?.venueName
+    || (item.author.venueLogo ? item.author.displayName : "")
+    || "";
+  const venueKey = hubFeedNormalizeVenueKey(venue);
+  if (title && venueKey) return `series:${venueKey}|${title}`;
+  if (title) return `series:title:${title}`;
+  return hubFeedEventCondenseKey(item);
+}
+
+/**
+ * Bulk recurring series → ONE feed card (badge Recurring), not N rows.
+ * Embeds the next upcoming night (or earliest) only.
+ */
+function bundleHubFeedRecurringSeries(cluster: HubFeedItem[]): HubFeedItem {
+  const withEvents = cluster.filter((item) => item.event != null);
+  if (withEvents.length === 0) return cluster[0];
+  if (withEvents.length === 1) return withEvents[0];
+
+  const byStart = [...withEvents].sort((a, b) =>
+    String(a.event!.dateStart || "").localeCompare(String(b.event!.dateStart || "")),
+  );
+  const now = Date.now();
+  const next =
+    byStart.find((item) => {
+      const ms = parsePacificDateTime(item.event!.dateStart);
+      return ms != null && ms >= now;
+    }) || byStart[0];
+
+  const newest = [...withEvents].sort((a, b) =>
+    String(b.createdAt).localeCompare(String(a.createdAt)),
+  )[0];
+  const n = withEvents.length;
+  const venueAuthor = newest.author.venueLogo;
+  const action = venueAuthor
+    ? `Listed a recurring series · ${n} nights`
+    : `Posted a recurring series · ${n} nights`;
+
+  return {
+    ...newest,
+    id: `event-series-${hubFeedSeriesKey(next)}-${n}`,
+    kind: "event",
+    badge: "Recurring",
+    action,
+    // Don't dump the first night's long description on a series card.
+    text: null,
+    // Single embed only - HubFeedCard must not render N event rows.
+    event: next.event ?? null,
+    events: undefined,
+    createdAt: newest.createdAt,
+    link: null,
+  };
+}
+
+function bundleHubFeedEventCluster(cluster: HubFeedItem[]): HubFeedItem {
+  if (cluster.length === 1) return cluster[0];
+  // Newest activity first in the bundle
+  const ordered = [...cluster].sort((a, b) =>
+    String(b.createdAt).localeCompare(String(a.createdAt)),
+  );
+  const head = ordered[0];
+  const events = ordered
+    .map((item) => item.event)
+    .filter((e): e is HubFeedEventEmbed => e != null);
+  const count = events.length;
+  const venueAuthor = head.author.venueLogo;
+  const action = venueAuthor
+    ? (count === 1 ? "Listed a party" : `Listed ${count} parties`)
+    : (count === 1 ? "Posted a new event" : `Posted ${count} new events`);
+  return {
+    ...head,
+    id: `event-bundle-${hubFeedEventCondenseKey(head)}-${head.createdAt}`,
+    action,
+    text: null,
+    events,
+    event: events[0] ?? null,
+  };
+}
+
+/**
+ * Same-venue multi-night drops within a short createdAt window
+ * (different show titles - not a single recurring series).
+ */
+function condenseHubFeedByVenueWindow(items: HubFeedItem[]): HubFeedItem[] {
+  if (items.length <= 1) return items;
+  const byKey = new Map<string, HubFeedItem[]>();
+  for (const item of items) {
+    const key = hubFeedEventCondenseKey(item);
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key)!.push(item);
+  }
+  const out: HubFeedItem[] = [];
+  for (const group of Array.from(byKey.values())) {
+    group.sort((a: HubFeedItem, b: HubFeedItem) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    let cluster: HubFeedItem[] = [];
+    for (const item of group) {
+      if (cluster.length === 0) {
+        cluster.push(item);
+        continue;
+      }
+      const anchor = new Date(cluster[0].createdAt).getTime();
+      const t = new Date(item.createdAt).getTime();
+      if (Number.isFinite(anchor) && Number.isFinite(t) && Math.abs(anchor - t) <= HUB_FEED_EVENT_CONDENSE_MS) {
+        cluster.push(item);
+      } else {
+        out.push(bundleHubFeedEventCluster(cluster));
+        cluster = [item];
+      }
+    }
+    if (cluster.length) out.push(bundleHubFeedEventCluster(cluster));
+  }
+  return out;
+}
+
+function condenseHubFeedEventItems(items: HubFeedItem[]): HubFeedItem[] {
+  if (items.length <= 1) return items;
+
+  // Pass 1 - recurring series: same venue + same title (bulk weekly/monthly adds).
+  // One news-feed card with badge "Recurring", not one row per night.
+  const bySeries = new Map<string, HubFeedItem[]>();
+  for (const item of items) {
+    const key = hubFeedSeriesKey(item);
+    if (!bySeries.has(key)) bySeries.set(key, []);
+    bySeries.get(key)!.push(item);
+  }
+
+  const residual: HubFeedItem[] = [];
+  const seriesOut: HubFeedItem[] = [];
+  for (const [key, group] of Array.from(bySeries.entries())) {
+    if (key.startsWith("series:") && group.length >= 2) {
+      seriesOut.push(bundleHubFeedRecurringSeries(group));
+    } else {
+      residual.push(...group);
+    }
+  }
+
+  // Pass 2 - leftover multi-title drops at the same venue still window-bundle.
+  return [...seriesOut, ...condenseHubFeedByVenueWindow(residual)];
+}
+
+function canViewerSeeHubFeedRsvp(
+  row: { userId: number; eventId: number; visibility?: string | null; isAnonymous?: number | boolean },
+  viewerUserId: number | undefined,
+  viewerIsAdmin: boolean,
+): boolean {
+  if (viewerUserId == null) return false;
+  const vis = resolveAttendanceVisibility(row);
+  // Anonymous never surfaces as a named hub card (mask would strip identity anyway).
+  if (vis === "anonymous") return false;
+  if (viewerIsAdmin) return true;
+  if (row.userId === viewerUserId) return true;
+  if (storage.isUserEventHost(row.eventId, viewerUserId)) return true;
+  if (vis === "friends") {
+    return canViewerSeeFriendsAttendance(viewerUserId, row.userId);
+  }
+  // public: followers of the RSVP'er (existing hub graph filter)
+  if (storage.isFollowing(viewerUserId, row.userId)) return true;
+  return false;
+}
+
+function hubFeedCreatedAt(row: { createdAt?: string | null; created_at?: string | null; dateStart?: string | null; date_start?: string | null }) {
+  return row.createdAt ?? row.created_at ?? row.dateStart ?? row.date_start ?? "";
+}
+
+function canViewerSeeHubFeedPost(
+  post: { userId: number; audience: string; eventId: number | null; status: string },
+  viewerUserId: number | undefined,
+  viewerRsvpEventIds: Set<number>,
+  viewerIsAdmin: boolean,
+  posterHostedIds: number[],
+): boolean {
+  if (post.status !== "LIVE") return false;
+  if (viewerUserId == null) return false;
+  if (post.userId === viewerUserId) return true;
+  if (viewerIsAdmin) return true;
+  if (post.audience === "ALL") return true;
+  if (post.eventId != null) return viewerRsvpEventIds.has(post.eventId);
+  return posterHostedIds.some((id) => viewerRsvpEventIds.has(id));
+}
+
+function hubFeedPostToItem(
+  row: any,
+  goingCounts: Record<number, { count: number }>,
+  businesses: Business[] = [],
+  viewerUserId?: number,
+): HubFeedItem {
+  const postType = row.postType ?? row.post_type;
+  const audience = row.audience ?? "ALL";
+  const eventId = row.eventId ?? row.event_id ?? null;
+  const postAs = row.postAs ?? row.post_as ?? "self";
+  const businessId = row.businessId ?? row.business_id ?? null;
+  const authorUserId = Number(row.userId ?? row.user_id ?? 0) || null;
+
+  let eventEmbed: HubFeedEventEmbed | null = null;
+  if (eventId != null) {
+    const evt = storage.getEvent(Number(eventId));
+    if (evt && evt.status === "LIVE") {
+      eventEmbed = hubFeedEventEmbed(evt, goingCounts[evt.id]?.count);
+    }
+  }
+
+  // The real person is always the account that posted - used as the primary
+  // author for "self" posts, and as the "posted by" sub-line for event/venue
+  // posts so co-hosts stay attributable.
+  const personAuthor = hubFeedAuthorFromUser({
+    displayName: row.displayName,
+    username: row.username,
+    photoUrl: row.authorPhotoUrl ?? row.photoUrl,
+    avatarChoice: row.avatarChoice,
+    avatarRing: row.avatarRing,
+  });
+
+  let author = personAuthor;
+  let postedBy: HubFeedAuthor | null = null;
+
+  if (postAs === "venue" && businessId != null) {
+    const biz = businesses.find((b) => b.id === Number(businessId)) || storage.getBusiness(Number(businessId));
+    if (biz) {
+      author = hubFeedBusinessAuthor(biz);
+      postedBy = personAuthor;
+    }
+  } else if (postAs === "event" && eventId != null) {
+    const evt = storage.getEvent(Number(eventId));
+    if (evt) {
+      author = hubFeedVenueAuthor(String(evt.venueName || ""), evt, businesses);
+      postedBy = personAuthor;
+    }
+  }
+
+  const action = audience === "RSVPS"
+    ? (eventEmbed ? `Shared with RSVPs for ${eventEmbed.title}` : "Shared with their RSVPs")
+    : "Shared with the scene";
+  const viewerFollowsAuthor =
+    viewerUserId != null && authorUserId != null && viewerUserId !== authorUserId
+      ? storage.isFollowing(viewerUserId, authorUserId)
+      : null;
+  const contentId = Number(row.id);
+  const vote = audience === "ALL"
+    ? storage.getHubPostVoteMeta(contentId, viewerUserId)
+    : null;
+  return {
+    id: `feed_post-${row.id}`,
+    kind: postType === "photo" ? "feed_photo" : "feed_text",
+    badge: postType === "photo" ? "Photo" : "Post",
+    action,
+    text: row.body ?? null,
+    photoUrl: row.photoUrl ?? row.photo_url ?? null,
+    createdAt: row.createdAt ?? row.created_at ?? "",
+    author,
+    postedBy,
+    event: eventEmbed,
+    link: null,
+    viewerFollowsAuthor,
+    engagement: vote
+      ? {
+          contentType: "HUB",
+          contentId,
+          score: vote.score,
+          viewerVote: vote.viewerVote,
+          replies: storage.countContentReplies("HUB", contentId),
+        }
+      : null,
+    authorKarma: authorUserId != null ? storage.getHubPostKarmaForUser(authorUserId) : null,
+  };
+}
+
+const HUB_FEED_GUIDE_AUTHOR: HubFeedAuthor = {
+  displayName: "Zaylist",
+  username: "prideguidepdx",
+  photoUrl: "/brand/zaylist-avatar.jpg",
+  avatarChoice: 1,
+  avatarRing: "rainbow",
+};
+
+function buildHubFeedPinnedItems(
+  goingCounts: Record<number, { count: number }>,
+  businesses: Business[],
+): HubFeedItem[] {
+  const pinned: HubFeedItem[] = [];
+  const anchorTime = "2000-01-01T00:00:00.000Z";
+
+  pinned.push({
+    id: "pin-beach-rooster-rock",
+    kind: "beach",
+    badge: "Beaches",
+    action: "River Brats board is live",
+    text: "Crossing levels, check-ins, and who is headed out to Rooster Rock today.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    beachId: "rooster-rock",
+    beachLabel: "Rooster Rock State Park",
+    link: "/nude-beaches?tab=rooster-rock",
+    pinned: true,
+  });
+
+  pinned.push({
+    id: "pin-beach-sauvie-island",
+    kind: "beach",
+    badge: "Beaches",
+    action: "River Brats board is live",
+    text: "Collins Beach check-ins, carpools, and the clothing-optional scene on Sauvie Island.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    beachId: "sauvie-island",
+    beachLabel: "Collins Beach · Sauvie Island",
+    link: "/nude-beaches?tab=sauvie-island",
+    pinned: true,
+  });
+
+  const stankId = findSiteOwnerEventId();
+  if (stankId != null) {
+    const stank = sqlite.prepare(`
+      SELECT id, title, description, venue_name AS venueName, day_of_week AS dayOfWeek,
+             date_start AS dateStart, admission, created_at AS createdAt,
+             claimed_by AS claimedBy, submitted_by AS submittedBy
+      FROM events WHERE id = ? AND status = 'LIVE'
+    `).get(stankId) as any;
+    if (stank) {
+      pinned.push({
+        id: `pin-event-${stank.id}`,
+        kind: "event",
+        badge: "Event",
+        action: "Pride weekend highlight",
+        text: stank.description?.slice(0, 280) || null,
+        createdAt: anchorTime,
+        author: hubFeedEventAuthor(stank, businesses),
+        event: hubFeedEventEmbed(
+          stank,
+          goingCounts[stank.id]?.count,
+          hubFeedEventPoster(stank, businesses),
+        ),
+        link: null,
+        pinned: true,
+      });
+    }
+  }
+
+  pinned.push({
+    id: "pin-feedback",
+    kind: "feedback",
+    badge: "Feedback",
+    action: "Spot a bug?",
+    text: "Broken button, weird layout, or wrong event detail? Send it through the same feedback route as the site footer.",
+    createdAt: anchorTime,
+    author: HUB_FEED_GUIDE_AUTHOR,
+    ctaAction: "feedback",
+    ctaLabel: "Submit feedback",
+    pinned: true,
+  });
+
+  const adminGigId = findSiteAdminGigPostId();
+  if (adminGigId != null) {
+    const gig = storage.getGigPosts("LIVE").find((g) => g.id === adminGigId);
+    if (gig) {
+      pinned.push({
+        id: `pin-gig-${gig.id}`,
+        kind: "gig",
+        badge: "Gig",
+        action: "Open on GIGZ",
+        title: gig.title,
+        text: gig.description || null,
+        createdAt: anchorTime,
+        author: hubFeedAuthorFromUser({
+          displayName: gig.displayName || gig.name,
+          username: gig.username,
+          photoUrl: gig.posterPhotoUrl,
+          avatarChoice: gig.avatarChoice,
+          avatarRing: gig.posterAvatarRing,
+        }),
+        link: `/pride-work?post=${gig.id}`,
+        boardPostId: gig.id,
+        pinned: true,
+      });
+    }
+  }
+
+  return pinned;
+}
+
+function giftingExpiry(postType: string, from = new Date()) {
+  const d = new Date(from);
+  d.setDate(d.getDate() + (postType === "ISO" ? 14 : 7));
+  return d.toISOString();
+}
+
+function safeJson(value: string) {
+  try {
+    return JSON.parse(value || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function safeJsonOrNull(value: string | null | undefined) {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+function expireGiftingPosts() {
+  sqlite.prepare(`
+    UPDATE gifting_posts
+    SET status = 'EXPIRED'
+    WHERE status IN ('OPEN','THREE_INTERESTED','POSTER_CHOOSING','LOOKING','OFFER_PENDING','REOPENED')
+      AND datetime(expires_at) <= datetime('now')
+  `).run();
+}
+
+export const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: Zaylist";
+export const SITE_ADMIN_GIG_OWNER_USERNAME = "tucker_pdmax";
+export const SITE_OWNER_EVENT_TITLE = "Stank Yes Coach, PDX PRIDE";
+export const SITE_OWNER_EMAIL = (
+  process.env.SITE_OWNER_EMAIL
+  || process.env.ADMIN_USER_EMAILS?.split(",")[0]
+  || "hello.tuckercasey@gmail.com"
+).trim().toLowerCase();
+
+/** Shared non-personal sender for admin rejects / guide notices. Replies land in Admin inbox. */
+export const GUIDE_ADMIN_USERNAME = "prideguidepdx";
+export const GUIDE_ADMIN_EMAIL = "admin@zaylist.com";
+export const GUIDE_ADMIN_DISPLAY_NAME = "Zaylist";
+export const GUIDE_ADMIN_PHOTO_URL = "/brand/zaylist-avatar.jpg";
+
+/** Message context types that always send as the shared guide-admin identity. */
+const GUIDE_ADMIN_CONTEXT_TYPES = new Set([
+  "GUIDE_UPDATE",
+  "PROFILE_PHOTO",
+  "SUBMISSION",
+  "PROMOTER",
+  "EVENT_CLAIM",
+  "ADMIN_ALERT",
+  "EVENT_TALENT",
+  "ADMIN_MESSAGE",
+]);
+
+export type AdminActionLogEntry = {
+  id: number;
+  actorUserId: number | null;
+  actorUsername: string | null;
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  targetLabel: string | null;
+  detail: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+export type AdminQueueBreakdown = {
+  total: number;
+  submissions: number;
+  moderation: number;
+  promoters: number;
+  businessClaims: number;
+  businessSubmissions: number;
+  logoRequests: number;
+  giftingReports: number;
+  giftingFlagged: number;
+  missedConnections: number;
+  riverBrats: number;
+  pendingGigs: number;
+  guideUnread: number;
+};
+
+function ensureAdminActionLogSchema() {
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS admin_action_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      actor_user_id INTEGER,
+      actor_username TEXT,
+      action TEXT NOT NULL,
+      target_type TEXT,
+      target_id TEXT,
+      target_label TEXT,
+      detail TEXT,
+      created_at TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_admin_action_log_created ON admin_action_log(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_admin_action_log_action ON admin_action_log(action);
+  `);
+}
+ensureAdminActionLogSchema();
+
+type SiteOwnerRow = {
+  id: number;
+  email: string;
+  displayName: string | null;
+  username: string;
+};
+
+const SITE_ADMIN_GIG_DESCRIPTION = `Zaylist is looking for site admins to help during Pride season and beyond.
+
+What you would help with:
+• Review new event submissions and promoter claims before they go live
+• Approve or hold gifting posts when first-time posters need a check
+• Triage moderation requests and site feedback reports
+• Keep event listings accurate during Pride weekend crunch
+• Step in when something breaks or needs a human
+
+Volunteer community labor for now. Remote OK. Training and admin access provided for the right person.
+
+Reply to this post through the gig board (messages go to @tucker_pdmax). Include why you want to help and any relevant experience.`;
+
+function toSiteOwnerRow(user: User | undefined): SiteOwnerRow | undefined {
+  if (!user) return undefined;
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.displayName ?? null,
+    username: user.username,
+  };
+}
+
+function listSiteOwnerCandidates(): SiteOwnerRow[] {
+  const { emails, usernames } = parseEnvAdminLists();
+  const seen = new Set<number>();
+  const rows: SiteOwnerRow[] = [];
+  const push = (user: User | undefined) => {
+    const row = toSiteOwnerRow(user);
+    if (!row || seen.has(row.id)) return;
+    seen.add(row.id);
+    rows.push(row);
+  };
+  for (const email of emails) {
+    push(db.select().from(users).where(eq(users.email, email)).get());
+  }
+  for (const username of usernames) {
+    push(db.select().from(users).where(eq(users.username, username)).get());
+  }
+  push(db.select().from(users).where(eq(users.username, SITE_ADMIN_GIG_OWNER_USERNAME)).get());
+  return rows;
+}
+
+function resolveSiteOwner(): SiteOwnerRow | undefined {
+  const candidates = listSiteOwnerCandidates();
+  if (!candidates.length) return undefined;
+  const byEmail = candidates.find(c => c.email.trim().toLowerCase() === SITE_OWNER_EMAIL);
+  if (byEmail) return byEmail;
+  const byUsername = candidates.find(c => c.username === SITE_ADMIN_GIG_OWNER_USERNAME);
+  return byUsername || candidates[0];
+}
+
+/**
+ * Shared site identity for admin-originated member messages (photo reject, queue
+ * outcomes, manual admin DMs). Not a login for humans - replies go here so they
+ * show under floating inbox → Admin → Inbox / Sent for every keyholder.
+ */
+function ensureGuideAdminUser(): User {
+  const byUsername = storage.getUserByUsername(GUIDE_ADMIN_USERNAME);
+  if (byUsername) {
+    const patch: Record<string, unknown> = {};
+    if (byUsername.displayName !== GUIDE_ADMIN_DISPLAY_NAME) patch.displayName = GUIDE_ADMIN_DISPLAY_NAME;
+    if (byUsername.photoUrl !== GUIDE_ADMIN_PHOTO_URL) patch.photoUrl = GUIDE_ADMIN_PHOTO_URL;
+    if ((byUsername as any).avatarRing !== "rainbow") patch.avatarRing = "rainbow";
+    if (byUsername.status !== "active") patch.status = "active";
+    if (Object.keys(patch).length) storage.updateUser(byUsername.id, patch as any);
+    return { ...byUsername, ...patch } as User;
+  }
+  const byEmail = storage.getUserByEmail(GUIDE_ADMIN_EMAIL);
+  if (byEmail) {
+    storage.updateUser(byEmail.id, {
+      username: GUIDE_ADMIN_USERNAME,
+      displayName: GUIDE_ADMIN_DISPLAY_NAME,
+      photoUrl: GUIDE_ADMIN_PHOTO_URL,
+      avatarRing: "rainbow",
+      status: "active",
+    } as any);
+    return storage.getUserById(byEmail.id)!;
+  }
+  const randomPw = crypto.randomBytes(32).toString("hex");
+  const created = storage.createUser({
+    username: GUIDE_ADMIN_USERNAME,
+    email: GUIDE_ADMIN_EMAIL,
+    passwordHash: randomPw,
+    displayName: GUIDE_ADMIN_DISPLAY_NAME,
+  });
+  storage.updateUser(created.id, {
+    photoUrl: GUIDE_ADMIN_PHOTO_URL,
+    avatarRing: "rainbow",
+    displayName: GUIDE_ADMIN_DISPLAY_NAME,
+  } as any);
+  return storage.getUserById(created.id) || created;
+}
+
+function resolveGuideAdminUser(): User | undefined {
+  try {
+    const user = ensureGuideAdminUser();
+    // Stamp brand photo after create (createUser doesn't take photoUrl).
+    if (user.photoUrl !== GUIDE_ADMIN_PHOTO_URL || (user as any).avatarRing !== "rainbow") {
+      storage.updateUser(user.id, {
+        photoUrl: GUIDE_ADMIN_PHOTO_URL,
+        avatarRing: "rainbow",
+        displayName: GUIDE_ADMIN_DISPLAY_NAME,
+      } as any);
+      return storage.getUserById(user.id);
+    }
+    return user;
+  } catch (err) {
+    console.error("[guide_admin] ensure failed:", err);
+    return undefined;
+  }
+}
+
+function isGuideAdminUserId(userId: number | null | undefined): boolean {
+  if (!userId) return false;
+  const guide = resolveGuideAdminUser();
+  return !!guide && guide.id === userId;
+}
+
+/** Move legacy owner-sent guide notices onto the shared admin identity. */
+function migrateGuideAdminMessagesOnce() {
+  if (hasBootMigration("guide_admin_sender_v1")) return;
+  const guide = resolveGuideAdminUser();
+  const owner = resolveSiteOwner();
+  if (!guide) {
+    recordBootMigration("guide_admin_sender_v1");
+    return;
+  }
+  if (owner && owner.id !== guide.id) {
+    const types = Array.from(GUIDE_ADMIN_CONTEXT_TYPES).map(t => `'${t}'`).join(",");
+    try {
+      sqlite.prepare(`
+        UPDATE messages
+        SET from_user_id = ?
+        WHERE from_user_id = ?
+          AND context_type IN (${types})
+      `).run(guide.id, owner.id);
+    } catch (err) {
+      console.warn("[guide_admin] migrate messages failed:", err);
+    }
+  }
+  recordBootMigration("guide_admin_sender_v1");
+}
+
+function isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean {
+  if (!user?.id) return false;
+  return listSiteOwnerCandidates().some(candidate => candidate.id === user.id);
+}
+
+/** True only for Tucker (primary owner), not other env-listed or granted admins. */
+function isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean {
+  if (!user?.id) return false;
+  const owner = resolveSiteOwner();
+  return !!owner && owner.id === user.id;
+}
+
+/**
+ * Owner-level admin peers (e.g. @brohoejams): same site-admin powers as primary owner
+ * except Owner Desk items stay primary-only.
+ * Comma-separated usernames via OWNER_ADMIN_PEER_USERNAMES, default brohoejams.
+ */
+const OWNER_ADMIN_PEER_USERNAMES: string[] = (
+  process.env.OWNER_ADMIN_PEER_USERNAMES || "brohoejams"
+)
+  .split(",")
+  .map(s => s.trim().toLowerCase().replace(/^@/, ""))
+  .filter(Boolean);
+
+function isOwnerAdminPeer(user: { username?: string | null } | null | undefined): boolean {
+  const uname = String(user?.username || "").trim().toLowerCase().replace(/^@/, "");
+  if (!uname) return false;
+  return OWNER_ADMIN_PEER_USERNAMES.includes(uname);
+}
+
+/** Primary owner OR designated peer - full admin tools except Owner Desk. */
+function hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean {
+  return isPrimarySiteOwner(user) || isOwnerAdminPeer(user);
+}
+
+function ownerIdentitySets(candidates: SiteOwnerRow[]) {
+  return {
+    userIds: Array.from(new Set(candidates.map(c => c.id))),
+    emails: Array.from(new Set(candidates.map(c => c.email.trim().toLowerCase()).filter(Boolean))),
+    usernames: Array.from(new Set(candidates.map(c => c.username.trim().toLowerCase()).filter(Boolean))),
+  };
+}
+
+function findSiteAdminGigPostId(): number | undefined {
+  const byTitle = sqlite.prepare(`SELECT id FROM gig_posts WHERE title = ? LIMIT 1`).get(SITE_ADMIN_GIG_TITLE) as { id: number } | undefined;
+  if (byTitle) return byTitle.id;
+  const byMarker = sqlite.prepare(`
+    SELECT id FROM gig_posts
+    WHERE description LIKE 'Zaylist is looking for site admins%'
+    ORDER BY id ASC
+    LIMIT 1
+  `).get() as { id: number } | undefined;
+  return byMarker?.id;
+}
+
+function linkSiteAdminGigPostToOwner(ownerId: number) {
+  const gigId = findSiteAdminGigPostId();
+  if (gigId == null) return;
+  sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(ownerId, gigId);
+}
+
+function findSiteOwnerEventId(): number | undefined {
+  const exact = sqlite.prepare(`SELECT id FROM events WHERE title = ? LIMIT 1`).get(SITE_OWNER_EVENT_TITLE) as { id: number } | undefined;
+  if (exact) return exact.id;
+  const fuzzy = sqlite.prepare(`
+    SELECT id FROM events
+    WHERE title LIKE '%Yes Coach%'
+    ORDER BY id ASC
+    LIMIT 1
+  `).get() as { id: number } | undefined;
+  return fuzzy?.id;
+}
+
+/** Keep site owner portfolio limited to Yes Coach + the site-admin gig post. */
+function syncSiteOwnerPortfolio() {
+  ensureSiteAdminGigPost();
+  ensureEventHostsSchema();
+  const owner = resolveSiteOwner();
+  if (!owner) return;
+
+  const candidates = listSiteOwnerCandidates();
+  const { userIds, emails, usernames } = ownerIdentitySets(candidates);
+
+  const adminGigId = findSiteAdminGigPostId();
+  if (adminGigId != null) {
+    sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(owner.id, adminGigId);
+    for (const userId of userIds) {
+      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(userId, adminGigId);
+    }
+  } else {
+    for (const userId of userIds) {
+      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ?`).run(userId);
+    }
+  }
+
+  const yesCoachId = findSiteOwnerEventId();
+  if (yesCoachId == null) {
+    console.warn("[site_owner] Yes Coach event not found - skipping event host sync");
+  } else {
+    sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ? AND role = 'PRIMARY'`).run(yesCoachId);
+    const existingHost = sqlite.prepare(`SELECT id FROM event_hosts WHERE event_id = ? AND user_id = ?`).get(yesCoachId, owner.id);
+    if (existingHost) {
+      sqlite.prepare(`UPDATE event_hosts SET role = 'PRIMARY' WHERE event_id = ? AND user_id = ?`).run(yesCoachId, owner.id);
+    } else {
+      db.insert(eventHosts).values({
+        eventId: yesCoachId,
+        userId: owner.id,
+        role: "PRIMARY",
+        addedByUserId: null,
+        createdAt: new Date().toISOString(),
+      } as any).run();
+    }
+    db.update(events).set({ isClaimable: false, claimedBy: owner.username }).where(eq(events.id, yesCoachId)).run();
+
+    for (const userId of userIds) {
+      sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
+      sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
+    }
+
+    const clearClaimed = sqlite.prepare(`
+      UPDATE events
+      SET claimed_by = NULL
+      WHERE id != ?
+        AND claimed_by IS NOT NULL
+        AND LOWER(TRIM(claimed_by)) = ?
+    `);
+    const clearSubmitted = sqlite.prepare(`
+      UPDATE events
+      SET submitted_by = NULL
+      WHERE id != ?
+        AND submitted_by IS NOT NULL
+        AND LOWER(TRIM(submitted_by)) = ?
+    `);
+    for (const identity of [...usernames, ...emails]) {
+      clearClaimed.run(yesCoachId, identity);
+      clearSubmitted.run(yesCoachId, identity);
+    }
+  }
+
+  const clearHistoricalSubmissions = sqlite.prepare(`
+    DELETE FROM submissions
+    WHERE LOWER(TRIM(submitter_email)) = ?
+      AND status IN ('APPROVED', 'REJECTED')
+  `);
+  for (const email of emails) clearHistoricalSubmissions.run(email);
+
+  releaseSiteOwnerPendingGifts(owner.id);
+  for (const userId of userIds) {
+    if (userId !== owner.id) releaseSiteOwnerPendingGifts(userId);
+  }
+}
+
+function releaseSiteOwnerPendingGifts(userId: number) {
+  sqlite.prepare(`
+    UPDATE gifting_posts
+    SET status = CASE WHEN post_type = 'ISO' THEN 'LOOKING' ELSE 'OPEN' END
+    WHERE user_id = ? AND status = 'PENDING'
+  `).run(userId);
+}
+
+function notifyGuideInbox(
+  toUserId: number,
+  subject: string,
+  body: string,
+  opts?: { contextType?: string; contextId?: number | null; contextLabel?: string | null },
+) {
+  const sender = resolveGuideAdminUser();
+  if (!sender) {
+    // Fallback: never leave the member without a notice if guide identity can't be created.
+    const owner = resolveSiteOwner();
+    if (!owner) return;
+    storage.sendMessage(owner.id, toUserId, subject, body, {
+      contextType: opts?.contextType || "GUIDE_UPDATE",
+      contextId: opts?.contextId ?? null,
+      contextLabel: opts?.contextLabel || null,
+    });
+    return;
+  }
+  if (sender.id === toUserId) return;
+  storage.sendMessage(sender.id, toUserId, subject, body, {
+    contextType: opts?.contextType || "GUIDE_UPDATE",
+    contextId: opts?.contextId ?? null,
+    contextLabel: opts?.contextLabel || null,
+  });
+}
+
+/** Outbound admin DM / reject note as the shared guide-admin profile. */
+function sendAsGuideAdmin(
+  toUserId: number,
+  subject: string,
+  body: string,
+  opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null },
+): Message | undefined {
+  const sender = resolveGuideAdminUser();
+  if (!sender || sender.id === toUserId) return undefined;
+  return storage.sendMessage(sender.id, toUserId, subject, body, {
+    threadId: opts?.threadId,
+    contextType: opts?.contextType || "ADMIN_MESSAGE",
+    contextId: opts?.contextId ?? null,
+    contextLabel: opts?.contextLabel || null,
+  });
+}
+
+function notifySubmissionMerged(
+  sub: { id: number; title: string; submitterEmail: string },
+  eventTitle: string,
+) {
+  const recipient = storage.getUserByEmail(sub.submitterEmail);
+  if (!recipient) return;
+  notifyGuideInbox(
+    recipient.id,
+    `Merged: ${sub.title}`,
+    `Your submission was merged into the existing listing "${eventTitle}". You're attached as the host, open your dashboard to manage it and post updates.`,
+    {
+      contextType: "SUBMISSION",
+      contextId: sub.id,
+      contextLabel: eventTitle,
+    },
+  );
+}
+
+function notifyBoardReject(
+  toUserId: number,
+  boardLabel: string,
+  postTitle: string,
+  reasonCode: string,
+  note: string | undefined,
+  context: { contextType: string; contextId: number; contextLabel: string },
+) {
+  const reason = formatBoardRejectMessage(reasonCode, note);
+  const body = `Your ${boardLabel} post "${postTitle}" was sent back and is not on the board.\n\nReason: ${reason}\n\nYou can edit and resubmit when ready.`;
+  notifyGuideInbox(toUserId, `${boardLabel} post sent back`, body, context);
+}
+
+function notifyProfilePhotoReject(toUserId: number, reasonCode: string, note?: string) {
+  const reason = formatProfilePhotoRejectMessage(reasonCode, note);
+  const body = `Your profile photo was removed because it doesn't fit our public-facing image guidelines.\n\nReason: ${reason}\n\nYou can upload a new photo from your dashboard when ready.`;
+  notifyGuideInbox(toUserId, "Profile photo removed", body, {
+    contextType: "PROFILE_PHOTO",
+    contextId: toUserId,
+    contextLabel: "Profile photo",
+  });
+}
+
+function notifySubmissionOutcome(
+  sub: { id: number; title: string; type: string; submitterEmail: string },
+  approved: boolean,
+  reason?: string,
+) {
+  const recipient = storage.getUserByEmail(sub.submitterEmail);
+  if (!recipient) return;
+  if (approved) {
+    const body = sub.type === "CLAIM"
+      ? `Your claim for "${sub.title}" was approved. Open your dashboard to manage the event and post host updates.`
+      : `Your event "${sub.title}" is live on Zaylist. Open your dashboard to see it listed.`;
+    notifyGuideInbox(recipient.id, `Approved: ${sub.title}`, body, {
+      contextType: "SUBMISSION",
+      contextId: sub.id,
+      contextLabel: sub.title,
+    });
+    return;
+  }
+  const body = `Your submission "${sub.title}" was not approved.${reason ? `\n\nReason: ${reason}` : ""}\n\nYou can revise and submit again from the Promoters page.`;
+  notifyGuideInbox(recipient.id, `Submission update: ${sub.title}`, body, {
+    contextType: "SUBMISSION",
+    contextId: sub.id,
+    contextLabel: sub.title,
+  });
+}
+
+function ensureSiteAdminGigPost() {
+  ensureGigPostsSchema();
+  const owner = resolveSiteOwner();
+  const now = new Date().toISOString();
+  const existingId = findSiteAdminGigPostId();
+  const payload = {
+    postType: "POSTING_GIG",
+    title: SITE_ADMIN_GIG_TITLE,
+    name: owner?.displayName || "Tucker",
+    contactEmail: owner?.email || "hello@zaylist.com",
+    description: SITE_ADMIN_GIG_DESCRIPTION,
+    skills: "Moderation, Event review, Community support, Detail-oriented",
+    compensation: "Volunteer, community help",
+    location: "Portland / Remote",
+    isRemote: true,
+    status: "LIVE",
+    userId: owner?.id ?? null,
+    createdAt: now,
+  };
+
+  if (existingId != null) {
+    if (owner?.id != null) linkSiteAdminGigPostToOwner(owner.id);
+    return;
+  }
+  insertGigPostCompat(payload);
+  if (owner?.id != null) linkSiteAdminGigPostToOwner(owner.id);
+}
+
+function removeGiftingSeedPosts() {
+  sqlite.prepare(`
+    DELETE FROM gifting_posts
+    WHERE title IN ('Extra rainbow string lights', 'Black mesh party top', 'ISO folding chair for parade day')
+       OR user_id IN (SELECT id FROM users WHERE username = 'community_closet')
+  `).run();
+  sqlite.prepare(`
+    DELETE FROM users
+    WHERE username = 'community_closet'
+      AND NOT EXISTS (SELECT 1 FROM gifting_posts WHERE user_id = users.id)
+  `).run();
+}
+
+function attendanceInitials(handle: string): string {
+  const clean = String(handle || "?").replace(/^@/, "").trim();
+  if (!clean) return "?";
+  const parts = clean.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return clean.slice(0, 2).toUpperCase();
+}
+
+function attendanceChatExpiresAt(from = new Date()): string {
+  return new Date(from.getTime() + ATTENDANCE_CHAT_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+function expireStaleAttendances(eventId?: number) {
+  const now = new Date().toISOString();
+  if (eventId != null) {
+    sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE event_id = ? AND is_active = 1 AND expires_at IS NOT NULL AND expires_at <= ?`).run(eventId, now);
+    return;
+  }
+  sqlite.prepare(`UPDATE attendances SET is_active = 0 WHERE is_active = 1 AND expires_at IS NOT NULL AND expires_at <= ?`).run(now);
+}
+
+/** Normalize API / DB attendance visibility. Maps legacy "visible" → "public". */
+export function normalizeAttendanceVisibility(
+  raw: unknown,
+  isAnonymousFallback?: boolean,
+): AttendanceVisibility {
+  if (isAnonymousFallback === true) return "anonymous";
+  const v = String(raw ?? "").trim().toLowerCase();
+  if (v === "visible" || v === "public") return "public";
+  if (v === "friends" || v === "friends_only" || v === "friends-only") return "friends";
+  if (v === "anonymous" || v === "anon") return "anonymous";
+  if (isAnonymousFallback === false) return "public";
+  return "public";
+}
+
+function resolveAttendanceVisibility(r: any): AttendanceVisibility {
+  const rawVis = r.visibility ?? r.Visibility;
+  const isAnon = Boolean(r.isAnonymous ?? r.is_anonymous);
+  if (rawVis != null && String(rawVis).trim() !== "") {
+    return normalizeAttendanceVisibility(rawVis, isAnon);
+  }
+  return isAnon ? "anonymous" : "public";
+}
+
+function canViewerSeeFriendsAttendance(
+  viewerUserId: number | undefined,
+  attendeeUserId: number | null | undefined,
+): boolean {
+  if (viewerUserId == null || attendeeUserId == null) return false;
+  if (viewerUserId === attendeeUserId) return true;
+  // Either direction: people you follow OR who follow you.
+  return (
+    storage.isFollowing(viewerUserId, attendeeUserId) ||
+    storage.isFollowing(attendeeUserId, viewerUserId)
+  );
+}
+
+function maskAttendanceIdentity(
+  r: any,
+  opts: { handle: string; isAnonymous: boolean; visibility: AttendanceVisibility },
+): any {
+  const expiresAt = r.expiresAt ?? r.expires_at ?? null;
+  return {
+    id: r.id,
+    event_id: r.event_id ?? r.eventId,
+    handle: opts.handle,
+    message: r.message,
+    avatarSeed: r.avatarSeed ?? r.avatar_seed,
+    photoUrl: null,
+    userPhotoUrl: null,
+    username: undefined,
+    displayName: null,
+    created_at: r.created_at,
+    is_active: r.is_active,
+    isAnonymous: opts.isAnonymous,
+    visibility: opts.visibility,
+    expiresAt,
+    masked: true,
+  };
+}
+
+function maskAttendanceRow(viewerUserId: number | undefined, viewerRsvped: boolean, r: any): any {
+  const uid = r.userId ?? r.user_id;
+  const isSelf = viewerUserId != null && uid === viewerUserId;
+  const visibility = resolveAttendanceVisibility(r);
+  const isAnonymous = visibility === "anonymous";
+  const expiresAt = r.expiresAt ?? r.expires_at ?? null;
+
+  // Non-RSVPed strangers only see masked shells (counts still via length).
+  if (!viewerRsvped && !isSelf) {
+    if (visibility === "friends") {
+      return maskAttendanceIdentity(r, {
+        handle: "Friends",
+        isAnonymous: false,
+        visibility: "friends",
+      });
+    }
+    return maskAttendanceIdentity(r, {
+      handle: "Anonymous",
+      isAnonymous: true,
+      visibility: isAnonymous ? "anonymous" : "public",
+    });
+  }
+
+  if (isAnonymous && !isSelf) {
+    return maskAttendanceIdentity(r, {
+      handle: "Anonymous",
+      isAnonymous: true,
+      visibility: "anonymous",
+    });
+  }
+
+  // Friends-only: full identity only for self or follow-graph peers.
+  if (visibility === "friends" && !isSelf && !canViewerSeeFriendsAttendance(viewerUserId, uid)) {
+    return maskAttendanceIdentity(r, {
+      handle: "Friends",
+      isAnonymous: false,
+      visibility: "friends",
+    });
+  }
+
+  return {
+    ...r,
+    isAnonymous,
+    visibility,
+    expiresAt,
+    masked: false,
+  };
+}
+
+function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
+  const viewerRsvped = viewerUserId != null && rows.some((r: any) => (r.userId ?? r.user_id) === viewerUserId);
+  return rows.map(r => maskAttendanceRow(viewerUserId, viewerRsvped, r));
+}
+
+function getActiveAttendanceForUser(eventId: number, userId: number) {
+  expireStaleAttendances(eventId);
+  return sqlite.prepare(`
+    SELECT * FROM attendances
+    WHERE event_id = ? AND user_id = ? AND is_active = 1
+    LIMIT 1
+  `).get(eventId, userId) as Attendance | undefined;
+}
+
+export type AdminMetricsSnapshot = {
+  generatedAt: string;
+  users: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  activeSessions: number;
+  messages: number;
+  liveEvents: number;
+  hiddenEvents: number;
+  userSubmittedEvents: number;
+  seededEvents: number;
+  attendances: number;
+  attendancesThisWeek: number;
+  pendingSubmissions: number;
+  pendingQueue: number;
+  gigPosts: number;
+  giftingPosts: number;
+  missedConnections: number;
+  directoryPlaces: number;
+  unclaimedEvents: number;
+  claimedEvents: number;
+  approvedPromoters: number;
+  pendingPromoterRequests: number;
+  signupsTrend14d: number[];
+  rsvpsTrend14d: number[];
+  memberGrowth12h: Array<{
+    at: string;
+    signups: number;
+    rsvps: number;
+    total: number;
+    cumulativeSignups: number;
+    cumulativeRsvps: number;
+  }>;
+  contentBreakdown: Array<{ label: string; count: number }>;
+  eventSources: Array<{ label: string; count: number }>;
+  conversions: {
+    newSignupsThisWeek: number;
+    newSignupsPrevWeek: number;
+    eventSubmissionsThisWeek: number;
+    eventSubmissionsPrevWeek: number;
+    rsvpsThisWeek: number;
+    rsvpsPrevWeek: number;
+  };
+  traffic: TrafficMetrics;
+  productExperience: ProductExperienceMetrics;
+};
+
+export interface IStorage {
+  // Events
+  getEvents(filters?: { status?: string; day?: string }): Event[];
+  countEventsBySource(source: string, status?: string): number;
+  getEvent(id: number): Event | undefined;
+  getPendingClaimEventIds(): number[];
+  createEvent(data: InsertEvent): Event;
+  updateEventStatus(id: number, status: string): void;
+  updateEvent(id: number, data: Partial<InsertEvent>, opts?: { source?: "sync" | "human" }): Event | undefined;
+  toggleClaimable(id: number, isClaimable: boolean): void;
+  // Submissions
+  getSubmissions(status?: string): Submission[];
+  getSubmission(id: number): Submission | undefined;
+  createSubmission(data: InsertSubmission): Submission;
+  autoApproveClaim(id: number, claimedByUsername: string): void;
+  approveSubmission(id: number, adminName: string): Submission | undefined;
+  mergeSubmissionIntoEvent(id: number, eventId: number, adminName: string): { event: Event; submission: Submission } | { error: string };
+  rejectSubmission(id: number, reason: string): void;
+  // Gigs
+  getGigPosts(status?: string): GigPostWithAuthor[];
+  createGigPost(data: InsertGigPost): GigPost;
+  getGigPostsByUser(userId: number): GigPost[];
+  updateGigPost(id: number, userId: number, data: Partial<GigPost>): void;
+  deleteGigPost(id: number, userId: number): void;
+  adminUpdateGigStatus(id: number, status: string): void;
+  adminUpdateGigPost(id: number, data: Partial<GigPost>): GigPost | undefined;
+  rejectGigPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectGiftingPost(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectMissedConnection(id: number, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  rejectUserProfilePhoto(username: string, reasonCode: string, note?: string): { ok?: boolean; error?: string };
+  getAdminMissedConnections(): any[];
+  getRecentlyReviewedMissedConnections(): any[];
+  approveMissedConnection(id: number): { ok?: boolean; error?: string };
+  removeMissedConnectionAdmin(id: number): { ok?: boolean; error?: string };
+  ensureSiteAdminGigPost(): void;
+  syncSiteOwnerPortfolio(): void;
+  isSiteOwnerUser(user: { id?: number | null; email?: string | null; username?: string | null } | null | undefined): boolean;
+  isPrimarySiteOwner(user: { id?: number | null } | null | undefined): boolean;
+  isOwnerAdminPeer(user: { username?: string | null } | null | undefined): boolean;
+  /** Primary owner or peer (e.g. brohoejams) - full admin tools except Owner Desk. */
+  hasOwnerAdminAccess(user: { id?: number | null; username?: string | null } | null | undefined): boolean;
+  // Promoters
+  getPromoterByEmail(email: string): Promoter | undefined;
+  createPromoter(data: InsertPromoter): Promoter;
+  // Moderation requests
+  getModerationRequests(status?: string): ModerationRequest[];
+  createModerationRequest(data: InsertModerationRequest): ModerationRequest;
+  resolveModerationRequest(id: number, status: "APPROVED" | "REJECTED", adminNotes?: string): void;
+  dismissStaleTestModerationRequests(): number;
+  getAdminPendingCount(): number;
+  getAdminQueueBreakdown(): AdminQueueBreakdown;
+  logAdminAction(input: {
+    actorUserId?: number | null;
+    actorUsername?: string | null;
+    action: string;
+    targetType?: string | null;
+    targetId?: string | number | null;
+    targetLabel?: string | null;
+    detail?: Record<string, unknown> | null;
+  }): void;
+  getAdminActionLog(limit?: number): AdminActionLogEntry[];
+  adminGlobalSearch(rawQuery: string, limit?: number): {
+    users: Array<{ id: number; username: string; displayName: string | null; email: string; promoterStatus: string }>;
+    events: Array<{ id: number; title: string; venueName: string | null; status: string; dateStart: string | null }>;
+    queue: Array<{ kind: string; id: number; title: string; meta: string }>;
+  };
+  markGuideAdminInboxRead(): number;
+  softDeleteGuideAdminThread(threadId: string): number;
+  isSystemGuideAccount(user: { id?: number | null; username?: string | null; email?: string | null } | null | undefined): boolean;
+  countAdminGiftingFlagged(): number;
+  getAdminMetrics(): AdminMetricsSnapshot;
+  hasSiteAdminGrant(userId: number): boolean;
+  /** True for env-listed admins, site_admin_grants, or sub_admin flag. */
+  userIsSiteAdmin(user: { id?: number | null; email?: string | null; username?: string | null; subAdmin?: boolean | null } | null | undefined): boolean;
+  ensureSiteAdminGrant(userId: number, grantedByUserId: number | null, note?: string | null, createdAt?: string): void;
+  /** Content likes for profile Updates (GIG | GIFTING | SPOTTED | HUB). */
+  countContentLikes(contentType: string, contentId: number): number;
+  hasContentLike(contentType: string, contentId: number, userId: number): boolean;
+  toggleContentLike(contentType: string, contentId: number, userId: number): { liked: boolean; likes: number; error?: string };
+  getHubPostVoteMeta(contentId: number, viewerUserId?: number): { score: number; viewerVote: HubFeedVoteValue };
+  voteOnHubPost(contentId: number, userId: number, value: HubFeedVoteValue): {
+    score: number;
+    viewerVote: HubFeedVoteValue;
+    authorKarma: number;
+    error?: string;
+  };
+  getHubPostKarmaForUser(userId: number): number;
+  /** Public thread replies for GIG / HUB. SPOTTED / GIFTING use native private flows for counts only. */
+  countContentReplies(contentType: string, contentId: number): number;
+  listContentReplies(contentType: string, contentId: number, limit?: number): Array<{
+    id: number;
+    body: string;
+    createdAt: string;
+    author: {
+      username: string;
+      displayName: string | null;
+      photoUrl: string | null;
+      avatarChoice: number;
+      avatarRing: string;
+    };
+  }>;
+  createContentReply(contentType: string, contentId: number, userId: number, body: string): {
+    reply?: {
+      id: number;
+      body: string;
+      createdAt: string;
+      author: {
+        username: string;
+        displayName: string | null;
+        photoUrl: string | null;
+        avatarChoice: number;
+        avatarRing: string;
+      };
+    };
+    replies?: number;
+    error?: string;
+  };
+  /** Native count for SPOTTED (threads) / GIFTING (interests); content_replies for GIG / HUB. */
+  getContentReplyMeta(contentType: string, contentId: number): {
+    count: number;
+    mode: "thread" | "native";
+    nativeHref: string | null;
+    error?: string;
+  };
+  listSiteAdmins(): Array<{
+    userId: number;
+    username: string;
+    email: string;
+    displayName: string | null;
+    photoUrl: string | null;
+    avatarChoice: number;
+    avatarRing: string;
+    source: "env" | "granted";
+    protected: boolean;
+    grantedAt: string;
+    grantedByUsername: string | null;
+    note: string | null;
+    /** Latest admin-panel or promoter-host activity for team roster. */
+    lastActivityAt: string | null;
+    lastActivityLabel: string | null;
+  }>;
+  grantSiteAdminByIdentifier(identifier: string, grantedByUserId: number | null, note?: string): { admin?: any; error?: string };
+  revokeSiteAdmin(userId: number): { ok?: boolean; error?: string };
+  // Attendance
+  getAttendances(eventId: number, viewerUserId?: number): any[];
+  getAttendanceSummaries(): Record<number, { count: number; preview: Array<{ id: number; initials: string; avatarSeed: string }> }>;
+  getAttendancesByUser(userId: number): any[];
+  /**
+   * Upsert RSVP. `visibility` accepts "public"|"friends"|"anonymous" (or legacy "visible"),
+   * or a boolean (true = anonymous) for older callers.
+   */
+  upsertAttendance(
+    eventId: number,
+    user: User,
+    message: string,
+    visibility?: AttendanceVisibility | boolean | string,
+  ): Attendance;
+  removeAttendance(eventId: number, userId: number): void;
+  /** Global search v0: LIVE events + active directory places. */
+  searchGlobal(q: string): {
+    q: string;
+    events: Array<{ id: number; title: string; subtitle: string; href: string }>;
+    places: Array<{ id: number; name: string; subtitle: string; href: string }>;
+  };
+  getEventChatMessages(eventId: number, viewerUserId: number): {
+    messages: any[];
+    expiresAt: string | null;
+    chatOpen: boolean;
+    opensAt: string | null;
+    windowState: "BEFORE" | "OPEN" | "CLOSED";
+    isHost: boolean;
+    pinned: any | null;
+  };
+  postEventChatMessage(eventId: number, userId: number, body: string): any;
+  // Users
+  getUserById(id: number): User | undefined;
+  getUserByEmail(email: string): User | undefined;
+  getUserByUsername(username: string): User | undefined;
+  getUserByGoogleId(googleId: string): User | undefined;
+  createUser(data: {
+    username: string;
+    email: string;
+    passwordHash: string;
+    displayName?: string;
+    googleId?: string;
+    communityStandardsVersion?: string | null;
+    communityStandardsAgreedAt?: string | null;
+  }): User;
+  setCommunityStandardsAgreement(userId: number, opts: { agreed: boolean; version: string }): void;
+  applyAccountModeration(opts: {
+    targetUserId: number;
+    actorUserId: number;
+    action: "suspend" | "unsuspend" | "shadowban" | "unshadowban" | "delete";
+    reasonCode?: string | null;
+    reasonLabel?: string | null;
+    note?: string | null;
+    until?: string | null;
+  }): User | null;
+  clearExpiredAccountModeration(userId: number): User | null;
+  linkGoogleToUser(id: number, googleId: string): void;
+  updateUser(id: number, data: Partial<Pick<User, 'displayName' | 'avatarChoice' | 'avatarRing' | 'avatarCrop' | 'bio' | 'photoUrl' | 'pronouns' | 'location' | 'socialLinks' | 'profileEmbeds' | 'profilePhotos' | 'promoterStatus' | 'subAdmin' | 'talents' | 'standFor' | 'affiliatedVenueIds' | 'marquee' | 'top8' | 'accentColor' | 'banner' | 'coverImageUrl' | 'coverCrop' | 'pup' | 'username' | 'usernameChangedAt'>>): void;
+  changeUsername(userId: number, rawUsername: string): { username: string } | { error: string };
+  updatePasswordHash(id: number, passwordHash: string): void;
+  createPasswordResetToken(userId: number, tokenHash: string, expiresAt: string): void;
+  resetPasswordWithToken(tokenHash: string, newPassword: string): boolean;
+  setPromoterStatus(userId: number, status: string): void;
+  /** Resolve standalone promoter-application rows when the promoter queue is acted on. */
+  resolvePromoterApplicationSubmissions(userId: number, outcome: "approved" | "rejected", adminName?: string, reason?: string): void;
+  getAllUsers(): User[];
+  // Member profiles + follows
+  getPublicProfile(username: string, viewerUserId?: number | null, viewerIsAdmin?: boolean): any | undefined;
+  getPackLinks(userId: number, relation: "packmate" | "handler"): Array<{ id: number; username: string; displayName: string | null; avatarChoice: number; avatarRing: string; photoUrl: string | null }>;
+  addPackLink(userId: number, relation: "packmate" | "handler", targetUsername: string): { ok?: boolean; error?: string };
+  removePackLink(userId: number, relation: "packmate" | "handler", linkedUserId: number): void;
+  getProfileMedia(userId: number): any | null;
+  saveProfileMedia(userId: number, data: any): any;
+  /** Soft-launch: every active member follows every other unless unfollowed. */
+  isFollowAllDefault(): boolean;
+  isFollowBlocked(followerUserId: number, followingUserId: number): boolean;
+  followUser(followerUserId: number, followingUserId: number): void;
+  unfollowUser(followerUserId: number, followingUserId: number): void;
+  getFollowerCount(userId: number): number;
+  getFollowingCount(userId: number): number;
+  isFollowing(followerUserId: number, followingUserId: number): boolean;
+  followBusiness(followerUserId: number, businessId: number): void;
+  unfollowBusiness(followerUserId: number, businessId: number): void;
+  isFollowingBusiness(followerUserId: number, businessId: number): boolean;
+  getBusinessFollowerCount(businessId: number): number;
+  /** Active directory venues this user follows (business_follows). */
+  getFollowedBusinessesList(userId: number): import("../shared/peopleHub").HubFollowedPlace[];
+  getFollowingList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
+  getFollowersList(userId: number, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser[];
+  discoverPeople(viewerUserId: number, limit?: number): import("../shared/peopleHub").PeopleHubUser[];
+  buildPeopleHubUser(row: any, viewerUserId: number | null): import("../shared/peopleHub").PeopleHubUser;
+  countEventsHostedByUser(userId: number): number;
+  purgeQaTestUsers(): { deleted: number; usernames: string[] };
+  countActiveMessages(): number;
+  autoApproveSubmission(id: number, claimedByUsername: string): void;
+  getPendingPromoterRequests(): any[];
+  // Host messages
+  getHostMessages(eventId: number, limit?: number): any[];
+  createHostMessage(data: InsertHostMessage): HostMessage;
+  notifyAttendeesOfHostUpdate(eventId: number, hostUserId: number, eventTitle: string, body: string): number;
+  getFollowerUserIds(userId: number): number[];
+  getPastAttendeeUserIdsForHost(hostUserId: number): number[];
+  previewEventInviteAudience(eventId: number, hostUserId: number): {
+    pastAttendees: number;
+    followers: number;
+    total: number;
+  };
+  inviteAudienceToEvent(
+    eventId: number,
+    hostUserId: number,
+    opts?: {
+      includePastAttendees?: boolean;
+      includeFollowers?: boolean;
+      message?: string | null;
+    },
+  ): { sent: number; pastAttendees: number; followers: number; skipped: number };
+  getEventHosts(eventId: number): any[];
+  resolveUserByIdentifier(identifier: string): User | undefined;
+  resolveEventPrimaryHostUser(eventId: number): User | undefined;
+  resolveVenueOwnerUser(event: Pick<Event, "venueName" | "address" | "lat" | "lng">): { user: User; businessName: string } | undefined;
+  resolveEventMessageRecipient(eventId: number): { user: User; recipientType: "host" | "venue_owner"; venueName?: string } | undefined;
+  isUserEventHost(eventId: number, userId: number): boolean;
+  setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
+  addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
+  replaceEventPrimaryHost(eventId: number, newUserId: number): void;
+  unassignEventHosts(eventId: number): void;
+  // Event talent
+  getEventTalent(eventId: number, opts?: { includePending?: boolean }): any[];
+  getEventTalentByUser(userId: number): Record<number, { roles: EventTalentRole[]; status: "LIVE" | "PENDING" }>;
+  getEventTalentById(talentId: number): any | undefined;
+  addEventTalentByHost(eventId: number, hostUserId: number, username: string, role: EventTalentRole, opts?: { isAdmin?: boolean }): { talent?: any; error?: string };
+  requestEventTalentSelf(eventId: number, userId: number, role: EventTalentRole): { talent?: any; error?: string };
+  approveEventTalent(talentId: number, approverUserId: number, opts?: { isAdmin?: boolean }): { talent?: any; error?: string };
+  rejectEventTalent(talentId: number, approverUserId: number, opts?: { isAdmin?: boolean }): { ok?: boolean; error?: string };
+  removeEventTalent(talentId: number, userId: number, opts?: { isAdmin?: boolean }): { ok?: boolean; error?: string };
+  getPendingTalentForUnclaimedEvents(): any[];
+  eventNeedsAdminTalentApproval(eventId: number): boolean;
+  getEventTalentApproverUserIds(eventId: number): number[];
+  canApproveEventTalent(talentId: number, userId: number, isAdmin?: boolean): boolean;
+  // Messages
+  getInbox(userId: number): Message[];
+  getSentMessages(userId: number): Message[];
+  getUnreadCount(userId: number): number;
+  getMemberBlockStatus(viewerUserId: number, targetUserId: number): { blockedByViewer: boolean; blockedViewer: boolean; interactionBlocked: boolean };
+  blockMember(blockerUserId: number, blockedUserId: number): void;
+  unblockMember(blockerUserId: number, blockedUserId: number): void;
+  getBlockedMembers(blockerUserId: number): Array<{ id: number; username: string; displayName: string | null; photoUrl: string | null }>;
+  isMemberInteractionBlocked(firstUserId: number, secondUserId: number): boolean;
+  /** Toggle a DM reaction. Viewer must be a participant on the message. */
+  toggleMessageReaction(
+    messageId: number,
+    userId: number,
+    emoji: string,
+  ): {
+    reactions: Array<{ code: string; count: number; mine: boolean }>;
+    error?: string;
+  };
+  sendMessage(fromUserId: number, toUserId: number, subject: string, body: string, opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null }): Message;
+  /** Shared non-personal admin identity used for rejects / admin DMs. */
+  resolveGuideAdminUser(): User | undefined;
+  isGuideAdminUserId(userId: number | null | undefined): boolean;
+  getGuideAdminInbox(): Message[];
+  getGuideAdminSent(): Message[];
+  getGuideAdminUnreadCount(): number;
+  /** Send or reply as the shared guide-admin profile (not the acting admin). */
+  sendAsGuideAdmin(
+    toUserId: number,
+    subject: string,
+    body: string,
+    opts?: { threadId?: string; contextType?: string; contextId?: number | null; contextLabel?: string | null },
+  ): Message | undefined;
+  /** Drop a content-moderation alert into the site owner's guide inbox. */
+  notifyOwnerModeration(subject: string, body: string): void;
+  /** Public "Message me" / sponsorship pitch / custom order form on the About page - always lands in the owner's guide inbox. Returns false if there's no resolvable owner to deliver to. */
+  sendPortfolioContactMessage(input: {
+    kind?: "message" | "sponsor" | "order";
+    name: string;
+    email: string;
+    phone?: string;
+    message: string;
+    businessName?: string;
+    lengthNeeded?: string;
+    sponsorshipType?: string;
+    /** Custom disco-body order fields */
+    size?: string;
+    hangingSpace?: string;
+    ceilingHeight?: string;
+    attachmentUrls?: string[];
+    pageUrl?: string;
+  }): boolean;
+  getNotificationPrefs(userId: number): NotificationPrefs;
+  setNotificationPrefs(userId: number, prefs: Partial<NotificationPrefs>, isAdmin?: boolean): NotificationPrefs;
+  upsertPushSubscription(userId: number, data: { endpoint: string; p256dh: string; auth: string; userAgent?: string | null; platform?: string | null }): unknown;
+  deactivatePushSubscription(id: number): void;
+  deactivatePushSubscriptionByEndpoint(userId: number, endpoint: string): void;
+  touchPushSubscription(id: number): void;
+  getActivePushSubscriptions(userId: number): Array<{ id: number; endpoint: string; p256dh: string; auth: string }>;
+  countActivePushSubscriptions(): number;
+  getAllActivePushSubscriptions(): Array<{ id: number; userId: number; endpoint: string; p256dh: string; auth: string }>;
+  markRead(messageId: number): void;
+  markReadForUser(messageId: number, userId: number): boolean;
+  getThread(threadId: string): Message[];
+  softDeleteThread(threadId: string, userId: number): number;
+  softDeleteTalentRequestThreads(talentId: number, userId: number): void;
+  clearInboxFolder(userId: number, folder: "inbox" | "sent" | "all"): number;
+  // Missed connections
+  getMissedConnection(id: number): MissedConnection | undefined;
+  getMissedConnections(status?: string, viewerUserId?: number): any[];
+  getMissedConnectionsByEvent(eventId: number, viewerUserId?: number): any[];
+  getMissedConnectionsByBeach(beachId: string, viewerUserId?: number): any[];
+  getMissedConnectionsByUser(userId: number): MissedConnection[];
+  expireRiverBratsCheckins(): void;
+  getBeachCheckins(beachId: string, calendarDate: string, viewerUserId?: number): any[];
+  /** Active planned beach days for My Schedule (advance check-ins). */
+  getBeachCheckinsByUser(userId: number): Array<{
+    id: number;
+    beachId: string;
+    calendarDate: string;
+    arrivalHour: number;
+    departHour: number | null;
+    note: string | null;
+    presence: string;
+    isAnonymous: boolean;
+  }>;
+  getBeachCheckinByUser(beachId: string, userId: number, calendarDate: string): BeachCheckin | undefined;
+  upsertBeachCheckin(data: InsertBeachCheckin & { isAnonymous?: boolean }): BeachCheckin;
+  deleteBeachCheckin(id: number, userId: number): boolean;
+  verifyBeachPresence(userId: number, beachId: string, calendarDate: string, lat: number, lng: number):
+    | { ok: true; presence: "HERE"; gpsVerifiedAt: string }
+    | { ok: false; error: "NO_CHECKIN" }
+    | { ok: false; error: "TOO_FAR"; distanceM: number };
+  scheduleBeachArrivalPrompt(checkin: BeachCheckin): void;
+  cancelBeachArrivalPrompts(userId: number, beachId: string, calendarDate: string): void;
+  markPromptSkipped(promptId: number): void;
+  claimDuePrompts(nowIso: string, limit?: number): any[];
+  purgeExpiredChatMessages(now?: number): void;
+  getMyGroupChats(userId: number): any[];
+  /** Active non-anon check-in dates for a user at a beach (still in access window). */
+  getBeachChatDatesForUser(beachId: string, userId: number): string[];
+  getBeachChatMessages(beachId: string, calendarDate: string, viewerUserId: number): { messages: any[]; expiresAt: string | null; opensAt?: string | null; chatOpen: boolean };
+  postBeachChatMessage(beachId: string, calendarDate: string, userId: number, body: string): any;
+  expireBeachCarpoolPosts(): void;
+  getBeachCarpoolPosts(beachId: string, tripDate: string, viewerUserId?: number): any[];
+  getBeachCarpoolPost(id: number): any;
+  createBeachCarpoolPost(data: InsertBeachCarpoolPost): BeachCarpoolPost;
+  deleteBeachCarpoolPost(id: number, userId: number): boolean;
+  requestBeachCarpool(postId: number, userId: number, note: string): BeachCarpoolRequest;
+  selectBeachCarpoolRequest(postId: number, requestId: number, posterUserId: number): Message;
+  getBeachCarpoolRequests(postId: number, posterUserId: number): any[];
+  reportRiverBrats(data: InsertRiverBratsReport): void;
+  getRiverBratsReports(status?: string): any[];
+  resolveRiverBratsReport(id: number, adminNotes?: string): void;
+  getHubFeed(opts?: { tab?: HubFeedTab; limit?: number; cursor?: string; viewerUserId?: number; viewerIsAdmin?: boolean }): HubFeedResponse;
+  canUserPostToHubFeed(userId: number, isAdmin?: boolean): boolean;
+  getHostedLiveEventIds(userId: number): number[];
+  createHubFeedPost(data: InsertHubFeedPost): HubFeedPost;
+  getHubFeedPostsByUser(userId: number, limit?: number): HubFeedPost[];
+  removeHubFeedPost(id: number, userId: number, opts?: { isAdmin?: boolean }): { ok: true } | { error: string };
+  getPostableEventsForMissedConnections(requireToday?: boolean): Event[];
+  getLinkableEventsForMissedConnections(): Array<{
+    id: number;
+    title: string;
+    venueName: string;
+    dayOfWeek: string | null;
+    dateStart: string;
+    dateEnd: string | null;
+    postable: boolean;
+    timing: "upcoming" | "live" | "past";
+  }>;
+  createMissedConnection(data: InsertMissedConnection & { closesAt?: string | null }): MissedConnection;
+  updateMissedConnection(id: number, userId: number, data: Partial<MissedConnection>): MissedConnection | undefined;
+  deleteMissedConnection(id: number, userId: number): void;
+  archiveExpiredMissedConnections(): void;
+  createMissedConnectionThread(threadId: string, missedConnectionId: number, posterUserId: number, replierUserId: number): void;
+  getMissedConnectionThread(threadId: string): any | undefined;
+  revealMissedConnectionIdentity(threadId: string, userId: number): any | undefined;
+  getThreadForViewer(threadId: string, viewerUserId: number): any[];
+  maskMessageParty(msg: any, viewerUserId: number, tab: "inbox" | "sent"): any;
+  // Gifting
+  getGiftingPosts(opts?: { includeInactive?: boolean; status?: string; userId?: number; viewerUserId?: number }): any[];
+  deleteGiftingPost(id: number, userId: number, opts?: { isAdmin?: boolean }): void;
+  getGiftingPost(id: number): any | undefined;
+  getGiftingPostsByUser(userId: number): any[];
+  createGiftingPost(data: InsertGiftingPost, status?: string): GiftingPost;
+  addGiftingInterest(data: InsertGiftingInterest): GiftingInterest;
+  chooseGiftingInterest(postId: number, interestId: number, ownerUserId: number): GiftingInterest | undefined;
+  markGiftingResolved(postId: number, userId: number, status: "GIFTED" | "FOUND"): void;
+  reopenGiftingPost(postId: number, userId: number): void;
+  renewGiftingPost(postId: number, userId: number): void;
+  reportGiftingPost(data: InsertGiftingReport): void;
+  getGiftingReports(status?: string): any[];
+  updateGiftingPostStatus(id: number, status: string, adminNotes?: string): void;
+  resolveGiftingReport(id: number, adminNotes?: string): void;
+  expireGiftingPosts(): void;
+  // SELLZ marketplace
+  getSellzPosts(opts?: { includeInactive?: boolean; userId?: number }): any[];
+  getSellzPost(id: number): any | undefined;
+  getSellzPostsByUser(userId: number): any[];
+  createSellzPost(data: InsertSellzPost): any;
+  updateSellzPost(id: number, userId: number, data: Partial<InsertSellzPost>): any;
+  addSellzInterest(data: InsertSellzInterest): any;
+  chooseSellzInterest(postId: number, interestId: number, ownerUserId: number): any;
+  setSellzStatus(postId: number, userId: number, status: "ACTIVE" | "RESERVED" | "SOLD"): void;
+  renewSellzPost(postId: number, userId: number): void;
+  deleteSellzPost(postId: number, userId: number): void;
+  reportSellzPost(data: InsertSellzReport): void;
+  toggleSellzSave(postId: number, userId: number): boolean;
+  markSellzSaveSeen(postId: number, userId: number): boolean;
+  getSellzSavedIds(userId: number): number[];
+  // Soft launch feedback (legacy table; new reports land in owner_desk_items)
+  createFeedbackReport(data: InsertFeedbackReport): FeedbackReport;
+  getFeedbackReports(status?: string): FeedbackReport[];
+  resolveFeedbackReport(id: number): void;
+  // Owner desk - contact form, bug reports, owner-only escalations
+  createOwnerDeskItem(data: {
+    kind: string;
+    title: string;
+    summary?: string | null;
+    body: string;
+    contactName?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    pageUrl?: string | null;
+    severity?: string | null;
+    metaJson?: Record<string, unknown> | null;
+  }): { id: number; kind: string; title: string; status: string; createdAt: string };
+  getOwnerDeskItems(status?: string): Array<{
+    id: number;
+    source: "desk" | "feedback";
+    kind: string;
+    kindLabel: string;
+    title: string;
+    summary: string;
+    body: string;
+    contactName: string | null;
+    contactEmail: string | null;
+    contactPhone: string | null;
+    pageUrl: string | null;
+    severity: string | null;
+    meta: Record<string, unknown>;
+    status: string;
+    createdAt: string;
+    resolvedAt: string | null;
+  }>;
+  getOwnerDeskCount(): number;
+  resolveOwnerDeskItem(id: number, source?: "desk" | "feedback"): void;
+  // Business directory
+  getBusinesses(opts?: { type?: string; neighborhood?: string; queerOwned?: boolean }): Business[];
+  getBusiness(id: number): Business | undefined;
+  createBusiness(data: InsertBusiness): Business;
+  updateBusiness(id: number, data: Partial<InsertBusiness>): Business | undefined;
+  toggleBusinessActive(id: number, active: boolean): void;
+  getUserLinkedBusinesses(userId: number): { id: number; name: string; type: string; address: string | null }[];
+  // Business ownership: claims, new-business submissions, blocklist, logo requests
+  getUserOwnedBusinesses(userId: number): Business[];
+  /** Admin directory roster with owner profiles for venue-claims assign UI. */
+  getAdminDirectoryBusinesses(): Array<Business & {
+    ownerProfile: {
+      id: number;
+      username: string;
+      displayName: string | null;
+      email: string;
+      photoUrl: string | null;
+      avatarChoice: number;
+      avatarRing: string;
+    } | null;
+  }>;
+  assignBusinessOwner(businessId: number, userId: number): { ok?: boolean; error?: string; business?: Business };
+  clearBusinessOwner(businessId: number): { ok?: boolean; error?: string; business?: Business };
+  createBusinessClaim(
+    businessId: number,
+    userId: number,
+    claimReason: string,
+    opts?: { mergePayload?: Record<string, unknown> },
+  ): { claim?: BusinessClaim; error?: string };
+  getPendingBusinessClaims(): any[];
+  getRecentResolvedBusinessClaims(): any[];
+  approveBusinessClaim(id: number, adminName: string): { ok?: boolean; error?: string };
+  rejectBusinessClaim(id: number, reason?: string): void;
+  createBusinessSubmission(userId: number, data: Omit<InsertBusiness, "active" | "isNew" | "queerOwned" | "queerFriendly"> & { logoImageUrl?: string | null }): BusinessSubmission;
+  getPendingBusinessSubmissions(): BusinessSubmission[];
+  getRecentResolvedBusinessSubmissions(): BusinessSubmission[];
+  approveBusinessSubmission(id: number, adminName: string, overrideImageUrl?: string): { business?: Business; error?: string };
+  rejectBusinessSubmission(id: number, reason?: string): void;
+  getPromotersForBusiness(businessId: number): { id: number; username: string; displayName: string | null }[];
+  blockPromoterFromBusiness(businessId: number, blockedUserId: number, createdByUserId: number): { ok?: boolean; error?: string };
+  unblockPromoterFromBusiness(businessId: number, blockedUserId: number): void;
+  isPromoterBlockedFromBusiness(businessId: number, userId: number): boolean;
+  getBlockedBusinessMatch(userId: number, venueLike: { venueName: string; address?: string | null; lat?: number | null; lng?: number | null }): Business | null;
+  getBusinessBlocks(businessId: number): any[];
+  createBusinessLogoRequest(businessId: number, userId: number, imageUrl: string): BusinessLogoRequest;
+  getPendingBusinessLogoRequests(): any[];
+  getRecentResolvedBusinessLogoRequests(): any[];
+  approveBusinessLogoRequest(id: number, overrideImageUrl?: string): { ok?: boolean; error?: string };
+  rejectBusinessLogoRequest(id: number, reason?: string): void;
+}
+
+const RECENT_QUEUE_DAYS = 30;
+
+function recentQueueCutoffIso(days = RECENT_QUEUE_DAYS): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
+}
+
+export const storage: IStorage = {
+  getEvents(filters) {
+    const rows = db.select().from(events).all();
+    return rows.filter(e => {
+      if (filters?.status && filters.status !== "" && e.status !== filters.status) return false;
+      if (filters?.day && e.dayOfWeek !== filters.day) return false;
+      return true;
+    });
+  },
+  countEventsBySource(source, status) {
+    if (status) {
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM events WHERE source = ? AND status = ?
+      `).get(source, status) as { count: number };
+      return row?.count ?? 0;
+    }
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count FROM events WHERE source = ?
+    `).get(source) as { count: number };
+    return row?.count ?? 0;
+  },
+  getEvent(id) {
+    return db.select().from(events).where(eq(events.id, id)).get();
+  },
+  getPendingClaimEventIds() {
+    return sqlite.prepare(`
+      SELECT DISTINCT event_id AS eventId
+      FROM submissions
+      WHERE type = 'CLAIM' AND status = 'PENDING' AND event_id IS NOT NULL
+    `).all().map((row: any) => Number(row.eventId));
+  },
+  createEvent(data) {
+    // Footgun guard: never inherit a silent LIVE default. Callers that want public
+    // must pass status: "LIVE" explicitly (admin seed, approve flows, etc.).
+    const now = new Date().toISOString();
+    return db
+      .insert(events)
+      .values({
+        ...data,
+        status: data.status ?? "HIDDEN",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+      .get();
+  },
+  updateEventStatus(id, status) {
+    db.update(events)
+      .set({ status, updatedAt: new Date().toISOString() })
+      .where(eq(events.id, id))
+      .run();
+  },
+  updateEvent(id, data, opts) {
+    const { updatedAt: _ignore, createdAt: _c, ...rest } = data as Partial<InsertEvent> & {
+      updatedAt?: string;
+      createdAt?: string;
+    };
+    // A human edit locks the fields it touched, so the next trusted-venue resync
+    // leaves them alone. Sync writes pass { source: "sync" } and never lock.
+    // Unclaimed events have no claimedBy to read, so this is what protects an
+    // admin fix. See mergeDraftIntoEvent in server/ingest/index.ts.
+    const patch: Record<string, unknown> = { ...rest };
+    if (opts?.source !== "sync") {
+      const current = db.select().from(events).where(eq(events.id, id)).get();
+      if (current) {
+        let locked: string[] = [];
+        try {
+          const parsed = JSON.parse(String(current.lockedFields || "[]"));
+          if (Array.isArray(parsed)) locked = parsed.filter(f => typeof f === "string");
+        } catch { /* corrupt value: start clean rather than throw mid-edit */ }
+        const before = locked.length;
+        for (const key of Object.keys(rest)) {
+          // Only lock fields a resync could actually clobber, and only when the
+          // value really changed, so a no-op save never freezes the feed out.
+          if (!SYNC_WRITABLE_FIELDS.has(key)) continue;
+          if ((rest as Record<string, unknown>)[key] === (current as Record<string, unknown>)[key]) continue;
+          if (!locked.includes(key)) locked.push(key);
+        }
+        if (locked.length !== before) patch.lockedFields = JSON.stringify(locked);
+      }
+    }
+    db.update(events)
+      .set({ ...patch, updatedAt: new Date().toISOString() } as any)
+      .where(eq(events.id, id))
+      .run();
+    return db.select().from(events).where(eq(events.id, id)).get();
+  },
+  toggleClaimable(id, isClaimable) {
+    db.update(events).set({ isClaimable }).where(eq(events.id, id)).run();
+  },
+  getSubmissions(status) {
+    const rows = db.select().from(submissions).all();
+    if (status) return rows.filter(s => s.status === status);
+    return rows;
+  },
+  getSubmission(id) {
+    return db.select().from(submissions).where(eq(submissions.id, id)).get();
+  },
+  createSubmission(data) {
+    return db.insert(submissions).values({
+      ...data,
+      status: "PENDING",
+      approvals: "[]",
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  },
+  getAllUsers() {
+    // Hide the shared system guide identity from roster / search surfaces.
+    return db.select().from(users).all().filter((u) => !storage.isSystemGuideAccount(u));
+  },
+  // ─── Member profiles + follows ─────────────────────────────────────────────
+  /**
+   * Soft-launch graph: every active member follows every other active member
+   * unless they explicitly unfollowed (row in follow_blocks).
+   * Set FOLLOW_ALL_DEFAULT=0 to revert to explicit follows-only.
+   */
+  isFollowAllDefault() {
+    const v = String(process.env.FOLLOW_ALL_DEFAULT ?? "1").trim().toLowerCase();
+    return !(v === "0" || v === "false" || v === "off" || v === "no");
+  },
+  isFollowBlocked(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return false;
+    return !!sqlite.prepare(
+      `SELECT 1 FROM follow_blocks WHERE blocker_user_id = ? AND blocked_user_id = ?`,
+    ).get(followerUserId, followingUserId);
+  },
+  followUser(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return;
+    // Re-follow: clear soft-launch unfollow block
+    sqlite.prepare(
+      `DELETE FROM follow_blocks WHERE blocker_user_id = ? AND blocked_user_id = ?`,
+    ).run(followerUserId, followingUserId);
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO follows (follower_user_id, following_user_id, created_at)
+      VALUES (?, ?, ?)
+    `).run(followerUserId, followingUserId, new Date().toISOString());
+  },
+  unfollowUser(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return;
+    sqlite.prepare(`DELETE FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).run(followerUserId, followingUserId);
+    if (storage.isFollowAllDefault()) {
+      sqlite.prepare(`
+        INSERT OR IGNORE INTO follow_blocks (blocker_user_id, blocked_user_id, created_at)
+        VALUES (?, ?, ?)
+      `).run(followerUserId, followingUserId, new Date().toISOString());
+    }
+  },
+  getFollowerCount(userId) {
+    if (storage.isFollowAllDefault()) {
+      // Everyone active except self and those who unfollowed this user
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      // Subtract system guide accounts (not listed as people)
+      const guide = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active' AND u.id != ?
+          AND lower(u.username) IN ('prideguidepdx', 'zaylist')
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      return Math.max(0, (row?.count ?? 0) - (guide?.count ?? 0));
+    }
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE following_user_id = ?`).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  getFollowingCount(userId) {
+    if (storage.isFollowAllDefault()) {
+      const row = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      const guide = sqlite.prepare(`
+        SELECT COUNT(*) AS count FROM users u
+        WHERE u.status = 'active' AND u.id != ?
+          AND lower(u.username) IN ('prideguidepdx', 'zaylist')
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+      `).get(userId, userId) as { count: number } | undefined;
+      return Math.max(0, (row?.count ?? 0) - (guide?.count ?? 0));
+    }
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM follows WHERE follower_user_id = ?`).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  isFollowing(followerUserId, followingUserId) {
+    if (followerUserId === followingUserId) return false;
+    if (storage.isFollowAllDefault()) {
+      return !storage.isFollowBlocked(followerUserId, followingUserId);
+    }
+    return !!sqlite.prepare(`SELECT 1 FROM follows WHERE follower_user_id = ? AND following_user_id = ?`).get(followerUserId, followingUserId);
+  },
+  followBusiness(followerUserId, businessId) {
+    sqlite.prepare(`
+      INSERT OR IGNORE INTO business_follows (follower_user_id, business_id, created_at)
+      VALUES (?, ?, ?)
+    `).run(followerUserId, businessId, new Date().toISOString());
+  },
+  unfollowBusiness(followerUserId, businessId) {
+    sqlite.prepare(`DELETE FROM business_follows WHERE follower_user_id = ? AND business_id = ?`).run(followerUserId, businessId);
+  },
+  isFollowingBusiness(followerUserId, businessId) {
+    return !!sqlite.prepare(`SELECT 1 FROM business_follows WHERE follower_user_id = ? AND business_id = ?`).get(followerUserId, businessId);
+  },
+  getBusinessFollowerCount(businessId) {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS count FROM business_follows WHERE business_id = ?`).get(businessId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  getFollowedBusinessesList(userId) {
+    const rows = sqlite.prepare(`
+      SELECT b.id, b.name, b.type, b.neighborhood, b.image_url AS imageUrl,
+             bf.created_at AS followedAt
+      FROM business_follows bf
+      JOIN businesses b ON b.id = bf.business_id
+      WHERE bf.follower_user_id = ? AND b.active = 1
+      ORDER BY bf.created_at DESC
+    `).all(userId) as Array<{
+      id: number;
+      name: string;
+      type: string;
+      neighborhood: string | null;
+      imageUrl: string | null;
+      followedAt: string;
+    }>;
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      type: row.type || "venue",
+      neighborhood: row.neighborhood ?? null,
+      imageUrl: row.imageUrl ?? null,
+      isFollowing: true,
+      followerCount: storage.getBusinessFollowerCount(row.id),
+    }));
+  },
+  getFollowingList(userId, viewerUserId) {
+    if (storage.isFollowAllDefault()) {
+      // Soft-launch: everyone you're not unfollowed
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+        ORDER BY u.display_name COLLATE NOCASE, u.username COLLATE NOCASE
+      `).all(userId, userId) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM follows f
+      JOIN users u ON u.id = f.following_user_id
+      WHERE f.follower_user_id = ? AND u.status = 'active'
+      ORDER BY f.created_at DESC
+    `).all(userId) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  getFollowersList(userId, viewerUserId) {
+    if (storage.isFollowAllDefault()) {
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND NOT EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = u.id AND fb.blocked_user_id = ?
+          )
+        ORDER BY u.display_name COLLATE NOCASE, u.username COLLATE NOCASE
+      `).all(userId, userId) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM follows f
+      JOIN users u ON u.id = f.follower_user_id
+      WHERE f.following_user_id = ? AND u.status = 'active'
+      ORDER BY f.created_at DESC
+    `).all(userId) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  discoverPeople(viewerUserId, limit = 24) {
+    // Soft-launch: who-to-follow = people you unfollowed (easy re-follow) + new hosts not yet "seen"
+    if (storage.isFollowAllDefault()) {
+      const rows = sqlite.prepare(`
+        SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+               u.location, u.promoter_status AS promoterStatus
+        FROM users u
+        WHERE u.status = 'active'
+          AND u.id != ?
+          AND EXISTS (
+            SELECT 1 FROM follow_blocks fb
+            WHERE fb.blocker_user_id = ? AND fb.blocked_user_id = u.id
+          )
+        ORDER BY u.created_at DESC
+        LIMIT ?
+      `).all(viewerUserId, viewerUserId, limit) as any[];
+      return rows
+        .filter((row) => !isGuideSystemUsername(row.username))
+        .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+    }
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.photo_url AS photoUrl,
+             u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing, u.bio,
+             u.location, u.promoter_status AS promoterStatus
+      FROM users u
+      WHERE u.status = 'active'
+        AND u.id != ?
+        AND u.id NOT IN (
+          SELECT following_user_id FROM follows WHERE follower_user_id = ?
+        )
+        AND (
+          u.promoter_status = 'approved'
+          OR EXISTS (
+            SELECT 1 FROM event_hosts eh
+            JOIN events e ON e.id = eh.event_id
+            WHERE eh.user_id = u.id AND e.status = 'LIVE'
+          )
+        )
+      ORDER BY
+        (SELECT COUNT(*) FROM follows WHERE following_user_id = u.id) DESC,
+        u.created_at DESC
+      LIMIT ?
+    `).all(viewerUserId, viewerUserId, limit) as any[];
+    return rows
+      .filter((row) => !isGuideSystemUsername(row.username))
+      .map((row) => storage.buildPeopleHubUser(row, viewerUserId));
+  },
+  buildPeopleHubUser(row, viewerUserId) {
+    const hosting = storage.countEventsHostedByUser(row.id);
+    const verifiedHost = row.promoterStatus === "approved";
+    const subtitleParts: string[] = [];
+    if (verifiedHost) subtitleParts.push("Verified host");
+    else if (hosting > 0) subtitleParts.push(hosting === 1 ? "1 event" : `${hosting} events`);
+    if (row.location?.trim()) subtitleParts.push(String(row.location).trim());
+    const bioSnippet = row.bio?.trim() ? String(row.bio).trim().slice(0, 120) : null;
+    return {
+      id: row.id,
+      username: row.username,
+      displayName: row.displayName ?? null,
+      photoUrl: row.photoUrl ?? null,
+      avatarChoice: row.avatarChoice ?? 1,
+      avatarRing: row.avatarRing || "none",
+      bio: bioSnippet,
+      verifiedHost,
+      followers: storage.getFollowerCount(row.id),
+      isFollowing: viewerUserId != null ? storage.isFollowing(viewerUserId, row.id) : false,
+      subtitle: subtitleParts.length > 0 ? subtitleParts.join(" · ") : null,
+    };
+  },
+  countEventsHostedByUser(userId) {
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count
+      FROM event_hosts eh
+      JOIN events e ON e.id = eh.event_id
+      WHERE eh.user_id = ? AND e.status = 'LIVE'
+    `).get(userId) as { count: number } | undefined;
+    return row?.count ?? 0;
+  },
+  getPublicProfile(username, viewerUserId = null, viewerIsAdmin = false) {
+    let user = storage.getUserByUsername(username);
+    if (!user) return undefined;
+    // Auto-lift timed suspend/shadow so profile status stays accurate.
+    if (user.status === "suspended" || user.shadowBanned) {
+      user = storage.clearExpiredAccountModeration(user.id) || user;
+    }
+    if (user.status === "deleted") return undefined;
+    if (user.status === "suspended") {
+      // Suspended profiles are not public; owner/admin can still open for moderation.
+      const isOwner = viewerUserId != null && viewerUserId === user.id;
+      if (!isOwner && !viewerIsAdmin) return undefined;
+    }
+    const isOwner = viewerUserId != null && viewerUserId === user.id;
+    // Shadow ban: hidden from everyone except self + admins.
+    if (user.shadowBanned && !isOwner && !viewerIsAdmin) {
+      const untilOk = !user.shadowBanUntil || Date.parse(user.shadowBanUntil) > Date.now();
+      if (untilOk) return undefined;
+    }
+    const verifiedHost = user.promoterStatus === "approved";
+
+    const talentByEvent = storage.getEventTalentByUser(user.id);
+    const roles: string[] = [];
+    for (const entry of Object.values(talentByEvent)) {
+      if (entry.status !== "LIVE") continue;
+      for (const role of entry.roles) {
+        const label = EVENT_TALENT_ROLE_LABELS[role];
+        if (label && !roles.includes(label)) roles.push(label);
+      }
+    }
+
+    const hostedEventsAll = sqlite.prepare(`
+      SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission, e.ticket_url AS ticketUrl,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood
+      FROM event_hosts eh
+      JOIN events e ON e.id = eh.event_id
+      WHERE eh.user_id = ? AND e.status = 'LIVE'
+      ORDER BY e.date_start ASC
+    `).all(user.id) as any[];
+    const nowMs = Date.now();
+    const isPastEvent = (e: { dateEnd: string }) => {
+      const endMs = parsePacificDateTime(e.dateEnd);
+      return endMs != null && endMs < nowMs;
+    };
+    const hostedUpcoming = hostedEventsAll.filter(e => !isPastEvent(e));
+    const hostedPastRaw = hostedEventsAll.filter(isPastEvent);
+    // Full archive for @tucker_pdmax; flyer-credit subset (DJ+Host) for @brohoejams.
+    const hostedPast = mergeTuckerHostedArchivePast(user.username, hostedPastRaw);
+    if ((hostedUpcoming.length + hostedPast.length) > 0 && !roles.includes("Party Host")) {
+      roles.push("Party Host");
+    }
+    // Archive flyer DJ credits for Bro Hoe even when nights aren't in event_talent.
+    if (
+      user.username.trim().toLowerCase() === "brohoejams" &&
+      hostedPast.some(e => e.id < 0) &&
+      !roles.includes("DJ")
+    ) {
+      roles.push("DJ");
+    }
+
+    const gigRows = storage.getGigPostsByUser(user.id).filter(gig => gig.status === "LIVE");
+    const HIDDEN_GIFTING_STATUSES = new Set(["REMOVED", "REJECTED", "PENDING", "EXPIRED"]);
+    const giftingRows = storage.getGiftingPostsByUser(user.id)
+      .filter((post: any) => !HIDDEN_GIFTING_STATUSES.has(String(post.status)));
+    // Missed connections stay anonymous: never list them on public profiles
+    // (even for the owner). Authors manage theirs via /spotted and dashboard.
+    const hubRows = storage.getHubFeedPostsByUser(user.id, 30)
+      .filter((post: any) => post.status === "LIVE" && String(post.audience || "ALL").toUpperCase() === "ALL");
+
+    const gigLikeCounts = bulkContentLikeCounts("GIG", gigRows.map(g => g.id));
+    const giftLikeCounts = bulkContentLikeCounts("GIFTING", giftingRows.map((g: any) => g.id));
+    const hubLikeCounts = bulkContentLikeCounts("HUB", hubRows.map((h: any) => h.id));
+    const gigReplyCounts = bulkContentReplyCounts("GIG", gigRows.map(g => g.id));
+    const hubReplyCounts = bulkContentReplyCounts("HUB", hubRows.map((h: any) => h.id));
+    // GIFTING: interests (not public replies).
+    const giftReplyCounts = bulkGiftingInterestCounts(giftingRows.map((g: any) => g.id));
+
+    const gigs = gigRows.map(gig => ({
+      id: gig.id,
+      title: gig.title,
+      venueText: gig.location || null,
+      compensation: gig.compensation || null,
+      status: gig.status,
+      createdAt: gig.createdAt,
+      description: gig.description,
+      likes: gigLikeCounts.get(gig.id) ?? 0,
+      replies: gigReplyCounts.get(gig.id) ?? 0,
+    }));
+    const gifting = giftingRows.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      neighborhood: post.neighborhood,
+      createdAt: post.createdAt ?? post.created_at,
+      description: post.description,
+      likes: giftLikeCounts.get(post.id) ?? 0,
+      replies: giftReplyCounts.get(post.id) ?? 0,
+    }));
+
+    // Profile Updates rail: gigs + gifting + public hub posts (no spotted).
+    const boardPosts = [
+      ...gigs.map(g => ({
+        id: g.id,
+        board: "GIGZ",
+        contentType: "GIG" as const,
+        color: "var(--board-gigs)",
+        where: g.venueText || "Portland",
+        title: g.title,
+        text: g.description || g.title,
+        createdAt: g.createdAt ?? null,
+        likes: g.likes,
+        replies: g.replies,
+      })),
+      ...gifting.map(g => ({
+        id: g.id,
+        board: "GIFTZ",
+        contentType: "GIFTING" as const,
+        color: "var(--board-gifting)",
+        where: g.neighborhood || "Portland",
+        title: g.title,
+        text: g.description || g.title,
+        createdAt: g.createdAt ?? null,
+        likes: g.likes,
+        replies: g.replies,
+      })),
+      ...hubRows.map((h: any) => ({
+        id: h.id,
+        board: "Updates",
+        contentType: "HUB" as const,
+        color: "var(--neon-cyan)",
+        where: "Hub",
+        text: String(h.body || "").trim() || (h.photoUrl ? "Shared a photo" : "Update"),
+        createdAt: h.createdAt ?? h.created_at ?? null,
+        likes: hubLikeCounts.get(h.id) ?? 0,
+        replies: hubReplyCounts.get(h.id) ?? 0,
+      })),
+    ].sort((a, b) => {
+      const ta = a.createdAt ? Date.parse(String(a.createdAt)) : 0;
+      const tb = b.createdAt ? Date.parse(String(b.createdAt)) : 0;
+      return tb - ta;
+    });
+
+    const attendedAll = sqlite.prepare(`
+      SELECT e.id, e.title, e.venue_name AS venueName, e.day_of_week AS dayOfWeek,
+             e.date_start AS dateStart, e.date_end AS dateEnd, e.admission,
+             e.poster_image_url AS posterImageUrl, e.neighborhood AS neighborhood,
+             e.ticket_url AS ticketUrl
+      FROM attendances a
+      JOIN events e ON e.id = a.event_id
+      WHERE a.user_id = ? AND a.is_active = 1 AND COALESCE(e.status, 'LIVE') != 'DELETED'
+      ORDER BY e.date_start ASC
+    `).all(user.id) as any[];
+    // One authoritative set drives the profile rail and its counters. Closing an
+    // event must not erase a legitimate attendance; only removed events disappear.
+    const checkIns = attendedAll.length;
+    const attendedPastLive = attendedAll.filter(isPastEvent);
+    // Host nights Tucker archived are nights he ran and was there - surface in
+    // both hosting.past and attended past without inventing fake RSVP rows.
+    const attendedPast = mergeTuckerHostedArchivePast(user.username, attendedPastLive);
+    // Public Going rail: upcoming RSVPs are visible on member profiles.
+    // (Previously owner-only, which left the design's Going panel empty for everyone else.)
+    const goingToUpcoming = attendedAll.filter(e => !isPastEvent(e));
+
+    const socialLinksRaw = safeJson(user.socialLinks || "{}");
+    const activity: any = {
+      hostedEvents: hostedUpcoming,
+      hostedEventsPast: hostedPast,
+      gigs,
+      gifting,
+      // Always empty - missed connections must not de-anonymize on profiles.
+      spotted: [],
+      goingTo: goingToUpcoming,
+      attendedPast,
+    };
+
+    const ownedBusinesses = storage.getUserOwnedBusinesses(user.id);
+    const affiliatedVenueIds: number[] = safeJson(user.affiliatedVenueIds || "[]");
+    const affiliatedVenues = affiliatedVenueIds
+      .map(id => storage.getBusiness(id))
+      .filter((b): b is Business => !!b)
+      .map(b => ({ id: b.id, name: b.name, type: b.type }));
+
+    return {
+      username: user.username,
+      displayName: user.displayName,
+      pronouns: user.pronouns || null,
+      location: user.location || null,
+      bio: user.bio,
+      photoUrl: user.photoUrl,
+      avatarChoice: user.avatarChoice ?? 1,
+      avatarRing: user.avatarRing || "none",
+      avatarCrop: user.avatarCrop || null,
+      memberSince: user.createdAt,
+      verifiedHost,
+      showPromoterVariant: verifiedHost,
+      roles,
+      talents: safeJson(user.talents || "[]"),
+      standFor: verifiedHost ? safeJson(user.standFor || "[]") : [],
+      affiliatedVenues,
+      ownedBusiness: ownedBusinesses[0] || null,
+      accentColor: user.accentColor || null,
+      banner: user.banner || DEFAULT_PROFILE_BANNER,
+      coverImageUrl: user.coverImageUrl || null,
+      coverCrop: user.coverCrop || null,
+      marquee: verifiedHost ? safeJsonOrNull(user.marquee) : null,
+      top8: resolveProfileTop8(user.top8),
+      pup: !verifiedHost ? safeJsonOrNull(user.pup) : null,
+      packmates: !verifiedHost ? storage.getPackLinks(user.id, "packmate") : [],
+      handlers: !verifiedHost ? storage.getPackLinks(user.id, "handler") : [],
+      media: storage.getProfileMedia(user.id),
+      socialLinks: socialLinksRaw && typeof socialLinksRaw === "object" && !Array.isArray(socialLinksRaw) ? socialLinksRaw : {},
+      profileEmbeds: safeJson(user.profileEmbeds || "[]"),
+      profilePhotos: safeJson(user.profilePhotos || "[]"),
+      stats: {
+        events: hostedUpcoming.length + hostedPast.length,
+        hosting: hostedUpcoming.length,
+        going: goingToUpcoming.length,
+        posts: boardPosts.length,
+        gigs: gigs.length,
+        gifting: gifting.length,
+        checkIns,
+        followers: storage.getFollowerCount(user.id),
+      },
+      isOwner,
+      isAdmin: storage.userIsSiteAdmin(user),
+      isSiteOwner: storage.isPrimarySiteOwner(user),
+      viewerIsAdmin: !!viewerIsAdmin && !isOwner,
+      isFollowing: viewerUserId != null && !isOwner ? storage.isFollowing(viewerUserId, user.id) : false,
+      blockStatus: viewerUserId != null && !isOwner
+        ? storage.getMemberBlockStatus(viewerUserId, user.id)
+        : { blockedByViewer: false, blockedViewer: false, interactionBlocked: false },
+      activity,
+      boardPosts,
+      linkedVenues: storage.getUserLinkedBusinesses(user.id),
+      // Admin-only moderation surface (also useful if owner is viewing own suspend state via gate)
+      accountStatus: user.status || "active",
+      suspendReasonCode: user.suspendReasonCode || null,
+      suspendReasonLabel: user.suspendReasonLabel || null,
+      suspendNote: user.suspendNote || null,
+      suspendUntil: user.suspendUntil || null,
+      suspendedAt: user.suspendedAt || null,
+      ...(viewerIsAdmin
+        ? {
+            shadowBanned: !!user.shadowBanned,
+            shadowBanReasonCode: user.shadowBanReasonCode || null,
+            shadowBanReasonLabel: user.shadowBanReasonLabel || null,
+            shadowBanUntil: user.shadowBanUntil || null,
+          }
+        : {}),
+    };
+  },
+  rejectUserProfilePhoto(username, reasonCode, note) {
+    const user = storage.getUserByUsername(String(username || "").trim().replace(/^@/, ""));
+    if (!user || user.status === "deleted") return { error: "User not found" };
+    if (!user.photoUrl) return { error: "No profile photo" };
+    storage.updateUser(user.id, { photoUrl: null, avatarCrop: null });
+    notifyProfilePhotoReject(user.id, reasonCode, note);
+    return { ok: true };
+  },
+  getPackLinks(userId, relation) {
+    const rows = sqlite.prepare(`
+      SELECT u.id, u.username, u.display_name AS displayName, u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS avatarRing, u.photo_url AS photoUrl
+      FROM pack_links pl
+      JOIN users u ON u.id = pl.linked_user_id
+      WHERE pl.user_id = ? AND pl.relation = ? AND u.status = 'active'
+      ORDER BY pl.created_at ASC
+    `).all(userId, relation) as any[];
+    return rows.map(r => ({
+      id: r.id, username: r.username, displayName: r.displayName ?? null,
+      avatarChoice: r.avatarChoice ?? 1, avatarRing: r.avatarRing || "none", photoUrl: r.photoUrl ?? null,
+    }));
+  },
+  addPackLink(userId, relation, targetUsername) {
+    const target = storage.getUserByUsername(targetUsername.replace(/^@/, "").trim());
+    if (!target || target.status !== "active") return { error: "That member could not be found." };
+    if (target.id === userId) return { error: "You can't link yourself." };
+    try {
+      sqlite.prepare(`
+        INSERT INTO pack_links (user_id, linked_user_id, relation, created_at)
+        VALUES (?, ?, ?, ?)
+      `).run(userId, target.id, relation, new Date().toISOString());
+      return { ok: true };
+    } catch (e: any) {
+      if (String(e?.message || "").includes("UNIQUE")) return { error: "Already added." };
+      return { error: "Could not add link." };
+    }
+  },
+  removePackLink(userId, relation, linkedUserId) {
+    sqlite.prepare(`DELETE FROM pack_links WHERE user_id = ? AND relation = ? AND linked_user_id = ?`)
+      .run(userId, relation, linkedUserId);
+  },
+  getProfileMedia(userId) {
+    const media = sqlite.prepare(`SELECT * FROM profile_media WHERE user_id = ?`).get(userId) as any;
+    if (media) {
+      const items = sqlite.prepare(`
+        SELECT id, label, title, meta, audio_url AS audioUrl, is_embed AS isEmbed
+        FROM profile_media_items WHERE media_id = ? ORDER BY sort_order ASC, id ASC
+      `).all(media.id) as any[];
+      return {
+        kind: media.kind,
+        title: media.title,
+        tag: media.tag ?? null,
+        cadence: media.cadence ?? null,
+        blurb: media.blurb ?? null,
+        coverUrl: media.cover_url ?? null,
+        platformLinks: safeJson(media.platform_links || "[]"),
+        items: items.map(it => ({ ...it, isEmbed: !!it.isEmbed })),
+      };
+    }
+    // Legacy fallback: synthesize a media card from SoundCloud embeds so
+    // existing promoters' sets don't vanish before they set up the new model.
+    const user = storage.getUserById(userId);
+    const embeds = safeJson(user?.profileEmbeds || "[]") as Array<{ id: string; src: string; title: string }>;
+    if (!user || embeds.length === 0) return null;
+    return {
+      kind: user.promoterStatus === "approved" ? "podcast" : "playlist",
+      title: "My tracks",
+      tag: null,
+      cadence: null,
+      blurb: null,
+      coverUrl: null,
+      platformLinks: [],
+      items: embeds.map(e => ({ id: e.id, label: null, title: e.title, meta: null, audioUrl: e.src, isEmbed: true })),
+    };
+  },
+  saveProfileMedia(userId, data) {
+    const now = new Date().toISOString();
+    const existing = sqlite.prepare(`SELECT id FROM profile_media WHERE user_id = ?`).get(userId) as { id: number } | undefined;
+    let mediaId: number;
+    if (existing) {
+      sqlite.prepare(`
+        UPDATE profile_media SET kind = ?, title = ?, tag = ?, cadence = ?, blurb = ?, cover_url = ?,
+          platform_links = ?, updated_at = ? WHERE id = ?
+      `).run(data.kind, data.title, data.tag ?? null, data.cadence ?? null, data.blurb ?? null,
+        data.coverUrl ?? null, JSON.stringify(data.platformLinks || []), now, existing.id);
+      mediaId = existing.id;
+      sqlite.prepare(`DELETE FROM profile_media_items WHERE media_id = ?`).run(mediaId);
+    } else {
+      const result = sqlite.prepare(`
+        INSERT INTO profile_media (user_id, kind, title, tag, cadence, blurb, cover_url, platform_links, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(userId, data.kind, data.title, data.tag ?? null, data.cadence ?? null, data.blurb ?? null,
+        data.coverUrl ?? null, JSON.stringify(data.platformLinks || []), now, now);
+      mediaId = Number(result.lastInsertRowid);
+    }
+    const items = (data.items || []).slice(0, 30);
+    items.forEach((item: any, i: number) => {
+      sqlite.prepare(`
+        INSERT INTO profile_media_items (media_id, sort_order, label, title, meta, audio_url, is_embed, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(mediaId, i, item.label ?? null, item.title, item.meta ?? null, item.audioUrl, item.isEmbed ? 1 : 0, now);
+    });
+    return storage.getProfileMedia(userId);
+  },
+  countActiveMessages() {
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) AS count FROM messages
+      WHERE deleted_by_from = 0 AND deleted_by_to = 0
+    `).get() as { count: number };
+    return row?.count ?? 0;
+  },
+  purgeQaTestUsers() {
+    const targets = db.select().from(users).all().filter((u: User) => {
+      if (isEnvListedSiteAdmin(u) || storage.hasSiteAdminGrant(u.id)) return false;
+      const email = String(u.email || "").toLowerCase();
+      const username = String(u.username || "").toLowerCase();
+      return email.includes("testmail.local")
+        || email.includes("+qa")
+        || username.startsWith("qa_")
+        || username.endsWith("_qa");
+    });
+    const deleted: string[] = [];
+    for (const user of targets) {
+      const userId = user.id;
+      const email = user.email;
+      sqlite.prepare(`DELETE FROM gig_posts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM gifting_interests WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM gifting_posts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM missed_connections WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM attendances WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM messages WHERE from_user_id = ? OR to_user_id = ?`).run(userId, userId);
+      sqlite.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
+      sqlite.prepare(`DELETE FROM submissions WHERE submitter_email = ?`).run(email);
+      deleted.push(user.username);
+    }
+    return { deleted: deleted.length, usernames: deleted };
+  },
+  autoApproveClaim(id: number, claimedByUsername: string) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub || sub.type !== "CLAIM" || !sub.eventId) return;
+    const now = new Date().toISOString();
+    db.update(submissions).set({
+      status: "APPROVED",
+      approvals: JSON.stringify([claimedByUsername]),
+      adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter, no manual review required.`,
+    }).where(eq(submissions.id, id)).run();
+    db.update(events).set({
+      isClaimable: false,
+      claimedBy: claimedByUsername,
+      adminNotes: null,
+    }).where(eq(events.id, sub.eventId)).run();
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    if (submitter) {
+      if (submitter.promoterStatus !== "approved") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
+    }
+  },
+  autoApproveSubmission(id, claimedByUsername) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub || sub.type !== "NEW_EVENT") return;
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const coords = mergeMapCoordinates({
+      venueName: sub.venueName,
+      address: sub.address,
+      lat: sub.lat,
+      lng: sub.lng,
+    }, directoryRows);
+    db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
+    const nowIso = new Date().toISOString();
+    const created = db.insert(events).values({
+      title: sub.title, description: sub.description,
+      venueName: sub.venueName, address: sub.address,
+      neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
+      dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+      ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+      admission: sub.admission, ticketUrl: sub.ticketUrl,
+      isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+      isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+      nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+      status: "LIVE", source: "user_submitted",
+      isClaimable: false, claimedBy: claimedByUsername,
+      submittedBy: sub.submitterEmail, adminNotes: null,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    }).returning().get();
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    if (created && submitter) {
+      if (submitter.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(created.id, submitter.id, null);
+    }
+  },
+  approveSubmission(id, adminName) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub) return undefined;
+    let approvalList: string[] = [];
+    try {
+      const parsed = JSON.parse(sub.approvals || "[]");
+      approvalList = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      approvalList = [];
+    }
+    if (!approvalList.includes(adminName)) approvalList.push(adminName);
+    const newStatus = approvalList.length >= 1 ? "APPROVED" : "PENDING";
+    db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();
+    if (newStatus === "APPROVED") {
+      const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+
+      if (sub.type === "PROMOTER_APPLICATION") {
+        // Standalone promoter application - approve user, no event created
+        if (submitter) db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      } else if (sub.type === "CLAIM" && sub.eventId) {
+        db.update(events).set({
+          isClaimable: false,
+          claimedBy: submitter?.username || sub.submitterEmail,
+          adminNotes: null,
+          updatedAt: new Date().toISOString(),
+        }).where(eq(events.id, sub.eventId)).run();
+        if (submitter) {
+          db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+          storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
+        }
+      } else if (sub.type === "SUGGEST") {
+        const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+        const coords = mergeMapCoordinates({
+          venueName: sub.venueName,
+          address: sub.address,
+          lat: sub.lat,
+          lng: sub.lng,
+        }, directoryRows);
+        // Community tip - goes live as unclaimed (anyone can claim it later)
+        const tipNow = new Date().toISOString();
+        db.insert(events).values({
+          title: sub.title, description: sub.description,
+          venueName: sub.venueName, address: sub.address,
+          neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
+          dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+          ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+          admission: sub.admission, ticketUrl: sub.ticketUrl,
+          isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+          isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+          nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+          status: "LIVE", source: "community_tip",
+          isClaimable: true, claimedBy: null,
+          submittedBy: sub.submitterEmail, adminNotes: null,
+          createdAt: tipNow,
+          updatedAt: tipNow,
+        }).run();
+      } else {
+        const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+        const coords = mergeMapCoordinates({
+          venueName: sub.venueName,
+          address: sub.address,
+          lat: sub.lat,
+          lng: sub.lng,
+        }, directoryRows);
+        // NEW_EVENT - create event, and if user was pending promoter, approve them too
+        const newNow = new Date().toISOString();
+        const created = db.insert(events).values({
+          title: sub.title, description: sub.description,
+          venueName: sub.venueName, address: sub.address,
+          neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
+          dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
+          ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
+          admission: sub.admission, ticketUrl: sub.ticketUrl,
+          isPublic: sub.isPublic, isPrivate: sub.isPrivate,
+          isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
+          nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
+          status: "LIVE", source: "user_submitted",
+          isClaimable: false, claimedBy: submitter?.username || null,
+          submittedBy: sub.submitterEmail, adminNotes: null,
+          createdAt: newNow,
+          updatedAt: newNow,
+        }).returning().get();
+        if (submitter) {
+          if (submitter.promoterStatus === "pending") {
+            db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+          }
+          storage.setPrimaryEventHost(created.id, submitter.id, null);
+        }
+      }
+      notifySubmissionOutcome(sub, true);
+    }
+    return db.select().from(submissions).where(eq(submissions.id, id)).get();
+  },
+  mergeSubmissionIntoEvent(id, eventId, adminName) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    if (!sub) return { error: "Submission not found" };
+    if (sub.status !== "PENDING") return { error: "Submission is not pending" };
+    if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
+      return { error: "Only new event submissions can be merged" };
+    }
+
+    const existing = db.select().from(events).where(eq(events.id, eventId)).get();
+    if (!existing) return { error: "Event not found" };
+    if (existing.status !== "LIVE") return { error: "Only live events can receive a merge" };
+
+    const patch = buildSubmissionMergePatch(existing, sub);
+    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+    const coords = mergeMapCoordinates({
+      venueName: (patch.venueName as string | undefined) ?? existing.venueName,
+      address: (patch.address as string | undefined) ?? existing.address,
+      lat: existing.lat,
+      lng: existing.lng,
+    }, directoryRows);
+
+    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+    const claimedBy = existing.claimedBy || submitter?.username || null;
+
+    db.update(events).set({
+      ...patch,
+      lat: coords.lat,
+      lng: coords.lng,
+      isClaimable: false,
+      claimedBy,
+      submittedBy: existing.submittedBy || sub.submitterEmail,
+      adminNotes: existing.adminNotes,
+    } as any).where(eq(events.id, eventId)).run();
+
+    db.update(submissions).set({
+      status: "APPROVED",
+      approvals: JSON.stringify([adminName]),
+      adminNotes: `Merged into event #${eventId} (${existing.title}) by ${adminName}.`,
+      eventId,
+    }).where(eq(submissions.id, id)).run();
+
+    if (submitter) {
+      if (submitter.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+      }
+      storage.setPrimaryEventHost(eventId, submitter.id, null);
+    }
+
+    const updatedEvent = db.select().from(events).where(eq(events.id, eventId)).get()!;
+    const updatedSub = db.select().from(submissions).where(eq(submissions.id, id)).get()!;
+    notifySubmissionMerged(sub, updatedEvent.title);
+    return { event: updatedEvent, submission: updatedSub };
+  },
+  rejectSubmission(id, reason) {
+    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+    db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
+    if (sub?.type === "PROMOTER_APPLICATION") {
+      const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+      if (submitter?.promoterStatus === "pending") {
+        db.update(users).set({ promoterStatus: "rejected" }).where(eq(users.id, submitter.id)).run();
+      }
+    }
+    if (sub) notifySubmissionOutcome(sub, false, reason);
+  },
+  getGigPosts(status) {
+    ensureGigPostsSchema();
+    const rows = sqlite.prepare(`
+      SELECT g.*,
+             u.username,
+             u.display_name AS displayName,
+             u.photo_url AS posterPhotoUrl,
+             u.avatar_choice AS avatarChoice,
+             u.avatar_ring AS posterAvatarRing
+      FROM gig_posts g
+      LEFT JOIN users u ON u.id = g.user_id
+      ORDER BY g.created_at DESC
+    `).all().map((row: any) => ({
+      id: row.id,
+      postType: row.post_type,
+      title: row.title,
+      name: row.name,
+      contactEmail: row.contact_email,
+      description: row.description,
+      skills: row.skills,
+      compensation: row.compensation,
+      location: row.location,
+      isRemote: Boolean(row.is_remote),
+      status: row.status,
+      adminNotes: row.admin_notes ?? null,
+      createdAt: row.created_at,
+      userId: row.user_id,
+      imageUrl: row.image_url,
+      gigDate: row.gig_date,
       gigTime: row.gig_time,
       businessId: row.business_id ?? null,
       username: row.username,
