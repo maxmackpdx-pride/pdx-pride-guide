@@ -1,20 +1,18 @@
 import type React from "react";
-import { useState, useMemo, Suspense, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import DirectoryHero from "@/components/DirectoryHero";
 import AuthModal from "@/components/AuthModal";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardLoadingState from "@/components/BoardLoadingState";
-import CountUpValue from "@/components/CountUpValue";
 import { Plus, X } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { placePath, placeUrl, slugifyPlaceName } from "@shared/placeSlug";
-import { Button, FilterChip, PlaceCard, SearchInput } from "@/components/ds";
+import { Button, PlaceCard, SearchInput } from "@/components/ds";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { isGrandOpeningActive } from "@shared/grandOpening";
 import type { BusinessLocation } from "@shared/businessLocations";
@@ -24,7 +22,6 @@ import {
   DIRECTORY_TYPE_LABELS as TYPE_LABELS,
 } from "@shared/directoryTheme";
 
-import { lazyWithReload } from "@/lib/lazyWithReload";
 import {
   directoryFallbackLogo,
   resolveDirectoryLogo,
@@ -34,11 +31,6 @@ import {
 } from "@/lib/directoryRecent";
 import PlaceModal from "@/components/PlaceModal";
 import "./Directory.css";
-
-const DirectoryMap = lazyWithReload(() => import("@/components/DirectoryMap"));
-
-/** Directory-preview map: large enough to browse without overpowering the listings. */
-const DIRECTORY_MAP_HEIGHT = 460;
 
 export type DirectoryEventSummary = {
   id: number;
@@ -239,7 +231,6 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return t && t in TYPE_LABELS ? t : "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
-  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
   const [selectedPlace, setSelectedPlace] = useState<Business | null>(null);
   const [placeOriginRect, setPlaceOriginRect] = useState<{
@@ -248,7 +239,6 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     width: number;
     height: number;
   } | null>(null);
-  const dockRef = useRef<HTMLDivElement>(null);
   const restoreScrollOnce = useRef(false);
 
   const recordRecentView = useCallback((biz: Business) => {
@@ -403,7 +393,17 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         if (activeType !== "ALL" && b.type !== activeType) return false;
         if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
         if (q) {
-          const haystack = `${b.name} ${b.description || ""} ${b.neighborhood || ""}`.toLowerCase();
+          const haystack = [
+            b.name,
+            TYPE_LABELS[b.type] || b.type,
+            b.type,
+            b.description,
+            b.address,
+            b.neighborhood,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
           if (!haystack.includes(q)) return false;
         }
         return true;
@@ -434,33 +434,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return [...ordered, ...extras];
   }, [activeType, businesses]);
 
-  const visibleNeighborhoods = useMemo(() => {
-    if (showAllNeighborhoods || neighborhoodsInUse.length <= 5) return neighborhoodsInUse;
-    const firstRow = neighborhoodsInUse.slice(0, 5);
-    return activeNeighborhood !== "ALL" && !firstRow.includes(activeNeighborhood)
-      ? [...firstRow, activeNeighborhood]
-      : firstRow;
-  }, [activeNeighborhood, neighborhoodsInUse, showAllNeighborhoods]);
-
-  const heroStats = useMemo(() => {
-    const boardBusinesses = isSpaces ? businesses.filter(b => b.type === "group") : businesses;
-    const queerOwned = boardBusinesses.filter(b => b.queerOwned).length;
-    const hostingThisWeek = boardBusinesses.filter(b => (b.upcomingEvents?.length ?? 0) > 0).length;
-    return [
-      { num: boardBusinesses.length, label: isSpaces ? "Squadz listed" : "PLACEZ listed", color: "#ff1fa0" },
-      { num: queerOwned, label: isSpaces ? "Community-led" : "Queer-owned", color: "#c8fa3c" },
-      { num: hostingThisWeek, label: "Hosting this week", color: "#19e3ff" },
-    ];
-  }, [businesses, isSpaces]);
-
   const handleSelectCategory = (key: string) => {
     setActiveType(key);
+    setActiveNeighborhood("ALL");
     setSelectedPlace(null);
   };
-
-  const directoryMapFallback = (
-    <div style={{ height: DIRECTORY_MAP_HEIGHT, background: "#0a0a0a" }} aria-hidden />
-  );
 
   const createMutation = useMutation({
     mutationFn: async (opts?: { confirmDistinct?: boolean }) => {
@@ -626,93 +604,101 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   return (
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-      <DirectoryHero placeCount={businesses.length} squadz={isSpaces || activeType === "group"} />
+      <header className="directory-browser-header">
+        <div className="directory-browser-header__identity">
+          <img
+            className="directory-browser-header__wordmark"
+            src={isSpaces ? "/brand/family/my-squadz.svg" : "/brand/family/our-placez.svg"}
+            alt={isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}
+            decoding="async"
+          />
+          <p className="directory-browser-header__lede">
+            {isSpaces
+              ? "Find queer clubs, crews, nonprofits, and community groups across Portland."
+              : "Find Portland bars, food, shops, services, care, and spaces that are ours or truly for us."}
+          </p>
+        </div>
 
-      <section className="directory-discovery" aria-label={isSpaces ? "Find a squad" : "Find a place"}>
-        <div className="directory-discovery__panel pdx-glass-card pdx-glass-rebind">
-          <label className="directory-discovery__field directory-discovery__field--search">
-            <span>What are you looking for?</span>
+        <div className="directory-browser-search pdx-glass-card pdx-glass-rebind">
+          <label className="directory-browser-search__field">
+            <span>Search {isSpaces ? "MY SQUADZ" : "OUR PLACEZ"}</span>
             <SearchInput
-              id="directory-hero-search"
+              id="directory-search"
               aria-label={isSpaces ? "Search MY SQUADZ" : "Search OUR PLACEZ"}
-              placeholder={isSpaces ? "Name, group, or keyword" : "Name, food, nightlife, care…"}
+              placeholder={isSpaces ? "Name, group, or keyword" : "Search by name, category, neighborhood, or what you need"}
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               onClear={() => setSearchQuery("")}
-              data-testid="directory-hero-search"
+              data-testid="directory-search"
             />
           </label>
-          {!isSpaces && (
-            <label className="directory-discovery__field">
-              <span>Category</span>
+
+          <div className="directory-browser-search__filters">
+            {!isSpaces && (
+              <label className="directory-browser-search__select">
+                <span>Category</span>
+                <select
+                  value={activeType}
+                  onChange={e => handleSelectCategory(e.target.value)}
+                  aria-label="Filter by category"
+                >
+                  <option value="ALL">All categories</option>
+                  {categoryBands.map(category => (
+                    <option key={category.key} value={category.key}>
+                      {category.label} ({category.count})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label className="directory-browser-search__select">
+              <span>Neighborhood</span>
               <select
-                value={activeType}
-                onChange={e => handleSelectCategory(e.target.value)}
-                aria-label="Filter by category"
+                value={activeNeighborhood}
+                onChange={e => setActiveNeighborhood(e.target.value)}
+                aria-label="Filter by neighborhood"
               >
-                <option value="ALL">All categories</option>
-                {CATEGORY_ORDER.map(type => (
-                  <option key={type} value={type}>{TYPE_LABELS[type]}</option>
+                {neighborhoodsInUse.map(neighborhood => (
+                  <option key={neighborhood} value={neighborhood}>
+                    {neighborhood === "ALL" ? "Anywhere in Portland" : neighborhood}
+                  </option>
                 ))}
               </select>
             </label>
-          )}
-          <label className="directory-discovery__field">
-            <span>Neighborhood</span>
-            <select
-              value={activeNeighborhood}
-              onChange={e => setActiveNeighborhood(e.target.value)}
-              aria-label="Filter by neighborhood"
-            >
-              {neighborhoodsInUse.map(n => <option key={n} value={n}>{n === "ALL" ? "Anywhere in Portland" : n}</option>)}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="directory-discovery__submit"
-            onClick={() => document.getElementById("directory-results")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          >
-            Explore {isSpaces ? "squadz" : "places"}
-          </button>
+            <Button variant="solid" accent="yellow" size="md" onClick={openAddForm} data-testid="directory-top-add">
+              <Plus size={15} /> {isSpaces ? "Add a squad" : "Add a place"}
+            </Button>
+          </div>
         </div>
+
         {!isSpaces && (
-          <div className="directory-discovery__quick" aria-label="Popular categories">
-            <span>Popular:</span>
-            {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0).slice(0, 5).map(type => (
-              <button key={type} type="button" onClick={() => handleSelectCategory(type)}>
-                {TYPE_LABELS[type]}
+          <div className="directory-browser-categories" role="group" aria-label="Filter by category">
+            <button
+              type="button"
+              className={`directory-browser-category${activeType === "ALL" ? " directory-browser-category--active" : ""}`}
+              style={{ ["--_c" as string]: "#19e3ff" }}
+              aria-pressed={activeType === "ALL"}
+              onClick={() => handleSelectCategory("ALL")}
+            >
+              <span>All</span>
+              <strong>{businesses.length}</strong>
+            </button>
+            {categoryBands.map(category => (
+              <button
+                key={category.key}
+                type="button"
+                className={`directory-browser-category${activeType === category.key ? " directory-browser-category--active" : ""}`}
+                style={{ ["--_c" as string]: category.color }}
+                aria-pressed={activeType === category.key}
+                onClick={() => handleSelectCategory(category.key)}
+              >
+                <span>{category.label}</span>
+                <strong>{category.count}</strong>
               </button>
             ))}
           </div>
         )}
-      </section>
-
-      {/* Stats band */}
-      <section
-        className="directory-stats-band"
-        aria-label={isSpaces ? "MY SQUADZ totals" : "PLACEZ totals"}
-      >
-        {heroStats.map((stat, i) => (
-          <div
-            key={stat.label}
-            className={`directory-stats-band__item${i < heroStats.length - 1 ? " directory-stats-band__item--rule" : ""}`}
-          >
-            <div
-              className="directory-stats-band__num"
-              style={{
-                color: stat.color,
-                animationDelay: `${0.3 + i * 0.1}s`,
-              }}
-            >
-              <CountUpValue
-                key={stat.num > 0 ? `stat-${stat.label}-ready` : `stat-${stat.label}-pending`}
-                value={stat.num}
-              />
-            </div>
-            <div className="directory-stats-band__label">{stat.label}</div>
-          </div>
-        ))}
-      </section>
+      </header>
 
       {formOpen && (
         <ScrollReveal>
@@ -896,216 +882,59 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         </ScrollReveal>
       )}
 
-      {/* Category band rail */}
-      {!isSpaces && <section className="directory-bands" aria-label="Categories">
-        <div className="directory-bands__head">
-          <h2 className="directory-bands__title">What do you need today?</h2>
-          <span className="directory-bands__hint">Tap a band to tune the city</span>
+      <section id="directory-results" className="directory-browser-results" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
+        <div className="directory-browser-results__head">
+          <div>
+            <p className="directory-browser-results__eyebrow">Browse Portland</p>
+            <h2 className="directory-browser-results__title">
+              {activeType === "ALL" ? (isSpaces ? "All squadz" : "All PLACEZ") : TYPE_LABELS[activeType]}
+            </h2>
+          </div>
+          <div className="directory-browser-results__status">
+            <span data-testid="directory-result-count">{resultLine}</span>
+            {(searchQuery || activeType !== "ALL" || activeNeighborhood !== "ALL") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  handleSelectCategory(isSpaces ? "group" : "ALL");
+                  setActiveNeighborhood("ALL");
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
+
         {isLoading ? (
           <BoardLoadingState label="Loading directory" />
         ) : isError ? (
           <div className="directory-inline-error">Could not load directory.</div>
-        ) : (
-          <div className="directory-bands__rail" role="group" aria-label="Filter by category">
-            <button
-              type="button"
-              className={`directory-band pdx-glass pdx-glass-rebind${activeType === "ALL" ? " directory-band--active" : ""}`}
-              style={{ ["--_c" as string]: "#19e3ff" }}
-              aria-pressed={activeType === "ALL"}
-              onClick={() => handleSelectCategory("ALL")}
-              data-testid="directory-band-all"
-            >
-              <span className="directory-band__bar" aria-hidden="true" />
-              <span className="directory-band__count">{businesses.length}</span>
-              <span className="directory-band__label">All</span>
+        ) : filtered.length === 0 ? (
+          <div className="board-empty board-empty--prototype directory-browser-results__empty">
+            <p className="display section-heading">Nothing matches</p>
+            <p className="board-copy-sm">
+              {isSpaces
+                ? "Try a broader search. If a squad is missing, add it for the next person."
+                : "Try a broader search or clear the filters. If a place is missing, add it for the next person."}
+            </p>
+            <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={openAddForm} style={{ marginTop: 16 }}>
+              <Plus size={16} /> {isSpaces ? "Add a squad" : "Add a place"}
             </button>
-            {categoryBands.map(band => {
-              const active = activeType === band.key;
-              return (
-                <button
-                  key={band.key}
-                  type="button"
-                  className={`directory-band pdx-glass pdx-glass-rebind${active ? " directory-band--active" : ""}`}
-                  style={{ ["--_c" as string]: band.color }}
-                  aria-pressed={active}
-                  onClick={() => handleSelectCategory(band.key)}
-                  data-testid={`directory-band-${band.key}`}
-                >
-                  <span className="directory-band__bar" aria-hidden="true" />
-                  <span className="directory-band__count">{band.count}</span>
-                  <span className="directory-band__label">{band.label}</span>
-                </button>
-              );
-            })}
+          </div>
+        ) : (
+          <div className="directory-browser-grid">
+            {filtered.map(biz => (
+              <DirectoryCard
+                key={biz.id}
+                biz={biz}
+                onClick={(el) => openPlace(biz, el)}
+                onRequireAuth={() => setShowAuth(true)}
+              />
+            ))}
           </div>
         )}
-      </section>}
-
-      {/* Map + key + filters + dock */}
-      <section id="directory-results" className="directory-stage" aria-label={isSpaces ? "MY SQUADZ" : "PLACEZ"}>
-        <div className="directory-stage__map">
-          <div className="directory-stage__map-frame">
-            {!isLoading && (
-              <Suspense fallback={directoryMapFallback}>
-                <DirectoryMap
-                  businesses={filtered}
-                  height={DIRECTORY_MAP_HEIGHT}
-                  showKey={false}
-                />
-              </Suspense>
-            )}
-            {isLoading && directoryMapFallback}
-            <div className="directory-stage__map-seam" aria-hidden="true" />
-          </div>
-
-          <div
-            className="directory-map-key directory-map-key--dock pdx-glass pdx-glass--neutral pdx-glass-rebind"
-            role="group"
-            aria-label="Map key"
-          >
-            <span className="directory-map-key__kicker">Key</span>
-            <ul className="directory-map-key__list">
-              {CATEGORY_ORDER.filter(type => (categoryCounts[type] ?? 0) > 0 && (!isSpaces || type === "group")).map(type => {
-                const isNonprofit = type === "nonprofit";
-                const color = TYPE_COLORS[type];
-                const label = TYPE_LABELS[type];
-                return (
-                  <li key={type} className="directory-map-key__item">
-                    <span
-                      className={
-                        isNonprofit
-                          ? "directory-map-key__swatch directory-map-key__swatch--rainbow"
-                          : "directory-map-key__swatch"
-                      }
-                      style={
-                        isNonprofit
-                          ? undefined
-                          : {
-                              background: "#000",
-                              border: `3px solid ${color}`,
-                              boxShadow: "0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.85)",
-                              width: 12,
-                              height: 12,
-                            }
-                      }
-                      aria-hidden="true"
-                    />
-                    <span className="directory-map-key__label">{label}</span>
-                  </li>
-                );
-              })}
-              <li className="directory-map-key__item">
-                <span
-                  className="directory-map-key__swatch directory-map-key__swatch--rainbow"
-                  aria-hidden="true"
-                />
-                <span className="directory-map-key__label">Queer-owned</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Search + neighborhood chips: not sticky */}
-        <div className="directory-filters" id="directory-filters">
-          <div className="directory-filters__search-row">
-            <div className="directory-filters__search">
-              <SearchInput
-                id="directory-search"
-                aria-label={isSpaces ? "Search MY SQUADZ" : "Search PLACEZ"}
-                placeholder={isSpaces ? "Search MY SQUADZ…" : "Search PLACEZ…"}
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                onClear={() => setSearchQuery("")}
-                data-testid="directory-search"
-                size="sm"
-              />
-            </div>
-            <div className="directory-filters__count" data-testid="directory-result-count">
-              {resultLine}
-            </div>
-          </div>
-          <div
-            className="directory-filters__hoods"
-            role="group"
-            aria-label="Filter by neighborhood"
-          >
-            {visibleNeighborhoods.map(n => {
-              const selected = activeNeighborhood === n;
-              return (
-                <FilterChip
-                  key={n}
-                  selected={selected}
-                  fill={selected}
-                  accent="lime"
-                  onToggle={() => {
-                    setActiveNeighborhood(n);
-                    setSelectedPlace(null);
-                  }}
-                >
-                  {n}
-                </FilterChip>
-              );
-            })}
-            {neighborhoodsInUse.length > 5 && (
-              <button
-                type="button"
-                className="directory-filters__more"
-                aria-expanded={showAllNeighborhoods}
-                onClick={() => setShowAllNeighborhoods(value => !value)}
-              >
-                {showAllNeighborhoods
-                  ? "View less"
-                  : `View ${neighborhoodsInUse.length - 5} more`}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* The dock */}
-        <div ref={dockRef} className="directory-dock">
-          <div className="directory-dock__head">
-            <h2 className="directory-dock__title">{isSpaces ? "The squadz" : "The dock"}</h2>
-            <div className="directory-dock__head-right">
-              <span className="directory-dock__hint">Tap to pin it</span>
-              <button
-                type="button"
-                className="directory-dock__add"
-                onClick={openAddForm}
-                data-testid="directory-dock-add"
-              >
-                <Plus size={13} /> {isSpaces ? "Add a squad" : "Add a place"}
-              </button>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <BoardLoadingState label="Loading directory" />
-          ) : isError ? (
-            <div className="directory-inline-error">Could not load directory.</div>
-          ) : filtered.length === 0 ? (
-            <div className="board-empty board-empty--prototype directory-dock__empty">
-              <p className="display section-heading">Nothing matches</p>
-              <p className="board-copy-sm">
-                {isSpaces ? "Try a broader search. If a squad you know is genuinely missing, add it and it will be here for the next person." : "Try a broader filter. If a place you love is genuinely missing, add it and it will be here for the next person."}
-              </p>
-              <button type="button" className="btn-neon magenta pdx-glass-rebind" onClick={openAddForm} style={{ marginTop: 16 }}>
-                <Plus size={16} /> {isSpaces ? "Add a squad" : "Add your business"}
-              </button>
-            </div>
-          ) : (
-            <div className="directory-dock__list">
-              {filtered.map(biz => (
-                <DirectoryCard
-                  key={biz.id}
-                  biz={biz}
-                  onClick={(el) => openPlace(biz, el)}
-                  onRequireAuth={() => setShowAuth(true)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
       </section>
 
       {/* Add-a-place band */}

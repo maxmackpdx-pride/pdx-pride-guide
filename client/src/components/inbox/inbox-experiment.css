@@ -1045,6 +1045,10 @@ html.calm-mode .inbox-overlay--experiment::after,
   background: var(--panel-lime);
 }
 
+.inbox-exp-filter__dot--sellz {
+  background: var(--panel-green);
+}
+
 .inbox-exp-filter__dot--housing {
   background: var(--panel-cyan);
 }

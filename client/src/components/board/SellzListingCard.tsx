@@ -60,6 +60,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
     onSettled: (_data, _err, vars) => {
       if (/\/save$/.test(vars.path)) endInFlight(savePendingRef.current, post.id);
       queryClient.invalidateQueries({ queryKey: ["/api/sellz"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sellz/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sellz/saved/ids"] });
     },
   });
@@ -77,27 +78,32 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
   };
   const style = { "--listing-accent": ACCENT, "--c": ACCENT, "--_c": ACCENT } as CSSProperties;
   const isDemo = post.username === "hausing_demo";
+  const statusLabel = post.status === "ACTIVE" ? "Available" : post.status.charAt(0) + post.status.slice(1).toLowerCase();
   useEffect(() => {
     if (!expanded || !saved || !user) return;
     fetch(`/api/sellz/${post.id}/seen`, { method: "POST", credentials: "include" }).catch(() => undefined);
   }, [expanded, saved, user, post.id]);
   return (
-    <article id={`sellz-post-${post.id}`} className={`board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""} pdx-glass-rebind`} style={style} onClick={onToggle} role="button" tabIndex={0} onKeyDown={e => { if ((e.key === "Enter" || e.key === " ") && !(e.target as HTMLElement).matches("input,textarea,select,button")) { e.preventDefault(); onToggle(); } }}>
+    <article id={`sellz-post-${post.id}`} className={`board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""} pdx-glass-rebind`} style={style}>
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
+      <button className="sellz-card__open" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls={`sellz-details-${post.id}`} aria-label={`${expanded ? "Close" : "Open"} listing: ${post.title}`} />
       <div className="board-listing-card__row">
         <div className="board-listing-card__thumb" style={!post.photoUrls?.[0] ? { background: "linear-gradient(135deg,#39ff14,#0044ff)" } : undefined}>
           {post.photoUrls?.[0] ? <img src={post.photoUrls[0]} alt="" /> : <Tag size={54} aria-hidden="true" />}
+          <span className={`sellz-card__availability${post.status !== "ACTIVE" ? " sellz-card__availability--inactive" : ""}${post.status === "RESERVED" ? " sellz-card__availability--reserved" : ""}`}>{statusLabel}</span>
+          {saved ? <span className="sellz-card__saved"><Bookmark size={11} fill="currentColor" aria-hidden="true" /> Saved</span> : null}
           {post.photoUrls?.length > 1 ? <span className="board-listing-card__thumb-badge">▦ {post.photoUrls.length}</span> : null}
         </div>
         <div className="board-listing-card__main">
           <div className="board-listing-card__tags"><span className="board-listing-card__kind board-listing-card__kind--text">{post.category}</span><span className="board-listing-card__time">{timeAgo(post.createdAt)}</span></div>
           <h3 className="board-listing-card__title">{post.title}</h3>
           <div className="sellz-card__price">{money(post.priceCents)}{post.negotiable ? <small> OBO</small> : null}</div>
+          <p className="sellz-card__summary">{post.description}</p>
           <div className="board-listing-card__poster"><UserAvatar photoUrl={post.posterPhotoUrl} avatarChoice={post.avatarChoice} avatarRing={post.posterAvatarRing} displayName={post.displayName} username={post.username} href={memberProfileHref(post.username)} onClick={(e: MouseEvent) => e.stopPropagation()} size={18} /><span>@{post.username} · {post.neighborhood}</span></div>
-          <div className="board-listing-card__footer"><span className="board-listing-card__status">{post.status === "RESERVED" ? "Reserved" : `${post.condition} · Available`}</span><span className="board-listing-card__cta">View →</span></div>
+          <div className="board-listing-card__footer"><span className="board-listing-card__status">{post.condition} · {post.pickupPreference}</span><span className="board-listing-card__cta">{expanded ? "Close" : "View details"} →</span></div>
         </div>
       </div>
-      {expanded ? <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+      {expanded ? <div id={`sellz-details-${post.id}`} className="board-listing-card__expand">
         {post.photoUrls?.length ? <div className="gifting-photo-gallery">{post.photoUrls.map((url, i) => <img key={url} src={url} alt={`${post.title}, photo ${i + 1}`} />)}</div> : null}
         <p>{post.description}</p>
         <div className="gifting-details">{post.condition} · {post.pickupPreference} · {post.neighborhood}</div>

@@ -206,6 +206,29 @@ function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
   return null;
 }
 
+function MapFocus({ pins, enabled }: { pins: MapPin[]; enabled: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!enabled || pins.length === 0) return;
+    const focus = () => {
+      map.invalidateSize({ animate: false });
+      if (pins.length === 1) {
+        map.setView([pins[0].lat, pins[0].lng], 15, { animate: false });
+        return;
+      }
+      map.fitBounds(
+        pins.map(pin => [pin.lat, pin.lng] as [number, number]),
+        { padding: [28, 28], maxZoom: 14, animate: false },
+      );
+    };
+    const timers = [0, 160, 420].map(ms => window.setTimeout(focus, ms));
+    return () => timers.forEach(window.clearTimeout);
+  }, [enabled, map, pins]);
+
+  return null;
+}
+
 function buildRainbowPin() {
   return divIcon({
     html: mapPinMultiHtml(),
@@ -459,6 +482,7 @@ export default function DirectoryMap({
   interactive = true,
   showMarkers = true,
   backdrop = false,
+  focusBusiness = false,
 }: {
   businesses: Business[];
   height?: number | string;
@@ -470,6 +494,8 @@ export default function DirectoryMap({
   showMarkers?: boolean;
   /** Non-interactive full-bleed layer for the category bubble explorer. */
   backdrop?: boolean;
+  /** Center tightly on the supplied place, fitting all storefronts when needed. */
+  focusBusiness?: boolean;
 }) {
   const isBackdrop = backdrop;
   const isInteractive = interactive && !isBackdrop;
@@ -481,6 +507,10 @@ export default function DirectoryMap({
   const mapHeight = isBackdrop ? "100%" : height;
   const heightStyle = typeof mapHeight === "number" ? `${mapHeight}px` : mapHeight;
   const fillParent = mapHeight === "100%";
+  const initialCenter: [number, number] = focusBusiness && mapped[0]
+    ? [mapped[0].lat, mapped[0].lng]
+    : [45.5231, -122.6765];
+  const initialZoom = focusBusiness && mapped.length === 1 ? 15 : 12;
 
   const mapSurface = (
     <div
@@ -504,8 +534,8 @@ export default function DirectoryMap({
         </>
       )}
       <MapContainer
-        center={[45.5231, -122.6765]}
-        zoom={12}
+        center={initialCenter}
+        zoom={initialZoom}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
         maxBounds={isBackdrop ? undefined : PORTLAND_BOUNDS}
         maxBoundsViscosity={1.0}
@@ -520,7 +550,8 @@ export default function DirectoryMap({
         attributionControl={isInteractive}
       >
         <CartoVectorBasemap />
-        <MapInvalidateSize enabled={isBackdrop} />
+        <MapInvalidateSize enabled={isBackdrop || focusBusiness} />
+        <MapFocus pins={mapped} enabled={focusBusiness} />
         {mapped.map(pin => {
           const accent = TYPE_COLORS[pin.biz.type] || "#FF00CC";
           const rainbow = pin.biz.type === "nonprofit";

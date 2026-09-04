@@ -42,6 +42,18 @@ export type HubFeedEventEmbed = {
   poster?: HubFeedAuthor | null;
 };
 
+export type HubFeedVoteValue = -1 | 0 | 1;
+
+export type HubFeedEngagement = {
+  /** Compatibility content identity used by the existing profile engagement API. */
+  contentType: "HUB";
+  contentId: number;
+  /** Net community vote. The chronological feed never sorts by this value. */
+  score: number;
+  viewerVote: HubFeedVoteValue;
+  replies: number;
+};
+
 export type HubFeedItem = {
   id: string;
   kind: HubFeedKind;
@@ -82,6 +94,10 @@ export type HubFeedItem = {
    * unless they unfollowed). Used for Unfollow / Follow on feed cards.
    */
   viewerFollowsAuthor?: boolean | null;
+  /** Voting is intentionally limited to member-authored scene posts for now. */
+  engagement?: HubFeedEngagement | null;
+  /** Net votes earned across the real person’s live public scene posts. */
+  authorKarma?: number | null;
   /**
    * Viewer-scoped “what changed” on a saved post. Null for everyone else.
    * Events / GIFTZ / GIGZ have no generic save table yet.

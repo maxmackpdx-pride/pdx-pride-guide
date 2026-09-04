@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import { InboxShell } from "@/components/inbox/InboxShell";
 import HubShell from "@/components/hub/HubShell";
+import "./Inbox.css";
 
 function threadFromQuery() {
   if (typeof window === "undefined") return "";
@@ -21,7 +22,7 @@ export default function Inbox() {
 
   usePageSeo(
     "Inbox | Zaylist",
-    "Private messages from MIZZED CONNECTION posts, GIGZ, event hosts, and check-ins.",
+    "Private messages from MIZZED CONNECTION, GIGZ, GIFTZ, SELLZ, THE HAÜZ, event hosts, and check-ins.",
   );
 
   const { data: adminSession } = useQuery<{ isAdmin?: boolean; isSuperAdmin?: boolean; isPrimaryOwner?: boolean } | null>({
@@ -70,9 +71,10 @@ export default function Inbox() {
 
   if (authLoading) {
     return (
-      <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
-        <div style={{ maxWidth: 520, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <p style={{ color: "#9d9a92", lineHeight: 1.6 }}>Loading inbox…</p>
+      <div className="zine-page inbox-page board-page">
+        <div className="inbox-page-gate" aria-live="polite" aria-busy="true">
+          <span className="inbox-page-gate__pulse" aria-hidden="true" />
+          <p>Loading inbox…</p>
         </div>
       </div>
     );
@@ -80,12 +82,14 @@ export default function Inbox() {
 
   if (!user) {
     return (
-      <div className="zine-page inbox-page board-page" style={{ minHeight: "100vh" }}>
-        <div style={{ maxWidth: 520, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <p style={{ color: "#9d9a92", marginBottom: 24, lineHeight: 1.6 }}>
-            Log in to read private threads from MIZZED CONNECTION posts, GIGZ, event hosts, and check-ins.
+      <div className="zine-page inbox-page board-page">
+        <div className="inbox-page-gate inbox-page-gate--signed-out">
+          <div className="inbox-page-gate__kicker">Private messages</div>
+          <h1>Inbox</h1>
+          <p>
+            Log in to read private threads from MIZZED CONNECTION, GIGZ, GIFTZ, SELLZ, THE HAÜZ, event hosts, and check-ins.
           </p>
-          <button type="button" className="btn-neon pdx-glass-rebind" onClick={() => setShowAuth(true)}>
+          <button type="button" className="pdxBtn pdxBtn--solid pdxBtn--md pdx-glass-rebind inbox-page-gate__action" onClick={() => setShowAuth(true)}>
             LOG IN / JOIN
           </button>
         </div>
@@ -112,7 +116,7 @@ export default function Inbox() {
       kicker="Private messages"
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
-      lede="Your 1:1 threads from MIZZED CONNECTION, GIGZ, event hosts, and check-ins. Only you can see these."
+      lede="Your 1:1 threads from MIZZED CONNECTION, GIGZ, GIFTZ, SELLZ, THE HAÜZ, event hosts, and check-ins. Only you can see these."
       onLogout={() => logout()}
       onMemberNavigate={(view) => {
         if (view === "posts") setLocation("/dashboard?view=posts");
@@ -128,14 +132,7 @@ export default function Inbox() {
         Back to hub
       </button>
       <div
-        className="inbox-page"
-        style={{
-          height: "min(70dvh, 720px)",
-          minHeight: 420,
-          overflow: "hidden",
-          borderRadius: 14,
-          border: "1px solid #1c1c22",
-        }}
+        className="inbox-page-frame"
       >
         <InboxShell initialThreadId={threadId} onThreadChange={syncThreadUrl} />
       </div>

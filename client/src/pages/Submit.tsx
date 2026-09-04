@@ -24,28 +24,12 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
 import { EVENT_WEEK_DAY_OPTIONS, defaultEventWeekDateTimes } from "@shared/eventWeek";
+import "./Submit.css";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
 const EVENT_TYPES = SUBMIT_EVENT_TYPE_OPTIONS.map(opt => opt.label);
 
 const SUBMIT_RETURN_KEY = "pdx-submit-return";
-
-const sectionHeadStyle: React.CSSProperties = {
-  fontFamily: "var(--font-display)",
-  fontWeight: 800,
-  fontSize: "1.05rem",
-  letterSpacing: "0.03em",
-  textTransform: "uppercase",
-  color: "var(--panel-lime, #c8fa3c)",
-  marginBottom: 14,
-  borderBottom: "1px solid var(--panel-border, #1c1c22)",
-  paddingBottom: 8,
-};
-
-const aboutYouHeadStyle: React.CSSProperties = {
-  ...sectionHeadStyle,
-  color: "var(--panel-purple, #b06bff)",
-};
 
 type PageMode = "landing" | "submit" | "apply" | "suggest" | "claim";
 /** Kept for auth-return restore only; submit is a single page now. */
@@ -58,6 +42,85 @@ type SubmitReturnState = {
 };
 
 type StatusChip = { label: string; color: string };
+
+type FormAccent = "lime" | "cyan" | "purple" | "magenta";
+
+type ProgressItem = {
+  label: string;
+  complete: boolean;
+};
+
+function FormProgress({ items, accent = "lime" }: { items: ProgressItem[]; accent?: FormAccent }) {
+  const ready = items.filter(item => item.complete).length;
+  const percent = Math.round((ready / items.length) * 100);
+
+  return (
+    <aside className={`submit-progress submit-progress--${accent}`} aria-label="Form progress">
+      <div className="submit-progress__head">
+        <span>Progress</span>
+        <span>{ready} of {items.length} sections ready</span>
+      </div>
+      <div
+        className="submit-progress__track"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={items.length}
+        aria-valuenow={ready}
+        aria-valuetext={`${ready} of ${items.length} sections ready`}
+      >
+        <span style={{ width: `${percent}%` }} />
+      </div>
+      <ol className="submit-progress__steps">
+        {items.map((item, index) => (
+          <li key={item.label} className={item.complete ? "is-complete" : ""}>
+            <span aria-hidden="true">{item.complete ? "✓" : index + 1}</span>
+            {item.label}
+          </li>
+        ))}
+      </ol>
+    </aside>
+  );
+}
+
+function FormSection({
+  number,
+  title,
+  help,
+  accent = "lime",
+  children,
+}: {
+  number: number;
+  title: string;
+  help?: string;
+  accent?: FormAccent;
+  children: React.ReactNode;
+}) {
+  return (
+    <fieldset className={`submit-form-section submit-form-section--${accent}`}>
+      <legend>
+        <span className="submit-form-section__number">{String(number).padStart(2, "0")}</span>
+        <span>
+          <span className="submit-form-section__title">{title}</span>
+          {help && <span className="submit-form-section__help">{help}</span>}
+        </span>
+      </legend>
+      <div className="submit-form-section__body">{children}</div>
+    </fieldset>
+  );
+}
+
+function InlineFormError({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <div className="submit-inline-error" role="alert" aria-live="assertive">
+      <span aria-hidden="true">!</span>
+      <div>
+        <strong>Could not send this yet</strong>
+        <p>{message}</p>
+      </div>
+    </div>
+  );
+}
 
 function liveChip(isVerified: boolean): StatusChip {
   return isVerified
@@ -114,6 +177,7 @@ export default function Submit() {
     potentialMatches?: Array<{ title: string; venueName: string; confidence: string }>;
   } | null>(null);
   const [flowSuccess, setFlowSuccess] = useState<FlowSuccess | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [location] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const claimPathEventId = location.match(/^\/submit\/claim\/(\d+)$/)?.[1] || "";
@@ -177,11 +241,14 @@ export default function Submit() {
   });
   const venueCount = new Set(allEvents.map(ev => ev.venueName)).size;
 
-  const openAuth = () => {
+  const openAuth = (returnMode: PageMode = mode) => {
     setAuthDismissed(false);
     setShowAuth(true);
-    if (mode !== "landing") {
-      sessionStorage.setItem(SUBMIT_RETURN_KEY, JSON.stringify({ mode, submitStep }));
+    if (returnMode !== "landing") {
+      sessionStorage.setItem(SUBMIT_RETURN_KEY, JSON.stringify({
+        mode: returnMode,
+        submitStep: returnMode === "submit" ? (isApproved ? "event_details" : "promoter_app") : submitStep,
+      }));
     }
   };
 
@@ -207,6 +274,7 @@ export default function Submit() {
   useEffect(() => {
     setFlowSuccess(null);
     setEventSubmitSuccess(null);
+    setFormError(null);
     if (mode === "landing") setAuthDismissed(false);
   }, [mode]);
 
@@ -232,7 +300,7 @@ export default function Submit() {
   }));
 
   const goMode = (m: PageMode) => {
-    if (!user) { openAuth(); return; }
+    if (!user) { openAuth(m); return; }
     setMode(m);
     // Single-page submit: no step navigation (submitStep kept only for auth restore).
     if (m === "submit") setSubmitStep(isApproved ? "event_details" : "promoter_app");
@@ -319,12 +387,16 @@ export default function Submit() {
       return payload;
     },
     onSuccess: () => {
+      setFormError(null);
       toast({ title: "Application submitted!", description: "Admins will review your promoter request and be in touch." });
       setPromoterForm(emptyPromoterForm());
       setSubmitterOrg("");
       setFlowSuccess("apply");
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => {
+      setFormError(err.message);
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
   });
 
   // Event submission mutation
@@ -361,6 +433,7 @@ export default function Submit() {
       return payload;
     },
     onSuccess: (payload, vars) => {
+      setFormError(null);
       const autoApproved = !!payload.autoApproved;
       const heldForReview = !!payload.heldForReview;
       const msgs: Record<string, { title: string; desc: string }> = {
@@ -410,7 +483,10 @@ export default function Submit() {
       setSubmitStep("promoter_app");
       setFlowSuccess(vars.type === "SUGGEST" ? "suggest" : "claim");
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) => {
+      setFormError(err.message);
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
   });
 
   const startAnotherEvent = () => {
@@ -428,6 +504,7 @@ export default function Submit() {
 
   const handleSubmitWithEvent = async () => {
     if (!user) { openAuth(); return; }
+    setFormError(null);
     if (!isApproved) {
       // Fire promoter application first - bail out if it fails
       const r = await apiRequest("POST", "/api/submit", {
@@ -438,7 +515,9 @@ export default function Submit() {
       });
       if (!r.ok) {
         const payload = await r.json().catch(() => ({}));
-        toast({ title: "Error", description: payload.error || "Could not submit promoter application. Please try again.", variant: "destructive" });
+        const message = payload.error || "Could not submit promoter application. Please try again.";
+        setFormError(message);
+        toast({ title: "Error", description: message, variant: "destructive" });
         return;
       }
     }
@@ -481,6 +560,30 @@ export default function Submit() {
 
   const ticketRequired = admissionRequiresTicketUrl(eventForm.admission);
   const admissionHint = ADMISSION_OPTIONS.find(o => o.value === eventForm.admission)?.hint;
+  const submitProgress: ProgressItem[] = [
+    ...(!isApproved ? [{ label: "About you", complete: promoterForm.appReason.trim().length > 0 }] : []),
+    { label: "Event basics", complete: eventForm.title.trim().length > 0 && eventForm.description.trim().length > 0 },
+    {
+      label: "Place and time",
+      complete: eventForm.venueName.trim().length > 0
+        && (eventForm.isHouseParty || eventForm.address.trim().length > 0)
+        && eventForm.dateStart.length > 0
+        && eventForm.dateEnd.length > 0,
+    },
+    { label: "Entry and details", complete: !ticketRequired || eventForm.ticketUrl.trim().length > 0 },
+  ];
+  const applyProgress: ProgressItem[] = [
+    { label: "Account", complete: !!user },
+    { label: "Promoter background", complete: promoterForm.appReason.trim().length > 0 },
+  ];
+  const suggestProgress: ProgressItem[] = [
+    { label: "Event", complete: eventForm.title.trim().length > 0 },
+    { label: "Source", complete: eventForm.ticketUrl.trim().length > 0 || promoterForm.suggestNote.trim().length > 0 },
+  ];
+  const claimProgress: ProgressItem[] = [
+    { label: "Listing", complete: promoterForm.claimEventId.length > 0 },
+    { label: "Connection", complete: promoterForm.claimReason.trim().length > 0 },
+  ];
 
   return (
     <div className="zine-page submit-page board-page board-page--makeover">
@@ -528,6 +631,28 @@ export default function Submit() {
       )}
 
       <div className="submit-page__body">
+
+        {mode !== "landing" && !flowSuccess && !eventSubmitSuccess && (
+          <nav className="submit-intent-nav" aria-label="Submission type">
+            <button type="button" onClick={backToLanding} className="submit-intent-nav__hub">
+              All options
+            </button>
+            <div className="submit-intent-nav__choices">
+              {paths.map(path => (
+                <button
+                  key={path.key}
+                  type="button"
+                  onClick={() => goMode(path.key)}
+                  className={mode === path.key ? "is-active" : ""}
+                  aria-current={mode === path.key ? "page" : undefined}
+                  style={{ "--intent-accent": path.accent } as React.CSSProperties}
+                >
+                  {path.title}
+                </button>
+              ))}
+            </div>
+          </nav>
+        )}
 
         {/* ── LANDING (Layout A · Sorter) ── */}
         {mode === "landing" && (
@@ -625,61 +750,100 @@ export default function Submit() {
                   <span className="submit-chip-note__text">{submitNote}</span>
                 </div>
                 <form
+                  className="submit-guided-form"
+                  onInput={() => formError && setFormError(null)}
+                  onInvalidCapture={() => setFormError("Check the required fields marked with an asterisk, then try again.")}
                   onSubmit={e => { e.preventDefault(); handleSubmitWithEvent(); }}
-                  style={{ display: "flex", flexDirection: "column", gap: 24 }}
                 >
+                  <FormProgress items={submitProgress} />
                   {!isApproved && (
                     <ScrollReveal>
-                      <div style={aboutYouHeadStyle}>1 · About you (one time)</div>
-                      <div className="gifting-form-grid">
-                        <label className="span">
-                          Organization or event name (optional)
-                          <input
-                            className="board-text-field"
-                            value={submitterOrg}
-                            onChange={e => setSubmitterOrg(e.target.value)}
-                            placeholder="e.g. After Dark PDX"
-                          />
-                        </label>
-                        <label className="span">
-                          Website, Instagram, or portfolio link
-                          <input
-                            className="board-text-field"
-                            value={promoterForm.proofUrl}
-                            onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))}
-                            type="url"
-                            placeholder="https://..."
-                          />
-                        </label>
-                        <label className="span">
-                          Tell us about you as a promoter *
-                          <textarea
-                            className="board-text-field"
-                            value={promoterForm.appReason}
-                            onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))}
-                            rows={4}
-                            required
-                            placeholder="What do you run? Your connection to the PDX scene? Links to your work."
-                            style={{ resize: "vertical" }}
-                          />
-                        </label>
-                      </div>
+                      <FormSection
+                        number={1}
+                        title="About you"
+                        help="You only do this once. Approval unlocks instant publishing later."
+                        accent="purple"
+                      >
+                        <div className="gifting-form-grid">
+                          <label className="span">
+                            Organization or event name <span className="submit-optional">Optional</span>
+                            <input
+                              className="board-text-field"
+                              value={submitterOrg}
+                              onChange={e => setSubmitterOrg(e.target.value)}
+                              placeholder="e.g. After Dark PDX"
+                            />
+                          </label>
+                          <label className="span">
+                            Website, Instagram, or portfolio link <span className="submit-optional">Optional</span>
+                            <input
+                              className="board-text-field"
+                              value={promoterForm.proofUrl}
+                              onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))}
+                              type="url"
+                              inputMode="url"
+                              placeholder="https://..."
+                            />
+                          </label>
+                          <label className="span">
+                            Tell us about you as a promoter <span aria-hidden="true">*</span>
+                            <textarea
+                              className="board-text-field"
+                              value={promoterForm.appReason}
+                              onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))}
+                              rows={4}
+                              required
+                              placeholder="What do you run? Your connection to the PDX scene? Links to your work."
+                            />
+                          </label>
+                        </div>
+                      </FormSection>
                     </ScrollReveal>
                   )}
 
                   <ScrollReveal delay={isApproved ? 0 : 40}>
-                    <div style={sectionHeadStyle}>{isApproved ? "Your event" : "2 · Your event"}</div>
-                    <div className="gifting-form-grid">
-                      <label className="span">
-                        Event title *
-                        <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="Horse Meat Disco" />
-                      </label>
-                      <label className="span">
-                        Description *
-                        <textarea className="board-text-field" value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} placeholder="What's the vibe? Who is it for?" style={{ resize: "vertical" }} />
-                      </label>
+                    <FormSection
+                      number={isApproved ? 1 : 2}
+                      title="Event basics"
+                      help="Give people enough to know what the night is and whether it is for them."
+                    >
+                      <div className="gifting-form-grid">
+                        <label className="span">
+                          Event title <span aria-hidden="true">*</span>
+                          <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="Horse Meat Disco" />
+                        </label>
+                        <label className="span">
+                          Description <span aria-hidden="true">*</span>
+                          <textarea className="board-text-field" value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} required rows={4} placeholder="What's the vibe? Who is it for?" />
+                        </label>
+                        <label className="span">
+                          Event flyer or poster <span className="submit-optional">Optional</span>
+                          <ImageUploader
+                            endpoint="/api/upload/poster"
+                            fieldName="poster"
+                            currentUrl={eventForm.posterImageUrl}
+                            onUploaded={handleFlyerUploaded}
+                            label="Upload flyer"
+                          />
+                          <div className="submit-upload-status" aria-live="polite">
+                            {flyerReadStatus === "reading" && "Reading your flyer. Fields will fill in a moment."}
+                            {flyerReadStatus === "filled" && "Filled from your flyer. Double-check everything before submitting."}
+                            {flyerReadStatus === "error" && "We could not read that flyer automatically. You can still complete the form."}
+                          </div>
+                        </label>
+                      </div>
+                    </FormSection>
+                  </ScrollReveal>
+
+                  <ScrollReveal delay={60}>
+                    <FormSection
+                      number={isApproved ? 2 : 3}
+                      title="Place and time"
+                      help="Use the public venue information people should use to find the event."
+                    >
+                      <div className="gifting-form-grid">
                       <label>
-                        Venue name *
+                        Venue name <span aria-hidden="true">*</span>
                         <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} required placeholder="Crystal Ballroom" />
                       </label>
                       <label>
@@ -689,7 +853,7 @@ export default function Submit() {
                         </select>
                       </label>
                       <label className="span">
-                        Venue address *
+                        Venue address {!eventForm.isHouseParty && <span aria-hidden="true">*</span>}
                         <input
                           className="board-text-field"
                           value={eventForm.address}
@@ -714,20 +878,31 @@ export default function Submit() {
                         </select>
                       </label>
                       <label>
+                        Start <span aria-hidden="true">*</span>
+                        <input className="board-text-field" type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} required />
+                      </label>
+                      <label>
+                        End <span aria-hidden="true">*</span>
+                        <input className="board-text-field" type="datetime-local" value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
+                      </label>
+                      </div>
+                    </FormSection>
+                  </ScrollReveal>
+
+                  <ScrollReveal delay={80}>
+                    <FormSection
+                      number={isApproved ? 3 : 4}
+                      title="Entry and event details"
+                      help="Set access details, then add any tags or flags that help people decide."
+                    >
+                      <div className="gifting-form-grid">
+                      <label>
                         Age
                         <select className="board-text-field" value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
                           <option value="ALL_AGES">All ages</option>
                           <option value="18_PLUS">18+</option>
                           <option value="21_PLUS">21+</option>
                         </select>
-                      </label>
-                      <label>
-                        Start *
-                        <input className="board-text-field" type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} required />
-                      </label>
-                      <label>
-                        End *
-                        <input className="board-text-field" type="datetime-local" value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
                       </label>
                       <label>
                         Admission
@@ -753,66 +928,48 @@ export default function Submit() {
                             : admissionHint || "Optional: add a link if you have one."}
                         </div>
                       </label>
-                      <label className="span">
-                        Event flyer / poster (optional)
-                        <ImageUploader
-                          endpoint="/api/upload/poster"
-                          fieldName="poster"
-                          currentUrl={eventForm.posterImageUrl}
-                          onUploaded={handleFlyerUploaded}
-                          label="Upload flyer"
-                        />
-                        {flyerReadStatus === "reading" && (
-                          <div className="board-copy-sm" style={{ marginTop: 6, opacity: 0.8 }}>
-                            Reading your flyer… fields will fill in a moment.
-                          </div>
-                        )}
-                        {flyerReadStatus === "filled" && (
-                          <div className="board-copy-sm" style={{ marginTop: 6, color: "var(--panel-purple, #b06bff)" }}>
-                            Filled from your flyer - please double-check everything before submitting.
-                          </div>
-                        )}
-                        {flyerReadStatus === "error" && (
-                          <div className="board-copy-sm" style={{ marginTop: 6, opacity: 0.8 }}>
-                            Couldn't read that one automatically - just fill the form in below.
-                          </div>
-                        )}
-                      </label>
-                    </div>
-                  </ScrollReveal>
-
-                  <ScrollReveal delay={60}>
-                    <div style={sectionHeadStyle}>Event tags</div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {EVENT_TYPES.map(t => (
-                        <BoardFilterChip key={t} active={eventForm.selectedTypes.includes(t)} onClick={() => toggleType(t)} accent="lime">
-                          {t}
-                        </BoardFilterChip>
-                      ))}
-                    </div>
-                  </ScrollReveal>
-
-                  <ScrollReveal delay={80}>
-                    <div style={sectionHeadStyle}>Flags</div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      <EventTypeTag label="HOUSE PARTY" interactive active={eventForm.isHouseParty} onClick={() => setEventForm(f => ({ ...f, isHouseParty: !f.isHouseParty }))} testId="toggle-house-party" />
-                      <EventTypeTag label="SEX POSITIVE" interactive active={eventForm.isSexPositive} onClick={() => setEventForm(f => ({ ...f, isSexPositive: !f.isSexPositive }))} testId="toggle-sex-positive" />
-                      <EventTypeTag label="NUDITY OK" interactive active={eventForm.nudityOk} onClick={() => setEventForm(f => ({ ...f, nudityOk: !f.nudityOk }))} testId="toggle-nudity-ok" />
-                    </div>
-                    {eventForm.isHouseParty && (
-                      <div className="submit-warning" data-testid="house-party-warning">
-                        <span className="submit-warning__mark" aria-hidden="true">!</span>
-                        <div>
-                          <div className="submit-warning__title">House parties are public</div>
-                          <div className="submit-warning__body">
-                            There is no invite-only option. Anyone browsing Zaylist can see it and show up. Only post if you are open to the community attending.
-                          </div>
+                      </div>
+                      <div className="submit-choice-group">
+                        <div className="submit-choice-group__label">Event tags <span>Choose any that fit</span></div>
+                        <div className="submit-choice-row">
+                          {EVENT_TYPES.map(t => (
+                            <BoardFilterChip key={t} active={eventForm.selectedTypes.includes(t)} onClick={() => toggleType(t)} accent="lime">
+                              {t}
+                            </BoardFilterChip>
+                          ))}
                         </div>
                       </div>
-                    )}
+                      <div className="submit-choice-group">
+                        <div className="submit-choice-group__label">Flags <span>Choose any that apply</span></div>
+                        <div className="submit-choice-row">
+                          <EventTypeTag label="HOUSE PARTY" interactive active={eventForm.isHouseParty} onClick={() => setEventForm(f => ({ ...f, isHouseParty: !f.isHouseParty }))} testId="toggle-house-party" />
+                          <EventTypeTag label="SEX POSITIVE" interactive active={eventForm.isSexPositive} onClick={() => setEventForm(f => ({ ...f, isSexPositive: !f.isSexPositive }))} testId="toggle-sex-positive" />
+                          <EventTypeTag label="NUDITY OK" interactive active={eventForm.nudityOk} onClick={() => setEventForm(f => ({ ...f, nudityOk: !f.nudityOk }))} testId="toggle-nudity-ok" />
+                        </div>
+                        {eventForm.isHouseParty && (
+                          <div className="submit-warning" data-testid="house-party-warning">
+                            <span className="submit-warning__mark" aria-hidden="true">!</span>
+                            <div>
+                              <div className="submit-warning__title">House parties are public</div>
+                              <div className="submit-warning__body">
+                                There is no invite-only option. Anyone browsing Zaylist can see it and show up. Only post if you are open to the community attending.
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </FormSection>
                   </ScrollReveal>
 
                   <ScrollReveal delay={100}>
+                    <div className="submit-review-bar">
+                      <div>
+                        <strong>{isApproved ? "Ready to publish?" : "Ready for review?"}</strong>
+                        <span>Check the dates, public location, access details, and flyer before sending.</span>
+                      </div>
+                      <StatusChipEl chip={submitChip} />
+                    </div>
+                    <InlineFormError message={formError} />
                     <Button
                       type="submit"
                       disabled={eventMutation.isPending}
@@ -861,37 +1018,49 @@ export default function Submit() {
               <StatusChipEl chip={applyChip} />
               <span className="submit-chip-note__text">One-time review. No event to post yet.</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } applyMutation.mutate(); }}>
-              <div className="gifting-form-grid">
-                <label>
-                  Your name
-                  <input className="board-text-field" value={user?.displayName || user?.username || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.55 }} />
-                </label>
-                <label>
-                  Email
-                  <input className="board-text-field" value={user?.email || ""} placeholder="Log in to autofill" disabled style={{ opacity: 0.55 }} />
-                </label>
-                <label className="span">
-                  Organization or event name (optional)
-                  <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. After Dark PDX" />
-                </label>
-                <label className="span">
-                  Website, Instagram, or portfolio link
-                  <input className="board-text-field" value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" placeholder="https://..." />
-                </label>
-                <label className="span">
-                  Tell us about you as a promoter *
-                  <textarea
-                    className="board-text-field"
-                    value={promoterForm.appReason}
-                    onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))}
-                    rows={5}
-                    required
-                    placeholder="What do you run or have you run? Your connection to the PDX scene? Links or proof of your work."
-                    style={{ resize: "vertical" }}
-                  />
-                </label>
-              </div>
+            <form
+              className="submit-guided-form"
+              onInput={() => formError && setFormError(null)}
+              onInvalidCapture={() => setFormError("Tell us about your promoter background, then try again.")}
+              onSubmit={e => { e.preventDefault(); setFormError(null); if (!user) { openAuth(); return; } applyMutation.mutate(); }}
+            >
+              <FormProgress items={applyProgress} accent="purple" />
+              <FormSection number={1} title="Your account" help="These details come from your Zaylist account." accent="purple">
+                <div className="gifting-form-grid">
+                  <label>
+                    Your name
+                    <input className="board-text-field" value={user?.displayName || user?.username || ""} placeholder="Log in to autofill" disabled />
+                  </label>
+                  <label>
+                    Email
+                    <input className="board-text-field" value={user?.email || ""} placeholder="Log in to autofill" disabled />
+                  </label>
+                </div>
+              </FormSection>
+              <FormSection number={2} title="Promoter background" help="A human reviews this once. Specific links make verification easier." accent="purple">
+                <div className="gifting-form-grid">
+                  <label className="span">
+                    Organization or event name <span className="submit-optional">Optional</span>
+                    <input className="board-text-field" value={submitterOrg} onChange={e => setSubmitterOrg(e.target.value)} placeholder="e.g. After Dark PDX" />
+                  </label>
+                  <label className="span">
+                    Website, Instagram, or portfolio link <span className="submit-optional">Optional</span>
+                    <input className="board-text-field" value={promoterForm.proofUrl} onChange={e => setPromoterForm(f => ({ ...f, proofUrl: e.target.value }))} type="url" inputMode="url" placeholder="https://..." />
+                  </label>
+                  <label className="span">
+                    Tell us about you as a promoter <span aria-hidden="true">*</span>
+                    <textarea
+                      className="board-text-field"
+                      value={promoterForm.appReason}
+                      onChange={e => setPromoterForm(f => ({ ...f, appReason: e.target.value }))}
+                      rows={5}
+                      required
+                      placeholder="What do you run or have you run? Your connection to the PDX scene? Links or proof of your work."
+                    />
+                  </label>
+                </div>
+              </FormSection>
+              <InlineFormError message={formError} />
               <Button type="submit" disabled={applyMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block>
                 {applyMutation.isPending ? "Submitting..." : "Submit application"}
               </Button>
@@ -924,47 +1093,59 @@ export default function Submit() {
               <StatusChipEl chip={suggestChip} />
               <span className="submit-chip-note__text">Free account required. No promoter status needed.</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}>
-              <div className="gifting-form-grid">
-                <label className="span">
-                  Event name *
-                  <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Dance Night at Wonder Ballroom" />
-                </label>
-                <label>
-                  Venue or location (if known)
-                  <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
-                </label>
-                <label>
-                  Day
-                  <select
-                    className="board-text-field"
-                    value={eventForm.dayOfWeek}
-                    onChange={e => {
-                      const day = e.target.value;
-                      setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
-                    }}
-                  >
-                    {EVENT_WEEK_DAY_OPTIONS.map(d => (
-                      <option key={d.value} value={d.value}>{d.label}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="span">
-                  Link (if you have one)
-                  <input className="board-text-field" value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" placeholder="https://..." />
-                </label>
-                <label className="span">
-                  Where did you spot this?
-                  <textarea
-                    className="board-text-field"
-                    value={promoterForm.suggestNote}
-                    onChange={e => setPromoterForm(f => ({ ...f, suggestNote: e.target.value }))}
-                    rows={3}
-                    placeholder="Instagram, a flyer, word of mouth. Any context helps."
-                    style={{ resize: "vertical" }}
-                  />
-                </label>
-              </div>
+            <form
+              className="submit-guided-form"
+              onInput={() => formError && setFormError(null)}
+              onInvalidCapture={() => setFormError("Add the event name, then try again.")}
+              onSubmit={e => { e.preventDefault(); setFormError(null); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
+            >
+              <FormProgress items={suggestProgress} accent="magenta" />
+              <FormSection number={1} title="The event" help="Share whatever you know. Only the event name is required." accent="magenta">
+                <div className="gifting-form-grid">
+                  <label className="span">
+                    Event name <span aria-hidden="true">*</span>
+                    <input className="board-text-field" value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Dance Night at Wonder Ballroom" />
+                  </label>
+                  <label>
+                    Venue or location <span className="submit-optional">If known</span>
+                    <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
+                  </label>
+                  <label>
+                    Day
+                    <select
+                      className="board-text-field"
+                      value={eventForm.dayOfWeek}
+                      onChange={e => {
+                        const day = e.target.value;
+                        setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
+                      }}
+                    >
+                      {EVENT_WEEK_DAY_OPTIONS.map(d => (
+                        <option key={d.value} value={d.value}>{d.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </FormSection>
+              <FormSection number={2} title="Where you found it" help="A source helps the team verify the event faster." accent="magenta">
+                <div className="gifting-form-grid">
+                  <label className="span">
+                    Link <span className="submit-optional">Optional</span>
+                    <input className="board-text-field" value={eventForm.ticketUrl} onChange={e => setEventForm(f => ({ ...f, ticketUrl: e.target.value }))} type="url" inputMode="url" placeholder="https://..." />
+                  </label>
+                  <label className="span">
+                    Where did you spot this? <span className="submit-optional">Optional</span>
+                    <textarea
+                      className="board-text-field"
+                      value={promoterForm.suggestNote}
+                      onChange={e => setPromoterForm(f => ({ ...f, suggestNote: e.target.value }))}
+                      rows={3}
+                      placeholder="Instagram, a flyer, word of mouth. Any context helps."
+                    />
+                  </label>
+                </div>
+              </FormSection>
+              <InlineFormError message={formError} />
               <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="pink" size="lg" arrow block>
                 {eventMutation.isPending ? "Sending..." : "Send tip"}
               </Button>
@@ -996,44 +1177,56 @@ export default function Submit() {
               <StatusChipEl chip={claimChip} />
               <span className="submit-chip-note__text">{claimNote}</span>
             </div>
-            <form onSubmit={e => { e.preventDefault(); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}>
-              <div className="gifting-form-grid">
-                <label className="span">
-                  Event to claim *
-                  <select
-                    className="board-text-field"
-                    value={promoterForm.claimEventId}
-                    onChange={e => setPromoterForm(f => ({ ...f, claimEventId: e.target.value }))}
-                    required
-                    data-testid="select-claim-event"
-                  >
-                    <option value="">Select an unclaimed event...</option>
-                    {unclaimedEvents.map(ev => (
-                      <option key={ev.id} value={ev.id}>{ev.title} · {ev.venueName} · {ev.dayOfWeek || "TBD"}</option>
-                    ))}
-                  </select>
-                  {unclaimedError ? (
-                    <div className="submit-field-hint submit-field-hint--warn">
-                      Could not load unclaimed events.{" "}
-                      <button type="button" onClick={() => refetchUnclaimed()} className="submit-inline-retry">Retry</button>
-                    </div>
-                  ) : unclaimedEvents.length === 0 && (
-                    <div className="submit-field-hint">No unclaimed events are available right now.</div>
-                  )}
-                </label>
-                <label className="span">
-                  How are you connected to this event? *
-                  <textarea
-                    className="board-text-field"
-                    value={promoterForm.claimReason}
-                    onChange={e => setPromoterForm(f => ({ ...f, claimReason: e.target.value }))}
-                    rows={4}
-                    required
-                    placeholder="Your organizer role, plus a website, ticketing dashboard, or social link as proof."
-                    style={{ resize: "vertical" }}
-                  />
-                </label>
-              </div>
+            <form
+              className="submit-guided-form"
+              onInput={() => formError && setFormError(null)}
+              onInvalidCapture={() => setFormError("Choose a listing and explain your connection to it, then try again.")}
+              onSubmit={e => { e.preventDefault(); setFormError(null); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "CLAIM" }); }}
+            >
+              <FormProgress items={claimProgress} accent="cyan" />
+              <FormSection number={1} title="Choose the listing" help="Only unclaimed events appear here." accent="cyan">
+                <div className="gifting-form-grid">
+                  <label className="span">
+                    Event to claim <span aria-hidden="true">*</span>
+                    <select
+                      className="board-text-field"
+                      value={promoterForm.claimEventId}
+                      onChange={e => setPromoterForm(f => ({ ...f, claimEventId: e.target.value }))}
+                      required
+                      data-testid="select-claim-event"
+                    >
+                      <option value="">Select an unclaimed event...</option>
+                      {unclaimedEvents.map(ev => (
+                        <option key={ev.id} value={ev.id}>{ev.title} · {ev.venueName} · {ev.dayOfWeek || "TBD"}</option>
+                      ))}
+                    </select>
+                    {unclaimedError ? (
+                      <div className="submit-field-hint submit-field-hint--warn" role="alert">
+                        Could not load unclaimed events.{" "}
+                        <button type="button" onClick={() => refetchUnclaimed()} className="submit-inline-retry">Retry</button>
+                      </div>
+                    ) : unclaimedEvents.length === 0 && (
+                      <div className="submit-field-hint">No unclaimed events are available right now.</div>
+                    )}
+                  </label>
+                </div>
+              </FormSection>
+              <FormSection number={2} title="Confirm your connection" help="Give the team enough detail to verify that you represent this event." accent="cyan">
+                <div className="gifting-form-grid">
+                  <label className="span">
+                    How are you connected to this event? <span aria-hidden="true">*</span>
+                    <textarea
+                      className="board-text-field"
+                      value={promoterForm.claimReason}
+                      onChange={e => setPromoterForm(f => ({ ...f, claimReason: e.target.value }))}
+                      rows={4}
+                      required
+                      placeholder="Your organizer role, plus a website, ticketing dashboard, or social link as proof."
+                    />
+                  </label>
+                </div>
+              </FormSection>
+              <InlineFormError message={formError} />
               <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block data-testid="submit-button">
                 {eventMutation.isPending
                   ? "Submitting..."

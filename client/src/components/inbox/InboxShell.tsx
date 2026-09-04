@@ -36,6 +36,7 @@ const CATC: Record<Category, string> = {
   spotted: "var(--pink)",
   gigs: "var(--cyan)",
   gifting: "var(--neon-yellow, #ccff00)",
+  sellz: "var(--green, #39ff14)",
   housing: "var(--panel-cyan, #19e3ff)",
   hosts: "var(--amber)",
   checkins: "var(--green)",
@@ -44,6 +45,7 @@ const BADGE: Record<Category, string> = {
   spotted: "MIZZED CONNECTION",
   gigs: "Gig",
   gifting: "GIFTZ",
+  sellz: "SELLZ",
   housing: "THE HAÜZ",
   hosts: "Host",
   checkins: "Check-in",
@@ -53,6 +55,7 @@ const CATS: Array<[string, string]> = [
   ["spotted", "MIZZED CONNECTION"],
   ["gigs", "GIGZ"],
   ["gifting", "GIFTZ"],
+  ["sellz", "SELLZ"],
   ["housing", "THE HAÜZ"],
   ["hosts", "Hosts"],
   ["checkins", "Check-ins"],
@@ -86,6 +89,11 @@ export function InboxShell({
   const {
     threads,
     loading,
+    listError,
+    activeLoading,
+    activeError,
+    retryList,
+    retryActive,
     sendMessage,
     toggleReaction,
     setRead,
@@ -102,6 +110,7 @@ export function InboxShell({
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [reply, setReply] = useState("");
+  const [sendState, setSendState] = useState<"idle" | "sending" | "error">("idle");
   const [mobileView, setMobileView] = useState<"list" | "thread">("list");
   const [isNarrow, setIsNarrow] = useState(false);
   const [calm, setCalm] = useState(false);
@@ -145,6 +154,7 @@ export function InboxShell({
     onThreadChange?.(id);
     setMobileView("thread");
     setReply("");
+    setSendState("idle");
     setRead(id, false);
     scrollMsgs();
   };
@@ -154,6 +164,7 @@ export function InboxShell({
     onThreadChange?.(null);
     setMobileView("list");
     setReply("");
+    setSendState("idle");
     setCat("all");
     setQuery("");
     setUnreadOnly(false);
@@ -176,13 +187,19 @@ export function InboxShell({
     }
   };
   const toggleRead = (id: string, unread: boolean) => setRead(id, unread);
-  const send = (text?: string) => {
+  const send = async (text?: string) => {
     const body = (text ?? reply).trim();
-    if (!body || !activeId) return;
+    if (!body || !activeId || sendState === "sending") return;
     setReply("");
-    sendMessage(activeId, body)
-      .then(scrollMsgs)
-      .catch(() => setReply(body));
+    setSendState("sending");
+    try {
+      await sendMessage(activeId, body);
+      setSendState("idle");
+      scrollMsgs();
+    } catch {
+      setReply(body);
+      setSendState("error");
+    }
   };
 
   /* ---- Derived (ported from Inbox.dc.html renderVals) ---- */
@@ -606,8 +623,32 @@ export function InboxShell({
       <div
         className="inbox-shell-root inbox-shell-root--deep-glass pdx-glass-rebind"
         style={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}
+        aria-busy="true"
+        aria-live="polite"
       >
-        <div className="inbox-shell-loading">Loading messages…</div>
+        <div className="inbox-shell-loading">
+          <span className="inbox-shell-loading__pulse" aria-hidden="true" />
+          Loading messages…
+        </div>
+      </div>
+    );
+  }
+
+  if (listError) {
+    return (
+      <div
+        className="inbox-shell-root inbox-shell-root--deep-glass pdx-glass-rebind"
+        style={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}
+        role="alert"
+      >
+        <div className="inbox-shell-state">
+          <MailIcon size={30} />
+          <div className="pdx-display inbox-shell-state__title">Messages could not load</div>
+          <p>Check your connection, then try the inbox again.</p>
+          <Button accent="cyan" size="sm" onClick={() => void retryList()}>
+            Try again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -616,6 +657,8 @@ export function InboxShell({
   return (
     <div
       className="inbox-shell-root inbox-shell-root--deep-glass pdx-glass-rebind"
+      role="region"
+      aria-label="Private messages"
       style={{
         height: "100%",
         minHeight: 0,
@@ -711,18 +754,18 @@ export function InboxShell({
                 {filtersOpen && (
                   <div style={compactFiltersPopover}>
                     <div style={compactGroupLabel}>Folder</div>
-                    <div style={{ display: "flex", gap: "7px", marginBottom: "13px" }}>
-                      <button onClick={() => switchFolder("inbox")} style={seg(folder === "inbox")}>
+                    <div role="group" aria-label="Message folder" style={{ display: "flex", gap: "7px", marginBottom: "13px" }}>
+                      <button type="button" aria-pressed={folder === "inbox"} onClick={() => switchFolder("inbox")} style={seg(folder === "inbox")}>
                         Received <span style={segCount}>{inboxCount}</span>
                       </button>
-                      <button onClick={() => switchFolder("sent")} style={seg(folder === "sent")}>
+                      <button type="button" aria-pressed={folder === "sent"} onClick={() => switchFolder("sent")} style={seg(folder === "sent")}>
                         Sent <span style={segCount}>{sentCount}</span>
                       </button>
                     </div>
                     <div style={compactGroupLabel}>Category</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "7px", marginBottom: "13px" }}>
                       {chips.map((c) => (
-                        <button key={c.key} onClick={c.onToggle} style={c.style}>
+                        <button type="button" key={c.key} aria-pressed={cat === c.key} onClick={c.onToggle} style={c.style}>
                           {c.label}
                           <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.66rem", opacity: 0.8 }}>
                             {c.count}
@@ -730,7 +773,7 @@ export function InboxShell({
                         </button>
                       ))}
                     </div>
-                    <button onClick={() => setUnreadOnly((u) => !u)} style={chipStyle(unreadOnly, accent)}>
+                    <button type="button" aria-pressed={unreadOnly} onClick={() => setUnreadOnly((u) => !u)} style={chipStyle(unreadOnly, accent)}>
                       <span
                         style={{ width: "8px", height: "8px", borderRadius: "999px", background: "currentColor", flex: "0 0 auto" }}
                       />
@@ -757,14 +800,14 @@ export function InboxShell({
               </span>
               {inboxUnread > 0 && <span style={unreadPill}>{inboxUnread} new</span>}
             </div>
-            <div style={{ display: "flex", gap: "7px", marginBottom: "12px" }}>
-              <button onClick={() => switchFolder("inbox")} style={seg(folder === "inbox")}>
+            <div role="group" aria-label="Message folder" style={{ display: "flex", gap: "7px", marginBottom: "12px" }}>
+              <button type="button" aria-pressed={folder === "inbox"} onClick={() => switchFolder("inbox")} style={seg(folder === "inbox")}>
                 Received{" "}
                 <span style={{ opacity: 0.7, fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.7rem" }}>
                   {inboxCount}
                 </span>
               </button>
-              <button onClick={() => switchFolder("sent")} style={seg(folder === "sent")}>
+              <button type="button" aria-pressed={folder === "sent"} onClick={() => switchFolder("sent")} style={seg(folder === "sent")}>
                 Sent{" "}
                 <span style={{ opacity: 0.7, fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.7rem" }}>
                   {sentCount}
@@ -772,6 +815,7 @@ export function InboxShell({
               </button>
             </div>
             <div
+              className="inbox-search-field"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -787,6 +831,8 @@ export function InboxShell({
                 <SearchIcon size={17} />
               </span>
               <input
+                type="search"
+                aria-label="Search messages"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search messages"
@@ -809,14 +855,14 @@ export function InboxShell({
             </div>
             <div style={{ display: "flex", gap: "7px", overflowX: "auto", marginTop: "12px", paddingBottom: "2px" }}>
               {chips.map((c) => (
-                <button key={c.key} onClick={c.onToggle} style={c.style}>
+                <button type="button" key={c.key} aria-pressed={cat === c.key} onClick={c.onToggle} style={c.style}>
                   {c.label}
                   <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.66rem", opacity: 0.8 }}>
                     {c.count}
                   </span>
                 </button>
               ))}
-              <button onClick={() => setUnreadOnly((u) => !u)} style={chipStyle(unreadOnly, accent)}>
+              <button type="button" aria-pressed={unreadOnly} onClick={() => setUnreadOnly((u) => !u)} style={chipStyle(unreadOnly, accent)}>
                 <span
                   style={{ width: "8px", height: "8px", borderRadius: "999px", background: "currentColor", flex: "0 0 auto" }}
                 />
@@ -826,20 +872,50 @@ export function InboxShell({
           </div>
           )}
 
-          <div style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}>
+          <div className="inbox-thread-list" style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}>
             {visibleThreads.length === 0 && (
-              <div style={{ padding: "44px 22px", textAlign: "center", color: "var(--text-lo)" }}>
+              <div className="inbox-shell-empty" style={{ padding: "44px 22px", textAlign: "center", color: "var(--text-lo)" }}>
                 <div className="pdx-display" style={{ fontSize: "1.1rem", color: "var(--text-mid)", marginBottom: "6px" }}>
                   Nothing here
                 </div>
                 <div style={{ fontSize: "0.85rem", lineHeight: 1.5 }}>{emptyText}</div>
+                {(q || unreadOnly || cat !== "all") && (
+                  <Button
+                    variant="ghost"
+                    accent="cyan"
+                    size="sm"
+                    onClick={() => {
+                      setQuery("");
+                      setCat("all");
+                      setUnreadOnly(false);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
               </div>
             )}
             {visibleThreads.map((t) => (
-              <div key={t.id} className="pxRow" onClick={() => open(t.id)} style={t.rowStyle}>
+              <div
+                key={t.id}
+                className="pxRow"
+                role="button"
+                tabIndex={0}
+                aria-current={t.id === activeId ? "true" : undefined}
+                aria-label={`${t.unread ? "Unread conversation" : "Conversation"} with ${t.displayName}: ${t.subject}`}
+                onClick={() => open(t.id)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    open(t.id);
+                  }
+                }}
+                style={t.rowStyle}
+              >
                 <span style={{ position: "relative", flex: "0 0 auto" }}>
                   <ThreadAvatar party={t.party} masked={t.displayName === "Anonymous"} size={t.avatarSize} ring={t.ring} />
-                  {t.unread && <span style={t.dotStyle} />}
+                  {t.unread && <span style={t.dotStyle} aria-hidden="true" />}
                 </span>
                 <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "8px" }}>
@@ -910,11 +986,13 @@ export function InboxShell({
           </div>
 
           {compact && (
-            <div style={compactSearchWrap}>
+            <div className="inbox-search-field" style={compactSearchWrap}>
               <span style={{ color: "var(--text-meta)", display: "flex", flex: "0 0 auto" }}>
                 <SearchIcon size={17} />
               </span>
               <input
+                type="search"
+                aria-label="Search messages"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search messages"
@@ -939,8 +1017,26 @@ export function InboxShell({
         </aside>
 
         {/* Thread pane */}
-        <section style={threadStyle}>
-          {hasActive && at && (
+        <section style={threadStyle} aria-label="Selected conversation">
+          {activeId && activeLoading && (
+            <div className="inbox-shell-state" aria-live="polite" aria-busy="true">
+              <span className="inbox-shell-loading__pulse" aria-hidden="true" />
+              <div className="pdx-display inbox-shell-state__title">Opening conversation</div>
+            </div>
+          )}
+
+          {activeId && activeError && (
+            <div className="inbox-shell-state" role="alert">
+              <MailIcon size={30} />
+              <div className="pdx-display inbox-shell-state__title">Conversation could not load</div>
+              <p>Your message list is safe. Try opening this conversation again.</p>
+              <Button accent="cyan" size="sm" onClick={() => void retryActive()}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {hasActive && at && !activeLoading && !activeError && (
             <>
               <div
                 style={{
@@ -1119,6 +1215,11 @@ export function InboxShell({
               {/* Messages */}
               <div
                 ref={msgRef}
+                className="inbox-message-log"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions text"
+                aria-label={`Messages with ${amasked ? "Anonymous" : at.name}`}
                 style={{
                   flex: "1 1 auto",
                   minHeight: 0,
@@ -1165,7 +1266,13 @@ export function InboxShell({
               >
                 <div style={{ display: "flex", gap: "7px", flexWrap: "wrap", marginBottom: "9px" }}>
                   {quickReplies.map((qr) => (
-                    <button key={qr.label} className="pxQuick" onClick={() => send(qr.label)}>
+                    <button
+                      type="button"
+                      key={qr.label}
+                      className="pxQuick"
+                      onClick={() => void send(qr.label)}
+                      disabled={sendState === "sending"}
+                    >
                       {qr.label}
                     </button>
                   ))}
@@ -1174,8 +1281,19 @@ export function InboxShell({
                   <textarea
                     className="pxComposer"
                     value={reply}
-                    onChange={(e) => setReply(e.target.value)}
+                    onChange={(e) => {
+                      setReply(e.target.value);
+                      if (sendState === "error") setSendState("idle");
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        void send();
+                      }
+                    }}
                     placeholder="Write a reply"
+                    aria-label="Write a reply"
+                    aria-describedby={sendState === "error" ? "inbox-send-status" : "inbox-compose-hint"}
                     rows={1}
                     style={{
                       flex: "1 1 auto",
@@ -1192,15 +1310,23 @@ export function InboxShell({
                       lineHeight: 1.4,
                     }}
                   />
-                  <Button accent={accentKey} size="md" arrow onClick={() => send()} disabled={!reply.trim()}>
-                    Send
+                  <Button accent={accentKey} size="md" arrow onClick={() => void send()} disabled={!reply.trim() || sendState === "sending"}>
+                    {sendState === "sending" ? "Sending…" : "Send"}
                   </Button>
                 </div>
+                <div id="inbox-compose-hint" className="inbox-compose-hint">
+                  Enter to send. Shift + Enter for a new line.
+                </div>
+                {sendState === "error" && (
+                  <div id="inbox-send-status" className="inbox-send-error" role="alert">
+                    Reply failed. Your message is still here so you can try again.
+                  </div>
+                )}
               </div>
             </>
           )}
 
-          {!hasActive && (
+          {!hasActive && !activeLoading && !activeError && (
             <div
               style={{
                 flex: "1 1 auto",
@@ -1231,8 +1357,8 @@ export function InboxShell({
                 Pick a thread
               </div>
               <div style={{ maxWidth: "38ch", color: "var(--text-lo)", fontSize: "0.9rem", lineHeight: 1.55 }}>
-                Private threads from MIZZED CONNECTION, GIGZ, event hosts, and check-ins land here. Choose one on the left to read and
-                reply.
+                Private threads from MIZZED CONNECTION, GIGZ, GIFTZ, SELLZ, THE HAÜZ, event hosts, and check-ins land here. Choose one
+                on the left to read and reply.
               </div>
               <hr className="pdx-rainbow-rule" style={{ width: "120px", margin: "6px 0 0" }} />
             </div>

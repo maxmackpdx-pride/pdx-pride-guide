@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { Badge } from "@/components/ds";
-import { Share2 } from "lucide-react";
+import { MapPinned, Share2 } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {
@@ -18,10 +18,6 @@ import {
   type Business,
   type DirectoryEventSummary,
 } from "@/pages/Directory";
-import {
-  directoryFallbackLogo,
-  resolveDirectoryLogo,
-} from "@/lib/directoryLogos";
 import { placeGoogleMapsUrl, placeAppleMapsUrl, telHref } from "@/lib/placeLinks";
 import { placePath } from "@shared/placeSlug";
 import { sharePageLink, shareToastTitle } from "@/lib/shareEvent";
@@ -29,6 +25,7 @@ import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import { resolveBusinessLocations } from "@shared/businessLocations";
+import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
 
 /** Source-card rect for little→big FLIP expand. */
@@ -400,8 +397,14 @@ export default function PlaceModal({
           : isGroup
             ? GROUP_EDGE
             : `linear-gradient(${accent},${accent})`;
-  const logoUrl = resolveDirectoryLogo(place.name, place.imageUrl);
-  const fallbackLogoUrl = directoryFallbackLogo(place.type);
+  const hasMapCoordinates =
+    locations.some(location =>
+      location.lat != null &&
+      location.lng != null &&
+      Number.isFinite(location.lat) &&
+      Number.isFinite(location.lng),
+    ) ||
+    (place.lat != null && place.lng != null && Number.isFinite(place.lat) && Number.isFinite(place.lng));
 
   const startEditing = () => {
     if (isOwner) {
@@ -541,24 +544,25 @@ export default function PlaceModal({
         </div>
 
         <div>
-          <div className="place-modal-panel__media">
-            <div className="place-modal-panel__media-glow" aria-hidden="true" />
-            <div className="place-modal-panel__media-scan" aria-hidden="true" />
-            {logoUrl ? (
-              <img
-                className="place-modal-panel__logo"
-                src={logoUrl}
-                alt={`${place.name} logo`}
-                loading="lazy"
+          <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
+            {hasMapCoordinates ? (
+              <DirectoryMap
+                businesses={[displayed]}
+                height="100%"
+                showKey={false}
+                interactive
+                focusBusiness
               />
             ) : (
-              <img
-                className="place-modal-panel__logo place-modal-panel__logo--fallback"
-                src={fallbackLogoUrl}
-                alt={categoryLabel}
-                loading="lazy"
-              />
+              <div className="place-modal-panel__map-empty">
+                <MapPinned size={28} aria-hidden="true" />
+                <span>Map location not added yet</span>
+              </div>
             )}
+            <div className="place-modal-panel__map-label">
+              <MapPinned size={14} aria-hidden="true" />
+              <span>{multiLoc ? `${locations.length} locations` : place.neighborhood || "Portland"}</span>
+            </div>
           </div>
 
           <div className="place-modal-panel__body">

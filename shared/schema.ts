@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, unique } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -842,6 +842,24 @@ export const insertHubFeedPostSchema = createInsertSchema(hubFeedPosts).omit({
 });
 export type InsertHubFeedPost = z.infer<typeof insertHubFeedPostSchema>;
 export type HubFeedPost = typeof hubFeedPosts.$inferSelect;
+
+// Existing profile likes evolved into signed votes for public Hub posts.
+// The historical table name stays in place so every existing like remains a +1 vote.
+export const contentVotes = sqliteTable("content_likes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  contentType: text("content_type").notNull(),
+  contentId: integer("content_id").notNull(),
+  userId: integer("user_id").notNull(),
+  value: integer("value").notNull().default(1),
+  createdAt: text("created_at").notNull().default(""),
+}, (table) => [
+  unique("content_likes_content_user_unique").on(
+    table.contentType,
+    table.contentId,
+    table.userId,
+  ),
+]);
+export type ContentVote = typeof contentVotes.$inferSelect;
 
 // Event hosts (up to 3 per event - primary + co-hosts)
 export const eventHosts = sqliteTable("event_hosts", {

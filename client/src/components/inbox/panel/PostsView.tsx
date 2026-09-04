@@ -128,6 +128,14 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
       actions: [{ label: "EDIT", href: "/gifting" }],
     })),
   );
+  const sellz = useMine<any>("/api/sellz/mine", (rows) =>
+    rows.map((listing) => ({
+      key: `sellz-${listing.id}`,
+      title: listing.title || "SELLZ listing",
+      meta: `SELLZ · ${listing.status || "Active"}`,
+      actions: [{ label: "EDIT", href: `/sellz?post=${listing.id}` }],
+    })),
+  );
   const spotted = useMine<any>("/api/missed-connections/mine", (rows) =>
     rows.map((s) => ({
       key: `spotted-${s.id}`,
@@ -205,6 +213,15 @@ export default function PostsView({ onNavigate }: { onNavigate?: (href: string) 
           items={gifting}
           open={!!open.gifting}
           onToggle={() => toggle("gifting")}
+          onNavigate={onNavigate}
+        />
+        <Section
+          title="SELLZ"
+          color={C.green}
+          countLabel={`${sellz.length} LISTINGS`}
+          items={sellz}
+          open={!!open.sellz}
+          onToggle={() => toggle("sellz")}
           onNavigate={onNavigate}
         />
         <Section

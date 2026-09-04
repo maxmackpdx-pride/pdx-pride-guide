@@ -261,65 +261,76 @@
   cursor: default;
 }
 
-/* ── Logo media well (soft orb, matches open PlaceCard) ───── */
-.place-modal-panel__media {
+/* ── Place-first map well ───────────────────────────────────
+   Open cards lead with location. Maps keep the canonical debossed
+   treatment and never receive an outer neon bloom. */
+.place-modal-panel__map {
   position: relative;
-  height: 190px;
-  display: grid;
-  place-items: center;
-  padding: 28px 22px 22px;
-  background: transparent;
+  height: clamp(220px, 38vw, 280px);
   overflow: hidden;
+  background: var(--map-surface-bg, #06060a);
+  border-bottom: 1px solid #000;
+  box-shadow:
+    inset 0 -1px 0 #23232a,
+    inset 0 -18px 34px -30px rgba(0, 0, 0, .96);
 }
 
-.place-modal-panel__media-glow {
+.place-modal-panel__map .directory-map,
+.place-modal-panel__map .directory-map-wrap {
+  height: 100% !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.place-modal-panel__map .leaflet-container {
+  height: 100%;
+}
+
+.place-modal-panel__map-label {
   position: absolute;
-  left: 50%;
-  top: 54%;
-  width: 88%;
-  height: 96%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse closest-side,
-    color-mix(in srgb, var(--c) 42%, transparent),
-    color-mix(in srgb, var(--c) 14%, transparent) 45%,
-    transparent 70%
-  );
-  filter: blur(26px);
-  z-index: 1;
+  left: 14px;
+  bottom: 14px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in srgb, var(--c) 44%, #202027);
+  border-radius: 999px;
+  background: rgba(5, 5, 7, .9);
+  color: #f5f2eb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: 800 10px/1 var(--font-mono, monospace);
+  letter-spacing: .1em;
+  text-transform: uppercase;
   pointer-events: none;
 }
 
-.place-modal-panel__media-scan {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.14;
-  z-index: 1;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0 3px,
-    rgba(0, 0, 0, 0.16) 3px 4px
-  );
+.place-modal-panel__map-label svg {
+  color: var(--c);
 }
 
-.place-modal-panel__logo {
-  position: relative;
-  z-index: 3;
-  max-width: 78%;
-  max-height: 150px;
-  object-fit: contain;
-  mix-blend-mode: screen;
-  filter: contrast(1.35) brightness(1.06)
-    drop-shadow(0 0 14px color-mix(in srgb, var(--c) 50%, transparent));
+.place-modal-panel__map-empty {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  color: #77736c;
+  background:
+    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--c) 10%, transparent), transparent 35%),
+    #06060a;
+  font: 700 10px/1.3 var(--font-mono, monospace);
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
 
-.place-modal-panel__logo--fallback {
-  max-width: 40%;
-  max-height: 100px;
-  mix-blend-mode: normal;
-  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--c) 55%, transparent));
+.place-modal-panel__map-empty svg {
+  color: var(--c);
 }
 
 /* ── Body content ─────────────────────────────────────────── */

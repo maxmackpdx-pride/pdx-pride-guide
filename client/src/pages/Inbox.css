@@ -1,0 +1,113 @@
+.inbox-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(80% 50% at 50% 0%, rgba(26, 77, 255, 0.08), transparent 68%),
+    var(--z-black, #050506);
+}
+
+.inbox-page-frame {
+  height: min(72dvh, 760px);
+  min-height: 520px;
+  overflow: hidden;
+  border: 1px solid var(--ink-border-default, #1c1c22);
+  border-radius: 16px;
+  background: #050506;
+  box-shadow:
+    0 0 0 1px #000,
+    0 24px 60px -36px rgba(26, 77, 255, 0.42);
+}
+
+.inbox-page-gate {
+  width: min(100% - 40px, 560px);
+  min-height: 70vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--text-lo, #9d9a92);
+}
+
+.inbox-page-gate p {
+  max-width: 46ch;
+  margin: 0;
+  line-height: 1.65;
+}
+
+.inbox-page-gate h1 {
+  margin: 0;
+  color: var(--text-hi, #fff);
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.inbox-page-gate__kicker {
+  color: var(--cyan, #00ffff);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.inbox-page-gate__action {
+  margin-top: 10px;
+}
+
+.inbox-page-gate__pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--cyan, #00ffff);
+  box-shadow: 0 0 16px -2px var(--cyan, #00ffff);
+  animation: inbox-page-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes inbox-page-pulse {
+  from { opacity: 0.38; transform: scale(0.82); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 860px) {
+  .inbox-page-frame {
+    height: min(74dvh, 760px);
+    min-height: 560px;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .inbox-page-frame {
+    width: calc(100% + 24px);
+    height: calc(100dvh - 190px);
+    min-height: 520px;
+    margin-inline: -12px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .inbox-page-gate {
+    width: min(100% - 24px, 560px);
+    padding-inline: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inbox-page-gate__pulse {
+    animation: none;
+  }
+}
+
+html.calm-mode .inbox-page-gate__pulse,
+:root[data-calm="true"] .inbox-page-gate__pulse {
+  animation: none;
+  box-shadow: none;
+}

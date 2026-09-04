@@ -8,6 +8,8 @@ export function categoryFromContext(contextType?: string | null): Category {
   }
   // Gift / ISO interest threads - never "Host" (that badge is for event hosts).
   if (ctx === "GIFTING") return "gifting";
+  // Marketplace interest and seller-selection threads stay distinct from hosts.
+  if (ctx === "SELLZ") return "sellz";
   // HAUSING: request to chat and request to join share one thread context.
   if (ctx === "HOUSING") return "housing";
   if (

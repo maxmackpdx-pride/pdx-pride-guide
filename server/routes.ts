@@ -3923,6 +3923,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ liked: result.liked, likes: result.likes });
   });
 
+  // Signed voting starts with public member-authored Hub posts. Historical
+  // likes remain +1 votes, while the existing like route stays compatible.
+  app.post("/api/content/HUB/:id/vote", requireAuth, (req: any, res) => {
+    const id = Number(req.params.id);
+    const value = Number(req.body?.value);
+    if (!Number.isInteger(id) || id <= 0 || ![-1, 0, 1].includes(value)) {
+      return res.status(400).json({ error: "Vote must be -1, 0, or 1" });
+    }
+    const result = storage.voteOnHubPost(id, req.session.userId!, value as -1 | 0 | 1);
+    if (result.error) {
+      return res.status(result.error === "Not found" ? 404 : 400).json({ error: result.error });
+    }
+    res.json(result);
+  });
+
   // List reply thread for board / hub content on public profile Updates.
   // GIG + HUB: public content_replies bodies.
   // SPOTTED + GIFTING: count-only (private native flows); no reply bodies.

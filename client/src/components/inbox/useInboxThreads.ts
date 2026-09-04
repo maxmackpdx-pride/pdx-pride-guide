@@ -147,7 +147,12 @@ export function useInboxThreads(activeThreadId: string | null) {
     return true;
   }, [queryClient, toast]);
 
-  const { data: inbox = [], isLoading: inboxLoading } = useQuery<ApiMessageRow[]>({
+  const {
+    data: inbox = [],
+    isLoading: inboxLoading,
+    isError: inboxError,
+    refetch: refetchInbox,
+  } = useQuery<ApiMessageRow[]>({
     queryKey: ["/api/messages/inbox"],
     queryFn: async () => {
       const r = await fetch("/api/messages/inbox", { credentials: "include" });
@@ -157,7 +162,12 @@ export function useInboxThreads(activeThreadId: string | null) {
     enabled: !!user,
   });
 
-  const { data: sent = [], isLoading: sentLoading } = useQuery<ApiMessageRow[]>({
+  const {
+    data: sent = [],
+    isLoading: sentLoading,
+    isError: sentError,
+    refetch: refetchSent,
+  } = useQuery<ApiMessageRow[]>({
     queryKey: ["/api/messages/sent"],
     queryFn: async () => {
       const r = await fetch("/api/messages/sent", { credentials: "include" });
@@ -167,7 +177,12 @@ export function useInboxThreads(activeThreadId: string | null) {
     enabled: !!user,
   });
 
-  const { data: activePayload } = useQuery({
+  const {
+    data: activePayload,
+    isLoading: activeLoading,
+    isError: activeError,
+    refetch: refetchActive,
+  } = useQuery({
     queryKey: ["/api/messages/thread", activeThreadId],
     queryFn: async () => {
       const r = await fetch(`/api/messages/thread/${encodeURIComponent(activeThreadId!)}`, { credentials: "include" });
@@ -413,6 +428,15 @@ export function useInboxThreads(activeThreadId: string | null) {
   return {
     threads,
     loading: inboxLoading || sentLoading,
+    listError: inboxError || sentError,
+    activeLoading,
+    activeError,
+    retryList: async () => {
+      await Promise.all([refetchInbox(), refetchSent()]);
+    },
+    retryActive: async () => {
+      await refetchActive();
+    },
     deletedCount,
     sendMessage,
     toggleReaction,

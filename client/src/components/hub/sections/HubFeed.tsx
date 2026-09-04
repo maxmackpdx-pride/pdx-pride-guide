@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import BoardFeedSkeleton from "@/components/BoardFeedSkeleton";
 import {
   HUB_FEED_TABS,
@@ -127,10 +127,12 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
   });
   const canPost = postOptionsQuery.data?.canPost ?? canPostToFeed;
 
-  const feedQuery = useQuery<HubFeedResponse>({
+  const feedQuery = useInfiniteQuery<HubFeedResponse>({
     queryKey: ["/api/hub/feed", filter, user?.id ?? "guest"],
-    queryFn: async () => {
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams({ tab: filter, limit: "30" });
+      if (pageParam) params.set("cursor", pageParam as string);
       try {
         const r = await fetch(`/api/hub/feed?${params}`, { credentials: "include" });
         // Local demo (no session): API is auth-gated - scene sample cards for look/feel.
@@ -148,6 +150,7 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
         throw err;
       }
     },
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
 
   const { data: events = [] } = useQuery<EventListing[]>({
@@ -193,10 +196,20 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
     setDismissTick((t) => t + 1);
   };
 
-  const items = feedQuery.data?.items ?? [];
-  const pinned = feedQuery.data?.pinned ?? [];
+  const items = useMemo(() => {
+    const seen = new Set<string>();
+    return (feedQuery.data?.pages ?? []).flatMap((page) =>
+      page.items.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      }),
+    );
+  }, [feedQuery.data?.pages]);
+  const pinned = feedQuery.data?.pages[0]?.pinned ?? [];
   const loading = feedQuery.isLoading;
-  const error = feedQuery.isError;
+  // A failed older-page request should keep the updates already on screen.
+  const error = feedQuery.isError && !feedQuery.data?.pages.length;
   const hasContent = items.length > 0 || pinned.length > 0;
 
   // Audience is derived server-side from the session cookie (do not spoof via query).
@@ -281,49 +294,80 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
 
   return (
     <div className="reveal hub-feed">
-      {/* Post to feed sits at the top of the feed (not a second hub page). */}
+      <section className="card hub-feed-toolbar pdx-glass-rebind" aria-labelledby="scene-feed-title">
+        <div className="hub-feed-toolbar__top">
+          <div>
+            <div className="kick hub-feed-toolbar__kick">Scene feed</div>
+            <h2 id="scene-feed-title" className="hub-feed-toolbar__title">Portland, right now.</h2>
+          </div>
+          <button
+            type="button"
+            className="ico hub-feed-refresh"
+            onClick={() => feedQuery.refetch()}
+            disabled={feedQuery.isFetching}
+            aria-label="Refresh scene feed"
+          >
+            {feedQuery.isFetching && !feedQuery.isFetchingNextPage ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
+        <p className="hub-feed-toolbar__copy">
+          Fresh from local people, places, and boards. New activity stays chronological, with scene staples pinned below.
+        </p>
+        <div className="hub-feed-toolbar__controls">
+          <div className="hs hub-feed-tabs" role="tablist" aria-label="Filter scene feed">
+            {HUB_FEED_TABS.map((f) => (
+              <button
+                key={f.key}
+                id={`hub-feed-tab-${f.key}`}
+                type="button"
+                role="tab"
+                aria-selected={filter === f.key}
+                aria-controls="hub-feed-results"
+                className={`seg${filter === f.key ? " on" : ""}`}
+                onClick={() => setFilter(parseHubFeedTab(f.key))}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          {!loading && !error && (
+            <span className="kick hub-feed-toolbar__count" aria-live="polite">
+              {items.length} recent
+            </span>
+          )}
+        </div>
+      </section>
+
+      {/* Post to feed stays embedded here, not on a second hub page. */}
       {canPost ? (
         <HubPost embedded />
       ) : (
-        <div className="card hub-feed-panel pdx-glass-rebind">
+        <div className="card hub-feed-panel hub-feed-panel--locked pdx-glass-rebind">
           <div className="kick hub-feed-panel__kick">Post to the feed</div>
           <p className="hub-feed-panel__copy">
-            Coming soon for members. Admins, event hosts, and directory venue owners can post now.
+            Posting is rolling out to members. Event hosts and verified place owners can post now.
           </p>
         </div>
       )}
 
-      <div className="card hub-feed-panel pdx-glass-rebind">
-        <div className="kick hub-feed-panel__kick">Scene feed</div>
-        <p className="hub-feed-panel__copy">
-          New events, board posts, RSVPs, and beach check-ins stack on top. Scene staples stay pinned below.
-        </p>
-      </div>
-
-      <div className="hs hub-feed-tabs">
-        {HUB_FEED_TABS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            className={`seg${filter === f.key ? " on" : ""}`}
-            onClick={() => setFilter(parseHubFeedTab(f.key))}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
       {featuredAd}
 
       {loading && (
-        <div className="card hub-empty hub-feed-empty hub-feed-empty--load pdx-glass-rebind">
+        <div
+          id="hub-feed-results"
+          className="card hub-empty hub-feed-empty hub-feed-empty--load pdx-glass-rebind"
+          role="status"
+          aria-live="polite"
+        >
           <BoardFeedSkeleton label="Loading scene feed" shape="feed" count={4} />
         </div>
       )}
 
       {error && !loading && (
-        <div className="card hub-empty hub-feed-empty pdx-glass-rebind">
-          <p className="hub-feed-empty__msg">Could not load the feed.</p>
+        <div id="hub-feed-results" className="card hub-empty hub-feed-empty pdx-glass-rebind" role="alert">
+          <div className="kick hub-feed-empty__kick">Feed unavailable</div>
+          <h3 className="hub-feed-empty__title">Portland went quiet for a second.</h3>
+          <p className="hub-feed-empty__msg">The feed did not load. Your filters and place in the Hub are still here.</p>
           <button
             type="button"
             className="ico hub-feed-retry"
@@ -335,13 +379,25 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
       )}
 
       {!loading && !error && !hasContent && (
-        <div className="card hub-empty hub-feed-empty pdx-glass-rebind">
+        <div id="hub-feed-results" className="card hub-empty hub-feed-empty pdx-glass-rebind" role="status">
+          <div className="kick hub-feed-empty__kick">Nothing new</div>
+          <h3 className="hub-feed-empty__title">This lane is clear.</h3>
           <p className="hub-feed-empty__msg">{emptyCopy(filter)}</p>
+          {filter !== "all" && (
+            <button type="button" className="ico hub-feed-retry" onClick={() => setFilter("all")}>
+              Show everything →
+            </button>
+          )}
         </div>
       )}
 
       {!loading && !error && hasContent && (
-        <div className="hub-feed-stack">
+        <div
+          id="hub-feed-results"
+          className="hub-feed-stack"
+          role="tabpanel"
+          aria-labelledby={`hub-feed-tab-${filter}`}
+        >
           {feedRows.map((row) =>
             row.kind === "affiliate" ? (
               row.ad ? (
@@ -354,11 +410,32 @@ export default function HubFeed({ canPostToFeed = false }: Props) {
             ),
           )}
           {items.length > 0 && pinned.length > 0 && (
-            <div className="kick hub-feed-pinned">On the board</div>
+            <div className="hub-feed-pinned" role="separator">
+              <span className="kick hub-feed-pinned__label">Scene staples</span>
+              <span className="hub-feed-pinned__copy">Useful posts kept within reach</span>
+            </div>
           )}
           {pinned.map((item) => (
             <HubFeedCard key={item.id} item={item} />
           ))}
+          {feedQuery.hasNextPage && (
+            <button
+              type="button"
+              className="hub-feed-more pdx-glass-btn pdx-glass-rebind"
+              onClick={() => feedQuery.fetchNextPage()}
+              disabled={feedQuery.isFetchingNextPage}
+            >
+              {feedQuery.isFetchingNextPage ? "Loading older updates…" : "Load older updates"}
+            </button>
+          )}
+          {feedQuery.isFetchNextPageError && (
+            <div className="hub-feed-more-error" role="alert">
+              <span>Older updates did not load.</span>
+              <button type="button" className="ico" onClick={() => feedQuery.fetchNextPage()}>
+                Try again →
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
