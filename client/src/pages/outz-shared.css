@@ -5,7 +5,7 @@
 
    Source design: "Outz Homepage.dc.html" + "Outz Place.dc.html" (claude.ai/design). */
 
-.outz-surface {
+.outz-surface.pdx-glass-rebind {
   /* OUTZ keeps a semantic alias for its field states, while --c is the
      canonical Design System accent channel inherited by its glass surfaces. */
   --c: var(--cyan, #00ffff);
@@ -55,7 +55,7 @@
 .outz-empty { color: var(--text-lo, #999); font-size: 14px; grid-column: 1 / -1; margin: 0; padding: 20px 0; }
 
 /* ---------- card ---------- */
-.outz-card {
+.outz-card.pdx-glass-rebind {
   --c: var(--outz-c);
   border-radius: var(--radius-tile, 10px);
   display: flex; flex-direction: column; overflow: hidden;
@@ -86,7 +86,7 @@
 .outz-card__cta { margin-top: auto; padding-top: 8px; }
 
 /* ---------- panel (place page's working surfaces) ---------- */
-.outz-panel {
+.outz-panel.pdx-glass-rebind {
   --c: var(--outz-c);
   border-radius: var(--radius-panel, 14px);
   padding: clamp(20px, 3vw, 26px);

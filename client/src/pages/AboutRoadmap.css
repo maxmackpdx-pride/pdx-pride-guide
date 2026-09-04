@@ -769,7 +769,7 @@
         color: var(--slate-9);
         white-space: nowrap;
       }
-      .stop {
+      .stop.pdx-glass-rebind {
         --c: var(--slate-12);
         align-self: center;
         position: relative;
@@ -995,7 +995,7 @@
         object-fit: cover;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.36);
       }
-      .foundation-link {
+      .foundation-link.pdx-glass-rebind {
         --c: #19e3ff;
         text-decoration: none;
       }
@@ -1776,7 +1776,7 @@
         height: 1px !important;
         overflow: hidden !important;
       }
-      .idea-submit {
+      .idea-submit.pdx-glass-rebind {
         grid-column: 1/-1;
         justify-self: start;
         --c: var(--product);
@@ -2108,7 +2108,7 @@
         font: 900 clamp(28px, 4vw, 52px)/.98 Barlow Condensed, sans-serif;
         text-transform: uppercase;
       }
-      .founder-open {
+      .founder-open.pdx-glass-rebind {
         --c: var(--system);
         position: relative;
         isolation: isolate;

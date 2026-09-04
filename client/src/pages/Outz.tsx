@@ -75,7 +75,7 @@ function StatusLine({ tone, children }: { tone: "good" | "warn" | "bad"; childre
 
 function MotifBand({ src, accent }: { src: string; accent: string }) {
   return (
-    <div className="outz-card__band" style={{ "--c": accent, "--outz-c": accent } as CSSProperties} aria-hidden="true">
+    <div className="outz-card__band pdx-glass-rebind" style={{ "--c": accent, "--outz-c": accent } as CSSProperties} aria-hidden="true">
       <img src={src} alt="" loading="lazy" />
     </div>
   );
@@ -106,7 +106,7 @@ export default function Outz() {
   const legendKinds = LEGEND.filter(kind => allPlaces.some(place => place.kind === kind));
 
   return (
-    <div className="zine-page board-page outz-surface outz-page">
+    <div className="zine-page board-page outz-surface outz-page pdx-glass-rebind">
       <div className="outz-surface__terrain" aria-hidden="true" />
       <img className="outz-surface__topo" src={`${OUTZ_MOTIF}/topographic-ridge-basin-amber.svg`} alt="" aria-hidden="true" />
 

@@ -203,7 +203,7 @@ export default function OutzPlace() {
   );
 
   if (!snapshotQuery.isLoading && !place) {
-    return <div className="outz-surface outz-place--missing"><h1>That OUTZ address isn’t current.</h1><Link href="/outz">Back to OUTZ</Link></div>;
+    return <div className="outz-surface outz-place--missing pdx-glass-rebind"><h1>That OUTZ address isn’t current.</h1><Link href="/outz">Back to OUTZ</Link></div>;
   }
 
   const alert = destination?.alerts[0] ?? null;

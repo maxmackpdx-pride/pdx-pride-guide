@@ -160,7 +160,7 @@ export default function TheBigOne({
 
   return (
     <section
-      className={`tbo${className ? ` ${className}` : ""}`}
+      className={`tbo pdx-glass-rebind${className ? ` ${className}` : ""}`}
       style={{ "--tbo-day": dayColor, "--tbo-day-ink": dayInk, "--tbo-opposite": DAY_OPPOSITE[dayCode] || "#CCFF00", "--c": dayColor } as CSSProperties}
       aria-label={`The Big One: ${event.title}`}
     >

@@ -55,7 +55,7 @@
   right: clamp(-70px, -4vw, -30px); top: -60px; width: min(520px, 64vw); z-index: 0;
 }
 .outz-map-frame > .outz-map { position: relative; z-index: 1; }
-.outz-map__chip {
+.outz-map__chip.pdx-glass-rebind {
   --c: var(--neon-orange, #ff6600);
   background: rgba(5, 5, 7, .88); border: 1px solid #000;
   box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, .75);
