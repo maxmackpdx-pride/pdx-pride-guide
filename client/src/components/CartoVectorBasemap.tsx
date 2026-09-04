@@ -19,6 +19,19 @@ type Props = {
   accent?: string | null;
 };
 
+function canUseWebGL(): boolean {
+  if (typeof window === "undefined" || typeof document === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl2") || canvas.getContext("webgl")),
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function CartoVectorBasemap({ accent }: Props) {
   const map = useMap();
 
@@ -30,15 +43,39 @@ export default function CartoVectorBasemap({ accent }: Props) {
     });
     raster.addTo(map);
 
-    const layer = maplibreGL({
-      style: cartoDarkVectorStyleUrl(),
-      minZoom: 1,
-      transformRequest: cartoTransformRequest,
-    });
-    Object.assign(layer.options, { attribution: CARTO_ATTRIBUTION });
-    layer.addTo(map);
+    if (!canUseWebGL()) {
+      return () => {
+        if (map.hasLayer(raster)) map.removeLayer(raster);
+      };
+    }
 
-    const gl = layer.getMaplibreMap();
+    let layer: ReturnType<typeof maplibreGL> | null = null;
+    let gl: ReturnType<ReturnType<typeof maplibreGL>["getMaplibreMap"]> | null = null;
+    let onVectorLoad: (() => void) | null = null;
+
+    try {
+      layer = maplibreGL({
+        style: cartoDarkVectorStyleUrl(),
+        minZoom: 1,
+        transformRequest: cartoTransformRequest,
+      });
+      Object.assign(layer.options, { attribution: CARTO_ATTRIBUTION });
+      layer.addTo(map);
+      gl = layer.getMaplibreMap();
+    } catch (error) {
+      console.warn("Vector map unavailable; keeping the raster basemap.", error);
+      if (layer && map.hasLayer(layer)) {
+        try {
+          map.removeLayer(layer);
+        } catch {
+          // A partially initialized MapLibre layer may not be removable.
+        }
+      }
+      return () => {
+        if (map.hasLayer(raster)) map.removeLayer(raster);
+      };
+    }
+
     const applyAccent = () => {
       if (!accent) return;
       const water = mixHex(WATER_BASE, accent, 0.22);
@@ -50,16 +87,22 @@ export default function CartoVectorBasemap({ accent }: Props) {
       if (gl.getLayer("watername_lake")) gl.setPaintProperty("watername_lake", "text-color", mixHex("#8a8a8a", accent, 0.45));
     };
 
-    const onVectorLoad = () => {
+    onVectorLoad = () => {
       applyAccent();
-      map.removeLayer(raster);
+      if (map.hasLayer(raster)) map.removeLayer(raster);
     };
     if (gl.loaded()) onVectorLoad();
     else gl.once("load", onVectorLoad);
 
     return () => {
-      gl.off("load", onVectorLoad);
-      map.removeLayer(layer);
+      if (onVectorLoad) gl?.off("load", onVectorLoad);
+      if (layer && map.hasLayer(layer)) {
+        try {
+          map.removeLayer(layer);
+        } catch {
+          // MapLibre can be only partially initialized if WebGL disappears.
+        }
+      }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
   }, [map, accent]);

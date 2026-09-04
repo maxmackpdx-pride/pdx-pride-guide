@@ -399,12 +399,17 @@ export default function PlaceModal({
             : `linear-gradient(${accent},${accent})`;
   const hasMapCoordinates =
     locations.some(location =>
+      Boolean(location.address?.trim()) &&
       location.lat != null &&
       location.lng != null &&
       Number.isFinite(location.lat) &&
       Number.isFinite(location.lng),
     ) ||
-    (place.lat != null && place.lng != null && Number.isFinite(place.lat) && Number.isFinite(place.lng));
+    (Boolean(place.address?.trim()) &&
+      place.lat != null &&
+      place.lng != null &&
+      Number.isFinite(place.lat) &&
+      Number.isFinite(place.lng));
 
   const startEditing = () => {
     if (isOwner) {
@@ -545,23 +550,22 @@ export default function PlaceModal({
 
         <div>
           <div className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
-            {hasMapCoordinates ? (
-              <DirectoryMap
-                businesses={[displayed]}
-                height="100%"
-                showKey={false}
-                interactive
-                focusBusiness
-              />
-            ) : (
-              <div className="place-modal-panel__map-empty">
-                <MapPinned size={28} aria-hidden="true" />
-                <span>Map location not added yet</span>
-              </div>
-            )}
+            <DirectoryMap
+              businesses={hasMapCoordinates ? [displayed] : []}
+              height="100%"
+              showKey={false}
+              interactive
+              focusBusiness={hasMapCoordinates}
+            />
             <div className="place-modal-panel__map-label">
               <MapPinned size={14} aria-hidden="true" />
-              <span>{multiLoc ? `${locations.length} locations` : place.neighborhood || "Portland"}</span>
+              <span>
+                {hasMapCoordinates
+                  ? multiLoc
+                    ? `${locations.length} locations`
+                    : place.neighborhood || "Portland"
+                  : "Portland overview"}
+              </span>
             </div>
           </div>
 
