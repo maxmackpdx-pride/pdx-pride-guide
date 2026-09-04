@@ -118,7 +118,8 @@ const NEIGHBORHOOD_ORDER = [
 
 const FORM_NEIGHBORHOODS = NEIGHBORHOOD_ORDER.filter(n => n !== "ALL");
 
-const CATEGORY_ORDER = Object.keys(TYPE_LABELS);
+/** Group records power Z/ communities and QSearch, but are not public PLACEZ. */
+const CATEGORY_ORDER = Object.keys(TYPE_LABELS).filter(key => key !== "group");
 
 /** Session keys so closing a place card does not dump you at top of page. */
 const DIR_SCROLL_KEY = "zaylist.directory.scrollY";
@@ -228,7 +229,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   const [activeType, setActiveType] = useState(() => {
     if (isSpaces) return "group";
     const t = new URLSearchParams(window.location.search).get("type");
-    return t && t in TYPE_LABELS ? t : "ALL";
+    return t && t !== "group" && t in TYPE_LABELS ? t : "ALL";
   });
   const [activeNeighborhood, setActiveNeighborhood] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
@@ -257,6 +258,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     staleTime: 60_000,
     refetchOnMount: "always",
   });
+
+  const visibleBusinesses = useMemo(
+    () => businesses.filter(b => isSpaces ? b.type === "group" : b.type !== "group"),
+    [businesses, isSpaces],
+  );
 
   /** Keep type/q on the place URL so remount from /directory → /directory/:id doesn't wipe filters. */
   const directoryQuerySuffix = useCallback(() => {
@@ -326,7 +332,14 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       setPlaceOriginRect(null);
       return;
     }
-    const match = businesses.find(b => b.id === placeId && (!isSpaces || b.type === "group"));
+    const sourceBusiness = businesses.find(b => b.id === placeId);
+    if (!isSpaces && sourceBusiness?.type === "group") {
+      setSelectedPlace(null);
+      setPlaceOriginRect(null);
+      setLocation("/z");
+      return;
+    }
+    const match = visibleBusinesses.find(b => b.id === placeId);
     if (!match) {
       setSelectedPlace(null);
       setPlaceOriginRect(null);
@@ -339,7 +352,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       const qs = window.location.search || "";
       setLocation(`${listingPath(match)}${qs}`);
     }
-  }, [businesses, isSpaces, listingPath, routePlaceId, setLocation, recordRecentView]);
+  }, [businesses, isSpaces, visibleBusinesses, listingPath, routePlaceId, setLocation, recordRecentView]);
 
   const placeSeo = selectedPlace;
   usePageSeo(
@@ -369,11 +382,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
   );
 
   const categoryCounts = useMemo(() => {
-    return businesses.reduce<Record<string, number>>((acc, b) => {
+    return visibleBusinesses.reduce<Record<string, number>>((acc, b) => {
       acc[b.type] = (acc[b.type] ?? 0) + 1;
       return acc;
     }, {});
-  }, [businesses]);
+  }, [visibleBusinesses]);
 
   const categoryBands = useMemo(() => {
     return CATEGORY_ORDER
@@ -388,7 +401,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return businesses
+    return visibleBusinesses
       .filter(b => {
         if (activeType !== "ALL" && b.type !== activeType) return false;
         if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
@@ -418,11 +431,11 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         if (bGo !== aGo) return bGo - aGo;
         return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       });
-  }, [businesses, activeType, activeNeighborhood, searchQuery]);
+  }, [visibleBusinesses, activeType, activeNeighborhood, searchQuery]);
 
   const neighborhoodsInUse = useMemo(() => {
     const seen = new Set(
-      businesses
+      visibleBusinesses
         .filter(b => activeType === "ALL" || b.type === activeType)
         .map(b => b.neighborhood)
         .filter((n): n is string => Boolean(n)),
@@ -432,7 +445,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       .filter(n => !NEIGHBORHOOD_ORDER.includes(n))
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
     return [...ordered, ...extras];
-  }, [activeType, businesses]);
+  }, [activeType, visibleBusinesses]);
 
   const handleSelectCategory = (key: string) => {
     setActiveType(key);
@@ -681,7 +694,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               onClick={() => handleSelectCategory("ALL")}
             >
               <span>All</span>
-              <strong>{businesses.length}</strong>
+              <strong>{visibleBusinesses.length}</strong>
             </button>
             {categoryBands.map(category => (
               <button
@@ -710,7 +723,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             <p className="board-copy-sm">
               {isSpaces
                 ? "Logged-in members can add queer clubs, crews, nonprofits, and community groups. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Organizers can claim a listing to manage it."
-                : "Logged-in members can list spots that are ours or truly for us - including Clubs & Groups (Rose Court, Pink Ponies, and more). New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it."}
+                : "Logged-in members can list spots that are ours or truly for us. New listings go live immediately unless we spot a likely duplicate. Keep it accurate and scene-rooted. Owners can claim a listing to manage it."}
             </p>
             {submitResult ? (
               <div className="submit-success">
@@ -782,7 +795,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               {!isSpaces && <label>
                 Type *
                 <select className="board-text-field" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                  {Object.entries(TYPE_LABELS).map(([key, label]) => (
+                  {Object.entries(TYPE_LABELS).filter(([key]) => key !== "group").map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
                 </select>
