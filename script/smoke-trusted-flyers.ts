@@ -20,6 +20,7 @@ import {
   matchSanctuaryIndexUrl,
   sanctuarySlugKey,
   applySeriesFlyerReuse,
+  normalizeSanctuaryIcsTimezone,
   buildSeriesPosterHintMap,
   isSanctuaryLogoPoster,
 } from "../server/ingest/adapters/sanctuary";
@@ -193,9 +194,14 @@ assert(
   "existing WP -WxH-N stripping unchanged",
 );
 
-/* ── 4. series flyer reuse: batch first, then board memory ── */
+/* ── 4. Sanctuary artwork must be exact-event; never reuse siblings/history ── */
 const LOGO = "https://pdxsanctuary.com/wp-content/uploads/2025/05/cropped-LOGO-trans_color_square-no_text-270x270.png";
 assert(isSanctuaryLogoPoster(LOGO), "logo detector still rejects site logo");
+assert(
+  normalizeSanctuaryIcsTimezone("DTSTART;TZID=UTC:20260918T203000\nDTEND;TZID=GMT:20260918T233000") ===
+    "DTSTART;TZID=America/Los_Angeles:20260918T203000\nDTEND;TZID=America/Los_Angeles:20260918T233000",
+  "Sanctuary's mislabeled UTC wall-clock values are treated as Pacific local time",
+);
 
 const batch = [
   draft({ title: "Game Bang! — July", dateStart: "2026-07-22T19:00:00", posterImageUrl: "https://pdxsanctuary.com/wp-content/uploads/2026/07/GameBangJuly.avif" }),
@@ -209,20 +215,20 @@ const hints = buildSeriesPosterHintMap([
 ]);
 const reused = applySeriesFlyerReuse(batch, hints);
 assert(
-  reused[1].posterImageUrl === "https://pdxsanctuary.com/wp-content/uploads/2026/07/GameBangJuly.avif",
-  "batch sibling flyer wins over board hint (fresher art)",
+  reused[1].posterImageUrl === null,
+  "missing exact-event artwork stays empty instead of copying a sibling flyer",
 );
 assert(
-  reused[1].warnings.includes("Series flyer reused"),
-  "batch reuse warning breadcrumb present",
+  !reused[1].warnings.some(w => /series flyer reused/i.test(w)),
+  "no sibling-reuse breadcrumb is emitted",
 );
 assert(
-  reused[2].posterImageUrl === "https://pdxsanctuary.com/wp-content/uploads/2026/06/NakedKaraoke.avif",
-  "board memory fills flyer when batch has none (cross-run reuse)",
+  reused[2].posterImageUrl === null,
+  "board history cannot supply artwork for a new occurrence",
 );
 assert(
-  reused[2].warnings.includes("Series flyer reused from existing board event"),
-  "cross-run reuse warning breadcrumb present",
+  reused[0].posterImageUrl === "https://pdxsanctuary.com/wp-content/uploads/2026/07/GameBangJuly.avif",
+  "verified exact-event artwork is preserved",
 );
 assert(!hints.has("some logo event") && !Array.from(hints.values()).includes(LOGO), "logo posters never enter hint map");
 

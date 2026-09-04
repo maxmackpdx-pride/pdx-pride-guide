@@ -20,7 +20,7 @@ import { isPastEventListing } from "../dates";
 import { inferAdmissionFromText } from "../admissionInfer";
 
 const DARCELLE_VENUE = "Darcelle XV Showplace";
-const DARCELLE_ADDRESS = "208 NW 3rd Ave, Portland, OR";
+const DARCELLE_ADDRESS = "208 NW 3rd Ave, Portland, OR 97209";
 const DARCELLE_NEIGHBORHOOD = "Old Town";
 /** Conservative default - reviewer downgrades for all-ages/brunch shows. */
 const DARCELLE_AGE = "21_PLUS" as const;
@@ -62,18 +62,30 @@ export function applyDarcellePolicy(draft: IngestEventDraft): IngestEventDraft {
     draft.venueName === "TBA" ||
     /darcelle/i.test(draft.venueName);
 
+  let dateStart = draft.dateStart;
+  const warnings = [...(draft.warnings || [])];
+  const isWeekendNightShow = /^(friday|saturday) night show$/i.test(title);
+  const pageSaysEightPm = /doors?\s+(?:open\s+)?(?:at\s+)?7\s*(?::00)?\s*p\.?m\.?.{0,80}show\s+(?:starts?\s+)?(?:at\s+)?8\s*(?::00)?\s*p\.?m\.?/i.test(
+    description,
+  );
+  if (isWeekendNightShow && /T08:00:00$/.test(dateStart) && pageSaysEightPm) {
+    dateStart = dateStart.replace(/T08:00:00$/, "T20:00:00");
+    warnings.push("Structured start was 8:00 AM; corrected to 8:00 PM from official event-page text");
+  }
+
   return {
     ...draft,
     title,
     description,
+    dateStart,
     venueName: weakVenue ? DARCELLE_VENUE : draft.venueName,
-    address: draft.address?.trim() ? draft.address : DARCELLE_ADDRESS,
+    address: weakVenue ? DARCELLE_ADDRESS : draft.address?.trim() ? draft.address : DARCELLE_ADDRESS,
     neighborhood: draft.neighborhood?.trim() ? draft.neighborhood : DARCELLE_NEIGHBORHOOD,
     ageRequirement: DARCELLE_AGE,
     admission,
     warnings: Array.from(
       new Set([
-        ...(draft.warnings || []),
+        ...warnings,
         "Age defaulted to 21_PLUS (Darcelle evening shows) - verify for all-ages/brunch shows",
         ...(adm.reason ? [adm.reason] : []),
       ]),

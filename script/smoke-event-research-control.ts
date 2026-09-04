@@ -168,6 +168,25 @@ const clearedGate = evaluateDecisionGate(gateInput);
 assert.equal(clearedGate.ok, true);
 if (clearedGate.ok) assert.equal(clearedGate.publishable, true);
 
+assert.equal(recordFieldEvidence({
+  runId: run.runId,
+  eventId: testEventId,
+  field: "dateStart",
+  observedValue: gateEvent.dateStart,
+  sourceUrl: "https://example.com/events/exact-occurrence",
+  checkedAt: new Date().toISOString(),
+}).ok, true);
+const camelCaseGate = evaluateDecisionGate({
+  eventId: testEventId,
+  fields: ["dateStart"],
+  proposedValues: { dateStart: gateEvent.dateStart },
+});
+assert.equal(camelCaseGate.ok, true);
+if (camelCaseGate.ok) {
+  assert.equal(camelCaseGate.publishable, true, "camel-case event fields match their evidence receipts");
+  assert.deepEqual(camelCaseGate.mismatchedEvidence, []);
+}
+
 assert.equal(upsertEventSeries({
   seriesKey: "series:test-fridays",
   canonicalTitle: "Test Fridays",

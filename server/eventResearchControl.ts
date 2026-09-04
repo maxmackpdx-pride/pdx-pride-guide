@@ -34,6 +34,40 @@ function key(raw: unknown, max = 160): string {
   return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9:_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, max);
 }
 
+const EVENT_EVIDENCE_FIELDS = [
+  "title",
+  "description",
+  "venueName",
+  "address",
+  "neighborhood",
+  "lat",
+  "lng",
+  "dateStart",
+  "dateEnd",
+  "ageRequirement",
+  "admission",
+  "ticketUrl",
+  "posterImageUrl",
+  "eventTypes",
+  "status",
+  "isPublic",
+  "isHouseParty",
+  "isSexPositive",
+  "nudityOk",
+] as const;
+
+const EVENT_EVIDENCE_FIELD_BY_FOLDED = new Map(
+  EVENT_EVIDENCE_FIELDS.map(field => [field.toLowerCase(), field]),
+);
+
+/** Keep real event-property casing while retaining normalized custom keys. */
+function evidenceField(raw: unknown): string {
+  const value = String(raw || "").trim().slice(0, 120);
+  if (!value) return "";
+  const folded = value.replace(/[^a-z0-9]/gi, "").toLowerCase();
+  return EVENT_EVIDENCE_FIELD_BY_FOLDED.get(folded) || key(value, 120);
+}
+
 export function ensureEventResearchControlTables() {
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS agent_research_runs (
@@ -348,7 +382,7 @@ export function recordFieldEvidence(input: {
   supersedesId?: string | null;
 }) {
   ensureEventResearchControlTables();
-  const field = key(input.field, 120);
+  const field = evidenceField(input.field);
   const sourceUrl = safeUrl(input.sourceUrl);
   const checked = Date.parse(input.checkedAt);
   if (!field || !sourceUrl || !Number.isFinite(checked)) {
@@ -463,7 +497,7 @@ export function recordConflict(input: {
   nextCheckAt?: string | null;
 }) {
   ensureEventResearchControlTables();
-  const field = key(input.field, 120);
+  const field = evidenceField(input.field);
   if (!field || !Array.isArray(input.values) || input.values.length < 2) return { ok: false as const, status: 400, error: "conflict requires a field and at least two values" };
   const id = randomUUID();
   sqlite.prepare(`
@@ -582,21 +616,21 @@ export function evaluateDecisionGate(input: {
 }) {
   ensureEventResearchControlTables();
   const eventId = Number(input.eventId);
-  const fields = [...new Set((input.fields || []).map(field => key(field, 120)).filter(Boolean))];
+  const fields = [...new Set((input.fields || []).map(field => evidenceField(field)).filter(Boolean))];
   if (!Number.isInteger(eventId) || eventId <= 0 || !fields.length) {
     return { ok: false as const, status: 400, error: "decision gate requires eventId and fields" };
   }
   const cutoff = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
-  const evidence = sqlite.prepare(`
+  const evidence = (sqlite.prepare(`
     SELECT id, field, source_url, authority_level, checked_at, observed_value_json
     FROM agent_field_evidence
     WHERE event_id = ? AND checked_at >= ?
     ORDER BY checked_at DESC
-  `).all(eventId, cutoff) as Array<any>;
-  const conflicts = sqlite.prepare(`
+  `).all(eventId, cutoff) as Array<any>).map(item => ({ ...item, field: evidenceField(item.field) }));
+  const conflicts = (sqlite.prepare(`
     SELECT id, field FROM agent_event_conflicts
     WHERE event_id = ? AND status = 'open' AND material = 1
-  `).all(eventId) as Array<any>;
+  `).all(eventId) as Array<any>).map(item => ({ ...item, field: evidenceField(item.field) }));
   const missing = fields.filter(field => !evidence.some(item => item.field === field));
   const event = storage.getEvent(eventId) as Record<string, unknown> | undefined;
   if (!event) return { ok: false as const, status: 404, error: "event not found" };

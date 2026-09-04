@@ -183,12 +183,31 @@ assert(
   "verify-age breadcrumb present for Review",
 );
 assert(revue.venueName === "Darcelle XV Showplace", "venue name normalized");
+assert(revue.address === "208 NW 3rd Ave, Portland, OR 97209", "known Darcelle venue uses its canonical address");
 assert(revue.dateStart.startsWith("2026-08-14"), "Tribe space-separated date parsed");
 
 const brunch = darcelleDrafts[1];
 assert(brunch.admission === "FREE", "explicit 'free entry' text keeps FREE (never invented)");
 assert(brunch.ageRequirement === "21_PLUS", "brunch still defaults 21_PLUS pending review");
-assert(brunch.address === "208 NW 3rd Ave, Portland, OR", "missing venue → directory address filled");
+assert(brunch.address === "208 NW 3rd Ave, Portland, OR 97209", "missing venue → canonical directory address filled");
+
+const weekendNight = applyDarcellePolicy(
+  parseTribeEventsJson(
+    JSON.stringify({
+      events: [{
+        title: "Saturday Night Show",
+        start_date: "2026-09-12 08:00:00",
+        end_date: "2026-09-12 22:30:00",
+        description: "Our doors open at 7pm and the show starts at 8pm.",
+        venue: {},
+      }],
+    }),
+    null,
+  )[0],
+);
+assert(weekendNight.dateStart === "2026-09-12T20:00:00", "official 8pm prose corrects bad 8am structured start");
+assert(weekendNight.dateEnd === "2026-09-12T22:30:00", "official structured end is preserved");
+assert(weekendNight.warnings.some(w => /corrected to 8:00 PM/i.test(w)), "time correction is auditable");
 
 // Never-invent-FREE: no free text → not FREE
 const noFree = applyDarcellePolicy(

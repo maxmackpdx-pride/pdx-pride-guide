@@ -5,7 +5,7 @@
  * 1. Fetch the trusted ICS feed
  * 2. Drop past listings
  * 3. Infer event page URLs + enrich flyers/descriptions from detail pages
- * 4. Reuse series flyers when an occurrence only has the site logo
+ * 4. Keep artwork empty unless it is verified on the exact event page
  * 5. Force Pearl District venue when LOCATION is empty/TBA/address-only
  */
 import { getTrustedVenue } from "@shared/trustedVenues";
@@ -31,6 +31,20 @@ const SANCTUARY_EVENT_TYPE_TAGS = ["SEX_POSITIVE", "NUDITY_OK", "KINK"] as const
 const DEFAULT_FEED =
   getTrustedVenue("sanctuary-ics")?.feedUrl ||
   "https://pdxsanctuary.com/events/calendar/sanctuary/ics/";
+
+/**
+ * Sanctuary's Sugar Calendar feed labels Pacific wall-clock values as UTC
+ * (for example, a page-listed 8 PM event is emitted as
+ * `DTSTART;TZID=UTC:...T200000`). Parsing that label literally shifts every
+ * event seven or eight hours early. This adapter owns the source-specific
+ * correction; the shared RFC-compliant ICS parser remains unchanged.
+ */
+export function normalizeSanctuaryIcsTimezone(ics: string): string {
+  return String(ics || "").replace(
+    /^(DT(?:START|END));TZID=(?:UTC|GMT):/gim,
+    "$1;TZID=America/Los_Angeles:",
+  );
+}
 
 /** Site logo / brand art / chrome - not a real event flyer. */
 export function isSanctuaryLogoPoster(url: string | null | undefined): boolean {
@@ -506,10 +520,13 @@ export function applySanctuaryPolicy(draft: IngestEventDraft): IngestEventDraft 
   };
 }
 
-/** Existing board event art offered to the current sync as series memory. */
+/** Existing board event art retained for API compatibility; never copied to another occurrence. */
 export type SeriesPosterHint = { title: string; posterImageUrl: string | null };
 
-/** Build seriesKey → poster map from existing board events (skips logos/empties). */
+/**
+ * Legacy helper retained for callers that still supply board hints. Sanctuary
+ * no longer consumes this map because an exact-event poster is mandatory.
+ */
 export function buildSeriesPosterHintMap(hints: SeriesPosterHint[] | undefined): Map<string, string> {
   const map = new Map<string, string>();
   for (const h of hints || []) {
@@ -522,48 +539,19 @@ export function buildSeriesPosterHintMap(hints: SeriesPosterHint[] | undefined):
 }
 
 /**
- * When a draft lacks a real flyer (missing or site logo), copy poster from
- * another draft in the same series that already has good art - first from
- * this batch, then from existing board events (cross-run memory: last month's
- * Game Bang already carries the series flyer even when this run's page fetch
- * came up empty).
+ * Never reuse Sanctuary artwork across occurrences. Recurring events can have
+ * different themes, dates, and flyers; a sibling or historical poster is not
+ * evidence for this exact event. Missing/logo artwork stays null for review.
  */
 export function applySeriesFlyerReuse(
   drafts: IngestEventDraft[],
-  boardHints?: Map<string, string>,
+  _boardHints?: Map<string, string>,
 ): IngestEventDraft[] {
-  // Prefer earliest occurrence with a good flyer as the series canonical art
-  const byDate = [...drafts].sort((a, b) =>
-    String(a.dateStart || "").localeCompare(String(b.dateStart || "")),
+  return drafts.map(d =>
+    isSanctuaryLogoPoster(d.posterImageUrl)
+      ? { ...d, posterImageUrl: null }
+      : d,
   );
-  const goodBySeries = new Map<string, string>();
-  for (const d of byDate) {
-    const key = seriesTitleKey(d.title);
-    if (!key || key.length < 3) continue;
-    if (!isSanctuaryLogoPoster(d.posterImageUrl) && d.posterImageUrl) {
-      if (!goodBySeries.has(key)) goodBySeries.set(key, d.posterImageUrl);
-    }
-  }
-
-  return drafts.map(d => {
-    if (!isSanctuaryLogoPoster(d.posterImageUrl)) return d;
-    const key = seriesTitleKey(d.title);
-    if (!key || key.length < 3) return d;
-    const batchFlyer = goodBySeries.get(key);
-    const boardFlyer = boardHints?.get(key);
-    const flyer = batchFlyer || boardFlyer;
-    if (!flyer) return d;
-    return {
-      ...d,
-      posterImageUrl: flyer,
-      warnings: Array.from(
-        new Set([
-          ...(d.warnings || []),
-          batchFlyer ? "Series flyer reused" : "Series flyer reused from existing board event",
-        ]),
-      ),
-    };
-  });
 }
 
 export type FetchSanctuaryDraftsOpts = {
@@ -572,7 +560,7 @@ export type FetchSanctuaryDraftsOpts = {
   concurrency?: number;
   /** When true, keep past VEVENTs (default false - adapter drops them). */
   includePast?: boolean;
-  /** Existing board events' titles+posters for cross-run series flyer reuse. */
+  /** Legacy input retained for callers; cross-occurrence poster reuse is disabled. */
   seriesPosterHints?: SeriesPosterHint[];
   /** Skip the /events/ index harvest (tests / offline). Default false. */
   skipIndexHarvest?: boolean;
@@ -580,7 +568,7 @@ export type FetchSanctuaryDraftsOpts = {
 
 /**
  * Full Sanctuary path: ICS → upcoming → real-URL harvest from /events/ index
- * → page enrich → series flyer reuse (batch + board memory) → venue fix.
+ * → page enrich → exact-event artwork validation → venue fix.
  */
 export async function fetchSanctuaryDrafts(
   opts?: FetchSanctuaryDraftsOpts,
@@ -594,7 +582,7 @@ export async function fetchSanctuaryDrafts(
     return [];
   }
 
-  let drafts = parseIcs(fetched.body, fetched.url || feedUrl);
+  let drafts = parseIcs(normalizeSanctuaryIcsTimezone(fetched.body), fetched.url || feedUrl);
 
   // De-dupe by event page / ticket URL when present, else title|day
   const seen = new Set<string>();
@@ -697,9 +685,9 @@ export async function fetchSanctuaryDrafts(
       : d,
   );
 
-  // Series reuse fills null/logo gaps - sibling occurrences first, then
-  // existing board events (cross-run memory)
-  enriched = applySeriesFlyerReuse(enriched, buildSeriesPosterHintMap(opts?.seriesPosterHints));
+  // Exact-event artwork only: missing/logo art stays null. Never copy from a
+  // sibling occurrence or an older board record.
+  enriched = applySeriesFlyerReuse(enriched);
   enriched = enriched.map(applySanctuaryVenue);
   // 21+ sex club policy - always, before auto-LIVE or review queue
   enriched = enriched.map(applySanctuaryPolicy);
