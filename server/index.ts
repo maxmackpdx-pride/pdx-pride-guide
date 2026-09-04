@@ -10,6 +10,7 @@ import { platform } from "node:os";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
 import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
+import { isEventResearchAgentRequest } from "./eventResearchAuth";
 
 const app = express();
 const httpServer = createServer(app);
@@ -172,6 +173,13 @@ const limiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: req => rateLimitSkipDev() || isEventResearchAgentRequest(req),
+});
+const eventResearchLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5_000,
+  standardHeaders: true,
+  legacyHeaders: false,
   skip: rateLimitSkipDev,
 });
 const authLimiter = rateLimit({
@@ -225,6 +233,10 @@ const adsTrackLimiter = rateLimit({
 app.use("/api/ads", adsTrackLimiter);
 // Admin JSON routes rely on requireAdmin session checks; avoid a separate strict
 // cap - the dashboard issues 8+ parallel reads on load (inbox, metrics, gigs, etc.).
+// QSearch 2.0 writes field-level evidence, decision previews, and rollback
+// records for every inspected event. Give its valid machine credential a
+// separate bounded budget while keeping the public API's tighter limit.
+app.use("/api/admin/event-research", eventResearchLimiter);
 app.use("/api", limiter);
 
 declare module "http" {
