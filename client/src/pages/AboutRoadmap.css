@@ -111,6 +111,7 @@
         outline: 2px solid var(--system);
         outline-offset: -3px;
       }
+      .quick-nav .quick-nav__mobile-link { display: none; }
       .quick-nav a:nth-child(7n + 1) { --nav-c: var(--day-mon-text); }
       .quick-nav a:nth-child(7n + 2) { --nav-c: var(--day-tue-text); }
       .quick-nav a:nth-child(7n + 3) { --nav-c: var(--day-wed); }
@@ -133,6 +134,7 @@
         }
         .quick-nav__group[aria-hidden="true"] { display: flex; }
         .quick-nav a { padding-inline: 15px; }
+        .quick-nav .quick-nav__mobile-link { display: inline-flex; }
         .quick-nav:focus-within .quick-nav__inner,
         .quick-nav:hover .quick-nav__inner { animation-play-state: paused; }
       }

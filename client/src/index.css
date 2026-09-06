@@ -622,7 +622,7 @@ body::before {
 .site-hub-button:focus-visible,
 .site-hub-button.active {
   filter:brightness(1.08);
-  color:#050506;
+  color:var(--c);
   outline:none;
 }
 
