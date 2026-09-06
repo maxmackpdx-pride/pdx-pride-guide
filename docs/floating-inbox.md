@@ -112,11 +112,14 @@ owner; carries contact PII). Item kinds come from `owner_desk_items` +
 | **Sponsor** | Sponsorship pitch | name, email, business, sponsorship type, length, message | Reply · Mark done |
 | **Bug** | Bug report via feedback form | description, page, severity | Mark done |
 | **Feedback** | General feedback | message, page | Mark done |
-| **Crash** (auto) | `ErrorBoundary` self-report when the UI crashes - stack trace + user agent, **not** a person | error, stack, page URL, user agent | Mark done |
 | **Keyholder / Escalation** | team-access requests / admin escalations to owner | who, what, context | Reply · Mark done |
 
 Resolve → `POST /api/admin/feedback/:id/resolve` (body `{ source: "desk" | "feedback" }`).
-Crash reports are created by `client/src/components/ErrorBoundary.tsx` (`category: "CRASH"`).
+Automated crashes do **not** belong to the inbox. `ErrorBoundary` writes them to
+the hidden `system_diagnostics` table through `POST /api/system-diagnostics/client-error`.
+The owner-only `GET /api/admin/system-diagnostics/digest` endpoint groups the
+last 24 hours for a scheduled diagnostic-review agent. Local editing errors are
+identified separately from production errors, and neither affects an inbox badge.
 
 ---
 

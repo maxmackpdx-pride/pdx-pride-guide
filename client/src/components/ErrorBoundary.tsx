@@ -5,15 +5,15 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
   state = { error: null as Error | null };
   static getDerivedStateFromError(error: Error) { return { error }; }
   componentDidCatch(error: Error) {
-    // Self-report crashes so they show up in admin feedback reports.
+    // Self-report crashes to the private diagnostic stream. Machine telemetry
+    // must never appear as a message from a person in the Owner Desk.
     try {
-      fetch("/api/feedback", {
+      fetch("/api/system-diagnostics/client-error", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          category: "CRASH",
-          severity: "HIGH",
-          message: `${error.message}\n${(error.stack || "").slice(0, 1500)}`,
+          message: error.message,
+          stack: (error.stack || "").slice(0, 8000),
           pageUrl: window.location.href,
           userAgent: navigator.userAgent,
         }),

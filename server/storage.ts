@@ -88,6 +88,7 @@ import {
 import { listHousingPosts } from "./housing/store";
 import { HOUSING_TYPE_LABEL, type HousingType } from "../shared/housing";
 import { shouldCoalesceChange } from "../shared/changeCoalesce";
+import { ensureSystemDiagnosticsTable } from "./systemDiagnostics";
 
 /** How a housing post announces itself in the hub feed. */
 const HOUSING_FEED_ACTION: Record<HousingType, string> = {
@@ -113,6 +114,7 @@ const db = drizzle(sqlite);
 
 ensureAnalyticsTable(sqlite);
 ensureAdsTables(sqlite);
+ensureSystemDiagnosticsTable(sqlite);
 
 // Waypoint (Next page) likes — anonymous excitement counter per roadmap card.
 sqlite.exec(`
@@ -14051,9 +14053,14 @@ export const storage: IStorage = {
     const deskRows = (status
       ? sqlite.prepare(`SELECT * FROM owner_desk_items WHERE status = ? ORDER BY created_at DESC`).all(status)
       : sqlite.prepare(`SELECT * FROM owner_desk_items ORDER BY created_at DESC`).all()
-    ).map(row => mapDeskRow(row as Record<string, unknown>));
+    ).map(row => mapDeskRow(row as Record<string, unknown>))
+      // Older automated ErrorBoundary reports were incorrectly written here.
+      // Keep the records for diagnosis, but never show or count them as messages from people.
+      .filter(row => String(row.meta?.category || "").toUpperCase() !== "CRASH");
 
-    const legacyRows = storage.getFeedbackReports(status).map(report => ({
+    const legacyRows = storage.getFeedbackReports(status)
+      .filter(report => String(report.category || "").toUpperCase() !== "CRASH")
+      .map(report => ({
       id: report.id,
       source: "feedback" as const,
       kind: report.category === "BUG" ? "bug" : "feedback",
@@ -14074,7 +14081,7 @@ export const storage: IStorage = {
       status: report.status,
       createdAt: report.createdAt,
       resolvedAt: report.status === "RESOLVED" ? report.createdAt : null,
-    }));
+      }));
 
     const deskIds = new Set(deskRows.map(r => `${r.kind}:${r.title}:${r.createdAt}`));
     const legacyOnly = legacyRows.filter(r => !deskIds.has(`${r.kind}:${r.title}:${r.createdAt}`));

@@ -58,6 +58,7 @@ import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
 import { registerCommunityRoutes, searchCommunities } from "./communities";
 import { registerPlatformV1 } from "./platformV1";
+import { getSystemDiagnosticsDigest, recordSystemDiagnostic } from "./systemDiagnostics";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
 import { renderGamePosterPng } from "./posters/gamePoster";
 import {
@@ -2271,6 +2272,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/feedback", (req, res) => {
     try {
+      // Older cached clients used the human-feedback endpoint for automatic
+      // ErrorBoundary reports. Divert those during the rollout so even stale
+      // browser bundles cannot refill the Owner Desk with machine telemetry.
+      if (String(req.body?.category || "").toUpperCase() === "CRASH") {
+        const messageAndStack = String(req.body?.message || "").trim();
+        if (!messageAndStack) return res.status(400).json({ error: "message required" });
+        const [message, ...stackLines] = messageAndStack.split("\n");
+        const diagnostic = recordSystemDiagnostic(sqlite, {
+          source: "legacy-react-error-boundary",
+          message,
+          stack: stackLines.join("\n") || null,
+          pageUrl: req.body?.pageUrl ? String(req.body.pageUrl) : String(req.get("referer") || ""),
+          userAgent: req.body?.userAgent ? String(req.body.userAgent) : String(req.get("user-agent") || ""),
+        });
+        return res.json({ ok: true, id: diagnostic.id });
+      }
       const payload = {
         ...req.body,
         pageUrl: String(req.body.pageUrl || req.get("referer") || "/").slice(0, 500),
@@ -2284,6 +2301,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!payload.message) return res.status(400).json({ error: "message required" });
       const feedback = storage.createFeedbackReport(insertFeedbackReportSchema.parse(payload));
       res.json({ ok: true, id: feedback.id });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  // Machine-generated client errors are operational telemetry, not messages
+  // from people. They stay out of the Owner Desk and every inbox badge.
+  app.post("/api/system-diagnostics/client-error", (req, res) => {
+    try {
+      const message = String(req.body?.message || "").trim();
+      if (!message) return res.status(400).json({ error: "message required" });
+      const result = recordSystemDiagnostic(sqlite, {
+        source: "react-error-boundary",
+        message,
+        stack: req.body?.stack ? String(req.body.stack) : null,
+        pageUrl: req.body?.pageUrl ? String(req.body.pageUrl) : String(req.get("referer") || ""),
+        userAgent: req.body?.userAgent ? String(req.body.userAgent) : String(req.get("user-agent") || ""),
+        environment: req.body?.environment ? String(req.body.environment) : null,
+      });
+      res.json({ ok: true, id: result.id });
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -6934,6 +6971,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.json(items);
     }
     res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
+  });
+
+  // Deliberately has no product UI. This is the private landing zone read by
+  // Tucker's scheduled diagnostic-review agent.
+  app.get("/api/admin/system-diagnostics/digest", requireAdmin, (req, res) => {
+    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
+    if (!user || !storage.isPrimarySiteOwner(user)) {
+      return res.status(403).json({ error: "Owner only" });
+    }
+    const hours = Number(req.query.hours || 24);
+    res.json(getSystemDiagnosticsDigest(sqlite, Number.isFinite(hours) ? hours : 24));
   });
 
   // Consolidated backlog report: every pending admin-queue category + the

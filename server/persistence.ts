@@ -154,9 +154,15 @@ export const PERSISTENCE_SURFACES: PersistenceSurface[] = [
   },
   {
     id: "feedback",
-    label: "Site feedback reports",
-    tables: ["feedback_reports", "owner_desk_items"],
-    apiRoutes: ["POST /api/feedback", "POST /api/contact/message", "GET /api/admin/owner-desk"],
+    label: "Human feedback and private system diagnostics",
+    tables: ["feedback_reports", "owner_desk_items", "system_diagnostics"],
+    apiRoutes: [
+      "POST /api/feedback",
+      "POST /api/contact/message",
+      "POST /api/system-diagnostics/client-error",
+      "GET /api/admin/owner-desk",
+      "GET /api/admin/system-diagnostics/digest",
+    ],
   },
   {
     id: "sessions",
