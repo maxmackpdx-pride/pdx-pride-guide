@@ -12,6 +12,11 @@
   to { --event-open-edge-angle: 378deg; }
 }
 
+@keyframes eventOpenGuidedReveal {
+  from { opacity: 0.35; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
 html[data-zaylist-cards] .event-modal.event-modal--approved,
 .event-modal.event-modal--approved {
   width: min(600px, calc(100vw - 32px)) !important;
@@ -416,6 +421,7 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
 
 .event-modal--approved .event-modal__hero-block {
   margin-top: 28px;
+  animation: eventOpenGuidedReveal 0.42s both;
 }
 
 .event-modal--approved .event-modal__kicker {
@@ -509,6 +515,7 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   margin: 32px 0 0;
   padding-bottom: 2px;
   border: 0;
+  animation: eventOpenGuidedReveal 0.42s 0.04s both;
 }
 
 .event-modal--approved .event-modal__tabs::after,
@@ -594,12 +601,18 @@ html[data-zaylist-cards] .event-modal.event-modal--approved,
   margin-bottom: 24px;
   padding: 18px;
   border-radius: 14px;
+  animation: eventOpenGuidedReveal 0.42s 0.08s both;
 }
 
 .event-modal--approved .event-modal__actions {
   gap: 12px;
   margin: 4px 0 22px;
   padding: 22px 0;
+  animation: eventOpenGuidedReveal 0.42s 0.12s both;
+}
+
+.event-modal--approved .event-modal__footer {
+  animation: eventOpenGuidedReveal 0.42s 0.16s both;
 }
 
 .event-modal--approved .event-modal__sticky-cta {
@@ -629,11 +642,31 @@ html.calm-mode .event-modal--approved .event-modal__poster-img,
   will-change: auto;
 }
 
+html.calm-mode .event-modal--approved .event-modal__hero-block,
+html.calm-mode .event-modal--approved .event-modal__tabs,
+html.calm-mode .event-modal--approved .event-modal__section,
+html.calm-mode .event-modal--approved .event-modal__actions,
+html.calm-mode .event-modal--approved .event-modal__footer,
+:root[data-calm="true"] .event-modal--approved .event-modal__hero-block,
+:root[data-calm="true"] .event-modal--approved .event-modal__tabs,
+:root[data-calm="true"] .event-modal--approved .event-modal__section,
+:root[data-calm="true"] .event-modal--approved .event-modal__actions,
+:root[data-calm="true"] .event-modal--approved .event-modal__footer {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .event-modal.event-modal--approved::before { animation: none; }
   .event-modal--approved .event-modal__poster-img {
     transform: none;
     will-change: auto;
+  }
+  .event-modal--approved .event-modal__hero-block,
+  .event-modal--approved .event-modal__tabs,
+  .event-modal--approved .event-modal__section,
+  .event-modal--approved .event-modal__actions,
+  .event-modal--approved .event-modal__footer {
+    animation: none;
   }
 }
 

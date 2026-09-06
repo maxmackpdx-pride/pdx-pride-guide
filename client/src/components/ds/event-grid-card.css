@@ -25,6 +25,14 @@
     0 14.4px 33.6px rgba(0,0,0,.72),0 0 36.8px -.8px color-mix(in srgb,var(--day-c) 72%,transparent),
     0 0 20.8px 0 color-mix(in srgb,var(--day-c) 58%,transparent)!important
 }
+.pdxBoard.pdxBoard--event-grid .pdxBoard__img,
+.pdxBoard.pdxBoard--event-grid .pdxBoard__title,
+.pdxBoard.pdxBoard--event-grid .pdxBoard__meta{
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),filter .28s ease,opacity .28s ease
+}
+.pdxBoard.pdxBoard--event-grid:hover .pdxBoard__img{filter:saturate(.78) brightness(.78)}
+.pdxBoard.pdxBoard--event-grid:hover .pdxBoard__title{transform:translateY(-4px)}
+.pdxBoard.pdxBoard--event-grid:hover .pdxBoard__meta{transform:translateY(-2.4px);filter:brightness(1.13)}
 .pdxBoard.pdxBoard--event-grid::before{
   content:"";position:absolute;z-index:8;top:50%;left:50%;right:auto;
   width:calc(100% + 7.2px);height:calc(100% + 7.2px);transform:translate(-50%,-50%);
@@ -133,12 +141,13 @@
 .pdxBoard__title.is-expanded{right:var(--event-title-inset)}
 .pdxBoard__titleLine{
   position:relative;z-index:1;display:block;width:max-content;max-width:none;white-space:nowrap;
-  -webkit-text-stroke:1.2px #000;paint-order:stroke fill;text-shadow:0 2.4px 4.8px rgba(0,0,0,.92)
+  -webkit-text-stroke:1.2px #000;paint-order:stroke fill;
+  text-shadow:0 2.4px 4px rgba(0,0,0,.94),0 5.6px 8px rgba(0,0,0,.72)
 }
 .pdxBoard__titleLine::before{
-  position:absolute;z-index:-1;inset:0;color:transparent;content:attr(data-shadow-text);
-  -webkit-text-stroke:1.2px #000;clip-path:inset(0 -38.4px -41.6px -38.4px);
-  text-shadow:0 0 9.6px rgba(0,0,0,.6),0 0 20px rgba(0,0,0,.576),0 0 33.6px rgba(0,0,0,.456);pointer-events:none
+  position:absolute;z-index:-1;inset:0;color:#000;content:attr(data-shadow-text);
+  -webkit-text-stroke:0;clip-path:inset(46% -19.2px -17.6px -19.2px);
+  filter:blur(4px);opacity:.88;pointer-events:none;transform:translateY(4px)
 }
 
 .pdxBoard__meta{
@@ -245,6 +254,12 @@ html.calm-mode .pdxBoard--event-grid,:root[data-calm="true"] .pdxBoard--event-gr
 html.calm-mode .pdxBoard--event-grid .pdxBoard__shine,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__shine{animation:none}
 html.calm-mode .pdxBoard--event-grid .pdxBoard__bloom,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__bloom{display:none}
 html.calm-mode .pdxBoard--event-grid .pdxBoard__divider,:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__divider{animation:none;filter:none}
+html.calm-mode .pdxBoard--event-grid .pdxBoard__img,
+html.calm-mode .pdxBoard--event-grid .pdxBoard__title,
+html.calm-mode .pdxBoard--event-grid .pdxBoard__meta,
+:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__img,
+:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__title,
+:root[data-calm="true"] .pdxBoard--event-grid .pdxBoard__meta{transition:none;transform:none;filter:none}
 
 /* Two-column mobile keeps the approved composition and scales its internal
    measurements optically instead of reflowing into a different card. */
@@ -258,8 +273,8 @@ html.calm-mode .pdxBoard--event-grid .pdxBoard__divider,:root[data-calm="true"] 
     border-radius:calc(var(--event-radius) + 2.5px)
   }
   .pdxBoard__shine{inset:-3px;border-radius:calc(var(--event-radius) + 3px)}
-  .pdxBoard__titleLine{-webkit-text-stroke-width:.8px;text-shadow:0 2px 4px rgba(0,0,0,.94)}
-  .pdxBoard__titleLine::before{-webkit-text-stroke-width:.8px;text-shadow:0 0 7px rgba(0,0,0,.6),0 0 13px rgba(0,0,0,.576),0 0 21px rgba(0,0,0,.456)}
+  .pdxBoard__titleLine{-webkit-text-stroke-width:.8px;text-shadow:0 2px 3.2px rgba(0,0,0,.94),0 4px 5.6px rgba(0,0,0,.72)}
+  .pdxBoard__titleLine::before{clip-path:inset(46% -12px -11px -12px);filter:blur(2.8px);transform:translateY(2.8px)}
   .pdxBoard__meta{min-height:126px;padding:7px 7px 8px}
   .pdxBoard__facts{gap:2px 4px;padding-top:4px}
   .pdxBoard__venue{font-size:12px;line-height:1.12}
@@ -274,5 +289,9 @@ html.calm-mode .pdxBoard--event-grid .pdxBoard__divider,:root[data-calm="true"] 
 
 @media(prefers-reduced-motion:reduce){
   .pdxBoard.pdxBoard--event-grid,.pdxBoard__shine,.pdxBoard__divider,
-  .pdxBoard__action--claim::before,.pdxBoard__action--claim::after{animation:none;transition:none}
+  .pdxBoard__action--claim::before,.pdxBoard__action--claim::after,
+  .pdxBoard--event-grid .pdxBoard__img,.pdxBoard--event-grid .pdxBoard__title,
+  .pdxBoard--event-grid .pdxBoard__meta{animation:none;transition:none}
+  .pdxBoard--event-grid:hover .pdxBoard__img,.pdxBoard--event-grid:hover .pdxBoard__title,
+  .pdxBoard--event-grid:hover .pdxBoard__meta{transform:none;filter:none}
 }
