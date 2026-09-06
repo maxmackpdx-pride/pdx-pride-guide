@@ -187,17 +187,20 @@ export const OUTZ_COMMUNITY_STAYS: OutzCommunityStay[] = [
     name: "Triangle Recreation Camp",
     region: "Granite Falls, WA · Pacific Northwest",
     kind: "campground",
-    detail: "Private queer-centered campground with tent and RV camping in the Cascade foothills.",
-    accessNote: "LGBTQ+ adults 21+; membership and reservation details are on the operator site. Seasonal access is operator-controlled.",
-    inclusionNote: "Queer-centered status is stated by the operator.",
-    officialUrl: "https://www.camptrc.org/",
-    lat: 48.0835,
-    lng: -121.851,
+    detail: "LGBTQ+ owned and operated 80-acre campground with tent and RV camping, trails, mountain views, and river access in the Cascade foothills.",
+    accessNote: "For LGBTQ+ adults 21+. Book overnight camping or a day-use pass with the operator before visiting. The camp is open mid-April through early October; download directions before heading east of Granite Falls, where there is no cell service.",
+    inclusionNote: "The operator describes Triangle Recreation Camp as Gay, Lesbian, Bisexual, Transgender, and Queer owned and operated.",
+    officialUrl: "https://wildapricot.camptrc.org/",
+    // Exact point from the operator-published Google Maps destination for
+    // 47715 Mountain Loop Highway. This is the public campground address,
+    // not a campsite, meeting point, or private driveway.
+    lat: 48.075589,
+    lng: -121.59269,
     discoverySource: {
       name: "Triangle Recreation Camp operator site",
       href: "https://wildapricot.camptrc.org/",
     },
-    reviewedAt: "2026-09-01",
+    reviewedAt: "2026-09-06",
   },
   {
     id: "umpquas-last-resort",
