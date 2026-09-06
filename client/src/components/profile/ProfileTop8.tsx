@@ -1,5 +1,9 @@
+import { useState } from "react";
+import { MessageCircle, UserRound } from "lucide-react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
+import { useAuth } from "@/context/AuthContext";
+import MessageModal from "@/pages/profile/MessageModal";
 import { placePath } from "@shared/placeSlug";
 import type { ProfileTop8Entry } from "@/pages/profile/types";
 
@@ -8,13 +12,16 @@ type Props = {
   isOwner: boolean;
   displayName: string;
   onEdit?: () => void;
+  onRequireAuth?: () => void;
   /** Open directory PlaceModal in-place (stay on profile when closed). */
   onPlaceClick?: (place: Extract<ProfileTop8Entry, { kind: "place" }>, originEl: HTMLElement | null) => void;
 };
 
 /** MySpace-style Top 8: ranked grid of favorite people + venues.
  *  People navigate to profiles; venues open the directory card modal on this page. */
-export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onPlaceClick }: Props) {
+export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onRequireAuth, onPlaceClick }: Props) {
+  const { user } = useAuth();
+  const [messageTarget, setMessageTarget] = useState<Extract<ProfileTop8Entry, { kind: "user" }> | null>(null);
   // Nothing to show and not the owner → hide the section entirely.
   if (entries.length === 0 && !isOwner) return null;
 
@@ -44,14 +51,14 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onP
           {entries.slice(0, 8).map((e, i) => {
             const rank = i + 1;
             if (e.kind === "user") {
+              const isSelf = user?.id === e.id;
               return (
-                <Link
+                <article
                   key={`u-${e.id}`}
-                  href={`/u/${encodeURIComponent(e.username)}`}
                   className="pp-top8__tile"
                 >
                   <span className="pp-top8__rank display">{rank}</span>
-                  <span className="pp-top8__avatar">
+                  <Link href={`/u/${encodeURIComponent(e.username)}`} className="pp-top8__avatar" aria-label={`View ${e.displayName}'s profile`}>
                     <UserAvatar
                       photoUrl={e.photoUrl}
                       avatarChoice={e.avatarChoice}
@@ -60,10 +67,14 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onP
                       username={e.username}
                       size={64}
                     />
-                  </span>
-                  <span className="pp-top8__name display">{e.displayName}</span>
+                  </Link>
+                  <Link href={`/u/${encodeURIComponent(e.username)}`} className="pp-top8__name display">{e.displayName}</Link>
                   <span className="pp-top8__meta">@{e.username}</span>
-                </Link>
+                  <div className="pp-top8__actions">
+                    <Link href={`/u/${encodeURIComponent(e.username)}`} className="pp-top8__action"><UserRound size={13} aria-hidden="true" />PROFILE</Link>
+                    {!isSelf ? <button type="button" className="pp-top8__action" onClick={() => user ? setMessageTarget(e) : onRequireAuth?.()}><MessageCircle size={13} aria-hidden="true" />MESSAGE</button> : null}
+                  </div>
+                </article>
               );
             }
             const placeInner = (
@@ -109,6 +120,7 @@ export default function ProfileTop8({ entries, isOwner, displayName, onEdit, onP
       {isOwner && entries.length > 0 && (
         <p className="pp-top8__owner-hint">{firstName}&apos;s crew. Tap Edit to reorder.</p>
       )}
+      {messageTarget ? <MessageModal data={messageTarget} username={messageTarget.username} onClose={() => setMessageTarget(null)} /> : null}
     </section>
   );
 }

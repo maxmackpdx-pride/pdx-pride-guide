@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ImagePlus, Minus, Move, Plus, RotateCcw, Upload } from "lucide-react";
 import { AVATAR_RING_OPTIONS } from "@shared/avatarRings";
 import {
   DEFAULT_AVATAR_CROP,
@@ -23,6 +24,14 @@ interface Props {
 }
 
 const CROP_CANVAS = 280;
+const MAX_AVATAR_BYTES = 8 * 1024 * 1024;
+const ACCEPTED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+
+function formatFileSize(bytes: number) {
+  return bytes >= 1024 * 1024
+    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
 
 export default function AvatarEditor({
   photoUrl,
@@ -36,6 +45,7 @@ export default function AvatarEditor({
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ownedPreviewUrlRef = useRef<string | null>(null);
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const [sourceImage, setSourceImage] = useState<HTMLImageElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState(photoUrl || "");
@@ -43,6 +53,8 @@ export default function AvatarEditor({
   const [crop, setCrop] = useState<AvatarCropData>(() => parseAvatarCrop(avatarCrop));
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const ringChanged = ring !== (avatarRing || "none");
   const canSave = !!sourceImage || !!photoUrl || ringChanged;
@@ -53,6 +65,10 @@ export default function AvatarEditor({
     setPreviewUrl(photoUrl || "");
   }, [photoUrl, avatarRing, avatarCrop]);
 
+  useEffect(() => () => {
+    if (ownedPreviewUrlRef.current) URL.revokeObjectURL(ownedPreviewUrlRef.current);
+  }, []);
+
   useEffect(() => {
     if (!sourceImage || !canvasRef.current) return;
     drawCropPreviewCanvas(canvasRef.current, sourceImage, crop);
@@ -62,23 +78,44 @@ export default function AvatarEditor({
     if (!img) return;
     try {
       const blob = await renderCroppedAvatarBlob(img, nextCrop, 256);
-      setPreviewUrl(prev => {
-        if (prev.startsWith("blob:")) URL.revokeObjectURL(prev);
-        return URL.createObjectURL(blob);
-      });
+      if (ownedPreviewUrlRef.current) URL.revokeObjectURL(ownedPreviewUrlRef.current);
+      const nextUrl = URL.createObjectURL(blob);
+      ownedPreviewUrlRef.current = nextUrl;
+      setPreviewUrl(nextUrl);
     } catch { /* preview only */ }
   };
 
   const handleFile = async (file: File) => {
+    if (!ACCEPTED_AVATAR_TYPES.has(file.type)) {
+      toast({ title: "Choose a JPG, PNG, GIF, or WebP image", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast({ title: "That image is larger than 8 MB", variant: "destructive" });
+      return;
+    }
     try {
       const img = await loadImageFromFile(file);
       const nextCrop = { ...DEFAULT_AVATAR_CROP };
       setSourceImage(img);
+      setSelectedFile(file);
       setCrop(nextCrop);
       await refreshPreview(nextCrop, img);
     } catch {
       toast({ title: "Could not load image", variant: "destructive" });
     }
+  };
+
+  const cancelSelection = () => {
+    if (ownedPreviewUrlRef.current) {
+      URL.revokeObjectURL(ownedPreviewUrlRef.current);
+      ownedPreviewUrlRef.current = null;
+    }
+    setSourceImage(null);
+    setSelectedFile(null);
+    setCrop(parseAvatarCrop(avatarCrop));
+    setPreviewUrl(photoUrl || "");
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   const applyCrop = (next: AvatarCropData) => {
@@ -108,6 +145,28 @@ export default function AvatarEditor({
     dragRef.current = null;
     setDragging(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  const nudgeCrop = (x: number, y: number) => {
+    applyCrop({
+      ...crop,
+      offsetX: Math.max(0, Math.min(1, crop.offsetX + x)),
+      offsetY: Math.max(0, Math.min(1, crop.offsetY + y)),
+    });
+  };
+
+  const onCropKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const step = e.shiftKey ? 0.05 : 0.015;
+    const movement: Record<string, [number, number]> = {
+      ArrowLeft: [-step, 0],
+      ArrowRight: [step, 0],
+      ArrowUp: [0, -step],
+      ArrowDown: [0, step],
+    };
+    const next = movement[e.key];
+    if (!next) return;
+    e.preventDefault();
+    nudgeCrop(next[0], next[1]);
   };
 
   const handleSave = async () => {
@@ -141,6 +200,7 @@ export default function AvatarEditor({
       if (!profileRes.ok) throw new Error("Profile save failed");
       toast({ title: "Avatar saved" });
       setSourceImage(null);
+      setSelectedFile(null);
       onSaved();
     } catch {
       toast({ title: "Could not save avatar", variant: "destructive" });
@@ -160,6 +220,7 @@ export default function AvatarEditor({
       });
       if (!res.ok) throw new Error("Remove failed");
       setSourceImage(null);
+      setSelectedFile(null);
       setPreviewUrl("");
       setRing("none");
       setCrop({ ...DEFAULT_AVATAR_CROP });
@@ -184,8 +245,8 @@ export default function AvatarEditor({
           size={96}
         />
         <div className="avatar-editor__hint">
-          <div className="display" style={{ color: "#CCFF00", fontSize: "0.9rem" }}>LIVE PREVIEW</div>
-          <p style={{ color: "var(--text-meta)", fontSize: "0.82rem", margin: "6px 0 0", lineHeight: 1.4 }}>
+          <div className="display avatar-editor__preview-label">LIVE PREVIEW</div>
+          <p className="avatar-editor__preview-copy">
             Drag to reposition. Zoom to fit your face in the circle. Rings are optional.
           </p>
         </div>
@@ -195,43 +256,78 @@ export default function AvatarEditor({
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp"
-        style={{ display: "none" }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
+        className="avatar-editor__file-input"
+        onChange={e => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.currentTarget.value = ""; }}
       />
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        <button type="button" className="avatar-editor__btn" onClick={() => inputRef.current?.click()}>
-          CHOOSE PHOTO
-        </button>
-        {(previewUrl || photoUrl) && (
-          <button type="button" className="avatar-editor__btn avatar-editor__btn--ghost" onClick={() => void handleRemove()}>
-            REMOVE PHOTO
-          </button>
-        )}
-      </div>
+      <button
+        type="button"
+        className={`avatar-editor__dropzone${dragActive ? " is-dragging" : ""}`}
+        onClick={() => inputRef.current?.click()}
+        onDragEnter={e => { e.preventDefault(); setDragActive(true); }}
+        onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+        onDragLeave={() => setDragActive(false)}
+        onDrop={e => {
+          e.preventDefault();
+          setDragActive(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) void handleFile(file);
+        }}
+      >
+        <span className="avatar-editor__dropzone-icon" aria-hidden="true">
+          {sourceImage ? <ImagePlus size={24} /> : <Upload size={24} />}
+        </span>
+        <span className="avatar-editor__dropzone-copy">
+          <strong>{sourceImage ? "CHOOSE A DIFFERENT PHOTO" : "DROP A PHOTO HERE OR BROWSE"}</strong>
+          <small>JPG, PNG, GIF, or WebP · 8 MB max</small>
+        </span>
+      </button>
 
       {sourceImage && (
         <div className="avatar-editor__crop-panel">
-          <label className="avatar-editor__label">CIRCLE CROP: DRAG & ZOOM</label>
+          <div className="avatar-editor__crop-heading">
+            <div>
+              <span className="avatar-editor__label">POSITION YOUR PHOTO</span>
+              {selectedFile && <span className="avatar-editor__file-meta">{selectedFile.name} · {formatFileSize(selectedFile.size)}</span>}
+            </div>
+            <button type="button" className="avatar-editor__text-btn" onClick={cancelSelection}>CANCEL</button>
+          </div>
           <canvas
             ref={canvasRef}
             width={CROP_CANVAS}
             height={CROP_CANVAS}
             className={`avatar-editor__crop-canvas${dragging ? " dragging" : ""}`}
+            tabIndex={0}
+            aria-label="Avatar crop. Drag or use the arrow keys to reposition the photo."
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
+            onKeyDown={onCropKeyDown}
           />
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.02}
-            value={crop.scale}
-            onChange={e => applyCrop({ ...crop, scale: Number(e.target.value) })}
-            className="avatar-editor__zoom"
-          />
+          <div className="avatar-editor__crop-help"><Move size={14} aria-hidden="true" /> Drag or use arrow keys to reposition</div>
+          <div className="avatar-editor__zoom-row">
+            <Minus size={16} aria-hidden="true" />
+            <label htmlFor="avatar-zoom" className="sr-only">Avatar zoom</label>
+            <input
+              id="avatar-zoom"
+              type="range"
+              min={1}
+              max={4}
+              step={0.02}
+              value={crop.scale}
+              onChange={e => applyCrop({ ...crop, scale: Number(e.target.value) })}
+              className="avatar-editor__zoom"
+            />
+            <Plus size={16} aria-hidden="true" />
+            <button
+              type="button"
+              className="avatar-editor__reset-btn"
+              onClick={() => applyCrop({ ...DEFAULT_AVATAR_CROP })}
+            >
+              <RotateCcw size={14} aria-hidden="true" /> RESET
+            </button>
+          </div>
         </div>
       )}
 
@@ -266,6 +362,11 @@ export default function AvatarEditor({
       >
         {saving ? "SAVING..." : sourceImage ? "SAVE CROPPED AVATAR" : "SAVE RING"}
       </button>
+      {(previewUrl || photoUrl) && !sourceImage && (
+        <button type="button" className="avatar-editor__remove" disabled={saving} onClick={() => void handleRemove()}>
+          REMOVE PHOTO
+        </button>
+      )}
     </div>
   );
 }

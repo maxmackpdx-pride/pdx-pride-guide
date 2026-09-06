@@ -1,0 +1,50 @@
+.mp-modal-overlay {
+  align-items: center;
+  background: rgba(0, 0, 0, .78);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 18px;
+  position: fixed;
+  z-index: 2400;
+}
+
+.mp-modal {
+  --c: var(--neon-cyan, #19e3ff);
+  max-height: calc(100dvh - 36px);
+  max-width: 520px;
+  overflow-y: auto;
+  padding: clamp(18px, 4vw, 26px);
+  width: 100%;
+}
+
+.mp-modal__head { align-items: center; display: flex; gap: 13px; margin-bottom: 20px; }
+.mp-modal__titles { flex: 1; min-width: 0; }
+.mp-modal__title { color: var(--text-hi, #fff); font-size: 1.35rem; font-weight: 900; text-transform: uppercase; }
+.mp-modal__sub { color: var(--text-lo, #999); font-size: .78rem; margin-top: 3px; }
+.mp-embed-remove {
+  align-items: center; appearance: none; background: transparent; border: 1px solid var(--panel-border-2, #24242c);
+  border-radius: 50%; color: var(--text-lo, #999); cursor: pointer; display: inline-flex; flex: 0 0 44px;
+  height: 44px; justify-content: center;
+}
+.mp-embed-remove:hover { border-color: var(--neon-cyan, #19e3ff); color: var(--neon-cyan, #19e3ff); }
+.mp-embed-remove:focus-visible { outline: 3px solid var(--chrome-focus, #19e3ff); outline-offset: 2px; }
+.mp-modal__input {
+  background: #050506; border: 1px solid var(--panel-border-2, #24242c); border-radius: 10px; color: var(--text-hi, #fff);
+  font: inherit; line-height: 1.5; min-height: 132px; padding: 13px; resize: vertical; width: 100%;
+}
+.mp-modal__input:focus { border-color: var(--neon-cyan, #19e3ff); outline: 2px solid color-mix(in srgb, var(--neon-cyan, #19e3ff) 35%, transparent); }
+.mp-modal__actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.mp-modal__cancel {
+  background: var(--btn-glow-bg); border: 1px solid var(--panel-border-2, #24242c); border-radius: 9px;
+  box-shadow: var(--btn-glow-shadow); color: var(--text-hi, #fff); cursor: pointer; font-family: var(--font-display);
+  font-weight: 800; min-height: 44px; padding: 0 18px; text-transform: uppercase;
+}
+.mp-modal__sent { color: var(--text-body, #b7b7bf); padding: 14px 0 2px; text-align: center; }
+.mp-sent-check { color: var(--neon-cyan, #19e3ff); font-size: 2rem; }
+.mp-modal__sent-title { color: var(--text-hi, #fff); font-size: 1.5rem; font-weight: 900; margin-top: 6px; text-transform: uppercase; }
+.mp-modal__sent p { line-height: 1.5; margin: 8px auto 18px; max-width: 36ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-modal, .mp-modal * { scroll-behavior: auto !important; transition: none !important; }
+}

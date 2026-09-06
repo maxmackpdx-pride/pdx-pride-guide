@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import AccentPicker from "./AccentPicker";
@@ -10,6 +10,7 @@ import ReportAccount from "@/components/profile/ReportAccount";
 import BlockMemberButton from "@/components/profile/BlockMemberButton";
 import { useAuth } from "@/context/AuthContext";
 import { coverCropToImgStyle } from "@/lib/coverCrop";
+import { clearDynamicTextCache, rowGapAbove, solveDynamicText, type DynamicTextResult } from "@/lib/dynamicText";
 import type { PublicProfileData } from "./types";
 import "./ProfileHero.css";
 
@@ -34,28 +35,39 @@ type Props = {
   onSolidBanner: (hex: string) => void;
 };
 
-function buildMetaLine(data: PublicProfileData, memberYear: number | null): string {
-  const parts: string[] = [];
-  if (data.location) parts.push(data.location);
-  else if (memberYear) parts.push("Portland");
+function DynamicProfileName({ name }: { name: string }) {
+  const frameRef = useRef<HTMLHeadingElement>(null);
+  const [layout, setLayout] = useState<DynamicTextResult | null>(null);
+  const visualName = name.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 
-  // Affiliation: first talent, business name, or first venue
-  const affiliation =
-    data.talents?.[0] ||
-    data.businessPlace?.name ||
-    data.affiliatedVenues?.[0]?.name ||
-    data.linkedVenues?.[0]?.name;
-  if (affiliation) parts.push(affiliation);
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const measure = () => {
+      const rect = frame.getBoundingClientRect();
+      if (rect.width && rect.height) setLayout(solveDynamicText(visualName, rect.width, rect.height, true, true));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [visualName]);
 
-  const secondVenue =
-    data.affiliatedVenues?.[1]?.name ||
-    (data.affiliatedVenues?.[0]?.name && data.linkedVenues?.[0]?.name !== data.affiliatedVenues?.[0]?.name
-      ? data.linkedVenues?.[0]?.name
-      : null);
-  if (secondVenue && secondVenue !== affiliation) parts.push(secondVenue);
+  useEffect(() => {
+    if (!document.fonts) return;
+    let live = true;
+    document.fonts.ready.then(() => {
+      if (!live) return;
+      clearDynamicTextCache();
+      const rect = frameRef.current?.getBoundingClientRect();
+      if (rect?.width && rect.height) setLayout(solveDynamicText(visualName, rect.width, rect.height, true, true));
+    });
+    return () => { live = false; };
+  }, [name, visualName]);
 
-  if (memberYear) parts.push(`Since ${memberYear}`);
-  return parts.join(" · ");
+  return <h1 ref={frameRef} className="pp-hero__name-frame" aria-label={name}>
+    {layout?.lines.map((line, index) => <span key={`${line}-${index}`} style={{ fontSize: layout.sizes[index], marginTop: index ? rowGapAbove(line, layout.sizes[index]) : undefined }}>{line}</span>)}
+  </h1>;
 }
 
 export default function ProfileHero({
@@ -85,11 +97,6 @@ export default function ProfileHero({
   const displayName = data.displayName || data.username;
   const canDeleteAccount = !!viewer?.isPrimaryOwner;
   const blockStatus = data.blockStatus ?? { blockedByViewer: false, blockedViewer: false, interactionBlocked: false };
-  const memberYear =
-    data.memberSince && !Number.isNaN(new Date(data.memberSince).getTime())
-      ? new Date(data.memberSince).getFullYear()
-      : null;
-  const metaLine = buildMetaLine(data, memberYear);
 
   const avatar = (
     <UserAvatar
@@ -98,34 +105,21 @@ export default function ProfileHero({
       avatarRing={data.avatarRing}
       displayName={data.displayName}
       username={data.username}
-      size={88}
+      size={180}
       className="pp-hero__avatar-el"
     />
   );
 
   return (
     <section className="pp-hero pp-hero--reimagined">
-      {data.coverImageUrl ? (
-        <div className="pp-hero__banner pp-hero__banner--custom">
-          <img
-            className="pp-hero__banner-img"
-            src={data.coverImageUrl}
-            alt=""
-            style={coverCropToImgStyle(data.coverCrop)}
-          />
-        </div>
-      ) : banner ? (
-        <img className="pp-hero__banner" src={banner} alt="" />
-      ) : (
-        <div className="pp-hero__banner-fallback" aria-hidden="true">
-          <div className="pp-hero__banner-dots" />
-        </div>
-      )}
-      <div className="pp-hero__scrim" aria-hidden="true" />
-      <div className="pp-hero__rainbow" aria-hidden="true" />
-
-      <div className="pp-hero__content">
-        <div className="pp-hero__identity">
+      <div className="pp-hero__stage">
+        {data.coverImageUrl ? (
+          <div className="pp-hero__banner pp-hero__banner--custom"><img className="pp-hero__banner-img" src={data.coverImageUrl} alt="" style={coverCropToImgStyle(data.coverCrop)} /></div>
+        ) : banner ? <img className="pp-hero__banner" src={banner} alt="" /> : <div className="pp-hero__banner-fallback" aria-hidden="true"><div className="pp-hero__banner-dots" /></div>}
+        <div className="pp-hero__scrim" aria-hidden="true" />
+        <div className="pp-hero__rainbow" aria-hidden="true" />
+        <DynamicProfileName name={displayName} />
+        <div className="pp-hero__portrait">
           <div className="pp-hero__avatar">
             {isOwner ? (
               <Link href="/dashboard?edit=profile" className="pp-hero__avatar-link" aria-label="Edit profile">
@@ -149,28 +143,12 @@ export default function ProfileHero({
               <ReportAccount username={data.username} />
             ) : null}
           </div>
+        </div>
+        <div className="pp-hero__roles"><RoleStickers isPromoter={isPromoter} isAdmin={data.isAdmin} isSiteOwner={data.isSiteOwner} /></div>
+      </div>
 
-          <div className="pp-hero__meta">
-            <div className="pp-hero__name-row">
-              <h1 className="display pp-hero__name">{displayName}</h1>
-              <RoleStickers
-                isPromoter={isPromoter}
-                isAdmin={data.isAdmin}
-                isSiteOwner={data.isSiteOwner}
-              />
-            </div>
-
-            <div className="pp-hero__subrow">
-              <span className="pp-hero__handle">@{data.username}</span>
-              {data.pronouns ? (
-                <span className="pp-hero__chip pp-hero__chip--pronouns display">{data.pronouns}</span>
-              ) : null}
-              {metaLine ? <span className="pp-hero__meta-line display">{metaLine}</span> : null}
-            </div>
-          </div>
-
-          {/* Single action row - no second copy under the avatar/bio */}
-          <div className="pp-hero__actions">
+      <div className="pp-hero__content">
+        <div className="pp-hero__actions">
             {!isOwner && (
               <>
                 <button
@@ -247,9 +225,7 @@ export default function ProfileHero({
                 anchorRef={shareRef}
               />
             </div>
-          </div>
         </div>
-
         {data.bio ? <p className="pp-hero__bio">{data.bio}</p> : null}
       </div>
     </section>

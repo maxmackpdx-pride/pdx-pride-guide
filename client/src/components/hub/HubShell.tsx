@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  Bell,
   Briefcase,
   CalendarDays,
   ChevronLeft,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 
 import UserAvatar from "@/components/UserAvatar";
+import { NotificationStateIcon } from "@/components/ui/animated-state-icons";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import "./hub-shell.css";
 
@@ -250,7 +250,7 @@ export default function HubShell({
       onClick={() => openSheet({ view: "inbox", account: "admin" })}
       aria-label={`Notifications${alertTotal > 0 ? `, ${alertTotal} pending` : ""}`}
     >
-      <Bell size={mode === "admin" ? 21 : 17} strokeWidth={2.2} aria-hidden />
+      <NotificationStateIcon active={alertTotal > 0} size={mode === "admin" ? 21 : 17} />
       {alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}
     </button>
   );

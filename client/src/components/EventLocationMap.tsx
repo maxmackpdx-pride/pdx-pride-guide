@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { CalendarPlus, Check, Copy, Map as MapIcon } from "lucide-react";
+import { CalendarPlus, Check, Map as MapIcon } from "lucide-react";
+import { CopyStateIcon } from "@/components/ui/animated-state-icons";
 import type { Event } from "@shared/schema";
 import { appleMapsUrl, googleMapsUrl } from "@/lib/eventLinks";
 
@@ -130,7 +131,7 @@ export default function EventLocationMap({
             )}
           </div>
         )}
-        {!event.isPrivate && <button type="button" onClick={copyAddress} aria-label="Copy event address">{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}<span>{copied ? "Copied" : "Copy"}</span></button>}
+        {!event.isPrivate && <button type="button" onClick={copyAddress} aria-label="Copy event address"><CopyStateIcon copied={copied} /><span>{copied ? "Copied" : "Copy"}</span></button>}
         <button type="button" onClick={onSchedule} disabled={schedulePending} aria-pressed={scheduled}>
           {scheduled ? <Check aria-hidden="true" /> : <CalendarPlus aria-hidden="true" />}
           <span>{scheduled ? "Scheduled" : "Schedule"}</span>

@@ -1579,6 +1579,9 @@ main:has(.pp-page--reimagined) {
   box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.8),
     0 0 18px -8px var(--profile-acc, #ff00cc);
 }
+.pp-top8__tile:focus-within {
+  border-color: color-mix(in srgb, var(--profile-acc, #ff00cc) 70%, #1c1c22);
+}
 .pp-top8__rank {
   position: absolute;
   top: 6px;
@@ -1592,6 +1595,16 @@ main:has(.pp-page--reimagined) {
 }
 .pp-top8__avatar {
   display: inline-flex;
+  border-radius: 50%;
+  transition: transform 0.16s ease;
+}
+.pp-top8__avatar:hover,
+.pp-top8__avatar:focus-visible {
+  outline: none;
+  transform: translateY(-4px);
+}
+.pp-top8__avatar:focus-visible {
+  box-shadow: 0 0 0 2px #050506, 0 0 0 4px var(--profile-acc, #ff00cc);
 }
 .pp-top8__avatar--logo {
   width: 64px;
@@ -1627,7 +1640,39 @@ main:has(.pp-page--reimagined) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: none;
 }
+.pp-top8__name:hover { color: var(--profile-acc, #ff00cc); }
+.pp-top8__name:focus-visible { outline: 2px solid var(--profile-acc, #ff00cc); outline-offset: 2px; }
+.pp-top8__actions {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 3px;
+  width: 100%;
+}
+.pp-top8__action {
+  align-items: center;
+  appearance: none;
+  background: var(--btn-glow-bg);
+  border: 1px solid color-mix(in srgb, var(--profile-acc, #ff00cc) 42%, #111);
+  border-radius: 8px;
+  box-shadow: var(--btn-glow-shadow);
+  color: var(--profile-acc, #ff00cc);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 800;
+  gap: 4px;
+  justify-content: center;
+  letter-spacing: .05em;
+  min-height: 44px;
+  padding: 0 5px;
+  text-decoration: none;
+}
+.pp-top8__action:hover { filter: brightness(1.12); text-decoration: none; }
+.pp-top8__action:focus-visible { outline: 2px solid var(--profile-acc, #ff00cc); outline-offset: 2px; }
 .pp-top8__meta {
   font-family: ui-monospace, monospace;
   font-size: 0.6rem;
@@ -1662,6 +1707,18 @@ main:has(.pp-page--reimagined) {
   font-size: 0.66rem;
   letter-spacing: 0.06em;
   color: var(--text-lo, #8c8980);
+}
+
+@media (max-width: 560px) {
+  .pp-top8__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-top8__tile,
+  .pp-top8__avatar { transition: none; }
+  .pp-top8__tile:hover,
+  .pp-top8__avatar:hover,
+  .pp-top8__avatar:focus-visible { transform: none; }
 }
 .pp-top8__owner-hint {
   margin: 10px 0 0;

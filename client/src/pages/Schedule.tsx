@@ -46,7 +46,7 @@ import ScheduleHero from "@/components/ScheduleHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
 import { Button } from "@/components/ds";
-import { Download } from "lucide-react";
+import { DownloadStateIcon } from "@/components/ui/animated-state-icons";
 import "./Schedule.css";
 import "./ScheduleToolbar.css";
 import { shareCardUrl } from "@shared/shareCards";
@@ -1485,7 +1485,7 @@ export default function Schedule({
               onClick={exportStories}
               disabled={exporting}
             >
-              <Download size={16} aria-hidden />
+              <DownloadStateIcon busy={exporting} size={16} />
               {exporting ? "Exporting…" : "Export to Stories"}
             </Button>
           </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
-import { ExternalLink, Lock, MapPin, MessageCircle, TentTree } from "lucide-react";
+import { ExternalLink, Lock, MapPin, MessageCircle, Star, TentTree } from "lucide-react";
 import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
 import BoardHero from "@/components/BoardHero";
@@ -92,6 +92,7 @@ export default function OutzPlace() {
   const [postKind, setPostKind] = useState<WallPost["postKind"]>("LOOKING_FOR_COMPANY");
   const [postBody, setPostBody] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
 
   const snapshotQuery = useQuery<OutzPayload>({
     queryKey: ["/api/outz"],
@@ -178,7 +179,10 @@ export default function OutzPlace() {
   });
   const saveRating = useMutation({
     mutationFn: (rating: number) => apiRequest("POST", "/api/outz/rating", { placeId, rating }).then(r => r.json()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ratingKey }),
+    onSuccess: (nextRating: RatingPayload) => {
+      queryClient.setQueryData(ratingKey, nextRating);
+      toast({ title: "OUTZide review saved", description: "Your trip rating now counts in the community score." });
+    },
     onError: () => toast({ title: "Couldn’t save rating", description: "Try again in a moment.", variant: "destructive" }),
   });
   const createWallPost = useMutation({
@@ -382,14 +386,46 @@ export default function OutzPlace() {
               </article>) : <div className="outz-wall-empty">No trip posts yet. Be the one who gets the plan moving.</div>}
             </div>
           </div>
-          <aside className="outz-rating outz-panel pdx-glass-card pdx-glass-rebind" aria-label="Destination rating">
-            <p>Trip signal</p>
-            <strong>{ratingQuery.data?.average == null ? "—" : ratingQuery.data.average.toFixed(1)}<small>/5</small></strong>
-            <span>{ratingQuery.data?.count || 0} community ratings</span>
-            <div className="outz-rating__stars" aria-label="Rate this destination from one to five">
-              {[1, 2, 3, 4, 5].map(star => <button type="button" key={star} className={(ratingQuery.data?.mine || 0) >= star ? "is-selected" : ""} aria-label={`Rate ${star} out of 5`} onClick={() => user ? saveRating.mutate(star) : setShowAuth(true)}>★</button>)}
+          <aside className="outz-rating outz-panel pdx-glass-card pdx-glass-rebind" aria-labelledby="outz-rating-heading">
+            <div className="outz-rating__head">
+              <div>
+                <p>Community signal</p>
+                <h3 id="outz-rating-heading">OUTZide reviews</h3>
+              </div>
+              <span className="outz-rating__count">{ratingQuery.data?.count || 0} {(ratingQuery.data?.count || 0) === 1 ? "rating" : "ratings"}</span>
             </div>
-            <small>Share your trip signal, not a substitute for official conditions, access, or reservation details.</small>
+            <div className="outz-rating__summary">
+              <strong>{ratingQuery.data?.average == null ? "—" : ratingQuery.data.average.toFixed(1)}<small>/5</small></strong>
+              <div className="outz-rating__average-stars" aria-hidden="true">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Star key={star} size={18} className={(ratingQuery.data?.average || 0) >= star - 0.5 ? "is-filled" : ""} />
+                ))}
+              </div>
+              <span>{ratingQuery.data?.count ? `From ${ratingQuery.data.count} community ${ratingQuery.data.count === 1 ? "trip" : "trips"}` : "Be the first to rate this trip"}</span>
+            </div>
+            <div className="outz-rating__rule" />
+            <div className="outz-rating__prompt">
+              <strong>{ratingQuery.data?.mine ? "Your rating" : "How was your trip?"}</strong>
+              <span>{hoverRating ? `${hoverRating} out of 5` : ratingQuery.data?.mine ? `You rated this ${ratingQuery.data.mine} out of 5` : "Choose a star to share your signal"}</span>
+            </div>
+            <div className="outz-rating__stars" role="group" aria-label={`Rate ${place?.name || "this destination"} from one to five`} onMouseLeave={() => setHoverRating(null)}>
+              {[1, 2, 3, 4, 5].map(star => {
+                const activeRating = hoverRating ?? ratingQuery.data?.mine ?? 0;
+                return <button
+                  type="button"
+                  key={star}
+                  className={activeRating >= star ? "is-selected" : ""}
+                  aria-pressed={(ratingQuery.data?.mine || 0) === star}
+                  aria-label={`${star} out of 5`}
+                  disabled={saveRating.isPending}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onFocus={() => setHoverRating(star)}
+                  onBlur={() => setHoverRating(null)}
+                  onClick={() => user ? saveRating.mutate(star) : setShowAuth(true)}
+                ><Star size={26} aria-hidden="true" /></button>;
+              })}
+            </div>
+            <small>Community experience only. Always confirm current access, conditions, and reservations with the official source.</small>
           </aside>
         </div>
       </section>

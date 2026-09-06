@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/UserAvatar";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { MemberProfileData } from "./types";
 import { trackProductEvent } from "@/lib/analytics";
+import "./MessageModal.css";
 
 function CloseIcon({ size = 15 }: { size?: number }) {
   return (
@@ -26,7 +27,26 @@ export default function MessageModal({
   const [msgText, setMsgText] = useState("");
   const [msgSent, setMsgSent] = useState(false);
   const [msgSending, setMsgSending] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const displayName = data.displayName || data.username;
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), textarea:not([disabled]), a[href]'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    textareaRef.current?.focus();
+    return () => { document.removeEventListener("keydown", onKeyDown); previousFocus?.focus(); };
+  }, [onClose]);
 
   const sendMessage = async () => {
     const body = msgText.trim();
@@ -45,8 +65,8 @@ export default function MessageModal({
   };
 
   return (
-    <div className="mp-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={`Message ${displayName}`}>
-      <div className="mp-modal" onClick={e => e.stopPropagation()}>
+    <div className="mp-modal-overlay" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
+      <div ref={dialogRef} className="mp-modal pdx-glass-card pdx-glass-rebind" role="dialog" aria-modal="true" aria-labelledby="member-message-title">
         <div className="mp-modal__head">
           <UserAvatar
             photoUrl={data.photoUrl}
@@ -57,7 +77,7 @@ export default function MessageModal({
             size={52}
           />
           <div className="mp-modal__titles">
-            <div className="display mp-modal__title">Message {displayName}</div>
+            <div id="member-message-title" className="display mp-modal__title">Message {displayName}</div>
             <div className="mp-modal__sub">Replies land in your Hub inbox.</div>
           </div>
           <button type="button" className="mp-embed-remove" onClick={onClose} aria-label="Close">
@@ -68,6 +88,7 @@ export default function MessageModal({
         {!msgSent ? (
           <div>
             <textarea
+              ref={textareaRef}
               value={msgText}
               onChange={e => setMsgText(e.target.value)}
               rows={5}

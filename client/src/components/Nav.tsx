@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { ChevronDown, Menu, Search, X, Zap } from "lucide-react";
+import { ChevronDown, Search, Zap } from "lucide-react";
+import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -885,7 +886,7 @@ export default function Nav() {
               aria-controls="site-nav-menu"
               onClick={() => setMenuOpen(open => !open)}
             >
-              {menuOpen ? <X size={28} /> : <Menu size={28} />}
+              <MenuCloseIcon open={menuOpen} size={28} />
               <span>{menuOpen ? "CLOSE" : "MENU"}</span>
             </button>
           </div>

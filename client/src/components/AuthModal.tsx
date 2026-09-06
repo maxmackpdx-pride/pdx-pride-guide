@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { ArrowRight, AtSign, Eye, EyeClosed, Lock, Mail, User, X } from "lucide-react";
+import { ArrowRight, AtSign, Lock, Mail, User, X } from "lucide-react";
+import { EyeToggleIcon } from "@/components/ui/animated-state-icons";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { prefersStillMotion } from "@/lib/motion";
@@ -175,7 +176,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
       aria-label={showPassword ? "Hide password" : "Show password"}
       className="absolute right-3 z-10 flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 text-white/40 transition-colors duration-300 hover:text-white"
     >
-      {showPassword ? <Eye className="h-4 w-4" /> : <EyeClosed className="h-4 w-4" />}
+      <EyeToggleIcon visible={showPassword} size={16} />
     </button>
   );
 

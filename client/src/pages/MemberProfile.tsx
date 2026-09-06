@@ -342,6 +342,7 @@ export default function MemberProfile() {
               isOwner={isOwner}
               displayName={data.displayName || data.username}
               onEdit={() => setTop8Open(true)}
+              onRequireAuth={() => setShowAuth(true)}
               onPlaceClick={openPlaceFromTop8}
             />
             {bigOne && (
