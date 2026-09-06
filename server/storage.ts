@@ -1831,24 +1831,6 @@ function seedData() {
       claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
     },
     {
-      title: "Sasha Colby Pride Kick-Off",
-      description: "Headline performance by drag queen Sasha Colby for Portland Pride Kick-Off.",
-      venueName: "Star Theater",
-      address: "13 NW 6th Ave, Portland, OR 97209",
-      neighborhood: "Old Town",
-      lat: 45.523204065035, lng: -122.676518408183,
-      dateStart: "2026-07-16T20:00:00", dateEnd: "2026-07-16T23:59:00",
-      dayOfWeek: "THU",
-      ageRequirement: "21_PLUS",
-      eventTypes: JSON.stringify(["DRAG", "HEADLINE", "KICKOFF"]),
-      admission: "TICKETED",
-      ticketUrl: "https://www.startheaterportland.com/tm-event/sasha-colby-pride-weekend-kickoff-drag-show/",
-      isPublic: true, isPrivate: false, isHouseParty: false, isSexPositive: false, nudityOk: false,
-      posterImageUrl: "/posters/sasha-colby-pride-kickoff.jpg",
-      status: "LIVE", source: "admin_seeded", isClaimable: true,
-      claimedBy: null, submittedBy: null, adminNotes: null, createdAt: now,
-    },
-    {
       title: "Treasure Trail Portland Pride",
       description: "Bearracuda's Pride Friday kick-off at Sanctuary. DJ TIGERBEATZ (Seattle), hosted by JP Hardy. Wristband color system at the door (red=top, blue=vers, green=bottom, white=side). Venmo tickets available with no surcharge.",
       venueName: "Sanctuary",
@@ -3373,10 +3355,14 @@ function hardDeleteEventIds(ids: number[]) {
   if (!ids.length) return;
   const idPh = ids.map(() => "?").join(",");
   sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
+  sqlite.prepare(`DELETE FROM event_chat_messages WHERE event_id IN (${idPh})`).run(...ids);
   sqlite.prepare(`DELETE FROM event_hosts WHERE event_id IN (${idPh})`).run(...ids);
   sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
   try {
     sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* table may not exist in older DBs */ }
+  try {
+    sqlite.prepare(`UPDATE hub_feed_posts SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
   } catch { /* table may not exist in older DBs */ }
   try {
     sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
@@ -3384,7 +3370,23 @@ function hardDeleteEventIds(ids: number[]) {
   try {
     sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
   } catch { /* ignore */ }
+  try {
+    sqlite.prepare(`DELETE FROM moderation_requests WHERE event_id IN (${idPh})`).run(...ids);
+  } catch { /* table may not exist in older DBs */ }
   sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
+}
+
+/** Permanent tombstone for the invalid Sasha Colby listing and its old assets. */
+function purgeInvalidSashaColbyEvent() {
+  const rows = sqlite
+    .prepare(`
+      SELECT id FROM events
+      WHERE LOWER(title) IN ('sasha colby live', 'sasha colby pride kick-off')
+         OR LOWER(COALESCE(ticket_url, '')) LIKE '%sasha-colby-pride-weekend-kickoff%'
+         OR LOWER(COALESCE(poster_image_url, '')) LIKE '%sasha-colby%'
+    `)
+    .all() as Array<{ id: number }>;
+  hardDeleteEventIds(rows.map((row) => row.id));
 }
 
 /**
@@ -6069,6 +6071,8 @@ function runBootMigrationsOnce() {
 
   // Permanent: wipe post-Jul-19 listings on every boot (seeds keep trying to revive them).
   prunePostPrideWeekEvents();
+  // Permanent: this invalid listing previously returned through seed/demo paths.
+  purgeInvalidSashaColbyEvent();
   if (!hasBootMigration("prune_post_pride_week_permanent_v2")) {
     // One-shot title wipe for known revivals (OSLC Aug contest).
     const oscl = sqlite

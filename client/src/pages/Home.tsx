@@ -26,7 +26,7 @@ export default function Home() {
     { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
   );
 
-  const { data: stats, isPending: statsPending } = useQuery<HomeStats>({
+  const { data: stats, isPending: statsPending, isError: statsError } = useQuery<HomeStats>({
     queryKey: ["/api/home/stats"],
     queryFn: () => apiRequest("GET", "/api/home/stats").then(r => r.json()),
     staleTime: 60_000,
@@ -48,6 +48,7 @@ export default function Home() {
               placesCount={placesCount}
               goingCount={goingCount}
               pending={{ events: statsPending, places: statsPending, going: statsPending }}
+              error={statsError}
             />
             <div
               className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"

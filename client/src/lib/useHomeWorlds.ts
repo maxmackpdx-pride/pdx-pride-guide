@@ -2,8 +2,8 @@
  * Live wiring for the home destination rail.
  *
  * One hook feeds all ten cards. Every slot follows the same rule: live records
- * from the board's own API come first, sorted newest first, and the demo
- * material in `homeWorlds.ts` only fills the slots live data did not reach.
+ * from the board's own API come first, sorted newest first. Non-event demo
+ * material in `homeWorlds.ts` only fills board slots live data did not reach.
  * Anything that came from demo keeps `isLive: false` so the card can sticker
  * it DEMO, per the live-is-truth rule in docs/LIVE_DESIGN_STANDARD.md.
  *
@@ -39,13 +39,12 @@ import {
   type SpottedRow,
 } from "@/lib/homeStageSamples";
 import {
-  DEMO_FLYER,
   DEMO_ITEMS,
   DEMO_OUTZ_ROWS,
   DEMO_PLACE_LOGOS,
   DEMO_POSTINGS,
-  DEMO_TODAY,
   WORLD_FEED_LIMITS,
+  type WorldKey,
   type WorldFlyer,
   type WorldItem,
   type WorldPanel,
@@ -139,22 +138,38 @@ export type HomeWorldsData = {
   postings: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPosting[]>;
   items: WorldItem[];
   today: WorldTodayItem[];
+  states: Record<WorldKey, HomeWorldPreviewState>;
+  retry: () => void;
 };
 
+export type HomeWorldPreviewState = "loading" | "error" | "empty" | "ready";
+
+function previewState(
+  pending: boolean,
+  error: boolean,
+  hasLiveContent: boolean,
+): HomeWorldPreviewState {
+  if (pending) return "loading";
+  if (error) return "error";
+  return hasLiveContent ? "ready" : "empty";
+}
+
 export function useHomeWorlds(): HomeWorldsData {
-  const { data: events = [] } = useQuery<EventListing[]>({
+  const eventsQuery = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
   });
+  const events = eventsQuery.data ?? [];
 
-  const { data: directory = [] } = useQuery<DirectoryPlace[]>({
+  const directoryQuery = useQuery<DirectoryPlace[]>({
     queryKey: ["/api/directory"],
     queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
     staleTime: 60_000,
   });
+  const directory = directoryQuery.data ?? [];
 
-  const { data: housing } = useQuery<HousingBoardResponse>({
+  const housingQuery = useQuery<HousingBoardResponse>({
     queryKey: ["/api/housing", "home-worlds"],
     queryFn: async () => {
       const r = await fetch("/api/housing?limit=12", { credentials: "include" });
@@ -163,8 +178,9 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const housing = housingQuery.data;
 
-  const { data: gifting = [] } = useQuery<GiftingRow[]>({
+  const giftingQuery = useQuery<GiftingRow[]>({
     queryKey: ["/api/gifting"],
     queryFn: async () => {
       const r = await fetch("/api/gifting", { credentials: "include" });
@@ -172,8 +188,9 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const gifting = giftingQuery.data ?? [];
 
-  const { data: gigs = [] } = useQuery<GigRow[]>({
+  const gigsQuery = useQuery<GigRow[]>({
     queryKey: ["/api/gigs"],
     queryFn: async () => {
       const r = await fetch("/api/gigs", { credentials: "include" });
@@ -181,8 +198,9 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const gigs = gigsQuery.data ?? [];
 
-  const { data: spotted = [] } = useQuery<SpottedRow[]>({
+  const spottedQuery = useQuery<SpottedRow[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: async () => {
       const r = await fetch("/api/missed-connections", { credentials: "include" });
@@ -190,8 +208,9 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const spotted = spottedQuery.data ?? [];
 
-  const { data: sellz = [] } = useQuery<SellzRow[]>({
+  const sellzQuery = useQuery<SellzRow[]>({
     queryKey: ["/api/sellz"],
     queryFn: async () => {
       const r = await fetch("/api/sellz", { credentials: "include" });
@@ -199,20 +218,23 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const sellz = sellzQuery.data ?? [];
 
-  const { data: beaches } = useQuery<{ data: NudeBeachesSnapshot }>({
+  const beachesQuery = useQuery<{ data: NudeBeachesSnapshot }>({
     queryKey: ["/api/nude-beaches"],
     queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
     staleTime: 5 * 60_000,
   });
+  const beaches = beachesQuery.data;
 
-  const { data: outz } = useQuery<{ data: OutzSnapshot }>({
+  const outzQuery = useQuery<{ data: OutzSnapshot }>({
     queryKey: ["/api/outz"],
     queryFn: () => apiRequest("GET", "/api/outz").then(r => r.json()),
     staleTime: 10 * 60_000,
   });
+  const outz = outzQuery.data;
 
-  const { data: roosterCheckins = [] } = useQuery<BeachCheckin[]>({
+  const roosterCheckinsQuery = useQuery<BeachCheckin[]>({
     queryKey: ["/api/river-brats/checkins", "rooster-rock"],
     queryFn: async () => {
       const r = await fetch("/api/river-brats/checkins?beach=rooster-rock", { credentials: "include" });
@@ -222,8 +244,9 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const roosterCheckins = roosterCheckinsQuery.data ?? [];
 
-  const { data: sauvieCheckins = [] } = useQuery<BeachCheckin[]>({
+  const sauvieCheckinsQuery = useQuery<BeachCheckin[]>({
     queryKey: ["/api/river-brats/checkins", "sauvie-island"],
     queryFn: async () => {
       const r = await fetch("/api/river-brats/checkins?beach=sauvie-island", { credentials: "include" });
@@ -233,6 +256,7 @@ export function useHomeWorlds(): HomeWorldsData {
     },
     staleTime: 60_000,
   });
+  const sauvieCheckins = sauvieCheckinsQuery.data ?? [];
 
   /* ── 01 OUTZ ────────────────────────────────────────────────────────────
      The two river beaches are their own live snapshot; the third row is the
@@ -299,7 +323,7 @@ export function useHomeWorlds(): HomeWorldsData {
       dayColor: dayColorVar(listingDay(event)),
       isLive: true,
     }));
-    return live.length ? live : [DEMO_FLYER];
+    return live;
   }, [events]);
 
   /* ── 03 OUR PLACEZ ──────────────────────────────────────────────────────
@@ -419,8 +443,33 @@ export function useHomeWorlds(): HomeWorldsData {
         accent: TODAY_ACCENTS[index % TODAY_ACCENTS.length],
         isLive: true,
       }));
-    return live.length ? live : DEMO_TODAY;
+    return live;
   }, [events]);
 
-  return { outzRows, flyers, panels, postings, items, today };
+  const states: Record<WorldKey, HomeWorldPreviewState> = {
+    outz: previewState(
+      beachesQuery.isPending || outzQuery.isPending || roosterCheckinsQuery.isPending || sauvieCheckinsQuery.isPending,
+      beachesQuery.isError || outzQuery.isError || roosterCheckinsQuery.isError || sauvieCheckinsQuery.isError,
+      outzRows.some(row => row.isLive),
+    ),
+    eventz: previewState(eventsQuery.isPending, eventsQuery.isError, flyers.some(flyer => flyer.isLive)),
+    placez: previewState(directoryQuery.isPending, directoryQuery.isError, directory.length > 0),
+    hauz: previewState(housingQuery.isPending, housingQuery.isError, postings.hauz.some(post => post.isLive)),
+    giftz: previewState(giftingQuery.isPending, giftingQuery.isError, postings.giftz.some(post => post.isLive)),
+    gigz: previewState(gigsQuery.isPending, gigsQuery.isError, postings.gigz.some(post => post.isLive)),
+    sellz: previewState(sellzQuery.isPending, sellzQuery.isError, items.some(item => item.isLive)),
+    mizzed: previewState(spottedQuery.isPending, spottedQuery.isError, postings.mizzed.some(post => post.isLive)),
+    zspace: previewState(eventsQuery.isPending, eventsQuery.isError, today.some(item => item.isLive)),
+    next: "ready",
+  };
+
+  const retry = () => {
+    void Promise.all([
+      eventsQuery.refetch(), directoryQuery.refetch(), housingQuery.refetch(), giftingQuery.refetch(),
+      gigsQuery.refetch(), spottedQuery.refetch(), sellzQuery.refetch(), beachesQuery.refetch(),
+      outzQuery.refetch(), roosterCheckinsQuery.refetch(), sauvieCheckinsQuery.refetch(),
+    ]);
+  };
+
+  return { outzRows, flyers, panels, postings, items, today, states, retry };
 }

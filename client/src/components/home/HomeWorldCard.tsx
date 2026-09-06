@@ -31,6 +31,7 @@ import {
   type WorldRow,
   type WorldSpec,
 } from "@/lib/homeWorlds";
+import type { HomeWorldPreviewState } from "@/lib/useHomeWorlds";
 import "./HomeWorldCard.css";
 
 const FLYER_ROTATE_MS = 4200;
@@ -46,6 +47,7 @@ export type HomeWorldCardProps = {
   postings?: WorldPosting[];
   items?: WorldItem[];
   today?: WorldTodayItem[];
+  previewState?: HomeWorldPreviewState;
 };
 
 /**
@@ -383,6 +385,7 @@ export default function HomeWorldCard({
   postings = [],
   items = [],
   today = [],
+  previewState = "ready",
 }: HomeWorldCardProps) {
   const motifs = WORLD_MOTIFS[world.key] ?? [];
   const isFlyerCard = world.slot === "flyer";
@@ -447,6 +450,20 @@ export default function HomeWorldCard({
           <span className="home-world__number">{world.number}</span>
           <span className="home-world__eyebrow">{world.eyebrow}</span>
         </div>
+
+        {previewState !== "ready" ? (
+          <div
+            className="home-world__data-state"
+            data-state={previewState}
+            role={previewState === "error" ? "alert" : "status"}
+            aria-live="polite"
+          >
+            <span className="home-world__data-state-dot" aria-hidden="true" />
+            {previewState === "loading" ? "Loading live preview" : null}
+            {previewState === "error" ? "Live preview unavailable · showing demo" : null}
+            {previewState === "empty" ? "Nothing live yet · showing demo" : null}
+          </div>
+        ) : null}
 
         {!isFlyerCard ? (
           <div className="home-world__head">

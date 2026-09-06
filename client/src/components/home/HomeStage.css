@@ -73,6 +73,8 @@ html.calm-mode .home-front__identity-line>span[aria-hidden="true"],
 .home-front__worlds-head { margin-bottom:clamp(28px,5vw,52px); }
 .home-front__worlds-head h2 { margin:0; color:#fff; font:900 clamp(42px,7vw,82px)/.9 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:-.02em; text-transform:uppercase; text-wrap:balance; }
 .home-front__worlds-head p { max-width:56ch; margin:18px 0 0; color:var(--text-body,#d6d6dc); font-size:clamp(15px,1.8vw,18px); line-height:1.5; text-wrap:pretty; }
+.home-front__preview-error { position:relative; z-index:2; box-sizing:border-box; width:min(calc(100% - (2 * var(--zl-gutter, 48px))),var(--zl-frame,1280px)); margin:0 auto 22px; display:flex; align-items:center; justify-content:center; gap:14px; color:var(--text-body,#d6d6dc); font:700 12px/1.4 var(--font-mono,monospace); letter-spacing:.04em; text-align:center; }
+.home-front__preview-error .pdx-glass-btn { flex:none; min-height:44px; border-radius:22px; }
 .home-front__content-word { position:relative; display:inline-block; }
 /* Heading white, and the fill reset so no inherited transparent fill can hide it. */
 .home-front__content-word-core { position:relative; z-index:1; color:#fff; -webkit-text-fill-color:currentColor; }
@@ -125,6 +127,7 @@ html.calm-mode .home-front__mark-glitch,:root[data-calm="true"] .home-front__mar
   .home-front__worlds-head { margin-bottom:20px; }
   .home-front__worlds-head h2 { font-size:clamp(34px, 9vw, 42px); }
   .home-front__worlds-head p { margin-top:12px; font-size:14px; }
+  .home-front__preview-error { width:calc(100% - 32px); margin-bottom:18px; flex-direction:column; gap:10px; }
   .home-front__deck { --fan-card:clamp(220px,72vw,280px); --fan-card-h:520px; }
 }
 

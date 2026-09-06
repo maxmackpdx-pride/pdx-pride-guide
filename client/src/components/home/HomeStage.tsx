@@ -33,6 +33,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [identityLine, setIdentityLine] = useState(0);
+  const hasPreviewError = Object.values(worldData.states).some(state => state === "error");
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 621px)");
@@ -151,6 +152,14 @@ export default function HomeStage({ afterWelcome }: Props) {
           </h2>
           <p>You&apos;re looking for the room, the ride, the person, or the thing that makes tonight feel good and tomorrow even better.</p>
         </header>
+        {hasPreviewError ? (
+          <div className="home-front__preview-error" role="alert">
+            <span>Some live previews could not load. Demo cards are standing in.</span>
+            <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" onClick={worldData.retry}>
+              Retry live previews
+            </button>
+          </div>
+        ) : null}
         <WorldFanCarousel
           total={WORLDS.length}
           selected={selectedWorld}
@@ -186,6 +195,7 @@ export default function HomeStage({ afterWelcome }: Props) {
                 }
                 items={worldData.items}
                 today={worldData.today}
+                previewState={worldData.states[world.key]}
               />
             );
           })}

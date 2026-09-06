@@ -108,6 +108,7 @@ export function WorldFanCarousel({
   const entered = useRef(false);
   const drag = useRef<{ id: number; x: number; moved: boolean } | null>(null);
   const justDragged = useRef(false);
+  const userPaused = useRef(false);
   selectedRef.current = selected;
 
   const ensure = (n: number) => {
@@ -270,7 +271,7 @@ export function WorldFanCarousel({
   useEffect(() => {
     if (!autoplay || total === 0) return;
     const timer = window.setInterval(() => {
-      if (prefersStillMotion()) return;
+      if (prefersStillMotion() || window.matchMedia("(max-width: 620px)").matches || userPaused.current) return;
       if (!drag.current && !hovering.current && inView.current) {
         onSelect((selectedRef.current + 1) % total);
       }
@@ -288,7 +289,10 @@ export function WorldFanCarousel({
     kick();
   };
 
-  const step = (dir: number) => onSelect((selected + dir + total) % total);
+  const step = (dir: number) => {
+    userPaused.current = true;
+    onSelect((selected + dir + total) % total);
+  };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const origin = event.target instanceof Element ? event.target : null;
@@ -352,6 +356,7 @@ export function WorldFanCarousel({
                 if (index !== selected) {
                   event.preventDefault();
                   event.stopPropagation();
+                  userPaused.current = true;
                   onSelect(index);
                 }
               }}
@@ -376,20 +381,22 @@ export function WorldFanCarousel({
         >
           &#8249;
         </button>
-        <div className="world-fan__dots" role="tablist">
-          {Array.from({ length: total }, (_, index) => (
-            <button
-              key={index}
-              type="button"
-              role="tab"
-              aria-selected={index === selected}
-              aria-label={labelOf(index)}
-              className={index === selected ? "pdx-glass-rebind is-on" : "pdx-glass-rebind"}
-              style={accentOf ? ({ ["--c" as string]: accentOf(index) }) : undefined}
-              onClick={() => onSelect(index)}
-            />
-          ))}
-        </div>
+        <label className="world-fan__picker pdx-glass-rebind" style={accentOf ? ({ ["--c" as string]: accentOf(selected) }) : undefined}>
+          <span className="sr-only">Choose destination</span>
+          <span aria-hidden="true">{String(selected + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span>
+          <select
+            aria-label="Choose destination"
+            value={selected}
+            onChange={event => {
+              userPaused.current = true;
+              onSelect(Number(event.target.value));
+            }}
+          >
+            {Array.from({ length: total }, (_, index) => (
+              <option key={index} value={index}>{labelOf(index)}</option>
+            ))}
+          </select>
+        </label>
         <button
           type="button"
           className="world-fan__nav"

@@ -169,6 +169,36 @@
   white-space: nowrap;
 }
 
+.home-world__data-state {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  margin-top: 8px;
+  color: var(--text-lo, #9a9aa4);
+  font: 700 9px/1.2 var(--font-mono, monospace);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.home-world__data-state-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.home-world__data-state[data-state="loading"] .home-world__data-state-dot {
+  color: var(--c);
+  animation: homeWorldBlink 1.15s steps(2, end) infinite;
+}
+
+.home-world__data-state[data-state="error"] { color: var(--status-danger, #ff5c72); }
+.home-world__data-state[data-state="empty"] { color: var(--text-body-muted, #c8c4bb); }
+
 .home-world__head { position: relative; z-index: 2; margin-top: 12px; }
 
 /* The family marks are normalised to one canvas, so sizing by height puts all
@@ -837,6 +867,8 @@ html.calm-mode .home-world__roadmap-scan,
 :root[data-calm="true"] .home-world__roadmap-scan,
 html.calm-mode .home-world__roadmap-glitch,
 :root[data-calm="true"] .home-world__roadmap-glitch { animation: none; }
+html.calm-mode .home-world__data-state-dot,
+:root[data-calm="true"] .home-world__data-state-dot { animation: none; }
 html.calm-mode .home-world__roadmap-glitch,
 :root[data-calm="true"] .home-world__roadmap-glitch { display: none; }
 html.calm-mode .home-world::before,
@@ -849,6 +881,7 @@ html.calm-mode .home-world__demo,
   .home-world__dot,
   .home-world__roadmap-scan,
   .home-world__roadmap-glitch { animation: none; }
+  .home-world__data-state-dot { animation: none; }
   .home-world__roadmap-glitch { display: none; }
   .home-world__action span:last-child { transition: none; }
 }

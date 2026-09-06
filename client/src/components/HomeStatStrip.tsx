@@ -7,6 +7,7 @@ type Props = {
   goingCount: number;
   /** Per stat: true until the real number has arrived from the API. */
   pending?: { events?: boolean; places?: boolean; going?: boolean };
+  error?: boolean;
 };
 
 /**
@@ -16,12 +17,14 @@ type Props = {
  */
 function StatValue({
   pending,
+  error,
   label,
   gradClass,
   children,
   testId,
 }: {
   pending: boolean;
+  error: boolean;
   label: string;
   gradClass: string;
   children: ReactNode;
@@ -31,10 +34,10 @@ function StatValue({
     <div
       className={`home-stat-strip__value home-stat-strip__grad ${gradClass}`}
       data-testid={testId}
-      aria-label={pending ? `Loading ${label}` : label}
+      aria-label={pending ? `Loading ${label}` : error ? `${label} unavailable` : label}
       aria-busy={pending || undefined}
     >
-      {pending ? <span className="home-stat-strip__pending" aria-hidden="true" /> : children}
+      {pending ? <span className="home-stat-strip__pending" aria-hidden="true" /> : error ? <span aria-hidden="true">—</span> : children}
     </div>
   );
 }
@@ -43,12 +46,13 @@ function StatValue({
  * Three-column stat band under the home hero:
  * events in the next 7 days · directory places · RSVPs going.
  */
-export default function HomeStatStrip({ eventCount, placesCount, goingCount, pending }: Props) {
+export default function HomeStatStrip({ eventCount, placesCount, goingCount, pending, error = false }: Props) {
   return (
     <div className="home-stat-strip" aria-label="Live site stats">
       <div className="home-stat-strip__cell home-stat-strip__cell--events">
         <StatValue
           pending={!!pending?.events}
+          error={error}
           label={`${eventCount} events in the next 7 days`}
           gradClass="home-stat-strip__grad--events"
           testId="home-events-count"
@@ -62,6 +66,7 @@ export default function HomeStatStrip({ eventCount, placesCount, goingCount, pen
       <div className="home-stat-strip__cell home-stat-strip__cell--places">
         <StatValue
           pending={!!pending?.places}
+          error={error}
           label={`${placesCount} places to back`}
           gradClass="home-stat-strip__grad--places"
         >
@@ -74,6 +79,7 @@ export default function HomeStatStrip({ eventCount, placesCount, goingCount, pen
       <div className="home-stat-strip__cell home-stat-strip__cell--last home-stat-strip__cell--going">
         <StatValue
           pending={!!pending?.going}
+          error={error}
           label={`${goingCount} going to events`}
           gradClass="home-stat-strip__grad--going"
         >

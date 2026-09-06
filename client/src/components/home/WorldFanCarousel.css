@@ -74,8 +74,8 @@
 
 .world-fan__nav {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, .16);
   background: rgba(10, 10, 14, .78);
@@ -95,32 +95,34 @@
   box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55));
 }
 
-.world-fan__dots {
+.world-fan__picker {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--c, var(--neon-cyan, #19e3ff)) 46%, #202026);
+  border-radius: 22px;
+  background: rgba(10, 10, 14, .78);
+  color: var(--c, var(--neon-cyan, #19e3ff));
+  font: 800 11px/1 var(--font-mono, monospace);
+  letter-spacing: .06em;
 }
 
-.world-fan__dots button {
-  width: 7px;
-  height: 7px;
-  padding: 0;
+.world-fan__picker select {
+  max-width: 180px;
+  min-height: 42px;
   border: 0;
-  border-radius: 50%;
-  background: #3a3a42;
-  opacity: .7;
+  outline: 0;
+  background: transparent;
+  color: #f2f2f6;
+  font: 800 12px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .07em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.world-fan__dots button.is-on {
-  width: 8px;
-  height: 8px;
-  background: var(--c, var(--neon-cyan, #19e3ff));
-  opacity: 1;
-}
-
-.world-fan__dots button:focus-visible {
+.world-fan__picker:focus-within {
   box-shadow: var(--chrome-focus, 0 0 0 3px rgba(0, 255, 255, .55));
 }
 
@@ -140,11 +142,9 @@
     --fan-dip: 36px;
     padding: 4px 0 0;
   }
-  .world-fan__nav {
-    width: 44px;
-    height: 44px;
-    font-size: 24px;
-  }
+  .world-fan__nav { font-size: 24px; }
+  .world-fan__picker { gap: 7px; padding-inline: 10px; }
+  .world-fan__picker select { max-width: 150px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

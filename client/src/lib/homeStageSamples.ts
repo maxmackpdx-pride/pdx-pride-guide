@@ -321,18 +321,6 @@ export function buildHomeStageSamples(input: {
 
 /** Soft demo fallbacks when boards are empty (hrefs go to boards, DEMO sticker on). */
 export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
-  events: {
-    key: "events",
-    href: "/events",
-    kicker: "Happening now",
-    title: "Champagne's catch a rising star",
-    line: "Darcelle XV, Pearl District. Tickets are at the door.",
-    meta: "Fri · 9:00 PM",
-    cta: "I'm going →",
-    accent: "var(--day-fri, #FF00CC)",
-    thumbUrl: "/home/flyers/sasha-colby-live.jpg",
-    isLive: false,
-  },
   housing: {
     key: "housing",
     href: "/the-hauz",
@@ -386,7 +374,7 @@ export const HOME_STAGE_DEMO_SAMPLES: HomeStageSamples = {
 /** Live samples with demo fill for any board that has no posts yet. */
 export function withDemoFallbacks(live: HomeStageSamples): HomeStageSamples {
   return {
-    events: live.events ?? HOME_STAGE_DEMO_SAMPLES.events,
+    events: live.events,
     housing: live.housing ?? HOME_STAGE_DEMO_SAMPLES.housing,
     gifting: live.gifting ?? HOME_STAGE_DEMO_SAMPLES.gifting,
     gigs: live.gigs ?? HOME_STAGE_DEMO_SAMPLES.gigs,
