@@ -7,19 +7,20 @@
     "node": ">=20.19.0 <21"
   },
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "predeploy": "bash script/predeploy-check.sh",
     "verify:deploy": "node script/verify-deploy-bundle.mjs",
     "test:platform": "tsx --test server/platformV1.test.ts",
     "ship": "npm run predeploy && npm run build && npm run verify:deploy",
     "start": "NODE_ENV=production node dist/index.cjs",
-    "preview:local": "npm run build && SESSION_SECRET=dev LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
+    "preview:local": "npm run build && node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db SESSION_SECRET=dev LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
     "check": "tsc",
     "typecheck": "tsc --noEmit",
     "audit:glass-rebind": "node script/audit-glass-rebind.mjs",
     "preview:ds": "NODE_ENV=development tsx server/index.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db drizzle-kit push",
+    "git:worktree-prune": "bash script/prune-stale-worktrees.sh"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.2.8",

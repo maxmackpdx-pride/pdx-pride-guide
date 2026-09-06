@@ -51,6 +51,27 @@ Verification must be proportional to the change:
 - If a meaningful verification step is unavailable, report the limitation and judge
   readiness based on the actual risk; do not fail closed by default.
 
+## Required task closeout
+
+Before ending any task that touched this repository, leave every file in one explicit
+state:
+
+- intended work is committed (and pushed only when Tucker authorized a push), or
+- unfinished work is preserved in a clearly named stash or branch, or
+- intentionally discarded work is restored and the checkout is clean.
+
+Always run `git status --short --branch` as the final repository check. Never leave an
+unexplained dirty checkout, mix unrelated work into a commit, or carry dirty files
+through a pull/rebase. If pre-existing changes prevent a clean closeout, preserve them
+without modification and report their paths and owner/status to Tucker.
+
+Local development must use the ignored `.local/data.db` runtime database through the
+repository scripts. The tracked root `data.db` is a production seed and must not be used
+as a writable local runtime database.
+
+For stale worktree maintenance, use `npm run git:worktree-prune`. It prunes only Git
+metadata for already-missing worktree directories; it never deletes a live worktree.
+
 ## Product and design sources
 
 - Primary navigation order lives in `client/src/lib/siteNav.ts` (`PRIMARY_NAV`). Do not
