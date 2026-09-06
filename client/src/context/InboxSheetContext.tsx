@@ -8,6 +8,7 @@ import { isLocalDemo } from "@/lib/localDemo";
 export type InboxSheetOpenOpts = {
   view?: "inbox" | "posts" | "stats";
   account?: "personal" | "admin" | "owner";
+  threadId?: string | null;
 };
 
 type InboxSheetContextValue = {
@@ -70,6 +71,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
             onClose={closeSheet}
             initialView={openOpts?.view}
             initialAccount={openOpts?.account}
+            initialThreadId={openOpts?.threadId}
           />
         </div>
       )}

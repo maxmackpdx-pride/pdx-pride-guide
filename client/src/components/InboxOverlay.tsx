@@ -33,6 +33,7 @@ type InboxOverlayProps = {
   onClose: () => void;
   initialView?: View;
   initialAccount?: Account;
+  initialThreadId?: string | null;
 };
 
 const ACCOUNTS: Array<[Account, string, string]> = [
@@ -62,7 +63,7 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, onClose, initialView, initialAccount }: InboxOverlayProps) {
+export default function InboxOverlay({ open, onClose, initialView, initialAccount, initialThreadId }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -155,6 +156,13 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || !initialThreadId) return;
+    setView("inbox");
+    setAccount("personal");
+    setActiveId(initialThreadId);
+  }, [open, initialThreadId]);
 
   // Close on outside press - but never on the same gesture that opened the
   // sheet (FAB / Messages tab). Also ignore the floating FAB itself so open

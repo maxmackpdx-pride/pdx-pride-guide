@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ds/Button";
 import SafetyGuide from "@/components/SafetyGuide";
 import ThreadAvatar from "./ThreadAvatar";
@@ -19,6 +20,7 @@ import {
   TrashIcon,
 } from "./icons";
 import { LongPressReactable } from "./MessageReactions";
+import ZaylistMessageBody from "./ZaylistMessageBody";
 import "./inbox.css";
 import "./message-reactions.css";
 
@@ -86,6 +88,10 @@ export function InboxShell({
   compact = false,
 }: InboxShellProps) {
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
+  const [otherTyping, setOtherTyping] = useState(false);
+  const [attachment, setAttachment] = useState<{ url: string; name: string } | null>(null);
+  const [attachmentPending, setAttachmentPending] = useState(false);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
   const {
     threads,
     loading,
@@ -188,18 +194,57 @@ export function InboxShell({
   };
   const toggleRead = (id: string, unread: boolean) => setRead(id, unread);
   const send = async (text?: string) => {
-    const body = (text ?? reply).trim();
+    const typed = (text ?? reply).trim();
+    const body = [typed, attachment?.url].filter(Boolean).join("\n");
     if (!body || !activeId || sendState === "sending") return;
     setReply("");
     setSendState("sending");
     try {
       await sendMessage(activeId, body);
+      setAttachment(null);
       setSendState("idle");
       scrollMsgs();
     } catch {
       setReply(body);
       setSendState("error");
     }
+  };
+
+  useEffect(() => {
+    if (!activeId) { setOtherTyping(false); return; }
+    let cancelled = false;
+    const poll = () => fetch(`/api/messages/thread/${encodeURIComponent(activeId)}/typing`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : { active: false })
+      .then(data => { if (!cancelled) setOtherTyping(Boolean(data.active)); })
+      .catch(() => { if (!cancelled) setOtherTyping(false); });
+    void poll();
+    const timer = window.setInterval(poll, 3000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [activeId]);
+
+  useEffect(() => {
+    if (!activeId) return;
+    const active = Boolean(reply.trim());
+    const timer = window.setTimeout(() => {
+      void fetch(`/api/messages/thread/${encodeURIComponent(activeId)}/typing`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+        body: JSON.stringify({ active }),
+      });
+    }, active ? 250 : 0);
+    return () => window.clearTimeout(timer);
+  }, [activeId, reply]);
+
+  const uploadAttachment = async (file?: File) => {
+    if (!file) return;
+    setAttachmentPending(true);
+    try {
+      const form = new FormData(); form.append("attachment", file);
+      const response = await fetch("/api/upload/message-attachment", { method: "POST", credentials: "include", body: form });
+      if (!response.ok) throw new Error("upload failed");
+      setAttachment(await response.json());
+    } catch {
+      setSendState("error");
+    } finally { setAttachmentPending(false); }
   };
 
   /* ---- Derived (ported from Inbox.dc.html renderVals) ---- */
@@ -1247,7 +1292,7 @@ export function InboxShell({
                           {m.senderLabel} · {m.at}
                         </div>
                         <div style={{ fontSize: "0.9rem", color: "var(--text-mid)", lineHeight: 1.5 }}>
-                          {m.body}
+                          <ZaylistMessageBody body={m.body} />
                         </div>
                       </div>
                     </LongPressReactable>
@@ -1277,7 +1322,11 @@ export function InboxShell({
                     </button>
                   ))}
                 </div>
+                {otherTyping && <div className="inbox-typing" role="status" aria-live="polite"><span aria-hidden="true"><i /><i /><i /></span>{amasked ? "Anonymous" : at.name} is typing</div>}
+                {attachment && <div className="inbox-attachment-chip"><img src={attachment.url} alt="" /><span>{attachment.name}</span><button type="button" onClick={() => setAttachment(null)} aria-label={`Remove ${attachment.name}`}><X size={16} /></button></div>}
+                <input ref={attachmentInputRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={event => { void uploadAttachment(event.target.files?.[0]); event.currentTarget.value = ""; }} />
                 <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
+                  <button type="button" className="inbox-attach-btn" onClick={() => attachmentInputRef.current?.click()} disabled={attachmentPending} aria-label="Attach an image"><Paperclip size={18} />{attachmentPending ? <span className="sr-only">Uploading</span> : null}</button>
                   <textarea
                     className="pxComposer"
                     value={reply}
@@ -1310,7 +1359,7 @@ export function InboxShell({
                       lineHeight: 1.4,
                     }}
                   />
-                  <Button accent={accentKey} size="md" arrow onClick={() => void send()} disabled={!reply.trim() || sendState === "sending"}>
+                  <Button accent={accentKey} size="md" arrow onClick={() => void send()} disabled={(!reply.trim() && !attachment) || sendState === "sending" || attachmentPending}>
                     {sendState === "sending" ? "Sending…" : "Send"}
                   </Button>
                 </div>

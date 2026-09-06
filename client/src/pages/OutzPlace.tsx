@@ -6,6 +6,7 @@ import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
 import BoardHero from "@/components/BoardHero";
 import OutzMap, { outzAccentForName } from "@/components/OutzMap";
+import { MeetingScheduler } from "@/components/ui/meeting-scheduler";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
@@ -323,42 +324,24 @@ export default function OutzPlace() {
         <div className="outz-place__social-grid">
           <div className="outz-checkin outz-panel pdx-glass-card pdx-glass-rebind">
             <div className="outz-checkin__eyebrow">{checkins.length} going {formatBeachCheckinDateLabel(date).toLowerCase()}</div>
-            <div className="outz-pillrow" role="group" aria-label="Check-in days (select all that apply)">
-              {dates.map(value => {
-                const selected = selectedDates.includes(value);
-                return <button
-                  type="button"
-                  key={value}
-                  className={selected ? "is-active" : ""}
-                  aria-pressed={selected}
-                  onClick={() => {
-                    setDate(value);
-                    setSelectedDates(current => selected
-                      ? current.filter(selectedDate => selectedDate !== value)
-                      : [...current, value].sort());
-                  }}
-                >{formatBeachCheckinDateLabel(value)}</button>;
-              })}
-            </div>
-            <p className="outz-checkin__day-help">Select all days that apply. Your time and note will be used for each selected day.</p>
             {mine ? <div className="outz-checkin__mine"><strong>{mine.isAnonymous ? "Anonymous" : "You"} · {formatRiverBratsWindow(mine.arrivalHour, mine.departHour)}</strong><button type="button" onClick={() => uncheck.mutate()} disabled={uncheck.isPending}>Uncheck {formatBeachCheckinDateLabel(date)}</button></div> : null}
-            <>
-              <div className="outz-checkin__grid">
-                <label className="outz-field"><span>Arrival</span>
-                  <select value={arrivalHour} onChange={event => { const hour = Number(event.target.value); setArrivalHour(hour); setDepartHour(current => Math.max(current, defaultDepartHour(hour))); }}>
-                    {Array.from({ length: 15 }, (_, index) => index + 7).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
-                  </select>
-                </label>
-                <label className="outz-field"><span>Leaving about</span>
-                  <select value={departHour} onChange={event => setDepartHour(Number(event.target.value))}>
-                    {Array.from({ length: 15 }, (_, index) => index + 8).filter(hour => hour > arrivalHour).map(hour => <option key={hour} value={hour}>{formatRiverBratsHour(hour)}</option>)}
-                  </select>
-                </label>
-              </div>
-              <label className="outz-field"><span>Optional note</span><input type="text" value={note} maxLength={80} placeholder="e.g. bringing a stove" onChange={event => setNote(event.target.value)} /></label>
-              <label className="outz-checkin__anonymous"><input type="checkbox" checked={anonymous} onChange={event => setAnonymous(event.target.checked)} /> Count me anonymously (no chat)</label>
-              <Button variant="solid" accent={OUTZ_BUTTON_ACCENT[meta?.color || "cyan"]} disabled={saveCheckin.isPending || selectedDates.length === 0} onClick={() => user ? saveCheckin.mutate() : setShowAuth(true)}>{saveCheckin.isPending ? "CHECKING IN" : selectedDates.length > 1 ? `CHECK IN ${selectedDates.length} DAYS · JOIN CHAT` : "CHECK IN · JOIN CHAT"}</Button>
-            </>
+            <MeetingScheduler
+              title="Plan this OUTZide check-in"
+              allowedDates={dates}
+              selectedDates={selectedDates}
+              arrivalHour={arrivalHour}
+              departHour={departHour}
+              anonymous={anonymous}
+              formatHour={formatRiverBratsHour}
+              onDatesChange={values => { setSelectedDates(values); if (values[0]) setDate(values[0]); }}
+              onArrivalChange={hour => { setArrivalHour(hour); setDepartHour(current => Math.max(current, defaultDepartHour(hour))); }}
+              onDepartChange={setDepartHour}
+              onAnonymousChange={setAnonymous}
+              onSchedule={() => user ? saveCheckin.mutate() : setShowAuth(true)}
+              pending={saveCheckin.isPending}
+              accent={OUTZ_BUTTON_ACCENT[meta?.color || "cyan"]}
+            />
+            <label className="outz-field"><span>Optional note</span><input type="text" value={note} maxLength={80} placeholder="e.g. bringing a stove" onChange={event => setNote(event.target.value)} /></label>
             <div className="outz-checkin__people">{checkins.map(checkin => <span key={checkin.id}>{checkin.masked ? "Anonymous" : checkin.displayName || checkin.username || "Member"}</span>)}</div>
           </div>
 

@@ -20,6 +20,7 @@ export { useHomeStageSamples, HomeStageCard };
 
 const WORDMARK = "/brand/family/zaylist-primary.svg";
 const HERO_VIDEO = "/home/hero-loop.mp4";
+const IDENTITY_LINES = ["Find your people", "Share what matters", "Show up together"] as const;
 
 type Props = {
   afterWelcome?: ReactNode;
@@ -31,6 +32,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
+  const [identityLine, setIdentityLine] = useState(0);
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 621px)");
@@ -53,6 +55,16 @@ export default function HomeStage({ afterWelcome }: Props) {
     videoRef.current.muted = true;
     videoRef.current.play().catch(() => setShowVideo(false));
   }, [showVideo]);
+
+  useEffect(() => {
+    if (calmMode || prefersStillMotion()) {
+      setIdentityLine(0);
+      return;
+    }
+    if (identityLine >= IDENTITY_LINES.length - 1) return;
+    const timer = window.setTimeout(() => setIdentityLine(line => line + 1), 2200);
+    return () => window.clearTimeout(timer);
+  }, [calmMode, identityLine]);
 
   return (
     <div className="home-front" id="top">
@@ -107,6 +119,10 @@ export default function HomeStage({ afterWelcome }: Props) {
               />
             </div>
           </div>
+          <p className="home-front__identity-line">
+            <span className="sr-only">Find your people. Share what matters. Show up together.</span>
+            <span key={identityLine} aria-hidden="true">{IDENTITY_LINES[identityLine]}</span>
+          </p>
           <div className="home-front__hero-actions">
             <Link href="/outz" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Open OUTZ</Link>
             <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>

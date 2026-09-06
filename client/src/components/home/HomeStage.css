@@ -23,6 +23,9 @@
 @keyframes homeFrontGlitchB { 0%,88%,100%{opacity:0;transform:none;clip-path:inset(0)} 90%{opacity:.62;transform:translate(4px,-1px);clip-path:inset(54% 0 24% 0)} 93%{opacity:.48;transform:translate(-3px,2px);clip-path:inset(27% 0 51% 0)} 96%{opacity:.32;transform:translate(2px,0);clip-path:inset(71% 0 9% 0)} }
 @keyframes homeFrontMarkFloat { from{transform:translateY(2px) scale(.995)} to{transform:translateY(-5px) scale(1.008)} }
 @keyframes homeFrontKickerBlink { 0%,38%,100%{opacity:1;transform:scale(1)} 42%,72%{opacity:.28;transform:scale(.82)} }
+.home-front__identity-line { min-height:1.2em; margin:clamp(16px,3vh,28px) 0 0; color:var(--text-hi,#fff); font:800 clamp(17px,2vw,23px)/1 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:.11em; text-transform:uppercase; }
+.home-front__identity-line>span[aria-hidden="true"] { display:inline-block; animation:homeFrontIdentityIn .42s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes homeFrontIdentityIn { from{opacity:0;transform:translateY(8px);filter:blur(4px)} to{opacity:1;transform:none;filter:none} }
 .home-front__hero-actions { width:100%; display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:clamp(30px,6vh,58px); margin-bottom:clamp(22px,3vh,36px); }
 .home-front__hero-actions .pdx-glass-btn {
   min-height:48px;
@@ -44,6 +47,7 @@
 
 @media (prefers-reduced-motion:reduce) {
   .home-front__mark,.home-front__kicker-live,
+  .home-front__identity-line>span[aria-hidden="true"],
   .home-front__worlds-orb,.home-front__worlds-grid,
   .home-front__content-word-a,.home-front__content-word-b { animation:none; }
 }
@@ -51,6 +55,8 @@ html.calm-mode .home-front__mark,
 :root[data-calm="true"] .home-front__mark,
 html.calm-mode .home-front__kicker-live,
 :root[data-calm="true"] .home-front__kicker-live { animation:none; }
+html.calm-mode .home-front__identity-line>span[aria-hidden="true"],
+:root[data-calm="true"] .home-front__identity-line>span[aria-hidden="true"] { animation:none; }
 
 .home-front__worlds { position:relative; isolation:isolate; width:100%; margin:0; padding:calc(clamp(34px,5vw,64px) - 2px) 0 calc(clamp(56px,8vw,104px) + 2px); overflow:hidden; background:#000; }
 .home-front__worlds-fx { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
@@ -111,6 +117,7 @@ html.calm-mode .home-front__mark-glitch,:root[data-calm="true"] .home-front__mar
   .home-front__kicker-live { width:6px; height:6px; }
   .home-front__kicker-beta { font-size:1.18em; letter-spacing:.1em; }
   .home-front__mark { width:100%; max-width:none; }
+  .home-front__identity-line { margin-top:18px; font-size:15px; }
   .home-front__hero-actions { margin-top:42px; margin-bottom:24px; }
   /* Compact vs desktop, but still a thumb target. 9px / 29px was unreadable. */
   .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:44px; height:44px; padding:0 16px; font-size:12px; }

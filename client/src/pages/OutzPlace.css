@@ -175,6 +175,41 @@
   color: var(--text-lo, #999); font-size: 12px; padding: 4px 12px;
 }
 
+.meeting-scheduler { --c: var(--outz-c); border: 1px solid var(--glass-keyline, #050505); border-radius: 14px; background: var(--glass-card-bg, rgba(8,8,10,.94)); box-shadow: var(--glass-card-shadow); overflow: hidden; }
+.meeting-scheduler__header { align-items: flex-start; border-bottom: 1px solid var(--border-default); display: flex; gap: 12px; padding: 16px; }
+.meeting-scheduler__header h3 { color: var(--text-hi); font-family: var(--font-display); font-size: 21px; line-height: 1; margin: 2px 0 7px; text-transform: uppercase; }
+.meeting-scheduler__header p { color: var(--text-lo); font-size: 13px; line-height: 1.45; margin: 0; }
+.meeting-scheduler__icon { align-items: center; border: 1px solid color-mix(in srgb, var(--outz-c) 55%, #222); border-radius: 50%; color: var(--outz-c); display: inline-flex; flex: 0 0 44px; height: 44px; justify-content: center; }
+.meeting-scheduler__body { display: grid; gap: 18px; grid-template-columns: minmax(270px, 1fr) minmax(250px, .9fr); padding: 16px; }
+.meeting-scheduler__monthbar { align-items: center; display: grid; grid-template-columns: 44px 1fr 44px; text-align: center; }
+.meeting-scheduler__monthbar button, .meeting-scheduler__days button { align-items: center; background: transparent; border: 1px solid transparent; color: var(--text-mid); cursor: pointer; display: inline-flex; height: 44px; justify-content: center; min-width: 44px; }
+.meeting-scheduler__monthbar button { border-radius: 50%; color: var(--outz-c); }
+.meeting-scheduler__monthbar strong { color: var(--text-hi); font-family: var(--font-display); letter-spacing: .05em; text-transform: uppercase; }
+.meeting-scheduler__week, .meeting-scheduler__days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.meeting-scheduler__week span { color: var(--text-faint); font-family: var(--font-display); font-size: 11px; padding: 10px 0 5px; text-align: center; }
+.meeting-scheduler__days button { border-radius: 50%; font-size: 13px; justify-self: center; }
+.meeting-scheduler__days button:disabled { color: var(--text-faint); cursor: default; opacity: .28; }
+.meeting-scheduler__days button.is-other-month { opacity: .42; }
+.meeting-scheduler__days button.is-today { border-color: color-mix(in srgb, var(--outz-c) 55%, transparent); }
+.meeting-scheduler__days button.is-selected { background: var(--outz-c); color: #050505; font-weight: 800; }
+.meeting-scheduler__details { display: flex; flex-direction: column; gap: 14px; }
+.meeting-scheduler__time-grid { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.meeting-scheduler__time-grid label { display: grid; gap: 7px; }
+.meeting-scheduler__time-grid span { color: var(--text-lo); font-size: 12px; }
+.meeting-scheduler__time-grid select { min-height: 44px; }
+.meeting-scheduler__anonymous { align-items: flex-start; color: var(--text-mid); display: flex; gap: 10px; }
+.meeting-scheduler__anonymous input { height: 20px; margin-top: 2px; width: 20px; }
+.meeting-scheduler__anonymous span { display: grid; gap: 3px; }
+.meeting-scheduler__anonymous strong { color: var(--text-hi); font-size: 13px; }
+.meeting-scheduler__anonymous small { color: var(--text-faint); line-height: 1.4; }
+.meeting-scheduler__summary { border-top: 1px solid var(--border-default); display: grid; gap: 3px; padding-top: 12px; }
+.meeting-scheduler__summary strong { color: var(--text-hi); font-size: 13px; }
+.meeting-scheduler__summary span { color: var(--outz-c); font-size: 12px; }
+@media (max-width: 720px) { .meeting-scheduler__body { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .meeting-scheduler__time-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .meeting-scheduler * { animation: none !important; transition: none !important; } }
+html.calm-mode .meeting-scheduler, :root[data-calm="true"] .meeting-scheduler { box-shadow: none; }
+
 .outz-group-chat { border-top-color: color-mix(in srgb, var(--outz-c) 72%, #2a2a32); display: flex; flex-direction: column; overflow: hidden; }
 .outz-group-chat__head { align-items: center; display: flex; gap: 10px; margin-bottom: 16px; }
 .outz-group-chat__head strong { color: var(--text-hi, #fff); display: block; font-family: var(--font-display, sans-serif); font-weight: 800; text-transform: uppercase; }

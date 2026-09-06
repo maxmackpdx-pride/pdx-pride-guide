@@ -141,7 +141,7 @@ function ProfileMenuPanel({
   unreadCount: number;
   location: string;
   onClose: () => void;
-  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner" }) => void;
+  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
   logout: () => void;
   isAdmin: boolean;
   canManageTeam: boolean;
@@ -252,7 +252,7 @@ function ProfileMenu({
   hubActive: boolean;
   unreadCount: number;
   location: string;
-  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner" }) => void;
+  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
   logout: () => void;
   onMenuClose: () => void;
   isAdmin: boolean;
@@ -361,7 +361,7 @@ function NotifyMenu({
 }: {
   unreadCount: number;
   adminPending: number;
-  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner" }) => void;
+  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
   onCloseOthers: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -448,7 +448,7 @@ function NotifyMenu({
                   className={`site-mobile-notify__row${unread ? " is-unread" : ""}`}
                   onClick={() => {
                     close();
-                    openSheet();
+                    openSheet({ view: "inbox", account: "personal", threadId: row.threadId ?? row.thread_id ?? null });
                   }}
                 >
                   {unread && <span className="site-mobile-notify__dot" aria-hidden="true" />}

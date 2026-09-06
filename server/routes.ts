@@ -223,6 +223,8 @@ const upload = multer({
   },
 });
 
+const inboxTyping = new Map<string, { userId: number; updatedAt: number }>();
+
 // Contact-form attachments (public, unauthenticated) - images or PDFs, small cap.
 const contactUpload = multer({
   storage: multer.diskStorage({
@@ -1508,6 +1510,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/upload/poster", requireAuth, upload.single("poster"), (req: any, res: any) => {
     if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
     res.json({ url: `/uploads/${req.file.filename}` });
+  });
+  app.post("/api/upload/message-attachment", requireAuth, upload.single("attachment"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "Choose a JPG, PNG, GIF, or WebP image up to 8MB" });
+    res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
   });
 
   // Flyer autofill: a submitter uploads a poster; we read it (OCR + vision) and
@@ -4727,6 +4733,31 @@ export function registerRoutes(httpServer: Server, app: Express) {
       contextLabel: first.contextLabel || null,
     });
     res.json(msg);
+  });
+
+  app.post("/api/messages/thread/:threadId/typing", requireAuth, (req, res) => {
+    const threadId = String(req.params.threadId || "");
+    const thread = storage.getThread(threadId);
+    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
+    const key = `${threadId}:${req.session.userId}`;
+    if (req.body?.active) inboxTyping.set(key, { userId: req.session.userId!, updatedAt: Date.now() });
+    else inboxTyping.delete(key);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/messages/thread/:threadId/typing", requireAuth, (req, res) => {
+    const threadId = String(req.params.threadId || "");
+    const thread = storage.getThread(threadId);
+    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
+    if (!visible) return res.status(404).json({ error: "Thread not found" });
+    const cutoff = Date.now() - 12_000;
+    let active = false;
+    for (const [key, state] of inboxTyping) {
+      if (state.updatedAt < cutoff) { inboxTyping.delete(key); continue; }
+      if (key.startsWith(`${threadId}:`) && state.userId !== req.session.userId) active = true;
+    }
+    res.json({ active });
   });
 
   app.put("/api/messages/:id/read", requireAuth, (req, res) => {

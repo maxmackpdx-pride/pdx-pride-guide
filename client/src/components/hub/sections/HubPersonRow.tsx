@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
+import IdentityPeek from "@/components/IdentityPeek";
 import type { PeopleHubUser } from "@shared/peopleHub";
 
 type Props = {
@@ -28,7 +29,7 @@ export default function HubPersonRow({
   if (rail) {
     return (
       <div className="hub-thread hub-people-row hub-people-row--rail rowin">
-        <Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link hub-thread__link--rail">
+        <IdentityPeek username={person.username} displayName={person.displayName} photoUrl={person.photoUrl} avatarChoice={person.avatarChoice} avatarRing={person.avatarRing} bio={person.bio} verifiedHost={person.verifiedHost} trigger={<Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link hub-thread__link--rail">
           <UserAvatar
             photoUrl={person.photoUrl}
             avatarChoice={person.avatarChoice}
@@ -50,7 +51,7 @@ export default function HubPersonRow({
               {sub || (person.verifiedHost ? "Verified host" : followerLabel(person.followers))}
             </span>
           </div>
-        </Link>
+        </Link>} />
         {showFollow && onToggleFollow && (
           <button
             type="button"
@@ -71,7 +72,7 @@ export default function HubPersonRow({
 
   return (
     <div className="hub-thread hub-people-row rowin">
-      <Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link">
+      <IdentityPeek username={person.username} displayName={person.displayName} photoUrl={person.photoUrl} avatarChoice={person.avatarChoice} avatarRing={person.avatarRing} bio={person.bio} verifiedHost={person.verifiedHost} trigger={<Link href={`/u/${encodeURIComponent(person.username)}`} className="hub-thread__link">
         <UserAvatar
           photoUrl={person.photoUrl}
           avatarChoice={person.avatarChoice}
@@ -98,7 +99,7 @@ export default function HubPersonRow({
             <span className="hub-thread__meta">{followerLabel(person.followers)}</span>
           )}
         </div>
-      </Link>
+      </Link>} />
       {showFollow && onToggleFollow && (
         <button
           type="button"
