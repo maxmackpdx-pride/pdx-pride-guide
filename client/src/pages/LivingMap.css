@@ -24,6 +24,12 @@
   display: block;
   overflow: visible;
 }
+.living-map-page .wp.is-resolving .wp-svg {
+  opacity: calc(0.38 + var(--wp-reveal) * 0.62);
+  transform: scale(calc(0.62 + var(--wp-reveal) * 0.38));
+  transform-origin: 50% 100%;
+  transition: opacity 0.18s linear, transform 0.18s linear;
+}
 .living-map-page .wp-glow-ring {
   opacity: 0.28;
   animation: living-map-glow 3.8s ease-in-out infinite;
@@ -407,6 +413,9 @@
   .living-map-card {
     scroll-behavior: auto;
   }
+  .living-map-page .wp.is-resolving .wp-svg {
+    transition: none;
+  }
 }
 html.calm-mode .living-map-page .wp-glow-ring,
 :root[data-calm="true"] .living-map-page .wp-glow-ring {
@@ -427,6 +436,10 @@ html.calm-mode .living-map-page .wp-logo--alternate,
 html.calm-mode .living-map-page .wp-logo--alternate,
 :root[data-calm="true"] .living-map-page .wp-logo--alternate {
   opacity: 0;
+}
+html.calm-mode .living-map-page .wp.is-resolving .wp-svg,
+:root[data-calm="true"] .living-map-page .wp.is-resolving .wp-svg {
+  transition: none;
 }
 .living-map-time {
   display: flex;

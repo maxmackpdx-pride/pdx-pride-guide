@@ -26,18 +26,20 @@ import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } f
 import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
 import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
 import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
+import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./LivingMap.css";
 
 type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
-type Mark = { key: string; kind: "event" | "place"; lat: number; lng: number; item: Event | Place };
+type Mark = { key: string; kind: "event" | "place" | "housing" | "mizzed" | "carpool"; lat: number; lng: number; item: Event | Place | MapRow };
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
 const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "boards"] as const;
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
 const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
-const PLACE_WAYPOINT_ZOOM = 19;
+const PLACE_WAYPOINT_REVEAL_START = 17.75;
+const PLACE_WAYPOINT_REVEAL_END = 19.25;
 /* Vaul measures pixel snaps from the viewport bottom. Keep the lowest state compact
    above the fixed mobile dock while leaving the grip visible for reopening. */
 const MOBILE_DRAWER_SNAPS = ["240px", 0.52, 1] as const;
@@ -51,9 +53,11 @@ const MAP_CREATE_LINKS = [
   { label: "Giftz", href: "/gifting", color: "#ccff00" },
   { label: "Sellz", href: "/sellz", color: "#39ff14" },
 ] as const;
-const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string }> = [
-  { label: "Eventz", id: "eventz", color: "#ff00cc", note: "Color matches the event day" },
-  { label: "Placez", id: "venue", color: "#00ffff", note: "Glowing orbs reveal logo waypoints nearby or on tap" },
+const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string; badgeId?: WaypointId; scoop?: string; avatarUrl?: string }> = [
+  { label: "Eventz", id: "eventz", color: "#ff00cc", scoop: "10P", note: "Ticket shell · day color · host and venue logos · white start time" },
+  { label: "Placez", id: "venue", badgeId: "cafe", color: "#00ffff", note: "Venue logo in the Placez shell; corner icon identifies the place type" },
+  { label: "Zenegades", id: "zenegade", color: "#ff2400", scoop: "42M", note: "Red long-form waypoint with countdown to start" },
+  { label: "AfterZ", id: "afterz", color: "#ffee00", note: "Yellow long-form after-hours waypoint" },
   { label: "Mizzed", id: "mizzed", color: "#ff00cc", note: "Connections nearby" },
   { label: "HAÜZ", id: "hauz", color: "#00ffff", note: "Housing and stays" },
   { label: "OutZide", id: "outz", color: "#ff6600", note: "Outdoor recommendations" },
@@ -61,6 +65,8 @@ const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: strin
   { label: "Gigz", id: "gigz", color: "#8800ff", note: "Work and paid opportunities" },
   { label: "Giftz", id: "giftz", color: "#ccff00", note: "Items offered freely" },
   { label: "Sellz", id: "sells", color: "#39ff14", note: "Items for sale" },
+  { label: "ZayDark user", id: "host-home", badgeId: "host-home", avatarUrl: "/hausing/demo/person-looking.jpg", color: "#ff2400", note: "Avatar fills the red shell; corner icon shows context or check-in" },
+  { label: "Adult Placez", id: "venue", badgeId: "adult", color: "#ff2400", note: "Placez anatomy with venue logo and adult-place category badge" },
 ];
 
 function dayAccent(day: string | null | undefined): string {
@@ -199,8 +205,19 @@ function placeMarks(places: Place[]): Mark[] {
   });
 }
 
+function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "housing" | "mizzed" | "carpool">): Mark[] {
+  return rows.flatMap((row, index) => {
+    const lat = Number(row.lat);
+    const lng = Number(row.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng)
+      ? [{ key: `${kind}-${row.id ?? index}`, kind, lat, lng, item: row }]
+      : [];
+  });
+}
+
 function MapReader({ onZoom, onCenter }: { onZoom: (zoom: number) => void; onCenter: (center: [number, number]) => void }) {
   useMapEvents({
+    zoom: event => onZoom(event.target.getZoom()),
     zoomend: event => onZoom(event.target.getZoom()),
     moveend: event => { const center = event.target.getCenter(); onCenter([center.lat, center.lng]); },
   });
@@ -291,6 +308,10 @@ export default function LivingMap() {
   const [customEnd, setCustomEnd] = useState(() => mapSearchParams().get("to") || "");
   const [showEvents, setShowEvents] = useState(true);
   const [showPlaces, setShowPlaces] = useState(true);
+  const [showHousing, setShowHousing] = useState(true);
+  const [showMizzed, setShowMizzed] = useState(true);
+  const [showCarpool, setShowCarpool] = useState(true);
+  const [barsOnly, setBarsOnly] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [zoom, setZoom] = useState(13);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
@@ -357,7 +378,8 @@ export default function LivingMap() {
       const rows = await Promise.all(beaches.map(async ([key, label]) => {
         const response = await apiRequest("GET", `/api/river-brats/carpool?beach=${key}&date=${today}`);
         const body = await response.json();
-        return Array.isArray(body) ? body.map(row => ({ ...row, _beach: label })) : [];
+        const point = BEACH_VERIFY_POINTS[key];
+        return Array.isArray(body) ? body.map(row => ({ ...row, _beach: label, _beachKey: key, lat: point.lat, lng: point.lng })) : [];
       }));
       return rows.flat();
     },
@@ -395,6 +417,7 @@ export default function LivingMap() {
   }), [events, q, timeFilter, customStart, customEnd]);
   const goingEvents = useMemo(() => visibleEvents.filter(event => myEventIds.has(event.id)), [visibleEvents, myEventIds]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
+  const mapPlaces = useMemo(() => barsOnly ? visiblePlaces.filter(place => place.type === "bar") : visiblePlaces, [visiblePlaces, barsOnly]);
   const nearbyPlaces = useMemo(() => visiblePlaces
     .map(place => ({ place, point: placePoint(place) }))
     .filter((entry): entry is { place: Place; point: [number, number] } => Boolean(entry.point))
@@ -410,10 +433,15 @@ export default function LivingMap() {
     const now = Date.now();
     return (starts <= now && ends > now) || (starts > now && starts <= now + 90 * 60000);
   }), [events, q]);
+  const visibleMizzed = useMemo(() => mizzed.filter(row => rowMatchesQuery(row, q)), [mizzed, q]);
+  const visibleHousing = useMemo(() => housing.filter(row => rowMatchesQuery(row, q)), [housing, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
-    ...(showPlaces ? placeMarks(visiblePlaces) : []),
-  ], [showEvents, showPlaces, visibleEvents, visiblePlaces]);
+    ...(showPlaces ? placeMarks(mapPlaces) : []),
+    ...(showHousing ? rowMarks(visibleHousing, "housing") : []),
+    ...(showMizzed ? rowMarks(visibleMizzed, "mizzed") : []),
+    ...(showCarpool ? rowMarks(carpools.filter(row => rowMatchesQuery(row, q)), "carpool") : []),
+  ], [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q]);
   const loading = eventsLoading || placesLoading;
   const failed = eventsError || placesError;
   const boardRows = [
@@ -421,8 +449,6 @@ export default function LivingMap() {
     ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
     ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
   ];
-  const visibleMizzed = useMemo(() => mizzed.filter(row => rowMatchesQuery(row, q)), [mizzed, q]);
-  const visibleHousing = useMemo(() => housing.filter(row => rowMatchesQuery(row, q)), [housing, q]);
   const visibleBoards = useMemo(() => boardRows.filter(row => rowMatchesQuery(row, q)), [boardRows, q]);
 
   useEffect(() => {
@@ -517,11 +543,15 @@ export default function LivingMap() {
     <h2>Map Filters</h2>
     <div className="living-map-time" data-vaul-no-drag role="radiogroup" aria-label="Event date filters"><button type="button" role="radio" aria-checked={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" role="radio" aria-checked={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" role="radio" aria-checked={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
     <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
-      <button type="button" aria-pressed={showEvents} className={`pdx-glass-rebind${showEvents ? " is-on" : ""}`} onClick={() => setShowEvents(v => !v)}>Eventz</button>
-      <button type="button" aria-pressed={showPlaces} className={`pdx-glass-rebind cyan${showPlaces ? " is-on" : ""}`} onClick={() => setShowPlaces(v => !v)}>Placez</button>
-      {!hideZayDark && (mobile ? <button type="button" className="living-map-zaydark-toggle pdx-glass-rebind" role="switch" aria-checked="false" aria-label="Turn on ZayDark" onClick={() => setSoon("ZayDark")}><img src="/brand/family/zaydark.svg" alt="ZayDark" /><span aria-hidden="true"><i /></span></button> : <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("ZayDark")}>ZayDark</button>)}
+      <button type="button" aria-pressed={showEvents} className={`pdx-glass-rebind${showEvents ? " is-on" : ""}`} style={{ "--c": "#ccff00" } as CSSProperties} onClick={() => setShowEvents(v => !v)}>Eventz</button>
+      <button type="button" aria-pressed={showPlaces} className={`pdx-glass-rebind cyan${showPlaces ? " is-on" : ""}`} style={{ "--c": "#19e3ff" } as CSSProperties} onClick={() => setShowPlaces(v => !v)}>Placez</button>
+      {!hideZayDark && (mobile ? <button type="button" className="living-map-zaydark-toggle pdx-glass-rebind" role="switch" aria-checked="false" aria-label="Turn on ZayDark" onClick={() => setSoon("ZayDark")}><img src="/brand/family/zaydark.svg" alt="ZayDark" /><span aria-hidden="true"><i /></span></button> : <button type="button" className="pdx-glass-rebind" style={{ "--c": "#ff2400" } as CSSProperties} onClick={() => setSoon("ZayDark")}>ZayDark</button>)}
+      <button type="button" aria-pressed={showHousing} className={`pdx-glass-rebind${showHousing ? " is-on" : ""}`} style={{ "--c": "#00ffff" } as CSSProperties} onClick={() => setShowHousing(v => !v)}>Haüz</button>
+      <button type="button" aria-pressed={showMizzed} className={`pdx-glass-rebind${showMizzed ? " is-on" : ""}`} style={{ "--c": "#ff00cc" } as CSSProperties} onClick={() => setShowMizzed(v => !v)}>Mizzed</button>
+      <button type="button" aria-pressed={showCarpool} className={`pdx-glass-rebind${showCarpool ? " is-on" : ""}`} style={{ "--c": "#00ffff" } as CSSProperties} onClick={() => setShowCarpool(v => !v)}>Carpool</button>
+      <button type="button" aria-pressed={barsOnly} className={`pdx-glass-rebind${barsOnly ? " is-on" : ""}`} style={{ "--c": "#ff00cc" } as CSSProperties} onClick={() => { setShowPlaces(true); setBarsOnly(v => !v); }}>Bars</button>
       <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("Zenegades")}>Zenegades</button>
-      <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("Afterz")}>Afterz</button>
+      <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("AfterZ")}>AfterZ</button>
     </div>
   </div>;
   const eventCard = (e: Event) => (
@@ -532,33 +562,42 @@ export default function LivingMap() {
 
   return <section className="living-map-page" aria-label="Zaylist living map">
     <div className="living-map-canvas">
-      <MapContainer ref={mapRef} center={[45.523, -122.676]} zoom={13} minZoom={10} maxBounds={[[45.35, -122.92], [45.70, -122.42]]} className="living-map-leaflet" attributionControl>
+      <MapContainer ref={mapRef} center={[45.523, -122.676]} zoom={13} minZoom={10} zoomSnap={0.25} zoomDelta={0.5} maxBounds={[[45.35, -122.92], [45.70, -122.42]]} className="living-map-leaflet" attributionControl>
         <TileLayer url={cartoDarkTileUrl()} attribution={CARTO_ATTRIBUTION} subdomains="abcd" maxZoom={20} />
         <MapReader onZoom={setZoom} onCenter={setMapCenter} />
         {marks.map(mark => {
           const chosen = selected === mark.key;
           const item = mark.item;
-          const place = item as Place;
-          const placeColor = mark.kind === "place" ? directoryTypeColor(place.type) : "";
-          const eventLogos = mark.kind === "event" ? eventBrandLogos(item as Event, places) : {};
-          const icon = mark.kind === "event"
-            ? waypointIcon({ id: "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen })
-            : chosen || zoom >= PLACE_WAYPOINT_ZOOM
-              ? waypointIcon({
-                id: "venue",
-                badgeId: PLACE_ICON[place.type] || "venue",
-                size: waypointSize(zoom, chosen),
-                color: placeColor,
-                logoUrl: resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type),
-                selected: chosen,
-              })
+          let icon;
+          let markerLabel = "Map listing";
+          if (mark.kind === "event") {
+            const event = item as Event;
+            const eventLogos = eventBrandLogos(event, places);
+            markerLabel = event.title;
+            icon = waypointIcon({ id: "eventz", size: waypointSize(zoom, chosen), scoop: hour(event.dateStart), color: dayAccent(event.dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen });
+          } else if (mark.kind === "place") {
+            const place = item as Place;
+            const placeColor = directoryTypeColor(place.type);
+            markerLabel = place.name;
+            const revealProgress = chosen ? 1 : Math.max(0, Math.min(1, (zoom - PLACE_WAYPOINT_REVEAL_START) / (PLACE_WAYPOINT_REVEAL_END - PLACE_WAYPOINT_REVEAL_START)));
+            icon = chosen || revealProgress > 0
+              ? waypointIcon({ id: "venue", badgeId: PLACE_ICON[place.type] || "venue", size: waypointSize(zoom, chosen), color: placeColor, logoUrl: resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type), selected: chosen, revealProgress })
               : placeOrbIcon(placeColor);
+          } else {
+            const row = item as MapRow;
+            const id: WaypointId = mark.kind === "housing" ? "hauz" : mark.kind === "mizzed" ? "mizzed" : "carpool";
+            markerLabel = String(row.title || row.name || row.displayName || (mark.kind === "carpool" ? row._beach : "Map listing"));
+            icon = waypointIcon({ id, size: waypointSize(zoom, chosen), selected: chosen });
+          }
           return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => {
             setSelected(mark.key);
             setCardOriginRect(originRect(event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null));
             if (mark.kind === "event") { setSelectedEvent(item as Event); goOverlay("event", (item as Event).id); }
-            else { setSelectedPlace(item as Place); goOverlay("place", (item as Place).id); }
-          } }}><Tooltip direction="top">{mark.kind === "event" ? (item as Event).title : (item as Place).name}</Tooltip></Marker>;
+            else if (mark.kind === "place") { setSelectedPlace(item as Place); goOverlay("place", (item as Place).id); }
+            else if (mark.kind === "mizzed") { setSelectedMizzed(item as MissedConnectionPost); goOverlay("mizzed", Number((item as MapRow).id)); }
+            else if (mark.kind === "housing") setLocation(`/the-hauz/${(item as MapRow).id}`);
+            else setLocation(`/outz/${String((item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
+          } }}><Tooltip direction="top">{markerLabel}</Tooltip></Marker>;
         })}
       </MapContainer>
     </div>
@@ -599,7 +638,7 @@ export default function LivingMap() {
       {keyOpen && <section className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
         <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => setKeyOpen(false)} aria-label="Close map key">×</button></div>
         <ul>{MAP_KEY_ITEMS.map(item => <li key={item.label}>
-          <span className="living-map-key__waypoint" dangerouslySetInnerHTML={{ __html: waypointHtml({ id: item.id, color: item.color, size: 31 }) }} />
+          <span className="living-map-key__waypoint" dangerouslySetInnerHTML={{ __html: waypointHtml({ id: item.id, color: item.color, size: 31, badgeId: item.badgeId, scoop: item.scoop, avatarUrl: item.avatarUrl }) }} />
           <span><b>{item.label}</b><small>{item.note}</small></span>
         </li>)}</ul>
       </section>}

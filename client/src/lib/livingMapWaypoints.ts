@@ -181,6 +181,7 @@ export type WaypointOpts = {
   alternateLogoUrl?: string;
   avatarUrl?: string;
   badgeId?: WaypointId;
+  revealProgress?: number;
   bloom?: boolean;
   size?: number;
 };
@@ -235,6 +236,7 @@ export function waypointSize(zoom: number, selected: boolean): number {
 export function waypointHtml(opts: WaypointOpts) {
   const D = opts.size ?? 42;
   const color = opts.color ?? WAYPOINT_COLOR[opts.id];
+  const reveal = Math.max(0, Math.min(1, opts.revealProgress ?? 1));
   const scoop = opts.scoop;
   const family = shellFamily(opts.id);
   const pad = Math.round(D * 0.22);
@@ -276,10 +278,10 @@ export function waypointHtml(opts: WaypointOpts) {
     ? `<circle class="wp-scoop-ring" cx="${cx}" cy="${scoopCy}" r="${scoopR}" fill="#050506" stroke="${ring}" stroke-width="${scoopStroke}"/>
        <text x="${cx}" y="${scoopCy + 1}" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${Math.max(8, D * 0.26)}" font-weight="800">${escapeXml(scoop)}</text>`
     : "";
-  const cls = ["wp", `wp--${opts.id}`, `wp--${D}`, opts.selected ? "is-selected" : "", scoop ? "has-scoop" : "", opts.bloom ? "is-bloom" : ""]
+  const cls = ["wp", `wp--${opts.id}`, `wp--${D}`, reveal < 1 ? "is-resolving" : "", opts.selected ? "is-selected" : "", scoop ? "has-scoop" : "", opts.bloom ? "is-bloom" : ""]
     .filter(Boolean)
     .join(" ");
-  return `<div class="${cls}" style="--wp:${color};width:${w}px;height:${h}px">
+  return `<div class="${cls}" style="--wp:${color};--wp-reveal:${reveal};width:${w}px;height:${h}px">
     <svg class="wp-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
       ${bloom}<defs><clipPath id="${clipId}"><path d="${mainPath}"/></clipPath></defs>
       ${integratedTip || scoop ? "" : `<polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>`}
