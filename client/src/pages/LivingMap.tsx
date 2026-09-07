@@ -526,7 +526,7 @@ export default function LivingMap() {
           const placeColor = mark.kind === "place" ? directoryTypeColor(place.type) : "";
           const eventLogos = mark.kind === "event" ? eventBrandLogos(item as Event, places) : {};
           const icon = mark.kind === "event"
-            ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen })
+            ? waypointIcon({ id: "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen })
             : chosen || zoom >= PLACE_WAYPOINT_ZOOM
               ? waypointIcon({
                 id: "venue",
