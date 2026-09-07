@@ -370,7 +370,7 @@
   .living-map-page {
     height: calc(100dvh - 76px);
   }
-  .living-map-drawer {
+  .living-map-drawer.pdx-glass-rebind {
     top: auto;
     right: 6px;
     bottom: 0;
@@ -511,9 +511,12 @@ html.calm-mode .living-map-page .wp-logo--alternate,
   .living-map-page {
     height: calc(100dvh - 126px);
   }
-  .living-map-drawer {
-    top: auto;
+  .living-map-drawer.pdx-glass-rebind {
+    top: 77px;
+    right: 6px;
     bottom: 72px;
+    left: 6px;
+    width: auto;
     max-height: calc(100dvh - 146px);
   }
   .living-map-handle,
@@ -525,8 +528,11 @@ html.calm-mode .living-map-page .wp-logo--alternate,
   }
 }
 @media (min-width: 641px) and (max-width: 767px) {
-  .living-map-drawer {
+  .living-map-drawer.pdx-glass-rebind {
+    right: 8px;
     bottom: 18px;
+    left: 8px;
+    width: auto;
     max-height: calc(100dvh - 112px);
   }
   .living-map-create {
@@ -793,8 +799,7 @@ html.calm-mode .living-map-page .wp-logo--alternate,
 
 @media (max-width: 767px) {
   .living-map-drawer {
-    height: calc(100dvh - 72px);
-    max-height: calc(100dvh - 72px);
+    height: auto;
     padding: 8px 16px 0;
   }
   .living-map-drawer-scroll {

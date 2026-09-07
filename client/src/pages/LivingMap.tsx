@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
 import { Link, useLocation } from "wouter";
@@ -40,7 +40,7 @@ const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue"
 const PLACE_WAYPOINT_ZOOM = 19;
 /* Vaul measures pixel snaps from the viewport bottom. Keep the lowest state compact
    above the fixed mobile dock while leaving the grip visible for reopening. */
-const MOBILE_DRAWER_SNAPS = ["190px", 0.52, 1] as const;
+const MOBILE_DRAWER_SNAPS = ["240px", 0.52, 1] as const;
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 const MAP_CREATE_LINKS = [
   { label: "Eventz", href: "/submit", color: "#ccff00" },
@@ -310,6 +310,8 @@ export default function LivingMap() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
   const drawerHandleDidDrag = useRef(false);
+  const drawerScrollRef = useRef<HTMLDivElement | null>(null);
+  const cardGesture = useRef({ x: 0, y: 0, scrollTop: 0, moved: false });
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
   const { myEventIds } = useEventRsvp();
   const locateMe = useCallback(() => {
@@ -326,6 +328,20 @@ export default function LivingMap() {
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
   }, []);
+  const cardPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
+    cardGesture.current = { x: event.clientX, y: event.clientY, scrollTop: drawerScrollRef.current?.scrollTop || 0, moved: false };
+  };
+  const cardPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    const gesture = cardGesture.current;
+    if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 8) gesture.moved = true;
+  };
+  const consumeCardScroll = (event: ReactMouseEvent<HTMLElement>) => {
+    const gesture = cardGesture.current;
+    const consumed = gesture.moved || Math.abs((drawerScrollRef.current?.scrollTop || 0) - gesture.scrollTop) > 4;
+    cardGesture.current.moved = false;
+    if (consumed) { event.preventDefault(); event.stopPropagation(); }
+    return consumed;
+  };
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
   const { data: mizzed = [], isLoading: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MapRow[]>({ queryKey: ["/api/missed-connections"], queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
@@ -475,14 +491,14 @@ export default function LivingMap() {
         const className = `living-map-card pdx-glass-rebind${id === "placez" ? " place" : ""}`;
         const style = { "--c": railAccent(id, row) } as CSSProperties;
         const key = `${id}-${row.id ?? i}`;
-        if (id === "placez") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); goOverlay("place", Number(row.id)); }}>{contents}</button>;
-        if (id === "mizzed") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={() => { setSelectedMizzed(row as unknown as MissedConnectionPost); goOverlay("mizzed", Number(row.id)); }}>{contents}</button>;
+        if (id === "placez") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); goOverlay("place", Number(row.id)); }}>{contents}</button>;
+        if (id === "mizzed") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setSelectedMizzed(row as unknown as MissedConnectionPost); goOverlay("mizzed", Number(row.id)); }}>{contents}</button>;
         if (id === "boards") {
           const kind = boardKind(row);
           const postId = Number(row.id);
-          if (kind && Number.isFinite(postId)) return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={() => { setBoardOverlay({ kind, postId }); goOverlay(boardParam(kind), postId); }}>{contents}</button>;
+          if (kind && Number.isFinite(postId)) return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setBoardOverlay({ kind, postId }); goOverlay(boardParam(kind), postId); }}>{contents}</button>;
         }
-        return <Link className={className} key={key} href={item.href(row)} style={style}>{contents}</Link>;
+        return <Link className={className} key={key} href={item.href(row)} style={style} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { consumeCardScroll(event); }}>{contents}</Link>;
       })}</div>}
     </section>;
   };
@@ -509,7 +525,7 @@ export default function LivingMap() {
     </div>
   </div>;
   const eventCard = (e: Event) => (
-    <button type="button" className="living-map-card event pdx-glass-rebind" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
+    <button type="button" className="living-map-card event pdx-glass-rebind" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
       {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
     </button>
   );
@@ -603,7 +619,7 @@ export default function LivingMap() {
       <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
       {desktop && filterControls()}
       </div>
-      <div className="living-map-drawer-scroll" data-vaul-no-drag>
+      <div ref={drawerScrollRef} className="living-map-drawer-scroll" data-vaul-no-drag>
       {loading && <p className="living-map-state">Loading the city…</p>}
       {failed && <div className="living-map-state" role="alert">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {customPending && <p className="living-map-state">Pick a start and end date.</p>}
