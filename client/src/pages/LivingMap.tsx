@@ -33,7 +33,9 @@ const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "b
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
 const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
-const MOBILE_FILTER_SNAPS = [116, 0.42, 0.78] as const;
+/* Vaul measures pixel snaps from the viewport bottom; include the fixed mobile dock
+   so the drawer leaves a 116px hub peek visibly resting above it. */
+const MOBILE_DRAWER_SNAPS = ["300px", 0.52, 0.88] as const;
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 const MAP_CREATE_LINKS = [
   { label: "Eventz", href: "/submit", color: "#ccff00" },
@@ -264,7 +266,8 @@ export default function LivingMap() {
   const [createOpen, setCreateOpen] = useState(false);
   const [keyOpen, setKeyOpen] = useState(false);
   const desktop = useDesktop();
-  const [mobileFilterSnap, setMobileFilterSnap] = useState<number | string | null>(MOBILE_FILTER_SNAPS[0]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
@@ -416,20 +419,20 @@ export default function LivingMap() {
   const closeSoon = useCallback(() => setSoon(null), []);
   const comingDialogRef = useModalA11y({ open: Boolean(soon), enabled: Boolean(soon), onClose: closeSoon });
   const customPending = timeFilter === "custom" && (!customStart || !customEnd);
-  const mobileFiltersPeek = mobileFilterSnap === MOBILE_FILTER_SNAPS[0];
+  const mobileDrawerPeek = mobileDrawerSnap === MOBILE_DRAWER_SNAPS[0];
   useEffect(() => {
-    if (!createOpen && !keyOpen) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setCreateOpen(false); setKeyOpen(false); } };
+    if (!createOpen && !keyOpen && !filtersOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setCreateOpen(false); setKeyOpen(false); setFiltersOpen(false); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [createOpen, keyOpen]);
-  const filterControls = (mobile = false) => <div className="living-map-filter-block" data-vaul-no-drag>
+  }, [createOpen, keyOpen, filtersOpen]);
+  const filterControls = (mobile = false, hideZayDark = false) => <div className="living-map-filter-block" data-vaul-no-drag>
     <h2>{mobile ? "Filter the map" : "Map Filters"}</h2>
     <div className="living-map-time" data-vaul-no-drag role="radiogroup" aria-label="Event date filters"><button type="button" role="radio" aria-checked={timeFilter === "default"} className={timeFilter === "default" ? "is-on" : ""} onClick={() => setTimeFilter("default")}>Anytime</button><button type="button" role="radio" aria-checked={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" role="radio" aria-checked={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" role="radio" aria-checked={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
     <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
       <button type="button" aria-pressed={showEvents} className={showEvents ? "is-on" : ""} onClick={() => setShowEvents(v => !v)}>Eventz</button>
       <button type="button" aria-pressed={showPlaces} className={showPlaces ? "is-on cyan" : "cyan"} onClick={() => setShowPlaces(v => !v)}>Placez</button>
-      <button type="button" onClick={() => setSoon("ZayDark")}>ZayDark</button>
+      {!hideZayDark && (mobile ? <button type="button" className="living-map-zaydark-toggle pdx-glass-rebind" role="switch" aria-checked="false" aria-label="Turn on ZayDark" onClick={() => setSoon("ZayDark")}><img src="/brand/family/zaydark.svg" alt="ZayDark" /><span aria-hidden="true"><i /></span></button> : <button type="button" onClick={() => setSoon("ZayDark")}>ZayDark</button>)}
       <button type="button" onClick={() => setSoon("Zenegades")}>Zenegades</button>
       <button type="button" onClick={() => setSoon("Afterz")}>Afterz</button>
     </div>
@@ -467,7 +470,7 @@ export default function LivingMap() {
       </MapContainer>
     </div>
     {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
-    <div className={`living-map-create${createOpen ? " is-open" : ""}${!desktop && !mobileFiltersPeek ? " is-tucked" : ""}`}>
+    <div className={`living-map-create${createOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
       <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
         {MAP_CREATE_LINKS.map((item, index) => (
           <Link
@@ -494,7 +497,7 @@ export default function LivingMap() {
         <span aria-hidden="true">+</span>
       </button>
     </div>
-    <div className={`living-map-key${keyOpen ? " is-open" : ""}${!desktop && !mobileFiltersPeek ? " is-tucked" : ""}`}>
+    <div className={`living-map-key${keyOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
       {keyOpen && <section className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
         <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => setKeyOpen(false)} aria-label="Close map key">×</button></div>
         <ul>{MAP_KEY_ITEMS.map(item => <li key={item.label}>
@@ -504,25 +507,19 @@ export default function LivingMap() {
       </section>}
       <button type="button" className="living-map-key__trigger pdx-glass-rebind" aria-expanded={keyOpen} onClick={() => { setKeyOpen(open => !open); setCreateOpen(false); }}>Key</button>
     </div>
-    {!desktop && <div className={`living-map-mobile-filters${!mobileFiltersPeek ? " is-tucked" : ""}`}>
-      <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label="Open map filters" aria-expanded={mobileFilterSnap !== MOBILE_FILTER_SNAPS[0]} onClick={() => { setMobileFilterSnap(MOBILE_FILTER_SNAPS[2]); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
+    {!desktop && filtersOpen && <button type="button" className="living-map-filter-backdrop" aria-label="Close map filters" onClick={() => setFiltersOpen(false)} />}
+    {!desktop && <div className={`living-map-mobile-filters${filtersOpen ? " is-open" : ""}${!mobileDrawerPeek ? " is-tucked" : ""}`}>
+      <div className="living-map-mobile-filters__rail" aria-hidden={!filtersOpen}>{filterControls(true)}</div>
+      <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
     </div>}
-    {!desktop && <Drawer.Root open modal={false} dismissible={false} handleOnly shouldScaleBackground={false} disablePreventScroll snapPoints={[...MOBILE_FILTER_SNAPS]} activeSnapPoint={mobileFilterSnap} setActiveSnapPoint={setMobileFilterSnap}>
-      <Drawer.Portal>
-        <Drawer.Content className="living-map-drawer living-map-drawer--mobile-filters pdx-glass-rebind pdx-liquid-overlay" aria-label="Map filters">
-          <Drawer.Title className="sr-only">Map filters</Drawer.Title>
-          <Drawer.Handle preventCycle className="living-map-handle" aria-hidden={false} aria-label="Resize map filters" onClick={() => setMobileFilterSnap(current => current === MOBILE_FILTER_SNAPS[0] ? MOBILE_FILTER_SNAPS[2] : MOBILE_FILTER_SNAPS[0])}><span /></Drawer.Handle>
-          <div className="living-map-mobile-filter-scroll" data-vaul-no-drag>{filterControls(true)}</div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>}
-    {desktop && <Drawer.Root open modal={false} dismissible={false} shouldScaleBackground={false} disablePreventScroll>
+    <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : setMobileDrawerSnap}>
       <Drawer.Portal>
       <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map">
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
+      {!desktop && <Drawer.Handle preventCycle className="living-map-handle" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[2] : MOBILE_DRAWER_SNAPS[0])}><span /></Drawer.Handle>}
       <div className="living-map-drawer-controls">
       <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
-      {filterControls()}
+      {filterControls(false, !desktop)}
       </div>
       <div className="living-map-drawer-scroll" data-vaul-no-drag>
       {loading && <p className="living-map-state">Loading the city…</p>}
@@ -537,7 +534,7 @@ export default function LivingMap() {
       </div>
       </Drawer.Content>
       </Drawer.Portal>
-    </Drawer.Root>}
+    </Drawer.Root>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={setSelectedEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}

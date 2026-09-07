@@ -1105,7 +1105,7 @@ html.calm-mode .hub-mobile-tab.is-active {
 
 /* Animated rainbow seam riding the top edge. */
 .hub-mobile-bar.site-hub-mobile-bar::before {
-  content: "";
+  content: none;
   position: absolute;
   top: 0;
   left: 0;

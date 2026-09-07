@@ -167,13 +167,16 @@ export type WaypointOpts = {
   color?: string;
   logoUrl?: string;
   bloom?: boolean;
-  size?: 31 | 42 | 57;
+  size?: number;
 };
 
-export function waypointSize(zoom: number, selected: boolean): 31 | 42 | 57 {
-  if (selected) return 57;
-  if (zoom >= 16) return 42;
-  return 31;
+export function waypointSize(zoom: number, selected: boolean): number {
+  const z = Math.max(10, Math.min(20, zoom));
+  const zoomProgress = Math.max(0, Math.min(1, (z - 12) / 4));
+  const base = selected ? 57 : 31 + (42 - 31) * zoomProgress;
+  const blockProgress = Math.max(0, Math.min(1, (z - 16) / 2));
+  const scaled = base * 1.2 * (1 + blockProgress * 0.15);
+  return Math.round(scaled * 10) / 10;
 }
 
 export function waypointHtml(opts: WaypointOpts) {
