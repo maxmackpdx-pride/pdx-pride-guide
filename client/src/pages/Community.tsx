@@ -6,6 +6,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ds";
 import SpectrumLoader from "@/components/SpectrumLoader";
+import { resolveDirectoryLogo } from "@/lib/directoryLogos";
 import type { CommunityDetail } from "@shared/community";
 import "./ZIndex.css";
 
@@ -43,10 +44,11 @@ export default function Community({ params }: { params: { communitySlug: string 
   if (community.isLoading) return <SpectrumLoader variant="full" label="Loading community" />;
   if (!community.data) return <div className="z-communities"><section className="z-communities__state"><h1>Community not found</h1><Link href="/z">BACK TO Z/</Link></section></div>;
   const item = community.data;
+  const communityLogo = item.imageUrl || (item.sourcePlaceId ? resolveDirectoryLogo(item.name) : null);
   return <div className="z-communities z-community-detail">
     <Link href="/z" className="z-community-detail__back">← ALL COMMUNITIES</Link>
     <header className="z-community-detail__hero">
-      <div className="z-community-detail__image" style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}>{!item.imageUrl ? <span aria-hidden="true">Z/</span> : null}</div>
+      <div className="z-community-detail__image" style={communityLogo ? { backgroundImage: `url(${communityLogo})` } : undefined}>{!communityLogo ? <span aria-hidden="true">Z/</span> : null}</div>
       <div><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1><p>{item.description}</p><p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"}</p>
         {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}

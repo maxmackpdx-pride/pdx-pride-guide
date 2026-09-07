@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
 import SpectrumLoader from "@/components/SpectrumLoader";
+import { resolveDirectoryLogo } from "@/lib/directoryLogos";
 import type { CommunitySummary } from "@shared/community";
 import "./ZIndex.css";
 
@@ -42,13 +43,13 @@ export default function ZIndex() {
     {communities.isError ? <section className="z-communities__state"><h2>Communities could not load.</h2><button type="button" onClick={() => communities.refetch()}>TRY AGAIN</button></section> : null}
     {!communities.isLoading && !communities.isError && communities.data?.length === 0 ? <section className="z-communities__state"><h2>The doors are being set.</h2><p>No public communities are ready yet. Nothing fake is being shown in their place.</p></section> : null}
     <section className="z-communities__grid" aria-label="Communities">
-      {communities.data?.map(community => <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
-        <div className="z-community-card__image" style={community.imageUrl ? { backgroundImage: `url(${community.imageUrl})` } : undefined}>{!community.imageUrl ? <span aria-hidden="true">Z/</span> : null}</div>
+      {communities.data?.map(community => { const communityLogo = community.imageUrl || (community.sourcePlaceId ? resolveDirectoryLogo(community.name) : null); return <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
+        <div className="z-community-card__image" style={communityLogo ? { backgroundImage: `url(${communityLogo})` } : undefined}>{!communityLogo ? <span aria-hidden="true">Z/</span> : null}</div>
         <div className="z-community-card__body">
           <p className="z-community-card__address">z/{community.slug}</p><h2>{community.name}</h2><p>{community.description}</p>
           <div className="z-community-card__meta"><span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}</span>{community.neighborhood ? <span>{community.neighborhood}</span> : null}</div>
         </div>
-      </Link>)}
+      </Link>; })}
     </section>
   </div>;
 }
