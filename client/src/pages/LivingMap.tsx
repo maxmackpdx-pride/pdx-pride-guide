@@ -25,6 +25,8 @@ import { DIRECTORY_TYPE_LABELS, directoryTypeColor } from "@shared/directoryThem
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
 import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
+import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
+import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./LivingMap.css";
 
 type Place = Business;
@@ -165,6 +167,17 @@ function railCopy(id: RailId, row: MapRow, fallbackLabel: string): { kicker: str
       meta: `${String(area || row.neighborhood || "View details")} →`,
     };
   }
+  if (id === "carpool") {
+    const offering = String(row.post_type) === "OFFERING_RIDE";
+    const beach = String(row._beach || "the beach");
+    const departure = String(row.departure_area || "Portland");
+    const leaveHour = Number(row.leave_hour);
+    return {
+      kicker: offering ? "Offering a ride" : "Ride needed",
+      title: `${carpoolDirectionLabel(String(row.direction || "TO_BEACH"))} · ${beach}`,
+      meta: `${departure} · ${Number.isFinite(leaveHour) ? formatRiverBratsHour(leaveHour) : "Time TBD"}`,
+    };
+  }
   return {
     kicker: String(row._board || row.type || fallbackLabel),
     title: String(row.title || row.name || "Open listing"),
@@ -298,6 +311,7 @@ export default function LivingMap() {
   const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
   const drawerHandleDidDrag = useRef(false);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
+  const { myEventIds } = useEventRsvp();
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
@@ -319,6 +333,19 @@ export default function LivingMap() {
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = [], isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const { data: carpools = [], isLoading: carpoolsLoading, isError: carpoolsError, refetch: retryCarpools } = useQuery<MapRow[]>({
+    queryKey: ["/api/river-brats/carpool", "living-map"],
+    queryFn: async () => {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      const beaches = [["rooster-rock", "Rooster Rock"], ["sauvie-island", "Sauvie Island"]] as const;
+      const rows = await Promise.all(beaches.map(async ([key, label]) => {
+        const response = await apiRequest("GET", `/api/river-brats/carpool?beach=${key}&date=${today}`);
+        const body = await response.json();
+        return Array.isArray(body) ? body.map(row => ({ ...row, _beach: label })) : [];
+      }));
+      return rows.flat();
+    },
+  });
   const housing = Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : []);
   const reorder = (id: RailId, delta: number) => setRailOrder(current => { const from = current.indexOf(id); const to = Math.max(0, Math.min(current.length - 1, from + delta)); const next = [...current]; next.splice(from, 1); next.splice(to, 0, id); localStorage.setItem("zaylist.map.rail-order", JSON.stringify(next)); return next; });
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => setLocation(overlayHref(key, id)), [setLocation]);
@@ -350,6 +377,7 @@ export default function LivingMap() {
     const day = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "America/Los_Angeles" }).format(new Date(at));
     return at >= now && at <= now + 7 * 86400000 && ["Fri", "Sat", "Sun"].includes(day);
   }), [events, q, timeFilter, customStart, customEnd]);
+  const goingEvents = useMemo(() => visibleEvents.filter(event => myEventIds.has(event.id)), [visibleEvents, myEventIds]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
   const nearbyPlaces = useMemo(() => visiblePlaces
     .map(place => ({ place, point: placePoint(place) }))
@@ -433,7 +461,7 @@ export default function LivingMap() {
       mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/spotted?post=${row.id}` : "/spotted" },
       outz: { label: "OutZide Nearby", rows: [], loading: false, href: () => "/outz" },
       housing: { label: "Housing", rows: visibleHousing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
-      carpool: { label: "Carpool", rows: [], loading: false, href: () => "/outz" },
+      carpool: { label: "Carpool", rows: carpools.filter(row => rowMatchesQuery(row, q)), loading: carpoolsLoading, error: carpoolsError, retry: () => { void retryCarpools(); }, href: () => "/outz" },
       boards: { label: "Gigz · Giftz · Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/pride-work") },
     };
     const item = config[id];
@@ -582,6 +610,8 @@ export default function LivingMap() {
       {!loading && !failed && !customPending && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
       <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span><Link className="living-map-view-all" href="/events">View All</Link></div>
       {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next 90 minutes.</p> : <div className="living-map-rail" data-vaul-no-drag>{soonEvents.slice(0, 10).map(eventCard)}</div>}
+      <div className="living-map-section-head"><b>Who’s Going</b><span>{goingEvents.length}</span></div>
+      {goingEvents.length === 0 ? <p className="living-map-rail-empty">You haven’t RSVP’d to any upcoming events yet.</p> : <div className="living-map-rail" data-vaul-no-drag>{goingEvents.slice(0, 10).map(eventCard)}</div>}
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
