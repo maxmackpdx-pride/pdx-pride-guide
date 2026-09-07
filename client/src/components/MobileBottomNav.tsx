@@ -211,7 +211,7 @@ export default function MobileBottomNav() {
               aria-haspopup="dialog"
               onClick={handleOutz}
             >
-              <span>Outz</span>
+              <span>OutZide</span>
             </button>
           </div>
         </>
@@ -220,8 +220,8 @@ export default function MobileBottomNav() {
       {outzOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setOutzOpen(false)} aria-hidden="true" />
-          <div className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="Outz, most visited">
-            <span className="hub-outz-drawer__kicker">Outz &middot; Most Visited</span>
+          <div className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="OutZide, most visited">
+            <span className="hub-outz-drawer__kicker">OutZide &middot; Most Visited</span>
             {OUTZ_NAV.map((item, index) => (
               <Link
                 key={item.href}
@@ -238,7 +238,7 @@ export default function MobileBottomNav() {
               className="hub-outz-drawer__all"
               onClick={() => setOutzOpen(false)}
             >
-              View All Outz &rarr;
+              View All OutZide &rarr;
             </Link>
           </div>
         </>

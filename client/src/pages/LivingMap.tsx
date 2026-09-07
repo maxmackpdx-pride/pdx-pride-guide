@@ -27,6 +27,7 @@ import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
 import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
 import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
+import { outzPlaceHref, type OutzSnapshot } from "@shared/outz";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./LivingMap.css";
 
@@ -370,6 +371,7 @@ export default function LivingMap() {
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = [], isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const { data: outzPayload, isLoading: outzLoading, isError: outzError, refetch: retryOutz } = useQuery<{ data: OutzSnapshot }>({ queryKey: ["/api/outz"], queryFn: () => apiRequest("GET", "/api/outz").then(r => r.json()) });
   const { data: carpools = [], isLoading: carpoolsLoading, isError: carpoolsError, refetch: retryCarpools } = useQuery<MapRow[]>({
     queryKey: ["/api/river-brats/carpool", "living-map"],
     queryFn: async () => {
@@ -450,6 +452,21 @@ export default function LivingMap() {
     ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
   ];
   const visibleBoards = useMemo(() => boardRows.filter(row => rowMatchesQuery(row, q)), [boardRows, q]);
+  const nearbyOutz = useMemo<MapRow[]>(() => {
+    const snapshot = outzPayload?.data;
+    if (!snapshot) return [];
+    const rows = [
+      ...snapshot.destinations.map(place => ({ ...place, detail: place.subtitle })),
+      ...snapshot.catalog,
+      ...snapshot.communityStays,
+    ];
+    return rows
+      .filter(row => finite(row.lat) && finite(row.lng))
+      .map(row => ({ ...row, _distance: milesBetween(mapCenter, [Number(row.lat), Number(row.lng)]) }))
+      .filter(row => Number(row._distance) <= 10)
+      .filter(row => rowMatchesQuery(row, q))
+      .sort((a, b) => Number(a._distance) - Number(b._distance));
+  }, [outzPayload, mapCenter, q]);
 
   useEffect(() => {
     const href = mapHref(params => {
@@ -501,7 +518,7 @@ export default function LivingMap() {
     const config: Record<RailId, { label: string; rows: MapRow[]; loading: boolean; error?: boolean; retry?: () => void; href: (row: MapRow) => string }> = {
       placez: { label: "Nearby Placez", rows: nearbyPlaces as MapRow[], loading: placesLoading, error: placesError, retry: () => { void retryPlaces(); }, href: row => placePath(Number(row.id), String(row.name || "place")) },
       mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/spotted?post=${row.id}` : "/spotted" },
-      outz: { label: "OutZide Nearby", rows: [], loading: false, href: () => "/outz" },
+      outz: { label: "OutZide Nearby", rows: nearbyOutz, loading: outzLoading, error: outzError, retry: () => { void retryOutz(); }, href: row => outzPlaceHref({ id: String(row.id), name: String(row.name || "OutZide") }) },
       housing: { label: "Housing", rows: visibleHousing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
       carpool: { label: "Carpool", rows: carpools.filter(row => rowMatchesQuery(row, q)), loading: carpoolsLoading, error: carpoolsError, retry: () => { void retryCarpools(); }, href: () => "/outz" },
       boards: { label: "Gigz · Giftz · Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/pride-work") },

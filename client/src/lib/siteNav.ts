@@ -49,7 +49,7 @@ export const PRIMARY_NAV: NavEntry[] = [
   {
     type: "dropdown",
     id: "outz",
-    label: "Outz",
+    label: "OutZide",
     accent: "orange",
     eyebrow: "Most Visited",
     /*
@@ -57,7 +57,7 @@ export const PRIMARY_NAV: NavEntry[] = [
      * provides a clear way to browse all currently published spots.
      */
     items: [
-      { href: "/outz", label: "All OUTZ", accent: "orange" },
+      { href: "/outz", label: "All OutZide", accent: "orange" },
       { href: "/outz/rooster-rock", label: "Rooster Rock", accent: "orange" },
       { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
