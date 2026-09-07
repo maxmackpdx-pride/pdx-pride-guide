@@ -52,3 +52,6 @@
 }
 
 @media(prefers-reduced-motion:reduce){.living-map-time>button{transition:none}}
+
+.living-map-card:is(button){appearance:none;width:auto;text-align:left;font:inherit;cursor:pointer}
+.living-map-page .wp-logo{mix-blend-mode:screen;filter:contrast(1.2) brightness(1.12) drop-shadow(0 0 2px rgba(255,255,255,.55))}

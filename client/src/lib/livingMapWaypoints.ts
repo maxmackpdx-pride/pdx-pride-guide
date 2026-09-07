@@ -165,6 +165,7 @@ export type WaypointOpts = {
   selected?: boolean;
   scoop?: string;
   color?: string;
+  logoUrl?: string;
   bloom?: boolean;
   size?: 31 | 42 | 57;
 };
@@ -201,6 +202,9 @@ export function waypointHtml(opts: WaypointOpts) {
     ? `<defs><linearGradient id="${fid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff00cc"/><stop offset=".25" stop-color="#ccff00"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".75" stop-color="#8800ff"/><stop offset="1" stop-color="#ff00cc"/></linearGradient></defs>`
     : "";
   const ring = opts.bloom ? `url(#${fid}b)` : color;
+  const markContent = opts.logoUrl
+    ? `<image class="wp-logo" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>`
+    : `<g transform="translate(${markX} ${markY}) scale(${mark / 24})" fill="#fff" stroke="#fff" color="#fff">${G[opts.id].replace('<svg viewBox="0 0 24 24" class="wp__mark" aria-hidden="true">', "").replace("</svg>", "")}</g>`;
   const scoopCircle = scoop
     ? `<circle class="wp-scoop-ring" cx="${cx}" cy="${scoopCy}" r="${scoopR}" fill="#050506" stroke="${ring}" stroke-width="${scoopStroke}"/>
        <text x="${cx}" y="${scoopCy + 1}" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${Math.max(8, D * 0.26)}" font-weight="800">${escapeXml(scoop)}</text>`
@@ -214,7 +218,7 @@ export function waypointHtml(opts: WaypointOpts) {
       <polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>
       <circle class="wp-glow-ring" cx="${cx}" cy="${cy}" r="${r + sw}" fill="none" stroke="${ring}" stroke-width="${glowW}"/>
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
-      <g transform="translate(${markX} ${markY}) scale(${mark / 24})" fill="#fff" stroke="#fff" color="#fff">${G[opts.id].replace('<svg viewBox="0 0 24 24" class="wp__mark" aria-hidden="true">', "").replace("</svg>", "")}</g>
+      ${markContent}
       ${scoopCircle}
     </svg>
   </div>`;
@@ -222,6 +226,10 @@ export function waypointHtml(opts: WaypointOpts) {
 
 function escapeXml(value: string) {
   return value.replace(/[&<>]/g, (ch) => ({ "&": "&" + "amp;", "<": "&" + "lt;", ">": "&" + "gt;" }[ch] ?? ch));
+}
+
+function escapeAttribute(value: string) {
+  return escapeXml(value).replace(/["']/g, ch => ch === '"' ? "&quot;" : "&#39;");
 }
 
 export function waypointIcon(opts: WaypointOpts) {

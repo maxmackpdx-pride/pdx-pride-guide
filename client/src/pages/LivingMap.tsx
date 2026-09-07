@@ -5,19 +5,21 @@ import { Link } from "wouter";
 import { MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Event } from "@shared/schema";
-import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { apiRequest } from "@/lib/queryClient";
 import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
-import { resolveBusinessLocations, type BusinessLocation } from "@shared/businessLocations";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 import { waypointIcon, waypointSize, WAYPOINT_COLOR, type WaypointId } from "@/lib/livingMapWaypoints";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
+import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
+import AuthModal from "@/components/AuthModal";
+import type { Business } from "@/pages/Directory";
+import { directoryTypeColor } from "@shared/directoryTheme";
+import { directoryFallbackLogo, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import "./LivingMap.css";
 
-type Place = {
-  id: number; name: string; type: string; neighborhood?: string | null; address?: string | null;
-  imageUrl?: string | null; lat?: number | null; lng?: number | null; locations?: BusinessLocation[];
-};
+type Place = Business;
 
 type Mark = { key: string; kind: "event" | "place"; lat: number; lng: number; item: Event | Place };
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
@@ -66,6 +68,12 @@ function placePoint(place: Place): [number, number] | null {
   return finite(place.lat) && finite(place.lng) ? [place.lat, place.lng] : null;
 }
 
+function originRect(element: Element | null): EventModalOriginRect | PlaceModalOriginRect | null {
+  if (!(element instanceof HTMLElement || element instanceof SVGElement)) return null;
+  const rect = element.getBoundingClientRect();
+  return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+}
+
 function useDesktop() {
   const [desktop, setDesktop] = useState(() => typeof window !== "undefined" && matchMedia("(min-width:768px)").matches);
   useEffect(() => { const media = matchMedia("(min-width:768px)"); const sync = () => setDesktop(media.matches); media.addEventListener("change", sync); return () => media.removeEventListener("change", sync); }, []);
@@ -83,6 +91,10 @@ export default function LivingMap() {
   const [zoom, setZoom] = useState(13);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
   const [soon, setSoon] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
   const desktop = useDesktop();
   const [mobileSnap, setMobileSnap] = useState<number | string | null>(MOBILE_SHEET_SNAPS[0]);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
@@ -155,7 +167,11 @@ export default function LivingMap() {
     const railIndex = railOrder.indexOf(id);
     return <section className="living-map-feed-section" key={id}>
       <div className="living-map-section-head"><b>{item.label}</b><span>{item.rows.length}</span><span className="living-map-reorder"><button type="button" disabled={railIndex === 0} aria-label={`Move ${item.label} up`} onClick={() => reorder(id, -1)}>↑</button><button type="button" disabled={railIndex === railOrder.length - 1} aria-label={`Move ${item.label} down`} onClick={() => reorder(id, 1)}>↓</button></span></div>
-      {item.loading ? <p className="living-map-rail-empty">Loading…</p> : item.error ? <p className="living-map-rail-empty" role="alert">This rail could not load. <button type="button" onClick={item.retry}>Try again</button></p> : item.rows.length === 0 ? <p className="living-map-rail-empty">Nothing live nearby right now.</p> : <div className="living-map-rail">{item.rows.slice(0, 10).map((row, i) => <Link className="living-map-card place" key={`${id}-${row.id ?? i}`} href={item.href(row)}><small>{String(row._board || row.type || item.label)}</small><strong>{String(row.title || row.name || "Open listing")}</strong><em>{String(row.destination || row.neighborhood || row.time || "View details")} →</em></Link>)}</div>}
+      {item.loading ? <p className="living-map-rail-empty">Loading…</p> : item.error ? <p className="living-map-rail-empty" role="alert">This rail could not load. <button type="button" onClick={item.retry}>Try again</button></p> : item.rows.length === 0 ? <p className="living-map-rail-empty">Nothing live nearby right now.</p> : <div className="living-map-rail">{item.rows.slice(0, 10).map((row, i) => {
+        const contents = <><small>{String(row._board || row.type || item.label)}</small><strong>{String(row.title || row.name || "Open listing")}</strong><em>{String(row.destination || row.neighborhood || row.time || "View details")} →</em></>;
+        if (id === "placez") return <button type="button" className="living-map-card place" key={`${id}-${row.id ?? i}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); }}>{contents}</button>;
+        return <Link className="living-map-card place" key={`${id}-${row.id ?? i}`} href={item.href(row)}>{contents}</Link>;
+      })}</div>}
     </section>;
   };
 
@@ -172,8 +188,19 @@ export default function LivingMap() {
           const item = mark.item;
           const icon = mark.kind === "event"
             ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: DAY[String((item as Event).dayOfWeek || "").slice(0,3).toUpperCase()] || WAYPOINT_COLOR.eventz, selected: chosen })
-            : waypointIcon({ id: PLACE_ICON[(item as Place).type] || "venue", size: waypointSize(zoom, chosen), selected: chosen });
-          return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: () => setSelected(mark.key) }}><Tooltip direction="top">{mark.kind === "event" ? (item as Event).title : (item as Place).name}</Tooltip></Marker>;
+            : waypointIcon({
+              id: PLACE_ICON[(item as Place).type] || "venue",
+              size: waypointSize(zoom, chosen),
+              color: directoryTypeColor((item as Place).type),
+              logoUrl: resolveDirectoryLogo((item as Place).name, (item as Place).imageUrl) || directoryFallbackLogo((item as Place).type),
+              selected: chosen,
+            });
+          return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => {
+            setSelected(mark.key);
+            setCardOriginRect(originRect(event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null));
+            if (mark.kind === "event") setSelectedEvent(item as Event);
+            else setSelectedPlace(item as Place);
+          } }}><Tooltip direction="top">{mark.kind === "event" ? (item as Event).title : (item as Place).name}</Tooltip></Marker>;
         })}
       </MapContainer>
     </div>
@@ -202,15 +229,18 @@ export default function LivingMap() {
       {!loading && !failed && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
       <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span></div>
       <div className="living-map-rail">
-        {soonEvents.slice(0, 10).map(e => <Link className="living-map-card event" key={`${e.id}-${e.dateStart}`} href={eventPath(e.id, e.title, e.dayOfWeek)} style={{ "--c": DAY[String(e.dayOfWeek || "").slice(0,3).toUpperCase()] || "#ccff00" } as React.CSSProperties}>
+        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); }} style={{ "--c": DAY[String(e.dayOfWeek || "").slice(0,3).toUpperCase()] || "#ccff00" } as React.CSSProperties}>
           {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
-        </Link>)}
+        </button>)}
       </div>
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
+    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={() => { setSelectedEvent(null); setCardOriginRect(null); }} onEventUpdated={setSelectedEvent} />}
+    {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={() => { setSelectedPlace(null); setCardOriginRect(null); }} onRequireAuth={() => setShowAuth(true)} />}
+    {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     {soon && <div className="living-map-coming-backdrop" role="presentation" onClick={closeSoon}><div ref={comingDialogRef} tabIndex={-1} className="living-map-coming" role="dialog" aria-modal="true" aria-labelledby="living-map-coming-title" onClick={e => e.stopPropagation()}><small>Zaylist living map</small><h2 id="living-map-coming-title">{soon} is coming soon</h2><p>This layer is staying visible while we finish it. It is not active yet.</p><button onClick={closeSoon}>Got it</button></div></div>}
   </section>;
 }
