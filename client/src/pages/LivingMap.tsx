@@ -50,6 +50,11 @@ function dayAccent(day: string | null | undefined): string {
   return DAY[code] || RSVP_COLOR;
 }
 
+function dayText(day: string | null | undefined): string {
+  const code = String(day || "").slice(0, 3).toUpperCase();
+  return EVENT_WEEK_DAY_OPTIONS.find(option => option.value === code)?.textColor || RSVP_COLOR;
+}
+
 function firstImage(value: unknown): string | null {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (Array.isArray(value)) {
@@ -209,7 +214,7 @@ function boardParam(kind: BoardKind): OverlayKey {
 function boardFromParam(key: string): BoardKind | null {
   if (key === "gig") return "gig";
   if (key === "gift") return "gifting";
-  if (key === "sell") return "sellz";
+  if (key === "sell" || key === "sellz") return "sellz";
   return null;
 }
 
@@ -348,13 +353,13 @@ export default function LivingMap() {
         setSelectedPlace(current => match && current?.id === match.id ? current : match || null);
       } else setSelectedPlace(current => current ? null : current);
 
-      const mizzedId = Number(params.get("mizzed"));
+      const mizzedId = Number(params.get("mizzed") || params.get("spotted"));
       if (Number.isFinite(mizzedId)) {
         const match = mizzed.find(row => Number(row.id) === mizzedId) as MissedConnectionPost | undefined;
         setSelectedMizzed(current => match && current?.id === match.id ? current : match || null);
       } else setSelectedMizzed(current => current ? null : current);
 
-      const boardHit = (["gig", "gift", "sell"] as const).find(key => params.get(key));
+      const boardHit = (["gig", "gift", "sell", "sellz"] as const).find(key => params.get(key));
       if (boardHit) {
         const postId = Number(params.get(boardHit));
         const kind = boardFromParam(boardHit);
@@ -401,6 +406,24 @@ export default function LivingMap() {
 
   const closeSoon = useCallback(() => setSoon(null), []);
   const comingDialogRef = useModalA11y({ open: Boolean(soon), enabled: Boolean(soon), onClose: closeSoon });
+  const customPending = timeFilter === "custom" && (!customStart || !customEnd);
+  const sheetPeek = !desktop && mobileSnap === MOBILE_SHEET_SNAPS[0];
+  const cycleSnap = () => {
+    const snaps = [...MOBILE_SHEET_SNAPS];
+    const index = snaps.findIndex(snap => snap === mobileSnap);
+    setMobileSnap(snaps[(index + 1) % snaps.length]);
+  };
+  useEffect(() => {
+    if (!createOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setCreateOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [createOpen]);
+  const eventCard = (e: Event) => (
+    <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
+      {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
+    </button>
+  );
 
   return <section className="living-map-page" aria-label="Zaylist living map">
     <div className="living-map-canvas">
@@ -429,8 +452,8 @@ export default function LivingMap() {
       </MapContainer>
     </div>
     {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
-    <div className={`living-map-create${createOpen ? " is-open" : ""}`}>
-      <div className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
+    <div className={`living-map-create${createOpen ? " is-open" : ""}${sheetPeek || desktop ? "" : " is-tucked"}`}>
+      <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
         {MAP_CREATE_LINKS.map((item, index) => (
           <Link
             key={item.href}
@@ -450,6 +473,7 @@ export default function LivingMap() {
         aria-label={createOpen ? "Close post menu" : "Post to the map"}
         aria-expanded={createOpen}
         aria-haspopup="menu"
+        aria-controls="living-map-create-menu"
         onClick={() => setCreateOpen(open => !open)}
       >
         <span aria-hidden="true">+</span>
@@ -460,12 +484,12 @@ export default function LivingMap() {
       <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map">
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
       <div className="living-map-drawer-controls">
-      <Drawer.Handle preventCycle className="living-map-handle" aria-hidden={false} aria-label={mobileSnap === MOBILE_SHEET_SNAPS[3] ? "Rest map drawer on the dock" : "Open map drawer fully"} onClick={() => setMobileSnap(mobileSnap === MOBILE_SHEET_SNAPS[3] ? MOBILE_SHEET_SNAPS[0] : MOBILE_SHEET_SNAPS[3])}><span /></Drawer.Handle>
+      <Drawer.Handle preventCycle className="living-map-handle" aria-hidden={false} aria-label="Resize map drawer" onClick={cycleSnap}><span /></Drawer.Handle>
       <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
-      <div className="living-map-filter-block" data-vaul-no-drag>
+      <div className="living-map-filter-block" data-vaul-no-drag {...(sheetPeek ? { inert: "" } : {})}>
       <h2>Map Filters</h2>
-      <div className="living-map-time" data-vaul-no-drag aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "default"} className={timeFilter === "default" ? "is-on" : ""} onClick={() => setTimeFilter("default")}>Anytime</button><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
-      <div className="living-map-chips" data-vaul-no-drag aria-label="Map layer filters">
+      <div className="living-map-time" data-vaul-no-drag role="radiogroup" aria-label="Event date filters"><button type="button" role="radio" aria-checked={timeFilter === "default"} className={timeFilter === "default" ? "is-on" : ""} onClick={() => setTimeFilter("default")}>Anytime</button><button type="button" role="radio" aria-checked={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" role="radio" aria-checked={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" role="radio" aria-checked={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
+      <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
         <button type="button" aria-pressed={showEvents} className={showEvents ? "is-on" : ""} onClick={() => setShowEvents(v => !v)}>Eventz</button>
         <button type="button" aria-pressed={showPlaces} className={showPlaces ? "is-on cyan" : "cyan"} onClick={() => setShowPlaces(v => !v)}>Placez</button>
         <button type="button" onClick={() => setSoon("ZayDark")}>ZayDark</button>
@@ -474,16 +498,15 @@ export default function LivingMap() {
       </div>
       </div>
       </div>
-      <div className="living-map-drawer-scroll" data-vaul-no-drag>
+      <div className="living-map-drawer-scroll" data-vaul-no-drag {...(sheetPeek ? { inert: "" } : {})}>
       {loading && <p className="living-map-state">Loading the city…</p>}
-      {failed && <div className="living-map-state">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
-      {!loading && !failed && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
+      {failed && <div className="living-map-state" role="alert">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
+      {customPending && <p className="living-map-state">Pick a start and end date.</p>}
+      {!loading && !failed && !customPending && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
       <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span></div>
-      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next 90 minutes.</p> : <div className="living-map-rail" data-vaul-no-drag>
-        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek) } as CSSProperties}>
-          {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
-        </button>)}
-      </div>}
+      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next 90 minutes.</p> : <div className="living-map-rail" data-vaul-no-drag>{soonEvents.slice(0, 10).map(eventCard)}</div>}
+      <div className="living-map-section-head"><b>On the map</b><span>{visibleEvents.length}</span></div>
+      {visibleEvents.length === 0 ? <p className="living-map-rail-empty">No events match those filters.</p> : <div className="living-map-rail" data-vaul-no-drag>{visibleEvents.slice(0, 10).map(eventCard)}</div>}
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
