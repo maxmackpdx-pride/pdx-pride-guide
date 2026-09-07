@@ -344,6 +344,7 @@ export default function LivingMap() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
   const drawerHandleDidDrag = useRef(false);
+  const drawerDragY = useRef({ start: 0, last: 0 });
   const drawerScrollRef = useRef<HTMLDivElement | null>(null);
   const cardGesture = useRef({ x: 0, y: 0, scrollTop: 0, moved: false });
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
@@ -694,9 +695,9 @@ export default function LivingMap() {
       <div className="living-map-mobile-filters__rail pdx-liquid-overlay" role="dialog" aria-label="Map filters" aria-hidden={!filtersOpen} {...inertWhen(!filtersOpen)}>{filterControls(true)}</div>
       <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
     </div>}
-    <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} snapToSequentialPoint shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : next => { if (next != null) setMobileDrawerSnap(next); }} onDrag={() => { drawerHandleDidDrag.current = true; }}>
+    <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} snapToSequentialPoint shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : next => { if (next != null) setMobileDrawerSnap(next); }} onDrag={event => { drawerHandleDidDrag.current = true; drawerDragY.current.last = event.clientY; }} onRelease={event => { const delta = event.pageY - drawerDragY.current.start; if (Math.abs(delta) > 24) window.setTimeout(() => setMobileDrawerSnap(delta > 0 ? MOBILE_DRAWER_SNAPS[0] : MOBILE_DRAWER_SNAPS[2]), 0); }}>
       <Drawer.Portal>
-      <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map">
+      <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map" onPointerDownCapture={event => { drawerDragY.current = { start: event.pageY, last: event.pageY }; }}>
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
       {!desktop && <Drawer.Handle preventCycle className="living-map-handle" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => { if (drawerHandleDidDrag.current) { drawerHandleDidDrag.current = false; return; } setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[2] : MOBILE_DRAWER_SNAPS[0]); }}><span /></Drawer.Handle>}
       <div className="living-map-drawer-controls">
