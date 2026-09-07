@@ -33,7 +33,7 @@ const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "b
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
 const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
-const PLACE_WAYPOINT_ZOOM = 17;
+const PLACE_WAYPOINT_ZOOM = 19;
 /* Vaul measures pixel snaps from the viewport bottom; include the fixed mobile dock
    so the drawer leaves a 116px hub peek visibly resting above it. */
 const MOBILE_DRAWER_SNAPS = ["300px", 0.52, 0.88] as const;
