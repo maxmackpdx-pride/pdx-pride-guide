@@ -643,7 +643,7 @@ export default function LivingMap() {
         const label = event?.title || place?.name || String(row.title || row.name || row.displayName || row._beach || "Map listing");
         const image = event?.posterImageUrl || (place ? resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type) : null);
         const accent = event ? dayAccent(event.dayOfWeek) : place ? directoryTypeColor(place.type) : railAccent(mark.kind === "housing" ? "housing" : mark.kind === "mizzed" ? "mizzed" : "carpool", row);
-        return <button type="button" key={mark.key} style={{ "--c": accent } as CSSProperties} onClick={e => openMark(mark, e.currentTarget)}>{image && <img src={image} alt="" />}<span><b>{label}</b><small>{mark.kind === "event" ? event?.venueName : mark.kind === "place" ? DIRECTORY_TYPE_LABELS[place?.type || ""] || place?.type : mark.kind}</small></span></button>;
+        return <button type="button" className="pdx-glass-rebind" key={mark.key} style={{ "--c": accent } as CSSProperties} onClick={e => openMark(mark, e.currentTarget)}>{image && <img src={image} alt="" />}<span><b>{label}</b><small>{mark.kind === "event" ? event?.venueName : mark.kind === "place" ? DIRECTORY_TYPE_LABELS[place?.type || ""] || place?.type : mark.kind}</small></span></button>;
       })}</div> : <p>Move the map to discover what’s nearby.</p>}
     </section>}
     {desktop && <div className="living-map-locate">
