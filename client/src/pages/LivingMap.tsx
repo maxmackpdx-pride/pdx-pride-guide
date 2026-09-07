@@ -9,7 +9,7 @@ import { placePath } from "@shared/placeSlug";
 import { apiRequest } from "@/lib/queryClient";
 import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { waypointHtml, waypointIcon, waypointSize, type WaypointId } from "@/lib/livingMapWaypoints";
+import { placeOrbIcon, waypointHtml, waypointIcon, waypointSize, type WaypointId } from "@/lib/livingMapWaypoints";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
@@ -33,6 +33,7 @@ const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "b
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
 const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
+const PLACE_WAYPOINT_ZOOM = 17;
 /* Vaul measures pixel snaps from the viewport bottom; include the fixed mobile dock
    so the drawer leaves a 116px hub peek visibly resting above it. */
 const MOBILE_DRAWER_SNAPS = ["300px", 0.52, 0.88] as const;
@@ -48,7 +49,7 @@ const MAP_CREATE_LINKS = [
 ] as const;
 const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string }> = [
   { label: "Eventz", id: "eventz", color: "#ff00cc", note: "Color matches the event day" },
-  { label: "Placez", id: "venue", color: "#00ffff", note: "Color and logo match the place type" },
+  { label: "Placez", id: "venue", color: "#00ffff", note: "Glowing orbs reveal logo waypoints nearby or on tap" },
   { label: "Mizzed", id: "mizzed", color: "#ff00cc", note: "Connections nearby" },
   { label: "HAÜZ", id: "hauz", color: "#00ffff", note: "Housing and stays" },
   { label: "OutZide", id: "outz", color: "#ff6600", note: "Outdoor recommendations" },
@@ -309,7 +310,7 @@ export default function LivingMap() {
     const day = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "America/Los_Angeles" }).format(new Date(at));
     return at >= now && at <= now + 7 * 86400000 && ["Fri", "Sat", "Sun"].includes(day);
   }), [events, q, timeFilter, customStart, customEnd]);
-  const visiblePlaces = useMemo(() => places.filter(p => !q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q)), [places, q]);
+  const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
   const nearbyPlaces = useMemo(() => visiblePlaces
     .map(place => ({ place, point: placePoint(place) }))
     .filter((entry): entry is { place: Place; point: [number, number] } => Boolean(entry.point))
@@ -453,15 +454,19 @@ export default function LivingMap() {
         {marks.map(mark => {
           const chosen = selected === mark.key;
           const item = mark.item;
+          const place = item as Place;
+          const placeColor = mark.kind === "place" ? directoryTypeColor(place.type) : "";
           const icon = mark.kind === "event"
             ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), selected: chosen })
-            : waypointIcon({
-              id: PLACE_ICON[(item as Place).type] || "venue",
-              size: waypointSize(zoom, chosen),
-              color: directoryTypeColor((item as Place).type),
-              logoUrl: resolveDirectoryLogo((item as Place).name, (item as Place).imageUrl) || directoryFallbackLogo((item as Place).type),
-              selected: chosen,
-            });
+            : chosen || zoom >= PLACE_WAYPOINT_ZOOM
+              ? waypointIcon({
+                id: PLACE_ICON[place.type] || "venue",
+                size: waypointSize(zoom, chosen),
+                color: placeColor,
+                logoUrl: resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type),
+                selected: chosen,
+              })
+              : placeOrbIcon(placeColor);
           return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => {
             setSelected(mark.key);
             setCardOriginRect(originRect(event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null));

@@ -170,6 +170,18 @@ export type WaypointOpts = {
   size?: number;
 };
 
+/** Compact Placez discovery marker. The 44px shell keeps the orb easy to tap. */
+export function placeOrbIcon(color: string) {
+  const size = 44;
+  return L.divIcon({
+    className: "wp-icon wp-place-orb-icon",
+    html: `<span class="wp-place-orb" style="--wp:${escapeAttribute(color)}" aria-hidden="true"><i></i></span>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+  });
+}
+
 export function waypointSize(zoom: number, selected: boolean): number {
   const z = Math.max(10, Math.min(20, zoom));
   const zoomProgress = Math.max(0, Math.min(1, (z - 12) / 4));
