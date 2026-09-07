@@ -52,6 +52,7 @@ import SuspendedAccountGate from "./components/SuspendedAccountGate";
 import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazy(() => import("./pages/Events"));
+const LivingMap = lazy(() => import("./pages/LivingMap"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Submit = lazy(() => import("./pages/Submit"));
 const PrideWork = lazy(() => import("./pages/PrideWork"));
@@ -95,6 +96,7 @@ function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
   const profile = isProfilePath(location);
+  const livingMap = location.split("?")[0] === "/map";
   // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
   // uses the global MobileBottomNav only (HubShell member bar removed).
   const adminShell = location.split("?")[0] === "/admin";
@@ -120,6 +122,7 @@ function AppLayout() {
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
+            <Route path="/map" component={LivingMap} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
@@ -194,8 +197,8 @@ function AppLayout() {
           </Suspense>
         </RouteBoundary>
       </main>
-      <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />
-      <Footer />
+      {!livingMap && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
+      {!livingMap && <Footer />}
     </div>
   );
 }

@@ -109,9 +109,9 @@ export default function MobileBottomNav() {
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = navLinkActive(location, "/z");
-  const hubActive = navLinkActive(location, "/dashboard");
+  const hubActive = navLinkActive(location, "/map");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
-  const hubSection = hubActive ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
+  const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
   const dismissExcept = (except?: MobileNavDismissDetail["except"]) => {
     closeLocalSheets(except);
@@ -147,16 +147,11 @@ export default function MobileBottomNav() {
 
   const localDemo = isLocalDemo();
 
-  /* Hub is navigation. Admin controls remain inside the Hub, never on the tab itself. */
+  /* The center Hub control opens the living map directly. */
   const handleHub = () => {
-    if (!user && !localDemo) {
-      dismissExcept();
-      setShowAuth(true);
-      return;
-    }
     dismissExcept();
     setHubOpen(false);
-    setLocation("/dashboard");
+    setLocation("/map");
   };
 
   const handleMessages = () => {
