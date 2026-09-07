@@ -1,0 +1,1207 @@
+{
+  "generatedAt": "2026-09-07T19:48:08.188Z",
+  "source": "https://www.zaylist.com/api/directory",
+  "count": 120,
+  "places": [
+    {
+      "id": 1,
+      "name": "CC Slaughters",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/CC_Slaughters.png",
+      "white": "/directory-logos/CC_Slaughters-white.png",
+      "generated": false
+    },
+    {
+      "id": 2,
+      "name": "Darcelle XV Showplace",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Darcelle_XV_Showplace.png",
+      "white": "/directory-logos/Darcelle_XV_Showplace-white.png",
+      "generated": false
+    },
+    {
+      "id": 3,
+      "name": "Stag PDX",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Stag_PDX.png",
+      "white": "/directory-logos/Stag_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 4,
+      "name": "Badlands",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Badlands.png",
+      "white": "/directory-logos/Badlands-white.png",
+      "generated": false
+    },
+    {
+      "id": 5,
+      "name": "Eagle Portland",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Eagle_Portland.png",
+      "white": "/directory-logos/Eagle_Portland-white.png",
+      "generated": false
+    },
+    {
+      "id": 6,
+      "name": "The Nest Lounge",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/place-thenestlounge.png",
+      "white": "/directory-logos/place-thenestlounge-white.png",
+      "generated": false
+    },
+    {
+      "id": 7,
+      "name": "Silverado",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Silverado.png",
+      "white": "/directory-logos/Silverado-white.png",
+      "generated": false
+    },
+    {
+      "id": 8,
+      "name": "Kann",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Kann.png",
+      "white": "/directory-logos/Kann-white.png",
+      "generated": false
+    },
+    {
+      "id": 9,
+      "name": "The Sports Bra",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/The_Sports_Bra.png",
+      "white": "/directory-logos/The_Sports_Bra-white.png",
+      "generated": false
+    },
+    {
+      "id": 10,
+      "name": "Mis Tacones",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Mis_Tacones.png",
+      "white": "/directory-logos/Mis_Tacones-white.png",
+      "generated": false
+    },
+    {
+      "id": 11,
+      "name": "Taqueria Los Puñales",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Taqueria_Los_Punales.png",
+      "white": "/directory-logos/Taqueria_Los_Punales-white.png",
+      "generated": false
+    },
+    {
+      "id": 12,
+      "name": "Friendship Kitchen",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Friendship_Kitchen.png",
+      "white": "/directory-logos/Friendship_Kitchen-white.png",
+      "generated": false
+    },
+    {
+      "id": 14,
+      "name": "Either/Or",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Either_Or.png",
+      "white": "/directory-logos/Either_Or-white.png",
+      "generated": false
+    },
+    {
+      "id": 15,
+      "name": "Tin Shed Garden Cafe",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Tin_Shed_Garden_Cafe.png",
+      "white": "/directory-logos/Tin_Shed_Garden_Cafe-white.png",
+      "generated": false
+    },
+    {
+      "id": 16,
+      "name": "Speed-o Cappuccino",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Speed_O_Cappuccino.png",
+      "white": "/directory-logos/Speed_O_Cappuccino-white.png",
+      "generated": false
+    },
+    {
+      "id": 17,
+      "name": "Coffee Beer",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Coffee_Beer.png",
+      "white": "/directory-logos/Coffee_Beer-white.png",
+      "generated": false
+    },
+    {
+      "id": 18,
+      "name": "Living Room Wines",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Living_Room_Wines.png",
+      "white": "/directory-logos/Living_Room_Wines-white.png",
+      "generated": false
+    },
+    {
+      "id": 19,
+      "name": "Stem Wine Bar",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Stem_Wine_Bar.png",
+      "white": "/directory-logos/Stem_Wine_Bar-white.png",
+      "generated": false
+    },
+    {
+      "id": 20,
+      "name": "Roots & Crowns",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Roots_and_Crowns.png",
+      "white": "/directory-logos/Roots_and_Crowns-white.png",
+      "generated": false
+    },
+    {
+      "id": 21,
+      "name": "Greenhouse Hair Collective",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-greenhousehaircollective.png",
+      "white": "/directory-logos/place-greenhousehaircollective-white.png",
+      "generated": false
+    },
+    {
+      "id": 22,
+      "name": "Arium Botanicals",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Arium_Botanicals.png",
+      "white": "/directory-logos/Arium_Botanicals-white.png",
+      "generated": false
+    },
+    {
+      "id": 23,
+      "name": "Pizza Thief",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Pizza_Thief.png",
+      "white": "/directory-logos/Pizza_Thief-white.png",
+      "generated": false
+    },
+    {
+      "id": 24,
+      "name": "Peacock PDX",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Peacock_PDX.png",
+      "white": "/directory-logos/Peacock_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 26,
+      "name": "Scandals East",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Scandals_East.png",
+      "white": "/directory-logos/Scandals_East-white.png",
+      "generated": false
+    },
+    {
+      "id": 27,
+      "name": "Honeyed Words",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Honeyed_Words.png",
+      "white": "/directory-logos/Honeyed_Words-white.png",
+      "generated": false
+    },
+    {
+      "id": 28,
+      "name": "Camp Bar PDX",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Camp_Bar_PDX.png",
+      "white": "/directory-logos/Camp_Bar_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 29,
+      "name": "Ring Ding Ding",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/place-ringdingding.png",
+      "white": "/directory-logos/place-ringdingding-white.png",
+      "generated": false
+    },
+    {
+      "id": 30,
+      "name": "Holocene",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Holocene.png",
+      "white": "/directory-logos/Holocene-white.png",
+      "generated": false
+    },
+    {
+      "id": 31,
+      "name": "Alberta Rose Theatre",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Alberta_Rose_Theatre.png",
+      "white": "/directory-logos/Alberta_Rose_Theatre-white.png",
+      "generated": false
+    },
+    {
+      "id": 32,
+      "name": "Jackie's",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Jackies.png",
+      "white": "/directory-logos/Jackies-white.png",
+      "generated": false
+    },
+    {
+      "id": 33,
+      "name": "Sanctuary Club",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Sanctuary_Club.png",
+      "white": "/directory-logos/Sanctuary_Club-white.png",
+      "generated": false
+    },
+    {
+      "id": 34,
+      "name": "Seagrape Apothecary",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Seagrape_Apothecary.png",
+      "white": "/directory-logos/Seagrape_Apothecary-white.png",
+      "generated": false
+    },
+    {
+      "id": 35,
+      "name": "REALM PDX",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/REALM_PDX.png",
+      "white": "/directory-logos/REALM_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 36,
+      "name": "Nova PDX",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Nova_PDX.png",
+      "white": "/directory-logos/Nova_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 37,
+      "name": "Star Theater",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Star_Theater.png",
+      "white": "/directory-logos/Star_Theater-white.png",
+      "generated": false
+    },
+    {
+      "id": 38,
+      "name": "The Get Down",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/The_Get_Down.png",
+      "white": "/directory-logos/The_Get_Down-white.png",
+      "generated": false
+    },
+    {
+      "id": 39,
+      "name": "Happylucky No. 1",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Happylucky_No_1.png",
+      "white": "/directory-logos/Happylucky_No_1-white.png",
+      "generated": false
+    },
+    {
+      "id": 40,
+      "name": "Escape Bar & Grill",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Escape_Bar_and_Grill.png",
+      "white": "/directory-logos/Escape_Bar_and_Grill-white.png",
+      "generated": false
+    },
+    {
+      "id": 41,
+      "name": "The Lodge Bar and Grill",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/The_Lodge_Bar_and_Grill.png",
+      "white": "/directory-logos/The_Lodge_Bar_and_Grill-white.png",
+      "generated": false
+    },
+    {
+      "id": 42,
+      "name": "Cascade AIDS Project (CAP) & Our House",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Cascade_AIDS_Project.png",
+      "white": "/directory-logos/Cascade_AIDS_Project-white.png",
+      "generated": true
+    },
+    {
+      "id": 43,
+      "name": "Pride Northwest",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Pride_Northwest.png",
+      "white": "/directory-logos/Pride_Northwest-white.png",
+      "generated": false
+    },
+    {
+      "id": 44,
+      "name": "Basic Rights Oregon",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Basic_Rights_Oregon.png",
+      "white": "/directory-logos/Basic_Rights_Oregon-white.png",
+      "generated": false
+    },
+    {
+      "id": 45,
+      "name": "New Avenues for Youth / SMYRC",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/New_Avenues_for_Youth_SMYRC.png",
+      "white": "/directory-logos/New_Avenues_for_Youth_SMYRC-white.png",
+      "generated": false
+    },
+    {
+      "id": 46,
+      "name": "Outside In",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Outside_In.png",
+      "white": "/directory-logos/Outside_In-white.png",
+      "generated": false
+    },
+    {
+      "id": 47,
+      "name": "The Marie Equi Center",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/The_Marie_Equi_Center.png",
+      "white": "/directory-logos/The_Marie_Equi_Center-white.png",
+      "generated": false
+    },
+    {
+      "id": 48,
+      "name": "WERQ Together",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/WERQ_Together.png",
+      "white": "/directory-logos/WERQ_Together-white.png",
+      "generated": false
+    },
+    {
+      "id": 49,
+      "name": "Portland Gay Men's Chorus",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Portland_Gay_Mens_Chorus.png",
+      "white": "/directory-logos/Portland_Gay_Mens_Chorus-white.png",
+      "generated": false
+    },
+    {
+      "id": 50,
+      "name": "underU4men",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/UnderU4Men.png",
+      "white": "/directory-logos/UnderU4Men-white.png",
+      "generated": false
+    },
+    {
+      "id": 51,
+      "name": "The Meet Rack at Darkroom",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/The_Meet_Rack.png",
+      "white": "/directory-logos/The_Meet_Rack-white.png",
+      "generated": false
+    },
+    {
+      "id": 52,
+      "name": "Hawks PDX",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/Hawks_PDX.png",
+      "white": "/directory-logos/Hawks_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 53,
+      "name": "Bowery Bagels",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Bowery_Bagels.png",
+      "white": "/directory-logos/Bowery_Bagels-white.png",
+      "generated": false
+    },
+    {
+      "id": 54,
+      "name": "Process",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Process.png",
+      "white": "/directory-logos/Process-white.png",
+      "generated": false
+    },
+    {
+      "id": 55,
+      "name": "Prism Health",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Prism_Health.png",
+      "white": "/directory-logos/Prism_Health-white.png",
+      "generated": false
+    },
+    {
+      "id": 56,
+      "name": "The Automatic Bar",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/The_Automatic_Bar.png",
+      "white": "/directory-logos/The_Automatic_Bar-white.png",
+      "generated": false
+    },
+    {
+      "id": 57,
+      "name": "Montavilla Station",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Montavilla_Station.png",
+      "white": "/directory-logos/Montavilla_Station-white.png",
+      "generated": false
+    },
+    {
+      "id": 58,
+      "name": "Covert Café",
+      "type": "bar",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Covert_Cafe.png",
+      "white": "/directory-logos/Covert_Cafe-white.png",
+      "generated": false
+    },
+    {
+      "id": 59,
+      "name": "Hunny Beez",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Hunny_Beez.png",
+      "white": "/directory-logos/Hunny_Beez-white.png",
+      "generated": false
+    },
+    {
+      "id": 60,
+      "name": "Q Restaurant & Bar",
+      "type": "restaurant",
+      "adult": false,
+      "treatment": "#FF6600-white",
+      "primary": "/directory-logos/Q_Restaurant_and_Bar.png",
+      "white": "/directory-logos/Q_Restaurant_and_Bar-white.png",
+      "generated": false
+    },
+    {
+      "id": 61,
+      "name": "GiGi's Cafe",
+      "type": "cafe",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Gigis_Cafe.png",
+      "white": "/directory-logos/Gigis_Cafe-white.png",
+      "generated": false
+    },
+    {
+      "id": 62,
+      "name": "Backstory Books & Yarn",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Backstory_Books_and_Yarn.png",
+      "white": "/directory-logos/Backstory_Books_and_Yarn-white.png",
+      "generated": false
+    },
+    {
+      "id": 63,
+      "name": "Bridge City Mentors",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/Bridge_City_Mentors.png",
+      "white": "/directory-logos/Bridge_City_Mentors-white.png",
+      "generated": false
+    },
+    {
+      "id": 64,
+      "name": "Rebel Heart Therapy",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Rebel_Heart_Therapy.png",
+      "white": "/directory-logos/Rebel_Heart_Therapy-white.png",
+      "generated": false
+    },
+    {
+      "id": 65,
+      "name": "Full Spectrum Therapy",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Full_Spectrum_Therapy.png",
+      "white": "/directory-logos/Full_Spectrum_Therapy-white.png",
+      "generated": false
+    },
+    {
+      "id": 66,
+      "name": "Sprout Therapy PDX",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Sprout_Therapy_PDX.png",
+      "white": "/directory-logos/Sprout_Therapy_PDX-white.png",
+      "generated": false
+    },
+    {
+      "id": 67,
+      "name": "The Center for Couples & Sex Therapy",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/The_Center_for_Couples_and_Sex_Therapy.png",
+      "white": "/directory-logos/The_Center_for_Couples_and_Sex_Therapy-white.png",
+      "generated": false
+    },
+    {
+      "id": 68,
+      "name": "Sold By Scott",
+      "type": "realestate",
+      "adult": false,
+      "treatment": "#1A4DFF-white",
+      "primary": "/directory-logos/Sold_By_Scott.png",
+      "white": "/directory-logos/Sold_By_Scott-white.png",
+      "generated": false
+    },
+    {
+      "id": 69,
+      "name": "Plus Psychiatry",
+      "type": "healthcare",
+      "adult": false,
+      "treatment": "#FF00CC-white",
+      "primary": "/directory-logos/Plus_Psychiatry.png",
+      "white": "/directory-logos/Plus_Psychiatry-white.png",
+      "generated": false
+    },
+    {
+      "id": 70,
+      "name": "The Imperial Sovereign Rose Court of Oregon",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-theimperialsovereignrosecourtoforegon.png",
+      "white": "/directory-logos/place-theimperialsovereignrosecourtoforegon-white.png",
+      "generated": false
+    },
+    {
+      "id": 71,
+      "name": "Pink Ponies",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Pink_Ponies.png",
+      "white": "/directory-logos/Pink_Ponies-white.png",
+      "generated": false
+    },
+    {
+      "id": 72,
+      "name": "Bearracuda",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Bearracuda.png",
+      "white": "/directory-logos/Bearracuda-white.png",
+      "generated": false
+    },
+    {
+      "id": 73,
+      "name": "Triangle Recreation Camp",
+      "type": "campground",
+      "adult": false,
+      "treatment": "#39FF14-white",
+      "primary": "/directory-logos/Triangle_Recreation_Camp.png",
+      "white": "/directory-logos/Triangle_Recreation_Camp-white.png",
+      "generated": false
+    },
+    {
+      "id": 74,
+      "name": "PDX PAH - Portland Pets & Handlers",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-pdxpahportlandpetsandhandlers.png",
+      "white": "/directory-logos/place-pdxpahportlandpetsandhandlers-white.png",
+      "generated": false
+    },
+    {
+      "id": 75,
+      "name": "Oregon State Leather Contest",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-oregonstateleathercontest.png",
+      "white": "/directory-logos/place-oregonstateleathercontest-white.png",
+      "generated": false
+    },
+    {
+      "id": 76,
+      "name": "Portland Leather Alliance",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-portlandleatheralliance.png",
+      "white": "/directory-logos/place-portlandleatheralliance-white.png",
+      "generated": false
+    },
+    {
+      "id": 77,
+      "name": "Bad Girls PDX",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-badgirlspdx.png",
+      "white": "/directory-logos/place-badgirlspdx-white.png",
+      "generated": false
+    },
+    {
+      "id": 78,
+      "name": "Black & Beyond the Binary Collective",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-blackandbeyondthebinarycollective.png",
+      "white": "/directory-logos/place-blackandbeyondthebinarycollective-white.png",
+      "generated": false
+    },
+    {
+      "id": 79,
+      "name": "Brown Girl Rise",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-browngirlrise.png",
+      "white": "/directory-logos/place-browngirlrise-white.png",
+      "generated": false
+    },
+    {
+      "id": 80,
+      "name": "TranzGuys PDX",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-tranzguyspdx.png",
+      "white": "/directory-logos/place-tranzguyspdx-white.png",
+      "generated": false
+    },
+    {
+      "id": 81,
+      "name": "Ori Gallery",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-origallery.png",
+      "white": "/directory-logos/place-origallery-white.png",
+      "generated": false
+    },
+    {
+      "id": 82,
+      "name": "Portland Frontrunners",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-portlandfrontrunners.png",
+      "white": "/directory-logos/place-portlandfrontrunners-white.png",
+      "generated": false
+    },
+    {
+      "id": 83,
+      "name": "Lavender League",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-lavenderleague.png",
+      "white": "/directory-logos/place-lavenderleague-white.png",
+      "generated": false
+    },
+    {
+      "id": 84,
+      "name": "PDX Gaymers",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-pdxgaymers.png",
+      "white": "/directory-logos/place-pdxgaymers-white.png",
+      "generated": false
+    },
+    {
+      "id": 85,
+      "name": "Sankofa Collective",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-sankofacollective.png",
+      "white": "/directory-logos/place-sankofacollective-white.png",
+      "generated": false
+    },
+    {
+      "id": 92,
+      "name": "Q Center",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-qcenter.png",
+      "white": "/directory-logos/place-qcenter-white.png",
+      "generated": false
+    },
+    {
+      "id": 93,
+      "name": "Yes Coach Productions",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/Yes_Coach_Productions.png",
+      "white": "/directory-logos/Yes_Coach_Productions-white.png",
+      "generated": false
+    },
+    {
+      "id": 94,
+      "name": "The Secret Warehouse",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/place-thesecretwarehouse.png",
+      "white": "/directory-logos/place-thesecretwarehouse-white.png",
+      "generated": false
+    },
+    {
+      "id": 95,
+      "name": "Fantasy Land",
+      "type": "shop",
+      "adult": true,
+      "treatment": "red-white",
+      "primary": "/directory-logos/Fantasy_Land.png",
+      "white": "/directory-logos/Fantasy_Land-white.png",
+      "generated": false
+    },
+    {
+      "id": 96,
+      "name": "Taboo Video",
+      "type": "shop",
+      "adult": true,
+      "treatment": "red-white",
+      "primary": "/directory-logos/Taboo_Video.png",
+      "white": "/directory-logos/Taboo_Video-white.png",
+      "generated": false
+    },
+    {
+      "id": 97,
+      "name": "Mr. Peeps",
+      "type": "shop",
+      "adult": true,
+      "treatment": "red-white",
+      "primary": "/directory-logos/Mr_Peeps.png",
+      "white": "/directory-logos/Mr_Peeps-white.png",
+      "generated": false
+    },
+    {
+      "id": 98,
+      "name": "FANTASY",
+      "type": "shop",
+      "adult": true,
+      "treatment": "red-white",
+      "primary": "/directory-logos/Fantasy_Adults_Only.png",
+      "white": "/directory-logos/Fantasy_Adults_Only-white.png",
+      "generated": false
+    },
+    {
+      "id": 99,
+      "name": "Inbundance Wealth Management",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-inbundancewealthmanagement.png",
+      "white": "/directory-logos/place-inbundancewealthmanagement-white.png",
+      "generated": false
+    },
+    {
+      "id": 100,
+      "name": "Gaylabration",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-gaylabration.png",
+      "white": "/directory-logos/place-gaylabration-white.png",
+      "generated": false
+    },
+    {
+      "id": 101,
+      "name": "Portland Queer Arts Foundation",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-portlandqueerartsfoundation.png",
+      "white": "/directory-logos/place-portlandqueerartsfoundation-white.png",
+      "generated": false
+    },
+    {
+      "id": 102,
+      "name": "Business Oregon",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-businessoregon.png",
+      "white": "/directory-logos/place-businessoregon-white.png",
+      "generated": false
+    },
+    {
+      "id": 103,
+      "name": "Foundation for Contemporary Arts",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-foundationforcontemporaryarts.png",
+      "white": "/directory-logos/place-foundationforcontemporaryarts-white.png",
+      "generated": false
+    },
+    {
+      "id": 104,
+      "name": "Future Prairie",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-futureprairie.png",
+      "white": "/directory-logos/place-futureprairie-white.png",
+      "generated": false
+    },
+    {
+      "id": 105,
+      "name": "Multnomah County Cultural Coalition",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-multnomahcountyculturalcoalition.png",
+      "white": "/directory-logos/place-multnomahcountyculturalcoalition-white.png",
+      "generated": false
+    },
+    {
+      "id": 106,
+      "name": "Oregon Arts Commission",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-oregonartscommission.png",
+      "white": "/directory-logos/place-oregonartscommission-white.png",
+      "generated": false
+    },
+    {
+      "id": 107,
+      "name": "Regional Arts & Culture Council",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-regionalartsandculturecouncil.png",
+      "white": "/directory-logos/place-regionalartsandculturecouncil-white.png",
+      "generated": false
+    },
+    {
+      "id": 108,
+      "name": "Backstage",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-backstage.png",
+      "white": "/directory-logos/place-backstage-white.png",
+      "generated": false
+    },
+    {
+      "id": 109,
+      "name": "Fertile Ground Festival",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-fertilegroundfestival.png",
+      "white": "/directory-logos/place-fertilegroundfestival-white.png",
+      "generated": false
+    },
+    {
+      "id": 110,
+      "name": "PDXBackstage",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-pdxbackstage.png",
+      "white": "/directory-logos/place-pdxbackstage-white.png",
+      "generated": false
+    },
+    {
+      "id": 111,
+      "name": "Portland Area Theatre Alliance",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-portlandareatheatrealliance.png",
+      "white": "/directory-logos/place-portlandareatheatrealliance-white.png",
+      "generated": false
+    },
+    {
+      "id": 112,
+      "name": "Lesbian Culture Club",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-lesbiancultureclub.png",
+      "white": "/directory-logos/place-lesbiancultureclub-white.png",
+      "generated": false
+    },
+    {
+      "id": 113,
+      "name": "Queer Social Club",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-queersocialclub.png",
+      "white": "/directory-logos/place-queersocialclub-white.png",
+      "generated": false
+    },
+    {
+      "id": 114,
+      "name": "Radical Faerie Arts Fest",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-radicalfaerieartsfest.png",
+      "white": "/directory-logos/place-radicalfaerieartsfest-white.png",
+      "generated": false
+    },
+    {
+      "id": 115,
+      "name": "CASH Oregon",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-cashoregon.png",
+      "white": "/directory-logos/place-cashoregon-white.png",
+      "generated": false
+    },
+    {
+      "id": 116,
+      "name": "Oregon Pride in Business",
+      "type": "group",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-oregonprideinbusiness.png",
+      "white": "/directory-logos/place-oregonprideinbusiness-white.png",
+      "generated": false
+    },
+    {
+      "id": 117,
+      "name": "Portland Small Business Development Center",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-portlandsmallbusinessdevelopmentcenter.png",
+      "white": "/directory-logos/place-portlandsmallbusinessdevelopmentcenter-white.png",
+      "generated": false
+    },
+    {
+      "id": 118,
+      "name": "Prosper Portland",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-prosperportland.png",
+      "white": "/directory-logos/place-prosperportland-white.png",
+      "generated": false
+    },
+    {
+      "id": 119,
+      "name": "SCORE Portland",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-scoreportland.png",
+      "white": "/directory-logos/place-scoreportland-white.png",
+      "generated": false
+    },
+    {
+      "id": 120,
+      "name": "Open Space Dance",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/place-openspacedance.png",
+      "white": "/directory-logos/place-openspacedance-white.png",
+      "generated": false
+    },
+    {
+      "id": 121,
+      "name": "Echo Theater",
+      "type": "venue",
+      "adult": false,
+      "treatment": "#19E3FF-white",
+      "primary": "/directory-logos/place-echotheater.png",
+      "white": "/directory-logos/place-echotheater-white.png",
+      "generated": false
+    },
+    {
+      "id": 122,
+      "name": "Independent Publishing Resource Center",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-independentpublishingresourcecenter.png",
+      "white": "/directory-logos/place-independentpublishingresourcecenter-white.png",
+      "generated": false
+    },
+    {
+      "id": 123,
+      "name": "MakeWithPDX",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-makewithpdx.png",
+      "white": "/directory-logos/place-makewithpdx-white.png",
+      "generated": false
+    },
+    {
+      "id": 124,
+      "name": "Sincere Studio",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-sincerestudio.png",
+      "white": "/directory-logos/place-sincerestudio-white.png",
+      "generated": false
+    },
+    {
+      "id": 125,
+      "name": "SymbiOp",
+      "type": "shop",
+      "adult": false,
+      "treatment": "#FFD700-white",
+      "primary": "/directory-logos/place-symbiop.png",
+      "white": "/directory-logos/place-symbiop-white.png",
+      "generated": false
+    },
+    {
+      "id": 126,
+      "name": "IL Youth 2 Youth",
+      "type": "service",
+      "adult": false,
+      "treatment": "#A855F7-white",
+      "primary": "/directory-logos/place-ilyouth2youth.png",
+      "white": "/directory-logos/place-ilyouth2youth-white.png",
+      "generated": false
+    },
+    {
+      "id": 127,
+      "name": "P:EAR",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-pear.png",
+      "white": "/directory-logos/place-pear-white.png",
+      "generated": false
+    },
+    {
+      "id": 128,
+      "name": "Portland Playhouse",
+      "type": "nonprofit",
+      "adult": false,
+      "treatment": "#FFFFFF-white",
+      "primary": "/directory-logos/place-portlandplayhouse.png",
+      "white": "/directory-logos/place-portlandplayhouse-white.png",
+      "generated": false
+    }
+  ]
+}
