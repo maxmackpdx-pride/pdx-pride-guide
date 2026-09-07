@@ -472,7 +472,7 @@ export default function LivingMap() {
         const copy = railCopy(id, row, item.label);
         const image = railImage(id, row, events);
         const contents = <>{image && <img src={image} alt="" />}<span className="shade" /><small>{copy.kicker}</small><strong>{copy.title}</strong><em>{copy.meta}</em></>;
-        const className = `living-map-card${id === "placez" ? " place" : ""}`;
+        const className = `living-map-card pdx-glass-rebind${id === "placez" ? " place" : ""}`;
         const style = { "--c": railAccent(id, row) } as CSSProperties;
         const key = `${id}-${row.id ?? i}`;
         if (id === "placez") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); goOverlay("place", Number(row.id)); }}>{contents}</button>;
@@ -501,15 +501,15 @@ export default function LivingMap() {
     <h2>Map Filters</h2>
     <div className="living-map-time" data-vaul-no-drag role="radiogroup" aria-label="Event date filters"><button type="button" role="radio" aria-checked={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" role="radio" aria-checked={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" role="radio" aria-checked={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
     <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
-      <button type="button" aria-pressed={showEvents} className={showEvents ? "is-on" : ""} onClick={() => setShowEvents(v => !v)}>Eventz</button>
-      <button type="button" aria-pressed={showPlaces} className={showPlaces ? "is-on cyan" : "cyan"} onClick={() => setShowPlaces(v => !v)}>Placez</button>
-      {!hideZayDark && (mobile ? <button type="button" className="living-map-zaydark-toggle pdx-glass-rebind" role="switch" aria-checked="false" aria-label="Turn on ZayDark" onClick={() => setSoon("ZayDark")}><img src="/brand/family/zaydark.svg" alt="ZayDark" /><span aria-hidden="true"><i /></span></button> : <button type="button" onClick={() => setSoon("ZayDark")}>ZayDark</button>)}
-      <button type="button" onClick={() => setSoon("Zenegades")}>Zenegades</button>
-      <button type="button" onClick={() => setSoon("Afterz")}>Afterz</button>
+      <button type="button" aria-pressed={showEvents} className={`pdx-glass-rebind${showEvents ? " is-on" : ""}`} onClick={() => setShowEvents(v => !v)}>Eventz</button>
+      <button type="button" aria-pressed={showPlaces} className={`pdx-glass-rebind cyan${showPlaces ? " is-on" : ""}`} onClick={() => setShowPlaces(v => !v)}>Placez</button>
+      {!hideZayDark && (mobile ? <button type="button" className="living-map-zaydark-toggle pdx-glass-rebind" role="switch" aria-checked="false" aria-label="Turn on ZayDark" onClick={() => setSoon("ZayDark")}><img src="/brand/family/zaydark.svg" alt="ZayDark" /><span aria-hidden="true"><i /></span></button> : <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("ZayDark")}>ZayDark</button>)}
+      <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("Zenegades")}>Zenegades</button>
+      <button type="button" className="pdx-glass-rebind" onClick={() => setSoon("Afterz")}>Afterz</button>
     </div>
   </div>;
   const eventCard = (e: Event) => (
-    <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
+    <button type="button" className="living-map-card event pdx-glass-rebind" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
       {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
     </button>
   );
@@ -552,7 +552,7 @@ export default function LivingMap() {
       {locating && <span role="status">Locating…</span>}
     </div>}
     {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
-    <div className={`living-map-create${createOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
+    <div className={`living-map-create pdx-glass-rebind${createOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
       <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
         {MAP_CREATE_LINKS.map((item, index) => (
           <Link
