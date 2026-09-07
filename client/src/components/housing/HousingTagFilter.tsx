@@ -127,7 +127,7 @@ export function HousingTagFilter({
       </div>
 
       {open ? (
-        <div className="hz-tagfilter__panel" role="dialog" aria-label="Filter listings by tag">
+        <div className="hz-tagfilter__panel pdx-liquid-overlay" role="dialog" aria-label="Filter listings by tag">
           <div className="hz-tagfilter__search">
             <HousingIcon name="search" size={14} />
             <input

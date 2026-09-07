@@ -33,7 +33,7 @@ export default function IdentityPeek({ trigger, username, displayName, photoUrl,
   return <>
     <HoverCard openDelay={260} closeDelay={140}>
       <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
-      <HoverCardContent className="identity-peek pdx-glass-card pdx-glass-rebind" sideOffset={8} align="start">
+      <HoverCardContent className="identity-peek pdx-glass-card pdx-glass-rebind pdx-liquid-overlay" sideOffset={8} align="start">
         <div className="identity-peek__head">
           <UserAvatar photoUrl={photoUrl} avatarChoice={avatarChoice ?? undefined} avatarRing={avatarRing ?? undefined} displayName={displayName} username={username} size={52} />
           <div><strong>{name}</strong><span>@{username}</span></div>

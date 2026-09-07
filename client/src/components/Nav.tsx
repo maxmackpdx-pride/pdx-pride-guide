@@ -98,7 +98,7 @@ function NavDropdown({
       </button>
       <div
         id={panelId}
-        className="site-nav-dropdown__panel"
+        className="site-nav-dropdown__panel pdx-liquid-overlay"
         role="menu"
       >
         <div className="site-nav-dropdown__column">
@@ -153,7 +153,7 @@ function ProfileMenuPanel({
     : undefined;
 
   return (
-    <div className="site-profile-menu__panel" role="menu">
+    <div className="site-profile-menu__panel pdx-liquid-overlay" role="menu">
       <Link
         href="/dashboard?edit=profile"
         role="menuitem"
@@ -432,7 +432,7 @@ function NotifyMenu({
         {alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}
       </button>
       {open && (
-        <div className="site-mobile-notify__panel" role="dialog" aria-label="Notifications">
+        <div className="site-mobile-notify__panel pdx-liquid-overlay" role="dialog" aria-label="Notifications">
           <div className="site-mobile-notify__head">Notifications</div>
           <div className="site-mobile-notify__list">
             {isLoading && <p className="site-mobile-notify__empty">Loading…</p>}

@@ -71,6 +71,27 @@
     transparent 70%
   );
 
+  /* ── 1.2b Liquid overlay tier ────────────────────────────
+     Floating chrome only. The map key is the visual reference.
+     This recipe changes fill, blur and internal light. It deliberately does
+     not set border or box-shadow, so every surface keeps its existing rim,
+     accent and bloom. */
+  --liquid-overlay-bg:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 14%, transparent 38%),
+    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.11), color-mix(in srgb, var(--c) 9%, transparent) 42%, transparent 72%),
+    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
+    rgba(5, 5, 8, 0.72);
+  /* Safari 15 and older reject a whole computed background when color-mix()
+     is unresolved inside a custom property. Keep the same optical structure
+     with a stable cyan tint, then enhance it with the surface accent below. */
+  --liquid-overlay-bg-fallback:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 14%, transparent 38%),
+    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.11), rgba(25, 227, 255, 0.08) 42%, transparent 72%),
+    radial-gradient(115% 90% at 50% -18%, rgba(25, 227, 255, 0.06), transparent 58%),
+    rgba(5, 5, 8, 0.76);
+  --liquid-overlay-blur: 18px;
+  --liquid-overlay-saturation: 1.22;
+
   /* ── 1.3 Refract seam (presentation; engine = pdx-rainbow-rule) ─ */
   --refract-seam-height: 2px;
   --refract-seam-gradient: linear-gradient(
@@ -304,6 +325,50 @@
   box-shadow: var(--glass-card-shadow);
   backdrop-filter: blur(var(--glass-card-blur));
   -webkit-backdrop-filter: blur(var(--glass-card-blur));
+}
+
+/* Floating-only liquid tier. Add beside the surface's existing class so its
+   geometry, border, seam and bloom remain owned by that component. */
+.pdx-liquid-overlay {
+  background: var(--liquid-overlay-bg-fallback) !important;
+  background-clip: padding-box;
+  backdrop-filter: blur(var(--liquid-overlay-blur)) saturate(var(--liquid-overlay-saturation)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-overlay-blur)) saturate(var(--liquid-overlay-saturation)) !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@supports (color: color-mix(in srgb, white 50%, black)) {
+  .pdx-liquid-overlay {
+    background: var(--liquid-overlay-bg) !important;
+  }
+}
+
+html.calm-mode .pdx-liquid-overlay,
+:root[data-calm="true"] .pdx-liquid-overlay {
+  background:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+    rgba(5, 5, 8, 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pdx-liquid-overlay {
+    background:
+      linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+      rgba(5, 5, 8, 0.97) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .pdx-liquid-overlay {
+    background:
+      linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+      rgba(5, 5, 8, 0.96) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .pdx-glass-card--neutral {

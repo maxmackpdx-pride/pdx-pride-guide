@@ -248,7 +248,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     return (
       <>
         <div
-          className="inbox-overlay inbox-overlay--experiment"
+          className="inbox-overlay inbox-overlay--experiment pdx-liquid-overlay"
           role="dialog"
           aria-modal="true"
           aria-label="Inbox demo"
@@ -377,7 +377,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
     <>
       <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
       <div
-        className="inbox-overlay inbox-overlay--experiment"
+        className="inbox-overlay inbox-overlay--experiment pdx-liquid-overlay"
         role="dialog"
         aria-modal="true"
         aria-label="Inbox"

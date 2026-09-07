@@ -525,7 +525,7 @@ export default function MissedConnectionsBubbleBoard({
             aria-label="Close reply panel"
             onClick={() => setReplyingTo(null)}
           />
-          <aside className="mc-reply-drawer" role="dialog" aria-labelledby="mc-reply-title">
+          <aside className="mc-reply-drawer pdx-liquid-overlay" role="dialog" aria-labelledby="mc-reply-title">
             <button type="button" className="mc-reply-drawer__close" onClick={() => setReplyingTo(null)} aria-label="Close">
               ×
             </button>

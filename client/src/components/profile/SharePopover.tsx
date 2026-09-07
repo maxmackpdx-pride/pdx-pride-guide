@@ -93,7 +93,7 @@ export default function SharePopover({
 
   return createPortal(
     <div
-      className="pp-share-pop pp-share-pop--portal"
+      className="pp-share-pop pp-share-pop--portal pdx-liquid-overlay"
       ref={panelRef}
       style={{ top: pos.top, left: pos.left }}
       role="menu"

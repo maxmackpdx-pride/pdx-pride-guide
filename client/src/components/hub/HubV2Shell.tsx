@@ -579,7 +579,7 @@ export default function HubV2Shell({
               <div
                 ref={sheetRef}
                 id="hub-v2-drawer-panel"
-                className="hub-v2-drawer__sheet"
+                className="hub-v2-drawer__sheet pdx-liquid-overlay"
                 role="dialog"
                 aria-label="Hub menu"
                 aria-hidden={!mobileDrawerOpen}

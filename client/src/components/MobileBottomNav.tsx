@@ -176,7 +176,7 @@ export default function MobileBottomNav() {
       {eventsOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setEventsOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site" data-accent="cyan" role="dialog" aria-label="Eventz">
+          <div className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="cyan" role="dialog" aria-label="Eventz">
             <h3>Eventz</h3>
             {EVENTS_NAV.map(item => (
               <Link
@@ -195,7 +195,7 @@ export default function MobileBottomNav() {
       {spaceOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site" data-accent="violet" role="dialog" aria-label="Z/ Communities">
+          <div className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="violet" role="dialog" aria-label="Z/ Communities">
             <h3>Z/ Communities</h3>
             {BOARD_NAV.map(item => (
               <Link
@@ -225,7 +225,7 @@ export default function MobileBottomNav() {
       {outzOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setOutzOpen(false)} aria-hidden="true" />
-          <div className="hub-outz-drawer" role="dialog" aria-label="Outz, most visited">
+          <div className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="Outz, most visited">
             <span className="hub-outz-drawer__kicker">Outz &middot; Most Visited</span>
             {OUTZ_NAV.map((item, index) => (
               <Link
@@ -252,7 +252,7 @@ export default function MobileBottomNav() {
       {hubOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setHubOpen(false)} aria-hidden="true" />
-          <div className="hub-sheet" role="dialog" aria-label="Your Hub">
+          <div className="hub-sheet pdx-liquid-overlay" role="dialog" aria-label="Your Hub">
             <span className="hub-sheet__grip" aria-hidden="true" />
             <div className="hub-sheet__body">
               <div className="hub-sheet__switch" role="group" aria-label="Hub account">

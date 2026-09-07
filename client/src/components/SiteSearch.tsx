@@ -189,7 +189,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
     <div className="site-search" role="presentation">
       <div className="site-search__backdrop" onClick={onClose} data-testid="site-search-backdrop" />
       <div
-        className="site-search__panel pdx-glass"
+        className="site-search__panel pdx-glass pdx-liquid-overlay"
         role="dialog"
         aria-modal="true"
         aria-label="Search Zaylist"
