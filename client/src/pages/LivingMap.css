@@ -283,13 +283,34 @@
   scroll-snap-align: start;
   overflow: hidden;
   padding: 18px;
-  border: 2px solid var(--c);
-  border-radius: 18px;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--c) 62%, #202027);
+  border-radius: 14px;
   color: #fff;
   text-decoration: none;
   background: #0a0a0c;
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--c) 18%, transparent);
+  box-shadow:
+    0 0 0 2px #000,
+    inset 0 -18px 34px rgba(0, 0, 0, 0.58),
+    0 18px 42px rgba(0, 0, 0, 0.72),
+    0 0 30px -5px color-mix(in srgb, var(--c) 48%, transparent);
 }
+.living-map-card.pdx-glass-rebind::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--map-card-angle), transparent 0deg 294deg, rgba(255,255,255,.95) 326deg, var(--c) 344deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: living-map-card-orbit 5.2s linear infinite;
+}
+@property --map-card-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes living-map-card-orbit { to { --map-card-angle: 360deg; } }
 .living-map-card img,
 .living-map-card .shade {
   position: absolute;
@@ -413,6 +434,10 @@
   .living-map-card {
     scroll-behavior: auto;
   }
+  .living-map-card.pdx-glass-rebind::before {
+    animation: none;
+    background: none;
+  }
   .living-map-page .wp.is-resolving .wp-svg {
     transition: none;
   }
@@ -440,6 +465,11 @@ html.calm-mode .living-map-page .wp-logo--alternate,
 html.calm-mode .living-map-page .wp.is-resolving .wp-svg,
 :root[data-calm="true"] .living-map-page .wp.is-resolving .wp-svg {
   transition: none;
+}
+html.calm-mode .living-map-card.pdx-glass-rebind::before,
+:root[data-calm="true"] .living-map-card.pdx-glass-rebind::before {
+  animation: none;
+  background: none;
 }
 .living-map-time {
   display: flex;
