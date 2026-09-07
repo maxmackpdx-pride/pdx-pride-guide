@@ -302,6 +302,10 @@ function rowMatchesQuery(row: MapRow, q: string): boolean {
   return `${row.title || ""} ${row.name || ""} ${row.headline || ""} ${row.body || ""} ${row.neighborhood || ""} ${row.displayName || ""} ${row._board || ""}`.toLowerCase().includes(q);
 }
 
+function inertWhen(condition: boolean) {
+  return condition ? ({ inert: "" } as Record<string, string>) : {};
+}
+
 function useDesktop() {
   const [desktop, setDesktop] = useState(() => typeof window !== "undefined" && matchMedia("(min-width:768px)").matches);
   useEffect(() => { const media = matchMedia("(min-width:768px)"); const sync = () => setDesktop(media.matches); media.addEventListener("change", sync); return () => media.removeEventListener("change", sync); }, []);
@@ -649,7 +653,7 @@ export default function LivingMap() {
     </div>}
     {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
     <div className={`living-map-create pdx-glass-rebind${createOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
-      <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
+      <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist" aria-hidden={!createOpen} {...inertWhen(!createOpen)}>
         {MAP_CREATE_LINKS.map((item, index) => (
           <Link
             key={item.href}
@@ -687,7 +691,7 @@ export default function LivingMap() {
     </div>
     {!desktop && filtersOpen && <button type="button" className="living-map-filter-backdrop" aria-label="Close map filters" onClick={() => setFiltersOpen(false)} />}
     {!desktop && <div className={`living-map-mobile-filters${filtersOpen ? " is-open" : ""}${!mobileDrawerPeek ? " is-tucked" : ""}`}>
-      <div className="living-map-mobile-filters__rail pdx-liquid-overlay" aria-hidden={!filtersOpen}>{filterControls(true)}</div>
+      <div className="living-map-mobile-filters__rail pdx-liquid-overlay" role="dialog" aria-label="Map filters" aria-hidden={!filtersOpen} {...inertWhen(!filtersOpen)}>{filterControls(true)}</div>
       <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
     </div>}
     <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} snapToSequentialPoint shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : next => { if (next != null) setMobileDrawerSnap(next); }} onDrag={() => { drawerHandleDidDrag.current = true; }}>
