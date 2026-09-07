@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
 import { Link, useLocation } from "wouter";
@@ -268,6 +268,8 @@ export default function LivingMap() {
   const desktop = useDesktop();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
+  const drawerHandlePointerY = useRef<number | null>(null);
+  const drawerHandleDidDrag = useRef(false);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
@@ -509,17 +511,17 @@ export default function LivingMap() {
     </div>
     {!desktop && filtersOpen && <button type="button" className="living-map-filter-backdrop" aria-label="Close map filters" onClick={() => setFiltersOpen(false)} />}
     {!desktop && <div className={`living-map-mobile-filters${filtersOpen ? " is-open" : ""}${!mobileDrawerPeek ? " is-tucked" : ""}`}>
-      <div className="living-map-mobile-filters__rail" aria-hidden={!filtersOpen}>{filterControls(true)}</div>
+      <div className="living-map-mobile-filters__rail pdx-liquid-overlay" aria-hidden={!filtersOpen}>{filterControls(true)}</div>
       <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
     </div>}
     <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : setMobileDrawerSnap}>
       <Drawer.Portal>
       <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map">
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
-      {!desktop && <Drawer.Handle preventCycle className="living-map-handle" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[2] : MOBILE_DRAWER_SNAPS[0])}><span /></Drawer.Handle>}
+      {!desktop && <Drawer.Handle preventCycle className="living-map-handle" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onPointerDown={event => { drawerHandlePointerY.current = event.clientY; drawerHandleDidDrag.current = false; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={event => { const startY = drawerHandlePointerY.current; if (startY === null || drawerHandleDidDrag.current) return; const delta = event.clientY - startY; if (Math.abs(delta) <= 24) return; drawerHandleDidDrag.current = true; setMobileDrawerSnap(delta > 0 ? MOBILE_DRAWER_SNAPS[0] : MOBILE_DRAWER_SNAPS[2]); }} onPointerUp={event => { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); drawerHandlePointerY.current = null; }} onPointerCancel={() => { drawerHandlePointerY.current = null; drawerHandleDidDrag.current = false; }} onClick={() => { if (drawerHandleDidDrag.current) { drawerHandleDidDrag.current = false; return; } setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[2] : MOBILE_DRAWER_SNAPS[0]); }}><span /></Drawer.Handle>}
       <div className="living-map-drawer-controls">
       <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
-      {filterControls(false, !desktop)}
+      {desktop && filterControls()}
       </div>
       <div className="living-map-drawer-scroll" data-vaul-no-drag>
       {loading && <p className="living-map-state">Loading the city…</p>}
