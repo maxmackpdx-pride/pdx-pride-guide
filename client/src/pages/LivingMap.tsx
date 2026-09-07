@@ -501,7 +501,8 @@ export default function LivingMap() {
             ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), logoUrl: eventLogos.primary, alternateLogoUrl: eventLogos.alternate, selected: chosen })
             : chosen || zoom >= PLACE_WAYPOINT_ZOOM
               ? waypointIcon({
-                id: PLACE_ICON[place.type] || "venue",
+                id: "venue",
+                badgeId: PLACE_ICON[place.type] || "venue",
                 size: waypointSize(zoom, chosen),
                 color: placeColor,
                 logoUrl: resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type),

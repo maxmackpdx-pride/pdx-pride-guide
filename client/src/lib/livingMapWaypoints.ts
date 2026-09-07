@@ -27,8 +27,12 @@ export type WaypointId =
   | "host-group"
   | "dark-room"
   | "sling"
-  | "booth"
-  | "crawl";
+  | "glory-hole"
+  | "trail"
+  | "happening"
+  | "looking-now"
+  | "looking-later"
+  | "goon-buds";
 
 export const WAYPOINT_COLOR: Record<WaypointId, string> = {
   eventz: "#ccff00",
@@ -57,8 +61,12 @@ export const WAYPOINT_COLOR: Record<WaypointId, string> = {
   "host-group": "#ff2400",
   "dark-room": "#ff2400",
   sling: "#ff2400",
-  booth: "#ff2400",
-  crawl: "#ff2400",
+  "glory-hole": "#ff2400",
+  trail: "#ff2400",
+  happening: "#ff2400",
+  "looking-now": "#ff2400",
+  "looking-later": "#ff2400",
+  "goon-buds": "#ff2400",
 };
 
 const DAY_COLOR: Record<string, string> = {
@@ -152,12 +160,16 @@ const G: Record<WaypointId, string> = {
   sling: svg(
     `<path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M5 19.4 12 4.6l7 14.8"/><path stroke="currentColor" stroke-width="2" d="M8.4 14.6h7.2"/>`,
   ),
-  booth: svg(
+  "glory-hole": svg(
     `<rect x="5" y="5" width="14" height="14" rx="2.4" fill="none" stroke="currentColor" stroke-width="2"/>`,
   ),
-  crawl: svg(
+  trail: svg(
     `<circle cx="16.6" cy="8.2" r="2.1" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M15.2 10.2 10.6 13.4 5.8 13.2M10.6 13.4 8.2 18.4M10.6 13.4 14.8 16.6"/>`,
   ),
+  happening: svg(`<path fill="none" stroke="currentColor" stroke-width="1.8" d="M5 6h14v14H5zM8 3v6M16 3v6"/><path fill="currentColor" d="m12 10 1.3 2.6 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z"/>`),
+  "looking-now": svg(`<path fill="none" stroke="currentColor" stroke-width="1.8" d="M2.8 12s3.4-5.2 9.2-5.2 9.2 5.2 9.2 5.2-3.4 5.2-9.2 5.2S2.8 12 2.8 12z"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/>`),
+  "looking-later": svg(`<circle cx="10.5" cy="11" r="6.8" fill="none" stroke="currentColor" stroke-width="1.8"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M10.5 6.8V11l3 2"/><path fill="currentColor" d="M18 10.5a5.2 5.2 0 1 0 3.5 8.7A4.5 4.5 0 1 1 18 10.5z"/>`),
+  "goon-buds": svg(`<path fill="none" stroke="currentColor" stroke-width="1.7" d="M4 13c0-3 2-5 4.5-5 1.5 0 2.7.7 3.5 1.8C12.8 8.7 14 8 15.5 8 18 8 20 10 20 13s-2.2 5-5 5c-1.2 0-2.2-.4-3-1.1-.8.7-1.8 1.1-3 1.1-2.8 0-5-2-5-5z"/><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="m8 12 1.4 2L12 10l2.6 4L16 12"/>`),
 };
 
 export type WaypointOpts = {
@@ -167,9 +179,37 @@ export type WaypointOpts = {
   color?: string;
   logoUrl?: string;
   alternateLogoUrl?: string;
+  avatarUrl?: string;
+  badgeId?: WaypointId;
   bloom?: boolean;
   size?: number;
 };
+
+const ZAYDARK_USER_IDS = new Set<WaypointId>([
+  "host-home", "host-hotel", "host-car", "host-hole", "host-group", "dark-room",
+  "sling", "glory-hole", "trail", "happening", "looking-now", "looking-later", "goon-buds",
+]);
+
+function shellFamily(id: WaypointId) {
+  if (id === "eventz" || id === "plus") return "ticket";
+  if (id === "zenegade" || id === "afterz") return "long";
+  if (id === "hauz") return "house";
+  if (id === "mizzed") return "speech";
+  if (ZAYDARK_USER_IDS.has(id)) return "zaydark";
+  if (["venue", "bar", "club", "park", "cafe", "shop", "bath", "adult"].includes(id)) return "place";
+  return "shield";
+}
+
+function shellPath(family: string, cx: number, cy: number, r: number) {
+  const x0 = cx - r, x1 = cx + r, y0 = cy - r, y1 = cy + r;
+  const q = r * .2;
+  if (family === "ticket") return `M${x0 + q},${y0}H${cx - q}Q${cx},${y0 + q} ${cx + q},${y0}H${x1 - q}V${cy - q}Q${x1 - q * .7},${cy} ${x1},${cy + q}V${y1}H${x0}V${cy + q}Q${x0 + q * .7},${cy} ${x0},${cy - q}V${y0}Z`;
+  if (family === "long") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
+  if (family === "house") return `M${x0 + q},${cy - r * .15} ${cx},${y0} ${x1 - q},${cy - r * .15}V${y1 - q}L${cx},${y1 + r * .68} ${x0 + q},${y1 - q}Z`;
+  if (family === "speech") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${x1 - q},${y1}H${cx + q},${cx},${y1 + r * .68} ${cx - q},${y1}H${x0 + q}L${x0},${y1 - q}V${y0 + q}Z`;
+  if (family === "zaydark") return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${cy + r * .45}L${cx},${y1 + r * .68} ${x0},${cy + r * .45}V${y0 + q}Z`;
+  return `M${x0 + q},${y0}H${x1 - q}L${x1},${y0 + q}V${y1 - q}L${cx},${y1 + r * .68} ${x0},${y1 - q}V${y0 + q}Z`;
+}
 
 /** Compact Placez discovery marker. The 44px shell keeps the orb easy to tap. */
 export function placeOrbIcon(color: string) {
@@ -196,6 +236,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const D = opts.size ?? 42;
   const color = opts.color ?? WAYPOINT_COLOR[opts.id];
   const scoop = opts.scoop;
+  const family = shellFamily(opts.id);
   const pad = Math.round(D * 0.22);
   const sw = Math.max(1, D * 0.0425);
   const cx = pad + D / 2;
@@ -203,6 +244,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const r = D / 2 - sw / 2;
   const scoopR = D * 0.3;
   const scoopCy = scoop ? cy + r + scoopR * 0.55 : cy;
+  const integratedTip = ["long", "house", "speech", "zaydark", "place", "shield"].includes(family);
   const attachY = scoop ? scoopCy + scoopR * 0.2 : cy + r * 0.62;
   const tipY = (scoop ? scoopCy + scoopR : cy + r) + D * 0.34;
   const tipW = D * 0.3;
@@ -218,9 +260,18 @@ export function waypointHtml(opts: WaypointOpts) {
     ? `<defs><linearGradient id="${fid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff00cc"/><stop offset=".25" stop-color="#ccff00"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".75" stop-color="#8800ff"/><stop offset="1" stop-color="#ff00cc"/></linearGradient></defs>`
     : "";
   const ring = opts.bloom ? `url(#${fid}b)` : color;
-  const markContent = opts.logoUrl
+  const mainPath = shellPath(family, cx, cy, r);
+  const clipId = `${fid}clip`;
+  const markContent = opts.avatarUrl
+    ? `<image class="wp-avatar" href="${escapeAttribute(opts.avatarUrl)}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2.28}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`
+    : opts.logoUrl
     ? `<image class="wp-logo${opts.alternateLogoUrl ? " wp-logo--primary" : ""}" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>${opts.alternateLogoUrl ? `<image class="wp-logo wp-logo--alternate" href="${escapeAttribute(opts.alternateLogoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>` : ""}`
     : `<g transform="translate(${markX} ${markY}) scale(${mark / 24})" fill="#fff" stroke="#fff" color="#fff">${G[opts.id].replace('<svg viewBox="0 0 24 24" class="wp__mark" aria-hidden="true">', "").replace("</svg>", "")}</g>`;
+  const badgeD = D * .38;
+  const badgeCx = cx + r * .78;
+  const badgeCy = cy - r * .72;
+  const badgeMark = badgeD * .62;
+  const badge = opts.badgeId ? `<g class="wp-badge"><path d="${shellPath("place", badgeCx, badgeCy, badgeD / 2)}" fill="#050506" stroke="${ring}" stroke-width="${Math.max(1, sw * .75)}"/><g transform="translate(${badgeCx - badgeMark / 2} ${badgeCy - badgeMark / 2}) scale(${badgeMark / 24})" fill="#fff" stroke="#fff" color="#fff">${G[opts.badgeId].replace('<svg viewBox="0 0 24 24" class="wp__mark" aria-hidden="true">', "").replace("</svg>", "")}</g></g>` : "";
   const scoopCircle = scoop
     ? `<circle class="wp-scoop-ring" cx="${cx}" cy="${scoopCy}" r="${scoopR}" fill="#050506" stroke="${ring}" stroke-width="${scoopStroke}"/>
        <text x="${cx}" y="${scoopCy + 1}" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${Math.max(8, D * 0.26)}" font-weight="800">${escapeXml(scoop)}</text>`
@@ -230,12 +281,13 @@ export function waypointHtml(opts: WaypointOpts) {
     .join(" ");
   return `<div class="${cls}" style="--wp:${color};width:${w}px;height:${h}px">
     <svg class="wp-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-      ${bloom}
-      <polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>
-      <circle class="wp-glow-ring" cx="${cx}" cy="${cy}" r="${r + sw}" fill="none" stroke="${ring}" stroke-width="${glowW}"/>
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
+      ${bloom}<defs><clipPath id="${clipId}"><path d="${mainPath}"/></clipPath></defs>
+      ${integratedTip || scoop ? "" : `<polygon points="${cx - tipW},${attachY} ${cx + tipW},${attachY} ${cx},${tipY}" fill="${ring}"/>`}
+      <path class="wp-glow-ring" d="${mainPath}" fill="none" stroke="${ring}" stroke-width="${glowW}"/>
+      <path d="${mainPath}" fill="#050506" stroke="${ring}" stroke-width="${sw}"/>
       ${markContent}
       ${scoopCircle}
+      ${badge}
     </svg>
   </div>`;
 }
