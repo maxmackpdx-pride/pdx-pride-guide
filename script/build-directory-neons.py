@@ -223,10 +223,15 @@ def colorize_alpha(alpha: Image.Image, color: tuple[int, int, int], opacity: flo
     )
 
 
-def render_neon(core: Image.Image, fallback_glow: str, force_core: str | None = None) -> Image.Image:
+def render_neon(
+    core: Image.Image,
+    fallback_glow: str,
+    force_core: str | None = None,
+    preserve_alpha: bool = False,
+) -> Image.Image:
     core = core.convert("RGBA")
     if force_core:
-        detail_alpha = monochrome_detail_alpha(core)
+        detail_alpha = core.getchannel("A") if preserve_alpha else monochrome_detail_alpha(core)
         core = solid_core(core, force_core)
         core.putalpha(detail_alpha)
     rgba = np.asarray(core).copy()
@@ -303,12 +308,26 @@ def main() -> None:
     for entry in manifest["remainingMissing"]:
         core = prepare(entry, args.source_root)
         color = CATEGORY_COLORS[entry["type"]]
-        save_png(render_neon(core, color, force_core=color), args.output_root / f'{entry["stem"]}.png')
+        save_png(
+            render_neon(core, color, force_core=color, preserve_alpha=bool(entry.get("preserveAlpha"))),
+            args.output_root / f'{entry["stem"]}.png',
+        )
 
     for entry in manifest.get("qualityRepairs", []):
         core = prepare(entry, args.source_root)
         color = CATEGORY_COLORS[entry["type"]]
-        save_png(render_neon(core, color, force_core=color), args.output_root / f'{entry["stem"]}.png')
+        save_png(
+            render_neon(core, color, force_core=color, preserve_alpha=bool(entry.get("preserveAlpha"))),
+            args.output_root / f'{entry["stem"]}.png',
+        )
+
+    for entry in manifest.get("legacyQualityRepairs", []):
+        core = prepare(entry, args.source_root)
+        color = CATEGORY_COLORS[entry["type"]]
+        save_png(
+            render_neon(core, color, force_core=color, preserve_alpha=bool(entry.get("preserveAlpha"))),
+            args.output_root / f'{entry["stem"]}.png',
+        )
 
 
 if __name__ == "__main__":
