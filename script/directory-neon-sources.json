@@ -1,0 +1,50 @@
+{
+  "renderedOn": "2026-09-07",
+  "groupTwin": {
+    "core": "#FFFFFF",
+    "glow": "#FFD700",
+    "background": "transparent"
+  },
+  "groups": [
+    {"name":"The Imperial Sovereign Rose Court of Oregon","stem":"Imperial_Sovereign_Rose_Court","localFile":"z/Imperial_Sovereign_Rose_Court.src","sourceUrl":"https://rosecourt.org/wp-content/uploads/2023/06/18ISRCCrestOl.png","glow":"#D71920"},
+    {"name":"Pink Ponies","stem":"Pink_Ponies","localFile":"z/Pink_Ponies.src","sourceUrl":"existing-pack","glow":"#FFD700","alreadyNeon":true},
+    {"name":"Bearracuda","stem":"Bearracuda","localFile":"z/Bearracuda.src","sourceUrl":"existing-pack","glow":"#FFD700","alreadyNeon":true},
+    {"name":"PDX PAH (Portland Pets and Handlers)","stem":"PDX_PAH","localFile":"z/PDX_PAH.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/59372f5bebbd1aec221c42ff/1496800600700-OGK3KNPJF7AT0E3SWVHK/banner_logo.jpg?format=1500w","glow":"#427AB6","removeBackground":true},
+    {"name":"Oregon State Leather Contest","stem":"Oregon_State_Leather_Contest","localFile":"z/Oregon_State_Leather_Contest.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/61fc7ed13dd33145ef504fa9/f1f9736a-70d3-477e-b887-7c11d68fd655/OSLC%2B-%2BHorizontal%2B-%2BRGB.png?format=1500w","glow":"#E21D2D"},
+    {"name":"Portland Leather Alliance","stem":"Portland_Leather_Alliance","localFile":"z/Portland_Leather_Alliance.src","sourceUrl":"https://www.portlandleather.org/plalogo.png","glow":"#0077B5"},
+    {"name":"Bad Girls PDX","stem":"Bad_Girls_PDX","localFile":"z/Bad_Girls_PDX.src","sourceUrl":"https://pdxbadgirls.net/wp-content/uploads/2021/09/bad-girls_logo_120x150_09-02.png","glow":"#ED1C24"},
+    {"name":"Black & Beyond the Binary Collective","stem":"Black_and_Beyond_the_Binary_Collective","localFile":"z/Black_and_Beyond_the_Binary_Collective.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/5fb42e75300426086615900b/1606164127712-KAVCH3UC9HWPQT23Y71C/49new-49.png?format=1500w","glow":"#F5A9B8"},
+    {"name":"Brown Girl Rise","stem":"Brown_Girl_Rise","localFile":"z/Brown_Girl_Rise.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/5ac57c1fb27e395f3f980cea/14b06364-03ac-4523-a614-69b7692ecc9e/My+project.png?format=1500w","glow":"#F4A340"},
+    {"name":"TranzGuys PDX","stem":"TranzGuys_PDX","textFallback":"TRANZGUYS PDX","sourceUrl":"official-name-fallback","glow":"#FFD700"},
+    {"name":"Portland Frontrunners","stem":"Portland_Frontrunners","localFile":"z/Portland_Frontrunners.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/5bf385d0d274cb3fb374ea2b/38dcdd58-185b-4172-8c57-b01413ff6613/Frontrunners_Est1982-05.png","glow":"#84C341"},
+    {"name":"Lavender League","stem":"Lavender_League","localFile":"z/Lavender_League.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/646d78fbbfe5e90d1d1ae9fb/5b08e883-ef03-4be8-9828-3a86d80f42c7/IMG_2552+%281%29.PNG?format=1500w","glow":"#8C52FF"},
+    {"name":"PDX Gaymers","stem":"PDX_Gaymers","localFile":"z/PDX_Gaymers.src","sourceUrl":"https://pdxgaymers.org/logo.png","glow":"#00AEEF"},
+    {"name":"Sankofa Collective","stem":"Sankofa_Collective","localFile":"z/Sankofa_Collective.src","sourceUrl":"https://www.instagram.com/sankofanw/","glow":"#ED1C24","removeBackground":true},
+    {"name":"Yes Coach Productions","stem":"Yes_Coach_Productions","localFile":"z/Yes_Coach_Productions.src","sourceUrl":"existing-pack","glow":"#FF1F2D"},
+    {"name":"Fertile Ground Festival","stem":"Fertile_Ground_Festival","localFile":"z/Fertile_Ground_Festival.src","sourceUrl":"https://fertilegroundpdx.org/wp-content/uploads/2025/09/FG-Logo-white-outline-1-e1756685300185.png","glow":"#FFFFFF"},
+    {"name":"PDXBackstage","stem":"PDXBackstage","textFallback":"PDXBACKSTAGE","sourceUrl":"official-name-fallback","glow":"#FFD700"},
+    {"name":"Portland Area Theatre Alliance","stem":"Portland_Area_Theatre_Alliance","localFile":"z/Portland_Area_Theatre_Alliance.src","sourceUrl":"https://portlandtheatre.com/wp-content/uploads/2022/08/PATA-Logo-Red.png","glow":"#D32010","removeBackground":true},
+    {"name":"Lesbian Culture Club","stem":"Lesbian_Culture_Club","localFile":"z/Lesbian_Culture_Club.source.svg","sourceUrl":"https://lesbiancultureclub.com/cdn/shop/files/LCC-Wordmark-DarkGreen.svg?v=1723506347","glow":"#194E3D"},
+    {"name":"Queer Social Club","stem":"Queer_Social_Club","localFile":"z/Queer_Social_Club.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/62155dfcfc6583248de4ebac/e774f080-be22-41d3-a4d0-f8f31fefd7f0/2026+logo+white+transparent+bg.png","glow":"#FF4AA2"},
+    {"name":"Radical Faerie Arts Fest","stem":"Radical_Faerie_Arts_Fest","localFile":"z/Radical_Faerie_Arts_Fest.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/63e9327ea475597f7bbac5f8/ef1f5897-2f71-4f89-9bc7-6ece72bd14df/RADFAF+LOGO+FINAL6.jpg?format=1500w","glow":"#950096","removeBackground":true},
+    {"name":"Oregon Pride in Business","stem":"Oregon_Pride_in_Business","localFile":"z/Oregon_Pride_in_Business.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/6789c3b70c8e5900dcba6a4d/6623214f-0dcd-4ffd-a9a2-01381f26746e/cropped-NEW-ORPIB-LOGO-MAIN.png?format=1500w","glow":"#F05A28"}
+  ],
+  "remainingMissing": [
+    {"name":"The Nest Lounge","stem":"The_Nest_Lounge","type":"bar","textFallback":"THE NEST LOUNGE","sourceUrl":"official-name-fallback"},
+    {"name":"Greenhouse Hair Collective","stem":"Greenhouse_Hair_Collective","type":"service","textFallback":"GREENHOUSE HAIR COLLECTIVE","sourceUrl":"official-name-fallback"},
+    {"name":"Ring Ding Ding","stem":"Ring_Ding_Ding","type":"bar","localFile":"missing/Ring_Ding_Ding.src","sourceUrl":"https://www.instagram.com/ringdingdingpdx/","removeBackground":true},
+    {"name":"The Secret Warehouse","stem":"The_Secret_Warehouse","type":"venue","textFallback":"THE SECRET WAREHOUSE","sourceUrl":"official-name-fallback"},
+    {"name":"Inbundance Wealth Management","stem":"Inbundance_Wealth_Management","type":"service","localFile":"missing/Inbundance_Wealth_Management.src","sourceUrl":"https://inbundance.com/"},
+    {"name":"Gaylabration","stem":"Gaylabration","type":"nonprofit","localFile":"missing/Gaylabration.src","sourceUrl":"https://gaylabration.org/"},
+    {"name":"Future Prairie","stem":"Future_Prairie","type":"nonprofit","textFallback":"FUTURE PRAIRIE","sourceUrl":"official-name-fallback"},
+    {"name":"Multnomah County Cultural Coalition","stem":"Multnomah_County_Cultural_Coalition","type":"nonprofit","localFile":"missing/Multnomah_County_Cultural_Coalition.src","sourceUrl":"https://www.multcoculturalcoalition.org/resources"},
+    {"name":"Backstage","stem":"Backstage","type":"service","textFallback":"BACKSTAGE","sourceUrl":"official-name-fallback"},
+    {"name":"SCORE Portland","stem":"SCORE_Portland","type":"service","textFallback":"SCORE PORTLAND","sourceUrl":"official-name-fallback"}
+  ],
+  "qualityRepairs": [
+    {"name":"Q Restaurant & Bar","stem":"Q_Restaurant_and_Bar","type":"restaurant","localFile":"missing/Q_Restaurant_and_Bar.src","sourceUrl":"https://q-portland.com/wp-content/uploads/2020/07/QRB_HeaderLogo-1.png","removeBackground":true},
+    {"name":"Badlands","stem":"Badlands","type":"bar","localFile":"missing/Badlands.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/67006feccf01f078fe3a8922/257a5a88-1735-4731-ab5c-f970592d765f/Badlands_logo1.png?format=1500w"},
+    {"name":"Escape Bar & Grill","stem":"Escape_Bar_and_Grill","type":"bar","textFallback":"ESCAPE BAR & GRILL","singleLine":true,"sourceUrl":"official-name-fallback"},
+    {"name":"Prism Health","stem":"Prism_Health","type":"healthcare","localFile":"missing/Prism_Health.src","sourceUrl":"https://images.squarespace-cdn.com/content/v1/62d85b8b2cd5533f553ee78c/f763c925-1492-4be0-9408-26bbc4b03b53/Prism-Logo-2023.png?format=1500w"}
+  ]
+}

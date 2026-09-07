@@ -1,7 +1,7 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-07-28";
+export const DIRECTORY_LOGO_VERSION = "2026-09-07";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
@@ -16,6 +16,32 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   badlands: "Badlands",
   basicrightsoregon: "Basic_Rights_Oregon",
   bearracuda: "Bearracuda",
+  // Z/ clubs and groups, brand-color neon plus gold/white twins in z-white/.
+  imperialsovereignrosecourtoforegon: "Imperial_Sovereign_Rose_Court",
+  theimperialsovereignrosecourtoforegon: "Imperial_Sovereign_Rose_Court",
+  imperialsovereignrosecourt: "Imperial_Sovereign_Rose_Court",
+  rosecourtpdx: "Imperial_Sovereign_Rose_Court",
+  pdxpahportlandpetsandhandlers: "PDX_PAH",
+  pdxpah: "PDX_PAH",
+  oregonstateleathercontest: "Oregon_State_Leather_Contest",
+  portlandleatheralliance: "Portland_Leather_Alliance",
+  badgirlspdx: "Bad_Girls_PDX",
+  blackandbeyondthebinarycollective: "Black_and_Beyond_the_Binary_Collective",
+  browngirlrise: "Brown_Girl_Rise",
+  tranzguyspdx: "TranzGuys_PDX",
+  tranzguys: "TranzGuys_PDX",
+  portlandfrontrunners: "Portland_Frontrunners",
+  lavenderleague: "Lavender_League",
+  lavenderleaguepdx: "Lavender_League",
+  pdxgaymers: "PDX_Gaymers",
+  sankofacollective: "Sankofa_Collective",
+  fertilegroundfestival: "Fertile_Ground_Festival",
+  pdxbackstage: "PDXBackstage",
+  portlandareatheatrealliance: "Portland_Area_Theatre_Alliance",
+  lesbiancultureclub: "Lesbian_Culture_Club",
+  queersocialclub: "Queer_Social_Club",
+  radicalfaerieartsfest: "Radical_Faerie_Arts_Fest",
+  oregonprideinbusiness: "Oregon_Pride_in_Business",
   // Yes Coach Productions — group / party collective (Tucker_PDmaX)
   yescoachproductions: "Yes_Coach_Productions",
   yescoach: "Yes_Coach_Productions",
@@ -64,7 +90,9 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   escapebargrill: "Escape_Bar_and_Grill",
   escapebarandgrill: "Escape_Bar_and_Grill",
   friendshipkitchen: "Friendship_Kitchen",
-  goldgritbarberco: "Gold_Grit_Barber_Co",
+  greenhousehaircollective: "Greenhouse_Hair_Collective",
+  greenhousepdx: "Greenhouse_Hair_Collective",
+  goldgritbarberco: "Greenhouse_Hair_Collective",
   happyluckyno1: "Happylucky_No_1",
   hawkspdx: "Hawks_PDX",
   hawks: "Hawks_PDX",
@@ -108,6 +136,19 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   tinshedgardencafe: "Tin_Shed_Garden_Cafe",
   underu4men: "UnderU4Men",
   werqtogether: "WERQ_Together",
+  thenestlounge: "The_Nest_Lounge",
+  nestlounge: "The_Nest_Lounge",
+  ringdingding: "Ring_Ding_Ding",
+  thesecretwarehouse: "The_Secret_Warehouse",
+  secretwarehouse: "The_Secret_Warehouse",
+  inbundancewealthmanagement: "Inbundance_Wealth_Management",
+  inbundance: "Inbundance_Wealth_Management",
+  gaylabration: "Gaylabration",
+  futureprairie: "Future_Prairie",
+  multnomahcountyculturalcoalition: "Multnomah_County_Cultural_Coalition",
+  multnomahculturalcoalition: "Multnomah_County_Cultural_Coalition",
+  backstage: "Backstage",
+  scoreportland: "SCORE_Portland",
   // ── 2026 Gay Pages + Process / Prism wave ──
   process: "Process",
   processpdx: "Process",
@@ -153,19 +194,8 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
  * PlaceCard falls back to the category artwork if an upstream image is unavailable.
  */
 const URL_BY_NORMALIZED: Record<string, string> = {
-  pdxpahportlandpetsandhandlers:
-    "https://images.squarespace-cdn.com/content/v1/59372f5bebbd1aec221c42ff/1496800600700-OGK3KNPJF7AT0E3SWVHK/banner_logo.jpg?format=1500w",
-  oregonstateleathercontest:
-    "https://images.squarespace-cdn.com/content/v1/61fc7ed13dd33145ef504fa9/f1f9736a-70d3-477e-b887-7c11d68fd655/OSLC%2B-%2BHorizontal%2B-%2BRGB.png?format=1500w",
-  portlandleatheralliance: "https://www.portlandleather.org/plalogo.png",
-  blackandbeyondthebinarycollective:
-    "https://images.squarespace-cdn.com/content/v1/5fb42e75300426086615900b/1606164127712-KAVCH3UC9HWPQT23Y71C/49new-49.png?format=1500w",
-  browngirlrise:
-    "https://images.squarespace-cdn.com/content/v1/5ac57c1fb27e395f3f980cea/14b06364-03ac-4523-a614-69b7692ecc9e/My+project.png?format=1500w",
   origallery:
     "https://images.squarespace-cdn.com/content/v1/58db2b5129687fd202ac76be/84c72ac7-e2c5-4592-ac52-e583a82046f3/Ori-Gallery--logo-white.png?format=1500w",
-  portlandfrontrunners:
-    "https://images.squarespace-cdn.com/content/v1/5bf385d0d274cb3fb374ea2b/38dcdd58-185b-4172-8c57-b01413ff6613/Frontrunners_Est1982-05.png",
   portlandqueerartsfoundation:
     "https://portlandqueerarts.foundation/wp-content/themes/pqa/assets/images/brand-assets/logos/Foundation-Logo-Horizontal-Light-TransparentBG-1024.png",
   foundationforcontemporaryarts: "https://www.foundationforcontemporaryarts.org/favicon.ico?v2",
@@ -175,18 +205,6 @@ const URL_BY_NORMALIZED: Record<string, string> = {
   regionalartsandculturecouncil: "https://racc.org/wp-content/uploads/2023/10/RACC-Logo.png",
   qcenter:
     "https://static.wixstatic.com/media/312949_58ad0c6b069848179ae7323543083ee1~mv2.png/v1/fill/w_600,h_600,al_c,q_90/2026%20Q%20Logo1.png",
-  queersocialclub:
-    "https://images.squarespace-cdn.com/content/v1/62155dfcfc6583248de4ebac/e774f080-be22-41d3-a4d0-f8f31fefd7f0/2026+logo+white+transparent+bg.png",
-  fertilegroundfestival:
-    "https://fertilegroundpdx.org/wp-content/uploads/2025/09/FG-Logo-white-outline-1-e1756685300185.png",
-  portlandareatheatrealliance:
-    "https://portlandtheatre.com/wp-content/uploads/2022/08/PATA-Logo-Red.png",
-  lesbiancultureclub:
-    "https://lesbiancultureclub.com/cdn/shop/files/favicon-32x32_f0ccb5ec-6927-40e1-b9e3-fbb8621df825.png?crop=center&height=194&v=1718903222&width=194",
-  radicalfaerieartsfest:
-    "https://images.squarespace-cdn.com/content/v1/63e9327ea475597f7bbac5f8/ef1f5897-2f71-4f89-9bc7-6ece72bd14df/RADFAF+LOGO+FINAL6.jpg?format=1500w",
-  oregonprideinbusiness:
-    "https://images.squarespace-cdn.com/content/v1/6789c3b70c8e5900dcba6a4d/6623214f-0dcd-4ffd-a9a2-01381f26746e/cropped-NEW-ORPIB-LOGO-MAIN.png?format=1500w",
   cashoregon: "https://cdn.netraising1.com/images-mfs/site/favicons/apple-touch-icon.png",
   portlandsmallbusinessdevelopmentcenter:
     "https://oregonsbdc.org/wp-content/uploads/2023/01/Oregon_SBDC-Logo-Header.jpg",
