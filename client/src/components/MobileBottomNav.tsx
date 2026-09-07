@@ -104,7 +104,7 @@ export default function MobileBottomNav() {
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = navLinkActive(location, "/z");
-  const hubActive = navLinkActive(location, "/map");
+  const hubActive = navLinkActive(location, "/");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -146,7 +146,7 @@ export default function MobileBottomNav() {
   const handleHub = () => {
     dismissExcept();
     setHubOpen(false);
-    setLocation("/map");
+    setLocation("/");
   };
 
   const handleMessages = () => {

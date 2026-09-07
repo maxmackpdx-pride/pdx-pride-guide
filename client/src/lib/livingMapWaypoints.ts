@@ -46,9 +46,9 @@ export const WAYPOINT_COLOR: Record<WaypointId, string> = {
   shop: "#ffb23d",
   bath: "#0044ff",
   adult: "#ff00cc",
-  gigz: "#ff6600",
+  gigz: "#8800ff",
   sells: "#39ff14",
-  giftz: "#8800ff",
+  giftz: "#ccff00",
   plus: "#ff2400",
   "host-home": "#ff2400",
   "host-hotel": "#ff2400",
@@ -166,6 +166,7 @@ export type WaypointOpts = {
   scoop?: string;
   color?: string;
   logoUrl?: string;
+  alternateLogoUrl?: string;
   bloom?: boolean;
   size?: number;
 };
@@ -196,7 +197,7 @@ export function waypointHtml(opts: WaypointOpts) {
   const color = opts.color ?? WAYPOINT_COLOR[opts.id];
   const scoop = opts.scoop;
   const pad = Math.round(D * 0.22);
-  const sw = Math.max(2, D * 0.085);
+  const sw = Math.max(1, D * 0.0425);
   const cx = pad + D / 2;
   const cy = pad + D / 2;
   const r = D / 2 - sw / 2;
@@ -212,13 +213,13 @@ export function waypointHtml(opts: WaypointOpts) {
   const markX = cx - mark / 2;
   const markY = cy - mark / 2;
   const glowW = sw * 1.6;
-  const scoopStroke = Math.max(2, sw * 0.85);
+  const scoopStroke = Math.max(1, sw * 0.85);
   const bloom = opts.bloom
     ? `<defs><linearGradient id="${fid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff00cc"/><stop offset=".25" stop-color="#ccff00"/><stop offset=".5" stop-color="#00ffff"/><stop offset=".75" stop-color="#8800ff"/><stop offset="1" stop-color="#ff00cc"/></linearGradient></defs>`
     : "";
   const ring = opts.bloom ? `url(#${fid}b)` : color;
   const markContent = opts.logoUrl
-    ? `<image class="wp-logo" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>`
+    ? `<image class="wp-logo${opts.alternateLogoUrl ? " wp-logo--primary" : ""}" href="${escapeAttribute(opts.logoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>${opts.alternateLogoUrl ? `<image class="wp-logo wp-logo--alternate" href="${escapeAttribute(opts.alternateLogoUrl)}" x="${markX}" y="${markY}" width="${mark}" height="${mark}" preserveAspectRatio="xMidYMid meet"/>` : ""}`
     : `<g transform="translate(${markX} ${markY}) scale(${mark / 24})" fill="#fff" stroke="#fff" color="#fff">${G[opts.id].replace('<svg viewBox="0 0 24 24" class="wp__mark" aria-hidden="true">', "").replace("</svg>", "")}</g>`;
   const scoopCircle = scoop
     ? `<circle class="wp-scoop-ring" cx="${cx}" cy="${scoopCy}" r="${scoopR}" fill="#050506" stroke="${ring}" stroke-width="${scoopStroke}"/>
@@ -251,7 +252,7 @@ export function waypointIcon(opts: WaypointOpts) {
   const D = opts.size ?? 42;
   const pad = Math.round(D * 0.22);
   const scoopR = D * 0.3;
-  const sw = Math.max(2, D * 0.085);
+  const sw = Math.max(1, D * 0.0425);
   const r = D / 2 - sw / 2;
   const cy = pad + D / 2;
   const scoopCy = opts.scoop ? cy + r + scoopR * 0.55 : cy;
