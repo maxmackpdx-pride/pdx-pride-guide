@@ -9,7 +9,7 @@ import { placePath } from "@shared/placeSlug";
 import { apiRequest } from "@/lib/queryClient";
 import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { waypointIcon, waypointSize, type WaypointId } from "@/lib/livingMapWaypoints";
+import { waypointHtml, waypointIcon, waypointSize, type WaypointId } from "@/lib/livingMapWaypoints";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
@@ -44,6 +44,14 @@ const MAP_CREATE_LINKS = [
   { label: "Giftz", href: "/gifting", color: "#ccff00" },
   { label: "Sellz", href: "/sellz", color: "#39ff14" },
 ] as const;
+const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string }> = [
+  { label: "Eventz", id: "eventz", color: "#ff00cc", note: "Color matches the event day" },
+  { label: "Placez", id: "venue", color: "#00ffff", note: "Color and logo match the place type" },
+  { label: "Mizzed", id: "mizzed", color: "#ff00cc", note: "Connections nearby" },
+  { label: "HAÜZ", id: "hauz", color: "#00ffff", note: "Housing and stays" },
+  { label: "OutZide", id: "outz", color: "#ff6600", note: "Outdoor recommendations" },
+  { label: "Boards", id: "gigz", color: "#6e3dff", note: "Gigz, Giftz, and Sellz" },
+];
 
 function dayAccent(day: string | null | undefined): string {
   const code = String(day || "").slice(0, 3).toUpperCase();
@@ -254,6 +262,7 @@ export default function LivingMap() {
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [keyOpen, setKeyOpen] = useState(false);
   const desktop = useDesktop();
   const [mobileSnap, setMobileSnap] = useState<number | string | null>(MOBILE_SHEET_SNAPS[0]);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
@@ -414,11 +423,11 @@ export default function LivingMap() {
     setMobileSnap(snaps[(index + 1) % snaps.length]);
   };
   useEffect(() => {
-    if (!createOpen) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setCreateOpen(false); };
+    if (!createOpen && !keyOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setCreateOpen(false); setKeyOpen(false); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [createOpen]);
+  }, [createOpen, keyOpen]);
   const eventCard = (e: Event) => (
     <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
       {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
@@ -478,6 +487,16 @@ export default function LivingMap() {
       >
         <span aria-hidden="true">+</span>
       </button>
+    </div>
+    <div className={`living-map-key${keyOpen ? " is-open" : ""}${sheetPeek || desktop ? "" : " is-tucked"}`}>
+      {keyOpen && <section className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
+        <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => setKeyOpen(false)} aria-label="Close map key">×</button></div>
+        <ul>{MAP_KEY_ITEMS.map(item => <li key={item.label}>
+          <span className="living-map-key__waypoint" dangerouslySetInnerHTML={{ __html: waypointHtml({ id: item.id, color: item.color, size: 31 }) }} />
+          <span><b>{item.label}</b><small>{item.note}</small></span>
+        </li>)}</ul>
+      </section>}
+      <button type="button" className="living-map-key__trigger pdx-glass-rebind" aria-expanded={keyOpen} onClick={() => { setKeyOpen(open => !open); setCreateOpen(false); }}>Key</button>
     </div>
     <Drawer.Root open modal={false} dismissible={false} handleOnly shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_SHEET_SNAPS]} activeSnapPoint={desktop ? undefined : mobileSnap} setActiveSnapPoint={desktop ? undefined : setMobileSnap}>
       <Drawer.Portal>

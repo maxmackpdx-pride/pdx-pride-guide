@@ -45,7 +45,6 @@ function ScrollToTop() {
   }, [pathname]);
   return null;
 }
-import Home from "./pages/Home";
 import { LEGACY_Z_PRODUCT_REDIRECTS } from "@shared/zNamespace";
 import CommunityStandardsGate from "./components/CommunityStandardsGate";
 import SuspendedAccountGate from "./components/SuspendedAccountGate";
@@ -96,7 +95,8 @@ function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
   const profile = isProfilePath(location);
-  const livingMap = location.split("?")[0] === "/map";
+  const routePath = location.split("?")[0];
+  const livingMap = routePath === "/" || routePath === "/map";
   // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
   // uses the global MobileBottomNav only (HubShell member bar removed).
   const adminShell = location.split("?")[0] === "/admin";
@@ -119,7 +119,7 @@ function AppLayout() {
               <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
             ))}
             <Route path="/z/:communitySlug" component={Community} />
-            <Route path="/" component={Home} />
+            <Route path="/" component={LivingMap} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
             <Route path="/map" component={LivingMap} />
