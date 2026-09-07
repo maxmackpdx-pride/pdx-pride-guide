@@ -855,6 +855,91 @@ html.calm-mode .living-map-page .wp.is-resolving .wp-svg,
     drop-shadow(0 0 2px rgba(255, 255, 255, 0.55));
 }
 
+.living-map-screen-rail.pdx-glass-rebind {
+  --c: #19e3ff;
+  position: fixed;
+  z-index: 650;
+  right: calc(min(510px, 42vw) + 54px);
+  bottom: calc(18% + 72px);
+  left: 18px;
+  padding: 10px 12px 12px;
+  border: 1px solid color-mix(in srgb, var(--c) 48%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  pointer-events: auto;
+}
+.living-map-screen-rail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #fff;
+  font: 900 0.75rem var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.living-map-screen-rail__head span,
+.living-map-screen-rail > p {
+  color: #a8a8ae;
+  font: 600 0.72rem var(--font-mono);
+}
+.living-map-screen-rail__items {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.living-map-screen-rail__items button {
+  display: flex;
+  flex: 0 0 190px;
+  min-height: 56px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid color-mix(in srgb, var(--c) 52%, #333);
+  border-radius: 12px;
+  background: rgba(5, 5, 6, 0.86);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.living-map-screen-rail__items button:hover,
+.living-map-screen-rail__items button:focus-visible {
+  border-color: var(--c);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c) 32%, transparent);
+}
+.living-map-screen-rail__items img {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 9px;
+  object-fit: cover;
+}
+.living-map-screen-rail__items span {
+  min-width: 0;
+}
+.living-map-screen-rail__items b,
+.living-map-screen-rail__items small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.living-map-screen-rail__items b {
+  font: 800 0.82rem var(--font-display);
+}
+.living-map-screen-rail__items small {
+  margin-top: 2px;
+  color: #aaa;
+  font: 600 0.66rem var(--font-body);
+  text-transform: capitalize;
+}
+@media (max-width: 767px) {
+  .living-map-screen-rail {
+    display: none !important;
+  }
+}
+
 .living-map-locate {
   position: fixed;
   z-index: 860;

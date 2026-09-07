@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
 import { Link, useLocation } from "wouter";
-import { MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import { Navigation } from "lucide-react";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -216,12 +216,19 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "housing" | "mizze
   });
 }
 
-function MapReader({ onZoom, onCenter }: { onZoom: (zoom: number) => void; onCenter: (center: [number, number]) => void }) {
-  useMapEvents({
-    zoom: event => onZoom(event.target.getZoom()),
-    zoomend: event => onZoom(event.target.getZoom()),
-    moveend: event => { const center = event.target.getCenter(); onCenter([center.lat, center.lng]); },
-  });
+type MapBounds = { south: number; west: number; north: number; east: number };
+
+function MapReader({ onZoom, onCenter, onBounds }: { onZoom: (zoom: number) => void; onCenter: (center: [number, number]) => void; onBounds: (bounds: MapBounds) => void }) {
+  const map = useMap();
+  const sync = useCallback(() => {
+    const center = map.getCenter();
+    const bounds = map.getBounds();
+    onZoom(map.getZoom());
+    onCenter([center.lat, center.lng]);
+    onBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
+  }, [map, onBounds, onCenter, onZoom]);
+  useEffect(sync, [sync]);
+  useMapEvents({ zoom: sync, zoomend: sync, moveend: sync, resize: sync });
   return null;
 }
 
@@ -316,6 +323,7 @@ export default function LivingMap() {
   const [selected, setSelected] = useState<string | null>(null);
   const [zoom, setZoom] = useState(13);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const [soon, setSoon] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
@@ -444,6 +452,9 @@ export default function LivingMap() {
     ...(showMizzed ? rowMarks(visibleMizzed, "mizzed") : []),
     ...(showCarpool ? rowMarks(carpools.filter(row => rowMatchesQuery(row, q)), "carpool") : []),
   ], [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q]);
+  const screenMarks = useMemo(() => mapBounds ? marks.filter(mark => (
+    mark.lat >= mapBounds.south && mark.lat <= mapBounds.north && mark.lng >= mapBounds.west && mark.lng <= mapBounds.east
+  )).slice(0, 12) : [], [mapBounds, marks]);
   const loading = eventsLoading || placesLoading;
   const failed = eventsError || placesError;
   const boardRows = [
@@ -550,6 +561,15 @@ export default function LivingMap() {
   const comingDialogRef = useModalA11y({ open: Boolean(soon), enabled: Boolean(soon), onClose: closeSoon });
   const customPending = timeFilter === "custom" && (!customStart || !customEnd);
   const mobileDrawerPeek = mobileDrawerSnap === MOBILE_DRAWER_SNAPS[0];
+  const openMark = useCallback((mark: Mark, target?: Element | null) => {
+    setSelected(mark.key);
+    setCardOriginRect(originRect(target || null));
+    if (mark.kind === "event") { setSelectedEvent(mark.item as Event); goOverlay("event", (mark.item as Event).id); }
+    else if (mark.kind === "place") { setSelectedPlace(mark.item as Place); goOverlay("place", (mark.item as Place).id); }
+    else if (mark.kind === "mizzed") { setSelectedMizzed(mark.item as MissedConnectionPost); goOverlay("mizzed", Number((mark.item as MapRow).id)); }
+    else if (mark.kind === "housing") setLocation(`/the-hauz/${(mark.item as MapRow).id}`);
+    else setLocation(`/outz/${String((mark.item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
+  }, [goOverlay, setLocation]);
   useEffect(() => {
     if (!createOpen && !keyOpen && !filtersOpen) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setCreateOpen(false); setKeyOpen(false); setFiltersOpen(false); } };
@@ -581,7 +601,7 @@ export default function LivingMap() {
     <div className="living-map-canvas">
       <MapContainer ref={mapRef} center={[45.523, -122.676]} zoom={13} minZoom={10} zoomSnap={0.25} zoomDelta={0.5} maxBounds={[[45.35, -122.92], [45.70, -122.42]]} className="living-map-leaflet" attributionControl>
         <TileLayer url={cartoDarkTileUrl()} attribution={CARTO_ATTRIBUTION} subdomains="abcd" maxZoom={20} />
-        <MapReader onZoom={setZoom} onCenter={setMapCenter} />
+        <MapReader onZoom={setZoom} onCenter={setMapCenter} onBounds={setMapBounds} />
         {marks.map(mark => {
           const chosen = selected === mark.key;
           const item = mark.item;
@@ -606,18 +626,22 @@ export default function LivingMap() {
             markerLabel = String(row.title || row.name || row.displayName || (mark.kind === "carpool" ? row._beach : "Map listing"));
             icon = waypointIcon({ id, size: waypointSize(zoom, chosen), selected: chosen });
           }
-          return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => {
-            setSelected(mark.key);
-            setCardOriginRect(originRect(event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null));
-            if (mark.kind === "event") { setSelectedEvent(item as Event); goOverlay("event", (item as Event).id); }
-            else if (mark.kind === "place") { setSelectedPlace(item as Place); goOverlay("place", (item as Place).id); }
-            else if (mark.kind === "mizzed") { setSelectedMizzed(item as MissedConnectionPost); goOverlay("mizzed", Number((item as MapRow).id)); }
-            else if (mark.kind === "housing") setLocation(`/the-hauz/${(item as MapRow).id}`);
-            else setLocation(`/outz/${String((item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
-          } }}><Tooltip direction="top">{markerLabel}</Tooltip></Marker>;
+          return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => openMark(mark, event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null) }}><Tooltip direction="top">{markerLabel}</Tooltip></Marker>;
         })}
       </MapContainer>
     </div>
+    {desktop && <section className="living-map-screen-rail pdx-glass-rebind" aria-label="What’s on my screen">
+      <div className="living-map-screen-rail__head"><strong>What’s on my screen</strong><span>{screenMarks.length}</span></div>
+      {screenMarks.length ? <div className="living-map-screen-rail__items">{screenMarks.map(mark => {
+        const event = mark.kind === "event" ? mark.item as Event : null;
+        const place = mark.kind === "place" ? mark.item as Place : null;
+        const row = mark.item as MapRow;
+        const label = event?.title || place?.name || String(row.title || row.name || row.displayName || row._beach || "Map listing");
+        const image = event?.posterImageUrl || (place ? resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type) : null);
+        const accent = event ? dayAccent(event.dayOfWeek) : place ? directoryTypeColor(place.type) : railAccent(mark.kind === "housing" ? "housing" : mark.kind === "mizzed" ? "mizzed" : "carpool", row);
+        return <button type="button" key={mark.key} style={{ "--c": accent } as CSSProperties} onClick={e => openMark(mark, e.currentTarget)}>{image && <img src={image} alt="" />}<span><b>{label}</b><small>{mark.kind === "event" ? event?.venueName : mark.kind === "place" ? DIRECTORY_TYPE_LABELS[place?.type || ""] || place?.type : mark.kind}</small></span></button>;
+      })}</div> : <p>Move the map to discover what’s nearby.</p>}
+    </section>}
     {desktop && <div className="living-map-locate">
       <button type="button" aria-label="Locate me" title="Locate me" onClick={locateMe}><Navigation aria-hidden="true" /></button>
       {locateError && <span role="status">{locateError}</span>}
