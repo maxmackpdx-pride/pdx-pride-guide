@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
 import { Link } from "wouter";
@@ -9,25 +9,128 @@ import { placePath } from "@shared/placeSlug";
 import { apiRequest } from "@/lib/queryClient";
 import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import { resolveBusinessLocations } from "@shared/businessLocations";
-import { waypointIcon, waypointSize, WAYPOINT_COLOR, type WaypointId } from "@/lib/livingMapWaypoints";
+import { waypointIcon, waypointSize, type WaypointId } from "@/lib/livingMapWaypoints";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
 import AuthModal from "@/components/AuthModal";
+import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import SpottedDetailModal from "@/components/SpottedDetailModal";
+import { spottedKind, spottedPlace } from "@/components/SpottedCard";
+import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import type { Business } from "@/pages/Directory";
-import { directoryTypeColor } from "@shared/directoryTheme";
+import { DIRECTORY_TYPE_LABELS, directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
+import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
 import "./LivingMap.css";
 
 type Place = Business;
-
+type BoardKind = "gig" | "gifting" | "sellz";
 type Mark = { key: string; kind: "event" | "place"; lat: number; lng: number; item: Event | Place };
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
 const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "boards"] as const;
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
-const DAY: Record<string, string> = { MON: "#8800ff", TUE: "#0044ff", WED: "#ffee00", THU: "#00ffff", FRI: "#ff00cc", SAT: "#39ff14", SUN: "#ff6600" };
+const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
 const MOBILE_SHEET_SNAPS = [116, 0.34, 0.52, 0.88] as const;
+const FORMING_COVER = "/hausing/forming-no-place.svg";
+const MAP_CREATE_LINKS = [
+  { label: "Eventz", href: "/submit", color: "#ccff00" },
+  { label: "Placez", href: "/directory?add=1", color: "#19e3ff" },
+  { label: "Mizzed", href: "/spotted", color: "#ff00cc" },
+  { label: "HAÜZ", href: "/the-hauz/new", color: "#00ffff" },
+  { label: "Gigz", href: "/pride-work", color: "#b06bff" },
+  { label: "Giftz", href: "/gifting", color: "#ccff00" },
+  { label: "Sellz", href: "/sellz", color: "#39ff14" },
+] as const;
+
+function dayAccent(day: string | null | undefined): string {
+  const code = String(day || "").slice(0, 3).toUpperCase();
+  return DAY[code] || RSVP_COLOR;
+}
+
+function firstImage(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value)) {
+    const hit = value.find((item): item is string => typeof item === "string" && item.trim().length > 0);
+    return hit || null;
+  }
+  return null;
+}
+
+function boardKind(row: MapRow): BoardKind | null {
+  const board = String(row._board || "");
+  if (board === "Gigz") return "gig";
+  if (board === "Giftz") return "gifting";
+  if (board === "Sellz") return "sellz";
+  return null;
+}
+
+function railImage(id: RailId, row: MapRow, events: Event[]): string | null {
+  if (id === "placez") {
+    const name = String(row.name || "");
+    const imageUrl = typeof row.imageUrl === "string" ? row.imageUrl : null;
+    return resolveDirectoryLogo(name, imageUrl) || directoryFallbackLogo(String(row.type || "venue"));
+  }
+  if (id === "housing") {
+    return firstImage(row.photos) || (String(row.type) === "FORMING" ? FORMING_COVER : null);
+  }
+  if (id === "boards") return firstImage(row.photoUrls) || firstImage(row.imageUrl);
+  if (id === "mizzed") {
+    const eventId = typeof row.eventId === "number" ? row.eventId : Number(row.eventId);
+    if (!Number.isFinite(eventId)) return null;
+    return events.find(event => event.id === eventId)?.posterImageUrl || null;
+  }
+  return null;
+}
+
+function railAccent(id: RailId, row: MapRow): string {
+  if (id === "placez") return directoryTypeColor(String(row.type || ""));
+  if (id === "mizzed") return "#FF00CC";
+  if (id === "housing") return HOUSING_ACCENT_VAR[String(row.type || "") as HousingType] || "var(--panel-cyan)";
+  if (id === "outz" || id === "carpool") return "#FF6600";
+  if (id === "boards") {
+    const kind = boardKind(row);
+    if (kind === "gig") return "var(--board-gigs)";
+    if (kind === "gifting") return "var(--board-gifting, #CCFF00)";
+    if (kind === "sellz") return "#39FF14";
+  }
+  return RSVP_COLOR;
+}
+
+function railCopy(id: RailId, row: MapRow, fallbackLabel: string): { kicker: string; title: string; meta: string } {
+  if (id === "placez") {
+    const type = String(row.type || "");
+    return {
+      kicker: DIRECTORY_TYPE_LABELS[type] || type || fallbackLabel,
+      title: String(row.name || "Open listing"),
+      meta: `${String(row.neighborhood || "Portland")} →`,
+    };
+  }
+  if (id === "mizzed") {
+    const post = row as unknown as MissedConnectionPost;
+    return {
+      kicker: "Mizzed Connection",
+      title: String(post.title?.trim() || post.body?.trim().split(/\n/)[0] || "Mizzed connection").slice(0, 80),
+      meta: spottedPlace(post),
+    };
+  }
+  if (id === "housing") {
+    const type = String(row.type || "") as HousingType;
+    const area = Array.isArray(row.areas) ? row.areas.find(item => typeof item === "string") : null;
+    return {
+      kicker: HOUSING_TYPE_KICKER[type] || fallbackLabel,
+      title: String(row.displayName || row.name || row.headline || "Open listing"),
+      meta: `${String(area || row.neighborhood || "View details")} →`,
+    };
+  }
+  return {
+    kicker: String(row._board || row.type || fallbackLabel),
+    title: String(row.title || row.name || "Open listing"),
+    meta: `${String(row.neighborhood || row.destination || row.time || "View details")} →`,
+  };
+}
 
 function finite(n: unknown): n is number { return typeof n === "number" && Number.isFinite(n); }
 function hour(iso: string) {
@@ -93,8 +196,11 @@ export default function LivingMap() {
   const [soon, setSoon] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [selectedMizzed, setSelectedMizzed] = useState<MissedConnectionPost | null>(null);
+  const [boardOverlay, setBoardOverlay] = useState<{ kind: BoardKind; postId: number } | null>(null);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const desktop = useDesktop();
   const [mobileSnap, setMobileSnap] = useState<number | string | null>(MOBILE_SHEET_SNAPS[0]);
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
@@ -167,10 +273,21 @@ export default function LivingMap() {
     const railIndex = railOrder.indexOf(id);
     return <section className="living-map-feed-section" key={id}>
       <div className="living-map-section-head"><b>{item.label}</b><span>{item.rows.length}</span><span className="living-map-reorder"><button type="button" disabled={railIndex === 0} aria-label={`Move ${item.label} up`} onClick={() => reorder(id, -1)}>↑</button><button type="button" disabled={railIndex === railOrder.length - 1} aria-label={`Move ${item.label} down`} onClick={() => reorder(id, 1)}>↓</button></span></div>
-      {item.loading ? <p className="living-map-rail-empty">Loading…</p> : item.error ? <p className="living-map-rail-empty" role="alert">This rail could not load. <button type="button" onClick={item.retry}>Try again</button></p> : item.rows.length === 0 ? <p className="living-map-rail-empty">Nothing live nearby right now.</p> : <div className="living-map-rail">{item.rows.slice(0, 10).map((row, i) => {
-        const contents = <><small>{String(row._board || row.type || item.label)}</small><strong>{String(row.title || row.name || "Open listing")}</strong><em>{String(row.destination || row.neighborhood || row.time || "View details")} →</em></>;
-        if (id === "placez") return <button type="button" className="living-map-card place" key={`${id}-${row.id ?? i}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); }}>{contents}</button>;
-        return <Link className="living-map-card place" key={`${id}-${row.id ?? i}`} href={item.href(row)}>{contents}</Link>;
+      {item.loading ? <p className="living-map-rail-empty">Loading…</p> : item.error ? <p className="living-map-rail-empty" role="alert">This rail could not load. <button type="button" onClick={item.retry}>Try again</button></p> : item.rows.length === 0 ? <p className="living-map-rail-empty">Nothing live nearby right now.</p> : <div className="living-map-rail" data-vaul-no-drag>{item.rows.slice(0, 10).map((row, i) => {
+        const copy = railCopy(id, row, item.label);
+        const image = railImage(id, row, events);
+        const contents = <>{image && <img src={image} alt="" />}<span className="shade" /><small>{copy.kicker}</small><strong>{copy.title}</strong><em>{copy.meta}</em></>;
+        const className = `living-map-card${id === "placez" ? " place" : ""}`;
+        const style = { "--c": railAccent(id, row) } as CSSProperties;
+        const key = `${id}-${row.id ?? i}`;
+        if (id === "placez") return <button type="button" className={className} key={key} style={style} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); }}>{contents}</button>;
+        if (id === "mizzed") return <button type="button" className={className} key={key} style={style} onClick={() => setSelectedMizzed(row as unknown as MissedConnectionPost)}>{contents}</button>;
+        if (id === "boards") {
+          const kind = boardKind(row);
+          const postId = Number(row.id);
+          if (kind && Number.isFinite(postId)) return <button type="button" className={className} key={key} style={style} onClick={() => setBoardOverlay({ kind, postId })}>{contents}</button>;
+        }
+        return <Link className={className} key={key} href={item.href(row)} style={style}>{contents}</Link>;
       })}</div>}
     </section>;
   };
@@ -187,7 +304,7 @@ export default function LivingMap() {
           const chosen = selected === mark.key;
           const item = mark.item;
           const icon = mark.kind === "event"
-            ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: DAY[String((item as Event).dayOfWeek || "").slice(0,3).toUpperCase()] || WAYPOINT_COLOR.eventz, selected: chosen })
+            ? waypointIcon({ id: (item as Event).isSexPositive ? "plus" : "eventz", size: waypointSize(zoom, chosen), scoop: hour((item as Event).dateStart), color: dayAccent((item as Event).dayOfWeek), selected: chosen })
             : waypointIcon({
               id: PLACE_ICON[(item as Place).type] || "venue",
               size: waypointSize(zoom, chosen),
@@ -204,17 +321,44 @@ export default function LivingMap() {
         })}
       </MapContainer>
     </div>
-    <Drawer.Root open modal={false} dismissible={false} shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_SHEET_SNAPS]} activeSnapPoint={desktop ? undefined : mobileSnap} setActiveSnapPoint={desktop ? undefined : setMobileSnap}>
+    {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
+    <div className={`living-map-create${createOpen ? " is-open" : ""}`}>
+      <div className="living-map-create__fan" role="menu" aria-label="Post to Zaylist">
+        {MAP_CREATE_LINKS.map((item, index) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            role="menuitem"
+            className="living-map-create__option pdx-glass-rebind"
+            style={{ "--c": item.color, "--fan-i": index } as CSSProperties}
+            onClick={() => setCreateOpen(false)}
+          >
+            <span aria-hidden="true">+</span>{item.label}
+          </Link>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="living-map-create__trigger pdx-glass-rebind"
+        aria-label={createOpen ? "Close post menu" : "Post to the map"}
+        aria-expanded={createOpen}
+        aria-haspopup="menu"
+        onClick={() => setCreateOpen(open => !open)}
+      >
+        <span aria-hidden="true">+</span>
+      </button>
+    </div>
+    <Drawer.Root open modal={false} dismissible={false} handleOnly shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_SHEET_SNAPS]} activeSnapPoint={desktop ? undefined : mobileSnap} setActiveSnapPoint={desktop ? undefined : setMobileSnap}>
       <Drawer.Portal>
       <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map">
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
       <div className="living-map-drawer-controls">
-      <button type="button" className="living-map-handle" aria-label={mobileSnap === MOBILE_SHEET_SNAPS[3] ? "Rest map drawer on the dock" : "Open map drawer fully"} onClick={() => setMobileSnap(mobileSnap === MOBILE_SHEET_SNAPS[3] ? MOBILE_SHEET_SNAPS[0] : MOBILE_SHEET_SNAPS[3])}><span /></button>
-      <label className="living-map-search"><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, DJs…" aria-label="Search the living map" /></label>
-      <div className="living-map-filter-block">
+      <Drawer.Handle preventCycle className="living-map-handle" aria-hidden={false} aria-label={mobileSnap === MOBILE_SHEET_SNAPS[3] ? "Rest map drawer on the dock" : "Open map drawer fully"} onClick={() => setMobileSnap(mobileSnap === MOBILE_SHEET_SNAPS[3] ? MOBILE_SHEET_SNAPS[0] : MOBILE_SHEET_SNAPS[3])}><span /></Drawer.Handle>
+      <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, DJs…" aria-label="Search the living map" /></label>
+      <div className="living-map-filter-block" data-vaul-no-drag>
       <h2>Map Filters</h2>
-      <div className="living-map-time" aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter("soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter("weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter("custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
-      <div className="living-map-chips" aria-label="Map layer filters">
+      <div className="living-map-time" data-vaul-no-drag aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter("soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter("weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter("custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
+      <div className="living-map-chips" data-vaul-no-drag aria-label="Map layer filters">
         <button type="button" aria-pressed={showEvents} className={showEvents ? "is-on" : ""} onClick={() => setShowEvents(v => !v)}>Eventz</button>
         <button type="button" aria-pressed={showPlaces} className={showPlaces ? "is-on cyan" : "cyan"} onClick={() => setShowPlaces(v => !v)}>Placez</button>
         <button type="button" onClick={() => setSoon("ZayDark")}>ZayDark</button>
@@ -223,13 +367,13 @@ export default function LivingMap() {
       </div>
       </div>
       </div>
-      <div className="living-map-drawer-scroll">
+      <div className="living-map-drawer-scroll" data-vaul-no-drag>
       {loading && <p className="living-map-state">Loading the city…</p>}
       {failed && <div className="living-map-state">The map feed could not load. <button onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {!loading && !failed && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
       <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span></div>
-      <div className="living-map-rail">
-        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); }} style={{ "--c": DAY[String(e.dayOfWeek || "").slice(0,3).toUpperCase()] || "#ccff00" } as React.CSSProperties}>
+      <div className="living-map-rail" data-vaul-no-drag>
+        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); }} style={{ "--c": dayAccent(e.dayOfWeek) } as CSSProperties}>
           {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
         </button>)}
       </div>
@@ -240,6 +384,8 @@ export default function LivingMap() {
     </Drawer.Root>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={() => { setSelectedEvent(null); setCardOriginRect(null); }} onEventUpdated={setSelectedEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={() => { setSelectedPlace(null); setCardOriginRect(null); }} onRequireAuth={() => setShowAuth(true)} />}
+    {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={() => setSelectedMizzed(null)} />}
+    {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={() => setBoardOverlay(null)} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     {soon && <div className="living-map-coming-backdrop" role="presentation" onClick={closeSoon}><div ref={comingDialogRef} tabIndex={-1} className="living-map-coming" role="dialog" aria-modal="true" aria-labelledby="living-map-coming-title" onClick={e => e.stopPropagation()}><small>Zaylist living map</small><h2 id="living-map-coming-title">{soon} is coming soon</h2><p>This layer is staying visible while we finish it. It is not active yet.</p><button onClick={closeSoon}>Got it</button></div></div>}
   </section>;
