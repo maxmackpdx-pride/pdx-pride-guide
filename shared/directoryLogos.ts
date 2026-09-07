@@ -1,7 +1,7 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-09-07";
+export const DIRECTORY_LOGO_VERSION = "2026-09-07-2";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
@@ -70,6 +70,14 @@ const STEM_BY_NORMALIZED: Record<string, string> = {
   mrpeepsadultsuperstores: "Mr_Peeps",
   thepeephole: "Mr_Peeps",
   peephole: "Mr_Peeps",
+  // Sex clubs, bathhouses, adult arcades, and adult shops use red neon with white accents.
+  steamportland: "Steam_Portland",
+  steampdx: "Steam_Portland",
+  thevelvetrope: "The_Velvet_Rope",
+  velvetrope: "The_Velvet_Rope",
+  velvetropepdx: "The_Velvet_Rope",
+  clubprivata: "Club_Privata",
+  privata: "Club_Privata",
   bowerybagels: "Bowery_Bagels",
   campbarpdx: "Camp_Bar_PDX",
   camp: "Camp_Bar_PDX",

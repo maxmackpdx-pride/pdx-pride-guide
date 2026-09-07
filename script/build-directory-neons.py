@@ -13,7 +13,7 @@ from collections import deque
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 
 CATEGORY_COLORS = {
@@ -30,6 +30,9 @@ CATEGORY_COLORS = {
     "group": "#FFD700",
     "campground": "#39FF14",
 }
+
+ADULT_RED = "#FF2038"
+NEON_PADDING = 72
 
 
 def hex_rgb(value: str) -> tuple[int, int, int]:
@@ -246,7 +249,7 @@ def render_neon(
     core = Image.fromarray(rgba, "RGBA")
     glow_color = Image.fromarray(np.dstack((glow_rgb, alpha)).astype(np.uint8), "RGBA")
 
-    padding = 72
+    padding = NEON_PADDING
     size = (core.width + padding * 2, core.height + padding * 2)
     result = Image.new("RGBA", size, (0, 0, 0, 0))
     alpha_canvas = Image.new("L", size, 0)
@@ -261,6 +264,29 @@ def render_neon(
         result = Image.alpha_composite(result, Image.fromarray(layer, "RGBA"))
     # The unblurred mark is composited last so bloom cannot erase counters or fine type.
     result.alpha_composite(core, (padding, padding))
+    return result
+
+
+def render_adult_neon(core: Image.Image, preserve_alpha: bool = False) -> Image.Image:
+    """Render the adult-venue system: dominant red neon with a crisp white edge accent."""
+    core = core.convert("RGBA")
+    detail_alpha = core.getchannel("A") if preserve_alpha else monochrome_detail_alpha(core)
+    red_core = solid_core(core, ADULT_RED)
+    red_core.putalpha(detail_alpha)
+    result = render_neon(red_core, ADULT_RED)
+
+    shifted = Image.new("L", detail_alpha.size, 0)
+    shifted.paste(detail_alpha, (4, 4))
+    highlight_alpha = ImageChops.subtract(detail_alpha, shifted).filter(ImageFilter.MaxFilter(3))
+
+    highlight_canvas = Image.new("L", result.size, 0)
+    highlight_canvas.paste(highlight_alpha, (NEON_PADDING, NEON_PADDING))
+    white = (255, 255, 255)
+    result = Image.alpha_composite(
+        result,
+        colorize_alpha(highlight_canvas.filter(ImageFilter.GaussianBlur(4)), white, 0.34),
+    )
+    result = Image.alpha_composite(result, colorize_alpha(highlight_canvas, white, 0.96))
     return result
 
 
@@ -324,8 +350,20 @@ def main() -> None:
     for entry in manifest.get("legacyQualityRepairs", []):
         core = prepare(entry, args.source_root)
         color = CATEGORY_COLORS[entry["type"]]
+        rendered = (
+            render_adult_neon(core, preserve_alpha=bool(entry.get("preserveAlpha")))
+            if entry.get("adultNeon")
+            else render_neon(core, color, force_core=color, preserve_alpha=bool(entry.get("preserveAlpha")))
+        )
         save_png(
-            render_neon(core, color, force_core=color, preserve_alpha=bool(entry.get("preserveAlpha"))),
+            rendered,
+            args.output_root / f'{entry["stem"]}.png',
+        )
+
+    for entry in manifest.get("adultNeons", []):
+        core = prepare(entry, args.source_root)
+        save_png(
+            render_adult_neon(core, preserve_alpha=bool(entry.get("preserveAlpha"))),
             args.output_root / f'{entry["stem"]}.png',
         )
 
