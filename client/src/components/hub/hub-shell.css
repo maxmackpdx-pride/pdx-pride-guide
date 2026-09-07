@@ -630,7 +630,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 80;
+  /* Stay above map canvases, Leaflet controls, and the map's Vaul drawer.
+     Navigation sheets begin at 1002, so they still layer over the bar. */
+  z-index: 1001;
   /* Transparent rail; dock chip holds the chrome */
   background: transparent;
   border-top: none;

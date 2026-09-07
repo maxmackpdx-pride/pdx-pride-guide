@@ -146,7 +146,7 @@ export default function MobileBottomNav() {
   const handleHub = () => {
     dismissExcept();
     setHubOpen(false);
-    setLocation("/");
+    setLocation("/map");
   };
 
   const handleMessages = () => {

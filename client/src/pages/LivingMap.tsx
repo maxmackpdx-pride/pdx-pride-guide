@@ -34,9 +34,9 @@ type RailId = typeof DEFAULT_RAIL_ORDER[number];
 const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
 const PLACE_WAYPOINT_ZOOM = 19;
-/* Vaul measures pixel snaps from the viewport bottom; include the fixed mobile dock
-   so the drawer leaves a 116px hub peek visibly resting above it. */
-const MOBILE_DRAWER_SNAPS = ["300px", 0.52, 0.88] as const;
+/* Vaul measures pixel snaps from the viewport bottom. Keep the lowest state compact
+   above the fixed mobile dock while leaving the grip visible for reopening. */
+const MOBILE_DRAWER_SNAPS = ["190px", 0.52, 0.88] as const;
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 const MAP_CREATE_LINKS = [
   { label: "Eventz", href: "/submit", color: "#ccff00" },
