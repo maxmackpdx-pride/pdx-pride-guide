@@ -15,7 +15,6 @@ import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 
 const MOBILE_ICON = 19;
-const HUB_Z_PATH = "M4 4h16v3.2L8.4 17H20v3H4v-3.2L15.6 7H4V4z";
 
 /**
  * "Your Hub" rows in the Hub sheet. Each is a real /dashboard section, in the
@@ -48,17 +47,13 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
-function HubMark() {
+function MapMark() {
   return (
-    <span className="hub-mobile-tab__z-glitch" aria-hidden>
-      <svg width="20" height="20" viewBox="0 0 24 24">
-        <path d={HUB_Z_PATH} fill="#e6e2d9" />
-      </svg>
-      <svg width="20" height="20" viewBox="0 0 24 24" className="hub-mobile-tab__z-glitch-a">
-        <path d={HUB_Z_PATH} fill="#19e3ff" />
-      </svg>
-      <svg width="20" height="20" viewBox="0 0 24 24" className="hub-mobile-tab__z-glitch-b">
-        <path d={HUB_Z_PATH} fill="#ff00cc" />
+    <span className="hub-mobile-tab__map-mark" aria-hidden>
+      <svg width="38" height="42" viewBox="0 0 38 42" fill="none">
+        <path d="M19 40S34 27.8 34 15.8C34 7.6 27.3 1 19 1S4 7.6 4 15.8C4 27.8 19 40 19 40Z" fill="#071018" stroke="#5AA8FF" strokeWidth="3" />
+        <circle cx="19" cy="16" r="10" fill="#050506" stroke="#19E3FF" strokeWidth="1.5" />
+        <path d="M13 10h12v2.7l-7.1 7H25V22H13v-2.6l7.2-7.1H13V10Z" fill="#5AA8FF" />
       </svg>
     </span>
   );
@@ -147,7 +142,7 @@ export default function MobileBottomNav() {
 
   const localDemo = isLocalDemo();
 
-  /* The center Hub control opens the living map directly. */
+  /* The center map control opens the living map directly. */
   const handleHub = () => {
     dismissExcept();
     setHubOpen(false);
@@ -355,13 +350,13 @@ export default function MobileBottomNav() {
           <button
             type="button"
             className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
-            aria-label="Hub"
-            title="Hub"
+            aria-label="Map"
+            title="Map"
             aria-current={hubActive ? "page" : undefined}
             onClick={handleHub}
           >
-            <HubMark />
-            <span>Hub</span>
+            <MapMark />
+            <span>Map</span>
           </button>
 
           <button

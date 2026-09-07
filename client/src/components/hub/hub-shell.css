@@ -1234,6 +1234,26 @@ html.calm-mode .hub-mobile-tab.is-active {
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-a { animation: navGlitchA 3.2s steps(1) infinite; }
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__z-glitch-b { animation: navGlitchB 3.2s steps(1) infinite; }
 
+/* The center destination is the living map, so its mark is the map waypoint. */
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__map-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 42px;
+  margin-top: -5px;
+  margin-bottom: -4px;
+  filter: none;
+}
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__map-mark svg {
+  display: block;
+  width: 38px;
+  height: 42px;
+}
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center:hover .hub-mobile-tab__map-mark,
+.hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab--center:active .hub-mobile-tab__map-mark {
+  filter: drop-shadow(0 0 9px rgba(25, 227, 255, .45));
+}
+
 /* Unread badge, top-right of the messages glyph. */
 .hub-mobile-bar.site-hub-mobile-bar .hub-mobile-tab__icon-wrap > i {
   position: absolute;
