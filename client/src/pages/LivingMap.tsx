@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Event } from "@shared/schema";
@@ -40,7 +40,7 @@ const MAP_CREATE_LINKS = [
   { label: "Placez", href: "/directory?add=1", color: "#19e3ff" },
   { label: "Mizzed", href: "/spotted", color: "#ff00cc" },
   { label: "HAÜZ", href: "/the-hauz/new", color: "#00ffff" },
-  { label: "Gigz", href: "/pride-work", color: "#b06bff" },
+  { label: "Gigz", href: "/pride-work", color: "#6e3dff" },
   { label: "Giftz", href: "/gifting", color: "#ccff00" },
   { label: "Sellz", href: "/sellz", color: "#39ff14" },
 ] as const;
@@ -177,6 +177,53 @@ function originRect(element: Element | null): EventModalOriginRect | PlaceModalO
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 }
 
+const OVERLAY_KEYS = ["event", "place", "mizzed", "gig", "gift", "sell"] as const;
+type OverlayKey = typeof OVERLAY_KEYS[number];
+type TimeFilter = "default" | "soon" | "weekend" | "custom";
+
+function mapSearchParams(): URLSearchParams {
+  if (typeof window === "undefined") return new URLSearchParams();
+  return new URLSearchParams(window.location.search);
+}
+
+function mapHref(mutate: (params: URLSearchParams) => void): string {
+  const params = mapSearchParams();
+  mutate(params);
+  const qs = params.toString();
+  return qs ? `/map?${qs}` : "/map";
+}
+
+function overlayHref(key: OverlayKey | null, id?: number): string {
+  return mapHref(params => {
+    for (const overlay of OVERLAY_KEYS) params.delete(overlay);
+    if (key && id != null && Number.isFinite(id)) params.set(key, String(id));
+  });
+}
+
+function boardParam(kind: BoardKind): OverlayKey {
+  if (kind === "gifting") return "gift";
+  if (kind === "sellz") return "sell";
+  return "gig";
+}
+
+function boardFromParam(key: string): BoardKind | null {
+  if (key === "gig") return "gig";
+  if (key === "gift") return "gifting";
+  if (key === "sell") return "sellz";
+  return null;
+}
+
+function readTimeFilter(params: URLSearchParams): TimeFilter {
+  const when = params.get("when");
+  if (when === "soon" || when === "weekend" || when === "custom") return when;
+  return "default";
+}
+
+function rowMatchesQuery(row: MapRow, q: string): boolean {
+  if (!q) return true;
+  return `${row.title || ""} ${row.name || ""} ${row.headline || ""} ${row.body || ""} ${row.neighborhood || ""} ${row.displayName || ""} ${row._board || ""}`.toLowerCase().includes(q);
+}
+
 function useDesktop() {
   const [desktop, setDesktop] = useState(() => typeof window !== "undefined" && matchMedia("(min-width:768px)").matches);
   useEffect(() => { const media = matchMedia("(min-width:768px)"); const sync = () => setDesktop(media.matches); media.addEventListener("change", sync); return () => media.removeEventListener("change", sync); }, []);
@@ -184,10 +231,11 @@ function useDesktop() {
 }
 
 export default function LivingMap() {
-  const [query, setQuery] = useState("");
-  const [timeFilter, setTimeFilter] = useState<"default" | "soon" | "weekend" | "custom">("default");
-  const [customStart, setCustomStart] = useState("");
-  const [customEnd, setCustomEnd] = useState("");
+  const [location, setLocation] = useLocation();
+  const [query, setQuery] = useState(() => mapSearchParams().get("q") || "");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(() => readTimeFilter(mapSearchParams()));
+  const [customStart, setCustomStart] = useState(() => mapSearchParams().get("from") || "");
+  const [customEnd, setCustomEnd] = useState(() => mapSearchParams().get("to") || "");
   const [showEvents, setShowEvents] = useState(true);
   const [showPlaces, setShowPlaces] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
@@ -213,6 +261,15 @@ export default function LivingMap() {
   const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
   const housing = Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : []);
   const reorder = (id: RailId, delta: number) => setRailOrder(current => { const from = current.indexOf(id); const to = Math.max(0, Math.min(current.length - 1, from + delta)); const next = [...current]; next.splice(from, 1); next.splice(to, 0, id); localStorage.setItem("zaylist.map.rail-order", JSON.stringify(next)); return next; });
+  const goOverlay = useCallback((key: OverlayKey | null, id?: number) => setLocation(overlayHref(key, id)), [setLocation]);
+  const closeOverlays = useCallback(() => {
+    setSelectedEvent(null);
+    setSelectedPlace(null);
+    setSelectedMizzed(null);
+    setBoardOverlay(null);
+    setCardOriginRect(null);
+    setLocation(overlayHref(null));
+  }, [setLocation]);
   const q = query.trim().toLowerCase();
   const visibleEvents = useMemo(() => events.filter(e => {
     if (!finite(e.lat) || !finite(e.lng)) return false;
@@ -256,18 +313,68 @@ export default function LivingMap() {
   const loading = eventsLoading || placesLoading;
   const failed = eventsError || placesError;
   const boardRows = [
-    ...gigs.map(row => ({ ...row, _board: "Gigz", _href: "/pride-work" })),
-    ...gifts.map(row => ({ ...row, _board: "Giftz", _href: "/gifting" })),
-    ...sells.map(row => ({ ...row, _board: "Sellz", _href: "/sellz" })),
+    ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
+    ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
+    ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
   ];
+  const visibleMizzed = useMemo(() => mizzed.filter(row => rowMatchesQuery(row, q)), [mizzed, q]);
+  const visibleHousing = useMemo(() => housing.filter(row => rowMatchesQuery(row, q)), [housing, q]);
+  const visibleBoards = useMemo(() => boardRows.filter(row => rowMatchesQuery(row, q)), [boardRows, q]);
+
+  useEffect(() => {
+    const href = mapHref(params => {
+      const next = query.trim();
+      if (next) params.set("q", next); else params.delete("q");
+      if (timeFilter === "default") params.delete("when"); else params.set("when", timeFilter);
+      if (timeFilter === "custom" && customStart) params.set("from", customStart); else params.delete("from");
+      if (timeFilter === "custom" && customEnd) params.set("to", customEnd); else params.delete("to");
+    });
+    const current = `${window.location.pathname}${window.location.search}`;
+    if (current !== href) window.history.replaceState(null, "", href);
+  }, [query, timeFilter, customStart, customEnd]);
+
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const params = mapSearchParams();
+      const eventId = Number(params.get("event"));
+      if (Number.isFinite(eventId)) {
+        const match = events.find(event => event.id === eventId);
+        setSelectedEvent(current => match && current?.id === match.id ? current : match || null);
+      } else setSelectedEvent(current => current ? null : current);
+
+      const placeId = Number(params.get("place"));
+      if (Number.isFinite(placeId)) {
+        const match = places.find(place => place.id === placeId);
+        setSelectedPlace(current => match && current?.id === match.id ? current : match || null);
+      } else setSelectedPlace(current => current ? null : current);
+
+      const mizzedId = Number(params.get("mizzed"));
+      if (Number.isFinite(mizzedId)) {
+        const match = mizzed.find(row => Number(row.id) === mizzedId) as MissedConnectionPost | undefined;
+        setSelectedMizzed(current => match && current?.id === match.id ? current : match || null);
+      } else setSelectedMizzed(current => current ? null : current);
+
+      const boardHit = (["gig", "gift", "sell"] as const).find(key => params.get(key));
+      if (boardHit) {
+        const postId = Number(params.get(boardHit));
+        const kind = boardFromParam(boardHit);
+        if (kind && Number.isFinite(postId)) {
+          setBoardOverlay(current => current?.kind === kind && current.postId === postId ? current : { kind, postId });
+        }
+      } else setBoardOverlay(current => current ? null : current);
+    };
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, [location, events, places, mizzed]);
   const genericRail = (id: RailId) => {
     const config: Record<RailId, { label: string; rows: MapRow[]; loading: boolean; error?: boolean; retry?: () => void; href: (row: MapRow) => string }> = {
       placez: { label: "Nearby Placez", rows: nearbyPlaces as MapRow[], loading: placesLoading, error: placesError, retry: () => { void retryPlaces(); }, href: row => placePath(Number(row.id), String(row.name || "place")) },
-      mizzed: { label: "Mizzed Connections", rows: mizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: () => "/spotted" },
+      mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/spotted?post=${row.id}` : "/spotted" },
       outz: { label: "OutZide Nearby", rows: [], loading: false, href: () => "/outz" },
-      housing: { label: "Housing", rows: housing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
-      carpool: { label: "Carpool", rows: [], loading: false, href: () => "/z" },
-      boards: { label: "Boards · Gigz / Giftz / Sellz", rows: boardRows, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/z") },
+      housing: { label: "Housing", rows: visibleHousing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
+      carpool: { label: "Carpool", rows: [], loading: false, href: () => "/outz" },
+      boards: { label: "Boards · Gigz / Giftz / Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/pride-work") },
     };
     const item = config[id];
     const railIndex = railOrder.indexOf(id);
@@ -280,12 +387,12 @@ export default function LivingMap() {
         const className = `living-map-card${id === "placez" ? " place" : ""}`;
         const style = { "--c": railAccent(id, row) } as CSSProperties;
         const key = `${id}-${row.id ?? i}`;
-        if (id === "placez") return <button type="button" className={className} key={key} style={style} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); }}>{contents}</button>;
-        if (id === "mizzed") return <button type="button" className={className} key={key} style={style} onClick={() => setSelectedMizzed(row as unknown as MissedConnectionPost)}>{contents}</button>;
+        if (id === "placez") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedPlace(row as unknown as Place); goOverlay("place", Number(row.id)); }}>{contents}</button>;
+        if (id === "mizzed") return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={() => { setSelectedMizzed(row as unknown as MissedConnectionPost); goOverlay("mizzed", Number(row.id)); }}>{contents}</button>;
         if (id === "boards") {
           const kind = boardKind(row);
           const postId = Number(row.id);
-          if (kind && Number.isFinite(postId)) return <button type="button" className={className} key={key} style={style} onClick={() => setBoardOverlay({ kind, postId })}>{contents}</button>;
+          if (kind && Number.isFinite(postId)) return <button type="button" className={className} key={key} style={style} aria-label={copy.title} onClick={() => { setBoardOverlay({ kind, postId }); goOverlay(boardParam(kind), postId); }}>{contents}</button>;
         }
         return <Link className={className} key={key} href={item.href(row)} style={style}>{contents}</Link>;
       })}</div>}
@@ -315,8 +422,8 @@ export default function LivingMap() {
           return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => {
             setSelected(mark.key);
             setCardOriginRect(originRect(event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null));
-            if (mark.kind === "event") setSelectedEvent(item as Event);
-            else setSelectedPlace(item as Place);
+            if (mark.kind === "event") { setSelectedEvent(item as Event); goOverlay("event", (item as Event).id); }
+            else { setSelectedPlace(item as Place); goOverlay("place", (item as Place).id); }
           } }}><Tooltip direction="top">{mark.kind === "event" ? (item as Event).title : (item as Place).name}</Tooltip></Marker>;
         })}
       </MapContainer>
@@ -354,10 +461,10 @@ export default function LivingMap() {
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
       <div className="living-map-drawer-controls">
       <Drawer.Handle preventCycle className="living-map-handle" aria-hidden={false} aria-label={mobileSnap === MOBILE_SHEET_SNAPS[3] ? "Rest map drawer on the dock" : "Open map drawer fully"} onClick={() => setMobileSnap(mobileSnap === MOBILE_SHEET_SNAPS[3] ? MOBILE_SHEET_SNAPS[0] : MOBILE_SHEET_SNAPS[3])}><span /></Drawer.Handle>
-      <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, DJs…" aria-label="Search the living map" /></label>
+      <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
       <div className="living-map-filter-block" data-vaul-no-drag>
       <h2>Map Filters</h2>
-      <div className="living-map-time" data-vaul-no-drag aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter("soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter("weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter("custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
+      <div className="living-map-time" data-vaul-no-drag aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "default"} className={timeFilter === "default" ? "is-on" : ""} onClick={() => setTimeFilter("default")}>Anytime</button><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
       <div className="living-map-chips" data-vaul-no-drag aria-label="Map layer filters">
         <button type="button" aria-pressed={showEvents} className={showEvents ? "is-on" : ""} onClick={() => setShowEvents(v => !v)}>Eventz</button>
         <button type="button" aria-pressed={showPlaces} className={showPlaces ? "is-on cyan" : "cyan"} onClick={() => setShowPlaces(v => !v)}>Placez</button>
@@ -369,24 +476,24 @@ export default function LivingMap() {
       </div>
       <div className="living-map-drawer-scroll" data-vaul-no-drag>
       {loading && <p className="living-map-state">Loading the city…</p>}
-      {failed && <div className="living-map-state">The map feed could not load. <button onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
+      {failed && <div className="living-map-state">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {!loading && !failed && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
       <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span></div>
-      <div className="living-map-rail" data-vaul-no-drag>
-        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); }} style={{ "--c": dayAccent(e.dayOfWeek) } as CSSProperties}>
+      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next 90 minutes.</p> : <div className="living-map-rail" data-vaul-no-drag>
+        {soonEvents.slice(0, 10).map(e => <button type="button" className="living-map-card event" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onClick={event => { setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek) } as CSSProperties}>
           {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
         </button>)}
-      </div>
+      </div>}
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
-    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={() => { setSelectedEvent(null); setCardOriginRect(null); }} onEventUpdated={setSelectedEvent} />}
-    {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={() => { setSelectedPlace(null); setCardOriginRect(null); }} onRequireAuth={() => setShowAuth(true)} />}
-    {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={() => setSelectedMizzed(null)} />}
-    {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={() => setBoardOverlay(null)} />}
+    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={setSelectedEvent} />}
+    {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
+    {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
+    {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-    {soon && <div className="living-map-coming-backdrop" role="presentation" onClick={closeSoon}><div ref={comingDialogRef} tabIndex={-1} className="living-map-coming" role="dialog" aria-modal="true" aria-labelledby="living-map-coming-title" onClick={e => e.stopPropagation()}><small>Zaylist living map</small><h2 id="living-map-coming-title">{soon} is coming soon</h2><p>This layer is staying visible while we finish it. It is not active yet.</p><button onClick={closeSoon}>Got it</button></div></div>}
+    {soon && <div className="living-map-coming-backdrop" role="presentation" onClick={closeSoon}><div ref={comingDialogRef} tabIndex={-1} className="living-map-coming" role="dialog" aria-modal="true" aria-labelledby="living-map-coming-title" onClick={e => e.stopPropagation()}><small>Zaylist living map</small><h2 id="living-map-coming-title">{soon} is coming soon</h2><p>This layer is staying visible while we finish it. It is not active yet.</p><button type="button" onClick={closeSoon}>Got it</button></div></div>}
   </section>;
 }
