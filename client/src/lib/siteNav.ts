@@ -33,7 +33,7 @@ export type NavEntry =
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
   { type: "link", href: "/about", label: "About", accent: "magenta" },
-  { type: "link", href: "/", label: "Hub", accent: "cyan" },
+  { type: "link", href: "/dashboard", label: "Hub", accent: "cyan" },
   {
     type: "dropdown",
     id: "events",

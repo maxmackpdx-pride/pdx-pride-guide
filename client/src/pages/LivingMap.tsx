@@ -267,7 +267,7 @@ function mapHref(mutate: (params: URLSearchParams) => void): string {
   const params = mapSearchParams();
   mutate(params);
   const qs = params.toString();
-  return qs ? `/?${qs}` : "/";
+  return qs ? `/map?${qs}` : "/map";
 }
 
 function overlayHref(key: OverlayKey | null, id?: number): string {

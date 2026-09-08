@@ -5,6 +5,7 @@ import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
@@ -17,6 +18,7 @@ import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
+import { isLocalDemo } from "./lib/localDemo";
 
 /** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
  *  on those two routes only, not on every OUTZ destination page. */
@@ -51,6 +53,7 @@ import SuspendedAccountGate from "./components/SuspendedAccountGate";
 import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazy(() => import("./pages/Events"));
+const Home = lazy(() => import("./pages/Home"));
 const LivingMap = lazy(() => import("./pages/LivingMap"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Submit = lazy(() => import("./pages/Submit"));
@@ -91,11 +94,17 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
+function SignedInLivingMap() {
+  const { user, loading } = useAuth();
+  if (loading) return <SpectrumLoader variant="full" label="Loading map" />;
+  return user || isLocalDemo() ? <LivingMap /> : <Redirect to="/" />;
+}
+
 function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
   const profile = isProfilePath(location);
-  const livingMap = ["/", "/map"].includes(location.split("?")[0]);
+  const livingMap = location.split("?")[0] === "/map";
   // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
   // uses the global MobileBottomNav only (HubShell member bar removed).
   const adminShell = location.split("?")[0] === "/admin";
@@ -118,10 +127,10 @@ function AppLayout() {
               <Route key={from} path={from}>{() => <Redirect to={to} />}</Route>
             ))}
             <Route path="/z/:communitySlug" component={Community} />
-            <Route path="/" component={LivingMap} />
+            <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
-            <Route path="/map">{() => <Redirect to="/" />}</Route>
+            <Route path="/map" component={SignedInLivingMap} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />

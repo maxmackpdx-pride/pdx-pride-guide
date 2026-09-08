@@ -104,7 +104,8 @@ export default function MobileBottomNav() {
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = navLinkActive(location, "/z");
-  const hubActive = navLinkActive(location, "/");
+  const mapActive = navLinkActive(location, "/map");
+  const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
 
@@ -144,9 +145,13 @@ export default function MobileBottomNav() {
 
   /* The center map control opens the living map directly. */
   const handleHub = () => {
+    if (!user && !localDemo) {
+      setShowAuth(true);
+      return;
+    }
     dismissExcept();
     setHubOpen(false);
-    setLocation("/");
+    setLocation("/map");
   };
 
   const handleMessages = () => {
@@ -349,10 +354,10 @@ export default function MobileBottomNav() {
 
           <button
             type="button"
-            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
+            className={`${tabClass(mapActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
             aria-label="Map"
             title="Map"
-            aria-current={hubActive ? "page" : undefined}
+            aria-current={mapActive ? "page" : undefined}
             onClick={handleHub}
           >
             <MapMark />
