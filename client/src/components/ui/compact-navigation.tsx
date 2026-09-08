@@ -13,7 +13,7 @@ import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDis
 // adapted to Tucker's Caption Dock + Split Rail selection (2026-09-08).
 // Real routes and Radix disclosures replace the catalog's local tab selection.
 const ICONS: Record<string, LucideIcon> = {
-  Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Map,
+  Home, About: Info, Eventz: CalendarDays, Placez: MapPin, Mapz: Map,
   OutZide: TreePine, "Z/ List": Layers, "The Haüz": House, Boards: LayoutGrid,
 };
 const entryKey = (entry: NavEntry) => entry.type === "link" ? entry.href : entry.id;

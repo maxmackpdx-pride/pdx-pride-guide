@@ -85,10 +85,16 @@
 }
 /* Keep the established five-tab mobile dock; reuse the desktop control skin. */
 @media (max-width: 959px) {
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption { display: block !important; position: fixed; inset: auto 0 0; z-index: 120; height: auto; padding: 0 0 env(safe-area-inset-bottom, 0px); background: var(--panel-ink); border: 0; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption { display: block !important; position: fixed; inset: auto 0 0; z-index: 120; height: auto; padding: 0 0 env(safe-area-inset-bottom, 0px); background: radial-gradient(120% 140% at 50% 0%, #12121a 0%, var(--panel-ink) 72%); border: 0; box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--edge-deboss), 0 -30px 60px -20px rgba(0, 0, 0, .8); }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption::after { display: block; background: var(--glow-sheen); height: 30px; }
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .hub-mobile-bar__dock { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 66px; padding: 3px 8px; gap: 4px; }
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .hub-mobile-tab.znav-control { min-width: 0; min-height: 60px; height: 60px; padding: 0; gap: 0; border: 0; background: none; color: var(--text-meta, #999); box-shadow: none; animation: none !important; transform: none; }
-  .hub-mobile-bar.site-mobile-nav--caption .hub-mobile-tab.znav-control.is-active { color: var(--c); box-shadow: none; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .hub-mobile-tab.znav-control { min-width: 0; min-height: 60px; height: 60px; padding: 0; gap: 0; border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .01)); color: var(--text-meta, #999); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); animation: none !important; transform: none; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .hub-mobile-tab.znav-control.is-active { color: var(--c); border-color: var(--c); background: var(--btn-glow-bg); }
+  .site-mobile-nav--caption .hub-mobile-tab.znav-control .znav-icon-row { border: 0; background: none; box-shadow: none; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .hub-mobile-tab.znav-control:hover { border-color: var(--c); color: var(--c); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor), var(--neon-bloom); }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .znav-mapz.znav-control { --c: #f2f2f6; color: #f2f2f6; border-color: rgba(255, 255, 255, .28); background: var(--glow-sheen), var(--panel-card); }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--caption .znav-mapz.znav-control.is-active { border-color: var(--c); }
+  .site-mobile-nav--caption .znav-mapz .hub-mobile-tab__prime-mark { width: 42px; height: 34px; max-width: none; object-fit: contain; }
   .site-mobile-nav--caption .znav-caption { font: 700 10px/14px var(--font-display); letter-spacing: .04em; }
   .site-mobile-nav--caption .znav-icon-row { width: 44px; height: 42px; }
   .site-mobile-nav--caption .hub-mobile-tab::before, .site-mobile-nav--caption .hub-mobile-tab::after { display: none; }

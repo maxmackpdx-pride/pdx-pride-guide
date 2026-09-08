@@ -13,7 +13,7 @@ import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
-import { CalendarDays, MapPin, PanelsTopLeft, LayoutGrid, MessageCircle } from "lucide-react";
+import { CalendarDays, MapPin, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 // Preserve access to the destinations that do not occupy a bottom-bar tab.
@@ -50,7 +50,7 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
-function HubMark() {
+function MapzMark() {
   return (
     <img className="hub-mobile-tab__prime-mark" src="/brand/family/prime-z.svg" width="26" height="22" alt="" aria-hidden="true" />
   );
@@ -64,7 +64,7 @@ function tabClass(
 }
 
 export default function MobileBottomNav() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const { user } = useAuth();
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
@@ -148,17 +148,6 @@ export default function MobileBottomNav() {
   };
 
   const localDemo = isLocalDemo();
-
-  /* Hub is a direct destination. */
-  const handleHub = () => {
-    if (!user && !localDemo) {
-      setShowAuth(true);
-      return;
-    }
-    dismissExcept();
-    setHubOpen(false);
-    setLocation("/dashboard");
-  };
 
   const handleMessages = () => {
     if (!user && !localDemo) {
@@ -356,18 +345,18 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Placez</span>
           </Link>
 
-          <button
-            type="button"
-            className={tabClass(hubActive, "cyan")}
+          <Link
+            href="/map"
+            className={`${tabClass(navLinkActive(location, "/map"), "cyan")} znav-mapz`}
             data-accent="cyan"
-            aria-label="Hub"
-            title="Hub"
-            aria-current={hubActive ? "page" : undefined}
-            onClick={handleHub}
+            aria-label="Mapz"
+            title="Mapz"
+            aria-current={navLinkActive(location, "/map") ? "page" : undefined}
+            onClick={handleNavLink}
           >
-            <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Hub</span>
-          </button>
+            <span className="znav-icon-row"><MapzMark /></span>
+            <span className="znav-caption">Mapz</span>
+          </Link>
 
           <button
             type="button"
