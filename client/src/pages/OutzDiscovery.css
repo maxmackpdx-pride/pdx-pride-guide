@@ -57,3 +57,20 @@
   backdrop-filter:blur(18px) saturate(120%);
   box-shadow:inset 0 1px 0 #ffffff29,inset 0 -1px 0 #ffffff08,0 6px 18px #00000030;
 }
+
+/* Full-bleed transparent contour art behind the page and glass cards. */
+.outz-discovery{position:relative;isolation:isolate;background:#06060a}
+.outz-discovery::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background-image:url('/motifs/outz/topographic-ridge-basin-amber.svg'),url('/motifs/outz/topographic-twin-summits.svg');
+  background-size:760px 760px,940px 940px;
+  background-position:-180px -120px,340px 300px;
+  background-repeat:repeat;
+  opacity:.11;
+}
+.outz-discovery .rugged{background:transparent}
+.outz-discovery .rugged-topo{display:none}
