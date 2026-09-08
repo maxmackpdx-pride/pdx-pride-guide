@@ -1058,10 +1058,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70010",
     "lat": 42.771,
     "lng": -124.144,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
+        "image": "https://farm2.staticflickr.com/1890/43820782945_5892a7e90e_b.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Barklow summit landscape with Copper Mountain view, manzanita and old lookout-site stones; no standing tower is depicted."
+    ],
+    "asset": "/motifs/outz/places/usfs-5233010526.svg"
   },
   {
     "id": "usfs-11231010526",
@@ -1070,10 +1077,17 @@
     "officialUrl": null,
     "lat": 42.752,
     "lng": -124.156,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
+        "image": "https://farm2.staticflickr.com/1865/29793101697_18615fa77c_b.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Barklow northern mountain approach represented by its shared ridge and collapsed shelter timbers amid fir forest; reference is connected mountain trail."
+    ],
+    "asset": "/motifs/outz/places/usfs-11231010526.svg"
   },
   {
     "id": "usfs-11232010526",
@@ -1082,10 +1096,17 @@
     "officialUrl": null,
     "lat": 42.747,
     "lng": -124.182,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
+        "image": "https://farm2.staticflickr.com/1867/30859336368_f0ece17b05_b.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Barklow west approach: twisting madrone and tanoak canopy, pine edge and climbing forest path."
+    ],
+    "asset": "/motifs/outz/places/usfs-11232010526.svg"
   },
   {
     "id": "usfs-5090010324",
@@ -1094,10 +1115,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53134",
     "lat": 45.236301,
     "lng": -121.626001,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/oregon-barlow-creek-campground",
+        "image": "https://thedyrt.com/camping/oregon/oregon-barlow-creek-campground"
+      }
+    ],
+    "visualFeatures": [
+      "Barlow Creek forest campground: small creek beside a shaded tent clearing and the historic Barlow Road corridor."
+    ],
+    "asset": "/motifs/outz/places/usfs-5090010324.svg"
   },
   {
     "id": "usfs-5081010324",
@@ -1106,10 +1134,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53136",
     "lat": 45.2172,
     "lng": -121.6114,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/oregon-barlow-crossing-campground",
+        "image": "https://thedyrt.com/camping/oregon/oregon-barlow-crossing-campground/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Barlow Crossing creekside camp: water winding below a sloped bank, scattered stones and shaded camping."
+    ],
+    "asset": "/motifs/outz/places/usfs-5081010324.svg"
   },
   {
     "id": "usfs-6433007010602",
