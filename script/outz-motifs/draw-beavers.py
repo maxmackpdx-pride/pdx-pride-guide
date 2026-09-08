@@ -1,0 +1,11 @@
+from drawing import pine,save
+save({
+'usfs-5615010274':('Beaver Campground on the Wind River: broadleaf canopy, tent clearing and the documented swingset in the activity area.','https://www.recreation.gov/camping/campgrounds/232864','https://www.recreation.gov/camping/campgrounds/232864#photos',
+'<path d="M23 182L45 99H142L164 182M142 99L118 181M78 100V155M106 100V155M73 155H111M39 212Q112 190 245 219M162 203L194 151 229 203ZM194 151V203M44 242Q123 226 243 245M195 139V66M195 92Q170 96 166 75Q159 58 179 52Q189 28 208 48Q232 46 232 65Q247 86 219 98M195 108L215 88"/>'),
+'usfs-5663497010602':('Beaver Creek Falls at the Sweet Creek confluence: two descending water channels join a fan-shaped cascade among mossy rock and forest.','https://oregondiscovery.com/sweet-creek-trail','https://www.waterfallsnorthwest.com/waterfall/Beaver-Creek-Falls-4703',
+'<path d="M19 129H92L99 160 128 192M119 118L124 151 139 178M244 154H189L164 180M242 171H202L178 192M128 192L88 224M139 178L119 224M164 180L148 228M178 192L176 226M74 231Q133 248 199 231M23 170L70 159 79 194M21 190L48 182 61 212M204 201L225 195 242 217"/>'+pine(35,150,.75)+pine(224,145,.65)),
+'usfs-5084010262':('Beaver Dam group camp: shaded old-growth tent sites and riparian creek habitat along the Beaver Dam Trail.','https://www.recreation.gov/camping/campgrounds/10249153','https://thedyrt.com/camping/oregon/oregon-beaver-dam-campground/gallery',
+'<path d="M20 198Q88 183 129 210T243 213M20 221Q82 206 126 231T244 239M78 172L113 115 151 172ZM113 115V172M151 158L178 117 207 158ZM178 117V158M67 184H157M214 206V181M207 190L214 196 222 187M51 211H70M156 229H178"/>'+pine(31,176,1.9)+pine(227,174,1.7)),
+'usfs-5344010371':('Beaver Swamp Trail descending through mixed forest and fire snags to Fish Lake in Rogue-Umpqua Divide Wilderness.','https://www.southernoregon.org/cities/tiller/outdoor-recreation/trails/beaver-swamp-trailhead/','https://www.flickr.com/photos/forestservicenw/39602075691',
+'<path d="M24 153L82 120 128 139 181 118 244 149M98 175Q146 162 202 177Q232 191 200 202Q156 211 108 198M128 186H196M30 248Q99 230 71 208T110 177M48 250Q122 235 92 207T121 181M54 174V116M54 143L41 131M54 155L67 138M188 164V121M188 142L201 129"/>'+pine(231,201,1)+pine(33,214,.8)),
+})

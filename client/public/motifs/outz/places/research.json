@@ -1296,10 +1296,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31708",
     "lat": 45.85663,
     "lng": -121.95679,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/232864",
+        "image": "https://www.recreation.gov/camping/campgrounds/232864#photos"
+      }
+    ],
+    "visualFeatures": [
+      "Beaver Campground on the Wind River: broadleaf canopy, tent clearing and the documented swingset in the activity area."
+    ],
+    "asset": "/motifs/outz/places/usfs-5615010274.svg"
   },
   {
     "id": "usfs-5663497010602",
@@ -1308,10 +1315,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=42675&actid=50",
     "lat": 43.94119,
     "lng": -123.891433,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://oregondiscovery.com/sweet-creek-trail",
+        "image": "https://www.waterfallsnorthwest.com/waterfall/Beaver-Creek-Falls-4703"
+      }
+    ],
+    "visualFeatures": [
+      "Beaver Creek Falls at the Sweet Creek confluence: two descending water channels join a fan-shaped cascade among mossy rock and forest."
+    ],
+    "asset": "/motifs/outz/places/usfs-5663497010602.svg"
   },
   {
     "id": "usfs-5084010262",
@@ -1320,10 +1334,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69670",
     "lat": 42.30401,
     "lng": -122.36701,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/10249153",
+        "image": "https://thedyrt.com/camping/oregon/oregon-beaver-dam-campground/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Beaver Dam group camp: shaded old-growth tent sites and riparian creek habitat along the Beaver Dam Trail."
+    ],
+    "asset": "/motifs/outz/places/usfs-5084010262.svg"
   },
   {
     "id": "usfs-5344010371",
@@ -1332,10 +1353,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=80574",
     "lat": 43.09346,
     "lng": -122.5171,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.southernoregon.org/cities/tiller/outdoor-recreation/trails/beaver-swamp-trailhead/",
+        "image": "https://www.flickr.com/photos/forestservicenw/39602075691"
+      }
+    ],
+    "visualFeatures": [
+      "Beaver Swamp Trail descending through mixed forest and fire snags to Fish Lake in Rogue-Umpqua Divide Wilderness."
+    ],
+    "asset": "/motifs/outz/places/usfs-5344010371.svg"
   },
   {
     "id": "usfs-5013.005621",
