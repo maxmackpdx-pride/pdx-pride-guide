@@ -19,7 +19,7 @@ type Props = {
   accent?: string | null;
   /** Fixed water color for maps whose category colors must not tint the basemap. */
   waterColor?: string;
-  /** Warm soil and olive terrain for the OutZide discovery map. */
+  /** Burnt orange and charcoal terrain for the OutZide discovery map. */
   warmLand?: boolean;
   topographic?: boolean;
 };
@@ -85,13 +85,13 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
 
     const applyAccent = () => {
       if (warmLand) {
-        if (gl.getLayer("background")) gl.setPaintProperty("background", "background-color", "#514637");
+        if (gl.getLayer("background")) gl.setPaintProperty("background", "background-color", "#3a2119");
         for (const [id, color] of Object.entries({
-          landcover: "#59543c",
-          park_national_park: "#626044",
-          park_nature_reserve: "#686347",
-          landuse: "#65513e",
-          landuse_residential: "#59483a",
+          landcover: "#48271b",
+          park_national_park: "#542d1d",
+          park_nature_reserve: "#603320",
+          landuse: "#66351f",
+          landuse_residential: "#301d17",
         })) {
           if (gl.getLayer(id)) gl.setPaintProperty(id, "fill-color", color);
         }

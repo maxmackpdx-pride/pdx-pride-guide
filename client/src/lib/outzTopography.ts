@@ -21,9 +21,9 @@ export function addOutzTopography(map: Map) {
   map.addLayer({
     id: "outz-relief", type: "hillshade", source: "outz-dem",
     paint: {
-      "hillshade-shadow-color": "#211a13",
-      "hillshade-highlight-color": "#c3ad83",
-      "hillshade-accent-color": "#59432c",
+      "hillshade-shadow-color": "#0e0c0a",
+      "hillshade-highlight-color": "#b96332",
+      "hillshade-accent-color": "#6e341e",
       "hillshade-exaggeration": 0.45,
     },
   }, before);
@@ -39,7 +39,7 @@ export function addOutzTopography(map: Map) {
     id: "outz-contour-lines", type: "line", source: "outz-contours",
     "source-layer": "contours", minzoom: 6,
     paint: {
-      "line-color": "#b39870",
+      "line-color": "#b8754c",
       "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.2, 11, 0.5],
       "line-width": ["match", ["get", "level"], 1, 0.9, 0.4],
     },
@@ -54,6 +54,6 @@ export function addOutzTopography(map: Map) {
       "text-field": ["concat", ["to-string", ["get", "ele"]], " ft"],
       "text-font": font?.type === "symbol" ? font.layout?.["text-font"] : ["Open Sans Regular"],
     },
-    paint: { "text-color": "#d2bd9b", "text-halo-color": "#413728", "text-halo-width": 1 },
+    paint: { "text-color": "#d3a381", "text-halo-color": "#281811", "text-halo-width": 1 },
   }, before);
 }
