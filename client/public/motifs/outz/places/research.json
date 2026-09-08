@@ -856,10 +856,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recreation/recarea/?recid=4265",
     "lat": 44.617772,
     "lng": -122.034343,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://adamschneider.net/photos/2024-06-bm/?p=20240611-120247",
+        "image": "https://adamschneider.net/photos/2024-06-bm/image/20240611-120247.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Bachelor Mountain near Detroit: meadow switchbacks and a rocky alcove framing Coffin Mountain; distinct from Mount Bachelor ski volcano."
+    ],
+    "asset": "/motifs/outz/places/usfs-6432979010602.svg"
   },
   {
     "id": "usfs-5993.004901",
@@ -868,10 +875,17 @@
     "officialUrl": null,
     "lat": 45.2574,
     "lng": -121.3908,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://trailsnw.com/trails/oregon-cascades/badger-creek",
+        "image": "https://trailsnw.com/trails/oregon-cascades/badger-creek"
+      }
+    ],
+    "visualFeatures": [
+      "Lower Badger Creek at the dry east-side forest transition: oak canopy, pines, rocky canyon and winding creek."
+    ],
+    "asset": "/motifs/outz/places/usfs-5993.004901.svg"
   },
   {
     "id": "usfs-5051010324",
@@ -880,10 +894,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52784",
     "lat": 45.3038,
     "lng": -121.5564,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Panoramic_of_Badger_Lake-Mt_Hood_%2823346354642%29.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Badger Lake campground: forested bowl lake framed by a tent clearing and driftwood shoreline; USFS panoramic photo. "
+    ],
+    "asset": "/motifs/outz/places/usfs-5051010324.svg"
   },
   {
     "id": "usfs-6015.004901",
@@ -892,10 +913,17 @@
     "officialUrl": null,
     "lat": 45.28541652,
     "lng": -121.5468118,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Panoramic_of_Badger_Lake-Mt_Hood_%2823346354642%29.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Badger Lake trail approach: path descending around a forested slope to the lake, with the shared trailhead sign. "
+    ],
+    "asset": "/motifs/outz/places/usfs-6015.004901.svg"
   },
   {
     "id": "usfs-4290630010602",
@@ -904,10 +932,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=79271",
     "lat": 44.95402,
     "lng": -122.17943,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/bagby-campground",
+        "image": "https://thedyrt.com/camping/oregon/bagby-campground/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Bagby campground forest tent clearing at the creek confluence, distinct from the hot-spring bathhouse farther up the trail."
+    ],
+    "asset": "/motifs/outz/places/usfs-4290630010602.svg"
   },
   {
     "id": "usfs-5147010324",
@@ -916,10 +951,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52880",
     "lat": 44.95444444,
     "lng": -122.1683333,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/2018/07/16/bagby-trail-to-silver-king-lake/",
+        "image": "https://www.tophotsprings.com/wp-content/uploads/2019/05/private-soaking-tubs-at-bagby-hot-springs-oregon-1600x1066.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Bagby hot-springs trail: timber bathhouse roof and carved log soaking tub, steam lines, and forest footbridge."
+    ],
+    "asset": "/motifs/outz/places/usfs-5147010324.svg"
   },
   {
     "id": "usfs-6146010414",
