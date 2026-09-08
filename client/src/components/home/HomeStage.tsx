@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "wouter";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
@@ -124,10 +123,6 @@ export default function HomeStage({ afterWelcome }: Props) {
             <span className="sr-only">Find your people. Share what matters. Show up together.</span>
             <span key={identityLine} aria-hidden="true">{IDENTITY_LINES[identityLine]}</span>
           </p>
-          <div className="home-front__hero-actions">
-            <Link href="/outz" className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-orange, #ff6600)", fontWeight: 900 }}>Open OUTZ</Link>
-            <Link href="/events" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" style={{ ["--c" as string]: "var(--neon-yellow, #ccff00)" }}>What&apos;s happening</Link>
-          </div>
         </div>
         {afterWelcome}
       </section>
