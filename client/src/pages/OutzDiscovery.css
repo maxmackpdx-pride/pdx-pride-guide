@@ -74,3 +74,10 @@
 }
 .outz-discovery .rugged{background:transparent}
 .outz-discovery .rugged-topo{display:none}
+
+/* OutZide's warm soil surface and restrained rugged grain. */
+.outz-discovery{background:radial-gradient(ellipse at 15% 0%,#4a3425aa,transparent 65%),#211b16}
+.outz-discovery::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url('/motifs/outz/grit.svg') repeat;opacity:.075;mix-blend-mode:soft-light}
+.outz-discovery .rugged .select-place,
+.outz-discovery .rugged .select-place[aria-pressed=true]{background:linear-gradient(135deg,#e5ceb91c,#ffffff03 48%,transparent 70%),#251f19b5}
+.outz-discovery .rugged .select-place::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background:url('/motifs/outz/grit.svg') repeat;opacity:.09;mix-blend-mode:soft-light}
