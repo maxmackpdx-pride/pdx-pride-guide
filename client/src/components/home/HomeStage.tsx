@@ -4,6 +4,7 @@ import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
 import HomeWorldCard from "@/components/home/HomeWorldCard";
 import { WorldFanCarousel } from "@/components/home/WorldFanCarousel";
+import { HandwritingText } from "@/components/ui/handwriting-text";
 import { WORLDS } from "@/lib/homeWorlds";
 import { useHomeWorlds } from "@/lib/useHomeWorlds";
 import {
@@ -19,7 +20,14 @@ export { useHomeStageSamples, HomeStageCard };
 
 const WORDMARK = "/brand/family/zaylist-primary.svg";
 const HERO_VIDEO = "/home/hero-loop.mp4";
-const IDENTITY_LINES = ["Find your people", "Share what matters", "Show up together"] as const;
+const IDENTITY_LINES = [
+  "Find your people",
+  "Share what matters",
+  "Show up together",
+  "You are not a product",
+  "Fuck Meta",
+  "Connection over content",
+] as const;
 
 type Props = {
   afterWelcome?: ReactNode;
@@ -32,6 +40,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [identityLine, setIdentityLine] = useState(0);
+  const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
   const hasPreviewError = Object.values(worldData.states).some(state => state === "error");
 
   useEffect(() => {
@@ -57,14 +66,21 @@ export default function HomeStage({ afterWelcome }: Props) {
   }, [showVideo]);
 
   useEffect(() => {
-    if (calmMode || prefersStillMotion()) {
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setStillIdentity(calmMode || prefersStillMotion());
+    sync();
+    motion.addEventListener("change", sync);
+    return () => motion.removeEventListener("change", sync);
+  }, [calmMode]);
+
+  useEffect(() => {
+    if (stillIdentity) {
       setIdentityLine(0);
       return;
     }
-    if (identityLine >= IDENTITY_LINES.length - 1) return;
-    const timer = window.setTimeout(() => setIdentityLine(line => line + 1), 2200);
+    const timer = window.setTimeout(() => setIdentityLine(line => (line + 1) % IDENTITY_LINES.length), 4000);
     return () => window.clearTimeout(timer);
-  }, [calmMode, identityLine]);
+  }, [stillIdentity, identityLine]);
 
   return (
     <div className="home-front" id="top">
@@ -120,8 +136,14 @@ export default function HomeStage({ afterWelcome }: Props) {
             </div>
           </div>
           <p className="home-front__identity-line">
-            <span className="sr-only">Find your people. Share what matters. Show up together.</span>
-            <span key={identityLine} aria-hidden="true">{IDENTITY_LINES[identityLine]}</span>
+            <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
+              <HandwritingText
+                text={IDENTITY_LINES[identityLine]}
+                animate={!stillIdentity}
+                className="home-front__identity-script"
+                height="1.35em"
+              />
+            </span>
           </p>
         </div>
         {afterWelcome}
