@@ -21,7 +21,7 @@ export function addOutzTopography(map: Map) {
   map.addLayer({
     id: "outz-relief", type: "hillshade", source: "outz-dem",
     paint: {
-      "hillshade-shadow-color": "#000000",
+      "hillshade-shadow-color": "#6B290C",
       "hillshade-highlight-color": "#A8C943",
       "hillshade-accent-color": "#A6420C",
       "hillshade-exaggeration": 0.65,
