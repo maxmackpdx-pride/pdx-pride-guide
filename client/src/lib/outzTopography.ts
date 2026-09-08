@@ -21,10 +21,10 @@ export function addOutzTopography(map: Map) {
   map.addLayer({
     id: "outz-relief", type: "hillshade", source: "outz-dem",
     paint: {
-      "hillshade-shadow-color": "#0e0c0a",
-      "hillshade-highlight-color": "#b96332",
-      "hillshade-accent-color": "#6e341e",
-      "hillshade-exaggeration": 0.45,
+      "hillshade-shadow-color": "#000000",
+      "hillshade-highlight-color": "#FF6600",
+      "hillshade-accent-color": "#A6420C",
+      "hillshade-exaggeration": 0.65,
     },
   }, before);
   map.addSource("outz-contours", {
@@ -39,7 +39,7 @@ export function addOutzTopography(map: Map) {
     id: "outz-contour-lines", type: "line", source: "outz-contours",
     "source-layer": "contours", minzoom: 6,
     paint: {
-      "line-color": "#b8754c",
+      "line-color": "#df6a23",
       "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.2, 11, 0.5],
       "line-width": ["match", ["get", "level"], 1, 0.9, 0.4],
     },
