@@ -136,7 +136,7 @@ export default function MobileBottomNav() {
 
   const localDemo = isLocalDemo();
 
-  /* Hub is a direct destination; Map remains available in Boards. */
+  /* Hub is a direct destination. */
   const handleHub = () => {
     if (!user && !localDemo) {
       setShowAuth(true);

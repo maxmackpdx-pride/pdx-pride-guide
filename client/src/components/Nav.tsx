@@ -705,6 +705,19 @@ export default function Nav() {
                 }}
               />
             )}
+            {(user || localDemo) && (
+              <Link
+                href="/dashboard"
+                className={`site-hub-button site-hub-button--mobile pdx-glass-rebind${hubActive ? " active" : ""}`}
+                aria-current={hubActive ? "page" : undefined}
+                onClick={() => {
+                  setMobileProfileOpen(false);
+                  dismissMobileNavOverlays();
+                }}
+              >
+                Hub
+              </Link>
+            )}
             {user ? (
               <ProfileMenu
                 user={user}
@@ -725,14 +738,6 @@ export default function Nav() {
               />
             ) : localDemo ? (
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <Link
-                  href="/dashboard"
-                  className={`hub-mtop__mode-btn${hubActive ? " is-active is-member" : ""}`}
-                  data-accent="cyan"
-                  onClick={() => dismissMobileNavOverlays()}
-                >
-                  Hub
-                </Link>
                 <Link
                   href={LOCAL_DEMO_PROFILE_PATH}
                   className={`hub-mtop__mode-btn${profileActive ? " is-active is-member" : ""}`}

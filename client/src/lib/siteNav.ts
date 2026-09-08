@@ -68,12 +68,9 @@ export const PRIMARY_NAV: NavEntry[] = [
     label: "More",
     accent: "violet",
     items: [
-      { href: "/z", label: "Z/ Communities", accent: "violet" },
+      { href: "/z", label: "Z/ List", accent: "violet" },
       { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
       { href: "/sellz", label: "Sellz", accent: "orange" },
-      { href: "/map", label: "Map", accent: "blue" },
-      { href: "/", label: "Home", accent: "lime" },
-      { href: "/about", label: "About", accent: "magenta" },
     ],
   },
 ];
@@ -116,12 +113,9 @@ export const BOARD_NAV: NavLinkItem[] = [
   { href: "/pride-work", label: "Gigz", accent: "violet" },
   { href: "/spotted", label: "Mizzed", accent: "magenta" },
   { href: "/gifting", label: "Giftz", accent: "green" },
-  { href: "/z", label: "Z/ Communities", accent: "violet" },
+  { href: "/z", label: "Z/ List", accent: "violet" },
   { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
   { href: "/sellz", label: "Sellz", accent: "orange" },
-  { href: "/map", label: "Map", accent: "blue" },
-  { href: "/", label: "Home", accent: "lime" },
-  { href: "/about", label: "About", accent: "magenta" },
 ];
 
 /**

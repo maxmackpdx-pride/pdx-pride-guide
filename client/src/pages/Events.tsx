@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -29,12 +29,8 @@ import type { UserEventTalentCard } from "@shared/eventTalent";
 import { eventPath, eventUrl } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { List, Grid } from "lucide-react";
-import { lazyWithReload } from "@/lib/lazyWithReload";
-import { MapViewFallback } from "@/components/EventsMapFallback";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 import CountUpValue from "@/components/CountUpValue";
-
-const MapView = lazyWithReload(() => import("@/components/EventsMap").then(m => ({ default: m.MapView })));
 
 import { DAY_SORT_ORDER } from "@shared/eventWeek";
 import { isEventSchedulePast, pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
@@ -328,9 +324,6 @@ export default function Events() {
   const [visibleItemCount, setVisibleItemCount] = useState(GRID_RENDER_BATCH);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [sortMode, setSortMode] = useState<SortMode>("start_time");
-  const [mapExpanded, setMapExpanded] = useState(false);
-  /** Map stays open by default; visitors can hide it to free vertical space. */
-  const [mapVisible, setMapVisible] = useState(true);
   const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
     readSearchParam("tab").toLowerCase() === "schedule" ? "schedule" : "board",
   );
@@ -715,51 +708,6 @@ export default function Events() {
               </div>
             </div>
           </ScrollReveal>
-
-          {/* Map under filter chips so pins track the same selection as the board. */}
-          <div className="events-map-toolbar">
-            <button
-              type="button"
-              className="events-map-toggle"
-              data-testid="button-toggle-events-map"
-              aria-expanded={mapVisible}
-              aria-controls="events-map-panel"
-              onClick={() => {
-                setMapVisible(v => {
-                  if (v) setMapExpanded(false);
-                  return !v;
-                });
-              }}
-            >
-              {mapVisible ? "Hide map" : "Show map"}
-            </button>
-            {mapVisible && !isLoading && (
-              <span className="events-map-toolbar__count" data-testid="events-map-filter-count">
-                Map · {filtered.length} event{filtered.length === 1 ? "" : "s"}
-                {activeChipLabel && activeDay !== "ALL" ? ` · ${activeChipLabel}` : ""}
-                {activeFilters.length > 0 ? ` · ${activeFilters.join(" · ")}` : ""}
-                {pastView ? " · past" : ""}
-              </span>
-            )}
-          </div>
-
-          {mapVisible && (
-            <ScrollReveal>
-              <div id="events-map-panel" className="events-map-row events-map-row--solo">
-                <div className="events-map-row__map">
-                  <Suspense fallback={<MapViewFallback variant="events" />}>
-                    <MapView
-                      events={filtered}
-                      expanded={mapExpanded}
-                      onExpand={() => setMapExpanded(true)}
-                      onCollapse={() => setMapExpanded(false)}
-                      onSelect={openEvent}
-                    />
-                  </Suspense>
-                </div>
-              </div>
-            </ScrollReveal>
-          )}
 
           <div className="board-active-feed__body">
         {isLoading ? (
