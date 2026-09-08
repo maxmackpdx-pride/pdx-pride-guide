@@ -1,0 +1,19 @@
+.outz-discovery .outz-news{margin-top:36px;padding:30px 0;border-top:1px solid #514330;--c:#ff8c00}
+.outz-discovery .outz-news__intro{margin:-8px 0 20px;max-width:760px}
+.outz-discovery .outz-news__filters{margin-bottom:20px}
+.outz-discovery .outz-news__meta{font-size:12px;color:#b4b4bc}
+.outz-discovery .outz-news__list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.outz-discovery .outz-news__item{min-width:0;padding:20px;border:1px solid #39342e;border-left:3px solid var(--c);border-radius:8px;background:var(--glass-sheen),#0d0b09e8;box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--neon-bloom)}
+.outz-discovery .outz-news__item header{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:12px}
+.outz-discovery .outz-news__item .kicker{color:var(--c)}
+.outz-discovery .outz-news__item time{font-size:11px;color:#b4b4bc;flex-shrink:0}
+.outz-discovery .outz-news__item h3{font-size:24px;overflow-wrap:anywhere}
+.outz-discovery .outz-news__place{font-size:12px;margin:8px 0;color:#d8d3ce}
+.outz-discovery .outz-news__body{white-space:pre-line;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;color:#c6c2be}
+.outz-discovery .outz-news__item footer{display:flex;justify-content:space-between;gap:16px;align-items:center;border-top:1px solid #ffffff14;margin-top:16px;padding-top:6px}
+.outz-discovery .outz-news__item footer>span{font-size:11px;color:#a9aab0}
+.outz-discovery .outz-news__item footer a{color:var(--c);display:inline-flex;align-items:center;min-height:44px;white-space:nowrap;text-underline-offset:4px}
+.outz-discovery .outz-news__notice{padding:14px 16px;border-left:3px solid #ff8c00;background:#23180fe0;color:#eed9c2}
+.outz-discovery .outz-news__notice a{text-decoration:underline}
+.outz-discovery .outz-news__empty{padding:20px 0}
+@media(max-width:800px){.outz-discovery .outz-news__list{grid-template-columns:1fr}.outz-discovery .outz-news__item{padding:16px}}

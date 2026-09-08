@@ -1,3 +1,5 @@
+import { getOutzCommunityFeed } from "./outzFeed";
+import { getOutzFeedWeather } from "./outzFeedWeather";
 import { safeMapReturnTo } from "@shared/authReturn";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { eventDatesError } from "@shared/eventIntakeDates";
@@ -1844,6 +1846,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (err) {
       console.error("GET /api/outz failed:", err);
       res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
+    }
+  });
+
+  app.get("/api/outz/feed", async (req: any, res) => {
+    res.setHeader("Cache-Control", "private, no-store");
+    try {
+      const [snapshot, weather] = await Promise.all([getOutzSnapshot(), getOutzFeedWeather()]);
+      res.json({ items: [...weather.items, ...getOutzCommunityFeed(snapshot.data, req.session?.userId)],
+        fetchedAt: new Date().toISOString(), weatherUnavailable: weather.unavailable, weatherUpdatedAt: weather.updatedAt });
+    } catch (error) {
+      console.error("GET /api/outz/feed failed:", error);
+      res.status(502).json({ error: "Outdoor updates are temporarily unavailable" });
     }
   });
 
