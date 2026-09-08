@@ -97,18 +97,27 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
           if (gl.getLayer(id)) gl.setPaintProperty(id, "fill-color", color);
         }
       }
+      if (warmLand) {
+        for (const road of gl.getStyle().layers) {
+          if (road.type === "line" && /^(road|bridge|tunnel)_/.test(road.id) && (road.id.includes("_fill") || road.id.endsWith("_path"))) {
+            gl.setPaintProperty(road.id, "line-color", "#c4c4c4");
+          }
+        }
+      }
       if (waterColor && gl.getLayer("water")) gl.setPaintProperty("water", "fill-color", waterColor);
       if (cyanWater) {
         const waterLayer = gl.getStyle().layers?.find(l => l.id === "water");
         if (waterLayer?.type === "fill") {
-          gl.setPaintProperty("water", "fill-color", "#031c45");
+          gl.setPaintProperty("water", "fill-color", "#000309");
           const layers = gl.getStyle().layers;
           const nextLayer = layers[layers.findIndex(l => l.id === "water") + 1]?.id;
-          // Soft shoreline bands blend cyan through blue into the dark water fill.
+          // Narrow blended shoreline bands keep open ocean almost black; broad bloom stays at 3%.
           for (const [id, color, width, blur, opacity] of [
-            ["outz-water-blue", "#0069b5", 20, 16, 0.8],
-            ["outz-water-cyan", "#00cfe8", 8, 7, 0.8],
-            ["outz-water-edge", "#00ffff", 1.4, 1, 0.9],
+            ["outz-water-bloom", "#00eaff", 20, 16, 0.03],
+            ["outz-water-navy", "#071b70", 10, 6, 0.85],
+            ["outz-water-blue", "#004da8", 6, 4, 0.8],
+            ["outz-water-cyan", "#00bddd", 3, 2, 0.8],
+            ["outz-water-edge", "#00ffff", 0.8, 0.5, 0.9],
           ] as const) {
             gl.addLayer({id, type: "line", source: waterLayer.source,
               "source-layer": waterLayer["source-layer"], filter: waterLayer.filter,
