@@ -17,6 +17,7 @@ import {
   formatEventWhen,
 } from "@/sandbox/ds/mockData";
 import { DsPlaceholder, type DsRegistry, tryLoadComponent } from "@/sandbox/ds/loadDs";
+import AnimatedDrawerDemo from "@/components/ui/animated-drawer-demo";
 
 import "@/components/ds/tokens/index.css";
 import "@/components/ds/styles.css";
@@ -289,6 +290,11 @@ export default function DesignSystemSandbox() {
             ) : (
               <DsPlaceholder name="SearchInput" />
             )}
+
+            <div>
+              <h3 className="ds-sandbox__subheading">Adaptive drawer</h3>
+              <AnimatedDrawerDemo />
+            </div>
           </div>
         </Section>
 
