@@ -31,6 +31,8 @@ export type NavEntry =
  * rest are hairline pills that light up in it on hover.
  */
 export const PRIMARY_NAV: NavEntry[] = [
+  { type: "link", href: "/", label: "Home", accent: "lime" },
+  { type: "link", href: "/about", label: "About", accent: "magenta" },
   {
     type: "dropdown",
     id: "events",
@@ -59,16 +61,16 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
-  { type: "link", href: "/pride-work", label: "Gigz", accent: "violet" },
+  { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
   { type: "link", href: "/spotted", label: "Mizzed", accent: "magenta" },
-  { type: "link", href: "/gifting", label: "Giftz", accent: "green" },
   {
     type: "dropdown",
     id: "more",
     label: "More",
     accent: "violet",
     items: [
-      { href: "/z", label: "Z/ List", accent: "violet" },
+      { href: "/pride-work", label: "Gigz", accent: "violet" },
+      { href: "/gifting", label: "Giftz", accent: "green" },
       { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
       { href: "/sellz", label: "Sellz", accent: "orange" },
     ],

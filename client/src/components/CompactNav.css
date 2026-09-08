@@ -102,7 +102,7 @@
 }
 
 /* Tablet uses a bounded menu before the complete desktop row can collide. */
-@media (min-width: 641px) and (max-width: 1099px) {
+@media (min-width: 641px) and (max-width: 1279px) {
   .site-header--compact .site-header-inner { position: relative; padding: 0 20px; }
   .site-header--compact .site-header-controls { display: flex; margin-left: auto; }
   .site-header--compact .site-nav-toggle { display: inline-flex; min-height: 44px; }
