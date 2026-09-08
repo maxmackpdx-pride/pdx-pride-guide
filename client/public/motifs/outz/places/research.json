@@ -1153,10 +1153,17 @@
     "officialUrl": null,
     "lat": 44.825247,
     "lng": -122.124807,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://cherylhill.net/blog/category/bull-of-the-woods-wilderness/",
+        "image": "https://www.flickr.com/photos/tags/oldcascades/"
+      }
+    ],
+    "visualFeatures": [
+      "Battle Ax summit rock and old lookout footings above Elk Lake, with Mount Jefferson on the horizon."
+    ],
+    "asset": "/motifs/outz/places/usfs-6433007010602.svg"
   },
   {
     "id": "usfs-6537271010602",
@@ -1177,10 +1184,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70438",
     "lat": 42.626,
     "lng": -123.833,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://adventuresoflupe.com/?tag=brandy-peak",
+        "image": "https://adventuresoflupe.com/?tag=brandy-peak"
+      }
+    ],
+    "visualFeatures": [
+      "Bear Camp Ridge FSR23 approach: timbered ridge and saddle trail toward Brandy Peak, based on connected Bear Camp Ridge route photographs."
+    ],
+    "asset": "/motifs/outz/places/usfs-5326.005181.svg"
   },
   {
     "id": "usfs-5357.005571",
@@ -1201,10 +1215,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52786",
     "lat": 45.116725,
     "lng": -121.531659,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/234720",
+        "image": "https://www.recreation.gov/camping/campgrounds/234720#photos"
+      }
+    ],
+    "visualFeatures": [
+      "Bear Springs campground group picnic shelter and tent clearing among east-side Mount Hood pines."
+    ],
+    "asset": "/motifs/outz/places/usfs-5076010324.svg"
   },
   {
     "id": "usfs-5347.004621",
@@ -1237,10 +1258,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70440",
     "lat": 42.602163,
     "lng": -123.881544,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://adventuresoflupe.com/?tag=brandy-peak",
+        "image": "https://adventuresoflupe.com/?tag=brandy-peak"
+      }
+    ],
+    "visualFeatures": [
+      "Brandy Peak narrow rocky summit ridge with successive Coast Range hills visible below it; connected trail photo reference."
+    ],
+    "asset": "/motifs/outz/places/usfs-10109010526.svg"
   },
   {
     "id": "usfs-10110010526",
@@ -1249,10 +1277,17 @@
     "officialUrl": null,
     "lat": 42.6259164,
     "lng": -123.8349326,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://adventuresoflupe.com/?tag=brandy-peak",
+        "image": "https://adventuresoflupe.com/?tag=brandy-peak"
+      }
+    ],
+    "visualFeatures": [
+      "Bearcamp High Ridge: forested crest with switchbacks on the south slope and a glimpse of the bald ridge above Brandy Peak approach."
+    ],
+    "asset": "/motifs/outz/places/usfs-10110010526.svg"
   },
   {
     "id": "usfs-5615010274",
