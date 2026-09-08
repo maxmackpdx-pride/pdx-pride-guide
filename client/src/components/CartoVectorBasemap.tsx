@@ -86,13 +86,13 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
 
     const applyAccent = () => {
       if (warmLand) {
-        if (gl.getLayer("background")) gl.setPaintProperty("background", "background-color", "#18110d");
+        if (gl.getLayer("background")) gl.setPaintProperty("background", "background-color", "#281207");
         for (const [id, color] of Object.entries({
-          landcover: "#35190e",
-          park_national_park: "#4b210d",
-          park_nature_reserve: "#60270d",
-          landuse: "#702d0d",
-          landuse_residential: "#111110",
+          landcover: "#48200b",
+          park_national_park: "#58250b",
+          park_nature_reserve: "#682a0c",
+          landuse: "#78300d",
+          landuse_residential: "#381809",
         })) {
           if (gl.getLayer(id)) gl.setPaintProperty(id, "fill-color", color);
         }
