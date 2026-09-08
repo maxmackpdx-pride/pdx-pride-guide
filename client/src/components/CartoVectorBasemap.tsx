@@ -17,6 +17,8 @@ const PARK_BASE = "#0e0e0e";
 type Props = {
   /** Optional place accent (Rooster orange / Sauvie green) mixed into water and parks. */
   accent?: string | null;
+  /** Fixed water color for maps whose category colors must not tint the basemap. */
+  waterColor?: string;
 };
 
 function canUseWebGL(): boolean {
@@ -32,7 +34,7 @@ function canUseWebGL(): boolean {
   }
 }
 
-export default function CartoVectorBasemap({ accent }: Props) {
+export default function CartoVectorBasemap({ accent, waterColor }: Props) {
   const map = useMap();
 
   useEffect(() => {
@@ -77,8 +79,9 @@ export default function CartoVectorBasemap({ accent }: Props) {
     }
 
     const applyAccent = () => {
+      if (waterColor && gl.getLayer("water")) gl.setPaintProperty("water", "fill-color", waterColor);
       if (!accent) return;
-      const water = mixHex(WATER_BASE, accent, 0.22);
+      const water = waterColor ?? mixHex(WATER_BASE, accent, 0.22);
       const park = mixHex(PARK_BASE, accent, 0.16);
       if (gl.getLayer("water")) gl.setPaintProperty("water", "fill-color", water);
       if (gl.getLayer("park_national_park")) gl.setPaintProperty("park_national_park", "fill-color", park);
@@ -105,7 +108,7 @@ export default function CartoVectorBasemap({ accent }: Props) {
       }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
-  }, [map, accent]);
+  }, [map, accent, waterColor]);
 
   return null;
 }

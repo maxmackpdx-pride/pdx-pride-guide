@@ -39,3 +39,5 @@
 .outz-discovery .rugged .outz-logo{width:min(100%,460px);height:auto;max-height:160px;object-fit:contain;object-position:left center;margin:18px 0 24px}
 @media(max-width:640px){.outz-discovery .rugged .outz-logo{width:100%;max-height:none;margin:18px 0 24px}.outz-discovery .rugged-hero-art{display:none}}
 .outz-discovery .real-map .leaflet-control-zoom a{color:#111!important;background:#fff!important}
+
+.outz-discovery .outz-map-key{display:flex;flex-wrap:wrap;gap:10px 20px;list-style:none;margin:0;padding:14px 16px;border-bottom:1px solid #ffffff18;color:#d7dee0;font-size:12px}.outz-discovery .outz-map-key li{display:flex;align-items:center;gap:7px}.outz-discovery .outz-map-key i{width:9px;height:9px;border-radius:50%;display:inline-block}
