@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import "./PortfolioContactModal.css";
 
 export type PortfolioContactVariant = "message" | "sponsor" | "order";
@@ -54,6 +55,7 @@ export default function PortfolioContactModal({
   onClose,
   variant = "message",
 }: PortfolioContactModalProps) {
+  const dialogRef = useModalA11y({ onClose });
   const isSponsor = variant === "sponsor";
   const isOrder = variant === "order";
   const [name, setName] = useState("");
@@ -144,11 +146,13 @@ export default function PortfolioContactModal({
   return (
     <div className="pcm-overlay" onClick={onClose}>
       <div
+        ref={dialogRef}
         className={`pcm-panel${isSponsor ? " pcm-panel--sponsor" : ""}${isOrder ? " pcm-panel--order" : ""}`}
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="pcm-title"
+        tabIndex={-1}
       >
         <button type="button" className="pcm-close" onClick={onClose} aria-label="Close">
           ✕
@@ -156,7 +160,7 @@ export default function PortfolioContactModal({
 
         {status === "sent" ? (
           <div className="pcm-sent">
-            <h2>
+            <h2 id="pcm-title">
               {isSponsor ? "Pitch sent" : isOrder ? "Order inquiry sent" : "Message sent"}
             </h2>
             <p>

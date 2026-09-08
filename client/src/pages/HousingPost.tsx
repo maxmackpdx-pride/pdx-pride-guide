@@ -253,6 +253,7 @@ export default function HousingPost() {
     onBack: () => navigate("/the-hauz"),
     onRequest: (kind) => {
       if (!requireAuth()) return;
+      if (isOwner) return;
       if (post.myRequest?.status === "ACCEPTED") {
         openSheet({ view: "inbox" });
         return;

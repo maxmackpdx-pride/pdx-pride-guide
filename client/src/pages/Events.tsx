@@ -99,13 +99,21 @@ const EMPTY_DATES = new Set<string>();
 type DayChip = { key: string; label: string };
 
 type DateWindows = {
+  today: string;
+  tonightStart: number;
+  tonightEnd: number;
   weekend: Set<string>;
   thisWeek: Set<string>;
   nextWeek: Set<string>;
 };
 
 function buildDateWindows(nowMs: number): DateWindows {
+  const today = pacificTodayDate(nowMs);
+  const tomorrow = pacDate((parsePacificDateTime(`${today}T12:00:00`) ?? nowMs) + 86400000);
   return {
+    today,
+    tonightStart: parsePacificDateTime(`${today}T18:00:00`) ?? nowMs,
+    tonightEnd: parsePacificDateTime(`${tomorrow}T06:00:00`) ?? nowMs,
     weekend: weekendDates(nowMs),
     thisWeek: weekDates(nowMs, 0),
     nextWeek: weekDates(nowMs, 1),
@@ -115,6 +123,9 @@ function buildDateWindows(nowMs: number): DateWindows {
 /** Date-window filter chips derived from the events in view (year-round). */
 function buildDayChips(pool: EventListing[], pastView: boolean, nowMs: number): DayChip[] {
   const chips: DayChip[] = [{ key: "ALL", label: "All" }];
+  if (!pastView) {
+    chips.push({ key: "TODAY", label: "Today" }, { key: "TONIGHT", label: "Tonight" });
+  }
   const { weekend, thisWeek, nextWeek } = buildDateWindows(nowMs);
 
   // Week windows first - quick “what’s on now / coming up”
@@ -145,6 +156,8 @@ const WINDOW_PALETTE = [
 ];
 function windowAccent(key: string, i: number): string {
   if (key === "ALL") return "var(--neon-cyan)";
+  if (key === "TODAY") return "var(--neon-green)";
+  if (key === "TONIGHT") return "var(--neon-violet)";
   if (key === "THIS_WEEK") return "var(--neon-green)";
   if (key === "NEXT_WEEK") return "var(--neon-cyan)";
   if (key === "WEEKEND") return "var(--neon-magenta)";
@@ -154,8 +167,14 @@ function windowAccent(key: string, i: number): string {
 /** True when event `e` falls inside the selected date window. */
 function eventInWindow(e: EventListing, window: string, windows: DateWindows): boolean {
   if (window === "ALL") return true;
+  if (window === "TONIGHT") {
+    const start = parsePacificDateTime(e.dateStart);
+    const end = parsePacificDateTime(e.dateEnd) ?? start;
+    return start != null && end != null && start < windows.tonightEnd && end > windows.tonightStart;
+  }
   const d = pacificCalendarDate(e.dateStart);
   if (!d) return false;
+  if (window === "TODAY") return d === windows.today;
   if (window === "THIS_WEEK") return windows.thisWeek.has(d);
   if (window === "NEXT_WEEK") return windows.nextWeek.has(d);
   if (window === "WEEKEND") return windows.weekend.has(d);
@@ -224,9 +243,9 @@ function filterBoardEvents(
   nowMs: number,
 ) {
   const windows =
-    activeDay === "WEEKEND" || activeDay === "THIS_WEEK" || activeDay === "NEXT_WEEK"
+    ["TODAY", "TONIGHT", "WEEKEND", "THIS_WEEK", "NEXT_WEEK"].includes(activeDay)
       ? buildDateWindows(nowMs)
-      : { weekend: EMPTY_DATES, thisWeek: EMPTY_DATES, nextWeek: EMPTY_DATES };
+      : { today: "", tonightStart: 0, tonightEnd: 0, weekend: EMPTY_DATES, thisWeek: EMPTY_DATES, nextWeek: EMPTY_DATES };
   return events
     .filter(e => {
       // Live board = upcoming + happening now. Past board = ended only.
@@ -436,7 +455,7 @@ export default function Events() {
   const pastEvents = useMemo(() => events.filter(isPastListing), [events]);
   const poolEvents = pastView ? pastEvents : liveEvents;
 
-  // Date-window chips: All / This week / Next week / This weekend / months
+  // Date-window chips: All / Today / Tonight / week windows / months
   const dayChips = useMemo(() => buildDayChips(poolEvents, pastView, Date.now()), [poolEvents, pastView]);
   const activeChipLabel = dayChips.find(c => c.key === activeDay)?.label ?? null;
   // If the selected window no longer exists in the pool (e.g. after toggling Past), fall back to All.
@@ -725,12 +744,18 @@ export default function Events() {
         ) : filtered.length === 0 ? (
           <div className="board-empty board-empty--prototype">
             <p className="display section-heading">
-              {pastView ? "No past events match" : "Nothing matches"}
+              {poolEvents.length === 0
+                ? pastView ? "No past events yet" : "No upcoming events listed yet"
+                : pastView ? "No past events match" : "Nothing matches"}
             </p>
             <p className="board-copy-sm">
-              {pastView
-                ? "Try another day filter or search. Switch off PAST to return to live listings."
-                : "Try a broader day or filter. Search by venue, neighborhood, or title. Past events live under PAST."}
+              {poolEvents.length === 0
+                ? pastView
+                  ? "Ended events will appear here. Browse live listings to see what is coming up."
+                  : pastEvents.length > 0
+                    ? "There are no upcoming listings right now. Explore past events in the archive, or submit an event you know about."
+                    : "There are no upcoming listings right now. Submit an event to help fill the board."
+                : "Try a broader date or filter. Search by venue, neighborhood, or title."}
             </p>
             <Button
               type="button"
@@ -740,11 +765,19 @@ export default function Events() {
                 setActiveDay("ALL");
                 setActiveFilters([]);
                 setSearchQuery("");
-                setPastView(false);
+                if (poolEvents.length === 0) {
+                  if (!pastView && pastEvents.length === 0) {
+                    setLocation("/submit");
+                  } else {
+                    setPastView(!pastView);
+                  }
+                }
               }}
               style={{ marginTop: 16 }}
             >
-              {pastView ? "Back to live listings" : "Clear filters"}
+              {poolEvents.length === 0
+                ? pastView ? "Back to live listings" : pastEvents.length > 0 ? "Explore the archive" : "Submit an event"
+                : "Clear filters"}
             </Button>
           </div>
         ) : viewMode === "grid" ? (

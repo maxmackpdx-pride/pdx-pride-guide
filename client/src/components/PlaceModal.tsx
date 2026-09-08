@@ -1018,7 +1018,7 @@ export default function PlaceModal({
             <div className="place-modal-panel__tab-panel" role="tabpanel">
             {tab === "events" && (
               upcomingEvents.length === 0 ? (
-                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming Pride events matched to this venue yet.</p>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No upcoming events matched to this venue yet.</p>
               ) : (
                 <div className="place-modal-events">
                   {upcomingEvents.length > 1 && (

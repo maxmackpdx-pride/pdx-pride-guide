@@ -64,6 +64,9 @@ function Field({
 }
 
 export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalProps) {
+  const googleAuthUrl = window.location.pathname === "/map"
+    ? `/api/auth/google?${new URLSearchParams({ returnTo: `${window.location.pathname}${window.location.search}` })}`
+    : "/api/auth/google";
   const [tab, setTab] = useState<"login" | "register">(defaultTab);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -367,12 +370,12 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                   it as a submit and swallow the navigation.
                 */}
                 <a
-                  href="/api/auth/google"
+                  href={googleAuthUrl}
                   data-testid="auth-google"
                   onClick={(e) => {
                     // Full top-level navigation (not SPA), so OAuth completes in Custom Tabs.
                     e.preventDefault();
-                    window.location.assign("/api/auth/google");
+                    window.location.assign(googleAuthUrl);
                   }}
                   className="zay-action pdx-glass-rebind flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-[0.82rem] uppercase text-white/80 no-underline transition-all duration-200 hover:border-white/25 hover:bg-white/[0.07] hover:text-white"
                   style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.05em" }}

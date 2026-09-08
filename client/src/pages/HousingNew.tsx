@@ -1,8 +1,8 @@
 /**
  * Post to THE HAÜZ.
  *
- * One question, four answers. Posting has to take under a minute, so only the
- * headline is required and everything else can be filled in later.
+ * One question, four answers. The headline and any required cover photo get a
+ * post started; optional details can be filled in later.
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -73,8 +73,7 @@ export default function HousingNew() {
   }
 
   return (
-    // The sheet is this page's only content, so it sizes to the viewport rather
-    // than to `.hz`, which has no in-flow children here. See Housing.css.
+    // Keep the standalone composer in document flow so the footer follows it.
     <div className="hz hz--sheetpage pdx-glass-rebind">
       <span className="hz-wash" aria-hidden="true" />
       <span className="hz-grain" aria-hidden="true" />

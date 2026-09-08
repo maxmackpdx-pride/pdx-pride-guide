@@ -355,10 +355,12 @@ function ActionBar({
   post,
   h,
   primary,
+  isOwner,
 }: {
   post: HousingPostView;
   h: HousingDetailHandlers;
   primary: ReactNode;
+  isOwner: boolean;
 }) {
   return (
     <div className="hz-actionbar">
@@ -372,7 +374,7 @@ function ActionBar({
           Share
         </Btn>
         <span style={{ marginLeft: "auto" }} />
-        {primary}
+        {isOwner ? <Mono micro>Your post</Mono> : primary}
       </div>
     </div>
   );
@@ -538,6 +540,7 @@ function LookingDetail({
       <ActionBar
         post={post}
         h={h}
+        isOwner={isOwner}
         primary={
           <RequestButton post={post} h={h} kind="CHAT" icon="message" label={`Chat with ${first}`} />
         }
@@ -550,7 +553,7 @@ function LookingDetail({
 /* Offering a room. Orange. The household is the post.                         */
 /* -------------------------------------------------------------------------- */
 
-function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHandlers }) {
+function OfferingDetail({ post, h, isOwner }: { post: HousingPostView; h: HousingDetailHandlers; isOwner: boolean }) {
   const { people, pets } = splitPeople(post);
   const verified = verificationLabel(post.trust);
   const area = post.areas[0] || "Portland";
@@ -655,6 +658,7 @@ function OfferingDetail({ post, h }: { post: HousingPostView; h: HousingDetailHa
       <ActionBar
         post={post}
         h={h}
+        isOwner={isOwner}
         primary={
           <RequestButton post={post} h={h} kind="CHAT" icon="message" label="Chat with the household" />
         }
@@ -1039,6 +1043,7 @@ function FormingDetail({
       <ActionBar
         post={post}
         h={h}
+        isOwner={isOwner}
         primary={
           isFull ? (
             <RequestButton
@@ -1070,7 +1075,7 @@ export function HousingDetail({
   workspace?: ReactNode;
 }) {
   if (post.type === "LOOKING") return <LookingDetail post={post} h={h} isOwner={isOwner} />;
-  if (post.type === "OFFERING") return <OfferingDetail post={post} h={h} />;
+  if (post.type === "OFFERING") return <OfferingDetail post={post} h={h} isOwner={isOwner} />;
   if (post.type === "MANAGED") return <ManagedDetail post={post} h={h} />;
   return <FormingDetail post={post} h={h} isOwner={isOwner} workspace={workspace} />;
 }

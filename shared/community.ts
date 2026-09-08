@@ -42,7 +42,7 @@ export type CommunityPost = {
 export type CommunityDetail = CommunitySummary & {
   rules: string[];
   moderators: Array<{ id: number; username: string; displayName: string | null; role: CommunityRole }>;
-  posts: CommunityPost[];
+  posts: Array<CommunityPost & { replies: CommunityPost[] }>;
   related: Array<{ type: "event" | "sellz" | "gig" | "place" | "guide"; relationshipType: string; id: string | number; name: string; meta: string | null; url: string }>;
 };
 

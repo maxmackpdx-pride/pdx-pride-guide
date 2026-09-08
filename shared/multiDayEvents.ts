@@ -5,6 +5,7 @@ import {
   EVENT_WEEK_DAYS,
   EVENT_WEEK_END_DATE,
   EVENT_WEEK_START_DATE,
+  prideDayFromDate,
 } from "./eventWeek";
 
 const PACIFIC_TZ = "America/Los_Angeles";
@@ -151,9 +152,7 @@ function dayOfWeekForCalendarDay(dayKey: string): string {
 }
 
 function primaryDayOfWeek(dateStart: string): string {
-  const key = pacificCalendarDate(dateStart);
-  if (!key) return "";
-  return dayOfWeekForCalendarDay(key);
+  return prideDayFromDate(dateStart);
 }
 
 /** Split true multi-day festivals into one listing per Pride day; keep overnights as one row. */
@@ -170,7 +169,7 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
     if (!isMultiDayFestival(event.dateStart, event.dateEnd)) {
       expanded.push({
         ...event,
-        dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),
+        dayOfWeek: primaryDayOfWeek(event.dateStart) || event.dayOfWeek,
       });
       continue;
     }
@@ -206,7 +205,7 @@ export function expandMultiDayEvents<T extends Event>(events: T[]): EventListing
       if (!prideCap || (startKey && startKey <= EVENT_WEEK_END_DATE)) {
         expanded.push({
           ...event,
-          dayOfWeek: event.dayOfWeek || primaryDayOfWeek(event.dateStart),
+          dayOfWeek: primaryDayOfWeek(event.dateStart) || event.dayOfWeek,
         });
       }
     }

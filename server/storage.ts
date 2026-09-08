@@ -10985,6 +10985,8 @@ export const storage: IStorage = {
       gigDate: data.gigDate ?? null,
       gigTime: data.gigTime ?? null,
       imageUrl: data.imageUrl ?? null,
+      isRemote: data.isRemote === undefined ? null : Number(Boolean(data.isRemote)),
+      status: data.status === "LIVE" || data.status === "CLOSED" ? data.status : null,
     };
     sqlite.prepare(`
       UPDATE gig_posts
@@ -10995,7 +10997,9 @@ export const storage: IStorage = {
           location = COALESCE(@location, location),
           gig_date = COALESCE(@gigDate, gig_date),
           gig_time = COALESCE(@gigTime, gig_time),
-          image_url = COALESCE(@imageUrl, image_url)
+          image_url = COALESCE(@imageUrl, image_url),
+          is_remote = COALESCE(@isRemote, is_remote),
+          status = COALESCE(@status, status)
       WHERE id = @id AND user_id = @userId
     `).run(params);
   },
@@ -12447,6 +12451,7 @@ export const storage: IStorage = {
         submissionId: detailSub?.id ?? null,
         eventId: claimSub?.eventId ?? null,
         claimReason: detailSub?.claimReason ?? appSub?.description ?? null,
+        ticketUrl: appSub?.ticketUrl ?? detailSub?.ticketUrl ?? null,
         submitterOrg: detailSub?.submitterOrg ?? null,
         requestedAt: detailSub?.createdAt ?? u.createdAt,
         eventTitle: evt?.title ?? null,

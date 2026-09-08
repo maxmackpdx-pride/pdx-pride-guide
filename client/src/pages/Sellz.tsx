@@ -37,6 +37,7 @@ export default function Sellz() {
   const [sort, setSort] = useState<Sort>("NEWEST");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
+  const [missingLinkedPost, setMissingLinkedPost] = useState(false);
   const deepLinkPostId = useMemo(() => Number(new URLSearchParams(location.search).get("post")), []);
 
   const { data: posts = [], isLoading, isError, refetch } = useQuery<SellzPost[]>({
@@ -79,6 +80,7 @@ export default function Sellz() {
     if (authLoading || deepLinkHandled.current || !deepLinkPostId || isLoading) return;
     const publicMatch = posts.some(post => post.id === deepLinkPostId);
     if (publicMatch) {
+      setMissingLinkedPost(false);
       setExpandedId(deepLinkPostId);
       setTimeout(() => document.getElementById(`sellz-post-${deepLinkPostId}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
       deepLinkHandled.current = true;
@@ -86,10 +88,12 @@ export default function Sellz() {
     }
     if (user && mineIsLoading) return;
     if (user && minePosts.some(post => post.id === deepLinkPostId)) {
+      setMissingLinkedPost(false);
       setView("MINE");
       setExpandedId(deepLinkPostId);
       setTimeout(() => document.getElementById(`sellz-post-${deepLinkPostId}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
     }
+    if (!posts.some(post => post.id === deepLinkPostId) && !minePosts.some(post => post.id === deepLinkPostId)) setMissingLinkedPost(true);
     deepLinkHandled.current = true;
   }, [authLoading, deepLinkPostId, isLoading, mineIsLoading, minePosts, posts, user]);
 
@@ -232,6 +236,7 @@ export default function Sellz() {
           <p aria-live="polite">{filtered.length} {filtered.length === 1 ? "listing" : "listings"}</p>
         </div>
 
+        {missingLinkedPost && <div role="status" className="board-empty"><p>This shared listing is no longer available. It may have been sold or removed.</p><p>Browse the listings below, or sign in to check your own listings.</p></div>}
         {resultsLoading ? <BoardFeedSkeleton label="Loading SELLZ listings" shape="board" count={6} /> : resultsError ? (
           <div className="board-empty board-empty--makeover sellz-market-empty" role="alert">
             <p className="display section-heading">Could not load SELLZ</p>

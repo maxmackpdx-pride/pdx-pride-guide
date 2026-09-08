@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { labelStyle, inputStyle } from "./DashboardProfileEditor";
 import EventTalentPanel from "@/components/EventTalentPanel";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
-import { EVENT_WEEK_DAY_OPTIONS } from "@shared/eventWeek";
+import { prideDayFromDate } from "@shared/eventWeek";
+import { eventDatesError, moveEventStart } from "@shared/eventIntakeDates";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { EVENT_TYPE_PICKER_LABELS } from "@shared/eventTypeTags";
 import type { EventEditFormState } from "@/lib/eventEditForm";
@@ -116,14 +117,6 @@ export function DashboardEventEditForm({
             <input style={inputStyle} value={eventForm.address} onChange={e => setEventForm(f => ({ ...f, address: e.target.value }))} />
           </div>
           <div>
-            <label style={labelStyle}>Day</label>
-            <select style={inputStyle} value={eventForm.dayOfWeek} onChange={e => setEventForm(f => ({ ...f, dayOfWeek: e.target.value }))}>
-              {EVENT_WEEK_DAY_OPTIONS.map(d => (
-                <option key={d.value} value={d.value}>{d.label}</option>
-              ))}
-            </select>
-          </div>
-          <div>
             <label style={labelStyle}>Age requirement</label>
             <select style={inputStyle} value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
               <option value="ALL_AGES">All Ages</option>
@@ -132,12 +125,12 @@ export function DashboardEventEditForm({
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Start</label>
-            <input type="datetime-local" style={inputStyle} value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} />
+            <label style={labelStyle}>Start · Pacific time</label>
+            <input aria-label="Start · Pacific time" type="datetime-local" style={inputStyle} value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, ...moveEventStart(f, e.target.value), dayOfWeek: prideDayFromDate(e.target.value) }))} />
           </div>
           <div>
-            <label style={labelStyle}>End</label>
-            <input type="datetime-local" style={inputStyle} value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} />
+            <label style={labelStyle}>End · Pacific time</label>
+            <input aria-label="End · Pacific time" type="datetime-local" min={eventForm.dateStart || undefined} style={inputStyle} value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} />
           </div>
           <div>
             <label style={labelStyle}>Admission</label>
@@ -280,7 +273,14 @@ export function DashboardEventEditForm({
         >
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => {
+              const error = eventDatesError(eventForm);
+              if (error) {
+                toast({ title: "Check event dates", description: error, variant: "destructive" });
+                return;
+              }
+              onSave();
+            }}
             disabled={saving || deleting}
             className={embedded ? "btn-neon solid event-modal__action-btn" : "dash-btn dash-btn-lime active"}
           >

@@ -4,6 +4,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { injectSeoIntoHtml } from "./seo";
 
+const APP_PATHS = new Set([
+  "/", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/pride-work", "/gifting", "/sellz",
+  "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resume", "/contact", "/sponsors", "/access", "/legal",
+  "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/spotted", "/directory", "/outz", "/design-preview", "/next", "/darkroom",
+]);
+function isAppPath(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, "").toLowerCase() || "/";
+  return APP_PATHS.has(normalized) || /^\/(?:events|directory)\/[^/]+(?:\/[^/]+)?$/.test(normalized)
+    || /^\/(?:z|u|outz|the-hauz)\/[^/]+$/.test(normalized) || /^\/submit\/claim\/[^/]+$/.test(normalized);
+}
+
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "public");
   if (!fs.existsSync(distPath)) {
@@ -24,7 +35,7 @@ export function serveStatic(app: Express) {
         '<head><script>window.__PDX_LOCAL_PREVIEW__=1</script>',
       );
     }
-    res.set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
+    res.status(isAppPath(requestPath) ? 200 : 404).set("Cache-Control", "no-cache").type("html").send(injectSeoIntoHtml(baseIndexHtml, requestPath));
   };
 
   // Short vanity URLs → their canonical page. 302 (not 301) so the target can

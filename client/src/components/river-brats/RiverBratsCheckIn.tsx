@@ -452,7 +452,7 @@ export default function RiverBratsCheckIn({
           {isViewingToday ? "heading out today" : `planned for ${dayLabel}`}
           {" · "}
           {isViewingToday
-            ? "pick when you&apos;ll get there"
+            ? "pick when you’ll get there"
             : "chat opens when you check in · one room for all days"}
         </span>
         {isViewingToday && <OnLocationPill count={onLocationCount} />}
@@ -615,8 +615,8 @@ export default function RiverBratsCheckIn({
             )}
           </div>
           <p className="rb-checkin__fine">
-            Plan up to 7 days ahead. Chat opens when you check in  -  one group room for every day
-            you&apos;re going. You stay until 12 hours after that day ends. Be kind; keep exact
+            Plan up to 7 days ahead. Check in with your username to join one shared room per beach,
+            with everyone going this week. Access lasts until 12 hours after your last check-in day ends. Be kind; keep exact
             meetup details to DMs.
           </p>
 

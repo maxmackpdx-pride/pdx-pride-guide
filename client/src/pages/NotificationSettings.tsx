@@ -26,7 +26,7 @@ export default function NotificationSettings() {
           section="Account"
           title="Notification settings"
           titleAccent="cyan"
-          lede="Sign in to manage push alerts for messages, events, and account updates."
+          lede="Sign in to choose device push alerts for messages, events, and account updates. Your inbox remains available."
         />
         <div className="dash-inner" style={{ maxWidth: 640, padding: "24px 20px 64px" }}>
           <p style={{ color: "#8c8980", marginBottom: 16 }}>You need to be logged in to change notification settings.</p>

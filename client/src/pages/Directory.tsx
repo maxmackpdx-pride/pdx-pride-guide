@@ -116,6 +116,16 @@ const NEIGHBORHOOD_ORDER = [
   "Alberta Arts District",
 ];
 
+/** Collapse spelling variants in filters; keep the listing's original location text. */
+function browseNeighborhood(value?: string | null): string {
+  const raw = (value || "").trim();
+  const area = raw.match(/^(NE|NW|SE|SW|N)\b/i)?.[1]?.toUpperCase();
+  if (area) return area;
+  if (/^Alberta(?: Arts District)?$/i.test(raw)) return "Alberta";
+  if (/online|national/i.test(raw)) return "Online / national";
+  return raw;
+}
+
 const FORM_NEIGHBORHOODS = NEIGHBORHOOD_ORDER.filter(n => n !== "ALL");
 
 /** Group records power Z/ communities and QSearch, but are not public PLACEZ. */
@@ -404,7 +414,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     return visibleBusinesses
       .filter(b => {
         if (activeType !== "ALL" && b.type !== activeType) return false;
-        if (activeNeighborhood !== "ALL" && b.neighborhood !== activeNeighborhood) return false;
+        if (activeNeighborhood !== "ALL" && browseNeighborhood(b.neighborhood) !== browseNeighborhood(activeNeighborhood)) return false;
         if (q) {
           const haystack = [
             b.name,
@@ -437,7 +447,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     const seen = new Set(
       visibleBusinesses
         .filter(b => activeType === "ALL" || b.type === activeType)
-        .map(b => b.neighborhood)
+        .map(b => browseNeighborhood(b.neighborhood))
         .filter((n): n is string => Boolean(n)),
     );
     const ordered = NEIGHBORHOOD_ORDER.filter(n => n === "ALL" || seen.has(n));
@@ -502,13 +512,13 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
       setSubmitResult({
         title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
         desc: hasMatches
-          ? `Your ${noun} is live on the map and listings.${claimLine} We also spotted similar listings you may want to double-check.`
-          : `Your ${noun} is live on the map and listings.${claimLine}`,
+          ? `Your ${noun} is live in the directory. Map placement requires a confirmed street address.${claimLine} We also spotted similar listings you may want to double-check.`
+          : `Your ${noun} is live in the directory. Map placement requires a confirmed street address.${claimLine}`,
         potentialMatches: hasMatches ? potentialMatches : undefined,
       });
       toast({
         title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
-        description: `Your ${isSpaces ? "squad" : "place"} is live on the map and listings.`,
+        description: `Your ${isSpaces ? "squad" : "place"} is live in the directory.`,
       });
     },
     onError: (err: Error) => {
@@ -612,7 +622,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const resultLine = isLoading
     ? "Loading…"
-    : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : "PLACEZ"}`;
+    : `${filtered.length} ${isSpaces ? (filtered.length === 1 ? "squad" : "squadz") : (filtered.length === 1 ? "PLACE" : "PLACEZ")}`;
 
   return (
     <div className={`zine-page directory-page board-page board-page--makeover directory-page--v2${isSpaces ? " directory-page--spaces" : ""}`}>

@@ -10,7 +10,7 @@ import { MeetingScheduler } from "@/components/ui/meeting-scheduler";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { OUTZ_BUTTON_ACCENT, OUTZ_KIND_META, OUTZ_MOTIF, outzTempLabel } from "@/lib/outzKinds";
 import {
   beachCheckinDateOptions,
@@ -45,6 +45,7 @@ type ChatPayload = {
 type RatingPayload = { count: number; average: number | null; mine: number | null };
 type WallPost = {
   id: number;
+  updatedAt?: string | null;
   postKind: "LOOKING_FOR_COMPANY" | "CARPOOL" | "TRIP_NOTE";
   body: string;
   tripDate: string | null;
@@ -91,6 +92,8 @@ export default function OutzPlace() {
   const [message, setMessage] = useState("");
   const [postKind, setPostKind] = useState<WallPost["postKind"]>("LOOKING_FOR_COMPANY");
   const [postBody, setPostBody] = useState("");
+  const [editingWallPost, setEditingWallPost] = useState<number | null>(null);
+  const [editWallBody, setEditWallBody] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
@@ -192,6 +195,16 @@ export default function OutzPlace() {
       queryClient.invalidateQueries({ queryKey: wallKey });
     },
     onError: () => toast({ title: "Couldn’t post to the wall", description: "Try again in a moment.", variant: "destructive" }),
+  });
+  const editWallPost = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: string }) => apiRequest("PATCH", `/api/outz/wall/${id}`, { body }),
+    onSuccess: () => { setEditingWallPost(null); queryClient.invalidateQueries({ queryKey: wallKey }); toast({ title: "Trip post updated" }); },
+    onError: err => toast({ title: "Couldn’t update post", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),
+  });
+  const removeWallPost = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/outz/wall/${id}`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: wallKey }); toast({ title: "Trip post removed" }); },
+    onError: err => toast({ title: "Couldn’t remove post", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),
   });
   const createComment = useMutation({
     mutationFn: ({ postId, body }: { postId: number; body: string }) => apiRequest("POST", `/api/outz/wall/${postId}/comments`, { body }).then(r => r.json()),
@@ -379,8 +392,12 @@ export default function OutzPlace() {
             <div className="outz-wall-feed">
               {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post outz-panel pdx-glass-card pdx-glass-rebind" key={post.id}>
                 <header><span>{post.postKind.replaceAll("_", " ")}</span><time dateTime={post.createdAt}>{post.tripDate ? formatBeachCheckinDateLabel(post.tripDate) : "Trip note"}</time></header>
-                <p>{post.body}</p>
-                <small>{post.isMine ? "You" : post.displayName || post.username || "Member"}</small>
+                {editingWallPost === post.id ? <form onSubmit={event => { event.preventDefault(); editWallPost.mutate({ id: post.id, body: editWallBody.trim() }); }}>
+                  <label><span className="sr-only">Edit your trip post</span><textarea value={editWallBody} maxLength={500} onChange={event => setEditWallBody(event.target.value)} required/></label>
+                  <Button type="submit" size="sm" disabled={editWallPost.isPending || !editWallBody.trim()}>SAVE</Button><Button type="button" size="sm" onClick={() => setEditingWallPost(null)}>CANCEL</Button>
+                </form> : <p>{post.body}</p>}
+                <small>{post.isMine ? "You" : post.displayName || post.username || "Member"}{post.updatedAt ? " · edited" : ""}</small>
+                {post.isMine ? <div className="outz-wall-post__actions"><Button size="sm" onClick={() => { setEditingWallPost(post.id); setEditWallBody(post.body); }}>EDIT</Button><Button size="sm" disabled={removeWallPost.isPending} onClick={() => removeWallPost.mutate(post.id)}>REMOVE</Button></div> : null}
                 {post.comments.length ? <div className="outz-wall-post__comments">{post.comments.map(comment => <p key={comment.id}><strong>{comment.isMine ? "You" : comment.displayName || comment.username || "Member"}</strong>{comment.body}</p>)}</div> : null}
                 <form onSubmit={event => { event.preventDefault(); const body = commentDrafts[post.id]?.trim(); if (body) user ? createComment.mutate({ postId: post.id, body }) : setShowAuth(true); }}><label><span className="sr-only">Reply to this post</span><input type="text" value={commentDrafts[post.id] || ""} maxLength={300} placeholder="Reply" onChange={event => setCommentDrafts(current => ({ ...current, [post.id]: event.target.value }))} /></label><Button type="submit" size="sm" disabled={createComment.isPending || !(commentDrafts[post.id] || "").trim()}>REPLY</Button></form>
               </article>) : <div className="outz-wall-empty">No trip posts yet. Be the one who gets the plan moving.</div>}

@@ -1,5 +1,5 @@
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
@@ -18,6 +18,8 @@ import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
+import AuthModal from "./components/AuthModal";
+import PageHeader from "./components/PageHeader";
 import { isLocalDemo } from "./lib/localDemo";
 
 /** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
@@ -96,8 +98,26 @@ function isProfilePath(path: string) {
 
 function SignedInLivingMap() {
   const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   if (loading) return <SpectrumLoader variant="full" label="Loading map" />;
-  return user || isLocalDemo() ? <LivingMap /> : <Redirect to="/" />;
+  if (user || isLocalDemo()) return <LivingMap />;
+  return (
+    <div className="zine-page board-page">
+      <PageHeader
+        section="Explore"
+        title="Map"
+        titleAccent="cyan"
+        lede="Sign in to explore nearby places, events, and community boards on the map."
+        actions={
+          <button type="button" className="site-login-button" onClick={() => setShowAuth(true)}>
+            LOG IN / JOIN
+          </button>
+        }
+      />
+      <p style={{ padding: "0 24px 32px", color: "var(--text-mid)" }}>Your map will open here after you sign in.</p>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+    </div>
+  );
 }
 
 function AppLayout() {

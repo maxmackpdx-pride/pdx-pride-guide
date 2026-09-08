@@ -228,6 +228,10 @@ export default function Schedule({
   }, [scheduleEvents]);
   const activeWeekStart = weekStart ?? defaultWeekStart;
   const weekColumns = useMemo(() => buildWeekColumns(activeWeekStart), [activeWeekStart]);
+  const weekEvents = useMemo(() => {
+    const dates = new Set(weekColumns.map(column => column.ymd));
+    return scheduleEvents.filter(event => event.calendarDate && dates.has(event.calendarDate));
+  }, [scheduleEvents, weekColumns]);
   const shiftWeek = useCallback(
     (deltaWeeks: number) => setWeekStart(msYmd(ymdMs(activeWeekStart) + deltaWeeks * 7 * 86400000)),
     [activeWeekStart],
@@ -468,7 +472,7 @@ export default function Schedule({
     [embed, view, myScheduleIds],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
-  const viewSet = useMemo(() => scheduleEvents.filter(inView), [scheduleEvents, inView]);
+  const viewSet = useMemo(() => weekEvents.filter(inView), [weekEvents, inView]);
 
   /* ---- time axis labels ------------------------------------------- */
 
@@ -941,18 +945,18 @@ export default function Schedule({
 
   /* ---- toggle + counts -------------------------------------------- */
 
-  const totalVisible = scheduleEvents.filter(pass).length;
-  const myCount = myEventIds.size + myBeachCheckIns.length;
+  const totalVisible = weekEventCount;
+  const myCount = weekEvents.filter(e => myScheduleIds.has(e.id) || isBeachScheduleEvent(e)).length;
   const countPillLabel =
-    view === 'mine' ? myCount + ' in my schedule' : totalVisible + ' events';
+    view === 'mine' ? totalVisible + ' in my schedule this week' : totalVisible + ' events this week';
 
   const heroStats = useMemo(
     () => [
-      { num: scheduleEvents.length, label: "Events on the grid", color: "#19e3ff" },
-      { num: myCount, label: "In your schedule", color: "#ccff00" },
+      { num: totalVisible, label: "Events on the grid", color: "#19e3ff" },
+      { num: myCount, label: "In your schedule this week", color: "#ccff00" },
       { num: 7, label: "Days, one timeline", color: "#ff1fa0" },
     ],
-    [scheduleEvents.length, myCount],
+    [totalVisible, myCount],
   );
 
   /* ---- empty banner ----------------------------------------------- */
@@ -993,9 +997,9 @@ export default function Schedule({
         </>
       ),
     };
-  } else if (totalVisible === 0) {
+  } else if (totalVisible === 0 && anyFilter && viewSet.length > 0) {
     emptyBanner = {
-      copy: "Nothing found. Check the spelling, or drop a word.",
+      copy: "No events this week match your filters.",
       actions: (
         <>
           <Button type="button" variant="solid" accent="cyan" size="sm" className="pdx-glass-rebind" onClick={clearFilters}>

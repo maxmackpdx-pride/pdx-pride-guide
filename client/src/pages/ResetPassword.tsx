@@ -47,13 +47,18 @@ export default function ResetPassword() {
             <p>Your password has been changed. Return to Zaylist and log in with the new password.</p>
             <Link className="zay-action zay-action--solid pdx-glass-rebind" href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
           </>
+        ) : !token ? (
+          <>
+            <p role="alert">This reset link is missing its recovery code. Request a new link from Log in → Forgot password.</p>
+            <Link href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
+          </>
         ) : (
           <form onSubmit={submit}>
             <p style={{ color: "#c8c4bb" }}>Choose a new password. This one-time link expires after use.</p>
-            <label style={labelStyle}>New password</label>
-            <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required autoComplete="new-password" />
-            <label style={labelStyle}>Enter it again</label>
-            <input style={inputStyle} type="password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={6} required autoComplete="new-password" />
+            <label htmlFor="reset-password" style={labelStyle}>New password</label>
+            <input id="reset-password" style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required autoComplete="new-password" />
+            <label htmlFor="reset-password-confirm" style={labelStyle}>Enter it again</label>
+            <input id="reset-password-confirm" style={inputStyle} type="password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={6} required autoComplete="new-password" />
             {error && <div role="alert" style={errorStyle}>{error}</div>}
             <button className="zay-action zay-action--solid pdx-glass-rebind" style={buttonStyle} disabled={loading}>{loading ? "UPDATING..." : "UPDATE PASSWORD →"}</button>
           </form>

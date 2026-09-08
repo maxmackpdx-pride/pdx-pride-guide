@@ -1,5 +1,6 @@
 import type { Event } from "@shared/schema";
 import { jsonTagsToSubmitLabels, submitLabelsToJsonTags } from "@shared/eventTypeTags";
+import { prideDayFromDate } from "@shared/eventWeek";
 
 export type EventEditFormState = {
   title: string;
@@ -36,7 +37,7 @@ export function eventToEditForm(evt: Event): EventEditFormState {
     neighborhood: evt.neighborhood || "SE Portland",
     dateStart: evt.dateStart || "",
     dateEnd: evt.dateEnd || "",
-    dayOfWeek: evt.dayOfWeek || "FRI",
+    dayOfWeek: prideDayFromDate(evt.dateStart),
     ageRequirement: evt.ageRequirement || "ALL_AGES",
     admission: evt.admission || "FREE",
     ticketUrl: evt.ticketUrl || "",
@@ -52,6 +53,7 @@ export function editFormToApiPayload(form: EventEditFormState) {
   const { selectedTypes, ...rest } = form;
   return {
     ...rest,
+    dayOfWeek: prideDayFromDate(form.dateStart),
     eventTypes: submitLabelsToJsonTags(selectedTypes),
   };
 }

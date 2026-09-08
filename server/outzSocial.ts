@@ -74,6 +74,8 @@ function ensureOutzSocialSchema() {
       CREATE INDEX IF NOT EXISTS outz_wall_comments_post_idx
         ON outz_wall_comments(post_id, created_at ASC);
     `);
+    const wallColumns = sqlite.prepare("PRAGMA table_info(outz_wall_posts)").all() as Array<{ name: string }>;
+    if (!wallColumns.some(column => column.name === "updated_at")) sqlite.exec("ALTER TABLE outz_wall_posts ADD COLUMN updated_at TEXT");
   } catch (error) {
     console.error("[outz-social] schema migration failed:", error);
   }
@@ -226,7 +228,7 @@ export function upsertOutzPlaceRating(placeId: string, userId: number, rating: n
 export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
   const posts = sqlite.prepare(`
     SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind, p.body,
-           p.trip_date AS tripDate, p.created_at AS createdAt, u.username, u.display_name AS displayName,
+           p.trip_date AS tripDate, p.created_at AS createdAt, p.updated_at AS updatedAt, u.username, u.display_name AS displayName,
            u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice
     FROM outz_wall_posts p JOIN users u ON u.id = p.user_id
     WHERE p.place_id = ? ORDER BY p.created_at DESC LIMIT 80
@@ -263,4 +265,19 @@ export function createOutzWallComment(input: { postId: number; userId: number; b
     INSERT INTO outz_wall_comments (post_id, user_id, body, created_at) VALUES (?, ?, ?, ?)
   `).run(input.postId, input.userId, input.body, new Date().toISOString());
   return { id: Number(result.lastInsertRowid) };
+}
+
+/** Match the author in the mutation itself, including when a caller supplies another user's ID. */
+export function updateOutzWallPost(id: number, userId: number, body: string) {
+  return sqlite.prepare("UPDATE outz_wall_posts SET body=?, updated_at=? WHERE id=? AND user_id=?")
+    .run(body, new Date().toISOString(), id, userId).changes > 0;
+}
+
+export function deleteOutzWallPost(id: number, userId: number) {
+  return sqlite.transaction(() => {
+    const owned = sqlite.prepare("SELECT id FROM outz_wall_posts WHERE id=? AND user_id=?").get(id, userId);
+    if (!owned) return false;
+    sqlite.prepare("DELETE FROM outz_wall_comments WHERE post_id=?").run(id);
+    return sqlite.prepare("DELETE FROM outz_wall_posts WHERE id=? AND user_id=?").run(id, userId).changes > 0;
+  })();
 }

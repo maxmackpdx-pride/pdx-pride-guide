@@ -1420,30 +1420,6 @@
   padding: 10px 12px;
 }
 
-/*
- * The composer's own page has nothing in it but the sheet.
- *
- * `.hz-sheetwrap` is absolute with `inset: 0`, so it sizes to `.hz`. On the
- * board that is fine, because the feed gives `.hz` thousands of pixels of
- * in-flow height. On /hausing/new the sheet is the only child and it is out of
- * flow, so `.hz` collapses to zero, `inset: 0` resolves against nothing, and
- * `.hz { overflow: hidden }` clips the whole composer. The page rendered blank.
- *
- * Sizing to the viewport instead of to a parent that has no height fixes it.
- * Scoped to this page so the report sheet on a listing, which sits inside a
- * tall page, keeps behaving exactly as it did.
- */
-.hz--sheetpage .hz-sheetwrap {
-  position: fixed;
-  /*
-   * Start below the sticky header. Centering in the full viewport pushed a tall
-   * sheet up underneath it, so the title row and the close button collided with
-   * the header seam. The token is 0 on mobile, where the header scrolls away
-   * and the sheet should have the whole screen.
-   */
-  top: var(--site-header-height, 0px);
-}
-
 /* composer sheet */
 .hz-sheetwrap {
   position: absolute;
@@ -1476,6 +1452,27 @@
   .hz .hz-sheet {
     border-radius: 16px;
   }
+}
+
+/* The standalone composer scrolls with the page. A fixed, out-of-flow sheet
+ * let the site footer overlap its submit button. Other housing sheets remain
+ * overlays; only this page contributes its complete height to the layout. */
+.hz.hz--sheetpage {
+  height: auto;
+  overflow: visible;
+}
+
+.hz--sheetpage .hz-sheetwrap {
+  position: relative;
+  inset: auto;
+  min-height: calc(100dvh - var(--site-header-height, 0px));
+  align-items: flex-start;
+  padding: 20px 0;
+}
+
+.hz--sheetpage .hz-sheet {
+  max-height: none;
+  overflow: visible;
 }
 
 .hz-sheet__head {
@@ -2679,9 +2676,8 @@ html.calm-mode .hz-tag--adult {
 }
 
 /*
- * The mobile bottom nav floats over the page, so a full height sheet buries its
- * own footer buttons underneath it. Pad the sheet's own scroll box, not the
- * wrapper, so the buttons scroll clear instead of the sheet shrinking.
+ * Leave enough page space after the actions to scroll them above the floating
+ * mobile navigation, including devices with a bottom safe area.
  */
 @media (max-width: 1023px) {
   .hz--sheetpage .hz-sheet {

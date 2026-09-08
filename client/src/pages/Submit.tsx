@@ -23,7 +23,8 @@ import PromoterIntake, {
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { ADMISSION_OPTIONS, admissionRequiresTicketUrl } from "@shared/admission";
 import { SUBMIT_EVENT_TYPE_OPTIONS, submitLabelsToJsonTags } from "@shared/eventTypeTags";
-import { EVENT_WEEK_DAY_OPTIONS, defaultEventWeekDateTimes } from "@shared/eventWeek";
+import { prideDayFromDate } from "@shared/eventWeek";
+import { eventDatesError, moveEventStart } from "@shared/eventIntakeDates";
 import "./Submit.css";
 
 const NEIGHBORHOODS = ["NE Portland", "SE Portland", "N Portland", "NW Portland", "SW Portland", "Downtown", "Pearl District", "Other"];
@@ -150,8 +151,7 @@ const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLin
 
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
-  ...defaultEventWeekDateTimes("FRI"),
-  dayOfWeek: "FRI",
+  dateStart: "", dateEnd: "",
   ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
   posterImageUrl: "", isPublic: true, isHouseParty: false,
   isSexPositive: false, nudityOk: false, selectedTypes: [] as string[],
@@ -189,11 +189,12 @@ export default function Submit() {
   const [mode, setMode] = useState<PageMode>(initialMode);
   const [submitStep, setSubmitStep] = useState<SubmitStep>("promoter_app");
   const [eventForm, setEventForm] = useState(emptyEventForm());
+  const [suggestDate, setSuggestDate] = useState("");
   const [flyerReadStatus, setFlyerReadStatus] = useState<"idle" | "reading" | "filled" | "error">("idle");
 
   // Upload a flyer → read it (OCR + vision) → fill blank fields for review.
   // Never clobbers anything the user already typed; dates come from the flyer
-  // when present (the form's default date is only a placeholder).
+  // only when the user has not entered them yet.
   const handleFlyerUploaded = async (url: string) => {
     setEventForm(f => ({ ...f, posterImageUrl: url }));
     setFlyerReadStatus("reading");
@@ -212,8 +213,8 @@ export default function Submit() {
         venueName: f.venueName || fields.venueName || "",
         address: f.address || fields.address || "",
         ticketUrl: f.ticketUrl || fields.ticketUrl || "",
-        ...(fields.dateStart ? { dateStart: fields.dateStart } : {}),
-        ...(fields.dateEnd ? { dateEnd: fields.dateEnd } : {}),
+        dateStart: f.dateStart || fields.dateStart || "",
+        dateEnd: f.dateEnd || fields.dateEnd || "",
       }));
       setFlyerReadStatus("filled");
     } catch {
@@ -402,17 +403,21 @@ export default function Submit() {
   // Event submission mutation
   const eventMutation = useMutation({
     mutationFn: async (opts: { type: "NEW_EVENT" | "SUGGEST" | "CLAIM" }) => {
-      const now = new Date().toISOString();
       const isSuggest = opts.type === "SUGGEST";
+      if (isSuggest && !suggestDate) throw new Error("Choose the event date.");
+      if (opts.type === "NEW_EVENT") {
+        const dateError = eventDatesError(eventForm);
+        if (dateError) throw new Error(dateError);
+      }
       const r = await apiRequest("POST", "/api/submit", {
         type: opts.type,
         ...(isSuggest ? {
           title: eventForm.title,
           venueName: eventForm.venueName || "Unknown",
           description: promoterForm.suggestNote || "Community tip",
-          dateStart: eventForm.dateStart || now,
-          dateEnd: eventForm.dateEnd || now,
-          dayOfWeek: eventForm.dayOfWeek,
+          dateStart: `${suggestDate}T00:00`,
+          dateEnd: `${suggestDate}T23:59`,
+          dayOfWeek: prideDayFromDate(`${suggestDate}T00:00`),
           ageRequirement: "ALL_AGES",
           admission: "FREE",
           isPublic: true,
@@ -424,6 +429,7 @@ export default function Submit() {
           submitterOrg,
         } : {
           ...eventForm,
+          dayOfWeek: prideDayFromDate(eventForm.dateStart),
           eventTypes: submitLabelsToJsonTags(eventForm.selectedTypes),
           submitterOrg,
         }),
@@ -479,6 +485,7 @@ export default function Submit() {
         return;
       }
       setEventForm(emptyEventForm());
+      setSuggestDate("");
       setPromoterForm(emptyPromoterForm());
       setSubmitStep("promoter_app");
       setFlowSuccess(vars.type === "SUGGEST" ? "suggest" : "claim");
@@ -567,8 +574,7 @@ export default function Submit() {
       label: "Place and time",
       complete: eventForm.venueName.trim().length > 0
         && (eventForm.isHouseParty || eventForm.address.trim().length > 0)
-        && eventForm.dateStart.length > 0
-        && eventForm.dateEnd.length > 0,
+        && eventDatesError(eventForm) == null,
     },
     { label: "Entry and details", complete: !ticketRequired || eventForm.ticketUrl.trim().length > 0 },
   ];
@@ -577,7 +583,7 @@ export default function Submit() {
     { label: "Promoter background", complete: promoterForm.appReason.trim().length > 0 },
   ];
   const suggestProgress: ProgressItem[] = [
-    { label: "Event", complete: eventForm.title.trim().length > 0 },
+    { label: "Event", complete: eventForm.title.trim().length > 0 && suggestDate.length > 0 },
     { label: "Source", complete: eventForm.ticketUrl.trim().length > 0 || promoterForm.suggestNote.trim().length > 0 },
   ];
   const claimProgress: ProgressItem[] = [
@@ -695,7 +701,7 @@ export default function Submit() {
                 <div className="submit-clarifier__kicker">Submit or Apply, what is the difference?</div>
                 <div className="submit-clarifier__cols">
                   <p>
-                    <strong className="submit-clarifier__lime">Submit</strong> posts your event now and gets you verified in the same step. Do this if you have an event to list today.
+                    <strong className="submit-clarifier__lime">Submit</strong> sends your event and promoter application for review together. Verified promoters can publish immediately. Do this if you have an event to list today.
                   </p>
                   <p>
                     <strong className="submit-clarifier__purple">Apply</strong> just gets you verified, with nothing to post yet. Do this if you want the fast lane ready for later.
@@ -863,27 +869,14 @@ export default function Submit() {
                         />
                       </label>
                       <label>
-                        Day
-                        <select
-                          className="board-text-field"
-                          value={eventForm.dayOfWeek}
-                          onChange={e => {
-                            const day = e.target.value;
-                            setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
-                          }}
-                        >
-                          {EVENT_WEEK_DAY_OPTIONS.map(d => (
-                            <option key={d.value} value={d.value}>{d.label}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
                         Start <span aria-hidden="true">*</span>
-                        <input className="board-text-field" type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, dateStart: e.target.value }))} required />
+                        <input className="board-text-field" type="datetime-local" value={eventForm.dateStart} onChange={e => setEventForm(f => ({ ...f, ...moveEventStart(f, e.target.value) }))} required />
+                        <span className="submit-optional">{prideDayFromDate(eventForm.dateStart) ? `${prideDayFromDate(eventForm.dateStart)} · ` : ""}Pacific time</span>
                       </label>
                       <label>
                         End <span aria-hidden="true">*</span>
-                        <input className="board-text-field" type="datetime-local" value={eventForm.dateEnd} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
+                        <input className="board-text-field" type="datetime-local" value={eventForm.dateEnd} min={eventForm.dateStart || undefined} onChange={e => setEventForm(f => ({ ...f, dateEnd: e.target.value }))} required />
+                        <span className="submit-optional">Pacific time. For overnight events, choose the following date.</span>
                       </label>
                       </div>
                     </FormSection>
@@ -1100,7 +1093,7 @@ export default function Submit() {
               onSubmit={e => { e.preventDefault(); setFormError(null); if (!user) { openAuth(); return; } eventMutation.mutate({ type: "SUGGEST" }); }}
             >
               <FormProgress items={suggestProgress} accent="magenta" />
-              <FormSection number={1} title="The event" help="Share whatever you know. Only the event name is required." accent="magenta">
+              <FormSection number={1} title="The event" help="Share the event name and date, plus anything else you know." accent="magenta">
                 <div className="gifting-form-grid">
                   <label className="span">
                     Event name <span aria-hidden="true">*</span>
@@ -1111,19 +1104,15 @@ export default function Submit() {
                     <input className="board-text-field" value={eventForm.venueName} onChange={e => setEventForm(f => ({ ...f, venueName: e.target.value }))} placeholder="Venue name or neighborhood" />
                   </label>
                   <label>
-                    Day
-                    <select
+                    Event date <span aria-hidden="true">*</span>
+                    <input
                       className="board-text-field"
-                      value={eventForm.dayOfWeek}
-                      onChange={e => {
-                        const day = e.target.value;
-                        setEventForm(f => ({ ...f, dayOfWeek: day, ...defaultEventWeekDateTimes(day) }));
-                      }}
-                    >
-                      {EVENT_WEEK_DAY_OPTIONS.map(d => (
-                        <option key={d.value} value={d.value}>{d.label}</option>
-                      ))}
-                    </select>
+                      type="date"
+                      value={suggestDate}
+                      onChange={e => setSuggestDate(e.target.value)}
+                      required
+                    />
+                    <span className="submit-optional">Pacific date. Add any known times in the note below.</span>
                   </label>
                 </div>
               </FormSection>

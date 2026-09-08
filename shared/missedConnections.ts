@@ -1,14 +1,46 @@
 const PACIFIC_TZ = "America/Los_Angeles";
 const POST_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const PACIFIC_OFFSET_FORMAT = new Intl.DateTimeFormat("en-US", {
+  timeZone: PACIFIC_TZ,
+  timeZoneName: "longOffset",
+});
+const pacificWallTimeCache = new Map<string, number | null>();
 
+function pacificOffsetMs(epochMs: number): number {
+  const name = PACIFIC_OFFSET_FORMAT.formatToParts(new Date(epochMs))
+    .find(part => part.type === "timeZoneName")?.value || "";
+  const match = name.match(/^GMT([+-])(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return 0;
+  const seconds = Number(match[2]) * 3600 + Number(match[3]) * 60 + Number(match[4] || 0);
+  return (match[1] === "-" ? -1 : 1) * seconds * 1000;
+}
+
+/** Pacific wall time; fall-back repeats use the earlier instant, spring gaps are invalid. */
 export function parsePacificDateTime(value?: string | null): number | null {
-  if (!value) return null;
-  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) {
+  if (typeof value !== "string" || !value) return null;
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(value)) {
     const t = new Date(value).getTime();
     return Number.isFinite(t) ? t : null;
   }
-  const t = new Date(`${value}-07:00`).getTime();
-  return Number.isFinite(t) ? t : null;
+  if (pacificWallTimeCache.has(value)) return pacificWallTimeCache.get(value)!;
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?)?$/);
+  if (!match) return null;
+  const normalized = `${match[1]}T${match[2] || "00"}:${match[3] || "00"}:${match[4] || "00"}.${(match[5] || "0").padEnd(3, "0").slice(0, 3)}Z`;
+  const wallMs = Date.parse(normalized);
+  if (!Number.isFinite(wallMs) || new Date(wallMs).toISOString() !== normalized) return null;
+
+  // Offsets on either side cover both candidates at a daylight-saving change.
+  // A candidate is valid only if its actual zone offset matches the assumed one.
+  const offsets = new Set([pacificOffsetMs(wallMs - 86400000), pacificOffsetMs(wallMs + 86400000)]);
+  const candidates = [...offsets]
+    .map(offset => ({ offset, epochMs: wallMs - offset }))
+    .filter(({ offset, epochMs }) => pacificOffsetMs(epochMs) === offset)
+    .map(({ epochMs }) => epochMs);
+  const result = candidates.length ? Math.min(...candidates) : null;
+  // Event lists repeatedly parse the same timestamps; keep this cache bounded.
+  if (pacificWallTimeCache.size >= 4096) pacificWallTimeCache.clear();
+  pacificWallTimeCache.set(value, result);
+  return result;
 }
 
 export function pacificCalendarDate(value?: string | null): string | null {

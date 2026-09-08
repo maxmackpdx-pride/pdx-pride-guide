@@ -3,8 +3,8 @@ import { parsePacificDateTime, pacificCalendarDate } from "@shared/missedConnect
 import type { EventListing } from "@shared/multiDayEvents";
 import { Z_OUT_BEACH_PATHS, type NudeBeachTab } from "@shared/nudeBeaches";
 import {
-  EVENT_WEEK_DAY_OPTIONS,
   EVENT_WEEK_DAYS,
+  prideDayFromDate,
   type AdmKey,
   type DayKey,
   type EventType,
@@ -73,8 +73,8 @@ export type ScheduleEvent = PrideEvent & {
 };
 
 function dayKeyFromCalendarDate(ymd: string): DayKey | null {
-  const hit = EVENT_WEEK_DAY_OPTIONS.find(d => d.date === ymd);
-  return hit ? (hit.value as DayKey) : null;
+  const day = prideDayFromDate(`${ymd}T12:00`);
+  return (EVENT_WEEK_DAYS as readonly string[]).includes(day) ? day as DayKey : null;
 }
 
 function isNudeBeachTab(id: string): id is NudeBeachTab {
@@ -82,7 +82,7 @@ function isNudeBeachTab(id: string): id is NudeBeachTab {
 }
 
 /**
- * Map a personal beach check-in onto the Pride Week schedule grid with
+ * Map a personal beach check-in onto its calendar week's schedule grid with
  * beach-branded flyer art (same block treatment as event flyers).
  */
 export function beachCheckinToScheduleEvent(row: BeachCheckinScheduleRow): ScheduleEvent | null {
@@ -226,7 +226,7 @@ export function eventListingToScheduleEvent(
   event: EventListing,
   going = 0,
 ): ScheduleEvent | null {
-  const day = event.dayOfWeek as DayKey;
+  const day = prideDayFromDate(event.dateStart) as DayKey;
   if (!day || !(EVENT_WEEK_DAYS as readonly string[]).includes(day)) return null;
 
   const startMin = pacificClockMinutes(event.dateStart);

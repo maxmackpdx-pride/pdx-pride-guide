@@ -40,7 +40,7 @@ export default function HubSettings({ onLogout }: Props) {
       <div className="card hub-settings__card hub-settings__card--tight pdx-glass-rebind">
         <div className="kick hub-settings__section-kick">Notifications</div>
         <p className="hub-settings__lede">
-          These save to your account - push alerts for messages, events, and account updates.
+          Choose the device push alerts you receive. Messages and account notices remain available in your inbox.
         </p>
         <div className="hub-settings__prefs">
           <DashboardNotificationPrefs isAdmin={isAdmin} embedded />

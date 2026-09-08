@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import BoardLoadingState from "@/components/BoardLoadingState";
 import { DAY_SORT_ORDER, EVENT_WEEK_DAYS } from "@shared/eventWeek";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { findSubmissionMatches, type SubmissionMatchCandidate } from "@shared/submissionMatch";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import {
@@ -102,6 +103,7 @@ interface PromoterRequest extends AdminUserProfile {
   eventId: number | null;
   eventTitle: string | null;
   claimReason: string | null;
+  ticketUrl: string | null;
   submitterOrg: string | null;
   requestedAt: string;
   promoterStatus?: string;
@@ -2883,6 +2885,7 @@ export default function Admin() {
                     <div className="space-y-2">
                       {(pendingPromoters.length > 0 ? pendingPromoters : pendingPromoterUsers).map(u => {
                         const uid = u.id as number;
+                        const proofUrl = "ticketUrl" in u ? publicHttpUrl(u.ticketUrl) : null;
                         return (
                         <div
                           key={uid}
@@ -2899,6 +2902,7 @@ export default function Admin() {
                               {"claimReason" in u && u.claimReason ? (
                                 <span className="block mt-1 text-white/35 line-clamp-2">{String(u.claimReason)}</span>
                               ) : null}
+                              {proofUrl && <a className="block mt-2 underline text-white/80" href={proofUrl} target="_blank" rel="noopener noreferrer">View application proof</a>}
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">

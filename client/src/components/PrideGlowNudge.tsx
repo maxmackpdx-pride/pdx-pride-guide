@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { AVATAR_EMOJI_OPTIONS, AVATAR_RING_OPTIONS } from "@shared/avatarRings";
@@ -15,6 +16,17 @@ import { useToast } from "@/hooks/use-toast";
 
 const SEEN_PREFIX = "pgpdx:glow-nudge:v1:";
 const CROP_CANVAS = 240;
+const NUDGE_IDLE_MS = 8_000;
+const NUDGE_BROWSE_PATHS = new Set(["/", "/events", "/schedule", "/directory", "/map", "/about", "/access"]);
+
+/** Only offer appearance setup during idle browsing, outside another task. */
+function canOfferAppearanceNudge(): boolean {
+  if (document.hidden || !NUDGE_BROWSE_PATHS.has(window.location.pathname)) return false;
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && (active.matches("input, textarea, select") || active.isContentEditable)) return false;
+  return !Array.from(document.querySelectorAll<HTMLElement>('form, [role="dialog"], [aria-modal="true"], .hz-sheetwrap'))
+    .some(node => node.getClientRects().length > 0 && getComputedStyle(node).visibility !== "hidden");
+}
 
 /** True when the ring is unset / the explicit "none" default. */
 function ringMissing(ring?: string | null): boolean {
@@ -42,6 +54,7 @@ function forcedPreview(): boolean {
  * member (localStorage); `?glowNudge=1` force-shows it for previewing.
  */
 export default function PrideGlowNudge() {
+  const [location] = useLocation();
   const { user, loading, refreshUser } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -78,19 +91,40 @@ export default function PrideGlowNudge() {
         alreadySeen = false;
       }
       if (alreadySeen) return;
-      // Mark seen the moment we decide to show it, so it appears only once.
-      try {
-        localStorage.setItem(seenKey, "1");
-      } catch {
-        /* ignore */
-      }
     }
-    setChoice(user.avatarChoice || 1);
-    setRing(user.avatarRing || "none");
-    setMode(user.photoUrl ? "photo" : "avatar");
-    const t = window.setTimeout(() => setOpen(true), forced ? 0 : 900);
-    return () => window.clearTimeout(t);
-  }, [loading, user, seenKey, needsRing, needsAvatar]);
+    let timer: number;
+    const offer = () => {
+      if (!forced && !canOfferAppearanceNudge()) {
+        timer = window.setTimeout(offer, NUDGE_IDLE_MS);
+        return;
+      }
+      // Deferring is not seeing: remember it only once it actually opens.
+      if (!forced && seenKey) {
+        try {
+          localStorage.setItem(seenKey, "1");
+        } catch {
+          /* ignore */
+        }
+      }
+      setChoice(user.avatarChoice || 1);
+      setRing(user.avatarRing || "none");
+      setMode(user.photoUrl ? "photo" : "avatar");
+      setOpen(true);
+      stopListening();
+    };
+    const waitForIdle = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(offer, forced ? 0 : NUDGE_IDLE_MS);
+    };
+    const events = ["pointerdown", "keydown", "focusin", "scroll"] as const;
+    const stopListening = () => events.forEach(event => window.removeEventListener(event, waitForIdle, true));
+    if (!forced) events.forEach(event => window.addEventListener(event, waitForIdle, { capture: true, passive: true }));
+    waitForIdle();
+    return () => {
+      window.clearTimeout(timer);
+      stopListening();
+    };
+  }, [loading, user, seenKey, needsRing, needsAvatar, location]);
 
   // Escape to dismiss.
   useEffect(() => {

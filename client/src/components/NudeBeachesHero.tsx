@@ -81,7 +81,7 @@ export default function NudeBeachesHero({ activeTab, snapshot, statsKey, tabs }:
           }
           lede={
             isRooster
-              ? "River level, air and water temps, forecast, directions, and day-use parking pass info - plus a GPS group chat that unlocks once you're actually on the beach."
+              ? "River level, air and water temps, forecast, directions, and day-use parking pass info - plus a shared beach chat that opens when you plan a check-in with your username. GPS only confirms when you are there."
               : "Swim Guide water quality, Sauvie Island Parking permits, island weather, and the links Collins Beach travelers use."
           }
         />

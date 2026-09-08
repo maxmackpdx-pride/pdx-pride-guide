@@ -1,6 +1,7 @@
 import type { Category } from "./types";
 
 const QUICK: Record<Category, string[]> = {
+  messages: ["Thanks for reaching out", "Tell me more", "Got it, thanks"],
   spotted: ["Yes, that was me", "Let us meet up", "Not sure that is me"],
   gigs: ["The slot is open", "Send the mix", "Let me check the lineup"],
   gifting: ["Still available?", "When works for pickup?", "Thanks - on my way"],

@@ -4,6 +4,7 @@ import { C } from "./sheet";
 import "../inbox-experiment.css";
 
 const CAT_TAG: Record<string, { label: string; color: string }> = {
+  messages: { label: "MESSAGE", color: C.cyan },
   spotted: { label: "MISSED CONN", color: C.magenta },
   gigs: { label: "GIG", color: C.purple },
   gifting: { label: "GIFTING", color: C.lime },

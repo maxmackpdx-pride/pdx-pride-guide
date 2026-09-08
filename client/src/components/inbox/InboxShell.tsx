@@ -35,6 +35,7 @@ export interface InboxProps {
 }
 
 const CATC: Record<Category, string> = {
+  messages: "var(--cyan)",
   spotted: "var(--pink)",
   gigs: "var(--cyan)",
   gifting: "var(--neon-yellow, #ccff00)",
@@ -44,6 +45,7 @@ const CATC: Record<Category, string> = {
   checkins: "var(--green)",
 };
 const BADGE: Record<Category, string> = {
+  messages: "Message",
   spotted: "MIZZED CONNECTION",
   gigs: "Gig",
   gifting: "GIFTZ",
@@ -54,6 +56,7 @@ const BADGE: Record<Category, string> = {
 };
 const CATS: Array<[string, string]> = [
   ["all", "All"],
+  ["messages", "Messages"],
   ["spotted", "MIZZED CONNECTION"],
   ["gigs", "GIGZ"],
   ["gifting", "GIFTZ"],
@@ -655,7 +658,9 @@ export function InboxShell({
         ? "You are all caught up. No unread messages."
         : folder === "sent"
           ? "You have not sent anything yet."
-          : "This filter is empty.";
+          : threads.length === 0
+            ? "No conversations yet. Message someone from their profile, an event, or a listing to get started."
+            : "No conversations in this filter. Choose All to see your inbox.";
   }
 
   // keep the message pane pinned to the latest message

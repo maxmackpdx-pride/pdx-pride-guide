@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { DIRECTORY_TYPES, DIRECTORY_TYPE_ADMIN_LABELS } from "@shared/directoryTheme";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
 import "../inbox-experiment.css";
@@ -34,6 +35,7 @@ type QueueRow = {
   fields: Array<[string, string]>;
   note: string;
   body?: string;
+  proofUrl?: string;
   /** Owner-desk contact/sponsor messages: reply target + file links. */
   replyEmail?: string;
   attachments?: string[];
@@ -126,6 +128,7 @@ function mapSubmission(s: any, completed = false): QueueRow | null {
     fields,
     note: s.description || "",
     body: s.claimReason || undefined,
+    proofUrl: s.type === "PROMOTER_APPLICATION" ? publicHttpUrl(s.ticketUrl) || undefined : undefined,
     outcome: completed ? status : undefined,
     completedAt: completed ? String(s.createdAt || "") : undefined,
     readOnly: completed,
@@ -315,6 +318,7 @@ function mapPromoterRequest(r: any): QueueRow {
     meta: `Promoter request${r.requestedAt ? " · " + ts(r.requestedAt) : ""}`,
     fields,
     note: String(r.claimReason || ""),
+    proofUrl: publicHttpUrl(r.ticketUrl) || undefined,
   };
 }
 
@@ -1217,6 +1221,11 @@ export default function QueueView({
                   </div>
                 ))}
               </div>
+            )}
+            {q.proofUrl && (
+              <a href={q.proofUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: 10, color: C.cyan, textDecoration: "underline" }}>
+                View application proof
+              </a>
             )}
             {(q.note || q.body) && (
               <div style={{ marginTop: 10, background: C.inset, borderRadius: 12, padding: "11px 13px", fontSize: 12.5, color: C.muted, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>

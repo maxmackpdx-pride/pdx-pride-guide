@@ -230,7 +230,7 @@ export default function RiverBratsGroupChat({
       <MaybeAdultGate gated={checkedIn}>
       <div className="rb-group-chat__thread" ref={listRef}>
         <div className="rb-group-chat__day-marker">
-          Opens {RIVER_BRATS_CHAT_OPENS_COPY} · one room for every day you&apos;re going ·{" "}
+          Opens {RIVER_BRATS_CHAT_OPENS_COPY} · one shared room per beach ·{" "}
           {RIVER_BRATS_CHAT_CLOSES_AT}
         </div>
         {isLoading && !locked && <p className="rb-group-chat__empty">Loading chat…</p>}

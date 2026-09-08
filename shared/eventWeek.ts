@@ -100,6 +100,15 @@ export function defaultEventWeekDateTimes(day: string) {
 
 /** Pacific weekday code ("MON"…"SUN") for a stored event dateStart; "" if unparseable. */
 export function prideDayFromDate(dateStart?: string | null): string {
+  // Intake uses Pacific wall-clock strings. Read their calendar date directly,
+  // including winter dates, instead of applying a fixed summer UTC offset.
+  if (dateStart && /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)?$/.test(dateStart)) {
+    const date = new Date(`${dateStart.slice(0, 10)}T12:00:00Z`);
+    if (Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === dateStart.slice(0, 10)) {
+      return ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][date.getUTCDay()];
+    }
+    return "";
+  }
   const ms = parsePacificDateTime(dateStart);
   if (ms == null) return "";
   return pacificDayOfWeek(ms);

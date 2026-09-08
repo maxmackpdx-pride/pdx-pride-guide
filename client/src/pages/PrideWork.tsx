@@ -150,9 +150,9 @@ export default function PrideWork() {
   });
 
   const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
-    queryKey: ["/api/gigs"],
+    queryKey: ["/api/gigs", onlyMine],
     queryFn: async () => {
-      const r = await fetch("/api/gigs", { credentials: "include" });
+      const r = await fetch(`/api/gigs${onlyMine ? "?mine=1" : ""}`, { credentials: "include" });
       if (!r.ok) throw new Error(`${r.status}: ${(await r.text()) || r.statusText}`);
       return r.json();
     },
@@ -766,6 +766,18 @@ export function GigListingCard({
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [messageBody, setMessageBody] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ title: gig.title, description: gig.description, skills: gig.skills || "", compensation: gig.compensation || "", location: gig.location || "", gigDate: gig.gigDate || "", gigTime: gig.gigTime || "", isRemote: !!gig.isRemote });
+  const updateMutation = useMutation({
+    mutationFn: (changes: Record<string, unknown>) => apiRequest("PUT", `/api/gigs/${gig.id}`, changes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
+      setEditing(false);
+      toast({ title: "Post updated", description: "Completed posts remain in My posts. You can reopen them there." });
+    },
+    onError: (error: Error) => toast({ title: "Could not update post", description: error.message, variant: "destructive" }),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => apiRequest("DELETE", `/api/gigs/${gig.id}`),
@@ -952,6 +964,13 @@ export function GigListingCard({
             {gig.username && profileHref ? (
               <Link href={profileHref}>View @{gig.username}&apos;s profile</Link>
             ) : null}
+            {gig.isMine && <>
+              <button type="button" onClick={() => setEditing(!editing)}>Edit post</button>
+              <button type="button" disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ status: gig.status === "CLOSED" ? "LIVE" : "CLOSED" })}>
+                {gig.status === "CLOSED" ? "Reopen post" : isLooking ? "Mark work found" : "Mark filled"}
+              </button>
+              {gig.status === "CLOSED" && <span role="status">Completed · visible only in your posts</span>}
+            </>}
             {gig.isMine ? (
               <button
                 type="button"
@@ -965,6 +984,15 @@ export function GigListingCard({
               </button>
             ) : null}
           </div>
+          {editing && gig.isMine && <form className="gifting-form-grid" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); updateMutation.mutate(draft); }}>
+            {(["title", "description", "skills", "compensation", "location", "gigDate", "gigTime"] as const).map(key => <label key={key}>
+              {{ title: "Title", description: "Description", skills: "Skills", compensation: "Pay or rate", location: "Location", gigDate: "Date", gigTime: "Time" }[key]}
+              {key === "description" ? <textarea className="board-text-field" required minLength={20} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /> : <input className="board-text-field" type={key === "gigDate" ? "date" : key === "gigTime" ? "time" : "text"} required={key === "title"} minLength={key === "title" ? 3 : undefined} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} />}
+            </label>)}
+            <label><input type="checkbox" checked={draft.isRemote} onChange={e => setDraft({ ...draft, isRemote: e.target.checked })} /> Remote work</label>
+            <Button type="submit" disabled={updateMutation.isPending}>Save changes</Button>
+            <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+          </form>}
           {!gig.isMine && gig.userId !== user?.id && (
             <div className="gifting-response">
               <textarea

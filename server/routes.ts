@@ -1,3 +1,7 @@
+import { safeMapReturnTo } from "@shared/authReturn";
+import { publicHttpUrl } from "@shared/safeHttpUrl";
+import { eventDatesError } from "@shared/eventIntakeDates";
+import { parseMarketplacePrice } from "@shared/marketplace";
 import express, { type Express } from "express";
 import type { Server } from "http";
 import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
@@ -149,6 +153,8 @@ import {
 } from "./eventResearchAuth";
 import {
   deleteOutzCheckin,
+  updateOutzWallPost,
+  deleteOutzWallPost,
   createOutzWallComment,
   createOutzWallPost,
   getOutzPlaceRating,
@@ -845,8 +851,8 @@ function assertGigBoardAllowed(body: any, fields: {
   description?: string | null;
   skills?: string | null;
   compensation?: string | null;
-}) {
-  if (!body.acceptRules) throw new Error("You must agree to the GIGZ board rules.");
+}, requireAcceptance = true) {
+  if (requireAcceptance && !body.acceptRules) throw new Error("You must agree to the GIGZ board rules.");
   const personalsErr = validateGigPostContent(fields);
   if (personalsErr) throw new Error(personalsErr);
 }
@@ -894,16 +900,18 @@ function safeEqualStr(a: string, b: string): boolean {
 }
 
 /** Stateless OAuth CSRF token - survives mobile browsers that drop the session cookie mid Google hop. */
-function createGoogleOAuthState(linkUserId?: number): string {
+
+function createGoogleOAuthState(linkUserId?: number, returnTo?: string): string {
   const body = Buffer.from(JSON.stringify({
     n: crypto.randomBytes(16).toString("hex"),
     t: Date.now(),
     ...(linkUserId ? { l: linkUserId } : {}),
+    ...(returnTo ? { r: returnTo } : {}),
   })).toString("base64url");
   return `${body}.${hmacSign(body)}`;
 }
 
-function parseGoogleOAuthState(state: string): { linkUserId?: number } | null {
+function parseGoogleOAuthState(state: string): { linkUserId?: number; returnTo?: string } | null {
   if (!state || !sessionSecret()) return null;
   const dot = state.lastIndexOf(".");
   if (dot <= 0) return null;
@@ -915,10 +923,11 @@ function parseGoogleOAuthState(state: string): { linkUserId?: number } | null {
       n?: string;
       t?: number;
       l?: number;
+      r?: string;
     };
     if (!data.n || typeof data.t !== "number") return null;
     if (Date.now() - data.t > GOOGLE_OAUTH_STATE_MAX_MS || data.t > Date.now() + 60_000) return null;
-    return typeof data.l === "number" ? { linkUserId: data.l } : {};
+    return { ...(typeof data.l === "number" ? { linkUserId: data.l } : {}), returnTo: safeMapReturnTo(data.r) };
   } catch {
     return null;
   }
@@ -1976,6 +1985,18 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  app.patch("/api/outz/wall/:id", requireAuth, (req, res) => {
+    const body = String(req.body.body || "").trim();
+    if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
+    if (moderationGate(res, "OUTZ trip board edit", { body })) return;
+    if (!updateOutzWallPost(Number(req.params.id), req.session.userId!, body)) return res.status(404).json({ error: "Post not found" });
+    res.json({ ok: true });
+  });
+  app.delete("/api/outz/wall/:id", requireAuth, (req, res) => {
+    if (!deleteOutzWallPost(Number(req.params.id), req.session.userId!)) return res.status(404).json({ error: "Post not found" });
+    res.status(204).end();
+  });
+
   app.post("/api/outz/wall/:id/comments", requireAuth, (req, res) => {
     try {
       const body = String(req.body.body || "").trim();
@@ -2039,6 +2060,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
       // Standalone promoter application - no event fields needed
       if (type === "PROMOTER_APPLICATION") {
+        const rawProofUrl = String(req.body.ticketUrl || "").trim();
+        const proofUrl = publicHttpUrl(rawProofUrl);
+        if (rawProofUrl && (!proofUrl || !/^https?:\/\//i.test(proofUrl))) {
+          return res.status(400).json({ error: "Enter a valid https:// or http:// proof link." });
+        }
         const now = new Date().toISOString();
         const data = insertSubmissionSchema.parse({
           type: "PROMOTER_APPLICATION",
@@ -2055,6 +2081,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
           submitterEmail: user.email,
           submitterOrg: req.body.submitterOrg || null,
           claimReason: String(req.body.claimReason || "").trim() || null,
+          ticketUrl: proofUrl,
         });
         const sub = storage.createSubmission(data);
         if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
@@ -2072,7 +2099,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
           return res.status(409).json({ error: "This event already has a pending claim." });
         }
       }
-      const source = type === "CLAIM" && claimEvent ? claimEvent : req.body;
+      const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body };
+      if (type === "NEW_EVENT" || type === "SUGGEST") {
+        const dateError = eventDatesError({ dateStart: source.dateStart || "", dateEnd: source.dateEnd || "" }) || validateEventDates(source.dateStart, source.dateEnd);
+        if (dateError) return res.status(400).json({ error: dateError });
+        syncDayOfWeek(source);
+      }
       if (type === "NEW_EVENT" || type === "CLAIM") {
         const blockedBusiness = storage.getBlockedBusinessMatch(user.id, {
           venueName: source.venueName || "",
@@ -2819,7 +2851,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── Gigs ─────────────────────────────────────────────────────────────────
   app.get("/api/gigs", (req, res) => {
     const viewerId = req.session?.userId;
-    const gigs = storage.getGigPosts("LIVE").map(gig => publicGigPost(gig, viewerId));
+    const rows = req.query.mine === "1" && viewerId ? storage.getGigPostsByUser(viewerId) : storage.getGigPosts("LIVE");
+    const gigs = rows.map(gig => publicGigPost(gig, viewerId));
     res.json(gigs);
   });
 
@@ -2877,12 +2910,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     try {
       const existing = storage.getGigPosts().find(g => g.id === id && g.userId === userId);
       if (!existing) return res.status(404).json({ error: "Not found" });
+      if (req.body.status !== undefined && !["LIVE", "CLOSED"].includes(req.body.status)) return res.status(400).json({ error: "Choose an open or completed post" });
+      if (req.body.status === "LIVE" && !["LIVE", "CLOSED"].includes(existing.status)) return res.status(403).json({ error: "This post needs moderator review before reopening" });
+      if (req.body.title !== undefined && String(req.body.title).trim().length < 3) return res.status(400).json({ error: "Title must be at least 3 characters" });
+      if (req.body.description !== undefined && String(req.body.description).trim().length < 20) return res.status(400).json({ error: "Description must be at least 20 characters" });
       assertGigBoardAllowed(req.body, {
         title: req.body.title ?? existing.title,
         description: req.body.description ?? existing.description,
         skills: req.body.skills ?? existing.skills,
         compensation: req.body.compensation ?? existing.compensation,
-      });
+      }, false);
       if (moderationGate(res, "Gig board edit", {
         title: req.body.title,
         name: req.body.name,
@@ -3109,10 +3146,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/sellz", requireAuth, (req, res) => {
     try {
       if (!req.body.acceptRules) throw new Error("You must agree to the SELLZ marketplace rules.");
-      const priceCents = Math.round(Number(req.body.price) * 100);
-      if (!Number.isFinite(priceCents) || priceCents < 100 || priceCents > 100000000) {
-        throw new Error("Enter a price between $1 and $1,000,000.");
-      }
+      const priceCents = parseMarketplacePrice(req.body.price);
       const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
       if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) {
         throw new Error("This listing appears to include a restricted item.");
@@ -3139,7 +3173,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.put("/api/sellz/:id", requireAuth, (req, res) => {
     try {
-      const priceCents = Math.round(Number(req.body.price) * 100);
+      const priceCents = parseMarketplacePrice(req.body.price);
+      const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
+      if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) throw new Error("This listing appears to include a restricted item.");
+      if (moderationGate(res, "SELLZ marketplace edit", { title: req.body.title, description: req.body.description })) return;
       const post = storage.updateSellzPost(Number(req.params.id), req.session.userId!, {
         title: String(req.body.title || "").trim(), description: String(req.body.description || "").trim(),
         category: String(req.body.category || "Other").trim(), condition: String(req.body.condition || "Good").trim(),
@@ -3378,7 +3415,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     const linkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
     // HMAC-signed state: works even when Android Chrome / in-app browsers drop the session cookie on the Google hop.
-    const state = createGoogleOAuthState(linkUserId);
+    const state = createGoogleOAuthState(linkUserId, safeMapReturnTo(req.query.returnTo));
     req.session.googleOAuthState = state;
     req.session.googleOAuthLinkUserId = linkUserId;
 
@@ -3550,7 +3587,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         }
       }
 
-      establishSession(user.id, "/dashboard");
+      establishSession(user.id, signed?.returnTo || "/dashboard");
     } catch (e) {
       console.error("Google sign-in error:", e);
       res.status(500).send(googleOAuthErrorPage("Something went wrong during Google sign-in. Try again."));

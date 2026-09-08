@@ -276,7 +276,7 @@ export default function Gifting() {
               {giftingStatusPending ? "Checking posting…" : postingOpen ? "Post a gift" : "Posting paused"}
             </Button>
             <Button variant="neon" accent="lime" size="lg" disabled={!postingOpen} onClick={() => openForm("ISO")}>
-              {giftingStatusPending ? "Checking…" : "Post an ISO"}
+              {giftingStatusPending ? "Checking…" : postingOpen ? "Post an ISO" : "Posting paused"}
             </Button>
           </>
         }
@@ -455,12 +455,10 @@ export default function Gifting() {
           <div className="board-empty board-empty--makeover">
             <p className="display section-heading">Nothing on the shelf right now</p>
             <p className="board-copy-sm">
-              Free stuff goes fast. Widen your search, or post what you are hunting for and let it find you.
+              {postingOpen ? "Free stuff goes fast. Widen your search, or post what you are hunting for and let it find you." : "New posts are paused. You can still browse existing gifts and continue handoffs in your inbox."}
             </p>
             <div className="board-empty__actions">
-              <Button variant="solid" accent="lime" onClick={() => openForm("GIFT")}>
-                Post a gift
-              </Button>
+              {postingOpen && <Button variant="solid" accent="lime" onClick={() => openForm("GIFT")}>Post a gift</Button>}
               <Button variant="neon" accent="lime" onClick={clearFilters}>
                 Clear filters
               </Button>

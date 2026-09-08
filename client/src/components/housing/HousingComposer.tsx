@@ -5,7 +5,7 @@
  * docs/design-handoff-hausing/haus-app.jsx.
  *
  * Three rules shape this file:
- *  1. Posting takes under a minute. Headline is the only required field.
+ *  1. Posting starts with a headline and the post type's required cover photo.
  *  2. Nothing here captures a protected characteristic. Preferences stay free
  *     text the poster wrote, and the fixed lists are logistics only.
  *  3. Fields start empty. The prototype's demo drafts are not ported.
@@ -179,7 +179,7 @@ async function uploadHousingPhotos(files: File[]): Promise<string[]> {
   return Array.isArray(data.urls) ? data.urls : [];
 }
 
-/** The composer sheet shell. Backdrop closes, the panel does not. */
+/** The standalone composer panel. Close and Back leave the posting flow. */
 function Sheet({
   title,
   onClose,
@@ -192,13 +192,11 @@ function Sheet({
   children: ReactNode;
 }) {
   return (
-    <div className="hz-sheetwrap" onClick={onClose}>
+    <div className="hz-sheetwrap">
       <div
         className="hz-sheet pdx-glass-rebind"
         style={style}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
+        role="region"
         aria-label={title}
       >
         <div className="hz-sheet__head">
@@ -865,7 +863,9 @@ export function HousingComposer({
             }
             onChange={(e) => patch({ headline: e.target.value })}
           />
-          <small className="hz-hint">The one line people read in the feed. This is the only one we need.</small>
+          <small className="hz-hint">
+            The one line people read in the feed. {photoRequired ? "Add a cover photo below, too." : "This is the only required field."}
+          </small>
         </div>
 
         <div className="hz-field">

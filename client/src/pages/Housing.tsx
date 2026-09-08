@@ -349,6 +349,9 @@ export default function Housing() {
             <div className="hz-hero__mantra">
               <Mono>Find a room · find people · find a home</Mono>
             </div>
+            <a className="hz-chip hz-chip--btn" href="#housing-listings" style={{ marginTop: 16 }}>
+              Browse the listings ↓
+            </a>
           </div>
         </div>
       </div>
@@ -442,7 +445,7 @@ export default function Housing() {
             </p>
           </div>
 
-          <div className="hz-filter">
+          <div className="hz-filter" id="housing-listings" tabIndex={-1} style={{ scrollMarginTop: "calc(var(--site-header-height, 0px) + 16px)" }}>
             <Mono micro>Show me</Mono>
             <div className="hz-tabs" role="tablist">
               {HOUSING_FILTERS.map((k) => (

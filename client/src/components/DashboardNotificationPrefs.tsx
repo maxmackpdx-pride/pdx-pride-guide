@@ -157,10 +157,10 @@ export default function DashboardNotificationPrefs({
       )}
       <p className={ledeClass} style={embedded ? undefined : { margin: "0 0 14px", fontSize: "0.78rem", color: "#8c8980", lineHeight: 1.45 }}>
         {!supported
-          ? "Choose which email and in-app alerts you want. Push is not available on this browser or device."
+          ? "Push is unavailable on this browser or device. These choices still save for your push-enabled devices. Your inbox and email delivery are unchanged."
           : pushActive
             ? "Push is on for this device. Choose which alerts you want below."
-            : "Get alerts for inbox messages and host updates during Pride weekend. Preferences are saved to your account."}
+            : "Enable device push to receive the alerts selected below. These preferences save to your account; inbox messages and email delivery are unchanged."}
       </p>
 
       {showEnableAsk && (
@@ -191,7 +191,7 @@ export default function DashboardNotificationPrefs({
               className={embedded ? "hub-settings-prefs__pending" : undefined}
               style={embedded ? undefined : { fontSize: "0.72rem", color: "#FF8C00", alignSelf: "center" }}
             >
-              Server push keys pending (Railway)
+              Device push is temporarily unavailable.
             </span>
           )}
         </div>
