@@ -1372,10 +1372,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4485",
     "lat": 43.97305556,
     "lng": -122.5455556,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/10165125",
+        "image": "https://www.flickr.com/photos/discoveroregon/14323960094"
+      }
+    ],
+    "visualFeatures": [
+      "Bedrock campground terrace above Fall Creek with fireweed on the fire-shaped hillside; correct creek confirmed by Recreation.gov."
+    ],
+    "asset": "/motifs/outz/places/usfs-5013.005621.svg"
   },
   {
     "id": "usfs-7676.004621",
@@ -1384,10 +1391,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38292",
     "lat": 43.93908333,
     "lng": -121.4140306,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.waterfallsnorthwest.com/waterfall/Benham-Falls-3698",
+        "image": "https://commons.wikimedia.org/wiki/Category:Benham_Falls"
+      }
+    ],
+    "visualFeatures": [
+      "Benham Falls west view: powerful stair-step rapids between pine-lined banks; river rather than a sheer vertical waterfall."
+    ],
+    "asset": "/motifs/outz/places/usfs-7676.004621.svg"
   },
   {
     "id": "usfs-5444.005571",
@@ -1396,10 +1410,17 @@
     "officialUrl": null,
     "lat": 44.21366667,
     "lng": -121.89208333,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.flickr.com/photos/victorhansonsmith/albums/72157627209479272",
+        "image": "https://www.flickr.com/photos/victorhansonsmith/albums/72157627209479272"
+      }
+    ],
+    "visualFeatures": [
+      "Benson Lake in Mount Washington Wilderness: rounded wooded basin, lakeshore trail and distant volcanic skyline; separate from Columbia Gorge Benson Lake."
+    ],
+    "asset": "/motifs/outz/places/usfs-5444.005571.svg"
   },
   {
     "id": "usfs-7113.004731",
@@ -1408,10 +1429,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31198",
     "lat": 46.466922,
     "lng": -121.526359,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.trevlarson.com/goatrocks",
+        "image": "https://www.trevlarson.com/goatrocks"
+      }
+    ],
+    "visualFeatures": [
+      "Berry Patch approach to Goat Rocks: flower meadow, sharp alpine skyline and a forest trail rising toward Goat Ridge; connected route photographic reference."
+    ],
+    "asset": "/motifs/outz/places/usfs-7113.004731.svg"
   },
   {
     "id": "usfs-5059.005641",
@@ -1420,10 +1448,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=81420",
     "lat": 43.67166667,
     "lng": -122.01861111,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://cascwild.org/2026/roadless-is-priceless-defending-the-wildly-popular-roadless-area-conservation-rule/",
+        "image": "https://cascwild.org/2026/roadless-is-priceless-defending-the-wildly-popular-roadless-area-conservation-rule/"
+      }
+    ],
+    "visualFeatures": [
+      "Betty Lake east of Waldo Lake: mist over still forest water with dense shoreline conifers and an approaching woodland path."
+    ],
+    "asset": "/motifs/outz/places/usfs-5059.005641.svg"
   },
   {
     "id": "usfs-5082.005641",
