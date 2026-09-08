@@ -274,10 +274,17 @@
     "officialUrl": null,
     "lat": 43.623383,
     "lng": -122.7257,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/2016/04/24/parker-falls-and-adams-mountain-way/",
+        "image": "https://farm2.staticflickr.com/1650/26604500665_f3e991a43a_c.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Adams Mountain Way forested ridge, steep tread and rhododendron; not Mount Adams volcano"
+    ],
+    "asset": "/motifs/outz/places/usfs-6171012010602.svg"
   },
   {
     "id": "usfs-6155010414",
@@ -286,10 +293,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42333",
     "lat": 44.0683346,
     "lng": -124.1017401,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/234502",
+        "image": "https://www.womo-abenteuer.de/sites/default/files/u197/alder_dune_4.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Coastal forest around Alder and Dune Lakes, reeds and tent clearing"
+    ],
+    "asset": "/motifs/outz/places/usfs-6155010414.svg"
   },
   {
     "id": "usfs-5117010324",
@@ -298,10 +312,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52872",
     "lat": 45.0812,
     "lng": -122.0546,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://oregondiscovery.com/alder-flat",
+        "image": "https://oregondiscovery.com/wp-content/uploads/2019/03/alder25Auth.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Clackamas River bend, midstream boulder, sandy bank and alder canopy"
+    ],
+    "asset": "/motifs/outz/places/usfs-5117010324.svg"
   },
   {
     "id": "usfs-3254060010602",
@@ -310,10 +331,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38278",
     "lat": 44.433311,
     "lng": -121.357779,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonhikers.org/field_guide/Alder_Springs-Lower_Whychus_Creek_Hike",
+        "image": "https://3.bp.blogspot.com/-1rcT1uTewDU/UIypdNIPVpI/AAAAAAAAFyw/CHAb_-nXbjc/s1600/IMAGE_889EE029-900A-41DC-8BDD-82CEC45B7C20.JPG"
+      }
+    ],
+    "visualFeatures": [
+      "Whychus Creek canyon: layered dry cliffs, springs and winding creek"
+    ],
+    "asset": "/motifs/outz/places/usfs-3254060010602.svg"
   },
   {
     "id": "usfs-5017.005631",
@@ -322,10 +350,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4358",
     "lat": 44.17788,
     "lng": -121.91032,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://visitcentraloregon.com/poi/alder-springs-campground/",
+        "image": "https://www.oregonhikers.org/w/images/1/14/Linton_Lake_Trailhead%2C_Three_Sisters_Wilderness.jpeg"
+      }
+    ],
+    "visualFeatures": [
+      "Alder Springs McKenzie Pass: towering Douglas firs and compact tent site by Linton trail access"
+    ],
+    "asset": "/motifs/outz/places/usfs-5017.005631.svg"
   },
   {
     "id": "usfs-5183010262",
@@ -334,10 +369,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69660",
     "lat": 43.0657,
     "lng": -122.3634,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.waterfallsnorthwest.com/waterfall/Alkali-Falls-4315",
+        "image": "https://www.waterfallsnorthwest.com/pictures/Alkali-Falls-OR-310.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Alkali Creek steep narrow stepped cascade through a wooded rocky chute"
+    ],
+    "asset": "/motifs/outz/places/usfs-5183010262.svg"
   },
   {
     "id": "usfs-5326.004621",
@@ -346,10 +388,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38566",
     "lat": 44.52814167,
     "lng": -121.6273389,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/oregon-allen-springs-campground",
+        "image": "https://photos.thedyrt.com/photo/652958/media/oregon-allen-springs-campground_b574768f-a0e5-47fa-b6c9-03f440c62319.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Allen Springs campsite overlooking the broad Metolius bend under ponderosa pines"
+    ],
+    "asset": "/motifs/outz/places/usfs-5326.004621.svg"
   },
   {
     "id": "usfs-5313.004621",
@@ -358,10 +407,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38568",
     "lat": 44.4712,
     "lng": -121.6377583,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.muddycamper.com/oregon/allingham-campground/",
+        "image": "https://dsqeev865ph38.cloudfront.net/media/images/recgov_campground_102308_02d1a.width-1600.jpegquality-85_6lnOmYN.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Allingham: pine-shaded riverbank campsite with picnic table and distinct low bridge reference"
+    ],
+    "asset": "/motifs/outz/places/usfs-5313.004621.svg"
   },
   {
     "id": "usfs-5434010324",
@@ -382,10 +438,17 @@
     "officialUrl": null,
     "lat": 43.80194444,
     "lng": -122.49888889,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/sourgrass-meadow-alpine-trail-2024_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Lower ridge junction: forest singletrack and exposed rocky shoulder"
+    ],
+    "asset": "/motifs/outz/places/usfs-5054.005621.svg"
   },
   {
     "id": "usfs-5094.005641",
@@ -394,10 +457,17 @@
     "officialUrl": null,
     "lat": 43.7525,
     "lng": -122.52111111,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/sourgrass-meadow-alpine-trail-2024_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Lower Alpine: steep descending singletrack through tall forest"
+    ],
+    "asset": "/motifs/outz/places/usfs-5094.005641.svg"
   },
   {
     "id": "usfs-5026.005621",
@@ -406,10 +476,17 @@
     "officialUrl": null,
     "lat": 43.88333333,
     "lng": -122.48944444,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/sourgrass-meadow-alpine-trail-2024_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Upper corridor: Elk Camp shelter and grassy forest opening"
+    ],
+    "asset": "/motifs/outz/places/usfs-5026.005621.svg"
   },
   {
     "id": "usfs-5027.005621",
@@ -418,10 +495,17 @@
     "officialUrl": null,
     "lat": 43.90166667,
     "lng": -122.46444444,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/sourgrass-meadow-alpine-trail-2024_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Upper road access: marshy meadow, beargrass and fir edge"
+    ],
+    "asset": "/motifs/outz/places/usfs-5027.005621.svg"
   },
   {
     "id": "usfs-5067.005621",
@@ -430,10 +514,17 @@
     "officialUrl": null,
     "lat": 43.83444444,
     "lng": -122.48194444,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/sourgrass-meadow-alpine-trail-2024_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Windy Pass: saddle between wooded shoulders and sweeping meadow tread"
+    ],
+    "asset": "/motifs/outz/places/usfs-5067.005621.svg"
   },
   {
     "id": "usfs-5129010262",
@@ -442,10 +533,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69664",
     "lat": 42.705311,
     "lng": -122.284382,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonhikers.org/field_guide/Lake_Alta",
+        "image": "https://www.oregonhikers.org/w/images/5/5a/LakeAltaSkyLakes.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Lake Alta: low forest horizon, still-water reflections and east-shore path"
+    ],
+    "asset": "/motifs/outz/places/usfs-5129010262.svg"
   },
   {
     "id": "usfs-5164010262",
@@ -466,10 +564,17 @@
     "officialUrl": null,
     "lat": 45.5606,
     "lng": -122.1716,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.adventographer.com/hiking-columbia-river-gorge-portland-oregon/",
+        "image": "https://www.adventographer.com/wp-content/uploads/2017/08/Angels_Rest_Hike_Columbia_River_Gorge-1024x683.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Angels Rest: broken basalt summit ledges over a distant Columbia River bend"
+    ],
+    "asset": "/motifs/outz/places/usfs-296847010602.svg"
   },
   {
     "id": "usfs-5031010372",
