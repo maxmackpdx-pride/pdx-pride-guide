@@ -28,7 +28,6 @@ import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shar
 import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { outzPlaceHref, type OutzSnapshot } from "@shared/outz";
-import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./LivingMap.css";
 
 type Place = Business;
@@ -348,7 +347,6 @@ export default function LivingMap() {
   const drawerScrollRef = useRef<HTMLDivElement | null>(null);
   const cardGesture = useRef({ x: 0, y: 0, scrollTop: 0, moved: false });
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
-  const { myEventIds } = useEventRsvp();
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
@@ -430,7 +428,6 @@ export default function LivingMap() {
     const day = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "America/Los_Angeles" }).format(new Date(at));
     return at >= now && at <= now + 7 * 86400000 && ["Fri", "Sat", "Sun"].includes(day);
   }), [events, q, timeFilter, customStart, customEnd]);
-  const goingEvents = useMemo(() => visibleEvents.filter(event => myEventIds.has(event.id)), [visibleEvents, myEventIds]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
   const mapPlaces = useMemo(() => barsOnly ? visiblePlaces.filter(place => place.type === "bar") : visiblePlaces, [visiblePlaces, barsOnly]);
   const nearbyPlaces = useMemo(() => visiblePlaces
@@ -446,8 +443,8 @@ export default function LivingMap() {
     const starts = new Date(e.dateStart).getTime();
     const ends = new Date(e.dateEnd).getTime();
     const now = Date.now();
-    return (starts <= now && ends > now) || (starts > now && starts <= now + 90 * 60000);
-  }), [events, q]);
+    return (starts <= now && ends > now) || (starts > now && starts <= now + 2 * 60 * 60000);
+  }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()), [events, q]);
   const visibleMizzed = useMemo(() => mizzed.filter(row => rowMatchesQuery(row, q)), [mizzed, q]);
   const visibleHousing = useMemo(() => housing.filter(row => rowMatchesQuery(row, q)), [housing, q]);
   const marks = useMemo<Mark[]>(() => [
@@ -709,10 +706,8 @@ export default function LivingMap() {
       {failed && <div className="living-map-state" role="alert">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {customPending && <p className="living-map-state">Pick a start and end date.</p>}
       {!loading && !failed && !customPending && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
-      <div className="living-map-section-head"><b>Soon</b><span>{soonEvents.length}</span><Link className="living-map-view-all" href="/events">View All</Link></div>
-      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next 90 minutes.</p> : <div className="living-map-rail" data-vaul-no-drag>{soonEvents.slice(0, 10).map(eventCard)}</div>}
-      <div className="living-map-section-head"><b>Who’s Going</b><span>{goingEvents.length}</span></div>
-      {goingEvents.length === 0 ? <p className="living-map-rail-empty">You haven’t RSVP’d to any upcoming events yet.</p> : <div className="living-map-rail" data-vaul-no-drag>{goingEvents.slice(0, 10).map(eventCard)}</div>}
+      <div className="living-map-section-head"><b>Happening Now</b><span>{soonEvents.length}</span><Link className="living-map-view-all" href="/events">View All</Link></div>
+      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next couple hours.</p> : <div className="living-map-rail" data-vaul-no-drag>{soonEvents.slice(0, 10).map(eventCard)}</div>}
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
