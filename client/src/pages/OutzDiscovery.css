@@ -45,7 +45,6 @@
 /* Match only the card side stripe to the map key; retain existing card treatments. */
 .outz-discovery .rugged .select-place,.outz-discovery .rugged .select-place[aria-pressed=true]{border-left-color:var(--side-color)}
 
-/* Category color belongs on the side stripe, not the card copy. */
+/* Keep titles consistent when selected; retain colored category labels. */
 .outz-discovery .rugged .select-place .place-copy>strong,
 .outz-discovery .rugged .select-place[aria-pressed=true] .place-copy>strong{color:#f4f4f5}
-.outz-discovery .rugged .select-place .place-copy>.kicker{color:#b4b4bc}
