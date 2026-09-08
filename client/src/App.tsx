@@ -9,6 +9,7 @@ import { useAuth } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
+import MobileBottomNav from "./components/MobileBottomNav";
 import PullToRefresh from "./components/PullToRefresh";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -139,6 +140,7 @@ function AppLayout() {
     >
       <PullToRefresh />
       <Nav />
+      {location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>

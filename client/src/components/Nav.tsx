@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Search, Zap } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
-import { CompactHubLink, CompactNavigation, MobileExploreNavigation } from "@/components/ui/compact-navigation";
+import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -361,11 +361,13 @@ function NotifyMenu({
   adminPending,
   openSheet,
   onCloseOthers,
+  compact = false,
 }: {
   unreadCount: number;
   adminPending: number;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
   onCloseOthers: () => void;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -416,7 +418,8 @@ function NotifyMenu({
     <div className={`site-mobile-notify${open ? " open" : ""}`} ref={ref}>
       <button
         type="button"
-        className={`hub-notify-btn site-mobile-notify__bolt${alertTotal > 0 ? " site-mobile-notify--alert" : ""}`}
+        className={compact ? `znav-control pdx-glass-rebind${open ? " is-open" : ""}` : `hub-notify-btn site-mobile-notify__bolt${alertTotal > 0 ? " site-mobile-notify--alert" : ""}`}
+        data-accent={compact ? "magenta" : undefined}
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={
@@ -430,8 +433,7 @@ function NotifyMenu({
           setOpen(v => !v);
         }}
       >
-        <Zap size={17} strokeWidth={2.4} aria-hidden="true" />
-        {alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}
+        {compact ? <><span className="znav-icon-row znav-notification-icon"><Zap size={20} strokeWidth={1.8} aria-hidden="true" />{alertTotal > 0 && <span className="znav-hub-badge">{alertTotal}</span>}</span><span className="znav-caption" aria-hidden="true">Notifications</span></> : <><Zap size={17} strokeWidth={2.4} aria-hidden="true" />{alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}</>}
       </button>
       {open && (
         <div className="site-mobile-notify__panel pdx-liquid-overlay" role="dialog" aria-label="Notifications">
@@ -679,24 +681,11 @@ export default function Nav() {
           </Link>
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
-            <Link href="/" className="site-brand site-brand--mobile" aria-label="Zaylist home" onClick={() => dismissMobileNavOverlays()}>
-              <GlitchLogo src="/brand/family/zaylist-primary.svg" alt="Zaylist" className="site-brand-lockup" />
-            </Link>
+            <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={PRIMARY_NAV.filter(entry => entry.type === "link" && (entry.href === "/" || entry.href === "/about"))} onNavigate={() => { closeMenu(); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
-            <button
-              type="button"
-              className="site-search-trigger site-search-trigger--mobile"
-              onClick={() => {
-                dismissMobileNavOverlays();
-                setSearchOpen(true);
-              }}
-              aria-label="Search events and places"
-              data-testid="site-search-trigger-mobile"
-            >
-              <Search size={18} aria-hidden="true" />
-            </button>
             {user && (
               <NotifyMenu
+                compact
                 unreadCount={unreadCount}
                 adminPending={adminPending}
                 openSheet={openSheet}
@@ -839,11 +828,6 @@ export default function Nav() {
             </button>
           </div>
         </div>
-        <MobileExploreNavigation location={location} onMessages={() => {
-          setMobileProfileOpen(false);
-          if (user || localDemo) openSheet();
-          else setShowAuth(true);
-        }} />
         <Divider
           seam
           thin

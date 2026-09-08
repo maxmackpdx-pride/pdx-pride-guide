@@ -9,12 +9,15 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
+import { CalendarDays, MapPin, PanelsTopLeft, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
+// Preserve access to the destinations that do not occupy a bottom-bar tab.
+const EXPLORE_LINKS = PRIMARY_NAV.filter(entry => entry.type === "link" && ["/map", "/z", "/the-hauz"].includes(entry.href));
 
 /**
  * "Your Hub" rows in the Hub sheet. Each is a real /dashboard section, in the
@@ -57,7 +60,7 @@ function tabClass(
   active: boolean,
   accent: "cyan" | "green" | "lime" | "orange" | "pink" | "purple" | "blue" | "more",
 ) {
-  return `hub-mobile-tab${active ? ` is-active is-${accent}` : ""}`;
+  return `hub-mobile-tab znav-control pdx-glass-rebind${active ? ` is-active is-${accent}` : ""}`;
 }
 
 export default function MobileBottomNav() {
@@ -94,6 +97,16 @@ export default function MobileBottomNav() {
     setOutzOpen(false);
     setHubOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    const close = () => { setEventsOpen(false); setSpaceOpen(false); setOutzOpen(false); setHubOpen(false); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    const desktop = window.matchMedia("(min-width: 960px)");
+    const onResize = () => { if (desktop.matches) close(); };
+    window.addEventListener("keydown", onKey);
+    desktop.addEventListener("change", onResize);
+    return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
+  }, []);
 
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
@@ -201,6 +214,8 @@ export default function MobileBottomNav() {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <h3 className="mobile-nav-explore-heading">Explore</h3>
+            {EXPLORE_LINKS.map(item => item.type === "link" && <Link key={item.href} href={item.href} className="hub-more-item" data-accent={item.accent} onClick={() => setSpaceOpen(false)}><span>{item.label}</span></Link>)}
             <button
               type="button"
               className={`hub-more-item hub-more-item--drawer${outzOpen ? " is-active" : ""}`}
@@ -314,69 +329,63 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className="hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact" aria-label="Site mobile navigation">
+      <nav className="hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption" aria-label="Site mobile navigation">
         <div className="hub-mobile-bar__dock">
           <button
             type="button"
             className={tabClass(eventsActive || eventsOpen, "cyan")}
+            data-accent="cyan"
             aria-expanded={eventsOpen}
             aria-haspopup="dialog"
             aria-label="Eventz"
             onClick={handleEvents}
           >
-            <TabIcon>
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M3 9h18M8 2v4M16 2v4" />
-            </TabIcon>
-            <span>Eventz</span>
+            <span className="znav-icon-row"><CalendarDays size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Eventz</span>
           </button>
 
           <Link
             href="/directory"
             className={tabClass(placesActive, "blue")}
+            data-accent="blue"
             aria-label="Placez"
             aria-current={placesActive ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <TabIcon>
-              <path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
-              <circle cx="12" cy="10" r="2.5" />
-            </TabIcon>
-            <span>Placez</span>
+            <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Placez</span>
           </Link>
 
           <button
             type="button"
-            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
+            className={tabClass(hubActive, "cyan")}
+            data-accent="cyan"
             aria-label="Hub"
             title="Hub"
             aria-current={hubActive ? "page" : undefined}
             onClick={handleHub}
           >
-            <HubMark />
-            <span>Hub</span>
+            <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Hub</span>
           </button>
 
           <button
             type="button"
             className={tabClass(boardsActive || spaceOpen || outzOpen, "purple")}
+            data-accent="violet"
             aria-expanded={spaceOpen}
             aria-haspopup="dialog"
             aria-label="Boards"
             onClick={handleSpace}
           >
-            <TabIcon>
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </TabIcon>
-            <span>Boards</span>
+            <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Boards</span>
           </button>
 
           <button
             type="button"
             className={tabClass(Boolean((user || localDemo) && open), "pink")}
+            data-accent="magenta"
             data-inbox-open-trigger="messages"
             onClick={handleMessages}
             aria-expanded={user || localDemo ? open : undefined}
@@ -386,14 +395,11 @@ export default function MobileBottomNav() {
                 : "Messages"
             }
           >
-            <span className="hub-mobile-tab__icon-wrap">
-              <TabIcon>
-                <path d="M21 8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h5" />
-                <path d="M3 8l9 6 9-6" />
-              </TabIcon>
+            <span className="znav-icon-row hub-mobile-tab__icon-wrap">
+              <MessageCircle size={20} strokeWidth={1.8} aria-hidden="true" />
               {user && attentionCount > 0 && <i>{attentionCount > 9 ? "9+" : attentionCount}</i>}
             </span>
-            <span>Messages</span>
+            <span className="znav-caption">Messages</span>
           </button>
         </div>
       </nav>

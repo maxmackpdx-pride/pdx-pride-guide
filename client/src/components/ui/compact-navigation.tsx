@@ -34,7 +34,7 @@ function useQuietMotion() {
   return reduced || calm;
 }
 
-export function CompactNavigation({ location, onNavigate }: { location: string; onNavigate: () => void }) {
+export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV }: { location: string; onNavigate: () => void; entries?: NavEntry[] }) {
   const [focused, setFocused] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const quiet = useQuietMotion();
@@ -45,7 +45,7 @@ export function CompactNavigation({ location, onNavigate }: { location: string; 
     return () => window.removeEventListener(MOBILE_NAV_DISMISS, close);
   }, []);
   return <div className="znav-rail" onMouseLeave={() => setFocused(null)}>
-    {PRIMARY_NAV.map(entry => {
+    {entries.map(entry => {
       const key = entryKey(entry);
       const Icon = ICONS[entry.label];
       const active = entryActive(entry, location);
