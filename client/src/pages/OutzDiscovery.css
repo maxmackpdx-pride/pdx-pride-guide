@@ -48,3 +48,12 @@
 /* Keep titles consistent when selected; retain colored category labels. */
 .outz-discovery .rugged .select-place .place-copy>strong,
 .outz-discovery .rugged .select-place[aria-pressed=true] .place-copy>strong{color:#f4f4f5}
+
+/* Smoked glass with a soft surface reflection and a clear inset edge. */
+.outz-discovery .rugged .select-place,
+.outz-discovery .rugged .select-place[aria-pressed=true]{
+  background:linear-gradient(135deg,#ffffff13 0%,#ffffff04 42%,#ffffff00 65%),#101216a8;
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+  backdrop-filter:blur(18px) saturate(120%);
+  box-shadow:inset 0 1px 0 #ffffff29,inset 0 -1px 0 #ffffff08,0 6px 18px #00000030;
+}
