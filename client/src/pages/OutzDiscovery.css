@@ -24,7 +24,7 @@
 .outz-discovery .rugged .freshness img{display:none}
 .outz-discovery .rugged-browser-art{inset:18px 0 auto auto;width:150px;height:76px;object-fit:contain;object-position:right center;opacity:.24;mask-image:linear-gradient(90deg,transparent,#000 35%)}
 .outz-discovery .rugged .browser>.section-title{padding-right:170px;min-height:62px}
-.outz-discovery .rugged .split{position:relative;background:#06060a}
+.outz-discovery .rugged .split{position:relative;background:transparent}
 .outz-discovery .rugged .sources{min-height:180px;margin-top:32px;padding:32px 210px 32px 0;isolation:isolate}
 .outz-discovery .rugged .sources p{max-width:600px}
 .outz-discovery .rugged-footer-art{inset:18px 0 18px auto;width:170px;height:calc(100% - 36px);object-fit:contain;object-position:right center;opacity:.35}
@@ -76,7 +76,7 @@
 .outz-discovery .rugged-topo{display:none}
 
 /* OutZide's warm soil surface and restrained rugged grain. */
-.outz-discovery{background:radial-gradient(ellipse at 15% 0%,#4a3425aa,transparent 65%),#211b16}
+.outz-discovery{background:radial-gradient(ellipse at 15% 0%,#30211766,transparent 65%),#100d0a}
 .outz-discovery::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url('/motifs/outz/grit.svg') repeat;opacity:.075;mix-blend-mode:soft-light}
 .outz-discovery .rugged .select-place,
 .outz-discovery .rugged .select-place[aria-pressed=true]{background:linear-gradient(135deg,#e5ceb91c,#ffffff03 48%,transparent 70%),#251f19b5}
