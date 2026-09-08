@@ -26,7 +26,7 @@ import {
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { startPromptScheduler } from "./scheduler";
-import { BetterSqliteSessionStore } from "./sessionStore";
+import { createSessionMiddleware, productionSecureCookies } from "./sessionConfig";
 import {
   insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
   insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema,
@@ -198,7 +198,6 @@ import {
 import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
-import session from "express-session";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -935,11 +934,6 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
-/** HTTPS in production; plain http://127.0.0.1 preview (LOCAL_PREVIEW=1) must not set Secure cookies. */
-function productionSecureCookies(): boolean {
-  return process.env.NODE_ENV === "production" && process.env.LOCAL_PREVIEW !== "1";
-}
-
 function setGoogleOAuthStateCookie(res: any, state: string) {
   const secure = productionSecureCookies() ? "; Secure" : "";
   // append - never replace the session Set-Cookie express-session already queued
@@ -1489,19 +1483,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // Session middleware - persisted on the same SQLite volume as user data
-  app.use(session({
-    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? (() => { throw new Error("SESSION_SECRET env var is required in production"); })() : "pdxpride_secret_dev_only"),
-    store: new BetterSqliteSessionStore(sqlite),
-    proxy: true,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: productionSecureCookies(),
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    },
-  }));
+  app.use(createSessionMiddleware(sqlite));
   registerCommunityRoutes(app, requireAuth);
   registerPlatformV1(app);
 

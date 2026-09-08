@@ -143,7 +143,7 @@ function ProfileMenuPanel({
   location: string;
   onClose: () => void;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAdmin: boolean;
   canManageTeam: boolean;
   isPrimaryOwner: boolean;
@@ -217,7 +217,7 @@ function ProfileMenuPanel({
         role="menuitem"
         className="site-profile-menu__item site-profile-menu__item--logout"
         onClick={() => {
-          logout();
+          void logout().catch(() => {});
           onClose();
         }}
       >
@@ -254,7 +254,7 @@ function ProfileMenu({
   unreadCount: number;
   location: string;
   openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   onMenuClose: () => void;
   isAdmin: boolean;
   canManageTeam: boolean;

@@ -10,8 +10,9 @@ export class BetterSqliteSessionStore extends Store {
   private readonly setStmt;
   private readonly destroyStmt;
   private readonly pruneStmt;
+  private readonly pruneTimer: ReturnType<typeof setInterval>;
 
-  constructor(db: Database.Database) {
+  constructor(db: Database.Database, pruneIntervalMs = 60 * 60 * 1000) {
     super();
     db.exec(`
       CREATE TABLE IF NOT EXISTS express_sessions (
@@ -30,6 +31,18 @@ export class BetterSqliteSessionStore extends Store {
     this.destroyStmt = db.prepare(`DELETE FROM express_sessions WHERE sid = ?`);
     this.pruneStmt = db.prepare(`DELETE FROM express_sessions WHERE expired <= ?`);
     this.pruneStmt.run(Date.now());
+    this.pruneTimer = setInterval(() => {
+      try {
+        this.pruneStmt.run(Date.now());
+      } catch (error) {
+        console.error("Session cleanup failed:", error);
+      }
+    }, pruneIntervalMs);
+    this.pruneTimer.unref();
+  }
+
+  close() {
+    clearInterval(this.pruneTimer);
   }
 
   get(sid: string, callback: (err: unknown, session?: SessionData | null) => void) {

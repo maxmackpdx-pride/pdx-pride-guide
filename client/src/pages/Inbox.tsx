@@ -117,7 +117,7 @@ export default function Inbox() {
       kickerColor="var(--cyan, #00ffff)"
       title="Inbox"
       lede="Your 1:1 threads from MIZZED CONNECTION, GIGZ, GIFTZ, SELLZ, THE HAÜZ, event hosts, and check-ins. Only you can see these."
-      onLogout={() => logout()}
+      onLogout={() => { void logout().catch(() => {}); }}
       onMemberNavigate={(view) => {
         if (view === "posts") setLocation("/dashboard?view=posts");
         else if (view === "home") setLocation("/dashboard");

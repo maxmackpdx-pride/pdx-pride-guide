@@ -43,8 +43,8 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(`${API_BASE}${queryKey.join("/")}`, { credentials: "include" });
+  async ({ queryKey, signal }) => {
+    const res = await fetch(`${API_BASE}${queryKey.join("/")}`, { credentials: "include", signal });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
@@ -59,12 +59,12 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true,
+      staleTime: 60_000,
       // A transient deploy/startup or upstream failure should not become a
       // visible page error on first load. Never retry deliberate client errors.
       retry: (failureCount, error) => {
-        const status = Number(String(error).match(/^(\d{3}):/)?.[1]);
+        const status = Number((error instanceof Error ? error.message : String(error)).match(/^(\d{3}):/)?.[1]);
         return failureCount < 2 && (!status || status >= 500);
       },
       retryDelay: attempt => Math.min(250 * 2 ** attempt, 1_000),

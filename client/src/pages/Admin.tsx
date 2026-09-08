@@ -1773,7 +1773,7 @@ export default function Admin() {
         pendingCount={pendingCount}
         calmMode={calmMode}
         onToggleCalm={toggleCalmMode}
-        onLogout={async () => { await logout(); navigate("/"); }}
+        onLogout={async () => { try { await logout(); navigate("/"); } catch {} }}
         rightRail={null}
         mainToolbar={(
           <button type="button" className="hub-ghost-btn" onClick={refreshAdminData}>

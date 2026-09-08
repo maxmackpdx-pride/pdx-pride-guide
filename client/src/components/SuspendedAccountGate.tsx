@@ -174,8 +174,10 @@ export default function SuspendedAccountGate() {
         <button
           type="button"
           onClick={async () => {
-            await logout();
-            window.location.href = "/";
+            try {
+              await logout();
+              window.location.href = "/";
+            } catch {}
           }}
           style={{
             width: "100%",

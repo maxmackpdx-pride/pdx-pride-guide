@@ -628,7 +628,7 @@ export default function Dashboard() {
           setHubSection("profile");
           setEditMode(true);
         }}
-        onLogout={() => logout()}
+        onLogout={() => { void logout().catch(() => {}); }}
         errorBanner={errorBanner}
         section={hubSection}
         onSectionChange={setHubSection}

@@ -28,6 +28,19 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Run regression tests
+        run: npx tsx --test server/platformV1.test.ts server/ingest/mirrorEventPosters.test.ts client/src/lib/optimisticCache.test.ts client/src/lib/authSession.test.ts client/src/lib/queryClient.test.ts server/sessionStore.test.ts server/passwords.test.ts
+
   glass-rebind:
     runs-on: ubuntu-latest
     timeout-minutes: 5

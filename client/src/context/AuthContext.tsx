@@ -1,5 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, Fragment, ReactNode } from "react";
 import { syncPushSubscriptionWithServer } from "@/lib/pushNotifications";
+
+import { queryClient } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
+import { endSession, replaceAccountCache } from "@/lib/authSession";
 
 export interface AuthUser {
   id: number;
@@ -61,20 +65,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const identity = useRef<number | null>(null);
+  const refreshVersion = useRef(0);
+
+  const applyUser = (next: AuthUser | null) => {
+    replaceAccountCache(queryClient, identity.current, next?.id ?? null);
+    identity.current = next?.id ?? null;
+    setUser(next);
+  };
+
   const refreshUser = async () => {
+    const version = ++refreshVersion.current;
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
       if (res.ok) {
-        setUser(await res.json());
+        const next = await res.json();
+        if (version !== refreshVersion.current) return;
+        applyUser(next);
         void syncPushSubscriptionWithServer();
-      } else {
-        setUser(null);
+      } else if (res.status === 401 && version === refreshVersion.current) {
+        applyUser(null);
       }
-    } catch { setUser(null); }
-    setLoading(false);
+    } catch {
+      // A transient request failure does not mean the session ended.
+    } finally {
+      if (version === refreshVersion.current) setLoading(false);
+    }
   };
 
-  useEffect(() => { refreshUser(); }, []);
+  useEffect(() => { void refreshUser().catch(() => {}); }, []);
 
   const login = async (email: string, password: string) => {
     const res = await fetch("/api/auth/login", {
@@ -86,7 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json().catch(() => null) as { error?: string } | null;
       throw new Error(data?.error || "Login failed");
     }
-    await refreshUser();
+    const next: AuthUser = await res.json();
+    ++refreshVersion.current;
+    applyUser(next);
+    setLoading(false);
+    void syncPushSubscriptionWithServer();
   };
 
   const register = async (
@@ -112,17 +135,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json().catch(() => null) as { error?: string } | null;
       throw new Error(data?.error || "Registration failed");
     }
-    await refreshUser();
+    const next: AuthUser = await res.json();
+    ++refreshVersion.current;
+    applyUser(next);
+    setLoading(false);
+    void syncPushSubscriptionWithServer();
   };
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    setUser(null);
+    try {
+      await endSession();
+      ++refreshVersion.current;
+      applyUser(null);
+    } catch (error) {
+      toast({ title: "Could not sign out", description: "Sign-out could not be confirmed. Please try again.", variant: "destructive" });
+      throw error;
+    }
   };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
-      {children}
+      <Fragment key={user?.id ?? "anonymous"}>{children}</Fragment>
     </AuthContext.Provider>
   );
 }
