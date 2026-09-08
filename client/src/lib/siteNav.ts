@@ -31,9 +31,6 @@ export type NavEntry =
  * rest are hairline pills that light up in it on hover.
  */
 export const PRIMARY_NAV: NavEntry[] = [
-  { type: "link", href: "/", label: "Home", accent: "lime" },
-  { type: "link", href: "/about", label: "About", accent: "magenta" },
-  { type: "link", href: "/dashboard", label: "Hub", accent: "cyan" },
   {
     type: "dropdown",
     id: "events",
@@ -62,18 +59,21 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
+  { type: "link", href: "/pride-work", label: "Gigz", accent: "violet" },
+  { type: "link", href: "/spotted", label: "Mizzed", accent: "magenta" },
+  { type: "link", href: "/gifting", label: "Giftz", accent: "green" },
   {
     type: "dropdown",
-    id: "communities",
-    label: "Z/ Communities",
+    id: "more",
+    label: "More",
     accent: "violet",
-    /*
-     * The featured card is retired: the panel is one plain column of pills
-     * under a line of descriptive copy. Z/ now opens Communities only.
-     */
-    eyebrow: "Find your people",
     items: [
-      { href: "/z", label: "All Communities", accent: "violet" },
+      { href: "/z", label: "Z/ Communities", accent: "violet" },
+      { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
+      { href: "/sellz", label: "Sellz", accent: "orange" },
+      { href: "/map", label: "Map", accent: "blue" },
+      { href: "/", label: "Home", accent: "lime" },
+      { href: "/about", label: "About", accent: "magenta" },
     ],
   },
 ];
@@ -109,14 +109,19 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
 };
 
 /**
- * Destinations behind the mobile footer Z/ Communities tab sheet.
- *
- * Mirrors the desktop Communities menu. The phone bar has no Outz tab of its own,
- * so this sheet is also the door to OUTZ - but Outz is not in this list: it is
- * a drawer trigger the sheet renders itself, not a plain link.
+ * Destinations behind the compact mobile Boards tab. OutZide remains a
+ * separate drawer trigger rendered by the sheet.
  */
 export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/z", label: "All Communities", accent: "violet" },
+  { href: "/pride-work", label: "Gigz", accent: "violet" },
+  { href: "/spotted", label: "Mizzed", accent: "magenta" },
+  { href: "/gifting", label: "Giftz", accent: "green" },
+  { href: "/z", label: "Z/ Communities", accent: "violet" },
+  { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
+  { href: "/sellz", label: "Sellz", accent: "orange" },
+  { href: "/map", label: "Map", accent: "blue" },
+  { href: "/", label: "Home", accent: "lime" },
+  { href: "/about", label: "About", accent: "magenta" },
 ];
 
 /**

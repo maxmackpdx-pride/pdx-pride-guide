@@ -47,15 +47,9 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
-function MapMark() {
+function HubMark() {
   return (
-    <span className="hub-mobile-tab__map-mark" aria-hidden>
-      <svg width="38" height="42" viewBox="0 0 38 42" fill="none">
-        <path d="M19 40S34 27.8 34 15.8C34 7.6 27.3 1 19 1S4 7.6 4 15.8C4 27.8 19 40 19 40Z" fill="#071018" stroke="#5AA8FF" strokeWidth="3" />
-        <circle cx="19" cy="16" r="10" fill="#050506" stroke="#19E3FF" strokeWidth="1.5" />
-        <path d="M13 10h12v2.7l-7.1 7H25V22H13v-2.6l7.2-7.1H13V10Z" fill="#5AA8FF" />
-      </svg>
-    </span>
+    <img className="hub-mobile-tab__prime-mark" src="/brand/family/prime-z.svg" width="26" height="22" alt="" aria-hidden="true" />
   );
 }
 
@@ -103,8 +97,7 @@ export default function MobileBottomNav() {
 
   const placesActive = navLinkActive(location, "/directory");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const boardsActive = navLinkActive(location, "/z");
-  const mapActive = navLinkActive(location, "/map");
+  const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href)) || navLinkActive(location, OUTZ_INDEX);
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -143,7 +136,7 @@ export default function MobileBottomNav() {
 
   const localDemo = isLocalDemo();
 
-  /* The center map control opens the living map directly. */
+  /* Hub is a direct destination; Map remains available in Boards. */
   const handleHub = () => {
     if (!user && !localDemo) {
       setShowAuth(true);
@@ -151,7 +144,7 @@ export default function MobileBottomNav() {
     }
     dismissExcept();
     setHubOpen(false);
-    setLocation("/map");
+    setLocation("/dashboard");
   };
 
   const handleMessages = () => {
@@ -195,8 +188,8 @@ export default function MobileBottomNav() {
       {spaceOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="violet" role="dialog" aria-label="Z/ Communities">
-            <h3>Z/ Communities</h3>
+          <div className="hub-more-sheet hub-more-sheet--site hub-more-sheet--boards pdx-liquid-overlay" data-accent="violet" role="dialog" aria-label="Boards">
+            <h3>Boards</h3>
             {BOARD_NAV.map(item => (
               <Link
                 key={item.href}
@@ -321,7 +314,7 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className="hub-mobile-bar site-hub-mobile-bar" aria-label="Site mobile navigation">
+      <nav className="hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact" aria-label="Site mobile navigation">
         <div className="hub-mobile-bar__dock">
           <button
             type="button"
@@ -354,14 +347,14 @@ export default function MobileBottomNav() {
 
           <button
             type="button"
-            className={`${tabClass(mapActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
-            aria-label="Map"
-            title="Map"
-            aria-current={mapActive ? "page" : undefined}
+            className={`${tabClass(hubActive, "cyan")} hub-mobile-tab--center hub-mobile-tab--hub-icon`}
+            aria-label="Hub"
+            title="Hub"
+            aria-current={hubActive ? "page" : undefined}
             onClick={handleHub}
           >
-            <MapMark />
-            <span>Map</span>
+            <HubMark />
+            <span>Hub</span>
           </button>
 
           <button
@@ -369,7 +362,7 @@ export default function MobileBottomNav() {
             className={tabClass(boardsActive || spaceOpen || outzOpen, "purple")}
             aria-expanded={spaceOpen}
             aria-haspopup="dialog"
-            aria-label="Z/ Communities"
+            aria-label="Boards"
             onClick={handleSpace}
           >
             <TabIcon>
@@ -378,7 +371,7 @@ export default function MobileBottomNav() {
               <rect x="3" y="14" width="7" height="7" rx="1" />
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </TabIcon>
-            <span>Z/</span>
+            <span>Boards</span>
           </button>
 
           <button

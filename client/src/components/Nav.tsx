@@ -51,6 +51,7 @@ function NavLink({
       data-accent={accent}
       onClick={onClick}
       aria-label={notifyLabel}
+      aria-current={active ? "page" : undefined}
     >
       {label}
       {showNotify && <span className="site-nav-notify-dot" aria-hidden="true" />}
@@ -511,7 +512,24 @@ export default function Nav() {
   const profileRef = useRef<HTMLDivElement>(null);
   const mobileProfileRef = useRef<HTMLDivElement>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const fetching = useIsFetching();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   // Deep link: /?auth=register (or join/signup) opens Join modal.
   // Direct secret-story exit uses /?auth=register&from=stank-egg → ticket gate first.
@@ -644,14 +662,12 @@ export default function Nav() {
   const profileActive = Boolean(
     profilePath && (location === profilePath || location.startsWith(`${profilePath}/`)),
   );
-  const aboutActive = navLinkActive(location, "/about");
-  const homeActive = location === "/";
 
   const seamLoading = routeLoading || fetching > 0;
 
   return (
     <>
-      <header className="site-header site-header--real-seam">
+      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact">
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
@@ -662,26 +678,9 @@ export default function Nav() {
           </Link>
 
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
-            <div className="hub-mtop__mode" role="group" aria-label="Site sections">
-              <Link
-                href="/"
-                className={`hub-mtop__mode-btn${homeActive ? " is-active is-member" : ""}`}
-                data-accent="lime"
-                aria-current={homeActive ? "page" : undefined}
-                onClick={() => dismissMobileNavOverlays()}
-              >
-                Home
-              </Link>
-              <Link
-                href="/about"
-                className={`hub-mtop__mode-btn${aboutActive ? " is-active is-member" : ""}`}
-                data-accent="magenta"
-                aria-current={aboutActive ? "page" : undefined}
-                onClick={() => dismissMobileNavOverlays()}
-              >
-                About
-              </Link>
-            </div>
+            <Link href="/" className="site-brand site-brand--mobile" aria-label="Zaylist home" onClick={() => dismissMobileNavOverlays()}>
+              <GlitchLogo src="/brand/family/zaylist-primary.svg" alt="Zaylist" className="site-brand-lockup" />
+            </Link>
             <div className="hub-mtop__spacer" />
             <button
               type="button"
