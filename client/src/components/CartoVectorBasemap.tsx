@@ -21,6 +21,7 @@ type Props = {
   waterColor?: string;
   /** Warm soil and olive terrain for the OutZide discovery map. */
   warmLand?: boolean;
+  topographic?: boolean;
 };
 
 function canUseWebGL(): boolean {
@@ -36,7 +37,7 @@ function canUseWebGL(): boolean {
   }
 }
 
-export default function CartoVectorBasemap({ accent, waterColor, warmLand = false }: Props) {
+export default function CartoVectorBasemap({ accent, waterColor, warmLand = false, topographic = false }: Props) {
   const map = useMap();
 
   useEffect(() => {
@@ -55,6 +56,8 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
 
     let layer: ReturnType<typeof maplibreGL> | null = null;
     let gl: ReturnType<ReturnType<typeof maplibreGL>["getMaplibreMap"]> | null = null;
+    let disposed = false;
+    const terrainAttribution = 'Elevation: <a href="https://www.mapzen.com/rights/">Mapzen</a>';
     let onVectorLoad: (() => void) | null = null;
 
     try {
@@ -106,12 +109,21 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
 
     onVectorLoad = () => {
       applyAccent();
+      if (topographic) {
+        import("@/lib/outzTopography").then(({ addOutzTopography }) => {
+          if (disposed || !gl) return;
+          addOutzTopography(gl);
+          map.attributionControl?.addAttribution(terrainAttribution);
+        }).catch(error => console.warn("Topographic overlay unavailable; retaining CARTO map.", error));
+      }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
     if (gl.loaded()) onVectorLoad();
     else gl.once("load", onVectorLoad);
 
     return () => {
+      disposed = true;
+      if (topographic) map.attributionControl?.removeAttribution(terrainAttribution);
       if (onVectorLoad) gl?.off("load", onVectorLoad);
       if (layer && map.hasLayer(layer)) {
         try {
@@ -122,7 +134,7 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
       }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
-  }, [map, accent, waterColor, warmLand]);
+  }, [map, accent, waterColor, warmLand, topographic]);
 
   return null;
 }

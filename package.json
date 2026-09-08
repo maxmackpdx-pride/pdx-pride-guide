@@ -80,6 +80,7 @@
     "input-otp": "^1.4.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.453.0",
+    "maplibre-contour": "^0.1.0",
     "maplibre-gl": "^4.7.1",
     "memorystore": "^1.6.7",
     "multer": "^2.2.0",
