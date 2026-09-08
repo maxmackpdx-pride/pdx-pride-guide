@@ -426,10 +426,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53338",
     "lat": 45.32198,
     "lng": -121.70389,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonsbestcamping.com/mt_hood/alpine.html",
+        "image": "https://www.oregonsbestcamping.com/photos10/alpine_campground_2.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Mt Hood high forest tent campsite: dense conifers, picnic table and distant snow summit; composed landscape, not a literal campsite view."
+    ],
+    "asset": "/motifs/outz/places/usfs-5434010324.svg"
   },
   {
     "id": "usfs-5054.005621",
@@ -552,10 +559,17 @@
     "officialUrl": null,
     "lat": 42.975,
     "lng": -122.4628,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://vanmarmot.org/2018/06/01/anderson-camp-rogue-umpqua-divide-wilderness-01-jun-2018/",
+        "image": "https://photos.smugmug.com/2018-06-01-Anderson-Mountain/i-f3tdz4D/0/720d68a8/L/1-P6010176-L.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Anderson Prairie on the Rogue-Umpqua Divide: sweeping grassy clearing, wooded ridge and wildflower foreground."
+    ],
+    "asset": "/motifs/outz/places/usfs-5164010262.svg"
   },
   {
     "id": "usfs-296847010602",
@@ -583,10 +597,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59833",
     "lat": 42.760874,
     "lng": -122.059064,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://workingonexploring.com/2019/10/20/oregon-blm-and-usfs-camping-finds/",
+        "image": "https://workingonexploring.com/wp-content/uploads/2019/10/img_20190927_164511.jpg?w=768"
+      }
+    ],
+    "visualFeatures": [
+      "Annie Creek flowing beside the open camping area, conifer edges and log warming shelter."
+    ],
+    "asset": "/motifs/outz/places/usfs-5031010372.svg"
   },
   {
     "id": "usfs-5136.004991",
@@ -595,10 +616,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38784",
     "lat": 44.00599967,
     "lng": -120.3899244,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.campbase.com/photos/antelope-flat-reservoir-campground",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/0/04/Antelope_Flat_Reservoir.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Antelope Flat Reservoir in the Maury Mountains: broad reservoir, low rounded hills, ponderosa edge and uphill tent camping; verified coordinates distinguish it from Jordan Valley."
+    ],
+    "asset": "/motifs/outz/places/usfs-5136.004991.svg"
   },
   {
     "id": "usfs-5254010381",
@@ -607,10 +635,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59899",
     "lat": 42.959298,
     "lng": -121.247602,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/plan-your-trip/places-to-stay/campgrounds/antler-horse-camp/",
+        "image": "https://hollyblogsheradventures.blogspot.com/2014/06/silver-creek-marsh-horse-camp.html"
+      }
+    ],
+    "visualFeatures": [
+      "Antler horse camp: corral rails and horse beside pine forest, with trail toward the timbered Yamsay Mountain country."
+    ],
+    "asset": "/motifs/outz/places/usfs-5254010381.svg"
   },
   {
     "id": "usfs-7632.004731",
@@ -619,10 +654,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=47014",
     "lat": 46.165526,
     "lng": -122.09105,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.wta.org/go-hiking/trip-reports/trip_report.2012-07-23.6932302684",
+        "image": "https://www.wta.org/site_images/trip-reports/2012/ape-canyon.jpg/%40%40download/image/Ape%20Canyon.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Ape Canyon narrow volcanic cleft with fractured rock walls, sparse alpine plants and forest beyond; canyon rather than the unrelated Ape Cave."
+    ],
+    "asset": "/motifs/outz/places/usfs-7632.004731.svg"
   },
   {
     "id": "usfs-5463010371",

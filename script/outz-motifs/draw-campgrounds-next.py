@@ -1,0 +1,9 @@
+from drawing import pine,save
+save({
+'usfs-5434010324':('Mt Hood high forest tent campsite: dense conifers, picnic table and distant snow summit; composed landscape, not a literal campsite view.','https://www.oregonsbestcamping.com/mt_hood/alpine.html','https://www.oregonsbestcamping.com/photos10/alpine_campground_2.jpg',
+'<path d="M63 101L104 67 130 30 155 72 198 105M104 67L119 76 130 57 143 79 155 72M24 232Q104 216 242 233M84 212L127 142 177 212ZM127 142V212L151 183M94 198L127 142M178 180H230M183 193H238M195 181L186 211M221 181L232 211"/>'+pine(38,208,1.8)+pine(224,164,1.3)+pine(66,149,.8)),
+'usfs-5031010372':('Annie Creek flowing beside the open camping area, conifer edges and log warming shelter.','https://workingonexploring.com/2019/10/20/oregon-blm-and-usfs-camping-finds/','https://workingonexploring.com/wp-content/uploads/2019/10/img_20190927_164511.jpg?w=768',
+'<path d="M16 148Q64 139 105 164T193 183Q224 190 247 207M18 170Q76 160 110 187T185 207Q223 214 246 236M44 169L68 173M128 195L150 201M198 211L219 218M68 119V74L118 39 166 74V119ZM56 77L118 30 177 77M81 81H104M130 81H153M81 92H104M130 92H153M81 103H104M130 103H153M109 119V79H128V119M197 164L220 127 245 164ZM220 127V164"/>'+pine(34,127,1.3)+pine(207,110,1.1)),
+'usfs-5136.004991':('Antelope Flat Reservoir in the Maury Mountains: broad reservoir, low rounded hills, ponderosa edge and uphill tent camping; verified coordinates distinguish it from Jordan Valley.','https://www.campbase.com/photos/antelope-flat-reservoir-campground','https://upload.wikimedia.org/wikipedia/commons/0/04/Antelope_Flat_Reservoir.jpg',
+'<path d="M17 95Q55 64 98 79T161 69Q210 48 247 80M30 112Q97 93 158 109T244 110M43 131Q123 116 209 133M61 145H182M119 157H218M16 191Q102 164 245 187M81 227L116 176 149 227ZM116 176V227L132 204M166 218H219M177 211H210M184 212L177 236M202 212L210 236M72 239Q163 247 245 237"/>'+pine(35,218,1.3)+pine(229,178,.75)),
+})
