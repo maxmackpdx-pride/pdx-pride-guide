@@ -22,7 +22,7 @@ export function addOutzTopography(map: Map) {
     id: "outz-relief", type: "hillshade", source: "outz-dem",
     paint: {
       "hillshade-shadow-color": "#000000",
-      "hillshade-highlight-color": "#FF6600",
+      "hillshade-highlight-color": "#A8C943",
       "hillshade-accent-color": "#A6420C",
       "hillshade-exaggeration": 0.65,
     },
