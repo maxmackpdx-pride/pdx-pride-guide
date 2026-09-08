@@ -123,7 +123,7 @@
   /* ── 1.5 Glass buttons (Card System §16 state sheet)
      Default = near-black translucent fill + 2px black ring + accent hairline
      + soft bloom + top sheen. Solid = filled accent CTA. Outline = secondary. */
-  --glass-btn-radius: 9px;
+  --glass-btn-radius: 22px;
   --glass-btn-bg:
     radial-gradient(
       120% 100% at 50% 0%,
@@ -260,10 +260,10 @@
    */
   --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--c) var(--bloom-alpha, 8%), transparent);
   --btn-glow-bg:
-    radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--c) 16%, transparent), transparent 60%),
+    radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c, var(--c)) 16%, transparent), transparent 60%),
     #000;
   --btn-glow-shadow:
-    0 2px 0 color-mix(in srgb, var(--c) 40%, #000),
+    0 2px 0 color-mix(in srgb, var(--button-c, var(--c)) 40%, #000),
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -8px 14px -8px rgba(255, 255, 255, 0.06),
     inset 0 10px 16px -12px rgba(0, 0, 0, 0.9),
@@ -506,118 +506,6 @@ html.calm-mode .pdxLegend,
   pointer-events: none;
   opacity: 0.35;
   background: var(--poster-well-scan);
-}
-
-/* Default glass CTA - dark fill + accent rim (state sheet DEFAULT) */
-.pdx-glass-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em;
-  font-family: var(--font-display);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  padding: 11px 20px;
-  font-size: 0.86rem;
-  border-radius: var(--glass-btn-radius, 9px);
-  color: var(--glass-btn-color, #fff);
-  border: var(--glass-btn-border);
-  /* Glow treatment (chrome.css): dark plate, accent rim, lit top edge, dark
-     inner floor, 8% outer bloom. Composed, never restated here. The older
-     --glass-btn-bg / --glass-btn-shadow pair said the same thing minus the
-     bloom, and is kept only for the surfaces that still read those tokens. */
-  background: var(--btn-glow-bg);
-  box-shadow: var(--btn-glow-shadow);
-  cursor: pointer;
-  text-decoration: none;
-  transition:
-    transform 0.15s ease,
-    filter 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease,
-    opacity 0.15s ease;
-}
-
-.pdx-glass-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  /* Hover lifts the same plate rather than swapping to a second recipe. */
-  filter: brightness(1.14);
-  background: var(--btn-glow-bg);
-  box-shadow: var(--btn-glow-shadow);
-  text-decoration: none;
-  color: var(--glass-btn-color, #fff);
-}
-
-.pdx-glass-btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-  filter: none;
-  background: var(--glass-btn-active-bg);
-  box-shadow: var(--glass-btn-active-shadow);
-}
-
-.pdx-glass-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  color: #6a6870;
-  background: linear-gradient(#0b0b0d, #08080a) padding-box, linear-gradient(#000, #000) border-box;
-  box-shadow: 0 0 0 1px #1c1c22, inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  transform: none;
-  filter: none;
-}
-
-/* Outline secondary */
-.pdx-glass-btn--outline {
-  color: var(--glass-btn-outline-color, var(--c));
-  background: var(--glass-btn-outline-bg);
-  border: var(--glass-btn-outline-border);
-  box-shadow: var(--glass-btn-outline-shadow);
-}
-
-.pdx-glass-btn--outline:hover:not(:disabled) {
-  color: var(--glass-btn-outline-color, var(--c));
-  filter: brightness(1.08);
-  background: color-mix(in srgb, var(--c) 10%, rgba(0, 0, 0, 0.55));
-  box-shadow:
-    0 0 0 1px #000,
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-/* Solid primary CTA */
-.pdx-glass-btn--solid {
-  color: var(--glass-btn-solid-color, #050506);
-  background: var(--glass-btn-solid-bg, var(--c));
-  border: var(--glass-btn-solid-border, 2px solid #000);
-  box-shadow: var(--glass-btn-solid-shadow);
-}
-
-.pdx-glass-btn--solid:hover:not(:disabled) {
-  color: var(--glass-btn-solid-color, #050506);
-  filter: brightness(1.06);
-  background: var(--glass-btn-solid-bg, var(--c));
-  box-shadow:
-    0 0 0 1px #000,
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
-}
-
-/* Rainbow special (keep for rare moments) */
-.pdx-glass-btn--gradient {
-  color: #050506;
-  border: 1px solid #000;
-  background: linear-gradient(100deg, #ff2400, #ff9500, #ffee00, #39ff14, #00ffff, #8800ff, #ff00cc);
-  background-size: 180% 180%;
-  box-shadow:
-    0 0 0 1px #000,
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.3);
-}
-
-.pdx-glass-btn--gradient:hover:not(:disabled) {
-  color: #050506;
-  filter: brightness(1.05);
-  background-position: 100% 50%;
 }
 
 .pdx-map-surface,

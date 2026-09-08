@@ -1437,8 +1437,7 @@ export default function Admin() {
       <button
         type="button"
         onClick={() => openMessageTo(target, "guide")}
-        className="display text-xs px-3 py-1 border"
-        style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+        className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
         data-testid={`admin-message-${uname}`}
         title="Send as Zaylist - replies go to shared Admin inbox"
       >
@@ -1458,8 +1457,7 @@ export default function Admin() {
       <button
         type="button"
         onClick={() => openMessageTo(target, "personal")}
-        className="display text-xs px-3 py-1 border"
-        style={{ borderColor: "#C8FA3C", color: "#C8FA3C" }}
+        className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
         data-testid={`admin-message-personal-${uname}`}
         title={`Send as ${signedInAdminLabel} - replies go to your personal inbox`}
       >
@@ -1831,8 +1829,7 @@ export default function Admin() {
               />
               <button
                 type="button"
-                className="display text-xs px-4 py-2 border"
-                style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                className="zay-action pdx-glass-rebind display text-xs px-4 py-2 border"
                 disabled={adminGlobalSearching || !adminGlobalSearchQ.trim()}
                 onClick={() => void runAdminGlobalSearch()}
               >
@@ -1921,8 +1918,7 @@ export default function Admin() {
             )}
             <button
               type="button"
-              className="display text-xs px-3 py-1 border mt-3"
-              style={{ borderColor: "#FF1FA0", color: "#FF1FA0" }}
+              className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border mt-3"
               onClick={() => openSheet({ view: "inbox", account: "admin" })}
             >
               OPEN QUEUE
@@ -2016,8 +2012,7 @@ export default function Admin() {
                 <button
                   type="button"
                   disabled={bulkBusy}
-                  className="display text-xs px-3 py-1 border"
-                  style={{ borderColor: "#19E3FF", color: "#19E3FF" }}
+                  className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                   onClick={async () => {
                     setBulkBusy(true);
                     try {
@@ -2453,13 +2448,13 @@ export default function Admin() {
                         </div>
                         <div className="flex gap-3 flex-wrap pt-2">
                           <button type="submit" disabled={editEventMutation.isPending}
-                            className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
-                            style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                            className="zay-action zay-action--solid pdx-glass-rebind display text-sm px-6 py-2 disabled:opacity-50"
+                            >
                             {editEventMutation.isPending ? "SAVING..." : "SAVE CHANGES"}
                           </button>
                           <button type="button" onClick={() => setEditingId(null)}
-                            className="display text-sm px-6 py-2 border"
-                            style={{ borderColor: "#333", color: "#666", background: "transparent" }}>
+                            className="zay-action pdx-glass-rebind display text-sm px-6 py-2 border"
+                            >
                             CANCEL
                           </button>
                         </div>
@@ -2623,13 +2618,13 @@ export default function Admin() {
                         </div>
                         <div className="flex gap-3 flex-wrap pt-2">
                           <button type="submit" disabled={editGigMutation.isPending}
-                            className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
-                            style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}>
+                            className="zay-action zay-action--solid pdx-glass-rebind display text-sm px-6 py-2 disabled:opacity-50"
+                            >
                             {editGigMutation.isPending ? "SAVING..." : "SAVE CHANGES"}
                           </button>
                           <button type="button" onClick={() => setEditingGigId(null)}
-                            className="display text-sm px-6 py-2 border"
-                            style={{ borderColor: "#333", color: "#666", background: "transparent" }}>
+                            className="zay-action pdx-glass-rebind display text-sm px-6 py-2 border"
+                            >
                             CANCEL
                           </button>
                         </div>
@@ -2685,8 +2680,7 @@ export default function Admin() {
                   type="button"
                   onClick={() => void handleUserSearch()}
                   disabled={userSearching || !userSearchQ.trim()}
-                  className="display text-xs px-5 py-2.5 border flex items-center gap-2 disabled:opacity-40"
-                  style={{ borderColor: "#FF6600", color: "#000", background: "#FF6600" }}
+                  className="zay-action pdx-glass-rebind zay-action--solid display text-xs px-5 py-2.5 border flex items-center gap-2 disabled:opacity-40"
                 >
                   <Search size={12} /> {userSearching ? "..." : "SEARCH"}
                 </button>
@@ -2718,11 +2712,11 @@ export default function Admin() {
                         )}
                         {u.promoterStatus !== "approved" && (
                           <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
-                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}>APPROVE</button>
+                            className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border" >APPROVE</button>
                         )}
                         {u.promoterStatus !== "pending" && (
                           <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
-                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#00FFFF", color: "#00FFFF" }}>SET PENDING</button>
+                            className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border" >SET PENDING</button>
                         )}
                         {u.promoterStatus !== "none" && u.promoterStatus !== null && (
                           <button type="button" onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "none" })}
@@ -2760,8 +2754,7 @@ export default function Admin() {
                             type="button"
                             onClick={() => setUsernameMutation.mutate({ userId: u.id, username: fixUsernameValue })}
                             disabled={!fixUsernameValue.trim() || setUsernameMutation.isPending}
-                            className="display text-xs px-3 py-1 border"
-                            style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                            className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                           >SAVE</button>
                           <button type="button" onClick={() => setFixUsernameTarget(null)} className="display text-xs px-2 py-1 text-white/40">CANCEL</button>
                         </div>
@@ -2839,8 +2832,7 @@ export default function Admin() {
                                 <button
                                   type="button"
                                   onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "pending" })}
-                                  className="display text-xs px-3 py-1 border"
-                                  style={{ borderColor: "#00FFFF", color: "#00FFFF" }}
+                                  className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                                 >
                                   SET PENDING
                                 </button>
@@ -2857,8 +2849,7 @@ export default function Admin() {
                               <button
                                 type="button"
                                 onClick={() => setPromoterStatusMutation.mutate({ userId: u.id, status: "approved" })}
-                                className="display text-xs px-3 py-1 border"
-                                style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                                className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                               >
                                 GRANT PROMOTER
                               </button>
@@ -2917,8 +2908,7 @@ export default function Admin() {
                               type="button"
                               onClick={() => approvePromoterMutation.mutate(uid)}
                               disabled={approvePromoterMutation.isPending}
-                              className="display text-xs px-3 py-1 border"
-                              style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                              className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                             >
                               APPROVE
                             </button>
@@ -2975,7 +2965,7 @@ export default function Admin() {
                         <button
                           onClick={() => businessClaimMutation.mutate({ id: claim.id, action: "approve" })}
                           disabled={businessClaimMutation.isPending}
-                          className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                         >APPROVE</button>
                         <button
                           onClick={() => businessClaimMutation.mutate({ id: claim.id, action: "deny" })}
@@ -3014,7 +3004,7 @@ export default function Admin() {
                           <button
                             onClick={() => businessSubmissionMutation.mutate({ id: sub.id, action: "approve" })}
                             disabled={businessSubmissionMutation.isPending}
-                            className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                            className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                           >APPROVE</button>
                           <button
                             onClick={() => businessSubmissionMutation.mutate({ id: sub.id, action: "deny" })}
@@ -3049,7 +3039,7 @@ export default function Admin() {
                         <button
                           onClick={() => businessLogoRequestMutation.mutate({ id: req.id, action: "approve" })}
                           disabled={businessLogoRequestMutation.isPending}
-                          className="display text-xs px-3 py-1 border" style={{ borderColor: "#CCFF00", color: "#CCFF00" }}
+                          className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                         >APPROVE AS-IS</button>
                         <button
                           onClick={() => businessLogoRequestMutation.mutate({ id: req.id, action: "deny" })}
@@ -3294,8 +3284,7 @@ export default function Admin() {
               {isSuperAdmin && (
                 <button
                   type="button"
-                  className="display text-xs px-4 py-2 border"
-                  style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                  className="zay-action pdx-glass-rebind zay-action--destructive display text-xs px-4 py-2 border"
                   disabled={purgeQaMutation.isPending}
                   onClick={() => purgeQaMutation.mutate()}
                 >
@@ -3417,8 +3406,7 @@ export default function Admin() {
               )}
               <button
                 type="button"
-                className="display text-xs px-3 py-1 border mt-3"
-                style={{ borderColor: "#FF1FA0", color: "#FF1FA0" }}
+                className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border mt-3"
                 onClick={() => openSheet({ view: "inbox", account: "admin" })}
               >
                 OPEN QUEUE
@@ -3460,8 +3448,7 @@ export default function Admin() {
                 <button
                   type="submit"
                   disabled={grantAdminMutation.isPending || !teamIdentifier.trim()}
-                  className="display text-sm px-6 py-2 border-2 disabled:opacity-50"
-                  style={{ background: "#CCFF00", borderColor: "#CCFF00", color: "#000" }}
+                  className="zay-action zay-action--solid pdx-glass-rebind display text-sm px-6 py-2 disabled:opacity-50"
                 >
                   {grantAdminMutation.isPending ? "ADDING..." : "GRANT ADMIN ACCESS"}
                 </button>
@@ -3521,8 +3508,7 @@ export default function Admin() {
                           type="button"
                           onClick={() => revokeAdminMutation.mutate(member.userId)}
                           disabled={revokeAdminMutation.isPending}
-                          className="display text-xs px-4 py-2 border-2"
-                          style={{ borderColor: "#FF2400", color: "#FF2400" }}
+                          className="zay-action pdx-glass-rebind zay-action--destructive display text-xs px-4 py-2 border-2"
                         >
                           REMOVE
                         </button>

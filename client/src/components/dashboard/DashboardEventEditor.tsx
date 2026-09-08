@@ -331,7 +331,7 @@ export function DashboardGigEditForm({
         <input style={inputStyle} value={gigForm.location} onChange={e => setGigForm(f => ({ ...f, location: e.target.value }))} placeholder="Location" />
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button type="button" onClick={onSave} className="dash-btn dash-btn-lime active" style={{ borderColor: "#FF8C00", background: "#FF8C00" }}>Save</button>
+        <button type="button" onClick={onSave} className="dash-btn dash-btn-lime-solid pdx-glass-rebind">Save</button>
         <button type="button" onClick={onCancel} className="dash-btn dash-btn-ghost">Cancel</button>
       </div>
     </div>

@@ -325,7 +325,7 @@ export default function AttendanceCluster({
                   type="button"
                   onClick={e => markWasHere(e.currentTarget)}
                   disabled={mutation.isPending}
-                  className="display attendance-cluster-cta__btn"
+                  className="display attendance-cluster-cta__btn pdx-glass-rebind"
                 >
                   {mutation.isPending ? "Saving…" : "I was here →"}
                 </button>
@@ -353,7 +353,7 @@ export default function AttendanceCluster({
                 data-testid="button-ill-be-there"
                 onClick={() => user ? setShowForm(true) : setShowAuth(true)}
                 disabled={mutation.isPending || removeMutation.isPending}
-                className="display attendance-cluster-cta__btn"
+                className="display attendance-cluster-cta__btn pdx-glass-rebind"
               >
                 {myAttendance ? "Going ✓" : "I'll be there →"}
               </button>

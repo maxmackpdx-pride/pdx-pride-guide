@@ -174,7 +174,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
       type="button"
       onClick={() => setShowPassword(v => !v)}
       aria-label={showPassword ? "Hide password" : "Show password"}
-      className="absolute right-3 z-10 flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 text-white/40 transition-colors duration-300 hover:text-white"
+      className="absolute right-1 z-10 flex h-11 w-11 items-center justify-center border-0 bg-transparent p-0 text-white/40 transition-colors duration-300 hover:text-white"
     >
       <EyeToggleIcon visible={showPassword} size={16} />
     </button>
@@ -267,7 +267,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               type="button"
               onClick={handleClose}
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 transition-colors duration-200 hover:border-white/25 hover:text-white"
+              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 transition-colors duration-200 hover:border-white/25 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
@@ -300,23 +300,21 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
               <div className="mb-6 flex gap-2" role="group" aria-label="Account">
                 {(["login", "register"] as const).map(t => {
                   const on = tab === t;
-                  const accent = t === "login" ? "#19e3ff" : "#c8fa3c";
+                  const accent = "var(--action-accent)";
                   return (
                     <button
                       key={t}
                       type="button"
                       onClick={() => { setTab(t); setError(""); setConfirmPassword(""); }}
                       aria-pressed={on}
-                      className="flex-1 rounded-full border-2 bg-transparent px-4 py-[10px] text-[0.78rem] uppercase transition-all duration-200"
+                      className="zay-auth-tab pdx-glass-rebind flex-1 rounded-full border-2 bg-transparent px-4 py-[10px] text-[0.78rem] uppercase transition-all duration-200"
                       style={{
                         fontFamily: "var(--font-display)",
                         fontWeight: 700,
                         letterSpacing: "0.05em",
                         borderColor: on ? accent : "#333",
                         color: on ? accent : "var(--text-body, #e6e2d9)",
-                        boxShadow: on
-                          ? `0 0 6px ${accent}, 0 0 14px color-mix(in srgb, ${accent} 55%, transparent)`
-                          : "none",
+                        boxShadow: on ? "var(--btn-glow-shadow)" : "none",
                       }}
                     >
                       {t === "login" ? "Log in" : "Join"}
@@ -376,7 +374,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
                     e.preventDefault();
                     window.location.assign("/api/auth/google");
                   }}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-[0.82rem] uppercase text-white/80 no-underline transition-all duration-200 hover:border-white/25 hover:bg-white/[0.07] hover:text-white"
+                  className="zay-action pdx-glass-rebind flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-[0.82rem] uppercase text-white/80 no-underline transition-all duration-200 hover:border-white/25 hover:bg-white/[0.07] hover:text-white"
                   style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.05em" }}
                 >
                   <span aria-hidden className="text-[0.95rem] font-bold">G</span>
@@ -543,29 +541,11 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
   );
 }
 
-/** Filled accent action. Cyan for log in, lime for join. */
-function SubmitButton({
-  accent = "#19e3ff",
-  children,
-  ...props
-}: { accent?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      {...props}
-      className="group/submit mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-xl border-0 text-[0.85rem] uppercase transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-45"
-      style={{
-        background: accent,
-        color: "#050506",
-        fontFamily: "var(--font-display)",
-        fontWeight: 900,
-        letterSpacing: "0.06em",
-        boxShadow: `0 0 8px color-mix(in srgb, ${accent} 55%, transparent), 0 0 22px -6px ${accent}`,
-      }}
-    >
-      {children}
-      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/submit:translate-x-1" />
-    </button>
-  );
+/** The account action uses the current surface's approved primary. */
+function SubmitButton({ accent: _accent, children, ...props }: { accent?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return <button {...props} className="zay-action zay-action--solid pdx-glass-rebind group/submit mt-1 w-full">
+    {children}<ArrowRight className="h-4 w-4" />
+  </button>;
 }
 
 function ErrorNote({ children }: { children: ReactNode }) {
@@ -589,7 +569,7 @@ function TextButton({ children, onClick }: { children: ReactNode; onClick: () =>
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto block min-h-[44px] border-0 bg-transparent px-3 text-[0.82rem] text-white/55 transition-colors duration-200 hover:text-white"
+      className="zay-text-action mx-auto block min-h-[44px] border-0 bg-transparent px-3 text-[0.82rem] text-white/55 transition-colors duration-200 hover:text-white"
     >
       {children}
     </button>
@@ -608,7 +588,7 @@ function SwapNote({
       <button
         type="button"
         onClick={onClick}
-        className="border-0 bg-transparent p-0 font-bold transition-opacity duration-200 hover:opacity-75"
+        className="zay-text-action border-0 bg-transparent p-0 font-bold transition-opacity duration-200 hover:opacity-75"
         style={{ color: accent }}
       >
         {action}

@@ -60,14 +60,14 @@ export default function SafetyGuide({ context, compact = false, onReport, onBloc
         <h2 id={`safety-${context}-title`}>{copy.title}</h2>
         <p>{copy.body}</p>
         <nav className="safety-guide__actions" aria-label="Safety actions">
-          <Link href="/access"><LockKeyhole size={15} aria-hidden="true" /> Safety</Link>
-          <Link href="/access#community-rules"><ShieldCheck size={15} aria-hidden="true" /> Rules</Link>
+          <Link className="zay-action pdx-glass-rebind" href="/access"><LockKeyhole size={15} aria-hidden="true" /> Safety</Link>
+          <Link className="zay-action pdx-glass-rebind" href="/access#community-rules"><ShieldCheck size={15} aria-hidden="true" /> Rules</Link>
           {onReport
-            ? <button type="button" onClick={reportOpened}><Flag size={15} aria-hidden="true" /> Report</button>
-            : <Link href="/access#report" onClick={reportOpened}><Flag size={15} aria-hidden="true" /> Report</Link>}
+            ? <button className="zay-action pdx-glass-rebind" type="button" onClick={reportOpened}><Flag size={15} aria-hidden="true" /> Report</button>
+            : <Link className="zay-action pdx-glass-rebind" href="/access#report" onClick={reportOpened}><Flag size={15} aria-hidden="true" /> Report</Link>}
           {onBlock
-            ? <button type="button" onClick={onBlock}><UserRoundX size={15} aria-hidden="true" /> Block</button>
-            : <Link href="/access#block"><UserRoundX size={15} aria-hidden="true" /> Block</Link>}
+            ? <button className="zay-action pdx-glass-rebind" type="button" onClick={onBlock}><UserRoundX size={15} aria-hidden="true" /> Block</button>
+            : <Link className="zay-action pdx-glass-rebind" href="/access#block"><UserRoundX size={15} aria-hidden="true" /> Block</Link>}
         </nav>
       </div>
     </aside>

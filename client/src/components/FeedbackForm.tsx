@@ -18,20 +18,7 @@ export function FeedbackButton() {
       <button
         id="feedback"
         onClick={() => setOpen(true)}
-        className="display"
-        style={{
-          background: "none",
-          border: "1px solid #333",
-          color: "#00FFFF",
-          padding: "8px 18px",
-          minHeight: "44px",
-          fontSize: "0.78rem",
-          letterSpacing: "0.08em",
-          cursor: "pointer",
-          transition: "border-color 0.15s",
-        }}
-        onMouseEnter={e => (e.currentTarget.style.borderColor = "#00FFFF")}
-        onMouseLeave={e => (e.currentTarget.style.borderColor = "#333")}
+        className="zay-feedback-action pdx-glass-rebind display"
       >
         REPORT A BUG / SEND FEEDBACK
       </button>

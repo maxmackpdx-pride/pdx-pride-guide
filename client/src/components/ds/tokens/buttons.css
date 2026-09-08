@@ -1,0 +1,338 @@
+/* Canonical action contract. Only registered action families belong here:
+   whole cards, navigation, map markers, tabs and data chips keep their anatomy.
+   Foundation release 2026-09-08.1: 44px / 22px, uppercase Barlow Condensed,
+   contextual primary, dark secondary glow plate, composed 8% bloom. */
+:root { --action-accent: var(--neon-yellow); --action-ink: #050506; }
+:root[data-action-context="hub"], [data-action-context="hub"] { --action-accent: var(--neon-cyan); }
+:root[data-action-context="admin"], [data-action-context="admin"] { --action-accent: var(--neon-magenta); }
+[data-action-context="owner"] { --action-accent: var(--neon-violet); --action-ink: #fff; }
+:root[data-action-context="rooster"] { --action-accent: var(--neon-orange); }
+:root[data-action-context="sauvie"] { --action-accent: var(--green-acid); }
+
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) {
+  --button-c: var(--_c, var(--c, var(--action-accent)));
+  /* Rebind the canonical chrome recipe to this control, not its parent card. */
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--button-c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c) 16%, transparent), transparent 60%), #000;
+  --btn-glow-shadow: 0 2px 0 color-mix(in srgb, var(--button-c) 40%, #000),
+    inset 0 1px 0 rgba(255,255,255,.28), inset 0 -8px 14px -8px rgba(255,255,255,.06),
+    inset 0 10px 16px -12px rgba(0,0,0,.9), var(--neon-bloom);
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 44px; min-width: 44px; padding: 10px 20px;
+  border: 1px solid var(--button-c); border-radius: 22px;
+  font-family: var(--font-display); font-size: .86rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em; line-height: 1.2;
+  color: var(--button-ink, var(--button-c)); background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow); text-decoration: none; cursor: pointer;
+  transition: filter .15s ease, transform .15s ease, opacity .15s ease;
+}
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):hover:not(:disabled):not([aria-disabled="true"]) {
+  color: var(--button-ink, var(--button-c)); background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow); filter: brightness(1.08);
+  transform: translateY(-1px); text-decoration: none;
+}
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)),
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):where(:is(.pdxBtn--solid,.pdxBtn--pill,.pdx-glass-btn--solid,.btn-neon.solid,.zay-action--solid,.dash-btn-lime-solid,.pgc-btn--primary,.rbi-btn,.support-sponsors__pitch,.nude-map-btn--primary)):hover:not(:disabled):not([aria-disabled="true"]) {
+  --button-c: var(--action-accent); --button-ink: var(--action-ink);
+  color: var(--button-ink); background: var(--button-c); border-color: #000;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor), var(--neon-bloom);
+}
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):active:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(1px); filter: none;
+  box-shadow: var(--chrome-keyline), inset 0 2px 5px rgba(0,0,0,.35), var(--neon-bloom);
+}
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):focus-visible {
+  outline: 3px solid var(--focus-ring); outline-offset: 3px; border-radius: 22px;
+}
+html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):is(:disabled,[aria-disabled="true"]) {
+  opacity: .55; cursor: not-allowed; transform: none; filter: none;
+  color: var(--text-lo); background: var(--ink-850); border-color: var(--border-strong); box-shadow: none;
+}
+html:root .pdxBtn.pdxBtn--sm { padding: 8px 15px; font-size: .75rem; }
+html:root .pdxBtn.pdxBtn--lg { min-height: 56px; padding: 14px 28px; font-size: 1.0625rem; border-radius: 28px; }
+html:root .pdxBtn--block { width: 100%; }
+html:root .zay-action.zay-action--icon { width: 44px; height: 44px; padding: 0; flex: none; }
+html:root .pdxIconBtn--lg { width: 52px; height: 52px; border-radius: 26px; }
+html:root .zay-action.zay-action--destructive { --button-c: var(--neon-red); }
+/* Lift dark violet/blue label ink without changing their identity rims. */
+html:root .pdxBtn[data-button-accent="purple"]:not(.pdxBtn--solid) { --button-ink: var(--day-mon-text); }
+html:root .pdxBoard__affShop.pdx-glass-btn--solid,
+html:root .pdxBoard__affShop.pdx-glass-btn--solid:is(:hover,:active):not(:disabled):not([aria-disabled="true"]) { --button-c: var(--c); --button-ink: var(--glass-btn-solid-color, #050506); }
+html:root .pdxBoard--affiliate-cb .pdxBoard__affShop,
+html:root .pdxBoard--affiliate-cb .pdxBoard__affShop:is(:hover,:active):not(:disabled):not([aria-disabled="true"]) { --button-ink: #fff; }
+html:root .pdxBtn.pdxBtn--ghost { background: transparent; box-shadow: none; }
+.pdxBtn__dot { width: .5em; height: .5em; border-radius: 50%; background: currentColor; }
+.pdxBtn__arrow { font-weight: 700; }
+
+html:root :is(.dash-btn,.zay-action,.pgc-btn,.hub-ghost-btn,.hub-back-btn,.hub-v2-profile__btn,.hub-settings-prefs__enable-btn) { --button-c: var(--action-accent); }
+html:root .btn-neon.pdx-glass-rebind:not(.cyan):not(.magenta):not(.orange):not(.green) { --c: var(--action-accent); }
+html:root .pp-btn--block { --button-c: var(--neon-red); }
+html:root .pdxChip { border-radius: 8px; }
+
+/* Account controls and text actions keep their distinct semantics. */
+html:root .zay-auth-tab { min-height: 44px; --c: var(--action-accent); border-radius: 22px; }
+html:root .zay-text-action { min-height: 44px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; }
+html:root :is(.pdx-auth-shell button[aria-label="Close"], .pdx-auth-shell button[aria-label*="password"], .pgc-x, .rbi-x, .gifting-close) {
+  min-width: 44px; min-height: 44px; border-radius: 22px;
+}
+
+/* Filters retain their data colors and selected state; fix target and type only. */
+html:root :is(.pdxChip, .sch-chip, .sch-weeknav__today, .directory-browser-category, .sellz-filters button, .hz-tag--more) {
+  min-height: 44px; border-radius: 8px; font-family: var(--font-display); text-transform: uppercase;
+}
+html:root .pdxChip__count { font-family: var(--font-display); }
+html:root :is(.schedule-seg__btn, .events-view-toggle__btn) { min-height: 44px; }
+html:root .sch-weeknav__today { color: var(--action-ink); background: var(--action-accent); border-radius: 22px; }
+
+/* Extend icon hit targets without resizing the approved event-card artwork. */
+.ds-listing-share::after { content: ""; position: absolute; width: 44px; height: 44px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+html:root .events-poster-grid .ds-listing-share { top: 10px; right: 10px; }
+html:root .sch-event-card button { min-width: 44px; min-height: 44px; }
+
+/* RSVP uses the reserved action color, never the event's day color. */
+html:root .event-modal .zay-rsvp.pdx-glass-btn--solid,
+html:root .event-modal .zay-rsvp.pdx-glass-btn--solid:hover,
+html:root .event-modal .attendance-cluster-cta__btn {
+  --button-c: var(--rsvp); --c: var(--rsvp);
+  background: var(--rsvp) !important; color: #050506 !important;
+  border: 1px solid #000 !important; border-radius: 22px;
+  box-shadow: var(--chrome-keyline), var(--chrome-bevel), var(--chrome-floor), var(--neon-bloom) !important;
+  font-family: var(--font-display); min-height: 44px;
+}
+html:root .event-modal .event-modal__action-btn { border-radius: 22px; }
+html:root .event-modal .event-modal__cta--secondary { --c: var(--neon-cyan); }
+html:root .event-modal .event-modal__tab { font-family: var(--font-display); }
+
+html.calm-mode :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))),
+html[data-calm="true"] :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) {
+  --bloom-alpha: 0%; box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))) { transition: none; }
+  html:root :is(.pdxBtn,
+  .pdx-glass-btn,
+  .btn-neon,
+  .btn-outline,
+  .zay-action,
+  .dash-btn,
+  .nude-map-btn,
+  .pgc-btn,
+  .rbi-btn,
+  .support-sponsors__pitch,
+  .board-mini-btn,
+  .gig-talent-card__actions :where(button),
+  .hz-chip--btn,
+  .hz-tagfilter__toggle,
+  .outz-card__cta,
+  .zay-feedback-action,
+  .hub-ghost-btn,
+  .hub-back-btn,
+  .hub-v2-profile__btn,
+  .hub-settings-prefs__enable-btn,
+  .pp-btn:where(:not(.pp-btn--accent-swatch))):is(:hover,:active) { transform: none; }
+}
+
+html:root .calm-mode-toggle__label { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
+
+/* The auth shell has a slight pointer tilt; 48px preserves a 44px screen target. */
+html:root .pdx-auth-shell :is(button[aria-label="Close"], button[aria-label*="password"]) { min-width: 48px; min-height: 48px; }

@@ -1411,7 +1411,7 @@ function EventModalInner({
           <div className="event-modal__sticky-cta" data-testid="event-modal-sticky-cta">
             <button
               type="button"
-              className="pdx-glass-btn pdx-glass-btn--outline event-modal__action-btn event-modal__sticky-cta-btn event-modal__cta--secondary pdx-glass-rebind"
+              className="pdx-glass-btn pdx-glass-btn--solid event-modal__action-btn event-modal__sticky-cta-btn zay-rsvp pdx-glass-rebind"
               data-testid="button-ill-be-there-sticky"
               onClick={jumpToAttendance}
             >

@@ -45,7 +45,7 @@ export default function ResetPassword() {
         {done ? (
           <>
             <p>Your password has been changed. Return to Zaylist and log in with the new password.</p>
-            <Link href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
+            <Link className="zay-action zay-action--solid pdx-glass-rebind" href="/" style={actionStyle}>RETURN TO ZAYLIST →</Link>
           </>
         ) : (
           <form onSubmit={submit}>
@@ -55,7 +55,7 @@ export default function ResetPassword() {
             <label style={labelStyle}>Enter it again</label>
             <input style={inputStyle} type="password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={6} required autoComplete="new-password" />
             {error && <div role="alert" style={errorStyle}>{error}</div>}
-            <button style={buttonStyle} disabled={loading}>{loading ? "UPDATING..." : "UPDATE PASSWORD →"}</button>
+            <button className="zay-action zay-action--solid pdx-glass-rebind" style={buttonStyle} disabled={loading}>{loading ? "UPDATING..." : "UPDATE PASSWORD →"}</button>
           </form>
         )}
       </div>
@@ -69,6 +69,6 @@ const kickerStyle: React.CSSProperties = { color: "#00ffff", fontFamily: "var(--
 const titleStyle: React.CSSProperties = { margin: "8px 0 24px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "clamp(2.5rem, 8vw, 4.5rem)", lineHeight: .9 };
 const labelStyle: React.CSSProperties = { display: "block", margin: "18px 0 6px", fontFamily: "var(--font-display)", fontWeight: 900, textTransform: "uppercase", letterSpacing: ".08em" };
 const inputStyle: React.CSSProperties = { width: "100%", minHeight: 48, padding: "10px 12px", background: "#050505", color: "#fff", border: "1px solid #666", fontSize: 16 };
-const buttonStyle: React.CSSProperties = { width: "100%", minHeight: 48, marginTop: 22, border: "2px solid #000", background: "#ccff00", color: "#050505", fontFamily: "var(--font-display)", fontWeight: 900, letterSpacing: ".08em", cursor: "pointer" };
+const buttonStyle: React.CSSProperties = { width: "100%", minHeight: 48, marginTop: 22,  fontFamily: "var(--font-display)", fontWeight: 900, letterSpacing: ".08em", cursor: "pointer" };
 const actionStyle: React.CSSProperties = { ...buttonStyle, display: "grid", placeItems: "center", textDecoration: "none" };
 const errorStyle: React.CSSProperties = { marginTop: 14, padding: 12, background: "#ff244d", color: "#fff" };

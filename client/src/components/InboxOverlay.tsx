@@ -378,6 +378,7 @@ export default function InboxOverlay({ open, onClose, initialView, initialAccoun
       <div className="inbox-overlay__backdrop" onClick={onClose} aria-hidden="true" />
       <div
         className="inbox-overlay inbox-overlay--experiment pdx-liquid-overlay"
+        data-action-context={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}
         role="dialog"
         aria-modal="true"
         aria-label="Inbox"

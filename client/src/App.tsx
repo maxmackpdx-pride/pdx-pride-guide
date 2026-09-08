@@ -103,6 +103,14 @@ function SignedInLivingMap() {
 function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
+  // Root scope also reaches portaled account dialogs. Identity/data accents stay local.
+  useEffect(() => {
+    const path = location.split("?")[0];
+    document.documentElement.dataset.actionContext = path === "/admin" ? "admin"
+      : path === "/outz/rooster-rock" ? "rooster"
+      : path === "/outz/sauvie-island" ? "sauvie"
+      : isHubPath(path) || path.startsWith("/settings/") ? "hub" : "public";
+  }, [location]);
   const profile = isProfilePath(location);
   const livingMap = location.split("?")[0] === "/map";
   // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
