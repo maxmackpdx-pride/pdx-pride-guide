@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Drawer } from "vaul";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,18 +19,17 @@ import {
 type DrawerView = "default" | "remove" | "phrase" | "key";
 
 function useMeasuredHeight() {
-  const ref = useRef<HTMLDivElement>(null);
+  const [node, ref] = useState<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number>();
 
   useEffect(() => {
-    const node = ref.current;
     if (!node) return;
     const measure = () => setHeight(node.getBoundingClientRect().height);
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [node]);
 
   return { ref, height };
 }
@@ -81,7 +79,6 @@ export function AnimatedDrawer() {
   const [view, setView] = useState<DrawerView>("default");
   const { ref, height } = useMeasuredHeight();
   const closingRef = useRef(false);
-  const reduceMotion = useReducedMotion();
   const close = () => {
     closingRef.current = true;
     setIsOpen(false);
@@ -149,20 +146,17 @@ export function AnimatedDrawer() {
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
         <Drawer.Content asChild>
-          <motion.div
+          <div
             aria-describedby={undefined}
-            className="fixed inset-x-4 bottom-4 z-50 mx-auto max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto rounded-[2rem] border border-cyan-300/25 bg-neutral-950/90 text-white shadow-[0_0_50px_rgba(0,255,255,.12)] outline-none backdrop-blur-2xl"
-            animate={height ? { height } : undefined}
-            transition={reduceMotion ? { duration: 0 } : { type: "spring", bounce: 0.12, duration: 0.42 }}
+            className="fixed inset-x-4 bottom-4 z-50 mx-auto max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto rounded-[2rem] border border-cyan-300/25 bg-neutral-950/90 text-white shadow-[0_0_50px_rgba(0,255,255,.12)] outline-none backdrop-blur-2xl transition-[height] [transition-duration:420ms] ease-out motion-reduce:transition-none"
+            style={{ height }}
           >
             <div ref={ref} className="p-6">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={view} initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -8 }} transition={{ duration: reduceMotion ? 0 : 0.16 }}>
-                  {content}
-                </motion.div>
-              </AnimatePresence>
+              <div key={view} className="animate-in fade-in-0 slide-in-from-bottom-2.5 [animation-duration:160ms] motion-reduce:animate-none">
+                {content}
+              </div>
             </div>
-          </motion.div>
+          </div>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
