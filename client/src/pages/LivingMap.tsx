@@ -196,6 +196,16 @@ function hour(iso: string) {
   try { return new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: true, timeZone: "America/Los_Angeles" }).format(new Date(iso)).replace(" ", "").replace("M", ""); }
   catch { return ""; }
 }
+function portlandCalendarDay(value: string | number | Date) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
 function placeMarks(places: Place[]): Mark[] {
   return places.flatMap((place) => {
     const locations = place.locations?.length ? place.locations : resolveBusinessLocations(place);
@@ -437,14 +447,16 @@ export default function LivingMap() {
     .filter(entry => entry.distance <= 10)
     .sort((a, b) => a.distance - b.distance)
     .map(entry => entry.place), [visiblePlaces, mapCenter]);
-  const soonEvents = useMemo(() => events.filter(e => {
-    if (!finite(e.lat) || !finite(e.lng)) return false;
-    if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
-    const starts = new Date(e.dateStart).getTime();
-    const ends = new Date(e.dateEnd).getTime();
-    const now = Date.now();
-    return (starts <= now && ends > now) || (starts > now && starts <= now + 2 * 60 * 60000);
-  }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()), [events, q]);
+  const todayEvents = useMemo(() => {
+    const today = portlandCalendarDay(Date.now());
+    return events.filter(e => {
+      if (!finite(e.lat) || !finite(e.lng)) return false;
+      if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
+      const startDay = portlandCalendarDay(e.dateStart);
+      const endDay = portlandCalendarDay(e.dateEnd) || startDay;
+      return Boolean(startDay && startDay <= today && endDay >= today);
+    }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+  }, [events, q]);
   const visibleMizzed = useMemo(() => mizzed.filter(row => rowMatchesQuery(row, q)), [mizzed, q]);
   const visibleHousing = useMemo(() => housing.filter(row => rowMatchesQuery(row, q)), [housing, q]);
   const marks = useMemo<Mark[]>(() => [
@@ -706,8 +718,8 @@ export default function LivingMap() {
       {failed && <div className="living-map-state" role="alert">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {customPending && <p className="living-map-state">Pick a start and end date.</p>}
       {!loading && !failed && !customPending && marks.length === 0 && <p className="living-map-state">Nothing on the map matches that search.</p>}
-      <div className="living-map-section-head"><b>Happening Now</b><span>{soonEvents.length}</span><Link className="living-map-view-all" href="/events">View All</Link></div>
-      {soonEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening in the next couple hours.</p> : <div className="living-map-rail" data-vaul-no-drag>{soonEvents.slice(0, 10).map(eventCard)}</div>}
+      <div className="living-map-section-head"><b>Happening Today</b><span>{todayEvents.length}</span><Link className="living-map-view-all" href="/events">View All</Link></div>
+      {todayEvents.length === 0 ? <p className="living-map-rail-empty">Nothing happening today.</p> : <div className="living-map-rail" data-vaul-no-drag>{todayEvents.map(eventCard)}</div>}
       {railOrder.map(genericRail)}
       </div>
       </Drawer.Content>
