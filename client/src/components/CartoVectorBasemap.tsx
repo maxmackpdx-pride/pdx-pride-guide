@@ -22,6 +22,7 @@ type Props = {
   /** Burnt orange and charcoal terrain for the OutZide discovery map. */
   warmLand?: boolean;
   topographic?: boolean;
+  cyanWater?: boolean;
 };
 
 function canUseWebGL(): boolean {
@@ -37,7 +38,7 @@ function canUseWebGL(): boolean {
   }
 }
 
-export default function CartoVectorBasemap({ accent, waterColor, warmLand = false, topographic = false }: Props) {
+export default function CartoVectorBasemap({ accent, waterColor, warmLand = false, topographic = false, cyanWater = false }: Props) {
   const map = useMap();
 
   useEffect(() => {
@@ -97,6 +98,26 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
         }
       }
       if (waterColor && gl.getLayer("water")) gl.setPaintProperty("water", "fill-color", waterColor);
+      if (cyanWater) {
+        const waterLayer = gl.getStyle().layers?.find(l => l.id === "water");
+        if (waterLayer?.type === "fill") {
+          gl.setPaintProperty("water", "fill-color", "#031c45");
+          const layers = gl.getStyle().layers;
+          const nextLayer = layers[layers.findIndex(l => l.id === "water") + 1]?.id;
+          // Soft shoreline bands blend cyan through blue into the dark water fill.
+          for (const [id, color, width, blur, opacity] of [
+            ["outz-water-blue", "#0069b5", 20, 16, 0.8],
+            ["outz-water-cyan", "#00cfe8", 8, 7, 0.8],
+            ["outz-water-edge", "#00ffff", 1.4, 1, 0.9],
+          ] as const) {
+            gl.addLayer({id, type: "line", source: waterLayer.source,
+              "source-layer": waterLayer["source-layer"], filter: waterLayer.filter,
+              paint: {"line-color": color, "line-width": width, "line-blur": blur, "line-opacity": opacity},
+            }, nextLayer);
+          }
+        }
+        if (gl.getLayer("waterway")) gl.setPaintProperty("waterway", "line-color", "#00cfe8");
+      }
       if (!accent) return;
       const water = waterColor ?? mixHex(WATER_BASE, accent, 0.22);
       const park = mixHex(PARK_BASE, accent, 0.16);
@@ -134,7 +155,7 @@ export default function CartoVectorBasemap({ accent, waterColor, warmLand = fals
       }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
-  }, [map, accent, waterColor, warmLand, topographic]);
+  }, [map, accent, waterColor, warmLand, topographic, cyanWater]);
 
   return null;
 }
