@@ -1,0 +1,1192 @@
+[
+  {
+    "id": "rooster-rock",
+    "name": "Rooster Rock",
+    "kind": "beach",
+    "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
+        "image": "https://cdn.crowdriff.com/in-use/a3814c39-d2f7-0d97-77ca-e5b6e8395dd0/750.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "basalt outcrop",
+      "river ripples",
+      "shoreline trees"
+    ],
+    "asset": "/motifs/outz/places/rooster-rock.svg"
+  },
+  {
+    "id": "sauvie-island",
+    "name": "Sauvie Island \u2014 Collins Beach",
+    "kind": "beach",
+    "officialUrl": "https://myodfw.com/sauvie-island-wildlife-area",
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.outdoorproject.com/united-states/oregon/collins-beach-sauvie-island",
+        "image": "https://www.outdoorproject.com/sites/default/files/styles/hero_image_desktop/public/features/DSC_0012_0.JPG?itok=_IVYCwAV"
+      }
+    ],
+    "visualFeatures": [
+      "broad sand shoreline",
+      "driftwood",
+      "deciduous trees"
+    ],
+    "asset": "/motifs/outz/places/sauvie-island.svg"
+  },
+  {
+    "id": "silver-falls",
+    "name": "Silver Falls State Park",
+    "kind": "camp-hike",
+    "officialUrl": "https://stateparks.oregon.gov/?do=park.profile&parkId=151",
+    "lat": 44.876667,
+    "lng": -122.64805,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=151",
+        "image": "https://cdn.crowdriff.com/in-use/be51c8ff-ae21-6602-1ec2-6d35b695dba8/750.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "South Falls basalt overhang and walk-behind trail"
+    ],
+    "asset": "/motifs/outz/places/silver-falls.svg"
+  },
+  {
+    "id": "cape-lookout",
+    "name": "Cape Lookout State Park",
+    "kind": "camp-hike",
+    "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
+    "lat": 45.349,
+    "lng": -123.971,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonocean.info/index.php/marine-conservation-area/cape-lookout",
+        "image": "https://www.oregonocean.info/images/sites/aerial/sclr_shorezone_01652_2011_med.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Narrow forested basalt headland projecting into Pacific surf"
+    ],
+    "asset": "/motifs/outz/places/cape-lookout.svg"
+  },
+  {
+    "id": "beacon-rock",
+    "name": "Beacon Rock State Park",
+    "kind": "camp-hike",
+    "officialUrl": "https://parks.wa.gov/find-parks/state-parks/beacon-rock-state-park",
+    "lat": 45.62318,
+    "lng": -122.0253,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonhikers.org/field_guide/Beacon_Rock_Hike",
+        "image": "https://www.oregonhikers.org/w/images/thumb/2/2b/BeaconRockJenThomas.jpg/600px-BeaconRockJenThomas.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Basalt monolith with switchback ledges above the Columbia"
+    ],
+    "asset": "/motifs/outz/places/beacon-rock.svg"
+  },
+  {
+    "id": "stub-stewart",
+    "name": "L.L. \"Stub\" Stewart State Park",
+    "kind": "camp-hike",
+    "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
+    "lat": 45.728645,
+    "lng": -123.186849,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
+        "image": "https://stateparks.oregon.gov/index.cfm?do=image.get&fit=cover&h=600&name=view_from-cabins104313.jpg&park=75&w=1200"
+      }
+    ],
+    "visualFeatures": [
+      "Coast Range rolling forest hills and hilltop rail overlook"
+    ],
+    "asset": "/motifs/outz/places/stub-stewart.svg"
+  },
+  {
+    "id": "memaloose",
+    "name": "Memaloose State Park",
+    "kind": "camp-hike",
+    "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
+    "lat": 45.695376,
+    "lng": -121.332886,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
+        "image": "https://stateparks.oregon.gov/index.cfm?do=image.get&fit=cover&h=600&name=Memaloose011940.jpg&park=118&w=1200"
+      }
+    ],
+    "visualFeatures": [
+      "River overlook campsite, spreading shade trees and dry Gorge hills"
+    ],
+    "asset": "/motifs/outz/places/memaloose.svg"
+  },
+  {
+    "id": "usfs-8156.004621",
+    "name": "370/380 JUNCTION TH",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38832",
+    "lat": 44.04868611,
+    "lng": -121.6553444,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.hikeoregon.net/no-name-lake.html",
+        "image": "https://www.hikeoregon.net/uploads/2/9/0/0/29006543/view-of-mt-bachelor-from-broken-top-trail_orig.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Volcanic Broken Top approach with exposed ridges and sparse subalpine trees"
+    ],
+    "asset": "/motifs/outz/places/usfs-8156.004621.svg",
+    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction."
+  },
+  {
+    "id": "usfs-8157.004621",
+    "name": "370/4601 JUNCTION TH",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 44.05996111,
+    "lng": -121.5978111,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://traveloregon.com/things-to-do/outdoor-recreation/hiking-backpacking/370-4601-junction-trailhead/",
+        "image": "https://visitbend.com/wp-content/uploads/2023/09/rental-bike-farewell-402x700.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Farewell-connected forest singletrack and wooded valley contours"
+    ],
+    "asset": "/motifs/outz/places/usfs-8157.004621.svg",
+    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction."
+  },
+  {
+    "id": "usfs-6795235010602",
+    "name": "44 TRAILS HUB",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 45.419003,
+    "lng": -121.527552,
+    "status": "drawn-needs-direct-image-reference",
+    "references": [
+      {
+        "url": "https://www.44trails.org/",
+        "image": "https://www.44trails.org/"
+      }
+    ],
+    "visualFeatures": [
+      "Mt Hood forest singletrack network, with branching paths and bicycle"
+    ],
+    "asset": "/motifs/outz/places/usfs-6795235010602.svg"
+  },
+  {
+    "id": "usfs-5179010262",
+    "name": "ABBOTT CREEK CAMPGROUND",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69654",
+    "lat": 42.69711,
+    "lng": -122.49184,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/oregon-abbott-creek-campground",
+        "image": "https://photos.thedyrt.com/photo/1242358/media/oregon-abbott-creek-campground_e25605f4-bb08-4c05-89f4-8eeb66366168.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Douglas-fir and pine campsite with a fallen log and creek"
+    ],
+    "asset": "/motifs/outz/places/usfs-5179010262.svg"
+  },
+  {
+    "id": "usfs-6961801010602",
+    "name": "ACKER DIVIDE",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.210278,
+    "lng": -122.516667,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://cherylhill.net/blog/2023/09/08/acker-divide-trail/",
+        "image": "https://live.staticflickr.com/65535/53117164349_9543375aff_b.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Acker Divide forest and Cripple Camp shelter"
+    ],
+    "asset": "/motifs/outz/places/usfs-6961801010602.svg"
+  },
+  {
+    "id": "usfs-5030010262",
+    "name": "ACORN WOMAN LAKES",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70358",
+    "lat": 42.03518674,
+    "lng": -123.0256072,
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://campflare.com/campground/acorn-woman-lakes-973",
+        "image": "https://cdn.campflare.com/8bbf10b1ea4835350f9f7106e890c0ba/medium.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Siskiyou forest lake, shoreline irises and submerged log"
+    ],
+    "asset": "/motifs/outz/places/usfs-5030010262.svg"
+  },
+  {
+    "id": "usfs-5719010274",
+    "name": "ADAMS FORK CG",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31186",
+    "lat": 46.339542,
+    "lng": -121.647473,
+    "status": "drawn-needs-direct-image-reference",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/232857",
+        "image": "https://maps.roadtrippers.com/us/randle-wa/camping-rv/adams-fork-campground"
+      }
+    ],
+    "visualFeatures": [
+      "Tall conifers and a riverbank campsite along Adams Creek Fork"
+    ],
+    "asset": "/motifs/outz/places/usfs-5719010274.svg"
+  },
+  {
+    "id": "usfs-6171012010602",
+    "name": "ADAMS MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.623383,
+    "lng": -122.7257,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6155010414",
+    "name": "ALDER DUNE (CAMPGROUND & TRAILHEADS)",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42333",
+    "lat": 44.0683346,
+    "lng": -124.1017401,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5117010324",
+    "name": "ALDER FLAT",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52872",
+    "lat": 45.0812,
+    "lng": -122.0546,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-3254060010602",
+    "name": "ALDER SPRINGS",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38278",
+    "lat": 44.433311,
+    "lng": -121.357779,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5017.005631",
+    "name": "ALDER SPRINGS",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4358",
+    "lat": 44.17788,
+    "lng": -121.91032,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5183010262",
+    "name": "ALKALI FALLS",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69660",
+    "lat": 43.0657,
+    "lng": -122.3634,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5326.004621",
+    "name": "ALLEN SPRINGS",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38566",
+    "lat": 44.52814167,
+    "lng": -121.6273389,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5313.004621",
+    "name": "ALLINGHAM",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38568",
+    "lat": 44.4712,
+    "lng": -121.6377583,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5434010324",
+    "name": "ALPINE",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53338",
+    "lat": 45.32198,
+    "lng": -121.70389,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5054.005621",
+    "name": "ALPINE (1910/683)",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.80194444,
+    "lng": -122.49888889,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5094.005641",
+    "name": "ALPINE (LOWER)",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.7525,
+    "lng": -122.52111111,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5026.005621",
+    "name": "ALPINE (RD 1825/1912)",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.88333333,
+    "lng": -122.48944444,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5027.005621",
+    "name": "ALPINE (ROAD 1912)",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.90166667,
+    "lng": -122.46444444,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5067.005621",
+    "name": "ALPINE (WINDY PASS)",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.83444444,
+    "lng": -122.48194444,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5129010262",
+    "name": "ALTA LAKE",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69664",
+    "lat": 42.705311,
+    "lng": -122.284382,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5164010262",
+    "name": "ANDERSON MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 42.975,
+    "lng": -122.4628,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-296847010602",
+    "name": "ANGEL'S REST TRAILHEAD",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 45.5606,
+    "lng": -122.1716,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5031010372",
+    "name": "ANNIE CREEK CAMPGROUND AND SNO-PARK",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59833",
+    "lat": 42.760874,
+    "lng": -122.059064,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5136.004991",
+    "name": "ANTELOPE RESERVOIR",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38784",
+    "lat": 44.00599967,
+    "lng": -120.3899244,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5254010381",
+    "name": "ANTLER TRAILHEAD / HORSE CAMP",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59899",
+    "lat": 42.959298,
+    "lng": -121.247602,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-7632.004731",
+    "name": "APE CANYON TH",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=47014",
+    "lat": 46.165526,
+    "lng": -122.09105,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5463010371",
+    "name": "APPLE CREEK",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=63664",
+    "lat": 43.30522,
+    "lng": -122.6758,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6131010414",
+    "name": "ARCHIE KNOWLES",
+    "kind": "campground",
+    "officialUrl": null,
+    "lat": 44.02121,
+    "lng": -123.80313,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5156010324",
+    "name": "ARMSTRONG",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52878",
+    "lat": 45.162761,
+    "lng": -122.152211,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-10990010371",
+    "name": "ASH FLAT",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recreation/recarea/?recid=64838",
+    "lat": 43.04488,
+    "lng": -122.7316,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5029010372",
+    "name": "ASPEN POINT CAMPGROUND",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59725",
+    "lat": 42.385356,
+    "lng": -122.213049,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5087.005641",
+    "name": "AUBREY MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.73444444,
+    "lng": -122.39055556,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5287010381",
+    "name": "AUGUR CREEK",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59887",
+    "lat": 42.512278,
+    "lng": -120.707047,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5231010526",
+    "name": "AZALEA LAKE EAST TRAILHEAD",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69998",
+    "lat": 42.701,
+    "lng": -124.08,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-11226010526",
+    "name": "AZALEA LAKE WEST TRAILHEAD",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 42.219,
+    "lng": -123.786,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5315.005181",
+    "name": "BABYFOOT LAKE",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70426",
+    "lat": 42.22500001,
+    "lng": -123.79300001,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6432979010602",
+    "name": "BACHELOR MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recreation/recarea/?recid=4265",
+    "lat": 44.617772,
+    "lng": -122.034343,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5993.004901",
+    "name": "BADGER CREEK",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 45.2574,
+    "lng": -121.3908,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5051010324",
+    "name": "BADGER LAKE",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52784",
+    "lat": 45.3038,
+    "lng": -121.5564,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6015.004901",
+    "name": "BADGER LAKE",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 45.28541652,
+    "lng": -121.5468118,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-4290630010602",
+    "name": "BAGBY CG",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=79271",
+    "lat": 44.95402,
+    "lng": -122.17943,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5147010324",
+    "name": "BAGBY TRAIL TH/PARKING",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52880",
+    "lat": 44.95444444,
+    "lng": -122.1683333,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6146010414",
+    "name": "BAKER BEACH (TRAILHEAD & CAMPGROUND)",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42345",
+    "lat": 44.087483,
+    "lng": -124.11836,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6433005010602",
+    "name": "BALD BUTTE",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 44.810387,
+    "lng": -121.881967,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-11370010324",
+    "name": "BALFOUR-KLICKITAT",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29880",
+    "lat": 45.699444,
+    "lng": -121.291667,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5198.004991",
+    "name": "BANDIT SPRING SNOPARK",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38678",
+    "lat": 44.48649939,
+    "lng": -120.3971163,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-3254340010602",
+    "name": "BANEBERRY",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=80975",
+    "lat": 44.34166666,
+    "lng": -120.3561111,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5233010526",
+    "name": "BARKLOW MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70010",
+    "lat": 42.771,
+    "lng": -124.144,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-11231010526",
+    "name": "BARKLOW MOUNTAIN NORTH",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 42.752,
+    "lng": -124.156,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-11232010526",
+    "name": "BARKLOW MOUNTAIN WEST",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 42.747,
+    "lng": -124.182,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5090010324",
+    "name": "BARLOW CREEK",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53134",
+    "lat": 45.236301,
+    "lng": -121.626001,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5081010324",
+    "name": "BARLOW CROSSING",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53136",
+    "lat": 45.2172,
+    "lng": -121.6114,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6433007010602",
+    "name": "BATTLE AXE",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 44.825247,
+    "lng": -122.124807,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6537271010602",
+    "name": "BATTLE LAKE",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=80524",
+    "lat": 45.30762,
+    "lng": -123.75,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5326.005181",
+    "name": "BEAR CAMP RIDGE - FSR 23",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70438",
+    "lat": 42.626,
+    "lng": -123.833,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5357.005571",
+    "name": "BEAR MOUNTAIN",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.5175,
+    "lng": -122.21888889,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5076010324",
+    "name": "BEAR SPRINGS",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52786",
+    "lat": 45.116725,
+    "lng": -121.531659,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5347.004621",
+    "name": "BEAR VALLEY T.H.",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=81750",
+    "lat": 44.51999167,
+    "lng": -121.7641889,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5452.005571",
+    "name": "BEARBONES",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.545436,
+    "lng": -122.524128,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-10109010526",
+    "name": "BEARCAMP RIDGE - BRANDY PEAK",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70440",
+    "lat": 42.602163,
+    "lng": -123.881544,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-10110010526",
+    "name": "BEARCAMP RIDGE - HIGH RIDGE",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 42.6259164,
+    "lng": -123.8349326,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5615010274",
+    "name": "BEAVER CG",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31708",
+    "lat": 45.85663,
+    "lng": -121.95679,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5663497010602",
+    "name": "BEAVER CREEK (SWEET CREEK)",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=42675&actid=50",
+    "lat": 43.94119,
+    "lng": -123.891433,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5084010262",
+    "name": "BEAVER DAM CAMPGROUND",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69670",
+    "lat": 42.30401,
+    "lng": -122.36701,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5344010371",
+    "name": "BEAVER SWAMP",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=80574",
+    "lat": 43.09346,
+    "lng": -122.5171,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5013.005621",
+    "name": "BEDROCK CAMPGROUND",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4485",
+    "lat": 43.97305556,
+    "lng": -122.5455556,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-7676.004621",
+    "name": "BENHAM WEST",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38292",
+    "lat": 43.93908333,
+    "lng": -121.4140306,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5444.005571",
+    "name": "BENSON LAKE TRAILHEAD",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 44.21366667,
+    "lng": -121.89208333,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-7113.004731",
+    "name": "BERRY PATCH TH",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31198",
+    "lat": 46.466922,
+    "lng": -121.526359,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5059.005641",
+    "name": "BETTY LAKE",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=81420",
+    "lat": 43.67166667,
+    "lng": -122.01861111,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5082.005641",
+    "name": "BIG BUNCHGRASS",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 43.687185,
+    "lng": -122.160273,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5041.004621",
+    "name": "BIG COVE BOAT-IN",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38802",
+    "lat": 43.84591944,
+    "lng": -121.867525,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-7674.004621",
+    "name": "BIG EDDY",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38302",
+    "lat": 43.97721945,
+    "lng": -121.409925,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6124010414",
+    "name": "BIG ELK",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42371",
+    "lat": 44.54416667,
+    "lng": -123.7219444,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6909.004731",
+    "name": "BIG HOLLOW TH",
+    "kind": "trailhead",
+    "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31988",
+    "lat": 45.927063,
+    "lng": -121.980476,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-6928.004731",
+    "name": "BIG HUCKLEBERRY PCT TH",
+    "kind": "trailhead",
+    "officialUrl": null,
+    "lat": 45.82836,
+    "lng": -121.83437,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5004.005631",
+    "name": "BIG LAKE",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4359",
+    "lat": 44.37807,
+    "lng": -121.87047,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "usfs-5000.005631",
+    "name": "BIG LAKE WEST",
+    "kind": "campground",
+    "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4361",
+    "lat": 44.3772749,
+    "lng": -121.8806893,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "we-moon-land",
+    "name": "We'Moon Land",
+    "kind": "outdoor-stay",
+    "officialUrl": "https://wemoonland.org/",
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "bamboo-acres",
+    "name": "Bamboo Acres",
+    "kind": "outdoor-stay",
+    "officialUrl": "https://www.bambooacres.org/",
+    "lat": 42.2457,
+    "lng": -122.7884,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "triangle-recreation-camp",
+    "name": "Triangle Recreation Camp",
+    "kind": "campground",
+    "officialUrl": "https://www.camptrc.org/",
+    "lat": 48.075589,
+    "lng": -121.59269,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  },
+  {
+    "id": "umpquas-last-resort",
+    "name": "Umpqua's Last Resort",
+    "kind": "outdoor-stay",
+    "officialUrl": "https://www.golastresort.com/about-us",
+    "lat": 43.304,
+    "lng": -122.804,
+    "status": "pending",
+    "references": [],
+    "visualFeatures": [],
+    "asset": null
+  }
+]
