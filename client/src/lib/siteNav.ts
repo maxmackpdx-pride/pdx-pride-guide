@@ -45,6 +45,7 @@ export const PRIMARY_NAV: NavEntry[] = [
     ],
   },
   { type: "link", href: "/directory", label: "Placez", accent: "blue" },
+  { type: "link", href: "/map", label: "Map", accent: "blue" },
   {
     type: "dropdown",
     id: "outz",
