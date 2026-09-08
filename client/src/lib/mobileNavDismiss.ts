@@ -3,6 +3,7 @@ export const MOBILE_NAV_DISMISS = "pdx-mobile-nav-dismiss";
 export type MobileNavDismissExcept =
   | "events"
   | "boards"
+  | "explore"
   | "inbox"
   | "outz"
   | "hub-sheet"

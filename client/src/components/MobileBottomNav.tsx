@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
@@ -13,11 +13,13 @@ import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
-import { CalendarDays, MapPin, LayoutGrid, MessageCircle } from "lucide-react";
+import { CalendarDays, Compass, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 // Preserve access to the destinations that do not occupy a bottom-bar tab.
-const EXPLORE_LINKS = PRIMARY_NAV.filter(entry => entry.type === "link" && ["/map", "/z", "/the-hauz"].includes(entry.href));
+const EXPLORE_LINKS = ["/z", "/directory", "/the-hauz"].flatMap(href =>
+  PRIMARY_NAV.filter(entry => entry.type === "link" && entry.href === href),
+);
 
 /**
  * "Your Hub" rows in the Hub sheet. Each is a real /dashboard section, in the
@@ -51,8 +53,17 @@ function TabIcon({ children }: { children: ReactNode }) {
 }
 
 function MapzMark() {
+  const markMaskId = useId();
   return (
-    <img className="hub-mobile-tab__prime-mark" src="/brand/family/prime-z.svg" width="26" height="22" alt="" aria-hidden="true" />
+    <svg className="znav-waypoint" width="48" height="54" viewBox="0 0 48 54" fill="none" aria-hidden="true">
+      <defs>
+        <mask id={markMaskId} maskUnits="userSpaceOnUse" x="7" y="8" width="34" height="27">
+          <image href="/brand/family/prime-z.svg" x="7" y="8" width="34" height="27" />
+        </mask>
+      </defs>
+      <path d="M24 51C20 46 5 34 5 21a19 19 0 0 1 38 0c0 13-15 25-19 30Z" fill="var(--panel-ink)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <rect x="7" y="8" width="34" height="27" fill="currentColor" mask={`url(#${markMaskId})`} />
+    </svg>
   );
 }
 
@@ -70,13 +81,47 @@ export default function MobileBottomNav() {
   const { total: attentionCount } = useInboxAttentionCount();
   const [eventsOpen, setEventsOpen] = useState(false);
   const [spaceOpen, setSpaceOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const exploreTriggerRef = useRef<HTMLButtonElement>(null);
   const [outzOpen, setOutzOpen] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [dockHidden, setDockHidden] = useState(false);
+  const overlayOpen = eventsOpen || spaceOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
+
+  useEffect(() => {
+    setDockHidden(false);
+    if (overlayOpen) return;
+    let lastY = window.scrollY;
+    let travel = 0;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const y = Math.max(0, Math.min(window.scrollY, maxY));
+      const delta = y - lastY;
+      lastY = y;
+      if (y < 80 || window.innerWidth >= 960) {
+        travel = 0;
+        setDockHidden(false);
+        return;
+      }
+      if (delta === 0) return;
+      travel = Math.sign(delta) === Math.sign(travel) ? travel + delta : delta;
+      if (Math.abs(travel) >= 12) {
+        setDockHidden(travel > 0);
+        travel = 0;
+      }
+    };
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); window.cancelAnimationFrame(frame); };
+  }, [location, overlayOpen]);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
     if (except !== "boards") setSpaceOpen(false);
+    if (except !== "explore") setExploreOpen(false);
     if (except !== "outz") setOutzOpen(false);
     if (except !== "hub-sheet") setHubOpen(false);
     if (except !== "inbox") closeSheet();
@@ -94,23 +139,29 @@ export default function MobileBottomNav() {
   useEffect(() => {
     setEventsOpen(false);
     setSpaceOpen(false);
+    setExploreOpen(false);
     setOutzOpen(false);
     setHubOpen(false);
   }, [location]);
 
   useEffect(() => {
-    const close = () => { setEventsOpen(false); setSpaceOpen(false); setOutzOpen(false); setHubOpen(false); };
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    const close = () => { setEventsOpen(false); setSpaceOpen(false); setExploreOpen(false); setOutzOpen(false); setHubOpen(false); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (exploreOpen || outzOpen) exploreTriggerRef.current?.focus();
+        close();
+      }
+    };
     const desktop = window.matchMedia("(min-width: 960px)");
     const onResize = () => { if (desktop.matches) close(); };
     window.addEventListener("keydown", onKey);
     desktop.addEventListener("change", onResize);
     return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
-  }, []);
+  }, [exploreOpen, outzOpen]);
 
-  const placesActive = navLinkActive(location, "/directory");
+  const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href)) || navLinkActive(location, OUTZ_INDEX);
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href)) || navLinkActive(location, OUTZ_INDEX);
+  const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -136,6 +187,15 @@ export default function MobileBottomNav() {
     }
     dismissExcept("boards");
     setSpaceOpen(true);
+  };
+
+  const handleExplore = () => {
+    if (exploreOpen) {
+      setExploreOpen(false);
+      return;
+    }
+    dismissExcept("explore");
+    setExploreOpen(true);
   };
 
   const handleOutz = () => {
@@ -203,8 +263,20 @@ export default function MobileBottomNav() {
                 <span>{item.label}</span>
               </Link>
             ))}
-            <h3 className="mobile-nav-explore-heading">Explore</h3>
-            {EXPLORE_LINKS.map(item => item.type === "link" && <Link key={item.href} href={item.href} className="hub-more-item" data-accent={item.accent} onClick={() => setSpaceOpen(false)}><span>{item.label}</span></Link>)}
+          </div>
+        </>
+      )}
+
+      {exploreOpen && (
+        <>
+          <div className="hub-more-backdrop" onClick={() => { setExploreOpen(false); exploreTriggerRef.current?.focus(); }} aria-hidden="true" />
+          <div id="mobile-explore-sheet" className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="blue" role="dialog" aria-label="Explore">
+            <h3>Explore</h3>
+            {EXPLORE_LINKS.map(item => item.type === "link" && (
+              <Link key={item.href} href={item.href} className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`} data-accent={item.accent} onClick={handleNavLink} aria-current={navLinkActive(location, item.href) ? "page" : undefined}>
+                <span>{item.label}</span>
+              </Link>
+            ))}
             <button
               type="button"
               className={`hub-more-item hub-more-item--drawer${outzOpen ? " is-active" : ""}`}
@@ -318,7 +390,7 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className="hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption" aria-label="Site mobile navigation">
+      <nav className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption${dockHidden && !overlayOpen ? " is-scroll-hidden" : ""}`} aria-label="Site mobile navigation" onFocusCapture={() => setDockHidden(false)}>
         <div className="hub-mobile-bar__dock">
           <button
             type="button"
@@ -333,17 +405,20 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Eventz</span>
           </button>
 
-          <Link
-            href="/directory"
-            className={tabClass(placesActive, "blue")}
+          <button
+            type="button"
+            ref={exploreTriggerRef}
+            className={tabClass(exploreActive || exploreOpen || outzOpen, "blue")}
             data-accent="blue"
-            aria-label="Placez"
-            aria-current={placesActive ? "page" : undefined}
-            onClick={handleNavLink}
+            aria-label="Explore"
+            aria-expanded={exploreOpen || outzOpen}
+            aria-haspopup="dialog"
+            aria-controls={exploreOpen ? "mobile-explore-sheet" : undefined}
+            onClick={handleExplore}
           >
-            <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Placez</span>
-          </Link>
+            <span className="znav-icon-row"><Compass size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">Explore</span>
+          </button>
 
           <Link
             href="/map"
@@ -354,13 +429,12 @@ export default function MobileBottomNav() {
             aria-current={navLinkActive(location, "/map") ? "page" : undefined}
             onClick={handleNavLink}
           >
-            <span className="znav-icon-row"><MapzMark /></span>
-            <span className="znav-caption">Mapz</span>
+            <MapzMark />
           </Link>
 
           <button
             type="button"
-            className={tabClass(boardsActive || spaceOpen || outzOpen, "purple")}
+            className={tabClass(boardsActive || spaceOpen, "purple")}
             data-accent="violet"
             aria-expanded={spaceOpen}
             aria-haspopup="dialog"
