@@ -24,11 +24,19 @@ export type NavEntry =
       eyebrow?: string;
     };
 
+/** The shared Boards dropdown: housing and Z/ List are independent destinations. */
+export const BOARD_NAV: NavLinkItem[] = [
+  { href: "/spotted", label: "Mizzed", accent: "magenta" },
+  { href: "/gifting", label: "Giftz", accent: "green" },
+  { href: "/sellz", label: "Sellz", accent: "orange" },
+  { href: "/pride-work", label: "Gigz", accent: "violet" },
+];
+
 /**
  * Primary nav - labels match on-page titles where possible.
  *
- * Every entry carries its own accent: the current page glows in it, and the
- * rest are hairline pills that light up in it on hover.
+ * Every entry carries its own accent: current destinations use an accent rim,
+ * with the same icons and captions on desktop and mobile.
  */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
@@ -63,18 +71,13 @@ export const PRIMARY_NAV: NavEntry[] = [
     ],
   },
   { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
-  { type: "link", href: "/spotted", label: "Mizzed", accent: "magenta" },
+  { type: "link", href: "/the-hauz", label: "The Haüz", accent: "cyan" },
   {
     type: "dropdown",
-    id: "more",
-    label: "More",
+    id: "boards",
+    label: "Boards",
     accent: "violet",
-    items: [
-      { href: "/pride-work", label: "Gigz", accent: "violet" },
-      { href: "/gifting", label: "Giftz", accent: "green" },
-      { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
-      { href: "/sellz", label: "Sellz", accent: "orange" },
-    ],
+    items: BOARD_NAV,
   },
 ];
 
@@ -107,19 +110,6 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/inbox": { section: "Account", title: "Inbox" },
   "/z": { section: "Zaylist", title: "z/" },
 };
-
-/**
- * Destinations behind the compact mobile Boards tab. OutZide remains a
- * separate drawer trigger rendered by the sheet.
- */
-export const BOARD_NAV: NavLinkItem[] = [
-  { href: "/pride-work", label: "Gigz", accent: "violet" },
-  { href: "/spotted", label: "Mizzed", accent: "magenta" },
-  { href: "/gifting", label: "Giftz", accent: "green" },
-  { href: "/z", label: "Z/ List", accent: "violet" },
-  { href: "/the-hauz", label: "The Haüz", accent: "cyan" },
-  { href: "/sellz", label: "Sellz", accent: "orange" },
-];
 
 /**
  * OUTZ destinations for the mobile most-visited drawer, in list order.

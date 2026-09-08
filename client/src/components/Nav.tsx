@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Search, Zap } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
+import { CompactHubLink, CompactNavigation, MobileExploreNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
@@ -667,7 +668,7 @@ export default function Nav() {
 
   return (
     <>
-      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact">
+      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split">
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
@@ -706,17 +707,14 @@ export default function Nav() {
               />
             )}
             {(user || localDemo) && (
-              <Link
-                href="/dashboard"
-                className={`site-hub-button site-hub-button--mobile pdx-glass-rebind${hubActive ? " active" : ""}`}
-                aria-current={hubActive ? "page" : undefined}
-                onClick={() => {
+              <CompactHubLink
+                active={hubActive}
+                unreadCount={unreadCount}
+                onNavigate={() => {
                   setMobileProfileOpen(false);
                   dismissMobileNavOverlays();
                 }}
-              >
-                Hub
-              </Link>
+              />
             )}
             {user ? (
               <ProfileMenu
@@ -738,14 +736,7 @@ export default function Nav() {
               />
             ) : localDemo ? (
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <Link
-                  href={LOCAL_DEMO_PROFILE_PATH}
-                  className={`hub-mtop__mode-btn${profileActive ? " is-active is-member" : ""}`}
-                  data-accent="violet"
-                  onClick={() => dismissMobileNavOverlays()}
-                >
-                  Profile
-                </Link>
+                <UserAvatar href={LOCAL_DEMO_PROFILE_PATH} username="tucker_pdmax" title="Local demo profile" size={34} onClick={() => dismissMobileNavOverlays()} />
               </div>
             ) : (
               <button
@@ -764,35 +755,7 @@ export default function Nav() {
             aria-label="Primary navigation"
           >
             <div className="site-nav-scroll" ref={navScrollRef}>
-              {navEntries.map(entry => {
-                if (entry.type === "link") {
-                  return (
-                    <NavLink
-                      key={entry.href}
-                      href={entry.href}
-                      label={entry.label}
-                      accent={entry.accent}
-                      active={navLinkActive(location, entry.href)}
-                      onClick={closeMenu}
-                    />
-                  );
-                }
-
-                return (
-                  <NavDropdown
-                    key={entry.id}
-                    id={entry.id}
-                    label={entry.label}
-                    items={entry.items}
-                    accent={entry.accent}
-                    eyebrow={entry.eyebrow}
-                    location={location}
-                    open={openDropdown === entry.id}
-                    onToggle={() => setOpenDropdown(current => (current === entry.id ? null : entry.id))}
-                    onClose={closeMenu}
-                  />
-                );
-              })}
+              <CompactNavigation location={location} onNavigate={closeMenu} />
             </div>
 
             <button
@@ -821,21 +784,7 @@ export default function Nav() {
                   />
                 )}
                 <span className="site-auth__hub">
-                  <Link
-                    href="/dashboard"
-                    className={`site-hub-button pdx-glass-rebind${hubActive ? " active" : ""}`}
-                    aria-label={
-                      user && unreadCount > 0
-                        ? `Hub, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
-                        : "Hub"
-                    }
-                    onClick={closeMenu}
-                  >
-                    Hub
-                    {Boolean(user && unreadCount > 0) && (
-                      <span className="site-nav-notify-dot" aria-hidden="true" />
-                    )}
-                  </Link>
+                  <CompactHubLink active={hubActive} unreadCount={unreadCount} onNavigate={closeMenu} />
                 </span>
                 <span className="site-auth__seam" aria-hidden="true" />
                 {user && (
@@ -863,12 +812,7 @@ export default function Nav() {
             {/* Local demo guest: public Tucker profile without a session */}
             {!user && localDemo && (
               <div className="site-auth site-auth--desktop site-auth--local-demo">
-                <NavLink
-                  href={LOCAL_DEMO_PROFILE_PATH}
-                  label="@tucker_pdmax"
-                  active={profileActive}
-                  onClick={closeMenu}
-                />
+                <UserAvatar href={LOCAL_DEMO_PROFILE_PATH} username="tucker_pdmax" title="Local demo profile" size={38} onClick={closeMenu} />
               </div>
             )}
 
@@ -895,6 +839,11 @@ export default function Nav() {
             </button>
           </div>
         </div>
+        <MobileExploreNavigation location={location} onMessages={() => {
+          setMobileProfileOpen(false);
+          if (user || localDemo) openSheet();
+          else setShowAuth(true);
+        }} />
         <Divider
           seam
           thin

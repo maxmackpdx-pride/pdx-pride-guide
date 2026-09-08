@@ -9,7 +9,6 @@ import { useAuth } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
-import MobileBottomNav from "./components/MobileBottomNav";
 import PullToRefresh from "./components/PullToRefresh";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -133,10 +132,6 @@ function AppLayout() {
   }, [location]);
   const profile = isProfilePath(location);
   const livingMap = location.split("?")[0] === "/map";
-  // /admin keeps HubShell's own bottom bar. Member hub (/dashboard, /inbox)
-  // uses the global MobileBottomNav only (HubShell member bar removed).
-  const adminShell = location.split("?")[0] === "/admin";
-
   return (
     <div
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
@@ -144,7 +139,6 @@ function AppLayout() {
     >
       <PullToRefresh />
       <Nav />
-      {!adminShell && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
           <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>
