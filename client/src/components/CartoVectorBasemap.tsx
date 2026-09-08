@@ -19,6 +19,8 @@ type Props = {
   accent?: string | null;
   /** Fixed water color for maps whose category colors must not tint the basemap. */
   waterColor?: string;
+  /** Warm soil and olive terrain for the OutZide discovery map. */
+  warmLand?: boolean;
 };
 
 function canUseWebGL(): boolean {
@@ -34,7 +36,7 @@ function canUseWebGL(): boolean {
   }
 }
 
-export default function CartoVectorBasemap({ accent, waterColor }: Props) {
+export default function CartoVectorBasemap({ accent, waterColor, warmLand = false }: Props) {
   const map = useMap();
 
   useEffect(() => {
@@ -79,6 +81,18 @@ export default function CartoVectorBasemap({ accent, waterColor }: Props) {
     }
 
     const applyAccent = () => {
+      if (warmLand) {
+        if (gl.getLayer("background")) gl.setPaintProperty("background", "background-color", "#514637");
+        for (const [id, color] of Object.entries({
+          landcover: "#59543c",
+          park_national_park: "#626044",
+          park_nature_reserve: "#686347",
+          landuse: "#65513e",
+          landuse_residential: "#59483a",
+        })) {
+          if (gl.getLayer(id)) gl.setPaintProperty(id, "fill-color", color);
+        }
+      }
       if (waterColor && gl.getLayer("water")) gl.setPaintProperty("water", "fill-color", waterColor);
       if (!accent) return;
       const water = waterColor ?? mixHex(WATER_BASE, accent, 0.22);
@@ -108,7 +122,7 @@ export default function CartoVectorBasemap({ accent, waterColor }: Props) {
       }
       if (map.hasLayer(raster)) map.removeLayer(raster);
     };
-  }, [map, accent, waterColor]);
+  }, [map, accent, waterColor, warmLand]);
 
   return null;
 }
