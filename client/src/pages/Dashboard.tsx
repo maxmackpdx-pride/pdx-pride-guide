@@ -285,7 +285,7 @@ export default function Dashboard() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Event updated!", description: "Your changes have been saved." });
+      toast({ title: "Event updated", description: "Your changes have been saved." });
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
@@ -487,7 +487,7 @@ export default function Dashboard() {
     if (res.ok) {
       const data = await res.json();
       await refreshUser();
-      setSaveMsg("Saved!");
+      setSaveMsg("Saved");
       setEditMode(false);
       setTimeout(() => setSaveMsg(""), 2000);
       if (data.username && data.username !== priorUsername) {

@@ -498,7 +498,7 @@ function EventModalInner({
   const dateLine = formatPacificDateTime(event.dateStart, {
     weekday: "long", month: "long", day: "numeric",
   });
-  const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })}–${endTime}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
+  const timeLine = `${formatPacificDateTime(event.dateStart, { hour: "2-digit", minute: "2-digit" })} to ${endTime}${event.neighborhood ? ` · ${event.neighborhood}` : ""}`;
   const venueHref =
     externalPageUrl(eventWithLinks.venueWebsite)
     || externalPageUrl(resolveVenueWebsite(event.venueName));

@@ -325,7 +325,7 @@ export default function OutzPlace() {
             : null}
           <p className="outz-place__map-note">
             {coords
-              ? stay ? "The pin shows the public town or region—not a private driveway. Get arrival details from the operator." : "Pin is the official record's published point, not a guaranteed trailhead or parking entrance."
+              ? stay ? "The pin shows the public town or region. Get the exact arrival details from the operator." : "Pin is the official record's published point, not a guaranteed trailhead or parking entrance."
               : stay ? "This stay keeps its visitor location private. Contact the operator before making the trip." : "This listing has no published coordinates. Use the official page for directions and parking."}
           </p>
         </div>

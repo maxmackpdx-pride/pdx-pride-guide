@@ -93,7 +93,7 @@ function buildWeekColumns(weekStartYmd: string): WeekColumn[] {
     return { key: code, short: code, date: ymdDayLabel(ymd), ymd, color: def?.color ?? "#19e3ff", text: def?.text ?? "#19e3ff" };
   });
 }
-/** "Jul 20 – 26" range label for the week header. */
+/** "Jul 20 to 26" range label for the week header. */
 function weekRangeLabel(weekStartYmd: string): string {
   const endYmd = msYmd(ymdMs(weekStartYmd) + 6 * 86400000);
   const startMs = ymdMs(weekStartYmd);
@@ -102,7 +102,7 @@ function weekRangeLabel(weekStartYmd: string): string {
   const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, day: "numeric" });
   const sameMonth = new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short" }).format(new Date(startMs)) ===
     new Intl.DateTimeFormat("en-US", { timeZone: SCHED_PACIFIC, month: "short" }).format(new Date(endMs));
-  return `${monthFmt.format(new Date(startMs))} – ${(sameMonth ? dayFmt : monthFmt).format(new Date(endMs))}`;
+  return `${monthFmt.format(new Date(startMs))} to ${(sameMonth ? dayFmt : monthFmt).format(new Date(endMs))}`;
 }
 
 /** Legacy prop - event blocks always use full-bleed flyer backgrounds. */
@@ -586,7 +586,7 @@ export default function Schedule({
             toggleRsvp(e.id);
           },
           style,
-          time: height >= (embed ? 40 : 54) ? fmtClock(e.s) + ' – ' + fmtClock(e.e) : fmtClock(e.s),
+          time: height >= (embed ? 40 : 54) ? fmtClock(e.s) + ' to ' + fmtClock(e.e) : fmtClock(e.s),
           title: e.title,
           venue: e.venue,
           showVenue,
@@ -1170,7 +1170,7 @@ export default function Schedule({
       dayShort: d.short,
       dayDate: d.date,
       admLabel: isBeach ? "Free" : adm.label,
-      timeRange: fmtClock(e.s) + " – " + fmtClock(e.e),
+      timeRange: fmtClock(e.s) + " to " + fmtClock(e.e),
       popStyle,
       posterStyle: S({
         position: "relative",

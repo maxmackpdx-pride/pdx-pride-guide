@@ -122,7 +122,7 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#CCF
     },
     onSuccess: () => {
       toast({
-        title: "You're on the lineup!",
+        title: "You're on the lineup",
         description: "Your role is live on this event. No admin approval needed.",
       });
       invalidate();
