@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer } from "vaul";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Link, useLocation } from "wouter";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
-import { Navigation } from "lucide-react";
+import { Navigation, SlidersHorizontal, X } from "lucide-react";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Event } from "@shared/schema";
@@ -40,9 +41,8 @@ const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.ma
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
 const PLACE_WAYPOINT_REVEAL_START = 17.75;
 const PLACE_WAYPOINT_REVEAL_END = 19.25;
-/* Vaul measures pixel snaps from the viewport bottom. Keep the lowest state compact
-   above the fixed mobile dock while leaving the grip visible for reopening. */
-const MOBILE_DRAWER_SNAPS = ["240px", 0.52, 1] as const;
+/* Snaps are relative to the drawer track inside the map, above the actual dock. */
+const MOBILE_DRAWER_SNAPS = ["52px", 1] as const;
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 const MAP_CREATE_LINKS = [
   { label: "Eventz", href: "/submit", color: "#ccff00" },
@@ -237,6 +237,7 @@ function MapReader({ onZoom, onCenter, onBounds }: { onZoom: (zoom: number) => v
     onBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
   }, [map, onBounds, onCenter, onZoom]);
   useEffect(sync, [sync]);
+  useEffect(() => { map.attributionControl.setPosition("topright"); }, [map]);
   useMapEvents({ zoom: sync, zoomend: sync, moveend: sync, resize: sync });
   return null;
 }
@@ -264,7 +265,7 @@ function originRect(element: Element | null): EventModalOriginRect | PlaceModalO
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 }
 
-const OVERLAY_KEYS = ["event", "place", "mizzed", "gig", "gift", "sell"] as const;
+const OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz"] as const;
 type OverlayKey = typeof OVERLAY_KEYS[number];
 type TimeFilter = "default" | "soon" | "weekend" | "custom";
 
@@ -349,14 +350,39 @@ export default function LivingMap() {
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<LeafletMap | null>(null);
+  const pageRef = useRef<HTMLElement | null>(null);
+  const [drawerContainer, setDrawerContainer] = useState<HTMLDivElement | null>(null);
+  const [mapHeight, setMapHeight] = useState<number>();
+  const toolsRef = useRef<HTMLDivElement | null>(null);
+  const keyTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const createTriggerRef = useRef<HTMLButtonElement | null>(null);
   const desktop = useDesktop();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileDrawerSnap, setMobileDrawerSnap] = useState<number | string | null>(MOBILE_DRAWER_SNAPS[0]);
   const drawerHandleDidDrag = useRef(false);
-  const drawerDragY = useRef({ start: 0, last: 0 });
   const drawerScrollRef = useRef<HTMLDivElement | null>(null);
   const cardGesture = useRef({ x: 0, y: 0, scrollTop: 0, moved: false });
   const [railOrder, setRailOrder] = useState<RailId[]>(() => { try { const saved = JSON.parse(localStorage.getItem("zaylist.map.rail-order") || "null"); return Array.isArray(saved) && DEFAULT_RAIL_ORDER.every(id => saved.includes(id)) ? saved : [...DEFAULT_RAIL_ORDER]; } catch { return [...DEFAULT_RAIL_ORDER]; } });
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+    const dock = document.querySelector(".site-hub-mobile-bar");
+    const header = document.querySelector(".site-header");
+    const measure = () => {
+      const viewportBottom = window.visualViewport ? window.visualViewport.height + window.visualViewport.offsetTop : window.innerHeight;
+      const dockTop = dock && dock.getBoundingClientRect().height > 0 ? dock.getBoundingClientRect().top : viewportBottom;
+      setMapHeight(Math.max(0, Math.min(viewportBottom, dockTop) - page.getBoundingClientRect().top));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (header) observer.observe(header);
+    if (dock) observer.observe(dock);
+    window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
+    return () => { observer.disconnect(); window.removeEventListener("resize", measure); window.visualViewport?.removeEventListener("resize", measure); };
+  }, [desktop]);
+  useEffect(() => { mapRef.current?.invalidateSize(); }, [mapHeight, desktop]);
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
@@ -575,6 +601,11 @@ export default function LivingMap() {
   const comingDialogRef = useModalA11y({ open: Boolean(soon), enabled: Boolean(soon), onClose: closeSoon });
   const customPending = timeFilter === "custom" && (!customStart || !customEnd);
   const mobileDrawerPeek = mobileDrawerSnap === MOBILE_DRAWER_SNAPS[0];
+  useEffect(() => {
+    setCreateOpen(false);
+    setKeyOpen(false);
+    setFiltersOpen(false);
+  }, [desktop, mobileDrawerPeek]);
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
@@ -586,13 +617,20 @@ export default function LivingMap() {
   }, [goOverlay, setLocation]);
   useEffect(() => {
     if (!createOpen && !keyOpen && !filtersOpen) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setCreateOpen(false); setKeyOpen(false); setFiltersOpen(false); } };
+    const trigger = keyOpen ? keyTriggerRef.current : filtersOpen ? filterTriggerRef.current : createTriggerRef.current;
+    const panelId = keyOpen ? "living-map-key-panel" : filtersOpen ? "living-map-filter-panel" : "living-map-create-menu";
+    const frame = requestAnimationFrame(() => document.getElementById(panelId)?.querySelector<HTMLElement>("button, a[href], input")?.focus({ preventScroll: true }));
+    const close = () => { setCreateOpen(false); setKeyOpen(false); setFiltersOpen(false); trigger?.focus({ preventScroll: true }); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && !soon) { event.preventDefault(); close(); } };
+    const onPointer = (event: PointerEvent) => { if (event.target instanceof Node && !toolsRef.current?.contains(event.target) && !soon) close(); };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [createOpen, keyOpen, filtersOpen]);
+    document.addEventListener("pointerdown", onPointer);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
+  }, [createOpen, keyOpen, filtersOpen, soon]);
   const filterControls = (mobile = false, hideZayDark = false) => <div className="living-map-filter-block" data-vaul-no-drag>
     <h2>Map Filters</h2>
-    <div className="living-map-time" data-vaul-no-drag role="radiogroup" aria-label="Event date filters"><button type="button" role="radio" aria-checked={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" role="radio" aria-checked={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" role="radio" aria-checked={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
+    <div className="living-map-filter-summary"><span>{timeFilter === "default" ? "Next 3 weeks" : timeFilter === "soon" ? "Starting soon or on now" : timeFilter === "weekend" ? "This weekend" : "Choose your dates"}</span><button type="button" onClick={() => { setTimeFilter("default"); setCustomStart(""); setCustomEnd(""); setShowEvents(true); setShowPlaces(true); setShowHousing(true); setShowMizzed(true); setShowCarpool(true); setBarsOnly(false); }}>Reset filters</button></div>
+    <div className="living-map-time" data-vaul-no-drag role="group" aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
     <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
       <button type="button" aria-pressed={showEvents} className={`pdx-glass-rebind${showEvents ? " is-on" : ""}`} style={{ "--c": "#ccff00" } as CSSProperties} onClick={() => setShowEvents(v => !v)}>Eventz</button>
       <button type="button" aria-pressed={showPlaces} className={`pdx-glass-rebind cyan${showPlaces ? " is-on" : ""}`} style={{ "--c": "#19e3ff" } as CSSProperties} onClick={() => setShowPlaces(v => !v)}>Placez</button>
@@ -611,7 +649,7 @@ export default function LivingMap() {
     </button>
   );
 
-  return <section className="living-map-page" aria-label="Zaylist living map">
+  return <section ref={pageRef} className={`living-map-page${!desktop && !mobileDrawerPeek ? " has-expanded-drawer" : ""}`} style={mapHeight === undefined ? undefined : { height: mapHeight, "--living-map-height": `${mapHeight}px` } as CSSProperties} aria-label="Zaylist living map">
     <div className="living-map-canvas">
       <MapContainer ref={mapRef} center={[45.523, -122.676]} zoom={13} minZoom={10} zoomSnap={0.25} zoomDelta={0.5} maxBounds={[[45.35, -122.92], [45.70, -122.42]]} className="living-map-leaflet" attributionControl>
         <TileLayer url={cartoDarkTileUrl()} attribution={CARTO_ATTRIBUTION} subdomains="abcd" maxZoom={20} />
@@ -640,7 +678,7 @@ export default function LivingMap() {
             markerLabel = String(row.title || row.name || row.displayName || (mark.kind === "carpool" ? row._beach : "Map listing"));
             icon = waypointIcon({ id, size: waypointSize(zoom, chosen), selected: chosen });
           }
-          return <Marker key={mark.key} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => openMark(mark, event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null) }}><Tooltip direction="top">{markerLabel}</Tooltip></Marker>;
+          return <Marker key={mark.key} title={markerLabel} alt={markerLabel} position={[mark.lat, mark.lng]} icon={icon} eventHandlers={{ click: event => openMark(mark, event.originalEvent?.target instanceof Element ? event.originalEvent.target.closest(".leaflet-marker-icon") : null) }}><Tooltip direction="top">{markerLabel}</Tooltip></Marker>;
         })}
       </MapContainer>
     </div>
@@ -656,19 +694,18 @@ export default function LivingMap() {
         return <button type="button" className="pdx-glass-rebind" key={mark.key} style={{ "--c": accent } as CSSProperties} onClick={e => openMark(mark, e.currentTarget)}>{image && <img src={image} alt="" />}<span><b>{label}</b><small>{mark.kind === "event" ? event?.venueName : mark.kind === "place" ? DIRECTORY_TYPE_LABELS[place?.type || ""] || place?.type : mark.kind}</small></span></button>;
       })}</div> : <p>Move the map to discover what’s nearby.</p>}
     </section>}
-    {desktop && <div className="living-map-locate">
-      <button type="button" aria-label="Locate me" title="Locate me" onClick={locateMe}><Navigation aria-hidden="true" /></button>
+    <div ref={toolsRef} className={`living-map-tools${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`} role="group" aria-label="Map controls">
+    <div className="living-map-locate">
+      <button type="button" aria-label="Locate me" aria-busy={locating} disabled={locating} title="Locate me" onClick={locateMe}><Navigation aria-hidden="true" /></button>
       {locateError && <span role="status">{locateError}</span>}
       {locating && <span role="status">Locating…</span>}
-    </div>}
-    {createOpen && <button type="button" className="living-map-create-backdrop" aria-label="Close post menu" onClick={() => setCreateOpen(false)} />}
+    </div>
     <div className={`living-map-create pdx-glass-rebind${createOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
-      <div id="living-map-create-menu" className="living-map-create__fan" role="menu" aria-label="Post to Zaylist" aria-hidden={!createOpen} {...inertWhen(!createOpen)}>
+      <nav id="living-map-create-menu" className="living-map-create__fan" aria-label="Post to Zaylist" aria-hidden={!createOpen} {...inertWhen(!createOpen)}>
         {MAP_CREATE_LINKS.map((item, index) => (
           <Link
             key={item.href}
             href={item.href}
-            role="menuitem"
             className="living-map-create__option pdx-glass-rebind"
             style={{ "--c": item.color, "--fan-i": index } as CSSProperties}
             onClick={() => setCreateOpen(false)}
@@ -676,44 +713,51 @@ export default function LivingMap() {
             <span aria-hidden="true">+</span>{item.label}
           </Link>
         ))}
-      </div>
+      </nav>
       <button
         type="button"
         className="living-map-create__trigger pdx-glass-rebind"
+        ref={createTriggerRef}
         aria-label={createOpen ? "Close post menu" : "Post to the map"}
         aria-expanded={createOpen}
-        aria-haspopup="menu"
         aria-controls="living-map-create-menu"
-        onClick={() => setCreateOpen(open => !open)}
+        onClick={() => { setCreateOpen(open => !open); setKeyOpen(false); setFiltersOpen(false); }}
       >
         <span aria-hidden="true">+</span>
       </button>
     </div>
     <div className={`living-map-key${keyOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
-      {keyOpen && <section className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
-        <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => setKeyOpen(false)} aria-label="Close map key">×</button></div>
+      {keyOpen && <section id="living-map-key-panel" className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
+        <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => { setKeyOpen(false); keyTriggerRef.current?.focus(); }} aria-label="Close map key"><X aria-hidden="true" size={20} /></button></div>
         <ul>{MAP_KEY_ITEMS.map(item => <li key={item.label}>
           <span className="living-map-key__waypoint" dangerouslySetInnerHTML={{ __html: waypointHtml({ id: item.id, color: item.color, size: 31, badgeId: item.badgeId, scoop: item.scoop, avatarUrl: item.avatarUrl }) }} />
           <span><b>{item.label}</b><small>{item.note}</small></span>
         </li>)}</ul>
       </section>}
-      <button type="button" className="living-map-key__trigger pdx-glass-rebind" aria-expanded={keyOpen} onClick={() => { setKeyOpen(open => !open); setCreateOpen(false); }}>Key</button>
+      <button ref={keyTriggerRef} type="button" className="living-map-key__trigger pdx-glass-rebind" aria-controls="living-map-key-panel" aria-expanded={keyOpen} onClick={() => { setKeyOpen(open => !open); setCreateOpen(false); setFiltersOpen(false); }}>Key</button>
     </div>
-    {!desktop && filtersOpen && <button type="button" className="living-map-filter-backdrop" aria-label="Close map filters" onClick={() => setFiltersOpen(false)} />}
     {!desktop && <div className={`living-map-mobile-filters${filtersOpen ? " is-open" : ""}${!mobileDrawerPeek ? " is-tucked" : ""}`}>
-      <div className="living-map-mobile-filters__rail pdx-liquid-overlay" role="dialog" aria-label="Map filters" aria-hidden={!filtersOpen} {...inertWhen(!filtersOpen)}>{filterControls(true)}</div>
-      <button type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg></button>
+      <section id="living-map-filter-panel" className="living-map-mobile-filters__rail pdx-liquid-overlay" aria-label="Map filters" aria-hidden={!filtersOpen} {...inertWhen(!filtersOpen)}>
+        <div className="living-map-filter-panel-head"><strong>Map Filters</strong><button type="button" aria-label="Close map filters" onClick={() => { setFiltersOpen(false); filterTriggerRef.current?.focus(); }}><X size={20} aria-hidden="true" /></button></div>
+        {filterControls(true)}
+      </section>
+      <button ref={filterTriggerRef} type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-controls="living-map-filter-panel" aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><SlidersHorizontal aria-hidden="true" /></button>
     </div>}
-    <Drawer.Root open modal={false} dismissible={false} handleOnly={!desktop} snapToSequentialPoint shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : next => { if (next != null) setMobileDrawerSnap(next); }} onDrag={event => { drawerHandleDidDrag.current = true; drawerDragY.current.last = event.clientY; }} onRelease={event => { const delta = event.pageY - drawerDragY.current.start; if (Math.abs(delta) > 24) window.setTimeout(() => setMobileDrawerSnap(delta > 0 ? MOBILE_DRAWER_SNAPS[0] : MOBILE_DRAWER_SNAPS[2]), 0); }}>
+    </div>
+    <div ref={setDrawerContainer} className="living-map-drawer-track" />
+    {drawerContainer && <Drawer.Root open container={drawerContainer} modal={false} dismissible={false} handleOnly={!desktop} shouldScaleBackground={false} disablePreventScroll snapPoints={desktop ? undefined : [...MOBILE_DRAWER_SNAPS]} activeSnapPoint={desktop ? undefined : mobileDrawerSnap} setActiveSnapPoint={desktop ? undefined : next => { if (next != null) setMobileDrawerSnap(next); }} onDrag={() => { drawerHandleDidDrag.current = true; }}>
+      {/* Vaul 1.1.2 does not forward modal to its Radix root. Supply the explicit
+          nonmodal context so this persistent sheet never hides map controls or nav. */}
+      <Dialog.Root open modal={false}>
       <Drawer.Portal>
-      <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map" onPointerDownCapture={event => { drawerDragY.current = { start: event.pageY, last: event.pageY }; }}>
+      <Drawer.Content className="living-map-drawer pdx-glass-rebind pdx-liquid-overlay" aria-label="Explore the map" aria-describedby={undefined} onPointerDownCapture={() => { drawerHandleDidDrag.current = false; }}>
       <Drawer.Title className="sr-only">Explore the map</Drawer.Title>
-      {!desktop && <Drawer.Handle preventCycle className="living-map-handle" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => { if (drawerHandleDidDrag.current) { drawerHandleDidDrag.current = false; return; } setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[2] : MOBILE_DRAWER_SNAPS[0]); }}><span /></Drawer.Handle>}
-      <div className="living-map-drawer-controls">
+      {!desktop && <Drawer.Handle preventCycle className="living-map-handle" role="button" tabIndex={0} aria-hidden={false} aria-expanded={!mobileDrawerPeek} aria-controls="living-map-drawer-feed" aria-label={mobileDrawerPeek ? "Open map drawer" : "Close map drawer"} onClick={() => { if (drawerHandleDidDrag.current) return; setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[1] : MOBILE_DRAWER_SNAPS[0]); }} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setMobileDrawerSnap(mobileDrawerPeek ? MOBILE_DRAWER_SNAPS[1] : MOBILE_DRAWER_SNAPS[0]); } }}><span /></Drawer.Handle>}
+      <div className="living-map-drawer-controls" {...inertWhen(!desktop && mobileDrawerPeek)}>
       <label className="living-map-search" data-vaul-no-drag><span aria-hidden="true">⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search events, places, listings…" aria-label="Search the living map" /></label>
       {desktop && filterControls()}
       </div>
-      <div ref={drawerScrollRef} className="living-map-drawer-scroll" data-vaul-no-drag>
+      <div id="living-map-drawer-feed" ref={drawerScrollRef} className="living-map-drawer-scroll" data-vaul-no-drag {...inertWhen(!desktop && mobileDrawerPeek)}>
       {loading && <p className="living-map-state">Loading the city…</p>}
       {failed && <div className="living-map-state" role="alert">The map feed could not load. <button type="button" onClick={() => { void retryEvents(); void retryPlaces(); }}>Try again</button></div>}
       {customPending && <p className="living-map-state">Pick a start and end date.</p>}
@@ -724,7 +768,8 @@ export default function LivingMap() {
       </div>
       </Drawer.Content>
       </Drawer.Portal>
-    </Drawer.Root>
+      </Dialog.Root>
+    </Drawer.Root>}
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={setSelectedEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
