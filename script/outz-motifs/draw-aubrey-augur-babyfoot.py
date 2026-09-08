@@ -1,0 +1,9 @@
+from drawing import pine,save
+save({
+'usfs-5087.005641':('Aubrey Mountain forested slope: switchback route opening into a small meadow; connected loop trip photo reference.','https://www.oregonhikers.org/forum/viewtopic.php?t=31208','https://www.oregonhikers.org/forum/viewtopic.php?t=31208',
+'<path d="M17 168Q83 102 139 143T247 129M20 197Q77 162 124 180T243 168M71 243Q50 213 123 205Q205 196 157 186Q89 174 141 159L172 146M94 244Q71 218 140 216Q228 207 177 188Q126 174 156 165M33 226l5-9 6 9M212 225l5-9 5 9M186 238l4-9 6 9"/>'+pine(35,176,.95)+pine(223,171,1.05)+pine(190,153,.55)),
+'usfs-5287010381':('Augur Creek drainage with a broad flat rim and pine forest, creek riparian growth and low snowberry shrubs; reference depicts the nearby research natural area.','https://research.fs.usda.gov/pnw/rnas/locations/augur-creek','https://research.fs.usda.gov/sites/default/files/styles/300px_wide/public/2023-03/pnw-augur_creek_oct-1987.jpg?itok=xLrjS3eo',
+'<path d="M17 131L69 108H157L209 130 244 123M114 153Q83 185 128 204T121 246M130 151Q104 181 146 204T142 246M30 224Q24 207 36 204Q46 193 57 207Q75 207 70 225M48 240V218M185 225Q171 207 187 199Q196 187 207 203Q226 201 227 220M202 236V209M80 234H95M162 233H177"/>'+pine(38,186,1)+pine(222,189,1.2)+pine(179,159,.6)),
+'usfs-5315.005181':('Babyfoot Lake beneath its rocky Kalmiopsis rim: surviving lakeside evergreens, fire snags and azalea flowers.','https://cherylhill.net/blog/2020/07/13/babyfoot-lake/','https://live.staticflickr.com/65535/50084951523_74f7cb3548_b.jpg',
+'<path d="M18 153L61 111 99 128 132 98 177 124 218 114 246 140M70 165Q134 144 218 165Q247 190 184 201Q116 210 63 190Q44 177 70 165ZM92 177H178M111 188H207M38 169V111M38 139L26 126M38 130L51 116M212 166V130M212 145L226 132M75 242V219M75 219Q60 211 68 201Q82 198 80 211Q94 204 97 216Q93 228 80 221M75 228L63 223M185 238l5-12 6 12"/>'+pine(43,213,.8)+pine(232,211,.7)),
+})

@@ -768,10 +768,17 @@
     "officialUrl": null,
     "lat": 43.73444444,
     "lng": -122.39055556,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.oregonhikers.org/forum/viewtopic.php?t=31208",
+        "image": "https://www.oregonhikers.org/forum/viewtopic.php?t=31208"
+      }
+    ],
+    "visualFeatures": [
+      "Aubrey Mountain forested slope: switchback route opening into a small meadow; connected loop trip photo reference."
+    ],
+    "asset": "/motifs/outz/places/usfs-5087.005641.svg"
   },
   {
     "id": "usfs-5287010381",
@@ -780,10 +787,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59887",
     "lat": 42.512278,
     "lng": -120.707047,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://research.fs.usda.gov/pnw/rnas/locations/augur-creek",
+        "image": "https://research.fs.usda.gov/sites/default/files/styles/300px_wide/public/2023-03/pnw-augur_creek_oct-1987.jpg?itok=xLrjS3eo"
+      }
+    ],
+    "visualFeatures": [
+      "Augur Creek drainage with a broad flat rim and pine forest, creek riparian growth and low snowberry shrubs; reference depicts the nearby research natural area."
+    ],
+    "asset": "/motifs/outz/places/usfs-5287010381.svg"
   },
   {
     "id": "usfs-5231010526",
@@ -793,9 +807,15 @@
     "lat": 42.701,
     "lng": -124.08,
     "status": "pending",
-    "references": [],
+    "references": [
+      {
+        "url": "https://naturalatlas.com/trails/azelea-lake-2228036",
+        "image": null
+      }
+    ],
     "visualFeatures": [],
-    "asset": null
+    "asset": null,
+    "researchNotes": "Coordinates are near Agness/Powers, not Red Buttes. Investigate Azelea Lake Trail #1262 before drawing; avoid borrowing Red Buttes lake scenery."
   },
   {
     "id": "usfs-11226010526",
@@ -804,10 +824,11 @@
     "officialUrl": null,
     "lat": 42.219,
     "lng": -123.786,
-    "status": "pending",
+    "status": "needs-location-verification",
     "references": [],
     "visualFeatures": [],
-    "asset": null
+    "asset": null,
+    "researchNotes": "Coordinates fall near Babyfoot Lake, far from the East trailhead near Agness. Verify record identity before drawing; do not assume Red Buttes Azalea Lake."
   },
   {
     "id": "usfs-5315.005181",
@@ -816,10 +837,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70426",
     "lat": 42.22500001,
     "lng": -123.79300001,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://cherylhill.net/blog/2020/07/13/babyfoot-lake/",
+        "image": "https://live.staticflickr.com/65535/50084951523_74f7cb3548_b.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Babyfoot Lake beneath its rocky Kalmiopsis rim: surviving lakeside evergreens, fire snags and azalea flowers."
+    ],
+    "asset": "/motifs/outz/places/usfs-5315.005181.svg"
   },
   {
     "id": "usfs-6432979010602",
