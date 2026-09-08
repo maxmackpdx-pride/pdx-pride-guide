@@ -970,10 +970,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42345",
     "lat": 44.087483,
     "lng": -124.11836,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://wanderingyuncks.com/tag/baker-beach/",
+        "image": "https://wanderingyuncks.com/tag/baker-beach/"
+      }
+    ],
+    "visualFeatures": [
+      "Baker Beach near Florence: grass-topped foredune, sandy trail across the deflation plain and Pacific surf; Oregon location, not San Francisco."
+    ],
+    "asset": "/motifs/outz/places/usfs-6146010414.svg"
   },
   {
     "id": "usfs-6433005010602",
@@ -994,10 +1001,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29880",
     "lat": 45.699444,
     "lng": -121.291667,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.wta.org/go-hiking/hikes/balfour-klickitat-day-use-area",
+        "image": "https://www.wta.org/site_images/hikes/balfour-klicktat_anna-roth.jpeg/@@download/image/balfour-klicktat_anna%20roth.jpeg"
+      }
+    ],
+    "visualFeatures": [
+      "Balfour-Klickitat former ranch fireplace remains beside a paved birdwatching loop and Columbia Gorge river panorama."
+    ],
+    "asset": "/motifs/outz/places/usfs-11370010324.svg"
   },
   {
     "id": "usfs-5198.004991",
@@ -1006,10 +1020,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38678",
     "lat": 44.48649939,
     "lng": -120.3971163,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.roaminglog.com/snowshoes/ochocoway.php",
+        "image": "https://www.roaminglog.com/snowshoes/ochocoway.php"
+      }
+    ],
+    "visualFeatures": [
+      "Bandit Springs Ochoco Way: ponderosa forest around a snow-covered meadow, with paired ski tracks."
+    ],
+    "asset": "/motifs/outz/places/usfs-5198.004991.svg"
   },
   {
     "id": "usfs-3254340010602",
@@ -1018,10 +1039,17 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=80975",
     "lat": 44.34166666,
     "lng": -120.3561111,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "drawn-awaiting-visual-review",
+    "references": [
+      {
+        "url": "https://www.onxmaps.com/hiking/4j064xr19q15/independent-mine-baneberry-trail",
+        "image": "https://eponaleah.wordpress.com/2011/10/"
+      }
+    ],
+    "visualFeatures": [
+      "Baneberry interpretive trail and adjacent Independent Mine: weathered cabin remains, white-fir forest and namesake berry cluster."
+    ],
+    "asset": "/motifs/outz/places/usfs-3254340010602.svg"
   },
   {
     "id": "usfs-5233010526",
