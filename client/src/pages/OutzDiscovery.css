@@ -82,3 +82,73 @@
 .outz-discovery .rugged .select-place[aria-pressed=true]{background:linear-gradient(135deg,#e5ceb91c,#ffffff03 48%,transparent 70%),#251f19b5}
 .outz-discovery .rugged .select-place::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background:url('/motifs/outz/grit.svg') repeat;opacity:.09;mix-blend-mode:soft-light}
 .outz-discovery .rugged .place-motif.custom-place-motif{object-fit:contain;opacity:1;filter:none}
+
+/* Guide chrome, with OutZide's approved geometry and typography preserved. */
+.outz-discovery .rugged .select-place,
+.outz-discovery .rugged .select-place[aria-pressed=true]{
+  background:var(--glass-sheen),var(--glass-sheen-specular),
+    radial-gradient(110% 80% at 50% 125%,color-mix(in srgb,var(--side-color) 8%,transparent),transparent 65%),#0d0b09d9;
+  border-color:#39342e;
+  border-left-color:var(--side-color);
+  box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor),var(--neon-bloom);
+  transition:border-color 160ms ease,background-color 160ms ease;
+}
+.outz-discovery .rugged .select-place::before{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:1px;
+  background:var(--refract-seam-gradient);
+  opacity:.24;
+  pointer-events:none;
+}
+.outz-discovery .rugged .select-place[aria-pressed=true]{
+  border-color:var(--side-color);
+}
+.outz-discovery .rugged .select-place:hover{
+  border-color:color-mix(in srgb,var(--side-color) 65%,#39342e);
+}
+.outz-discovery .rugged .select-place:focus-visible{
+  outline-color:var(--side-color);
+  outline-offset:-4px;
+}
+.outz-discovery .rugged :is(.categories button,.mobile-view button,.freshness button){
+  --c:#ff8c00;
+  background:var(--btn-glow-bg);
+  box-shadow:var(--chrome-keyline),var(--btn-glow-shadow);
+  border-color:color-mix(in srgb,var(--c) 45%,#242424);
+  color:#efbf88;
+  transition:border-color 160ms ease,color 160ms ease;
+}
+.outz-discovery .rugged :is(.categories button,.mobile-view button)[aria-pressed=true]{
+  background:var(--c);
+  color:#090909;
+  border-color:var(--c);
+  box-shadow:var(--chrome-keyline),var(--chrome-bevel),var(--chrome-floor),var(--neon-bloom);
+}
+.outz-discovery .rugged :is(.categories button,.mobile-view button,.freshness button):hover{
+  border-color:var(--c);
+}
+.outz-discovery .rugged :is(.categories button,.mobile-view button,.freshness button):active{
+  box-shadow:var(--chrome-keyline),var(--chrome-floor);
+}
+.outz-discovery .rugged .map-selection{
+  background:var(--glass-sheen),var(--glass-sheen-specular),#080909ed;
+  box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor);
+}
+.outz-discovery .rugged .map-selection a{
+  text-decoration-color:color-mix(in srgb,var(--c) 45%,transparent);
+  text-underline-offset:4px;
+}
+.outz-discovery .rugged .map-selection a:hover{
+  text-decoration:underline;
+}
+@media(prefers-reduced-motion:reduce){
+  .outz-discovery .rugged .select-place,
+  .outz-discovery .rugged :is(.categories button,.mobile-view button,.freshness button){transition:none}
+}
+html.calm-mode .outz-discovery .rugged .select-place{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  background:#0d0b09;
+}
