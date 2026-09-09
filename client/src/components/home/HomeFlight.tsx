@@ -27,6 +27,7 @@ export default function HomeFlight({ paused = false, onExploringChange }: {
         + (parseFloat(headerStyle?.marginBottom ?? "0") || 0);
       const bottomInset = (counter?.getBoundingClientRect().height ?? 96) + 12;
       element.style.setProperty("--home-flight-bottom", `${bottomInset}px`);
+      front?.style.setProperty("--home-foreground-bottom", `${bottomInset}px`);
       front?.style.setProperty("--home-header-height", `${headerHeight}px`);
       frame.current?.contentWindow?.postMessage({
         type: "zaylist:flight-state",

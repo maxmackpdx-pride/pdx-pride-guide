@@ -74,40 +74,42 @@ export default function HomeStage({ afterWelcome }: Props) {
           aria-hidden={exploring || undefined}
           ref={element => { if (element) element.inert = exploring; }}
         >
-          <h1 id="home-front-title" className="sr-only">Zaylist</h1>
-          <div className="home-front__mark">
-            <div className="home-front__mark-art">
-              <img
-                className="home-front__mark-core"
-                src={WORDMARK}
-                alt="Zaylist"
-                width="2393"
-                height="824"
-                loading="eager"
-                decoding="sync"
-                fetchPriority="high"
-              />
-            </div>
-          </div>
-          <div className="home-front__welcome-copy">
-            <p className="home-front__identity-line">
-              <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
-                <HandwritingText
-                  text={IDENTITY_LINES[identityLine]}
-                  animate={!stillIdentity}
-                  className="home-front__identity-script"
-                  height="1.35em"
+          <div className="home-front__brand-group">
+            <h1 id="home-front-title" className="sr-only">Zaylist</h1>
+            <div className="home-front__mark">
+              <div className="home-front__mark-art">
+                <img
+                  className="home-front__mark-core"
+                  src={WORDMARK}
+                  alt="Zaylist"
+                  width="2393"
+                  height="824"
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
                 />
-              </span>
-            </p>
-            <div className="home-front__hero-actions">
-              {user ? (
-                <Link href="/dashboard" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth">Open your Hub</Link>
-              ) : (
-                <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth" onClick={() => setShowAuth(true)} aria-haspopup="dialog">
-                  Log in / Sign up
-                </button>
-              )}
+              </div>
+            </div>
+            <div className="home-front__welcome-copy">
+              <p className="home-front__identity-line">
+                <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
+                  <HandwritingText
+                    text={IDENTITY_LINES[identityLine]}
+                    animate={!stillIdentity}
+                    className="home-front__identity-script"
+                    height="1.35em"
+                  />
+                </span>
+              </p>
+              <div className="home-front__hero-actions">
+                {user ? (
+                  <Link href="/dashboard" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth">Open your Hub</Link>
+                ) : (
+                  <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth" onClick={() => setShowAuth(true)} aria-haspopup="dialog">
+                    Log in / Sign up
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

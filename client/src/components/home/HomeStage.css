@@ -6,10 +6,16 @@
 .home-front__flight-credit a { color:inherit; }
 .home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .7s ease; }
 .home-front__flight[data-ready="true"] .home-front__flight-frame { opacity:1; pointer-events:auto; }
-.home-front__hero { --home-logo-height:min(calc((100vw - 40px) * 824 / 2393),344px,28svh); position:absolute; inset:0; z-index:2; min-width:0; text-align:center; pointer-events:none; }
+.home-front__hero { --home-logo-height:min(calc((100vw - 40px) * 824 / 2393),344px,28svh); position:absolute; inset:var(--home-header-height,var(--site-header-height,86px)) 0 var(--home-foreground-bottom,196px); z-index:2; min-width:0; display:flex; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
 .home-front__hero { opacity:1; visibility:visible; transition:opacity .7s ease,visibility 0s; }
 .home-front__hero[data-exploring="true"] { opacity:0; visibility:hidden; transition:opacity .45s ease,visibility 0s .45s; }
-.home-front__mark { position:absolute; left:50%; top:25%; transform:translate(-50%,-50%); height:var(--home-logo-height); width:calc(var(--home-logo-height) * 2393 / 824); max-width:calc(100% - 40px); }
+/* Keep the complete brand group slightly above the usable area's midpoint. */
+.home-front__brand-group { position:relative; isolation:isolate; width:100%; display:flex; flex-direction:column; align-items:center; transform:translateY(-2svh); }
+.home-front__brand-group::before {
+  content:""; position:absolute; inset:-22% -8%; z-index:-1; pointer-events:none;
+  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.78) 0%,rgba(0,0,0,.64) 38%,rgba(0,0,0,.28) 70%,transparent 100%);
+}
+.home-front__mark { position:relative; flex:none; height:var(--home-logo-height); width:calc(var(--home-logo-height) * 2393 / 824); max-width:calc(100% - 40px); }
 .home-front__mark-art { width:100%; height:100%; }
 .home-front__mark,.home-front__identity-line { isolation:isolate; }
 .home-front__mark::before,.home-front__identity-line::before {
@@ -27,7 +33,7 @@
 }
 .home-front__identity-line::before { inset:-.55em 0; }
 .home-front__mark img { display:block; width:100%; height:100%; object-fit:contain; }
-.home-front__welcome-copy { position:absolute; top:calc(25% + var(--home-logo-height) / 2 + clamp(12px,2svh,22px)); left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:760px; }
+.home-front__welcome-copy { position:relative; flex:none; margin-top:clamp(12px,2svh,22px); width:calc(100% - 32px); max-width:760px; }
 .home-front__identity-line { position:relative; display:flex; align-items:center; justify-content:center; width:100%; min-height:1.6em; margin:0; color:#fff; font-size:clamp(22px,3vw,34px); line-height:1; }
 .home-front__identity-script { max-width:100%; font-family:"Bradley Hand","Comic Sans MS",cursive; filter:drop-shadow(0 1px 1px #000) drop-shadow(0 3px 4px rgba(0,0,0,.95)); }
 .home-front__hero-actions { display:flex; justify-content:center; margin-top:clamp(18px,3svh,28px); }
@@ -37,15 +43,6 @@ html:root .home-front .home-front__auth:focus-visible { outline:2px solid #fff; 
 .home-front__welcome > .home-hero-stats-boundary { position:absolute; inset:auto 0 0; z-index:3; }
 @media(min-width:960px) {
   .home-front { --home-desktop-counter-height:clamp(132px,16svh,168px); }
-  /* Center the complete foreground group between the navbar and counters. */
-  .home-front__hero {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    box-sizing:border-box;
-    padding-top:var(--home-header-height,var(--site-header-height,86px));
-    padding-bottom:calc(var(--home-desktop-counter-height) + 3px);
-  }
-  .home-front__mark { position:relative; left:auto; top:auto; transform:none; flex:none; }
-  .home-front__welcome-copy { position:static; transform:none; flex:none; margin-top:clamp(12px,2svh,22px); }
   html:root .home-front .home-front__auth { min-width:220px; min-height:64px; padding:18px 36px; font-size:20px; border-radius:20px; }
   .home-main-stage .home-front__welcome .home-stat-strip__cell {
     min-height:var(--home-desktop-counter-height); padding:24px 32px;
