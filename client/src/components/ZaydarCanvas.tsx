@@ -3,7 +3,7 @@ import ZaydarFallback from './ZaydarFallback';
 import {forwardRef,useEffect,useImperativeHandle,useRef,useState} from 'react';
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
-type Row={key:string;coordinates:number[];name:string;color:string;logo:string;alternateLogo?:string;time?:string};
+type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string};
 export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect:(key:string)=>void;onMode:(mode:string)=>void;onView:(view:View)=>void}>(function ZaydarCanvas({rows,selected,onSelect,onMode,onView},ref){
  const [labels,setLabels]=useState<EventLabel[]>([]);
  const fallbackControl=useRef<ZaydarHandle>(null);
@@ -19,7 +19,7 @@ export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect
   if(event.data.type==='fatal'){setFallback(true);setError('3D view unavailable. Showing the lightweight map.');}
   if(event.data.type==='mode')latest.current.onMode(event.data.mode);
   if(event.data.type==='select')latest.current.onSelect(event.data.key);
-  if(event.data.type==='error')setError('Some map tiles could not load. Listings are still available in Results.');
+  if(event.data.type==='error')setError('Some map tiles could not load. Listings are still available in the search drawer.');
  };window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive);},[]);
  const serialized=JSON.stringify(rows);
  useEffect(()=>{if(!ready)return;send('data',{rows});const timer=window.setInterval(()=>send('data',{rows:latest.current.rows}),60000);return()=>window.clearInterval(timer);},[ready,serialized]);

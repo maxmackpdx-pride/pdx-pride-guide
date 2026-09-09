@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 
 import { Link, useLocation } from "wouter";
+import ZaydarSearchDrawer, {zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation, SlidersHorizontal, X } from "lucide-react";
 
@@ -70,6 +71,7 @@ const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: strin
 
 // Preserve the adult locations already marked red in the Zaydar studio snapshot.
 const ADULT_VENUES = new Set(['Sanctuary Club','Hawks PDX','FANTASY','Steam Portland','Club Privata','The Velvet Rope'].map(normalizeDirectoryName));
+function zaydarPlaceType(place: Pick<Place,'name'|'type'>) { return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? 'adult' : place.type; }
 function zaydarPlaceColor(place: Pick<Place,'name'|'type'>) {
   return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? '#FF0000' : directoryTypeColor(place.type);
 }
@@ -320,7 +322,7 @@ export default function ZaydarMapDemo() {
   const [showHousing, setShowHousing] = useState(true);
   const [showMizzed, setShowMizzed] = useState(true);
   const [showCarpool, setShowCarpool] = useState(true);
-  const [barsOnly, setBarsOnly] = useState(false);
+  const [placeType, setPlaceType] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
   const [zoom, setZoom] = useState(13);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
@@ -333,7 +335,6 @@ export default function ZaydarMapDemo() {
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [keyOpen, setKeyOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<ZaydarHandle | null>(null);
@@ -341,12 +342,10 @@ export default function ZaydarMapDemo() {
 
   const [mapHeight, setMapHeight] = useState<number>();
   const toolsRef = useRef<HTMLDivElement | null>(null);
-  const keyTriggerRef = useRef<HTMLButtonElement | null>(null);
   const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const createTriggerRef = useRef<HTMLButtonElement | null>(null);
   const desktop = useDesktop();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [resultsOpen,setResultsOpen]=useState(false);
   const [flight,setFlight]=useState(false);
   const [flat,setFlat]=useState(false);
   const [labels,setLabels]=useState(false);
@@ -459,7 +458,7 @@ export default function ZaydarMapDemo() {
     return at >= now && at <= now + 7 * 86400000 && ["Fri", "Sat", "Sun"].includes(day);
   }), [events, q, timeFilter, customStart, customEnd]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
-  const mapPlaces = useMemo(() => barsOnly ? visiblePlaces.filter(place => place.type === "bar") : visiblePlaces, [visiblePlaces, barsOnly]);
+  const mapPlaces = useMemo(() => visiblePlaces.filter(place => placeType === "all" || zaydarPlaceType(place) === placeType), [visiblePlaces, placeType]);
   const nearbyPlaces = useMemo(() => visiblePlaces
     .map(place => ({ place, point: placePoint(place) }))
     .filter((entry): entry is { place: Place; point: [number, number] } => Boolean(entry.point))
@@ -485,7 +484,14 @@ export default function ZaydarMapDemo() {
     ...(showHousing ? rowMarks(visibleHousing, "housing") : []),
     ...(showMizzed ? rowMarks(visibleMizzed, "mizzed") : []),
     ...(showCarpool ? rowMarks(carpools.filter(row => rowMatchesQuery(row, q)), "carpool") : []),
-  ], [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q]);
+  ].filter(mark => {
+    if(placeType === 'all' || mark.kind === 'place') return true;
+    if(mark.kind !== 'event') return false;
+    const event=mark.item as Event;
+    if(zaydarEventColor(event,places)==='#FF0000')return placeType==='adult';
+    const venue=places.find(place=>normalizeDirectoryName(place.name)===normalizeDirectoryName(event.venueName||''));
+    return (venue?.type||'venue')===placeType;
+  }), [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q, placeType, places]);
   const screenMarks = useMemo(() => mapBounds ? marks.filter(mark => (
     mark.lat >= mapBounds.south && mark.lat <= mapBounds.north && mark.lng >= mapBounds.west && mark.lng <= mapBounds.east
   )).slice(0, 12) : [], [mapBounds, marks]);
@@ -597,7 +603,6 @@ export default function ZaydarMapDemo() {
   const mobileDrawerPeek = true;
   useEffect(() => {
     setCreateOpen(false);
-    setKeyOpen(false);
     setFiltersOpen(false);
   }, [desktop, mobileDrawerPeek]);
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
@@ -610,20 +615,20 @@ export default function ZaydarMapDemo() {
     else setLocation(`/outz/${String((mark.item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
   }, [goOverlay, setLocation]);
   useEffect(() => {
-    if (!createOpen && !keyOpen && !filtersOpen) return;
-    const trigger = keyOpen ? keyTriggerRef.current : filtersOpen ? filterTriggerRef.current : createTriggerRef.current;
-    const panelId = keyOpen ? "living-map-key-panel" : filtersOpen ? "living-map-filter-panel" : "living-map-create-menu";
+    if (!createOpen) return;
+    const trigger = createTriggerRef.current;
+    const panelId = "living-map-create-menu";
     const frame = requestAnimationFrame(() => document.getElementById(panelId)?.querySelector<HTMLElement>("button, a[href], input")?.focus({ preventScroll: true }));
-    const close = () => { setCreateOpen(false); setKeyOpen(false); setFiltersOpen(false); trigger?.focus({ preventScroll: true }); };
+    const close = () => { setCreateOpen(false); setFiltersOpen(false); trigger?.focus({ preventScroll: true }); };
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && !soon) { event.preventDefault(); close(); } };
     const onPointer = (event: PointerEvent) => { if (event.target instanceof Node && !pageRef.current?.contains(event.target) && !soon) close(); };
     window.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
     return () => { cancelAnimationFrame(frame); window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
-  }, [createOpen, keyOpen, filtersOpen, soon]);
+  }, [createOpen, soon]);
   const filterControls = (mobile = false, hideZayDark = false) => <div className="living-map-filter-block" data-vaul-no-drag>
     <h2>Map Filters</h2>
-    <div className="living-map-filter-summary"><span>{timeFilter === "default" ? "Next 3 weeks" : timeFilter === "soon" ? "Starting soon or on now" : timeFilter === "weekend" ? "This weekend" : "Choose your dates"}</span><button type="button" onClick={() => { setTimeFilter("default"); setCustomStart(""); setCustomEnd(""); setShowEvents(true); setShowPlaces(true); setShowHousing(true); setShowMizzed(true); setShowCarpool(true); setBarsOnly(false); }}>Reset filters</button></div>
+    <div className="living-map-filter-summary"><span>{timeFilter === "default" ? "Next 3 weeks" : timeFilter === "soon" ? "Starting soon or on now" : timeFilter === "weekend" ? "This weekend" : "Choose your dates"}</span><button type="button" onClick={() => { setTimeFilter("default"); setCustomStart(""); setCustomEnd(""); setShowEvents(true); setShowPlaces(true); setShowHousing(true); setShowMizzed(true); setShowCarpool(true); setPlaceType("all"); }}>Reset filters</button></div>
     <div className="living-map-time" data-vaul-no-drag role="group" aria-label="Event date filters"><button type="button" aria-pressed={timeFilter === "soon"} className={timeFilter === "soon" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "soon" ? "default" : "soon")}>Soon</button><button type="button" aria-pressed={timeFilter === "weekend"} className={timeFilter === "weekend" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "weekend" ? "default" : "weekend")}>This weekend</button><button type="button" aria-pressed={timeFilter === "custom"} className={timeFilter === "custom" ? "is-on" : ""} onClick={() => setTimeFilter(current => current === "custom" ? "default" : "custom")}>Custom date range</button>{timeFilter === "custom" && <span className="living-map-date-range"><label>From<input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} /></label><label>To<input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} /></label></span>}</div>
     <div className="living-map-chips" data-vaul-no-drag role="group" aria-label="Map layer filters">
       <button type="button" aria-pressed={showEvents} className={`pdx-glass-rebind${showEvents ? " is-on" : ""}`} style={{ "--c": "#ccff00" } as CSSProperties} onClick={() => setShowEvents(v => !v)}>Eventz</button>
@@ -632,7 +637,6 @@ export default function ZaydarMapDemo() {
       <button type="button" aria-pressed={showHousing} className={`pdx-glass-rebind${showHousing ? " is-on" : ""}`} style={{ "--c": "#00ffff" } as CSSProperties} onClick={() => setShowHousing(v => !v)}>Haüz</button>
       <button type="button" aria-pressed={showMizzed} className={`pdx-glass-rebind${showMizzed ? " is-on" : ""}`} style={{ "--c": "#ff00cc" } as CSSProperties} onClick={() => setShowMizzed(v => !v)}>Mizzed</button>
       <button type="button" aria-pressed={showCarpool} className={`pdx-glass-rebind${showCarpool ? " is-on" : ""}`} style={{ "--c": "#00ffff" } as CSSProperties} onClick={() => setShowCarpool(v => !v)}>Carpool</button>
-      <button type="button" aria-pressed={barsOnly} className={`pdx-glass-rebind${barsOnly ? " is-on" : ""}`} style={{ "--c": "#ff00cc" } as CSSProperties} onClick={() => { setShowPlaces(true); setBarsOnly(v => !v); }}>Bars</button>
 
 
     </div>
@@ -649,7 +653,9 @@ export default function ZaydarMapDemo() {
     const row=mark.item as MapRow;
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):mark.kind==='mizzed'?'#FF00CC':mark.kind==='housing'?'#00FFFF':'#FF6600';
-    return {key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
+    const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
+    const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):mark.kind;
+    return {typeIcon:place||event?zaydarTypeIcon(type):`/zaydar-map/icons/${type}.svg`,type,key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
       logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':mark.kind==='housing'?'/zaydar-map/icons/housing.svg':mark.kind==='mizzed'?'/zaydar-map/icons/mizzed.svg':'/zaydar-map/icons/carpool.svg'),
       alternateLogo:brands?.alternate,
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
@@ -658,15 +664,16 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   });
+  const listedPlaces=new Set<number>();
+  const resultMarks=[...marks].sort((a,b)=>milesBetween(mapCenter,[a.lat,a.lng])-milesBetween(mapCenter,[b.lat,b.lng])).filter(mark=>{
+    if(mark.kind!=='place')return true;
+    const id=(mark.item as Place).id;if(listedPlaces.has(id))return false;listedPlaces.add(id);return true;
+  });
+  // A directory entry can be found before its address has a confirmed map pin.
+  if(showPlaces)for(const place of mapPlaces){if(!listedPlaces.has(place.id))resultMarks.push({key:`unmapped-${place.id}`,kind:'place',lat:NaN,lng:NaN,item:place});}
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map demo">
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onMode={mode=>setFlight(mode==='flight')} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
-    <div className="zaydar-demo-toolbar pdx-glass-rebind">
-      <strong>ZAYDAR <small>MAP DEMO</small></strong>
-      <label><span className="sr-only">Search the map</span><input aria-label="Search the map" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search places, events…" /></label>
-      <button aria-pressed={filtersOpen} onClick={()=>{setFiltersOpen(v=>!v);setKeyOpen(false);setCreateOpen(false);}}>Filters</button>
-      <button aria-pressed={resultsOpen} onClick={()=>setResultsOpen(v=>!v)}>Results <span>{marks.length}</span></button>
-    </div>
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
       <button onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
@@ -674,26 +681,25 @@ export default function ZaydarMapDemo() {
       <button aria-pressed={flat} onClick={()=>{setFlat(v=>!v);mapRef.current?.send('pitch',{flat:!flat});}}>{flat?'3D':'2D'}</button>
       <button aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
       <button aria-pressed={flight} onClick={()=>{setFlight(v=>!v);mapRef.current?.send('mode',{mode:flight?'browse':'flight'});}}>{flight?'Browse':'Flyover'}</button>
-      <button aria-expanded={keyOpen} onClick={()=>{setKeyOpen(v=>!v);setFiltersOpen(false);setCreateOpen(false);}}>Key</button>
-      <button aria-expanded={createOpen} onClick={()=>{setCreateOpen(v=>!v);setFiltersOpen(false);setKeyOpen(false);}}>Post +</button>
+      <button aria-expanded={createOpen} onClick={()=>{setCreateOpen(v=>!v);setFiltersOpen(false);}}>Post +</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
     <div ref={toolsRef}>
-    {filtersOpen&&<section id="living-map-filter-panel" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Map filters"><button className="zaydar-close" onClick={()=>setFiltersOpen(false)} aria-label="Close filters">×</button>{filterControls(false,true)}</section>}
-    {keyOpen&&<section id="living-map-key-panel" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Map key"><button className="zaydar-close" onClick={()=>setKeyOpen(false)} aria-label="Close map key">×</button><h2>Map key</h2><p>Zoom in or select a light to reveal its hologram.</p>{Object.entries(DIRECTORY_TYPE_LABELS).map(([type,label])=><p key={type}><i className="zaydar-key-orb" style={{background:directoryTypeColor(type),boxShadow:`0 0 14px ${directoryTypeColor(type)}`}}/>{label}</p>)}<p><i className="zaydar-key-orb" style={{background:"#FF0000",boxShadow:"0 0 14px #FF0000"}}/>Adult venues and events</p><p>Events inherit their venue’s directory type color.</p><p>Housing · cyan / Mizzed · magenta / Carpool · orange</p></section>}
     {createOpen&&<nav id="living-map-create-menu" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Post to Zaylist"><button className="zaydar-close" onClick={()=>setCreateOpen(false)} aria-label="Close post menu">×</button><h2>Post to Zaylist</h2>{MAP_CREATE_LINKS.map(item=><Link key={item.href} href={item.href}>{item.label} ↗</Link>)}</nav>}
     </div>
-    {resultsOpen&&<section className="zaydar-demo-results pdx-glass-rebind" aria-label="Map results">
-      <button className="zaydar-close" onClick={()=>setResultsOpen(false)} aria-label="Close results">×</button>
-      <h2>On this map</h2>
+    <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
+      <h2>{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
       {loading&&<p role="status">Loading live listings…</p>}
       {failed&&<p role="alert">Some listings could not load. <button onClick={()=>{void retryEvents();void retryPlaces();}}>Retry</button></p>}
-      {!loading&&!marks.length&&<p>No listings match. Try another search or reset filters.</p>}
-      <h3>What’s on my screen</h3><div className="living-map-rail">{screenMarks.map(mark=><button key={mark.key} onClick={()=>{mapRef.current?.send('select',{key:mark.key});openMark(mark);}}>{String((mark.item as MapRow).title||(mark.item as MapRow).name||'Listing')}</button>)}</div>
-      <h3>Happening today</h3><div className="living-map-rail">{todayEvents.map(eventCard)}</div>
-      {railOrder.map(genericRail)}
-    </section>}
-    <p className="zaydar-demo-caption">{marks.length} listings · {flight?'Automatic flyover':'Drag to explore · Zoom in for holograms'}</p>
+      {!loading&&!resultMarks.length&&<p role="status">No listings match. Try another search or Placez type.</p>}
+      <div className="zaydar-result-list">{resultMarks.map(mark=>{
+        const event=mark.kind==='event'?mark.item as Event:null,place=mark.kind==='place'?mark.item as Place:null;
+        const scene=sceneRows.find(row=>row.key===mark.key)||{type:zaydarPlaceType(place!),typeIcon:zaydarTypeIcon(zaydarPlaceType(place!)),color:zaydarPlaceColor(place!)};
+        const title=event?.title||place?.name||String((mark.item as MapRow).title||'Listing');
+        const meta=event?`${event.venueName} · ${new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric'}).format(new Date(event.dateStart))} · ${hour(event.dateStart)}`:place?`${zaydarTypeLabel(scene.type)} · ${place.neighborhood||'Portland'}`:mark.kind==='housing'?'Haüz':mark.kind==='mizzed'?'Mizzed':'Carpool';
+        return <button type="button" className="zaydar-result-row" key={mark.key} onClick={click=>{if(finite(mark.lat)&&finite(mark.lng))mapRef.current?.send('select',{key:mark.key});openMark(mark,click.currentTarget);}}><span className="zaydar-result-icon" style={{'--type-color':scene.color} as CSSProperties}><img src={scene.typeIcon} style={scene.color==='#FFFFFF'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span><strong>{title}</strong><small>{meta}</small></span><span className="zaydar-result-arrow" aria-hidden="true">›</span></button>;
+      })}</div>
+    </ZaydarSearchDrawer>
     {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={setSelectedEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title || String(selectedMizzed.body || "").slice(0, 80)} body={String(selectedMizzed.body || "")} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}

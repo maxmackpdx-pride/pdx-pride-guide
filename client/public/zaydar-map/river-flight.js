@@ -415,7 +415,7 @@ function drawLights(fade,target=map,surface=lights){
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
    if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:22});}
-   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
+   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon);hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
   }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
@@ -742,7 +742,8 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 function tell(type,payload={}){parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 // Use the original Zaydar orb materials, breathing glow, and drifting mist.
-function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha){
+const typeIcons=new Map();
+function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
  const size=126*(.92+.1*pulse);
@@ -751,11 +752,17 @@ function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha){
  drawLightMist(ctx,x,y,phase,fade);
  ctx.globalAlpha=alpha;
  ctx.drawImage(hologramMaterials.orbs.get(color),x-12.5,y-12.5,25,25);
+ const icon=typeIcons.get(typeIcon);
+ if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,11,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-7.5,y-7.5,15,15);}
  ctx.restore();
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){
  const generation=++dataGeneration;
+ for(const src of new Set(rows.map(row=>row.typeIcon).filter(Boolean))){
+  if(typeIcons.has(src))continue;
+  typeIcons.set(src,null);const icon=new Image();icon.onload=()=>{if(!disposed){const dark=document.createElement('canvas');dark.width=dark.height=32;const c=dark.getContext('2d');c.drawImage(icon,0,0,32,32);c.globalCompositeOperation='source-in';c.fillStyle='#243744';c.fillRect(0,0,32,32);typeIcons.set(src,{light:icon,dark});scheduleFrame();}};icon.src=src;
+ }
  const colors=[...new Set([...baseColors,adultVenueColor,...rows.map(row=>row.color)])];
  for(const color of colors)ensureLightSprite(color);
  const nextPalette=colors.slice().sort().join(',');if(nextPalette!==paletteKey){hologramMaterials.dispose();hologramMaterials=createHologramMaterials(colors);paletteKey=nextPalette;}
