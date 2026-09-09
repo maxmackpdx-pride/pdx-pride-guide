@@ -401,7 +401,14 @@ function drawLights(fade,target=map,surface=lights){
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
   const emergence=isBar?emergenceFor(feature):0;
-  if(pass===0){const orbY=p.y-8;drawDiscoveryOrb(lightsContext,p.x,orbY,color,coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:orbY,r:22});}
+  if(pass===0){
+   // An expanded projector owns its ground footprint. Nearby event/place rows
+   // must not stack bright discovery balls over the original rings and pin light.
+   const orbY=p.y-8;
+   const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
+   if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:22});}
+   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,orbY,color,coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:orbY,r:22});}
+  }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=fade*pulse*beamAlpha;
