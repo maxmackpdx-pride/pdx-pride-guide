@@ -171,3 +171,36 @@ html.calm-mode .outz-discovery .rugged .select-place{
     mask-image:linear-gradient(to bottom,transparent,#000 28px,#000 calc(100% - 28px),transparent);
   }
 }
+
+/* Both discovery columns share one height; long destination details scroll inside. */
+.outz-discovery .rugged .split{--outz-panel-height:820px;align-items:start}
+.outz-discovery .rugged .split .map-list{
+  height:var(--outz-panel-height);
+  max-height:var(--outz-panel-height);
+  overflow-y:auto;
+}
+.outz-discovery .rugged .split .real-waypoints.map-panel{
+  height:var(--outz-panel-height);
+  min-height:0;
+  position:relative;
+  top:0;
+}
+.outz-discovery .rugged .real-waypoints .real-map{flex:0 0 430px}
+.outz-discovery .rugged .real-waypoints .map-selection{
+  flex:1 1 0;
+  min-height:0;
+  overflow-y:auto;
+  scrollbar-color:#746042 #0c0c0e;
+}
+.outz-discovery .rugged .real-waypoints .map-selection>*{flex-shrink:0}
+.outz-discovery .rugged .real-waypoints .outz-map-key,
+.outz-discovery .rugged .real-waypoints .map-data-note{flex-shrink:0}
+@media(max-width:640px){
+  .outz-discovery .rugged .split{--outz-panel-height:760px}
+  .outz-discovery .rugged .real-waypoints .real-map{flex-basis:360px}
+  .outz-discovery .rugged .map-list{
+    padding-block:28px;
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 28px,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(to bottom,transparent,#000 28px,#000 calc(100% - 28px),transparent);
+  }
+}
