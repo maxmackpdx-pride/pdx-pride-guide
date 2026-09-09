@@ -19,3 +19,5 @@
 .zaydar-event-title>.zaydar-event-title-fallback{font-size:var(--event-fallback-size);line-height:1.05;white-space:normal;overflow-wrap:anywhere;}
 .zaydar-event-clock{display:flex;justify-content:center;align-items:end;gap:5px;color:var(--clock-color);filter:drop-shadow(0 0 5px var(--clock-color)) drop-shadow(0 2px 3px #000);}
 .zaydar-event-clock svg{height:var(--event-clock-height);max-width:80%;fill:currentColor;}.zaydar-event-clock path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:square}.zaydar-event-clock small{font:700 8px 'Inter',sans-serif;line-height:1.6}
+
+.zaydar-logo-target{position:absolute;z-index:2;transform:translate(-50%,-50%);border:0;padding:0;background:transparent;cursor:pointer;}

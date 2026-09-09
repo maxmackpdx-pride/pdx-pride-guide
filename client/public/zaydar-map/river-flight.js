@@ -134,7 +134,8 @@ async function decodeVenueLogo(url,mode){
    const outline=outlined.getContext('2d');
    for(let i=0;i<8;i++){const angle=i*Math.PI/4;outline.drawImage(silhouette,padding+Math.cos(angle)*outlineRadius,padding+Math.sin(angle)*outlineRadius);}
    outline.drawImage(clean,padding,padding);
-   venueLogos.set(url,{image:clean,silhouette,outlined,padding,left:0,top:0,width:clean.width,height:clean.height});
+   const chromatic=['#00FFFF','#FF00CC'].map(color=>{const channel=document.createElement('canvas');channel.width=clean.width;channel.height=clean.height;const ctx=channel.getContext('2d');ctx.drawImage(clean,0,0);ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,channel.width,channel.height);return channel;});
+   venueLogos.set(url,{image:clean,silhouette,outlined,chromatic,padding,left:0,top:0,width:clean.width,height:clean.height});
    canvas.width=canvas.height=1;
 
   }
@@ -468,11 +469,17 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.restore();
    continue;
    }
-   hitTargets.push({key:feature.properties.key,x:logoX,y:raisedY-178.5*beaconScale,r:Math.max(28,70*beaconScale)});
+
    // Floating hologram: only the artwork and fine corner guides, no pin body.
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;
    lightsContext.translate(logoX,raisedY);lightsContext.scale(5.25*beaconScale,5.25*beaconScale);
-   const artUrl=feature.properties.alternateLogo&&Math.floor(pulseTime/5)%2?feature.properties.alternateLogo:feature.properties.logo;
+   const canCycle=feature.properties.alternateLogo&&venueLogos.has(feature.properties.alternateLogo);
+   const cycle=pulseTime/5,swapProgress=(pulseTime%5)/.48;
+   const cycleIndex=Math.floor(cycle);
+   const alternate=canCycle&&(cycleIndex>0&&swapProgress<.5?cycleIndex-1:cycleIndex)%2===1;
+   const artUrl=alternate?feature.properties.alternateLogo:feature.properties.logo;
+   const logoKey=alternate?feature.properties.alternateLogoKey:feature.properties.logoKey;
+   if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:raisedY-178.5*beaconScale,r:Math.max(28,70*beaconScale)});
    const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo),focus=logoFocus.active.get(phase);
    if(focus&&logo){
    const age=pulseTime-focus.start,remaining=focus.end-pulseTime;
@@ -519,7 +526,7 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25*beaconScale;
     const labelWidth=logo.width*fit*.86;
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-34*5.25*beaconScale+logo.height*fit/2+5,width:labelWidth,opacity:coreAlpha});
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-34*5.25*beaconScale+logo.height*fit/2+5,width:labelWidth,logoKey,logoY:raisedY-34*5.25*beaconScale,logoWidth:logo.width*fit,logoHeight:logo.height*fit,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -532,7 +539,20 @@ function drawLights(fade,target=map,surface=lights){
     const scale=Math.min(maxWidth/logo.width,21/logo.height),w=logo.width*scale,h=logo.height*scale;
     lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
     const padding=logo.padding*scale;
+    const glitch=canCycle&&cycleIndex>0&&!reduced.matches&&swapProgress<1?Math.sin(Math.PI*swapProgress):0;
+    if(glitch>0){
+     lightsContext.save();lightsContext.globalCompositeOperation='screen';lightsContext.globalAlpha=coreAlpha*glitch*.8;
+     const offset=glitch*(1.1+.4*Math.sin(pulseTime*63));
+     logo.chromatic.forEach((channel,i)=>lightsContext.drawImage(channel,-w/2+(i?offset:-offset),-34-h/2+(i?-.25:.25)*glitch,w,h));
+     lightsContext.restore();
+    }
+    lightsContext.globalAlpha=coreAlpha*(1-glitch*.4);
     lightsContext.drawImage(logo.outlined,-w/2-padding,-34-h/2-padding,w+padding*2,h+padding*2);
+    if(glitch>0){
+     lightsContext.save();lightsContext.globalAlpha=coreAlpha*glitch*.75;
+     for(let band=0;band<3;band++){const sy=((band*.31+pulseTime*.8)%1)*logo.height,sh=Math.min(logo.height*.045,logo.height-sy);const shift=Math.sin(pulseTime*47+band*2)*glitch*1.6;lightsContext.drawImage(logo.image,0,sy,logo.width,sh,-w/2+shift,-34-h/2+sy*scale,w,sh*scale);}
+     lightsContext.restore();
+    }
     // Tiny low-contrast digital scan, confined to the artwork's alpha mask.
     if(!reduced.matches){
      const band=(Math.sin(pulseTime*.31+phase*5.1)*.5+.5)*logo.height;
@@ -696,7 +716,7 @@ window.addEventListener('pagehide',()=>{
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
- for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined])canvas.width=canvas.height=1;
+ for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];nearbyLights=()=>[];lights.width=lights.height=1;
@@ -744,7 +764,7 @@ map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=[...hitTargets].reverse().find(h=>Math.hypot(e.clientX-h.x,e.clientY-h.y)<h.r);
- if(hit){selectedKey=hit.key;tell('select',{key:hit.key});scheduleFrame();}
+ if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;tell('select',{key:hit.key});scheduleFrame();}
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>tell('fatal'));

@@ -86,7 +86,7 @@ function phraseIncludes(haystack: string, needle: string): boolean {
   return phrase.length >= 3 && ` ${words(haystack)} `.includes(` ${phrase} `);
 }
 
-function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string } {
+function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alternate?: string; directoryId?: number; alternateDirectoryId?: number } {
   const eventCopy = `${event.title} ${event.description || ""}`;
   const host = places
     .filter(place => place.type === "group" && phraseIncludes(eventCopy, place.name))
@@ -95,8 +95,8 @@ function eventBrandLogos(event: Event, places: Place[]): { primary?: string; alt
   const venueKey = normalizeDirectoryName(event.venueName || "");
   const venue = places.find(place => place.type !== "group" && normalizeDirectoryName(place.name) === venueKey);
   const venueLogo = resolveDirectoryLogo(event.venueName || "", venue?.imageUrl);
-  if (hostLogo) return { primary: hostLogo, alternate: venueLogo && venueLogo !== hostLogo ? venueLogo : undefined };
-  return { primary: venueLogo || undefined };
+  if (hostLogo && venueLogo && hostLogo !== venueLogo) return { primary: venueLogo, alternate: hostLogo, directoryId: venue?.id, alternateDirectoryId: host?.id };
+  return { primary: venueLogo || hostLogo || undefined, directoryId: venue?.id || host?.id };
 }
 
 function firstImage(value: unknown): string | null {
@@ -650,11 +650,13 @@ export default function ZaydarMapDemo() {
     return {key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
       logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':mark.kind==='housing'?'/zaydar-map/icons/housing.svg':mark.kind==='mizzed'?'/zaydar-map/icons/mizzed.svg':'/zaydar-map/icons/carpool.svg'),
       alternateLogo:brands?.alternate,
+      logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
+      alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   });
-  const onSceneSelect=(key:string)=>{const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
+  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map demo">
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onMode={mode=>setFlight(mode==='flight')} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
     <div className="zaydar-demo-toolbar pdx-glass-rebind">
