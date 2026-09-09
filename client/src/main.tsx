@@ -18,6 +18,7 @@ import "@/components/ds/adapters/listing-card.css";
 import "./fluent2-m3-cards.css";
 import "./components/CompactNav.css";
 import "./components/CaptionSplitNav.css";
+import "./components/GlassNav.css";
 import "@/components/ds/tokens/buttons.css";
 
 // Fluent 2 depth + Material 3 states, governed by Zaylist color semantics.
