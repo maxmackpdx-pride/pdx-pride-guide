@@ -31,7 +31,7 @@ export function formatGridCardWhen(event: Event): string {
   });
   const start = clock(event.dateStart);
   const end = event.dateEnd ? clock(event.dateEnd) : "";
-  return [dateLabel, [start, end].filter(Boolean).join("–")].filter(Boolean).join(" · ");
+  return [dateLabel, [start, end].filter(Boolean).join(" to ")].filter(Boolean).join(" · ");
 }
 
 export function listingTypeTags(event: Event, max = 2): string[] {

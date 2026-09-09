@@ -60,15 +60,15 @@ export type Step = { icon: ReactNode; title: ReactNode; sub: string };
 const b = (t: string) => <strong style={{ color: "#fff" }}>{t}</strong>;
 
 export const IOS_STEPS: Step[] = [
-  { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "In Safari's toolbar — the ⬆️ square, usually bottom-center." },
+  { icon: <ShareGlyph />, title: <>Tap the {b("Share")} button</>, sub: "Look for the square with an upward arrow in Safari's toolbar." },
   { icon: <AddGlyph />, title: <>Choose {b("Add to Home Screen")}</>, sub: "Scroll the share menu down a little if you don't see it." },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "Opens Zaylist full-screen." },
 ];
 
 export const ANDROID_STEPS: Step[] = [
   { icon: <MenuGlyph />, title: <>Tap the {b("⋮ menu")}</>, sub: "Top-right corner of Chrome." },
   { icon: <InstallGlyph />, title: <>Choose {b("Install app")}</>, sub: "Some phones label it \"Add to Home screen.\"" },
-  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "It launches full-screen, like a real app — icon and all." },
+  { icon: <HomeIcon src="/icons/apple-touch-icon.png" />, title: <>Open it from your {b("home screen")}</>, sub: "Opens Zaylist full-screen." },
 ];
 
 // On-brand, self-contained visual how-to. `compact` tightens spacing so the

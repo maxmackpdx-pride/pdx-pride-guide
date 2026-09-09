@@ -322,7 +322,7 @@ export default function PlaceModal({
     onSuccess: (result: { autoApproved?: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
       toast({
-        title: result?.autoApproved ? "You're the owner!" : "Claim submitted",
+        title: result?.autoApproved ? "You're the owner" : "Claim submitted",
         description: result?.autoApproved
           ? "This venue is now linked to your account."
           : "Sent to the site admin for approval.",
@@ -814,7 +814,7 @@ export default function PlaceModal({
                 <input
                   style={fieldStyle}
                   value={isOwner ? ownerForm.hours : form.hours}
-                  placeholder="e.g. Mon–Sat 4pm–2am"
+                  placeholder="e.g. Mon to Sat, 4pm to 2am"
                   onChange={e => isOwner
                     ? setOwnerForm(f => ({ ...f, hours: e.target.value }))
                     : setForm(f => ({ ...f, hours: e.target.value }))}

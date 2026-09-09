@@ -828,7 +828,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
               </label>
               <label>
                 Hours
-                <input className="board-text-field" value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. Mon–Sat 4pm–2am" />
+                <input className="board-text-field" value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. Mon to Sat, 4pm to 2am" />
               </label>
               <label>
                 Phone

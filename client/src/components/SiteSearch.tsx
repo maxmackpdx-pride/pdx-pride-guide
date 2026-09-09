@@ -201,7 +201,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
             ref={inputRef}
             type="search"
             className="site-search__input"
-            placeholder="Search EVENTZ, Places, and Communities…"
+            placeholder="Search EVENTZ, PLACEZ, and communities…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
@@ -226,7 +226,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
 
         <div id={listId} className="site-search__body" role="listbox">
           {debouncedQ.length < 2 && (
-            <p className="site-search__hint">Type at least 2 characters. Search EVENTZ, Places, and Communities.</p>
+            <p className="site-search__hint">Type at least 2 characters. Search EVENTZ, PLACEZ, and communities.</p>
           )}
           {loading && <p className="site-search__hint">Searching…</p>}
           {showEmpty && <p className="site-search__hint">No matches for “{debouncedQ}”.</p>}
@@ -263,7 +263,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
 
           {places.length > 0 && (
             <section className="site-search__group">
-              <h3 className="site-search__group-title">Places</h3>
+              <h3 className="site-search__group-title">PLACEZ</h3>
               <ul className="site-search__list">
                 {places.map((p) => {
                   const idx = flat.findIndex((f) => f.key === `place-${p.id}`);

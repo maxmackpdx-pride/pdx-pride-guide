@@ -389,7 +389,7 @@ export default function Submit() {
     },
     onSuccess: () => {
       setFormError(null);
-      toast({ title: "Application submitted!", description: "Admins will review your promoter request and be in touch." });
+      toast({ title: "Application submitted", description: "We'll review your promoter request and get back to you." });
       setPromoterForm(emptyPromoterForm());
       setSubmitterOrg("");
       setFlowSuccess("apply");

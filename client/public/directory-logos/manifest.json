@@ -38,10 +38,12 @@
       "name": "Badlands",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/Badlands.png",
       "white": "/directory-logos/Badlands-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://www.badlandsportland.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 5,
@@ -58,10 +60,12 @@
       "name": "The Nest Lounge",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/place-thenestlounge.png",
       "white": "/directory-logos/place-thenestlounge-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://citytocitymarket.com/business-listings/the-nest-lounge-and-patio-portland",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 7,
@@ -168,10 +172,12 @@
       "name": "Living Room Wines",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/Living_Room_Wines.png",
       "white": "/directory-logos/Living_Room_Wines-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://www.livingroomwinespdx.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 19,
@@ -268,10 +274,12 @@
       "name": "Ring Ding Ding",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/place-ringdingding.png",
       "white": "/directory-logos/place-ringdingding-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://www.instagram.com/ringdingdingpdx/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 30,
@@ -378,10 +386,12 @@
       "name": "Escape Bar & Grill",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/Escape_Bar_and_Grill.png",
       "white": "/directory-logos/Escape_Bar_and_Grill-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://escapebargrillpdx.weebly.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 41,
@@ -538,30 +548,36 @@
       "name": "The Automatic Bar",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/The_Automatic_Bar.png",
       "white": "/directory-logos/The_Automatic_Bar-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://www.theautomaticbarpdx.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 57,
       "name": "Montavilla Station",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-white",
       "primary": "/directory-logos/Montavilla_Station.png",
       "white": "/directory-logos/Montavilla_Station-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://montavillastation.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 58,
       "name": "Covert Café",
       "type": "bar",
       "adult": false,
-      "treatment": "#FF00CC-white",
+      "treatment": "source-monochrome",
       "primary": "/directory-logos/Covert_Cafe.png",
       "white": "/directory-logos/Covert_Cafe-white.png",
-      "generated": false
+      "generated": false,
+      "artworkSourceUrl": "https://www.thecovertcafe.com/",
+      "artworkUpdatedAt": "2026-09-09T04:38:38.992Z"
     },
     {
       "id": 59,

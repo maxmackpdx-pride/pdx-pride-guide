@@ -41,7 +41,7 @@ export default function ZIndex() {
     </form> : null}
     {communities.isLoading ? <SpectrumLoader label="Loading communities" /> : null}
     {communities.isError ? <section className="z-communities__state"><h2>Communities could not load.</h2><button type="button" onClick={() => communities.refetch()}>TRY AGAIN</button></section> : null}
-    {!communities.isLoading && !communities.isError && communities.data?.length === 0 ? <section className="z-communities__state"><h2>The doors are being set.</h2><p>No public communities are ready yet. Nothing fake is being shown in their place.</p></section> : null}
+    {!communities.isLoading && !communities.isError && communities.data?.length === 0 ? <section className="z-communities__state"><h2>No public communities yet.</h2><p>Check back soon, or start a community.</p></section> : null}
     <section className="z-communities__grid" aria-label="Communities">
       {communities.data?.map(community => { const communityLogo = community.imageUrl || (community.sourcePlaceId ? resolveDirectoryLogo(community.name) : null); return <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
         <div className="z-community-card__image" style={communityLogo ? { backgroundImage: `url(${communityLogo})` } : undefined}>{!communityLogo ? <span aria-hidden="true">Z/</span> : null}</div>

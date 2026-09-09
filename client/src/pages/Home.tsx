@@ -23,7 +23,7 @@ export default function Home() {
   usePageSeo(
     "Zaylist | Queer Portland, all in one place",
     "Every Portland night worth knowing, in one place. Find the party, the room, the gig, and the people.",
-    { image: shareCardUrl("home"), imageAlt: "Zaylist — Portland queer events and community" },
+    { image: shareCardUrl("home"), imageAlt: "Zaylist: Portland queer events and community" },
   );
 
   const { data: stats, isPending: statsPending, isError: statsError } = useQuery<HomeStats>({

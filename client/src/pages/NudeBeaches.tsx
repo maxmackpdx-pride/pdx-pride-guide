@@ -185,7 +185,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
     {
       image: shareCardUrl("nudeBeaches"),
       imageAlt:
-        "RIVERBRATS on Zaylist — Make naked friends on Zaylist. Sun, sand, and a speaker. Clothing optional. JOIN NOW BECAUSE, FUCK META!",
+        "OUTZ: River Brats beach community on Zaylist",
     },
   );
 

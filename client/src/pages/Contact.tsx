@@ -20,7 +20,7 @@ const TOPICS = [
   },
   {
     title: "You built something and want to help",
-    body: "The gig board is right there, but you can also just say hi.",
+    body: "Find work or offer your skills on GIGZ. You can also message me here.",
   },
 ] as const;
 
@@ -29,7 +29,7 @@ export default function Contact() {
 
   usePageSeo(
     "Contact | Zaylist",
-    "Reach Zaylist about listings, privacy, or help. Messages go to the site owner inbox.",
+    "Ask about a listing, your account, or helping with Zaylist. Messages go to Tucker.",
   );
 
   return (
@@ -39,7 +39,7 @@ export default function Contact() {
         title="Contact"
         titleAccent="cyan"
         kicker="Say something"
-        lede="One inbox, one guy, no ticketing system. I read everything. I answer most of it, eventually, usually at a bad hour."
+        lede="Send me a correction, a question, or an offer to help. I read every message."
       />
 
       <div className="zine-content">
@@ -58,7 +58,7 @@ export default function Contact() {
               Message me
             </Button>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
-              Goes to my Owner Desk on Zaylist, not a personal email or the shared admin queue.
+              Your message goes directly to me.
             </p>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
               Or hit the feedback button at the bottom of any page to report a bug.

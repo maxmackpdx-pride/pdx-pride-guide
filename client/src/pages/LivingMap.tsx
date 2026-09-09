@@ -728,7 +728,7 @@ export default function LivingMap() {
     </div>
     <div className={`living-map-key${keyOpen ? " is-open" : ""}${!desktop && !mobileDrawerPeek ? " is-tucked" : ""}`}>
       {keyOpen && <section id="living-map-key-panel" className="living-map-key__panel pdx-liquid-overlay" aria-label="Map key">
-        <div className="living-map-key__head"><strong>Map Key</strong><button type="button" onClick={() => { setKeyOpen(false); keyTriggerRef.current?.focus(); }} aria-label="Close map key"><X aria-hidden="true" size={20} /></button></div>
+        <div className="living-map-key__head"><strong>Map key</strong><button type="button" onClick={() => { setKeyOpen(false); keyTriggerRef.current?.focus(); }} aria-label="Close map key"><X aria-hidden="true" size={20} /></button></div>
         <ul>{MAP_KEY_ITEMS.map(item => <li key={item.label}>
           <span className="living-map-key__waypoint" dangerouslySetInnerHTML={{ __html: waypointHtml({ id: item.id, color: item.color, size: 31, badgeId: item.badgeId, scoop: item.scoop, avatarUrl: item.avatarUrl }) }} />
           <span><b>{item.label}</b><small>{item.note}</small></span>
@@ -738,7 +738,7 @@ export default function LivingMap() {
     </div>
     {!desktop && <div className={`living-map-mobile-filters${filtersOpen ? " is-open" : ""}${!mobileDrawerPeek ? " is-tucked" : ""}`}>
       <section id="living-map-filter-panel" className="living-map-mobile-filters__rail pdx-liquid-overlay" aria-label="Map filters" aria-hidden={!filtersOpen} {...inertWhen(!filtersOpen)}>
-        <div className="living-map-filter-panel-head"><strong>Map Filters</strong><button type="button" aria-label="Close map filters" onClick={() => { setFiltersOpen(false); filterTriggerRef.current?.focus(); }}><X size={20} aria-hidden="true" /></button></div>
+        <div className="living-map-filter-panel-head"><strong>Map filters</strong><button type="button" aria-label="Close map filters" onClick={() => { setFiltersOpen(false); filterTriggerRef.current?.focus(); }}><X size={20} aria-hidden="true" /></button></div>
         {filterControls(true)}
       </section>
       <button ref={filterTriggerRef} type="button" className="living-map-mobile-filters__trigger pdx-glass-rebind" aria-label={filtersOpen ? "Close map filters" : "Open map filters"} aria-controls="living-map-filter-panel" aria-expanded={filtersOpen} onClick={() => { setFiltersOpen(open => !open); setCreateOpen(false); setKeyOpen(false); }}><SlidersHorizontal aria-hidden="true" /></button>
