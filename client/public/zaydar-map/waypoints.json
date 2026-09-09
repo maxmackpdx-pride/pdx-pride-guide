@@ -1,0 +1,1495 @@
+[
+  {
+    "id": "1-0",
+    "name": "CC Slaughters",
+    "coordinates": [
+      -122.67265978363,
+      45.524612586064
+    ],
+    "isBar": true,
+    "address": "219 NW Davis St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "219 NW DAVIS ST, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6737,
+      45.5236
+    ],
+    "logo": "./venue-logos/1-0.png"
+  },
+  {
+    "id": "2-0",
+    "name": "Darcelle XV Showplace",
+    "coordinates": [
+      -122.673354790034,
+      45.524649023488
+    ],
+    "isBar": false,
+    "address": "208 NW 3rd Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "208 NW 3RD AVE, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6743,
+      45.5238
+    ],
+    "isLargePin": true,
+    "logo": "./venue-logos/2-0.png"
+  },
+  {
+    "id": "3-0",
+    "name": "Stag PDX",
+    "coordinates": [
+      -122.677601642236,
+      45.525333665978
+    ],
+    "isBar": true,
+    "address": "317 NW Broadway",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "317 NW BROADWAY, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6755,
+      45.524
+    ],
+    "logo": "./venue-logos/3-0.png"
+  },
+  {
+    "id": "4-0",
+    "name": "Badlands",
+    "coordinates": [
+      -122.677388010838,
+      45.523878444325
+    ],
+    "isBar": true,
+    "address": "110 NW Broadway, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "110 NW BROADWAY, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6754,
+      45.5236
+    ],
+    "logo": "./venue-logos/badlands-official.png",
+    "logoMode": "alpha",
+    "logoSource": "https://www.badlandsportland.com/"
+  },
+  {
+    "id": "5-0",
+    "name": "Eagle Portland",
+    "coordinates": [
+      -122.675349125866,
+      45.577275827371
+    ],
+    "isBar": true,
+    "address": "835 N Lombard St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "835 N LOMBARD ST, PORTLAND, OR, 97217",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6856,
+      45.5803
+    ],
+    "logo": "./venue-logos/5-0.png"
+  },
+  {
+    "id": "6-0",
+    "name": "The Nest Lounge",
+    "coordinates": [
+      -122.63795951472,
+      45.51649744214
+    ],
+    "isBar": true,
+    "address": "2715 SE Belmont St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2715 SE BELMONT ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6432,
+      45.5165
+    ],
+    "logo": "./venue-logos/nest-official.png",
+    "logoMode": "light-faint",
+    "logoSource": "https://citytocitymarket.com/business-listings/the-nest-lounge-and-patio-portland"
+  },
+  {
+    "id": "7-0",
+    "name": "Silverado",
+    "coordinates": [
+      -122.676614296438,
+      45.523716269082
+    ],
+    "isBar": true,
+    "address": "610 NW Couch St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "610 NW COUCH ST, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6748,
+      45.5224
+    ],
+    "logo": "./venue-logos/7-0.png"
+  },
+  {
+    "id": "8-0",
+    "name": "Kann",
+    "coordinates": [
+      -122.660218970557,
+      45.521446819263
+    ],
+    "isBar": false,
+    "address": "548 SE Ash St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "548 SE ASH ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6569,
+      45.5218
+    ]
+  },
+  {
+    "id": "9-0",
+    "name": "The Sports Bra",
+    "coordinates": [
+      -122.63993098084,
+      45.535104234772
+    ],
+    "isBar": false,
+    "address": "2512 NE Broadway",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2512 NE BROADWAY ST, PORTLAND, OR, 97232",
+    "addressMatch": "Non_Exact",
+    "previousDirectoryCoordinates": [
+      -122.6354,
+      45.5374
+    ],
+    "isLargePin": true,
+    "logo": "./venue-logos/9-0.png"
+  },
+  {
+    "id": "10-0",
+    "name": "Mis Tacones",
+    "coordinates": [
+      -122.648270444615,
+      45.562656290003
+    ],
+    "isBar": false,
+    "address": "1670 NE Killingsworth St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1670 NE KILLINGSWORTH ST, PORTLAND, OR, 97211",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6623,
+      45.5574
+    ]
+  },
+  {
+    "id": "11-0",
+    "name": "Taqueria Los Pu\u00f1ales",
+    "coordinates": [
+      -122.630712067926,
+      45.51639323491
+    ],
+    "isBar": false,
+    "address": "3312 SE Belmont St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3312 SE BELMONT ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6432,
+      45.5165
+    ]
+  },
+  {
+    "id": "12-0",
+    "name": "Friendship Kitchen",
+    "coordinates": [
+      -122.642098676242,
+      45.526537297941
+    ],
+    "isBar": false,
+    "address": "2333 NE Glisan St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2333 NE GLISAN ST, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6391,
+      45.5274
+    ]
+  },
+  {
+    "id": "14-0",
+    "name": "Either/Or",
+    "coordinates": [
+      -122.66681440859,
+      45.552134916362
+    ],
+    "isBar": false,
+    "address": "4003 N Williams Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "4003 N WILLIAMS AVE, PORTLAND, OR, 97227",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6658,
+      45.5627
+    ]
+  },
+  {
+    "id": "15-0",
+    "name": "Tin Shed Garden Cafe",
+    "coordinates": [
+      -122.650772395451,
+      45.559035979779
+    ],
+    "isBar": false,
+    "address": "1438 NE Alberta St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1438 NE ALBERTA ST, PORTLAND, OR, 97211",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6478,
+      45.5588
+    ]
+  },
+  {
+    "id": "16-0",
+    "name": "Speed-o Cappuccino",
+    "coordinates": [
+      -122.65545446937,
+      45.519405828671
+    ],
+    "isBar": false,
+    "address": "1015 SE Stark St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1015 SE STARK ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.651,
+      45.5176
+    ]
+  },
+  {
+    "id": "17-0",
+    "name": "Coffee Beer",
+    "coordinates": [
+      -122.618875452886,
+      45.492951485
+    ],
+    "isBar": false,
+    "address": "4142 SE 42nd Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "4142 SE 42ND AVE, PORTLAND, OR, 97206",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6225,
+      45.5026
+    ]
+  },
+  {
+    "id": "18-0",
+    "name": "Living Room Wines",
+    "coordinates": [
+      -122.718713289822,
+      45.580445171114
+    ],
+    "isBar": true,
+    "address": "4818 N Lombard St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "4818 N LOMBARD ST, PORTLAND, OR, 97203",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6857,
+      45.5805
+    ],
+    "logo": "./venue-logos/living-room-official.jpg",
+    "logoMode": "chroma",
+    "logoSource": "https://www.livingroomwinespdx.com/"
+  },
+  {
+    "id": "19-0",
+    "name": "Stem Wine Bar",
+    "coordinates": [
+      -122.675454615104,
+      45.551130298736
+    ],
+    "isBar": true,
+    "address": "3920 N Mississippi Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3920 N MISSISSIPPI AVE, PORTLAND, OR, 97227",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6785,
+      45.5638
+    ],
+    "logo": "./venue-logos/19-0.png"
+  },
+  {
+    "id": "20-0",
+    "name": "Roots & Crowns",
+    "coordinates": [
+      -122.700766635567,
+      45.535585853155
+    ],
+    "isBar": false,
+    "address": "1812 NW 24th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1812 NW 24TH AVE, PORTLAND, OR, 97210",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6949,
+      45.5374
+    ]
+  },
+  {
+    "id": "21-0",
+    "name": "Greenhouse Hair Collective",
+    "coordinates": [
+      -122.70622931235,
+      45.536726854915
+    ],
+    "isBar": false,
+    "address": "2668 NW Vaughn St, Portland, OR 97210",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2668 NW VAUGHN ST, PORTLAND, OR, 97210",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.7063224,
+      45.5366774
+    ]
+  },
+  {
+    "id": "22-0",
+    "name": "Arium Botanicals",
+    "coordinates": [
+      -122.661549588285,
+      45.537473609072
+    ],
+    "isBar": false,
+    "address": "2046 NE Martin Luther King Jr Blvd, Portland, OR 97212",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2046 NE M L KING BLVD, PORTLAND, OR, 97212",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6612012,
+      45.5377231
+    ]
+  },
+  {
+    "id": "23-0",
+    "name": "Pizza Thief",
+    "coordinates": [
+      -122.705148939406,
+      45.536746409067
+    ],
+    "isBar": false,
+    "address": "2610 NW Vaughn St, Portland, OR 97210",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2610 NW VAUGHN ST, PORTLAND, OR, 97210",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.7053269,
+      45.5366907
+    ],
+    "isLargePin": true,
+    "logo": "./venue-logos/23-0.png"
+  },
+  {
+    "id": "24-0",
+    "name": "Peacock PDX",
+    "coordinates": [
+      -122.651534752739,
+      45.517140237003
+    ],
+    "isBar": true,
+    "address": "1400 SE Morrison St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1400 SE MORRISON ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.649,
+      45.5169
+    ],
+    "logo": "./venue-logos/24-0.png"
+  },
+  {
+    "id": "26-0",
+    "name": "Scandals East",
+    "coordinates": [
+      -122.657241031124,
+      45.559167826555
+    ],
+    "isBar": true,
+    "address": "827 NE Alberta St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "827 NE ALBERTA ST, PORTLAND, OR, 97211",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6527,
+      45.5614
+    ],
+    "logo": "./venue-logos/26-0.png"
+  },
+  {
+    "id": "27-0",
+    "name": "Honeyed Words",
+    "coordinates": [
+      -122.639901379348,
+      45.528023834299
+    ],
+    "isBar": false,
+    "address": "2504 NE Sandy Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2504 NE SANDY BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6318,
+      45.5327
+    ]
+  },
+  {
+    "id": "28-0",
+    "name": "Camp Bar PDX",
+    "coordinates": [
+      -122.6775,
+      45.5193
+    ],
+    "isBar": true,
+    "address": "1125 SW Harvey Milk St, Portland, OR 97205",
+    "coordinateSource": "directory",
+    "addressMatch": "unverified",
+    "logo": "./venue-logos/28-0.png"
+  },
+  {
+    "id": "29-0",
+    "name": "Ring Ding Ding",
+    "coordinates": [
+      -122.639643534784,
+      45.503517390319
+    ],
+    "isBar": true,
+    "address": "2601 SE Clinton St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2601 SE CLINTON ST, PORTLAND, OR, 97202",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6432,
+      45.5049
+    ],
+    "logo": "./venue-logos/ring-ding-ding-official.jpg",
+    "logoMode": "white-ink",
+    "logoSource": "https://www.instagram.com/ringdingdingpdx/"
+  },
+  {
+    "id": "30-0",
+    "name": "Holocene",
+    "coordinates": [
+      -122.65558925207,
+      45.517263828809
+    ],
+    "isBar": false,
+    "address": "1001 SE Morrison St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1001 SE MORRISON ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6556,
+      45.5173
+    ]
+  },
+  {
+    "id": "31-0",
+    "name": "Alberta Rose Theatre",
+    "coordinates": [
+      -122.63477668578,
+      45.558981232861
+    ],
+    "isBar": false,
+    "address": "3000 NE Alberta St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3000 NE ALBERTA ST, PORTLAND, OR, 97211",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6478,
+      45.5581
+    ]
+  },
+  {
+    "id": "32-0",
+    "name": "Jackie's",
+    "coordinates": [
+      -122.656247024065,
+      45.520981580058
+    ],
+    "isBar": true,
+    "address": "930 SE Sandy Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "930 SE SANDY BLVD, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6478,
+      45.5192
+    ],
+    "logo": "./venue-logos/32-0.png"
+  },
+  {
+    "id": "33-0",
+    "name": "Sanctuary Club",
+    "coordinates": [
+      -122.680179337043,
+      45.523244045755
+    ],
+    "isBar": false,
+    "address": "33 NW 9th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "33 NW 9TH AVE, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6802,
+      45.5232
+    ],
+    "logo": "./venue-logos/33-0.png",
+    "isLargePin": true,
+    "lighting": "red"
+  },
+  {
+    "id": "34-0",
+    "name": "Seagrape Apothecary",
+    "coordinates": [
+      -122.636807019167,
+      45.529356757537
+    ],
+    "isBar": false,
+    "address": "2823 NE Sandy Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2823 NE SANDY BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6327,
+      45.533
+    ]
+  },
+  {
+    "id": "35-0",
+    "name": "REALM PDX",
+    "coordinates": [
+      -122.659516684784,
+      45.51799282917
+    ],
+    "isBar": false,
+    "address": "615 SE Alder St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "615 SE ALDER ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6595,
+      45.518
+    ]
+  },
+  {
+    "id": "36-0",
+    "name": "Nova PDX",
+    "coordinates": [
+      -122.658404662953,
+      45.522864237377
+    ],
+    "isBar": false,
+    "address": "722 E Burnside St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "722 E BURNSIDE ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6574,
+      45.5234
+    ]
+  },
+  {
+    "id": "37-0",
+    "name": "Star Theater",
+    "coordinates": [
+      -122.676518408183,
+      45.523204065035
+    ],
+    "isBar": false,
+    "address": "13 NW 6th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "13 NW 6TH AVE, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6765,
+      45.5232
+    ]
+  },
+  {
+    "id": "38-0",
+    "name": "The Get Down",
+    "coordinates": [
+      -122.659642694029,
+      45.518102119173
+    ],
+    "isBar": false,
+    "address": "680 SE 6th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "680 SE 6TH AVE, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6596,
+      45.5181
+    ]
+  },
+  {
+    "id": "39-0",
+    "name": "Happylucky No. 1",
+    "coordinates": [
+      -122.65962726452,
+      45.520548409717
+    ],
+    "isBar": true,
+    "address": "330 SE 6th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "330 SE 6TH AVE, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6596,
+      45.5205
+    ],
+    "logo": "./venue-logos/39-0.png"
+  },
+  {
+    "id": "40-0",
+    "name": "Escape Bar & Grill",
+    "coordinates": [
+      -122.569991983829,
+      45.555896918159
+    ],
+    "isBar": true,
+    "address": "9004 NE Sandy Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "9004 NE SANDY BLVD, PORTLAND, OR, 97220",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.57,
+      45.5559
+    ],
+    "logo": "./venue-logos/escape-official.png",
+    "logoMode": "alpha",
+    "logoSource": "https://escapebargrillpdx.weebly.com/"
+  },
+  {
+    "id": "41-0",
+    "name": "The Lodge Bar and Grill",
+    "coordinates": [
+      -122.595467785343,
+      45.497508823791
+    ],
+    "isBar": true,
+    "address": "6605 SE Powell Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "6605 SE POWELL BLVD, PORTLAND, OR, 97206",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.5955,
+      45.4977
+    ],
+    "logo": "./venue-logos/41-0.png"
+  },
+  {
+    "id": "43-0",
+    "name": "Pride Northwest",
+    "coordinates": [
+      -122.7111975,
+      45.5446973
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "52-0",
+    "name": "Hawks PDX",
+    "coordinates": [
+      -122.562357520572,
+      45.520175147981
+    ],
+    "isBar": false,
+    "address": "335 SE 99th Ave, Portland, OR 97216",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "335 SE 99TH AVE, PORTLAND, OR, 97216",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.562357520572,
+      45.520175147981
+    ],
+    "logo": "./venue-logos/52-0.png",
+    "isLargePin": true,
+    "lighting": "red"
+  },
+  {
+    "id": "53-0",
+    "name": "Bowery Bagels",
+    "coordinates": [
+      -122.67743675058,
+      45.525300196283
+    ],
+    "isBar": false,
+    "address": "310 NW Broadway",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "310 NW BROADWAY, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6758,
+      45.5257
+    ]
+  },
+  {
+    "id": "54-0",
+    "name": "Process",
+    "coordinates": [
+      -122.649861068595,
+      45.486159708058
+    ],
+    "isBar": true,
+    "address": "5040 SE Milwaukie Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "5040 SE MILWAUKIE AVE, PORTLAND, OR, 97202",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6484,
+      45.4869
+    ],
+    "logo": "./venue-logos/54-0.png"
+  },
+  {
+    "id": "55-0",
+    "name": "Prism Health",
+    "coordinates": [
+      -122.643179755243,
+      45.516395249604
+    ],
+    "isBar": false,
+    "address": "2236 SE Belmont St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2236 SE BELMONT ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.643,
+      45.5165
+    ]
+  },
+  {
+    "id": "56-0",
+    "name": "The Automatic Bar",
+    "coordinates": [
+      -122.6255226894,
+      45.504725951469
+    ],
+    "isBar": true,
+    "address": "3652 SE Division St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3652 SE DIVISION ST, PORTLAND, OR, 97202",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6265,
+      45.5047
+    ],
+    "logo": "./venue-logos/automatic-official.jpg",
+    "logoMode": "chroma",
+    "logoSource": "https://www.theautomaticbarpdx.com/"
+  },
+  {
+    "id": "57-0",
+    "name": "Montavilla Station",
+    "coordinates": [
+      -122.581552307201,
+      45.519626273125
+    ],
+    "isBar": true,
+    "address": "417 SE 80th Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "417 SE 80TH AVE, PORTLAND, OR, 97215",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.582,
+      45.5195
+    ],
+    "logo": "./venue-logos/montavilla-official.png",
+    "logoMode": "dark",
+    "logoSource": "https://montavillastation.com/"
+  },
+  {
+    "id": "58-0",
+    "name": "Covert Caf\u00e9",
+    "coordinates": [
+      -122.579019755323,
+      45.516843772421
+    ],
+    "isBar": true,
+    "address": "803 SE 82nd Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "803 SE 82ND AVE, PORTLAND, OR, 97216",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.5785,
+      45.517
+    ],
+    "logo": "./venue-logos/covert-official.png",
+    "logoMode": "grayscale",
+    "logoSource": "https://www.thecovertcafe.com/"
+  },
+  {
+    "id": "59-0",
+    "name": "Hunny Beez",
+    "coordinates": [
+      -122.683184360943,
+      45.514667670995
+    ],
+    "isBar": false,
+    "address": "1434 SW Park Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1434 SW PARK AVE, PORTLAND, OR, 97201",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6845,
+      45.5128
+    ]
+  },
+  {
+    "id": "60-0",
+    "name": "Q Restaurant & Bar",
+    "coordinates": [
+      -122.674958291095,
+      45.517077103876
+    ],
+    "isBar": false,
+    "address": "828 SW 2nd Ave",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "828 SW 2ND AVE, PORTLAND, OR, 97204",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6765,
+      45.5175
+    ]
+  },
+  {
+    "id": "61-0",
+    "name": "GiGi's Cafe",
+    "coordinates": [
+      -122.69725967398,
+      45.477972474097
+    ],
+    "isBar": false,
+    "address": "6320 SW Capitol Hwy",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "6320 SW CAPITOL HWY, PORTLAND, OR, 97239",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.7035,
+      45.4805
+    ]
+  },
+  {
+    "id": "62-0",
+    "name": "Backstory Books & Yarn",
+    "coordinates": [
+      -122.633434913964,
+      45.512124826834
+    ],
+    "isBar": false,
+    "address": "3129 SE Hawthorne Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3129 SE HAWTHORNE BLVD, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6325,
+      45.5122
+    ]
+  },
+  {
+    "id": "63-0",
+    "name": "Bridge City Mentors",
+    "coordinates": [
+      -122.638763451541,
+      45.528457297011
+    ],
+    "isBar": false,
+    "address": "2636 NE Sandy Blvd Suite E",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2636 NE SANDY BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6385,
+      45.5345
+    ]
+  },
+  {
+    "id": "64-0",
+    "name": "Rebel Heart Therapy",
+    "coordinates": [
+      -122.661755807663,
+      45.53091560504
+    ],
+    "isBar": false,
+    "address": "1111 NE MLK Blvd",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1111 NE M L KING BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6615,
+      45.531
+    ]
+  },
+  {
+    "id": "65-0",
+    "name": "Full Spectrum Therapy",
+    "coordinates": [
+      -122.652886718856,
+      45.496837572559
+    ],
+    "isBar": false,
+    "address": "1219 SE Lafayette St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1219 SE LAFAYETTE ST, PORTLAND, OR, 97202",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6535,
+      45.5065
+    ]
+  },
+  {
+    "id": "66-0",
+    "name": "Sprout Therapy PDX",
+    "coordinates": [
+      -122.602098320765,
+      45.528369822677
+    ],
+    "isBar": false,
+    "address": "6011 NE Oregon St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "6011 NE OREGON ST, PORTLAND, OR, 97213",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6015,
+      45.5275
+    ]
+  },
+  {
+    "id": "67-0",
+    "name": "The Center for Couples & Sex Therapy",
+    "coordinates": [
+      -122.635668887985,
+      45.535218825725
+    ],
+    "isBar": false,
+    "address": "2923 NE Broadway St",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2923 NE BROADWAY ST, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6355,
+      45.535
+    ]
+  },
+  {
+    "id": "69-0",
+    "name": "Plus Psychiatry",
+    "coordinates": [
+      -122.654485163503,
+      45.517860237264
+    ],
+    "isBar": false,
+    "address": "1110 SE Alder St Suite 301",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1110 SE ALDER ST, PORTLAND, OR, 97214",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6545,
+      45.5176
+    ]
+  },
+  {
+    "id": "73-0",
+    "name": "Triangle Recreation Camp",
+    "coordinates": [
+      -121.605485769301,
+      48.072484104885
+    ],
+    "isBar": false,
+    "address": "47715 Mountain Loop Highway, Granite Falls, WA 98252",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "47715 MOUNTAIN LOOP HWY, GRANITE FALLS, WA, 98252",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -121.5901687,
+      48.0745268
+    ]
+  },
+  {
+    "id": "74-0",
+    "name": "PDX PAH - Portland Pets & Handlers",
+    "coordinates": [
+      -122.675349125866,
+      45.577275827371
+    ],
+    "isBar": false,
+    "address": "Eagle Portland, 835 N Lombard St, Portland, OR 97217",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "835 N LOMBARD ST, PORTLAND, OR, 97217",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6856,
+      45.5803
+    ]
+  },
+  {
+    "id": "81-0",
+    "name": "Ori Gallery",
+    "coordinates": [
+      -122.675444110241,
+      45.552600680092
+    ],
+    "isBar": false,
+    "address": "4038 N Mississippi Ave, Portland, OR 97217",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "4038 N MISSISSIPPI AVE, PORTLAND, OR, 97227",
+    "addressMatch": "Non_Exact",
+    "previousDirectoryCoordinates": [
+      -122.6753325,
+      45.5527108
+    ]
+  },
+  {
+    "id": "93-0",
+    "name": "Yes Coach Productions",
+    "coordinates": [
+      -122.680179337043,
+      45.523244045755
+    ],
+    "isBar": false,
+    "address": "33 NW 9th Ave, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "33 NW 9TH AVE, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.680179337043,
+      45.523244045755
+    ]
+  },
+  {
+    "id": "94-0",
+    "name": "The Secret Warehouse",
+    "coordinates": [
+      -122.647565738397,
+      45.525938772215
+    ],
+    "isBar": false,
+    "address": "411 NE 18th Ave, Portland, OR 97232",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "411 NE 18TH AVE, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6475,
+      45.5239
+    ]
+  },
+  {
+    "id": "95-0",
+    "name": "Fantasy Land",
+    "coordinates": [
+      -122.608395459244,
+      45.495289768608
+    ],
+    "isBar": false,
+    "address": "5228 SE Foster Rd, Portland, OR 97206",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "5228 SE FOSTER RD, PORTLAND, OR, 97206",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6085,
+      45.4945
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/fantasy-foster.png",
+    "locationLabel": "Fantasy on Foster"
+  },
+  {
+    "id": "96-0",
+    "name": "Taboo Video",
+    "coordinates": [
+      -122.677600255511,
+      45.525297148686
+    ],
+    "isBar": false,
+    "address": "311 NW Broadway, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "311 NW BROADWAY, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6785,
+      45.5255
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/taboo-video.png"
+  },
+  {
+    "id": "96-1",
+    "name": "Taboo Video",
+    "coordinates": [
+      -122.578595695696,
+      45.50603123044
+    ],
+    "isBar": false,
+    "address": "2330 SE 82nd Ave, Portland, OR 97216",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2330 SE 82ND AVE, PORTLAND, OR, 97216",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.5787,
+      45.5054
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/taboo-video.png"
+  },
+  {
+    "id": "96-2",
+    "name": "Taboo Video",
+    "coordinates": [
+      -122.6615,
+      45.5208
+    ],
+    "isBar": false,
+    "address": "237 SE MLK Jr Blvd, Portland, OR 97214",
+    "coordinateSource": "directory",
+    "addressMatch": "unverified",
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/taboo-video.png"
+  },
+  {
+    "id": "96-3",
+    "name": "Taboo Video",
+    "coordinates": [
+      -122.577345744242,
+      45.657071824975
+    ],
+    "isBar": false,
+    "address": "4811 NE 94th Ave, Vancouver, WA 98662",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "4811 NE 94TH AVE, VANCOUVER, WA, 98662",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.5535,
+      45.6585
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/taboo-video.png"
+  },
+  {
+    "id": "97-0",
+    "name": "Mr. Peeps",
+    "coordinates": [
+      -122.537830884844,
+      45.517595223019
+    ],
+    "isBar": false,
+    "address": "709 SE 122nd Ave, Portland, OR 97233",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "709 SE 122ND AVE, PORTLAND, OR, 97233",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.5378,
+      45.5178
+    ]
+  },
+  {
+    "id": "97-1",
+    "name": "Mr. Peeps",
+    "coordinates": [
+      -122.814462684461,
+      45.489678846701
+    ],
+    "isBar": false,
+    "address": "13355 SW Henry St, Beaverton, OR 97005",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "13355 SW HENRY ST, BEAVERTON, OR, 97005",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.816,
+      45.4865
+    ]
+  },
+  {
+    "id": "97-2",
+    "name": "Mr. Peeps",
+    "coordinates": [
+      -122.889175449742,
+      45.496193839127
+    ],
+    "isBar": false,
+    "address": "20625 SW Tualatin Valley Hwy, Aloha, OR 97003",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "20625 SW TUALATIN VALLEY HWY, ALOHA, OR, 97003",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.8715,
+      45.4935
+    ]
+  },
+  {
+    "id": "98-0",
+    "name": "FANTASY",
+    "coordinates": [
+      -122.632406897493,
+      45.531060662241
+    ],
+    "isBar": false,
+    "address": "3137 NE Sandy Blvd, Portland, OR 97232",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "3137 NE SANDY BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6325,
+      45.5328
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/fantasy.png",
+    "locationLabel": "Hollywood / Sandy",
+    "website": "https://www.fantasyforadultsonly.com/store-locations/"
+  },
+  {
+    "id": "98-1",
+    "name": "FANTASY",
+    "coordinates": [
+      -122.688316733967,
+      45.522980003124
+    ],
+    "isBar": false,
+    "address": "1703 W Burnside St, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "1703 W BURNSIDE ST, PORTLAND, OR, 97209",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.6895,
+      45.523
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/fantasy.png",
+    "locationLabel": "Downtown / Burnside",
+    "website": "https://www.fantasyforadultsonly.com/store-locations/"
+  },
+  {
+    "id": "98-2",
+    "name": "FANTASY",
+    "coordinates": [
+      -122.7429782,
+      45.442463
+    ],
+    "isBar": false,
+    "address": "6440 SW Coronado Dr, Portland, OR 97219",
+    "coordinateSource": "Official Fantasy Tigard Google Maps place link",
+    "addressMatch": "Official venue map pin; Esri PointAddress corroboration (98.06, Street/Drive suffix)",
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/fantasy.png",
+    "locationLabel": "Tigard",
+    "website": "https://www.fantasyforadultsonly.com/store-locations/",
+    "previousDirectoryCoordinates": [
+      -122.746,
+      45.4395
+    ],
+    "coordinateSourceUrl": "https://maps.app.goo.gl/B7iFBCQkuRmhKM8K8",
+    "matchedAddress": "6440 SW Coronado St, Portland, Oregon, 97219"
+  },
+  {
+    "id": "98-3",
+    "name": "FANTASY",
+    "coordinates": [
+      -122.568262074965,
+      45.410425580852
+    ],
+    "isBar": false,
+    "address": "15536 SE 82nd Dr, Clackamas, OR 97015",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "15536 SE 82ND DR, CLACKAMAS, OR, 97015",
+    "addressMatch": "Exact",
+    "previousDirectoryCoordinates": [
+      -122.547,
+      45.3995
+    ],
+    "isLargePin": true,
+    "lighting": "red",
+    "logo": "./venue-logos/fantasy.png",
+    "locationLabel": "Clackamas",
+    "website": "https://www.fantasyforadultsonly.com/store-locations/"
+  },
+  {
+    "id": "102-0",
+    "name": "Business Oregon",
+    "coordinates": [
+      -122.4921525,
+      45.5591754
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "115-0",
+    "name": "CASH Oregon",
+    "coordinates": [
+      -122.5402317,
+      45.5188551
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "118-0",
+    "name": "Prosper Portland",
+    "coordinates": [
+      -122.6706444,
+      45.5226961
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "121-0",
+    "name": "Echo Theater",
+    "coordinates": [
+      -122.626067,
+      45.5117657
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "122-0",
+    "name": "Independent Publishing Resource Center",
+    "coordinates": [
+      -122.662087,
+      45.513473
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "124-0",
+    "name": "Sincere Studio",
+    "coordinates": [
+      -122.6684199,
+      45.5387466
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "125-0",
+    "name": "SymbiOp",
+    "coordinates": [
+      -122.6289543,
+      45.4964906
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "127-0",
+    "name": "P:EAR",
+    "coordinates": [
+      -122.676224,
+      45.5257641
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "128-0",
+    "name": "Portland Playhouse",
+    "coordinates": [
+      -122.6593727,
+      45.5553246
+    ],
+    "isBar": false,
+    "address": null,
+    "coordinateSource": "directory",
+    "addressMatch": "unverified"
+  },
+  {
+    "id": "steam-portland-0",
+    "name": "Steam Portland",
+    "address": "2885 NE Sandy Blvd, Portland, OR 97232",
+    "coordinates": [
+      -122.635809981186,
+      45.529740871515
+    ],
+    "isBar": false,
+    "isLargePin": true,
+    "logo": "./venue-logos/steam-portland-0.png",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "2885 NE SANDY BLVD, PORTLAND, OR, 97232",
+    "addressMatch": "Exact",
+    "website": "https://www.steampdx.com/contact",
+    "statusSource": "https://www.steampdx.com/contact",
+    "verifiedOn": "2026-09-08",
+    "lighting": "red"
+  },
+  {
+    "id": "club-privata-0",
+    "name": "Club Privata",
+    "address": "824 SW 1st Ave, Portland, OR 97204",
+    "coordinates": [
+      -122.67399137448,
+      45.516860623236
+    ],
+    "isBar": false,
+    "isLargePin": true,
+    "logo": "./venue-logos/club-privata-0.png",
+    "coordinateSource": "US Census address geocoder",
+    "matchedAddress": "824 SW 1ST AVE, PORTLAND, OR, 97204",
+    "addressMatch": "Exact",
+    "website": "https://www.clubprivata.com/contact-us",
+    "statusSource": "https://www.clubprivata.com/contact-us",
+    "verifiedOn": "2026-09-08",
+    "lighting": "red"
+  },
+  {
+    "id": "velvet-rope-0",
+    "name": "The Velvet Rope",
+    "address": "3533 SE Cesar E. Chavez Blvd, Portland, OR 97202",
+    "coordinates": [
+      -122.622840610623,
+      45.496696557615
+    ],
+    "isBar": false,
+    "isLargePin": true,
+    "logo": "./venue-logos/velvet-rope-0.png",
+    "coordinateSource": "Esri World Geocoding Service",
+    "matchedAddress": "3533 SE Cesar E Chavez Blvd, Portland, Oregon, 97202",
+    "addressMatch": "PointAddress (100)",
+    "website": "https://velvetropepdx.com/contact/",
+    "statusSource": "https://velvetropepdx.com/contact/",
+    "verifiedOn": "2026-09-08",
+    "lighting": "red"
+  }
+]

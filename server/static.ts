@@ -6,7 +6,7 @@ import { injectSeoIntoHtml } from "./seo";
 import { homeBootLogoHtml } from "../shared/homeBoot";
 
 const APP_PATHS = new Set([
-  "/", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/pride-work", "/gifting", "/sellz",
+  "/", "/map-demo", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/pride-work", "/gifting", "/sellz",
   "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resume", "/contact", "/sponsors", "/access", "/legal",
   "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/spotted", "/directory", "/outz", "/design-preview", "/next", "/darkroom",
 ]);
