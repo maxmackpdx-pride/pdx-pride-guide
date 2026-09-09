@@ -516,7 +516,11 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.beginPath();lightsContext.moveTo(-8+scan,-19);lightsContext.lineTo(3+scan,-19);lightsContext.stroke();
    lightsContext.restore();
    }
-   if(feature.properties.time&&coreAlpha>.1){eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-17*5.25*beaconScale,width:Math.min(width-24,Math.max(160,210*beaconScale)),opacity:coreAlpha});}
+   if(feature.properties.time&&logo&&coreAlpha>.1){
+    const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25*beaconScale;
+    const labelWidth=logo.width*fit*.86;
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-34*5.25*beaconScale+logo.height*fit/2+5,width:labelWidth,opacity:coreAlpha});
+   }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
     lightsContext.save();lightsContext.translate(0,-34);
