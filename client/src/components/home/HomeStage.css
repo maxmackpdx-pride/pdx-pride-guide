@@ -15,7 +15,7 @@
 .home-front__brand-group { position:relative; isolation:isolate; width:100%; display:flex; flex-direction:column; align-items:center; transform:translateY(-2svh); }
 .home-front__brand-group::before {
   content:""; position:absolute; inset:-22% -8%; z-index:-1; pointer-events:none;
-  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.78) 0%,rgba(0,0,0,.64) 38%,rgba(0,0,0,.28) 70%,transparent 100%);
+  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.46) 0%,rgba(0,0,0,.38) 20%,rgba(0,0,0,.27) 42%,rgba(0,0,0,.15) 62%,rgba(0,0,0,.06) 82%,transparent 100%);
 }
 .home-front__mark { position:relative; flex:none; height:var(--home-logo-height); width:calc(var(--home-logo-height) * 2393 / 824); max-width:calc(100% - 40px); }
 .home-front__mark-art { width:100%; height:100%; }
@@ -24,7 +24,7 @@
   content:""; position:absolute; z-index:-1; pointer-events:none;
   background:radial-gradient(ellipse closest-side,rgba(0,0,0,.34) 0%,rgba(0,0,0,.24) 34%,rgba(0,0,0,.1) 68%,transparent 100%);
 }
-.home-front__mark::before { inset:-10% -5%; }
+.home-front__mark::before { inset:-10% -5%; background:radial-gradient(ellipse closest-side,rgba(0,0,0,.18) 0%,rgba(0,0,0,.12) 30%,rgba(0,0,0,.05) 65%,transparent 100%); }
 .home-front__mark::after {
   content:""; position:absolute; inset:-10% -5%; z-index:-1; pointer-events:none;
   /* A small backdrop blur proportional to the logo, with the same soft falloff. */
