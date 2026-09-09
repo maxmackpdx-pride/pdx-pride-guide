@@ -18,6 +18,25 @@ html:root .home-front .home-front__auth { --button-c:#eef3fb; --button-ink:#fff;
 html:root .home-front .home-front__auth:hover { background-color:rgba(20,28,38,.88); border-color:rgba(255,255,255,.65); }
 html:root .home-front .home-front__auth:focus-visible { outline:2px solid #fff; outline-offset:5px; }
 .home-front__welcome > .home-hero-stats-boundary { position:absolute; inset:auto 0 0; z-index:3; }
+@media(min-width:960px) {
+  .home-front { --home-desktop-counter-height:clamp(132px,16svh,168px); }
+  /* Center the complete foreground group between the navbar and counters. */
+  .home-front__hero {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-sizing:border-box;
+    padding-top:var(--home-header-height,var(--site-header-height,86px));
+    padding-bottom:calc(var(--home-desktop-counter-height) + 3px);
+  }
+  .home-front__mark { position:relative; left:auto; top:auto; transform:none; flex:none; }
+  .home-front__welcome-copy { position:static; transform:none; flex:none; margin-top:clamp(12px,2svh,22px); }
+  html:root .home-front .home-front__auth { min-width:220px; min-height:64px; padding:18px 36px; font-size:20px; border-radius:20px; }
+  .home-main-stage .home-front__welcome .home-stat-strip__cell {
+    min-height:var(--home-desktop-counter-height); padding:24px 32px;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .home-main-stage .home-front__welcome .home-stat-strip__value { font-size:clamp(60px,5vw,76px); }
+  .home-main-stage .home-front__welcome .home-stat-strip__label { font-size:14px; margin-top:12px; }
+}
 @media(max-width:959px) {
   /* Reserve the existing mobile dock without shortening the map panel. */
   .home-front__welcome > .home-hero-stats-boundary { padding-bottom:calc(var(--site-mobile-nav-height,72px) + var(--site-mobile-nav-offset,8px) + env(safe-area-inset-bottom,0px)); }
