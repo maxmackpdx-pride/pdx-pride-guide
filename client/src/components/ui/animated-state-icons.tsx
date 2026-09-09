@@ -10,9 +10,9 @@ export function MenuCloseIcon({ open, size = 28, className }: StateIconProps & {
   const still = useReducedMotion();
   const transition = { duration: still ? 0 : 0.28, ease };
   return <svg viewBox="0 0 40 40" fill="none" className={cn("animated-state-icon", className)} style={{ width: size, height: size }} aria-hidden="true">
-    <motion.line x1="10" x2="30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" animate={open ? { y1: 20, y2: 20, rotate: 45 } : { y1: 12, y2: 12, rotate: 0 }} transition={transition} style={{ transformOrigin: "20px 20px" }} />
+    <motion.line x1="10" y1="12" x2="30" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" initial={false} animate={open ? { y1: 20, y2: 20, rotate: 45 } : { y1: 12, y2: 12, rotate: 0 }} transition={transition} style={{ transformOrigin: "20px 20px" }} />
     <motion.line x1="10" y1="20" x2="30" y2="20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" animate={open ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }} transition={{ duration: still ? 0 : 0.16 }} style={{ transformOrigin: "20px 20px" }} />
-    <motion.line x1="10" x2="30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" animate={open ? { y1: 20, y2: 20, rotate: -45 } : { y1: 28, y2: 28, rotate: 0 }} transition={transition} style={{ transformOrigin: "20px 20px" }} />
+    <motion.line x1="10" y1="28" x2="30" y2="28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" initial={false} animate={open ? { y1: 20, y2: 20, rotate: -45 } : { y1: 28, y2: 28, rotate: 0 }} transition={transition} style={{ transformOrigin: "20px 20px" }} />
   </svg>;
 }
 

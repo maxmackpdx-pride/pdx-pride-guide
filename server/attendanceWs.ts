@@ -8,7 +8,17 @@ type AttendanceWsHub = {
 export function initAttendanceWs(httpServer: Server): AttendanceWsHub {
   const rooms = new Map<number, Set<WebSocket>>();
   const summaryClients = new Set<WebSocket>();
-  const wss = new WebSocketServer({ server: httpServer, path: "/ws/attendance" });
+  const wss = new WebSocketServer({ noServer: true });
+
+  // Do not attach ws's path-filtering server mode here. It rejects unmatched
+  // upgrade requests before Vite can accept its /vite-hmr socket in local dev.
+  httpServer.on("upgrade", (request, socket, head) => {
+    const pathname = new URL(request.url || "/", "http://localhost").pathname;
+    if (pathname !== "/ws/attendance") return;
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  });
 
   wss.on("connection", (ws) => {
     const subscriptions = new Set<number>();
