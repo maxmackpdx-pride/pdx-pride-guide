@@ -46,7 +46,10 @@
   .site-header--glass .site-hub-mtop .hub-mtop__spacer { display:none; }
   .site-header--glass .site-hub-mtop .site-profile-menu { flex:none; }
   .site-header--glass .site-hub-mtop .user-avatar { --avatar-size:44px; }
-  .site-header--glass .site-hub-mtop .hub-notify { min-width:44px; }
+  .site-header--glass .site-hub-mtop .site-mobile-notify { flex:none; width:44px; margin:0; }
+  .site-header--glass .site-hub-mtop .site-mobile-notify .znav-control { width:44px; padding:0; }
+  .site-header--glass .site-hub-mtop .znav-notification-icon { display:flex; height:24px; min-width:24px; padding:0; }
+  .site-header--glass .site-hub-mtop .site-mobile-notify .znav-caption { display:none; }
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass {
     height:82px; border:0; border-radius:28px; padding:0; overflow:visible;
     background:rgba(5,5,6,.82); box-shadow:0 0 0 1px #000,0 12px 28px -18px #000;
@@ -78,3 +81,4 @@ html.calm-mode .z-glass,html[data-calm="true"] .z-glass { background:#080c12; tr
 html.calm-mode .z-glass__blur,html[data-calm="true"] .z-glass__blur { backdrop-filter:none; -webkit-backdrop-filter:none; }
 html.calm-mode .z-glass__pointer,html[data-calm="true"] .z-glass__pointer { display:none; }
 @media (prefers-reduced-transparency:reduce) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } .z-glass__blur { backdrop-filter:none; -webkit-backdrop-filter:none; } }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } }
