@@ -50,10 +50,6 @@ export default function Home() {
               pending={{ events: statsPending, places: statsPending, going: statsPending }}
               error={statsError}
             />
-            <div
-              className="rainbow-bar rainbow-bar--thick rainbow-bar--bleed home-rainbow-seam"
-              aria-hidden="true"
-            />
           </div>
         )}
       />
