@@ -4,7 +4,7 @@
     "name": "Rooster Rock",
     "kind": "beach",
     "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=126",
@@ -16,14 +16,15 @@
       "river ripples",
       "shoreline trees"
     ],
-    "asset": "/motifs/outz/places/rooster-rock.svg"
+    "asset": "/motifs/outz/places/rooster-rock.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "sauvie-island",
     "name": "Sauvie Island \u2014 Collins Beach",
     "kind": "beach",
     "officialUrl": "https://myodfw.com/sauvie-island-wildlife-area",
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.outdoorproject.com/united-states/oregon/collins-beach-sauvie-island",
@@ -35,7 +36,8 @@
       "driftwood",
       "deciduous trees"
     ],
-    "asset": "/motifs/outz/places/sauvie-island.svg"
+    "asset": "/motifs/outz/places/sauvie-island.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "silver-falls",
@@ -44,7 +46,7 @@
     "officialUrl": "https://stateparks.oregon.gov/?do=park.profile&parkId=151",
     "lat": 44.876667,
     "lng": -122.64805,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=151",
@@ -54,7 +56,8 @@
     "visualFeatures": [
       "South Falls basalt overhang and walk-behind trail"
     ],
-    "asset": "/motifs/outz/places/silver-falls.svg"
+    "asset": "/motifs/outz/places/silver-falls.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "cape-lookout",
@@ -63,7 +66,7 @@
     "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
     "lat": 45.349,
     "lng": -123.971,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonocean.info/index.php/marine-conservation-area/cape-lookout",
@@ -73,7 +76,8 @@
     "visualFeatures": [
       "Narrow forested basalt headland projecting into Pacific surf"
     ],
-    "asset": "/motifs/outz/places/cape-lookout.svg"
+    "asset": "/motifs/outz/places/cape-lookout.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "beacon-rock",
@@ -82,7 +86,7 @@
     "officialUrl": "https://parks.wa.gov/find-parks/state-parks/beacon-rock-state-park",
     "lat": 45.62318,
     "lng": -122.0253,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonhikers.org/field_guide/Beacon_Rock_Hike",
@@ -92,7 +96,8 @@
     "visualFeatures": [
       "Basalt monolith with switchback ledges above the Columbia"
     ],
-    "asset": "/motifs/outz/places/beacon-rock.svg"
+    "asset": "/motifs/outz/places/beacon-rock.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "stub-stewart",
@@ -101,7 +106,7 @@
     "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
     "lat": 45.728645,
     "lng": -123.186849,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=75",
@@ -111,7 +116,8 @@
     "visualFeatures": [
       "Coast Range rolling forest hills and hilltop rail overlook"
     ],
-    "asset": "/motifs/outz/places/stub-stewart.svg"
+    "asset": "/motifs/outz/places/stub-stewart.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "memaloose",
@@ -120,7 +126,7 @@
     "officialUrl": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
     "lat": 45.695376,
     "lng": -121.332886,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=118",
@@ -130,7 +136,8 @@
     "visualFeatures": [
       "River overlook campsite, spreading shade trees and dry Gorge hills"
     ],
-    "asset": "/motifs/outz/places/memaloose.svg"
+    "asset": "/motifs/outz/places/memaloose.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-8156.004621",
@@ -139,7 +146,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38832",
     "lat": 44.04868611,
     "lng": -121.6553444,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.hikeoregon.net/no-name-lake.html",
@@ -150,7 +157,8 @@
       "Volcanic Broken Top approach with exposed ridges and sparse subalpine trees"
     ],
     "asset": "/motifs/outz/places/usfs-8156.004621.svg",
-    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction."
+    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction.",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-8157.004621",
@@ -159,7 +167,7 @@
     "officialUrl": null,
     "lat": 44.05996111,
     "lng": -121.5978111,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/hiking-backpacking/370-4601-junction-trailhead/",
@@ -170,7 +178,8 @@
       "Farewell-connected forest singletrack and wooded valley contours"
     ],
     "asset": "/motifs/outz/places/usfs-8157.004621.svg",
-    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction."
+    "referenceScope": "Connected trail landscape, not a literal photograph of the numbered road junction.",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6795235010602",
@@ -179,7 +188,7 @@
     "officialUrl": null,
     "lat": 45.419003,
     "lng": -121.527552,
-    "status": "drawn-needs-direct-image-reference",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.44trails.org/",
@@ -189,7 +198,8 @@
     "visualFeatures": [
       "Mt Hood forest singletrack network, with branching paths and bicycle"
     ],
-    "asset": "/motifs/outz/places/usfs-6795235010602.svg"
+    "asset": "/motifs/outz/places/usfs-6795235010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5179010262",
@@ -198,7 +208,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69654",
     "lat": 42.69711,
     "lng": -122.49184,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/oregon-abbott-creek-campground",
@@ -208,7 +218,8 @@
     "visualFeatures": [
       "Douglas-fir and pine campsite with a fallen log and creek"
     ],
-    "asset": "/motifs/outz/places/usfs-5179010262.svg"
+    "asset": "/motifs/outz/places/usfs-5179010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6961801010602",
@@ -217,7 +228,7 @@
     "officialUrl": null,
     "lat": 43.210278,
     "lng": -122.516667,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://cherylhill.net/blog/2023/09/08/acker-divide-trail/",
@@ -227,7 +238,8 @@
     "visualFeatures": [
       "Acker Divide forest and Cripple Camp shelter"
     ],
-    "asset": "/motifs/outz/places/usfs-6961801010602.svg"
+    "asset": "/motifs/outz/places/usfs-6961801010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5030010262",
@@ -236,7 +248,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70358",
     "lat": 42.03518674,
     "lng": -123.0256072,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://campflare.com/campground/acorn-woman-lakes-973",
@@ -246,7 +258,8 @@
     "visualFeatures": [
       "Siskiyou forest lake, shoreline irises and submerged log"
     ],
-    "asset": "/motifs/outz/places/usfs-5030010262.svg"
+    "asset": "/motifs/outz/places/usfs-5030010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5719010274",
@@ -255,7 +268,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31186",
     "lat": 46.339542,
     "lng": -121.647473,
-    "status": "drawn-needs-direct-image-reference",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/232857",
@@ -265,7 +278,8 @@
     "visualFeatures": [
       "Tall conifers and a riverbank campsite along Adams Creek Fork"
     ],
-    "asset": "/motifs/outz/places/usfs-5719010274.svg"
+    "asset": "/motifs/outz/places/usfs-5719010274.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6171012010602",
@@ -274,7 +288,7 @@
     "officialUrl": null,
     "lat": 43.623383,
     "lng": -122.7257,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/2016/04/24/parker-falls-and-adams-mountain-way/",
@@ -284,7 +298,8 @@
     "visualFeatures": [
       "Adams Mountain Way forested ridge, steep tread and rhododendron; not Mount Adams volcano"
     ],
-    "asset": "/motifs/outz/places/usfs-6171012010602.svg"
+    "asset": "/motifs/outz/places/usfs-6171012010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6155010414",
@@ -293,7 +308,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42333",
     "lat": 44.0683346,
     "lng": -124.1017401,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/234502",
@@ -303,7 +318,8 @@
     "visualFeatures": [
       "Coastal forest around Alder and Dune Lakes, reeds and tent clearing"
     ],
-    "asset": "/motifs/outz/places/usfs-6155010414.svg"
+    "asset": "/motifs/outz/places/usfs-6155010414.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5117010324",
@@ -312,7 +328,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52872",
     "lat": 45.0812,
     "lng": -122.0546,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://oregondiscovery.com/alder-flat",
@@ -322,7 +338,8 @@
     "visualFeatures": [
       "Clackamas River bend, midstream boulder, sandy bank and alder canopy"
     ],
-    "asset": "/motifs/outz/places/usfs-5117010324.svg"
+    "asset": "/motifs/outz/places/usfs-5117010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-3254060010602",
@@ -331,7 +348,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38278",
     "lat": 44.433311,
     "lng": -121.357779,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonhikers.org/field_guide/Alder_Springs-Lower_Whychus_Creek_Hike",
@@ -341,7 +358,8 @@
     "visualFeatures": [
       "Whychus Creek canyon: layered dry cliffs, springs and winding creek"
     ],
-    "asset": "/motifs/outz/places/usfs-3254060010602.svg"
+    "asset": "/motifs/outz/places/usfs-3254060010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5017.005631",
@@ -350,7 +368,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4358",
     "lat": 44.17788,
     "lng": -121.91032,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://visitcentraloregon.com/poi/alder-springs-campground/",
@@ -360,7 +378,8 @@
     "visualFeatures": [
       "Alder Springs McKenzie Pass: towering Douglas firs and compact tent site by Linton trail access"
     ],
-    "asset": "/motifs/outz/places/usfs-5017.005631.svg"
+    "asset": "/motifs/outz/places/usfs-5017.005631.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5183010262",
@@ -369,7 +388,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69660",
     "lat": 43.0657,
     "lng": -122.3634,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.waterfallsnorthwest.com/waterfall/Alkali-Falls-4315",
@@ -379,7 +398,8 @@
     "visualFeatures": [
       "Alkali Creek steep narrow stepped cascade through a wooded rocky chute"
     ],
-    "asset": "/motifs/outz/places/usfs-5183010262.svg"
+    "asset": "/motifs/outz/places/usfs-5183010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5326.004621",
@@ -388,7 +408,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38566",
     "lat": 44.52814167,
     "lng": -121.6273389,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/oregon-allen-springs-campground",
@@ -398,7 +418,8 @@
     "visualFeatures": [
       "Allen Springs campsite overlooking the broad Metolius bend under ponderosa pines"
     ],
-    "asset": "/motifs/outz/places/usfs-5326.004621.svg"
+    "asset": "/motifs/outz/places/usfs-5326.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5313.004621",
@@ -407,7 +428,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38568",
     "lat": 44.4712,
     "lng": -121.6377583,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.muddycamper.com/oregon/allingham-campground/",
@@ -417,7 +438,8 @@
     "visualFeatures": [
       "Allingham: pine-shaded riverbank campsite with picnic table and distinct low bridge reference"
     ],
-    "asset": "/motifs/outz/places/usfs-5313.004621.svg"
+    "asset": "/motifs/outz/places/usfs-5313.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5434010324",
@@ -426,7 +448,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53338",
     "lat": 45.32198,
     "lng": -121.70389,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonsbestcamping.com/mt_hood/alpine.html",
@@ -436,7 +458,8 @@
     "visualFeatures": [
       "Mt Hood high forest tent campsite: dense conifers, picnic table and distant snow summit; composed landscape, not a literal campsite view."
     ],
-    "asset": "/motifs/outz/places/usfs-5434010324.svg"
+    "asset": "/motifs/outz/places/usfs-5434010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5054.005621",
@@ -445,7 +468,7 @@
     "officialUrl": null,
     "lat": 43.80194444,
     "lng": -122.49888889,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
@@ -455,7 +478,8 @@
     "visualFeatures": [
       "Lower ridge junction: forest singletrack and exposed rocky shoulder"
     ],
-    "asset": "/motifs/outz/places/usfs-5054.005621.svg"
+    "asset": "/motifs/outz/places/usfs-5054.005621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5094.005641",
@@ -464,7 +488,7 @@
     "officialUrl": null,
     "lat": 43.7525,
     "lng": -122.52111111,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
@@ -474,7 +498,8 @@
     "visualFeatures": [
       "Lower Alpine: steep descending singletrack through tall forest"
     ],
-    "asset": "/motifs/outz/places/usfs-5094.005641.svg"
+    "asset": "/motifs/outz/places/usfs-5094.005641.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5026.005621",
@@ -483,7 +508,7 @@
     "officialUrl": null,
     "lat": 43.88333333,
     "lng": -122.48944444,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
@@ -493,7 +518,8 @@
     "visualFeatures": [
       "Upper corridor: Elk Camp shelter and grassy forest opening"
     ],
-    "asset": "/motifs/outz/places/usfs-5026.005621.svg"
+    "asset": "/motifs/outz/places/usfs-5026.005621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5027.005621",
@@ -502,7 +528,7 @@
     "officialUrl": null,
     "lat": 43.90166667,
     "lng": -122.46444444,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
@@ -512,7 +538,8 @@
     "visualFeatures": [
       "Upper road access: marshy meadow, beargrass and fir edge"
     ],
-    "asset": "/motifs/outz/places/usfs-5027.005621.svg"
+    "asset": "/motifs/outz/places/usfs-5027.005621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5067.005621",
@@ -521,7 +548,7 @@
     "officialUrl": null,
     "lat": 43.83444444,
     "lng": -122.48194444,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/things-to-do/outdoor-recreation/bicycling/alpine-trail-3450/",
@@ -531,7 +558,8 @@
     "visualFeatures": [
       "Windy Pass: saddle between wooded shoulders and sweeping meadow tread"
     ],
-    "asset": "/motifs/outz/places/usfs-5067.005621.svg"
+    "asset": "/motifs/outz/places/usfs-5067.005621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5129010262",
@@ -540,7 +568,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69664",
     "lat": 42.705311,
     "lng": -122.284382,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonhikers.org/field_guide/Lake_Alta",
@@ -550,7 +578,8 @@
     "visualFeatures": [
       "Lake Alta: low forest horizon, still-water reflections and east-shore path"
     ],
-    "asset": "/motifs/outz/places/usfs-5129010262.svg"
+    "asset": "/motifs/outz/places/usfs-5129010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5164010262",
@@ -559,7 +588,7 @@
     "officialUrl": null,
     "lat": 42.975,
     "lng": -122.4628,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://vanmarmot.org/2018/06/01/anderson-camp-rogue-umpqua-divide-wilderness-01-jun-2018/",
@@ -569,7 +598,8 @@
     "visualFeatures": [
       "Anderson Prairie on the Rogue-Umpqua Divide: sweeping grassy clearing, wooded ridge and wildflower foreground."
     ],
-    "asset": "/motifs/outz/places/usfs-5164010262.svg"
+    "asset": "/motifs/outz/places/usfs-5164010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-296847010602",
@@ -578,7 +608,7 @@
     "officialUrl": null,
     "lat": 45.5606,
     "lng": -122.1716,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.adventographer.com/hiking-columbia-river-gorge-portland-oregon/",
@@ -588,7 +618,8 @@
     "visualFeatures": [
       "Angels Rest: broken basalt summit ledges over a distant Columbia River bend"
     ],
-    "asset": "/motifs/outz/places/usfs-296847010602.svg"
+    "asset": "/motifs/outz/places/usfs-296847010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5031010372",
@@ -597,7 +628,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59833",
     "lat": 42.760874,
     "lng": -122.059064,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://workingonexploring.com/2019/10/20/oregon-blm-and-usfs-camping-finds/",
@@ -607,7 +638,8 @@
     "visualFeatures": [
       "Annie Creek flowing beside the open camping area, conifer edges and log warming shelter."
     ],
-    "asset": "/motifs/outz/places/usfs-5031010372.svg"
+    "asset": "/motifs/outz/places/usfs-5031010372.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5136.004991",
@@ -616,7 +648,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38784",
     "lat": 44.00599967,
     "lng": -120.3899244,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.campbase.com/photos/antelope-flat-reservoir-campground",
@@ -626,7 +658,8 @@
     "visualFeatures": [
       "Antelope Flat Reservoir in the Maury Mountains: broad reservoir, low rounded hills, ponderosa edge and uphill tent camping; verified coordinates distinguish it from Jordan Valley."
     ],
-    "asset": "/motifs/outz/places/usfs-5136.004991.svg"
+    "asset": "/motifs/outz/places/usfs-5136.004991.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5254010381",
@@ -635,7 +668,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59899",
     "lat": 42.959298,
     "lng": -121.247602,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://traveloregon.com/plan-your-trip/places-to-stay/campgrounds/antler-horse-camp/",
@@ -645,7 +678,8 @@
     "visualFeatures": [
       "Antler horse camp: corral rails and horse beside pine forest, with trail toward the timbered Yamsay Mountain country."
     ],
-    "asset": "/motifs/outz/places/usfs-5254010381.svg"
+    "asset": "/motifs/outz/places/usfs-5254010381.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-7632.004731",
@@ -654,7 +688,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=47014",
     "lat": 46.165526,
     "lng": -122.09105,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.wta.org/go-hiking/trip-reports/trip_report.2012-07-23.6932302684",
@@ -664,7 +698,8 @@
     "visualFeatures": [
       "Ape Canyon narrow volcanic cleft with fractured rock walls, sparse alpine plants and forest beyond; canyon rather than the unrelated Ape Cave."
     ],
-    "asset": "/motifs/outz/places/usfs-7632.004731.svg"
+    "asset": "/motifs/outz/places/usfs-7632.004731.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5463010371",
@@ -673,7 +708,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=63664",
     "lat": 43.30522,
     "lng": -122.6758,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.go-oregon.com/Apple-Creek-Campground/",
@@ -683,7 +718,8 @@
     "visualFeatures": [
       "North Umpqua riverside camping with clustered ladys-slipper orchids documented by the Native Plant Society of Oregon at Apple Creek in April 2024."
     ],
-    "asset": "/motifs/outz/places/usfs-5463010371.svg"
+    "asset": "/motifs/outz/places/usfs-5463010371.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6131010414",
@@ -692,7 +728,7 @@
     "officialUrl": null,
     "lat": 44.02121,
     "lng": -123.80313,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/oregon-archie-knowles-campground",
@@ -702,7 +738,8 @@
     "visualFeatures": [
       "Knowles Creek forest campground: mossy stone entrance plinth, fern understory, wooded creek and tent site."
     ],
-    "asset": "/motifs/outz/places/usfs-6131010414.svg"
+    "asset": "/motifs/outz/places/usfs-6131010414.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5156010324",
@@ -711,7 +748,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52878",
     "lat": 45.162761,
     "lng": -122.152211,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/232843",
@@ -721,7 +758,8 @@
     "visualFeatures": [
       "Clackamas River bank beneath surviving mature trees, with broad river bend and shaded tent pad; 2025 USFS campsite photo reference."
     ],
-    "asset": "/motifs/outz/places/usfs-5156010324.svg"
+    "asset": "/motifs/outz/places/usfs-5156010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-10990010371",
@@ -730,7 +768,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recreation/recarea/?recid=64838",
     "lat": 43.04488,
     "lng": -122.7316,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/10377487",
@@ -740,7 +778,8 @@
     "visualFeatures": [
       "Ash Flat South Umpqua River beach and swimming bend under mixed conifers and hardwoods, with rounded river stones."
     ],
-    "asset": "/motifs/outz/places/usfs-10990010371.svg"
+    "asset": "/motifs/outz/places/usfs-10990010371.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5029010372",
@@ -749,7 +788,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59725",
     "lat": 42.385356,
     "lng": -122.213049,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/233707",
@@ -759,7 +798,8 @@
     "visualFeatures": [
       "Aspen Point on Lake of the Woods: open lake, mountain horizon, pine campsite and canoe along the water."
     ],
-    "asset": "/motifs/outz/places/usfs-5029010372.svg"
+    "asset": "/motifs/outz/places/usfs-5029010372.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5087.005641",
@@ -768,7 +808,7 @@
     "officialUrl": null,
     "lat": 43.73444444,
     "lng": -122.39055556,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.oregonhikers.org/forum/viewtopic.php?t=31208",
@@ -778,7 +818,8 @@
     "visualFeatures": [
       "Aubrey Mountain forested slope: switchback route opening into a small meadow; connected loop trip photo reference."
     ],
-    "asset": "/motifs/outz/places/usfs-5087.005641.svg"
+    "asset": "/motifs/outz/places/usfs-5087.005641.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5287010381",
@@ -787,7 +828,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/fremont-winema/recarea/?recid=59887",
     "lat": 42.512278,
     "lng": -120.707047,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://research.fs.usda.gov/pnw/rnas/locations/augur-creek",
@@ -797,7 +838,8 @@
     "visualFeatures": [
       "Augur Creek drainage with a broad flat rim and pine forest, creek riparian growth and low snowberry shrubs; reference depicts the nearby research natural area."
     ],
-    "asset": "/motifs/outz/places/usfs-5287010381.svg"
+    "asset": "/motifs/outz/places/usfs-5287010381.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5231010526",
@@ -806,16 +848,19 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69998",
     "lat": 42.701,
     "lng": -124.08,
-    "status": "pending",
+    "status": "complete",
     "references": [
       {
-        "url": "https://naturalatlas.com/trails/azelea-lake-2228036",
-        "image": null
+        "url": "https://wanderingyuncks.wordpress.com/2017/05/15/elk-creek-coquille-river-falls-and-azalea-lake/",
+        "image": "https://wanderingyuncks.wordpress.com/2017/05/15/elk-creek-coquille-river-falls-and-azalea-lake/"
       }
     ],
-    "visualFeatures": [],
-    "asset": null,
-    "researchNotes": "Coordinates are near Agness/Powers, not Red Buttes. Investigate Azelea Lake Trail #1262 before drawing; avoid borrowing Red Buttes lake scenery."
+    "visualFeatures": [
+      "Wooded Azalea Lake loop near Powers and Agness, with flowering shoreline shrubs and a rough-skinned newt from the documented lakeside wildlife."
+    ],
+    "asset": "/motifs/outz/places/usfs-5231010526.svg",
+    "researchNotes": "Confirmed Powers Ranger District Azalea Lake Trail #1262 via official INFRA description and the Powers/Agness photo trip report.",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-11226010526",
@@ -824,11 +869,19 @@
     "officialUrl": null,
     "lat": 42.219,
     "lng": -123.786,
-    "status": "needs-location-verification",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null,
-    "researchNotes": "Coordinates fall near Babyfoot Lake, far from the East trailhead near Agness. Verify record identity before drawing; do not assume Red Buttes Azalea Lake."
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InfraRecreationSites_01/MapServer/0",
+        "image": "https://wanderingyuncks.wordpress.com/2017/05/15/elk-creek-coquille-river-falls-and-azalea-lake/"
+      }
+    ],
+    "visualFeatures": [
+      "Azalea Lake shoreline loop with fawn lilies, tangled shoreline timber and forest. USFS managing_org 061028 and parent_recarea POWERS RD identify this as the Powers lake despite inconsistent published coordinates; artwork represents the shared lake destination rather than an asserted west trailhead viewpoint."
+    ],
+    "asset": "/motifs/outz/places/usfs-11226010526.svg",
+    "researchNotes": "Identity resolved through official INFRA parent_recarea POWERS RD and managing_org 061028, matching East. Coordinates remain inconsistent in the source and are unchanged by this artwork task.",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5315.005181",
@@ -837,7 +890,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70426",
     "lat": 42.22500001,
     "lng": -123.79300001,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://cherylhill.net/blog/2020/07/13/babyfoot-lake/",
@@ -847,7 +900,8 @@
     "visualFeatures": [
       "Babyfoot Lake beneath its rocky Kalmiopsis rim: surviving lakeside evergreens, fire snags and azalea flowers."
     ],
-    "asset": "/motifs/outz/places/usfs-5315.005181.svg"
+    "asset": "/motifs/outz/places/usfs-5315.005181.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6432979010602",
@@ -856,7 +910,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recreation/recarea/?recid=4265",
     "lat": 44.617772,
     "lng": -122.034343,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://adamschneider.net/photos/2024-06-bm/?p=20240611-120247",
@@ -866,7 +920,8 @@
     "visualFeatures": [
       "Bachelor Mountain near Detroit: meadow switchbacks and a rocky alcove framing Coffin Mountain; distinct from Mount Bachelor ski volcano."
     ],
-    "asset": "/motifs/outz/places/usfs-6432979010602.svg"
+    "asset": "/motifs/outz/places/usfs-6432979010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5993.004901",
@@ -875,7 +930,7 @@
     "officialUrl": null,
     "lat": 45.2574,
     "lng": -121.3908,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://trailsnw.com/trails/oregon-cascades/badger-creek",
@@ -885,7 +940,8 @@
     "visualFeatures": [
       "Lower Badger Creek at the dry east-side forest transition: oak canopy, pines, rocky canyon and winding creek."
     ],
-    "asset": "/motifs/outz/places/usfs-5993.004901.svg"
+    "asset": "/motifs/outz/places/usfs-5993.004901.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5051010324",
@@ -894,7 +950,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52784",
     "lat": 45.3038,
     "lng": -121.5564,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
@@ -904,7 +960,8 @@
     "visualFeatures": [
       "Badger Lake campground: forested bowl lake framed by a tent clearing and driftwood shoreline; USFS panoramic photo. "
     ],
-    "asset": "/motifs/outz/places/usfs-5051010324.svg"
+    "asset": "/motifs/outz/places/usfs-5051010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6015.004901",
@@ -913,7 +970,7 @@
     "officialUrl": null,
     "lat": 45.28541652,
     "lng": -121.5468118,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://commons.wikimedia.org/wiki/File:Panoramic_of_Badger_Lake-Mt_Hood_(23346354642).jpg",
@@ -923,7 +980,8 @@
     "visualFeatures": [
       "Badger Lake trail approach: path descending around a forested slope to the lake, with the shared trailhead sign. "
     ],
-    "asset": "/motifs/outz/places/usfs-6015.004901.svg"
+    "asset": "/motifs/outz/places/usfs-6015.004901.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-4290630010602",
@@ -932,7 +990,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=79271",
     "lat": 44.95402,
     "lng": -122.17943,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/bagby-campground",
@@ -942,7 +1000,8 @@
     "visualFeatures": [
       "Bagby campground forest tent clearing at the creek confluence, distinct from the hot-spring bathhouse farther up the trail."
     ],
-    "asset": "/motifs/outz/places/usfs-4290630010602.svg"
+    "asset": "/motifs/outz/places/usfs-4290630010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5147010324",
@@ -951,7 +1010,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52880",
     "lat": 44.95444444,
     "lng": -122.1683333,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/2018/07/16/bagby-trail-to-silver-king-lake/",
@@ -961,7 +1020,8 @@
     "visualFeatures": [
       "Bagby hot-springs trail: timber bathhouse roof and carved log soaking tub, steam lines, and forest footbridge."
     ],
-    "asset": "/motifs/outz/places/usfs-5147010324.svg"
+    "asset": "/motifs/outz/places/usfs-5147010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6146010414",
@@ -970,7 +1030,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42345",
     "lat": 44.087483,
     "lng": -124.11836,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/tag/baker-beach/",
@@ -980,7 +1040,8 @@
     "visualFeatures": [
       "Baker Beach near Florence: grass-topped foredune, sandy trail across the deflation plain and Pacific surf; Oregon location, not San Francisco."
     ],
-    "asset": "/motifs/outz/places/usfs-6146010414.svg"
+    "asset": "/motifs/outz/places/usfs-6146010414.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6433005010602",
@@ -989,10 +1050,18 @@
     "officialUrl": null,
     "lat": 44.810387,
     "lng": -121.881967,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://thesis.caltech.edu/6230/1/Thayer_tp_1934.pdf",
+        "image": "https://thesis.caltech.edu/6230/1/Thayer_tp_1934.pdf#page=140"
+      }
+    ],
+    "visualFeatures": [
+      "Rounded forested Bald Butte and layered Breitenbush valley ridges, based on the explicitly labeled Plate 33 photograph in Thayer 1934, PDF pages 139\u2013140. Historical landform reference; not the Mount Hood or Fremont-Winema Bald Butte."
+    ],
+    "asset": "/motifs/outz/places/usfs-6433005010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-11370010324",
@@ -1001,7 +1070,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/crgnsa/recarea/?recid=29880",
     "lat": 45.699444,
     "lng": -121.291667,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.wta.org/go-hiking/hikes/balfour-klickitat-day-use-area",
@@ -1011,7 +1080,8 @@
     "visualFeatures": [
       "Balfour-Klickitat former ranch fireplace remains beside a paved birdwatching loop and Columbia Gorge river panorama."
     ],
-    "asset": "/motifs/outz/places/usfs-11370010324.svg"
+    "asset": "/motifs/outz/places/usfs-11370010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5198.004991",
@@ -1020,7 +1090,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=38678",
     "lat": 44.48649939,
     "lng": -120.3971163,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.roaminglog.com/snowshoes/ochocoway.php",
@@ -1030,7 +1100,8 @@
     "visualFeatures": [
       "Bandit Springs Ochoco Way: ponderosa forest around a snow-covered meadow, with paired ski tracks."
     ],
-    "asset": "/motifs/outz/places/usfs-5198.004991.svg"
+    "asset": "/motifs/outz/places/usfs-5198.004991.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-3254340010602",
@@ -1039,7 +1110,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/ochoco/recarea/?recid=80975",
     "lat": 44.34166666,
     "lng": -120.3561111,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.onxmaps.com/hiking/4j064xr19q15/independent-mine-baneberry-trail",
@@ -1049,7 +1120,8 @@
     "visualFeatures": [
       "Baneberry interpretive trail and adjacent Independent Mine: weathered cabin remains, white-fir forest and namesake berry cluster."
     ],
-    "asset": "/motifs/outz/places/usfs-3254340010602.svg"
+    "asset": "/motifs/outz/places/usfs-3254340010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5233010526",
@@ -1058,7 +1130,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70010",
     "lat": 42.771,
     "lng": -124.144,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
@@ -1068,7 +1140,8 @@
     "visualFeatures": [
       "Barklow summit landscape with Copper Mountain view, manzanita and old lookout-site stones; no standing tower is depicted."
     ],
-    "asset": "/motifs/outz/places/usfs-5233010526.svg"
+    "asset": "/motifs/outz/places/usfs-5233010526.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-11231010526",
@@ -1077,7 +1150,7 @@
     "officialUrl": null,
     "lat": 42.752,
     "lng": -124.156,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
@@ -1087,7 +1160,8 @@
     "visualFeatures": [
       "Barklow northern mountain approach represented by its shared ridge and collapsed shelter timbers amid fir forest; reference is connected mountain trail."
     ],
-    "asset": "/motifs/outz/places/usfs-11231010526.svg"
+    "asset": "/motifs/outz/places/usfs-11231010526.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-11232010526",
@@ -1096,7 +1170,7 @@
     "officialUrl": null,
     "lat": 42.747,
     "lng": -124.182,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://wanderingyuncks.com/2018/09/20/barklow-mountain-and-bullards-beach/",
@@ -1106,7 +1180,8 @@
     "visualFeatures": [
       "Barklow west approach: twisting madrone and tanoak canopy, pine edge and climbing forest path."
     ],
-    "asset": "/motifs/outz/places/usfs-11232010526.svg"
+    "asset": "/motifs/outz/places/usfs-11232010526.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5090010324",
@@ -1115,7 +1190,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53134",
     "lat": 45.236301,
     "lng": -121.626001,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/oregon-barlow-creek-campground",
@@ -1125,7 +1200,8 @@
     "visualFeatures": [
       "Barlow Creek forest campground: small creek beside a shaded tent clearing and the historic Barlow Road corridor."
     ],
-    "asset": "/motifs/outz/places/usfs-5090010324.svg"
+    "asset": "/motifs/outz/places/usfs-5090010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5081010324",
@@ -1134,7 +1210,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=53136",
     "lat": 45.2172,
     "lng": -121.6114,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://thedyrt.com/camping/oregon/oregon-barlow-crossing-campground",
@@ -1144,7 +1220,8 @@
     "visualFeatures": [
       "Barlow Crossing creekside camp: water winding below a sloped bank, scattered stones and shaded camping."
     ],
-    "asset": "/motifs/outz/places/usfs-5081010324.svg"
+    "asset": "/motifs/outz/places/usfs-5081010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6433007010602",
@@ -1153,7 +1230,7 @@
     "officialUrl": null,
     "lat": 44.825247,
     "lng": -122.124807,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://cherylhill.net/blog/category/bull-of-the-woods-wilderness/",
@@ -1163,7 +1240,8 @@
     "visualFeatures": [
       "Battle Ax summit rock and old lookout footings above Elk Lake, with Mount Jefferson on the horizon."
     ],
-    "asset": "/motifs/outz/places/usfs-6433007010602.svg"
+    "asset": "/motifs/outz/places/usfs-6433007010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6537271010602",
@@ -1172,10 +1250,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=80524",
     "lat": 45.30762,
     "lng": -123.75,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://pubs.usgs.gov/unnumbered/70199338/report.pdf",
+        "image": "https://hiiker.app/trails/oregon/tillamook-county/battle-lake-trail"
+      }
+    ],
+    "visualFeatures": [
+      "Small sheltered lake enclosed by steep wooded hills, with shoreline logs and alder leaves. Lake character corroborated by USGS Lakes of Oregon; trail image reference is HiiKER Battle Lake, Tillamook County."
+    ],
+    "asset": "/motifs/outz/places/usfs-6537271010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5326.005181",
@@ -1184,7 +1270,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70438",
     "lat": 42.626,
     "lng": -123.833,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://adventuresoflupe.com/?tag=brandy-peak",
@@ -1194,7 +1280,8 @@
     "visualFeatures": [
       "Bear Camp Ridge FSR23 approach: timbered ridge and saddle trail toward Brandy Peak, based on connected Bear Camp Ridge route photographs."
     ],
-    "asset": "/motifs/outz/places/usfs-5326.005181.svg"
+    "asset": "/motifs/outz/places/usfs-5326.005181.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5357.005571",
@@ -1203,10 +1290,18 @@
     "officialUrl": null,
     "lat": 43.5175,
     "lng": -122.21888889,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.skimountaineer.com/CascadeSki/CascadeSki.php?name=Diamond",
+        "image": "https://www.skimountaineer.com/CascadeSki/Diamond/DiamondPeakSunsetNW.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Conifer approach and the multi-summit Diamond Peak massif with its northwest snow bowls. Photo reference shows the destination landscape from northwest, not the trailhead itself."
+    ],
+    "asset": "/motifs/outz/places/usfs-5357.005571.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5076010324",
@@ -1215,7 +1310,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/mthood/recarea/?recid=52786",
     "lat": 45.116725,
     "lng": -121.531659,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/234720",
@@ -1225,7 +1320,8 @@
     "visualFeatures": [
       "Bear Springs campground group picnic shelter and tent clearing among east-side Mount Hood pines."
     ],
-    "asset": "/motifs/outz/places/usfs-5076010324.svg"
+    "asset": "/motifs/outz/places/usfs-5076010324.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5347.004621",
@@ -1234,10 +1330,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=81750",
     "lat": 44.51999167,
     "lng": -121.7641889,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://nwhorsetrails.com/blogs/central-oregon-horse-trails/bear-valley-on-the-metolius-windigo-trail",
+        "image": "https://nwhorsetrails.com/blogs/central-oregon-horse-trails/bear-valley-on-the-metolius-windigo-trail"
+      }
+    ],
+    "visualFeatures": [
+      "Ridge trail through regenerating ponderosa pines and standing burn snags above Bear Valley Creek, based on the photographed Metolius-Windigo approach to this trailhead."
+    ],
+    "asset": "/motifs/outz/places/usfs-5347.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5452.005571",
@@ -1246,10 +1350,18 @@
     "officialUrl": null,
     "lat": 43.545436,
     "lng": -122.524128,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://westerncascades.com/2022/06/18/monitoring-siskiyou-fritillary-at-bearbones-mountain/",
+        "image": "https://westerncascades.com/2022/06/18/monitoring-siskiyou-fritillary-at-bearbones-mountain/"
+      }
+    ],
+    "visualFeatures": [
+      "Layered rocky summit ridge with nodding Siskiyou fritillary blossoms and distant Cascade peaks; based on Bearbones Mountain botanical trip photographs. Shared trail sign is graphic identification, not a claim of an existing sign on site."
+    ],
+    "asset": "/motifs/outz/places/usfs-5452.005571.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-10109010526",
@@ -1258,7 +1370,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=70440",
     "lat": 42.602163,
     "lng": -123.881544,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://adventuresoflupe.com/?tag=brandy-peak",
@@ -1268,7 +1380,8 @@
     "visualFeatures": [
       "Brandy Peak narrow rocky summit ridge with successive Coast Range hills visible below it; connected trail photo reference."
     ],
-    "asset": "/motifs/outz/places/usfs-10109010526.svg"
+    "asset": "/motifs/outz/places/usfs-10109010526.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-10110010526",
@@ -1277,7 +1390,7 @@
     "officialUrl": null,
     "lat": 42.6259164,
     "lng": -123.8349326,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://adventuresoflupe.com/?tag=brandy-peak",
@@ -1287,7 +1400,8 @@
     "visualFeatures": [
       "Bearcamp High Ridge: forested crest with switchbacks on the south slope and a glimpse of the bald ridge above Brandy Peak approach."
     ],
-    "asset": "/motifs/outz/places/usfs-10110010526.svg"
+    "asset": "/motifs/outz/places/usfs-10110010526.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5615010274",
@@ -1296,7 +1410,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31708",
     "lat": 45.85663,
     "lng": -121.95679,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/232864",
@@ -1306,7 +1420,8 @@
     "visualFeatures": [
       "Beaver Campground on the Wind River: broadleaf canopy, tent clearing and the documented swingset in the activity area."
     ],
-    "asset": "/motifs/outz/places/usfs-5615010274.svg"
+    "asset": "/motifs/outz/places/usfs-5615010274.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5663497010602",
@@ -1315,7 +1430,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recreation/recarea/?recid=42675&actid=50",
     "lat": 43.94119,
     "lng": -123.891433,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://oregondiscovery.com/sweet-creek-trail",
@@ -1325,7 +1440,8 @@
     "visualFeatures": [
       "Beaver Creek Falls at the Sweet Creek confluence: two descending water channels join a fan-shaped cascade among mossy rock and forest."
     ],
-    "asset": "/motifs/outz/places/usfs-5663497010602.svg"
+    "asset": "/motifs/outz/places/usfs-5663497010602.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5084010262",
@@ -1334,7 +1450,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=69670",
     "lat": 42.30401,
     "lng": -122.36701,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/10249153",
@@ -1344,7 +1460,8 @@
     "visualFeatures": [
       "Beaver Dam group camp: shaded old-growth tent sites and riparian creek habitat along the Beaver Dam Trail."
     ],
-    "asset": "/motifs/outz/places/usfs-5084010262.svg"
+    "asset": "/motifs/outz/places/usfs-5084010262.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5344010371",
@@ -1353,7 +1470,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=80574",
     "lat": 43.09346,
     "lng": -122.5171,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.southernoregon.org/cities/tiller/outdoor-recreation/trails/beaver-swamp-trailhead/",
@@ -1363,7 +1480,8 @@
     "visualFeatures": [
       "Beaver Swamp Trail descending through mixed forest and fire snags to Fish Lake in Rogue-Umpqua Divide Wilderness."
     ],
-    "asset": "/motifs/outz/places/usfs-5344010371.svg"
+    "asset": "/motifs/outz/places/usfs-5344010371.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5013.005621",
@@ -1372,7 +1490,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4485",
     "lat": 43.97305556,
     "lng": -122.5455556,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.recreation.gov/camping/campgrounds/10165125",
@@ -1382,7 +1500,8 @@
     "visualFeatures": [
       "Bedrock campground terrace above Fall Creek with fireweed on the fire-shaped hillside; correct creek confirmed by Recreation.gov."
     ],
-    "asset": "/motifs/outz/places/usfs-5013.005621.svg"
+    "asset": "/motifs/outz/places/usfs-5013.005621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-7676.004621",
@@ -1391,7 +1510,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38292",
     "lat": 43.93908333,
     "lng": -121.4140306,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.waterfallsnorthwest.com/waterfall/Benham-Falls-3698",
@@ -1401,7 +1520,8 @@
     "visualFeatures": [
       "Benham Falls west view: powerful stair-step rapids between pine-lined banks; river rather than a sheer vertical waterfall."
     ],
-    "asset": "/motifs/outz/places/usfs-7676.004621.svg"
+    "asset": "/motifs/outz/places/usfs-7676.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5444.005571",
@@ -1410,7 +1530,7 @@
     "officialUrl": null,
     "lat": 44.21366667,
     "lng": -121.89208333,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.flickr.com/photos/victorhansonsmith/albums/72157627209479272",
@@ -1420,7 +1540,8 @@
     "visualFeatures": [
       "Benson Lake in Mount Washington Wilderness: rounded wooded basin, lakeshore trail and distant volcanic skyline; separate from Columbia Gorge Benson Lake."
     ],
-    "asset": "/motifs/outz/places/usfs-5444.005571.svg"
+    "asset": "/motifs/outz/places/usfs-5444.005571.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-7113.004731",
@@ -1429,7 +1550,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31198",
     "lat": 46.466922,
     "lng": -121.526359,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://www.trevlarson.com/goatrocks",
@@ -1439,7 +1560,8 @@
     "visualFeatures": [
       "Berry Patch approach to Goat Rocks: flower meadow, sharp alpine skyline and a forest trail rising toward Goat Ridge; connected route photographic reference."
     ],
-    "asset": "/motifs/outz/places/usfs-7113.004731.svg"
+    "asset": "/motifs/outz/places/usfs-7113.004731.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5059.005641",
@@ -1448,7 +1570,7 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=81420",
     "lat": 43.67166667,
     "lng": -122.01861111,
-    "status": "drawn-awaiting-visual-review",
+    "status": "complete",
     "references": [
       {
         "url": "https://cascwild.org/2026/roadless-is-priceless-defending-the-wildly-popular-roadless-area-conservation-rule/",
@@ -1458,7 +1580,8 @@
     "visualFeatures": [
       "Betty Lake east of Waldo Lake: mist over still forest water with dense shoreline conifers and an approaching woodland path."
     ],
-    "asset": "/motifs/outz/places/usfs-5059.005641.svg"
+    "asset": "/motifs/outz/places/usfs-5059.005641.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5082.005641",
@@ -1467,10 +1590,18 @@
     "officialUrl": null,
     "lat": 43.687185,
     "lng": -122.160273,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.hikeoregon.net/bunchgrass-ridge.html",
+        "image": "https://www.hikeoregon.net/bunchgrass-ridge.html"
+      }
+    ],
+    "visualFeatures": [
+      "Big Bunchgrass ridge meadow, with Fuji Mountain and the Twins in the distance and a winding high trail."
+    ],
+    "asset": "/motifs/outz/places/usfs-5082.005641.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5041.004621",
@@ -1479,10 +1610,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38802",
     "lat": 43.84591944,
     "lng": -121.867525,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campsites/10028981",
+        "image": "https://www.recreation.gov/camping/campsites/10028981#photos"
+      }
+    ],
+    "visualFeatures": [
+      "Big Cove boat-in campsite on Cultus Lake: canoe at the sheltered forest shore and a lakeside tent."
+    ],
+    "asset": "/motifs/outz/places/usfs-5041.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-7674.004621",
@@ -1491,10 +1630,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/deschutes/recarea/?recid=38302",
     "lat": 43.97721945,
     "lng": -121.409925,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://visitcentraloregon.com/poi/big-eddy-trailhead/",
+        "image": "https://www.americanwhitewater.org/content/River/view/river-detail/1505/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Big Eddy Deschutes rapids with repeated standing waves between rocky banks and pine forest."
+    ],
+    "asset": "/motifs/outz/places/usfs-7674.004621.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6124010414",
@@ -1503,10 +1650,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42371",
     "lat": 44.54416667,
     "lng": -123.7219444,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://thedyrt.com/camping/oregon/oregon-big-elk-campground",
+        "image": "https://thedyrt.com/camping/oregon/oregon-big-elk-campground/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Big Elk campground in Siuslaw National Forest: broadleaf forest, fern understory and a quiet tent-and-picnic clearing."
+    ],
+    "asset": "/motifs/outz/places/usfs-6124010414.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6909.004731",
@@ -1515,10 +1670,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/giffordpinchot/recarea/?recid=31988",
     "lat": 45.927063,
     "lng": -121.980476,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.wta.org/go-hiking/hikes/big-hollow",
+        "image": "https://www.wta.org/go-outside/seasonal-hikes/go-hiking/hikes/observation-peak"
+      }
+    ],
+    "visualFeatures": [
+      "Big Hollow forest climb toward Observation Peak: slide-alder spring, fir trunks and switchback trail; connected WTA route reference."
+    ],
+    "asset": "/motifs/outz/places/usfs-6909.004731.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-6928.004731",
@@ -1527,10 +1690,18 @@
     "officialUrl": null,
     "lat": 45.82836,
     "lng": -121.83437,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.alltrails.com/trail/us/washington/big-huckleberry-mountain-via-pacific-crest-trail",
+        "image": "https://www.summitpost.org/view-up-from-grassy-knoll/293743"
+      }
+    ],
+    "visualFeatures": [
+      "Big Huckleberry Mountain PCT approach: open meadow summit, layered ridges and huckleberry foreground."
+    ],
+    "asset": "/motifs/outz/places/usfs-6928.004731.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5004.005631",
@@ -1539,10 +1710,18 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4359",
     "lat": 44.37807,
     "lng": -121.87047,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/232287",
+        "image": "https://www.recreation.gov/camping/campgrounds/232287#photos"
+      }
+    ],
+    "visualFeatures": [
+      "Big Lake campground: Mount Washington spire across the water, lakeside tent and forest edge."
+    ],
+    "asset": "/motifs/outz/places/usfs-5004.005631.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "usfs-5000.005631",
@@ -1551,20 +1730,36 @@
     "officialUrl": "https://www.fs.usda.gov/recarea/willamette/recarea/?recid=4361",
     "lat": 44.3772749,
     "lng": -121.8806893,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.recreation.gov/camping/campgrounds/234729",
+        "image": "https://thedyrt.com/camping/oregon/oregon-big-lake-west-campground/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Big Lake West: sheltered tent clearing and boat launch into Big Lake with the pointed Mount Washington skyline."
+    ],
+    "asset": "/motifs/outz/places/usfs-5000.005631.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "we-moon-land",
     "name": "We'Moon Land",
     "kind": "outdoor-stay",
     "officialUrl": "https://wemoonland.org/",
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://9girlsonabus.wordpress.com/2013/08/11/we-moon-land/",
+        "image": "https://9girlsonabus.wordpress.com/2013/08/11/we-moon-land/"
+      }
+    ],
+    "visualFeatures": [
+      "Round community house, garden rows and cedar setting, with a moon symbol recalling the community moon circles. Based on a published visitor photograph and description; architectural details simplified."
+    ],
+    "asset": "/motifs/outz/places/we-moon-land.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "bamboo-acres",
@@ -1573,10 +1768,18 @@
     "officialUrl": "https://www.bambooacres.org/",
     "lat": 42.2457,
     "lng": -122.7884,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.bambooacres.org/lodging",
+        "image": "https://static.wixstatic.com/media/913458_be622c4d2c6d43a3992c809b4cb955cd~mv2.jpg"
+      }
+    ],
+    "visualFeatures": [
+      "Vintage rounded travel trailer framed by bamboo and garden pond; based on operator lodging photographs."
+    ],
+    "asset": "/motifs/outz/places/bamboo-acres.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "triangle-recreation-camp",
@@ -1585,10 +1788,18 @@
     "officialUrl": "https://www.camptrc.org/",
     "lat": 48.075589,
     "lng": -121.59269,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.camptrc.org/what-to-do",
+        "image": "https://www.camptrc.org/camping"
+      }
+    ],
+    "visualFeatures": [
+      "Old-growth trunks, riverside tent and a stony river edge, informed by operator forest and river photographs."
+    ],
+    "asset": "/motifs/outz/places/triangle-recreation-camp.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   },
   {
     "id": "umpquas-last-resort",
@@ -1597,9 +1808,17 @@
     "officialUrl": "https://www.golastresort.com/about-us",
     "lat": 43.304,
     "lng": -122.804,
-    "status": "pending",
-    "references": [],
-    "visualFeatures": [],
-    "asset": null
+    "status": "complete",
+    "references": [
+      {
+        "url": "https://www.golastresort.com/about-us",
+        "image": "https://thedyrt.com/camping/oregon/umpqua-s-last-resort-oregon-mountain-guides/gallery"
+      }
+    ],
+    "visualFeatures": [
+      "Front-gabled wilderness cabin among conifers above a flowing river; reference is resort cabin photographs, not a literal site plan."
+    ],
+    "asset": "/motifs/outz/places/umpquas-last-resort.svg",
+    "visualReview": "Reviewed in full-set browser gallery at 210px; no clipping. Longest sign additionally reviewed in the actual destination card. SVG and category color validated."
   }
 ]
