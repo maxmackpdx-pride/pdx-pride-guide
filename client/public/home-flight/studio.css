@@ -42,3 +42,8 @@ aside { bottom:var(--flight-bottom-inset,20px); }
   #exploration-status { bottom:calc(var(--flight-bottom-inset,20px) + 79px); }
   body:has(details[open]) #exploration-status { bottom:calc(var(--flight-bottom-inset,20px) + 257px); }
 }
+
+.explore-hint { position:fixed; left:max(20px,env(safe-area-inset-left)); bottom:var(--flight-bottom-inset,20px); z-index:4; margin:0; color:#c2d0df; font-size:12px; line-height:1.5; letter-spacing:.025em; text-shadow:0 1px 4px #000,0 2px 10px #000; pointer-events:none; opacity:.8; transition:opacity .45s ease; }
+body:has(#exploration-status:not(:empty)) .explore-hint { opacity:0; }
+@media(max-width:600px) { .explore-hint { left:12px; } }
+@media(prefers-reduced-motion:reduce) { .explore-hint { transition:none; } }
