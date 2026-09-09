@@ -241,8 +241,8 @@ function hologramBounds(feature,scale){
  if(!logo)return {halfWidth:85*logoSpacing*scale,halfHeight:67.5*logoSpacing*scale};
  const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25;
  // Keep the 15% breathing room, measured around the actual logo artwork.
- return {halfWidth:Math.max(feature.properties.time?90:0,Math.max(65,(logo.width*fit/2+10)*logoSpacing)*scale),
-  halfHeight:Math.max(feature.properties.time?150:0,Math.max(42,(logo.height*fit/2+10)*logoSpacing)*scale)};
+ return {halfWidth:Math.max(feature.properties.time?90:0,Math.max(65,(logo.width*fit/2+10)*logoSpacing))*scale,
+  halfHeight:Math.max(feature.properties.time?150:0,Math.max(42,(logo.height*fit/2+10)*logoSpacing))*scale};
 }
 function separateHolograms(items,width,height){
  const overlaps=(a,b)=>Math.abs(a.x-b.x)<a.halfWidth+b.halfWidth&&Math.abs(a.y-b.y)<a.halfHeight+b.halfHeight;
@@ -301,6 +301,9 @@ function drawLights(fade,target=map,surface=lights){
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
  const viewportScale=Math.min(1,Math.max(.72,(width-32)/680));
+ // Full size at street level; zooming out can only reduce the presentation.
+ const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
+ const presentationScale=viewportScale*zoomScale;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
@@ -334,10 +337,10 @@ function drawLights(fade,target=map,surface=lights){
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=reduced.matches?0:29*Math.sin(pulseTime*(.17+.025*Math.cos(phase))+phase)+9*Math.sin(pulseTime*.09+phase*2.4);
   const driftY=reduced.matches?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
-  item.scaleGoal=emergenceFor(item.feature)*viewportScale*(1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
+  item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  item.x=item.p.x+driftX;item.y=item.p.y-(roofLift(target,item.feature,surfaces)+178.5*viewportScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY;
+  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
   item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25:0;
  }
@@ -365,7 +368,8 @@ function drawLights(fade,target=map,surface=lights){
   const key=item.feature.properties.phase,prev=layout.get(key)||{x:item.x-item.p.x,y:item.y-item.p.y,scale:item.scaleGoal,vx:0,vy:0,vs:0,avoidX:0,avoidY:0};
   settleValue(prev,'x','vx',item.x-item.p.x,2.3,motionDelta);
   settleValue(prev,'y','vy',item.y-item.p.y,2.3,motionDelta);
-  settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);layout.set(key,prev);
+  settleValue(prev,'scale','vs',item.scaleGoal,2.8,motionDelta);
+  prev.scale=Math.min(prev.scale,presentationScale);layout.set(key,prev);
   item.offset=prev;
  }
  for(const item of beacons){
@@ -382,6 +386,8 @@ function drawLights(fade,target=map,surface=lights){
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
  separateHolograms(beacons,width,height);
+ // Collision avoidance cannot stretch a projector indefinitely at wide zoom.
+ for(const item of beacons){item.x=Math.max(item.p.x-155*zoomScale,Math.min(item.p.x+155*zoomScale,item.x));item.y=Math.max(item.p.y-300*presentationScale,Math.min(item.p.y-70*presentationScale,item.y));}
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX,y=item.y-item.p.y+item.hover-item.offset.avoidY;
