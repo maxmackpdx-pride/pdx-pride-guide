@@ -24,7 +24,7 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import type { Business } from "@/pages/Directory";
 import { DIRECTORY_TYPE_LABELS, directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
-import { EVENT_WEEK_DAY_OPTIONS, RSVP_COLOR } from "@shared/eventWeek";
+import { RSVP_COLOR } from "@shared/eventWeek";
 import { HOUSING_ACCENT_VAR, HOUSING_TYPE_KICKER, type HousingType } from "@shared/housing";
 import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats";
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
@@ -38,7 +38,6 @@ type Mark = { key: string; kind: "event" | "place" | "housing" | "mizzed" | "car
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
 const DEFAULT_RAIL_ORDER = ["placez", "mizzed", "outz", "housing", "carpool", "boards"] as const;
 type RailId = typeof DEFAULT_RAIL_ORDER[number];
-const DAY: Record<string, string> = Object.fromEntries(EVENT_WEEK_DAY_OPTIONS.map(day => [day.value, day.color]));
 const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue", cafe: "cafe", venue: "venue", shop: "shop", hotel: "hauz", campground: "park" };
 /* Snaps are relative to the drawer track inside the map, above the actual dock. */
 
@@ -53,7 +52,7 @@ const MAP_CREATE_LINKS = [
   { label: "Sellz", href: "/sellz", color: "#39ff14" },
 ] as const;
 const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string; badgeId?: WaypointId; scoop?: string; avatarUrl?: string }> = [
-  { label: "Eventz", id: "eventz", color: "#ff00cc", scoop: "10P", note: "Ticket shell · day color · host and venue logos · white start time" },
+  { label: "Eventz", id: "eventz", color: "#ff00cc", scoop: "10P", note: "Ticket shell · directory type color · host and venue logos · start time" },
   { label: "Placez", id: "venue", badgeId: "cafe", color: "#00ffff", note: "Venue logo in the Placez shell; corner icon identifies the place type" },
   { label: "Zenegades", id: "zenegade", color: "#ff2400", scoop: "42M", note: "Red long-form waypoint with countdown to start" },
   { label: "AfterZ", id: "afterz", color: "#ffee00", note: "Yellow long-form after-hours waypoint" },
@@ -68,14 +67,17 @@ const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: strin
   { label: "Adult Placez", id: "venue", badgeId: "adult", color: "#ff2400", note: "Placez anatomy with venue logo and adult-place category badge" },
 ];
 
-function dayAccent(day: string | null | undefined): string {
-  const code = String(day || "").slice(0, 3).toUpperCase();
-  return DAY[code] || RSVP_COLOR;
+// Preserve the adult locations already marked red in the Zaydar studio snapshot.
+const ADULT_VENUES = new Set(['Sanctuary Club','Hawks PDX','FANTASY','Steam Portland'].map(normalizeDirectoryName));
+function zaydarPlaceColor(place: Pick<Place,'name'|'type'>) {
+  return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? '#FF0000' : directoryTypeColor(place.type);
 }
-
-function dayText(day: string | null | undefined): string {
-  const code = String(day || "").slice(0, 3).toUpperCase();
-  return EVENT_WEEK_DAY_OPTIONS.find(option => option.value === code)?.textColor || RSVP_COLOR;
+function zaydarEventColor(event: Event, places: Place[]) {
+  const venueKey=normalizeDirectoryName(event.venueName || '');
+  let tags: string[]=[];try { const parsed=JSON.parse(event.eventTypes || '[]'); if(Array.isArray(parsed))tags=parsed; } catch {}
+  if(event.isSexPositive || event.nudityOk || tags.some(tag=>['SEX_POSITIVE','NUDITY_OK','KINK'].includes(tag)) || ADULT_VENUES.has(venueKey))return '#FF0000';
+  const venue=places.find(place=>place.type!=='group' && normalizeDirectoryName(place.name)===venueKey);
+  return venue?zaydarPlaceColor(venue):directoryTypeColor('venue');
 }
 
 function phraseIncludes(haystack: string, needle: string): boolean {
@@ -634,7 +636,7 @@ export default function ZaydarMapDemo() {
     </div>
   </div>;
   const eventCard = (e: Event) => (
-    <button type="button" className="living-map-card event pdx-glass-rebind" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": dayAccent(e.dayOfWeek), "--c-text": dayText(e.dayOfWeek) } as CSSProperties}>
+    <button type="button" className="living-map-card event pdx-glass-rebind" key={`${e.id}-${e.dateStart}`} aria-label={e.title} onPointerDown={cardPointerDown} onPointerMove={cardPointerMove} onClick={event => { if (consumeCardScroll(event)) return; setCardOriginRect(originRect(event.currentTarget)); setSelectedEvent(e); goOverlay("event", e.id); }} style={{ "--c": zaydarEventColor(e,places), "--c-text": zaydarEventColor(e,places) } as CSSProperties}>
       {e.posterImageUrl && <img src={e.posterImageUrl} alt="" />}<span className="shade"/><small>{String(e.dayOfWeek || "").slice(0,3)} {hour(e.dateStart)} · {e.neighborhood || "Portland"}</small><strong>{e.title}</strong><em>{e.venueName}</em>
     </button>
   );
@@ -644,7 +646,7 @@ export default function ZaydarMapDemo() {
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
     const brands=event?eventBrandLogos(event,places):null;
-    const color=event?dayAccent(event.dayOfWeek):place?directoryTypeColor(place.type):mark.kind==='mizzed'?'#FF00CC':mark.kind==='housing'?'#00FFFF':'#FF6600';
+    const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):mark.kind==='mizzed'?'#FF00CC':mark.kind==='housing'?'#00FFFF':'#FF6600';
     return {key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
       logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':mark.kind==='housing'?'/zaydar-map/icons/housing.svg':mark.kind==='mizzed'?'/zaydar-map/icons/mizzed.svg':'/zaydar-map/icons/carpool.svg'),
       alternateLogo:brands?.alternate,
@@ -674,7 +676,7 @@ export default function ZaydarMapDemo() {
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
     <div ref={toolsRef}>
     {filtersOpen&&<section id="living-map-filter-panel" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Map filters"><button className="zaydar-close" onClick={()=>setFiltersOpen(false)} aria-label="Close filters">×</button>{filterControls(false,true)}</section>}
-    {keyOpen&&<section id="living-map-key-panel" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Map key"><button className="zaydar-close" onClick={()=>setKeyOpen(false)} aria-label="Close map key">×</button><h2>Map key</h2><p>Zoom in or select a light to reveal its hologram.</p>{EVENT_WEEK_DAY_OPTIONS.map(day=><p key={day.value}><i className="zaydar-key-orb" style={{background:day.color,boxShadow:`0 0 14px ${day.color}`}}/>{day.label} events</p>)}<p>Placez use their category colors and existing logos.</p><p>Housing · cyan / Mizzed · magenta / Carpool · orange</p></section>}
+    {keyOpen&&<section id="living-map-key-panel" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Map key"><button className="zaydar-close" onClick={()=>setKeyOpen(false)} aria-label="Close map key">×</button><h2>Map key</h2><p>Zoom in or select a light to reveal its hologram.</p>{Object.entries(DIRECTORY_TYPE_LABELS).map(([type,label])=><p key={type}><i className="zaydar-key-orb" style={{background:directoryTypeColor(type),boxShadow:`0 0 14px ${directoryTypeColor(type)}`}}/>{label}</p>)}<p><i className="zaydar-key-orb" style={{background:"#FF0000",boxShadow:"0 0 14px #FF0000"}}/>Adult venues and events</p><p>Events inherit their venue’s directory type color.</p><p>Housing · cyan / Mizzed · magenta / Carpool · orange</p></section>}
     {createOpen&&<nav id="living-map-create-menu" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Post to Zaylist"><button className="zaydar-close" onClick={()=>setCreateOpen(false)} aria-label="Close post menu">×</button><h2>Post to Zaylist</h2>{MAP_CREATE_LINKS.map(item=><Link key={item.href} href={item.href}>{item.label} ↗</Link>)}</nav>}
     </div>
     {resultsOpen&&<section className="zaydar-demo-results pdx-glass-rebind" aria-label="Map results">

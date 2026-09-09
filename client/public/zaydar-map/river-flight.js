@@ -26,8 +26,8 @@ const map = new maplibregl.Map({container:'map',interactive:false,attributionCon
   style:structuredClone(vectorStyle)});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
-const dayColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
-let hologramMaterials=createHologramMaterials([...dayColors,adultVenueColor]);
+const baseColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
+let hologramMaterials=createHologramMaterials([...baseColors,adultVenueColor]);
 const assetController=new AbortController();
 function waypointHeightScale([longitude,latitude]){
  // Rise gradually outside downtown: +50% at 3 km, up to +75% at 10 km.
@@ -160,7 +160,7 @@ function logoPointerOffset(x,y,phase,halfWidth,halfHeight){
  const angle=distance>.01?Math.atan2(dy,dx):phase+logoMotionSeed;
  return {x:Math.cos(angle)*strength,y:Math.sin(angle)*strength};
 }
-for(const color of [...dayColors,adultVenueColor]){
+for(const color of [...baseColors,adultVenueColor]){
  const sprite=document.createElement('canvas');sprite.width=sprite.height=216;
  const ctx=sprite.getContext('2d');ctx.scale(9,9);
  const glow=ctx.createRadialGradient(12,12,0,12,12,12);
@@ -717,7 +717,7 @@ function drawDiscoveryOrb(ctx,x,y,color,alpha){
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){
  const generation=++dataGeneration;
- const colors=[...new Set([...dayColors,adultVenueColor,...rows.map(row=>row.color)])];
+ const colors=[...new Set([...baseColors,adultVenueColor,...rows.map(row=>row.color)])];
  const nextPalette=colors.slice().sort().join(',');if(nextPalette!==paletteKey){hologramMaterials.dispose();hologramMaterials=createHologramMaterials(colors);paletteKey=nextPalette;}
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const dailyVenues=new Map();
