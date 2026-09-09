@@ -1,4 +1,4 @@
-import {flightVisible,flightMotion,flightReady} from './host-bridge.js';
+import {flightVisible,flightMotion,flightReady,flightExploring} from './host-bridge.js';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
@@ -568,11 +568,13 @@ const exploration=createMapExploration({
  map,pauseControl,reduced,message:document.querySelector('#exploration-status'),
  isReady:()=>loaded&&assetsReady,isVisible:flightVisible,
  onExplore:()=>{
+  flightExploring(true);
   cameraDirty=false;loopWaiting=false;exitAt=null;revealTime=3;
   clearLogoPointer();scheduleFrame();
  },
  returnCamera:()=>flightCamera(0),
  onResume:()=>{
+  flightExploring(false);
   travel=0;elapsed=0;exitAt=null;loopWaiting=false;revealTime=3;last=0;cameraDirty=false;
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
   scheduleFrame();

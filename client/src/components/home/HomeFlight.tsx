@@ -3,7 +3,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 
 /** The flight has its own document so its camera cannot alter the page layout. */
-export default function HomeFlight({ paused = false }: { paused?: boolean }) {
+export default function HomeFlight({ paused = false, onExploringChange }: {
+  paused?: boolean;
+  onExploringChange: (exploring: boolean) => void;
+}) {
   const { calmMode } = useTheme();
   const container = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -35,8 +38,11 @@ export default function HomeFlight({ paused = false }: { paused?: boolean }) {
     };
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
-      if (event.data?.type === "zaylist:flight-ready") { setReady(true); sync(); }
-      if (event.data?.type === "zaylist:flight-error") setReady(false);
+      if (event.data?.type === "zaylist:flight-ready") { setReady(true); onExploringChange(false); sync(); }
+      if (event.data?.type === "zaylist:flight-error") { setReady(false); onExploringChange(false); }
+      if (event.data?.type === "zaylist:flight-exploring" && typeof event.data.exploring === "boolean") {
+        onExploringChange(event.data.exploring);
+      }
     };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0.01 });
     observer.observe(element);
@@ -60,7 +66,7 @@ export default function HomeFlight({ paused = false }: { paused?: boolean }) {
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("message", onMessage);
     };
-  }, [calmMode, paused]);
+  }, [calmMode, paused, onExploringChange]);
 
   return (
     <div ref={container} className="home-front__flight" data-ready={ready}>

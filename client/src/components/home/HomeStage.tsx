@@ -41,6 +41,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   const worldData = useHomeWorlds();
   const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const [exploring, setExploring] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
@@ -66,8 +67,13 @@ export default function HomeStage({ afterWelcome }: Props) {
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        <HomeFlight paused={showAuth} />
-        <div className="home-front__hero">
+        <HomeFlight paused={showAuth} onExploringChange={setExploring} />
+        <div
+          className="home-front__hero"
+          data-exploring={exploring}
+          aria-hidden={exploring || undefined}
+          ref={element => { if (element) element.inert = exploring; }}
+        >
           <h1 id="home-front-title" className="sr-only">Zaylist</h1>
           <div className="home-front__mark">
             <div className="home-front__mark-art">

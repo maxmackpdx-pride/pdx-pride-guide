@@ -20,4 +20,5 @@ function receive(event){
 window.addEventListener('message',receive);
 window.addEventListener('pagehide',()=>window.removeEventListener('message',receive),{once:true});
 export function flightReady(){window.parent.postMessage({type:'zaylist:flight-ready'},location.origin);}
+export function flightExploring(exploring){window.parent.postMessage({type:'zaylist:flight-exploring',exploring},location.origin);}
 window.addEventListener('error',()=>window.parent.postMessage({type:'zaylist:flight-error'},location.origin));
