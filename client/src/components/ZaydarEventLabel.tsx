@@ -1,0 +1,14 @@
+import {useEffect,useRef,useState,type CSSProperties} from 'react';
+import {solveDynamicText,rowGapAbove,clearDynamicTextCache,type DynamicTextResult} from '@/lib/dynamicText';
+export type EventLabel={key:string;name:string;time:string;color:string;x:number;y:number;width:number;opacity:number};
+function complement(hex:string){const n=parseInt(hex.replace('#',''),16);return `rgb(${Math.max(85,255-(n>>16&255))}, ${Math.max(85,255-(n>>8&255))}, ${Math.max(85,255-(n&255))})`;}
+const segments:Record<string,string>={'0':'abcdef','1':'bc','2':'abdeg','3':'abcdg','4':'bcfg','5':'acdfg','6':'acdefg','7':'abc','8':'abcdefg','9':'abcdfg'};
+function DigitalClock({time}:{time:string}){const [digits,period]=time.split(' ');return <span className="zaydar-event-clock" aria-label={time}><svg aria-hidden="true" viewBox={`0 0 ${digits.length*22} 38`}>{[...digits].map((digit,i)=>digit===':'?<g key={i} transform={`translate(${i*22},0)`}><circle cx="10" cy="12" r="2"/><circle cx="10" cy="26" r="2"/></g>:<g key={i} transform={`translate(${i*22},0)`}>{Object.entries({a:'M4 2H16',b:'M18 4V16',c:'M18 22V34',d:'M4 36H16',e:'M2 22V34',f:'M2 4V16',g:'M4 19H16'}).map(([segment,d])=><path key={segment} d={d} opacity={segments[digit]?.includes(segment)?1:.08}/>)}</g>)}</svg><small aria-hidden="true">{period}</small></span>}
+export default function ZaydarEventLabel({label,onSelect}:{label:EventLabel;onSelect:(key:string)=>void}){
+ const frame=useRef<HTMLSpanElement>(null);const [fit,setFit]=useState<DynamicTextResult|null>(null);
+ useEffect(()=>{let active=true;const measure=()=>{if(!active||!frame.current)return;const box=frame.current.getBoundingClientRect();setFit(solveDynamicText(label.name,box.width,box.height));};const observer=new ResizeObserver(measure);if(frame.current)observer.observe(frame.current);document.fonts.ready.then(()=>{if(active){clearDynamicTextCache();measure();}});measure();return()=>{active=false;observer.disconnect();};},[label.name]);
+ return <button className="zaydar-event-label" onClick={()=>onSelect(label.key)} aria-label={`${label.name}, starts at ${label.time}`} style={{left:label.x,top:label.y,width:label.width,opacity:label.opacity,'--clock-color':complement(label.color)} as CSSProperties}>
+ <span ref={frame} className="zaydar-event-title" aria-hidden="true">{fit&&!fit.outOfRange?fit.lines.map((line,i)=><span key={i} style={{fontSize:fit.sizes[i],paddingTop:i?rowGapAbove(line,fit.sizes[i]):0}}>{line}</span>):<span className="zaydar-event-title-fallback">{label.name}</span>}</span>
+ <DigitalClock time={label.time}/>
+ </button>;
+}

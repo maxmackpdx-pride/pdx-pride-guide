@@ -240,8 +240,8 @@ function hologramBounds(feature,scale){
  if(!logo)return {halfWidth:85*logoSpacing*scale,halfHeight:67.5*logoSpacing*scale};
  const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25;
  // Keep the 15% breathing room, measured around the actual logo artwork.
- return {halfWidth:Math.max(65,(logo.width*fit/2+10)*logoSpacing)*scale,
-  halfHeight:Math.max(42,(logo.height*fit/2+10)*logoSpacing)*scale};
+ return {halfWidth:Math.max(feature.properties.time?90:0,Math.max(65,(logo.width*fit/2+10)*logoSpacing)*scale),
+  halfHeight:Math.max(feature.properties.time?150:0,Math.max(42,(logo.height*fit/2+10)*logoSpacing)*scale)};
 }
 function separateHolograms(items,width,height){
  const overlaps=(a,b)=>Math.abs(a.x-b.x)<a.halfWidth+b.halfWidth&&Math.abs(a.y-b.y)<a.halfHeight+b.halfHeight;
@@ -292,6 +292,10 @@ function hologramVariation(time,phase,channel){
 }
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
+ const eventLabels=[];
+ const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ const activeToday=feature=>feature.properties.eventDay===today&&feature.properties.autoToday!==false;
+ const emergenceFor=feature=>feature.properties.key===selectedKey||activeToday(feature)?1:reveal;
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
@@ -308,17 +312,17 @@ function drawLights(fade,target=map,surface=lights){
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Expand a few distinct locations; individual event rows remain discoverable as orbs.
- const candidates=ordered.filter(v=>v.feature.properties.isBar&&(reveal>.005||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
- candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
+ const candidates=ordered.filter(v=>v.feature.properties.isBar&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Number(activeToday(b.feature))-Number(activeToday(a.feature))||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const beacons=[];
  for(const item of candidates){
-  if(beacons.length>=(width<768?3:8))break;
+
   const [lng,lat]=item.feature.geometry.coordinates;
   if(beacons.some(other=>{
    const [otherLng,otherLat]=other.feature.geometry.coordinates;
    const sameLocation=Math.hypot((lng-otherLng)*Math.cos(lat*Math.PI/180),lat-otherLat)<.00065;
    const tooClose=Math.hypot(item.p.x-other.p.x,item.p.y-other.p.y)<(width<768?150:180);
-   return sameLocation||tooClose;
+   return sameLocation||(tooClose&&!activeToday(item.feature));
   }))continue;
   beacons.push(item);
  }
@@ -329,7 +333,7 @@ function drawLights(fade,target=map,surface=lights){
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
   const driftX=reduced.matches?0:29*Math.sin(pulseTime*(.17+.025*Math.cos(phase))+phase)+9*Math.sin(pulseTime*.09+phase*2.4);
   const driftY=reduced.matches?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
-  item.scaleGoal=(item.feature.properties.key===selectedKey?1:reveal)*viewportScale*(1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
+  item.scaleGoal=emergenceFor(item.feature)*viewportScale*(1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
   item.x=item.p.x+driftX;item.y=item.p.y-(roofLift(target,item.feature,surfaces)+178.5*viewportScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY;
@@ -372,7 +376,7 @@ function drawLights(fade,target=map,surface=lights){
   item.offset.avoidX+=(avoidance.x-item.offset.avoidX)*pointerBlend;
   item.offset.avoidY+=(avoidance.y-item.offset.avoidY)*pointerBlend;
   item.x+=item.offset.avoidX;item.y+=item.offset.avoidY;
- const emergence=item.feature.properties.key===selectedKey?1:reveal;
+ const emergence=emergenceFor(item.feature);
  item.x=item.p.x+(item.x-item.p.x)*emergence;
  item.y=item.p.y+(item.y-item.p.y)*emergence;
  }
@@ -395,7 +399,7 @@ function drawLights(fade,target=map,surface=lights){
   const beaconScale=offset?.scale??1;
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
-  const emergence=isBar?(feature.properties.key===selectedKey?1:reveal):0;
+  const emergence=isBar?emergenceFor(feature):0;
   if(pass===0){const orbY=p.y-8;drawDiscoveryOrb(lightsContext,p.x,orbY,color,coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:orbY,r:22});}
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
@@ -512,7 +516,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.beginPath();lightsContext.moveTo(-8+scan,-19);lightsContext.lineTo(3+scan,-19);lightsContext.stroke();
    lightsContext.restore();
    }
-   if(feature.properties.time){lightsContext.save();lightsContext.globalAlpha=coreAlpha;lightsContext.fillStyle='#fff';lightsContext.font='3px sans-serif';lightsContext.textAlign='center';lightsContext.fillText(feature.properties.time,0,-17);lightsContext.restore();}
+   if(feature.properties.time&&coreAlpha>.1){eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-17*5.25*beaconScale,width:Math.min(width-24,Math.max(160,210*beaconScale)),opacity:coreAlpha});}
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
     lightsContext.save();lightsContext.translate(0,-34);
@@ -544,6 +548,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
+ if(performance.now()-lastLabelUpdate>80){tell('labels',{labels:eventLabels});lastLabelUpdate=performance.now();}
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
 // Broad turns center the Old Town bar cluster, then the Mississippi/Alberta bars and Eagle.
@@ -581,7 +586,7 @@ function downtownZoom(latitude){
 }
 const status=document.querySelector('#map-status');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-let selectedKey=null,hitTargets=[];
+let selectedKey=null,hitTargets=[],lastLabelUpdate=0;
 const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
 let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
 const frameInterval=1000/30;
@@ -710,6 +715,10 @@ async function setListings(rows){
  const generation=++dataGeneration;
  const colors=[...new Set([...dayColors,adultVenueColor,...rows.map(row=>row.color)])];
  const nextPalette=colors.slice().sort().join(',');if(nextPalette!==paletteKey){hologramMaterials.dispose();hologramMaterials=createHologramMaterials(colors);paletteKey=nextPalette;}
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const dailyVenues=new Map();
+ for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=Date.now()?new Date(r.startsAt).getTime()-Date.now():1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
+ rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
  nearbyLights=createSpatialIndex(lightFeatures,f=>f.geometry.coordinates);assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));

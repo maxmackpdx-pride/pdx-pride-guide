@@ -441,7 +441,7 @@ export default function ZaydarMapDemo() {
     const at = new Date(e.dateStart).getTime();
     const ends = new Date(e.dateEnd).getTime();
     const now = Date.now();
-    if (timeFilter === "default") return at <= now + 21 * 86400000 && ends >= now;
+    if (timeFilter === "default") return at <= now + 21 * 86400000 && (ends >= now || portlandCalendarDay(e.dateStart) === portlandCalendarDay(now));
     if (timeFilter === "soon") return (at <= now && ends > now) || (at > now && at <= now + 90 * 60000);
     if (timeFilter === "custom") {
       if (!customStart || !customEnd) return false;
@@ -648,7 +648,9 @@ export default function ZaydarMapDemo() {
     return {key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
       logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':mark.kind==='housing'?'/zaydar-map/icons/housing.svg':mark.kind==='mizzed'?'/zaydar-map/icons/mizzed.svg':'/zaydar-map/icons/carpool.svg'),
       alternateLogo:brands?.alternate,
-      time:event?hour(event.dateStart):undefined};
+      eventDay:event?portlandCalendarDay(event.dateStart):undefined,
+      startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
+      time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   });
   const onSceneSelect=(key:string)=>{const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map demo">
