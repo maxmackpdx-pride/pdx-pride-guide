@@ -68,6 +68,7 @@ export default function HomeStage({ afterWelcome }: Props) {
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
         <HomeFlight paused={showAuth} onExploringChange={setExploring} />
+        <div className="home-front__backdrop-dim" data-exploring={exploring} aria-hidden="true" />
         <div
           className="home-front__hero"
           data-exploring={exploring}

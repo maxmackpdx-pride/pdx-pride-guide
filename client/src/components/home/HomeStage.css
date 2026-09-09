@@ -6,6 +6,8 @@
 .home-front__flight-credit a { color:inherit; }
 .home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .7s ease; }
 .home-front__flight[data-ready="true"] .home-front__flight-frame { opacity:1; pointer-events:auto; }
+.home-front__backdrop-dim { position:absolute; inset:0; z-index:1; background:#000; opacity:.1; pointer-events:none; transition:opacity .7s ease; }
+.home-front__backdrop-dim[data-exploring="true"] { opacity:0; transition-duration:.45s; }
 .home-front__hero { --home-logo-height:min(calc((100vw - 40px) * 824 / 2393),344px,28svh); position:absolute; inset:var(--home-header-height,var(--site-header-height,86px)) 0 var(--home-foreground-bottom,196px); z-index:2; min-width:0; display:flex; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
 .home-front__hero { opacity:1; visibility:visible; transition:opacity .7s ease,visibility 0s; }
 .home-front__hero[data-exploring="true"] { opacity:0; visibility:hidden; transition:opacity .45s ease,visibility 0s .45s; }
@@ -56,11 +58,13 @@ html:root .home-front .home-front__auth:focus-visible { outline:2px solid #fff; 
   .home-front__welcome > .home-hero-stats-boundary { padding-bottom:calc(var(--site-mobile-nav-height,72px) + var(--site-mobile-nav-offset,8px) + env(safe-area-inset-bottom,0px)); }
 }
 @media(prefers-reduced-motion:reduce) {
+  .home-front__backdrop-dim { transition:none; }
   .home-front__flight-frame { transition:none; }
   .home-front__hero,.home-front__hero[data-exploring="true"] { transition:none; }
   .home-front__worlds-orb,.home-front__worlds-grid,.home-front__content-word-a,.home-front__content-word-b { animation:none; }
 }
 html.calm-mode .home-front__hero,:root[data-calm="true"] .home-front__hero { transition:none; }
+html.calm-mode .home-front__backdrop-dim,:root[data-calm="true"] .home-front__backdrop-dim { transition:none; }
 
 @keyframes homeFrontGlitchA { 0%,87%,100%{opacity:0;transform:none;clip-path:inset(0)} 89%{opacity:.7;transform:translate(-4px,1px);clip-path:inset(18% 0 58% 0)} 92%{opacity:.55;transform:translate(3px,-1px);clip-path:inset(63% 0 14% 0)} 95%{opacity:.38;transform:translate(-2px,0);clip-path:inset(42% 0 36% 0)} }
 @keyframes homeFrontGlitchB { 0%,88%,100%{opacity:0;transform:none;clip-path:inset(0)} 90%{opacity:.62;transform:translate(4px,-1px);clip-path:inset(54% 0 24% 0)} 93%{opacity:.48;transform:translate(-3px,2px);clip-path:inset(27% 0 51% 0)} 96%{opacity:.32;transform:translate(2px,0);clip-path:inset(71% 0 9% 0)} }
