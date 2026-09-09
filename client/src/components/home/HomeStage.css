@@ -4,7 +4,7 @@
 .home-front__flight { position:absolute; inset:0; z-index:0; background:#020509 url('/home-flight/poster.webp') center/cover no-repeat; }
 .home-front__flight-credit { position:absolute; right:14px; bottom:var(--home-flight-bottom,116px); z-index:1; color:#9eb0c1; font-size:10px; text-shadow:0 1px 3px #000; }
 .home-front__flight-credit a { color:inherit; }
-.home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .7s ease; }
+.home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .25s ease; }
 .home-front__flight[data-ready="true"] .home-front__flight-frame { opacity:1; pointer-events:auto; }
 .home-front__backdrop-dim { position:absolute; inset:0; z-index:1; background:#000; opacity:.1; pointer-events:none; transition:opacity .7s ease; }
 .home-front__backdrop-dim[data-exploring="true"] { opacity:0; transition-duration:.45s; }

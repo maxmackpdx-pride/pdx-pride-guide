@@ -50,7 +50,7 @@ const waypoints=fetch('./waypoints.json',{signal:assetController.signal}).then(r
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
-map.on('load',()=>{map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
+map.on('style.load',()=>{map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
@@ -111,7 +111,7 @@ function loadVenueLogo(url,mode){
  const promise=decodeVenueLogo(url,mode);logoLoads.set(url,promise);return promise;
 }
 async function decodeVenueLogo(url,mode){
- const image=new Image();image.src=url;
+ const image=new Image();image.fetchPriority='low';image.src=url;
  try{
   await image.decode();
   if(disposed)return;
@@ -565,7 +565,7 @@ function downtownZoom(latitude){
 const status=document.querySelector('#map-status');
 const reduced=flightMotion;
 const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
-let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
+let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false,firstReveal=true;
 const frameInterval=1000/30;
 function flightSpeed(latitude){
  const enter=smoothRange(45.523078444325,45.523878444325,latitude);
@@ -602,7 +602,15 @@ function updateSceneStatus(){
  if(loaded&&assetsReady)flightReady();
 }
 function scheduleFrame(){if(!frame&&!disposed&&flightVisible())frame=requestAnimationFrame(draw);}
-map.on('load',()=>{loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();});
+function revealFirstMapFrame(){
+ if(loaded)return;
+ // Reveal usable geography without waiting for every visible tile to finish.
+ if(!map.getLayer('streets')||!map.queryRenderedFeatures({layers:['water','streets','skyline']}).length)return;
+ loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();
+ map.off('render',revealFirstMapFrame);
+}
+map.on('render',revealFirstMapFrame);
+map.on('load',()=>{if(!loaded){loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();map.off('render',revealFirstMapFrame);}});
 map.on('idle',()=>{
  if(loopWaiting){
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
@@ -628,7 +636,7 @@ function draw(now){
  }
  // End from the actual projected Eagle location, so the loop fits any viewport.
  if(exitAt!==null && elapsed-exitAt>=3.5){
-  elapsed=0;travel=0;revealTime=0;exitAt=null;loopWaiting=true;cameraDirty=true;
+  elapsed=0;travel=0;revealTime=0;firstReveal=false;exitAt=null;loopWaiting=true;cameraDirty=true;
   hologramLayouts.delete(map);surfaceCache.delete(map);glitterCache.delete(map);
  }
  const t=Math.min(travel/flightDuration,1);
@@ -640,7 +648,7 @@ function draw(now){
   const eagleAtEnd=eagle.y>=window.innerHeight*.4&&eagle.y<=window.innerHeight&&eagle.x>=0&&eagle.x<=window.innerWidth;
   if(exitAt===null && (eagleAtEnd || t>=1))exitAt=elapsed;
  }
- const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
+ const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,firstReveal?.45:3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
  if(ready)drawLights(visibility);
@@ -666,7 +674,7 @@ function onVisibilityChange(){
 document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('flightvisibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
- disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);window.removeEventListener('flightvisibilitychange',onVisibilityChange);
+ disposed=true;map.off('render',revealFirstMapFrame);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);window.removeEventListener('flightvisibilitychange',onVisibilityChange);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);

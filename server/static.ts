@@ -39,6 +39,10 @@ export function serveStatic(app: Express) {
     // Read from disk each request so a deploy never serves a stale bundle hash
     // from an in-memory snapshot taken at process startup.
     let baseIndexHtml = fs.readFileSync(indexPath, "utf8");
+    if ((requestPath === "/" || requestPath === "/index.html") && flightBase) {
+      // Fetch the map module graph while the app starts, before the lazy home route mounts its iframe.
+      baseIndexHtml = baseIndexHtml.replace("</head>", `<link rel="modulepreload" href="${flightBase}/river-flight.js"><link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin><link rel="preload" href="https://tiles.openfreemap.org/planet" as="fetch" crossorigin></head>`);
+    }
     if (process.env.LOCAL_PREVIEW === "1") {
       baseIndexHtml = baseIndexHtml.replace(
         "<head>",
