@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Link, useLocation } from "wouter";
 import ZaydarSearchDrawer, {zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
+import ZaydarRecentEvents from "@/components/ZaydarRecentEvents";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation, SlidersHorizontal, X } from "lucide-react";
@@ -690,6 +691,7 @@ export default function ZaydarMapDemo() {
     </div>
     <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
       {!q&&placeType==='all'&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
+      {!q&&placeType==='all'&&<ZaydarRecentEvents events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
       <h2 className="zaydar-nearby-title">{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
       {loading&&<p role="status">Loading live listings…</p>}
       {failed&&<p role="alert">Some listings could not load. <button onClick={()=>{void retryEvents();void retryPlaces();}}>Retry</button></p>}

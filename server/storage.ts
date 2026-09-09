@@ -9645,7 +9645,7 @@ export interface IStorage {
   resolveUserByIdentifier(identifier: string): User | undefined;
   resolveEventPrimaryHostUser(eventId: number): User | undefined;
   resolveVenueOwnerUser(event: Pick<Event, "venueName" | "address" | "lat" | "lng">): { user: User; businessName: string } | undefined;
-  resolveEventMessageRecipient(eventId: number): { user: User; recipientType: "host" | "venue_owner"; venueName?: string } | undefined;
+  resolveEventMessageRecipient(eventId: number, target?: "auto" | "host" | "venue"): { user: User; recipientType: "host" | "venue_owner"; venueName?: string } | undefined;
   isUserEventHost(eventId: number, userId: number): boolean;
   setPrimaryEventHost(eventId: number, userId: number, addedByUserId: number | null): void;
   addEventCoHost(eventId: number, inviterUserId: number, username: string, email: string): { host?: any; error?: string };
@@ -12646,12 +12646,13 @@ export const storage: IStorage = {
     }
     return undefined;
   },
-  resolveEventMessageRecipient(eventId) {
+  resolveEventMessageRecipient(eventId, target = "auto") {
     const evt = storage.getEvent(eventId);
     if (!evt) return undefined;
 
     const host = storage.resolveEventPrimaryHostUser(eventId);
-    if (host) return { user: host, recipientType: "host" as const };
+    if (target !== "venue" && host) return { user: host, recipientType: "host" as const };
+    if (target === "host") return undefined;
 
     const venueOwner = storage.resolveVenueOwnerUser(evt);
     if (venueOwner) {

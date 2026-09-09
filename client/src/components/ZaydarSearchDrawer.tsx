@@ -1,4 +1,5 @@
 import {useRef,useState,lazy,Suspense,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
+import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
 import {Search,SlidersHorizontal,X,ChevronRight,Plus} from 'lucide-react';
 const DirectoryAddPlaceForm=lazy(()=>import('./DirectoryAddPlaceForm'));
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
@@ -22,7 +23,8 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   if(gesture.current.moved){const height=gesture.current.height+gesture.current.y-event.clientY;setLevel(height<160?'compact':height>Math.min(440,gesture.current.max*.75)?'full':'peek');suppressClick.current=true;}
   setDragHeight(null);
  };
- return <section ref={sheet} className={`zaydar-search-drawer is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" style={dragHeight===null?undefined:{height:dragHeight} as CSSProperties} onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
+ return <section ref={sheet} data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" style={dragHeight===null?undefined:{height:dragHeight} as CSSProperties} onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
+  <NavGlassLayers/>
   <button type="button" className="zaydar-drawer-handle" aria-label={level==='full'?'Collapse results drawer':'Expand results drawer'} aria-expanded={level==='full'} aria-controls="zaydar-drawer-content"
    onClick={()=>{if(suppressClick.current){suppressClick.current=false;return;}setLevel(level==='full'?'peek':'full');}}
    onKeyDown={event=>{if(event.key==='ArrowUp'){event.preventDefault();setLevel('full');}if(event.key==='ArrowDown'){event.preventDefault();setLevel(level==='full'?'peek':'compact');}}}
