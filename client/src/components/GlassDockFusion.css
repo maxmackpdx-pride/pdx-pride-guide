@@ -1,0 +1,26 @@
+/* 21st Floating Nav + LumaBar + LiquidGlass, in the existing Zaylist dock skin. */
+.glass-dock-expand { display:none; }
+.glass-dock-lens { position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:-3; backdrop-filter:blur(9px) saturate(1.25); -webkit-backdrop-filter:blur(9px) saturate(1.25); }
+@supports (backdrop-filter:url("#lens")) { .glass-dock-lens { backdrop-filter:blur(9px) var(--dock-lens) saturate(1.25); } }
+.site-mobile-nav--fusion > .z-glass__blur { display:none; }
+.glass-dock-indicator { position:absolute; top:0; left:0; border-radius:22px; pointer-events:none; z-index:0; border:1px solid color-mix(in srgb,var(--indicator-color) 78%,transparent); background:radial-gradient(110% 150% at 12% 0%,rgba(175,232,253,.18),transparent 46%),linear-gradient(160deg,color-mix(in srgb,var(--indicator-color) 8%,transparent),rgba(5,12,18,.65) 66%,color-mix(in srgb,var(--indicator-color) 10%,transparent)); box-shadow:inset 2px 2px 1px -1px rgba(225,249,255,.72),inset -1px -1px 1px rgba(148,223,245,.3); }
+.glass-dock-indicator > span { position:absolute; inset:18%; border-radius:50%; background:var(--indicator-color); opacity:.15; filter:blur(12px); }
+@media(max-width:959px) {
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.site-mobile-nav--fusion { right:auto; left:8px; width:calc(100% - 16px); max-width:576px; margin-inline:0; transition:width .42s cubic-bezier(.22,.8,.25,1),height .42s cubic-bezier(.22,.8,.25,1),border-radius .42s; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.site-mobile-nav--fusion .hub-mobile-bar__dock { width:min(calc(100vw - 16px),576px); flex:none; transition:opacity .16s,visibility .16s; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.site-mobile-nav--fusion .hub-mobile-tab { position:relative; z-index:1; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.site-mobile-nav--fusion .hub-mobile-tab.is-active { background:transparent; border-color:transparent; box-shadow:none; }
+  .site-mobile-nav--fusion .znav-icon-row { transition:transform .3s cubic-bezier(.22,.8,.25,1); }
+  .site-mobile-nav--fusion .is-active .znav-icon-row { transform:translateY(-1px) scale(1.08); }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.site-mobile-nav--fusion.is-collapsed { width:64px; height:64px; border-radius:50%; }
+  .site-mobile-nav--fusion.is-collapsed .hub-mobile-bar__dock { opacity:0; visibility:hidden; pointer-events:none; }
+  .site-mobile-nav--fusion .glass-dock-expand { display:grid; place-items:center; position:absolute; inset:0; z-index:4; width:64px; height:64px; padding:0; border:0; border-radius:50%; background:transparent; color:#e1e7ef; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .16s; }
+  .site-mobile-nav--fusion.is-collapsed .glass-dock-expand { opacity:1; visibility:visible; pointer-events:auto; transition-delay:.15s; }
+  .glass-dock-expand:focus-visible { outline:2px solid #19e3ff; outline-offset:-5px; }
+}
+html.calm-mode .site-mobile-nav--fusion *,html[data-calm="true"] .site-mobile-nav--fusion *,html.calm-mode .site-mobile-nav--fusion,html[data-calm="true"] .site-mobile-nav--fusion { transition:none!important; }
+html.calm-mode .glass-dock-lens,html[data-calm="true"] .glass-dock-lens { backdrop-filter:none; -webkit-backdrop-filter:none; }
+@media(prefers-reduced-motion:reduce) { .site-mobile-nav--fusion,.site-mobile-nav--fusion * { transition:none!important; } .glass-dock-lens { backdrop-filter:blur(9px) saturate(1.25); } }
+@media(prefers-reduced-transparency:reduce) { .glass-dock-lens { backdrop-filter:none; -webkit-backdrop-filter:none; } }
+@media(forced-colors:active) { .glass-dock-lens,.glass-dock-indicator { display:none; } .site-mobile-nav--fusion .glass-dock-expand { border:1px solid ButtonText; color:ButtonText; } }
+.site-mobile-nav--fusion .znav-hologram { display:block; flex:none; width:44px; height:54px; }

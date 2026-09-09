@@ -14,6 +14,8 @@ import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { NavGlassLayers, navGlassPointer } from "@/components/ui/nav-glass";
+import { GlassDockIndicator, LiquidDockLens } from "./ui/glass-dock-effects";
+import "./GlassDockFusion.css";
 import { CalendarDays, Compass, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
@@ -53,19 +55,23 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
+// Existing Hero Z outline from the About hero; reused without redrawing the mark.
+const HERO_Z_PATH = "M57 62L140 166 458 167 112 577 628 555 708 461 345 458 692 62Z";
+function HeroZMark() {
+  return <svg width="32" height="28" viewBox="45 45 680 550" fill="currentColor" aria-hidden="true"><path d={HERO_Z_PATH} /></svg>;
+}
 function MapzMark() {
-  const markMaskId = useId();
-  return (
-    <svg className="znav-waypoint" width="48" height="54" viewBox="0 0 48 54" fill="none" aria-hidden="true">
-      <defs>
-        <mask id={markMaskId} maskUnits="userSpaceOnUse" x="7" y="8" width="34" height="27">
-          <image href="/brand/family/prime-z.svg" x="7" y="8" width="34" height="27" />
-        </mask>
-      </defs>
-      <path d="M24 51C20 46 5 34 5 21a19 19 0 0 1 38 0c0 13-15 25-19 30Z" fill="var(--panel-ink)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-      <rect x="7" y="8" width="34" height="27" fill="currentColor" mask={`url(#${markMaskId})`} />
-    </svg>
-  );
+  const maskId = `hologram-z-${useId().replace(/:/g, "")}`;
+  return <svg className="znav-hologram" width="48" height="54" viewBox="0 0 48 54" fill="none" aria-hidden="true">
+    <defs><mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="54">
+      <rect width="48" height="54" fill="white" />
+      <path d={HERO_Z_PATH} transform="translate(10 5) scale(.038)" fill="black" />
+    </mask></defs>
+    <path d="M5 5H43L39 30H9Z" fill="currentColor" mask={`url(#${maskId})`} />
+    <path d="M10 31L24 48L38 31M16 32L24 46L32 32" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" opacity=".7" />
+    <path d="M15 35H33M18 40H30" stroke="currentColor" strokeWidth=".8" opacity=".45" />
+    <ellipse cx="24" cy="49" rx="7" ry="2.5" stroke="currentColor" strokeWidth="1.4" />
+  </svg>;
 }
 
 function tabClass(
@@ -88,6 +94,9 @@ export default function MobileBottomNav() {
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [dockHidden, setDockHidden] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  const dockId = useId();
   const overlayOpen = eventsOpen || spaceOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
 
   useEffect(() => {
@@ -110,7 +119,7 @@ export default function MobileBottomNav() {
       if (delta === 0) return;
       travel = Math.sign(delta) === Math.sign(travel) ? travel + delta : delta;
       if (Math.abs(travel) >= 12) {
-        setDockHidden(travel > 0);
+        setDockHidden(travel > 0 && !navRef.current?.contains(document.activeElement));
         travel = 0;
       }
     };
@@ -391,9 +400,12 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption z-glass site-mobile-nav--glass${dockHidden && !overlayOpen ? " is-scroll-hidden" : ""}`} data-seam="top" aria-label="Site mobile navigation" onFocusCapture={() => setDockHidden(false)} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
+      <nav ref={navRef} className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption z-glass site-mobile-nav--glass site-mobile-nav--fusion${dockHidden && !overlayOpen ? " is-collapsed" : ""}`} data-seam="top" aria-label="Site mobile navigation" onFocusCapture={event => { if (!(event.target as HTMLElement).closest(".glass-dock-expand")) setDockHidden(false); }} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
         <NavGlassLayers />
-        <div className="hub-mobile-bar__dock">
+        <LiquidDockLens hostRef={navRef} />
+        <button type="button" className="glass-dock-expand" aria-label="Expand navigation" aria-expanded={false} aria-controls={dockId} tabIndex={dockHidden && !overlayOpen ? 0 : -1} aria-hidden={!dockHidden || overlayOpen} onClick={() => { setDockHidden(false); requestAnimationFrame(() => dockRef.current?.querySelector<HTMLElement>(".is-active, button, a")?.focus()); }}><HeroZMark /></button>
+        <div id={dockId} ref={dockRef} className="hub-mobile-bar__dock" {...{ inert: dockHidden && !overlayOpen ? "" : undefined }}>
+          <GlassDockIndicator dockRef={dockRef} activeKey={`${location}:${eventsOpen}:${exploreOpen}:${outzOpen}:${spaceOpen}:${open}`} />
           <button
             type="button"
             className={tabClass(eventsActive || eventsOpen, "cyan")}
