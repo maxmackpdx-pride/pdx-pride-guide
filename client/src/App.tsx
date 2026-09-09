@@ -1,3 +1,4 @@
+import { homeBootLogoHtml } from "@shared/homeBoot";
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -143,7 +144,7 @@ function AppLayout() {
       {location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
         <RouteBoundary>
-          <Suspense fallback={<SpectrumLoader variant="full" label="Loading page" />}>
+          <Suspense fallback={location.split("?")[0] === "/" ? <div dangerouslySetInnerHTML={{ __html: homeBootLogoHtml }} /> : <SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
             {/* Z/ is Communities only. Old product addresses remain redirects. */}
             <Route path="/z" component={ZIndex} />

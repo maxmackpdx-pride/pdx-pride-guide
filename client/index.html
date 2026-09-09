@@ -119,7 +119,7 @@
           var root = document.getElementById("root");
           if (!root) return;
           // Hide as soon as React mounts; never re-show once the app has booted.
-          if (root.childElementCount > 0) setBootFallback(false);
+          if (root.childElementCount > 0 && !root.querySelector(":scope > [data-home-boot]")) setBootFallback(false);
         }
 
         var root = document.getElementById("root");
@@ -131,7 +131,7 @@
         window.setTimeout(function () {
           var rootEl = document.getElementById("root");
           var fallback = document.getElementById("boot-fallback");
-          if (rootEl && !rootEl.childElementCount && fallback) {
+          if (rootEl && (!rootEl.childElementCount || rootEl.querySelector(":scope > [data-home-boot]")) && fallback) {
             setBootFallback(true);
           }
         }, 6000);

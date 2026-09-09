@@ -3,6 +3,7 @@ import type { Express } from 'express';
 import fs from "node:fs";
 import path from "node:path";
 import { injectSeoIntoHtml } from "./seo";
+import { homeBootLogoHtml } from "../shared/homeBoot";
 
 const APP_PATHS = new Set([
   "/", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/pride-work", "/gifting", "/sellz",
@@ -24,24 +25,16 @@ export function serveStatic(app: Express) {
   }
 
   const indexPath = path.resolve(distPath, "index.html");
-  const flightManifest = path.join(distPath, "zaydar-manifest.json");
-  const flightBase = fs.existsSync(flightManifest) ? JSON.parse(fs.readFileSync(flightManifest, "utf8")).base as string : null;
   const sendSeoIndex = (req: express.Request, res: express.Response) => {
     const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
-    if ((requestPath === "/" || requestPath === "/index.html") && flightBase) {
-      // Also available to Cloudflare Early Hints when enabled for the zone.
-      res.set("Link", [
-        `<${flightBase}/poster.webp>; rel=preload; as=image`,
-        `<${flightBase}/vendor/maplibre-gl-5.6.2.js>; rel=preload; as=script`,
-        '<https://tiles.openfreemap.org>; rel=preconnect; crossorigin',
-      ].join(", "));
+    if (requestPath === "/" || requestPath === "/index.html") {
+      res.set("Link", '</brand/family/zaylist-primary.svg>; rel=preload; as=image; fetchpriority=high');
     }
     // Read from disk each request so a deploy never serves a stale bundle hash
     // from an in-memory snapshot taken at process startup.
     let baseIndexHtml = fs.readFileSync(indexPath, "utf8");
-    if ((requestPath === "/" || requestPath === "/index.html") && flightBase) {
-      // Fetch the map module graph while the app starts, before the lazy home route mounts its iframe.
-      baseIndexHtml = baseIndexHtml.replace("</head>", `<link rel="modulepreload" href="${flightBase}/river-flight.js"><link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin><link rel="preload" href="https://tiles.openfreemap.org/planet" as="fetch" crossorigin></head>`);
+    if (requestPath === "/" || requestPath === "/index.html") {
+      baseIndexHtml = baseIndexHtml.replace('<div id="root"></div>', `<div id="root">${homeBootLogoHtml}</div>`);
     }
     if (process.env.LOCAL_PREVIEW === "1") {
       baseIndexHtml = baseIndexHtml.replace(

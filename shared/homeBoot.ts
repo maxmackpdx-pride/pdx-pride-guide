@@ -1,0 +1,2 @@
+// Static first paint and the home-route fallback share the same lightweight logo.
+export const homeBootLogoHtml = `<div data-home-boot style="min-height:calc(100svh - 86px);display:flex;align-items:center;justify-content:center;background:#020509;padding:20px;box-sizing:border-box"><img src="/brand/family/zaylist-primary.svg" alt="Zaylist" width="2393" height="824" fetchpriority="high" decoding="sync" style="display:block;width:min(100%,1000px);max-height:28svh;object-fit:contain;transform:translateY(-8svh)"></div>`;

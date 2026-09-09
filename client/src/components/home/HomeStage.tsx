@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import AuthModal from "@/components/AuthModal";
 import HomeFlight from "@/components/home/HomeFlight";
@@ -40,12 +40,27 @@ export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const worldData = useHomeWorlds();
   const { user } = useAuth();
+  const logoRef = useRef<HTMLImageElement>(null);
+  const [logoReady, setLogoReady] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [exploring, setExploring] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
   const hasPreviewError = Object.values(worldData.states).some(state => state === "error");
+
+  useEffect(() => {
+    let cancelled = false, firstPaint = 0, secondPaint = 0;
+    const afterLogo = () => {
+      if (cancelled) return;
+      firstPaint = requestAnimationFrame(() => {
+        secondPaint = requestAnimationFrame(() => { if (!cancelled) setLogoReady(true); });
+      });
+    };
+    // Give the real wordmark a paint before starting the map engine or poster download.
+    void logoRef.current?.decode().then(afterLogo, afterLogo);
+    return () => { cancelled = true; cancelAnimationFrame(firstPaint); cancelAnimationFrame(secondPaint); };
+  }, []);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -67,7 +82,7 @@ export default function HomeStage({ afterWelcome }: Props) {
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        <HomeFlight paused={showAuth} onExploringChange={setExploring} />
+        <HomeFlight enabled={logoReady} paused={showAuth} onExploringChange={setExploring} />
         <div className="home-front__backdrop-dim" data-exploring={exploring} aria-hidden="true" />
         <div
           className="home-front__hero"
@@ -80,6 +95,7 @@ export default function HomeStage({ afterWelcome }: Props) {
             <div className="home-front__mark">
               <div className="home-front__mark-art">
                 <img
+                  ref={logoRef}
                   className="home-front__mark-core"
                   src={WORDMARK}
                   alt="Zaylist"

@@ -5,7 +5,8 @@ import { prefersStillMotion } from "@/lib/motion";
 declare const __ZAYDAR_BASE__: string;
 
 /** The flight has its own document so its camera cannot alter the page layout. */
-export default function HomeFlight({ paused = false, onExploringChange }: {
+export default function HomeFlight({ enabled = true, paused = false, onExploringChange }: {
+  enabled?: boolean;
   paused?: boolean;
   onExploringChange: (exploring: boolean) => void;
 }) {
@@ -15,6 +16,7 @@ export default function HomeFlight({ paused = false, onExploringChange }: {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
     const element = container.current;
     if (!element) return;
     const front = element.closest<HTMLElement>(".home-front");
@@ -69,22 +71,22 @@ export default function HomeFlight({ paused = false, onExploringChange }: {
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("message", onMessage);
     };
-  }, [calmMode, paused, onExploringChange]);
+  }, [enabled, calmMode, paused, onExploringChange]);
 
   return (
-    <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: `url(${__ZAYDAR_BASE__}/poster.webp)` }}>
+    <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: enabled ? `url(${__ZAYDAR_BASE__}/poster.webp)` : "none" }}>
       {!ready && (
         <div className="home-front__flight-credit">
           © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
           {" · "}<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> · OpenMapTiles
         </div>
       )}
-      <iframe
+      {enabled && <iframe
         ref={frame}
         src={`${__ZAYDAR_BASE__}/index.html`}
         title="Explore Portland’s queer venues — click the map to pause the flyover"
         className="home-front__flight-frame"
-      />
+      />}
     </div>
   );
 }
