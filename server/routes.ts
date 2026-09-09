@@ -1,3 +1,4 @@
+import { getOutzDetails } from "./outzDetails";
 import { getOutzCommunityFeed } from "./outzFeed";
 import { getOutzFeedWeather } from "./outzFeedWeather";
 import { safeMapReturnTo } from "@shared/authReturn";
@@ -1847,6 +1848,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
       console.error("GET /api/outz failed:", err);
       res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
     }
+  });
+
+  app.get("/api/outz/details", async (req, res) => {
+    try {
+      const id = typeof req.query.place === "string" ? req.query.place : "";
+      if (!id || id.length > 180) return res.status(400).json({ error: "Invalid destination" });
+      const data = await getOutzDetails(id, (await getOutzSnapshot()).data);
+      if (!data) return res.status(404).json({ error: "Unknown destination" });
+      res.setHeader("Cache-Control", "no-store");
+      res.json(data);
+    } catch { res.status(502).json({ error: "Spot details unavailable" }); }
   });
 
   app.get("/api/outz/feed", async (req: any, res) => {
