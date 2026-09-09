@@ -42,6 +42,7 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
  const moveDrag=(event:PointerEvent<HTMLDivElement>)=>{
   const active=gesture.current;if(!active||active.pointerId!==event.pointerId)return;
   const delta=active.y-event.clientY;
+  if(Math.hypot(event.clientX-active.x,delta)>=8)suppressClick.current=true;
   if(!active.moved){
    if(Math.abs(delta)<8||Math.abs(delta)<=Math.abs(event.clientX-active.x))return;
    active.moved=true;suppressClick.current=true;event.currentTarget.setPointerCapture(event.pointerId);
@@ -65,7 +66,13 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   }
   setDragHeight(null);
  };
- const cancelDrag=()=>{gesture.current=null;suppressClick.current=false;setDragHeight(null);};
+ const cancelDrag=()=>{gesture.current=null;suppressClick.current=true;setDragHeight(null);};
+ // Native scrolling owns the body. A pointer that moved or was cancelled must not also tap a filter.
+ const contentGesture=useRef<{pointerId:number;x:number;y:number;scrolled:boolean}|null>(null);
+ const trackContentMovement=(event:PointerEvent<HTMLDivElement>)=>{
+  const active=contentGesture.current;
+  if(active?.pointerId===event.pointerId&&Math.hypot(event.clientX-active.x,event.clientY-active.y)>=8)active.scrolled=true;
+ };
  return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
   <NavGlassLayers/>
   <div className="zaydar-drawer-header" role="group" aria-label="Drawer search and resize controls"
@@ -81,10 +88,16 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
    <button type="button" className="zaydar-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setAdding(false);setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
   </SmoothDrawerItem>
   </div>
-  <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="zaydar-drawer-content" className="zaydar-drawer-scroll" hidden={level==='compact'&&dragHeight===null}>
+  <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="zaydar-drawer-content" className="zaydar-drawer-scroll"
+   onPointerDownCapture={event=>{if(event.isPrimary)contentGesture.current={pointerId:event.pointerId,x:event.clientX,y:event.clientY,scrolled:false};}}
+   onPointerMoveCapture={trackContentMovement} onPointerUpCapture={trackContentMovement}
+   onPointerCancelCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
+   onScrollCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
+   onClickCapture={event=>{if(event.detail>0&&contentGesture.current?.scrolled){event.preventDefault();event.stopPropagation();}}}
+   hidden={level==='compact'&&dragHeight===null}>
    {adding?<Suspense fallback={<p role="status">Loading place form…</p>}><DirectoryAddPlaceForm embedded readOnly={Boolean((window as unknown as {__PDX_LOCAL_PREVIEW__?:number}).__PDX_LOCAL_PREVIEW__)} onClose={()=>setAdding(false)}/></Suspense>:<>
    <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}<button type="button" className="zaydar-add-place" aria-label="Add a place" onClick={()=>{setAdding(true);setLevel('full');}}><Plus size={22}/></button></SmoothDrawerItem>
-   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</SmoothDrawerItem>
    {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
    <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
    </>}
