@@ -1,4 +1,5 @@
-import {useRef,useState,lazy,Suspense,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
+import {useRef,useState,useLayoutEffect,lazy,Suspense,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
+import SmoothDrawer,{SmoothDrawerGroup,SmoothDrawerItem} from './ui/smooth-drawer';
 import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
 import {Search,SlidersHorizontal,X,ChevronRight,Plus} from 'lucide-react';
 const DirectoryAddPlaceForm=lazy(()=>import('./DirectoryAddPlaceForm'));
@@ -16,6 +17,19 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
  const [filtersOpen,setFiltersOpen]=useState(false);
  const [adding,setAdding]=useState(false);
  const sheet=useRef<HTMLElement>(null),input=useRef<HTMLInputElement>(null);
+ const [track,setTrack]=useState<{height:number;desktop:boolean}|null>(null);
+ useLayoutEffect(()=>{
+  const parent=sheet.current?.parentElement;if(!parent)return;
+  const desktop=window.matchMedia('(min-width:768px)');
+  const measure=()=>setTrack(previous=>{
+   const next={height:parent.clientHeight,desktop:desktop.matches};
+   return previous?.height===next.height&&previous.desktop===next.desktop?previous:next;
+  });
+  const observer=new ResizeObserver(measure);observer.observe(parent);desktop.addEventListener('change',measure);measure();
+  return()=>{observer.disconnect();desktop.removeEventListener('change',measure);};
+ },[]);
+ const fullHeight=track?Math.max(92,track.desktop?track.height-36:track.height*.92):undefined;
+ const snapHeight=track?level==='compact'?92:level==='full'?fullHeight:Math.min(fullHeight!,track.desktop?380:Math.min(380,track.height*.52)):undefined;
  const gesture=useRef({y:0,height:0,max:0,moved:false}),suppressClick=useRef(false);
  const endDrag=(event:PointerEvent<HTMLButtonElement>)=>{
   if(!event.currentTarget.hasPointerCapture(event.pointerId))return;
@@ -23,25 +37,25 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   if(gesture.current.moved){const height=gesture.current.height+gesture.current.y-event.clientY;setLevel(height<160?'compact':height>Math.min(440,gesture.current.max*.75)?'full':'peek');suppressClick.current=true;}
   setDragHeight(null);
  };
- return <section ref={sheet} data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" style={dragHeight===null?undefined:{height:dragHeight} as CSSProperties} onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
+ return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
   <NavGlassLayers/>
   <button type="button" className="zaydar-drawer-handle" aria-label={level==='full'?'Collapse results drawer':'Expand results drawer'} aria-expanded={level==='full'} aria-controls="zaydar-drawer-content"
    onClick={()=>{if(suppressClick.current){suppressClick.current=false;return;}setLevel(level==='full'?'peek':'full');}}
    onKeyDown={event=>{if(event.key==='ArrowUp'){event.preventDefault();setLevel('full');}if(event.key==='ArrowDown'){event.preventDefault();setLevel(level==='full'?'peek':'compact');}}}
-   onPointerDown={event=>{gesture.current={y:event.clientY,height:sheet.current!.getBoundingClientRect().height,max:(sheet.current!.parentElement!.clientHeight)*.92,moved:false};event.currentTarget.setPointerCapture(event.pointerId);}}
+   onPointerDown={event=>{gesture.current={y:event.clientY,height:sheet.current!.getBoundingClientRect().height,max:fullHeight??(sheet.current!.parentElement!.clientHeight)*.92,moved:false};event.currentTarget.setPointerCapture(event.pointerId);}}
    onPointerMove={event=>{if(!event.currentTarget.hasPointerCapture(event.pointerId))return;const delta=gesture.current.y-event.clientY;if(Math.abs(delta)>8)gesture.current.moved=true;if(gesture.current.moved)setDragHeight(Math.max(92,Math.min(gesture.current.max,gesture.current.height+delta)));}}
    onPointerUp={endDrag} onPointerCancel={()=>setDragHeight(null)}><span/></button>
-  <div className="zaydar-drawer-search-row">
+  <SmoothDrawerItem className="zaydar-drawer-search-row">
    <label className="zaydar-drawer-search"><Search size={22}/><input ref={input} type="search" aria-label="Search Zaydar" placeholder="Search Zaydar" value={query} onFocus={()=>{setAdding(false);setLevel('full');}} onChange={event=>{onQuery(event.target.value);setLevel('full');}}/>{query&&<button type="button" onClick={()=>{onQuery('');input.current?.focus();}} aria-label="Clear search"><X size={18}/></button>}</label>
    <button type="button" className="zaydar-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setAdding(false);setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
-  </div>
-  <div id="zaydar-drawer-content" className="zaydar-drawer-scroll" hidden={level==='compact'&&dragHeight===null}>
+  </SmoothDrawerItem>
+  <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="zaydar-drawer-content" className="zaydar-drawer-scroll" hidden={level==='compact'&&dragHeight===null}>
    {adding?<Suspense fallback={<p role="status">Loading place form…</p>}><DirectoryAddPlaceForm embedded readOnly={Boolean((window as unknown as {__PDX_LOCAL_PREVIEW__?:number}).__PDX_LOCAL_PREVIEW__)} onClose={()=>setAdding(false)}/></Suspense>:<>
-   <div className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}<button type="button" className="zaydar-add-place" aria-label="Add a place" onClick={()=>{setAdding(true);setLevel('full');}}><Plus size={22}/></button></div>
-   <div className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</div>
-   {filtersOpen&&<div className="zaydar-drawer-advanced">{filters}</div>}
-   <div className="zaydar-drawer-results">{children}</div>
+   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}<button type="button" className="zaydar-add-place" aria-label="Add a place" onClick={()=>{setAdding(true);setLevel('full');}}><Plus size={22}/></button></SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</SmoothDrawerItem>
+   {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
+   <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
    </>}
-  </div>
- </section>;
+  </SmoothDrawerGroup>
+ </SmoothDrawer>;
 }
