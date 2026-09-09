@@ -9,6 +9,7 @@ import {
 } from "./lib/resetPageScroll";
 import { captureInstallPrompt, registerServiceWorker } from "./lib/pwa";
 import { listenForPushSubscriptionChanges } from "./lib/pushNotifications";
+import { installStaleAssetRecovery } from "./lib/lazyWithReload";
 import "./fonts.css";
 import "./index.css";
 import "./layout-end.css";
@@ -23,6 +24,9 @@ import "@/components/ds/tokens/buttons.css";
 
 // Fluent 2 depth + Material 3 states, governed by Zaylist color semantics.
 document.documentElement.dataset.zaylistCards = "fluent2-m3";
+
+// Install before React renders and requests any route-level JS or CSS chunks.
+installStaleAssetRecovery();
 
 // Prevent the browser from restoring a previous scroll position on
 // reload / back-forward navigation so every page load starts at the top.
