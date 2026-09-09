@@ -307,7 +307,22 @@ function drawLights(fade,target=map,surface=lights){
  const ordered=lightFeatures.map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
- const beacons=ordered.filter(v=>v.feature.properties.isBar&&(reveal>.005||v.feature.properties.key===selectedKey));
+ // Expand a few distinct locations; individual event rows remain discoverable as orbs.
+ const candidates=ordered.filter(v=>v.feature.properties.isBar&&(reveal>.005||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
+ const beacons=[];
+ for(const item of candidates){
+  if(beacons.length>=(width<768?3:8))break;
+  const [lng,lat]=item.feature.geometry.coordinates;
+  if(beacons.some(other=>{
+   const [otherLng,otherLat]=other.feature.geometry.coordinates;
+   const sameLocation=Math.hypot((lng-otherLng)*Math.cos(lat*Math.PI/180),lat-otherLat)<.00065;
+   const tooClose=Math.hypot(item.p.x-other.p.x,item.p.y-other.p.y)<(width<768?150:180);
+   return sameLocation||tooClose;
+  }))continue;
+  beacons.push(item);
+ }
+ const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -375,12 +390,12 @@ function drawLights(fade,target=map,surface=lights){
  logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
  for(const pass of [0,1])for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
-  const isBar=feature.properties.isBar&&(reveal>.005||feature.properties.key===selectedKey);
+  const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
-  const emergence=feature.properties.key===selectedKey?1:reveal;
+  const emergence=isBar?(feature.properties.key===selectedKey?1:reveal):0;
   if(pass===0){const orbY=p.y-8;drawDiscoveryOrb(lightsContext,p.x,orbY,color,coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:orbY,r:22});}
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);

@@ -137,7 +137,7 @@ function AppLayout() {
   const livingMap = ["/map", "/map-demo"].includes(location.split("?")[0]);
   return (
     <div
-      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}`}
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${location.split("?")[0] === "/map-demo" ? " app-shell--zaydar-demo" : ""}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
