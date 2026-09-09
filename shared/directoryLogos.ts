@@ -1,7 +1,7 @@
 /** Map directory business names → static neon logo paths under /directory-logos. */
 
 /** Bump when logo assets under /directory-logos change so browsers fetch fresh files. */
-export const DIRECTORY_LOGO_VERSION = "2026-09-07";
+export const DIRECTORY_LOGO_VERSION = "2026-09-08-venue-artwork";
 
 /** Append soft cache-bust query to pack paths. Skip if already has a query string. */
 function withLogoCacheBust(path: string): string {
