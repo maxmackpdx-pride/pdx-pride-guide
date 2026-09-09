@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Link, useLocation } from "wouter";
 import ZaydarSearchDrawer, {zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
+import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation, SlidersHorizontal, X } from "lucide-react";
 
@@ -688,7 +689,8 @@ export default function ZaydarMapDemo() {
     {createOpen&&<nav id="living-map-create-menu" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Post to Zaylist"><button className="zaydar-close" onClick={()=>setCreateOpen(false)} aria-label="Close post menu">×</button><h2>Post to Zaylist</h2>{MAP_CREATE_LINKS.map(item=><Link key={item.href} href={item.href}>{item.label} ↗</Link>)}</nav>}
     </div>
     <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
-      <h2>{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
+      {!q&&placeType==='all'&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
+      <h2 className="zaydar-nearby-title">{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
       {loading&&<p role="status">Loading live listings…</p>}
       {failed&&<p role="alert">Some listings could not load. <button onClick={()=>{void retryEvents();void retryPlaces();}}>Retry</button></p>}
       {!loading&&!resultMarks.length&&<p role="status">No listings match. Try another search or Placez type.</p>}
