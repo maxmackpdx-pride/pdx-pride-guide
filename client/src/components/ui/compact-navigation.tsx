@@ -34,7 +34,7 @@ function useQuietMotion() {
   return reduced || calm;
 }
 
-export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV }: { location: string; onNavigate: () => void; entries?: NavEntry[] }) {
+export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV, textOnly = false }: { location: string; onNavigate: () => void; entries?: NavEntry[]; textOnly?: boolean }) {
   const [focused, setFocused] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const quiet = useQuietMotion();
@@ -50,11 +50,11 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV 
       const Icon = ICONS[entry.label];
       const active = entryActive(entry, location);
       const expanded = open === key || (focused ? focused === key : active);
-      const content = <><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+      const content = textOnly ? <><span className="znav-caption">{entry.label}</span>{entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={13} aria-hidden="true" />}</> : <><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
         <motion.span initial={false} animate={{ width: expanded ? 66 : 0, opacity: expanded ? 1 : 0, marginLeft: expanded ? 7 : 0 }} transition={quiet ? { duration: 0 } : { width: { type: "spring", stiffness: 350, damping: 32 }, opacity: { duration: 0.19 }, marginLeft: { duration: 0.19 } }} className="znav-expanding-label">{entry.label}</motion.span>
         {entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={11} aria-hidden="true" />}
       </span><span className="znav-caption" aria-hidden="true">{entry.label}</span></>;
-      const className = `znav-control pdx-glass-rebind${active ? " is-active" : ""}${open === key ? " is-open" : ""}`;
+      const className = `znav-control pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}${open === key ? " is-open" : ""}`;
       return <div key={key} className={`znav-item${entry.label === "About" ? " znav-item--split" : ""}`} data-accent={entry.accent}>
         {entry.type === "link" ? <Link href={entry.href} className={className} data-accent={entry.accent} aria-label={entry.label} aria-current={active ? "page" : undefined} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)} onClick={onNavigate}>{content}</Link> :
           <DropdownMenu.Root open={open === key} onOpenChange={value => { if (value) dismissMobileNavOverlays(); setOpen(value ? key : null); }}>
@@ -70,10 +70,11 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV 
 }
 
 /** Hub shares the destination controls' icon, caption, and accent-rim treatment. */
-export function CompactHubLink({ active, unreadCount = 0, onNavigate }: { active: boolean; unreadCount?: number; onNavigate: () => void }) {
-  return <Link href="/dashboard" className={`znav-control znav-hub pdx-glass-rebind${active ? " is-active" : ""}`} data-accent="cyan" aria-current={active ? "page" : undefined} aria-label={unreadCount > 0 ? `Hub, ${unreadCount} unread messages` : "Hub"} onClick={onNavigate}>
-    <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" />{unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}</span>
+export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly = false }: { active: boolean; unreadCount?: number; onNavigate: () => void; textOnly?: boolean }) {
+  return <Link href="/dashboard" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}`} data-accent="cyan" aria-current={active ? "page" : undefined} aria-label={unreadCount > 0 ? `Hub, ${unreadCount} unread messages` : "Hub"} onClick={onNavigate}>
+    {!textOnly && <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" />{unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}</span>}
     <span className="znav-caption" aria-hidden="true">Hub</span>
+    {textOnly && unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}
   </Link>;
 }
 

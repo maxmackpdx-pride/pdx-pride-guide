@@ -26,11 +26,26 @@
   .site-header--glass .znav-control:not(.is-active,.is-open,.znav-hub):hover,
   .site-mobile-nav--glass.site-hub-mobile-bar .hub-mobile-tab:not(.is-active):hover { color:#e1e7ef; background:rgba(160,195,215,.07); }
 }
-@media (min-width:960px) { :root { --site-header-height:86px; } }
+/* Desktop adopts the mobile top bar's single-label text buttons. Keep the
+   discovery dock's icon captions and the account utility icons unchanged. */
+@media (min-width:960px) {
+  :root { --site-header-height:86px; }
+  .site-header--glass .znav-control--text {
+    flex-direction:row; gap:8px; height:46px; min-height:46px;
+    padding:0 14px; border:1px solid transparent;
+  }
+  .site-header--glass .znav-control--text .znav-caption { font:700 16px/1 var(--font-display); letter-spacing:.025em; }
+  .site-header--glass .znav-control--text:is(.is-active,.is-open),
+  .site-header--glass .znav-control--text.znav-hub { border-color:color-mix(in srgb,var(--c,#19e3ff) 78%,transparent); }
+  .site-header--glass .znav-rail { gap:4px; }
+  .site-header--glass .site-nav-scroll { min-width:0; overflow-x:auto; scrollbar-width:thin; scrollbar-color:#344453 transparent; padding:3px 0; }
+  .site-header--glass .site-auth { flex-shrink:0; }
+}
 @media (min-width:960px) and (max-width:1199px) {
   .site-header--glass .site-header-inner { gap:8px; padding-inline:8px; }
   .site-header--glass .znav-expanding-label { display:none; }
   .site-header--glass .site-nav { gap:4px; }
+  .site-header--glass .znav-control--text { padding-inline:9px; gap:4px; }
 }
 @media (max-width:959px) {
   :root { --site-header-height:74px; --site-mobile-nav-height:82px; --site-mobile-nav-offset:8px; }

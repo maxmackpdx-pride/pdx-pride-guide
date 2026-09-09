@@ -36,7 +36,7 @@ export const BOARD_NAV: NavLinkItem[] = [
  * Primary nav - labels match on-page titles where possible.
  *
  * Every entry carries its own accent: current destinations use an accent rim,
- * with the same icons and captions on desktop and mobile.
+ * with text-only buttons on desktop and icon captions in the mobile dock.
  */
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },

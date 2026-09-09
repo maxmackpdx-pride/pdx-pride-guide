@@ -746,7 +746,7 @@ export default function Nav() {
             aria-label="Primary navigation"
           >
             <div className="site-nav-scroll" ref={navScrollRef}>
-              <CompactNavigation location={location} onNavigate={closeMenu} />
+              <CompactNavigation textOnly location={location} onNavigate={closeMenu} />
             </div>
 
             <button
@@ -775,7 +775,7 @@ export default function Nav() {
                   />
                 )}
                 <span className="site-auth__hub">
-                  <CompactHubLink active={hubActive} unreadCount={unreadCount} onNavigate={closeMenu} />
+                  <CompactHubLink textOnly active={hubActive} unreadCount={unreadCount} onNavigate={closeMenu} />
                 </span>
                 <span className="site-auth__seam" aria-hidden="true" />
                 {user && (
