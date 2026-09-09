@@ -17,7 +17,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   function noteActivity() {
     clearIdle();
     if(mode==='exploring'&&!pointers.size&&isVisible()&&!disposed)
-      idleTimer=setTimeout(returnToFlight,15000);
+      idleTimer=setTimeout(returnToFlight,5000);
   }
   function stopReturn() {
     if(returnEnd){map.off('moveend',returnEnd);returnEnd=null;}
@@ -28,7 +28,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     if(mode!=='exploring') {
       stopReturn();mode='exploring';pauseControl.checked=true;
       onExplore();setGestures(true);
-      message.textContent='Drag or zoom to explore · Flight resumes after 15 seconds idle';
+      message.textContent='Drag or zoom to explore · Flight resumes after 5 seconds idle';
     }
     noteActivity();
   }
