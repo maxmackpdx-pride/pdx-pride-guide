@@ -2,13 +2,17 @@
   --z-cyan: #19e3ff; --z-idle: #aeb7c4; --z-core: #050506; --z-edge: rgba(172,207,231,.36);
   --z-spectrum: linear-gradient(90deg,#19e3ff 0%,#39ff14 15%,#ffee00 32%,#ff8c00 48%,#ff1fa0 69%,#bf6bff 87%,#19e3ff 100%);
   position: relative; isolation: isolate; border-radius: 28px; color: var(--z-idle);
-  background: rgba(5,5,6,.82); box-shadow: 0 0 0 1px #000, 0 12px 28px -18px #000;
+  background: rgba(5,5,6,.68); box-shadow: 0 0 0 1px #000, 0 12px 28px -18px #000;
   font-family: "Barlow Condensed", sans-serif;
 }
 .z-filter-defs { position:absolute; pointer-events:none; }
 .z-glass__blur,.z-glass__tint,.z-glass__edge,.z-glass__rainbow { position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
-.z-glass__blur { z-index:-3; backdrop-filter:blur(16px) saturate(1.2); -webkit-backdrop-filter:blur(16px) saturate(1.2); }
-.z-glass__tint { z-index:-2; background:linear-gradient(164deg,rgba(123,182,201,.16),rgba(7,13,20,.18) 38%,rgba(4,8,12,.6) 66%,rgba(57,102,144,.13)); }
+.z-glass__blur { z-index:-3; backdrop-filter:blur(9px) saturate(1.25); -webkit-backdrop-filter:blur(9px) saturate(1.25); }
+/* SVG-capable engines refract the backdrop; others retain the clear blur. */
+@supports (backdrop-filter: url("#nav-refraction")) {
+  .z-glass__blur[data-refract] { backdrop-filter:blur(9px) var(--z-nav-refraction) saturate(1.25); }
+}
+.z-glass__tint { z-index:-2; background:linear-gradient(164deg,rgba(123,182,201,.12),rgba(7,13,20,.12) 38%,rgba(4,8,12,.38) 66%,rgba(57,102,144,.1)); }
 .z-glass__edge { z-index:2; border:1px solid var(--z-edge); box-shadow:inset 0 1.5px 1px -.5px rgba(226,244,255,.65),inset 1px 0 2px rgba(125,193,214,.3),inset -1px -1px 1px rgba(192,214,255,.3),inset 0 0 3px 2px rgba(156,208,230,.08); }
 .z-glass__edge::after { content:"";position:absolute;inset:3px;border-radius:inherit;border:1px solid rgba(182,226,247,.12);border-top-color:rgba(216,240,255,.23); }
 .z-glass__rainbow { z-index:3; padding:.75px; background:var(--z-spectrum);
@@ -52,5 +56,5 @@
 .z-bottom-dock.is-scroll-hidden { transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none; }
 .z-bottom-dock.is-scroll-hidden:focus-within { transform:none;opacity:1;pointer-events:auto; }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .z-glass { background:#080c12; } }
-@media(prefers-reduced-motion:reduce) { .z-glass *,.z-bottom-dock { transition:none!important; } .z-glass__blur { filter:none!important; } }
+@media(prefers-reduced-motion:reduce) { .z-glass *,.z-bottom-dock { transition:none!important; } .z-glass__blur { filter:none!important; } .z-glass__blur[data-refract] { backdrop-filter:blur(9px) saturate(1.25); } }
 @media(forced-colors:active) { .z-glass,.z-liquid-button--selected,.z-liquid-button--primary { border:1px solid ButtonText; } .z-glass__rainbow,.z-glass__tint,.z-liquid-button__edge { display:none; } }

@@ -1,11 +1,22 @@
-import type { PointerEvent } from "react";
+import { useId, type CSSProperties, type PointerEvent } from "react";
 import "./zaylist-glass.css";
 
 /** Shared optical layers from Tucker's approved 21st-inspired React demo.
  * Host keeps layout, semantics, routing and focus; only the background is blurred. */
 export function NavGlassLayers() {
+  const filterId = `nav-refraction-${useId().replace(/:/g, "")}`;
   return <>
-    <span className="z-glass__blur" aria-hidden="true" />
+    <svg className="z-filter-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id={filterId} x="-15%" y="-30%" width="130%" height="160%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.024" numOctaves="1" seed="17" result="glassNoise" />
+          <feGaussianBlur in="glassNoise" stdDeviation="2" result="glassMap" />
+          <feDisplacementMap in="SourceGraphic" in2="glassMap" scale="18" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    {/* Filter the sampled backdrop, never the nav's text, icons or menus. */}
+    <span className="z-glass__blur" data-refract aria-hidden="true" style={{ "--z-nav-refraction": `url("#${filterId}")` } as CSSProperties} />
     <span className="z-glass__tint" aria-hidden="true" />
     <span className="z-glass__edge" aria-hidden="true" />
     <span className="z-glass__pointer" aria-hidden="true" />
