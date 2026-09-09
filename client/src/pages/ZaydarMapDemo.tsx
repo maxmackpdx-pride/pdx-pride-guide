@@ -7,6 +7,7 @@ import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation, SlidersHorizontal, X } from "lucide-react";
 
 
+import type { CommunitySummary } from "@shared/community";
 import type { Event } from "@shared/schema";
 import { placePath } from "@shared/placeSlug";
 import { apiRequest } from "@/lib/queryClient";
@@ -68,7 +69,7 @@ const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: strin
 ];
 
 // Preserve the adult locations already marked red in the Zaydar studio snapshot.
-const ADULT_VENUES = new Set(['Sanctuary Club','Hawks PDX','FANTASY','Steam Portland'].map(normalizeDirectoryName));
+const ADULT_VENUES = new Set(['Sanctuary Club','Hawks PDX','FANTASY','Steam Portland','Club Privata','The Velvet Rope'].map(normalizeDirectoryName));
 function zaydarPlaceColor(place: Pick<Place,'name'|'type'>) {
   return ADULT_VENUES.has(normalizeDirectoryName(place.name)) ? '#FF0000' : directoryTypeColor(place.type);
 }
@@ -403,6 +404,7 @@ export default function ZaydarMapDemo() {
     return consumed;
   };
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
+  const { data: communities = [] } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
   const { data: mizzed = [], isLoading: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MapRow[]>({ queryKey: ["/api/missed-connections"], queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
   const { data: housingRaw, isLoading: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
@@ -656,7 +658,7 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   });
-  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
+  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map demo">
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onMode={mode=>setFlight(mode==='flight')} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
     <div className="zaydar-demo-toolbar pdx-glass-rebind">

@@ -161,7 +161,8 @@ function logoPointerOffset(x,y,phase,halfWidth,halfHeight){
  const angle=distance>.01?Math.atan2(dy,dx):phase+logoMotionSeed;
  return {x:Math.cos(angle)*strength,y:Math.sin(angle)*strength};
 }
-for(const color of [...baseColors,adultVenueColor]){
+function ensureLightSprite(color){
+ if(lightSprites.has(color))return;
  const sprite=document.createElement('canvas');sprite.width=sprite.height=216;
  const ctx=sprite.getContext('2d');ctx.scale(9,9);
  const glow=ctx.createRadialGradient(12,12,0,12,12,12);
@@ -171,6 +172,7 @@ for(const color of [...baseColors,adultVenueColor]){
  lightSprites.set(color,sprite);
 
 }
+for(const color of [...baseColors,adultVenueColor])ensureLightSprite(color);
 // Two shared, softly colored cloud stamps; no particle simulation or per-frame blur.
 const mistSprites=Array.from({length:2},(_,variant)=>{
  const sprite=document.createElement('canvas');sprite.width=256;sprite.height=192;
@@ -413,7 +415,7 @@ function drawLights(fade,target=map,surface=lights){
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
    if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:22});}
-   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,orbY,color,coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:orbY,r:22});}
+   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence));hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
   }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
@@ -739,18 +741,23 @@ window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();
 // Interactive adapter: isolated from the original studio and homepage.
 function tell(type,payload={}){parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
-const orbMaterials=new Map();
-function drawDiscoveryOrb(ctx,x,y,color,alpha){
+// Use the original Zaydar orb materials, breathing glow, and drifting mist.
+function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha){
  if(alpha<=0)return;
- let sprite=orbMaterials.get(color);
- if(!sprite){sprite=document.createElement('canvas');sprite.width=sprite.height=96;const c=sprite.getContext('2d');
- const halo=c.createRadialGradient(48,48,0,48,48,46);halo.addColorStop(0,'#ffffff');halo.addColorStop(.08,'#ffffff');halo.addColorStop(.2,color);halo.addColorStop(.38,color+'e0');halo.addColorStop(.62,color+'40');halo.addColorStop(1,color+'00');c.fillStyle=halo;c.fillRect(0,0,96,96);orbMaterials.set(color,sprite);}
- ctx.save();ctx.globalAlpha=alpha;ctx.globalCompositeOperation='screen';ctx.drawImage(sprite,x-19,y-19,38,38);ctx.restore();
+ const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
+ const size=126*(.92+.1*pulse);
+ ctx.save();ctx.globalAlpha=fade*pulse;
+ ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
+ drawLightMist(ctx,x,y,phase,fade);
+ ctx.globalAlpha=alpha;
+ ctx.drawImage(hologramMaterials.orbs.get(color),x-12.5,y-12.5,25,25);
+ ctx.restore();
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){
  const generation=++dataGeneration;
  const colors=[...new Set([...baseColors,adultVenueColor,...rows.map(row=>row.color)])];
+ for(const color of colors)ensureLightSprite(color);
  const nextPalette=colors.slice().sort().join(',');if(nextPalette!==paletteKey){hologramMaterials.dispose();hologramMaterials=createHologramMaterials(colors);paletteKey=nextPalette;}
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const dailyVenues=new Map();
