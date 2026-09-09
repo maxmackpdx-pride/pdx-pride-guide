@@ -1,59 +1,34 @@
-.home-front { background: var(--ink-900, #050506); color: var(--text-body, #d6d6dc); overflow: clip; }
+/* The navbar stays in its existing stacking layer; the flight bleeds beneath it. */
+.home-front { margin-top:calc(-1 * var(--home-header-height, var(--site-header-height,0px))); background:var(--ink-900,#050506); color:var(--text-body,#d6d6dc); overflow:clip; }
+.home-front__welcome { position:relative; height:100svh; min-height:100svh; isolation:isolate; overflow:hidden; background:#020509; }
+.home-front__flight { position:absolute; inset:0; z-index:0; background:#020509 url('/home-flight/poster.webp') center/cover no-repeat; }
+.home-front__flight-credit { position:absolute; right:14px; bottom:var(--home-flight-bottom,116px); z-index:1; color:#9eb0c1; font-size:10px; text-shadow:0 1px 3px #000; }
+.home-front__flight-credit a { color:inherit; }
+.home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .7s ease; }
+.home-front__flight[data-ready="true"] .home-front__flight-frame { opacity:1; pointer-events:auto; }
+.home-front__hero { --home-logo-height:min(calc((100vw - 40px) * 824 / 2393),344px,28svh); position:absolute; inset:0; z-index:2; min-width:0; text-align:center; pointer-events:none; }
+.home-front__mark { position:absolute; left:50%; top:25%; transform:translate(-50%,-50%); height:var(--home-logo-height); width:calc(var(--home-logo-height) * 2393 / 824); max-width:calc(100% - 40px); }
+.home-front__mark-art { width:100%; height:100%; }
+.home-front__mark img { display:block; width:100%; height:100%; object-fit:contain; }
+.home-front__welcome-copy { position:absolute; top:calc(25% + var(--home-logo-height) / 2 + clamp(12px,2svh,22px)); left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:760px; }
+.home-front__identity-line { display:flex; align-items:center; justify-content:center; width:100%; min-height:1.6em; margin:0; color:#fff; font-size:clamp(22px,3vw,34px); line-height:1; }
+.home-front__identity-script { max-width:100%; font-family:"Bradley Hand","Comic Sans MS",cursive; filter:drop-shadow(0 1px 1px #000) drop-shadow(0 3px 4px rgba(0,0,0,.95)); }
+.home-front__hero-actions { display:flex; justify-content:center; margin-top:clamp(18px,3svh,28px); }
+html:root .home-front .home-front__auth { --button-c:#eef3fb; --button-ink:#fff; --btn-glow-bg:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.025)),rgba(8,12,18,.64); --btn-glow-shadow:0 8px 24px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.15); pointer-events:auto; min-height:48px; padding:14px 28px; border:1px solid rgba(255,255,255,.3); border-radius:16px; background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.025)),rgba(8,12,18,.64); color:#fff; font-size:14px; font-weight:750; letter-spacing:.035em; text-shadow:0 1px 2px #000; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 8px 24px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.15); transition:background-color .2s,border-color .2s; }
+html:root .home-front .home-front__auth:hover { background-color:rgba(20,28,38,.88); border-color:rgba(255,255,255,.65); }
+html:root .home-front .home-front__auth:focus-visible { outline:2px solid #fff; outline-offset:5px; }
+.home-front__welcome > .home-hero-stats-boundary { position:absolute; inset:auto 0 0; z-index:3; }
+@media(max-width:959px) {
+  /* Reserve the existing mobile dock without shortening the map panel. */
+  .home-front__welcome > .home-hero-stats-boundary { padding-bottom:calc(var(--site-mobile-nav-height,72px) + var(--site-mobile-nav-offset,8px) + env(safe-area-inset-bottom,0px)); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .home-front__flight-frame { transition:none; }
+  .home-front__worlds-orb,.home-front__worlds-grid,.home-front__content-word-a,.home-front__content-word-b { animation:none; }
+}
 
-.home-front__welcome { position:relative; min-height:min(760px,calc(100svh - 76px)); display:flex; flex-direction:column; isolation:isolate; overflow:hidden; background:#050506; }
-.home-front__video { position: absolute; inset: 0; z-index: -4; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.08) contrast(1.14) brightness(.56); }
-/* Was a flat wash (.34 -> .66 -> solid) across the whole panel, which is what
-   made the logo read matte. Now it only feathers the bottom edge into the
-   seam, leaving the middle clear so the mark stays sharp and vibrant. */
-.home-front__atmosphere { position: absolute; inset: 0; z-index: -3; background: linear-gradient(180deg, transparent 0%, transparent 58%, rgba(5,5,6,.55) 84%, #050506 100%); }
-.home-front__hero { position:relative; z-index:2; box-sizing:border-box; width:min(100%,var(--zl-frame,1280px)); min-width:0; min-height:0; flex:1 1 auto; margin-inline:auto; padding-block:clamp(32px,6vw,72px); padding-inline:var(--zl-gutter,clamp(28px,3.4vw,48px)); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
-.home-front__kicker { margin:0 0 clamp(32px,7vh,72px); display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 10px; max-width:100%; min-width:0; box-sizing:border-box; padding-inline:4px; color:var(--status-good,#39ff14); font:700 15.2px/1 var(--font-mono,monospace); letter-spacing:.2em; text-transform:uppercase; }
-.home-front__kicker-row { display:inline-flex; align-items:center; gap:10px; min-width:0; }
-.home-front__kicker-line { min-width:0; }
-.home-front__kicker-dot { flex:none; letter-spacing:0; opacity:.85; }
-.home-front__kicker-beta { font-size:1.3em; font-style:normal; font-weight:700; letter-spacing:.16em; }
-.home-front__kicker-live { flex:none; width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 12px currentColor; animation:homeFrontKickerBlink 1.15s steps(2,end) infinite; }
-.home-front__mark { position:relative; width:min(100%,1000px); animation:homeFrontMarkFloat 6.4s ease-in-out infinite alternate; }
-.home-front__mark-art { position:relative; }
-.home-front__mark img { display:block; width:100%; height:auto; filter:saturate(1.35) brightness(1.08) drop-shadow(0 20px 18px rgba(0,0,0,.72)) drop-shadow(0 0 24px rgba(255,0,204,.3)) drop-shadow(0 0 34px rgba(0,255,255,.22)); }
-.home-front__mark-glitch { position:absolute; inset:0; opacity:0; mix-blend-mode:screen; pointer-events:none; }
-.home-front__mark-glitch--a { filter:hue-rotate(135deg) saturate(2) brightness(1.2); animation:homeFrontGlitchA 3.4s steps(1,end) infinite; }
-.home-front__mark-glitch--b { filter:hue-rotate(-80deg) saturate(2.2) brightness(1.16); animation:homeFrontGlitchB 3.4s steps(1,end) infinite; }
 @keyframes homeFrontGlitchA { 0%,87%,100%{opacity:0;transform:none;clip-path:inset(0)} 89%{opacity:.7;transform:translate(-4px,1px);clip-path:inset(18% 0 58% 0)} 92%{opacity:.55;transform:translate(3px,-1px);clip-path:inset(63% 0 14% 0)} 95%{opacity:.38;transform:translate(-2px,0);clip-path:inset(42% 0 36% 0)} }
 @keyframes homeFrontGlitchB { 0%,88%,100%{opacity:0;transform:none;clip-path:inset(0)} 90%{opacity:.62;transform:translate(4px,-1px);clip-path:inset(54% 0 24% 0)} 93%{opacity:.48;transform:translate(-3px,2px);clip-path:inset(27% 0 51% 0)} 96%{opacity:.32;transform:translate(2px,0);clip-path:inset(71% 0 9% 0)} }
-@keyframes homeFrontMarkFloat { from{transform:translateY(2px) scale(.995)} to{transform:translateY(-5px) scale(1.008)} }
-@keyframes homeFrontKickerBlink { 0%,38%,100%{opacity:1;transform:scale(1)} 42%,72%{opacity:.28;transform:scale(.82)} }
-.home-front__identity-line { display:flex; align-items:center; justify-content:center; width:100%; min-height:2em; margin:clamp(16px,3vh,28px) 0 0; color:var(--text-hi,#fff); font-size:clamp(22px,3vw,34px); line-height:1; }
-.home-front__identity-script { max-width:min(92vw,760px); font-family:"Bradley Hand","Comic Sans MS",cursive; filter:drop-shadow(0 3px 8px rgba(0,0,0,.85)); }
-.home-front__hero-actions { width:100%; display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:clamp(30px,6vh,58px); margin-bottom:clamp(22px,3vh,36px); }
-.home-front__hero-actions .pdx-glass-btn {
-  min-height:48px;
-  padding:0 22px;
-  border-radius:16px;
-  font-size:14px;
-  font-weight:900;
-  letter-spacing:.075em;
-  box-shadow:0 2px 3px rgba(0,0,0,.38),0 7px 18px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.16);
-}
-.home-front__hero-actions .pdx-glass-btn:hover:not(:disabled) {
-  transform:translateY(-2px);
-  box-shadow:0 3px 5px rgba(0,0,0,.42),0 10px 22px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.2);
-}
-.home-front__hero-actions .pdx-glass-btn:active:not(:disabled) {
-  transform:translateY(0) scale(.985);
-  box-shadow:0 1px 2px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12);
-}
-
-@media (prefers-reduced-motion:reduce) {
-  .home-front__mark,.home-front__kicker-live,
-  .home-front__worlds-orb,.home-front__worlds-grid,
-  .home-front__content-word-a,.home-front__content-word-b { animation:none; }
-}
-html.calm-mode .home-front__mark,
-:root[data-calm="true"] .home-front__mark,
-html.calm-mode .home-front__kicker-live,
-:root[data-calm="true"] .home-front__kicker-live { animation:none; }
-
 .home-front__worlds { position:relative; isolation:isolate; width:100%; margin:0; padding:calc(clamp(34px,5vw,64px) - 2px) 0 calc(clamp(56px,8vw,104px) + 2px); overflow:hidden; background:#000; }
 .home-front__worlds-fx { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .home-front__worlds-orb { position:absolute; display:block; width:clamp(280px,36vw,560px); aspect-ratio:1; border-radius:50%; opacity:.55; pointer-events:none; }
@@ -78,47 +53,18 @@ html.calm-mode .home-front__kicker-live,
 .home-front__content-word-a { color:#00ffff; animation:homeFrontGlitchA 3.4s steps(1,end) infinite; }
 .home-front__content-word-b { color:#ff00cc; animation:homeFrontGlitchB 3.4s steps(1,end) infinite; }
 .home-front__deck { /* One box for every slide: the fan sizes each slide to --fan-card x --fan-card-h and stretches its child to 100%, so widening these keeps all cards identical. The old 248px cap could not fit an 11-character word at the title size. */ --fan-card:clamp(236px,18vw,280px); --fan-card-h:560px; }
-html.calm-mode .home-front__video,:root[data-calm="true"] .home-front__video { display:none; }
-html.calm-mode .home-front__atmosphere,:root[data-calm="true"] .home-front__atmosphere { background:linear-gradient(#080809,#050506); }
 html.calm-mode .home-front__worlds-orb,:root[data-calm="true"] .home-front__worlds-orb,
 html.calm-mode .home-front__content-word-a,:root[data-calm="true"] .home-front__content-word-a,
 html.calm-mode .home-front__content-word-b,:root[data-calm="true"] .home-front__content-word-b { animation:none; }
 html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__worlds-grid { animation:none; }
-html.calm-mode .home-front__mark-glitch,:root[data-calm="true"] .home-front__mark-glitch { display:none; }
 
 @media (max-width:900px) {
   .home-front__deck { --fan-card:clamp(210px,30vw,250px); --fan-card-h:520px; }
-  .home-front__kicker { font-size:13px; letter-spacing:.14em; }
 }
 
 @media (max-width:620px) {
-  /* Don't force the hero to near-full-screen. That is what created the giant
-     empty bands above and below. Let it hug its content with even, modest
-     top/bottom breathing room so the stat strip sits right under the buttons. */
-  .home-front__welcome { min-height:0; }
-  .home-front__hero {
-    flex:0 0 auto;
-    justify-content:center;
-    padding-top:calc(clamp(42px,11vw,86px) + env(safe-area-inset-top, 0px));
-    padding-bottom:clamp(42px,11vw,86px);
-  }
-  .home-front__kicker {
-    flex-direction:column;
-    gap:7px;
-    margin-bottom:clamp(16px,3.5vh,28px);
-    font-size:11px;
-    letter-spacing:.11em;
-    line-height:1.2;
-  }
-  .home-front__kicker-row { gap:8px; }
-  .home-front__kicker-dot { display:none; }
-  .home-front__kicker-live { width:6px; height:6px; }
-  .home-front__kicker-beta { font-size:1.18em; letter-spacing:.1em; }
-  .home-front__mark { width:100%; max-width:none; }
-  .home-front__identity-line { min-height:2.3em; margin-top:18px; font-size:clamp(19px,6.4vw,27px); }
-  .home-front__hero-actions { margin-top:42px; margin-bottom:24px; }
-  /* Compact vs desktop, but still a thumb target. 9px / 29px was unreadable. */
-  .home-front__hero-actions .pdx-glass-btn { flex:0 0 auto; min-width:0; min-height:44px; height:44px; padding:0 16px; font-size:12px; }
+  .home-front__identity-line { font-size:clamp(21px,6.4vw,27px); }
+  html:root .home-front .home-front__auth { min-height:46px; padding:12px 24px; }
   .home-front__worlds { padding-top:20px; padding-bottom:36px; }
   .home-front__worlds-head { margin-bottom:20px; }
   .home-front__worlds-head h2 { font-size:clamp(34px, 9vw, 42px); }
@@ -127,12 +73,8 @@ html.calm-mode .home-front__mark-glitch,:root[data-calm="true"] .home-front__mar
   .home-front__deck { --fan-card:clamp(220px,72vw,280px); --fan-card-h:520px; }
 }
 
-@media (prefers-reduced-motion:reduce) {
-  .home-front__video { display:none; }
-  .home-front__mark-glitch { display:none; }
-}
 
 .home-front__identity-cycle { display:flex; justify-content:center; width:100%; animation:homeFrontIdentityOut .4s ease-in 3.6s both; }
 .home-front__identity-cycle[data-still="true"] { animation:none; }
-@keyframes homeFrontIdentityOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(-12px); } }
+@keyframes homeFrontIdentityOut { from { opacity:1; transform:none; } to { opacity:0; transform:none; } }
 @media (prefers-reduced-motion:reduce) { .home-front__identity-cycle { animation:none; } }

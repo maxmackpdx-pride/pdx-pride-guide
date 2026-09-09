@@ -1,4 +1,8 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Link } from "wouter";
+import AuthModal from "@/components/AuthModal";
+import HomeFlight from "@/components/home/HomeFlight";
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
@@ -19,7 +23,6 @@ export type { HomeStageBoardKey, HomeStageCardData, HomeStageSamples };
 export { useHomeStageSamples, HomeStageCard };
 
 const WORDMARK = "/brand/family/zaylist-primary.svg";
-const HERO_VIDEO = "/home/hero-loop.mp4";
 const IDENTITY_LINES = [
   "Find your people",
   "Share what matters",
@@ -36,34 +39,12 @@ type Props = {
 export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const worldData = useHomeWorlds();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { user } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState(0);
-  const [showVideo, setShowVideo] = useState(false);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
   const hasPreviewError = Object.values(worldData.states).some(state => state === "error");
-
-  useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 621px)");
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setShowVideo(desktop.matches && !prefersStillMotion());
-    sync();
-    desktop.addEventListener("change", sync);
-    motion.addEventListener("change", sync);
-    const observer = new MutationObserver(sync);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });
-    return () => {
-      desktop.removeEventListener("change", sync);
-      motion.removeEventListener("change", sync);
-      observer.disconnect();
-    };
-  }, [calmMode]);
-
-  useEffect(() => {
-    if (!showVideo || !videoRef.current) return;
-    videoRef.current.muted = true;
-    videoRef.current.play().catch(() => setShowVideo(false));
-  }, [showVideo]);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -85,19 +66,8 @@ export default function HomeStage({ afterWelcome }: Props) {
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        {showVideo ? (
-          <video ref={videoRef} className="home-front__video" src={HERO_VIDEO} preload="metadata" autoPlay muted loop playsInline aria-hidden />
-        ) : null}
-        <div className="home-front__atmosphere" aria-hidden />
+        <HomeFlight paused={showAuth} />
         <div className="home-front__hero">
-          <p className="home-front__kicker">
-            <span className="home-front__kicker-row">
-              <span className="home-front__kicker-live" aria-hidden="true" />
-              <span className="home-front__kicker-line">made in Portland</span>
-            </span>
-            <span className="home-front__kicker-dot" aria-hidden="true">·</span>
-            <span className="home-front__kicker-line">still in <em className="home-front__kicker-beta">beta</em></span>
-          </p>
           <h1 id="home-front-title" className="sr-only">Zaylist</h1>
           <div className="home-front__mark">
             <div className="home-front__mark-art">
@@ -111,43 +81,33 @@ export default function HomeStage({ afterWelcome }: Props) {
                 decoding="sync"
                 fetchPriority="high"
               />
-              <img
-                className="home-front__mark-glitch home-front__mark-glitch--a"
-                src={WORDMARK}
-                alt=""
-                aria-hidden="true"
-                width="2393"
-                height="824"
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-              <img
-                className="home-front__mark-glitch home-front__mark-glitch--b"
-                src={WORDMARK}
-                alt=""
-                aria-hidden="true"
-                width="2393"
-                height="824"
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
             </div>
           </div>
-          <p className="home-front__identity-line">
-            <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
-              <HandwritingText
-                text={IDENTITY_LINES[identityLine]}
-                animate={!stillIdentity}
-                className="home-front__identity-script"
-                height="1.35em"
-              />
-            </span>
-          </p>
+          <div className="home-front__welcome-copy">
+            <p className="home-front__identity-line">
+              <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
+                <HandwritingText
+                  text={IDENTITY_LINES[identityLine]}
+                  animate={!stillIdentity}
+                  className="home-front__identity-script"
+                  height="1.35em"
+                />
+              </span>
+            </p>
+            <div className="home-front__hero-actions">
+              {user ? (
+                <Link href="/dashboard" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth">Open your Hub</Link>
+              ) : (
+                <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind home-front__auth" onClick={() => setShowAuth(true)} aria-haspopup="dialog">
+                  Log in / Sign up
+                </button>
+              )}
+            </div>
+          </div>
         </div>
         {afterWelcome}
       </section>
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       <section className="home-front__worlds" id="home-worlds" aria-labelledby="home-worlds-title">
         <span className="home-front__worlds-fx" aria-hidden="true">
