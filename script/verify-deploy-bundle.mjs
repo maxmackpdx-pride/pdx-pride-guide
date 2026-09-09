@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const assetsDir = "dist/public/assets";
@@ -20,7 +20,19 @@ const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
 const dashboardCss = readFileSync("client/src/components/dashboard/dashboard.css", "utf8");
 
+// A cached map document must keep every relative import and logo in its version directory.
+const flightBase = JSON.parse(readFileSync("dist/public/zaydar-manifest.json", "utf8")).base;
+function flightFilesMatch(directory, relative = "") {
+  return readdirSync(directory, { withFileTypes: true }).every(entry => {
+    const source = join(directory, entry.name), child = join(relative, entry.name);
+    if (entry.isDirectory()) return flightFilesMatch(source, child);
+    const built = join("dist/public", flightBase, child);
+    return existsSync(built) && readFileSync(source).equals(readFileSync(built));
+  });
+}
+
 const checks = {
+  versionedZaydar: /^\/assets\/zaydar-[a-f0-9]{16}$/.test(flightBase) && js.includes(flightBase) && flightFilesMatch("client/public/home-flight"),
   posterGrid: js.includes("events-poster-grid"),
   noEventBoardCard: !js.includes("EventBoardCard"),
   noLegacyPageHeroCss: !sourceCss.includes(".page-hero") && !sourceCss.includes(".zine-hero"),

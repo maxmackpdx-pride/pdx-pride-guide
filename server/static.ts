@@ -24,8 +24,18 @@ export function serveStatic(app: Express) {
   }
 
   const indexPath = path.resolve(distPath, "index.html");
+  const flightManifest = path.join(distPath, "zaydar-manifest.json");
+  const flightBase = fs.existsSync(flightManifest) ? JSON.parse(fs.readFileSync(flightManifest, "utf8")).base as string : null;
   const sendSeoIndex = (req: express.Request, res: express.Response) => {
     const requestPath = (req.originalUrl || req.url || req.path || "/").split("?")[0] || "/";
+    if ((requestPath === "/" || requestPath === "/index.html") && flightBase) {
+      // Also available to Cloudflare Early Hints when enabled for the zone.
+      res.set("Link", [
+        `<${flightBase}/poster.webp>; rel=preload; as=image`,
+        `<${flightBase}/vendor/maplibre-gl-5.6.2.js>; rel=preload; as=script`,
+        '<https://tiles.openfreemap.org>; rel=preconnect; crossorigin',
+      ].join(", "));
+    }
     // Read from disk each request so a deploy never serves a stale bundle hash
     // from an in-memory snapshot taken at process startup.
     let baseIndexHtml = fs.readFileSync(indexPath, "utf8");

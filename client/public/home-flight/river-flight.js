@@ -213,11 +213,26 @@ function drawLightMist(ctx,x,y,phase,fade){
 waypoints.then(async data=>{
  if(disposed)return;
  lightFeatures=data.features;nearbyLights=createSpatialIndex(lightFeatures,feature=>feature.geometry.coordinates);
- await Promise.all(lightFeatures.map(feature=>loadVenueLogo(feature.properties.logo,feature.properties.logoMode)));
+ // The city can appear as soon as tiles and waypoint positions are ready.
+ // A slow logo must never hold the whole map behind the poster.
+ assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
+ const center=map.getCenter();
+ const distance=feature=>Math.hypot((feature.geometry.coordinates[0]-center.lng)*.7,feature.geometry.coordinates[1]-center.lat);
+ const queue=[...lightFeatures].filter(feature=>feature.properties.logo).sort((a,b)=>distance(a)-distance(b));
+ // Bound decoding work and let the browser draw between each logo.
+ async function loadNext(){
+  while(queue.length&&!disposed){
+   const feature=queue.shift();
+   await loadVenueLogo(feature.properties.logo,feature.properties.logoMode);
+   if(disposed)return;
+   scheduleFrame();
+   await new Promise(resolve=>setTimeout(resolve,0));
+  }
+ }
+ await Promise.all(Array.from({length:3},loadNext));
  if(disposed)return;
  const missing=lightFeatures.some(feature=>feature.properties.isBar&&feature.properties.logo&&!venueLogos.has(feature.properties.logo));
- assetError=missing?'Some venue logos could not load. Refresh to retry.':'';
- assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
+ if(missing)console.warn('Some venue logos could not load; the map remains available.');
 }).catch(error=>{if(disposed)return;console.error(error);assetError='Directory lights unavailable. Refresh to retry.';assetsReady=true;updateSceneStatus();scheduleFrame();});
 // Choose the same geographic roof corner regardless of polygon winding or start.
 const glitterCache=new WeakMap();

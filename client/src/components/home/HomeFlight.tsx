@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 
+declare const __ZAYDAR_BASE__: string;
+
 /** The flight has its own document so its camera cannot alter the page layout. */
 export default function HomeFlight({ paused = false, onExploringChange }: {
   paused?: boolean;
@@ -70,7 +72,7 @@ export default function HomeFlight({ paused = false, onExploringChange }: {
   }, [calmMode, paused, onExploringChange]);
 
   return (
-    <div ref={container} className="home-front__flight" data-ready={ready}>
+    <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: `url(${__ZAYDAR_BASE__}/poster.webp)` }}>
       {!ready && (
         <div className="home-front__flight-credit">
           © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
@@ -79,7 +81,7 @@ export default function HomeFlight({ paused = false, onExploringChange }: {
       )}
       <iframe
         ref={frame}
-        src="/home-flight/index.html"
+        src={`${__ZAYDAR_BASE__}/index.html`}
         title="Explore Portland’s queer venues — click the map to pause the flyover"
         className="home-front__flight-frame"
       />

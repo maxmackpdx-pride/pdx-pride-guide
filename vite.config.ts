@@ -2,10 +2,34 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import fs from "node:fs";
+import { createHash } from "node:crypto";
 
-export default defineConfig({
+// Fingerprint the complete standalone map, including its relative imports and artwork.
+const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
+const flightHash = createHash("sha256");
+function hashFlight(directory: string) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) hashFlight(file);
+    else flightHash.update(path.relative(flightSource, file)).update("\0").update(fs.readFileSync(file)).update("\0");
+  }
+}
+hashFlight(flightSource);
+const flightBase = `/assets/zaydar-${flightHash.digest("hex").slice(0, 16)}`;
+
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
+    {
+      name: "version-zaydar-assets",
+      apply: "build",
+      closeBundle() {
+        const output = path.resolve(import.meta.dirname, "dist/public");
+        fs.cpSync(flightSource, path.join(output, flightBase), { recursive: true });
+        fs.writeFileSync(path.join(output, "zaydar-manifest.json"), JSON.stringify({ base: flightBase }));
+      },
+    },
     VitePWA({
       strategies: "injectManifest",
       srcDir: "src",
@@ -51,6 +75,7 @@ export default defineConfig({
   },
   // Shared modules may reference process.env on the server; avoid browser TDZ.
   define: {
+    __ZAYDAR_BASE__: JSON.stringify(command === "build" ? flightBase : "/home-flight"),
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
   },
   server: {
@@ -60,4 +85,4 @@ export default defineConfig({
     },
     // Middleware mode is configured in server/vite.ts (hmr on same HTTP port).
   },
-});
+}));
