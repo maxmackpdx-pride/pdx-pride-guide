@@ -1,0 +1,80 @@
+/* Approved 2026-09-08 React glass dock, adapted to the existing route controls. */
+.site-header.site-header--glass {
+  top: calc(8px + env(safe-area-inset-top, 0px)); left: 8px; right: 8px;
+  width: calc(100% - 16px); border: 0; border-radius: 28px; padding-bottom:0; margin:8px;
+  background: rgba(5,5,6,.82); box-shadow: 0 0 0 1px #000, 0 12px 28px -18px #000;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.site-header--glass::before,.site-header--glass::after { display:none; }
+.site-header--glass .site-header-inner { position:relative; z-index:1; height:70px; min-height:70px; padding:6px 12px; gap:16px; }
+.site-header--glass .site-header-rainbow-seam { display:none; }
+.site-header--glass .znav-control { min-height:58px; border-radius:22px; color:#aeb7c4; position:relative; }
+.site-header--glass .znav-control .znav-icon-row { border:0; background:none; box-shadow:none; }
+.site-header--glass .znav-control:is(.is-active,.is-open),.site-header--glass .znav-hub { color:var(--c,#19e3ff); }
+.site-header--glass .znav-control:is(.is-active,.is-open),.site-header--glass .znav-hub,
+.site-mobile-nav--glass.site-hub-mobile-bar .hub-mobile-tab.is-active {
+  background:radial-gradient(110% 150% at 12% 0%,rgba(175,232,253,.18),transparent 46%),linear-gradient(160deg,rgba(25,227,255,.08),rgba(5,12,18,.65) 66%,rgba(25,227,255,.1));
+  border:1px solid color-mix(in srgb,var(--c,#19e3ff) 78%,transparent);
+  box-shadow:inset 2px 2px 1px -1px rgba(225,249,255,.72),inset -1px -1px 1px rgba(148,223,245,.3),inset 0 0 6px 3px rgba(124,214,250,.05),inset 0 -6px 9px -8px rgba(255,255,255,.38);
+}
+.site-header--glass .znav-control:hover .znav-icon-row { background:none; box-shadow:none; }
+.site-header--glass .znav-item--split { border:0; padding-right:4px; margin-right:4px; }
+.site-header--glass .site-brand--desktop { flex:none; }
+.site-header--glass .site-login-button { min-height:44px; border-radius:22px; white-space:nowrap; }
+.site-header--glass .znav-control:focus-visible { outline-offset:-3px; }
+@media (hover:hover) {
+  .site-header--glass .znav-control:not(.is-active,.is-open,.znav-hub):hover,
+  .site-mobile-nav--glass.site-hub-mobile-bar .hub-mobile-tab:not(.is-active):hover { color:#e1e7ef; background:rgba(160,195,215,.07); }
+}
+@media (min-width:960px) { :root { --site-header-height:86px; } }
+@media (min-width:960px) and (max-width:1199px) {
+  .site-header--glass .site-header-inner { gap:8px; padding-inline:8px; }
+  .site-header--glass .znav-expanding-label { display:none; }
+  .site-header--glass .site-nav { gap:4px; }
+}
+@media (max-width:959px) {
+  :root { --site-header-height:74px; --site-mobile-nav-height:82px; --site-mobile-nav-offset:8px; }
+  .site-header--glass .site-header-inner { height:58px; min-height:58px; padding:0; }
+  .site-header--glass .site-hub-mtop { height:58px; padding:6px 8px; gap:4px; }
+  .site-header--glass .site-hub-mtop > nav { flex:2; }
+  .site-header--glass .site-hub-mtop .znav-rail { display:flex; width:100%; gap:4px; }
+  .site-header--glass .site-hub-mtop .znav-item { flex:1; padding:0; margin:0; }
+  .site-header--glass .site-hub-mtop .znav-control { min-height:46px; height:46px; padding:0 8px; }
+  .site-header--glass .site-hub-mtop .znav-icon-row { display:none; }
+  .site-header--glass .site-hub-mtop .znav-caption { font:700 15px/1 var(--font-display); letter-spacing:.025em; }
+  .site-header--glass .site-hub-mtop .znav-hub { flex:1; margin:0; }
+  .site-header--glass .site-hub-mtop .hub-mtop__spacer { display:none; }
+  .site-header--glass .site-hub-mtop .site-profile-menu { flex:none; }
+  .site-header--glass .site-hub-mtop .user-avatar { --avatar-size:44px; }
+  .site-header--glass .site-hub-mtop .hub-notify { min-width:44px; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass {
+    height:82px; border:0; border-radius:28px; padding:0; overflow:visible;
+    background:rgba(5,5,6,.82); box-shadow:0 0 0 1px #000,0 12px 28px -18px #000;
+    backdrop-filter:none; -webkit-backdrop-filter:none;
+  }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass::before,
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass::after { display:none; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass .hub-mobile-bar__dock { position:relative; z-index:1; height:82px; padding:6px; gap:2px; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass .hub-mobile-tab.znav-control {
+    height:70px; min-height:70px; border:1px solid transparent; border-radius:22px; padding:6px 2px; gap:7px;
+    color:#aeb7c4; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none;
+  }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass .hub-mobile-tab.znav-control.is-active {
+    color:var(--c); border-color:color-mix(in srgb,var(--c) 78%,transparent);
+    background:radial-gradient(110% 150% at 12% 0%,rgba(175,232,253,.18),transparent 46%),linear-gradient(160deg,rgba(25,227,255,.08),rgba(5,12,18,.65) 66%,rgba(25,227,255,.1));
+    box-shadow:inset 2px 2px 1px -1px rgba(225,249,255,.72),inset -1px -1px 1px rgba(148,223,245,.3),inset 0 0 6px 3px rgba(124,214,250,.05),inset 0 -6px 9px -8px rgba(255,255,255,.38);
+  }
+  .site-mobile-nav--glass [data-accent="blue"] { --c:#91acff; }
+  .site-mobile-nav--glass [data-accent="violet"] { --c:#b06bff; }
+  .site-mobile-nav--glass [data-accent="magenta"] { --c:#ff6abb; }
+  .site-mobile-nav--glass .znav-icon-row { height:24px; min-height:24px; padding:0; }
+  .site-mobile-nav--glass .znav-icon-row > svg { width:22px; height:22px; }
+  .site-mobile-nav--glass .znav-caption { font-size:11px; line-height:1; }
+  .site-mobile-nav--glass .znav-waypoint path { fill:transparent; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.is-scroll-hidden:focus-within { transform:none; opacity:1; pointer-events:auto; }
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.is-scroll-hidden:focus-within .hub-mobile-bar__dock { pointer-events:auto; }
+}
+html.calm-mode .z-glass,html[data-calm="true"] .z-glass { background:#080c12; transition:none; }
+html.calm-mode .z-glass__blur,html[data-calm="true"] .z-glass__blur { backdrop-filter:none; -webkit-backdrop-filter:none; }
+html.calm-mode .z-glass__pointer,html[data-calm="true"] .z-glass__pointer { display:none; }
+@media (prefers-reduced-transparency:reduce) { .site-header.site-header--glass,.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass { background:#080c12; } .z-glass__blur { backdrop-filter:none; -webkit-backdrop-filter:none; } }

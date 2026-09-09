@@ -13,6 +13,7 @@ import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
 import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
 import { Divider } from "@/components/ds";
+import { NavGlassLayers, navGlassPointer } from "@/components/ui/nav-glass";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
@@ -670,7 +671,8 @@ export default function Nav() {
 
   return (
     <>
-      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split">
+      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass" data-seam="bottom" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
+        <NavGlassLayers />
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo

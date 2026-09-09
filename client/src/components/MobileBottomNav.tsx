@@ -13,6 +13,7 @@ import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
+import { NavGlassLayers, navGlassPointer } from "@/components/ui/nav-glass";
 import { CalendarDays, Compass, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
@@ -390,7 +391,8 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption${dockHidden && !overlayOpen ? " is-scroll-hidden" : ""}`} aria-label="Site mobile navigation" onFocusCapture={() => setDockHidden(false)}>
+      <nav className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption z-glass site-mobile-nav--glass${dockHidden && !overlayOpen ? " is-scroll-hidden" : ""}`} data-seam="top" aria-label="Site mobile navigation" onFocusCapture={() => setDockHidden(false)} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
+        <NavGlassLayers />
         <div className="hub-mobile-bar__dock">
           <button
             type="button"
