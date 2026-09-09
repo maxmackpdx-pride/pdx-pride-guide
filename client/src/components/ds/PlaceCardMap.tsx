@@ -1,9 +1,6 @@
-import { useId } from "react";
+import { lazy, Suspense, useId } from "react";
 import { ChevronDown, MapPinned } from "lucide-react";
-import { MapContainer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import CartoVectorBasemap from "@/components/CartoVectorBasemap";
-import { MAP_SURFACE_BG } from "@/components/ds/mapTheme";
+const LivePlaceMap = lazy(() => import("./LivePlaceMap"));
 
 function formatCoordinates(latitude: number, longitude: number) {
   const latitudeDirection = latitude >= 0 ? "N" : "S";
@@ -58,19 +55,9 @@ export function PlaceCardMap({
           {expanded && (
             <>
               <div className="pdxPlaceMap__live">
-                <MapContainer
-                  center={[latitude, longitude]}
-                  zoom={zoom}
-                  minZoom={1}
-                  zoomControl={false}
-                  attributionControl={false}
-                  dragging={false}
-                  scrollWheelZoom={false}
-                  doubleClickZoom={false}
-                  style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
-                >
-                  <CartoVectorBasemap />
-                </MapContainer>
+                <Suspense fallback={<span role="status">Loading map…</span>}>
+                  <LivePlaceMap latitude={latitude} longitude={longitude} zoom={zoom} />
+                </Suspense>
               </div>
               <span className="pdxPlaceMap__pin" aria-hidden="true">
                 <MapPinned size={27} strokeWidth={2.5} />

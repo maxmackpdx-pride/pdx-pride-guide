@@ -1,4 +1,3 @@
-import html2canvas from "html2canvas";
 import type { EventListing } from "@shared/multiDayEvents";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
@@ -175,7 +174,7 @@ export async function exportScheduleToStories(events: EventListing[]): Promise<v
 
   document.body.appendChild(node);
   try {
-    const canvas = await html2canvas(node, {
+    const canvas = await (await import("html2canvas")).default(node, {
       width: 1080,
       height: 1920,
       backgroundColor: "#050505",

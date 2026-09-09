@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
 import { Link, useLocation } from "wouter";
@@ -35,9 +35,10 @@ import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
 import { DAY_COLORS, DAY_TEXT_COLORS } from "@shared/eventWeek";
-import EventLocationMap from "./EventLocationMap";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import "./EventModal.approved.css";
+
+const EventLocationMap = lazy(() => import("./EventLocationMap"));
 
 type EventWithLinks = Event & {
   venueWebsite?: string | null;
@@ -913,14 +914,16 @@ function EventModalInner({
               <span ref={dateRef}>{dateLine}</span>
               <span ref={timeRef}>{timeLine}</span>
             </div>
-            <EventLocationMap
-              event={event}
-              primary={accentColor}
-              complementary={oppositeColor}
-              scheduled={rsvp.myEventIds.has(event.id)}
-              schedulePending={rsvp.isRsvpPending(event.id)}
-              onSchedule={() => rsvp.toggleRsvp(event.id)}
-            />
+            <Suspense fallback={<div className="event-location-map" role="status">Loading map…</div>}>
+              <EventLocationMap
+                event={event}
+                primary={accentColor}
+                complementary={oppositeColor}
+                scheduled={rsvp.myEventIds.has(event.id)}
+                schedulePending={rsvp.isRsvpPending(event.id)}
+                onSchedule={() => rsvp.toggleRsvp(event.id)}
+              />
+            </Suspense>
             {primaryLink && !editing ? (
               <a
                 href={primaryLink.href}

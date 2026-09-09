@@ -66,6 +66,7 @@ export default defineConfig(({ command }) => ({
   // fallback, and the app never booted on deep links.
   base: "/",
   build: {
+    manifest: true,
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     // No manualChunks: hand-splitting leaflet created a circular chunk

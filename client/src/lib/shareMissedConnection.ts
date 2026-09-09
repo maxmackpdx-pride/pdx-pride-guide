@@ -1,4 +1,3 @@
-import html2canvas from "html2canvas";
 import { shareOrDownloadPng } from "@/lib/shareImage";
 
 type ShareMissedConnection = {
@@ -129,7 +128,7 @@ async function buildMissedConnectionCanvas(post: ShareMissedConnection): Promise
 
   document.body.appendChild(node);
   try {
-    return await html2canvas(node, {
+    return await (await import("html2canvas")).default(node, {
       width: 1080,
       height: 1920,
       backgroundColor: "#050505",

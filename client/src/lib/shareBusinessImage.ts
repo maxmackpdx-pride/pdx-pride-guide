@@ -1,4 +1,3 @@
-import html2canvas from "html2canvas";
 import { directoryFallbackLogo } from "@/lib/directoryLogos";
 import { shareOrDownloadPng } from "@/lib/shareImage";
 
@@ -124,7 +123,7 @@ async function buildBusinessCardCanvas(business: ShareBusiness): Promise<HTMLCan
 
   document.body.appendChild(node);
   try {
-    return await html2canvas(node, {
+    return await (await import("html2canvas")).default(node, {
       width: 1080,
       height: 1350,
       backgroundColor: "#0b0b0e",
