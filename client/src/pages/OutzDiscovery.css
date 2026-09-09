@@ -152,3 +152,22 @@ html.calm-mode .outz-discovery .rugged .select-place{
   -webkit-backdrop-filter:none;
   background:#0d0b09;
 }
+
+/* Keep destination titles and action labels in the shared display face. */
+.outz-discovery .rugged .place-copy>strong{
+  font-family:var(--font-display);
+  font-weight:var(--fw-black,900);
+  letter-spacing:var(--tracking-display,.005em);
+}
+.outz-discovery .rugged .place-copy>small{
+  font-family:var(--font-display);
+  font-weight:var(--fw-bold,700);
+}
+/* Fade moving cards into the page; padding keeps the first/last card readable. */
+@media(min-width:641px){
+  .outz-discovery .rugged .map-list{
+    padding-block:28px;
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 28px,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(to bottom,transparent,#000 28px,#000 calc(100% - 28px),transparent);
+  }
+}
