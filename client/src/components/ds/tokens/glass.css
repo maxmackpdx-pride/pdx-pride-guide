@@ -376,6 +376,16 @@ html.calm-mode .pdx-liquid-overlay,
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+
+  .pdx-glass-card,
+  .pdx-glass,
+  .pdx-glass-card--neutral {
+    background:
+      linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+      rgba(5, 5, 8, 0.96) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .pdx-glass-card--neutral {
@@ -432,8 +442,8 @@ html.calm-mode .pdx-liquid-overlay,
   border: var(--glass-card-neutral-border);
   border-radius: var(--glass-card-radius, 14px);
   box-shadow: var(--glass-card-neutral-shadow);
-  backdrop-filter: blur(var(--glass-card-blur));
-  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+  backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
 }
 
 /* Non-overlay keys need a containing block for sheen */
@@ -1046,6 +1056,17 @@ html.calm-mode .pdx-glass-card--neutral,
   -webkit-backdrop-filter: none !important;
 }
 
+html.calm-mode .pdx-glass-card,
+html.calm-mode .pdx-glass,
+html.calm-mode .pdx-glass-card--neutral,
+:root[data-calm="true"] .pdx-glass-card,
+:root[data-calm="true"] .pdx-glass,
+:root[data-calm="true"] .pdx-glass-card--neutral {
+  background:
+    linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+    rgba(5, 5, 8, 0.94) !important;
+}
+
 /* No backdrop-filter support: solid OLED slab */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .pdx-glass-card,
@@ -1065,6 +1086,8 @@ html.calm-mode .pdx-glass-card--neutral,
   .rb-panel,
   .rb-card,
   .fitem--glow {
-    background: #050506 !important;
+    background:
+      linear-gradient(133deg, rgba(255, 255, 255, 0.09), transparent 34%),
+      rgba(5, 5, 8, 0.97) !important;
   }
 }
