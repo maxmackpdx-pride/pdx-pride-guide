@@ -5111,10 +5111,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(req2);
   });
 
+  // Contact availability is resolved on the server; never trust a client-supplied recipient ID.
+  app.get("/api/events/:id/message-options", requireAuth, (req, res) => {
+    const evt = storage.getEvent(Number(req.params.id));
+    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    const host = storage.resolveEventMessageRecipient(evt.id, "host");
+    const venue = storage.resolveEventMessageRecipient(evt.id, "venue");
+    res.json({
+      canMessageHost: Boolean(host && host.user.id !== req.session.userId),
+      canMessageVenue: Boolean(venue && venue.user.id !== req.session.userId),
+      venueName: venue?.venueName || evt.venueName,
+    });
+  });
+
   app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    const recipient = storage.resolveEventMessageRecipient(evt.id);
+    const target = req.body.target ?? "auto";
+    if (target !== "auto" && target !== "host" && target !== "venue") {
+      return res.status(400).json({ error: "Invalid message target" });
+    }
+    const recipient = storage.resolveEventMessageRecipient(evt.id, target);
     if (!recipient) {
       const venueWebsite = resolveVenueWebsite(evt.venueName, venueWebsiteIndex());
       return res.status(400).json({

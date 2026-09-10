@@ -53,3 +53,6 @@
     padding-bottom: 18px;
   }
 }
+
+/* The map demo uses the bottom navigation on phones, including during loading. */
+@media(max-width:767px){.app-shell--zaydar-demo .site-header,.app-shell--zaydar-demo .site-header-rainbow-seam{display:none}}

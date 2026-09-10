@@ -33,6 +33,13 @@ export default function PullToRefresh() {
     };
 
     const onStart = (e: TouchEvent) => {
+      // Embedded map drawers own their header gestures and scroll their content independently.
+      if (e.target instanceof Element && e.target.closest("[data-no-pull-to-refresh]")) {
+        dragging.current = false;
+        startY.current = null;
+        set(0);
+        return;
+      }
       if (busy.current || window.scrollY > 0 || e.touches.length !== 1) return;
       startY.current = e.touches[0].clientY;
       dragging.current = true;
