@@ -84,7 +84,7 @@ export default function OutzMap({
           <MapResizer />
           {destinations.map(place => (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={pin(outzPinHex(place.name, place.kind))}>
-              <Popup><PopupCard name={place.name} detail={place.subtitle} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
+              <Popup><PopupCard name={place.name} detail={place.officialNotice?.summary ?? place.subtitle} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
             </Marker>
           ))}
           {catalog.map(place => (

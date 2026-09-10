@@ -1,5 +1,5 @@
 import { sqlite } from "./storage";
-import { OUTZ_COMMUNITY_STAYS, OUTZ_SOURCES, type OutzAlert, type OutzCatalogPlace, type OutzDestination, type OutzSnapshot } from "@shared/outz";
+import { activeOutzOfficialNotice, OUTZ_COMMUNITY_STAYS, OUTZ_SOURCES, type OutzAlert, type OutzCatalogPlace, type OutzDestination, type OutzOfficialNotice, type OutzSnapshot } from "@shared/outz";
 
 const CACHE_ID = 1;
 const CACHE_TTL_MS = 20 * 60 * 1000;
@@ -31,6 +31,10 @@ function readCache(): OutzSnapshot | null {
     // app, not remote feeds. Keep cached live conditions and catalog records,
     // but never let an older serialized payload hide a verified correction
     // after deploy.
+    snapshot.destinations = (snapshot.destinations ?? []).map(destination => ({
+      ...destination,
+      officialNotice: activeOutzOfficialNotice(FEATURED.find(feature => feature.id === destination.id)?.officialNotice),
+    }));
     snapshot.communityStays = OUTZ_COMMUNITY_STAYS;
     snapshot.sources = OUTZ_SOURCES;
     return snapshot;
@@ -61,8 +65,9 @@ async function fetchJson<T>(url: string, headers: Record<string, string> = {}): 
   }
 }
 
-type FeaturedConfig = Omit<OutzDestination, "sourceStatus" | "forecast" | "airTempF" | "wind" | "alerts"> & {
+type FeaturedConfig = Omit<OutzDestination, "sourceStatus" | "officialNotice" | "forecast" | "airTempF" | "wind" | "alerts"> & {
   statePark?: "oregon" | "washington";
+  officialNotice?: OutzOfficialNotice;
 };
 
 // Each feature has a direct, official visitor page. This is a deliberate small
@@ -89,6 +94,14 @@ const FEATURED: FeaturedConfig[] = [
     officialUrl: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
     sourceName: "Oregon Parks and Recreation Department",
     statePark: "oregon",
+    officialNotice: {
+      summary: "Closed: day-use area, campground, and hiker/biker camp are closed for construction.",
+      sourceUrl: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
+      checkedAt: "2026-09-10",
+      // The official timeline is still being adjusted. Force a new evidence
+      // check instead of leaving a temporary closure indefinitely.
+      expiresAt: "2026-09-17T00:00:00-07:00",
+    },
   },
   {
     id: "beacon-rock",
@@ -238,11 +251,15 @@ export async function refreshOutzSnapshot(): Promise<OutzSnapshot> {
   ]);
   const snapshot: OutzSnapshot = {
     fetchedAt: new Date().toISOString(),
-    destinations: FEATURED.map((destination, index) => ({
-      ...destination,
-      ...conditions[index],
-      sourceStatus: stateStatuses.get(destination.name) ?? null,
-    })),
+    destinations: FEATURED.map((destination, index) => {
+      const officialNotice = activeOutzOfficialNotice(destination.officialNotice);
+      return {
+        ...destination,
+        ...conditions[index],
+        officialNotice,
+        sourceStatus: stateStatuses.get(destination.name) ?? null,
+      };
+    }),
     catalog,
     communityStays: OUTZ_COMMUNITY_STAYS,
     sources: OUTZ_SOURCES,

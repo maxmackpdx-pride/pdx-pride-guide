@@ -225,6 +225,7 @@ export default function OutzPlace() {
   }
 
   const alert = destination?.alerts[0] ?? null;
+  const officialNotice = destination?.officialNotice ?? null;
 
   return (
     <div
@@ -295,7 +296,9 @@ export default function OutzPlace() {
           {stay ? <div className="outz-stay-facts">
               <article><span>Before you go</span><p>{stay.accessNote}</p></article>
               <article><span>Why it’s here</span><p>{stay.inclusionNote}</p></article>
-            </div> : alert
+            </div> : officialNotice
+            ? <div className="outz-place__alert outz-place__alert--bad"><strong>Official closure:</strong><span>{officialNotice.summary} <a href={officialNotice.sourceUrl} target="_blank" rel="noreferrer">Verify with Oregon Parks ↗</a></span></div>
+            : alert
             ? <div className="outz-place__alert outz-place__alert--bad"><strong>⚠ Alert:</strong><span>{alert.headline}</span></div>
             : destination
               ? <div className="outz-place__alert outz-place__alert--good"><strong>No active NWS alert.</strong><span>Conditions change fast. Confirm on the official page before you drive.</span></div>
@@ -303,6 +306,7 @@ export default function OutzPlace() {
 
           <p className="outz-place__official">
             {place?.sourceStatus ? <><span>{stay ? "Listing review" : "Official status"}</span> {place.sourceStatus}</> : null}
+            {officialNotice ? <small> Official source checked {officialNotice.checkedAt}; recheck after {new Date(officialNotice.expiresAt).toLocaleDateString()}.</small> : null}
             {place?.officialUrl
               ? <a href={place.officialUrl} target="_blank" rel="noreferrer">Official details ↗</a>
               : <em>Official source has no direct visitor page.</em>}

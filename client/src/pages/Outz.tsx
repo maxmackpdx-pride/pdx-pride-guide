@@ -24,7 +24,7 @@ export default function Outz(){
  const snapshot=query.data?.data;
  const places=useMemo<OutzDiscoveryPlace[]>(()=>[
   ...beaches,
-  ...(snapshot?.destinations??[]).filter(p=>p.kind!=="beach").map(p=>({id:p.id,name:p.name,region:p.subtitle,kind:"Camp + Hike",short:OUTZ_KIND_META[p.kind].label,cardAccent:outzPinHex(p.name,p.kind),accent:"#39FF14",note:[p.sourceStatus,p.alerts.map(a=>a.headline).join(" · "),p.forecast].filter(Boolean).join(" · ")||"Check current access and conditions with the managing agency.",href:outzPlaceHref(p),lat:p.lat,lng:p.lng})),
+  ...(snapshot?.destinations??[]).filter(p=>p.kind!=="beach").map(p=>({id:p.id,name:p.name,region:p.subtitle,kind:"Camp + Hike",short:OUTZ_KIND_META[p.kind].label,cardAccent:outzPinHex(p.name,p.kind),accent:"#39FF14",note:[p.officialNotice?.summary,p.sourceStatus,p.alerts.map(a=>a.headline).join(" · "),p.forecast].filter(Boolean).join(" · ")||"Check current access and conditions with the managing agency.",href:outzPlaceHref(p),lat:p.lat,lng:p.lng})),
   ...(snapshot?.catalog??[]).map(p=>({id:p.id,name:p.name,region:p.sourceName,kind:"Camp + Hike",short:OUTZ_KIND_META[p.kind].label,cardAccent:outzPinHex(p.name,p.kind),accent:p.kind==="trailhead"?"#FF6600":"#39FF14",note:p.statusReason||p.status||"Check current access and conditions with the managing agency.",href:outzPlaceHref(p),lat:p.lat,lng:p.lng})),
   ...(snapshot?.communityStays??OUTZ_COMMUNITY_STAYS).map(p=>({id:p.id,name:p.name,region:p.region,kind:"Community stays",short:OUTZ_KIND_META[p.kind].label,cardAccent:outzPinHex(p.name,p.kind),accent:p.kind==="campground"?"#39FF14":"#00FFFF",note:p.accessNote,href:outzPlaceHref(p),lat:p.lat,lng:p.lng,logo:stayLogo[p.id]?`/motifs/outz/stays/${stayLogo[p.id]}.png`:undefined}))
  ],[snapshot]);

@@ -11,6 +11,23 @@ export type OutzAlert = {
   endsAt: string | null;
 };
 
+/** A short-lived access notice from a named official source. */
+export type OutzOfficialNotice = {
+  summary: string;
+  sourceUrl: string;
+  checkedAt: string;
+  expiresAt: string;
+};
+
+export function activeOutzOfficialNotice(
+  notice: OutzOfficialNotice | null | undefined,
+  now = Date.now(),
+): OutzOfficialNotice | null {
+  if (!notice) return null;
+  const expiresAt = new Date(notice.expiresAt).getTime();
+  return Number.isFinite(expiresAt) && expiresAt > now ? notice : null;
+}
+
 export type OutzDestination = {
   id: string;
   name: string;
@@ -21,6 +38,7 @@ export type OutzDestination = {
   officialUrl: string;
   sourceName: string;
   sourceStatus: string | null;
+  officialNotice: OutzOfficialNotice | null;
   forecast: string | null;
   airTempF: number | null;
   wind: string | null;
