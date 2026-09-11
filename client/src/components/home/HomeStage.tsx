@@ -156,7 +156,7 @@ export default function HomeStage({ afterWelcome }: Props) {
         </header>
         {hasPreviewError ? (
           <div className="home-front__preview-error" role="alert">
-            <span>Some live previews could not load. Demo cards are standing in.</span>
+            <span>Some live previews could not load. You can still open every destination.</span>
             <button type="button" className="pdx-glass-btn pdx-glass-btn--outline pdx-glass-rebind" onClick={worldData.retry}>
               Retry live previews
             </button>
@@ -197,6 +197,7 @@ export default function HomeStage({ afterWelcome }: Props) {
                 }
                 items={worldData.items}
                 today={worldData.today}
+                communities={worldData.communities}
                 previewState={worldData.states[world.key]}
               />
             );

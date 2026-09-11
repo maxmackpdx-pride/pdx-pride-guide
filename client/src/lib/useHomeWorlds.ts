@@ -14,6 +14,7 @@
  *             cannot drift into tomorrow.
  */
 
+import type { CommunitySummary } from "@shared/community";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -138,6 +139,7 @@ export type HomeWorldsData = {
   postings: Record<"hauz" | "giftz" | "gigz" | "mizzed", WorldPosting[]>;
   items: WorldItem[];
   today: WorldTodayItem[];
+  communities: CommunitySummary[];
   states: Record<WorldKey, HomeWorldPreviewState>;
   retry: () => void;
 };
@@ -161,6 +163,11 @@ export function useHomeWorlds(): HomeWorldsData {
     staleTime: 60_000,
   });
   const events = eventsQuery.data ?? [];
+  const communitiesQuery = useQuery<CommunitySummary[]>({
+    queryKey: ["/api/communities"],
+    staleTime: 60_000,
+  });
+  const communities = (communitiesQuery.data ?? []).slice(0, 3);
 
   const directoryQuery = useQuery<DirectoryPlace[]>({
     queryKey: ["/api/directory"],
@@ -459,17 +466,17 @@ export function useHomeWorlds(): HomeWorldsData {
     gigz: previewState(gigsQuery.isPending, gigsQuery.isError, postings.gigz.some(post => post.isLive)),
     sellz: previewState(sellzQuery.isPending, sellzQuery.isError, items.some(item => item.isLive)),
     mizzed: previewState(spottedQuery.isPending, spottedQuery.isError, postings.mizzed.some(post => post.isLive)),
-    zspace: previewState(eventsQuery.isPending, eventsQuery.isError, today.some(item => item.isLive)),
+    zspace: previewState(communitiesQuery.isPending, communitiesQuery.isError, communities.length > 0),
     next: "ready",
   };
 
   const retry = () => {
     void Promise.all([
-      eventsQuery.refetch(), directoryQuery.refetch(), housingQuery.refetch(), giftingQuery.refetch(),
+      communitiesQuery.refetch(), eventsQuery.refetch(), directoryQuery.refetch(), housingQuery.refetch(), giftingQuery.refetch(),
       gigsQuery.refetch(), spottedQuery.refetch(), sellzQuery.refetch(), beachesQuery.refetch(),
       outzQuery.refetch(), roosterCheckinsQuery.refetch(), sauvieCheckinsQuery.refetch(),
     ]);
   };
 
-  return { outzRows, flyers, panels, postings, items, today, states, retry };
+  return { outzRows, flyers, panels, postings, items, today, communities, states, retry };
 }

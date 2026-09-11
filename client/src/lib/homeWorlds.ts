@@ -33,6 +33,7 @@ export type WorldSlotKind =
   | "marquee"
   | "postings"
   | "items"
+  | "communities"
   | "today"
   | "roadmap";
 
@@ -148,13 +149,13 @@ export const WORLDS: WorldSpec[] = [
   {
     key: "outz",
     number: "01",
-    title: "OUTZ",
-    eyebrow: "Join the chat",
-    body: "Camping, hiking, trailheads and beaches, with the access notes and the people who make the trip better. Every address has a check-in chat, plus a planning chat for a day you're booking ahead.",
-    action: "Join the chat",
+    title: "OutZide",
+    eyebrow: "Explore outside",
+    body: "Camping, trails, beaches and stays. Find your next destination.",
+    action: "Open OutZide",
     href: "/outz",
     accent: "var(--neon-orange, #ff6600)",
-    mark: "/brand/family/outz.svg",
+    mark: "/brand/outzide.png",
     slot: "rows",
   },
   {
@@ -162,6 +163,7 @@ export const WORLDS: WorldSpec[] = [
     number: "02",
     title: "EVENTZ",
     eyebrow: "Flyers · Portland",
+    body: "Find the party. See what is happening around Portland.",
     action: "Open EVENTZ",
     href: "/events",
     accent: "var(--neon-cyan, #00ffff)",
@@ -174,9 +176,9 @@ export const WORLDS: WorldSpec[] = [
     title: "OUR PLACEZ",
     eyebrow: "The directory for us",
     body: "Queer-owned and queer-friendly Portland businesses, celebrated and not just indexed.",
-    action: "Spend queer",
+    action: "Open OUR PLACEZ",
     href: "/directory",
-    accent: "var(--neon-blue, #0044ff)",
+    accent: "var(--panel-cyan, #19e3ff)",
     mark: "/brand/family/our-placez.svg",
     slot: "marquee",
   },
@@ -186,7 +188,7 @@ export const WORLDS: WorldSpec[] = [
     title: "THE HAÜZ",
     eyebrow: "Rooms and people",
     body: "Find a room, a roommate or the people to form a home with.",
-    action: "Find your people",
+    action: "Open THE HAÜZ",
     href: "/the-hauz",
     accent: "var(--panel-cyan, #19e3ff)",
     mark: "/brand/family/the-hauz.svg",
@@ -210,7 +212,7 @@ export const WORLDS: WorldSpec[] = [
     title: "GIGZ",
     eyebrow: "Hiring both ways",
     body: "Find paid work, or find the queer talent your event needs.",
-    action: "Find a gig",
+    action: "Open GIGZ",
     href: "/pride-work",
     accent: "var(--board-gigs, #6e3dff)",
     mark: "/brand/family/gigz.svg",
@@ -222,7 +224,7 @@ export const WORLDS: WorldSpec[] = [
     title: "SELLZ",
     eyebrow: "Local marketplace",
     body: "Buy and sell with the scene. Simple listings, real people, local handoffs.",
-    action: "Browse listings",
+    action: "Open SELLZ",
     href: "/sellz",
     accent: "var(--neon-green, #39ff14)",
     mark: "/brand/family/sellz.svg",
@@ -234,7 +236,7 @@ export const WORLDS: WorldSpec[] = [
     title: "MIZZED CONNECTION",
     eyebrow: "Say the thing",
     body: "Post who you saw. Replies stay private and consent comes first.",
-    action: "See who got spotted",
+    action: "Open MIZZED CONNECTION",
     href: "/spotted",
     accent: "var(--board-spotted, #ff00cc)",
     mark: "/brand/family/mizzed-connection.svg",
@@ -244,27 +246,14 @@ export const WORLDS: WorldSpec[] = [
     key: "zspace",
     number: "09",
     title: "Z/ COMMUNITIES",
-    /* Kept inside the eyebrow's one nowrap line: "Every board, one address"
-       was the only kicker on the rail that ran past its box and ellipsed. */
     eyebrow: "Find your people",
-    /* No wordmark by request: the headline carries this card, and the list
-       below it is the subject. The eyebrow already names the destination.
-
-       The body describes the list that is actually there, which is what is
-       still to come today, and leaves the whole-namespace promise to the
-       eyebrow and the action row. The old copy said "every address in the
-       namespace, and everything on it today" over a list that is today's
-       events, and a card should not promise more than it shows. */
-    headline: "Where people belong",
-    /* Two lines is the whole body box on this rail, and at rail card width
-       that is about sixty characters, so this says one thing and stops. The
-       whole-namespace promise is the eyebrow's and the action row's. */
+    headline: "Z/ Communities",
     body: "Memberships, rules, posts, and the gatherings around them.",
     action: "Open Communities",
     href: "/z",
-    accent: "var(--board-zspace, #8f5cff)",
+    accent: "var(--panel-cyan, #19e3ff)",
     mark: null,
-    slot: "today",
+    slot: "communities",
   },
 ];
 
