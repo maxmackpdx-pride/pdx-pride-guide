@@ -269,7 +269,8 @@ function mapHref(mutate: (params: URLSearchParams) => void): string {
   const params = mapSearchParams();
   mutate(params);
   const qs = params.toString();
-  return qs ? `/map-demo?${qs}` : "/map-demo";
+  const path = typeof window !== "undefined" && window.location.pathname === "/map-demo" ? "/map-demo" : "/map";
+  return qs ? `${path}?${qs}` : path;
 }
 
 function overlayHref(key: OverlayKey | null, id?: number): string {
@@ -674,7 +675,7 @@ export default function ZaydarMapDemo() {
   // A directory entry can be found before its address has a confirmed map pin.
   if(showPlaces)for(const place of mapPlaces){if(!listedPlaces.has(place.id))resultMarks.push({key:`unmapped-${place.id}`,kind:'place',lat:NaN,lng:NaN,item:place});}
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map demo">
+  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map">
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onMode={mode=>setFlight(mode==='flight')} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>

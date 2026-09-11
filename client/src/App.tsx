@@ -59,7 +59,6 @@ import ResetPassword from "./pages/ResetPassword";
 const Events = lazyWithReload(() => import("./pages/Events"));
 const Home = lazyWithReload(() => import("./pages/Home"));
 const ZaydarMapDemo = lazyWithReload(() => import("./pages/ZaydarMapDemo"));
-const LivingMap = lazyWithReload(() => import("./pages/LivingMap"));
 const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const PrideWork = lazyWithReload(() => import("./pages/PrideWork"));
@@ -99,11 +98,11 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
-function SignedInLivingMap({ demo = false }: { demo?: boolean } = {}) {
+function SignedInLivingMap() {
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   if (loading) return <SpectrumLoader variant="full" label="Loading map" />;
-  if (user || isLocalDemo()) return demo ? <ZaydarMapDemo /> : <LivingMap />;
+  if (user || isLocalDemo()) return <ZaydarMapDemo />;
   return (
     <div className="zine-page board-page">
       <PageHeader
@@ -138,7 +137,7 @@ function AppLayout() {
   const livingMap = ["/map", "/map-demo"].includes(location.split("?")[0]);
   return (
     <div
-      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${location.split("?")[0] === "/map-demo" ? " app-shell--zaydar-demo" : ""}`}
+      className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--zaydar-demo" : ""}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
@@ -157,7 +156,7 @@ function AppLayout() {
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
-            <Route path="/map-demo" component={() => <SignedInLivingMap demo />} />
+            <Route path="/map-demo" component={() => <SignedInLivingMap />} />
             <Route path="/map" component={() => <SignedInLivingMap />} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
