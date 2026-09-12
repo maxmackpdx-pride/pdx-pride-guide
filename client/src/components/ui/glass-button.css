@@ -1,0 +1,22 @@
+/* The supplied JSX has no material CSS. Scoped polished-lens completion. */
+.glass-button-wrap { position:relative;display:inline-flex;border-radius:999px;isolation:isolate; }
+.glass-button { position:relative;isolation:isolate;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;min-height:44px;background:rgba(5,5,6,.14);color:inherit;cursor:pointer;transition:transform .22s,box-shadow .22s; }
+.glass-button--default { padding:14px 24px; }
+.glass-button--sm { padding:10px 16px; }
+.glass-button--lg { padding:16px 32px; }
+.glass-button--icon { padding:0;width:56px;height:56px; }
+.glass-button-text { position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;z-index:1; }
+.glass-button-surface { position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(140deg,rgba(220,243,250,.12),transparent 35% 66%,rgba(135,186,204,.06));
+  box-shadow:inset 1.5px 1.5px 1px -1px rgba(223,247,255,.68),inset -1.5px -2px 1px -1px rgba(153,206,224,.46),inset 0 0 1px 1px rgba(130,172,190,.13),inset 0 -5px 7px -7px #000;
+}
+.glass-button-wrap .glass-button-surface { backdrop-filter:blur(.45px);-webkit-backdrop-filter:blur(.45px); }
+.glass-button-shadow { position:absolute;inset:4px 3px -4px;z-index:-1;border-radius:inherit;box-shadow:0 4px 8px #0003;pointer-events:none; }
+.glass-button:not(:disabled):active { transform:scale(.97); }
+.glass-button:focus-visible { outline:2px solid #19e3ff;outline-offset:3px; }
+.glass-button:disabled { opacity:.45;cursor:default; }
+/* Only the closed circle gains the supplied material. Brand seam stays separate. */
+.z-mobile-dock__restore>.glass-button-surface { z-index:-1; }
+@media(prefers-reduced-motion:reduce) { .glass-button { transition:none;transform:none!important; } }
+html.calm-mode .glass-button { transition:none;transform:none!important; }
+

@@ -6,6 +6,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, type LucideIcon } from "lucide-react";
 import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
+import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 
 // 21st arunachalam/Bottom Nav Bar (8343): spring width/opacity label reveal.
 // https://21st.dev/@arunachalam/components/bottom-nav-bar
@@ -50,7 +51,7 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
       const Icon = ICONS[entry.label];
       const active = entryActive(entry, location);
       const expanded = open === key || (focused ? focused === key : active);
-      const content = textOnly ? <><span className="znav-caption">{entry.label}</span>{entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={13} aria-hidden="true" />}</> : <><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+      const content = textOnly ? <><ButtonGlassOptics /><span className="znav-caption">{entry.label}</span>{entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={13} aria-hidden="true" />}</> : <><ButtonGlassOptics /><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
         <motion.span initial={false} animate={{ width: expanded ? 66 : 0, opacity: expanded ? 1 : 0, marginLeft: expanded ? 7 : 0 }} transition={quiet ? { duration: 0 } : { width: { type: "spring", stiffness: 350, damping: 32 }, opacity: { duration: 0.19 }, marginLeft: { duration: 0.19 } }} className="znav-expanding-label">{entry.label}</motion.span>
         {entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={11} aria-hidden="true" />}
       </span><span className="znav-caption" aria-hidden="true">{entry.label}</span></>;
@@ -72,6 +73,7 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
 /** Hub shares the destination controls' icon, caption, and accent-rim treatment. */
 export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly = false }: { active: boolean; unreadCount?: number; onNavigate: () => void; textOnly?: boolean }) {
   return <Link href="/dashboard" className={`znav-control znav-hub pdx-glass-rebind${textOnly ? " znav-control--text" : ""}${active ? " is-active" : ""}`} data-accent="cyan" aria-current={active ? "page" : undefined} aria-label={unreadCount > 0 ? `Hub, ${unreadCount} unread messages` : "Hub"} onClick={onNavigate}>
+    <ButtonGlassOptics />
     {!textOnly && <span className="znav-icon-row"><PanelsTopLeft size={20} strokeWidth={1.8} aria-hidden="true" />{unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}</span>}
     <span className="znav-caption" aria-hidden="true">Hub</span>
     {textOnly && unreadCount > 0 && <span className="znav-hub-badge" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</span>}

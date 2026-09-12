@@ -137,6 +137,7 @@ function AppLayout() {
   const livingMap = ["/map", "/map-demo"].includes(location.split("?")[0]);
   return (
     <div
+      data-glass-scene
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--zaydar-demo" : ""}`}
       style={{ background: "var(--z-black, #050506)" }}
     >

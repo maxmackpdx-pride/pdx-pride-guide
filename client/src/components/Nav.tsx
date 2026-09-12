@@ -13,7 +13,9 @@ import UserAvatar from "@/components/UserAvatar";
 import CalmModeToggle from "@/components/CalmModeToggle";
 import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
 import { Divider } from "@/components/ds";
-import { NavGlassLayers, navGlassPointer } from "@/components/ui/nav-glass";
+import { navGlassPointer } from "@/components/ui/nav-glass";
+import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
+import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
 import { contextLabelOf, contextTypeOf, notifyContextTag } from "@/lib/inboxContext";
 import { PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
@@ -282,6 +284,7 @@ function ProfileMenu({
             setProfileOpen((open) => !open);
           }}
         >
+          <ButtonGlassOptics />
           <UserAvatar
             photoUrl={user.photoUrl}
             avatarChoice={user.avatarChoice}
@@ -434,6 +437,7 @@ function NotifyMenu({
           setOpen(v => !v);
         }}
       >
+        <ButtonGlassOptics />
         {compact ? <><span className="znav-icon-row znav-notification-icon"><Zap size={20} strokeWidth={1.8} aria-hidden="true" />{alertTotal > 0 && <span className="znav-hub-badge">{alertTotal}</span>}</span><span className="znav-caption" aria-hidden="true">Notifications</span></> : <><Zap size={17} strokeWidth={2.4} aria-hidden="true" />{alertTotal > 0 && <span className="hub-notify-btn__badge">{alertTotal}</span>}</>}
       </button>
       {open && (
@@ -672,7 +676,7 @@ export default function Nav() {
   return (
     <>
       <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass" data-seam="bottom" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
-        <NavGlassLayers />
+        <MobileLiquidGlass quiet={false} />
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">
             <GlitchLogo
@@ -685,6 +689,16 @@ export default function Nav() {
           <div className="hub-mtop site-hub-mtop" aria-label="Mobile navigation">
             <nav aria-label="Mobile top navigation"><CompactNavigation location={location} entries={PRIMARY_NAV.filter(entry => entry.type === "link" && (entry.href === "/" || entry.href === "/about"))} onNavigate={() => { closeMenu(); dismissMobileNavOverlays(); }} /></nav>
             <div className="hub-mtop__spacer" />
+            {(user || localDemo) && (
+              <CompactHubLink
+                active={hubActive}
+                unreadCount={unreadCount}
+                onNavigate={() => {
+                  setMobileProfileOpen(false);
+                  dismissMobileNavOverlays();
+                }}
+              />
+            )}
             {user && (
               <NotifyMenu
                 compact
@@ -694,16 +708,6 @@ export default function Nav() {
                 onCloseOthers={() => {
                   setMobileProfileOpen(false);
                   dismissMobileNavOverlays("notify");
-                }}
-              />
-            )}
-            {(user || localDemo) && (
-              <CompactHubLink
-                active={hubActive}
-                unreadCount={unreadCount}
-                onNavigate={() => {
-                  setMobileProfileOpen(false);
-                  dismissMobileNavOverlays();
                 }}
               />
             )}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
@@ -13,7 +13,8 @@ import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
-import { NavGlassLayers, navGlassPointer } from "@/components/ui/nav-glass";
+import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
+import { HologramWaypoint as MapzMark } from "@/components/ui/hero-z-hologram";
 import { CalendarDays, Compass, LayoutGrid, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
@@ -53,21 +54,6 @@ function TabIcon({ children }: { children: ReactNode }) {
   );
 }
 
-function MapzMark() {
-  const markMaskId = useId();
-  return (
-    <svg className="znav-waypoint" width="48" height="54" viewBox="0 0 48 54" fill="none" aria-hidden="true">
-      <defs>
-        <mask id={markMaskId} maskUnits="userSpaceOnUse" x="7" y="8" width="34" height="27">
-          <image href="/brand/family/prime-z.svg" x="7" y="8" width="34" height="27" />
-        </mask>
-      </defs>
-      <path d="M24 51C20 46 5 34 5 21a19 19 0 0 1 38 0c0 13-15 25-19 30Z" fill="var(--panel-ink)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-      <rect x="7" y="8" width="34" height="27" fill="currentColor" mask={`url(#${markMaskId})`} />
-    </svg>
-  );
-}
-
 function tabClass(
   active: boolean,
   accent: "cyan" | "green" | "lime" | "orange" | "pink" | "purple" | "blue" | "more",
@@ -87,37 +73,7 @@ export default function MobileBottomNav() {
   const [outzOpen, setOutzOpen] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [dockHidden, setDockHidden] = useState(false);
   const overlayOpen = eventsOpen || spaceOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
-
-  useEffect(() => {
-    setDockHidden(false);
-    if (overlayOpen) return;
-    let lastY = window.scrollY;
-    let travel = 0;
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const y = Math.max(0, Math.min(window.scrollY, maxY));
-      const delta = y - lastY;
-      lastY = y;
-      if (y < 80 || window.innerWidth >= 960) {
-        travel = 0;
-        setDockHidden(false);
-        return;
-      }
-      if (delta === 0) return;
-      travel = Math.sign(delta) === Math.sign(travel) ? travel + delta : delta;
-      if (Math.abs(travel) >= 12) {
-        setDockHidden(travel > 0);
-        travel = 0;
-      }
-    };
-    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); window.cancelAnimationFrame(frame); };
-  }, [location, overlayOpen]);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
@@ -163,6 +119,7 @@ export default function MobileBottomNav() {
   const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href)) || navLinkActive(location, OUTZ_INDEX);
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
+  const activeIndex = open || showAuth ? 4 : spaceOpen ? 3 : exploreOpen || outzOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : boardsActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -391,9 +348,7 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      <nav className={`hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption z-glass site-mobile-nav--glass${dockHidden && !overlayOpen ? " is-scroll-hidden" : ""}`} data-seam="top" aria-label="Site mobile navigation" onFocusCapture={() => setDockHidden(false)} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
-        <NavGlassLayers />
-        <div className="hub-mobile-bar__dock">
+      <MobileDockShell activeIndex={activeIndex} overlayOpen={overlayOpen} location={location} attentionCount={user ? attentionCount : 0}>
           <button
             type="button"
             className={tabClass(eventsActive || eventsOpen, "cyan")}
@@ -466,8 +421,7 @@ export default function MobileBottomNav() {
             </span>
             <span className="znav-caption">Messages</span>
           </button>
-        </div>
-      </nav>
+      </MobileDockShell>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </>,
