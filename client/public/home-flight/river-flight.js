@@ -18,7 +18,7 @@ const vectorStyle={version:8,light:{anchor:'map',color:'#c7d9ed',intensity:.42,p
   ]};
 // OpenFreeMap vector geometry; no symbols, labels, land fill, or map background.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
-  center:[-122.66544,45.5018],zoom:(13.8849625+Math.log2(1.25)),pitch:48,bearing:0,
+  center:[-122.66544,45.5032],zoom:(13.8849625+Math.log2(1.18)),pitch:48,bearing:0,
   style:structuredClone(vectorStyle)});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
@@ -530,7 +530,7 @@ function drawLights(fade,target=map,surface=lights){
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
 // Broad turns center the Old Town bar cluster, then the Mississippi/Alberta bars and Eagle.
-const route=[[-122.66544,45.5018],[-122.663,45.509],[-122.667,45.517],[-122.6735,45.5236],[-122.674,45.5305],[-122.6715,45.541],[-122.6685,45.552],[-122.671,45.562],[-122.675349125866,45.572],[-122.675349125866,45.577275827371],[-122.675349125866,45.593],[-122.675349125866,45.61],[-122.675349125866,45.65]];
+const route=[[-122.66544,45.5032],[-122.663,45.509],[-122.667,45.517],[-122.6735,45.5236],[-122.674,45.5305],[-122.6715,45.541],[-122.6685,45.552],[-122.671,45.562],[-122.675349125866,45.572],[-122.675349125866,45.577275827371],[-122.675349125866,45.593],[-122.675349125866,45.61],[-122.675349125866,45.65]];
 // Densify with a low-tension Hermite spline for gentle turns, then sample
 // by distance so the camera maintains an even speed through tight bends.
 const flightPath=[];
@@ -552,7 +552,7 @@ function point(t){
  return flightPath[i-1].map((v,j)=>v+(flightPath[i][j]-v)*f);
 }
 // Smooth downtown close-up along the river: Ross Island Bridge to Lloyd district.
-const normalZoom=(13.8849625+Math.log2(1.25));
+const normalZoom=(13.8849625+Math.log2(1.18));
 function smoothRange(a,b,value){const x=Math.max(0,Math.min(1,(value-a)/(b-a)));return x*x*x*(x*(x*6-15)+10);}
 function downtownZoom(latitude){
  const enter=smoothRange(45.501,45.521,latitude);
