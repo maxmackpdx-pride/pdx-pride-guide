@@ -85,7 +85,7 @@
   gap: 14px;
   padding: clamp(16px, 2.3vw, 24px);
   border-radius: 18px;
-  background: color-mix(in srgb, #09090d 95%, transparent);
+  background: var(--glass-card-bg);
   box-shadow: var(--glass-card-shadow), var(--neon-bloom);
 }
 
@@ -1207,11 +1207,9 @@
   z-index: 5;
 }
 
-/* OLED reassert for standard cards only (edge variants own multi-layer bg) */
+/* Standard cards use Liquid Deep Glass; edge variants keep their layered rim. */
 .directory-page .pdxPlace:not(.pdxPlace--edge) .pdxPlace__body {
-  background:
-    radial-gradient(90% 70% at 50% 40%, #000 0%, #000 42%, #030304 78%, color-mix(in srgb, var(--c) 5%, #050408) 100%),
-    radial-gradient(110% 70% at 50% 118%, color-mix(in srgb, var(--c) 16%, transparent), transparent 58%) !important;
+  background: var(--glass-card-bg);
 }
 
 /* Map island */

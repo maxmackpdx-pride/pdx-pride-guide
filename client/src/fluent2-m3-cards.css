@@ -13,11 +13,8 @@ html[data-zaylist-cards="fluent2-m3"] {
   --glass-card-radius: var(--f2m3-card-radius);
   --glass-card-blur: var(--f2m3-card-blur);
 
-  /* Neutral card keeps the same material without inventing a semantic color. */
-  --glass-card-neutral-bg:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 30%),
-    radial-gradient(100% 80% at 50% 108%, rgba(184, 184, 194, 0.11), transparent 60%),
-    rgba(4, 4, 6, 0.9);
+  /* Fill and blur come from the canonical Liquid Deep Glass tokens.
+     This layer retains Fluent borders, shadows, geometry, and state behavior. */
   --glass-card-neutral-border: 1px solid rgba(184, 184, 194, 0.44);
   --glass-card-neutral-shadow:
     0 2px 4px rgba(0, 0, 0, 0.28),
@@ -68,11 +65,6 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   .hz-card,
   .home-stage__chat-card
 ) {
-  --glass-card-bg:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.105), transparent 29%),
-    radial-gradient(100% 78% at 50% 108%, color-mix(in srgb, var(--c) 16%, transparent), transparent 61%),
-    radial-gradient(90% 70% at 50% 46%, #000 0%, #000 34%, #030304 70%, color-mix(in srgb, var(--c) 7%, #050408) 100%),
-    rgba(4, 4, 6, 0.92);
   --glass-card-border: 1px solid color-mix(in srgb, var(--c) 58%, rgba(255, 255, 255, 0.18));
   --glass-card-shadow:
     0 2px 4px rgba(0, 0, 0, 0.28),
@@ -116,8 +108,8 @@ html[data-zaylist-cards="fluent2-m3"] :where(
   border: var(--glass-card-border);
   border-radius: var(--f2m3-card-radius);
   box-shadow: var(--glass-card-shadow);
-  backdrop-filter: blur(var(--f2m3-card-blur)) saturate(1.18);
-  -webkit-backdrop-filter: blur(var(--f2m3-card-blur)) saturate(1.18);
+  backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
   transition:
     transform 180ms cubic-bezier(0.2, 0, 0, 1),
     box-shadow 180ms cubic-bezier(0.2, 0, 0, 1),
@@ -129,11 +121,7 @@ html[data-zaylist-cards="fluent2-m3"] :where(
 html[data-zaylist-cards="fluent2-m3"] .event-modal {
   overflow: hidden;
   isolation: isolate;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 24%),
-    radial-gradient(80% 34% at 50% 101%, color-mix(in srgb, var(--c) 20%, transparent), transparent 72%),
-    radial-gradient(65% 42% at 100% 4%, color-mix(in srgb, var(--c) 11%, transparent), transparent 76%),
-    rgba(3, 3, 5, 0.94);
+  background: var(--glass-card-bg);
   border-color: color-mix(in srgb, var(--c) 66%, rgba(255, 255, 255, 0.2));
   box-shadow:
     0 3px 7px rgba(0, 0, 0, 0.4),
@@ -281,10 +269,7 @@ html[data-zaylist-cards="fluent2-m3"] .event-modal__sticky-cta {
 /* Directory card, closed: the compact version of the same category room. */
 html[data-zaylist-cards="fluent2-m3"] .pdxPlace__body {
   border-radius: var(--f2m3-card-radius);
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 29%),
-    radial-gradient(105% 82% at 50% 112%, color-mix(in srgb, var(--c) 20%, transparent), transparent 62%),
-    radial-gradient(90% 70% at 50% 42%, #000 0%, #000 40%, #030304 76%, color-mix(in srgb, var(--c) 7%, #050408) 100%);
+  background: var(--glass-card-bg);
 }
 
 html[data-zaylist-cards="fluent2-m3"] .pdxPlace__media {
@@ -306,11 +291,7 @@ html[data-zaylist-cards="fluent2-m3"] .pdxPlace__share {
 html[data-zaylist-cards="fluent2-m3"] .place-modal-panel {
   border-radius: 22px;
   isolation: isolate;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.11), transparent 24%),
-    radial-gradient(84% 34% at 50% 102%, color-mix(in srgb, var(--c) 20%, transparent), transparent 72%),
-    radial-gradient(70% 48% at 100% 0%, color-mix(in srgb, var(--c) 12%, transparent), transparent 74%),
-    rgba(3, 3, 5, 0.95);
+  background: var(--glass-card-bg);
   border-color: color-mix(in srgb, var(--c) 66%, rgba(255, 255, 255, 0.2));
   box-shadow:
     0 3px 7px rgba(0, 0, 0, 0.4),
