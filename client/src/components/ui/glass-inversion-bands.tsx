@@ -12,7 +12,8 @@ export function GlassInversionBands({ quiet, variant = 'surface' }: { quiet: boo
   useEffect(() => {
     const host = ref.current;
     const scene = document.querySelector<HTMLElement>('[data-glass-scene]');
-    if (!host || !scene || quiet) return;
+    const mobile = window.matchMedia('(max-width: 959px)');
+    if (!host || !scene || quiet || !mobile.matches) return;
     const clips = [...host.querySelectorAll<HTMLElement>('[data-inversion-scene-window]')];
     const filter = host.querySelector('filter')!;
     const mapImage = host.querySelector('feImage')!;
@@ -22,6 +23,7 @@ export function GlassInversionBands({ quiet, variant = 'surface' }: { quiet: boo
     let padding = 0;
     const copies: HTMLElement[] = [];
     let frame = 0, dirty = true, disposed = false;
+    type ShapeZone = { x: number; y: number; width: number; height: number; radii: readonly [number, number, number, number] };
     // A scene can now contain glass buttons. Never recursively clone their
     // optical copies, and never observe our own rendering as a source change.
     const cloneScene = (node: Node): Node | null => {
@@ -78,14 +80,31 @@ export function GlassInversionBands({ quiet, variant = 'surface' }: { quiet: boo
     const paint = () => {
       frame = 0;
       if (disposed) return;
-      if (dirty) rebuild();
       const glass = host.getBoundingClientRect(), source = scene.getBoundingClientRect();
       if (!glass.width || !glass.height) return;
+      if (dirty) rebuild();
       const band = variant === 'button'
         ? Math.min(8, Math.min(glass.width, glass.height) * .14)
         : Math.min(18, Math.min(glass.width, glass.height) * .22);
       const radii = readGlassRadii(getComputedStyle(host), glass.width, glass.height);
-      const key = [glass.width, glass.height, ...radii].map(v => v.toFixed(2)).join(',');
+      const shapeZones: ShapeZone[] = variant === 'surface'
+        ? [...(host.parentElement?.querySelectorAll<HTMLElement>('.z-button-optics') ?? [])]
+          .map(marker => marker.closest<HTMLElement>('button,a,[role="button"]'))
+          .filter((control): control is HTMLElement => Boolean(control))
+          .map(control => {
+            const rect = control.getBoundingClientRect();
+            return {
+              x: rect.left - glass.left + rect.width / 2 - glass.width / 2,
+              y: rect.top - glass.top + rect.height / 2 - glass.height / 2,
+              width: rect.width,
+              height: rect.height,
+              radii: readGlassRadii(getComputedStyle(control), rect.width, rect.height),
+            };
+          })
+          .filter(shape => shape.width > 1 && shape.height > 1)
+        : [];
+      const key = [glass.width, glass.height, ...radii, ...shapeZones.flatMap(shape => [shape.x, shape.y, shape.width, shape.height, ...shape.radii])]
+        .map(v => v.toFixed(2)).join(',');
       if (key !== geometryKey) {
         geometryKey = key;
         // Overscan supplies the pixels outside the physical rim that the lens
@@ -102,29 +121,38 @@ export function GlassInversionBands({ quiet, variant = 'surface' }: { quiet: boo
         mask.width = Math.ceil(glass.width * ratio); mask.height = Math.ceil(glass.height * ratio);
         const maskContext = mask.getContext('2d')!;
         const alpha = maskContext.createImageData(mask.width, mask.height);
+        const sampleAt = (px: number, py: number) => {
+          let best = glassShapeSample(px, py, glass.width, glass.height, radii, band);
+          for (const shape of shapeZones) {
+            const shapeBand = Math.min(8, Math.min(shape.width, shape.height) * .14);
+            const localX = px - shape.x, localY = py - shape.y;
+            const sample = glassShapeSample(localX, localY, shape.width, shape.height, shape.radii, shapeBand);
+            const magnitude = Math.hypot(sample.dx, sample.dy);
+            const vertical = magnitude ? Math.abs(sample.dy) / magnitude : 0;
+            const u = Math.max(0, Math.min(1, (vertical - .35) / .5));
+            const verticalEdge = u * u * (3 - 2 * u);
+            const side = localY < 0 ? .34 : 1;
+            const shaped = { ...sample, alpha: sample.alpha * .52 * verticalEdge * side };
+            if (shaped.alpha > best.alpha) best = shaped;
+          }
+          return best;
+        };
         for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
           const px = (x + .5) / map.width * frameWidth - padding - glass.width / 2;
           const py = (y + .5) / map.height * frameHeight - padding - glass.height / 2;
-          const sample = glassShapeSample(px, py, glass.width, glass.height, radii, band);
+          const sample = sampleAt(px, py);
           const offset = (y * map.width + x) * 4;
           pixels.data[offset] = (sample.dx / scale + .5) * 255;
           pixels.data[offset + 1] = (sample.dy / scale + .5) * 255;
           pixels.data[offset + 2] = 128; pixels.data[offset + 3] = 255;
         }
         for (let y = 0; y < mask.height; y++) for (let x = 0; x < mask.width; x++) {
+          const localX = (x + .5) / mask.width * glass.width - glass.width / 2;
           const localY = (y + .5) / mask.height * glass.height - glass.height / 2;
-          const sample = glassShapeSample((x + .5) / mask.width * glass.width - glass.width / 2,
-            localY, glass.width, glass.height, radii, band);
+          const sample = sampleAt(localX, localY);
           const offset = (y * mask.width + x) * 4;
-          const magnitude = Math.hypot(sample.dx, sample.dy);
-          const vertical = magnitude ? Math.abs(sample.dy) / magnitude : 0;
-          const verticalT = Math.max(0, Math.min(1, (vertical - .35) / .5));
-          const buttonEdge = verticalT * verticalT * (3 - 2 * verticalT);
-          // The dock already supplies a strong upper fold. Reduce the button's
-          // upper copy so the two layers do not form a detached blurred cap.
-          const buttonSide = localY < 0 ? .3 : 1;
           alpha.data[offset] = alpha.data[offset + 1] = alpha.data[offset + 2] = 255;
-          alpha.data[offset + 3] = sample.alpha * (variant === 'button' ? .42 * buttonEdge * buttonSide : 1) * 255;
+          alpha.data[offset + 3] = sample.alpha * 255;
         }
         context.putImageData(pixels, 0, 0); maskContext.putImageData(alpha, 0, 0);
         mapImage.setAttribute('href', map.toDataURL());
@@ -174,4 +202,3 @@ export function GlassInversionBands({ quiet, variant = 'surface' }: { quiet: boo
     </span>
   </span>;
 }
-

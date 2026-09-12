@@ -1,21 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useContext } from 'react';
 import { DockMaterialContext } from '@/lib/dockMaterial';
-import { GlassInversionBands } from '@/components/ui/glass-inversion-bands';
 
-/** Background-only refraction for a control. Existing borders, fills, labels,
- * icons and blooms remain separate foreground layers. */
+/** Marks a control as a shape in the parent's shared refraction surface.
+ * One scene copy per navigation bar keeps mobile memory bounded. */
 export function ButtonGlassOptics() {
   const material = useContext(DockMaterialContext);
-  const reduced = useReducedMotion();
-  const [calm, setCalm] = useState(false);
-  useEffect(() => {
-    const update = () => setCalm(document.documentElement.matches('.calm-mode,[data-calm="true"]'));
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-calm'] });
-    return () => observer.disconnect();
-  }, []);
-  return material === 'm3' ? <GlassInversionBands quiet={Boolean(reduced || calm)} variant="button" /> : null;
+  return material === 'm3' ? <span className="z-button-optics" aria-hidden="true" /> : null;
 }
-

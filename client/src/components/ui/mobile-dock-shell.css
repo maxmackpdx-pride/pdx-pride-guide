@@ -17,16 +17,9 @@
     border:1px solid rgba(172,207,231,.16);
     box-shadow:0 5px 14px rgba(0,0,0,.2),inset 0 1px .75px rgba(226,244,255,.2),inset 0 -1px .75px rgba(112,166,196,.1),inset 0 -2px 3px rgba(0,0,0,.22);
   }
-  .site-header--glass .znav-control > .z-glass-inversion,
-  .site-header--glass .site-profile-menu__avatar-link > .z-glass-inversion {
-    inset:1px;z-index:0;contain:paint;
-    clip-path:inset(0 round 21px);-webkit-clip-path:inset(0 round 21px);
-  }
-  .site-header--glass .site-profile-menu__avatar-link > .z-glass-inversion {
-    border-radius:50%;clip-path:circle(calc(50% - 1px));-webkit-clip-path:circle(calc(50% - 1px));
-  }
-  .site-header--glass .znav-control > :not(.z-glass-inversion),
-  .site-header--glass .site-profile-menu__avatar-link > :not(.z-glass-inversion) { position:relative;z-index:2; }
+  .z-button-optics { position:absolute;inset:1px;z-index:0;border-radius:inherit;pointer-events:none; }
+  .site-header--glass .znav-control > :not(.z-button-optics),
+  .site-header--glass .site-profile-menu__avatar-link > :not(.z-button-optics) { position:relative;z-index:2; }
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
     --dock-expanded-width:min(576px, calc(var(--dock-viewport-width,100vw) - max(8px, env(safe-area-inset-left,0px)) - max(8px, env(safe-area-inset-right,0px))));
     position:fixed; inset:auto auto calc(8px + env(safe-area-inset-bottom,0px)) max(8px, env(safe-area-inset-left,0px), calc((var(--dock-viewport-width,100vw) - 576px)/2));
@@ -45,14 +38,9 @@
   .z-glass-inversion .z-inversion-scene { position:absolute;left:0;top:0;margin:0;min-height:0;max-width:none;transform-origin:0 0;pointer-events:none;user-select:none; }
   /* Button optics contain background pixels only. Brand edges, active fills,
      labels, icons and blooms stay above this layer exactly as authored. */
-  .z-liquid-button > .z-glass-inversion[data-variant="button"],
-  .hub-mobile-tab > .z-glass-inversion[data-variant="button"] {
-    inset:1px;z-index:0;contain:paint;
-    clip-path:inset(0 round 21px);-webkit-clip-path:inset(0 round 21px);
-  }
   .z-liquid-button > .z-liquid-button__edge { z-index:1; }
   .z-liquid-button > .z-liquid-button__content,
-  .hub-mobile-tab > :not(.z-glass-inversion) { position:relative;z-index:2; }
+  .hub-mobile-tab > :not(.z-button-optics) { position:relative;z-index:2; }
   html.calm-mode .z-glass-inversion,html[data-calm="true"] .z-glass-inversion { display:none; }
   @media (prefers-reduced-transparency:reduce) { .z-glass-inversion { display:none; } }
   @supports (backdrop-filter:url("#dock")) {
