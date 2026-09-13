@@ -43,7 +43,7 @@ const waypoints=fetch('./waypoints.json',{signal:assetController.signal}).then(r
   return false;
  }
  if(!assign(0))throw Error('Unable to color neighboring waypoints');
- return {type:'FeatureCollection',features:bars.map((b,i)=>({type:'Feature',geometry:{type:'Point',coordinates:b.coordinates},properties:{name:b.name,logo:b.logo,logoMode:b.logoMode,isBar:b.isBar||b.isLargePin,heightScale:waypointHeightScale(b.coordinates),phase:i*2.399963,color:b.lighting==='red'?adultVenueColor:dayColors[colors[i]]}}))};
+ return {type:'FeatureCollection',features:bars.map((b,i)=>({type:'Feature',geometry:{type:'Point',coordinates:b.coordinates},properties:{key:b.id,name:b.name,logo:b.logo,logoMode:b.logoMode,isBar:b.isBar||b.isLargePin,heightScale:waypointHeightScale(b.coordinates),phase:i*2.399963,color:b.lighting==='red'?adultVenueColor:dayColors[colors[i]]}}))};
 });
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
@@ -300,7 +300,19 @@ function hologramVariation(time,phase,channel){
  const blend=fraction*fraction*fraction*(fraction*(fraction*6-15)+10);
  return random(step)*(1-blend)+random(step+1)*blend;
 }
+function drawIdleWaypoint(ctx,x,y,color,phase,fade,alpha){
+ const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
+ const size=126*(.92+.1*pulse);
+ ctx.save();ctx.globalAlpha=fade*pulse;
+ ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
+ drawLightMist(ctx,x,y,phase,fade);
+ ctx.globalAlpha=alpha;
+ ctx.drawImage(hologramMaterials.orbs.get(color),x-12.5,y-12.5,25,25);
+ ctx.restore();
+}
+let selectedKey=null,hitTargets=[];
 function drawLights(fade,target=map,surface=lights){
+ hitTargets=[];
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
@@ -315,7 +327,7 @@ function drawLights(fade,target=map,surface=lights){
  // Ground effects first, then upright pins from farthest to nearest.
  const ordered=lightFeatures.map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
- const beacons=ordered.filter(v=>v.feature.properties.isBar);
+ const beacons=ordered.filter(v=>v.feature.properties.isBar&&v.feature.properties.key===selectedKey);
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -379,14 +391,15 @@ function drawLights(fade,target=map,surface=lights){
  const visibleLogos=fade>.01?beacons.filter(item=>venueLogos.has(item.feature.properties.logo)&&item.x>0&&item.x<width&&item.y>0&&item.y<height):[];
  logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
  for(const pass of [0,1])for(const {feature,p,offset,neighbors=0} of ordered){
-  const {color,isBar,phase}=feature.properties;
+  const {color,phase}=feature.properties;
+  const isExpanded=feature.properties.isBar&&feature.properties.key===selectedKey;
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=fade*pulse*beamAlpha;
-  if(isBar){
+  if(isExpanded){
    if(pass===0){
    // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
    lightsContext.save();lightsContext.translate(p.x,p.y);lightsContext.scale(1,.58);
@@ -520,11 +533,8 @@ function drawLights(fade,target=map,surface=lights){
    }
    lightsContext.restore();
   }else if(pass===0){
-   const size=126*(.92+.1*pulse);
-   lightsContext.drawImage(lightSprites.get(color),p.x-size/2,raisedY-size/2,size,size);
-   drawLightMist(lightsContext,p.x,raisedY,phase,fade);
-   lightsContext.globalAlpha=coreAlpha;
-   lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
+   drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
+   if(feature.properties.isBar)hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:24});
   }
  }
 }
@@ -590,7 +600,7 @@ const exploration=createMapExploration({
  returnCamera:()=>flightCamera(0),
  onResume:()=>{
   flightExploring(false);
-  travel=0;elapsed=0;exitAt=null;loopWaiting=false;revealTime=3;last=0;cameraDirty=false;
+  selectedKey=null;travel=0;elapsed=0;exitAt=null;loopWaiting=false;revealTime=3;last=0;cameraDirty=false;
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
   scheduleFrame();
  },
@@ -647,6 +657,14 @@ function draw(now){
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();
+let pointerDown=null;
+map.getCanvas().addEventListener('pointerdown',event=>{pointerDown={x:event.clientX,y:event.clientY};});
+map.getCanvas().addEventListener('pointerup',event=>{
+ if(!pointerDown||Math.hypot(event.clientX-pointerDown.x,event.clientY-pointerDown.y)>7){pointerDown=null;return;}
+ pointerDown=null;
+ const hit=[...hitTargets].reverse().find(target=>Math.hypot(event.clientX-target.x,event.clientY-target.y)<target.r);
+ selectedKey=hit?.key??null;scheduleFrame();
+});
 function onSceneInput(){
  const speedOutput=document.querySelector('#speed-value'),mapOutput=document.querySelector('#map-value');
  if(speedOutput)speedOutput.value=`${Math.round(Number(speedControl.value)/.6*100)}%`;

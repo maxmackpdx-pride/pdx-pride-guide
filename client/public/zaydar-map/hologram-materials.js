@@ -29,13 +29,24 @@ export function createHologramMaterials(colors) {
     const orb = document.createElement('canvas'); orb.width = orb.height = 64;
     const painter = orb.getContext('2d');
     const shade = amount => `rgb(${rgb.map(channel => Math.round(channel * amount)).join(',')})`;
-    const glow = painter.createRadialGradient(26, 23, 2, 32, 32, 28);
-    glow.addColorStop(0, color); glow.addColorStop(.48, shade(.96));
-    glow.addColorStop(.84, shade(.76)); glow.addColorStop(1, shade(.42));
-    painter.fillStyle = glow; painter.beginPath(); painter.arc(32, 32, 27, 0, Math.PI * 2); painter.fill();
-    painter.strokeStyle = color; painter.lineWidth = 1.2; painter.stroke();
-    painter.fillStyle = color === '#FF0000' ? color : '#ffffff';
-    painter.globalAlpha = .28; painter.beginPath(); painter.ellipse(25, 23, 4, 2.5, -.45, 0, Math.PI * 2); painter.fill();
+    painter.save(); painter.translate(32, 32); painter.rotate(-.08);
+    // Idle waypoints read as low, Saturn-like scanner disks instead of balls.
+    // The ring stays wider than the core so the silhouette remains obvious at map scale.
+    painter.shadowColor = color; painter.shadowBlur = 9;
+    painter.globalAlpha = .22; painter.strokeStyle = color; painter.lineWidth = 6;
+    painter.beginPath(); painter.ellipse(0, 0, 27, 7.5, 0, 0, Math.PI * 2); painter.stroke();
+    painter.shadowBlur = 4; painter.globalAlpha = .72; painter.lineWidth = 1.4;
+    painter.beginPath(); painter.ellipse(0, 0, 27, 7.5, 0, 0, Math.PI * 2); painter.stroke();
+    const glow = painter.createRadialGradient(-3, -2, 1, 0, 0, 11);
+    glow.addColorStop(0, color === '#FF0000' ? color : '#ffffff');
+    glow.addColorStop(.3, color); glow.addColorStop(.72, shade(.82)); glow.addColorStop(1, shade(.38));
+    painter.globalAlpha = 1; painter.fillStyle = glow;
+    painter.beginPath(); painter.ellipse(0, 0, 10, 5.7, 0, 0, Math.PI * 2); painter.fill();
+    painter.strokeStyle = color; painter.lineWidth = 1; painter.stroke();
+    // Repaint the near half of the ring across the planet to create real overlap.
+    painter.shadowBlur = 2; painter.globalAlpha = .95; painter.lineWidth = 1.5;
+    painter.beginPath(); painter.ellipse(0, 0, 27, 7.5, 0, 0, Math.PI); painter.stroke();
+    painter.restore();
     orbs.set(color, orb);
   }
   return {
