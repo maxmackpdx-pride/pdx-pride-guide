@@ -2,12 +2,19 @@ import { useContext, useEffect, useId, useRef, useState, type CSSProperties } fr
 import { glassEdgeDisplacement } from "@/lib/glassEdgeRefraction";
 import { readGlassRadii } from '@/lib/glassShape';
 import { GlassInversionBands } from './glass-inversion-bands';
+import { MobileGlassLite, useMobileGlassViewport } from './mobile-glass-lite';
 import { DockMaterialContext, dockOpticalParameters, supportsDockRefraction } from "@/lib/dockMaterial";
 
 // 21st LiquidGlass 2759: SDF texture adapted to local edge normals.
 // The rim filter samples the actual backdrop. The demo's inversion adapter
 // separately mirrors its designated HTML scene so Safari can show both folds.
 export function MobileLiquidGlass({ quiet }: { quiet: boolean }) {
+  const mobile = useMobileGlassViewport();
+  return mobile ? <MobileGlassLite /> : <DesktopGlassSurface quiet={quiet} />;
+}
+
+// Preserve the existing desktop implementation; it is never mounted on phones.
+function DesktopGlassSurface({ quiet }: { quiet: boolean }) {
   const material = useContext(DockMaterialContext);
   const id = `dock-liquid-${useId().replace(/:/g, "")}`;
   const ref = useRef<HTMLSpanElement>(null);
@@ -98,4 +105,3 @@ export function MobileLiquidGlass({ quiet }: { quiet: boolean }) {
     <span className="z-glass__rainbow" aria-hidden="true" />
   </>;
 }
-

@@ -1,12 +1,11 @@
 import { Children, cloneElement, isValidElement, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { DockLensSurface } from "./dock-lens-surface";
+import { MobileGlassLite } from "./mobile-glass-lite";
 import { HeroZSymbol } from "./hero-z-hologram";
 import { advanceDockScroll } from "@/lib/mobileDockScroll";
 import "./mobile-dock-shell.css";
 import { useContext } from "react";
 import { DockMaterialContext } from "@/lib/dockMaterial";
-import { GlassButtonSurface } from '@/components/ui/glass-button';
 import { ButtonGlassOptics } from '@/components/ui/button-glass-optics';
 
 // Floating Nav (ruixen.ui, 5840): measured sliding indicator and fixed shell.
@@ -87,7 +86,7 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
       if (compact) requestAnimationFrame(() => rowRef.current?.querySelector<HTMLElement>("button, a")?.focus());
     } }}
     onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setKeyboardFocus(false); }}>
-    <DockLensSurface quiet={quiet} />
+    <MobileGlassLite />
     <div ref={rowRef} id={rowId} className="hub-mobile-bar__dock" aria-hidden={compact || undefined}>
       <motion.div className="z-mobile-dock__indicator" aria-hidden="true" initial={false}
         animate={{ left: material === "m3" ? indicator.left + (indicator.width - Math.min(64, Math.max(0, indicator.width - 8))) / 2 : indicator.left, width: material === "m3" ? Math.min(64, Math.max(0, indicator.width - 8)) : indicator.width, opacity: activeIndex >= 0 && !compact ? 1 : 0 }}
@@ -106,7 +105,7 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
         setCollapsed(false);
         if (event.detail === 0) requestAnimationFrame(() => rowRef.current?.querySelector<HTMLElement>("button, a")?.focus());
       }}>
-      <GlassButtonSurface /><span className="z-dock-glitch" aria-hidden="true">
+      <span className="z-dock-glitch" aria-hidden="true">
         <HeroZSymbol />
         <span className="z-dock-glitch__red"><HeroZSymbol /></span>
         <span className="z-dock-glitch__green"><HeroZSymbol /></span>

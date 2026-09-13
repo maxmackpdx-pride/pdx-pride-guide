@@ -1,0 +1,60 @@
+/* Mobile-only budget: one mild backdrop blur per bar; all other chrome static. */
+@media (max-width:959px) {
+  .site-header.site-header--glass,
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
+    background:rgba(5,5,6,.68);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  .z-mobile-glass-lite {
+    position:absolute;inset:0;z-index:-2;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(150deg,rgba(210,231,240,.035),transparent 38%);
+    backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  }
+  .site-header.site-header--glass > .z-glass__edge,
+  .z-mobile-dock > .z-glass__edge {
+    border-color:rgba(172,207,231,.18);
+    box-shadow:inset 0 1px 0 rgba(226,244,255,.13);
+  }
+  .site-header.site-header--glass > .z-glass__edge::after,
+  .z-mobile-dock > .z-glass__edge::after { content:none; }
+  .site-header.site-header--glass > .z-glass__rainbow,
+  .z-mobile-dock > .z-glass__rainbow { filter:none;opacity:.8; }
+  .site-header.site-header--glass .znav-control,
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control {
+    background:transparent;border:1px solid rgba(0,0,0,.5);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 1px 0 rgba(210,231,240,.055);
+  }
+  .site-header.site-header--glass .znav-control:not(.is-active):not(.is-open),
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[data-dock-selected="false"] {
+    color:#fff;border-color:rgba(0,0,0,.5);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 1px 0 rgba(210,231,240,.055);
+  }
+  .site-header.site-header--glass .znav-control:is(.is-active,.is-open),
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[data-dock-selected="true"] {
+    color:var(--nav-c-ink,var(--c,#00ffff));
+    border-color:color-mix(in srgb,var(--nav-c,var(--c,#00ffff)) 55%,transparent);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 0 16px color-mix(in srgb,var(--nav-c,var(--c,#00ffff)) 4%,transparent);
+  }
+  .z-mobile-dock .z-mobile-dock__indicator { background:transparent;box-shadow:none;border-color:transparent; }
+  .z-mobile-dock .z-mobile-dock__glow { display:none; }
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock[data-collapsed="true"] { border-radius:28px; }
+  .z-mobile-dock .z-mobile-dock__restore { color:#fff; }
+  .z-mobile-dock .z-dock-glitch { position:relative;display:block;width:30px;height:26px;line-height:0; }
+  .z-mobile-dock .z-dock-glitch > svg { display:block;width:30px;height:26px; }
+  .z-mobile-dock .z-dock-glitch > span { position:absolute;inset:0;opacity:0;pointer-events:none; }
+  .z-mobile-dock .z-dock-glitch > span > svg { display:block;width:30px;height:26px; }
+  .z-mobile-dock .z-dock-glitch__red { color:#ff304f;clip-path:inset(18% 0 62%);--glitch-x:-1px; }
+  .z-mobile-dock .z-dock-glitch__green { color:#39ff14;clip-path:inset(48% 0 35%);--glitch-x:1px; }
+  .z-mobile-dock .z-dock-glitch__blue { color:#00ffff;clip-path:inset(72% 0 10%);--glitch-x:-1px; }
+  .z-mobile-dock[data-collapsed="true"] .z-dock-glitch > span { animation:zDockLiteGlitch 6s steps(1,end) infinite; }
+  @keyframes zDockLiteGlitch { 0%,96%,100% { opacity:0;transform:none; } 97%,99% { opacity:.65;transform:translateX(var(--glitch-x)); } }
+  .z-mobile-dock[data-quiet="true"] .z-dock-glitch > span,
+  html.calm-mode .z-dock-glitch > span,
+  html[data-calm="true"] .z-dock-glitch > span { animation:none;opacity:0; }
+  html.calm-mode .z-mobile-glass-lite,
+  html[data-calm="true"] .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; }
+  @media(prefers-reduced-motion:reduce) { .z-mobile-dock .z-dock-glitch > span { animation:none;opacity:0; } }
+  @media(prefers-reduced-transparency:reduce) { .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; } }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .z-mobile-glass-lite { background:#080c12; } }
+}
