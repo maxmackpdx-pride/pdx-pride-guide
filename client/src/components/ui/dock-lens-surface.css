@@ -1,0 +1,15 @@
+/* Optical adapter only; never filters the navigation's foreground children. */
+@media (max-width:959px) {
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock[data-collapsed="true"] { border-radius:28px; }
+  .z-mobile-dock .z-mobile-liquid__background { backdrop-filter:blur(.8px) saturate(1.2);-webkit-backdrop-filter:blur(.8px) saturate(1.2); }
+  @supports (backdrop-filter:url("#dock")) {
+    .z-mobile-dock .z-mobile-liquid__background[data-refract="true"] { backdrop-filter:var(--dock-refraction) blur(.35px) saturate(1.2); }
+  }
+  .z-mobile-dock .z-mobile-liquid__specular { inset:0;padding:0;background:var(--lens-reflection,none) center / 100% 100% no-repeat;mask:none;-webkit-mask:none;opacity:1; }
+  .z-mobile-dock[data-material="m3"] .z-mobile-liquid__specular { opacity:1; }
+  .z-mobile-dock > .z-glass__edge { border-color:rgba(172,207,231,.12);box-shadow:inset .5px 1px 1px -.5px rgba(226,244,255,.22),inset -.5px -1px 1px -.5px rgba(192,214,255,.08); }
+  .z-mobile-dock > .z-glass__edge::after { border-color:rgba(182,226,247,.025);border-top-color:rgba(216,240,255,.065); }
+  @media(prefers-reduced-transparency:reduce) {
+    .z-mobile-dock .z-mobile-liquid__background { backdrop-filter:none!important;-webkit-backdrop-filter:none!important; }
+  }
+}
