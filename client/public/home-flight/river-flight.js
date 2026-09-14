@@ -327,7 +327,9 @@ function drawLights(fade,target=map,surface=lights){
  // Ground effects first, then upright pins from farthest to nearest.
  const ordered=lightFeatures.map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
- const beacons=ordered.filter(v=>v.feature.properties.isBar&&v.feature.properties.key===selectedKey);
+ // Every featured venue keeps its floating logo. Selection only upgrades the
+ // flat Saturn projector into the full beam treatment.
+ const beacons=ordered.filter(v=>v.feature.properties.isBar);
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -399,8 +401,13 @@ function drawLights(fade,target=map,surface=lights){
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
   lightsContext.globalAlpha=fade*pulse*beamAlpha;
-  if(isExpanded){
+  if(feature.properties.isBar){
    if(pass===0){
+   if(!isExpanded){
+    drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
+    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:24});
+    continue;
+   }
    // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
    lightsContext.save();lightsContext.translate(p.x,p.y);lightsContext.scale(1,.58);
    const radius=147*beaconScale*(.94+.12*pulse);
@@ -534,7 +541,6 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.restore();
   }else if(pass===0){
    drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
-   if(feature.properties.isBar)hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:24});
   }
  }
 }
