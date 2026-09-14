@@ -46,15 +46,6 @@ const PLACE_ICON: Record<string, WaypointId> = { bar: "bar", restaurant: "venue"
 /* Snaps are relative to the drawer track inside the map, above the actual dock. */
 
 const FORMING_COVER = "/hausing/forming-no-place.svg";
-const MAP_CREATE_LINKS = [
-  { label: "Eventz", href: "/submit", color: "#ccff00" },
-  { label: "Placez", href: "/directory?add=1", color: "#19e3ff" },
-  { label: "Mizzed", href: "/spotted", color: "#ff00cc" },
-  { label: "HAÜZ", href: "/the-hauz/new", color: "#00ffff" },
-  { label: "Gigz", href: "/pride-work", color: "#6e3dff" },
-  { label: "Giftz", href: "/gifting", color: "#ccff00" },
-  { label: "Sellz", href: "/sellz", color: "#39ff14" },
-] as const;
 const MAP_KEY_ITEMS: ReadonlyArray<{ label: string; id: WaypointId; color: string; note: string; badgeId?: WaypointId; scoop?: string; avatarUrl?: string }> = [
   { label: "Eventz", id: "eventz", color: "#ff00cc", scoop: "10P", note: "Ticket shell · directory type color · host and venue logos · start time" },
   { label: "Placez", id: "venue", badgeId: "cafe", color: "#00ffff", note: "Venue logo in the Placez shell; corner icon identifies the place type" },
@@ -337,19 +328,14 @@ export default function ZaydarMapDemo() {
   const [boardOverlay, setBoardOverlay] = useState<{ kind: BoardKind; postId: number } | null>(null);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<ZaydarHandle | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
 
   const [mapHeight, setMapHeight] = useState<number>();
-  const toolsRef = useRef<HTMLDivElement | null>(null);
-  const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const createTriggerRef = useRef<HTMLButtonElement | null>(null);
   const desktop = useDesktop();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [flight,setFlight]=useState(false);
   const [flat,setFlat]=useState(false);
   const [labels,setLabels]=useState(false);
 
@@ -604,10 +590,7 @@ export default function ZaydarMapDemo() {
   const comingDialogRef = useModalA11y({ open: Boolean(soon), enabled: Boolean(soon), onClose: closeSoon });
   const customPending = timeFilter === "custom" && (!customStart || !customEnd);
   const mobileDrawerPeek = true;
-  useEffect(() => {
-    setCreateOpen(false);
-    setFiltersOpen(false);
-  }, [desktop, mobileDrawerPeek]);
+  useEffect(() => { setFiltersOpen(false); }, [desktop, mobileDrawerPeek]);
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
@@ -617,18 +600,6 @@ export default function ZaydarMapDemo() {
     else if (mark.kind === "housing") setLocation(`/the-hauz/${(mark.item as MapRow).id}`);
     else setLocation(`/outz/${String((mark.item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
   }, [goOverlay, setLocation]);
-  useEffect(() => {
-    if (!createOpen) return;
-    const trigger = createTriggerRef.current;
-    const panelId = "living-map-create-menu";
-    const frame = requestAnimationFrame(() => document.getElementById(panelId)?.querySelector<HTMLElement>("button, a[href], input")?.focus({ preventScroll: true }));
-    const close = () => { setCreateOpen(false); setFiltersOpen(false); trigger?.focus({ preventScroll: true }); };
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && !soon) { event.preventDefault(); close(); } };
-    const onPointer = (event: PointerEvent) => { if (event.target instanceof Node && !pageRef.current?.contains(event.target) && !soon) close(); };
-    window.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
-  }, [createOpen, soon]);
   const filterControls = (mobile = false, hideZayDark = false) => <div className="living-map-filter-block" data-vaul-no-drag>
     <h2>Map Filters</h2>
     <div className="living-map-filter-summary"><span>{timeFilter === "default" ? "Next 3 weeks" : timeFilter === "soon" ? "Starting soon or on now" : timeFilter === "weekend" ? "This weekend" : "Choose your dates"}</span><button type="button" onClick={() => { setTimeFilter("default"); setCustomStart(""); setCustomEnd(""); setShowEvents(true); setShowPlaces(true); setShowHousing(true); setShowMizzed(true); setShowCarpool(true); setPlaceType("all"); }}>Reset filters</button></div>
@@ -676,20 +647,15 @@ export default function ZaydarMapDemo() {
   if(showPlaces)for(const place of mapPlaces){if(!listedPlaces.has(place.id))resultMarks.push({key:`unmapped-${place.id}`,kind:'place',lat:NaN,lng:NaN,item:place});}
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map">
-    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onMode={mode=>setFlight(mode==='flight')} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
+    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
       <button onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
       <button onClick={locateMe} aria-label="Locate me" disabled={locating}><Navigation size={18}/></button>
       <button aria-pressed={flat} onClick={()=>{setFlat(v=>!v);mapRef.current?.send('pitch',{flat:!flat});}}>{flat?'3D':'2D'}</button>
       <button aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
-      <button aria-pressed={flight} onClick={()=>{setFlight(v=>!v);mapRef.current?.send('mode',{mode:flight?'browse':'flight'});}}>{flight?'Browse':'Flyover'}</button>
-      <button aria-expanded={createOpen} onClick={()=>{setCreateOpen(v=>!v);setFiltersOpen(false);}}>Post +</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
-    <div ref={toolsRef}>
-    {createOpen&&<nav id="living-map-create-menu" className="zaydar-demo-panel pdx-glass-rebind" aria-label="Post to Zaylist"><button className="zaydar-close" onClick={()=>setCreateOpen(false)} aria-label="Close post menu">×</button><h2>Post to Zaylist</h2>{MAP_CREATE_LINKS.map(item=><Link key={item.href} href={item.href}>{item.label} ↗</Link>)}</nav>}
-    </div>
     <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
       {!q&&placeType==='all'&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
       {!q&&placeType==='all'&&<ZaydarRecentEvents events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}

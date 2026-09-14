@@ -18,6 +18,7 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
   const material = useContext(DockMaterialContext);
   const rowRef = useRef<HTMLDivElement>(null);
   const scrollState = useRef({ y: 0, travel: 0, collapsed: false });
+  const scrollSource = useRef<EventTarget | null>(null);
   const rowId = `mobile-dock-${useId().replace(/:/g, "")}`;
   const [collapsed, setCollapsed] = useState(false);
   const [collapseRequested, setCollapseRequested] = useState(false);
@@ -46,16 +47,34 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     setCollapsed(false);
     setCollapseRequested(false);
     scrollState.current = { y: window.scrollY, travel: 0, collapsed: false };
+    scrollSource.current = document;
     let frame = 0;
+    let pendingSource: EventTarget | null = document;
     const measure = () => {
       frame = 0;
-      const y = Math.max(0, Math.min(window.scrollY, Math.max(0, document.documentElement.scrollHeight - innerHeight)));
+      const source = pendingSource;
+      const y = source instanceof Element
+        ? source.scrollTop
+        : Math.max(0, Math.min(window.scrollY, Math.max(0, document.documentElement.scrollHeight - innerHeight)));
+      if (source !== scrollSource.current) {
+        scrollSource.current = source;
+        scrollState.current = { y, travel: 0, collapsed: scrollState.current.collapsed };
+        return;
+      }
       scrollState.current = advanceDockScroll(scrollState.current, y, held, innerWidth >= 960);
       setCollapseRequested(scrollState.current.collapsed);
     };
-    const scroll = () => { if (!frame) frame = requestAnimationFrame(measure); };
-    window.addEventListener("scroll", scroll, { passive: true });
-    return () => { window.removeEventListener("scroll", scroll); cancelAnimationFrame(frame); };
+    const scroll = (event: Event) => {
+      pendingSource = event.target;
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    // Zaydar and other app surfaces scroll inside their own containers. Scroll
+    // does not bubble, so capture it here to preserve the same dock behavior.
+    document.addEventListener("scroll", scroll, { passive: true, capture: true });
+    return () => {
+      document.removeEventListener("scroll", scroll, { capture: true });
+      cancelAnimationFrame(frame);
+    };
   }, [location, held]);
   useEffect(() => {
     if (!collapseRequested || held) { setCollapsed(false); return; }
@@ -100,7 +119,12 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     <button type="button" className="z-mobile-dock__restore" aria-label={attentionCount > 0 ? `Expand navigation, ${attentionCount} messages need attention` : "Expand navigation"}
       aria-expanded={!compact} aria-controls={rowId} aria-hidden={!compact || undefined} tabIndex={compact ? 0 : -1}
       onClick={event => {
-        scrollState.current = { y: window.scrollY, travel: 0, collapsed: false };
+        const source = scrollSource.current;
+        scrollState.current = {
+          y: source instanceof Element ? source.scrollTop : window.scrollY,
+          travel: 0,
+          collapsed: false,
+        };
         setCollapseRequested(false);
         setCollapsed(false);
         if (event.detail === 0) requestAnimationFrame(() => rowRef.current?.querySelector<HTMLElement>("button, a")?.focus());

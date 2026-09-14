@@ -4,7 +4,7 @@ import {forwardRef,useEffect,useImperativeHandle,useRef,useState} from 'react';
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string};
-export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect:(key:string)=>void;onMode:(mode:string)=>void;onView:(view:View)=>void}>(function ZaydarCanvas({rows,selected,onSelect,onMode,onView},ref){
+export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void}>(function ZaydarCanvas({rows,selected,onSelect,onMode=()=>{},onView},ref){
  const [labels,setLabels]=useState<EventLabel[]>([]);
  const fallbackControl=useRef<ZaydarHandle>(null);
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({rows,onSelect,onMode,onView});latest.current={rows,onSelect,onMode,onView};
