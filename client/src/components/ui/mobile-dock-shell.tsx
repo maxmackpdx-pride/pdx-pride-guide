@@ -38,6 +38,14 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.mobileDock = compact ? "collapsed" : "expanded";
+    window.dispatchEvent(new CustomEvent("zaylist:mobile-dock", { detail: { collapsed: compact } }));
+    return () => {
+      if (root.dataset.mobileDock === (compact ? "collapsed" : "expanded")) delete root.dataset.mobileDock;
+    };
+  }, [compact]);
+  useEffect(() => {
     const update = () => setCalm(document.documentElement.matches('.calm-mode, [data-calm="true"]'));
     update(); const observer = new MutationObserver(update);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });

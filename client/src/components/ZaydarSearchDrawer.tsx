@@ -1,8 +1,7 @@
-import {useRef,useState,useLayoutEffect,lazy,Suspense,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
+import {useEffect,useRef,useState,useLayoutEffect,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
 import SmoothDrawer,{SmoothDrawerGroup,SmoothDrawerItem} from './ui/smooth-drawer';
 import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
-import {Search,SlidersHorizontal,X,ChevronRight,Plus} from 'lucide-react';
-const DirectoryAddPlaceForm=lazy(()=>import('./DirectoryAddPlaceForm'));
+import {Search,SlidersHorizontal,X,ChevronRight} from 'lucide-react';
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
 
 export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','nonprofit','healthcare','realestate','campground','adult'];
@@ -15,24 +14,32 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
  const [level,setLevel]=useState<'compact'|'peek'|'full'>('peek');
  const [dragHeight,setDragHeight]=useState<number|null>(null);
  const [filtersOpen,setFiltersOpen]=useState(false);
- const [adding,setAdding]=useState(false);
+ const [dockCollapsed,setDockCollapsed]=useState(()=>typeof document!=='undefined'&&document.documentElement.dataset.mobileDock==='collapsed');
  const sheet=useRef<HTMLElement>(null),input=useRef<HTMLInputElement>(null);
  const [track,setTrack]=useState<{height:number;desktop:boolean}|null>(null);
+ const initialized=useRef(false);
+ useEffect(()=>{
+  const sync=()=>setDockCollapsed(document.documentElement.dataset.mobileDock==='collapsed');
+  sync();window.addEventListener('zaylist:mobile-dock',sync);
+  return()=>window.removeEventListener('zaylist:mobile-dock',sync);
+ },[]);
  useLayoutEffect(()=>{
   const parent=sheet.current?.parentElement;if(!parent)return;
   const desktop=window.matchMedia('(min-width:768px)');
   const measure=()=>setTrack(previous=>{
    const next={height:parent.clientHeight,desktop:desktop.matches};
+   if(!initialized.current){initialized.current=true;if(!next.desktop)setLevel('full');}
    return previous?.height===next.height&&previous.desktop===next.desktop?previous:next;
   });
   const observer=new ResizeObserver(measure);observer.observe(parent);desktop.addEventListener('change',measure);measure();
   return()=>{observer.disconnect();desktop.removeEventListener('change',measure);};
  },[]);
- const fullHeight=track?Math.max(92,track.desktop?track.height-36:track.height*.92):undefined;
- const snapHeight=track?level==='compact'?92:level==='full'?fullHeight:Math.min(fullHeight!,track.desktop?380:Math.min(380,track.height*.52)):undefined;
+ const fullHeight=track?Math.max(56,track.desktop?track.height-36:track.height-116):undefined;
+ const snapHeight=track?level==='compact'?(track.desktop?92:56):level==='full'?fullHeight:Math.min(fullHeight!,track.desktop?380:fullHeight!):undefined;
  type HeaderGesture={pointerId:number;x:number;y:number;height:number;max:number;startedAt:number;level:typeof level;moved:boolean};
  const gesture=useRef<HeaderGesture|null>(null),suppressClick=useRef(false);
  const startDrag=(event:PointerEvent<HTMLDivElement>)=>{
+  if(!track?.desktop)return;
   if(!event.isPrimary||event.button!==0)return;
   suppressClick.current=false;
   gesture.current={pointerId:event.pointerId,x:event.clientX,y:event.clientY,height:sheet.current!.getBoundingClientRect().height,max:fullHeight??sheet.current!.parentElement!.clientHeight*.92,startedAt:event.timeStamp,level,moved:false};
@@ -73,19 +80,21 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   const active=contentGesture.current;
   if(active?.pointerId===event.pointerId&&Math.hypot(event.clientX-active.x,event.clientY-active.y)>=8)active.scrolled=true;
  };
- return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(adding){setAdding(false);return;}if(filtersOpen)setFiltersOpen(false);else{setLevel('peek');input.current?.blur();}}}}>
+ const drawerOpen=level!=='compact';
+ const toggleDrawer=()=>setLevel(drawerOpen?'compact':'full');
+ return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
   <NavGlassLayers/>
   <div className="zaydar-drawer-header" role="group" aria-label="Drawer search and resize controls"
    onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={cancelDrag}
    onClickCapture={event=>{if(suppressClick.current&&event.detail>0){event.preventDefault();event.stopPropagation();suppressClick.current=false;}}}
-   onClick={event=>{if(!(event.target as Element).closest('button,input,label'))setLevel(level==='full'?'peek':'full');}}>
-  <button type="button" className="zaydar-drawer-handle" aria-label={level==='full'?'Collapse results drawer':'Expand results drawer'} aria-expanded={level==='full'} aria-controls="zaydar-drawer-content"
-   onClick={()=>setLevel(level==='full'?'peek':'full')}
+   onClick={event=>{if(!(event.target as Element).closest('button,input,label'))setLevel(track?.desktop?(level==='full'?'peek':'full'):(drawerOpen?'compact':'full'));}}>
+  <button type="button" className="zaydar-drawer-handle" aria-label={drawerOpen?'Collapse results drawer':'Expand results drawer'} aria-expanded={drawerOpen} aria-controls="zaydar-drawer-content"
+   onClick={()=>track?.desktop?setLevel(level==='full'?'peek':'full'):toggleDrawer()}
    onKeyDown={event=>{if(event.key==='ArrowUp'){event.preventDefault();setLevel('full');}if(event.key==='ArrowDown'){event.preventDefault();setLevel(level==='full'?'peek':'compact');}}}
    ><span/></button>
   <SmoothDrawerItem className="zaydar-drawer-search-row">
-   <label className="zaydar-drawer-search"><Search size={22}/><input ref={input} type="search" aria-label="Search Zaydar" placeholder="Search Zaydar" value={query} onFocus={()=>{setAdding(false);setLevel('full');}} onChange={event=>{onQuery(event.target.value);setLevel('full');}}/>{query&&<button type="button" onClick={()=>{onQuery('');input.current?.focus();}} aria-label="Clear search"><X size={18}/></button>}</label>
-   <button type="button" className="zaydar-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setAdding(false);setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
+   <label className="zaydar-drawer-search"><Search size={22}/><input ref={input} type="search" aria-label="Search Zaylist" placeholder="Search Zaylist" value={query} onFocus={()=>setLevel('full')} onChange={event=>{onQuery(event.target.value);setLevel('full');}}/>{query&&<button type="button" onClick={()=>{onQuery('');input.current?.focus();}} aria-label="Clear search"><X size={18}/></button>}</label>
+   <button type="button" className="zaydar-drawer-filter" aria-label="More map filters" aria-expanded={filtersOpen} onClick={()=>{setFiltersOpen(v=>!v);setLevel('full');}}><SlidersHorizontal size={21}/></button>
   </SmoothDrawerItem>
   </div>
   <SmoothDrawerGroup open={level!=='compact'||dragHeight!==null} id="zaydar-drawer-content" className="zaydar-drawer-scroll"
@@ -95,12 +104,10 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
    onScrollCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
    onClickCapture={event=>{if(event.detail>0&&contentGesture.current?.scrolled){event.preventDefault();event.stopPropagation();}}}
    hidden={level==='compact'&&dragHeight===null}>
-   {adding?<Suspense fallback={<p role="status">Loading place form…</p>}><DirectoryAddPlaceForm embedded readOnly={Boolean((window as unknown as {__PDX_LOCAL_PREVIEW__?:number}).__PDX_LOCAL_PREVIEW__)} onClose={()=>setAdding(false)}/></Suspense>:<>
-   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}<button type="button" className="zaydar-add-place" aria-label="Add a place" onClick={()=>{setAdding(true);setLevel('full');}}><Plus size={22}/></button></SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}</SmoothDrawerItem>
    <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</SmoothDrawerItem>
    {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
    <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
-   </>}
   </SmoothDrawerGroup>
  </SmoothDrawer>;
 }

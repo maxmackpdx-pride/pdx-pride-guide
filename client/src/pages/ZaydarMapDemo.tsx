@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Link, useLocation } from "wouter";
 import ZaydarSearchDrawer, {zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
-import ZaydarRecentEvents from "@/components/ZaydarRecentEvents";
+import ZaydarUpcomingEvents from "@/components/ZaydarUpcomingEvents";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation, SlidersHorizontal, X } from "lucide-react";
@@ -350,8 +350,7 @@ export default function ZaydarMapDemo() {
     const header = document.querySelector(".site-header");
     const measure = () => {
       const viewportBottom = window.visualViewport ? window.visualViewport.height + window.visualViewport.offsetTop : window.innerHeight;
-      const dockTop = dock && dock.getBoundingClientRect().height > 0 ? dock.getBoundingClientRect().top : viewportBottom;
-      setMapHeight(Math.max(0, Math.min(viewportBottom, dockTop) - page.getBoundingClientRect().top));
+      setMapHeight(Math.max(0, viewportBottom - page.getBoundingClientRect().top));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -646,7 +645,7 @@ export default function ZaydarMapDemo() {
   // A directory entry can be found before its address has a confirmed map pin.
   if(showPlaces)for(const place of mapPlaces){if(!listedPlaces.has(place.id))resultMarks.push({key:`unmapped-${place.id}`,kind:'place',lat:NaN,lng:NaN,item:place});}
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaydar interactive map">
+  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} onSelect={onSceneSelect} onView={view=>{setMapCenter(view.center);setMapBounds(view.bounds);setZoom(view.zoom);}} />
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
@@ -658,7 +657,7 @@ export default function ZaydarMapDemo() {
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
     <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
       {!q&&placeType==='all'&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
-      {!q&&placeType==='all'&&<ZaydarRecentEvents events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
+      {!q&&placeType==='all'&&<ZaydarUpcomingEvents events={events} loading={eventsLoading} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
       <h2 className="zaydar-nearby-title">{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
       {loading&&<p role="status">Loading live listings…</p>}
       {failed&&<p role="alert">Some listings could not load. <button onClick={()=>{void retryEvents();void retryPlaces();}}>Retry</button></p>}
