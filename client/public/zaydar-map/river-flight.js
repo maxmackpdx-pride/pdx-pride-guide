@@ -7,14 +7,14 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#a9b2bc',intensity:.34,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
+const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.32,'hillshade-shadow-color':'#02070d','hillshade-highlight-color':'#183747','hillshade-accent-color':'#0a1d28'}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#06151c','fill-opacity':1}},
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#245667','line-opacity':.65,'line-width':.8}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#183e4b','line-opacity':.72,'line-width':.8}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:12,paint:{'fill-extrusion-color':'#101419','fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:12,paint:{'line-color':'#39434d','line-opacity':.55,'line-width':.5}}
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:12,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.96,'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:12,paint:{'line-color':'#50748c','line-opacity':.48,'line-width':.55}}
   ]};
 vectorStyle.layers.push(
  {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
