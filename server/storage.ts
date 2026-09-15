@@ -7952,6 +7952,16 @@ function runBootMigrationsOnce() {
     );
     recordBootMigration("sync_verified_map_coordinates_2026_09_v1");
   }
+
+  // v1 correctly removed this nonphysical PO-box pin, but the legacy async
+  // name-only geocoder could recreate it after startup. The backfill now skips
+  // addressless organizations; clear the already-recreated production value.
+  if (!hasBootMigration("remove_pride_northwest_placeholder_pin_2026_09_v2")) {
+    sqlite
+      .prepare(`UPDATE businesses SET lat = NULL, lng = NULL, locations = NULL WHERE LOWER(name) = LOWER('Pride Northwest')`)
+      .run();
+    recordBootMigration("remove_pride_northwest_placeholder_pin_2026_09_v2");
+  }
 }
 
 function parseEnvAdminLists() {

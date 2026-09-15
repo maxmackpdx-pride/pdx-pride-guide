@@ -2,6 +2,7 @@ import type { Business } from "@shared/schema";
 import { storage } from "./storage";
 import {
   geocodePortlandLocation,
+  hasMapCoordinates,
   hasUsableMapCoordinates,
   mergeMapCoordinates,
   resolvePersistedMapCoordinates,
@@ -36,8 +37,11 @@ export async function fillEventMapCoordinates(eventId: number): Promise<void> {
 }
 
 export async function fillBusinessMapCoordinates(business: Business): Promise<void> {
-  if (hasUsableMapCoordinates(business)) return;
-  const coords = await geocodePortlandLocation(business.address, business.name);
+  // Directory organizations may publish only a PO box, and some legitimate
+  // directory locations sit outside the Portland metro. Never replace a
+  // finite audited point or invent a street pin from a business name alone.
+  if (hasMapCoordinates(business) || !business.address?.trim()) return;
+  const coords = await geocodePortlandLocation(business.address, null);
   if (!coords) return;
   storage.updateBusiness(business.id, { lat: coords.lat, lng: coords.lng });
 }
@@ -71,7 +75,7 @@ export function scheduleMapCoordinateBackfill() {
       await sleep(1100);
     }
 
-    const missingBusinesses = storage.getBusinesses().filter(biz => !hasUsableMapCoordinates(biz));
+    const missingBusinesses = storage.getBusinesses().filter(biz => !hasMapCoordinates(biz));
     for (const biz of missingBusinesses) {
       await fillBusinessMapCoordinates(biz);
       await sleep(1100);
