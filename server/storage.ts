@@ -2369,7 +2369,7 @@ function seedData() {
       venueName: "Eagle Portland",
       address: "835 N Lombard St, Portland, OR 97217",
       neighborhood: "N Portland",
-      lat: 45.5803, lng: -122.6856,
+      lat: 45.577275827371, lng: -122.675349125866,
       dateStart: "2026-07-06T19:30:00", dateEnd: "2026-07-06T22:00:00",
       dayOfWeek: "MON",
       ageRequirement: "21_PLUS",
@@ -2797,8 +2797,8 @@ function seedPdxPahJuly2026Events() {
     venueName: "Eagle Portland",
     address: "835 N Lombard St, Portland, OR 97217",
     neighborhood: "N Portland",
-    lat: 45.5803,
-    lng: -122.6856,
+    lat: 45.577275827371,
+    lng: -122.675349125866,
     dateStart: "2026-07-17T19:00:00",
     dateEnd: "2026-07-18T00:00:00",
     dayOfWeek: "FRI",
@@ -4001,7 +4001,7 @@ function runBootMigrationsOnce() {
       { name: "Silverado",            lat: 45.5224, lng: -122.6748, phone: "(503) 224-4493" },
       { name: "Camp Bar PDX",         lat: 45.5193, lng: -122.6775, instagram: "@campbarpdx" },
       { name: "Scandals East",        lat: 45.5614, lng: -122.6527, hours: "Daily 4pm–midnight", phone: "(971) 275-6494" },
-      { name: "Eagle Portland",       lat: 45.5803, lng: -122.6856, phone: "(503) 283-9734" },
+      { name: "Eagle Portland",       lat: 45.577275827371, lng: -122.675349125866, phone: "(503) 283-9734" },
       { name: "The Nest Lounge",      lat: 45.5165, lng: -122.6432, hours: "Mon–Sun 3pm–2:30am", phone: "(503) 764-9023" },
       { name: "Living Room Wines",    lat: 45.5805, lng: -122.6857, hours: "Mon–Thu 3–9pm, Fri–Sat 3–10pm, Sun 3–8pm" },
       { name: "Peacock PDX",          lat: 45.5169, lng: -122.6490, hours: "Mon–Thu 3pm–12am, Fri–Sat 3pm–2am, Sun 3pm–12am", phone: "(503) 946-8929" },
@@ -6628,12 +6628,43 @@ function runBootMigrationsOnce() {
         `UPDATE businesses SET
            address = 'Eagle Portland, 835 N Lombard St, Portland, OR 97217',
            neighborhood = 'North Portland',
-           lat = 45.5803,
-           lng = -122.6856
+           lat = 45.577275827371,
+           lng = -122.675349125866
          WHERE LOWER(name) = LOWER('PDX PAH - Portland Pets & Handlers')`,
       )
       .run();
     recordBootMigration("directory_verified_details_2026_07_v1");
+  }
+
+  // Eagle's former directory coordinate landed roughly half a mile northwest
+  // of its verified 835 N Lombard address. Keep every map surface and existing
+  // production row pinned to the same address-geocoded point.
+  if (!hasBootMigration("fix_eagle_portland_coordinates_2026_09_v1")) {
+    const eagleLat = 45.577275827371;
+    const eagleLng = -122.675349125866;
+    sqlite
+      .prepare(
+        `UPDATE businesses
+         SET lat = ?, lng = ?
+         WHERE LOWER(name) IN (
+           'eagle', 'the eagle', 'eagle portland', 'the eagle portland',
+           'eagle pdx', 'the eagle pdx', 'pdx pah - portland pets & handlers'
+         )
+            OR LOWER(COALESCE(address, '')) LIKE '%835 n lombard%'`,
+      )
+      .run(eagleLat, eagleLng);
+    sqlite
+      .prepare(
+        `UPDATE events
+         SET lat = ?, lng = ?
+         WHERE LOWER(venue_name) IN (
+           'eagle', 'the eagle', 'eagle portland', 'the eagle portland',
+           'eagle pdx', 'the eagle pdx'
+         )
+            OR LOWER(COALESCE(address, '')) LIKE '%835 n lombard%'`,
+      )
+      .run(eagleLat, eagleLng);
+    recordBootMigration("fix_eagle_portland_coordinates_2026_09_v1");
   }
 
   /**
