@@ -1,6 +1,31 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
 <script>window.addEventListener('error',function(){parent.postMessage({source:'zaydar-demo',type:'fatal'},location.origin)});</script>
+<script>
+(function(){
+  var start=null, signaled=false;
+  function collapseDock(){
+    if(signaled)return;
+    signaled=true;
+    try{ parent.dispatchEvent(new CustomEvent('zaylist:collapse-mobile-dock')); }catch(err){}
+  }
+  window.addEventListener('pointerdown',function(event){start={x:event.clientX,y:event.clientY};signaled=false;},true);
+  window.addEventListener('pointermove',function(event){if(!start||signaled)return;if(Math.hypot(event.clientX-start.x,event.clientY-start.y)>=5)collapseDock();},{capture:true,passive:true});
+  window.addEventListener('pointerup',function(){start=null;signaled=false;},true);
+  window.addEventListener('pointercancel',function(){start=null;signaled=false;},true);
+  window.addEventListener('wheel',collapseDock,{capture:true,passive:true});
+  window.addEventListener('touchmove',collapseDock,{capture:true,passive:true});
+  try{
+    var doc=parent.document;
+    if(doc&&!doc.getElementById('zaydar-map-shell-overrides')){
+      var style=doc.createElement('style');
+      style.id='zaydar-map-shell-overrides';
+      style.textContent='.zaydar-map-demo .zaydar-demo-navigation button:nth-child(1),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(2),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(5){display:none!important}@media(max-width:959px){.zaydar-map-demo .zaydar-demo-navigation{top:auto!important;right:max(12px,env(safe-area-inset-right,0px))!important;bottom:108px!important;left:auto!important}}';
+      doc.head.appendChild(style);
+    }
+  }catch(err){}
+})();
+</script>
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="modulepreload" href="./river-flight.js">
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
