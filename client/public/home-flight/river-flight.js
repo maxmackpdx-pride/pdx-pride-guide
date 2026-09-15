@@ -327,8 +327,8 @@ function drawLights(fade,target=map,surface=lights){
  // Ground effects first, then upright pins from farthest to nearest.
  const ordered=lightFeatures.map(feature=>({feature,p:target.project(feature.geometry.coordinates)})).filter(({feature,p})=>p.x>=-420&&p.y>=-420&&p.x<=width+420&&p.y<=height+420*(feature.properties.isBar?feature.properties.heightScale:1)).sort((a,b)=>a.p.y-b.p.y);
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
- // Every featured venue keeps its floating logo. Selection only upgrades the
- // flat Saturn projector into the full beam treatment.
+ // Every featured venue keeps its floating logo and projection beam. Selection
+ // upgrades the flat Saturn projector with the full interference treatment.
  const beacons=ordered.filter(v=>v.feature.properties.isBar);
  for(const item of beacons){
   const phase=item.feature.properties.phase;
@@ -404,6 +404,15 @@ function drawLights(fade,target=map,surface=lights){
   if(feature.properties.isBar){
    if(pass===0){
    if(!isExpanded){
+    // Keep the closed state visually light, but preserve the upward shaft that
+    // connects each exact venue location to its floating hologram.
+    lightsContext.save();
+    const top=raisedY-178.5*beaconScale,halfWidth=61.25*beaconScale;
+    lightsContext.globalAlpha=Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2));
+    drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),p,logoX,top,halfWidth);
+    lightsContext.strokeStyle=color;lightsContext.lineWidth=.6;lightsContext.globalAlpha=fade*.14*beamAlpha;
+    lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX+(p.x-logoX)*.08,top+(p.y-top)*.08);lightsContext.stroke();
+    lightsContext.restore();
     drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
     hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:24});
     continue;
