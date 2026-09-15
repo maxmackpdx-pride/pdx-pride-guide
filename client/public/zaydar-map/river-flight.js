@@ -304,10 +304,10 @@ function drawLights(fade,target=map,surface=lights){
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
  const viewportScale=Math.min(1,Math.max(.72,(width-32)/680));
  // At the city-wide distance, holograms dominate while unopened Placez markers
- // recede. Both return smoothly to their original scale by street level.
+ // recede. Holograms then grow smoothly as the camera approaches street level.
  const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
  const streetProgress=smoothRange(13.5,15,target.getZoom());
- const hologramMultiplier=3-2*streetProgress;
+ const hologramMultiplier=2.4-.75*streetProgress;
  const placezScale=.375+.625*streetProgress;
  const placezGlow=.375+.625*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
