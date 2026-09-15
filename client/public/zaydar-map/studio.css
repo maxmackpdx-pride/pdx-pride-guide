@@ -30,5 +30,5 @@ output{font-variant-numeric:tabular-nums;text-align:right;font-size:11px;color:#
 .flight-settings .pause{display:flex;gap:9px;width:fit-content;cursor:pointer}
 input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor:pointer}
 :focus-visible{outline:2px solid #c8e3ff;outline-offset:5px;border-radius:4px}
-@media(max-width:600px){aside{left:12px;bottom:max(12px,env(safe-area-inset-bottom))}details[open]{max-width:calc(100vw - 24px)}.credit{font-size:9px;right:10px}#exploration-status{bottom:76px;width:max-content;max-width:calc(100vw - 24px)}body:has(details[open]) #exploration-status{bottom:280px}}
+@media(max-width:600px){aside{left:12px;bottom:max(12px,env(safe-area-inset-bottom))}details[open]{max-width:calc(100vw - 24px)}.credit{font-size:9px;right:10px}#exploration-status{bottom:66px;width:max-content;max-width:calc(100vw - 24px)}body:has(details[open]) #exploration-status{bottom:280px}}
 @media(prefers-reduced-motion:reduce){.chevron{transition:none}}

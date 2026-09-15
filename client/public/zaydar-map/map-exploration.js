@@ -3,7 +3,8 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   const container=map.getCanvasContainer(),canvas=map.getCanvas();
   const handlers=['dragPan','scrollZoom','touchZoomRotate','keyboard','doubleClickZoom'];
   const pointers=new Set();
-  let mode='flight',idleTimer=0,returnEnd=null,disposed=false;
+  let mode='flight',idleTimer=0,returnEnd=null,disposed=false,instructionDismissed=false;
+  try{instructionDismissed=localStorage.getItem('zaydar-exploration-seen')==='1';}catch{}
   canvas.tabIndex=0;
   canvas.setAttribute('aria-label','Portland map. Click or drag to pause and explore.');
 
@@ -27,7 +28,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     if(mode!=='exploring') {
       stopReturn();mode='exploring';pauseControl.checked=true;
       onExplore();setGestures(true);
-      message.textContent='Drag or zoom to explore';
+      if(!instructionDismissed)message.textContent='Drag or zoom to explore';
     }
     noteActivity();
   }
@@ -57,7 +58,10 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   function pauseInput(){if(pauseControl.checked)explore();else returnToFlight();}
   function move() {
     if(mode==='flight')return;
-    if(mode==='exploring')noteActivity();
+    if(mode==='exploring'){
+      noteActivity();
+      if(!instructionDismissed){instructionDismissed=true;message.textContent='';try{localStorage.setItem('zaydar-exploration-seen','1');}catch{}}
+    }
     onMove();
   }
   function visibility() {

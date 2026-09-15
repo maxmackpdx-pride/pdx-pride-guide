@@ -628,7 +628,7 @@ export default function ZaydarMapDemo() {
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):mark.kind==='mizzed'?'#FF00CC':mark.kind==='housing'?'#00FFFF':'#FF6600';
     const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):mark.kind;
-    return {typeIcon:place||event?zaydarTypeIcon(type):`/zaydar-map/icons/${type}.svg`,type,key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
+    return {kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):`/zaydar-map/icons/${type}.svg`,type,key:mark.key,coordinates:[mark.lng,mark.lat],name:event?.title||place?.name||String(row.title||row.name||'Listing'),color,
       logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':mark.kind==='housing'?'/zaydar-map/icons/housing.svg':mark.kind==='mizzed'?'/zaydar-map/icons/mizzed.svg':'/zaydar-map/icons/carpool.svg'),
       alternateLogo:brands?.alternate,
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
@@ -650,8 +650,8 @@ export default function ZaydarMapDemo() {
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
       <button onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
-      <button onClick={locateMe} aria-label="Locate me" disabled={locating}><Navigation size={18}/></button>
-      <button aria-pressed={flat} onClick={()=>{setFlat(v=>!v);mapRef.current?.send('pitch',{flat:!flat});}}>{flat?'3D':'2D'}</button>
+      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" disabled={locating}><Navigation size={18}/></button>
+      <button className="zaydar-control-mode" aria-label={flat?'2D map view selected. Switch to 3D view':'Switch to 2D map view'} aria-pressed={flat} onClick={()=>{setFlat(v=>!v);mapRef.current?.send('pitch',{flat:!flat});}}>2D</button>
       <button aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}

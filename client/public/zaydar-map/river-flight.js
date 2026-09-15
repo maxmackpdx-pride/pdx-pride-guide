@@ -7,7 +7,8 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#a9b2bc',intensity:.34,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},layers:[
+const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#a9b2bc',intensity:.34,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
+    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.32,'hillshade-shadow-color':'#02070d','hillshade-highlight-color':'#183747','hillshade-accent-color':'#0a1d28'}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#06151c','fill-opacity':1}},
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#245667','line-opacity':.65,'line-width':.8}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#183e4b','line-opacity':.72,'line-width':.8}},
@@ -323,7 +324,7 @@ function drawLights(fade,target=map,surface=lights){
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Expand a few distinct locations; individual event rows remain discoverable as orbs.
- const candidates=ordered.filter(v=>v.feature.properties.isBar&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ const candidates=ordered.filter(v=>v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
  candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Number(activeToday(b.feature))-Number(activeToday(a.feature))||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const beacons=[];
  for(const item of candidates){
@@ -338,6 +339,16 @@ function drawLights(fade,target=map,surface=lights){
   beacons.push(item);
  }
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
+ const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind==='place'&&!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
+ const visibleOrbs=ordered.filter(item=>{
+  if(expandedKeys.has(item.feature.properties.key))return false;
+  const cluster=placeClusters.byKey.get(item.feature.properties.key);
+  return item.feature.properties.kind!=='place'||!cluster||cluster.leader===item;
+ });
+ const glowByKey=new Map(visibleOrbs.map(item=>{
+  const neighbors=visibleOrbs.filter(other=>other!==item&&Math.hypot(other.p.x-item.p.x,other.p.y-item.p.y)<92).length;
+  return [item.feature.properties.key,Math.max(.24,1/Math.sqrt(1+neighbors*.9))];
+ }));
  for(const item of beacons){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
@@ -412,15 +423,24 @@ function drawLights(fade,target=map,surface=lights){
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
-  const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.38);
+  const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
   const emergence=isBar?emergenceFor(feature):0;
   if(pass===0){
    // An expanded projector owns its ground footprint. Nearby event/place rows
    // must not stack bright discovery balls over the original rings and pin light.
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
-   if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:22});}
-   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow);hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
+   const placeCluster=feature.properties.kind==='place'?placeClusters.byKey.get(feature.properties.key):null;
+   if(placeCluster&&placeCluster.leader.feature.properties.key!==feature.properties.key)continue;
+   if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});}
+   else if(!underProjector){
+    const isPlace=feature.properties.kind==='place';
+    const densityGlow=glowByKey.get(feature.properties.key)??1;
+    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow,isPlace);
+    if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,raisedY,placeCluster.members.length,color);
+    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,raisedY,feature.properties.name,feature.properties.type,color,width);
+    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:28,name:feature.properties.name,category:feature.properties.type,clusterCenter:placeCluster?.members.length>1?placeCluster.center:null});
+   }
   }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
@@ -748,21 +768,41 @@ function tell(type,payload={}){parent.postMessage({source:'zaydar-demo',type,...
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 // Use the original Zaydar orb materials, breathing glow, and drifting mist.
 const typeIcons=new Map();
-function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1){
+function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
- const size=126*scale*(.92+.1*pulse);
+ const size=(flat?72:126)*scale*(.92+.1*pulse);
  const coreSize=25*scale;
  const iconRadius=11*scale;
  const iconSize=15*scale;
  ctx.save();ctx.globalAlpha=fade*pulse*glowStrength;
  ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
- drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
+ if(!flat)drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
  ctx.globalAlpha=alpha;
  ctx.drawImage(hologramMaterials.orbs.get(color),x-coreSize/2,y-coreSize/2,coreSize,coreSize);
  const icon=typeIcons.get(typeIcon);
  if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,iconRadius,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-iconSize/2,y-iconSize/2,iconSize,iconSize);}
  ctx.restore();
+}
+function clusterPlaceMarkers(items,selected,zoom,width,height){
+ const radius=zoom<13.5?64:zoom<14.5?52:zoom<15.5?38:zoom<16.25?28:0;
+ const byKey=new Map();
+ if(!radius)return {byKey};
+ const pending=[...items].filter(item=>item.p.x>=-40&&item.p.x<=width+40&&item.p.y>=-40&&item.p.y<=height+40).sort((a,b)=>Number(b.feature.properties.key===selected)-Number(a.feature.properties.key===selected)||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2));
+ while(pending.length){
+  const leader=pending.shift(),members=[leader];
+  for(let i=pending.length-1;i>=0;i--)if(Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
+  const center=members.reduce((sum,item)=>[sum[0]+item.feature.geometry.coordinates[0]/members.length,sum[1]+item.feature.geometry.coordinates[1]/members.length],[0,0]);
+  const cluster={leader,members,center};
+  for(const member of members)byKey.set(member.feature.properties.key,cluster);
+ }
+ return {byKey};
+}
+function drawClusterCount(ctx,x,y,count,color){
+ ctx.save();ctx.translate(x+10,y-10);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,9,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 10px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
+}
+function drawSelectedMarkerLabel(ctx,x,y,name,type,color,width){
+ const label=String(name||type||'Place');ctx.save();ctx.font='600 12px Inter,Arial,sans-serif';const labelWidth=Math.min(190,ctx.measureText(label).width+22);const labelX=Math.max(labelWidth/2+8,Math.min(width-labelWidth/2-8,x));ctx.fillStyle='#050b12e8';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(labelX-labelWidth/2,y+17,labelWidth,28,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f4fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,labelX,y+31,labelWidth-16);ctx.restore();
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
 async function setListings(rows){
@@ -799,7 +839,8 @@ map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=[...hitTargets].reverse().find(h=>Math.hypot(e.clientX-h.x,e.clientY-h.y)<h.r);
- if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;tell('select',{key:hit.key});scheduleFrame();}
+ if(hit?.clusterCenter){map.easeTo({center:hit.clusterCenter,zoom:Math.min(18,map.getZoom()+1.35),duration:520});scheduleFrame();return;}
+ if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>tell('fatal'));

@@ -20,18 +20,19 @@
     if(doc&&!doc.getElementById('zaydar-map-shell-overrides')){
       var style=doc.createElement('style');
       style.id='zaydar-map-shell-overrides';
-      style.textContent='.zaydar-map-demo .zaydar-demo-navigation button:nth-child(1),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(2),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(5){display:none!important}@media(max-width:959px){.zaydar-map-demo .zaydar-demo-navigation{top:auto!important;right:max(12px,env(safe-area-inset-right,0px))!important;bottom:108px!important;left:auto!important}}';
+      style.textContent='.zaydar-map-demo .zaydar-demo-navigation button:nth-child(1),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(2),.zaydar-map-demo .zaydar-demo-navigation button:nth-child(5){display:none!important}';
       doc.head.appendChild(style);
     }
   }catch(err){}
 })();
 </script>
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+<link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
 <link rel="modulepreload" href="./river-flight.js">
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
 <link href="./studio.css" rel="stylesheet">
 </head><body>
-<div id="map"></div><canvas id="waypoint-lights" aria-label="Floating venue holograms and animated map tracking brackets"></canvas>
+<div id="map"></div><canvas id="waypoint-lights" aria-label="Interactive Placez markers and floating event holograms"></canvas>
 <div id="exploration-status" role="status" aria-live="polite"></div>
 <div class="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a> · OpenMapTiles</div><div id="map-status" role="status" aria-live="polite">Preparing Portland…</div>
 <aside hidden aria-label="Flyover controls"><details>
