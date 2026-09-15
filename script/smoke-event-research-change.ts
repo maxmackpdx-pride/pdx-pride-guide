@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { storage } from "../server/storage";
+import { beginResearchRun, finishResearchRun, getResearchControlState, recordFieldEvidence, recordMistakeTestResult } from "../server/eventResearchControl";
 import {
   applyEventResearchEventChange,
   createEventFromResearch,
@@ -145,7 +146,19 @@ const createEvent = {
   admission: "FREE",
   status: "LIVE",
 };
+const createRun = beginResearchRun({});
+assert.equal(createRun.ok, true);
+const createCandidateKey = "candidate:smoke-created-event";
+// Disposable gate fixtures, not production mistake-test results.
+for (const test of getResearchControlState().mistakeTests) recordMistakeTestResult({ testKey: test.test_key, passed: true });
+for (const [field, observedValue] of Object.entries(createEvent)) {
+  for (const url of [sourceUrl, "https://example.com/official-qsearch-test-tickets"]) {
+    assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: createCandidateKey, field, observedValue, sourceUrl: url, checkedAt }).ok, true);
+  }
+}
 const created = createEventFromResearch({
+  runId: createRun.runId,
+  candidateKey: createCandidateKey,
   event: createEvent,
   evidenceReceipts: Object.keys(createEvent).map(field => ({ field, sourceUrl, checkedAt })),
   reason: "Create a verified test event with complete official field receipts.",
@@ -159,6 +172,7 @@ assert.equal(created.event.source, "qsearch-2");
 const { address: _omittedAddress, ...withoutAddress } = createEvent;
 const missingAddress = { ...withoutAddress, title: "QSearch Missing Address" };
 const rejectedPublish = createEventFromResearch({
+  candidateKey: "candidate:smoke-missing-address",
   event: missingAddress,
   evidenceReceipts: Object.keys(missingAddress).map(field => ({ field, sourceUrl, checkedAt })),
   reason: "A LIVE event without an exact address must not publish automatically.",
@@ -177,5 +191,6 @@ assert.ok(changes.some(change => change.eventId === base.id && change.rolledBack
 assert.ok(changes.some(change => change.eventId === created.event.id && change.rolledBackAt));
 assert.ok(changes.every(change => typeof change.rollbackToken === "string"));
 assert.ok(changes.every(change => change.afterValues && typeof change.afterValues === "object"));
+assert.equal(finishResearchRun({ runId: created.runId! }).ok, true);
 
 console.log("All QSearch event-change and rollback checks passed.");

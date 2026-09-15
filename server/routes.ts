@@ -1271,6 +1271,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
     const result = createEventFromResearch({
+      candidateKey: req.body?.candidateKey,
       event: req.body?.event,
       evidenceReceipts: req.body?.evidenceReceipts,
       reason: req.body?.reason,

@@ -3,7 +3,7 @@ import { eventDedupeKey } from "@shared/eventDedupe";
 import { TRUSTED_VENUES } from "@shared/trustedVenues";
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
-import { ensureEventResearchControlTables, markRunSource, persistMutationEvidence } from "./eventResearchControl";
+import { ensureEventResearchControlTables, evaluateDecisionGate, markRunSource, persistMutationEvidence } from "./eventResearchControl";
 
 type ArchivedHealthRow = {
   source_id: string;
@@ -56,6 +56,7 @@ export type EventResearchChangeInput = {
 };
 
 export type EventResearchCreateInput = {
+  candidateKey: string;
   event: Record<string, unknown>;
   evidenceReceipts: EventResearchEvidenceReceipt[];
   reason: string;
@@ -618,6 +619,20 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
     Object.keys(event).filter(field => field !== "dayOfWeek"),
   );
   if (!receipts.ok) return receipts;
+  const candidateValues = {
+    ...event,
+    ...(event.eventTypes === undefined ? {} : { eventTypes: JSON.parse(String(event.eventTypes)) }),
+  };
+  const candidateGate = () => evaluateDecisionGate({
+    candidateKey: input.candidateKey,
+    runId: input.runId,
+    fields: Object.keys(candidateValues),
+    proposedValues: candidateValues,
+    requireIndependentVerification: true,
+  });
+  const gate = candidateGate();
+  if (!gate.ok) return gate;
+  if (!gate.publishable) return eventResearchError(409, "candidate decision gate did not approve creation", { gate });
   const dayOfWeek = derivedDayOfWeek(String(event.dateStart));
   if (dayOfWeek) event.dayOfWeek = dayOfWeek;
   const duplicateKey = eventDedupeKey({
@@ -634,6 +649,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
     return {
       ok: true as const,
       operation: "create_preview" as const,
+      candidateKey: input.candidateKey,
       dryRun: true,
       event: eventForResearchAgent({ ...event, id: null, source: "qsearch-2", lockedFields: "[]" }),
       beforeValues: null,
@@ -644,6 +660,11 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   }
   const lockedFields = Object.keys(event).filter(field => EVENT_RESEARCH_MUTABLE_FIELDS.has(field));
   const response = sqlite.transaction(() => {
+    // Re-evaluate inside the same transaction as creation: a prior preview is
+    // not a reusable permission token and may have become stale.
+    const currentGate = candidateGate();
+    if (!currentGate.ok) return currentGate;
+    if (!currentGate.publishable) return eventResearchError(409, "candidate decision gate did not approve creation", { gate: currentGate });
     const created = storage.createEvent({
       ...event,
       source: "qsearch-2",
@@ -666,9 +687,13 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
       values: event,
       receipts: receipts.receipts,
     });
+    sqlite.prepare(`UPDATE agent_field_evidence SET event_id = ? WHERE entity_key = ? AND run_id = ? AND event_id IS NULL`).run(created.id, input.candidateKey, input.runId);
+    sqlite.prepare(`UPDATE agent_event_conflicts SET event_id = ? WHERE candidate_key = ? AND event_id IS NULL`).run(created.id, input.candidateKey);
+    sqlite.prepare(`UPDATE agent_review_queue SET event_id = ? WHERE candidate_key = ? AND event_id IS NULL`).run(created.id, input.candidateKey);
     const result = {
       ok: true as const,
       operation: "create" as const,
+      candidateKey: input.candidateKey,
       runId: input.runId || null,
       event: eventForResearchAgent(created),
       beforeValues: null,
