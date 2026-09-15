@@ -38,32 +38,32 @@ const MULTI_LOCATION_REGISTRY: Record<string, BusinessLocation[]> = {
       address: "311 NW Broadway, Portland, OR 97209",
       phone: "(503) 227-3443",
       hours: "Sun to Mon 11am to midnight, Tue to Sat 11am to 2am",
-      lat: 45.5255,
-      lng: -122.6785,
+      lat: 45.525297148686,
+      lng: -122.677600255511,
     },
     {
       label: "SE 82nd",
       address: "2330 SE 82nd Ave, Portland, OR 97216",
       phone: "(503) 206-4708",
       hours: "Open 24 hours",
-      lat: 45.5054,
-      lng: -122.5787,
+      lat: 45.50603123044,
+      lng: -122.578595695696,
     },
     {
       label: "MLK",
       address: "237 SE MLK Jr Blvd, Portland, OR 97214",
       phone: "(503) 239-1678",
       hours: "Sun to Thu 10am to midnight, Fri to Sat 10am to 2am",
-      lat: 45.5208,
-      lng: -122.6615,
+      lat: 45.521232403172,
+      lng: -122.661852044621,
     },
     {
       label: "Vancouver WA",
       address: "4811 NE 94th Ave, Vancouver, WA 98662",
       phone: "(360) 254-1126",
       hours: "Open 24 hours",
-      lat: 45.6585,
-      lng: -122.5535,
+      lat: 45.657071824975,
+      lng: -122.577345744242,
     },
   ],
   // Mr. Peeps — Portland 122nd, Beaverton, Aloha
@@ -73,24 +73,24 @@ const MULTI_LOCATION_REGISTRY: Record<string, BusinessLocation[]> = {
       address: "709 SE 122nd Ave, Portland, OR 97233",
       phone: "(503) 257-8617",
       hours: "Open 24 hours (confirm)",
-      lat: 45.5178,
-      lng: -122.5378,
+      lat: 45.517595223019,
+      lng: -122.537830884844,
     },
     {
       label: "Beaverton",
       address: "13355 SW Henry St, Beaverton, OR 97005",
       phone: "(503) 643-6645",
       hours: "Open 24 hours (confirm)",
-      lat: 45.4865,
-      lng: -122.816,
+      lat: 45.489678846701,
+      lng: -122.814462684461,
     },
     {
       label: "Aloha",
       address: "20625 SW Tualatin Valley Hwy, Aloha, OR 97003",
       phone: "(503) 356-5624",
       hours: "Open 24 hours (confirm)",
-      lat: 45.4935,
-      lng: -122.8715,
+      lat: 45.496193839127,
+      lng: -122.889175449742,
     },
   ],
   // FANTASY (Fantasy for Adults Only) — not Fantasy Land on Foster
@@ -100,32 +100,32 @@ const MULTI_LOCATION_REGISTRY: Record<string, BusinessLocation[]> = {
       address: "3137 NE Sandy Blvd, Portland, OR 97232",
       phone: "(503) 239-6969",
       hours: "10am to 12am",
-      lat: 45.5328,
-      lng: -122.6325,
+      lat: 45.531060662241,
+      lng: -122.632406897493,
     },
     {
       label: "Downtown / Burnside",
       address: "1703 W Burnside St, Portland, OR 97209",
       phone: "(503) 295-6969",
       hours: "12pm to 8pm",
-      lat: 45.523,
-      lng: -122.6895,
+      lat: 45.522980003124,
+      lng: -122.688316733967,
     },
     {
       label: "Tigard",
       address: "6440 SW Coronado Dr, Portland, OR 97219",
       phone: "(503) 244-6969",
       hours: "10am to 12am",
-      lat: 45.4395,
-      lng: -122.746,
+      lat: 45.442463,
+      lng: -122.7429782,
     },
     {
       label: "Clackamas",
       address: "15536 SE 82nd Dr, Clackamas, OR 97015",
       phone: "(503) 203-6969",
       hours: "12pm to 8pm",
-      lat: 45.3995,
-      lng: -122.547,
+      lat: 45.410425580852,
+      lng: -122.568262074965,
     },
   ],
 };
@@ -186,7 +186,7 @@ function normalizeLocation(loc: BusinessLocation): BusinessLocation {
   };
 }
 
-function registryLocationsForName(name: string): BusinessLocation[] | null {
+export function knownBusinessLocationsForName(name: string): BusinessLocation[] | null {
   const key = normalizeVenueKey(name);
   if (!key) return null;
   // Explicit: Fantasy Land is a single Foster shop, never the FANTASY chain.
@@ -221,7 +221,7 @@ export function resolveBusinessLocations(biz: BusinessLocationSource): BusinessL
   const fromField = parseLocationsField(biz.locations);
   if (fromField && fromField.length > 0) return fromField;
 
-  const fromRegistry = registryLocationsForName(biz.name);
+  const fromRegistry = knownBusinessLocationsForName(biz.name);
   if (fromRegistry && fromRegistry.length > 0) return fromRegistry;
 
   return primaryAsSingleLocation(biz);

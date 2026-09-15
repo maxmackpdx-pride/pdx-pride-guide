@@ -77,6 +77,8 @@ import { getEventChatWindow, CHAT_RETENTION_DAYS } from "@shared/eventChatWindow
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { haversineMeters } from "@shared/geo";
 import { isGuideSystemUsername } from "@shared/peopleHub";
+import { VERIFIED_MAP_COORDINATES } from "@shared/verifiedMapCoordinates";
+import { knownBusinessLocationsForName } from "@shared/businessLocations";
 import { ATTENDANCE_CHAT_HOURS } from "@shared/attendancePhrases";
 import { DEFAULT_PROFILE_BANNER } from "@shared/profileTheme";
 import { mergeTuckerHostedArchivePast } from "@shared/tuckerHostedArchive";
@@ -7889,6 +7891,66 @@ function runBootMigrationsOnce() {
       `[boot] qsearch_event_flyer_audit_2026_08_25_v1: hid ${hideIds.length} exact duplicate(s), cleared ${cleared.changes} wrong flyer(s), added ${added} Q Center event(s)`,
     );
     recordBootMigration("qsearch_event_flyer_audit_2026_08_25_v1");
+  }
+
+  // Keep directory and event pins aligned with the address-level waypoint
+  // audit. This runs after every directory seed so old production rows and
+  // fresh databases resolve to the same coordinates.
+  if (!hasBootMigration("sync_verified_map_coordinates_2026_09_v1")) {
+    const directoryRows = db.select().from(businesses).all();
+    const updateBusiness = sqlite.prepare(
+      `UPDATE businesses
+       SET lat = ?, lng = ?,
+           address = CASE WHEN address IS NULL OR TRIM(address) = '' THEN ? ELSE address END,
+           locations = ?
+       WHERE id = ?`,
+    );
+    const comparableName = (value: string | null | undefined) =>
+      String(value || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    const selectPoint = (fields: { venueName: string; address?: string | null; lat?: number | null; lng?: number | null }) => {
+      const matches = VERIFIED_MAP_COORDINATES.filter(candidate => eventMatchesBusiness(fields, candidate));
+      if (matches.length < 2) return matches[0];
+      return matches.find(candidate => comparableName(candidate.name) === comparableName(fields.venueName)) || matches[0];
+    };
+    let businessChanges = 0;
+    for (const business of directoryRows) {
+      const point = selectPoint({ venueName: business.name, address: business.address, lat: business.lat, lng: business.lng });
+      if (!point) continue;
+      const knownLocations = knownBusinessLocationsForName(business.name);
+      let locations = knownLocations ? JSON.stringify(knownLocations) : business.locations;
+      if (!knownLocations && business.locations) {
+        try {
+          const parsed = JSON.parse(business.locations) as Array<Record<string, unknown>>;
+          if (Array.isArray(parsed) && parsed.length === 1) {
+            locations = JSON.stringify([{ ...parsed[0], address: parsed[0].address || point.address, lat: point.lat, lng: point.lng }]);
+          }
+        } catch {
+          // Leave malformed legacy location data untouched; the primary row is still corrected.
+        }
+      }
+      businessChanges += updateBusiness.run(point.lat, point.lng, point.address, locations, business.id).changes;
+    }
+
+    // Pride Northwest publishes a PO box rather than a physical public venue.
+    // A fabricated street pin is worse than omitting it from the map.
+    businessChanges += sqlite
+      .prepare(`UPDATE businesses SET lat = NULL, lng = NULL, locations = NULL WHERE LOWER(name) = LOWER('Pride Northwest')`)
+      .run().changes;
+
+    const eventRows = sqlite
+      .prepare(`SELECT id, venue_name AS venueName, address, lat, lng FROM events`)
+      .all() as Array<{ id: number; venueName: string; address: string | null; lat: number | null; lng: number | null }>;
+    const updateEvent = sqlite.prepare(`UPDATE events SET lat = ?, lng = ? WHERE id = ?`);
+    let eventChanges = 0;
+    for (const event of eventRows) {
+      const point = selectPoint(event);
+      if (!point) continue;
+      eventChanges += updateEvent.run(point.lat, point.lng, event.id).changes;
+    }
+    console.info(
+      `[boot] sync_verified_map_coordinates_2026_09_v1: updated ${businessChanges} businesses and ${eventChanges} events`,
+    );
+    recordBootMigration("sync_verified_map_coordinates_2026_09_v1");
   }
 }
 

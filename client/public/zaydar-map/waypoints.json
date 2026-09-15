@@ -155,10 +155,10 @@
       45.535104234772
     ],
     "isBar": false,
-    "address": "2512 NE Broadway",
+    "address": "2512 NE Broadway St, Portland, OR 97232",
     "coordinateSource": "US Census address geocoder",
     "matchedAddress": "2512 NE BROADWAY ST, PORTLAND, OR, 97232",
-    "addressMatch": "Non_Exact",
+    "addressMatch": "Exact",
     "previousDirectoryCoordinates": [
       -122.6354,
       45.5374
@@ -185,7 +185,7 @@
   },
   {
     "id": "11-0",
-    "name": "Taqueria Los Pu\u00f1ales",
+    "name": "Taqueria Los Puñales",
     "coordinates": [
       -122.630712067926,
       45.51639323491
@@ -450,14 +450,19 @@
     "id": "28-0",
     "name": "Camp Bar PDX",
     "coordinates": [
-      -122.6775,
-      45.5193
+      -122.682349851482,
+      45.522423862572
     ],
     "isBar": true,
     "address": "1125 SW Harvey Milk St, Portland, OR 97205",
-    "coordinateSource": "directory",
-    "addressMatch": "unverified",
-    "logo": "./venue-logos/28-0.png"
+    "coordinateSource": "US Census address geocoder (legacy SW Stark street name)",
+    "addressMatch": "Renamed_Street_Exact",
+    "logo": "./venue-logos/28-0.png",
+    "matchedAddress": "1125 SW STARK ST, PORTLAND, OR, 97205",
+    "previousDirectoryCoordinates": [
+      -122.6775,
+      45.5193
+    ]
   },
   {
     "id": "29-0",
@@ -693,18 +698,6 @@
     "logo": "./venue-logos/41-0.png"
   },
   {
-    "id": "43-0",
-    "name": "Pride Northwest",
-    "coordinates": [
-      -122.7111975,
-      45.5446973
-    ],
-    "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
-  },
-  {
     "id": "52-0",
     "name": "Hawks PDX",
     "coordinates": [
@@ -818,7 +811,7 @@
   },
   {
     "id": "58-0",
-    "name": "Covert Caf\u00e9",
+    "name": "Covert Café",
     "coordinates": [
       -122.579019755323,
       45.516843772421
@@ -1051,7 +1044,7 @@
     "address": "4038 N Mississippi Ave, Portland, OR 97217",
     "coordinateSource": "US Census address geocoder",
     "matchedAddress": "4038 N MISSISSIPPI AVE, PORTLAND, OR, 97227",
-    "addressMatch": "Non_Exact",
+    "addressMatch": "Street_Exact_Zip_Mismatch",
     "previousDirectoryCoordinates": [
       -122.6753325,
       45.5527108
@@ -1156,16 +1149,21 @@
     "id": "96-2",
     "name": "Taboo Video",
     "coordinates": [
-      -122.6615,
-      45.5208
+      -122.661852044621,
+      45.521232403172
     ],
     "isBar": false,
     "address": "237 SE MLK Jr Blvd, Portland, OR 97214",
-    "coordinateSource": "directory",
-    "addressMatch": "unverified",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
     "isLargePin": true,
     "lighting": "red",
-    "logo": "./venue-logos/taboo-video.png"
+    "logo": "./venue-logos/taboo-video.png",
+    "matchedAddress": "237 SE MARTIN LUTHER KING JR BLVD, PORTLAND, OR, 97214",
+    "previousDirectoryCoordinates": [
+      -122.6615,
+      45.5208
+    ]
   },
   {
     "id": "96-3",
@@ -1331,109 +1329,154 @@
     "id": "102-0",
     "name": "Business Oregon",
     "coordinates": [
-      -122.4921525,
-      45.5591754
+      -123.0269045329,
+      44.945578442307
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "775 Summer St NE, Salem, OR 97301",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "775 SUMMER ST NE, SALEM, OR, 97301",
+    "previousDirectoryCoordinates": [
+      -122.4921525,
+      45.5591754
+    ]
   },
   {
     "id": "115-0",
     "name": "CASH Oregon",
     "coordinates": [
-      -122.5402317,
-      45.5188551
+      -122.646543196879,
+      45.528988435907
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "919 NE 19th Ave, Portland, OR 97232",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "919 NE 19TH AVE, PORTLAND, OR, 97232",
+    "previousDirectoryCoordinates": [
+      -122.5402317,
+      45.5188551
+    ]
   },
   {
     "id": "118-0",
     "name": "Prosper Portland",
     "coordinates": [
-      -122.6706444,
-      45.5226961
+      -122.672347328739,
+      45.524742367934
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "220 NW 2nd Ave, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "220 NW 2ND AVE, PORTLAND, OR, 97209",
+    "previousDirectoryCoordinates": [
+      -122.6706444,
+      45.5226961
+    ]
   },
   {
     "id": "121-0",
     "name": "Echo Theater",
     "coordinates": [
-      -122.626067,
-      45.5117657
+      -122.625832029994,
+      45.511929734679
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "1515 SE 37th Ave, Portland, OR 97214",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "1515 SE 37TH AVE, PORTLAND, OR, 97214",
+    "previousDirectoryCoordinates": [
+      -122.626067,
+      45.5117657
+    ]
   },
   {
     "id": "122-0",
     "name": "Independent Publishing Resource Center",
     "coordinates": [
-      -122.662087,
-      45.513473
+      -122.662571609222,
+      45.51360323834
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "318 SE Main St, Portland, OR 97214",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "318 SE MAIN ST, PORTLAND, OR, 97214",
+    "previousDirectoryCoordinates": [
+      -122.662087,
+      45.513473
+    ]
   },
   {
     "id": "124-0",
     "name": "Sincere Studio",
     "coordinates": [
-      -122.6684199,
-      45.5387466
+      -122.668642653121,
+      45.538366951768
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "2134 N Flint Ave, Portland, OR 97227",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "2134 N FLINT AVE, PORTLAND, OR, 97227",
+    "previousDirectoryCoordinates": [
+      -122.6684199,
+      45.5387466
+    ]
   },
   {
     "id": "125-0",
     "name": "SymbiOp",
     "coordinates": [
-      -122.6289543,
-      45.4964906
+      -122.628695338245,
+      45.496823370243
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "3454 SE Powell Blvd, Portland, OR 97202",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "3454 SE POWELL BLVD, PORTLAND, OR, 97202",
+    "previousDirectoryCoordinates": [
+      -122.6289543,
+      45.4964906
+    ]
   },
   {
     "id": "127-0",
     "name": "P:EAR",
     "coordinates": [
-      -122.676224,
-      45.5257641
+      -122.67643072209,
+      45.525488610208
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "338 NW 6th Ave, Portland, OR 97209",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "338 NW 6TH AVE, PORTLAND, OR, 97209",
+    "previousDirectoryCoordinates": [
+      -122.676224,
+      45.5257641
+    ]
   },
   {
     "id": "128-0",
     "name": "Portland Playhouse",
     "coordinates": [
-      -122.6593727,
-      45.5553246
+      -122.659460599086,
+      45.555435235602
     ],
     "isBar": false,
-    "address": null,
-    "coordinateSource": "directory",
-    "addressMatch": "unverified"
+    "address": "602 NE Prescott St, Portland, OR 97211",
+    "coordinateSource": "US Census address geocoder",
+    "addressMatch": "Exact",
+    "matchedAddress": "602 NE PRESCOTT ST, PORTLAND, OR, 97211",
+    "previousDirectoryCoordinates": [
+      -122.6593727,
+      45.5553246
+    ]
   },
   {
     "id": "steam-portland-0",
