@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState,useLayoutEffect,type CSSProperties,type ReactNode,type PointerEvent} from 'react';
 import SmoothDrawer,{SmoothDrawerGroup,SmoothDrawerItem} from './ui/smooth-drawer';
 import {NavGlassLayers,navGlassPointer} from './ui/nav-glass';
-import {Search,SlidersHorizontal,X,ChevronRight} from 'lucide-react';
+import {Search,SlidersHorizontal,X,ChevronRight,ChevronDown} from 'lucide-react';
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
 
 export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','nonprofit','healthcare','realestate','campground','adult'];
@@ -109,5 +109,6 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
    {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
    <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
   </SmoothDrawerGroup>
+  {track&&!track.desktop&&drawerOpen&&<button type="button" className="zaydar-drawer-close-corner" aria-label="Collapse results drawer to search" aria-controls="zaydar-drawer-content" onClick={toggleDrawer}><ChevronDown size={24}/></button>}
  </SmoothDrawer>;
 }
