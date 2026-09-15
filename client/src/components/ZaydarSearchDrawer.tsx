@@ -81,6 +81,13 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   if(active?.pointerId===event.pointerId&&Math.hypot(event.clientX-active.x,event.clientY-active.y)>=8)active.scrolled=true;
  };
  const drawerOpen=level!=='compact';
+ useEffect(()=>{
+  const root=document.documentElement;
+  const state=drawerOpen?'open':'compact';
+  root.dataset.zaylistDrawer=state;
+  window.dispatchEvent(new CustomEvent('zaylist:drawer',{detail:{open:drawerOpen}}));
+  return()=>{if(root.dataset.zaylistDrawer===state)delete root.dataset.zaylistDrawer;};
+ },[drawerOpen]);
  const toggleDrawer=()=>setLevel(drawerOpen?'compact':'full');
  return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
   <NavGlassLayers/>
