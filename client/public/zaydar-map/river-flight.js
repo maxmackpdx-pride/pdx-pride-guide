@@ -189,16 +189,16 @@ const mistSprites=Array.from({length:2},(_,variant)=>{
  }
  return sprite;
 });
-function drawLightMist(ctx,x,y,phase,fade){
+function drawLightMist(ctx,x,y,phase,fade,scale=1,intensity=1){
  if(x < -110||x > window.innerWidth+110||y < -100||y > window.innerHeight+100)return;
  const clock=reduced.matches?0:pulseTime;
  ctx.save();
  for(let layer=0;layer<2;layer++){
   const drift=clock*(.075+layer*.018)+phase+layer*2.1;
-  const size=180+12*Math.sin(drift*.73);
-  ctx.save();ctx.translate(x+7*Math.sin(drift),y-5+5*Math.cos(drift*.81));
+  const size=(180+12*Math.sin(drift*.73))*scale;
+  ctx.save();ctx.translate(x+7*scale*Math.sin(drift),y-5*scale+5*scale*Math.cos(drift*.81));
   ctx.rotate(.16*Math.sin(drift*.57)+layer*.75);
-  ctx.globalAlpha=fade*(.17+.025*Math.sin(drift+layer));
+  ctx.globalAlpha=fade*intensity*(.17+.025*Math.sin(drift+layer));
   ctx.drawImage(mistSprites[layer],-size/2,-size*.375,size,size*.75);ctx.restore();
  }
  ctx.restore();
@@ -303,9 +303,14 @@ function drawLights(fade,target=map,surface=lights){
  const surfaces=updateSurfaces(target);
  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(devicePixelRatio||1,2);
  const viewportScale=Math.min(1,Math.max(.72,(width-32)/680));
- // Full size at street level; zooming out can only reduce the presentation.
+ // At the city-wide distance, holograms dominate while unopened Placez markers
+ // recede. Both return smoothly to their original scale by street level.
  const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
- const presentationScale=viewportScale*zoomScale;
+ const streetProgress=smoothRange(13.5,15,target.getZoom());
+ const hologramMultiplier=6-5*streetProgress;
+ const placezScale=.25+.75*streetProgress;
+ const placezGlow=.25+.75*streetProgress;
+ const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
@@ -415,7 +420,7 @@ function drawLights(fade,target=map,surface=lights){
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
    if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:22});}
-   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon);hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
+   else if(!underProjector){drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow);hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:22});}
   }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
@@ -743,17 +748,20 @@ function tell(type,payload={}){parent.postMessage({source:'zaydar-demo',type,...
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 // Use the original Zaydar orb materials, breathing glow, and drifting mist.
 const typeIcons=new Map();
-function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon){
+function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
- const size=126*(.92+.1*pulse);
- ctx.save();ctx.globalAlpha=fade*pulse;
+ const size=126*scale*(.92+.1*pulse);
+ const coreSize=25*scale;
+ const iconRadius=11*scale;
+ const iconSize=15*scale;
+ ctx.save();ctx.globalAlpha=fade*pulse*glowStrength;
  ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
- drawLightMist(ctx,x,y,phase,fade);
+ drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
  ctx.globalAlpha=alpha;
- ctx.drawImage(hologramMaterials.orbs.get(color),x-12.5,y-12.5,25,25);
+ ctx.drawImage(hologramMaterials.orbs.get(color),x-coreSize/2,y-coreSize/2,coreSize,coreSize);
  const icon=typeIcons.get(typeIcon);
- if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,11,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-7.5,y-7.5,15,15);}
+ if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,iconRadius,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-iconSize/2,y-iconSize/2,iconSize,iconSize);}
  ctx.restore();
 }
 let sequence=0,phases=new Map(),dataGeneration=0,paletteKey='';
