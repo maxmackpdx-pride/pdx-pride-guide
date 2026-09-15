@@ -7,17 +7,17 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#c7d9ed',intensity:.42,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},layers:[
-    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#193645','fill-opacity':.35}},
-    {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#6d98ab','line-opacity':.5,'line-width':.8}},
-    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#6291a4','line-opacity':.48,'line-width':.8}},
+const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#a9b2bc',intensity:.34,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},layers:[
+    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#06151c','fill-opacity':1}},
+    {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#245667','line-opacity':.65,'line-width':.8}},
+    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#183e4b','line-opacity':.72,'line-width':.8}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:12,paint:{'fill-extrusion-color':'#203447','fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:12,paint:{'line-color':'#708da3','line-opacity':.21,'line-width':.5}}
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:12,paint:{'fill-extrusion-color':'#101419','fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:12,paint:{'line-color':'#39434d','line-opacity':.55,'line-width':.5}}
   ]};
 vectorStyle.layers.push(
- {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#b8ccd9','text-halo-color':'#07111a','text-halo-width':1.5}},
- {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':'#b8ccd9','text-halo-color':'#07111a','text-halo-width':1.5}}
+ {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
+ {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':'#68727d','text-halo-color':'#020305','text-halo-width':1.5}}
 );
 // OpenFreeMap vector geometry; no symbols, labels, land fill, or map background.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
@@ -307,9 +307,9 @@ function drawLights(fade,target=map,surface=lights){
  // recede. Both return smoothly to their original scale by street level.
  const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
  const streetProgress=smoothRange(13.5,15,target.getZoom());
- const hologramMultiplier=6-5*streetProgress;
- const placezScale=.25+.75*streetProgress;
- const placezGlow=.25+.75*streetProgress;
+ const hologramMultiplier=3-2*streetProgress;
+ const placezScale=.375+.625*streetProgress;
+ const placezGlow=.375+.625*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);

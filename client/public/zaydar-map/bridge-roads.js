@@ -1,6 +1,7 @@
-// Both surfaces use the same physical road widths and opaque slate material.
-// The map's overall opacity still controls the entire city together.
-export const roadColor = '#314451';
+// Keep the road hierarchy legible without competing with the neon Placez.
+export const roadColor = ['match', ['get', 'class'],
+  'motorway', '#282e35', 'trunk', '#282e35', 'primary', '#282e35',
+  'secondary', '#242a31', '#171b20'];
 const roadWidths = {motorway: 9, trunk: 9, primary: 8, secondary: 7, tertiary: 6, minor: 5, service: 3.5, path: 1.2, rail: 1.4};
 const widthExpression = ['match', ['get', 'class'], ...Object.entries(roadWidths).flat(), 5];
 const metersAtZoom14 = 512 * 2 ** 14 / (40075016.686 * Math.cos(45.53 * Math.PI / 180));
@@ -146,7 +147,7 @@ export function createBridgeLayer(maplibre) {
       const fragment = compile(gl.FRAGMENT_SHADER, `#version 300 es
         precision highp float; in float v_shade; in float v_edge; out vec4 color;
         void main(){float aa=max(fwidth(v_edge),0.001);float alpha=1.0-smoothstep(1.0-aa,1.0,abs(v_edge));
-        color=vec4(vec3(49.0,68.0,81.0)/255.0*v_shade*alpha,alpha);}`);
+        color=vec4(vec3(58.0,66.0,76.0)/255.0*v_shade*alpha,alpha);}`);
       this.program = gl.createProgram(); gl.attachShader(this.program, vertex); gl.attachShader(this.program, fragment); gl.linkProgram(this.program);
       gl.deleteShader(vertex); gl.deleteShader(fragment);
       if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(this.program));
