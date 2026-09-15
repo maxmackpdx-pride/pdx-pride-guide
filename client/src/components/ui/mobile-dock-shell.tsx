@@ -46,6 +46,21 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     };
   }, [compact]);
   useEffect(() => {
+    const collapseFromMap = () => {
+      if (innerWidth >= 960 || held) return;
+      const source = scrollSource.current;
+      scrollState.current = {
+        y: source instanceof Element ? source.scrollTop : window.scrollY,
+        travel: 0,
+        collapsed: true,
+      };
+      setCollapseRequested(true);
+      setCollapsed(true);
+    };
+    window.addEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
+    return () => window.removeEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
+  }, [held]);
+  useEffect(() => {
     const update = () => setCalm(document.documentElement.matches('.calm-mode, [data-calm="true"]'));
     update(); const observer = new MutationObserver(update);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-calm"] });
