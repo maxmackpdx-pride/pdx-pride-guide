@@ -613,7 +613,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
- if(performance.now()-lastLabelUpdate>80){tell('labels',{labels:eventLabels});lastLabelUpdate=performance.now();}
+ if(performance.now()-lastLabelUpdate>80){tell('labels',{labels:eventLabels,viewport:{width,height}});lastLabelUpdate=performance.now();}
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
 // Broad turns center the Old Town bar cluster, then the Mississippi/Alberta bars and Eagle.
