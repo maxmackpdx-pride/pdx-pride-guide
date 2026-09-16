@@ -7,6 +7,7 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
+import {installRoadSurface} from './road-surface.js';
 import {createStreetAtmosphere} from './street-atmosphere.js';
 import {createMapNature} from './map-nature.js';
 const maxExploreZoom=17.75;
@@ -52,7 +53,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
-map.on('load',()=>{mapNature.add();map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
+map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;

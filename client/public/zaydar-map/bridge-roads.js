@@ -142,12 +142,24 @@ export function createBridgeLayer(maplibre) {
       };
       const vertex = compile(gl.VERTEX_SHADER, `#version 300 es
         in vec3 a_position; in float a_shade; in float a_edge;
-        uniform mat4 u_matrix; out float v_shade; out float v_edge;
-        void main(){gl_Position=u_matrix*vec4(a_position,1.0);v_shade=a_shade;v_edge=a_edge;}`);
+        uniform mat4 u_matrix; out float v_shade; out float v_edge; out vec2 v_surface;
+        void main(){gl_Position=u_matrix*vec4(a_position,1.0);v_shade=a_shade;v_edge=a_edge;v_surface=a_position.xy;}`);
       const fragment = compile(gl.FRAGMENT_SHADER, `#version 300 es
-        precision highp float; in float v_shade; in float v_edge; out vec4 color;
-        void main(){float aa=max(fwidth(v_edge),0.001);float alpha=1.0-smoothstep(1.0-aa,1.0,abs(v_edge));
-        color=vec4(vec3(58.0,66.0,76.0)/255.0*v_shade*alpha,alpha);}`);
+        precision highp float; in float v_shade; in float v_edge; in vec2 v_surface; out vec4 color;
+        float noise(vec2 p){return fract(sin(dot(floor(p),vec2(127.1,311.7)))*43758.5453123);}
+        void main(){
+          float aa=max(fwidth(v_edge),0.001),edge=1.0-smoothstep(.72,1.0,abs(v_edge));
+          float alpha=1.0-smoothstep(1.0-aa,1.0,abs(v_edge));
+          float coarse=noise(v_surface*1.7),fine=noise(v_surface*5.4);
+          vec3 asphalt=vec3(40.0,47.0,54.0)/255.0;
+          asphalt*=.88+coarse*.15+fine*.055;
+          float cyan=step(.985,noise(v_surface*3.1+19.0));
+          float magenta=step(.989,noise(v_surface*3.7-31.0));
+          asphalt=mix(asphalt,vec3(0.0,.72,.76),cyan*.10);
+          asphalt=mix(asphalt,vec3(.72,0.0,.55),magenta*.085);
+          asphalt*=mix(.74,1.0,edge)*v_shade;
+          color=vec4(asphalt*alpha,alpha);
+        }`);
       this.program = gl.createProgram(); gl.attachShader(this.program, vertex); gl.attachShader(this.program, fragment); gl.linkProgram(this.program);
       gl.deleteShader(vertex); gl.deleteShader(fragment);
       if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(this.program));
