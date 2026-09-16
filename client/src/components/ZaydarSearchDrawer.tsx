@@ -5,15 +5,17 @@ import {Search,SlidersHorizontal,X,ChevronRight,ChevronDown} from 'lucide-react'
 import {DIRECTORY_TYPE_LABELS,directoryTypeColor} from '@shared/directoryTheme';
 
 export const ZAYDAR_PLACE_TYPES=['all','bar','restaurant','cafe','venue','shop','service','hotel','nonprofit','healthcare','realestate','campground','adult'];
+export const ZAYDAR_PLACE_TYPE_OPTIONS=ZAYDAR_PLACE_TYPES.filter(type=>type!=='all');
 export const zaydarTypeIcon=(type:string)=>`/zaydar-map/icons/types/${ZAYDAR_PLACE_TYPES.includes(type)?type:'venue'}.svg`;
 export const zaydarTypeLabel=(type:string)=>type==='all'?'All placez':type==='adult'?'Adult':DIRECTORY_TYPE_LABELS[type]||'Venues';
 export const zaydarTypeColor=(type:string)=>type==='adult'?'#FF0000':type==='all'?'#63798B':directoryTypeColor(type);
 
-type Props={query:string;onQuery:(query:string)=>void;placeType:string;onPlaceType:(type:string)=>void;filters:ReactNode;children:ReactNode};
-export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,filters,children}:Props){
+type Props={query:string;onQuery:(query:string)=>void;placeTypes:string[];onPlaceTypes:(types:string[])=>void;filters:ReactNode;children:ReactNode};
+export default function ZaydarSearchDrawer({query,onQuery,placeTypes,onPlaceTypes,filters,children}:Props){
  const [level,setLevel]=useState<'compact'|'peek'|'full'>('peek');
  const [dragHeight,setDragHeight]=useState<number|null>(null);
  const [filtersOpen,setFiltersOpen]=useState(false);
+ const [typesOpen,setTypesOpen]=useState(false);
  const [dockCollapsed,setDockCollapsed]=useState(()=>typeof document!=='undefined'&&document.documentElement.dataset.mobileDock==='collapsed');
  const sheet=useRef<HTMLElement>(null),input=useRef<HTMLInputElement>(null);
  const [track,setTrack]=useState<{height:number;desktop:boolean}|null>(null);
@@ -89,7 +91,9 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
   return()=>{if(root.dataset.zaylistDrawer===state)delete root.dataset.zaylistDrawer;};
  },[drawerOpen]);
  const toggleDrawer=()=>setLevel(drawerOpen?'compact':'full');
- return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
+ const toggleTypes=()=>{setTypesOpen(open=>!open);setLevel('full');};
+ const togglePlaceType=(type:string)=>onPlaceTypes(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]);
+ return <SmoothDrawer ref={sheet} height={dragHeight??snapHeight} dragging={dragHeight!==null} data-no-pull-to-refresh data-seam="top" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer} className={`zaydar-search-drawer z-glass is-${level}${dockCollapsed?' dock-is-collapsed':' dock-is-expanded'}${dragHeight!==null?' is-dragging':''}`} aria-label="Search and map results" onKeyDown={event=>{if(event.key==='Escape'){if(typesOpen)setTypesOpen(false);else if(filtersOpen)setFiltersOpen(false);else{setLevel(track?.desktop?'peek':'compact');input.current?.blur();}}}}>
   <NavGlassLayers/>
   <div className="zaydar-drawer-header" role="group" aria-label="Drawer search and resize controls"
    onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={cancelDrag}
@@ -111,12 +115,17 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
    onScrollCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
    onClickCapture={event=>{if(event.detail>0&&contentGesture.current?.scrolled){event.preventDefault();event.stopPropagation();}}}
    hidden={level==='compact'&&dragHeight===null}>
-   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/></SmoothDrawerItem>
-   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez">
-    <button type="button" aria-pressed={placeType==='all'} onClick={()=>{onPlaceType('all');setLevel('full');}} style={{'--type-color':zaydarTypeColor('all')} as CSSProperties}>
+   <SmoothDrawerItem>
+    <button type="button" className="zaydar-placez-heading" aria-expanded={typesOpen} aria-controls="zaydar-place-type-menu" onClick={toggleTypes}>
+     <h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>
+    </button>
+   </SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-place-types" id="zaydar-place-type-menu" role="group" aria-label="Placez">
+    <button type="button" className="zaydar-place-menu" aria-expanded={typesOpen} aria-controls="zaydar-place-type-menu" onClick={toggleTypes} style={{'--type-color':zaydarTypeColor('all')} as CSSProperties}>
      <span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon('all')} alt=""/></span>
      <span>{zaydarTypeLabel('all')}</span>
     </button>
+    {ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button type="button" className="zaydar-place-option" hidden={!typesOpen} key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>{togglePlaceType(type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}
    </SmoothDrawerItem>
    {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
    <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 
 import { Link, useLocation } from "wouter";
-import ZaydarSearchDrawer, {zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
+import ZaydarSearchDrawer, {ZAYDAR_PLACE_TYPE_OPTIONS,zaydarTypeIcon,zaydarTypeLabel} from "@/components/ZaydarSearchDrawer";
 import ZaydarUpcomingEvents from "@/components/ZaydarUpcomingEvents";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
@@ -316,7 +316,7 @@ export default function ZaydarMapDemo() {
   const [showHousing, setShowHousing] = useState(true);
   const [showMizzed, setShowMizzed] = useState(true);
   const [showCarpool, setShowCarpool] = useState(true);
-  const [placeType, setPlaceType] = useState("all");
+  const [placeTypes, setPlaceTypes] = useState<string[]>(() => [...ZAYDAR_PLACE_TYPE_OPTIONS]);
   const [selected, setSelected] = useState<string | null>(null);
   const [zoom, setZoom] = useState(13);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
@@ -446,14 +446,15 @@ export default function ZaydarMapDemo() {
     return at >= now && at <= now + 7 * 86400000 && ["Fri", "Sat", "Sun"].includes(day);
   }), [events, q, timeFilter, customStart, customEnd]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
-  const mapPlaces = useMemo(() => visiblePlaces.filter(place => placeType === "all" || zaydarPlaceType(place) === placeType), [visiblePlaces, placeType]);
-  const nearbyPlaces = useMemo(() => visiblePlaces
+  const placeTypesAll = placeTypes.length === ZAYDAR_PLACE_TYPE_OPTIONS.length;
+  const mapPlaces = useMemo(() => visiblePlaces.filter(place => placeTypes.includes(zaydarPlaceType(place))), [visiblePlaces, placeTypes]);
+  const nearbyPlaces = useMemo(() => mapPlaces
     .map(place => ({ place, point: placePoint(place) }))
     .filter((entry): entry is { place: Place; point: [number, number] } => Boolean(entry.point))
     .map(entry => ({ ...entry, distance: milesBetween(mapCenter, entry.point) }))
     .filter(entry => entry.distance <= 10)
     .sort((a, b) => a.distance - b.distance)
-    .map(entry => entry.place), [visiblePlaces, mapCenter]);
+    .map(entry => entry.place), [mapPlaces, mapCenter]);
   const todayEvents = useMemo(() => {
     const today = portlandCalendarDay(Date.now());
     return events.filter(e => {
@@ -473,13 +474,13 @@ export default function ZaydarMapDemo() {
     ...(showMizzed ? rowMarks(visibleMizzed, "mizzed") : []),
     ...(showCarpool ? rowMarks(carpools.filter(row => rowMatchesQuery(row, q)), "carpool") : []),
   ].filter(mark => {
-    if(placeType === 'all' || mark.kind === 'place') return true;
+    if(placeTypesAll || mark.kind === 'place') return true;
     if(mark.kind !== 'event') return false;
     const event=mark.item as Event;
-    if(zaydarEventColor(event,places)==='#FF0000')return placeType==='adult';
+    if(zaydarEventColor(event,places)==='#FF0000')return placeTypes.includes('adult');
     const venue=places.find(place=>normalizeDirectoryName(place.name)===normalizeDirectoryName(event.venueName||''));
-    return (venue?.type||'venue')===placeType;
-  }), [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q, placeType, places]);
+    return placeTypes.includes(venue?.type||'venue');
+  }), [showEvents, showPlaces, showHousing, showMizzed, showCarpool, visibleEvents, mapPlaces, visibleHousing, visibleMizzed, carpools, q, placeTypes, placeTypesAll, places]);
   const screenMarks = useMemo(() => mapBounds ? marks.filter(mark => (
     mark.lat >= mapBounds.south && mark.lat <= mapBounds.north && mark.lng >= mapBounds.west && mark.lng <= mapBounds.east
   )).slice(0, 12) : [], [mapBounds, marks]);
@@ -655,10 +656,10 @@ export default function ZaydarMapDemo() {
       <button aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
-    <ZaydarSearchDrawer query={query} onQuery={setQuery} placeType={placeType} onPlaceType={type=>{setPlaceType(type);setShowPlaces(true);}} filters={filterControls(false,true)}>
-      {!q&&placeType==='all'&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
-      {!q&&placeType==='all'&&<ZaydarUpcomingEvents events={events} loading={eventsLoading} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
-      <h2 className="zaydar-nearby-title">{q?'Search results':placeType==='all'?'Nearby':zaydarTypeLabel(placeType)}</h2>
+    <ZaydarSearchDrawer query={query} onQuery={setQuery} placeTypes={placeTypes} onPlaceTypes={types=>{setPlaceTypes(types);setShowPlaces(true);}} filters={filterControls(false,true)}>
+      {!q&&placeTypesAll&&<ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={()=>setShowAuth(true)} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
+      {!q&&placeTypesAll&&<ZaydarUpcomingEvents events={events} loading={eventsLoading} onOpen={(event,target)=>openMark({key:`e-${event.id}-${event.dateStart}`,kind:'event',lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)}/>}
+      <h2 className="zaydar-nearby-title">{q?'Search results':placeTypesAll?'Nearby':placeTypes.length===1?zaydarTypeLabel(placeTypes[0]):'Nearby'}</h2>
       {loading&&<p role="status">Loading live listings…</p>}
       {failed&&<p role="alert">Some listings could not load. <button onClick={()=>{void retryEvents();void retryPlaces();}}>Retry</button></p>}
       {!loading&&!resultMarks.length&&<p role="status">No listings match. Try another search or Placez type.</p>}
