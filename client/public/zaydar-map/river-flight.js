@@ -25,6 +25,7 @@ const map = new maplibregl.Map({container:'map',interactive:false,attributionCon
   center:[-122.676,45.523],zoom:13.5,pitch:48,bearing:0,
   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:20,
   style:structuredClone(vectorStyle)});
+let deckLayers=null;
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
@@ -750,6 +751,7 @@ function onVisibilityChange(){
 document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
  disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
+ deckLayers?.dispose();deckLayers=null;
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
@@ -819,6 +821,7 @@ async function setListings(rows){
  for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=Date.now()?new Date(r.startsAt).getTime()-Date.now():1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
+ deckLayers?.setListings(lightFeatures);
  nearbyLights=createSpatialIndex(lightFeatures,f=>f.geometry.coordinates);assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
  await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
@@ -846,6 +849,11 @@ map.on('moveend',viewState);
 map.on('webglcontextlost',()=>tell('fatal'));
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
+ void import('./deck-mobile-demo.js').then(module=>{
+  if(disposed)return;
+  deckLayers=module.attachDeckMobileDemo(map);
+  deckLayers.setListings(lightFeatures);
+ }).catch(error=>console.error('Deck layers unavailable',error));
 });
 map.on('error',event=>tell('error',{message:event.error?.message||'Map data unavailable'}));
 tell('ready');
