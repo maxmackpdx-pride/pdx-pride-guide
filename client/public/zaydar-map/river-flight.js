@@ -4,8 +4,8 @@ import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.j
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
-import {createCitySparkles} from './city-sparkles.js';
-import {roofSparkles} from './roof-sparkles.js';
+import {createCitySparkles} from './city-sparkles.js?v=20260916-facade';
+import {roofSparkles} from './roof-sparkles.js?v=20260916-facade';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
 import {installRoadSurface} from './road-surface.js?v=20260916-orange-grain';
 import {applyMoonlight} from './moonlight.js?v=20260916-moon-20';
@@ -18,13 +18,13 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':'#071917','fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
     {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub','#0a211e','#081c1a'],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
     {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#01070c','line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
-    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,'#03131c',13,'#041a26',16,'#062432'],'fill-opacity':1}},
+    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,'#073a46',13,'#0c5564',16,'#147888'],'fill-opacity':1}},
     {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':'#07303c','line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
     {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#19e3ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.28,14,.4,17,.48],'line-width':['interpolate',['linear'],['zoom'],9.5,4.5,14,7.5,17,11],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.8,16,5.5]}},
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#7af4ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.82,14,.94,17,.98],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#19e3ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.5,15,.8],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#0b1822',18,'#122433',60,'#1c3548',160,'#27485c'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
     {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':'#50748c','line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.48],'line-width':.55}}
   ]};
 vectorStyle.layers.push(
@@ -250,10 +250,11 @@ waypoints.then(async data=>{
 const glitterCache=new WeakMap();
 function buildingGlitter(target,surfaces){
  const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
- if(cached && cached.surfaces===surfaces&&cached.flat===flat)return cached.points;
- // Flat mode gets twice as many illuminated roofs so the city keeps its depth without extrusion height.
- const points=roofSparkles(surfaces.buildings??[],flat?9000:6000,flat?2:4);
- glitterCache.set(target,{time:now,surfaces,flat,points});return points;
+ const coarse=matchMedia('(pointer:coarse)').matches;
+ if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
+ const bands=coarse?(flat?[.5,1]:[.36,.7,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
+ const points=roofSparkles(surfaces.buildings??[],coarse?(flat?4800:3000):(flat?9000:7200),coarse?3:4,bands);
+ glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;
 }
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();

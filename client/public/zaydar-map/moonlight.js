@@ -15,9 +15,9 @@ export function applyMoonlight(style){
  // Saturated material colors, not another glow overlay or rendering pass.
  paint('park-ground',{'fill-color':'#0b392b'});
  paint('woodland-ground',{'fill-color':['match',['get','class'],'scrub','#124b35','#0b382c']});
- paint('water',{'fill-color':['interpolate',['linear'],['zoom'],9.5,'#04232e',13,'#06323e',16,'#094352']});
+ paint('water',{'fill-color':['interpolate',['linear'],['zoom'],9.5,'#073a46',13,'#0c5564',16,'#147888']});
  paint('river-depth',{'line-color':'#145d6b'});
- paint('banks',{'line-color':'#46b6bd'});
- paint('streams',{'line-color':'#359d9e'});
- paint('skyline',{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#142e3a',18,'#1d3d4a',60,'#305968',160,'#427887']});
+ paint('banks',{'line-color':'#7af4ff'});
+ paint('streams',{'line-color':'#19e3ff'});
+ paint('skyline',{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#0b1822',18,'#122433',60,'#1c3548',160,'#27485c']});
 }
