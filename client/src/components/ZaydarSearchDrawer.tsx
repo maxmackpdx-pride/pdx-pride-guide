@@ -111,8 +111,13 @@ export default function ZaydarSearchDrawer({query,onQuery,placeType,onPlaceType,
    onScrollCapture={()=>{if(contentGesture.current)contentGesture.current.scrolled=true;}}
    onClickCapture={event=>{if(event.detail>0&&contentGesture.current?.scrolled){event.preventDefault();event.stopPropagation();}}}
    hidden={level==='compact'&&dragHeight===null}>
-   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/>{placeType!=='all'&&<button type="button" onClick={()=>onPlaceType('all')}>Clear filter</button>}</SmoothDrawerItem>
-   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez type filters">{ZAYDAR_PLACE_TYPES.map(type=><button type="button" key={type} aria-pressed={placeType===type} onClick={()=>{onPlaceType(type===placeType?'all':type);setLevel('full');}} style={{'--type-color':zaydarTypeColor(type)} as CSSProperties}><span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon(type)} style={type==='nonprofit'?{filter:'brightness(.2)'}:undefined} alt=""/></span><span>{zaydarTypeLabel(type)}</span></button>)}</SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-placez-heading"><h2>Placez</h2><ChevronRight size={20} aria-hidden="true"/></SmoothDrawerItem>
+   <SmoothDrawerItem className="zaydar-place-types" role="group" aria-label="Placez">
+    <button type="button" aria-pressed={placeType==='all'} onClick={()=>{onPlaceType('all');setLevel('full');}} style={{'--type-color':zaydarTypeColor('all')} as CSSProperties}>
+     <span className="zaydar-type-circle"><img draggable={false} src={zaydarTypeIcon('all')} alt=""/></span>
+     <span>{zaydarTypeLabel('all')}</span>
+    </button>
+   </SmoothDrawerItem>
    {filtersOpen&&<SmoothDrawerItem className="zaydar-drawer-advanced">{filters}</SmoothDrawerItem>}
    <SmoothDrawerItem className="zaydar-drawer-results">{children}</SmoothDrawerItem>
   </SmoothDrawerGroup>
