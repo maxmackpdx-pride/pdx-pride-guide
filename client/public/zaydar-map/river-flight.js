@@ -245,13 +245,17 @@ function buildingGlitter(target,surfaces){
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
+const hologramArtworkScale=2.625;
+const hologramLabelWidth=60;
+const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 function hologramBounds(feature,scale){
  const logo=venueLogos.get(feature.properties.logo);
- if(!logo)return {halfWidth:85*logoSpacing*scale,halfHeight:67.5*logoSpacing*scale};
- const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25;
- // Keep the 15% breathing room, measured around the actual logo artwork.
- return {halfWidth:Math.max(feature.properties.time?90:0,Math.max(65,(logo.width*fit/2+10)*logoSpacing))*scale,
-  halfHeight:Math.max(feature.properties.time?150:0,Math.max(42,(logo.height*fit/2+10)*logoSpacing))*scale};
+ if(!logo)return {halfWidth:40*logoSpacing*scale,halfHeight:75*logoSpacing*scale};
+ const fit=logoFit(logo)*hologramArtworkScale;
+ const logoHalfWidth=logo.width*fit/2,logoHalfHeight=logo.height*fit/2;
+ // The artwork, title, and clock share one compact footprint regardless of source-logo dimensions.
+ return {halfWidth:Math.max(feature.properties.time?hologramLabelWidth/2:0,logoHalfWidth+6)*logoSpacing*scale,
+  halfHeight:(feature.properties.time?Math.max(75,logoHalfHeight+hologramLabelWidth*.72):logoHalfHeight+6)*logoSpacing*scale};
 }
 function separateHolograms(items,width,height){
  const overlaps=(a,b)=>Math.abs(a.x-b.x)<a.halfWidth+b.halfWidth&&Math.abs(a.y-b.y)<a.halfHeight+b.halfHeight;
@@ -518,20 +522,23 @@ function drawLights(fade,target=map,surface=lights){
    }
 
    // Floating hologram: only the artwork and fine corner guides, no pin body.
+   const hologramCenterY=raisedY-178.5*beaconScale;
+   const renderedArtworkScale=hologramArtworkScale*beaconScale;
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;
-   lightsContext.translate(logoX,raisedY);lightsContext.scale(5.25*beaconScale,5.25*beaconScale);
+   // Keep every part of the hologram attached to the same map-tracked center.
+   lightsContext.translate(logoX,hologramCenterY+34*renderedArtworkScale);lightsContext.scale(renderedArtworkScale,renderedArtworkScale);
    const canCycle=feature.properties.alternateLogo&&venueLogos.has(feature.properties.alternateLogo);
    const cycle=pulseTime/5,swapProgress=(pulseTime%5)/.48;
    const cycleIndex=Math.floor(cycle);
    const alternate=canCycle&&(cycleIndex>0&&swapProgress<.5?cycleIndex-1:cycleIndex)%2===1;
    const artUrl=alternate?feature.properties.alternateLogo:feature.properties.logo;
    const logoKey=alternate?feature.properties.alternateLogoKey:feature.properties.logoKey;
-   if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:raisedY-178.5*beaconScale,r:Math.max(28,70*beaconScale)});
+   if(logoKey)hitTargets.push({key:logoKey,x:logoX,y:hologramCenterY,r:Math.max(24,38*beaconScale)});
    const logo=venueLogos.get(artUrl)||venueLogos.get(feature.properties.logo),focus=logoFocus.active.get(phase);
    if(focus&&logo){
    const age=pulseTime-focus.start,remaining=focus.end-pulseTime;
    const focusAlpha=coreAlpha*Math.max(0,Math.min(1,age/.12,remaining/.18));
-   const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
+   const fit=logoFit(logo);
    const acquire=reduced.matches?0:1-smoothRange(0,.65,age);
    const search=reduced.matches?0:Math.sin(age*5+focus.seed)*acquire;
    lightsContext.save();lightsContext.globalAlpha=focusAlpha;
@@ -571,9 +578,10 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.restore();
    }
    if(feature.properties.time&&logo&&coreAlpha>.1){
-    const fit=Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height)*5.25*beaconScale;
-    const labelWidth=logo.width*fit*.86;
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:raisedY-34*5.25*beaconScale+logo.height*fit/2+5,width:labelWidth,logoKey,logoY:raisedY-34*5.25*beaconScale,logoWidth:logo.width*fit,logoHeight:logo.height*fit,opacity:coreAlpha});
+    const fit=logoFit(logo)*renderedArtworkScale;
+    const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
+    const labelWidth=hologramLabelWidth*beaconScale;
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:labelWidth,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -582,8 +590,7 @@ function drawLights(fade,target=map,surface=lights){
     // Horizontal yaw: keep the artwork upright while it turns left and right.
     lightsContext.transform(Math.cos(angle),0,Math.sin(angle)*.12,1,0,0);
     lightsContext.translate(0,34);
-    const maxWidth=logo.width/logo.height>3?29:25;
-    const scale=Math.min(maxWidth/logo.width,21/logo.height),w=logo.width*scale,h=logo.height*scale;
+    const scale=logoFit(logo),w=logo.width*scale,h=logo.height*scale;
     lightsContext.imageSmoothingEnabled=true;lightsContext.imageSmoothingQuality='high';
     const padding=logo.padding*scale;
     const glitch=canCycle&&cycleIndex>0&&!reduced.matches&&swapProgress<1?Math.sin(Math.PI*swapProgress):0;
