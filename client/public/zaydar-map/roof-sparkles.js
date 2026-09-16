@@ -1,5 +1,5 @@
 // Canonical roof outlines give identical anchors across tile order and winding.
-export function roofSparkles(buildings,limit=6000) {
+export function roofSparkles(buildings,limit=6000,roofDivisor=4) {
   const roofs=new Map();
   const hashKey=key=>{let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;return hash;};
   for(const building of buildings) {
@@ -13,7 +13,7 @@ export function roofSparkles(buildings,limit=6000) {
     const a=JSON.stringify(forward),b=JSON.stringify(backward),signature=a<b?a:b;
     ring=a<b?forward:backward;
     const key=ring[0].map(v=>v.toFixed(5)).join(','),hash=hashKey(key);
-    if(hash%4!==0)continue;
+    if(hash%roofDivisor!==0)continue;
     const prior=roofs.get(key);
     if(!prior||building.height>prior.height||(building.height===prior.height&&signature<prior.signature))
       roofs.set(key,{key,hash,ring,height:building.height,signature});

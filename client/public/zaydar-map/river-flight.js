@@ -16,8 +16,8 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#245667','line-opacity':.65,'line-width':.8}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#183e4b','line-opacity':.72,'line-width':.8}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:14.25,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],14.25,0,14.8,.96],'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:14.25,paint:{'line-color':'#50748c','line-opacity':['interpolate',['linear'],['zoom'],14.25,0,14.8,.48],'line-width':.55}}
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':'#50748c','line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.48],'line-width':.55}}
   ]};
 vectorStyle.layers.push(
  {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
@@ -239,10 +239,11 @@ waypoints.then(async data=>{
 // Choose the same geographic roof corner regardless of polygon winding or start.
 const glitterCache=new WeakMap();
 function buildingGlitter(target,surfaces){
- const now=performance.now(),cached=glitterCache.get(target);
- if(cached && cached.surfaces===surfaces)return cached.points;
- const points=roofSparkles(surfaces.buildings??[]);
- glitterCache.set(target,{time:now,surfaces,points});return points;
+ const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
+ if(cached && cached.surfaces===surfaces&&cached.flat===flat)return cached.points;
+ // Flat mode gets twice as many illuminated roofs so the city keeps its depth without extrusion height.
+ const points=roofSparkles(surfaces.buildings??[],flat?9000:6000,flat?2:4);
+ glitterCache.set(target,{time:now,surfaces,flat,points});return points;
 }
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
