@@ -9,7 +9,6 @@ import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
 import {installRoadSurface} from './road-surface.js';
 import {createStreetAtmosphere} from './street-atmosphere.js';
-import {createMapNature} from './map-nature.js';
 const maxExploreZoom=17.75;
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-base',type:'background',paint:{'background-color':'#050c13','background-opacity':1}},
@@ -36,7 +35,6 @@ const map = new maplibregl.Map({container:'map',interactive:false,attributionCon
   style:structuredClone(vectorStyle)});
 let deckLayers=null;
 const streetAtmosphere=createStreetAtmosphere(map);
-const mapNature=createMapNature(map);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
@@ -53,7 +51,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
-map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
+map.on('load',()=>{installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
@@ -805,7 +803,6 @@ window.addEventListener('pagehide',()=>{
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
  streetAtmosphere.dispose();
- mapNature.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
@@ -904,5 +901,8 @@ map.on('load',()=>{
   deckLayers.setListings(lightFeatures);
  }).catch(error=>console.error('Deck layers unavailable',error));
 });
-map.on('error',event=>tell('error',{message:event.error?.message||'Map data unavailable'}));
+// Individual vector or elevation tiles can fail transiently on mobile networks.
+// MapLibre retains neighboring and cached tiles, so do not turn a recoverable
+// provider miss into a persistent error banner over an otherwise working map.
+map.on('error',event=>console.warn('Recoverable map resource error',event.error||event));
 tell('ready');
