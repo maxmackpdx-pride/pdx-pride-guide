@@ -20,4 +20,13 @@ export function applyMoonlight(style){
  paint('banks',{'line-color':'#7af4ff'});
  paint('streams',{'line-color':'#19e3ff'});
  paint('skyline',{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#0b1822',18,'#122433',60,'#1c3548',160,'#27485c']});
+ style.sky={
+  'sky-color':'#050c18',
+  'sky-horizon-blend':.42,
+  'horizon-color':'#0d3a4a',
+  'horizon-fog-blend':.72,
+  'fog-color':'#07161e',
+  'fog-ground-blend':.22,
+  'atmosphere-blend':.18
+ };
 }

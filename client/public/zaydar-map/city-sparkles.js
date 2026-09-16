@@ -1,9 +1,9 @@
 // Rooftop and facade lights share the map's camera and depth buffer. Time changes light only.
-export function createCitySparkles(maplibre) {
+export function createCitySparkles(maplibre,id='city-sparkles') {
   const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]);
   const unit=origin.meterInMercatorCoordinateUnits();
   return {
-    id:'city-sparkles',type:'custom',renderingMode:'3d',count:0,time:0,still:false,
+    id,type:'custom',renderingMode:'3d',count:0,time:0,still:false,
     update(points,time,still) {
       const changed=this.time!==time||this.still!==still||this.points!==points;
       this.time=time;this.still=still;

@@ -57,4 +57,14 @@ export function installRoadSurface(map,filter,width){
    'line-width':['*',width,.94]
   }
  },'skyline');
+ if(!map.getLayer('street-sodium'))map.addLayer({
+  id:'street-sodium',type:'line',source:'terrain','source-layer':'transportation',filter,
+  layout:{'line-cap':'round','line-join':'round'},
+  paint:{
+   'line-color':'#FF6600',
+   'line-opacity':['interpolate',['linear'],['zoom'],11,.06,14,.14,17,.2],
+   'line-width':['*',width,1.35],
+   'line-blur':['interpolate',['linear'],['zoom'],11,1.5,16,5.5]
+  }
+ },'skyline');
 }

@@ -4,13 +4,16 @@ import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.j
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
-import {createCitySparkles} from './city-sparkles.js?v=20260916-facade';
+import {createCitySparkles} from './city-sparkles.js?v=20260916-lamps';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-facade';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-import {installRoadSurface} from './road-surface.js?v=20260916-orange-grain';
-import {applyMoonlight} from './moonlight.js?v=20260916-moon-20';
+import {installRoadSurface} from './road-surface.js?v=20260916-sodium';
+import {applyMoonlight} from './moonlight.js?v=20260916-sky';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-rotation';
+import {createFacadeWindows,inDowntown} from './facade-windows.js?v=20260916-night';
+import {sampleStreetLamps} from './street-lamps.js?v=20260916-night';
+import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-night';
 const maxExploreZoom=17.75;
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-base',type:'background',paint:{'background-color':'#050c13','background-opacity':1}},
@@ -56,7 +59,9 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
-map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
+const streetLampSparks=createCitySparkles(maplibregl,'street-lamps');
+const facadeWindows=createFacadeWindows(maplibregl);
+map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);installWaterCaustic(map);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(streetLampSparks);map.addLayer(facadeWindows);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
@@ -248,12 +253,20 @@ waypoints.then(async data=>{
 }).catch(error=>{if(disposed)return;console.error(error);assetError='Directory lights unavailable. Refresh to retry.';assetsReady=true;updateSceneStatus();scheduleFrame();});
 // Choose the same geographic roof corner regardless of polygon winding or start.
 const glitterCache=new WeakMap();
+const lampCache={time:0,zoom:0,points:[]};
+function streetLampPoints(target){
+ const now=performance.now();
+ if(now-lampCache.time<1600&&Math.abs(lampCache.zoom-target.getZoom())<.2)return lampCache.points;
+ lampCache.time=now;lampCache.zoom=target.getZoom();lampCache.points=sampleStreetLamps(target,matchMedia('(pointer:coarse)').matches);
+ return lampCache.points;
+}
 function buildingGlitter(target,surfaces){
  const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
  const coarse=matchMedia('(pointer:coarse)').matches;
  if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
+ const local=(surfaces.buildings??[]).filter(building=>!inDowntown(building.center[0],building.center[1]));
  const bands=coarse?(flat?[.34,.66,1]:[.28,.52,.76,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
- const points=roofSparkles(surfaces.buildings??[],coarse?(flat?6800:5200):(flat?9000:7200),coarse?3:4,bands);
+ const points=roofSparkles(local,coarse?(flat?6800:5200):(flat?9000:7200),coarse?3:4,bands);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;
 }
 const logoFocus=createLogoFocus();
@@ -344,6 +357,8 @@ function drawLights(fade,target=map,surface=lights){
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
+ facadeWindows.update(target.getPitch()<8||target.getZoom()<14?[]:surfaces.buildings??[],pulseTime,reduced.matches);
+ streetLampSparks.update(streetLampPoints(target),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
  lightsContext.globalAlpha=fade;
@@ -644,6 +659,8 @@ function drawLights(fade,target=map,surface=lights){
   }
  }
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
+ drawWaterSheen(lightsContext,target,fade,pulseTime);
+ bloomOverlay(lightsContext,width,height,reduced.matches?0.06:0.1);
  tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
@@ -814,6 +831,8 @@ window.addEventListener('pagehide',()=>{
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
+ if(map.getLayer(streetLampSparks.id))map.removeLayer(streetLampSparks.id);
+ if(map.getLayer(facadeWindows.id))map.removeLayer(facadeWindows.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
