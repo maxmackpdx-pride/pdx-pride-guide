@@ -2,14 +2,14 @@
 // share an azimuth, so rotating the camera never moves the light source.
 export function applyMoonlight(style){
  const azimuth=315;
- style.light={anchor:'map',color:'#bceff5',intensity:.64,position:[1.15,azimuth,55]};
+ style.light={anchor:'map',color:'#bceff5',intensity:.768,position:[1.15,azimuth,55]};
  const paint=(id,values)=>Object.assign(style.layers.find(layer=>layer.id===id).paint,values);
  paint('terrain-shade',{
   'hillshade-illumination-anchor':'map',
   'hillshade-illumination-direction':azimuth,
   'hillshade-exaggeration':.75,
   'hillshade-shadow-color':'#010609',
-  'hillshade-highlight-color':'#4b9198',
+  'hillshade-highlight-color':'#5aaeb6',
   'hillshade-accent-color':'#1b4b49'
  });
  // Saturated material colors, not another glow overlay or rendering pass.

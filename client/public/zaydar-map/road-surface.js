@@ -18,18 +18,21 @@ function asphaltTexture(){
   const index=(y*size+x)*4;
   const broad=Math.sin((x+y*.57)*.39)*1.6+Math.sin((x*.21-y*.34))*1.2;
   const grain=(random()-.5)*14;
-  const value=Math.max(28,Math.min(55,41+broad+grain));
-  pixels[index]=value-3;pixels[index+1]=value+1;pixels[index+2]=value+5;pixels[index+3]=255;
+  const value=Math.max(28,Math.min(55,41+broad));
+  const spark=Math.max(0,grain)/14;
+  pixels[index]=Math.min(255,Math.round((value-3)*(1-spark)+255*spark));
+  pixels[index+1]=Math.min(255,Math.round((value+1)*(1-spark)+102*spark));
+  pixels[index+2]=Math.min(255,Math.round((value+5)*(1-spark)));
+  pixels[index+3]=255;
  }
  ctx.putImageData(image,0,0);
- // Sparse colored aggregate keeps the texture in the Zaydar palette without
- // turning the streets into neon lines.
- for(let i=0;i<80;i++){
-  const cyan=random()>.5;
-  ctx.fillStyle=cyan?'rgba(0,255,255,.10)':'rgba(255,0,204,.085)';
-  const radius=.28+random()*.65;
-  ctx.beginPath();ctx.arc(random()*size,random()*size,radius,0,Math.PI*2);ctx.fill();
- }
+ // 2% bloom on the orange grain only — asphalt body stays dark.
+ ctx.save();
+ ctx.globalCompositeOperation='lighter';
+ ctx.filter='blur(.8px)';
+ ctx.globalAlpha=.02;
+ ctx.drawImage(canvas,0,0);
+ ctx.restore();
  // Fine cracks and repaired seams read only when the camera gets close.
  ctx.lineWidth=.45;
  for(let i=0;i<8;i++){
