@@ -247,6 +247,7 @@ function buildingGlitter(target,surfaces){
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
+const hologramLiftScale=.7;
 const hologramArtworkScale=3.15;
 const hologramLabelWidth=68.4;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
@@ -371,9 +372,9 @@ function drawLights(fade,target=map,surface=lights){
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale;
+  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*hologramLiftScale;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
-  item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25:0;
+  item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*hologramLiftScale:0;
  }
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
  for(let iteration=0;iteration<12;iteration++)for(let i=0;i<beacons.length;i++)for(let j=i+1;j<beacons.length;j++){
@@ -418,7 +419,7 @@ function drawLights(fade,target=map,surface=lights){
  }
  separateHolograms(beacons,width,height);
  // Collision avoidance cannot stretch a projector indefinitely at wide zoom.
- for(const item of beacons){item.x=Math.max(item.p.x-155*zoomScale,Math.min(item.p.x+155*zoomScale,item.x));item.y=Math.max(item.p.y-300*presentationScale,Math.min(item.p.y-70*presentationScale,item.y));}
+ for(const item of beacons){item.x=Math.max(item.p.x-155*zoomScale,Math.min(item.p.x+155*zoomScale,item.x));item.y=Math.max(item.p.y-300*presentationScale*hologramLiftScale,Math.min(item.p.y-70*presentationScale*hologramLiftScale,item.y));}
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX,y=item.y-item.p.y+item.hover-item.offset.avoidY;
