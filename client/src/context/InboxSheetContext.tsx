@@ -1,9 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import FloatingInbox from "@/components/FloatingInbox";
-import InboxOverlay from "@/components/InboxOverlay";
 import { isLocalDemo } from "@/lib/localDemo";
+
+const InboxOverlay = lazy(() => import("@/components/InboxOverlay"));
 
 export type InboxSheetOpenOpts = {
   view?: "inbox" | "posts" | "stats";
@@ -30,6 +31,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const pathname = location.split("?")[0] || location;
   const [open, setOpen] = useState(false);
+  const [overlayActivated, setOverlayActivated] = useState(false);
   const [openOpts, setOpenOpts] = useState<InboxSheetOpenOpts | null>(null);
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   const openSheet = useCallback((opts?: InboxSheetOpenOpts) => {
+    setOverlayActivated(true);
     setOpenOpts(opts ?? null);
     setOpen(true);
   }, []);
@@ -47,6 +50,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleSheet = useCallback(() => {
     setOpen((v) => {
+      if (!v) setOverlayActivated(true);
       if (v) setOpenOpts(null);
       return !v;
     });
@@ -64,15 +68,17 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
     <InboxSheetContext.Provider value={value}>
       {children}
       <FloatingInbox />
-      {showOverlay && (
+      {showOverlay && overlayActivated && (
         <div className="inbox-sheet-host" aria-hidden={!open}>
-          <InboxOverlay
-            open={open}
-            onClose={closeSheet}
-            initialView={openOpts?.view}
-            initialAccount={openOpts?.account}
-            initialThreadId={openOpts?.threadId}
-          />
+          <Suspense fallback={null}>
+            <InboxOverlay
+              open={open}
+              onClose={closeSheet}
+              initialView={openOpts?.view}
+              initialAccount={openOpts?.account}
+              initialThreadId={openOpts?.threadId}
+            />
+          </Suspense>
         </div>
       )}
     </InboxSheetContext.Provider>

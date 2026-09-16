@@ -13,7 +13,7 @@ export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect
  useImperativeHandle(ref,()=>({send}),[]);
  useEffect(()=>{const receive=(event:MessageEvent)=>{
   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
-  if(event.data.type==='ready'){setReady(true);send('data',{rows:latest.current.rows});}
+  if(event.data.type==='ready')setReady(true);
   if(event.data.type==='labels'){
    const canvas=frame.current,viewport=event.data.viewport;
    const sourceWidth=Number(viewport?.width),sourceHeight=Number(viewport?.height);
@@ -28,7 +28,7 @@ export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect
   if(event.data.type==='error')setError('Some map tiles could not load. Listings are still available in the search drawer.');
  };window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive);},[]);
  const serialized=JSON.stringify(rows);
- useEffect(()=>{if(!ready)return;send('data',{rows});const timer=window.setInterval(()=>send('data',{rows:latest.current.rows}),60000);return()=>window.clearInterval(timer);},[ready,serialized]);
+ useEffect(()=>{if(ready)send('data',{rows});},[ready,serialized]);
  useEffect(()=>{if(ready)send('select',{key:selected});},[ready,selected]);
- return <>{fallback?<ZaydarFallback ref={fallbackControl} rows={rows} onSelect={onSelect} onView={onView}/>:<iframe ref={frame} src="/zaydar-map/index.html" title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas" onLoad={()=>send('data',{rows:latest.current.rows})}/>} {!fallback&&labels.map(label=><ZaydarEventLabel key={label.key} label={label} onSelect={onSelect}/>)} {error&&<p className="zaydar-demo-notice" role="status">{error} <button onClick={()=>{setError('');setFallback(false);if(frame.current)frame.current.src='/zaydar-map/index.html';}}>Retry map</button></p>}</>;
+ return <>{fallback?<ZaydarFallback ref={fallbackControl} rows={rows} onSelect={onSelect} onView={onView}/>:<iframe ref={frame} src="/zaydar-map/index.html" title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas"/>} {!fallback&&labels.map(label=><ZaydarEventLabel key={label.key} label={label} onSelect={onSelect}/>)} {error&&<p className="zaydar-demo-notice" role="status">{error} <button onClick={()=>{setError('');setFallback(false);if(frame.current)frame.current.src='/zaydar-map/index.html';}}>Retry map</button></p>}</>;
 });

@@ -8,6 +8,7 @@ import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
 import {installRoadSurface} from './road-surface.js';
+import {applyMoonlight} from './moonlight.js';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-portland-canopy';
 const maxExploreZoom=17.75;
@@ -29,6 +30,7 @@ vectorStyle.layers.push(
  {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
  {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':'#68727d','text-halo-color':'#020305','text-halo-width':1.5}}
 );
+applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
   center:[-122.676,45.523],zoom:13.5,pitch:48,bearing:0,
@@ -896,16 +898,25 @@ map.getCanvas().addEventListener('pointerup',e=>{
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>tell('fatal'));
-map.on('load',()=>{
- pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
- void import('./deck-mobile-demo.js').then(module=>{
+async function installAutomaticLayers(){
+ try{
+  const module=await import('./deck-mobile-demo.js');
   if(disposed)return;
   deckLayers=module.attachDeckMobileDemo(map);
   deckLayers.setListings(lightFeatures);
- }).catch(error=>console.error('Deck layers unavailable',error));
+  // Keep the screenshot's enabled layers, without exposing the demo controls.
+  // Use the existing toggle path so weather fetching and layer state stay aligned.
+  const panel=document.querySelector('.deck-lab');
+  panel?.querySelector('[data-layer="tonight"]')?.click();
+  panel?.querySelector('[data-layer="weather"]')?.click();
+  panel?.remove();
+ }catch(error){console.error('Automatic map layers unavailable',error);}
+}
+map.on('load',()=>{
+ pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
+ void installAutomaticLayers();
 });
 // Individual vector or elevation tiles can fail transiently on mobile networks.
 // MapLibre retains neighboring and cached tiles, so do not turn a recoverable
 // provider miss into a persistent error banner over an otherwise working map.
 map.on('error',event=>console.warn('Recoverable map resource error',event.error||event));
-tell('ready');

@@ -74,7 +74,7 @@ export default function HomeFlight({ enabled = true, paused = false, onExploring
   }, [enabled, calmMode, paused, onExploringChange]);
 
   return (
-    <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: enabled ? `url(${__ZAYDAR_BASE__}/poster.webp)` : "none" }}>
+    <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: "url(/home-flight/poster.webp)" }}>
       {!ready && (
         <div className="home-front__flight-credit">
           © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
@@ -86,6 +86,7 @@ export default function HomeFlight({ enabled = true, paused = false, onExploring
         src={`${__ZAYDAR_BASE__}/index.html`}
         title="Explore Portland’s queer venues — click the map to pause the flyover"
         className="home-front__flight-frame"
+        loading="eager"
       />}
     </div>
   );
