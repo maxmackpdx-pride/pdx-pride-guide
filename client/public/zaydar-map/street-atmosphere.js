@@ -36,7 +36,7 @@ function buildScene(features){
   const lampOffsets=[[-34,-4],[34,4],[-6,44],[8,-46]];
   treeOffsets.forEach(([x,y],index)=>{
    const cos=Math.cos(angle),sin=Math.sin(angle),east=(x*cos-y*sin)*scale,north=(x*sin+y*cos)*scale;
-   trees.push({coordinates:offsetMeters(origin,east,north),height:7+hash(`${key}:tree:${index}`)*5,tone:index%3});
+   trees.push({coordinates:offsetMeters(origin,east,north),height:8+hash(`${key}:tree:${index}`)*8,tone:index%3,type:hash(`${key}:tree-type:${index}`)<.42?1:0,rotation:hash(`${key}:tree-rotation:${index}`)*TAU});
   });
   lampOffsets.forEach(([x,y],index)=>{
    const cos=Math.cos(angle),sin=Math.sin(angle),east=x*cos-y*sin,north=x*sin+y*cos;
@@ -57,14 +57,25 @@ function visiblePoint(map,coordinates,padding=80){
 function drawTree(ctx,map,tree,alpha,metersPerPixel,pitch){
  const base=visiblePoint(map,tree.coordinates,60);if(!base)return;
  const height=Math.max(8,tree.height/metersPerPixel*Math.max(.56,Math.sin(pitch)+.25));
- const width=Math.max(4,height*.42),top=base.y-height;
+ const width=Math.max(4,height*(tree.type?.34:.46)),top=base.y-height;
  ctx.save();ctx.globalAlpha=alpha;
  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(base.x+2,base.y+1,width*.8,width*.18,0,0,TAU);ctx.fill();
- ctx.strokeStyle='#3a2a24';ctx.lineWidth=Math.max(1,height*.08);ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.lineTo(base.x,top+height*.62);ctx.stroke();
+ ctx.strokeStyle='#3a2a24';ctx.lineWidth=Math.max(1,height*.075);ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.quadraticCurveTo(base.x+Math.sin(tree.rotation)*height*.06,top+height*.72,base.x+Math.cos(tree.rotation)*height*.025,top+height*.46);ctx.stroke();
  const palettes=[['#173f38','#246354','#2f7c64'],['#153c43','#205a5f','#2c7472'],['#20384b','#2a5364','#367080']][tree.tone];
- for(let tier=0;tier<3;tier++){
-  const y=top+height*(.16+tier*.22),half=width*(.7+tier*.28);
-  ctx.fillStyle=palettes[2-tier];ctx.beginPath();ctx.moveTo(base.x,y-height*.18);ctx.lineTo(base.x-half,y+height*.28);ctx.lineTo(base.x+half,y+height*.28);ctx.closePath();ctx.fill();
+ if(tree.type){
+  for(let tier=0;tier<4;tier++){
+   const y=top+height*(.12+tier*.17),half=width*(.48+tier*.19);
+   ctx.fillStyle=palettes[2-Math.min(2,tier)];ctx.beginPath();ctx.moveTo(base.x,y-height*.17);ctx.quadraticCurveTo(base.x-half*.35,y+height*.12,base.x-half,y+height*.24);ctx.quadraticCurveTo(base.x,y+height*.19,base.x+half,y+height*.24);ctx.quadraticCurveTo(base.x+half*.35,y+height*.12,base.x,y-height*.17);ctx.fill();
+  }
+ }else{
+  const gradient=ctx.createRadialGradient(base.x-width*.3,top+height*.2,0,base.x,top+height*.34,width*1.25);gradient.addColorStop(0,palettes[2]);gradient.addColorStop(.55,palettes[1]);gradient.addColorStop(1,palettes[0]);ctx.fillStyle=gradient;ctx.beginPath();
+  const lobes=12;
+  for(let index=0;index<=lobes;index++){
+   const angle=index/lobes*TAU+tree.rotation,radius=width*(.82+.12*Math.sin(index*2.17+tree.rotation*3)+.08*Math.sin(index*4.31-tree.rotation));
+   const x=base.x+Math.cos(angle)*radius,y=top+height*.3+Math.sin(angle)*radius*.9;
+   if(index===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.closePath();ctx.fill();
  }
  ctx.restore();
 }
