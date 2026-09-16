@@ -326,6 +326,8 @@ function drawLights(fade,target=map,surface=lights){
  const placezScale=.375+.625*streetProgress;
  const placezGlow=.375+.625*streetProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
+ const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
+ const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
@@ -373,9 +375,9 @@ function drawLights(fade,target=map,surface=lights){
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
-  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*hologramLiftScale;
+  item.x=item.p.x+driftX*zoomScale;item.y=item.p.y+(-(roofLift(target,item.feature,surfaces)+178.5*presentationScale)*item.feature.properties.heightScale*(1+heightBoost)+driftY*zoomScale)*effectiveHologramLift;
   item.neighbors=beacons.filter(v=>v!==item&&Math.hypot(v.p.x-item.p.x,v.p.y-item.p.y)<220).length;
-  item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*hologramLiftScale:0;
+  item.y-=item.neighbors?((item.feature.properties.phase*1.71)%3)*25*effectiveHologramLift:0;
  }
  // Relax overlapping logo bounds, with restrained displacement from each fixed anchor.
  for(let iteration=0;iteration<12;iteration++)for(let i=0;i<beacons.length;i++)for(let j=i+1;j<beacons.length;j++){
@@ -420,7 +422,7 @@ function drawLights(fade,target=map,surface=lights){
  }
  separateHolograms(beacons,width,height);
  // Collision avoidance cannot stretch a projector indefinitely at wide zoom.
- for(const item of beacons){item.x=Math.max(item.p.x-155*zoomScale,Math.min(item.p.x+155*zoomScale,item.x));item.y=Math.max(item.p.y-300*presentationScale*hologramLiftScale,Math.min(item.p.y-70*presentationScale*hologramLiftScale,item.y));}
+ for(const item of beacons){item.x=Math.max(item.p.x-155*zoomScale,Math.min(item.p.x+155*zoomScale,item.x));item.y=Math.max(item.p.y-300*presentationScale*effectiveHologramLift,Math.min(item.p.y-70*presentationScale*effectiveHologramLift,item.y));}
  // Keep the pointer's temporary offset separate so it cannot accumulate into drift.
  for(const item of beacons){
   const x=item.x-item.p.x-item.offset.avoidX,y=item.y-item.p.y+item.hover-item.offset.avoidY;
@@ -658,6 +660,12 @@ function point(t){
 // Smooth downtown close-up along the river: Ross Island Bridge to Lloyd district.
 const normalZoom=(13.8849625+Math.log2(1.25));
 function smoothRange(a,b,value){const x=Math.max(0,Math.min(1,(value-a)/(b-a)));return x*x*x*(x*(x*6-15)+10);}
+let manualFlat=false;
+function automaticPitch(){return manualFlat?0:48*smoothRange(11.25,13.2,map.getZoom());}
+function syncOverviewPitch(){
+ const pitch=automaticPitch();
+ if(Math.abs(map.getPitch()-pitch)>.1)map.setPitch(pitch);
+}
 function downtownZoom(latitude){
  const enter=smoothRange(45.501,45.521,latitude);
  const leave=1-smoothRange(45.528,45.551,latitude);
@@ -697,7 +705,7 @@ const exploration=createMapExploration({
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
   scheduleFrame();
  },
- onMove:()=>scheduleFrame()
+ onMove:()=>{syncOverviewPitch();scheduleFrame();}
 });
 function updateSceneStatus(){
  status.textContent=assetError||(loaded&&assetsReady?'':'Preparing Portland…');
@@ -854,7 +862,7 @@ window.addEventListener('message',event=>{
  if(type==='zoom')map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
- if(type==='pitch')map.easeTo({pitch:data.flat?0:48,bearing:0,duration:600});
+ if(type==='pitch'){manualFlat=Boolean(data.flat);map.easeTo({pitch:automaticPitch(),bearing:0,duration:600});}
 });
 let down=null;
 map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});
