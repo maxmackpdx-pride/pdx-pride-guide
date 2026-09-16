@@ -11,7 +11,7 @@ import {installRoadSurface} from './road-surface.js?v=20260916-sodium';
 import {applyMoonlight} from './moonlight.js?v=20260916-sky';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-rotation';
-import {createFacadeWindows,inDowntown} from './facade-windows.js?v=20260916-night';
+import {createFacadeWindows,hasFacade} from './facade-windows.js?v=20260916-scatter';
 import {sampleStreetLamps} from './street-lamps.js?v=20260916-night';
 import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-night';
 const maxExploreZoom=17.75;
@@ -264,7 +264,7 @@ function buildingGlitter(target,surfaces){
  const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
  const coarse=matchMedia('(pointer:coarse)').matches;
  if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
- const local=(surfaces.buildings??[]).filter(building=>!inDowntown(building.center[0],building.center[1]));
+ const local=(surfaces.buildings??[]).filter(building=>!hasFacade(building.center));
  const bands=coarse?(flat?[.34,.66,1]:[.28,.52,.76,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
  const points=roofSparkles(local,coarse?(flat?6800:5200):(flat?9000:7200),coarse?3:4,bands);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;

@@ -1,22 +1,21 @@
-// Downtown-only emissive facades. Sparkles keep the rest of the metro.
-export const DOWNTOWN={west:-122.698,south:45.508,east:-122.662,north:45.536};
-export const inDowntown=(lng,lat)=>lng>=DOWNTOWN.west&&lng<=DOWNTOWN.east&&lat>=DOWNTOWN.south&&lat<=DOWNTOWN.north;
-
 function hash32(value){let h=2166136261;for(const c of String(value))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
+
+export function hasFacade(center){
+ return (hash32((center||[]).map(value=>Number(value).toFixed(5)).join(','))%100)<70;
+}
 
 function facadeAtlas(){
  const size=128,canvas=document.createElement('canvas');
  canvas.width=canvas.height=size;
  const ctx=canvas.getContext('2d');
  ctx.fillStyle='#070d14';ctx.fillRect(0,0,size,size);
- const cols=4,rows=8,gapX=5,gapY=4;
+ const cols=4,rows=8,gapX=5,gapY=4,pal=['#ff2ad4','#5ceeff','#ff7a18'];
  const cw=(size-gapX*(cols+1))/cols,ch=(size-gapY*(rows+1))/rows;
  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-  const x=gapX+c*(cw+gapX),y=gapY+r*(ch+gapY),on=(r*7+c*13)%5!==1;
-  ctx.globalAlpha=on?.92:.22;
-  ctx.fillStyle=on?(c%3===0?'#5ceeff':'#ff2ad4'):'#121820';
+  const x=gapX+c*(cw+gapX),y=gapY+r*(ch+gapY);
+  ctx.globalAlpha=.95;ctx.fillStyle=pal[(r+c)%3];
   ctx.fillRect(x,y,cw,ch);
-  if(on){ctx.globalAlpha=.28;ctx.fillStyle='#fff';ctx.fillRect(x,y,cw,ch*.3);}
+  ctx.globalAlpha=.28;ctx.fillStyle='#fff';ctx.fillRect(x,y,cw,ch*.3);
  }
  return canvas;
 }
@@ -30,19 +29,19 @@ export function createFacadeWindows(maplibre){
    this.time=time;this.still=still;
    if(this.buildings===buildings){this.map?.triggerRepaint();return;}
    this.buildings=buildings;
-   const verts=[];
-   const max=matchMedia('(pointer:coarse)').matches?220:420;
-   let used=0;
+   const coarse=matchMedia('(pointer:coarse)').matches,max=coarse?640:1200,candidates=[];
    for(const building of buildings||[]){
-    if(used>=max)break;
-    const [lng,lat]=building.center;
-    if(!inDowntown(lng,lat)||building.height<10)continue;
+    if(building.height<7||!hasFacade(building.center))continue;
     let ring=building.ring;if(!ring?.length)continue;
     if(ring[0][0]===ring.at(-1)[0]&&ring[0][1]===ring.at(-1)[1])ring=ring.slice(0,-1);
     if(ring.length<3)continue;
-    const seed=hash32(ring[0].map(v=>v.toFixed(5)).join(',')),mask=seed&0xffff,tone=(seed>>>16)%3===0?1:0;
-    const floors=Math.max(3,building.height/3.2);
-    used++;
+    const seed=hash32(ring[0].map(v=>v.toFixed(5)).join(','));
+    candidates.push({building,ring,seed});
+   }
+   candidates.sort((a,b)=>a.seed-b.seed);
+   const verts=[];
+   for(const {building,ring,seed} of candidates.slice(0,max)){
+    const mask=seed&0xffff,floors=Math.max(3,building.height/3.2);
     for(let i=0;i<ring.length;i++){
      const a=ring[i],b=ring[(i+1)%ring.length];
      const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx*85000,dy*111320);
@@ -61,7 +60,7 @@ export function createFacadeWindows(maplibre){
      const uv=[[0,0],[uScale,0],[uScale,floors],[0,floors]];
      for(const tri of quad)for(const idx of tri){
       const p=corners[idx],t=uv[idx];
-      verts.push(p[0],p[1],p[2],t[0],t[1],seed%1000,mask,tone);
+      verts.push(p[0],p[1],p[2],t[0],t[1],seed%1000,mask,0);
      }
     }
    }
@@ -73,30 +72,27 @@ export function createFacadeWindows(maplibre){
    const vertex=compile(gl.VERTEX_SHADER,`#version 300 es
     in vec3 a_position; in vec2 a_uv; in float a_seed; in float a_mask; in float a_tone;
     uniform mat4 u_matrix;
-    out vec2 v_uv; out float v_seed; out float v_mask; out float v_tone;
+    out vec2 v_uv; out float v_seed; out float v_mask;
     void main(){
      gl_Position=u_matrix*vec4(a_position,1.);
-     v_uv=a_uv;v_seed=a_seed;v_mask=a_mask;v_tone=a_tone;
+     v_uv=a_uv;v_seed=a_seed;v_mask=a_mask;
     }`);
    const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
     precision highp float;
-    in vec2 v_uv; in float v_seed; in float v_mask; in float v_tone;
+    in vec2 v_uv; in float v_seed; in float v_mask;
     uniform sampler2D u_atlas; uniform float u_time; uniform float u_still;
     out vec4 color;
     float hash(float n){return fract(sin(n)*43758.5453);}
     void main(){
      float floorIndex=floor(v_uv.y),col=floor(v_uv.x*4.);
-     float bit=mod(floorIndex,16.);
-     float litFloor=mod(floor(v_mask/pow(2.,bit)),2.);
-     if(litFloor<.5)discard;
-     float n=hash(v_seed+floorIndex*19.1+col*7.3);
-     if(n<.28)discard;
+     float n=hash(v_seed+floorIndex*19.1+col*7.3+v_mask*.001);
+     if(n>=.10)discard;
      vec4 pane=texture(u_atlas,vec2(fract(v_uv.x),fract(v_uv.y)));
-     float wave=mix(hash(floorIndex+u_time*.15+v_seed),.7,u_still);
-     vec3 hue=v_tone>.5?vec3(.4,.92,1.):vec3(1.,.14,.82);
-     vec3 rgb=mix(hue,pane.rgb,.55)*(.45+.55*wave);
-     float alpha=pane.r*.85+.2;
-     if(alpha<.08)discard;
+     float wave=mix(hash(floorIndex+u_time*.15+v_seed),.72,u_still);
+     float huePick=hash(v_seed*1.7+floorIndex*5.3+col*13.1);
+     vec3 hue=huePick<.33?vec3(1.,.14,.82):huePick<.66?vec3(.38,.92,1.):vec3(1.,.56,.16);
+     vec3 rgb=mix(hue,pane.rgb,.4)*(.5+.5*wave);
+     float alpha=.55+.35*wave;
      color=vec4(rgb*alpha,alpha);
     }`);
    this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);
