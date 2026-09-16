@@ -19,7 +19,7 @@ export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect
    const sourceWidth=Number(viewport?.width),sourceHeight=Number(viewport?.height);
    const scaleX=canvas&&sourceWidth>0?canvas.clientWidth/sourceWidth:1,scaleY=canvas&&sourceHeight>0?canvas.clientHeight/sourceHeight:1;
    const offsetX=canvas?.offsetLeft||0,offsetY=canvas?.offsetTop||0;
-   setLabels((event.data.labels||[]).map((label:EventLabel)=>({...label,x:offsetX+label.x*scaleX,y:offsetY+label.y*scaleY,width:label.width*scaleX,logoY:offsetY+label.logoY*scaleY,logoWidth:label.logoWidth*scaleX,logoHeight:label.logoHeight*scaleY})));
+   setLabels((event.data.labels||[]).map((label:EventLabel)=>({...label,x:offsetX+label.x*scaleX,y:offsetY+label.y*scaleY,scale:(label.scale||1)*scaleX,logoY:offsetY+label.logoY*scaleY,logoWidth:label.logoWidth*scaleX,logoHeight:label.logoHeight*scaleY})));
   }
   if(event.data.type==='view')latest.current.onView(event.data);
   if(event.data.type==='fatal'){setFallback(true);setError('3D view unavailable. Showing the lightweight map.');}

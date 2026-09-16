@@ -8,23 +8,25 @@ import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
 import {createStreetAtmosphere} from './street-atmosphere.js';
+const maxExploreZoom=17.75;
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
-    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.32,'hillshade-shadow-color':'#02070d','hillshade-highlight-color':'#183747','hillshade-accent-color':'#0a1d28'}},
+    {id:'terrain-base',type:'background',paint:{'background-color':'#050c13','background-opacity':1}},
+    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.62,'hillshade-shadow-color':'#010407','hillshade-highlight-color':'#31586a','hillshade-accent-color':'#163846'}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#06151c','fill-opacity':1}},
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#245667','line-opacity':.65,'line-width':.8}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#183e4b','line-opacity':.72,'line-width':.8}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:12,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.96,'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:12,paint:{'line-color':'#50748c','line-opacity':.48,'line-width':.55}}
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:14.25,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#13283a',18,'#1b354b',60,'#29465e',160,'#365a72'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],14.25,0,14.8,.96],'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:14.25,paint:{'line-color':'#50748c','line-opacity':['interpolate',['linear'],['zoom'],14.25,0,14.8,.48],'line-width':.55}}
   ]};
 vectorStyle.layers.push(
  {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
  {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':'#68727d','text-halo-color':'#020305','text-halo-width':1.5}}
 );
-// OpenFreeMap vector geometry; no symbols, labels, land fill, or map background.
+// OpenFreeMap vector geometry with a solid terrain base and optional labels.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
   center:[-122.676,45.523],zoom:13.5,pitch:48,bearing:0,
-  maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:20,
+  maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
   style:structuredClone(vectorStyle)});
 let deckLayers=null;
 const streetAtmosphere=createStreetAtmosphere(map);
@@ -245,8 +247,8 @@ function buildingGlitter(target,surfaces){
 const logoFocus=createLogoFocus();
 const hologramLayouts=new WeakMap();
 const logoSpacing=1.15;
-const hologramArtworkScale=2.625;
-const hologramLabelWidth=60;
+const hologramArtworkScale=3.15;
+const hologramLabelWidth=68.4;
 const logoFit=logo=>Math.min((logo.width/logo.height>3?29:25)/logo.width,21/logo.height);
 function hologramBounds(feature,scale){
  const logo=venueLogos.get(feature.properties.logo);
@@ -580,8 +582,7 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    const labelWidth=hologramLabelWidth*beaconScale;
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:labelWidth,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -626,7 +627,8 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
- if(performance.now()-lastLabelUpdate>80){tell('labels',{labels:eventLabels,viewport:{width,height}});lastLabelUpdate=performance.now();}
+ // Keep the DOM title and clock on the same animation cadence as the canvas logo.
+ tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
 // Broad turns center the Old Town bar cluster, then the Mississippi/Alberta bars and Eagle.
@@ -664,7 +666,7 @@ function downtownZoom(latitude){
 }
 const status=document.querySelector('#map-status');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-let selectedKey=null,hitTargets=[],lastLabelUpdate=0;
+let selectedKey=null,hitTargets=[];
 const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
 let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
 const frameInterval=1000/30;
@@ -847,7 +849,7 @@ window.addEventListener('message',event=>{
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
- if(type==='zoom')map.zoomTo(Math.max(10,Math.min(20,map.getZoom()+data.delta)),{duration:300});
+ if(type==='zoom')map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
  if(type==='pitch')map.easeTo({pitch:data.flat?0:48,bearing:0,duration:600});
