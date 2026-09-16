@@ -7,7 +7,7 @@ export function applyMoonlight(style){
  paint('terrain-shade',{
   'hillshade-illumination-anchor':'map',
   'hillshade-illumination-direction':azimuth,
-  'hillshade-exaggeration':.68,
+  'hillshade-exaggeration':.75,
   'hillshade-shadow-color':'#010609',
   'hillshade-highlight-color':'#4b9198',
   'hillshade-accent-color':'#1b4b49'

@@ -3,18 +3,18 @@ import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
-import {createMapExploration} from './map-exploration.js';
+import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
 import {installRoadSurface} from './road-surface.js';
-import {applyMoonlight} from './moonlight.js';
+import {applyMoonlight} from './moonlight.js?v=20260916-rotation';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
-import {createMapNature} from './map-nature.js?v=20260916-portland-canopy';
+import {createMapNature} from './map-nature.js?v=20260916-rotation';
 const maxExploreZoom=17.75;
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-base',type:'background',paint:{'background-color':'#050c13','background-opacity':1}},
-    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.62,'hillshade-shadow-color':'#010407','hillshade-highlight-color':'#31586a','hillshade-accent-color':'#163846'}},
+    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':'#010407','hillshade-highlight-color':'#31586a','hillshade-accent-color':'#163846'}},
     {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':'#071917','fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
     {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub','#0a211e','#081c1a'],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
     {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#01070c','line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
@@ -32,7 +32,7 @@ vectorStyle.layers.push(
 );
 applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
-const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
+const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
   center:[-122.676,45.523],zoom:13.5,pitch:48,bearing:0,
   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
   style:structuredClone(vectorStyle)});
@@ -445,6 +445,7 @@ function drawLights(fade,target=map,surface=lights){
  logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
  for(const pass of [0,1])for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
+  const bloomScale=feature.properties.type==='nonprofit'?.4:1;
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
@@ -462,7 +463,7 @@ function drawLights(fade,target=map,surface=lights){
    else if(!underProjector){
     const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
-    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow,isPlace);
+    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale,isPlace);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,raisedY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,raisedY,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:28,name:feature.properties.name,category:feature.properties.type,clusterCenter:placeCluster?.members.length>1?placeCluster.center:null});
@@ -470,7 +471,7 @@ function drawLights(fade,target=map,surface=lights){
   }
   if(!isBar)continue;
   const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
-  lightsContext.globalAlpha=fade*pulse*beamAlpha;
+  lightsContext.globalAlpha=(fade*pulse*beamAlpha)*bloomScale;
   if(isBar){
    if(pass===0){
    // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
@@ -480,13 +481,13 @@ function drawLights(fade,target=map,surface=lights){
    spill.addColorStop(0,color+'cc');spill.addColorStop(.25,color+'88');spill.addColorStop(.6,color+'33');spill.addColorStop(1,color+'00');
    lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
    lightsContext.save();
-   lightsContext.strokeStyle=color;lightsContext.globalAlpha=fade*pulse*.4;lightsContext.lineWidth=1;
+   lightsContext.strokeStyle=color;lightsContext.globalAlpha=(fade*pulse*.4)*bloomScale;lightsContext.lineWidth=1;
    lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX,raisedY);lightsContext.stroke();
    lightsContext.restore();
    // Project a soft cone from the exact ground anchor up to the floating artwork.
    lightsContext.save();
    const top=raisedY-178.5*beaconScale,halfWidth=61.25*beaconScale;
-   lightsContext.globalAlpha=Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2));
+   lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
    drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),p,logoX,top,halfWidth);
    lightsContext.beginPath();lightsContext.moveTo(p.x-2,p.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(p.x+2,p.y);lightsContext.closePath();
    // Sparse TV interference stays inside the beam, underneath the crisp logo.
@@ -497,40 +498,40 @@ function drawLights(fade,target=map,surface=lights){
    const scanPosition=scanClock-Math.floor(scanClock);
    for(let band=0;band<24;band++){
     const row=((band/24)+scanPosition)%1,y=top+beamHeight*row;
-    lightsContext.globalAlpha=fade*beamAlpha*smoothRange(0,.14,row)*(.025+.035*Math.sin(band*1.9+phase)**2);
+    lightsContext.globalAlpha=(fade*beamAlpha*smoothRange(0,.14,row)*(.025+.035*Math.sin(band*1.9+phase)**2))*bloomScale;
     lightsContext.fillStyle=band%4===0?(color===adultVenueColor?'#160000':'#050918'):color;
     lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,band%4===0?1.4:.7);
    }
    const scanY=p.y-beamHeight*scanPosition;
    const sweep=lightsContext.createLinearGradient(0,scanY-9,0,scanY+9);
    sweep.addColorStop(0,color+'00');sweep.addColorStop(.5,color+'b0');sweep.addColorStop(1,color+'00');
-   lightsContext.globalAlpha=fade*beamAlpha*.38*smoothRange(0,.14,1-scanPosition);lightsContext.fillStyle=sweep;
+   lightsContext.globalAlpha=(fade*beamAlpha*.38*smoothRange(0,.14,1-scanPosition))*bloomScale;lightsContext.fillStyle=sweep;
    lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,scanY-9,Math.abs(p.x-logoX)+halfWidth*2,18);
    const staticTick=reduced.matches?0:Math.floor(pulseTime*(3.2+.6*Math.sin(phase))+phase*7);
    for(let line=0;line<7;line++){
     const seed=Math.sin(phase*23.7+line*91.3+staticTick*7.1)*43758.5453;
     const noise=seed-Math.floor(seed),height=p.y-top;
     const y=top+height*(.12+.78*noise);
-    lightsContext.globalAlpha=fade*beamAlpha*(.055+.055*noise);
+    lightsContext.globalAlpha=(fade*beamAlpha*(.055+.055*noise))*bloomScale;
     lightsContext.fillStyle=line%3===0?(color===adultVenueColor?'#100000':'#020510'):color;
     lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,line%3===0?1.3:.7);
    }
    lightsContext.restore();
-   lightsContext.strokeStyle=color;lightsContext.lineWidth=.6;lightsContext.globalAlpha=fade*.18*beamAlpha;
+   lightsContext.strokeStyle=color;lightsContext.lineWidth=.6;lightsContext.globalAlpha=(fade*.18*beamAlpha)*bloomScale;
    lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX+(p.x-logoX)*.08,top+(p.y-top)*.08);lightsContext.stroke();
-   lightsContext.globalAlpha=fade*pulse;lightsContext.lineWidth=1.2;
+   lightsContext.globalAlpha=(fade*pulse)*bloomScale;lightsContext.lineWidth=1.2;
    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,15.75,6.125,0,0,Math.PI*2);lightsContext.stroke();
    const projectorAngle=reduced.matches?phase:pulseTime*.14+phase;
-   lightsContext.globalAlpha=fade*pulse*.45;lightsContext.lineWidth=.8;
+   lightsContext.globalAlpha=(fade*pulse*.45)*bloomScale;lightsContext.lineWidth=.8;
    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,22,8.55,0,projectorAngle,projectorAngle+Math.PI*.72);lightsContext.stroke();
    // Two stationary light echoes breathe at independent rates; the address stays still.
    for(let echo=0;echo<2;echo++){
     const breath=reduced.matches?.45:.5+.5*Math.sin(pulseTime*(.31+echo*.047)+phase*1.43-echo*1.9);
-    lightsContext.globalAlpha=fade*pulse*beamAlpha*(.04+.15*breath*breath);
+    lightsContext.globalAlpha=(fade*pulse*beamAlpha*(.04+.15*breath*breath))*bloomScale;
     lightsContext.lineWidth=echo?1.1:1.8;
     lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,27+echo*7,10.5+echo*2.7,0,0,Math.PI*2);lightsContext.stroke();
    }
-   lightsContext.globalAlpha=fade*pulse;
+   lightsContext.globalAlpha=(fade*pulse)*bloomScale;
    lightsContext.fillStyle=color===adultVenueColor?adultVenueColor:'#eaffff';lightsContext.beginPath();lightsContext.arc(p.x,p.y,2.8,0,Math.PI*2);lightsContext.fill();
    lightsContext.restore();
    continue;
@@ -886,7 +887,7 @@ window.addEventListener('message',event=>{
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
- if(type==='pitch'){manualFlat=Boolean(data.flat);map.easeTo({pitch:automaticPitch(),bearing:0,duration:600});}
+ if(type==='pitch'){manualFlat=Boolean(data.flat);map.easeTo({pitch:automaticPitch(),duration:600});}
 });
 let down=null;
 map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});

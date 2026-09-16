@@ -1,7 +1,7 @@
 // One idle timer; native map gestures stay disabled during the guided flight.
 export function createMapExploration({map, pauseControl, message, reduced, isReady, onExplore, returnCamera, onResume, onMove}) {
   const container=map.getCanvasContainer(),canvas=map.getCanvas();
-  const handlers=['dragPan','scrollZoom','touchZoomRotate','keyboard','doubleClickZoom'];
+  const handlers=['dragPan','dragRotate','scrollZoom','touchZoomRotate','keyboard','doubleClickZoom'];
   const pointers=new Set();
   let mode='flight',idleTimer=0,returnEnd=null,disposed=false,instructionDismissed=false;
   try{instructionDismissed=localStorage.getItem('zaydar-exploration-seen')==='1';}catch{}
@@ -10,8 +10,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
 
   function setGestures(enabled) {
     for(const name of handlers)map[name][enabled?'enable':'disable']();
-    // Keep the horizon steady while allowing touch pinch zoom.
-    map.touchZoomRotate.disableRotation();
+    if(enabled)map.touchZoomRotate.enableRotation();
     container.classList.toggle('is-exploring',enabled);
   }
   function clearIdle(){clearTimeout(idleTimer);idleTimer=0;}
@@ -45,7 +44,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     map.easeTo({...returnCamera(),duration:reduced.matches?0:5000,easing:t=>t*t*t*(t*(t*6-15)+10)});
   }
   function pointerDown(event) {
-    if(event.button!==0&&event.pointerType!=='touch')return;
+    if(event.button!==0&&event.button!==2&&event.pointerType!=='touch')return;
     explore();
     if(mode==='exploring'){pointers.add(event.pointerId);clearIdle();}
   }
@@ -70,6 +69,14 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
     else noteActivity();
   }
   function blur(){pointers.clear();noteActivity();}
+  let clampingBearing=false;
+  function constrainBearing(){
+    if(clampingBearing||mode!=='exploring')return;
+    const bearing=map.getBearing(),bounded=Math.max(-40,Math.min(40,bearing));
+    if(bearing===bounded)return;
+    clampingBearing=true;
+    try{map.setBearing(bounded);}finally{clampingBearing=false;}
+  }
   setGestures(false);
   container.addEventListener('pointerdown',pointerDown,{capture:true,passive:true});
   container.addEventListener('wheel',wheel,{capture:true,passive:true});
@@ -81,6 +88,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   pauseControl.addEventListener('input',pauseInput);
   document.addEventListener('visibilitychange',visibility);
   map.on('move',move);
+  map.on('rotate',constrainBearing);
   return {
     get mode(){return mode;},noteActivity,
     dispose(){
@@ -94,7 +102,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
       window.removeEventListener('blur',blur);
       pauseControl.removeEventListener('input',pauseInput);
       document.removeEventListener('visibilitychange',visibility);
-      map.off('move',move);pointers.clear();
+      map.off('move',move);map.off('rotate',constrainBearing);pointers.clear();
     }
   };
 }

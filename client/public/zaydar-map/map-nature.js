@@ -5,8 +5,8 @@ const LOW_POWER=COARSE_POINTER&&((DEVICE_MEMORY>0&&DEVICE_MEMORY<=4)||CPU_CORES<
 // Keep mobile comfortably below general-purpose 3D point limits. The full
 // canopy remains a cheap flat layer while only a smaller height-prioritized
 // subset becomes individual WebGL trees at close zoom.
-const MAX_CANOPIES=COARSE_POINTER?(LOW_POWER?1800:2800):6200;
-const MAX_TREE_MODELS=COARSE_POINTER?(LOW_POWER?1000:1800):4200;
+const MAX_CANOPIES=COARSE_POINTER?(LOW_POWER?4150:4650):6350;
+const MAX_TREE_MODELS=COARSE_POINTER?(LOW_POWER?3750:4150):5350;
 const PARK_CLASSES=new Set(['park','recreation_ground','cemetery','grass']);
 const WOOD_CLASSES=new Set(['wood','forest','scrub']);
 const TREE_ROAD_CLASSES=new Set(['minor','service','path']);
