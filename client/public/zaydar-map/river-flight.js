@@ -252,8 +252,8 @@ function buildingGlitter(target,surfaces){
  const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
  const coarse=matchMedia('(pointer:coarse)').matches;
  if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
- const bands=coarse?(flat?[.5,1]:[.36,.7,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
- const points=roofSparkles(surfaces.buildings??[],coarse?(flat?4800:3000):(flat?9000:7200),coarse?3:4,bands);
+ const bands=coarse?(flat?[.34,.66,1]:[.28,.52,.76,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
+ const points=roofSparkles(surfaces.buildings??[],coarse?(flat?6800:5200):(flat?9000:7200),coarse?3:4,bands);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;
 }
 const logoFocus=createLogoFocus();
