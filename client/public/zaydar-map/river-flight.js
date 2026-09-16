@@ -7,6 +7,7 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
+import {createStreetAtmosphere} from './street-atmosphere.js';
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.32,'hillshade-shadow-color':'#02070d','hillshade-highlight-color':'#183747','hillshade-accent-color':'#0a1d28'}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#06151c','fill-opacity':1}},
@@ -26,6 +27,7 @@ const map = new maplibregl.Map({container:'map',interactive:false,attributionCon
   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:20,
   style:structuredClone(vectorStyle)});
 let deckLayers=null;
+const streetAtmosphere=createStreetAtmosphere(map);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
@@ -79,10 +81,13 @@ function drawSurfaceReflections(ctx,target,reflections,fade){
   const c=target.project(light.geometry.coordinates),lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*Math.sin(target.getPitch()*Math.PI/180);
   ctx.save();ctx.beginPath();
   building.ring.forEach((point,i)=>{const p=target.project(point);if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();ctx.clip();
-  const radius=light.properties.isBar?48:18,color=light.properties.color;
+  const radius=light.properties.isBar?68:24,color=light.properties.color;
   const glow=ctx.createRadialGradient(c.x,c.y-lift,0,c.x,c.y-lift,radius);
-  glow.addColorStop(0,color+'66');glow.addColorStop(.35,color+'28');glow.addColorStop(1,color+'00');
-  ctx.globalAlpha=fade*.55;ctx.fillStyle=glow;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,radius*2);ctx.restore();
+  glow.addColorStop(0,color+'72');glow.addColorStop(.3,color+'32');glow.addColorStop(1,color+'00');
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*.68;ctx.fillStyle=glow;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,radius*2);
+  const wash=ctx.createLinearGradient(c.x,c.y-lift-radius,c.x,c.y+radius*.4);
+  wash.addColorStop(0,color+'00');wash.addColorStop(.42,color+'28');wash.addColorStop(1,color+'08');
+  ctx.globalAlpha=fade*.42;ctx.fillStyle=wash;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,lift+radius*1.4);ctx.restore();
  }
 }
 function roofLift(target,feature,surfaces){
@@ -316,6 +321,7 @@ function drawLights(fade,target=map,surface=lights){
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
+ streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
@@ -758,6 +764,7 @@ window.addEventListener('pagehide',()=>{
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
+ streetAtmosphere.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
@@ -821,6 +828,7 @@ async function setListings(rows){
  for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=Date.now()?new Date(r.startsAt).getTime()-Date.now():1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
+ streetAtmosphere.setListings(lightFeatures);
  deckLayers?.setListings(lightFeatures);
  nearbyLights=createSpatialIndex(lightFeatures,f=>f.geometry.coordinates);assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
