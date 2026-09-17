@@ -41,7 +41,7 @@ vectorStyle.layers.push(
 applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
-  center:[-122.676,45.523],zoom:13.5,pitch:48,bearing:0,
+  center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
   style:structuredClone(vectorStyle)});
 let deckLayers=null;
@@ -693,7 +693,7 @@ function point(t){
  return flightPath[i-1].map((v,j)=>v+(flightPath[i][j]-v)*f);
 }
 // Smooth downtown close-up along the river: Ross Island Bridge to Lloyd district.
-const normalZoom=(13.8849625+Math.log2(1.25));
+const normalZoom=(13.8849625+Math.log2(1.25)+Math.log2(1.25));
 function smoothRange(a,b,value){const x=Math.max(0,Math.min(1,(value-a)/(b-a)));return x*x*x*(x*(x*6-15)+10);}
 let manualFlat=false;
 function automaticPitch(){return manualFlat?0:48*smoothRange(11.25,13.2,map.getZoom());}
