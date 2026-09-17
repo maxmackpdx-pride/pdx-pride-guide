@@ -18,21 +18,14 @@ function asphaltTexture(){
   const index=(y*size+x)*4;
   const broad=Math.sin((x+y*.57)*.39)*1.6+Math.sin((x*.21-y*.34))*1.2;
   const grain=(random()-.5)*14;
-  const value=Math.max(28,Math.min(55,41+broad));
+  const value=Math.max(10,Math.min(38,24+broad));
   const spark=Math.max(0,grain)/14;
-  pixels[index]=Math.min(255,Math.round((value-2)*(1-spark)+255*spark));
-  pixels[index+1]=Math.min(255,Math.round((value)*(1-spark)+128*spark));
-  pixels[index+2]=Math.min(255,Math.round((value+2)*(1-spark)+31*spark));
+  pixels[index]=Math.min(255,Math.round(value*(1-spark)));
+  pixels[index+1]=Math.min(255,Math.round(value*(1-spark)));
+  pixels[index+2]=Math.min(255,Math.round(value*(1-spark)));
   pixels[index+3]=255;
  }
  ctx.putImageData(image,0,0);
- // 2% bloom on the orange grain only — asphalt body stays dark.
- ctx.save();
- ctx.globalCompositeOperation='lighter';
- ctx.filter='blur(.8px)';
- ctx.globalAlpha=.02;
- ctx.drawImage(canvas,0,0);
- ctx.restore();
  // Fine cracks and repaired seams read only when the camera gets close.
  ctx.lineWidth=.45;
  for(let i=0;i<8;i++){
@@ -61,8 +54,8 @@ export function installRoadSurface(map,filter,width){
   id:'street-sodium',type:'line',source:'terrain','source-layer':'transportation',filter,
   layout:{'line-cap':'round','line-join':'round'},
   paint:{
-   'line-color':'#f76b15',
-   'line-opacity':['interpolate',['linear'],['zoom'],11,.08,14,.2,17,.3],
+   'line-color':'#000000',
+   'line-opacity':['interpolate',['linear'],['zoom'],11,.18,14,.38,17,.55],
    'line-width':['*',width,1.55],
    'line-blur':['interpolate',['linear'],['zoom'],11,2,16,6.5]
   }

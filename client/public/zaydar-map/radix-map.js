@@ -8,7 +8,7 @@
 //   #bceff5 moonlight              → cyan 12
 //   #282e35/#171b20 roads          → slate 5 / slate 2
 //   #50748c building edge          → cyan 8
-// Windows, holograms, and the clock stay product neon.
+// Accents on the map are the 7-day tokens, never off-palette neon.
 export const radix={
  cyan1:'#0b161a',cyan2:'#101b20',cyan3:'#082c36',cyan4:'#003848',
  cyan5:'#004558',cyan6:'#045468',cyan7:'#12677e',cyan8:'#11809c',
@@ -22,7 +22,16 @@ export const radix={
  slate5:'#2e3135',slate6:'#363a3f',slate8:'#5a6169',slate10:'#777b84',slate11:'#b0b4ba',
  orange3:'#331e0b',orange8:'#a35829',orange9:'#f76b15',orange10:'#ff801f'
 };
-export const windowNeon={violet:'#8800FF',magenta:'#FF00CC',cyan:'#00FFFF'};
+export const OLED='#000000';
+export const DAYS={
+ mon:'#8800FF',tue:'#0044FF',wed:'#FFEE00',thu:'#00FFFF',
+ fri:'#FF00CC',sat:'#39FF14',sun:'#FF6600'
+};
+export const DAY_LIST=[DAYS.mon,DAYS.tue,DAYS.wed,DAYS.thu,DAYS.fri,DAYS.sat,DAYS.sun];
+export const windowNeon={
+ violet:DAYS.mon,blue:DAYS.tue,yellow:DAYS.wed,cyan:DAYS.thu,
+ magenta:DAYS.fri,green:DAYS.sat,orange:DAYS.sun
+};
 export const DOWNTOWN=[-122.676,45.523];
 export function downtownDistance(center){
  const dx=((center?.[0]??0)-DOWNTOWN[0])*.7,dy=((center?.[1]??0)-DOWNTOWN[1]);

@@ -7,20 +7,21 @@ import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
 import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
-import {installRoadSurface} from './road-surface.js?v=20260916-equiv';
-import {applyMoonlight} from './moonlight.js?v=20260916-gloss';
+import {installRoadSurface} from './road-surface.js?v=20260917-days';
+import {applyMoonlight} from './moonlight.js?v=20260917-days';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
-import {createFacadeWindows} from './facade-windows.js?v=20260916-win5';
-import {createRoofOutline} from './roof-outline.js?v=20260916-outlines';
+import {createFacadeWindows} from './facade-windows.js?v=20260917-days';
+import {createRoofOutline} from './roof-outline.js?v=20260917-days';
 import {installGrassNeon} from './grass-neon.js?v=20260917-tiles';
 import {drawWaterSheen,drawGrassSheen,drawMoonSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss2';
-import {radix} from './radix-map.js?v=20260916-equiv';
+import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
 const naturalWaterway=['in',['get','class'],['literal',['river','stream']]];
-const neonCyan='#00FFFF';
-const outlineColor=radix.orange9;
+const neonCyan=DAYS.thu;
+const outlineColor=DAYS.sun;
+const roadBloom=OLED;
 const outlineOpacity=['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38];
 const outlineWidth=['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8];
 const outlineBlur=['interpolate',['linear'],['zoom'],14,1.6,16,4.2];
@@ -36,7 +37,7 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams-bloom',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,3.2,14,5.5,17,8],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.4,16,4.5]}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
-    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-gap-width':roadLineWidth,'line-blur':outlineBlur}},
+    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadBloom,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,15,.5,17.5,.72],'line-width':outlineWidth,'line-gap-width':roadLineWidth,'line-blur':outlineBlur}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
     {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},
     {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
@@ -57,7 +58,7 @@ const streetAtmosphere=createStreetAtmosphere(map);
 const mapNature=createMapNature(map,maplibregl);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
-const baseColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
+const baseColors=DAY_LIST;
 let hologramMaterials=createHologramMaterials([...baseColors,adultVenueColor]);
 const assetController=new AbortController();
 function waypointHeightScale([longitude,latitude]){
@@ -186,7 +187,7 @@ async function decodeVenueLogo(url,mode){
    const outline=outlined.getContext('2d');
    for(let i=0;i<8;i++){const angle=i*Math.PI/4;outline.drawImage(silhouette,padding+Math.cos(angle)*outlineRadius,padding+Math.sin(angle)*outlineRadius);}
    outline.drawImage(clean,padding,padding);
-   const chromatic=['#00FFFF','#FF00CC'].map(color=>{const channel=document.createElement('canvas');channel.width=clean.width;channel.height=clean.height;const ctx=channel.getContext('2d');ctx.drawImage(clean,0,0);ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,channel.width,channel.height);return channel;});
+   const chromatic=[DAYS.thu,DAYS.fri].map(color=>{const channel=document.createElement('canvas');channel.width=clean.width;channel.height=clean.height;const ctx=channel.getContext('2d');ctx.drawImage(clean,0,0);ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,channel.width,channel.height);return channel;});
    venueLogos.set(url,{image:clean,silhouette,outlined,chromatic,padding,left:0,top:0,width:clean.width,height:clean.height});
    canvas.width=canvas.height=1;
 
