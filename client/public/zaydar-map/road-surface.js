@@ -62,31 +62,9 @@ export function installRoadSurface(map,filter,width){
   layout:{'line-cap':'round','line-join':'round'},
   paint:{
    'line-color':'#f76b15',
-   'line-opacity':['interpolate',['linear'],['zoom'],11,.06,14,.14,17,.2],
-   'line-width':['*',width,1.2],
-   'line-blur':['interpolate',['linear'],['zoom'],11,2,16,5]
-  }
- },'skyline');
- if(!map.getLayer('streets-edge-bloom'))map.addLayer({
-  id:'streets-edge-bloom',type:'line',source:'terrain','source-layer':'transportation',filter,
-  layout:{'line-cap':'butt','line-join':'round'},
-  paint:{
-   'line-color':'#FF6600',
-   'line-opacity':.04,
-   'line-width':['interpolate',['linear'],['zoom'],12,3.4,17,6.2],
-   'line-gap-width':['*',width,.92],
-   'line-blur':['interpolate',['linear'],['zoom'],12,1.8,17,3.6]
-  }
- },'skyline');
- if(!map.getLayer('streets-edge'))map.addLayer({
-  id:'streets-edge',type:'line',source:'terrain','source-layer':'transportation',filter,
-  layout:{'line-cap':'butt','line-join':'round'},
-  paint:{
-   'line-color':'#FF6600',
-   'line-opacity':['interpolate',['linear'],['zoom'],12,.5,16,.86],
-   'line-width':['interpolate',['linear'],['zoom'],12,.55,17,1.2],
-   'line-gap-width':['*',width,.92],
-   'line-blur':.28
+   'line-opacity':['interpolate',['linear'],['zoom'],11,.08,14,.2,17,.3],
+   'line-width':['*',width,1.55],
+   'line-blur':['interpolate',['linear'],['zoom'],11,2,16,6.5]
   }
  },'skyline');
 }

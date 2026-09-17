@@ -7,14 +7,13 @@ import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
 import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
-import {installRoadSurface} from './road-surface.js?v=20260916-edge';
+import {installRoadSurface} from './road-surface.js?v=20260916-equiv';
 import {applyMoonlight} from './moonlight.js?v=20260916-equiv';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-glsl';
-import {createCornerUplight} from './corner-uplight.js?v=20260916-up';
 import {sampleStreetLamps} from './street-lamps.js?v=20260916-radix';
-import {drawWaterSheen,drawCorridorBloom,bloomOverlay} from './overlay-atmosphere.js?v=20260916-court';
+import {drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-equiv';
 import {radix} from './radix-map.js?v=20260916-equiv';
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake','pond','ocean']]];
@@ -31,6 +30,7 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':radix.sky9,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':radix.cyan11,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
+    {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.orange9,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38],'line-width':['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8],'line-blur':['interpolate',['linear'],['zoom'],14,1.6,16,4.2]}},
     {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
     {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.4],'line-width':.55}}
   ]};
@@ -65,8 +65,7 @@ const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
 const streetLampSparks=createCitySparkles(maplibregl,'street-lamps');
 const facadeWindows=createFacadeWindows(maplibregl);
-const cornerUplight=createCornerUplight(maplibregl);
-map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(streetLampSparks);map.addLayer(facadeWindows);map.addLayer(cornerUplight);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
+map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(streetLampSparks);map.addLayer(facadeWindows);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
@@ -365,7 +364,6 @@ function drawLights(fade,target=map,surface=lights){
  streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  facadeWindows.update(target.getPitch()<8||target.getZoom()<14?[]:surfaces.buildings??[],pulseTime,reduced.matches);
- cornerUplight.update(target.getPitch()<8||target.getZoom()<14?[]:surfaces.buildings??[]);
  streetLampSparks.update(streetLampPoints(target),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
@@ -668,7 +666,6 @@ function drawLights(fade,target=map,surface=lights){
  }
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
  drawWaterSheen(lightsContext,target,fade,pulseTime);
- drawCorridorBloom(lightsContext,target,surfaces.buildings??[],fade);
  bloomOverlay(lightsContext,width,height,reduced.matches?0.06:0.1);
  tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
@@ -842,7 +839,6 @@ window.addEventListener('pagehide',()=>{
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  if(map.getLayer(streetLampSparks.id))map.removeLayer(streetLampSparks.id);
  if(map.getLayer(facadeWindows.id))map.removeLayer(facadeWindows.id);
- if(map.getLayer(cornerUplight.id))map.removeLayer(cornerUplight.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
