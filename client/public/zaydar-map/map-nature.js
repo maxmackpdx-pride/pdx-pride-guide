@@ -60,8 +60,13 @@ function spacingForZoom(zoom){
  return COARSE_POINTER?42:32;
 }
 
-function addTree(points,seen,coordinate,seed,kind){
- if(points.length>=MAX_CANOPIES)return;
+function inCity([lng,lat]){
+ return lng>-122.698&&lng<-122.655&&lat>45.508&&lat<45.538;
+}
+
+function addTree(points,seen,coordinate,seed,kind,water){
+ if(points.length>=MAX_CANOPIES||inCity(coordinate))return;
+ if(water?.some(rings=>pointInPolygon(coordinate,rings)))return;
  const key=`${coordinate[0].toFixed(6)}:${coordinate[1].toFixed(6)}`;
  if(seen.has(key))return;seen.add(key);
  const forest=kind==='wood';
@@ -73,7 +78,7 @@ function addTree(points,seen,coordinate,seed,kind){
  points.push({type:'Feature',properties:{key,kind,tone:Math.floor(hash(`${seed}:tone`)*3),scale:.78+hash(`${seed}:scale`)*.48,height,type:evergreen?1:0,rotation:hash(`${seed}:rotation`)},geometry:{type:'Point',coordinates:coordinate}});
 }
 
-function samplePolygon(rings,spacingMeters,density,kind,points,seen){
+function samplePolygon(rings,spacingMeters,density,kind,points,seen,water){
  const outer=rings[0];if(!outer?.length)return;
  let west=Infinity,south=Infinity,east=-Infinity,north=-Infinity;
  for(const coordinate of outer){west=Math.min(west,coordinate[0]);east=Math.max(east,coordinate[0]);south=Math.min(south,coordinate[1]);north=Math.max(north,coordinate[1]);}
@@ -88,7 +93,7 @@ function samplePolygon(rings,spacingMeters,density,kind,points,seen){
   const longitude=(column+.16+hash(`${seed}:x`)*.68)*longitudeStep;
   const latitude=(row+.16+hash(`${seed}:y`)*.68)*latitudeStep;
   const coordinate=[longitude,latitude];
-  if(pointInPolygon(coordinate,rings))addTree(points,seen,coordinate,seed,kind);
+  if(pointInPolygon(coordinate,rings))addTree(points,seen,coordinate,seed,kind,water);
  }
 }
 
@@ -101,7 +106,7 @@ function offsetMeters([longitude,latitude],east,north){
  return [longitude+east/(111320*Math.max(.25,Math.cos(latitude*Math.PI/180))),latitude+north/111320];
 }
 
-function sampleStreetLine(line,points,seen){
+function sampleStreetLine(line,points,seen,water){
  if(line.length<2)return;
  const spacing=LOW_POWER?92:COARSE_POINTER?72:58;
  for(let index=1;index<line.length&&points.length<MAX_CANOPIES;index++){
@@ -113,7 +118,7 @@ function sampleStreetLine(line,points,seen){
    const center=[a[0]+dx*t,a[1]+dy*t],seed=`street:${a[0].toFixed(5)}:${a[1].toFixed(5)}:${index}:${step}`;
    if(hash(`${seed}:keep`)>.72)continue;
    const side=hash(`${seed}:side`)>.5?1:-1,offset=(7.5+hash(`${seed}:offset`)*4)*side;
-   addTree(points,seen,offsetMeters(center,normalEast*offset,normalNorth*offset),seed,'street');
+   addTree(points,seen,offsetMeters(center,normalEast*offset,normalNorth*offset),seed,'street',water);
   }
  }
 }
@@ -125,19 +130,21 @@ function classifiedFeatures(map,sourceLayer,classes){
 
 function canopyCollection(map){
  const zoom=map.getZoom(),spacing=spacingForZoom(zoom),points=[],seen=new Set(),unique=new Set();
+ let water=[];
+ try{water=map.querySourceFeatures('terrain',{sourceLayer:'water'}).flatMap(feature=>polygons(feature));}catch{}
  const woodland=classifiedFeatures(map,'landcover',WOOD_CLASSES);
  const parks=classifiedFeatures(map,'landuse',PARK_CLASSES);
  for(const [features,density,kind] of [[woodland,.94,'wood'],[parks,.63,'park']])for(const feature of features){
   for(const rings of polygons(feature)){
    const signature=JSON.stringify(rings[0]?.slice(0,6));if(unique.has(signature))continue;unique.add(signature);
-   samplePolygon(rings,spacing,density,kind,points,seen);
+   samplePolygon(rings,spacing,density,kind,points,seen,water);
   }
  }
  // Portland's published inventory includes more than 250,000 mapped street
  // trees. Sample only real minor/service/path geometry, only when close, and
  // keep it below the same mobile vertex budget as parks and forests.
  if(zoom>=14.4)for(const feature of classifiedFeatures(map,'transportation',TREE_ROAD_CLASSES)){
-  for(const line of lines(feature))sampleStreetLine(line,points,seen);
+  for(const line of lines(feature))sampleStreetLine(line,points,seen,water);
   if(points.length>=MAX_CANOPIES)break;
  }
  return {type:'FeatureCollection',features:points};

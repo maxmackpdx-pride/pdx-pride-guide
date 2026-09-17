@@ -10,7 +10,7 @@ import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridg
 import {installRoadSurface} from './road-surface.js?v=20260916-radix';
 import {applyMoonlight} from './moonlight.js?v=20260916-radix';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
-import {createMapNature} from './map-nature.js?v=20260916-rotation';
+import {createMapNature} from './map-nature.js?v=20260916-no-city-trees';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-radix';
 import {sampleStreetLamps} from './street-lamps.js?v=20260916-radix';
 import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-radix';
