@@ -59,7 +59,7 @@ export function installGrassNeon(map){
  },'water-shadow');
  if(!map.getLayer('grass-cover-neon'))map.addLayer({
   id:'grass-cover-neon',type:'fill',source:'terrain','source-layer':'landcover',
-  filter:['==',['get','class'],'grass'],
+  filter:['in',['get','class'],['literal',['grass','wood','forest','scrub']]],
   paint
  },'water-shadow');
 }

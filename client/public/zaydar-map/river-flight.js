@@ -13,8 +13,8 @@ import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-win5';
 import {createRoofOutline} from './roof-outline.js?v=20260916-outlines';
-import {installGrassNeon} from './grass-neon.js?v=20260916-gloss';
-import {drawWaterSheen,drawGrassSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss';
+import {installGrassNeon} from './grass-neon.js?v=20260916-gloss2';
+import {drawWaterSheen,drawGrassSheen,drawMoonSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss2';
 import {radix} from './radix-map.js?v=20260916-equiv';
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
@@ -87,7 +87,7 @@ function updateSurfaces(target){
   const raw=Number(f.properties.render_height||f.properties.height);
   const height=Number.isFinite(raw)&&raw>0?raw:9;
   const screen=target.project(center);
-  if(screen.x < -200||screen.y < -200||screen.x > window.innerWidth+200||screen.y > window.innerHeight+400)continue;
+  if(screen.x < -720||screen.y < -720||screen.x > window.innerWidth+720||screen.y > window.innerHeight+900)continue;
   buildings.push({center,height,ring});
  }
  bridgeLayer.update(target.querySourceFeatures('terrain',{sourceLayer:'transportation',filter:bridgeFilter}));
@@ -361,6 +361,7 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
+ drawMoonSheen(lightsContext,target,fade,pulseTime);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);

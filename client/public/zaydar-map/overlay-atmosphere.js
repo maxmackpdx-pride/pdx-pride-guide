@@ -32,6 +32,14 @@ function moonGloss(ctx,width,height,fade,time,bearing,tint,hot){
  }
 }
 
+export function drawMoonSheen(ctx,map,fade,time){
+ if(fade<=0||map.getZoom()<11)return;
+ const width=ctx.canvas.clientWidth||window.innerWidth,height=ctx.canvas.clientHeight||window.innerHeight;
+ ctx.save();
+ moonGloss(ctx,width,height,fade*.55,time,map.getBearing(),'182,236,247','234,252,255');
+ ctx.restore();
+}
+
 export function drawWaterSheen(ctx,map,fade,time){
  if(fade<=0||map.getZoom()<12)return;
  const features=map.querySourceFeatures('terrain',{sourceLayer:'water'});
@@ -50,7 +58,7 @@ export function drawGrassSheen(ctx,map,fade,time){
  const cover=map.querySourceFeatures('terrain',{sourceLayer:'landcover'});
  const width=ctx.canvas.clientWidth||window.innerWidth,height=ctx.canvas.clientHeight||window.innerHeight;
  ctx.save();ctx.beginPath();
- const any=addRings(ctx,map,landuse,new Set(['park','recreation_ground','cemetery','grass']))||addRings(ctx,map,cover,new Set(['grass']));
+ const any=addRings(ctx,map,landuse,new Set(['park','recreation_ground','cemetery','grass']))||addRings(ctx,map,cover,new Set(['grass','wood','forest','scrub']));
  if(!any){ctx.restore();return;}
  ctx.clip();
  moonGloss(ctx,width,height,fade*.85,time,map.getBearing(),'180,255,90','230,255,210');
