@@ -98,11 +98,11 @@ export function createFacadeWindows(maplibre){
      float bloom=exp(-outside*outside*70.)*.06;
      float lit=max(pane,bloom);
      if(lit<.01)discard;
-     vec4 sample=texture(u_atlas,vec2(fract(v_uv.x),fract(v_uv.y)));
+     vec4 atlas=texture(u_atlas,vec2(fract(v_uv.x),fract(v_uv.y)));
      float wave=mix(hash(floorIndex+u_time*.15+v_seed),.72,u_still);
      float huePick=hash(v_seed*1.7+floorIndex*5.3+col*13.1);
      vec3 hue=huePick<.33?vec3(.533,0.,1.):huePick<.66?vec3(1.,0.,.8):vec3(0.,1.,1.);
-     vec3 rgb=mix(hue,sample.rgb,.28)*(.55+.45*wave);
+     vec3 rgb=mix(hue,atlas.rgb,.28)*(.55+.45*wave);
      float alpha=(.6+.3*wave)*pane+bloom;
      color=vec4(rgb*alpha,alpha);
     }`);
