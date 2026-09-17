@@ -33,7 +33,7 @@ export function roofSparkles(buildings,limit=6000,roofDivisor=4,bands=[1]) {
         const a=ring[edge],b=ring[(edge+1)%ring.length],mix=(distance-lengths[edge])/(lengths[edge+1]-lengths[edge]||1);
         const seed=hashKey(`${hash}:${band}:${i}`);
         // Lower floors run warm street amber; upper floors are magenta with cyan hits.
-        const tone=bands[band]<.35?2:seed%5===0?1:0;
+        const tone=seed%3===0?1:0;
         points.push({coordinates:a.map((v,j)=>v+(b[j]-v)*mix),height:level,phase:hashKey(`${seed}:phase`)/4294967295*100,rate:.65+seed/4294967295*.65,star:bands[band]>=.95&&seed%3===0,tone});
       }
     }

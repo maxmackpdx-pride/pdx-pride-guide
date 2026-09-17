@@ -1,3 +1,5 @@
+import {downtownDistance,windowNeon} from './radix-map.js';
+
 function hash32(value){let h=2166136261;for(const c of String(value))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
 
 export function hasFacade(center){
@@ -8,14 +10,14 @@ function facadeAtlas(){
  const size=128,canvas=document.createElement('canvas');
  canvas.width=canvas.height=size;
  const ctx=canvas.getContext('2d');
- ctx.fillStyle='#070d14';ctx.fillRect(0,0,size,size);
- const cols=4,rows=8,gapX=5,gapY=4,pal=['#ff2ad4','#5ceeff','#ff7a18'];
+ ctx.fillStyle='#050506';ctx.fillRect(0,0,size,size);
+ const cols=5,rows=8,gapX=14,gapY=10,pal=[windowNeon.violet,windowNeon.magenta,windowNeon.cyan];
  const cw=(size-gapX*(cols+1))/cols,ch=(size-gapY*(rows+1))/rows;
  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
   const x=gapX+c*(cw+gapX),y=gapY+r*(ch+gapY);
   ctx.globalAlpha=.95;ctx.fillStyle=pal[(r+c)%3];
   ctx.fillRect(x,y,cw,ch);
-  ctx.globalAlpha=.28;ctx.fillStyle='#fff';ctx.fillRect(x,y,cw,ch*.3);
+  ctx.globalAlpha=.3;ctx.fillStyle='#fff';ctx.fillRect(x,y,cw,ch*.28);
  }
  return canvas;
 }
@@ -31,17 +33,17 @@ export function createFacadeWindows(maplibre){
    this.buildings=buildings;
    const coarse=matchMedia('(pointer:coarse)').matches,max=coarse?640:1200,candidates=[];
    for(const building of buildings||[]){
-    if(building.height<7||!hasFacade(building.center))continue;
+    if(building.height<3||!hasFacade(building.center))continue;
     let ring=building.ring;if(!ring?.length)continue;
     if(ring[0][0]===ring.at(-1)[0]&&ring[0][1]===ring.at(-1)[1])ring=ring.slice(0,-1);
     if(ring.length<3)continue;
     const seed=hash32(ring[0].map(v=>v.toFixed(5)).join(','));
-    candidates.push({building,ring,seed});
+    candidates.push({building,ring,seed,dist:downtownDistance(building.center)});
    }
-   candidates.sort((a,b)=>a.seed-b.seed);
+   candidates.sort((a,b)=>a.dist-b.dist||a.seed-b.seed);
    const verts=[];
    for(const {building,ring,seed} of candidates.slice(0,max)){
-    const mask=seed&0xffff,floors=Math.max(3,building.height/3.2);
+    const mask=seed&0xffff,floors=Math.max(2,building.height/4.6);
     for(let i=0;i<ring.length;i++){
      const a=ring[i],b=ring[(i+1)%ring.length];
      const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx*85000,dy*111320);
@@ -56,7 +58,7 @@ export function createFacadeWindows(maplibre){
       maplibre.MercatorCoordinate.fromLngLat(b2,building.height),
       maplibre.MercatorCoordinate.fromLngLat(a2,building.height)
      ].map(p=>[(p.x-origin.x)/unit,(p.y-origin.y)/unit,p.z/unit]);
-     const uScale=len/12,quad=[[0,1,2],[0,2,3]];
+     const uScale=len/8,quad=[[0,1,2],[0,2,3]];
      const uv=[[0,0],[uScale,0],[uScale,floors],[0,floors]];
      for(const tri of quad)for(const idx of tri){
       const p=corners[idx],t=uv[idx];
@@ -84,15 +86,18 @@ export function createFacadeWindows(maplibre){
     out vec4 color;
     float hash(float n){return fract(sin(n)*43758.5453);}
     void main(){
-     float floorIndex=floor(v_uv.y),col=floor(v_uv.x*4.);
+     float floorIndex=floor(v_uv.y),col=floor(v_uv.x);
+     vec2 cell=fract(v_uv);
+     if(cell.x<.38||cell.x>.62||cell.y<.34||cell.y>.58)discard;
+     if(mod(floorIndex+col*3.,10.)>.5)discard;
      float n=hash(v_seed+floorIndex*19.1+col*7.3+v_mask*.001);
-     if(n>=.10)discard;
+     if(n>.92)discard;
      vec4 pane=texture(u_atlas,vec2(fract(v_uv.x),fract(v_uv.y)));
      float wave=mix(hash(floorIndex+u_time*.15+v_seed),.72,u_still);
      float huePick=hash(v_seed*1.7+floorIndex*5.3+col*13.1);
-     vec3 hue=huePick<.33?vec3(1.,.14,.82):huePick<.66?vec3(.38,.92,1.):vec3(1.,.56,.16);
-     vec3 rgb=mix(hue,pane.rgb,.4)*(.5+.5*wave);
-     float alpha=.55+.35*wave;
+     vec3 hue=huePick<.33?vec3(.533,0.,1.):huePick<.66?vec3(1.,0.,.8):vec3(0.,1.,1.);
+     vec3 rgb=mix(hue,pane.rgb,.28)*(.55+.45*wave);
+     float alpha=.6+.3*wave;
      color=vec4(rgb*alpha,alpha);
     }`);
    this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);

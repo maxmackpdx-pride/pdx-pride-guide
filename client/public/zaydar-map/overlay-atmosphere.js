@@ -1,12 +1,20 @@
+import {radix} from './radix-map.js';
+
+function hexRgb(hex){
+ const n=parseInt(hex.slice(1),16);
+ return [(n>>16)&255,(n>>8)&255,n&255];
+}
+
 function causticTexture(){
  const size=64,canvas=document.createElement('canvas');
  canvas.width=canvas.height=size;
  const ctx=canvas.getContext('2d'),image=ctx.createImageData(size,size),pixels=image.data;
+ const [cr,cg,cb]=hexRgb(radix.cyan8);
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
   const i=(y*size+x)*4;
   const wave=Math.sin(x*.28+y*.11)+Math.sin(x*.09-y*.31)+Math.sin((x+y)*.17);
   const v=Math.max(0,Math.min(1,.5+wave*.18));
-  pixels[i]=20+v*90;pixels[i+1]=90+v*130;pixels[i+2]=110+v*120;pixels[i+3]=Math.round(40+v*90);
+  pixels[i]=Math.round(cr*v);pixels[i+1]=Math.round(cg*v);pixels[i+2]=Math.round(cb*v);pixels[i+3]=Math.round(36+v*80);
  }
  ctx.putImageData(image,0,0);
  return ctx.getImageData(0,0,size,size);
@@ -42,13 +50,13 @@ export function drawWaterSheen(ctx,map,fade,time){
  if(!any){ctx.restore();return;}
  ctx.clip();
  const gradient=ctx.createLinearGradient(width/2-mx*width,height/2-my*height,width/2+mx*width,height/2+my*height);
- gradient.addColorStop(0,'rgba(25,227,255,0)');
- gradient.addColorStop(.46,`rgba(255,255,255,${.035*fade})`);
- gradient.addColorStop(.52,`rgba(180,240,255,${.11*fade})`);
- gradient.addColorStop(.6,`rgba(25,227,255,${.045*fade})`);
- gradient.addColorStop(1,'rgba(25,227,255,0)');
+ gradient.addColorStop(0,'rgba(20,144,176,0)');
+ gradient.addColorStop(.46,`rgba(176,180,186,${.03*fade})`);
+ gradient.addColorStop(.52,`rgba(76,195,223,${.09*fade})`);
+ gradient.addColorStop(.6,`rgba(0,162,199,${.04*fade})`);
+ gradient.addColorStop(1,'rgba(20,144,176,0)');
  ctx.globalCompositeOperation='screen';ctx.fillStyle=gradient;ctx.fillRect(0,0,width,height);
- ctx.globalAlpha=.07*fade;ctx.fillStyle='rgba(80,220,230,.4)';
+ ctx.globalAlpha=.06*fade;ctx.fillStyle='rgba(20,144,176,.35)';
  for(let i=0;i<10;i++){
   const x=width*(.12+.76*((i*.37+time*.02)%1)),y=height*(.18+.64*((i*.19+time*.012)%1));
   ctx.beginPath();ctx.ellipse(x,y,36+i*5,7,moon,0,Math.PI*2);ctx.fill();

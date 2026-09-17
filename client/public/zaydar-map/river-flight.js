@@ -4,35 +4,36 @@ import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.j
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
-import {createCitySparkles} from './city-sparkles.js?v=20260916-lamps';
-import {roofSparkles} from './roof-sparkles.js?v=20260916-facade';
-import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-import {installRoadSurface} from './road-surface.js?v=20260916-sodium';
-import {applyMoonlight} from './moonlight.js?v=20260916-sky';
+import {createCitySparkles} from './city-sparkles.js?v=20260916-radix';
+import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
+import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
+import {installRoadSurface} from './road-surface.js?v=20260916-radix';
+import {applyMoonlight} from './moonlight.js?v=20260916-radix';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-rotation';
-import {createFacadeWindows,hasFacade} from './facade-windows.js?v=20260916-scatter';
-import {sampleStreetLamps} from './street-lamps.js?v=20260916-night';
-import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-night';
+import {createFacadeWindows} from './facade-windows.js?v=20260916-radix';
+import {sampleStreetLamps} from './street-lamps.js?v=20260916-radix';
+import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-radix';
+import {radix} from './radix-map.js?v=20260916-radix';
 const maxExploreZoom=17.75;
-const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:'#b7d7eb',intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
-    {id:'terrain-base',type:'background',paint:{'background-color':'#050c13','background-opacity':1}},
-    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':'#010407','hillshade-highlight-color':'#31586a','hillshade-accent-color':'#163846'}},
-    {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':'#071917','fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
-    {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub','#0a211e','#081c1a'],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
-    {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#01070c','line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
-    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,'#073a46',13,'#0c5564',16,'#147888'],'fill-opacity':1}},
-    {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':'#07303c','line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
-    {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#19e3ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.28,14,.4,17,.48],'line-width':['interpolate',['linear'],['zoom'],9.5,4.5,14,7.5,17,11],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.8,16,5.5]}},
-    {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#7af4ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.82,14,.94,17,.98],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
-    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#19e3ff','line-opacity':['interpolate',['linear'],['zoom'],9.5,.5,15,.8],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
+const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.slate11,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
+    {id:'terrain-base',type:'background',paint:{'background-color':radix.slate1,'background-opacity':1}},
+    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':radix.slate1,'hillshade-highlight-color':radix.slate8,'hillshade-accent-color':radix.sage5}},
+    {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':radix.sage3,'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
+    {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub',radix.sage4,radix.sage2],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
+    {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.slate1,'line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
+    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,radix.cyan3,13,radix.cyan4,16,radix.cyan5],'fill-opacity':1}},
+    {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':radix.cyan6,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
+    {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.22,14,.32,17,.4],'line-width':['interpolate',['linear'],['zoom'],9.5,4.5,14,7.5,17,11],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.8,16,5.5]}},
+    {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan9,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
+    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#0b1822',18,'#122433',60,'#1c3548',160,'#27485c'],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':'#50748c','line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.48],'line-width':.55}}
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.slate2,18,radix.slate3,60,radix.slate4,160,radix.slate6],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.slate8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.4],'line-width':.55}}
   ]};
 vectorStyle.layers.push(
- {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#a9b2bc','text-halo-color':'#020305','text-halo-width':1.5}},
- {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':'#68727d','text-halo-color':'#020305','text-halo-width':1.5}}
+ {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':radix.slate11,'text-halo-color':radix.slate1,'text-halo-width':1.5}},
+ {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':radix.slate10,'text-halo-color':radix.slate1,'text-halo-width':1.5}}
 );
 applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
@@ -72,7 +73,8 @@ function updateSurfaces(target){
   if(!ring?.length)continue;
   const key=JSON.stringify(ring);if(seen.has(key))continue;seen.add(key);
   const center=ring.reduce((a,p)=>[a[0]+p[0]/ring.length,a[1]+p[1]/ring.length],[0,0]);
-  const height=Math.max(6,Number(f.properties.render_height||f.properties.height)||9),base=Number(f.properties.render_min_height)||0;
+  const raw=Number(f.properties.render_height||f.properties.height);
+  const height=Number.isFinite(raw)&&raw>0?raw:9;
   const screen=target.project(center);
   if(screen.x < -200||screen.y < -200||screen.x > window.innerWidth+200||screen.y > window.innerHeight+400)continue;
   buildings.push({center,height,ring});
@@ -264,9 +266,9 @@ function buildingGlitter(target,surfaces){
  const now=performance.now(),flat=target.getPitch()<8,cached=glitterCache.get(target);
  const coarse=matchMedia('(pointer:coarse)').matches;
  if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
- const local=(surfaces.buildings??[]).filter(building=>!hasFacade(building.center));
- const bands=coarse?(flat?[.34,.66,1]:[.28,.52,.76,1]):(flat?[.34,.66,1]:[.24,.48,.72,1]);
- const points=roofSparkles(local,coarse?(flat?6800:5200):(flat?9000:7200),coarse?3:4,bands);
+ const short=(surfaces.buildings??[]).filter(building=>building.height<=3);
+ const bands=coarse?(flat?[.55,1]:[.4,.85]):(flat?[.4,.75,1]:[.3,.55,.85]);
+ const points=roofSparkles(short,coarse?(flat?4200:2800):(flat?6000:4800),coarse?2:3,bands);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;
 }
 const logoFocus=createLogoFocus();

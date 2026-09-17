@@ -20,9 +20,9 @@ function asphaltTexture(){
   const grain=(random()-.5)*14;
   const value=Math.max(28,Math.min(55,41+broad));
   const spark=Math.max(0,grain)/14;
-  pixels[index]=Math.min(255,Math.round((value-3)*(1-spark)+255*spark));
-  pixels[index+1]=Math.min(255,Math.round((value+1)*(1-spark)+102*spark));
-  pixels[index+2]=Math.min(255,Math.round((value+5)*(1-spark)));
+  pixels[index]=Math.min(255,Math.round((value-2)*(1-spark)+255*spark));
+  pixels[index+1]=Math.min(255,Math.round((value)*(1-spark)+128*spark));
+  pixels[index+2]=Math.min(255,Math.round((value+2)*(1-spark)+31*spark));
   pixels[index+3]=255;
  }
  ctx.putImageData(image,0,0);
@@ -61,7 +61,7 @@ export function installRoadSurface(map,filter,width){
   id:'street-sodium',type:'line',source:'terrain','source-layer':'transportation',filter,
   layout:{'line-cap':'round','line-join':'round'},
   paint:{
-   'line-color':'#FF6600',
+   'line-color':'#c36522',
    'line-opacity':['interpolate',['linear'],['zoom'],11,.06,14,.14,17,.2],
    'line-width':['*',width,1.35],
    'line-blur':['interpolate',['linear'],['zoom'],11,1.5,16,5.5]

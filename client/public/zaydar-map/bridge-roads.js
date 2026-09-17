@@ -1,7 +1,9 @@
+import {radix} from './radix-map.js';
+
 // Keep the road hierarchy legible without competing with the neon Placez.
 export const roadColor = ['match', ['get', 'class'],
-  'motorway', '#282e35', 'trunk', '#282e35', 'primary', '#282e35',
-  'secondary', '#242a31', '#171b20'];
+  'motorway', radix.slate5, 'trunk', radix.slate5, 'primary', radix.slate5,
+  'secondary', radix.slate4, radix.slate3];
 const roadWidths = {motorway: 9, trunk: 9, primary: 8, secondary: 7, tertiary: 6, minor: 5, service: 3.5, path: 1.2, rail: 1.4};
 const widthExpression = ['match', ['get', 'class'], ...Object.entries(roadWidths).flat(), 5];
 const metersAtZoom14 = 512 * 2 ** 14 / (40075016.686 * Math.cos(45.53 * Math.PI / 180));
