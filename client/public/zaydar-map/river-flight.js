@@ -351,9 +351,10 @@ function drawLights(fade,target=map,surface=lights){
  // recede. Holograms then grow smoothly as the camera approaches street level.
  const zoomScale=Math.min(1,Math.pow(2,(target.getZoom()-15)*.65));
  const streetProgress=smoothRange(13.5,15,target.getZoom());
+ const closeProgress=smoothRange(15,17.25,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
- const placezScale=.375+.625*streetProgress;
- const placezGlow=.375+.625*streetProgress;
+ const placezScale=.375+.625*streetProgress+.2*closeProgress;
+ const placezGlow=.375+.625*streetProgress+.12*closeProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
