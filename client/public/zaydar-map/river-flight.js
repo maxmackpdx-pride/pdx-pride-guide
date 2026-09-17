@@ -8,13 +8,13 @@ import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
 import {installRoadSurface} from './road-surface.js?v=20260916-equiv';
-import {applyMoonlight} from './moonlight.js?v=20260916-banks-win';
+import {applyMoonlight} from './moonlight.js?v=20260916-gloss';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-win5';
 import {createRoofOutline} from './roof-outline.js?v=20260916-outlines';
-import {installGrassNeon} from './grass-neon.js?v=20260916-outlines';
-import {drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-equiv';
+import {installGrassNeon} from './grass-neon.js?v=20260916-gloss';
+import {drawWaterSheen,drawGrassSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss';
 import {radix} from './radix-map.js?v=20260916-equiv';
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
@@ -667,6 +667,7 @@ function drawLights(fade,target=map,surface=lights){
  }
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
  drawWaterSheen(lightsContext,target,fade,pulseTime);
+ drawGrassSheen(lightsContext,target,fade,pulseTime);
  bloomOverlay(lightsContext,width,height,reduced.matches?0.06:0.1);
  tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
