@@ -117,12 +117,9 @@ export function createStreetAtmosphere(map){
   setListings(features){scene=buildScene(features||[]);},
   draw(ctx,fade,time,reduced){
    const progress=smoothRange(16.25,17.35,map.getZoom());if(progress<=0)return;
-   const center=map.getCenter(),metersPerPixel=40075016.686*Math.cos(center.lat*Math.PI/180)/(512*Math.pow(2,map.getZoom())),pitch=map.getPitch()*Math.PI/180;
    const alpha=fade*progress;
    for(const item of scene.sheen)drawSheen(ctx,map,item,alpha*.75);
    for(const item of scene.mist)drawMist(ctx,map,item,alpha*.72,time,reduced);
-   for(const tree of scene.trees)drawTree(ctx,map,tree,alpha,metersPerPixel,pitch);
-   for(const lamp of scene.lamps)drawLamp(ctx,map,lamp,alpha,metersPerPixel,pitch,time,reduced);
   },
   dispose(){scene={trees:[],lamps:[],mist:[],sheen:[]};}
  };
