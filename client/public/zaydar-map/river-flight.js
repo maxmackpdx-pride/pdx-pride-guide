@@ -8,17 +8,18 @@ import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
 import {installRoadSurface} from './road-surface.js?v=20260916-equiv';
-import {applyMoonlight} from './moonlight.js?v=20260916-equiv';
+import {applyMoonlight} from './moonlight.js?v=20260916-banks-win';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
-import {createFacadeWindows} from './facade-windows.js?v=20260916-glsl';
+import {createFacadeWindows} from './facade-windows.js?v=20260916-win5';
 import {createRoofOutline} from './roof-outline.js?v=20260916-outlines';
 import {installGrassNeon} from './grass-neon.js?v=20260916-outlines';
 import {drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-equiv';
 import {radix} from './radix-map.js?v=20260916-equiv';
 const maxExploreZoom=17.75;
-const naturalWater=['in',['get','class'],['literal',['river','lake','pond','ocean']]];
+const naturalWater=['in',['get','class'],['literal',['river','lake']]];
 const naturalWaterway=['in',['get','class'],['literal',['river','stream']]];
+const neonCyan='#00FFFF';
 const outlineColor=radix.orange9;
 const outlineOpacity=['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38];
 const outlineWidth=['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8];
@@ -31,9 +32,10 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan1,'line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,radix.cyan3,13,radix.cyan6,16,radix.cyan7],'fill-opacity':1}},
     {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':radix.cyan6,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
-    {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':radix.sky9,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.22,14,.32,17,.4],'line-width':['interpolate',['linear'],['zoom'],9.5,4.5,14,7.5,17,11],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.8,16,5.5]}},
-    {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':radix.sky9,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
-    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':radix.cyan11,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
+    {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,5.5,14,9,17,13],'line-blur':['interpolate',['linear'],['zoom'],9.5,3.2,16,6]}},
+    {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
+    {id:'streams-bloom',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,3.2,14,5.5,17,8],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.4,16,4.5]}},
+    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
     {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':['+',roadLineWidth,outlineWidth],'line-blur':outlineBlur}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
     {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},

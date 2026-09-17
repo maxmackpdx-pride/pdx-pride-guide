@@ -16,8 +16,8 @@ export function applyMoonlight(style){
  paint('woodland-ground',{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2]});
  paint('water',{'fill-color':['interpolate',['linear'],['zoom'],9.5,radix.cyan3,13,radix.cyan6,16,radix.cyan7]});
  paint('river-depth',{'line-color':radix.cyan6});
- paint('banks',{'line-color':radix.sky9});
- paint('streams',{'line-color':radix.cyan11});
+ paint('banks',{'line-color':'#00FFFF'});
+ paint('streams',{'line-color':'#00FFFF'});
  paint('skyline',{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5]});
  style.sky={
   'sky-color':radix.sky1,

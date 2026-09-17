@@ -95,7 +95,7 @@ export function createFacadeWindows(maplibre){
      vec2 gap=max(paneMin-cell,cell-paneMax);
      float outside=length(max(gap,0.))+max(max(gap.x,gap.y),0.)*.15;
      float pane=1.-smoothstep(0.,.018,outside);
-     float bloom=exp(-outside*outside*70.)*.06;
+     float bloom=exp(-outside*outside*70.)*.05;
      float lit=max(pane,bloom);
      if(lit<.01)discard;
      vec4 atlas=texture(u_atlas,vec2(fract(v_uv.x),fract(v_uv.y)));
