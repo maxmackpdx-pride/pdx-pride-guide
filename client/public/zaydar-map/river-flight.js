@@ -14,6 +14,7 @@ import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260917-days';
 import {createRoofOutline} from './roof-outline.js?v=20260917-earth';
 import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
+import {installGoogleTextures} from './google-textures.js?v=20260917-sat';
 import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
 import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
 const maxExploreZoom=17.75;
@@ -78,6 +79,7 @@ map.on('load',()=>{
  loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();
  const extras=[
   ()=>installGrassNeon(map),
+  ()=>installGoogleTextures(map),
   ()=>installRoadSurface(map,['!',bridgeFilter],roadLineWidth),
   ()=>map.addLayer(bridgeLayer,'skyline'),
   ()=>map.addLayer(citySparkles),
