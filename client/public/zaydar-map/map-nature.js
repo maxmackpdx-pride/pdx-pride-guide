@@ -64,9 +64,15 @@ function inCity([lng,lat]){
  return lng>-122.698&&lng<-122.655&&lat>45.508&&lat<45.538;
 }
 
+function nearWater(coordinate,water,meters=48){
+ if(!water?.length)return false;
+ if(water.some(rings=>pointInPolygon(coordinate,rings)))return true;
+ const probes=[[meters,0],[-meters,0],[0,meters],[0,-meters],[meters,meters],[meters,-meters],[-meters,meters],[-meters,-meters]];
+ return probes.some(([east,north])=>water.some(rings=>pointInPolygon(offsetMeters(coordinate,east,north),rings)));
+}
+
 function addTree(points,seen,coordinate,seed,kind,water){
- if(points.length>=MAX_CANOPIES||inCity(coordinate))return;
- if(water?.some(rings=>pointInPolygon(coordinate,rings)))return;
+ if(points.length>=MAX_CANOPIES||inCity(coordinate)||nearWater(coordinate,water))return;
  const key=`${coordinate[0].toFixed(6)}:${coordinate[1].toFixed(6)}`;
  if(seen.has(key))return;seen.add(key);
  const forest=kind==='wood';

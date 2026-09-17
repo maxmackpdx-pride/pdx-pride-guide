@@ -1,36 +1,3 @@
-import {radix} from './radix-map.js';
-
-function hexRgb(hex){
- const n=parseInt(hex.slice(1),16);
- return [(n>>16)&255,(n>>8)&255,n&255];
-}
-
-function causticTexture(){
- const size=64,canvas=document.createElement('canvas');
- canvas.width=canvas.height=size;
- const ctx=canvas.getContext('2d'),image=ctx.createImageData(size,size),pixels=image.data;
- const [cr,cg,cb]=hexRgb(radix.cyan8);
- for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-  const i=(y*size+x)*4;
-  const wave=Math.sin(x*.28+y*.11)+Math.sin(x*.09-y*.31)+Math.sin((x+y)*.17);
-  const v=Math.max(0,Math.min(1,.5+wave*.18));
-  pixels[i]=Math.round(cr*v);pixels[i+1]=Math.round(cg*v);pixels[i+2]=Math.round(cb*v);pixels[i+3]=Math.round(36+v*80);
- }
- ctx.putImageData(image,0,0);
- return ctx.getImageData(0,0,size,size);
-}
-
-export function installWaterCaustic(map){
- const id='zaydar-caustic';
- if(!map.hasImage(id))map.addImage(id,causticTexture(),{pixelRatio:2});
- if(map.getLayer('water-caustic'))return;
- if(!map.getLayer('banks-bloom'))return;
- map.addLayer({
-  id:'water-caustic',type:'fill',source:'terrain','source-layer':'water',
-  paint:{'fill-pattern':id,'fill-opacity':['interpolate',['linear'],['zoom'],11,.07,16,.16]}
- },'banks-bloom');
-}
-
 export function drawWaterSheen(ctx,map,fade,time){
  if(fade<=0||map.getZoom()<12)return;
  const features=map.querySourceFeatures('terrain',{sourceLayer:'water'});

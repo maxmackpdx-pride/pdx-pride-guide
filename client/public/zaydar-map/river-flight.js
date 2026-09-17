@@ -10,10 +10,10 @@ import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridg
 import {installRoadSurface} from './road-surface.js?v=20260916-radix';
 import {applyMoonlight} from './moonlight.js?v=20260916-radix';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
-import {createMapNature} from './map-nature.js?v=20260916-no-city-trees';
+import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-radix';
 import {sampleStreetLamps} from './street-lamps.js?v=20260916-radix';
-import {installWaterCaustic,drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-radix';
+import {drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-no-grid';
 import {radix} from './radix-map.js?v=20260916-radix';
 const maxExploreZoom=17.75;
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.slate11,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
@@ -62,7 +62,7 @@ const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
 const streetLampSparks=createCitySparkles(maplibregl,'street-lamps');
 const facadeWindows=createFacadeWindows(maplibregl);
-map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);installWaterCaustic(map);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(streetLampSparks);map.addLayer(facadeWindows);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
+map.on('load',()=>{mapNature.add();installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(streetLampSparks);map.addLayer(facadeWindows);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
