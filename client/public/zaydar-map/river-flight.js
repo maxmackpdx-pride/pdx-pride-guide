@@ -4,14 +4,14 @@ import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.j
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
-import {createCitySparkles} from './city-sparkles.js?v=20260916-radix';
+import {createCitySparkles} from './city-sparkles.js?v=20260916-bloom';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
 import {installRoadSurface} from './road-surface.js?v=20260916-uplight';
 import {applyMoonlight} from './moonlight.js?v=20260916-uplight';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
-import {createFacadeWindows} from './facade-windows.js?v=20260916-radix';
+import {createFacadeWindows} from './facade-windows.js?v=20260916-bloom';
 import {sampleStreetLamps} from './street-lamps.js?v=20260916-radix';
 import {drawWaterSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-no-grid';
 import {radix} from './radix-map.js?v=20260916-radix';

@@ -49,9 +49,10 @@ export function createCitySparkles(maplibre,id='city-sparkles') {
           vec2 p=gl_PointCoord*2.-1.;float r=length(p);
           if(r>1.)discard;
           float halo=exp(-r*r*7.)*.32;
+          float bloom=exp(-r*r*1.8)*.03;
           float core=1.-smoothstep(.02,.12,r);
           float rays=(exp(-abs(p.x)*60.)+exp(-abs(p.y)*60.))*(1.-smoothstep(.15,.95,r));
-          float alpha=clamp((halo+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(.12+.88*v_wave),0.,1.);
+          float alpha=clamp((halo+bloom+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(.12+.88*v_wave),0.,1.);
           if(alpha<.008)discard;
           vec3 hue=v_tone<0.5?vec3(.69,.705,.73):v_tone<1.5?vec3(.30,.765,.875):vec3(.969,.408,.031);
           color=vec4(mix(hue,vec3(1.),core*.55)*alpha,alpha);
