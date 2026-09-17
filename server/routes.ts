@@ -32,6 +32,7 @@ import {
 } from "./adminOps";
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
+import { startPromptScheduler } from "./scheduler";
 import { registerGoogleTileRoutes } from "./googleTiles";
 import { createSessionMiddleware, productionSecureCookies } from "./sessionConfig";
 import {
