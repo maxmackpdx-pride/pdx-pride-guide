@@ -17,13 +17,13 @@ export function drawWaterSheen(ctx,map,fade,time){
  if(!any){ctx.restore();return;}
  ctx.clip();
  const gradient=ctx.createLinearGradient(width/2-mx*width,height/2-my*height,width/2+mx*width,height/2+my*height);
- gradient.addColorStop(0,'rgba(20,144,176,0)');
- gradient.addColorStop(.46,`rgba(176,180,186,${.03*fade})`);
- gradient.addColorStop(.52,`rgba(76,195,223,${.09*fade})`);
- gradient.addColorStop(.6,`rgba(0,162,199,${.04*fade})`);
- gradient.addColorStop(1,'rgba(20,144,176,0)');
+ gradient.addColorStop(0,'rgba(182,236,247,0)');
+ gradient.addColorStop(.46,`rgba(194,243,255,${.03*fade})`);
+ gradient.addColorStop(.52,`rgba(182,236,247,${.1*fade})`);
+ gradient.addColorStop(.6,`rgba(124,226,254,${.05*fade})`);
+ gradient.addColorStop(1,'rgba(182,236,247,0)');
  ctx.globalCompositeOperation='screen';ctx.fillStyle=gradient;ctx.fillRect(0,0,width,height);
- ctx.globalAlpha=.06*fade;ctx.fillStyle='rgba(20,144,176,.35)';
+ ctx.globalAlpha=.06*fade;ctx.fillStyle='rgba(124,226,254,.35)';
  for(let i=0;i<10;i++){
   const x=width*(.12+.76*((i*.37+time*.02)%1)),y=height*(.18+.64*((i*.19+time*.012)%1));
   ctx.beginPath();ctx.ellipse(x,y,36+i*5,7,moon,0,Math.PI*2);ctx.fill();

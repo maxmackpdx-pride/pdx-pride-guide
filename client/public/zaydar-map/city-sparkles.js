@@ -54,7 +54,7 @@ export function createCitySparkles(maplibre,id='city-sparkles') {
           float rays=(exp(-abs(p.x)*60.)+exp(-abs(p.y)*60.))*(1.-smoothstep(.15,.95,r));
           float alpha=clamp((halo+bloom+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(.12+.88*v_wave),0.,1.);
           if(alpha<.008)discard;
-          vec3 hue=v_tone<0.5?vec3(.69,.705,.73):v_tone<1.5?vec3(.30,.765,.875):vec3(.969,.408,.031);
+          vec3 hue=v_tone<0.5?vec3(.714,.8,.902):v_tone<1.5?vec3(.298,.8,.902):vec3(.969,.42,.082);
           color=vec4(mix(hue,vec3(1.),core*.55)*alpha,alpha);
         }`);
       this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);

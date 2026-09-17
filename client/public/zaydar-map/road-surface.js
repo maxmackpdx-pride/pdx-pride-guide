@@ -61,7 +61,7 @@ export function installRoadSurface(map,filter,width){
   id:'street-sodium',type:'line',source:'terrain','source-layer':'transportation',filter,
   layout:{'line-cap':'round','line-join':'round'},
   paint:{
-   'line-color':'#c36522',
+   'line-color':'#f76b15',
    'line-opacity':['interpolate',['linear'],['zoom'],11,.08,14,.2,17,.3],
    'line-width':['*',width,1.55],
    'line-blur':['interpolate',['linear'],['zoom'],11,2,16,6.5]
