@@ -2,15 +2,15 @@ import {radix,DAYS} from './radix-map.js?v=20260917-days';
 
 export function applyMoonlight(style){
  const azimuth=315;
- style.light={anchor:'map',color:'#eafcff',intensity:.86,position:[1.15,azimuth,58]};
+ style.light={anchor:'map',color:radix.cyan11,intensity:.56,position:[1.15,azimuth,48]};
  const paint=(id,values)=>Object.assign(style.layers.find(layer=>layer.id===id).paint,values);
  paint('terrain-shade',{
   'hillshade-illumination-anchor':'map',
   'hillshade-illumination-direction':azimuth,
-  'hillshade-exaggeration':.92,
-  'hillshade-shadow-color':radix.cyan1,
-  'hillshade-highlight-color':'#eafcff',
-  'hillshade-accent-color':radix.cyan12
+  'hillshade-exaggeration':.62,
+  'hillshade-shadow-color':radix.teal1,
+  'hillshade-highlight-color':radix.teal6,
+  'hillshade-accent-color':radix.teal5
  });
  paint('park-ground',{'fill-color':radix.teal4});
  paint('woodland-ground',{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2]});

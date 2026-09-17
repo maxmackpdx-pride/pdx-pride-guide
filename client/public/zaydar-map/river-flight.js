@@ -8,13 +8,13 @@ import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
 import {installRoadSurface} from './road-surface.js?v=20260917-days';
-import {applyMoonlight} from './moonlight.js?v=20260917-days';
+import {applyMoonlight} from './moonlight.js?v=20260917-matte';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260917-days';
 import {createRoofOutline} from './roof-outline.js?v=20260917-days';
-import {installGrassNeon} from './grass-neon.js?v=20260917-tiles';
-import {drawWaterSheen,drawGrassSheen,drawMoonSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss2';
+import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
+import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
 import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
@@ -28,8 +28,8 @@ const outlineBlur=['interpolate',['linear'],['zoom'],14,1.6,16,4.2];
 const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.cyan12,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
     {id:'terrain-base',type:'background',paint:{'background-color':radix.cyan1,'background-opacity':1}},
     {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':radix.cyan1,'hillshade-highlight-color':radix.cyan11,'hillshade-accent-color':radix.teal5}},
-    {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':radix.teal4,'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
-    {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
+    {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':radix.teal4,'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.5,13,.68,16,.8]}},
+    {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.7,13,.8,16,.9]}},
     {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan1,'line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,radix.cyan3,13,radix.cyan6,16,radix.cyan7],'fill-opacity':1}},
     {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':radix.cyan6,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
@@ -377,7 +377,6 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
- drawMoonSheen(lightsContext,target,fade,pulseTime);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
@@ -683,8 +682,6 @@ function drawLights(fade,target=map,surface=lights){
   }
  }
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
- drawWaterSheen(lightsContext,target,fade,pulseTime);
- drawGrassSheen(lightsContext,target,fade,pulseTime);
  bloomOverlay(lightsContext,width,height,reduced.matches?0.06:0.1);
  tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
