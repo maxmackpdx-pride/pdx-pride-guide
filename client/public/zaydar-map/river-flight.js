@@ -7,8 +7,8 @@ import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
 import {createCitySparkles} from './city-sparkles.js?v=20260916-radix';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
-import {installRoadSurface} from './road-surface.js?v=20260916-radix';
-import {applyMoonlight} from './moonlight.js?v=20260916-radix';
+import {installRoadSurface} from './road-surface.js?v=20260916-uplight';
+import {applyMoonlight} from './moonlight.js?v=20260916-uplight';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-portland-canopy';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-radix';
@@ -30,8 +30,9 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':radix.cyan9,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.slate2,18,radix.slate3,60,radix.slate4,160,radix.slate6],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.slate8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.4],'line-width':.55}}
+    {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.orange8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38],'line-width':['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8],'line-blur':['interpolate',['linear'],['zoom'],14,1.6,16,4.2]}},
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,'#2c1d14',14,'#241810',40,radix.slate3,160,radix.slate4],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
+    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.orange9,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,15,.18,17.5,.32],'line-width':['interpolate',['linear'],['zoom'],14,.45,16,.9],'line-blur':.7}}
   ]};
 vectorStyle.layers.push(
  {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':radix.slate11,'text-halo-color':radix.slate1,'text-halo-width':1.5}},

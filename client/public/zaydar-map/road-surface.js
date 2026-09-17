@@ -62,9 +62,9 @@ export function installRoadSurface(map,filter,width){
   layout:{'line-cap':'round','line-join':'round'},
   paint:{
    'line-color':'#c36522',
-   'line-opacity':['interpolate',['linear'],['zoom'],11,.06,14,.14,17,.2],
-   'line-width':['*',width,1.35],
-   'line-blur':['interpolate',['linear'],['zoom'],11,1.5,16,5.5]
+   'line-opacity':['interpolate',['linear'],['zoom'],11,.08,14,.2,17,.3],
+   'line-width':['*',width,1.55],
+   'line-blur':['interpolate',['linear'],['zoom'],11,2,16,6.5]
   }
  },'skyline');
 }
