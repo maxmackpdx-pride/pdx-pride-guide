@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
-<script>window.addEventListener('error',function(){parent.postMessage({source:'zaydar-demo',type:'fatal'},location.origin)});</script>
+<script>window.addEventListener('error',function(event){var el=event&&event.target;if(el&&el.tagName==='SCRIPT')parent.postMessage({source:'zaydar-demo',type:'fatal',message:String(event.message||'script')},location.origin);},true);</script>
 <script>
 (function(){
   var start=null, signaled=false;
@@ -28,7 +28,7 @@
 </script>
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
-<link rel="modulepreload" href="./river-flight.js?v=20260916-gloss2">
+<link rel="modulepreload" href="./river-flight.js?v=20260917-tiles">
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
 <link href="./studio.css" rel="stylesheet">
 </head><body>
@@ -42,5 +42,5 @@
 <label>Map <input id="map-opacity" type="range" min="0" max="1" step=".05" value=".75"><output id="map-value" for="map-opacity">75%</output></label>
 <label class="pause"><input id="pause-flight" type="checkbox">Pause &amp; explore</label>
 </div></details></aside>
-<script type="module" src="./river-flight.js?v=20260916-gloss2"></script></body></html>
+<script type="module" src="./river-flight.js?v=20260917-tiles"></script></body></html>
 

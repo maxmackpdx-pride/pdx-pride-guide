@@ -40,26 +40,24 @@ function grassTexture(){
   ctx.lineTo(x+Math.cos(angle)*len,y+Math.sin(angle)*len);
   ctx.stroke();
  }
- ctx.globalCompositeOperation='lighter';
- ctx.filter='blur(.55px)';
- ctx.globalAlpha=.45;
- ctx.drawImage(canvas,0,0);
  ctx.restore();
  return ctx.getImageData(0,0,size,size);
 }
 
 export function installGrassNeon(map){
- if(!map.hasImage(TEXTURE_ID))map.addImage(TEXTURE_ID,grassTexture(),{pixelRatio:2});
- if(map.getLayer('grass-neon'))return;
- const paint={'fill-pattern':TEXTURE_ID,'fill-opacity':['interpolate',['linear'],['zoom'],10,.28,14,.46,17,.58]};
- map.addLayer({
-  id:'grass-neon',type:'fill',source:'terrain','source-layer':'landuse',
-  filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],
-  paint
- },'water-shadow');
- if(!map.getLayer('grass-cover-neon'))map.addLayer({
-  id:'grass-cover-neon',type:'fill',source:'terrain','source-layer':'landcover',
-  filter:['in',['get','class'],['literal',['grass','wood','forest','scrub']]],
-  paint
- },'water-shadow');
+ try{
+  if(!map.hasImage(TEXTURE_ID))map.addImage(TEXTURE_ID,grassTexture(),{pixelRatio:2});
+  if(map.getLayer('grass-neon'))return;
+  const paint={'fill-pattern':TEXTURE_ID,'fill-opacity':['interpolate',['linear'],['zoom'],10,.28,14,.46,17,.58]};
+  map.addLayer({
+   id:'grass-neon',type:'fill',source:'terrain','source-layer':'landuse',
+   filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],
+   paint
+  },'water-shadow');
+  if(!map.getLayer('grass-cover-neon'))map.addLayer({
+   id:'grass-cover-neon',type:'fill',source:'terrain','source-layer':'landcover',
+   filter:['in',['get','class'],['literal',['grass','wood','forest','scrub']]],
+   paint
+  },'water-shadow');
+ }catch(error){console.error('grass-neon',error);}
 }

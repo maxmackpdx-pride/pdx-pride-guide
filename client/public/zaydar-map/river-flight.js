@@ -13,7 +13,7 @@ import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
 import {createFacadeWindows} from './facade-windows.js?v=20260916-win5';
 import {createRoofOutline} from './roof-outline.js?v=20260916-outlines';
-import {installGrassNeon} from './grass-neon.js?v=20260916-gloss2';
+import {installGrassNeon} from './grass-neon.js?v=20260917-tiles';
 import {drawWaterSheen,drawGrassSheen,drawMoonSheen,bloomOverlay} from './overlay-atmosphere.js?v=20260916-gloss2';
 import {radix} from './radix-map.js?v=20260916-equiv';
 const maxExploreZoom=17.75;
@@ -36,7 +36,7 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams-bloom',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,3.2,14,5.5,17,8],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.4,16,4.5]}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
-    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':['+',roadLineWidth,outlineWidth],'line-blur':outlineBlur}},
+    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-gap-width':roadLineWidth,'line-blur':outlineBlur}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
     {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},
     {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
@@ -73,7 +73,22 @@ const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
 const facadeWindows=createFacadeWindows(maplibregl);
 const roofOutline=createRoofOutline(maplibregl);
-map.on('load',()=>{installGrassNeon(map);installRoadSurface(map,['!',bridgeFilter],roadLineWidth);map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);map.addLayer(facadeWindows);map.addLayer(roofOutline);if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);});
+map.on('load',()=>{
+ loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();
+ const extras=[
+  ()=>installGrassNeon(map),
+  ()=>installRoadSurface(map,['!',bridgeFilter],roadLineWidth),
+  ()=>map.addLayer(bridgeLayer,'skyline'),
+  ()=>map.addLayer(citySparkles),
+  ()=>map.addLayer(facadeWindows),
+  ()=>map.addLayer(roofOutline),
+  ()=>{if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);}
+ ];
+ for(const extra of extras){
+  try{extra();}
+  catch(error){console.error('map extra',error);}
+ }
+});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
  if(cached && now-cached.time<1600)return cached;
@@ -763,7 +778,6 @@ function updateSceneStatus(){
  document.body.classList.toggle('scene-ready',loaded&&assetsReady);
 }
 function scheduleFrame(){if(!frame&&!disposed&&!document.hidden)frame=requestAnimationFrame(draw);}
-map.on('load',()=>{loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();});
 map.on('idle',()=>{
  if(loopWaiting){
   surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
@@ -771,7 +785,15 @@ map.on('idle',()=>{
  }
  else if(reduced.matches)scheduleFrame();
 });
-map.on('error',()=>{if(!loaded)status.textContent='Map tiles unavailable — check connection';});
+map.on('error',event=>{
+ const message=String(event?.error?.message||event?.error||'');
+ console.warn('maplibre',message||event);
+ if(/dem|terrain|hillshade|elevation|mapterhorn/i.test(message)||event?.sourceId==='elevation'){
+  try{if(map.getTerrain())map.setTerrain(null);}catch(error){}
+  try{if(map.getLayer('terrain-shade'))map.removeLayer('terrain-shade');}catch(error){}
+ }
+});
+setTimeout(()=>{if(!loaded)status.textContent='Map tiles unavailable — check connection';},8000);
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
@@ -947,7 +969,3 @@ map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
  void installAutomaticLayers();
 });
-// Individual vector or elevation tiles can fail transiently on mobile networks.
-// MapLibre retains neighboring and cached tiles, so do not turn a recoverable
-// provider miss into a persistent error banner over an otherwise working map.
-map.on('error',event=>console.warn('Recoverable map resource error',event.error||event));
