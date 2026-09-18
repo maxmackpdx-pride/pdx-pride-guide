@@ -37,7 +37,6 @@ export async function installGoogleTextures(map){
     'raster-fade-duration':0
    }
   },before);
-  hideGlow(map,'building-uplight');
   hideGlow(map,'buildings');
   tint(map,'park-ground',['interpolate',['linear'],['zoom'],9.5,.18,13,.26,16,.32]);
   tint(map,'woodland-ground',['interpolate',['linear'],['zoom'],9.5,.2,13,.28,16,.34]);

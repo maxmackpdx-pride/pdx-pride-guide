@@ -59,7 +59,7 @@ export function createRoofOutline(maplibre){
      void main(){
       float glow=exp(-v_across*v_across*2.4);
       float alpha=glow*.32;
-      color=vec4(vec3(.067,.502,.612)*alpha,alpha);
+      color=vec4(vec3(0.,1.,1.)*alpha,alpha);
      }`);
     this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);
     gl.deleteShader(vertex);gl.deleteShader(fragment);
