@@ -11,8 +11,8 @@ import {installRoadSurface} from './road-surface.js?v=20260917-days';
 import {applyMoonlight} from './moonlight.js?v=20260917-matte';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
 import {createMapNature} from './map-nature.js?v=20260916-clear-water';
-import {createFacadeWindows} from './facade-windows.js?v=20260917-days';
-import {createRoofOutline} from './roof-outline.js?v=20260917-earth';
+import {createFacadeWindows} from './facade-windows.js?v=20260917-nored';
+import {createRoofOutline} from './roof-outline.js?v=20260917-cyan';
 import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
 import {installGoogleTextures} from './google-textures.js?v=20260917-gbuild';
 import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
@@ -21,7 +21,7 @@ const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
 const naturalWaterway=['in',['get','class'],['literal',['river','stream']]];
 const neonCyan=DAYS.thu;
-const outlineColor=radix.orange9;
+const outlineColor=radix.cyan8;
 const roadBloom=OLED;
 const outlineOpacity=['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38];
 const outlineWidth=['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8];
@@ -41,7 +41,7 @@ const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontst
     {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadBloom,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,15,.5,17.5,.72],'line-width':outlineWidth,'line-gap-width':roadLineWidth,'line-blur':outlineBlur}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
     {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':false}},
+    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':true}},
     {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.4],'line-width':.55}}
   ]};
 vectorStyle.layers.push(
