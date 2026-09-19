@@ -5,7 +5,10 @@
   - `maxmackpdx-pride/pdx-pride-guide` (any local path; resolve as `$ZAYLIST_REPO`)
 - Live deployment target:
   - GitHub `master` on `maxmackpdx-pride/pdx-pride-guide`
-  - Railway production for project `zaylist` / service `pdx-pride-guide`
+  - Railway project `pdx-pride-guide` (`13064cbe-e2d7-41cd-a028-fa957d0c9167`)
+  - Environment `production` (`8ab787f3-f5ee-4713-9845-bd17dd30ad08`)
+  - Service `pdx-pride-guide` (`c87eff12-aee2-4af2-8fd9-7f42b67c3ba3`)
+  - Volume `pdx-pride-guide-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) at `/data`
 
 ## Mandatory release rule
 - No site changes are production edits unless they land on this repo’s `origin/master`.
@@ -27,6 +30,31 @@
    - Railway shows deploy SUCCESS.
 8. Probe endpoint:
    - `https://www.zaylist.com/api/health`
+
+Never deploy production with `railway up` or `railway sandbox`. The only normal ship
+path is `git push origin master` -> GitHub Actions -> Railway. Keep `domain-redirects`
+and `domain-redirects-apex` in place.
+
+## Current production facts (2026-09-19)
+
+- Live deploy `5c6ce1c5-75f8-407c-aea8-29922737ce46` is `SUCCESS`.
+- Health is OK with git SHA `46597a947d60321bb3e8991fe53c8b7ba818f99f`.
+- RAM use is about 0.71 GB. Railway still reports an 8 GB limit; a 1.5 GB replica-cap
+  attempt did not stick, so do not keep retrying caps that do not apply.
+- Env controls: `FLYER_LLM_DISABLED=1`, `QSEARCH_SCRUB_LLM=0`, and
+  `QSEARCH_SCRUB_FLYER_VISION=0`.
+
+## Staging and sandboxes
+
+- Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on
+  2026-09-18 and had zero live services as of 2026-09-19.
+- Do not recreate staging as always-on, apply leftover canvas creates, or attach the
+  production `/data` volume.
+- Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**.
+- Never point `zaylist.com` or `prideguidepdx.com` at a sandbox. Use a short idle timeout
+  and destroy it when done.
+- Sandbox VMs cost about `$50/GB-month` while they exist.
+- Keep Mapz color and shader work off `master`.
 
 ## Language rules
 - Before push: say **"Fixed locally — ready to push"**.

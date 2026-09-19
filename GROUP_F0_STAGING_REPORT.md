@@ -1,5 +1,9 @@
 # F0 Staging target
 
+> **Status update (2026-09-19):** Staging was torn down on 2026-09-18 and is empty with
+> zero live services. There is no staged patch. Do not recreate it as always-on, apply
+> leftover Railway canvas creates, or attach the production `/data` volume.
+
 Railway environment `staging` (`d10b5732-c324-46bc-b557-ac2cc626d4f0`) in project `pdx-pride-guide`.
 Service `pdx-pride-guide` watches git branch `staging`.
 URL: https://pdx-pride-guide-staging.up.railway.app

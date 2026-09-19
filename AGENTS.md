@@ -20,21 +20,32 @@ repository-specific facts and safeguards.
 | Checkout | `/Users/tuckercasey/pdx-pride-guide` |
 | Repository | `maxmackpdx-pride/pdx-pride-guide` |
 | Production branch | `master` |
-| Railway project | `pdx-pride-guide` |
-| Railway service | `pdx-pride-guide` |
-| Railway environment | `production` |
+| Railway project | `pdx-pride-guide` (`13064cbe-e2d7-41cd-a028-fa957d0c9167`) |
+| Railway service | `pdx-pride-guide` (`c87eff12-aee2-4af2-8fd9-7f42b67c3ba3`) |
+| Railway environment | `production` (`8ab787f3-f5ee-4713-9845-bd17dd30ad08`) |
+| Production volume | `pdx-pride-guide-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) at `/data` |
 | Live site | `https://www.zaylist.com` |
 | Health endpoint | `/api/health` |
 
 Production deploys use GitHub `master` -> GitHub Actions -> Railway. Do not use
-`railway up`, create a replacement Railway project, or upload the application tree from
-the CLI. Before shipping, synchronize safely with `origin/master`, commit only the
-intended diff, push, wait for Railway `SUCCESS`, and probe the affected live path when
-useful.
+`railway up`, `railway sandbox`, create a replacement Railway project, or upload the
+application tree from the CLI. Before shipping, synchronize safely with `origin/master`,
+commit only the intended diff, push, wait for Railway `SUCCESS`, and probe the affected
+live path when useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
 
-Staging is branch `staging`, Railway environment `staging`, at
-`https://pdx-pride-guide-staging.up.railway.app`. Do not merge or fast-forward staging
-without explicit authorization.
+Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026-09-18
+and had zero live services as of 2026-09-19. Do not recreate it as always-on, apply
+leftover Railway canvas creates, or attach the production `/data` volume to staging.
+
+Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**. Never
+point `zaylist.com` or `prideguidepdx.com` at one, never attach `/data`, use a short idle
+timeout, and destroy it when finished. Sandbox VMs cost about $50/GB-month while they
+exist. Keep Mapz color and shader work off `master`.
+
+Current production uses about 0.71 GB RAM, although Railway still reports an 8 GB limit.
+A 1.5 GB replica-cap attempt did not stick; do not keep retrying caps that do not apply.
+Current env controls are `FLYER_LLM_DISABLED=1`, `QSEARCH_SCRUB_LLM=0`, and
+`QSEARCH_SCRUB_FLYER_VISION=0`.
 
 ## Verification
 

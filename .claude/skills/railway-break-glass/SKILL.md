@@ -14,6 +14,16 @@ Use this only as a break-glass procedure when one of these conditions is true:
 
 If none of those conditions is true, do **not** invoke this skill. Follow the normal production deploy rules in `AGENTS.md`.
 
+Current production identity as of 2026-09-19:
+
+- project `pdx-pride-guide` (`13064cbe-e2d7-41cd-a028-fa957d0c9167`)
+- environment `production` (`8ab787f3-f5ee-4713-9845-bd17dd30ad08`)
+- service `pdx-pride-guide` (`c87eff12-aee2-4af2-8fd9-7f42b67c3ba3`)
+- volume `pdx-pride-guide-volume` (`d824af22-9a4b-4e1f-8f76-8be45f93886b`) at `/data`
+
+Never delete that volume or attach it to staging or a sandbox. Keep the
+`domain-redirects` and `domain-redirects-apex` services.
+
 ## What we learned
 
 A push to `master` currently has two independent Railway-related paths:
@@ -52,6 +62,8 @@ Therefore a failed custom GitHub Action does **not** by itself prove that produc
 6. **Do not intentionally trigger repeated pushes just to force a deploy.** One clean `master` push is enough. Observe what Railway does.
 7. **Do not describe Cloudflare as the mechanism for this fallback unless evidence shows Cloudflare performed the build/deploy.** The 2026-08-30 fallback was still a Railway deployment.
 8. **Do not remove the custom GitHub Action during the incident.** Decide which path to keep only after Railway billing/service health has been restored and both paths can be tested deliberately.
+9. **Never use `railway up` or a Railway Sandbox as production.** Production ships only by an approved push to `master`.
+10. **Do not create a sandbox unless Tucker explicitly says demo or sandbox.** Never attach `/data` or production domains, use a short idle timeout, and destroy the sandbox when done.
 
 ## Break-glass procedure
 

@@ -1,22 +1,43 @@
 # What this costs to run
 
-Real numbers, updated 2026-07-22. The rule: **no AI on this project spends
+Real numbers, updated 2026-09-19. The rule: **no AI on this project spends
 without a ceiling.**
 
-## Monthly
+## Current Railway billing cycle
+
+- Hobby workspace compute already has a `$60` cap.
+- Compute is `$45.12 / $60`; current total usage is about `$45.19` and the estimated
+  bill is about `$48.70`. Almost all usage is `pdx-pride-guide`.
+- Agent usage is about `$0.07 / $5`.
+- Do **not** lower the hard cap to `$40` during this cycle. More than `$45` has already
+  been spent, so doing that could stop the production site.
+- This cycle includes leftover cost from the old 4 GB production footprint and the
+  failed staging box. Staging is now empty and production idle RAM is about 0.71 GB.
+
+## Next Railway billing cycle
+
+- After the cycle resets, set the workspace compute hard cap to `$40`.
+- Set a soft alert around `$25–$30`.
+- Expect a lower cycle if staging stays dead and Mapz color/shader work does not ship on
+  `master` all day. Measure the result rather than restoring the stale `$5–$10` estimate.
+
+## Other monthly costs
 
 | Thing | Cost | Notes |
 |---|---|---|
-| Railway (app + SQLite) | ~$5-10 | One service. No managed Postgres — deliberate. |
+| Railway (app + SQLite) | ~$45–$49 this cycle | Current cycle includes old 4 GB production and failed staging; next cycle uses the `$40` hard-cap plan above. |
 | Trusted venue sync (10 venues) | $0 | Own server fetching public pages. No AI calls. |
 | Flyer OCR (Tesseract) | $0 | Runs on our own CPU. |
 | Flyer vision/LLM calls (Groq) | pennies-$5 | ~fraction of a cent per flyer (1024px image). 500 flyers/mo ≈ single-digit dollars. Free tier rate-limits prevent runaway bills. |
 | GitHub Actions CI | $0 | ~4 min/run, path-filtered triggers, well inside the 2,000 free min/mo. |
 | Domain | ~$1-2 amortized | |
-| **Infra total** | **~$10-15/mo** | |
+| **Infra total** | **~$46–$51 this cycle** | Railway dominates this cycle; reassess after the reset. |
 | AI assistant subscriptions (Claude/Grok/Codex/Perplexity) | **$60-100+** | The dominant cost of this project. Review quarterly: does each seat still earn it? |
 
-## Spending ceilings (enforced in code)
+## Spending ceilings and controls
+
+- Railway workspace compute: `$60` hard cap this cycle. After reset, change it to `$40`
+  and add a `$25–$30` soft alert.
 
 - `FLYER_LLM_DISABLED=1` — kill switch: stops ALL paid LLM + vision calls
   instantly (Railway env var or GitHub secret). Pipeline degrades to
@@ -28,6 +49,14 @@ without a ceiling.**
   every push. Report commits cannot re-trigger CI or Railway deploys.
 - Groq free tier has hard rate limits — worst-case runaway is throttled,
   not billed.
+
+## Railway sandboxes and staging
+
+- Staging was torn down 2026-09-18 and must not be recreated as an always-on service.
+- Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**.
+- Sandbox VM compute is about `$50/GB-month` while the VM exists. Use a short idle
+  timeout and destroy it when done.
+- Never attach the production `/data` volume or point production domains at a sandbox.
 
 ## Before adding anything that spends
 

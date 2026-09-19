@@ -11,6 +11,11 @@ export default forwardRef<ZaydarHandle,{rows:Row[];selected:string|null;onSelect
  const [ready,setReady]=useState(false),[error,setError]=useState(''),[fallback,setFallback]=useState(false);
  const send=(type:string,data:Record<string,unknown>={})=>{fallbackControl.current?.send(type,data);frame.current?.contentWindow?.postMessage({source:'zaydar-host',type,...data},window.location.origin);};
  useImperativeHandle(ref,()=>({send}),[]);
+ useEffect(()=>{
+  if(ready||fallback)return;
+  const timer=window.setTimeout(()=>{setFallback(true);setError('3D view took too long to start. Showing the lightweight map.');},15000);
+  return()=>window.clearTimeout(timer);
+ },[ready,fallback]);
  useEffect(()=>{const receive=(event:MessageEvent)=>{
   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
   if(event.data.type==='ready')setReady(true);
