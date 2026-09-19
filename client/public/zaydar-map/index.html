@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
-<script>(function(){var failed=false;function fatal(message){if(failed||document.body&&document.body.classList.contains('scene-ready'))return;failed=true;parent.postMessage({source:'zaydar-demo',type:'fatal',message:String(message||'map startup')},location.origin);}window.addEventListener('error',function(event){fatal(event&&event.message||'script');},true);window.addEventListener('unhandledrejection',function(event){fatal(event&&event.reason&&event.reason.message||'map startup');});})();</script>
+<script>(function(){var failed=false;function fatal(message){if(failed||document.body&&document.body.classList.contains('scene-ready'))return;failed=true;parent.postMessage({source:'zaydar-demo',type:'fatal',message:String(message||'map startup')},location.origin);}window.addEventListener('error',function(event){fatal(event&&event.message||'script');},true);window.addEventListener('unhandledrejection',function(event){fatal(event&&event.reason&&event.reason.message||'map startup');});window.addEventListener('load',function(){if(!failed)parent.postMessage({source:'zaydar-demo',type:'booted'},location.origin);},{once:true});})();</script>
 <script>
 (function(){
   var start=null, signaled=false;
