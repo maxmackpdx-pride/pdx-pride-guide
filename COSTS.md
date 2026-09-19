@@ -50,13 +50,24 @@ without a ceiling.**
 - Groq free tier has hard rate limits — worst-case runaway is throttled,
   not billed.
 
-## Railway sandboxes and staging
+## Railway preview cost and controls
 
-- Staging was torn down 2026-09-18 and must not be recreated as an always-on service.
-- Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**.
-- Sandbox VM compute is about `$50/GB-month` while the VM exists. Use a short idle
-  timeout and destroy it when done.
-- Never attach the production `/data` volume or point production domains at a sandbox.
+- The old `staging` environment (`d10b5732-c324-46bc-b557-ac2cc626d4f0`) was torn down
+  on 2026-09-18. Do not wake it or recreate it as an always-on environment.
+- A request for phone or Safari testing, **stage this**, or a demo URL means a temporary
+  Railway Sandbox in the existing `pdx-pride-guide` project. This sandbox is the only
+  canonical remote preview. It is not `/hauz-map-sandbox`, a zip, or a second always-on
+  service.
+- Sandbox compute is about `$50/GB-month` while the VM exists. At the maximum allowed
+  2 GB size, the monthly-rate equivalent is about `$100`, so the short lifetime is a
+  billing control, not just cleanup.
+- Before creating a sandbox, check current workspace compute against the `$60` hard
+  cap. It is `$45.12 / $60` as of 2026-09-19. If the sandbox would risk the cap, stop
+  and tell Tucker before creating it.
+- Give the sandbox a public HTTPS URL, cap it at 2 GB, set an idle timeout of about
+  15 minutes, attach no `/data` volume, and attach no `zaylist.com` or
+  `prideguidepdx.com` DNS.
+- Never leave a sandbox running. Destroy it when Tucker says done.
 
 ## Before adding anything that spends
 

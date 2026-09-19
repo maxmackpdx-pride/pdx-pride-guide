@@ -33,14 +33,23 @@ application tree from the CLI. Before shipping, synchronize safely with `origin/
 commit only the intended diff, push, wait for Railway `SUCCESS`, and probe the affected
 live path when useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
 
-Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026-09-18
-and had zero live services as of 2026-09-19. Do not recreate it as always-on, apply
-leftover Railway canvas creates, or attach the production `/data` volume to staging.
+Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026-09-18.
+Do not wake or recreate it, apply leftover Railway canvas creates, or attach the
+production `/data` volume to any preview environment.
 
-Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**. Never
-point `zaylist.com` or `prideguidepdx.com` at one, never attach `/data`, use a short idle
-timeout, and destroy it when finished. Sandbox VMs cost about $50/GB-month while they
-exist. Keep Mapz color and shader work off `master`.
+The canonical phone/Safari preview is a Railway Sandbox in the existing
+`pdx-pride-guide` project. Requests such as **stage this**, **show me on my phone**,
+**test in Safari**, or **give me a demo URL** authorize that temporary sandbox preview.
+Follow `.claude/skills/railway-sandbox-preview/SKILL.md` for that workflow.
+It replaces the old staging environment. It is not a hidden production path such as
+`/hauz-map-sandbox`, a zip, or a second always-on service.
+
+Every sandbox must have a public HTTPS URL, use no more than 2 GB, idle out after about
+15 minutes, have no `/data` volume, and have no `zaylist.com` or `prideguidepdx.com`
+DNS. Destroy it when Tucker says done. Sandbox VMs cost about $50/GB-month while they
+exist, and workspace compute is already $45.12 of the $60 cap this cycle. Check current
+spend before creating one, never leave one running, and stop to tell Tucker first if it
+would risk the $60 cap. Keep Mapz color and shader work off `master`.
 
 Current production uses about 0.71 GB RAM, although Railway still reports an 8 GB limit.
 A 1.5 GB replica-cap attempt did not stick; do not keep retrying caps that do not apply.

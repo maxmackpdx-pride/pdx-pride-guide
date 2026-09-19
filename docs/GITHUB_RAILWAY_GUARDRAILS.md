@@ -47,13 +47,19 @@ and `domain-redirects-apex` in place.
 ## Staging and sandboxes
 
 - Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on
-  2026-09-18 and had zero live services as of 2026-09-19.
-- Do not recreate staging as always-on, apply leftover canvas creates, or attach the
-  production `/data` volume.
-- Create a Railway Sandbox only when Tucker explicitly says **demo** or **sandbox**.
-- Never point `zaylist.com` or `prideguidepdx.com` at a sandbox. Use a short idle timeout
-  and destroy it when done.
-- Sandbox VMs cost about `$50/GB-month` while they exist.
+  2026-09-18. Do not wake or recreate it, apply leftover canvas creates, or attach the
+  production `/data` volume to a preview.
+- Phone testing, Safari testing, **stage this**, and demo URL requests use a temporary
+  Railway Sandbox in project `pdx-pride-guide`. A sandbox is the replacement for
+  staging. It is not a production path such as `/hauz-map-sandbox`, a zip, or a second
+  always-on service.
+- Each sandbox must have a public HTTPS URL, use no more than 2 GB, idle out after about
+  15 minutes, have no `/data` volume, and have no `zaylist.com` or
+  `prideguidepdx.com` DNS.
+- Sandbox VMs cost about `$50/GB-month` while they exist. Workspace compute is
+  `$45.12 / $60` this cycle. Check fresh spend first, never leave a sandbox running,
+  and stop to tell Tucker before creation if it would risk the `$60` cap.
+- Destroy the sandbox when Tucker says done.
 - Keep Mapz color and shader work off `master`.
 
 ## Language rules
