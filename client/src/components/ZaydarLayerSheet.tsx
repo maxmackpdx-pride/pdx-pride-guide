@@ -116,6 +116,17 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
             <div className="zaydar-layer-chip" data-active={active === layer.id} data-enabled={layer.enabled} key={layer.id} style={{ "--layer-color": layer.color } as CSSProperties}>
               <button
                 type="button"
+                className="zaydar-layer-chip__toggle"
+                aria-label={`${layer.label} map filter`}
+                aria-pressed={layer.enabled}
+                title={`${layer.enabled ? "Hide" : "Show"} ${layer.label} pins`}
+                onClick={layer.onToggle}
+              >
+                {layer.id === "houz" && <House className="zaydar-layer-chip__house" size={16} aria-hidden="true" />}
+                <span>{layer.label}</span>
+              </button>
+              <button
+                type="button"
                 ref={element => { if (element) triggers.current.set(layer.id, element); else triggers.current.delete(layer.id); }}
                 className="zaydar-layer-chip__open"
                 aria-label={`${active === layer.id ? "Close" : "Open"} ${layer.label} panel`}
@@ -123,8 +134,6 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
                 aria-expanded={active === layer.id}
                 onClick={() => openLayer(layer.id)}
               >
-                {layer.id === "houz" && <House className="zaydar-layer-chip__house" size={19} aria-hidden="true" />}
-                <span>{layer.label}</span>
                 <ChevronDown className="zaydar-layer-chip__chevron" size={16} aria-hidden="true" />
               </button>
             </div>

@@ -67,3 +67,14 @@ These were present before this task, remain untouched and are excluded from the 
 - `.claude/skills/zaylist-design`: already deleted.
 - `client/public/posters/lets-get-wild-pride-drag-show.jpg`: already modified.
 - `tmp/`: existing untracked sandbox patches.
+
+## Follow-up: layer buttons also filter map pins
+
+- Each label is now an independent pressed-state toggle connected to the existing layer visibility state. Its separate arrow opens or closes that layer's drawer without changing visibility. The drawer checkbox and label toggle stay synchronized.
+- Enabled layers retain their layer color and underline. Disabled layers dim even when their drawer is open. Mobile compact controls stack the arrow below the label so both targets remain usable between the dock and map controls.
+- PASS: local and sandbox typechecks, sandbox production build, and whitespace check.
+- PASS: browser checks for all four label toggles, independent drawer opening, checkbox synchronization, and Escape close. The current event dataset has zero matching pins, so Eventz was verified through its pressed state and checkbox, not a marker-count reduction.
+- PASS: actual rendered marker counts were 90 initially, 6 with Placez disabled, 88 with Boards disabled, and 86 with Houz disabled. Each returned to 90 after re-enabling.
+- PASS: actual app rendered inside 393 × 850 and 320 × 850 browser frames. Visually inspected expanded dock, collapsed dock, compact rail, and open Houz drawer with Houz disabled. Button labels did not overflow; compact arrow targets were at least 35 × 24 pixels. This is responsive-layout verification, not an iPhone Safari or 3D rendering test.
+- Separate existing map-provider issue: the visual capture shows an “API key required” watermark in CARTO basemap imagery. The earlier attribution-only check did not detect this, so the prior statement that tiles fully work was too broad. This filter-only change does not resolve that provider issue. WebGL is also disabled in the test browser, which uses the existing lightweight map fallback.
+- Published this filter change only to the already-authorized temporary Railway demo. No production push.
