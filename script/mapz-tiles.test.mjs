@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [host,fallback,page,html,renderer,server,routes]=await Promise.all([
+const [host,fallback,page,html,renderer,server,routes,app]=await Promise.all([
  readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/components/ZaydarFallback.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/pages/ZaydarMapDemo.tsx',import.meta.url),'utf8'),
@@ -10,6 +10,7 @@ const [host,fallback,page,html,renderer,server,routes]=await Promise.all([
  readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8'),
  readFile(new URL('../server/mapzTiles.ts',import.meta.url),'utf8'),
  readFile(new URL('../server/routes.ts',import.meta.url),'utf8'),
+ readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
 ]);
 
 test('3D browser traffic uses same-origin Mapz tile routes',()=>{
@@ -64,4 +65,9 @@ test('2D is retained but disconnected from both the map host and toggle',()=>{
  assert.match(host,/<Zaydar3D key=\{generation\}/);
  assert.match(fallback,/preferCanvas/);
  assert.match(host,/>Retry 3D<\/button>/);
+});
+
+test('the public demo route loads Mapz directly while the main route keeps its gate',()=>{
+ assert.match(app,/<Route path="\/map-demo" component=\{ZaydarMapDemo\} \/>/);
+ assert.match(app,/<Route path="\/map" component=\{\(\) => <SignedInLivingMap \/>\} \/>/);
 });

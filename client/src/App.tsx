@@ -157,7 +157,7 @@ function AppLayout() {
             <Route path="/" component={Home} />
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
-            <Route path="/map-demo" component={() => <SignedInLivingMap />} />
+            <Route path="/map-demo" component={ZaydarMapDemo} />
             <Route path="/map" component={() => <SignedInLivingMap />} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
