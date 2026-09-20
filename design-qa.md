@@ -87,3 +87,11 @@ These were present before this task, remain untouched and are excluded from the 
 - PASS: typecheck, CSS parsing for both affected stylesheets, and whitespace check.
 - Not visually verified or deployed: the Railway preview returns 404 and the Railway sign-in endpoint returned 502 in the preceding task. These edits are committed locally only.
 - The unrelated pre-existing changes listed above remain untouched; their ownership remains unknown.
+
+## Follow-up: browser-loaded basemap
+
+- The 3D Mapz engine continues to load from the bundled `/zaydar-map/` files when the visitor opens the map.
+- The lightweight CARTO fallback now requests raster tiles directly from CARTO in the visitor's browser, including the configured public basemap key. It no longer sends each tile through the Zaylist Express server.
+- Removed the obsolete `/api/mapz/carto-tiles` server route and proxy module.
+- PASS: typecheck, complete client/service-worker/server production build, reference search for the removed route, and whitespace check.
+- This change is committed locally only. The unavailable Railway Sandbox was not used for verification or deployment.

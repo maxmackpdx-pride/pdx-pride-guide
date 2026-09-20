@@ -5,7 +5,7 @@ declare global {
 }
 
 const CARTO_DARK_VECTOR = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
-const CARTO_DARK_RASTER = "/api/mapz/carto-tiles/{z}/{x}/{y}.png";
+const CARTO_DARK_RASTER = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
 
 /** Required by CARTO's free basemap tier. */
 export const CARTO_ATTRIBUTION =
@@ -30,9 +30,9 @@ export function cartoDarkVectorStyleUrl(): string {
   return withCartoKey(CARTO_DARK_VECTOR);
 }
 
-/** Same-origin Dark Matter raster proxy, so privacy tools cannot block fallback tiles. */
+/** Load fallback tiles in the visitor's browser instead of routing them through Zaylist. */
 export function cartoDarkTileUrl(): string {
-  return CARTO_DARK_RASTER;
+  return withCartoKey(CARTO_DARK_RASTER);
 }
 
 /** MapLibre fetches style.json, then tiles/sprites/fonts without the query. Reattach the key. */
