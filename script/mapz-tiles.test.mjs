@@ -14,7 +14,6 @@ const [host,fallback,page,html,renderer,server,routes]=await Promise.all([
 
 test('3D browser traffic uses same-origin Mapz tile routes',()=>{
  assert.match(renderer,/\/api\/mapz\/vector-tiles\/\{z\}\/\{x\}\/\{y\}\.pbf/);
- assert.match(renderer,/\/api\/mapz\/terrain-tiles\/\{z\}\/\{x\}\/\{y\}\.webp/);
  assert.match(renderer,/\/api\/mapz\/fonts\/\{fontstack\}\/\{range\}\.pbf/);
  assert.doesNotMatch(renderer,/https:\/\/tiles\.(?:openfreemap|mapterhorn)\.com/);
  assert.doesNotMatch(renderer,/https:\/\/tiles\.openfreemap\.org/);
@@ -29,11 +28,13 @@ test('server registers constrained OpenFreeMap and terrain proxies',()=>{
  assert.match(routes,/registerMapzTileRoutes\(app\)/);
 });
 
-test('terrain is optional and cannot block the base vector map',()=>{
+test('elevation is disconnected while the full vector city and scene extras remain',()=>{
  const initialStyle=renderer.slice(renderer.indexOf('const vectorStyle='),renderer.indexOf('applyMoonlight(vectorStyle)'));
  assert.match(initialStyle,/id:'skyline'/);
  assert.doesNotMatch(initialStyle,/elevation|terrain-shade|setTerrain/);
- assert.match(renderer,/function installTerrain\(\)/);
+ assert.doesNotMatch(renderer,/raster-dem|terrain-tiles|setTerrain|installTerrain/);
+ for(const layer of ['streets','water','skyline','buildings'])assert.ok(initialStyle.includes("id:'"+layer+"'"));
+ for(const extra of ['installGrassNeon','installRoadSurface','bridgeLayer','citySparkles','facadeWindows','roofOutline'])assert.ok(renderer.includes(extra));
  assert.match(renderer,/window\.setTimeout\(\(\)=>\{if\(!disposed\)installSceneExtras\(\);\},0\)/);
 });
 

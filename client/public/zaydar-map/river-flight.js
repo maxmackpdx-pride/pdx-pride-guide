@@ -47,7 +47,8 @@ vectorStyle.layers.push(
  {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':radix.slate10,'text-halo-color':radix.slate1,'text-halo-width':1.5}}
 );
 applyMoonlight(vectorStyle);
-// OpenFreeMap vector geometry with a solid terrain base and optional labels.
+// OpenFreeMap vector geometry on flat ground, with optional labels.
+// Elevation tiles and terrain displacement are disconnected for this renderer.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
 let map;
@@ -78,14 +79,6 @@ const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
 const facadeWindows=createFacadeWindows(maplibregl);
 const roofOutline=createRoofOutline(maplibregl);
-function installTerrain(){
- try{
-  if(map.getSource('elevation'))return;
-  map.addSource('elevation',{type:'raster-dem',tiles:['/api/mapz/terrain-tiles/{z}/{x}/{y}.webp'],tileSize:512,maxzoom:15,encoding:'terrarium'});
-  map.addLayer({id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':radix.cyan1,'hillshade-highlight-color':radix.cyan11,'hillshade-accent-color':radix.teal5}},'park-ground');
-  map.setTerrain({source:'elevation',exaggeration:1});
- }catch(error){console.warn('Optional terrain unavailable',error);}
-}
 function installSceneExtras(){
  const extras=[
   ()=>installGrassNeon(map),
@@ -100,7 +93,6 @@ function installSceneExtras(){
   try{extra();}
   catch(error){console.error('map extra',error);}
  }
- installTerrain();
  void installAutomaticLayers();
 }
 map.on('load',()=>{
@@ -803,10 +795,7 @@ map.on('idle',()=>{
 map.on('error',event=>{
  const message=String(event?.error?.message||event?.error||'');
  console.warn('maplibre',message||event);
- if(/dem|terrain|hillshade|elevation|mapterhorn/i.test(message)||event?.sourceId==='elevation'){
-  try{if(map.getTerrain())map.setTerrain(null);}catch(error){}
-  try{if(map.getLayer('terrain-shade'))map.removeLayer('terrain-shade');}catch(error){}
- }
+
 });
 setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8000);
 let firstFrameSent=false,baseFrameRendered=false;
