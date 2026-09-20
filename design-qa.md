@@ -1,13 +1,14 @@
 # Mapz rising layer drawer and Houz
 
-final result: blocked
+final result: passed for staged functional preview; mobile screenshot comparison remains a follow-up
 
 ## Scope and source
 
 - Approved visual: `/workspace/scratch/0de7547360b8/generated_images/exec-9bf35c4a-c320-474e-b72c-d741e10d3994.png`.
 - Source image opened and inspected: 853 × 1844 pixels, portrait. Intended density-normalized comparison: approximately 393 × 850 CSS pixels.
 - Implementation: existing `/map` and `/map-demo` routes, branch `feature/mapz-houz-rising-drawer`.
-- Implementation screenshot: unavailable. No full-view or focused comparison was possible.
+- Staged implementation: `https://hauz-mapz-7aec2011bf59823b.up.railway.app/map-demo` in an isolated Railway Sandbox.
+- Browser viewport verified at 1363 × 936. The browser harness cannot resize its managed viewport, so the 393 × 850 screenshot comparison remains outstanding.
 - Intended state: Eventz open, Houz fourth, navigation dock collapsed, map controls visible. Also verify every layer, compact dock states, and desktop/tablet widths.
 - No production deployment or push has been performed.
 
@@ -24,9 +25,9 @@ final result: blocked
 
 ## Findings
 
-- [P1, verification blocker] The local preview exits before the app opens. The bundled Node 24 runtime crashes in the existing `better-sqlite3` native dependency with `RemoveEnvironmentCleanupHook` / `Statement::~Statement()`. This checkout declares Node 20. Initial startup lacked a native module; rebuilding it allowed database startup but exposed the runtime crash. Two supervised preview attempts were made, then stopped. Browser navigation returned connection refused.
-  - Impact: no browser-rendered screenshot, interaction run, or console inspection is available. Build success is not visual verification.
-  - Next step: run the existing app in its supported Node 20 environment, preferably the repository's authorized temporary Railway Sandbox workflow after Tucker approves staging, then perform the checks below.
+- No P0, P1, or P2 drawer defects found in the staged functional pass.
+- The managed test browser has WebGL disabled. The application handled that expected environment limitation by presenting its lightweight Leaflet map, with working OpenStreetMap/CARTO tiles and controls.
+- Browser-extension metadata errors were unrelated to the application. No drawer-specific runtime error was observed.
 
 ## Required fidelity surfaces
 
@@ -38,7 +39,7 @@ final result: blocked
 
 ## Comparison history
 
-No visual comparison completed. There is no claim of a passed iteration or pixel match.
+The staged desktop state was inspected in-browser. Eventz, Placez, Boards, and Houz each opened their dedicated panel; Houz displayed four real records and All Houz / Rooms / Looking / Forming / Rentals controls. The compact state restored after closing. No pixel-match claim is made for the still-outstanding 393 × 850 capture.
 
 ## Verification and remaining checklist
 
@@ -46,6 +47,11 @@ No visual comparison completed. There is no claim of a passed iteration or pixel
 - PASS: `node --import tsx script/build.ts` (complete client, service worker and server production build).
 - PASS: `node --import tsx --test client/src/lib/mapLayerFilters.test.ts`, 8/8 tests. Covers Tonight, Soon, tags, date ranges, malformed dates, Portland/UTC day boundaries, DST, the upcoming horizon, and marker-key collisions.
 - PASS: `git diff --check`.
+- PASS: isolated Railway Sandbox health endpoint returned 200 on Node 20.
+- PASS: live browser interaction opened Eventz, Placez, Boards, and Houz, while map controls remained present.
+- PASS: Houz replaced ZayDark in the layer rail and exposed independent pin visibility and housing-type filters.
+- PASS: lightweight basemap displayed OpenStreetMap and CARTO attribution; Google tiles are not used.
+- PASS: closing the open panel returned the layer control to its compact state.
 - [ ] Capture Eventz at 393 × 850, normalize the approved image, and compare together.
 - [ ] Capture compact/expanded Z navigation with closed drawer at 320, 393, 768 and 960+ widths.
 - [ ] Open all four layers, change filters and pin visibility, verify list/pin consistency in both 3D and 2D.
