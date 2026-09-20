@@ -3,7 +3,7 @@
   --active-layer-color: #00ffff;
   position: absolute;
   z-index: 6;
-  inset: auto 68px calc(8px + env(safe-area-inset-bottom, 0px)) 70px;
+  inset: auto max(8px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) 70px;
   display: flex;
   flex-direction: column;
   height: 60px;
@@ -141,9 +141,12 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 .zaydar-layer-sheet button:focus-visible { outline-offset: -3px; }
 @media (hover: hover) { .zaydar-layer-chip__toggle:hover, .zaydar-layer-chip__open:hover, .zaydar-layer-row:hover, .zaydar-layer-rail button:hover { background-color: #ffffff0c; } }
 @media (max-width: 959px) {
-  html[data-zaylist-drawer="compact"] .zaydar-demo-navigation { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
-  html[data-zaylist-drawer="compact"][data-mobile-dock="expanded"] .zaydar-demo-navigation { bottom: calc(98px + env(safe-area-inset-bottom, 0px)); }
-  html[data-zaylist-drawer="open"] .zaydar-demo-navigation { top: 12px; bottom: auto; opacity: 1; pointer-events: auto; }
+  .zaydar-map-demo .zaydar-demo-navigation { top: 12px; bottom: auto; opacity: 1; pointer-events: auto; }
+  html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-open {
+    bottom: calc(98px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100% - 122px - env(safe-area-inset-bottom, 0px));
+  }
+  html[data-mobile-dock="expanded"] .zaydar-layer-sheet__footer { padding-left: 15px; }
 }
 @media (min-width: 960px) {
   .zaydar-map-lockup { left: 476px; }

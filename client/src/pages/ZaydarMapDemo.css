@@ -111,9 +111,7 @@
  html[data-zaylist-drawer] .site-header--glass .site-hub-mtop{padding:4px 7px}
  html[data-zaylist-drawer] .site-header--glass .site-hub-mtop .znav-control{height:44px;min-height:44px}
  html[data-zaylist-drawer] .site-header--glass .site-hub-mtop .user-avatar{--avatar-size:40px}
- .zaydar-demo-navigation{right:max(10px,env(safe-area-inset-right,0px));left:auto;top:auto;bottom:calc(100% - 228px);transition:bottom .32s cubic-bezier(.22,.8,.25,1)}
- html[data-zaylist-drawer="compact"] .zaydar-demo-navigation{bottom:calc(66px + env(safe-area-inset-bottom,0px))}
- html[data-zaylist-drawer="compact"][data-mobile-dock="expanded"] .zaydar-demo-navigation{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
+ .zaydar-demo-navigation{right:max(10px,env(safe-area-inset-right,0px));left:auto;top:12px;bottom:auto}
  html[data-zaylist-drawer] .z-mobile-dock[data-collapsed="true"],html[data-zaylist-drawer] .z-mobile-dock[data-collapsed="true"] .z-mobile-dock__restore{width:50px;height:50px}
  .zaydar-search-drawer.z-glass{left:auto;right:max(8px,env(safe-area-inset-right,0px));bottom:calc(98px + env(safe-area-inset-bottom,0px));width:min(312px,calc(100% - 78px));height:calc(100% - 116px);border-radius:30px;box-shadow:0 0 0 1px #000,0 18px 44px -18px #000;transition:width .32s cubic-bezier(.22,.8,.25,1),bottom .32s cubic-bezier(.22,.8,.25,1),border-radius .32s cubic-bezier(.22,.8,.25,1)}
  .zaydar-search-drawer.z-glass.dock-is-collapsed:not(.is-compact){bottom:calc(72px + env(safe-area-inset-bottom,0px))}

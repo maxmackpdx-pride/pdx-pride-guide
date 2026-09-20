@@ -20,7 +20,7 @@ final result: passed for staged functional preview; mobile screenshot comparison
 - First five matching event results include poster, venue, date/time and a working event-detail action. RSVPs remain available in a secondary disclosure.
 - Event filters now drive both results and event pins. Tonight means Portland's current day, Soon means live or starting within 90 minutes. Place categories no longer silently hide event pins.
 - Each panel retains a separate Show pins checkbox, loading/error/empty states, and its existing destination for View more.
-- Escape restores focus to the active layer control. Handle supports tap and downward swipe. Switching layers resets the result scroll. Closing retains the collapsed navigation dock; restoring navigation closes the sheet. Scrolling sheet content does not expand navigation over it.
+- Escape restores focus to the active layer control. Handle supports tap and downward swipe. Switching layers resets the result scroll. Closing retains the collapsed navigation dock; restoring navigation now keeps the sheet open and lifts it above the dock. Scrolling sheet content does not expand navigation over it.
 - Housing/board marker keys are namespaced, avoiding collisions between equal numeric ids from different APIs. Null/empty listing coordinates are not converted to zero.
 
 ## Findings
@@ -78,3 +78,12 @@ These were present before this task, remain untouched and are excluded from the 
 - PASS: actual app rendered inside 393 × 850 and 320 × 850 browser frames. Visually inspected expanded dock, collapsed dock, compact rail, and open Houz drawer with Houz disabled. Button labels did not overflow; compact arrow targets were at least 35 × 24 pixels. This is responsive-layout verification, not an iPhone Safari or 3D rendering test.
 - Separate existing map-provider issue: the visual capture shows an “API key required” watermark in CARTO basemap imagery. The earlier attribution-only check did not detect this, so the prior statement that tiles fully work was too broad. This filter-only change does not resolve that provider issue. WebGL is also disabled in the test browser, which uses the existing lightweight map fallback.
 - Published this filter change only to the already-authorized temporary Railway demo. No production push.
+
+## Follow-up: top-right map controls and dock clearance
+
+- Map controls now stay at the top right in both compact and open drawer states, independent of the dock state.
+- Tapping Z to restore navigation preserves the selected drawer. Both the compact rail and open drawer clear the expanded dock by moving to 98px plus the bottom safe area. Open drawer height is capped to preserve top clearance on short screens.
+- Removed the unused bottom-right control reservation from the compact rail, giving the layer toggles more room. With the expanded dock, the footer no longer reserves space for the collapsed Z button.
+- PASS: typecheck, CSS parsing for both affected stylesheets, and whitespace check.
+- Not visually verified or deployed: the Railway preview returns 404 and the Railway sign-in endpoint returned 502 in the preceding task. These edits are committed locally only.
+- The unrelated pre-existing changes listed above remain untouched; their ownership remains unknown.

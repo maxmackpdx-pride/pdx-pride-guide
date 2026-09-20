@@ -159,9 +159,8 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     <button type="button" className="z-mobile-dock__restore" aria-label={attentionCount > 0 ? `Expand navigation, ${attentionCount} messages need attention` : "Expand navigation"}
       aria-expanded={!compact} aria-controls={rowId} aria-hidden={!compact || undefined} tabIndex={compact ? 0 : -1}
       onClick={event => {
-        if (document.documentElement.dataset.zaylistDrawer === "open") {
-          window.dispatchEvent(new CustomEvent("zaylist:map-sheet-close"));
-        }
+        // Keep the selected map drawer open. Its layout responds to
+        // data-mobile-dock and lifts above the expanded navigation.
         const source = scrollSource.current;
         scrollState.current = {
           y: source instanceof Element ? source.scrollTop : window.scrollY,
