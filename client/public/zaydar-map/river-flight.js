@@ -10,9 +10,8 @@ import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridg
 import {installRoadSurface} from './road-surface.js?v=20260917-days';
 import {applyMoonlight} from './moonlight.js?v=20260917-noon';
 import {createRoofOutline} from './roof-outline.js?v=20260917-noon';
-import {createStreetAtmosphere} from './street-atmosphere.js?v=20260916-no-trees';
-import {createMapNature} from './map-nature.js?v=20260916-clear-water';
-import {createFacadeWindows} from './facade-windows.js?v=20260917-noon';
+import {createStreetAtmosphere} from './street-atmosphere.js?v=20260920-no-trees-lamps';
+import {createFacadeWindows} from './facade-windows.js?v=20260920-half-lights';
 import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
 import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
 import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
@@ -54,7 +53,6 @@ const map = new maplibregl.Map({container:'map',interactive:false,attributionCon
   style:structuredClone(vectorStyle)});
 let deckLayers=null;
 const streetAtmosphere=createStreetAtmosphere(map);
-const mapNature=createMapNature(map,maplibregl);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -287,7 +285,9 @@ function buildingGlitter(target,surfaces){
  if(cached && cached.surfaces===surfaces&&cached.flat===flat&&cached.coarse===coarse)return cached.points;
  const short=(surfaces.buildings??[]).filter(building=>building.height<=3);
  const bands=coarse?(flat?[.55,1]:[.4,.85]):(flat?[.4,.75,1]:[.3,.55,.85]);
- const points=roofSparkles(short,coarse?(flat?4200:2800):(flat?6000:4800),coarse?2:3,bands);
+ // Halve both the stable geographic sample and its cap so dense downtown
+ // and sparse neighborhoods lose the same share without tile-order bias.
+ const points=roofSparkles(short,coarse?(flat?2100:1400):(flat?3000:2400),coarse?4:6,bands);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,points});return points;
 }
 const logoFocus=createLogoFocus();
@@ -710,8 +710,7 @@ function point(t){
 // Smooth downtown close-up along the river: Ross Island Bridge to Lloyd district.
 const normalZoom=(13.8849625+Math.log2(1.25)+Math.log2(1.25));
 function smoothRange(a,b,value){const x=Math.max(0,Math.min(1,(value-a)/(b-a)));return x*x*x*(x*(x*6-15)+10);}
-let manualFlat=false;
-function automaticPitch(){return manualFlat?0:48*smoothRange(11.25,13.2,map.getZoom());}
+function automaticPitch(){return 48*smoothRange(11.25,13.2,map.getZoom());}
 function downtownZoom(latitude){
  const enter=smoothRange(45.501,45.521,latitude);
  const leave=1-smoothRange(45.528,45.551,latitude);
@@ -855,7 +854,6 @@ window.addEventListener('pagehide',()=>{
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
  streetAtmosphere.dispose();
- mapNature.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
@@ -934,9 +932,9 @@ window.addEventListener('message',event=>{
  if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
+ if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(10,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:automaticPitch()});viewState();}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
  if(type==='labels')for(const id of ['road-labels','place-labels'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',data.enabled?'visible':'none');
- if(type==='pitch'){manualFlat=Boolean(data.flat);map.easeTo({pitch:automaticPitch(),duration:600});}
 });
 let down=null;
 map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});

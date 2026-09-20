@@ -1,7581 +1,4635 @@
-import { getOutzDetails } from "./outzDetails";
-import { getOutzCommunityFeed } from "./outzFeed";
-import { getOutzFeedWeather } from "./outzFeedWeather";
-import { safeMapReturnTo } from "@shared/authReturn";
-import { publicHttpUrl } from "@shared/safeHttpUrl";
-import { eventDatesError } from "@shared/eventIntakeDates";
-import { parseMarketplacePrice } from "@shared/marketplace";
-import express, { type Express } from "express";
-import type { Server } from "http";
-import { buildLlmsTxt, buildRobotsTxt, buildSitemapXml, getLiveEventsForSeo } from "./seo";
-import { buildAdminReport, renderAdminReportHtml } from "./adminReport";
-import { expandMultiDayEvents } from "@shared/multiDayEvents";
-import { dedupeEvents, eventDedupeKey } from "@shared/eventDedupe";
-import {
-  isPostEventWeekListingCapActive,
-  prideDayFromDate,
-  EVENT_WEEK_END_DATE,
-} from "@shared/eventWeek";
-import { storage, hashPassword, verifyPassword, isLegacyPasswordHash, sqlite, getTableCounts, normalizeAttendanceVisibility } from "./storage";
-import { isTransactionalEmailConfigured, sendOwnerDeskNotification, sendPasswordResetEmail } from "./email";
-import {
-  adminSearchForViewer,
-  attachDirectoryListing,
-  checkAdminMessageRateLimit,
-  claimAdminQueueItem,
-  executeBulkEvents,
-  getAdminQueueAggregate,
-  listAdminQueueClaims,
-  previewBulkEvents,
-  publicPreviewLinks,
-  releaseAdminQueueClaim,
-} from "./adminOps";
-import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
-import { initAttendanceWs } from "./attendanceWs";
-import { startPromptScheduler } from "./scheduler";
-import { registerGoogleTileRoutes } from "./googleTiles";
-import { createSessionMiddleware, productionSecureCookies } from "./sessionConfig";
-import {
-  insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
-  insertGiftingPostSchema, insertGiftingInterestSchema, insertGiftingReportSchema, insertFeedbackReportSchema,
-  insertSellzPostSchema, insertSellzInterestSchema, insertSellzReportSchema,
-  insertBeachCheckinSchema, insertBeachCarpoolPostSchema, insertRiverBratsReportSchema,
-} from "@shared/schema";
-import { z } from "zod";
-import { moderateFields, moderationMessage } from "@shared/contentModeration";
-import { resolveEventPosterUrl } from "@shared/eventPoster";
-import {
-  getArchiveSyntheticCredits,
-  getTuckerHostedArchiveRow,
-  isTuckerHostedArchiveId,
-  tuckerHostedArchiveAsEvent,
-} from "@shared/tuckerHostedArchive";
-import { buildVenueWebsiteIndex, resolveVenueWebsite } from "@shared/venueLinks";
-import {
-  enrichEventForMap,
-  fillEventMapCoordinates,
-  fillFieldsMapCoordinates,
-  scheduleMapCoordinateBackfill,
-} from "./mapCoordinateSync";
-import { attachEventsToBusinesses, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
-import { resolveBusinessLocations } from "@shared/businessLocations";
-import { parsePacificDateTime } from "@shared/missedConnections";
-import { DIRECTORY_TYPES } from "@shared/directoryTheme";
-import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
-import { registerAdRoutes } from "./adsRoutes";
-import { registerHousingRoutes } from "./housing/routes";
-import { registerCommunityRoutes, searchCommunities } from "./communities";
-import { registerPlatformV1 } from "./platformV1";
-import { getSystemDiagnosticsDigest, recordSystemDiagnostic } from "./systemDiagnostics";
-import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
-import { renderGamePosterPng } from "./posters/gamePoster";
-import {
-  INGEST_SOURCES,
-  buildDirectoryIngestSources,
-  expandWebsiteScrapeCandidates,
-  mergeIngestSources,
-} from "@shared/ingestSources";
-import { isTrustedLaneSource } from "@shared/trustedVenues";
-import { matchClosedVenue } from "@shared/closedVenues";
-import {
-  attachDirectoryBrandsToCandidates,
-  cancelScan,
-  dashboardSnapshot,
-  getScanJobView,
-  startScan,
-} from "./qsearch/scanJob";
-import {
-  addCustomSource,
-  clearScanQueue,
-  deleteSource,
-  enableSource,
-  listCandidates,
-  markAllNewSeen,
-  clearCandidateFlyer,
-  markCandidatesCommitted,
-  markCandidatesSkipped,
-  prunePendingAgainstCatalog,
-  restoreCandidate,
-  setDragpdxOptIn,
-  setInstagramHandle,
-  setRecipeUrl,
-} from "./qsearch/store";
-import { triggerNightlyPriorityScan } from "./qsearch/nightly";
-import { getTrustedDashboard } from "./qsearch/trustedHealth";
-import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
-import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
-import { buildScanCandidates } from "./qsearch/analyze";
-import { saveCandidates } from "./qsearch/store";
-import { randomUUID } from "node:crypto";
-import {
-  COMMUNITY_STANDARDS_VERSION,
-  COMMUNITY_STANDARDS_DECLINE_URL,
-  COMMUNITY_STANDARDS_GATE_ENABLED,
-} from "@shared/communityStandards";
-import {
-  accountModReasonLabel,
-  untilIsoFromHours,
-} from "@shared/accountModeration";
-import {
-  getGoogleAnalyticsPublicTotals,
-  getGoogleAnalyticsTrafficMetrics,
-  isGoogleAnalyticsAdminConfigured,
-} from "./googleAnalytics";
-import { readGaMeasurementId } from "./gaSnippet";
-import { forceRefreshNudeBeachesSnapshot, getNudeBeachesSnapshot } from "./nudeBeaches";
-import { forceRefreshOutzSnapshot, getOutzSnapshot } from "./outz";
-import {
-  applyEventResearchEventChange,
-  createEventFromResearch,
-  eventForResearchAgent,
-  getEventResearchSourceMemory,
-  listEventResearchChanges,
-  recordEventResearchPath,
-  rollbackEventResearchChange,
-} from "./eventResearchMemory";
-import {
-  beginResearchRun,
-  enqueueResearchReview,
-  evaluateDecisionGate,
-  finishResearchRun,
-  getResearchControlState,
-  markRunSource,
-  recordConflict,
-  recordFieldEvidence,
-  recordMediaProvenance,
-  recordDecisionOutcome,
-  recordMistakeTestResult,
-  resolveResearchItem,
-  setSourceSchedule,
-  upsertEntityIdentity,
-  upsertEventSeries,
-  upsertMistakeTest,
-} from "./eventResearchControl";
-import {
-  allowAdminOrEventResearchAgent,
-  eventResearchActor,
-} from "./eventResearchAuth";
-import {
-  deleteOutzCheckin,
-  updateOutzWallPost,
-  deleteOutzWallPost,
-  createOutzWallComment,
-  createOutzWallPost,
-  getOutzPlaceRating,
-  getOutzWallPosts,
-  getOutzChatMessages,
-  getOutzCheckins,
-  postOutzChatMessage,
-  upsertOutzPlaceRating,
-  upsertOutzCheckin,
-} from "./outzSocial";
-import { isProfileAccentColor, isProfileBanner, normalizeProfileAccentColor } from "@shared/profileTheme";
-import {
-  formatCustomSpottedVenue,
-  generalSpottedClosesAt,
-  isMissedConnectionPostable,
-  missedConnectionClosesAt,
-  pacificCalendarDate,
-  pacificDayOfWeek,
-} from "@shared/missedConnections";
-import { isEventTalentRole } from "@shared/eventTalent";
-import { parseHubFeedTab } from "@shared/hubFeed";
-import { BOARD_REJECT_REASONS, PROFILE_PHOTO_REJECT_REASONS, validateGigPostContent } from "@shared/boardModeration";
-import { buildTipLinks } from "@shared/tipSupport";
-
-import {
-  diffSubmissionMerge,
-  findSubmissionMatches,
-  submissionHasStrongDuplicate,
-} from "@shared/submissionMatch";
-import {
-  buildDirectoryMergePatch,
-  directoryHasStrongDuplicate,
-  findDirectoryMatches,
-  type DirectoryMergePayload,
-} from "@shared/directoryMatch";
-import type { Event } from "@shared/schema";
-import {
-  beachVenueLabel,
-  isAllowedBeachCheckinDate,
-  isAllowedCarpoolTripDate,
-  isValidCarpoolDirection,
-  isValidBeachId,
-  isValidRiverBratsDepartHour,
-  isValidRiverBratsHour,
-  pacificTodayDate,
-} from "@shared/riverBrats";
-import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
-import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
-import crypto from "crypto";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-
-// â”€â”€â”€ File upload setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-    filename: (_req, file, cb) => {
-      const rawExt = path.extname(file.originalname).toLowerCase();
-      const ext = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(rawExt) ? rawExt : ".jpg";
-      cb(null, `poster-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-    },
-  }),
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
-  fileFilter: (_req, file, cb) => {
-    const ok = /^image\/(jpeg|jpg|png|gif|webp)$/.test(file.mimetype);
-    cb(null, ok);
-  },
-});
-
-const inboxTyping = new Map<string, { userId: number; updatedAt: number }>();
-
-// Contact-form attachments (public, unauthenticated) - images or PDFs, small cap.
-const contactUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-    filename: (_req, file, cb) => {
-      const rawExt = path.extname(file.originalname).toLowerCase();
-      const ext = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"].includes(rawExt) ? rawExt : ".bin";
-      cb(null, `contact-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-    },
-  }),
-  limits: { fileSize: 10 * 1024 * 1024, files: 3 },
-  fileFilter: (_req, file, cb) => {
-    const ok = /^image\/(jpeg|jpg|png|gif|webp)$/.test(file.mimetype) || file.mimetype === "application/pdf";
-    cb(null, ok);
-  },
-});
-
-// Extend express-session to include our custom fields
-declare module "express-session" {
-  interface SessionData {
-    userId?: number;
-    promoterId?: number;
-    isAdmin?: boolean;
-    googleOAuthState?: string;
-    googleOAuthLinkUserId?: number;
-  }
-}
-
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
-const ADMIN_USER_EMAILS = (process.env.ADMIN_USER_EMAILS || "hello.tuckercasey@gmail.com")
-  .split(",")
-  .map(value => value.trim().toLowerCase())
-  .filter(Boolean);
-const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || "hello_tuckercasey,tucker_pdmax")
-  .split(",")
-  .map(value => value.trim().replace(/^@/, "").toLowerCase())
-  .filter(Boolean);
-const OWNER_DISPLAY_NAME = process.env.OWNER_DISPLAY_NAME || "Tucker_PDmaX";
-
-function publicEvent(
-  evt: any,
-  pendingClaimIds: Set<number> = new Set(),
-  venueWebsites?: Map<string, string> | null,
-) {
-  const { adminNotes, submittedBy, claimedBy, ...safe } = enrichEventForMap(evt);
-  const venueWebsite =
-    (evt as any).venueWebsite
-    || resolveVenueWebsite(evt.venueName, venueWebsites)
-    || null;
-  return {
-    ...safe,
-    posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
-    hasPendingClaim: pendingClaimIds.has(evt.id),
-    venueWebsite,
-  };
-}
-
-function venueWebsiteIndex() {
-  return buildVenueWebsiteIndex(storage.getBusinesses() as any);
-}
-
-function publicUser(user: any) {
-  if (!user) return null;
-  const { passwordHash, email, status, googleId, ...safe } = user;
-  return safe;
-}
-
-function adminUserSummary(user: any) {
-  return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    displayName: user.displayName,
-    photoUrl: user.photoUrl || null,
-    avatarChoice: user.avatarChoice ?? 1,
-    avatarRing: user.avatarRing || "none",
-    promoterStatus: user.promoterStatus || "none",
-    subAdmin: !!user.subAdmin,
-    googleLinked: !!user.googleId,
-    status: user.status || "active",
-    createdAt: user.createdAt || "",
-    isOwner: isMainAdminUser(user),
-    communityStandardsVersion: user.communityStandardsVersion || null,
-    communityStandardsAgreedAt: user.communityStandardsAgreedAt || null,
-    communityStandardsDeclinedAt: user.communityStandardsDeclinedAt || null,
-    accountStatus: user.status || "active",
-    suspendReasonCode: user.suspendReasonCode || null,
-    suspendReasonLabel: user.suspendReasonLabel || null,
-    suspendNote: user.suspendNote || null,
-    suspendUntil: user.suspendUntil || null,
-    suspendedAt: user.suspendedAt || null,
-    shadowBanned: !!user.shadowBanned,
-    shadowBanReasonCode: user.shadowBanReasonCode || null,
-    shadowBanReasonLabel: user.shadowBanReasonLabel || null,
-    shadowBanUntil: user.shadowBanUntil || null,
-  };
-}
-
-function lookupUserProfile(identifier: string | null | undefined) {
-  const raw = String(identifier || "").trim().replace(/^@/, "");
-  if (!raw) return null;
-  const user = storage.getUserByEmail(raw) || storage.getUserByUsername(raw);
-  return user ? adminUserSummary(user) : null;
-}
-
-function resolveUserByUsername(username: string) {
-  const uname = username.trim().replace(/^@/, "");
-  if (!uname) return undefined;
-  return storage.getUserByUsername(uname)
-    || sqlite.prepare(`SELECT * FROM users WHERE LOWER(username) = LOWER(?)`).get(uname) as ReturnType<typeof storage.getUserByUsername>;
-}
-
-function submissionMatchPool(): Event[] {
-  return storage.getEvents({ status: "LIVE" });
-}
-
-function enrichSubmissionMatches(sub: { type: string; eventId?: number | null } & Record<string, unknown>) {
-  if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
-    return [];
-  }
-  const pool = submissionMatchPool();
-  const matches = findSubmissionMatches(sub as any, pool, { excludeEventId: sub.eventId });
-  return matches.map(match => ({
-    ...match,
-    event: pool.find(evt => evt.id === match.eventId) ?? null,
-  }));
-}
-
-function enrichSubmissionForAdmin(sub: any) {
-  const user = storage.getUserByEmail(sub.submitterEmail);
-  return {
-    ...sub,
-    submitterProfile: user ? adminUserSummary(user) : null,
-    potentialMatches: enrichSubmissionMatches(sub),
-  };
-}
-
-function directoryMatchPool() {
-  return storage.getBusinesses().filter(b => b.active);
-}
-
-function enrichDirectoryMatches(listing: {
-  name: string;
-  type?: string | null;
-  address?: string | null;
-  neighborhood?: string | null;
-}) {
-  const pool = directoryMatchPool();
-  const matches = findDirectoryMatches(listing, pool);
-  return matches.map(match => ({
-    ...match,
-    business: pool.find(biz => biz.id === match.businessId) ?? null,
-  }));
-}
-
-function enrichModerationForAdmin(req: any) {
-  const user = storage.getUserByEmail(req.requesterEmail);
-  return {
-    ...attachDirectoryListing(req),
-    requesterProfile: user ? adminUserSummary(user) : null,
-  };
-}
-
-/**
- * Validate event dates for create/edit.
- * Merges patch with existing so a partial dateStart-only update still hits the Pride cap.
- */
-function validateEventDates(
-  dateStart?: string | null,
-  dateEnd?: string | null,
-  existing?: { dateStart?: string | null; dateEnd?: string | null },
-): string | null {
-  const start = (dateStart ?? existing?.dateStart ?? undefined) || undefined;
-  const end = (dateEnd ?? existing?.dateEnd ?? undefined) || undefined;
-
-  // Until Jul 19 6pm Pacific, block starts after Pride Sunday (even if only dateStart is patched).
-  if (isPostEventWeekListingCapActive() && start) {
-    const startDay = pacificCalendarDate(start);
-    if (startDay && startDay > EVENT_WEEK_END_DATE) {
-      return "Postâ€“Pride week events open Sunday July 19 at 6pm Pacific. Until then, list nights through July 19 only.";
-    }
-  }
-
-  if (start && end) {
-    const startMs = new Date(start).getTime();
-    const endMs = new Date(end).getTime();
-    if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs <= startMs) {
-      return "End date must be after start date";
-    }
-  }
-  return null;
-}
-
-/** Public board: hide events whose start day is after Pride week while the cap is active. */
-function isPublicEventVisibleUnderPrideCap(evt: { dateStart?: string | null }): boolean {
-  if (!isPostEventWeekListingCapActive()) return true;
-  const startDay = pacificCalendarDate(evt.dateStart || "");
-  if (startDay && startDay > EVENT_WEEK_END_DATE) return false;
-  return true;
-}
-
-/**
- * dateStart is authoritative for dayOfWeek - derive it on every write so a
- * stale or mistaken client value can never disagree with the actual date.
- */
-function syncDayOfWeek(patch: Record<string, unknown>, existing?: { dateStart?: string | null }) {
-  const dateStart = (patch.dateStart as string | undefined) ?? existing?.dateStart ?? undefined;
-  if (!dateStart) return;
-  const derived = prideDayFromDate(dateStart);
-  if (!derived) return;
-  if (patch.dayOfWeek !== undefined && patch.dayOfWeek !== derived) {
-    console.warn(
-      `[events] dayOfWeek "${String(patch.dayOfWeek)}" corrected to "${derived}" from dateStart ${dateStart}`,
-    );
-  }
-  if (patch.dayOfWeek !== undefined || patch.dateStart !== undefined) {
-    patch.dayOfWeek = derived;
-  }
-}
-
-function enrichEventForAdmin(evt: any) {
-  return {
-    ...evt,
-    submittedByProfile: lookupUserProfile(evt.submittedBy),
-    claimedByProfile: lookupUserProfile(evt.claimedBy),
-  };
-}
-
-/** Admin catalog rows: expanded LIVE listings (matches public /api/events) + raw HIDDEN records. */
-function getAdminEventCatalog() {
-  const all = storage.getEvents({});
-  const hidden = all.filter(evt => evt.status === "HIDDEN");
-  const live = all.filter(evt => evt.status === "LIVE");
-  return [...expandMultiDayEvents(live), ...hidden];
-}
-
-function isMainAdminUser(user: any) {
-  if (!user) return false;
-  const email = String(user.email || "").trim().toLowerCase();
-  const username = String(user.username || "").trim().replace(/^@/, "").toLowerCase();
-  return ADMIN_USER_EMAILS.includes(email)
-    || ADMIN_USERNAMES.includes(username)
-    || storage.hasSiteAdminGrant(user.id);
-}
-
-/** Live admin check - never trust sticky session.isAdmin alone (revoke must stick). */
-function userIsAdminNow(user: any): boolean {
-  return !!(user && (
-    isMainAdminUser(user)
-    || user.subAdmin
-    || storage.hasOwnerAdminAccess(user)
-  ));
-}
-
-function markAdminSessionForUser(req: any, user: any) {
-  if (userIsAdminNow(user)) {
-    req.session.isAdmin = true;
-    return true;
-  }
-  if (req.session?.isAdmin) {
-    delete req.session.isAdmin;
-  }
-  return false;
-}
-
-function syncOwnerDisplayName(user: any) {
-  // Only Tucker (primary owner) - not env-listed co-admins or granted admins like @heygirl.
-  if (!storage.isPrimarySiteOwner(user) || user.displayName === OWNER_DISPLAY_NAME) return user;
-  storage.updateUser(user.id, { displayName: OWNER_DISPLAY_NAME });
-  return { ...user, displayName: OWNER_DISPLAY_NAME };
-}
-
-function safeJsonValue(raw: unknown, fallback: unknown) {
-  if (typeof raw !== "string" || !raw) return fallback;
-  try { return JSON.parse(raw); } catch { return fallback; }
-}
-
-function authUserResponse(req: any, user: any) {
-  const isAdmin = markAdminSessionForUser(req, user);
-  return {
-    id: user.id, username: user.username, email: user.email,
-    displayName: user.displayName, avatarChoice: user.avatarChoice,
-    avatarRing: user.avatarRing || "none", avatarCrop: user.avatarCrop || null,
-    bio: user.bio, photoUrl: user.photoUrl,
-    coverImageUrl: user.coverImageUrl || null, coverCrop: user.coverCrop || null,
-    googleLinked: !!user.googleId,
-    promoterStatus: user.promoterStatus || "none",
-    pronouns: user.pronouns || null,
-    location: user.location || null,
-    socialLinks: safeJsonValue(user.socialLinks, {}),
-    profileEmbeds: safeJsonValue(user.profileEmbeds, []),
-    profilePhotos: safeJsonValue(user.profilePhotos, []),
-    memberSince: user.createdAt || "",
-    createdAt: user.createdAt || "",
-    isAdmin,
-    isSuperAdmin: isMainAdminUser(user) || storage.hasOwnerAdminAccess(user),
-    // Primary owner only - Owner Desk stays private to Tucker.
-    isPrimaryOwner: storage.isPrimarySiteOwner(user),
-    // Owner + peers (brohoejams): full site admin tools except Owner Desk.
-    canManageTeam: storage.hasOwnerAdminAccess(user),
-    canViewUsers: storage.hasOwnerAdminAccess(user),
-    canPush: storage.hasOwnerAdminAccess(user) || isMainAdminUser(user),
-    canManageCatalog: storage.hasOwnerAdminAccess(user) || isMainAdminUser(user),
-    subAdmin: !!user.subAdmin,
-    usernameChangedAt: user.usernameChangedAt || null,
-    communityStandardsVersion: user.communityStandardsVersion || null,
-    communityStandardsAgreedAt: user.communityStandardsAgreedAt || null,
-    communityStandardsDeclinedAt: user.communityStandardsDeclinedAt || null,
-    accountStatus: user.status || "active",
-    suspendReasonCode: user.suspendReasonCode || null,
-    suspendReasonLabel: user.suspendReasonLabel || null,
-    suspendNote: user.suspendNote || null,
-    suspendUntil: user.suspendUntil || null,
-    suspendedAt: user.suspendedAt || null,
-  };
-}
-
-// â”€â”€â”€ Member profile field validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const SOCIAL_LINK_KEYS = [
-  "instagram", "tiktok", "soundcloud", "spotify", "bluesky", "x",
-  "facebook", "website", "linktree", "venmo", "onlyfans", "fetlife", "bookingEmail",
-] as const;
-
-function sanitizeSocialLinks(input: unknown): string | null {
-  if (input === null) return null;
-  if (typeof input !== "object" || Array.isArray(input)) return null;
-  const clean: Record<string, string> = {};
-  for (const key of SOCIAL_LINK_KEYS) {
-    const value = (input as Record<string, unknown>)[key];
-    if (typeof value !== "string") continue;
-    const trimmed = value.replace(/[<>]/g, "").trim().slice(0, 120);
-    if (trimmed) clean[key] = trimmed;
-  }
-  return JSON.stringify(clean);
-}
-
-const SOUNDCLOUD_EMBED_HOSTS = new Set(["w.soundcloud.com", "soundcloud.com", "api.soundcloud.com"]);
-
-function isValidSoundcloudEmbedSrc(src: unknown): src is string {
-  if (typeof src !== "string") return false;
-  try {
-    const url = new URL(src);
-    return url.protocol === "https:" && SOUNDCLOUD_EMBED_HOSTS.has(url.hostname);
-  } catch {
-    return false;
-  }
-}
-
-function sanitizeProfileEmbeds(input: unknown): string | null {
-  if (input === null) return null;
-  if (!Array.isArray(input)) return null;
-  const clean = input
-    .filter((entry: any) => entry && typeof entry === "object" && isValidSoundcloudEmbedSrc(entry.src))
-    .slice(0, 12)
-    .map((entry: any) => ({
-      id: String(entry.id || `embed_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`).slice(0, 40),
-      src: String(entry.src),
-      title: String(entry.title || "").replace(/[<>]/g, "").trim().slice(0, 80),
-    }));
-  return JSON.stringify(clean);
-}
-
-function sanitizeProfilePhotos(input: unknown): string | null {
-  if (input === null) return null;
-  if (!Array.isArray(input)) return null;
-  const clean = input
-    .filter((entry: any) => {
-      const url = entry && typeof entry === "object" ? entry.url : null;
-      return typeof url === "string" && (url.startsWith("/uploads/") || url.startsWith("https://"));
-    })
-    .slice(0, 6)
-    .map((entry: any) => ({
-      url: String(entry.url),
-      caption: String(entry.caption || "").replace(/[<>]/g, "").trim().slice(0, 60),
-    }));
-  return JSON.stringify(clean);
-}
-
-function sanitizeCoverImageUrl(input: unknown): string | null | false {
-  if (input === null || input === "") return null;
-  if (typeof input !== "string") return false;
-  const trimmed = input.trim().slice(0, 300);
-  if (!trimmed) return null;
-  if (!trimmed.startsWith("/uploads/") && !trimmed.startsWith("https://")) return false;
-  return trimmed;
-}
-
-function sanitizeCoverCrop(input: unknown): string | null {
-  if (input === null || input === "") return null;
-  if (typeof input !== "string") return null;
-  try {
-    const parsed = JSON.parse(input);
-    const offsetX = Math.max(0, Math.min(1, Number(parsed.offsetX ?? 0.5)));
-    const offsetY = Math.max(0, Math.min(1, Number(parsed.offsetY ?? 0.5)));
-    const scale = Math.max(1, Math.min(3, Number(parsed.scale ?? 1) || 1));
-    return JSON.stringify({ offsetX, offsetY, scale });
-  } catch {
-    return null;
-  }
-}
-
-function sanitizeTalents(input: unknown): string | null {
-  if (input === null) return null;
-  if (!Array.isArray(input)) return null;
-  const clean = input
-    .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
-    .slice(0, 12)
-    .map(entry => entry.replace(/[<>]/g, "").trim().slice(0, 40));
-  return JSON.stringify(clean);
-}
-
-function sanitizeAffiliatedVenueIds(input: unknown): string | null {
-  if (input === null) return null;
-  if (!Array.isArray(input)) return null;
-  const clean = input
-    .map(entry => Number(entry))
-    .filter(id => Number.isInteger(id) && id > 0 && !!storage.getBusiness(id))
-    .slice(0, 6);
-  return JSON.stringify(clean);
-}
-
-function sanitizeMarquee(input: unknown): string | null {
-  if (input === null) return null;
-  if (typeof input !== "object" || Array.isArray(input)) return null;
-  const raw = input as Record<string, unknown>;
-  const items = Array.isArray(raw.items)
-    ? raw.items.filter((i): i is string => typeof i === "string" && i.trim().length > 0)
-        .slice(0, 12).map(i => i.replace(/[<>]/g, "").trim().slice(0, 60))
-    : [];
-  const speed = Number(raw.speed);
-  const color = typeof raw.color === "string" ? raw.color.replace(/[<>]/g, "").trim().slice(0, 20) : "rainbow";
-  return JSON.stringify({
-    items,
-    speed: Number.isFinite(speed) ? Math.min(60, Math.max(12, speed)) : 30,
-    color: color || "rainbow",
-  });
-}
-
-function sanitizePup(input: unknown): string | null {
-  if (input === null) return null;
-  if (typeof input !== "object" || Array.isArray(input)) return null;
-  const raw = input as Record<string, unknown>;
-  const field = (v: unknown) => (typeof v === "string" ? v.replace(/[<>]/g, "").trim().slice(0, 60) : "");
-  const name = field(raw.name);
-  if (!name) return null;
-  return JSON.stringify({ name, hood: field(raw.hood), role: field(raw.role), lookingFor: field(raw.lookingFor) });
-}
-
-// â”€â”€â”€ Content moderation gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Runs user-authored text through @shared/contentModeration.
-//   BLOCK  â†’ sends a friendly 400 and returns true (caller must stop).
-//   REVIEW â†’ content is accepted, but an alert lands in the site owner's inbox.
-// Sexual / kink / sex-work content is allowlisted inside the shared module and
-// never trips these gates - this only catches the house-rule exclusions
-// (scat, blood/gore, weapons, abuse, illegal content, off-platform links).
-function moderationGate(
-  res: any,
-  boardName: string,
-  fields: Record<string, string | null | undefined>,
-): boolean {
-  const result = moderateFields(fields);
-  if (result.verdict === "BLOCK") {
-    const category = result.reasons[0]?.category || "ABUSE";
-    res.status(400).json({ error: moderationMessage(category), moderation: result.reasons });
-    return true;
-  }
-  if (result.verdict === "REVIEW") {
-    const snippet = Object.values(fields)
-      .filter((v): v is string => typeof v === "string" && !!v.trim())
-      .join(" Â· ")
-      .slice(0, 200);
-    const reasonText = result.reasons
-      .map(r => `${r.category}${r.field ? ` (${r.field})` : ""}: "${r.match}"`)
-      .join("; ");
-    try {
-      storage.notifyOwnerModeration(
-        `Moderation review: ${boardName}`,
-        `Board: ${boardName}\nVerdict: REVIEW (content was accepted and is live)\nReasons: ${reasonText}\n\nSnippet:\n${snippet}`,
-      );
-    } catch (err) {
-      console.error("[moderation] failed to send owner review alert:", err);
-    }
-  }
-  return false;
-}
-
-function publicGiftingPost(post: any, viewerUserId?: number) {
-  const userId = Number(post.userId ?? post.user_id);
-  const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
-  const isPoster = !!viewerUserId && userId === viewerUserId;
-  const allSafeInterests = Array.isArray(post.interests) ? post.interests.map((interest: any) => ({
-    id: interest.id,
-    userId: interest.userId ?? interest.user_id,
-    note: interest.note,
-    status: interest.status,
-    username: interest.username,
-    displayName: interest.displayName,
-    photoUrl: interest.photoUrl,
-    avatarChoice: interest.avatarChoice,
-    avatarRing: interest.avatarRing || "none",
-    isMine: viewerUserId ? Number(interest.userId ?? interest.user_id) === viewerUserId : false,
-  })) : [];
-  // Response notes and identities are private marketplace handoff data. The
-  // poster can review the response list; everyone else can only see their own.
-  const safeInterests = isPoster
-    ? allSafeInterests
-    : allSafeInterests.filter((interest: any) => interest.isMine);
-  const viewerInterest = allSafeInterests.find((interest: any) => interest.isMine);
-  return {
-    id: post.id,
-    userId,
-    postType: post.postType ?? post.post_type,
-    title: post.title,
-    description: post.description,
-    category: post.category,
-    neighborhood: post.neighborhood,
-    pickupPreference: post.pickupPreference ?? post.pickup_preference,
-    photoUrls: post.photoUrls || [],
-    status: post.status,
-    selectedInterestId: isPoster ? selectedInterestId : null,
-    renewCount: post.renewCount ?? post.renew_count ?? 0,
-    expiresAt: post.expiresAt ?? post.expires_at,
-    reportCount: post.reportCount ?? post.report_count ?? 0,
-    createdAt: post.createdAt ?? post.created_at,
-    username: post.username,
-    displayName: post.displayName,
-    posterPhotoUrl: post.posterPhotoUrl,
-    avatarChoice: post.avatarChoice,
-    posterAvatarRing: post.posterAvatarRing || post.avatarRing || "none",
-    interestCount: Number(post.interestCount || 0),
-    interests: safeInterests,
-    isMine: viewerUserId ? userId === viewerUserId : false,
-    selectedUserId: isPoster
-      ? allSafeInterests.find((interest: any) => interest.id === selectedInterestId)?.userId || null
-      : null,
-    viewerSelected: !!viewerInterest && viewerInterest.id === selectedInterestId,
-  };
-}
-
-function publicSellzPost(post: any, viewerUserId?: number) {
-  const userId = Number(post.userId ?? post.user_id);
-  const selectedInterestId = Number(post.selectedInterestId ?? post.selected_interest_id ?? 0) || null;
-  const isMine = !!viewerUserId && userId === viewerUserId;
-  const interests = (Array.isArray(post.interests) ? post.interests : []).map((interest: any) => ({
-    id: interest.id,
-    userId: Number(interest.userId ?? interest.user_id),
-    note: interest.note,
-    offerCents: interest.offerCents ?? interest.offer_cents ?? null,
-    status: interest.status,
-    username: interest.username,
-    displayName: interest.displayName,
-    photoUrl: interest.photoUrl,
-    avatarChoice: interest.avatarChoice,
-    avatarRing: interest.avatarRing || "none",
-  }));
-  const safeInterests = isMine ? interests : interests.filter((interest: any) => interest.userId === viewerUserId);
-  return {
-    id: post.id, userId, title: post.title, description: post.description,
-    category: post.category, condition: post.condition,
-    priceCents: Number(post.priceCents ?? post.price_cents),
-    negotiable: Boolean(post.negotiable), neighborhood: post.neighborhood,
-    pickupPreference: post.pickupPreference ?? post.pickup_preference,
-    photoUrls: post.photoUrls || [], status: post.status,
-    selectedInterestId: isMine ? selectedInterestId : null,
-    expiresAt: post.expiresAt ?? post.expires_at,
-    createdAt: post.createdAt ?? post.created_at,
-    interestCount: Number(post.interestCount || 0), interests: safeInterests,
-    username: post.username, displayName: post.displayName,
-    posterPhotoUrl: post.posterPhotoUrl, avatarChoice: post.avatarChoice,
-    posterAvatarRing: post.posterAvatarRing || "none", isMine,
-    viewerSelected: safeInterests.some((interest: any) => interest.userId === viewerUserId && interest.id === selectedInterestId),
-  };
-}
-
-function publicGigPost(gig: any, viewerUserId?: number) {
-  // contactEmail and adminNotes are workflow-only fields. Contact happens via
-  // contextual inbox messaging; moderation notes never enter a public payload.
-  const {
-    contactEmail: _contactEmail,
-    contact_email: _contactEmailSnake,
-    adminNotes: _adminNotes,
-    admin_notes: _adminNotesSnake,
-    ...safe
-  } = gig;
-  return {
-    ...safe,
-    isMine: viewerUserId ? gig.userId === viewerUserId : false,
-  };
-}
-
-const GIFTING_RUN_END = new Date("2026-07-27T00:00:00-07:00").getTime();
-const RESTRICTED_GIFTING_TERMS = [
-  "weapon", "gun", "ammo", "drugs", "cocaine", "meth", "fentanyl", "prescription",
-  "alcohol", "needle", "needles", "poppers", "lube", "lubricant", "insertable",
-  "underwear", "stolen", "counterfeit", "hazardous",
-];
-
-function parseBoardRejectBody(body: any) {
-  const reasonCode = String(body.reasonCode || "").trim().toUpperCase();
-  const note = String(body.note || "").trim();
-  if (!BOARD_REJECT_REASONS.some(r => r.code === reasonCode)) {
-    throw new Error("Invalid reject reason");
-  }
-  return { reasonCode, note: note || undefined };
-}
-
-function parseProfilePhotoRejectBody(body: any) {
-  const reasonCode = String(body.reasonCode || "").trim().toUpperCase();
-  const note = String(body.note || "").trim();
-  if (!PROFILE_PHOTO_REJECT_REASONS.some(r => r.code === reasonCode)) {
-    throw new Error("Invalid reject reason");
-  }
-  return { reasonCode, note: note || undefined };
-}
-
-function assertGigBoardAllowed(body: any, fields: {
-  title?: string | null;
-  description?: string | null;
-  skills?: string | null;
-  compensation?: string | null;
-}, requireAcceptance = true) {
-  if (requireAcceptance && !body.acceptRules) throw new Error("You must agree to the GIGZ board rules.");
-  const personalsErr = validateGigPostContent(fields);
-  if (personalsErr) throw new Error(personalsErr);
-}
-
-function assertGiftingAllowed(body: any) {
-  if (!giftingPostingOpen()) {
-    throw new Error("Public GIFTZ posts are paused after July 26, 2026.");
-  }
-  if (!body.acceptRules) throw new Error("You must agree to the community rules.");
-  const haystack = `${body.title || ""} ${body.description || ""} ${body.category || ""}`.toLowerCase();
-  const found = RESTRICTED_GIFTING_TERMS.find(term => haystack.includes(term));
-  if (found) throw new Error("This post appears to include a restricted item. Please revise or contact an admin.");
-}
-
-function giftingPostingOpen(): boolean {
-  return Date.now() < GIFTING_RUN_END || process.env.GIFTING_KEEP_OPEN === "true";
-}
-
-function getBaseUrl(req: any) {
-  const proto = req.get("x-forwarded-proto") || req.protocol || "https";
-  return `${proto}://${req.get("host")}`;
-}
-
-function googleRedirectUri(_req: any) {
-  // Always use www so OAuth state cookie + Google redirect URI stay on one host.
-  return process.env.GOOGLE_REDIRECT_URI || "https://www.zaylist.com/api/auth/google/callback";
-}
-
-const GOOGLE_OAUTH_STATE_MAX_MS = 15 * 60 * 1000;
-const GOOGLE_OAUTH_STATE_COOKIE = "pdx_g_oauth";
-
-function sessionSecret(): string {
-  return process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? "" : "pdxpride_secret_dev_only");
-}
-
-function hmacSign(payload: string): string {
-  return crypto.createHmac("sha256", sessionSecret()).update(payload).digest("base64url");
-}
-
-function safeEqualStr(a: string, b: string): boolean {
-  const ba = Buffer.from(a);
-  const bb = Buffer.from(b);
-  if (ba.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ba, bb);
-}
-
-/** Stateless OAuth CSRF token - survives mobile browsers that drop the session cookie mid Google hop. */
-
-function createGoogleOAuthState(linkUserId?: number, returnTo?: string): string {
-  const body = Buffer.from(JSON.stringify({
-    n: crypto.randomBytes(16).toString("hex"),
-    t: Date.now(),
-    ...(linkUserId ? { l: linkUserId } : {}),
-    ...(returnTo ? { r: returnTo } : {}),
-  })).toString("base64url");
-  return `${body}.${hmacSign(body)}`;
-}
-
-function parseGoogleOAuthState(state: string): { linkUserId?: number; returnTo?: string } | null {
-  if (!state || !sessionSecret()) return null;
-  const dot = state.lastIndexOf(".");
-  if (dot <= 0) return null;
-  const body = state.slice(0, dot);
-  const sig = state.slice(dot + 1);
-  if (!sig || !safeEqualStr(sig, hmacSign(body))) return null;
-  try {
-    const data = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as {
-      n?: string;
-      t?: number;
-      l?: number;
-      r?: string;
-    };
-    if (!data.n || typeof data.t !== "number") return null;
-    if (Date.now() - data.t > GOOGLE_OAUTH_STATE_MAX_MS || data.t > Date.now() + 60_000) return null;
-    return { ...(typeof data.l === "number" ? { linkUserId: data.l } : {}), returnTo: safeMapReturnTo(data.r) };
-  } catch {
-    return null;
-  }
-}
-
-function readCookie(req: any, name: string): string | undefined {
-  const header = String(req.headers?.cookie || "");
-  if (!header) return undefined;
-  for (const part of header.split(";")) {
-    const [k, ...rest] = part.trim().split("=");
-    if (k === name) return decodeURIComponent(rest.join("="));
-  }
-  return undefined;
-}
-
-function setGoogleOAuthStateCookie(res: any, state: string) {
-  const secure = productionSecureCookies() ? "; Secure" : "";
-  // append - never replace the session Set-Cookie express-session already queued
-  res.append(
-    "Set-Cookie",
-    `${GOOGLE_OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(GOOGLE_OAUTH_STATE_MAX_MS / 1000)}${secure}`,
-  );
-}
-
-function clearGoogleOAuthStateCookie(res: any) {
-  const secure = productionSecureCookies() ? "; Secure" : "";
-  res.append(
-    "Set-Cookie",
-    `${GOOGLE_OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`,
-  );
-}
-
-function googleOAuthErrorPage(message: string): string {
-  const safe = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Google sign-in</title>
-<style>body{font-family:system-ui,sans-serif;background:#06060a;color:#f4f1ea;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
-.card{max-width:420px;background:#0c0c0f;border:1.5px solid #1c1c22;border-radius:14px;padding:28px}
-h1{font-size:1.25rem;margin:0 0 10px}p{color:#c8c4bb;line-height:1.5;margin:0 0 18px}
-a{display:inline-block;background:#c8fa3c;color:#06060a;font-weight:800;text-decoration:none;padding:12px 16px;border-radius:8px;margin-right:10px;margin-top:6px}
-a.sec{background:transparent;color:#19e3ff;border:1px solid #19e3ff}</style></head>
-<body><div class="card"><h1>Google sign-in didnâ€™t finish</h1><p>${safe}</p>
-<a href="/api/auth/google">Try Google again</a>
-<a class="sec" href="/">Back home</a></div></body></html>`;
-}
-
-function makeUsername(email: string) {
-  const base = email
-    .split("@")[0]
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 22) || "google_user";
-  let username = base.length >= 3 ? base : `${base}_user`;
-  let suffix = 1;
-  while (storage.getUserByUsername(username)) {
-    username = `${base.slice(0, 18)}_${suffix++}`;
-  }
-  return username;
-}
-
-function maybeSyncSiteOwnerPortfolio(user: { id?: number; email?: string | null; username?: string | null } | null | undefined) {
-  if (storage.isSiteOwnerUser(user)) storage.syncSiteOwnerPortfolio();
-}
-
-function requireAuth(req: any, res: any, next: any) {
-  if (!req.session?.userId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  let user = storage.getUserById(req.session.userId);
-  if (!user || user.status === "deleted") {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  user = storage.clearExpiredAccountModeration(user.id) || user;
-  // Suspended accounts may only hit auth/status/appeal endpoints.
-  if (user.status === "suspended") {
-    const path = String(req.path || req.url || "");
-    const allowed =
-      path.includes("/auth/me") ||
-      path.includes("/auth/logout") ||
-      path.includes("/auth/suspension-appeal") ||
-      path.includes("/auth/community-standards");
-    if (!allowed && req.method !== "GET") {
-      return res.status(403).json({
-        error: "Account suspended",
-        suspended: true,
-        suspendReasonLabel: user.suspendReasonLabel || null,
-        suspendUntil: user.suspendUntil || null,
-      });
-    }
-  }
-  next();
-}
-
-function requireAdmin(req: any, res: any, next: any) {
-  const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-  if (markAdminSessionForUser(req, user)) {
-    return next();
-  }
-  return res.status(401).json({ error: "Not authenticated" });
-}
-
-const requireEventResearchAccess = allowAdminOrEventResearchAgent(requireAdmin);
-
-function getSessionAdminUser(req: any) {
-  if (!req.session?.userId) return null;
-  const user = storage.getUserById(req.session.userId);
-  if (!isMainAdminUser(user)) return null;
-  req.session.isAdmin = true;
-  return user;
-}
-
-function sessionIsAdmin(req: any): boolean {
-  const user = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-  return markAdminSessionForUser(req, user);
-}
-
-function getAdminActorUserId(req: any): number | null {
-  const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-  if (sessionUser && isMainAdminUser(sessionUser)) return sessionUser.id;
-  for (const email of ADMIN_USER_EMAILS) {
-    const u = storage.getUserByEmail(email);
-    if (u) return u.id;
-  }
-  for (const uname of ADMIN_USERNAMES) {
-    const u = storage.getUserByUsername(uname);
-    if (u) return u.id;
-  }
-  return null;
-}
-
-/** Acting admin for audit logs (session user preferred over env fallback). */
-function getAdminActor(req: any): { id: number | null; username: string | null } {
-  const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-  if (sessionUser && storage.userIsSiteAdmin(sessionUser)) {
-    return { id: sessionUser.id, username: sessionUser.username || null };
-  }
-  const main = getSessionAdminUser(req);
-  if (main) return { id: main.id, username: main.username || null };
-  return { id: getAdminActorUserId(req), username: null };
-}
-
-function auditAdmin(
-  req: any,
-  action: string,
-  target?: {
-    type?: string | null;
-    id?: string | number | null;
-    label?: string | null;
-    detail?: Record<string, unknown> | null;
-  },
-) {
-  const actor = getAdminActor(req);
-  storage.logAdminAction({
-    actorUserId: actor.id,
-    actorUsername: actor.username,
-    action,
-    targetType: target?.type ?? null,
-    targetId: target?.id ?? null,
-    targetLabel: target?.label ?? null,
-    detail: target?.detail ?? null,
-  });
-}
-
-function auditEventResearch(
-  req: any,
-  action: string,
-  target?: {
-    type?: string | null;
-    id?: string | number | null;
-    label?: string | null;
-    detail?: Record<string, unknown> | null;
-  },
-) {
-  const actor = eventResearchActor(req);
-  if (!actor) return auditAdmin(req, action, target);
-  storage.logAdminAction({
-    actorUserId: null,
-    actorUsername: actor,
-    action,
-    targetType: target?.type ?? null,
-    targetId: target?.id ?? null,
-    targetLabel: target?.label ?? null,
-    detail: target?.detail ?? null,
-  });
-}
-
-let attendanceHub: ReturnType<typeof initAttendanceWs> | null = null;
-
-function notifyAttendanceUpdate(eventId: number) {
-  attendanceHub?.broadcastAttendance(eventId);
-}
-
-export function registerRoutes(httpServer: Server, app: Express) {
-  assertProductionPersistence();
-  assertProductionSecrets();
-  registerGoogleTileRoutes(app);
-
-  // QSEARCH was archived on 2026-08-30. Keep its code and database records for
-  // possible future recovery, but make every legacy action inert in production.
-  // Event research now runs as a Codex agent workflow, not this scraper/model.
-  app.all(
-    ["/api/admin/qsearch", "/api/admin/qsearch/*path"],
-    requireAdmin,
-    (_req, res) =>
-      res.status(410).json({
-        error: "QSEARCH is archived",
-        archived: true,
-        replacement: "QSearch 2.0",
-      }),
-  );
-
-  // The agent can read every old source pathway without reviving QSEARCH.
-  app.get("/api/admin/event-research/source-memory", requireEventResearchAccess, (_req, res) => {
-    res.json(getEventResearchSourceMemory());
-  });
-
-  app.get("/api/admin/event-research/control", requireEventResearchAccess, (_req, res) => {
-    res.json(getResearchControlState());
-  });
-
-  const sendResearchControlResult = (res: any, result: any, successStatus = 200) => {
-    if (!result.ok) return res.status(result.status || 400).json(result);
-    return res.status(successStatus).json(result);
-  };
-
-  app.post("/api/admin/event-research/runs", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, beginResearchRun(req.body || {}), 201);
-  });
-
-  app.post("/api/admin/event-research/runs/:id/source", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, markRunSource({ runId: req.params.id, ...req.body }));
-  });
-
-  app.post("/api/admin/event-research/source-memory/schedule", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, setSourceSchedule(req.body));
-  });
-
-  app.post("/api/admin/event-research/runs/:id/finish", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, finishResearchRun({ runId: req.params.id, ...req.body }));
-  });
-
-  app.post("/api/admin/event-research/evidence", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, recordFieldEvidence(req.body), 201);
-  });
-
-  app.post("/api/admin/event-research/identities", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, upsertEntityIdentity(req.body));
-  });
-
-  app.post("/api/admin/event-research/conflicts", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, recordConflict(req.body), 201);
-  });
-
-  app.post("/api/admin/event-research/review", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, enqueueResearchReview(req.body), 201);
-  });
-
-  app.post("/api/admin/event-research/media", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, recordMediaProvenance(req.body), 201);
-  });
-
-  app.post("/api/admin/event-research/mistake-tests", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, upsertMistakeTest(req.body));
-  });
-
-  app.post("/api/admin/event-research/mistake-tests/result", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, recordMistakeTestResult(req.body));
-  });
-
-  app.post("/api/admin/event-research/decision-gate", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, evaluateDecisionGate(req.body));
-  });
-
-  app.post("/api/admin/event-research/series", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, upsertEventSeries(req.body));
-  });
-
-  app.post("/api/admin/event-research/outcomes", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, recordDecisionOutcome(req.body), 201);
-  });
-
-  app.post("/api/admin/event-research/resolve", requireEventResearchAccess, (req, res) => {
-    sendResearchControlResult(res, resolveResearchItem(req.body));
-  });
-
-  app.post("/api/admin/event-research/source-memory/path", requireEventResearchAccess, (req, res) => {
-    const result = recordEventResearchPath({
-      runId: req.body?.runId != null ? String(req.body.runId) : null,
-      sourceKey: String(req.body?.sourceKey || ""),
-      label: String(req.body?.label || ""),
-      url: String(req.body?.url || ""),
-      pathType: req.body?.pathType != null ? String(req.body.pathType) : undefined,
-      outcome: String(req.body?.outcome || "candidate") as "candidate" | "success" | "failure",
-      discoveredFrom:
-        req.body?.discoveredFrom != null ? String(req.body.discoveredFrom) : null,
-      navigationRecipe:
-        req.body?.navigationRecipe != null ? String(req.body.navigationRecipe) : null,
-      fieldsFound: Array.isArray(req.body?.fieldsFound) ? req.body.fieldsFound : null,
-      requiresLogin:
-        typeof req.body?.requiresLogin === "boolean" ? req.body.requiresLogin : null,
-      evidenceNote:
-        req.body?.evidenceNote != null ? String(req.body.evidenceNote) : null,
-      error: req.body?.error != null ? String(req.body.error) : null,
-    });
-    if (!result.ok) return res.status(400).json(result);
-    auditEventResearch(req, "event_research_source_memory", {
-      type: "event_research_source",
-      id: String((result.path as any)?.id || ""),
-      detail: {
-        sourceKey: req.body?.sourceKey,
-        outcome: req.body?.outcome,
-        pathType: req.body?.pathType,
-      },
-    });
-    res.json(result);
-  });
-
-  /**
-   * Narrow machine catalog for QSearch 2.0. Unlike /api/admin/events, this
-   * omits member/admin profiles and accepts only the dedicated agent token or
-   * a live admin session.
-   */
-  app.get("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
-    const from = String(req.query.from || "").trim();
-    const events = storage
-      .getEvents({})
-      .filter(event => event.status === "LIVE" || event.status === "HIDDEN")
-      .filter(event => !from || String(event.dateEnd || event.dateStart || "") >= from)
-      .map(event => eventForResearchAgent(event as any));
-    res.json({ generatedAt: new Date().toISOString(), events });
-  });
-
-  app.get("/api/admin/event-research/changes", requireEventResearchAccess, (req, res) => {
-    res.json({
-      generatedAt: new Date().toISOString(),
-      changes: listEventResearchChanges(Number(req.query.limit) || 100),
-    });
-  });
-
-  app.post("/api/admin/event-research/events", requireEventResearchAccess, (req, res) => {
-    const result = createEventFromResearch({
-      candidateKey: req.body?.candidateKey,
-      event: req.body?.event,
-      evidenceReceipts: req.body?.evidenceReceipts,
-      reason: req.body?.reason,
-      mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
-      runId: req.body?.runId,
-      idempotencyKey: req.body?.idempotencyKey,
-      dryRun: req.body?.dryRun === true,
-    });
-    if (!result.ok) return res.status(result.status).json(result);
-    auditEventResearch(req, "event_research_event_create", {
-      type: "event",
-      id: result.event.id,
-      label: result.event.title,
-      detail: {
-        evidenceReceiptCount: result.evidenceReceipts.length,
-        rollbackAvailable: result.rollback.available,
-      },
-    });
-    res.status(201).json(result);
-  });
-
-  app.post("/api/admin/event-research/events/:id/change", requireEventResearchAccess, (req, res) => {
-    const result = applyEventResearchEventChange(Number(req.params.id), {
-      expectedUpdatedAt: String(req.body?.expectedUpdatedAt || ""),
-      patch: req.body?.patch,
-      evidenceReceipts: req.body?.evidenceReceipts,
-      reason: req.body?.reason,
-      mistakeTestsPassed: req.body?.mistakeTestsPassed === true,
-      runId: req.body?.runId,
-      idempotencyKey: req.body?.idempotencyKey,
-      dryRun: req.body?.dryRun === true,
-    });
-    if (!result.ok) return res.status(result.status).json(result);
-    auditEventResearch(req, "event_research_event_change", {
-      type: "event",
-      id: result.event.id,
-      label: result.event.title,
-      detail: {
-        changedFields: result.changedFields,
-        evidenceReceiptCount: result.evidenceReceipts.length,
-        rollbackAvailable: result.rollback.available,
-      },
-    });
-    res.json(result);
-  });
-
-  app.post(
-    "/api/admin/event-research/changes/:rollbackToken/rollback",
-    requireEventResearchAccess,
-    (req, res) => {
-      if (req.body?.confirm !== true) {
-        return res.status(400).json({ error: "confirm: true is required" });
-      }
-      const result = rollbackEventResearchChange(String(req.params.rollbackToken || ""));
-      if (!result.ok) return res.status(result.status).json(result);
-      auditEventResearch(req, "event_research_event_rollback", {
-        type: "event",
-        id: result.eventId,
-        detail: {
-          operation: result.operation,
-          alreadyRolledBack: result.alreadyRolledBack === true,
-          rolledBackAt: result.rolledBackAt,
-        },
-      });
-      res.json(result);
-    },
-  );
-
-  // Lightweight probe for Railway healthchecks - must not hit the DB.
-  // Public tip links (Venmo + optional Stripe Payment Link for Apple Pay / cards).
-  // Set STRIPE_PAYMENT_LINK (or TIP_STRIPE_URL) on Railway after creating a Payment Link.
-  app.get("/api/site/tip-links", (_req, res) => {
-    const stripe =
-      process.env.STRIPE_PAYMENT_LINK?.trim() ||
-      process.env.TIP_STRIPE_URL?.trim() ||
-      process.env.VITE_STRIPE_PAYMENT_LINK?.trim() ||
-      null;
-    const venmoHandle =
-      process.env.VENMO_HANDLE?.trim() ||
-      process.env.TIP_VENMO_HANDLE?.trim() ||
-      null;
-    res.setHeader("Cache-Control", "public, max-age=60");
-    res.json(buildTipLinks({ stripePaymentLink: stripe, venmoHandle }));
-  });
-
-  app.get("/api/health", (_req, res) => {
-    // Health must stay up even if the DB is briefly unavailable.
-    let pushSubscriptions = 0;
-    if (isPushConfigured()) {
-      try {
-        pushSubscriptions = storage.countActivePushSubscriptions();
-      } catch (err) {
-        console.error("[health] countActivePushSubscriptions failed:", err);
-      }
-    }
-    const gitShaRaw =
-      process.env.RAILWAY_GIT_COMMIT_SHA ||
-      process.env.RAILWAY_GIT_COMMIT_MESSAGE ||
-      process.env.GIT_COMMIT ||
-      "";
-    // Prefer full SHA when present; fall back to first token of commit message.
-    const gitSha = gitShaRaw.trim()
-      ? (gitShaRaw.match(/^[0-9a-f]{7,40}/i)?.[0] || gitShaRaw.trim().slice(0, 40))
-      : undefined;
-    const railwayEnvironment =
-      process.env.RAILWAY_ENVIRONMENT_NAME ||
-      process.env.RAILWAY_ENVIRONMENT ||
-      undefined;
-    const deploymentId = process.env.RAILWAY_DEPLOYMENT_ID || undefined;
-    res.json({
-      ok: true,
-      ts: new Date().toISOString(),
-      pushConfigured: isPushConfigured(),
-      emailConfigured: isTransactionalEmailConfigured(),
-      pushSubscriptions,
-      ...(gitSha ? { gitSha } : {}),
-      ...(railwayEnvironment ? { railwayEnvironment } : {}),
-      ...(deploymentId ? { deploymentId } : {}),
-    });
-  });
-
-  // Auto-generated game poster (Swedish-minimal, Sports Bra brand). Stateless
-  // image from short text params; small in-memory cache + long browser cache.
-  // Used as fallback art for watch-party games that have no flyer.
-  const gamePosterCache = new Map<string, Buffer>();
-  const clip = (s: unknown, n: number): string => String(s ?? "").slice(0, n);
-  app.get("/api/game-poster", async (req, res) => {
-    try {
-      const q = req.query as Record<string, string>;
-      const input = {
-        league: clip(q.league, 40) || "Game Day",
-        tag: clip(q.tag, 24) || "Watch Party",
-        away: clip(q.away, 60) || "Women's Sports",
-        home: clip(q.home, 60) || null,
-        dateLabel: clip(q.date, 40) || "This Week",
-        timeLabel: clip(q.time, 24) || "See Bar",
-      };
-      const key = JSON.stringify(input);
-      let png = gamePosterCache.get(key);
-      if (!png) {
-        png = await renderGamePosterPng(input);
-        if (gamePosterCache.size > 200) gamePosterCache.clear();
-        gamePosterCache.set(key, png);
-      }
-      res.set("Content-Type", "image/png");
-      res.set("Cache-Control", "public, max-age=86400, immutable");
-      return res.send(png);
-    } catch (err) {
-      return res.status(500).json({ error: "poster render failed" });
-    }
-  });
-
-  // 1200Ã—630 branded social cards (replace raw flyer/logo in og:image)
-  app.get("/api/og/event/:id", async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
-      const { renderEventOgCard } = await import("./ogCards");
-      const buf = await renderEventOgCard(id);
-      if (!buf) return res.status(404).json({ error: "Event not found" });
-      res.set({
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
-      });
-      return res.send(buf);
-    } catch (err) {
-      console.error("GET /api/og/event failed:", err);
-      return res.status(500).json({ error: "Could not render card" });
-    }
-  });
-
-  app.get("/api/og/place/:id", async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
-      const { renderPlaceOgCard } = await import("./ogCards");
-      const buf = await renderPlaceOgCard(id);
-      if (!buf) return res.status(404).json({ error: "Place not found" });
-      res.set({
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
-      });
-      return res.send(buf);
-    } catch (err) {
-      console.error("GET /api/og/place failed:", err);
-      return res.status(500).json({ error: "Could not render card" });
-    }
-  });
-
-  app.get("/api/og/profile/:username", async (req, res) => {
-    try {
-      const username = String(req.params.username || "").trim().replace(/^@/, "");
-      if (!username) return res.status(400).json({ error: "Invalid username" });
-      const { renderProfileOgCard } = await import("./ogCards");
-      const buf = await renderProfileOgCard(username);
-      if (!buf) return res.status(404).json({ error: "Profile not found" });
-      res.set({
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=1800, stale-while-revalidate=86400",
-      });
-      return res.send(buf);
-    } catch (err) {
-      console.error("GET /api/og/profile failed:", err);
-      return res.status(500).json({ error: "Could not render card" });
-    }
-  });
-
-  attendanceHub = initAttendanceWs(httpServer);
-  storage.syncSiteOwnerPortfolio();
-
-  // Machine-readable discovery for search engines and AI crawlers.
-  app.get("/llms.txt", (_req, res) => {
-    res.type("text/plain; charset=utf-8").send(buildLlmsTxt(getLiveEventsForSeo()));
-  });
-
-  app.get("/sitemap.xml", (_req, res) => {
-    res.type("application/xml; charset=utf-8").send(buildSitemapXml(getLiveEventsForSeo()));
-  });
-
-  app.get("/robots.txt", (_req, res) => {
-    res.type("text/plain; charset=utf-8").send(buildRobotsTxt());
-  });
-
-  // Session middleware - persisted on the same SQLite volume as user data
-  app.use(createSessionMiddleware(sqlite));
-  registerCommunityRoutes(app, requireAuth);
-  registerPlatformV1(app);
-
-  // â”€â”€â”€ FILE UPLOADS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Poster image upload (event submit / claim edit)
-  app.post("/api/upload/poster", requireAuth, upload.single("poster"), (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
-    res.json({ url: `/uploads/${req.file.filename}` });
-  });
-  app.post("/api/upload/message-attachment", requireAuth, upload.single("attachment"), (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "Choose a JPG, PNG, GIF, or WebP image up to 8MB" });
-    res.json({ url: `/uploads/${req.file.filename}`, name: req.file.originalname });
-  });
-
-  // Flyer autofill: a submitter uploads a poster; we read it (OCR + vision) and
-  // return SUGGESTED form fields for them to review. Suggestions only - nothing
-  // is created here; the real submit still goes through /api/submit's moderation.
-  // Daily caps + the shared FLYER_LLM_DISABLED kill switch keep vision cost bounded.
-  const flyerAutofill = { day: "", perUser: new Map<string, number>(), global: 0 };
-  const FLYER_AUTOFILL_USER_DAILY = Math.max(1, Number(process.env.FLYER_AUTOFILL_USER_DAILY) || 10);
-  const FLYER_AUTOFILL_GLOBAL_DAILY = Math.max(1, Number(process.env.FLYER_AUTOFILL_GLOBAL_DAILY) || 200);
-  app.post("/api/flyer-autofill", requireAuth, async (req: any, res: any) => {
-    try {
-      const today = new Date().toISOString().slice(0, 10);
-      if (flyerAutofill.day !== today) {
-        flyerAutofill.day = today;
-        flyerAutofill.perUser.clear();
-        flyerAutofill.global = 0;
-      }
-      const uid = String(req.session?.userId ?? req.user?.id ?? "anon");
-      const used = flyerAutofill.perUser.get(uid) || 0;
-      if (flyerAutofill.global >= FLYER_AUTOFILL_GLOBAL_DAILY || used >= FLYER_AUTOFILL_USER_DAILY) {
-        return res
-          .status(429)
-          .json({ error: "Flyer autofill limit reached for today - you can still fill the form in manually." });
-      }
-
-      const uploadUrl = String(req.body?.uploadUrl || "");
-      if (!uploadUrl.startsWith("/uploads/")) {
-        return res.status(400).json({ error: "Upload the flyer first, then autofill." });
-      }
-      // Confine to UPLOADS_DIR (no traversal) and cap size.
-      const filePath = path.join(UPLOADS_DIR, path.basename(uploadUrl));
-      if (!filePath.startsWith(UPLOADS_DIR) || !fs.existsSync(filePath)) {
-        return res.status(404).json({ error: "Flyer not found." });
-      }
-      if (fs.statSync(filePath).size > 8 * 1024 * 1024) {
-        return res.status(413).json({ error: "Flyer too large (max 8MB)." });
-      }
-
-      const imageBuffer = fs.readFileSync(filePath);
-      const { ocrFlyer } = await import("./flyerReader/ocr");
-      const { structureFlyer } = await import("./flyerReader/parse");
-      let rawText = "";
-      let ocrConfidence: number | undefined;
-      try {
-        const ocr = await ocrFlyer(imageBuffer);
-        rawText = ocr.text;
-        ocrConfidence = ocr.confidence;
-      } catch {
-        /* OCR optional - vision reads the image directly */
-      }
-      const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence });
-
-      // Count only a successful read against the cap.
-      flyerAutofill.perUser.set(uid, used + 1);
-      flyerAutofill.global += 1;
-
-      // Shape to the Submit form (datetime-local "YYYY-MM-DDTHH:mm").
-      const dateStart = parse.start_date ? `${parse.start_date}T${parse.time || "21:00"}` : null;
-      const dateEnd = parse.end_date ? `${parse.end_date}T02:00` : null;
-      return res.json({
-        ok: true,
-        confidence: parse.confidence,
-        model: parse.model,
-        fields: {
-          title: parse.title,
-          description: parse.description,
-          venueName: parse.venue,
-          address: parse.address,
-          dateStart,
-          dateEnd,
-          ticketUrl: parse.url,
-        },
-      });
-    } catch (err) {
-      return res.status(500).json({ error: "Could not read that flyer - please fill the form in manually." });
-    }
-  });
-
-  app.post("/api/admin/upload/poster", requireAdmin, upload.single("poster"), (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
-    res.json({ url: `/uploads/${req.file.filename}` });
-  });
-
-  // Profile photo upload (client sends pre-cropped circle JPEG from AvatarEditor)
-  app.post("/api/upload/avatar", requireAuth, upload.single("avatar"), async (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
-    const url = `/uploads/${req.file.filename}`;
-    res.json({ url });
-  });
-
-  // Profile cover image upload (full image; client stores crop/position metadata separately)
-  app.post("/api/upload/cover", requireAuth, upload.single("cover"), async (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type" });
-    const url = `/uploads/${req.file.filename}`;
-    res.json({ url });
-  });
-
-  app.post("/api/upload/gifting", requireAuth, upload.array("photos", 2), (req: any, res: any) => {
-    const files = Array.isArray(req.files) ? req.files : [];
-    if (!files.length) return res.status(400).json({ error: "Upload 1 or 2 image files (jpg/png/gif/webp, max 8MB each)" });
-    res.json({ urls: files.slice(0, 2).map((file: any) => `/uploads/${file.filename}`) });
-  });
-  app.post("/api/upload/sellz", requireAuth, upload.array("photos", 6), (req: any, res: any) => {
-    const files = Array.isArray(req.files) ? req.files : [];
-    if (!files.length) return res.status(400).json({ error: "Upload 1 to 6 image files (jpg/png/gif/webp, max 8MB each)" });
-    res.json({ urls: files.slice(0, 6).map((file: any) => `/uploads/${file.filename}`) });
-  });
-
-  // Public "Message me" / sponsorship pitch / custom order form - no login required, lands in Owner Desk only.
-  app.post("/api/contact/message", contactUpload.array("attachments", 3), (req: any, res: any) => {
-    const honeypot = String(req.body?.company || "").trim();
-    if (honeypot) return res.json({ ok: true }); // bot filled the hidden field - silently drop
-
-    const kindRaw = String(req.body?.kind || "message").trim().toLowerCase();
-    const kind =
-      kindRaw === "sponsor" ? "sponsor" as const
-      : kindRaw === "order" ? "order" as const
-      : "message" as const;
-    const name = String(req.body?.name || "").trim().slice(0, 120);
-    const email = String(req.body?.email || "").trim().slice(0, 200);
-    const phone = String(req.body?.phone || "").trim().slice(0, 40);
-    const message = String(req.body?.message || "").trim().slice(0, 4000);
-    const businessName = String(req.body?.businessName || "").trim().slice(0, 160);
-    const lengthNeeded = String(req.body?.lengthNeeded || "").trim().slice(0, 120);
-    const sponsorshipType = String(req.body?.sponsorshipType || "").trim().slice(0, 80);
-    const size = String(req.body?.size || "").trim().slice(0, 80);
-    const hangingSpace = String(req.body?.hangingSpace || "").trim().slice(0, 800);
-    const ceilingHeight = String(req.body?.ceilingHeight || "").trim().slice(0, 120);
-
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: "Name, email, and message are required." });
-    }
-    if (kind === "sponsor" && (!businessName || !lengthNeeded)) {
-      return res.status(400).json({ error: "Business name and length of time needed are required." });
-    }
-    if (kind === "order" && (!size || !hangingSpace || !ceilingHeight)) {
-      return res.status(400).json({ error: "Size, hanging space, and ceiling height are required for an order inquiry." });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: "Enter a valid email address." });
-    }
-
-    const files = Array.isArray(req.files) ? req.files : [];
-    const attachmentUrls = files.map((file: any) => `/uploads/${file.filename}`);
-
-    const pageUrl = String(req.body?.pageUrl || req.get("referer") || "/about").slice(0, 500);
-    const delivered = storage.sendPortfolioContactMessage({
-      kind,
-      name,
-      email,
-      phone: phone || undefined,
-      message,
-      businessName: businessName || undefined,
-      lengthNeeded: lengthNeeded || undefined,
-      sponsorshipType: sponsorshipType || undefined,
-      size: size || undefined,
-      hangingSpace: hangingSpace || undefined,
-      ceilingHeight: ceilingHeight || undefined,
-      attachmentUrls,
-      pageUrl,
-    });
-    if (!delivered) return res.status(500).json({ error: "Could not deliver the message right now." });
-    void sendOwnerDeskNotification().catch(err => {
-      console.error("[email] owner desk notification failed:", err instanceof Error ? err.message : err);
-    });
-    res.json({ ok: true });
-  });
-
-  // Serve uploaded files statically (ESM-safe - do not use require())
-  app.use("/uploads", express.static(UPLOADS_DIR));
-
-  // â”€â”€â”€ ANALYTICS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/analytics/pageview", (req, res) => {
-    const schema = z.object({
-      path: z.string().trim().min(1).max(240),
-      visitorId: z.string().trim().min(8).max(80),
-      sessionId: z.string().trim().min(8).max(80),
-      referrer: z.string().trim().max(500).optional().nullable(),
-      deviceType: z.enum(["mobile", "desktop", "tablet"]).optional().nullable(),
-      userId: z.number().int().positive().optional().nullable(),
-    });
-    try {
-      const data = schema.parse(req.body);
-      const ok = recordPageView(sqlite, {
-        path: data.path,
-        visitorId: data.visitorId,
-        sessionId: data.sessionId,
-        referrer: data.referrer,
-        deviceType: data.deviceType,
-        userId: data.userId ?? req.session?.userId ?? null,
-      });
-      if (!ok) return res.status(204).end();
-      res.json({ ok: true });
-    } catch {
-      res.status(400).json({ error: "Invalid analytics payload" });
-    }
-  });
-
-  app.post("/api/analytics/product-event", (req, res) => {
-    const schema = z.object({
-      eventName: z.enum(PRODUCT_EVENT_NAMES),
-      surface: z.string().trim().min(1).max(60).regex(/^[a-z0-9:_-]+$/),
-      value: z.number().nonnegative().max(3_600_000).optional().nullable(),
-      visitorId: z.string().trim().min(8).max(80),
-      sessionId: z.string().trim().min(8).max(80),
-    });
-    try {
-      const data = schema.parse(req.body);
-      const ok = recordProductEvent(sqlite, { ...data, userId: req.session?.userId ?? null });
-      if (!ok) return res.status(204).end();
-      res.json({ ok: true });
-    } catch {
-      res.status(400).json({ error: "Invalid analytics payload" });
-    }
-  });
-
-  // â”€â”€â”€ EVENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/events", (req, res) => {
-    const { day } = req.query;
-    // Collapse same-day/same-time duplicates so the public board never shows the
-    // same event twice (non-destructive â€” nothing is deleted from the DB).
-    let evts = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
-    if (typeof day === "string" && day.length > 0) {
-      evts = evts.filter(evt => evt.dayOfWeek === day);
-    }
-    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    const websites = venueWebsiteIndex();
-    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
-  });
-
-  /**
-   * Lifetime event count for the About page â€” every distinct event the site has
-   * ever published (LIVE now or previously public then REMOVED), de-duped so
-   * same-day/same-time doubles count once. HIDDEN drafts were never public.
-   */
-  app.get("/api/events/total", (_req, res) => {
-    const published = storage
-      .getEvents({})
-      .filter(e => e.status === "LIVE" || e.status === "REMOVED");
-    const total = new Set(published.map(e => eventDedupeKey(e))).size;
-    res.json({ total });
-  });
-
-  app.get("/api/events/unclaimed", (req, res) => {
-    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    const websites = venueWebsiteIndex();
-    const evts = storage.getEvents({ status: "LIVE" }).filter(evt =>
-      evt.isClaimable && !evt.claimedBy && !pendingClaimIds.has(evt.id)
-      && isPublicEventVisibleUnderPrideCap(evt)
-    );
-    res.json(evts.map(evt => publicEvent(evt, pendingClaimIds, websites)));
-  });
-
-  app.get("/api/events/attendance-summaries", (_req, res) => {
-    res.json(storage.getAttendanceSummaries());
-  });
-
-  // Homepage counters need three numbers, not the full event, directory, and
-  // attendance payloads. In particular, /api/directory enriches every place
-  // with events, promoters, boards, followers, and viewer state; using it for
-  // a count made the strip wait several seconds on otherwise unnecessary work.
-  app.get("/api/home/stats", (_req, res) => {
-    const now = Date.now();
-    const windowEnd = now + 7 * 24 * 60 * 60 * 1000;
-    const liveEvents = dedupeEvents(expandMultiDayEvents(storage.getEvents({ status: "LIVE" })));
-    const eventCount = liveEvents.filter(event => {
-      const start = parsePacificDateTime(event.dateStart);
-      if (start == null) return false;
-      const end = parsePacificDateTime(event.dateEnd) ?? start;
-      return end >= now && start <= windowEnd;
-    }).length;
-    const placesCount = storage.getBusinesses().length;
-    const goingCount = Object.values(storage.getAttendanceSummaries())
-      .reduce((sum, summary) => sum + (summary?.count ?? 0), 0);
-
-    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=120");
-    res.json({ eventCount, placesCount, goingCount });
-  });
-
-  // â”€â”€ Next-page waypoint likes: anonymous "excited for this" counter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const WAYPOINT_ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
-  const bumpWaypointLike = (id: string, delta: number) => {
-    sqlite.prepare(`INSERT OR IGNORE INTO waypoint_likes (waypoint_id, count) VALUES (?, 0)`).run(id);
-    sqlite.prepare(`UPDATE waypoint_likes SET count = MAX(0, count + ?) WHERE waypoint_id = ?`).run(delta, id);
-    const row = sqlite.prepare(`SELECT count FROM waypoint_likes WHERE waypoint_id = ?`).get(id) as { count: number } | undefined;
-    return row?.count ?? 0;
-  };
-
-  app.get("/api/next/likes", (_req, res) => {
-    const rows = sqlite.prepare(`SELECT waypoint_id AS id, count FROM waypoint_likes`).all() as Array<{ id: string; count: number }>;
-    const out: Record<string, number> = {};
-    for (const r of rows) out[r.id] = r.count;
-    res.json(out);
-  });
-
-  app.post("/api/next/likes/:id", (req, res) => {
-    const id = String(req.params.id || "").toLowerCase();
-    if (!WAYPOINT_ID.test(id)) return res.status(400).json({ error: "bad id" });
-    res.json({ id, count: bumpWaypointLike(id, 1) });
-  });
-
-  app.delete("/api/next/likes/:id", (req, res) => {
-    const id = String(req.params.id || "").toLowerCase();
-    if (!WAYPOINT_ID.test(id)) return res.status(400).json({ error: "bad id" });
-    res.json({ id, count: bumpWaypointLike(id, -1) });
-  });
-
-  app.get("/api/nude-beaches", async (_req, res) => {
-    try {
-      const result = await getNudeBeachesSnapshot();
-      res.json(result);
-    } catch (err) {
-      console.error("GET /api/nude-beaches failed:", err);
-      res.status(502).json({ error: "Could not load beach conditions" });
-    }
-  });
-
-  app.post("/api/nude-beaches/refresh", async (_req, res) => {
-    try {
-      const result = await forceRefreshNudeBeachesSnapshot();
-      res.json({
-        data: result.data,
-        stale: false,
-        fromCache: false,
-        rateLimited: !!result.rateLimited,
-      });
-    } catch (err) {
-      console.error("POST /api/nude-beaches/refresh failed:", err);
-      res.status(502).json({ error: "Could not refresh beach conditions" });
-    }
-  });
-
-  // OUTZ (official outdoor conditions + catalog)
-  app.get("/api/outz", async (_req, res) => {
-    try {
-      res.json(await getOutzSnapshot());
-    } catch (err) {
-      console.error("GET /api/outz failed:", err);
-      res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
-    }
-  });
-
-  app.get("/api/outz/details", async (req, res) => {
-    try {
-      const id = typeof req.query.place === "string" ? req.query.place : "";
-      if (!id || id.length > 180) return res.status(400).json({ error: "Invalid destination" });
-      const data = await getOutzDetails(id, (await getOutzSnapshot()).data);
-      if (!data) return res.status(404).json({ error: "Unknown destination" });
-      res.setHeader("Cache-Control", "no-store");
-      res.json(data);
-    } catch { res.status(502).json({ error: "Spot details unavailable" }); }
-  });
-
-  app.get("/api/outz/feed", async (req: any, res) => {
-    res.setHeader("Cache-Control", "private, no-store");
-    try {
-      const [snapshot, weather] = await Promise.all([getOutzSnapshot(), getOutzFeedWeather()]);
-      res.json({ items: [...weather.items, ...getOutzCommunityFeed(snapshot.data, req.session?.userId)],
-        fetchedAt: new Date().toISOString(), weatherUnavailable: weather.unavailable, weatherUpdatedAt: weather.updatedAt });
-    } catch (error) {
-      console.error("GET /api/outz/feed failed:", error);
-      res.status(502).json({ error: "Outdoor updates are temporarily unavailable" });
-    }
-  });
-
-  app.post("/api/outz/refresh", async (_req, res) => {
-    try {
-      const result = await forceRefreshOutzSnapshot();
-      res.json(result);
-    } catch (err) {
-      console.error("POST /api/outz/refresh failed:", err);
-      res.status(502).json({ error: "Outdoor conditions are temporarily unavailable" });
-    }
-  });
-
-  const knownOutzPlace = async (value: unknown) => {
-    const placeId = String(value || "").trim();
-    if (!placeId || placeId.length > 180) return null;
-    const snapshot = (await getOutzSnapshot()).data;
-    const known = [
-      ...snapshot.destinations.map(place => place.id),
-      ...snapshot.catalog.map(place => place.id),
-      ...snapshot.communityStays.map(place => place.id),
-    ];
-    return known.includes(placeId) ? placeId : null;
-  };
-
-  app.get("/api/outz/checkins", async (req: any, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.query.place);
-      const date = String(req.query.date || pacificTodayDate());
-      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
-      res.json(getOutzCheckins(placeId, date, req.session?.userId));
-    } catch (error) {
-      console.error("GET /api/outz/checkins failed:", error);
-      res.status(502).json({ error: "Could not load OUTZ check-ins" });
-    }
-  });
-
-  app.post("/api/outz/checkins", requireAuth, async (req, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.body.placeId);
-      const requestedDates: unknown[] = Array.isArray(req.body.dates) ? req.body.dates : [req.body.date || pacificTodayDate()];
-      const dates: string[] = [...new Set(requestedDates.map((value: unknown) => String(value)))];
-      const arrivalHour = Number(req.body.arrivalHour);
-      const departHour = Number(req.body.departHour);
-      if (!placeId || dates.length === 0 || dates.length > 7 || dates.some(date => !isAllowedBeachCheckinDate(date))) {
-        return res.status(400).json({ error: "Choose one or more valid OUTZ check-in days" });
-      }
-      if (!isValidRiverBratsHour(arrivalHour) || !isValidRiverBratsDepartHour(departHour, arrivalHour)) {
-        return res.status(400).json({ error: "Choose an arrival between 7am and 9pm and a later departure by 10pm" });
-      }
-      const note = String(req.body.note || "").trim().slice(0, 80) || null;
-      if (moderationGate(res, "OUTZ check-in", { note: note || "" })) return;
-      const checkins = dates.map(date => upsertOutzCheckin({
-        userId: req.session.userId!, placeId, arrivalHour, departHour, note, calendarDate: date,
-        isAnonymous: Boolean(req.body.isAnonymous),
-      }));
-      res.json({ checkins });
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Could not save OUTZ check-in" });
-    }
-  });
-
-  app.delete("/api/outz/checkins/:id", requireAuth, (req, res) => {
-    if (!deleteOutzCheckin(Number(req.params.id), req.session.userId!)) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/outz/chat", requireAuth, async (req: any, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.query.place);
-      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
-      res.json(getOutzChatMessages(placeId, req.session.userId!));
-    } catch (error) {
-      console.error("GET /api/outz/chat failed:", error);
-      res.status(502).json({ error: "Could not load OUTZ chat" });
-    }
-  });
-
-  app.post("/api/outz/chat", requireAuth, async (req, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.body.placeId);
-      const date = String(req.body.date || pacificTodayDate());
-      const body = String(req.body.body || "").trim();
-      if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
-      if (!body || body.length > 500) return res.status(400).json({ error: "Message must be 1 to 500 characters" });
-      if (moderationGate(res, "OUTZ group chat", { body })) return;
-      res.json(postOutzChatMessage(placeId, date, req.session.userId!, body));
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Could not send message" });
-    }
-  });
-
-  app.get("/api/outz/rating", async (req: any, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.query.place);
-      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
-      res.json(getOutzPlaceRating(placeId, req.session?.userId));
-    } catch (error) {
-      console.error("GET /api/outz/rating failed:", error);
-      res.status(502).json({ error: "Could not load rating" });
-    }
-  });
-
-  app.post("/api/outz/rating", requireAuth, async (req, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.body.placeId);
-      const rating = Number(req.body.rating);
-      if (!placeId || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ error: "Choose a rating from 1 to 5" });
-      res.json(upsertOutzPlaceRating(placeId, req.session.userId!, rating));
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Could not save rating" });
-    }
-  });
-
-  app.get("/api/outz/wall", async (req: any, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.query.place);
-      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
-      res.json(getOutzWallPosts(placeId, req.session?.userId));
-    } catch (error) {
-      console.error("GET /api/outz/wall failed:", error);
-      res.status(502).json({ error: "Could not load destination wall" });
-    }
-  });
-
-  app.post("/api/outz/wall", requireAuth, async (req, res) => {
-    try {
-      const placeId = await knownOutzPlace(req.body.placeId);
-      const postKind = String(req.body.postKind || "");
-      const body = String(req.body.body || "").trim();
-      const tripDate = req.body.tripDate ? String(req.body.tripDate) : null;
-      if (!placeId || !["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
-      if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
-      if (tripDate && !isAllowedBeachCheckinDate(tripDate)) return res.status(400).json({ error: "Choose a trip day in the next week" });
-      if (moderationGate(res, "OUTZ trip board post", { body })) return;
-      res.json(createOutzWallPost({ placeId, userId: req.session.userId!, postKind, body, tripDate }));
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Could not post to destination wall" });
-    }
-  });
-
-  app.patch("/api/outz/wall/:id", requireAuth, (req, res) => {
-    const body = String(req.body.body || "").trim();
-    if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
-    if (moderationGate(res, "OUTZ trip board edit", { body })) return;
-    if (!updateOutzWallPost(Number(req.params.id), req.session.userId!, body)) return res.status(404).json({ error: "Post not found" });
-    res.json({ ok: true });
-  });
-  app.delete("/api/outz/wall/:id", requireAuth, (req, res) => {
-    if (!deleteOutzWallPost(Number(req.params.id), req.session.userId!)) return res.status(404).json({ error: "Post not found" });
-    res.status(204).end();
-  });
-
-  app.post("/api/outz/wall/:id/comments", requireAuth, (req, res) => {
-    try {
-      const body = String(req.body.body || "").trim();
-      if (!body || body.length > 300) return res.status(400).json({ error: "Comment must be 1 to 300 characters" });
-      if (moderationGate(res, "OUTZ destination comment", { body })) return;
-      res.json(createOutzWallComment({ postId: Number(req.params.id), userId: req.session.userId!, body }));
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Could not post comment" });
-    }
-  });
-
-  app.get("/api/events/:id", (req, res) => {
-    const eventId = Number(req.params.id);
-    if (isTuckerHostedArchiveId(eventId)) {
-      const row = getTuckerHostedArchiveRow(eventId);
-      if (!row) return res.status(404).json({ error: "Not found" });
-      const archiveEvt = tuckerHostedArchiveAsEvent(row);
-      const listing = expandMultiDayEvents([archiveEvt])[0] || archiveEvt;
-      return res.json(publicEvent(listing, new Set(), venueWebsiteIndex()));
-    }
-    const evt = storage.getEvent(eventId);
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    // Public detail must match list: only LIVE. Admins may open HIDDEN for moderation.
-    if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
-      return res.status(404).json({ error: "Not found" });
-    }
-    // Public detail must match list: suppress post-Pride starts while the lock is active.
-    if (!sessionIsAdmin(req) && !isPublicEventVisibleUnderPrideCap(evt)) {
-      return res.status(404).json({ error: "Not found" });
-    }
-    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
-    const expanded = expandMultiDayEvents([evt]);
-    const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
-    // Prefer expanded listing; do not fall back to raw post-Pride rows for public.
-    const listing =
-      (day ? expanded.find(e => e.dayOfWeek === day) : undefined)
-      || expanded[0]
-      || (sessionIsAdmin(req) ? evt : null);
-    if (!listing) return res.status(404).json({ error: "Not found" });
-    res.json(publicEvent(listing, pendingClaimIds, venueWebsiteIndex()));
-  });
-
-  // â”€â”€â”€ SUBMISSIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/submit", requireAuth, (req, res) => {
-    try {
-      const user = storage.getUserById(req.session.userId!);
-      if (!user) return res.status(401).json({ error: "Not authenticated" });
-      if (moderationGate(res, "Event submission", {
-        title: req.body.title,
-        description: req.body.description,
-        venueName: req.body.venueName,
-        claimReason: req.body.claimReason,
-      })) return;
-      const rawType = req.body.type;
-      const type = rawType === "CLAIM" ? "CLAIM"
-        : rawType === "SUGGEST" ? "SUGGEST"
-        : rawType === "PROMOTER_APPLICATION" ? "PROMOTER_APPLICATION"
-        : "NEW_EVENT";
-      const promoterStatus = user.promoterStatus || "none";
-      const isAdminUser = userIsAdminNow(user);
-
-      // Standalone promoter application - no event fields needed
-      if (type === "PROMOTER_APPLICATION") {
-        const rawProofUrl = String(req.body.ticketUrl || "").trim();
-        const proofUrl = publicHttpUrl(rawProofUrl);
-        if (rawProofUrl && (!proofUrl || !/^https?:\/\//i.test(proofUrl))) {
-          return res.status(400).json({ error: "Enter a valid https:// or http:// proof link." });
-        }
-        const now = new Date().toISOString();
-        const data = insertSubmissionSchema.parse({
-          type: "PROMOTER_APPLICATION",
-          title: `Promoter Application: ${user.displayName || user.username}`,
-          description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
-          venueName: "N/A",
-          dateStart: now,
-          dateEnd: now,
-          ageRequirement: "ALL_AGES",
-          eventTypes: "[]",
-          admission: "FREE",
-          isPublic: true,
-          submitterName: user.displayName || user.username,
-          submitterEmail: user.email,
-          submitterOrg: req.body.submitterOrg || null,
-          claimReason: String(req.body.claimReason || "").trim() || null,
-          ticketUrl: proofUrl,
-        });
-        const sub = storage.createSubmission(data);
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-        return res.json({ ...sub, pendingPromoterReview: true });
-      }
-
-      const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
-      const claimEventId = eventId ?? 0;
-      const claimEvent = type === "CLAIM" && Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
-      if (type === "CLAIM") {
-        if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
-          return res.status(400).json({ error: "This event is not available to claim." });
-        }
-        if (storage.getPendingClaimEventIds().includes(claimEventId)) {
-          return res.status(409).json({ error: "This event already has a pending claim." });
-        }
-      }
-      const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body };
-      if (type === "NEW_EVENT" || type === "SUGGEST") {
-        const dateError = eventDatesError({ dateStart: source.dateStart || "", dateEnd: source.dateEnd || "" }) || validateEventDates(source.dateStart, source.dateEnd);
-        if (dateError) return res.status(400).json({ error: dateError });
-        syncDayOfWeek(source);
-      }
-      if (type === "NEW_EVENT" || type === "CLAIM") {
-        const blockedBusiness = storage.getBlockedBusinessMatch(user.id, {
-          venueName: source.venueName || "",
-          address: source.address ?? null,
-          lat: source.lat ?? null,
-          lng: source.lng ?? null,
-        });
-        if (blockedBusiness) {
-          return res.status(403).json({ error: `${blockedBusiness.name} has blocked you from posting events at their venue.` });
-        }
-      }
-      const data = insertSubmissionSchema.parse({
-        ...source,
-        type,
-        eventId: type === "CLAIM" ? claimEventId : null,
-        submitterName: user.displayName || user.username,
-        submitterEmail: user.email,
-        submitterOrg: req.body.submitterOrg || null,
-        claimReason: type === "CLAIM" ? req.body.claimReason : null,
-        eventTypes: type === "CLAIM"
-          ? source.eventTypes
-          : (typeof req.body.eventTypes === "string"
-              ? req.body.eventTypes
-              : JSON.stringify(req.body.eventTypes || [])),
-      });
-      const sub = storage.createSubmission(data);
-      const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
-        ? enrichSubmissionMatches(sub)
-        : [];
-      const strongDuplicate = type === "NEW_EVENT"
-        ? submissionHasStrongDuplicate(potentialMatches)
-        : undefined;
-
-      // Approved promoters / admins bypass the review queue unless a likely duplicate exists
-      if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser) && !strongDuplicate) {
-        storage.autoApproveSubmission(sub.id, user.username);
-        const created = storage.getEvents({ status: "LIVE" })
-          .filter(evt => evt.submittedBy === user.email && evt.title === sub.title)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-        if (created) {
-          void fillEventMapCoordinates(created.id).catch(err =>
-            console.error("[fillEventMapCoordinates] submit auto-approve failed:", err),
-          );
-        }
-        return res.json({ ...sub, autoApproved: true, potentialMatches });
-      }
-      if (type === "NEW_EVENT" && strongDuplicate) {
-        return res.json({
-          ...sub,
-          potentialMatches,
-          heldForReview: true,
-          heldReason: `Possible duplicate of "${strongDuplicate.title}"`,
-        });
-      }
-      if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
-        storage.autoApproveClaim(sub.id, user.username);
-        return res.json({ ...sub, autoApproved: true });
-      }
-
-      // NEW_EVENT from unapproved user â†’ goes to queue + flags them for promoter review
-      if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-        return res.json({ ...sub, pendingPromoterReview: true, potentialMatches });
-      }
-
-      // CLAIM from unapproved user â†’ flag for promoter review
-      if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-      }
-
-      // SUGGEST goes straight to queue, no promoter status change
-      res.json({ ...sub, potentialMatches });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  // â”€â”€â”€ CLAIMED EVENT EDIT (owner only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Returns events claimed by the logged-in user
-  app.get("/api/events/mine/claimed", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    if (!storage.getUserById(userId)) return res.status(404).json({ error: "User not found" });
-    const all = storage.getEvents({});
-    const mine = all.filter(e => storage.isUserEventHost(e.id, userId)).map(evt => ({
-      ...evt,
-      posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
-    }));
-    res.json(mine);
-  });
-
-  app.get("/api/events/mine/submitted", requireAuth, (req, res) => {
-    const user = storage.getUserById(req.session.userId!);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    if (storage.isSiteOwnerUser(user)) return res.json([]);
-    const mine = storage.getSubmissions().filter(s => s.submitterEmail === user.email);
-    res.json(mine);
-  });
-
-  app.get("/api/events/mine/check-ins", requireAuth, (req, res) => {
-    res.json(storage.getAttendancesByUser(req.session.userId!));
-  });
-
-  app.get("/api/events/mine/talent", requireAuth, (req, res) => {
-    res.json(storage.getEventTalentByUser(req.session.userId!));
-  });
-
-  // Host (or admin) edits an event from the card / hub editor
-  app.put("/api/events/:id/edit", requireAuth, async (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const user = storage.getUserById(req.session.userId!);
-    const isAdmin = sessionIsAdmin(req);
-    if (!user || (!isAdmin && !storage.isUserEventHost(evt.id, user.id))) {
-      return res.status(403).json({ error: "Not your event" });
-    }
-    if (moderationGate(res, "Event edit", {
-      title: req.body.title,
-      description: req.body.description,
-      venueName: req.body.venueName,
-    })) return;
-    const allowed = [
-      "title", "description", "venueName", "address", "neighborhood",
-      "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
-      "ticketUrl", "posterImageUrl", "eventTypes",
-      "isPublic", "isHouseParty", "isSexPositive", "nudityOk",
-    ];
-    // Admins may also set status (e.g. HIDDEN) via the full admin PUT; hosts cannot.
-    const patch: any = {};
-    allowed.forEach(k => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
-    if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
-      patch.eventTypes = JSON.stringify(patch.eventTypes);
-    }
-    const dateErr = validateEventDates(
-      patch.dateStart as string | undefined,
-      patch.dateEnd as string | undefined,
-      evt,
-    );
-    if (dateErr) return res.status(400).json({ error: dateErr });
-    syncDayOfWeek(patch, evt);
-    const updated = storage.updateEvent(Number(req.params.id), patch);
-    if (updated && (patch.address !== undefined || patch.venueName !== undefined)) {
-      await fillEventMapCoordinates(updated.id);
-    }
-    const fresh = storage.getEvent(Number(req.params.id));
-    res.json(fresh ? enrichEventForMap(fresh) : fresh);
-  });
-
-  // â”€â”€â”€ MODERATION REQUESTS (remove/flag - claims go through /api/submit) â”€â”€â”€
-  app.post("/api/moderation-request", requireAuth, (req, res) => {
-    try {
-      const data = insertModerationRequestSchema.parse(req.body);
-      if (data.type === "CLAIM") {
-        const user = storage.getUserById(req.session.userId!);
-        if (!user) return res.status(401).json({ error: "Not authenticated" });
-        const claimEventId = Number(data.eventId);
-        const claimEvent = Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
-        if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
-          return res.status(400).json({ error: "This event is not available to claim." });
-        }
-        if (storage.getPendingClaimEventIds().includes(claimEventId)) {
-          return res.status(409).json({ error: "This event already has a pending claim." });
-        }
-        const sub = storage.createSubmission(insertSubmissionSchema.parse({
-          ...claimEvent,
-          type: "CLAIM",
-          eventId: claimEventId,
-          submitterName: user.displayName || user.username,
-          submitterEmail: user.email,
-          submitterOrg: null,
-          claimReason: data.proof,
-          eventTypes: claimEvent.eventTypes,
-        }));
-        const promoterStatus = user.promoterStatus || "none";
-        if (promoterStatus !== "approved" && !isMainAdminUser(user)) {
-          storage.setPromoterStatus(user.id, "pending");
-        }
-        return res.json({ redirected: "submission", submission: sub });
-      }
-      const req2 = storage.createModerationRequest(data);
-      res.json(req2);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/feedback", (req, res) => {
-    try {
-      // Older cached clients used the human-feedback endpoint for automatic
-      // ErrorBoundary reports. Divert those during the rollout so even stale
-      // browser bundles cannot refill the Owner Desk with machine telemetry.
-      if (String(req.body?.category || "").toUpperCase() === "CRASH") {
-        const messageAndStack = String(req.body?.message || "").trim();
-        if (!messageAndStack) return res.status(400).json({ error: "message required" });
-        const [message, ...stackLines] = messageAndStack.split("\n");
-        const diagnostic = recordSystemDiagnostic(sqlite, {
-          source: "legacy-react-error-boundary",
-          message,
-          stack: stackLines.join("\n") || null,
-          pageUrl: req.body?.pageUrl ? String(req.body.pageUrl) : String(req.get("referer") || ""),
-          userAgent: req.body?.userAgent ? String(req.body.userAgent) : String(req.get("user-agent") || ""),
-        });
-        return res.json({ ok: true, id: diagnostic.id });
-      }
-      const payload = {
-        ...req.body,
-        pageUrl: String(req.body.pageUrl || req.get("referer") || "/").slice(0, 500),
-        category: String(req.body.category || "BUG").slice(0, 40),
-        severity: String(req.body.severity || "MEDIUM").slice(0, 40),
-        message: String(req.body.message || "").trim().slice(0, 2000),
-        steps: req.body.steps ? String(req.body.steps).trim().slice(0, 2000) : null,
-        email: req.body.email ? String(req.body.email).trim().slice(0, 180) : null,
-        userAgent: String(req.body.userAgent || req.get("user-agent") || "").slice(0, 500),
-      };
-      if (!payload.message) return res.status(400).json({ error: "message required" });
-      const feedback = storage.createFeedbackReport(insertFeedbackReportSchema.parse(payload));
-      res.json({ ok: true, id: feedback.id });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  // Machine-generated client errors are operational telemetry, not messages
-  // from people. They stay out of the Owner Desk and every inbox badge.
-  app.post("/api/system-diagnostics/client-error", (req, res) => {
-    try {
-      const message = String(req.body?.message || "").trim();
-      if (!message) return res.status(400).json({ error: "message required" });
-      const result = recordSystemDiagnostic(sqlite, {
-        source: "react-error-boundary",
-        message,
-        stack: req.body?.stack ? String(req.body.stack) : null,
-        pageUrl: req.body?.pageUrl ? String(req.body.pageUrl) : String(req.get("referer") || ""),
-        userAgent: req.body?.userAgent ? String(req.body.userAgent) : String(req.get("user-agent") || ""),
-        environment: req.body?.environment ? String(req.body.environment) : null,
-      });
-      res.json({ ok: true, id: result.id });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  // â”€â”€â”€ GLOBAL SEARCH: EVENTZ + Places + Communities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/search", (req, res) => {
-    const q = String(req.query.q || "").trim();
-    if (q.length < 2) {
-      return res.json({ q, events: [], places: [], communities: [] });
-    }
-    res.json({ ...storage.searchGlobal(q), communities: searchCommunities(q, req.session?.userId) });
-  });
-
-  // â”€â”€â”€ ATTENDANCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/events/:id/attendance", (req, res) => {
-    const list = storage.getAttendances(Number(req.params.id), req.session?.userId);
-    res.json(list);
-  });
-
-  app.post("/api/events/:id/attendance", requireAuth, (req, res) => {
-    try {
-      const user = storage.getUserById(req.session.userId!);
-      if (!user) return res.status(401).json({ error: "Not authenticated" });
-      const message = String(req.body.message || "").trim();
-      if (!message) return res.status(400).json({ error: "message required" });
-      // Prefer body.visibility; map legacy isAnonymous / "visible" â†’ public|anonymous|friends.
-      const visibility = normalizeAttendanceVisibility(
-        req.body.visibility,
-        req.body.isAnonymous === true ? true : req.body.isAnonymous === false ? false : undefined,
-      );
-      const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message, visibility);
-      notifyAttendanceUpdate(eventId);
-      res.json(att);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
-    const eventId = Number(req.params.id);
-    storage.removeAttendance(eventId, req.session.userId!);
-    notifyAttendanceUpdate(eventId);
-    res.json({ ok: true });
-  });
-
-  app.get("/api/events/:id/chat", requireAuth, (req, res) => {
-    const eventId = Number(req.params.id);
-    const payload = storage.getEventChatMessages(eventId, req.session.userId!);
-    res.json(payload);
-  });
-
-  app.post("/api/events/:id/chat", requireAuth, (req, res) => {
-    try {
-      const eventId = Number(req.params.id);
-      const body = String(req.body.body || "").trim();
-      if (!body) return res.status(400).json({ error: "body required" });
-      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
-      const msg = storage.postEventChatMessage(eventId, req.session.userId!, body);
-      res.json(msg);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/events/:eventId/attendance/:attendanceId/message", requireAuth, (req, res) => {
-    const eventId = Number(req.params.eventId);
-    const senderList = storage.getAttendances(eventId, req.session.userId);
-    const senderRsvped = senderList.some((a: any) => a.user_id === req.session.userId);
-    if (!senderRsvped) return res.status(403).json({ error: "RSVP required to message attendees" });
-    const att = senderList.find((a: any) => a.id === Number(req.params.attendanceId));
-    if (!att?.user_id) return res.status(404).json({ error: "Check-in not found" });
-    if (att.user_id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    const evt = storage.getEvent(Number(req.params.eventId));
-    const msg = storage.sendMessage(req.session.userId!, Number(att.user_id), `Check-in: ${evt?.title || "Event"}`, body, {
-      contextType: "CHECK_IN",
-      contextId: Number(req.params.eventId),
-      contextLabel: evt?.title || null,
-    });
-    res.json(msg);
-  });
-
-  // â”€â”€â”€ GIGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // â”€â”€ Business Directory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/directory", (req, res) => {
-    const { type, neighborhood, queerOwned } = req.query as Record<string, string>;
-    const businesses = storage.getBusinesses({
-      type: type || undefined,
-      neighborhood: neighborhood || undefined,
-      queerOwned: queerOwned === "true" ? true : undefined,
-    });
-    const liveEvents = storage.getEvents({ status: "LIVE" });
-    // Upcoming Pride nights + past (LIVE past + Tucker archive for Sanctuary/Eagle)
-    const withEvents = attachEventsToBusinesses(businesses, liveEvents);
-    const withPromoters = attachPromotersToBusinesses(withEvents, id => storage.getPromotersForBusiness(id));
-    const missedConnections = storage.getMissedConnections("ACTIVE");
-    const gigs = storage.getGigPosts("LIVE");
-    const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
-    // Flag which listings the logged-in user can self-service edit (hosted/claimed/
-    // submitted an event there) - drives the "Edit venue info" button client-side;
-    // the PATCH endpoint below re-checks this server-side regardless.
-    const linkedIds = req.session?.userId
-      ? new Set(storage.getUserLinkedBusinesses(req.session.userId).map(b => b.id))
-      : null;
-    const userId = req.session?.userId;
-    res.json(withTabs.map(biz => {
-      const isOwner = userId != null && biz.ownerId === userId;
-      return {
-        ...biz,
-        /** Resolved storefronts (JSON column, known multi-loc chains, or primary address). */
-        locations: resolveBusinessLocations(biz),
-        isOwner,
-        canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
-        isFollowing: userId != null ? storage.isFollowingBusiness(userId, biz.id) : false,
-        followerCount: storage.getBusinessFollowerCount(biz.id),
-      };
-    }));
-  });
-
-  app.post("/api/directory/:id/follow", requireAuth, (req, res) => {
-    const businessId = Number(req.params.id);
-    const biz = storage.getBusiness(businessId);
-    if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
-    storage.followBusiness(req.session.userId!, businessId);
-    res.json({
-      isFollowing: true,
-      followerCount: storage.getBusinessFollowerCount(businessId),
-    });
-  });
-
-  app.delete("/api/directory/:id/follow", requireAuth, (req, res) => {
-    const businessId = Number(req.params.id);
-    const biz = storage.getBusiness(businessId);
-    if (!biz || !biz.active) return res.status(404).json({ error: "Venue not found" });
-    storage.unfollowBusiness(req.session.userId!, businessId);
-    res.json({
-      isFollowing: false,
-      followerCount: storage.getBusinessFollowerCount(businessId),
-    });
-  });
-
-  const memberBusinessSchema = z.object({
-    name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]),
-    description: z.string().trim().min(10).max(2000),
-    address: z.string().trim().max(200).optional().nullable(),
-    neighborhood: z.string().trim().max(80).optional().nullable(),
-    website: z.string().trim().max(300).optional().nullable(),
-    instagram: z.string().trim().max(80).optional().nullable(),
-    hours: z.string().trim().max(200).optional().nullable(),
-    phone: z.string().trim().max(40).optional().nullable(),
-    queerOwned: z.boolean().optional().default(false),
-    queerFriendly: z.boolean().optional().default(true),
-  });
-
-  const directorySubmitSchema = memberBusinessSchema.extend({
-    confirmDistinct: z.boolean().optional().default(false),
-    /**
-     * Does the submitter run this place, or are they just putting it on the map?
-     * Adding a listing never confers ownership on its own - "runs" files a normal
-     * business claim an admin still has to approve.
-     */
-    relationship: z.enum(["runs", "adding"]).optional().default("adding"),
-    relationshipNote: z.string().trim().max(500).optional().default(""),
-  });
-
-  const directoryMatchPreviewSchema = z.object({
-    name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).optional(),
-    address: z.string().trim().max(200).optional().nullable(),
-    neighborhood: z.string().trim().max(80).optional().nullable(),
-  });
-
-  app.post("/api/directory/matches", requireAuth, (req, res) => {
-    try {
-      const data = directoryMatchPreviewSchema.parse(req.body ?? {});
-      res.json({ potentialMatches: enrichDirectoryMatches(data) });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message || "Invalid match preview" });
-    }
-  });
-
-  app.post("/api/directory", requireAuth, async (req, res) => {
-    try {
-      const data = directorySubmitSchema.parse(req.body);
-      const potentialMatches = enrichDirectoryMatches(data);
-      const strongDuplicate = directoryHasStrongDuplicate(potentialMatches);
-
-      if (strongDuplicate && !data.confirmDistinct) {
-        return res.json({
-          ok: false,
-          heldForReview: true,
-          heldReason: `Possible duplicate of "${strongDuplicate.name}"`,
-          potentialMatches,
-        });
-      }
-
-      const withCoords = await fillFieldsMapCoordinates({
-        venueName: data.name,
-        address: data.address ?? undefined,
-      });
-      const { confirmDistinct: _confirmDistinct, relationship, relationshipNote, ...bizFields } = data;
-      const biz = storage.createBusiness({
-        ...bizFields,
-        address: data.address ?? null,
-        neighborhood: data.neighborhood ?? null,
-        website: data.website ?? null,
-        instagram: data.instagram ?? null,
-        hours: data.hours ?? null,
-        phone: data.phone ?? null,
-        lat: withCoords.lat ?? null,
-        lng: withCoords.lng ?? null,
-        active: true,
-        queerOwned: !!data.queerOwned,
-        queerFriendly: data.queerFriendly !== false,
-        isNew: false,
-        imageUrl: null,
-      });
-      // Member directory adds go live immediately; notify all admins so they can
-      // review what just published.
-      const actor = storage.getUserById(req.session.userId!);
-      storage.createModerationRequest({
-        type: "NEW_DIRECTORY_LISTING",
-        // The listing's own id, so the queue row can act on the real venue
-        // (set its category, assign its owner) instead of guessing by name.
-        eventId: biz.id,
-        eventTitle: `${biz.name} Â· ${biz.type}`,
-        requesterName: actor?.displayName || actor?.username || "member",
-        requesterEmail: actor?.email || null,
-        proof: [biz.neighborhood, biz.address, biz.description].filter(Boolean).join(" Â· ").slice(0, 500),
-      } as any);
-
-      // Adding a listing is not the same as owning it. When the submitter says
-      // they run the place, file a normal business claim so it lands in the
-      // Venue claims queue and an admin still has to approve ownership.
-      let ownershipRequested = false;
-      if (relationship === "runs") {
-        const reason = (relationshipNote || "").trim() || "Submitted this listing and says they run it.";
-        const claim = storage.createBusinessClaim(biz.id, req.session.userId!, reason);
-        ownershipRequested = !("error" in claim);
-      }
-
-      res.status(201).json({ ...biz, potentialMatches, ownershipRequested });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message || "Invalid directory listing" });
-    }
-  });
-
-  // Promoter self-service venue edit: only description/hours/phone/website/instagram/donateUrl,
-  // only if the requester has hosted, claimed, or submitted an event matching this business.
-  // Name/address/type/lat/lng are never accepted here (would let a linked promoter hijack or
-  // relocate a shared directory listing) - edits go live immediately, no moderation queue.
-  const businessEditSchema = z.object({
-    description: z.string().trim().min(10).max(2000).optional(),
-    hours: z.string().trim().max(200).optional().nullable(),
-    phone: z.string().trim().max(40).optional().nullable(),
-    website: z.string().trim().max(300).optional().nullable(),
-    instagram: z.string().trim().max(80).optional().nullable(),
-    donateUrl: z.string().trim().max(300).optional().nullable(),
-  });
-
-  // Business owners (real ownerId, see claim flow below) get a wider self-service field set.
-  // lat/lng always stay geocoded, and imageUrl is never accepted here - logo changes route
-  // through the logo-request queue for Tucker's manual conversion (see /api/upload/business-logo).
-  const businessOwnerEditSchema = z.object({
-    name: z.string().trim().min(2).max(120).optional(),
-    address: z.string().trim().max(200).optional().nullable(),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).optional(),
-    neighborhood: z.string().trim().max(80).optional().nullable(),
-    queerOwned: z.boolean().optional(),
-    queerFriendly: z.boolean().optional(),
-    description: z.string().trim().min(10).max(2000).optional(),
-    hours: z.string().trim().max(200).optional().nullable(),
-    phone: z.string().trim().max(40).optional().nullable(),
-    website: z.string().trim().max(300).optional().nullable(),
-    instagram: z.string().trim().max(80).optional().nullable(),
-    donateUrl: z.string().trim().max(300).optional().nullable(),
-  });
-
-  app.patch("/api/directory/:id", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const existing = storage.getBusiness(id);
-    if (!existing) return res.status(404).json({ error: "Not found" });
-
-    const strip = (v: string | null | undefined) => (v == null ? v ?? null : v.replace(/[<>]/g, ""));
-
-    if (existing.ownerId && req.session.userId === existing.ownerId) {
-      let parsed: z.infer<typeof businessOwnerEditSchema>;
-      try {
-        parsed = businessOwnerEditSchema.parse(req.body ?? {});
-      } catch (e: any) {
-        return res.status(400).json({ error: e.message || "Invalid venue info" });
-      }
-      const patch: Record<string, unknown> = {};
-      for (const key of ["name", "address", "type", "neighborhood", "description", "hours", "phone", "website", "instagram", "donateUrl"] as const) {
-        if (parsed[key] !== undefined) patch[key] = typeof parsed[key] === "string" ? strip(parsed[key] as string) : parsed[key];
-      }
-      if (parsed.queerOwned !== undefined) patch.queerOwned = parsed.queerOwned;
-      if (parsed.queerFriendly !== undefined) patch.queerFriendly = parsed.queerFriendly;
-      const updated = storage.updateBusiness(id, patch as any);
-      if (!updated) return res.status(404).json({ error: "Not found" });
-      return res.json(updated);
-    }
-
-    const linkedVenues = storage.getUserLinkedBusinesses(req.session.userId!);
-    if (!linkedVenues.some(biz => biz.id === id)) {
-      return res.status(403).json({ error: "You can only edit venues you've hosted, claimed, or submitted an event at." });
-    }
-
-    let parsed: z.infer<typeof businessEditSchema>;
-    try {
-      parsed = businessEditSchema.parse(req.body ?? {});
-    } catch (e: any) {
-      return res.status(400).json({ error: e.message || "Invalid venue info" });
-    }
-
-    // Only the six allowed fields are ever applied - anything else in req.body (name, address,
-    // type, lat, lng, ...) is silently dropped by the zod parse above (unknown keys stripped).
-    const patch: Record<string, string | null> = {};
-    if (parsed.description !== undefined) patch.description = parsed.description.replace(/[<>]/g, "");
-    if (parsed.hours !== undefined) patch.hours = parsed.hours ? parsed.hours.replace(/[<>]/g, "") : null;
-    if (parsed.phone !== undefined) patch.phone = parsed.phone ? parsed.phone.replace(/[<>]/g, "") : null;
-    if (parsed.website !== undefined) patch.website = parsed.website ? parsed.website.replace(/[<>]/g, "") : null;
-    if (parsed.instagram !== undefined) patch.instagram = parsed.instagram ? parsed.instagram.replace(/[<>]/g, "") : null;
-    if (parsed.donateUrl !== undefined) patch.donateUrl = parsed.donateUrl ? parsed.donateUrl.replace(/[<>]/g, "") : null;
-
-    const updated = storage.updateBusiness(id, patch);
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
-  });
-
-  // â”€â”€ Business ownership: claim an existing venue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/directory/:id/claim", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const claimReason = String(req.body?.claimReason || "").trim();
-    if (!claimReason || claimReason.length < 10) {
-      return res.status(400).json({ error: "Tell us how you're connected to this venue (10+ characters)." });
-    }
-    const pendingMerge = !!req.body?.pendingMerge;
-    const rawMerge = req.body?.mergePayload;
-    const mergePayload = pendingMerge && rawMerge && typeof rawMerge === "object"
-      ? buildDirectoryMergePatch(rawMerge as DirectoryMergePayload)
-      : undefined;
-    const result = storage.createBusinessClaim(id, req.session.userId!, claimReason, {
-      mergePayload: mergePayload && Object.keys(mergePayload).length ? mergePayload : undefined,
-    });
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    const user = storage.getUserById(req.session.userId!);
-    const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user);
-    if (eligible && result.claim && !pendingMerge) {
-      const approval = storage.approveBusinessClaim(result.claim.id, user?.username || "system");
-      return res.json({ ok: true, autoApproved: true, ...approval });
-    }
-    res.json({ ok: true, autoApproved: false, claim: result.claim });
-  });
-
-  app.get("/api/directory/mine/owned", requireAuth, (req, res) => {
-    res.json(storage.getUserOwnedBusinesses(req.session.userId!));
-  });
-
-  // â”€â”€ New-business submission (gig-flow "this address isn't in the system" branch) â”€â”€
-  const businessSubmissionSchema = z.object({
-    name: z.string().trim().min(2).max(120),
-    type: z.enum(["bar", "restaurant", "cafe", "venue", "service", "shop", "hotel", "nonprofit", "healthcare", "realestate", "group", "campground"]).default("bar"),
-    description: z.string().trim().min(10).max(2000),
-    address: z.string().trim().max(200).optional().nullable(),
-    neighborhood: z.string().trim().max(80).optional().nullable(),
-    hours: z.string().trim().max(200).optional().nullable(),
-    phone: z.string().trim().max(40).optional().nullable(),
-    website: z.string().trim().max(300).optional().nullable(),
-    instagram: z.string().trim().max(80).optional().nullable(),
-    logoImageUrl: z.string().trim().max(300).optional().nullable(),
-  });
-
-  app.post("/api/directory/new-submission", requireAuth, (req, res) => {
-    try {
-      const data = businessSubmissionSchema.parse(req.body ?? {});
-      const sub = storage.createBusinessSubmission(req.session.userId!, data);
-      res.status(201).json(sub);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message || "Invalid business submission" });
-    }
-  });
-
-  // â”€â”€ Venue owner: promoters at this venue + blocklist â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function requireBusinessOwner(req: any, res: any, id: number) {
-    const business = storage.getBusiness(id);
-    if (!business) { res.status(404).json({ error: "Not found" }); return null; }
-    if (business.ownerId !== req.session.userId) { res.status(403).json({ error: "You don't own this venue." }); return null; }
-    return business;
-  }
-
-  app.get("/api/directory/:id/promoters", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    if (!requireBusinessOwner(req, res, id)) return;
-    res.json(storage.getPromotersForBusiness(id));
-  });
-
-  app.post("/api/directory/:id/block", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    if (!requireBusinessOwner(req, res, id)) return;
-    const userId = Number(req.body?.userId);
-    if (!userId) return res.status(400).json({ error: "userId required" });
-    const result = storage.blockPromoterFromBusiness(id, userId, req.session.userId!);
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    res.json({ ok: true });
-  });
-
-  app.delete("/api/directory/:id/block/:userId", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    if (!requireBusinessOwner(req, res, id)) return;
-    storage.unblockPromoterFromBusiness(id, Number(req.params.userId));
-    res.json({ ok: true });
-  });
-
-  // â”€â”€ Venue owner: logo change request (candidate held for Tucker's manual conversion) â”€â”€
-  app.post("/api/upload/business-logo", requireAuth, upload.single("logo"), (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
-    res.json({ url: `/uploads/${req.file.filename}` });
-  });
-
-  app.post("/api/directory/:id/logo-request", requireAuth, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    if (!requireBusinessOwner(req, res, id)) return;
-    const imageUrl = String(req.body?.imageUrl || "").trim();
-    if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
-    const created = storage.createBusinessLogoRequest(id, req.session.userId!, imageUrl);
-    res.status(201).json(created);
-  });
-
-  app.post("/api/admin/directory", requireAdmin, async (req, res) => {
-    const data = req.body;
-    if (!data.name || !data.type || !data.description) {
-      return res.status(400).json({ error: "name, type, and description are required" });
-    }
-    const withCoords = await fillFieldsMapCoordinates({
-      venueName: data.name,
-      address: data.address,
-      lat: data.lat,
-      lng: data.lng,
-    });
-    const biz = storage.createBusiness({
-      name: String(data.name).trim(),
-      type: String(data.type).trim(),
-      description: String(data.description).trim(),
-      address: data.address != null && String(data.address).trim() ? String(data.address).trim() : null,
-      neighborhood:
-        data.neighborhood != null && String(data.neighborhood).trim()
-          ? String(data.neighborhood).trim()
-          : null,
-      website: data.website != null && String(data.website).trim() ? String(data.website).trim() : null,
-      instagram:
-        data.instagram != null && String(data.instagram).trim() ? String(data.instagram).trim() : null,
-      phone: data.phone != null && String(data.phone).trim() ? String(data.phone).trim() : null,
-      hours: data.hours != null && String(data.hours).trim() ? String(data.hours).trim() : null,
-      imageUrl:
-        data.imageUrl != null && String(data.imageUrl).trim() ? String(data.imageUrl).trim() : null,
-      donateUrl: data.donateUrl != null && String(data.donateUrl).trim() ? String(data.donateUrl).trim() : null,
-      lat: withCoords.lat ?? data.lat ?? null,
-      lng: withCoords.lng ?? data.lng ?? null,
-      active: data.active !== false,
-      queerOwned: !!data.queerOwned,
-      queerFriendly: data.queerFriendly !== false,
-      isNew: data.isNew === true,
-      grandOpeningDate: data.grandOpeningDate || null,
-    });
-    try {
-      auditAdmin(req, "directory_create", {
-        type: "business",
-        id: String(biz.id),
-        label: biz.name,
-        detail: { type: biz.type, from: "qsearch_or_admin" },
-      });
-    } catch {
-      /* audit optional */
-    }
-    res.json(biz);
-  });
-
-  app.put("/api/admin/directory/:id", requireAdmin, async (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const existing = storage.getBusiness(id);
-    if (!existing) return res.status(404).json({ error: "Not found" });
-    const withCoords = await fillFieldsMapCoordinates({
-      venueName: req.body.name ?? existing.name,
-      address: req.body.address ?? existing.address,
-      lat: req.body.lat ?? existing.lat,
-      lng: req.body.lng ?? existing.lng,
-    });
-    const updated = storage.updateBusiness(id, {
-      ...req.body,
-      ...(withCoords.lat != null ? { lat: withCoords.lat } : {}),
-      ...(withCoords.lng != null ? { lng: withCoords.lng } : {}),
-    });
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
-  });
-
-  app.patch("/api/admin/directory/:id/active", requireAdmin, (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    storage.toggleBusinessActive(id, !!req.body.active);
-    res.json({ ok: true });
-  });
-
-  // â”€â”€ Gigs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/gigs", (req, res) => {
-    const viewerId = req.session?.userId;
-    const rows = req.query.mine === "1" && viewerId ? storage.getGigPostsByUser(viewerId) : storage.getGigPosts("LIVE");
-    const gigs = rows.map(gig => publicGigPost(gig, viewerId));
-    res.json(gigs);
-  });
-
-  app.post("/api/gigs", requireAuth, (req, res) => {
-    try {
-      if (moderationGate(res, "Gig board", {
-        title: req.body.title,
-        name: req.body.name,
-        description: req.body.description,
-        skills: req.body.skills,
-        compensation: req.body.compensation,
-        location: req.body.location,
-      })) return;
-      const data = insertGigPostSchema.parse(req.body);
-      assertGigBoardAllowed(req.body, data);
-      const userId = req.session.userId!;
-      if (data.businessId != null) {
-        const user = storage.getUserById(userId);
-        const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user) || storage.getUserOwnedBusinesses(userId).length > 0;
-        if (!eligible) return res.status(403).json({ error: "Only approved promoters and venue owners can link a gig to a directory venue." });
-        const business = storage.getBusiness(data.businessId);
-        if (!business || !business.active) return res.status(400).json({ error: "That venue is not available to link." });
-      }
-      const gig = storage.createGigPost({ ...data, userId } as any);
-      res.json(gig);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gigs/:id/message", requireAuth, (req, res) => {
-    const gig = storage.getGigPosts().find(g => g.id === Number(req.params.id));
-    if (!gig?.userId) return res.status(404).json({ error: "Host not available" });
-    if (gig.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Gig board message", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, gig.userId, `GIGZ: ${gig.title}`, body, {
-      contextType: "GIG",
-      contextId: gig.id,
-      contextLabel: gig.title,
-    });
-    res.json(msg);
-  });
-
-  // User's own gig posts
-  app.get("/api/gigs/mine", requireAuth, (req, res) => {
-    const gigs = storage.getGigPostsByUser(req.session.userId!);
-    res.json(gigs);
-  });
-
-  app.put("/api/gigs/:id", requireAuth, (req, res) => {
-    const id = Number(req.params.id);
-    const userId = req.session.userId!;
-    try {
-      const existing = storage.getGigPosts().find(g => g.id === id && g.userId === userId);
-      if (!existing) return res.status(404).json({ error: "Not found" });
-      if (req.body.status !== undefined && !["LIVE", "CLOSED"].includes(req.body.status)) return res.status(400).json({ error: "Choose an open or completed post" });
-      if (req.body.status === "LIVE" && !["LIVE", "CLOSED"].includes(existing.status)) return res.status(403).json({ error: "This post needs moderator review before reopening" });
-      if (req.body.title !== undefined && String(req.body.title).trim().length < 3) return res.status(400).json({ error: "Title must be at least 3 characters" });
-      if (req.body.description !== undefined && String(req.body.description).trim().length < 20) return res.status(400).json({ error: "Description must be at least 20 characters" });
-      assertGigBoardAllowed(req.body, {
-        title: req.body.title ?? existing.title,
-        description: req.body.description ?? existing.description,
-        skills: req.body.skills ?? existing.skills,
-        compensation: req.body.compensation ?? existing.compensation,
-      }, false);
-      if (moderationGate(res, "Gig board edit", {
-        title: req.body.title,
-        name: req.body.name,
-        description: req.body.description,
-        skills: req.body.skills,
-        compensation: req.body.compensation,
-        location: req.body.location,
-      })) return;
-      storage.updateGigPost(id, userId, req.body);
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.delete("/api/gigs/:id", requireAuth, (req, res) => {
-    const id = Number(req.params.id);
-    const userId = req.session.userId!;
-    storage.deleteGigPost(id, userId);
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ OUT OF MY CLOSET: GIFTING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/gifting/status", (_req, res) => {
-    const postingOpen = giftingPostingOpen();
-    res.json({
-      postingOpen,
-      message: postingOpen
-        ? "GIFTZ posting is open."
-        : "New GIFTZ posts are paused. Existing listings and handoffs stay available.",
-    });
-  });
-
-  app.get("/api/gifting", (req: any, res) => {
-    const posts = storage.getGiftingPosts({ viewerUserId: req.session?.userId });
-    res.json(posts.map(post => publicGiftingPost(post, req.session?.userId)));
-  });
-
-  app.get("/api/gifting/mine", requireAuth, (req, res) => {
-    const posts = storage.getGiftingPostsByUser(req.session.userId!);
-    res.json(posts.map(post => publicGiftingPost(post, req.session.userId!)));
-  });
-
-  app.get("/api/gifting/:id", (req: any, res) => {
-    const post = storage.getGiftingPost(Number(req.params.id));
-    if (!post) return res.status(404).json({ error: "Not found" });
-    res.json(publicGiftingPost(post, req.session?.userId));
-  });
-
-  app.post("/api/gifting", requireAuth, (req, res) => {
-    try {
-      assertGiftingAllowed(req.body);
-      if (moderationGate(res, "Gifting board", {
-        title: req.body.title,
-        description: req.body.description,
-        pickupPreference: req.body.pickupPreference,
-      })) return;
-      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 2) : [];
-      const postType = req.body.postType === "ISO" ? "ISO" : "GIFT";
-      const data = insertGiftingPostSchema.parse({
-        userId: req.session.userId!,
-        postType,
-        title: String(req.body.title || "").trim(),
-        description: String(req.body.description || "").trim(),
-        category: String(req.body.category || "").trim(),
-        neighborhood: String(req.body.neighborhood || "").trim(),
-        pickupPreference: String(req.body.pickupPreference || "").trim(),
-        photoUrls: JSON.stringify(photoUrls),
-      });
-      const post = storage.createGiftingPost(data);
-      res.json({ ...post, message: "Your GIFTZ post is live." });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/interest", requireAuth, (req, res) => {
-    try {
-      const post = storage.getGiftingPost(Number(req.params.id));
-      if (!post) return res.status(404).json({ error: "Not found" });
-      if ((post.post_type || post.postType) !== "GIFT") return res.status(400).json({ error: "Use the In Search Of offer flow for In Search Of posts." });
-      const note = String(req.body.note || "").trim();
-      if (!note) return res.status(400).json({ error: "A short note is required." });
-      if (moderationGate(res, "Gifting interest note", { note })) return;
-      const interest = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
-        postId: post.id,
-        userId: req.session.userId!,
-        note,
-      }));
-      const interestedUser = storage.getUserById(req.session.userId!);
-      storage.sendMessage(req.session.userId!, Number(post.user_id), `Gifting interest: ${post.title}`, `${interestedUser?.displayName || interestedUser?.username || "Someone"} raised their hand: ${note}`, {
-        contextType: "GIFTING",
-        contextId: post.id,
-        contextLabel: post.title,
-      });
-      res.json(interest);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/offer", requireAuth, (req, res) => {
-    try {
-      const post = storage.getGiftingPost(Number(req.params.id));
-      if (!post) return res.status(404).json({ error: "Not found" });
-      if ((post.post_type || post.postType) !== "ISO") return res.status(400).json({ error: "Use the interest flow for Gift posts." });
-      const note = String(req.body.note || "").trim();
-      if (!note) return res.status(400).json({ error: "A short note is required." });
-      if (moderationGate(res, "Gifting offer note", { note })) return;
-      const offer = storage.addGiftingInterest(insertGiftingInterestSchema.parse({
-        postId: post.id,
-        userId: req.session.userId!,
-        note,
-      }));
-      const msg = storage.sendMessage(req.session.userId!, Number(post.user_id), `In Search Of offer: ${post.title}`, note, {
-        contextType: "GIFTING",
-        contextId: post.id,
-        contextLabel: post.title,
-      });
-      res.json({ offer, message: msg });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/interests/:interestId/choose", requireAuth, (req, res) => {
-    try {
-      const selected = storage.chooseGiftingInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
-      if (!selected) return res.status(404).json({ error: "Interest not found" });
-      const post = storage.getGiftingPost(Number(req.params.id));
-      const body = String(req.body.body || `You were picked for "${post?.title}". Coordinate pickup here.`).trim();
-      storage.sendMessage(req.session.userId!, Number((selected as any).userId), `Gifting pickup: ${post?.title || "Gift"}`, body, {
-        contextType: "GIFTING",
-        contextId: Number(req.params.id),
-        contextLabel: post?.title || null,
-      });
-      res.json(selected);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/mark-gifted", requireAuth, (req, res) => {
-    try {
-      storage.markGiftingResolved(Number(req.params.id), req.session.userId!, "GIFTED");
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/mark-found", requireAuth, (req, res) => {
-    try {
-      storage.markGiftingResolved(Number(req.params.id), req.session.userId!, "FOUND");
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/reopen", requireAuth, (req, res) => {
-    try {
-      storage.reopenGiftingPost(Number(req.params.id), req.session.userId!);
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/renew", requireAuth, (req, res) => {
-    try {
-      storage.renewGiftingPost(Number(req.params.id), req.session.userId!);
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/gifting/:id/report", requireAuth, (req, res) => {
-    try {
-      const reason = String(req.body.reason || "").trim();
-      if (!reason) return res.status(400).json({ error: "reason required" });
-      storage.reportGiftingPost(insertGiftingReportSchema.parse({
-        postId: Number(req.params.id),
-        reporterUserId: req.session.userId!,
-        reason,
-      }));
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.delete("/api/gifting/:id", requireAuth, (req, res) => {
-    try {
-      const user = storage.getUserById(req.session.userId!);
-      if (!user) return res.status(401).json({ error: "Not authenticated" });
-      storage.deleteGiftingPost(Number(req.params.id), user.id, { isAdmin: isMainAdminUser(user) });
-      res.json({ ok: true });
-    } catch (e: any) {
-      const status = e.message === "Not allowed" ? 403 : e.message === "Post not found" ? 404 : 400;
-      res.status(status).json({ error: e.message });
-    }
-  });
-
-  // â”€â”€â”€ SELLZ: MEMBER MARKETPLACE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/sellz", (req: any, res) => {
-    res.json(storage.getSellzPosts().map((post: any) => publicSellzPost(post, req.session?.userId)));
-  });
-
-  app.get("/api/sellz/mine", requireAuth, (req, res) => {
-    res.json(storage.getSellzPostsByUser(req.session.userId!).map((post: any) => publicSellzPost(post, req.session.userId!)));
-  });
-  app.get("/api/sellz/saved/ids", requireAuth, (req, res) => {
-    res.json(storage.getSellzSavedIds(req.session.userId!));
-  });
-
-  app.get("/api/sellz/:id", (req: any, res) => {
-    const post = storage.getSellzPost(Number(req.params.id));
-    if (!post) return res.status(404).json({ error: "Listing not found" });
-    res.json(publicSellzPost(post, req.session?.userId));
-  });
-
-  app.post("/api/sellz", requireAuth, (req, res) => {
-    try {
-      if (!req.body.acceptRules) throw new Error("You must agree to the SELLZ marketplace rules.");
-      const priceCents = parseMarketplacePrice(req.body.price);
-      const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
-      if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) {
-        throw new Error("This listing appears to include a restricted item.");
-      }
-      if (moderationGate(res, "SELLZ marketplace", { title: req.body.title, description: req.body.description })) return;
-      const photoUrls = Array.isArray(req.body.photoUrls) ? req.body.photoUrls.slice(0, 6) : [];
-      const post = storage.createSellzPost(insertSellzPostSchema.parse({
-        userId: req.session.userId!,
-        title: String(req.body.title || "").trim(),
-        description: String(req.body.description || "").trim(),
-        category: String(req.body.category || "Other").trim(),
-        condition: String(req.body.condition || "Good").trim(),
-        priceCents,
-        negotiable: Boolean(req.body.negotiable),
-        neighborhood: String(req.body.neighborhood || "Portland").trim(),
-        pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
-        photoUrls: JSON.stringify(photoUrls),
-      }));
-      res.json(publicSellzPost(post, req.session.userId!));
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.put("/api/sellz/:id", requireAuth, (req, res) => {
-    try {
-      const priceCents = parseMarketplacePrice(req.body.price);
-      const haystack = `${req.body.title || ""} ${req.body.description || ""} ${req.body.category || ""}`.toLowerCase();
-      if (RESTRICTED_GIFTING_TERMS.some(term => haystack.includes(term))) throw new Error("This listing appears to include a restricted item.");
-      if (moderationGate(res, "SELLZ marketplace edit", { title: req.body.title, description: req.body.description })) return;
-      const post = storage.updateSellzPost(Number(req.params.id), req.session.userId!, {
-        title: String(req.body.title || "").trim(), description: String(req.body.description || "").trim(),
-        category: String(req.body.category || "Other").trim(), condition: String(req.body.condition || "Good").trim(),
-        priceCents, negotiable: Boolean(req.body.negotiable), neighborhood: String(req.body.neighborhood || "Portland").trim(),
-        pickupPreference: String(req.body.pickupPreference || "Message to coordinate").trim(),
-      });
-      res.json(publicSellzPost(post, req.session.userId!));
-    } catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-
-  app.post("/api/sellz/:id/interest", requireAuth, (req, res) => {
-    try {
-      const post = storage.getSellzPost(Number(req.params.id));
-      if (!post) return res.status(404).json({ error: "Listing not found" });
-      const note = String(req.body.note || "Is this available?").trim();
-      const offerCents = req.body.offer == null || req.body.offer === "" ? null : Math.round(Number(req.body.offer) * 100);
-      if (offerCents != null && (!Number.isFinite(offerCents) || offerCents < 100)) throw new Error("Enter a valid offer.");
-      if (moderationGate(res, "SELLZ buyer message", { note })) return;
-      const interest = storage.addSellzInterest(insertSellzInterestSchema.parse({
-        postId: Number(req.params.id), userId: req.session.userId!, note, offerCents,
-      }));
-      const buyer = storage.getUserById(req.session.userId!);
-      storage.sendMessage(req.session.userId!, Number(post.user_id), `SELLZ: ${post.title}`,
-        `${buyer?.displayName || buyer?.username || "Someone"}: ${note}${offerCents ? `\nOffer: $${(offerCents / 100).toFixed(2)}` : ""}`,
-        { contextType: "SELLZ", contextId: post.id, contextLabel: post.title });
-      res.json(interest);
-    } catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-
-  app.post("/api/sellz/:id/interests/:interestId/choose", requireAuth, (req, res) => {
-    try {
-      const selected = storage.chooseSellzInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
-      const post = storage.getSellzPost(Number(req.params.id));
-      storage.sendMessage(req.session.userId!, Number(selected.user_id), `Reserved for you: ${post?.title || "SELLZ listing"}`,
-        String(req.body.note || "You are first in line. Coordinate payment and pickup here."),
-        { contextType: "SELLZ", contextId: Number(req.params.id), contextLabel: post?.title || null });
-      res.json(selected);
-    } catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-
-  for (const [path, status] of [["reserve", "RESERVED"], ["sold", "SOLD"], ["reopen", "ACTIVE"]] as const) {
-    app.post(`/api/sellz/:id/${path}`, requireAuth, (req, res) => {
-      try { storage.setSellzStatus(Number(req.params.id), req.session.userId!, status); res.json({ ok: true }); }
-      catch (e: any) { res.status(400).json({ error: e.message }); }
-    });
-  }
-
-  app.post("/api/sellz/:id/renew", requireAuth, (req, res) => {
-    try { storage.renewSellzPost(Number(req.params.id), req.session.userId!); res.json({ ok: true }); }
-    catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-
-  app.post("/api/sellz/:id/report", requireAuth, (req, res) => {
-    try {
-      storage.reportSellzPost(insertSellzReportSchema.parse({ postId: Number(req.params.id), reporterUserId: req.session.userId!, reason: String(req.body.reason || "").trim() }));
-      res.json({ ok: true });
-    } catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-  app.post("/api/sellz/:id/save", requireAuth, (req, res) => {
-    res.json({ saved: storage.toggleSellzSave(Number(req.params.id), req.session.userId!) });
-  });
-  app.post("/api/sellz/:id/seen", requireAuth, (req, res) => {
-    res.json({ ok: storage.markSellzSaveSeen(Number(req.params.id), req.session.userId!) });
-  });
-
-  app.delete("/api/sellz/:id", requireAuth, (req, res) => {
-    try { storage.deleteSellzPost(Number(req.params.id), req.session.userId!); res.json({ ok: true }); }
-    catch (e: any) { res.status(400).json({ error: e.message }); }
-  });
-
-  // â”€â”€â”€ USER AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const { username, email, password, displayName, agreedToCommunityStandards, communityStandardsVersion } = req.body;
-      if (!username || !email || !password) {
-        return res.status(400).json({ error: "username, email, and password are required" });
-      }
-      if (username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
-      if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
-      if (COMMUNITY_STANDARDS_GATE_ENABLED && !agreedToCommunityStandards) {
-        return res.status(400).json({ error: "You must agree to the Community Standards and legal terms to join" });
-      }
-      // Reserved shared guide-admin identity - not a human signup.
-      if (storage.isSystemGuideAccount({ username, email })) {
-        return res.status(400).json({ error: "That username or email is reserved" });
-      }
-
-      const existingEmail = storage.getUserByEmail(email);
-      if (existingEmail) return res.status(409).json({ error: "Email already registered" });
-
-      const existingUsername = storage.getUserByUsername(username);
-      if (existingUsername) return res.status(409).json({ error: "Username already taken" });
-
-      const version =
-        typeof communityStandardsVersion === "string" && communityStandardsVersion
-          ? communityStandardsVersion
-          : COMMUNITY_STANDARDS_VERSION;
-      const now = new Date().toISOString();
-      const user = storage.createUser({
-        username,
-        email,
-        passwordHash: password,
-        displayName,
-        ...(COMMUNITY_STANDARDS_GATE_ENABLED
-          ? {
-              communityStandardsVersion: version,
-              communityStandardsAgreedAt: now,
-            }
-          : {}),
-      });
-      const finishRegister = () => {
-        req.session.userId = user.id;
-        maybeSyncSiteOwnerPortfolio(user);
-        res.json(authUserResponse(req, user));
-      };
-      // Match login: regenerate session before binding the new userId.
-      if (typeof req.session.regenerate === "function") {
-        return req.session.regenerate(err => {
-          if (err) return res.status(500).json({ error: "Session error" });
-          finishRegister();
-        });
-      }
-      finishRegister();
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/auth/community-standards/agree", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    const version =
-      typeof req.body?.version === "string" && req.body.version
-        ? req.body.version
-        : COMMUNITY_STANDARDS_VERSION;
-    storage.setCommunityStandardsAgreement(userId, { agreed: true, version });
-    const user = storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(authUserResponse(req, user));
-  });
-
-  app.post("/api/auth/community-standards/decline", (req, res) => {
-    const userId = req.session?.userId;
-    const version =
-      typeof req.body?.version === "string" && req.body.version
-        ? req.body.version
-        : COMMUNITY_STANDARDS_VERSION;
-    if (userId) {
-      storage.setCommunityStandardsAgreement(userId, { agreed: false, version });
-    }
-    const payload = { ok: true, redirectUrl: COMMUNITY_STANDARDS_DECLINE_URL };
-    if (typeof req.session?.destroy === "function") {
-      req.session.destroy(() => res.json(payload));
-      return;
-    }
-    res.json(payload);
-  });
-
-  app.post("/api/auth/login", (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "username/email and password required" });
-    // Accept username or email
-    const user = storage.getUserByEmail(email) || storage.getUserByUsername(email);
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
-    // System guide-admin mailbox cannot be signed into as a person.
-    if (storage.isSystemGuideAccount(user)) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-    if (!verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
-    if (isLegacyPasswordHash(user.passwordHash)) {
-      storage.updatePasswordHash(user.id, hashPassword(password));
-    }
-    const finishLogin = () => {
-      if (user.status === "deleted") {
-        return res.status(403).json({ error: "This account has been removed" });
-      }
-      // Timed suspend/shadow auto-lift on login
-      const refreshed = storage.clearExpiredAccountModeration(user.id) || user;
-      if (refreshed.status === "deleted") {
-        return res.status(403).json({ error: "This account has been removed" });
-      }
-      req.session.userId = refreshed.id;
-      maybeSyncSiteOwnerPortfolio(refreshed);
-      res.json(authUserResponse(req, refreshed));
-    };
-    if (typeof req.session.regenerate === "function") {
-      return req.session.regenerate(err => {
-        if (err) return res.status(500).json({ error: "Session error" });
-        finishLogin();
-      });
-    }
-    finishLogin();
-  });
-
-  app.post("/api/auth/password/forgot", async (req, res) => {
-    const response = {
-      ok: true,
-      message: "If that email is registered, a password reset link is on its way.",
-    };
-    const email = String(req.body?.email || "").trim().toLowerCase().slice(0, 200);
-    const token = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    const matchedEmail = email
-      ? (sqlite.prepare(`SELECT email FROM users WHERE LOWER(email) = ? LIMIT 1`).get(email) as { email: string } | undefined)?.email
-      : undefined;
-    const user = matchedEmail ? storage.getUserByEmail(matchedEmail) : undefined;
-
-    if (user && user.status !== "deleted" && !storage.isSystemGuideAccount(user)) {
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-      storage.createPasswordResetToken(user.id, tokenHash, expiresAt);
-      const baseUrl = (process.env.PUBLIC_BASE_URL?.trim() || "https://www.zaylist.com").replace(/\/$/, "");
-      const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
-      void sendPasswordResetEmail({ to: user.email, resetUrl }).catch(err => {
-        console.error("[email] password reset delivery failed:", err instanceof Error ? err.message : err);
-      });
-    }
-
-    res.status(202).json(response);
-  });
-
-  app.post("/api/auth/password/reset", (req, res) => {
-    const token = String(req.body?.token || "").trim();
-    const password = String(req.body?.password || "");
-    if (!/^[a-f0-9]{64}$/.test(token) || password.length < 6) {
-      return res.status(400).json({ error: "This reset link is invalid or expired." });
-    }
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    const changed = storage.resetPasswordWithToken(tokenHash, password);
-    if (!changed) return res.status(400).json({ error: "This reset link is invalid or expired." });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/auth/google", (req, res) => {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    if (!clientId) return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
-    if (!sessionSecret()) return res.status(500).send(googleOAuthErrorPage("Server session secret is missing."));
-
-    const linkUserId = req.query.link === "1" && req.session.userId ? req.session.userId : undefined;
-    // HMAC-signed state: works even when Android Chrome / in-app browsers drop the session cookie on the Google hop.
-    const state = createGoogleOAuthState(linkUserId, safeMapReturnTo(req.query.returnTo));
-    req.session.googleOAuthState = state;
-    req.session.googleOAuthLinkUserId = linkUserId;
-
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: googleRedirectUri(req),
-      response_type: "code",
-      scope: "openid email profile",
-      state,
-      prompt: "select_account",
-    });
-
-    const finishRedirect = () => {
-      setGoogleOAuthStateCookie(res, state);
-      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-    };
-
-    req.session.save((err) => {
-      if (err) {
-        console.error("Google OAuth session save failed:", err);
-        // Still proceed: signed state + cookie do not require the session to survive.
-      }
-      finishRedirect();
-    });
-  });
-
-  app.get("/api/auth/google/callback", async (req, res) => {
-    try {
-      const clientId = process.env.GOOGLE_CLIENT_ID;
-      const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-      const code = String(req.query.code || "");
-      const state = String(req.query.state || "");
-      if (!clientId || !clientSecret) {
-        return res.status(500).send(googleOAuthErrorPage("Google sign-in is not configured on the server."));
-      }
-      if (!code) {
-        return res.status(400).send(googleOAuthErrorPage("Google did not return an authorization code. Try again from the browser (not an in-app browser if possible)."));
-      }
-
-      const cookieState = readCookie(req, GOOGLE_OAUTH_STATE_COOKIE);
-      const sessionState = req.session?.googleOAuthState;
-      // Prefer HMAC validation (stateless). Session/cookie equality is a fallback for older in-flight logins.
-      const signed = parseGoogleOAuthState(state);
-      const stateOk = Boolean(
-        signed
-        || (sessionState && state === sessionState)
-        || (cookieState && state === cookieState),
-      );
-      if (!stateOk) {
-        console.warn("Google OAuth state mismatch", {
-          hasSessionState: Boolean(sessionState),
-          hasCookieState: Boolean(cookieState),
-          hasSignedState: Boolean(signed),
-          ua: String(req.headers["user-agent"] || "").slice(0, 120),
-        });
-        clearGoogleOAuthStateCookie(res);
-        return res.status(400).send(googleOAuthErrorPage(
-          "That sign-in step expired or this browser dropped the login cookie (common in Instagram/TikTok in-app browsers and some Android WebViews). Open zaylist.com in Chrome or your system browser and try Google again.",
-        ));
-      }
-
-      req.session.googleOAuthState = undefined;
-      clearGoogleOAuthStateCookie(res);
-
-      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code,
-          grant_type: "authorization_code",
-          redirect_uri: googleRedirectUri(req),
-        }),
-      });
-      if (!tokenRes.ok) {
-        const text = await tokenRes.text();
-        console.error("Google token exchange failed:", text);
-        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again in a minute."));
-      }
-      const token = await tokenRes.json() as { access_token?: string };
-      if (!token.access_token) {
-        return res.status(401).send(googleOAuthErrorPage("Google token exchange failed. Try again."));
-      }
-
-      const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${token.access_token}` },
-      });
-      if (!profileRes.ok) {
-        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
-      }
-      const profile = await profileRes.json() as {
-        email?: string;
-        email_verified?: boolean;
-        sub?: string;
-        name?: string;
-        picture?: string;
-      };
-      if (!profile.email || profile.email_verified === false) {
-        return res.status(401).send(googleOAuthErrorPage("Your Google email must be verified to sign in."));
-      }
-      if (!profile.sub) {
-        return res.status(401).send(googleOAuthErrorPage("Could not load your Google profile."));
-      }
-
-      const linkUserId = signed?.linkUserId ?? req.session.googleOAuthLinkUserId;
-      req.session.googleOAuthLinkUserId = undefined;
-
-      const establishSession = (userId: number, redirectTo: string) => {
-        const finish = () => {
-          req.session.userId = userId;
-          const user = storage.getUserById(userId);
-          if (user) {
-            maybeSyncSiteOwnerPortfolio(user);
-            markAdminSessionForUser(req, user);
-          }
-          req.session.save((saveErr) => {
-            if (saveErr) {
-              console.error("Google sign-in session save failed:", saveErr);
-              return res.status(500).send(googleOAuthErrorPage("Signed in with Google, but saving your session failed. Try again."));
-            }
-            res.redirect(redirectTo);
-          });
-        };
-        // Fresh session id after OAuth (matches password login) - cleaner cookies on mobile Chrome.
-        if (typeof req.session.regenerate === "function") {
-          return req.session.regenerate((err) => {
-            if (err) {
-              console.error("Google OAuth session regenerate failed:", err);
-              return finish();
-            }
-            finish();
-          });
-        }
-        finish();
-      };
-
-      if (linkUserId) {
-        if (req.session.userId && req.session.userId !== linkUserId) {
-          return res.status(401).send(googleOAuthErrorPage("Google link session expired. Log in again, then link Google from settings."));
-        }
-        const existingGoogleUser = storage.getUserByGoogleId(profile.sub);
-        if (existingGoogleUser && existingGoogleUser.id !== linkUserId) {
-          return res.status(409).send(googleOAuthErrorPage("That Google account is already linked to another Zaylist profile."));
-        }
-        const linkedUser = storage.getUserById(linkUserId);
-        if (!linkedUser) {
-          return res.status(401).send(googleOAuthErrorPage("Google link session expired. Log in again, then retry linking."));
-        }
-        storage.linkGoogleToUser(linkUserId, profile.sub);
-        if (!linkedUser.photoUrl && profile.picture) storage.updateUser(linkUserId, { photoUrl: profile.picture });
-        return establishSession(linkUserId, "/dashboard?google=linked");
-      }
-
-      let user = storage.getUserByGoogleId(profile.sub) || storage.getUserByEmail(profile.email);
-      if (!user) {
-        user = storage.createUser({
-          username: makeUsername(profile.email),
-          email: profile.email,
-          passwordHash: crypto.randomBytes(32).toString("hex"),
-          displayName: profile.name || profile.email.split("@")[0],
-          googleId: profile.sub,
-        });
-        if (profile.picture) storage.updateUser(user.id, { photoUrl: profile.picture });
-      } else {
-        if (!user.googleId) storage.linkGoogleToUser(user.id, profile.sub);
-        if (!user.photoUrl && profile.picture) {
-          storage.updateUser(user.id, { photoUrl: profile.picture });
-        }
-      }
-
-      establishSession(user.id, signed?.returnTo || "/dashboard");
-    } catch (e) {
-      console.error("Google sign-in error:", e);
-      res.status(500).send(googleOAuthErrorPage("Something went wrong during Google sign-in. Try again."));
-    }
-  });
-
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy(err => {
-      if (err) return res.status(500).json({ error: "Logout failed" });
-      // Must match session cookie attributes or Secure cookies will not clear in browsers.
-      res.clearCookie("connect.sid", {
-        path: "/",
-        secure: productionSecureCookies(),
-        httpOnly: true,
-        sameSite: "lax",
-      });
-      res.json({ ok: true });
-    });
-  });
-
-  app.get("/api/auth/me", (req, res) => {
-    if (!req.session?.userId) return res.status(401).json({ error: "Not authenticated" });
-    let user = storage.getUserById(req.session.userId);
-    if (!user) return res.status(401).json({ error: "Not authenticated" });
-    if (user.status === "deleted") {
-      req.session.destroy(() => {});
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    user = storage.clearExpiredAccountModeration(user.id) || user;
-    res.json(authUserResponse(req, user));
-  });
-
-  // Username autocomplete - requires auth, returns up to 8 matches
-  app.get("/api/users/search", requireAuth, (req, res) => {
-    const q = String(req.query.q || "").trim().replace(/^@/, "").toLowerCase();
-    if (!q || q.length < 2) return res.json([]);
-    const rows = sqlite.prepare(`
-      SELECT id, username, display_name AS displayName, photo_url AS photoUrl,
-             avatar_choice AS avatarChoice, avatar_ring AS avatarRing
-      FROM users
-      WHERE LOWER(username) LIKE ? OR LOWER(display_name) LIKE ?
-      ORDER BY username COLLATE NOCASE
-      LIMIT 8
-    `).all(`${q}%`, `${q}%`) as { id: number; username: string; displayName: string | null; photoUrl: string | null; avatarChoice: string | null; avatarRing: string | null }[];
-    res.json(rows);
-  });
-
-  // Update own profile
-  app.put("/api/users/me", requireAuth, (req, res) => {
-    const {
-      username, displayName, avatarChoice, avatarRing, avatarCrop, bio, photoUrl, coverImageUrl, coverCrop,
-      pronouns, location,
-      socialLinks, profileEmbeds, profilePhotos, talents, standFor, affiliatedVenueIds, marquee, accentColor, banner, pup,
-      top8,
-    } = req.body;
-    const moderated: Record<string, string | null | undefined> = {
-      displayName: typeof displayName === "string" ? displayName : undefined,
-      bio: typeof bio === "string" ? bio : undefined,
-      pronouns: typeof pronouns === "string" ? pronouns : undefined,
-      location: typeof location === "string" ? location : undefined,
-      username: typeof username === "string" ? username : undefined,
-    };
-    if (marquee && typeof marquee === "object" && !Array.isArray(marquee)) {
-      const mq = marquee as Record<string, unknown>;
-      if (Array.isArray(mq.items)) moderated["marquee.items"] = mq.items.map(String).join(", ");
-    }
-    if (pup && typeof pup === "object" && !Array.isArray(pup)) {
-      const p = pup as Record<string, unknown>;
-      if (typeof p.name === "string") moderated["pup.name"] = p.name;
-      if (typeof p.lookingFor === "string") moderated["pup.lookingFor"] = p.lookingFor;
-    }
-    if (socialLinks && typeof socialLinks === "object" && !Array.isArray(socialLinks)) {
-      for (const [key, value] of Object.entries(socialLinks as Record<string, unknown>)) {
-        // "website" is the one place a member's own off-platform site belongs.
-        if (key === "website") continue;
-        if (typeof value === "string") moderated[`socialLinks.${key}`] = value;
-      }
-    }
-    if (moderationGate(res, "Member profile", moderated)) return;
-    if (username !== undefined) {
-      const result = storage.changeUsername(req.session.userId!, username);
-      if ("error" in result) return res.status(400).json({ error: result.error });
-    }
-    if (accentColor !== undefined && accentColor !== null && !isProfileAccentColor(accentColor)) {
-      return res.status(400).json({ error: "Invalid accent color" });
-    }
-    if (banner !== undefined && banner !== null && !isProfileBanner(banner)) {
-      return res.status(400).json({ error: "Invalid banner option" });
-    }
-    const user = storage.getUserById(req.session.userId!);
-    const patch: Record<string, unknown> = {};
-    if (displayName !== undefined) patch.displayName = displayName;
-    if (avatarChoice !== undefined) patch.avatarChoice = avatarChoice;
-    if (avatarRing !== undefined) patch.avatarRing = avatarRing || "none";
-    if (avatarCrop !== undefined) patch.avatarCrop = avatarCrop || null;
-    if (bio !== undefined) patch.bio = bio;
-    if (photoUrl !== undefined) {
-      const cleanPhoto = sanitizeCoverImageUrl(photoUrl);
-      if (cleanPhoto === false) {
-        return res.status(400).json({ error: "Invalid photo URL" });
-      }
-      patch.photoUrl = cleanPhoto;
-    }
-    if (coverImageUrl !== undefined) {
-      const cleanCover = sanitizeCoverImageUrl(coverImageUrl);
-      if (cleanCover === false) {
-        return res.status(400).json({ error: "Invalid cover image URL" });
-      }
-      patch.coverImageUrl = cleanCover;
-    }
-    if (coverCrop !== undefined) patch.coverCrop = sanitizeCoverCrop(coverCrop);
-    if (pronouns !== undefined) patch.pronouns = pronouns ? String(pronouns).replace(/[<>]/g, "").trim().slice(0, 40) : null;
-    if (location !== undefined) patch.location = location ? String(location).replace(/[<>]/g, "").trim().slice(0, 80) : null;
-    if (socialLinks !== undefined) patch.socialLinks = sanitizeSocialLinks(socialLinks);
-    if (profileEmbeds !== undefined) patch.profileEmbeds = sanitizeProfileEmbeds(profileEmbeds);
-    if (profilePhotos !== undefined) patch.profilePhotos = sanitizeProfilePhotos(profilePhotos);
-    if (talents !== undefined) patch.talents = sanitizeTalents(talents);
-    // "Stand for" is promoter-only, same reasoning as marquee below.
-    if (standFor !== undefined && user?.promoterStatus === "approved") patch.standFor = sanitizeTalents(standFor);
-    if (affiliatedVenueIds !== undefined) patch.affiliatedVenueIds = sanitizeAffiliatedVenueIds(affiliatedVenueIds);
-    // Marquee is promoter-only - silently ignored for everyone else rather than erroring,
-    // since the field simply doesn't apply to a member's own profile.
-    if (marquee !== undefined && user?.promoterStatus === "approved") patch.marquee = sanitizeMarquee(marquee);
-    if (accentColor !== undefined) patch.accentColor = accentColor === null
-      ? null
-      : normalizeProfileAccentColor(String(accentColor));
-    if (banner !== undefined) patch.banner = banner;
-    if (pup !== undefined) patch.pup = sanitizePup(pup);
-    // Top 8: up to 8 ordered refs to real people (k:"u") or venues (k:"b").
-    if (top8 !== undefined) {
-      const arr = Array.isArray(top8) ? top8 : [];
-      const clean: { k: "u" | "b"; id: number }[] = [];
-      const seen = new Set<string>();
-      for (const e of arr) {
-        const k = e?.k === "b" ? "b" : e?.k === "u" ? "u" : null;
-        const id = Number(e?.id);
-        if (!k || !Number.isInteger(id) || id <= 0) continue;
-        const key = `${k}:${id}`;
-        if (seen.has(key)) continue;
-        const exists = k === "u" ? !!storage.getUserById(id) : !!storage.getBusiness(id);
-        if (!exists) continue;
-        seen.add(key);
-        clean.push({ k, id });
-        if (clean.length >= 8) break;
-      }
-      patch.top8 = JSON.stringify(clean);
-    }
-    storage.updateUser(req.session.userId!, patch as any);
-    const updated = storage.getUserById(req.session.userId!);
-    res.json(authUserResponse(req, updated));
-  });
-
-  // Owner-only: full replace of the profile media card (podcast/playlist) + its item list
-  app.put("/api/users/me/media", requireAuth, (req, res) => {
-    const { kind, title, tag, cadence, blurb, coverUrl, platformLinks, items } = req.body || {};
-    if (kind !== "podcast" && kind !== "playlist") return res.status(400).json({ error: "kind must be podcast or playlist" });
-    if (typeof title !== "string" || !title.trim()) return res.status(400).json({ error: "title required" });
-    const cleanItems = Array.isArray(items)
-      ? items
-          .filter((it: any) => it && typeof it.title === "string" && typeof it.audioUrl === "string")
-          .slice(0, 30)
-          .map((it: any) => ({
-            label: typeof it.label === "string" ? it.label.replace(/[<>]/g, "").trim().slice(0, 20) : null,
-            title: String(it.title).replace(/[<>]/g, "").trim().slice(0, 120),
-            meta: typeof it.meta === "string" ? it.meta.replace(/[<>]/g, "").trim().slice(0, 60) : null,
-            audioUrl: String(it.audioUrl).trim().slice(0, 500),
-            isEmbed: !!it.isEmbed,
-          }))
-      : [];
-    const cleanPlatforms = Array.isArray(platformLinks)
-      ? platformLinks
-          .filter((p: any) => p && typeof p.label === "string" && typeof p.url === "string")
-          .slice(0, 6)
-          .map((p: any) => ({ label: String(p.label).slice(0, 30), url: String(p.url).slice(0, 300) }))
-      : [];
-    const saved = storage.saveProfileMedia(req.session.userId!, {
-      kind,
-      title: title.replace(/[<>]/g, "").trim().slice(0, 80),
-      tag: typeof tag === "string" ? tag.replace(/[<>]/g, "").trim().slice(0, 30) : null,
-      cadence: typeof cadence === "string" ? cadence.replace(/[<>]/g, "").trim().slice(0, 40) : null,
-      blurb: typeof blurb === "string" ? blurb.replace(/[<>]/g, "").trim().slice(0, 240) : null,
-      coverUrl: typeof coverUrl === "string" ? coverUrl.trim().slice(0, 300) : null,
-      platformLinks: cleanPlatforms,
-      items: cleanItems,
-    });
-    res.json(saved);
-  });
-
-  // Pack & pup: link/unlink a packmate or handler (real user references, not free text)
-  app.post("/api/users/me/pack/:relation", requireAuth, (req, res) => {
-    const relation = req.params.relation;
-    if (relation !== "packmate" && relation !== "handler") return res.status(400).json({ error: "Invalid relation" });
-    const username = String(req.body?.username || "").trim();
-    if (!username) return res.status(400).json({ error: "username required" });
-    const result = storage.addPackLink(req.session.userId!, relation, username);
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json({ ok: true });
-  });
-
-  app.delete("/api/users/me/pack/:relation/:userId", requireAuth, (req, res) => {
-    const relation = req.params.relation;
-    if (relation !== "packmate" && relation !== "handler") return res.status(400).json({ error: "Invalid relation" });
-    storage.removePackLink(req.session.userId!, relation, Number(req.params.userId));
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ HUB SCENE FEED â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/hub/feed", requireAuth, (req, res) => {
-    const tab = parseHubFeedTab(typeof req.query.tab === "string" ? req.query.tab : null);
-    const limit = Number(req.query.limit) || 30;
-    const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
-    const feed = storage.getHubFeed({
-      tab,
-      limit: Number.isFinite(limit) ? limit : 30,
-      cursor,
-      viewerUserId: req.session.userId,
-      viewerIsAdmin: sessionIsAdmin(req),
-    });
-    res.json(feed);
-  });
-
-  app.get("/api/hub/feed/post-options", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    const isAdmin = sessionIsAdmin(req);
-    const canPost = storage.canUserPostToHubFeed(userId, isAdmin);
-    const hostedIds = storage.getHostedLiveEventIds(userId);
-    const hostedEvents = hostedIds.map((id) => {
-      const evt = storage.getEvent(id);
-      if (!evt) return null;
-      return { id: evt.id, title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek };
-    }).filter(Boolean);
-    const ownedVenues = storage.getUserOwnedBusinesses(userId).map((biz) => ({
-      id: biz.id,
-      name: biz.name,
-      type: biz.type,
-      logoUrl: biz.imageUrl ?? null,
-    }));
-    res.json({ canPost, hostedEvents, ownedVenues });
-  });
-
-  app.get("/api/hub/feed/posts/mine", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    const isAdmin = sessionIsAdmin(req);
-    if (!storage.canUserPostToHubFeed(userId, isAdmin)) {
-      return res.status(403).json({ error: "Not allowed to post to the scene feed" });
-    }
-    const posts = storage.getHubFeedPostsByUser(userId, 20);
-    res.json(posts);
-  });
-
-  app.post("/api/hub/feed/posts", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    const user = storage.getUserById(userId);
-    const isAdmin = sessionIsAdmin(req);
-    if (!user || !storage.canUserPostToHubFeed(userId, isAdmin)) {
-      return res.status(403).json({ error: "Sign in with an active account to post to the scene feed" });
-    }
-
-    const postType = String(req.body.postType || "").trim().toLowerCase();
-    if (postType !== "text" && postType !== "photo") {
-      return res.status(400).json({ error: "postType must be text or photo" });
-    }
-
-    const audience = String(req.body.audience || "ALL").trim().toUpperCase();
-    if (audience !== "ALL" && audience !== "RSVPS") {
-      return res.status(400).json({ error: "audience must be ALL or RSVPS" });
-    }
-
-    // "Post as" identity: yourself, an upcoming event you host, or a venue you own.
-    const postAs = String(req.body.postAs || "self").trim().toLowerCase();
-    if (postAs !== "self" && postAs !== "event" && postAs !== "venue") {
-      return res.status(400).json({ error: "postAs must be self, event, or venue" });
-    }
-    let businessId: number | null = null;
-    if (postAs === "venue") {
-      businessId = Number(req.body.businessId);
-      if (!Number.isInteger(businessId) || businessId <= 0) {
-        return res.status(400).json({ error: "Posting as a venue needs a valid venue" });
-      }
-      const owns = storage.getUserOwnedBusinesses(userId).some((b) => b.id === businessId);
-      if (!owns && !isAdmin) {
-        return res.status(403).json({ error: "You can only post as a venue you own" });
-      }
-    }
-
-    const body = req.body.body != null ? String(req.body.body).trim().slice(0, 1000) : "";
-    const photoUrl = req.body.photoUrl != null ? String(req.body.photoUrl).trim() : "";
-
-    if (postType === "text") {
-      if (!body) return res.status(400).json({ error: "Text posts need a message" });
-      if (photoUrl) return res.status(400).json({ error: "Text posts cannot include a photo" });
-    } else {
-      if (!photoUrl || (!photoUrl.startsWith("/uploads/") && !photoUrl.startsWith("https://"))) {
-        return res.status(400).json({ error: "Photo posts need a valid uploaded image" });
-      }
-      if (!body && !photoUrl) return res.status(400).json({ error: "Photo posts need an image" });
-    }
-
-    // eventId drives both the "post as event" identity and RSVP targeting; a
-    // host may use it for either. Posting as an event requires one.
-    let eventId: number | null = null;
-    if (req.body.eventId != null && req.body.eventId !== "") {
-      eventId = Number(req.body.eventId);
-      if (!Number.isInteger(eventId) || eventId <= 0) {
-        return res.status(400).json({ error: "Invalid event" });
-      }
-      if (!storage.isUserEventHost(eventId, userId) && !isAdmin) {
-        return res.status(403).json({ error: "You can only post as or target events you host" });
-      }
-    }
-    if (postAs === "event" && eventId == null) {
-      return res.status(400).json({ error: "Posting as an event needs a valid event" });
-    }
-
-    if (audience === "RSVPS") {
-      const hosted = storage.getHostedLiveEventIds(userId);
-      if (hosted.length === 0) {
-        return res.status(400).json({ error: "RSVP-only posts require at least one live hosted event" });
-      }
-      if (eventId != null && !hosted.includes(eventId) && !isAdmin) {
-        return res.status(400).json({ error: "That event is not in your hosted list" });
-      }
-    } else if (eventId != null && postAs !== "event") {
-      // For a public post, an event is only valid as the "post as" identity.
-      return res.status(400).json({ error: "eventId is only valid for RSVP audience or posting as that event" });
-    }
-
-    if (moderationGate(res, "Scene feed post", { body: body || null })) return;
-
-    const post = storage.createHubFeedPost({
-      userId,
-      postType,
-      body: body || null,
-      photoUrl: photoUrl || null,
-      audience,
-      eventId,
-      postAs,
-      businessId,
-    });
-    res.json(post);
-  });
-
-  app.delete("/api/hub/feed/posts/:id", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    const result = storage.removeHubFeedPost(Number(req.params.id), userId, { isAdmin: sessionIsAdmin(req) });
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    res.json(result);
-  });
-
-  app.post("/api/upload/feed-photo", requireAuth, upload.single("photo"), (req: any, res: any) => {
-    if (!req.file) return res.status(400).json({ error: "No file or invalid type (jpg/png/gif/webp, max 8MB)" });
-    res.json({ url: `/uploads/${req.file.filename}` });
-  });
-
-  // â”€â”€â”€ MEMBER PROFILES + FOLLOWS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Public profile page - no auth required; viewer detected via session.
-  app.get("/api/users/:username", (req: any, res) => {
-    const username = String(req.params.username || "").trim().replace(/^@/, "");
-    const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
-    if (!profile) return res.status(404).json({ error: "Not found" });
-    res.json(profile);
-  });
-
-  app.get("/api/users/me/blocked", requireAuth, (req, res) => {
-    res.json(storage.getBlockedMembers(req.session.userId!));
-  });
-
-  app.post("/api/users/:username/block", requireAuth, (req, res) => {
-    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
-    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
-    if (target.id === req.session.userId) return res.status(400).json({ error: "You cannot block yourself" });
-    if (storage.isGuideAdminUserId(target.id)) return res.status(400).json({ error: "The Zaylist guide account cannot be blocked" });
-    storage.blockMember(req.session.userId!, target.id);
-    res.json(storage.getMemberBlockStatus(req.session.userId!, target.id));
-  });
-
-  app.delete("/api/users/:username/block", requireAuth, (req, res) => {
-    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
-    if (!target) return res.status(404).json({ error: "Not found" });
-    storage.unblockMember(req.session.userId!, target.id);
-    res.json(storage.getMemberBlockStatus(req.session.userId!, target.id));
-  });
-
-  // Toggle a like on board / hub content shown on public profile Updates.
-  // Types: GIG | GIFTING | SPOTTED | HUB
-  app.post("/api/content/:type/:id/like", requireAuth, (req: any, res) => {
-    const type = String(req.params.type || "").trim().toUpperCase();
-    const id = Number(req.params.id);
-    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: "Invalid id" });
-    const result = storage.toggleContentLike(type, id, req.session.userId!);
-    if (result.error) {
-      const status = result.error === "Not found" ? 404 : 400;
-      return res.status(status).json({ error: result.error });
-    }
-    res.json({ liked: result.liked, likes: result.likes });
-  });
-
-  // Signed voting starts with public member-authored Hub posts. Historical
-  // likes remain +1 votes, while the existing like route stays compatible.
-  app.post("/api/content/HUB/:id/vote", requireAuth, (req: any, res) => {
-    const id = Number(req.params.id);
-    const value = Number(req.body?.value);
-    if (!Number.isInteger(id) || id <= 0 || ![-1, 0, 1].includes(value)) {
-      return res.status(400).json({ error: "Vote must be -1, 0, or 1" });
-    }
-    const result = storage.voteOnHubPost(id, req.session.userId!, value as -1 | 0 | 1);
-    if (result.error) {
-      return res.status(result.error === "Not found" ? 404 : 400).json({ error: result.error });
-    }
-    res.json(result);
-  });
-
-  // List reply thread for board / hub content on public profile Updates.
-  // GIG + HUB: public content_replies bodies.
-  // SPOTTED + GIFTING: count-only (private native flows); no reply bodies.
-  app.get("/api/content/:type/:id/replies", (req: any, res) => {
-    const type = String(req.params.type || "").trim().toUpperCase();
-    const id = Number(req.params.id);
-    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: "Invalid id" });
-    const meta = storage.getContentReplyMeta(type, id);
-    if (meta.error) {
-      const status = meta.error === "Not found" ? 404 : 400;
-      return res.status(status).json({ error: meta.error });
-    }
-    const replies =
-      meta.mode === "thread" ? storage.listContentReplies(type, id, 20) : [];
-    res.json({
-      replies,
-      count: meta.count,
-      mode: meta.mode,
-      nativeHref: meta.nativeHref,
-    });
-  });
-
-  // Post a public reply on GIG or HUB content. SPOTTED / GIFTING stay native-only.
-  app.post("/api/content/:type/:id/replies", requireAuth, (req: any, res) => {
-    const type = String(req.params.type || "").trim().toUpperCase();
-    const id = Number(req.params.id);
-    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: "Invalid id" });
-    const body = String(req.body?.body || "").trim().slice(0, 500);
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Content reply", { body })) return;
-    const result = storage.createContentReply(type, id, req.session.userId!, body);
-    if (result.error) {
-      const status = result.error === "Not found" ? 404 : 400;
-      return res.status(status).json({ error: result.error });
-    }
-    res.json({ reply: result.reply, replies: result.replies });
-  });
-
-  app.post("/api/users/:username/follow", requireAuth, (req, res) => {
-    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
-    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
-    if (target.id === req.session.userId) return res.status(400).json({ error: "You can't follow yourself" });
-    storage.followUser(req.session.userId!, target.id);
-    res.json({ followers: storage.getFollowerCount(target.id), isFollowing: true });
-  });
-
-  app.delete("/api/users/:username/follow", requireAuth, (req, res) => {
-    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
-    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
-    if (target.id === req.session.userId) return res.status(400).json({ error: "You can't follow yourself" });
-    storage.unfollowUser(req.session.userId!, target.id);
-    res.json({ followers: storage.getFollowerCount(target.id), isFollowing: false });
-  });
-
-  app.get("/api/users/me/follow-stats", requireAuth, (req, res) => {
-    const userId = req.session.userId!;
-    res.json({
-      followers: storage.getFollowerCount(userId),
-      following: storage.getFollowingCount(userId),
-    });
-  });
-
-  app.get("/api/users/me/people/:tab", requireAuth, (req, res) => {
-    const tab = String(req.params.tab || "").trim();
-    const userId = req.session.userId!;
-    // Following includes both people (follows) and places (business_follows).
-    // Venue "Follow me" used to write only business_follows, so Hub People looked empty.
-    if (tab === "following") {
-      return res.json({
-        people: storage.getFollowingList(userId, userId),
-        places: storage.getFollowedBusinessesList(userId),
-      });
-    }
-    if (tab === "followers") return res.json(storage.getFollowersList(userId, userId));
-    if (tab === "discover") return res.json(storage.discoverPeople(userId));
-    return res.status(400).json({ error: "Invalid tab" });
-  });
-
-  app.post("/api/users/:username/message", requireAuth, (req, res) => {
-    const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
-    if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
-    if (target.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body?.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    const sender = storage.getUserById(req.session.userId!);
-    if (!sender) return res.status(401).json({ error: "Not authenticated" });
-    const subject = String(req.body?.subject || "").trim().slice(0, 120) || `Message from @${sender.username}`;
-    if (moderationGate(res, "Direct message", { subject, body })) return;
-    storage.sendMessage(sender.id, target.id, subject, body, { contextType: "THREAD" });
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ MISSED CONNECTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/missed-connections/postable-events", requireAuth, (req, res) => {
-    const scope = String(req.query.scope || "today");
-    if (scope === "board") {
-      return res.json(storage.getLinkableEventsForMissedConnections());
-    }
-    const requireToday = scope === "today";
-    const events = storage.getPostableEventsForMissedConnections(requireToday);
-    res.json(events.map(evt => ({
-      id: evt.id,
-      title: evt.title,
-      venueName: evt.venueName,
-      dayOfWeek: evt.dayOfWeek,
-      dateStart: evt.dateStart,
-      dateEnd: evt.dateEnd,
-    })));
-  });
-
-  app.get("/api/missed-connections", (req: any, res) => {
-    const beach = String(req.query.beach || "").trim();
-    if (beach && isValidBeachId(beach)) {
-      return res.json(storage.getMissedConnectionsByBeach(beach, req.session?.userId));
-    }
-    res.json(storage.getMissedConnections("ACTIVE", req.session?.userId));
-  });
-
-  app.get("/api/events/:id/missed-connections", (req: any, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    res.json(storage.getMissedConnectionsByEvent(evt.id, req.session?.userId));
-  });
-
-  app.get("/api/missed-connections/mine", requireAuth, (req, res) => {
-    res.json(storage.getMissedConnectionsByUser(req.session.userId!));
-  });
-
-  app.post("/api/missed-connections", requireAuth, (req, res) => {
-    try {
-      const rawEventId = req.body.eventId;
-      const rawBeachId = req.body.beachId;
-      const hasEvent = rawEventId !== undefined && rawEventId !== null && rawEventId !== "";
-      const hasBeach = rawBeachId !== undefined && rawBeachId !== null && rawBeachId !== "";
-      const eventId = hasEvent ? Number(rawEventId) : null;
-      const beachId = hasBeach ? String(rawBeachId) : null;
-
-      if (hasEvent && hasBeach) {
-        return res.status(400).json({ error: "Link to an event or a beach, not both" });
-      }
-      if (hasEvent && !Number.isFinite(eventId)) {
-        return res.status(400).json({ error: "Invalid event" });
-      }
-      if (hasBeach && !isValidBeachId(beachId)) {
-        return res.status(400).json({ error: "Invalid beach" });
-      }
-
-      if (moderationGate(res, "MIZZED CONNECTION", {
-        title: req.body.title,
-        body: req.body.body,
-        eventLabel: req.body.eventLabel,
-        venueHint: req.body.venueHint,
-      })) return;
-
-      let payload: Record<string, unknown>;
-      let eventMeta: { title: string; venueName: string; dayOfWeek: string } | null = null;
-
-      const scope = String(req.body.scope || "");
-      const boardScope = scope === "board";
-
-      if (beachId) {
-        payload = {
-          ...req.body,
-          userId: req.session.userId!,
-          eventId: null,
-          beachId,
-          dayOfWeek: pacificDayOfWeek(),
-          venueHint: beachVenueLabel(beachId as "rooster-rock" | "sauvie-island"),
-          closesAt: generalSpottedClosesAt(),
-        };
-      } else if (eventId != null) {
-        const evt = storage.getEvent(eventId);
-        if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
-
-        const requireToday = !boardScope && scope === "today";
-        const window = isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday });
-        if (!window.ok) return res.status(400).json({ error: window.reason || "Posting not open for this event yet" });
-
-        payload = {
-          ...req.body,
-          userId: req.session.userId!,
-          eventId,
-          dayOfWeek: evt.dayOfWeek,
-          venueHint: evt.venueName,
-          closesAt: window.closesAt || missedConnectionClosesAt(evt.dateStart, evt.dateEnd),
-        };
-        eventMeta = { title: evt.title, venueName: evt.venueName, dayOfWeek: evt.dayOfWeek || "" };
-      } else {
-        const customLabel = String(req.body.eventLabel || "").trim();
-        const venueHint = formatCustomSpottedVenue(
-          customLabel,
-          String(req.body.venueHint || "").trim(),
-        );
-        payload = {
-          ...req.body,
-          userId: req.session.userId!,
-          eventId: null,
-          dayOfWeek: pacificDayOfWeek(),
-          venueHint,
-          closesAt: generalSpottedClosesAt(),
-        };
-      }
-
-      const data = insertMissedConnectionSchema.parse(payload);
-      if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
-      const created = storage.createMissedConnection(data);
-      res.json({
-        ...created,
-        eventTitle: eventMeta?.title ?? null,
-        eventVenue: eventMeta?.venueName ?? null,
-        eventDay: eventMeta?.dayOfWeek ?? created.dayOfWeek ?? null,
-        isMine: true,
-        anonymous: false,
-      });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.put("/api/missed-connections/:id", requireAuth, (req, res) => {
-    const patch: any = {};
-    ["title", "body", "status"].forEach(k => {
-      if (req.body[k] !== undefined) patch[k] = req.body[k];
-    });
-    if (patch.body && patch.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
-    if (moderationGate(res, "MIZZED CONNECTION edit", { title: patch.title, body: patch.body })) return;
-    const updated = storage.updateMissedConnection(Number(req.params.id), req.session.userId!, patch);
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
-  });
-
-  app.delete("/api/missed-connections/:id", requireAuth, (req, res) => {
-    storage.deleteMissedConnection(Number(req.params.id), req.session.userId!);
-    res.json({ ok: true });
-  });
-
-  app.post("/api/missed-connections/:id/reply", requireAuth, (req, res) => {
-    const post = storage.getMissedConnection(Number(req.params.id));
-    if (!post || post.status !== "ACTIVE") return res.status(404).json({ error: "Not found" });
-    if (post.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "MIZZED CONNECTION reply", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, post.userId, `MIZZED CONNECTION: ${post.title}`, body, {
-      contextType: "MISSED_CONNECTION",
-      contextId: post.id,
-      contextLabel: post.title,
-    });
-    storage.createMissedConnectionThread(msg.threadId, post.id, post.userId, req.session.userId!);
-    res.json(msg);
-  });
-
-  app.post("/api/missed-connections/:id/report", requireAuth, (req, res) => {
-    const post = storage.getMissedConnection(Number(req.params.id));
-    if (!post || post.status !== "ACTIVE") return res.status(404).json({ error: "Not found" });
-    const reason = String(req.body.reason || "").trim().slice(0, 500) || "No reason given";
-    const actor = storage.getUserById(req.session.userId!);
-    storage.createModerationRequest({
-      type: "MISSED_CONNECTION_REPORT",
-      eventId: 0,
-      eventTitle: post.title || `Missed connection #${post.id}`,
-      requesterName: actor?.displayName || actor?.username || "member",
-      requesterEmail: actor?.email || null,
-      proof: `Missed connection #${post.id} reported - ${reason}`,
-    } as any);
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ RIVER BRATS (Nude Beaches social) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  /** Active beach days for the signed-in user (feeds My Schedule flyer blocks). */
-  app.get("/api/river-brats/checkins/mine", requireAuth, (req, res) => {
-    res.json(storage.getBeachCheckinsByUser(req.session.userId!));
-  });
-
-  app.get("/api/river-brats/checkins", (req: any, res) => {
-    const beachId = String(req.query.beach || "");
-    const date = String(req.query.date || pacificTodayDate());
-    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    try {
-      const rows = storage.getBeachCheckins(beachId, date, req.session?.userId);
-      // Always JSON-array so clients never .filter an error object
-      res.json(Array.isArray(rows) ? rows : []);
-    } catch (e: any) {
-      console.error("[river-brats/checkins]", e?.message || e);
-      res.status(500).json({ error: "Could not load check-ins" });
-    }
-  });
-
-  app.post("/api/river-brats/checkins", requireAuth, (req, res) => {
-    try {
-      const beachId = String(req.body.beachId || "");
-      const arrivalHour = Number(req.body.arrivalHour);
-      const departHourRaw = req.body.departHour;
-      const departHour = departHourRaw == null || departHourRaw === "" ? null : Number(departHourRaw);
-      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-      if (!isValidRiverBratsHour(arrivalHour)) return res.status(400).json({ error: "Pick a time between 7am and 9pm" });
-      if (!isValidRiverBratsDepartHour(departHour, arrivalHour)) {
-        return res.status(400).json({ error: "Pick how long you'll stay (leave after you arrive, by 10pm)" });
-      }
-      const note = String(req.body.note || "").trim().slice(0, 80) || null;
-      if (moderationGate(res, "River Brats check-in", { note: note || "" })) return;
-      const calendarDate = String(req.body.date || pacificTodayDate());
-      if (!isAllowedBeachCheckinDate(calendarDate)) {
-        return res.status(400).json({ error: "Pick a day from today through the next 7 days" });
-      }
-      const isAnonymous = Boolean(req.body.isAnonymous);
-      const row = storage.upsertBeachCheckin({
-        ...insertBeachCheckinSchema.parse({
-          userId: req.session.userId!,
-          beachId,
-          arrivalHour,
-          departHour,
-          note,
-          calendarDate,
-        }),
-        isAnonymous,
-      });
-      res.json(row);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.delete("/api/river-brats/checkins/:id", requireAuth, (req, res) => {
-    const ok = storage.deleteBeachCheckin(Number(req.params.id), req.session.userId!);
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  });
-
-  // GPS presence confirm ("I am here"). Coordinates are compared to the beach
-  // anchor server-side and discarded - never persisted or logged.
-  app.post("/api/river-brats/checkins/verify", requireAuth, (req, res) => {
-    const beachId = String(req.body.beachId || "");
-    const date = String(req.body.date || pacificTodayDate());
-    const lat = Number(req.body.lat);
-    const lng = Number(req.body.lng);
-    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    if (date !== pacificTodayDate()) {
-      return res.status(400).json({ error: "You can only confirm presence on the day of your check-in" });
-    }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      return res.status(400).json({ error: "Location unavailable" });
-    }
-    const result = storage.verifyBeachPresence(req.session.userId!, beachId, date, lat, lng);
-    if (!result.ok && result.error === "NO_CHECKIN") {
-      return res.status(403).json({ error: "Check in first" });
-    }
-    if (!result.ok) {
-      return res.status(400).json({ error: "TOO_FAR", distanceM: result.distanceM });
-    }
-    res.json(result);
-  });
-
-  app.get("/api/river-brats/checkins/chat", requireAuth, (req: any, res) => {
-    const beachId = String(req.query.beach || "");
-    const date = String(req.query.date || pacificTodayDate());
-    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    const payload = storage.getBeachChatMessages(beachId, date, req.session.userId!);
-    res.json(payload);
-  });
-
-  app.post("/api/river-brats/checkins/chat", requireAuth, (req, res) => {
-    try {
-      const beachId = String(req.body.beachId || "");
-      const date = String(req.body.date || pacificTodayDate());
-      const body = String(req.body.body || "").trim();
-      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-      if (!body) return res.status(400).json({ error: "body required" });
-      if (body.length > 500) return res.status(400).json({ error: "Message too long" });
-      if (moderationGate(res, "River Brats beach chat", { body })) return;
-      const msg = storage.postBeachChatMessage(beachId, date, req.session.userId!, body);
-      res.json(msg);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/river-brats/checkins/:id/message", requireAuth, (req, res) => {
-    try {
-      const checkinId = Number(req.params.id);
-      const beachId = String(req.body.beachId || "");
-      const date = String(req.body.date || pacificTodayDate());
-      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-      if (!storage.getBeachCheckinByUser(beachId, req.session.userId!, date)) {
-        return res.status(403).json({ error: "Check-in required to message others" });
-      }
-      const rows = storage.getBeachCheckins(beachId, date, req.session.userId!);
-      const target = rows.find((r: any) => r.id === checkinId);
-      if (!target?.userId || target.masked) return res.status(404).json({ error: "Check-in not found" });
-      if (target.userId === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-      const body = String(req.body.body || "").trim();
-      if (!body) return res.status(400).json({ error: "body required" });
-      if (moderationGate(res, "River Brats DM", { body })) return;
-      const msg = storage.sendMessage(
-        req.session.userId!,
-        Number(target.userId),
-        `River Brats: ${beachVenueLabel(beachId)}`,
-        body,
-        { contextType: "RIVER_BRATS_CHECKIN", contextId: checkinId, contextLabel: beachVenueLabel(beachId) },
-      );
-      res.json(msg);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.get("/api/river-brats/carpool", (req: any, res) => {
-    const beachId = String(req.query.beach || "");
-    const tripDate = String(req.query.date || pacificTodayDate());
-    if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-    res.json(storage.getBeachCarpoolPosts(beachId, tripDate, req.session?.userId));
-  });
-
-  app.post("/api/river-brats/carpool", requireAuth, (req, res) => {
-    try {
-      const beachId = String(req.body.beachId || "");
-      const postType = String(req.body.postType || "");
-      const leaveHour = Number(req.body.leaveHour);
-      const departureArea = String(req.body.departureArea || "").trim();
-      const note = String(req.body.note || "").trim();
-      const tripDate = String(req.body.tripDate || pacificTodayDate());
-      const directionRaw = String(req.body.direction || "TO_BEACH").toUpperCase();
-      const direction = isValidCarpoolDirection(directionRaw) ? directionRaw : "TO_BEACH";
-      const seats = req.body.seats != null ? Number(req.body.seats) : null;
-      if (!isValidBeachId(beachId)) return res.status(400).json({ error: "Invalid beach" });
-      if (postType !== "OFFERING_RIDE" && postType !== "NEED_RIDE") return res.status(400).json({ error: "Invalid post type" });
-      if (!isAllowedCarpoolTripDate(tripDate)) {
-        return res.status(400).json({ error: "Pick a day from today through the next 7 days" });
-      }
-      if (!isValidRiverBratsHour(leaveHour)) return res.status(400).json({ error: "Leave time required (7amâ€“9pm)" });
-      if (!departureArea) return res.status(400).json({ error: "Departure area required" });
-      if (!note || note.length < 8) return res.status(400).json({ error: "Add a short note (min 8 characters)" });
-      if (postType === "OFFERING_RIDE" && (!seats || seats < 1 || seats > 4)) {
-        return res.status(400).json({ error: "Seats required (1â€“4) when offering a ride" });
-      }
-      if (moderationGate(res, "River Brats carpool", { note, departureArea })) return;
-      const row = storage.createBeachCarpoolPost(insertBeachCarpoolPostSchema.parse({
-        userId: req.session.userId!,
-        beachId,
-        postType,
-        direction,
-        departureArea,
-        tripDate,
-        leaveHour,
-        seats: postType === "OFFERING_RIDE" ? seats : null,
-        note,
-      }));
-      res.json({ ...row, isMine: true, requestCount: 0 });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.delete("/api/river-brats/carpool/:id", requireAuth, (req, res) => {
-    const ok = storage.deleteBeachCarpoolPost(Number(req.params.id), req.session.userId!);
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  });
-
-  app.post("/api/river-brats/carpool/:id/request", requireAuth, (req, res) => {
-    try {
-      const note = String(req.body.note || "").trim();
-      if (!note) return res.status(400).json({ error: "note required" });
-      if (moderationGate(res, "River Brats carpool request", { note })) return;
-      const row = storage.requestBeachCarpool(Number(req.params.id), req.session.userId!, note);
-      res.json(row);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.get("/api/river-brats/carpool/:id/requests", requireAuth, (req, res) => {
-    try {
-      res.json(storage.getBeachCarpoolRequests(Number(req.params.id), req.session.userId!));
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/river-brats/carpool/:id/select/:requestId", requireAuth, (req, res) => {
-    try {
-      const msg = storage.selectBeachCarpoolRequest(
-        Number(req.params.id),
-        Number(req.params.requestId),
-        req.session.userId!,
-      );
-      res.json(msg);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/river-brats/report", requireAuth, (req, res) => {
-    try {
-      const reason = String(req.body.reason || "").trim();
-      const targetType = String(req.body.targetType || "");
-      const targetId = Number(req.body.targetId);
-      if (!reason) return res.status(400).json({ error: "reason required" });
-      if (!["CHECKIN", "CARPOOL", "CHAT_MESSAGE", "MISSED_CONNECTION"].includes(targetType)) {
-        return res.status(400).json({ error: "Invalid target" });
-      }
-      storage.reportRiverBrats(insertRiverBratsReportSchema.parse({
-        targetType,
-        targetId,
-        reporterUserId: req.session.userId!,
-        reason,
-        note: req.body.note ? String(req.body.note).trim() : null,
-      }));
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  // â”€â”€â”€ PUSH NOTIFICATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/push/vapid-public-key", (_req, res) => {
-    if (!isPushConfigured()) return res.json({ configured: false, publicKey: null });
-    res.json({ configured: true, publicKey: getVapidPublicKey() });
-  });
-
-  app.get("/api/users/me/notification-prefs", requireAuth, (req, res) => {
-    const user = storage.getUserById(req.session.userId!);
-    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
-    res.json({
-      prefs: storage.getNotificationPrefs(req.session.userId!),
-      pushConfigured: Boolean(process.env.VAPID_PUBLIC_KEY),
-      isAdmin,
-    });
-  });
-
-  app.put("/api/users/me/notification-prefs", requireAuth, (req, res) => {
-    const user = storage.getUserById(req.session.userId!);
-    const body = req.body || {};
-    const patch: Record<string, boolean> = {};
-    for (const key of ["messages", "my_events", "account", "admin"] as const) {
-      if (typeof body[key] === "boolean") patch[key] = body[key];
-    }
-    // Same isAdmin predicate as GET (includes grant-based site admins).
-    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
-    const prefs = storage.setNotificationPrefs(
-      req.session.userId!,
-      patch,
-      isAdmin,
-    );
-    res.json({ prefs });
-  });
-
-  app.post("/api/push/subscribe", requireAuth, (req, res) => {
-    const endpoint = String(req.body?.endpoint || "").trim();
-    const p256dh = String(req.body?.keys?.p256dh || req.body?.p256dh || "").trim();
-    const auth = String(req.body?.keys?.auth || req.body?.auth || "").trim();
-    if (!endpoint || !p256dh || !auth) return res.status(400).json({ error: "Invalid subscription" });
-    const sub = storage.upsertPushSubscription(req.session.userId!, {
-      endpoint,
-      p256dh,
-      auth,
-      userAgent: String(req.get("user-agent") || "").slice(0, 500),
-      platform: String(req.body?.platform || "").slice(0, 40) || null,
-    });
-    res.json({ ok: true, id: (sub as any)?.id });
-  });
-
-  app.delete("/api/push/subscribe", requireAuth, (req, res) => {
-    const endpoint = String(req.body?.endpoint || "").trim();
-    if (!endpoint) return res.status(400).json({ error: "endpoint required" });
-    storage.deactivatePushSubscriptionByEndpoint(req.session.userId!, endpoint);
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/push-status", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !(storage.hasOwnerAdminAccess(caller) || isMainAdminUser(caller))) {
-      return res.status(403).json({ error: "Primary or super admin only" });
-    }
-    const userId = req.session.userId!;
-    res.json({
-      configured: isPushConfigured(),
-      totalActiveSubscriptions: storage.countActivePushSubscriptions(),
-      myDeviceSubscriptions: storage.getActivePushSubscriptions(userId).length,
-    });
-  });
-
-  app.post("/api/push/test", requireAdmin, async (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !(storage.hasOwnerAdminAccess(caller) || isMainAdminUser(caller))) {
-      return res.status(403).json({ error: "Primary or super admin only" });
-    }
-    if (!isPushConfigured()) return res.status(503).json({ error: "VAPID keys not configured on server" });
-    const userId = req.session.userId!;
-    const subs = storage.getActivePushSubscriptions(userId);
-    if (subs.length === 0) {
-      return res.status(400).json({
-        error: "No active push subscription for this admin account",
-        hint: "Avatar menu â†’ Notification settings â†’ Enable push on this device. On iPhone, open the Home Screen app first.",
-      });
-    }
-    const payload = buildDeclarativePayload({
-      title: "Zaylist test",
-      body: "Push notifications are working. If you see this, delivery is fixed.",
-      navigate: "/dashboard",
-      tag: `pdx-test-${Date.now()}`,
-    });
-    const results = await Promise.all(subs.map(async (sub) => {
-      const result = await sendPushToSubscription(sub, payload);
-      if (result.ok) storage.touchPushSubscription(sub.id);
-      else if (result.gone) storage.deactivatePushSubscription(sub.id);
-      const host = (() => {
-        try { return new URL(sub.endpoint).host; } catch { return "unknown"; }
-      })();
-      return {
-        id: sub.id,
-        host,
-        ok: result.ok,
-        statusCode: result.statusCode,
-        error: "error" in result ? result.error : undefined,
-      };
-    }));
-    const sent = results.filter((r) => r.ok).length;
-    console.log(`[push] admin test user=${userId} sent=${sent}/${subs.length}`, JSON.stringify(results));
-    if (sent === 0) return res.status(502).json({ error: "Push send failed for all devices", results });
-    res.json({
-      ok: true,
-      sent,
-      total: subs.length,
-      results,
-      hint: "On Mac: check Notification Center (and System Settings â†’ Notifications â†’ Safari). On iPhone: open the Home Screen Zaylist app; Settings â†’ Notifications â†’ Zaylist must allow alerts.",
-    });
-  });
-
-  // OWNER-ONLY broadcast: send one push announcement to every subscribed device.
-  // Respects each user's "account" notification preference (the category we use
-  // for site/guide announcements). Not rate-limited by the per-message limiter -
-  // this is a deliberate one-shot the primary owner fires by hand.
-  app.post("/api/admin/push/broadcast", requireAdmin, async (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.isPrimarySiteOwner(caller)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    if (!isPushConfigured()) return res.status(503).json({ error: "VAPID keys not configured on server" });
-
-    const title = String(req.body?.title || "").trim();
-    const body = String(req.body?.body || "").trim();
-    const navigateRaw = String(req.body?.url || req.body?.navigate || "/events").trim();
-    // Only allow same-site relative paths for the deep link.
-    const navigate = navigateRaw.startsWith("/") ? navigateRaw : "/events";
-    if (!title) return res.status(400).json({ error: "Title is required" });
-    if (title.length > 80) return res.status(400).json({ error: "Title must be 80 characters or fewer" });
-    if (body.length > 180) return res.status(400).json({ error: "Body must be 180 characters or fewer" });
-
-    const allSubs = storage.getAllActivePushSubscriptions();
-    // Group devices by user so we can respect each user's announcement pref once.
-    const byUser = new Map<number, typeof allSubs>();
-    for (const sub of allSubs) {
-      const list = byUser.get(sub.userId) || [];
-      list.push(sub);
-      byUser.set(sub.userId, list);
-    }
-
-    const payload = buildDeclarativePayload({
-      title,
-      body: body || undefined,
-      navigate,
-      tag: `pdx-broadcast-${Date.now()}`,
-    });
-
-    let sent = 0;
-    let failed = 0;
-    let deviceTotal = 0;
-    let usersTargeted = 0;
-    let usersOptedOut = 0;
-
-    for (const [userId, subs] of byUser) {
-      // "account" is the announcement/guide-update category. Muted â†’ skip.
-      const prefs = storage.getNotificationPrefs(userId);
-      if (!prefs.account) {
-        usersOptedOut += 1;
-        continue;
-      }
-      usersTargeted += 1;
-      await Promise.all(subs.map(async (sub) => {
-        deviceTotal += 1;
-        const result = await sendPushToSubscription(sub, payload);
-        if (result.ok) {
-          storage.touchPushSubscription(sub.id);
-          sent += 1;
-        } else {
-          failed += 1;
-          if (result.gone) storage.deactivatePushSubscription(sub.id);
-        }
-      }));
-    }
-
-    console.log(
-      `[push] BROADCAST by owner=${caller.id} title=${JSON.stringify(title)} sent=${sent}/${deviceTotal} ` +
-      `usersTargeted=${usersTargeted} optedOut=${usersOptedOut}`,
-    );
-
-    res.json({
-      ok: true,
-      sent,
-      failed,
-      deviceTotal,
-      usersTargeted,
-      usersOptedOut,
-      title,
-      body,
-      navigate,
-    });
-  });
-
-  // â”€â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/messages/unread-count", requireAuth, (req, res) => {
-    res.json({ count: storage.getUnreadCount(req.session.userId!) });
-  });
-
-  // Group chats the viewer belongs to (event rooms via check-in/hosting, plus
-  // today's beach room) - powers the Inbox sheet GROUP rows.
-  app.get("/api/chats/mine", requireAuth, (req, res) => {
-    res.json(storage.getMyGroupChats(req.session.userId!));
-  });
-
-  app.get("/api/messages/inbox", requireAuth, (req, res) => {
-    const inbox = storage.getInbox(req.session.userId!).map(m =>
-      storage.maskMessageParty(m, req.session.userId!, "inbox"),
-    );
-    res.json(inbox);
-  });
-
-  app.get("/api/messages/sent", requireAuth, (req, res) => {
-    const sent = storage.getSentMessages(req.session.userId!).map(m =>
-      storage.maskMessageParty(m, req.session.userId!, "sent"),
-    );
-    res.json(sent);
-  });
-
-  app.post("/api/messages/thread/:threadId/reply", requireAuth, (req, res) => {
-    const thread = storage.getThread(req.params.threadId);
-    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
-    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
-    const first = thread[0] as any;
-    const last = thread[thread.length - 1] as any;
-    const toUserId = last.fromUserId === req.session.userId ? last.toUserId : last.fromUserId;
-    const body = String(req.body.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Inbox thread reply", { body })) return;
-    const msg = storage.sendMessage(req.session.userId!, toUserId, first.subject || "Reply", body, {
-      threadId: req.params.threadId,
-      contextType: first.contextType || "THREAD",
-      contextId: first.contextId || null,
-      contextLabel: first.contextLabel || null,
-    });
-    res.json(msg);
-  });
-
-  app.post("/api/messages/thread/:threadId/typing", requireAuth, (req, res) => {
-    const threadId = String(req.params.threadId || "");
-    const thread = storage.getThread(threadId);
-    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const key = `${threadId}:${req.session.userId}`;
-    if (req.body?.active) inboxTyping.set(key, { userId: req.session.userId!, updatedAt: Date.now() });
-    else inboxTyping.delete(key);
-    res.json({ ok: true });
-  });
-
-  app.get("/api/messages/thread/:threadId/typing", requireAuth, (req, res) => {
-    const threadId = String(req.params.threadId || "");
-    const thread = storage.getThread(threadId);
-    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const cutoff = Date.now() - 12_000;
-    let active = false;
-    for (const [key, state] of inboxTyping) {
-      if (state.updatedAt < cutoff) { inboxTyping.delete(key); continue; }
-      if (key.startsWith(`${threadId}:`) && state.userId !== req.session.userId) active = true;
-    }
-    res.json({ active });
-  });
-
-  app.put("/api/messages/:id/read", requireAuth, (req, res) => {
-    const ok = storage.markReadForUser(Number(req.params.id), req.session.userId!);
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  });
-
-  // Long-press DM reactions: ðŸ‘ ðŸ‘Ž ðŸ˜‚ ðŸ˜¢ â¤ï¸ ðŸ’” GAY!
-  app.post("/api/messages/:id/reactions", requireAuth, (req: any, res) => {
-    const messageId = Number(req.params.id);
-    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
-    if (!emoji) return res.status(400).json({ error: "emoji required" });
-    const result = storage.toggleMessageReaction(messageId, req.session.userId!, emoji);
-    if (result.error) {
-      const status = result.error === "Invalid reaction" ? 400 : 404;
-      return res.status(status).json({ error: result.error });
-    }
-    res.json({ reactions: result.reactions });
-  });
-
-  app.get("/api/messages/thread/:threadId", requireAuth, (req, res) => {
-    const thread = storage.getThreadForViewer(req.params.threadId, req.session.userId!);
-    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const mcThread = storage.getMissedConnectionThread(req.params.threadId);
-    const bothRevealed = !mcThread || Boolean(mcThread.poster_revealed && mcThread.replier_revealed);
-    res.json({
-      messages: thread,
-      reveal: mcThread ? {
-        posterRevealed: Boolean(mcThread.poster_revealed),
-        replierRevealed: Boolean(mcThread.replier_revealed),
-        bothRevealed,
-        iAmPoster: mcThread.poster_user_id === req.session.userId,
-        iRevealed: mcThread.poster_user_id === req.session.userId
-          ? Boolean(mcThread.poster_revealed)
-          : mcThread.replier_user_id === req.session.userId
-            ? Boolean(mcThread.replier_revealed)
-            : false,
-      } : null,
-    });
-  });
-
-  app.post("/api/messages/thread/:threadId/reveal", requireAuth, (req, res) => {
-    const thread = storage.getThread(req.params.threadId);
-    const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const updated = storage.revealMissedConnectionIdentity(req.params.threadId, req.session.userId!);
-    if (!updated) return res.status(400).json({ error: "Cannot reveal in this thread" });
-    res.json({
-      reveal: {
-        posterRevealed: Boolean(updated.poster_revealed),
-        replierRevealed: Boolean(updated.replier_revealed),
-        bothRevealed: Boolean(updated.poster_revealed && updated.replier_revealed),
-      },
-    });
-  });
-
-  app.delete("/api/messages/thread/:threadId", requireAuth, (req, res) => {
-    const threadId = decodeURIComponent(req.params.threadId || "").trim();
-    if (!threadId) return res.status(400).json({ error: "Thread id required" });
-    const thread = storage.getThread(threadId);
-    const userId = req.session.userId!;
-    const visible = thread.some((m: any) => m.fromUserId === userId || m.toUserId === userId);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const cleared = storage.softDeleteThread(threadId, userId);
-    if (cleared === 0) return res.status(404).json({ error: "Nothing to delete" });
-    res.json({ ok: true, cleared });
-  });
-
-  app.delete("/api/messages/folder/:folder", requireAuth, (req, res) => {
-    const folder = String(req.params.folder || "").toLowerCase();
-    if (!["inbox", "sent", "all"].includes(folder)) {
-      return res.status(400).json({ error: "folder must be inbox, sent, or all" });
-    }
-    const cleared = storage.clearInboxFolder(req.session.userId!, folder as "inbox" | "sent" | "all");
-    res.json({ ok: true, cleared });
-  });
-
-  app.get("/api/events/:id/hosts", (req, res) => {
-    const eventId = Number(req.params.id);
-    if (isTuckerHostedArchiveId(eventId)) {
-      const credits = getArchiveSyntheticCredits(eventId).filter(c => c.role === "PRIMARY" || c.role === "COHOST");
-      const hosts = credits
-        .map((c, i) => {
-          const user = storage.getUserByUsername(c.username);
-          if (!user) return null;
-          return {
-            id: -(eventId * 10 + i + 1),
-            eventId,
-            userId: user.id,
-            role: c.role,
-            addedByUserId: null,
-            createdAt: "",
-            username: user.username,
-            displayName: user.displayName,
-            photoUrl: user.photoUrl,
-            avatarChoice: user.avatarChoice ?? 1,
-            avatarRing: user.avatarRing || "none",
-          };
-        })
-        .filter(Boolean);
-      return res.json(hosts);
-    }
-    const evt = storage.getEvent(eventId);
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    res.json(storage.getEventHosts(evt.id));
-  });
-
-  app.post("/api/events/:id/hosts", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    if (!sessionIsAdmin(req) && !storage.isUserEventHost(evt.id, req.session.userId!)) {
-      return res.status(403).json({ error: "Only event hosts can add co-hosts" });
-    }
-    const username = String(req.body.username || "").trim();
-    const email = String(req.body.email || "").trim();
-    const result = storage.addEventCoHost(evt.id, req.session.userId!, username, email);
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result.host);
-  });
-
-  app.get("/api/events/:id/talent", (req, res) => {
-    const eventId = Number(req.params.id);
-    if (isTuckerHostedArchiveId(eventId)) {
-      const credits = getArchiveSyntheticCredits(eventId).filter(c => c.role === "DJ");
-      const talent = credits
-        .map((c, i) => {
-          const user = storage.getUserByUsername(c.username);
-          if (!user) return null;
-          return {
-            id: -(eventId * 10 + i + 50),
-            eventId,
-            userId: user.id,
-            role: "DJ",
-            status: "LIVE",
-            addedByUserId: null,
-            createdAt: "",
-            username: user.username,
-            displayName: user.displayName,
-            photoUrl: user.photoUrl,
-            avatarChoice: user.avatarChoice ?? 1,
-            avatarRing: user.avatarRing || "none",
-          };
-        })
-        .filter(Boolean);
-      return res.json(talent);
-    }
-    const evt = storage.getEvent(eventId);
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    const userId = req.session?.userId;
-    const isAdmin = sessionIsAdmin(req);
-    const canManage = isAdmin || (userId && storage.isUserEventHost(evt.id, userId));
-    const talent = storage.getEventTalent(evt.id, { includePending: Boolean(canManage) });
-    res.json(talent);
-  });
-
-  app.post("/api/events/:id/talent", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    if (!sessionIsAdmin(req) && !storage.isUserEventHost(evt.id, req.session.userId!)) {
-      return res.status(403).json({ error: "Only event hosts can add talent" });
-    }
-    const role = String(req.body.role || "").trim().toUpperCase();
-    if (!isEventTalentRole(role)) return res.status(400).json({ error: "Invalid role" });
-    const username = String(req.body.username || "").trim();
-    if (!username) return res.status(400).json({ error: "username required" });
-    const result = storage.addEventTalentByHost(evt.id, req.session.userId!, username, role, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result.talent);
-  });
-
-  app.post("/api/events/:id/talent/self", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    const role = String(req.body.role || "").trim().toUpperCase();
-    if (!isEventTalentRole(role)) return res.status(400).json({ error: "Invalid role" });
-    const result = storage.requestEventTalentSelf(evt.id, req.session.userId!, role);
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result);
-  });
-
-  app.post("/api/events/:id/talent/:talentId/approve", requireAuth, (req, res) => {
-    const talentId = Number(req.params.talentId);
-    const result = storage.approveEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result.talent);
-  });
-
-  app.post("/api/events/:id/talent/:talentId/reject", requireAuth, (req, res) => {
-    const talentId = Number(req.params.talentId);
-    const result = storage.rejectEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result);
-  });
-
-  app.get("/api/talent-request/:talentId", requireAuth, (req, res) => {
-    const row = storage.getEventTalentById(Number(req.params.talentId));
-    if (!row) return res.status(404).json({ error: "Not found" });
-    if (!storage.canApproveEventTalent(row.id, req.session.userId!, sessionIsAdmin(req))) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
-    res.json(row);
-  });
-
-  app.post("/api/talent-request/:talentId/approve", requireAuth, (req, res) => {
-    const talentId = Number(req.params.talentId);
-    const userId = req.session.userId!;
-    const result = storage.approveEventTalent(talentId, userId, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    storage.softDeleteTalentRequestThreads(talentId, userId);
-    res.json(result.talent);
-  });
-
-  app.post("/api/talent-request/:talentId/reject", requireAuth, (req, res) => {
-    const talentId = Number(req.params.talentId);
-    const userId = req.session.userId!;
-    const result = storage.rejectEventTalent(talentId, userId, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    storage.softDeleteTalentRequestThreads(talentId, userId);
-    res.json(result);
-  });
-
-  app.delete("/api/events/:id/talent/:talentId", requireAuth, (req, res) => {
-    const talentId = Number(req.params.talentId);
-    const result = storage.removeEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result);
-  });
-
-  app.get("/api/events/:id/host-messages", (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    res.json(storage.getHostMessages(Number(req.params.id), 2));
-  });
-
-  app.post("/api/events/:id/host-messages", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const user = storage.getUserById(req.session.userId!);
-    if (!user || !storage.isUserEventHost(evt.id, user.id)) {
-      return res.status(403).json({ error: "Only the event host can post updates" });
-    }
-    const body = String(req.body.body || "").trim().slice(0, 1000);
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Host update", { body })) return;
-    const msg = storage.createHostMessage({ eventId: evt.id, userId: user.id, body });
-    const notified = storage.notifyAttendeesOfHostUpdate(evt.id, user.id, evt.title, body);
-    res.json({ ...msg, notified });
-  });
-
-  // Promoter invite: past attendees of their events + their profile followers â†’ inbox.
-  app.get("/api/events/:id/invite-audience", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const userId = req.session.userId!;
-    if (!storage.isUserEventHost(evt.id, userId) && !sessionIsAdmin(req)) {
-      return res.status(403).json({ error: "Only the event host can invite" });
-    }
-    res.json(storage.previewEventInviteAudience(evt.id, userId));
-  });
-
-  app.post("/api/events/:id/invite-audience", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const user = storage.getUserById(req.session.userId!);
-    if (!user || (!storage.isUserEventHost(evt.id, user.id) && !sessionIsAdmin(req))) {
-      return res.status(403).json({ error: "Only the event host can invite" });
-    }
-    if (evt.status !== "LIVE") {
-      return res.status(400).json({ error: "Event must be live to send invites" });
-    }
-    const includePastAttendees = req.body?.includePastAttendees !== false;
-    const includeFollowers = req.body?.includeFollowers !== false;
-    if (!includePastAttendees && !includeFollowers) {
-      return res.status(400).json({ error: "Pick at least one audience: past attendees or followers" });
-    }
-    const message = req.body?.message != null ? String(req.body.message).trim().slice(0, 800) : "";
-    if (message && moderationGate(res, "Event invite", { body: message })) return;
-    const result = storage.inviteAudienceToEvent(evt.id, user.id, {
-      includePastAttendees,
-      includeFollowers,
-      message: message || null,
-    });
-    res.json(result);
-  });
-
-  app.post("/api/events/:id/transfer", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const user = storage.getUserById(req.session.userId!);
-    if (!user || !storage.isUserEventHost(evt.id, user.id)) {
-      return res.status(403).json({ error: "Only the current host can transfer this event" });
-    }
-    const target = String(req.body.target || "").trim();
-    const notes = String(req.body.notes || "").trim();
-    if (!target) return res.status(400).json({ error: "target required (username or email)" });
-    const req2 = storage.createModerationRequest({
-      type: "TRANSFER",
-      eventId: evt.id,
-      eventTitle: evt.title,
-      requesterName: user.displayName || user.username,
-      requesterEmail: user.email,
-      proof: `${target}${notes ? ` - ${notes}` : ""}`,
-    });
-    res.json(req2);
-  });
-
-  // Contact availability is resolved on the server; never trust a client-supplied recipient ID.
-  app.get("/api/events/:id/message-options", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
-    const host = storage.resolveEventMessageRecipient(evt.id, "host");
-    const venue = storage.resolveEventMessageRecipient(evt.id, "venue");
-    res.json({
-      canMessageHost: Boolean(host && host.user.id !== req.session.userId),
-      canMessageVenue: Boolean(venue && venue.user.id !== req.session.userId),
-      venueName: venue?.venueName || evt.venueName,
-    });
-  });
-
-  app.post("/api/events/:id/message-host", requireAuth, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const target = req.body.target ?? "auto";
-    if (target !== "auto" && target !== "host" && target !== "venue") {
-      return res.status(400).json({ error: "Invalid message target" });
-    }
-    const recipient = storage.resolveEventMessageRecipient(evt.id, target);
-    if (!recipient) {
-      const venueWebsite = resolveVenueWebsite(evt.venueName, venueWebsiteIndex());
-      return res.status(400).json({
-        error: "NO_CONTACT",
-        ticketUrl: evt.ticketUrl || null,
-        venueWebsite,
-        venueName: evt.venueName || null,
-      });
-    }
-    const { user: host, recipientType, venueName } = recipient;
-    if (host.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Message to event host", { body })) return;
-    const subject = recipientType === "venue_owner"
-      ? `Event at ${venueName || evt.venueName}: ${evt.title}`
-      : `Event: ${evt.title}`;
-    const msg = storage.sendMessage(req.session.userId!, host.id, subject, body, {
-      contextType: "EVENT_HOST",
-      contextId: evt.id,
-      contextLabel: evt.title,
-    });
-    if (!msg?.id) {
-      console.error("[message-host] sendMessage returned no row", {
-        eventId: evt.id,
-        recipientId: host.id,
-        recipientType,
-      });
-      return res.status(500).json({ error: "Could not deliver message" });
-    }
-    res.json({ ...msg, recipientType, venueName: venueName || null });
-  });
-
-  // â”€â”€â”€ PROMOTER AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/promoter/register", (req, res) => {
-    try {
-      const { name, email, org, password } = req.body;
-      if (!name || !email || !password) return res.status(400).json({ error: "name, email, password required" });
-      const existing = storage.getPromoterByEmail(email);
-      if (existing) return res.status(409).json({ error: "Email already registered" });
-      const promoter = storage.createPromoter({ name, email, org, passwordHash: password });
-      res.json({ id: promoter.id, name: promoter.name, email: promoter.email, org: promoter.org });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/promoter/login", (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "email and password required" });
-    const promoter = storage.getPromoterByEmail(email);
-    if (!promoter) return res.status(401).json({ error: "Invalid credentials" });
-    if (!verifyPassword(password, promoter.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
-    req.session.promoterId = promoter.id;
-    res.json({ id: promoter.id, name: promoter.name, email: promoter.email, org: promoter.org });
-  });
-
-  // â”€â”€â”€ ADMIN AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.post("/api/admin/login", (req, res) => {
-    const { username, password } = req.body;
-    if (!password) return res.status(400).json({ error: "password required" });
-
-    // Accept regular user account credentials if that user is a site admin
-    const userByHandle = storage.getUserByUsername(username) || storage.getUserByEmail(username);
-    if (userByHandle && verifyPassword(password, userByHandle.passwordHash) && isMainAdminUser(userByHandle)) {
-      req.session.isAdmin = true;
-      req.session.userId = userByHandle.id;
-      return res.json({
-        isAdmin: true,
-        username: userByHandle.username,
-        isSuperAdmin: isMainAdminUser(userByHandle),
-        isPrimaryOwner: storage.isPrimarySiteOwner(userByHandle),
-      });
-    }
-
-    // Legacy env-var credential fallback (set ADMIN_USERNAME + ADMIN_PASSWORD in Railway if needed)
-    if (ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      req.session.isAdmin = true;
-      const actorId = getAdminActorUserId(req);
-      const actor = actorId ? storage.getUserById(actorId) : null;
-      if (actorId) req.session.userId = actorId;
-      return res.json({
-        isAdmin: true,
-        username: ADMIN_USERNAME,
-        isSuperAdmin: true,
-        isPrimaryOwner: actor ? storage.isPrimarySiteOwner(actor) : false,
-      });
-    }
-
-    return res.status(401).json({ error: "Invalid credentials" });
-  });
-
-  app.post("/api/admin/logout", (req, res) => {
-    req.session.isAdmin = undefined;
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/me", requireAdmin, (req, res) => {
-    const mainUser = getSessionAdminUser(req);
-    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-    const resolved = mainUser ? syncOwnerDisplayName(mainUser) : sessionUser;
-    const primaryOwner = resolved ? storage.isPrimarySiteOwner(resolved) : false;
-    const ownerAdmin = resolved ? storage.hasOwnerAdminAccess(resolved) : false;
-    const superAdmin = !!mainUser || ownerAdmin;
-    res.json({
-      isAdmin: true,
-      username: resolved?.displayName || resolved?.username || ADMIN_USERNAME,
-      email: resolved?.email || null,
-      isSuperAdmin: superAdmin,
-      isPrimaryOwner: primaryOwner,
-      canManageTeam: ownerAdmin,
-      canViewUsers: ownerAdmin,
-      canPush: ownerAdmin || !!mainUser,
-      canManageCatalog: ownerAdmin || !!mainUser,
-    });
-  });
-
-  app.get("/api/admin/team", requireAdmin, (req, res) => {
-    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-    if (!sessionUser || !storage.hasOwnerAdminAccess(sessionUser)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    res.json(storage.listSiteAdmins());
-  });
-
-  app.post("/api/admin/team", requireAdmin, (req, res) => {
-    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-    if (!sessionUser || !storage.hasOwnerAdminAccess(sessionUser)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const { identifier, note } = req.body || {};
-    const result = storage.grantSiteAdminByIdentifier(String(identifier || ""), sessionUser.id, note);
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json(result.admin);
-  });
-
-  app.delete("/api/admin/team/:userId", requireAdmin, (req, res) => {
-    const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
-    if (!sessionUser || !storage.hasOwnerAdminAccess(sessionUser)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const result = storage.revokeSiteAdmin(Number(req.params.userId));
-    if (result.error) return res.status(400).json({ error: result.error });
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ ADMIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/admin/submissions", requireAdmin, (req, res) => {
-    const subs = req.query.all === "true" ? storage.getSubmissions() : storage.getSubmissions("PENDING");
-    res.json(subs.map(enrichSubmissionForAdmin));
-  });
-
-  app.post("/api/admin/submissions/:id/approve", requireAdmin, (req, res) => {
-    const { adminName } = req.body;
-    if (!adminName) return res.status(400).json({ error: "adminName required" });
-    const pending = storage.getSubmissions().find(s => s.id === Number(req.params.id));
-    // Only event submissions carry real dates - promoter applications and
-    // claims store a placeholder timestamp where start === end.
-    if (pending && (pending.type === "NEW_EVENT" || pending.type === "SUGGEST")) {
-      const dateErr = validateEventDates(pending.dateStart, pending.dateEnd);
-      if (dateErr) return res.status(400).json({ error: `Cannot approve: ${dateErr}` });
-    }
-    const sub = storage.approveSubmission(Number(req.params.id), adminName);
-    if (!sub) return res.status(404).json({ error: "Not found" });
-    if (sub.status === "APPROVED" && (sub.type === "NEW_EVENT" || sub.type === "SUGGEST")) {
-      const created = storage.getEvents({ status: "LIVE" })
-        .filter(evt => evt.submittedBy === sub.submitterEmail && evt.title === sub.title)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-      if (created) {
-        void fillEventMapCoordinates(created.id).catch(err =>
-          console.error("[fillEventMapCoordinates] admin create failed:", err),
-        );
-      }
-    }
-    auditAdmin(req, "approve_submission", {
-      type: "submission",
-      id: sub.id,
-      label: sub.title,
-      detail: { status: sub.status, submissionType: sub.type },
-    });
-    releaseAdminQueueClaim("submission", Number(req.params.id), getAdminActor(req).id || 0, { force: true });
-    res.json(sub);
-  });
-
-  app.post("/api/admin/submissions/:id/reject", requireAdmin, (req, res) => {
-    const { reason } = req.body;
-    const id = Number(req.params.id);
-    storage.rejectSubmission(id, reason || "");
-    auditAdmin(req, "reject_submission", {
-      type: "submission",
-      id,
-      label: `submission #${id}`,
-      detail: { reason: reason || null },
-    });
-    releaseAdminQueueClaim("submission", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/submissions/:id/merge-preview", requireAdmin, (req, res) => {
-    const sub = storage.getSubmission(Number(req.params.id));
-    if (!sub) return res.status(404).json({ error: "Submission not found" });
-    const eventId = Number(req.query.eventId);
-    const existing = Number.isFinite(eventId) ? storage.getEvent(eventId) : undefined;
-    if (!existing) return res.status(404).json({ error: "Event not found" });
-    res.json({
-      submissionId: sub.id,
-      eventId: existing.id,
-      fields: diffSubmissionMerge(existing, sub),
-    });
-  });
-
-  app.post("/api/admin/submissions/:id/merge", requireAdmin, async (req, res) => {
-    const { adminName, eventId } = req.body;
-    if (!adminName) return res.status(400).json({ error: "adminName required" });
-    const targetEventId = Number(eventId);
-    if (!Number.isFinite(targetEventId)) return res.status(400).json({ error: "eventId required" });
-
-    const sub = storage.getSubmission(Number(req.params.id));
-    if (!sub) return res.status(404).json({ error: "Submission not found" });
-    const dateErr = validateEventDates(sub.dateStart, sub.dateEnd);
-    if (dateErr) return res.status(400).json({ error: `Cannot merge: ${dateErr}` });
-
-    const result = storage.mergeSubmissionIntoEvent(Number(req.params.id), targetEventId, adminName);
-    if ("error" in result) return res.status(400).json({ error: result.error });
-
-    await fillEventMapCoordinates(result.event.id);
-    res.json(result);
-  });
-
-  app.get("/api/admin/talent-requests", requireAdmin, (req, res) => {
-    res.json(storage.getPendingTalentForUnclaimedEvents());
-  });
-
-  app.post("/api/admin/talent-requests/:talentId/approve", requireAdmin, (req, res) => {
-    const approverId = getAdminActorUserId(req);
-    if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
-    const talentId = Number(req.params.talentId);
-    const result = storage.approveEventTalent(talentId, approverId, { isAdmin: true });
-    if (result.error) return res.status(400).json({ error: result.error });
-    storage.softDeleteTalentRequestThreads(talentId, approverId);
-    if (req.session.userId && req.session.userId !== approverId) {
-      storage.softDeleteTalentRequestThreads(talentId, req.session.userId);
-    }
-    res.json(result.talent);
-  });
-
-  app.post("/api/admin/talent-requests/:talentId/reject", requireAdmin, (req, res) => {
-    const approverId = getAdminActorUserId(req);
-    if (!approverId) return res.status(401).json({ error: "No admin user account configured" });
-    const talentId = Number(req.params.talentId);
-    const result = storage.rejectEventTalent(talentId, approverId, { isAdmin: true });
-    if (result.error) return res.status(400).json({ error: result.error });
-    storage.softDeleteTalentRequestThreads(talentId, approverId);
-    if (req.session.userId && req.session.userId !== approverId) {
-      storage.softDeleteTalentRequestThreads(talentId, req.session.userId);
-    }
-    res.json(result);
-  });
-
-  app.get("/api/admin/promoter-requests", requireAdmin, (req, res) => {
-    res.json(storage.getPendingPromoterRequests());
-  });
-
-  app.post("/api/admin/promoter-requests/:userId/approve", requireAdmin, (req, res) => {
-    const userId = Number(req.params.userId);
-    const user = storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    const adminName = getSessionAdminUser(req)?.displayName
-      || getSessionAdminUser(req)?.username
-      || storage.getUserById(req.session.userId!)?.displayName
-      || storage.getUserById(req.session.userId!)?.username
-      || "admin";
-    storage.setPromoterStatus(userId, "approved");
-    storage.resolvePromoterApplicationSubmissions(userId, "approved", adminName);
-    auditAdmin(req, "approve_promoter", {
-      type: "promoter",
-      id: userId,
-      label: `@${user.username}`,
-    });
-    releaseAdminQueueClaim("promoter", userId, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true, promoterStatus: "approved" });
-  });
-
-  app.post("/api/admin/promoter-requests/:userId/deny", requireAdmin, (req, res) => {
-    const userId = Number(req.params.userId);
-    const user = storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    storage.setPromoterStatus(userId, "rejected");
-    storage.resolvePromoterApplicationSubmissions(userId, "rejected", "admin", "Promoter request denied");
-    auditAdmin(req, "deny_promoter", {
-      type: "promoter",
-      id: userId,
-      label: `@${user.username}`,
-    });
-    releaseAdminQueueClaim("promoter", userId, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true, promoterStatus: "rejected" });
-  });
-
-  // â”€â”€ Admin: venue claims + new-business submissions + logo requests â”€â”€â”€â”€â”€â”€
-  app.get("/api/admin/business-claims", requireAdmin, (req, res) => {
-    res.json(req.query.recent === "true"
-      ? storage.getRecentResolvedBusinessClaims()
-      : storage.getPendingBusinessClaims());
-  });
-
-  app.post("/api/admin/business-claims/:id/approve", requireAdmin, (req, res) => {
-    const adminName = String(req.body?.adminName || "Admin");
-    const id = Number(req.params.id);
-    const result = storage.approveBusinessClaim(id, adminName);
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    auditAdmin(req, "approve_business_claim", { type: "business_claim", id });
-    releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
-    res.json(result);
-  });
-
-  app.post("/api/admin/business-claims/:id/deny", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    storage.rejectBusinessClaim(id, req.body?.reason);
-    auditAdmin(req, "deny_business_claim", { type: "business_claim", id, detail: { reason: req.body?.reason || null } });
-    releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/business-submissions", requireAdmin, (req, res) => {
-    res.json(req.query.recent === "true"
-      ? storage.getRecentResolvedBusinessSubmissions()
-      : storage.getPendingBusinessSubmissions());
-  });
-
-  app.post("/api/admin/business-submissions/:id/approve", requireAdmin, (req, res) => {
-    const adminName = String(req.body?.adminName || "Admin");
-    const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
-    const id = Number(req.params.id);
-    const result = storage.approveBusinessSubmission(id, adminName, overrideImageUrl);
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    auditAdmin(req, "approve_business_submission", { type: "business_submission", id });
-    releaseAdminQueueClaim("business_submission", id, getAdminActor(req).id || 0, { force: true });
-    res.json(result);
-  });
-
-  app.post("/api/admin/business-submissions/:id/deny", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    storage.rejectBusinessSubmission(id, req.body?.reason);
-    auditAdmin(req, "deny_business_submission", { type: "business_submission", id });
-    releaseAdminQueueClaim("business_submission", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/business-logo-requests", requireAdmin, (req, res) => {
-    res.json(req.query.recent === "true"
-      ? storage.getRecentResolvedBusinessLogoRequests()
-      : storage.getPendingBusinessLogoRequests());
-  });
-
-  app.post("/api/admin/business-logo-requests/:id/approve", requireAdmin, (req, res) => {
-    const overrideImageUrl = req.body?.imageUrl ? String(req.body.imageUrl) : undefined;
-    const id = Number(req.params.id);
-    const result = storage.approveBusinessLogoRequest(id, overrideImageUrl);
-    if ("error" in result) return res.status(400).json({ error: result.error });
-    auditAdmin(req, "approve_logo", { type: "logo_request", id });
-    res.json(result);
-  });
-
-  app.post("/api/admin/business-logo-requests/:id/deny", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    storage.rejectBusinessLogoRequest(id, req.body?.reason);
-    auditAdmin(req, "deny_logo", { type: "logo_request", id });
-    res.json({ ok: true });
-  });
-
-  // Full directory roster + assign/unassign venue owners (same idea as event host assign)
-  app.get("/api/admin/directory", requireAdmin, (req, res) => {
-    res.json(storage.getAdminDirectoryBusinesses());
-  });
-
-  app.post("/api/admin/directory/:id/owner", requireAdmin, (req, res) => {
-    try {
-      const businessId = Number(req.params.id);
-      const username = String(req.body.username || "").trim().replace(/^@/, "");
-      if (!username) return res.status(400).json({ error: "username required" });
-      const user = resolveUserByUsername(username);
-      if (!user) return res.status(404).json({ error: "No account found with that username" });
-      if (user.status !== "active") return res.status(400).json({ error: "User account is not active" });
-      const result = storage.assignBusinessOwner(businessId, user.id);
-      if (result.error) return res.status(400).json({ error: result.error });
-      auditAdmin(req, "assign_business_owner", {
-        type: "business",
-        id: businessId,
-        detail: { userId: user.id, username: user.username },
-      });
-      try {
-        const name = result.business?.name || "your venue";
-        storage.sendAsGuideAdmin(
-          user.id,
-          `You now own: ${name}`,
-          `An admin assigned you as the owner of "${name}" in the Queer Directory. Open your Hub to manage the listing.`,
-          { contextType: "GUIDE_UPDATE", contextLabel: name },
-        );
-      } catch (notifyErr) {
-        console.error("[admin] assign venue owner notify failed:", notifyErr);
-      }
-      const enriched = storage.getAdminDirectoryBusinesses().find((b) => b.id === businessId);
-      res.json(enriched || result.business);
-    } catch (err) {
-      console.error("[admin] assign venue owner failed:", err);
-      res.status(500).json({ error: "Could not assign venue owner" });
-    }
-  });
-
-  // Recategorise a listing (e.g. a community org filed under "nonprofit" that
-  // really belongs in Clubs & Groups). Narrow on purpose: validates against the
-  // canonical category list and audits, unlike the broad PUT above.
-  app.patch("/api/admin/directory/:id/type", requireAdmin, (req, res) => {
-    const businessId = Number(req.params.id);
-    const before = storage.getBusiness(businessId);
-    if (!before) return res.status(404).json({ error: "Venue not found" });
-    const type = String(req.body?.type || "").trim();
-    if (!(DIRECTORY_TYPES as readonly string[]).includes(type)) {
-      return res.status(400).json({ error: "Unknown category" });
-    }
-    const updated = storage.updateBusiness(businessId, { type } as any);
-    if (!updated) return res.status(404).json({ error: "Venue not found" });
-    auditAdmin(req, "set_business_type", {
-      type: "business",
-      id: businessId,
-      detail: { from: before.type, to: type },
-    });
-    res.json(updated);
-  });
-
-  app.delete("/api/admin/directory/:id/owner", requireAdmin, (req, res) => {
-    const businessId = Number(req.params.id);
-    const before = storage.getBusiness(businessId);
-    if (!before) return res.status(404).json({ error: "Venue not found" });
-    const result = storage.clearBusinessOwner(businessId);
-    if (result.error) return res.status(400).json({ error: result.error });
-    auditAdmin(req, "unassign_business_owner", {
-      type: "business",
-      id: businessId,
-      detail: { previousOwnerId: before.ownerId ?? null },
-    });
-    const enriched = storage.getAdminDirectoryBusinesses().find((b) => b.id === businessId);
-    res.json(enriched || result.business);
-  });
-
-  app.get("/api/admin/users", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const q = String(req.query.q || "").trim().toLowerCase();
-    const all = storage.getAllUsers ? storage.getAllUsers() : [];
-    const filtered = q
-      ? all.filter((u: any) =>
-        u.username?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        u.displayName?.toLowerCase().includes(q)
-      )
-      : all;
-    const sorted = [...filtered].sort((a: any, b: any) => {
-      const aTime = Date.parse(a.createdAt || "") || a.id || 0;
-      const bTime = Date.parse(b.createdAt || "") || b.id || 0;
-      return bTime - aTime;
-    });
-    res.json(sorted.map(adminUserSummary));
-  });
-
-  app.get("/api/admin/users/search", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    // Strip leading @ so "@brohoejams" matches username brohoejams
-    const q = String(req.query.q || "").trim().toLowerCase().replace(/^@+/, "");
-    if (!q) return res.json([]);
-    const all = storage.getAllUsers ? storage.getAllUsers() : [];
-    const matches = all
-      .filter((u: any) => {
-        const uname = String(u.username || "").toLowerCase().replace(/^@+/, "");
-        const email = String(u.email || "").toLowerCase();
-        const display = String(u.displayName || "").toLowerCase();
-        return uname.includes(q) || email.includes(q) || display.includes(q) || uname === q;
-      })
-      .slice(0, 25)
-      .map(adminUserSummary);
-    res.json(matches);
-  });
-
-  app.post("/api/admin/users/:userId/set-sub-admin", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const userId = Number(req.params.userId);
-    const { grant } = req.body as { grant: boolean };
-    const target = storage.getUserById(userId);
-    if (!target) return res.status(404).json({ error: "User not found" });
-    if (isMainAdminUser(target) && !grant) {
-      return res.status(400).json({ error: "Cannot demote env/super admin here" });
-    }
-    if (storage.isPrimarySiteOwner(target)) {
-      return res.status(400).json({ error: "Cannot modify primary owner" });
-    }
-    storage.updateUser(userId, { subAdmin: grant });
-    const now = new Date().toISOString();
-    if (grant) {
-      storage.ensureSiteAdminGrant(userId, req.session.userId ?? null, "Sub-admin", now);
-    } else {
-      storage.revokeSiteAdmin(userId);
-    }
-    res.json({ ok: true, subAdmin: grant });
-  });
-
-  app.post("/api/admin/users/:userId/set-username", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const userId = Number(req.params.userId);
-    const { username } = req.body as { username: string };
-    if (!username || username.trim().length < 3) return res.status(400).json({ error: "Username must be at least 3 characters" });
-    const clean = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (clean.length < 3) return res.status(400).json({ error: "Invalid username" });
-    const target = storage.getUserById(userId);
-    if (!target) return res.status(404).json({ error: "User not found" });
-    const existing = storage.getUserByUsername(clean);
-    if (existing && existing.id !== userId) return res.status(409).json({ error: "Username already taken" });
-    sqlite.prepare("UPDATE users SET username = ? WHERE id = ?").run(clean, userId);
-    res.json({ ok: true, username: clean });
-  });
-
-  // Manual promoter role grant/revoke is owner-only. Queue approve/deny stays open to all admins.
-  app.post("/api/admin/users/:userId/set-promoter-status", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const userId = Number(req.params.userId);
-    const { status } = req.body as { status: string };
-    const allowed = ["none", "pending", "approved", "rejected"];
-    if (!allowed.includes(status)) return res.status(400).json({ error: "Invalid status" });
-    const user = storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    storage.setPromoterStatus(userId, status);
-    res.json({ ok: true, promoterStatus: status });
-  });
-
-  app.post("/api/admin/users/:username/moderate", requireAdmin, (req, res) => {
-    const actorId = req.session.userId;
-    if (!actorId) return res.status(401).json({ error: "Not authenticated" });
-    const actor = storage.getUserById(actorId);
-    if (!actor) return res.status(401).json({ error: "Not authenticated" });
-
-    const username = String(req.params.username || "").trim().replace(/^@/, "");
-    const target = storage.getUserByUsername(username);
-    if (!target) return res.status(404).json({ error: "User not found" });
-    if (target.id === actorId) return res.status(400).json({ error: "Cannot moderate your own account" });
-    if (storage.isPrimarySiteOwner(target) && !storage.isPrimarySiteOwner(actor)) {
-      return res.status(403).json({ error: "Cannot moderate the primary owner" });
-    }
-
-    const action = String(req.body?.action || "").toLowerCase();
-    const allowed = ["suspend", "unsuspend", "shadowban", "unshadowban", "delete"];
-    if (!allowed.includes(action)) {
-      return res.status(400).json({ error: "action must be suspend, unsuspend, shadowban, unshadowban, or delete" });
-    }
-    // Full account delete is primary-owner only.
-    if (action === "delete" && !storage.isPrimarySiteOwner(actor)) {
-      return res.status(403).json({ error: "Only the site owner can fully delete an account" });
-    }
-
-    const reasonCode = String(req.body?.reasonCode || "OTHER").trim();
-    const reasonLabel =
-      typeof req.body?.reasonLabel === "string" && req.body.reasonLabel.trim()
-        ? req.body.reasonLabel.trim().slice(0, 160)
-        : accountModReasonLabel(reasonCode);
-    const note = typeof req.body?.note === "string" ? req.body.note : "";
-    let until: string | null = null;
-    if (req.body?.until) {
-      until = String(req.body.until);
-    } else if (req.body?.durationHours != null && req.body.durationHours !== "") {
-      until = untilIsoFromHours(Number(req.body.durationHours));
-    }
-
-    if ((action === "suspend" || action === "shadowban" || action === "delete") && !reasonCode) {
-      return res.status(400).json({ error: "reasonCode required" });
-    }
-
-    const updated = storage.applyAccountModeration({
-      targetUserId: target.id,
-      actorUserId: actorId,
-      action: action as any,
-      reasonCode,
-      reasonLabel,
-      note,
-      until,
-    });
-    if (!updated) return res.status(500).json({ error: "Could not update user" });
-
-    // Shared admin queue + owner inbox for restricting actions
-    if (action === "suspend" || action === "shadowban" || action === "delete") {
-      const type =
-        action === "suspend"
-          ? "ACCOUNT_SUSPEND"
-          : action === "shadowban"
-            ? "ACCOUNT_SHADOWBAN"
-            : "ACCOUNT_DELETE";
-      const untilLine = until ? `Until: ${until}` : "Until: indefinite";
-      const proof = [
-        `Action: ${action}`,
-        `By: @${actor.username} (${actor.displayName || "admin"})`,
-        `Reason: ${reasonLabel} (${reasonCode})`,
-        untilLine,
-        note.trim() ? `Note: ${note.trim()}` : null,
-        `Profile: /u/${encodeURIComponent(target.username)}`,
-      ]
-        .filter(Boolean)
-        .join("\n");
-      storage.createModerationRequest({
-        type,
-        eventId: 0,
-        eventTitle: `@${target.username}`,
-        requesterName: actor.displayName || actor.username,
-        requesterEmail: actor.email,
-        proof,
-      });
-      // Duplicate into owner personal inbox + Owner Desk.
-      const ownerUser =
-        storage.getAllUsers().find((u) => storage.isPrimarySiteOwner(u)) || null;
-      if (ownerUser) {
-        storage.sendAsGuideAdmin(
-          ownerUser.id,
-          `${action.toUpperCase()}: @${target.username}`,
-          proof,
-          {
-            contextType: "ADMIN_ALERT",
-            contextId: target.id,
-            contextLabel: `@${target.username}`,
-          },
-        );
-      }
-      storage.createOwnerDeskItem({
-        kind: "account_moderation",
-        title: `${action}: @${target.username}`,
-        summary: reasonLabel,
-        body: proof,
-        contactName: actor.displayName || actor.username,
-        contactEmail: actor.email,
-        pageUrl: `/u/${encodeURIComponent(target.username)}`,
-        severity: action === "delete" ? "critical" : "high",
-        metaJson: {
-          action,
-          targetUserId: target.id,
-          targetUsername: target.username,
-          reasonCode,
-          until,
-          actorUserId: actor.id,
-        },
-      });
-    }
-
-    auditAdmin(req, `account_${action}`, {
-      type: "user",
-      id: target.id,
-      label: `@${target.username}`,
-      detail: { reasonCode, until, hasNote: Boolean(note) },
-    });
-
-    res.json({ ok: true, user: adminUserSummary(updated) });
-  });
-
-  /** Member report of another account â†’ admin moderation queue */
-  app.post("/api/users/:username/report", requireAuth, (req, res) => {
-    const reporterId = req.session.userId!;
-    const reporter = storage.getUserById(reporterId);
-    if (!reporter) return res.status(401).json({ error: "Not authenticated" });
-    const username = String(req.params.username || "").trim().replace(/^@/, "");
-    const target = storage.getUserByUsername(username);
-    if (!target || target.status === "deleted") {
-      return res.status(404).json({ error: "User not found" });
-    }
-    if (target.id === reporterId) {
-      return res.status(400).json({ error: "Cannot report yourself" });
-    }
-    const reasonCode = String(req.body?.reasonCode || "OTHER").trim();
-    const reasonLabel = accountModReasonLabel(reasonCode);
-    const note = String(req.body?.note || "").trim().slice(0, 1000);
-    const proof = [
-      `Report against @${target.username}`,
-      `From: @${reporter.username}`,
-      `Reason: ${reasonLabel} (${reasonCode})`,
-      note ? `Details: ${note}` : null,
-      `Profile: /u/${encodeURIComponent(target.username)}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const row = storage.createModerationRequest({
-      type: "ACCOUNT_REPORT",
-      eventId: 0,
-      eventTitle: `@${target.username}`,
-      requesterName: reporter.displayName || reporter.username,
-      requesterEmail: reporter.email,
-      proof,
-    });
-    res.json({ ok: true, reportId: row.id });
-  });
-
-  app.post("/api/auth/suspension-appeal", requireAuth, (req, res) => {
-    let user = storage.getUserById(req.session.userId!);
-    if (!user) return res.status(401).json({ error: "Not authenticated" });
-    user = storage.clearExpiredAccountModeration(user.id) || user;
-    if (user.status !== "suspended") {
-      return res.status(400).json({ error: "Your account is not suspended" });
-    }
-    const body = String(req.body?.body || "").trim().slice(0, 2000);
-    if (body.length < 20) {
-      return res.status(400).json({ error: "Appeal must be at least 20 characters" });
-    }
-    const proof = [
-      `Suspension appeal from @${user.username}`,
-      `Suspend reason: ${user.suspendReasonLabel || user.suspendReasonCode || "n/a"}`,
-      user.suspendUntil ? `Until: ${user.suspendUntil}` : "Until: indefinite",
-      user.suspendNote ? `Admin note: ${user.suspendNote}` : null,
-      "",
-      "Appeal:",
-      body,
-    ]
-      .filter((x) => x !== null)
-      .join("\n");
-    // Appeals go to shared Admin queue (moderation), not Owner Desk only.
-    const row = storage.createModerationRequest({
-      type: "SUSPEND_APPEAL",
-      eventId: 0,
-      eventTitle: `@${user.username}`,
-      requesterName: user.displayName || user.username,
-      requesterEmail: user.email,
-      proof,
-    });
-    res.json({ ok: true, appealId: row.id });
-  });
-
-  app.post("/api/admin/users/:username/reject-photo", requireAdmin, (req, res) => {
-    try {
-      const username = String(req.params.username || "").trim().replace(/^@/, "");
-      const { reasonCode, note } = parseProfilePhotoRejectBody(req.body);
-      const result = storage.rejectUserProfilePhoto(username, reasonCode, note);
-      if (result.error) return res.status(400).json({ error: result.error });
-      auditAdmin(req, "reject_photo", {
-        type: "user",
-        id: username,
-        label: `@${username}`,
-        detail: { reasonCode, hasNote: Boolean(note) },
-      });
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.get("/api/admin/events", requireAdmin, (req, res) => {
-    res.json(getAdminEventCatalog().map(enrichEventForAdmin));
-  });
-
-  app.get("/api/admin/persistence", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    res.json(getPersistenceAudit(getTableCounts()));
-  });
-
-  app.get("/api/admin/pending-count", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
-    const breakdown = storage.getAdminQueueBreakdown();
-    const queueCount = breakdown.total;
-    const guideUnread = breakdown.guideUnread;
-    res.json({
-      count: queueCount,
-      queueCount,
-      guideUnread,
-      /** Badge total for Admin tab / mobile Queue: queue items + guide-inbox unreplies. */
-      adminBadge: queueCount + guideUnread,
-      ownerCount,
-      /** Category counts - one mobile-friendly payload for badges and overview. */
-      breakdown,
-    });
-  });
-
-  /**
-   * Mobile-first admin pulse: single round-trip for overview cards + queue chips.
-   * Prefer this over hammering many queue endpoints on a phone.
-   */
-  app.get("/api/admin/pulse", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const breakdown = storage.getAdminQueueBreakdown();
-    const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() : 0;
-    const metrics = storage.getAdminMetrics();
-    res.json({
-      generatedAt: new Date().toISOString(),
-      queue: breakdown,
-      adminBadge: breakdown.total + breakdown.guideUnread,
-      ownerCount,
-      liveEvents: metrics.liveEvents,
-      pendingSubmissions: metrics.pendingSubmissions,
-      newUsersToday: metrics.newUsersToday,
-      guideUnread: breakdown.guideUnread,
-      guideSentPreview: storage.getGuideAdminSent().slice(0, 5).map((m: any) => ({
-        id: m.id,
-        threadId: m.threadId,
-        subject: m.subject,
-        toUsername: m.to_username || null,
-        createdAt: m.createdAt,
-      })),
-    });
-  });
-
-  /** Unified search for admin tools â†’ floating inbox Queue or /admin tabs. */
-  app.get("/api/admin/search", requireAdmin, (req, res) => {
-    const q = String(req.query.q || "").trim();
-    const limit = Number(req.query.limit) || 16;
-    const viewer = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    res.json(adminSearchForViewer(q, viewer ?? null, limit));
-  });
-
-  /** Recent admin actions (rejects, DMs, grants) for accountability on mobile/desktop. */
-  app.get("/api/admin/activity", requireAdmin, (req, res) => {
-    const limit = Number(req.query.limit) || 60;
-    res.json(storage.getAdminActionLog(limit));
-  });
-
-  /**
-   * Single payload for floating inbox Admin Â· Queue (all buckets + soft claims).
-   * Prefer this over 10 parallel list endpoints on mobile admin.
-   */
-  app.get("/api/admin/queue", requireAdmin, (_req, res) => {
-    try {
-      res.json(getAdminQueueAggregate());
-    } catch (err) {
-      console.error("[admin/queue]", err);
-      res.status(500).json({ error: "Could not load admin queue" });
-    }
-  });
-
-  app.get("/api/admin/queue-claims", requireAdmin, (_req, res) => {
-    res.json(listAdminQueueClaims());
-  });
-
-  app.post("/api/admin/queue-claims", requireAdmin, (req, res) => {
-    const actor = getAdminActor(req);
-    if (!actor.id) return res.status(401).json({ error: "No admin actor" });
-    const kind = String(req.body?.kind || req.body?.queueKind || "").trim();
-    const entityId = Number(req.body?.entityId ?? req.body?.id);
-    const takeover = Boolean(req.body?.takeover);
-    const result = claimAdminQueueItem(kind, entityId, actor.id, { takeover });
-    if (result.error) return res.status(400).json({ error: result.error });
-    auditAdmin(req, takeover ? "queue_takeover" : "queue_claim", {
-      type: kind,
-      id: entityId,
-      label: `${kind} #${entityId}`,
-    });
-    res.json(result);
-  });
-
-  app.delete("/api/admin/queue-claims/:kind/:entityId", requireAdmin, (req, res) => {
-    const actor = getAdminActor(req);
-    if (!actor.id) return res.status(401).json({ error: "No admin actor" });
-    const result = releaseAdminQueueClaim(
-      String(req.params.kind || ""),
-      Number(req.params.entityId),
-      actor.id,
-      { force: Boolean(req.query.force === "1" || req.body?.force) },
-    );
-    if (result.error) return res.status(400).json({ error: result.error });
-    auditAdmin(req, "queue_release", {
-      type: String(req.params.kind),
-      id: req.params.entityId,
-    });
-    res.json({ ok: true });
-  });
-
-  /** Dry-run bulk event actions (no writes). */
-  app.post("/api/admin/events/bulk/preview", requireAdmin, (req, res) => {
-    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : [];
-    const action = String(req.body?.action || "");
-    const result = previewBulkEvents(ids, action);
-    if ("error" in result && result.error) return res.status(400).json(result);
-    res.json(result);
-  });
-
-  /** Execute bulk event actions (guarded: hide / claimable only, max batch). */
-  app.post("/api/admin/events/bulk/execute", requireAdmin, (req, res) => {
-    if (!req.body?.confirm) {
-      return res.status(400).json({ error: "confirm: true required - use preview first" });
-    }
-    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number) : [];
-    const action = String(req.body?.action || "");
-    const reason = String(req.body?.reason || "").trim().slice(0, 300);
-    const actor = getAdminActor(req);
-    const result = executeBulkEvents(ids, action, actor, reason);
-    if ("error" in result && result.error) return res.status(400).json(result);
-    res.json(result);
-  });
-
-  /**
-   * Live ingest source list: curated registry + every directory website.
-   * New Places with a website appear here automatically.
-   */
-  app.get("/api/admin/events/ingest/sources", requireAdmin, (_req, res) => {
-    const businesses = storage.getBusinesses({});
-    const directory = buildDirectoryIngestSources(
-      businesses.map((b: any) => ({
-        id: b.id,
-        name: b.name,
-        website: b.website,
-        type: b.type,
-        active: b.active,
-        ingestEvents: b.ingestEvents,
-      })),
-    );
-    // Catch-all list only - trusted venues live on the Trusted board
-    const sources = mergeIngestSources(INGEST_SOURCES, directory).filter(
-      s => !isTrustedLaneSource({ id: s.id, url: s.url }),
-    );
-    res.json({
-      sources,
-      curatedCount: sources.filter(s => s.tier !== "directory").length,
-      directoryCount: sources.filter(s => s.tier === "directory").length,
-      total: sources.length,
-    });
-  });
-
-  // â”€â”€â”€ QSearch dashboard (multi-source scan + health) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/admin/qsearch/dashboard", requireAdmin, (_req, res) => {
-    const businesses = storage.getBusinesses({}).map((b: any) => ({
-      id: b.id,
-      name: b.name,
-      website: b.website,
-      type: b.type,
-      active: b.active,
-    }));
-    res.json(dashboardSnapshot(businesses));
-  });
-
-  /**
-   * Trusted venues health board.
-   * GET  â†’ registry + health
-   * POST â†’ manual sync defaults to Review queue (mode=review). Never LIVE from admin button.
-   */
-  app.get("/api/admin/qsearch/trusted", requireAdmin, (_req, res) => {
-    res.json(getTrustedDashboard());
-  });
-
-  /**
-   * Prefill "Add to directory" from venue name + optional website/address.
-   * Geocode (Nominatim) + light website scrape for blurb / IG / phone / og:image.
-   */
-  // â”€â”€ Flyer Reader (Phase 1): GitHub-sourced flyer â†’ sharp preprocess â†’
-  // Tesseract OCR â†’ raw text + confidence. Structured parsing lands in
-  // Phase 2 (reuses qsearch/vision.ts); validation harness in Phase 4.
-  app.post("/api/admin/qsearch/flyer-reader/ocr", requireAdmin, async (req, res) => {
-    try {
-      const { loadFlyer } = await import("./flyerReader/github");
-      const { ocrFlyer } = await import("./flyerReader/ocr");
-
-      const githubPath = req.body?.githubPath != null ? String(req.body.githubPath) : "";
-      const imageBase64 = req.body?.imageBase64 != null ? String(req.body.imageBase64) : "";
-
-      let buffer: Buffer;
-      let source = "upload";
-      let flyerPath: string | null = null;
-      if (githubPath) {
-        const flyer = await loadFlyer(githubPath);
-        buffer = flyer.buffer;
-        source = flyer.source;
-        flyerPath = flyer.path;
-      } else if (imageBase64) {
-        buffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
-      } else {
-        return res.status(400).json({ ok: false, error: "Provide githubPath or imageBase64" });
-      }
-      if (!buffer?.length) {
-        return res.status(400).json({ ok: false, error: "Empty flyer" });
-      }
-
-      const result = await ocrFlyer(buffer);
-      res.json({ ok: true, source, path: flyerPath, bytes: buffer.length, ...result });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      res.status(500).json({ ok: false, error: message });
-    }
-  });
-
-  // â”€â”€ Flyer Reader (Phase 2): OCR â†’ LLM â†’ structured event JSON + draft â”€â”€
-  app.post("/api/admin/qsearch/flyer-reader/parse", requireAdmin, async (req, res) => {
-    try {
-      const { loadFlyer } = await import("./flyerReader/github");
-      const { ocrFlyer } = await import("./flyerReader/ocr");
-      const { structureFlyer, flyerParseToDraft } = await import("./flyerReader/parse");
-
-      const githubPath = req.body?.githubPath != null ? String(req.body.githubPath) : "";
-      const imageBase64 = req.body?.imageBase64 != null ? String(req.body.imageBase64) : "";
-      const rawTextIn = req.body?.rawText != null ? String(req.body.rawText) : "";
-
-      let flyerPath: string | null = null;
-      let source = "upload";
-      let ocr: Awaited<ReturnType<typeof ocrFlyer>> | null = null;
-      let rawText = rawTextIn;
-      let imageBuffer: Buffer | null = null;
-
-      if (!rawText) {
-        if (githubPath) {
-          const flyer = await loadFlyer(githubPath);
-          imageBuffer = flyer.buffer;
-          source = flyer.source;
-          flyerPath = flyer.path;
-        } else if (imageBase64) {
-          imageBuffer = Buffer.from(imageBase64.replace(/^data:[^,]+,/, ""), "base64");
-        } else {
-          return res
-            .status(400)
-            .json({ ok: false, error: "Provide githubPath, imageBase64, or rawText" });
-        }
-        if (!imageBuffer?.length) return res.status(400).json({ ok: false, error: "Empty flyer" });
-        ocr = await ocrFlyer(imageBuffer);
-        rawText = ocr.text;
-      }
-
-      const parse = await structureFlyer({ imageBuffer, rawText, ocrConfidence: ocr?.confidence });
-      const draft = flyerParseToDraft(parse, { sourcePath: flyerPath });
-
-      // Phase 3: queue=true lands the draft in the QSearch Review queue
-      // (same human-approve path as every other source - never auto-LIVE).
-      let queuedJobId: string | null = null;
-      if (req.body?.queue === true && draft) {
-        if (flyerPath) {
-          // Show the actual flyer art on the Review card
-          draft.posterImageUrl = `https://raw.githubusercontent.com/${
-            process.env.GITHUB_FLYERS_REPO?.trim() || "maxmackpdx-pride/pdx-pride-guide"
-          }/${process.env.GITHUB_FLYERS_BRANCH?.trim() || "master"}/${flyerPath}`;
-        }
-        const { jobId } = await queueManualQSearchDrafts({
-          drafts: [draft],
-          sourceId: "flyer-reader",
-          sourceLabel: "Flyer Reader",
-          sourceUrl: flyerPath ? `github:${flyerPath}` : "flyer-upload",
-          kind: "flyer_reader",
-        });
-        queuedJobId = jobId;
-      }
-
-      res.json({
-        ok: true,
-        source,
-        path: flyerPath,
-        ocr: ocr
-          ? { confidence: ocr.confidence, preprocessMs: ocr.preprocessMs, ocrMs: ocr.ocrMs }
-          : null,
-        parse,
-        draft,
-        queuedJobId,
-      });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      res.status(500).json({ ok: false, error: message });
-    }
-  });
-
-  app.post("/api/admin/qsearch/directory-lookup", requireAdmin, async (req, res) => {
-    try {
-      const { lookupDirectoryPlace } = await import("./qsearch/directoryLookup");
-      const result = await lookupDirectoryPlace({
-        name: String(req.body?.name || "").trim(),
-        address: req.body?.address != null ? String(req.body.address) : null,
-        website: req.body?.website != null ? String(req.body.website) : null,
-        description: req.body?.description != null ? String(req.body.description) : null,
-      });
-      if (!result.name || result.name.length < 2) {
-        return res.status(400).json({ error: "name required" });
-      }
-      res.json(result);
-    } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Directory lookup failed" });
-    }
-  });
-
-  async function runTrustedSyncHandler(
-    req: any,
-    res: any,
-    sourceId: string | undefined,
-  ) {
-    try {
-      const mod = await import("./qsearch/trustedSync");
-      // Admin manual sync always goes to Review - ignore body.mode=publish
-      const syncOpts = { mode: "review" as const };
-
-      if (sourceId) {
-        if (typeof mod.syncTrustedVenue !== "function") {
-          return res.status(503).json({ error: "Trusted sync is unavailable" });
-        }
-        const result = await mod.syncTrustedVenue(sourceId, syncOpts);
-        auditAdmin(req, "qsearch_trusted_sync", {
-          type: "qsearch_trusted",
-          id: sourceId,
-          detail: { scope: "one", mode: "review", result },
-        });
-        const queued = Number((result as any)?.queued || 0);
-        const updated = Number((result as any)?.updated?.length || 0);
-        return res.json({
-          ok: true,
-          sourceId,
-          mode: "review",
-          queued,
-          updated,
-          result,
-          message:
-            [
-              queued > 0 ? `${queued} new for Review` : null,
-              updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
-            ]
-              .filter(Boolean)
-              .join(" Â· ") || "Sync finished - nothing new",
-        });
-      }
-
-      if (typeof mod.syncAllTrustedVenues !== "function") {
-        return res.status(503).json({ error: "Trusted sync is unavailable" });
-      }
-      const results = await mod.syncAllTrustedVenues(syncOpts);
-      const queued = results.reduce((n, r) => n + (Number(r.queued) || 0), 0);
-      const updated = results.reduce((n, r) => n + (Number((r as any)?.updated?.length) || 0), 0);
-      auditAdmin(req, "qsearch_trusted_sync", {
-        type: "qsearch_trusted",
-        detail: { scope: "all", mode: "review", results },
-      });
-      return res.json({
-        ok: true,
-        scope: "all",
-        mode: "review",
-        queued,
-        updated,
-        result: results,
-        message:
-          [
-            queued > 0 ? `${queued} new for Review` : null,
-            updated > 0 ? `${updated} existing event${updated === 1 ? "" : "s"} refreshed` : null,
-          ]
-            .filter(Boolean)
-            .join(" Â· ") || "Sync finished - nothing new",
-      });
-    } catch (err: any) {
-      const msg = String(err?.message || err || "trusted sync failed");
-      if (
-        msg.includes("Cannot find module") ||
-        msg.includes("Cannot find package") ||
-        err?.code === "ERR_MODULE_NOT_FOUND" ||
-        err?.code === "MODULE_NOT_FOUND"
-      ) {
-        return res.status(503).json({ error: "Trusted sync module missing", detail: msg });
-      }
-      console.error("[qsearch-trusted] sync failed:", err);
-      return res.status(500).json({ error: msg });
-    }
-  }
-
-  app.post("/api/admin/qsearch/trusted/sync", requireAdmin, async (req, res) => {
-    const sourceId =
-      req.body?.sourceId != null && String(req.body.sourceId).trim()
-        ? String(req.body.sourceId).trim()
-        : undefined;
-    await runTrustedSyncHandler(req, res, sourceId);
-  });
-
-  app.post("/api/admin/qsearch/trusted/sync/:sourceId", requireAdmin, async (req, res) => {
-    const sourceId = decodeURIComponent(String(req.params.sourceId || "")).trim();
-    if (!sourceId) {
-      return res.status(400).json({ error: "sourceId required" });
-    }
-    await runTrustedSyncHandler(req, res, sourceId);
-  });
-
-  app.get("/api/admin/qsearch/queue", requireAdmin, (req, res) => {
-    const status = req.query.status != null ? String(req.query.status) : "pending";
-    const limit = Math.min(500, Number(req.query.limit) || 200);
-    const candidates = listCandidates({ status, limit });
-    // Always re-match directory brands so logo pack + fuzzy match apply to old rows
-    const enriched = attachDirectoryBrandsToCandidates(candidates as any[]);
-    res.json({ candidates: enriched });
-  });
-
-  /** Clear review queue: last scan only (default) or all pending. */
-  app.post("/api/admin/qsearch/queue/clear", requireAdmin, (req, res) => {
-    const scope = req.body?.scope === "all" ? "all" : "last";
-    const hard = Boolean(req.body?.hard);
-    const result = clearScanQueue({ scope, hard });
-    auditAdmin(req, "qsearch_queue_clear", {
-      type: "qsearch",
-      detail: { scope: result.scope, cleared: result.cleared, hard: result.hard, jobId: result.jobId },
-    });
-    res.json(result);
-  });
-
-  /** Dismiss one or more Review queue cards (status â†’ skipped). Does not create events. */
-  app.post("/api/admin/qsearch/queue/dismiss", requireAdmin, (req, res) => {
-    const raw = req.body?.ids;
-    const ids = Array.isArray(raw)
-      ? raw.map((id: unknown) => String(id || "").trim()).filter(Boolean)
-      : typeof req.body?.id === "string"
-        ? [req.body.id.trim()].filter(Boolean)
-        : [];
-    if (!ids.length) return res.status(400).json({ error: "ids required" });
-    const capped = ids.slice(0, 200);
-    markCandidatesSkipped(capped);
-    auditAdmin(req, "qsearch_queue_dismiss", {
-      type: "qsearch",
-      detail: { count: capped.length, ids: capped.slice(0, 20) },
-    });
-    res.json({ ok: true, dismissed: capped.length });
-  });
-
-  /** Restore an AI-dropped candidate back into the pending Review queue. */
-  app.post("/api/admin/qsearch/queue/restore", requireAdmin, (req, res) => {
-    const id = String(req.body?.id || "").trim();
-    if (!id) return res.status(400).json({ error: "id required" });
-    const restored = restoreCandidate(id);
-    if (restored) auditAdmin(req, "qsearch_queue_restore", { type: "qsearch", detail: { id } });
-    res.json({ ok: restored, restored });
-  });
-
-  /** Drop a candidate's poster (e.g. AI flagged it as a logo / wrong flyer). */
-  app.post("/api/admin/qsearch/queue/clear-flyer", requireAdmin, (req, res) => {
-    const id = String(req.body?.id || "").trim();
-    if (!id) return res.status(400).json({ error: "id required" });
-    const cleared = clearCandidateFlyer(id);
-    if (cleared) auditAdmin(req, "qsearch_queue_clear_flyer", { type: "qsearch", detail: { id } });
-    res.json({ ok: cleared, cleared });
-  });
-
-  app.post("/api/admin/qsearch/sources/ack-new", requireAdmin, (_req, res) => {
-    markAllNewSeen();
-    res.json({ ok: true });
-  });
-
-  /** Add a custom scrape source (any http(s) URL). */
-  app.post("/api/admin/qsearch/sources", requireAdmin, (req, res) => {
-    const result = addCustomSource({
-      label: String(req.body?.label || "").trim(),
-      url: String(req.body?.url || "").trim(),
-      tier: req.body?.tier != null ? String(req.body.tier) : undefined,
-      format: req.body?.format != null ? String(req.body.format) : undefined,
-      businessId:
-        req.body?.businessId != null && req.body.businessId !== ""
-          ? Number(req.body.businessId)
-          : null,
-    });
-    if (!result.ok) {
-      res.status(400).json({ error: result.error });
-      return;
-    }
-    auditAdmin(req, "qsearch_source_add", {
-      type: "qsearch_source",
-      id: result.source.sourceId,
-      detail: { label: result.source.label, url: result.source.url, tier: result.source.tier },
-    });
-    res.json({ ok: true, source: result.source });
-  });
-
-  /** Soft-disable registry/directory sources; hard-delete custom ones. */
-  app.delete("/api/admin/qsearch/sources/:sourceId", requireAdmin, (req, res) => {
-    const sourceId = decodeURIComponent(String(req.params.sourceId));
-    const result = deleteSource(sourceId);
-    if (!result.ok) {
-      res.status(404).json({ error: result.error });
-      return;
-    }
-    auditAdmin(req, "qsearch_source_delete", {
-      type: "qsearch_source",
-      id: sourceId,
-      detail: { hard: result.hard },
-    });
-    res.json({ ok: true, sourceId, hard: result.hard });
-  });
-
-  /** Re-enable a soft-disabled source. */
-  app.post("/api/admin/qsearch/sources/:sourceId/enable", requireAdmin, (req, res) => {
-    const sourceId = decodeURIComponent(String(req.params.sourceId));
-    const result = enableSource(sourceId);
-    if (!result.ok) {
-      res.status(404).json({ error: result.error });
-      return;
-    }
-    auditAdmin(req, "qsearch_source_enable", { type: "qsearch_source", id: sourceId });
-    res.json({ ok: true, source: result.source });
-  });
-
-  app.post("/api/admin/qsearch/sources/:sourceId/recipe", requireAdmin, (req, res) => {
-    const sourceId = String(req.params.sourceId);
-    const recipeUrl =
-      req.body?.recipeUrl === null || req.body?.recipeUrl === ""
-        ? null
-        : String(req.body?.recipeUrl || "").trim() || null;
-    setRecipeUrl(sourceId, recipeUrl);
-    auditAdmin(req, "qsearch_recipe", { type: "qsearch_source", id: sourceId, detail: { recipeUrl } });
-    res.json({ ok: true, sourceId, recipeUrl });
-  });
-
-  app.post("/api/admin/qsearch/sources/:sourceId/instagram", requireAdmin, (req, res) => {
-    const sourceId = String(req.params.sourceId);
-    const handle = parseInstagramHandle(req.body?.handle ?? req.body?.instagramHandle ?? null);
-    setInstagramHandle(sourceId, handle);
-    res.json({ ok: true, sourceId, handle });
-  });
-
-  app.post("/api/admin/qsearch/dragpdx-opt-in", requireAdmin, (req, res) => {
-    const optIn = Boolean(req.body?.optIn);
-    setDragpdxOptIn(optIn);
-    auditAdmin(req, "qsearch_dragpdx_opt_in", { type: "qsearch", detail: { optIn } });
-    res.json({ ok: true, optIn });
-  });
-
-  app.post("/api/admin/qsearch/scan", requireAdmin, (req, res) => {
-    const businesses = storage.getBusinesses({}).map((b: any) => ({
-      id: b.id,
-      name: b.name,
-      website: b.website,
-      type: b.type,
-      active: b.active,
-    }));
-    const result = startScan({
-      tiers: Array.isArray(req.body?.tiers) ? req.body.tiers.map(String) : undefined,
-      onlyFailing: Boolean(req.body?.onlyFailing),
-      onlyDirectory: Boolean(req.body?.onlyDirectory),
-      onlyNew: Boolean(req.body?.onlyNew),
-      sourceIds: Array.isArray(req.body?.sourceIds) ? req.body.sourceIds.map(String) : undefined,
-      kind: req.body?.kind === "nightly" ? "nightly" : "manual",
-      // Default on; pass tryVision: false to skip flyer vision sampling
-      tryVision: req.body?.tryVision !== false,
-      // Default off - only upcoming/current listings unless explicitly included
-      includePastEvents: req.body?.includePastEvents === true,
-      businesses,
-      existingEvents: storage.getEvents({}),
-    });
-    if ("error" in result) return res.status(400).json(result);
-    auditAdmin(req, "qsearch_scan_start", {
-      type: "qsearch",
-      id: result.jobId,
-      label: `Scan ${result.total} sources`,
-      detail: { total: result.total },
-    });
-    res.json(result);
-  });
-
-  app.post("/api/admin/qsearch/scan/nightly-now", requireAdmin, (req, res) => {
-    const result = triggerNightlyPriorityScan();
-    if ("error" in result) return res.status(400).json(result);
-    auditAdmin(req, "qsearch_nightly_manual", { type: "qsearch", id: result.jobId });
-    res.json(result);
-  });
-
-  app.get("/api/admin/qsearch/scan/:jobId", requireAdmin, (req, res) => {
-    const job = getScanJobView(String(req.params.jobId));
-    if (!job) return res.status(404).json({ error: "Scan job not found" });
-    res.json(job);
-  });
-
-  app.post("/api/admin/qsearch/scan/:jobId/cancel", requireAdmin, (req, res) => {
-    const ok = cancelScan(String(req.params.jobId));
-    if (!ok) return res.status(400).json({ error: "Cannot cancel" });
-    res.json({ ok: true });
-  });
-
-  /**
-   * Approve QSearch candidates â†’ HIDDEN by default.
-   * Body: { confirm: true, status?: HIDDEN|LIVE, items: [{ id?, draft, skip?, conflictAction?, conflictEventIds? }] }
-   */
-  app.post("/api/admin/qsearch/approve", requireAdmin, async (req, res) => {
-    if (!req.body?.confirm) {
-      return res.status(400).json({ error: "confirm: true required" });
-    }
-    // LIVE only if explicitly requested - still never automatic
-    const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
-    const rawItems = Array.isArray(req.body?.items) ? req.body.items : [];
-    if (!rawItems.length) return res.status(400).json({ error: "No items" });
-
-    const overrides: number[] = [];
-    const denySkipIds: string[] = [];
-    const mergeOps: Array<{ candidateId?: string; draft: any; eventId: number }> = [];
-    const items: Array<{ draft: any; skip: boolean; candidateId?: string; allowDuplicate?: boolean }> = [];
-    for (const row of rawItems) {
-      const action = String(row?.conflictAction || "keep_both");
-      const candidateId = row?.id != null ? String(row.id) : undefined;
-      const targetIds = Array.isArray(row?.conflictEventIds)
-        ? row.conflictEventIds.map(Number).filter((n: number) => Number.isFinite(n))
-        : [];
-
-      if (action === "deny" || row?.skip) {
-        if (candidateId) denySkipIds.push(candidateId);
-        items.push({ draft: row?.draft, skip: true, candidateId });
-        continue;
-      }
-      // Closed venues: never approve into LIVE/HIDDEN unless explicit allowClosedVenue
-      if (!row?.allowClosedVenue && row?.draft) {
-        const closedHit = matchClosedVenue({
-          venueName: row.draft.venueName,
-          address: row.draft.address,
-          title: row.draft.title,
-        });
-        if (closedHit) {
-          if (candidateId) denySkipIds.push(candidateId);
-          items.push({ draft: row.draft, skip: true, candidateId });
-          continue;
-        }
-      }
-      // Merge: update the existing event in place (keep its id â†’ keep RSVPs).
-      // Handled below; NOT sent to commitIngest so no duplicate row is created.
-      if (action === "merge" && targetIds.length) {
-        mergeOps.push({ candidateId, draft: row?.draft, eventId: targetIds[0] });
-        continue;
-      }
-      if (action === "override") {
-        for (const id of targetIds) overrides.push(id);
-      }
-      // The admin explicitly resolved the conflict (keep both / override), so let
-      // this draft through the duplicate filter instead of silently skipping it.
-      const allowDuplicate = action === "keep_both" || action === "override";
-      items.push({ draft: row?.draft, skip: false, candidateId, allowDuplicate });
-    }
-
-    for (const id of Array.from(new Set(overrides))) {
-      try {
-        storage.updateEventStatus(id, "HIDDEN");
-      } catch {
-        /* ignore */
-      }
-    }
-
-    // Apply merges: patch each existing row from the newest sync, preserving id/RSVPs.
-    const mergedCand: Array<{ candidateId?: string; eventId: number }> = [];
-    for (const op of mergeOps) {
-      try {
-        const existing = storage.getEvent(op.eventId);
-        if (!existing || !op.draft?.title || !op.draft?.dateStart) continue;
-        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft), { source: "sync" });
-        mergedCand.push({ candidateId: op.candidateId, eventId: op.eventId });
-      } catch {
-        /* ignore a single bad merge */
-      }
-    }
-
-    const existingEvents = storage.getEvents({});
-    // When every picked candidate was a MERGE (or there is simply nothing to
-    // create), skip commitIngest - an empty item list is a no-op, not an error.
-    const result = items.length
-      ? await commitIngest({
-          items,
-          status,
-          // Always on for admin approve - never re-create main-board twins
-          skipDuplicates: req.body?.skipDuplicates !== false,
-          existingEvents,
-          createEvent: (data) => storage.createEvent(data),
-        })
-      : {
-          ok: true as const,
-          created: [] as Array<{ id: number; title: string; status: string; candidateId?: string }>,
-          skipped: [] as Array<{ index: number; title: string; reason: string; candidateId?: string }>,
-          impact: mergedCand.length ? `Merged ${mergedCand.length}` : "Nothing to do",
-        };
-    if (!result.ok) return res.status(400).json({ error: result.error });
-
-    // Resolve Review cards: created â†’ committed; already-on-board / invalid â†’ skipped (leave queue)
-    type CandOutcome = { eventIds: number[]; boardSkip: boolean; deny: boolean };
-    const byCand = new Map<string, CandOutcome>();
-    const touch = (id: string | undefined): CandOutcome | null => {
-      if (!id) return null;
-      let o = byCand.get(id);
-      if (!o) {
-        o = { eventIds: [], boardSkip: false, deny: false };
-        byCand.set(id, o);
-      }
-      return o;
-    };
-    for (const id of denySkipIds) {
-      const o = touch(id);
-      if (o) o.deny = true;
-    }
-    for (const c of result.created) {
-      const o = touch(c.candidateId);
-      if (o) o.eventIds.push(c.id);
-    }
-    for (const s of result.skipped) {
-      const o = touch(s.candidateId);
-      if (!o) continue;
-      if (/Already on main board|Strong duplicate|Invalid draft/i.test(s.reason)) {
-        o.boardSkip = true;
-      }
-    }
-    const committedIds: string[] = [];
-    const committedEventIds: number[] = [];
-    const autoSkipIds: string[] = [];
-    Array.from(byCand.entries()).forEach(([id, o]) => {
-      if (o.eventIds.length) {
-        committedIds.push(id);
-        committedEventIds.push(o.eventIds[0]);
-      } else if (o.boardSkip || o.deny) {
-        autoSkipIds.push(id);
-      }
-    });
-    // Merged candidates resolve like committed ones (clear the Review card).
-    for (const m of mergedCand) {
-      if (!m.candidateId) continue;
-      committedIds.push(m.candidateId);
-      committedEventIds.push(m.eventId);
-    }
-    if (committedIds.length) markCandidatesCommitted(committedIds, committedEventIds);
-    if (autoSkipIds.length) markCandidatesSkipped(Array.from(new Set(autoSkipIds)));
-
-    auditAdmin(req, "qsearch_approve", {
-      type: "qsearch",
-      label: result.impact,
-      detail: {
-        createdIds: result.created.map(c => c.id),
-        skipped: result.skipped,
-        overridden: overrides,
-        merged: mergedCand.map(m => m.eventId),
-        status,
-      },
-    });
-    res.json({
-      ...result,
-      overridden: overrides,
-      merged: mergedCand.map(m => m.eventId),
-    });
-  });
-
-  /** Persist vision/IG drafts into the review queue (HIDDEN path via approve). */
-  async function queueManualQSearchDrafts(opts: {
-    drafts: import("./ingest/types").IngestEventDraft[];
-    sourceId: string;
-    sourceLabel: string;
-    sourceUrl: string;
-    kind: string;
-  }) {
-    const catalog = storage.getEvents({});
-    const businesses = storage.getBusinesses({});
-    const candidates = buildScanCandidates(
-      opts.drafts.map(draft => ({
-        draft,
-        sourceId: opts.sourceId,
-        sourceLabel: opts.sourceLabel,
-        sourceUrl: opts.sourceUrl,
-      })),
-      catalog,
-      businesses,
-    );
-    for (const c of candidates) {
-      if (c.draft.confidence != null && c.draft.confidence < 0.55) c.selected = false;
-    }
-    const jobId = `${opts.kind}-${randomUUID()}`;
-    const { insertScanJob } = await import("./qsearch/store");
-    insertScanJob({
-      id: jobId,
-      status: "done",
-      startedAt: new Date().toISOString(),
-      finishedAt: new Date().toISOString(),
-      total: 1,
-      completed: 1,
-      currentSourceId: null,
-      currentLabel: opts.sourceLabel,
-      etaSeconds: 0,
-      error: null,
-      avgMs: 0,
-      filterJson: JSON.stringify({ kind: opts.kind }),
-      perSourceJson: "[]",
-      kind: "manual",
-    });
-    saveCandidates(
-      jobId,
-      candidates.map(c => ({
-        id: c.id,
-        sourceId: c.sourceId,
-        sourceLabel: c.sourceLabel,
-        sourceUrl: c.sourceUrl,
-        draft: c.draft,
-        selected: c.selected,
-        recurring: c.recurring,
-        recurringCount: c.recurringCount,
-        condensed: c.condensed,
-        conflicts: c.conflicts,
-        duplicates: c.duplicates,
-        strongDuplicate: c.strongDuplicate,
-        directoryBrands: c.directoryBrands,
-      })),
-    );
-    return { jobId, candidates };
-  }
-
-  /** Vision flyer URL â†’ queue candidates (HIDDEN path via approve). */
-  app.post("/api/admin/qsearch/vision", requireAdmin, async (req, res) => {
-    try {
-      let imageUrl = String(req.body?.imageUrl || "").trim();
-      if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
-      const venueHint = req.body?.venueHint != null ? String(req.body.venueHint) : null;
-      const sourceUrl = req.body?.sourceUrl != null ? String(req.body.sourceUrl) : imageUrl;
-      let posterStoreUrl: string | null = imageUrl.startsWith("data:") ? null : imageUrl;
-      // Local upload path â†’ data URL for cloud vision API
-      if (imageUrl.startsWith("/uploads/")) {
-        const dataUrl = localUploadToDataUrl(imageUrl);
-        if (!dataUrl) return res.status(400).json({ error: "Upload file not found" });
-        posterStoreUrl = imageUrl;
-        imageUrl = dataUrl;
-      }
-      const vis = await visionFlyerToDrafts({
-        imageUrl,
-        sourceUrl,
-        venueHint,
-        posterStoreUrl,
-      });
-      if (vis.error && !vis.drafts.length) {
-        return res.status(400).json({ error: vis.error, model: vis.model });
-      }
-      const { jobId, candidates } = await queueManualQSearchDrafts({
-        drafts: vis.drafts,
-        sourceId: "vision-manual",
-        sourceLabel: "Vision flyer",
-        sourceUrl,
-        kind: "vision",
-      });
-      auditAdmin(req, "qsearch_vision", { type: "qsearch", id: jobId, detail: { count: candidates.length } });
-      res.json({ ok: true, jobId, model: vis.model, candidates, error: vis.error || null });
-    } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Vision failed" });
-    }
-  });
-
-  /** Batch flyer upload â†’ vision each file â†’ review queue. */
-  app.post(
-    "/api/admin/qsearch/vision/upload",
-    requireAdmin,
-    upload.array("flyers", 12),
-    async (req: any, res) => {
-      try {
-        const files = Array.isArray(req.files) ? req.files : [];
-        if (!files.length) {
-          return res.status(400).json({ error: "Upload 1â€“12 flyer images (jpg/png/webp/gif)" });
-        }
-        const venueHint = req.body?.venueHint != null ? String(req.body.venueHint) : null;
-        const allDrafts: import("./ingest/types").IngestEventDraft[] = [];
-        const errors: string[] = [];
-        let model: string | null = null;
-        for (const file of files) {
-          const storeUrl = `/uploads/${file.filename}`;
-          const dataUrl = localUploadToDataUrl(storeUrl);
-          if (!dataUrl) {
-            errors.push(`${file.originalname}: could not read upload`);
-            continue;
-          }
-          const vis = await visionFlyerToDrafts({
-            imageUrl: dataUrl,
-            sourceUrl: storeUrl,
-            venueHint,
-            posterStoreUrl: storeUrl,
-          });
-          model = vis.model;
-          if (vis.error && !vis.drafts.length) {
-            errors.push(`${file.originalname}: ${vis.error}`);
-            continue;
-          }
-          allDrafts.push(...vis.drafts);
-        }
-        if (!allDrafts.length) {
-          return res.status(400).json({
-            error: errors[0] || "No events extracted from uploads",
-            errors,
-            model,
-          });
-        }
-        const { jobId, candidates } = await queueManualQSearchDrafts({
-          drafts: allDrafts,
-          sourceId: "vision-upload",
-          sourceLabel: "Vision upload",
-          sourceUrl: "upload",
-          kind: "vision-upload",
-        });
-        auditAdmin(req, "qsearch_vision_upload", {
-          type: "qsearch",
-          id: jobId,
-          detail: { files: files.length, drafts: allDrafts.length, errors },
-        });
-        res.json({
-          ok: true,
-          jobId,
-          model,
-          candidates,
-          fileCount: files.length,
-          draftCount: allDrafts.length,
-          errors: errors.length ? errors : null,
-        });
-      } catch (err: any) {
-        res.status(500).json({ error: err?.message || "Vision upload failed" });
-      }
-    },
-  );
-
-  /** Instagram assist - single URL preferred; Graph Business Discovery if creds exist. */
-  app.post("/api/admin/qsearch/instagram", requireAdmin, async (req, res) => {
-    try {
-      const mode = String(req.body?.mode || "url");
-      let result;
-      if (mode === "graph") {
-        result = await igGraphPull({
-          handle: String(req.body?.handle || ""),
-          limit: Number(req.body?.limit) || 5,
-        });
-      } else if (mode === "url" || req.body?.url) {
-        result = await igFromUrl({
-          url: String(req.body?.url || req.body?.postUrl || req.body?.imageUrl || ""),
-          venueHint: req.body?.venueHint != null ? String(req.body.venueHint) : null,
-        });
-      } else {
-        result = await igPasteAssist({
-          handle: req.body?.handle,
-          caption: req.body?.caption,
-          imageUrl: req.body?.imageUrl,
-          postUrl: req.body?.postUrl,
-          venueHint: req.body?.venueHint,
-        });
-      }
-      if (!result.ok && !result.drafts.length) {
-        return res.status(400).json(result);
-      }
-      const sourceUrl = String(
-        req.body?.url || req.body?.postUrl || req.body?.imageUrl || "instagram",
-      );
-      const { jobId, candidates } = await queueManualQSearchDrafts({
-        drafts: result.drafts,
-        sourceId: `ig-${result.handle || "url"}`,
-        sourceLabel: result.handle ? `IG @${result.handle}` : "Instagram",
-        sourceUrl,
-        kind: "instagram",
-      });
-      res.json({
-        ok: true,
-        jobId,
-        mode: result.mode,
-        handle: result.handle,
-        note: result.note,
-        error: result.error || null,
-        candidates,
-      });
-    } catch (err: any) {
-      res.status(500).json({ error: err?.message || "IG assist failed" });
-    }
-  });
-
-  /**
-   * Phase 4 ingest - preview only (no DB writes).
-   * Body: { url?: string, html?: string, ics?: string, expandPaths?: boolean }
-   * expandPaths (default true): if homepage is empty, try /events, format=json, Tribe REST, etc.
-   */
-  app.post("/api/admin/events/ingest/preview", requireAdmin, async (req, res) => {
-    try {
-      const url = req.body?.url != null ? String(req.body.url) : null;
-      const html = req.body?.html != null ? String(req.body.html) : null;
-      const ics = req.body?.ics != null ? String(req.body.ics) : null;
-      const expandPaths = req.body?.expandPaths !== false;
-      const existingEvents = storage.getEvents({});
-
-      let result = await previewIngest({ url, html, ics, existingEvents });
-      if (!result.ok) return res.status(400).json({ error: result.error });
-
-      if (expandPaths && url && !html && !ics && result.events.length === 0) {
-        const candidates = expandWebsiteScrapeCandidates(url).slice(1);
-        const warnings = [
-          ...result.warnings,
-          `No events on primary URL - tried ${candidates.length} event-path candidates`,
-        ];
-        for (const candidate of candidates.slice(0, 6)) {
-          const next = await previewIngest({ url: candidate, existingEvents });
-          if (next.ok && next.events.length > 0) {
-            result = {
-              ...next,
-              warnings: [...warnings, ...next.warnings, `Used expanded path: ${candidate}`],
-              impact: `${next.impact} Â· via expanded path`,
-            };
-            break;
-          }
-          if (next.ok) warnings.push(...next.warnings);
-        }
-        if (result.events.length === 0) {
-          result = { ...result, warnings: Array.from(new Set(warnings)) };
-        }
-      }
-
-      res.json(result);
-    } catch (err: any) {
-      console.error("ingest preview failed:", err);
-      res.status(500).json({ error: err?.message || "Ingest preview failed" });
-    }
-  });
-
-  /**
-   * Phase 4 ingest - commit after preview.
-   * Body: {
-   *   confirm: true,
-   *   status?: "HIDDEN" | "LIVE" (default HIDDEN),
-   *   skipDuplicates?: boolean (default true),
-   *   events: Array<{ draft, skip?: boolean }>
-   * }
-   * Safety: defaults to HIDDEN; max batch; strong duplicates skipped by default.
-   */
-  app.post("/api/admin/events/ingest/commit", requireAdmin, async (req, res) => {
-    if (!req.body?.confirm) {
-      return res.status(400).json({ error: "confirm: true required - use preview first" });
-    }
-    const status = req.body?.status === "LIVE" ? "LIVE" : "HIDDEN";
-    const skipDuplicates = req.body?.skipDuplicates !== false;
-    const rawEvents = Array.isArray(req.body?.events) ? req.body.events : [];
-    const items = rawEvents.map((row: any) => ({
-      draft: row?.draft ?? row,
-      skip: Boolean(row?.skip),
-    }));
-    const existingEvents = storage.getEvents({});
-    const result = await commitIngest({
-      items,
-      status,
-      skipDuplicates,
-      existingEvents,
-      createEvent: (data) => storage.createEvent(data),
-    });
-    if (!result.ok) return res.status(400).json({ error: result.error });
-
-    auditAdmin(req, "events_ingest_commit", {
-      type: "events",
-      label: result.impact,
-      detail: {
-        status,
-        createdIds: result.created.map(c => c.id),
-        skipped: result.skipped.length,
-      },
-    });
-    res.json(result);
-  });
-
-  /** Public URLs for admin "view as public" (no admin session required on the target). */
-  app.get("/api/admin/preview-links", requireAdmin, (req, res) => {
-    const eventId = req.query.eventId != null ? Number(req.query.eventId) : null;
-    const businessId = req.query.businessId != null ? Number(req.query.businessId) : null;
-    const username = req.query.username != null ? String(req.query.username) : null;
-    res.json({
-      links: publicPreviewLinks({ eventId, businessId, username }),
-    });
-  });
-
-  app.get("/api/analytics/totals", async (_req, res) => {
-    const totals = await getGoogleAnalyticsPublicTotals();
-    if (!totals) {
-      return res.status(503).json({ error: "Analytics totals are temporarily unavailable" });
-    }
-    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-    const members = storage.getAllUsers().filter(user => user.status === "active").length;
-    return res.json({ ...totals, members });
-  });
-
-  app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
-    try {
-      const metrics = storage.getAdminMetrics();
-      const gaTrackingEnabled = !!readGaMeasurementId();
-      const gaReportingEnabled = isGoogleAnalyticsAdminConfigured();
-
-      if (gaReportingEnabled) {
-        const gaTraffic = await getGoogleAnalyticsTrafficMetrics();
-        if (gaTraffic) {
-          metrics.traffic = gaTraffic;
-        } else {
-          metrics.traffic = {
-            ...metrics.traffic,
-            gaTrackingEnabled,
-            gaReportingEnabled,
-          };
-        }
-      } else {
-        metrics.traffic = {
-          ...metrics.traffic,
-          gaTrackingEnabled,
-          gaReportingEnabled: false,
-        };
-      }
-
-      res.json(metrics);
-    } catch (err) {
-      console.error("[admin/metrics]", err);
-      res.status(500).json({ error: err instanceof Error ? err.message : "Failed to load admin metrics" });
-    }
-  });
-
-  app.get("/api/admin/users/new-today", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!caller || !storage.hasOwnerAdminAccess(caller)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    const rows = sqlite.prepare(`
-      SELECT id, username, display_name AS displayName, email, created_at AS createdAt, avatar_choice AS avatarChoice, photo_url AS photoUrl
-      FROM users WHERE created_at >= ? ORDER BY created_at DESC
-    `).all(todayStart.toISOString());
-    res.json(rows);
-  });
-
-  app.post("/api/admin/users/purge-qa", requireAdmin, (req, res) => {
-    const caller = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!isMainAdminUser(caller)) return res.status(403).json({ error: "Super admin only" });
-    const result = storage.purgeQaTestUsers();
-    res.json(result);
-  });
-
-  app.get("/api/admin/feedback", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.isPrimarySiteOwner(user)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    const status = String(req.query.status || "").toUpperCase();
-    if (status === "RESOLVED") {
-      const items = storage.getOwnerDeskItems("RESOLVED")
-        .filter((item) => item.resolvedAt || item.status === "RESOLVED")
-        .sort((a, b) => {
-          const aTs = Date.parse(a.resolvedAt || a.createdAt) || 0;
-          const bTs = Date.parse(b.resolvedAt || b.createdAt) || 0;
-          return bTs - aTs;
-        });
-      return res.json(items);
-    }
-    res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
-  });
-
-  // Deliberately has no product UI. This is the private landing zone read by
-  // Tucker's scheduled diagnostic-review agent.
-  app.get("/api/admin/system-diagnostics/digest", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.isPrimarySiteOwner(user)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    const hours = Number(req.query.hours || 24);
-    res.json(getSystemDiagnosticsDigest(sqlite, Number.isFinite(hours) ? hours : 24));
-  });
-
-  // Consolidated backlog report: every pending admin-queue category + the
-  // Owner Desk (owner only) in one printable page. ?format=json for raw data.
-  app.get("/api/admin/report", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.hasOwnerAdminAccess(user)) {
-      return res.status(403).json({ error: "Owner admin only" });
-    }
-    // Owner desk rows only for true primary owner
-    const data = buildAdminReport(storage, storage.isPrimarySiteOwner(user));
-    if (String(req.query.format) === "json") return res.json(data);
-    res.type("html").send(renderAdminReportHtml(data));
-  });
-
-  app.post("/api/admin/feedback/:id/resolve", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.isPrimarySiteOwner(user)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
-    storage.resolveOwnerDeskItem(Number(req.params.id), source);
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/owner-desk", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.isPrimarySiteOwner(user)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    res.json(storage.getOwnerDeskItems());
-  });
-
-  app.post("/api/admin/owner-desk/:id/resolve", requireAdmin, (req, res) => {
-    const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    if (!user || !storage.isPrimarySiteOwner(user)) {
-      return res.status(403).json({ error: "Owner only" });
-    }
-    const source = String(req.body?.source || "desk") === "feedback" ? "feedback" as const : "desk" as const;
-    storage.resolveOwnerDeskItem(Number(req.params.id), source);
-    res.json({ ok: true });
-  });
-
-  // PUT full event edit (admin only)
-  app.put("/api/admin/events/:id", requireAdmin, async (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    const allowed = [
-      "title", "description", "venueName", "address", "neighborhood", "lat", "lng",
-      "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
-      "ticketUrl", "posterImageUrl", "eventTypes", "status",
-      "isPublic", "isHouseParty", "isSexPositive", "nudityOk", "isClaimable",
-      "claimedBy", "source",
-    ];
-    const patch: Record<string, unknown> = {};
-    for (const key of allowed) {
-      if (req.body[key] !== undefined) patch[key] = req.body[key];
-    }
-    if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
-      patch.eventTypes = JSON.stringify(patch.eventTypes);
-    }
-    const dateErr = validateEventDates(
-      patch.dateStart as string | undefined,
-      patch.dateEnd as string | undefined,
-      evt,
-    );
-    if (dateErr) return res.status(400).json({ error: dateErr });
-    syncDayOfWeek(patch, evt);
-    const updated = storage.updateEvent(Number(req.params.id), patch);
-    if (updated && (patch.address !== undefined || patch.venueName !== undefined || patch.lat !== undefined || patch.lng !== undefined)) {
-      await fillEventMapCoordinates(updated.id);
-    }
-    const fresh = storage.getEvent(Number(req.params.id));
-    res.json(fresh ? enrichEventForMap(fresh) : fresh);
-  });
-
-  // Soft-delete: hide from public listings. Restorable via Admin â†’ Events (status LIVE).
-  app.delete("/api/admin/events/:id", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    const evt = storage.getEvent(id);
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    if (evt.status === "HIDDEN") {
-      return res.json({ ok: true, id, status: "HIDDEN", alreadyHidden: true });
-    }
-    storage.updateEventStatus(id, "HIDDEN");
-    res.json({ ok: true, id, status: "HIDDEN" });
-  });
-
-  app.patch("/api/admin/events/:id/claimable", requireAdmin, (req, res) => {
-    const { isClaimable } = req.body;
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    storage.toggleClaimable(Number(req.params.id), Boolean(isClaimable));
-    res.json({ ok: true });
-  });
-
-  // Assign a promoter as the event's primary host (same effect as an approved claim)
-  app.post("/api/admin/events/:id/host", requireAdmin, (req, res) => {
-    try {
-      const evt = storage.getEvent(Number(req.params.id));
-      if (!evt) return res.status(404).json({ error: "Not found" });
-      const username = String(req.body.username || "").trim().replace(/^@/, "");
-      if (!username) return res.status(400).json({ error: "username required" });
-      const user = resolveUserByUsername(username);
-      if (!user) return res.status(404).json({ error: "No account found with that username" });
-      const actorId = getAdminActorUserId(req);
-      storage.setPrimaryEventHost(evt.id, user.id, actorId);
-      if ((user.promoterStatus || "none") !== "approved") {
-        storage.setPromoterStatus(user.id, "approved");
-      }
-      try {
-        storage.sendAsGuideAdmin(
-          user.id,
-          `You now host: ${evt.title}`,
-          `An admin assigned you as the promoter for "${evt.title}". Open your dashboard to manage the event and post host updates.`,
-          { contextType: "EVENT_CLAIM", contextId: evt.id, contextLabel: evt.title },
-        );
-      } catch (notifyErr) {
-        console.error("[admin] assign host notify failed:", notifyErr);
-      }
-      const fresh = storage.getEvent(evt.id);
-      res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
-    } catch (err) {
-      console.error("[admin] assign host failed:", err);
-      res.status(500).json({ error: "Could not assign promoter" });
-    }
-  });
-
-  // Remove all hosts and return the event to the unclaimed/claimable pool
-  app.delete("/api/admin/events/:id/host", requireAdmin, (req, res) => {
-    const evt = storage.getEvent(Number(req.params.id));
-    if (!evt) return res.status(404).json({ error: "Not found" });
-    storage.unassignEventHosts(evt.id);
-    const fresh = storage.getEvent(evt.id);
-    res.json(fresh ? enrichEventForAdmin(fresh) : { ok: true });
-  });
-
-  // GET admin moderation requests
-  app.get("/api/admin/moderation", requireAdmin, (req, res) => {
-    const reqs = req.query.all === "true" ? storage.getModerationRequests() : storage.getModerationRequests("PENDING");
-    res.json(reqs.map(enrichModerationForAdmin));
-  });
-
-  // POST resolve moderation request
-  app.post("/api/admin/moderation/:id/resolve", requireAdmin, (req, res) => {
-    const { status, adminNotes } = req.body;
-    if (!["APPROVED", "REJECTED"].includes(status)) return res.status(400).json({ error: "status must be APPROVED or REJECTED" });
-    const id = Number(req.params.id);
-    storage.resolveModerationRequest(id, status, adminNotes);
-    auditAdmin(req, "resolve_moderation", { type: "moderation", id, detail: { status } });
-    releaseAdminQueueClaim("moderation", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.post("/api/admin/moderation/dismiss-stale-tests", requireAdmin, (req, res) => {
-    const count = storage.dismissStaleTestModerationRequests();
-    res.json({ ok: true, dismissed: count });
-  });
-
-  app.get("/api/admin/gifting", requireAdmin, (req, res) => {
-    res.json({
-      posts: storage.getGiftingPosts({ includeInactive: true }).map(post => publicGiftingPost(post)),
-      reports: storage.getGiftingReports(),
-    });
-  });
-
-  app.post("/api/admin/gifting/:id/status", requireAdmin, (req, res) => {
-    const status = String(req.body.status || "").trim().toUpperCase();
-    if (!status) return res.status(400).json({ error: "status required" });
-    storage.updateGiftingPostStatus(Number(req.params.id), status);
-    res.json({ ok: true });
-  });
-
-  app.post("/api/admin/gifting/:id/reject", requireAdmin, (req, res) => {
-    try {
-      const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const id = Number(req.params.id);
-      const result = storage.rejectGiftingPost(id, reasonCode, note);
-      if (result.error) return res.status(400).json({ error: result.error });
-      auditAdmin(req, "reject_gifting", { type: "gifting", id, detail: { reasonCode } });
-      releaseAdminQueueClaim("gifting_flagged", id, getAdminActor(req).id || 0, { force: true });
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.post("/api/admin/gifting/reports/:id/resolve", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    storage.resolveGiftingReport(id, String(req.body.adminNotes || ""));
-    auditAdmin(req, "resolve_gifting_report", { type: "gifting_report", id });
-    releaseAdminQueueClaim("gifting_report", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.get("/api/admin/river-brats/reports", requireAdmin, (_req, res) => {
-    res.json(storage.getRiverBratsReports());
-  });
-
-  app.post("/api/admin/river-brats/reports/:id/resolve", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    storage.resolveRiverBratsReport(id, String(req.body.adminNotes || ""));
-    auditAdmin(req, "resolve_river_brats", { type: "river_brats", id });
-    releaseAdminQueueClaim("river_brats", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  // â”€â”€â”€ ADMIN: GIGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  app.get("/api/admin/gigs", requireAdmin, (req, res) => {
-    res.json(storage.getGigPosts().map(gig => {
-      const user = gig.userId ? storage.getUserById(gig.userId) : null;
-      return {
-        ...gig,
-        username: user?.username,
-        displayName: user?.displayName,
-        posterPhotoUrl: user?.photoUrl ?? null,
-        avatarChoice: user?.avatarChoice ?? 1,
-        posterAvatarRing: user?.avatarRing || "none",
-      };
-    }));
-  });
-
-  app.post("/api/admin/gigs/:id/status", requireAdmin, (req, res) => {
-    const status = String(req.body.status || "").trim().toUpperCase();
-    if (!["LIVE", "PENDING", "REJECTED", "REMOVED"].includes(status)) return res.status(400).json({ error: "Invalid status" });
-    const id = Number(req.params.id);
-    storage.adminUpdateGigStatus(id, status);
-    auditAdmin(req, "gig_status", { type: "gig_pending", id, detail: { status } });
-    if (status === "LIVE" || status === "REJECTED" || status === "REMOVED") {
-      releaseAdminQueueClaim("gig_pending", id, getAdminActor(req).id || 0, { force: true });
-    }
-    res.json({ ok: true });
-  });
-
-  app.post("/api/admin/gigs/:id/reject", requireAdmin, (req, res) => {
-    try {
-      const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const id = Number(req.params.id);
-      const result = storage.rejectGigPost(id, reasonCode, note);
-      if (result.error) return res.status(400).json({ error: result.error });
-      auditAdmin(req, "reject_gig", { type: "gig_pending", id, detail: { reasonCode } });
-      releaseAdminQueueClaim("gig_pending", id, getAdminActor(req).id || 0, { force: true });
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.get("/api/admin/missed-connections", requireAdmin, (req, res) => {
-    res.json(req.query.recent === "true"
-      ? storage.getRecentlyReviewedMissedConnections()
-      : storage.getAdminMissedConnections());
-  });
-
-  app.post("/api/admin/missed-connections/:id/approve", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    const result = storage.approveMissedConnection(id);
-    if (result.error) return res.status(404).json({ error: result.error });
-    auditAdmin(req, "clear_missed_connection", { type: "missed_connection", id });
-    releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.delete("/api/admin/missed-connections/:id", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    const result = storage.removeMissedConnectionAdmin(id);
-    if (result.error) return res.status(404).json({ error: result.error });
-    auditAdmin(req, "remove_missed_connection", { type: "missed_connection", id });
-    releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
-    res.json({ ok: true });
-  });
-
-  app.post("/api/admin/missed-connections/:id/reject", requireAdmin, (req, res) => {
-    try {
-      const { reasonCode, note } = parseBoardRejectBody(req.body);
-      const id = Number(req.params.id);
-      const result = storage.rejectMissedConnection(id, reasonCode, note);
-      if (result.error) return res.status(400).json({ error: result.error });
-      auditAdmin(req, "reject_missed_connection", { type: "missed_connection", id, detail: { reasonCode } });
-      releaseAdminQueueClaim("missed_connection", id, getAdminActor(req).id || 0, { force: true });
-      res.json({ ok: true });
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
-  });
-
-  app.put("/api/admin/gigs/:id", requireAdmin, (req, res) => {
-    const id = Number(req.params.id);
-    const patch: Record<string, unknown> = {};
-    const fields = [
-      "postType", "title", "name", "contactEmail", "description", "skills",
-      "compensation", "location", "isRemote", "status", "gigDate", "gigTime", "imageUrl",
-    ] as const;
-    for (const key of fields) {
-      if (req.body[key] !== undefined) patch[key] = req.body[key];
-    }
-    if (patch.postType && !["POSTING_GIG", "LOOKING_FOR_WORK"].includes(String(patch.postType))) {
-      return res.status(400).json({ error: "Invalid post type" });
-    }
-    if (patch.status && !["LIVE", "PENDING", "REJECTED", "REMOVED"].includes(String(patch.status).toUpperCase())) {
-      return res.status(400).json({ error: "Invalid status" });
-    }
-    if (patch.status) patch.status = String(patch.status).toUpperCase();
-    const updated = storage.adminUpdateGigPost(id, patch as any);
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
-  });
-
-  // GET admin inbox summary (notification counts)
-  app.get("/api/admin/inbox", requireAdmin, (req, res) => {
-    const pendingSubs = storage.getSubmissions("PENDING").length;
-    const pendingMod = storage.getModerationRequests("PENDING").length;
-    const guideUnread = storage.getGuideAdminUnreadCount();
-    res.json({
-      pendingSubmissions: pendingSubs,
-      pendingModeration: pendingMod,
-      total: pendingSubs + pendingMod,
-      guideUnread,
-    });
-  });
-
-  // Shared guide-admin mailbox (floating inbox â†’ Admin â†’ Inbox / Sent).
-  // Outbound rejects and admin DMs send as @prideguidepdx so replies land here for all keyholders.
-  app.get("/api/admin/messages/inbox", requireAdmin, (_req, res) => {
-    res.json(storage.getGuideAdminInbox());
-  });
-
-  app.get("/api/admin/messages/sent", requireAdmin, (_req, res) => {
-    res.json(storage.getGuideAdminSent());
-  });
-
-  app.get("/api/admin/messages/unread-count", requireAdmin, (_req, res) => {
-    res.json({ count: storage.getGuideAdminUnreadCount() });
-  });
-
-  app.get("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
-    const guide = storage.resolveGuideAdminUser();
-    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const thread = storage.getThreadForViewer(req.params.threadId, guide.id);
-    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
-    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
-    res.json({ messages: thread, guideUserId: guide.id });
-  });
-
-  /** React on guide-admin DMs as the shared guide identity. */
-  app.post("/api/admin/messages/:id/reactions", requireAdmin, (req: any, res) => {
-    const guide = storage.resolveGuideAdminUser();
-    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const messageId = Number(req.params.id);
-    const emoji = String(req.body?.emoji || req.body?.code || "").trim();
-    if (!emoji) return res.status(400).json({ error: "emoji required" });
-    const result = storage.toggleMessageReaction(messageId, guide.id, emoji);
-    if (result.error) {
-      const status = result.error === "Invalid reaction" ? 400 : 404;
-      return res.status(status).json({ error: result.error });
-    }
-    res.json({ reactions: result.reactions });
-  });
-
-  app.post("/api/admin/messages/thread/:threadId/reply", requireAdmin, (req, res) => {
-    const actor = getAdminActor(req);
-    if (actor.id) {
-      const rate = checkAdminMessageRateLimit(actor.id);
-      if (!rate.ok) return res.status(429).json({ error: rate.error });
-    }
-    const guide = storage.resolveGuideAdminUser();
-    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const thread = storage.getThread(req.params.threadId);
-    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
-    if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
-    const first = thread[0] as any;
-    const last = thread[thread.length - 1] as any;
-    const toUserId = last.fromUserId === guide.id ? last.toUserId : last.fromUserId;
-    const body = String(req.body?.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
-    if (moderationGate(res, "Admin guide reply", { body })) return;
-    const msg = storage.sendAsGuideAdmin(toUserId, first.subject || "Reply", body, {
-      threadId: req.params.threadId,
-      contextType: first.contextType || "ADMIN_MESSAGE",
-      contextId: first.contextId ?? null,
-      contextLabel: first.contextLabel || null,
-    });
-    if (!msg) return res.status(500).json({ error: "Could not send reply" });
-    auditAdmin(req, "guide_reply", {
-      type: "thread",
-      id: req.params.threadId,
-      label: first.subject || "Reply",
-    });
-    res.json(msg);
-  });
-
-  app.put("/api/admin/messages/:id/read", requireAdmin, (req, res) => {
-    const guide = storage.resolveGuideAdminUser();
-    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const ok = storage.markReadForUser(Number(req.params.id), guide.id);
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  });
-
-  /** Compose a new message as the shared guide-admin profile (Admin MESSAGE buttons). */
-  app.post("/api/admin/messages", requireAdmin, (req, res) => {
-    const actor = getAdminActor(req);
-    if (actor.id) {
-      const rate = checkAdminMessageRateLimit(actor.id);
-      if (!rate.ok) return res.status(429).json({ error: rate.error });
-    }
-    const username = String(req.body?.username || "").trim().replace(/^@/, "");
-    const body = String(req.body?.body || "").trim();
-    const subject = String(req.body?.subject || "").trim().slice(0, 120);
-    if (!username) return res.status(400).json({ error: "username required" });
-    if (!body) return res.status(400).json({ error: "body required" });
-    const target = storage.getUserByUsername(username);
-    if (!target || target.status !== "active") return res.status(404).json({ error: "User not found" });
-    if (storage.isGuideAdminUserId(target.id)) {
-      return res.status(400).json({ error: "Cannot message the Zaylist system identity" });
-    }
-    if (moderationGate(res, "Admin guide message", { subject: subject || "Admin message", body })) return;
-    const msg = storage.sendAsGuideAdmin(
-      target.id,
-      subject || `Message from Zaylist`,
-      body,
-      { contextType: "ADMIN_MESSAGE" },
-    );
-    if (!msg) return res.status(500).json({ error: "Could not send message" });
-    auditAdmin(req, "admin_message", {
-      type: "user",
-      id: target.id,
-      label: `@${target.username}`,
-      detail: { threadId: msg.threadId, subject: msg.subject },
-    });
-    res.json({ ok: true, message: msg });
-  });
-
-  app.post("/api/admin/messages/mark-all-read", requireAdmin, (_req, res) => {
-    const cleared = storage.markGuideAdminInboxRead();
-    res.json({ ok: true, cleared });
-  });
-
-  app.delete("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
-    const threadId = decodeURIComponent(req.params.threadId || "").trim();
-    if (!threadId) return res.status(400).json({ error: "Thread id required" });
-    const guide = storage.resolveGuideAdminUser();
-    if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
-    const thread = storage.getThread(threadId);
-    const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
-    if (!visible) return res.status(404).json({ error: "Thread not found" });
-    const cleared = storage.softDeleteGuideAdminThread(threadId);
-    if (cleared === 0) return res.status(404).json({ error: "Nothing to delete" });
-    res.json({ ok: true, cleared });
-  });
-
-  // Owner-only Ad Manager + public serve/track
-  registerAdRoutes(app, {
-    db: sqlite,
-    requireAdmin,
-    isPrimaryOwner: (user) => storage.isPrimarySiteOwner(user),
-    getUserById: (id) => storage.getUserById(id),
-    uploadSingle: upload.single("asset"),
-    auditAdmin,
-  });
-
-  // HAUSING - the Housing board. See docs/HAUS_ENGINEERING_HANDOFF.md
-  registerHousingRoutes(app, {
-    db: sqlite,
-    requireAuth,
-    requireAdmin,
-    isPrimaryOwner: (user) => storage.isPrimarySiteOwner(user),
-    getUserById: (id) => storage.getUserById(id),
-    uploadPhotos: upload.array("photos", 8),
-    createModerationRequest: (data) => storage.createModerationRequest(data),
-    sendMessage: (from, to, subject, body, opts) => storage.sendMessage(from, to, subject, body, opts),
-  });
-
-  scheduleMapCoordinateBackfill();
-  startPromptScheduler();
-
-  // Existing events predate capture-at-ingest. Mirror their remote flyers after
-  // startup; archived QSEARCH candidate rows are deliberately left untouched.
-  if (process.env.NODE_ENV === "production") {
-    setTimeout(() => {
-      void (async () => {
-        try {
-          const { mirrorEventPosters } = await import("./ingest/mirrorEventPosters");
-          const summary = await mirrorEventPosters({
-            events: storage.getEvents({}),
-            pendingCandidates: [],
-            updateEventPoster: (id, url) => {
-              storage.updateEvent(id, { posterImageUrl: url }, { source: "sync" });
-            },
-            updateCandidatePoster: () => false,
-          });
-          console.log(
-            `[poster-mirror] checked=${summary.checked} captured=${summary.captured} retained_remote=${summary.retainedRemote}`,
-          );
-        } catch (error) {
-          console.error("[poster-mirror] backfill failed", error);
-        }
-      })();
-    }, 15_000);
-  }
-}
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×]µç´èµ©hºÚn¶X§zÍZ[\ÜÈÙ]Ý]‘]Z[ÈHœ›ÛH‹‹ÛÝ]‘]Z[ÈŽÂš[\ÜÈÙ]Ý]ÛÛ[][š]Q™YYHœ›ÛH‹‹ÛÝ]‘™YYŽÂš[\ÜÈÙ]Ý]‘™YYÙX]\ˆHœ›ÛH‹‹ÛÝ]‘™YYÙX]\ˆŽÂš[\ÜÈØY™SX\™]\›•ÈHœ›ÛHÚ\™YØ]]™]\›ˆŽÂš[\ÜÈX›XÒ\›Hœ›ÛHÚ\™YÜØY™R\›ŽÂš[\ÜÈ]™[]\Ñ\œ›ÜˆHœ›ÛHÚ\™YÙ]™[[ZÙQ]\ÈŽÂš[\ÜÈ\œÙSX\šÙ]XÙTšXÙHHœ›ÛHÚ\™YÛX\šÙ]XÙHŽÂš[\Ü^™\ÜËÈ\H^™\ÜÈHœ›ÛH™^™\ÜÈŽÂš[\Ü\HÈÙ\™\ˆHœ›ÛHšŽÂš[\ÜÈZ[\ÕZ[›Ø›ÝÕZ[Ú][X\[Ù]]™Q]™[Ñ›Ü”Ù[ÈHœ›ÛH‹‹ÜÙ[ÈŽÂš[\ÜÈZ[YZ[”™\Ü™[™\YZ[”™\Ü[Hœ›ÛH‹‹ØYZ[”™\ÜŽÂš[\ÜÈ^[™][Q^Q]™[ÈHœ›ÛHÚ\™YÛ][Q^Q]™[ÈŽÂš[\ÜÈY\Q]™[Ë]™[Y\RÙ^HHœ›ÛHÚ\™YÙ]™[Y\HŽÂš[\ÜÂˆ\ÔÜÝ]™[ÙYZÓ\Ý[™ÐØ\XÝ]™KˆšYQ^Qœ›ÛQ]KˆU‘S•ÕÑQR×ÑS‘ÑUKŸHœ›ÛHÚ\™YÙ]™[ÙYZÈŽÂš[\ÜÈÝÜ˜YÙK\Ú\ÜÝÛÜ™™\šYžT\ÜÝÛÜ™\ÓYØXÞT\ÜÝÛÜ™\ÚÜ[]KÙ]X›PÛÝ[Ë›Ü›X[^™P][™[˜ÙUš\ÚXš[]HHœ›ÛH‹‹ÜÝÜ˜YÙHŽÂš[\ÜÈ\Õ˜[œØXÝ[Û˜[[XZ[ÛÛ™šYÝ\™YÙ[™ÝÛ™\‘\ÚÓ›ÝYšXØ][Û‹Ù[™\ÜÝÛÜ™™\Ù][XZ[Hœ›ÛH‹‹Ù[XZ[ŽÂš[\ÜÂˆYZ[”ÙX\˜Ú›Ü•šY]Ù\‹ˆ]XÚ\™XÝÜžS\Ý[™ËˆÚXÚÐYZ[“Y\ÜØYÙT˜]S[Z]ˆÛZ[PYZ[”]Y]YR][Kˆ^XÝ]P[Ñ]™[ËˆÙ]YZ[”]Y]YPYÙÜ™YØ]Kˆ\ÝYZ[”]Y]YPÛZ[\Ëˆ™]šY]Ð[Ñ]™[ËˆX›XÔ™]šY]Ó[šÜËˆ™[X\ÙPYZ[”]Y]YPÛZ[KŸHœ›ÛH‹‹ØYZ[“ÜÈŽÂš[\ÜÈ\ÜÙ\›ÙXÝ[Û”\œÚ\Ý[˜ÙK\ÜÙ\›ÙXÝ[Û”ÙXÜ™]ËÙ]\œÚ\Ý[˜ÙP]Y]Hœ›ÛH‹‹Ü\œÚ\Ý[˜ÙHŽÂš[\ÜÈ[š]][™[˜ÙUÜÈHœ›ÛH‹‹Ø][™[˜ÙUÜÈŽÂš[\ÜÈÝ\›Û\ØÚY[\ˆHœ›ÛH‹‹ÜØÚY[\ˆŽÂš[\ÜÈ™YÚ\Ý\Ø\Õ[T›Ý]\ÈHœ›ÛH‹‹ØØ\Õ[\ÈŽÂš[\ÜÈÜ™X]TÙ\ÜÚ[Û“ZY]Ø\™K›ÙXÝ[Û”ÙXÝ\™PÛÛÚÚY\ÈHœ›ÛH‹‹ÜÙ\ÜÚ[ÛÛÛ™šYÈŽÂš[\ÜÂˆ[œÙ\ÝX›Z\ÜÚ[Û”ØÚ[XK[œÙ\ÚYÔÜÝØÚ[XK[œÙ\[Ù\˜][Û”™\]Y\ÝØÚ[XK[œÙ\Z\ÜÙYÛÛ›™XÝ[Û”ØÚ[XKˆ[œÙ\ÚY[™ÔÜÝØÚ[XK[œÙ\ÚY[™Ò[\™\ÝØÚ[XK[œÙ\ÚY[™Ô™\ÜØÚ[XK[œÙ\™YY˜XÚÔ™\ÜØÚ[XKˆ[œÙ\Ù[”ÜÝØÚ[XK[œÙ\Ù[’[\™\ÝØÚ[XK[œÙ\Ù[”™\ÜØÚ[XKˆ[œÙ\™XXÚÚXÚÚ[”ØÚ[XK[œÙ\™XXÚØ\œÛÛÜÝØÚ[XK[œÙ\š]™\œ˜]Ô™\ÜØÚ[XKŸHœ›ÛHÚ\™YÜØÚ[XHŽÂš[\ÜÈˆHœ›ÛHž›ÙŽÂš[\ÜÈ[Ù\˜]QšY[Ë[Ù\˜][Û“Y\ÜØYÙHHœ›ÛHÚ\™YØÛÛ[[Ù\˜][ÛˆŽÂš[\ÜÈ™\ÛÛ™Q]™[ÜÝ\•\›Hœ›ÛHÚ\™YÙ]™[ÜÝ\ˆŽÂš[\ÜÂˆÙ]\˜Ú]™TÞ[]XÐÜ™Y]ËˆÙ]XÚÙ\’ÜÝY\˜Ú]™T›ÝËˆ\ÕXÚÙ\’ÜÝY\˜Ú]™RYˆXÚÙ\’ÜÝY\˜Ú]™P\Ñ]™[ŸHœ›ÛHÚ\™YÝXÚÙ\’ÜÝY\˜Ú]™HŽÂš[\ÜÈZ[™[YUÙXœÚ]R[™^™\ÛÛ™U™[YUÙXœÚ]HHœ›ÛHÚ\™YÝ™[YS[šÜÈŽÂš[\ÜÂˆ[œšXÚ]™[›Ü“X\ˆš[]™[X\ÛÛÜ™[˜]\Ëˆš[šY[ÓX\ÛÛÜ™[˜]\ËˆØÚY[SX\ÛÛÜ™[˜]P˜XÚÙš[ŸHœ›ÛH‹‹ÛX\ÛÛÜ™[˜]TÞ[˜ÈŽÂš[\ÜÈ]XÚ]™[ÕÐ\Ú[™\ÜÙ\Ë]XÚ›Û[Ý\œÕÐ\Ú[™\ÜÙ\Ë]XÚÜÝY[™ÚYÜÕÐ\Ú[™\ÜÙ\ÈHœ›ÛH‹‹Ù\™XÝÜžQ]™[ÈŽÂš[\ÜÈ™\ÛÛ™P\Ú[™\ÜÓØØ][ÛœÈHœ›ÛHÚ\™YØ\Ú[™\ÜÓØØ][ÛœÈŽÂš[\ÜÈ\œÙTXÚYšXÑ]U[YHHœ›ÛHÚ\™YÛZ\ÜÙYÛÛ›™XÝ[ÛœÈŽÂš[\ÜÈT‘PÕÔ–WÕTTÈHœ›ÛHÚ\™YÙ\™XÝÜžU[YHŽÂš[\ÜÈ“ÑPÕÑU‘S•ÓSQTË™XÛÜ™YÙUšY]Ë™XÛÜ™›ÙXÝ]™[Hœ›ÛH‹‹Ø[˜[]XÜÈŽÂš[\ÜÈ™YÚ\Ý\Y›Ý]\ÈHœ›ÛH‹‹ØYÔ›Ý]\ÈŽÂš[\ÜÈ™YÚ\Ý\’Ý\Ú[™Ô›Ý]\ÈHœ›ÛH‹‹ÚÝ\Ú[™ËÜ›Ý]\ÈŽÂš[\ÜÈ™YÚ\Ý\ÛÛ[][š]T›Ý]\ËÙX\˜ÚÛÛ[][š]Y\ÈHœ›ÛH‹‹ØÛÛ[][š]Y\ÈŽÂš[\ÜÈ™YÚ\Ý\”]›Ü›UŒHHœ›ÛH‹‹Ü]›Ü›UŒHŽÂš[\ÜÈÙ]Þ\Ý[QXYÛ›ÜÝXÜÑYÙ\Ý™XÛÜ™Þ\Ý[QXYÛ›ÜÝXÈHœ›ÛH‹‹ÜÞ\Ý[QXYÛ›ÜÝXÜÈŽÂš[\ÜÈÛÛ[Z][™Ù\Ý™]šY]Ò[™Ù\ÝY\™ÙQ˜Y[Ñ]™[Hœ›ÛH‹‹Ú[™Ù\ÝŽÂš[\ÜÈ™[™\‘Ø[YTÜÝ\”™ÈHœ›ÛH‹‹ÜÜÝ\œËÙØ[YTÜÝ\ˆŽÂš[\ÜÂˆS‘ÑTÕÔÓÕTÑTËˆZ[\™XÝÜžR[™Ù\ÝÛÝ\˜Ù\Ëˆ^[™ÙXœÚ]TØÜ˜\PØ[™Y]\ËˆY\™ÙR[™Ù\ÝÛÝ\˜Ù\ËŸHœ›ÛHÚ\™YÚ[™Ù\ÝÛÝ\˜Ù\ÈŽÂš[\ÜÈ\Õ\ÝY[™TÛÝ\˜ÙHHœ›ÛHÚ\™YÝ\ÝY™[Y\ÈŽÂš[\ÜÈX]ÚÛÜÙY™[YHHœ›ÛHÚ\™YØÛÜÙY™[Y\ÈŽÂš[\ÜÂˆ]XÚ\™XÝÜžPœ˜[™ÕÐØ[™Y]\ËˆØ[˜Ù[ØØ[‹ˆ\Ú›Ø\™Û˜\ÚÝˆÙ]ØØ[’›Ø•šY]ËˆÝ\ØØ[‹ŸHœ›ÛH‹‹Ü\ÙX\˜ÚÜØØ[’›ØˆŽÂš[\ÜÂˆYÝ\ÝÛTÛÝ\˜ÙKˆÛX\”ØØ[”]Y]YKˆ[]TÛÝ\˜ÙKˆ[˜X›TÛÝ\˜ÙKˆ\ÝØ[™Y]\ËˆX\šÐ[™]ÔÙY[‹ˆÛX\Ø[™Y]Q›Y\‹ˆX\šÐØ[™Y]\ÐÛÛ[Z]YˆX\šÐØ[™Y]\ÔÚÚ\Yˆ[™T[™[™ÐYØZ[œÝØ][ÙËˆ™\ÝÜ™PØ[™Y]KˆÙ]˜YÜÜ[‹ˆÙ][œÝYÜ˜[R[™KˆÙ]™XÚ\U\›ŸHœ›ÛH‹‹Ü\ÙX\˜ÚÜÝÜ™HŽÂš[\ÜÈšYÙÙ\“šYÚTš[Üš]TØØ[ˆHœ›ÛH‹‹Ü\ÙX\˜ÚÛšYÚHŽÂš[\ÜÈÙ]\ÝY\Ú›Ø\™Hœ›ÛH‹‹Ü\ÙX\˜ÚÝ\ÝYX[ŽÂš[\ÜÈØØ[\ØYÑ]U\›š\Ú[Û‘›Y\•Ñ˜YÈHœ›ÛH‹‹Ü\ÙX\˜ÚÝš\Ú[ÛˆŽÂš[\ÜÈYÑœ›ÛU\›YÑÜ˜\[YÔ\ÝP\ÜÚ\Ý\œÙR[œÝYÜ˜[R[™HHœ›ÛH‹‹Ü\ÙX\˜ÚÚ[œÝYÜ˜[HŽÂš[\ÜÈZ[ØØ[Ø[™Y]\ÈHœ›ÛH‹‹Ü\ÙX\˜ÚØ[˜[^™HŽÂš[\ÜÈØ]™PØ[™Y]\ÈHœ›ÛH‹‹Ü\ÙX\˜ÚÜÝÜ™HŽÂš[\ÜÈ˜[™ÛUURQHœ›ÛH››ÙN˜Üž\ÈŽÂš[\ÜÂˆÓÓSUS’UWÔÕS‘T‘×Õ‘T”ÒSÓ‹ˆÓÓSUS’UWÔÕS‘T‘×ÑPÓS‘WÕT“ˆÓÓSUS’UWÔÕS‘T‘×ÑÐUWÑSP“QŸHœ›ÛHÚ\™YØÛÛ[][š]TÝ[™\™ÈŽÂš[\ÜÂˆXØÛÝ[[Ù™X\ÛÛ“X™[ˆ[[\ÛÑœ›ÛRÝ\œËŸHœ›ÛHÚ\™YØXØÛÝ[[Ù\˜][ÛˆŽÂš[\ÜÂˆÙ]ÛÛÙÛP[˜[]XÜÔX›XÕÝ[ËˆÙ]ÛÛÙÛP[˜[]XÜÕ˜Y™šXÓY]šXÜËˆ\ÑÛÛÙÛP[˜[]XÜÐYZ[ÛÛ™šYÝ\™YŸHœ›ÛH‹‹ÙÛÛÙÛP[˜[]XÜÈŽÂš[\ÜÈ™XYØSYX\Ý\™[Y[YHœ›ÛH‹‹ÙØTÛš\]ŽÂš[\ÜÈ›Ü˜ÙT™Yœ™\ÚYP™XXÚ\ÔÛ˜\ÚÝÙ]YP™XXÚ\ÔÛ˜\ÚÝHœ›ÛH‹‹ÛYP™XXÚ\ÈŽÂš[\ÜÈ›Ü˜ÙT™Yœ™\ÚÝ]”Û˜\ÚÝÙ]Ý]”Û˜\ÚÝHœ›ÛH‹‹ÛÝ]ˆŽÂš[\ÜÂˆ\Q]™[™\ÙX\˜Ú]™[Ú[™ÙKˆÜ™X]Q]™[œ›ÛT™\ÙX\˜Úˆ]™[›Ü”™\ÙX\˜ÚYÙ[ˆÙ]]™[™\ÙX\˜ÚÛÝ\˜ÙSY[[ÜžKˆ\Ý]™[™\ÙX\˜ÚÚ[™Ù\Ëˆ™XÛÜ™]™[™\ÙX\˜Ú]ˆ›Û˜XÚÑ]™[™\ÙX\˜ÚÚ[™ÙKŸHœ›ÛH‹‹Ù]™[™\ÙX\˜ÚY[[ÜžHŽÂš[\ÜÂˆ™YÚ[”™\ÙX\˜Ú[‹ˆ[œ]Y]YT™\ÙX\˜Ú™]šY]Ëˆ]˜[X]QXÚ\Ú[Û‘Ø]Kˆš[š\Ú™\ÙX\˜Ú[‹ˆÙ]™\ÙX\˜ÚÛÛ›ÛÝ]KˆX\šÔ[”ÛÝ\˜ÙKˆ™XÛÜ™ÛÛ™›XÝˆ™XÛÜ™šY[]šY[˜ÙKˆ™XÛÜ™YYXT›Ý™[˜[˜ÙKˆ™XÛÜ™XÚ\Ú[Û“Ý]ÛÛYKˆ™XÛÜ™Z\ÝZÙU\Ý™\Ý[ˆ™\ÛÛ™T™\ÙX\˜Ú][KˆÙ]ÛÝ\˜ÙTØÚY[Kˆ\Ù\[]RY[]Kˆ\Ù\]™[Ù\šY\Ëˆ\Ù\Z\ÝZÙU\ÝŸHœ›ÛH‹‹Ù]™[™\ÙX\˜ÚÛÛ›ÛŽÂš[\ÜÂˆ[ÝÐYZ[“Ü‘]™[™\ÙX\˜ÚYÙ[ˆ]™[™\ÙX\˜ÚXÝÜ‹ŸHœ›ÛH‹‹Ù]™[™\ÙX\˜Ú]]ŽÂš[\ÜÂˆ[]SÝ]ÚXÚÚ[‹ˆ\]SÝ]•Ø[ÜÝˆ[]SÝ]•Ø[ÜÝˆÜ™X]SÝ]•Ø[ÛÛ[Y[ˆÜ™X]SÝ]•Ø[ÜÝˆÙ]Ý]”XÙT˜][™ËˆÙ]Ý]•Ø[ÜÝËˆÙ]Ý]Ú]Y\ÜØYÙ\ËˆÙ]Ý]ÚXÚÚ[œËˆÜÝÝ]Ú]Y\ÜØYÙKˆ\Ù\Ý]”XÙT˜][™Ëˆ\Ù\Ý]ÚXÚÚ[‹ŸHœ›ÛH‹‹ÛÝ]”ÛØÚX[ŽÂš[\ÜÈ\Ô›Ùš[PXØÙ[ÛÛÜ‹\Ô›Ùš[P˜[›™\‹›Ü›X[^™T›Ùš[PXØÙ[ÛÛÜˆHœ›ÛHÚ\™YÜ›Ùš[U[YHŽÂš[\ÜÂˆ›Ü›X]Ý\ÝÛTÜÝY™[YKˆÙ[™\˜[ÜÝYÛÜÙ\Ð]ˆ\ÓZ\ÜÙYÛÛ›™XÝ[Û”ÜÝX›KˆZ\ÜÙYÛÛ›™XÝ[ÛÛÜÙ\Ð]ˆXÚYšXÐØ[[™\‘]KˆXÚYšXÑ^SÙ•ÙYZËŸHœ›ÛHÚ\™YÛZ\ÜÙYÛÛ›™XÝ[ÛœÈŽÂš[\ÜÈ\Ñ]™[[[›ÛHHœ›ÛHÚ\™YÙ]™[[[ŽÂš[\ÜÈ\œÙRX‘™YYXˆHœ›ÛHÚ\™YÚX‘™YYŽÂš[\ÜÈ“ÐT‘Ô‘R‘PÕÔ‘PTÓÓ”Ë“Ñ’SWÔÕ×Ô‘R‘PÕÔ‘PTÓÓ”Ë˜[Y]QÚYÔÜÝÛÛ[Hœ›ÛHÚ\™YØ›Ø\™[Ù\˜][ÛˆŽÂš[\ÜÈZ[\[šÜÈHœ›ÛHÚ\™YÝ\Ý\ÜŽÂ‚š[\ÜÂˆY™”ÝX›Z\ÜÚ[Û“Y\™ÙKˆš[™ÝX›Z\ÜÚ[Û“X]Ú\ËˆÝX›Z\ÜÚ[Û’\ÔÝ›Û™Ñ\XØ]KŸHœ›ÛHÚ\™YÜÝX›Z\ÜÚ[Û“X]ÚŽÂš[\ÜÂˆZ[\™XÝÜžSY\™ÙT]Úˆ\™XÝÜžR\ÔÝ›Û™Ñ\XØ]Kˆš[™\™XÝÜžSX]Ú\Ëˆ\H\™XÝÜžSY\™ÙT^[ØYŸHœ›ÛHÚ\™YÙ\™XÝÜžSX]ÚŽÂš[\Ü\HÈ]™[Hœ›ÛHÚ\™YÜØÚ[XHŽÂš[\ÜÂˆ™XXÚ™[YSX™[ˆ\Ð[ÝÙY™XXÚÚXÚÚ[‘]Kˆ\Ð[ÝÙYØ\œÛÛš\]Kˆ\Õ˜[YØ\œÛÛ\™XÝ[Û‹ˆ\Õ˜[Y™XXÚYˆ\Õ˜[Yš]™\œ˜]Ñ\\Ý\‹ˆ\Õ˜[Yš]™\œ˜]ÒÝ\‹ˆXÚYšXÕÙ^Q]KŸHœ›ÛHÚ\™YÜš]™\œ˜]ÈŽÂš[\ÜÈÙ]˜\YX›XÒÙ^K\Ô\ÚÛÛ™šYÝ\™YHœ›ÛH‹‹Ü\ÚÝ˜\YŽÂš[\ÜÈZ[XÛ\˜]]™T^[ØYÙ[™\ÚÔÝXœØÜš\[ÛˆHœ›ÛH‹‹Ü\ÚÜÙ[™ŽÂš[\ÜÜž\Èœ›ÛH˜Üž\ÈŽÂš[\Ü][\ˆœ›ÛH›][\ˆŽÂš[\Ü]œ›ÛHœ]ŽÂš[\ÜœÈœ›ÛH™œÈŽÂ‚‹ËÈ8¥ 8¥ 8¥ š[H\ØYÙ]\8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˜ÛÛœÝTÐQ×ÑTˆH]œ™\ÛÛ™J›ØÙ\ÜË™[‹•TÐQ×ÑTˆ]š›Ú[Š›ØÙ\ÜË˜ÝÙ
+
+K\ØYÈŠJNÂšYˆ
+YœË™^\ÝÔÞ[˜ÊTÐQ×ÑTŠJHœË›ZÙ\”Þ[˜ÊTÐQ×ÑT‹È™XÝ\œÚ]™NˆYHJNÂ‚˜ÛÛœÝ\ØYH][\ŠÂˆÝÜ˜YÙNˆ][\‹™\ÚÔÝÜ˜YÙJÂˆ\Ý[˜][ÛŽˆ
+Ü™\KÙš[KØŠHOˆØŠ[TÐQ×ÑTŠKˆš[[˜[YNˆ
+Ü™\Kš[KØŠHOˆÂˆÛÛœÝ˜]Ñ^H]™^˜[YJš[K›ÜšYÚ[˜[˜[YJKÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ^HÈ‹šœÈ‹‹šœYÈ‹‹œ™È‹‹™ÚYˆ‹‹ÙXœ—Kš[˜ÛY\Ê˜]Ñ^
+HÈ˜]Ñ^ˆ‹šœÈŽÂˆØŠ[ÜÝ\‹IÑ]K››ÝÊ
+_KIÓX]œ˜[™ÛJ
+KÔÝš[™ÊÍŠKœÛXÙJŠ_IÙ^X
+NÂˆKˆJKˆ[Z]ÎˆÈš[TÚ^™Nˆ
+ˆL
+ˆLKËÈP‚ˆš[Qš[\Žˆ
+Ü™\Kš[KØŠHOˆÂˆÛÛœÝÚÈH×š[XYÙWÊœYßœß™ßÚYŸÙXœ
+IË\Ý
+š[K›Z[Y]\JNÂˆØŠ[ÚÊNÂˆKŸJNÂ‚˜ÛÛœÝ[˜›Þ\[™ÈH™]ÈX\Ýš[™ËÈ\Ù\’Yˆ[X™\ŽÈ\]Y]ˆ[X™\ˆOŠ
+NÂ‚‹ËÈÛÛXÝY›Ü›H]XÚY[È
+X›XË[˜]][XØ]Y
+HH[XYÙ\ÈÜˆœËÛX[Ø\‚˜ÛÛœÝÛÛXÝ\ØYH][\ŠÂˆÝÜ˜YÙNˆ][\‹™\ÚÔÝÜ˜YÙJÂˆ\Ý[˜][ÛŽˆ
+Ü™\KÙš[KØŠHOˆØŠ[TÐQ×ÑTŠKˆš[[˜[YNˆ
+Ü™\Kš[KØŠHOˆÂˆÛÛœÝ˜]Ñ^H]™^˜[YJš[K›ÜšYÚ[˜[˜[YJKÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ^HÈ‹šœÈ‹‹šœYÈ‹‹œ™È‹‹™ÚYˆ‹‹ÙXœ‹‹œˆ—Kš[˜ÛY\Ê˜]Ñ^
+HÈ˜]Ñ^ˆ‹˜š[ˆŽÂˆØŠ[ÛÛXÝIÑ]K››ÝÊ
+_KIÓX]œ˜[™ÛJ
+KÔÝš[™ÊÍŠKœÛXÙJŠ_IÙ^X
+NÂˆKˆJKˆ[Z]ÎˆÈš[TÚ^™NˆL
+ˆL
+ˆLš[\ÎˆÈKˆš[Qš[\Žˆ
+Ü™\Kš[KØŠHOˆÂˆÛÛœÝÚÈH×š[XYÙWÊœYßœß™ßÚYŸÙXœ
+IË\Ý
+š[K›Z[Y]\JHš[K›Z[Y]\HOOH˜\XØ][Û‹ÜˆŽÂˆØŠ[ÚÊNÂˆKŸJNÂ‚‹ËÈ^[™^™\ÜË\Ù\ÜÚ[ÛˆÈ[˜ÛYHÝ\ˆÝ\ÝÛHšY[Â™XÛ\™H[Ù[H™^™\ÜË\Ù\ÜÚ[ÛˆˆÂˆ[\™˜XÙHÙ\ÜÚ[Û‘]HÂˆ\Ù\’YÎˆ[X™\ŽÂˆ›Û[Ý\’YÎˆ[X™\ŽÂˆ\ÐYZ[Îˆ›ÛÛX[ŽÂˆÛÛÙÛSÐ]]Ý]OÎˆÝš[™ÎÂˆÛÛÙÛSÐ]][šÕ\Ù\’YÎˆ[X™\ŽÂˆBŸB‚˜ÛÛœÝQRS—ÕTÑT“SQHH›ØÙ\ÜË™[‹QRS—ÕTÑT“SQHÏÈˆŽÂ˜ÛÛœÝQRS—ÔTÔÕÓÔ‘H›ØÙ\ÜË™[‹QRS—ÔTÔÕÓÔ‘ÏÈˆŽÂ˜ÛÛœÝQRS—ÕTÑT—ÑSPRSÈH
+›ØÙ\ÜË™[‹QRS—ÕTÑT—ÑSPRSÈš[ËXÚÙ\˜Ø\Ù^PÛXZ[˜ÛÛHŠBˆœÜ]
+‹ŠBˆ›X\
+˜[YHOˆ˜[YKš[J
+KÓÝÙ\Ø\ÙJ
+JBˆ™š[\Š›ÛÛX[ŠNÂ˜ÛÛœÝQRS—ÕTÑT“SQTÈH
+›ØÙ\ÜË™[‹QRS—ÕTÑT“SQTÈš[×ÝXÚÙ\˜Ø\Ù^KXÚÙ\—ÜX^ŠBˆœÜ]
+‹ŠBˆ›X\
+˜[YHOˆ˜[YKš[J
+Kœ™\XÙJ×ËˆŠKÓÝÙ\Ø\ÙJ
+JBˆ™š[\Š›ÛÛX[ŠNÂ˜ÛÛœÝÕÓ‘T—ÑTÔVWÓSQHH›ØÙ\ÜË™[‹“ÕÓ‘T—ÑTÔVWÓSQH•XÚÙ\—ÔXVŽÂ‚™[˜Ý[ÛˆX›XÑ]™[
+ˆ]ˆ[žKˆ[™[™ÐÛZ[RYÎˆÙ][X™\ˆH™]ÈÙ]
+
+Kˆ™[YUÙXœÚ]\ÏÎˆX\Ýš[™ËÝš[™Ïˆ[ŠHÂˆÛÛœÝÈYZ[“›Ý\ËÝX›Z]YžKÛZ[YYžK‹‹œØY™HHH[œšXÚ]™[›Ü“X\
+]
+NÂˆÛÛœÝ™[YUÙXœÚ]HBˆ
+]\È[žJK™[YUÙXœÚ]Bˆ™\ÛÛ™U™[YUÙXœÚ]J]™[YS˜[YK™[YUÙXœÚ]\ÊBˆ[Âˆ™]\›ˆÂˆ‹‹œØY™KˆÜÝ\’[XYÙU\›ˆ™\ÛÛ™Q]™[ÜÝ\•\›
+]šY]œÜÝ\’[XYÙU\›]™^SÙ•ÙYZÊKˆ\Ô[™[™ÐÛZ[Nˆ[™[™ÐÛZ[RYËš\Ê]šY
+Kˆ™[YUÙXœÚ]KˆNÂŸB‚™[˜Ý[Ûˆ™[YUÙXœÚ]R[™^
+
+HÂˆ™]\›ˆZ[™[YUÙXœÚ]R[™^
+ÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\Ê
+H\È[žJNÂŸB‚™[˜Ý[ÛˆX›XÕ\Ù\Š\Ù\Žˆ[žJHÂˆYˆ
+]\Ù\ŠH™]\›ˆ[ÂˆÛÛœÝÈ\ÜÝÛÜ™\Ú[XZ[Ý]\ËÛÛÙÛRY‹‹œØY™HHH\Ù\ŽÂˆ™]\›ˆØY™NÂŸB‚™[˜Ý[ÛˆYZ[•\Ù\”Ý[[X\žJ\Ù\Žˆ[žJHÂˆ™]\›ˆÂˆYˆ\Ù\‹šYˆ\Ù\›˜[YNˆ\Ù\‹\Ù\›˜[YKˆ[XZ[ˆ\Ù\‹™[XZ[ˆ\Ü^S˜[YNˆ\Ù\‹™\Ü^S˜[YKˆÝÕ\›ˆ\Ù\‹œÝÕ\›[ˆ]˜]\ÚÚXÙNˆ\Ù\‹˜]˜]\ÚÚXÙHÏÈKˆ]˜]\”š[™Îˆ\Ù\‹˜]˜]\”š[™È››Û™H‹ˆ›Û[Ý\”Ý]\Îˆ\Ù\‹œ›Û[Ý\”Ý]\È››Û™H‹ˆÝXYZ[ŽˆH]\Ù\‹œÝXYZ[‹ˆÛÛÙÛS[šÙYˆH]\Ù\‹™ÛÛÙÛRYˆÝ]\Îˆ\Ù\‹œÝ]\È˜XÝ]™H‹ˆÜ™X]Y]ˆ\Ù\‹˜Ü™X]Y]ˆ‹ˆ\ÓÝÛ™\Žˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠKˆÛÛ[][š]TÝ[™\™Õ™\œÚ[ÛŽˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™Õ™\œÚ[Ûˆ[ˆÛÛ[][š]TÝ[™\™ÐYÜ™YY]ˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™ÐYÜ™YY][ˆÛÛ[][š]TÝ[™\™ÑXÛ[™Y]ˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™ÑXÛ[™Y][ˆXØÛÝ[Ý]\Îˆ\Ù\‹œÝ]\È˜XÝ]™H‹ˆÝ\Ü[™™X\ÛÛÛÙNˆ\Ù\‹œÝ\Ü[™™X\ÛÛÛÙH[ˆÝ\Ü[™™X\ÛÛ“X™[ˆ\Ù\‹œÝ\Ü[™™X\ÛÛ“X™[[ˆÝ\Ü[™›ÝNˆ\Ù\‹œÝ\Ü[™›ÝH[ˆÝ\Ü[™[[ˆ\Ù\‹œÝ\Ü[™[[[ˆÝ\Ü[™Y]ˆ\Ù\‹œÝ\Ü[™Y][ˆÚYÝÐ˜[›™YˆH]\Ù\‹œÚYÝÐ˜[›™YˆÚYÝÐ˜[”™X\ÛÛÛÙNˆ\Ù\‹œÚYÝÐ˜[”™X\ÛÛÛÙH[ˆÚYÝÐ˜[”™X\ÛÛ“X™[ˆ\Ù\‹œÚYÝÐ˜[”™X\ÛÛ“X™[[ˆÚYÝÐ˜[•[[ˆ\Ù\‹œÚYÝÐ˜[•[[[ˆNÂŸB‚™[˜Ý[ÛˆÛÚÝ\\Ù\”›Ùš[JY[YšY\ŽˆÝš[™È[[™Yš[™Y
+HÂˆÛÛœÝ˜]ÈHÝš[™ÊY[YšY\ˆˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆYˆ
+\˜]ÊH™]\›ˆ[ÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+˜]ÊHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ˜]ÊNÂˆ™]\›ˆ\Ù\ˆÈYZ[•\Ù\”Ý[[X\žJ\Ù\ŠHˆ[ÂŸB‚™[˜Ý[Ûˆ™\ÛÛ™U\Ù\žU\Ù\›˜[YJ\Ù\›˜[YNˆÝš[™ÊHÂˆÛÛœÝ[˜[YHH\Ù\›˜[YKš[J
+Kœ™\XÙJ×ËˆŠNÂˆYˆ
+][˜[YJH™]\›ˆ[™Yš[™YÂˆ™]\›ˆÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ[˜[YJBˆÜ[]Kœ™\\™JÑSPÕ
+ˆ”“ÓH\Ù\œÈÒT‘HÕÑTŠ\Ù\›˜[YJHHÕÑTŠÊX
+K™Ù]
+[˜[YJH\È™]\›•\O\[ÙˆÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YOŽÂŸB‚™[˜Ý[ÛˆÝX›Z\ÜÚ[Û“X]ÚÛÛ
+
+Nˆ]™[×HÂˆ™]\›ˆÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJNÂŸB‚™[˜Ý[Ûˆ[œšXÚÝX›Z\ÜÚ[Û“X]Ú\ÊÝXŽˆÈ\NˆÝš[™ÎÈ]™[YÎˆ[X™\ˆ[H	ˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛŠHÂˆYˆ
+ÝX‹\HOOH“‘U×ÑU‘S•ˆ	‰ˆÝX‹\HOOH”ÕQÑÑTÕŠHÂˆ™]\›ˆ×NÂˆBˆÛÛœÝÛÛHÝX›Z\ÜÚ[Û“X]ÚÛÛ
+
+NÂˆÛÛœÝX]Ú\ÈHš[™ÝX›Z\ÜÚ[Û“X]Ú\ÊÝXˆ\È[žKÛÛÈ^ÛYQ]™[YˆÝX‹™]™[YJNÂˆ™]\›ˆX]Ú\Ë›X\
+X]ÚOˆ
+Âˆ‹‹›X]Úˆ]™[ˆÛÛ™š[™
+]Oˆ]šYOOHX]Ú™]™[Y
+HÏÈ[ˆJJNÂŸB‚™[˜Ý[Ûˆ[œšXÚÝX›Z\ÜÚ[Û‘›ÜYZ[ŠÝXŽˆ[žJHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+ÝX‹œÝX›Z]\‘[XZ[
+NÂˆ™]\›ˆÂˆ‹‹œÝX‹ˆÝX›Z]\”›Ùš[Nˆ\Ù\ˆÈYZ[•\Ù\”Ý[[X\žJ\Ù\ŠHˆ[ˆÝ[X[X]Ú\Îˆ[œšXÚÝX›Z\ÜÚ[Û“X]Ú\ÊÝXŠKˆNÂŸB‚™[˜Ý[Ûˆ\™XÝÜžSX]ÚÛÛ
+
+HÂˆ™]\›ˆÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\Ê
+K™š[\ŠˆOˆ‹˜XÝ]™JNÂŸB‚™[˜Ý[Ûˆ[œšXÚ\™XÝÜžSX]Ú\Ê\Ý[™ÎˆÂˆ˜[YNˆÝš[™ÎÂˆ\OÎˆÝš[™È[ÂˆY™\ÜÏÎˆÝš[™È[Âˆ™ZYÚ›ÜšÛÙÎˆÝš[™È[ÂŸJHÂˆÛÛœÝÛÛH\™XÝÜžSX]ÚÛÛ
+
+NÂˆÛÛœÝX]Ú\ÈHš[™\™XÝÜžSX]Ú\Ê\Ý[™ËÛÛ
+NÂˆ™]\›ˆX]Ú\Ë›X\
+X]ÚOˆ
+Âˆ‹‹›X]Úˆ\Ú[™\ÜÎˆÛÛ™š[™
+š^ˆOˆš^‹šYOOHX]Ú˜\Ú[™\ÜÒY
+HÏÈ[ˆJJNÂŸB‚™[˜Ý[Ûˆ[œšXÚ[Ù\˜][Û‘›ÜYZ[Š™\Nˆ[žJHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+™\Kœ™\]Y\Ý\‘[XZ[
+NÂˆ™]\›ˆÂˆ‹‹˜]XÚ\™XÝÜžS\Ý[™Ê™\JKˆ™\]Y\Ý\”›Ùš[Nˆ\Ù\ˆÈYZ[•\Ù\”Ý[[X\žJ\Ù\ŠHˆ[ˆNÂŸB‚‹ÊŠ‚ˆ
+ˆ˜[Y]H]™[]\È›ÜˆÜ™X]KÙY]‚ˆ
+ˆY\™Ù\È]ÚÚ]^\Ý[™ÈÛÈH\X[]TÝ\[Û›H\]HÝ[]ÈHšYHØ\‚ˆ
+‹Â™[˜Ý[Ûˆ˜[Y]Q]™[]\Êˆ]TÝ\ÎˆÝš[™È[ˆ]Q[™ÎˆÝš[™È[ˆ^\Ý[™ÏÎˆÈ]TÝ\ÎˆÝš[™È[È]Q[™ÎˆÝš[™È[KŠNˆÝš[™È[ÂˆÛÛœÝÝ\H
+]TÝ\ÏÈ^\Ý[™ÏË™]TÝ\ÏÈ[™Yš[™Y
+H[™Yš[™YÂˆÛÛœÝ[™H
+]Q[™ÏÈ^\Ý[™ÏË™]Q[™ÏÈ[™Yš[™Y
+H[™Yš[™YÂ‚ˆËÈ[[[NHœHXÚYšXË›ØÚÈÝ\ÈY\ˆšYHÝ[™^H
+]™[ˆYˆÛ›H]TÝ\\È]ÚY
+K‚ˆYˆ
+\ÔÜÝ]™[ÙYZÓ\Ý[™ÐØ\XÝ]™J
+H	‰ˆÝ\
+HÂˆÛÛœÝÝ\^HHXÚYšXÐØ[[™\‘]JÝ\
+NÂˆYˆ
+Ý\^H	‰ˆÝ\^HˆU‘S•ÕÑQR×ÑS‘ÑUJHÂˆ™]\›ˆ”ÜÝ8 $ÔšYHÙYZÈ]™[ÈÜ[ˆÝ[™^H[HNH]œHXÚYšXËˆ[[[‹\ÝšYÚÈ›ÝYÚ[HNHÛ›KˆŽÂˆBˆB‚ˆYˆ
+Ý\	‰ˆ[™
+HÂˆÛÛœÝÝ\\ÈH™]È]JÝ\
+K™Ù][YJ
+NÂˆÛÛœÝ[™\ÈH™]È]J[™
+K™Ù][YJ
+NÂˆYˆ
+[X™\‹š\Ñš[š]JÝ\\ÊH	‰ˆ[X™\‹š\Ñš[š]J[™\ÊH	‰ˆ[™\ÈHÝ\\ÊHÂˆ™]\›ˆ‘[™]H]\Ý™HY\ˆÝ\]HŽÂˆBˆBˆ™]\›ˆ[ÂŸB‚‹ÊŠˆX›XÈ›Ø\™ˆYH]™[ÈÚÜÙHÝ\^H\ÈY\ˆšYHÙYZÈÚ[HHØ\\ÈXÝ]™Kˆ
+‹Â™[˜Ý[Ûˆ\ÔX›XÑ]™[š\ÚX›U[™\”šYPØ\
+]ˆÈ]TÝ\ÎˆÝš[™È[JNˆ›ÛÛX[ˆÂˆYˆ
+Z\ÔÜÝ]™[ÙYZÓ\Ý[™ÐØ\XÝ]™J
+JH™]\›ˆYNÂˆÛÛœÝÝ\^HHXÚYšXÐØ[[™\‘]J]™]TÝ\ˆŠNÂˆYˆ
+Ý\^H	‰ˆÝ\^HˆU‘S•ÕÑQR×ÑS‘ÑUJH™]\›ˆ˜[ÙNÂˆ™]\›ˆYNÂŸB‚‹ÊŠ‚ˆ
+ˆ]TÝ\\È]]Üš]]]™H›Üˆ^SÙ•ÙYZÈH\š]™H]Ûˆ]™\žHÜš]HÛÈBˆ
+ˆÝ[HÜˆZ\ÝZÙ[ˆÛY[˜[YHØ[ˆ™]™\ˆ\ØYÜ™YHÚ]HXÝX[]K‚ˆ
+‹Â™[˜Ý[ÛˆÞ[˜Ñ^SÙ•ÙYZÊ]Úˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛ‹^\Ý[™ÏÎˆÈ]TÝ\ÎˆÝš[™È[JHÂˆÛÛœÝ]TÝ\H
+]Ú™]TÝ\\ÈÝš[™È[™Yš[™Y
+HÏÈ^\Ý[™ÏË™]TÝ\ÏÈ[™Yš[™YÂˆYˆ
+Y]TÝ\
+H™]\›ŽÂˆÛÛœÝ\š]™YHšYQ^Qœ›ÛQ]J]TÝ\
+NÂˆYˆ
+Y\š]™Y
+H™]\›ŽÂˆYˆ
+]Ú™^SÙ•ÙYZÈOOH[™Yš[™Y	‰ˆ]Ú™^SÙ•ÙYZÈOOH\š]™Y
+HÂˆÛÛœÛÛKØ\›ŠˆÙ]™[×H^SÙ•ÙYZÈ‰ÔÝš[™Ê]Ú™^SÙ•ÙYZÊ_HˆÛÜœ™XÝYÈ‰Ù\š]™YHˆœ›ÛH]TÝ\	Ù]TÝ\Xˆ
+NÂˆBˆYˆ
+]Ú™^SÙ•ÙYZÈOOH[™Yš[™Y]Ú™]TÝ\OOH[™Yš[™Y
+HÂˆ]Ú™^SÙ•ÙYZÈH\š]™YÂˆBŸB‚™[˜Ý[Ûˆ[œšXÚ]™[›ÜYZ[Š]ˆ[žJHÂˆ™]\›ˆÂˆ‹‹™]ˆÝX›Z]YžT›Ùš[NˆÛÚÝ\\Ù\”›Ùš[J]œÝX›Z]YžJKˆÛZ[YYžT›Ùš[NˆÛÚÝ\\Ù\”›Ùš[J]˜ÛZ[YYžJKˆNÂŸB‚‹ÊŠˆYZ[ˆØ][ÙÈ›ÝÜÎˆ^[™YU‘H\Ý[™ÜÈ
+X]Ú\ÈX›XÈØ\KÙ]™[ÊH
+È˜]ÈQSˆ™XÛÜ™Ëˆ
+‹Â™[˜Ý[ÛˆÙ]YZ[‘]™[Ø][ÙÊ
+HÂˆÛÛœÝ[HÝÜ˜YÙK™Ù]]™[ÊßJNÂˆÛÛœÝY[ˆH[™š[\Š]Oˆ]œÝ]\ÈOOH’QSˆŠNÂˆÛÛœÝ]™HH[™š[\Š]Oˆ]œÝ]\ÈOOH“U‘HŠNÂˆ™]\›ˆË‹‹™^[™][Q^Q]™[Ê]™JK‹‹šY[—NÂŸB‚™[˜Ý[Ûˆ\ÓXZ[YZ[•\Ù\Š\Ù\Žˆ[žJHÂˆYˆ
+]\Ù\ŠH™]\›ˆ˜[ÙNÂˆÛÛœÝ[XZ[HÝš[™Ê\Ù\‹™[XZ[ˆŠKš[J
+KÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê\Ù\‹\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠKÓÝÙ\Ø\ÙJ
+NÂˆ™]\›ˆQRS—ÕTÑT—ÑSPRSËš[˜ÛY\Ê[XZ[
+BˆQRS—ÕTÑT“SQTËš[˜ÛY\Ê\Ù\›˜[YJBˆÝÜ˜YÙKš\ÔÚ]PYZ[‘Ü˜[
+\Ù\‹šY
+NÂŸB‚‹ÊŠˆ]™HYZ[ˆÚXÚÈH™]™\ˆ\ÝÝXÚÞHÙ\ÜÚ[Û‹š\ÐYZ[ˆ[Û™H
+™]›ÚÙH]\ÝÝXÚÊKˆ
+‹Â™[˜Ý[Ûˆ\Ù\’\ÐYZ[“›ÝÊ\Ù\Žˆ[žJNˆ›ÛÛX[ˆÂˆ™]\›ˆHJ\Ù\ˆ	‰ˆ
+ˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠBˆ\Ù\‹œÝXYZ[‚ˆÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠBˆ
+JNÂŸB‚™[˜Ý[ÛˆX\šÐYZ[”Ù\ÜÚ[Û‘›Ü•\Ù\Š™\Nˆ[žK\Ù\Žˆ[žJHÂˆYˆ
+\Ù\’\ÐYZ[“›ÝÊ\Ù\ŠJHÂˆ™\KœÙ\ÜÚ[Û‹š\ÐYZ[ˆHYNÂˆ™]\›ˆYNÂˆBˆYˆ
+™\KœÙ\ÜÚ[ÛËš\ÐYZ[ŠHÂˆ[]H™\KœÙ\ÜÚ[Û‹š\ÐYZ[ŽÂˆBˆ™]\›ˆ˜[ÙNÂŸB‚™[˜Ý[ÛˆÞ[˜ÓÝÛ™\‘\Ü^S˜[YJ\Ù\Žˆ[žJHÂˆËÈÛ›HXÚÙ\ˆ
+š[X\žHÝÛ™\ŠHH›Ý[‹[\ÝYÛËXYZ[œÈÜˆÜ˜[YYZ[œÈZÙH^YÚ\›‚ˆYˆ
+\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠH\Ù\‹™\Ü^S˜[YHOOHÕÓ‘T—ÑTÔVWÓSQJH™]\›ˆ\Ù\ŽÂˆÝÜ˜YÙK\]U\Ù\Š\Ù\‹šYÈ\Ü^S˜[YNˆÕÓ‘T—ÑTÔVWÓSQHJNÂˆ™]\›ˆÈ‹‹\Ù\‹\Ü^S˜[YNˆÕÓ‘T—ÑTÔVWÓSQHNÂŸB‚™[˜Ý[ÛˆØY™RœÛÛ•˜[YJ˜]Îˆ[šÛ›ÝÛ‹˜[˜XÚÎˆ[šÛ›ÝÛŠHÂˆYˆ
+\[Ùˆ˜]ÈOOHœÝš[™Èˆ\˜]ÊH™]\›ˆ˜[˜XÚÎÂˆžHÈ™]\›ˆ”ÓÓ‹œ\œÙJ˜]ÊNÈHØ]ÚÈ™]\›ˆ˜[˜XÚÎÈBŸB‚™[˜Ý[Ûˆ]]\Ù\”™\ÜÛœÙJ™\Nˆ[žK\Ù\Žˆ[žJHÂˆÛÛœÝ\ÐYZ[ˆHX\šÐYZ[”Ù\ÜÚ[Û‘›Ü•\Ù\Š™\K\Ù\ŠNÂˆ™]\›ˆÂˆYˆ\Ù\‹šY\Ù\›˜[YNˆ\Ù\‹\Ù\›˜[YK[XZ[ˆ\Ù\‹™[XZ[ˆ\Ü^S˜[YNˆ\Ù\‹™\Ü^S˜[YK]˜]\ÚÚXÙNˆ\Ù\‹˜]˜]\ÚÚXÙKˆ]˜]\”š[™Îˆ\Ù\‹˜]˜]\”š[™È››Û™H‹]˜]\Ü›Üˆ\Ù\‹˜]˜]\Ü›Ü[ˆš[Îˆ\Ù\‹˜š[ËÝÕ\›ˆ\Ù\‹œÝÕ\›ˆÛÝ™\’[XYÙU\›ˆ\Ù\‹˜ÛÝ™\’[XYÙU\›[ÛÝ™\Ü›Üˆ\Ù\‹˜ÛÝ™\Ü›Ü[ˆÛÛÙÛS[šÙYˆH]\Ù\‹™ÛÛÙÛRYˆ›Û[Ý\”Ý]\Îˆ\Ù\‹œ›Û[Ý\”Ý]\È››Û™H‹ˆ›Û›Ý[œÎˆ\Ù\‹œ›Û›Ý[œÈ[ˆØØ][ÛŽˆ\Ù\‹›ØØ][Ûˆ[ˆÛØÚX[[šÜÎˆØY™RœÛÛ•˜[YJ\Ù\‹œÛØÚX[[šÜËßJKˆ›Ùš[Q[X™YÎˆØY™RœÛÛ•˜[YJ\Ù\‹œ›Ùš[Q[X™YË×JKˆ›Ùš[TÝÜÎˆØY™RœÛÛ•˜[YJ\Ù\‹œ›Ùš[TÝÜË×JKˆY[X™\”Ú[˜ÙNˆ\Ù\‹˜Ü™X]Y]ˆ‹ˆÜ™X]Y]ˆ\Ù\‹˜Ü™X]Y]ˆ‹ˆ\ÐYZ[‹ˆ\ÔÝ\\YZ[Žˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠHÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠKˆËÈš[X\žHÝÛ™\ˆÛ›HHÝÛ™\ˆ\ÚÈÝ^\Èš]˜]HÈXÚÙ\‹‚ˆ\Ôš[X\žSÝÛ™\ŽˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠKˆËÈÝÛ™\ˆ
+ÈY\œÈ
+œ›ÚÙZ˜[\ÊNˆ[Ú]HYZ[ˆÛÛÈ^Ù\ÝÛ™\ˆ\ÚË‚ˆØ[“X[˜YÙUX[NˆÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠKˆØ[•šY]Õ\Ù\œÎˆÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠKˆØ[”\ÚˆÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠH\ÓXZ[YZ[•\Ù\Š\Ù\ŠKˆØ[“X[˜YÙPØ][ÙÎˆÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠH\ÓXZ[YZ[•\Ù\Š\Ù\ŠKˆÝXYZ[ŽˆH]\Ù\‹œÝXYZ[‹ˆ\Ù\›˜[YPÚ[™ÙY]ˆ\Ù\‹\Ù\›˜[YPÚ[™ÙY][ˆÛÛ[][š]TÝ[™\™Õ™\œÚ[ÛŽˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™Õ™\œÚ[Ûˆ[ˆÛÛ[][š]TÝ[™\™ÐYÜ™YY]ˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™ÐYÜ™YY][ˆÛÛ[][š]TÝ[™\™ÑXÛ[™Y]ˆ\Ù\‹˜ÛÛ[][š]TÝ[™\™ÑXÛ[™Y][ˆXØÛÝ[Ý]\Îˆ\Ù\‹œÝ]\È˜XÝ]™H‹ˆÝ\Ü[™™X\ÛÛÛÙNˆ\Ù\‹œÝ\Ü[™™X\ÛÛÛÙH[ˆÝ\Ü[™™X\ÛÛ“X™[ˆ\Ù\‹œÝ\Ü[™™X\ÛÛ“X™[[ˆÝ\Ü[™›ÝNˆ\Ù\‹œÝ\Ü[™›ÝH[ˆÝ\Ü[™[[ˆ\Ù\‹œÝ\Ü[™[[[ˆÝ\Ü[™Y]ˆ\Ù\‹œÝ\Ü[™Y][ˆNÂŸB‚‹ËÈ8¥ 8¥ 8¥ Y[X™\ˆ›Ùš[HšY[˜[Y][Ûˆ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˜ÛÛœÝÓÐÒPSÓS’×ÒÑVTÈHÂˆš[œÝYÜ˜[H‹ZÝÚÈ‹œÛÝ[™ÛÝY‹œÜÝYžH‹˜›Y\ÚÞH‹ž‹ˆ™˜XÙX›ÛÚÈ‹ÙXœÚ]H‹›[šÝ™YH‹™[›[È‹›Û›Y˜[œÈ‹™™]Y™H‹˜›ÛÚÚ[™Ñ[XZ[‹—H\ÈÛÛœÝÂ‚™[˜Ý[ÛˆØ[š]^™TÛØÚX[[šÜÊ[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+\[Ùˆ[œ]OOH›Øš™XÝˆ\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝÛX[Žˆ™XÛÜ™Ýš[™ËÝš[™ÏˆHßNÂˆ›Üˆ
+ÛÛœÝÙ^HÙˆÓÐÒPSÓS’×ÒÑVTÊHÂˆÛÛœÝ˜[YHH
+[œ]\È™XÛÜ™Ýš[™Ë[šÛ›ÝÛŠVÚÙ^WNÂˆYˆ
+\[Ùˆ˜[YHOOHœÝš[™ÈŠHÛÛ[YNÂˆÛÛœÝš[[YYH˜[YKœ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJLŒ
+NÂˆYˆ
+š[[YY
+HÛX[–ÚÙ^WHHš[[YYÂˆBˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÛX[ŠNÂŸB‚˜ÛÛœÝÓÕS‘ÓÕQÑSP‘QÒÔÕÈH™]ÈÙ]
+ÈËœÛÝ[™ÛÝY˜ÛÛH‹œÛÝ[™ÛÝY˜ÛÛH‹˜\KœÛÝ[™ÛÝY˜ÛÛH—JNÂ‚™[˜Ý[Ûˆ\Õ˜[YÛÝ[™ÛÝY[X™YÜ˜ÊÜ˜Îˆ[šÛ›ÝÛŠNˆÜ˜È\ÈÝš[™ÈÂˆYˆ
+\[ÙˆÜ˜ÈOOHœÝš[™ÈŠH™]\›ˆ˜[ÙNÂˆžHÂˆÛÛœÝ\›H™]ÈT“
+Ü˜ÊNÂˆ™]\›ˆ\›œ›ÝØÛÛOOHšÎˆˆ	‰ˆÓÕS‘ÓÕQÑSP‘QÒÔÕËš\Ê\›šÜÝ˜[YJNÂˆHØ]ÚÂˆ™]\›ˆ˜[ÙNÂˆBŸB‚™[˜Ý[ÛˆØ[š]^™T›Ùš[Q[X™YÊ[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+P\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝÛX[ˆH[œ]ˆ™š[\Š
+[žNˆ[žJHOˆ[žH	‰ˆ\[Ùˆ[žHOOH›Øš™XÝˆ	‰ˆ\Õ˜[YÛÝ[™ÛÝY[X™YÜ˜Ê[žKœÜ˜ÊJBˆœÛXÙJLŠBˆ›X\
+
+[žNˆ[žJHOˆ
+ÂˆYˆÝš[™Ê[žKšY[X™YÉÑ]K››ÝÊ
+_WÉÓX]œ˜[™ÛJ
+KÔÝš[™ÊÍŠKœÛXÙJ‹
+_X
+KœÛXÙJ
+KˆÜ˜ÎˆÝš[™Ê[žKœÜ˜ÊKˆ]NˆÝš[™Ê[žK]HˆŠKœ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJ
+KˆJJNÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÛX[ŠNÂŸB‚™[˜Ý[ÛˆØ[š]^™T›Ùš[TÝÜÊ[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+P\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝÛX[ˆH[œ]ˆ™š[\Š
+[žNˆ[žJHOˆÂˆÛÛœÝ\›H[žH	‰ˆ\[Ùˆ[žHOOH›Øš™XÝˆÈ[žK\›ˆ[Âˆ™]\›ˆ\[Ùˆ\›OOHœÝš[™Èˆ	‰ˆ
+\›œÝ\ÕÚ]
+‹Ý\ØYËÈŠH\›œÝ\ÕÚ]
+šÎ‹ËÈŠJNÂˆJBˆœÛXÙJŠBˆ›X\
+
+[žNˆ[žJHOˆ
+Âˆ\›ˆÝš[™Ê[žK\›
+KˆØ\[ÛŽˆÝš[™Ê[žK˜Ø\[ÛˆˆŠKœ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJŒ
+KˆJJNÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÛX[ŠNÂŸB‚™[˜Ý[ÛˆØ[š]^™PÛÝ™\’[XYÙU\›
+[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[˜[ÙHÂˆYˆ
+[œ]OOH[[œ]OOHˆŠH™]\›ˆ[ÂˆYˆ
+\[Ùˆ[œ]OOHœÝš[™ÈŠH™]\›ˆ˜[ÙNÂˆÛÛœÝš[[YYH[œ]š[J
+KœÛXÙJÌ
+NÂˆYˆ
+]š[[YY
+H™]\›ˆ[ÂˆYˆ
+]š[[YYœÝ\ÕÚ]
+‹Ý\ØYËÈŠH	‰ˆ]š[[YYœÝ\ÕÚ]
+šÎ‹ËÈŠJH™]\›ˆ˜[ÙNÂˆ™]\›ˆš[[YYÂŸB‚™[˜Ý[ÛˆØ[š]^™PÛÝ™\Ü›Ü
+[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[[œ]OOHˆŠH™]\›ˆ[ÂˆYˆ
+\[Ùˆ[œ]OOHœÝš[™ÈŠH™]\›ˆ[ÂˆžHÂˆÛÛœÝ\œÙYH”ÓÓ‹œ\œÙJ[œ]
+NÂˆÛÛœÝÙ™œÙ]HX]›X^
+X]›Z[ŠK[X™\Š\œÙY›Ù™œÙ]ÏÈJJJNÂˆÛÛœÝÙ™œÙ]HHX]›X^
+X]›Z[ŠK[X™\Š\œÙY›Ù™œÙ]HÏÈJJJNÂˆÛÛœÝØØ[HHX]›X^
+KX]›Z[ŠË[X™\Š\œÙYœØØ[HÏÈJHJJNÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÈÙ™œÙ]Ù™œÙ]KØØ[HJNÂˆHØ]ÚÂˆ™]\›ˆ[ÂˆBŸB‚™[˜Ý[ÛˆØ[š]^™U[[Ê[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+P\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝÛX[ˆH[œ]ˆ™š[\Š
+[žJNˆ[žH\ÈÝš[™ÈOˆ\[Ùˆ[žHOOHœÝš[™Èˆ	‰ˆ[žKš[J
+K›[™Ýˆ
+BˆœÛXÙJLŠBˆ›X\
+[žHOˆ[žKœ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJ
+JNÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÛX[ŠNÂŸB‚™[˜Ý[ÛˆØ[š]^™PY™š[X]Y™[YRYÊ[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+P\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝÛX[ˆH[œ]ˆ›X\
+[žHOˆ[X™\Š[žJJBˆ™š[\ŠYOˆ[X™\‹š\Ò[YÙ\ŠY
+H	‰ˆYˆ	‰ˆH\ÝÜ˜YÙK™Ù]\Ú[™\ÜÊY
+JBˆœÛXÙJŠNÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÛX[ŠNÂŸB‚™[˜Ý[ÛˆØ[š]^™SX\œ]YYJ[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+\[Ùˆ[œ]OOH›Øš™XÝˆ\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝ˜]ÈH[œ]\È™XÛÜ™Ýš[™Ë[šÛ›ÝÛŽÂˆÛÛœÝ][\ÈH\œ˜^Kš\Ð\œ˜^J˜]Ëš][\ÊBˆÈ˜]Ëš][\Ë™š[\Š
+JNˆH\ÈÝš[™ÈOˆ\[ÙˆHOOHœÝš[™Èˆ	‰ˆKš[J
+K›[™Ýˆ
+BˆœÛXÙJLŠK›X\
+HOˆKœ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJŒ
+JBˆˆ×NÂˆÛÛœÝÜYYH[X™\Š˜]ËœÜYY
+NÂˆÛÛœÝÛÛÜˆH\[Ùˆ˜]Ë˜ÛÛÜˆOOHœÝš[™ÈˆÈ˜]Ë˜ÛÛÜ‹œ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJŒ
+Hˆœ˜Z[˜›ÝÈŽÂˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÂˆ][\ËˆÜYYˆ[X™\‹š\Ñš[š]JÜYY
+HÈX]›Z[ŠŒX]›X^
+L‹ÜYY
+JHˆÌˆÛÛÜŽˆÛÛÜˆœ˜Z[˜›ÝÈ‹ˆJNÂŸB‚™[˜Ý[ÛˆØ[š]^™T\
+[œ]ˆ[šÛ›ÝÛŠNˆÝš[™È[ÂˆYˆ
+[œ]OOH[
+H™]\›ˆ[ÂˆYˆ
+\[Ùˆ[œ]OOH›Øš™XÝˆ\œ˜^Kš\Ð\œ˜^J[œ]
+JH™]\›ˆ[ÂˆÛÛœÝ˜]ÈH[œ]\È™XÛÜ™Ýš[™Ë[šÛ›ÝÛŽÂˆÛÛœÝšY[H
+Žˆ[šÛ›ÝÛŠHOˆ
+\[ÙˆˆOOHœÝš[™ÈˆÈ‹œ™\XÙJÖÏ—KÙËˆŠKš[J
+KœÛXÙJŒ
+HˆˆŠNÂˆÛÛœÝ˜[YHHšY[
+˜]Ë›˜[YJNÂˆYˆ
+[˜[YJH™]\›ˆ[Âˆ™]\›ˆ”ÓÓ‹œÝš[™ÚYžJÈ˜[YKÛÙˆšY[
+˜]ËšÛÙ
+K›ÛNˆšY[
+˜]Ëœ›ÛJKÛÚÚ[™Ñ›ÜŽˆšY[
+˜]Ë›ÛÚÚ[™Ñ›ÜŠHJNÂŸB‚‹ËÈ8¥ 8¥ 8¥ ÛÛ[[Ù\˜][ÛˆØ]H8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ‹ËÈ[œÈ\Ù\‹X]]Ü™Y^›ÝYÚÚ\™YØÛÛ[[Ù\˜][Û‹‚‹ËÈ“ÐÒÈ8¡¤ˆÙ[™ÈHœšY[™H[™™]\›œÈYH
+Ø[\ˆ]\ÝÝÜ
+K‚‹ËÈ‘U’QUÈ8¡¤ˆÛÛ[\ÈXØÙ\Y][ˆ[\[™È[ˆHÚ]HÝÛ™\‰ÜÈ[˜›Þ‚‹ËÈÙ^X[ÈÚ[šÈÈÙ^]ÛÜšÈÛÛ[\È[ÝÛ\ÝY[œÚYHHÚ\™Y[Ù[H[™‹ËÈ™]™\ˆš\È\ÙHØ]\ÈH\ÈÛ›HØ]Ú\ÈHÝ\ÙK\[H^Û\Ú[ÛœÂ‹ËÈ
+ØØ]›ÛÙÙÛÜ™KÙX\ÛœËX\ÙK[YØ[ÛÛ[Ù™‹\]›Ü›H[šÜÊK‚™[˜Ý[Ûˆ[Ù\˜][Û‘Ø]Jˆ™\Îˆ[žKˆ›Ø\™˜[YNˆÝš[™ËˆšY[Îˆ™XÛÜ™Ýš[™ËÝš[™È[[™Yš[™Y‹ŠNˆ›ÛÛX[ˆÂˆÛÛœÝ™\Ý[H[Ù\˜]QšY[ÊšY[ÊNÂˆYˆ
+™\Ý[™\™XÝOOH“ÐÒÈŠHÂˆÛÛœÝØ]YÛÜžHH™\Ý[œ™X\ÛÛœÖÌOË˜Ø]YÛÜžHP•TÑHŽÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ[Ù\˜][Û“Y\ÜØYÙJØ]YÛÜžJK[Ù\˜][ÛŽˆ™\Ý[œ™X\ÛÛœÈJNÂˆ™]\›ˆYNÂˆBˆYˆ
+™\Ý[™\™XÝOOH”‘U’QUÈŠHÂˆÛÛœÝÛš\]HØš™XÝ˜[Y\ÊšY[ÊBˆ™š[\Š
+ŠNˆˆ\ÈÝš[™ÈOˆ\[ÙˆˆOOHœÝš[™Èˆ	‰ˆH]‹š[J
+JBˆš›Ú[Šˆ0­ÈŠBˆœÛXÙJŒ
+NÂˆÛÛœÝ™X\ÛÛ•^H™\Ý[œ™X\ÛÛœÂˆ›X\
+ˆOˆ	Ü‹˜Ø]YÛÜž_IÜ‹™šY[È
+	Ü‹™šY[JXˆˆŸNˆ‰Ü‹›X]ÚH˜
+Bˆš›Ú[ŠŽÈŠNÂˆžHÂˆÝÜ˜YÙK››ÝYžSÝÛ™\“[Ù\˜][ÛŠˆ[Ù\˜][Ûˆ™]šY]Îˆ	Ø›Ø\™˜[Y_Xˆ›Ø\™ˆ	Ø›Ø\™˜[Y_W•™\™XÝˆ‘U’QUÈ
+ÛÛ[Ø\ÈXØÙ\Y[™\È]™JW”™X\ÛÛœÎˆ	Ü™X\ÛÛ•^W—”Ûš\]—‰ÜÛš\]Xˆ
+NÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–Û[Ù\˜][Û—H˜Z[YÈÙ[™ÝÛ™\ˆ™]šY]È[\ˆ‹\œŠNÂˆBˆBˆ™]\›ˆ˜[ÙNÂŸB‚™[˜Ý[ÛˆX›XÑÚY[™ÔÜÝ
+ÜÝˆ[žKšY]Ù\•\Ù\’YÎˆ[X™\ŠHÂˆÛÛœÝ\Ù\’YH[X™\ŠÜÝ\Ù\’YÏÈÜÝ\Ù\—ÚY
+NÂˆÛÛœÝÙ[XÝY[\™\ÝYH[X™\ŠÜÝœÙ[XÝY[\™\ÝYÏÈÜÝœÙ[XÝYÚ[\™\ÝÚYÏÈ
+H[ÂˆÛÛœÝ\ÔÜÝ\ˆHH]šY]Ù\•\Ù\’Y	‰ˆ\Ù\’YOOHšY]Ù\•\Ù\’YÂˆÛÛœÝ[ØY™R[\™\ÝÈH\œ˜^Kš\Ð\œ˜^JÜÝš[\™\ÝÊHÈÜÝš[\™\ÝË›X\
+
+[\™\Ýˆ[žJHOˆ
+ÂˆYˆ[\™\ÝšYˆ\Ù\’Yˆ[\™\Ý\Ù\’YÏÈ[\™\Ý\Ù\—ÚYˆ›ÝNˆ[\™\Ý››ÝKˆÝ]\Îˆ[\™\ÝœÝ]\Ëˆ\Ù\›˜[YNˆ[\™\Ý\Ù\›˜[YKˆ\Ü^S˜[YNˆ[\™\Ý™\Ü^S˜[YKˆÝÕ\›ˆ[\™\ÝœÝÕ\›ˆ]˜]\ÚÚXÙNˆ[\™\Ý˜]˜]\ÚÚXÙKˆ]˜]\”š[™Îˆ[\™\Ý˜]˜]\”š[™È››Û™H‹ˆ\ÓZ[™NˆšY]Ù\•\Ù\’YÈ[X™\Š[\™\Ý\Ù\’YÏÈ[\™\Ý\Ù\—ÚY
+HOOHšY]Ù\•\Ù\’Yˆ˜[ÙKˆJJHˆ×NÂˆËÈ™\ÜÛœÙH›Ý\È[™Y[]Y\È\™Hš]˜]HX\šÙ]XÙH[™Ù™ˆ]KˆBˆËÈÜÝ\ˆØ[ˆ™]šY]ÈH™\ÜÛœÙH\ÝÈ]™\ž[Û™H[ÙHØ[ˆÛ›HÙYHZ\ˆÝÛ‹‚ˆÛÛœÝØY™R[\™\ÝÈH\ÔÜÝ\‚ˆÈ[ØY™R[\™\ÝÂˆˆ[ØY™R[\™\ÝË™š[\Š
+[\™\Ýˆ[žJHOˆ[\™\Ýš\ÓZ[™JNÂˆÛÛœÝšY]Ù\’[\™\ÝH[ØY™R[\™\ÝË™š[™
+
+[\™\Ýˆ[žJHOˆ[\™\Ýš\ÓZ[™JNÂˆ™]\›ˆÂˆYˆÜÝšYˆ\Ù\’YˆÜÝ\NˆÜÝœÜÝ\HÏÈÜÝœÜÝÝ\Kˆ]NˆÜÝ]Kˆ\ØÜš\[ÛŽˆÜÝ™\ØÜš\[Û‹ˆØ]YÛÜžNˆÜÝ˜Ø]YÛÜžKˆ™ZYÚ›ÜšÛÙˆÜÝ›™ZYÚ›ÜšÛÙˆXÚÝ\™Y™\™[˜ÙNˆÜÝœXÚÝ\™Y™\™[˜ÙHÏÈÜÝœXÚÝ\Ü™Y™\™[˜ÙKˆÝÕ\›ÎˆÜÝœÝÕ\›È×KˆÝ]\ÎˆÜÝœÝ]\ËˆÙ[XÝY[\™\ÝYˆ\ÔÜÝ\ˆÈÙ[XÝY[\™\ÝYˆ[ˆ™[™]ÐÛÝ[ˆÜÝœ™[™]ÐÛÝ[ÏÈÜÝœ™[™]×ØÛÝ[ÏÈˆ^\™\Ð]ˆÜÝ™^\™\Ð]ÏÈÜÝ™^\™\×Ø]ˆ™\ÜÛÝ[ˆÜÝœ™\ÜÛÝ[ÏÈÜÝœ™\ÜØÛÝ[ÏÈˆÜ™X]Y]ˆÜÝ˜Ü™X]Y]ÏÈÜÝ˜Ü™X]YØ]ˆ\Ù\›˜[YNˆÜÝ\Ù\›˜[YKˆ\Ü^S˜[YNˆÜÝ™\Ü^S˜[YKˆÜÝ\”ÝÕ\›ˆÜÝœÜÝ\”ÝÕ\›ˆ]˜]\ÚÚXÙNˆÜÝ˜]˜]\ÚÚXÙKˆÜÝ\]˜]\”š[™ÎˆÜÝœÜÝ\]˜]\”š[™ÈÜÝ˜]˜]\”š[™È››Û™H‹ˆ[\™\ÝÛÝ[ˆ[X™\ŠÜÝš[\™\ÝÛÝ[
+Kˆ[\™\ÝÎˆØY™R[\™\ÝËˆ\ÓZ[™NˆšY]Ù\•\Ù\’YÈ\Ù\’YOOHšY]Ù\•\Ù\’Yˆ˜[ÙKˆÙ[XÝY\Ù\’Yˆ\ÔÜÝ\‚ˆÈ[ØY™R[\™\ÝË™š[™
+
+[\™\Ýˆ[žJHOˆ[\™\ÝšYOOHÙ[XÝY[\™\ÝY
+OË\Ù\’Y[ˆˆ[ˆšY]Ù\”Ù[XÝYˆH]šY]Ù\’[\™\Ý	‰ˆšY]Ù\’[\™\ÝšYOOHÙ[XÝY[\™\ÝYˆNÂŸB‚™[˜Ý[ÛˆX›XÔÙ[”ÜÝ
+ÜÝˆ[žKšY]Ù\•\Ù\’YÎˆ[X™\ŠHÂˆÛÛœÝ\Ù\’YH[X™\ŠÜÝ\Ù\’YÏÈÜÝ\Ù\—ÚY
+NÂˆÛÛœÝÙ[XÝY[\™\ÝYH[X™\ŠÜÝœÙ[XÝY[\™\ÝYÏÈÜÝœÙ[XÝYÚ[\™\ÝÚYÏÈ
+H[ÂˆÛÛœÝ\ÓZ[™HHH]šY]Ù\•\Ù\’Y	‰ˆ\Ù\’YOOHšY]Ù\•\Ù\’YÂˆÛÛœÝ[\™\ÝÈH
+\œ˜^Kš\Ð\œ˜^JÜÝš[\™\ÝÊHÈÜÝš[\™\ÝÈˆ×JK›X\
+
+[\™\Ýˆ[žJHOˆ
+ÂˆYˆ[\™\ÝšYˆ\Ù\’Yˆ[X™\Š[\™\Ý\Ù\’YÏÈ[\™\Ý\Ù\—ÚY
+Kˆ›ÝNˆ[\™\Ý››ÝKˆÙ™™\Ù[Îˆ[\™\Ý›Ù™™\Ù[ÈÏÈ[\™\Ý›Ù™™\—ØÙ[ÈÏÈ[ˆÝ]\Îˆ[\™\ÝœÝ]\Ëˆ\Ù\›˜[YNˆ[\™\Ý\Ù\›˜[YKˆ\Ü^S˜[YNˆ[\™\Ý™\Ü^S˜[YKˆÝÕ\›ˆ[\™\ÝœÝÕ\›ˆ]˜]\ÚÚXÙNˆ[\™\Ý˜]˜]\ÚÚXÙKˆ]˜]\”š[™Îˆ[\™\Ý˜]˜]\”š[™È››Û™H‹ˆJJNÂˆÛÛœÝØY™R[\™\ÝÈH\ÓZ[™HÈ[\™\ÝÈˆ[\™\ÝË™š[\Š
+[\™\Ýˆ[žJHOˆ[\™\Ý\Ù\’YOOHšY]Ù\•\Ù\’Y
+NÂˆ™]\›ˆÂˆYˆÜÝšY\Ù\’Y]NˆÜÝ]K\ØÜš\[ÛŽˆÜÝ™\ØÜš\[Û‹ˆØ]YÛÜžNˆÜÝ˜Ø]YÛÜžKÛÛ™][ÛŽˆÜÝ˜ÛÛ™][Û‹ˆšXÙPÙ[Îˆ[X™\ŠÜÝœšXÙPÙ[ÈÏÈÜÝœšXÙWØÙ[ÊKˆ™YÛÝXX›Nˆ›ÛÛX[ŠÜÝ›™YÛÝXX›JK™ZYÚ›ÜšÛÙˆÜÝ›™ZYÚ›ÜšÛÙˆXÚÝ\™Y™\™[˜ÙNˆÜÝœXÚÝ\™Y™\™[˜ÙHÏÈÜÝœXÚÝ\Ü™Y™\™[˜ÙKˆÝÕ\›ÎˆÜÝœÝÕ\›È×KÝ]\ÎˆÜÝœÝ]\ËˆÙ[XÝY[\™\ÝYˆ\ÓZ[™HÈÙ[XÝY[\™\ÝYˆ[ˆ^\™\Ð]ˆÜÝ™^\™\Ð]ÏÈÜÝ™^\™\×Ø]ˆÜ™X]Y]ˆÜÝ˜Ü™X]Y]ÏÈÜÝ˜Ü™X]YØ]ˆ[\™\ÝÛÝ[ˆ[X™\ŠÜÝš[\™\ÝÛÝ[
+K[\™\ÝÎˆØY™R[\™\ÝËˆ\Ù\›˜[YNˆÜÝ\Ù\›˜[YK\Ü^S˜[YNˆÜÝ™\Ü^S˜[YKˆÜÝ\”ÝÕ\›ˆÜÝœÜÝ\”ÝÕ\›]˜]\ÚÚXÙNˆÜÝ˜]˜]\ÚÚXÙKˆÜÝ\]˜]\”š[™ÎˆÜÝœÜÝ\]˜]\”š[™È››Û™H‹\ÓZ[™KˆšY]Ù\”Ù[XÝYˆØY™R[\™\ÝËœÛÛYJ
+[\™\Ýˆ[žJHOˆ[\™\Ý\Ù\’YOOHšY]Ù\•\Ù\’Y	‰ˆ[\™\ÝšYOOHÙ[XÝY[\™\ÝY
+KˆNÂŸB‚™[˜Ý[ÛˆX›XÑÚYÔÜÝ
+ÚYÎˆ[žKšY]Ù\•\Ù\’YÎˆ[X™\ŠHÂˆËÈÛÛXÝ[XZ[[™YZ[“›Ý\È\™HÛÜšÙ›ÝË[Û›HšY[ËˆÛÛXÝ\[œÈšXBˆËÈÛÛ^X[[˜›ÞY\ÜØYÚ[™ÎÈ[Ù\˜][Ûˆ›Ý\È™]™\ˆ[\ˆHX›XÈ^[ØY‚ˆÛÛœÝÂˆÛÛXÝ[XZ[ˆØÛÛXÝ[XZ[ˆÛÛXÝÙ[XZ[ˆØÛÛXÝ[XZ[Û˜ZÙKˆYZ[“›Ý\ÎˆØYZ[“›Ý\ËˆYZ[—Û›Ý\ÎˆØYZ[“›Ý\ÔÛ˜ZÙKˆ‹‹œØY™BˆHHÚYÎÂˆ™]\›ˆÂˆ‹‹œØY™Kˆ\ÓZ[™NˆšY]Ù\•\Ù\’YÈÚYË\Ù\’YOOHšY]Ù\•\Ù\’Yˆ˜[ÙKˆNÂŸB‚˜ÛÛœÝÒQ•S‘×Ô•S—ÑS‘H™]È]JŒŒ‹LËLÕŒŒLÎŒŠK™Ù][YJ
+NÂ˜ÛÛœÝ‘TÕ’PÕQÑÒQ•S‘×ÕT“TÈHÂˆÙX\Ûˆ‹™Ý[ˆ‹˜[[[È‹™YÜÈ‹˜ÛØØZ[™H‹›Y]‹™™[[ž[‹œ™\ØÜš\[Ûˆ‹ˆ˜[ÛÚÛ‹›™YYH‹›™YY\È‹œÜ\œÈ‹›X™H‹›XœšXØ[‹š[œÙ\X›H‹ˆ[™\ÙX\ˆ‹œÝÛ[ˆ‹˜ÛÝ[\™™Z]‹š^˜\™Ý\È‹—NÂ‚™[˜Ý[Ûˆ\œÙP›Ø\™™Z™XÝ›ÙJ›ÙNˆ[žJHÂˆÛÛœÝ™X\ÛÛÛÙHHÝš[™Ê›ÙKœ™X\ÛÛÛÙHˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆÛÛœÝ›ÝHHÝš[™Ê›ÙK››ÝHˆŠKš[J
+NÂˆYˆ
+P“ÐT‘Ô‘R‘PÕÔ‘PTÓÓ”ËœÛÛYJˆOˆ‹˜ÛÙHOOH™X\ÛÛÛÙJJHÂˆ›ÝÈ™]È\œ›ÜŠ’[˜[Y™Z™XÝ™X\ÛÛˆŠNÂˆBˆ™]\›ˆÈ™X\ÛÛÛÙK›ÝNˆ›ÝH[™Yš[™YNÂŸB‚™[˜Ý[Ûˆ\œÙT›Ùš[TÝÔ™Z™XÝ›ÙJ›ÙNˆ[žJHÂˆÛÛœÝ™X\ÛÛÛÙHHÝš[™Ê›ÙKœ™X\ÛÛÛÙHˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆÛÛœÝ›ÝHHÝš[™Ê›ÙK››ÝHˆŠKš[J
+NÂˆYˆ
+T“Ñ’SWÔÕ×Ô‘R‘PÕÔ‘PTÓÓ”ËœÛÛYJˆOˆ‹˜ÛÙHOOH™X\ÛÛÛÙJJHÂˆ›ÝÈ™]È\œ›ÜŠ’[˜[Y™Z™XÝ™X\ÛÛˆŠNÂˆBˆ™]\›ˆÈ™X\ÛÛÛÙK›ÝNˆ›ÝH[™Yš[™YNÂŸB‚™[˜Ý[Ûˆ\ÜÙ\ÚYÐ›Ø\™[ÝÙY
+›ÙNˆ[žKšY[ÎˆÂˆ]OÎˆÝš[™È[Âˆ\ØÜš\[ÛÎˆÝš[™È[ÂˆÚÚ[ÏÎˆÝš[™È[ÂˆÛÛ\[œØ][ÛÎˆÝš[™È[ÂŸK™\]Z\™PXØÙ\[˜ÙHHYJHÂˆYˆ
+™\]Z\™PXØÙ\[˜ÙH	‰ˆX›ÙK˜XØÙ\[\ÊH›ÝÈ™]È\œ›ÜŠ–[ÝH]\ÝYÜ™YHÈHÒQÖˆ›Ø\™[\ËˆŠNÂˆÛÛœÝ\œÛÛ˜[Ñ\œˆH˜[Y]QÚYÔÜÝÛÛ[
+šY[ÊNÂˆYˆ
+\œÛÛ˜[Ñ\œŠH›ÝÈ™]È\œ›ÜŠ\œÛÛ˜[Ñ\œŠNÂŸB‚™[˜Ý[Ûˆ\ÜÙ\ÚY[™Ð[ÝÙY
+›ÙNˆ[žJHÂˆYˆ
+YÚY[™ÔÜÝ[™ÓÜ[Š
+JHÂˆ›ÝÈ™]È\œ›ÜŠ”X›XÈÒQ•ˆÜÝÈ\™H]\ÙYY\ˆ[H‹Œ‹ˆŠNÂˆBˆYˆ
+X›ÙK˜XØÙ\[\ÊH›ÝÈ™]È\œ›ÜŠ–[ÝH]\ÝYÜ™YHÈHÛÛ[][š]H[\ËˆŠNÂˆÛÛœÝ^\ÝXÚÈH	Ø›ÙK]HˆŸH	Ø›ÙK™\ØÜš\[ÛˆˆŸH	Ø›ÙK˜Ø]YÛÜžHˆŸXÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ›Ý[™H‘TÕ’PÕQÑÒQ•S‘×ÕT“TË™š[™
+\›HOˆ^\ÝXÚËš[˜ÛY\Ê\›JJNÂˆYˆ
+›Ý[™
+H›ÝÈ™]È\œ›ÜŠ•\ÈÜÝ\X\œÈÈ[˜ÛYHH™\ÝšXÝY][KˆX\ÙH™]š\ÙHÜˆÛÛXÝ[ˆYZ[‹ˆŠNÂŸB‚™[˜Ý[ÛˆÚY[™ÔÜÝ[™ÓÜ[Š
+Nˆ›ÛÛX[ˆÂˆ™]\›ˆ]K››ÝÊ
+HÒQ•S‘×Ô•S—ÑS‘›ØÙ\ÜË™[‹‘ÒQ•S‘×ÒÑQTÓÔSˆOOHYHŽÂŸB‚™[˜Ý[ÛˆÙ]˜\ÙU\›
+™\Nˆ[žJHÂˆÛÛœÝ›ÝÈH™\K™Ù]
+žY›ÜØ\™Y\›ÝÈŠH™\Kœ›ÝØÛÛšÈŽÂˆ™]\›ˆ	Ü›ÝßN‹ËÉÜ™\K™Ù]
+šÜÝŠ_XÂŸB‚™[˜Ý[ÛˆÛÛÙÛT™Y\™XÝ\šJÜ™\Nˆ[žJHÂˆËÈ[Ø^\È\ÙHÝÝÈÛÈÐ]]Ý]HÛÛÚÚYH
+ÈÛÛÙÛH™Y\™XÝT’HÝ^HÛˆÛ™HÜÝ‚ˆ™]\›ˆ›ØÙ\ÜË™[‹‘ÓÓÑÓWÔ‘QT‘PÕÕT’HšÎ‹ËÝÝÝËž˜^[\Ý˜ÛÛKØ\KØ]]ÙÛÛÙÛKØØ[˜XÚÈŽÂŸB‚˜ÛÛœÝÓÓÑÓWÓÐUUÔÕUWÓPVÓTÈHMH
+ˆŒ
+ˆLÂ˜ÛÛœÝÓÓÑÓWÓÐUUÔÕUWÐÓÓÒÒQHHœÙ×ÛØ]]ŽÂ‚™[˜Ý[ÛˆÙ\ÜÚ[Û”ÙXÜ™]
+
+NˆÝš[™ÈÂˆ™]\›ˆ›ØÙ\ÜË™[‹”ÑTÔÒSÓ—ÔÑPÔ‘U
+›ØÙ\ÜË™[‹““ÑWÑS•ˆOOHœ›ÙXÝ[ÛˆˆÈˆˆˆœšYWÜÙXÜ™]Ù]—ÛÛ›HŠNÂŸB‚™[˜Ý[ÛˆXXÔÚYÛŠ^[ØYˆÝš[™ÊNˆÝš[™ÈÂˆ™]\›ˆÜž\Ë˜Ü™X]RXXÊœÚLMˆ‹Ù\ÜÚ[Û”ÙXÜ™]
+
+JK\]J^[ØY
+K™YÙ\Ý
+˜˜\ÙM\›ŠNÂŸB‚™[˜Ý[ÛˆØY™Q\]X[ÝŠNˆÝš[™ËŽˆÝš[™ÊNˆ›ÛÛX[ˆÂˆÛÛœÝ˜HHY™™\‹™œ›ÛJJNÂˆÛÛœÝ˜ˆHY™™\‹™œ›ÛJŠNÂˆYˆ
+˜K›[™ÝOOH˜‹›[™Ý
+H™]\›ˆ˜[ÙNÂˆ™]\›ˆÜž\Ë[Z[™ÔØY™Q\]X[
+˜K˜ŠNÂŸB‚‹ÊŠˆÝ][\ÜÈÐ]]ÔÔ‘ˆÚÙ[ˆHÝ\š]™\È[Øš[Hœ›ÝÜÙ\œÈ]›ÜHÙ\ÜÚ[ÛˆÛÛÚÚYHZYÛÛÙÛHÜˆ
+‹Â‚™[˜Ý[ÛˆÜ™X]QÛÛÙÛSÐ]]Ý]J[šÕ\Ù\’YÎˆ[X™\‹™]\›•ÏÎˆÝš[™ÊNˆÝš[™ÈÂˆÛÛœÝ›ÙHHY™™\‹™œ›ÛJ”ÓÓ‹œÝš[™ÚYžJÂˆŽˆÜž\Ëœ˜[™ÛPž]\ÊMŠKÔÝš[™Êš^ŠKˆˆ]K››ÝÊ
+Kˆ‹‹Š[šÕ\Ù\’YÈÈˆ[šÕ\Ù\’YHˆßJKˆ‹‹Š™]\›•ÈÈÈŽˆ™]\›•ÈHˆßJKˆJJKÔÝš[™Ê˜˜\ÙM\›ŠNÂˆ™]\›ˆ	Ø›Ù_K‰ÚXXÔÚYÛŠ›ÙJ_XÂŸB‚™[˜Ý[Ûˆ\œÙQÛÛÙÛSÐ]]Ý]JÝ]NˆÝš[™ÊNˆÈ[šÕ\Ù\’YÎˆ[X™\ŽÈ™]\›•ÏÎˆÝš[™ÈH[ÂˆYˆ
+\Ý]H\Ù\ÜÚ[Û”ÙXÜ™]
+
+JH™]\›ˆ[ÂˆÛÛœÝÝHÝ]K›\Ý[™^ÙŠ‹ˆŠNÂˆYˆ
+ÝH
+H™]\›ˆ[ÂˆÛÛœÝ›ÙHHÝ]KœÛXÙJÝ
+NÂˆÛÛœÝÚYÈHÝ]KœÛXÙJÝ
+ÈJNÂˆYˆ
+\ÚYÈ\ØY™Q\]X[ÝŠÚYËXXÔÚYÛŠ›ÙJJJH™]\›ˆ[ÂˆžHÂˆÛÛœÝ]HH”ÓÓ‹œ\œÙJY™™\‹™œ›ÛJ›ÙK˜˜\ÙM\›ŠKÔÝš[™Ê]ŽŠJH\ÈÂˆÎˆÝš[™ÎÂˆÎˆ[X™\ŽÂˆÎˆ[X™\ŽÂˆÎˆÝš[™ÎÂˆNÂˆYˆ
+Y]K›ˆ\[Ùˆ]KOOH›[X™\ˆŠH™]\›ˆ[ÂˆYˆ
+]K››ÝÊ
+HH]KˆÓÓÑÓWÓÐUUÔÕUWÓPVÓTÈ]Kˆ]K››ÝÊ
+H
+ÈŒÌ
+H™]\›ˆ[Âˆ™]\›ˆÈ‹‹Š\[Ùˆ]K›OOH›[X™\ˆˆÈÈ[šÕ\Ù\’Yˆ]K›HˆßJK™]\›•ÎˆØY™SX\™]\›•Ê]KœŠHNÂˆHØ]ÚÂˆ™]\›ˆ[ÂˆBŸB‚™[˜Ý[Ûˆ™XYÛÛÚÚYJ™\Nˆ[žK˜[YNˆÝš[™ÊNˆÝš[™È[™Yš[™YÂˆÛÛœÝXY\ˆHÝš[™Ê™\KšXY\œÏË˜ÛÛÚÚYHˆŠNÂˆYˆ
+ZXY\ŠH™]\›ˆ[™Yš[™YÂˆ›Üˆ
+ÛÛœÝ\ÙˆXY\‹œÜ]
+ŽÈŠJHÂˆÛÛœÝÚË‹‹œ™\ÝHH\š[J
+KœÜ]
+HŠNÂˆYˆ
+ÈOOH˜[YJH™]\›ˆXÛÙUT’PÛÛ\Û™[
+™\Ýš›Ú[ŠHŠJNÂˆBˆ™]\›ˆ[™Yš[™YÂŸB‚™[˜Ý[ÛˆÙ]ÛÛÙÛSÐ]]Ý]PÛÛÚÚYJ™\Îˆ[žKÝ]NˆÝš[™ÊHÂˆÛÛœÝÙXÝ\™HH›ÙXÝ[Û”ÙXÝ\™PÛÛÚÚY\Ê
+HÈŽÈÙXÝ\™HˆˆˆŽÂˆËÈ\[™H™]™\ˆ™\XÙHHÙ\ÜÚ[ÛˆÙ]PÛÛÚÚYH^™\ÜË\Ù\ÜÚ[Ûˆ[™XYH]Y]YYˆ™\Ë˜\[™
+ˆ”Ù]PÛÛÚÚYH‹ˆ	ÑÓÓÑÓWÓÐUUÔÕUWÐÓÓÒÒQ_OIÙ[˜ÛÙUT’PÛÛ\Û™[
+Ý]J_NÈ]KÎÈÛ›NÈØ[YTÚ]OS^ÈX^PYÙOIÓX]™›ÛÜŠÓÓÑÓWÓÐUUÔÕUWÓPVÓTÈÈL
+_IÜÙXÝ\™_Xˆ
+NÂŸB‚™[˜Ý[ÛˆÛX\‘ÛÛÙÛSÐ]]Ý]PÛÛÚÚYJ™\Îˆ[žJHÂˆÛÛœÝÙXÝ\™HH›ÙXÝ[Û”ÙXÝ\™PÛÛÚÚY\Ê
+HÈŽÈÙXÝ\™HˆˆˆŽÂˆ™\Ë˜\[™
+ˆ”Ù]PÛÛÚÚYH‹ˆ	ÑÓÓÑÓWÓÐUUÔÕUWÐÓÓÒÒQ_ONÈ]KÎÈÛ›NÈØ[YTÚ]OS^ÈX^PYÙOL	ÜÙXÝ\™_Xˆ
+NÂŸB‚™[˜Ý[ÛˆÛÛÙÛSÐ]]\œ›Ü”YÙJY\ÜØYÙNˆÝš[™ÊNˆÝš[™ÈÂˆÛÛœÝØY™HHY\ÜØYÙKœ™\XÙJÉ‹ÙË‰˜[\ÈŠKœ™\XÙJÏÙË‰›ÈŠKœ™\XÙJÏ‹ÙË‰™ÝÈŠNÂˆ™]\›ˆQÐÕTH[[[™ÏH™[ˆXYY]HÚ\œÙ]H]‹N‹ÏY]H˜[YOHšY]ÜÜˆÛÛ[HÚYY]šXÙK]ÚY[š]X[\ØØ[OLH‹Ï]O‘ÛÛÙÛHÚYÛ‹Z[Ý]O‚Ý[O˜›Ù^Ù›ÛY˜[Z[NœÞ\Ý[K]ZKØ[œË\Ù\šYŽØ˜XÚÙÜ›Ý[™ˆÌŒŒNØÛÛÜŽˆÙŒYXNÙ\Ü^N™›^ÛZ[‹ZZYÚŒLšØ[YÛ‹Z][\Î˜Ù[\ŽÚ\ÝYžKXÛÛ[˜Ù[\ŽÛX\™Ú[ŽŒÜY[™ÎŒB‹˜Ø\™ÛX^]ÚYŒØ˜XÚÙÜ›Ý[™ˆÌÌÌŽØ›Ü™\ŽŒK\ÛÛYÌXÌXÌŒŽØ›Ü™\‹\˜Y]\ÎŒMÜY[™ÎŒŽBš^Ù›Û\Ú^™NŒKŒ\™[NÛX\™Ú[ŽŒL\ØÛÛÜŽˆØÎÍ˜ŽÛ[™KZZYÚŒKNÛX\™Ú[ŽŒNB˜^Ù\Ü^Nš[›[™KX›ØÚÎØ˜XÚÙÜ›Ý[™ˆØÎ˜LØÎØÛÛÜŽˆÌŒŒNÙ›Û]ÙZYÚŽÝ^YXÛÜ˜][ÛŽ››Û™NÜY[™ÎŒLœMœØ›Ü™\‹\˜Y]\ÎŽÛX\™Ú[‹\šYÚŒLÛX\™Ú[‹]ÜœB˜KœÙXÞØ˜XÚÙÜ›Ý[™˜[œÜ\™[ØÛÛÜŽˆÌNYLÙ™ŽØ›Ü™\ŽŒ\ÛÛYÌNYLÙ™ŸOÜÝ[OÚXY‚›ÙO]ˆÛ\ÜÏH˜Ø\™O‘ÛÛÙÛHÚYÛ‹Z[ˆY¸ &]š[š\ÚÚO‰ÜØY™_OÜ‚H™YH‹Ø\KØ]]ÙÛÛÙÛH•žHÛÛÙÛHYØZ[ØO‚HÛ\ÜÏHœÙXÈˆ™YH‹È˜XÚÈÛYOØOÙ]Ø›ÙOÚ[˜ÂŸB‚™[˜Ý[ÛˆXZÙU\Ù\›˜[YJ[XZ[ˆÝš[™ÊHÂˆÛÛœÝ˜\ÙHH[XZ[ˆœÜ]
+ŠVÌBˆÓÝÙ\Ø\ÙJ
+Bˆœ™\XÙJÖ×˜K^ŒNW×KÙË—ÈŠBˆœ™\XÙJ×—ÊßÊÉÙËˆŠBˆœÛXÙJŒŠH™ÛÛÙÛWÝ\Ù\ˆŽÂˆ]\Ù\›˜[YHH˜\ÙK›[™ÝHÈÈ˜\ÙHˆ	Ø˜\Ù_WÝ\Ù\˜Âˆ]ÝY™š^HNÂˆÚ[H
+ÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJJHÂˆ\Ù\›˜[YHH	Ø˜\ÙKœÛXÙJN
+_WÉÜÝY™š^
+ÊßXÂˆBˆ™]\›ˆ\Ù\›˜[YNÂŸB‚™[˜Ý[ÛˆX^X™TÞ[˜ÔÚ]SÝÛ™\”Ü›Û[Ê\Ù\ŽˆÈYÎˆ[X™\ŽÈ[XZ[ÎˆÝš[™È[È\Ù\›˜[YOÎˆÝš[™È[H[[™Yš[™Y
+HÂˆYˆ
+ÝÜ˜YÙKš\ÔÚ]SÝÛ™\•\Ù\Š\Ù\ŠJHÝÜ˜YÙKœÞ[˜ÔÚ]SÝÛ™\”Ü›Û[Ê
+NÂŸB‚™[˜Ý[Ûˆ™\]Z\™P]]
+™\Nˆ[žK™\Îˆ[žK™^ˆ[žJHÂˆYˆ
+\™\KœÙ\ÜÚ[ÛË\Ù\’Y
+HÂˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆBˆ]\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]\Ù\ˆ\Ù\‹œÝ]\ÈOOH™[]YŠHÂˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆBˆ\Ù\ˆHÝÜ˜YÙK˜ÛX\‘^\™YXØÛÝ[[Ù\˜][ÛŠ\Ù\‹šY
+H\Ù\ŽÂˆËÈÝ\Ü[™YXØÛÝ[ÈX^HÛ›H]]]ÜÝ]\ËØ\X[[™Ú[Ë‚ˆYˆ
+\Ù\‹œÝ]\ÈOOHœÝ\Ü[™YŠHÂˆÛÛœÝ]HÝš[™Ê™\Kœ]™\K\›ˆŠNÂˆÛÛœÝ[ÝÙYBˆ]š[˜ÛY\Ê‹Ø]]ÛYHŠHˆ]š[˜ÛY\Ê‹Ø]]ÛÙÛÝ]ŠHˆ]š[˜ÛY\Ê‹Ø]]ÜÝ\Ü[œÚ[Û‹X\X[ŠHˆ]š[˜ÛY\Ê‹Ø]]ØÛÛ[][š]K\Ý[™\™ÈŠNÂˆYˆ
+X[ÝÙY	‰ˆ™\K›Y]ÙOOH‘ÑUŠHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÂˆ\œ›ÜŽˆXØÛÝ[Ý\Ü[™Y‹ˆÝ\Ü[™YˆYKˆÝ\Ü[™™X\ÛÛ“X™[ˆ\Ù\‹œÝ\Ü[™™X\ÛÛ“X™[[ˆÝ\Ü[™[[ˆ\Ù\‹œÝ\Ü[™[[[ˆJNÂˆBˆBˆ™^
+
+NÂŸB‚™[˜Ý[Ûˆ™\]Z\™PYZ[Š™\Nˆ[žK™\Îˆ[žK™^ˆ[žJHÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+X\šÐYZ[”Ù\ÜÚ[Û‘›Ü•\Ù\Š™\K\Ù\ŠJHÂˆ™]\›ˆ™^
+
+NÂˆBˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂŸB‚˜ÛÛœÝ™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜÈH[ÝÐYZ[“Ü‘]™[™\ÙX\˜ÚYÙ[
+™\]Z\™PYZ[ŠNÂ‚™[˜Ý[ÛˆÙ]Ù\ÜÚ[ÛYZ[•\Ù\Š™\Nˆ[žJHÂˆYˆ
+\™\KœÙ\ÜÚ[ÛË\Ù\’Y
+H™]\›ˆ[ÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+Z\ÓXZ[YZ[•\Ù\Š\Ù\ŠJH™]\›ˆ[Âˆ™\KœÙ\ÜÚ[Û‹š\ÐYZ[ˆHYNÂˆ™]\›ˆ\Ù\ŽÂŸB‚™[˜Ý[ÛˆÙ\ÜÚ[Û’\ÐYZ[Š™\Nˆ[žJNˆ›ÛÛX[ˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[Âˆ™]\›ˆX\šÐYZ[”Ù\ÜÚ[Û‘›Ü•\Ù\Š™\K\Ù\ŠNÂŸB‚™[˜Ý[ÛˆÙ]YZ[XÝÜ•\Ù\’Y
+™\Nˆ[žJNˆ[X™\ˆ[ÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+Ù\ÜÚ[Û•\Ù\ˆ	‰ˆ\ÓXZ[YZ[•\Ù\ŠÙ\ÜÚ[Û•\Ù\ŠJH™]\›ˆÙ\ÜÚ[Û•\Ù\‹šYÂˆ›Üˆ
+ÛÛœÝ[XZ[ÙˆQRS—ÕTÑT—ÑSPRSÊHÂˆÛÛœÝHHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+[XZ[
+NÂˆYˆ
+JH™]\›ˆKšYÂˆBˆ›Üˆ
+ÛÛœÝ[˜[YHÙˆQRS—ÕTÑT“SQTÊHÂˆÛÛœÝHHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ[˜[YJNÂˆYˆ
+JH™]\›ˆKšYÂˆBˆ™]\›ˆ[ÂŸB‚‹ÊŠˆXÝ[™ÈYZ[ˆ›Üˆ]Y]ÙÜÈ
+Ù\ÜÚ[Ûˆ\Ù\ˆ™Y™\œ™YÝ™\ˆ[ˆ˜[˜XÚÊKˆ
+‹Â™[˜Ý[ÛˆÙ]YZ[XÝÜŠ™\Nˆ[žJNˆÈYˆ[X™\ˆ[È\Ù\›˜[YNˆÝš[™È[HÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+Ù\ÜÚ[Û•\Ù\ˆ	‰ˆÝÜ˜YÙK\Ù\’\ÔÚ]PYZ[ŠÙ\ÜÚ[Û•\Ù\ŠJHÂˆ™]\›ˆÈYˆÙ\ÜÚ[Û•\Ù\‹šY\Ù\›˜[YNˆÙ\ÜÚ[Û•\Ù\‹\Ù\›˜[YH[NÂˆBˆÛÛœÝXZ[ˆHÙ]Ù\ÜÚ[ÛYZ[•\Ù\Š™\JNÂˆYˆ
+XZ[ŠH™]\›ˆÈYˆXZ[‹šY\Ù\›˜[YNˆXZ[‹\Ù\›˜[YH[NÂˆ™]\›ˆÈYˆÙ]YZ[XÝÜ•\Ù\’Y
+™\JK\Ù\›˜[YNˆ[NÂŸB‚™[˜Ý[Ûˆ]Y]YZ[Šˆ™\Nˆ[žKˆXÝ[ÛŽˆÝš[™Ëˆ\™Ù]ÎˆÂˆ\OÎˆÝš[™È[ÂˆYÎˆÝš[™È[X™\ˆ[ÂˆX™[ÎˆÝš[™È[Âˆ]Z[Îˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛˆ[ÂˆKŠHÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆÝÜ˜YÙK›ÙÐYZ[XÝ[ÛŠÂˆXÝÜ•\Ù\’YˆXÝÜ‹šYˆXÝÜ•\Ù\›˜[YNˆXÝÜ‹\Ù\›˜[YKˆXÝ[Û‹ˆ\™Ù]\Nˆ\™Ù]Ë\HÏÈ[ˆ\™Ù]Yˆ\™Ù]ËšYÏÈ[ˆ\™Ù]X™[ˆ\™Ù]Ë›X™[ÏÈ[ˆ]Z[ˆ\™Ù]Ë™]Z[ÏÈ[ˆJNÂŸB‚™[˜Ý[Ûˆ]Y]]™[™\ÙX\˜Ú
+ˆ™\Nˆ[žKˆXÝ[ÛŽˆÝš[™Ëˆ\™Ù]ÎˆÂˆ\OÎˆÝš[™È[ÂˆYÎˆÝš[™È[X™\ˆ[ÂˆX™[ÎˆÝš[™È[Âˆ]Z[Îˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛˆ[ÂˆKŠHÂˆÛÛœÝXÝÜˆH]™[™\ÙX\˜ÚXÝÜŠ™\JNÂˆYˆ
+XXÝÜŠH™]\›ˆ]Y]YZ[Š™\KXÝ[Û‹\™Ù]
+NÂˆÝÜ˜YÙK›ÙÐYZ[XÝ[ÛŠÂˆXÝÜ•\Ù\’Yˆ[ˆXÝÜ•\Ù\›˜[YNˆXÝÜ‹ˆXÝ[Û‹ˆ\™Ù]\Nˆ\™Ù]Ë\HÏÈ[ˆ\™Ù]Yˆ\™Ù]ËšYÏÈ[ˆ\™Ù]X™[ˆ\™Ù]Ë›X™[ÏÈ[ˆ]Z[ˆ\™Ù]Ë™]Z[ÏÈ[ˆJNÂŸB‚›]][™[˜ÙRXŽˆ™]\›•\O\[Ùˆ[š]][™[˜ÙUÜÏˆ[H[Â‚™[˜Ý[Ûˆ›ÝYžP][™[˜ÙU\]J]™[Yˆ[X™\ŠHÂˆ][™[˜ÙRXË˜œ›ØYØ\Ý][™[˜ÙJ]™[Y
+NÂŸB‚™^Ü[˜Ý[Ûˆ™YÚ\Ý\”›Ý]\ÊÙ\™\ŽˆÙ\™\‹\ˆ^™\ÜÊHÂˆ\ÜÙ\›ÙXÝ[Û”\œÚ\Ý[˜ÙJ
+NÂˆ\ÜÙ\›ÙXÝ[Û”ÙXÜ™]Ê
+NÂˆ™YÚ\Ý\Ø\Õ[T›Ý]\Ê\
+NÂ‚ˆËÈTÑPTÒØ\È\˜Ú]™YÛˆŒ‹LLÌˆÙY\]ÈÛÙH[™]X˜\ÙH™XÛÜ™È›Ü‚ˆËÈÜÜÚX›H]\™H™XÛÝ™\žK]XZÙH]™\žHYØXÞHXÝ[Ûˆ[™\[ˆ›ÙXÝ[Û‹‚ˆËÈ]™[™\ÙX\˜Ú›ÝÈ[œÈ\ÈHÛÙ^YÙ[ÛÜšÙ›ÝË›Ý\ÈØÜ˜\\‹Û[Ù[‚ˆ\˜[
+ˆÈ‹Ø\KØYZ[‹Ü\ÙX\˜Ú‹‹Ø\KØYZ[‹Ü\ÙX\˜ÚÊœ]—Kˆ™\]Z\™PYZ[‹ˆ
+Ü™\K™\ÊHO‚ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÂˆ\œ›ÜŽˆ”TÑPTÒ\È\˜Ú]™Y‹ˆ\˜Ú]™YˆYKˆ™\XÙ[Y[ˆ”TÙX\˜Ú‹Œ‹ˆJKˆ
+NÂ‚ˆËÈHYÙ[Ø[ˆ™XY]™\žHÛÛÝ\˜ÙH]Ø^HÚ]Ý]™]š]š[™ÈTÑPTÒ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜÛÝ\˜ÙK[Y[[ÜžH‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÙ]]™[™\ÙX\˜ÚÛÝ\˜ÙSY[[ÜžJ
+JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚØÛÛ›Û‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÙ]™\ÙX\˜ÚÛÛ›ÛÝ]J
+JNÂˆJNÂ‚ˆÛÛœÝÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[H
+™\Îˆ[žK™\Ý[ˆ[žKÝXØÙ\ÜÔÝ]\ÈHŒ
+HOˆÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê™\Ý[œÝ]\È
+KšœÛÛŠ™\Ý[
+NÂˆ™]\›ˆ™\ËœÝ]\ÊÝXØÙ\ÜÔÝ]\ÊKšœÛÛŠ™\Ý[
+NÂˆNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜ[œÈ‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™YÚ[”™\ÙX\˜Ú[Š™\K˜›ÙHßJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜ[œËÎšYÜÛÝ\˜ÙH‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\ËX\šÔ[”ÛÝ\˜ÙJÈ[’Yˆ™\Kœ\˜[\ËšY‹‹œ™\K˜›ÙHJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜÛÝ\˜ÙK[Y[[ÜžKÜØÚY[H‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\ËÙ]ÛÝ\˜ÙTØÚY[J™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜ[œËÎšYÙš[š\Ú‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ëš[š\Ú™\ÙX\˜Ú[ŠÈ[’Yˆ™\Kœ\˜[\ËšY‹‹œ™\K˜›ÙHJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÙ]šY[˜ÙH‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™XÛÜ™šY[]šY[˜ÙJ™\K˜›ÙJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÚY[]Y\È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë\Ù\[]RY[]J™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚØÛÛ™›XÝÈ‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™XÛÜ™ÛÛ™›XÝ
+™\K˜›ÙJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜ™]šY]È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë[œ]Y]YT™\ÙX\˜Ú™]šY]Ê™\K˜›ÙJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÛYYXH‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™XÛÜ™YYXT›Ý™[˜[˜ÙJ™\K˜›ÙJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÛZ\ÝZÙK]\ÝÈ‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë\Ù\Z\ÝZÙU\Ý
+™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÛZ\ÝZÙK]\ÝËÜ™\Ý[‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™XÛÜ™Z\ÝZÙU\Ý™\Ý[
+™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÙXÚ\Ú[Û‹YØ]H‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë]˜[X]QXÚ\Ú[Û‘Ø]J™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜÙ\šY\È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë\Ù\]™[Ù\šY\Ê™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÛÝ]ÛÛY\È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™XÛÜ™XÚ\Ú[Û“Ý]ÛÛYJ™\K˜›ÙJKŒJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜ™\ÛÛ™H‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÙ[™™\ÙX\˜ÚÛÛ›Û™\Ý[
+™\Ë™\ÛÛ™T™\ÙX\˜Ú][J™\K˜›ÙJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÜÛÝ\˜ÙK[Y[[ÜžKÜ]‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ý[H™XÛÜ™]™[™\ÙX\˜Ú]
+Âˆ[’Yˆ™\K˜›ÙOËœ[’YOH[ÈÝš[™Ê™\K˜›ÙKœ[’Y
+Hˆ[ˆÛÝ\˜ÙRÙ^NˆÝš[™Ê™\K˜›ÙOËœÛÝ\˜ÙRÙ^HˆŠKˆX™[ˆÝš[™Ê™\K˜›ÙOË›X™[ˆŠKˆ\›ˆÝš[™Ê™\K˜›ÙOË\›ˆŠKˆ]\Nˆ™\K˜›ÙOËœ]\HOH[ÈÝš[™Ê™\K˜›ÙKœ]\JHˆ[™Yš[™YˆÝ]ÛÛYNˆÝš[™Ê™\K˜›ÙOË›Ý]ÛÛYH˜Ø[™Y]HŠH\È˜Ø[™Y]HˆœÝXØÙ\ÜÈˆ™˜Z[\™H‹ˆ\ØÛÝ™\™Yœ›ÛN‚ˆ™\K˜›ÙOË™\ØÛÝ™\™Yœ›ÛHOH[ÈÝš[™Ê™\K˜›ÙK™\ØÛÝ™\™Yœ›ÛJHˆ[ˆ˜]šYØ][Û”™XÚ\N‚ˆ™\K˜›ÙOË›˜]šYØ][Û”™XÚ\HOH[ÈÝš[™Ê™\K˜›ÙK›˜]šYØ][Û”™XÚ\JHˆ[ˆšY[Ñ›Ý[™ˆ\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOË™šY[Ñ›Ý[™
+HÈ™\K˜›ÙK™šY[Ñ›Ý[™ˆ[ˆ™\]Z\™\ÓÙÚ[Ž‚ˆ\[Ùˆ™\K˜›ÙOËœ™\]Z\™\ÓÙÚ[ˆOOH˜›ÛÛX[ˆˆÈ™\K˜›ÙKœ™\]Z\™\ÓÙÚ[ˆˆ[ˆ]šY[˜ÙS›ÝN‚ˆ™\K˜›ÙOË™]šY[˜ÙS›ÝHOH[ÈÝš[™Ê™\K˜›ÙK™]šY[˜ÙS›ÝJHˆ[ˆ\œ›ÜŽˆ™\K˜›ÙOË™\œ›ÜˆOH[ÈÝš[™Ê™\K˜›ÙK™\œ›ÜŠHˆ[ˆJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆ]Y]]™[™\ÙX\˜Ú
+™\K™]™[Ü™\ÙX\˜ÚÜÛÝ\˜ÙWÛY[[ÜžH‹Âˆ\Nˆ™]™[Ü™\ÙX\˜ÚÜÛÝ\˜ÙH‹ˆYˆÝš[™Ê
+™\Ý[œ]\È[žJOËšYˆŠKˆ]Z[ˆÂˆÛÝ\˜ÙRÙ^Nˆ™\K˜›ÙOËœÛÝ\˜ÙRÙ^KˆÝ]ÛÛYNˆ™\K˜›ÙOË›Ý]ÛÛYKˆ]\Nˆ™\K˜›ÙOËœ]\KˆKˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ˜\œ›ÝÈXXÚ[™HØ][ÙÈ›ÜˆTÙX\˜Ú‹Œˆ[›ZÙHØ\KØYZ[‹Ù]™[Ë\Âˆ
+ˆÛZ]ÈY[X™\‹ØYZ[ˆ›Ùš[\È[™XØÙ\ÈÛ›HHYXØ]YYÙ[ÚÙ[ˆÜ‚ˆ
+ˆH]™HYZ[ˆÙ\ÜÚ[Û‹‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÙ]™[È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÛÛœÝœ›ÛHHÝš[™Ê™\Kœ]Y\žK™œ›ÛHˆŠKš[J
+NÂˆÛÛœÝ]™[ÈHÝÜ˜YÙBˆ™Ù]]™[ÊßJBˆ™š[\Š]™[Oˆ]™[œÝ]\ÈOOH“U‘Hˆ]™[œÝ]\ÈOOH’QSˆŠBˆ™š[\Š]™[OˆYœ›ÛHÝš[™Ê]™[™]Q[™]™[™]TÝ\ˆŠHHœ›ÛJBˆ›X\
+]™[Oˆ]™[›Ü”™\ÙX\˜ÚYÙ[
+]™[\È[žJJNÂˆ™\ËšœÛÛŠÈÙ[™\˜]Y]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+K]™[ÈJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚØÚ[™Ù\È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÂˆÙ[™\˜]Y]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+KˆÚ[™Ù\Îˆ\Ý]™[™\ÙX\˜ÚÚ[™Ù\Ê[X™\Š™\Kœ]Y\žK›[Z]
+HL
+KˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÙ]™[È‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ý[HÜ™X]Q]™[œ›ÛT™\ÙX\˜Ú
+ÂˆØ[™Y]RÙ^Nˆ™\K˜›ÙOË˜Ø[™Y]RÙ^Kˆ]™[ˆ™\K˜›ÙOË™]™[ˆ]šY[˜ÙT™XÙZ\Îˆ™\K˜›ÙOË™]šY[˜ÙT™XÙZ\Ëˆ™X\ÛÛŽˆ™\K˜›ÙOËœ™X\ÛÛ‹ˆZ\ÝZÙU\ÝÔ\ÜÙYˆ™\K˜›ÙOË›Z\ÝZÙU\ÝÔ\ÜÙYOOHYKˆ[’Yˆ™\K˜›ÙOËœ[’YˆY[\Ý[˜ÞRÙ^Nˆ™\K˜›ÙOËšY[\Ý[˜ÞRÙ^KˆžT[Žˆ™\K˜›ÙOË™žT[ˆOOHYKˆJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê™\Ý[œÝ]\ÊKšœÛÛŠ™\Ý[
+NÂˆ]Y]]™[™\ÙX\˜Ú
+™\K™]™[Ü™\ÙX\˜ÚÙ]™[ØÜ™X]H‹Âˆ\Nˆ™]™[‹ˆYˆ™\Ý[™]™[šYˆX™[ˆ™\Ý[™]™[]Kˆ]Z[ˆÂˆ]šY[˜ÙT™XÙZ\ÛÝ[ˆ™\Ý[™]šY[˜ÙT™XÙZ\Ë›[™Ýˆ›Û˜XÚÐ]˜Z[X›Nˆ™\Ý[œ›Û˜XÚË˜]˜Z[X›KˆKˆJNÂˆ™\ËœÝ]\ÊŒJKšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚÙ]™[ËÎšYØÚ[™ÙH‹™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜË
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ý[H\Q]™[™\ÙX\˜Ú]™[Ú[™ÙJ[X™\Š™\Kœ\˜[\ËšY
+KÂˆ^XÝY\]Y]ˆÝš[™Ê™\K˜›ÙOË™^XÝY\]Y]ˆŠKˆ]Úˆ™\K˜›ÙOËœ]Úˆ]šY[˜ÙT™XÙZ\Îˆ™\K˜›ÙOË™]šY[˜ÙT™XÙZ\Ëˆ™X\ÛÛŽˆ™\K˜›ÙOËœ™X\ÛÛ‹ˆZ\ÝZÙU\ÝÔ\ÜÙYˆ™\K˜›ÙOË›Z\ÝZÙU\ÝÔ\ÜÙYOOHYKˆ[’Yˆ™\K˜›ÙOËœ[’YˆY[\Ý[˜ÞRÙ^Nˆ™\K˜›ÙOËšY[\Ý[˜ÞRÙ^KˆžT[Žˆ™\K˜›ÙOË™žT[ˆOOHYKˆJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê™\Ý[œÝ]\ÊKšœÛÛŠ™\Ý[
+NÂˆ]Y]]™[™\ÙX\˜Ú
+™\K™]™[Ü™\ÙX\˜ÚÙ]™[ØÚ[™ÙH‹Âˆ\Nˆ™]™[‹ˆYˆ™\Ý[™]™[šYˆX™[ˆ™\Ý[™]™[]Kˆ]Z[ˆÂˆÚ[™ÙYšY[Îˆ™\Ý[˜Ú[™ÙYšY[Ëˆ]šY[˜ÙT™XÙZ\ÛÝ[ˆ™\Ý[™]šY[˜ÙT™XÙZ\Ë›[™Ýˆ›Û˜XÚÐ]˜Z[X›Nˆ™\Ý[œ›Û˜XÚË˜]˜Z[X›KˆKˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+ˆ‹Ø\KØYZ[‹Ù]™[\™\ÙX\˜ÚØÚ[™Ù\ËÎœ›Û˜XÚÕÚÙ[‹Ü›Û˜XÚÈ‹ˆ™\]Z\™Q]™[™\ÙX\˜ÚXØÙ\ÜËˆ
+™\K™\ÊHOˆÂˆYˆ
+™\K˜›ÙOË˜ÛÛ™š\›HOOHYJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜ÛÛ™š\›NˆYH\È™\]Z\™YˆJNÂˆBˆÛÛœÝ™\Ý[H›Û˜XÚÑ]™[™\ÙX\˜ÚÚ[™ÙJÝš[™Ê™\Kœ\˜[\Ëœ›Û˜XÚÕÚÙ[ˆˆŠJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê™\Ý[œÝ]\ÊKšœÛÛŠ™\Ý[
+NÂˆ]Y]]™[™\ÙX\˜Ú
+™\K™]™[Ü™\ÙX\˜ÚÙ]™[Ü›Û˜XÚÈ‹Âˆ\Nˆ™]™[‹ˆYˆ™\Ý[™]™[Yˆ]Z[ˆÂˆÜ\˜][ÛŽˆ™\Ý[›Ü\˜][Û‹ˆ[™XYT›ÛY˜XÚÎˆ™\Ý[˜[™XYT›ÛY˜XÚÈOOHYKˆ›ÛY˜XÚÐ]ˆ™\Ý[œ›ÛY˜XÚÐ]ˆKˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆKˆ
+NÂ‚ˆËÈYÚÙZYÚ›Ø™H›Üˆ˜Z[Ø^HX[ÚXÚÜÈH]\Ý›Ý]H‹‚ˆËÈX›XÈ\[šÜÈ
+™[›[È
+ÈÜ[Û˜[Ýš\H^[Y[[šÈ›Üˆ\H^HÈØ\™ÊK‚ˆËÈÙ]Õ’TWÔVSQS•ÓS’È
+ÜˆTÔÕ’TWÕT“
+HÛˆ˜Z[Ø^HY\ˆÜ™X][™ÈH^[Y[[šË‚ˆ\™Ù]
+‹Ø\KÜÚ]KÝ\[[šÜÈ‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝÝš\HBˆ›ØÙ\ÜË™[‹”Õ’TWÔVSQS•ÓS’ÏËš[J
+Hˆ›ØÙ\ÜË™[‹•TÔÕ’TWÕT“Ëš[J
+Hˆ›ØÙ\ÜË™[‹•’UWÔÕ’TWÔVSQS•ÓS’ÏËš[J
+Hˆ[ÂˆÛÛœÝ™[›[Ò[™HBˆ›ØÙ\ÜË™[‹•‘S“S×ÒS‘OËš[J
+Hˆ›ØÙ\ÜË™[‹•TÕ‘S“S×ÒS‘OËš[J
+Hˆ[Âˆ™\ËœÙ]XY\ŠØXÚKPÛÛ›Û‹œX›XËX^XYÙOMŒŠNÂˆ™\ËšœÛÛŠZ[\[šÜÊÈÝš\T^[Y[[šÎˆÝš\K™[›[Ò[™HJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÚX[‹
+Ü™\K™\ÊHOˆÂˆËÈX[]\ÝÝ^H\]™[ˆYˆHˆ\ÈœšYY›H[˜]˜Z[X›K‚ˆ]\ÚÝXœØÜš\[ÛœÈHÂˆYˆ
+\Ô\ÚÛÛ™šYÝ\™Y
+
+JHÂˆžHÂˆ\ÚÝXœØÜš\[ÛœÈHÝÜ˜YÙK˜ÛÝ[XÝ]™T\ÚÝXœØÜš\[ÛœÊ
+NÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ÚX[HÛÝ[XÝ]™T\ÚÝXœØÜš\[ÛœÈ˜Z[Yˆ‹\œŠNÂˆBˆBˆÛÛœÝÚ]ÚT˜]ÈBˆ›ØÙ\ÜË™[‹”RSÐVWÑÒUÐÓÓSRUÔÒHˆ›ØÙ\ÜË™[‹”RSÐVWÑÒUÐÓÓSRUÓQTÔÐQÑHˆ›ØÙ\ÜË™[‹‘ÒUÐÓÓSRUˆˆŽÂˆËÈ™Y™\ˆ[ÒHÚ[ˆ™\Ù[È˜[˜XÚÈÈš\œÝÚÙ[ˆÙˆÛÛ[Z]Y\ÜØYÙK‚ˆÛÛœÝÚ]ÚHHÚ]ÚT˜]Ëš[J
+BˆÈ
+Ú]ÚT˜]Ë›X]Ú
+×–ÌNXKY—^ÍËKÚJOË–ÌHÚ]ÚT˜]Ëš[J
+KœÛXÙJ
+JBˆˆ[™Yš[™YÂˆÛÛœÝ˜Z[Ø^Q[š\›Û›Y[Bˆ›ØÙ\ÜË™[‹”RSÐVWÑS•’T“Ó“QS•ÓSQHˆ›ØÙ\ÜË™[‹”RSÐVWÑS•’T“Ó“QS•ˆ[™Yš[™YÂˆÛÛœÝ\Þ[Y[YH›ØÙ\ÜË™[‹”RSÐVWÑTÖSQS•ÒQ[™Yš[™YÂˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÎˆ™]È]J
+KÒTÓÔÝš[™Ê
+Kˆ\ÚÛÛ™šYÝ\™Yˆ\Ô\ÚÛÛ™šYÝ\™Y
+
+Kˆ[XZ[ÛÛ™šYÝ\™Yˆ\Õ˜[œØXÝ[Û˜[[XZ[ÛÛ™šYÝ\™Y
+
+Kˆ\ÚÝXœØÜš\[ÛœËˆ‹‹ŠÚ]ÚHÈÈÚ]ÚHHˆßJKˆ‹‹Š˜Z[Ø^Q[š\›Û›Y[ÈÈ˜Z[Ø^Q[š\›Û›Y[HˆßJKˆ‹‹Š\Þ[Y[YÈÈ\Þ[Y[YHˆßJKˆJNÂˆJNÂ‚ˆËÈ]]ËYÙ[™\˜]YØ[YHÜÝ\ˆ
+ÝÙY\Ú[Z[š[X[ÜÜÈœ˜Hœ˜[™
+KˆÝ][\ÜÂˆËÈ[XYÙHœ›ÛHÚÜ^\˜[\ÎÈÛX[[‹[Y[[ÜžHØXÚH
+ÈÛ™Èœ›ÝÜÙ\ˆØXÚK‚ˆËÈ\ÙY\È˜[˜XÚÈ\›ÜˆØ]Ú\\HØ[Y\È]]™H›È›Y\‹‚ˆÛÛœÝØ[YTÜÝ\ØXÚHH™]ÈX\Ýš[™ËY™™\Š
+NÂˆÛÛœÝÛ\H
+Îˆ[šÛ›ÝÛ‹Žˆ[X™\ŠNˆÝš[™ÈOˆÝš[™ÊÈÏÈˆŠKœÛXÙJŠNÂˆ\™Ù]
+‹Ø\KÙØ[YK\ÜÝ\ˆ‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝHH™\Kœ]Y\žH\È™XÛÜ™Ýš[™ËÝš[™ÏŽÂˆÛÛœÝ[œ]HÂˆXYÝYNˆÛ\
+K›XYÝYK
+H‘Ø[YH^H‹ˆYÎˆÛ\
+KYË
+H•Ø]Ú\H‹ˆ]Ø^NˆÛ\
+K˜]Ø^KŒ
+H•ÛÛY[‰ÜÈÜÜÈ‹ˆÛYNˆÛ\
+KšÛYKŒ
+H[ˆ]SX™[ˆÛ\
+K™]K
+H•\ÈÙYZÈ‹ˆ[YSX™[ˆÛ\
+K[YK
+H”ÙYH˜\ˆ‹ˆNÂˆÛÛœÝÙ^HH”ÓÓ‹œÝš[™ÚYžJ[œ]
+NÂˆ]™ÈHØ[YTÜÝ\ØXÚK™Ù]
+Ù^JNÂˆYˆ
+\™ÊHÂˆ™ÈH]ØZ]™[™\‘Ø[YTÜÝ\”™Ê[œ]
+NÂˆYˆ
+Ø[YTÜÝ\ØXÚKœÚ^™HˆŒ
+HØ[YTÜÝ\ØXÚK˜ÛX\Š
+NÂˆØ[YTÜÝ\ØXÚKœÙ]
+Ù^K™ÊNÂˆBˆ™\ËœÙ]
+ÛÛ[U\H‹š[XYÙKÜ™ÈŠNÂˆ™\ËœÙ]
+ØXÚKPÛÛ›Û‹œX›XËX^XYÙON[[]]X›HŠNÂˆ™]\›ˆ™\ËœÙ[™
+™ÊNÂˆHØ]Ú
+\œŠHÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆœÜÝ\ˆ™[™\ˆ˜Z[YˆJNÂˆBˆJNÂ‚ˆËÈLŒ0åÍŒÌœ˜[™YÛØÚX[Ø\™È
+™\XÙH˜]È›Y\‹ÛÙÛÈ[ˆÙÎš[XYÙJBˆ\™Ù]
+‹Ø\KÛÙËÙ]™[ÎšY‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆYˆ
+S[X™\‹š\Ñš[š]JY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YYˆJNÂˆÛÛœÝÈ™[™\‘]™[ÙÐØ\™HH]ØZ][\Ü
+‹‹ÛÙÐØ\™ÈŠNÂˆÛÛœÝYˆH]ØZ]™[™\‘]™[ÙÐØ\™
+Y
+NÂˆYˆ
+XYŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘]™[›Ý›Ý[™ˆJNÂˆ™\ËœÙ]
+ÂˆÛÛ[U\HŽˆš[XYÙKÜ™È‹ˆØXÚKPÛÛ›ÛŽˆœX›XËX^XYÙOLÍŒÝ[K]Ú[K\™]˜[Y]ON‹ˆJNÂˆ™]\›ˆ™\ËœÙ[™
+YŠNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÙËÙ]™[˜Z[Yˆ‹\œŠNÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý™[™\ˆØ\™ˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÙËÜXÙKÎšY‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆYˆ
+S[X™\‹š\Ñš[š]JY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YYˆJNÂˆÛÛœÝÈ™[™\”XÙSÙÐØ\™HH]ØZ][\Ü
+‹‹ÛÙÐØ\™ÈŠNÂˆÛÛœÝYˆH]ØZ]™[™\”XÙSÙÐØ\™
+Y
+NÂˆYˆ
+XYŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÙH›Ý›Ý[™ˆJNÂˆ™\ËœÙ]
+ÂˆÛÛ[U\HŽˆš[XYÙKÜ™È‹ˆØXÚKPÛÛ›ÛŽˆœX›XËX^XYÙOLÍŒÝ[K]Ú[K\™]˜[Y]ON‹ˆJNÂˆ™]\›ˆ™\ËœÙ[™
+YŠNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÙËÜXÙH˜Z[Yˆ‹\œŠNÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý™[™\ˆØ\™ˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÙËÜ›Ùš[KÎ\Ù\›˜[YH‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\Kœ\˜[\Ë\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆYˆ
+]\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y\Ù\›˜[YHˆJNÂˆÛÛœÝÈ™[™\”›Ùš[SÙÐØ\™HH]ØZ][\Ü
+‹‹ÛÙÐØ\™ÈŠNÂˆÛÛœÝYˆH]ØZ]™[™\”›Ùš[SÙÐØ\™
+\Ù\›˜[YJNÂˆYˆ
+XYŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”›Ùš[H›Ý›Ý[™ˆJNÂˆ™\ËœÙ]
+ÂˆÛÛ[U\HŽˆš[XYÙKÜ™È‹ˆØXÚKPÛÛ›ÛŽˆœX›XËX^XYÙOLNÝ[K]Ú[K\™]˜[Y]ON‹ˆJNÂˆ™]\›ˆ™\ËœÙ[™
+YŠNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÙËÜ›Ùš[H˜Z[Yˆ‹\œŠNÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý™[™\ˆØ\™ˆJNÂˆBˆJNÂ‚ˆ][™[˜ÙRXˆH[š]][™[˜ÙUÜÊÙ\™\ŠNÂˆÝÜ˜YÙKœÞ[˜ÔÚ]SÝÛ™\”Ü›Û[Ê
+NÂ‚ˆËÈXXÚ[™K\™XYX›H\ØÛÝ™\žH›ÜˆÙX\˜Ú[™Ú[™\È[™RHÜ˜]Û\œË‚ˆ\™Ù]
+‹Û\Ë‹
+Ü™\K™\ÊHOˆÂˆ™\Ë\J^ÜZ[ŽÈÚ\œÙ]]]‹NŠKœÙ[™
+Z[\Õ
+Ù]]™Q]™[Ñ›Ü”Ù[Ê
+JJNÂˆJNÂ‚ˆ\™Ù]
+‹ÜÚ][X\ž[‹
+Ü™\K™\ÊHOˆÂˆ™\Ë\J˜\XØ][Û‹Þ[ÈÚ\œÙ]]]‹NŠKœÙ[™
+Z[Ú][X\[
+Ù]]™Q]™[Ñ›Ü”Ù[Ê
+JJNÂˆJNÂ‚ˆ\™Ù]
+‹Ü›Ø›ÝË‹
+Ü™\K™\ÊHOˆÂˆ™\Ë\J^ÜZ[ŽÈÚ\œÙ]]]‹NŠKœÙ[™
+Z[›Ø›ÝÕ
+
+JNÂˆJNÂ‚ˆËÈÙ\ÜÚ[ÛˆZY]Ø\™HH\œÚ\ÝYÛˆHØ[YHÔS]H›Û[YH\È\Ù\ˆ]Bˆ\\ÙJÜ™X]TÙ\ÜÚ[Û“ZY]Ø\™JÜ[]JJNÂˆ™YÚ\Ý\ÛÛ[][š]T›Ý]\Ê\™\]Z\™P]]
+NÂˆ™YÚ\Ý\”]›Ü›UŒJ\
+NÂ‚ˆËÈ8¥ 8¥ 8¥ ’SHTÐQÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆËÈÜÝ\ˆ[XYÙH\ØY
+]™[ÝX›Z]ÈÛZ[HY]
+Bˆ\œÜÝ
+‹Ø\KÝ\ØYÜÜÝ\ˆ‹™\]Z\™P]]\ØYœÚ[™ÛJœÜÝ\ˆŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Èš[HÜˆ[˜[Y\H
+œËÜ™ËÙÚY‹ÝÙXœX^PŠHˆJNÂˆ™\ËšœÛÛŠÈ\›ˆÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_XJNÂˆJNÂˆ\œÜÝ
+‹Ø\KÝ\ØYÛY\ÜØYÙKX]XÚY[‹™\]Z\™P]]\ØYœÚ[™ÛJ˜]XÚY[ŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙHH”Ë‘ËÒQ‹ÜˆÙX”[XYÙH\ÈPˆˆJNÂˆ™\ËšœÛÛŠÈ\›ˆÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_X˜[YNˆ™\K™š[K›ÜšYÚ[˜[˜[YHJNÂˆJNÂ‚ˆËÈ›Y\ˆ]]Ùš[ˆHÝX›Z]\ˆ\ØYÈHÜÝ\ŽÈÙH™XY]
+ÐÔˆ
+Èš\Ú[ÛŠH[™ˆËÈ™]\›ˆÕQÑÑTÕQ›Ü›HšY[È›Üˆ[HÈ™]šY]ËˆÝYÙÙ\Ý[ÛœÈÛ›HH›Ý[™ÂˆËÈ\ÈÜ™X]Y\™NÈH™X[ÝX›Z]Ý[ÛÙ\È›ÝYÚØ\KÜÝX›Z]	ÜÈ[Ù\˜][Û‹‚ˆËÈZ[HØ\È
+ÈHÚ\™Y“QT—ÓWÑTÐP“QÚ[ÝÚ]ÚÙY\š\Ú[ÛˆÛÜÝ›Ý[™Y‚ˆÛÛœÝ›Y\]]Ùš[HÈ^Nˆˆ‹\•\Ù\Žˆ™]ÈX\Ýš[™Ë[X™\Š
+KÛØ˜[ˆNÂˆÛÛœÝ“QT—ÐUUÑ’SÕTÑT—ÑRSHHX]›X^
+K[X™\Š›ØÙ\ÜË™[‹‘“QT—ÐUUÑ’SÕTÑT—ÑRSJHL
+NÂˆÛÛœÝ“QT—ÐUUÑ’SÑÓÐSÑRSHHX]›X^
+K[X™\Š›ØÙ\ÜË™[‹‘“QT—ÐUUÑ’SÑÓÐSÑRSJHŒ
+NÂˆ\œÜÝ
+‹Ø\KÙ›Y\‹X]]Ùš[‹™\]Z\™P]]\Þ[˜È
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆžHÂˆÛÛœÝÙ^HH™]È]J
+KÒTÓÔÝš[™Ê
+KœÛXÙJL
+NÂˆYˆ
+›Y\]]Ùš[™^HOOHÙ^JHÂˆ›Y\]]Ùš[™^HHÙ^NÂˆ›Y\]]Ùš[œ\•\Ù\‹˜ÛX\Š
+NÂˆ›Y\]]Ùš[™ÛØ˜[HÂˆBˆÛÛœÝZYHÝš[™Ê™\KœÙ\ÜÚ[ÛË\Ù\’YÏÈ™\K\Ù\ËšYÏÈ˜[›ÛˆŠNÂˆÛÛœÝ\ÙYH›Y\]]Ùš[œ\•\Ù\‹™Ù]
+ZY
+HÂˆYˆ
+›Y\]]Ùš[™ÛØ˜[H“QT—ÐUUÑ’SÑÓÐSÑRSH\ÙYH“QT—ÐUUÑ’SÕTÑT—ÑRSJHÂˆ™]\›ˆ™\ÂˆœÝ]\ÊŽJBˆšœÛÛŠÈ\œ›ÜŽˆ‘›Y\ˆ]]Ùš[[Z]™XXÚY›ÜˆÙ^HH[ÝHØ[ˆÝ[š[H›Ü›H[ˆX[X[KˆˆJNÂˆB‚ˆÛÛœÝ\ØY\›HÝš[™Ê™\K˜›ÙOË\ØY\›ˆŠNÂˆYˆ
+]\ØY\›œÝ\ÕÚ]
+‹Ý\ØYËÈŠJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ØYH›Y\ˆš\œÝ[ˆ]]Ùš[ˆˆJNÂˆBˆËÈÛÛ™š[™HÈTÐQ×ÑTˆ
+›È˜]™\œØ[
+H[™Ø\Ú^™K‚ˆÛÛœÝš[T]H]š›Ú[ŠTÐQ×ÑT‹]˜˜\Ù[˜[YJ\ØY\›
+JNÂˆYˆ
+Yš[T]œÝ\ÕÚ]
+TÐQ×ÑTŠHYœË™^\ÝÔÞ[˜Êš[T]
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘›Y\ˆ›Ý›Ý[™ˆˆJNÂˆBˆYˆ
+œËœÝ]Þ[˜Êš[T]
+KœÚ^™Hˆ
+ˆL
+ˆL
+HÂˆ™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘›Y\ˆÛÈ\™ÙH
+X^PŠKˆˆJNÂˆB‚ˆÛÛœÝ[XYÙPY™™\ˆHœËœ™XYš[TÞ[˜Êš[T]
+NÂˆÛÛœÝÈØÜ‘›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹ÛØÜˆŠNÂˆÛÛœÝÈÝXÝ\™Q›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹Ü\œÙHŠNÂˆ]˜]Õ^HˆŽÂˆ]ØÜÛÛ™šY[˜ÙNˆ[X™\ˆ[™Yš[™YÂˆžHÂˆÛÛœÝØÜˆH]ØZ]ØÜ‘›Y\Š[XYÙPY™™\ŠNÂˆ˜]Õ^HØÜ‹^ÂˆØÜÛÛ™šY[˜ÙHHØÜ‹˜ÛÛ™šY[˜ÙNÂˆHØ]ÚÂˆÊˆÐÔˆÜ[Û˜[Hš\Ú[Ûˆ™XYÈH[XYÙH\™XÝH
+‹ÂˆBˆÛÛœÝ\œÙHH]ØZ]ÝXÝ\™Q›Y\ŠÈ[XYÙPY™™\‹˜]Õ^ØÜÛÛ™šY[˜ÙHJNÂ‚ˆËÈÛÝ[Û›HHÝXØÙ\ÜÙ[™XYYØZ[œÝHØ\‚ˆ›Y\]]Ùš[œ\•\Ù\‹œÙ]
+ZY\ÙY
+ÈJNÂˆ›Y\]]Ùš[™ÛØ˜[
+ÏHNÂ‚ˆËÈÚ\HÈHÝX›Z]›Ü›H
+]][YK[ØØ[–VVVKSSKQ›[HŠK‚ˆÛÛœÝ]TÝ\H\œÙKœÝ\Ù]HÈ	Ü\œÙKœÝ\Ù]_U	Ü\œÙK[YHŒŒNŒŸXˆ[ÂˆÛÛœÝ]Q[™H\œÙK™[™Ù]HÈ	Ü\œÙK™[™Ù]_UŽŒˆ[Âˆ™]\›ˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÛÛ™šY[˜ÙNˆ\œÙK˜ÛÛ™šY[˜ÙKˆ[Ù[ˆ\œÙK›[Ù[ˆšY[ÎˆÂˆ]Nˆ\œÙK]Kˆ\ØÜš\[ÛŽˆ\œÙK™\ØÜš\[Û‹ˆ™[YS˜[YNˆ\œÙK™[YKˆY™\ÜÎˆ\œÙK˜Y™\ÜËˆ]TÝ\ˆ]Q[™ˆXÚÙ]\›ˆ\œÙK\›ˆKˆJNÂˆHØ]Ú
+\œŠHÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý™XY]›Y\ˆHX\ÙHš[H›Ü›H[ˆX[X[KˆˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\ØYÜÜÝ\ˆ‹™\]Z\™PYZ[‹\ØYœÚ[™ÛJœÜÝ\ˆŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Èš[HÜˆ[˜[Y\H
+œËÜ™ËÙÚY‹ÝÙXœX^PŠHˆJNÂˆ™\ËšœÛÛŠÈ\›ˆÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_XJNÂˆJNÂ‚ˆËÈ›Ùš[HÝÈ\ØY
+ÛY[Ù[™È™KXÜ›ÜYÚ\˜ÛH”QÈœ›ÛH]˜]\‘Y]ÜŠBˆ\œÜÝ
+‹Ø\KÝ\ØYØ]˜]\ˆ‹™\]Z\™P]]\ØYœÚ[™ÛJ˜]˜]\ˆŠK\Þ[˜È
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Èš[HÜˆ[˜[Y\HˆJNÂˆÛÛœÝ\›HÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_XÂˆ™\ËšœÛÛŠÈ\›JNÂˆJNÂ‚ˆËÈ›Ùš[HÛÝ™\ˆ[XYÙH\ØY
+[[XYÙNÈÛY[ÝÜ™\ÈÜ›ÜÜÜÚ][ÛˆY]Y]HÙ\\˜][JBˆ\œÜÝ
+‹Ø\KÝ\ØYØÛÝ™\ˆ‹™\]Z\™P]]\ØYœÚ[™ÛJ˜ÛÝ™\ˆŠK\Þ[˜È
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Èš[HÜˆ[˜[Y\HˆJNÂˆÛÛœÝ\›HÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_XÂˆ™\ËšœÛÛŠÈ\›JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÝ\ØYÙÚY[™È‹™\]Z\™P]]\ØY˜\œ˜^JœÝÜÈ‹ŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆÛÛœÝš[\ÈH\œ˜^Kš\Ð\œ˜^J™\K™š[\ÊHÈ™\K™š[\Èˆ×NÂˆYˆ
+Yš[\Ë›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ØYHÜˆˆ[XYÙHš[\È
+œËÜ™ËÙÚY‹ÝÙXœX^PˆXXÚ
+HˆJNÂˆ™\ËšœÛÛŠÈ\›Îˆš[\ËœÛXÙJŠK›X\
+
+š[Nˆ[žJHOˆÝ\ØYËÉÙš[K™š[[˜[Y_X
+HJNÂˆJNÂˆ\œÜÝ
+‹Ø\KÝ\ØYÜÙ[ˆ‹™\]Z\™P]]\ØY˜\œ˜^JœÝÜÈ‹ŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆÛÛœÝš[\ÈH\œ˜^Kš\Ð\œ˜^J™\K™š[\ÊHÈ™\K™š[\Èˆ×NÂˆYˆ
+Yš[\Ë›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ØYHÈˆ[XYÙHš[\È
+œËÜ™ËÙÚY‹ÝÙXœX^PˆXXÚ
+HˆJNÂˆ™\ËšœÛÛŠÈ\›Îˆš[\ËœÛXÙJŠK›X\
+
+š[Nˆ[žJHOˆÝ\ØYËÉÙš[K™š[[˜[Y_X
+HJNÂˆJNÂ‚ˆËÈX›XÈ“Y\ÜØYÙHYHˆÈÜÛœÛÜœÚ\]ÚÈÝ\ÝÛHÜ™\ˆ›Ü›HH›ÈÙÚ[ˆ™\]Z\™Y[™È[ˆÝÛ™\ˆ\ÚÈÛ›K‚ˆ\œÜÝ
+‹Ø\KØÛÛXÝÛY\ÜØYÙH‹ÛÛXÝ\ØY˜\œ˜^J˜]XÚY[È‹ÊK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆÛÛœÝÛ™^\ÝHÝš[™Ê™\K˜›ÙOË˜ÛÛ\[žHˆŠKš[J
+NÂˆYˆ
+Û™^\Ý
+H™]\›ˆ™\ËšœÛÛŠÈÚÎˆYHJNÈËÈ›Ýš[YHY[ˆšY[HÚ[[H›Ü‚ˆÛÛœÝÚ[™˜]ÈHÝš[™Ê™\K˜›ÙOËšÚ[™›Y\ÜØYÙHŠKš[J
+KÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝÚ[™BˆÚ[™˜]ÈOOHœÜÛœÛÜˆˆÈœÜÛœÛÜˆˆ\ÈÛÛœÝˆˆÚ[™˜]ÈOOH›Ü™\ˆˆÈ›Ü™\ˆˆ\ÈÛÛœÝˆˆ›Y\ÜØYÙHˆ\ÈÛÛœÝÂˆÛÛœÝ˜[YHHÝš[™Ê™\K˜›ÙOË›˜[YHˆŠKš[J
+KœÛXÙJLŒ
+NÂˆÛÛœÝ[XZ[HÝš[™Ê™\K˜›ÙOË™[XZ[ˆŠKš[J
+KœÛXÙJŒ
+NÂˆÛÛœÝÛ™HHÝš[™Ê™\K˜›ÙOËœÛ™HˆŠKš[J
+KœÛXÙJ
+NÂˆÛÛœÝY\ÜØYÙHHÝš[™Ê™\K˜›ÙOË›Y\ÜØYÙHˆŠKš[J
+KœÛXÙJ
+NÂˆÛÛœÝ\Ú[™\ÜÓ˜[YHHÝš[™Ê™\K˜›ÙOË˜\Ú[™\ÜÓ˜[YHˆŠKš[J
+KœÛXÙJMŒ
+NÂˆÛÛœÝ[™Ý™YYYHÝš[™Ê™\K˜›ÙOË›[™Ý™YYYˆŠKš[J
+KœÛXÙJLŒ
+NÂˆÛÛœÝÜÛœÛÜœÚ\\HHÝš[™Ê™\K˜›ÙOËœÜÛœÛÜœÚ\\HˆŠKš[J
+KœÛXÙJ
+NÂˆÛÛœÝÚ^™HHÝš[™Ê™\K˜›ÙOËœÚ^™HˆŠKš[J
+KœÛXÙJ
+NÂˆÛÛœÝ[™Ú[™ÔÜXÙHHÝš[™Ê™\K˜›ÙOËš[™Ú[™ÔÜXÙHˆŠKš[J
+KœÛXÙJ
+NÂˆÛÛœÝÙZ[[™ÒZYÚHÝš[™Ê™\K˜›ÙOË˜ÙZ[[™ÒZYÚˆŠKš[J
+KœÛXÙJLŒ
+NÂ‚ˆYˆ
+[˜[YHY[XZ[[Y\ÜØYÙJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“˜[YK[XZ[[™Y\ÜØYÙH\™H™\]Z\™YˆˆJNÂˆBˆYˆ
+Ú[™OOHœÜÛœÛÜˆˆ	‰ˆ
+X\Ú[™\ÜÓ˜[YH[[™Ý™YYY
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ú[™\ÜÈ˜[YH[™[™ÝÙˆ[YH™YYY\™H™\]Z\™YˆˆJNÂˆBˆYˆ
+Ú[™OOH›Ü™\ˆˆ	‰ˆ
+\Ú^™HZ[™Ú[™ÔÜXÙHXÙZ[[™ÒZYÚ
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”Ú^™K[™Ú[™ÈÜXÙK[™ÙZ[[™ÈZYÚ\™H™\]Z\™Y›Üˆ[ˆÜ™\ˆ[œ]Z\žKˆˆJNÂˆBˆYˆ
+K×–×—ÐJÐ×—ÐJ×–×—ÐJÉË\Ý
+[XZ[
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘[\ˆH˜[Y[XZ[Y™\ÜËˆˆJNÂˆB‚ˆÛÛœÝš[\ÈH\œ˜^Kš\Ð\œ˜^J™\K™š[\ÊHÈ™\K™š[\Èˆ×NÂˆÛÛœÝ]XÚY[\›ÈHš[\Ë›X\
+
+š[Nˆ[žJHOˆÝ\ØYËÉÙš[K™š[[˜[Y_X
+NÂ‚ˆÛÛœÝYÙU\›HÝš[™Ê™\K˜›ÙOËœYÙU\›™\K™Ù]
+œ™Y™\™\ˆŠH‹ØX›Ý]ŠKœÛXÙJL
+NÂˆÛÛœÝ[]™\™YHÝÜ˜YÙKœÙ[™Ü›Û[ÐÛÛXÝY\ÜØYÙJÂˆÚ[™ˆ˜[YKˆ[XZ[ˆÛ™NˆÛ™H[™Yš[™YˆY\ÜØYÙKˆ\Ú[™\ÜÓ˜[YNˆ\Ú[™\ÜÓ˜[YH[™Yš[™Yˆ[™Ý™YYYˆ[™Ý™YYY[™Yš[™YˆÜÛœÛÜœÚ\\NˆÜÛœÛÜœÚ\\H[™Yš[™YˆÚ^™NˆÚ^™H[™Yš[™Yˆ[™Ú[™ÔÜXÙNˆ[™Ú[™ÔÜXÙH[™Yš[™YˆÙZ[[™ÒZYÚˆÙZ[[™ÒZYÚ[™Yš[™Yˆ]XÚY[\›ËˆYÙU\›ˆJNÂˆYˆ
+Y[]™\™Y
+H™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý[]™\ˆHY\ÜØYÙHšYÚ›ÝËˆˆJNÂˆ›ÚYÙ[™ÝÛ™\‘\ÚÓ›ÝYšXØ][ÛŠ
+K˜Ø]Ú
+\œˆOˆÂˆÛÛœÛÛK™\œ›ÜŠ–Ù[XZ[HÝÛ™\ˆ\ÚÈ›ÝYšXØ][Ûˆ˜Z[Yˆ‹\œˆ[œÝ[˜Ù[Ùˆ\œ›ÜˆÈ\œ‹›Y\ÜØYÙHˆ\œŠNÂˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈÙ\™H\ØYYš[\ÈÝ]XØ[H
+TÓK\ØY™HHÈ›Ý\ÙH™\]Z\™J
+JBˆ\\ÙJ‹Ý\ØYÈ‹^™\ÜËœÝ]XÊTÐQ×ÑTŠJNÂ‚ˆËÈ8¥ 8¥ 8¥ SSUPÔÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KØ[˜[]XÜËÜYÙ]šY]È‹
+™\K™\ÊHOˆÂˆÛÛœÝØÚ[XHH‹›Øš™XÝ
+Âˆ]ˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠJK›X^
+
+Kˆš\Ú]Ü’Yˆ‹œÝš[™Ê
+Kš[J
+K›Z[Š
+K›X^
+
+KˆÙ\ÜÚ[Û’Yˆ‹œÝš[™Ê
+Kš[J
+K›Z[Š
+K›X^
+
+Kˆ™Y™\œ™\Žˆ‹œÝš[™Ê
+Kš[J
+K›X^
+L
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ]šXÙU\Nˆ‹™[[JÈ›[Øš[H‹™\ÚÝÜ‹X›]—JK›Ü[Û˜[
+
+K›[X›J
+Kˆ\Ù\’Yˆ‹›[X™\Š
+Kš[
+
+KœÜÚ]]™J
+K›Ü[Û˜[
+
+K›[X›J
+KˆJNÂˆžHÂˆÛÛœÝ]HHØÚ[XKœ\œÙJ™\K˜›ÙJNÂˆÛÛœÝÚÈH™XÛÜ™YÙUšY]ÊÜ[]KÂˆ]ˆ]Kœ]ˆš\Ú]Ü’Yˆ]Kš\Ú]Ü’YˆÙ\ÜÚ[Û’Yˆ]KœÙ\ÜÚ[Û’Yˆ™Y™\œ™\Žˆ]Kœ™Y™\œ™\‹ˆ]šXÙU\Nˆ]K™]šXÙU\Kˆ\Ù\’Yˆ]K\Ù\’YÏÈ™\KœÙ\ÜÚ[ÛË\Ù\’YÏÈ[ˆJNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\ÊŒ
+K™[™
+
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]ÚÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y[˜[]XÜÈ^[ØYˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØ[˜[]XÜËÜ›ÙXÝY]™[‹
+™\K™\ÊHOˆÂˆÛÛœÝØÚ[XHH‹›Øš™XÝ
+Âˆ]™[˜[YNˆ‹™[[J“ÑPÕÑU‘S•ÓSQTÊKˆÝ\™˜XÙNˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠJK›X^
+Œ
+Kœ™YÙ^
+×–ØK^ŒNN—ËWJÉÊKˆ˜[YNˆ‹›[X™\Š
+K››Û›™YØ]]™J
+K›X^
+×ÍŒÌ
+K›Ü[Û˜[
+
+K›[X›J
+Kˆš\Ú]Ü’Yˆ‹œÝš[™Ê
+Kš[J
+K›Z[Š
+K›X^
+
+KˆÙ\ÜÚ[Û’Yˆ‹œÝš[™Ê
+Kš[J
+K›Z[Š
+K›X^
+
+KˆJNÂˆžHÂˆÛÛœÝ]HHØÚ[XKœ\œÙJ™\K˜›ÙJNÂˆÛÛœÝÚÈH™XÛÜ™›ÙXÝ]™[
+Ü[]KÈ‹‹™]K\Ù\’Yˆ™\KœÙ\ÜÚ[ÛË\Ù\’YÏÈ[JNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\ÊŒ
+K™[™
+
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]ÚÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y[˜[]XÜÈ^[ØYˆJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ U‘S•È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÙ]™[È‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ^HHH™\Kœ]Y\žNÂˆËÈÛÛ\ÙHØ[YKY^KÜØ[YK][YH\XØ]\ÈÛÈHX›XÈ›Ø\™™]™\ˆÚÝÜÈBˆËÈØ[YH]™[ÚXÙH
+›Û‹Y\ÝXÝ]™H8 %›Ý[™È\È[]Yœ›ÛHHŠK‚ˆ]]ÈHY\Q]™[Ê^[™][Q^Q]™[ÊÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJJJNÂˆYˆ
+\[Ùˆ^HOOHœÝš[™Èˆ	‰ˆ^K›[™Ýˆ
+HÂˆ]ÈH]Ë™š[\Š]Oˆ]™^SÙ•ÙYZÈOOH^JNÂˆBˆÛÛœÝ[™[™ÐÛZ[RYÈH™]ÈÙ]
+ÝÜ˜YÙK™Ù][™[™ÐÛZ[Q]™[YÊ
+JNÂˆÛÛœÝÙXœÚ]\ÈH™[YUÙXœÚ]R[™^
+
+NÂˆ™\ËšœÛÛŠ]Ë›X\
+]OˆX›XÑ]™[
+][™[™ÐÛZ[RYËÙXœÚ]\ÊJJNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆY™][YH]™[ÛÝ[›ÜˆHX›Ý]YÙH8 %]™\žH\Ý[˜Ý]™[HÚ]H\Âˆ
+ˆ]™\ˆX›\ÚY
+U‘H›ÝÈÜˆ™]š[Ý\ÛHX›XÈ[ˆ‘SSÕ‘Q
+KKY\YÛÂˆ
+ˆØ[YKY^KÜØ[YK][YHÝX›\ÈÛÝ[Û˜ÙKˆQSˆ˜YÈÙ\™H™]™\ˆX›XË‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KÙ]™[ËÝÝ[‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝX›\ÚYHÝÜ˜YÙBˆ™Ù]]™[ÊßJBˆ™š[\ŠHOˆKœÝ]\ÈOOH“U‘HˆKœÝ]\ÈOOH”‘SSÕ‘QŠNÂˆÛÛœÝÝ[H™]ÈÙ]
+X›\ÚY›X\
+HOˆ]™[Y\RÙ^JJJJKœÚ^™NÂˆ™\ËšœÛÛŠÈÝ[JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÝ[˜ÛZ[YY‹
+™\K™\ÊHOˆÂˆÛÛœÝ[™[™ÐÛZ[RYÈH™]ÈÙ]
+ÝÜ˜YÙK™Ù][™[™ÐÛZ[Q]™[YÊ
+JNÂˆÛÛœÝÙXœÚ]\ÈH™[YUÙXœÚ]R[™^
+
+NÂˆÛÛœÝ]ÈHÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJK™š[\Š]O‚ˆ]š\ÐÛZ[XX›H	‰ˆY]˜ÛZ[YYžH	‰ˆ\[™[™ÐÛZ[RYËš\Ê]šY
+Bˆ	‰ˆ\ÔX›XÑ]™[š\ÚX›U[™\”šYPØ\
+]
+Bˆ
+NÂˆ™\ËšœÛÛŠ]Ë›X\
+]OˆX›XÑ]™[
+][™[™ÐÛZ[RYËÙXœÚ]\ÊJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËØ][™[˜ÙK\Ý[[X\šY\È‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]][™[˜ÙTÝ[[X\šY\Ê
+JNÂˆJNÂ‚ˆËÈÛY\YÙHÛÝ[\œÈ™YY™YH[X™\œË›ÝH[]™[\™XÝÜžK[™ˆËÈ][™[˜ÙH^[ØYËˆ[ˆ\XÝ[\‹Ø\KÙ\™XÝÜžH[œšXÚ\È]™\žHXÙBˆËÈÚ]]™[Ë›Û[Ý\œË›Ø\™Ë›ÛÝÙ\œË[™šY]Ù\ˆÝ]NÈ\Ú[™È]›Ü‚ˆËÈHÛÝ[XYHHÝš\ØZ]Ù]™\˜[ÙXÛÛ™ÈÛˆÝ\Ú\ÙH[›™XÙ\ÜØ\žHÛÜšË‚ˆ\™Ù]
+‹Ø\KÚÛYKÜÝ]È‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝ›ÝÈH]K››ÝÊ
+NÂˆÛÛœÝÚ[™ÝÑ[™H›ÝÈ
+ÈÈ
+ˆ
+ˆŒ
+ˆŒ
+ˆLÂˆÛÛœÝ]™Q]™[ÈHY\Q]™[Ê^[™][Q^Q]™[ÊÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJJJNÂˆÛÛœÝ]™[ÛÝ[H]™Q]™[Ë™š[\Š]™[OˆÂˆÛÛœÝÝ\H\œÙTXÚYšXÑ]U[YJ]™[™]TÝ\
+NÂˆYˆ
+Ý\OH[
+H™]\›ˆ˜[ÙNÂˆÛÛœÝ[™H\œÙTXÚYšXÑ]U[YJ]™[™]Q[™
+HÏÈÝ\Âˆ™]\›ˆ[™H›ÝÈ	‰ˆÝ\HÚ[™ÝÑ[™ÂˆJK›[™ÝÂˆÛÛœÝXÙ\ÐÛÝ[HÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\Ê
+K›[™ÝÂˆÛÛœÝÛÚ[™ÐÛÝ[HØš™XÝ˜[Y\ÊÝÜ˜YÙK™Ù]][™[˜ÙTÝ[[X\šY\Ê
+JBˆœ™YXÙJ
+Ý[KÝ[[X\žJHOˆÝ[H
+È
+Ý[[X\žOË˜ÛÝ[ÏÈ
+K
+NÂ‚ˆ™\ËœÙ]
+ØXÚKPÛÛ›Û‹œX›XËX^XYÙOLÌÝ[K]Ú[K\™]˜[Y]OLLŒŠNÂˆ™\ËšœÛÛŠÈ]™[ÛÝ[XÙ\ÐÛÝ[ÛÚ[™ÐÛÝ[JNÂˆJNÂ‚ˆËÈ8¥ 8¥ ™^\YÙHØ^\Ú[ZÙ\Îˆ[›Ûž[[Ý\È™^Ú]Y›Üˆ\ÈˆÛÝ[\ˆ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆÛÛœÝÐVTÒS•ÒQH×–ØK^ŒNWVØK^ŒNKW^ÌÎ_IÎÂˆÛÛœÝ[\Ø^\Ú[ZÙHH
+YˆÝš[™Ë[Nˆ[X™\ŠHOˆÂˆÜ[]Kœ™\\™JS”ÑT•ÔˆQÓ“Ô‘HS•ÈØ^\Ú[ÛZÙ\È
+Ø^\Ú[ÚYÛÝ[
+HSQTÈ
+Ë
+X
+Kœ[ŠY
+NÂˆÜ[]Kœ™\\™JTUHØ^\Ú[ÛZÙ\ÈÑUÛÝ[HPV
+ÛÝ[
+ÈÊHÒT‘HØ^\Ú[ÚYHØ
+Kœ[Š[KY
+NÂˆÛÛœÝ›ÝÈHÜ[]Kœ™\\™JÑSPÕÛÝ[”“ÓHØ^\Ú[ÛZÙ\ÈÒT‘HØ^\Ú[ÚYHØ
+K™Ù]
+Y
+H\ÈÈÛÝ[ˆ[X™\ˆH[™Yš[™YÂˆ™]\›ˆ›ÝÏË˜ÛÝ[ÏÈÂˆNÂ‚ˆ\™Ù]
+‹Ø\KÛ™^ÛZÙ\È‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝ›ÝÜÈHÜ[]Kœ™\\™JÑSPÕØ^\Ú[ÚYTÈYÛÝ[”“ÓHØ^\Ú[ÛZÙ\Ø
+K˜[
+
+H\È\œ˜^OÈYˆÝš[™ÎÈÛÝ[ˆ[X™\ˆOŽÂˆÛÛœÝÝ]ˆ™XÛÜ™Ýš[™Ë[X™\ˆHßNÂˆ›Üˆ
+ÛÛœÝˆÙˆ›ÝÜÊHÝ]Ü‹šYHH‹˜ÛÝ[Âˆ™\ËšœÛÛŠÝ]
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛ™^ÛZÙ\ËÎšY‹
+™\K™\ÊHOˆÂˆÛÛœÝYHÝš[™Ê™\Kœ\˜[\ËšYˆŠKÓÝÙ\Ø\ÙJ
+NÂˆYˆ
+UÐVTÒS•ÒQ\Ý
+Y
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜˜YYˆJNÂˆ™\ËšœÛÛŠÈYÛÝ[ˆ[\Ø^\Ú[ZÙJYJHJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÛ™^ÛZÙ\ËÎšY‹
+™\K™\ÊHOˆÂˆÛÛœÝYHÝš[™Ê™\Kœ\˜[\ËšYˆŠKÓÝÙ\Ø\ÙJ
+NÂˆYˆ
+UÐVTÒS•ÒQ\Ý
+Y
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜˜YYˆJNÂˆ™\ËšœÛÛŠÈYÛÝ[ˆ[\Ø^\Ú[ZÙJYLJHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛYKX™XXÚ\È‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™\Ý[H]ØZ]Ù]YP™XXÚ\ÔÛ˜\ÚÝ
+
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛYKX™XXÚ\È˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØY™XXÚÛÛ™][ÛœÈˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛYKX™XXÚ\ËÜ™Yœ™\Ú‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™\Ý[H]ØZ]›Ü˜ÙT™Yœ™\ÚYP™XXÚ\ÔÛ˜\ÚÝ
+
+NÂˆ™\ËšœÛÛŠÂˆ]Nˆ™\Ý[™]KˆÝ[Nˆ˜[ÙKˆœ›ÛPØXÚNˆ˜[ÙKˆ˜]S[Z]YˆH\™\Ý[œ˜]S[Z]YˆJNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ”ÔÕØ\KÛYKX™XXÚ\ËÜ™Yœ™\Ú˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý™Yœ™\Ú™XXÚÛÛ™][ÛœÈˆJNÂˆBˆJNÂ‚ˆËÈÕUˆ
+Ù™šXÚX[Ý]ÛÜˆÛÛ™][ÛœÈ
+ÈØ][ÙÊBˆ\™Ù]
+‹Ø\KÛÝ]ˆ‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆžHÂˆ™\ËšœÛÛŠ]ØZ]Ù]Ý]”Û˜\ÚÝ
+
+JNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]ˆ˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆ“Ý]ÛÜˆÛÛ™][ÛœÈ\™H[\Ü˜\š[H[˜]˜Z[X›HˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹Ù]Z[È‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝYH\[Ùˆ™\Kœ]Y\žKœXÙHOOHœÝš[™ÈˆÈ™\Kœ]Y\žKœXÙHˆˆŽÂˆYˆ
+ZYY›[™ÝˆN
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y\Ý[˜][ÛˆˆJNÂˆÛÛœÝ]HH]ØZ]Ù]Ý]‘]Z[ÊY
+]ØZ]Ù]Ý]”Û˜\ÚÝ
+
+JK™]JNÂˆYˆ
+Y]JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•[šÛ›ÝÛˆ\Ý[˜][ÛˆˆJNÂˆ™\ËœÙ]XY\ŠØXÚKPÛÛ›Û‹››Ë\ÝÜ™HŠNÂˆ™\ËšœÛÛŠ]JNÂˆHØ]ÚÈ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆ”ÜÝ]Z[È[˜]˜Z[X›HˆJNÈBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹Ù™YY‹\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆ™\ËœÙ]XY\ŠØXÚKPÛÛ›Û‹œš]˜]K›Ë\ÝÜ™HŠNÂˆžHÂˆÛÛœÝÜÛ˜\ÚÝÙX]\—HH]ØZ]›ÛZ\ÙK˜[
+ÙÙ]Ý]”Û˜\ÚÝ
+
+KÙ]Ý]‘™YYÙX]\Š
+WJNÂˆ™\ËšœÛÛŠÈ][\ÎˆË‹‹ÙX]\‹š][\Ë‹‹™Ù]Ý]ÛÛ[][š]Q™YY
+Û˜\ÚÝ™]K™\KœÙ\ÜÚ[ÛË\Ù\’Y
+WKˆ™]ÚY]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+KÙX]\•[˜]˜Z[X›NˆÙX]\‹[˜]˜Z[X›KÙX]\•\]Y]ˆÙX]\‹\]Y]JNÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]‹Ù™YY˜Z[Yˆ‹\œ›ÜŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆ“Ý]ÛÜˆ\]\È\™H[\Ü˜\š[H[˜]˜Z[X›HˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹Ü™Yœ™\Ú‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™\Ý[H]ØZ]›Ü˜ÙT™Yœ™\ÚÝ]”Û˜\ÚÝ
+
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ”ÔÕØ\KÛÝ]‹Ü™Yœ™\Ú˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆ“Ý]ÛÜˆÛÛ™][ÛœÈ\™H[\Ü˜\š[H[˜]˜Z[X›HˆJNÂˆBˆJNÂ‚ˆÛÛœÝÛ›ÝÛ“Ý]”XÙHH\Þ[˜È
+˜[YNˆ[šÛ›ÝÛŠHOˆÂˆÛÛœÝXÙRYHÝš[™Ê˜[YHˆŠKš[J
+NÂˆYˆ
+\XÙRYXÙRY›[™ÝˆN
+H™]\›ˆ[ÂˆÛÛœÝÛ˜\ÚÝH
+]ØZ]Ù]Ý]”Û˜\ÚÝ
+
+JK™]NÂˆÛÛœÝÛ›ÝÛˆHÂˆ‹‹œÛ˜\ÚÝ™\Ý[˜][ÛœË›X\
+XÙHOˆXÙKšY
+Kˆ‹‹œÛ˜\ÚÝ˜Ø][ÙË›X\
+XÙHOˆXÙKšY
+Kˆ‹‹œÛ˜\ÚÝ˜ÛÛ[][š]TÝ^\Ë›X\
+XÙHOˆXÙKšY
+KˆNÂˆ™]\›ˆÛ›ÝÛ‹š[˜ÛY\ÊXÙRY
+HÈXÙRYˆ[ÂˆNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹ØÚXÚÚ[œÈ‹\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\Kœ]Y\žKœXÙJNÂˆÛÛœÝ]HHÝš[™Ê™\Kœ]Y\žK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+\XÙRYZ\Ð[ÝÙY™XXÚÚXÚÚ[‘]J]JJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆXÙHÜˆ]HˆJNÂˆ™\ËšœÛÛŠÙ]Ý]ÚXÚÚ[œÊXÙRY]K™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]‹ØÚXÚÚ[œÈ˜Z[Yˆ‹\œ›ÜŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØYÕUˆÚXÚËZ[œÈˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹ØÚXÚÚ[œÈ‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\K˜›ÙKœXÙRY
+NÂˆÛÛœÝ™\]Y\ÝY]\Îˆ[šÛ›ÝÛ–×HH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙK™]\ÊHÈ™\K˜›ÙK™]\ÈˆÜ™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+WNÂˆÛÛœÝ]\ÎˆÝš[™Ö×HHË‹‹›™]ÈÙ]
+™\]Y\ÝY]\Ë›X\
+
+˜[YNˆ[šÛ›ÝÛŠHOˆÝš[™Ê˜[YJJJWNÂˆÛÛœÝ\œš]˜[Ý\ˆH[X™\Š™\K˜›ÙK˜\œš]˜[Ý\ŠNÂˆÛÛœÝ\\Ý\ˆH[X™\Š™\K˜›ÙK™\\Ý\ŠNÂˆYˆ
+\XÙRY]\Ë›[™ÝOOH]\Ë›[™ÝˆÈ]\ËœÛÛYJ]HOˆZ\Ð[ÝÙY™XXÚÚXÚÚ[‘]J]JJJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙHÛ™HÜˆ[Ü™H˜[YÕUˆÚXÚËZ[ˆ^\ÈˆJNÂˆBˆYˆ
+Z\Õ˜[Yš]™\œ˜]ÒÝ\Š\œš]˜[Ý\ŠHZ\Õ˜[Yš]™\œ˜]Ñ\\Ý\Š\\Ý\‹\œš]˜[Ý\ŠJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙH[ˆ\œš]˜[™]ÙY[ˆØ[H[™\H[™H]\ˆ\\\™HžHLHˆJNÂˆBˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+KœÛXÙJ
+H[ÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“ÕUˆÚXÚËZ[ˆ‹È›ÝNˆ›ÝHˆˆJJH™]\›ŽÂˆÛÛœÝÚXÚÚ[œÈH]\Ë›X\
+]HOˆ\Ù\Ý]ÚXÚÚ[ŠÂˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKXÙRY\œš]˜[Ý\‹\\Ý\‹›ÝKØ[[™\‘]Nˆ]Kˆ\Ð[›Ûž[[Ý\Îˆ›ÛÛX[Š™\K˜›ÙKš\Ð[›Ûž[[Ý\ÊKˆJJNÂˆ™\ËšœÛÛŠÈÚXÚÚ[œÈJNÂˆHØ]Ú
+\œ›ÜŽˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\œ›Ü‹›Y\ÜØYÙHÛÝ[›ÝØ]™HÕUˆÚXÚËZ[ˆˆJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÛÝ]‹ØÚXÚÚ[œËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆYˆ
+Y[]SÝ]ÚXÚÚ[Š[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹ØÚ]‹™\]Z\™P]]\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\Kœ]Y\žKœXÙJNÂˆYˆ
+\XÙRY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆXÙHˆJNÂˆ™\ËšœÛÛŠÙ]Ý]Ú]Y\ÜØYÙ\ÊXÙRY™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]‹ØÚ]˜Z[Yˆ‹\œ›ÜŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØYÕUˆÚ]ˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹ØÚ]‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\K˜›ÙKœXÙRY
+NÂˆÛÛœÝ]HHÝš[™Ê™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+JNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+\XÙRYZ\Ð[ÝÙY™XXÚÚXÚÚ[‘]J]JJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆXÙHÜˆ]HˆJNÂˆYˆ
+X›ÙH›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“Y\ÜØYÙH]\Ý™HHÈLÚ\˜XÝ\œÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“ÕUˆÜ›Ý\Ú]‹È›ÙHJJH™]\›ŽÂˆ™\ËšœÛÛŠÜÝÝ]Ú]Y\ÜØYÙJXÙRY]K™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÙJJNÂˆHØ]Ú
+\œ›ÜŽˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\œ›Ü‹›Y\ÜØYÙHÛÝ[›ÝÙ[™Y\ÜØYÙHˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹Ü˜][™È‹\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\Kœ]Y\žKœXÙJNÂˆYˆ
+\XÙRY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆXÙHˆJNÂˆ™\ËšœÛÛŠÙ]Ý]”XÙT˜][™ÊXÙRY™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]‹Ü˜][™È˜Z[Yˆ‹\œ›ÜŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØY˜][™ÈˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹Ü˜][™È‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\K˜›ÙKœXÙRY
+NÂˆÛÛœÝ˜][™ÈH[X™\Š™\K˜›ÙKœ˜][™ÊNÂˆYˆ
+\XÙRYS[X™\‹š\Ò[YÙ\Š˜][™ÊH˜][™ÈH˜][™ÈˆJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙHH˜][™Èœ›ÛHHÈHˆJNÂˆ™\ËšœÛÛŠ\Ù\Ý]”XÙT˜][™ÊXÙRY™\KœÙ\ÜÚ[Û‹\Ù\’YK˜][™ÊJNÂˆHØ]Ú
+\œ›ÜŽˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\œ›Ü‹›Y\ÜØYÙHÛÝ[›ÝØ]™H˜][™ÈˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛÝ]‹ÝØ[‹\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\Kœ]Y\žKœXÙJNÂˆYˆ
+\XÙRY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆXÙHˆJNÂˆ™\ËšœÛÛŠÙ]Ý]•Ø[ÜÝÊXÙRY™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ‘ÑUØ\KÛÝ]‹ÝØ[˜Z[Yˆ‹\œ›ÜŠNÂˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØY\Ý[˜][ÛˆØ[ˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹ÝØ[‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝXÙRYH]ØZ]Û›ÝÛ“Ý]”XÙJ™\K˜›ÙKœXÙRY
+NÂˆÛÛœÝÜÝÚ[™HÝš[™Ê™\K˜›ÙKœÜÝÚ[™ˆŠNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆÛÛœÝš\]HH™\K˜›ÙKš\]HÈÝš[™Ê™\K˜›ÙKš\]JHˆ[ÂˆYˆ
+\XÙRYVÈ“ÓÒÒS‘×Ñ“Ô—ÐÓÓTS–H‹ÐT”ÓÓ‹•’TÓ“ÕH—Kš[˜ÛY\ÊÜÝÚ[™
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÕUˆÜÝˆJNÂˆYˆ
+X›ÙH›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÜÝ]\Ý™HHÈLÚ\˜XÝ\œÈˆJNÂˆYˆ
+š\]H	‰ˆZ\Ð[ÝÙY™XXÚÚXÚÚ[‘]Jš\]JJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙHHš\^H[ˆH™^ÙYZÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“ÕUˆš\›Ø\™ÜÝ‹È›ÙHJJH™]\›ŽÂˆ™\ËšœÛÛŠÜ™X]SÝ]•Ø[ÜÝ
+ÈXÙRY\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKÜÝÚ[™›ÙKš\]HJJNÂˆHØ]Ú
+\œ›ÜŽˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\œ›Ü‹›Y\ÜØYÙHÛÝ[›ÝÜÝÈ\Ý[˜][ÛˆØ[ˆJNÂˆBˆJNÂ‚ˆ\œ]Ú
+‹Ø\KÛÝ]‹ÝØ[ÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙH›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÜÝ]\Ý™HHÈLÚ\˜XÝ\œÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“ÕUˆš\›Ø\™Y]‹È›ÙHJJH™]\›ŽÂˆYˆ
+]\]SÝ]•Ø[ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÙJJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÜÝ›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂˆ\™[]J‹Ø\KÛÝ]‹ÝØ[ÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆYˆ
+Y[]SÝ]•Ø[ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÜÝ›Ý›Ý[™ˆJNÂˆ™\ËœÝ]\ÊŒ
+K™[™
+
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛÝ]‹ÝØ[ÎšYØÛÛ[Y[È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙH›ÙK›[™ÝˆÌ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÛÛ[Y[]\Ý™HHÈÌÚ\˜XÝ\œÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“ÕUˆ\Ý[˜][ÛˆÛÛ[Y[‹È›ÙHJJH™]\›ŽÂˆ™\ËšœÛÛŠÜ™X]SÝ]•Ø[ÛÛ[Y[
+ÈÜÝYˆ[X™\Š™\Kœ\˜[\ËšY
+K\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÙHJJNÂˆHØ]Ú
+\œ›ÜŽˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\œ›Ü‹›Y\ÜØYÙHÛÝ[›ÝÜÝÛÛ[Y[ˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšY‹
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆYˆ
+\ÕXÚÙ\’ÜÝY\˜Ú]™RY
+]™[Y
+JHÂˆÛÛœÝ›ÝÈHÙ]XÚÙ\’ÜÝY\˜Ú]™T›ÝÊ]™[Y
+NÂˆYˆ
+\›ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\˜Ú]™Q]HXÚÙ\’ÜÝY\˜Ú]™P\Ñ]™[
+›ÝÊNÂˆÛÛœÝ\Ý[™ÈH^[™][Q^Q]™[ÊØ\˜Ú]™Q]JVÌH\˜Ú]™Q]Âˆ™]\›ˆ™\ËšœÛÛŠX›XÑ]™[
+\Ý[™Ë™]ÈÙ]
+
+K™[YUÙXœÚ]R[™^
+
+JJNÂˆBˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+]™[Y
+NÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆËÈX›XÈ]Z[]\ÝX]Ú\ÝˆÛ›HU‘KˆYZ[œÈX^HÜ[ˆQSˆ›Üˆ[Ù\˜][Û‹‚ˆYˆ
+]œÝ]\ÈOOH“U‘Hˆ	‰ˆ\Ù\ÜÚ[Û’\ÐYZ[Š™\JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆBˆËÈX›XÈ]Z[]\ÝX]Ú\ÝˆÝ\™\ÜÈÜÝTšYHÝ\ÈÚ[HHØÚÈ\ÈXÝ]™K‚ˆYˆ
+\Ù\ÜÚ[Û’\ÐYZ[Š™\JH	‰ˆZ\ÔX›XÑ]™[š\ÚX›U[™\”šYPØ\
+]
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆBˆÛÛœÝ[™[™ÐÛZ[RYÈH™]ÈÙ]
+ÝÜ˜YÙK™Ù][™[™ÐÛZ[Q]™[YÊ
+JNÂˆÛÛœÝ^[™YH^[™][Q^Q]™[ÊÙ]JNÂˆÛÛœÝ^HH\[Ùˆ™\Kœ]Y\žK™^HOOHœÝš[™ÈˆÈ™\Kœ]Y\žK™^KÕ\\Ø\ÙJ
+HˆˆŽÂˆËÈ™Y™\ˆ^[™Y\Ý[™ÎÈÈ›Ý˜[˜XÚÈÈ˜]ÈÜÝTšYH›ÝÜÈ›ÜˆX›XË‚ˆÛÛœÝ\Ý[™ÈBˆ
+^HÈ^[™Y™š[™
+HOˆK™^SÙ•ÙYZÈOOH^JHˆ[™Yš[™Y
+Bˆ^[™YÌBˆ
+Ù\ÜÚ[Û’\ÐYZ[Š™\JHÈ]ˆ[
+NÂˆYˆ
+[\Ý[™ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠX›XÑ]™[
+\Ý[™Ë[™[™ÐÛZ[RYË™[YUÙXœÚ]R[™^
+
+JJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÕP“RTÔÒSÓ”È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KÜÝX›Z]‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘]™[ÝX›Z\ÜÚ[Ûˆ‹Âˆ]Nˆ™\K˜›ÙK]Kˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[Û‹ˆ™[YS˜[YNˆ™\K˜›ÙK™[YS˜[YKˆÛZ[T™X\ÛÛŽˆ™\K˜›ÙK˜ÛZ[T™X\ÛÛ‹ˆJJH™]\›ŽÂˆÛÛœÝ˜]Õ\HH™\K˜›ÙK\NÂˆÛÛœÝ\HH˜]Õ\HOOHÓRSHˆÈÓRSH‚ˆˆ˜]Õ\HOOH”ÕQÑÑTÕˆÈ”ÕQÑÑTÕ‚ˆˆ˜]Õ\HOOH”“ÓSÕT—ÐTPÐUSÓˆˆÈ”“ÓSÕT—ÐTPÐUSÓˆ‚ˆˆ“‘U×ÑU‘S•ŽÂˆÛÛœÝ›Û[Ý\”Ý]\ÈH\Ù\‹œ›Û[Ý\”Ý]\È››Û™HŽÂˆÛÛœÝ\ÐYZ[•\Ù\ˆH\Ù\’\ÐYZ[“›ÝÊ\Ù\ŠNÂ‚ˆËÈÝ[™[Û™H›Û[Ý\ˆ\XØ][ÛˆH›È]™[šY[È™YYYˆYˆ
+\HOOH”“ÓSÕT—ÐTPÐUSÓˆŠHÂˆÛÛœÝ˜]Ô›ÛÙ•\›HÝš[™Ê™\K˜›ÙKXÚÙ]\›ˆŠKš[J
+NÂˆÛÛœÝ›ÛÙ•\›HX›XÒ\›
+˜]Ô›ÛÙ•\›
+NÂˆYˆ
+˜]Ô›ÛÙ•\›	‰ˆ
+\›ÛÙ•\›K×šÏÎ—×ËÚK\Ý
+›ÛÙ•\›
+JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘[\ˆH˜[YÎ‹ËÈÜˆ‹ËÈ›ÛÙˆ[šËˆˆJNÂˆBˆÛÛœÝ›ÝÈH™]È]J
+KÒTÓÔÝš[™Ê
+NÂˆÛÛœÝ]HH[œÙ\ÝX›Z\ÜÚ[Û”ØÚ[XKœ\œÙJÂˆ\Nˆ”“ÓSÕT—ÐTPÐUSÓˆ‹ˆ]Nˆ›Û[Ý\ˆ\XØ][ÛŽˆ	Ý\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[Y_Xˆ\ØÜš\[ÛŽˆÝš[™Ê™\K˜›ÙK˜ÛZ[T™X\ÛÛˆ™\K˜›ÙK™\ØÜš\[ÛˆˆŠKš[J
+H“›È]Z[È›ÝšYY‹ˆ™[YS˜[YNˆ“‹ÐH‹ˆ]TÝ\ˆ›ÝËˆ]Q[™ˆ›ÝËˆYÙT™\]Z\™[Y[ˆSÐQÑTÈ‹ˆ]™[\\Îˆ–×H‹ˆYZ\ÜÚ[ÛŽˆ‘”‘QH‹ˆ\ÔX›XÎˆYKˆÝX›Z]\“˜[YNˆ\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[YKˆÝX›Z]\‘[XZ[ˆ\Ù\‹™[XZ[ˆÝX›Z]\“Ü™Îˆ™\K˜›ÙKœÝX›Z]\“Ü™È[ˆÛZ[T™X\ÛÛŽˆÝš[™Ê™\K˜›ÙK˜ÛZ[T™X\ÛÛˆˆŠKš[J
+H[ˆXÚÙ]\›ˆ›ÛÙ•\›ˆJNÂˆÛÛœÝÝXˆHÝÜ˜YÙK˜Ü™X]TÝX›Z\ÜÚ[ÛŠ]JNÂˆYˆ
+›Û[Ý\”Ý]\ÈOOH››Û™HŠHÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\‹šYœ[™[™ÈŠNÂˆ™]\›ˆ™\ËšœÛÛŠÈ‹‹œÝX‹[™[™Ô›Û[Ý\”™]šY]ÎˆYHJNÂˆB‚ˆÛÛœÝ]™[YH\HOOHÓRSHˆÈ[X™\Š™\K˜›ÙK™]™[Y
+Hˆ[ÂˆÛÛœÝÛZ[Q]™[YH]™[YÏÈÂˆÛÛœÝÛZ[Q]™[H\HOOHÓRSHˆ	‰ˆ[X™\‹š\Ñš[š]JÛZ[Q]™[Y
+HÈÝÜ˜YÙK™Ù]]™[
+ÛZ[Q]™[Y
+Hˆ[ÂˆYˆ
+\HOOHÓRSHŠHÂˆYˆ
+XÛZ[Q]™[ÛZ[Q]™[œÝ]\ÈOOH“U‘HˆXÛZ[Q]™[š\ÐÛZ[XX›HÛZ[Q]™[˜ÛZ[YYžJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\È]™[\È›Ý]˜Z[X›HÈÛZ[KˆˆJNÂˆBˆYˆ
+ÝÜ˜YÙK™Ù][™[™ÐÛZ[Q]™[YÊ
+Kš[˜ÛY\ÊÛZ[Q]™[Y
+JHÂˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ•\È]™[[™XYH\ÈH[™[™ÈÛZ[KˆˆJNÂˆBˆBˆÛÛœÝÛÝ\˜ÙHH\HOOHÓRSHˆ	‰ˆÛZ[Q]™[ÈÛZ[Q]™[ˆÈ‹‹œ™\K˜›ÙHNÂˆYˆ
+\HOOH“‘U×ÑU‘S•ˆ\HOOH”ÕQÑÑTÕŠHÂˆÛÛœÝ]Q\œ›ÜˆH]™[]\Ñ\œ›ÜŠÈ]TÝ\ˆÛÝ\˜ÙK™]TÝ\ˆ‹]Q[™ˆÛÝ\˜ÙK™]Q[™ˆˆJH˜[Y]Q]™[]\ÊÛÝ\˜ÙK™]TÝ\ÛÝ\˜ÙK™]Q[™
+NÂˆYˆ
+]Q\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ]Q\œ›ÜˆJNÂˆÞ[˜Ñ^SÙ•ÙYZÊÛÝ\˜ÙJNÂˆBˆYˆ
+\HOOH“‘U×ÑU‘S•ˆ\HOOHÓRSHŠHÂˆÛÛœÝ›ØÚÙY\Ú[™\ÜÈHÝÜ˜YÙK™Ù]›ØÚÙY\Ú[™\ÜÓX]Ú
+\Ù\‹šYÂˆ™[YS˜[YNˆÛÝ\˜ÙK™[YS˜[YHˆ‹ˆY™\ÜÎˆÛÝ\˜ÙK˜Y™\ÜÈÏÈ[ˆ]ˆÛÝ\˜ÙK›]ÏÈ[ˆ™ÎˆÛÝ\˜ÙK›™ÈÏÈ[ˆJNÂˆYˆ
+›ØÚÙY\Ú[™\ÜÊHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ	Ø›ØÚÙY\Ú[™\ÜË›˜[Y_H\È›ØÚÙY[ÝHœ›ÛHÜÝ[™È]™[È]Z\ˆ™[YK˜JNÂˆBˆBˆÛÛœÝ]HH[œÙ\ÝX›Z\ÜÚ[Û”ØÚ[XKœ\œÙJÂˆ‹‹œÛÝ\˜ÙKˆ\Kˆ]™[Yˆ\HOOHÓRSHˆÈÛZ[Q]™[Yˆ[ˆÝX›Z]\“˜[YNˆ\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[YKˆÝX›Z]\‘[XZ[ˆ\Ù\‹™[XZ[ˆÝX›Z]\“Ü™Îˆ™\K˜›ÙKœÝX›Z]\“Ü™È[ˆÛZ[T™X\ÛÛŽˆ\HOOHÓRSHˆÈ™\K˜›ÙK˜ÛZ[T™X\ÛÛˆˆ[ˆ]™[\\Îˆ\HOOHÓRSH‚ˆÈÛÝ\˜ÙK™]™[\\Âˆˆ
+\[Ùˆ™\K˜›ÙK™]™[\\ÈOOHœÝš[™È‚ˆÈ™\K˜›ÙK™]™[\\Âˆˆ”ÓÓ‹œÝš[™ÚYžJ™\K˜›ÙK™]™[\\È×JJKˆJNÂˆÛÛœÝÝXˆHÝÜ˜YÙK˜Ü™X]TÝX›Z\ÜÚ[ÛŠ]JNÂˆÛÛœÝÝ[X[X]Ú\ÈH\HOOH“‘U×ÑU‘S•ˆ\HOOH”ÕQÑÑTÕ‚ˆÈ[œšXÚÝX›Z\ÜÚ[Û“X]Ú\ÊÝXŠBˆˆ×NÂˆÛÛœÝÝ›Û™Ñ\XØ]HH\HOOH“‘U×ÑU‘S•‚ˆÈÝX›Z\ÜÚ[Û’\ÔÝ›Û™Ñ\XØ]JÝ[X[X]Ú\ÊBˆˆ[™Yš[™YÂ‚ˆËÈ\›Ý™Y›Û[Ý\œÈÈYZ[œÈž\\ÜÈH™]šY]È]Y]YH[›\ÜÈHZÙ[H\XØ]H^\ÝÂˆYˆ
+\HOOH“‘U×ÑU‘S•ˆ	‰ˆ
+›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ\ÐYZ[•\Ù\ŠH	‰ˆ\Ý›Û™Ñ\XØ]JHÂˆÝÜ˜YÙK˜]]Ð\›Ý™TÝX›Z\ÜÚ[ÛŠÝX‹šY\Ù\‹\Ù\›˜[YJNÂˆÛÛœÝÜ™X]YHÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJBˆ™š[\Š]Oˆ]œÝX›Z]YžHOOH\Ù\‹™[XZ[	‰ˆ]]HOOHÝX‹]JBˆœÛÜ
+
+KŠHOˆ™]È]J‹˜Ü™X]Y]
+K™Ù][YJ
+HH™]È]JK˜Ü™X]Y]
+K™Ù][YJ
+JVÌNÂˆYˆ
+Ü™X]Y
+HÂˆ›ÚYš[]™[X\ÛÛÜ™[˜]\ÊÜ™X]YšY
+K˜Ø]Ú
+\œˆO‚ˆÛÛœÛÛK™\œ›ÜŠ–Ùš[]™[X\ÛÛÜ™[˜]\×HÝX›Z]]]ËX\›Ý™H˜Z[Yˆ‹\œŠKˆ
+NÂˆBˆ™]\›ˆ™\ËšœÛÛŠÈ‹‹œÝX‹]]Ð\›Ý™YˆYKÝ[X[X]Ú\ÈJNÂˆBˆYˆ
+\HOOH“‘U×ÑU‘S•ˆ	‰ˆÝ›Û™Ñ\XØ]JHÂˆ™]\›ˆ™\ËšœÛÛŠÂˆ‹‹œÝX‹ˆÝ[X[X]Ú\Ëˆ[›Ü”™]šY]ÎˆYKˆ[™X\ÛÛŽˆÜÜÚX›H\XØ]HÙˆ‰ÜÝ›Û™Ñ\XØ]K]_H˜ˆJNÂˆBˆYˆ
+\HOOHÓRSHˆ	‰ˆ
+›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ\ÐYZ[•\Ù\ŠJHÂˆÝÜ˜YÙK˜]]Ð\›Ý™PÛZ[JÝX‹šY\Ù\‹\Ù\›˜[YJNÂˆ™]\›ˆ™\ËšœÛÛŠÈ‹‹œÝX‹]]Ð\›Ý™YˆYHJNÂˆB‚ˆËÈ‘U×ÑU‘S•œ›ÛH[˜\›Ý™Y\Ù\ˆ8¡¤ˆÛÙ\ÈÈ]Y]YH
+È›YÜÈ[H›Üˆ›Û[Ý\ˆ™]šY]ÂˆYˆ
+\HOOH“‘U×ÑU‘S•ˆ	‰ˆ›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ	‰ˆZ\ÐYZ[•\Ù\ŠHÂˆYˆ
+›Û[Ý\”Ý]\ÈOOH››Û™HŠHÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\‹šYœ[™[™ÈŠNÂˆ™]\›ˆ™\ËšœÛÛŠÈ‹‹œÝX‹[™[™Ô›Û[Ý\”™]šY]ÎˆYKÝ[X[X]Ú\ÈJNÂˆB‚ˆËÈÓRSHœ›ÛH[˜\›Ý™Y\Ù\ˆ8¡¤ˆ›YÈ›Üˆ›Û[Ý\ˆ™]šY]ÂˆYˆ
+\HOOHÓRSHˆ	‰ˆ›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ	‰ˆZ\ÐYZ[•\Ù\ŠHÂˆYˆ
+›Û[Ý\”Ý]\ÈOOH››Û™HŠHÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\‹šYœ[™[™ÈŠNÂˆB‚ˆËÈÕQÑÑTÕÛÙ\ÈÝ˜ZYÚÈ]Y]YK›È›Û[Ý\ˆÝ]\ÈÚ[™ÙBˆ™\ËšœÛÛŠÈ‹‹œÝX‹Ý[X[X]Ú\ÈJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÓRSQQU‘S•QU
+ÝÛ™\ˆÛ›JH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆËÈ™]\›œÈ]™[ÈÛZ[YYžHHÙÙÙYZ[ˆ\Ù\‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÛZ[™KØÛZ[YY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆYˆ
+\ÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆÛÛœÝ[HÝÜ˜YÙK™Ù]]™[ÊßJNÂˆÛÛœÝZ[™HH[™š[\ŠHOˆÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+KšY\Ù\’Y
+JK›X\
+]Oˆ
+Âˆ‹‹™]ˆÜÝ\’[XYÙU\›ˆ™\ÛÛ™Q]™[ÜÝ\•\›
+]šY]œÜÝ\’[XYÙU\›]™^SÙ•ÙYZÊKˆJJNÂˆ™\ËšœÛÛŠZ[™JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÛZ[™KÜÝX›Z]Y‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆYˆ
+ÝÜ˜YÙKš\ÔÚ]SÝÛ™\•\Ù\Š\Ù\ŠJH™]\›ˆ™\ËšœÛÛŠ×JNÂˆÛÛœÝZ[™HHÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛœÊ
+K™š[\ŠÈOˆËœÝX›Z]\‘[XZ[OOH\Ù\‹™[XZ[
+NÂˆ™\ËšœÛÛŠZ[™JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÛZ[™KØÚXÚËZ[œÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]][™[˜Ù\ÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÛZ[™KÝ[[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]]™[[[žU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆËÈÜÝ
+ÜˆYZ[ŠHY]È[ˆ]™[œ›ÛHHØ\™ÈXˆY]Ü‚ˆ\œ]
+‹Ø\KÙ]™[ËÎšYÙY]‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝ\ÐYZ[ˆHÙ\ÜÚ[Û’\ÐYZ[Š™\JNÂˆYˆ
+]\Ù\ˆ
+Z\ÐYZ[ˆ	‰ˆ\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\‹šY
+JJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“›Ý[Ý\ˆ]™[ˆJNÂˆBˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘]™[Y]‹Âˆ]Nˆ™\K˜›ÙK]Kˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[Û‹ˆ™[YS˜[YNˆ™\K˜›ÙK™[YS˜[YKˆJJH™]\›ŽÂˆÛÛœÝ[ÝÙYHÂˆ]H‹™\ØÜš\[Ûˆ‹™[YS˜[YH‹˜Y™\ÜÈ‹›™ZYÚ›ÜšÛÙ‹ˆ™]TÝ\‹™]Q[™‹™^SÙ•ÙYZÈ‹˜YÙT™\]Z\™[Y[‹˜YZ\ÜÚ[Ûˆ‹ˆXÚÙ]\›‹œÜÝ\’[XYÙU\›‹™]™[\\È‹ˆš\ÔX›XÈ‹š\ÒÝ\ÙT\H‹š\ÔÙ^ÜÚ]]™H‹›Y]SÚÈ‹ˆNÂˆËÈYZ[œÈX^H[ÛÈÙ]Ý]\È
+K™ËˆQSŠHšXHH[YZ[ˆUÈÜÝÈØ[››Ý‚ˆÛÛœÝ]Úˆ[žHHßNÂˆ[ÝÙY™›Ü‘XXÚ
+ÈOˆÈYˆ
+™\K˜›ÙVÚ×HOOH[™Yš[™Y
+H]ÚÚ×HH™\K˜›ÙVÚ×NÈJNÂˆYˆ
+]Ú™]™[\\È	‰ˆ\œ˜^Kš\Ð\œ˜^J]Ú™]™[\\ÊJHÂˆ]Ú™]™[\\ÈH”ÓÓ‹œÝš[™ÚYžJ]Ú™]™[\\ÊNÂˆBˆÛÛœÝ]Q\œˆH˜[Y]Q]™[]\Êˆ]Ú™]TÝ\\ÈÝš[™È[™Yš[™Yˆ]Ú™]Q[™\ÈÝš[™È[™Yš[™Yˆ]ˆ
+NÂˆYˆ
+]Q\œŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ]Q\œˆJNÂˆÞ[˜Ñ^SÙ•ÙYZÊ]Ú]
+NÂˆÛÛœÝ\]YHÝÜ˜YÙK\]Q]™[
+[X™\Š™\Kœ\˜[\ËšY
+K]Ú
+NÂˆYˆ
+\]Y	‰ˆ
+]Ú˜Y™\ÜÈOOH[™Yš[™Y]Ú™[YS˜[YHOOH[™Yš[™Y
+JHÂˆ]ØZ]š[]™[X\ÛÛÜ™[˜]\Ê\]YšY
+NÂˆBˆÛÛœÝœ™\ÚHÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆ™\ËšœÛÛŠœ™\ÚÈ[œšXÚ]™[›Ü“X\
+œ™\Ú
+Hˆœ™\Ú
+NÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ SÑTUSÓˆ‘TUQTÕÈ
+™[[Ý™KÙ›YÈHÛZ[\ÈÛÈ›ÝYÚØ\KÜÝX›Z]
+H8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KÛ[Ù\˜][Û‹\™\]Y\Ý‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]HH[œÙ\[Ù\˜][Û”™\]Y\ÝØÚ[XKœ\œÙJ™\K˜›ÙJNÂˆYˆ
+]K\HOOHÓRSHŠHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆÛÛœÝÛZ[Q]™[YH[X™\Š]K™]™[Y
+NÂˆÛÛœÝÛZ[Q]™[H[X™\‹š\Ñš[š]JÛZ[Q]™[Y
+HÈÝÜ˜YÙK™Ù]]™[
+ÛZ[Q]™[Y
+Hˆ[ÂˆYˆ
+XÛZ[Q]™[ÛZ[Q]™[œÝ]\ÈOOH“U‘HˆXÛZ[Q]™[š\ÐÛZ[XX›HÛZ[Q]™[˜ÛZ[YYžJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\È]™[\È›Ý]˜Z[X›HÈÛZ[KˆˆJNÂˆBˆYˆ
+ÝÜ˜YÙK™Ù][™[™ÐÛZ[Q]™[YÊ
+Kš[˜ÛY\ÊÛZ[Q]™[Y
+JHÂˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ•\È]™[[™XYH\ÈH[™[™ÈÛZ[KˆˆJNÂˆBˆÛÛœÝÝXˆHÝÜ˜YÙK˜Ü™X]TÝX›Z\ÜÚ[ÛŠ[œÙ\ÝX›Z\ÜÚ[Û”ØÚ[XKœ\œÙJÂˆ‹‹˜ÛZ[Q]™[ˆ\NˆÓRSH‹ˆ]™[YˆÛZ[Q]™[YˆÝX›Z]\“˜[YNˆ\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[YKˆÝX›Z]\‘[XZ[ˆ\Ù\‹™[XZ[ˆÝX›Z]\“Ü™Îˆ[ˆÛZ[T™X\ÛÛŽˆ]Kœ›ÛÙ‹ˆ]™[\\ÎˆÛZ[Q]™[™]™[\\ËˆJJNÂˆÛÛœÝ›Û[Ý\”Ý]\ÈH\Ù\‹œ›Û[Ý\”Ý]\È››Û™HŽÂˆYˆ
+›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ	‰ˆZ\ÓXZ[YZ[•\Ù\Š\Ù\ŠJHÂˆÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\‹šYœ[™[™ÈŠNÂˆBˆ™]\›ˆ™\ËšœÛÛŠÈ™Y\™XÝYˆœÝX›Z\ÜÚ[Ûˆ‹ÝX›Z\ÜÚ[ÛŽˆÝXˆJNÂˆBˆÛÛœÝ™\LˆHÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+]JNÂˆ™\ËšœÛÛŠ™\LŠNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ™YY˜XÚÈ‹
+™\K™\ÊHOˆÂˆžHÂˆËÈÛ\ˆØXÚYÛY[È\ÙYH[X[‹Y™YY˜XÚÈ[™Ú[›Üˆ]]ÛX]XÂˆËÈ\œ›Ü›Ý[™\žH™\ÜËˆ]™\ÜÙH\š[™ÈH›ÛÝ]ÛÈ]™[ˆÝ[BˆËÈœ›ÝÜÙ\ˆ[™\ÈØ[››Ý™Yš[HÝÛ™\ˆ\ÚÈÚ]XXÚ[™H[[Y]žK‚ˆYˆ
+Ýš[™Ê™\K˜›ÙOË˜Ø]YÛÜžHˆŠKÕ\\Ø\ÙJ
+HOOHÔTÒŠHÂˆÛÛœÝY\ÜØYÙP[™ÝXÚÈHÝš[™Ê™\K˜›ÙOË›Y\ÜØYÙHˆŠKš[J
+NÂˆYˆ
+[Y\ÜØYÙP[™ÝXÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›Y\ÜØYÙH™\]Z\™YˆJNÂˆÛÛœÝÛY\ÜØYÙK‹‹œÝXÚÓ[™\×HHY\ÜØYÙP[™ÝXÚËœÜ]
+—ˆŠNÂˆÛÛœÝXYÛ›ÜÝXÈH™XÛÜ™Þ\Ý[QXYÛ›ÜÝXÊÜ[]KÂˆÛÝ\˜ÙNˆ›YØXÞK\™XXÝY\œ›Ü‹X›Ý[™\žH‹ˆY\ÜØYÙKˆÝXÚÎˆÝXÚÓ[™\Ëš›Ú[Š—ˆŠH[ˆYÙU\›ˆ™\K˜›ÙOËœYÙU\›ÈÝš[™Ê™\K˜›ÙKœYÙU\›
+HˆÝš[™Ê™\K™Ù]
+œ™Y™\™\ˆŠHˆŠKˆ\Ù\YÙ[ˆ™\K˜›ÙOË\Ù\YÙ[ÈÝš[™Ê™\K˜›ÙK\Ù\YÙ[
+HˆÝš[™Ê™\K™Ù]
+\Ù\‹XYÙ[ŠHˆŠKˆJNÂˆ™]\›ˆ™\ËšœÛÛŠÈÚÎˆYKYˆXYÛ›ÜÝXËšYJNÂˆBˆÛÛœÝ^[ØYHÂˆ‹‹œ™\K˜›ÙKˆYÙU\›ˆÝš[™Ê™\K˜›ÙKœYÙU\›™\K™Ù]
+œ™Y™\™\ˆŠH‹ÈŠKœÛXÙJL
+KˆØ]YÛÜžNˆÝš[™Ê™\K˜›ÙK˜Ø]YÛÜžH•QÈŠKœÛXÙJ
+KˆÙ]™\š]NˆÝš[™Ê™\K˜›ÙKœÙ]™\š]H“QQUSHŠKœÛXÙJ
+KˆY\ÜØYÙNˆÝš[™Ê™\K˜›ÙK›Y\ÜØYÙHˆŠKš[J
+KœÛXÙJŒ
+KˆÝ\Îˆ™\K˜›ÙKœÝ\ÈÈÝš[™Ê™\K˜›ÙKœÝ\ÊKš[J
+KœÛXÙJŒ
+Hˆ[ˆ[XZ[ˆ™\K˜›ÙK™[XZ[ÈÝš[™Ê™\K˜›ÙK™[XZ[
+Kš[J
+KœÛXÙJN
+Hˆ[ˆ\Ù\YÙ[ˆÝš[™Ê™\K˜›ÙK\Ù\YÙ[™\K™Ù]
+\Ù\‹XYÙ[ŠHˆŠKœÛXÙJL
+KˆNÂˆYˆ
+\^[ØY›Y\ÜØYÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›Y\ÜØYÙH™\]Z\™YˆJNÂˆÛÛœÝ™YY˜XÚÈHÝÜ˜YÙK˜Ü™X]Q™YY˜XÚÔ™\Ü
+[œÙ\™YY˜XÚÔ™\ÜØÚ[XKœ\œÙJ^[ØY
+JNÂˆ™\ËšœÛÛŠÈÚÎˆYKYˆ™YY˜XÚËšYJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈXXÚ[™KYÙ[™\˜]YÛY[\œ›ÜœÈ\™HÜ\˜][Û˜[[[Y]žK›ÝY\ÜØYÙ\ÂˆËÈœ›ÛH[ÜKˆ^HÝ^HÝ]ÙˆHÝÛ™\ˆ\ÚÈ[™]™\žH[˜›Þ˜YÙK‚ˆ\œÜÝ
+‹Ø\KÜÞ\Ý[KYXYÛ›ÜÝXÜËØÛY[Y\œ›Üˆ‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝY\ÜØYÙHHÝš[™Ê™\K˜›ÙOË›Y\ÜØYÙHˆŠKš[J
+NÂˆYˆ
+[Y\ÜØYÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›Y\ÜØYÙH™\]Z\™YˆJNÂˆÛÛœÝ™\Ý[H™XÛÜ™Þ\Ý[QXYÛ›ÜÝXÊÜ[]KÂˆÛÝ\˜ÙNˆœ™XXÝY\œ›Ü‹X›Ý[™\žH‹ˆY\ÜØYÙKˆÝXÚÎˆ™\K˜›ÙOËœÝXÚÈÈÝš[™Ê™\K˜›ÙKœÝXÚÊHˆ[ˆYÙU\›ˆ™\K˜›ÙOËœYÙU\›ÈÝš[™Ê™\K˜›ÙKœYÙU\›
+HˆÝš[™Ê™\K™Ù]
+œ™Y™\™\ˆŠHˆŠKˆ\Ù\YÙ[ˆ™\K˜›ÙOË\Ù\YÙ[ÈÝš[™Ê™\K˜›ÙK\Ù\YÙ[
+HˆÝš[™Ê™\K™Ù]
+\Ù\‹XYÙ[ŠHˆŠKˆ[š\›Û›Y[ˆ™\K˜›ÙOË™[š\›Û›Y[ÈÝš[™Ê™\K˜›ÙK™[š\›Û›Y[
+Hˆ[ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKYˆ™\Ý[šYJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÓÐSÑPTÒˆU‘S•ˆ
+ÈXÙ\È
+ÈÛÛ[][š]Y\È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÜÙX\˜Ú‹
+™\K™\ÊHOˆÂˆÛÛœÝHHÝš[™Ê™\Kœ]Y\žKœHˆŠKš[J
+NÂˆYˆ
+K›[™ÝŠHÂˆ™]\›ˆ™\ËšœÛÛŠÈK]™[Îˆ×KXÙ\Îˆ×KÛÛ[][š]Y\Îˆ×HJNÂˆBˆ™\ËšœÛÛŠÈ‹‹œÝÜ˜YÙKœÙX\˜ÚÛØ˜[
+JKÛÛ[][š]Y\ÎˆÙX\˜ÚÛÛ[][š]Y\ÊK™\KœÙ\ÜÚ[ÛË\Ù\’Y
+HJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ US‘SÑH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYØ][™[˜ÙH‹
+™\K™\ÊHOˆÂˆÛÛœÝ\ÝHÝÜ˜YÙK™Ù]][™[˜Ù\Ê[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[ÛË\Ù\’Y
+NÂˆ™\ËšœÛÛŠ\Ý
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYØ][™[˜ÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆÛÛœÝY\ÜØYÙHHÝš[™Ê™\K˜›ÙK›Y\ÜØYÙHˆŠKš[J
+NÂˆYˆ
+[Y\ÜØYÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›Y\ÜØYÙH™\]Z\™YˆJNÂˆËÈ™Y™\ˆ›ÙKš\ÚXš[]NÈX\YØXÞH\Ð[›Ûž[[Ý\ÈÈš\ÚX›Hˆ8¡¤ˆX›Xß[›Ûž[[Ý\ßœšY[™Ë‚ˆÛÛœÝš\ÚXš[]HH›Ü›X[^™P][™[˜ÙUš\ÚXš[]Jˆ™\K˜›ÙKš\ÚXš[]Kˆ™\K˜›ÙKš\Ð[›Ûž[[Ý\ÈOOHYHÈYHˆ™\K˜›ÙKš\Ð[›Ûž[[Ý\ÈOOH˜[ÙHÈ˜[ÙHˆ[™Yš[™Yˆ
+NÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ]HÝÜ˜YÙK\Ù\][™[˜ÙJ]™[Y\Ù\‹Y\ÜØYÙKš\ÚXš[]JNÂˆ›ÝYžP][™[˜ÙU\]J]™[Y
+NÂˆ™\ËšœÛÛŠ]
+NÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÙ]™[ËÎšYØ][™[˜ÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™[[Ý™P][™[˜ÙJ]™[Y™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ›ÝYžP][™[˜ÙU\]J]™[Y
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYØÚ]‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ^[ØYHÝÜ˜YÙK™Ù]]™[Ú]Y\ÜØYÙ\Ê]™[Y™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠ^[ØY
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYØÚ]‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“Y\ÜØYÙHÛÈÛ™ÈˆJNÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÜÝ]™[Ú]Y\ÜØYÙJ]™[Y™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÙJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎ™]™[YØ][™[˜ÙKÎ˜][™[˜ÙRYÛY\ÜØYÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\Ë™]™[Y
+NÂˆÛÛœÝÙ[™\“\ÝHÝÜ˜YÙK™Ù]][™[˜Ù\Ê]™[Y™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆÛÛœÝÙ[™\”œÝœYHÙ[™\“\ÝœÛÛYJ
+Nˆ[žJHOˆK\Ù\—ÚYOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+\Ù[™\”œÝœY
+H™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ””Õ”™\]Z\™YÈY\ÜØYÙH][™Y\ÈˆJNÂˆÛÛœÝ]HÙ[™\“\Ý™š[™
+
+Nˆ[žJHOˆKšYOOH[X™\Š™\Kœ\˜[\Ë˜][™[˜ÙRY
+JNÂˆYˆ
+X]Ë\Ù\—ÚY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚXÚËZ[ˆ›Ý›Ý[™ˆJNÂˆYˆ
+]\Ù\—ÚYOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙH[Ý\œÙ[ˆˆJNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\Ë™]™[Y
+JNÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\Š]\Ù\—ÚY
+KÚXÚËZ[Žˆ	Ù]Ë]H‘]™[ŸX›ÙKÂˆÛÛ^\NˆÒPÒ×ÒSˆ‹ˆÛÛ^Yˆ[X™\Š™\Kœ\˜[\Ë™]™[Y
+KˆÛÛ^X™[ˆ]Ë]H[ˆJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÒQÔÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆËÈ8¥ 8¥ \Ú[™\ÜÈ\™XÝÜžH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÙ\™XÝÜžH‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ\K™ZYÚ›ÜšÛÙ]YY\“ÝÛ™YHH™\Kœ]Y\žH\È™XÛÜ™Ýš[™ËÝš[™ÏŽÂˆÛÛœÝ\Ú[™\ÜÙ\ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\ÊÂˆ\Nˆ\H[™Yš[™Yˆ™ZYÚ›ÜšÛÙˆ™ZYÚ›ÜšÛÙ[™Yš[™Yˆ]YY\“ÝÛ™Yˆ]YY\“ÝÛ™YOOHYHˆÈYHˆ[™Yš[™YˆJNÂˆÛÛœÝ]™Q]™[ÈHÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJNÂˆËÈ\ÛÛZ[™ÈšYHšYÚÈ
+È\Ý
+U‘H\Ý
+ÈXÚÙ\ˆ\˜Ú]™H›ÜˆØ[˜ÝX\žKÑXYÛJBˆÛÛœÝÚ]]™[ÈH]XÚ]™[ÕÐ\Ú[™\ÜÙ\Ê\Ú[™\ÜÙ\Ë]™Q]™[ÊNÂˆÛÛœÝÚ]›Û[Ý\œÈH]XÚ›Û[Ý\œÕÐ\Ú[™\ÜÙ\ÊÚ]]™[ËYOˆÝÜ˜YÙK™Ù]›Û[Ý\œÑ›Ü\Ú[™\ÜÊY
+JNÂˆÛÛœÝZ\ÜÙYÛÛ›™XÝ[ÛœÈHÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛœÊPÕU‘HŠNÂˆÛÛœÝÚYÜÈHÝÜ˜YÙK™Ù]ÚYÔÜÝÊ“U‘HŠNÂˆÛÛœÝÚ]XœÈH]XÚÜÝY[™ÚYÜÕÐ\Ú[™\ÜÙ\ÊÚ]›Û[Ý\œËZ\ÜÙYÛÛ›™XÝ[ÛœËÚYÜÊNÂˆËÈ›YÈÚXÚ\Ý[™ÜÈHÙÙÙYZ[ˆ\Ù\ˆØ[ˆÙ[‹\Ù\šXÙHY]
+ÜÝYØÛZ[YYÂˆËÈÝX›Z]Y[ˆ]™[\™JHHš]™\ÈH‘Y]™[YH[™›Èˆ]ÛˆÛY[\ÚYNÂˆËÈHUÒ[™Ú[™[ÝÈ™KXÚXÚÜÈ\ÈÙ\™\‹\ÚYH™YØ\™\ÜË‚ˆÛÛœÝ[šÙYYÈH™\KœÙ\ÜÚ[ÛË\Ù\’YˆÈ™]ÈÙ]
+ÝÜ˜YÙK™Ù]\Ù\“[šÙY\Ú[™\ÜÙ\Ê™\KœÙ\ÜÚ[Û‹\Ù\’Y
+K›X\
+ˆOˆ‹šY
+JBˆˆ[ÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[ÛË\Ù\’YÂˆ™\ËšœÛÛŠÚ]XœË›X\
+š^ˆOˆÂˆÛÛœÝ\ÓÝÛ™\ˆH\Ù\’YOH[	‰ˆš^‹›ÝÛ™\’YOOH\Ù\’YÂˆ™]\›ˆÂˆ‹‹˜š^‹ˆÊŠˆ™\ÛÛ™YÝÜ™Yœ›ÛÈ
+”ÓÓˆÛÛ[[‹Û›ÝÛˆ][K[ØÈÚZ[œËÜˆš[X\žHY™\ÜÊKˆ
+‹ÂˆØØ][ÛœÎˆ™\ÛÛ™P\Ú[™\ÜÓØØ][ÛœÊš^ŠKˆ\ÓÝÛ™\‹ˆØ[‘Y]™[YNˆ\ÓÝÛ™\ˆ
+[šÙYYÏËš\Êš^‹šY
+HÏÈ˜[ÙJKˆ\Ñ›ÛÝÚ[™Îˆ\Ù\’YOH[ÈÝÜ˜YÙKš\Ñ›ÛÝÚ[™Ð\Ú[™\ÜÊ\Ù\’Yš^‹šY
+Hˆ˜[ÙKˆ›ÛÝÙ\ÛÝ[ˆÝÜ˜YÙK™Ù]\Ú[™\ÜÑ›ÛÝÙ\ÛÝ[
+š^‹šY
+KˆNÂˆJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÎšYÙ›ÛÝÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÒYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝš^ˆHÝÜ˜YÙK™Ù]\Ú[™\ÜÊ\Ú[™\ÜÒY
+NÂˆYˆ
+Xš^ˆXš^‹˜XÝ]™JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™[YH›Ý›Ý[™ˆJNÂˆÝÜ˜YÙK™›ÛÝÐ\Ú[™\ÜÊ™\KœÙ\ÜÚ[Û‹\Ù\’YK\Ú[™\ÜÒY
+NÂˆ™\ËšœÛÛŠÂˆ\Ñ›ÛÝÚ[™ÎˆYKˆ›ÛÝÙ\ÛÝ[ˆÝÜ˜YÙK™Ù]\Ú[™\ÜÑ›ÛÝÙ\ÛÝ[
+\Ú[™\ÜÒY
+KˆJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÙ\™XÝÜžKÎšYÙ›ÛÝÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÒYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝš^ˆHÝÜ˜YÙK™Ù]\Ú[™\ÜÊ\Ú[™\ÜÒY
+NÂˆYˆ
+Xš^ˆXš^‹˜XÝ]™JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™[YH›Ý›Ý[™ˆJNÂˆÝÜ˜YÙK[™›ÛÝÐ\Ú[™\ÜÊ™\KœÙ\ÜÚ[Û‹\Ù\’YK\Ú[™\ÜÒY
+NÂˆ™\ËšœÛÛŠÂˆ\Ñ›ÛÝÚ[™Îˆ˜[ÙKˆ›ÛÝÙ\ÛÝ[ˆÝÜ˜YÙK™Ù]\Ú[™\ÜÑ›ÛÝÙ\ÛÝ[
+\Ú[™\ÜÒY
+KˆJNÂˆJNÂ‚ˆÛÛœÝY[X™\\Ú[™\ÜÔØÚ[XHH‹›Øš™XÝ
+Âˆ˜[YNˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠŠK›X^
+LŒ
+Kˆ\Nˆ‹™[[JÈ˜˜\ˆ‹œ™\Ý]\˜[‹˜ØY™H‹™[YH‹œÙ\šXÙH‹œÚÜ‹šÝ[‹››Ûœ›Ùš]‹šX[Ø\™H‹œ™X[\Ý]H‹™Ü›Ý\‹˜Ø[\Ü›Ý[™—JKˆ\ØÜš\[ÛŽˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠL
+K›X^
+Œ
+KˆY™\ÜÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ™ZYÚ›ÜšÛÙˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÙXœÚ]Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ[œÝYÜ˜[Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÝ\œÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ™Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ]YY\“ÝÛ™Yˆ‹˜›ÛÛX[Š
+K›Ü[Û˜[
+
+K™Y˜][
+˜[ÙJKˆ]YY\‘œšY[™Nˆ‹˜›ÛÛX[Š
+K›Ü[Û˜[
+
+K™Y˜][
+YJKˆJNÂ‚ˆÛÛœÝ\™XÝÜžTÝX›Z]ØÚ[XHHY[X™\\Ú[™\ÜÔØÚ[XK™^[™
+ÂˆÛÛ™š\›Q\Ý[˜Ýˆ‹˜›ÛÛX[Š
+K›Ü[Û˜[
+
+K™Y˜][
+˜[ÙJKˆÊŠ‚ˆ
+ˆÙ\ÈHÝX›Z]\ˆ[ˆ\ÈXÙKÜˆ\™H^H\Ý][™È]ÛˆHX\Âˆ
+ˆY[™ÈH\Ý[™È™]™\ˆÛÛ™™\œÈÝÛ™\œÚ\Ûˆ]ÈÝÛˆHœ[œÈˆš[\ÈH›Ü›X[ˆ
+ˆ\Ú[™\ÜÈÛZ[H[ˆYZ[ˆÝ[\ÈÈ\›Ý™K‚ˆ
+‹Âˆ™[][ÛœÚ\ˆ‹™[[JÈœ[œÈ‹˜Y[™È—JK›Ü[Û˜[
+
+K™Y˜][
+˜Y[™ÈŠKˆ™[][ÛœÚ\›ÝNˆ‹œÝš[™Ê
+Kš[J
+K›X^
+L
+K›Ü[Û˜[
+
+K™Y˜][
+ˆŠKˆJNÂ‚ˆÛÛœÝ\™XÝÜžSX]Ú™]šY]ÔØÚ[XHH‹›Øš™XÝ
+Âˆ˜[YNˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠŠK›X^
+LŒ
+Kˆ\Nˆ‹™[[JÈ˜˜\ˆ‹œ™\Ý]\˜[‹˜ØY™H‹™[YH‹œÙ\šXÙH‹œÚÜ‹šÝ[‹››Ûœ›Ùš]‹šX[Ø\™H‹œ™X[\Ý]H‹™Ü›Ý\‹˜Ø[\Ü›Ý[™—JK›Ü[Û˜[
+
+KˆY™\ÜÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ™ZYÚ›ÜšÛÙˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÛX]Ú\È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]HH\™XÝÜžSX]Ú™]šY]ÔØÚ[XKœ\œÙJ™\K˜›ÙHÏÈßJNÂˆ™\ËšœÛÛŠÈÝ[X[X]Ú\Îˆ[œšXÚ\™XÝÜžSX]Ú\Ê]JHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙH’[˜[YX]Ú™]šY]ÈˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžH‹™\]Z\™P]]\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]HH\™XÝÜžTÝX›Z]ØÚ[XKœ\œÙJ™\K˜›ÙJNÂˆÛÛœÝÝ[X[X]Ú\ÈH[œšXÚ\™XÝÜžSX]Ú\Ê]JNÂˆÛÛœÝÝ›Û™Ñ\XØ]HH\™XÝÜžR\ÔÝ›Û™Ñ\XØ]JÝ[X[X]Ú\ÊNÂ‚ˆYˆ
+Ý›Û™Ñ\XØ]H	‰ˆY]K˜ÛÛ™š\›Q\Ý[˜Ý
+HÂˆ™]\›ˆ™\ËšœÛÛŠÂˆÚÎˆ˜[ÙKˆ[›Ü”™]šY]ÎˆYKˆ[™X\ÛÛŽˆÜÜÚX›H\XØ]HÙˆ‰ÜÝ›Û™Ñ\XØ]K›˜[Y_H˜ˆÝ[X[X]Ú\ËˆJNÂˆB‚ˆÛÛœÝÚ]ÛÛÜ™ÈH]ØZ]š[šY[ÓX\ÛÛÜ™[˜]\ÊÂˆ™[YS˜[YNˆ]K›˜[YKˆY™\ÜÎˆ]K˜Y™\ÜÈÏÈ[™Yš[™YˆJNÂˆÛÛœÝÈÛÛ™š\›Q\Ý[˜ÝˆØÛÛ™š\›Q\Ý[˜Ý™[][ÛœÚ\™[][ÛœÚ\›ÝK‹‹˜š^‘šY[ÈHH]NÂˆÛÛœÝš^ˆHÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÊÂˆ‹‹˜š^‘šY[ËˆY™\ÜÎˆ]K˜Y™\ÜÈÏÈ[ˆ™ZYÚ›ÜšÛÙˆ]K›™ZYÚ›ÜšÛÙÏÈ[ˆÙXœÚ]Nˆ]KÙXœÚ]HÏÈ[ˆ[œÝYÜ˜[Nˆ]Kš[œÝYÜ˜[HÏÈ[ˆÝ\œÎˆ]KšÝ\œÈÏÈ[ˆÛ™Nˆ]KœÛ™HÏÈ[ˆ]ˆÚ]ÛÛÜ™Ë›]ÏÈ[ˆ™ÎˆÚ]ÛÛÜ™Ë›™ÈÏÈ[ˆXÝ]™NˆYKˆ]YY\“ÝÛ™YˆHY]Kœ]YY\“ÝÛ™Yˆ]YY\‘œšY[™Nˆ]Kœ]YY\‘œšY[™HOOH˜[ÙKˆ\Ó™]Îˆ˜[ÙKˆ[XYÙU\›ˆ[ˆJNÂˆËÈY[X™\ˆ\™XÝÜžHYÈÛÈ]™H[[YYX][NÈ›ÝYžH[YZ[œÈÛÈ^HØ[‚ˆËÈ™]šY]ÈÚ]\ÝX›\ÚY‚ˆÛÛœÝXÝÜˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\Nˆ“‘U×ÑT‘PÕÔ–WÓTÕS‘È‹ˆËÈH\Ý[™ÉÜÈÝÛˆYÛÈH]Y]YH›ÝÈØ[ˆXÝÛˆH™X[™[YBˆËÈ
+Ù]]ÈØ]YÛÜžK\ÜÚYÛˆ]ÈÝÛ™\ŠH[œÝXYÙˆÝY\ÜÚ[™ÈžH˜[YK‚ˆ]™[Yˆš^‹šYˆ]™[]Nˆ	Øš^‹›˜[Y_H0­È	Øš^‹\_Xˆ™\]Y\Ý\“˜[YNˆXÝÜË™\Ü^S˜[YHXÝÜË\Ù\›˜[YH›Y[X™\ˆ‹ˆ™\]Y\Ý\‘[XZ[ˆXÝÜË™[XZ[[ˆ›ÛÙŽˆØš^‹›™ZYÚ›ÜšÛÙš^‹˜Y™\ÜËš^‹™\ØÜš\[Û—K™š[\Š›ÛÛX[ŠKš›Ú[Šˆ0­ÈŠKœÛXÙJL
+KˆH\È[žJNÂ‚ˆËÈY[™ÈH\Ý[™È\È›ÝHØ[YH\ÈÝÛš[™È]ˆÚ[ˆHÝX›Z]\ˆØ^\ÂˆËÈ^H[ˆHXÙKš[HH›Ü›X[\Ú[™\ÜÈÛZ[HÛÈ][™È[ˆBˆËÈ™[YHÛZ[\È]Y]YH[™[ˆYZ[ˆÝ[\ÈÈ\›Ý™HÝÛ™\œÚ\‚ˆ]ÝÛ™\œÚ\™\]Y\ÝYH˜[ÙNÂˆYˆ
+™[][ÛœÚ\OOHœ[œÈŠHÂˆÛÛœÝ™X\ÛÛˆH
+™[][ÛœÚ\›ÝHˆŠKš[J
+H”ÝX›Z]Y\È\Ý[™È[™Ø^\È^H[ˆ]ˆŽÂˆÛÛœÝÛZ[HHÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÐÛZ[Jš^‹šY™\KœÙ\ÜÚ[Û‹\Ù\’YK™X\ÛÛŠNÂˆÝÛ™\œÚ\™\]Y\ÝYHJ™\œ›Üˆˆ[ˆÛZ[JNÂˆB‚ˆ™\ËœÝ]\ÊŒJKšœÛÛŠÈ‹‹˜š^‹Ý[X[X]Ú\ËÝÛ™\œÚ\™\]Y\ÝYJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙH’[˜[Y\™XÝÜžH\Ý[™ÈˆJNÂˆBˆJNÂ‚ˆËÈ›Û[Ý\ˆÙ[‹\Ù\šXÙH™[YHY]ˆÛ›H\ØÜš\[Û‹ÚÝ\œËÜÛ™KÝÙXœÚ]KÚ[œÝYÜ˜[KÙÛ˜]U\›ˆËÈÛ›HYˆH™\]Y\Ý\ˆ\ÈÜÝYÛZ[YYÜˆÝX›Z]Y[ˆ]™[X]Ú[™È\È\Ú[™\ÜË‚ˆËÈ˜[YKØY™\ÜËÝ\KÛ]Û™È\™H™]™\ˆXØÙ\Y\™H
+ÛÝ[]H[šÙY›Û[Ý\ˆZ˜XÚÈÜ‚ˆËÈ™[ØØ]HHÚ\™Y\™XÝÜžH\Ý[™ÊHHY]ÈÛÈ]™H[[YYX][K›È[Ù\˜][Ûˆ]Y]YK‚ˆÛÛœÝ\Ú[™\ÜÑY]ØÚ[XHH‹›Øš™XÝ
+Âˆ\ØÜš\[ÛŽˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠL
+K›X^
+Œ
+K›Ü[Û˜[
+
+KˆÝ\œÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ™Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÙXœÚ]Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ[œÝYÜ˜[Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ˜]U\›ˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+KˆJNÂ‚ˆËÈ\Ú[™\ÜÈÝÛ™\œÈ
+™X[ÝÛ™\’YÙYHÛZ[H›ÝÈ™[ÝÊHÙ]HÚY\ˆÙ[‹\Ù\šXÙHšY[Ù]‚ˆËÈ]Û™È[Ø^\ÈÝ^HÙ[ØÛÙY[™[XYÙU\›\È™]™\ˆXØÙ\Y\™HHÙÛÈÚ[™Ù\È›Ý]BˆËÈ›ÝYÚHÙÛË\™\]Y\Ý]Y]YH›ÜˆXÚÙ\‰ÜÈX[X[ÛÛ™\œÚ[Ûˆ
+ÙYHØ\KÝ\ØYØ\Ú[™\ÜË[ÙÛÊK‚ˆÛÛœÝ\Ú[™\ÜÓÝÛ™\‘Y]ØÚ[XHH‹›Øš™XÝ
+Âˆ˜[YNˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠŠK›X^
+LŒ
+K›Ü[Û˜[
+
+KˆY™\ÜÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ\Nˆ‹™[[JÈ˜˜\ˆ‹œ™\Ý]\˜[‹˜ØY™H‹™[YH‹œÙ\šXÙH‹œÚÜ‹šÝ[‹››Ûœ›Ùš]‹šX[Ø\™H‹œ™X[\Ý]H‹™Ü›Ý\‹˜Ø[\Ü›Ý[™—JK›Ü[Û˜[
+
+Kˆ™ZYÚ›ÜšÛÙˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ]YY\“ÝÛ™Yˆ‹˜›ÛÛX[Š
+K›Ü[Û˜[
+
+Kˆ]YY\‘œšY[™Nˆ‹˜›ÛÛX[Š
+K›Ü[Û˜[
+
+Kˆ\ØÜš\[ÛŽˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠL
+K›X^
+Œ
+K›Ü[Û˜[
+
+KˆÝ\œÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ™Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÙXœÚ]Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ[œÝYÜ˜[Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ˜]U\›ˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+KˆJNÂ‚ˆ\œ]Ú
+‹Ø\KÙ\™XÝÜžKÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÊY
+NÂˆYˆ
+Y^\Ý[™ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂ‚ˆÛÛœÝÝš\H
+ŽˆÝš[™È[[™Yš[™Y
+HOˆ
+ˆOH[ÈˆÏÈ[ˆ‹œ™\XÙJÖÏ—KÙËˆŠJNÂ‚ˆYˆ
+^\Ý[™Ë›ÝÛ™\’Y	‰ˆ™\KœÙ\ÜÚ[Û‹\Ù\’YOOH^\Ý[™Ë›ÝÛ™\’Y
+HÂˆ]\œÙYˆ‹š[™™\\[Ùˆ\Ú[™\ÜÓÝÛ™\‘Y]ØÚ[XOŽÂˆžHÂˆ\œÙYH\Ú[™\ÜÓÝÛ™\‘Y]ØÚ[XKœ\œÙJ™\K˜›ÙHÏÈßJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙH’[˜[Y™[YH[™›ÈˆJNÂˆBˆÛÛœÝ]Úˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛˆHßNÂˆ›Üˆ
+ÛÛœÝÙ^HÙˆÈ›˜[YH‹˜Y™\ÜÈ‹\H‹›™ZYÚ›ÜšÛÙ‹™\ØÜš\[Ûˆ‹šÝ\œÈ‹œÛ™H‹ÙXœÚ]H‹š[œÝYÜ˜[H‹™Û˜]U\›—H\ÈÛÛœÝ
+HÂˆYˆ
+\œÙYÚÙ^WHOOH[™Yš[™Y
+H]ÚÚÙ^WHH\[Ùˆ\œÙYÚÙ^WHOOHœÝš[™ÈˆÈÝš\
+\œÙYÚÙ^WH\ÈÝš[™ÊHˆ\œÙYÚÙ^WNÂˆBˆYˆ
+\œÙYœ]YY\“ÝÛ™YOOH[™Yš[™Y
+H]Úœ]YY\“ÝÛ™YH\œÙYœ]YY\“ÝÛ™YÂˆYˆ
+\œÙYœ]YY\‘œšY[™HOOH[™Yš[™Y
+H]Úœ]YY\‘œšY[™HH\œÙYœ]YY\‘œšY[™NÂˆÛÛœÝ\]YHÝÜ˜YÙK\]P\Ú[™\ÜÊY]Ú\È[žJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™]\›ˆ™\ËšœÛÛŠ\]Y
+NÂˆB‚ˆÛÛœÝ[šÙY™[Y\ÈHÝÜ˜YÙK™Ù]\Ù\“[šÙY\Ú[™\ÜÙ\Ê™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+[[šÙY™[Y\ËœÛÛYJš^ˆOˆš^‹šYOOHY
+JHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ–[ÝHØ[ˆÛ›HY]™[Y\È[ÝIÝ™HÜÝYÛZ[YYÜˆÝX›Z]Y[ˆ]™[]ˆˆJNÂˆB‚ˆ]\œÙYˆ‹š[™™\\[Ùˆ\Ú[™\ÜÑY]ØÚ[XOŽÂˆžHÂˆ\œÙYH\Ú[™\ÜÑY]ØÚ[XKœ\œÙJ™\K˜›ÙHÏÈßJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙH’[˜[Y™[YH[™›ÈˆJNÂˆB‚ˆËÈÛ›HHÚ^[ÝÙYšY[È\™H]™\ˆ\YYH[ž][™È[ÙH[ˆ™\K˜›ÙH
+˜[YKY™\ÜËˆËÈ\K]™Ë‹‹ŠH\ÈÚ[[H›ÜYžHH›Ù\œÙHX›Ý™H
+[šÛ›ÝÛˆÙ^\ÈÝš\Y
+K‚ˆÛÛœÝ]Úˆ™XÛÜ™Ýš[™ËÝš[™È[ˆHßNÂˆYˆ
+\œÙY™\ØÜš\[ÛˆOOH[™Yš[™Y
+H]Ú™\ØÜš\[ÛˆH\œÙY™\ØÜš\[Û‹œ™\XÙJÖÏ—KÙËˆŠNÂˆYˆ
+\œÙYšÝ\œÈOOH[™Yš[™Y
+H]ÚšÝ\œÈH\œÙYšÝ\œÈÈ\œÙYšÝ\œËœ™\XÙJÖÏ—KÙËˆŠHˆ[ÂˆYˆ
+\œÙYœÛ™HOOH[™Yš[™Y
+H]ÚœÛ™HH\œÙYœÛ™HÈ\œÙYœÛ™Kœ™\XÙJÖÏ—KÙËˆŠHˆ[ÂˆYˆ
+\œÙYÙXœÚ]HOOH[™Yš[™Y
+H]ÚÙXœÚ]HH\œÙYÙXœÚ]HÈ\œÙYÙXœÚ]Kœ™\XÙJÖÏ—KÙËˆŠHˆ[ÂˆYˆ
+\œÙYš[œÝYÜ˜[HOOH[™Yš[™Y
+H]Úš[œÝYÜ˜[HH\œÙYš[œÝYÜ˜[HÈ\œÙYš[œÝYÜ˜[Kœ™\XÙJÖÏ—KÙËˆŠHˆ[ÂˆYˆ
+\œÙY™Û˜]U\›OOH[™Yš[™Y
+H]Ú™Û˜]U\›H\œÙY™Û˜]U\›È\œÙY™Û˜]U\›œ™\XÙJÖÏ—KÙËˆŠHˆ[Â‚ˆÛÛœÝ\]YHÝÜ˜YÙK\]P\Ú[™\ÜÊY]Ú
+NÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ\]Y
+NÂˆJNÂ‚ˆËÈ8¥ 8¥ \Ú[™\ÜÈÝÛ™\œÚ\ˆÛZ[H[ˆ^\Ý[™È™[YH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÎšYØÛZ[H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆÛÛœÝÛZ[T™X\ÛÛˆHÝš[™Ê™\K˜›ÙOË˜ÛZ[T™X\ÛÛˆˆŠKš[J
+NÂˆYˆ
+XÛZ[T™X\ÛÛˆÛZ[T™X\ÛÛ‹›[™ÝL
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•[\ÈÝÈ[ÝIÜ™HÛÛ›™XÝYÈ\È™[YH
+L
+ÈÚ\˜XÝ\œÊKˆˆJNÂˆBˆÛÛœÝ[™[™ÓY\™ÙHHH\™\K˜›ÙOËœ[™[™ÓY\™ÙNÂˆÛÛœÝ˜]ÓY\™ÙHH™\K˜›ÙOË›Y\™ÙT^[ØYÂˆÛÛœÝY\™ÙT^[ØYH[™[™ÓY\™ÙH	‰ˆ˜]ÓY\™ÙH	‰ˆ\[Ùˆ˜]ÓY\™ÙHOOH›Øš™XÝ‚ˆÈZ[\™XÝÜžSY\™ÙT]Ú
+˜]ÓY\™ÙH\È\™XÝÜžSY\™ÙT^[ØY
+Bˆˆ[™Yš[™YÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÐÛZ[JY™\KœÙ\ÜÚ[Û‹\Ù\’YKÛZ[T™X\ÛÛ‹ÂˆY\™ÙT^[ØYˆY\™ÙT^[ØY	‰ˆØš™XÝšÙ^\ÊY\™ÙT^[ØY
+K›[™ÝÈY\™ÙT^[ØYˆ[™Yš[™YˆJNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝ[YÚX›HH\Ù\Ëœ›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠNÂˆYˆ
+[YÚX›H	‰ˆ™\Ý[˜ÛZ[H	‰ˆ\[™[™ÓY\™ÙJHÂˆÛÛœÝ\›Ý˜[HÝÜ˜YÙK˜\›Ý™P\Ú[™\ÜÐÛZ[J™\Ý[˜ÛZ[KšY\Ù\Ë\Ù\›˜[YHœÞ\Ý[HŠNÂˆ™]\›ˆ™\ËšœÛÛŠÈÚÎˆYK]]Ð\›Ý™YˆYK‹‹˜\›Ý˜[JNÂˆBˆ™\ËšœÛÛŠÈÚÎˆYK]]Ð\›Ý™Yˆ˜[ÙKÛZ[Nˆ™\Ý[˜ÛZ[HJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ\™XÝÜžKÛZ[™KÛÝÛ™Y‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]\Ù\“ÝÛ™Y\Ú[™\ÜÙ\Ê™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆËÈ8¥ 8¥ ™]ËX\Ú[™\ÜÈÝX›Z\ÜÚ[Ûˆ
+ÚYËY›ÝÈ\ÈY™\ÜÈ\Û‰Ý[ˆHÞ\Ý[Hˆœ˜[˜Ú
+H8¥ 8¥ ˆÛÛœÝ\Ú[™\ÜÔÝX›Z\ÜÚ[Û”ØÚ[XHH‹›Øš™XÝ
+Âˆ˜[YNˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠŠK›X^
+LŒ
+Kˆ\Nˆ‹™[[JÈ˜˜\ˆ‹œ™\Ý]\˜[‹˜ØY™H‹™[YH‹œÙ\šXÙH‹œÚÜ‹šÝ[‹››Ûœ›Ùš]‹šX[Ø\™H‹œ™X[\Ý]H‹™Ü›Ý\‹˜Ø[\Ü›Ý[™—JK™Y˜][
+˜˜\ˆŠKˆ\ØÜš\[ÛŽˆ‹œÝš[™Ê
+Kš[J
+K›Z[ŠL
+K›X^
+Œ
+KˆY™\ÜÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ™ZYÚ›ÜšÛÙˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÝ\œÎˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Œ
+K›Ü[Û˜[
+
+K›[X›J
+KˆÛ™Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÙXœÚ]Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+Kˆ[œÝYÜ˜[Nˆ‹œÝš[™Ê
+Kš[J
+K›X^
+
+K›Ü[Û˜[
+
+K›[X›J
+KˆÙÛÒ[XYÙU\›ˆ‹œÝš[™Ê
+Kš[J
+K›X^
+Ì
+K›Ü[Û˜[
+
+K›[X›J
+KˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÛ™]Ë\ÝX›Z\ÜÚ[Ûˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]HH\Ú[™\ÜÔÝX›Z\ÜÚ[Û”ØÚ[XKœ\œÙJ™\K˜›ÙHÏÈßJNÂˆÛÛœÝÝXˆHÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÔÝX›Z\ÜÚ[ÛŠ™\KœÙ\ÜÚ[Û‹\Ù\’YK]JNÂˆ™\ËœÝ]\ÊŒJKšœÛÛŠÝXŠNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙH’[˜[Y\Ú[™\ÜÈÝX›Z\ÜÚ[ÛˆˆJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ ™[YHÝÛ™\Žˆ›Û[Ý\œÈ]\È™[YH
+È›ØÚÛ\Ý8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ[˜Ý[Ûˆ™\]Z\™P\Ú[™\ÜÓÝÛ™\Š™\Nˆ[žK™\Îˆ[žKYˆ[X™\ŠHÂˆÛÛœÝ\Ú[™\ÜÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÊY
+NÂˆYˆ
+X\Ú[™\ÜÊHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÈ™]\›ˆ[ÈBˆYˆ
+\Ú[™\ÜË›ÝÛ™\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+HÈ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ–[ÝHÛ‰ÝÝÛˆ\È™[YKˆˆJNÈ™]\›ˆ[ÈBˆ™]\›ˆ\Ú[™\ÜÎÂˆB‚ˆ\™Ù]
+‹Ø\KÙ\™XÝÜžKÎšYÜ›Û[Ý\œÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆYˆ
+\™\]Z\™P\Ú[™\ÜÓÝÛ™\Š™\K™\ËY
+JH™]\›ŽÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]›Û[Ý\œÑ›Ü\Ú[™\ÜÊY
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÎšYØ›ØÚÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆYˆ
+\™\]Z\™P\Ú[™\ÜÓÝÛ™\Š™\K™\ËY
+JH™]\›ŽÂˆÛÛœÝ\Ù\’YH[X™\Š™\K˜›ÙOË\Ù\’Y
+NÂˆYˆ
+]\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\’Y™\]Z\™YˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜›ØÚÔ›Û[Ý\‘œ›ÛP\Ú[™\ÜÊY\Ù\’Y™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÙ\™XÝÜžKÎšYØ›ØÚËÎ\Ù\’Y‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆYˆ
+\™\]Z\™P\Ú[™\ÜÓÝÛ™\Š™\K™\ËY
+JH™]\›ŽÂˆÝÜ˜YÙK[˜›ØÚÔ›Û[Ý\‘œ›ÛP\Ú[™\ÜÊY[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+JNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ ™[YHÝÛ™\ŽˆÙÛÈÚ[™ÙH™\]Y\Ý
+Ø[™Y]H[›ÜˆXÚÙ\‰ÜÈX[X[ÛÛ™\œÚ[ÛŠH8¥ 8¥ ˆ\œÜÝ
+‹Ø\KÝ\ØYØ\Ú[™\ÜË[ÙÛÈ‹™\]Z\™P]]\ØYœÚ[™ÛJ›ÙÛÈŠK
+™\Nˆ[žK™\Îˆ[žJHOˆÂˆYˆ
+\™\K™š[JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Èš[HÜˆ[˜[Y\H
+œËÜ™ËÙÚY‹ÝÙXœX^PŠHˆJNÂˆ™\ËšœÛÛŠÈ\›ˆÝ\ØYËÉÜ™\K™š[K™š[[˜[Y_XJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ\™XÝÜžKÎšYÛÙÛË\™\]Y\Ý‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆYˆ
+\™\]Z\™P\Ú[™\ÜÓÝÛ™\Š™\K™\ËY
+JH™]\›ŽÂˆÛÛœÝ[XYÙU\›HÝš[™Ê™\K˜›ÙOËš[XYÙU\›ˆŠKš[J
+NÂˆYˆ
+Z[XYÙU\›
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆš[XYÙU\›™\]Z\™YˆJNÂˆÛÛœÝÜ™X]YHÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÓÙÛÔ™\]Y\Ý
+Y™\KœÙ\ÜÚ[Û‹\Ù\’YK[XYÙU\›
+NÂˆ™\ËœÝ]\ÊŒJKšœÛÛŠÜ™X]Y
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù\™XÝÜžH‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝ]HH™\K˜›ÙNÂˆYˆ
+Y]K›˜[YHY]K\HY]K™\ØÜš\[ÛŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›˜[YK\K[™\ØÜš\[Ûˆ\™H™\]Z\™YˆJNÂˆBˆÛÛœÝÚ]ÛÛÜ™ÈH]ØZ]š[šY[ÓX\ÛÛÜ™[˜]\ÊÂˆ™[YS˜[YNˆ]K›˜[YKˆY™\ÜÎˆ]K˜Y™\ÜËˆ]ˆ]K›]ˆ™Îˆ]K›™ËˆJNÂˆÛÛœÝš^ˆHÝÜ˜YÙK˜Ü™X]P\Ú[™\ÜÊÂˆ˜[YNˆÝš[™Ê]K›˜[YJKš[J
+Kˆ\NˆÝš[™Ê]K\JKš[J
+Kˆ\ØÜš\[ÛŽˆÝš[™Ê]K™\ØÜš\[ÛŠKš[J
+KˆY™\ÜÎˆ]K˜Y™\ÜÈOH[	‰ˆÝš[™Ê]K˜Y™\ÜÊKš[J
+HÈÝš[™Ê]K˜Y™\ÜÊKš[J
+Hˆ[ˆ™ZYÚ›ÜšÛÙ‚ˆ]K›™ZYÚ›ÜšÛÙOH[	‰ˆÝš[™Ê]K›™ZYÚ›ÜšÛÙ
+Kš[J
+BˆÈÝš[™Ê]K›™ZYÚ›ÜšÛÙ
+Kš[J
+Bˆˆ[ˆÙXœÚ]Nˆ]KÙXœÚ]HOH[	‰ˆÝš[™Ê]KÙXœÚ]JKš[J
+HÈÝš[™Ê]KÙXœÚ]JKš[J
+Hˆ[ˆ[œÝYÜ˜[N‚ˆ]Kš[œÝYÜ˜[HOH[	‰ˆÝš[™Ê]Kš[œÝYÜ˜[JKš[J
+HÈÝš[™Ê]Kš[œÝYÜ˜[JKš[J
+Hˆ[ˆÛ™Nˆ]KœÛ™HOH[	‰ˆÝš[™Ê]KœÛ™JKš[J
+HÈÝš[™Ê]KœÛ™JKš[J
+Hˆ[ˆÝ\œÎˆ]KšÝ\œÈOH[	‰ˆÝš[™Ê]KšÝ\œÊKš[J
+HÈÝš[™Ê]KšÝ\œÊKš[J
+Hˆ[ˆ[XYÙU\›‚ˆ]Kš[XYÙU\›OH[	‰ˆÝš[™Ê]Kš[XYÙU\›
+Kš[J
+HÈÝš[™Ê]Kš[XYÙU\›
+Kš[J
+Hˆ[ˆÛ˜]U\›ˆ]K™Û˜]U\›OH[	‰ˆÝš[™Ê]K™Û˜]U\›
+Kš[J
+HÈÝš[™Ê]K™Û˜]U\›
+Kš[J
+Hˆ[ˆ]ˆÚ]ÛÛÜ™Ë›]ÏÈ]K›]ÏÈ[ˆ™ÎˆÚ]ÛÛÜ™Ë›™ÈÏÈ]K›™ÈÏÈ[ˆXÝ]™Nˆ]K˜XÝ]™HOOH˜[ÙKˆ]YY\“ÝÛ™YˆHY]Kœ]YY\“ÝÛ™Yˆ]YY\‘œšY[™Nˆ]Kœ]YY\‘œšY[™HOOH˜[ÙKˆ\Ó™]Îˆ]Kš\Ó™]ÈOOHYKˆÜ˜[™Ü[š[™Ñ]Nˆ]K™Ü˜[™Ü[š[™Ñ]H[ˆJNÂˆžHÂˆ]Y]YZ[Š™\K™\™XÝÜžWØÜ™X]H‹Âˆ\Nˆ˜\Ú[™\ÜÈ‹ˆYˆÝš[™Êš^‹šY
+KˆX™[ˆš^‹›˜[YKˆ]Z[ˆÈ\Nˆš^‹\Kœ›ÛNˆœ\ÙX\˜ÚÛÜ—ØYZ[ˆˆKˆJNÂˆHØ]ÚÂˆÊˆ]Y]Ü[Û˜[
+‹ÂˆBˆ™\ËšœÛÛŠš^ŠNÂˆJNÂ‚ˆ\œ]
+‹Ø\KØYZ[‹Ù\™XÝÜžKÎšY‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÊY
+NÂˆYˆ
+Y^\Ý[™ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝÚ]ÛÛÜ™ÈH]ØZ]š[šY[ÓX\ÛÛÜ™[˜]\ÊÂˆ™[YS˜[YNˆ™\K˜›ÙK›˜[YHÏÈ^\Ý[™Ë›˜[YKˆY™\ÜÎˆ™\K˜›ÙK˜Y™\ÜÈÏÈ^\Ý[™Ë˜Y™\ÜËˆ]ˆ™\K˜›ÙK›]ÏÈ^\Ý[™Ë›]ˆ™Îˆ™\K˜›ÙK›™ÈÏÈ^\Ý[™Ë›™ËˆJNÂˆÛÛœÝ\]YHÝÜ˜YÙK\]P\Ú[™\ÜÊYÂˆ‹‹œ™\K˜›ÙKˆ‹‹ŠÚ]ÛÛÜ™Ë›]OH[ÈÈ]ˆÚ]ÛÛÜ™Ë›]HˆßJKˆ‹‹ŠÚ]ÛÛÜ™Ë›™ÈOH[ÈÈ™ÎˆÚ]ÛÛÜ™Ë›™ÈHˆßJKˆJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ\]Y
+NÂˆJNÂ‚ˆ\œ]Ú
+‹Ø\KØYZ[‹Ù\™XÝÜžKÎšYØXÝ]™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH\œÙR[
+™\Kœ\˜[\ËšYL
+NÂˆÝÜ˜YÙKÙÙÛP\Ú[™\ÜÐXÝ]™JYH\™\K˜›ÙK˜XÝ]™JNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ ÚYÜÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÙÚYÜÈ‹
+™\K™\ÊHOˆÂˆÛÛœÝšY]Ù\’YH™\KœÙ\ÜÚ[ÛË\Ù\’YÂˆÛÛœÝ›ÝÜÈH™\Kœ]Y\žK›Z[™HOOHŒHˆ	‰ˆšY]Ù\’YÈÝÜ˜YÙK™Ù]ÚYÔÜÝÐžU\Ù\ŠšY]Ù\’Y
+HˆÝÜ˜YÙK™Ù]ÚYÔÜÝÊ“U‘HŠNÂˆÛÛœÝÚYÜÈH›ÝÜË›X\
+ÚYÈOˆX›XÑÚYÔÜÝ
+ÚYËšY]Ù\’Y
+JNÂˆ™\ËšœÛÛŠÚYÜÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚYÜÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚYÈ›Ø\™‹Âˆ]Nˆ™\K˜›ÙK]Kˆ˜[YNˆ™\K˜›ÙK›˜[YKˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[Û‹ˆÚÚ[Îˆ™\K˜›ÙKœÚÚ[ËˆÛÛ\[œØ][ÛŽˆ™\K˜›ÙK˜ÛÛ\[œØ][Û‹ˆØØ][ÛŽˆ™\K˜›ÙK›ØØ][Û‹ˆJJH™]\›ŽÂˆÛÛœÝ]HH[œÙ\ÚYÔÜÝØÚ[XKœ\œÙJ™\K˜›ÙJNÂˆ\ÜÙ\ÚYÐ›Ø\™[ÝÙY
+™\K˜›ÙK]JNÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆYˆ
+]K˜\Ú[™\ÜÒYOH[
+HÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆÛÛœÝ[YÚX›HH\Ù\Ëœ›Û[Ý\”Ý]\ÈOOH˜\›Ý™Yˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠHÝÜ˜YÙK™Ù]\Ù\“ÝÛ™Y\Ú[™\ÜÙ\Ê\Ù\’Y
+K›[™ÝˆÂˆYˆ
+Y[YÚX›JH™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›H\›Ý™Y›Û[Ý\œÈ[™™[YHÝÛ™\œÈØ[ˆ[šÈHÚYÈÈH\™XÝÜžH™[YKˆˆJNÂˆÛÛœÝ\Ú[™\ÜÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÊ]K˜\Ú[™\ÜÒY
+NÂˆYˆ
+X\Ú[™\ÜÈX\Ú[™\ÜË˜XÝ]™JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•]™[YH\È›Ý]˜Z[X›HÈ[šËˆˆJNÂˆBˆÛÛœÝÚYÈHÝÜ˜YÙK˜Ü™X]QÚYÔÜÝ
+È‹‹™]K\Ù\’YH\È[žJNÂˆ™\ËšœÛÛŠÚYÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚYÜËÎšYÛY\ÜØYÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÚYÈHÝÜ˜YÙK™Ù]ÚYÔÜÝÊ
+K™š[™
+ÈOˆËšYOOH[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+YÚYÏË\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’ÜÝ›Ý]˜Z[X›HˆJNÂˆYˆ
+ÚYË\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙH[Ý\œÙ[ˆˆJNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚYÈ›Ø\™Y\ÜØYÙH‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YKÚYË\Ù\’YÒQÖŽˆ	ÙÚYË]_X›ÙKÂˆÛÛ^\Nˆ‘ÒQÈ‹ˆÛÛ^YˆÚYËšYˆÛÛ^X™[ˆÚYË]KˆJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆJNÂ‚ˆËÈ\Ù\‰ÜÈÝÛˆÚYÈÜÝÂˆ\™Ù]
+‹Ø\KÙÚYÜËÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÚYÜÈHÝÜ˜YÙK™Ù]ÚYÔÜÝÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠÚYÜÊNÂˆJNÂ‚ˆ\œ]
+‹Ø\KÙÚYÜËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆžHÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]ÚYÔÜÝÊ
+K™š[™
+ÈOˆËšYOOHY	‰ˆË\Ù\’YOOH\Ù\’Y
+NÂˆYˆ
+Y^\Ý[™ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+™\K˜›ÙKœÝ]\ÈOOH[™Yš[™Y	‰ˆVÈ“U‘H‹ÓÔÑQ—Kš[˜ÛY\Ê™\K˜›ÙKœÝ]\ÊJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚÛÜÙH[ˆÜ[ˆÜˆÛÛ\]YÜÝˆJNÂˆYˆ
+™\K˜›ÙKœÝ]\ÈOOH“U‘Hˆ	‰ˆVÈ“U‘H‹ÓÔÑQ—Kš[˜ÛY\Ê^\Ý[™ËœÝ]\ÊJH™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÈÜÝ™YYÈ[Ù\˜]Üˆ™]šY]È™Y›Ü™H™[Ü[š[™ÈˆJNÂˆYˆ
+™\K˜›ÙK]HOOH[™Yš[™Y	‰ˆÝš[™Ê™\K˜›ÙK]JKš[J
+K›[™ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•]H]\Ý™H]X\ÝÈÚ\˜XÝ\œÈˆJNÂˆYˆ
+™\K˜›ÙK™\ØÜš\[ÛˆOOH[™Yš[™Y	‰ˆÝš[™Ê™\K˜›ÙK™\ØÜš\[ÛŠKš[J
+K›[™ÝŒ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘\ØÜš\[Ûˆ]\Ý™H]X\ÝŒÚ\˜XÝ\œÈˆJNÂˆ\ÜÙ\ÚYÐ›Ø\™[ÝÙY
+™\K˜›ÙKÂˆ]Nˆ™\K˜›ÙK]HÏÈ^\Ý[™Ë]Kˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[ÛˆÏÈ^\Ý[™Ë™\ØÜš\[Û‹ˆÚÚ[Îˆ™\K˜›ÙKœÚÚ[ÈÏÈ^\Ý[™ËœÚÚ[ËˆÛÛ\[œØ][ÛŽˆ™\K˜›ÙK˜ÛÛ\[œØ][ÛˆÏÈ^\Ý[™Ë˜ÛÛ\[œØ][Û‹ˆK˜[ÙJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚYÈ›Ø\™Y]‹Âˆ]Nˆ™\K˜›ÙK]Kˆ˜[YNˆ™\K˜›ÙK›˜[YKˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[Û‹ˆÚÚ[Îˆ™\K˜›ÙKœÚÚ[ËˆÛÛ\[œØ][ÛŽˆ™\K˜›ÙK˜ÛÛ\[œØ][Û‹ˆØØ][ÛŽˆ™\K˜›ÙK›ØØ][Û‹ˆJJH™]\›ŽÂˆÝÜ˜YÙK\]QÚYÔÜÝ
+Y\Ù\’Y™\K˜›ÙJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÙÚYÜËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÝÜ˜YÙK™[]QÚYÔÜÝ
+Y\Ù\’Y
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÕUÑˆVHÓÔÑUˆÒQ•S‘È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÙÚY[™ËÜÝ]\È‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝÜÝ[™ÓÜ[ˆHÚY[™ÔÜÝ[™ÓÜ[Š
+NÂˆ™\ËšœÛÛŠÂˆÜÝ[™ÓÜ[‹ˆY\ÜØYÙNˆÜÝ[™ÓÜ[‚ˆÈ‘ÒQ•ˆÜÝ[™È\ÈÜ[‹ˆ‚ˆˆ“™]ÈÒQ•ˆÜÝÈ\™H]\ÙYˆ^\Ý[™È\Ý[™ÜÈ[™[™Ù™œÈÝ^H]˜Z[X›Kˆ‹ˆJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙÚY[™È‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝÜÝÈHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝÊÈšY]Ù\•\Ù\’Yˆ™\KœÙ\ÜÚ[ÛË\Ù\’YJNÂˆ™\ËšœÛÛŠÜÝË›X\
+ÜÝOˆX›XÑÚY[™ÔÜÝ
+ÜÝ™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙÚY[™ËÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÜÝÈHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠÜÝË›X\
+ÜÝOˆX›XÑÚY[™ÔÜÝ
+ÜÝ™\KœÙ\ÜÚ[Û‹\Ù\’YJJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙÚY[™ËÎšY‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠX›XÑÚY[™ÔÜÝ
+ÜÝ™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆ\ÜÙ\ÚY[™Ð[ÝÙY
+™\K˜›ÙJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚY[™È›Ø\™‹Âˆ]Nˆ™\K˜›ÙK]Kˆ\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[Û‹ˆXÚÝ\™Y™\™[˜ÙNˆ™\K˜›ÙKœXÚÝ\™Y™\™[˜ÙKˆJJH™]\›ŽÂˆÛÛœÝÝÕ\›ÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙKœÝÕ\›ÊHÈ™\K˜›ÙKœÝÕ\›ËœÛXÙJŠHˆ×NÂˆÛÛœÝÜÝ\HH™\K˜›ÙKœÜÝ\HOOH’TÓÈˆÈ’TÓÈˆˆ‘ÒQ•ŽÂˆÛÛœÝ]HH[œÙ\ÚY[™ÔÜÝØÚ[XKœ\œÙJÂˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆÜÝ\Kˆ]NˆÝš[™Ê™\K˜›ÙK]HˆŠKš[J
+Kˆ\ØÜš\[ÛŽˆÝš[™Ê™\K˜›ÙK™\ØÜš\[ÛˆˆŠKš[J
+KˆØ]YÛÜžNˆÝš[™Ê™\K˜›ÙK˜Ø]YÛÜžHˆŠKš[J
+Kˆ™ZYÚ›ÜšÛÙˆÝš[™Ê™\K˜›ÙK›™ZYÚ›ÜšÛÙˆŠKš[J
+KˆXÚÝ\™Y™\™[˜ÙNˆÝš[™Ê™\K˜›ÙKœXÚÝ\™Y™\™[˜ÙHˆŠKš[J
+KˆÝÕ\›Îˆ”ÓÓ‹œÝš[™ÚYžJÝÕ\›ÊKˆJNÂˆÛÛœÝÜÝHÝÜ˜YÙK˜Ü™X]QÚY[™ÔÜÝ
+]JNÂˆ™\ËšœÛÛŠÈ‹‹œÜÝY\ÜØYÙNˆ–[Ý\ˆÒQ•ˆÜÝ\È]™KˆˆJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÚ[\™\Ý‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+
+ÜÝœÜÝÝ\HÜÝœÜÝ\JHOOH‘ÒQ•ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ÙHH[ˆÙX\˜ÚÙˆÙ™™\ˆ›ÝÈ›Üˆ[ˆÙX\˜ÚÙˆÜÝËˆˆJNÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+NÂˆYˆ
+[›ÝJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆHÚÜ›ÝH\È™\]Z\™YˆˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚY[™È[\™\Ý›ÝH‹È›ÝHJJH™]\›ŽÂˆÛÛœÝ[\™\ÝHÝÜ˜YÙK˜YÚY[™Ò[\™\Ý
+[œÙ\ÚY[™Ò[\™\ÝØÚ[XKœ\œÙJÂˆÜÝYˆÜÝšYˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ›ÝKˆJJNÂˆÛÛœÝ[\™\ÝY\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\ŠÜÝ\Ù\—ÚY
+KÚY[™È[\™\Ýˆ	ÜÜÝ]_X	Ú[\™\ÝY\Ù\Ë™\Ü^S˜[YH[\™\ÝY\Ù\Ë\Ù\›˜[YH”ÛÛY[Û™HŸH˜Z\ÙYZ\ˆ[™ˆ	Û›Ý_XÂˆÛÛ^\Nˆ‘ÒQ•S‘È‹ˆÛÛ^YˆÜÝšYˆÛÛ^X™[ˆÜÝ]KˆJNÂˆ™\ËšœÛÛŠ[\™\Ý
+NÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÛÙ™™\ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+
+ÜÝœÜÝÝ\HÜÝœÜÝ\JHOOH’TÓÈŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ÙHH[\™\Ý›ÝÈ›ÜˆÚYÜÝËˆˆJNÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+NÂˆYˆ
+[›ÝJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆHÚÜ›ÝH\È™\]Z\™YˆˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë‘ÚY[™ÈÙ™™\ˆ›ÝH‹È›ÝHJJH™]\›ŽÂˆÛÛœÝÙ™™\ˆHÝÜ˜YÙK˜YÚY[™Ò[\™\Ý
+[œÙ\ÚY[™Ò[\™\ÝØÚ[XKœ\œÙJÂˆÜÝYˆÜÝšYˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ›ÝKˆJJNÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\ŠÜÝ\Ù\—ÚY
+K[ˆÙX\˜ÚÙˆÙ™™\Žˆ	ÜÜÝ]_X›ÝKÂˆÛÛ^\Nˆ‘ÒQ•S‘È‹ˆÛÛ^YˆÜÝšYˆÛÛ^X™[ˆÜÝ]KˆJNÂˆ™\ËšœÛÛŠÈÙ™™\‹Y\ÜØYÙNˆ\ÙÈJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÚ[\™\ÝËÎš[\™\ÝYØÚÛÜÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÙ[XÝYHÝÜ˜YÙK˜ÚÛÜÙQÚY[™Ò[\™\Ý
+[X™\Š™\Kœ\˜[\ËšY
+K[X™\Š™\Kœ\˜[\Ëš[\™\ÝY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+\Ù[XÝY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[\™\Ý›Ý›Ý[™ˆJNÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]ÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙH[ÝHÙ\™HXÚÙY›Üˆ‰ÜÜÝË]_H‹ˆÛÛÜ™[˜]HXÚÝ\\™K˜
+Kš[J
+NÂˆÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\Š
+Ù[XÝY\È[žJK\Ù\’Y
+KÚY[™ÈXÚÝ\ˆ	ÜÜÝË]H‘ÚYŸX›ÙKÂˆÛÛ^\Nˆ‘ÒQ•S‘È‹ˆÛÛ^Yˆ[X™\Š™\Kœ\˜[\ËšY
+KˆÛÛ^X™[ˆÜÝË]H[ˆJNÂˆ™\ËšœÛÛŠÙ[XÝY
+NÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÛX\šËYÚYY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÝÜ˜YÙK›X\šÑÚY[™Ô™\ÛÛ™Y
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YK‘ÒQ•QŠNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÛX\šËY›Ý[™‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÝÜ˜YÙK›X\šÑÚY[™Ô™\ÛÛ™Y
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YK‘“ÕS‘ŠNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÜ™[Ü[ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÝÜ˜YÙKœ™[Ü[‘ÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÜ™[™]È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÝÜ˜YÙKœ™[™]ÑÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙÚY[™ËÎšYÜ™\Ü‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™X\ÛÛˆHÝš[™Ê™\K˜›ÙKœ™X\ÛÛˆˆŠKš[J
+NÂˆYˆ
+\™X\ÛÛŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœ™X\ÛÛˆ™\]Z\™YˆJNÂˆÝÜ˜YÙKœ™\ÜÚY[™ÔÜÝ
+[œÙ\ÚY[™Ô™\ÜØÚ[XKœ\œÙJÂˆÜÝYˆ[X™\Š™\Kœ\˜[\ËšY
+Kˆ™\Ü\•\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ™X\ÛÛ‹ˆJJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÙÚY[™ËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆÝÜ˜YÙK™[]QÚY[™ÔÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K\Ù\‹šYÈ\ÐYZ[Žˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆÛÛœÝÝ]\ÈHK›Y\ÜØYÙHOOH“›Ý[ÝÙYˆÈÈˆK›Y\ÜØYÙHOOH”ÜÝ›Ý›Ý[™ˆÈˆÂˆ™\ËœÝ]\ÊÝ]\ÊKšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ÑSŽˆQSP‘TˆPT’ÑUPÑH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÜÙ[ˆ‹
+™\Nˆ[žK™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Ù[”ÜÝÊ
+K›X\
+
+ÜÝˆ[žJHOˆX›XÔÙ[”ÜÝ
+ÜÝ™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜÙ[‹ÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Ù[”ÜÝÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJK›X\
+
+ÜÝˆ[žJHOˆX›XÔÙ[”ÜÝ
+ÜÝ™\KœÙ\ÜÚ[Û‹\Ù\’YJJJNÂˆJNÂˆ\™Ù]
+‹Ø\KÜÙ[‹ÜØ]™YÚYÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Ù[”Ø]™YYÊ™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜÙ[‹ÎšY‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]Ù[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“\Ý[™È›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠX›XÔÙ[”ÜÝ
+ÜÝ™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜÙ[ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆYˆ
+\™\K˜›ÙK˜XØÙ\[\ÊH›ÝÈ™]È\œ›ÜŠ–[ÝH]\ÝYÜ™YHÈHÑSˆX\šÙ]XÙH[\ËˆŠNÂˆÛÛœÝšXÙPÙ[ÈH\œÙSX\šÙ]XÙTšXÙJ™\K˜›ÙKœšXÙJNÂˆÛÛœÝ^\ÝXÚÈH	Ü™\K˜›ÙK]HˆŸH	Ü™\K˜›ÙK™\ØÜš\[ÛˆˆŸH	Ü™\K˜›ÙK˜Ø]YÛÜžHˆŸXÓÝÙ\Ø\ÙJ
+NÂˆYˆ
+‘TÕ’PÕQÑÒQ•S‘×ÕT“TËœÛÛYJ\›HOˆ^\ÝXÚËš[˜ÛY\Ê\›JJJHÂˆ›ÝÈ™]È\œ›ÜŠ•\È\Ý[™È\X\œÈÈ[˜ÛYHH™\ÝšXÝY][KˆŠNÂˆBˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”ÑSˆX\šÙ]XÙH‹È]Nˆ™\K˜›ÙK]K\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[ÛˆJJH™]\›ŽÂˆÛÛœÝÝÕ\›ÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙKœÝÕ\›ÊHÈ™\K˜›ÙKœÝÕ\›ËœÛXÙJŠHˆ×NÂˆÛÛœÝÜÝHÝÜ˜YÙK˜Ü™X]TÙ[”ÜÝ
+[œÙ\Ù[”ÜÝØÚ[XKœ\œÙJÂˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ]NˆÝš[™Ê™\K˜›ÙK]HˆŠKš[J
+Kˆ\ØÜš\[ÛŽˆÝš[™Ê™\K˜›ÙK™\ØÜš\[ÛˆˆŠKš[J
+KˆØ]YÛÜžNˆÝš[™Ê™\K˜›ÙK˜Ø]YÛÜžH“Ý\ˆŠKš[J
+KˆÛÛ™][ÛŽˆÝš[™Ê™\K˜›ÙK˜ÛÛ™][Ûˆ‘ÛÛÙŠKš[J
+KˆšXÙPÙ[Ëˆ™YÛÝXX›Nˆ›ÛÛX[Š™\K˜›ÙK›™YÛÝXX›JKˆ™ZYÚ›ÜšÛÙˆÝš[™Ê™\K˜›ÙK›™ZYÚ›ÜšÛÙ”Ü[™ŠKš[J
+KˆXÚÝ\™Y™\™[˜ÙNˆÝš[™Ê™\K˜›ÙKœXÚÝ\™Y™\™[˜ÙH“Y\ÜØYÙHÈÛÛÜ™[˜]HŠKš[J
+KˆÝÕ\›Îˆ”ÓÓ‹œÝš[™ÚYžJÝÕ\›ÊKˆJJNÂˆ™\ËšœÛÛŠX›XÔÙ[”ÜÝ
+ÜÝ™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œ]
+‹Ø\KÜÙ[‹ÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝšXÙPÙ[ÈH\œÙSX\šÙ]XÙTšXÙJ™\K˜›ÙKœšXÙJNÂˆÛÛœÝ^\ÝXÚÈH	Ü™\K˜›ÙK]HˆŸH	Ü™\K˜›ÙK™\ØÜš\[ÛˆˆŸH	Ü™\K˜›ÙK˜Ø]YÛÜžHˆŸXÓÝÙ\Ø\ÙJ
+NÂˆYˆ
+‘TÕ’PÕQÑÒQ•S‘×ÕT“TËœÛÛYJ\›HOˆ^\ÝXÚËš[˜ÛY\Ê\›JJJH›ÝÈ™]È\œ›ÜŠ•\È\Ý[™È\X\œÈÈ[˜ÛYHH™\ÝšXÝY][KˆŠNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”ÑSˆX\šÙ]XÙHY]‹È]Nˆ™\K˜›ÙK]K\ØÜš\[ÛŽˆ™\K˜›ÙK™\ØÜš\[ÛˆJJH™]\›ŽÂˆÛÛœÝÜÝHÝÜ˜YÙK\]TÙ[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YKÂˆ]NˆÝš[™Ê™\K˜›ÙK]HˆŠKš[J
+K\ØÜš\[ÛŽˆÝš[™Ê™\K˜›ÙK™\ØÜš\[ÛˆˆŠKš[J
+KˆØ]YÛÜžNˆÝš[™Ê™\K˜›ÙK˜Ø]YÛÜžH“Ý\ˆŠKš[J
+KÛÛ™][ÛŽˆÝš[™Ê™\K˜›ÙK˜ÛÛ™][Ûˆ‘ÛÛÙŠKš[J
+KˆšXÙPÙ[Ë™YÛÝXX›Nˆ›ÛÛX[Š™\K˜›ÙK›™YÛÝXX›JK™ZYÚ›ÜšÛÙˆÝš[™Ê™\K˜›ÙK›™ZYÚ›ÜšÛÙ”Ü[™ŠKš[J
+KˆXÚÝ\™Y™\™[˜ÙNˆÝš[™Ê™\K˜›ÙKœXÚÝ\™Y™\™[˜ÙH“Y\ÜØYÙHÈÛÛÜ™[˜]HŠKš[J
+KˆJNÂˆ™\ËšœÛÛŠX›XÔÙ[”ÜÝ
+ÜÝ™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆHØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÚ[\™\Ý‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]Ù[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“\Ý[™È›Ý›Ý[™ˆJNÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝH’\È\È]˜Z[X›OÈŠKš[J
+NÂˆÛÛœÝÙ™™\Ù[ÈH™\K˜›ÙK›Ù™™\ˆOH[™\K˜›ÙK›Ù™™\ˆOOHˆˆÈ[ˆX]œ›Ý[™
+[X™\Š™\K˜›ÙK›Ù™™\ŠH
+ˆL
+NÂˆYˆ
+Ù™™\Ù[ÈOH[	‰ˆ
+S[X™\‹š\Ñš[š]JÙ™™\Ù[ÊHÙ™™\Ù[ÈL
+JH›ÝÈ™]È\œ›ÜŠ‘[\ˆH˜[YÙ™™\‹ˆŠNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”ÑSˆ^Y\ˆY\ÜØYÙH‹È›ÝHJJH™]\›ŽÂˆÛÛœÝ[\™\ÝHÝÜ˜YÙK˜YÙ[’[\™\Ý
+[œÙ\Ù[’[\™\ÝØÚ[XKœ\œÙJÂˆÜÝYˆ[X™\Š™\Kœ\˜[\ËšY
+K\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÝKÙ™™\Ù[ËˆJJNÂˆÛÛœÝ^Y\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\ŠÜÝ\Ù\—ÚY
+KÑSŽˆ	ÜÜÝ]_Xˆ	Ø^Y\Ë™\Ü^S˜[YH^Y\Ë\Ù\›˜[YH”ÛÛY[Û™HŸNˆ	Û›Ý_IÛÙ™™\Ù[ÈÈ“Ù™™\Žˆ		ÊÙ™™\Ù[ÈÈL
+KÑš^Y
+Š_XˆˆŸXˆÈÛÛ^\Nˆ”ÑSˆ‹ÛÛ^YˆÜÝšYÛÛ^X™[ˆÜÝ]HJNÂˆ™\ËšœÛÛŠ[\™\Ý
+NÂˆHØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÚ[\™\ÝËÎš[\™\ÝYØÚÛÜÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÙ[XÝYHÝÜ˜YÙK˜ÚÛÜÙTÙ[’[\™\Ý
+[X™\Š™\Kœ\˜[\ËšY
+K[X™\Š™\Kœ\˜[\Ëš[\™\ÝY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]Ù[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK[X™\ŠÙ[XÝY\Ù\—ÚY
+K™\Ù\™Y›Üˆ[ÝNˆ	ÜÜÝË]H”ÑSˆ\Ý[™ÈŸXˆÝš[™Ê™\K˜›ÙK››ÝH–[ÝH\™Hš\œÝ[ˆ[™KˆÛÛÜ™[˜]H^[Y[[™XÚÝ\\™KˆŠKˆÈÛÛ^\Nˆ”ÑSˆ‹ÛÛ^Yˆ[X™\Š™\Kœ\˜[\ËšY
+KÛÛ^X™[ˆÜÝË]H[JNÂˆ™\ËšœÛÛŠÙ[XÝY
+NÂˆHØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂ‚ˆ›Üˆ
+ÛÛœÝÜ]Ý]\×HÙˆÖÈœ™\Ù\™H‹”‘TÑT•‘Q—KÈœÛÛ‹”ÓÓ—KÈœ™[Ü[ˆ‹PÕU‘H—WH\ÈÛÛœÝ
+HÂˆ\œÜÝ
+Ø\KÜÙ[‹ÎšYÉÜ]X™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÈÝÜ˜YÙKœÙ]Ù[”Ý]\Ê[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YKÝ]\ÊNÈ™\ËšœÛÛŠÈÚÎˆYHJNÈBˆØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂˆB‚ˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÜ™[™]È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÈÝÜ˜YÙKœ™[™]ÔÙ[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÈ™\ËšœÛÛŠÈÚÎˆYHJNÈBˆØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÜ™\Ü‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÝÜ˜YÙKœ™\ÜÙ[”ÜÝ
+[œÙ\Ù[”™\ÜØÚ[XKœ\œÙJÈÜÝYˆ[X™\Š™\Kœ\˜[\ËšY
+K™\Ü\•\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YK™X\ÛÛŽˆÝš[™Ê™\K˜›ÙKœ™X\ÛÛˆˆŠKš[J
+HJJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÜØ]™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÈØ]™YˆÝÜ˜YÙKÙÙÛTÙ[”Ø]™J[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJHJNÂˆJNÂˆ\œÜÝ
+‹Ø\KÜÙ[‹ÎšYÜÙY[ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÈÚÎˆÝÜ˜YÙK›X\šÔÙ[”Ø]™TÙY[Š[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJHJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÜÙ[‹ÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÈÝÜ˜YÙK™[]TÙ[”ÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÈ™\ËšœÛÛŠÈÚÎˆYHJNÈBˆØ]Ú
+Nˆ[žJHÈ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÈBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ TÑTˆUU8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KØ]]Ü™YÚ\Ý\ˆ‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈ\Ù\›˜[YK[XZ[\ÜÝÛÜ™\Ü^S˜[YKYÜ™YYÐÛÛ[][š]TÝ[™\™ËÛÛ[][š]TÝ[™\™Õ™\œÚ[ÛˆHH™\K˜›ÙNÂˆYˆ
+]\Ù\›˜[YHY[XZ[\\ÜÝÛÜ™
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YK[XZ[[™\ÜÝÛÜ™\™H™\]Z\™YˆJNÂˆBˆYˆ
+\Ù\›˜[YK›[™ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\›˜[YH]\Ý™H]X\ÝÈÚ\˜XÝ\œÈˆJNÂˆYˆ
+\ÜÝÛÜ™›[™ÝŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”\ÜÝÛÜ™]\Ý™H]X\ÝˆÚ\˜XÝ\œÈˆJNÂˆYˆ
+ÓÓSUS’UWÔÕS‘T‘×ÑÐUWÑSP“Q	‰ˆXYÜ™YYÐÛÛ[][š]TÝ[™\™ÊHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ–[ÝH]\ÝYÜ™YHÈHÛÛ[][š]HÝ[™\™È[™YØ[\›\ÈÈ›Ú[ˆˆJNÂˆBˆËÈ™\Ù\™YÚ\™YÝZYKXYZ[ˆY[]HH›ÝH[X[ˆÚYÛ\‚ˆYˆ
+ÝÜ˜YÙKš\ÔÞ\Ý[QÝZYPXØÛÝ[
+È\Ù\›˜[YK[XZ[JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•]\Ù\›˜[YHÜˆ[XZ[\È™\Ù\™YˆJNÂˆB‚ˆÛÛœÝ^\Ý[™Ñ[XZ[HÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+[XZ[
+NÂˆYˆ
+^\Ý[™Ñ[XZ[
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ‘[XZ[[™XYH™YÚ\Ý\™YˆJNÂ‚ˆÛÛœÝ^\Ý[™Õ\Ù\›˜[YHHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+^\Ý[™Õ\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ•\Ù\›˜[YH[™XYHZÙ[ˆˆJNÂ‚ˆÛÛœÝ™\œÚ[ÛˆBˆ\[ÙˆÛÛ[][š]TÝ[™\™Õ™\œÚ[ÛˆOOHœÝš[™Èˆ	‰ˆÛÛ[][š]TÝ[™\™Õ™\œÚ[Û‚ˆÈÛÛ[][š]TÝ[™\™Õ™\œÚ[Û‚ˆˆÓÓSUS’UWÔÕS‘T‘×Õ‘T”ÒSÓŽÂˆÛÛœÝ›ÝÈH™]È]J
+KÒTÓÔÝš[™Ê
+NÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK˜Ü™X]U\Ù\ŠÂˆ\Ù\›˜[YKˆ[XZ[ˆ\ÜÝÛÜ™\Úˆ\ÜÝÛÜ™ˆ\Ü^S˜[YKˆ‹‹ŠÓÓSUS’UWÔÕS‘T‘×ÑÐUWÑSP“QˆÈÂˆÛÛ[][š]TÝ[™\™Õ™\œÚ[ÛŽˆ™\œÚ[Û‹ˆÛÛ[][š]TÝ[™\™ÐYÜ™YY]ˆ›ÝËˆBˆˆßJKˆJNÂˆÛÛœÝš[š\Ú™YÚ\Ý\ˆH
+
+HOˆÂˆ™\KœÙ\ÜÚ[Û‹\Ù\’YH\Ù\‹šYÂˆX^X™TÞ[˜ÔÚ]SÝÛ™\”Ü›Û[Ê\Ù\ŠNÂˆ™\ËšœÛÛŠ]]\Ù\”™\ÜÛœÙJ™\K\Ù\ŠJNÂˆNÂˆËÈX]ÚÙÚ[Žˆ™YÙ[™\˜]HÙ\ÜÚ[Ûˆ™Y›Ü™Hš[™[™ÈH™]È\Ù\’Y‚ˆYˆ
+\[Ùˆ™\KœÙ\ÜÚ[Û‹œ™YÙ[™\˜]HOOH™[˜Ý[ÛˆŠHÂˆ™]\›ˆ™\KœÙ\ÜÚ[Û‹œ™YÙ[™\˜]J\œˆOˆÂˆYˆ
+\œŠH™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ”Ù\ÜÚ[Ûˆ\œ›ÜˆˆJNÂˆš[š\Ú™YÚ\Ý\Š
+NÂˆJNÂˆBˆš[š\Ú™YÚ\Ý\Š
+NÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØ]]ØÛÛ[][š]K\Ý[™\™ËØYÜ™YH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝ™\œÚ[ÛˆBˆ\[Ùˆ™\K˜›ÙOË™\œÚ[ÛˆOOHœÝš[™Èˆ	‰ˆ™\K˜›ÙK™\œÚ[Û‚ˆÈ™\K˜›ÙK™\œÚ[Û‚ˆˆÓÓSUS’UWÔÕS‘T‘×Õ‘T”ÒSÓŽÂˆÝÜ˜YÙKœÙ]ÛÛ[][š]TÝ[™\™ÐYÜ™Y[Y[
+\Ù\’YÈYÜ™YYˆYK™\œÚ[ÛˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ]]\Ù\”™\ÜÛœÙJ™\K\Ù\ŠJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØ]]ØÛÛ[][š]K\Ý[™\™ËÙXÛ[™H‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[ÛË\Ù\’YÂˆÛÛœÝ™\œÚ[ÛˆBˆ\[Ùˆ™\K˜›ÙOË™\œÚ[ÛˆOOHœÝš[™Èˆ	‰ˆ™\K˜›ÙK™\œÚ[Û‚ˆÈ™\K˜›ÙK™\œÚ[Û‚ˆˆÓÓSUS’UWÔÕS‘T‘×Õ‘T”ÒSÓŽÂˆYˆ
+\Ù\’Y
+HÂˆÝÜ˜YÙKœÙ]ÛÛ[][š]TÝ[™\™ÐYÜ™Y[Y[
+\Ù\’YÈYÜ™YYˆ˜[ÙK™\œÚ[ÛˆJNÂˆBˆÛÛœÝ^[ØYHÈÚÎˆYK™Y\™XÝ\›ˆÓÓSUS’UWÔÕS‘T‘×ÑPÓS‘WÕT“NÂˆYˆ
+\[Ùˆ™\KœÙ\ÜÚ[ÛË™\Ý›ÞHOOH™[˜Ý[ÛˆŠHÂˆ™\KœÙ\ÜÚ[Û‹™\Ý›ÞJ
+
+HOˆ™\ËšœÛÛŠ^[ØY
+JNÂˆ™]\›ŽÂˆBˆ™\ËšœÛÛŠ^[ØY
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØ]]ÛÙÚ[ˆ‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ[XZ[\ÜÝÛÜ™HH™\K˜›ÙNÂˆYˆ
+Y[XZ[\\ÜÝÛÜ™
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YKÙ[XZ[[™\ÜÝÛÜ™™\]Z\™YˆJNÂˆËÈXØÙ\\Ù\›˜[YHÜˆ[XZ[ˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+[XZ[
+HÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ[XZ[
+NÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆËÈÞ\Ý[HÝZYKXYZ[ˆXZ[›ÞØ[››Ý™HÚYÛ™Y[È\ÈH\œÛÛ‹‚ˆYˆ
+ÝÜ˜YÙKš\ÔÞ\Ý[QÝZYPXØÛÝ[
+\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆBˆYˆ
+]™\šYžT\ÜÝÛÜ™
+\ÜÝÛÜ™\Ù\‹œ\ÜÝÛÜ™\Ú
+JH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆYˆ
+\ÓYØXÞT\ÜÝÛÜ™\Ú
+\Ù\‹œ\ÜÝÛÜ™\Ú
+JHÂˆÝÜ˜YÙK\]T\ÜÝÛÜ™\Ú
+\Ù\‹šY\Ú\ÜÝÛÜ™
+\ÜÝÛÜ™
+JNÂˆBˆÛÛœÝš[š\ÚÙÚ[ˆH
+
+HOˆÂˆYˆ
+\Ù\‹œÝ]\ÈOOH™[]YŠHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÈXØÛÝ[\È™Y[ˆ™[[Ý™YˆJNÂˆBˆËÈ[YYÝ\Ü[™ÜÚYÝÈ]]Ë[YÛˆÙÚ[‚ˆÛÛœÝ™Yœ™\ÚYHÝÜ˜YÙK˜ÛX\‘^\™YXØÛÝ[[Ù\˜][ÛŠ\Ù\‹šY
+H\Ù\ŽÂˆYˆ
+™Yœ™\ÚYœÝ]\ÈOOH™[]YŠHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÈXØÛÝ[\È™Y[ˆ™[[Ý™YˆJNÂˆBˆ™\KœÙ\ÜÚ[Û‹\Ù\’YH™Yœ™\ÚYšYÂˆXuÛ^{¶‰žËkºwµç[œÐžP™XXÚ
+™XXÚ™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆBˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛœÊPÕU‘H‹™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÛZ\ÜÙYXÛÛ›™XÝ[ÛœÈ‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛœÐžQ]™[
+]šY™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛœÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ˜]Ñ]™[YH™\K˜›ÙK™]™[YÂˆÛÛœÝ˜]Ð™XXÚYH™\K˜›ÙK˜™XXÚYÂˆÛÛœÝ\Ñ]™[H˜]Ñ]™[YOOH[™Yš[™Y	‰ˆ˜]Ñ]™[YOOH[	‰ˆ˜]Ñ]™[YOOHˆŽÂˆÛÛœÝ\Ð™XXÚH˜]Ð™XXÚYOOH[™Yš[™Y	‰ˆ˜]Ð™XXÚYOOH[	‰ˆ˜]Ð™XXÚYOOHˆŽÂˆÛÛœÝ]™[YH\Ñ]™[È[X™\Š˜]Ñ]™[Y
+Hˆ[ÂˆÛÛœÝ™XXÚYH\Ð™XXÚÈÝš[™Ê˜]Ð™XXÚY
+Hˆ[Â‚ˆYˆ
+\Ñ]™[	‰ˆ\Ð™XXÚ
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“[šÈÈ[ˆ]™[ÜˆH™XXÚ›Ý›ÝˆJNÂˆBˆYˆ
+\Ñ]™[	‰ˆS[X™\‹š\Ñš[š]J]™[Y
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y]™[ˆJNÂˆBˆYˆ
+\Ð™XXÚ	‰ˆZ\Õ˜[Y™XXÚY
+™XXÚY
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆB‚ˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“RV–‘QÓÓ“‘PÕSÓˆ‹Âˆ]Nˆ™\K˜›ÙK]Kˆ›ÙNˆ™\K˜›ÙK˜›ÙKˆ]™[X™[ˆ™\K˜›ÙK™]™[X™[ˆ™[YR[ˆ™\K˜›ÙK™[YR[ˆJJH™]\›ŽÂ‚ˆ]^[ØYˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛŽÂˆ]]™[Y]NˆÈ]NˆÝš[™ÎÈ™[YS˜[YNˆÝš[™ÎÈ^SÙ•ÙYZÎˆÝš[™ÈH[H[Â‚ˆÛÛœÝØÛÜHHÝš[™Ê™\K˜›ÙKœØÛÜHˆŠNÂˆÛÛœÝ›Ø\™ØÛÜHHØÛÜHOOH˜›Ø\™ŽÂ‚ˆYˆ
+™XXÚY
+HÂˆ^[ØYHÂˆ‹‹œ™\K˜›ÙKˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ]™[Yˆ[ˆ™XXÚYˆ^SÙ•ÙYZÎˆXÚYšXÑ^SÙ•ÙYZÊ
+Kˆ™[YR[ˆ™XXÚ™[YSX™[
+™XXÚY\Èœ›ÛÜÝ\‹\›ØÚÈˆœØ]]šYKZ\Û[™ŠKˆÛÜÙ\Ð]ˆÙ[™\˜[ÜÝYÛÜÙ\Ð]
+
+KˆNÂˆH[ÙHYˆ
+]™[YOH[
+HÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+]™[Y
+NÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y]™[ˆJNÂ‚ˆÛÛœÝ™\]Z\™UÙ^HHX›Ø\™ØÛÜH	‰ˆØÛÜHOOHÙ^HŽÂˆÛÛœÝÚ[™ÝÈH\ÓZ\ÜÙYÛÛ›™XÝ[Û”ÜÝX›J]™]TÝ\]™]Q[™È™\]Z\™UÙ^HJNÂˆYˆ
+]Ú[™ÝË›ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚ[™ÝËœ™X\ÛÛˆ”ÜÝ[™È›ÝÜ[ˆ›Üˆ\È]™[Y]ˆJNÂ‚ˆ^[ØYHÂˆ‹‹œ™\K˜›ÙKˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ]™[Yˆ^SÙ•ÙYZÎˆ]™^SÙ•ÙYZËˆ™[YR[ˆ]™[YS˜[YKˆÛÜÙ\Ð]ˆÚ[™ÝË˜ÛÜÙ\Ð]Z\ÜÙYÛÛ›™XÝ[ÛÛÜÙ\Ð]
+]™]TÝ\]™]Q[™
+KˆNÂˆ]™[Y]HHÈ]Nˆ]]K™[YS˜[YNˆ]™[YS˜[YK^SÙ•ÙYZÎˆ]™^SÙ•ÙYZÈˆˆNÂˆH[ÙHÂˆÛÛœÝÝ\ÝÛSX™[HÝš[™Ê™\K˜›ÙK™]™[X™[ˆŠKš[J
+NÂˆÛÛœÝ™[YR[H›Ü›X]Ý\ÝÛTÜÝY™[YJˆÝ\ÝÛSX™[ˆÝš[™Ê™\K˜›ÙK™[YR[ˆŠKš[J
+Kˆ
+NÂˆ^[ØYHÂˆ‹‹œ™\K˜›ÙKˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ]™[Yˆ[ˆ^SÙ•ÙYZÎˆXÚYšXÑ^SÙ•ÙYZÊ
+Kˆ™[YR[ˆÛÜÙ\Ð]ˆÙ[™\˜[ÜÝYÛÜÙ\Ð]
+
+KˆNÂˆB‚ˆÛÛœÝ]HH[œÙ\Z\ÜÙYÛÛ›™XÝ[Û”ØÚ[XKœ\œÙJ^[ØY
+NÂˆYˆ
+]K˜›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙHX^\ÈLÚ\˜XÝ\œÈˆJNÂˆÛÛœÝÜ™X]YHÝÜ˜YÙK˜Ü™X]SZ\ÜÙYÛÛ›™XÝ[ÛŠ]JNÂˆ™\ËšœÛÛŠÂˆ‹‹˜Ü™X]Yˆ]™[]Nˆ]™[Y]OË]HÏÈ[ˆ]™[™[YNˆ]™[Y]OË™[YS˜[YHÏÈ[ˆ]™[^Nˆ]™[Y]OË™^SÙ•ÙYZÈÏÈÜ™X]Y™^SÙ•ÙYZÈÏÈ[ˆ\ÓZ[™NˆYKˆ[›Ûž[[Ý\Îˆ˜[ÙKˆJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œ]
+‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]Úˆ[žHHßNÂˆÈ]H‹˜›ÙH‹œÝ]\È—K™›Ü‘XXÚ
+ÈOˆÂˆYˆ
+™\K˜›ÙVÚ×HOOH[™Yš[™Y
+H]ÚÚ×HH™\K˜›ÙVÚ×NÂˆJNÂˆYˆ
+]Ú˜›ÙH	‰ˆ]Ú˜›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙHX^\ÈLÚ\˜XÝ\œÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“RV–‘QÓÓ“‘PÕSÓˆY]‹È]Nˆ]Ú]K›ÙNˆ]Ú˜›ÙHJJH™]\›ŽÂˆÛÛœÝ\]YHÝÜ˜YÙK\]SZ\ÜÙYÛÛ›™XÝ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YK]Ú
+NÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ\]Y
+NÂˆJNÂ‚ˆ\™[]J‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÝÜ˜YÙK™[]SZ\ÜÙYÛÛ›™XÝ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšYÜ™\H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝÜÝœÝ]\ÈOOHPÕU‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+ÜÝ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙH[Ý\œÙ[ˆˆJNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“RV–‘QÓÓ“‘PÕSÓˆ™\H‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YKÜÝ\Ù\’YRV–‘QÓÓ“‘PÕSÓŽˆ	ÜÜÝ]_X›ÙKÂˆÛÛ^\Nˆ“RTÔÑQÐÓÓ“‘PÕSÓˆ‹ˆÛÛ^YˆÜÝšYˆÛÛ^X™[ˆÜÝ]KˆJNÂˆÝÜ˜YÙK˜Ü™X]SZ\ÜÙYÛÛ›™XÝ[Û•™XY
+\ÙË™XYYÜÝšYÜÝ\Ù\’Y™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšYÜ™\Ü‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÜÝHÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÜÝÜÝœÝ]\ÈOOHPÕU‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ™X\ÛÛˆHÝš[™Ê™\K˜›ÙKœ™X\ÛÛˆˆŠKš[J
+KœÛXÙJL
+H“›È™X\ÛÛˆÚ]™[ˆŽÂˆÛÛœÝXÝÜˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\Nˆ“RTÔÑQÐÓÓ“‘PÕSÓ—Ô‘TÔ•‹ˆ]™[Yˆˆ]™[]NˆÜÝ]HZ\ÜÙYÛÛ›™XÝ[ÛˆÉÜÜÝšYXˆ™\]Y\Ý\“˜[YNˆXÝÜË™\Ü^S˜[YHXÝÜË\Ù\›˜[YH›Y[X™\ˆ‹ˆ™\]Y\Ý\‘[XZ[ˆXÝÜË™[XZ[[ˆ›ÛÙŽˆZ\ÜÙYÛÛ›™XÝ[ÛˆÉÜÜÝšYH™\ÜYH	Ü™X\ÛÛŸXˆH\È[žJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ ’U‘Tˆ”UÈ
+YH™XXÚ\ÈÛØÚX[
+H8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆÊŠˆXÝ]™H™XXÚ^\È›ÜˆHÚYÛ™YZ[ˆ\Ù\ˆ
+™YYÈ^HØÚY[H›Y\ˆ›ØÚÜÊKˆ
+‹Âˆ\™Ù]
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]™XXÚÚXÚÚ[œÐžU\Ù\Š™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œÈ‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝ™XXÚYHÝš[™Ê™\Kœ]Y\žK˜™XXÚˆŠNÂˆÛÛœÝ]HHÝš[™Ê™\Kœ]Y\žK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆžHÂˆÛÛœÝ›ÝÜÈHÝÜ˜YÙK™Ù]™XXÚÚXÚÚ[œÊ™XXÚY]K™\KœÙ\ÜÚ[ÛË\Ù\’Y
+NÂˆËÈ[Ø^\È”ÓÓ‹X\œ˜^HÛÈÛY[È™]™\ˆ™š[\ˆ[ˆ\œ›ÜˆØš™XÝˆ™\ËšœÛÛŠ\œ˜^Kš\Ð\œ˜^J›ÝÜÊHÈ›ÝÜÈˆ×JNÂˆHØ]Ú
+Nˆ[žJHÂˆÛÛœÛÛK™\œ›ÜŠ–Üš]™\‹Xœ˜]ËØÚXÚÚ[œ×H‹OË›Y\ÜØYÙHJNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØYÚXÚËZ[œÈˆJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™XXÚYHÝš[™Ê™\K˜›ÙK˜™XXÚYˆŠNÂˆÛÛœÝ\œš]˜[Ý\ˆH[X™\Š™\K˜›ÙK˜\œš]˜[Ý\ŠNÂˆÛÛœÝ\\Ý\”˜]ÈH™\K˜›ÙK™\\Ý\ŽÂˆÛÛœÝ\\Ý\ˆH\\Ý\”˜]ÈOH[\\Ý\”˜]ÈOOHˆˆÈ[ˆ[X™\Š\\Ý\”˜]ÊNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆYˆ
+Z\Õ˜[Yš]™\œ˜]ÒÝ\Š\œš]˜[Ý\ŠJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÚÈH[YH™]ÙY[ˆØ[H[™\HˆJNÂˆYˆ
+Z\Õ˜[Yš]™\œ˜]Ñ\\Ý\Š\\Ý\‹\œš]˜[Ý\ŠJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÚÈÝÈÛ™È[ÝIÛÝ^H
+X]™HY\ˆ[ÝH\œš]™KžHLJHˆJNÂˆBˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+KœÛXÙJ
+H[ÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”š]™\ˆœ˜]ÈÚXÚËZ[ˆ‹È›ÝNˆ›ÝHˆˆJJH™]\›ŽÂˆÛÛœÝØ[[™\‘]HHÝš[™Ê™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+Z\Ð[ÝÙY™XXÚÚXÚÚ[‘]JØ[[™\‘]JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÚÈH^Hœ›ÛHÙ^H›ÝYÚH™^È^\ÈˆJNÂˆBˆÛÛœÝ\Ð[›Ûž[[Ý\ÈH›ÛÛX[Š™\K˜›ÙKš\Ð[›Ûž[[Ý\ÊNÂˆÛÛœÝ›ÝÈHÝÜ˜YÙK\Ù\™XXÚÚXÚÚ[ŠÂˆ‹‹š[œÙ\™XXÚÚXÚÚ[”ØÚ[XKœ\œÙJÂˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ™XXÚYˆ\œš]˜[Ý\‹ˆ\\Ý\‹ˆ›ÝKˆØ[[™\‘]KˆJKˆ\Ð[›Ûž[[Ý\ËˆJNÂˆ™\ËšœÛÛŠ›ÝÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÚÈHÝÜ˜YÙK™[]P™XXÚÚXÚÚ[Š[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈÔÈ™\Ù[˜ÙHÛÛ™š\›H
+’H[H\™HŠKˆÛÛÜ™[˜]\È\™HÛÛ\\™YÈH™XXÚˆËÈ[˜ÚÜˆÙ\™\‹\ÚYH[™\ØØ\™YH™]™\ˆ\œÚ\ÝYÜˆÙÙÙY‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËÝ™\šYžH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XXÚYHÝš[™Ê™\K˜›ÙK˜™XXÚYˆŠNÂˆÛÛœÝ]HHÝš[™Ê™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+JNÂˆÛÛœÝ]H[X™\Š™\K˜›ÙK›]
+NÂˆÛÛœÝ™ÈH[X™\Š™\K˜›ÙK›™ÊNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆYˆ
+]HOOHXÚYšXÕÙ^Q]J
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ–[ÝHØ[ˆÛ›HÛÛ™š\›H™\Ù[˜ÙHÛˆH^HÙˆ[Ý\ˆÚXÚËZ[ˆˆJNÂˆBˆYˆ
+S[X™\‹š\Ñš[š]J]
+HS[X™\‹š\Ñš[š]J™ÊJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“ØØ][Ûˆ[˜]˜Z[X›HˆJNÂˆBˆÛÛœÝ™\Ý[HÝÜ˜YÙK™\šYžP™XXÚ™\Ù[˜ÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YK™XXÚY]K]™ÊNÂˆYˆ
+\™\Ý[›ÚÈ	‰ˆ™\Ý[™\œ›ÜˆOOH““×ÐÒPÒÒSˆŠHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆÚXÚÈ[ˆš\œÝˆJNÂˆBˆYˆ
+\™\Ý[›ÚÊHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•Ó×ÑTˆ‹\Ý[˜ÙSNˆ™\Ý[™\Ý[˜ÙSHJNÂˆBˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËØÚ]‹™\]Z\™P]]
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝ™XXÚYHÝš[™Ê™\Kœ]Y\žK˜™XXÚˆŠNÂˆÛÛœÝ]HHÝš[™Ê™\Kœ]Y\žK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆÛÛœÝ^[ØYHÝÜ˜YÙK™Ù]™XXÚÚ]Y\ÜØYÙ\Ê™XXÚY]K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆ™\ËšœÛÛŠ^[ØY
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËØÚ]‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™XXÚYHÝš[™Ê™\K˜›ÙK˜™XXÚYˆŠNÂˆÛÛœÝ]HHÝš[™Ê™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+JNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+›ÙK›[™ÝˆL
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“Y\ÜØYÙHÛÈÛ™ÈˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”š]™\ˆœ˜]È™XXÚÚ]‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÜÝ™XXÚÚ]Y\ÜØYÙJ™XXÚY]K™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÙJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØÚXÚÚ[œËÎšYÛY\ÜØYÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÚXÚÚ[’YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™XXÚYHÝš[™Ê™\K˜›ÙK˜™XXÚYˆŠNÂˆÛÛœÝ]HHÝš[™Ê™\K˜›ÙK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆYˆ
+\ÝÜ˜YÙK™Ù]™XXÚÚXÚÚ[žU\Ù\Š™XXÚY™\KœÙ\ÜÚ[Û‹\Ù\’YK]JJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆÚXÚËZ[ˆ™\]Z\™YÈY\ÜØYÙHÝ\œÈˆJNÂˆBˆÛÛœÝ›ÝÜÈHÝÜ˜YÙK™Ù]™XXÚÚXÚÚ[œÊ™XXÚY]K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝ\™Ù]H›ÝÜË™š[™
+
+Žˆ[žJHOˆ‹šYOOHÚXÚÚ[’Y
+NÂˆYˆ
+]\™Ù]Ë\Ù\’Y\™Ù]›X\ÚÙY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆÚXÚËZ[ˆ›Ý›Ý[™ˆJNÂˆYˆ
+\™Ù]\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙH[Ý\œÙ[ˆˆJNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”š]™\ˆœ˜]ÈH‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ[X™\Š\™Ù]\Ù\’Y
+Kˆš]™\ˆœ˜]Îˆ	Ø™XXÚ™[YSX™[
+™XXÚY
+_Xˆ›ÙKˆÈÛÛ^\Nˆ”’U‘T—Ð”U×ÐÒPÒÒSˆ‹ÛÛ^YˆÚXÚÚ[’YÛÛ^X™[ˆ™XXÚ™[YSX™[
+™XXÚY
+HKˆ
+NÂˆ™\ËšœÛÛŠ\ÙÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛ‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝ™XXÚYHÝš[™Ê™\Kœ]Y\žK˜™XXÚˆŠNÂˆÛÛœÝš\]HHÝš[™Ê™\Kœ]Y\žK™]HXÚYšXÕÙ^Q]J
+JNÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]™XXÚØ\œÛÛÜÝÊ™XXÚYš\]K™\KœÙ\ÜÚ[ÛË\Ù\’Y
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™XXÚYHÝš[™Ê™\K˜›ÙK˜™XXÚYˆŠNÂˆÛÛœÝÜÝ\HHÝš[™Ê™\K˜›ÙKœÜÝ\HˆŠNÂˆÛÛœÝX]™RÝ\ˆH[X™\Š™\K˜›ÙK›X]™RÝ\ŠNÂˆÛÛœÝ\\\™P\™XHHÝš[™Ê™\K˜›ÙK™\\\™P\™XHˆŠKš[J
+NÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+NÂˆÛÛœÝš\]HHÝš[™Ê™\K˜›ÙKš\]HXÚYšXÕÙ^Q]J
+JNÂˆÛÛœÝ\™XÝ[Û”˜]ÈHÝš[™Ê™\K˜›ÙK™\™XÝ[Ûˆ•×Ð‘PPÒŠKÕ\\Ø\ÙJ
+NÂˆÛÛœÝ\™XÝ[ÛˆH\Õ˜[YØ\œÛÛ\™XÝ[ÛŠ\™XÝ[Û”˜]ÊHÈ\™XÝ[Û”˜]Èˆ•×Ð‘PPÒŽÂˆÛÛœÝÙX]ÈH™\K˜›ÙKœÙX]ÈOH[È[X™\Š™\K˜›ÙKœÙX]ÊHˆ[ÂˆYˆ
+Z\Õ˜[Y™XXÚY
+™XXÚY
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y™XXÚˆJNÂˆYˆ
+ÜÝ\HOOH“Ñ‘‘T’S‘×Ô’QHˆ	‰ˆÜÝ\HOOH“‘QQÔ’QHŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜÝ\HˆJNÂˆYˆ
+Z\Ð[ÝÙYØ\œÛÛš\]Jš\]JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÚÈH^Hœ›ÛHÙ^H›ÝYÚH™^È^\ÈˆJNÂˆBˆYˆ
+Z\Õ˜[Yš]™\œ˜]ÒÝ\ŠX]™RÝ\ŠJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“X]™H[YH™\]Z\™Y
+Ø[x $Î\JHˆJNÂˆYˆ
+Y\\\™P\™XJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘\\\™H\™XH™\]Z\™YˆJNÂˆYˆ
+[›ÝH›ÝK›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆYHÚÜ›ÝH
+Z[ˆÚ\˜XÝ\œÊHˆJNÂˆYˆ
+ÜÝ\HOOH“Ñ‘‘T’S‘×Ô’QHˆ	‰ˆ
+\ÙX]ÈÙX]ÈHÙX]Èˆ
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÙX]È™\]Z\™Y
+x $Í
+HÚ[ˆÙ™™\š[™ÈHšYHˆJNÂˆBˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”š]™\ˆœ˜]ÈØ\œÛÛ‹È›ÝK\\\™P\™XHJJH™]\›ŽÂˆÛÛœÝ›ÝÈHÝÜ˜YÙK˜Ü™X]P™XXÚØ\œÛÛÜÝ
+[œÙ\™XXÚØ\œÛÛÜÝØÚ[XKœ\œÙJÂˆ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ™XXÚYˆÜÝ\Kˆ\™XÝ[Û‹ˆ\\\™P\™XKˆš\]KˆX]™RÝ\‹ˆÙX]ÎˆÜÝ\HOOH“Ñ‘‘T’S‘×Ô’QHˆÈÙX]Èˆ[ˆ›ÝKˆJJNÂˆ™\ËšœÛÛŠÈ‹‹œ›ÝË\ÓZ[™NˆYK™\]Y\ÝÛÝ[ˆJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™[]J‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛÎšY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÚÈHÝÜ˜YÙK™[]P™XXÚØ\œÛÛÜÝ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛÎšYÜ™\]Y\Ý‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙK››ÝHˆŠKš[J
+NÂˆYˆ
+[›ÝJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ››ÝH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë”š]™\ˆœ˜]ÈØ\œÛÛ™\]Y\Ý‹È›ÝHJJH™]\›ŽÂˆÛÛœÝ›ÝÈHÝÜ˜YÙKœ™\]Y\Ý™XXÚØ\œÛÛ
+[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÝJNÂˆ™\ËšœÛÛŠ›ÝÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛÎšYÜ™\]Y\ÝÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]™XXÚØ\œÛÛ™\]Y\ÝÊ[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËØØ\œÛÛÎšYÜÙ[XÝÎœ™\]Y\ÝY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[XÝ™XXÚØ\œÛÛ™\]Y\Ý
+ˆ[X™\Š™\Kœ\˜[\ËšY
+Kˆ[X™\Š™\Kœ\˜[\Ëœ™\]Y\ÝY
+Kˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ
+NÂˆ™\ËšœÛÛŠ\ÙÊNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜš]™\‹Xœ˜]ËÜ™\Ü‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ™X\ÛÛˆHÝš[™Ê™\K˜›ÙKœ™X\ÛÛˆˆŠKš[J
+NÂˆÛÛœÝ\™Ù]\HHÝš[™Ê™\K˜›ÙK\™Ù]\HˆŠNÂˆÛÛœÝ\™Ù]YH[X™\Š™\K˜›ÙK\™Ù]Y
+NÂˆYˆ
+\™X\ÛÛŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœ™X\ÛÛˆ™\]Z\™YˆJNÂˆYˆ
+VÈÒPÒÒSˆ‹ÐT”ÓÓ‹ÒUÓQTÔÐQÑH‹“RTÔÑQÐÓÓ“‘PÕSÓˆ—Kš[˜ÛY\Ê\™Ù]\JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y\™Ù]ˆJNÂˆBˆÝÜ˜YÙKœ™\Üš]™\œ˜]Ê[œÙ\š]™\œ˜]Ô™\ÜØÚ[XKœ\œÙJÂˆ\™Ù]\Kˆ\™Ù]Yˆ™\Ü\•\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ™X\ÛÛ‹ˆ›ÝNˆ™\K˜›ÙK››ÝHÈÝš[™Ê™\K˜›ÙK››ÝJKš[J
+Hˆ[ˆJJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ TÒ“ÕQ’PÐUSÓ”È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÜ\ÚÝ˜\Y\X›XËZÙ^H‹
+Ü™\K™\ÊHOˆÂˆYˆ
+Z\Ô\ÚÛÛ™šYÝ\™Y
+
+JH™]\›ˆ™\ËšœÛÛŠÈÛÛ™šYÝ\™Yˆ˜[ÙKX›XÒÙ^Nˆ[JNÂˆ™\ËšœÛÛŠÈÛÛ™šYÝ\™YˆYKX›XÒÙ^NˆÙ]˜\YX›XÒÙ^J
+HJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÝ\Ù\œËÛYKÛ›ÝYšXØ][Û‹\™YœÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝ\ÐYZ[ˆH›ÛÛX[Š\Ù\ËœÝXYZ[ˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠHÝÜ˜YÙKš\ÔÚ]PYZ[‘Ü˜[
+™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆ™\ËšœÛÛŠÂˆ™YœÎˆÝÜ˜YÙK™Ù]›ÝYšXØ][Û”™YœÊ™\KœÙ\ÜÚ[Û‹\Ù\’YJKˆ\ÚÛÛ™šYÝ\™Yˆ›ÛÛX[Š›ØÙ\ÜË™[‹•TQÔP“P×ÒÑVJKˆ\ÐYZ[‹ˆJNÂˆJNÂ‚ˆ\œ]
+‹Ø\KÝ\Ù\œËÛYKÛ›ÝYšXØ][Û‹\™YœÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝ›ÙHH™\K˜›ÙHßNÂˆÛÛœÝ]Úˆ™XÛÜ™Ýš[™Ë›ÛÛX[ˆHßNÂˆ›Üˆ
+ÛÛœÝÙ^HÙˆÈ›Y\ÜØYÙ\È‹›^WÙ]™[È‹˜XØÛÝ[‹˜YZ[ˆ—H\ÈÛÛœÝ
+HÂˆYˆ
+\[Ùˆ›ÙVÚÙ^WHOOH˜›ÛÛX[ˆŠH]ÚÚÙ^WHH›ÙVÚÙ^WNÂˆBˆËÈØ[YH\ÐYZ[ˆ™YXØ]H\ÈÑU
+[˜ÛY\ÈÜ˜[X˜\ÙYÚ]HYZ[œÊK‚ˆÛÛœÝ\ÐYZ[ˆH›ÛÛX[Š\Ù\ËœÝXYZ[ˆ\ÓXZ[YZ[•\Ù\Š\Ù\ŠHÝÜ˜YÙKš\ÔÚ]PYZ[‘Ü˜[
+™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆÛÛœÝ™YœÈHÝÜ˜YÙKœÙ]›ÝYšXØ][Û”™YœÊˆ™\KœÙ\ÜÚ[Û‹\Ù\’YKˆ]Úˆ\ÐYZ[‹ˆ
+NÂˆ™\ËšœÛÛŠÈ™YœÈJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜ\ÚÜÝXœØÜšX™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[™Ú[HÝš[™Ê™\K˜›ÙOË™[™Ú[ˆŠKš[J
+NÂˆÛÛœÝM™HÝš[™Ê™\K˜›ÙOËšÙ^\ÏËœM™™\K˜›ÙOËœM™ˆŠKš[J
+NÂˆÛÛœÝ]]HÝš[™Ê™\K˜›ÙOËšÙ^\ÏË˜]]™\K˜›ÙOË˜]]ˆŠKš[J
+NÂˆYˆ
+Y[™Ú[\M™X]]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÝXœØÜš\[ÛˆˆJNÂˆÛÛœÝÝXˆHÝÜ˜YÙK\Ù\\ÚÝXœØÜš\[ÛŠ™\KœÙ\ÜÚ[Û‹\Ù\’YKÂˆ[™Ú[ˆM™ˆ]]ˆ\Ù\YÙ[ˆÝš[™Ê™\K™Ù]
+\Ù\‹XYÙ[ŠHˆŠKœÛXÙJL
+Kˆ]›Ü›NˆÝš[™Ê™\K˜›ÙOËœ]›Ü›HˆŠKœÛXÙJ
+H[ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKYˆ
+ÝXˆ\È[žJOËšYJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÜ\ÚÜÝXœØÜšX™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[™Ú[HÝš[™Ê™\K˜›ÙOË™[™Ú[ˆŠKš[J
+NÂˆYˆ
+Y[™Ú[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™[™Ú[™\]Z\™YˆJNÂˆÝÜ˜YÙK™XXÝ]˜]T\ÚÝXœØÜš\[ÛžQ[™Ú[
+™\KœÙ\ÜÚ[Û‹\Ù\’YK[™Ú[
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü\Ú\Ý]\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆJÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠH\ÓXZ[YZ[•\Ù\ŠØ[\ŠJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ”š[X\žHÜˆÝ\\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆ™\ËšœÛÛŠÂˆÛÛ™šYÝ\™Yˆ\Ô\ÚÛÛ™šYÝ\™Y
+
+KˆÝ[XÝ]™TÝXœØÜš\[ÛœÎˆÝÜ˜YÙK˜ÛÝ[XÝ]™T\ÚÝXœØÜš\[ÛœÊ
+Kˆ^Q]šXÙTÝXœØÜš\[ÛœÎˆÝÜ˜YÙK™Ù]XÝ]™T\ÚÝXœØÜš\[ÛœÊ\Ù\’Y
+K›[™ÝˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜ\ÚÝ\Ý‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆJÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠH\ÓXZ[YZ[•\Ù\ŠØ[\ŠJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ”š[X\žHÜˆÝ\\ˆYZ[ˆÛ›HˆJNÂˆBˆYˆ
+Z\Ô\ÚÛÛ™šYÝ\™Y
+
+JH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ•TQÙ^\È›ÝÛÛ™šYÝ\™YÛˆÙ\™\ˆˆJNÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝÝXœÈHÝÜ˜YÙK™Ù]XÝ]™T\ÚÝXœØÜš\[ÛœÊ\Ù\’Y
+NÂˆYˆ
+ÝXœË›[™ÝOOH
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÂˆ\œ›ÜŽˆ“›ÈXÝ]™H\ÚÝXœØÜš\[Ûˆ›Üˆ\ÈYZ[ˆXØÛÝ[‹ˆ[ˆ]˜]\ˆY[H8¡¤ˆ›ÝYšXØ][ÛˆÙ][™ÜÈ8¡¤ˆ[˜X›H\ÚÛˆ\È]šXÙKˆÛˆTÛ™KÜ[ˆHÛYHØÜ™Y[ˆ\š\œÝˆ‹ˆJNÂˆBˆÛÛœÝ^[ØYHZ[XÛ\˜]]™T^[ØY
+Âˆ]Nˆ–˜^[\Ý\Ý‹ˆ›ÙNˆ”\Ú›ÝYšXØ][ÛœÈ\™HÛÜšÚ[™ËˆYˆ[ÝHÙYH\Ë[]™\žH\Èš^Yˆ‹ˆ˜]šYØ]Nˆ‹Ù\Ú›Ø\™‹ˆYÎˆ]\ÝIÑ]K››ÝÊ
+_XˆJNÂˆÛÛœÝ™\Ý[ÈH]ØZ]›ÛZ\ÙK˜[
+ÝXœË›X\
+\Þ[˜È
+ÝXŠHOˆÂˆÛÛœÝ™\Ý[H]ØZ]Ù[™\ÚÔÝXœØÜš\[ÛŠÝX‹^[ØY
+NÂˆYˆ
+™\Ý[›ÚÊHÝÜ˜YÙKÝXÚ\ÚÝXœØÜš\[ÛŠÝX‹šY
+NÂˆ[ÙHYˆ
+™\Ý[™ÛÛ™JHÝÜ˜YÙK™XXÝ]˜]T\ÚÝXœØÜš\[ÛŠÝX‹šY
+NÂˆÛÛœÝÜÝH
+
+
+HOˆÂˆžHÈ™]\›ˆ™]ÈT“
+ÝX‹™[™Ú[
+KšÜÝÈHØ]ÚÈ™]\›ˆ[šÛ›ÝÛˆŽÈBˆJJ
+NÂˆ™]\›ˆÂˆYˆÝX‹šYˆÜÝˆÚÎˆ™\Ý[›ÚËˆÝ]\ÐÛÙNˆ™\Ý[œÝ]\ÐÛÙKˆ\œ›ÜŽˆ™\œ›Üˆˆ[ˆ™\Ý[È™\Ý[™\œ›Üˆˆ[™Yš[™YˆNÂˆJJNÂˆÛÛœÝÙ[H™\Ý[Ë™š[\Š
+ŠHOˆ‹›ÚÊK›[™ÝÂˆÛÛœÛÛK›ÙÊÜ\ÚHYZ[ˆ\Ý\Ù\IÝ\Ù\’YHÙ[IÜÙ[KÉÜÝXœË›[™ÝX”ÓÓ‹œÝš[™ÚYžJ™\Ý[ÊJNÂˆYˆ
+Ù[OOH
+H™]\›ˆ™\ËœÝ]\ÊLŠKšœÛÛŠÈ\œ›ÜŽˆ”\ÚÙ[™˜Z[Y›Üˆ[]šXÙ\È‹™\Ý[ÈJNÂˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÙ[ˆÝ[ˆÝXœË›[™Ýˆ™\Ý[Ëˆ[ˆ“ÛˆXXÎˆÚXÚÈ›ÝYšXØ][ÛˆÙ[\ˆ
+[™Þ\Ý[HÙ][™ÜÈ8¡¤ˆ›ÝYšXØ][ÛœÈ8¡¤ˆØY˜\šJKˆÛˆTÛ™NˆÜ[ˆHÛYHØÜ™Y[ˆ˜^[\Ý\ÈÙ][™ÜÈ8¡¤ˆ›ÝYšXØ][ÛœÈ8¡¤ˆ˜^[\Ý]\Ý[ÝÈ[\Ëˆ‹ˆJNÂˆJNÂ‚ˆËÈÕÓ‘T‹SÓ“Hœ›ØYØ\ÝˆÙ[™Û™H\Ú[››Ý[˜Ù[Y[È]™\žHÝXœØÜšX™Y]šXÙK‚ˆËÈ™\ÜXÝÈXXÚ\Ù\‰ÜÈ˜XØÛÝ[ˆ›ÝYšXØ][Ûˆ™Y™\™[˜ÙH
+HØ]YÛÜžHÙH\ÙBˆËÈ›ÜˆÚ]KÙÝZYH[››Ý[˜Ù[Y[ÊKˆ›Ý˜]K[[Z]YžHH\‹[Y\ÜØYÙH[Z]\ˆBˆËÈ\È\ÈH[X™\˜]HÛ™K\ÚÝHš[X\žHÝÛ™\ˆš\™\ÈžH[™‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÚØœ›ØYØ\Ý‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\ŠØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆYˆ
+Z\Ô\ÚÛÛ™šYÝ\™Y
+
+JH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ•TQÙ^\È›ÝÛÛ™šYÝ\™YÛˆÙ\™\ˆˆJNÂ‚ˆÛÛœÝ]HHÝš[™Ê™\K˜›ÙOË]HˆŠKš[J
+NÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙOË˜›ÙHˆŠKš[J
+NÂˆÛÛœÝ˜]šYØ]T˜]ÈHÝš[™Ê™\K˜›ÙOË\›™\K˜›ÙOË›˜]šYØ]H‹Ù]™[ÈŠKš[J
+NÂˆËÈÛ›H[ÝÈØ[YK\Ú]H™[]]™H]È›ÜˆHY\[šË‚ˆÛÛœÝ˜]šYØ]HH˜]šYØ]T˜]ËœÝ\ÕÚ]
+‹ÈŠHÈ˜]šYØ]T˜]Èˆ‹Ù]™[ÈŽÂˆYˆ
+]]JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•]H\È™\]Z\™YˆJNÂˆYˆ
+]K›[™Ýˆ
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•]H]\Ý™HÚ\˜XÝ\œÈÜˆ™]Ù\ˆˆJNÂˆYˆ
+›ÙK›[™ÝˆN
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›ÙH]\Ý™HNÚ\˜XÝ\œÈÜˆ™]Ù\ˆˆJNÂ‚ˆÛÛœÝ[ÝXœÈHÝÜ˜YÙK™Ù][XÝ]™T\ÚÝXœØÜš\[ÛœÊ
+NÂˆËÈÜ›Ý\]šXÙ\ÈžH\Ù\ˆÛÈÙHØ[ˆ™\ÜXÝXXÚ\Ù\‰ÜÈ[››Ý[˜Ù[Y[™YˆÛ˜ÙK‚ˆÛÛœÝžU\Ù\ˆH™]ÈX\[X™\‹\[Ùˆ[ÝXœÏŠ
+NÂˆ›Üˆ
+ÛÛœÝÝXˆÙˆ[ÝXœÊHÂˆÛÛœÝ\ÝHžU\Ù\‹™Ù]
+ÝX‹\Ù\’Y
+H×NÂˆ\Ýœ\Ú
+ÝXŠNÂˆžU\Ù\‹œÙ]
+ÝX‹\Ù\’Y\Ý
+NÂˆB‚ˆÛÛœÝ^[ØYHZ[XÛ\˜]]™T^[ØY
+Âˆ]Kˆ›ÙNˆ›ÙH[™Yš[™Yˆ˜]šYØ]KˆYÎˆXœ›ØYØ\ÝIÑ]K››ÝÊ
+_XˆJNÂ‚ˆ]Ù[HÂˆ]˜Z[YHÂˆ]]šXÙUÝ[HÂˆ]\Ù\œÕ\™Ù]YHÂˆ]\Ù\œÓÜYÝ]HÂ‚ˆ›Üˆ
+ÛÛœÝÝ\Ù\’YÝXœ×HÙˆžU\Ù\ŠHÂˆËÈ˜XØÛÝ[ˆ\ÈH[››Ý[˜Ù[Y[ÙÝZYK]\]HØ]YÛÜžKˆ]]Y8¡¤ˆÚÚ\‚ˆÛÛœÝ™YœÈHÝÜ˜YÙK™Ù]›ÝYšXØ][Û”™YœÊ\Ù\’Y
+NÂˆYˆ
+\™YœË˜XØÛÝ[
+HÂˆ\Ù\œÓÜYÝ]
+ÏHNÂˆÛÛ[YNÂˆBˆ\Ù\œÕ\™Ù]Y
+ÏHNÂˆ]ØZ]›ÛZ\ÙK˜[
+ÝXœË›X\
+\Þ[˜È
+ÝXŠHOˆÂˆ]šXÙUÝ[
+ÏHNÂˆÛÛœÝ™\Ý[H]ØZ]Ù[™\ÚÔÝXœØÜš\[ÛŠÝX‹^[ØY
+NÂˆYˆ
+™\Ý[›ÚÊHÂˆÝÜ˜YÙKÝXÚ\ÚÝXœØÜš\[ÛŠÝX‹šY
+NÂˆÙ[
+ÏHNÂˆH[ÙHÂˆ˜Z[Y
+ÏHNÂˆYˆ
+™\Ý[™ÛÛ™JHÝÜ˜YÙK™XXÝ]˜]T\ÚÝXœØÜš\[ÛŠÝX‹šY
+NÂˆBˆJJNÂˆB‚ˆÛÛœÛÛK›ÙÊˆÜ\ÚH”“ÐQÐTÕžHÝÛ™\IØØ[\‹šYH]OIÒ”ÓÓ‹œÝš[™ÚYžJ]J_HÙ[IÜÙ[KÉÙ]šXÙUÝ[H
+Âˆ\Ù\œÕ\™Ù]YIÝ\Ù\œÕ\™Ù]YHÜYÝ]IÝ\Ù\œÓÜYÝ]Xˆ
+NÂ‚ˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÙ[ˆ˜Z[Yˆ]šXÙUÝ[ˆ\Ù\œÕ\™Ù]Yˆ\Ù\œÓÜYÝ]ˆ]Kˆ›ÙKˆ˜]šYØ]KˆJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ QTÔÐQÑTÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KÛY\ÜØYÙ\ËÝ[œ™XYXÛÝ[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÈÛÝ[ˆÝÜ˜YÙK™Ù][œ™XYÛÝ[
+™\KœÙ\ÜÚ[Û‹\Ù\’YJHJNÂˆJNÂ‚ˆËÈÜ›Ý\Ú]ÈHšY]Ù\ˆ™[Û™ÜÈÈ
+]™[›ÛÛ\ÈšXHÚXÚËZ[‹ÚÜÝ[™Ë\ÂˆËÈÙ^IÜÈ™XXÚ›ÛÛJHHÝÙ\œÈH[˜›ÞÚY]Ô“ÕT›ÝÜË‚ˆ\™Ù]
+‹Ø\KØÚ]ËÛZ[™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]^QÜ›Ý\Ú]Ê™\KœÙ\ÜÚ[Û‹\Ù\’YJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛY\ÜØYÙ\ËÚ[˜›Þ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[˜›ÞHÝÜ˜YÙK™Ù][˜›Þ
+™\KœÙ\ÜÚ[Û‹\Ù\’YJK›X\
+HO‚ˆÝÜ˜YÙK›X\ÚÓY\ÜØYÙT\JK™\KœÙ\ÜÚ[Û‹\Ù\’YKš[˜›ÞŠKˆ
+NÂˆ™\ËšœÛÛŠ[˜›Þ
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛY\ÜØYÙ\ËÜÙ[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÙ[HÝÜ˜YÙK™Ù]Ù[Y\ÜØYÙ\Ê™\KœÙ\ÜÚ[Û‹\Ù\’YJK›X\
+HO‚ˆÝÜ˜YÙK›X\ÚÓY\ÜØYÙT\JK™\KœÙ\ÜÚ[Û‹\Ù\’YKœÙ[ŠKˆ
+NÂˆ™\ËšœÛÛŠÙ[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYYÜ™\H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™\Kœ\˜[\Ë™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]š\ÚX›H™XY›[™ÝOOH
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝš\œÝH™XYÌH\È[žNÂˆÛÛœÝ\ÝH™XYÝ™XY›[™ÝHWH\È[žNÂˆÛÛœÝÕ\Ù\’YH\Ý™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YÈ\ÝÕ\Ù\’Yˆ\Ý™œ›ÛU\Ù\’YÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë’[˜›Þ™XY™\H‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’Yš\œÝœÝXš™XÝ”™\H‹›ÙKÂˆ™XYYˆ™\Kœ\˜[\Ë™XYYˆÛÛ^\Nˆš\œÝ˜ÛÛ^\H•‘PQ‹ˆÛÛ^Yˆš\œÝ˜ÛÛ^Y[ˆÛÛ^X™[ˆš\œÝ˜ÛÛ^X™[[ˆJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYYÝ\[™È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYYHÝš[™Ê™\Kœ\˜[\Ë™XYYˆŠNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝÙ^HH	Ý™XYYN‰Ü™\KœÙ\ÜÚ[Û‹\Ù\’YXÂˆYˆ
+™\K˜›ÙOË˜XÝ]™JH[˜›Þ\[™ËœÙ]
+Ù^KÈ\Ù\’Yˆ™\KœÙ\ÜÚ[Û‹\Ù\’YK\]Y]ˆ]K››ÝÊ
+HJNÂˆ[ÙH[˜›Þ\[™Ë™[]JÙ^JNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYYÝ\[™È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYYHÝš[™Ê™\Kœ\˜[\Ë™XYYˆŠNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝÝ]Ù™ˆH]K››ÝÊ
+HHL—ÌÂˆ]XÝ]™HH˜[ÙNÂˆ›Üˆ
+ÛÛœÝÚÙ^KÝ]WHÙˆ[˜›Þ\[™ÊHÂˆYˆ
+Ý]K\]Y]Ý]Ù™ŠHÈ[˜›Þ\[™Ë™[]JÙ^JNÈÛÛ[YNÈBˆYˆ
+Ù^KœÝ\ÕÚ]
+	Ý™XYYN˜
+H	‰ˆÝ]K\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+HXÝ]™HHYNÂˆBˆ™\ËšœÛÛŠÈXÝ]™HJNÂˆJNÂ‚ˆ\œ]
+‹Ø\KÛY\ÜØYÙ\ËÎšYÜ™XY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝÚÈHÝÜ˜YÙK›X\šÔ™XY›Ü•\Ù\Š[X™\Š™\Kœ\˜[\ËšY
+K™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈÛ™Ë\™\ÜÈH™XXÝ[ÛœÎˆ<'äcH<'äcˆ<'æ ˆ<'æ(ˆ8§i;î#È<'ä¥ÐVHBˆ\œÜÝ
+‹Ø\KÛY\ÜØYÙ\ËÎšYÜ™XXÝ[ÛœÈ‹™\]Z\™P]]
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝY\ÜØYÙRYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ[[ÚšHHÝš[™Ê™\K˜›ÙOË™[[ÚšH™\K˜›ÙOË˜ÛÙHˆŠKš[J
+NÂˆYˆ
+Y[[ÚšJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™[[ÚšH™\]Z\™YˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKÙÙÛSY\ÜØYÙT™XXÝ[ÛŠY\ÜØYÙRY™\KœÙ\ÜÚ[Û‹\Ù\’YK[[ÚšJNÂˆYˆ
+™\Ý[™\œ›ÜŠHÂˆÛÛœÝÝ]\ÈH™\Ý[™\œ›ÜˆOOH’[˜[Y™XXÝ[ÛˆˆÈˆÂˆ™]\›ˆ™\ËœÝ]\ÊÝ]\ÊKšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆBˆ™\ËšœÛÛŠÈ™XXÝ[ÛœÎˆ™\Ý[œ™XXÝ[ÛœÈJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY›Ü•šY]Ù\Š™\Kœ\˜[\Ë™XYY™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝXÕ™XYHÝÜ˜YÙK™Ù]Z\ÜÙYÛÛ›™XÝ[Û•™XY
+™\Kœ\˜[\Ë™XYY
+NÂˆÛÛœÝ›Ý™]™X[YH[XÕ™XY›ÛÛX[ŠXÕ™XYœÜÝ\—Ü™]™X[Y	‰ˆXÕ™XYœ™\Y\—Ü™]™X[Y
+NÂˆ™\ËšœÛÛŠÂˆY\ÜØYÙ\Îˆ™XYˆ™]™X[ˆXÕ™XYÈÂˆÜÝ\”™]™X[Yˆ›ÛÛX[ŠXÕ™XYœÜÝ\—Ü™]™X[Y
+Kˆ™\Y\”™]™X[Yˆ›ÛÛX[ŠXÕ™XYœ™\Y\—Ü™]™X[Y
+Kˆ›Ý™]™X[YˆP[TÜÝ\ŽˆXÕ™XYœÜÝ\—Ý\Ù\—ÚYOOH™\KœÙ\ÜÚ[Û‹\Ù\’YˆT™]™X[YˆXÕ™XYœÜÝ\—Ý\Ù\—ÚYOOH™\KœÙ\ÜÚ[Û‹\Ù\’YˆÈ›ÛÛX[ŠXÕ™XYœÜÝ\—Ü™]™X[Y
+BˆˆXÕ™XYœ™\Y\—Ý\Ù\—ÚYOOH™\KœÙ\ÜÚ[Û‹\Ù\’YˆÈ›ÛÛX[ŠXÕ™XYœ™\Y\—Ü™]™X[Y
+Bˆˆ˜[ÙKˆHˆ[ˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYYÜ™]™X[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™\Kœ\˜[\Ë™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’YKÕ\Ù\’YOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝ\]YHÝÜ˜YÙKœ™]™X[Z\ÜÙYÛÛ›™XÝ[Û’Y[]J™\Kœ\˜[\Ë™XYY™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý™]™X[[ˆ\È™XYˆJNÂˆ™\ËšœÛÛŠÂˆ™]™X[ˆÂˆÜÝ\”™]™X[Yˆ›ÛÛX[Š\]YœÜÝ\—Ü™]™X[Y
+Kˆ™\Y\”™]™X[Yˆ›ÛÛX[Š\]Yœ™\Y\—Ü™]™X[Y
+Kˆ›Ý™]™X[Yˆ›ÛÛX[Š\]YœÜÝ\—Ü™]™X[Y	‰ˆ\]Yœ™\Y\—Ü™]™X[Y
+KˆKˆJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÛY\ÜØYÙ\ËÝ™XYÎ™XYY‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™XYYHXÛÙUT’PÛÛ\Û™[
+™\Kœ\˜[\Ë™XYYˆŠKš[J
+NÂˆYˆ
+]™XYY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XYY™\]Z\™YˆJNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™XYY
+NÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOH\Ù\’YKÕ\Ù\’YOOH\Ù\’Y
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝÛX\™YHÝÜ˜YÙKœÛÙ[]U™XY
+™XYY\Ù\’Y
+NÂˆYˆ
+ÛX\™YOOH
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý[™ÈÈ[]HˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛX\™YJNÂˆJNÂ‚ˆ\™[]J‹Ø\KÛY\ÜØYÙ\ËÙ›Û\‹Î™›Û\ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ›Û\ˆHÝš[™Ê™\Kœ\˜[\Ë™›Û\ˆˆŠKÓÝÙ\Ø\ÙJ
+NÂˆYˆ
+VÈš[˜›Þ‹œÙ[‹˜[—Kš[˜ÛY\Ê›Û\ŠJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™›Û\ˆ]\Ý™H[˜›ÞÙ[Üˆ[ˆJNÂˆBˆÛÛœÝÛX\™YHÝÜ˜YÙK˜ÛX\’[˜›Þ›Û\Š™\KœÙ\ÜÚ[Û‹\Ù\’YK›Û\ˆ\Èš[˜›ÞˆœÙ[ˆ˜[ŠNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛX\™YJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÚÜÝÈ‹
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆYˆ
+\ÕXÚÙ\’ÜÝY\˜Ú]™RY
+]™[Y
+JHÂˆÛÛœÝÜ™Y]ÈHÙ]\˜Ú]™TÞ[]XÐÜ™Y]Ê]™[Y
+K™š[\ŠÈOˆËœ›ÛHOOH”’SPT–HˆËœ›ÛHOOHÓÒÔÕŠNÂˆÛÛœÝÜÝÈHÜ™Y]Âˆ›X\
+
+ËJHOˆÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJË\Ù\›˜[YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ[Âˆ™]\›ˆÂˆYˆJ]™[Y
+ˆL
+ÈH
+ÈJKˆ]™[Yˆ\Ù\’Yˆ\Ù\‹šYˆ›ÛNˆËœ›ÛKˆYYžU\Ù\’Yˆ[ˆÜ™X]Y]ˆˆ‹ˆ\Ù\›˜[YNˆ\Ù\‹\Ù\›˜[YKˆ\Ü^S˜[YNˆ\Ù\‹™\Ü^S˜[YKˆÝÕ\›ˆ\Ù\‹œÝÕ\›ˆ]˜]\ÚÚXÙNˆ\Ù\‹˜]˜]\ÚÚXÙHÏÈKˆ]˜]\”š[™Îˆ\Ù\‹˜]˜]\”š[™È››Û™H‹ˆNÂˆJBˆ™š[\Š›ÛÛX[ŠNÂˆ™]\›ˆ™\ËšœÛÛŠÜÝÊNÂˆBˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+]™[Y
+NÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]]™[ÜÝÊ]šY
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÚÜÝÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+\Ù\ÜÚ[Û’\ÐYZ[Š™\JH	‰ˆ\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY™\KœÙ\ÜÚ[Û‹\Ù\’YJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›H]™[ÜÝÈØ[ˆYÛËZÜÝÈˆJNÂˆBˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\K˜›ÙK\Ù\›˜[YHˆŠKš[J
+NÂˆÛÛœÝ[XZ[HÝš[™Ê™\K˜›ÙK™[XZ[ˆŠKš[J
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜Y]™[ÛÒÜÝ
+]šY™\KœÙ\ÜÚ[Û‹\Ù\’YK\Ù\›˜[YK[XZ[
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[šÜÝ
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÝ[[‹
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH[X™\Š™\Kœ\˜[\ËšY
+NÂˆYˆ
+\ÕXÚÙ\’ÜÝY\˜Ú]™RY
+]™[Y
+JHÂˆÛÛœÝÜ™Y]ÈHÙ]\˜Ú]™TÞ[]XÐÜ™Y]Ê]™[Y
+K™š[\ŠÈOˆËœ›ÛHOOH‘ˆŠNÂˆÛÛœÝ[[HÜ™Y]Âˆ›X\
+
+ËJHOˆÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJË\Ù\›˜[YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ[Âˆ™]\›ˆÂˆYˆJ]™[Y
+ˆL
+ÈH
+ÈL
+Kˆ]™[Yˆ\Ù\’Yˆ\Ù\‹šYˆ›ÛNˆ‘ˆ‹ˆÝ]\Îˆ“U‘H‹ˆYYžU\Ù\’Yˆ[ˆÜ™X]Y]ˆˆ‹ˆ\Ù\›˜[YNˆ\Ù\‹\Ù\›˜[YKˆ\Ü^S˜[YNˆ\Ù\‹™\Ü^S˜[YKˆÝÕ\›ˆ\Ù\‹œÝÕ\›ˆ]˜]\ÚÚXÙNˆ\Ù\‹˜]˜]\ÚÚXÙHÏÈKˆ]˜]\”š[™Îˆ\Ù\‹˜]˜]\”š[™È››Û™H‹ˆNÂˆJBˆ™š[\Š›ÛÛX[ŠNÂˆ™]\›ˆ™\ËšœÛÛŠ[[
+NÂˆBˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+]™[Y
+NÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[ÛË\Ù\’YÂˆÛÛœÝ\ÐYZ[ˆHÙ\ÜÚ[Û’\ÐYZ[Š™\JNÂˆÛÛœÝØ[“X[˜YÙHH\ÐYZ[ˆ
+\Ù\’Y	‰ˆÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\’Y
+JNÂˆÛÛœÝ[[HÝÜ˜YÙK™Ù]]™[[[
+]šYÈ[˜ÛYT[™[™Îˆ›ÛÛX[ŠØ[“X[˜YÙJHJNÂˆ™\ËšœÛÛŠ[[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÝ[[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+\Ù\ÜÚ[Û’\ÐYZ[Š™\JH	‰ˆ\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY™\KœÙ\ÜÚ[Û‹\Ù\’YJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›H]™[ÜÝÈØ[ˆY[[ˆJNÂˆBˆÛÛœÝ›ÛHHÝš[™Ê™\K˜›ÙKœ›ÛHˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆYˆ
+Z\Ñ]™[[[›ÛJ›ÛJJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y›ÛHˆJNÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\K˜›ÙK\Ù\›˜[YHˆŠKš[J
+NÂˆYˆ
+]\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YH™\]Z\™YˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜Y]™[[[žRÜÝ
+]šY™\KœÙ\ÜÚ[Û‹\Ù\’YK\Ù\›˜[YK›ÛKÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[[[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÝ[[ÜÙ[ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ›ÛHHÝš[™Ê™\K˜›ÙKœ›ÛHˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆYˆ
+Z\Ñ]™[[[›ÛJ›ÛJJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y›ÛHˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™\]Y\Ý]™[[[Ù[Š]šY™\KœÙ\ÜÚ[Û‹\Ù\’YK›ÛJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÝ[[Î[[YØ\›Ý™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™Q]™[[[
+[[Y™\KœÙ\ÜÚ[Û‹\Ù\’YKÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[[[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÝ[[Î[[YÜ™Z™XÝ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝ]™[[[
+[[Y™\KœÙ\ÜÚ[Û‹\Ù\’YKÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÝ[[\™\]Y\ÝÎ[[Y‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ›ÝÈHÝÜ˜YÙK™Ù]]™[[[žRY
+[X™\Š™\Kœ\˜[\Ë[[Y
+JNÂˆYˆ
+\›ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+\ÝÜ˜YÙK˜Ø[\›Ý™Q]™[[[
+›ÝËšY™\KœÙ\ÜÚ[Û‹\Ù\’YKÙ\ÜÚ[Û’\ÐYZ[Š™\JJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]]Üš^™YˆJNÂˆBˆ™\ËšœÛÛŠ›ÝÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÝ[[\™\]Y\ÝÎ[[YØ\›Ý™H‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™Q]™[[[
+[[Y\Ù\’YÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y\Ù\’Y
+NÂˆ™\ËšœÛÛŠ™\Ý[[[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÝ[[\™\]Y\ÝÎ[[YÜ™Z™XÝ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝ]™[[[
+[[Y\Ù\’YÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y\Ù\’Y
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™[]J‹Ø\KÙ]™[ËÎšYÝ[[Î[[Y‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™[[Ý™Q]™[[[
+[[Y™\KœÙ\ÜÚ[Û‹\Ù\’YKÈ\ÐYZ[ŽˆÙ\ÜÚ[Û’\ÐYZ[Š™\JHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÚÜÝ[Y\ÜØYÙ\È‹
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÜÝY\ÜØYÙ\Ê[X™\Š™\Kœ\˜[\ËšY
+KŠJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÚÜÝ[Y\ÜØYÙ\È‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\‹šY
+JHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›HH]™[ÜÝØ[ˆÜÝ\]\ÈˆJNÂˆBˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+KœÛXÙJL
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë’ÜÝ\]H‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙK˜Ü™X]RÜÝY\ÜØYÙJÈ]™[Yˆ]šY\Ù\’Yˆ\Ù\‹šY›ÙHJNÂˆÛÛœÝ›ÝYšYYHÝÜ˜YÙK››ÝYžP][™Y\ÓÙ’ÜÝ\]J]šY\Ù\‹šY]]K›ÙJNÂˆ™\ËšœÛÛŠÈ‹‹›\ÙË›ÝYšYYJNÂˆJNÂ‚ˆËÈ›Û[Ý\ˆ[š]Nˆ\Ý][™Y\ÈÙˆZ\ˆ]™[È
+ÈZ\ˆ›Ùš[H›ÛÝÙ\œÈ8¡¤ˆ[˜›Þ‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÚ[š]KX]YY[˜ÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆYˆ
+\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\’Y
+H	‰ˆ\Ù\ÜÚ[Û’\ÐYZ[Š™\JJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›HH]™[ÜÝØ[ˆ[š]HˆJNÂˆBˆ™\ËšœÛÛŠÝÜ˜YÙKœ™]šY]Ñ]™[[š]P]YY[˜ÙJ]šY\Ù\’Y
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÚ[š]KX]YY[˜ÙH‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ˆ
+\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\‹šY
+H	‰ˆ\Ù\ÜÚ[Û’\ÐYZ[Š™\JJJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›HH]™[ÜÝØ[ˆ[š]HˆJNÂˆBˆYˆ
+]œÝ]\ÈOOH“U‘HŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘]™[]\Ý™H]™HÈÙ[™[š]\ÈˆJNÂˆBˆÛÛœÝ[˜ÛYT\Ý][™Y\ÈH™\K˜›ÙOËš[˜ÛYT\Ý][™Y\ÈOOH˜[ÙNÂˆÛÛœÝ[˜ÛYQ›ÛÝÙ\œÈH™\K˜›ÙOËš[˜ÛYQ›ÛÝÙ\œÈOOH˜[ÙNÂˆYˆ
+Z[˜ÛYT\Ý][™Y\È	‰ˆZ[˜ÛYQ›ÛÝÙ\œÊHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”XÚÈ]X\ÝÛ™H]YY[˜ÙNˆ\Ý][™Y\ÈÜˆ›ÛÝÙ\œÈˆJNÂˆBˆÛÛœÝY\ÜØYÙHH™\K˜›ÙOË›Y\ÜØYÙHOH[ÈÝš[™Ê™\K˜›ÙK›Y\ÜØYÙJKš[J
+KœÛXÙJ
+HˆˆŽÂˆYˆ
+Y\ÜØYÙH	‰ˆ[Ù\˜][Û‘Ø]J™\Ë‘]™[[š]H‹È›ÙNˆY\ÜØYÙHJJH™]\›ŽÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKš[š]P]YY[˜ÙUÑ]™[
+]šY\Ù\‹šYÂˆ[˜ÛYT\Ý][™Y\Ëˆ[˜ÛYQ›ÛÝÙ\œËˆY\ÜØYÙNˆY\ÜØYÙH[ˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÝ˜[œÙ™\ˆ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Õ\Ù\‘]™[ÜÝ
+]šY\Ù\‹šY
+JHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›HHÝ\œ™[ÜÝØ[ˆ˜[œÙ™\ˆ\È]™[ˆJNÂˆBˆÛÛœÝ\™Ù]HÝš[™Ê™\K˜›ÙK\™Ù]ˆŠKš[J
+NÂˆÛÛœÝ›Ý\ÈHÝš[™Ê™\K˜›ÙK››Ý\ÈˆŠKš[J
+NÂˆYˆ
+]\™Ù]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\™Ù]™\]Z\™Y
+\Ù\›˜[YHÜˆ[XZ[
+HˆJNÂˆÛÛœÝ™\LˆHÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\Nˆ•S”Ñ‘Tˆ‹ˆ]™[Yˆ]šYˆ]™[]Nˆ]]Kˆ™\]Y\Ý\“˜[YNˆ\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[YKˆ™\]Y\Ý\‘[XZ[ˆ\Ù\‹™[XZ[ˆ›ÛÙŽˆ	Ý\™Ù]IÛ›Ý\ÈÈH	Û›Ý\ßXˆˆŸXˆJNÂˆ™\ËšœÛÛŠ™\LŠNÂˆJNÂ‚ˆËÈÛÛXÝ]˜Z[Xš[]H\È™\ÛÛ™YÛˆHÙ\™\ŽÈ™]™\ˆ\ÝHÛY[\Ý\YY™XÚ\Y[Q‚ˆ\™Ù]
+‹Ø\KÙ]™[ËÎšYÛY\ÜØYÙK[Ü[ÛœÈ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]]œÝ]\ÈOOH“U‘HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝÜÝHÝÜ˜YÙKœ™\ÛÛ™Q]™[Y\ÜØYÙT™XÚ\Y[
+]šYšÜÝŠNÂˆÛÛœÝ™[YHHÝÜ˜YÙKœ™\ÛÛ™Q]™[Y\ÜØYÙT™XÚ\Y[
+]šY™[YHŠNÂˆ™\ËšœÛÛŠÂˆØ[“Y\ÜØYÙRÜÝˆ›ÛÛX[ŠÜÝ	‰ˆÜÝ\Ù\‹šYOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+KˆØ[“Y\ÜØYÙU™[YNˆ›ÛÛX[Š™[YH	‰ˆ™[YK\Ù\‹šYOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Kˆ™[YS˜[YNˆ™[YOË™[YS˜[YH]™[YS˜[YKˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÙ]™[ËÎšYÛY\ÜØYÙKZÜÝ‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\™Ù]H™\K˜›ÙK\™Ù]ÏÈ˜]]ÈŽÂˆYˆ
+\™Ù]OOH˜]]Èˆ	‰ˆ\™Ù]OOHšÜÝˆ	‰ˆ\™Ù]OOH™[YHŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YY\ÜØYÙH\™Ù]ˆJNÂˆBˆÛÛœÝ™XÚ\Y[HÝÜ˜YÙKœ™\ÛÛ™Q]™[Y\ÜØYÙT™XÚ\Y[
+]šY\™Ù]
+NÂˆYˆ
+\™XÚ\Y[
+HÂˆÛÛœÝ™[YUÙXœÚ]HH™\ÛÛ™U™[YUÙXœÚ]J]™[YS˜[YK™[YUÙXœÚ]R[™^
+
+JNÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÂˆ\œ›ÜŽˆ““×ÐÓÓ•PÕ‹ˆXÚÙ]\›ˆ]XÚÙ]\›[ˆ™[YUÙXœÚ]Kˆ™[YS˜[YNˆ]™[YS˜[YH[ˆJNÂˆBˆÛÛœÝÈ\Ù\ŽˆÜÝ™XÚ\Y[\K™[YS˜[YHHH™XÚ\Y[ÂˆYˆ
+ÜÝšYOOH™\KœÙ\ÜÚ[Û‹\Ù\’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙH[Ý\œÙ[ˆˆJNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙK˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\Ë“Y\ÜØYÙHÈ]™[ÜÝ‹È›ÙHJJH™]\›ŽÂˆÛÛœÝÝXš™XÝH™XÚ\Y[\HOOH™[YWÛÝÛ™\ˆ‚ˆÈ]™[]	Ý™[YS˜[YH]™[YS˜[Y_Nˆ	Ù]]_Xˆˆ]™[ˆ	Ù]]_XÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™Y\ÜØYÙJ™\KœÙ\ÜÚ[Û‹\Ù\’YKÜÝšYÝXš™XÝ›ÙKÂˆÛÛ^\Nˆ‘U‘S•ÒÔÕ‹ˆÛÛ^Yˆ]šYˆÛÛ^X™[ˆ]]KˆJNÂˆYˆ
+[\ÙÏËšY
+HÂˆÛÛœÛÛK™\œ›ÜŠ–ÛY\ÜØYÙKZÜÝHÙ[™Y\ÜØYÙH™]\›™Y›È›ÝÈ‹Âˆ]™[Yˆ]šYˆ™XÚ\Y[YˆÜÝšYˆ™XÚ\Y[\KˆJNÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý[]™\ˆY\ÜØYÙHˆJNÂˆBˆ™\ËšœÛÛŠÈ‹‹›\ÙË™XÚ\Y[\K™[YS˜[YNˆ™[YS˜[YH[JNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ “ÓSÕTˆUU8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KÜ›Û[Ý\‹Ü™YÚ\Ý\ˆ‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈ˜[YK[XZ[Ü™Ë\ÜÝÛÜ™HH™\K˜›ÙNÂˆYˆ
+[˜[YHY[XZ[\\ÜÝÛÜ™
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›˜[YK[XZ[\ÜÝÛÜ™™\]Z\™YˆJNÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]›Û[Ý\žQ[XZ[
+[XZ[
+NÂˆYˆ
+^\Ý[™ÊH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ‘[XZ[[™XYH™YÚ\Ý\™YˆJNÂˆÛÛœÝ›Û[Ý\ˆHÝÜ˜YÙK˜Ü™X]T›Û[Ý\ŠÈ˜[YK[XZ[Ü™Ë\ÜÝÛÜ™\Úˆ\ÜÝÛÜ™JNÂˆ™\ËšœÛÛŠÈYˆ›Û[Ý\‹šY˜[YNˆ›Û[Ý\‹›˜[YK[XZ[ˆ›Û[Ý\‹™[XZ[Ü™Îˆ›Û[Ý\‹›Ü™ÈJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KÜ›Û[Ý\‹ÛÙÚ[ˆ‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ[XZ[\ÜÝÛÜ™HH™\K˜›ÙNÂˆYˆ
+Y[XZ[\\ÜÝÛÜ™
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™[XZ[[™\ÜÝÛÜ™™\]Z\™YˆJNÂˆÛÛœÝ›Û[Ý\ˆHÝÜ˜YÙK™Ù]›Û[Ý\žQ[XZ[
+[XZ[
+NÂˆYˆ
+\›Û[Ý\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆYˆ
+]™\šYžT\ÜÝÛÜ™
+\ÜÝÛÜ™›Û[Ý\‹œ\ÜÝÛÜ™\Ú
+JH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆ™\KœÙ\ÜÚ[Û‹œ›Û[Ý\’YH›Û[Ý\‹šYÂˆ™\ËšœÛÛŠÈYˆ›Û[Ý\‹šY˜[YNˆ›Û[Ý\‹›˜[YK[XZ[ˆ›Û[Ý\‹™[XZ[Ü™Îˆ›Û[Ý\‹›Ü™ÈJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ QRSˆUU8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛÙÚ[ˆ‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ\Ù\›˜[YK\ÜÝÛÜ™HH™\K˜›ÙNÂˆYˆ
+\\ÜÝÛÜ™
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœ\ÜÝÛÜ™™\]Z\™YˆJNÂ‚ˆËÈXØÙ\™YÝ[\ˆ\Ù\ˆXØÛÝ[Ü™Y[X[ÈYˆ]\Ù\ˆ\ÈHÚ]HYZ[‚ˆÛÛœÝ\Ù\žR[™HHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJHÝÜ˜YÙK™Ù]\Ù\žQ[XZ[
+\Ù\›˜[YJNÂˆYˆ
+\Ù\žR[™H	‰ˆ™\šYžT\ÜÝÛÜ™
+\ÜÝÛÜ™\Ù\žR[™Kœ\ÜÝÛÜ™\Ú
+H	‰ˆ\ÓXZ[YZ[•\Ù\Š\Ù\žR[™JJHÂˆ™\KœÙ\ÜÚ[Û‹š\ÐYZ[ˆHYNÂˆ™\KœÙ\ÜÚ[Û‹\Ù\’YH\Ù\žR[™KšYÂˆ™]\›ˆ™\ËšœÛÛŠÂˆ\ÐYZ[ŽˆYKˆ\Ù\›˜[YNˆ\Ù\žR[™K\Ù\›˜[YKˆ\ÔÝ\\YZ[Žˆ\ÓXZ[YZ[•\Ù\Š\Ù\žR[™JKˆ\Ôš[X\žSÝÛ™\ŽˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\žR[™JKˆJNÂˆB‚ˆËÈYØXÞH[‹]˜\ˆÜ™Y[X[˜[˜XÚÈ
+Ù]QRS—ÕTÑT“SQH
+ÈQRS—ÔTÔÕÓÔ‘[ˆ˜Z[Ø^HYˆ™YYY
+BˆYˆ
+QRS—ÕTÑT“SQH	‰ˆQRS—ÔTÔÕÓÔ‘	‰ˆ\Ù\›˜[YHOOHQRS—ÕTÑT“SQH	‰ˆ\ÜÝÛÜ™OOHQRS—ÔTÔÕÓÔ‘
+HÂˆ™\KœÙ\ÜÚ[Û‹š\ÐYZ[ˆHYNÂˆÛÛœÝXÝÜ’YHÙ]YZ[XÝÜ•\Ù\’Y
+™\JNÂˆÛÛœÝXÝÜˆHXÝÜ’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+XÝÜ’Y
+Hˆ[ÂˆYˆ
+XÝÜ’Y
+H™\KœÙ\ÜÚ[Û‹\Ù\’YHXÝÜ’YÂˆ™]\›ˆ™\ËšœÛÛŠÂˆ\ÐYZ[ŽˆYKˆ\Ù\›˜[YNˆQRS—ÕTÑT“SQKˆ\ÔÝ\\YZ[ŽˆYKˆ\Ôš[X\žSÝÛ™\ŽˆXÝÜˆÈÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\ŠXÝÜŠHˆ˜[ÙKˆJNÂˆB‚ˆ™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜ™Y[X[ÈˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛÙÛÝ]‹
+™\K™\ÊHOˆÂˆ™\KœÙ\ÜÚ[Û‹š\ÐYZ[ˆH[™Yš[™YÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛYH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXZ[•\Ù\ˆHÙ]Ù\ÜÚ[ÛYZ[•\Ù\Š™\JNÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆÛÛœÝ™\ÛÛ™YHXZ[•\Ù\ˆÈÞ[˜ÓÝÛ™\‘\Ü^S˜[YJXZ[•\Ù\ŠHˆÙ\ÜÚ[Û•\Ù\ŽÂˆÛÛœÝš[X\žSÝÛ™\ˆH™\ÛÛ™YÈÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š™\ÛÛ™Y
+Hˆ˜[ÙNÂˆÛÛœÝÝÛ™\YZ[ˆH™\ÛÛ™YÈÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ™\ÛÛ™Y
+Hˆ˜[ÙNÂˆÛÛœÝÝ\\YZ[ˆHH[XZ[•\Ù\ˆÝÛ™\YZ[ŽÂˆ™\ËšœÛÛŠÂˆ\ÐYZ[ŽˆYKˆ\Ù\›˜[YNˆ™\ÛÛ™YË™\Ü^S˜[YH™\ÛÛ™YË\Ù\›˜[YHQRS—ÕTÑT“SQKˆ[XZ[ˆ™\ÛÛ™YË™[XZ[[ˆ\ÔÝ\\YZ[ŽˆÝ\\YZ[‹ˆ\Ôš[X\žSÝÛ™\Žˆš[X\žSÝÛ™\‹ˆØ[“X[˜YÙUX[NˆÝÛ™\YZ[‹ˆØ[•šY]Õ\Ù\œÎˆÝÛ™\YZ[‹ˆØ[”\ÚˆÝÛ™\YZ[ˆH[XZ[•\Ù\‹ˆØ[“X[˜YÙPØ][ÙÎˆÝÛ™\YZ[ˆH[XZ[•\Ù\‹ˆJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÝX[H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+\Ù\ÜÚ[Û•\Ù\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊÙ\ÜÚ[Û•\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆ™\ËšœÛÛŠÝÜ˜YÙK›\ÝÚ]PYZ[œÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÝX[H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+\Ù\ÜÚ[Û•\Ù\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊÙ\ÜÚ[Û•\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝÈY[YšY\‹›ÝHHH™\K˜›ÙHßNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK™Ü˜[Ú]PYZ[žRY[YšY\ŠÝš[™ÊY[YšY\ˆˆŠKÙ\ÜÚ[Û•\Ù\‹šY›ÝJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠ™\Ý[˜YZ[ŠNÂˆJNÂ‚ˆ\™[]J‹Ø\KØYZ[‹ÝX[KÎ\Ù\’Y‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÙ\ÜÚ[Û•\Ù\ˆH™\KœÙ\ÜÚ[ÛË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+\Ù\ÜÚ[Û•\Ù\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊÙ\ÜÚ[Û•\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™]›ÚÙTÚ]PYZ[Š[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+JNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ QRSˆ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KØYZ[‹ÜÝX›Z\ÜÚ[ÛœÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝXœÈH™\Kœ]Y\žK˜[OOHYHˆÈÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛœÊ
+HˆÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛœÊ”S‘S‘ÈŠNÂˆ™\ËšœÛÛŠÝXœË›X\
+[œšXÚÝX›Z\ÜÚ[Û‘›ÜYZ[ŠJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÜÝX›Z\ÜÚ[ÛœËÎšYØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÈYZ[“˜[YHHH™\K˜›ÙNÂˆYˆ
+XYZ[“˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜YZ[“˜[YH™\]Z\™YˆJNÂˆÛÛœÝ[™[™ÈHÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛœÊ
+K™š[™
+ÈOˆËšYOOH[X™\Š™\Kœ\˜[\ËšY
+JNÂˆËÈÛ›H]™[ÝX›Z\ÜÚ[ÛœÈØ\œžH™X[]\ÈH›Û[Ý\ˆ\XØ][ÛœÈ[™ˆËÈÛZ[\ÈÝÜ™HHXÙZÛ\ˆ[Y\Ý[\Ú\™HÝ\OOH[™‚ˆYˆ
+[™[™È	‰ˆ
+[™[™Ë\HOOH“‘U×ÑU‘S•ˆ[™[™Ë\HOOH”ÕQÑÑTÕŠJHÂˆÛÛœÝ]Q\œˆH˜[Y]Q]™[]\Ê[™[™Ë™]TÝ\[™[™Ë™]Q[™
+NÂˆYˆ
+]Q\œŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý\›Ý™Nˆ	Ù]Q\œŸXJNÂˆBˆÛÛœÝÝXˆHÝÜ˜YÙK˜\›Ý™TÝX›Z\ÜÚ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+KYZ[“˜[YJNÂˆYˆ
+\ÝXŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+ÝX‹œÝ]\ÈOOHT“Õ‘Qˆ	‰ˆ
+ÝX‹\HOOH“‘U×ÑU‘S•ˆÝX‹\HOOH”ÕQÑÑTÕŠJHÂˆÛÛœÝÜ™X]YHÝÜ˜YÙK™Ù]]™[ÊÈÝ]\Îˆ“U‘HˆJBˆ™š[\Š]Oˆ]œÝX›Z]YžHOOHÝX‹œÝX›Z]\‘[XZ[	‰ˆ]]HOOHÝX‹]JBˆœÛÜ
+
+KŠHOˆ™]È]J‹˜Ü™X]Y]
+K™Ù][YJ
+HH™]È]JK˜Ü™X]Y]
+K™Ù][YJ
+JVÌNÂˆYˆ
+Ü™X]Y
+HÂˆ›ÚYš[]™[X\ÛÛÜ™[˜]\ÊÜ™X]YšY
+K˜Ø]Ú
+\œˆO‚ˆÛÛœÛÛK™\œ›ÜŠ–Ùš[]™[X\ÛÛÜ™[˜]\×HYZ[ˆÜ™X]H˜Z[Yˆ‹\œŠKˆ
+NÂˆBˆBˆ]Y]YZ[Š™\K˜\›Ý™WÜÝX›Z\ÜÚ[Ûˆ‹Âˆ\NˆœÝX›Z\ÜÚ[Ûˆ‹ˆYˆÝX‹šYˆX™[ˆÝX‹]Kˆ]Z[ˆÈÝ]\ÎˆÝX‹œÝ]\ËÝX›Z\ÜÚ[Û•\NˆÝX‹\HKˆJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[JœÝX›Z\ÜÚ[Ûˆ‹[X™\Š™\Kœ\˜[\ËšY
+KÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÝXŠNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÜÝX›Z\ÜÚ[ÛœËÎšYÜ™Z™XÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ™X\ÛÛˆHH™\K˜›ÙNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™Z™XÝÝX›Z\ÜÚ[ÛŠY™X\ÛÛˆˆŠNÂˆ]Y]YZ[Š™\Kœ™Z™XÝÜÝX›Z\ÜÚ[Ûˆ‹Âˆ\NˆœÝX›Z\ÜÚ[Ûˆ‹ˆYˆX™[ˆÝX›Z\ÜÚ[ÛˆÉÚYXˆ]Z[ˆÈ™X\ÛÛŽˆ™X\ÛÛˆ[KˆJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[JœÝX›Z\ÜÚ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÜÝX›Z\ÜÚ[ÛœËÎšYÛY\™ÙK\™]šY]È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝXˆHÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÝXŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÝX›Z\ÜÚ[Ûˆ›Ý›Ý[™ˆJNÂˆÛÛœÝ]™[YH[X™\Š™\Kœ]Y\žK™]™[Y
+NÂˆÛÛœÝ^\Ý[™ÈH[X™\‹š\Ñš[š]J]™[Y
+HÈÝÜ˜YÙK™Ù]]™[
+]™[Y
+Hˆ[™Yš[™YÂˆYˆ
+Y^\Ý[™ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ‘]™[›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÂˆÝX›Z\ÜÚ[Û’YˆÝX‹šYˆ]™[Yˆ^\Ý[™ËšYˆšY[ÎˆY™”ÝX›Z\ÜÚ[Û“Y\™ÙJ^\Ý[™ËÝXŠKˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÜÝX›Z\ÜÚ[ÛœËÎšYÛY\™ÙH‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝÈYZ[“˜[YK]™[YHH™\K˜›ÙNÂˆYˆ
+XYZ[“˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜YZ[“˜[YH™\]Z\™YˆJNÂˆÛÛœÝ\™Ù]]™[YH[X™\Š]™[Y
+NÂˆYˆ
+S[X™\‹š\Ñš[š]J\™Ù]]™[Y
+JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™]™[Y™\]Z\™YˆJNÂ‚ˆÛÛœÝÝXˆHÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛŠ[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+\ÝXŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ÝX›Z\ÜÚ[Ûˆ›Ý›Ý[™ˆJNÂˆÛÛœÝ]Q\œˆH˜[Y]Q]™[]\ÊÝX‹™]TÝ\ÝX‹™]Q[™
+NÂˆYˆ
+]Q\œŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\™ÙNˆ	Ù]Q\œŸXJNÂ‚ˆÛÛœÝ™\Ý[HÝÜ˜YÙK›Y\™ÙTÝX›Z\ÜÚ[Û’[Ñ]™[
+[X™\Š™\Kœ\˜[\ËšY
+K\™Ù]]™[YYZ[“˜[YJNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂ‚ˆ]ØZ]š[]™[X\ÛÛÜ™[˜]\Ê™\Ý[™]™[šY
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ý[[\™\]Y\ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù][™[™Õ[[›Ü•[˜ÛZ[YY]™[Ê
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý[[\™\]Y\ÝËÎ[[YØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\›Ý™\’YHÙ]YZ[XÝÜ•\Ù\’Y
+™\JNÂˆYˆ
+X\›Ý™\’Y
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›ÈYZ[ˆ\Ù\ˆXØÛÝ[ÛÛ™šYÝ\™YˆJNÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™Q]™[[[
+[[Y\›Ý™\’YÈ\ÐYZ[ŽˆYHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y\›Ý™\’Y
+NÂˆYˆ
+™\KœÙ\ÜÚ[Û‹\Ù\’Y	‰ˆ™\KœÙ\ÜÚ[Û‹\Ù\’YOOH\›Ý™\’Y
+HÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆBˆ™\ËšœÛÛŠ™\Ý[[[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý[[\™\]Y\ÝËÎ[[YÜ™Z™XÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\›Ý™\’YHÙ]YZ[XÝÜ•\Ù\’Y
+™\JNÂˆYˆ
+X\›Ý™\’Y
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›ÈYZ[ˆ\Ù\ˆXØÛÝ[ÛÛ™šYÝ\™YˆJNÂˆÛÛœÝ[[YH[X™\Š™\Kœ\˜[\Ë[[Y
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝ]™[[[
+[[Y\›Ý™\’YÈ\ÐYZ[ŽˆYHJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y\›Ý™\’Y
+NÂˆYˆ
+™\KœÙ\ÜÚ[Û‹\Ù\’Y	‰ˆ™\KœÙ\ÜÚ[Û‹\Ù\’YOOH\›Ý™\’Y
+HÂˆÝÜ˜YÙKœÛÙ[]U[[™\]Y\Ý™XYÊ[[Y™\KœÙ\ÜÚ[Û‹\Ù\’Y
+NÂˆBˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü›Û[Ý\‹\™\]Y\ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù][™[™Ô›Û[Ý\”™\]Y\ÝÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü›Û[Ý\‹\™\]Y\ÝËÎ\Ù\’YØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\’YH[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+NÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆÛÛœÝYZ[“˜[YHHÙ]Ù\ÜÚ[ÛYZ[•\Ù\Š™\JOË™\Ü^S˜[YBˆÙ]Ù\ÜÚ[ÛYZ[•\Ù\Š™\JOË\Ù\›˜[YBˆÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJOË™\Ü^S˜[YBˆÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJOË\Ù\›˜[YBˆ˜YZ[ˆŽÂˆÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\’Y˜\›Ý™YŠNÂˆÝÜ˜YÙKœ™\ÛÛ™T›Û[Ý\\XØ][Û”ÝX›Z\ÜÚ[ÛœÊ\Ù\’Y˜\›Ý™Y‹YZ[“˜[YJNÂˆ]Y]YZ[Š™\K˜\›Ý™WÜ›Û[Ý\ˆ‹Âˆ\Nˆœ›Û[Ý\ˆ‹ˆYˆ\Ù\’YˆX™[ˆ	Ý\Ù\‹\Ù\›˜[Y_XˆJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[Jœ›Û[Ý\ˆ‹\Ù\’YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYK›Û[Ý\”Ý]\Îˆ˜\›Ý™YˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü›Û[Ý\‹\™\]Y\ÝËÎ\Ù\’YÙ[žH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\’YH[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+NÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\’Yœ™Z™XÝYŠNÂˆÝÜ˜YÙKœ™\ÛÛ™T›Û[Ý\\XØ][Û”ÝX›Z\ÜÚ[ÛœÊ\Ù\’Yœ™Z™XÝY‹˜YZ[ˆ‹”›Û[Ý\ˆ™\]Y\Ý[šYYŠNÂˆ]Y]YZ[Š™\K™[žWÜ›Û[Ý\ˆ‹Âˆ\Nˆœ›Û[Ý\ˆ‹ˆYˆ\Ù\’YˆX™[ˆ	Ý\Ù\‹\Ù\›˜[Y_XˆJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[Jœ›Û[Ý\ˆ‹\Ù\’YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYK›Û[Ý\”Ý]\Îˆœ™Z™XÝYˆJNÂˆJNÂ‚ˆËÈ8¥ 8¥ YZ[Žˆ™[YHÛZ[\È
+È™]ËX\Ú[™\ÜÈÝX›Z\ÜÚ[ÛœÈ
+ÈÙÛÈ™\]Y\ÝÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KØYZ[‹Ø\Ú[™\ÜËXÛZ[\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠ™\Kœ]Y\žKœ™XÙ[OOHYH‚ˆÈÝÜ˜YÙK™Ù]™XÙ[™\ÛÛ™Y\Ú[™\ÜÐÛZ[\Ê
+BˆˆÝÜ˜YÙK™Ù][™[™Ð\Ú[™\ÜÐÛZ[\Ê
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜËXÛZ[\ËÎšYØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYZ[“˜[YHHÝš[™Ê™\K˜›ÙOË˜YZ[“˜[YHYZ[ˆŠNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™P\Ú[™\ÜÐÛZ[JYYZ[“˜[YJNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K˜\›Ý™WØ\Ú[™\Ü×ØÛZ[H‹È\Nˆ˜\Ú[™\Ü×ØÛZ[H‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J˜\Ú[™\Ü×ØÛZ[H‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜËXÛZ[\ËÎšYÙ[žH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™Z™XÝ\Ú[™\ÜÐÛZ[JY™\K˜›ÙOËœ™X\ÛÛŠNÂˆ]Y]YZ[Š™\K™[žWØ\Ú[™\Ü×ØÛZ[H‹È\Nˆ˜\Ú[™\Ü×ØÛZ[H‹Y]Z[ˆÈ™X\ÛÛŽˆ™\K˜›ÙOËœ™X\ÛÛˆ[HJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J˜\Ú[™\Ü×ØÛZ[H‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË\ÝX›Z\ÜÚ[ÛœÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠ™\Kœ]Y\žKœ™XÙ[OOHYH‚ˆÈÝÜ˜YÙK™Ù]™XÙ[™\ÛÛ™Y\Ú[™\ÜÔÝX›Z\ÜÚ[ÛœÊ
+BˆˆÝÜ˜YÙK™Ù][™[™Ð\Ú[™\ÜÔÝX›Z\ÜÚ[ÛœÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË\ÝX›Z\ÜÚ[ÛœËÎšYØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYZ[“˜[YHHÝš[™Ê™\K˜›ÙOË˜YZ[“˜[YHYZ[ˆŠNÂˆÛÛœÝÝ™\œšYR[XYÙU\›H™\K˜›ÙOËš[XYÙU\›ÈÝš[™Ê™\K˜›ÙKš[XYÙU\›
+Hˆ[™Yš[™YÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™P\Ú[™\ÜÔÝX›Z\ÜÚ[ÛŠYYZ[“˜[YKÝ™\œšYR[XYÙU\›
+NÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K˜\›Ý™WØ\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹È\Nˆ˜\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J˜\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË\ÝX›Z\ÜÚ[ÛœËÎšYÙ[žH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™Z™XÝ\Ú[™\ÜÔÝX›Z\ÜÚ[ÛŠY™\K˜›ÙOËœ™X\ÛÛŠNÂˆ]Y]YZ[Š™\K™[žWØ\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹È\Nˆ˜\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J˜\Ú[™\Ü×ÜÝX›Z\ÜÚ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË[ÙÛË\™\]Y\ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠ™\Kœ]Y\žKœ™XÙ[OOHYH‚ˆÈÝÜ˜YÙK™Ù]™XÙ[™\ÛÛ™Y\Ú[™\ÜÓÙÛÔ™\]Y\ÝÊ
+BˆˆÝÜ˜YÙK™Ù][™[™Ð\Ú[™\ÜÓÙÛÔ™\]Y\ÝÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË[ÙÛË\™\]Y\ÝËÎšYØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝ™\œšYR[XYÙU\›H™\K˜›ÙOËš[XYÙU\›ÈÝš[™Ê™\K˜›ÙKš[XYÙU\›
+Hˆ[™Yš[™YÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™P\Ú[™\ÜÓÙÛÔ™\]Y\Ý
+YÝ™\œšYR[XYÙU\›
+NÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K˜\›Ý™WÛÙÛÈ‹È\Nˆ›ÙÛ×Ü™\]Y\Ý‹YJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ø\Ú[™\ÜË[ÙÛË\™\]Y\ÝËÎšYÙ[žH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™Z™XÝ\Ú[™\ÜÓÙÛÔ™\]Y\Ý
+Y™\K˜›ÙOËœ™X\ÛÛŠNÂˆ]Y]YZ[Š™\K™[žWÛÙÛÈ‹È\Nˆ›ÙÛ×Ü™\]Y\Ý‹YJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ[\™XÝÜžH›ÜÝ\ˆ
+È\ÜÚYÛ‹Ý[˜\ÜÚYÛˆ™[YHÝÛ™\œÈ
+Ø[YHYXH\È]™[ÜÝ\ÜÚYÛŠBˆ\™Ù]
+‹Ø\KØYZ[‹Ù\™XÝÜžH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]YZ[‘\™XÝÜžP\Ú[™\ÜÙ\Ê
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù\™XÝÜžKÎšYÛÝÛ™\ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ú[™\ÜÒYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\K˜›ÙK\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆYˆ
+]\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YH™\]Z\™YˆJNÂˆÛÛœÝ\Ù\ˆH™\ÛÛ™U\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›ÈXØÛÝ[›Ý[™Ú]]\Ù\›˜[YHˆJNÂˆYˆ
+\Ù\‹œÝ]\ÈOOH˜XÝ]™HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆXØÛÝ[\È›ÝXÝ]™HˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\ÜÚYÛ\Ú[™\ÜÓÝÛ™\Š\Ú[™\ÜÒY\Ù\‹šY
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K˜\ÜÚYÛ—Ø\Ú[™\Ü×ÛÝÛ™\ˆ‹Âˆ\Nˆ˜\Ú[™\ÜÈ‹ˆYˆ\Ú[™\ÜÒYˆ]Z[ˆÈ\Ù\’Yˆ\Ù\‹šY\Ù\›˜[YNˆ\Ù\‹\Ù\›˜[YHKˆJNÂˆžHÂˆÛÛœÝ˜[YHH™\Ý[˜\Ú[™\ÜÏË›˜[YHž[Ý\ˆ™[YHŽÂˆÝÜ˜YÙKœÙ[™\ÑÝZYPYZ[Šˆ\Ù\‹šYˆ[ÝH›ÝÈÝÛŽˆ	Û˜[Y_Xˆ[ˆYZ[ˆ\ÜÚYÛ™Y[ÝH\ÈHÝÛ™\ˆÙˆ‰Û˜[Y_Hˆ[ˆH]YY\ˆ\™XÝÜžKˆÜ[ˆ[Ý\ˆXˆÈX[˜YÙHH\Ý[™Ë˜ˆÈÛÛ^\Nˆ‘ÕRQWÕTUH‹ÛÛ^X™[ˆ˜[YHKˆ
+NÂˆHØ]Ú
+›ÝYžQ\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[—H\ÜÚYÛˆ™[YHÝÛ™\ˆ›ÝYžH˜Z[Yˆ‹›ÝYžQ\œŠNÂˆBˆÛÛœÝ[œšXÚYHÝÜ˜YÙK™Ù]YZ[‘\™XÝÜžP\Ú[™\ÜÙ\Ê
+K™š[™
+
+ŠHOˆ‹šYOOH\Ú[™\ÜÒY
+NÂˆ™\ËšœÛÛŠ[œšXÚY™\Ý[˜\Ú[™\ÜÊNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[—H\ÜÚYÛˆ™[YHÝÛ™\ˆ˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý\ÜÚYÛˆ™[YHÝÛ™\ˆˆJNÂˆBˆJNÂ‚ˆËÈ™XØ]YÛÜš\ÙHH\Ý[™È
+K™ËˆHÛÛ[][š]HÜ™Èš[Y[™\ˆ››Ûœ›Ùš]ˆ]ˆËÈ™X[H™[Û™ÜÈ[ˆÛXœÈ	ˆÜ›Ý\ÊKˆ˜\œ›ÝÈÛˆ\œÜÙNˆ˜[Y]\ÈYØZ[œÝBˆËÈØ[›ÛšXØ[Ø]YÛÜžH\Ý[™]Y]Ë[›ZÙHHœ›ØYUX›Ý™K‚ˆ\œ]Ú
+‹Ø\KØYZ[‹Ù\™XÝÜžKÎšYÝ\H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÒYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™Y›Ü™HHÝÜ˜YÙK™Ù]\Ú[™\ÜÊ\Ú[™\ÜÒY
+NÂˆYˆ
+X™Y›Ü™JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™[YH›Ý›Ý[™ˆJNÂˆÛÛœÝ\HHÝš[™Ê™\K˜›ÙOË\HˆŠKš[J
+NÂˆYˆ
+JT‘PÕÔ–WÕTTÈ\È™XYÛ›HÝš[™Ö×JKš[˜ÛY\Ê\JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•[šÛ›ÝÛˆØ]YÛÜžHˆJNÂˆBˆÛÛœÝ\]YHÝÜ˜YÙK\]P\Ú[™\ÜÊ\Ú[™\ÜÒYÈ\HH\È[žJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™[YH›Ý›Ý[™ˆJNÂˆ]Y]YZ[Š™\KœÙ]Ø\Ú[™\Ü×Ý\H‹Âˆ\Nˆ˜\Ú[™\ÜÈ‹ˆYˆ\Ú[™\ÜÒYˆ]Z[ˆÈœ›ÛNˆ™Y›Ü™K\KÎˆ\HKˆJNÂˆ™\ËšœÛÛŠ\]Y
+NÂˆJNÂ‚ˆ\™[]J‹Ø\KØYZ[‹Ù\™XÝÜžKÎšYÛÝÛ™\ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÒYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™Y›Ü™HHÝÜ˜YÙK™Ù]\Ú[™\ÜÊ\Ú[™\ÜÒY
+NÂˆYˆ
+X™Y›Ü™JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™[YH›Ý›Ý[™ˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜ÛX\\Ú[™\ÜÓÝÛ™\Š\Ú[™\ÜÒY
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K[˜\ÜÚYÛ—Ø\Ú[™\Ü×ÛÝÛ™\ˆ‹Âˆ\Nˆ˜\Ú[™\ÜÈ‹ˆYˆ\Ú[™\ÜÒYˆ]Z[ˆÈ™]š[Ý\ÓÝÛ™\’Yˆ™Y›Ü™K›ÝÛ™\’YÏÈ[KˆJNÂˆÛÛœÝ[œšXÚYHÝÜ˜YÙK™Ù]YZ[‘\™XÝÜžP\Ú[™\ÜÙ\Ê
+K™š[™
+
+ŠHOˆ‹šYOOH\Ú[™\ÜÒY
+NÂˆ™\ËšœÛÛŠ[œšXÚY™\Ý[˜\Ú[™\ÜÊNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ý\Ù\œÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝHHÝš[™Ê™\Kœ]Y\žKœHˆŠKš[J
+KÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ[HÝÜ˜YÙK™Ù][\Ù\œÈÈÝÜ˜YÙK™Ù][\Ù\œÊ
+Hˆ×NÂˆÛÛœÝš[\™YHBˆÈ[™š[\Š
+Nˆ[žJHO‚ˆK\Ù\›˜[YOËÓÝÙ\Ø\ÙJ
+Kš[˜ÛY\ÊJHˆK™[XZ[ËÓÝÙ\Ø\ÙJ
+Kš[˜ÛY\ÊJHˆK™\Ü^S˜[YOËÓÝÙ\Ø\ÙJ
+Kš[˜ÛY\ÊJBˆ
+Bˆˆ[ÂˆÛÛœÝÛÜYHË‹‹™š[\™YKœÛÜ
+
+Nˆ[žKŽˆ[žJHOˆÂˆÛÛœÝU[YHH]Kœ\œÙJK˜Ü™X]Y]ˆŠHKšYÂˆÛÛœÝ•[YHH]Kœ\œÙJ‹˜Ü™X]Y]ˆŠH‹šYÂˆ™]\›ˆ•[YHHU[YNÂˆJNÂˆ™\ËšœÛÛŠÛÜY›X\
+YZ[•\Ù\”Ý[[X\žJJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ý\Ù\œËÜÙX\˜Ú‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆËÈÝš\XY[™ÈÛÈœ›ÚÙZ˜[\ÈˆX]Ú\È\Ù\›˜[YHœ›ÚÙZ˜[\ÂˆÛÛœÝHHÝš[™Ê™\Kœ]Y\žKœHˆŠKš[J
+KÓÝÙ\Ø\ÙJ
+Kœ™\XÙJ×
+ËËˆŠNÂˆYˆ
+\JH™]\›ˆ™\ËšœÛÛŠ×JNÂˆÛÛœÝ[HÝÜ˜YÙK™Ù][\Ù\œÈÈÝÜ˜YÙK™Ù][\Ù\œÊ
+Hˆ×NÂˆÛÛœÝX]Ú\ÈH[ˆ™š[\Š
+Nˆ[žJHOˆÂˆÛÛœÝ[˜[YHHÝš[™ÊK\Ù\›˜[YHˆŠKÓÝÙ\Ø\ÙJ
+Kœ™\XÙJ×
+ËËˆŠNÂˆÛÛœÝ[XZ[HÝš[™ÊK™[XZ[ˆŠKÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ\Ü^HHÝš[™ÊK™\Ü^S˜[YHˆŠKÓÝÙ\Ø\ÙJ
+NÂˆ™]\›ˆ[˜[YKš[˜ÛY\ÊJH[XZ[š[˜ÛY\ÊJH\Ü^Kš[˜ÛY\ÊJH[˜[YHOOHNÂˆJBˆœÛXÙJJBˆ›X\
+YZ[•\Ù\”Ý[[X\žJNÂˆ™\ËšœÛÛŠX]Ú\ÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÎ\Ù\’YÜÙ]\ÝX‹XYZ[ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝ\Ù\’YH[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+NÂˆÛÛœÝÈÜ˜[HH™\K˜›ÙH\ÈÈÜ˜[ˆ›ÛÛX[ˆNÂˆÛÛœÝ\™Ù]HÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\™Ù]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆYˆ
+\ÓXZ[YZ[•\Ù\Š\™Ù]
+H	‰ˆYÜ˜[
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý[[ÝH[‹ÜÝ\\ˆYZ[ˆ\™HˆJNÂˆBˆYˆ
+ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\™Ù]
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý[ÙYžHš[X\žHÝÛ™\ˆˆJNÂˆBˆÝÜ˜YÙK\]U\Ù\Š\Ù\’YÈÝXYZ[ŽˆÜ˜[JNÂˆÛÛœÝ›ÝÈH™]È]J
+KÒTÓÔÝš[™Ê
+NÂˆYˆ
+Ü˜[
+HÂˆÝÜ˜YÙK™[œÝ\™TÚ]PYZ[‘Ü˜[
+\Ù\’Y™\KœÙ\ÜÚ[Û‹\Ù\’YÏÈ[”ÝX‹XYZ[ˆ‹›ÝÊNÂˆH[ÙHÂˆÝÜ˜YÙKœ™]›ÚÙTÚ]PYZ[Š\Ù\’Y
+NÂˆBˆ™\ËšœÛÛŠÈÚÎˆYKÝXYZ[ŽˆÜ˜[JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÎ\Ù\’YÜÙ]]\Ù\›˜[YH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝ\Ù\’YH[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+NÂˆÛÛœÝÈ\Ù\›˜[YHHH™\K˜›ÙH\ÈÈ\Ù\›˜[YNˆÝš[™ÈNÂˆYˆ
+]\Ù\›˜[YH\Ù\›˜[YKš[J
+K›[™ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\›˜[YH]\Ý™H]X\ÝÈÚ\˜XÝ\œÈˆJNÂˆÛÛœÝÛX[ˆH\Ù\›˜[YKš[J
+KÓÝÙ\Ø\ÙJ
+Kœ™\XÙJÖ×˜K^ŒNW×KÙËˆŠNÂˆYˆ
+ÛX[‹›[™ÝÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[Y\Ù\›˜[YHˆJNÂˆÛÛœÝ\™Ù]HÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\™Ù]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJÛX[ŠNÂˆYˆ
+^\Ý[™È	‰ˆ^\Ý[™ËšYOOH\Ù\’Y
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ•\Ù\›˜[YH[™XYHZÙ[ˆˆJNÂˆÜ[]Kœ™\\™J•TUH\Ù\œÈÑU\Ù\›˜[YHHÈÒT‘HYHÈŠKœ[ŠÛX[‹\Ù\’Y
+NÂˆ™\ËšœÛÛŠÈÚÎˆYK\Ù\›˜[YNˆÛX[ˆJNÂˆJNÂ‚ˆËÈX[X[›Û[Ý\ˆ›ÛHÜ˜[Ü™]›ÚÙH\ÈÝÛ™\‹[Û›Kˆ]Y]YH\›Ý™KÙ[žHÝ^\ÈÜ[ˆÈ[YZ[œË‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÎ\Ù\’YÜÙ]\›Û[Ý\‹\Ý]\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝ\Ù\’YH[X™\Š™\Kœ\˜[\Ë\Ù\’Y
+NÂˆÛÛœÝÈÝ]\ÈHH™\K˜›ÙH\ÈÈÝ]\ÎˆÝš[™ÈNÂˆÛÛœÝ[ÝÙYHÈ››Û™H‹œ[™[™È‹˜\›Ý™Y‹œ™Z™XÝY—NÂˆYˆ
+X[ÝÙYš[˜ÛY\ÊÝ]\ÊJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÝ]\ÈˆJNÂˆÛÛœÝ\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+\Ù\’Y
+NÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\’YÝ]\ÊNÂˆ™\ËšœÛÛŠÈÚÎˆYK›Û[Ý\”Ý]\ÎˆÝ]\ÈJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÎ\Ù\›˜[YKÛ[Ù\˜]H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXÝÜ’YH™\KœÙ\ÜÚ[Û‹\Ù\’YÂˆYˆ
+XXÝÜ’Y
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆÛÛœÝXÝÜˆHÝÜ˜YÙK™Ù]\Ù\žRY
+XÝÜ’Y
+NÂˆYˆ
+XXÝÜŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂ‚ˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\Kœ\˜[\Ë\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆÛÛœÝ\™Ù]HÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+]\™Ù]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆYˆ
+\™Ù]šYOOHXÝÜ’Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý[Ù\˜]H[Ý\ˆÝÛˆXØÛÝ[ˆJNÂˆYˆ
+ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\™Ù]
+H	‰ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\ŠXÝÜŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆØ[››Ý[Ù\˜]HHš[X\žHÝÛ™\ˆˆJNÂˆB‚ˆÛÛœÝXÝ[ÛˆHÝš[™Ê™\K˜›ÙOË˜XÝ[ÛˆˆŠKÓÝÙ\Ø\ÙJ
+NÂˆÛÛœÝ[ÝÙYHÈœÝ\Ü[™‹[œÝ\Ü[™‹œÚYÝØ˜[ˆ‹[œÚYÝØ˜[ˆ‹™[]H—NÂˆYˆ
+X[ÝÙYš[˜ÛY\ÊXÝ[ÛŠJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜XÝ[Ûˆ]\Ý™HÝ\Ü[™[œÝ\Ü[™ÚYÝØ˜[‹[œÚYÝØ˜[‹Üˆ[]HˆJNÂˆBˆËÈ[XØÛÝ[[]H\Èš[X\žK[ÝÛ™\ˆÛ›K‚ˆYˆ
+XÝ[ÛˆOOH™[]Hˆ	‰ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\ŠXÝÜŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“Û›HHÚ]HÝÛ™\ˆØ[ˆ[H[]H[ˆXØÛÝ[ˆJNÂˆB‚ˆÛÛœÝ™X\ÛÛÛÙHHÝš[™Ê™\K˜›ÙOËœ™X\ÛÛÛÙH“ÕTˆŠKš[J
+NÂˆÛÛœÝ™X\ÛÛ“X™[Bˆ\[Ùˆ™\K˜›ÙOËœ™X\ÛÛ“X™[OOHœÝš[™Èˆ	‰ˆ™\K˜›ÙKœ™X\ÛÛ“X™[š[J
+BˆÈ™\K˜›ÙKœ™X\ÛÛ“X™[š[J
+KœÛXÙJMŒ
+BˆˆXØÛÝ[[Ù™X\ÛÛ“X™[
+™X\ÛÛÛÙJNÂˆÛÛœÝ›ÝHH\[Ùˆ™\K˜›ÙOË››ÝHOOHœÝš[™ÈˆÈ™\K˜›ÙK››ÝHˆˆŽÂˆ][[ˆÝš[™È[H[ÂˆYˆ
+™\K˜›ÙOË[[
+HÂˆ[[HÝš[™Ê™\K˜›ÙK[[
+NÂˆH[ÙHYˆ
+™\K˜›ÙOË™\˜][Û’Ý\œÈOH[	‰ˆ™\K˜›ÙK™\˜][Û’Ý\œÈOOHˆŠHÂˆ[[H[[\ÛÑœ›ÛRÝ\œÊ[X™\Š™\K˜›ÙK™\˜][Û’Ý\œÊJNÂˆB‚ˆYˆ
+
+XÝ[ÛˆOOHœÝ\Ü[™ˆXÝ[ÛˆOOHœÚYÝØ˜[ˆˆXÝ[ÛˆOOH™[]HŠH	‰ˆ\™X\ÛÛÛÙJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœ™X\ÛÛÛÙH™\]Z\™YˆJNÂˆB‚ˆÛÛœÝ\]YHÝÜ˜YÙK˜\PXØÛÝ[[Ù\˜][ÛŠÂˆ\™Ù]\Ù\’Yˆ\™Ù]šYˆXÝÜ•\Ù\’YˆXÝÜ’YˆXÝ[ÛŽˆXÝ[Ûˆ\È[žKˆ™X\ÛÛÛÙKˆ™X\ÛÛ“X™[ˆ›ÝKˆ[[ˆJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý\]H\Ù\ˆˆJNÂ‚ˆËÈÚ\™YYZ[ˆ]Y]YH
+ÈÝÛ™\ˆ[˜›Þ›Üˆ™\ÝšXÝ[™ÈXÝ[ÛœÂˆYˆ
+XÝ[ÛˆOOHœÝ\Ü[™ˆXÝ[ÛˆOOHœÚYÝØ˜[ˆˆXÝ[ÛˆOOH™[]HŠHÂˆÛÛœÝ\HBˆXÝ[ÛˆOOHœÝ\Ü[™‚ˆÈPÐÓÕS•ÔÕTÔS‘‚ˆˆXÝ[ÛˆOOHœÚYÝØ˜[ˆ‚ˆÈPÐÓÕS•ÔÒQÕÐSˆ‚ˆˆPÐÓÕS•ÑSUHŽÂˆÛÛœÝ[[[™HH[[È[[ˆ	Ý[[Xˆ•[[ˆ[™Yš[š]HŽÂˆÛÛœÝ›ÛÙˆHÂˆXÝ[ÛŽˆ	ØXÝ[ÛŸXˆžNˆ	ØXÝÜ‹\Ù\›˜[Y_H
+	ØXÝÜ‹™\Ü^S˜[YH˜YZ[ˆŸJXˆ™X\ÛÛŽˆ	Ü™X\ÛÛ“X™[H
+	Ü™X\ÛÛÛÙ_JXˆ[[[™Kˆ›ÝKš[J
+HÈ›ÝNˆ	Û›ÝKš[J
+_Xˆ[ˆ›Ùš[NˆÝKÉÙ[˜ÛÙUT’PÛÛ\Û™[
+\™Ù]\Ù\›˜[YJ_XˆBˆ™š[\Š›ÛÛX[ŠBˆš›Ú[Š—ˆŠNÂˆÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\Kˆ]™[Yˆˆ]™[]Nˆ	Ý\™Ù]\Ù\›˜[Y_Xˆ™\]Y\Ý\“˜[YNˆXÝÜ‹™\Ü^S˜[YHXÝÜ‹\Ù\›˜[YKˆ™\]Y\Ý\‘[XZ[ˆXÝÜ‹™[XZ[ˆ›ÛÙ‹ˆJNÂˆËÈ\XØ]H[ÈÝÛ™\ˆ\œÛÛ˜[[˜›Þ
+ÈÝÛ™\ˆ\ÚË‚ˆÛÛœÝÝÛ™\•\Ù\ˆBˆÝÜ˜YÙK™Ù][\Ù\œÊ
+K™š[™
+
+JHOˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\ŠJJH[ÂˆYˆ
+ÝÛ™\•\Ù\ŠHÂˆÝÜ˜YÙKœÙ[™\ÑÝZYPYZ[ŠˆÝÛ™\•\Ù\‹šYˆ	ØXÝ[Û‹Õ\\Ø\ÙJ
+_Nˆ	Ý\™Ù]\Ù\›˜[Y_Xˆ›ÛÙ‹ˆÂˆÛÛ^\NˆQRS—ÐST•‹ˆÛÛ^Yˆ\™Ù]šYˆÛÛ^X™[ˆ	Ý\™Ù]\Ù\›˜[Y_XˆKˆ
+NÂˆBˆÝÜ˜YÙK˜Ü™X]SÝÛ™\‘\ÚÒ][JÂˆÚ[™ˆ˜XØÛÝ[Û[Ù\˜][Ûˆ‹ˆ]Nˆ	ØXÝ[ÛŸNˆ	Ý\™Ù]\Ù\›˜[Y_XˆÝ[[X\žNˆ™X\ÛÛ“X™[ˆ›ÙNˆ›ÛÙ‹ˆÛÛXÝ˜[YNˆXÝÜ‹™\Ü^S˜[YHXÝÜ‹\Ù\›˜[YKˆÛÛXÝ[XZ[ˆXÝÜ‹™[XZ[ˆYÙU\›ˆÝKÉÙ[˜ÛÙUT’PÛÛ\Û™[
+\™Ù]\Ù\›˜[YJ_XˆÙ]™\š]NˆXÝ[ÛˆOOH™[]HˆÈ˜Üš]XØ[ˆˆšYÚ‹ˆY]RœÛÛŽˆÂˆXÝ[Û‹ˆ\™Ù]\Ù\’Yˆ\™Ù]šYˆ\™Ù]\Ù\›˜[YNˆ\™Ù]\Ù\›˜[YKˆ™X\ÛÛÛÙKˆ[[ˆXÝÜ•\Ù\’YˆXÝÜ‹šYˆKˆJNÂˆB‚ˆ]Y]YZ[Š™\KXØÛÝ[ÉØXÝ[ÛŸXÂˆ\Nˆ\Ù\ˆ‹ˆYˆ\™Ù]šYˆX™[ˆ	Ý\™Ù]\Ù\›˜[Y_Xˆ]Z[ˆÈ™X\ÛÛÛÙK[[\Ó›ÝNˆ›ÛÛX[Š›ÝJHKˆJNÂ‚ˆ™\ËšœÛÛŠÈÚÎˆYK\Ù\ŽˆYZ[•\Ù\”Ý[[X\žJ\]Y
+HJNÂˆJNÂ‚ˆÊŠˆY[X™\ˆ™\ÜÙˆ[›Ý\ˆXØÛÝ[8¡¤ˆYZ[ˆ[Ù\˜][Ûˆ]Y]YH
+‹Âˆ\œÜÝ
+‹Ø\KÝ\Ù\œËÎ\Ù\›˜[YKÜ™\Ü‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ü\’YH™\KœÙ\ÜÚ[Û‹\Ù\’YNÂˆÛÛœÝ™\Ü\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\Ü\’Y
+NÂˆYˆ
+\™\Ü\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\Kœ\˜[\Ë\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆÛÛœÝ\™Ù]HÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+]\™Ù]\™Ù]œÝ]\ÈOOH™[]YŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆBˆYˆ
+\™Ù]šYOOH™\Ü\’Y
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››Ý™\Ü[Ý\œÙ[ˆˆJNÂˆBˆÛÛœÝ™X\ÛÛÛÙHHÝš[™Ê™\K˜›ÙOËœ™X\ÛÛÛÙH“ÕTˆŠKš[J
+NÂˆÛÛœÝ™X\ÛÛ“X™[HXØÛÝ[[Ù™X\ÛÛ“X™[
+™X\ÛÛÛÙJNÂˆÛÛœÝ›ÝHHÝš[™Ê™\K˜›ÙOË››ÝHˆŠKš[J
+KœÛXÙJL
+NÂˆÛÛœÝ›ÛÙˆHÂˆ™\ÜYØZ[œÝ	Ý\™Ù]\Ù\›˜[Y_Xˆœ›ÛNˆ	Ü™\Ü\‹\Ù\›˜[Y_Xˆ™X\ÛÛŽˆ	Ü™X\ÛÛ“X™[H
+	Ü™X\ÛÛÛÙ_JXˆ›ÝHÈ]Z[Îˆ	Û›Ý_Xˆ[ˆ›Ùš[NˆÝKÉÙ[˜ÛÙUT’PÛÛ\Û™[
+\™Ù]\Ù\›˜[YJ_XˆBˆ™š[\Š›ÛÛX[ŠBˆš›Ú[Š—ˆŠNÂˆÛÛœÝ›ÝÈHÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\NˆPÐÓÕS•Ô‘TÔ•‹ˆ]™[Yˆˆ]™[]Nˆ	Ý\™Ù]\Ù\›˜[Y_Xˆ™\]Y\Ý\“˜[YNˆ™\Ü\‹™\Ü^S˜[YH™\Ü\‹\Ù\›˜[YKˆ™\]Y\Ý\‘[XZ[ˆ™\Ü\‹™[XZ[ˆ›ÛÙ‹ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYK™\ÜYˆ›ÝËšYJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØ]]ÜÝ\Ü[œÚ[Û‹X\X[‹™\]Z\™P]]
+™\K™\ÊHOˆÂˆ]\Ù\ˆHÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›Ý]][XØ]YˆJNÂˆ\Ù\ˆHÝÜ˜YÙK˜ÛX\‘^\™YXØÛÝ[[Ù\˜][ÛŠ\Ù\‹šY
+H\Ù\ŽÂˆYˆ
+\Ù\‹œÝ]\ÈOOHœÝ\Ü[™YŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ–[Ý\ˆXØÛÝ[\È›ÝÝ\Ü[™YˆJNÂˆBˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙOË˜›ÙHˆŠKš[J
+KœÛXÙJŒ
+NÂˆYˆ
+›ÙK›[™ÝŒ
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\X[]\Ý™H]X\ÝŒÚ\˜XÝ\œÈˆJNÂˆBˆÛÛœÝ›ÛÙˆHÂˆÝ\Ü[œÚ[Ûˆ\X[œ›ÛH	Ý\Ù\‹\Ù\›˜[Y_XˆÝ\Ü[™™X\ÛÛŽˆ	Ý\Ù\‹œÝ\Ü[™™X\ÛÛ“X™[\Ù\‹œÝ\Ü[™™X\ÛÛÛÙH›‹ØHŸXˆ\Ù\‹œÝ\Ü[™[[È[[ˆ	Ý\Ù\‹œÝ\Ü[™[[Xˆ•[[ˆ[™Yš[š]H‹ˆ\Ù\‹œÝ\Ü[™›ÝHÈYZ[ˆ›ÝNˆ	Ý\Ù\‹œÝ\Ü[™›Ý_Xˆ[ˆˆ‹ˆ\X[ˆ‹ˆ›ÙKˆBˆ™š[\Š
+
+HOˆOOH[
+Bˆš›Ú[Š—ˆŠNÂˆËÈ\X[ÈÛÈÈÚ\™YYZ[ˆ]Y]YH
+[Ù\˜][ÛŠK›ÝÝÛ™\ˆ\ÚÈÛ›K‚ˆÛÛœÝ›ÝÈHÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+Âˆ\Nˆ”ÕTÔS‘ÐTPS‹ˆ]™[Yˆˆ]™[]Nˆ	Ý\Ù\‹\Ù\›˜[Y_Xˆ™\]Y\Ý\“˜[YNˆ\Ù\‹™\Ü^S˜[YH\Ù\‹\Ù\›˜[YKˆ™\]Y\Ý\‘[XZ[ˆ\Ù\‹™[XZ[ˆ›ÛÙ‹ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYK\X[Yˆ›ÝËšYJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÎ\Ù\›˜[YKÜ™Z™XÝ\ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\Kœ\˜[\Ë\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆÛÛœÝÈ™X\ÛÛÛÙK›ÝHHH\œÙT›Ùš[TÝÔ™Z™XÝ›ÙJ™\K˜›ÙJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝ\Ù\”›Ùš[TÝÊ\Ù\›˜[YK™X\ÛÛÛÙK›ÝJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ™Z™XÝÜÝÈ‹Âˆ\Nˆ\Ù\ˆ‹ˆYˆ\Ù\›˜[YKˆX™[ˆ	Ý\Ù\›˜[Y_Xˆ]Z[ˆÈ™X\ÛÛÛÙK\Ó›ÝNˆ›ÛÛX[Š›ÝJHKˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÙ]YZ[‘]™[Ø][ÙÊ
+K›X\
+[œšXÚ]™[›ÜYZ[ŠJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü\œÚ\Ý[˜ÙH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆ™\ËšœÛÛŠÙ]\œÚ\Ý[˜ÙP]Y]
+Ù]X›PÛÝ[Ê
+JJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü[™[™ËXÛÝ[‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆÛÛœÝÝÛ™\ÛÝ[H\Ù\ˆ	‰ˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠHÈÝÜ˜YÙK™Ù]ÝÛ™\‘\ÚÐÛÝ[
+
+HˆÂˆÛÛœÝœ™XZÙÝÛˆHÝÜ˜YÙK™Ù]YZ[”]Y]YPœ™XZÙÝÛŠ
+NÂˆÛÛœÝ]Y]YPÛÝ[Hœ™XZÙÝÛ‹Ý[ÂˆÛÛœÝÝZYU[œ™XYHœ™XZÙÝÛ‹™ÝZYU[œ™XYÂˆ™\ËšœÛÛŠÂˆÛÝ[ˆ]Y]YPÛÝ[ˆ]Y]YPÛÝ[ˆÝZYU[œ™XYˆÊŠˆ˜YÙHÝ[›ÜˆYZ[ˆXˆÈ[Øš[H]Y]YNˆ]Y]YH][\È
+ÈÝZYKZ[˜›Þ[œ™\Y\Ëˆ
+‹ÂˆYZ[˜YÙNˆ]Y]YPÛÝ[
+ÈÝZYU[œ™XYˆÝÛ™\ÛÝ[ˆÊŠˆØ]YÛÜžHÛÝ[ÈHÛ™H[Øš[KYœšY[™H^[ØY›Üˆ˜YÙ\È[™Ý™\šY]Ëˆ
+‹Âˆœ™XZÙÝÛ‹ˆJNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ[Øš[KYš\œÝYZ[ˆ[ÙNˆÚ[™ÛH›Ý[™]š\›ÜˆÝ™\šY]ÈØ\™È
+È]Y]YHÚ\Ë‚ˆ
+ˆ™Y™\ˆ\ÈÝ™\ˆ[[Y\š[™ÈX[žH]Y]YH[™Ú[ÈÛˆHÛ™K‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ü[ÙH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆÛÛœÝœ™XZÙÝÛˆHÝÜ˜YÙK™Ù]YZ[”]Y]YPœ™XZÙÝÛŠ
+NÂˆÛÛœÝÝÛ™\ÛÝ[H\Ù\ˆ	‰ˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠHÈÝÜ˜YÙK™Ù]ÝÛ™\‘\ÚÐÛÝ[
+
+HˆÂˆÛÛœÝY]šXÜÈHÝÜ˜YÙK™Ù]YZ[“Y]šXÜÊ
+NÂˆ™\ËšœÛÛŠÂˆÙ[™\˜]Y]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+Kˆ]Y]YNˆœ™XZÙÝÛ‹ˆYZ[˜YÙNˆœ™XZÙÝÛ‹Ý[
+Èœ™XZÙÝÛ‹™ÝZYU[œ™XYˆÝÛ™\ÛÝ[ˆ]™Q]™[ÎˆY]šXÜË›]™Q]™[Ëˆ[™[™ÔÝX›Z\ÜÚ[ÛœÎˆY]šXÜËœ[™[™ÔÝX›Z\ÜÚ[ÛœËˆ™]Õ\Ù\œÕÙ^NˆY]šXÜË›™]Õ\Ù\œÕÙ^KˆÝZYU[œ™XYˆœ™XZÙÝÛ‹™ÝZYU[œ™XYˆÝZYTÙ[™]šY]ÎˆÝÜ˜YÙK™Ù]ÝZYPYZ[”Ù[
+
+KœÛXÙJJK›X\
+
+Nˆ[žJHOˆ
+ÂˆYˆKšYˆ™XYYˆK™XYYˆÝXš™XÝˆKœÝXš™XÝˆÕ\Ù\›˜[YNˆK×Ý\Ù\›˜[YH[ˆÜ™X]Y]ˆK˜Ü™X]Y]ˆJJKˆJNÂˆJNÂ‚ˆÊŠˆ[šYšYYÙX\˜Ú›ÜˆYZ[ˆÛÛÈ8¡¤ˆ›Ø][™È[˜›Þ]Y]YHÜˆØYZ[ˆXœËˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹ÜÙX\˜Ú‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝHHÝš[™Ê™\Kœ]Y\žKœHˆŠKš[J
+NÂˆÛÛœÝ[Z]H[X™\Š™\Kœ]Y\žK›[Z]
+HMŽÂˆÛÛœÝšY]Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[Âˆ™\ËšœÛÛŠYZ[”ÙX\˜Ú›Ü•šY]Ù\ŠKšY]Ù\ˆÏÈ[[Z]
+JNÂˆJNÂ‚ˆÊŠˆ™XÙ[YZ[ˆXÝ[ÛœÈ
+™Z™XÝË\ËÜ˜[ÊH›ÜˆXØÛÝ[Xš[]HÛˆ[Øš[KÙ\ÚÝÜˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹ØXÝ]š]H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ[Z]H[X™\Š™\Kœ]Y\žK›[Z]
+HŒÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]YZ[XÝ[Û“ÙÊ[Z]
+JNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆÚ[™ÛH^[ØY›Üˆ›Ø][™È[˜›ÞYZ[ˆ0­È]Y]YH
+[XÚÙ]È
+ÈÛÙÛZ[\ÊK‚ˆ
+ˆ™Y™\ˆ\ÈÝ™\ˆL\˜[[\Ý[™Ú[ÈÛˆ[Øš[HYZ[‹‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ü]Y]YH‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆžHÂˆ™\ËšœÛÛŠÙ]YZ[”]Y]YPYÙÜ™YØ]J
+JNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[‹Ü]Y]YWH‹\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝØYYZ[ˆ]Y]YHˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü]Y]YKXÛZ[\È‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠ\ÝYZ[”]Y]YPÛZ[\Ê
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü]Y]YKXÛZ[\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆYˆ
+XXÝÜ‹šY
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›ÈYZ[ˆXÝÜˆˆJNÂˆÛÛœÝÚ[™HÝš[™Ê™\K˜›ÙOËšÚ[™™\K˜›ÙOËœ]Y]YRÚ[™ˆŠKš[J
+NÂˆÛÛœÝ[]RYH[X™\Š™\K˜›ÙOË™[]RYÏÈ™\K˜›ÙOËšY
+NÂˆÛÛœÝZÙ[Ý™\ˆH›ÛÛX[Š™\K˜›ÙOËZÙ[Ý™\ŠNÂˆÛÛœÝ™\Ý[HÛZ[PYZ[”]Y]YR][JÚ[™[]RYXÝÜ‹šYÈZÙ[Ý™\ˆJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\KZÙ[Ý™\ˆÈœ]Y]YWÝZÙ[Ý™\ˆˆˆœ]Y]YWØÛZ[H‹Âˆ\NˆÚ[™ˆYˆ[]RYˆX™[ˆ	ÚÚ[™HÉÙ[]RYXˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™[]J‹Ø\KØYZ[‹Ü]Y]YKXÛZ[\ËÎšÚ[™Î™[]RY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆYˆ
+XXÝÜ‹šY
+H™]\›ˆ™\ËœÝ]\ÊJKšœÛÛŠÈ\œ›ÜŽˆ“›ÈYZ[ˆXÝÜˆˆJNÂˆÛÛœÝ™\Ý[H™[X\ÙPYZ[”]Y]YPÛZ[JˆÝš[™Ê™\Kœ\˜[\ËšÚ[™ˆŠKˆ[X™\Š™\Kœ\˜[\Ë™[]RY
+KˆXÝÜ‹šYˆÈ›Ü˜ÙNˆ›ÛÛX[Š™\Kœ]Y\žK™›Ü˜ÙHOOHŒHˆ™\K˜›ÙOË™›Ü˜ÙJHKˆ
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ]Y]YWÜ™[X\ÙH‹Âˆ\NˆÝš[™Ê™\Kœ\˜[\ËšÚ[™
+KˆYˆ™\Kœ\˜[\Ë™[]RYˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆÊŠˆžK\[ˆ[È]™[XÝ[ÛœÈ
+›ÈÜš]\ÊKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[ËØ[ËÜ™]šY]È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOËšYÊHÈ™\K˜›ÙKšYË›X\
+[X™\ŠHˆ×NÂˆÛÛœÝXÝ[ÛˆHÝš[™Ê™\K˜›ÙOË˜XÝ[ÛˆˆŠNÂˆÛÛœÝ™\Ý[H™]šY]Ð[Ñ]™[ÊYËXÝ[ÛŠNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[	‰ˆ™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆÊŠˆ^XÝ]H[È]™[XÝ[ÛœÈ
+ÝX\™YˆYHÈÛZ[XX›HÛ›KX^˜]Ú
+Kˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[ËØ[ËÙ^XÝ]H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆYˆ
+\™\K˜›ÙOË˜ÛÛ™š\›JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜ÛÛ™š\›NˆYH™\]Z\™YH\ÙH™]šY]Èš\œÝˆJNÂˆBˆÛÛœÝYÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOËšYÊHÈ™\K˜›ÙKšYË›X\
+[X™\ŠHˆ×NÂˆÛÛœÝXÝ[ÛˆHÝš[™Ê™\K˜›ÙOË˜XÝ[ÛˆˆŠNÂˆÛÛœÝ™X\ÛÛˆHÝš[™Ê™\K˜›ÙOËœ™X\ÛÛˆˆŠKš[J
+KœÛXÙJÌ
+NÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆÛÛœÝ™\Ý[H^XÝ]P[Ñ]™[ÊYËXÝ[Û‹XÝÜ‹™X\ÛÛŠNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[	‰ˆ™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ]™H[™Ù\ÝÛÝ\˜ÙH\ÝˆÝ\˜]Y™YÚ\ÝžH
+È]™\žH\™XÝÜžHÙXœÚ]K‚ˆ
+ˆ™]ÈXÙ\ÈÚ]HÙXœÚ]H\X\ˆ\™H]]ÛX]XØ[K‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ù]™[ËÚ[™Ù\ÝÜÛÝ\˜Ù\È‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÙ\ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\ÊßJNÂˆÛÛœÝ\™XÝÜžHHZ[\™XÝÜžR[™Ù\ÝÛÝ\˜Ù\Êˆ\Ú[™\ÜÙ\Ë›X\
+
+Žˆ[žJHOˆ
+ÂˆYˆ‹šYˆ˜[YNˆ‹›˜[YKˆÙXœÚ]Nˆ‹ÙXœÚ]Kˆ\Nˆ‹\KˆXÝ]™Nˆ‹˜XÝ]™Kˆ[™Ù\Ý]™[Îˆ‹š[™Ù\Ý]™[ËˆJJKˆ
+NÂˆËÈØ]ÚX[\ÝÛ›HH\ÝY™[Y\È]™HÛˆH\ÝY›Ø\™ˆÛÛœÝÛÝ\˜Ù\ÈHY\™ÙR[™Ù\ÝÛÝ\˜Ù\ÊS‘ÑTÕÔÓÕTÑTË\™XÝÜžJK™š[\ŠˆÈOˆZ\Õ\ÝY[™TÛÝ\˜ÙJÈYˆËšY\›ˆË\›JKˆ
+NÂˆ™\ËšœÛÛŠÂˆÛÝ\˜Ù\ËˆÝ\˜]YÛÝ[ˆÛÝ\˜Ù\Ë™š[\ŠÈOˆËY\ˆOOH™\™XÝÜžHŠK›[™Ýˆ\™XÝÜžPÛÝ[ˆÛÝ\˜Ù\Ë™š[\ŠÈOˆËY\ˆOOH™\™XÝÜžHŠK›[™ÝˆÝ[ˆÛÝ\˜Ù\Ë›[™ÝˆJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ TÙX\˜Ú\Ú›Ø\™
+][K\ÛÝ\˜ÙHØØ[ˆ
+ÈX[
+H8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÙ\Ú›Ø\™‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÙ\ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\ÊßJK›X\
+
+Žˆ[žJHOˆ
+ÂˆYˆ‹šYˆ˜[YNˆ‹›˜[YKˆÙXœÚ]Nˆ‹ÙXœÚ]Kˆ\Nˆ‹\KˆXÝ]™Nˆ‹˜XÝ]™KˆJJNÂˆ™\ËšœÛÛŠ\Ú›Ø\™Û˜\ÚÝ
+\Ú[™\ÜÙ\ÊJNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ\ÝY™[Y\ÈX[›Ø\™‚ˆ
+ˆÑU8¡¤ˆ™YÚ\ÝžH
+ÈX[ˆ
+ˆÔÕ8¡¤ˆX[X[Þ[˜ÈY˜][ÈÈ™]šY]È]Y]YH
+[ÙO\™]šY]ÊKˆ™]™\ˆU‘Hœ›ÛHYZ[ˆ]Û‹‚ˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÝ\ÝY‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÙ]\ÝY\Ú›Ø\™
+
+JNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ™Yš[YÈ\™XÝÜžHˆœ›ÛH™[YH˜[YH
+ÈÜ[Û˜[ÙXœÚ]KØY™\ÜË‚ˆ
+ˆÙ[ØÛÙH
+›ÛZ[˜][JH
+ÈYÚÙXœÚ]HØÜ˜\H›Üˆ›\˜ˆÈQÈÈÛ™HÈÙÎš[XYÙK‚ˆ
+‹ÂˆËÈ8¥ 8¥ ›Y\ˆ™XY\ˆ
+\ÙHJNˆÚ]X‹\ÛÝ\˜ÙY›Y\ˆ8¡¤ˆÚ\œ™\›ØÙ\ÜÈ8¡¤‚ˆËÈ\ÜÙ\˜XÝÐÔˆ8¡¤ˆ˜]È^
+ÈÛÛ™šY[˜ÙKˆÝXÝ\™Y\œÚ[™È[™È[‚ˆËÈ\ÙHˆ
+™]\Ù\È\ÙX\˜ÚÝš\Ú[Û‹ÊNÈ˜[Y][Ûˆ\›™\ÜÈ[ˆ\ÙH‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÙ›Y\‹\™XY\‹ÛØÜˆ‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈØY›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹ÙÚ]XˆŠNÂˆÛÛœÝÈØÜ‘›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹ÛØÜˆŠNÂ‚ˆÛÛœÝÚ]X”]H™\K˜›ÙOË™Ú]X”]OH[ÈÝš[™Ê™\K˜›ÙK™Ú]X”]
+HˆˆŽÂˆÛÛœÝ[XYÙP˜\ÙMH™\K˜›ÙOËš[XYÙP˜\ÙMOH[ÈÝš[™Ê™\K˜›ÙKš[XYÙP˜\ÙM
+HˆˆŽÂ‚ˆ]Y™™\ŽˆY™™\ŽÂˆ]ÛÝ\˜ÙHH\ØYŽÂˆ]›Y\”]ˆÝš[™È[H[ÂˆYˆ
+Ú]X”]
+HÂˆÛÛœÝ›Y\ˆH]ØZ]ØY›Y\ŠÚ]X”]
+NÂˆY™™\ˆH›Y\‹˜Y™™\ŽÂˆÛÝ\˜ÙHH›Y\‹œÛÝ\˜ÙNÂˆ›Y\”]H›Y\‹œ]ÂˆH[ÙHYˆ
+[XYÙP˜\ÙM
+HÂˆY™™\ˆHY™™\‹™œ›ÛJ[XYÙP˜\ÙMœ™\XÙJ×™]N–×‹JËËˆŠK˜˜\ÙMŠNÂˆH[ÙHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆ”›ÝšYHÚ]X”]Üˆ[XYÙP˜\ÙMˆJNÂˆBˆYˆ
+XY™™\Ë›[™Ý
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆ‘[\H›Y\ˆˆJNÂˆB‚ˆÛÛœÝ™\Ý[H]ØZ]ØÜ‘›Y\ŠY™™\ŠNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙK]ˆ›Y\”]ž]\ÎˆY™™\‹›[™Ý‹‹œ™\Ý[JNÂˆHØ]Ú
+\œŽˆ[šÛ›ÝÛŠHÂˆÛÛœÝY\ÜØYÙHH\œˆ[œÝ[˜Ù[Ùˆ\œ›ÜˆÈ\œ‹›Y\ÜØYÙHˆÝš[™Ê\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆY\ÜØYÙHJNÂˆBˆJNÂ‚ˆËÈ8¥ 8¥ ›Y\ˆ™XY\ˆ
+\ÙHŠNˆÐÔˆ8¡¤ˆH8¡¤ˆÝXÝ\™Y]™[”ÓÓˆ
+È˜Y8¥ 8¥ ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÙ›Y\‹\™XY\‹Ü\œÙH‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈØY›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹ÙÚ]XˆŠNÂˆÛÛœÝÈØÜ‘›Y\ˆHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹ÛØÜˆŠNÂˆÛÛœÝÈÝXÝ\™Q›Y\‹›Y\”\œÙUÑ˜YHH]ØZ][\Ü
+‹‹Ù›Y\”™XY\‹Ü\œÙHŠNÂ‚ˆÛÛœÝÚ]X”]H™\K˜›ÙOË™Ú]X”]OH[ÈÝš[™Ê™\K˜›ÙK™Ú]X”]
+HˆˆŽÂˆÛÛœÝ[XYÙP˜\ÙMH™\K˜›ÙOËš[XYÙP˜\ÙMOH[ÈÝš[™Ê™\K˜›ÙKš[XYÙP˜\ÙM
+HˆˆŽÂˆÛÛœÝ˜]Õ^[ˆH™\K˜›ÙOËœ˜]Õ^OH[ÈÝš[™Ê™\K˜›ÙKœ˜]Õ^
+HˆˆŽÂ‚ˆ]›Y\”]ˆÝš[™È[H[Âˆ]ÛÝ\˜ÙHH\ØYŽÂˆ]ØÜŽˆ]ØZ]Y™]\›•\O\[ÙˆØÜ‘›Y\ˆ[H[Âˆ]˜]Õ^H˜]Õ^[ŽÂˆ][XYÙPY™™\ŽˆY™™\ˆ[H[Â‚ˆYˆ
+\˜]Õ^
+HÂˆYˆ
+Ú]X”]
+HÂˆÛÛœÝ›Y\ˆH]ØZ]ØY›Y\ŠÚ]X”]
+NÂˆ[XYÙPY™™\ˆH›Y\‹˜Y™™\ŽÂˆÛÝ\˜ÙHH›Y\‹œÛÝ\˜ÙNÂˆ›Y\”]H›Y\‹œ]ÂˆH[ÙHYˆ
+[XYÙP˜\ÙM
+HÂˆ[XYÙPY™™\ˆHY™™\‹™œ›ÛJ[XYÙP˜\ÙMœ™\XÙJ×™]N–×‹JËËˆŠK˜˜\ÙMŠNÂˆH[ÙHÂˆ™]\›ˆ™\ÂˆœÝ]\Ê
+BˆšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆ”›ÝšYHÚ]X”][XYÙP˜\ÙMÜˆ˜]Õ^ˆJNÂˆBˆYˆ
+Z[XYÙPY™™\Ë›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆ‘[\H›Y\ˆˆJNÂˆØÜˆH]ØZ]ØÜ‘›Y\Š[XYÙPY™™\ŠNÂˆ˜]Õ^HØÜ‹^ÂˆB‚ˆÛÛœÝ\œÙHH]ØZ]ÝXÝ\™Q›Y\ŠÈ[XYÙPY™™\‹˜]Õ^ØÜÛÛ™šY[˜ÙNˆØÜË˜ÛÛ™šY[˜ÙHJNÂˆÛÛœÝ˜YH›Y\”\œÙUÑ˜Y
+\œÙKÈÛÝ\˜ÙT]ˆ›Y\”]JNÂ‚ˆËÈ\ÙHÎˆ]Y]YO]YH[™ÈH˜Y[ˆHTÙX\˜Ú™]šY]È]Y]YBˆËÈ
+Ø[YH[X[‹X\›Ý™H]\È]™\žHÝ\ˆÛÝ\˜ÙHH™]™\ˆ]]ËSU‘JK‚ˆ]]Y]YY›Ø’YˆÝš[™È[H[ÂˆYˆ
+™\K˜›ÙOËœ]Y]YHOOHYH	‰ˆ˜Y
+HÂˆYˆ
+›Y\”]
+HÂˆËÈÚÝÈHXÝX[›Y\ˆ\ÛˆH™]šY]ÈØ\™ˆ˜YœÜÝ\’[XYÙU\›HÎ‹ËÜ˜]Ë™Ú]X\Ù\˜ÛÛ[˜ÛÛKÉÂˆ›ØÙ\ÜË™[‹‘ÒUP—Ñ“QT”×Ô‘TÏËš[J
+H›X^XXÚÜ\šYKÜ\šYKYÝZYH‚ˆKÉÜ›ØÙ\ÜË™[‹‘ÒUP—Ñ“QT”×Ð”SÒËš[J
+H›X\Ý\ˆŸKÉÙ›Y\”]XÂˆBˆÛÛœÝÈ›Ø’YHH]ØZ]]Y]YSX[X[TÙX\˜Ú˜YÊÂˆ˜YÎˆÙ˜YKˆÛÝ\˜ÙRYˆ™›Y\‹\™XY\ˆ‹ˆÛÝ\˜ÙSX™[ˆ‘›Y\ˆ™XY\ˆ‹ˆÛÝ\˜ÙU\›ˆ›Y\”]ÈÚ]XŽ‰Ù›Y\”]Xˆ™›Y\‹]\ØY‹ˆÚ[™ˆ™›Y\—Ü™XY\ˆ‹ˆJNÂˆ]Y]YY›Ø’YH›Ø’YÂˆB‚ˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÛÝ\˜ÙKˆ]ˆ›Y\”]ˆØÜŽˆØÜ‚ˆÈÈÛÛ™šY[˜ÙNˆØÜ‹˜ÛÛ™šY[˜ÙK™\›ØÙ\ÜÓ\ÎˆØÜ‹œ™\›ØÙ\ÜÓ\ËØÜ“\ÎˆØÜ‹›ØÜ“\ÈBˆˆ[ˆ\œÙKˆ˜Yˆ]Y]YY›Ø’YˆJNÂˆHØ]Ú
+\œŽˆ[šÛ›ÝÛŠHÂˆÛÛœÝY\ÜØYÙHH\œˆ[œÝ[˜Ù[Ùˆ\œ›ÜˆÈ\œ‹›Y\ÜØYÙHˆÝš[™Ê\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈÚÎˆ˜[ÙK\œ›ÜŽˆY\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÙ\™XÝÜžK[ÛÚÝ\‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈÛÚÝ\\™XÝÜžTXÙHHH]ØZ][\Ü
+‹‹Ü\ÙX\˜ÚÙ\™XÝÜžSÛÚÝ\ŠNÂˆÛÛœÝ™\Ý[H]ØZ]ÛÚÝ\\™XÝÜžTXÙJÂˆ˜[YNˆÝš[™Ê™\K˜›ÙOË›˜[YHˆŠKš[J
+KˆY™\ÜÎˆ™\K˜›ÙOË˜Y™\ÜÈOH[ÈÝš[™Ê™\K˜›ÙK˜Y™\ÜÊHˆ[ˆÙXœÚ]Nˆ™\K˜›ÙOËÙXœÚ]HOH[ÈÝš[™Ê™\K˜›ÙKÙXœÚ]JHˆ[ˆ\ØÜš\[ÛŽˆ™\K˜›ÙOË™\ØÜš\[ÛˆOH[ÈÝš[™Ê™\K˜›ÙK™\ØÜš\[ÛŠHˆ[ˆJNÂˆYˆ
+\™\Ý[›˜[YH™\Ý[›˜[YK›[™ÝŠHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ›˜[YH™\]Z\™YˆJNÂˆBˆ™\ËšœÛÛŠ™\Ý[
+NÂˆHØ]Ú
+\œŽˆ[žJHÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œË›Y\ÜØYÙH‘\™XÝÜžHÛÚÝ\˜Z[YˆJNÂˆBˆJNÂ‚ˆ\Þ[˜È[˜Ý[Ûˆ[•\ÝYÞ[˜Ò[™\Šˆ™\Nˆ[žKˆ™\Îˆ[žKˆÛÝ\˜ÙRYˆÝš[™È[™Yš[™Yˆ
+HÂˆžHÂˆÛÛœÝ[ÙH]ØZ][\Ü
+‹‹Ü\ÙX\˜ÚÝ\ÝYÞ[˜ÈŠNÂˆËÈYZ[ˆX[X[Þ[˜È[Ø^\ÈÛÙ\ÈÈ™]šY]ÈHYÛ›Ü™H›ÙK›[ÙO\X›\ÚˆÛÛœÝÞ[˜ÓÜÈHÈ[ÙNˆœ™]šY]Èˆ\ÈÛÛœÝNÂ‚ˆYˆ
+ÛÝ\˜ÙRY
+HÂˆYˆ
+\[Ùˆ[ÙœÞ[˜Õ\ÝY™[YHOOH™[˜Ý[ÛˆŠHÂˆ™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÝYÞ[˜È\È[˜]˜Z[X›HˆJNÂˆBˆÛÛœÝ™\Ý[H]ØZ][ÙœÞ[˜Õ\ÝY™[YJÛÝ\˜ÙRYÞ[˜ÓÜÊNÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÝ\ÝYÜÞ[˜È‹Âˆ\Nˆœ\ÙX\˜ÚÝ\ÝY‹ˆYˆÛÝ\˜ÙRYˆ]Z[ˆÈØÛÜNˆ›Û™H‹[ÙNˆœ™]šY]È‹™\Ý[KˆJNÂˆÛÛœÝ]Y]YYH[X™\Š
+™\Ý[\È[žJOËœ]Y]YY
+NÂˆÛÛœÝ\]YH[X™\Š
+™\Ý[\È[žJOË\]YË›[™Ý
+NÂˆ™]\›ˆ™\ËšœÛÛŠÂˆÚÎˆYKˆÛÝ\˜ÙRYˆ[ÙNˆœ™]šY]È‹ˆ]Y]YYˆ\]Yˆ™\Ý[ˆY\ÜØYÙN‚ˆÂˆ]Y]YYˆÈ	Ü]Y]YYH™]È›Üˆ™]šY]Øˆ[ˆ\]YˆÈ	Ý\]YH^\Ý[™È]™[	Ý\]YOOHHÈˆˆˆœÈŸH™Yœ™\ÚYˆ[ˆBˆ™š[\Š›ÛÛX[ŠBˆš›Ú[Šˆ0­ÈŠH”Þ[˜Èš[š\ÚYH›Ý[™È™]È‹ˆJNÂˆB‚ˆYˆ
+\[Ùˆ[ÙœÞ[˜Ð[\ÝY™[Y\ÈOOH™[˜Ý[ÛˆŠHÂˆ™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÝYÞ[˜È\È[˜]˜Z[X›HˆJNÂˆBˆÛÛœÝ™\Ý[ÈH]ØZ][ÙœÞ[˜Ð[\ÝY™[Y\ÊÞ[˜ÓÜÊNÂˆÛÛœÝ]Y]YYH™\Ý[Ëœ™YXÙJ
+‹ŠHOˆˆ
+È
+[X™\Š‹œ]Y]YY
+H
+K
+NÂˆÛÛœÝ\]YH™\Ý[Ëœ™YXÙJ
+‹ŠHOˆˆ
+È
+[X™\Š
+ˆ\È[žJOË\]YË›[™Ý
+H
+K
+NÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÝ\ÝYÜÞ[˜È‹Âˆ\Nˆœ\ÙX\˜ÚÝ\ÝY‹ˆ]Z[ˆÈØÛÜNˆ˜[‹[ÙNˆœ™]šY]È‹™\Ý[ÈKˆJNÂˆ™]\›ˆ™\ËšœÛÛŠÂˆÚÎˆYKˆØÛÜNˆ˜[‹ˆ[ÙNˆœ™]šY]È‹ˆ]Y]YYˆ\]Yˆ™\Ý[ˆ™\Ý[ËˆY\ÜØYÙN‚ˆÂˆ]Y]YYˆÈ	Ü]Y]YYH™]È›Üˆ™]šY]Øˆ[ˆ\]YˆÈ	Ý\]YH^\Ý[™È]™[	Ý\]YOOHHÈˆˆˆœÈŸH™Yœ™\ÚYˆ[ˆBˆ™š[\Š›ÛÛX[ŠBˆš›Ú[Šˆ0­ÈŠH”Þ[˜Èš[š\ÚYH›Ý[™È™]È‹ˆJNÂˆHØ]Ú
+\œŽˆ[žJHÂˆÛÛœÝ\ÙÈHÝš[™Ê\œË›Y\ÜØYÙH\œˆ\ÝYÞ[˜È˜Z[YŠNÂˆYˆ
+ˆ\ÙËš[˜ÛY\ÊØ[››Ýš[™[Ù[HŠHˆ\ÙËš[˜ÛY\ÊØ[››Ýš[™XÚØYÙHŠHˆ\œË˜ÛÙHOOH‘T”—ÓSÑSWÓ“ÕÑ“ÕS‘ˆˆ\œË˜ÛÙHOOH“SÑSWÓ“ÕÑ“ÕS‘‚ˆ
+HÂˆ™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ•\ÝYÞ[˜È[Ù[HZ\ÜÚ[™È‹]Z[ˆ\ÙÈJNÂˆBˆÛÛœÛÛK™\œ›ÜŠ–Ü\ÙX\˜Ú]\ÝYHÞ[˜È˜Z[Yˆ‹\œŠNÂˆ™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\ÙÈJNÂˆBˆB‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÝ\ÝYÜÞ[˜È‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYBˆ™\K˜›ÙOËœÛÝ\˜ÙRYOH[	‰ˆÝš[™Ê™\K˜›ÙKœÛÝ\˜ÙRY
+Kš[J
+BˆÈÝš[™Ê™\K˜›ÙKœÛÝ\˜ÙRY
+Kš[J
+Bˆˆ[™Yš[™YÂˆ]ØZ][•\ÝYÞ[˜Ò[™\Š™\K™\ËÛÝ\˜ÙRY
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÝ\ÝYÜÞ[˜ËÎœÛÝ\˜ÙRY‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYHXÛÙUT’PÛÛ\Û™[
+Ýš[™Ê™\Kœ\˜[\ËœÛÝ\˜ÙRYˆŠJKš[J
+NÂˆYˆ
+\ÛÝ\˜ÙRY
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœÛÝ\˜ÙRY™\]Z\™YˆJNÂˆBˆ]ØZ][•\ÝYÞ[˜Ò[™\Š™\K™\ËÛÝ\˜ÙRY
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜ]Y]YH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝ]\ÈH™\Kœ]Y\žKœÝ]\ÈOH[ÈÝš[™Ê™\Kœ]Y\žKœÝ]\ÊHˆœ[™[™ÈŽÂˆÛÛœÝ[Z]HX]›Z[ŠL[X™\Š™\Kœ]Y\žK›[Z]
+HŒ
+NÂˆÛÛœÝØ[™Y]\ÈH\ÝØ[™Y]\ÊÈÝ]\Ë[Z]JNÂˆËÈ[Ø^\È™K[X]Ú\™XÝÜžHœ˜[™ÈÛÈÙÛÈXÚÈ
+È^žžHX]Ú\HÈÛ›ÝÜÂˆÛÛœÝ[œšXÚYH]XÚ\™XÝÜžPœ˜[™ÕÐØ[™Y]\ÊØ[™Y]\È\È[žV×JNÂˆ™\ËšœÛÛŠÈØ[™Y]\Îˆ[œšXÚYJNÂˆJNÂ‚ˆÊŠˆÛX\ˆ™]šY]È]Y]YNˆ\ÝØØ[ˆÛ›H
+Y˜][
+HÜˆ[[™[™Ëˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜ]Y]YKØÛX\ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØÛÜHH™\K˜›ÙOËœØÛÜHOOH˜[ˆÈ˜[ˆˆ›\ÝŽÂˆÛÛœÝ\™H›ÛÛX[Š™\K˜›ÙOËš\™
+NÂˆÛÛœÝ™\Ý[HÛX\”ØØ[”]Y]YJÈØÛÜK\™JNÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜ]Y]YWØÛX\ˆ‹Âˆ\Nˆœ\ÙX\˜Ú‹ˆ]Z[ˆÈØÛÜNˆ™\Ý[œØÛÜKÛX\™Yˆ™\Ý[˜ÛX\™Y\™ˆ™\Ý[š\™›Ø’Yˆ™\Ý[š›Ø’YKˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆÊŠˆ\ÛZ\ÜÈÛ™HÜˆ[Ü™H™]šY]È]Y]YHØ\™È
+Ý]\È8¡¤ˆÚÚ\Y
+KˆÙ\È›ÝÜ™X]H]™[Ëˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜ]Y]YKÙ\ÛZ\ÜÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ˜]ÈH™\K˜›ÙOËšYÎÂˆÛÛœÝYÈH\œ˜^Kš\Ð\œ˜^J˜]ÊBˆÈ˜]Ë›X\
+
+Yˆ[šÛ›ÝÛŠHOˆÝš[™ÊYˆŠKš[J
+JK™š[\Š›ÛÛX[ŠBˆˆ\[Ùˆ™\K˜›ÙOËšYOOHœÝš[™È‚ˆÈÜ™\K˜›ÙKšYš[J
+WK™š[\Š›ÛÛX[ŠBˆˆ×NÂˆYˆ
+ZYË›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆšYÈ™\]Z\™YˆJNÂˆÛÛœÝØ\YHYËœÛXÙJŒ
+NÂˆX\šÐØ[™Y]\ÔÚÚ\Y
+Ø\Y
+NÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜ]Y]YWÙ\ÛZ\ÜÈ‹Âˆ\Nˆœ\ÙX\˜Ú‹ˆ]Z[ˆÈÛÝ[ˆØ\Y›[™ÝYÎˆØ\YœÛXÙJŒ
+HKˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYK\ÛZ\ÜÙYˆØ\Y›[™ÝJNÂˆJNÂ‚ˆÊŠˆ™\ÝÜ™H[ˆRKY›ÜYØ[™Y]H˜XÚÈ[ÈH[™[™È™]šY]È]Y]YKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜ]Y]YKÜ™\ÝÜ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYHÝš[™Ê™\K˜›ÙOËšYˆŠKš[J
+NÂˆYˆ
+ZY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆšY™\]Z\™YˆJNÂˆÛÛœÝ™\ÝÜ™YH™\ÝÜ™PØ[™Y]JY
+NÂˆYˆ
+™\ÝÜ™Y
+H]Y]YZ[Š™\Kœ\ÙX\˜ÚÜ]Y]YWÜ™\ÝÜ™H‹È\Nˆœ\ÙX\˜Ú‹]Z[ˆÈYHJNÂˆ™\ËšœÛÛŠÈÚÎˆ™\ÝÜ™Y™\ÝÜ™YJNÂˆJNÂ‚ˆÊŠˆ›ÜHØ[™Y]IÜÈÜÝ\ˆ
+K™ËˆRH›YÙÙY]\ÈHÙÛÈÈÜ›Û™È›Y\ŠKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜ]Y]YKØÛX\‹Y›Y\ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYHÝš[™Ê™\K˜›ÙOËšYˆŠKš[J
+NÂˆYˆ
+ZY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆšY™\]Z\™YˆJNÂˆÛÛœÝÛX\™YHÛX\Ø[™Y]Q›Y\ŠY
+NÂˆYˆ
+ÛX\™Y
+H]Y]YZ[Š™\Kœ\ÙX\˜ÚÜ]Y]YWØÛX\—Ù›Y\ˆ‹È\Nˆœ\ÙX\˜Ú‹]Z[ˆÈYHJNÂˆ™\ËšœÛÛŠÈÚÎˆÛX\™YÛX\™YJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\ËØXÚË[™]È‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆX\šÐ[™]ÔÙY[Š
+NÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆÊŠˆYHÝ\ÝÛHØÜ˜\HÛÝ\˜ÙH
+[žH
+ÊHT“
+Kˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ý[HYÝ\ÝÛTÛÝ\˜ÙJÂˆX™[ˆÝš[™Ê™\K˜›ÙOË›X™[ˆŠKš[J
+Kˆ\›ˆÝš[™Ê™\K˜›ÙOË\›ˆŠKš[J
+KˆY\Žˆ™\K˜›ÙOËY\ˆOH[ÈÝš[™Ê™\K˜›ÙKY\ŠHˆ[™Yš[™Yˆ›Ü›X]ˆ™\K˜›ÙOË™›Ü›X]OH[ÈÝš[™Ê™\K˜›ÙK™›Ü›X]
+Hˆ[™Yš[™Yˆ\Ú[™\ÜÒY‚ˆ™\K˜›ÙOË˜\Ú[™\ÜÒYOH[	‰ˆ™\K˜›ÙK˜\Ú[™\ÜÒYOOHˆ‚ˆÈ[X™\Š™\K˜›ÙK˜\Ú[™\ÜÒY
+Bˆˆ[ˆJNÂˆYˆ
+\™\Ý[›ÚÊHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™]\›ŽÂˆBˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜÛÝ\˜ÙWØY‹Âˆ\Nˆœ\ÙX\˜ÚÜÛÝ\˜ÙH‹ˆYˆ™\Ý[œÛÝ\˜ÙKœÛÝ\˜ÙRYˆ]Z[ˆÈX™[ˆ™\Ý[œÛÝ\˜ÙK›X™[\›ˆ™\Ý[œÛÝ\˜ÙK\›Y\Žˆ™\Ý[œÛÝ\˜ÙKY\ˆKˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙNˆ™\Ý[œÛÝ\˜ÙHJNÂˆJNÂ‚ˆÊŠˆÛÙY\ØX›H™YÚ\ÝžKÙ\™XÝÜžHÛÝ\˜Ù\ÎÈ\™Y[]HÝ\ÝÛHÛ™\Ëˆ
+‹Âˆ\™[]J‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\ËÎœÛÝ\˜ÙRY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYHXÛÙUT’PÛÛ\Û™[
+Ýš[™Ê™\Kœ\˜[\ËœÛÝ\˜ÙRY
+JNÂˆÛÛœÝ™\Ý[H[]TÛÝ\˜ÙJÛÝ\˜ÙRY
+NÂˆYˆ
+\™\Ý[›ÚÊHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™]\›ŽÂˆBˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜÛÝ\˜ÙWÙ[]H‹Âˆ\Nˆœ\ÙX\˜ÚÜÛÝ\˜ÙH‹ˆYˆÛÝ\˜ÙRYˆ]Z[ˆÈ\™ˆ™\Ý[š\™KˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙRY\™ˆ™\Ý[š\™JNÂˆJNÂ‚ˆÊŠˆ™KY[˜X›HHÛÙY\ØX›YÛÝ\˜ÙKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\ËÎœÛÝ\˜ÙRYÙ[˜X›H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYHXÛÙUT’PÛÛ\Û™[
+Ýš[™Ê™\Kœ\˜[\ËœÛÝ\˜ÙRY
+JNÂˆÛÛœÝ™\Ý[H[˜X›TÛÝ\˜ÙJÛÝ\˜ÙRY
+NÂˆYˆ
+\™\Ý[›ÚÊHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ™]\›ŽÂˆBˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜÛÝ\˜ÙWÙ[˜X›H‹È\Nˆœ\ÙX\˜ÚÜÛÝ\˜ÙH‹YˆÛÝ\˜ÙRYJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙNˆ™\Ý[œÛÝ\˜ÙHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\ËÎœÛÝ\˜ÙRYÜ™XÚ\H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYHÝš[™Ê™\Kœ\˜[\ËœÛÝ\˜ÙRY
+NÂˆÛÛœÝ™XÚ\U\›Bˆ™\K˜›ÙOËœ™XÚ\U\›OOH[™\K˜›ÙOËœ™XÚ\U\›OOHˆ‚ˆÈ[ˆˆÝš[™Ê™\K˜›ÙOËœ™XÚ\U\›ˆŠKš[J
+H[ÂˆÙ]™XÚ\U\›
+ÛÝ\˜ÙRY™XÚ\U\›
+NÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜ™XÚ\H‹È\Nˆœ\ÙX\˜ÚÜÛÝ\˜ÙH‹YˆÛÝ\˜ÙRY]Z[ˆÈ™XÚ\U\›HJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙRY™XÚ\U\›JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜÛÝ\˜Ù\ËÎœÛÝ\˜ÙRYÚ[œÝYÜ˜[H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ\˜ÙRYHÝš[™Ê™\Kœ\˜[\ËœÛÝ\˜ÙRY
+NÂˆÛÛœÝ[™HH\œÙR[œÝYÜ˜[R[™J™\K˜›ÙOËš[™HÏÈ™\K˜›ÙOËš[œÝYÜ˜[R[™HÏÈ[
+NÂˆÙ][œÝYÜ˜[R[™JÛÝ\˜ÙRY[™JNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛÝ\˜ÙRY[™HJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÙ˜YÜ[ÜZ[ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÜ[ˆH›ÛÛX[Š™\K˜›ÙOË›Ü[ŠNÂˆÙ]˜YÜÜ[ŠÜ[ŠNÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÙ˜YÜÛÜÚ[ˆ‹È\Nˆœ\ÙX\˜Ú‹]Z[ˆÈÜ[ˆHJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÜ[ˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜØØ[ˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ú[™\ÜÙ\ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\ÊßJK›X\
+
+Žˆ[žJHOˆ
+ÂˆYˆ‹šYˆ˜[YNˆ‹›˜[YKˆÙXœÚ]Nˆ‹ÙXœÚ]Kˆ\Nˆ‹\KˆXÝ]™Nˆ‹˜XÝ]™KˆJJNÂˆÛÛœÝ™\Ý[HÝ\ØØ[ŠÂˆY\œÎˆ\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOËY\œÊHÈ™\K˜›ÙKY\œË›X\
+Ýš[™ÊHˆ[™Yš[™YˆÛ›Q˜Z[[™Îˆ›ÛÛX[Š™\K˜›ÙOË›Û›Q˜Z[[™ÊKˆÛ›Q\™XÝÜžNˆ›ÛÛX[Š™\K˜›ÙOË›Û›Q\™XÝÜžJKˆÛ›S™]Îˆ›ÛÛX[Š™\K˜›ÙOË›Û›S™]ÊKˆÛÝ\˜ÙRYÎˆ\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOËœÛÝ\˜ÙRYÊHÈ™\K˜›ÙKœÛÝ\˜ÙRYË›X\
+Ýš[™ÊHˆ[™Yš[™YˆÚ[™ˆ™\K˜›ÙOËšÚ[™OOH›šYÚHˆÈ›šYÚHˆˆ›X[X[‹ˆËÈY˜][ÛŽÈ\ÜÈžUš\Ú[ÛŽˆ˜[ÙHÈÚÚ\›Y\ˆš\Ú[ÛˆØ[\[™ÂˆžUš\Ú[ÛŽˆ™\K˜›ÙOËžUš\Ú[ÛˆOOH˜[ÙKˆËÈY˜][Ù™ˆHÛ›H\ÛÛZ[™ËØÝ\œ™[\Ý[™ÜÈ[›\ÜÈ^XÚ]H[˜ÛYYˆ[˜ÛYT\Ý]™[Îˆ™\K˜›ÙOËš[˜ÛYT\Ý]™[ÈOOHYKˆ\Ú[™\ÜÙ\Ëˆ^\Ý[™Ñ]™[ÎˆÝÜ˜YÙK™Ù]]™[ÊßJKˆJNÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÜØØ[—ÜÝ\‹Âˆ\Nˆœ\ÙX\˜Ú‹ˆYˆ™\Ý[š›Ø’YˆX™[ˆØØ[ˆ	Ü™\Ý[Ý[HÛÝ\˜Ù\Øˆ]Z[ˆÈÝ[ˆ™\Ý[Ý[KˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜØØ[‹ÛšYÚK[›ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ™\Ý[HšYÙÙ\“šYÚTš[Üš]TØØ[Š
+NÂˆYˆ
+™\œ›Üˆˆ[ˆ™\Ý[
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÛšYÚWÛX[X[‹È\Nˆœ\ÙX\˜Ú‹Yˆ™\Ý[š›Ø’YJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜØØ[‹Îš›Ø’Y‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ›ØˆHÙ]ØØ[’›Ø•šY]ÊÝš[™Ê™\Kœ\˜[\Ëš›Ø’Y
+JNÂˆYˆ
+Z›ØŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ”ØØ[ˆ›Øˆ›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ›ØŠNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÜØØ[‹Îš›Ø’YØØ[˜Ù[‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÚÈHØ[˜Ù[ØØ[ŠÝš[™Ê™\Kœ\˜[\Ëš›Ø’Y
+JNÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝØ[˜Ù[ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆÊŠ‚ˆ
+ˆ\›Ý™HTÙX\˜ÚØ[™Y]\È8¡¤ˆQSˆžHY˜][‚ˆ
+ˆ›ÙNˆÈÛÛ™š\›NˆYKÝ]\ÏÎˆQSŸU‘K][\ÎˆÞÈYË˜YÚÚ\ËÛÛ™›XÝXÝ[ÛËÛÛ™›XÝ]™[YÏÈWHBˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚØ\›Ý™H‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆYˆ
+\™\K˜›ÙOË˜ÛÛ™š\›JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜ÛÛ™š\›NˆYH™\]Z\™YˆJNÂˆBˆËÈU‘HÛ›HYˆ^XÚ]H™\]Y\ÝYHÝ[™]™\ˆ]]ÛX]XÂˆÛÛœÝÝ]\ÈH™\K˜›ÙOËœÝ]\ÈOOH“U‘HˆÈ“U‘Hˆˆ’QSˆŽÂˆÛÛœÝ˜]Ò][\ÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOËš][\ÊHÈ™\K˜›ÙKš][\Èˆ×NÂˆYˆ
+\˜]Ò][\Ë›[™Ý
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›È][\ÈˆJNÂ‚ˆÛÛœÝÝ™\œšY\Îˆ[X™\–×HH×NÂˆÛÛœÝ[žTÚÚ\YÎˆÝš[™Ö×HH×NÂˆÛÛœÝY\™ÙSÜÎˆ\œ˜^OÈØ[™Y]RYÎˆÝš[™ÎÈ˜Yˆ[žNÈ]™[Yˆ[X™\ˆOˆH×NÂˆÛÛœÝ][\Îˆ\œ˜^OÈ˜Yˆ[žNÈÚÚ\ˆ›ÛÛX[ŽÈØ[™Y]RYÎˆÝš[™ÎÈ[ÝÑ\XØ]OÎˆ›ÛÛX[ˆOˆH×NÂˆ›Üˆ
+ÛÛœÝ›ÝÈÙˆ˜]Ò][\ÊHÂˆÛÛœÝXÝ[ÛˆHÝš[™Ê›ÝÏË˜ÛÛ™›XÝXÝ[ÛˆšÙY\Ø›ÝŠNÂˆÛÛœÝØ[™Y]RYH›ÝÏËšYOH[ÈÝš[™Ê›ÝËšY
+Hˆ[™Yš[™YÂˆÛÛœÝ\™Ù]YÈH\œ˜^Kš\Ð\œ˜^J›ÝÏË˜ÛÛ™›XÝ]™[YÊBˆÈ›ÝË˜ÛÛ™›XÝ]™[YË›X\
+[X™\ŠK™š[\Š
+Žˆ[X™\ŠHOˆ[X™\‹š\Ñš[š]JŠJBˆˆ×NÂ‚ˆYˆ
+XÝ[ÛˆOOH™[žHˆ›ÝÏËœÚÚ\
+HÂˆYˆ
+Ø[™Y]RY
+H[žTÚÚ\YËœ\Ú
+Ø[™Y]RY
+NÂˆ][\Ëœ\Ú
+È˜Yˆ›ÝÏË™˜YÚÚ\ˆYKØ[™Y]RYJNÂˆÛÛ[YNÂˆBˆËÈÛÜÙY™[Y\Îˆ™]™\ˆ\›Ý™H[ÈU‘KÒQSˆ[›\ÜÈ^XÚ][ÝÐÛÜÙY™[YBˆYˆ
+\›ÝÏË˜[ÝÐÛÜÙY™[YH	‰ˆ›ÝÏË™˜Y
+HÂˆÛÛœÝÛÜÙY]HX]ÚÛÜÙY™[YJÂˆ™[YS˜[YNˆ›ÝË™˜Y™[YS˜[YKˆY™\ÜÎˆ›ÝË™˜Y˜Y™\ÜËˆ]Nˆ›ÝË™˜Y]KˆJNÂˆYˆ
+ÛÜÙY]
+HÂˆYˆ
+Ø[™Y]RY
+H[žTÚÚ\YËœ\Ú
+Ø[™Y]RY
+NÂˆ][\Ëœ\Ú
+È˜Yˆ›ÝË™˜YÚÚ\ˆYKØ[™Y]RYJNÂˆÛÛ[YNÂˆBˆBˆËÈY\™ÙNˆ\]HH^\Ý[™È]™[[ˆXÙH
+ÙY\]ÈY8¡¤ˆÙY\”Õ”ÊK‚ˆËÈ[™Y™[ÝÎÈ“ÕÙ[ÈÛÛ[Z][™Ù\ÝÛÈ›È\XØ]H›ÝÈ\ÈÜ™X]Y‚ˆYˆ
+XÝ[ÛˆOOH›Y\™ÙHˆ	‰ˆ\™Ù]YË›[™Ý
+HÂˆY\™ÙSÜËœ\Ú
+ÈØ[™Y]RY˜Yˆ›ÝÏË™˜Y]™[Yˆ\™Ù]YÖÌHJNÂˆÛÛ[YNÂˆBˆYˆ
+XÝ[ÛˆOOH›Ý™\œšYHŠHÂˆ›Üˆ
+ÛÛœÝYÙˆ\™Ù]YÊHÝ™\œšY\Ëœ\Ú
+Y
+NÂˆBˆËÈHYZ[ˆ^XÚ]H™\ÛÛ™YHÛÛ™›XÝ
+ÙY\›ÝÈÝ™\œšYJKÛÈ]ˆËÈ\È˜Y›ÝYÚH\XØ]Hš[\ˆ[œÝXYÙˆÚ[[HÚÚ\[™È]‚ˆÛÛœÝ[ÝÑ\XØ]HHXÝ[ÛˆOOHšÙY\Ø›ÝˆXÝ[ÛˆOOH›Ý™\œšYHŽÂˆ][\Ëœ\Ú
+È˜Yˆ›ÝÏË™˜YÚÚ\ˆ˜[ÙKØ[™Y]RY[ÝÑ\XØ]HJNÂˆB‚ˆ›Üˆ
+ÛÛœÝYÙˆ\œ˜^K™œ›ÛJ™]ÈÙ]
+Ý™\œšY\ÊJJHÂˆžHÂˆÝÜ˜YÙK\]Q]™[Ý]\ÊY’QSˆŠNÂˆHØ]ÚÂˆÊˆYÛ›Ü™H
+‹ÂˆBˆB‚ˆËÈ\HY\™Ù\Îˆ]ÚXXÚ^\Ý[™È›ÝÈœ›ÛHH™]Ù\ÝÞ[˜Ë™\Ù\š[™ÈYÔ”Õ”Ë‚ˆÛÛœÝY\™ÙYØ[™ˆ\œ˜^OÈØ[™Y]RYÎˆÝš[™ÎÈ]™[Yˆ[X™\ˆOˆH×NÂˆ›Üˆ
+ÛÛœÝÜÙˆY\™ÙSÜÊHÂˆžHÂˆÛÛœÝ^\Ý[™ÈHÝÜ˜YÙK™Ù]]™[
+Ü™]™[Y
+NÂˆYˆ
+Y^\Ý[™È[Ü™˜YË]H[Ü™˜YË™]TÝ\
+HÛÛ[YNÂˆÝÜ˜YÙK\]Q]™[
+Ü™]™[YY\™ÙQ˜Y[Ñ]™[
+^\Ý[™ËÜ™˜Y
+KÈÛÝ\˜ÙNˆœÞ[˜ÈˆJNÂˆY\™ÙYØ[™œ\Ú
+ÈØ[™Y]RYˆÜ˜Ø[™Y]RY]™[YˆÜ™]™[YJNÂˆHØ]ÚÂˆÊˆYÛ›Ü™HHÚ[™ÛH˜YY\™ÙH
+‹ÂˆBˆB‚ˆÛÛœÝ^\Ý[™Ñ]™[ÈHÝÜ˜YÙK™Ù]]™[ÊßJNÂˆËÈÚ[ˆ]™\žHXÚÙYØ[™Y]HØ\ÈHQT‘ÑH
+Üˆ\™H\ÈÚ[\H›Ý[™ÈÂˆËÈÜ™X]JKÚÚ\ÛÛ[Z][™Ù\ÝH[ˆ[\H][H\Ý\ÈH›Ë[Ü›Ý[ˆ\œ›Ü‹‚ˆÛÛœÝ™\Ý[H][\Ë›[™ÝˆÈ]ØZ]ÛÛ[Z][™Ù\Ý
+Âˆ][\ËˆÝ]\ËˆËÈ[Ø^\ÈÛˆ›ÜˆYZ[ˆ\›Ý™HH™]™\ˆ™KXÜ™X]HXZ[‹X›Ø\™Ú[œÂˆÚÚ\\XØ]\Îˆ™\K˜›ÙOËœÚÚ\\XØ]\ÈOOH˜[ÙKˆ^\Ý[™Ñ]™[ËˆÜ™X]Q]™[ˆ
+]JHOˆÝÜ˜YÙK˜Ü™X]Q]™[
+]JKˆJBˆˆÂˆÚÎˆYH\ÈÛÛœÝˆÜ™X]Yˆ×H\È\œ˜^OÈYˆ[X™\ŽÈ]NˆÝš[™ÎÈÝ]\ÎˆÝš[™ÎÈØ[™Y]RYÎˆÝš[™ÈO‹ˆÚÚ\Yˆ×H\È\œ˜^OÈ[™^ˆ[X™\ŽÈ]NˆÝš[™ÎÈ™X\ÛÛŽˆÝš[™ÎÈØ[™Y]RYÎˆÝš[™ÈO‹ˆ[\XÝˆY\™ÙYØ[™›[™ÝÈY\™ÙY	ÛY\™ÙYØ[™›[™ÝXˆ“›Ý[™ÈÈÈ‹ˆNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂ‚ˆËÈ™\ÛÛ™H™]šY]ÈØ\™ÎˆÜ™X]Y8¡¤ˆÛÛ[Z]YÈ[™XYK[Û‹X›Ø\™È[˜[Y8¡¤ˆÚÚ\Y
+X]™H]Y]YJBˆ\HØ[™Ý]ÛÛYHHÈ]™[YÎˆ[X™\–×NÈ›Ø\™ÚÚ\ˆ›ÛÛX[ŽÈ[žNˆ›ÛÛX[ˆNÂˆÛÛœÝžPØ[™H™]ÈX\Ýš[™ËØ[™Ý]ÛÛYOŠ
+NÂˆÛÛœÝÝXÚH
+YˆÝš[™È[™Yš[™Y
+NˆØ[™Ý]ÛÛYH[OˆÂˆYˆ
+ZY
+H™]\›ˆ[Âˆ]ÈHžPØ[™™Ù]
+Y
+NÂˆYˆ
+[ÊHÂˆÈHÈ]™[YÎˆ×K›Ø\™ÚÚ\ˆ˜[ÙK[žNˆ˜[ÙHNÂˆžPØ[™œÙ]
+YÊNÂˆBˆ™]\›ˆÎÂˆNÂˆ›Üˆ
+ÛÛœÝYÙˆ[žTÚÚ\YÊHÂˆÛÛœÝÈHÝXÚ
+Y
+NÂˆYˆ
+ÊHË™[žHHYNÂˆBˆ›Üˆ
+ÛÛœÝÈÙˆ™\Ý[˜Ü™X]Y
+HÂˆÛÛœÝÈHÝXÚ
+Ë˜Ø[™Y]RY
+NÂˆYˆ
+ÊHË™]™[YËœ\Ú
+ËšY
+NÂˆBˆ›Üˆ
+ÛÛœÝÈÙˆ™\Ý[œÚÚ\Y
+HÂˆÛÛœÝÈHÝXÚ
+Ë˜Ø[™Y]RY
+NÂˆYˆ
+[ÊHÛÛ[YNÂˆYˆ
+Ð[™XYHÛˆXZ[ˆ›Ø\™Ý›Û™È\XØ]_[˜[Y˜YÚK\Ý
+Ëœ™X\ÛÛŠJHÂˆË˜›Ø\™ÚÚ\HYNÂˆBˆBˆÛÛœÝÛÛ[Z]YYÎˆÝš[™Ö×HH×NÂˆÛÛœÝÛÛ[Z]Y]™[YÎˆ[X™\–×HH×NÂˆÛÛœÝ]]ÔÚÚ\YÎˆÝš[™Ö×HH×NÂˆ\œ˜^K™œ›ÛJžPØ[™™[šY\Ê
+JK™›Ü‘XXÚ
+
+ÚY×JHOˆÂˆYˆ
+Ë™]™[YË›[™Ý
+HÂˆÛÛ[Z]YYËœ\Ú
+Y
+NÂˆÛÛ[Z]Y]™[YËœ\Ú
+Ë™]™[YÖÌJNÂˆH[ÙHYˆ
+Ë˜›Ø\™ÚÚ\Ë™[žJHÂˆ]]ÔÚÚ\YËœ\Ú
+Y
+NÂˆBˆJNÂˆËÈY\™ÙYØ[™Y]\È™\ÛÛ™HZÙHÛÛ[Z]YÛ™\È
+ÛX\ˆH™]šY]ÈØ\™
+K‚ˆ›Üˆ
+ÛÛœÝHÙˆY\™ÙYØ[™
+HÂˆYˆ
+[K˜Ø[™Y]RY
+HÛÛ[YNÂˆÛÛ[Z]YYËœ\Ú
+K˜Ø[™Y]RY
+NÂˆÛÛ[Z]Y]™[YËœ\Ú
+K™]™[Y
+NÂˆBˆYˆ
+ÛÛ[Z]YYË›[™Ý
+HX\šÐØ[™Y]\ÐÛÛ[Z]Y
+ÛÛ[Z]YYËÛÛ[Z]Y]™[YÊNÂˆYˆ
+]]ÔÚÚ\YË›[™Ý
+HX\šÐØ[™Y]\ÔÚÚ\Y
+\œ˜^K™œ›ÛJ™]ÈÙ]
+]]ÔÚÚ\YÊJJNÂ‚ˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚØ\›Ý™H‹Âˆ\Nˆœ\ÙX\˜Ú‹ˆX™[ˆ™\Ý[š[\XÝˆ]Z[ˆÂˆÜ™X]YYÎˆ™\Ý[˜Ü™X]Y›X\
+ÈOˆËšY
+KˆÚÚ\Yˆ™\Ý[œÚÚ\YˆÝ™\œšY[ŽˆÝ™\œšY\ËˆY\™ÙYˆY\™ÙYØ[™›X\
+HOˆK™]™[Y
+KˆÝ]\ËˆKˆJNÂˆ™\ËšœÛÛŠÂˆ‹‹œ™\Ý[ˆÝ™\œšY[ŽˆÝ™\œšY\ËˆY\™ÙYˆY\™ÙYØ[™›X\
+HOˆK™]™[Y
+KˆJNÂˆJNÂ‚ˆÊŠˆ\œÚ\Ýš\Ú[Û‹ÒQÈ˜YÈ[ÈH™]šY]È]Y]YH
+QSˆ]šXH\›Ý™JKˆ
+‹Âˆ\Þ[˜È[˜Ý[Ûˆ]Y]YSX[X[TÙX\˜Ú˜YÊÜÎˆÂˆ˜YÎˆ[\Ü
+‹‹Ú[™Ù\ÝÝ\\ÈŠK’[™Ù\Ý]™[˜Y×NÂˆÛÝ\˜ÙRYˆÝš[™ÎÂˆÛÝ\˜ÙSX™[ˆÝš[™ÎÂˆÛÝ\˜ÙU\›ˆÝš[™ÎÂˆÚ[™ˆÝš[™ÎÂˆJHÂˆÛÛœÝØ][ÙÈHÝÜ˜YÙK™Ù]]™[ÊßJNÂˆÛÛœÝ\Ú[™\ÜÙ\ÈHÝÜ˜YÙK™Ù]\Ú[™\ÜÙ\ÊßJNÂˆÛÛœÝØ[™Y]\ÈHZ[ØØ[Ø[™Y]\ÊˆÜË™˜YË›X\
+˜YOˆ
+Âˆ˜YˆÛÝ\˜ÙRYˆÜËœÛÝ\˜ÙRYˆÛÝ\˜ÙSX™[ˆÜËœÛÝ\˜ÙSX™[ˆÛÝ\˜ÙU\›ˆÜËœÛÝ\˜ÙU\›ˆJJKˆØ][ÙËˆ\Ú[™\ÜÙ\Ëˆ
+NÂˆ›Üˆ
+ÛÛœÝÈÙˆØ[™Y]\ÊHÂˆYˆ
+Ë™˜Y˜ÛÛ™šY[˜ÙHOH[	‰ˆË™˜Y˜ÛÛ™šY[˜ÙHMJHËœÙ[XÝYH˜[ÙNÂˆBˆÛÛœÝ›Ø’YH	ÛÜËšÚ[™KIÜ˜[™ÛUURQ
+
+_XÂˆÛÛœÝÈ[œÙ\ØØ[’›ØˆHH]ØZ][\Ü
+‹‹Ü\ÙX\˜ÚÜÝÜ™HŠNÂˆ[œÙ\ØØ[’›ØŠÂˆYˆ›Ø’YˆÝ]\Îˆ™Û™H‹ˆÝ\Y]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+Kˆš[š\ÚY]ˆ™]È]J
+KÒTÓÔÝš[™Ê
+KˆÝ[ˆKˆÛÛ\]YˆKˆÝ\œ™[ÛÝ\˜ÙRYˆ[ˆÝ\œ™[X™[ˆÜËœÛÝ\˜ÙSX™[ˆ]TÙXÛÛ™Îˆˆ\œ›ÜŽˆ[ˆ]™Ó\Îˆˆš[\’œÛÛŽˆ”ÓÓ‹œÝš[™ÚYžJÈÚ[™ˆÜËšÚ[™JKˆ\”ÛÝ\˜ÙRœÛÛŽˆ–×H‹ˆÚ[™ˆ›X[X[‹ˆJNÂˆØ]™PØ[™Y]\Êˆ›Ø’YˆØ[™Y]\Ë›X\
+ÈOˆ
+ÂˆYˆËšYˆÛÝ\˜ÙRYˆËœÛÝ\˜ÙRYˆÛÝ\˜ÙSX™[ˆËœÛÝ\˜ÙSX™[ˆÛÝ\˜ÙU\›ˆËœÛÝ\˜ÙU\›ˆ˜YˆË™˜YˆÙ[XÝYˆËœÙ[XÝYˆ™XÝ\œš[™ÎˆËœ™XÝ\œš[™Ëˆ™XÝ\œš[™ÐÛÝ[ˆËœ™XÝ\œš[™ÐÛÝ[ˆÛÛ™[œÙYˆË˜ÛÛ™[œÙYˆÛÛ™›XÝÎˆË˜ÛÛ™›XÝËˆ\XØ]\ÎˆË™\XØ]\ËˆÝ›Û™Ñ\XØ]NˆËœÝ›Û™Ñ\XØ]Kˆ\™XÝÜžPœ˜[™ÎˆË™\™XÝÜžPœ˜[™ËˆJJKˆ
+NÂˆ™]\›ˆÈ›Ø’YØ[™Y]\ÈNÂˆB‚ˆÊŠˆš\Ú[Ûˆ›Y\ˆT“8¡¤ˆ]Y]YHØ[™Y]\È
+QSˆ]šXH\›Ý™JKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÝš\Ú[Ûˆ‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆ][XYÙU\›HÝš[™Ê™\K˜›ÙOËš[XYÙU\›ˆŠKš[J
+NÂˆYˆ
+Z[XYÙU\›
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆš[XYÙU\›™\]Z\™YˆJNÂˆÛÛœÝ™[YR[H™\K˜›ÙOË™[YR[OH[ÈÝš[™Ê™\K˜›ÙK™[YR[
+Hˆ[ÂˆÛÛœÝÛÝ\˜ÙU\›H™\K˜›ÙOËœÛÝ\˜ÙU\›OH[ÈÝš[™Ê™\K˜›ÙKœÛÝ\˜ÙU\›
+Hˆ[XYÙU\›Âˆ]ÜÝ\”ÝÜ™U\›ˆÝš[™È[H[XYÙU\›œÝ\ÕÚ]
+™]NˆŠHÈ[ˆ[XYÙU\›ÂˆËÈØØ[\ØY]8¡¤ˆ]HT“›ÜˆÛÝYš\Ú[ÛˆTBˆYˆ
+[XYÙU\›œÝ\ÕÚ]
+‹Ý\ØYËÈŠJHÂˆÛÛœÝ]U\›HØØ[\ØYÑ]U\›
+[XYÙU\›
+NÂˆYˆ
+Y]U\›
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ØYš[H›Ý›Ý[™ˆJNÂˆÜÝ\”ÝÜ™U\›H[XYÙU\›Âˆ[XYÙU\›H]U\›ÂˆBˆÛÛœÝš\ÈH]ØZ]š\Ú[Û‘›Y\•Ñ˜YÊÂˆ[XYÙU\›ˆÛÝ\˜ÙU\›ˆ™[YR[ˆÜÝ\”ÝÜ™U\›ˆJNÂˆYˆ
+š\Ë™\œ›Üˆ	‰ˆ]š\Ë™˜YË›[™Ý
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆš\Ë™\œ›Ü‹[Ù[ˆš\Ë›[Ù[JNÂˆBˆÛÛœÝÈ›Ø’YØ[™Y]\ÈHH]ØZ]]Y]YSX[X[TÙX\˜Ú˜YÊÂˆ˜YÎˆš\Ë™˜YËˆÛÝ\˜ÙRYˆš\Ú[Û‹[X[X[‹ˆÛÝ\˜ÙSX™[ˆ•š\Ú[Ûˆ›Y\ˆ‹ˆÛÝ\˜ÙU\›ˆÚ[™ˆš\Ú[Ûˆ‹ˆJNÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÝš\Ú[Ûˆ‹È\Nˆœ\ÙX\˜Ú‹Yˆ›Ø’Y]Z[ˆÈÛÝ[ˆØ[™Y]\Ë›[™ÝHJNÂˆ™\ËšœÛÛŠÈÚÎˆYK›Ø’Y[Ù[ˆš\Ë›[Ù[Ø[™Y]\Ë\œ›ÜŽˆš\Ë™\œ›Üˆ[JNÂˆHØ]Ú
+\œŽˆ[žJHÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œË›Y\ÜØYÙH•š\Ú[Ûˆ˜Z[YˆJNÂˆBˆJNÂ‚ˆÊŠˆ˜]Ú›Y\ˆ\ØY8¡¤ˆš\Ú[ÛˆXXÚš[H8¡¤ˆ™]šY]È]Y]YKˆ
+‹Âˆ\œÜÝ
+ˆ‹Ø\KØYZ[‹Ü\ÙX\˜ÚÝš\Ú[Û‹Ý\ØY‹ˆ™\]Z\™PYZ[‹ˆ\ØY˜\œ˜^J™›Y\œÈ‹LŠKˆ\Þ[˜È
+™\Nˆ[žK™\ÊHOˆÂˆžHÂˆÛÛœÝš[\ÈH\œ˜^Kš\Ð\œ˜^J™\K™š[\ÊHÈ™\K™š[\Èˆ×NÂˆYˆ
+Yš[\Ë›[™Ý
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\ØYx $ÌLˆ›Y\ˆ[XYÙ\È
+œËÜ™ËÝÙXœÙÚYŠHˆJNÂˆBˆÛÛœÝ™[YR[H™\K˜›ÙOË™[YR[OH[ÈÝš[™Ê™\K˜›ÙK™[YR[
+Hˆ[ÂˆÛÛœÝ[˜YÎˆ[\Ü
+‹‹Ú[™Ù\ÝÝ\\ÈŠK’[™Ù\Ý]™[˜Y×HH×NÂˆÛÛœÝ\œ›ÜœÎˆÝš[™Ö×HH×NÂˆ][Ù[ˆÝš[™È[H[Âˆ›Üˆ
+ÛÛœÝš[HÙˆš[\ÊHÂˆÛÛœÝÝÜ™U\›HÝ\ØYËÉÙš[K™š[[˜[Y_XÂˆÛÛœÝ]U\›HØØ[\ØYÑ]U\›
+ÝÜ™U\›
+NÂˆYˆ
+Y]U\›
+HÂˆ\œ›ÜœËœ\Ú
+	Ùš[K›ÜšYÚ[˜[˜[Y_NˆÛÝ[›Ý™XY\ØY
+NÂˆÛÛ[YNÂˆBˆÛÛœÝš\ÈH]ØZ]š\Ú[Û‘›Y\•Ñ˜YÊÂˆ[XYÙU\›ˆ]U\›ˆÛÝ\˜ÙU\›ˆÝÜ™U\›ˆ™[YR[ˆÜÝ\”ÝÜ™U\›ˆÝÜ™U\›ˆJNÂˆ[Ù[Hš\Ë›[Ù[ÂˆYˆ
+š\Ë™\œ›Üˆ	‰ˆ]š\Ë™˜YË›[™Ý
+HÂˆ\œ›ÜœËœ\Ú
+	Ùš[K›ÜšYÚ[˜[˜[Y_Nˆ	Ýš\Ë™\œ›ÜŸX
+NÂˆÛÛ[YNÂˆBˆ[˜YËœ\Ú
+‹‹š\Ë™˜YÊNÂˆBˆYˆ
+X[˜YË›[™Ý
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÂˆ\œ›ÜŽˆ\œ›ÜœÖÌH“›È]™[È^˜XÝYœ›ÛH\ØYÈ‹ˆ\œ›ÜœËˆ[Ù[ˆJNÂˆBˆÛÛœÝÈ›Ø’YØ[™Y]\ÈHH]ØZ]]Y]YSX[X[TÙX\˜Ú˜YÊÂˆ˜YÎˆ[˜YËˆÛÝ\˜ÙRYˆš\Ú[Û‹]\ØY‹ˆÛÝ\˜ÙSX™[ˆ•š\Ú[Ûˆ\ØY‹ˆÛÝ\˜ÙU\›ˆ\ØY‹ˆÚ[™ˆš\Ú[Û‹]\ØY‹ˆJNÂˆ]Y]YZ[Š™\Kœ\ÙX\˜ÚÝš\Ú[Û—Ý\ØY‹Âˆ\Nˆœ\ÙX\˜Ú‹ˆYˆ›Ø’Yˆ]Z[ˆÈš[\Îˆš[\Ë›[™Ý˜YÎˆ[˜YË›[™Ý\œ›ÜœÈKˆJNÂˆ™\ËšœÛÛŠÂˆÚÎˆYKˆ›Ø’Yˆ[Ù[ˆØ[™Y]\Ëˆš[PÛÝ[ˆš[\Ë›[™Ýˆ˜YÛÝ[ˆ[˜YË›[™Ýˆ\œ›ÜœÎˆ\œ›ÜœË›[™ÝÈ\œ›ÜœÈˆ[ˆJNÂˆHØ]Ú
+\œŽˆ[žJHÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œË›Y\ÜØYÙH•š\Ú[Ûˆ\ØY˜Z[YˆJNÂˆBˆKˆ
+NÂ‚ˆÊŠˆ[œÝYÜ˜[H\ÜÚ\ÝHÚ[™ÛHT“™Y™\œ™YÈÜ˜\\Ú[™\ÜÈ\ØÛÝ™\žHYˆÜ™YÈ^\Ýˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ü\ÙX\˜ÚÚ[œÝYÜ˜[H‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ[ÙHHÝš[™Ê™\K˜›ÙOË›[ÙH\›ŠNÂˆ]™\Ý[ÂˆYˆ
+[ÙHOOH™Ü˜\ŠHÂˆ™\Ý[H]ØZ]YÑÜ˜\[
+Âˆ[™NˆÝš[™Ê™\K˜›ÙOËš[™HˆŠKˆ[Z]ˆ[X™\Š™\K˜›ÙOË›[Z]
+HKˆJNÂˆH[ÙHYˆ
+[ÙHOOH\›ˆ™\K˜›ÙOË\›
+HÂˆ™\Ý[H]ØZ]YÑœ›ÛU\›
+Âˆ\›ˆÝš[™Ê™\K˜›ÙOË\›™\K˜›ÙOËœÜÝ\›™\K˜›ÙOËš[XYÙU\›ˆŠKˆ™[YR[ˆ™\K˜›ÙOË™[YR[OH[ÈÝš[™Ê™\K˜›ÙK™[YR[
+Hˆ[ˆJNÂˆH[ÙHÂˆ™\Ý[H]ØZ]YÔ\ÝP\ÜÚ\Ý
+Âˆ[™Nˆ™\K˜›ÙOËš[™KˆØ\[ÛŽˆ™\K˜›ÙOË˜Ø\[Û‹ˆ[XYÙU\›ˆ™\K˜›ÙOËš[XYÙU\›ˆÜÝ\›ˆ™\K˜›ÙOËœÜÝ\›ˆ™[YR[ˆ™\K˜›ÙOË™[YR[ˆJNÂˆBˆYˆ
+\™\Ý[›ÚÈ	‰ˆ\™\Ý[™˜YË›[™Ý
+HÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠ™\Ý[
+NÂˆBˆÛÛœÝÛÝ\˜ÙU\›HÝš[™Êˆ™\K˜›ÙOË\›™\K˜›ÙOËœÜÝ\›™\K˜›ÙOËš[XYÙU\›š[œÝYÜ˜[H‹ˆ
+NÂˆÛÛœÝÈ›Ø’YØ[™Y]\ÈHH]ØZ]]Y]YSX[X[TÙX\˜Ú˜YÊÂˆ˜YÎˆ™\Ý[™˜YËˆÛÝ\˜ÙRYˆYËIÜ™\Ý[š[™H\›ŸXˆÛÝ\˜ÙSX™[ˆ™\Ý[š[™HÈQÈ	Ü™\Ý[š[™_Xˆ’[œÝYÜ˜[H‹ˆÛÝ\˜ÙU\›ˆÚ[™ˆš[œÝYÜ˜[H‹ˆJNÂˆ™\ËšœÛÛŠÂˆÚÎˆYKˆ›Ø’Yˆ[ÙNˆ™\Ý[›[ÙKˆ[™Nˆ™\Ý[š[™Kˆ›ÝNˆ™\Ý[››ÝKˆ\œ›ÜŽˆ™\Ý[™\œ›Üˆ[ˆØ[™Y]\ËˆJNÂˆHØ]Ú
+\œŽˆ[žJHÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œË›Y\ÜØYÙH’QÈ\ÜÚ\Ý˜Z[YˆJNÂˆBˆJNÂ‚ˆÊŠ‚ˆ
+ˆ\ÙH[™Ù\ÝH™]šY]ÈÛ›H
+›ÈˆÜš]\ÊK‚ˆ
+ˆ›ÙNˆÈ\›ÎˆÝš[™Ë[ÎˆÝš[™ËXÜÏÎˆÝš[™Ë^[™]ÏÎˆ›ÛÛX[ˆBˆ
+ˆ^[™]È
+Y˜][YJNˆYˆÛY\YÙH\È[\KžHÙ]™[Ë›Ü›X]ZœÛÛ‹šX™H‘TÕ]Ë‚ˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[ËÚ[™Ù\ÝÜ™]šY]È‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ\›H™\K˜›ÙOË\›OH[ÈÝš[™Ê™\K˜›ÙK\›
+Hˆ[ÂˆÛÛœÝ[H™\K˜›ÙOËš[OH[ÈÝš[™Ê™\K˜›ÙKš[
+Hˆ[ÂˆÛÛœÝXÜÈH™\K˜›ÙOËšXÜÈOH[ÈÝš[™Ê™\K˜›ÙKšXÜÊHˆ[ÂˆÛÛœÝ^[™]ÈH™\K˜›ÙOË™^[™]ÈOOH˜[ÙNÂˆÛÛœÝ^\Ý[™Ñ]™[ÈHÝÜ˜YÙK™Ù]]™[ÊßJNÂ‚ˆ]™\Ý[H]ØZ]™]šY]Ò[™Ù\Ý
+È\›[XÜË^\Ý[™Ñ]™[ÈJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂ‚ˆYˆ
+^[™]È	‰ˆ\›	‰ˆZ[	‰ˆZXÜÈ	‰ˆ™\Ý[™]™[Ë›[™ÝOOH
+HÂˆÛÛœÝØ[™Y]\ÈH^[™ÙXœÚ]TØÜ˜\PØ[™Y]\Ê\›
+KœÛXÙJJNÂˆÛÛœÝØ\›š[™ÜÈHÂˆ‹‹œ™\Ý[Ø\›š[™ÜËˆ›È]™[ÈÛˆš[X\žHT“HšYY	ØØ[™Y]\Ë›[™ÝH]™[\]Ø[™Y]\ØˆNÂˆ›Üˆ
+ÛÛœÝØ[™Y]HÙˆØ[™Y]\ËœÛXÙJŠJHÂˆÛÛœÝ™^H]ØZ]™]šY]Ò[™Ù\Ý
+È\›ˆØ[™Y]K^\Ý[™Ñ]™[ÈJNÂˆYˆ
+™^›ÚÈ	‰ˆ™^™]™[Ë›[™Ýˆ
+HÂˆ™\Ý[HÂˆ‹‹›™^ˆØ\›š[™ÜÎˆË‹‹Ø\›š[™ÜË‹‹›™^Ø\›š[™ÜË\ÙY^[™Y]ˆ	ØØ[™Y]_XKˆ[\XÝˆ	Û™^š[\XÝH0­ÈšXH^[™Y]ˆNÂˆœ™XZÎÂˆBˆYˆ
+™^›ÚÊHØ\›š[™ÜËœ\Ú
+‹‹›™^Ø\›š[™ÜÊNÂˆBˆYˆ
+™\Ý[™]™[Ë›[™ÝOOH
+HÂˆ™\Ý[HÈ‹‹œ™\Ý[Ø\›š[™ÜÎˆ\œ˜^K™œ›ÛJ™]ÈÙ]
+Ø\›š[™ÜÊJHNÂˆBˆB‚ˆ™\ËšœÛÛŠ™\Ý[
+NÂˆHØ]Ú
+\œŽˆ[žJHÂˆÛÛœÛÛK™\œ›ÜŠš[™Ù\Ý™]šY]È˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œË›Y\ÜØYÙH’[™Ù\Ý™]šY]È˜Z[YˆJNÂˆBˆJNÂ‚ˆÊŠ‚ˆ
+ˆ\ÙH[™Ù\ÝHÛÛ[Z]Y\ˆ™]šY]Ë‚ˆ
+ˆ›ÙNˆÂˆ
+ˆÛÛ™š\›NˆYKˆ
+ˆÝ]\ÏÎˆ’QSˆˆ“U‘Hˆ
+Y˜][QSŠKˆ
+ˆÚÚ\\XØ]\ÏÎˆ›ÛÛX[ˆ
+Y˜][YJKˆ
+ˆ]™[Îˆ\œ˜^OÈ˜YÚÚ\Îˆ›ÛÛX[ˆO‚ˆ
+ˆBˆ
+ˆØY™]NˆY˜][ÈÈQSŽÈX^˜]ÚÈÝ›Û™È\XØ]\ÈÚÚ\YžHY˜][‚ˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[ËÚ[™Ù\ÝØÛÛ[Z]‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆYˆ
+\™\K˜›ÙOË˜ÛÛ™š\›JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜ÛÛ™š\›NˆYH™\]Z\™YH\ÙH™]šY]Èš\œÝˆJNÂˆBˆÛÛœÝÝ]\ÈH™\K˜›ÙOËœÝ]\ÈOOH“U‘HˆÈ“U‘Hˆˆ’QSˆŽÂˆÛÛœÝÚÚ\\XØ]\ÈH™\K˜›ÙOËœÚÚ\\XØ]\ÈOOH˜[ÙNÂˆÛÛœÝ˜]Ñ]™[ÈH\œ˜^Kš\Ð\œ˜^J™\K˜›ÙOË™]™[ÊHÈ™\K˜›ÙK™]™[Èˆ×NÂˆÛÛœÝ][\ÈH˜]Ñ]™[Ë›X\
+
+›ÝÎˆ[žJHOˆ
+Âˆ˜Yˆ›ÝÏË™˜YÏÈ›ÝËˆÚÚ\ˆ›ÛÛX[Š›ÝÏËœÚÚ\
+KˆJJNÂˆÛÛœÝ^\Ý[™Ñ]™[ÈHÝÜ˜YÙK™Ù]]™[ÊßJNÂˆÛÛœÝ™\Ý[H]ØZ]ÛÛ[Z][™Ù\Ý
+Âˆ][\ËˆÝ]\ËˆÚÚ\\XØ]\Ëˆ^\Ý[™Ñ]™[ËˆÜ™X]Q]™[ˆ
+]JHOˆÝÜ˜YÙK˜Ü™X]Q]™[
+]JKˆJNÂˆYˆ
+\™\Ý[›ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂ‚ˆ]Y]YZ[Š™\K™]™[×Ú[™Ù\ÝØÛÛ[Z]‹Âˆ\Nˆ™]™[È‹ˆX™[ˆ™\Ý[š[\XÝˆ]Z[ˆÂˆÝ]\ËˆÜ™X]YYÎˆ™\Ý[˜Ü™X]Y›X\
+ÈOˆËšY
+KˆÚÚ\Yˆ™\Ý[œÚÚ\Y›[™ÝˆKˆJNÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆÊŠˆX›XÈT“È›ÜˆYZ[ˆšY]È\ÈX›XÈˆ
+›ÈYZ[ˆÙ\ÜÚ[Ûˆ™\]Z\™YÛˆH\™Ù]
+Kˆ
+‹Âˆ\™Ù]
+‹Ø\KØYZ[‹Ü™]šY]Ë[[šÜÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ]™[YH™\Kœ]Y\žK™]™[YOH[È[X™\Š™\Kœ]Y\žK™]™[Y
+Hˆ[ÂˆÛÛœÝ\Ú[™\ÜÒYH™\Kœ]Y\žK˜\Ú[™\ÜÒYOH[È[X™\Š™\Kœ]Y\žK˜\Ú[™\ÜÒY
+Hˆ[ÂˆÛÛœÝ\Ù\›˜[YHH™\Kœ]Y\žK\Ù\›˜[YHOH[ÈÝš[™Ê™\Kœ]Y\žK\Ù\›˜[YJHˆ[Âˆ™\ËšœÛÛŠÂˆ[šÜÎˆX›XÔ™]šY]Ó[šÜÊÈ]™[Y\Ú[™\ÜÒY\Ù\›˜[YHJKˆJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØ[˜[]XÜËÝÝ[È‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆÛÛœÝÝ[ÈH]ØZ]Ù]ÛÛÙÛP[˜[]XÜÔX›XÕÝ[Ê
+NÂˆYˆ
+]Ý[ÊHÂˆ™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ[˜[]XÜÈÝ[È\™H[\Ü˜\š[H[˜]˜Z[X›HˆJNÂˆBˆ™\ËœÙ]XY\ŠØXÚKPÛÛ›Û‹œX›XËX^XYÙOMŒÝ[K]Ú[K\™]˜[Y]OLÌŠNÂˆÛÛœÝY[X™\œÈHÝÜ˜YÙK™Ù][\Ù\œÊ
+K™š[\Š\Ù\ˆOˆ\Ù\‹œÝ]\ÈOOH˜XÝ]™HŠK›[™ÝÂˆ™]\›ˆ™\ËšœÛÛŠÈ‹‹Ý[ËY[X™\œÈJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛY]šXÜÈ‹™\]Z\™PYZ[‹\Þ[˜È
+Ü™\K™\ÊHOˆÂˆžHÂˆÛÛœÝY]šXÜÈHÝÜ˜YÙK™Ù]YZ[“Y]šXÜÊ
+NÂˆÛÛœÝØU˜XÚÚ[™Ñ[˜X›YHH\™XYØSYX\Ý\™[Y[Y
+
+NÂˆÛÛœÝØT™\Ü[™Ñ[˜X›YH\ÑÛÛÙÛP[˜[]XÜÐYZ[ÛÛ™šYÝ\™Y
+
+NÂ‚ˆYˆ
+ØT™\Ü[™Ñ[˜X›Y
+HÂˆÛÛœÝØU˜Y™šXÈH]ØZ]Ù]ÛÛÙÛP[˜[]XÜÕ˜Y™šXÓY]šXÜÊ
+NÂˆYˆ
+ØU˜Y™šXÊHÂˆY]šXÜË˜Y™šXÈHØU˜Y™šXÎÂˆH[ÙHÂˆY]šXÜË˜Y™šXÈHÂˆ‹‹›Y]šXÜË˜Y™šXËˆØU˜XÚÚ[™Ñ[˜X›YˆØT™\Ü[™Ñ[˜X›YˆNÂˆBˆH[ÙHÂˆY]šXÜË˜Y™šXÈHÂˆ‹‹›Y]šXÜË˜Y™šXËˆØU˜XÚÚ[™Ñ[˜X›YˆØT™\Ü[™Ñ[˜X›Yˆ˜[ÙKˆNÂˆB‚ˆ™\ËšœÛÛŠY]šXÜÊNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[‹ÛY]šXÜ×H‹\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆ\œˆ[œÝ[˜Ù[Ùˆ\œ›ÜˆÈ\œ‹›Y\ÜØYÙHˆ‘˜Z[YÈØYYZ[ˆY]šXÜÈˆJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ý\Ù\œËÛ™]Ë]Ù^H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+XØ[\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊØ[\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆÛÛœÝÙ^TÝ\H™]È]J
+NÈÙ^TÝ\œÙ]Ý\œÊ
+NÂˆÛÛœÝ›ÝÜÈHÜ[]Kœ™\\™JˆÑSPÕY\Ù\›˜[YK\Ü^WÛ˜[YHTÈ\Ü^S˜[YK[XZ[Ü™X]YØ]TÈÜ™X]Y]]˜]\—ØÚÚXÙHTÈ]˜]\ÚÚXÙKÝ×Ý\›TÈÝÕ\›ˆ”“ÓH\Ù\œÈÒT‘HÜ™X]YØ]HÈÔ‘Tˆ–HÜ™X]YØ]TÐÂˆ
+K˜[
+Ù^TÝ\ÒTÓÔÝš[™Ê
+JNÂˆ™\ËšœÛÛŠ›ÝÜÊNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ý\Ù\œËÜ\™ÙK\XH‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝØ[\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+Z\ÓXZ[YZ[•\Ù\ŠØ[\ŠJH™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ”Ý\\ˆYZ[ˆÛ›HˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ\™ÙTXU\Ý\Ù\œÊ
+NÂˆ™\ËšœÛÛŠ™\Ý[
+NÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ù™YY˜XÚÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆÛÛœÝÝ]\ÈHÝš[™Ê™\Kœ]Y\žKœÝ]\ÈˆŠKÕ\\Ø\ÙJ
+NÂˆYˆ
+Ý]\ÈOOH”‘TÓÓ‘QŠHÂˆÛÛœÝ][\ÈHÝÜ˜YÙK™Ù]ÝÛ™\‘\ÚÒ][\Ê”‘TÓÓ‘QŠBˆ™š[\Š
+][JHOˆ][Kœ™\ÛÛ™Y]][KœÝ]\ÈOOH”‘TÓÓ‘QŠBˆœÛÜ
+
+KŠHOˆÂˆÛÛœÝUÈH]Kœ\œÙJKœ™\ÛÛ™Y]K˜Ü™X]Y]
+HÂˆÛÛœÝ•ÈH]Kœ\œÙJ‹œ™\ÛÛ™Y]‹˜Ü™X]Y]
+HÂˆ™]\›ˆ•ÈHUÎÂˆJNÂˆ™]\›ˆ™\ËšœÛÛŠ][\ÊNÂˆBˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÝÛ™\‘\ÚÒ][\Ê™\Kœ]Y\žK˜[OOHYHˆÈ[™Yš[™Yˆ“ÔSˆŠJNÂˆJNÂ‚ˆËÈ[X™\˜][H\È›È›ÙXÝRKˆ\È\ÈHš]˜]H[™[™È›Û™H™XYžBˆËÈXÚÙ\‰ÜÈØÚY[YXYÛ›ÜÝXË\™]šY]ÈYÙ[‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÜÞ\Ý[KYXYÛ›ÜÝXÜËÙYÙ\Ý‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆÛÛœÝÝ\œÈH[X™\Š™\Kœ]Y\žKšÝ\œÈ
+NÂˆ™\ËšœÛÛŠÙ]Þ\Ý[QXYÛ›ÜÝXÜÑYÙ\Ý
+Ü[]K[X™\‹š\Ñš[š]JÝ\œÊHÈÝ\œÈˆ
+JNÂˆJNÂ‚ˆËÈÛÛœÛÛY]Y˜XÚÛÙÈ™\Üˆ]™\žH[™[™ÈYZ[‹\]Y]YHØ]YÛÜžH
+ÈBˆËÈÝÛ™\ˆ\ÚÈ
+ÝÛ™\ˆÛ›JH[ˆÛ™Hš[X›HYÙKˆÙ›Ü›X]ZœÛÛˆ›Üˆ˜]È]K‚ˆ\™Ù]
+‹Ø\KØYZ[‹Ü™\Ü‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\ÓÝÛ™\YZ[XØÙ\ÜÊ\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆYZ[ˆÛ›HˆJNÂˆBˆËÈÝÛ™\ˆ\ÚÈ›ÝÜÈÛ›H›ÜˆYHš[X\žHÝÛ™\‚ˆÛÛœÝ]HHZ[YZ[”™\Ü
+ÝÜ˜YÙKÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJNÂˆYˆ
+Ýš[™Ê™\Kœ]Y\žK™›Ü›X]
+HOOHšœÛÛˆŠH™]\›ˆ™\ËšœÛÛŠ]JNÂˆ™\Ë\Jš[ŠKœÙ[™
+™[™\YZ[”™\Ü[
+]JJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Ù™YY˜XÚËÎšYÜ™\ÛÛ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆÛÛœÝÛÝ\˜ÙHHÝš[™Ê™\K˜›ÙOËœÛÝ\˜ÙH™\ÚÈŠHOOH™™YY˜XÚÈˆÈ™™YY˜XÚÈˆ\ÈÛÛœÝˆ™\ÚÈˆ\ÈÛÛœÝÂˆÝÜ˜YÙKœ™\ÛÛ™SÝÛ™\‘\ÚÒ][J[X™\Š™\Kœ\˜[\ËšY
+KÛÝ\˜ÙJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛÝÛ™\‹Y\ÚÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÝÛ™\‘\ÚÒ][\Ê
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛÝÛ™\‹Y\ÚËÎšYÜ™\ÛÛ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ\Ù\ˆH™\KœÙ\ÜÚ[Û‹\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+™\KœÙ\ÜÚ[Û‹\Ù\’Y
+Hˆ[ÂˆYˆ
+]\Ù\ˆ\ÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠJHÂˆ™]\›ˆ™\ËœÝ]\ÊÊKšœÛÛŠÈ\œ›ÜŽˆ“ÝÛ™\ˆÛ›HˆJNÂˆBˆÛÛœÝÛÝ\˜ÙHHÝš[™Ê™\K˜›ÙOËœÛÝ\˜ÙH™\ÚÈŠHOOH™™YY˜XÚÈˆÈ™™YY˜XÚÈˆ\ÈÛÛœÝˆ™\ÚÈˆ\ÈÛÛœÝÂˆÝÜ˜YÙKœ™\ÛÛ™SÝÛ™\‘\ÚÒ][J[X™\Š™\Kœ\˜[\ËšY
+KÛÝ\˜ÙJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈU[]™[Y]
+YZ[ˆÛ›JBˆ\œ]
+‹Ø\KØYZ[‹Ù]™[ËÎšY‹™\]Z\™PYZ[‹\Þ[˜È
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ[ÝÙYHÂˆ]H‹™\ØÜš\[Ûˆ‹™[YS˜[YH‹˜Y™\ÜÈ‹›™ZYÚ›ÜšÛÙ‹›]‹›™È‹ˆ™]TÝ\‹™]Q[™‹™^SÙ•ÙYZÈ‹˜YÙT™\]Z\™[Y[‹˜YZ\ÜÚ[Ûˆ‹ˆXÚÙ]\›‹œÜÝ\’[XYÙU\›‹™]™[\\È‹œÝ]\È‹ˆš\ÔX›XÈ‹š\ÒÝ\ÙT\H‹š\ÔÙ^ÜÚ]]™H‹›Y]SÚÈ‹š\ÐÛZ[XX›H‹ˆ˜ÛZ[YYžH‹œÛÝ\˜ÙH‹ˆNÂˆÛÛœÝ]Úˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛˆHßNÂˆ›Üˆ
+ÛÛœÝÙ^HÙˆ[ÝÙY
+HÂˆYˆ
+™\K˜›ÙVÚÙ^WHOOH[™Yš[™Y
+H]ÚÚÙ^WHH™\K˜›ÙVÚÙ^WNÂˆBˆYˆ
+]Ú™]™[\\È	‰ˆ\œ˜^Kš\Ð\œ˜^J]Ú™]™[\\ÊJHÂˆ]Ú™]™[\\ÈH”ÓÓ‹œÝš[™ÚYžJ]Ú™]™[\\ÊNÂˆBˆÛÛœÝ]Q\œˆH˜[Y]Q]™[]\Êˆ]Ú™]TÝ\\ÈÝš[™È[™Yš[™Yˆ]Ú™]Q[™\ÈÝš[™È[™Yš[™Yˆ]ˆ
+NÂˆYˆ
+]Q\œŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ]Q\œˆJNÂˆÞ[˜Ñ^SÙ•ÙYZÊ]Ú]
+NÂˆÛÛœÝ\]YHÝÜ˜YÙK\]Q]™[
+[X™\Š™\Kœ\˜[\ËšY
+K]Ú
+NÂˆYˆ
+\]Y	‰ˆ
+]Ú˜Y™\ÜÈOOH[™Yš[™Y]Ú™[YS˜[YHOOH[™Yš[™Y]Ú›]OOH[™Yš[™Y]Ú›™ÈOOH[™Yš[™Y
+JHÂˆ]ØZ]š[]™[X\ÛÛÜ™[˜]\Ê\]YšY
+NÂˆBˆÛÛœÝœ™\ÚHÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆ™\ËšœÛÛŠœ™\ÚÈ[œšXÚ]™[›Ü“X\
+œ™\Ú
+Hˆœ™\Ú
+NÂˆJNÂ‚ˆËÈÛÙY[]NˆYHœ›ÛHX›XÈ\Ý[™ÜËˆ™\ÝÜ˜X›HšXHYZ[ˆ8¡¤ˆ]™[È
+Ý]\ÈU‘JK‚ˆ\™[]J‹Ø\KØYZ[‹Ù]™[ËÎšY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+Y
+NÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆYˆ
+]œÝ]\ÈOOH’QSˆŠHÂˆ™]\›ˆ™\ËšœÛÛŠÈÚÎˆYKYÝ]\Îˆ’QSˆ‹[™XYRY[ŽˆYHJNÂˆBˆÝÜ˜YÙK\]Q]™[Ý]\ÊY’QSˆŠNÂˆ™\ËšœÛÛŠÈÚÎˆYKYÝ]\Îˆ’QSˆˆJNÂˆJNÂ‚ˆ\œ]Ú
+‹Ø\KØYZ[‹Ù]™[ËÎšYØÛZ[XX›H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÈ\ÐÛZ[XX›HHH™\K˜›ÙNÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÝÜ˜YÙKÙÙÛPÛZ[XX›J[X™\Š™\Kœ\˜[\ËšY
+K›ÛÛX[Š\ÐÛZ[XX›JJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ\ÜÚYÛˆH›Û[Ý\ˆ\ÈH]™[	ÜÈš[X\žHÜÝ
+Ø[YHY™™XÝ\È[ˆ\›Ý™YÛZ[JBˆ\œÜÝ
+‹Ø\KØYZ[‹Ù]™[ËÎšYÚÜÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\K˜›ÙK\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆYˆ
+]\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YH™\]Z\™YˆJNÂˆÛÛœÝ\Ù\ˆH™\ÛÛ™U\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+]\Ù\ŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›ÈXØÛÝ[›Ý[™Ú]]\Ù\›˜[YHˆJNÂˆÛÛœÝXÝÜ’YHÙ]YZ[XÝÜ•\Ù\’Y
+™\JNÂˆÝÜ˜YÙKœÙ]š[X\žQ]™[ÜÝ
+]šY\Ù\‹šYXÝÜ’Y
+NÂˆYˆ
+
+\Ù\‹œ›Û[Ý\”Ý]\È››Û™HŠHOOH˜\›Ý™YŠHÂˆÝÜ˜YÙKœÙ]›Û[Ý\”Ý]\Ê\Ù\‹šY˜\›Ý™YŠNÂˆBˆžHÂˆÝÜ˜YÙKœÙ[™\ÑÝZYPYZ[Šˆ\Ù\‹šYˆ[ÝH›ÝÈÜÝˆ	Ù]]_Xˆ[ˆYZ[ˆ\ÜÚYÛ™Y[ÝH\ÈH›Û[Ý\ˆ›Üˆ‰Ù]]_H‹ˆÜ[ˆ[Ý\ˆ\Ú›Ø\™ÈX[˜YÙHH]™[[™ÜÝÜÝ\]\Ë˜ˆÈÛÛ^\Nˆ‘U‘S•ÐÓRSH‹ÛÛ^Yˆ]šYÛÛ^X™[ˆ]]HKˆ
+NÂˆHØ]Ú
+›ÝYžQ\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[—H\ÜÚYÛˆÜÝ›ÝYžH˜Z[Yˆ‹›ÝYžQ\œŠNÂˆBˆÛÛœÝœ™\ÚHÝÜ˜YÙK™Ù]]™[
+]šY
+NÂˆ™\ËšœÛÛŠœ™\ÚÈ[œšXÚ]™[›ÜYZ[Šœ™\Ú
+HˆÈÚÎˆYHJNÂˆHØ]Ú
+\œŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ØYZ[—H\ÜÚYÛˆÜÝ˜Z[Yˆ‹\œŠNÂˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›Ý\ÜÚYÛˆ›Û[Ý\ˆˆJNÂˆBˆJNÂ‚ˆËÈ™[[Ý™H[ÜÝÈ[™™]\›ˆH]™[ÈH[˜ÛZ[YYØÛZ[XX›HÛÛˆ\™[]J‹Ø\KØYZ[‹Ù]™[ËÎšYÚÜÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ]HÝÜ˜YÙK™Ù]]™[
+[X™\Š™\Kœ\˜[\ËšY
+JNÂˆYˆ
+Y]
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆÝÜ˜YÙK[˜\ÜÚYÛ‘]™[ÜÝÊ]šY
+NÂˆÛÛœÝœ™\ÚHÝÜ˜YÙK™Ù]]™[
+]šY
+NÂˆ™\ËšœÛÛŠœ™\ÚÈ[œšXÚ]™[›ÜYZ[Šœ™\Ú
+HˆÈÚÎˆYHJNÂˆJNÂ‚ˆËÈÑUYZ[ˆ[Ù\˜][Ûˆ™\]Y\ÝÂˆ\™Ù]
+‹Ø\KØYZ[‹Û[Ù\˜][Ûˆ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ™\\ÈH™\Kœ]Y\žK˜[OOHYHˆÈÝÜ˜YÙK™Ù][Ù\˜][Û”™\]Y\ÝÊ
+HˆÝÜ˜YÙK™Ù][Ù\˜][Û”™\]Y\ÝÊ”S‘S‘ÈŠNÂˆ™\ËšœÛÛŠ™\\Ë›X\
+[œšXÚ[Ù\˜][Û‘›ÜYZ[ŠJNÂˆJNÂ‚ˆËÈÔÕ™\ÛÛ™H[Ù\˜][Ûˆ™\]Y\Ýˆ\œÜÝ
+‹Ø\KØYZ[‹Û[Ù\˜][Û‹ÎšYÜ™\ÛÛ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÈÝ]\ËYZ[“›Ý\ÈHH™\K˜›ÙNÂˆYˆ
+VÈT“Õ‘Q‹”‘R‘PÕQ—Kš[˜ÛY\ÊÝ]\ÊJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœÝ]\È]\Ý™HT“Õ‘QÜˆ‘R‘PÕQˆJNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™\ÛÛ™S[Ù\˜][Û”™\]Y\Ý
+YÝ]\ËYZ[“›Ý\ÊNÂˆ]Y]YZ[Š™\Kœ™\ÛÛ™WÛ[Ù\˜][Ûˆ‹È\Nˆ›[Ù\˜][Ûˆ‹Y]Z[ˆÈÝ]\ÈHJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J›[Ù\˜][Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Û[Ù\˜][Û‹Ù\ÛZ\ÜË\Ý[K]\ÝÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÛÝ[HÝÜ˜YÙK™\ÛZ\ÜÔÝ[U\Ý[Ù\˜][Û”™\]Y\ÝÊ
+NÂˆ™\ËšœÛÛŠÈÚÎˆYK\ÛZ\ÜÙYˆÛÝ[JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÙÚY[™È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÂˆÜÝÎˆÝÜ˜YÙK™Ù]ÚY[™ÔÜÝÊÈ[˜ÛYR[˜XÝ]™NˆYHJK›X\
+ÜÝOˆX›XÑÚY[™ÔÜÝ
+ÜÝ
+JKˆ™\ÜÎˆÝÜ˜YÙK™Ù]ÚY[™Ô™\ÜÊ
+KˆJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÙÚY[™ËÎšYÜÝ]\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝ]\ÈHÝš[™Ê™\K˜›ÙKœÝ]\ÈˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆYˆ
+\Ý]\ÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆœÝ]\È™\]Z\™YˆJNÂˆÝÜ˜YÙK\]QÚY[™ÔÜÝÝ]\Ê[X™\Š™\Kœ\˜[\ËšY
+KÝ]\ÊNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÙÚY[™ËÎšYÜ™Z™XÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈ™X\ÛÛÛÙK›ÝHHH\œÙP›Ø\™™Z™XÝ›ÙJ™\K˜›ÙJNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝÚY[™ÔÜÝ
+Y™X\ÛÛÛÙK›ÝJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ™Z™XÝÙÚY[™È‹È\Nˆ™ÚY[™È‹Y]Z[ˆÈ™X\ÛÛÛÙHHJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J™ÚY[™×Ù›YÙÙY‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÙÚY[™ËÜ™\ÜËÎšYÜ™\ÛÛ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™\ÛÛ™QÚY[™Ô™\Ü
+YÝš[™Ê™\K˜›ÙK˜YZ[“›Ý\ÈˆŠJNÂˆ]Y]YZ[Š™\Kœ™\ÛÛ™WÙÚY[™×Ü™\Ü‹È\Nˆ™ÚY[™×Ü™\Ü‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J™ÚY[™×Ü™\Ü‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹Üš]™\‹Xœ˜]ËÜ™\ÜÈ‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]š]™\œ˜]Ô™\ÜÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹Üš]™\‹Xœ˜]ËÜ™\ÜËÎšYÜ™\ÛÛ™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙKœ™\ÛÛ™Tš]™\œ˜]Ô™\Ü
+YÝš[™Ê™\K˜›ÙK˜YZ[“›Ý\ÈˆŠJNÂˆ]Y]YZ[Š™\Kœ™\ÛÛ™WÜš]™\—Øœ˜]È‹È\Nˆœš]™\—Øœ˜]È‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[Jœš]™\—Øœ˜]È‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆËÈ8¥ 8¥ 8¥ QRSŽˆÒQÔÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ˆ\™Ù]
+‹Ø\KØYZ[‹ÙÚYÜÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÚYÔÜÝÊ
+K›X\
+ÚYÈOˆÂˆÛÛœÝ\Ù\ˆHÚYË\Ù\’YÈÝÜ˜YÙK™Ù]\Ù\žRY
+ÚYË\Ù\’Y
+Hˆ[Âˆ™]\›ˆÂˆ‹‹™ÚYËˆ\Ù\›˜[YNˆ\Ù\Ë\Ù\›˜[YKˆ\Ü^S˜[YNˆ\Ù\Ë™\Ü^S˜[YKˆÜÝ\”ÝÕ\›ˆ\Ù\ËœÝÕ\›ÏÈ[ˆ]˜]\ÚÚXÙNˆ\Ù\Ë˜]˜]\ÚÚXÙHÏÈKˆÜÝ\]˜]\”š[™Îˆ\Ù\Ë˜]˜]\”š[™È››Û™H‹ˆNÂˆJJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÙÚYÜËÎšYÜÝ]\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝ]\ÈHÝš[™Ê™\K˜›ÙKœÝ]\ÈˆŠKš[J
+KÕ\\Ø\ÙJ
+NÂˆYˆ
+VÈ“U‘H‹”S‘S‘È‹”‘R‘PÕQ‹”‘SSÕ‘Q—Kš[˜ÛY\ÊÝ]\ÊJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÝ]\ÈˆJNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÝÜ˜YÙK˜YZ[•\]QÚYÔÝ]\ÊYÝ]\ÊNÂˆ]Y]YZ[Š™\K™ÚY×ÜÝ]\È‹È\Nˆ™ÚY×Ü[™[™È‹Y]Z[ˆÈÝ]\ÈHJNÂˆYˆ
+Ý]\ÈOOH“U‘HˆÝ]\ÈOOH”‘R‘PÕQˆÝ]\ÈOOH”‘SSÕ‘QŠHÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J™ÚY×Ü[™[™È‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆBˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÙÚYÜËÎšYÜ™Z™XÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈ™X\ÛÛÛÙK›ÝHHH\œÙP›Ø\™™Z™XÝ›ÙJ™\K˜›ÙJNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝÚYÔÜÝ
+Y™X\ÛÛÛÙK›ÝJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ™Z™XÝÙÚYÈ‹È\Nˆ™ÚY×Ü[™[™È‹Y]Z[ˆÈ™X\ÛÛÛÙHHJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J™ÚY×Ü[™[™È‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛZ\ÜÙYXÛÛ›™XÝ[ÛœÈ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆ™\ËšœÛÛŠ™\Kœ]Y\žKœ™XÙ[OOHYH‚ˆÈÝÜ˜YÙK™Ù]™XÙ[T™]šY]ÙYZ\ÜÙYÛÛ›™XÝ[ÛœÊ
+BˆˆÝÜ˜YÙK™Ù]YZ[“Z\ÜÙYÛÛ›™XÝ[ÛœÊ
+JNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšYØ\›Ý™H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙK˜\›Ý™SZ\ÜÙYÛÛ›™XÝ[ÛŠY
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\K˜ÛX\—ÛZ\ÜÙYØÛÛ›™XÝ[Ûˆ‹È\Nˆ›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\™[]J‹Ø\KØYZ[‹ÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™[[Ý™SZ\ÜÙYÛÛ›™XÝ[ÛYZ[ŠY
+NÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ™[[Ý™WÛZ\ÜÙYØÛÛ›™XÝ[Ûˆ‹È\Nˆ›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹YJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛZ\ÜÙYXÛÛ›™XÝ[ÛœËÎšYÜ™Z™XÝ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆžHÂˆÛÛœÝÈ™X\ÛÛÛÙK›ÝHHH\œÙP›Ø\™™Z™XÝ›ÙJ™\K˜›ÙJNÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKœ™Z™XÝZ\ÜÙYÛÛ›™XÝ[ÛŠY™X\ÛÛÛÙK›ÝJNÂˆYˆ
+™\Ý[™\œ›ÜŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆ]Y]YZ[Š™\Kœ™Z™XÝÛZ\ÜÙYØÛÛ›™XÝ[Ûˆ‹È\Nˆ›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹Y]Z[ˆÈ™X\ÛÛÛÙHHJNÂˆ™[X\ÙPYZ[”]Y]YPÛZ[J›Z\ÜÙYØÛÛ›™XÝ[Ûˆ‹YÙ]YZ[XÝÜŠ™\JKšYÈ›Ü˜ÙNˆYHJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆHØ]Ú
+Nˆ[žJHÂˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆK›Y\ÜØYÙHJNÂˆBˆJNÂ‚ˆ\œ]
+‹Ø\KØYZ[‹ÙÚYÜËÎšY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ]Úˆ™XÛÜ™Ýš[™Ë[šÛ›ÝÛˆHßNÂˆÛÛœÝšY[ÈHÂˆœÜÝ\H‹]H‹›˜[YH‹˜ÛÛXÝ[XZ[‹™\ØÜš\[Ûˆ‹œÚÚ[È‹ˆ˜ÛÛ\[œØ][Ûˆ‹›ØØ][Ûˆ‹š\Ô™[[ÝH‹œÝ]\È‹™ÚYÑ]H‹™ÚYÕ[YH‹š[XYÙU\›‹ˆH\ÈÛÛœÝÂˆ›Üˆ
+ÛÛœÝÙ^HÙˆšY[ÊHÂˆYˆ
+™\K˜›ÙVÚÙ^WHOOH[™Yš[™Y
+H]ÚÚÙ^WHH™\K˜›ÙVÚÙ^WNÂˆBˆYˆ
+]ÚœÜÝ\H	‰ˆVÈ”ÔÕS‘×ÑÒQÈ‹“ÓÒÒS‘×Ñ“Ô—ÕÓÔ’È—Kš[˜ÛY\ÊÝš[™Ê]ÚœÜÝ\JJJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÜÝ\HˆJNÂˆBˆYˆ
+]ÚœÝ]\È	‰ˆVÈ“U‘H‹”S‘S‘È‹”‘R‘PÕQ‹”‘SSÕ‘Q—Kš[˜ÛY\ÊÝš[™Ê]ÚœÝ]\ÊKÕ\\Ø\ÙJ
+JJHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ’[˜[YÝ]\ÈˆJNÂˆBˆYˆ
+]ÚœÝ]\ÊH]ÚœÝ]\ÈHÝš[™Ê]ÚœÝ]\ÊKÕ\\Ø\ÙJ
+NÂˆÛÛœÝ\]YHÝÜ˜YÙK˜YZ[•\]QÚYÔÜÝ
+Y]Ú\È[žJNÂˆYˆ
+]\]Y
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠ\]Y
+NÂˆJNÂ‚ˆËÈÑUYZ[ˆ[˜›ÞÝ[[X\žH
+›ÝYšXØ][ÛˆÛÝ[ÊBˆ\™Ù]
+‹Ø\KØYZ[‹Ú[˜›Þ‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ[™[™ÔÝXœÈHÝÜ˜YÙK™Ù]ÝX›Z\ÜÚ[ÛœÊ”S‘S‘ÈŠK›[™ÝÂˆÛÛœÝ[™[™Ó[ÙHÝÜ˜YÙK™Ù][Ù\˜][Û”™\]Y\ÝÊ”S‘S‘ÈŠK›[™ÝÂˆÛÛœÝÝZYU[œ™XYHÝÜ˜YÙK™Ù]ÝZYPYZ[•[œ™XYÛÝ[
+
+NÂˆ™\ËšœÛÛŠÂˆ[™[™ÔÝX›Z\ÜÚ[ÛœÎˆ[™[™ÔÝXœËˆ[™[™Ó[Ù\˜][ÛŽˆ[™[™Ó[ÙˆÝ[ˆ[™[™ÔÝXœÈ
+È[™[™Ó[ÙˆÝZYU[œ™XYˆJNÂˆJNÂ‚ˆËÈÚ\™YÝZYKXYZ[ˆXZ[›Þ
+›Ø][™È[˜›Þ8¡¤ˆYZ[ˆ8¡¤ˆ[˜›ÞÈÙ[
+K‚ˆËÈÝ]›Ý[™™Z™XÝÈ[™YZ[ˆ\ÈÙ[™\ÈšYYÝZY\ÛÈ™\Y\È[™\™H›Üˆ[Ù^ZÛ\œË‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÚ[˜›Þ‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÝZYPYZ[’[˜›Þ
+
+JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÜÙ[‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÝÜ˜YÙK™Ù]ÝZYPYZ[”Ù[
+
+JNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÝ[œ™XYXÛÝ[‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆ™\ËšœÛÛŠÈÛÝ[ˆÝÜ˜YÙK™Ù]ÝZYPYZ[•[œ™XYÛÝ[
+
+HJNÂˆJNÂ‚ˆ\™Ù]
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÝ™XYÎ™XYY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝZYHHÝÜ˜YÙKœ™\ÛÛ™QÝZYPYZ[•\Ù\Š
+NÂˆYˆ
+YÝZYJH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘ÝZYHYZ[ˆY[]H[˜]˜Z[X›HˆJNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY›Ü•šY]Ù\Š™\Kœ\˜[\Ë™XYYÝZYKšY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOHÝZYKšYKÕ\Ù\’YOOHÝZYKšY
+NÂˆYˆ
+]š\ÚX›H™XY›[™ÝOOH
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈY\ÜØYÙ\Îˆ™XYÝZYU\Ù\’YˆÝZYKšYJNÂˆJNÂ‚ˆÊŠˆ™XXÝÛˆÝZYKXYZ[ˆ\È\ÈHÚ\™YÝZYHY[]Kˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÎšYÜ™XXÝ[ÛœÈ‹™\]Z\™PYZ[‹
+™\Nˆ[žK™\ÊHOˆÂˆÛÛœÝÝZYHHÝÜ˜YÙKœ™\ÛÛ™QÝZYPYZ[•\Ù\Š
+NÂˆYˆ
+YÝZYJH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘ÝZYHYZ[ˆY[]H[˜]˜Z[X›HˆJNÂˆÛÛœÝY\ÜØYÙRYH[X™\Š™\Kœ\˜[\ËšY
+NÂˆÛÛœÝ[[ÚšHHÝš[™Ê™\K˜›ÙOË™[[ÚšH™\K˜›ÙOË˜ÛÙHˆŠKš[J
+NÂˆYˆ
+Y[[ÚšJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ™[[ÚšH™\]Z\™YˆJNÂˆÛÛœÝ™\Ý[HÝÜ˜YÙKÙÙÛSY\ÜØYÙT™XXÝ[ÛŠY\ÜØYÙRYÝZYKšY[[ÚšJNÂˆYˆ
+™\Ý[™\œ›ÜŠHÂˆÛÛœÝÝ]\ÈH™\Ý[™\œ›ÜˆOOH’[˜[Y™XXÝ[ÛˆˆÈˆÂˆ™]\›ˆ™\ËœÝ]\ÊÝ]\ÊKšœÛÛŠÈ\œ›ÜŽˆ™\Ý[™\œ›ÜˆJNÂˆBˆ™\ËšœÛÛŠÈ™XXÝ[ÛœÎˆ™\Ý[œ™XXÝ[ÛœÈJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÝ™XYÎ™XYYÜ™\H‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆYˆ
+XÝÜ‹šY
+HÂˆÛÛœÝ˜]HHÚXÚÐYZ[“Y\ÜØYÙT˜]S[Z]
+XÝÜ‹šY
+NÂˆYˆ
+\˜]K›ÚÊH™]\›ˆ™\ËœÝ]\ÊŽJKšœÛÛŠÈ\œ›ÜŽˆ˜]K™\œ›ÜˆJNÂˆBˆÛÛœÝÝZYHHÝÜ˜YÙKœ™\ÛÛ™QÝZYPYZ[•\Ù\Š
+NÂˆYˆ
+YÝZYJH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘ÝZYHYZ[ˆY[]H[˜]˜Z[X›HˆJNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™\Kœ\˜[\Ë™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOHÝZYKšYKÕ\Ù\’YOOHÝZYKšY
+NÂˆYˆ
+]š\ÚX›H™XY›[™ÝOOH
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝš\œÝH™XYÌH\È[žNÂˆÛÛœÝ\ÝH™XYÝ™XY›[™ÝHWH\È[žNÂˆÛÛœÝÕ\Ù\’YH\Ý™œ›ÛU\Ù\’YOOHÝZYKšYÈ\ÝÕ\Ù\’Yˆ\Ý™œ›ÛU\Ù\’YÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙOË˜›ÙHˆŠKš[J
+NÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆYˆ
+[Ù\˜][Û‘Ø]J™\ËYZ[ˆÝZYH™\H‹È›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™\ÑÝZYPYZ[ŠÕ\Ù\’Yš\œÝœÝXš™XÝ”™\H‹›ÙKÂˆ™XYYˆ™\Kœ\˜[\Ë™XYYˆÛÛ^\Nˆš\œÝ˜ÛÛ^\HQRS—ÓQTÔÐQÑH‹ˆÛÛ^Yˆš\œÝ˜ÛÛ^YÏÈ[ˆÛÛ^X™[ˆš\œÝ˜ÛÛ^X™[[ˆJNÂˆYˆ
+[\ÙÊH™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝÙ[™™\HˆJNÂˆ]Y]YZ[Š™\K™ÝZYWÜ™\H‹Âˆ\Nˆ™XY‹ˆYˆ™\Kœ\˜[\Ë™XYYˆX™[ˆš\œÝœÝXš™XÝ”™\H‹ˆJNÂˆ™\ËšœÛÛŠ\ÙÊNÂˆJNÂ‚ˆ\œ]
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÎšYÜ™XY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝÝZYHHÝÜ˜YÙKœ™\ÛÛ™QÝZYPYZ[•\Ù\Š
+NÂˆYˆ
+YÝZYJH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘ÝZYHYZ[ˆY[]H[˜]˜Z[X›HˆJNÂˆÛÛœÝÚÈHÝÜ˜YÙK›X\šÔ™XY›Ü•\Ù\Š[X™\Š™\Kœ\˜[\ËšY
+KÝZYKšY
+NÂˆYˆ
+[ÚÊH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý›Ý[™ˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYHJNÂˆJNÂ‚ˆÊŠˆÛÛ\ÜÙHH™]ÈY\ÜØYÙH\ÈHÚ\™YÝZYKXYZ[ˆ›Ùš[H
+YZ[ˆQTÔÐQÑH]ÛœÊKˆ
+‹Âˆ\œÜÝ
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\È‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝXÝÜˆHÙ]YZ[XÝÜŠ™\JNÂˆYˆ
+XÝÜ‹šY
+HÂˆÛÛœÝ˜]HHÚXÚÐYZ[“Y\ÜØYÙT˜]S[Z]
+XÝÜ‹šY
+NÂˆYˆ
+\˜]K›ÚÊH™]\›ˆ™\ËœÝ]\ÊŽJKšœÛÛŠÈ\œ›ÜŽˆ˜]K™\œ›ÜˆJNÂˆBˆÛÛœÝ\Ù\›˜[YHHÝš[™Ê™\K˜›ÙOË\Ù\›˜[YHˆŠKš[J
+Kœ™\XÙJ×ËˆŠNÂˆÛÛœÝ›ÙHHÝš[™Ê™\K˜›ÙOË˜›ÙHˆŠKš[J
+NÂˆÛÛœÝÝXš™XÝHÝš[™Ê™\K˜›ÙOËœÝXš™XÝˆŠKš[J
+KœÛXÙJLŒ
+NÂˆYˆ
+]\Ù\›˜[YJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ\Ù\›˜[YH™\]Z\™YˆJNÂˆYˆ
+X›ÙJH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ˜›ÙH™\]Z\™YˆJNÂˆÛÛœÝ\™Ù]HÝÜ˜YÙK™Ù]\Ù\žU\Ù\›˜[YJ\Ù\›˜[YJNÂˆYˆ
+]\™Ù]\™Ù]œÝ]\ÈOOH˜XÝ]™HŠH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•\Ù\ˆ›Ý›Ý[™ˆJNÂˆYˆ
+ÝÜ˜YÙKš\ÑÝZYPYZ[•\Ù\’Y
+\™Ù]šY
+JHÂˆ™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆØ[››ÝY\ÜØYÙHH˜^[\ÝÞ\Ý[HY[]HˆJNÂˆBˆYˆ
+[Ù\˜][Û‘Ø]J™\ËYZ[ˆÝZYHY\ÜØYÙH‹ÈÝXš™XÝˆÝXš™XÝYZ[ˆY\ÜØYÙH‹›ÙHJJH™]\›ŽÂˆÛÛœÝ\ÙÈHÝÜ˜YÙKœÙ[™\ÑÝZYPYZ[Šˆ\™Ù]šYˆÝXš™XÝY\ÜØYÙHœ›ÛH˜^[\Ýˆ›ÙKˆÈÛÛ^\NˆQRS—ÓQTÔÐQÑHˆKˆ
+NÂˆYˆ
+[\ÙÊH™]\›ˆ™\ËœÝ]\ÊL
+KšœÛÛŠÈ\œ›ÜŽˆÛÝ[›ÝÙ[™Y\ÜØYÙHˆJNÂˆ]Y]YZ[Š™\K˜YZ[—ÛY\ÜØYÙH‹Âˆ\Nˆ\Ù\ˆ‹ˆYˆ\™Ù]šYˆX™[ˆ	Ý\™Ù]\Ù\›˜[Y_Xˆ]Z[ˆÈ™XYYˆ\ÙË™XYYÝXš™XÝˆ\ÙËœÝXš™XÝKˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKY\ÜØYÙNˆ\ÙÈJNÂˆJNÂ‚ˆ\œÜÝ
+‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÛX\šËX[\™XY‹™\]Z\™PYZ[‹
+Ü™\K™\ÊHOˆÂˆÛÛœÝÛX\™YHÝÜ˜YÙK›X\šÑÝZYPYZ[’[˜›Þ™XY
+
+NÂˆ™\ËšœÛÛŠÈÚÎˆYKÛX\™YJNÂˆJNÂ‚ˆ\™[]J‹Ø\KØYZ[‹ÛY\ÜØYÙ\ËÝ™XYÎ™XYY‹™\]Z\™PYZ[‹
+™\K™\ÊHOˆÂˆÛÛœÝ™XYYHXÛÙUT’PÛÛ\Û™[
+™\Kœ\˜[\Ë™XYYˆŠKš[J
+NÂˆYˆ
+]™XYY
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XYY™\]Z\™YˆJNÂˆÛÛœÝÝZYHHÝÜ˜YÙKœ™\ÛÛ™QÝZYPYZ[•\Ù\Š
+NÂˆYˆ
+YÝZYJH™]\›ˆ™\ËœÝ]\ÊLÊKšœÛÛŠÈ\œ›ÜŽˆ‘ÝZYHYZ[ˆY[]H[˜]˜Z[X›HˆJNÂˆÛÛœÝ™XYHÝÜ˜YÙK™Ù]™XY
+™XYY
+NÂˆÛÛœÝš\ÚX›HH™XYœÛÛYJ
+Nˆ[žJHOˆK™œ›ÛU\Ù\’YOOHÝZYKšYKÕ\Ù\’YOOHÝZYKšY
+NÂˆYˆ
+]š\ÚX›JH™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ•™XY›Ý›Ý[™ˆJNÂˆÛÛœÝÛX\™YHÝÜ˜YÙKœÛÙ[]QÝZYPYZ[•™XY
+™XYY
+NÂˆYˆ
+ÛX\™YOOH
+H™]\›ˆ™\ËœÝ]\Ê
+KšœÛÛŠÈ\œ›ÜŽˆ“›Ý[™ÈÈ[]HˆJNÂˆ™\ËšœÛÛŠÈÚÎˆYKÛX\™YJNÂˆJNÂ‚ˆËÈÝÛ™\‹[Û›HYX[˜YÙ\ˆ
+ÈX›XÈÙ\™KÝ˜XÚÂˆ™YÚ\Ý\Y›Ý]\Ê\ÂˆŽˆÜ[]Kˆ™\]Z\™PYZ[‹ˆ\Ôš[X\žSÝÛ™\Žˆ
+\Ù\ŠHOˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠKˆÙ]\Ù\žRYˆ
+Y
+HOˆÝÜ˜YÙK™Ù]\Ù\žRY
+Y
+Kˆ\ØYÚ[™ÛNˆ\ØYœÚ[™ÛJ˜\ÜÙ]ŠKˆ]Y]YZ[‹ˆJNÂ‚ˆËÈUTÒS‘ÈHHÝ\Ú[™È›Ø\™ˆÙYHØÜËÒUT×ÑS‘ÒS‘QT’S‘×ÒS‘Ñ‘‹›Yˆ™YÚ\Ý\’Ý\Ú[™Ô›Ý]\Ê\ÂˆŽˆÜ[]Kˆ™\]Z\™P]]ˆ™\]Z\™PYZ[‹ˆ\Ôš[X\žSÝÛ™\Žˆ
+\Ù\ŠHOˆÝÜ˜YÙKš\Ôš[X\žTÚ]SÝÛ™\Š\Ù\ŠKˆÙ]\Ù\žRYˆ
+Y
+HOˆÝÜ˜YÙK™Ù]\Ù\žRY
+Y
+Kˆ\ØYÝÜÎˆ\ØY˜\œ˜^JœÝÜÈ‹
+KˆÜ™X]S[Ù\˜][Û”™\]Y\Ýˆ
+]JHOˆÝÜ˜YÙK˜Ü™X]S[Ù\˜][Û”™\]Y\Ý
+]JKˆÙ[™Y\ÜØYÙNˆ
+œ›ÛKËÝXš™XÝ›ÙKÜÊHOˆÝÜ˜YÙKœÙ[™Y\ÜØYÙJœ›ÛKËÝXš™XÝ›ÙKÜÊKˆJNÂ‚ˆØÚY[SX\ÛÛÜ™[˜]P˜XÚÙš[
+
+NÂˆÝ\›Û\ØÚY[\Š
+NÂ‚ˆËÈ^\Ý[™È]™[È™Y]HØ\\™KX]Z[™Ù\ÝˆZ\œ›ÜˆZ\ˆ™[[ÝH›Y\œÈY\‚ˆËÈÝ\\È\˜Ú]™YTÑPTÒØ[™Y]H›ÝÜÈ\™H[X™\˜][HY[ÝXÚY‚ˆYˆ
+›ØÙ\ÜË™[‹““ÑWÑS•ˆOOHœ›ÙXÝ[ÛˆŠHÂˆÙ][Y[Ý]
+
+
+HOˆÂˆ›ÚY
+\Þ[˜È
+
+HOˆÂˆžHÂˆÛÛœÝÈZ\œ›Ü‘]™[ÜÝ\œÈHH]ØZ][\Ü
+‹‹Ú[™Ù\ÝÛZ\œ›Ü‘]™[ÜÝ\œÈŠNÂˆÛÛœÝÝ[[X\žHH]ØZ]Z\œ›Ü‘]™[ÜÝ\œÊÂˆ]™[ÎˆÝÜ˜YÙK™Ù]]™[ÊßJKˆ[™[™ÐØ[™Y]\Îˆ×Kˆ\]Q]™[ÜÝ\Žˆ
+Y\›
+HOˆÂˆÝÜ˜YÙK\]Q]™[
+YÈÜÝ\’[XYÙU\›ˆ\›KÈÛÝ\˜ÙNˆœÞ[˜ÈˆJNÂˆKˆ\]PØ[™Y]TÜÝ\Žˆ
+
+HOˆ˜[ÙKˆJNÂˆÛÛœÛÛK›ÙÊˆÜÜÝ\‹[Z\œ›Ü—HÚXÚÙYIÜÝ[[X\žK˜ÚXÚÙYHØ\\™YIÜÝ[[X\žK˜Ø\\™YH™]Z[™YÜ™[[ÝOIÜÝ[[X\žKœ™]Z[™Y™[[Ý_Xˆ
+NÂˆHØ]Ú
+\œ›ÜŠHÂˆÛÛœÛÛK™\œ›ÜŠ–ÜÜÝ\‹[Z\œ›Ü—H˜XÚÙš[˜Z[Y‹\œ›ÜŠNÂˆBˆJJ
+NÂˆKMWÌ
+NÂˆBŸB

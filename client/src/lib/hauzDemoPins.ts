@@ -20,9 +20,7 @@ export function stampHauzMapPoints<T extends { id?: number | string; lat?: unkno
   rows: T[],
 ): T[] {
   return rows.map((row) => {
-    const lat = Number(row.lat);
-    const lng = Number(row.lng);
-    if (Number.isFinite(lat) && Number.isFinite(lng)) return row;
+    if (typeof row.lat === "number" && Number.isFinite(row.lat) && typeof row.lng === "number" && Number.isFinite(row.lng)) return row;
     const id = Number(row.id);
     if (Number.isFinite(id) && HAUZ_DEMO_PINS[id]) {
       return { ...row, ...HAUZ_DEMO_PINS[id] };

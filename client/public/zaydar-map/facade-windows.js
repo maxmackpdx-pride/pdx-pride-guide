@@ -3,7 +3,9 @@ import {downtownDistance,windowNeon} from './radix-map.js?v=20260917-days';
 function hash32(value){let h=2166136261;for(const c of String(value))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
 
 export function hasFacade(center){
- return (hash32((center||[]).map(value=>Number(value).toFixed(5)).join(','))%100)<70;
+ // Stable coordinate hashing keeps the remaining half evenly distributed
+ // across the city and unchanged between sessions or tile-load order.
+ return (hash32((center||[]).map(value=>Number(value).toFixed(5)).join(','))%100)<35;
 }
 
 function facadeAtlas(){
@@ -31,7 +33,7 @@ export function createFacadeWindows(maplibre){
    this.time=time;this.still=still;
    if(this.buildings===buildings){this.map?.triggerRepaint();return;}
    this.buildings=buildings;
-   const coarse=matchMedia('(pointer:coarse)').matches,max=coarse?640:1200,candidates=[];
+   const coarse=matchMedia('(pointer:coarse)').matches,max=coarse?320:600,candidates=[];
    for(const building of buildings||[]){
     if(building.height<3||!hasFacade(building.center))continue;
     let ring=building.ring;if(!ring?.length)continue;

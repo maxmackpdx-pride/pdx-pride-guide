@@ -57,8 +57,23 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
       setCollapseRequested(true);
       setCollapsed(true);
     };
+    const syncMapSheet = (event: Event) => {
+      if (innerWidth >= 960) return;
+      const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
+      scrollState.current = {
+        y: scrollSource.current instanceof Element ? scrollSource.current.scrollTop : window.scrollY,
+        travel: 0,
+        collapsed: open,
+      };
+      setCollapseRequested(open);
+      setCollapsed(open);
+    };
     window.addEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
-    return () => window.removeEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
+    window.addEventListener("zaylist:drawer", syncMapSheet);
+    return () => {
+      window.removeEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
+      window.removeEventListener("zaylist:drawer", syncMapSheet);
+    };
   }, [held]);
   useEffect(() => {
     const update = () => setCalm(document.documentElement.matches('.calm-mode, [data-calm="true"]'));
@@ -142,6 +157,9 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     <button type="button" className="z-mobile-dock__restore" aria-label={attentionCount > 0 ? `Expand navigation, ${attentionCount} messages need attention` : "Expand navigation"}
       aria-expanded={!compact} aria-controls={rowId} aria-hidden={!compact || undefined} tabIndex={compact ? 0 : -1}
       onClick={event => {
+        if (document.documentElement.dataset.zaylistDrawer === "open") {
+          window.dispatchEvent(new CustomEvent("zaylist:map-sheet-close"));
+        }
         const source = scrollSource.current;
         scrollState.current = {
           y: source instanceof Element ? source.scrollTop : window.scrollY,
