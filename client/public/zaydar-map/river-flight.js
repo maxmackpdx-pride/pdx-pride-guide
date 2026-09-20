@@ -15,6 +15,8 @@ import {createFacadeWindows} from './facade-windows.js?v=20260920-half-lights';
 import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
 import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
 import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
+const startup=window.__zaydarStartup||{phase(){},fatal(){}};
+startup.phase('script');
 const maxExploreZoom=17.75;
 const naturalWater=['in',['get','class'],['literal',['river','lake']]];
 const naturalWaterway=['in',['get','class'],['literal',['river','stream']]];
@@ -23,9 +25,8 @@ const outlineColor=radix.orange9;
 const outlineOpacity=['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38];
 const outlineWidth=['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8];
 const outlineBlur=['interpolate',['linear'],['zoom'],14,1.6,16,4.2];
-const vectorStyle={version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.cyan12,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'},elevation:{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'}},terrain:{source:'elevation',exaggeration:1},layers:[
+const vectorStyle={version:8,glyphs:'/api/mapz/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.cyan12,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',tiles:['/api/mapz/vector-tiles/{z}/{x}/{y}.pbf'],minzoom:0,maxzoom:14,attribution:'© OpenStreetMap · OpenFreeMap · OpenMapTiles'}},layers:[
     {id:'terrain-base',type:'background',paint:{'background-color':radix.cyan1,'background-opacity':1}},
-    {id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':radix.cyan1,'hillshade-highlight-color':radix.cyan11,'hillshade-accent-color':radix.teal5}},
     {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':radix.teal4,'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
     {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
     {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan1,'line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
@@ -47,10 +48,16 @@ vectorStyle.layers.push(
 );
 applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
-const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
-  center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
-  maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
-  style:structuredClone(vectorStyle)});
+const webglProbe=document.createElement('canvas').getContext('webgl2');
+if(!webglProbe){startup.fatal('WebGL2 is unavailable');throw new Error('WebGL2 is unavailable');}
+let map;
+try{
+ map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
+   center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
+   maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
+   style:structuredClone(vectorStyle)});
+ startup.phase('map-created');
+}catch(error){startup.fatal(error?.message||error);throw error;}
 let deckLayers=null;
 const streetAtmosphere=createStreetAtmosphere(map);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
@@ -71,8 +78,16 @@ const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
 const facadeWindows=createFacadeWindows(maplibregl);
 const roofOutline=createRoofOutline(maplibregl);
+function installTerrain(){
+ try{
+  if(map.getSource('elevation'))return;
+  map.addSource('elevation',{type:'raster-dem',tiles:['/api/mapz/terrain-tiles/{z}/{x}/{y}.webp'],tileSize:512,maxzoom:15,encoding:'terrarium'});
+  map.addLayer({id:'terrain-shade',type:'hillshade',source:'elevation',paint:{'hillshade-illumination-anchor':'map','hillshade-exaggeration':.75,'hillshade-shadow-color':radix.cyan1,'hillshade-highlight-color':radix.cyan11,'hillshade-accent-color':radix.teal5}},'park-ground');
+  map.setTerrain({source:'elevation',exaggeration:1});
+ }catch(error){console.warn('Optional terrain unavailable',error);}
+}
 map.on('load',()=>{
- loaded=true;cameraDirty=true;updateSceneStatus();scheduleFrame();
+ loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
  const extras=[
   ()=>installGrassNeon(map),
   ()=>installRoadSurface(map,['!',bridgeFilter],roadLineWidth),
@@ -86,6 +101,7 @@ map.on('load',()=>{
   try{extra();}
   catch(error){console.error('map extra',error);}
  }
+ window.setTimeout(()=>{if(!disposed)installTerrain();},0);
 });
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
@@ -789,7 +805,8 @@ map.on('error',event=>{
   try{if(map.getLayer('terrain-shade'))map.removeLayer('terrain-shade');}catch(error){}
  }
 });
-setTimeout(()=>{if(!loaded)status.textContent='Map tiles unavailable — check connection';},8000);
+setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8000);
+let firstFrameSent=false;
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
@@ -823,6 +840,7 @@ function draw(now){
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
  if(ready)drawLights(visibility);
+ if(ready&&!firstFrameSent&&visibility>0){firstFrameSent=true;startup.phase('first-frame');tell('first-frame');}
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();

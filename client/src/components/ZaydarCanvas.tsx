@@ -7,24 +7,26 @@ type View={center:[number,number];zoom:number;bounds:{south:number;north:number;
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string};
 type CanvasProps={rows:Row[];selected:string|null;renderer:ZaydarRenderer;labelsEnabled:boolean;onRendererChange:(renderer:ZaydarRenderer)=>void;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps={rows:Row[];selected:string|null;labelsEnabled:boolean;initialView:View|null;onFailure:(message:string)=>void;onNotice:(message:string)=>void;onSelect:(key:string)=>void;onMode:(mode:string)=>void;onView:(view:View)=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260920-renderers';
+const MAP_SRC='/zaydar-map/index.html?v=20260920-tile-proxy';
 const DEFAULT_VIEW:View={center:[45.523,-122.676],zoom:13,bounds:{south:45.2,north:45.85,west:-123.15,east:-122.15}};
 const ZaydarFallback=lazy(()=>import('./ZaydarFallback'));
 
 const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,initialView,onFailure,onNotice,onSelect,onMode,onView},ref){
  const [labels,setLabels]=useState<EventLabel[]>([]);
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onNotice,onSelect,onMode,onView});latest.current={onFailure,onNotice,onSelect,onMode,onView};
- const [booted,setBooted]=useState(false),[ready,setReady]=useState(false);
+ const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
  const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'zaydar-host',type,...data},window.location.origin);
  useImperativeHandle(ref,()=>({send:post}),[]);
  useEffect(()=>{
-  if(booted||ready)return;
-  const timer=window.setTimeout(()=>latest.current.onFailure('3D view took too long to start. Showing the lightweight map.'),15000);
+  if(firstFrame)return;
+  const delay=phase==='loading'?15000:45000;
+  const timer=window.setTimeout(()=>latest.current.onFailure('3D view could not produce a visible frame. Showing the lightweight map.'),delay);
   return()=>window.clearTimeout(timer);
- },[booted,ready]);
+ },[phase,firstFrame]);
  useEffect(()=>{const receive=(event:MessageEvent)=>{
   if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='zaydar-demo')return;
-  if(event.data.type==='booted')setBooted(true);
+  if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
+  if(event.data.type==='first-frame')setFirstFrame(true);
   if(event.data.type==='ready')setReady(true);
   if(event.data.type==='labels'){
    const canvas=frame.current,viewport=event.data.viewport;

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
-<script>(function(){var failed=false;function fatal(message){if(failed||document.body&&document.body.classList.contains('scene-ready'))return;failed=true;parent.postMessage({source:'zaydar-demo',type:'fatal',message:String(message||'map startup')},location.origin);}window.addEventListener('error',function(event){fatal(event&&event.message||'script');},true);window.addEventListener('unhandledrejection',function(event){fatal(event&&event.reason&&event.reason.message||'map startup');});window.addEventListener('load',function(){if(!failed)parent.postMessage({source:'zaydar-demo',type:'booted'},location.origin);},{once:true});})();</script>
+<script>(function(){var failed=false;function tell(type,payload){parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}function phase(value){tell('phase',{phase:value});}function fatal(message){if(failed||document.body&&document.body.classList.contains('scene-ready'))return;failed=true;tell('fatal',{message:String(message||'map startup')});}window.__zaydarStartup={phase:phase,fatal:fatal};phase('document');window.addEventListener('error',function(event){fatal(event&&event.message||'script');},true);window.addEventListener('unhandledrejection',function(event){fatal(event&&event.reason&&event.reason.message||'map startup');});window.addEventListener('DOMContentLoaded',function(){phase('dom-ready');},{once:true});})();</script>
 <script>
 (function(){
   var start=null, signaled=false;
@@ -26,9 +26,7 @@
   }catch(err){}
 })();
 </script>
-<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
-<link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
-<link rel="modulepreload" href="./river-flight.js?v=20260920-renderers">
+<link rel="modulepreload" href="./river-flight.js?v=20260920-tile-proxy">
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
 <link href="./studio.css" rel="stylesheet">
 </head><body>
@@ -42,4 +40,4 @@
 <label>Map <input id="map-opacity" type="range" min="0" max="1" step=".05" value=".75"><output id="map-value" for="map-opacity">75%</output></label>
 <label class="pause"><input id="pause-flight" type="checkbox">Pause &amp; explore</label>
 </div></details></aside>
-<script type="module" src="./river-flight.js?v=20260920-renderers"></script></body></html>
+<script type="module" src="./river-flight.js?v=20260920-tile-proxy"></script></body></html>
