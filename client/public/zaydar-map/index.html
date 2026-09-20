@@ -1,6 +1,33 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaydar · Interactive map</title>
-<script>(function(){var failed=false;function tell(type,payload){parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}function phase(value){tell('phase',{phase:value});}function fatal(message){if(failed||document.body&&document.body.classList.contains('scene-ready'))return;failed=true;tell('fatal',{message:String(message||'map startup')});}window.__zaydarStartup={phase:phase,fatal:fatal};phase('document');window.addEventListener('error',function(event){if(event instanceof ErrorEvent)fatal(event.message||'3D script error');else if(event.target&&event.target.tagName==='SCRIPT')fatal('3D script could not load');},true);window.addEventListener('unhandledrejection',function(event){fatal(event&&event.reason&&event.reason.message||'map startup');});window.addEventListener('DOMContentLoaded',function(){phase('dom-ready');},{once:true});})();</script>
+<script>
+(function(){
+ var failed=false,visible=false;
+ function tell(type,payload){parent.postMessage(Object.assign({source:'zaydar-demo',type:type},payload||{}),location.origin);}
+ function phase(value){
+  if(value==='first-frame')visible=true;
+  document.documentElement.dataset.mapPhase=value;
+  tell('phase',{phase:value});
+ }
+ function fatal(message){
+  if(failed)return;
+  failed=true;
+  var detail=String(message||'Unknown 3D startup error');
+  document.documentElement.dataset.mapError=detail;
+  var status=document.getElementById('map-status');
+  if(status)status.textContent='3D error: '+detail;
+  tell('fatal',{message:detail});
+ }
+ window.__zaydarStartup={phase:phase,fatal:fatal};phase('document');
+ window.addEventListener('error',function(event){
+  if(visible)return;
+  if(event instanceof ErrorEvent)fatal(event.message||'3D script error');
+  else if(event.target&&event.target.tagName==='SCRIPT')fatal('3D script could not load: '+event.target.src);
+ },true);
+ window.addEventListener('unhandledrejection',function(event){if(!visible)fatal(event&&event.reason&&event.reason.message||'3D startup rejected');});
+ window.addEventListener('DOMContentLoaded',function(){phase('dom-ready');},{once:true});
+})();
+</script>
 <script>
 (function(){
   var start=null, signaled=false;
@@ -20,13 +47,13 @@
     if(doc&&!doc.getElementById('zaydar-map-shell-overrides')){
       var style=doc.createElement('style');
       style.id='zaydar-map-shell-overrides';
-      style.textContent='.zaydar-map-demo .zaydar-demo-navigation button:nth-child(5){display:none!important}';
+      style.textContent='.zaydar-map-demo .zaydar-demo-navigation .zaydar-control-labels{display:none!important}';
       doc.head.appendChild(style);
     }
   }catch(err){}
 })();
 </script>
-<link rel="modulepreload" href="./river-flight.js?v=20260920-3d-recovery">
+<link rel="modulepreload" href="./river-flight.js?v=20260920-3d-only">
 <link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
 <link href="./studio.css" rel="stylesheet">
 </head><body>
@@ -40,4 +67,4 @@
 <label>Map <input id="map-opacity" type="range" min="0" max="1" step=".05" value=".75"><output id="map-value" for="map-opacity">75%</output></label>
 <label class="pause"><input id="pause-flight" type="checkbox">Pause &amp; explore</label>
 </div></details></aside>
-<script type="module" src="./river-flight.js?v=20260920-3d-recovery"></script></body></html>
+<script type="module" src="./river-flight.js?v=20260920-3d-only"></script></body></html>

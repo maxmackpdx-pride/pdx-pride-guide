@@ -39,6 +39,8 @@ function asphaltTexture(){
 }
 
 export function installRoadSurface(map,filter,width){
+ // Keep zoom at the top level, scaling only each interpolation's output.
+ const scaledWidth=factor=>width.map((value,index)=>index>=4&&index%2===0?['*',value,factor]:value);
  if(!map.hasImage(TEXTURE_ID))map.addImage(TEXTURE_ID,asphaltTexture(),{pixelRatio:2});
  if(map.getLayer('streets-texture'))return;
  map.addLayer({
@@ -47,7 +49,7 @@ export function installRoadSurface(map,filter,width){
   paint:{
    'line-pattern':TEXTURE_ID,
    'line-opacity':['interpolate',['linear'],['zoom'],10,.34,13,.48,15,.66,17.75,.78],
-   'line-width':['*',width,.94]
+   'line-width':scaledWidth(.94)
   }
  },'skyline');
  if(!map.getLayer('street-sodium'))map.addLayer({
@@ -56,7 +58,7 @@ export function installRoadSurface(map,filter,width){
   paint:{
    'line-color':'#000000',
    'line-opacity':['interpolate',['linear'],['zoom'],11,.18,14,.38,17,.55],
-   'line-width':['*',width,1.55],
+   'line-width':scaledWidth(1.55),
    'line-blur':['interpolate',['linear'],['zoom'],11,2,16,6.5]
   }
  },'skyline');

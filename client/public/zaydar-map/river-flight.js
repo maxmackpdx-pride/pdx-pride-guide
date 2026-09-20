@@ -6,9 +6,9 @@ import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
 import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
 import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
-import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260916-radix';
-import {installRoadSurface} from './road-surface.js?v=20260917-days';
-import {applyMoonlight} from './moonlight.js?v=20260917-noon';
+import {roadColor, roadLineWidth, outlinedRoadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260920-valid-widths';
+import {installRoadSurface} from './road-surface.js?v=20260920-valid-widths';
+import {applyMoonlight} from './moonlight.js?v=20260920-optional-terrain';
 import {createRoofOutline} from './roof-outline.js?v=20260917-noon';
 import {createStreetAtmosphere} from './street-atmosphere.js?v=20260920-no-trees-lamps';
 import {createFacadeWindows} from './facade-windows.js?v=20260920-half-lights';
@@ -36,7 +36,7 @@ const vectorStyle={version:8,glyphs:'/api/mapz/fonts/{fontstack}/{range}.pbf',li
     {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
     {id:'streams-bloom',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,3.2,14,5.5,17,8],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.4,16,4.5]}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
-    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':['+',roadLineWidth,outlineWidth],'line-blur':outlineBlur}},
+    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlinedRoadLineWidth,'line-blur':outlineBlur}},
     {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
     {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},
     {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
@@ -48,8 +48,8 @@ vectorStyle.layers.push(
 );
 applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry with a solid terrain base and optional labels.
-const webglProbe=document.createElement('canvas').getContext('webgl2');
-if(!webglProbe){startup.fatal('WebGL2 is unavailable');throw new Error('WebGL2 is unavailable');}
+// MapLibre creates and checks its own WebGL context. A separate retained probe
+// needlessly consumes another context on phones and can prevent the real one.
 let map;
 try{
  map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
@@ -86,8 +86,7 @@ function installTerrain(){
   map.setTerrain({source:'elevation',exaggeration:1});
  }catch(error){console.warn('Optional terrain unavailable',error);}
 }
-map.on('load',()=>{
- loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
+function installSceneExtras(){
  const extras=[
   ()=>installGrassNeon(map),
   ()=>installRoadSurface(map,['!',bridgeFilter],roadLineWidth),
@@ -101,7 +100,11 @@ map.on('load',()=>{
   try{extra();}
   catch(error){console.error('map extra',error);}
  }
- window.setTimeout(()=>{if(!disposed)installTerrain();},0);
+ installTerrain();
+ void installAutomaticLayers();
+}
+map.on('load',()=>{
+ loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
 });
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
@@ -806,7 +809,16 @@ map.on('error',event=>{
  }
 });
 setTimeout(()=>{if(!loaded)status.textContent='Portland is still loading…';},8000);
-let firstFrameSent=false;
+let firstFrameSent=false,baseFrameRendered=false;
+map.on('render',()=>{
+ // A loaded style or an opacity change alone is not evidence of a city frame.
+ // Wait for actual vector geography in a rendered, non-zero canvas.
+ if(baseFrameRendered||!loaded)return;
+ const canvas=map.getCanvas();
+ if(canvas.width>0&&canvas.height>0&&map.queryRenderedFeatures({layers:['streets','water','skyline']}).length){
+  baseFrameRendered=true;scheduleFrame();
+ }
+});
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
@@ -841,7 +853,11 @@ function draw(now){
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
  if(overlaysReady)drawLights(visibility);
- if(ready&&!firstFrameSent&&visibility>0){firstFrameSent=true;startup.phase('first-frame');tell('first-frame');}
+ if(ready&&baseFrameRendered&&!firstFrameSent&&visibility>0){
+  firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
+  // Optional GPU layers must not prevent the first base-city frame.
+  window.setTimeout(()=>{if(!disposed)installSceneExtras();},0);
+ }
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();
@@ -964,7 +980,7 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
 });
 map.on('moveend',viewState);
-map.on('webglcontextlost',()=>tell('fatal'));
+map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
 async function installAutomaticLayers(){
  try{
   const module=await import('./deck-mobile-demo.js');
@@ -981,5 +997,4 @@ async function installAutomaticLayers(){
 }
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
- void installAutomaticLayers();
 });

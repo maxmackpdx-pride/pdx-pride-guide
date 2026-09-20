@@ -7,7 +7,7 @@ import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/co
 import ZaydarLayerSheet, { type ZaydarLayer } from "@/components/ZaydarLayerSheet";
 import ZaydarUpcomingEvents from "@/components/ZaydarUpcomingEvents";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
-import ZaydarCanvas, { type ZaydarHandle, type ZaydarRenderer } from "@/components/ZaydarCanvas";
+import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { Navigation } from "lucide-react";
 
 
@@ -258,7 +258,6 @@ export default function ZaydarMapDemo() {
 
   const [mapHeight, setMapHeight] = useState<number>();
   const desktop = useDesktop();
-  const [renderer,setRenderer]=useState<ZaydarRenderer>('3d');
   const [labels,setLabels]=useState(false);
 
 
@@ -513,14 +512,13 @@ export default function ZaydarMapDemo() {
   });
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} renderer={renderer} labelsEnabled={labels} onRendererChange={setRenderer} onSelect={onSceneSelect} onView={view=>setMapCenter(view.center)} />
+    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} onSelect={onSceneSelect} onView={view=>setMapCenter(view.center)} />
     <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`Downtown Portland, ${clock}`}><strong>Downtown</strong><span>{clock}</span></div>
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
       <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" disabled={locating}><Navigation size={18}/></button>
-      <button className="zaydar-control-mode" aria-label={renderer==='2d'?'Switch to 3D map view':'Switch to lightweight 2D map view'} aria-pressed={renderer==='2d'} onClick={()=>setRenderer(current=>current==='3d'?'2d':'3d')}>{renderer==='2d'?'3D':'2D'}</button>
-      <button aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
+      <button className="zaydar-control-labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
     <ZaydarLayerSheet layers={layers} />

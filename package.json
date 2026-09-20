@@ -17,7 +17,7 @@
     "preview:local": "npm run build && node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db SESSION_SECRET=dev LOCAL_PREVIEW=1 NODE_ENV=production PORT=5050 node dist/index.cjs",
     "check": "tsc",
     "typecheck": "tsc --noEmit",
-    "test:mapz": "node --test script/mapz-tiles.test.mjs",
+    "test:mapz": "node --test script/mapz-*.test.mjs",
     "audit:glass-rebind": "node script/audit-glass-rebind.mjs",
     "preview:ds": "NODE_ENV=development tsx server/index.ts",
     "db:push": "node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db drizzle-kit push",

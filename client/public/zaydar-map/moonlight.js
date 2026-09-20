@@ -3,7 +3,12 @@ import {radix} from './radix-map.js?v=20260917-days';
 export function applyMoonlight(style){
  const azimuth=315;
  style.light={anchor:'map',color:'#eafcff',intensity:.86,position:[1.15,azimuth,58]};
- const paint=(id,values)=>Object.assign(style.layers.find(layer=>layer.id===id).paint,values);
+ // Terrain is attached after the vector city is visible. It is not present in
+ // the startup style, so optional layers must not abort map construction.
+ const paint=(id,values)=>{
+  const layer=style.layers.find(layer=>layer.id===id);
+  if(layer)Object.assign(layer.paint,values);
+ };
  paint('terrain-shade',{
   'hillshade-illumination-anchor':'map',
   'hillshade-illumination-direction':azimuth,

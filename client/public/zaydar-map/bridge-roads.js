@@ -10,6 +10,15 @@ const metersAtZoom14 = 512 * 2 ** 14 / (40075016.686 * Math.cos(45.53 * Math.PI 
 export const roadLineWidth = ['interpolate', ['exponential', 2], ['zoom'],
   8, ['*', widthExpression, metersAtZoom14 / 64],
   22, ['*', widthExpression, metersAtZoom14 * 256]];
+// MapLibre permits only one top-level zoom curve per paint expression. Sample
+// the physical road width plus the existing outline at quarter-zoom stops,
+// retaining the width/halo hierarchy without nesting two zoom interpolations.
+export const outlinedRoadLineWidth = ['interpolate', ['linear'], ['zoom'],
+  ...Array.from({length:57},(_,index)=>{
+    const zoom=8+index/4;
+    const outline=zoom<=14?2.2:zoom<=16?2.2+(zoom-14)*1.65:zoom<17.5?5.5+(zoom-16)*2.5/1.5:8;
+    return [zoom,['+',['*',widthExpression,metersAtZoom14*2**(zoom-14)],outline]];
+  }).flat()];
 export const bridgeFilter = ['all', ['==', ['get', 'brunnel'], 'bridge'],
   ['!', ['in', ['get', 'class'], ['literal', ['rail', 'path']]]]];
 

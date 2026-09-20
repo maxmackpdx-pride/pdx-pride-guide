@@ -30,20 +30,24 @@ test('server registers constrained OpenFreeMap and terrain proxies',()=>{
 });
 
 test('terrain is optional and cannot block the base vector map',()=>{
- const initialStyle=renderer.slice(renderer.indexOf('const vectorStyle='),renderer.indexOf('applyMoonlight'));
+ const initialStyle=renderer.slice(renderer.indexOf('const vectorStyle='),renderer.indexOf('applyMoonlight(vectorStyle)'));
+ assert.match(initialStyle,/id:'skyline'/);
  assert.doesNotMatch(initialStyle,/elevation|terrain-shade|setTerrain/);
  assert.match(renderer,/function installTerrain\(\)/);
- assert.match(renderer,/window\.setTimeout\(\(\)=>\{if\(!disposed\)installTerrain\(\);\},0\)/);
+ assert.match(renderer,/window\.setTimeout\(\(\)=>\{if\(!disposed\)installSceneExtras\(\);\},0\)/);
 });
 
-test('fallback waits for a real visible 3D frame',()=>{
+test('3D recovery waits for a rendered city frame and preserves the actual error',()=>{
  assert.match(host,/event\.data\.type==='first-frame'/);
  assert.match(host,/MAX_3D_ATTEMPTS=3/);
  assert.match(host,/phase==='loading'\?25000:60000/);
- assert.match(host,/3D map is restarting/);
+ assert.match(host,/Restarting 3D/);
+ assert.match(host,/event\.data\.message/);
  assert.doesNotMatch(host,/type==='booted'/);
  assert.match(renderer,/tell\('first-frame'\)/);
- assert.match(renderer,/WebGL2 is unavailable/);
+ assert.match(renderer,/queryRenderedFeatures\(\{layers:\['streets','water','skyline'\]\}\)/);
+ assert.match(renderer,/ready&&baseFrameRendered&&!firstFrameSent/);
+ assert.doesNotMatch(renderer,/webglProbe/);
 });
 
 test('3D base frame does not wait for optional waypoint assets',()=>{
@@ -53,10 +57,10 @@ test('3D base frame does not wait for optional waypoint assets',()=>{
  assert.match(renderer,/if\(overlaysReady\)drawLights\(visibility\)/);
 });
 
-test('Leaflet remains lazy and exclusive to 2D',()=>{
- assert.match(host,/lazy\(\(\)=>import\('\.\/ZaydarFallback'\)\)/);
- assert.doesNotMatch(host,/import ZaydarFallback from/);
- assert.match(host,/renderer==='3d'[\s\S]*?<Zaydar3D[\s\S]*?:<Suspense[\s\S]*?<ZaydarFallback/);
+test('2D is retained but disconnected from both the map host and toggle',()=>{
+ assert.doesNotMatch(host,/ZaydarFallback|onRendererChange|failTo2D|lazy\(|Suspense/);
+ assert.doesNotMatch(page,/ZaydarFallback|setRenderer|Switch to.*2D/);
+ assert.match(host,/<Zaydar3D key=\{generation\}/);
  assert.match(fallback,/preferCanvas/);
- assert.match(page,/renderer==='2d'\?'3D':'2D'/);
+ assert.match(host,/>Retry 3D<\/button>/);
 });
