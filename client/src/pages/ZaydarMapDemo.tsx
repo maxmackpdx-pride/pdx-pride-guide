@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
 import ZaydarLayerSheet, { type ZaydarLayer } from "@/components/ZaydarLayerSheet";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
-import ZaydarCanvas, { type ZaydarHandle, type ZaydarRenderer } from "@/components/ZaydarCanvas";
+import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, Navigation } from "lucide-react";
 
 
