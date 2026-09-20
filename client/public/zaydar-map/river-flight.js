@@ -786,8 +786,8 @@ function settleOverviewPitch(){
 map.on('zoom',queueOverviewPitch);
 map.on('zoomend',settleOverviewPitch);
 function updateSceneStatus(){
- status.textContent=assetError||(loaded&&assetsReady?'':'Preparing Portland…');
- document.body.classList.toggle('scene-ready',loaded&&assetsReady);
+ status.textContent=assetError||(loaded?'':'Preparing Portland…');
+ document.body.classList.toggle('scene-ready',loaded);
 }
 function scheduleFrame(){if(!frame&&!disposed&&!document.hidden)frame=requestAnimationFrame(draw);}
 map.on('idle',()=>{
@@ -814,7 +814,8 @@ function draw(now){
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
  motionDelta=dt;
  if(!reduced.matches)pulseTime+=dt;
- const ready=loaded&&assetsReady;
+ const ready=loaded;
+ const overlaysReady=loaded&&assetsReady;
  if(ready&&!loopWaiting)revealTime+=dt;
  const moving=ready&&!loopWaiting&&exploration.mode==='flight'&&!reduced.matches&&!pauseControl.checked&&Number(speedControl.value)>0;
  if(moving){
@@ -839,7 +840,7 @@ function draw(now){
  const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
- if(ready)drawLights(visibility);
+ if(overlaysReady)drawLights(visibility);
  if(ready&&!firstFrameSent&&visibility>0){firstFrameSent=true;startup.phase('first-frame');tell('first-frame');}
  if(!reduced.matches||!ready)scheduleFrame();
 }

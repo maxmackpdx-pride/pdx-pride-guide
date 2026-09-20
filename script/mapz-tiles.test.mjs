@@ -38,10 +38,19 @@ test('terrain is optional and cannot block the base vector map',()=>{
 
 test('fallback waits for a real visible 3D frame',()=>{
  assert.match(host,/event\.data\.type==='first-frame'/);
- assert.match(host,/phase==='loading'\?15000:45000/);
+ assert.match(host,/MAX_3D_ATTEMPTS=3/);
+ assert.match(host,/phase==='loading'\?25000:60000/);
+ assert.match(host,/3D map is restarting/);
  assert.doesNotMatch(host,/type==='booted'/);
  assert.match(renderer,/tell\('first-frame'\)/);
  assert.match(renderer,/WebGL2 is unavailable/);
+});
+
+test('3D base frame does not wait for optional waypoint assets',()=>{
+ assert.match(renderer,/const ready=loaded;/);
+ assert.match(renderer,/const overlaysReady=loaded&&assetsReady;/);
+ assert.match(renderer,/classList\.toggle\('scene-ready',loaded\)/);
+ assert.match(renderer,/if\(overlaysReady\)drawLights\(visibility\)/);
 });
 
 test('Leaflet remains lazy and exclusive to 2D',()=>{
