@@ -35,15 +35,28 @@ async function fixture() {
   await fs.mkdir(path.join(root, "dist"));
   await fs.writeFile(path.join(root, "dist/design-component-source-evidence.json"), JSON.stringify({ schemaVersion: 1,
     registryChecksum: digest(JSON.stringify(DESIGN_COMPONENT_REGISTRY)), evidenceChecksum: digest(JSON.stringify(sources)), sources }));
-  return { root, git, publication, button, badge };
+  return { root, git, publication, button, badge, baseRevision };
 }
 
 test("discovers and seals one approved product publication", async t => {
   const f = await fixture(); t.after(() => fs.rm(f.root, { recursive: true, force: true }));
   assert.equal(await discoverProductPublication(f.root), f.publication);
+  assert.equal(await discoverProductPublication(f.root, f.baseRevision), f.publication);
   const result = await verifyProductPublication(f.publication, f.root);
   assert.equal(result.proposalId, "12345678-1234-1234-1234-123456789abc");
   assert.equal(result.sourceChanges[0].afterSha256, digest("export const Button = () => 'after';\n"));
+});
+
+test("direct governed changes without an approved handoff fail the push gate", async t => {
+  const f = await fixture(); t.after(() => fs.rm(f.root, { recursive: true, force: true }));
+  f.git("rm", f.publication); f.git("commit", "--quiet", "-m", "remove handoff");
+  await assert.rejects(() => discoverProductPublication(f.root, f.baseRevision), /without an approved publication handoff/);
+});
+
+test("worktree edits to a committed approval export cannot change the verified handoff", async t => {
+  const f = await fixture(); t.after(() => fs.rm(f.root, { recursive: true, force: true }));
+  await fs.writeFile(path.join(f.root, f.publication), "invalid local overwrite");
+  assert.equal((await verifyProductPublication(f.publication, f.root)).proposalId, "12345678-1234-1234-1234-123456789abc");
 });
 
 test("rejects an unapproved governed source change", async t => {

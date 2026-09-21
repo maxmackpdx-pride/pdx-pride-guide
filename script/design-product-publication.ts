@@ -16,6 +16,7 @@ const uuid = (value: unknown): value is string => typeof value === "string" && /
 const tokenPath = (value: string) => /^client\/src\/components\/ds\/tokens\/[A-Za-z0-9_.-]+\.css$/.test(value);
 const handoffPath = (id: string) => `design-publications/product/${id}.json`;
 const REGISTRY_CHECKSUM = digest(JSON.stringify(DESIGN_COMPONENT_REGISTRY));
+const COMPONENT_PATHS = new Set(DESIGN_COMPONENT_REGISTRY.map(component => component.sourcePath));
 
 function git(root: string, ...args: string[]) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", maxBuffer: 20_000_000, stdio: ["ignore", "pipe", "pipe"] });
@@ -25,17 +26,22 @@ function readGit(root: string, ref: string, file: string): Buffer | null {
   catch { return null; }
 }
 
-export async function discoverProductPublication(root = process.cwd()) {
-  const files = git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD", "--", "design-publications/product")
-    .trim().split("\n").filter(Boolean).filter(file => /^design-publications\/product\/[a-f0-9-]{36}\.json$/.test(file));
+export async function discoverProductPublication(root = process.cwd(), before?: string) {
+  if (before && !/^[a-f0-9]{40}$/.test(before)) throw new Error("A valid previous product commit is required.");
+  const changed = before
+    ? git(root, "diff", "--name-only", "--no-renames", before, "HEAD", "--").trim().split("\n").filter(Boolean)
+    : git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD").trim().split("\n").filter(Boolean);
+  const files = changed.filter(file => /^design-publications\/product\/[a-f0-9-]{36}\.json$/.test(file));
   if (files.length > 1) throw new Error("A deployment may carry at most one product design publication.");
+  if (!files.length && changed.some(file => COMPONENT_PATHS.has(file) || tokenPath(file))) throw new Error("Governed product source changed without an approved publication handoff.");
   return files[0] ?? "";
 }
 
 export async function verifyProductPublication(proposalFile: string, root = process.cwd()) {
   root = await fs.realpath(root);
   if (await fs.realpath(git(root, "rev-parse", "--show-toplevel").trim()) !== root || git(root, "rev-parse", "HEAD").trim().length !== 40) throw new Error("Verify the checked-out product repository HEAD only.");
-  const bytes = await fs.readFile(path.join(root, proposalFile));
+  const bytes = readGit(root, "HEAD", proposalFile);
+  if (!bytes || git(root, "ls-tree", "HEAD", "--", proposalFile).trim().startsWith("100644 blob ") === false) throw new Error("Use a committed regular-file proposal export.");
   if (bytes.length > 400_000) throw new Error("Approved proposal export is too large.");
   const proposal = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   if (!uuid(proposal?.id) || proposalFile !== handoffPath(proposal.id) || proposal.status !== "approved" || proposal.lastEventId < 1 ||
@@ -44,10 +50,9 @@ export async function verifyProductPublication(proposalFile: string, root = proc
       digest(JSON.stringify(proposal.payload)) !== proposal.checksum || !Array.isArray(proposal.payload.sourceChanges) || !proposal.payload.sourceChanges.length) throw new Error("Use the exact currently approved product proposal export.");
   const base = proposal.payload.target.baseRevision;
   git(root, "cat-file", "-e", `${base}^{commit}`); git(root, "merge-base", "--is-ancestor", base, "HEAD");
-  const componentPaths = new Set(DESIGN_COMPONENT_REGISTRY.map(component => component.sourcePath));
   const selected = new Set<string>();
   const sourceChanges = proposal.payload.sourceChanges.map((change: any) => {
-    if (!change || typeof change.path !== "string" || selected.has(change.path) || !componentPaths.has(change.path) && !tokenPath(change.path)) throw new Error(`Invalid approved product source: ${change?.path}`);
+    if (!change || typeof change.path !== "string" || selected.has(change.path) || !COMPONENT_PATHS.has(change.path) && !tokenPath(change.path)) throw new Error(`Invalid approved product source: ${change?.path}`);
     selected.add(change.path);
     const before = readGit(root, base, change.path), after = readGit(root, "HEAD", change.path);
     const afterText = after === null ? null : new TextDecoder("utf-8", { fatal: true }).decode(after);
@@ -55,7 +60,7 @@ export async function verifyProductPublication(proposalFile: string, root = proc
     return { path: change.path, beforeSha256: change.beforeSha256, afterSha256: after === null ? null : digest(after) };
   }).sort((a: any, b: any) => a.path.localeCompare(b.path));
   for (const file of git(root, "diff", "--name-only", "--no-renames", base, "HEAD", "--", "client/src/components").trim().split("\n").filter(Boolean)) {
-    if ((componentPaths.has(file) || tokenPath(file)) && !selected.has(file)) throw new Error(`Unapproved governed product change: ${file}`);
+    if ((COMPONENT_PATHS.has(file) || tokenPath(file)) && !selected.has(file)) throw new Error(`Unapproved governed product change: ${file}`);
   }
   const protectedFiles = [".github/workflows/railway-deploy.yml", "script/design-product-publication.ts", "script/design-component-source-evidence.ts", "script/build.ts", "server/routes.ts"];
   if (git(root, "diff", "--name-only", base, "HEAD", "--", ...protectedFiles).trim()) throw new Error("Publication or evidence machinery changed after the approved baseline.");
@@ -88,7 +93,7 @@ export async function publicationApi(action: "prepare" | "complete" | "fail", bo
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     const [command, ...args] = process.argv.slice(2), option = (name: string) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
-    if (command === "discover") console.log(await discoverProductPublication());
+    if (command === "discover") console.log(await discoverProductPublication(process.cwd(), process.env.BEFORE_SHA));
     else if (command === "verify") { const file = option("--proposal"), output = option("--output"); if (!file || !output) throw new Error("verify requires --proposal and --output"); await fs.writeFile(output, `${JSON.stringify(await verifyProductPublication(file))}\n`); }
     else if (command === "prepare") { const input = option("--input"), output = option("--output"); if (!input || !output) throw new Error("prepare requires --input and --output"); await fs.writeFile(output, `${JSON.stringify(await publicationApi("prepare", JSON.parse(await fs.readFile(input, "utf8"))))}\n`); }
     else if (command === "complete") { const state = option("--state"); if (!state) throw new Error("complete requires --state"); const publication = JSON.parse(await fs.readFile(state, "utf8")); console.log(JSON.stringify(await publicationApi("complete", { publicationId: publication.id }))); }
