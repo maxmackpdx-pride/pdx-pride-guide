@@ -1,4 +1,4 @@
-import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js?v=20260920-solid-ground';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js?v=20260920-flat-relief';
 import {bridgeFilter,createBridgeLayer} from '../home-flight/bridge-roads.js';
 import {createCitySparkles} from '../home-flight/city-sparkles.js';
 import {roofSparkles} from '../home-flight/roof-sparkles.js';
@@ -12,7 +12,7 @@ import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
-// The home city materials, extended with real terrain and Mapz surface treatments.
+// The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
 let map;

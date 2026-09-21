@@ -1,7 +1,7 @@
 import {vectorStyle} from '../home-flight/city-map.js';
 
 export const WATER_CYAN = '#00bfbf'; // Cyan mixed with 25% black; glow alpha stays unchanged.
-export const FOREST_COLORS = ['#09251a', '#103322', '#19432c'];
+export const FOREST_COLORS = ['#06140e', '#0a1b12', '#0e2418'];
 export const naturalWater = ['all', ['in', ['get', 'class'], ['literal', ['river', 'lake', 'pond']]], ['!=', ['get', 'intermittent'], 1]];
 
 /** Mapz extends the home city without mutating the homepage's materials. */
@@ -12,11 +12,12 @@ export function mapzSurfaceStyle() {
     encoding: 'terrarium', tileSize: 512,
     attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
   };
-  style.terrain = {source: 'elevation', exaggeration: 1};
+  // Use the DEM for relief shading without warping the vector city onto a 3D
+  // mesh. Draping these layers creates vertical curtains at polygon/tile edges.
   style.layers.unshift(
     {id:'ground',type:'background',paint:{'background-color':'#050506','background-opacity':1}},
-    {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':.22,'hillshade-shadow-color':'#183b31','hillshade-highlight-color':'#84998e','hillshade-accent-color':'#234738'}},
-    ...['landcover','landuse'].map(sourceLayer=>({id:`forest-${sourceLayer}`,type:'fill',source:'terrain','source-layer':sourceLayer,filter:['in',['get','class'],['literal',['wood','forest']]],paint:{'fill-pattern':'forest-canopy','fill-opacity':1}})),
+    {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':.28,'hillshade-shadow-color':'#07110d','hillshade-highlight-color':'#53675d','hillshade-accent-color':'#132a20'}},
+    ...['landcover','landuse'].map(sourceLayer=>({id:`forest-${sourceLayer}`,type:'fill',source:'terrain','source-layer':sourceLayer,filter:['in',['get','class'],['literal',['wood','forest']]],paint:{'fill-pattern':'forest-canopy','fill-opacity':.72}})),
   );
   // Opaque terrain and water prevent the terrain framebuffer from exposing
   // lower surfaces. Underground transport must not be painted on top of land.
@@ -33,7 +34,7 @@ export function mapzSurfaceStyle() {
 }
 
 /** Seamlessly repeating canopy patches, using exactly three dark-green shades. */
-export function forestPattern(size=64) {
+export function forestPattern(size=32) {
   const palette=FOREST_COLORS.map(hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)));
   const data=new Uint8Array(size*size*4);
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){

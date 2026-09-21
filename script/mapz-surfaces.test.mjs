@@ -5,11 +5,12 @@ import {mapzSurfaceStyle,forestPattern,FOREST_COLORS,inwardDistances} from '../c
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
 const require=createRequire(import.meta.url),mapRequire=createRequire(require.resolve('maplibre-gl'));
 const {validateStyleMin}=mapRequire('@maplibre/maplibre-gl-style-spec');
-test('terrain and forest style validates, keeps building color and isolates home styling',()=>{
+test('hillshade relief and forest style validate without deforming the vector city',()=>{
  const before=JSON.stringify(vectorStyle),style=mapzSurfaceStyle();
  assert.deepEqual(validateStyleMin(style).map(e=>e.message),[]);
  assert.equal(style.sources.elevation.encoding,'terrarium');
- assert.equal(style.terrain.exaggeration,1);
+ assert.equal(style.terrain,undefined);
+ assert.equal(style.layers.find(l=>l.id==='land-relief').type,'hillshade');
  const skyline=style.layers.find(l=>l.id==='skyline');
  assert.equal(skyline.paint['fill-extrusion-color'],vectorStyle.layers.find(l=>l.id==='skyline').paint['fill-extrusion-color']);
  assert.equal(skyline.paint['fill-extrusion-opacity'],1);
@@ -20,6 +21,8 @@ test('forest texture uses exactly the requested three tones and stays determinis
  for(let i=0;i<image.data.length;i+=4){colors.add('#'+[...image.data.slice(i,i+3)].map(c=>c.toString(16).padStart(2,'0')).join(''));assert.equal(image.data[i+3],255);}
  assert.deepEqual([...colors].sort(),[...FOREST_COLORS].sort());
  assert.deepEqual(image.data,forestPattern().data);
+ assert.equal(image.width,32);
+ assert.equal(mapzSurfaceStyle().layers.find(l=>l.id==='forest-landcover').paint['fill-opacity'],.72);
 });
 test('water glow stays inside water and decays from shore toward the center',()=>{
  const size=11,mask=new Uint8Array(size*size);
