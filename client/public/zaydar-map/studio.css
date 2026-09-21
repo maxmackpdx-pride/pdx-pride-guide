@@ -35,7 +35,7 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 @media(max-width:600px){aside{left:12px;bottom:max(12px,env(safe-area-inset-bottom))}details[open]{max-width:calc(100vw - 24px)}.credit{font-size:9px;right:10px}#exploration-status{bottom:66px;width:max-content;max-width:calc(100vw - 24px)}body:has(details[open]) #exploration-status{bottom:280px}}
 @media(prefers-reduced-motion:reduce){.chevron{transition:none}}
 
-/* Keep face stacks on the floating HOUS artwork, independent of title wrapping. */
+/* Keep face stacks on the floating HOÜS artwork, independent of title wrapping. */
 .standalone-hologram-faces--anchored{position:absolute;transform:translate(-50%,-50%) scale(var(--face-scale));transform-origin:center;margin-top:0;padding-left:0;white-space:nowrap;pointer-events:none}
 .standalone-hologram-face{width:var(--face-size,18px);height:var(--face-size,18px);flex-shrink:0;margin-left:calc(var(--face-size,18px)*-.28)}
 .standalone-hologram-face:first-child{margin-left:0}

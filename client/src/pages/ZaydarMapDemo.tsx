@@ -180,7 +180,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The Haüz") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if (String(row._board) === "The HOÜS") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   const kind = boardKind(row);
   if (kind === "gig") return "#8800FF";
   if (kind === "gifting") return "#CCFF00";
@@ -188,7 +188,7 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The Haüz") return "/zaydar-map/icons/housing.svg";
+  if (String(row._board) === "The HOÜS") return "/zaydar-map/icons/housing.svg";
   const kind = boardKind(row);
   if (kind === "gig") return zaydarTypeIcon("service");
   return zaydarTypeIcon("shop");
@@ -472,7 +472,7 @@ export default function ZaydarMapDemo() {
   const visibleBoards = useMemo(() => boardRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [boardRows, boardKinds, q]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The Haüz" })), [housing, housingType, q]);
+    .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
@@ -487,7 +487,7 @@ export default function ZaydarMapDemo() {
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The Haüz") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
+      if (String(row._board) === "The HOÜS") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
       else {
         const kind = boardKind(row);
         const postId = Number(row.id);
@@ -556,25 +556,25 @@ export default function ZaydarMapDemo() {
     {gigsLoading || giftsLoading || sellsLoading ? <p role="status">Loading Boards…</p> : gigsError || giftsError || sellsError ? <p role="alert">Boards could not load. <button type="button" onClick={() => { void retryGigs(); void retryGifts(); void retrySells(); }}>Try again</button></p> : panelRows(visibleBoards, "boards")}
   </section>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Houz</h2></div>
+    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">HOÜS</h2></div>
     <div className="zaydar-layer-rail" role="group" aria-label="Housing types">
-      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All Houz" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HOÜS" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
     </div>
-    {housingLoading ? <p role="status">Loading Houz…</p> : housingError ? <p role="alert">Houz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingLoading ? <p role="status">Loading HOÜS…</p> : housingError ? <p role="alert">HOÜS could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
     { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => toggleLayer("hideBoards"), panel: boardsPanel, viewMore: [{ label: "Gigz", href: "/pride-work" }, { label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
-    { id: "houz", label: "Houz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more Houz", href: "/the-hauz" }] },
+    { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more HOÜS", href: "/the-hauz" }] },
   ];
 
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
-    const isHouz=String(row._board)==='The Haüz';
+    const isHouz=String(row._board)==='The HOÜS';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
     const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
