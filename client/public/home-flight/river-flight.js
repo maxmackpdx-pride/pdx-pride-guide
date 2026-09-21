@@ -1,14 +1,16 @@
-import {flightVisible,flightMotion,flightReady,flightExploring} from './host-bridge.js';
+import {flightVisible,flightMotion,flightReady} from './host-bridge.js';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
-import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-const vectorStyle={version:8,light:{anchor:'map',color:'#c7d9ed',intensity:.42,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},layers:[
+// Tile coverage for the Ross Island → Eagle flight, including the pitched horizon
+// and wide-screen edges. Bounds constrain source requests, not the camera or logos.
+const flightBounds=[-122.735,45.48,-122.605,45.615];
+const vectorStyle={version:8,light:{anchor:'map',color:'#c7d9ed',intensity:.42,position:[1.15,210,38]},sources:{terrain:{type:'vector',url:'https://tiles.openfreemap.org/planet',bounds:flightBounds}},layers:[
     {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':'#193645','fill-opacity':.35}},
     {id:'banks',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':'#6d98ab','line-opacity':.5,'line-width':.8}},
     {id:'streams',type:'line',source:'terrain','source-layer':'waterway',paint:{'line-color':'#6291a4','line-opacity':.48,'line-width':.8}},
@@ -18,6 +20,7 @@ const vectorStyle={version:8,light:{anchor:'map',color:'#c7d9ed',intensity:.42,p
   ]};
 // OpenFreeMap vector geometry; no symbols, labels, land fill, or map background.
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
+  renderWorldCopies:false,pixelRatio:Math.min(devicePixelRatio||1,1.5),maxTileCacheSize:64,
   center:[-122.66544,45.5018],zoom:(13.8849625+Math.log2(1.25)),pitch:48,bearing:0,
   style:structuredClone(vectorStyle)});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
@@ -309,7 +312,7 @@ function drawLights(fade,target=map,surface=lights){
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
- const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
+ const mapOpacity=.75,coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
  lightsContext.globalAlpha=fade;
  // Ground effects first, then upright pins from farthest to nearest.
@@ -564,7 +567,7 @@ function downtownZoom(latitude){
 }
 const status=document.querySelector('#map-status');
 const reduced=flightMotion;
-const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
+const mapElement=document.querySelector('#map');
 let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
 const frameInterval=1000/30;
 function flightSpeed(latitude){
@@ -579,23 +582,6 @@ function flightCamera(t){
  const cityReveal=smoothRange(45.503,45.520,center[1])*(1-smoothRange(45.529,45.554,center[1]));
  return {center,zoom:downtownZoom(center[1]),pitch:48+4*cityReveal,bearing:0};
 }
-const exploration=createMapExploration({
- map,pauseControl,reduced,message:document.querySelector('#exploration-status'),
- isReady:()=>loaded&&assetsReady,isVisible:flightVisible,
- onExplore:()=>{
-  flightExploring(true);
-  cameraDirty=false;loopWaiting=false;exitAt=null;revealTime=3;
-  clearLogoPointer();scheduleFrame();
- },
- returnCamera:()=>flightCamera(0),
- onResume:()=>{
-  flightExploring(false);
-  travel=0;elapsed=0;exitAt=null;loopWaiting=false;revealTime=3;last=0;cameraDirty=false;
-  surfaceCache.delete(map);glitterCache.delete(map);hologramLayouts.delete(map);
-  scheduleFrame();
- },
- onMove:()=>scheduleFrame()
-});
 function updateSceneStatus(){
  status.textContent=assetError||(loaded&&assetsReady?'':'Preparing Portland…');
  document.body.classList.toggle('scene-ready',loaded&&assetsReady);
@@ -620,11 +606,11 @@ function draw(now){
  if(!reduced.matches)pulseTime+=dt;
  const ready=loaded&&assetsReady;
  if(ready&&!loopWaiting)revealTime+=dt;
- const moving=ready&&!loopWaiting&&exploration.mode==='flight'&&!reduced.matches&&!pauseControl.checked&&Number(speedControl.value)>0;
+ const moving=ready&&!loopWaiting&&!reduced.matches;
  if(moving){
   elapsed+=dt;
   const exitEase=exitAt===null?1:1-.85*smoothRange(0,3.5,elapsed-exitAt);
-  travel+=dt*.7*(Number(speedControl.value)/.6)*flightSpeed(point(Math.min(travel/flightDuration,1))[1])*exitEase;
+  travel+=dt*.7*flightSpeed(point(Math.min(travel/flightDuration,1))[1])*exitEase;
  }
  // End from the actual projected Eagle location, so the loop fits any viewport.
  if(exitAt!==null && elapsed-exitAt>=3.5){
@@ -632,7 +618,7 @@ function draw(now){
   hologramLayouts.delete(map);surfaceCache.delete(map);glitterCache.delete(map);
  }
  const t=Math.min(travel/flightDuration,1);
- if(loaded&&exploration.mode==='flight'&&(moving||cameraDirty)){
+ if(loaded&&(moving||cameraDirty)){
   cameraDirty=false;
   map.jumpTo(flightCamera(t));
   const eagle=map.project(eagleCoordinates);
@@ -641,22 +627,14 @@ function draw(now){
   if(exitAt===null && (eagleAtEnd || t>=1))exitAt=elapsed;
  }
  const fade=!ready||loopWaiting?0:exitAt===null?(reduced.matches?1:smoothRange(0,3,revealTime)):1-smoothRange(.5,3.5,elapsed-exitAt);
- const visibility=Number(opacityControl.value)*fade;
+ const visibility=.75*fade;
  mapElement.style.opacity=visibility;
  if(ready)drawLights(visibility);
  if(!reduced.matches||!ready)scheduleFrame();
 }
 scheduleFrame();
-function onSceneInput(){
- const speedOutput=document.querySelector('#speed-value'),mapOutput=document.querySelector('#map-value');
- if(speedOutput)speedOutput.value=`${Math.round(Number(speedControl.value)/.6*100)}%`;
- if(mapOutput)mapOutput.value=`${Math.round(Number(opacityControl.value)*100)}%`;
- exploration.noteActivity();
- scheduleFrame();
-}
 function onSceneResize(){cameraDirty=true;surfaceCache.delete(map);scheduleFrame();}
 function onReducedChange(){last=0;clearLogoPointer();scheduleFrame();}
-for(const control of [opacityControl,pauseControl,speedControl])control.addEventListener('input',onSceneInput);
 window.addEventListener('resize',onSceneResize,{passive:true});
 reduced.addEventListener('change',onReducedChange);
 function onVisibilityChange(){
@@ -667,9 +645,7 @@ document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('flightvisibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
  disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);window.removeEventListener('flightvisibilitychange',onVisibilityChange);
- exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
- for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
