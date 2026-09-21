@@ -1,7 +1,9 @@
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-lighting-pass';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-ground-lights';
+import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
-import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-city-glitter';
-import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../home-flight/roof-sparkles.js?v=20260920-lighting-pass';
+import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-ground-lights';
+import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
+import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../home-flight/roof-sparkles.js?v=20260920-ground-lights';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
@@ -47,8 +49,10 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
-const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
+const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true});
+const groundLightPools=createGroundLightPools(maplibregl);
 function installSceneExtras(){
+ map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
  map.addLayer(citySparkles);
 }
@@ -87,8 +91,10 @@ function updateSurfaces(target){
   for(const building of nearbyBuildings(c))if(Math.hypot((building.center[0]-c[0])*.7,building.center[1]-c[1])<.00075)roof=Math.max(roof,building.height);
   roofs.set(feature.properties.phase,roof);
  }
- const overviewRoads=target.getZoom()<12.75?transportation:[];
- const lightPools=intersectionLightPools(transportation,matchMedia('(pointer:coarse)').matches?90:180);
+ // Keep a street fallback even above 12.75: building tiles can be sparse or
+ // still loading at any overview zoom. Otherwise the glitter disappears.
+ const overviewRoads=transportation;
+ groundLightPools.update(intersectionLightPools(transportation,matchMedia('(pointer:coarse)').matches?90:180));
  const bridgeLights=[];
  for(const feature of bridgeFeatures){
   const lines=feature.geometry.type==='LineString'?[feature.geometry.coordinates]:feature.geometry.type==='MultiLineString'?feature.geometry.coordinates:[];
@@ -96,7 +102,7 @@ function updateSurfaces(target){
    const a=line[i-1],b=line[Math.min(i,line.length-1)];bridgeLights.push({type:'Feature',geometry:{type:'Point',coordinates:[(a[0]+b[0])/2,(a[1]+b[1])/2]},properties:{color:'#8fc8d4',isBridge:true}});
   }
  }
- const result={time:now,buildings,reflections,roofs,overviewRoads,lightPools,bridgeLights:bridgeLights.slice(0,160)};surfaceCache.set(target,result);return result;
+ const result={time:now,buildings,reflections,roofs,overviewRoads,bridgeLights:bridgeLights.slice(0,160)};surfaceCache.set(target,result);return result;
 }
 function drawSurfaceReflections(ctx,target,reflections,fade){
  const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686;
@@ -142,32 +148,6 @@ function drawAmbientBuildingSheen(ctx,target,buildings,fade,time=0){
  const sheen=ctx.createLinearGradient(cx-dx,cy-dy,cx+dx,cy+dy);
  sheen.addColorStop(0,'rgba(104,151,146,0)');sheen.addColorStop(.25,'rgba(104,151,146,.035)');sheen.addColorStop(.42,'rgba(135,181,198,.04)');sheen.addColorStop(.5,'rgba(218,239,244,.17)');sheen.addColorStop(.58,'rgba(135,181,198,.035)');sheen.addColorStop(1,'rgba(135,181,198,0)');
  ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*(.34+.18*smoothRange(14,17,target.getZoom()));ctx.fillStyle=sheen;ctx.fillRect(0,0,width,height);ctx.restore();
-}
-function drawStreetLightPools(ctx,target,pools,fade){
- if(!pools?.length||fade<=0)return;
- ctx.save();ctx.globalCompositeOperation='screen';
- for(const pool of pools){
-  const p=target.project(pool.coordinates);if(p.x<-80||p.y<-80||p.x>window.innerWidth+80||p.y>window.innerHeight+80)continue;
-  const pulse=reduced.matches?1:.9+.1*Math.sin(pulseTime*.42+pool.phase),radius=Math.min(42,17+pool.count*2.2)*pulse;
-  const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,radius);glow.addColorStop(0,pool.color+'42');glow.addColorStop(.3,pool.color+'1e');glow.addColorStop(1,pool.color+'00');
-  ctx.globalAlpha=fade*.48;ctx.fillStyle=glow;ctx.fillRect(p.x-radius,p.y-radius,radius*2,radius*2);
- }
- ctx.restore();
-}
-function drawNeighborhoodAmbient(ctx,target,fade){
- const cells=new Map(),size=190;
- for(const feature of lightFeatures){
-  const p=target.project(feature.geometry.coordinates);if(p.x<-160||p.y<-160||p.x>window.innerWidth+160||p.y>window.innerHeight+160)continue;
-  const kind=feature.properties.type==='The Haüz'?'houz':feature.properties.kind;
-  const color=kind==='event'?'#ff00cc':kind==='place'?'#00ffff':kind==='board'?'#8800ff':'#389187';
-  const key=`${Math.round(p.x/size)}:${Math.round(p.y/size)}:${kind}`,cell=cells.get(key)??{x:0,y:0,count:0,color};cell.x+=p.x;cell.y+=p.y;cell.count++;cells.set(key,cell);
- }
- ctx.save();ctx.globalCompositeOperation='screen';
- for(const cell of cells.values()){
-  const x=cell.x/cell.count,y=cell.y/cell.count,radius=76+Math.min(8,cell.count)*10,glow=ctx.createRadialGradient(x,y,0,x,y,radius);
-  glow.addColorStop(0,cell.color+'20');glow.addColorStop(.5,cell.color+'0c');glow.addColorStop(1,cell.color+'00');ctx.globalAlpha=fade*Math.min(.62,.2+cell.count*.045);ctx.fillStyle=glow;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
- }
- ctx.restore();
 }
 function roofLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates,roof=surfaces.roofs?.get(feature.properties.phase)??9;
@@ -460,7 +440,7 @@ function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
  const eventLabels=[];
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
- const activeToday=feature=>feature.properties.eventDay===today;
+ const activeToday=feature=>feature.properties.eventDay===today||(parent===window&&feature.properties.demoOpen===true);
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeToday(feature)?1:reveal;
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
@@ -482,8 +462,6 @@ function drawLights(fade,target=map,surface=lights){
  const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures];if(userLocation)reflectionSources.unshift(userLocation.feature);
  waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
  drawUserLocationGlow(lightsContext,target,fade);
- drawNeighborhoodAmbient(lightsContext,target,fade);
- drawStreetLightPools(lightsContext,target,surfaces.lightPools,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
@@ -979,12 +957,13 @@ window.addEventListener('pagehide',()=>{
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
+ if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
 
 // Interactive adapter: isolated from the original studio and homepage.
-function tell(type,payload={}){parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
+function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'zaydar-demo',type,...payload},location.origin);}
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 // Use the original Zaydar orb materials, breathing glow, and drifting mist.
 const typeIcons=new Map();
@@ -1066,5 +1045,7 @@ map.getCanvas().addEventListener('pointerup',e=>{
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
 map.on('load',()=>{
- pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
+ pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));
+ if(parent===window){map.jumpTo(STANDALONE_DEMO_VIEW);void setListings(standaloneDemoRows());}
+ viewState();tell('ready');
 });

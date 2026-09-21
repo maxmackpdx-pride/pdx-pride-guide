@@ -61,16 +61,28 @@ export function streetSparkles(features,limit=7000,{bloomPercent=3,sampleModulo=
 }
 
 export function intersectionLightPools(features,limit=180) {
-  const nodes=new Map(),excluded=new Set(['rail','path']);
+  const nodes=new Map(),excluded=new Set(['rail','path','motorway','trunk']);
   for(const feature of features){
-    if(excluded.has(feature.properties?.class))continue;
+    const properties=feature.properties??{};
+    if(excluded.has(properties.class)||['bridge','tunnel'].includes(properties.brunnel)||Number(properties.layer||0)!==0)continue;
     const lines=feature.geometry?.type==='LineString'?[feature.geometry.coordinates]:feature.geometry?.type==='MultiLineString'?feature.geometry.coordinates:[];
-    for(const line of lines)for(const coordinate of line){
-      const key=coordinate.map(value=>Number(value).toFixed(4)).join(','),node=nodes.get(key)??{coordinates:[Number(coordinate[0]),Number(coordinate[1])],count:0,hash:hashKey(key)};
-      node.count++;nodes.set(key,node);
+    for(const line of lines)for(let i=0;i<line.length;i++){
+      const coordinate=line[i];
+      // Use a canonical geographic anchor, never the first tile's coordinate.
+      const key=coordinate.map(value=>Number(value).toFixed(5)).join(',');
+      const node=nodes.get(key)??{key,coordinates:key.split(',').map(Number),branches:new Set(),hash:hashKey(key)};
+      for(const neighbor of [line[i-1],line[i+1]]){
+        if(!neighbor)continue;
+        const dx=(neighbor[0]-coordinate[0])*Math.cos(coordinate[1]*Math.PI/180),dy=neighbor[1]-coordinate[1];
+        if(Math.hypot(dx,dy)<1e-7)continue;
+        // Buffered copies of a road must not turn a bend into an intersection.
+        node.branches.add((Math.round(Math.atan2(dy,dx)*12/Math.PI)+24)%24);
+      }
+      nodes.set(key,node);
     }
   }
-  return [...nodes.values()].filter(node=>node.count>=2).sort((a,b)=>b.count-a.count||a.hash-b.hash).slice(0,limit).map((node,index)=>({
-    coordinates:node.coordinates,count:node.count,phase:(node.hash/4294967295)*Math.PI*2,color:index%3===0?'#d39a55':'#8fc8d4',
+  return [...nodes.values()].filter(node=>node.branches.size>=3).sort((a,b)=>a.hash-b.hash).slice(0,limit).map(node=>({
+    key:node.key,coordinates:node.coordinates,count:node.branches.size,
+    radiusMeters:14+node.hash%6,angle:hashKey(`${node.key}:angle`)/4294967295*Math.PI*2,
   }));
 }

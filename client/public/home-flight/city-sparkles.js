@@ -1,5 +1,5 @@
 // Rooftop lights share the map's camera and depth buffer. Time changes light only.
-export function createCitySparkles(maplibre,elevation=()=>0) {
+export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false}={}) {
   const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]);
   const unit=origin.meterInMercatorCoordinateUnits();
   return {
@@ -41,7 +41,7 @@ export function createCitySparkles(maplibre,elevation=()=>0) {
           float twinkle=pow(max(0.,sin(fract(clock)*3.14159265)),4.)*peak*lit;
           v_wave=mix(twinkle,.32,u_still);v_star=a_light.z;
           float bloom=v_star*smoothstep(.58,.92,v_wave);
-          gl_PointSize=(3.2+v_wave*3.1+bloom*6.8)*u_dpr;
+          gl_PointSize=(${visibleCore?'4.2+v_wave*2.1':'3.2+v_wave*3.1'}+bloom*6.8)*u_dpr;
         }`);
       const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
         precision highp float; in float v_wave; in float v_star; out vec4 color;
@@ -49,9 +49,9 @@ export function createCitySparkles(maplibre,elevation=()=>0) {
           vec2 p=gl_PointCoord*2.-1.;float r=length(p);
           if(r>1.)discard;
           float halo=exp(-r*r*7.)*.3;
-          float core=1.-smoothstep(.025,.13,r);
+          float core=1.-smoothstep(${visibleCore?'.08,.26':'.025,.13'},r);
           float rays=(exp(-abs(p.x)*60.)+exp(-abs(p.y)*60.))*(1.-smoothstep(.15,.95,r));
-          float alpha=clamp((halo+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(.10+.90*v_wave),0.,1.);
+          float alpha=clamp((halo+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(${visibleCore?'.22+.78*v_wave':'.10+.90*v_wave'}),0.,1.);
           if(alpha<.008)discard;
           color=vec4(mix(vec3(.66,.86,1.),vec3(1.),core)*alpha,alpha);
         }`);
