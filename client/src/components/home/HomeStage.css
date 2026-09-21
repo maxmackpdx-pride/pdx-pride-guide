@@ -32,9 +32,9 @@
   -webkit-mask-image:radial-gradient(ellipse closest-side,#000 0%,#000 34%,transparent 100%);
 }
 .home-front__identity-line::before {
-  inset:-.55em 0;
-  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.204) 0%,rgba(0,0,0,.144) 34%,rgba(0,0,0,.06) 68%,transparent 100%);
-  backdrop-filter:blur(.6px); -webkit-backdrop-filter:blur(.6px);
+  inset:-.55em 12.5%;
+  background:radial-gradient(ellipse closest-side,rgba(0,0,0,.102) 0%,rgba(0,0,0,.072) 34%,rgba(0,0,0,.03) 68%,transparent 100%);
+  backdrop-filter:blur(.45px); -webkit-backdrop-filter:blur(.45px);
   mask-image:radial-gradient(ellipse closest-side,#000 0%,#000 55%,transparent 100%);
   -webkit-mask-image:radial-gradient(ellipse closest-side,#000 0%,#000 55%,transparent 100%);
 }
