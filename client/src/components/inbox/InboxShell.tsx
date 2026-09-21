@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ds/Button";
 import SafetyGuide from "@/components/SafetyGuide";
+import ScrollFade from "@/components/ScrollFade";
 import ThreadAvatar from "./ThreadAvatar";
 import { useInboxThreads } from "./useInboxThreads";
 import { quickRepliesFor } from "./quickReplies";
@@ -903,7 +904,7 @@ export function InboxShell({
                 </button>
               )}
             </div>
-            <div style={{ display: "flex", gap: "7px", overflowX: "auto", marginTop: "12px", paddingBottom: "2px" }}>
+            <ScrollFade aria-label="Message filters" style={{ display: "flex", gap: "7px", overflowX: "auto", marginTop: "12px", paddingBottom: "2px" }}>
               {chips.map((c) => (
                 <button type="button" key={c.key} aria-pressed={cat === c.key} onClick={c.onToggle} style={c.style}>
                   {c.label}
@@ -918,7 +919,7 @@ export function InboxShell({
                 />
                 Unread
               </button>
-            </div>
+            </ScrollFade>
           </div>
           )}
 

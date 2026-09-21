@@ -96,13 +96,13 @@ export default function SharePopover({
       className="pp-share-pop pp-share-pop--portal pdx-liquid-overlay"
       ref={panelRef}
       style={{ top: pos.top, left: pos.left }}
-      role="menu"
+      role="dialog"
+      aria-modal={window.matchMedia("(max-width: 640px)").matches || undefined}
       aria-label={`Share ${displayName}`}
     >
       <button
         type="button"
         className="pp-share-pop__item"
-        role="menuitem"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -114,7 +114,7 @@ export default function SharePopover({
         </svg>
         <span>{copied ? "Copied to clipboard" : "Copy link"}</span>
       </button>
-      <a className="pp-share-pop__item" href={igUrl} target="_blank" rel="noopener noreferrer" role="menuitem">
+      <a className="pp-share-pop__item" href={igUrl} target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--neon-magenta)" strokeWidth="2" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" />
         </svg>
@@ -124,7 +124,6 @@ export default function SharePopover({
         <button
           type="button"
           className="pp-share-pop__item"
-          role="menuitem"
           onClick={() => {
             onClose();
             onMessage();

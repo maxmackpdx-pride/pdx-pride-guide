@@ -24,7 +24,11 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
   const [people, setPeople] = useState<ProfileTop8Entry[]>([]);
   const [venues, setVenues] = useState<Business[]>([]);
   const [loading, setLoading] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
   const debounce = useRef<number | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => { closeRef.current?.focus(); }, []);
 
   const inList = (e: ProfileTop8Entry) => list.some(x => keyOf(x) === keyOf(e));
   const full = list.length >= 8;
@@ -88,6 +92,7 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
   };
   const remove = (e: ProfileTop8Entry) => setList(prev => prev.filter(x => keyOf(x) !== keyOf(e)));
   const move = (i: number, dir: -1 | 1) => {
+    const moved = list[i];
     setList(prev => {
       const next = [...prev];
       const j = i + dir;
@@ -95,6 +100,7 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
       [next[i], next[j]] = [next[j], next[i]];
       return next;
     });
+    if (moved) setAnnouncement(`${nameOf(moved)} moved to position ${i + dir + 1} of ${list.length}.`);
   };
 
   const save = () => onSave(list.map(e => ({ k: e.kind === "user" ? "u" : "b", id: e.id })));
@@ -112,12 +118,13 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
   const subOf = (e: ProfileTop8Entry) => (e.kind === "user" ? `@${e.username}` : "Venue");
 
   return createPortal(
-    <div className="top8ed__backdrop" role="presentation" onClick={onClose}>
-      <div className="top8ed" role="dialog" aria-label="Edit Top 8" onClick={e => e.stopPropagation()}>
+    <>
+      <button type="button" className="top8ed__backdrop" onClick={onClose} aria-label="Close Top 8 editor" />
+      <div className="top8ed" role="dialog" aria-modal="true" aria-label="Edit Top 8">
         <div className="top8ed__head">
           <span className="display top8ed__title">Edit Top 8</span>
           <span className="top8ed__count">{list.length}/8</span>
-          <button type="button" className="top8ed__x" onClick={onClose} aria-label="Close">✕</button>
+          <button ref={closeRef} type="button" className="top8ed__x" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         {/* Current, ordered */}
@@ -131,12 +138,13 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
                 <span className="top8ed__row-name display">{nameOf(e)}</span>
                 <span className="top8ed__row-sub">{subOf(e)}</span>
               </span>
-              <button type="button" className="top8ed__mv" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">↑</button>
-              <button type="button" className="top8ed__mv" disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label="Move down">↓</button>
-              <button type="button" className="top8ed__rm" onClick={() => remove(e)} aria-label="Remove">✕</button>
+              <button type="button" className="top8ed__mv" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Move ${nameOf(e)} up from position ${i + 1}`}>↑</button>
+              <button type="button" className="top8ed__mv" disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label={`Move ${nameOf(e)} down from position ${i + 1}`}>↓</button>
+              <button type="button" className="top8ed__rm" onClick={() => { remove(e); setAnnouncement(`${nameOf(e)} removed from Top 8.`); }} aria-label={`Remove ${nameOf(e)}`}>✕</button>
             </div>
           ))}
         </div>
+        <p className="sr-only" aria-live="polite">{announcement}</p>
 
         {/* Search */}
         <div className="top8ed__search">
@@ -150,7 +158,6 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
             placeholder={tab === "people" ? "Search people by name…" : "Search venues…"}
             value={q}
             onChange={e => setQ(e.target.value)}
-            autoFocus
           />
           <div className="top8ed__results">
             {loading && tab === "people" && <p className="top8ed__hint">Searching…</p>}
@@ -186,7 +193,7 @@ export default function Top8Editor({ current, onClose, onSave }: Props) {
           <button type="button" className="top8ed__save display" onClick={save}>Save Top 8</button>
         </div>
       </div>
-    </div>,
+    </>,
     document.body,
   );
 }

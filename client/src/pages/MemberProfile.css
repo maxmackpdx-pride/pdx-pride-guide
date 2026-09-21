@@ -625,6 +625,18 @@ a.pp-btn {
   text-decoration: none;
 }
 
+@media (max-width: 640px) {
+  .pp-share-pop--portal {
+    position: fixed !important;
+    inset: auto 10px calc(var(--site-mobile-nav-height, 98px) + 10px + env(safe-area-inset-bottom)) 10px !important;
+    width: auto;
+    padding: 10px;
+    border-radius: 18px;
+    box-shadow: var(--glass-card-shadow);
+  }
+  .pp-share-pop__item { min-height: 48px; border-radius: 10px; }
+}
+
 /* Stats */
 .pp-stats {
   max-width: 1160px;
@@ -1736,12 +1748,17 @@ main:has(.pp-page--reimagined) {
   z-index: 200;
   background: rgba(4, 4, 6, 0.72);
   backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  display: block;
+  padding: 0;
+  border: 0;
+  cursor: default;
 }
 .top8ed {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
   width: min(460px, 100%);
   max-height: min(86vh, 720px);
   display: flex;

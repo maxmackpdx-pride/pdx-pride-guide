@@ -495,6 +495,8 @@ export default function QueueView({
   const [ownerInputs, setOwnerInputs] = useState<Record<string, string>>({});
   /** "all" | "mine" | bucket id from ADMIN_QUEUE_BUCKETS */
   const [bucketFilter, setBucketFilter] = useState<string>("all");
+  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
+  const [bulkPending, setBulkPending] = useState(false);
   const accent = mode === "admin" ? C.magenta : C.purple;
   const completed = queueFolder === "completed";
   const useAggregate = mode === "admin" && !completed;
@@ -842,6 +844,29 @@ export default function QueueView({
     });
   }, [rows, bucketFilter, user?.id, queueClaims]);
 
+  const selectedQueueRows = rowsFiltered.filter((row) => selectedRows[row.id]);
+  const selectableQueueRows = rowsFiltered.filter((row) => !row.readOnly && !claimFor(row.kind, row.entityId));
+  const toggleSelected = (id: string) => setSelectedRows((current) => ({ ...current, [id]: !current[id] }));
+  const clearSelected = () => setSelectedRows({});
+  const claimSelected = async () => {
+    if (!selectedQueueRows.length || bulkPending) return;
+    setBulkPending(true);
+    try {
+      await Promise.all(selectedQueueRows.map(async (row) => {
+        const response = await apiRequest("POST", "/api/admin/queue-claims", {
+          kind: claimKindFor(row.kind),
+          entityId: row.entityId,
+          takeover: false,
+        });
+        if (!response.ok) throw new Error(`Could not claim ${row.title}`);
+      }));
+      clearSelected();
+      invalidateAdminQueue(qc);
+    } finally {
+      setBulkPending(false);
+    }
+  };
+
   const bucketCounts = useMemo(() => {
     const base = rows;
     const counts: Record<string, number> = {
@@ -1150,20 +1175,17 @@ export default function QueueView({
       const c = claimFor(q.kind, q.entityId);
       return c?.assigneeUsername ? ` · claimed by @${c.assigneeUsername}` : "";
     })();
+    const selectable = mode === "admin" && !completed && !q.readOnly && !claimFor(q.kind, q.entityId);
     return (
       <div key={q.id} className={`inbox-exp-queue-row${isOpen ? " is-open" : ""}`}>
-        <div
-          className="inbox-exp-queue-row__head"
-          onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setOpen((p) => ({ ...p, [q.id]: !p[q.id] }));
-            }
-          }}
-        >
+        <div className="inbox-exp-queue-row__head">
+          {selectable && (
+            <label className="inbox-exp-queue-select">
+              <input type="checkbox" checked={!!selectedRows[q.id]} onChange={() => toggleSelected(q.id)} aria-label={`Select ${q.title}`} />
+              <span aria-hidden="true" />
+            </label>
+          )}
+          <button type="button" className="inbox-exp-queue-row__head-main" onClick={() => setOpen((p) => ({ ...p, [q.id]: !p[q.id] }))} aria-expanded={isOpen}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="inbox-exp-row__foot" style={{ marginTop: 0, marginBottom: 6 }}>
               <span className="inbox-exp-tag" style={{ background: q.tagColor }}>
@@ -1183,9 +1205,10 @@ export default function QueueView({
           >
             <ChevronDown size={20} strokeWidth={2.4} />
           </span>
+          </button>
         </div>
         {isOpen && (
-          <div className="inbox-exp-queue-row__detail" onClick={(e) => e.stopPropagation()}>
+          <div className="inbox-exp-queue-row__detail">
             {mode === "admin" && !q.readOnly && (
               <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                 {(() => {
@@ -1512,6 +1535,15 @@ export default function QueueView({
       {failedSources.length > 0 && (
         <div className="inbox-exp-alert inbox-exp-alert--error">
           Could not load: {failedSources.join(", ")}. You may need to sign in again as admin, or the server returned an error - not an empty queue.
+        </div>
+      )}
+
+      {mode === "admin" && !completed && selectableQueueRows.length > 0 && (
+        <div className="inbox-exp-bulkbar pdx-liquid-overlay" aria-label="Bulk queue actions">
+          <span aria-live="polite">{selectedQueueRows.length} selected</span>
+          <button type="button" onClick={() => setSelectedRows(Object.fromEntries(selectableQueueRows.map((row) => [row.id, true])))} disabled={bulkPending || selectedQueueRows.length === selectableQueueRows.length}>Select all visible</button>
+          <button type="button" onClick={clearSelected} disabled={bulkPending || selectedQueueRows.length === 0}>Clear</button>
+          <button type="button" className="is-primary" onClick={() => void claimSelected()} disabled={bulkPending || selectedQueueRows.length === 0}>{bulkPending ? "Claiming…" : "Claim selected"}</button>
         </div>
       )}
 
