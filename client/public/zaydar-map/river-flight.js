@@ -1,5 +1,6 @@
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260921-building-mask-v10';
+import {createBuildingModelLayer} from './building-models.js';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
@@ -60,6 +61,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 const surfaceCache=new WeakMap();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
+const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
 const housingHolograms=createHousingHologramLayer(maplibregl,terrainHeight,reduced);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
@@ -71,6 +73,7 @@ function installSceneExtras(){
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
  map.addLayer(portlandBridges,'skyline');
+ map.addLayer(landmarkBuildings,'skyline');
  map.addLayer(portlandLandmarks);
  map.addLayer(housingHolograms);
  map.addLayer(citySparkles);
@@ -83,7 +86,9 @@ function updateSurfaces(target){
  if(cached && now-cached.time<1600)return cached;
  if(!target.getLayer('bridge-decks'))return {buildings:[]};
  const buildings=[],seen=new Set();
- for(const f of target.querySourceFeatures('terrain',{sourceLayer:'building'})){
+ const buildingFeatures=target.querySourceFeatures('terrain',{sourceLayer:'building'});
+ landmarkBuildings.update(buildingFeatures);
+ for(const f of landmarkBuildings.surfaceFeatures()){
   const ring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.type==='MultiPolygon'?f.geometry.coordinates[0][0]:null;
   if(!ring?.length)continue;
   const key=JSON.stringify(ring);if(seen.has(key))continue;seen.add(key);
