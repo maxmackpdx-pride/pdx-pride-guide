@@ -24,6 +24,11 @@ function placePoint(place: { lat: number; lon: number }) {
   const y = (1 - Math.asinh(Math.tan(place.lat * Math.PI / 180)) / Math.PI) / 2 * 1024;
   return sphere((x - CENTER[0]) / 1.05, (CENTER[1] - y) / 1.05);
 }
+const RIVERS = [
+  { name: "Columbia River", lat: 45.604, lon: -122.583 },
+  { name: "Willamette River", lat: 45.552, lon: -122.688 },
+];
+type GeographicPath = { water: boolean; points: [number, number][] };
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
@@ -42,6 +47,29 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let width = 0, height = 0;
     let points: Point[] = [];
     const abort = new AbortController();
+    let geography: { water: boolean; points: (Point | null)[] }[] = [];
+    void fetch('/home-globe/portland-lines.json', { signal: abort.signal })
+      .then(response => { if (!response.ok) throw new Error('Map detail unavailable'); return response.json() as Promise<{ paths: GeographicPath[] }>; })
+      .then(({ paths }) => {
+        if (disposed) return;
+        geography = paths.map(path => {
+          const points: (Point | null)[] = [];
+          for (let index = 0; index < path.points.length; index++) {
+            const [u,v] = path.points[index];
+            const previous = path.points[Math.max(0,index-1)];
+            // Subdivide straight tile segments before wrapping, so rivers follow
+            // the sphere's curvature instead of cutting chords across it.
+            const steps = Math.max(1, Math.ceil(Math.hypot(u-previous[0],v-previous[1])/.012));
+            for (let step=1;step<=steps;step++) {
+              const x=previous[0]+(u-previous[0])*step/steps;
+              const y=previous[1]+(v-previous[1])*step/steps;
+              points.push(Math.abs(x)<=1 && Math.abs(y)<=1 ? sphere(x,y) : null);
+            }
+          }
+          return { water:path.water, points };
+        });
+        draw();
+      }).catch(() => { /* The local dotted map still supplies the geography. */ });
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
       for (const [index, venue] of rows.entries()) {
@@ -99,20 +127,24 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
-      // Illustrative metro connections, not transit routes or live traffic.
-      for (let m = 1; m < MARKERS.length; m++) {
-        const a = MARKERS[0].point, b = MARKERS[m].point;
-        context.beginPath(); let started = false;
-        for (let step = 0; step <= 48; step++) {
-          const t = step / 48;
-          const p = { x: a.x * (1-t) + b.x*t, y: a.y*(1-t)+b.y*t, z:a.z*(1-t)+b.z*t, tone:0 };
-          const norm = Math.hypot(p.x,p.y,p.z);
-          const q = project({ x:p.x/norm,y:p.y/norm,z:p.z/norm,tone:0 }, 1 + Math.sin(t*Math.PI)*.2);
-          if (q.z <= 0) { started = false; continue; }
-          if (!started) context.moveTo(q.x,q.y); else context.lineTo(q.x,q.y);
-          started = true;
+      // Real waterways and major roads share the dot map's exact projection.
+      // Hide every back-facing segment; there is only one visible globe surface.
+      for (const water of [false, true]) {
+        context.beginPath();
+        for (const path of geography) {
+          if (path.water !== water) continue;
+          let started = false;
+          for (const point of path.points) {
+            if (!point) { started=false; continue; }
+            const p=project(point,1.001);
+            if (p.z<=.035) { started=false; continue; }
+            if (started) context.lineTo(p.x,p.y); else context.moveTo(p.x,p.y);
+            started=true;
+          }
         }
-        context.strokeStyle = 'rgba(230,246,255,.48)'; context.lineWidth = .8; context.stroke();
+        context.strokeStyle=water?'rgba(65,226,255,.82)':'rgba(239,247,255,.22)';
+        context.lineWidth=water?1.1:.55;
+        context.stroke();
       }
       // Fixed surface anchors; each light has its own clock, like the map glitter.
       for (let i = 0; i < points.length; i += 37) {
@@ -138,8 +170,17 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = 'rgba(0,0,0,.78)'; context.fillRect(p.x-tw/2-5,p.y+7,tw+10,17);
         context.fillStyle = '#edfaff'; context.fillText(marker.name,p.x,p.y+19);
       }
+      context.font = `italic ${width < 600 ? 9 : 12}px monospace`;
+      for (const river of RIVERS) {
+        const p=project(placePoint(river),1.006);
+        if (p.z<.25) continue;
+        context.fillStyle='#8feeff';
+        context.shadowColor='#000'; context.shadowBlur=4;
+        context.fillText(river.name,p.x,p.y);
+      }
+      context.shadowBlur=0;
       // Keep original venue artwork, projection beams and depth-driven expansion.
-      // Fan the floating heads out while their beams remain tied to real addresses.
+      // Each head lifts from its actual surface position, without a separate orbit.
       const visible = venues.map(venue => ({ ...venue, anchor: project(venue.point) }))
         .filter(venue => venue.anchor.z > .08)
         .sort((a,b) => a.anchor.z - b.anchor.z);
@@ -149,10 +190,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const depth = anchor.z;
         const breathe = still ? 1 : 1 + Math.sin(elapsed / 1700 + phase) * .08;
         const size = Math.min(width < 600 ? 64 : 118, radius * .3) * (.38 + depth * .62) * breathe;
-        const orbit = phase + yaw * .25;
-        const distance = radius * (.72 + (Math.sin(phase * 3) + 1) * .15);
-        const x = cx + Math.cos(orbit) * distance;
-        const y = cy + Math.sin(orbit) * distance;
+        const head = project(venue.point, 1.16);
+        const x = head.x;
+        const y = head.y - size * .8 - radius * .055;
         if (occupied.some(other => Math.hypot(other.x-x, other.y-y) < (other.size+size)*.65)) continue;
         occupied.push({x,y,size});
         context.save(); context.globalAlpha = Math.min(1,depth * 2) * .72;
@@ -218,7 +258,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   }, [active, still]);
 
   return <canvas ref={canvasRef} className="home-front__metro-globe"
-    role="img" aria-label="Stylized Portland metro globe with the Columbia and Willamette rivers and connections to Vancouver, Gresham, Oregon City, Beaverton and Hillsboro"
+    role="img" aria-label="Stylized Portland metro globe with the Columbia and Willamette rivers and the metro cities Vancouver, Gresham, Oregon City, Beaverton and Hillsboro"
     onPointerDown={event => { if(event.pointerType === 'touch') return; pointer.current = {id:event.pointerId,x:event.clientX}; event.currentTarget.setPointerCapture(event.pointerId); }}
     onPointerMove={event => { const drag = pointer.current; if (!drag || drag.id !== event.pointerId) return; angle.current = angle.current+(event.clientX-drag.x)/350; drag.x=event.clientX; redrawRef.current(); }}
     onPointerUp={() => { pointer.current=null; }} onPointerCancel={() => { pointer.current=null; }} onLostPointerCapture={() => { pointer.current=null; }}
