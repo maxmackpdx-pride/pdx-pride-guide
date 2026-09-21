@@ -1,3 +1,4 @@
+import {reuseSurfaceCache,surfaceCameraKey} from '../client/public/zaydar-map/render-budget.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,access} from 'node:fs/promises';
@@ -103,9 +104,9 @@ test('zoom changes only the pool projection; geometry stays anchored and never w
 test('sparse building tiles keep street sparkles at overview zooms through sixteen',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const roads=Array.from({length:100},(_,i)=>road([[-122.675+i*.0001,45.52],[-122.675+i*.0001,45.522]]));
-  const target={getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
+  const target={getCenter:()=>({lng:-122.67,lat:45.52}),getBearing:()=>0,getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
-    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
+    surfaceRevision:0,reuseSurfaceCache,surfaceCameraKey,surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
     createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });
   vm.runInContext(renderer.slice(renderer.indexOf('function updateSurfaces('),renderer.indexOf('function drawSurfaceReflections(')),context);

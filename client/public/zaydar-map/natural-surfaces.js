@@ -209,9 +209,9 @@ export function inwardDistances(mask,width,height) {
 export function createWaterBloom() {
   const surface=document.createElement('canvas'),interior=document.createElement('canvas'),reflection=document.createElement('canvas');
   const ctx=surface.getContext('2d',{willReadFrequently:true}),maskContext=interior.getContext('2d'),reflectionContext=reflection.getContext('2d');
-  let signature='',revision=0,reflectionSignature='',reflectionPaths=[];
+  let signature='',revision=0,reflectionSignature='',reflectionPaths=[],waterFeatures=null;
   return {
-    invalidate(){revision++;},
+    invalidate(){revision++;waterFeatures=null;},
     draw(output,map,width,height,fade,time=0,reduced=false,lightSources=[]){
       const center=map.getCenter();
       const key=[revision,width,height,center.lng,center.lat,map.getZoom(),map.getBearing(),map.getPitch()].join(':');
@@ -221,7 +221,7 @@ export function createWaterBloom() {
         surface.width=interior.width=reflection.width=Math.ceil(width/scale)+pad*2;
         surface.height=interior.height=reflection.height=Math.ceil(height/scale)+pad*2;
         ctx.fillStyle='#fff';
-        const features=map.querySourceFeatures('terrain',{sourceLayer:'water',filter:naturalWater});
+        const features=waterFeatures??(waterFeatures=map.querySourceFeatures('terrain',{sourceLayer:'water',filter:naturalWater}));
         // Fill all fragments into one union before computing distance: tile seams
         // are not shorelines. Even-odd polygon fill keeps islands dry.
         for(const feature of features){

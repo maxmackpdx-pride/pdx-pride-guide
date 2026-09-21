@@ -1,3 +1,4 @@
+import {mapPixelRatio} from '../client/public/zaydar-map/render-budget.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -43,7 +44,7 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  let options;
  const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('const waterBloom='));
  assert.throws(()=>vm.runInNewContext(prefix,{
-  mapzSurfaceStyle,structuredClone,
+  mapzSurfaceStyle,structuredClone,mapPixelRatio,
   window:{__zaydarStartup:{phase(){},fatal(){}}},
   mlcontour:{DemSource:class{setupMaplibre(){} get sharedDemProtocolUrl(){return 'dem://tiles';} contourProtocolUrl(){return 'contour://tiles';}}},
   // No document canvas probe should be needed before the real map is created.

@@ -70,7 +70,7 @@ export function parseHousingHologramGlb(buffer,heightMeters=120){
 function loadArrayBuffer(url){return new Promise((resolve,reject)=>{const request=new XMLHttpRequest();request.open('GET',url,true);request.responseType='arraybuffer';request.onload=()=>request.status===0||request.status>=200&&request.status<300?resolve(request.response):reject(Error(`HOUS hologram request failed (${request.status}).`));request.onerror=()=>reject(Error('HOUS hologram request failed.'));request.send();});}
 function rgb(color){return [1,3,5].map(start=>parseInt(color.slice(start,start+2),16)/255);}
 
-export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={matches:false}){
+export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={matches:false},{externallyClocked=false}={}){
   const models=new Map(Object.values(HOUSING_HOLOGRAM_MODELS).map(definition=>[definition.id,{...definition,loading:false,count:0}]));
   return {
     id:'housing-holograms',type:'custom',renderingMode:'3d',instances:[],layouts:new Map(),selected:null,disposed:false,
@@ -144,7 +144,7 @@ export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={mat
         const canvas=this.map.getCanvas();gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.uniform2f(this.screenShift,2*(layout.x??0)/canvas.clientWidth,2*(layout.lift??0)/canvas.clientHeight);gl.uniform3fv(this.color,rgb(instance.color));gl.uniform1f(this.phase,instance.phase);gl.drawArrays(gl.TRIANGLES,0,model.count);
       }
       gl.bindVertexArray(null);gl.blendFuncSeparate(srcRgb,dstRgb,srcAlpha,dstAlpha);gl.depthMask(depthMask);if(depth)gl.enable(gl.DEPTH_TEST);else gl.disable(gl.DEPTH_TEST);if(cull)gl.enable(gl.CULL_FACE);else gl.disable(gl.CULL_FACE);if(blend)gl.enable(gl.BLEND);else gl.disable(gl.BLEND);
-      if(!reduced.matches)this.map.triggerRepaint();
+      if(!reduced.matches&&!externallyClocked&&!(typeof document!=='undefined'&&document.hidden))this.map.triggerRepaint();
     },
     onRemove(map,gl){this.disposed=true;for(const model of models.values()){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.count=0;}gl.deleteProgram(this.program);this.instances=[];this.layouts.clear();this.map=null;}
   };

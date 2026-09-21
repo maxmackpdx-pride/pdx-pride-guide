@@ -1,3 +1,4 @@
+import {mapPixelRatio,reuseSurfaceCache,surfaceCameraKey} from './render-budget.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-nightlife';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
@@ -32,12 +33,13 @@ try{
  map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
    maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,maxPitch:72,
-   style:surfaceStyle});
+   style:surfaceStyle,pixelRatio:mapPixelRatio(window.devicePixelRatio)});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
 const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
 map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
-map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
+let surfaceRevision=0,surfaceRefreshTimer=0;
+map.on('sourcedata',event=>{if(event.sourceId==='terrain'&&event.sourceDataType!=='visibility'){surfaceRevision++;waterBloom.invalidate();scheduleFrame();clearTimeout(surfaceRefreshTimer);surfaceRefreshTimer=setTimeout(scheduleFrame,250);}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -55,7 +57,7 @@ const surfaceCache=new WeakMap();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
-const housingHolograms=createHousingHologramLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
+const housingHolograms=createHousingHologramLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced,{externallyClocked:true});
 const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
 const ambientSignals=createAmbientSignals(map,reduced);
@@ -71,8 +73,8 @@ map.on('load',()=>{
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
 });
 function updateSurfaces(target){
- const cached=surfaceCache.get(target),now=performance.now();
- if(cached && now-cached.time<1600)return cached;
+ const cached=surfaceCache.get(target),now=performance.now(),cameraKey=surfaceCameraKey(target,window.innerWidth,window.innerHeight);
+ if(reuseSurfaceCache(cached,now,cameraKey,surfaceRevision))return cached;
  if(!target.getLayer('bridge-decks'))return {buildings:[]};
  const buildings=[],seen=new Set();
  for(const f of target.querySourceFeatures('terrain',{sourceLayer:'building'})){
@@ -118,7 +120,7 @@ function updateSurfaces(target){
    const a=line[i-1],b=line[Math.min(i,line.length-1)];bridgeLights.push({type:'Feature',geometry:{type:'Point',coordinates:[(a[0]+b[0])/2,(a[1]+b[1])/2]},properties:{color:'#8fc8d4',isBridge:true}});
   }
  }
- const result={time:now,buildings,reflections,roofs,overviewRoads,bridgeLights:bridgeLights.slice(0,160)};surfaceCache.set(target,result);return result;
+ const result={time:now,cameraKey,revision:surfaceRevision,buildings,reflections,roofs,overviewRoads,bridgeLights:bridgeLights.slice(0,160)};surfaceCache.set(target,result);return result;
 }
 function drawSurfaceReflections(ctx,target,reflections,fade){
  const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686;
@@ -938,7 +940,7 @@ function onSceneInput(){
  exploration.noteActivity();
  scheduleFrame();
 }
-function onSceneResize(){cameraDirty=true;surfaceCache.delete(map);scheduleFrame();}
+function onSceneResize(){map.setPixelRatio(mapPixelRatio(window.devicePixelRatio));cameraDirty=true;surfaceCache.delete(map);scheduleFrame();}
 function onReducedChange(){last=0;clearLogoPointer();scheduleFrame();}
 for(const control of [opacityControl,pauseControl,speedControl])control.addEventListener('input',onSceneInput);
 window.addEventListener('resize',onSceneResize,{passive:true});
@@ -949,7 +951,7 @@ function onVisibilityChange(){
 }
 document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
- disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
+ disposed=true;clearTimeout(surfaceRefreshTimer);cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);

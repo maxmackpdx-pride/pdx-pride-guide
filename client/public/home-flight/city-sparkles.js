@@ -10,10 +10,12 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false,p
       this.time=time;this.still=still;
       if(this.points!==points) {
         this.points=points;
-        this.vertices=new Float32Array(points.flatMap(point=>{
+        this.vertices=new Float32Array(points.length*6);
+        let offset=0;for(const point of points){
           const p=maplibre.MercatorCoordinate.fromLngLat(point.coordinates,point.height+.8+elevation(point.coordinates));
-          return [(p.x-origin.x)/unit,(p.y-origin.y)/unit,p.z/unit,point.phase,point.rate,(point.star?1:0)+(point.white?2:0)];
-        }));
+          this.vertices[offset++]=(p.x-origin.x)/unit;this.vertices[offset++]=(p.y-origin.y)/unit;this.vertices[offset++]=p.z/unit;
+          this.vertices[offset++]=point.phase;this.vertices[offset++]=point.rate;this.vertices[offset++]=(point.star?1:0)+(point.white?2:0);
+        }
       }
       if(changed)this.map?.triggerRepaint();
     },
