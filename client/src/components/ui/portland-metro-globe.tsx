@@ -19,9 +19,19 @@ const PLACES = [
   { name: "Oregon City", lat: 45.3573, lon: -122.6068 },
   { name: "Beaverton", lat: 45.4871, lon: -122.8037 },
 ];
+// A continuous focus warp spreads the dense central metro around the sphere.
+// The map, labels, glitter and venue anchors all use this same transform.
+function warp(value: number, center: number, strength: number, inverse = false) {
+  const low=Math.atan((-1-center)*strength), high=Math.atan((1-center)*strength);
+  return inverse ? Math.tan(low+(value+1)*.5*(high-low))/strength+center
+    : (Math.atan((value-center)*strength)-low)/(high-low)*2-1;
+}
+const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
+const MAX_HOLOGRAMS = 6;
+type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
 type Point = { x: number; y: number; z: number; tone: number };
 function sphere(u: number, v: number, tone = 0): Point {
-  const longitude = u * Math.PI, latitude = v * Math.PI / 2;
+  const longitude = warp(u,-.15,5) * Math.PI, latitude = warp(v,.16,4) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
 }
 function placePoint(place: { lat: number; lon: number }) {
@@ -40,6 +50,10 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   const angle = useRef(0);
   const elapsedRef = useRef(0);
   const redrawRef = useRef(() => {});
+  const hologramStates = useRef(new Map<number,HologramState>());
+  const lastShown = useRef(new Map<number,number>());
+  const lastFrame = useRef(0);
+  const nextOpen = useRef(0);
   const pointer = useRef<{ id: number; x: number } | null>(null);
 
   useEffect(() => {
@@ -51,6 +65,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let width = 0, height = 0;
     let points: Point[] = [];
     const abort = new AbortController();
+    let loadingArtwork = 0;
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
       for (const [index, venue] of rows.entries()) {
@@ -62,7 +77,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         if (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north) continue;
         const image = new Image();
         const hologram = { point: placePoint({ lat, lon }), image: document.createElement("canvas"), color: COLORS[index % COLORS.length], phase: index * 2.39996 };
+        loadingArtwork++;
         image.onload = () => {
+          loadingArtwork--;
           if (disposed) return;
           const ink = hologram.image;
           const sampling = Math.max(image.naturalWidth,image.naturalHeight) < 256 ? 4 : 1;
@@ -102,6 +119,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           hologram.image=clean;
           venues.push(hologram); draw();
         };
+        image.onerror = () => { loadingArtwork--; if (!disposed) draw(); };
         image.src = `${__ZAYDAR_BASE__}/${venue.logo.replace(/^\.\//, '')}`;
       }
     }).catch(() => { /* Geography remains available if venue artwork cannot load. */ });
@@ -171,50 +189,93 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillText(river.name,p.x,p.y);
       }
       context.shadowBlur=0;
-      // Keep holograms fully expanded; only the sphere occludes the far side.
-      // Each head lifts from its actual surface position, without a separate orbit.
-      const visible = venues.map(venue => ({ ...venue, anchor: project(venue.point) }))
-        .filter(venue => venue.anchor.z > .08)
-        .sort((a,b) => a.phase - b.phase);
+      // Six slots include opening AND closing artwork; no replacement appears
+      // until the old logo has finished retracting into its geographic anchor.
+      const projected = venues.map(venue => ({ ...venue, anchor: project(venue.point) }));
+      const states = hologramStates.current;
+      const dt = Math.min(64,Math.max(0,elapsed-lastFrame.current));
+      lastFrame.current=elapsed;
+      if (!loadingArtwork) {
+        for (const [key,state] of states) {
+          const venue=projected.find(item=>item.phase===key);
+          if (!venue) continue;
+          if (!still && (venue.anchor.z<.18 || elapsed-state.openedAt>13000+(key%5)*700)) state.closing=true;
+          if (!still) state.progress=Math.max(0,Math.min(1,state.progress+(state.closing?-1:1)*dt/1500));
+          if (state.closing && state.progress===0) { states.delete(key); lastShown.current.set(key,elapsed); }
+        }
+        const candidates = projected.filter(venue=>venue.anchor.z>.3 && !states.has(venue.phase));
+        // Farthest-first picks keep the open set distributed over the visible
+        // geography, while a cooldown gives other venues a turn.
+        while (states.size<MAX_HOLOGRAMS && candidates.length && (still || elapsed>=nextOpen.current)) {
+          let best=0, bestScore=-Infinity;
+          candidates.forEach((venue,index)=>{
+            const distance=states.size ? Math.min(...[...states.keys()].map(key=>{
+              const other=projected.find(item=>item.phase===key);
+              return other ? Math.hypot(venue.anchor.x-other.anchor.x,venue.anchor.y-other.anchor.y)/radius : 2;
+            })) : venue.anchor.z;
+            const recentlyShown=lastShown.current.get(venue.phase);
+            const cooldown=recentlyShown===undefined?0:Math.max(0,1-(elapsed-recentlyShown)/30000)*2;
+            const score=distance-cooldown;
+            if(score>bestScore){best=index;bestScore=score;}
+          });
+          const venue=candidates.splice(best,1)[0];
+          states.set(venue.phase,{progress:still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0});
+          nextOpen.current=elapsed+250;
+        }
+      }
+      const visible=projected.filter(venue=>states.has(venue.phase) && venue.anchor.z>0)
+        .sort((a,b)=>a.phase-b.phase);
       const occupied: { x: number; y: number; w: number; h: number }[] = [];
+      let renderedCount=0;
       for (const venue of visible) {
         const { anchor, image, color } = venue;
-        const size = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
-        const fit = Math.min(size/image.width,size*.65/image.height);
-        const w=image.width*fit,h=image.height*fit;
-        const head = project(venue.point, 1.06);
-        const preferred = { x:head.x, y:head.y-size*.45-radius*.025 };
-        let x=preferred.x, y=preferred.y;
-        // Move overlapping heads, rather than closing/collapsing holograms.
-        // Every beam still terminates at its original geographic anchor.
-        for (let attempt=0;attempt<240;attempt++) {
-          const distance=Math.sqrt(attempt)*14;
-          const direction=attempt*2.399963;
-          const candidateX=Math.max(w/2+8,Math.min(width-w/2-8,preferred.x+Math.cos(direction)*distance));
-          const candidateY=Math.max(headerInset+h/2+8,Math.min(height-footerInset-h/2-8,preferred.y+Math.sin(direction)*distance));
-          if (occupied.some(other => Math.abs(other.x-candidateX)<(other.w+w)/2+12 && Math.abs(other.y-candidateY)<(other.h+h)/2+12)) continue;
-          x=candidateX; y=candidateY; break;
+        const state=states.get(venue.phase)!;
+        const opening=smooth(state.progress);
+        if (opening<=0) continue;
+        const visibility=opening*smooth(anchor.z/.18);
+        const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
+        const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
+        const fullW=image.width*fullFit, fullH=image.height*fullFit;
+        const head = project(venue.point,1.06);
+        const preferred={x:head.x,y:head.y-fullSize*.45-radius*.025};
+        let targetX=preferred.x,targetY=preferred.y;
+        for (let attempt=0;attempt<80;attempt++) {
+          const distance=Math.sqrt(attempt)*10, direction=attempt*2.399963;
+          const x=Math.max(fullW/2+8,Math.min(width-fullW/2-8,preferred.x+Math.cos(direction)*distance));
+          const y=Math.max(headerInset+fullH/2+8,Math.min(height-footerInset-fullH/2-8,preferred.y+Math.sin(direction)*distance));
+          if(occupied.some(other=>Math.abs(other.x-x)<(other.w+fullW)/2+10 && Math.abs(other.y-y)<(other.h+fullH)/2+10))continue;
+          targetX=x;targetY=y;break;
         }
-        occupied.push({x,y,w,h});
-        context.save(); context.globalAlpha = .72;
+        const follow=still?1:1-Math.exp(-dt/220);
+        state.offsetX+=(targetX-preferred.x-state.offsetX)*follow;
+        state.offsetY+=(targetY-preferred.y-state.offsetY)*follow;
+        occupied.push({x:preferred.x+state.offsetX,y:preferred.y+state.offsetY,w:fullW,h:fullH});
+        // Size, opacity and lift share one eased curve, landing at the exact pin.
+        const x=anchor.x+(preferred.x+state.offsetX-anchor.x)*opening;
+        const y=anchor.y+(preferred.y+state.offsetY-anchor.y)*opening;
+        const size=fullSize*opening,w=fullW*opening,h=fullH*opening;
+        renderedCount++;
+        context.save(); context.globalAlpha = visibility*.72;
         const beam = context.createLinearGradient(anchor.x,anchor.y,x,y);
         beam.addColorStop(0,`${color}08`); beam.addColorStop(1,`${color}65`);
         context.fillStyle = beam;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x-size*.38,y); context.lineTo(x+size*.38,y); context.closePath(); context.fill();
         context.strokeStyle=color; context.lineWidth=.6;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x,y); context.stroke();
-        context.globalAlpha = 1;
+        context.globalAlpha = visibility;
         context.imageSmoothingEnabled=true; context.imageSmoothingQuality="high";
         context.shadowBlur=0;
         context.drawImage(image,x-w/2,y-h/2,w,h);
         context.shadowBlur=0;
-        const corner=5, left=x-w/2-5,right=x+w/2+5,top=y-h/2-5,bottom=y+h/2+5;
+        const corner=5*opening, left=x-w/2-5,right=x+w/2+5,top=y-h/2-5,bottom=y+h/2+5;
         context.beginPath();
         for (const [xx, sx] of [[left,1],[right,-1]]) for (const [yy,sy] of [[top,1],[bottom,-1]]) {
           context.moveTo(xx,yy+sy*corner); context.lineTo(xx,yy); context.lineTo(xx+sx*corner,yy);
         }
         context.stroke(); context.restore();
       }
+      canvas.dataset.openHolograms=String(renderedCount);
+      canvas.dataset.hologramSlots=String(states.size);
     };
     const resize = () => {
       const rect = canvas.getBoundingClientRect(); width = rect.width; height = rect.height;
@@ -223,7 +284,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       context.setTransform(dpr,0,0,dpr,0,0); draw();
     };
     const animate = (now: number) => {
-      if (now - previous >= 32) {
+      if (now - previous >= 16) {
         if (previous && !pointer.current) elapsed += Math.min(now-previous,64);
         previous = now; elapsedRef.current = elapsed; draw();
       }
@@ -238,10 +299,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const data = ctx.getImageData(0,0,1024,1024).data;
       points = [];
       for (let row = -88; row <= 88; row++) {
-        const v = row/90;
-        const columns = Math.max(8,Math.round(280*Math.cos(v*Math.PI/2)));
+        const latitude = row/90;
+        const v = warp(latitude,.16,4,true);
+        const columns = Math.max(8,Math.round(280*Math.cos(latitude*Math.PI/2)));
         for(let col = 0; col <= columns; col++) {
-          const u = col/columns*2-1;
+          const u = warp(col/columns*2-1,-.15,5,true);
           const px = Math.round((CENTER[0]-161+u*SPAN[0])*256);
           const py = Math.round((CENTER[1]-364-v*SPAN[1])*256);
           const pixel = (py*1024+px)*4;
