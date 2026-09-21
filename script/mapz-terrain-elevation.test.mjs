@@ -6,9 +6,9 @@ import {groundLightMesh} from '../client/public/zaydar-map/ground-light-pools.js
 test('shared anchors scale raw DEM once and avoid per-frame resampling', () => {
   let reads = 0;
   const terrain = createTerrainSampler(() => { reads++; return 200; });
-  for (let frame = 0; frame < 1800; frame++) assert.equal(terrain.sample([-122.7, 45.5]).height, 70);
+  for (let frame = 0; frame < 1800; frame++) assert.equal(terrain.sample([-122.7, 45.5]).height, 100);
   assert.equal(reads, 1);
-  assert.equal(terrain.sample({lng:-122.7, lat:45.5}).height, 70);
+  assert.equal(terrain.sample({lng:-122.7, lat:45.5}).height, 100);
   assert.equal(reads, 1);
 });
 test('missing DEM retains last known elevation and newly available tiles refresh explicitly', () => {
@@ -16,11 +16,11 @@ test('missing DEM retains last known elevation and newly available tiles refresh
   const terrain = createTerrainSampler(() => raw);
   assert.deepEqual(terrain.sample([0,0]), {revision:0, height:0, available:false});
   raw = 100; terrain.invalidate();
-  assert.equal(terrain.sample([0,0]).height, 35);
+  assert.equal(terrain.sample([0,0]).height, 50);
   raw = null; terrain.invalidate();
-  assert.equal(terrain.sample([0,0]).height, 35);
+  assert.equal(terrain.sample([0,0]).height, 50);
   raw = NaN; terrain.invalidate();
-  assert.equal(terrain.sample([0,0]).height, 35);
+  assert.equal(terrain.sample([0,0]).height, 50);
 });
 test('terrain cache is bounded and preserves recently used anchors', () => {
   let reads = 0;

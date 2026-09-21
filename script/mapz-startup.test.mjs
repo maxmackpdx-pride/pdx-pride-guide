@@ -51,7 +51,7 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
  }),error=>error===reached);
  assert.ok(options.pitch>0);
- assert.equal(options.style.terrain.exaggeration,.35);
+ assert.equal(options.style.terrain.exaggeration,.5);
  assert.deepEqual(validateStyleMin(options.style).map(error=>error.message),[]);
 });
 

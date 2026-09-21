@@ -1,6 +1,6 @@
 // This sampler consumes raw DEM meters, not queryTerrainElevation values that
 // may already include the map's terrain strength. Scale exactly once.
-export const TERRAIN_STRENGTH = 0.35;
+export const TERRAIN_STRENGTH = 0.5;
 
 export function createTerrainSampler(readRaw, {strength = TERRAIN_STRENGTH, capacity = 4096} = {}) {
   if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new RangeError('Terrain strength must be between zero and one');
