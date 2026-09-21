@@ -9,7 +9,7 @@ const expected={
   'darcelle-plaza-rainbow-hydrants':[5.3,.755,1.09],
   'darcelle-xv-marquee':[4.68,.985,2.095],
   'harvey-milk-street-sign':[2.1,.245,2.985],
-  'paul-bunyan-kenton':[3.5,2.818,8.84],
+  'paul-bunyan-kenton':[3.5,2.818,9.45],
   'skidmore-fountain':[4.7,4.7,5.21],
   'weather-machine':[2.07,1.8,9.993],
   'white-stag-portland-sign':[12.537,3.299,14.617],
@@ -33,6 +33,15 @@ test('landmarks use requested scale, fixed GPS anchors, and the R2-D2 scan/stati
   assert.equal(welcome.scale,3);assert.deepEqual(welcome.center,[-122.67052,45.52339]);
   assert.ok(PORTLAND_LANDMARKS.filter(landmark=>landmark!==welcome).every(landmark=>landmark.scale===1.75&&landmark.center.every(Number.isFinite)));
   const layer=await readFile(new URL('../client/public/zaydar-map/portland-landmarks.js',import.meta.url),'utf8'),renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  assert.match(layer,/float scan=/);assert.match(layer,/float snow=/);assert.match(layer,/float dropout=/);assert.match(layer,/depthMask\(false\)/);
+  assert.match(layer,/float scan=/);assert.match(layer,/float snow=/);assert.match(layer,/float dropout=/);assert.match(layer,/disable\(gl\.DEPTH_TEST\)/);assert.match(layer,/depthMask\(false\)/);
   assert.match(renderer,/map\.addLayer\(portlandLandmarks\)/);
+});
+
+test('directional landmarks face their documented real-world viewing direction',()=>{
+  const byId=new Map(PORTLAND_LANDMARKS.map(landmark=>[landmark.id,landmark]));
+  assert.equal(byId.get('paul-bunyan-kenton').bearing,180,'authored south-facing mesh rotates to geographic north');
+  assert.equal(byId.get('paul-bunyan-kenton').dimensions[2],9.45,'31-foot statue height');
+  assert.equal(byId.get('white-stag-portland-sign').bearing,-90,'sign faces east toward westbound Burnside Bridge traffic');
+  assert.equal(byId.get('darcelle-xv-marquee').bearing,-90,'marquee faces east from the west side of NW 3rd');
+  assert.ok(byId.get('darcelle-xv-marquee').center[0]>-122.67311,'marquee is fitted to the street-facing facade edge');
 });
