@@ -43,7 +43,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [exploring, setExploring] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState(0);
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
@@ -82,14 +81,9 @@ export default function HomeStage({ afterWelcome }: Props) {
   return (
     <div className="home-front" id="top">
       <section className="home-front__welcome" aria-labelledby="home-front-title">
-        <HomeFlight enabled={logoReady} paused={showAuth} onExploringChange={setExploring} />
-        <div className="home-front__backdrop-dim" data-exploring={exploring} aria-hidden="true" />
-        <div
-          className="home-front__hero"
-          data-exploring={exploring}
-          aria-hidden={exploring || undefined}
-          ref={element => { if (element) element.inert = exploring; }}
-        >
+        <HomeFlight enabled={logoReady} paused={showAuth} />
+        <div className="home-front__backdrop-dim" aria-hidden="true" />
+        <div className="home-front__hero">
           <div className="home-front__brand-group">
             <h1 id="home-front-title" className="sr-only">Zaylist</h1>
             <div className="home-front__mark">
