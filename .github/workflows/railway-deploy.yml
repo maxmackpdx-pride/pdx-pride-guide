@@ -92,4 +92,4 @@ jobs:
       - name: Record failed Foundation release attestation
         if: failure() && steps.prepare_publication.outputs.publication_id != ''
         continue-on-error: true
-        run: npm run --silent design:publication -- fail --state "$RUNNER_TEMP/design-publication-state.json" --reason product-deployment-or-verification-failed
+        run: npm run --silent design:publication -- fail --state "$RUNNER_TEMP/design-publication-state.json" --reason verification-failed
