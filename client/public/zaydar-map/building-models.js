@@ -2,7 +2,8 @@ import {BUILDING_FILL} from './natural-surfaces.js';
 export const BUILDING_MODEL_MIN_ZOOM=12;
 const files=[
  ['big-pink-us-bancorp-tower',45.52280,-122.67620,110],
- ['moda-center',45.53167,-122.66667,15],
+ // Arena long axis from the mapped footprint (OpenFreeMap building 209934310).
+ ['moda-center',45.53167,-122.66667,351.87],
  ['oregon-convention-center',45.52830,-122.66310,135],
  ['pioneer-courthouse',45.51862,-122.67836,20],
  ['pittock-mansion',45.52500,-122.71639,90],
