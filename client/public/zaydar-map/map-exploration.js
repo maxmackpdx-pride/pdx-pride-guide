@@ -1,7 +1,22 @@
+export function nextFlightPitchOffset(current,deltaY) {
+  if(!Number.isFinite(deltaY)||deltaY===0)return Math.max(-20,Math.min(20,current));
+  const step=Math.min(3,Math.max(.35,Math.abs(deltaY)*.025));
+  return Math.max(-20,Math.min(20,current+Math.sign(deltaY)*step));
+}
+export const IOS_MAP_HANDLERS=['dragPan','dragRotate','scrollZoom','touchZoomRotate','touchPitch','keyboard','doubleClickZoom'];
+export function trackpadGesture(event) {
+  if(event.ctrlKey)return 'zoom';
+  return Number.isFinite(event.deltaX)&&Number.isFinite(event.deltaY)&&(event.deltaX||event.deltaY)?'pan':'none';
+}
+export function trackpadPanDelta(delta,deltaMode=0) {
+  const multiplier=deltaMode===1?16:deltaMode===2?120:1;
+  return delta*multiplier;
+}
+
 // One idle timer; native map gestures stay disabled during the guided flight.
-export function createMapExploration({map, pauseControl, message, reduced, isReady, onExplore, returnCamera, onResume, onMove}) {
+export function createMapExploration({map, pauseControl, message, reduced, isReady, onExplore, onFlightPitch, returnCamera, onResume, onMove}) {
   const container=map.getCanvasContainer(),canvas=map.getCanvas();
-  const handlers=['dragPan','dragRotate','scrollZoom','touchZoomRotate','keyboard','doubleClickZoom'];
+  const handlers=IOS_MAP_HANDLERS;
   const pointers=new Set();
   let mode='flight',idleTimer=0,returnEnd=null,disposed=false,instructionDismissed=false;
   try{instructionDismissed=localStorage.getItem('zaydar-exploration-seen')==='1';}catch{}
@@ -50,7 +65,18 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   }
   function pointerMove(event){if(pointers.has(event.pointerId))noteActivity();}
   function pointerUp(event){if(pointers.delete(event.pointerId))noteActivity();}
-  function wheel(){explore();}
+  function wheel(event){
+    if(mode==='flight'){
+      event.preventDefault();event.stopPropagation();onFlightPitch(event.deltaY);noteActivity();return;
+    }
+    explore();
+    const gesture=trackpadGesture(event);
+    if(gesture==='pan'){
+      event.preventDefault();event.stopPropagation();
+      map.panBy([trackpadPanDelta(event.deltaX,event.deltaMode),trackpadPanDelta(event.deltaY,event.deltaMode)],{duration:0});
+      noteActivity();onMove();
+    }
+  }
   function keyDown(event) {
     if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','_'].includes(event.key))explore();
   }
@@ -79,7 +105,7 @@ export function createMapExploration({map, pauseControl, message, reduced, isRea
   }
   setGestures(false);
   container.addEventListener('pointerdown',pointerDown,{capture:true,passive:true});
-  container.addEventListener('wheel',wheel,{capture:true,passive:true});
+  container.addEventListener('wheel',wheel,{capture:true,passive:false});
   container.addEventListener('keydown',keyDown,true);
   window.addEventListener('pointermove',pointerMove,{passive:true});
   window.addEventListener('pointerup',pointerUp,{passive:true});

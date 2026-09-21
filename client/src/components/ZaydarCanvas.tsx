@@ -4,12 +4,12 @@ import {forwardRef,useCallback,useEffect,useImperativeHandle,useRef,useState} fr
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string};
-type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
+type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260920-clean-waterways';
+const MAP_SRC='/zaydar-map/index.html?v=20260920-region-time';
 const MAX_3D_ATTEMPTS=3;
 
-const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,attempt,initialView,onFailure,onVisible,onSelect,onMode,onView},ref){
+const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onMode,onView},ref){
  const [labels,setLabels]=useState<EventLabel[]>([]);
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onMode,onView});latest.current={onFailure,onVisible,onSelect,onMode,onView};
  const failed=useRef(false),restoreView=useRef(initialView);
@@ -58,6 +58,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  useEffect(()=>{if(ready&&restoreView.current)post('view',{center:restoreView.current.center,zoom:restoreView.current.zoom});},[ready]);
  useEffect(()=>{if(ready)post('select',{key:selected});},[ready,selected]);
  useEffect(()=>{if(ready)post('labels',{enabled:labelsEnabled});},[ready,labelsEnabled]);
+ useEffect(()=>{if(ready)post('time',{timestamp:viewTime});},[ready,viewTime]);
  return <><iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas"/>{labels.map(label=><ZaydarEventLabel key={label.key} label={label} onSelect={onSelect}/>)}</>;
 });
 

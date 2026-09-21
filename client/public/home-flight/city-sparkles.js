@@ -40,7 +40,8 @@ export function createCitySparkles(maplibre,elevation=()=>0) {
           float lit=step(.2,noise(beat*1.93+a_light.x*7.31));
           float twinkle=pow(max(0.,sin(fract(clock)*3.14159265)),4.)*peak*lit;
           v_wave=mix(twinkle,.32,u_still);v_star=a_light.z;
-          gl_PointSize=(4.+v_wave*5.)*u_dpr;
+          float bloom=v_star*smoothstep(.58,.92,v_wave);
+          gl_PointSize=(3.2+v_wave*3.1+bloom*6.8)*u_dpr;
         }`);
       const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
         precision highp float; in float v_wave; in float v_star; out vec4 color;

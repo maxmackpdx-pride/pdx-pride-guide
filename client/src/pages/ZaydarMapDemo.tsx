@@ -8,6 +8,7 @@ import ZaydarLayerSheet, { type ZaydarLayer } from "@/components/ZaydarLayerShee
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, Navigation } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 
 import type { CommunitySummary } from "@shared/community";
@@ -26,6 +27,7 @@ import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLay
 import { HOUSING_TYPE_LABEL, type HousingType } from "@shared/housing";
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
+import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
 import "./LivingMap.css";
 import "./ZaydarMapDemo.css";
 import "@/components/ZaydarLayerSheet.css";
@@ -100,6 +102,36 @@ function portlandCalendarDay(value: string | number | Date) {
     month: "2-digit",
     day: "2-digit",
   }).format(date);
+}
+function dateTimeLocalValue(value: number) {
+  const date = new Date(value);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+function pointInPolygon(lat: number, lng: number, polygon: [number, number][]) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [aLng, aLat] = polygon[i], [bLng, bLat] = polygon[j];
+    if ((aLat > lat) !== (bLat > lat) && lng < (bLng - aLng) * (lat - aLat) / (bLat - aLat) + aLng) inside = !inside;
+  }
+  return inside;
+}
+const DOWNTOWN_BOUNDARY: [number, number][] = [[-122.707,45.507],[-122.697,45.537],[-122.67,45.538],[-122.657,45.512],[-122.676,45.497]];
+const NORTH_PORTLAND_BOUNDARY: [number, number][] = [[-122.81,45.61],[-122.76,45.67],[-122.65,45.67],[-122.64,45.602],[-122.665,45.568],[-122.69,45.55],[-122.735,45.56],[-122.79,45.58]];
+function riverLongitude(lat: number) {
+  const points: [number, number][] = [[45.45,-122.66],[45.5,-122.665],[45.53,-122.675],[45.56,-122.7],[45.6,-122.75]];
+  for (let i = 1; i < points.length; i++) if (lat <= points[i][0]) {
+    const [aLat,aLng]=points[i-1],[bLat,bLng]=points[i],mix=(lat-aLat)/(bLat-aLat);
+    return aLng+(bLng-aLng)*mix;
+  }
+  return points.at(-1)![1];
+}
+function portlandRegion([lat,lng]: [number, number]) {
+  if (pointInPolygon(lat,lng,DOWNTOWN_BOUNDARY)) return "Downtown";
+  if (pointInPolygon(lat,lng,NORTH_PORTLAND_BOUNDARY)) return "North Portland";
+  const west = lng < riverLongitude(lat), north = lat >= 45.523;
+  if (west) return north ? "Northwest" : "Southwest";
+  return north ? "Northeast" : "Southeast";
 }
 function placeMarks(places: Place[]): Mark[] {
   return places.flatMap((place) => {
@@ -221,6 +253,7 @@ function useDesktop() {
 }
 
 export default function ZaydarMapDemo() {
+  const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [query] = useState(() => mapSearchParams().get("q") || "");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(() => readTimeFilter(mapSearchParams()));
@@ -234,7 +267,8 @@ export default function ZaydarMapDemo() {
   const [placeTypes, setPlaceTypes] = useState<string[]>(() => [...ZAYDAR_PLACE_TYPE_OPTIONS]);
   const [eventTag, setEventTag] = useState<string | null>(null);
   const [boardKinds, setBoardKinds] = useState(() => new Set(["Gigz", "Giftz", "Sellz"]));
-  const [clock, setClock] = useState("");
+  const [clockNow, setClockNow] = useState(() => Date.now());
+  const [previewDateTime, setPreviewDateTime] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -246,14 +280,33 @@ export default function ZaydarMapDemo() {
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<ZaydarHandle | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
+  const timeInputRef = useRef<HTMLInputElement | null>(null);
 
   const [mapHeight, setMapHeight] = useState<number>();
   const desktop = useDesktop();
   const [labels,setLabels]=useState(false);
+  const viewTimestamp = useMemo(() => {
+    const selected = previewDateTime ? new Date(previewDateTime).getTime() : NaN;
+    return Number.isFinite(selected) ? selected : clockNow;
+  }, [previewDateTime, clockNow]);
+  const regionLabel = useMemo(() => portlandRegion(mapCenter), [mapCenter]);
+  const mapTimeLabel = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles", month: previewDateTime ? "short" : undefined, day: previewDateTime ? "numeric" : undefined,
+    hour: "numeric", minute: "2-digit",
+  }).format(viewTimestamp), [viewTimestamp, previewDateTime]);
+  const locationAvatar = useMemo(() => {
+    const option = AVATAR_EMOJI_OPTIONS.find(item => item.id === (user?.avatarChoice || 1)) || AVATAR_EMOJI_OPTIONS[0];
+    return {
+      url: user ? (user.photoUrl || option.img || "") : "/brand/zaylist-avatar.jpg",
+      initial: (user?.displayName || user?.username || "Z").trim().slice(0, 1).toUpperCase(),
+      background: option.bg || "#00FFFF",
+      ring: normalizeAvatarRing(user?.avatarRing),
+    };
+  }, [user]);
 
 
   useEffect(() => {
-    const update = () => setClock(new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" }).format(new Date()));
+    const update = () => setClockNow(Date.now());
     update();
     const timer = window.setInterval(update, 30_000);
     return () => window.clearInterval(timer);
@@ -284,13 +337,13 @@ export default function ZaydarMapDemo() {
       const point: [number, number] = [position.coords.latitude, position.coords.longitude];
       if(point[0]<45.2||point[0]>45.85||point[1]<-123.15||point[1]>-122.15){setLocateError("You’re outside this Portland metro demo.");setLocating(false);return;}
       setMapCenter(point);
-      mapRef.current?.send("locate", { coordinates: [point[1], point[0]] });
+      mapRef.current?.send("locate", { coordinates: [point[1], point[0]], avatar: locationAvatar });
       setLocating(false);
     }, () => {
       setLocateError("We could not find your location.");
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
-  }, []);
+  }, [locationAvatar]);
   const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: communities = [] } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
@@ -318,8 +371,8 @@ export default function ZaydarMapDemo() {
   const visibleEvents = useMemo(() => events.filter(e => {
     if (!mapCoordinates(e.lat, e.lng)) return false;
     if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
-    return matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd);
-  }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, clock]);
+    return matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd, viewTimestamp);
+  }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, viewTimestamp]);
   const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
   const mapPlaces = useMemo(() => visiblePlaces.filter(place => placeTypes.includes(zaydarPlaceType(place))), [visiblePlaces, placeTypes]);
   const nearbyPlaces = useMemo(() => mapPlaces
@@ -330,7 +383,7 @@ export default function ZaydarMapDemo() {
     .sort((a, b) => a.distance - b.distance)
     .map(entry => entry.place), [mapPlaces, mapCenter]);
   const todayEvents = useMemo(() => {
-    const today = portlandCalendarDay(Date.now());
+    const today = portlandCalendarDay(viewTimestamp);
     return events.filter(e => {
       if (!finite(e.lat) || !finite(e.lng)) return false;
       if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
@@ -338,7 +391,7 @@ export default function ZaydarMapDemo() {
       const endDay = portlandCalendarDay(e.dateEnd) || startDay;
       return Boolean(startDay && startDay <= today && endDay >= today);
     }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
-  }, [events, q]);
+  }, [events, q, viewTimestamp]);
   const boardRows = useMemo(() => ([
     ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
     ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
@@ -504,8 +557,13 @@ export default function ZaydarMapDemo() {
   });
   const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} onSelect={onSceneSelect} onView={view=>setMapCenter(view.center)} />
-    <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`Downtown Portland, ${clock}`}><strong>Downtown</strong><span>{clock}</span></div>
+    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(view.center)} />
+    <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
+      <strong>{regionLabel}</strong>
+      <button type="button" className="zaydar-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
+      <input ref={timeInputRef} className="zaydar-map-time-input" type="datetime-local" min={dateTimeLocalValue(clockNow)} value={previewDateTime} onChange={event => setPreviewDateTime(event.target.value)} aria-label="Future map date and time" />
+      {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
+    </div>
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
       <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
