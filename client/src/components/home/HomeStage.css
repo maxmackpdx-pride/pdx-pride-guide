@@ -115,3 +115,9 @@ html.calm-mode .home-front__worlds-grid,:root[data-calm="true"] .home-front__wor
 .home-front__identity-cycle[data-still="true"] { animation:none; }
 @keyframes homeFrontIdentityOut { from { opacity:1; transform:none; } to { opacity:0; transform:none; } }
 @media (prefers-reduced-motion:reduce) { .home-front__identity-cycle { animation:none; } }
+
+/* Portland's local geography with holograms and glitter on a dotted sphere. */
+.home-front__flight--globe { background:#000; }
+.home-front__metro-globe { position:absolute; inset:0; display:block; width:100%; height:100%; cursor:grab; touch-action:pan-y; }
+.home-front__metro-globe:active { cursor:grabbing; }
+.home-front__flight--globe .home-front__flight-credit { font-size:9px; opacity:.8; }
