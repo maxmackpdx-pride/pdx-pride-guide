@@ -165,6 +165,18 @@ app.use(
   }),
 );
 
+// The Foundation Design Guide embeds this one production-rendered specimen
+// route. Every other Zaylist page keeps Helmet's default same-origin framing.
+app.use("/design-system/specimen", (_req, res, next) => {
+  res.removeHeader("X-Frame-Options");
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors 'self' https://zaylist-foundation-library.maxmackpdx.workers.dev",
+  );
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  next();
+});
+
 // Rate limiting (skipped for local dev + preview:local smoke so repeated runs do not 429)
 const rateLimitSkipDev = () =>
   process.env.NODE_ENV === "development" || process.env.LOCAL_PREVIEW === "1";

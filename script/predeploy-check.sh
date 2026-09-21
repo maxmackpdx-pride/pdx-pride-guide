@@ -56,6 +56,9 @@ fi
 # founder-locked as a dedicated lesbian/LGBTQ+ venue, and its unreliable direct
 # schedule stays out of scraper registries.
 if [[ -d "node_modules" ]] || [[ -n "${CI:-}" ]]; then
+  echo "predeploy: verifying connected Design API component identities…"
+  node --import tsx script/smoke-design-component-registry.ts
+
   echo "predeploy: running QSearch identity guards…"
   node --import tsx script/smoke-qsearch-identity.ts
   node --import tsx script/smoke-sports-bra.ts

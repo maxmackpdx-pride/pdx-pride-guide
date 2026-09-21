@@ -80,6 +80,7 @@ const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
 const Outz = lazyWithReload(() => import("./pages/Outz"));
 const OutzPlace = lazyWithReload(() => import("./pages/OutzPlace"));
 const DesignSystemSandbox = lazyWithReload(() => import("./pages/DesignSystemSandbox"));
+const DesignComponentSpecimen = lazyWithReload(() => import("./pages/DesignComponentSpecimen"));
 const ZIndex = lazyWithReload(() => import("./pages/ZIndex"));
 const Community = lazyWithReload(() => import("./pages/Community"));
 const MemberProfile = lazyWithReload(() => import("./pages/MemberProfile"));
@@ -96,15 +97,16 @@ function isProfilePath(path: string) {
 
 function AppLayout() {
   const [location] = useLocation();
+  const pathname = location.split("?")[0];
   const hub = isHubPath(location);
   // Root scope also reaches portaled account dialogs. Identity/data accents stay local.
   useEffect(() => {
-    const path = location.split("?")[0];
+    const path = pathname;
     document.documentElement.dataset.actionContext = path === "/admin" ? "admin"
       : path === "/outz/rooster-rock" ? "rooster"
       : path === "/outz/sauvie-island" ? "sauvie"
       : isHubPath(path) || path.startsWith("/settings/") ? "hub" : "public";
-  }, [location]);
+  }, [pathname]);
   const profile = isProfilePath(location);
   const livingMap = ["/map", "/map-demo"].includes(location.split("?")[0]);
   return (
@@ -212,6 +214,25 @@ function AppLayout() {
 }
 
 export default function App() {
+  // The Design Guide embeds this route as a production component specimen.
+  // Keep the component inside the real product theme/router/query contexts, but
+  // do not mount product chrome, account gates, analytics, prompts, or nudges in
+  // the guide iframe.
+  if (window.location.pathname.replace(/\/+$/, "") === "/design-system/specimen") {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <Router>
+            <ErrorBoundary>
+              <Suspense fallback={<SpectrumLoader variant="full" label="Loading component" />}>
+                <DesignComponentSpecimen />
+              </Suspense>
+            </ErrorBoundary>
+          </Router>
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+  }
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

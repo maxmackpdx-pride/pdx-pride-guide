@@ -105,7 +105,12 @@ import { localUploadToDataUrl, visionFlyerToDrafts } from "./qsearch/vision";
 import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./qsearch/instagram";
 import { buildScanCandidates } from "./qsearch/analyze";
 import { saveCandidates } from "./qsearch/store";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import {
+  DESIGN_COMPONENT_REGISTRY,
+  DESIGN_COMPONENT_REGISTRY_SCHEMA,
+  DESIGN_COMPONENT_SOURCE_REPOSITORY,
+} from "@shared/designComponentRegistry";
 import {
   COMMUNITY_STANDARDS_VERSION,
   COMMUNITY_STANDARDS_DECLINE_URL,
@@ -1355,6 +1360,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
       null;
     res.setHeader("Cache-Control", "public, max-age=60");
     res.json(buildTipLinks({ stripePaymentLink: stripe, venmoHandle }));
+  });
+
+  app.get("/api/design-system/v1/components", (_req, res) => {
+    const revisionValue = String(
+      process.env.RAILWAY_GIT_COMMIT_SHA || process.env.GIT_COMMIT || "",
+    ).trim();
+    const sourceRevision = /^[0-9a-f]{40}$/i.test(revisionValue) ? revisionValue.toLowerCase() : null;
+    const registryChecksum = createHash("sha256")
+      .update(JSON.stringify(DESIGN_COMPONENT_REGISTRY))
+      .digest("hex");
+    res.setHeader("Access-Control-Allow-Origin", "https://zaylist-foundation-library.maxmackpdx.workers.dev");
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+    res.json({
+      schemaVersion: DESIGN_COMPONENT_REGISTRY_SCHEMA,
+      registryChecksum,
+      sourceRepository: DESIGN_COMPONENT_SOURCE_REPOSITORY,
+      sourceRevision,
+      sourceRevisionVerified: sourceRevision !== null,
+      specimenOrigin: "https://www.zaylist.com",
+      components: DESIGN_COMPONENT_REGISTRY,
+    });
   });
 
   app.get("/api/health", (_req, res) => {
