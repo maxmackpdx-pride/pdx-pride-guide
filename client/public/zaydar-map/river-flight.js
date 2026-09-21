@@ -14,6 +14,7 @@ import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
 import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO} from './housing-holograms.js?v=20260920-hous-holograms-v2';
+import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260920-portland-landmarks';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
@@ -56,6 +57,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
 const housingHolograms=createHousingHologramLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
+const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
 const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
 const ambientSignals=createAmbientSignals(map,reduced);
@@ -64,6 +66,7 @@ function installSceneExtras(){
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
  map.addLayer(portlandBridges,'skyline');
+ map.addLayer(portlandLandmarks);
  map.addLayer(housingHolograms);
  map.addLayer(citySparkles);
 }
@@ -579,6 +582,7 @@ function drawLights(fade,target=map,surface=lights){
   const housingLift=HOUSING_EVENT_HEIGHT_RATIO*smoothRange(13.75,14.75,target.getZoom());
   const hologramTop=feature.properties.housingModel?p.y+(eventTop-p.y)*housingLift:eventTop,raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
+  const beamHalfWidth=feature.properties.housingModel?housingHolograms.beamHalfWidth(feature.properties.key,beaconScale):61.25*beaconScale;
   const emergence=isBar?emergenceFor(feature):0;
   if(pass===0){
    // An expanded projector owns its ground footprint. Nearby event/place rows
@@ -611,7 +615,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
    // Project a soft cone from the exact ground anchor up to the floating artwork.
    lightsContext.save();
-   const top=hologramTop,halfWidth=feature.properties.housingModel?housingHolograms.beamHalfWidth(feature.properties.key,beaconScale):61.25*beaconScale;
+   const top=hologramTop,halfWidth=beamHalfWidth;
    if(feature.properties.housingModel)housingHolograms.setLayout(feature.properties.key,{x:logoX-p.x,lift:p.y-top,scale:beaconScale});
    lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
    drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),p,logoX,top,halfWidth);
@@ -724,7 +728,7 @@ function drawLights(fade,target=map,surface=lights){
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    if(feature.properties.housingModel&&coreAlpha>.1){
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:logoX,y:hologramCenterY+12*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:hologramCenterY,logoWidth:halfWidth*2,logoHeight:72*beaconScale,opacity:coreAlpha});
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:logoX,y:hologramCenterY+12*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:72*beaconScale,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -962,6 +966,7 @@ window.addEventListener('pagehide',()=>{
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
+ if(map.getLayer(portlandLandmarks.id))map.removeLayer(portlandLandmarks.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
