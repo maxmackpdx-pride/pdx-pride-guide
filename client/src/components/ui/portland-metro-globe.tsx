@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
-// Texture: OpenFreeMap / OpenMapTiles / OSM, z10 tiles x161–164, y364–367.
+// Built-up land-use and water mask: OpenFreeMap / OpenMapTiles / OSM,
+// z10 tiles x161–164, y364–367. Unmapped/rural/park areas stay empty.
 declare const __ZAYDAR_BASE__: string;
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string };
@@ -28,7 +29,6 @@ const RIVERS = [
   { name: "Columbia River", lat: 45.604, lon: -122.583 },
   { name: "Willamette River", lat: 45.552, lon: -122.688 },
 ];
-type GeographicPath = { water: boolean; points: [number, number][] };
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
@@ -47,29 +47,6 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let width = 0, height = 0;
     let points: Point[] = [];
     const abort = new AbortController();
-    let geography: { water: boolean; points: (Point | null)[] }[] = [];
-    void fetch('/home-globe/portland-lines.json', { signal: abort.signal })
-      .then(response => { if (!response.ok) throw new Error('Map detail unavailable'); return response.json() as Promise<{ paths: GeographicPath[] }>; })
-      .then(({ paths }) => {
-        if (disposed) return;
-        geography = paths.map(path => {
-          const points: (Point | null)[] = [];
-          for (let index = 0; index < path.points.length; index++) {
-            const [u,v] = path.points[index];
-            const previous = path.points[Math.max(0,index-1)];
-            // Subdivide straight tile segments before wrapping, so rivers follow
-            // the sphere's curvature instead of cutting chords across it.
-            const steps = Math.max(1, Math.ceil(Math.hypot(u-previous[0],v-previous[1])/.012));
-            for (let step=1;step<=steps;step++) {
-              const x=previous[0]+(u-previous[0])*step/steps;
-              const y=previous[1]+(v-previous[1])*step/steps;
-              points.push(Math.abs(x)<=1 && Math.abs(y)<=1 ? sphere(x,y) : null);
-            }
-          }
-          return { water:path.water, points };
-        });
-        draw();
-      }).catch(() => { /* The local dotted map still supplies the geography. */ });
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
       for (const [index, venue] of rows.entries()) {
@@ -99,7 +76,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const texture = new Image();
     const draw = () => {
       if (!width || !height) return;
-      const radius = Math.min(width * .48, height * .43);
+      const radius = Math.min(width * .48, height * .43) * .7;
       const cx = width / 2, cy = height / 2;
       const yaw = angle.current + (still ? 0 : elapsed / 28000);
       const project = (p: Point, elevation = 1) => {
@@ -108,9 +85,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         return { x: cx + x * radius * elevation, y: cy - p.y * radius * elevation, z };
       };
       context.clearRect(0, 0, width, height);
-      const surface = context.createRadialGradient(cx - radius * .35, cy - radius * .4, 0, cx, cy, radius);
-      surface.addColorStop(0, '#10202a'); surface.addColorStop(.7, '#071018'); surface.addColorStop(1, '#010305');
-      context.fillStyle = surface;
+      // Black negative space between the populated areas and waterways.
+      context.fillStyle = '#000';
       context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI * 2); context.fill();
       // Batch dot paths by depth and land class instead of issuing 15k fills.
       const batches = Array.from({ length: 12 }, () => new Path2D());
@@ -127,25 +103,6 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
-      // Real waterways and major roads share the dot map's exact projection.
-      // Hide every back-facing segment; there is only one visible globe surface.
-      for (const water of [false, true]) {
-        context.beginPath();
-        for (const path of geography) {
-          if (path.water !== water) continue;
-          let started = false;
-          for (const point of path.points) {
-            if (!point) { started=false; continue; }
-            const p=project(point,1.001);
-            if (p.z<=.035) { started=false; continue; }
-            if (started) context.lineTo(p.x,p.y); else context.moveTo(p.x,p.y);
-            started=true;
-          }
-        }
-        context.strokeStyle=water?'rgba(65,226,255,.82)':'rgba(239,247,255,.22)';
-        context.lineWidth=water?1.1:.55;
-        context.stroke();
-      }
       // Fixed surface anchors; each light has its own clock, like the map glitter.
       for (let i = 0; i < points.length; i += 37) {
         const point = points[i], p = project(point, 1.003);
@@ -244,13 +201,16 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const u = col/columns*2-1;
           const px = Math.round((CENTER[0]-161+u*1.05)*256);
           const py = Math.round((CENTER[1]-364-v*1.05)*256);
-          const value = data[(py*1024+px)*4];
-          points.push(sphere(u,v,value < 100 ? 2 : value < 215 ? 1 : 0));
+          const pixel = (py*1024+px)*4;
+          const builtUp = data[pixel] > 180;
+          const river = data[pixel] < 100 && data[pixel+1] > 160 && data[pixel+2] > 160;
+          // No uniform sphere grid: dots exist only on mapped urban land or water.
+          if (builtUp || river) points.push(sphere(u,v,river ? 2 : 0));
         }
       }
       draw();
     };
-    texture.src = '/home-globe/portland-metro.png';
+    texture.src = '/home-globe/portland-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
     if (active && !still) frame = requestAnimationFrame(animate);
     redrawRef.current = draw;
