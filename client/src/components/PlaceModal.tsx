@@ -25,6 +25,7 @@ import VenueFollowButton from "@/components/VenueFollowButton";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import { categoryHidesMissedConnections } from "@shared/missedConnections";
 import { resolveBusinessLocations } from "@shared/businessLocations";
+import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
 import DirectoryMap from "@/components/DirectoryMap";
 import "./PlaceModal.css";
 
@@ -570,6 +571,21 @@ export default function PlaceModal({
           </div>
 
           <div className="place-modal-panel__body">
+
+          <img
+            key={`${place.id}:${place.name}:${place.imageUrl}`}
+            className="place-modal-panel__logo"
+            src={resolveDirectoryLogo(place.name, place.imageUrl) || directoryFallbackLogo(place.type)}
+            alt={`${place.name} logo`}
+            onError={(event) => {
+              const image = event.currentTarget;
+              const fallback = directoryFallbackLogo(place.type);
+              if (image.getAttribute("src") !== fallback) {
+                image.src = fallback;
+                image.alt = categoryLabel;
+              }
+            }}
+          />
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
             {isGrandOpeningActive(place.grandOpeningDate) && (
