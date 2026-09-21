@@ -12,7 +12,6 @@ import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PullToRefresh from "./components/PullToRefresh";
-import RouteGuide from "./components/RouteGuide";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PushNotificationPrompt from "./components/PushNotificationPrompt";
@@ -143,7 +142,6 @@ function AppLayout() {
       style={{ background: "var(--z-black, #050506)" }}
     >
       <PullToRefresh />
-      <RouteGuide />
       <Nav />
       {location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
