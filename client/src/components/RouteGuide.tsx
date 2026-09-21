@@ -37,7 +37,7 @@ export default function RouteGuide() {
       </button>
       {open && <>
         <button type="button" className="route-guide__backdrop" aria-label="Close guide" onClick={() => setOpen(false)} />
-        <section className="route-guide__sheet pdx-liquid-overlay" role="dialog" aria-modal="true" aria-labelledby="route-guide-title">
+        <section className="route-guide__sheet pdx-liquid-overlay pdx-glass-rebind" role="dialog" aria-modal="true" aria-labelledby="route-guide-title">
           <div className="route-guide__head">
             <div><span className="route-guide__kicker">Quick guide</span><h2 id="route-guide-title">{guide.title}</h2></div>
             <button ref={closeRef} type="button" className="route-guide__close" aria-label="Close guide" onClick={() => setOpen(false)}><X size={20} /></button>

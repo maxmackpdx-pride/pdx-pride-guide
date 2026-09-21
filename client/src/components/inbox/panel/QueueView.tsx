@@ -1539,7 +1539,7 @@ export default function QueueView({
       )}
 
       {mode === "admin" && !completed && selectableQueueRows.length > 0 && (
-        <div className="inbox-exp-bulkbar pdx-liquid-overlay" aria-label="Bulk queue actions">
+        <div className="inbox-exp-bulkbar pdx-liquid-overlay pdx-glass-rebind" aria-label="Bulk queue actions">
           <span aria-live="polite">{selectedQueueRows.length} selected</span>
           <button type="button" onClick={() => setSelectedRows(Object.fromEntries(selectableQueueRows.map((row) => [row.id, true])))} disabled={bulkPending || selectedQueueRows.length === selectableQueueRows.length}>Select all visible</button>
           <button type="button" onClick={clearSelected} disabled={bulkPending || selectedQueueRows.length === 0}>Clear</button>
