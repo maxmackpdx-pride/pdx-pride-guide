@@ -105,7 +105,7 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
   const roads=Array.from({length:100},(_,i)=>road([[-122.675+i*.0001,45.52],[-122.675+i*.0001,45.522]]));
   const target={getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
-    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
+    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){}},landmarkBuildings:{update(features){this.features=features},surfaceFeatures(){return this.features}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
     createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });
   vm.runInContext(renderer.slice(renderer.indexOf('function updateSurfaces('),renderer.indexOf('function drawSurfaceReflections(')),context);
