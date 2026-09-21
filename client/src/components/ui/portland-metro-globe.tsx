@@ -132,11 +132,15 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const texture = new Image();
     const draw = () => {
       if (!width || !height) return;
-      const radius = Math.min(width * .48, height * .43) * .7 * 1.15;
-      const cx = width / 2, cy = height / 2;
       const front = canvas.closest('.home-front');
       const headerInset = front ? parseFloat(getComputedStyle(front).getPropertyValue('--home-header-height')) || 0 : 0;
       const footerInset = canvas.parentElement ? parseFloat(getComputedStyle(canvas.parentElement).getPropertyValue('--home-flight-bottom')) || 0 : 0;
+      const mobile=width<600;
+      const availableHeight=Math.max(1,height-headerInset-footerInset);
+      // On phones, fill the hero's usable space and let its sides crop slightly.
+      const radius=mobile?Math.min(width*.54,availableHeight*.52)
+        :Math.min(width*.48,height*.43)*.7*1.15;
+      const cx=width/2,cy=mobile?headerInset+availableHeight/2:height/2;
       const canvasBounds=canvas.getBoundingClientRect();
       const protectedAreas = ['.home-front__mark','.home-front__identity-script'].flatMap(selector=>{
         const element=front?.querySelector(selector);
