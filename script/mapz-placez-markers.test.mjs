@@ -23,5 +23,8 @@ test('Placez markers remain on their projected ground anchor with at most two pe
   assert.match(renderer,/const markerY=isPlace\?p\.y:raisedY/);
   assert.match(renderer,/const placezBloomMax=\.02/);
   assert.match(renderer,/const markerBloom=isPlace\?Math\.min\(placezBloomMax,/);
+  assert.match(renderer,/const placezGroundPitch=Math\.max\(\.28,Math\.cos\(target\.getPitch\(\)\*Math\.PI\/180\)\)/);
+  assert.match(renderer,/if\(flat\)\{ctx\.translate\(x,y\);ctx\.scale\(1,groundPitch\);x=0;y=0;\}/);
+  assert.match(renderer,/isPlace\?placezGroundPitch:1/);
   assert.match(renderer,/String\(a\.feature\.properties\.key\)\.localeCompare/);
 });
