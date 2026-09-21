@@ -1,6 +1,6 @@
 import {vectorStyle} from '../home-flight/city-map.js';
 
-export const WATER_CYAN = '#00bfbf'; // Cyan mixed with 25% black; glow alpha stays unchanged.
+export const WATER_CYAN = '#3a8f83'; // Moonlit mineral teal: oxidized copper softened for the night palette.
 export const FOREST_COLORS = ['#06140e', '#0a1b12', '#0e2418'];
 export const WOOD_FILL = '#0d1610';
 export const GRASS_FILL = '#101812';
@@ -73,6 +73,10 @@ export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
   style.layers.splice(streetIndex,0,{...structuredClone(streets),id:'street-casings',paint:{'line-color':'#050b0e','line-opacity':.92,'line-width':casingWidth}});
   const banks = style.layers.find(layer=>layer.id==='banks');
   banks.filter = naturalWater;
+  // Polygon rivers already carry a shoreline and interior material. Suppress
+  // their centerline geometry while retaining genuinely narrow waterways.
+  const streams = style.layers.find(layer=>layer.id==='streams');
+  streams.filter = ['in',['get','class'],['literal',['stream','ditch','drain']]];
   const banksIndex=style.layers.indexOf(banks);
   // Native line layers remain continuous across vector-tile boundaries. Their
   // positive offset keeps almost all blur inside clockwise water polygons.
@@ -173,7 +177,7 @@ export function createWaterBloom() {
       reflectionContext.clearRect(0,0,reflection.width,reflection.height);
       const travel=reduced?.5:(time*.025)%1,sweepCenter=(-.15+travel*1.3)*reflection.width;
       const sheen=reflectionContext.createLinearGradient(sweepCenter-reflection.width*.22,reflection.height,sweepCenter+reflection.width*.22,0);
-      sheen.addColorStop(0,'rgba(142,209,211,0)');sheen.addColorStop(.46,'rgba(142,209,211,.08)');sheen.addColorStop(.5,'rgba(218,242,239,.22)');sheen.addColorStop(.54,'rgba(142,209,211,.08)');sheen.addColorStop(1,'rgba(142,209,211,0)');
+      sheen.addColorStop(0,'rgba(101,157,143,0)');sheen.addColorStop(.46,'rgba(101,157,143,.08)');sheen.addColorStop(.5,'rgba(181,207,190,.22)');sheen.addColorStop(.54,'rgba(101,157,143,.08)');sheen.addColorStop(1,'rgba(101,157,143,0)');
       reflectionContext.fillStyle=sheen;reflectionContext.fillRect(0,0,reflection.width,reflection.height);
       reflectionContext.globalCompositeOperation='destination-in';reflectionContext.drawImage(interior,0,0);reflectionContext.globalCompositeOperation='source-over';
       output.save();output.globalCompositeOperation='screen';output.globalAlpha=fade*.28;output.drawImage(reflection,-pad*scale,-pad*scale,reflection.width*scale,reflection.height*scale);output.restore();

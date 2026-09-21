@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {mapzSurfaceStyle,forestPattern,FOREST_COLORS,inwardDistances} from '../client/public/zaydar-map/natural-surfaces.js';
+import {mapzSurfaceStyle,forestPattern,FOREST_COLORS,WOOD_FILL,GRASS_FILL,PARK_FILL,inwardDistances} from '../client/public/zaydar-map/natural-surfaces.js';
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
 const require=createRequire(import.meta.url),mapRequire=createRequire(require.resolve('maplibre-gl'));
 const {validateStyleMin}=mapRequire('@maplibre/maplibre-gl-style-spec');
@@ -17,13 +17,17 @@ test('hillshade and contours validate without deforming the vector city',()=>{
  assert.equal(skyline.paint['fill-extrusion-opacity'],1);
  assert.equal(JSON.stringify(vectorStyle),before);
 });
-test('forest texture uses exactly the requested three tones and stays deterministic',()=>{
+test('legacy forest texture stays deterministic while live green fills remain quiet',()=>{
  const image=forestPattern(),colors=new Set();
  for(let i=0;i<image.data.length;i+=4){colors.add('#'+[...image.data.slice(i,i+3)].map(c=>c.toString(16).padStart(2,'0')).join(''));assert.equal(image.data[i+3],255);}
  assert.deepEqual([...colors].sort(),[...FOREST_COLORS].sort());
  assert.deepEqual(image.data,forestPattern().data);
  assert.equal(image.width,48);
- assert.deepEqual(mapzSurfaceStyle().layers.find(l=>l.id==='forest-landcover').paint['fill-opacity'],['interpolate',['linear'],['zoom'],10,.38,13,.52,15.5,.72,18,.82]);
+ const style=mapzSurfaceStyle(),layer=id=>style.layers.find(l=>l.id===id),opacity=['interpolate',['linear'],['zoom'],10,.55,14,.72,18,.85];
+ assert.equal(layer('forest-landcover').paint['fill-color'],WOOD_FILL);
+ assert.equal(layer('leaf-landcover').paint['fill-color'],GRASS_FILL);
+ assert.equal(layer('park-areas').paint['fill-color'],PARK_FILL);
+ assert.deepEqual(layer('forest-landcover').paint['fill-opacity'],opacity);
 });
 
 test('roads have a legible hierarchy with dark casings and brighter major routes',()=>{
@@ -45,14 +49,15 @@ test('water glow stays inside water and decays from shore toward the center',()=
  assert.equal(island[5*size+5],0);assert.equal(island[5*size+4],1);
 });
 
-test('ground and water are opaque and cyan is 25 percent darker',()=>{
+test('ground and water are opaque with the moonlit mineral shoreline color',()=>{
  const style=mapzSurfaceStyle(),layer=id=>style.layers.find(l=>l.id===id);
  assert.equal(style.layers[0].id,'ground');
  assert.equal(layer('ground').paint['background-opacity'],1);
  assert.equal(layer('water').paint['fill-opacity'],1);
- assert.equal(layer('banks').paint['line-color'],'#00bfbf');
- assert.equal(layer('water-bloom-wide').paint['line-color'],'#00bfbf');
- assert.equal(layer('water-bloom-tight').paint['line-color'],'#00bfbf');
+ assert.equal(layer('banks').paint['line-color'],'#3a8f83');
+ assert.equal(layer('water-bloom-wide').paint['line-color'],'#3a8f83');
+ assert.equal(layer('water-bloom-tight').paint['line-color'],'#3a8f83');
+ assert.deepEqual(layer('streams').filter,['in',['get','class'],['literal',['stream','ditch','drain']]]);
  assert.deepEqual(layer('streets').filter.slice(-2),[
   ['!=',['get','brunnel'],'tunnel'],['>=',['coalesce',['get','layer'],0],0]
  ]);
