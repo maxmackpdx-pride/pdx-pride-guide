@@ -1,5 +1,5 @@
 // Rooftop lights share the map's camera and depth buffer. Time changes light only.
-export function createCitySparkles(maplibre) {
+export function createCitySparkles(maplibre,elevation=()=>0) {
   const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]);
   const unit=origin.meterInMercatorCoordinateUnits();
   return {
@@ -10,7 +10,7 @@ export function createCitySparkles(maplibre) {
       if(this.points!==points) {
         this.points=points;
         this.vertices=new Float32Array(points.flatMap(point=>{
-          const p=maplibre.MercatorCoordinate.fromLngLat(point.coordinates,point.height+.8);
+          const p=maplibre.MercatorCoordinate.fromLngLat(point.coordinates,point.height+.8+elevation(point.coordinates));
           return [(p.x-origin.x)/unit,(p.y-origin.y)/unit,p.z/unit,point.phase,point.rate,point.star?1:0];
         }));
       }

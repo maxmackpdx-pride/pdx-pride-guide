@@ -121,7 +121,7 @@ export function bridgeMesh(network) {
   return new Float32Array(vertices);
 }
 
-export function createBridgeLayer(maplibre) {
+export function createBridgeLayer(maplibre,elevation=()=>0) {
   const origin = maplibre.MercatorCoordinate.fromLngLat([-122.67, 45.53]);
   const unit = origin.meterInMercatorCoordinateUnits();
   const project = coordinate => { const p = maplibre.MercatorCoordinate.fromLngLat(coordinate); return [(p.x - origin.x) / unit, (p.y - origin.y) / unit]; };
@@ -130,7 +130,12 @@ export function createBridgeLayer(maplibre) {
     update(features) {
       const signature = JSON.stringify(features.map(f => [f.properties.class, f.geometry.coordinates]));
       if (signature === this.signature) return;
-      this.signature = signature; this.vertices = bridgeMesh(bridgeNetwork(features, project)); this.dirty = true;
+      this.signature = signature; this.vertices = bridgeMesh(bridgeNetwork(features, project));
+      for(let i=0;i<this.vertices.length;i+=5){
+        const coordinate=new maplibre.MercatorCoordinate(origin.x+this.vertices[i]*unit,origin.y+this.vertices[i+1]*unit).toLngLat();
+        this.vertices[i+2]+=elevation(coordinate)*maplibre.MercatorCoordinate.fromLngLat(coordinate).meterInMercatorCoordinateUnits()/unit;
+      }
+      this.dirty = true;
     },
     onAdd(map, gl) {
       this.map = map;
