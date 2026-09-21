@@ -41,6 +41,7 @@
 .zaydar-event-title>.zaydar-event-title-fallback{font-size:var(--event-fallback-size);line-height:1.05;white-space:normal;overflow-wrap:anywhere;}
 .zaydar-event-clock{display:flex;justify-content:center;align-items:end;gap:var(--event-clock-gap);color:var(--clock-color);filter:drop-shadow(0 0 5px var(--clock-color)) drop-shadow(0 2px 3px #000);}
 .zaydar-event-clock svg{height:var(--event-clock-height);max-width:80%;fill:currentColor;}.zaydar-event-clock path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:square}.zaydar-event-clock small{font:700 var(--event-period-size) 'Inter',sans-serif;line-height:1.6}
+.zaydar-housing-face-stack{display:flex;justify-content:center;align-items:center;margin-top:3px;padding-left:5px}.zaydar-housing-face{display:grid;width:18px;height:18px;margin-left:-5px;place-items:center;overflow:hidden;border:1.5px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #020509,0 0 7px var(--clock-color);color:#020509;font:900 9px/1 'Inter',sans-serif}.zaydar-housing-face img{width:100%;height:100%;object-fit:cover}
 
 .zaydar-logo-target{position:absolute;z-index:2;transform:translate(-50%,-50%);border:0;padding:0;background:transparent;cursor:pointer;}
 .zaydar-search-drawer .directory-form--embedded{margin:0;padding:8px 0 20px;background:none!important;box-shadow:none!important;border:0!important;border-radius:0;backdrop-filter:none}
@@ -144,3 +145,8 @@
 .zaydar-map-lockup{position:absolute;z-index:5;top:14px;left:12px;display:flex;align-items:baseline;gap:9px;padding:8px 12px;border:1px solid #a4b6c62b;border-radius:16px;background:rgba(5,5,6,.7);box-shadow:0 10px 28px -20px #000;color:#e8f5fb;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .zaydar-map-lockup strong{font:800 17px/1 var(--font-display,"Barlow Condensed",sans-serif);letter-spacing:.055em;text-transform:uppercase}
 .zaydar-map-time,.zaydar-map-live{appearance:none;border:0;background:none;padding:0;color:#aeb7c4;font:600 11px/1 Inter,Arial,sans-serif;cursor:pointer}.zaydar-map-time:hover,.zaydar-map-time:focus-visible{color:#e8f5fb}.zaydar-map-live{padding-left:7px;border-left:1px solid #a4b6c638;color:#67ddd0;text-transform:uppercase;letter-spacing:.06em}.zaydar-map-time-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden}
+
+/* Keep face stacks on the floating HOUS artwork, independent of title wrapping. */
+.zaydar-housing-face-stack{position:absolute;left:50%;top:var(--face-offset);transform:translate(-50%,-50%);margin-top:0;padding-left:0;white-space:nowrap}
+.zaydar-housing-face{width:var(--face-size,18px);height:var(--face-size,18px);flex-shrink:0;margin-left:calc(var(--face-size,18px)*-.28)}
+.zaydar-housing-face:first-child{margin-left:0}

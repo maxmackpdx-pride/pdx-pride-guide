@@ -67,7 +67,8 @@ function nightEarthFills() {
 export const naturalWater = ['all', ['in', ['get', 'class'], ['literal', ['river', 'lake', 'pond']]], ['!=', ['get', 'intermittent'], 1]];
 
 /** Shared Mapz surface treatment used by Mapz and the homepage flyover. */
-export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
+export function mapzSurfaceStyle({demTiles,contourTiles,terrainStrength=0}={}) {
+  if(!Number.isFinite(terrainStrength)||terrainStrength<0||terrainStrength>1)throw new RangeError('Terrain strength must be between zero and one');
   const style = structuredClone(vectorStyle);
   style.sources.elevation = {
     type: 'raster-dem',
@@ -76,8 +77,8 @@ export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
     attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
   };
   if(contourTiles)style.sources.contours={type:'vector',tiles:contourTiles,maxzoom:15};
-  // Use the DEM for relief shading without warping the vector city onto a 3D
-  // mesh. Draping these layers creates vertical curtains at polygon/tile edges.
+  // Terrain remains opt-in while road approaches and model anchors are verified.
+  if(terrainStrength>0)style.terrain={source:'elevation',exaggeration:terrainStrength};
   style.layers.unshift(
     {id:'ground',type:'background',paint:{'background-color':NIGHT_EARTH,'background-opacity':1}},
     {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':['interpolate',['linear'],['zoom'],10,.34,14,.24,17,.16],'hillshade-shadow-color':'#07110d','hillshade-highlight-color':'#53675d','hillshade-accent-color':'#132a20'}},

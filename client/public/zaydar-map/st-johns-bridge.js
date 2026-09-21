@@ -157,7 +157,7 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
     id:'portland-bridge-models',type:'custom',renderingMode:'3d',models,disposed:false,
     update(features){
       for(const model of models){
-        const fit=fitBridgeRoad(features,{...model,center:model.sourceCenter});
+        const fit=fitBridgeRoad(features,{...model,center:model.sourceCenter},elevation);
         if(!fit)continue;
         if(model.fit?.signature===fit.signature)continue;
         model.fit=fit;model.center=[...model.sourceCenter];
@@ -195,7 +195,7 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
       this.syncRailSurfaces();
       const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       const cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.program);
-      for(const model of ready){if(model.dirty){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
+      for(const model of ready){if(model.dirty){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=model.fit?.terrainAnchored?0:Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
       if(cull)gl.enable(gl.CULL_FACE);if(blend)gl.enable(gl.BLEND);gl.bindVertexArray(null);
     },
     onRemove(map,gl){this.disposed=true;for(const [id,filter] of this.railFilters??[])if(map.getLayer(id))map.setFilter(id,filter);for(const model of models){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.sourceBuffer=null;model.count=0;}gl.deleteProgram(this.program);this.map=null;}

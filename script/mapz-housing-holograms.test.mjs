@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import test from 'node:test';
-import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
+import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
 import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
 
 const modelFiles={
@@ -48,6 +48,25 @@ test('standalone demo includes the four seeded HOUS listing roles at neighborhoo
   assert.equal(rows.find(row=>row.housingModel==='MANAGED').color,'#8800FF');
 });
 
+test('HOUS labels use the event-title fitter beneath each icon',async()=>{
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const labelComponent=await readFile(new URL('../client/src/components/ZaydarEventLabel.tsx',import.meta.url),'utf8');
+  assert.deepEqual(HOUSING_HOLOGRAM_LABELS,{
+    LOOKING:'LOOKING TO RENT',
+    FORMING:'BUILDING A HOUS',
+    OFFERING:'JOIN OUR HOUS',
+    MANAGED:'COMMERCIAL RENTAL HOUS',
+  });
+  assert.match(renderer,/name:housingName,time:'',color/);
+  assert.match(renderer,/kind:'housing'/);
+  assert.match(renderer,/width:hologramLabelWidth,scale:beaconScale/);
+  assert.match(renderer,/y:hologramCenterY\+housingIconHeight\/2\+3\*beaconScale/);
+  assert.match(labelComponent,/const isHousing=label\.kind==='housing'/);
+  assert.match(labelComponent,/!isHousing&&<DigitalClock time=\{label\.time\}/);
+  assert.match(labelComponent,/className="zaydar-event-title"/);
+  assert.match(labelComponent,/solveDynamicText\(label\.name,240/);
+});
+
 test('HOUS is isolated from the existing Eventz, Placez, and sparkle pipelines',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const layer=await readFile(new URL('../client/public/zaydar-map/housing-holograms.js',import.meta.url),'utf8');
@@ -59,4 +78,29 @@ test('HOUS is isolated from the existing Eventz, Placez, and sparkle pipelines',
   assert.match(layer,/float snow=/);
   assert.match(layer,/float alpha=\(\.42/);
   assert.match(layer,/gl\.disable\(gl\.DEPTH_TEST\)/);
+});
+
+test('HOUS projection keeps a readable event-relative envelope at every camera distance',async()=>{
+  const {housingScreenFit,housingIconSize,createHousingHologramLayer}=await import('../client/public/zaydar-map/housing-holograms.js');
+  const bounds={min:[-40,-10,0],max:[40,10,80]},viewport={width:1000,height:800};
+  for(const distance of [.01,1,100,10000])for(const scale of [.08,.3,1,1.65]){
+    const matrix=[1,0,0,0,0,.5,0,0,0,1,1,0,0,0,0,distance];
+    const size=housingIconSize(scale),fit=housingScreenFit(matrix,bounds,viewport,size);
+    const width=80/distance*viewport.width/2*fit.fit,height=90/distance*viewport.height/2*fit.fit;
+    assert.ok(width<=size.width+1e-8&&height<=size.height+1e-8);
+    assert.ok(Math.abs(width-size.width)<1e-8||Math.abs(height-size.height)<1e-8);
+    assert.ok(width<78.75*scale&&height<66.15*scale);
+  }
+  const layer=createHousingHologramLayer({});
+  layer.map={getZoom:()=>0,project:()=>({x:50,y:50}),getCanvas:()=>({clientWidth:100,clientHeight:100})};
+  assert.equal(layer.visible({demoOpen:true,coordinates:[0,0]}),true);
+  assert.equal(layer.visible({demoOpen:false,key:'closed',coordinates:[0,0]}),false);
+});
+
+test('face stacks anchor to the icon center in both label renderers',async()=>{
+  for(const path of ['../client/public/zaydar-map/river-flight.js','../client/src/components/ZaydarEventLabel.tsx']){
+    const source=await readFile(new URL(path,import.meta.url),'utf8');
+    assert.match(source,/label\.logoY-label\.y/);
+    assert.match(source,/--face-offset/);
+  }
 });

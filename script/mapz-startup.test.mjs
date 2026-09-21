@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import test from 'node:test';
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
 import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js';
+import {TERRAIN_STRENGTH} from '../client/public/zaydar-map/terrain-elevation.js';
 // Use the validator belonging to the installed MapLibre dependency, not a
 // hand-written approximation of its zoom-expression rules.
 const require=createRequire(import.meta.url);
@@ -43,13 +44,14 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  let options;
  const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('const waterBloom='));
  assert.throws(()=>vm.runInNewContext(prefix,{
-  mapzSurfaceStyle,structuredClone,
+  mapzSurfaceStyle,structuredClone,URLSearchParams,TERRAIN_STRENGTH,location:{search:'?terrain=1'},
   window:{__zaydarStartup:{phase(){},fatal(){}}},
   mlcontour:{DemSource:class{setupMaplibre(){} get sharedDemProtocolUrl(){return 'dem://tiles';} contourProtocolUrl(){return 'contour://tiles';}}},
   // No document canvas probe should be needed before the real map is created.
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
  }),error=>error===reached);
  assert.ok(options.pitch>0);
+ assert.equal(options.style.terrain.exaggeration,.5);
  assert.deepEqual(validateStyleMin(options.style).map(error=>error.message),[]);
 });
 

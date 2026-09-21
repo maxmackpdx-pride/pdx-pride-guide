@@ -5,10 +5,9 @@ import { prefersStillMotion } from "@/lib/motion";
 declare const __ZAYDAR_BASE__: string;
 
 /** The flight has its own document so its camera cannot alter the page layout. */
-export default function HomeFlight({ enabled = true, paused = false, onExploringChange }: {
+export default function HomeFlight({ enabled = true, paused = false }: {
   enabled?: boolean;
   paused?: boolean;
-  onExploringChange: (exploring: boolean) => void;
 }) {
   const { calmMode } = useTheme();
   const container = useRef<HTMLDivElement>(null);
@@ -43,11 +42,8 @@ export default function HomeFlight({ enabled = true, paused = false, onExploring
     };
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
-      if (event.data?.type === "zaylist:flight-ready") { setReady(true); onExploringChange(false); sync(); }
-      if (event.data?.type === "zaylist:flight-error") { setReady(false); onExploringChange(false); }
-      if (event.data?.type === "zaylist:flight-exploring" && typeof event.data.exploring === "boolean") {
-        onExploringChange(event.data.exploring);
-      }
+      if (event.data?.type === "zaylist:flight-ready") { setReady(true); sync(); }
+      if (event.data?.type === "zaylist:flight-error") { setReady(false); }
     };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0.01 });
     observer.observe(element);
@@ -71,7 +67,7 @@ export default function HomeFlight({ enabled = true, paused = false, onExploring
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("message", onMessage);
     };
-  }, [enabled, calmMode, paused, onExploringChange]);
+  }, [enabled, calmMode, paused]);
 
   return (
     <div ref={container} className="home-front__flight" data-ready={ready} style={{ backgroundImage: "url(/home-flight/poster.webp)" }}>
@@ -84,7 +80,8 @@ export default function HomeFlight({ enabled = true, paused = false, onExploring
       {enabled && <iframe
         ref={frame}
         src={`${__ZAYDAR_BASE__}/index.html`}
-        title="Explore Portland’s queer venues — click the map to pause the flyover"
+        title="Portland’s queer venues — continuous flyover"
+        tabIndex={-1}
         className="home-front__flight-frame"
         loading="eager"
       />}
