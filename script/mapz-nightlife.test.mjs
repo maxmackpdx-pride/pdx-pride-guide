@@ -70,7 +70,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
-    hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,
+    hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
     clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
     hologramBounds:()=>({halfWidth:60,halfHeight:80}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},

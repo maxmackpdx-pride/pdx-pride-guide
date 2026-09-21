@@ -13,7 +13,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
-import {createHousingHologramLayer} from './housing-holograms.js?v=20260920-hous-holograms';
+import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO} from './housing-holograms.js?v=20260920-hous-holograms-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
@@ -570,12 +570,14 @@ function drawLights(fade,target=map,surface=lights){
   }
   for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
-  const bloomScale=feature.properties.type==='nonprofit'?.4:1;
+  const bloomScale=feature.properties.type==='nonprofit'?.4:feature.properties.housingModel?.5:1;
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const groundScale=projectorGroundScale(target.getZoom());
-  const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
+  const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
+  const housingLift=HOUSING_EVENT_HEIGHT_RATIO*smoothRange(13.75,14.75,target.getZoom());
+  const hologramTop=feature.properties.housingModel?p.y+(eventTop-p.y)*housingLift:eventTop,raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
   const emergence=isBar?emergenceFor(feature):0;
   if(pass===0){
@@ -608,7 +610,8 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
    // Project a soft cone from the exact ground anchor up to the floating artwork.
    lightsContext.save();
-   const top=raisedY-178.5*beaconScale,halfWidth=61.25*beaconScale;
+   const top=hologramTop,halfWidth=feature.properties.housingModel?housingHolograms.beamHalfWidth(feature.properties.key,beaconScale):61.25*beaconScale;
+   if(feature.properties.housingModel)housingHolograms.setLayout(feature.properties.key,{x:logoX-p.x,lift:p.y-top,scale:beaconScale});
    lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
    drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),p,logoX,top,halfWidth);
    lightsContext.beginPath();lightsContext.moveTo(p.x-2,p.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(p.x+2,p.y);lightsContext.closePath();
@@ -659,7 +662,7 @@ function drawLights(fade,target=map,surface=lights){
    }
 
    // Floating hologram: only the artwork and fine corner guides, no pin body.
-   const hologramCenterY=raisedY-178.5*beaconScale;
+   const hologramCenterY=hologramTop;
    const renderedArtworkScale=hologramArtworkScale*beaconScale;
    lightsContext.save();lightsContext.globalAlpha=coreAlpha;
    // Keep every part of the hologram attached to the same map-tracked center.
@@ -720,7 +723,7 @@ function drawLights(fade,target=map,surface=lights){
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    if(feature.properties.housingModel&&coreAlpha>.1){
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:p.x,y:p.y-112*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:p.y-172*beaconScale,logoWidth:90*beaconScale,logoHeight:118*beaconScale,opacity:coreAlpha});
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:logoX,y:hologramCenterY+12*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:hologramCenterY,logoWidth:halfWidth*2,logoHeight:72*beaconScale,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){

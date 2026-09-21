@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import test from 'node:test';
-import {HOUSING_HOLOGRAM_MODELS,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
+import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
 import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
 
 const modelFiles={
@@ -21,6 +21,18 @@ test('HOUS holograms use aggressively simplified local meshes',async()=>{
     assert.ok(Math.abs(parsed.height-definition.height)<1e-9);
     assert.ok((await stat(url)).size<500_000,`${id} stays below 500 KB`);
   }
+});
+
+test('HOUS icons are smaller, rotate slowly, and use a short zoom-responsive beam',async()=>{
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const layer=await readFile(new URL('../client/public/zaydar-map/housing-holograms.js',import.meta.url),'utf8');
+  assert.equal(HOUSING_ICON_SCALE,.6);
+  assert.equal(HOUSING_EVENT_HEIGHT_RATIO,1/3);
+  assert.ok(HOUSING_ROTATION_SPEED>0&&HOUSING_ROTATION_SPEED<.1);
+  assert.match(renderer,/HOUSING_EVENT_HEIGHT_RATIO\*smoothRange\(13\.75,14\.75,target\.getZoom\(\)\)/);
+  assert.match(renderer,/feature\.properties\.housingModel\?\.5:1/);
+  assert.match(layer,/seconds\*HOUSING_ROTATION_SPEED/);
+  assert.match(layer,/u_screen_shift/);
 });
 
 test('the managed-property house is purple in the asset and renderer mapping',async()=>{
