@@ -175,7 +175,7 @@
   color: var(--text-lo, #999); font-size: 12px; padding: 4px 12px;
 }
 
-.meeting-scheduler { --c: var(--outz-c); border: 1px solid var(--glass-keyline, #050505); border-radius: 14px; background: var(--glass-card-bg, rgba(8,8,10,.94)); box-shadow: var(--glass-card-shadow); overflow: hidden; }
+:where(.meeting-scheduler).pdx-glass-rebind { --c: var(--outz-c); border: 1px solid var(--glass-keyline, #050505); border-radius: 14px; background: var(--glass-card-bg, rgba(8,8,10,.94)); box-shadow: var(--glass-card-shadow); overflow: hidden; }
 .meeting-scheduler__header { align-items: flex-start; border-bottom: 1px solid var(--border-default); display: flex; gap: 12px; padding: 16px; }
 .meeting-scheduler__header h3 { color: var(--text-hi); font-family: var(--font-display); font-size: 21px; line-height: 1; margin: 2px 0 7px; text-transform: uppercase; }
 .meeting-scheduler__header p { color: var(--text-lo); font-size: 13px; line-height: 1.45; margin: 0; }

@@ -26,13 +26,13 @@
 .znav-control.is-active, .znav-control.is-open { color: var(--c); }
 .znav-control.is-active .znav-icon-row, .znav-control.is-open .znav-icon-row { border-color: var(--c); background: color-mix(in srgb, var(--c) 7%, var(--panel-ink)); box-shadow: none; }
 .znav-control:focus-visible, .znav-menu-link:focus-visible, .znav-explore-trigger:focus-visible, .znav-close:focus-visible { outline: 2px solid var(--c, var(--panel-cyan)); outline-offset: 2px; }
-:is(.znav-control,.znav-menu-link)[data-accent="lime"] { --c: var(--neon-yellow); }
-:is(.znav-control,.znav-menu-link)[data-accent="magenta"] { --c: var(--panel-magenta); }
-:is(.znav-control,.znav-menu-link)[data-accent="cyan"] { --c: var(--panel-cyan); }
-:is(.znav-control,.znav-menu-link)[data-accent="blue"] { --c: #5a8bff; }
-:is(.znav-control,.znav-menu-link)[data-accent="orange"] { --c: var(--panel-orange); }
-:is(.znav-control,.znav-menu-link)[data-accent="violet"] { --c: var(--panel-purple); }
-:is(.znav-control,.znav-menu-link)[data-accent="green"] { --c: var(--green-acid); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="lime"] { --c: var(--neon-yellow); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="magenta"] { --c: var(--panel-magenta); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="cyan"] { --c: var(--panel-cyan); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="blue"] { --c: #5a8bff; }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="orange"] { --c: var(--panel-orange); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="violet"] { --c: var(--panel-purple); }
+:where(.znav-control,.znav-menu-link).pdx-glass-rebind[data-accent="green"] { --c: var(--green-acid); }
 .znav-dropdown { z-index: 160; width: 230px; max-height: var(--radix-dropdown-menu-content-available-height); overflow-y: auto; border: 1px solid var(--panel-border-2); border-radius: 14px; padding: 8px; background: var(--panel-card-2); box-shadow: 0 18px 44px -12px #000b; }
 .znav-menu-link { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 14px; margin: 4px 0; border: 1px solid var(--panel-border-2); border-radius: 12px; background: var(--panel-ink); color: var(--text-main, #eee); text-decoration: none; text-transform: uppercase; font: 700 16px var(--font-display); cursor: pointer; }
 .znav-menu-link:hover, .znav-menu-link[data-highlighted], .znav-menu-link[aria-current="page"] { color: var(--c, var(--panel-cyan)); border-color: var(--c, var(--panel-cyan)); text-decoration: none; }

@@ -17,7 +17,7 @@ export default function OutzNewsFeed() {
   const query = useQuery<OutzFeedPayload>({ queryKey: ["/api/outz/feed", user?.id ?? "public"],
     queryFn: () => apiRequest("GET", "/api/outz/feed").then(r => r.json()), refetchInterval: 60_000 });
   const items = (query.data?.items || []).filter(item => filter === "all" || item.kind === filter);
-  return <section className="outz-news" aria-labelledby="outz-news-heading">
+  return <section className="outz-news pdx-glass-rebind" aria-labelledby="outz-news-heading">
     <div className="section-title"><div><span className="kicker">From the community + National Weather Service</span><h2 id="outz-news-heading">Outdoor updates</h2></div></div>
     <p className="outz-news__intro">Trip notes, rides, and plans for the week ahead. Major weather alerts cover Oregon and Washington.</p>
     <div className="categories outz-news__filters" role="group" aria-label="Outdoor update type">

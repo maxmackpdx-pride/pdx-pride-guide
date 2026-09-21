@@ -9,7 +9,7 @@
   z-index: 2400;
 }
 
-.mp-modal {
+:where(.mp-modal).pdx-glass-rebind {
   --c: var(--neon-cyan, #19e3ff);
   max-height: calc(100dvh - 36px);
   max-width: 520px;

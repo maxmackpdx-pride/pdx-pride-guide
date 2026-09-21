@@ -15,7 +15,7 @@ import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
 import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO} from './housing-holograms.js?v=20260920-hous-holograms-v2';
-import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260920-portland-landmarks';
+import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');

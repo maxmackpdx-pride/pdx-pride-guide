@@ -1,16 +1,16 @@
 export const PORTLAND_LANDMARK_MIN_ZOOM=14;
 
-const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260920-portland-landmarks`,import.meta.url).href;
+const asset=name=>new URL(`./models/landmarks/${name}.glb?v=20260920-portland-landmarks-v2`,import.meta.url).href;
 export const PORTLAND_LANDMARKS=[
   {id:'benson-bubbler',label:'Benson Bubbler',url:asset('benson-bubbler'),center:[-122.67925,45.51923],dimensions:[1.17,1.17,1],bearing:0,scale:1.75},
   {id:'chinatown-friendship-gate',label:'Chinatown Friendship Gate',url:asset('chinatown-friendship-gate'),center:[-122.67444,45.52331],dimensions:[19.9,3.84,11.324],bearing:0,scale:1.75},
   {id:'darcelle-plaza-rainbow-hydrants',label:'Darcelle Plaza rainbow hydrants',url:asset('darcelle-plaza-rainbow-hydrants'),center:[-122.67992,45.52143],dimensions:[5.3,.755,1.09],bearing:90,scale:1.75},
-  {id:'darcelle-xv-marquee',label:'Darcelle XV marquee',url:asset('darcelle-xv-marquee'),center:[-122.67311,45.52475],dimensions:[4.68,.985,2.095],bearing:90,scale:1.75,baseOffset:3},
+  {id:'darcelle-xv-marquee',label:'Darcelle XV marquee',url:asset('darcelle-xv-marquee'),center:[-122.67305,45.52475],dimensions:[4.68,.985,2.095],bearing:-90,scale:1.75,baseOffset:3},
   {id:'harvey-milk-street-sign',label:'SW Harvey Milk street sign',url:asset('harvey-milk-street-sign'),center:[-122.68330,45.52230],dimensions:[2.1,.245,2.985],bearing:0,scale:1.75},
-  {id:'paul-bunyan-kenton',label:'Paul Bunyan statue',url:asset('paul-bunyan-kenton'),center:[-122.68662,45.58383],dimensions:[3.5,2.818,8.84],bearing:0,scale:1.75},
+  {id:'paul-bunyan-kenton',label:'Paul Bunyan statue',url:asset('paul-bunyan-kenton'),center:[-122.68662,45.58383],dimensions:[3.5,2.818,9.45],bearing:180,scale:1.75},
   {id:'skidmore-fountain',label:'Skidmore Fountain',url:asset('skidmore-fountain'),center:[-122.67108,45.52240],dimensions:[4.7,4.7,5.21],bearing:0,scale:1.75},
   {id:'weather-machine',label:'Weather Machine',url:asset('weather-machine'),center:[-122.67933,45.51901],dimensions:[2.07,1.8,9.993],bearing:0,scale:1.75},
-  {id:'white-stag-portland-sign',label:'Welcome to Portland sign',url:asset('white-stag-portland-sign'),center:[-122.67052,45.52339],dimensions:[12.537,3.299,14.617],bearing:90,scale:3,baseOffset:22},
+  {id:'white-stag-portland-sign',label:'Welcome to Portland sign',url:asset('white-stag-portland-sign'),center:[-122.67052,45.52339],dimensions:[12.537,3.299,14.617],bearing:-90,scale:3,baseOffset:22},
 ];
 
 const componentCounts={SCALAR:1,VEC2:2,VEC3:3,VEC4:4};
@@ -90,7 +90,7 @@ export function createPortlandLandmarkLayer(maplibre,elevation=()=>0,reduced={ma
     render(gl,input){
       const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       const depth=gl.isEnabled(gl.DEPTH_TEST),cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND),depthMask=gl.getParameter(gl.DEPTH_WRITEMASK),srcRgb=gl.getParameter(gl.BLEND_SRC_RGB),dstRgb=gl.getParameter(gl.BLEND_DST_RGB),srcAlpha=gl.getParameter(gl.BLEND_SRC_ALPHA),dstAlpha=gl.getParameter(gl.BLEND_DST_ALPHA);
-      gl.disable(gl.CULL_FACE);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);
+      gl.disable(gl.CULL_FACE);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);
       for(let index=0;index<ready.length;index++){
         const model=ready[index];if(model.dirty)this.upload(gl,model);const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits()*model.scale,base=Math.max(0,elevation(model.center)||0)+(model.baseOffset??1),angle=model.bearing*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);
         for(let row=0;row<4;row++){local[row]=(matrix[row]*cos+matrix[4+row]*sin)*unit;local[4+row]=(-matrix[row]*sin+matrix[4+row]*cos)*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*(unit/model.scale)+matrix[12+row];}

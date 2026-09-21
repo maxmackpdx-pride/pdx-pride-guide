@@ -82,9 +82,9 @@
     background:radial-gradient(110% 150% at 12% 0%,rgba(175,232,253,.18),transparent 46%),linear-gradient(160deg,rgba(25,227,255,.08),rgba(5,12,18,.65) 66%,rgba(25,227,255,.1));
     box-shadow:inset 2px 2px 1px -1px rgba(225,249,255,.72),inset -1px -1px 1px rgba(148,223,245,.3),inset 0 0 6px 3px rgba(124,214,250,.05),inset 0 -6px 9px -8px rgba(255,255,255,.38);
   }
-  .site-mobile-nav--glass [data-accent="blue"] { --c:#91acff; }
-  .site-mobile-nav--glass [data-accent="violet"] { --c:#b06bff; }
-  .site-mobile-nav--glass [data-accent="magenta"] { --c:#ff6abb; }
+  .site-mobile-nav--glass .pdx-glass-rebind:where([data-accent="blue"]) { --c:#91acff; }
+  .site-mobile-nav--glass .pdx-glass-rebind:where([data-accent="violet"]) { --c:#b06bff; }
+  .site-mobile-nav--glass .pdx-glass-rebind:where([data-accent="magenta"]) { --c:#ff6abb; }
   .site-mobile-nav--glass .znav-icon-row { height:24px; min-height:24px; padding:0; }
   .site-mobile-nav--glass .znav-icon-row > svg { width:22px; height:22px; }
   .site-mobile-nav--glass .znav-caption { font-size:11px; line-height:1; }
