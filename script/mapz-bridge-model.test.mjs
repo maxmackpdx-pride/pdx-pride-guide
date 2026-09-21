@@ -92,3 +92,23 @@ test('fitted road models omit the authored second deck and contain only finite g
  let maximumSide=0;for(let i=0;i<fitted.vertices.length;i+=7)maximumSide=Math.max(maximumSide,Math.abs(fitted.vertices[i+1]));
  assert.ok(maximumSide<6,'structure width fits the 8m road rather than the original 21m deck');
 });
+
+test('rail ground strokes are hidden only after the raised replacement is ready, and restored below building zoom',async()=>{
+ const {createPortlandBridgeLayer}=await import('../client/public/zaydar-map/st-johns-bridge.js');
+ const layer=createPortlandBridgeLayer({},()=>0,[{id:'bnsf-test',center:[-122.7,45.5],length:600}]);
+ const filters=new Map([['streets',['==',['get','class'],'rail']],['street-casings',null]]);let zoom=15;
+ layer.map={getZoom:()=>zoom,getLayer:id=>filters.has(id),getFilter:id=>filters.get(id),setFilter:(id,value)=>filters.set(id,value),triggerRepaint(){}};
+ layer.update([roadFeature([[-300,0],[300,0]],{class:'rail'})]);
+ layer.syncRailSurfaces();assert.deepEqual(filters.get('streets'),['==',['get','class'],'rail']);
+ layer.models[0].count=36;layer.syncRailSurfaces();
+ assert.equal(filters.get('streets')[0],'all');assert.match(JSON.stringify(filters.get('streets')),/within/);
+ zoom=11;layer.syncRailSurfaces();assert.deepEqual(filters.get('streets'),['==',['get','class'],'rail']);assert.equal(filters.get('street-casings'),null);
+});
+
+test('Glenn Jackson fits its whole roadway rather than expanding a narrow median',async()=>{
+ const definition=PORTLAND_BRIDGE_MODELS.find(d=>d.id==='glenn-jackson');
+ const fit=fitBridgeRoad([roadFeature([[-1800,0],[1800,0]],{class:'motorway'})],{...definition,center:[-122.7,45.5]});
+ const file=await readFile(new URL(definition.url)),model=parseBridgeGlb(file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength),90,definition.length,fit);
+ let width=0;for(let i=0;i<model.vertices.length;i+=7)width=Math.max(width,Math.abs(model.vertices[i+1])*2);
+ assert.ok(width<9.2,`the 9m road must not acquire a ${width}m-wide bridge`);
+});

@@ -23,6 +23,7 @@ import type { Business } from "@/pages/Directory";
 import { directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { mapCoordinates } from "@/lib/mapCoordinates";
+import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
 import { HOUSING_TYPE_LABEL, type HousingType } from "@shared/housing";
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
@@ -153,7 +154,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The Haüz") return "#00FFFF";
+  if (String(row._board) === "The Haüz") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   const kind = boardKind(row);
   if (kind === "gig") return "#8800FF";
   if (kind === "gifting") return "#CCFF00";
@@ -169,6 +170,16 @@ function boardIcon(row: MapRow): string {
 
 function boardTitle(row: MapRow): string {
   return String(row.displayName || row.headline || row.title || row.name || "Board listing");
+}
+
+function housingAreaLabel(row: MapRow): string {
+  if (Array.isArray(row.areas)) return row.areas.filter((area): area is string => typeof area === "string").join(" · ").toUpperCase();
+  return String(row.neighborhood || "PORTLAND").toUpperCase();
+}
+
+function housingDemo(row: MapRow): boolean {
+  const author = row.author;
+  return Boolean(author && typeof author === "object" && (author as { username?: unknown }).username === "hausing_demo");
 }
 
 function milesBetween(a: [number, number], b: [number, number]) {
@@ -351,7 +362,7 @@ export default function ZaydarMapDemo() {
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = [], isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
-  const housing = useMemo(() => (Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
+  const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => setLocation(overlayHref(key, id)), [setLocation]);
   const closeOverlays = useCallback(() => {
     setSelected(null);
@@ -540,15 +551,19 @@ export default function ZaydarMapDemo() {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
+    const isHouz=String(row._board)==='The Haüz';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
     const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
-    const boardLogo=String(row._board)==='The Haüz'?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
+    const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
     return {kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
-      logo:brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
+      logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
+      housingModel:isHouz?String(row.type||'LOOKING'):undefined,
+      neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
+      demoOpen:isHouz&&housingDemo(row),
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,

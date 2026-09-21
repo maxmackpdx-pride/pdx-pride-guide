@@ -1,4 +1,4 @@
-import {fitBridgeRoad,sampleBridgeRoad} from './bridge-fit.js';
+import {fitBridgeRoad,sampleBridgeRoad,railBridgeFootprint} from './bridge-fit.js';
 export const ST_JOHNS_CENTER=[-122.76327215,45.58579725];
 export const ST_JOHNS_BEARING=54.24624408372691;
 export const ST_JOHNS_LENGTH_METERS=630;
@@ -69,7 +69,10 @@ export function parseBridgeGlb(buffer,bearing=90,lengthMeters,fit){
   }
   const decks=primitives.filter(p=>p.material===3);
   const deckMin=Math.min(...decks.map(p=>p.position.min[0])),deckMax=Math.max(...decks.map(p=>p.position.max[0]));
-  const deckWidth=Math.max(...decks.map(p=>p.position.max[2]))-Math.min(...decks.map(p=>p.position.min[2]));
+  // Some supplied models label only the median as "Deck" and put the wide
+  // roadway in the steel mesh. Fit the full superstructure, not that median.
+  const roadway=primitives.filter(p=>p.material!==2);
+  const deckWidth=Math.max(...roadway.map(p=>p.position.max[2]))-Math.min(...roadway.map(p=>p.position.min[2]));
   // The supplied neutral deck is replaced by the existing connected road mesh.
   const deckTop=Math.max(...decks.map(p=>p.position.max[1]));
   const deckSteps=fit?.retainDeck?Math.ceil(fit.length/8):0;
@@ -163,6 +166,19 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
       this.map?.triggerRepaint();
     },
     visible(model){if(!model.fit||this.map.getZoom()<ST_JOHNS_MIN_ZOOM)return false;const point=this.map.project(model.center),canvas=this.map.getCanvas();return point.x>-900&&point.y>-900&&point.x<canvas.clientWidth+900&&point.y<canvas.clientHeight+900;},
+    syncRailSurfaces(){
+      const ready=this.map.getZoom()>=ST_JOHNS_MIN_ZOOM?models.filter(model=>model.fit?.retainDeck&&model.count):[];
+      const footprints=ready.map(model=>railBridgeFootprint(model.fit)),signature=JSON.stringify(footprints);
+      if(signature===this.railSignature)return;this.railSignature=signature;
+      this.railFilters??=new Map();
+      for(const id of ['streets','street-casings']){
+        if(!this.map.getLayer(id))continue;
+        if(!this.railFilters.has(id))this.railFilters.set(id,this.map.getFilter(id));
+        const original=this.railFilters.get(id);
+        const covered=['all',['==',['get','class'],'rail'],['==',['get','brunnel'],'bridge'],['any',...footprints.map(geometry=>['within',geometry])]];
+        this.map.setFilter(id,footprints.length?['all',original??true,['!',covered]]:original);
+      }
+    },
     async load(model){if(model.loading||model.count||this.disposed||activeLoads>=2)return;model.loading=true;activeLoads++;try{model.sourceBuffer=await loadArrayBuffer(model.url);if(this.disposed)return;const parsed=parseBridgeGlb(model.sourceBuffer,model.bearing,model.length,model.fit);model.vertices=parsed.vertices;model.count=parsed.count;model.dirty=true;this.map?.triggerRepaint();}catch(error){console.warn(`${model.label} Bridge model unavailable`,error);}finally{model.loading=false;activeLoads--;this.map?.triggerRepaint();}},
     onAdd(map,gl){
       this.map=map;this.disposed=false;const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;};
@@ -176,12 +192,13 @@ export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=P
     },
     upload(gl,model){model.buffer=gl.createBuffer();model.vao=gl.createVertexArray();gl.bindVertexArray(model.vao);gl.bindBuffer(gl.ARRAY_BUFFER,model.buffer);gl.bufferData(gl.ARRAY_BUFFER,model.vertices,gl.STATIC_DRAW);for(const [name,size,offset] of [['a_position',3,0],['a_normal',3,12],['a_shade',1,24]]){const location=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,28,offset);}gl.bindVertexArray(null);model.vertices=null;model.dirty=false;},
     render(gl,input){
+      this.syncRailSurfaces();
       const visible=models.filter(model=>this.visible(model));for(const model of visible)if(!model.count)this.load(model);const ready=visible.filter(model=>model.count);if(!ready.length)return;
       const cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.program);
       for(const model of ready){if(model.dirty){if(model.buffer){gl.deleteBuffer(model.buffer);gl.deleteVertexArray(model.vao);}this.upload(gl,model);}const origin=maplibre.MercatorCoordinate.fromLngLat(model.center),unit=origin.meterInMercatorCoordinateUnits(),base=Math.max(0,elevation(model.center)||0),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];}gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.drawArrays(gl.TRIANGLES,0,model.count);}
       if(cull)gl.enable(gl.CULL_FACE);if(blend)gl.enable(gl.BLEND);gl.bindVertexArray(null);
     },
-    onRemove(map,gl){this.disposed=true;for(const model of models){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.sourceBuffer=null;model.count=0;}gl.deleteProgram(this.program);this.map=null;}
+    onRemove(map,gl){this.disposed=true;for(const [id,filter] of this.railFilters??[])if(map.getLayer(id))map.setFilter(id,filter);for(const model of models){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.sourceBuffer=null;model.count=0;}gl.deleteProgram(this.program);this.map=null;}
   };
 }
 

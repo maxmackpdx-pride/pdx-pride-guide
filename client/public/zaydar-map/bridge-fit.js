@@ -38,3 +38,12 @@ export function sampleBridgeRoad(fit,fraction){
  const distance=Math.min(a.distance+length*t,b.distance+length*(1-t));
  return {x,y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,width:a.width+(b.width-a.width)*t,height:deckHeight(distance,true),coordinate:[fit.anchor[0]+x/fit.longitudeScale,fit.anchor[1]-y/latitudeScale]};
 }
+
+// Only the ground-level rail strokes under a ready raised rail crossing are
+// suppressed. The approach tracks and all non-bridge streets keep their style.
+export function railBridgeFootprint(fit){
+ const coordinates=fit.points.map(p=>[fit.anchor[0]+p.x/fit.longitudeScale,fit.anchor[1]-p.y/latitudeScale]);
+ const west=Math.min(...coordinates.map(p=>p[0]))-8/fit.longitudeScale,east=Math.max(...coordinates.map(p=>p[0]))+8/fit.longitudeScale;
+ const south=Math.min(...coordinates.map(p=>p[1]))-8/latitudeScale,north=Math.max(...coordinates.map(p=>p[1]))+8/latitudeScale;
+ return {type:'Polygon',coordinates:[[[west,south],[east,south],[east,north],[west,north],[west,south]]]};
+}

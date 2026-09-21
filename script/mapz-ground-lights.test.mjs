@@ -118,7 +118,7 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
 });
 test('standalone holograms use real directory anchors and local artwork without fake event dates',async()=>{
   const directory=JSON.parse(await readFile(new URL('../client/public/zaydar-map/waypoints.json',import.meta.url),'utf8'));
-  const rows=standaloneDemoRows();assert.equal(rows.length,2);
+  const rows=standaloneDemoRows().filter(row=>row.kind==='event');assert.equal(rows.length,2);
   for(const row of rows){
     const venue=directory.find(v=>v.name.toLowerCase().startsWith(row.name.toLowerCase()));
     assert.deepEqual(row.coordinates,venue.coordinates);assert.equal(row.logo,venue.logo);assert.equal(row.demoOpen,true);

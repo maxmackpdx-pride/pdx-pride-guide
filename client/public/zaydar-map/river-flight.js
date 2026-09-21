@@ -13,6 +13,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
+import {createHousingHologramLayer} from './housing-holograms.js?v=20260920-hous-holograms';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
@@ -51,17 +52,19 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
+const housingHolograms=createHousingHologramLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
 const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const ambientSignals=createAmbientSignals(map,reduced);
 function installSceneExtras(){
  ambientSignals.install();
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
  map.addLayer(portlandBridges,'skyline');
+ map.addLayer(housingHolograms);
  map.addLayer(citySparkles);
 }
 map.on('load',()=>{
@@ -464,7 +467,7 @@ function drawLights(fade,target=map,surface=lights){
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Expand a few distinct locations; individual event rows remain discoverable as orbs.
- const candidates=ordered.filter(v=>v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ const candidates=ordered.filter(v=>(v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)||v.feature.properties.housingModel&&(v.feature.properties.demoOpen||v.feature.properties.key===selectedKey))&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
  candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Number(activeToday(b.feature))-Number(activeToday(a.feature))||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const beacons=[];
  for(const item of candidates){
@@ -599,7 +602,7 @@ function drawLights(fade,target=map,surface=lights){
    if(pass===0){
    // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
    lightsContext.save();lightsContext.translate(p.x,p.y);lightsContext.scale(1,.58);
-   const radius=147*beaconScale*(.94+.12*pulse);
+   const radius=88.2*beaconScale*(.94+.12*pulse);
    const spill=lightsContext.createRadialGradient(0,0,0,0,0,radius);
    spill.addColorStop(0,color+'cc');spill.addColorStop(.25,color+'88');spill.addColorStop(.6,color+'33');spill.addColorStop(1,color+'00');
    lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
@@ -715,6 +718,9 @@ function drawLights(fade,target=map,surface=lights){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+   }
+   if(feature.properties.housingModel&&coreAlpha>.1){
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:p.x,y:p.y-112*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:p.y-172*beaconScale,logoWidth:90*beaconScale,logoHeight:118*beaconScale,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -1012,6 +1018,8 @@ async function setListings(rows){
  for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=viewTime?new Date(r.startsAt).getTime()-viewTime:1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
+ housingHolograms.update(lightFeatures.map(feature=>feature.properties));
+ housingHolograms.setSelected?.(selectedKey);
  refreshNearbyLights();assetsReady=true;updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
  await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
@@ -1020,7 +1028,7 @@ window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='zaydar-host')return;
  const {type,...data}=event.data;
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
- if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
+ if(type==='select'){selectedKey=data.key;housingHolograms.setSelected?.(selectedKey);const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
  if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(10,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:automaticPitch()});viewState();}
@@ -1034,7 +1042,7 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=[...hitTargets].reverse().find(h=>Math.hypot(e.clientX-h.x,e.clientY-h.y)<h.r);
  if(hit?.clusterCenter){map.easeTo({center:hit.clusterCenter,zoom:Math.min(18,map.getZoom()+1.35),duration:520});scheduleFrame();return;}
- if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
+ if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
