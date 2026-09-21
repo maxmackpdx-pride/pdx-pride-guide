@@ -148,17 +148,24 @@ export function applyBuildingOcclusion(ctx,target,buildings,solidity=BUILDING_LI
   if(!buildings.length||solidity<=0)return;
   const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686,pitch=Math.sin(target.getPitch()*Math.PI/180);
   ctx.save();ctx.beginPath();
+  // Normalize winding so overlapping roofs and walls form one union. Even-odd
+  // fill cancels their overlap and exposes rectangular strips of the beam.
+  const polygon=points=>{
+    const area=points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a.x*b.y-b.x*a.y;},0);
+    if(area<0)points.reverse();
+    points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
+  };
   for(const building of buildings){
     const lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*pitch;
     const footprint=building.ring.map(point=>target.project(point));
-    footprint.forEach((p,i)=>{if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();
+    polygon(footprint.map(p=>({x:p.x,y:p.y-lift})));
     const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
     for(let i=0;i<footprint.length;i++){
       const a=footprint[i],b=footprint[(i+1)%footprint.length];if((b.x-a.x)*winding>=0)continue;
-      ctx.moveTo(a.x,a.y-lift);ctx.lineTo(b.x,b.y-lift);ctx.lineTo(b.x,b.y);ctx.lineTo(a.x,a.y);ctx.closePath();
+      polygon([{x:a.x,y:a.y-lift},{x:b.x,y:b.y-lift},b,a]);
     }
   }
-  ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=solidity;ctx.fillStyle='#000';ctx.fill('evenodd');ctx.restore();
+  ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=solidity;ctx.fillStyle='#000';ctx.fill('nonzero');ctx.restore();
 }
 
 /** Legacy canopy sprite. Unused by the live style. Kept so old imports do not throw. */

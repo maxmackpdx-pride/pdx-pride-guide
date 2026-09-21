@@ -28,7 +28,7 @@ test('buildings retain only two percent transparency to map and overlay light',(
  const calls=[],ctx={save(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(rule){calls.push([this.globalCompositeOperation,this.globalAlpha,rule]);},restore(){}};
  const target={getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})};
  applyBuildingOcclusion(ctx,target,[{height:12,center:[0,45],ring:[[0,0],[10,0],[10,10],[0,10]]}]);
- assert.deepEqual(calls,[['destination-out',.98,'evenodd']]);
+ assert.deepEqual(calls,[['destination-out',.98,'nonzero']]);
 });
 
 test('wheel pitch control accumulates smoothly and clamps twenty degrees each way',()=>{
@@ -139,4 +139,19 @@ test('ground and water are opaque with the moonlit mineral shoreline color',()=>
  assert.deepEqual(layer('streets').filter.slice(-2),[
   ['!=',['get','brunnel'],'tunnel'],['>=',['coalesce',['get','layer'],0],0]
  ]);
+});
+
+
+test('overlapping building masks form a union for either source ring winding',()=>{
+ const polygons=[];let polygon;
+ const ctx={save(){},beginPath(){},moveTo(x,y){polygon=[[x,y]];polygons.push(polygon);},lineTo(x,y){polygon.push([x,y]);},closePath(){},fill(rule){assert.equal(rule,'nonzero');},restore(){}};
+ const ring=[[0,0],[10,0],[10,10],[0,10]];
+ applyBuildingOcclusion(ctx,{getZoom:()=>16,getPitch:()=>48,project:([x,y])=>({x,y})},[
+  {height:12,center:[0,45],ring},{height:18,center:[0,45],ring:[...ring].reverse()},
+ ]);
+ assert.equal(polygons.length,4);
+ for(const points of polygons){
+  const area=points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a[0]*b[1]-b[0]*a[1];},0);
+  assert.ok(area>0,'roof and wall winding must agree so overlap cannot punch holes');
+ }
 });
