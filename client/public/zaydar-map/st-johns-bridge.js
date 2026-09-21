@@ -1,3 +1,4 @@
+import {fitBridgeRoad,sampleBridgeRoad} from './bridge-fit.js';
 export const ST_JOHNS_CENTER=[-122.76327215,45.58579725];
 export const ST_JOHNS_BEARING=54.24624408372691;
 export const ST_JOHNS_LENGTH_METERS=630;
@@ -15,8 +16,8 @@ export const PORTLAND_BRIDGE_MODELS=[
   {id:'fremont',label:'Fremont',center:[-122.68306,45.53778],bearing:90,length:664,url:asset('fremont')},
   {id:'glenn-jackson',label:'Glenn Jackson',center:[-122.54861,45.59306],bearing:90,length:3588,url:asset('glenn-jackson')},
   {id:'hawthorne',label:'Hawthorne',center:[-122.67056,45.51306],bearing:90,length:422.9,url:asset('hawthorne')},
-  {id:'interstate',label:'Interstate',center:[-122.67371,45.61789],bearing:0,length:1086,url:asset('interstate')},
-  {id:'marquam',label:'Marquam',center:[-122.66917,45.50806],bearing:90,length:326,url:asset('marquam')},
+  {disabled:true,id:'interstate',label:'Interstate',center:[-122.67371,45.61789],bearing:0,length:1086,url:asset('interstate')},
+  {disabled:true,id:'marquam',label:'Marquam',center:[-122.66917,45.50806],bearing:90,length:326,url:asset('marquam')},
   {id:'morrison',label:'Morrison',center:[-122.66972,45.51778],bearing:90,length:239.7,url:asset('morrison')},
   {id:'ross-island',label:'Ross Island',center:[-122.66444,45.50111],bearing:90,length:562,url:asset('ross-island')},
   {id:'sellwood',label:'Sellwood',center:[-122.66592,45.46428],bearing:90,length:609,url:asset('sellwood')},
@@ -56,7 +57,7 @@ function readAccessor(buffer,json,binary,index){
 }
 
 /** Convert a supplied Y-up GLB into east/south/up local Mercator-meter vertices. */
-export function parseBridgeGlb(buffer,bearing=90,lengthMeters){
+export function parseBridgeGlb(buffer,bearing=90,lengthMeters,fit){
   const {json,binary}=glbChunks(buffer),angle=bearing*Math.PI/180,sin=Math.sin(angle),cos=Math.cos(angle);
   const primitives=[];let modelMin=Infinity,modelMax=-Infinity,total=0;
   for(const mesh of json.meshes??[])for(const primitive of mesh.primitives??[]){
@@ -66,17 +67,47 @@ export function parseBridgeGlb(buffer,bearing=90,lengthMeters){
     modelMin=Math.min(modelMin,position.min?.[0]??Infinity);modelMax=Math.max(modelMax,position.max?.[0]??-Infinity);
     primitives.push({position,normal,material:primitive.material??0});total+=position.count;
   }
+  const decks=primitives.filter(p=>p.material===3);
+  const deckMin=Math.min(...decks.map(p=>p.position.min[0])),deckMax=Math.max(...decks.map(p=>p.position.max[0]));
+  const deckWidth=Math.max(...decks.map(p=>p.position.max[2]))-Math.min(...decks.map(p=>p.position.min[2]));
+  // The supplied neutral deck is replaced by the existing connected road mesh.
+  const deckTop=Math.max(...decks.map(p=>p.position.max[1]));
+  const deckSteps=fit?.retainDeck?Math.ceil(fit.length/8):0;
+  if(fit)total=primitives.filter(p=>p.material!==3).reduce((n,p)=>n+p.position.count,0)+deckSteps*18;
   const sourceLength=modelMax-modelMin,scale=(lengthMeters??sourceLength)/sourceLength,vertices=new Float32Array(total*7);
   let cursor=0;
   for(const primitive of primitives){
+    if(fit&&primitive.material===3)continue;
     const materialShade=[1,.82,.76,.94][primitive.material]??.9;
     for(let index=0;index<primitive.position.count;index++){
       const x=primitive.position.values[index*3]*scale,up=primitive.position.values[index*3+1]*scale,width=primitive.position.values[index*3+2]*scale;
       const nx=primitive.normal.values[index*3],nup=primitive.normal.values[index*3+1],nwidth=primitive.normal.values[index*3+2];
+      if(fit){
+        const rawX=primitive.position.values[index*3],rawY=primitive.position.values[index*3+1],rawZ=primitive.position.values[index*3+2];
+        const road=sampleBridgeRoad(fit,(rawX-deckMin)/(deckMax-deckMin));
+        const transverse=road.width/deckWidth,vertical=Math.min(1,Math.max(.35,transverse));
+        const z=rawY>=deckTop?road.height+(rawY-deckTop)*vertical:Math.max(0,road.height*(rawY/deckTop));
+        vertices[cursor++]=road.x-road.dy*rawZ*transverse;vertices[cursor++]=road.y+road.dx*rawZ*transverse;vertices[cursor++]=z;
+        const alongScale=fit.length/(deckMax-deckMin),nyScale=rawY>=deckTop?vertical:road.height/deckTop;
+        const normal=[road.dx*nx/alongScale-road.dy*nwidth/transverse,road.dy*nx/alongScale+road.dx*nwidth/transverse,nup/Math.max(.001,nyScale)];
+        const norm=Math.hypot(...normal)||1;vertices[cursor++]=normal[0]/norm;vertices[cursor++]=normal[1]/norm;vertices[cursor++]=normal[2]/norm;vertices[cursor++]=materialShade;continue;
+      }
       // A compass bearing rotates the model's +X length axis. Mercator Y points
       // south, so geographic north is negated for both position and normal.
       vertices[cursor++]=x*sin+width*cos;vertices[cursor++]=-(x*cos-width*sin);vertices[cursor++]=up;
       vertices[cursor++]=nx*sin+nwidth*cos;vertices[cursor++]=-(nx*cos-nwidth*sin);vertices[cursor++]=nup;vertices[cursor++]=materialShade;
+    }
+  }
+  if(deckSteps){
+    const put=(p,normal,shade)=>{vertices.set([...p,...normal,shade],cursor);cursor+=7;};
+    const triangle=(a,b,c,normal,shade)=>{put(a,normal,shade);put(b,normal,shade);put(c,normal,shade);};
+    let previous;
+    for(let i=0;i<=deckSteps;i++){
+      const road=sampleBridgeRoad(fit,i/deckSteps),half=road.width/2;
+      const pair=[-1,1].map(side=>[road.x-road.dy*half*side,road.y+road.dx*half*side,road.height]);
+      if(previous){const [a,b]=previous,[c,d]=pair;triangle(a,b,c,[0,0,1],1);triangle(b,d,c,[0,0,1],1);
+        for(const [u,v] of [[a,c],[d,b]]){const lowU=[u[0],u[1],Math.max(0,u[2]-.5)],lowV=[v[0],v[1],Math.max(0,v[2]-.5)];triangle(u,lowU,v,[-road.dy,road.dx,0],.67);triangle(lowU,lowV,v,[-road.dy,road.dx,0],.67);}
+      }previous=pair;
     }
   }
   return {vertices,count:total,scale,bounds:{length:sourceLength*scale}};
@@ -118,15 +149,21 @@ export function isStJohnsBridgeFeature(feature){return bridgeFeatureCoveredByMod
 function loadArrayBuffer(url){return new Promise((resolve,reject)=>{const request=new XMLHttpRequest();request.open('GET',url,true);request.responseType='arraybuffer';request.onload=()=>request.status===0||request.status>=200&&request.status<300?resolve(request.response):reject(Error(`Bridge model request failed (${request.status}).`));request.onerror=()=>reject(Error('Bridge model request failed.'));request.send();});}
 
 export function createPortlandBridgeLayer(maplibre,elevation=()=>0,definitions=PORTLAND_BRIDGE_MODELS){
-  const models=definitions.map(definition=>({...definition,center:[...definition.center],sourceCenter:[...definition.center],loading:false,count:0,dirty:false}));let activeLoads=0;
+  const models=definitions.filter(definition=>!definition.disabled).map(definition=>({...definition,center:[...definition.center],sourceCenter:[...definition.center],loading:false,count:0,dirty:false}));let activeLoads=0;
   return {
     id:'portland-bridge-models',type:'custom',renderingMode:'3d',models,disposed:false,
     update(features){
-      for(const model of models){const placement=estimateBridgePlacement(features,{...model,center:model.sourceCenter});if(!placement)continue;const changed=Math.abs(placement.bearing-model.bearing)>.08||Math.hypot(...localMeters(placement.center,model.center))>.5;model.center=placement.center;model.bearing=placement.bearing;model.span=placement.span;if(changed&&model.sourceBuffer){const parsed=parseBridgeGlb(model.sourceBuffer,model.bearing,model.length);model.vertices=parsed.vertices;model.count=parsed.count;model.dirty=true;}}
+      for(const model of models){
+        const fit=fitBridgeRoad(features,{...model,center:model.sourceCenter});
+        if(!fit)continue;
+        if(model.fit?.signature===fit.signature)continue;
+        model.fit=fit;model.center=[...model.sourceCenter];
+        if(model.sourceBuffer){const parsed=parseBridgeGlb(model.sourceBuffer,model.bearing,model.length,fit);model.vertices=parsed.vertices;model.count=parsed.count;model.dirty=true;}
+      }
       this.map?.triggerRepaint();
     },
-    visible(model){if(this.map.getZoom()<ST_JOHNS_MIN_ZOOM)return false;const point=this.map.project(model.center),canvas=this.map.getCanvas();return point.x>-900&&point.y>-900&&point.x<canvas.clientWidth+900&&point.y<canvas.clientHeight+900;},
-    async load(model){if(model.loading||model.count||this.disposed||activeLoads>=2)return;model.loading=true;activeLoads++;try{model.sourceBuffer=await loadArrayBuffer(model.url);if(this.disposed)return;const parsed=parseBridgeGlb(model.sourceBuffer,model.bearing,model.length);model.vertices=parsed.vertices;model.count=parsed.count;model.dirty=true;this.map?.triggerRepaint();}catch(error){console.warn(`${model.label} Bridge model unavailable`,error);}finally{model.loading=false;activeLoads--;this.map?.triggerRepaint();}},
+    visible(model){if(!model.fit||this.map.getZoom()<ST_JOHNS_MIN_ZOOM)return false;const point=this.map.project(model.center),canvas=this.map.getCanvas();return point.x>-900&&point.y>-900&&point.x<canvas.clientWidth+900&&point.y<canvas.clientHeight+900;},
+    async load(model){if(model.loading||model.count||this.disposed||activeLoads>=2)return;model.loading=true;activeLoads++;try{model.sourceBuffer=await loadArrayBuffer(model.url);if(this.disposed)return;const parsed=parseBridgeGlb(model.sourceBuffer,model.bearing,model.length,model.fit);model.vertices=parsed.vertices;model.count=parsed.count;model.dirty=true;this.map?.triggerRepaint();}catch(error){console.warn(`${model.label} Bridge model unavailable`,error);}finally{model.loading=false;activeLoads--;this.map?.triggerRepaint();}},
     onAdd(map,gl){
       this.map=map;this.disposed=false;const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;};
       const vertex=compile(gl.VERTEX_SHADER,`#version 300 es

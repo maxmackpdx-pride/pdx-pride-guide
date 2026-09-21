@@ -59,3 +59,36 @@ test('procedural bridge decks remain enabled as connected model approaches',asyn
   assert.match(source,/bridgeLayer\.update\(bridgeFeatures\)/);
   assert.doesNotMatch(source,/bridgeLayer\.update\([^\n]*isStJohnsBridgeFeature/);
 });
+
+const {fitBridgeRoad,sampleBridgeRoad}=await import('../client/public/zaydar-map/bridge-fit.js');
+const {deckHeight}=await import('../client/public/home-flight/bridge-roads.js');
+function roadFeature(points,properties={}){
+ const anchor=[-122.7,45.5];
+ return {properties:{class:'primary',brunnel:'bridge',...properties},geometry:{type:'LineString',coordinates:points.map(([x,y])=>[anchor[0]+x/(111320*Math.cos(anchor[1]*Math.PI/180)),anchor[1]-y/111320])}};
+}
+test('model fitting follows road curves and the exact road ramp profile',()=>{
+ const feature=roadFeature([[-300,0],[-100,0],[100,35],[300,35]]);
+ const fit=fitBridgeRoad([feature],{id:'test',center:[-122.7,45.5],length:700});
+ assert.ok(fit);
+ const start=sampleBridgeRoad(fit,0),end=sampleBridgeRoad(fit,1),middle=sampleBridgeRoad(fit,.5);
+ assert.ok(Math.abs(start.x+300)<.001);assert.ok(Math.abs(end.x-300)<.001);
+ assert.ok(Math.abs(end.y-35)<.001);
+ assert.equal(start.width,8);assert.equal(end.width,8);
+ assert.equal(start.height,deckHeight(0,true));assert.equal(end.height,deckHeight(0,true));
+ assert.equal(middle.height,deckHeight(150,true));
+});
+test('fitting ignores nearby footpaths and supports MapLibre geometry getters',()=>{
+ const road=roadFeature([[-300,8],[300,8]]),footpath=roadFeature([[-300,0],[300,0]],{class:'path'});
+ const wrapper={properties:road.properties};Object.defineProperty(wrapper,'geometry',{get:()=>road.geometry});
+ const fit=fitBridgeRoad([wrapper,footpath],{id:'test',center:[-122.7,45.5],length:600});
+ assert.ok(fit);assert.ok(Math.abs(sampleBridgeRoad(fit,.5).y-8)<.001);
+});
+test('fitted road models omit the authored second deck and contain only finite geometry',async()=>{
+ const fit=fitBridgeRoad([roadFeature([[-400,0],[400,0]])],{id:'test',center:[-122.7,45.5],length:630});
+ const file=await readFile(modelUrl),buffer=file.buffer.slice(file.byteOffset,file.byteOffset+file.byteLength);
+ const original=parseStJohnsBridgeGlb(buffer),fitted=parseBridgeGlb(buffer,90,630,fit);
+ assert.equal(original.count-fitted.count,108,'all St Johns road/sidewalk triangles are replaced by the connected road mesh');
+ for(const value of fitted.vertices)assert.ok(Number.isFinite(value));
+ let maximumSide=0;for(let i=0;i<fitted.vertices.length;i+=7)maximumSide=Math.max(maximumSide,Math.abs(fitted.vertices[i+1]));
+ assert.ok(maximumSide<6,'structure width fits the 8m road rather than the original 21m deck');
+});

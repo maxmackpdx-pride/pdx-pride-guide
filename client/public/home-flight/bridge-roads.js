@@ -1,7 +1,7 @@
 // Both surfaces use the same physical road widths and opaque slate material.
 // The map's overall opacity still controls the entire city together.
 export const roadColor = '#314451';
-const roadWidths = {motorway: 9, trunk: 9, primary: 8, secondary: 7, tertiary: 6, minor: 5, service: 3.5, path: 1.2, rail: 1.4};
+export const roadWidths = {motorway: 9, trunk: 9, primary: 8, secondary: 7, tertiary: 6, minor: 5, service: 3.5, path: 1.2, rail: 1.4};
 const widthExpression = ['match', ['get', 'class'], ...Object.entries(roadWidths).flat(), 5];
 const metersAtZoom14 = 512 * 2 ** 14 / (40075016.686 * Math.cos(45.53 * Math.PI / 180));
 export const roadLineWidth = ['interpolate', ['exponential', 2], ['zoom'],
@@ -75,7 +75,7 @@ export function bridgeNetwork(features, project) {
   return {nodes, edges};
 }
 
-function deckHeight(distance,raisedMaterial=false) {
+export function deckHeight(distance,raisedMaterial=false) {
   const t = Math.min(1, distance / 150);
   return (raisedMaterial?.6:.05) + (raisedMaterial?21:16) * t * t * (3 - 2 * t);
 }
