@@ -97,6 +97,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     housingHolograms:{beamHalfWidth:()=>18,setLayout:noop},
     projectorGroundScale,housingIconSize,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
+    mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });
   vm.runInContext(source,context);vm.runInContext('drawLights(1)',context);

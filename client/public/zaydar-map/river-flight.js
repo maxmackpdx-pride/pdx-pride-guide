@@ -1,3 +1,4 @@
+import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260921-building-mask-v10';
 import {createBuildingModelLayer} from './building-models.js';
@@ -254,11 +255,14 @@ async function decodeVenueLogo(url,mode){
 const logoMotionSeed=Math.random()*Math.PI*2;
 let pulseTime=0,motionDelta=1/30;
 const logoPointer={x:0,y:0,active:false};
+const mapHover=createMapHover(map.getCanvas());
+let hoverTargets=[];
 function trackLogoPointer(event){
- logoPointer.active=event.pointerType!=='touch'&&!event.target?.closest?.('aside,.credit');
+ logoPointer.active=event.pointerType!=='touch'&&!event.buttons&&!event.target?.closest?.('aside,.credit,.standalone-hologram-label');
  logoPointer.x=event.clientX;logoPointer.y=event.clientY;
+ mapHover.update(hoverTargets,logoPointer);
 }
-function clearLogoPointer(){logoPointer.active=false;}
+function clearLogoPointer(){logoPointer.active=false;mapHover.update([],logoPointer);}
 function leaveLogoPointer(event){if(!event.relatedTarget)clearLogoPointer();}
 window.addEventListener('pointermove',trackLogoPointer,{passive:true});
 window.addEventListener('pointerout',leaveLogoPointer,{passive:true});
@@ -815,6 +819,10 @@ function drawLights(fade,target=map,surface=lights){
  // Titles live in this same document and frame cadence as their canvas logos.
  // Crossing the iframe boundary here caused visible lag while panning and zooming.
  renderHologramLabels(eventLabels);
+ hitTargets.push(...eventLabels.filter(label=>label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
+ hoverTargets=[...hitTargets];
+ if(userLocation&&fade>.1){const p=target.project(userLocation.coordinates);hoverTargets.push({x:p.x,y:p.y-27,r:23,color:userLocation.feature.properties.color,hoverOnly:true});}
+ mapHover.update(hoverTargets,logoPointer);
 }
 
 const labelMeasureContext=typeof document.createElement==='function'?document.createElement('canvas').getContext('2d'):{font:'',measureText:text=>({width:String(text).length*55})};
@@ -1045,6 +1053,7 @@ window.addEventListener('pagehide',()=>{
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
+ mapHover.dispose();
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  ambientSignals.dispose();
@@ -1138,7 +1147,7 @@ let down=null;
 map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
- const hit=[...hitTargets].reverse().find(h=>Math.hypot(e.clientX-h.x,e.clientY-h.y)<h.r);
+ const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
  if(hit?.clusterBounds){map.fitBounds(hit.clusterBounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();return;}
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
 });

@@ -39,3 +39,11 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
 .standalone-hologram-faces--anchored{position:absolute;transform:translate(-50%,-50%) scale(var(--face-scale));transform-origin:center;margin-top:0;padding-left:0;white-space:nowrap;pointer-events:none}
 .standalone-hologram-face{width:var(--face-size,18px);height:var(--face-size,18px);flex-shrink:0;margin-left:calc(var(--face-size,18px)*-.28)}
 .standalone-hologram-face:first-child{margin-left:0}
+
+.map-hover-highlight{position:fixed;z-index:4;pointer-events:none;transform:translate(-50%,-50%);border:1px solid color-mix(in srgb,var(--hover-color) 70%,white);box-shadow:0 0 9px color-mix(in srgb,var(--hover-color) 35%,transparent),inset 0 0 7px color-mix(in srgb,var(--hover-color) 16%,transparent);background:color-mix(in srgb,var(--hover-color) 5%,transparent)}
+.map-hover-highlight[hidden]{display:none}
+@media (hover:hover) and (pointer:fine){
+ .standalone-hologram-label:hover .standalone-hologram-title{filter:drop-shadow(0 0 4px var(--label-color));color:#fff}
+ .standalone-hologram-face:hover{outline:2px solid #fff;outline-offset:2px;filter:brightness(1.12)}
+}
+.standalone-hologram-label:focus-visible{outline:2px solid var(--label-color);outline-offset:5px;border-radius:6px}
