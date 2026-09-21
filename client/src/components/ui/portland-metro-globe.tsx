@@ -40,7 +40,7 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 6;
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
-type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
+type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
@@ -90,6 +90,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let disposed = false, frame = 0, previous = 0, elapsed = elapsedRef.current;
     let width = 0, height = 0;
     let points: Point[] = [];
+    let lastHoverFrame=performance.now();
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
     const abort = new AbortController();
@@ -190,13 +191,41 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const hoverAngle=Math.asin(Math.sin(Math.min(.45,52/radius))*.7);
       const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
       const beamDots: {x:number;y:number;size:number;glow:NonNullable<Point["glow"]>}[]=[];
+      const hoverNow=performance.now(),hoverDt=Math.min(64,Math.max(0,hoverNow-lastHoverFrame));
+      lastHoverFrame=hoverNow;
       const glowDt=Math.min(64,Math.max(0,elapsed-lastFrame.current));
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
-        const q = project(p);
+        let q = project(p);
         if (q.z <= 0) continue;
         const depth = Math.min(3, Math.floor(q.z * 4));
         const size = Math.max(.35, radius / 195 * Math.sqrt(q.z));
+        let hoverTarget=0;
+        if(surfaceHover){
+          const nx=(q.x-cx)/radius,ny=(cy-q.y)/radius;
+          // Great-circle distance creates a patch ON the sphere. It naturally
+          // foreshortens toward the rim instead of staying a flat cursor disk.
+          const cosine=nx*surfaceHover.x+ny*surfaceHover.y+q.z*surfaceHover.z;
+          const distance=Math.acos(Math.max(-1,Math.min(1,cosine)))/hoverAngle;
+          if(distance<1){
+            const across=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength)/Math.sin(hoverAngle);
+            const strength=smooth(1-distance);
+            hoverTarget=strength;
+            const effect=p.hoverGlow ??= {strength:0,lift:0,hue:0,core:0,lastLit:-Infinity};
+            effect.hue=270*(1-Math.max(0,Math.min(1,(across+1)/2)));
+            effect.core=Math.exp(-14*distance*distance);
+            effect.lastLit=hoverNow;
+          }
+        }
+        const effect=p.hoverGlow;
+        if(effect){
+          const held=hoverNow-effect.lastLit<2000?Math.max(hoverTarget,effect.strength):hoverTarget;
+          effect.strength+=(held-effect.strength)*(1-Math.exp(-hoverDt/(held>effect.strength?110:650)));
+          effect.lift+=((still?0:hoverTarget)-effect.lift)*(1-Math.exp(-hoverDt/180));
+          q=project(p,1+effect.lift*2/radius);
+          q.y-=effect.lift*1.2;
+          if(effect.strength>.005)hoverDots.push({x:q.x,y:q.y,radius:size,strength:effect.strength,hue:effect.hue,core:effect.core});
+        }
         const path = batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
         if(p.tone!==2 && !p.beamExcluded){
@@ -224,18 +253,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           }
           if(glow.strength>.01)beamDots.push({x:q.x,y:q.y,size,glow});
         }
-        if(surfaceHover){
-          const nx=(q.x-cx)/radius,ny=(cy-q.y)/radius;
-          // Great-circle distance creates a patch ON the sphere. It naturally
-          // foreshortens toward the rim instead of staying a flat cursor disk.
-          const cosine=nx*surfaceHover.x+ny*surfaceHover.y+q.z*surfaceHover.z;
-          const distance=Math.acos(Math.max(-1,Math.min(1,cosine)))/hoverAngle;
-          if(distance<1){
-            const across=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength)/Math.sin(hoverAngle);
-            const strength=Math.exp(-3*distance*distance)*(1-smooth((distance-.7)/.3));
-            hoverDots.push({x:q.x,y:q.y,radius:size,strength,hue:270*(1-Math.max(0,Math.min(1,(across+1)/2))),core:Math.exp(-14*distance*distance)});
-          }
-        }
+
       }
       batches.forEach((path, index) => {
         const tone = Math.floor(index / 4), depth = index % 4;
@@ -415,7 +433,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const animate = (now: number) => {
       if (now - previous >= 16) {
         if (previous) elapsed += Math.min(now-previous,64);
-        previous = now; elapsedRef.current = elapsed; draw();
+        previous = now; elapsedRef.current = elapsed;
+        if(!still || hover.current || points.some(p=>(p.hoverGlow?.strength ?? 0)>.005))draw();
       }
       frame = requestAnimationFrame(animate);
     };
@@ -448,7 +467,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     texture.src = '/home-globe/portland-city-beam-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
-    if (active && !still) frame = requestAnimationFrame(animate);
+    if (active) frame = requestAnimationFrame(animate);
     redrawRef.current = draw;
     return () => { disposed = true; abort.abort(); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; };
   }, [active, still]);
