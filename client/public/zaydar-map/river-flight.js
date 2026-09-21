@@ -854,14 +854,18 @@ function labelRows(text,width,requiredRows){
  }).sort((a,b)=>b.score-a.score)[0]||{lines:[text],sizes:[14]};
 }
 function labelComplement(hex){const n=parseInt(String(hex).replace('#',''),16);return `rgb(${Math.max(85,255-(n>>16&255))}, ${Math.max(85,255-(n>>8&255))}, ${Math.max(85,255-(n&255))})`;}
-function selectHologramLabel(key){if(parent===window){selectedKey=key;scheduleFrame();}else tell('select',{key});}
+function selectHologramLabel(key,element){
+ if(parent===window){selectedKey=key;scheduleFrame();return;}
+ const {left,top,width,height}=element.getBoundingClientRect();
+ tell('select',{key,rect:{left,top,width,height}});
+}
 function renderHologramLabels(labels){
  const root=document.getElementById('hologram-labels');if(!root)return;
  const live=new Set();
  for(const label of labels){
   live.add(label.key);
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
-  if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey));root.appendChild(item);}
+  if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey,item));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.color));item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
   item.style.setProperty('--title-height',`${label.width*.52}px`);
@@ -1158,7 +1162,7 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
  if(hit?.clusterBounds){map.fitBounds(hit.clusterBounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();return;}
- if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
+ if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));

@@ -6,7 +6,7 @@ import { useLocation, useSearch } from "wouter";
 import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
 import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/components/ZaydarLayerSheet";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
-import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
+import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, Navigation } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -638,7 +638,7 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   }), [marks, places]);
-  const onSceneSelect=(key:string)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HOÜS')setCardOriginRect(rect);}};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map" onClickCapture={gateSignedOutControls}>
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center)} />
     <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
@@ -660,7 +660,7 @@ export default function ZaydarMapDemo() {
     {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
-    {canOpenMapObjects && selectedHouz && <HousingPostOverlay post={selectedHouz} userId={user?.id} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => goOverlay("houz", postId)} />}
+    {canOpenMapObjects && selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
   </section>;

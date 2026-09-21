@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -31,14 +31,46 @@ import "@/pages/Housing.css";
 type Props = {
   post: HousingPostView;
   userId?: number | null;
+  originRect?: Pick<DOMRect, "left" | "top" | "width" | "height"> | null;
   onClose: () => void;
   onRequireAuth: () => void;
   onSelectPost: (postId: number) => void;
 };
 
 /** The complete HOÜS card and detail flow, kept on top of Mapz. */
-export default function HousingPostOverlay({ post: initialPost, userId, onClose, onRequireAuth, onSelectPost }: Props) {
-  const dialogRef = useModalA11y({ onClose });
+const TRANSITION_MS = 220;
+function motionAllowed() {
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+    !document.documentElement.classList.contains("calm-mode") &&
+    document.documentElement.dataset.calm !== "true";
+}
+
+function markerTransform(source: Pick<DOMRect, "left" | "top" | "width" | "height">, target: DOMRect) {
+  if ([source.left, source.top, source.width, source.height, target.left, target.top, target.width, target.height].some(value => !Number.isFinite(value)) || source.width < 8 || source.height < 8 || target.width < 8 || target.height < 8) return null;
+  const x = source.left + source.width / 2 - (target.left + target.width / 2);
+  const y = source.top + source.height / 2 - (target.top + target.height / 2);
+  return `translate3d(${x}px, ${y}px, 0) scale(${source.width / target.width}, ${source.height / target.height})`;
+}
+
+export default function HousingPostOverlay({ post: initialPost, userId, originRect, onClose, onRequireAuth, onSelectPost }: Props) {
+  const closingRef = useRef(false);
+  const panelAnimationRef = useRef<Animation | null>(null);
+  const transitionFromRef = useRef<DOMRect | null>(null);
+  const latestCloseRef = useRef({ onClose, originRect });
+  latestCloseRef.current = { onClose, originRect };
+  const requestClose = useCallback(() => {
+    if (closingRef.current) return;
+    const { onClose: finishClose, originRect: closeOrigin } = latestCloseRef.current;
+    const panel = dialogRef.current;
+    const transform = panel && closeOrigin && motionAllowed() ? markerTransform(closeOrigin, panel.getBoundingClientRect()) : null;
+    if (!panel || !transform) { finishClose(); return; }
+    closingRef.current = true;
+    panelAnimationRef.current?.cancel();
+    const animation = panel.animate([{ transform: "none", opacity: 1 }, { transform, opacity: 0 }], { duration: TRANSITION_MS, easing: "cubic-bezier(.4,0,1,1)" });
+    animation.onfinish = finishClose;
+    animation.oncancel = () => { closingRef.current = false; };
+  }, []);
+  const dialogRef = useModalA11y({ onClose: requestClose });
   const { toast } = useToast();
   const { openSheet } = useInboxSheet();
   const [detail, setDetail] = useState(false);
@@ -46,6 +78,35 @@ export default function HousingPostOverlay({ post: initialPost, userId, onClose,
   const savePendingRef = useRef(new Set<number>());
   const requestPendingRef = useRef(new Set<number>());
   const [savePendingIds, setSavePendingIds] = useState<Set<number>>(() => new Set());
+
+  useLayoutEffect(() => {
+    const panel = dialogRef.current;
+    const transform = panel && originRect && motionAllowed() ? markerTransform(originRect, panel.getBoundingClientRect()) : null;
+    if (!panel || !transform) return;
+    const animation = panel.animate([{ transform, opacity: 0.45 }, { transform: "none", opacity: 1 }], { duration: TRANSITION_MS, easing: "cubic-bezier(.2,.85,.3,1)" });
+    panelAnimationRef.current = animation;
+    return () => animation.cancel();
+  }, [initialPost.id, originRect]);
+
+  useLayoutEffect(() => {
+    const panel = dialogRef.current;
+    const from = transitionFromRef.current;
+    transitionFromRef.current = null;
+    if (!panel || !from) return;
+    panel.scrollTop = 0;
+    if (!motionAllowed()) return;
+    const to = panel.getBoundingClientRect();
+    if (Math.abs(from.width - to.width) < 2 && Math.abs(from.height - to.height) < 2) return;
+    const animation = panel.animate([{ width: `${from.width}px`, height: `${from.height}px` }, { width: `${to.width}px`, height: `${to.height}px` }], { duration: TRANSITION_MS, easing: "cubic-bezier(.2,.85,.3,1)" });
+    panelAnimationRef.current = animation;
+    return () => animation.cancel();
+  }, [detail]);
+
+  const showDetail = (next: boolean) => {
+    panelAnimationRef.current?.cancel();
+    transitionFromRef.current = dialogRef.current?.getBoundingClientRect() || null;
+    setDetail(next);
+  };
 
   const { data: fetchedPost } = useQuery<HousingPostView>({
     queryKey: ["/api/housing", initialPost.id],
@@ -119,26 +180,28 @@ export default function HousingPostOverlay({ post: initialPost, userId, onClose,
     setSavePendingIds(new Set(savePendingRef.current)); saveMutation.mutate();
   };
   const cardHandlers: HousingCardHandlers = {
-    onOpen: () => setDetail(true), onSave: save, onShare: share,
+    onOpen: () => showDetail(true), onSave: save, onShare: share,
     onChat: () => request("CHAT"), onJoin: () => request("JOIN"), onWaitlist: () => request("WAITLIST"),
     onBuildHaus: () => { if (requireAuth()) buildMutation.mutate(); }, savePendingIds,
   };
   const detailHandlers: HousingDetailHandlers = {
-    onBack: () => setDetail(false), backLabel: "Back to card", onRequest: request, onSave: save, onShare: share,
+    onBack: () => showDetail(false), backLabel: "Back to card", onRequest: request, onSave: save, onShare: share,
     onReport: () => { if (requireAuth()) setReporting(true); },
     onConvert: () => { if (requireAuth()) convertMutation.mutate(post.type === "LOOKING" ? "FORMING" : "LOOKING"); },
     onBuildHaus: () => { if (requireAuth()) buildMutation.mutate(); }, onOpenPost: onSelectPost,
   };
   const panelStyle = {
-    width: detail ? "min(960px, calc(100vw - 24px))" : "min(620px, calc(100vw - 24px))", maxHeight: "min(92vh, 980px)", overflow: "auto",
+    width: detail ? "min(960px, calc(100vw - 24px))" : "min(620px, calc(100vw - 24px))", height: "auto", maxHeight: "min(92vh, 980px)", overflow: "auto",
     position: "relative", border: 0, borderRadius: 14, padding: 0, background: "transparent", boxShadow: "none", backdropFilter: "none",
   } as CSSProperties;
 
   return createPortal(
-    <div className="board-detail-backdrop" onClick={onClose}>
+    <div className="board-detail-backdrop" onClick={requestClose}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HOÜS ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind" style={panelStyle} onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="gifting-close" onClick={onClose} aria-label="Close HOÜS and return to map" style={{ position: "absolute", top: 10, right: 10, zIndex: 30 }}><X size={18} /></button>
-        {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
+        <button type="button" className="gifting-close" onClick={requestClose} aria-label="Close HOÜS and return to map" style={{ position: "absolute", top: 10, right: 10, zIndex: 30 }}><X size={18} /></button>
+        <div key={detail ? "detail" : "card"} className="houz-overlay-content">
+          {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
+        </div>
         {reporting ? <div className="hz-sheetwrap" onClick={() => setReporting(false)}><div className="hz-sheet pdx-glass-rebind" onClick={(event) => event.stopPropagation()}>
           <div className="hz-sheet__head"><Mono accent>Report this post</Mono><button className="hz-x" onClick={() => setReporting(false)} aria-label="Close">×</button></div>
           <p className="hz-prose">What is wrong with it? An admin sees this, and the poster does not.</p>

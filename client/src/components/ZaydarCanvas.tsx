@@ -3,7 +3,8 @@ import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useS
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
-type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
+export type MapSelectionRect={left:number;top:number;width:number;height:number};
+type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};
 const MAP_SRC='/zaydar-map/index.html?v=20260921-downtown-placez-v17';
 const MAX_3D_ATTEMPTS=3;
@@ -42,7 +43,12 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
    fail(`3D error: ${detail}`);
   }
   if(event.data.type==='mode')latest.current.onMode?.(event.data.mode);
-  if(event.data.type==='select')latest.current.onSelect(event.data.key);
+  if(event.data.type==='select'){
+   const source=event.data.rect,frameRect=frame.current?.getBoundingClientRect();
+   const rect=source&&frameRect&&[source.left,source.top,source.width,source.height].every(Number.isFinite)
+    ?{left:frameRect.left+source.left,top:frameRect.top+source.top,width:source.width,height:source.height}:undefined;
+   latest.current.onSelect(event.data.key,rect);
+  }
  };window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive);},[fail]);
  const serialized=useMemo(()=>JSON.stringify(rows),[rows]);
  useEffect(()=>{if(ready)post('data',{rows});},[ready,serialized]);

@@ -10,7 +10,7 @@ test('HOÜS card, detail, and close stay on Mapz',async()=>{
   const [page,overlay]=await Promise.all([readFile(mapPageUrl,'utf8'),readFile(overlayUrl,'utf8')]);
   assert.match(page,/goOverlay\("houz", postId\)/);
   assert.match(page,/<HousingPostOverlay/);
-  assert.match(overlay,/onOpen: \(\) => setDetail\(true\)/);
+  assert.match(overlay,/onOpen: \(\) => showDetail\(true\)/);
   assert.match(overlay,/backLabel: "Back to card"/);
   assert.match(overlay,/aria-label="Close HOÜS and return to map"/);
   assert.doesNotMatch(overlay,/\/the-hauz/);

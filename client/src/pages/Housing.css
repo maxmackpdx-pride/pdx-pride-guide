@@ -1936,6 +1936,21 @@ html.calm-mode .hz-card:hover {
   transition: none !important;
 }
 
+/* HOÜS Mapz card → detail: only the replaced contents crossfade. The panel
+ * size is interpolated by the overlay component, with no map render work. */
+.houz-overlay-content {
+  animation: houz-overlay-content-in .18s ease-out both;
+}
+@keyframes houz-overlay-content-in {
+  from { opacity: .35; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .houz-overlay-content { animation: none; }
+}
+html.calm-mode .houz-overlay-content,
+html[data-calm="true"] .houz-overlay-content { animation: none; }
+
 /* ---------------------------------------------------------------------------
  * Additions beyond the prototype stylesheet.
  *
