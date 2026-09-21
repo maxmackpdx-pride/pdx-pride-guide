@@ -458,6 +458,7 @@ function drawLights(fade,target=map,surface=lights){
  const closeProgress=smoothRange(15,17.25,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
  const placezScale=1.625*(.375+.625*streetProgress+.2*closeProgress);
+ const placezGroundPitch=Math.max(.28,Math.cos(target.getPitch()*Math.PI/180));
  const placezGlow=.375+.625*streetProgress+.12*closeProgress;
  const placezBloomMax=.02;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
@@ -604,7 +605,7 @@ function drawLights(fade,target=map,surface=lights){
     const densityGlow=glowByKey.get(feature.properties.key)??1;
     const markerY=isPlace?p.y:raisedY;
     const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
-    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
+    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace,isPlace?placezGroundPitch:1);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
@@ -1035,14 +1036,16 @@ function tell(type,payload={}){if(parent!==window)parent.postMessage({source:'za
 function viewState(){const c=map.getCenter(),b=map.getBounds();tell('view',{center:[c.lat,c.lng],zoom:map.getZoom(),bounds:{south:b.getSouth(),north:b.getNorth(),west:b.getWest(),east:b.getEast()}});}
 // Use the original Zaydar orb materials, breathing glow, and drifting mist.
 const typeIcons=new Map();
-function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false){
+function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false,groundPitch=1){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
  const size=(flat?72:126)*scale*(flat?1:(.92+.1*pulse));
  const coreSize=25*scale;
  const iconRadius=11*scale;
  const iconSize=15*scale;
- ctx.save();ctx.globalAlpha=fade*(flat?1:pulse)*glowStrength;
+ ctx.save();
+ if(flat){ctx.translate(x,y);ctx.scale(1,groundPitch);x=0;y=0;}
+ ctx.globalAlpha=fade*(flat?1:pulse)*glowStrength;
  ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
  if(!flat)drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
  ctx.globalAlpha=alpha;
