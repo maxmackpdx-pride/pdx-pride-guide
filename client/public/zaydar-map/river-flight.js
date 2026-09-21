@@ -448,7 +448,7 @@ function drawLights(fade,target=map,surface=lights){
  const streetProgress=smoothRange(13.5,15,target.getZoom());
  const closeProgress=smoothRange(15,17.25,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
- const placezScale=.375+.625*streetProgress+.2*closeProgress;
+ const placezScale=1.3*(.375+.625*streetProgress+.2*closeProgress);
  const placezGlow=.375+.625*streetProgress+.12*closeProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
@@ -591,10 +591,11 @@ function drawLights(fade,target=map,surface=lights){
    else if(!underProjector){
     const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
-    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale,isPlace);
-    if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,raisedY,placeCluster.members.length,color);
-    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,raisedY,feature.properties.name,feature.properties.type,color,width);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:28,name:feature.properties.name,category:feature.properties.type,clusterCenter:placeCluster?.members.length>1?placeCluster.center:null});
+    const markerY=isPlace?p.y:raisedY;
+    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale,isPlace);
+    if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
+    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
+    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?36:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
    }
   }
   if(!isBar)continue;
@@ -994,8 +995,8 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  while(pending.length){
   const leader=pending.shift(),members=[leader];
   for(let i=pending.length-1;i>=0;i--)if(Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
-  const center=members.reduce((sum,item)=>[sum[0]+item.feature.geometry.coordinates[0]/members.length,sum[1]+item.feature.geometry.coordinates[1]/members.length],[0,0]);
-  const cluster={leader,members,center};
+  const coordinates=members.map(item=>item.feature.geometry.coordinates),west=Math.min(...coordinates.map(point=>point[0])),east=Math.max(...coordinates.map(point=>point[0])),south=Math.min(...coordinates.map(point=>point[1])),north=Math.max(...coordinates.map(point=>point[1]));
+  const cluster={leader,members,bounds:[[west,south],[east,north]]};
   for(const member of members)byKey.set(member.feature.properties.key,cluster);
  }
  return {byKey};
@@ -1044,7 +1045,7 @@ map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=[...hitTargets].reverse().find(h=>Math.hypot(e.clientX-h.x,e.clientY-h.y)<h.r);
- if(hit?.clusterCenter){map.easeTo({center:hit.clusterCenter,zoom:Math.min(18,map.getZoom()+1.35),duration:520});scheduleFrame();return;}
+ if(hit?.clusterBounds){map.fitBounds(hit.clusterBounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();return;}
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);tell('select',{key:hit.key});scheduleFrame();}
 });
 map.on('moveend',viewState);
