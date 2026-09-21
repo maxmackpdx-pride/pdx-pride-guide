@@ -32,6 +32,7 @@ test('the actual startup reaches MapLibre construction, with only one graphics c
  assert.throws(()=>vm.runInNewContext(prefix,{
   mapzSurfaceStyle,structuredClone,
   window:{__zaydarStartup:{phase(){},fatal(){}}},
+  mlcontour:{DemSource:class{setupMaplibre(){} get sharedDemProtocolUrl(){return 'dem://tiles';} contourProtocolUrl(){return 'contour://tiles';}}},
   // No document canvas probe should be needed before the real map is created.
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
  }),error=>error===reached);

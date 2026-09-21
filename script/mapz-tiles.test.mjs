@@ -15,6 +15,8 @@ const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
 
 test('Mapz extends the shared home style with its own natural surfaces',()=>{
  assert.match(renderer,/mapzSurfaceStyle/);
+ assert.match(renderer,/mlcontour\.DemSource/);
+ assert.match(html,/maplibre-contour-0\.1\.0\.js/);
  assert.match(home,/import \{vectorStyle\} from '\.\/city-map.js'/);
  assert.doesNotMatch(renderer,/api\/mapz|deck-mobile/);
  assert.doesNotMatch(routes,/registerMapzTileRoutes/);

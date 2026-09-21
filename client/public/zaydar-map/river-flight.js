@@ -1,4 +1,4 @@
-import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js?v=20260920-flat-relief';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js?v=20260920-material-hierarchy';
 import {bridgeFilter,createBridgeLayer} from '../home-flight/bridge-roads.js';
 import {createCitySparkles} from '../home-flight/city-sparkles.js';
 import {roofSparkles} from '../home-flight/roof-sparkles.js';
@@ -12,6 +12,12 @@ import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
+const elevation=new mlcontour.DemSource({id:'mapz-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:64});
+elevation.setupMaplibre(maplibregl);
+const surfaceStyle=mapzSurfaceStyle({
+ demTiles:[elevation.sharedDemProtocolUrl],
+ contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
+});
 // The home city materials, extended with DEM hillshade and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
@@ -20,11 +26,11 @@ try{
  map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
    maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
-   style:mapzSurfaceStyle()});
+   style:surfaceStyle});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
 const waterBloom=createWaterBloom();
-map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern());});
+map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
 map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
@@ -40,7 +46,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
-const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
+const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
 const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
 function installSceneExtras(){
  map.addLayer(bridgeLayer,'skyline');
@@ -103,6 +109,27 @@ function drawSurfaceReflections(ctx,target,reflections,fade){
   wash.addColorStop(0,color+'00');wash.addColorStop(.42,color+'28');wash.addColorStop(1,color+'08');
   ctx.globalAlpha=fade*.65;ctx.fillStyle=wash;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,lift+radius*1.4);ctx.restore();
  }
+}
+function drawAmbientBuildingSheen(ctx,target,buildings,fade){
+ if(!buildings.length||fade<=0)return;
+ ctx.save();ctx.beginPath();
+ const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686,pitch=Math.sin(target.getPitch()*Math.PI/180);
+ for(const building of buildings){
+  const lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*pitch;
+  const footprint=building.ring.map(point=>target.project(point));
+  footprint.forEach((p,i)=>{if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();
+  const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
+  for(let i=0;i<footprint.length;i++){
+   const a=footprint[i],b=footprint[(i+1)%footprint.length];if((b.x-a.x)*winding>=0)continue;
+   ctx.moveTo(a.x,a.y-lift);ctx.lineTo(b.x,b.y-lift);ctx.lineTo(b.x,b.y);ctx.lineTo(a.x,a.y);ctx.closePath();
+  }
+ }
+ ctx.clip('evenodd');
+ const width=window.innerWidth,height=window.innerHeight,span=Math.hypot(width,height),angle=(target.getBearing()+32)*Math.PI/180;
+ const dx=Math.cos(angle)*span*.52,dy=Math.sin(angle)*span*.52,cx=width*.5,cy=height*.47;
+ const sheen=ctx.createLinearGradient(cx-dx,cy-dy,cx+dx,cy+dy);
+ sheen.addColorStop(0,'rgba(135,181,198,0)');sheen.addColorStop(.42,'rgba(135,181,198,.035)');sheen.addColorStop(.5,'rgba(218,239,244,.16)');sheen.addColorStop(.58,'rgba(135,181,198,.035)');sheen.addColorStop(1,'rgba(135,181,198,0)');
+ ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*(.34+.18*smoothRange(14,17,target.getZoom()));ctx.fillStyle=sheen;ctx.fillRect(0,0,width,height);ctx.restore();
 }
 function roofLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates,roof=surfaces.roofs?.get(feature.properties.phase)??9;
@@ -347,7 +374,8 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
- waterBloom.draw(lightsContext,target,width,height,fade);
+ waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches);
+ drawAmbientBuildingSheen(lightsContext,target,surfaces.buildings??[],fade);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;

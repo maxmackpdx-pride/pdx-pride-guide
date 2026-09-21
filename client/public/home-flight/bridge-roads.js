@@ -75,11 +75,11 @@ export function bridgeNetwork(features, project) {
   return {nodes, edges};
 }
 
-function deckHeight(distance) {
+function deckHeight(distance,raisedMaterial=false) {
   const t = Math.min(1, distance / 150);
-  return .05 + 16 * t * t * (3 - 2 * t);
+  return (raisedMaterial?.6:.05) + (raisedMaterial?21:16) * t * t * (3 - 2 * t);
 }
-export function bridgeMesh(network) {
+export function bridgeMesh(network,raisedMaterial=false) {
   const {nodes, edges} = network, vertices = [];
   const triangle = (a, b, c, shade, edgeA, edgeB, edgeC) => {
     vertices.push(...a, shade, edgeA, ...b, shade, edgeB, ...c, shade, edgeC);
@@ -105,7 +105,7 @@ export function bridgeMesh(network) {
     let previous;
     for (let i = 0; i <= steps; i++) {
       const t = i / steps, distance = Math.min(a.distance + edge.length * t, b.distance + edge.length * (1 - t));
-      const z = deckHeight(distance);
+      const z = deckHeight(distance,raisedMaterial);
       const current = start.map((p, side) => [p[0] + (end[side][0] - p[0]) * t, p[1] + (end[side][1] - p[1]) * t, z]);
       if (previous) {
         const [l0, r0] = previous, [l1, r1] = current;
@@ -121,7 +121,7 @@ export function bridgeMesh(network) {
   return new Float32Array(vertices);
 }
 
-export function createBridgeLayer(maplibre,elevation=()=>0) {
+export function createBridgeLayer(maplibre,elevation=()=>0,raisedMaterial=false) {
   const origin = maplibre.MercatorCoordinate.fromLngLat([-122.67, 45.53]);
   const unit = origin.meterInMercatorCoordinateUnits();
   const project = coordinate => { const p = maplibre.MercatorCoordinate.fromLngLat(coordinate); return [(p.x - origin.x) / unit, (p.y - origin.y) / unit]; };
@@ -130,7 +130,7 @@ export function createBridgeLayer(maplibre,elevation=()=>0) {
     update(features) {
       const signature = JSON.stringify(features.map(f => [f.properties.class, f.geometry.coordinates]));
       if (signature === this.signature) return;
-      this.signature = signature; this.vertices = bridgeMesh(bridgeNetwork(features, project));
+      this.signature = signature; this.vertices = bridgeMesh(bridgeNetwork(features, project),raisedMaterial);
       for(let i=0;i<this.vertices.length;i+=5){
         const coordinate=new maplibre.MercatorCoordinate(origin.x+this.vertices[i]*unit,origin.y+this.vertices[i+1]*unit).toLngLat();
         this.vertices[i+2]+=elevation(coordinate)*maplibre.MercatorCoordinate.fromLngLat(coordinate).meterInMercatorCoordinateUnits()/unit;
@@ -148,7 +148,13 @@ export function createBridgeLayer(maplibre,elevation=()=>0) {
         in vec3 a_position; in float a_shade; in float a_edge;
         uniform mat4 u_matrix; out float v_shade; out float v_edge;
         void main(){gl_Position=u_matrix*vec4(a_position,1.0);v_shade=a_shade;v_edge=a_edge;}`);
-      const fragment = compile(gl.FRAGMENT_SHADER, `#version 300 es
+      const fragment = compile(gl.FRAGMENT_SHADER, raisedMaterial?`#version 300 es
+        precision highp float; in float v_shade; in float v_edge; out vec4 color;
+        void main(){float aa=max(fwidth(v_edge),0.001);float alpha=1.0-smoothstep(1.0-aa,1.0,abs(v_edge));
+        vec3 base=vec3(60.0,85.0,101.0)/255.0*v_shade;
+        float rim=smoothstep(0.62,0.94,abs(v_edge));
+        base+=vec3(0.10,0.17,0.20)*rim*v_shade;
+        color=vec4(base*alpha,alpha);}`:`#version 300 es
         precision highp float; in float v_shade; in float v_edge; out vec4 color;
         void main(){float aa=max(fwidth(v_edge),0.001);float alpha=1.0-smoothstep(1.0-aa,1.0,abs(v_edge));
         color=vec4(vec3(49.0,68.0,81.0)/255.0*v_shade*alpha,alpha);}`);
