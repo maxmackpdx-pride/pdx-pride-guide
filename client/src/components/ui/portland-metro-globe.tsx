@@ -185,7 +185,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const pointerY=hover.current?(cy-hover.current.y)/radius:2;
       const pointerRadiusSquared=pointerX*pointerX+pointerY*pointerY;
       const surfaceHover=pointerRadiusSquared<1?{x:pointerX,y:pointerY,z:Math.sqrt(1-pointerRadiusSquared)}:null;
-      const hoverAngle=Math.min(.45,52/radius);
+      const hoverAngle=Math.asin(Math.sin(Math.min(.45,52/radius))*.7);
       const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
@@ -213,7 +213,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
-      // A softly blended spectrum across the surface, with a luminous white
+      // A softly blended spectrum across the surface, with a softly brightened
       // center. No angular hue sectors or radial spokes.
       context.save();
       context.beginPath();context.arc(cx,cy,radius,0,Math.PI*2);context.clip();
@@ -224,8 +224,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.scale(Math.max(.025,surfaceHover.z),1);
         const haloRadius=radius*Math.sin(hoverAngle);
         const halo=context.createRadialGradient(0,0,0,0,0,haloRadius);
-        halo.addColorStop(0,'rgba(255,250,255,.24)');
-        halo.addColorStop(.2,'rgba(232,222,255,.15)');
+        halo.addColorStop(0,'rgba(205,220,255,.12)');
+        halo.addColorStop(.2,'rgba(200,205,255,.08)');
         halo.addColorStop(.55,'rgba(130,200,255,.045)');
         halo.addColorStop(1,'rgba(130,200,255,0)');
         context.fillStyle=halo;
@@ -234,9 +234,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       }
       for(const dot of hoverDots){
         context.globalAlpha=dot.strength;
-        context.fillStyle=`hsl(${dot.hue} ${90-dot.core*65}% ${65+dot.core*33}%)`;
-        context.shadowColor=`hsl(${dot.hue} 95% ${65+dot.core*25}%)`;
-        context.shadowBlur=4+dot.core*13;
+        context.fillStyle=`hsl(${dot.hue} ${90-dot.core*20}% ${65+dot.core*13}%)`;
+        context.shadowColor=`hsl(${dot.hue} 95% ${65+dot.core*10}%)`;
+        context.shadowBlur=2.8+dot.core*9.1;
         context.beginPath();context.arc(dot.x,dot.y,dot.radius*(1+dot.strength*.6),0,Math.PI*2);context.fill();
       }
       context.restore();
