@@ -165,7 +165,13 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       context.fillStyle = '#000';
       context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI * 2); context.fill();
       // Batch dot paths by depth and land class instead of issuing 15k fills.
-      const hoverDots: { x:number; y:number; radius:number; strength:number; hue:number }[] = [];
+      const hoverDots: { x:number; y:number; radius:number; strength:number; hue:number; core:number }[] = [];
+      const pointerX=hover.current?(hover.current.x-cx)/radius:2;
+      const pointerY=hover.current?(cy-hover.current.y)/radius:2;
+      const pointerRadiusSquared=pointerX*pointerX+pointerY*pointerY;
+      const surfaceHover=pointerRadiusSquared<1?{x:pointerX,y:pointerY,z:Math.sqrt(1-pointerRadiusSquared)}:null;
+      const hoverAngle=Math.min(.45,52/radius);
+      const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
         const q = project(p);
@@ -174,10 +180,17 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const size = Math.max(.35, radius / 195 * Math.sqrt(q.z));
         const path = batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
-        if(hover.current){
-          const dx=q.x-hover.current.x,dy=q.y-hover.current.y,distance=Math.hypot(dx,dy);
-          const hoverRadius=46;
-          if(distance<hoverRadius)hoverDots.push({x:q.x,y:q.y,radius:size,strength:smooth(1-distance/hoverRadius),hue:(Math.atan2(dy,dx)*180/Math.PI+360)%360});
+        if(surfaceHover){
+          const nx=(q.x-cx)/radius,ny=(cy-q.y)/radius;
+          // Great-circle distance creates a patch ON the sphere. It naturally
+          // foreshortens toward the rim instead of staying a flat cursor disk.
+          const cosine=nx*surfaceHover.x+ny*surfaceHover.y+q.z*surfaceHover.z;
+          const distance=Math.acos(Math.max(-1,Math.min(1,cosine)))/hoverAngle;
+          if(distance<1){
+            const across=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength)/Math.sin(hoverAngle);
+            const strength=Math.exp(-3*distance*distance)*(1-smooth((distance-.7)/.3));
+            hoverDots.push({x:q.x,y:q.y,radius:size,strength,hue:270*(1-Math.max(0,Math.min(1,(across+1)/2))),core:Math.exp(-14*distance*distance)});
+          }
         }
       }
       batches.forEach((path, index) => {
@@ -185,14 +198,31 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
-      // Illuminate only existing dots: a small rainbow falls off into black gaps.
+      // A softly blended spectrum across the surface, with a luminous white
+      // center. No angular hue sectors or radial spokes.
       context.save();
+      context.beginPath();context.arc(cx,cy,radius,0,Math.PI*2);context.clip();
+      if(surfaceHover && hover.current){
+        context.save();
+        context.translate(hover.current.x,hover.current.y);
+        context.rotate(Math.atan2(-surfaceHover.y,surfaceHover.x));
+        context.scale(Math.max(.025,surfaceHover.z),1);
+        const haloRadius=radius*Math.sin(hoverAngle);
+        const halo=context.createRadialGradient(0,0,0,0,0,haloRadius);
+        halo.addColorStop(0,'rgba(255,250,255,.24)');
+        halo.addColorStop(.2,'rgba(232,222,255,.15)');
+        halo.addColorStop(.55,'rgba(130,200,255,.045)');
+        halo.addColorStop(1,'rgba(130,200,255,0)');
+        context.fillStyle=halo;
+        context.beginPath();context.arc(0,0,haloRadius,0,Math.PI*2);context.fill();
+        context.restore();
+      }
       for(const dot of hoverDots){
         context.globalAlpha=dot.strength;
-        context.fillStyle=`hsl(${dot.hue} 100% 72%)`;
-        context.shadowColor=`hsl(${dot.hue} 100% 55%)`;
-        context.shadowBlur=5*dot.strength;
-        context.beginPath();context.arc(dot.x,dot.y,dot.radius*(1+dot.strength*.7),0,Math.PI*2);context.fill();
+        context.fillStyle=`hsl(${dot.hue} ${90-dot.core*65}% ${65+dot.core*33}%)`;
+        context.shadowColor=`hsl(${dot.hue} 95% ${65+dot.core*25}%)`;
+        context.shadowBlur=4+dot.core*13;
+        context.beginPath();context.arc(dot.x,dot.y,dot.radius*(1+dot.strength*.6),0,Math.PI*2);context.fill();
       }
       context.restore();
       // Fixed surface anchors; each light has its own clock, like the map glitter.
