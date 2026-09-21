@@ -2,7 +2,7 @@ import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} 
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
-import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-nightlife';
+import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-day-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../home-flight/roof-sparkles.js?v=20260920-ground-lights';
 import {createLogoFocus} from './logo-focus.js';
@@ -50,7 +50,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
-const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,nightlifePalette:true});
+const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
 function installSceneExtras(){
  map.addLayer(groundLightPools,'buildings');
