@@ -19,6 +19,9 @@ import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
 import AuthModal from "@/components/AuthModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
+import HousingComposerOverlay from "@/components/housing/HousingComposerOverlay";
+import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
 import type { Business } from "@/pages/Directory";
 import { directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
@@ -26,7 +29,7 @@ import { mapRecordId, clearMapOverlay } from "@/lib/mapDrawerNavigation";
 import { mapCoordinates } from "@/lib/mapCoordinates";
 import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
-import { HOUSING_TYPE_LABEL, type HousingType } from "@shared/housing";
+import { HOUSING_TYPE_LABEL, type HousingBoardResponse, type HousingPostView, type HousingType } from "@shared/housing";
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
@@ -232,7 +235,7 @@ function originRect(element: Element | null): EventModalOriginRect | PlaceModalO
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 }
 
-const OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz"] as const;
+const OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz", "houz"] as const;
 type OverlayKey = typeof OVERLAY_KEYS[number];
 type TimeFilter = MapTimeFilter;
 
@@ -321,6 +324,12 @@ export default function ZaydarMapDemo() {
   const housingValue = params.get("housingType");
   const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
   const setHousingType = (value: HousingType | null) => updateParams(p => { if (value) p.set("housingType", value); else p.delete("housingType"); });
+  const housingSaved = params.get("housingSaved") === "1";
+  const setHousingSaved = (value: boolean) => updateParams(p => { if (value) p.set("housingSaved", "1"); else p.delete("housingSaved"); });
+  const housingTags = useMemo(() => (params.get("housingTags") || "").split(",").filter(Boolean), [params]);
+  const setHousingTags = (tags: string[]) => updateParams(p => { if (tags.length) p.set("housingTags", tags.join(",")); else p.delete("housingTags"); });
+  const composeValue = params.get("houzCompose");
+  const houzCompose = composeValue === "PM" || ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(composeValue || "") ? composeValue as HousingType | "PM" : null;
   const placeTypesParam = params.get("placeTypes");
   const placeTypes = useMemo(() => placeTypesParam !== null ? placeTypesParam.split(",") : [...ZAYDAR_PLACE_TYPE_OPTIONS], [placeTypesParam]);
   const eventTag = params.get("tag");
@@ -418,6 +427,7 @@ export default function ZaydarMapDemo() {
   const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = EMPTY_ROWS, isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
   const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
+  const housingStats = !Array.isArray(housingRaw) && housingRaw && typeof housingRaw === "object" ? (housingRaw as HousingBoardResponse).stats : undefined;
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => {
     const hasOverlay = OVERLAY_KEYS.some(key => mapSearchParams().has(key));
     setLocation(overlayHref(key, id), { replace: hasOverlay, state: { ...window.history.state,
@@ -448,6 +458,13 @@ export default function ZaydarMapDemo() {
   });
   const selectedEvent = eventId ? feedEvent || eventDetail.data : null;
   const selectedPlace = placeId ? places.find(place => place.id === placeId) : null;
+  const houzId = mapRecordId(params.get("houz"));
+  const feedHouz = houzId ? housing.find(post => Number(post.id) === houzId) as HousingPostView | undefined : undefined;
+  const houzDetail = useQuery<HousingPostView>({
+    queryKey: ["/api/housing", houzId], enabled: houzId !== null && !feedHouz,
+    queryFn: async () => { const response = await fetch(`/api/housing/${houzId}`, { credentials: "include" }); if (!response.ok) throw new Error("Not found"); return response.json(); },
+  });
+  const selectedHouz = feedHouz || houzDetail.data;
   const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
   const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
   const missingPlace = placeId !== null && !placesLoading && !selectedPlace;
@@ -483,8 +500,8 @@ export default function ZaydarMapDemo() {
   ]), [gigs, gifts, sells]);
   const visibleBoards = useMemo(() => boardRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [boardRows, boardKinds, q]);
   const visibleHousing = useMemo(() => housing
-    .filter(row => (!housingType || row.type === housingType) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, q]);
+    .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
+    .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, housingSaved, housingTags, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
@@ -500,14 +517,17 @@ export default function ZaydarMapDemo() {
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The HOÜS") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
+      if (String(row._board) === "The HOÜS") {
+        const postId = Number(row.id);
+        if (Number.isFinite(postId)) goOverlay("houz", postId);
+      }
       else {
         const kind = boardKind(row);
         const postId = Number(row.id);
         if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
-  }, [canOpenMapObjects, goOverlay, setLocation]);
+  }, [canOpenMapObjects, goOverlay]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: `board-${row._board}-${row.id}`, kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const toggleBoardKind = (kind: string) => updateParams(p => {
     const next = new Set(boardKinds);
@@ -516,10 +536,10 @@ export default function ZaydarMapDemo() {
   });
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="zaydar-layer-list">
-      {rows.slice(0, 5).map((row, index) => {
+      {rows.slice(0, kind === "houz" ? 50 : 5).map((row, index) => {
         const isPlace = kind === "places";
         const title = isPlace ? String(row.name || "Place") : boardTitle(row);
-        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing"} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
+        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing").replace("HAÜS", "HOÜS")} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
         const fallback = isPlace ? directoryFallbackLogo(String(row.type)) : boardIcon(row);
         const photo = isPlace ? resolveDirectoryLogo(String(row.name), typeof row.imageUrl === "string" ? row.imageUrl : undefined) : firstImage(kind === "houz" ? row.photos : row.photoUrls) || firstImage(row.imageUrl);
         return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
@@ -570,17 +590,28 @@ export default function ZaydarMapDemo() {
   </section>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">HOÜS</h2></div>
+    {housingStats && <div className="zaydar-houz-stats" aria-label="HOÜS board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
+    <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HOÜS</button>
+    <div className="zaydar-layer-rail zaydar-houz-actions" role="group" aria-label="Start a HOÜS post">
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "OFFERING")) : setShowAuth(true)}>Offer a room</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Find housing</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HOÜS</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "PM")) : setShowAuth(true)}>List a rental</button>
+    </div>
     <div className="zaydar-layer-rail" role="group" aria-label="Housing types">
       {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HOÜS" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
+    <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
     {housingLoading ? <p role="status">Loading HOÜS…</p> : housingError ? <p role="alert">HOÜS could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
+    <details className="zaydar-houz-about"><summary>How HOÜS works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
     { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => toggleLayer("hideBoards"), panel: boardsPanel, viewMore: [{ label: "Gigz", href: "/pride-work" }, { label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
-    { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more HOÜS", href: "/the-hauz" }] },
+    { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
   ];
 
   const sceneRows = useMemo(() => marks.map(mark => {
@@ -629,6 +660,8 @@ export default function ZaydarMapDemo() {
     {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
+    {canOpenMapObjects && selectedHouz && <HousingPostOverlay post={selectedHouz} userId={user?.id} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => goOverlay("houz", postId)} />}
+    {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
   </section>;
 }

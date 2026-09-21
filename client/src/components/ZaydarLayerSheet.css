@@ -134,6 +134,14 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 .zaydar-layer-visibility { display: flex; align-items: center; gap: 8px; min-height: 44px; color: #b7cede; font: 500 12px/1.4 Inter, sans-serif; }
 .zaydar-layer-visibility input { width: 18px; height: 18px; accent-color: var(--active-layer-color); }
 .zaydar-layer-panel .zaydar-layer-location-note { margin: 10px 0 0; font-size: 11px; }
+.zaydar-houz-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 9px; }
+.zaydar-houz-stats span { padding: 8px 5px; border: 1px solid #a4b6c622; border-radius: 11px; background: #ffffff05; color: #9fb4c6; font: 600 9px/1.2 Inter, sans-serif; text-align: center; text-transform: uppercase; letter-spacing: .05em; }
+.zaydar-houz-stats strong { display: block; margin-bottom: 2px; color: #fff; font: 800 17px/1 var(--font-display, "Barlow Condensed", sans-serif); }
+.zaydar-map-demo .zaydar-houz-post { width: 100%; min-height: 44px; margin: 0 0 7px; border: 1px solid color-mix(in srgb, var(--active-layer-color) 58%, transparent); border-radius: 22px; background: color-mix(in srgb, var(--active-layer-color) 11%, #07111b); color: #fff; font: 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .04em; text-transform: uppercase; }
+.zaydar-layer-sheet .zaydar-houz-actions { margin-bottom: 9px; }
+.zaydar-houz-about { margin: 10px 0 2px; padding: 0 11px 10px; border: 1px solid #a4b6c622; border-radius: 12px; color: #a9bed2; font: 400 12px/1.5 Inter, sans-serif; }
+.zaydar-houz-about summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: #e8f5fb; font: 700 13px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
+.zaydar-houz-about p { margin: 0 0 8px; }.zaydar-houz-about ol { margin: 0 0 9px; padding-left: 18px; }.zaydar-houz-about strong { color: #fff; }
 .zaydar-layer-sheet__footer { flex: none; display: flex; align-items: center; gap: 8px; min-height: 58px; padding: 7px 15px calc(10px + env(safe-area-inset-bottom, 0px)) 78px; background: #07111bee; }
 .zaydar-layer-sheet__more { text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; min-width: 0; height: 44px; padding: 6px 8px; border: 1px solid #00ffff70; border-radius: 22px; background: #001d2755; color: #00ffff !important; font: 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; }
 .zaydar-layer-sheet__more svg { transform: rotate(-90deg); }

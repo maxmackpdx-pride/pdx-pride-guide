@@ -8,7 +8,7 @@ export function mapRecordId(value: string | null, allowArchive = false): number 
   const id = Number(value);
   return Number.isSafeInteger(id) ? id : null;
 }
-export const MAP_OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz"] as const;
+export const MAP_OVERLAY_KEYS = ["event", "place", "mizzed", "spotted", "gig", "gift", "sell", "sellz", "houz"] as const;
 export function clearMapOverlay(params: URLSearchParams) {
   for (const key of MAP_OVERLAY_KEYS) params.delete(key);
 }

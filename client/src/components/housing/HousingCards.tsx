@@ -60,6 +60,24 @@ const stop = (fn: () => void) => (e: React.MouseEvent) => {
   fn();
 };
 
+const SINGLE_WORD_CARD_LINE: Record<HousingPostView["type"], string> = {
+  LOOKING: "LOOKING TO RENT",
+  OFFERING: "JOIN OUR HOÜS",
+  FORMING: "BUILDING A HOÜS",
+  MANAGED: "COMMERCIAL RENTAL HOÜS",
+};
+
+/**
+ * HOÜS cards always reserve at least two visible Dynamic Text rows. Most
+ * authored titles naturally split on words; a one-word name receives the
+ * listing-type line so we preserve whole words instead of cutting a name in
+ * half. The manual break stays inside the canonical solver.
+ */
+function cardDynamicTitle(post: HousingPostView, title: string): string {
+  const clean = title.trim();
+  return clean.split(/\s+/).length > 1 ? clean : `${clean}\n${SINGLE_WORD_CARD_LINE[post.type]}`;
+}
+
 function splitPeople(post: HousingPostView) {
   const people = post.household.filter((p) => p.kind !== "PET");
   const pets = post.household.filter((p) => p.kind === "PET");
@@ -161,7 +179,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.LOOKING} />
-      <HousingWell photos={post.photos} title={post.author.displayName}>
+      <HousingWell photos={post.photos} title={cardDynamicTitle(post, post.author.displayName)}>
         <HouseholdStack
           people={[self, ...people]}
           pets={pets}
@@ -207,7 +225,7 @@ export function OfferingCard({ post, h }: { post: HousingPostView; h: HousingCar
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.OFFERING} />
-      <HousingWell photos={post.photos} title={post.displayName}>
+      <HousingWell photos={post.photos} title={cardDynamicTitle(post, post.displayName)}>
         <HouseholdStack
           people={people}
           pets={pets}
@@ -257,7 +275,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
       <HousingWell
         photos={post.photos}
         // With no place picked yet there is nothing to name, so the card asks.
-        title={post.photos.length ? post.displayName : "Build a HAÜS"}
+        title={cardDynamicTitle(post, post.photos.length ? post.displayName : "Build a HOÜS")}
         fallbackPhoto={FORMING_DEFAULT_COVER}
         className="hz-well--contain-stack"
       >
@@ -336,7 +354,7 @@ export function ManagedCard({
   return (
     <CardShell post={post} onOpen={() => h.onOpen(post)}>
       <TypeTitle label={HOUSING_TYPE_KICKER.MANAGED} />
-      <HousingWell photos={post.photos} title={post.displayName}>
+      <HousingWell photos={post.photos} title={cardDynamicTitle(post, post.displayName)}>
         <PropertyManagerBadge>
           <HousingIcon name="verified" size={13} />
           Property manager
