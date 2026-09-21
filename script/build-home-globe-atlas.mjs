@@ -21,4 +21,4 @@ for(const [index,r] of rows.entries()){
  const x=index%4*256,y=Math.floor(index/4)*256;composites.push({input:png,left:x,top:y});manifest.push({id:r.id,coordinates:r.coordinates,phase:r.phase,color:r.color,product:!!r.product,x,y,w,h});
 }
 const output=path.join(pub,'home-globe');await sharp({create:{width:1024,height:Math.ceil(rows.length/4)*256,channels:4,background:'#00000000'}}).composite(composites).webp({lossless:true}).toFile(path.join(output,'holograms.webp'));
-await fs.writeFile(path.join(output,'holograms.json'),JSON.stringify(manifest));console.log({logos:rows.length,sourceBytes:before,atlasBytes:(await fs.stat(path.join(output,'holograms.webp'))).size});
+await fs.writeFile(path.join(root,'client/src/components/ui/portland-globe-holograms.json'),JSON.stringify(manifest));console.log({logos:rows.length,sourceBytes:before,atlasBytes:(await fs.stat(path.join(output,'holograms.webp'))).size});

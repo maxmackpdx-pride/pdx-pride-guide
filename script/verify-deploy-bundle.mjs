@@ -32,7 +32,11 @@ function flightFilesMatch(directory, relative = "") {
 }
 
 const checks = {
-  versionedZaydar: /^\/assets\/zaydar-[a-f0-9]{16}$/.test(flightBase) && js.includes(flightBase) && flightFilesMatch("client/public/home-flight"),
+  versionedZaydar: /^\/assets\/zaydar-[a-f0-9]{16}$/.test(flightBase) && (js.includes(flightBase) || js.includes("/home-globe/holograms.webp")) && flightFilesMatch("client/public/home-flight"),
+  homepageGlobe: ["holograms.webp", "portland-city-beam-density.png"].every(name => {
+    const route = `/home-globe/${name}`, built = join("dist/public", route);
+    return js.includes(route) && existsSync(built) && readFileSync(`client/public${route}`).equals(readFileSync(built));
+  }),
   posterGrid: js.includes("events-poster-grid"),
   noEventBoardCard: !js.includes("EventBoardCard"),
   noLegacyPageHeroCss: !sourceCss.includes(".page-hero") && !sourceCss.includes(".zine-hero"),
