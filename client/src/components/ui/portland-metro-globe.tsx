@@ -40,7 +40,7 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 6;
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
-type Point = { x: number; y: number; z: number; tone: number };
+type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; glow?: { strength: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
@@ -90,6 +90,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let disposed = false, frame = 0, previous = 0, elapsed = elapsedRef.current;
     let width = 0, height = 0;
     let points: Point[] = [];
+    // Previous frame footprints keep the dot pass beneath beams and artwork.
+    let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
     const abort = new AbortController();
     let loadingArtwork = 0;
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
@@ -187,6 +189,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const surfaceHover=pointerRadiusSquared<1?{x:pointerX,y:pointerY,z:Math.sqrt(1-pointerRadiusSquared)}:null;
       const hoverAngle=Math.asin(Math.sin(Math.min(.45,52/radius))*.7);
       const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
+      const beamDots: {x:number;y:number;size:number;glow:NonNullable<Point["glow"]>}[]=[];
+      const glowDt=Math.min(64,Math.max(0,elapsed-lastFrame.current));
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
         const q = project(p);
@@ -195,6 +199,27 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const size = Math.max(.35, radius / 195 * Math.sqrt(q.z));
         const path = batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
+        if(p.tone!==2 && !p.beamExcluded){
+          let target=0, rgb=[255,255,255];
+          for(const beam of beamFootprints){
+            const dy=beam.y-beam.ay;
+            if(Math.abs(dy)<1)continue;
+            const t=(q.y-beam.ay)/dy;
+            if(t<=0 || t>=1)continue;
+            const center=beam.ax+(beam.x-beam.ax)*t;
+            const edge=Math.abs(q.x-center)/Math.max(1,beam.halfWidth*t);
+            if(edge>=1)continue;
+            const strength=beam.strength*smooth((1-edge)/.4)*smooth(t/.15)*smooth((1-t)/.15);
+            if(strength>target){target=strength;rgb=beam.rgb;}
+          }
+          const glow=p.glow ??= {strength:0,r:rgb[0],g:rgb[1],b:rgb[2]};
+          const blend=still?1:1-Math.exp(-glowDt/(target>glow.strength?180:450));
+          glow.strength+=(target-glow.strength)*blend;
+          if(target>0){
+            glow.r+=(rgb[0]-glow.r)*blend;glow.g+=(rgb[1]-glow.g)*blend;glow.b+=(rgb[2]-glow.b)*blend;
+          }
+          if(glow.strength>.01)beamDots.push({x:q.x,y:q.y,size,glow});
+        }
         if(surfaceHover){
           const nx=(q.x-cx)/radius,ny=(cy-q.y)/radius;
           // Great-circle distance creates a patch ON the sphere. It naturally
@@ -213,6 +238,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
+      context.save();
+      for(const dot of beamDots){
+        const {r,g,b,strength}=dot.glow;
+        context.fillStyle=`rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${strength*.9})`;
+        context.beginPath();context.arc(dot.x,dot.y,dot.size*(1+strength*.25),0,Math.PI*2);context.fill();
+      }
+      context.restore();
+      beamFootprints=[];
       // A softly blended spectrum across the surface, with a softly brightened
       // center. No angular hue sectors or radial spokes.
       context.save();
@@ -342,6 +375,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const x=anchor.x+(preferred.x+state.offsetX-anchor.x)*opening;
         const y=anchor.y+(preferred.y+state.offsetY-anchor.y)*opening;
         const size=fullSize*opening,w=fullW*opening,h=fullH*opening;
+        beamFootprints.push({ax:anchor.x,ay:anchor.y,x,y,halfWidth:size*.38,strength:visibility,
+          rgb:[1,3,5].map(start=>parseInt(color.slice(start,start+2),16))});
         renderedCount++;
         context.save();
         // Foreground text stays above the canvas; limited overlap remains natural.
@@ -400,12 +435,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const builtUp = data[pixel] > 180;
           const river = data[pixel] < 100 && data[pixel+1] > 160 && data[pixel+2] > 160;
           // No uniform sphere grid: dots exist only on mapped urban land or water.
-          if (builtUp || river) points.push(sphere(u,v,river ? 2 : 0));
+          if (builtUp || river) points.push({...sphere(u,v,river ? 2 : 0),
+            // Magenta mask pixels encode highways, Hawthorne and Powell corridors.
+            beamExcluded:builtUp && data[pixel+1]<100});
         }
       }
       draw();
     };
-    texture.src = '/home-globe/portland-city-density.png';
+    texture.src = '/home-globe/portland-city-beam-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
     if (active && !still) frame = requestAnimationFrame(animate);
     redrawRef.current = draw;
