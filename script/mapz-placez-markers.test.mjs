@@ -17,8 +17,8 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   assert.match(renderer,/map\.fitBounds\(hit\.clusterBounds/);
 });
 
-test('Placez markers are thirty percent larger and remain on their projected anchor',async()=>{
+test('Placez markers retain their enlarged scale and remain on their projected anchor',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  assert.match(renderer,/const placezScale=1\.3\*/);
+  assert.match(renderer,/const placezScale=1\.625\*/);
   assert.match(renderer,/const markerY=isPlace\?p\.y:raisedY/);
 });

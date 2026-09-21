@@ -1,3 +1,4 @@
+import {housingIconSize} from '../client/public/zaydar-map/housing-holograms.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
@@ -93,7 +94,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
     housingHolograms:{beamHalfWidth:()=>18,setLayout:noop},
-    projectorGroundScale,
+    projectorGroundScale,housingIconSize,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });
