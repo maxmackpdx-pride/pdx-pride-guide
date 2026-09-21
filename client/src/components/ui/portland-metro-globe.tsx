@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 // z13 geography cropped to the screenshot bounds below; parks stay empty.
 declare const __ZAYDAR_BASE__: string;
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
-type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string };
+type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string; color?: string; point?: Point };
 // Screenshot crop, approximated from Eagle, downtown, I-205 and Sellwood.
 // These bounds drive BOTH the texture sampling and all venue/label positions.
 const METRO = { west: -122.704, east: -122.555, north: 45.588, south: 45.475 };
@@ -55,6 +55,21 @@ const RIVERS = [
 ];
 const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI;
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
+// Decorative product waypoints, not real listings or claimed venue locations.
+// One per longitude sector keeps the random anchors spread around the globe.
+const PRODUCT_WAYPOINTS: Venue[] = [
+  { id: "giftz", name: "GIFTZ", logo: "/brand/family/giftz.svg", color: "#ccff00" },
+  { id: "mizzed", name: "MIZZED CONNECTION", logo: "/brand/family/mizzed-connection.svg", color: "#ff00cc" },
+  { id: "gigz", name: "GIGZ", logo: "/brand/family/gigz.svg", color: "#8800ff" },
+  { id: "outz", name: "OUTZide", logo: "/brand/outzide.png", color: "#ff6600" },
+  { id: "sellz", name: "SELLZ", logo: "/brand/family/sellz.svg", color: "#39ff14" },
+  { id: "hauz", name: "THE HAÜZ", logo: "/brand/family/the-hauz.svg", color: "#00ffff" },
+].map((waypoint, index) => ({
+  ...waypoint, coordinates: [0, 0], logoMode: "alpha",
+  point: sphere(warp(-1+(index+.2+Math.random()*.6)/3,-.15,5,true),
+    equatorialLatitude((Math.random()-.5)*.6,true)),
+}));
+
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -79,15 +94,15 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let loadingArtwork = 0;
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
-      for (const [index, venue] of rows.entries()) {
+      for (const [index, venue] of [...rows, ...PRODUCT_WAYPOINTS].entries()) {
         if (!venue.logo || !Array.isArray(venue.coordinates)) continue;
         // One representative location per requested brand on the home globe.
         if (/^taboo\b/i.test(venue.name) && venue.id !== '96-0') continue;
         if (/^fantasy\b/i.test(venue.name) && venue.id !== '98-0') continue;
         const [lon, lat] = venue.coordinates;
-        if (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north) continue;
+        if (!venue.point && (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north)) continue;
         const image = new Image();
-        const hologram = { point: placePoint({ lat, lon }), image: document.createElement("canvas"), color: COLORS[index % COLORS.length], phase: index * 2.39996 };
+        const hologram = { point: venue.point ?? placePoint({ lat, lon }), image: document.createElement("canvas"), color: venue.color ?? COLORS[index % COLORS.length], phase: index * 2.39996 };
         loadingArtwork++;
         image.onload = () => {
           loadingArtwork--;
@@ -131,7 +146,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           venues.push(hologram); draw();
         };
         image.onerror = () => { loadingArtwork--; if (!disposed) draw(); };
-        image.src = `${__ZAYDAR_BASE__}/${venue.logo.replace(/^\.\//, '')}`;
+        image.src = venue.logo.startsWith("/") ? venue.logo : `${__ZAYDAR_BASE__}/${venue.logo.replace(/^\.\//, '')}`;
       }
     }).catch(() => { /* Geography remains available if venue artwork cannot load. */ });
     const texture = new Image();
