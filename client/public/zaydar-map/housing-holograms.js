@@ -2,6 +2,12 @@ export const HOUSING_HOLOGRAM_MIN_ZOOM=13.25;
 export const HOUSING_EVENT_HEIGHT_RATIO=1/3;
 export const HOUSING_ICON_SCALE=.6;
 export const HOUSING_ROTATION_SPEED=.08;
+export const HOUSING_HOLOGRAM_LABELS={
+  LOOKING:'LOOKING TO RENT',
+  FORMING:'BUILDING A HOUS',
+  OFFERING:'JOIN OUR HOUS',
+  MANAGED:'COMMERCIAL RENTAL HOUS',
+};
 
 const asset=name=>new URL(`./models/housing/${name}.glb?v=20260920-hous-holograms`,import.meta.url).href;
 export const HOUSING_HOLOGRAM_MODELS={

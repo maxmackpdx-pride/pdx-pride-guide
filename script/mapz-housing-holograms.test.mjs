@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import test from 'node:test';
-import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
+import {HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS,HOUSING_HOLOGRAM_MODELS,HOUSING_ICON_SCALE,HOUSING_ROTATION_SPEED,parseHousingHologramGlb} from '../client/public/zaydar-map/housing-holograms.js';
 import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
 
 const modelFiles={
@@ -46,6 +46,25 @@ test('standalone demo includes the four seeded HOUS listing roles at neighborhoo
   assert.deepEqual(rows.map(row=>row.housingModel).sort(),['FORMING','LOOKING','MANAGED','OFFERING']);
   assert.ok(rows.every(row=>row.demoOpen&&row.neighborhoodLabel&&row.coordinates.every(Number.isFinite)));
   assert.equal(rows.find(row=>row.housingModel==='MANAGED').color,'#8800FF');
+});
+
+test('HOUS labels use the event-title fitter beneath each icon',async()=>{
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const labelComponent=await readFile(new URL('../client/src/components/ZaydarEventLabel.tsx',import.meta.url),'utf8');
+  assert.deepEqual(HOUSING_HOLOGRAM_LABELS,{
+    LOOKING:'LOOKING TO RENT',
+    FORMING:'BUILDING A HOUS',
+    OFFERING:'JOIN OUR HOUS',
+    MANAGED:'COMMERCIAL RENTAL HOUS',
+  });
+  assert.match(renderer,/name:housingName,time:'',color/);
+  assert.match(renderer,/kind:'housing'/);
+  assert.match(renderer,/width:hologramLabelWidth,scale:beaconScale/);
+  assert.match(renderer,/y:hologramCenterY\+housingIconHeight\/2\+3\*beaconScale/);
+  assert.match(labelComponent,/const isHousing=label\.kind==='housing'/);
+  assert.match(labelComponent,/!isHousing&&<DigitalClock time=\{label\.time\}/);
+  assert.match(labelComponent,/className="zaydar-event-title"/);
+  assert.match(labelComponent,/solveDynamicText\(label\.name,240/);
 });
 
 test('HOUS is isolated from the existing Eventz, Placez, and sparkle pipelines',async()=>{

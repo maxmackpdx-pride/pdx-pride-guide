@@ -14,7 +14,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
-import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO} from './housing-holograms.js?v=20260920-hous-holograms-v2';
+import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260921-hous-labels-v3';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -733,7 +733,8 @@ function drawLights(fade,target=map,surface=lights){
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    if(feature.properties.housingModel&&coreAlpha>.1){
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.neighborhoodLabel||feature.properties.time||'PORTLAND',color,x:logoX,y:hologramCenterY+12*beaconScale,width:92,scale:Math.max(.82,beaconScale),logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:72*beaconScale,opacity:coreAlpha});
+    const housingName=HOUSING_HOLOGRAM_LABELS[feature.properties.housingModel],housingIconHeight=72*beaconScale;
+    if(housingName)eventLabels.push({key:feature.properties.key,kind:'housing',name:housingName,time:'',color,x:logoX,y:hologramCenterY+housingIconHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:housingIconHeight,opacity:coreAlpha,avatars:feature.properties.avatars||[]});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -781,7 +782,21 @@ function drawLights(fade,target=map,surface=lights){
  }
  drawUserLocationAvatar(lightsContext,target,fade);
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
- tell('labels',{labels:eventLabels,viewport:{width,height}});
+ if(parent===window)renderStandaloneLabels(eventLabels);else tell('labels',{labels:eventLabels,viewport:{width,height}});
+}
+
+function renderStandaloneLabels(labels){
+ const root=document.getElementById('hologram-labels');if(!root)return;
+ const live=new Set();
+ for(const label of labels){
+  if(label.kind!=='housing')continue;live.add(label.key);
+  let item=[...root.children].find(node=>node.dataset.labelKey===label.key);
+  if(!item){item=document.createElement('div');item.className='standalone-hologram-label';item.dataset.labelKey=label.key;root.appendChild(item);}
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.setAttribute('aria-label',label.name);
+  const signature=JSON.stringify([label.name,label.color,label.avatars]);
+  if(item.dataset.signature!==signature){item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';title.textContent=label.name;item.appendChild(title);if(label.avatars?.length){const stack=document.createElement('span');stack.className='standalone-hologram-faces';stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}item.appendChild(stack);}}
+ }
+ for(const item of [...root.children])if(!live.has(item.dataset.labelKey))item.remove();
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
 // Broad turns center the Old Town bar cluster, then the Mississippi/Alberta bars and Eagle.

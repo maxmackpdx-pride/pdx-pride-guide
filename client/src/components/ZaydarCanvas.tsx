@@ -3,10 +3,10 @@ import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useS
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
-type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string};
+type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260921-landmark-orientation-v6';
+const MAP_SRC='/zaydar-map/index.html?v=20260921-hous-faces-v8';
 const MAX_3D_ATTEMPTS=3;
 
 const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onMode,onView},ref){

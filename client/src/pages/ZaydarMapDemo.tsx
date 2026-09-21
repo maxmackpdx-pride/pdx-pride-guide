@@ -86,6 +86,27 @@ function firstImage(value: unknown): string | null {
   return null;
 }
 
+function housingFaceStack(row: MapRow) {
+  const household = Array.isArray(row.household) ? row.household : [];
+  const author = row.author && typeof row.author === "object" ? row.author : null;
+  const people = [...(author ? [author] : []), ...household].filter((person): person is Record<string, unknown> => Boolean(person && typeof person === "object"));
+  const seen = new Set<string>();
+  return people.flatMap((person) => {
+    const key = String(person.userId || person.id || person.username || person.name || "");
+    if (!key || seen.has(key)) return [];
+    seen.add(key);
+    const avatarChoice = Number(person.avatarChoice) || 1;
+    const option = AVATAR_EMOJI_OPTIONS.find(item => item.id === avatarChoice) || AVATAR_EMOJI_OPTIONS[0];
+    const name = String(person.displayName || person.name || person.username || "Zaylist member");
+    return [{
+      url: firstImage(person.photoUrl) || option.img || "",
+      initial: name.trim().slice(0, 1).toUpperCase() || "Z",
+      background: option.bg || "#00FFFF",
+      ring: normalizeAvatarRing(typeof person.avatarRing === "string" ? person.avatarRing : null),
+    }];
+  }).slice(0, 5);
+}
+
 function boardKind(row: MapRow): BoardKind | null {
   const board = String(row._board || "");
   if (board === "Gigz") return "gig";
@@ -565,6 +586,7 @@ export default function ZaydarMapDemo() {
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
+      avatars:isHouz?housingFaceStack(row):undefined,
       demoOpen:isHouz&&housingDemo(row),
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,

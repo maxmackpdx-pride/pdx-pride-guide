@@ -66,11 +66,12 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   const surface={width:900,height:1200,getContext:()=>ctx},map={getZoom:()=>15.5,project:()=>({x:450,y:700})};
   const color='#FF00CC',feature={geometry:{coordinates:[-122.675,45.52]},properties:{key:'demo',kind:'event',demoOpen:true,logo:'logo',phase:1,color,heightScale:1}};
   const logo={width:120,height:60,padding:1,outlined:'sky-logo',image:'artwork',silhouette:'mask'};
-  const context=vm.createContext({window,parent:window,map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
+  const context=vm.createContext({window,parent:window,document:{getElementById:()=>null},map,lights:surface,devicePixelRatio:1,Intl,Date,Map,Set,Math,
     hitTargets:[],viewTime:Date.now(),selectedKey:null,reduced:{matches:true},userLocation:null,lightFeatures:[feature],
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
+    HOUSING_HOLOGRAM_LABELS:{LOOKING:'LOOKING TO RENT',FORMING:'BUILDING A HOUS',OFFERING:'JOIN OUR HOUS',MANAGED:'COMMERCIAL RENTAL HOUS'},
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
     clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,
     hologramBounds:()=>({halfWidth:60,halfHeight:80}),settleValue:(object,key,_velocity,goal)=>{object[key]=goal;},

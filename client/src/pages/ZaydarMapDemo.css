@@ -41,6 +41,7 @@
 .zaydar-event-title>.zaydar-event-title-fallback{font-size:var(--event-fallback-size);line-height:1.05;white-space:normal;overflow-wrap:anywhere;}
 .zaydar-event-clock{display:flex;justify-content:center;align-items:end;gap:var(--event-clock-gap);color:var(--clock-color);filter:drop-shadow(0 0 5px var(--clock-color)) drop-shadow(0 2px 3px #000);}
 .zaydar-event-clock svg{height:var(--event-clock-height);max-width:80%;fill:currentColor;}.zaydar-event-clock path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:square}.zaydar-event-clock small{font:700 var(--event-period-size) 'Inter',sans-serif;line-height:1.6}
+.zaydar-housing-face-stack{display:flex;justify-content:center;align-items:center;margin-top:3px;padding-left:5px}.zaydar-housing-face{display:grid;width:18px;height:18px;margin-left:-5px;place-items:center;overflow:hidden;border:1.5px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #020509,0 0 7px var(--clock-color);color:#020509;font:900 9px/1 'Inter',sans-serif}.zaydar-housing-face img{width:100%;height:100%;object-fit:cover}
 
 .zaydar-logo-target{position:absolute;z-index:2;transform:translate(-50%,-50%);border:0;padding:0;background:transparent;cursor:pointer;}
 .zaydar-search-drawer .directory-form--embedded{margin:0;padding:8px 0 20px;background:none!important;box-shadow:none!important;border:0!important;border-radius:0;backdrop-filter:none}
