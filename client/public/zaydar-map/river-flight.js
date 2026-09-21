@@ -6,7 +6,7 @@ import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlif
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
-import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
+import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js?v=20260921-downtown-placez';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
@@ -164,10 +164,19 @@ function roofLift(target,feature,surfaces){
  return Math.max(12,(roof+12)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180));
 }
 const PLACEZ_HOVER_METERS=3;
+const PLACEZ_ROOF_CLEARANCE_METERS=4;
 const PLACEZ_BLOOM_RADIUS_SCALE=.35;
-function placezHoverLift(target,coordinates){
+function placezHoverLift(target,feature,surfaces){
+ const coordinates=feature.geometry.coordinates;
+ const roof=surfaces.roofs?.get(feature.properties.phase)??PLACEZ_HOVER_METERS;
+ // Buildings enter the style at zoom 12. Keep overview markers near the
+ // ground, then smoothly raise each one just above its tallest nearby roof as
+ // those extrusions become useful visual context.
+ const buildingVisibility=smoothRange(12,15,target.getZoom());
+ const roofHeight=Math.max(PLACEZ_HOVER_METERS,roof+PLACEZ_ROOF_CLEARANCE_METERS);
+ const hoverMeters=PLACEZ_HOVER_METERS+(roofHeight-PLACEZ_HOVER_METERS)*buildingVisibility;
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
- return PLACEZ_HOVER_METERS/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
+ return hoverMeters/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
 }
 // One direct canvas overlay; no duplicate map, smoke pass, or texture uploads.
 const lights=document.querySelector('#waypoint-lights');
@@ -632,9 +641,9 @@ function drawLights(fade,target=map,surface=lights){
    else if(!underProjector){
     const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
-    // Placez stay tied to their geographic anchor. Their only screen offset is
-    // the perspective projection of a fixed three-meter world-space hover.
-    const markerY=isPlace?p.y-placezHoverLift(target,feature.geometry.coordinates):raisedY;
+    // Placez stay tied to their geographic anchor. At street zoom they clear
+    // nearby roofs; as the 3D buildings disappear they ease back toward 3 m.
+    const markerY=isPlace?p.y-placezHoverLift(target,feature,surfaces):raisedY;
     const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
     drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);

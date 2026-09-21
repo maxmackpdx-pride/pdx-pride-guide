@@ -2,6 +2,15 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
+import {standaloneDowntownPlacez} from '../client/public/zaydar-map/standalone-demo.js';
+
+test('standalone demo includes the real Downtown Placez set',()=>{
+  const rows=standaloneDowntownPlacez();
+  assert.equal(rows.length,18);
+  assert.ok(rows.every(row=>row.kind==='place'&&row.key.startsWith('directory-')));
+  assert.ok(rows.every(row=>row.coordinates.every(Number.isFinite)));
+  assert.deepEqual(new Set(rows.map(row=>row.type)),new Set(['bar','venue','adult','nonprofit','shop','cafe','restaurant','service']));
+});
 
 test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
@@ -17,11 +26,14 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   assert.match(renderer,/map\.fitBounds\(hit\.clusterBounds/);
 });
 
-test('Placez markers stay geographically locked three meters up with compact bloom',async()=>{
+test('Placez markers stay geographically locked, clear nearby roofs, and retain compact bloom',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.match(renderer,/const placezScale=1\.625\*/);
   assert.match(renderer,/const PLACEZ_HOVER_METERS=3/);
-  assert.match(renderer,/const markerY=isPlace\?p\.y-placezHoverLift\(target,feature\.geometry\.coordinates\):raisedY/);
+  assert.match(renderer,/const PLACEZ_ROOF_CLEARANCE_METERS=4/);
+  assert.match(renderer,/const buildingVisibility=smoothRange\(12,15,target\.getZoom\(\)\)/);
+  assert.match(renderer,/const roof=surfaces\.roofs\?\.get\(feature\.properties\.phase\)\?\?PLACEZ_HOVER_METERS/);
+  assert.match(renderer,/const markerY=isPlace\?p\.y-placezHoverLift\(target,feature,surfaces\):raisedY/);
   assert.match(renderer,/const placezBloomMax=\.02/);
   assert.match(renderer,/const markerBloom=isPlace\?Math\.min\(placezBloomMax,/);
   assert.match(renderer,/const PLACEZ_BLOOM_RADIUS_SCALE=\.35/);
