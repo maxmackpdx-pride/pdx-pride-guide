@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
 import CartoVectorBasemap from "@/components/CartoVectorBasemap";
+import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import {
   MAP_PIN_SIZE,
   MAP_SURFACE_BG,
@@ -409,6 +410,29 @@ function DirectoryPopup({
   );
 }
 
+const PLACE_MINIMAP_STYLES = `
+  .directory-map--place-minimap .leaflet-tile-pane {
+    filter: grayscale(.82) saturate(.35) contrast(1.18) brightness(.68);
+  }
+  .directory-map--place-minimap .directory-map__accent-wash {
+    position: absolute;
+    inset: 0;
+    z-index: 350;
+    pointer-events: none;
+    background:
+      linear-gradient(color-mix(in srgb, var(--map-accent) 17%, transparent), color-mix(in srgb, var(--map-accent) 7%, transparent)),
+      radial-gradient(circle at 50% 48%, transparent 22%, color-mix(in srgb, var(--map-accent) 15%, transparent) 100%);
+    mix-blend-mode: screen;
+  }
+  .directory-map--place-minimap .leaflet-control-zoom a {
+    color: var(--map-accent) !important;
+    border-color: color-mix(in srgb, var(--map-accent) 44%, #1c1c22) !important;
+  }
+  .directory-map--place-minimap .leaflet-control-attribution {
+    color: color-mix(in srgb, var(--map-accent) 70%, #aaa) !important;
+  }
+`;
+
 const POPUP_STYLES = `
   .pdx-dir-popup .leaflet-popup-content-wrapper {
     background: transparent !important;
@@ -483,6 +507,8 @@ export default function DirectoryMap({
   showMarkers = true,
   backdrop = false,
   focusBusiness = false,
+  rasterBasemap = false,
+  accent,
 }: {
   businesses: Business[];
   height?: number | string;
@@ -496,6 +522,10 @@ export default function DirectoryMap({
   backdrop?: boolean;
   /** Center tightly on the supplied place, fitting all storefronts when needed. */
   focusBusiness?: boolean;
+  /** Use the lightweight Leaflet raster basemap instead of the vector renderer. */
+  rasterBasemap?: boolean;
+  /** Optional category color wash for an embedded place minimap. */
+  accent?: string;
 }) {
   const isBackdrop = backdrop;
   const isInteractive = interactive && !isBackdrop;
@@ -517,6 +547,7 @@ export default function DirectoryMap({
       className={[
         fillParent ? "directory-map directory-map--fill" : "directory-map",
         isBackdrop ? "directory-map--backdrop" : "pdx-map-live pdx-map-surface pdx-map-surface--neutral",
+        rasterBasemap ? "directory-map--place-minimap" : "",
       ].filter(Boolean).join(" ")}
       style={{
         height: heightStyle,
@@ -524,9 +555,10 @@ export default function DirectoryMap({
         width: "100%",
         position: "relative",
         flex: fillParent ? "1 1 auto" : undefined,
+        ...(accent ? { ["--map-accent" as string]: accent } : {}),
       }}
     >
-      <style>{POPUP_STYLES}{!isBackdrop ? LIVE_MAP_CHROME_CSS : ""}</style>
+      <style>{POPUP_STYLES}{PLACE_MINIMAP_STYLES}{!isBackdrop ? LIVE_MAP_CHROME_CSS : ""}</style>
       {!isBackdrop && (
         <>
           <div className="pdx-map-live__vignette" aria-hidden="true" />
@@ -549,7 +581,14 @@ export default function DirectoryMap({
         zoomControl={isInteractive}
         attributionControl={isInteractive}
       >
-        <CartoVectorBasemap />
+        {rasterBasemap ? (
+          <TileLayer
+            url={cartoDarkTileUrl()}
+            attribution={CARTO_ATTRIBUTION}
+            subdomains="abcd"
+            maxZoom={20}
+          />
+        ) : <CartoVectorBasemap />}
         <MapInvalidateSize enabled={isBackdrop || focusBusiness} />
         <MapFocus pins={mapped} enabled={focusBusiness} />
         {mapped.map(pin => {
@@ -568,6 +607,7 @@ export default function DirectoryMap({
           );
         })}
       </MapContainer>
+      {rasterBasemap && accent && <div className="directory-map__accent-wash" aria-hidden="true" />}
     </div>
   );
 
