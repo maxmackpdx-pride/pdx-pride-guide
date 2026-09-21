@@ -1,7 +1,8 @@
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-ground-lights';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-nightlife';
+import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
-import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-ground-lights';
+import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-nightlife';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../home-flight/roof-sparkles.js?v=20260920-ground-lights';
 import {createLogoFocus} from './logo-focus.js';
@@ -31,7 +32,7 @@ try{
    style:surfaceStyle});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
-const waterBloom=createWaterBloom();
+const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
 map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
 map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
@@ -49,7 +50,7 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
-const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true});
+const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,nightlifePalette:true});
 const groundLightPools=createGroundLightPools(maplibregl);
 function installSceneExtras(){
  map.addLayer(groundLightPools,'buildings');
@@ -127,27 +128,6 @@ function drawSurfaceReflections(ctx,target,reflections,fade){
   wash.addColorStop(0,color+'00');wash.addColorStop(.42,color+'28');wash.addColorStop(1,color+'08');
   ctx.globalAlpha=fade*.65;ctx.fillStyle=wash;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,lift+radius*1.4);ctx.restore();
  }
-}
-function drawAmbientBuildingSheen(ctx,target,buildings,fade,time=0){
- if(!buildings.length||fade<=0)return;
- ctx.save();ctx.beginPath();
- const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686,pitch=Math.sin(target.getPitch()*Math.PI/180);
- for(const building of buildings){
-  const lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*pitch;
-  const footprint=building.ring.map(point=>target.project(point));
-  footprint.forEach((p,i)=>{if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();
-  const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
-  for(let i=0;i<footprint.length;i++){
-   const a=footprint[i],b=footprint[(i+1)%footprint.length];if((b.x-a.x)*winding>=0)continue;
-   ctx.moveTo(a.x,a.y-lift);ctx.lineTo(b.x,b.y-lift);ctx.lineTo(b.x,b.y);ctx.lineTo(a.x,a.y);ctx.closePath();
-  }
- }
- ctx.clip('evenodd');
- const width=window.innerWidth,height=window.innerHeight,span=Math.hypot(width,height),angle=(target.getBearing()+32+7*Math.sin(time*.035))*Math.PI/180;
- const dx=Math.cos(angle)*span*.52,dy=Math.sin(angle)*span*.52,cx=width*(.5+.16*Math.sin(time*.022)),cy=height*(.47+.08*Math.cos(time*.019));
- const sheen=ctx.createLinearGradient(cx-dx,cy-dy,cx+dx,cy+dy);
- sheen.addColorStop(0,'rgba(104,151,146,0)');sheen.addColorStop(.25,'rgba(104,151,146,.035)');sheen.addColorStop(.42,'rgba(135,181,198,.04)');sheen.addColorStop(.5,'rgba(218,239,244,.17)');sheen.addColorStop(.58,'rgba(135,181,198,.035)');sheen.addColorStop(1,'rgba(135,181,198,0)');
- ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*(.34+.18*smoothRange(14,17,target.getZoom()));ctx.fillStyle=sheen;ctx.fillRect(0,0,width,height);ctx.restore();
 }
 function roofLift(target,feature,surfaces){
  const coordinates=feature.geometry.coordinates,roof=surfaces.roofs?.get(feature.properties.phase)??9;
@@ -564,7 +544,15 @@ function drawLights(fade,target=map,surface=lights){
  // Only loaded artwork actually on camera can receive a tracking frame.
  const visibleLogos=fade>.01?beacons.filter(item=>venueLogos.has(item.feature.properties.logo)&&item.x>0&&item.x<width&&item.y>0&&item.y<height):[];
  logoFocus.update(pulseTime,visibleLogos.map(item=>item.feature.properties.phase));
- for(const pass of [0,1])for(const {feature,p,offset,neighbors=0} of ordered){
+ for(const pass of [0,1]){
+  if(pass===1){
+   // Ground light and projection beams sit behind solid buildings. Floating
+   // logo artwork is drawn afterward, in the sky, and is never punched out.
+   applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);
+   buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);
+   drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
+  }
+  for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
   const bloomScale=feature.properties.type==='nonprofit'?.4:1;
   const isBar=expandedKeys.has(feature.properties.key);
@@ -762,11 +750,7 @@ function drawLights(fade,target=map,surface=lights){
    lightsContext.drawImage(hologramMaterials.orbs.get(color),p.x-12.5,raisedY-12.5,25,25);
   }
  }
- applyBuildingOcclusion(lightsContext,target,surfaces.buildings??[]);
- // Reflections belong to the building material, so restore them after light
- // behind the building has been reduced to the requested two percent.
- drawAmbientBuildingSheen(lightsContext,target,surfaces.buildings??[],fade,pulseTime);
- drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
+ }
  drawUserLocationAvatar(lightsContext,target,fade);
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
  tell('labels',{labels:eventLabels,viewport:{width,height}});

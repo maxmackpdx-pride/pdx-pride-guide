@@ -1,5 +1,5 @@
 // Rooftop lights share the map's camera and depth buffer. Time changes light only.
-export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false}={}) {
+export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false,nightlifePalette=false}={}) {
   const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]);
   const unit=origin.meterInMercatorCoordinateUnits();
   return {
@@ -26,10 +26,12 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false}=
       const vertex=compile(gl.VERTEX_SHADER,`#version 300 es
         in vec3 a_position; in vec3 a_light;
         uniform mat4 u_matrix; uniform float u_time; uniform float u_dpr; uniform float u_still;
-        out float v_wave; out float v_star;
+        out float v_wave; out float v_star; out vec3 v_tint;
         float noise(float seed){return fract(sin(seed*127.1)*43758.5453);}
         void main(){
           gl_Position=u_matrix*vec4(a_position,1.);
+          float palette=noise(a_light.x*17.3);
+          v_tint=${nightlifePalette?'palette<.65?vec3(.80,.88,1.):palette<.87?vec3(.40,.83,.89):vec3(.71,.56,.90)':'vec3(.66,.86,1.)'};
           // Off-camera roofs skip light animation; depth testing handles occlusion.
           if(gl_Position.w<=0.||abs(gl_Position.x)>gl_Position.w||abs(gl_Position.y)>gl_Position.w||abs(gl_Position.z)>gl_Position.w){
             v_wave=0.;v_star=0.;gl_PointSize=1.;return;
@@ -44,7 +46,7 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false}=
           gl_PointSize=(${visibleCore?'4.2+v_wave*2.1':'3.2+v_wave*3.1'}+bloom*6.8)*u_dpr;
         }`);
       const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
-        precision highp float; in float v_wave; in float v_star; out vec4 color;
+        precision highp float; in float v_wave; in float v_star; in vec3 v_tint; out vec4 color;
         void main(){
           vec2 p=gl_PointCoord*2.-1.;float r=length(p);
           if(r>1.)discard;
@@ -53,7 +55,7 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false}=
           float rays=(exp(-abs(p.x)*60.)+exp(-abs(p.y)*60.))*(1.-smoothstep(.15,.95,r));
           float alpha=clamp((halo+core+rays*v_star*smoothstep(.25,.8,v_wave)*.62)*(${visibleCore?'.22+.78*v_wave':'.10+.90*v_wave'}),0.,1.);
           if(alpha<.008)discard;
-          color=vec4(mix(vec3(.66,.86,1.),vec3(1.),core)*alpha,alpha);
+          color=vec4(mix(v_tint,vec3(1.),core*${nightlifePalette?'.42':'1.'})*alpha,alpha);
         }`);
       this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);
       gl.deleteShader(vertex);gl.deleteShader(fragment);

@@ -1,4 +1,5 @@
 import {vectorStyle} from '../home-flight/city-map.js';
+import {REFLECTION_COLORS,waterReflectionSegments} from './nightlife-materials.js?v=20260920-nightlife';
 
 export const WATER_CYAN = '#389187'; // Five percent cooler and more saturated, with the same HSL lightness.
 export const BUILDING_SOLIDITY = .98;
@@ -104,6 +105,17 @@ export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
       'line-gap-width':['interpolate',['exponential',2],['zoom'],8,0,12,.55,14,2,16,9,18,40,22,684]},
   };
   style.layers.splice(style.layers.indexOf(streets)+1,0,highwayEdge);
+  const roadId=['to-number',['id'],0];
+  style.layers.splice(style.layers.indexOf(streets)+1,0,{
+    id:'night-street-inlays',type:'line',source:'terrain','source-layer':'transportation',minzoom:12,
+    filter:['all',streets.filter,['in',['get','class'],['literal',['primary','secondary']]],['!=',['get','brunnel'],'bridge']],
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{
+      'line-color':['case',['all',['>',roadId,0],['==',['%',roadId,11],0]],'#955285','#438b96'],
+      'line-width':['interpolate',['exponential',2],['zoom'],12,.08,16,.55,18,1.25],
+      'line-opacity':['interpolate',['linear'],['zoom'],12,0,14,.28,16,.42,18,.36],
+    },
+  });
   const banks = style.layers.find(layer=>layer.id==='banks');
   banks.filter = naturalWater;
   // Polygon rivers already carry a shoreline and interior material. Suppress
@@ -191,7 +203,7 @@ export function inwardDistances(mask,width,height) {
 export function createWaterBloom() {
   const surface=document.createElement('canvas'),interior=document.createElement('canvas'),reflection=document.createElement('canvas');
   const ctx=surface.getContext('2d',{willReadFrequently:true}),maskContext=interior.getContext('2d'),reflectionContext=reflection.getContext('2d');
-  let signature='',revision=0;
+  let signature='',revision=0,reflectionSignature='',reflectionPaths=[];
   return {
     invalidate(){revision++;},
     draw(output,map,width,height,fade,time=0,reduced=false,lightSources=[]){
@@ -232,23 +244,29 @@ export function createWaterBloom() {
       }
       output.save();output.globalCompositeOperation='screen';output.globalAlpha=fade*.45;output.drawImage(surface,-pad*scale,-pad*scale,surface.width*scale,surface.height*scale);output.restore();
       reflectionContext.clearRect(0,0,reflection.width,reflection.height);
-      const travel=reduced?.5:(time*.025)%1,sweepCenter=(-.15+travel*1.3)*reflection.width;
-      const sheen=reflectionContext.createLinearGradient(sweepCenter-reflection.width*.22,reflection.height,sweepCenter+reflection.width*.22,0);
-      sheen.addColorStop(0,'rgba(100,158,146,0)');sheen.addColorStop(.46,'rgba(100,158,146,.08)');sheen.addColorStop(.5,'rgba(180,208,191,.22)');sheen.addColorStop(.54,'rgba(100,158,146,.08)');sheen.addColorStop(1,'rgba(100,158,146,0)');
-      reflectionContext.fillStyle=sheen;reflectionContext.fillRect(0,0,reflection.width,reflection.height);
-      reflectionContext.globalCompositeOperation='screen';reflectionContext.lineCap='round';
-      for(const source of lightSources.slice(0,240)){
-        const coordinate=source.geometry?.coordinates??source.coordinates;if(!coordinate)continue;
-        const projected=map.project(coordinate),x=projected.x/scale+pad,y=projected.y/scale+pad;
-        if(x<-24||x>reflection.width+24||y<-70||y>reflection.height+24)continue;
-        const color=source.properties?.color||source.color||'#8fc8d4',strength=source.properties?.isBar?1:source.properties?.isUser?1.2:source.properties?.isBridge?.72:.55;
-        const length=(48+46*strength)/scale,drift=7*Math.sin(time*.16+(x+y)*.13)/scale;
-        const ribbon=reflectionContext.createLinearGradient(x,y,x+drift,y+length);ribbon.addColorStop(0,color+'00');ribbon.addColorStop(.18,color+'78');ribbon.addColorStop(.6,color+'22');ribbon.addColorStop(1,color+'00');
-        reflectionContext.strokeStyle=ribbon;reflectionContext.globalAlpha=fade*.28*strength;reflectionContext.lineWidth=Math.max(.55,1.25*strength/scale);
-        reflectionContext.beginPath();reflectionContext.moveTo(x,y);reflectionContext.lineTo(x+drift,y+length);reflectionContext.stroke();
+      const coordinates=lightSources.slice(0,120).map(source=>source.geometry?.coordinates??source.coordinates).filter(Boolean);
+      const reflectionKey=key+':'+coordinates.map(c=>c.join(',')).join(';');
+      if(reflectionSignature!==reflectionKey){
+        reflectionSignature=reflectionKey;reflectionPaths=Array.from({length:9},()=>new Path2D());
+        for(const coordinate of coordinates){
+          const anchor=map.project(coordinate);
+          if(anchor.x<-160||anchor.x>width+160||anchor.y<-160||anchor.y>height+160)continue;
+          for(const segment of waterReflectionSegments(coordinate)){
+            const a=map.project(segment.a),b=map.project(segment.b),path=reflectionPaths[segment.group];
+            path.moveTo(a.x/scale+pad,a.y/scale+pad);path.lineTo(b.x/scale+pad,b.y/scale+pad);
+          }
+        }
       }
+      reflectionContext.globalCompositeOperation='screen';reflectionContext.lineCap='round';
+      reflectionContext.lineWidth=2.2*512*Math.pow(2,map.getZoom())/(40075016.686*Math.cos(center.lat*Math.PI/180)*scale);
+      reflectionPaths.forEach((path,i)=>{
+        reflectionContext.strokeStyle=REFLECTION_COLORS[Math.floor(i/3)];
+        reflectionContext.globalAlpha=reduced?.38:.32+.12*Math.sin(time*.55+i*2.1);
+        reflectionContext.stroke(path);
+      });
+      reflectionContext.globalAlpha=1;
       reflectionContext.globalCompositeOperation='destination-in';reflectionContext.drawImage(interior,0,0);reflectionContext.globalCompositeOperation='source-over';
-      output.save();output.globalCompositeOperation='screen';output.globalAlpha=fade*.28;output.drawImage(reflection,-pad*scale,-pad*scale,reflection.width*scale,reflection.height*scale);output.restore();
+      output.save();output.globalCompositeOperation='screen';output.globalAlpha=fade*.48;output.drawImage(reflection,-pad*scale,-pad*scale,reflection.width*scale,reflection.height*scale);output.restore();
     },
     dispose(){for(const canvas of [surface,interior,reflection])canvas.width=canvas.height=1;},
   };
