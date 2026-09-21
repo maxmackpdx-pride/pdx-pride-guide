@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -30,6 +30,7 @@ import { HOUSING_TYPE_LABEL, type HousingType } from "@shared/housing";
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
+import { isLocalDemo } from "@/lib/localDemo";
 import "./LivingMap.css";
 import "./ZaydarMapDemo.css";
 import "@/components/ZaydarLayerSheet.css";
@@ -180,7 +181,7 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The Haüz") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if (String(row._board) === "The HOÜS") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
   const kind = boardKind(row);
   if (kind === "gig") return "#8800FF";
   if (kind === "gifting") return "#CCFF00";
@@ -188,7 +189,7 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The Haüz") return "/zaydar-map/icons/housing.svg";
+  if (String(row._board) === "The HOÜS") return "/zaydar-map/icons/housing.svg";
   const kind = boardKind(row);
   if (kind === "gig") return zaydarTypeIcon("service");
   return zaydarTypeIcon("shop");
@@ -291,6 +292,7 @@ function useDesktop() {
 
 export default function ZaydarMapDemo() {
   const { user } = useAuth();
+  const canOpenMapObjects = Boolean(user) || isLocalDemo();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -336,6 +338,16 @@ export default function ZaydarMapDemo() {
   const mapRef = useRef<ZaydarHandle | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const gateSignedOutControls = useCallback((event: ReactMouseEvent<HTMLElement>) => {
+    if (canOpenMapObjects) return;
+    const target = event.target as HTMLElement;
+    if (target.closest(".zaydar-control-zoom")) return;
+    if (!target.closest("button,a,input,summary,label")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setShowAuth(true);
+  }, [canOpenMapObjects]);
 
   const [mapHeight, setMapHeight] = useState<number>();
   const desktop = useDesktop();
@@ -472,7 +484,7 @@ export default function ZaydarMapDemo() {
   const visibleBoards = useMemo(() => boardRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [boardRows, boardKinds, q]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The Haüz" })), [housing, housingType, q]);
+    .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
@@ -481,20 +493,21 @@ export default function ZaydarMapDemo() {
   ], [showEvents, showPlaces, showBoards, showHouz, visibleEvents, mapPlaces, visibleBoards, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
+    if (!canOpenMapObjects) { setShowAuth(true); return; }
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
     if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The Haüz") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
+      if (String(row._board) === "The HOÜS") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
       else {
         const kind = boardKind(row);
         const postId = Number(row.id);
         if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
-  }, [goOverlay, setLocation]);
+  }, [canOpenMapObjects, goOverlay, setLocation]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: `board-${row._board}-${row.id}`, kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const toggleBoardKind = (kind: string) => updateParams(p => {
     const next = new Set(boardKinds);
@@ -556,25 +569,25 @@ export default function ZaydarMapDemo() {
     {gigsLoading || giftsLoading || sellsLoading ? <p role="status">Loading Boards…</p> : gigsError || giftsError || sellsError ? <p role="alert">Boards could not load. <button type="button" onClick={() => { void retryGigs(); void retryGifts(); void retrySells(); }}>Try again</button></p> : panelRows(visibleBoards, "boards")}
   </section>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Houz</h2></div>
+    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">HOÜS</h2></div>
     <div className="zaydar-layer-rail" role="group" aria-label="Housing types">
-      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All Houz" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HOÜS" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
     </div>
-    {housingLoading ? <p role="status">Loading Houz…</p> : housingError ? <p role="alert">Houz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingLoading ? <p role="status">Loading HOÜS…</p> : housingError ? <p role="alert">HOÜS could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
     { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => toggleLayer("hideBoards"), panel: boardsPanel, viewMore: [{ label: "Gigz", href: "/pride-work" }, { label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
-    { id: "houz", label: "Houz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more Houz", href: "/the-hauz" }] },
+    { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more HOÜS", href: "/the-hauz" }] },
   ];
 
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
-    const isHouz=String(row._board)==='The Haüz';
+    const isHouz=String(row._board)==='The HOÜS';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
     const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
@@ -594,8 +607,8 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   }), [marks, places]);
-  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
+  const onSceneSelect=(key:string)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
+  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map" onClickCapture={gateSignedOutControls}>
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center)} />
     <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
       <strong>{regionLabel}</strong>
@@ -613,9 +626,9 @@ export default function ZaydarMapDemo() {
     <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="zaydar-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="zaydar-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
-    {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
-    {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
-    {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+    {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
+    {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
+    {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
+    {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
   </section>;
 }

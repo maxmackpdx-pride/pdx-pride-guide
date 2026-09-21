@@ -1,4 +1,4 @@
-import {fitBridgeRoad,sampleBridgeRoad,railBridgeFootprint} from './bridge-fit.js';
+import {fitBridgeRoad,sampleBridgeRoad,railBridgeFootprint} from './bridge-fit.js?v=20260921-layer-join';
 export const ST_JOHNS_CENTER=[-122.76327215,45.58579725];
 export const ST_JOHNS_BEARING=54.24624408372691;
 export const ST_JOHNS_LENGTH_METERS=630;

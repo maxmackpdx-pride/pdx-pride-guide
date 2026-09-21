@@ -557,6 +557,8 @@ export default function PlaceModal({
               showKey={false}
               interactive
               focusBusiness={hasMapCoordinates}
+              rasterBasemap
+              accent={accent}
             />
             <div className="place-modal-panel__map-label">
               <MapPinned size={14} aria-hidden="true" />
