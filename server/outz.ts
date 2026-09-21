@@ -97,10 +97,10 @@ const FEATURED: FeaturedConfig[] = [
     officialNotice: {
       summary: "Closed: day-use area, campground, and hiker/biker camp are closed for construction.",
       sourceUrl: "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=134",
-      checkedAt: "2026-09-10",
+      checkedAt: "2026-09-20",
       // The official timeline is still being adjusted. Force a new evidence
       // check instead of leaving a temporary closure indefinitely.
-      expiresAt: "2026-09-17T00:00:00-07:00",
+      expiresAt: "2026-09-27T00:00:00-07:00",
     },
   },
   {
