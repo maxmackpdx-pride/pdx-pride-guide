@@ -176,16 +176,16 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const occupied: { x: number; y: number; w: number; h: number }[] = [];
       for (const venue of visible) {
         const { anchor, image, color } = venue;
-        const size = Math.min(width < 600 ? 86 : 144, radius * .52);
+        const size = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fit = Math.min(size/image.width,size*.65/image.height);
         const w=image.width*fit,h=image.height*fit;
-        const head = project(venue.point, 1.16);
-        const preferred = { x:head.x, y:head.y-size*.8-radius*.055 };
+        const head = project(venue.point, 1.06);
+        const preferred = { x:head.x, y:head.y-size*.45-radius*.025 };
         let x=preferred.x, y=preferred.y;
         // Move overlapping heads, rather than closing/collapsing holograms.
         // Every beam still terminates at its original geographic anchor.
         for (let attempt=0;attempt<240;attempt++) {
-          const distance=Math.sqrt(attempt)*18;
+          const distance=Math.sqrt(attempt)*14;
           const direction=attempt*2.399963;
           const candidateX=Math.max(w/2+8,Math.min(width-w/2-8,preferred.x+Math.cos(direction)*distance));
           const candidateY=Math.max(headerInset+h/2+8,Math.min(height-footerInset-h/2-8,preferred.y+Math.sin(direction)*distance));
