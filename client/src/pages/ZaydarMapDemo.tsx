@@ -21,7 +21,7 @@ import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import type { Business } from "@/pages/Directory";
 import { directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
-import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
+import { mapCoordinates } from "@/lib/mapCoordinates";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
 import { HOUSING_TYPE_LABEL, type HousingType } from "@shared/housing";
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
@@ -104,35 +104,19 @@ function portlandCalendarDay(value: string | number | Date) {
 function placeMarks(places: Place[]): Mark[] {
   return places.flatMap((place) => {
     const locations = place.locations?.length ? place.locations : resolveBusinessLocations(place);
-    const valid = locations.filter((loc) => finite(loc.lat) && finite(loc.lng));
+    const valid = locations.filter((loc) => mapCoordinates(loc.lat, loc.lng));
     if (valid.length) return valid.map((loc, i) => ({ key: `p-${place.id}-${i}`, kind: "place" as const, lat: loc.lat!, lng: loc.lng!, item: place }));
-    return finite(place.lat) && finite(place.lng) ? [{ key: `p-${place.id}`, kind: "place" as const, lat: place.lat, lng: place.lng, item: place }] : [];
+    const point = mapCoordinates(place.lat, place.lng);
+    return point ? [{ key: `p-${place.id}`, kind: "place" as const, ...point, item: place }] : [];
   });
 }
 
 function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] {
   return rows.flatMap((row, index) => {
-    if (row.lat == null || row.lng == null || row.lat === "" || row.lng === "") return [];
-    const lat = Number(row.lat);
-    const lng = Number(row.lng);
-    return Number.isFinite(lat) && Number.isFinite(lng)
-      ? [{ key: mapListingKey(row._board, row.id ?? index), kind, lat, lng, item: row }]
-      : [];
-  });
-}
-
-const BOARD_FALLBACK_POINTS: ReadonlyArray<[number, number]> = [
-  [45.5234, -122.6762], [45.5298, -122.6815], [45.5177, -122.6658],
-  [45.5352, -122.6498], [45.5125, -122.6581], [45.5441, -122.6751],
-  [45.5068, -122.6892], [45.5324, -122.7044], [45.4977, -122.6378],
-];
-
-function stampBoardMapPoints(rows: MapRow[]): MapRow[] {
-  return rows.map((row, index) => {
-    if (Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lng))) return row;
-    const seed = `${row._board || "board"}-${row.id ?? index}`.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    const [lat, lng] = BOARD_FALLBACK_POINTS[seed % BOARD_FALLBACK_POINTS.length];
-    return { ...row, lat, lng };
+    const point = mapCoordinates(row.lat, row.lng);
+    if (!point) return [];
+    const {lat, lng} = point;
+    return [{ key: mapListingKey(row._board, row.id ?? index), kind, lat, lng, item: row }];
   });
 }
 
@@ -314,7 +298,7 @@ export default function ZaydarMapDemo() {
   const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = [], isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
-  const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
+  const housing = useMemo(() => (Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => setLocation(overlayHref(key, id)), [setLocation]);
   const closeOverlays = useCallback(() => {
     setSelected(null);
@@ -332,7 +316,7 @@ export default function ZaydarMapDemo() {
     } catch { return []; }
   }))).slice(0, 8), [events]);
   const visibleEvents = useMemo(() => events.filter(e => {
-    if (!finite(e.lat) || !finite(e.lng)) return false;
+    if (!mapCoordinates(e.lat, e.lng)) return false;
     if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
     return matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd);
   }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, clock]);
@@ -355,7 +339,7 @@ export default function ZaydarMapDemo() {
       return Boolean(startDay && startDay <= today && endDay >= today);
     }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
   }, [events, q]);
-  const boardRows = useMemo(() => stampBoardMapPoints([
+  const boardRows = useMemo(() => ([
     ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
     ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
     ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
@@ -438,7 +422,7 @@ export default function ZaydarMapDemo() {
         const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing"} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
         const fallback = isPlace ? directoryFallbackLogo(String(row.type)) : boardIcon(row);
         const photo = isPlace ? resolveDirectoryLogo(String(row.name), typeof row.imageUrl === "string" ? row.imageUrl : undefined) : firstImage(kind === "houz" ? row.photos : row.photoUrls) || firstImage(row.imageUrl);
-        return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark({ key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
+        return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
           <img src={photo || fallback} alt="" loading="lazy" onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = fallback; }} />
           <span className="zaydar-layer-row__copy"><strong>{title}</strong><small>{meta}</small></span>
           <ChevronRight size={18} aria-hidden="true" />
@@ -490,7 +474,7 @@ export default function ZaydarMapDemo() {
       {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All Houz" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
     </div>
     {housingLoading ? <p role="status">Loading Houz…</p> : housingError ? <p role="alert">Houz could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
-    <p className="zaydar-layer-location-note">Pins may show a neighborhood, not an exact address. Listings without a mapped area still appear here.</p>
+    <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => setShowEvents(value => !value), panel: eventPanel, onViewMore: () => setLocation("/events") },

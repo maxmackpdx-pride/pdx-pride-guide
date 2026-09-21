@@ -1,52 +1,17 @@
+import {vectorStyle} from '../home-flight/city-map.js';
+import {bridgeFilter,createBridgeLayer} from '../home-flight/bridge-roads.js';
+import {createCitySparkles} from '../home-flight/city-sparkles.js';
+import {roofSparkles} from '../home-flight/roof-sparkles.js';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration} from './map-exploration.js?v=20260916-rotation';
-import {createCitySparkles} from './city-sparkles.js?v=20260916-equiv';
-import {roofSparkles} from './roof-sparkles.js?v=20260916-short-glitter';
-import {roadColor, roadLineWidth, outlinedRoadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js?v=20260920-valid-widths';
-import {installRoadSurface} from './road-surface.js?v=20260920-valid-widths';
-import {applyMoonlight} from './moonlight.js?v=20260920-optional-terrain';
-import {createRoofOutline} from './roof-outline.js?v=20260917-noon';
-import {createStreetAtmosphere} from './street-atmosphere.js?v=20260920-no-trees-lamps';
-import {createFacadeWindows} from './facade-windows.js?v=20260920-half-lights';
-import {installGrassNeon} from './grass-neon.js?v=20260917-matte';
-import {bloomOverlay} from './overlay-atmosphere.js?v=20260917-matte';
-import {radix,DAYS,DAY_LIST,OLED} from './radix-map.js?v=20260917-days';
+import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
-const naturalWater=['in',['get','class'],['literal',['river','lake']]];
-const naturalWaterway=['in',['get','class'],['literal',['river','stream']]];
-const neonCyan='#00FFFF';
-const outlineColor=radix.orange9;
-const outlineOpacity=['interpolate',['linear'],['zoom'],13.85,0,15,.22,17.5,.38];
-const outlineWidth=['interpolate',['linear'],['zoom'],14,2.2,16,5.5,17.5,8];
-const outlineBlur=['interpolate',['linear'],['zoom'],14,1.6,16,4.2];
-const vectorStyle={version:8,glyphs:'/api/mapz/fonts/{fontstack}/{range}.pbf',light:{anchor:'map',color:radix.cyan12,intensity:.48,position:[1.15,210,38]},sources:{terrain:{type:'vector',tiles:['/api/mapz/vector-tiles/{z}/{x}/{y}.pbf'],minzoom:0,maxzoom:14,attribution:'© OpenStreetMap · OpenFreeMap · OpenMapTiles'}},layers:[
-    {id:'terrain-base',type:'background',paint:{'background-color':radix.cyan1,'background-opacity':1}},
-    {id:'park-ground',type:'fill',source:'terrain','source-layer':'landuse',filter:['in',['get','class'],['literal',['park','recreation_ground','cemetery','grass']]],paint:{'fill-color':radix.teal4,'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.38,13,.56,16,.7]}},
-    {id:'woodland-ground',type:'fill',source:'terrain','source-layer':'landcover',filter:['in',['get','class'],['literal',['wood','forest','scrub']]],paint:{'fill-color':['match',['get','class'],'scrub',radix.teal3,radix.teal2],'fill-opacity':['interpolate',['linear'],['zoom'],9.5,.64,13,.74,16,.86]}},
-    {id:'water-shadow',type:'line',source:'terrain','source-layer':'water',paint:{'line-color':radix.cyan1,'line-opacity':.92,'line-width':['interpolate',['linear'],['zoom'],9.5,2.2,13,4,17,7],'line-blur':['interpolate',['linear'],['zoom'],9.5,1.8,16,3]}},
-    {id:'water',type:'fill',source:'terrain','source-layer':'water',paint:{'fill-color':['interpolate',['linear'],['zoom'],9.5,radix.cyan3,13,radix.cyan6,16,radix.cyan7],'fill-opacity':1}},
-    {id:'river-depth',type:'line',source:'terrain','source-layer':'waterway',filter:['in',['get','class'],['literal',['river','canal']]],paint:{'line-color':radix.cyan6,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.4,14,.62],'line-width':['interpolate',['linear'],['zoom'],9.5,1.1,13,2.4,17,5.5],'line-blur':1.2}},
-    {id:'banks-bloom',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,5.5,14,9,17,13],'line-blur':['interpolate',['linear'],['zoom'],9.5,3.2,16,6]}},
-    {id:'banks',type:'line',source:'terrain','source-layer':'water',filter:naturalWater,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.7,14,.86,17,.92],'line-width':['interpolate',['linear'],['zoom'],9.5,1.05,14,1.6,17,2.3],'line-blur':.45}},
-    {id:'streams-bloom',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':.03,'line-width':['interpolate',['linear'],['zoom'],9.5,3.2,14,5.5,17,8],'line-blur':['interpolate',['linear'],['zoom'],9.5,2.4,16,4.5]}},
-    {id:'streams',type:'line',source:'terrain','source-layer':'waterway',filter:naturalWaterway,paint:{'line-color':neonCyan,'line-opacity':['interpolate',['linear'],['zoom'],9.5,.45,15,.72],'line-width':['interpolate',['linear'],['zoom'],9.5,.55,14,1,17,1.8],'line-blur':.65}},
-    {id:'streets-outline',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],minzoom:13.85,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlinedRoadLineWidth,'line-blur':outlineBlur}},
-    {id:'streets',type:'line',source:'terrain','source-layer':'transportation',filter:['!',bridgeFilter],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':roadColor,'line-opacity':1,'line-width':roadLineWidth}},
-    {id:'building-uplight',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':outlineColor,'line-opacity':outlineOpacity,'line-width':outlineWidth,'line-blur':outlineBlur}},
-    {id:'skyline',type:'fill-extrusion',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'fill-extrusion-color':['interpolate',['linear'],['to-number',['coalesce',['get','render_height'],['get','height'],9]],0,radix.sky1,18,radix.sky2,60,radix.sky4,160,radix.sky5],'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],9],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.96],'fill-extrusion-vertical-gradient':true}},
-    {id:'buildings',type:'line',source:'terrain','source-layer':'building',minzoom:13.85,paint:{'line-color':radix.cyan8,'line-opacity':['interpolate',['linear'],['zoom'],13.85,0,14.65,.4],'line-width':.55}}
-  ]};
-vectorStyle.layers.push(
- {id:'road-labels',type:'symbol',source:'terrain','source-layer':'transportation_name',minzoom:14,layout:{visibility:'none','symbol-placement':'line','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':radix.slate11,'text-halo-color':radix.slate1,'text-halo-width':1.5}},
- {id:'place-labels',type:'symbol',source:'terrain','source-layer':'place',maxzoom:15,layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular'],'text-size':12},paint:{'text-color':radix.slate10,'text-halo-color':radix.slate1,'text-halo-width':1.5}}
-);
-applyMoonlight(vectorStyle);
 // OpenFreeMap vector geometry on flat ground, with optional labels.
 // Elevation tiles and terrain displacement are disconnected for this renderer.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
@@ -59,8 +24,6 @@ try{
    style:structuredClone(vectorStyle)});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
-let deckLayers=null;
-const streetAtmosphere=createStreetAtmosphere(map);
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -77,23 +40,9 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl);
 const citySparkles=createCitySparkles(maplibregl);
-const facadeWindows=createFacadeWindows(maplibregl);
-const roofOutline=createRoofOutline(maplibregl);
 function installSceneExtras(){
- const extras=[
-  ()=>installGrassNeon(map),
-  ()=>installRoadSurface(map,['!',bridgeFilter],roadLineWidth),
-  ()=>map.addLayer(bridgeLayer,'skyline'),
-  ()=>map.addLayer(citySparkles),
-  ()=>map.addLayer(facadeWindows),
-  ()=>map.addLayer(roofOutline),
-  ()=>{if(typeof map.setSky==='function'&&map.getStyle()?.sky)map.setSky(map.getStyle().sky);}
- ];
- for(const extra of extras){
-  try{extra();}
-  catch(error){console.error('map extra',error);}
- }
- void installAutomaticLayers();
+ map.addLayer(bridgeLayer,'skyline');
+ map.addLayer(citySparkles);
 }
 map.on('load',()=>{
  loaded=true;startup.phase('map-loaded');cameraDirty=true;updateSceneStatus();scheduleFrame();
@@ -388,10 +337,7 @@ function drawLights(fade,target=map,surface=lights){
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
- streetAtmosphere.draw(lightsContext,fade,pulseTime,reduced.matches);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
- facadeWindows.update(target.getPitch()<8||target.getZoom()<14?[]:surfaces.buildings??[],pulseTime,reduced.matches);
- roofOutline.update(target.getPitch()<8||target.getZoom()<13.85?[]:surfaces.buildings??[]);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
  const pointerBlend=1-Math.exp(-motionDelta*3.16);
  lightsContext.globalAlpha=fade;
@@ -692,7 +638,6 @@ function drawLights(fade,target=map,surface=lights){
   }
  }
  // Keep the DOM title and clock on the same animation cadence as the canvas logo.
- bloomOverlay(lightsContext,width,height,reduced.matches?0.06:0.1);
  tell('labels',{labels:eventLabels,viewport:{width,height}});
 }
 // Gentle corridor: Ross Island Bridge -> downtown -> directory clusters -> Eagle, continuing north only until it leaves the viewport.
@@ -870,19 +815,15 @@ document.addEventListener('visibilitychange',onVisibilityChange);
 window.addEventListener('pagehide',()=>{
  disposed=true;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',onVisibilityChange);
  cancelAnimationFrame(overviewPitchFrame);map.off('zoom',queueOverviewPitch);map.off('zoomend',settleOverviewPitch);
- deckLayers?.dispose();deckLayers=null;
  exploration.dispose();
  assetController.abort();reduced.removeEventListener('change',onReducedChange);window.removeEventListener('resize',onSceneResize);
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
  hologramMaterials.dispose();
- streetAtmosphere.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
- if(map.getLayer(facadeWindows.id))map.removeLayer(facadeWindows.id);
- if(map.getLayer(roofOutline.id))map.removeLayer(roofOutline.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
@@ -943,8 +884,6 @@ async function setListings(rows){
  for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=Date.now()?new Date(r.startsAt).getTime()-Date.now():1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
- streetAtmosphere.setListings(lightFeatures);
- deckLayers?.setListings(lightFeatures);
  nearbyLights=createSpatialIndex(lightFeatures,f=>f.geometry.coordinates);assetsReady=true;surfaceCache.delete(map);updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
  await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
@@ -970,20 +909,6 @@ map.getCanvas().addEventListener('pointerup',e=>{
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));
-async function installAutomaticLayers(){
- try{
-  const module=await import('./deck-mobile-demo.js');
-  if(disposed)return;
-  deckLayers=module.attachDeckMobileDemo(map);
-  deckLayers.setListings(lightFeatures);
-  // Keep the screenshot's enabled layers, without exposing the demo controls.
-  // Use the existing toggle path so weather fetching and layer state stay aligned.
-  const panel=document.querySelector('.deck-lab');
-  panel?.querySelector('[data-layer="tonight"]')?.click();
-  panel?.querySelector('[data-layer="weather"]')?.click();
-  panel?.remove();
- }catch(error){console.error('Automatic map layers unavailable',error);}
-}
 map.on('load',()=>{
  pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));viewState();tell('ready');
 });

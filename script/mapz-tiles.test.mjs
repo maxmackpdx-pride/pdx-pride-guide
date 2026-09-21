@@ -2,41 +2,22 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [host,fallback,page,html,renderer,server,routes,app]=await Promise.all([
+const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
  readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/components/ZaydarFallback.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/src/pages/ZaydarMapDemo.tsx',import.meta.url),'utf8'),
  readFile(new URL('../client/public/zaydar-map/index.html',import.meta.url),'utf8'),
  readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8'),
- readFile(new URL('../server/mapzTiles.ts',import.meta.url),'utf8'),
+ readFile(new URL('../client/public/home-flight/river-flight.js',import.meta.url),'utf8'),
  readFile(new URL('../server/routes.ts',import.meta.url),'utf8'),
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
 ]);
 
-test('3D browser traffic uses same-origin Mapz tile routes',()=>{
- assert.match(renderer,/\/api\/mapz\/vector-tiles\/\{z\}\/\{x\}\/\{y\}\.pbf/);
- assert.match(renderer,/\/api\/mapz\/fonts\/\{fontstack\}\/\{range\}\.pbf/);
- assert.doesNotMatch(renderer,/https:\/\/tiles\.(?:openfreemap|mapterhorn)\.com/);
- assert.doesNotMatch(renderer,/https:\/\/tiles\.openfreemap\.org/);
- assert.doesNotMatch(html,/preconnect[^>]+(?:openfreemap|mapterhorn)/);
-});
-
-test('server registers constrained OpenFreeMap and terrain proxies',()=>{
- assert.match(server,/tiles\.openfreemap\.org/);
- assert.match(server,/tiles\.mapterhorn\.com/);
- assert.match(server,/tileIndex/);
- assert.match(server,/AbortSignal\.timeout/);
- assert.match(routes,/registerMapzTileRoutes\(app\)/);
-});
-
-test('elevation is disconnected while the full vector city and scene extras remain',()=>{
- const initialStyle=renderer.slice(renderer.indexOf('const vectorStyle='),renderer.indexOf('applyMoonlight(vectorStyle)'));
- assert.match(initialStyle,/id:'skyline'/);
- assert.doesNotMatch(initialStyle,/elevation|terrain-shade|setTerrain/);
- assert.doesNotMatch(renderer,/raster-dem|terrain-tiles|setTerrain|installTerrain/);
- for(const layer of ['streets','water','skyline','buildings'])assert.ok(initialStyle.includes("id:'"+layer+"'"));
- for(const extra of ['installGrassNeon','installRoadSurface','bridgeLayer','citySparkles','facadeWindows','roofOutline'])assert.ok(renderer.includes(extra));
- assert.match(renderer,/window\.setTimeout\(\(\)=>\{if\(!disposed\)installSceneExtras\(\);\},0\)/);
+test('Mapz and home import the identical city style',()=>{
+ assert.match(renderer,/import \{vectorStyle\} from '\.\.\/home-flight\/city-map.js'/);
+ assert.match(home,/import \{vectorStyle\} from '\.\/city-map.js'/);
+ assert.doesNotMatch(renderer,/api\/mapz|applyMoonlight|installGrassNeon|installRoadSurface|deck-mobile|raster-dem|setTerrain/);
+ assert.doesNotMatch(routes,/registerMapzTileRoutes/);
 });
 
 test('3D recovery waits for a rendered city frame and preserves the actual error',()=>{

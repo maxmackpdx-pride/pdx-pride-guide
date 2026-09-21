@@ -33,7 +33,6 @@ import {
 import { assertProductionPersistence, assertProductionSecrets, getPersistenceAudit } from "./persistence";
 import { initAttendanceWs } from "./attendanceWs";
 import { startPromptScheduler } from "./scheduler";
-import { registerMapzTileRoutes } from "./mapzTiles";
 import { createSessionMiddleware, productionSecureCookies } from "./sessionConfig";
 import {
   insertSubmissionSchema, insertGigPostSchema, insertModerationRequestSchema, insertMissedConnectionSchema,
@@ -1127,7 +1126,6 @@ function notifyAttendanceUpdate(eventId: number) {
 export function registerRoutes(httpServer: Server, app: Express) {
   assertProductionPersistence();
   assertProductionSecrets();
-  registerMapzTileRoutes(app);
 
   // QSEARCH was archived on 2026-08-30. Keep its code and database records for
   // possible future recovery, but make every legacy action inert in production.
