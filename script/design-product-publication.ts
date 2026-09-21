@@ -62,7 +62,7 @@ export async function verifyProductPublication(proposalFile: string, root = proc
   for (const file of git(root, "diff", "--name-only", "--no-renames", base, "HEAD", "--", "client/src/components").trim().split("\n").filter(Boolean)) {
     if ((COMPONENT_PATHS.has(file) || tokenPath(file)) && !selected.has(file)) throw new Error(`Unapproved governed product change: ${file}`);
   }
-  const protectedFiles = [".github/workflows/railway-deploy.yml", "script/design-product-publication.ts", "script/design-component-source-evidence.ts", "script/build.ts", "server/routes.ts"];
+  const protectedFiles = [".github/workflows/railway-deploy.yml", "railway.json", "script/design-product-publication.ts", "script/verify-railway-design-build.ts", "script/design-component-source-evidence.ts", "script/build.ts", "server/routes.ts"];
   if (git(root, "diff", "--name-only", base, "HEAD", "--", ...protectedFiles).trim()) throw new Error("Publication or evidence machinery changed after the approved baseline.");
   const evidence = JSON.parse(await fs.readFile(path.join(root, "dist/design-component-source-evidence.json"), "utf8"));
   if (evidence?.schemaVersion !== 1 || evidence.registryChecksum !== REGISTRY_CHECKSUM || !Array.isArray(evidence.sources) ||
