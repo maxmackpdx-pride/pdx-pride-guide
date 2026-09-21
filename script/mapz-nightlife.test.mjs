@@ -16,6 +16,20 @@ test('projector circles shrink at overview zoom without a camera-facing guide li
   assert.equal(renderer.includes("lineTo(logoX+(p.x-logoX)*.08"),false);
 });
 
+test('labels and Placez markers stay locked to the map during camera movement',async()=>{
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const canvasHost=await readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8');
+  assert.match(renderer,/renderHologramLabels\(eventLabels\)/);
+  assert.doesNotMatch(renderer,/tell\('labels'/);
+  assert.doesNotMatch(canvasHost,/ZaydarEventLabel|event\.data\.type==='labels'/);
+  assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
+  assert.match(renderer,/reduced\.matches\|\|cameraMoving\?0:/);
+  assert.match(renderer,/const placezScale=1\.625\*/);
+  assert.match(renderer,/r:isPlace\?45:28/);
+  assert.match(renderer,/flat\?1:\(\.92\+\.1\*pulse\)/);
+  assert.match(renderer,/map\.isMoving\(\)\?1000\/60:frameInterval/);
+});
+
 test('street inlays stay on major surface roads, below buildings, without recoloring bridges',()=>{
   const require=createRequire(import.meta.url),mr=createRequire(require.resolve('maplibre-gl'));
   const {createExpression}=mr('@maplibre/maplibre-gl-style-spec');

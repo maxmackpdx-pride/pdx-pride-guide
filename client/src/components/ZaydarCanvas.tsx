@@ -1,4 +1,3 @@
-import ZaydarEventLabel,{type EventLabel} from './ZaydarEventLabel';
 import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useState} from 'react';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
@@ -6,11 +5,10 @@ type View={center:[number,number];zoom:number;bounds:{south:number;north:number;
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260921-hous-faces-v8';
+const MAP_SRC='/zaydar-map/index.html?v=20260921-marker-lock-v9';
 const MAX_3D_ATTEMPTS=3;
 
 const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onMode,onView},ref){
- const [labels,setLabels]=useState<EventLabel[]>([]);
  const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onMode,onView});latest.current={onFailure,onVisible,onSelect,onMode,onView};
  const failed=useRef(false),restoreView=useRef(initialView);
  const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
@@ -38,13 +36,6 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   if(event.data.type==='phase'&&typeof event.data.phase==='string')setPhase(event.data.phase);
   if(event.data.type==='first-frame'){setFirstFrame(true);latest.current.onVisible();}
   if(event.data.type==='ready')setReady(true);
-  if(event.data.type==='labels'){
-   const canvas=frame.current,viewport=event.data.viewport;
-   const sourceWidth=Number(viewport?.width),sourceHeight=Number(viewport?.height);
-   const scaleX=canvas&&sourceWidth>0?canvas.clientWidth/sourceWidth:1,scaleY=canvas&&sourceHeight>0?canvas.clientHeight/sourceHeight:1;
-   const offsetX=canvas?.offsetLeft||0,offsetY=canvas?.offsetTop||0;
-   setLabels((event.data.labels||[]).map((label:EventLabel)=>({...label,x:offsetX+label.x*scaleX,y:offsetY+label.y*scaleY,scale:(label.scale||1)*scaleX,logoY:offsetY+label.logoY*scaleY,logoWidth:label.logoWidth*scaleX,logoHeight:label.logoHeight*scaleY})));
-  }
   if(event.data.type==='view')latest.current.onView(event.data);
   if(event.data.type==='fatal'){
    const detail=typeof event.data.message==='string'?event.data.message.slice(0,300):'Unknown graphics error.';
@@ -59,7 +50,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
  useEffect(()=>{if(ready)post('select',{key:selected});},[ready,selected]);
  useEffect(()=>{if(ready)post('labels',{enabled:labelsEnabled});},[ready,labelsEnabled]);
  useEffect(()=>{if(ready)post('time',{timestamp:viewTime});},[ready,viewTime]);
- return <><iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas"/>{labels.map(label=><ZaydarEventLabel key={label.key} label={label} onSelect={onSelect}/>)}</>;
+ return <iframe ref={frame} src={`${MAP_SRC}&attempt=${attempt}`} title="Zaylist interactive Portland metro map" className="zaydar-demo-canvas"/>;
 });
 
 // Leaflet is deliberately disconnected. Its component is retained separately,

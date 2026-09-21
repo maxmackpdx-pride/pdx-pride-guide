@@ -443,6 +443,7 @@ function drawUserLocationAvatar(ctx,target,fade){
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
  const eventLabels=[];
+ const cameraMoving=Boolean(target.isMoving?.());
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
  const activeToday=feature=>feature.properties.eventDay===today||(parent===window&&feature.properties.demoOpen===true);
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeToday(feature)?1:reveal;
@@ -456,7 +457,7 @@ function drawLights(fade,target=map,surface=lights){
  const streetProgress=smoothRange(13.5,15,target.getZoom());
  const closeProgress=smoothRange(15,17.25,target.getZoom());
  const hologramMultiplier=2.4-.75*streetProgress;
- const placezScale=1.3*(.375+.625*streetProgress+.2*closeProgress);
+ const placezScale=1.625*(.375+.625*streetProgress+.2*closeProgress);
  const placezGlow=.375+.625*streetProgress+.12*closeProgress;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
@@ -504,8 +505,8 @@ function drawLights(fade,target=map,surface=lights){
   const phase=item.feature.properties.phase;
   // Each venue slowly takes a turn holding its ground while its neighbors yield.
   item.attention=reduced.matches?.5:.5+.5*Math.sin(pulseTime*(.13+.025*Math.sin(phase))+phase*1.83);
-  const driftX=reduced.matches?0:29*Math.sin(pulseTime*(.17+.025*Math.cos(phase))+phase)+9*Math.sin(pulseTime*.09+phase*2.4);
-  const driftY=reduced.matches?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
+  const driftX=reduced.matches||cameraMoving?0:29*Math.sin(pulseTime*(.17+.025*Math.cos(phase))+phase)+9*Math.sin(pulseTime*.09+phase*2.4);
+  const driftY=reduced.matches||cameraMoving?0:15*Math.sin(pulseTime*.12+phase*1.6)-22*item.attention;
   item.scaleGoal=emergenceFor(item.feature)*presentationScale*Math.min(1,1+(reduced.matches?0:.1*hologramVariation(pulseTime,phase,0)));
   item.boundsGoal=hologramBounds(item.feature,item.scaleGoal);
   const heightBoost=reduced.matches?0:.2*hologramVariation(pulseTime,phase,1);
@@ -543,10 +544,10 @@ function drawLights(fade,target=map,surface=lights){
  }
  for(const item of beacons){
   const phase=item.feature.properties.phase;
-  item.hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
+  item.hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   item.x=item.p.x+item.offset.x;item.y=item.p.y+item.offset.y-item.hover;
   Object.assign(item,hologramBounds(item.feature,item.offset.scale));
-  const avoidance=logoPointerOffset(item.x,item.y,phase,item.halfWidth,item.halfHeight);
+  const avoidance=cameraMoving?{x:0,y:0}:logoPointerOffset(item.x,item.y,phase,item.halfWidth,item.halfHeight);
   item.offset.avoidX+=(avoidance.x-item.offset.avoidX)*pointerBlend;
   item.offset.avoidY+=(avoidance.y-item.offset.avoidY)*pointerBlend;
   item.x+=item.offset.avoidX;item.y+=item.offset.avoidY;
@@ -580,7 +581,7 @@ function drawLights(fade,target=map,surface=lights){
   const {color,phase}=feature.properties;
   const bloomScale=feature.properties.type==='nonprofit'?.4:feature.properties.housingModel?.5:1;
   const isBar=expandedKeys.has(feature.properties.key);
-  const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
+  const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const groundScale=projectorGroundScale(target.getZoom());
   const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
@@ -604,7 +605,7 @@ function drawLights(fade,target=map,surface=lights){
     drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale,isPlace);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?36:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
+    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
    }
   }
   if(!isBar)continue;
@@ -781,20 +782,47 @@ function drawLights(fade,target=map,surface=lights){
  }
  }
  drawUserLocationAvatar(lightsContext,target,fade);
- // Keep the DOM title and clock on the same animation cadence as the canvas logo.
- if(parent===window)renderStandaloneLabels(eventLabels);else tell('labels',{labels:eventLabels,viewport:{width,height}});
+ // Titles live in this same document and frame cadence as their canvas logos.
+ // Crossing the iframe boundary here caused visible lag while panning and zooming.
+ renderHologramLabels(eventLabels);
 }
 
-function renderStandaloneLabels(labels){
+const labelMeasureContext=typeof document.createElement==='function'?document.createElement('canvas').getContext('2d'):{font:'',measureText:text=>({width:String(text).length*55})};
+function labelRows(text,width){
+ const words=String(text).trim().split(/\s+/).filter(Boolean),candidates=[];
+ const partition=(start,rows,left)=>{
+  if(left===1){candidates.push([...rows,words.slice(start).join(' ')]);return;}
+  for(let end=start+1;end<=words.length-left+1;end++)partition(end,[...rows,words.slice(start,end).join(' ')],left-1);
+ };
+ for(let count=1;count<=Math.min(3,words.length);count++)partition(0,[],count);
+ labelMeasureContext.font="900 100px 'Barlow Condensed','Arial Narrow',sans-serif";
+ const targetWidth=width*.96,targetHeight=width*.52,maxSize=width*.34;
+ return candidates.map(lines=>{
+  let sizes=lines.map(line=>Math.min(maxSize,targetWidth/Math.max(1,labelMeasureContext.measureText(line).width)*100));
+  const total=sizes.reduce((sum,size)=>sum+size*.82,0);
+  if(total>targetHeight){const ratio=targetHeight/total;sizes=sizes.map(size=>size*ratio);}
+  const height=sizes.reduce((sum,size)=>sum+size*.82,0);
+  return {lines,sizes,score:height-lines.length*.05};
+ }).sort((a,b)=>b.score-a.score)[0]||{lines:[text],sizes:[14]};
+}
+function labelComplement(hex){const n=parseInt(String(hex).replace('#',''),16);return `rgb(${Math.max(85,255-(n>>16&255))}, ${Math.max(85,255-(n>>8&255))}, ${Math.max(85,255-(n&255))})`;}
+function selectHologramLabel(key){if(parent===window){selectedKey=key;scheduleFrame();}else tell('select',{key});}
+function renderHologramLabels(labels){
  const root=document.getElementById('hologram-labels');if(!root)return;
  const live=new Set();
  for(const label of labels){
-  if(label.kind!=='housing')continue;live.add(label.key);
+  live.add(label.key);
   let item=[...root.children].find(node=>node.dataset.labelKey===label.key);
-  if(!item){item=document.createElement('div');item.className='standalone-hologram-label';item.dataset.labelKey=label.key;root.appendChild(item);}
-  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.setAttribute('aria-label',label.name);
-  const signature=JSON.stringify([label.name,label.color,label.avatars]);
-  if(item.dataset.signature!==signature){item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';title.textContent=label.name;item.appendChild(title);if(label.avatars?.length){const stack=document.createElement('span');stack.className='standalone-hologram-faces';stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}item.appendChild(stack);}}
+  if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey));root.appendChild(item);}
+  item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
+  item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.color));item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.width,label.avatars]);
+  if(item.dataset.signature!==signature){
+   item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
+   const fitted=labelRows(label.name,label.width);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
+   if(label.kind!=='housing'&&label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;item.appendChild(clock);}
+   if(label.kind==='housing'&&label.avatars?.length){const stack=document.createElement('span');stack.className='standalone-hologram-faces';stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}item.appendChild(stack);}
+  }
  }
  for(const item of [...root.children])if(!live.has(item.dataset.labelKey))item.remove();
 }
@@ -915,7 +943,8 @@ map.on('render',()=>{
 function draw(now){
  frame=0;
  if(disposed||document.hidden)return;
- if(last&&now-last<frameInterval-1){scheduleFrame();return;}
+ const activeFrameInterval=map.isMoving()?1000/60:frameInterval;
+ if(last&&now-last<activeFrameInterval-1){scheduleFrame();return;}
  const dt=last?Math.min((now-last)/1000,.1):0;last=now;
  motionDelta=dt;
  if(!reduced.matches)pulseTime+=dt;
@@ -999,11 +1028,11 @@ const typeIcons=new Map();
 function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
- const size=(flat?72:126)*scale*(.92+.1*pulse);
+ const size=(flat?72:126)*scale*(flat?1:(.92+.1*pulse));
  const coreSize=25*scale;
  const iconRadius=11*scale;
  const iconSize=15*scale;
- ctx.save();ctx.globalAlpha=fade*pulse*glowStrength;
+ ctx.save();ctx.globalAlpha=fade*(flat?1:pulse)*glowStrength;
  ctx.drawImage(lightSprites.get(color),x-size/2,y-size/2,size,size);
  if(!flat)drawLightMist(ctx,x,y,phase,fade,scale,glowStrength);
  ctx.globalAlpha=alpha;
@@ -1027,7 +1056,7 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  return {byKey};
 }
 function drawClusterCount(ctx,x,y,count,color){
- ctx.save();ctx.translate(x+10,y-10);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,9,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 10px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
+ ctx.save();ctx.translate(x+12.5,y-12.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
 }
 function drawSelectedMarkerLabel(ctx,x,y,name,type,color,width){
  const label=String(name||type||'Place');ctx.save();ctx.font='600 12px Inter,Arial,sans-serif';const labelWidth=Math.min(190,ctx.measureText(label).width+22);const labelX=Math.max(labelWidth/2+8,Math.min(width-labelWidth/2-8,x));ctx.fillStyle='#050b12e8';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(labelX-labelWidth/2,y+17,labelWidth,28,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f4fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,labelX,y+31,labelWidth-16);ctx.restore();
