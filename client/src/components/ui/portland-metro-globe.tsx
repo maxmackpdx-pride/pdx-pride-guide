@@ -149,8 +149,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const rect=element.getBoundingClientRect();
         return [{ x:rect.left-canvasBounds.left-12,y:rect.top-canvasBounds.top-12,w:rect.width+24,h:rect.height+24 }];
       });
-      const overlapsText=(x:number,y:number,w:number,h:number)=>protectedAreas.some(rect=>
-        x+w/2>rect.x && x-w/2<rect.x+rect.w && y+h/2>rect.y && y-h/2<rect.y+rect.h);
+      const textOverlap=(x:number,y:number,w:number,h:number)=>Math.min(1,protectedAreas.reduce((area,rect)=>{
+        const overlapW=Math.max(0,Math.min(x+w/2,rect.x+rect.w)-Math.max(x-w/2,rect.x));
+        const overlapH=Math.max(0,Math.min(y+h/2,rect.y+rect.h)-Math.max(y-h/2,rect.y));
+        return area+overlapW*overlapH;
+      },0)/(w*h));
       const yaw = INITIAL_YAW + angle.current + (still ? 0 : elapsed / 28000);
       const project = (p: Point, elevation = 1) => {
         const x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
@@ -273,15 +276,18 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
         const fullW=image.width*fullFit, fullH=image.height*fullFit;
         const head = project(venue.point,1.06);
-        const preferred={x:head.x,y:head.y-fullSize*.45-radius*.025};
-        let targetX=preferred.x,targetY=preferred.y;
-        for (let attempt=0;attempt<640;attempt++) {
+        // Let heads reach toward the upper shoulders while beams keep real anchors.
+        const preferred={x:cx+(head.x-cx)*1.22,y:head.y-fullSize*.45-radius*.12};
+        let targetX=preferred.x,targetY=preferred.y,bestPlacement=Infinity;
+        for (let attempt=0;attempt<320;attempt++) {
           const distance=Math.sqrt(attempt)*18, direction=attempt*2.399963;
           const x=Math.max(fullW/2+8,Math.min(width-fullW/2-8,preferred.x+Math.cos(direction)*distance));
           const y=Math.max(headerInset+fullH/2+8,Math.min(height-footerInset-fullH/2-8,preferred.y+Math.sin(direction)*distance));
-          if(overlapsText(x,y,fullW+12,fullH+12))continue;
+          const overlap=textOverlap(x,y,fullW+12,fullH+12);
+          if(overlap>.35)continue;
           if(occupied.some(other=>Math.abs(other.x-x)<(other.w+fullW)/2+10 && Math.abs(other.y-y)<(other.h+fullH)/2+10))continue;
-          targetX=x;targetY=y;break;
+          const score=Math.hypot(x-preferred.x,y-preferred.y)/radius+overlap*.7;
+          if(score<bestPlacement){targetX=x;targetY=y;bestPlacement=score;}
         }
         const follow=still?1:1-Math.exp(-dt/220);
         state.offsetX+=(targetX-preferred.x-state.offsetX)*follow;
@@ -293,12 +299,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const size=fullSize*opening,w=fullW*opening,h=fullH*opening;
         renderedCount++;
         context.save();
-        // Clip the protected bands during travel too, so no hologram or beam
-        // crosses the wordmark or any phrase of the rotating headline.
-        for(const rect of protectedAreas){
-          const clear=new Path2D();clear.rect(0,0,width,height);clear.rect(rect.x,rect.y,rect.w,rect.h);
-          context.clip(clear,'evenodd');
-        }
+        // Foreground text stays above the canvas; limited overlap remains natural.
         context.globalAlpha = visibility*.72;
         const beam = context.createLinearGradient(anchor.x,anchor.y,x,y);
         beam.addColorStop(0,`${color}08`); beam.addColorStop(1,`${color}65`);
