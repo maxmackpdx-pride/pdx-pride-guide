@@ -2,6 +2,43 @@ import {vectorStyle} from '../home-flight/city-map.js';
 
 export const WATER_CYAN = '#00bfbf'; // Cyan mixed with 25% black; glow alpha stays unchanged.
 export const FOREST_COLORS = ['#06140e', '#0a1b12', '#0e2418'];
+export const WOOD_FILL = '#0d1610';
+export const GRASS_FILL = '#101812';
+export const PARK_FILL = '#0e1712';
+const GREEN_OPACITY = ['interpolate',['linear'],['zoom'],10,.55,14,.72,18,.85];
+
+function quietGreenFills() {
+  const wood = ['wood','forest'];
+  const leaf = ['grass','scrub','heath','meadow','grassland'];
+  const layers = [];
+  for (const sourceLayer of ['landcover','landuse']) {
+    layers.push({
+      id: `forest-${sourceLayer}`,
+      type: 'fill',
+      source: 'terrain',
+      'source-layer': sourceLayer,
+      filter: ['in', ['get', 'class'], ['literal', wood]],
+      paint: {'fill-color': WOOD_FILL, 'fill-opacity': GREEN_OPACITY, 'fill-antialias': true},
+    });
+    layers.push({
+      id: `leaf-${sourceLayer}`,
+      type: 'fill',
+      source: 'terrain',
+      'source-layer': sourceLayer,
+      filter: ['in', ['get', 'class'], ['literal', leaf]],
+      paint: {'fill-color': GRASS_FILL, 'fill-opacity': GREEN_OPACITY, 'fill-antialias': true},
+    });
+  }
+  layers.push({
+    id: 'park-areas',
+    type: 'fill',
+    source: 'terrain',
+    'source-layer': 'park',
+    paint: {'fill-color': PARK_FILL, 'fill-opacity': GREEN_OPACITY, 'fill-antialias': true},
+  });
+  return layers;
+}
+
 export const naturalWater = ['all', ['in', ['get', 'class'], ['literal', ['river', 'lake', 'pond']]], ['!=', ['get', 'intermittent'], 1]];
 
 /** Mapz extends the home city without mutating the homepage's materials. */
@@ -19,7 +56,7 @@ export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
   style.layers.unshift(
     {id:'ground',type:'background',paint:{'background-color':'#050506','background-opacity':1}},
     {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':['interpolate',['linear'],['zoom'],10,.34,14,.24,17,.16],'hillshade-shadow-color':'#07110d','hillshade-highlight-color':'#53675d','hillshade-accent-color':'#132a20'}},
-    ...['landcover','landuse'].map(sourceLayer=>({id:`forest-${sourceLayer}`,type:'fill',source:'terrain','source-layer':sourceLayer,filter:['in',['get','class'],['literal',['wood','forest']]],paint:{'fill-pattern':'forest-canopy','fill-opacity':['interpolate',['linear'],['zoom'],10,.38,13,.52,15.5,.72,18,.82]}})),
+    ...quietGreenFills(),
     ...(contourTiles?[{id:'elevation-contours',type:'line',source:'contours','source-layer':'contours',minzoom:10,paint:{'line-color':'#35515a','line-opacity':['interpolate',['linear'],['zoom'],10,.08,12.5,.22,15,.14,18,.06],'line-width':['match',['get','level'],1,.85,.38]}}]:[]),
   );
   // Opaque terrain and water prevent the terrain framebuffer from exposing
@@ -48,7 +85,7 @@ export function mapzSurfaceStyle({demTiles,contourTiles}={}) {
   return style;
 }
 
-/** Seamlessly repeating canopy patches, using exactly three dark-green shades. */
+/** Legacy canopy sprite. Unused by the live style. Kept so old imports do not throw. */
 export function forestPattern(size=48) {
   const palette=FOREST_COLORS.map(hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)));
   const data=new Uint8Array(size*size*4);
