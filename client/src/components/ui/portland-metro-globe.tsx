@@ -55,6 +55,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
       for (const [index, venue] of rows.entries()) {
         if (!venue.logo || !Array.isArray(venue.coordinates)) continue;
+        // One representative location per requested brand on the home globe.
+        if (/^taboo\b/i.test(venue.name) && venue.id !== '96-0') continue;
+        if (/^fantasy\b/i.test(venue.name) && venue.id !== '98-0') continue;
         const [lon, lat] = venue.coordinates;
         if (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north) continue;
         const image = new Image();
