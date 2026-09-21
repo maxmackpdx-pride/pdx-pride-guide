@@ -1,18 +1,9 @@
-/**
- * One card in the home destination rail.
- *
- * Every card is the same box and the same vertical order:
- *   seam -> top (number + eyebrow) -> wordmark + blurb -> slot -> action row
- * and only the slot changes between them. Seven slot bodies exist and no card
- * mixes two. Anything beyond those seven is drift; do not add an eighth.
- *
- * EVENTZ is the one exception to the padding: its flyer is the card, so the
- * shell drops to zero padding, the number ring floats over the poster, and the
- * action row is folded into the flyer footer instead of sitting under it.
- */
+/** Homepage destinations share a header, preview well, and page link. */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
+import type { CommunitySummary } from "@shared/community";
+import { resolveDirectoryLogo } from "@/lib/directoryLogos";
 import { prefersStillMotion } from "@/lib/motion";
 import {
   clearDynamicTextCache,
@@ -47,6 +38,7 @@ export type HomeWorldCardProps = {
   postings?: WorldPosting[];
   items?: WorldItem[];
   today?: WorldTodayItem[];
+  communities?: CommunitySummary[];
   previewState?: HomeWorldPreviewState;
 };
 
@@ -95,7 +87,7 @@ function useDynamicTitle(text: string) {
      * were solved against, and the two would chase each other without settling.
      */
     const measure = () => {
-      const rect = body.getBoundingClientRect();
+      // The fan scales and rotates cards; measure their layout, not the transformed screen box.
       // Padding is read, not assumed: the breakpoints below 900px tighten it,
       // and a hardcoded 10 would put the frame ~4px off exactly where the band
       // is already tightest.
@@ -105,8 +97,8 @@ function useDynamicTitle(text: string) {
       // The whole band, for every card. No per-card fraction: a 0.6 on some
       // cards and 1.0 on others is exactly the per-brand multiplier that made
       // the rail's type scale disagree with itself.
-      const w = rect.width - padX;
-      const h = rect.height - padY - kicker.offsetHeight - tail.offsetHeight - TITLE_GAP;
+      const w = body.clientWidth - padX;
+      const h = body.clientHeight - padY - kicker.offsetHeight - tail.offsetHeight - TITLE_GAP;
       if (w <= 0 || h <= 0) return;
       publishFrame(idRef.current!, { w, h });
     };
@@ -285,7 +277,7 @@ function Flyer({ flyers, playing }: { flyers: WorldFlyer[]; playing: boolean }) 
   }, [playing, flyers.length]);
 
   const flyer = flyers[active] ?? flyers[0];
-  if (!flyer) return null;
+  if (!flyer) return <div className="home-world__empty">Upcoming event flyers will appear here.</div>;
 
   return (
     <div className="home-world__flyer" style={{ ["--day-c" as string]: flyer.dayColor }}>
@@ -385,10 +377,10 @@ export default function HomeWorldCard({
   postings = [],
   items = [],
   today = [],
+  communities = [],
   previewState = "ready",
 }: HomeWorldCardProps) {
   const motifs = WORLD_MOTIFS[world.key] ?? [];
-  const isFlyerCard = world.slot === "flyer";
 
   return (
     <article
@@ -451,30 +443,26 @@ export default function HomeWorldCard({
           <span className="home-world__eyebrow">{world.eyebrow}</span>
         </div>
 
-        {previewState !== "ready" ? (
-          <div
-            className="home-world__data-state"
-            data-state={previewState}
-            role={previewState === "error" ? "alert" : "status"}
-            aria-live="polite"
-          >
-            <span className="home-world__data-state-dot" aria-hidden="true" />
-            {previewState === "loading" ? "Loading live preview" : null}
-            {previewState === "error" ? "Live preview unavailable · showing demo" : null}
-            {previewState === "empty" ? "Nothing live yet · showing demo" : null}
-          </div>
-        ) : null}
+        <div
+          className="home-world__data-state"
+          data-state={previewState}
+          role={previewState === "error" ? "alert" : "status"}
+          aria-live="polite"
+        >
+          {previewState !== "ready" ? <span className="home-world__data-state-dot" aria-hidden="true" /> : null}
+          {previewState === "loading" ? "Loading live preview" : null}
+          {previewState === "error" ? <>Live preview unavailable{world.slot !== "communities" && world.slot !== "flyer" ? " · showing demo" : ""}</> : null}
+          {previewState === "empty" ? (world.slot === "communities" ? "No public communities yet" : world.slot === "flyer" ? "No upcoming events yet" : "Nothing live yet · showing demo") : null}
+        </div>
 
-        {!isFlyerCard ? (
-          <div className="home-world__head">
-            {world.mark ? (
-              <img className="home-world__mark" src={world.mark} alt={world.title} loading="lazy" decoding="async" />
-            ) : world.headline ? (
-              <h3 className="home-world__headline">{world.headline}</h3>
-            ) : null}
-            {world.body ? <p className="home-world__body">{world.body}</p> : null}
-          </div>
-        ) : null}
+        <div className="home-world__head">
+          {world.mark ? (
+            <img className="home-world__mark" src={world.mark} alt={world.title} loading="lazy" decoding="async" />
+          ) : world.headline ? (
+            <h3 className="home-world__headline">{world.headline}</h3>
+          ) : null}
+          {world.body ? <p className="home-world__body">{world.body}</p> : null}
+        </div>
 
         <div className="home-world__slot">
           {world.slot === "rows" ? (
@@ -532,6 +520,24 @@ export default function HomeWorldCard({
                   </span>
                 </Link>
               ))}
+            </div>
+          ) : null}
+
+          {world.slot === "communities" ? (
+            <div className="home-world__communities">
+              {communities.map(community => {
+                const logo = community.imageUrl || (community.sourcePlaceId ? resolveDirectoryLogo(community.name) : null);
+                return <Link key={community.id} href={`/z/${community.slug}`} className="home-world__community">
+                  <span className="home-world__community-image">
+                    {logo ? <img src={logo} alt="" loading="lazy" /> : <span aria-hidden="true">Z/</span>}
+                  </span>
+                  <span className="home-world__community-copy">
+                    <span className="home-world__community-address">z/{community.slug}</span>
+                    <strong>{community.name}</strong>
+                    <span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}{community.neighborhood ? ` · ${community.neighborhood}` : ""}</span>
+                  </span>
+                </Link>;
+              })}
             </div>
           ) : null}
 
@@ -596,12 +602,10 @@ export default function HomeWorldCard({
           ) : null}
         </div>
 
-        {!isFlyerCard ? (
-          <Link href={world.href} className="home-world__action">
-            <span>{world.action}</span>
-            <span aria-hidden="true">↗</span>
-          </Link>
-        ) : null}
+        <Link href={world.href} className="home-world__action">
+          <span>{world.action}</span>
+          <span aria-hidden="true">↗</span>
+        </Link>
       </div>
     </article>
   );

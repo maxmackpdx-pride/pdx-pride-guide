@@ -116,7 +116,7 @@ export function WorldFanCarousel({
       cur.current.push({ r: 0, x: 0, s: 0.82, o: 0 });
       vel.current.push({ r: 0, x: 0, s: 0, o: 0 });
       tgt.current.push({ r: 0, x: 0, s: 0.82, o: 0 });
-      offsetRef.current.push(0);
+      offsetRef.current.push(wrapOffset(offsetRef.current.length, selectedRef.current, n));
       delayUntil.current.push(0);
     }
   };
@@ -298,14 +298,17 @@ export function WorldFanCarousel({
     const origin = event.target instanceof Element ? event.target : null;
     if (origin?.closest(".world-fan__pager, button")) return;
     if (event.button !== 0) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    justDragged.current = false;
     drag.current = { id: event.pointerId, x: event.clientX, moved: false };
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const current = drag.current;
     if (!current || current.id !== event.pointerId) return;
-    if (Math.abs(event.clientX - current.x) > 8) current.moved = true;
+    if (Math.abs(event.clientX - current.x) > 8 && !current.moved) {
+      current.moved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   };
 
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
@@ -327,12 +330,21 @@ export function WorldFanCarousel({
       aria-roledescription="carousel"
       aria-label={label}
       tabIndex={0}
+      onClickCapture={event => {
+        if (justDragged.current) {
+          justDragged.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+      onDragStart={event => event.preventDefault()}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
+      onPointerCancel={() => { drag.current = null; justDragged.current = false; }}
+      onFocusCapture={() => { userPaused.current = true; }}
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseLeave={() => { setHover(false); if (!drag.current?.moved) drag.current = null; }}
       onKeyDown={event => {
         if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
         if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
@@ -347,12 +359,6 @@ export function WorldFanCarousel({
               className="world-fan__slide"
               ref={node => { slideRefs.current[index] = node; }}
               onClickCapture={event => {
-                if (justDragged.current) {
-                  justDragged.current = false;
-                  event.preventDefault();
-                  event.stopPropagation();
-                  return;
-                }
                 if (index !== selected) {
                   event.preventDefault();
                   event.stopPropagation();
