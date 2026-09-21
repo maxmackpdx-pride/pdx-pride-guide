@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
 // Built-up land-use and water mask: OpenFreeMap / OpenMapTiles / OSM,
 // z13 geography cropped to the screenshot bounds below; parks stay empty.
-declare const __ZAYDAR_BASE__: string;
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string; color?: string; point?: Point };
 // Screenshot crop, approximated from Eagle, downtown, I-205 and Sellwood.
@@ -38,9 +37,9 @@ function warp(value: number, center: number, strength: number, inverse = false) 
     : (Math.atan((value-center)*strength)-low)/(high-low)*2-1;
 }
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
-const MAX_HOLOGRAMS = 6;
+const MAX_HOLOGRAMS = 8;
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
-type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
+type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; brightRoad?: boolean; hoverGlow?: { strength:number; lift:number; hue:number; core:number; lastLit:number }; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
@@ -72,6 +71,8 @@ const PRODUCT_WAYPOINTS: Venue[] = [
 
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
+  const mode=useRef({active,still});
+  const syncAnimation=useRef(()=>{});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const angle = useRef(0);
   const elapsedRef = useRef(0);
@@ -87,6 +88,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     if (!canvas) return;
     const context = canvas.getContext("2d");
     if (!context) return;
+    let {active,still}=mode.current;
     let disposed = false, frame = 0, previous = 0, elapsed = elapsedRef.current;
     let width = 0, height = 0;
     let points: Point[] = [];
@@ -94,64 +96,23 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
     const abort = new AbortController();
-    let loadingArtwork = 0;
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
-    void Promise.all([import(/* @vite-ignore */ `${__ZAYDAR_BASE__}/logo-mask.js`), fetch(`${__ZAYDAR_BASE__}/waypoints.json`, { signal: abort.signal }).then(r => { if (!r.ok) throw new Error('Venue artwork unavailable'); return r.json() as Promise<Venue[]>; })]).then(([{ logoCoverage }, rows]) => {
-      for (const [index, venue] of [...rows, ...PRODUCT_WAYPOINTS].entries()) {
-        if (!venue.logo || !Array.isArray(venue.coordinates)) continue;
-        // One representative location per requested brand on the home globe.
-        if (/^taboo\b/i.test(venue.name) && venue.id !== '96-0') continue;
-        if (/^fantasy\b/i.test(venue.name) && venue.id !== '98-0') continue;
-        const [lon, lat] = venue.coordinates;
-        if (!venue.point && (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north)) continue;
-        const image = new Image();
-        const hologram = { point: venue.point ?? placePoint({ lat, lon }), image: document.createElement("canvas"), color: venue.color ?? COLORS[index % COLORS.length], phase: index * 2.39996 };
-        loadingArtwork++;
-        image.onload = () => {
-          loadingArtwork--;
-          if (disposed) return;
-          const ink = hologram.image;
-          const sampling = Math.max(image.naturalWidth,image.naturalHeight) < 256 ? 4 : 1;
-          ink.width = image.naturalWidth * sampling; ink.height = image.naturalHeight * sampling;
-          const painter = ink.getContext('2d'); if (!painter) return;
-          painter.imageSmoothingQuality = "high";
-          painter.drawImage(image,0,0,ink.width,ink.height);
-          const artwork = painter.getImageData(0,0,ink.width,ink.height), pixels = artwork.data;
-          for (let i=0;i<pixels.length;i+=4) {
-            const coverage = logoCoverage(pixels[i],pixels[i+1],pixels[i+2],pixels[i+3],venue.logoMode);
-            const tone = venue.logoMode === 'grayscale' ? Math.round(.2126*pixels[i]+.7152*pixels[i+1]+.0722*pixels[i+2]) : 255;
-            pixels[i]=pixels[i+1]=pixels[i+2]=tone; pixels[i+3]=Math.round(coverage*255);
-          }
-          painter.putImageData(artwork,0,0);
-          // Fit actual ink, not transparent source padding, and cache a crisp
-          // black keyline so the white artwork stays readable over map dots.
-          let left=ink.width, top=ink.height, right=-1, bottom=-1;
-          for (let y=0;y<ink.height;y++) for (let x=0;x<ink.width;x++) {
-            if (pixels[(y*ink.width+x)*4+3] <= 32) continue;
-            left=Math.min(left,x); right=Math.max(right,x);
-            top=Math.min(top,y); bottom=Math.max(bottom,y);
-          }
-          if (right < left || bottom < top) return;
-          const w=right-left+1, h=bottom-top+1;
-          const edge=Math.max(2,Math.ceil(Math.max(w,h)/100));
-          const clean=document.createElement('canvas');
-          clean.width=w+edge*2; clean.height=h+edge*2;
-          const ctx=clean.getContext('2d'); if (!ctx) return;
-          for (let i=0;i<8;i++) {
-            const theta=i*Math.PI/4;
-            ctx.drawImage(ink,left,top,w,h,edge+Math.cos(theta)*edge,edge+Math.sin(theta)*edge,w,h);
-          }
-          ctx.globalCompositeOperation='source-in'; ctx.fillStyle='#000';
-          ctx.fillRect(0,0,clean.width,clean.height);
-          ctx.globalCompositeOperation='source-over';
-          ctx.drawImage(ink,left,top,w,h,edge,edge,w,h);
-          hologram.image=clean;
-          venues.push(hologram); draw();
-        };
-        image.onerror = () => { loadingArtwork--; if (!disposed) draw(); };
-        image.src = venue.logo.startsWith("/") ? venue.logo : `${__ZAYDAR_BASE__}/${venue.logo.replace(/^\.\//, '')}`;
+    type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;x:number;y:number;w:number;h:number};
+    const atlas=new Image();atlas.decoding="async";
+    atlas.src='/home-globe/holograms.webp';
+    void Promise.all([atlas.decode(),fetch('/home-globe/holograms.json',{signal:abort.signal}).then(r=>{
+      if(!r.ok)throw new Error('Hologram atlas unavailable');return r.json() as Promise<AtlasEntry[]>;
+    })]).then(([,rows])=>{
+      if(disposed)return;
+      for(const row of rows){
+        const image=document.createElement('canvas');image.width=row.w;image.height=row.h;
+        image.getContext('2d')?.drawImage(atlas,row.x,row.y,row.w,row.h,0,0,row.w,row.h);
+        const [lon,lat]=row.coordinates;
+        const point=row.product?PRODUCT_WAYPOINTS.find(p=>p.id===row.id)?.point:placePoint({lat,lon});
+        if(point)venues.push({point,image,color:row.color,phase:row.phase});
       }
-    }).catch(() => { /* Geography remains available if venue artwork cannot load. */ });
+      draw();
+    }).catch(()=>{ /* The globe remains visible if the optional artwork fails. */ });
     const texture = new Image();
     const draw = () => {
       if (!width || !height) return;
@@ -172,10 +133,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const overlapH=Math.max(0,Math.min(y+h/2,rect.y+rect.h)-Math.max(y-h/2,rect.y));
         return area+overlapW*overlapH;
       },0)/(w*h));
-      const yaw = INITIAL_YAW + angle.current + (still ? 0 : elapsed / 28000);
+      const yaw = INITIAL_YAW + angle.current + (still ? 0 : elapsed / 42000);
+      const yawCos=Math.cos(yaw),yawSin=Math.sin(yaw);
       const project = (p: Point, elevation = 1) => {
-        const x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
-        const z = p.z * Math.cos(yaw) - p.x * Math.sin(yaw);
+        const x = p.x * yawCos + p.z * yawSin;
+        const z = p.z * yawCos - p.x * yawSin;
         return { x: cx + x * radius * elevation, y: cy - p.y * radius * elevation, z };
       };
       context.clearRect(0, 0, width, height);
@@ -189,11 +151,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const pointerRadiusSquared=pointerX*pointerX+pointerY*pointerY;
       const surfaceHover=pointerRadiusSquared<1?{x:pointerX,y:pointerY,z:Math.sqrt(1-pointerRadiusSquared)}:null;
       const hoverAngle=Math.asin(Math.sin(Math.min(.45,52/radius))*.7);
+      const hoverTurn=still?0:performance.now()/1500;
+      const hoverCos=Math.cos(hoverTurn),hoverSin=Math.sin(hoverTurn);
       const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
       const beamDots: {x:number;y:number;size:number;glow:NonNullable<Point["glow"]>}[]=[];
       const hoverNow=performance.now(),hoverDt=Math.min(64,Math.max(0,hoverNow-lastHoverFrame));
       lastHoverFrame=hoverNow;
       const glowDt=Math.min(64,Math.max(0,elapsed-lastFrame.current));
+      const brightRoads=new Path2D();
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
         let q = project(p);
@@ -208,7 +173,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const cosine=nx*surfaceHover.x+ny*surfaceHover.y+q.z*surfaceHover.z;
           const distance=Math.acos(Math.max(-1,Math.min(1,cosine)))/hoverAngle;
           if(distance<1){
-            const across=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength)/Math.sin(hoverAngle);
+            const east=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength);
+            const north=(-nx*surfaceHover.y*surfaceHover.x+ny*tangentLength*tangentLength-q.z*surfaceHover.y*surfaceHover.z)/Math.max(.001,tangentLength);
+            const across=(east*hoverCos+north*hoverSin)/Math.sin(hoverAngle);
             const strength=smooth(1-distance);
             hoverTarget=strength;
             const effect=p.hoverGlow ??= {strength:0,lift:0,hue:0,core:0,lastLit:-Infinity};
@@ -226,7 +193,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           q.y-=effect.lift*1.2;
           if(effect.strength>.005)hoverDots.push({x:q.x,y:q.y,radius:size,strength:effect.strength,hue:effect.hue,core:effect.core});
         }
-        const path = batches[p.tone * 4 + depth];
+        const path = p.brightRoad?brightRoads:batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
         if(p.tone!==2 && !p.beamExcluded){
           let target=0, rgb=[255,255,255];
@@ -260,6 +227,10 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
+      context.save();
+      context.fillStyle='rgba(255,255,255,.92)';
+      context.shadowColor='rgba(255,255,255,.01)';context.shadowBlur=1;
+      context.fill(brightRoads);context.restore();
       context.save();
       for(const dot of beamDots){
         const {r,g,b,strength}=dot.glow;
@@ -328,18 +299,18 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillText(river.name,p.x,p.y);
       }
       context.shadowBlur=0;
-      // Six slots include opening AND closing artwork; no replacement appears
+      // Eight slots include opening AND closing artwork; no replacement appears
       // until the old logo has finished retracting into its geographic anchor.
       const projected = venues.map(venue => ({ ...venue, anchor: project(venue.point) }));
       const states = hologramStates.current;
       const dt = Math.min(64,Math.max(0,elapsed-lastFrame.current));
       lastFrame.current=elapsed;
-      if (!loadingArtwork) {
+      if (venues.length) {
         for (const [key,state] of states) {
           const venue=projected.find(item=>item.phase===key);
           if (!venue) continue;
           if (!still && (venue.anchor.z<.18 || elapsed-state.openedAt>13000+(key%5)*700)) state.closing=true;
-          if (!still) state.progress=Math.max(0,Math.min(1,state.progress+(state.closing?-1:1)*dt/1500));
+          if (!still) state.progress=Math.max(0,Math.min(1,state.progress+(state.closing?-1:1)*dt/2200));
           if (state.closing && state.progress===0) { states.delete(key); lastShown.current.set(key,elapsed); }
         }
         const candidates = projected.filter(venue=>venue.anchor.z>.3 && !states.has(venue.phase));
@@ -395,7 +366,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           const score=Math.hypot(x-preferred.x,y-preferred.y)/radius+overlap*.7;
           if(score<bestPlacement){targetX=x;targetY=y;bestPlacement=score;}
         }
-        const follow=still?1:1-Math.exp(-dt/220);
+        const follow=still?1:1-Math.exp(-dt/550);
         state.offsetX+=(targetX-preferred.x-state.offsetX)*follow;
         state.offsetY+=(targetY-preferred.y-state.offsetY)*follow;
         occupied.push({x:preferred.x+state.offsetX,y:preferred.y+state.offsetY,w:fullW,h:fullH});
@@ -466,17 +437,23 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           // No uniform sphere grid: dots exist only on mapped urban land or water.
           if (builtUp || river) points.push({...sphere(u,v,river ? 2 : 0),
             // Magenta mask pixels encode highways, Hawthorne and Powell corridors.
-            beamExcluded:builtUp && data[pixel+1]<100});
+            beamExcluded:builtUp && data[pixel+1]<100,brightRoad:builtUp && data[pixel+1]<100 && data[pixel+2]<100});
         }
       }
       draw();
     };
     texture.src = '/home-globe/portland-city-beam-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
+    syncAnimation.current=()=>{
+      active=mode.current.active;still=mode.current.still;
+      cancelAnimationFrame(frame);previous=0;draw();
+      if(active)frame=requestAnimationFrame(animate);
+    };
     if (active) frame = requestAnimationFrame(animate);
-    redrawRef.current = draw;
-    return () => { disposed = true; abort.abort(); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; };
-  }, [active, still]);
+    redrawRef.current = () => { if(still || !active)draw(); };
+    return () => { disposed = true; abort.abort(); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
+  }, []);
+  useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 
   return <canvas ref={canvasRef} className="home-front__metro-globe"
     role="img" aria-label="Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"
