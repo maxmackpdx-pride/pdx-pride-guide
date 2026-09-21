@@ -215,7 +215,6 @@ import { getVapidPublicKey, isPushConfigured } from "./push/vapid";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import crypto from "crypto";
 import multer from "multer";
-import path from "path";
 import fs from "fs";
 
 // ─── File upload setup ────────────────────────────────────────────────────────

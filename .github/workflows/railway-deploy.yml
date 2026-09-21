@@ -13,6 +13,10 @@ concurrency:
   group: railway-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -32,6 +36,27 @@ jobs:
 
       - name: Pre-ship design and bundle guards
         run: npm run ship
+
+      - name: Verify approved design publication
+        id: design_publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest=$(npm run --silent design:publication -- discover)
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+          if [ -n "$manifest" ]; then
+            npm run --silent design:publication -- verify --proposal "$manifest" --output "$RUNNER_TEMP/design-publication-input.json"
+          fi
+
+      - name: Prepare Foundation release attestation
+        id: prepare_publication
+        if: steps.design_publication.outputs.manifest != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run --silent design:publication -- prepare --input "$RUNNER_TEMP/design-publication-input.json" --output "$RUNNER_TEMP/design-publication-state.json"
+          publication_id=$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).id)" "$RUNNER_TEMP/design-publication-state.json")
+          echo "publication_id=$publication_id" >> "$GITHUB_OUTPUT"
 
       # Railway's connected GitHub service deploys every push to master.
       # Verify that native deployment here instead of triggering a duplicate
@@ -59,3 +84,12 @@ jobs:
 
           echo "Timed out waiting for Railway production to serve $COMMIT_SHA"
           exit 1
+
+      - name: Complete Foundation release attestation
+        if: steps.prepare_publication.outputs.publication_id != ''
+        run: npm run --silent design:publication -- complete --state "$RUNNER_TEMP/design-publication-state.json"
+
+      - name: Record failed Foundation release attestation
+        if: failure() && steps.prepare_publication.outputs.publication_id != ''
+        continue-on-error: true
+        run: npm run --silent design:publication -- fail --state "$RUNNER_TEMP/design-publication-state.json" --reason product-deployment-or-verification-failed

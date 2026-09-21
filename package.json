@@ -21,6 +21,7 @@
     "audit:glass-rebind": "node script/audit-glass-rebind.mjs",
     "preview:ds": "NODE_ENV=development tsx server/index.ts",
     "design:proposal": "tsx script/prepare-design-component-proposal.ts",
+    "design:publication": "tsx script/design-product-publication.ts",
     "db:push": "node script/prepare-local-db.mjs && DATABASE_PATH=.local/data.db drizzle-kit push",
     "git:worktree-prune": "bash script/prune-stale-worktrees.sh"
   },
