@@ -162,6 +162,12 @@ function roofLift(target,feature,surfaces){
  const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
  return Math.max(12,(roof+12)/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180));
 }
+const PLACEZ_HOVER_METERS=3;
+const PLACEZ_BLOOM_RADIUS_SCALE=.35;
+function placezHoverLift(target,coordinates){
+ const metersPerPixel=40075016.686*Math.cos(coordinates[1]*Math.PI/180)/(512*Math.pow(2,target.getZoom()));
+ return PLACEZ_HOVER_METERS/metersPerPixel*Math.sin(target.getPitch()*Math.PI/180);
+}
 // One direct canvas overlay; no duplicate map, smoke pass, or texture uploads.
 const lights=document.querySelector('#waypoint-lights');
 let lightFeatures=[];
@@ -607,7 +613,9 @@ function drawLights(fade,target=map,surface=lights){
    else if(!underProjector){
     const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
-    const markerY=isPlace?p.y:raisedY;
+    // Placez stay tied to their geographic anchor. Their only screen offset is
+    // the perspective projection of a fixed three-meter world-space hover.
+    const markerY=isPlace?p.y-placezHoverLift(target,feature.geometry.coordinates):raisedY;
     const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
     drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
@@ -1043,7 +1051,7 @@ const typeIcons=new Map();
 function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowStrength=1,flat=false){
  if(alpha<=0)return;
  const pulse=reduced.matches?1:.8+.12*Math.sin(pulseTime*.43+phase)+.08*Math.sin(pulseTime*.173+phase*1.7);
- const size=(flat?72:126)*scale*(flat?1:(.92+.1*pulse));
+ const size=(flat?72*PLACEZ_BLOOM_RADIUS_SCALE:126)*scale*(flat?1:(.92+.1*pulse));
  const coreSize=25*scale;
  const iconRadius=11*scale;
  const iconSize=15*scale;

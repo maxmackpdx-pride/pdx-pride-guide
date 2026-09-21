@@ -17,11 +17,14 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   assert.match(renderer,/map\.fitBounds\(hit\.clusterBounds/);
 });
 
-test('Placez markers remain on their projected ground anchor with at most two percent bloom',async()=>{
+test('Placez markers stay geographically locked three meters up with compact bloom',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   assert.match(renderer,/const placezScale=1\.625\*/);
-  assert.match(renderer,/const markerY=isPlace\?p\.y:raisedY/);
+  assert.match(renderer,/const PLACEZ_HOVER_METERS=3/);
+  assert.match(renderer,/const markerY=isPlace\?p\.y-placezHoverLift\(target,feature\.geometry\.coordinates\):raisedY/);
   assert.match(renderer,/const placezBloomMax=\.02/);
   assert.match(renderer,/const markerBloom=isPlace\?Math\.min\(placezBloomMax,/);
+  assert.match(renderer,/const PLACEZ_BLOOM_RADIUS_SCALE=\.35/);
+  assert.match(renderer,/flat\?72\*PLACEZ_BLOOM_RADIUS_SCALE:126/);
   assert.match(renderer,/String\(a\.feature\.properties\.key\)\.localeCompare/);
 });
