@@ -3,7 +3,7 @@ import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} 
 import {createBuildingModelLayer} from './building-models.js';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
-import {createBridgeLayer} from '../home-flight/bridge-roads.js';
+import {createBridgeLayer} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
 import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
@@ -14,7 +14,7 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
-import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
+import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
 import {createHousingHologramLayer,housingIconSize,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260921-hous-screen-fit';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';

@@ -42,6 +42,15 @@ test('an explicit ramp joins the upper road without a duplicate junction',()=>{
   assert.equal(junction.length,1);assert.equal(junction[0].edges.length,3);assert.equal(junction[0].layer,2);
   near(junction[0].baseline,10);
 });
+test('a straight shared bridge endpoint survives an untagged layer change',()=>{
+  const graph=bridgeNetwork([
+    levelRoad([[-300,0],[0,0]],1),
+    levelRoad([[0,0],[300,0]],2),
+  ],p=>p,()=>10);
+  assert.equal(graph.nodes.filter(node=>Math.hypot(node.x,node.y)<.01).length,1);
+  assert.equal(graph.edges.length,2);
+  assert.equal(graph.nodes.find(node=>Math.hypot(node.x,node.y)<.01).edges.length,2);
+});
 test('overlaid different-level tile fragments remain separate',()=>{
   const graph=bridgeNetwork([levelRoad([[0,0],[200,0]],1),levelRoad([[0,0],[100,0],[200,0]],2)],p=>p);
   assert.equal(graph.edges.length,3);

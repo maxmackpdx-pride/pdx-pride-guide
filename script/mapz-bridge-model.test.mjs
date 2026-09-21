@@ -77,6 +77,14 @@ test('model fitting follows road curves and the exact road ramp profile',()=>{
  assert.equal(start.height,deckHeight(0,true));assert.equal(end.height,deckHeight(0,true));
  assert.equal(middle.height,deckHeight(150,true));
 });
+test('model fitting crosses a straight untagged bridge layer transition',()=>{
+ const west=roadFeature([[-300,0],[0,0]],{layer:1}),east=roadFeature([[0,0],[300,0]],{layer:2});
+ const fit=fitBridgeRoad([west,east],{id:'test',center:[-122.7,45.5],length:500});
+ assert.ok(fit);
+ assert.equal(fit.length,500);
+ assert.ok(fit.points[0].x<0&&fit.points.at(-1).x>0);
+ assert.ok(sampleBridgeRoad(fit,.25).x<0&&sampleBridgeRoad(fit,.75).x>0);
+});
 test('fitting ignores nearby footpaths and supports MapLibre geometry getters',()=>{
  const road=roadFeature([[-300,8],[300,8]]),footpath=roadFeature([[-300,0],[300,0]],{class:'path'});
  const wrapper={properties:road.properties};Object.defineProperty(wrapper,'geometry',{get:()=>road.geometry});

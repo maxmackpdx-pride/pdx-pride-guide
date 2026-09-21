@@ -38,7 +38,7 @@ export function bridgeNetwork(features, project, elevation) {
     const layer=Number.isFinite(Number(properties.layer))?Number(properties.layer):1;
     for (const line of lines) {
       const ids = line.map(coordinate=>nodeAt(coordinate,layer));
-      for (let i = 1; i < ids.length; i++) if (ids[i - 1] !== ids[i]) segments.push({a: ids[i - 1], b: ids[i], width,layer,ramp:properties.ramp===1});
+      for (let i = 1; i < ids.length; i++) if (ids[i - 1] !== ids[i]) segments.push({a: ids[i - 1], b: ids[i], width,layer,roadClass:properties.class,ramp:properties.ramp===1});
     }
   }
   const edges = [], seen = new Map();
@@ -59,21 +59,31 @@ export function bridgeNetwork(features, project, elevation) {
     for (let i = 1; i < cuts.length; i++) {
       const u = cuts[i - 1].id, v = cuts[i].id, key = `${Math.min(u, v)}:${Math.max(u, v)}`;
       if (seen.has(key)) { seen.get(key).width = Math.max(seen.get(key).width, segment.width); continue; }
-      const edge = {a: u, b: v, width: segment.width, layer:segment.layer,ramp:segment.ramp,length: Math.hypot(nodes[u].x - nodes[v].x, nodes[u].y - nodes[v].y)};
+      const edge = {a: u, b: v, width: segment.width, layer:segment.layer,roadClass:segment.roadClass,ramp:segment.ramp,length: Math.hypot(nodes[u].x - nodes[v].x, nodes[u].y - nodes[v].y)};
       if (edge.length < .05) continue;
       seen.set(key, edge); edges.push(edge); nodes[u].edges.push(edge); nodes[v].edges.push(edge);
     }
   }
-  // An explicit ramp can connect levels at its endpoint. Merely crossing the
-  // same XY position on different layers must never create an intersection.
+  // An explicit ramp can connect levels at its endpoint. OpenMapTiles also
+  // splits some continuous bridge decks at a layer change without tagging the
+  // joining segment as a ramp (Morrison Bridge is one example). Join that
+  // shared endpoint only when the road class matches and the two directions
+  // form one straight continuation. Perpendicular grade-separated crossings
+  // remain independent.
   const parents=nodes.map((_,i)=>i);
   const root=i=>{while(parents[i]!==i)i=parents[i];return i;};
+  const direction=(id,edge)=>{const other=nodes[edge.a===id?edge.b:edge.a];const node=nodes[id],length=Math.hypot(other.x-node.x,other.y-node.y)||1;return [(other.x-node.x)/length,(other.y-node.y)/length];};
   for(let i=0;i<nodes.length;i++){
-    const node=nodes[i];if(node.edges.length!==1||!node.edges[0].ramp)continue;
+    const node=nodes[i];if(!node.edges.length)continue;
     const bx=Math.floor(node.x/32),by=Math.floor(node.y/32);
     for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(const j of buckets.get(bucketKey(bx+dx,by+dy))??[]){
       const other=nodes[j];if(i===j||node.layer===other.layer||Math.hypot(node.x-other.x,node.y-other.y)>.15)continue;
-      parents[root(i)]=root(j);break;
+      const explicit=node.edges.length===1&&node.edges[0].ramp;
+      const continuous=(node.edges.length===1||other.edges.length===1)&&node.edges.some(a=>other.edges.some(b=>{
+        if(a.roadClass!==b.roadClass)return false;
+        const u=direction(i,a),v=direction(j,b);return u[0]*v[0]+u[1]*v[1]<-.82;
+      }));
+      if(explicit||continuous){parents[root(i)]=root(j);break;}
     }
   }
   const indices=new Map(),compacted=[];

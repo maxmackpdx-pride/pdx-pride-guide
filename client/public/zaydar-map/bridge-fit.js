@@ -1,4 +1,4 @@
-import {bridgeNetwork,deckHeight} from '../home-flight/bridge-roads.js';
+import {bridgeNetwork,deckHeight} from '../home-flight/bridge-roads.js?v=20260921-layer-join';
 
 const latitudeScale=111320;
 export function fitBridgeRoad(features,definition,elevation){
