@@ -420,11 +420,18 @@ function hologramVariation(time,phase,channel){
  const blend=fraction*fraction*fraction*(fraction*(fraction*6-15)+10);
  return random(step)*(1-blend)+random(step+1)*blend;
 }
+const USER_LOCATION_AVATAR_SCALE=1.3;
+const USER_LOCATION_CENTER_LIFT=27*USER_LOCATION_AVATAR_SCALE;
+function avatarConicGradient(ctx,x,y,palette,rotation=0){
+ const gradient=typeof ctx.createConicGradient==='function'?ctx.createConicGradient(-Math.PI/2+rotation,x,y):null;
+ if(gradient){palette.forEach((color,index)=>gradient.addColorStop(index/palette.length,color));gradient.addColorStop(1,palette[0]);}
+ return gradient;
+}
 function drawUserLocationGlow(ctx,target,fade){
  if(!userLocation||fade<=0)return;
- const ground=target.project(userLocation.coordinates),x=ground.x,y=ground.y-27;
+ const ground=target.project(userLocation.coordinates),x=ground.x,y=ground.y-USER_LOCATION_CENTER_LIFT;
  if(x<-90||x>window.innerWidth+90||y<-90||y>window.innerHeight+90)return;
- const color=userLocation.feature.properties.color,pulse=reduced.matches?1:.94+.06*Math.sin(pulseTime*2.2),radius=62*pulse;
+ const color=userLocation.feature.properties.color,pulse=reduced.matches?1:.94+.06*Math.sin(pulseTime*2.2),radius=62*USER_LOCATION_AVATAR_SCALE*pulse;
  ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade;
  const glow=ctx.createRadialGradient(x,y,7,x,y,radius);
  glow.addColorStop(0,color+'b8');glow.addColorStop(.3,color+'62');glow.addColorStop(.66,color+'20');glow.addColorStop(1,color+'00');
@@ -432,22 +439,30 @@ function drawUserLocationGlow(ctx,target,fade){
 }
 function drawUserLocationAvatar(ctx,target,fade){
  if(!userLocation||fade<=0)return;
- const ground=target.project(userLocation.coordinates),x=ground.x,y=ground.y-27,radius=23;
+ const ground=target.project(userLocation.coordinates),x=ground.x,y=ground.y-USER_LOCATION_CENTER_LIFT,radius=23*USER_LOCATION_AVATAR_SCALE;
  if(x<-60||x>window.innerWidth+60||y<-60||y>window.innerHeight+60)return;
- const {avatar}=userLocation,palette=avatarPalette(avatar.ring);
- ctx.save();ctx.globalAlpha=fade;ctx.shadowColor=userLocation.feature.properties.color;ctx.shadowBlur=13;
- ctx.beginPath();ctx.moveTo(x-7,y+17);ctx.lineTo(x,y+29);ctx.lineTo(x+7,y+17);ctx.closePath();ctx.fillStyle=palette[0];ctx.fill();
- ctx.shadowBlur=0;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);
- const ring=typeof ctx.createConicGradient==='function'?ctx.createConicGradient(-Math.PI/2,x,y):null;
- if(ring){palette.forEach((color,index)=>ring.addColorStop(index/palette.length,color));ring.addColorStop(1,palette[0]);}
- ctx.fillStyle=ring||palette[0];ctx.fill();
- ctx.beginPath();ctx.arc(x,y,radius-4,0,Math.PI*2);ctx.clip();ctx.fillStyle=avatar.background;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
+ const {avatar}=userLocation,palette=avatarPalette(avatar.ring),rotation=reduced.matches?0:pulseTime*Math.PI*2/5;
+ const ring=avatarConicGradient(ctx,x,y,palette,rotation),breathe=reduced.matches?.84:.86*(.58+.42*(.5+.5*Math.sin(pulseTime*Math.PI*2/2.4)));
+ ctx.save();ctx.globalAlpha=fade;
+ // Match the nav avatar: pride colors live in a blurred rotating bloom behind
+ // an opaque photo disc instead of forming a hard colored border.
+ if(avatar.ring!=='none'){
+  ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*breathe;ctx.filter=`blur(${radius*.12}px) saturate(1.2) brightness(1.12)`;
+  ctx.beginPath();ctx.arc(x,y,radius*1.065,0,Math.PI*2);ctx.fillStyle=ring||palette[0];ctx.fill();ctx.restore();
+  const shimmer=typeof ctx.createConicGradient==='function'?ctx.createConicGradient(rotation,x,y):null;
+  if(shimmer){shimmer.addColorStop(0,'#ffffff00');shimmer.addColorStop(.11,'#ffffff00');shimmer.addColorStop(.16,'#ffffffaa');shimmer.addColorStop(.255,'#ffffff00');shimmer.addColorStop(1,'#ffffff00');ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*.78;ctx.filter=`blur(${radius*.065}px)`;ctx.beginPath();ctx.arc(x,y,radius*1.08,0,Math.PI*2);ctx.fillStyle=shimmer;ctx.fill();ctx.restore();}
+ }
+ const tailHalf=7*USER_LOCATION_AVATAR_SCALE,tailTop=17*USER_LOCATION_AVATAR_SCALE,tailBottom=29*USER_LOCATION_AVATAR_SCALE;
+ ctx.beginPath();ctx.moveTo(x-tailHalf,y+tailTop);ctx.lineTo(x,y+tailBottom);ctx.lineTo(x+tailHalf,y+tailTop);ctx.closePath();ctx.fillStyle='#000';ctx.fill();
+ const outline=2*USER_LOCATION_AVATAR_SCALE;
+ ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();
+ ctx.beginPath();ctx.arc(x,y,radius-outline,0,Math.PI*2);ctx.clip();ctx.fillStyle=avatar.background;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
  if(userAvatarImage){
-  const scale=Math.max((radius*2-8)/userAvatarImage.naturalWidth,(radius*2-8)/userAvatarImage.naturalHeight);
+  const scale=Math.max(((radius-outline)*2)/userAvatarImage.naturalWidth,((radius-outline)*2)/userAvatarImage.naturalHeight);
   const width=userAvatarImage.naturalWidth*scale,height=userAvatarImage.naturalHeight*scale;
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(userAvatarImage,x-width/2,y-height/2,width,height);
  }else{
-  ctx.fillStyle='#05080a';ctx.font='900 22px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(avatar.initial,x,y+1);
+  ctx.fillStyle='#05080a';ctx.font=`900 ${22*USER_LOCATION_AVATAR_SCALE}px Inter,Arial,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(avatar.initial,x,y+1);
  }
  ctx.restore();
 }
