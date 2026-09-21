@@ -23,7 +23,7 @@ const maxExploreZoom=17.75;
 const elevation=new mlcontour.DemSource({id:'mapz-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:64});
 elevation.setupMaplibre(maplibregl);
 const surfaceStyle=mapzSurfaceStyle({
- terrainStrength:new URLSearchParams(location.search).get('terrain')==='1'?TERRAIN_STRENGTH:0,
+ terrainStrength:TERRAIN_STRENGTH,
  demTiles:[elevation.sharedDemProtocolUrl],
  contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
 });
