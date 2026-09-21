@@ -1,5 +1,6 @@
 // Both surfaces use the same physical road widths and opaque slate material.
 // The map's overall opacity still controls the entire city together.
+import {bridgeElevations} from './bridge-elevation.js';
 export const roadColor = '#314451';
 export const roadWidths = {motorway: 9, trunk: 9, primary: 8, secondary: 7, tertiary: 6, minor: 5, service: 3.5, path: 1.2, rail: 1.4};
 const widthExpression = ['match', ['get', 'class'], ...Object.entries(roadWidths).flat(), 5];
@@ -12,7 +13,7 @@ export const bridgeFilter = ['all', ['==', ['get', 'brunnel'], 'bridge'],
 
 // Tile buffers may contain overlapping pieces of the same road. Split at shared
 // endpoints before deduplicating, so tile boundaries never become ramp ends.
-export function bridgeNetwork(features, project) {
+export function bridgeNetwork(features, project, elevation) {
   const nodes = [], buckets = new Map(), segments = [];
   const bucketKey = (x, y) => `${x},${y}`;
   function nodeAt(coordinate) {
@@ -23,7 +24,7 @@ export function bridgeNetwork(features, project) {
       }
     }
     const index = nodes.length;
-    nodes.push({x, y, edges: [], distance: Infinity});
+    nodes.push({x, y, coordinate, edges: [], distance: Infinity});
     const key = bucketKey(bx, by);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(index);
@@ -72,6 +73,7 @@ export function bridgeNetwork(features, project) {
       if (distance < other.distance && distance < 160) { other.distance = distance; pending.push(other); }
     }
   }
+  if (elevation) bridgeElevations(nodes, edges, elevation);
   return {nodes, edges};
 }
 
@@ -105,7 +107,7 @@ export function bridgeMesh(network,raisedMaterial=false) {
     let previous;
     for (let i = 0; i <= steps; i++) {
       const t = i / steps, distance = Math.min(a.distance + edge.length * t, b.distance + edge.length * (1 - t));
-      const z = deckHeight(distance,raisedMaterial);
+      const z = deckHeight(distance,raisedMaterial) + (a.baseline??0)*(1-t) + (b.baseline??0)*t;
       const current = start.map((p, side) => [p[0] + (end[side][0] - p[0]) * t, p[1] + (end[side][1] - p[1]) * t, z]);
       if (previous) {
         const [l0, r0] = previous, [l1, r1] = current;
@@ -128,13 +130,11 @@ export function createBridgeLayer(maplibre,elevation=()=>0,raisedMaterial=false)
   return {
     id: 'bridge-decks', type: 'custom', renderingMode: '3d', dirty: false, count: 0, signature: '',
     update(features) {
-      const signature = JSON.stringify(features.map(f => [f.properties.class, f.geometry.coordinates]));
+      const signature = JSON.stringify(features.map(f => [f.properties.class, f.properties.layer, f.geometry.coordinates]));
       if (signature === this.signature) return;
-      this.signature = signature; this.vertices = bridgeMesh(bridgeNetwork(features, project),raisedMaterial);
-      for(let i=0;i<this.vertices.length;i+=5){
-        const coordinate=new maplibre.MercatorCoordinate(origin.x+this.vertices[i]*unit,origin.y+this.vertices[i+1]*unit).toLngLat();
-        this.vertices[i+2]+=elevation(coordinate)*maplibre.MercatorCoordinate.fromLngLat(coordinate).meterInMercatorCoordinateUnits()/unit;
-      }
+      this.signature = signature;
+      const ground = coordinate => elevation(coordinate)*maplibre.MercatorCoordinate.fromLngLat(coordinate).meterInMercatorCoordinateUnits()/unit;
+      this.vertices = bridgeMesh(bridgeNetwork(features, project, ground),raisedMaterial);
       this.dirty = true;
     },
     onAdd(map, gl) {

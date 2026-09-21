@@ -1,3 +1,4 @@
+import {createTerrainSampler,TERRAIN_STRENGTH} from '../zaydar-map/terrain-elevation.js';
 import {flightVisible,flightMotion,flightReady,flightExploring} from './host-bridge.js';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
@@ -13,12 +14,16 @@ import {createBuildingChrome} from '../zaydar-map/nightlife-materials.js?v=20260
 const elevation=new mlcontour.DemSource({id:'home-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:48});
 elevation.setupMaplibre(maplibregl);
 const surfaceStyle=mapzSurfaceStyle({
+ terrainStrength:new URLSearchParams(location.search).get('terrain')==='1'?TERRAIN_STRENGTH:0,
  demTiles:[elevation.sharedDemProtocolUrl],
  contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
 });
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
   center:[-122.66544,45.5032],zoom:(13.8849625+Math.log2(1.18)),pitch:48,bearing:0,
   style:surfaceStyle});
+// MapLibre query results already include terrain strength.
+const terrainSamples=createTerrainSampler(coordinates=>map.queryTerrainElevation(coordinates),{strength:1});
+const terrainHeight=coordinates=>terrainSamples.sample(coordinates).height;
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const dayColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
@@ -47,10 +52,10 @@ const waypoints=fetch('./waypoints.json',{signal:assetController.signal}).then(r
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap(),glitterCache=new WeakMap();
-const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
-const citySparkles=createCitySparkles(maplibregl);
+const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
+const citySparkles=createCitySparkles(maplibregl,terrainHeight);
 const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
-map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
+map.on('sourcedata',event=>{if(event.sourceId==='elevation')terrainSamples.invalidate();if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 map.on('load',()=>{map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();

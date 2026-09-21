@@ -1,3 +1,4 @@
+import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260920-nightlife';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
@@ -22,6 +23,7 @@ const maxExploreZoom=17.75;
 const elevation=new mlcontour.DemSource({id:'mapz-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:64});
 elevation.setupMaplibre(maplibregl);
 const surfaceStyle=mapzSurfaceStyle({
+ terrainStrength:new URLSearchParams(location.search).get('terrain')==='1'?TERRAIN_STRENGTH:0,
  demTiles:[elevation.sharedDemProtocolUrl],
  contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
 });
@@ -36,9 +38,12 @@ try{
    style:surfaceStyle});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
+// MapLibre query results already include terrain strength.
+const terrainSamples=createTerrainSampler(coordinates=>map.queryTerrainElevation(coordinates),{strength:1});
+const terrainHeight=coordinates=>terrainSamples.sample(coordinates).height;
 const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
 map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
-map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
+map.on('sourcedata',event=>{if(event.sourceId==='elevation')terrainSamples.invalidate();if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -54,11 +59,11 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
-const portlandBridges=createPortlandBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
-const housingHolograms=createHousingHologramLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
-const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,reduced);
-const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
+const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
+const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
+const housingHolograms=createHousingHologramLayer(maplibregl,terrainHeight,reduced);
+const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
+const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
 const ambientSignals=createAmbientSignals(map,reduced);
 function installSceneExtras(){

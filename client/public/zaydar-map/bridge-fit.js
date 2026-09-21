@@ -1,7 +1,7 @@
 import {bridgeNetwork,deckHeight} from '../home-flight/bridge-roads.js';
 
 const latitudeScale=111320;
-export function fitBridgeRoad(features,definition){
+export function fitBridgeRoad(features,definition,elevation){
  const anchor=definition.center,longitudeScale=latitudeScale*Math.cos(anchor[1]*Math.PI/180);
  const project=p=>[(p[0]-anchor[0])*longitudeScale,-(p[1]-anchor[1])*latitudeScale];
  const rail=definition.id.startsWith('bnsf');
@@ -12,7 +12,7 @@ export function fitBridgeRoad(features,definition){
   return lines.some(line=>{const points=line.map(project);return Math.min(...points.map(p=>p[0]))<=radius&&Math.max(...points.map(p=>p[0]))>=-radius&&Math.min(...points.map(p=>p[1]))<=radius&&Math.max(...points.map(p=>p[1]))>=-radius;});
  });
  // Rail and pedestrian crossings still need a connected centerline for their structures.
- const network=bridgeNetwork(eligible.map(f=>({geometry:f.geometry,properties:{...f.properties,class:rail?'service':f.properties.class==='path'?'minor':f.properties.class}})),project);
+ const network=bridgeNetwork(eligible.map(f=>({geometry:f.geometry,properties:{...f.properties,class:rail?'service':f.properties.class==='path'?'minor':f.properties.class}})),project,elevation);
  let seed=null,best=Infinity;
  for(const edge of network.edges){const a=network.nodes[edge.a],b=network.nodes[edge.b],dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,-(a.x*dx+a.y*dy)/(edge.length**2))),distance=Math.hypot(a.x+t*dx,a.y+t*dy);if(distance<best){best=distance;seed=edge;}}
  if(!seed||best>Math.min(180,Math.max(75,definition.length*.12)))return null;
@@ -27,7 +27,7 @@ export function fitBridgeRoad(features,definition){
  for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),t=Math.max(0,Math.min(1,-(a.x*dx+a.y*dy)/(len*len))),d=Math.hypot(a.x+t*dx,a.y+t*dy);if(d<closest){closest=d;closestAlong=a.distanceAlong+t*len;}}
  const length=Math.min(definition.length,distance),start=Math.max(0,Math.min(distance-length,closestAlong-length/2));
  if(length<definition.length*.55)return null;
- return {points,length,start,anchor,longitudeScale,retainDeck:rail||eligible.every(f=>f.properties.class==='path'),signature:JSON.stringify(points.map(p=>[p.x,p.y,p.width,p.distance]))};
+ return {points,length,start,anchor,longitudeScale,terrainAnchored:!!elevation,retainDeck:rail||eligible.every(f=>f.properties.class==='path'),signature:JSON.stringify(points.map(p=>[p.x,p.y,p.width,p.distance,p.baseline]))};
 }
 
 export function sampleBridgeRoad(fit,fraction){
@@ -36,7 +36,7 @@ export function sampleBridgeRoad(fit,fraction){
  const a=points[i-1],b=points[i],length=b.distanceAlong-a.distanceAlong,t=(d-a.distanceAlong)/length;
  const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
  const distance=Math.min(a.distance+length*t,b.distance+length*(1-t));
- return {x,y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,width:a.width+(b.width-a.width)*t,height:deckHeight(distance,true),coordinate:[fit.anchor[0]+x/fit.longitudeScale,fit.anchor[1]-y/latitudeScale]};
+ return {x,y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,width:a.width+(b.width-a.width)*t,height:deckHeight(distance,true)+(a.baseline??0)*(1-t)+(b.baseline??0)*t,coordinate:[fit.anchor[0]+x/fit.longitudeScale,fit.anchor[1]-y/latitudeScale]};
 }
 
 // Only the ground-level rail strokes under a ready raised rail crossing are
