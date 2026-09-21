@@ -2,23 +2,18 @@ import { useEffect, useRef } from "react";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
 // Built-up land-use and water mask: OpenFreeMap / OpenMapTiles / OSM,
-// z10 tiles x161–164, y364–367. Unmapped/rural/park areas stay empty.
+// z13 geography cropped to the screenshot bounds below; parks stay empty.
 declare const __ZAYDAR_BASE__: string;
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string };
-// Beaverton / northwest Portland through Gresham; southern Vancouver to Oregon City.
-const METRO = { west: -122.88, east: -122.39, north: 45.65, south: 45.34 };
+// Screenshot crop, approximated from Eagle, downtown, I-205 and Sellwood.
+// These bounds drive BOTH the texture sampling and all venue/label positions.
+const METRO = { west: -122.704, east: -122.555, north: 45.588, south: 45.475 };
 const tileX = (lon: number) => (lon + 180) / 360 * 1024;
 const tileY = (lat: number) => (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * 1024;
 const CENTER = [(tileX(METRO.west)+tileX(METRO.east))/2, (tileY(METRO.north)+tileY(METRO.south))/2];
 const SPAN = [(tileX(METRO.east)-tileX(METRO.west))/2, (tileY(METRO.south)-tileY(METRO.north))/2];
-const PLACES = [
-  { name: "Portland", lat: 45.523, lon: -122.676 },
-  { name: "Vancouver", lat: 45.6387, lon: -122.6615 },
-  { name: "Gresham", lat: 45.5001, lon: -122.4302 },
-  { name: "Oregon City", lat: 45.3573, lon: -122.6068 },
-  { name: "Beaverton", lat: 45.4871, lon: -122.8037 },
-];
+const PLACES = [{ name: "Portland", lat: 45.523, lon: -122.676 }];
 // A continuous focus warp spreads the dense central metro around the sphere.
 // The map, labels, glitter and venue anchors all use this same transform.
 function warp(value: number, center: number, strength: number, inverse = false) {
@@ -40,9 +35,9 @@ function placePoint(place: { lat: number; lon: number }) {
   return sphere((x - CENTER[0]) / SPAN[0], (CENTER[1] - y) / SPAN[1]);
 }
 const RIVERS = [
-  { name: "Columbia River", lat: 45.604, lon: -122.583 },
   { name: "Willamette River", lat: 45.552, lon: -122.688 },
 ];
+const INITIAL_YAW = -warp((tileX(-122.666)-CENTER[0])/SPAN[0],-.15,5)*Math.PI;
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
@@ -131,7 +126,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const front = canvas.closest('.home-front');
       const headerInset = front ? parseFloat(getComputedStyle(front).getPropertyValue('--home-header-height')) || 0 : 0;
       const footerInset = canvas.parentElement ? parseFloat(getComputedStyle(canvas.parentElement).getPropertyValue('--home-flight-bottom')) || 0 : 0;
-      const yaw = angle.current + (still ? 0 : elapsed / 28000);
+      const yaw = INITIAL_YAW + angle.current + (still ? 0 : elapsed / 28000);
       const project = (p: Point, elevation = 1) => {
         const x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
         const z = p.z * Math.cos(yaw) - p.x * Math.sin(yaw);
@@ -304,8 +299,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const columns = Math.max(8,Math.round(280*Math.cos(latitude*Math.PI/2)));
         for(let col = 0; col <= columns; col++) {
           const u = warp(col/columns*2-1,-.15,5,true);
-          const px = Math.round((CENTER[0]-161+u*SPAN[0])*256);
-          const py = Math.round((CENTER[1]-364-v*SPAN[1])*256);
+          const px = Math.max(0,Math.min(1023,Math.round((u+1)*.5*1023)));
+          const py = Math.max(0,Math.min(1023,Math.round((1-v)*.5*1023)));
           const pixel = (py*1024+px)*4;
           const builtUp = data[pixel] > 180;
           const river = data[pixel] < 100 && data[pixel+1] > 160 && data[pixel+2] > 160;
@@ -315,7 +310,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       }
       draw();
     };
-    texture.src = '/home-globe/portland-density.png';
+    texture.src = '/home-globe/portland-city-density.png';
     const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
     if (active && !still) frame = requestAnimationFrame(animate);
     redrawRef.current = draw;
@@ -323,7 +318,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   }, [active, still]);
 
   return <canvas ref={canvasRef} className="home-front__metro-globe"
-    role="img" aria-label="Stylized Portland metro globe with the Columbia and Willamette rivers and the metro cities southern Vancouver, Gresham, Oregon City, Beaverton and northwest Portland"
+    role="img" aria-label="Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"
     onPointerDown={event => { if(event.pointerType === 'touch') return; pointer.current = {id:event.pointerId,x:event.clientX}; event.currentTarget.setPointerCapture(event.pointerId); }}
     onPointerMove={event => { const drag = pointer.current; if (!drag || drag.id !== event.pointerId) return; angle.current = angle.current+(event.clientX-drag.x)/350; drag.x=event.clientX; redrawRef.current(); }}
     onPointerUp={() => { pointer.current=null; }} onPointerCancel={() => { pointer.current=null; }} onLostPointerCapture={() => { pointer.current=null; }}
