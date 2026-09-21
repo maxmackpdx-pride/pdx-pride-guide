@@ -93,6 +93,22 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     let width = 0, height = 0;
     let points: Point[] = [];
     let lastHoverFrame=performance.now();
+    // Reuse small glow stamps instead of asking the renderer to blur every dot.
+    const hoverSprites=new Map<number,HTMLCanvasElement>();
+    const hoverSprite=(hue:number,core:number)=>{
+      const h=Math.round(hue/6)*6,c=Math.round(core*3)/3,key=h*4+Math.round(c*3);
+      const cached=hoverSprites.get(key);if(cached)return cached;
+      const sprite=document.createElement('canvas');sprite.width=sprite.height=32;
+      const ink=sprite.getContext('2d')!;
+      const bloom=ink.createRadialGradient(16,16,1,16,16,9);
+      bloom.addColorStop(0,`hsla(${h},95%,${65+c*10}%,.45)`);
+      bloom.addColorStop(.4,`hsla(${h},95%,${65+c*10}%,.12)`);
+      bloom.addColorStop(1,`hsla(${h},95%,${65+c*10}%,0)`);
+      ink.fillStyle=bloom;ink.fillRect(0,0,32,32);
+      ink.fillStyle=`hsl(${h} ${90-c*20}% ${65+c*13}%)`;
+      ink.beginPath();ink.arc(16,16,2.5,0,Math.PI*2);ink.fill();
+      hoverSprites.set(key,sprite);return sprite;
+    };
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
     const abort = new AbortController();
@@ -153,10 +169,12 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const hoverAngle=Math.asin(Math.sin(Math.min(.45,52/radius))*.7);
       const hoverTurn=still?0:performance.now()/1500;
       const hoverCos=Math.cos(hoverTurn),hoverSin=Math.sin(hoverTurn);
+      const hoverCosLimit=Math.cos(hoverAngle),hoverSinAngle=Math.sin(hoverAngle);
       const tangentLength=surfaceHover?Math.hypot(surfaceHover.x,surfaceHover.z):1;
       const beamDots: {x:number;y:number;size:number;glow:NonNullable<Point["glow"]>}[]=[];
       const hoverNow=performance.now(),hoverDt=Math.min(64,Math.max(0,hoverNow-lastHoverFrame));
       lastHoverFrame=hoverNow;
+      const hoverRise=1-Math.exp(-hoverDt/110),hoverFall=1-Math.exp(-hoverDt/650),hoverLift=1-Math.exp(-hoverDt/180);
       const glowDt=Math.min(64,Math.max(0,elapsed-lastFrame.current));
       const brightRoads=new Path2D();
       const batches = Array.from({ length: 12 }, () => new Path2D());
@@ -171,11 +189,12 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           // Great-circle distance creates a patch ON the sphere. It naturally
           // foreshortens toward the rim instead of staying a flat cursor disk.
           const cosine=nx*surfaceHover.x+ny*surfaceHover.y+q.z*surfaceHover.z;
-          const distance=Math.acos(Math.max(-1,Math.min(1,cosine)))/hoverAngle;
-          if(distance<1){
+          // The cheap dot-product test rejects the rest of the sphere before acos.
+          if(cosine>hoverCosLimit){
+            const distance=Math.acos(Math.min(1,cosine))/hoverAngle;
             const east=(nx*surfaceHover.z-q.z*surfaceHover.x)/Math.max(.001,tangentLength);
             const north=(-nx*surfaceHover.y*surfaceHover.x+ny*tangentLength*tangentLength-q.z*surfaceHover.y*surfaceHover.z)/Math.max(.001,tangentLength);
-            const across=(east*hoverCos+north*hoverSin)/Math.sin(hoverAngle);
+            const across=(east*hoverCos+north*hoverSin)/hoverSinAngle;
             const strength=smooth(1-distance);
             hoverTarget=strength;
             const effect=p.hoverGlow ??= {strength:0,lift:0,hue:0,core:0,lastLit:-Infinity};
@@ -187,11 +206,12 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const effect=p.hoverGlow;
         if(effect){
           const held=hoverNow-effect.lastLit<2000?Math.max(hoverTarget,effect.strength):hoverTarget;
-          effect.strength+=(held-effect.strength)*(1-Math.exp(-hoverDt/(held>effect.strength?110:650)));
-          effect.lift+=((still?0:hoverTarget)-effect.lift)*(1-Math.exp(-hoverDt/180));
+          effect.strength+=(held-effect.strength)*(held>effect.strength?hoverRise:hoverFall);
+          effect.lift+=((still?0:hoverTarget)-effect.lift)*hoverLift;
           q=project(p,1+effect.lift*2/radius);
           q.y-=effect.lift*1.2;
           if(effect.strength>.005)hoverDots.push({x:q.x,y:q.y,radius:size,strength:effect.strength,hue:effect.hue,core:effect.core});
+          else if(effect.lift<.001 && hoverTarget===0)p.hoverGlow=undefined;
         }
         const path = p.brightRoad?brightRoads:batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
@@ -260,10 +280,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       }
       for(const dot of hoverDots){
         context.globalAlpha=dot.strength;
-        context.fillStyle=`hsl(${dot.hue} ${90-dot.core*20}% ${65+dot.core*13}%)`;
-        context.shadowColor=`hsl(${dot.hue} 95% ${65+dot.core*10}%)`;
-        context.shadowBlur=2.8+dot.core*9.1;
-        context.beginPath();context.arc(dot.x,dot.y,dot.radius*(1+dot.strength*.6),0,Math.PI*2);context.fill();
+        const stampSize=32*dot.radius*(1+dot.strength*.6)/2.5;
+        context.drawImage(hoverSprite(dot.hue,dot.core),dot.x-stampSize/2,dot.y-stampSize/2,stampSize,stampSize);
       }
       context.restore();
       // Fixed surface anchors; each light has its own clock, like the map glitter.
