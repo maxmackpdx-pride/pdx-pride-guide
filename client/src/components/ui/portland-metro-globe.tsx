@@ -58,9 +58,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         image.onload = () => {
           if (disposed) return;
           const ink = hologram.image;
-          ink.width = image.naturalWidth; ink.height = image.naturalHeight;
+          const sampling = Math.max(image.naturalWidth,image.naturalHeight) < 256 ? 4 : 1;
+          ink.width = image.naturalWidth * sampling; ink.height = image.naturalHeight * sampling;
           const painter = ink.getContext('2d'); if (!painter) return;
-          painter.drawImage(image,0,0);
+          painter.imageSmoothingQuality = "high";
+          painter.drawImage(image,0,0,ink.width,ink.height);
           const artwork = painter.getImageData(0,0,ink.width,ink.height), pixels = artwork.data;
           for (let i=0;i<pixels.length;i+=4) {
             const coverage = logoCoverage(pixels[i],pixels[i+1],pixels[i+2],pixels[i+3],venue.logoMode);
@@ -68,6 +70,29 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             pixels[i]=pixels[i+1]=pixels[i+2]=tone; pixels[i+3]=Math.round(coverage*255);
           }
           painter.putImageData(artwork,0,0);
+          // Fit actual ink, not transparent source padding, and cache a crisp
+          // black keyline so the white artwork stays readable over map dots.
+          let left=ink.width, top=ink.height, right=-1, bottom=-1;
+          for (let y=0;y<ink.height;y++) for (let x=0;x<ink.width;x++) {
+            if (pixels[(y*ink.width+x)*4+3] <= 32) continue;
+            left=Math.min(left,x); right=Math.max(right,x);
+            top=Math.min(top,y); bottom=Math.max(bottom,y);
+          }
+          if (right < left || bottom < top) return;
+          const w=right-left+1, h=bottom-top+1;
+          const edge=Math.max(2,Math.ceil(Math.max(w,h)/100));
+          const clean=document.createElement('canvas');
+          clean.width=w+edge*2; clean.height=h+edge*2;
+          const ctx=clean.getContext('2d'); if (!ctx) return;
+          for (let i=0;i<8;i++) {
+            const theta=i*Math.PI/4;
+            ctx.drawImage(ink,left,top,w,h,edge+Math.cos(theta)*edge,edge+Math.sin(theta)*edge,w,h);
+          }
+          ctx.globalCompositeOperation='source-in'; ctx.fillStyle='#000';
+          ctx.fillRect(0,0,clean.width,clean.height);
+          ctx.globalCompositeOperation='source-over';
+          ctx.drawImage(ink,left,top,w,h,edge,edge,w,h);
+          hologram.image=clean;
           venues.push(hologram); draw();
         };
         image.src = `${__ZAYDAR_BASE__}/${venue.logo.replace(/^\.\//, '')}`;
@@ -146,7 +171,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const { anchor, image, color, phase } = venue;
         const depth = anchor.z;
         const breathe = still ? 1 : 1 + Math.sin(elapsed / 1700 + phase) * .08;
-        const size = Math.min(width < 600 ? 64 : 118, radius * .3) * (.38 + depth * .62) * breathe;
+        const size = Math.min(width < 600 ? 86 : 144, radius * .52) * (.65 + depth * .35) * breathe;
         const head = project(venue.point, 1.16);
         const x = head.x;
         const y = head.y - size * .8 - radius * .055;
@@ -162,7 +187,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.globalAlpha = Math.min(1,depth*2);
         const fit = Math.min(size/image.width,size*.65/image.height);
         const w=image.width*fit,h=image.height*fit;
-        context.shadowColor=color; context.shadowBlur=8*depth;
+        context.imageSmoothingEnabled=true; context.imageSmoothingQuality="high";
+        context.shadowBlur=0;
         context.drawImage(image,x-w/2,y-h/2,w,h);
         context.shadowBlur=0;
         const corner=5, left=x-w/2-5,right=x+w/2+5,top=y-h/2-5,bottom=y+h/2+5;
