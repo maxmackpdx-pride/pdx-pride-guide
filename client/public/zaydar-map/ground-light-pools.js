@@ -1,29 +1,37 @@
 // Physical ground patches share the map camera. Their size is in meters, so
 // zooming out makes them smaller instead of spreading haze over whole blocks.
-export function groundLightMesh(pools,project) {
+export function groundLightMesh(pools,project,groundHeight=()=>0) {
   const vertices=[];
   const corners=[[-1,-1],[1,-1],[-1,1],[-1,1],[1,-1],[1,1]];
   for(const pool of pools){
     const {x,y,unitsPerMeter=1}=project(pool.coordinates);
     const radius=pool.radiusMeters*unitsPerMeter,c=Math.cos(pool.angle),s=Math.sin(pool.angle);
-    for(const [u,v] of corners)vertices.push(x+(u*c-v*s)*radius,y+(u*s+v*c)*radius,.06*unitsPerMeter,u,v);
+    for(const [u,v] of corners){
+      const px=x+(u*c-v*s)*radius,py=y+(u*s+v*c)*radius;
+      vertices.push(px,py,groundHeight(px,py)+.06*unitsPerMeter,u,v);
+    }
   }
   return new Float32Array(vertices);
 }
 
-export function createGroundLightPools(maplibre) {
+export function createGroundLightPools(maplibre,elevation=()=>0) {
   const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]);
   const unit=origin.meterInMercatorCoordinateUnits();
   const project=coordinates=>{
     const p=maplibre.MercatorCoordinate.fromLngLat(coordinates);
     return {x:(p.x-origin.x)/unit,y:(p.y-origin.y)/unit,unitsPerMeter:p.meterInMercatorCoordinateUnits()/unit};
   };
+  const groundHeight=(x,y)=>{
+    const coordinate=new maplibre.MercatorCoordinate(origin.x+x*unit,origin.y+y*unit).toLngLat();
+    return elevation(coordinate)*maplibre.MercatorCoordinate.fromLngLat(coordinate).meterInMercatorCoordinateUnits()/unit;
+  };
   return {
     id:'intersection-ground-lights',type:'custom',renderingMode:'3d',count:0,signature:'',
+    invalidate(){this.signature='';},
     update(pools){
       const signature=JSON.stringify(pools.map(({key,radiusMeters,angle})=>[key,radiusMeters,angle]));
       if(signature===this.signature)return;
-      this.signature=signature;this.vertices=groundLightMesh(pools,project);this.map?.triggerRepaint();
+      this.signature=signature;this.vertices=groundLightMesh(pools,project,groundHeight);this.map?.triggerRepaint();
     },
     onAdd(map,gl){
       this.map=map;

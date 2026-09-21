@@ -43,7 +43,7 @@ const terrainSamples=createTerrainSampler(coordinates=>map.queryTerrainElevation
 const terrainHeight=coordinates=>terrainSamples.sample(coordinates).height;
 const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
 map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern(),{pixelRatio:2});});
-map.on('sourcedata',event=>{if(event.sourceId==='elevation')terrainSamples.invalidate();if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
+map.on('sourcedata',event=>{if(event.sourceId==='elevation'){terrainSamples.invalidate();groundLightPools.invalidate();}if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -64,7 +64,7 @@ const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
 const housingHolograms=createHousingHologramLayer(maplibregl,terrainHeight,reduced);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
-const groundLightPools=createGroundLightPools(maplibregl);
+const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
 const ambientSignals=createAmbientSignals(map,reduced);
 function installSceneExtras(){
  ambientSignals.install();

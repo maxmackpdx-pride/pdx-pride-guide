@@ -27,7 +27,7 @@ export function fitBridgeRoad(features,definition,elevation){
  for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),t=Math.max(0,Math.min(1,-(a.x*dx+a.y*dy)/(len*len))),d=Math.hypot(a.x+t*dx,a.y+t*dy);if(d<closest){closest=d;closestAlong=a.distanceAlong+t*len;}}
  const length=Math.min(definition.length,distance),start=Math.max(0,Math.min(distance-length,closestAlong-length/2));
  if(length<definition.length*.55)return null;
- return {points,length,start,anchor,longitudeScale,terrainAnchored:!!elevation,retainDeck:rail||eligible.every(f=>f.properties.class==='path'),signature:JSON.stringify(points.map(p=>[p.x,p.y,p.width,p.distance,p.baseline]))};
+ return {points,length,start,anchor,longitudeScale,terrainAnchored:!!elevation,retainDeck:rail||eligible.every(f=>f.properties.class==='path'),signature:JSON.stringify(points.map(p=>[p.x,p.y,p.width,p.distance,p.baseline,p.layer]))};
 }
 
 export function sampleBridgeRoad(fit,fraction){
@@ -36,7 +36,7 @@ export function sampleBridgeRoad(fit,fraction){
  const a=points[i-1],b=points[i],length=b.distanceAlong-a.distanceAlong,t=(d-a.distanceAlong)/length;
  const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
  const distance=Math.min(a.distance+length*t,b.distance+length*(1-t));
- return {x,y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,width:a.width+(b.width-a.width)*t,height:deckHeight(distance,true)+(a.baseline??0)*(1-t)+(b.baseline??0)*t,coordinate:[fit.anchor[0]+x/fit.longitudeScale,fit.anchor[1]-y/latitudeScale]};
+ return {x,y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,width:a.width+(b.width-a.width)*t,height:deckHeight(distance,true,a.layer*(1-t)+b.layer*t)+(a.baseline??0)*(1-t)+(b.baseline??0)*t,coordinate:[fit.anchor[0]+x/fit.longitudeScale,fit.anchor[1]-y/latitudeScale]};
 }
 
 // Only the ground-level rail strokes under a ready raised rail crossing are

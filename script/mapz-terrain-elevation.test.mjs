@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createTerrainSampler, approachBaseline} from '../client/public/zaydar-map/terrain-elevation.js';
+import {groundLightMesh} from '../client/public/zaydar-map/ground-light-pools.js';
 
 test('shared anchors scale raw DEM once and avoid per-frame resampling', () => {
   let reads = 0;
@@ -38,4 +39,9 @@ test('deck baseline meets both approaches without dropping to river elevation', 
 });
 test('exaggeration is rejected', () => {
   assert.throws(() => createTerrainSampler(() => 0, {strength:1.1}), RangeError);
+});
+test('ground light corners follow a slope instead of floating on a horizontal plate',()=>{
+  const mesh=groundLightMesh([{coordinates:[0,0],radiusMeters:10,angle:0}],()=>({x:0,y:0}), (x,y)=>20+x*.1+y*.2);
+  for(let i=0;i<mesh.length;i+=5)assert.ok(Math.abs(mesh[i+2]-(20+mesh[i]*.1+mesh[i+1]*.2+.06))<1e-5);
+  assert.ok(Math.max(...Array.from({length:6},(_,i)=>mesh[i*5+2]))-Math.min(...Array.from({length:6},(_,i)=>mesh[i*5+2]))>5);
 });

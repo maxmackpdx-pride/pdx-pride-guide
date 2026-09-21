@@ -14,17 +14,17 @@ export const bridgeFilter = ['all', ['==', ['get', 'brunnel'], 'bridge'],
 // Tile buffers may contain overlapping pieces of the same road. Split at shared
 // endpoints before deduplicating, so tile boundaries never become ramp ends.
 export function bridgeNetwork(features, project, elevation) {
-  const nodes = [], buckets = new Map(), segments = [];
+  let nodes = [];const buckets = new Map(), segments = [];
   const bucketKey = (x, y) => `${x},${y}`;
-  function nodeAt(coordinate) {
+  function nodeAt(coordinate,layer) {
     const [x, y] = project(coordinate), bx = Math.floor(x / 32), by = Math.floor(y / 32);
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       for (const i of buckets.get(bucketKey(bx + dx, by + dy)) || []) {
-        if (Math.hypot(nodes[i].x - x, nodes[i].y - y) < .6) return i;
+        if (nodes[i].layer===layer&&Math.hypot(nodes[i].x - x, nodes[i].y - y) < .6) return i;
       }
     }
     const index = nodes.length;
-    nodes.push({x, y, coordinate, edges: [], distance: Infinity});
+    nodes.push({x, y, coordinate, layer, edges: [], distance: Infinity});
     const key = bucketKey(bx, by);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(index);
@@ -35,9 +35,10 @@ export function bridgeNetwork(features, project, elevation) {
     if (properties.brunnel !== 'bridge' || ['rail', 'path'].includes(properties.class)) continue;
     const lines = geometry.type === 'LineString' ? [geometry.coordinates] : geometry.type === 'MultiLineString' ? geometry.coordinates : [];
     const width = roadWidths[properties.class] || 5;
+    const layer=Number.isFinite(Number(properties.layer))?Number(properties.layer):1;
     for (const line of lines) {
-      const ids = line.map(nodeAt);
-      for (let i = 1; i < ids.length; i++) if (ids[i - 1] !== ids[i]) segments.push({a: ids[i - 1], b: ids[i], width});
+      const ids = line.map(coordinate=>nodeAt(coordinate,layer));
+      for (let i = 1; i < ids.length; i++) if (ids[i - 1] !== ids[i]) segments.push({a: ids[i - 1], b: ids[i], width,layer,ramp:properties.ramp===1});
     }
   }
   const edges = [], seen = new Map();
@@ -48,7 +49,8 @@ export function bridgeNetwork(features, project, elevation) {
       for (let y = Math.floor((Math.min(a.y, b.y) - .6) / 32); y <= Math.floor((Math.max(a.y, b.y) + .6) / 32); y++) {
         for (const id of buckets.get(bucketKey(x, y)) || []) {
           if (id === segment.a || id === segment.b) continue;
-          const p = nodes[id], t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / length2;
+          const p = nodes[id];if(p.layer!==segment.layer)continue;
+          const t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / length2;
           if (t > 0 && t < 1 && Math.abs((p.x - a.x) * dy - (p.y - a.y) * dx) / Math.sqrt(length2) < .6) cuts.push({id, t});
         }
       }
@@ -57,11 +59,27 @@ export function bridgeNetwork(features, project, elevation) {
     for (let i = 1; i < cuts.length; i++) {
       const u = cuts[i - 1].id, v = cuts[i].id, key = `${Math.min(u, v)}:${Math.max(u, v)}`;
       if (seen.has(key)) { seen.get(key).width = Math.max(seen.get(key).width, segment.width); continue; }
-      const edge = {a: u, b: v, width: segment.width, length: Math.hypot(nodes[u].x - nodes[v].x, nodes[u].y - nodes[v].y)};
+      const edge = {a: u, b: v, width: segment.width, layer:segment.layer,ramp:segment.ramp,length: Math.hypot(nodes[u].x - nodes[v].x, nodes[u].y - nodes[v].y)};
       if (edge.length < .05) continue;
       seen.set(key, edge); edges.push(edge); nodes[u].edges.push(edge); nodes[v].edges.push(edge);
     }
   }
+  // An explicit ramp can connect levels at its endpoint. Merely crossing the
+  // same XY position on different layers must never create an intersection.
+  const parents=nodes.map((_,i)=>i);
+  const root=i=>{while(parents[i]!==i)i=parents[i];return i;};
+  for(let i=0;i<nodes.length;i++){
+    const node=nodes[i];if(node.edges.length!==1||!node.edges[0].ramp)continue;
+    const bx=Math.floor(node.x/32),by=Math.floor(node.y/32);
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(const j of buckets.get(bucketKey(bx+dx,by+dy))??[]){
+      const other=nodes[j];if(i===j||node.layer===other.layer||Math.hypot(node.x-other.x,node.y-other.y)>.15)continue;
+      parents[root(i)]=root(j);break;
+    }
+  }
+  const indices=new Map(),compacted=[];
+  nodes.forEach((node,i)=>{const r=root(i);if(!indices.has(r)){indices.set(r,compacted.length);compacted.push({...nodes[r],edges:[]});}const merged=compacted[indices.get(r)];merged.layer=Math.max(merged.layer,node.layer);});
+  for(const edge of edges){edge.a=indices.get(root(edge.a));edge.b=indices.get(root(edge.b));compacted[edge.a].edges.push(edge);compacted[edge.b].edges.push(edge);}
+  nodes=compacted;
   // Multi-source shortest paths give branches one shared elevation at junctions.
   const pending = nodes.filter(n => n.edges.length === 1);
   pending.forEach(n => { n.distance = 0; });
@@ -77,9 +95,9 @@ export function bridgeNetwork(features, project, elevation) {
   return {nodes, edges};
 }
 
-export function deckHeight(distance,raisedMaterial=false) {
+export function deckHeight(distance,raisedMaterial=false,layer=1) {
   const t = Math.min(1, distance / 150);
-  return (raisedMaterial?.6:.05) + (raisedMaterial?21:16) * t * t * (3 - 2 * t);
+  return (raisedMaterial?.6:.05) + ((raisedMaterial?21:16)+Math.max(0,layer-1)*6) * t * t * (3 - 2 * t);
 }
 export function bridgeMesh(network,raisedMaterial=false) {
   const {nodes, edges} = network, vertices = [];
@@ -107,7 +125,7 @@ export function bridgeMesh(network,raisedMaterial=false) {
     let previous;
     for (let i = 0; i <= steps; i++) {
       const t = i / steps, distance = Math.min(a.distance + edge.length * t, b.distance + edge.length * (1 - t));
-      const z = deckHeight(distance,raisedMaterial) + (a.baseline??0)*(1-t) + (b.baseline??0)*t;
+      const z = deckHeight(distance,raisedMaterial,a.layer*(1-t)+b.layer*t) + (a.baseline??0)*(1-t) + (b.baseline??0)*t;
       const current = start.map((p, side) => [p[0] + (end[side][0] - p[0]) * t, p[1] + (end[side][1] - p[1]) * t, z]);
       if (previous) {
         const [l0, r0] = previous, [l1, r1] = current;
