@@ -13,10 +13,10 @@ const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
 ]);
 
-test('Mapz and home import the identical city style',()=>{
- assert.match(renderer,/import \{vectorStyle\} from '\.\.\/home-flight\/city-map.js'/);
+test('Mapz extends the shared home style with its own natural surfaces',()=>{
+ assert.match(renderer,/mapzSurfaceStyle/);
  assert.match(home,/import \{vectorStyle\} from '\.\/city-map.js'/);
- assert.doesNotMatch(renderer,/api\/mapz|applyMoonlight|installGrassNeon|installRoadSurface|deck-mobile|raster-dem|setTerrain/);
+ assert.doesNotMatch(renderer,/api\/mapz|deck-mobile/);
  assert.doesNotMatch(routes,/registerMapzTileRoutes/);
 });
 

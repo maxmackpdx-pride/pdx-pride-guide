@@ -1,4 +1,4 @@
-import {vectorStyle} from '../home-flight/city-map.js';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js';
 import {bridgeFilter,createBridgeLayer} from '../home-flight/bridge-roads.js';
 import {createCitySparkles} from '../home-flight/city-sparkles.js';
 import {roofSparkles} from '../home-flight/roof-sparkles.js';
@@ -12,8 +12,7 @@ import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
 const maxExploreZoom=17.75;
-// OpenFreeMap vector geometry on flat ground, with optional labels.
-// Elevation tiles and terrain displacement are disconnected for this renderer.
+// The home city materials, extended with real terrain and Mapz surface treatments.
 // MapLibre creates and checks its own WebGL context. A separate retained probe
 // needlessly consumes another context on phones and can prevent the real one.
 let map;
@@ -21,9 +20,12 @@ try{
  map=new maplibregl.Map({container:'map',interactive:false,attributionControl:false,pitchWithRotate:false,
    center:[-122.676,45.523],zoom:13.5+Math.log2(1.25),pitch:48,bearing:0,
    maxBounds:[[-123.15,45.2],[-122.15,45.85]],minZoom:10,maxZoom:maxExploreZoom,
-   style:structuredClone(vectorStyle)});
+   style:mapzSurfaceStyle()});
  startup.phase('map-created');
 }catch(error){startup.fatal(error?.message||error);throw error;}
+const waterBloom=createWaterBloom();
+map.on('styleimagemissing',event=>{if(event.id==='forest-canopy'&&!map.hasImage(event.id))map.addImage(event.id,forestPattern());});
+map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const baseColors=DAY_LIST;
@@ -38,8 +40,8 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
-const bridgeLayer=createBridgeLayer(maplibregl);
-const citySparkles=createCitySparkles(maplibregl);
+const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
+const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
 function installSceneExtras(){
  map.addLayer(bridgeLayer,'skyline');
  map.addLayer(citySparkles);
@@ -83,14 +85,23 @@ function drawSurfaceReflections(ctx,target,reflections,fade){
  for(const {building,light} of reflections){
   const c=target.project(light.geometry.coordinates),lift=building.height*zoomScale/Math.cos(building.center[1]*Math.PI/180)*Math.sin(target.getPitch()*Math.PI/180);
   ctx.save();ctx.beginPath();
-  building.ring.forEach((point,i)=>{const p=target.project(point);if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();ctx.clip();
+  const footprint=building.ring.map(point=>target.project(point));
+  footprint.forEach((p,i)=>{if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);});ctx.closePath();
+  const winding=footprint.reduce((sum,a,i)=>{const b=footprint[(i+1)%footprint.length];return sum+a.x*b.y-b.x*a.y;},0);
+  // Reflect onto the roof and camera-facing facades, never the ground outside.
+  for(let i=0;i<footprint.length;i++){
+    const a=footprint[i],b=footprint[(i+1)%footprint.length];
+    if((b.x-a.x)*winding>=0)continue;
+    ctx.moveTo(a.x,a.y-lift);ctx.lineTo(b.x,b.y-lift);ctx.lineTo(b.x,b.y);ctx.lineTo(a.x,a.y);ctx.closePath();
+  }
+  ctx.clip('evenodd');
   const radius=light.properties.isBar?68:24,color=light.properties.color;
   const glow=ctx.createRadialGradient(c.x,c.y-lift,0,c.x,c.y-lift,radius);
-  glow.addColorStop(0,color+'72');glow.addColorStop(.3,color+'32');glow.addColorStop(1,color+'00');
-  ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*.68;ctx.fillStyle=glow;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,radius*2);
+  glow.addColorStop(0,color+'b0');glow.addColorStop(.3,color+'60');glow.addColorStop(1,color+'00');
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=fade*.9;ctx.fillStyle=glow;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,radius*2);
   const wash=ctx.createLinearGradient(c.x,c.y-lift-radius,c.x,c.y+radius*.4);
   wash.addColorStop(0,color+'00');wash.addColorStop(.42,color+'28');wash.addColorStop(1,color+'08');
-  ctx.globalAlpha=fade*.42;ctx.fillStyle=wash;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,lift+radius*1.4);ctx.restore();
+  ctx.globalAlpha=fade*.65;ctx.fillStyle=wash;ctx.fillRect(c.x-radius,c.y-lift-radius,radius*2,lift+radius*1.4);ctx.restore();
  }
 }
 function roofLift(target,feature,surfaces){
@@ -336,6 +347,7 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
+ waterBloom.draw(lightsContext,target,width,height,fade);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
@@ -820,7 +832,7 @@ window.addEventListener('pagehide',()=>{
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
- hologramMaterials.dispose();
+ waterBloom.dispose();hologramMaterials.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);

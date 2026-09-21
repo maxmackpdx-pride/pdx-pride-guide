@@ -4,6 +4,7 @@ import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import test from 'node:test';
 import {vectorStyle} from '../client/public/home-flight/city-map.js';
+import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js';
 // Use the validator belonging to the installed MapLibre dependency, not a
 // hand-written approximation of its zoom-expression rules.
 const require=createRequire(import.meta.url);
@@ -27,9 +28,9 @@ test('MapLibre accepts every base-city paint expression',()=>{
 test('the actual startup reaches MapLibre construction, with only one graphics context',()=>{
  const reached=new Error('Reached real map construction boundary');
  let options;
- const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('// Neon colors'));
+ const prefix=renderer.slice(renderer.indexOf('const startup='),renderer.indexOf('const waterBloom='));
  assert.throws(()=>vm.runInNewContext(prefix,{
-  vectorStyle,structuredClone,
+  mapzSurfaceStyle,structuredClone,
   window:{__zaydarStartup:{phase(){},fatal(){}}},
   // No document canvas probe should be needed before the real map is created.
   maplibregl:{Map:class{constructor(value){options=value;throw reached;}}}
