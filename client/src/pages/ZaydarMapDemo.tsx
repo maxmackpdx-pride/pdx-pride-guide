@@ -2,9 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { useQuery } from "@tanstack/react-query";
 
 
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
-import ZaydarLayerSheet, { type ZaydarLayer } from "@/components/ZaydarLayerSheet";
+import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/components/ZaydarLayerSheet";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, Navigation } from "lucide-react";
@@ -13,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 
 import type { CommunitySummary } from "@shared/community";
 import type { Event } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
@@ -22,6 +22,7 @@ import BoardPostOverlay from "@/components/board/BoardPostOverlay";
 import type { Business } from "@/pages/Directory";
 import { directoryTypeColor } from "@shared/directoryTheme";
 import { directoryFallbackLogo, normalizeDirectoryName, resolveDirectoryLogo } from "@/lib/directoryLogos";
+import { mapRecordId, clearMapOverlay } from "@/lib/mapDrawerNavigation";
 import { mapCoordinates } from "@/lib/mapCoordinates";
 import { stampHauzMapPoints } from "@/lib/hauzDemoPins";
 import { mapListingKey, matchesMapEvent, type MapTimeFilter } from "@/lib/mapLayerFilters";
@@ -37,6 +38,10 @@ type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
 type Mark = { key: string; kind: "event" | "place" | "board"; lat: number; lng: number; item: Event | Place | MapRow };
 type MapRow = Record<string, unknown> & { id?: number | string; title?: string; name?: string };
+const EMPTY_EVENTS: Event[] = [];
+const EMPTY_PLACES: Place[] = [];
+const EMPTY_ROWS: MapRow[] = [];
+const EMPTY_COMMUNITIES: CommunitySummary[] = [];
 const FORMING_COVER = "/hausing/forming-no-place.svg";
 
 // Preserve the adult locations already marked red in the Zaydar studio snapshot.
@@ -224,7 +229,7 @@ function mapHref(mutate: (params: URLSearchParams) => void): string {
 
 function overlayHref(key: OverlayKey | null, id?: number): string {
   return mapHref(params => {
-    for (const overlay of OVERLAY_KEYS) params.delete(overlay);
+    clearMapOverlay(params);
     if (key && id != null && Number.isFinite(id)) params.set(key, String(id));
   });
 }
@@ -265,26 +270,44 @@ function useDesktop() {
 
 export default function ZaydarMapDemo() {
   const { user } = useAuth();
-  const [location, setLocation] = useLocation();
-  const [query] = useState(() => mapSearchParams().get("q") || "");
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(() => readTimeFilter(mapSearchParams()));
-  const [customStart, setCustomStart] = useState(() => mapSearchParams().get("from") || "");
-  const [customEnd, setCustomEnd] = useState(() => mapSearchParams().get("to") || "");
-  const [showEvents, setShowEvents] = useState(true);
-  const [showPlaces, setShowPlaces] = useState(true);
-  const [showBoards, setShowBoards] = useState(true);
-  const [showHouz, setShowHouz] = useState(true);
-  const [housingType, setHousingType] = useState<HousingType | null>(null);
-  const [placeTypes, setPlaceTypes] = useState<string[]>(() => [...ZAYDAR_PLACE_TYPE_OPTIONS]);
-  const [eventTag, setEventTag] = useState<string | null>(null);
-  const [boardKinds, setBoardKinds] = useState(() => new Set(["Gigz", "Giftz", "Sellz"]));
+  const [, setLocation] = useLocation();
+  const search = useSearch();
+  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const updateParams = useCallback((mutate: (params: URLSearchParams) => void) => {
+    setLocation(mapHref(mutate), { replace: true, state: window.history.state });
+  }, [setLocation]);
+  const query = params.get("q") || "";
+  const timeFilter = readTimeFilter(params);
+  const customStart = params.get("from") || "", customEnd = params.get("to") || "";
+  const setTimeFilter = (value: TimeFilter) => updateParams(p => {
+    if (value === "default") p.delete("when"); else p.set("when", value);
+    if (value !== "custom") { p.delete("from"); p.delete("to"); }
+  });
+  const layerValue = params.get("layer");
+  const activeLayer = ["events", "places", "boards", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
+  const changeLayer = useCallback((next: ZaydarLayerId | null) => {
+    const current = mapSearchParams().get("layer");
+    setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
+      replace: Boolean(current) || !next,
+      state: window.history.state,
+    });
+  }, [setLocation]);
+  const showEvents = params.get("hideEvents") !== "1", showPlaces = params.get("hidePlaces") !== "1";
+  const showBoards = params.get("hideBoards") !== "1", showHouz = params.get("hideHouz") !== "1";
+  const toggleLayer = (key: string) => updateParams(p => { if (p.get(key) === "1") p.delete(key); else p.set(key, "1"); });
+  const housingValue = params.get("housingType");
+  const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
+  const setHousingType = (value: HousingType | null) => updateParams(p => { if (value) p.set("housingType", value); else p.delete("housingType"); });
+  const placeTypesParam = params.get("placeTypes");
+  const placeTypes = useMemo(() => placeTypesParam !== null ? placeTypesParam.split(",") : [...ZAYDAR_PLACE_TYPE_OPTIONS], [placeTypesParam]);
+  const eventTag = params.get("tag");
+  const setEventTag = (value: string | null) => updateParams(p => { if (value) p.set("tag", value); else p.delete("tag"); });
+  const boardKindsParam = params.get("boards");
+  const boardKinds = useMemo(() => new Set(boardKindsParam !== null ? boardKindsParam.split(",") : ["Gigz", "Giftz", "Sellz"]), [boardKindsParam]);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [previewDateTime, setPreviewDateTime] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [boardOverlay, setBoardOverlay] = useState<{ kind: BoardKind; postId: number } | null>(null);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -339,7 +362,6 @@ export default function ZaydarMapDemo() {
     window.visualViewport?.addEventListener("resize", measure);
     return () => { observer.disconnect(); window.removeEventListener("resize", measure); window.visualViewport?.removeEventListener("resize", measure); };
   }, [desktop]);
-  useEffect(() => {  }, [mapHeight, desktop]);
   const locateMe = useCallback(() => {
     if (!navigator.geolocation) { setLocateError("Location is not available on this device."); return; }
     setLocating(true);
@@ -355,23 +377,51 @@ export default function ZaydarMapDemo() {
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
   }, [locationAvatar]);
-  const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
-  const { data: communities = [] } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
-  const { data: places = [], isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
+  const { data: events = EMPTY_EVENTS, isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
+  const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
+  const { data: places = EMPTY_PLACES, isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
   const { data: housingRaw, isLoading: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
-  const { data: gigs = [], isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
-  const { data: gifts = [], isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
-  const { data: sells = [], isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const { data: gigs = EMPTY_ROWS, isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
+  const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
+  const { data: sells = EMPTY_ROWS, isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
   const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
-  const goOverlay = useCallback((key: OverlayKey | null, id?: number) => setLocation(overlayHref(key, id)), [setLocation]);
+  const goOverlay = useCallback((key: OverlayKey | null, id?: number) => {
+    const hasOverlay = OVERLAY_KEYS.some(key => mapSearchParams().has(key));
+    setLocation(overlayHref(key, id), { replace: hasOverlay, state: { ...window.history.state,
+      mapOverlayReturn: hasOverlay ? window.history.state?.mapOverlayReturn : window.location.pathname + window.location.search,
+    } });
+  }, [setLocation]);
+  const closingOverlay = useRef(false);
+  useEffect(() => { closingOverlay.current = false; }, [search]);
   const closeOverlays = useCallback(() => {
     setSelected(null);
-    setSelectedEvent(null);
-    setSelectedPlace(null);
-    setBoardOverlay(null);
     setCardOriginRect(null);
-    setLocation(overlayHref(null));
+    if (closingOverlay.current) return;
+    closingOverlay.current = true;
+    const closingHref = window.location.pathname + window.location.search;
+    // Detail links call onClose before navigating. Let their destination win.
+    queueMicrotask(() => {
+      if (closingHref !== window.location.pathname + window.location.search) { closingOverlay.current = false; return; }
+      if (window.history.state?.mapOverlayReturn) window.history.back();
+      else setLocation(overlayHref(null), { replace: true, state: window.history.state });
+    });
   }, [setLocation]);
+  const eventId = mapRecordId(params.get("event"), true);
+  const placeId = mapRecordId(params.get("place"));
+  const feedEvent = events.find(event => event.id === eventId);
+  const eventDetail = useQuery<Event>({
+    queryKey: ["/api/events", eventId], enabled: eventId !== null && !feedEvent && !eventsLoading,
+    queryFn: () => apiRequest("GET", `/api/events/${eventId}`).then(r => r.json()),
+  });
+  const selectedEvent = eventId ? feedEvent || eventDetail.data : null;
+  const selectedPlace = placeId ? places.find(place => place.id === placeId) : null;
+  const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
+  const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
+  const missingPlace = placeId !== null && !placesLoading && !selectedPlace;
+  const updateEvent = (event: Event) => {
+    queryClient.setQueryData<Event[]>(["/api/events"], rows => rows?.map(row => row.id === event.id ? event : row));
+    queryClient.setQueryData(["/api/events", event.id], event);
+  };
   const q = query.trim().toLowerCase();
   const eventTags = useMemo(() => Array.from(new Set(events.flatMap(event => {
     try {
@@ -393,16 +443,6 @@ export default function ZaydarMapDemo() {
     .filter(entry => entry.distance <= 10)
     .sort((a, b) => a.distance - b.distance)
     .map(entry => entry.place), [mapPlaces, mapCenter]);
-  const todayEvents = useMemo(() => {
-    const today = portlandCalendarDay(viewTimestamp);
-    return events.filter(e => {
-      if (!finite(e.lat) || !finite(e.lng)) return false;
-      if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
-      const startDay = portlandCalendarDay(e.dateStart);
-      const endDay = portlandCalendarDay(e.dateEnd) || startDay;
-      return Boolean(startDay && startDay <= today && endDay >= today);
-    }).sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
-  }, [events, q, viewTimestamp]);
   const boardRows = useMemo(() => ([
     ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
     ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
@@ -419,64 +459,26 @@ export default function ZaydarMapDemo() {
     ...(showHouz ? rowMarks(visibleHousing, "board") : []),
   ], [showEvents, showPlaces, showBoards, showHouz, visibleEvents, mapPlaces, visibleBoards, visibleHousing]);
 
-  useEffect(() => {
-    const href = mapHref(params => {
-      if (timeFilter === "default") params.delete("when"); else params.set("when", timeFilter);
-      if (timeFilter === "custom" && customStart) params.set("from", customStart); else params.delete("from");
-      if (timeFilter === "custom" && customEnd) params.set("to", customEnd); else params.delete("to");
-    });
-    const current = `${window.location.pathname}${window.location.search}`;
-    if (current !== href) window.history.replaceState(null, "", href);
-  }, [timeFilter, customStart, customEnd]);
-
-  useEffect(() => {
-    const syncFromUrl = () => {
-      const params = mapSearchParams();
-      const eventId = Number(params.get("event"));
-      if (Number.isFinite(eventId)) {
-        const match = events.find(event => event.id === eventId);
-        setSelectedEvent(current => match && current?.id === match.id ? current : match || null);
-      } else setSelectedEvent(current => current ? null : current);
-
-      const placeId = Number(params.get("place"));
-      if (Number.isFinite(placeId)) {
-        const match = places.find(place => place.id === placeId);
-        setSelectedPlace(current => match && current?.id === match.id ? current : match || null);
-      } else setSelectedPlace(current => current ? null : current);
-
-      const boardHit = (["gig", "gift", "sell", "sellz"] as const).find(key => params.get(key));
-      if (boardHit) {
-        const postId = Number(params.get(boardHit));
-        const kind = boardFromParam(boardHit);
-        if (kind && Number.isFinite(postId)) {
-          setBoardOverlay(current => current?.kind === kind && current.postId === postId ? current : { kind, postId });
-        }
-      } else setBoardOverlay(current => current ? null : current);
-    };
-    syncFromUrl();
-    window.addEventListener("popstate", syncFromUrl);
-    return () => window.removeEventListener("popstate", syncFromUrl);
-  }, [location, events, places]);
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
-    if (mark.kind === "event") { setSelectedEvent(mark.item as Event); goOverlay("event", (mark.item as Event).id); }
-    else if (mark.kind === "place") { setSelectedPlace(mark.item as Place); goOverlay("place", (mark.item as Place).id); }
+    if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
+    else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The Haüz") setLocation(`/the-hauz/${row.id}`);
+      if (String(row._board) === "The Haüz") setLocation(`/the-hauz/${row.id}?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`, { state: { mapReturnTo: window.location.pathname + window.location.search } });
       else {
         const kind = boardKind(row);
         const postId = Number(row.id);
-        if (kind && Number.isFinite(postId)) { setBoardOverlay({ kind, postId }); goOverlay(boardParam(kind), postId); }
+        if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
   }, [goOverlay, setLocation]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: `board-${row._board}-${row.id}`, kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
-  const toggleBoardKind = (kind: string) => setBoardKinds(current => {
-    const next = new Set(current);
+  const toggleBoardKind = (kind: string) => updateParams(p => {
+    const next = new Set(boardKinds);
     if (next.has(kind)) next.delete(kind); else next.add(kind);
-    return next;
+    p.set("boards", [...next].join(","));
   });
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="zaydar-layer-list">
@@ -500,7 +502,7 @@ export default function ZaydarMapDemo() {
     <div className="zaydar-layer-rail" role="group" aria-label="Event filters">
       <button type="button" aria-pressed={timeFilter === "tonight"} onClick={() => setTimeFilter(timeFilter === "tonight" ? "default" : "tonight")}>Tonight</button>
       <button type="button" aria-pressed={timeFilter === "soon"} onClick={() => setTimeFilter(timeFilter === "soon" ? "default" : "soon")}>Soon</button>
-      {eventTags.map(tag => <button type="button" key={tag} aria-pressed={eventTag === tag} onClick={() => setEventTag(current => current === tag ? null : tag)}>{tag.replaceAll("_", " ")}</button>)}
+      {eventTags.map(tag => <button type="button" key={tag} aria-pressed={eventTag === tag} onClick={() => setEventTag(eventTag === tag ? null : tag)}>{tag.replaceAll("_", " ")}</button>)}
       <button type="button" aria-pressed={timeFilter === "default" && !eventTag} onClick={() => { setTimeFilter("default"); setEventTag(null); }}>All upcoming</button>
     </div>
     {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="zaydar-layer-list">
@@ -521,7 +523,7 @@ export default function ZaydarMapDemo() {
   const placesPanel = <section className="zaydar-layer-panel" aria-labelledby="map-placez-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-placez-title">Placez</h2></div>
     <div className="zaydar-layer-rail" role="group" aria-label="Place categories">
-      {ZAYDAR_PLACE_TYPE_OPTIONS.map(type => <button type="button" key={type} aria-pressed={placeTypes.includes(type)} onClick={() => setPlaceTypes(current => current.includes(type) ? current.filter(item => item !== type) : [...current, type])}>{zaydarTypeLabel(type)}</button>)}
+      {ZAYDAR_PLACE_TYPE_OPTIONS.map(type => <button type="button" key={type} aria-pressed={placeTypes.includes(type)} onClick={() => updateParams(p => p.set("placeTypes", (placeTypes.includes(type) ? placeTypes.filter(item => item !== type) : [...placeTypes, type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}
     </div>
     {placesLoading ? <p>Loading Placez…</p> : placesError ? <p role="alert">Placez could not load. <button type="button" onClick={() => void retryPlaces()}>Try again</button></p> : panelRows(nearbyPlaces as MapRow[], "places")}
   </section>;
@@ -541,13 +543,13 @@ export default function ZaydarMapDemo() {
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
   </section>;
   const layers: ZaydarLayer[] = [
-    { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => setShowEvents(value => !value), panel: eventPanel, onViewMore: () => setLocation("/events") },
-    { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => setShowPlaces(value => !value), panel: placesPanel, onViewMore: () => setLocation("/directory") },
-    { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => setShowBoards(value => !value), panel: boardsPanel, onViewMore: () => setLocation("/z") },
-    { id: "houz", label: "Houz", color: "#00FFFF", enabled: showHouz, onToggle: () => setShowHouz(value => !value), panel: houzPanel, onViewMore: () => setLocation("/the-hauz") },
+    { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
+    { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
+    { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => toggleLayer("hideBoards"), panel: boardsPanel, viewMore: [{ label: "Gigz", href: "/pride-work" }, { label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
+    { id: "houz", label: "Houz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [{ label: "View more Houz", href: "/the-hauz" }] },
   ];
 
-  const sceneRows = marks.map(mark => {
+  const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
@@ -569,10 +571,10 @@ export default function ZaydarMapDemo() {
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
-  });
-  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){window.location.assign(`/z/${encodeURIComponent(community.slug)}`);return;}setSelectedPlace(place);goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
+  }), [marks, places]);
+  const onSceneSelect=(key:string)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark)openMark(mark);};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
-    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(view.center)} />
+    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center)} />
     <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
       <strong>{regionLabel}</strong>
       <button type="button" className="zaydar-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
@@ -586,8 +588,10 @@ export default function ZaydarMapDemo() {
       <button className="zaydar-control-labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
-    <ZaydarLayerSheet layers={layers} />
-    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={setSelectedEvent} />}
+    <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
+    {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="zaydar-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="zaydar-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
+    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}

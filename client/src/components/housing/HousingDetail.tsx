@@ -53,6 +53,7 @@ import {
 
 export type HousingDetailHandlers = {
   onBack: () => void;
+  backLabel?: string;
   onRequest: (kind: HousingRequestKind) => void;
   onSave: () => void;
   onShare: () => void;
@@ -134,10 +135,10 @@ function leadPerson(group: HousingInterestGroup): HousingPerson {
   };
 }
 
-function Back({ onBack }: { onBack: () => void }) {
+function Back({ onBack, label = "Back to THE HAÜZ" }: { onBack: () => void; label?: string }) {
   return (
     <button type="button" className="hz-back" onClick={onBack}>
-      <Mono>&#8592; Back to THE HAÜZ</Mono>
+      <Mono>&#8592; {label}</Mono>
     </button>
   );
 }
@@ -437,7 +438,7 @@ function LookingDetail({
     <div className="pdx-glass-rebind" style={accentStyle(post.type)}>
       <div className="hz-pad">
         <div className="hz-wrap">
-          <Back onBack={h.onBack} />
+          <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.author.displayName} nameCap={0.35}>
@@ -562,7 +563,7 @@ function OfferingDetail({ post, h, isOwner }: { post: HousingPostView; h: Housin
     <div className="pdx-glass-rebind" style={accentStyle(post.type)}>
       <div className="hz-pad">
         <div className="hz-wrap">
-          <Back onBack={h.onBack} />
+          <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
@@ -682,7 +683,7 @@ function ManagedDetail({ post, h }: { post: HousingPostView; h: HousingDetailHan
     <div className="pdx-glass-rebind" style={accentStyle(post.type)}>
       <div className="hz-pad">
         <div className="hz-wrap">
-          <Back onBack={h.onBack} />
+          <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
             <HousingWell photos={post.photos} title={post.displayName} nameCap={0.35}>
@@ -887,7 +888,7 @@ function FormingDetail({
     <div className="pdx-glass-rebind" style={accentStyle(post.type)}>
       <div className="hz-pad">
         <div className="hz-wrap">
-          <Back onBack={h.onBack} />
+          <Back onBack={h.onBack} label={h.backLabel} />
 
           <div className="hz-dhead">
             <HousingWell

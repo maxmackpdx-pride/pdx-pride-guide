@@ -9,7 +9,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocation, useRoute } from "wouter";
+import { useLocation, useRoute, useSearch } from "wouter";
+import { mapReturnPath } from "@/lib/mapDrawerNavigation";
 import { queryClient } from "@/lib/queryClient";
 import {
   applyHousingRequest,
@@ -41,6 +42,12 @@ import { shareCardUrl } from "@shared/shareCards";
 export default function HousingPost() {
   const [, params] = useRoute("/the-hauz/:id");
   const [, navigate] = useLocation();
+  const mapSearch = useSearch();
+  const returnTo = mapReturnPath(new URLSearchParams(mapSearch).get("returnTo"));
+  const goBack = () => {
+    if (returnTo && window.history.state?.mapReturnTo === returnTo) window.history.back();
+    else navigate(returnTo || "/the-hauz", { replace: Boolean(returnTo) });
+  };
   const { user } = useAuth();
   const { toast } = useToast();
   const { openSheet } = useInboxSheet();
@@ -238,7 +245,7 @@ export default function HousingPost() {
             <div className="hz-panel hz-empty">
               That post is not on the board.
               <div style={{ marginTop: 12 }}>
-                <Chip onClick={() => navigate("/the-hauz")}>Back to THE HAÜZ</Chip>
+                <Chip onClick={goBack}>Back to {returnTo ? "Mapz" : "THE HAÜZ"}</Chip>
               </div>
             </div>
           </div>
@@ -250,7 +257,8 @@ export default function HousingPost() {
   const isOwner = !!user && user.id === post.author.userId;
 
   const handlers: HousingDetailHandlers = {
-    onBack: () => navigate("/the-hauz"),
+    onBack: goBack,
+    backLabel: returnTo ? "Back to Mapz" : undefined,
     onRequest: (kind) => {
       if (!requireAuth()) return;
       if (isOwner) return;

@@ -1,5 +1,5 @@
 import ZaydarEventLabel,{type EventLabel} from './ZaydarEventLabel';
-import {forwardRef,useCallback,useEffect,useImperativeHandle,useRef,useState} from 'react';
+import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useState} from 'react';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
@@ -53,7 +53,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
   if(event.data.type==='mode')latest.current.onMode?.(event.data.mode);
   if(event.data.type==='select')latest.current.onSelect(event.data.key);
  };window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive);},[fail]);
- const serialized=JSON.stringify(rows);
+ const serialized=useMemo(()=>JSON.stringify(rows),[rows]);
  useEffect(()=>{if(ready)post('data',{rows});},[ready,serialized]);
  useEffect(()=>{if(ready&&restoreView.current)post('view',{center:restoreView.current.center,zoom:restoreView.current.zoom});},[ready]);
  useEffect(()=>{if(ready)post('select',{key:selected});},[ready,selected]);

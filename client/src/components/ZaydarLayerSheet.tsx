@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
+import { Link } from "wouter";
 import { ChevronDown, House } from "lucide-react";
 import SmoothDrawer, { SmoothDrawerGroup, SmoothDrawerItem } from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
@@ -12,11 +13,10 @@ export type ZaydarLayer = {
   enabled: boolean;
   onToggle: () => void;
   panel: ReactNode;
-  onViewMore: () => void;
+  viewMore: { label: string; href: string }[];
 };
 
-export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) {
-  const [active, setActive] = useState<ZaydarLayerId | null>(null);
+export default function ZaydarLayerSheet({ layers, active, onActiveChange: setActive }: { layers: ZaydarLayer[]; active: ZaydarLayerId | null; onActiveChange: (id: ZaydarLayerId | null) => void }) {
   const lastActive = useRef<ZaydarLayerId>("events");
   const triggers = useRef(new Map<ZaydarLayerId, HTMLButtonElement>());
   const body = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
   const panelId = useId();
   const open = active !== null;
 
-  useEffect(() => { if (body.current) body.current.scrollTop = 0; }, [active]);
+  useEffect(() => { if (body.current) body.current.scrollTop = 0; if (active) lastActive.current = active; }, [active]);
 
   const closePanel = (restoreFocus = false) => {
     if (restoreFocus && active) triggers.current.get(active)?.focus({ preventScroll: true });
@@ -38,7 +38,7 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
     root.dataset.zaylistDrawer = state;
     // Closing the map sheet leaves the Z dock collapsed. Only its own restore
     // button should expand site navigation and move the compact rail upward.
-    if (open) window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open } }));
+    window.dispatchEvent(new CustomEvent("zaylist:drawer", { detail: { open } }));
     if (open) window.dispatchEvent(new CustomEvent("zaylist:collapse-mobile-dock"));
     return () => {
       if (root.dataset.zaylistDrawer === state) delete root.dataset.zaylistDrawer;
@@ -53,11 +53,11 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
     const close = () => setActive(null);
     window.addEventListener("zaylist:map-sheet-close", close);
     return () => window.removeEventListener("zaylist:map-sheet-close", close);
-  }, []);
+  }, [setActive]);
 
   const openLayer = (id: ZaydarLayerId) => {
     lastActive.current = id;
-    setActive(current => current === id ? null : id);
+    setActive(active === id ? null : id);
   };
   const activeLayer = layers.find(layer => layer.id === active);
 
@@ -155,7 +155,7 @@ export default function ZaydarLayerSheet({ layers }: { layers: ZaydarLayer[] }) 
 
       {open && (
         <div className="zaydar-layer-sheet__footer">
-          <button type="button" className="zaydar-layer-sheet__more" aria-label={`View more ${activeLayer?.label || "listings"}`} onClick={activeLayer?.onViewMore}>View more <ChevronDown size={18} aria-hidden="true" /></button>
+          {activeLayer?.viewMore.map(link => <Link key={link.href} className="zaydar-layer-sheet__more" href={link.href}>{link.label}<ChevronDown size={18} aria-hidden="true" /></Link>)}
           <button type="button" className="zaydar-layer-sheet__close" aria-label="Close map layer panel" aria-controls={panelId} onClick={() => closePanel(true)}>
             <ChevronDown size={22} aria-hidden="true" />
           </button>

@@ -1,6 +1,8 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { X } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
@@ -27,12 +29,12 @@ type Props = {
 
 export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const [showAuth, setShowAuth] = useState(false);
+  const dialogRef = useModalA11y({ onClose, enabled: !showAuth });
 
   const giftQuery = useQuery<GiftingPost[]>({
     queryKey: ["/api/gifting"],
     queryFn: async () => {
-      const r = await fetch("/api/gifting", { credentials: "include" });
-      if (!r.ok) return [];
+      const r = await apiRequest("GET", "/api/gifting");
       return r.json();
     },
     enabled: kind === "gifting",
@@ -41,8 +43,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const gigQuery = useQuery<GigPost[]>({
     queryKey: ["/api/gigs"],
     queryFn: async () => {
-      const r = await fetch("/api/gigs", { credentials: "include" });
-      if (!r.ok) return [];
+      const r = await apiRequest("GET", "/api/gigs");
       return r.json();
     },
     enabled: kind === "gig",
@@ -50,8 +51,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const sellzQuery = useQuery<SellzPost[]>({
     queryKey: ["/api/sellz"],
     queryFn: async () => {
-      const r = await fetch("/api/sellz", { credentials: "include" });
-      if (!r.ok) return [];
+      const r = await apiRequest("GET", "/api/sellz");
       return r.json();
     },
     enabled: kind === "sellz",
@@ -63,11 +63,6 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     : kind === "sellz"
       ? sellzQuery.data?.find(p => p.id === postId)
       : gigQuery.data?.find(g => g.id === postId);
-
-  // If the post is gone after a load (deleted, marked done, expired), close.
-  useEffect(() => {
-    if (!query.isLoading && query.data && !post) onClose();
-  }, [query.isLoading, query.data, post, onClose]);
 
   let card: ReactNode = null;
   // Accent tints the panel border + glow, matching the board card's color.
@@ -119,6 +114,11 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     <>
       <div className="board-detail-backdrop" onClick={onClose}>
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={kind === "gig" ? "Gigz listing" : kind === "gifting" ? "Giftz listing" : "Sellz listing"}
+          tabIndex={-1}
           className="board-post-overlay board-post-overlay--glass"
           onClick={e => e.stopPropagation()}
           style={panelStyle}
@@ -134,7 +134,8 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
           </button>
           {card ?? (
             <div className="board-listing-card board-listing-card--makeover pdx-glass-rebind" style={{ padding: 28, textAlign: "center", "--listing-accent": accent, "--c": accent } as CSSProperties}>
-              <p className="board-copy-sm">Loading…</p>
+              <p className="board-copy-sm" role={query.isError ? "alert" : "status"}>{query.isLoading ? "Loading…" : query.isError ? "This listing could not load." : "This listing is no longer available."}</p>
+              {query.isError && <button type="button" onClick={() => void query.refetch()}>Try again</button>}
             </div>
           )}
         </div>

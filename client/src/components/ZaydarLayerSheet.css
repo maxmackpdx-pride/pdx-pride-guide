@@ -6,13 +6,13 @@
   inset: auto max(8px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) 70px;
   display: flex;
   flex-direction: column;
-  height: 60px;
+  height: 90px;
   min-width: 0;
   overflow: hidden;
   box-sizing: border-box;
-  border: 1px solid #00ffff70;
+  border: 1px solid #a4b6c626;
   border-radius: 17px;
-  background: rgba(5, 12, 20, .94);
+  background: #101d27e8;
   box-shadow: inset 0 1px 0 #b6f4ff35, 0 12px 32px #0007;
   color: #eaf2fa;
   isolation: isolate;
@@ -51,7 +51,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 .zaydar-map-demo .zaydar-layer-sheet__chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
 .zaydar-map-demo .zaydar-layer-chip {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 28px;
+  grid-template-columns: minmax(0, 1fr) 44px;
   min-width: 0;
   height: 46px;
   border: 1px solid color-mix(in srgb, var(--layer-color) 32%, transparent);
@@ -62,7 +62,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
   box-shadow: inset 0 1px 1px #e2f4ff12;
 }
 .zaydar-layer-sheet.is-open .zaydar-layer-chip { height: 46px; }
-.zaydar-layer-sheet.is-peek .zaydar-layer-chip { grid-template-columns: minmax(0, 1fr); grid-template-rows: 32px 24px; height: 58px; }
+.zaydar-layer-sheet.is-peek .zaydar-layer-chip { grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px 44px; height: 88px; }
 .zaydar-map-demo .zaydar-layer-chip:first-child { border-radius: 12px 0 0 12px; }
 .zaydar-map-demo .zaydar-layer-chip:last-child { border-radius: 0 12px 12px 0; border-right-width: 1px; }
 .zaydar-map-demo .zaydar-layer-chip[data-enabled="true"] {
@@ -116,7 +116,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 .zaydar-layer-empty button { padding: 5px; border: 0; background: none; color: #00ffff; text-decoration: underline; }
 .zaydar-layer-sheet .zaydar-layer-rail { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px 7px; padding: 3px 2px; scrollbar-width: none; }
 .zaydar-layer-rail::-webkit-scrollbar { display: none; }
-.zaydar-layer-sheet .zaydar-layer-rail button { flex: none; min-height: 36px; padding: 7px 13px; border: 1px solid #6484aa50; border-radius: 20px; background: #050b1280; color: #bbd0e3; font: 700 12px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .02em; text-transform: uppercase; }
+.zaydar-layer-sheet .zaydar-layer-rail button { flex: none; min-height: 44px; padding: 7px 13px; border: 1px solid #6484aa50; border-radius: 20px; background: #050b1280; color: #bbd0e3; font: 700 12px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .02em; text-transform: uppercase; }
 .zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed="true"] { color: #fff; border-color: var(--active-layer-color); background: color-mix(in srgb, var(--active-layer-color) 16%, #050b12); box-shadow: inset 0 0 10px color-mix(in srgb, var(--active-layer-color) 13%, transparent); }
 .zaydar-layer-list { overflow: hidden; border: 1px solid #517b9c45; border-radius: 12px; background: #02080d75; }
 .zaydar-map-demo .zaydar-layer-row { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 48px; padding: 3px 7px 3px 0; border: 0; border-bottom: 1px solid #54718b45; background: none; text-align: left; }
@@ -130,12 +130,12 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 .zaydar-layer-row > svg { flex: none; color: #a9c2d7; }
 .zaydar-layer-empty { margin: 0; padding: 20px 14px; font: 400 13px/1.5 Inter, sans-serif; color: #c1d1df; }
 .zaydar-layer-rsvps { margin-top: 12px; color: #b7cede; font: 500 12px/1.4 Inter, sans-serif; }
-.zaydar-layer-rsvps summary { min-height: 32px; cursor: pointer; }
+.zaydar-layer-rsvps summary { min-height: 44px; cursor: pointer; }
 .zaydar-layer-visibility { display: flex; align-items: center; gap: 8px; min-height: 44px; color: #b7cede; font: 500 12px/1.4 Inter, sans-serif; }
 .zaydar-layer-visibility input { width: 18px; height: 18px; accent-color: var(--active-layer-color); }
 .zaydar-layer-panel .zaydar-layer-location-note { margin: 10px 0 0; font-size: 11px; }
-.zaydar-layer-sheet__footer { flex: none; display: flex; align-items: center; gap: 18px; min-height: 58px; padding: 7px 15px calc(10px + env(safe-area-inset-bottom, 0px)) 78px; background: #07111bee; }
-.zaydar-layer-sheet__more { display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; min-width: 0; height: 38px; padding: 6px 12px; border: 1px solid #00ffff70; border-radius: 22px; background: #001d2755; color: #00ffff !important; font: 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; }
+.zaydar-layer-sheet__footer { flex: none; display: flex; align-items: center; gap: 8px; min-height: 58px; padding: 7px 15px calc(10px + env(safe-area-inset-bottom, 0px)) 78px; background: #07111bee; }
+.zaydar-layer-sheet__more { text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; min-width: 0; height: 44px; padding: 6px 8px; border: 1px solid #00ffff70; border-radius: 22px; background: #001d2755; color: #00ffff !important; font: 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; }
 .zaydar-layer-sheet__more svg { transform: rotate(-90deg); }
 .zaydar-map-demo .zaydar-layer-sheet__close { position: static; display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #00ffff; border-radius: 50%; background: #071822; color: #00ffff; box-shadow: inset 0 1px 2px #adfaff70; }
 .zaydar-layer-sheet button:focus-visible { outline-offset: -3px; }
@@ -151,7 +151,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 @media (min-width: 960px) {
   .zaydar-map-lockup { left: 476px; }
   .zaydar-map-demo .zaydar-layer-sheet, html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek { left: 18px; right: auto; bottom: 18px; width: 440px; }
-  .zaydar-map-demo .zaydar-layer-sheet.is-open { height: min(78%, 620px); border-radius: 24px; }
+  .zaydar-map-demo .zaydar-layer-sheet.is-open { left: 18px; right: auto; bottom: 18px; height: min(78%, 620px); border-radius: 24px; }
   .zaydar-map-demo .zaydar-layer-sheet.is-peek { height: 48px; }
   .zaydar-layer-sheet.is-peek .zaydar-layer-chip { grid-template-columns: minmax(0, 1fr) 28px; grid-template-rows: 1fr; height: 46px; }
   .zaydar-layer-sheet.is-peek .zaydar-layer-chip__open { border-top: 0 !important; border-left: 1px solid #a9bed22b !important; }
@@ -175,3 +175,16 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 }
 @media (prefers-reduced-motion: reduce) { .zaydar-map-demo .zaydar-layer-sheet, .zaydar-layer-chip__chevron { transition: none; } }
 @media (prefers-reduced-transparency: reduce) { .zaydar-map-demo .zaydar-layer-sheet { background: #080c12; } }
+
+/* Drawer controls use the same dark plate and restrained rim as Mapz tools. */
+.zaydar-layer-sheet .zaydar-layer-rail button { background: #ffffff06; border-color: #a4b6c626; }
+.zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed="true"] { background: color-mix(in srgb, var(--active-layer-color) 9%, #101d27); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--active-layer-color) 50%, transparent); }
+.zaydar-layer-sheet .zaydar-layer-sheet__more { color: var(--active-layer-color) !important; border-color: color-mix(in srgb, var(--active-layer-color) 45%, transparent); background: #ffffff06; }
+.zaydar-layer-sheet__body { scroll-padding-block: 8px; }
+.zaydar-layer-sheet .zaydar-layer-panel > p button, .zaydar-layer-empty button { min-height: 44px; }
+@media (max-width: 959px) {
+  .zaydar-layer-sheet.is-open .zaydar-layer-chip { grid-template-columns: 1fr; grid-template-rows: 44px 44px; height: 88px; }
+  .zaydar-layer-sheet.is-open .zaydar-layer-chip__open { border-left: 0 !important; border-top: 1px solid #a9bed22b !important; }
+}
+.calm-mode .zaydar-map-demo .zaydar-layer-sheet, [data-calm="true"] .zaydar-map-demo .zaydar-layer-sheet,
+.calm-mode .zaydar-layer-chip__chevron, [data-calm="true"] .zaydar-layer-chip__chevron { transition: none; }
