@@ -62,7 +62,7 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
             <DropdownMenu.Trigger className={className} data-accent={entry.accent} aria-label={entry.label} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)}>{content}</DropdownMenu.Trigger>
             <DropdownMenu.Portal><DropdownMenu.Content className="znav-dropdown pdx-liquid-overlay" aria-label={entry.label} sideOffset={10} align={entry.id === "boards" ? "end" : "start"} collisionPadding={12}>
               {entry.eyebrow && <DropdownMenu.Label className="znav-eyebrow">{entry.eyebrow}</DropdownMenu.Label>}
-              {entry.items.map(item => <DropdownMenu.Item asChild key={item.href}><Link href={item.href} className="znav-menu-link" data-accent={item.accent ?? entry.accent} aria-current={navLinkActive(location, item.href) ? "page" : undefined} onClick={onNavigate}>{item.label}</Link></DropdownMenu.Item>)}
+              {entry.items.map(item => <DropdownMenu.Item asChild key={item.href}><Link href={item.href} className="znav-menu-link pdx-glass-rebind" data-accent={item.accent ?? entry.accent} aria-current={navLinkActive(location, item.href) ? "page" : undefined} onClick={onNavigate}>{item.label}</Link></DropdownMenu.Item>)}
             </DropdownMenu.Content></DropdownMenu.Portal>
           </DropdownMenu.Root>}
       </div>;
@@ -92,7 +92,7 @@ export function MobileExploreNavigation({ location, onMessages }: { location: st
     return () => window.removeEventListener(MOBILE_NAV_DISMISS, close);
   }, []);
   return <Dialog.Root open={open} onOpenChange={value => { if (value) dismissMobileNavOverlays(); setOpen(value); }}>
-    <div className="znav-mobile-row"><nav className="znav-mobile-scroll" aria-label="Mobile primary navigation"><CompactNavigation location={location} onNavigate={() => dismissMobileNavOverlays()} /></nav><Dialog.Trigger className="znav-control znav-explore-trigger" data-accent="cyan" aria-label="Explore all navigation"><span className="znav-icon-row"><Menu size={20} aria-hidden="true" /></span><span className="znav-caption" aria-hidden="true">Explore</span></Dialog.Trigger></div>
+    <div className="znav-mobile-row"><nav className="znav-mobile-scroll" aria-label="Mobile primary navigation"><CompactNavigation location={location} onNavigate={() => dismissMobileNavOverlays()} /></nav><Dialog.Trigger className="znav-control znav-explore-trigger pdx-glass-rebind" data-accent="cyan" aria-label="Explore all navigation"><span className="znav-icon-row"><Menu size={20} aria-hidden="true" /></span><span className="znav-caption" aria-hidden="true">Explore</span></Dialog.Trigger></div>
     <Dialog.Portal><Dialog.Overlay className="znav-scrim" /><Dialog.Content className="znav-mobile-sheet pdx-liquid-overlay" onCloseAutoFocus={event => {
       if (messagesPending.current) { event.preventDefault(); messagesPending.current = false; onMessages(); }
     }}>
@@ -100,11 +100,11 @@ export function MobileExploreNavigation({ location, onMessages }: { location: st
       <Dialog.Description className="sr-only">Choose a page or open a destination group.</Dialog.Description>
       <nav aria-label="Mobile destinations">{PRIMARY_NAV.map(entry => {
         const Icon = ICONS[entry.label];
-        if (entry.type === "link") return <Link key={entry.href} href={entry.href} className="znav-menu-link" data-accent={entry.accent} aria-current={entryActive(entry, location) ? "page" : undefined} onClick={() => setOpen(false)}><Icon size={19} aria-hidden="true" />{entry.label}</Link>;
-        return <div key={entry.id}><button className="znav-menu-link" data-accent={entry.accent} aria-expanded={group === entry.id} aria-controls={`znav-mobile-${entry.id}`} onClick={() => setGroup(group === entry.id ? null : entry.id)}><Icon size={19} aria-hidden="true" />{entry.label}<ChevronDown size={15} className="znav-group-chevron" /></button>
-          {group === entry.id && <div id={`znav-mobile-${entry.id}`} className="znav-mobile-group">{entry.items.map(item => <Link key={item.href} href={item.href} className="znav-menu-link" data-accent={item.accent} onClick={() => setOpen(false)}>{item.label}</Link>)}</div>}
+        if (entry.type === "link") return <Link key={entry.href} href={entry.href} className="znav-menu-link pdx-glass-rebind" data-accent={entry.accent} aria-current={entryActive(entry, location) ? "page" : undefined} onClick={() => setOpen(false)}><Icon size={19} aria-hidden="true" />{entry.label}</Link>;
+        return <div key={entry.id}><button className="znav-menu-link pdx-glass-rebind" data-accent={entry.accent} aria-expanded={group === entry.id} aria-controls={`znav-mobile-${entry.id}`} onClick={() => setGroup(group === entry.id ? null : entry.id)}><Icon size={19} aria-hidden="true" />{entry.label}<ChevronDown size={15} className="znav-group-chevron" /></button>
+          {group === entry.id && <div id={`znav-mobile-${entry.id}`} className="znav-mobile-group">{entry.items.map(item => <Link key={item.href} href={item.href} className="znav-menu-link pdx-glass-rebind" data-accent={item.accent} onClick={() => setOpen(false)}>{item.label}</Link>)}</div>}
         </div>;
-      })}<button className="znav-menu-link" onClick={() => { messagesPending.current = true; setOpen(false); }}><MessageCircle size={19} aria-hidden="true" />Messages</button></nav>
+      })}<button className="znav-menu-link pdx-glass-rebind" onClick={() => { messagesPending.current = true; setOpen(false); }}><MessageCircle size={19} aria-hidden="true" />Messages</button></nav>
     </Dialog.Content></Dialog.Portal>
   </Dialog.Root>;
 }

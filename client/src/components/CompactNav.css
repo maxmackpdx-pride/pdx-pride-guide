@@ -79,8 +79,8 @@
   border-color: transparent;
   color: var(--text-meta);
 }
-.site-header--compact .site-hub-button,
-.site-header--compact .site-login-button {
+.site-header--compact :where(.site-hub-button).pdx-glass-rebind,
+.site-header--compact :where(.site-login-button).pdx-glass-rebind {
   --c: var(--panel-cyan);
   min-height: 44px;
   padding: 0 19px;

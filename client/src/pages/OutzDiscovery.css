@@ -112,7 +112,7 @@
   outline-color:var(--side-color);
   outline-offset:-4px;
 }
-.outz-discovery .rugged :is(.categories button,.mobile-view button,.freshness button){
+.outz-discovery :where(.rugged) :is(.categories button,.mobile-view button,.freshness button).pdx-glass-rebind{
   --c:#ff8c00;
   background:var(--btn-glow-bg);
   box-shadow:var(--chrome-keyline),var(--btn-glow-shadow);
