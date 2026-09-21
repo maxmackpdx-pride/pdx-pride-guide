@@ -147,6 +147,6 @@
 .zaydar-map-time,.zaydar-map-live{appearance:none;border:0;background:none;padding:0;color:#aeb7c4;font:600 11px/1 Inter,Arial,sans-serif;cursor:pointer}.zaydar-map-time:hover,.zaydar-map-time:focus-visible{color:#e8f5fb}.zaydar-map-live{padding-left:7px;border-left:1px solid #a4b6c638;color:#67ddd0;text-transform:uppercase;letter-spacing:.06em}.zaydar-map-time-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden}
 
 /* Keep face stacks on the floating HOUS artwork, independent of title wrapping. */
-.zaydar-housing-face-stack{position:absolute;left:50%;top:var(--face-offset);transform:translate(-50%,-50%);margin-top:0;padding-left:0;white-space:nowrap}
+.zaydar-housing-face-stack--anchored{position:absolute;z-index:3;transform:translate(-50%,-50%) scale(var(--face-scale));transform-origin:center;margin-top:0;padding-left:0;white-space:nowrap;pointer-events:none}
 .zaydar-housing-face{width:var(--face-size,18px);height:var(--face-size,18px);flex-shrink:0;margin-left:calc(var(--face-size,18px)*-.28)}
 .zaydar-housing-face:first-child{margin-left:0}

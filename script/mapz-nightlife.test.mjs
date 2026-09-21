@@ -86,6 +86,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     updateSurfaces:()=>({buildings:[{}],reflections:[]}),waterBloom:{draw:noop},drawUserLocationGlow:noop,
     citySparkles:{update:noop},buildingGlitter:()=>[],opacityControl:{value:1},motionDelta:1/30,pulseTime:1,
     hologramLiftScale:.7,hologramArtworkScale:3.15,hologramLayouts:new WeakMap(),hologramLabelWidth:68.4,HOUSING_EVENT_HEIGHT_RATIO:1/3,
+    housingIconSize:scale=>({width:70*scale,height:58*scale}),
     HOUSING_HOLOGRAM_LABELS:{LOOKING:'LOOKING TO RENT',FORMING:'BUILDING A HOUS',OFFERING:'JOIN OUR HOUS',MANAGED:'COMMERCIAL RENTAL HOUS'},
     smoothRange:(a,b,v)=>Math.max(0,Math.min(1,(v-a)/(b-a))),
     clusterPlaceMarkers:()=>({byKey:new Map()}),roofLift:()=>15,

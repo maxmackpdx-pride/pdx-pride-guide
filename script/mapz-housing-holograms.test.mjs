@@ -59,12 +59,12 @@ test('HOUS labels use the event-title fitter beneath each icon',async()=>{
   });
   assert.match(renderer,/name:housingName,time:'',color/);
   assert.match(renderer,/kind:'housing'/);
-  assert.match(renderer,/width:hologramLabelWidth,scale:beaconScale/);
+  assert.match(renderer,/width:hologramLabelWidth\*1\.4,scale:beaconScale/);
   assert.match(renderer,/y:hologramCenterY\+housingIconHeight\/2\+3\*beaconScale/);
   assert.match(labelComponent,/const isHousing=label\.kind==='housing'/);
   assert.match(labelComponent,/!isHousing&&<DigitalClock time=\{label\.time\}/);
   assert.match(labelComponent,/className="zaydar-event-title"/);
-  assert.match(labelComponent,/solveDynamicText\(label\.name,240/);
+  assert.match(labelComponent,/solveDynamicText\(isHousing\?twoLineTitle\(label\.name\):label\.name,240/);
 });
 
 test('HOUS is isolated from the existing Eventz, Placez, and sparkle pipelines',async()=>{
@@ -97,10 +97,15 @@ test('HOUS projection keeps a readable event-relative envelope at every camera d
   assert.equal(layer.visible({demoOpen:false,key:'closed',coordinates:[0,0]}),false);
 });
 
-test('face stacks anchor to the icon center in both label renderers',async()=>{
-  for(const path of ['../client/public/zaydar-map/river-flight.js','../client/src/components/ZaydarEventLabel.tsx']){
-    const source=await readFile(new URL(path,import.meta.url),'utf8');
-    assert.match(source,/label\.logoY-label\.y/);
-    assert.match(source,/--face-offset/);
-  }
+test('HOUS titles are 40% larger, use exactly two rows, and faces stay fixed on the rotating icon',async()=>{
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  const labelComponent=await readFile(new URL('../client/src/components/ZaydarEventLabel.tsx',import.meta.url),'utf8');
+  assert.match(renderer,/width:hologramLabelWidth\*1\.4/);
+  assert.match(renderer,/labelRows\(label\.name,label\.width,label\.kind==='housing'\?2:undefined\)/);
+  assert.match(renderer,/stack\.style\.left=`\$\{label\.x\}px`/);
+  assert.match(renderer,/stack\.style\.top=`\$\{label\.logoY\}px`/);
+  assert.match(renderer,/--face-scale/);
+  assert.doesNotMatch(renderer,/label\.logoY-label\.y/);
+  assert.match(labelComponent,/twoLineTitle\(label\.name\)/);
+  assert.match(labelComponent,/left:label\.x,top:label\.logoY/);
 });

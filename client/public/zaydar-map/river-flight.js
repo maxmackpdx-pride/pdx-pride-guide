@@ -459,6 +459,7 @@ function drawLights(fade,target=map,surface=lights){
  const hologramMultiplier=2.4-.75*streetProgress;
  const placezScale=1.625*(.375+.625*streetProgress+.2*closeProgress);
  const placezGlow=.375+.625*streetProgress+.12*closeProgress;
+ const placezBloomMax=.02;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
@@ -602,7 +603,8 @@ function drawLights(fade,target=map,surface=lights){
     const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
     const markerY=isPlace?p.y:raisedY;
-    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale,isPlace);
+    const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
+    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
@@ -735,7 +737,7 @@ function drawLights(fade,target=map,surface=lights){
    }
    if(feature.properties.housingModel&&coreAlpha>.1){
     const housingName=HOUSING_HOLOGRAM_LABELS[feature.properties.housingModel],housingIconHeight=housingIconSize(beaconScale).height;
-    if(housingName)eventLabels.push({key:feature.properties.key,kind:'housing',name:housingName,time:'',color,x:logoX,y:hologramCenterY+housingIconHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:housingIconHeight,opacity:coreAlpha,avatars:feature.properties.avatars||[]});
+    if(housingName)eventLabels.push({key:feature.properties.key,kind:'housing',name:housingName,time:'',color,x:logoX,y:hologramCenterY+housingIconHeight/2+3*beaconScale,width:hologramLabelWidth*1.4,scale:beaconScale,logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:housingIconHeight,opacity:coreAlpha,avatars:feature.properties.avatars||[]});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -788,13 +790,14 @@ function drawLights(fade,target=map,surface=lights){
 }
 
 const labelMeasureContext=typeof document.createElement==='function'?document.createElement('canvas').getContext('2d'):{font:'',measureText:text=>({width:String(text).length*55})};
-function labelRows(text,width){
+function labelRows(text,width,requiredRows){
  const words=String(text).trim().split(/\s+/).filter(Boolean),candidates=[];
  const partition=(start,rows,left)=>{
   if(left===1){candidates.push([...rows,words.slice(start).join(' ')]);return;}
   for(let end=start+1;end<=words.length-left+1;end++)partition(end,[...rows,words.slice(start,end).join(' ')],left-1);
  };
- for(let count=1;count<=Math.min(3,words.length);count++)partition(0,[],count);
+ const rowCounts=requiredRows?[Math.min(requiredRows,words.length)]:Array.from({length:Math.min(3,words.length)},(_,index)=>index+1);
+ for(const count of rowCounts)partition(0,[],count);
  labelMeasureContext.font="900 100px 'Barlow Condensed','Arial Narrow',sans-serif";
  const targetWidth=width*.96,targetHeight=width*.52,maxSize=width*.34;
  return candidates.map(lines=>{
@@ -812,21 +815,24 @@ function renderHologramLabels(labels){
  const live=new Set();
  for(const label of labels){
   live.add(label.key);
-  let item=[...root.children].find(node=>node.dataset.labelKey===label.key);
-  if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey));root.appendChild(item);}
+  let item=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='title');
+  if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.dataset.labelRole='title';item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.color));item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
-  if(label.kind==='housing'){
-   item.style.setProperty('--face-offset',`${(label.logoY-label.y)/Math.max(.001,label.scale)}px`);
-   item.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,(label.avatars?.length||1)*.72+.28))}px`);
-  }
+  item.style.setProperty('--title-height',`${label.width*.52}px`);
   const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.width,label.avatars]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';
-   const fitted=labelRows(label.name,label.width);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
+   const fitted=labelRows(label.name,label.width,label.kind==='housing'?2:undefined);fitted.lines.forEach((line,index)=>{const row=document.createElement('span');row.textContent=line;row.style.fontSize=`${fitted.sizes[index]}px`;title.appendChild(row);});item.appendChild(title);
    if(label.kind!=='housing'&&label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;item.appendChild(clock);}
-   if(label.kind==='housing'&&label.avatars?.length){const stack=document.createElement('span');stack.className='standalone-hologram-faces';stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}item.appendChild(stack);}
   }
+  let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
+  if(label.kind==='housing'&&label.avatars?.length){
+   if(!stack){stack=document.createElement('span');stack.className='standalone-hologram-faces standalone-hologram-faces--anchored';stack.dataset.labelKey=label.key;stack.dataset.labelRole='faces';root.appendChild(stack);}
+   stack.style.left=`${label.x}px`;stack.style.top=`${label.logoY}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
+   const faceSignature=JSON.stringify([label.color,label.avatars]);
+   if(stack.dataset.signature!==faceSignature){stack.dataset.signature=faceSignature;stack.replaceChildren();stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}}
+  }else stack?.remove();
  }
  for(const item of [...root.children])if(!live.has(item.dataset.labelKey))item.remove();
 }
@@ -1049,7 +1055,9 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  const radius=zoom<13.5?64:zoom<14.5?52:zoom<15.5?38:zoom<16.25?28:0;
  const byKey=new Map();
  if(!radius)return {byKey};
- const pending=[...items].filter(item=>item.p.x>=-40&&item.p.x<=width+40&&item.p.y>=-40&&item.p.y<=height+40).sort((a,b)=>Number(b.feature.properties.key===selected)-Number(a.feature.properties.key===selected)||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2));
+ // Pick a deterministic geographic leader so a cluster cannot jump between
+ // nearby Placez while the camera pans, pitches, or rotates.
+ const pending=[...items].filter(item=>item.p.x>=-40&&item.p.x<=width+40&&item.p.y>=-40&&item.p.y<=height+40).sort((a,b)=>Number(b.feature.properties.key===selected)-Number(a.feature.properties.key===selected)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  while(pending.length){
   const leader=pending.shift(),members=[leader];
   for(let i=pending.length-1;i>=0;i--)if(Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
