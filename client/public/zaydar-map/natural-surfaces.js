@@ -1,5 +1,6 @@
 import {vectorStyle} from '../home-flight/city-map.js';
 
+export const WATER_CYAN = '#00bfbf'; // Cyan mixed with 25% black; glow alpha stays unchanged.
 export const FOREST_COLORS = ['#09251a', '#103322', '#19432c'];
 export const naturalWater = ['all', ['in', ['get', 'class'], ['literal', ['river', 'lake', 'pond']]], ['!=', ['get', 'intermittent'], 1]];
 
@@ -13,13 +14,20 @@ export function mapzSurfaceStyle() {
   };
   style.terrain = {source: 'elevation', exaggeration: 1};
   style.layers.unshift(
+    {id:'ground',type:'background',paint:{'background-color':'#050506','background-opacity':1}},
     {id:'land-relief',type:'hillshade',source:'elevation',paint:{'hillshade-exaggeration':.22,'hillshade-shadow-color':'#183b31','hillshade-highlight-color':'#84998e','hillshade-accent-color':'#234738'}},
     ...['landcover','landuse'].map(sourceLayer=>({id:`forest-${sourceLayer}`,type:'fill',source:'terrain','source-layer':sourceLayer,filter:['in',['get','class'],['literal',['wood','forest']]],paint:{'fill-pattern':'forest-canopy','fill-opacity':1}})),
   );
+  // Opaque terrain and water prevent the terrain framebuffer from exposing
+  // lower surfaces. Underground transport must not be painted on top of land.
+  const water = style.layers.find(layer=>layer.id==='water');
+  water.paint = {'fill-color':'#091318','fill-opacity':1};
+  const streets = style.layers.find(layer=>layer.id==='streets');
+  streets.filter = ['all', streets.filter, ['!=',['get','brunnel'],'tunnel'], ['>=',['coalesce',['get','layer'],0],0]];
   // Water bloom is clipped to water geometry, so no cyan haze spills onto land.
   const banks = style.layers.find(layer=>layer.id==='banks');
   banks.filter = naturalWater;
-  banks.paint = {'line-color':'#00ffff','line-opacity':.85,'line-width':1.2};
+  banks.paint = {'line-color':WATER_CYAN,'line-opacity':.85,'line-width':1.2};
   style.layers.find(layer=>layer.id==='skyline').paint['fill-extrusion-opacity'] = 1;
   return style;
 }
@@ -88,7 +96,7 @@ export function createWaterBloom() {
         const distances=inwardDistances(mask,surface.width,surface.height),radius=38/scale;
         for(let i=0;i<mask.length;i++){
           const falloff=mask[i]?Math.exp(-distances[i]/radius):0;
-          pixels.data.set([0,255,255,Math.round(150*falloff)],i*4);
+          pixels.data.set([0,191,191,Math.round(150*falloff)],i*4);
         }
         ctx.putImageData(pixels,0,0);
       }

@@ -1,4 +1,4 @@
-import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom} from './natural-surfaces.js?v=20260920-solid-ground';
 import {bridgeFilter,createBridgeLayer} from '../home-flight/bridge-roads.js';
 import {createCitySparkles} from '../home-flight/city-sparkles.js';
 import {roofSparkles} from '../home-flight/roof-sparkles.js';

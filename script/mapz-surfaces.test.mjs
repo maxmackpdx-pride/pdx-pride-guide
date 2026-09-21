@@ -32,3 +32,14 @@ test('water glow stays inside water and decays from shore toward the center',()=
  mask[5*size+5]=0;const island=inwardDistances(mask,size,size);
  assert.equal(island[5*size+5],0);assert.equal(island[5*size+4],1);
 });
+
+test('ground and water are opaque and cyan is 25 percent darker',()=>{
+ const style=mapzSurfaceStyle(),layer=id=>style.layers.find(l=>l.id===id);
+ assert.equal(style.layers[0].id,'ground');
+ assert.equal(layer('ground').paint['background-opacity'],1);
+ assert.equal(layer('water').paint['fill-opacity'],1);
+ assert.equal(layer('banks').paint['line-color'],'#00bfbf');
+ assert.deepEqual(layer('streets').filter.slice(-2),[
+  ['!=',['get','brunnel'],'tunnel'],['>=',['coalesce',['get','layer'],0],0]
+ ]);
+});
