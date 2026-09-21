@@ -65,7 +65,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   const lastShown = useRef(new Map<number,number>());
   const lastFrame = useRef(0);
   const nextOpen = useRef(0);
-  const pointer = useRef<{ id: number; x: number } | null>(null);
+  const hover = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -137,11 +137,20 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     const texture = new Image();
     const draw = () => {
       if (!width || !height) return;
-      const radius = Math.min(width * .48, height * .43) * .7;
+      const radius = Math.min(width * .48, height * .43) * .7 * 1.15;
       const cx = width / 2, cy = height / 2;
       const front = canvas.closest('.home-front');
       const headerInset = front ? parseFloat(getComputedStyle(front).getPropertyValue('--home-header-height')) || 0 : 0;
       const footerInset = canvas.parentElement ? parseFloat(getComputedStyle(canvas.parentElement).getPropertyValue('--home-flight-bottom')) || 0 : 0;
+      const canvasBounds=canvas.getBoundingClientRect();
+      const protectedAreas = ['.home-front__mark','.home-front__identity-line'].flatMap(selector=>{
+        const element=front?.querySelector(selector);
+        if(!element)return [];
+        const rect=element.getBoundingClientRect();
+        return [{ x:rect.left-canvasBounds.left-12,y:rect.top-canvasBounds.top-12,w:rect.width+24,h:rect.height+24 }];
+      });
+      const overlapsText=(x:number,y:number,w:number,h:number)=>protectedAreas.some(rect=>
+        x+w/2>rect.x && x-w/2<rect.x+rect.w && y+h/2>rect.y && y-h/2<rect.y+rect.h);
       const yaw = INITIAL_YAW + angle.current + (still ? 0 : elapsed / 28000);
       const project = (p: Point, elevation = 1) => {
         const x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
@@ -153,6 +162,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       context.fillStyle = '#000';
       context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI * 2); context.fill();
       // Batch dot paths by depth and land class instead of issuing 15k fills.
+      const hoverDots: { x:number; y:number; radius:number; strength:number; hue:number }[] = [];
       const batches = Array.from({ length: 12 }, () => new Path2D());
       for (const p of points) {
         const q = project(p);
@@ -161,12 +171,27 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const size = Math.max(.35, radius / 195 * Math.sqrt(q.z));
         const path = batches[p.tone * 4 + depth];
         path.moveTo(q.x + size, q.y); path.arc(q.x, q.y, size, 0, Math.PI * 2);
+        if(hover.current){
+          const dx=q.x-hover.current.x,dy=q.y-hover.current.y,distance=Math.hypot(dx,dy);
+          const hoverRadius=46;
+          if(distance<hoverRadius)hoverDots.push({x:q.x,y:q.y,radius:size,strength:smooth(1-distance/hoverRadius),hue:(Math.atan2(dy,dx)*180/Math.PI+360)%360});
+        }
       }
       batches.forEach((path, index) => {
         const tone = Math.floor(index / 4), depth = index % 4;
         context.fillStyle = `rgba(${["235,246,255","153,255,199","0,220,255"][tone]},${[.8,.7,.92][tone] * (.2 + depth * .26)})`;
         context.fill(path);
       });
+      // Illuminate only existing dots: a small rainbow falls off into black gaps.
+      context.save();
+      for(const dot of hoverDots){
+        context.globalAlpha=dot.strength;
+        context.fillStyle=`hsl(${dot.hue} 100% 72%)`;
+        context.shadowColor=`hsl(${dot.hue} 100% 55%)`;
+        context.shadowBlur=5*dot.strength;
+        context.beginPath();context.arc(dot.x,dot.y,dot.radius*(1+dot.strength*.7),0,Math.PI*2);context.fill();
+      }
+      context.restore();
       // Fixed surface anchors; each light has its own clock, like the map glitter.
       for (let i = 0; i < points.length; i += 37) {
         const point = points[i], p = project(point, 1.003);
@@ -250,10 +275,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const head = project(venue.point,1.06);
         const preferred={x:head.x,y:head.y-fullSize*.45-radius*.025};
         let targetX=preferred.x,targetY=preferred.y;
-        for (let attempt=0;attempt<80;attempt++) {
-          const distance=Math.sqrt(attempt)*10, direction=attempt*2.399963;
+        for (let attempt=0;attempt<640;attempt++) {
+          const distance=Math.sqrt(attempt)*18, direction=attempt*2.399963;
           const x=Math.max(fullW/2+8,Math.min(width-fullW/2-8,preferred.x+Math.cos(direction)*distance));
           const y=Math.max(headerInset+fullH/2+8,Math.min(height-footerInset-fullH/2-8,preferred.y+Math.sin(direction)*distance));
+          if(overlapsText(x,y,fullW+12,fullH+12))continue;
           if(occupied.some(other=>Math.abs(other.x-x)<(other.w+fullW)/2+10 && Math.abs(other.y-y)<(other.h+fullH)/2+10))continue;
           targetX=x;targetY=y;break;
         }
@@ -266,7 +292,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const y=anchor.y+(preferred.y+state.offsetY-anchor.y)*opening;
         const size=fullSize*opening,w=fullW*opening,h=fullH*opening;
         renderedCount++;
-        context.save(); context.globalAlpha = visibility*.72;
+        context.save();
+        // Clip the protected bands during travel too, so no hologram or beam
+        // crosses the wordmark or any phrase of the rotating headline.
+        for(const rect of protectedAreas){
+          const clear=new Path2D();clear.rect(0,0,width,height);clear.rect(rect.x,rect.y,rect.w,rect.h);
+          context.clip(clear,'evenodd');
+        }
+        context.globalAlpha = visibility*.72;
         const beam = context.createLinearGradient(anchor.x,anchor.y,x,y);
         beam.addColorStop(0,`${color}08`); beam.addColorStop(1,`${color}65`);
         context.fillStyle = beam;
@@ -296,7 +329,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     const animate = (now: number) => {
       if (now - previous >= 16) {
-        if (previous && !pointer.current) elapsed += Math.min(now-previous,64);
+        if (previous) elapsed += Math.min(now-previous,64);
         previous = now; elapsedRef.current = elapsed; draw();
       }
       frame = requestAnimationFrame(animate);
@@ -335,8 +368,12 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
 
   return <canvas ref={canvasRef} className="home-front__metro-globe"
     role="img" aria-label="Stylized globe made from the selected Portland city map: north Portland, downtown, the inner eastside and Sellwood, with the Willamette River"
-    onPointerDown={event => { if(event.pointerType === 'touch') return; pointer.current = {id:event.pointerId,x:event.clientX}; event.currentTarget.setPointerCapture(event.pointerId); }}
-    onPointerMove={event => { const drag = pointer.current; if (!drag || drag.id !== event.pointerId) return; angle.current = angle.current+(event.clientX-drag.x)/350; drag.x=event.clientX; redrawRef.current(); }}
-    onPointerUp={() => { pointer.current=null; }} onPointerCancel={() => { pointer.current=null; }} onLostPointerCapture={() => { pointer.current=null; }}
+    onPointerMove={event => {
+      if(event.pointerType==='touch')return;
+      const rect=event.currentTarget.getBoundingClientRect();
+      hover.current={x:event.clientX-rect.left,y:event.clientY-rect.top};
+      redrawRef.current();
+    }}
+    onPointerLeave={() => { hover.current=null; redrawRef.current(); }}
   />;
 }
