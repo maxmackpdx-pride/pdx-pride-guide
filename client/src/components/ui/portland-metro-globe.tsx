@@ -161,7 +161,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       const headerInset = front ? parseFloat(getComputedStyle(front).getPropertyValue('--home-header-height')) || 0 : 0;
       const footerInset = canvas.parentElement ? parseFloat(getComputedStyle(canvas.parentElement).getPropertyValue('--home-flight-bottom')) || 0 : 0;
       const canvasBounds=canvas.getBoundingClientRect();
-      const protectedAreas = ['.home-front__mark','.home-front__identity-line'].flatMap(selector=>{
+      const protectedAreas = ['.home-front__mark','.home-front__identity-script'].flatMap(selector=>{
         const element=front?.querySelector(selector);
         if(!element)return [];
         const rect=element.getBoundingClientRect();
@@ -376,8 +376,14 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
         const fullW=image.width*fullFit, fullH=image.height*fullFit;
         const head = project(venue.point,1.06);
-        // Let heads reach toward the upper shoulders while beams keep real anchors.
-        const preferred={x:cx+(head.x-cx)*1.22,y:head.y-fullSize*.45-radius*.12};
+        // Side-facing anchors also use the pockets below the wordmark corners.
+        // Protect the actual rotating words, leaving the empty ends of its row open.
+        const side=Math.sign(head.x-cx);
+        const sidePocket=smooth((Math.abs(head.x-cx)/radius-.3)/.4)
+          * (1-smooth((Math.abs(head.y-cy)/radius-.4)/.35));
+        const upperX=cx+(head.x-cx)*1.22,upperY=head.y-fullSize*.45-radius*.12;
+        const preferred={x:upperX+(cx+side*radius*.94-upperX)*sidePocket,
+          y:upperY+(cy+radius*.08-upperY)*sidePocket};
         let targetX=preferred.x,targetY=preferred.y,bestPlacement=Infinity;
         for (let attempt=0;attempt<320;attempt++) {
           const distance=Math.sqrt(attempt)*18, direction=attempt*2.399963;
