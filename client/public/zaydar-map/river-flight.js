@@ -14,7 +14,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
-import {createHousingHologramLayer,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260921-hous-labels-v3';
+import {createHousingHologramLayer,housingIconSize,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260921-hous-screen-fit';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -734,7 +734,7 @@ function drawLights(fade,target=map,surface=lights){
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    if(feature.properties.housingModel&&coreAlpha>.1){
-    const housingName=HOUSING_HOLOGRAM_LABELS[feature.properties.housingModel],housingIconHeight=72*beaconScale;
+    const housingName=HOUSING_HOLOGRAM_LABELS[feature.properties.housingModel],housingIconHeight=housingIconSize(beaconScale).height;
     if(housingName)eventLabels.push({key:feature.properties.key,kind:'housing',name:housingName,time:'',color,x:logoX,y:hologramCenterY+housingIconHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:housingIconHeight,opacity:coreAlpha,avatars:feature.properties.avatars||[]});
    }
    lightsContext.globalAlpha=coreAlpha;
@@ -816,6 +816,10 @@ function renderHologramLabels(labels){
   if(!item){item=document.createElement('button');item.type='button';item.className='standalone-hologram-label';item.dataset.labelKey=label.key;item.addEventListener('click',()=>selectHologramLabel(item.dataset.labelKey));root.appendChild(item);}
   item.classList.toggle('standalone-hologram-label--housing',label.kind==='housing');item.classList.toggle('standalone-hologram-label--event',label.kind!=='housing');
   item.style.left=`${label.x}px`;item.style.top=`${label.y}px`;item.style.width=`${label.width}px`;item.style.opacity=label.opacity;item.style.setProperty('--label-scale',label.scale);item.style.setProperty('--label-color',label.color);item.style.setProperty('--label-clock',labelComplement(label.color));item.setAttribute('aria-label',label.kind==='housing'?label.name:`${label.name}, starts at ${label.time}`);
+  if(label.kind==='housing'){
+   item.style.setProperty('--face-offset',`${(label.logoY-label.y)/Math.max(.001,label.scale)}px`);
+   item.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,(label.avatars?.length||1)*.72+.28))}px`);
+  }
   const signature=JSON.stringify([label.kind,label.name,label.time,label.color,label.width,label.avatars]);
   if(item.dataset.signature!==signature){
    item.dataset.signature=signature;item.replaceChildren();const title=document.createElement('span');title.className='standalone-hologram-title';

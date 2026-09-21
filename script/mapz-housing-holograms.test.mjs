@@ -79,3 +79,28 @@ test('HOUS is isolated from the existing Eventz, Placez, and sparkle pipelines',
   assert.match(layer,/float alpha=\(\.42/);
   assert.match(layer,/gl\.disable\(gl\.DEPTH_TEST\)/);
 });
+
+test('HOUS projection keeps a readable event-relative envelope at every camera distance',async()=>{
+  const {housingScreenFit,housingIconSize,createHousingHologramLayer}=await import('../client/public/zaydar-map/housing-holograms.js');
+  const bounds={min:[-40,-10,0],max:[40,10,80]},viewport={width:1000,height:800};
+  for(const distance of [.01,1,100,10000])for(const scale of [.08,.3,1,1.65]){
+    const matrix=[1,0,0,0,0,.5,0,0,0,1,1,0,0,0,0,distance];
+    const size=housingIconSize(scale),fit=housingScreenFit(matrix,bounds,viewport,size);
+    const width=80/distance*viewport.width/2*fit.fit,height=90/distance*viewport.height/2*fit.fit;
+    assert.ok(width<=size.width+1e-8&&height<=size.height+1e-8);
+    assert.ok(Math.abs(width-size.width)<1e-8||Math.abs(height-size.height)<1e-8);
+    assert.ok(width<78.75*scale&&height<66.15*scale);
+  }
+  const layer=createHousingHologramLayer({});
+  layer.map={getZoom:()=>0,project:()=>({x:50,y:50}),getCanvas:()=>({clientWidth:100,clientHeight:100})};
+  assert.equal(layer.visible({demoOpen:true,coordinates:[0,0]}),true);
+  assert.equal(layer.visible({demoOpen:false,key:'closed',coordinates:[0,0]}),false);
+});
+
+test('face stacks anchor to the icon center in both label renderers',async()=>{
+  for(const path of ['../client/public/zaydar-map/river-flight.js','../client/src/components/ZaydarEventLabel.tsx']){
+    const source=await readFile(new URL(path,import.meta.url),'utf8');
+    assert.match(source,/label\.logoY-label\.y/);
+    assert.match(source,/--face-offset/);
+  }
+});
