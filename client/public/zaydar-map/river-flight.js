@@ -2,9 +2,9 @@ import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} 
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
-import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-day-sparkles';
+import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
-import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles} from '../home-flight/roof-sparkles.js?v=20260920-ground-lights';
+import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-sparkles';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
 import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
@@ -316,10 +316,16 @@ function buildingGlitter(target,surfaces){
  let points=roofSparkles(buildings,overview?(coarse?4200:7200):(coarse?(flat?2100:1400):(flat?3000:2400)),{
   sampleModulo:overview?2:4,lightsPerRoof:overview?1:5,bloomPercent:3,distribute:overview,
  });
+ let useStreets=false;
  if(overview&&(target.getZoom()<12.75||points.length<500)){
   const streets=streetSparkles(surfaces.overviewRoads??[],coarse?4200:7200,{bloomPercent:3,sampleModulo:2});
-  points=streets.length?streets:points;
+  if(streets.length){points=streets;useStreets=true;}
  }
+ const whiteLimit=Math.min(coarse?420:720,Math.ceil(points.length*.28));
+ const whiteCandidates=whiteLimit===0?[]:useStreets
+  ?streetSparkles(surfaces.overviewRoads??[],coarse?8400:14400,{bloomPercent:3,sampleModulo:1})
+  :roofSparkles(buildings,coarse?8400:14400,{sampleModulo:1,lightsPerRoof:2,bloomPercent:3,distribute:true});
+ points=points.concat(whiteSparkles(whiteCandidates,points,whiteLimit));
  glitterCache.set(target,{time:now,surfaces,flat,coarse,overview,points});return points;
 }
 const logoFocus=createLogoFocus();

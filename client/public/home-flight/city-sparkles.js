@@ -12,7 +12,7 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false,p
         this.points=points;
         this.vertices=new Float32Array(points.flatMap(point=>{
           const p=maplibre.MercatorCoordinate.fromLngLat(point.coordinates,point.height+.8+elevation(point.coordinates));
-          return [(p.x-origin.x)/unit,(p.y-origin.y)/unit,p.z/unit,point.phase,point.rate,point.star?1:0];
+          return [(p.x-origin.x)/unit,(p.y-origin.y)/unit,p.z/unit,point.phase,point.rate,(point.star?1:0)+(point.white?2:0)];
         }));
       }
       if(changed)this.map?.triggerRepaint();
@@ -33,6 +33,7 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false,p
         void main(){
           gl_Position=u_matrix*vec4(a_position,1.);
           v_tint=${paletteColors.length?`paletteColors[int(floor(noise(a_light.x*17.3)*${paletteColors.length}.))]`:'vec3(.66,.86,1.)'};
+          v_tint=mix(v_tint,vec3(1.),step(1.5,a_light.z));
           // Off-camera roofs skip light animation; depth testing handles occlusion.
           if(gl_Position.w<=0.||abs(gl_Position.x)>gl_Position.w||abs(gl_Position.y)>gl_Position.w||abs(gl_Position.z)>gl_Position.w){
             v_wave=0.;v_star=0.;gl_PointSize=1.;return;
@@ -42,7 +43,7 @@ export function createCitySparkles(maplibre,elevation=()=>0,{visibleCore=false,p
           float peak=.4+.6*noise(beat+a_light.x*3.7);
           float lit=step(.2,noise(beat*1.93+a_light.x*7.31));
           float twinkle=pow(max(0.,sin(fract(clock)*3.14159265)),4.)*peak*lit;
-          v_wave=mix(twinkle,.32,u_still);v_star=a_light.z;
+          v_wave=mix(twinkle,.32,u_still);v_star=mod(a_light.z,2.);
           float bloom=v_star*smoothstep(.58,.92,v_wave);
           gl_PointSize=(${visibleCore?'4.2+v_wave*2.1':'3.2+v_wave*3.1'}+bloom*6.8)*u_dpr;
         }`);

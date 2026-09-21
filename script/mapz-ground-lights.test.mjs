@@ -3,15 +3,41 @@ import assert from 'node:assert/strict';
 import {readFile,access} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
-import {intersectionLightPools,roofSparkles,streetSparkles,CITY_SPARKLE_MAX_ZOOM} from '../client/public/home-flight/roof-sparkles.js';
+import {intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM} from '../client/public/home-flight/roof-sparkles.js';
 import {groundLightMesh,createGroundLightPools} from '../client/public/zaydar-map/ground-light-pools.js';
 import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
+import {createCitySparkles} from '../client/public/home-flight/city-sparkles.js';
+import {DAY_LIST} from '../client/public/zaydar-map/radix-map.js';
 
 const road=(coordinates,properties={})=>({geometry:{type:'LineString',coordinates},properties:{class:'minor',...properties}});
 const intersection=[
   road([[-122.676,45.521],[-122.675,45.521],[-122.674,45.521]]),
   road([[-122.675,45.520],[-122.675,45.521],[-122.675,45.522]]),
 ];
+test('additional white sparkles cover sparse and dense cells without replacing colored anchors',()=>{
+  const candidates=[],colored=[];
+  for(let x=0;x<8;x++)for(let y=0;y<8;y++){
+    for(let i=0;i<(x<4?20:2);i++){
+      const point={coordinates:[-122.67+(x+.2+i*.025)*160/(111320*Math.cos(45.53*Math.PI/180)),45.53+(y+.4)*160/111320],
+        height:9,phase:i,rate:1,star:false};
+      candidates.push(point);if(i===0)colored.push(point);
+    }
+  }
+  const before=structuredClone(colored),white=whiteSparkles(candidates,colored);
+  assert.equal(white.length,64);assert.deepEqual(colored,before);
+  assert.deepEqual(whiteSparkles([...candidates].reverse(),colored),white);
+  assert.ok(white.every(p=>p.white&&!colored.some(c=>c.coordinates.every((v,i)=>v===p.coordinates[i]))));
+  assert.equal(whiteSparkles(candidates,colored,12).length,12);
+});
+test('white sparkle vertices append to the same batch without changing colored lights',()=>{
+  const require=createRequire(import.meta.url),{MercatorCoordinate}=require('maplibre-gl');
+  const layer=createCitySparkles({MercatorCoordinate},()=>0,{palette:DAY_LIST});
+  const colored={coordinates:[-122.67,45.53],height:12,phase:3,rate:.8,star:true};
+  layer.update([colored],0,false);const original=layer.vertices.slice();
+  layer.update([colored,{...colored,coordinates:[-122.671,45.531],white:true,star:false}],1,false);
+  assert.deepEqual(layer.vertices.slice(0,6),original);assert.equal(layer.vertices.length,12);
+  assert.equal(layer.vertices[5],1);assert.equal(layer.vertices[11],2);
+});
 test('intersection anchors and materials survive reordered, reversed and duplicated tiles',()=>{
   const pools=intersectionLightPools(intersection);
   assert.equal(pools.length,1);assert.equal(pools[0].count,4);
@@ -61,7 +87,7 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
   const target={getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
     surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},groundLightPools:{update(){}},lightFeatures:[],
-    createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,CITY_SPARKLE_MAX_ZOOM,target,
+    createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });
   vm.runInContext(renderer.slice(renderer.indexOf('function updateSurfaces('),renderer.indexOf('function drawSurfaceReflections(')),context);
   vm.runInContext(renderer.slice(renderer.indexOf('function buildingGlitter('),renderer.indexOf('const logoFocus=')),context);

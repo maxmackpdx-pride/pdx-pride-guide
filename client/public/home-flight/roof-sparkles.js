@@ -60,6 +60,27 @@ export function streetSparkles(features,limit=7000,{bloomPercent=3,sampleModulo=
   return [...points.values()].sort((a,b)=>a.hash-b.hash).slice(0,limit).map(({hash,...point})=>point);
 }
 
+// One additional white light per occupied geographic cell spreads highlights
+// across the city instead of piling them into its densest roof clusters.
+export function whiteSparkles(candidates,colored,limit=720,spacingMeters=160){
+  const keyOf=point=>point.coordinates.map(v=>v.toFixed(7)).join(',');
+  const occupied=new Set(colored.map(keyOf)),cells=new Map();
+  for(const point of candidates){
+    const key=keyOf(point);if(occupied.has(key))continue;
+    const [lng,lat]=point.coordinates;
+    const x=(lng+122.67)*111320*Math.cos(45.53*Math.PI/180),y=(lat-45.53)*111320;
+    const gx=Math.floor(x/spacingMeters),gy=Math.floor(y/spacingMeters),cellKey=`${gx}:${gy}`;
+    const distance=Math.hypot(x-(gx+.5)*spacingMeters,y-(gy+.5)*spacingMeters),previous=cells.get(cellKey);
+    if(!previous||distance<previous.distance||(distance===previous.distance&&key<previous.key))
+      cells.set(cellKey,{point,key,distance,order:hashKey(cellKey)});
+  }
+  return [...cells.values()].sort((a,b)=>a.order-b.order||a.key.localeCompare(b.key)).slice(0,limit).map(({point,key})=>{
+    const seed=hashKey(`${key}:white`);
+    return {...point,white:true,phase:seed/4294967295*100,rate:.6+hashKey(`${seed}:rate`)/4294967295*.6,
+      star:hashKey(`${seed}:bloom`)/4294967295<.03};
+  });
+}
+
 export function intersectionLightPools(features,limit=180) {
   const nodes=new Map(),excluded=new Set(['rail','path','motorway','trunk']);
   for(const feature of features){
