@@ -1,7 +1,7 @@
 /* The navbar stays in its existing stacking layer; the flight bleeds beneath it. */
 .home-front { margin-top:calc(-1 * var(--home-header-height, var(--site-header-height,0px))); background:var(--ink-900,#050506); color:var(--text-body,#d6d6dc); overflow:clip; }
 .home-front__welcome { position:relative; height:100svh; min-height:100svh; isolation:isolate; overflow:hidden; background:#020509; }
-.home-front__flight { position:absolute; inset:0; z-index:0; background:#020509 url('/home-flight/poster.webp') center/cover no-repeat; }
+.home-front__flight { position:absolute; inset:0; z-index:0; background:#020509; }
 .home-front__flight-credit { position:absolute; right:14px; bottom:var(--home-flight-bottom,116px); z-index:1; color:#9eb0c1; font-size:10px; text-shadow:0 1px 3px #000; }
 .home-front__flight-credit a { color:inherit; }
 .home-front__flight-frame { display:block; pointer-events:none; width:100%; height:100%; border:0; opacity:0; transition:opacity .7s ease; }

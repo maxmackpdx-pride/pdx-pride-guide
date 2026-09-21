@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import hologramData from "./portland-globe-holograms.json";
 
 // A deliberately enlarged metro wrapped over a sphere, not an Earth-scale globe.
 // Built-up land-use and water mask: OpenFreeMap / OpenMapTiles / OSM,
@@ -111,14 +112,13 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     // Previous frame footprints keep the dot pass beneath beams and artwork.
     let beamFootprints: { ax:number; ay:number; x:number; y:number; halfWidth:number; strength:number; rgb:number[] }[] = [];
-    const abort = new AbortController();
     const venues: { point: Point; image: HTMLCanvasElement; color: string; phase: number }[] = [];
     type AtlasEntry = {id:string; coordinates:[number,number];color:string;phase:number;product:boolean;x:number;y:number;w:number;h:number};
     const atlas=new Image();atlas.decoding="async";
     atlas.src='/home-globe/holograms.webp';
-    void Promise.all([atlas.decode(),fetch('/home-globe/holograms.json',{signal:abort.signal}).then(r=>{
-      if(!r.ok)throw new Error('Hologram atlas unavailable');return r.json() as Promise<AtlasEntry[]>;
-    })]).then(([,rows])=>{
+    // Coordinates and labels ship with the app; no map service or data fetch.
+    void atlas.decode().then(()=>{
+      const rows=hologramData as AtlasEntry[];
       if(disposed)return;
       for(const row of rows){
         const image=document.createElement('canvas');image.width=row.w;image.height=row.h;
@@ -473,7 +473,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
     };
     if (active) frame = requestAnimationFrame(animate);
     redrawRef.current = () => { if(still || !active)draw(); };
-    return () => { disposed = true; abort.abort(); cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
+    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); redrawRef.current = () => {}; syncAnimation.current=()=>{}; };
   }, []);
   useEffect(()=>{mode.current={active,still};syncAnimation.current();},[active,still]);
 

@@ -39,8 +39,8 @@ export default function HomeFlight({ enabled = true, paused = false }: { enabled
   return <div ref={container} className="home-front__flight home-front__flight--globe">
     {enabled && <PortlandMetroGlobe active={active} still={still} />}
     <div className="home-front__flight-credit">
-      © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
-      {" · "}<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> · OpenMapTiles
+      © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
+      {" · "}<a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>
     </div>
   </div>;
 }
