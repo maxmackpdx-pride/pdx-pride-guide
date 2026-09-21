@@ -40,7 +40,7 @@ function warp(value: number, center: number, strength: number, inverse = false) 
 const smooth = (value: number) => { const t=Math.max(0,Math.min(1,value)); return t*t*t*(t*(t*6-15)+10); };
 const MAX_HOLOGRAMS = 6;
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
-type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; glow?: { strength: number; r: number; g: number; b: number } };
+type Point = { x: number; y: number; z: number; tone: number; beamExcluded?: boolean; glow?: { strength: number; lastLit: number; r: number; g: number; b: number } };
 function sphere(u: number, v: number, tone = 0): Point {
   const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
@@ -212,9 +212,13 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             const strength=beam.strength*smooth((1-edge)/.4)*smooth(t/.15)*smooth((1-t)/.15);
             if(strength>target){target=strength;rgb=beam.rgb;}
           }
-          const glow=p.glow ??= {strength:0,r:rgb[0],g:rgb[1],b:rgb[2]};
-          const blend=still?1:1-Math.exp(-glowDt/(target>glow.strength?180:450));
-          glow.strength+=(target-glow.strength)*blend;
+          const glow=p.glow ??= {strength:0,lastLit:-Infinity,r:rgb[0],g:rgb[1],b:rgb[2]};
+          if(target>.01)glow.lastLit=elapsed;
+          // Hold the illuminated color for four seconds after the beam leaves,
+          // then use the existing gentle fade back to the map's base dots.
+          const heldTarget=elapsed-glow.lastLit<4000?Math.max(target,glow.strength):target;
+          const blend=still?1:1-Math.exp(-glowDt/(heldTarget>glow.strength?180:450));
+          glow.strength+=(heldTarget-glow.strength)*blend;
           if(target>0){
             glow.r+=(rgb[0]-glow.r)*blend;glow.g+=(rgb[1]-glow.g)*blend;glow.b+=(rgb[2]-glow.b)*blend;
           }
