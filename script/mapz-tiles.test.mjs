@@ -51,7 +51,12 @@ test('2D is retained but disconnected from both the map host and toggle',()=>{
  assert.match(host,/>Retry 3D<\/button>/);
 });
 
-test('the public demo route loads Mapz directly while the main route keeps its gate',()=>{
+test('Mapz is public while signed-out object interactions require authentication',()=>{
  assert.match(app,/<Route path="\/map-demo" component=\{ZaydarMapDemo\} \/>/);
- assert.match(app,/<Route path="\/map" component=\{\(\) => <SignedInLivingMap \/>\} \/>/);
+ assert.match(app,/<Route path="\/map" component=\{ZaydarMapDemo\} \/>/);
+ assert.doesNotMatch(app,/SignedInLivingMap/);
+ assert.match(page,/if\(!canOpenMapObjects\)\{mapRef\.current\?\.send\('select',\{key:null\}\);setShowAuth\(true\);return;\}/);
+ assert.match(page,/target\.closest\("\.zaydar-control-zoom"\)/);
+ assert.match(page,/onClickCapture=\{gateSignedOutControls\}/);
+ assert.match(page,/<AuthModal onClose=\{\(\) => setShowAuth\(false\)\} defaultTab="login" \/>/);
 });

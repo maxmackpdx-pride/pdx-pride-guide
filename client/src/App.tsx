@@ -1,12 +1,11 @@
 import { homeBootLogoHtml } from "@shared/homeBoot";
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { scheduleScrollReset } from "./lib/resetPageScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Nav from "./components/Nav";
@@ -19,9 +18,6 @@ import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
-import AuthModal from "./components/AuthModal";
-import PageHeader from "./components/PageHeader";
-import { isLocalDemo } from "./lib/localDemo";
 import { lazyWithReload } from "./lib/lazyWithReload";
 
 /** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
@@ -98,30 +94,6 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
-function SignedInLivingMap() {
-  const { user, loading } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
-  if (loading) return <SpectrumLoader variant="full" label="Loading map" />;
-  if (user || isLocalDemo()) return <ZaydarMapDemo />;
-  return (
-    <div className="zine-page board-page">
-      <PageHeader
-        section="Explore"
-        title="Map"
-        titleAccent="cyan"
-        lede="Sign in to explore nearby places, events, and community boards on the map."
-        actions={
-          <button type="button" className="site-login-button" onClick={() => setShowAuth(true)}>
-            LOG IN / JOIN
-          </button>
-        }
-      />
-      <p style={{ padding: "0 24px 32px", color: "var(--text-mid)" }}>Your map will open here after you sign in.</p>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </div>
-  );
-}
-
 function AppLayout() {
   const [location] = useLocation();
   const hub = isHubPath(location);
@@ -158,7 +130,7 @@ function AppLayout() {
             <Route path="/events/:id/:slug?" component={Events} />
             <Route path="/events" component={Events} />
             <Route path="/map-demo" component={ZaydarMapDemo} />
-            <Route path="/map" component={() => <SignedInLivingMap />} />
+            <Route path="/map" component={ZaydarMapDemo} />
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
