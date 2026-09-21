@@ -13,6 +13,22 @@ const tileX = (lon: number) => (lon + 180) / 360 * 1024;
 const tileY = (lat: number) => (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * 1024;
 const CENTER = [(tileX(METRO.west)+tileX(METRO.east))/2, (tileY(METRO.north)+tileY(METRO.south))/2];
 const SPAN = [(tileX(METRO.east)-tileX(METRO.west))/2, (tileY(METRO.south)-tileY(METRO.north))/2];
+// Initial globe center: SE Hawthorne Boulevard at SE 12th Avenue.
+const START_LOCATION = { lat: 45.5121, lon: -122.65365 };
+const EQUATOR_V = (CENTER[1]-tileY(START_LOCATION.lat))/SPAN[1];
+// Compress the central city into an equatorial band, preserving crop edges.
+function equatorialLatitude(value: number, inverse = false): number {
+  if (inverse) {
+    let low=-1, high=1;
+    for(let i=0;i<28;i++) {
+      const mid=(low+high)/2;
+      if(equatorialLatitude(mid)<value)low=mid;else high=mid;
+    }
+    return (low+high)/2;
+  }
+  const t=(value-EQUATOR_V)/(value>=EQUATOR_V?1-EQUATOR_V:1+EQUATOR_V);
+  return .28*t+.72*t*t*t;
+}
 const PLACES = [{ name: "Portland", lat: 45.523, lon: -122.676 }];
 // A continuous focus warp spreads the dense central metro around the sphere.
 // The map, labels, glitter and venue anchors all use this same transform.
@@ -26,7 +42,7 @@ const MAX_HOLOGRAMS = 6;
 type HologramState = { progress: number; openedAt: number; closing: boolean; offsetX: number; offsetY: number };
 type Point = { x: number; y: number; z: number; tone: number };
 function sphere(u: number, v: number, tone = 0): Point {
-  const longitude = warp(u,-.15,5) * Math.PI, latitude = warp(v,.16,4) * Math.PI / 2;
+  const longitude = warp(u,-.15,5) * Math.PI, latitude = equatorialLatitude(v) * Math.PI / 2;
   return { x: Math.sin(longitude) * Math.cos(latitude), y: Math.sin(latitude), z: Math.cos(longitude) * Math.cos(latitude), tone };
 }
 function placePoint(place: { lat: number; lon: number }) {
@@ -37,7 +53,7 @@ function placePoint(place: { lat: number; lon: number }) {
 const RIVERS = [
   { name: "Willamette River", lat: 45.552, lon: -122.688 },
 ];
-const INITIAL_YAW = -warp((tileX(-122.666)-CENTER[0])/SPAN[0],-.15,5)*Math.PI;
+const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI;
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 
 export function PortlandMetroGlobe({ active, still }: { active: boolean; still: boolean }) {
@@ -295,7 +311,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       points = [];
       for (let row = -88; row <= 88; row++) {
         const latitude = row/90;
-        const v = warp(latitude,.16,4,true);
+        const v = equatorialLatitude(latitude,true);
         const columns = Math.max(8,Math.round(280*Math.cos(latitude*Math.PI/2)));
         for(let col = 0; col <= columns; col++) {
           const u = warp(col/columns*2-1,-.15,5,true);
