@@ -406,8 +406,9 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.strokeStyle=color;lightsContext.lineWidth=.6;lightsContext.globalAlpha=fade*.14*beamAlpha;
     lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX+(p.x-logoX)*.08,top+(p.y-top)*.08);lightsContext.stroke();
     lightsContext.restore();
-    drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:24});
+    // The Saturn disk and its hit target stay at the projected address.
+    drawIdleWaypoint(lightsContext,p.x,p.y,color,phase,fade,coreAlpha);
+    hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:24});
     continue;
    }
    // Wide, flattened light spill on the ground; the upright pin's tip is the anchor.
@@ -542,7 +543,7 @@ function drawLights(fade,target=map,surface=lights){
    }
    lightsContext.restore();
   }else if(pass===0){
-   drawIdleWaypoint(lightsContext,p.x,raisedY,color,phase,fade,coreAlpha);
+   drawIdleWaypoint(lightsContext,p.x,p.y,color,phase,fade,coreAlpha);
   }
  }
 }
