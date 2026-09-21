@@ -21,6 +21,19 @@ test('home map retains vector buildings without added terrain or backgrounds',()
  assert.equal(style.light.color,'#c7d9ed');
 });
 
+test('home flyover uses the Mapz surface materials without replacing its hologram system',async()=>{
+ const homeRenderer=await readFile(new URL('../client/public/home-flight/river-flight.js',import.meta.url),'utf8');
+ const homeHtml=await readFile(new URL('../client/public/home-flight/index.html',import.meta.url),'utf8');
+ assert.match(homeRenderer,/mapzSurfaceStyle\(\{/);
+ assert.match(homeRenderer,/createWaterBloom/);
+ assert.match(homeRenderer,/createBuildingChrome/);
+ assert.match(homeRenderer,/style:surfaceStyle/);
+ assert.match(homeRenderer,/createHologramMaterials\(\[\.\.\.dayColors,adultVenueColor\]\)/);
+ assert.match(homeRenderer,/flightCamera\(t\)/);
+ assert.match(homeHtml,/maplibre-contour-0\.1\.0\.js/);
+ assert.match(homeHtml,/Mapterhorn/);
+});
+
 test('MapLibre accepts every base-city paint expression',()=>{
  assert.deepEqual(validateStyleMin(getStyle()).map(error=>error.message),[]);
 });

@@ -135,7 +135,7 @@ test('ground and water are opaque with the moonlit mineral shoreline color',()=>
  assert.equal(layer('water-bloom-wide'),undefined);
  assert.equal(layer('water-bloom-tight'),undefined);
  assert.deepEqual(layer('banks').paint['line-opacity'],['interpolate',['linear'],['zoom'],10,.2,15,.32,18,.26]);
- assert.deepEqual(layer('streams').filter,['in',['get','class'],['literal',['stream','ditch','drain']]]);
+ assert.deepEqual(layer('streams').layout,{visibility:'none'});
  assert.deepEqual(layer('streets').filter.slice(-2),[
   ['!=',['get','brunnel'],'tunnel'],['>=',['coalesce',['get','layer'],0],0]
  ]);

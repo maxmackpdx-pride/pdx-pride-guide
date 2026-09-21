@@ -5,6 +5,16 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import {mapzSurfaceStyle} from '../client/public/zaydar-map/natural-surfaces.js';
 import {waterReflectionSegments,createBuildingChrome} from '../client/public/zaydar-map/nightlife-materials.js';
+import {projectorGroundScale} from '../client/public/zaydar-map/hologram-materials.js';
+
+test('projector circles shrink at overview zoom without a camera-facing guide line',async()=>{
+  assert.equal(projectorGroundScale(12),.28);
+  assert.ok(projectorGroundScale(13)<projectorGroundScale(14));
+  assert.equal(projectorGroundScale(15),1);
+  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+  assert.equal(renderer.includes('lineTo(logoX,raisedY)'),false);
+  assert.equal(renderer.includes("lineTo(logoX+(p.x-logoX)*.08"),false);
+});
 
 test('street inlays stay on major surface roads, below buildings, without recoloring bridges',()=>{
   const require=createRequire(import.meta.url),mr=createRequire(require.resolve('maplibre-gl'));
@@ -67,6 +77,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
+    projectorGroundScale,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,
   });

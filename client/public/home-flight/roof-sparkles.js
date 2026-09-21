@@ -60,25 +60,39 @@ export function streetSparkles(features,limit=7000,{bloomPercent=3,sampleModulo=
   return [...points.values()].sort((a,b)=>a.hash-b.hash).slice(0,limit).map(({hash,...point})=>point);
 }
 
-// One additional white light per occupied geographic cell spreads highlights
-// across the city instead of piling them into its densest roof clusters.
-export function whiteSparkles(candidates,colored,limit=720,spacingMeters=160){
-  const keyOf=point=>point.coordinates.map(v=>v.toFixed(7)).join(',');
-  const occupied=new Set(colored.map(keyOf)),cells=new Map();
-  for(const point of candidates){
-    const key=keyOf(point);if(occupied.has(key))continue;
+// Convert exactly the requested share of the existing colored field to white.
+// Each geographic cell keeps the same proportion, so white lights remain even
+// across sparse neighborhoods and dense downtown roofs without adding points.
+export function whiteSparkles(points,percent=30,spacingMeters=160){
+  const target=Math.round(points.length*Math.max(0,Math.min(100,percent))/100);
+  if(!target)return points.map(point=>({...point,white:false}));
+  const keyOf=point=>point.coordinates.map(v=>v.toFixed(7)).join(','),cells=new Map();
+  for(const point of points){
+    const key=keyOf(point);
     const [lng,lat]=point.coordinates;
     const x=(lng+122.67)*111320*Math.cos(45.53*Math.PI/180),y=(lat-45.53)*111320;
     const gx=Math.floor(x/spacingMeters),gy=Math.floor(y/spacingMeters),cellKey=`${gx}:${gy}`;
-    const distance=Math.hypot(x-(gx+.5)*spacingMeters,y-(gy+.5)*spacingMeters),previous=cells.get(cellKey);
-    if(!previous||distance<previous.distance||(distance===previous.distance&&key<previous.key))
-      cells.set(cellKey,{point,key,distance,order:hashKey(cellKey)});
+    const distance=Math.hypot(x-(gx+.5)*spacingMeters,y-(gy+.5)*spacingMeters);
+    const cell=cells.get(cellKey)??{key:cellKey,order:hashKey(cellKey),points:[]};
+    cell.points.push({point,key,distance,order:hashKey(`${cellKey}:${key}:white`)});cells.set(cellKey,cell);
   }
-  return [...cells.values()].sort((a,b)=>a.order-b.order||a.key.localeCompare(b.key)).slice(0,limit).map(({point,key})=>{
-    const seed=hashKey(`${key}:white`);
-    return {...point,white:true,phase:seed/4294967295*100,rate:.6+hashKey(`${seed}:rate`)/4294967295*.6,
-      star:hashKey(`${seed}:bloom`)/4294967295<.03};
-  });
+  const selected=new Set(),ranked=[...cells.values()];
+  for(const cell of ranked){
+    cell.points.sort((a,b)=>a.distance-b.distance||a.order-b.order||a.key.localeCompare(b.key));
+    cell.quota=cell.points.length*percent/100;
+    cell.base=Math.floor(cell.quota);
+    for(const item of cell.points.slice(0,cell.base))selected.add(item.key);
+  }
+  ranked.sort((a,b)=>(b.quota-b.base)-(a.quota-a.base)||a.order-b.order||a.key.localeCompare(b.key));
+  for(const cell of ranked){
+    if(selected.size>=target)break;
+    const item=cell.points[cell.base];if(item)selected.add(item.key);
+  }
+  if(selected.size<target){
+    const remaining=ranked.flatMap(cell=>cell.points).filter(item=>!selected.has(item.key)).sort((a,b)=>a.order-b.order||a.key.localeCompare(b.key));
+    for(const item of remaining){if(selected.size>=target)break;selected.add(item.key);}
+  }
+  return points.map(point=>({...point,white:selected.has(keyOf(point))}));
 }
 
 export function intersectionLightPools(features,limit=180) {

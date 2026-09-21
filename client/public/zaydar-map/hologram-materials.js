@@ -55,6 +55,11 @@ export function createHologramMaterials(colors) {
   };
 }
 
+export function projectorGroundScale(zoom){
+  const value=Math.max(0,Math.min(1,(zoom-12)/3));
+  return .28+.72*value*value*(3-2*value);
+}
+
 export function drawProjectionBeam(ctx, texture, anchor, logoX, top, halfWidth) {
   const height = anchor.y - top;
   if (height <= 1) return;

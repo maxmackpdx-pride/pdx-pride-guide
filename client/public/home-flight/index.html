@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portland · Zaylist Flight</title>
-<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
-<link rel="modulepreload" href="./river-flight.js">
-<link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script>
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin><link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
+<link rel="modulepreload" href="./river-flight.js?v=20260920-shared-map-materials">
+<link href="./vendor/maplibre-gl-5.6.2.css" rel="stylesheet"><script src="./vendor/maplibre-gl-5.6.2.js"></script><script src="../zaydar-map/vendor/maplibre-contour-0.1.0.js"></script>
 <link href="./studio.css" rel="stylesheet">
 </head><body>
 <div id="map"></div><canvas id="waypoint-lights" aria-label="Floating venue holograms and animated map tracking brackets"></canvas>
 <div id="exploration-status" role="status" aria-live="polite"></div>
-<div class="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a> · OpenMapTiles</div><div id="map-status" role="status" aria-live="polite">Preparing Portland…</div>
+<div class="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a> · OpenMapTiles · <a href="https://mapterhorn.com/attribution">Mapterhorn</a></div><div id="map-status" role="status" aria-live="polite">Preparing Portland…</div>
 <p class="explore-hint">Tap and drag to explore</p>
 <!-- Keep the flight’s existing default settings and pause state offscreen. -->
 <div hidden>
@@ -16,4 +16,4 @@
 <label>Map <input id="map-opacity" type="range" min="0" max="1" step=".05" value=".75"><output id="map-value" for="map-opacity">75%</output></label>
 <label class="pause"><input id="pause-flight" type="checkbox">Pause &amp; explore</label>
 </div></div>
-<script type="module" src="./river-flight.js"></script></body></html>
+<script type="module" src="./river-flight.js?v=20260920-shared-map-materials"></script></body></html>

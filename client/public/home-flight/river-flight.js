@@ -8,11 +8,17 @@ import {createMapExploration} from './map-exploration.js';
 import {createCitySparkles} from './city-sparkles.js';
 import {roofSparkles} from './roof-sparkles.js';
 import {roadColor, roadLineWidth, bridgeFilter, createBridgeLayer} from './bridge-roads.js';
-import {vectorStyle} from './city-map.js';
-// OpenFreeMap vector geometry; no symbols, labels, land fill, or map background.
+import {mapzSurfaceStyle,createWaterBloom} from '../zaydar-map/natural-surfaces.js?v=20260920-shared-map-materials';
+import {createBuildingChrome} from '../zaydar-map/nightlife-materials.js?v=20260920-shared-map-materials';
+const elevation=new mlcontour.DemSource({id:'home-elevation',url:'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',encoding:'terrarium',maxzoom:13,worker:true,cacheSize:48});
+elevation.setupMaplibre(maplibregl);
+const surfaceStyle=mapzSurfaceStyle({
+ demTiles:[elevation.sharedDemProtocolUrl],
+ contourTiles:[elevation.contourProtocolUrl({multiplier:3.28084,thresholds:{10:[500,2000],12:[100,500],14:[50,200],15:[20,100]},contourLayer:'contours',elevationKey:'ele',levelKey:'level'})],
+});
 const map = new maplibregl.Map({container:'map',interactive:false,attributionControl:false,
   center:[-122.66544,45.5032],zoom:(13.8849625+Math.log2(1.18)),pitch:48,bearing:0,
-  style:structuredClone(vectorStyle)});
+  style:surfaceStyle});
 // Neon colors excluding yellow and royal blue. Random per page, stable during flight.
 const adultVenueColor='#FF0000';
 const dayColors=['#8800FF','#00FFFF','#FF00CC','#39FF14','#FF6600'];
@@ -40,9 +46,11 @@ const waypoints=fetch('./waypoints.json',{signal:assetController.signal}).then(r
 });
 // Roads and raised decks share one material and physical widths; the custom
 // mesh adds thin sides and gradual approaches without another canvas/context.
-const surfaceCache=new WeakMap();
-const bridgeLayer=createBridgeLayer(maplibregl);
+const surfaceCache=new WeakMap(),glitterCache=new WeakMap();
+const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
 const citySparkles=createCitySparkles(maplibregl);
+const waterBloom=createWaterBloom(),buildingChrome=createBuildingChrome();
+map.on('sourcedata',event=>{if(event.sourceId==='terrain'||event.sourceId==='elevation'){waterBloom.invalidate();surfaceCache.delete(map);glitterCache.delete(map);bridgeLayer.signature='';scheduleFrame();}});
 map.on('load',()=>{map.addLayer(bridgeLayer,'skyline');map.addLayer(citySparkles);});
 function updateSurfaces(target){
  const cached=surfaceCache.get(target),now=performance.now();
@@ -228,7 +236,6 @@ waypoints.then(async data=>{
  if(missing)console.warn('Some venue logos could not load; the map remains available.');
 }).catch(error=>{if(disposed)return;console.error(error);assetError='Directory lights unavailable. Refresh to retry.';assetsReady=true;updateSceneStatus();scheduleFrame();});
 // Choose the same geographic roof corner regardless of polygon winding or start.
-const glitterCache=new WeakMap();
 function buildingGlitter(target,surfaces){
  const now=performance.now(),cached=glitterCache.get(target);
  if(cached && cached.surfaces===surfaces)return cached.points;
@@ -312,6 +319,8 @@ function drawLights(fade,target=map,surface=lights){
  const viewportScale=Math.min(1,Math.max(.72,(width-32)/680));
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
+ waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,[]);
+ buildingChrome.draw(lightsContext,target,surfaces.buildings??[],fade);
  drawSurfaceReflections(lightsContext,target,surfaces.reflections??[],fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
@@ -699,6 +708,7 @@ window.addEventListener('pagehide',()=>{
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
+ waterBloom.dispose();
  hologramMaterials.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;

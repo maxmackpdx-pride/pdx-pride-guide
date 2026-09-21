@@ -8,26 +8,30 @@ import {groundLightMesh,createGroundLightPools} from '../client/public/zaydar-ma
 import {standaloneDemoRows} from '../client/public/zaydar-map/standalone-demo.js';
 import {createCitySparkles} from '../client/public/home-flight/city-sparkles.js';
 import {DAY_LIST} from '../client/public/zaydar-map/radix-map.js';
+import {contourSignalOpacity,corridorGradient,selectSignalCorridors} from '../client/public/zaydar-map/ambient-signals.js';
 
 const road=(coordinates,properties={})=>({geometry:{type:'LineString',coordinates},properties:{class:'minor',...properties}});
 const intersection=[
   road([[-122.676,45.521],[-122.675,45.521],[-122.674,45.521]]),
   road([[-122.675,45.520],[-122.675,45.521],[-122.675,45.522]]),
 ];
-test('additional white sparkles cover sparse and dense cells without replacing colored anchors',()=>{
-  const candidates=[],colored=[];
+test('thirty percent of colored sparkles turn white across sparse and dense cells',()=>{
+  const candidates=[];
   for(let x=0;x<8;x++)for(let y=0;y<8;y++){
     for(let i=0;i<(x<4?20:2);i++){
       const point={coordinates:[-122.67+(x+.2+i*.025)*160/(111320*Math.cos(45.53*Math.PI/180)),45.53+(y+.4)*160/111320],
         height:9,phase:i,rate:1,star:false};
-      candidates.push(point);if(i===0)colored.push(point);
+      candidates.push(point);
     }
   }
-  const before=structuredClone(colored),white=whiteSparkles(candidates,colored);
-  assert.equal(white.length,64);assert.deepEqual(colored,before);
-  assert.deepEqual(whiteSparkles([...candidates].reverse(),colored),white);
-  assert.ok(white.every(p=>p.white&&!colored.some(c=>c.coordinates.every((v,i)=>v===p.coordinates[i]))));
-  assert.equal(whiteSparkles(candidates,colored,12).length,12);
+  const converted=whiteSparkles(candidates,30);
+  assert.equal(converted.length,candidates.length);
+  assert.equal(converted.filter(point=>point.white).length,Math.round(candidates.length*.3));
+  const selected=converted.filter(point=>point.white).map(point=>point.coordinates.join(',')).sort();
+  const reversed=whiteSparkles([...candidates].reverse(),30).filter(point=>point.white).map(point=>point.coordinates.join(',')).sort();
+  assert.deepEqual(reversed,selected);
+  const whiteCells=new Set(converted.filter(point=>point.white).map(point=>Math.floor((point.coordinates[1]-45.53)*111320/160)));
+  assert.ok(whiteCells.size>=7);
 });
 test('white sparkle vertices append to the same batch without changing colored lights',()=>{
   const require=createRequire(import.meta.url),{MercatorCoordinate}=require('maplibre-gl');
@@ -51,6 +55,21 @@ test('ground lights exclude elevated roads, tunnels and highway ramps',()=>{
   for(const properties of [{brunnel:'bridge'},{brunnel:'tunnel'},{layer:1},{layer:-1},{class:'motorway'},{class:'trunk'}]){
     assert.equal(intersectionLightPools(intersection.map(f=>road(f.geometry.coordinates,properties))).length,0);
   }
+});
+test('ambient signals stay sparse, geographic and restrained',()=>{
+  const roads=Array.from({length:12},(_,index)=>road([
+    [-122.70+index*.002,45.50],[-122.69+index*.002,45.54],
+  ],{class:index%3===0?'motorway':index%3===1?'trunk':'primary',brunnel:index===0?'bridge':undefined}));
+  const selected=selectSignalCorridors([...roads,...roads],6);
+  assert.equal(selected.length,6);
+  assert.ok(selected.some(feature=>feature.properties.bridge));
+  assert.ok(selected.every(feature=>feature.geometry.type==='LineString'));
+  assert.ok(contourSignalOpacity(4,0,13,false)<=.033);
+  assert.equal(contourSignalOpacity(4,0,16,false),0);
+  assert.equal(contourSignalOpacity(4,0,13,true),contourSignalOpacity(400,0,13,true));
+  const gradient=corridorGradient(.5,false,.85);
+  const stops=gradient.slice(3).filter((_,index)=>index%2===0);
+  assert.ok(stops.every((stop,index)=>index===0||stop>stops[index-1]));
 });
 test('pool geometry stays flat and measured in ground meters',()=>{
   const pool={coordinates:[100,200],radiusMeters:18,angle:0};
@@ -86,7 +105,7 @@ test('sparse building tiles keep street sparkles at overview zooms through sixte
   const roads=Array.from({length:100},(_,i)=>road([[-122.675+i*.0001,45.52],[-122.675+i*.0001,45.522]]));
   const target={getLayer:()=>true,querySourceFeatures:(_source,{sourceLayer})=>sourceLayer==='building'?[]:roads,getZoom:()=>14,getPitch:()=>48};
   const context=vm.createContext({Map,Set,WeakMap,performance,window:{innerWidth:900,innerHeight:1200},matchMedia:()=>({matches:false}),
-    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},groundLightPools:{update(){}},lightFeatures:[],
+    surfaceCache:new WeakMap(),glitterCache:new WeakMap(),bridgeLayer:{update(){}},portlandBridges:{update(){}},groundLightPools:{update(){}},ambientSignals:{update(){}},lightFeatures:[],
     createSpatialIndex:()=>()=>[],intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles,CITY_SPARKLE_MAX_ZOOM,target,
   });
   vm.runInContext(renderer.slice(renderer.indexOf('function updateSurfaces('),renderer.indexOf('function drawSurfaceReflections(')),context);

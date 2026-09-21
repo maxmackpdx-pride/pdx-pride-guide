@@ -4,13 +4,15 @@ import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-
 import {createBridgeLayer} from '../home-flight/bridge-roads.js';
 import {createCitySparkles} from '../home-flight/city-sparkles.js?v=20260920-white-sparkles';
 import {standaloneDemoRows,STANDALONE_DEMO_VIEW} from './standalone-demo.js';
-import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-sparkles';
+import {CITY_SPARKLE_MAX_ZOOM,intersectionLightPools,roofSparkles,streetSparkles,whiteSparkles} from '../home-flight/roof-sparkles.js?v=20260920-white-30';
 import {createLogoFocus} from './logo-focus.js';
 import {logoCoverage} from './logo-mask.js';
-import {createHologramMaterials,drawProjectionBeam} from './hologram-materials.js';
+import {createHologramMaterials,drawProjectionBeam,projectorGroundScale} from './hologram-materials.js?v=20260920-overview-projectors';
 import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
+import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
+import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260920-portland-bridges';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
 startup.phase('script');
@@ -50,11 +52,16 @@ const waypoints=Promise.resolve({type:'FeatureCollection',features:[]});
 // mesh adds thin sides and gradual approaches without another canvas/context.
 const surfaceCache=new WeakMap();
 const bridgeLayer=createBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,true);
+const portlandBridges=createPortlandBridgeLayer(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0);
 const citySparkles=createCitySparkles(maplibregl,coordinates=>map.queryTerrainElevation(coordinates)||0,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const ambientSignals=createAmbientSignals(map,reduced);
 function installSceneExtras(){
+ ambientSignals.install();
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
+ map.addLayer(portlandBridges,'skyline');
  map.addLayer(citySparkles);
 }
 map.on('load',()=>{
@@ -77,7 +84,12 @@ function updateSurfaces(target){
   buildings.push({center,height,ring});
  }
  const transportation=target.querySourceFeatures('terrain',{sourceLayer:'transportation'});
- const bridgeFeatures=transportation.filter(feature=>feature.properties?.brunnel==='bridge'&&!['rail','path'].includes(feature.properties?.class));
+ ambientSignals.update(transportation);
+ const allBridgeFeatures=transportation.filter(feature=>feature.properties?.brunnel==='bridge');
+ portlandBridges.update(allBridgeFeatures);
+ const bridgeFeatures=allBridgeFeatures.filter(feature=>!['rail','path'].includes(feature.properties?.class));
+ // Keep the vector deck under each real model. It provides a continuous road
+ // through the model and preserves the short approach pieces at both ends.
  bridgeLayer.update(bridgeFeatures);
  // Geographic light/building associations change only when the surface cache refreshes.
  const reflections=[];
@@ -316,16 +328,11 @@ function buildingGlitter(target,surfaces){
  let points=roofSparkles(buildings,overview?(coarse?4200:7200):(coarse?(flat?2100:1400):(flat?3000:2400)),{
   sampleModulo:overview?2:4,lightsPerRoof:overview?1:5,bloomPercent:3,distribute:overview,
  });
- let useStreets=false;
  if(overview&&(target.getZoom()<12.75||points.length<500)){
   const streets=streetSparkles(surfaces.overviewRoads??[],coarse?4200:7200,{bloomPercent:3,sampleModulo:2});
-  if(streets.length){points=streets;useStreets=true;}
+  if(streets.length)points=streets;
  }
- const whiteLimit=Math.min(coarse?420:720,Math.ceil(points.length*.28));
- const whiteCandidates=whiteLimit===0?[]:useStreets
-  ?streetSparkles(surfaces.overviewRoads??[],coarse?8400:14400,{bloomPercent:3,sampleModulo:1})
-  :roofSparkles(buildings,coarse?8400:14400,{sampleModulo:1,lightsPerRoof:2,bloomPercent:3,distribute:true});
- points=points.concat(whiteSparkles(whiteCandidates,points,whiteLimit));
+ points=whiteSparkles(points,30);
  glitterCache.set(target,{time:now,surfaces,flat,coarse,overview,points});return points;
 }
 const logoFocus=createLogoFocus();
@@ -564,6 +571,7 @@ function drawLights(fade,target=map,surface=lights){
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
+  const groundScale=projectorGroundScale(target.getZoom());
   const lift=roofLift(target,feature,surfaces),raisedY=offset?p.y+offset.y+offset.avoidY+178.5*beaconScale-hover:p.y-lift-hover;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
   const emergence=isBar?emergenceFor(feature):0;
@@ -595,10 +603,6 @@ function drawLights(fade,target=map,surface=lights){
    const spill=lightsContext.createRadialGradient(0,0,0,0,0,radius);
    spill.addColorStop(0,color+'cc');spill.addColorStop(.25,color+'88');spill.addColorStop(.6,color+'33');spill.addColorStop(1,color+'00');
    lightsContext.fillStyle=spill;lightsContext.fillRect(-radius,-radius,radius*2,radius*2);lightsContext.restore();
-   lightsContext.save();
-   lightsContext.strokeStyle=color;lightsContext.globalAlpha=(fade*pulse*.4)*bloomScale;lightsContext.lineWidth=1;
-   lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX,raisedY);lightsContext.stroke();
-   lightsContext.restore();
    // Project a soft cone from the exact ground anchor up to the floating artwork.
    lightsContext.save();
    const top=raisedY-178.5*beaconScale,halfWidth=61.25*beaconScale;
@@ -632,22 +636,21 @@ function drawLights(fade,target=map,surface=lights){
     lightsContext.fillRect(Math.min(p.x,logoX)-halfWidth,y,Math.abs(p.x-logoX)+halfWidth*2,line%3===0?1.3:.7);
    }
    lightsContext.restore();
-   lightsContext.strokeStyle=color;lightsContext.lineWidth=.6;lightsContext.globalAlpha=(fade*.18*beamAlpha)*bloomScale;
-   lightsContext.beginPath();lightsContext.moveTo(p.x,p.y);lightsContext.lineTo(logoX+(p.x-logoX)*.08,top+(p.y-top)*.08);lightsContext.stroke();
+   lightsContext.strokeStyle=color;
    lightsContext.globalAlpha=(fade*pulse)*bloomScale;lightsContext.lineWidth=1.2;
-   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,15.75,6.125,0,0,Math.PI*2);lightsContext.stroke();
+   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,15.75*groundScale,6.125*groundScale,0,0,Math.PI*2);lightsContext.stroke();
    const projectorAngle=reduced.matches?phase:pulseTime*.14+phase;
    lightsContext.globalAlpha=(fade*pulse*.45)*bloomScale;lightsContext.lineWidth=.8;
-   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,22,8.55,0,projectorAngle,projectorAngle+Math.PI*.72);lightsContext.stroke();
+   lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,22*groundScale,8.55*groundScale,0,projectorAngle,projectorAngle+Math.PI*.72);lightsContext.stroke();
    // Two stationary light echoes breathe at independent rates; the address stays still.
    for(let echo=0;echo<2;echo++){
     const breath=reduced.matches?.45:.5+.5*Math.sin(pulseTime*(.31+echo*.047)+phase*1.43-echo*1.9);
     lightsContext.globalAlpha=(fade*pulse*beamAlpha*(.04+.15*breath*breath))*bloomScale;
     lightsContext.lineWidth=echo?1.1:1.8;
-    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,27+echo*7,10.5+echo*2.7,0,0,Math.PI*2);lightsContext.stroke();
+    lightsContext.beginPath();lightsContext.ellipse(p.x,p.y,(27+echo*7)*groundScale,(10.5+echo*2.7)*groundScale,0,0,Math.PI*2);lightsContext.stroke();
    }
    lightsContext.globalAlpha=(fade*pulse)*bloomScale;
-   lightsContext.fillStyle=color===adultVenueColor?adultVenueColor:'#eaffff';lightsContext.beginPath();lightsContext.arc(p.x,p.y,2.8,0,Math.PI*2);lightsContext.fill();
+   lightsContext.fillStyle=color===adultVenueColor?adultVenueColor:'#eaffff';lightsContext.beginPath();lightsContext.arc(p.x,p.y,Math.max(1.5,2.8*groundScale),0,Math.PI*2);lightsContext.fill();
    lightsContext.restore();
    continue;
    }
@@ -798,7 +801,6 @@ function downtownZoom(latitude){
  return normalZoom+Math.log2(1.5)*enter*leave+Math.log2(1.35)*barApproach*barDeparture;
 }
 const status=document.querySelector('#map-status');
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let selectedKey=null,hitTargets=[],viewTime=Date.now();
 const mapElement=document.querySelector('#map'),opacityControl=document.querySelector('#map-opacity'),pauseControl=document.querySelector('#pause-flight'),speedControl=document.querySelector('#speed');
 let loaded=false,elapsed=0,travel=0,last=0,frame=0,exitAt=null,disposed=false,cameraDirty=true,revealTime=0,loopWaiting=false;
@@ -910,6 +912,7 @@ function draw(now){
  const visibility=Number(opacityControl.value)*fade;
  mapElement.style.opacity=visibility;
  if(overlaysReady)drawLights(visibility);
+ if(ready)ambientSignals.draw(pulseTime,map.getZoom(),map.isMoving());
  if(ready&&baseFrameRendered&&!firstFrameSent&&visibility>0){
   firstFrameSent=true;startup.phase('first-frame');tell('first-frame');
   // Optional GPU layers must not prevent the first base-city frame.
@@ -943,6 +946,7 @@ window.addEventListener('pagehide',()=>{
  for(const control of [opacityControl,pauseControl,speedControl])control.removeEventListener('input',onSceneInput);
  window.removeEventListener('pointermove',trackLogoPointer);window.removeEventListener('pointerout',leaveLogoPointer);window.removeEventListener('blur',clearLogoPointer);
  for(const sprite of mistSprites)sprite.width=sprite.height=1;
+ ambientSignals.dispose();
  waterBloom.dispose();hologramMaterials.dispose();
  for(const logo of venueLogos.values())for(const canvas of [logo.image,logo.silhouette,logo.outlined,...logo.chromatic])canvas.width=canvas.height=1;
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;

@@ -13,11 +13,12 @@ const [host,fallback,page,html,renderer,home,routes,app]=await Promise.all([
  readFile(new URL('../client/src/App.tsx',import.meta.url),'utf8'),
 ]);
 
-test('Mapz extends the shared home style with its own natural surfaces',()=>{
+test('Mapz and the home flyover share the same natural surface renderer',()=>{
  assert.match(renderer,/mapzSurfaceStyle/);
  assert.match(renderer,/mlcontour\.DemSource/);
  assert.match(html,/maplibre-contour-0\.1\.0\.js/);
- assert.match(home,/import \{vectorStyle\} from '\.\/city-map.js'/);
+ assert.match(home,/import \{mapzSurfaceStyle,createWaterBloom\} from '\.\.\/zaydar-map\/natural-surfaces\.js/);
+ assert.match(home,/mlcontour\.DemSource/);
  assert.doesNotMatch(renderer,/api\/mapz|deck-mobile/);
  assert.doesNotMatch(routes,/registerMapzTileRoutes/);
 });
