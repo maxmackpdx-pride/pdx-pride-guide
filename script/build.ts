@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "node:fs/promises";
+import { writeDesignComponentSourceEvidence } from "./design-component-source-evidence";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -32,6 +33,8 @@ const allowlist = [
 
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
+  const evidence = await writeDesignComponentSourceEvidence();
+  console.log(`sealed ${evidence.sources.length} canonical design source checksums`);
 
   console.log("building client...");
   await viteBuild();

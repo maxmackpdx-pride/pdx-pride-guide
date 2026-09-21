@@ -106,6 +106,8 @@ import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./q
 import { buildScanCandidates } from "./qsearch/analyze";
 import { saveCandidates } from "./qsearch/store";
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import {
   DESIGN_COMPONENT_REGISTRY,
   DESIGN_COMPONENT_REGISTRY_SCHEMA,
@@ -1370,6 +1372,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const registryChecksum = createHash("sha256")
       .update(JSON.stringify(DESIGN_COMPONENT_REGISTRY))
       .digest("hex");
+    let sourceEvidence: unknown = null;
+    try {
+      const value = JSON.parse(readFileSync(path.resolve(__dirname, "design-component-source-evidence.json"), "utf8"));
+      if (value?.registryChecksum === registryChecksum && Array.isArray(value?.sources)) sourceEvidence = value;
+    } catch { /* A missing build seal must never be represented as verified evidence. */ }
     res.setHeader("Access-Control-Allow-Origin", "https://zaylist-foundation-library.maxmackpdx.workers.dev");
     res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     res.json({
@@ -1378,6 +1385,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       sourceRepository: DESIGN_COMPONENT_SOURCE_REPOSITORY,
       sourceRevision,
       sourceRevisionVerified: sourceRevision !== null,
+      sourceEvidence,
       specimenOrigin: "https://www.zaylist.com",
       components: DESIGN_COMPONENT_REGISTRY,
     });
