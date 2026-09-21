@@ -6,14 +6,18 @@ import { useEffect, useRef } from "react";
 declare const __ZAYDAR_BASE__: string;
 const COLORS = ["#00ffff", "#ff00cc", "#ccff00", "#ff6600", "#ab75ff"];
 type Venue = { id: string; name: string; coordinates: [number, number]; logo?: string; logoMode?: string };
-const CENTER = [163.072, 366.25708];
+// Beaverton / northwest Portland through Gresham; southern Vancouver to Oregon City.
+const METRO = { west: -122.88, east: -122.39, north: 45.65, south: 45.34 };
+const tileX = (lon: number) => (lon + 180) / 360 * 1024;
+const tileY = (lat: number) => (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * 1024;
+const CENTER = [(tileX(METRO.west)+tileX(METRO.east))/2, (tileY(METRO.north)+tileY(METRO.south))/2];
+const SPAN = [(tileX(METRO.east)-tileX(METRO.west))/2, (tileY(METRO.south)-tileY(METRO.north))/2];
 const PLACES = [
   { name: "Portland", lat: 45.523, lon: -122.676 },
   { name: "Vancouver", lat: 45.6387, lon: -122.6615 },
   { name: "Gresham", lat: 45.5001, lon: -122.4302 },
   { name: "Oregon City", lat: 45.3573, lon: -122.6068 },
   { name: "Beaverton", lat: 45.4871, lon: -122.8037 },
-  { name: "Hillsboro", lat: 45.5229, lon: -122.9898 },
 ];
 type Point = { x: number; y: number; z: number; tone: number };
 function sphere(u: number, v: number, tone = 0): Point {
@@ -23,7 +27,7 @@ function sphere(u: number, v: number, tone = 0): Point {
 function placePoint(place: { lat: number; lon: number }) {
   const x = (place.lon + 180) / 360 * 1024;
   const y = (1 - Math.asinh(Math.tan(place.lat * Math.PI / 180)) / Math.PI) / 2 * 1024;
-  return sphere((x - CENTER[0]) / 1.05, (CENTER[1] - y) / 1.05);
+  return sphere((x - CENTER[0]) / SPAN[0], (CENTER[1] - y) / SPAN[1]);
 }
 const RIVERS = [
   { name: "Columbia River", lat: 45.604, lon: -122.583 },
@@ -52,7 +56,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       for (const [index, venue] of rows.entries()) {
         if (!venue.logo || !Array.isArray(venue.coordinates)) continue;
         const [lon, lat] = venue.coordinates;
-        if (Math.abs(lon + 122.67) > .55 || Math.abs(lat - 45.52) > .38) continue;
+        if (lon < METRO.west || lon > METRO.east || lat < METRO.south || lat > METRO.north) continue;
         const image = new Image();
         const hologram = { point: placePoint({ lat, lon }), image: document.createElement("canvas"), color: COLORS[index % COLORS.length], phase: index * 2.39996 };
         image.onload = () => {
@@ -103,6 +107,9 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
       if (!width || !height) return;
       const radius = Math.min(width * .48, height * .43) * .7;
       const cx = width / 2, cy = height / 2;
+      const front = canvas.closest('.home-front');
+      const headerInset = front ? parseFloat(getComputedStyle(front).getPropertyValue('--home-header-height')) || 0 : 0;
+      const footerInset = canvas.parentElement ? parseFloat(getComputedStyle(canvas.parentElement).getPropertyValue('--home-flight-bottom')) || 0 : 0;
       const yaw = angle.current + (still ? 0 : elapsed / 28000);
       const project = (p: Point, elevation = 1) => {
         const x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
@@ -161,32 +168,39 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         context.fillText(river.name,p.x,p.y);
       }
       context.shadowBlur=0;
-      // Keep original venue artwork, projection beams and depth-driven expansion.
+      // Keep holograms fully expanded; only the sphere occludes the far side.
       // Each head lifts from its actual surface position, without a separate orbit.
       const visible = venues.map(venue => ({ ...venue, anchor: project(venue.point) }))
         .filter(venue => venue.anchor.z > .08)
-        .sort((a,b) => a.anchor.z - b.anchor.z);
-      const occupied: { x: number; y: number; size: number }[] = [];
+        .sort((a,b) => a.phase - b.phase);
+      const occupied: { x: number; y: number; w: number; h: number }[] = [];
       for (const venue of visible) {
-        const { anchor, image, color, phase } = venue;
-        const depth = anchor.z;
-        const breathe = still ? 1 : 1 + Math.sin(elapsed / 1700 + phase) * .08;
-        const size = Math.min(width < 600 ? 86 : 144, radius * .52) * (.65 + depth * .35) * breathe;
+        const { anchor, image, color } = venue;
+        const size = Math.min(width < 600 ? 86 : 144, radius * .52);
+        const fit = Math.min(size/image.width,size*.65/image.height);
+        const w=image.width*fit,h=image.height*fit;
         const head = project(venue.point, 1.16);
-        const x = head.x;
-        const y = head.y - size * .8 - radius * .055;
-        if (occupied.some(other => Math.hypot(other.x-x, other.y-y) < (other.size+size)*.65)) continue;
-        occupied.push({x,y,size});
-        context.save(); context.globalAlpha = Math.min(1,depth * 2) * .72;
+        const preferred = { x:head.x, y:head.y-size*.8-radius*.055 };
+        let x=preferred.x, y=preferred.y;
+        // Move overlapping heads, rather than closing/collapsing holograms.
+        // Every beam still terminates at its original geographic anchor.
+        for (let attempt=0;attempt<240;attempt++) {
+          const distance=Math.sqrt(attempt)*18;
+          const direction=attempt*2.399963;
+          const candidateX=Math.max(w/2+8,Math.min(width-w/2-8,preferred.x+Math.cos(direction)*distance));
+          const candidateY=Math.max(headerInset+h/2+8,Math.min(height-footerInset-h/2-8,preferred.y+Math.sin(direction)*distance));
+          if (occupied.some(other => Math.abs(other.x-candidateX)<(other.w+w)/2+12 && Math.abs(other.y-candidateY)<(other.h+h)/2+12)) continue;
+          x=candidateX; y=candidateY; break;
+        }
+        occupied.push({x,y,w,h});
+        context.save(); context.globalAlpha = .72;
         const beam = context.createLinearGradient(anchor.x,anchor.y,x,y);
         beam.addColorStop(0,`${color}08`); beam.addColorStop(1,`${color}65`);
         context.fillStyle = beam;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x-size*.38,y); context.lineTo(x+size*.38,y); context.closePath(); context.fill();
         context.strokeStyle=color; context.lineWidth=.6;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x,y); context.stroke();
-        context.globalAlpha = Math.min(1,depth*2);
-        const fit = Math.min(size/image.width,size*.65/image.height);
-        const w=image.width*fit,h=image.height*fit;
+        context.globalAlpha = 1;
         context.imageSmoothingEnabled=true; context.imageSmoothingQuality="high";
         context.shadowBlur=0;
         context.drawImage(image,x-w/2,y-h/2,w,h);
@@ -225,8 +239,8 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
         const columns = Math.max(8,Math.round(280*Math.cos(v*Math.PI/2)));
         for(let col = 0; col <= columns; col++) {
           const u = col/columns*2-1;
-          const px = Math.round((CENTER[0]-161+u*1.05)*256);
-          const py = Math.round((CENTER[1]-364-v*1.05)*256);
+          const px = Math.round((CENTER[0]-161+u*SPAN[0])*256);
+          const py = Math.round((CENTER[1]-364-v*SPAN[1])*256);
           const pixel = (py*1024+px)*4;
           const builtUp = data[pixel] > 180;
           const river = data[pixel] < 100 && data[pixel+1] > 160 && data[pixel+2] > 160;
@@ -244,7 +258,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
   }, [active, still]);
 
   return <canvas ref={canvasRef} className="home-front__metro-globe"
-    role="img" aria-label="Stylized Portland metro globe with the Columbia and Willamette rivers and the metro cities Vancouver, Gresham, Oregon City, Beaverton and Hillsboro"
+    role="img" aria-label="Stylized Portland metro globe with the Columbia and Willamette rivers and the metro cities southern Vancouver, Gresham, Oregon City, Beaverton and northwest Portland"
     onPointerDown={event => { if(event.pointerType === 'touch') return; pointer.current = {id:event.pointerId,x:event.clientX}; event.currentTarget.setPointerCapture(event.pointerId); }}
     onPointerMove={event => { const drag = pointer.current; if (!drag || drag.id !== event.pointerId) return; angle.current = angle.current+(event.clientX-drag.x)/350; drag.x=event.clientX; redrawRef.current(); }}
     onPointerUp={() => { pointer.current=null; }} onPointerCancel={() => { pointer.current=null; }} onLostPointerCapture={() => { pointer.current=null; }}
