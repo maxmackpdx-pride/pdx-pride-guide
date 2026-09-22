@@ -8,7 +8,7 @@ export function parseWinterSeason(key:string,html:string,now=Date.now()){
  const closed=/\b(?:winter operations|skiing\s*(?:&|and)\s*snowboarding)\s*[:–—-]?\s*(?:are\s*)?closed (?:for|until) (?:the |next )?season/i.test(text)
   ||key==='hoodoo'&&/HOURS\s+Closed until next season/i.test(text)
   ||key==='49north'&&/Chairs Operating\s+Closed for the season/i.test(text);
- const open=/\b(?:winter operations|skiing\s*(?:&|and)\s*snowboarding)\s*[:–—-]\s*(?:are\s*)?open\b/i.test(text);
+ const open=/\b(?:winter operations|skiing\s*(?:&|and)\s*snowboarding)\s*(?:[:–—-]\s*(?:are\s*)?|are\s+)open\b/i.test(text);
  // A planned future season can be pre-season; passing the date never proves opening.
  const preseason=key==='meadows'&&!!expectedOpening&&/Planned Schedule for the 20\d{2}[-–]\d{2} Season/i.test(text);
  return {status:open&&!closed?'open':closed||preseason?'seasonal':'unknown',expectedOpening,scope:'winter',reason:closed?'Winter operations closed for the season':preseason?'Winter season has not started':open?'Winter operations open':'Winter status not verified'};

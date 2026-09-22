@@ -9,7 +9,8 @@ let cache:{checkedAt:string;statuses:any[]}|null=null;let pending:Promise<any>|n
 export async function getOutzClosures(){
  if(cache&&Date.now()-Date.parse(cache.checkedAt)<5*60_000)return cache;
  if(pending)return pending;
- pending=(async()=>{const ids=[...new Set(catalog.places.map(sourceId).filter(id=>id!==null))];const infra=catalog.places.map(p=>/^usfs-([0-9.]+)$/.exec(p.id)?.[1]).filter(Boolean);const features:any[]=[];
+ pending=(async()=>{const forest=(async()=>{const ids=[...new Set(catalog.places.map(sourceId).filter(id=>id!==null))];const infra=catalog.places.map(p=>/^usfs-([0-9.]+)$/.exec(p.id)?.[1]).filter(Boolean);const features:any[]=[];
  for(let offset=0;offset<Math.max(ids.length,infra.length);offset+=60){const u=new URL(closureSource+'/query');u.search=new URLSearchParams({f:'json',where:[ids.slice(offset,offset+60).length?`recareaid IN (${ids.slice(offset,offset+60).join(',')})`:null,infra.slice(offset,offset+60).length?`infra_cn IN (${infra.slice(offset,offset+60).map(id=>"'"+id+"'").join(',')})`:null].filter(Boolean).join(' OR '),outFields:'recareaid,recareaname,openstatus,infra_cn',returnGeometry:'false'}).toString();const r=await fetch(u,{signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('Closure source unavailable');const data=await r.json();if(data.error||!Array.isArray(data.features)||data.exceededTransferLimit)throw Error('Incomplete closure source');features.push(...data.features);}
- const winter=await getWinterSeasonStatuses();const checkedAt=new Date().toISOString();cache={checkedAt,statuses:[...matchStatuses(catalog.places,features,checkedAt),...winter]};return cache;})().finally(()=>{pending=null;});return pending;
+ return matchStatuses(catalog.places,features,new Date().toISOString());})();
+ const results=await Promise.allSettled([forest,getWinterSeasonStatuses()]);const checkedAt=new Date().toISOString();cache={checkedAt,statuses:results.flatMap(result=>result.status==='fulfilled'?result.value:[])};return cache;})().finally(()=>{pending=null;});return pending;
 }
