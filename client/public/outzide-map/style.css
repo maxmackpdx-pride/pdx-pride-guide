@@ -59,3 +59,5 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .demo-post-label{font:10px var(--mono);letter-spacing:.04em;color:#b8ceaa;margin-bottom:9px}
 #field-feed-items{flex:1 1 auto;min-height:140px;overflow-y:auto}
 #field-feed-compose details[open]{max-height:30dvh;overflow:auto}
+.waypoint-head,.waypoint-label,.waypoint-count{translate:var(--sway-x,0px) var(--sway-y,0px)}
+@media(prefers-reduced-motion:reduce){.waypoint-head,.waypoint-label,.waypoint-count{translate:none}}
