@@ -1,3 +1,4 @@
+import { createWaypointStore } from './outzWaypoints';
 import outzMapCatalog from '@shared/outzMapCatalog';
 import { getOutzDetails } from "./outzDetails";
 import { getOutzCommunityFeed } from "./outzFeed";
@@ -1930,6 +1931,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     ];
     return known.includes(placeId) ? placeId : null;
   };
+
+  const waypointStore = createWaypointStore(sqlite);
+  app.get('/api/outz/waypoints', (req: any, res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    const place = outzMapCatalog.find(p => p.id === req.query.place && ['trail','beach'].includes(p.kind));
+    if (!place) return res.status(400).json({error:'Choose a trail or beach'});
+    res.json(waypointStore.list(place.id, req.session?.userId));
+  });
+  app.post('/api/outz/waypoints', requireAuth, (req, res) => {
+    const place = outzMapCatalog.find(p => p.id === req.body.placeId && ['trail','beach'].includes(p.kind));
+    if (!place) return res.status(400).json({error:'Choose a trail or beach'});
+    if (moderationGate(res, 'OUTZ waypoint', {title: String(req.body.title || ''), body: String(req.body.note || '')})) return;
+    try { const id = waypointStore.add(place.id, req.session.userId!, req.body); res.status(201).json({id}); }
+    catch (error: any) { res.status(400).json({error:error.message}); }
+  });
+  app.delete('/api/outz/waypoints/:id', requireAuth, (req, res) => {
+    if (!waypointStore.remove(Number(req.params.id), req.session.userId!)) return res.status(404).json({error:'Waypoint not found'});
+    res.json({ok:true});
+  });
 
   app.get("/api/outz/checkins", async (req: any, res) => {
     try {
