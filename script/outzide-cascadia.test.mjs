@@ -1,18 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {addCascadiaOutline,installCascadiaReveal,CASCADIA_MIN_ZOOM} from '../client/public/outzide-map/assets/cascadia-reveal.js';
-test('max zoom reveal toggles once and restores normal layers when zooming in',()=>{
- const old=globalThis.document;const classes=new Set();const sign={setAttribute(){},hidden:true};globalThis.document={addEventListener(){},createElement:()=>sign,body:{append(){},classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}};
- try{const style={sources:{},layers:[{id:'i5-spectrum-0-core'},{id:'ordinary-road'},{id:'place-label',type:'symbol'}]};addCascadiaOutline(style);const handlers={};const visibility={};let zoom=6,jumps=0;const map={getCenter:()=>[-122,45],getZoom:()=>zoom,getStyle:()=>style,setLayoutProperty:(id,_,v)=>visibility[id]=v,on:(name,fn)=>handlers[name]=fn,jumpTo:()=>{jumps++;handlers.zoomend();}};
- installCascadiaReveal(map);zoom=CASCADIA_MIN_ZOOM;handlers.zoomend();assert.equal(jumps,1);assert.equal(sign.hidden,false);assert.ok(classes.has('cascadia-mode'));assert.equal(visibility['i5-spectrum-0-core'],'none');assert.equal(visibility['cascadia-core'],'visible');assert.equal(visibility['ordinary-road'],undefined);
- handlers.zoomend();assert.equal(jumps,1);zoom=4;handlers.zoomend();assert.equal(sign.hidden,true);assert.equal(visibility['i5-spectrum-0-core'],'visible');assert.equal(visibility['cascadia-core'],'none');assert.equal(classes.size,0);
- }finally{globalThis.document=old;}
-});
-test('last zoom-out button step enters the viewport-fitted reveal and zooming in restores pins',()=>{
- const old=globalThis.document,classes=new Set(),button={},sign={setAttribute(){},hidden:true};
- globalThis.document={getElementById:()=>button,addEventListener(){},createElement:()=>sign,body:{append(){},classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}};
- try{let zoom=6,min=3,stops=0;const handlers={},style={sources:{},layers:[]};addCascadiaOutline(style);
- const map={getZoom:()=>zoom,getMinZoom:()=>min,setMinZoom:z=>min=z,getCenter:()=>[-122,45],getStyle:()=>style,setLayoutProperty(){},cameraForBounds:()=>({center:[-126,51],zoom:2.7}),on:(e,fn)=>handlers[e]=fn,stop:()=>stops++,jumpTo:camera=>{zoom=camera.zoom;handlers.zoomend()},zoomOut:()=>{zoom--;handlers.zoomend()}};
- installCascadiaReveal(map);handlers.load();assert.equal(min,2.7);button.onclick();button.onclick();button.onclick();button.onclick();assert.equal(zoom,2.7);assert.equal(stops,1);assert.equal(sign.hidden,false);assert.ok(classes.has('cascadia-mode'));button.onclick();assert.equal(stops,1);
- zoom=3.7;handlers.zoomend();assert.equal(sign.hidden,true);assert.equal(classes.size,0);
+import {addCascadiaOutline,installCascadiaReveal,cascadiaCamera,cascadiaOutline} from '../client/public/outzide-map/assets/cascadia-reveal.js';
+for(const [width,height] of [[1440,900],[390,844],[844,390]])test(`Cascadia fits and is the hard zoom floor at ${width}×${height}`,()=>{
+ const camera=cascadiaCamera(width,height),scale=512*2**camera.zoom;
+ const y=lat=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2;
+ for(const [lng,lat] of cascadiaOutline){assert.ok(Math.abs((lng-camera.center[0])/360*scale)<=(width-60)/2+.001);assert.ok(Math.abs((y(lat)-y(camera.center[1]))*scale)<=(height-160)/2+.001);}
+ const old=globalThis.document,classes=new Set(),button={},sign={setAttribute(){},hidden:true};globalThis.document={getElementById:()=>button,addEventListener(){},createElement:()=>sign,body:{append(){},classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}};
+ try{let zoom=6,min=0,center={lng:-122,lat:45},stops=0,pitch=35;const handlers={},visibility={},style={sources:{},layers:[{id:'i5-spectrum-0-core'}]};addCascadiaOutline(style);
+ const emit=e=>(handlers[e]||[]).forEach(fn=>fn());const setZoom=z=>{zoom=Math.max(min,z);emit('zoom')};
+ const map={getContainer:()=>({clientWidth:width,clientHeight:height}),getZoom:()=>zoom,setMinZoom:z=>min=z,getCenter:()=>center,getPitch:()=>pitch,getBearing:()=>0,getStyle:()=>style,setLayoutProperty:(id,_,v)=>visibility[id]=v,on:(e,fn)=>(handlers[e]??=[]).push(fn),stop:()=>stops++,jumpTo:c=>{center={lng:c.center[0],lat:c.center[1]};pitch=c.pitch??pitch;setZoom(c.zoom);emit('moveend')},zoomOut:()=>setZoom(zoom-1)};
+ installCascadiaReveal(map);assert.equal(min,camera.zoom,'floor installed before load');
+ setZoom(-5);assert.equal(zoom,min);assert.equal(sign.hidden,false);assert.ok(classes.has('cascadia-mode'));assert.equal(visibility['i5-spectrum-0-core'],'none');assert.equal(visibility['cascadia-core'],'visible');assert.equal(pitch,0);
+ const previous=stops;setZoom(-20);assert.equal(stops,previous,'continued pinch does not retrigger');assert.equal(zoom,min);
+ setZoom(min+1);assert.equal(sign.hidden,true);assert.equal(visibility['i5-spectrum-0-core'],'visible');button.onclick();assert.equal(sign.hidden,false);assert.equal(zoom,min);
+ center={lng:0,lat:0};emit('moveend');assert.equal(center.lng,camera.center[0],'cannot pan away from final outline');
  }finally{globalThis.document=old;}
 });
