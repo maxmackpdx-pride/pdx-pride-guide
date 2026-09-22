@@ -941,11 +941,6 @@ export default [
     "kind": "trail"
   },
   {
-    "id": "black-rock-city",
-    "name": "Black Rock City · Burning Man",
-    "kind": "camp"
-  },
-  {
     "id": "usfs-6108010414",
     "name": "Tillicum Beach Campground",
     "kind": "coastcamp"
@@ -1069,16 +1064,6 @@ export default [
     "id": "glass-bar-island",
     "name": "Glass Bar Island · BRING Beach",
     "kind": "beach"
-  },
-  {
-    "id": "highlands-resort",
-    "name": "The Highlands",
-    "kind": "stay"
-  },
-  {
-    "id": "the-woods-guerneville",
-    "name": "The Woods · Cottages & Cabins",
-    "kind": "stay"
   },
   {
     "id": "fishing-or-barton-park",

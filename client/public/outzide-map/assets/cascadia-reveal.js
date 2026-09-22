@@ -1,21 +1,79 @@
 export const CASCADIA_MIN_ZOOM=3;
-export const isCascadiaZoom=zoom=>zoom<=CASCADIA_MIN_ZOOM+.04;
+export const isCascadiaZoom=(zoom,minimum=CASCADIA_MIN_ZOOM)=>zoom<=minimum+.08;
 // Original, deliberately simplified bioregional silhouette; not a jurisdictional boundary.
 // General extent: Pacific coastal watersheds and the Columbia/Fraser basins.
 export const cascadiaOutline=[[-141,60],[-138,60.1],[-135.5,59.7],[-133,58.7],[-130.7,57.8],[-128,56.8],[-125.5,55.7],[-123,54.7],[-120,54.3],[-118.2,53.4],[-116.7,51.7],[-115,50.6],[-114.1,49.3],[-113.3,48.4],[-112.8,46.9],[-111.5,45],[-110.8,43.6],[-113.2,42.1],[-115.8,41.9],[-118,42.1],[-119.5,41.6],[-120.5,40.6],[-122,40],[-124.4,40.1],[-124.3,41.5],[-124.5,42.8],[-124.1,44.2],[-124,45.6],[-124.4,46.8],[-124.7,48.3],[-125.6,48.7],[-127.2,49.8],[-128,50.8],[-128.6,52],[-130.2,53.1],[-132.2,54.1],[-133.2,55.4],[-135.3,57],[-137.5,58.4],[-139.5,59.6],[-141,60]];
 export function addCascadiaOutline(style){
  style.sources['cascadia-outline']={type:'geojson',lineMetrics:true,data:{type:'Feature',properties:{description:'Original stylized Cascadia bioregion outline — approximate, not an official boundary'},geometry:{type:'LineString',coordinates:cascadiaOutline}}};
  const gradient=['interpolate',['linear'],['line-progress'],0,'#ff2579',.17,'#ff7600',.33,'#eeff25',.5,'#3cff67',.67,'#16eeff',.83,'#7658ff',1,'#ff2579'];
- const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':opacity}}));
+ const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':0,'line-opacity-transition':{duration:0,delay:0}}}));
  const index=style.layers.findIndex(l=>l.type==='symbol');style.layers.splice(index<0?style.layers.length:index,0,...layers);
 }
-export function installCascadiaReveal(map){
- let active=false,entryCenter=null;const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
- const update=()=>{const next=isCascadiaZoom(map.getZoom());if(next===active)return;active=next;document.body.classList.toggle('cascadia-mode',active);sign.hidden=!active;
- for(const layer of map.getStyle().layers){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-'))map.setLayoutProperty(layer.id,'visibility',active?'visible':'none');}
- // One camera reset on entry keeps the entire silhouette in the wide view.
- if(active){entryCenter=map.getCenter();map.jumpTo({center:[-125.5,50.5],zoom:CASCADIA_MIN_ZOOM,pitch:0,bearing:0});}
+// The overview follows the full catalog, independent of the current filters.
+export function destinationExtent(places){
+ const points=places.filter(p=>Number.isFinite(p.lng)&&Number.isFinite(p.lat));
+ if(!points.length)return cascadiaOutline;
+ const west=Math.min(...points.map(p=>p.lng)),east=Math.max(...points.map(p=>p.lng));
+ const south=Math.min(...points.map(p=>p.lat)),north=Math.max(...points.map(p=>p.lat));
+ const latPadding=Math.max(.1,(north-south)*.05),lngPadding=Math.max(.1,(east-west)*.05);
+ return [[west-lngPadding,south-latPadding],[east+lngPadding,south-latPadding],[east+lngPadding,north+latPadding],[west-lngPadding,north+latPadding]];
+}
+// Fit the padded destination extent while preserving the user's tilt and bearing.
+export function cascadiaCamera(width,height,pitch=0,bearing=0,extent=cascadiaOutline){
+ const y=lat=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2;
+ const north=y(Math.max(...extent.map(p=>p[1]))),south=y(Math.min(...extent.map(p=>p[1]))),centerY=(north+south)/2;
+ const centerLng=(Math.min(...extent.map(p=>p[0]))+Math.max(...extent.map(p=>p[0])))/2;
+ const halfW=Math.max(1,width-60)/2,halfH=Math.max(1,height-160)/2;
+ const angle=bearing*Math.PI/180,tilt=pitch*Math.PI/180;
+ // Use a conservative camera distance (MapLibre's default is ~1.5 viewport heights).
+ const distance=Math.max(1,height);let scale=Infinity;
+ for(const [lng,lat] of extent){
+  const dx=(lng-centerLng)/360,dy=y(lat)-centerY;
+  const rx=dx*Math.cos(angle)+dy*Math.sin(angle),ry=-dx*Math.sin(angle)+dy*Math.cos(angle);
+  const perspective=Math.abs(ry)*Math.sin(tilt)/distance;
+  scale=Math.min(scale,halfW/(Math.abs(rx)+halfW*perspective),halfH/(Math.abs(ry)*Math.cos(tilt)+halfH*perspective));
+ }
+ const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*centerY)))*180/Math.PI;
+ return {center:[centerLng,centerLat],zoom:Math.log2(scale/512),pitch,bearing};
+}
+// Reverse from the current frame if zoom changes direction during the reveal.
+export function animateCascadia(render){
+ let value=0,frameId=null;
+ return show=>{
+  if(frameId!==null)cancelAnimationFrame(frameId);
+  const target=show?1:0,from=value;
+  if(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches||!globalThis.requestAnimationFrame){value=target;render(value);return;}
+  const duration=(show?850:500)*Math.abs(target-from);let start;
+  const tick=time=>{
+   start??=time;const t=duration?Math.min(1,(time-start)/duration):1;
+   value=from+(target-from)*t*t*(3-2*t);render(value);
+   frameId=t<1?requestAnimationFrame(tick):null;
+  };
+  frameId=requestAnimationFrame(tick);
  };
- document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#updates-button,[data-kind]'))map.jumpTo({center:entryCenter,zoom:5.5});});
- map.on('zoom',update);map.on('load',update);return update;
+}
+export function installCascadiaReveal(map,places=[]){
+ const extent=destinationExtent(places);
+ let active=false,framing=false,entryCenter=null,camera,reveal=0;
+ const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
+ const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing(),extent);};
+ const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-')){map.setLayoutProperty(layer.id,'visibility',active||reveal>0?'visible':'none');const opacity={'cascadia-bloom':.42,'cascadia-halo':.75,'cascadia-core':1}[layer.id];if(opacity!==undefined)map.setPaintProperty?.(layer.id,'line-opacity',opacity*reveal);}}};
+ const animate=animateCascadia(value=>{
+  reveal=value;sign.hidden=value===0&&!active;
+  if(sign.style){sign.style.opacity=String(value);sign.style.transform=`translateY(${(1-value)*10}px) scale(${.955+.045*value})`;sign.style.filter=`blur(${(1-value)*7}px)`;}
+  layers();
+ });
+ const place=()=>{framing=true;map.stop();map.jumpTo(camera);framing=false;};
+ const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;sign.setAttribute('aria-hidden','false');animate(true);layers();}place();};
+ const update=()=>{if(framing)return;
+  if(map.getZoom()<=camera.zoom+.08){if(!active)enter();return;}
+  if(active&&map.getZoom()>camera.zoom+.15){active=false;document.body.classList.toggle('cascadia-mode',false);sign.setAttribute('aria-hidden','true');animate(false);layers();}
+ };
+ const configure=()=>{if(framing)return;framing=true;camera=frame();map.setMinZoom(camera.zoom);framing=false;if(active)place();else update();};
+ const zoomOut=document.getElementById('zoom-out');if(zoomOut)zoomOut.onclick=()=>{if(map.getZoom()-1<=camera.zoom+.08)enter();else map.zoomOut();};
+ document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#updates-button,[data-kind]'))map.jumpTo({center:entryCenter,zoom:Math.max(5.5,camera.zoom+1)});});
+ // Wheel, trackpad and pinch trigger during movement, not only after momentum ends.
+ map.on('zoom',update);map.on('zoomend',update);
+ map.on('moveend',()=>{if(framing||!active)return;if(map.getPitch()!==camera.pitch||map.getBearing()!==camera.bearing){configure();return;}const center=map.getCenter();if(Math.abs(center.lng-camera.center[0])>.01||Math.abs(center.lat-camera.center[1])>.01)place();});
+ map.on('load',()=>{configure();layers();});map.on('resize',configure);map.on('pitchend',configure);map.on('rotateend',configure);configure();return update;
 }

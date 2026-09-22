@@ -28,3 +28,14 @@ test('neon stays under labels, uses terrain geometry, and fades at street zoom',
   assert.equal(layer.paint['line-opacity'].at(-1),0);
  }
 });
+test('northern quarter blends trans colors continuously and preserves the southern rainbow',()=>{
+ const latitude=p=>41.25+p*(49.01-41.25);
+ assert.equal(spectrumColor(latitude(0)),'rgb(255,22,22)');
+ assert.equal(spectrumColor(latitude(1)),'rgb(66,220,255)');
+ assert.equal(spectrumColor(latitude(.895)),'rgb(245,253,255)');
+ const channels=p=>spectrumColor(latitude(p)).match(/\d+/g).map(Number);
+ for(const stop of [.75,.79,.84,.895,.95]){
+  const before=channels(stop-.000001),after=channels(stop+.000001);
+  assert.ok(before.every((v,i)=>Math.abs(v-after[i])<=1),'continuous at '+stop);
+ }
+});

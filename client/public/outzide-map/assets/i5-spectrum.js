@@ -1,7 +1,16 @@
 // Color is tied to latitude, not to tile boundaries or camera position.
 // Line progress uses Web Mercator lengths, matching MapLibre's GeoJSON metrics.
 export function spectrumColor(latitude) {
-  const hue=Math.max(0,Math.min(1,(latitude-41.25)/(49.01-41.25)))*300;
+  const progress=Math.max(0,Math.min(1,(latitude-41.25)/(49.01-41.25)));
+  // Northern quarter: blend from the rainbow into blue, pink, white, pink, blue.
+  // The shared latitude stops keep both carriageways and adjoining tiles in sync.
+  if(progress>.75){
+    const stops=[[.75,[22,80,255]],[.79,[66,220,255]],[.84,[255,125,194]],[.895,[245,253,255]],[.95,[255,125,194]],[1,[66,220,255]]];
+    const index=stops.findIndex(([at])=>at>=progress),[from,a]=stops[index-1],[to,b]=stops[index];
+    const t=(progress-from)/(to-from);
+    return 'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')+')';
+  }
+  const hue=progress*300;
   const h=hue/60,x=1-Math.abs(h%2-1);
   const rgb=h<1?[1,x,0]:h<2?[x,1,0]:h<3?[0,1,x]:h<4?[0,x,1]:h<5?[x,0,1]:[1,0,x];
   return `rgb(${rgb.map(v=>Math.round(22+v*233)).join(',')})`;
