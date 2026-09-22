@@ -16,7 +16,7 @@ function siteBase(): string {
 
 /** Filename under /og/ (no leading slash in the map values beyond path). */
 export const SHARE_CARD_FILES = {
-  home: "zaylist-social-portland.png",
+  home: "zaylist-social-portland-nightlife-v2.png",
   events: "zaylist-events-1200x630.png",
   schedule: "zaylist-events-1200x630.png",
   housing: "zaylist-housing-1200x630.png",
