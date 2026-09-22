@@ -79,3 +79,5 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .activity-info{margin:16px 0;padding:14px;border:1px solid color-mix(in srgb,var(--c) 25%,transparent);border-radius:9px;background:#06120b44}
 .activity-tags{display:flex;gap:8px;margin-bottom:9px}.activity-tags span{font:11px var(--mono);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);border-radius:4px;padding:3px 7px}
 .fieldbar .filters{flex-wrap:nowrap;overflow-x:auto;min-width:0;scrollbar-width:thin}.fieldbar .filters button{flex-shrink:0;white-space:nowrap}
+
+.type-dot.dayuse{color:#F6D45B;transform:none;border-radius:50%;background:#f6d45b22;box-shadow:0 0 4px #f6d45b33}.waypoint-head.dayuse{border-radius:50%;background:#26210d;color:#F6D45B;border-color:#F6D45B;box-shadow:0 0 9px #f6d45b33}

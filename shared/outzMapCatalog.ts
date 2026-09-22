@@ -1629,5 +1629,105 @@ export default [
     "id": "atv-wa-riverside-state-park-orv-area",
     "name": "Riverside State Park · ORV Area",
     "kind": "atv"
+  },
+  {
+    "id": "dayuse-or-dabney-state-recreation-area",
+    "name": "Dabney State Recreation Area",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-latourell-falls-trailhead-guy-w-talbot",
+    "name": "Latourell Falls Trailhead (Guy W. Talbot)",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-lewis-and-clark-state-recreation-site",
+    "name": "Lewis and Clark State Recreation Site",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-hat-rock-state-park",
+    "name": "Hat Rock State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-ecola-state-park",
+    "name": "Ecola State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-oswald-west-state-park",
+    "name": "Oswald West State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-smith-rock-state-park",
+    "name": "Smith Rock State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-shore-acres-state-park",
+    "name": "Shore Acres State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-willamette-mission-state-park",
+    "name": "Willamette Mission State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-or-touvelle-state-recreation-site",
+    "name": "TouVelle State Recreation Site",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-saltwater-state-park",
+    "name": "Saltwater State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-nolte-state-park",
+    "name": "Nolte State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-federation-forest-state-park",
+    "name": "Federation Forest State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-rockport-state-park",
+    "name": "Rockport State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-lime-kiln-point-state-park",
+    "name": "Lime Kiln Point State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-peace-arch-historical-state-park",
+    "name": "Peace Arch Historical State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-palouse-falls-state-park-heritage-site",
+    "name": "Palouse Falls State Park Heritage Site",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-ginkgo-petrified-forest-state-park",
+    "name": "Ginkgo Petrified Forest State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-fort-casey-historical-state-park",
+    "name": "Fort Casey Historical State Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "dayuse-wa-scenic-beach-state-park",
+    "name": "Scenic Beach State Park",
+    "kind": "dayuse"
   }
 ];

@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 const root=new URL('../../',import.meta.url),base=new URL('client/public/outzide-map/',root);
 const data=JSON.parse(fs.readFileSync(new URL('catalog.json',import.meta.url)));
+const dayuse=JSON.parse(fs.readFileSync(new URL('dayuse.json',import.meta.url)));
+data.places.push(...dayuse.places);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const pine=(x,y,k=1)=>`<g transform="translate(${x} ${y}) scale(${k})"><path d="M0 0V-58M-18-12 0-45 18-12M-13-29 0-58 13-29"/></g>`;
 function artwork(p){
@@ -10,7 +12,11 @@ function artwork(p){
  const canyon=`<path d="M15 119V69l22-6 9-23 31 8 5 26 22 8v31M161 113V64l26-7 8-28 31 12 5 30 18 8v40M23 83l48-8M29 95l49-6M182 76l49 5M175 96l60 8"/>`;
  const trees=p.landscape==='dunes'||p.landscape==='desert'?'':pine(28,132,.7)+pine(52,129,.48)+pine(236,143,.7)+pine(212,130,.43);
  let scene=(p.landscape==='dunes'?dunes:p.landscape==='desert'?canyon:mountain)+trees;
- if(water){
+ if(p.kind==='dayuse'){
+ scene='<circle cx="'+(63+n)+'" cy="52" r="18"/><path d="M'+(63+n)+' 22v-8M'+(63+n)+' 82v8M'+(33+n)+' 52h-8M'+(93+n)+' 52h8M'+(42+n)+' 31l-6-6M'+(84+n)+' 73l6 6M'+(42+n)+' 73l-6 6M'+(84+n)+' 31l6-6"/>'+trees+(p.landscape==='desert'?canyon:'<path d="M15 132q52-51 105-10t129-16M20 231q62-21 121-6t102-9"/>');
+ scene+='<path d="M62 154h139v11H62zM95 165l-26 53M165 165l26 53M58 191h151v9H58zM91 200l-8 18M175 200l8 18M105 174h50"/>';
+ if(p.landscape==='coast')scene+='<path d="M20 242q24-9 48 0t48 0 48 0 48 0"/>';
+ }else if(water){
  scene+=`<path d="M16 147Q66 ${130+n} 108 145T248 146M12 204q23-9 44 0t44 0M166 211q23-9 44 0t40 0M25 233q27-10 53 0t53 0 53 0 53 0"/>`;
  if(p.kind==='fishing')scene+=`<g transform="translate(${n/3-3} 0)"><path d="M66 173q43-44 102-5l29-20-2 44-28-17q-56 37-101-2ZM151 158q-9 15 0 30M108 151l15-16 15 18M113 192l14 13 10-19M82 169q17-11 35-8M38 135 83 52q35-28 74-5M157 47q14 20 10 46v29q0 17-11 17t-10-11l6 5M42 129l8 5"/><circle cx="163" cy="170" r="2"/><circle cx="56" cy="111" r="7"/></g>`;
  else if(seed%2)scene+=`<path d="M65 179h131l-18 25H85l-20-25ZM122 177V88M116 95l-44 72h44V95ZM129 118l43 50h-43v-50ZM86 211q24 8 49 0t50 0M121 88l22 8-22 5"/>`;
@@ -23,7 +29,7 @@ function artwork(p){
 for(const p of data.places)fs.writeFileSync(new URL(p.art,base),artwork(p));
 const path=new URL('places.json',base),catalog=JSON.parse(fs.readFileSync(path));
 const ids=new Set(data.places.map(p=>p.id));catalog.places=catalog.places.filter(p=>!ids.has(p.id)).concat(data.places);
-catalog.activityCatalog={checkedAt:data.checkedAt,selection:data.selection,countsPerState:{fishing:30,boating:15,atv:10}};
+catalog.activityCatalog={checkedAt:data.checkedAt,selection:data.selection,countsPerState:{fishing:30,boating:15,atv:10,dayuse:10}};
 fs.writeFileSync(path,JSON.stringify(catalog,null,2)+'\n');
 fs.writeFileSync(new URL('shared/outzMapCatalog.ts',root),'/** Public destinations in the Outzide field map. */\nexport default '+JSON.stringify(catalog.places.map(({id,name,kind})=>({id,name,kind})),null,2)+';\n');
 console.log(`Generated ${data.places.length} SVG illustrations; catalog now has ${catalog.places.length} destinations.`);

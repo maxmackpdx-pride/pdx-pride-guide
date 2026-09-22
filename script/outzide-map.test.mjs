@@ -4,7 +4,7 @@ import {readFile,access} from 'node:fs/promises';
 const base=new URL('../client/public/outzide-map/',import.meta.url);
 const {places}=JSON.parse(await readFile(new URL('places.json',base),'utf8'));
 test('every destination has unique identity and shipped artwork',async()=>{
- assert.equal(places.length,326);assert.equal(new Set(places.map(p=>p.id)).size,places.length);
+ assert.equal(places.length,346);assert.equal(new Set(places.map(p=>p.id)).size,places.length);
  for(const place of places){assert.ok(place.name);assert.ok(place.art.startsWith('assets/'));await access(new URL(place.art,base));}
 });
 test('production map retains live beach data and never uses session-only social writes',async()=>{
@@ -28,4 +28,11 @@ test('activity expansion has requested counts, sourced locations and individual 
   assert.ok(shared.includes(p.id),'backend recognizes destination');
   if(p.kind==='atv')assert.equal(p.accent,'#D95757');
  }
+});
+
+test('day-use destinations add ten per state without repeating earlier places',async()=>{
+ const added=places.filter(p=>p.collection==='outz-dayuse-2026');assert.equal(added.length,20);
+ for(const state of ['OR','WA'])assert.equal(added.filter(p=>p.state===state).length,10);
+ const priorNames=new Set(places.filter(p=>p.collection!=='outz-dayuse-2026').map(p=>p.name.toLowerCase()));
+ for(const p of added){assert.ok(!priorNames.has(p.name.toLowerCase()));assert.equal(p.kind,'dayuse');assert.equal(p.locationPrecision,'agency-area');assert.ok(Number.isFinite(p.lat)&&Number.isFinite(p.lng));assert.ok(p.officialUrl.startsWith('https://'));const art=await readFile(new URL(p.art,base),'utf8');assert.ok(art.includes('<circle'),'sun artwork');}
 });
