@@ -4351,58 +4351,6 @@
       "sourceCheckedAt": "2026-09-22"
     },
     {
-      "id": "highlands-resort",
-      "name": "The Highlands",
-      "lat": 38.5046136,
-      "lng": -122.9963554,
-      "address": "14000 Woodland Drive, Guerneville, CA 95446",
-      "detail": "An adults-only Russian River retreat with cabins and rooms among redwoods, a pool, and a short walk to downtown Guerneville.",
-      "note": "Guests must be 18+. The operator states that the pool is no longer clothing-optional and does not offer day-use passes. Book accommodation and confirm arrival arrangements directly.",
-      "inclusionNote": "The Highlands maintains an LGBTQ+ visitor guide and describes its longstanding connection to Guerneville’s gay community.",
-      "officialUrl": "https://www.highlandsresort.com/",
-      "policiesUrl": "https://www.highlandsresort.com/policies",
-      "referenceUrl": "https://www.highlandsresort.com/lgbtq",
-      "coordinateSource": "https://www.highlandsresort.com/getting-here",
-      "state": "CA",
-      "region": "Russian River · Guerneville, CA",
-      "kind": "stay",
-      "accent": "#00FFFF",
-      "sourceName": "Operator listing",
-      "reviewedAt": "2026-09-22",
-      "art": "assets/motifs/places/highlands-resort.svg",
-      "accessNote": "Guests must be 18+. The operator states that the pool is no longer clothing-optional and does not offer day-use passes. Book accommodation and confirm arrival arrangements directly.",
-      "discoverySource": {
-        "name": "The Highlands official site",
-        "href": "https://www.highlandsresort.com/"
-      }
-    },
-    {
-      "id": "the-woods-guerneville",
-      "name": "The Woods · Cottages & Cabins",
-      "lat": 38.5033294,
-      "lng": -123.0010185,
-      "address": "16484 Fourth Street, Guerneville, CA 95446",
-      "detail": "Gay-owned cottages and cabins in downtown Guerneville, with gardens, a pool and easy access to Russian River outings.",
-      "note": "Adult-oriented accommodation. Pool heating is seasonal and weather-dependent. Reserve with the operator and confirm room amenities, pet availability and current pool policies before visiting.",
-      "inclusionNote": "The operator identifies The Woods as gay-owned and LGBTQ+ welcoming.",
-      "officialUrl": "https://russianriverhotel.com/",
-      "policiesUrl": "https://russianriverhotel.com/the-woods-guerneville-cottages-cabins-rates-policies/",
-      "referenceUrl": "https://russianriverhotel.com/",
-      "coordinateSource": "https://steller.co/d/the-woods-cottages-3aGpZ9WzJ7khYY96hS6fgac",
-      "state": "CA",
-      "region": "Russian River · Guerneville, CA",
-      "kind": "stay",
-      "accent": "#00FFFF",
-      "sourceName": "Operator listing",
-      "reviewedAt": "2026-09-22",
-      "art": "assets/motifs/places/the-woods-guerneville.svg",
-      "accessNote": "Adult-oriented accommodation. Pool heating is seasonal and weather-dependent. Reserve with the operator and confirm room amenities, pet availability and current pool policies before visiting.",
-      "discoverySource": {
-        "name": "The Woods · Cottages & Cabins official site",
-        "href": "https://russianriverhotel.com/"
-      }
-    },
-    {
       "id": "fishing-or-barton-park",
       "name": "Barton Park",
       "kind": "fishing",

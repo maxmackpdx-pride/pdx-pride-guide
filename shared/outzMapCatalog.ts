@@ -1071,16 +1071,6 @@ export default [
     "kind": "beach"
   },
   {
-    "id": "highlands-resort",
-    "name": "The Highlands",
-    "kind": "stay"
-  },
-  {
-    "id": "the-woods-guerneville",
-    "name": "The Woods · Cottages & Cabins",
-    "kind": "stay"
-  },
-  {
     "id": "fishing-or-barton-park",
     "name": "Barton Park",
     "kind": "fishing"
