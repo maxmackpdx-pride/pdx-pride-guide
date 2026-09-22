@@ -1,0 +1,26 @@
+{
+  "runId": "ddb45054-f756-46b2-ac0a-21655fb87b58",
+  "checkedAt": "2026-09-22T20:55:27.247Z",
+  "summary": {
+    "scope": "Four OR/WA resort LGBTQ+ event sources only, user-requested expansion. Not a full QSearch sweep.",
+    "sourcesChecked": 4,
+    "sourcesSucceeded": 4,
+    "eventsPublished": 0,
+    "eventsCorrected": 0,
+    "eventsCanceled": 0,
+    "reviewItems": 1,
+    "pathsLearned": 4,
+    "schedules": "Weekly, 168 hours; only event-specific LGBTQ+ ski weekends/Pride. General resort events excluded.",
+    "knownDates": "Winter PrideFest February 25–28 2027 announced. Individual on-mountain events not scheduled yet. Meadows April 2026 canceled; Crystal March 2026 past; Stevens evidence historical 2025.",
+    "blocked": "No exact future on-mountain occurrences with complete publication evidence. Facebook and Instagram not accessed. Remaining global due-source set outside this targeted run.",
+    "localImplementation": "16 winter resort cards, snow/frost effects, cached reports/weather/pass info API and canonical Events linkage implemented locally, not deployed."
+  },
+  "coverage": {
+    "due": 1358,
+    "checked": 4,
+    "dueChecked": 0,
+    "succeeded": 4,
+    "blocked": 0,
+    "percent": 0
+  }
+}

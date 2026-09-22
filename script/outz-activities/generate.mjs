@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const root=new URL('../../',import.meta.url),base=new URL('client/public/outzide-map/',root);
 const data=JSON.parse(fs.readFileSync(new URL('catalog.json',import.meta.url)));
 const dayuse=JSON.parse(fs.readFileSync(new URL('dayuse.json',import.meta.url)));
-data.places.push(...dayuse.places);
+data.places.push(...dayuse.places,...JSON.parse(fs.readFileSync(new URL('../outz-winter/catalog.json',import.meta.url))).places);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const pine=(x,y,k=1)=>`<g transform="translate(${x} ${y}) scale(${k})"><path d="M0 0V-58M-18-12 0-45 18-12M-13-29 0-58 13-29"/></g>`;
 function artwork(p){
@@ -12,7 +12,10 @@ function artwork(p){
  const canyon=`<path d="M15 119V69l22-6 9-23 31 8 5 26 22 8v31M161 113V64l26-7 8-28 31 12 5 30 18 8v40M23 83l48-8M29 95l49-6M182 76l49 5M175 96l60 8"/>`;
  const trees=p.landscape==='dunes'||p.landscape==='desert'?'':pine(28,132,.7)+pine(52,129,.48)+pine(236,143,.7)+pine(212,130,.43);
  let scene=(p.landscape==='dunes'?dunes:p.landscape==='desert'?canyon:mountain)+trees;
- if(p.kind==='dayuse'){
+ if(p.kind==='winter'){
+ scene=mountain+trees+'<path d="M50 222 126 121q8-11 14-1l-72 109q-10 14-22 5M108 229l73-107q8-9 13 1l-70 112q-8 12-20 4M110 154l18 13M99 170l18 13M165 158l17 11M154 175l18 11M40 151l54 76M26 141l22 16M185 189l47 30M200 219l15-15"/>';
+ scene+='<path d="M199 16v43M179 27l40 22M179 49l40-22M199 16l-6 6m6-6 6 6M179 27l2 8m-2-8 8-2M219 49l-8 2m8-2-2-8"/>';
+ }else if(p.kind==='dayuse'){
  scene='<circle cx="'+(63+n)+'" cy="52" r="18"/><path d="M'+(63+n)+' 22v-8M'+(63+n)+' 82v8M'+(33+n)+' 52h-8M'+(93+n)+' 52h8M'+(42+n)+' 31l-6-6M'+(84+n)+' 73l6 6M'+(42+n)+' 73l-6 6M'+(84+n)+' 31l6-6"/>'+trees+(p.landscape==='desert'?canyon:'<path d="M15 132q52-51 105-10t129-16M20 231q62-21 121-6t102-9"/>');
  scene+='<path d="M62 154h139v11H62zM95 165l-26 53M165 165l26 53M58 191h151v9H58zM91 200l-8 18M175 200l8 18M105 174h50"/>';
  if(p.landscape==='coast')scene+='<path d="M20 242q24-9 48 0t48 0 48 0 48 0"/>';
@@ -32,4 +35,6 @@ const ids=new Set(data.places.map(p=>p.id));catalog.places=catalog.places.filter
 catalog.activityCatalog={checkedAt:data.checkedAt,selection:data.selection,countsPerState:{fishing:30,boating:15,atv:10,dayuse:10}};
 fs.writeFileSync(path,JSON.stringify(catalog,null,2)+'\n');
 fs.writeFileSync(new URL('shared/outzMapCatalog.ts',root),'/** Public destinations in the Outzide field map. */\nexport default '+JSON.stringify(catalog.places.map(({id,name,kind})=>({id,name,kind})),null,2)+';\n');
+const winter=data.places.filter(p=>p.kind==='winter');
+fs.writeFileSync(new URL('shared/outzWinterCatalog.ts',root),'// Public resort areas, not exact trail entrances. Generated from script/outz-winter/catalog.json.\nexport const winterResorts = '+JSON.stringify(winter.map(p=>({id:p.id,name:p.name,state:p.state,lat:p.lat,lng:p.lng,...p.winter})),null,2)+';\n');
 console.log(`Generated ${data.places.length} SVG illustrations; catalog now has ${catalog.places.length} destinations.`);

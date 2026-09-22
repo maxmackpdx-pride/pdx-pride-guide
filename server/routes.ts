@@ -1,3 +1,5 @@
+import { getWinterConditions } from './outzWinter';
+import { publicWinterEvents } from '../shared/outzWinterEvents';
 import { createWaypointStore } from './outzWaypoints';
 import outzMapCatalog from '@shared/outzMapCatalog';
 import { getOutzDetails } from "./outzDetails";
@@ -1877,6 +1879,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // OUTZ (official outdoor conditions + catalog)
+  app.get('/api/outz/winter/events', (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ events: publicWinterEvents(storage.getEvents()), fetchedAt: new Date().toISOString() });
+  });
+  app.get('/api/outz/winter/:id', async (req, res) => {
+    try { const data = await getWinterConditions(req.params.id); if (!data) return res.status(404).json({error:'Unknown winter destination'});
+      res.setHeader('Cache-Control','public, max-age=300');res.json(data);
+    } catch { res.status(502).json({error:'Winter conditions unavailable'}); }
+  });
+
   app.get("/api/outz", async (_req, res) => {
     try {
       res.json(await getOutzSnapshot());

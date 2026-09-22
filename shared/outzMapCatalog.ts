@@ -1729,5 +1729,85 @@ export default [
     "id": "dayuse-wa-scenic-beach-state-park",
     "name": "Scenic Beach State Park",
     "kind": "dayuse"
+  },
+  {
+    "id": "winter-meadows",
+    "name": "Mt. Hood Meadows",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-bachelor",
+    "name": "Mt. Bachelor",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-timberline",
+    "name": "Timberline Lodge & Ski Area",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-skibowl",
+    "name": "Mt. Hood Skibowl",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-ashland",
+    "name": "Mt. Ashland Ski Area",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-hoodoo",
+    "name": "Hoodoo Ski Area",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-willamette",
+    "name": "Willamette Pass Resort",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-anthony",
+    "name": "Anthony Lakes Mountain Resort",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-crystal",
+    "name": "Crystal Mountain Resort",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-stevens",
+    "name": "Stevens Pass",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-summit",
+    "name": "The Summit at Snoqualmie & Alpental",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-baker",
+    "name": "Mt. Baker Ski Area",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-whitepass",
+    "name": "White Pass Ski Area",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-mission",
+    "name": "Mission Ridge",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-49north",
+    "name": "49° North Mountain Resort",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-bluewood",
+    "name": "Bluewood",
+    "kind": "winter"
   }
 ];
