@@ -941,11 +941,6 @@ export default [
     "kind": "trail"
   },
   {
-    "id": "black-rock-city",
-    "name": "Black Rock City · Burning Man",
-    "kind": "camp"
-  },
-  {
     "id": "usfs-6108010414",
     "name": "Tillicum Beach Campground",
     "kind": "coastcamp"

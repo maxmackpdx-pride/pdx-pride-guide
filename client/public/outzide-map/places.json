@@ -3912,23 +3912,6 @@
       "art": "assets/motifs/places/fern-canyon.svg"
     },
     {
-      "id": "black-rock-city",
-      "name": "Black Rock City · Burning Man",
-      "state": "NV",
-      "kind": "camp",
-      "lat": 40.786,
-      "lng": -119.206,
-      "officialUrl": "https://burningman.org/black-rock-city/preparation/getting-there-and-back/",
-      "region": "Black Rock Desert · Nevada",
-      "detail": "Burning Man’s temporary desert city. This is a seasonal, ticketed gathering—not a year-round campground. The waypoint marks the general event area; use the official current-year arrival instructions.",
-      "note": "Confirm event dates, tickets, vehicle access, Gate instructions, and playa restrictions with Burning Man before travel.",
-      "accent": "#39FF14",
-      "sourceName": "burningman.org",
-      "sourceFetchedAt": "2026-09-22T09:26:38.060Z",
-      "collection": "Beyond the Northwest",
-      "art": "assets/motifs/places/black-rock-city.svg"
-    },
-    {
       "id": "usfs-6108010414",
       "name": "Tillicum Beach Campground",
       "kind": "coastcamp",
