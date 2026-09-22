@@ -1,3 +1,5 @@
+import { useAttendanceSummariesLive } from '@/hooks/useAttendanceSummariesLive';
+import type { AttendanceSummary } from '@/lib/attendanceBubble';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -422,6 +424,8 @@ export default function ZaydarMapDemo() {
       setLocating(false);
     }, { enableHighAccuracy: true, timeout: 12000 });
   }, [locationAvatar]);
+  useAttendanceSummariesLive();
+  const { data: attendance = {} } = useQuery<Record<string, AttendanceSummary>>({queryKey:['/api/events/attendance-summaries'],queryFn:()=>apiRequest('GET','/api/events/attendance-summaries').then(r=>r.json()),refetchInterval:60000});
   const { data: events = EMPTY_EVENTS, isLoading: eventsLoading, isError: eventsError, refetch: retryEvents } = useQuery<Event[]>({ queryKey: ["/api/events"], queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()) });
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = EMPTY_PLACES, isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
@@ -652,7 +656,8 @@ export default function ZaydarMapDemo() {
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    const upcoming=event&&(parsePacificDateTime(event.dateStart)||0)>Date.now()?attendance[String(event.id)]:undefined;
+    return {futureCheckinCount:upcoming?.count||0,futureCheckinFaces:(upcoming?.preview||[]).slice(0,5).map(person=>({url:person.photoUrl||'',initial:person.initials||'?'})),kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
@@ -664,7 +669,7 @@ export default function ZaydarMapDemo() {
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
-  }), [marks, places]);
+  }), [marks, places, attendance]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HOÜS')setCardOriginRect(rect);}};
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map" onClickCapture={gateSignedOutControls}>
     <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center)} />

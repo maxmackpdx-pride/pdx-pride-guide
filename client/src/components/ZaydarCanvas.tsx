@@ -2,7 +2,7 @@ import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useS
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
 type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
-type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
+type Row={futureCheckinCount?:number;futureCheckinFaces?:Array<{url:string;initial:string}>;key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
 type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
 type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};

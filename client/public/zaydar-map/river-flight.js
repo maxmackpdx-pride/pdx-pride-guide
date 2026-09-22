@@ -481,7 +481,7 @@ function drawUserLocationAvatar(ctx,target,fade){
 }
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
- const eventLabels=[];
+ const eventLabels=[],checkinStacks=[];
  const cameraMoving=Boolean(target.isMoving?.());
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
  const activeToday=feature=>feature.properties.eventDay===today||(parent===window&&feature.properties.demoOpen===true);
@@ -531,11 +531,11 @@ function drawLights(fade,target=map,surface=lights){
   beacons.push(item);
  }
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
- const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind==='place'&&!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=clusterPlaceMarkers(ordered.filter(item=>!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
  const visibleOrbs=ordered.filter(item=>{
   if(expandedKeys.has(item.feature.properties.key))return false;
   const cluster=placeClusters.byKey.get(item.feature.properties.key);
-  return item.feature.properties.kind!=='place'||!cluster||cluster.leader===item;
+  return !cluster||cluster.leader===item;
  });
  const glowByKey=new Map(visibleOrbs.map(item=>{
   const neighbors=visibleOrbs.filter(other=>other!==item&&Math.hypot(other.p.x-item.p.x,other.p.y-item.p.y)<92).length;
@@ -635,7 +635,7 @@ function drawLights(fade,target=map,surface=lights){
    // must not stack bright discovery balls over the original rings and pin light.
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
-   const placeCluster=feature.properties.kind==='place'?placeClusters.byKey.get(feature.properties.key):null;
+   const placeCluster=placeClusters.byKey.get(feature.properties.key);
    if(placeCluster&&placeCluster.leader.feature.properties.key!==feature.properties.key)continue;
    if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});}
    else if(!underProjector){
@@ -646,6 +646,9 @@ function drawLights(fade,target=map,surface=lights){
     const markerY=isPlace?p.y-placezHoverLift(target,feature,surfaces):raisedY;
     const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
     drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
+    const checkins=(placeCluster?.members||[{feature}]).map(item=>item.feature.properties);
+    const checkinCount=checkins.reduce((total,item)=>total+(item.futureCheckinCount||0),0);
+    if(checkinCount>0)checkinStacks.push({key:feature.properties.key,x:p.x,y:markerY+23*placezScale,color,faces:checkins.flatMap(item=>item.futureCheckinFaces||[]).slice(0,5),count:checkinCount});
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
@@ -828,6 +831,8 @@ function drawLights(fade,target=map,surface=lights){
  // Titles live in this same document and frame cadence as their canvas logos.
  // Crossing the iframe boundary here caused visible lag while panning and zooming.
  renderHologramLabels(eventLabels);
+ for(const label of eventLabels){const p=lightFeatures.find(f=>f.properties.key===label.key)?.properties;if(p?.futureCheckinCount>0)checkinStacks.push({key:label.key,x:label.x,y:label.logoY-label.logoHeight/2-16,color:label.color,faces:p.futureCheckinFaces||[],count:p.futureCheckinCount});}
+ renderCheckinStacks(checkinStacks);
  hitTargets.push(...eventLabels.filter(label=>label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
  hoverTargets=[...hitTargets];
  if(userLocation&&fade>.1){const p=target.project(userLocation.coordinates);hoverTargets.push({x:p.x,y:p.y-27,r:23,color:userLocation.feature.properties.color,hoverOnly:true});}
@@ -1129,8 +1134,15 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  }
  return {byKey};
 }
+
+function renderCheckinStacks(stacks){
+ let root=document.getElementById('waypoint-checkin-stacks');if(!root){root=document.createElement('div');root.id='waypoint-checkin-stacks';document.body.appendChild(root)}
+ const live=new Set();for(const stack of stacks){live.add(stack.key);let el=[...root.children].find(n=>n.dataset.key===stack.key);if(!el){el=document.createElement('div');el.className='waypoint-checkin-stack';el.dataset.key=stack.key;root.appendChild(el)}el.style.left=stack.x+'px';el.style.top=stack.y+'px';el.style.setProperty('--face-color',stack.color);el.setAttribute('aria-label',stack.count+' upcoming check-ins');
+ const signature=JSON.stringify([stack.faces,stack.count]);if(el.dataset.signature===signature)continue;el.dataset.signature=signature;el.replaceChildren();const faces=stack.faces.slice(0,5);for(const avatar of faces){const face=document.createElement('span');face.className='waypoint-checkin-face';if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image)}else face.textContent=avatar.initial||'?';el.appendChild(face)}const extra=Math.max(0,stack.count-faces.length);if(extra){const count=document.createElement('span');count.className='waypoint-checkin-face waypoint-checkin-more';count.textContent='+'+extra;el.appendChild(count)}}for(const el of [...root.children])if(!live.has(el.dataset.key))el.remove();
+}
+
 function drawClusterCount(ctx,x,y,count,color){
- ctx.save();ctx.translate(x+12.5,y-12.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
+ ctx.save();ctx.translate(x+12.5,y-12.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-Math.max(10.5,String(count).length*3.5+4),-10.5,Math.max(21,String(count).length*7+8),21,10.5);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
 }
 function drawSelectedMarkerLabel(ctx,x,y,name,type,color,width){
  const label=String(name||type||'Place');ctx.save();ctx.font='600 12px Inter,Arial,sans-serif';const labelWidth=Math.min(190,ctx.measureText(label).width+22);const labelX=Math.max(labelWidth/2+8,Math.min(width-labelWidth/2-8,x));ctx.fillStyle='#050b12e8';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(labelX-labelWidth/2,y+17,labelWidth,28,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f4fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,labelX,y+31,labelWidth-16);ctx.restore();

@@ -47,3 +47,5 @@ input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#b7cce9;cursor
  .standalone-hologram-face:hover{outline:2px solid #fff;outline-offset:2px;filter:brightness(1.12)}
 }
 .standalone-hologram-label:focus-visible{outline:2px solid var(--label-color);outline-offset:5px;border-radius:6px}
+
+#waypoint-checkin-stacks{position:fixed;inset:0;z-index:4;pointer-events:none}.waypoint-checkin-stack{position:absolute;display:flex;transform:translate(-50%,-50%);pointer-events:none}.waypoint-checkin-face{width:20px;height:20px;flex-shrink:0;display:grid;place-items:center;border:1.5px solid var(--face-color);border-radius:50%;margin-left:-5px;background:#10170f;color:#fff;overflow:hidden;font:700 9px Inter,Arial,sans-serif}.waypoint-checkin-face:first-child{margin-left:0}.waypoint-checkin-face img{width:100%;height:100%;object-fit:cover}.waypoint-checkin-more{min-width:24px;width:auto;padding:0 4px}
