@@ -15,7 +15,7 @@ export const HOUSING_TYPES = ["LOOKING", "OFFERING", "FORMING", "MANAGED"] as co
 export type HousingType = (typeof HOUSING_TYPES)[number];
 
 /** The locked suffix every household name ends in. Never editable by the poster. */
-export const HAUS_SUFFIX = "HAÜS";
+export const HAUS_SUFFIX = "HAÜZ";
 
 /** Types whose name carries the locked HAÜS suffix. A managed building is not a household. */
 export const SUFFIXED_TYPES: HousingType[] = ["OFFERING", "FORMING"];
@@ -42,7 +42,7 @@ export const HOUSING_BOARD_ACCENT = "var(--panel-cyan)";
 export const HOUSING_TYPE_LABEL: Record<HousingType, string> = {
   LOOKING: "Looking for housing",
   OFFERING: "Offering a room",
-  FORMING: "Forming a HAÜS",
+  FORMING: "Forming a HAÜZ",
   MANAGED: "Managed property",
 };
 
@@ -50,7 +50,7 @@ export const HOUSING_TYPE_LABEL: Record<HousingType, string> = {
 export const HOUSING_TYPE_KICKER: Record<HousingType, string> = {
   LOOKING: "LOOKING FOR HOUSING",
   OFFERING: "OFFERING A ROOM",
-  FORMING: "FORMING A HAÜS",
+  FORMING: "FORMING A HAÜZ",
   MANAGED: "MANAGED PROPERTY",
 };
 
@@ -184,7 +184,7 @@ export function withinHousingBounds(lat: number, lng: number): boolean {
 /** Strip any suffix the poster managed to type, so it is stored exactly once. */
 export function stripHausSuffix(raw: string): string {
   return raw
-    .replace(/\s*HA[ÜU]S\s*$/i, "")
+    .replace(/\s*H[AO][ÜU][SZ]\s*$/i, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -231,7 +231,7 @@ export const HOUSING_FILTER_LABEL: Record<HousingFilter, string> = {
   ALL: "All",
   LOOKING: "Looking for housing",
   OFFERING: "Offering a room",
-  FORMING: "Forming a HAÜS",
+  FORMING: "Forming a HAÜZ",
   MANAGED: "Managed property",
   SAVED: "Saved",
 };

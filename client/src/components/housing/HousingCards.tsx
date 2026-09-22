@@ -62,9 +62,9 @@ const stop = (fn: () => void) => (e: React.MouseEvent) => {
 
 const SINGLE_WORD_CARD_LINE: Record<HousingPostView["type"], string> = {
   LOOKING: "LOOKING TO RENT",
-  OFFERING: "JOIN OUR HOÜS",
-  FORMING: "BUILDING A HOÜS",
-  MANAGED: "COMMERCIAL RENTAL HOÜS",
+  OFFERING: "JOIN OUR HAÜZ",
+  FORMING: "BUILDING A HAÜZ",
+  MANAGED: "COMMERCIAL RENTAL HAÜZ",
 };
 
 /**
@@ -205,7 +205,7 @@ export function LookingCard({ post, h }: { post: HousingPostView; h: HousingCard
       </div>
 
       <div className="hz-chiprow">
-        {post.openToHaus ? <Chip tone="haus">Open to a HAÜS</Chip> : null}
+        {post.openToHaus ? <Chip tone="haus">Open to a HAÜZ</Chip> : null}
         {(post.livingStyle || []).slice(0, 3).map((l) => (
           <Chip key={l}>{l}</Chip>
         ))}
@@ -275,7 +275,7 @@ export function FormingCard({ post, h }: { post: HousingPostView; h: HousingCard
       <HousingWell
         photos={post.photos}
         // With no place picked yet there is nothing to name, so the card asks.
-        title={cardDynamicTitle(post, post.photos.length ? post.displayName : "Build a HOÜS")}
+        title={cardDynamicTitle(post, post.photos.length ? post.displayName : "Build a HAÜZ")}
         fallbackPhoto={FORMING_DEFAULT_COVER}
         className="hz-well--contain-stack"
       >
@@ -414,7 +414,7 @@ export function ManagedCard({
         <span className="hz-spacer" />
         <Btn size="sm" kind="outline" onClick={stop(() => h.onBuildHaus(post))}>
           <HousingIcon name="home" />
-          {viewerLeadsGroup ? "Open your HAÜS" : "Build a HAÜS"}
+          {viewerLeadsGroup ? "Open your HAÜZ" : "Build a HAÜZ"}
         </Btn>
         <Btn size="sm" kind="solid" onClick={stop(() => h.onOpen(post))}>
           <HousingIcon name="search" />

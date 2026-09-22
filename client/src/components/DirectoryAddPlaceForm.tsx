@@ -64,6 +64,7 @@ type DirectoryMatchPreview = {
 
 type DirectorySubmitResult = {
   title: string;
+  postId?: number;
   desc: string;
   heldForReview?: boolean;
   potentialMatches?: DirectoryMatchPreview[];
@@ -83,7 +84,7 @@ function directoryMergePayload(form: DirectoryFormState) {
 }
 
 
-export default function DirectoryAddPlaceForm({isSpaces=false,embedded=false,readOnly=false,onClose}:{isSpaces?:boolean;embedded?:boolean;readOnly?:boolean;onClose:()=>void}) {
+export default function DirectoryAddPlaceForm({isSpaces=false,embedded=false,readOnly=false,onClose,onView}:{isSpaces?:boolean;embedded?:boolean;readOnly?:boolean;onClose:()=>void;onView?:(id:number)=>void}) {
  const {user}=useAuth();
  const {toast}=useToast();
  const [showAuth,setShowAuth]=useState(false);
@@ -138,6 +139,7 @@ export default function DirectoryAddPlaceForm({isSpaces=false,embedded=false,rea
       setForm(blankDirectoryForm(isSpaces ? "group" : "bar"));
       setSubmitResult({
         title: isSpaces ? "Added to MY SQUADZ" : "Added to directory",
+        postId: payload.id,
         desc: hasMatches
           ? `Your ${noun} is live in the directory. Map placement requires a confirmed street address.${claimLine} We also spotted similar listings you may want to double-check.`
           : `Your ${noun} is live in the directory. Map placement requires a confirmed street address.${claimLine}`,
@@ -305,6 +307,7 @@ return <>{showAuth&&<AuthModal onClose={()=>setShowAuth(false)} defaultTab="logi
                   </div>
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {!submitResult.heldForReview && submitResult.postId && onView && <button type="button" className="btn-neon solid pdx-glass-rebind" onClick={()=>onView(submitResult.postId!)}>Open this place on the map</button>}
                   {!submitResult.heldForReview && (
                     <button type="button" className="btn-neon solid pdx-glass-rebind" onClick={openAddForm} style={{ width: "100%", justifyContent: "center" }}>
                       Add another place →

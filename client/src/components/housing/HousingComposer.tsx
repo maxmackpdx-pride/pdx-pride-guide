@@ -1160,7 +1160,7 @@ export function HousingComposer({
                 onChange={(e) => patch({ openToHaus: e.target.checked })}
               />
               <span>
-                <b style={{ color: "var(--text-hi)" }}>Open to forming or joining a HAÜS</b>
+                <b style={{ color: "var(--text-hi)" }}>Open to forming or joining a HAÜZ</b>
                 <p>A chip on your post, not a commitment. You can change it whenever.</p>
               </span>
             </label>
@@ -1171,7 +1171,7 @@ export function HousingComposer({
           <>
             <div className="hz-field">
               <label>
-                <Mono micro>How this HAÜS works</Mono>
+                <Mono micro>How this HAÜZ works</Mono>
               </label>
               <div className="hz-ask" style={{ gridTemplateColumns: "1fr 1fr", marginTop: 0 }}>
                 {FORMING_FLAVORS.map((f) => (

@@ -171,7 +171,7 @@ function HouseChatTab({ post, onOpenThread }: { post: HousingPostView; onOpenThr
     <div>
       <div className="hz-note">
         The house thread lives in your inbox with every other Zaylist conversation. One thread,
-        everyone in {post.displayName || "the HAÜS"}, and it follows you around the site.
+        everyone in {post.displayName || "the HAÜZ"}, and it follows you around the site.
       </div>
       <div className="hz-composer">
         {onOpenThread ? (
@@ -603,7 +603,7 @@ function PeopleTab({
         {workspace.isLead ? (
           <div className="hz-chiprow">
             <Chip tone={isFull ? "full" : ""} onClick={() => setFull.mutate(!isFull)}>
-              {isFull ? "We are full" : "Mark the HAÜS full"}
+              {isFull ? "We are full" : "Mark the HAÜZ full"}
             </Chip>
           </div>
         ) : null}

@@ -129,6 +129,7 @@ export default function PrideWork() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
+  const [composeType, setComposeType] = useState<GigFormData["postType"]>("POSTING_GIG");
   const [showAuth, setShowAuth] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "LOOKING_FOR_WORK" | "POSTING_GIG">(() => {
     const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
@@ -140,15 +141,6 @@ export default function PrideWork() {
   const [sort, setSort] = useState(() => new URLSearchParams(window.location.search).get("sort") === "oldest" ? "LONGEST" : "RECENT");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const deepLinkHandled = useRef(false);
-  const [acceptRules, setAcceptRules] = useState(false);
-  const [venueQuery, setVenueQuery] = useState("");
-  const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
-  const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
-  const [newBusinessForm, setNewBusinessForm] = useState({
-    name: "", type: "bar", description: "", address: "", neighborhood: "",
-    hours: "", phone: "", website: "", instagram: "", logoImageUrl: "",
-  });
-
   const { data: gigs = [], isLoading, isError, error } = useQuery<GigPost[]>({
     queryKey: ["/api/gigs", onlyMine],
     queryFn: async () => {
@@ -186,40 +178,6 @@ export default function PrideWork() {
     }
   }, [gigs]);
 
-  const { data: ownedBusinesses = [] } = useQuery<Business[]>({
-    queryKey: ["/api/directory/mine/owned"],
-    queryFn: () => apiRequest("GET", "/api/directory/mine/owned").then(r => r.json()),
-    enabled: !!user,
-  });
-
-  const isEligiblePoster = !!user && (user.promoterStatus === "approved" || !!user.isAdmin || ownedBusinesses.length > 0);
-
-  const { data: directoryBusinesses = [] } = useQuery<Business[]>({
-    queryKey: ["/api/directory"],
-    queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
-    enabled: isEligiblePoster,
-    staleTime: 60_000,
-  });
-
-  const venueMatches = useMemo(() => {
-    const q = normalizeVenueQuery(venueQuery);
-    if (q.length < 3) return [];
-    return directoryBusinesses
-      .filter(b => normalizeVenueQuery(b.name).includes(q) || (b.address && normalizeVenueQuery(b.address).includes(q)))
-      .slice(0, 5);
-  }, [directoryBusinesses, venueQuery]);
-
-  const newBusinessMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
-    onSuccess: () => {
-      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed. Your gig will keep using the plain location for now." });
-      setNewBusinessForm({ name: "", type: "bar", description: "", address: "", neighborhood: "", hours: "", phone: "", website: "", instagram: "", logoImageUrl: "" });
-      setVenueBranch("idle");
-      setVenueQuery("");
-    },
-    onError: (err: Error) => toast({ title: "Could not submit", description: err.message, variant: "destructive" }),
-  });
-
   const stats = useMemo(() => [
     { num: gigs.filter(g => g.postType === "LOOKING_FOR_WORK").length, label: "Talent on deck", color: "#19e3ff" },
     { num: gigs.filter(g => g.postType === "POSTING_GIG").length, label: "GIGZ up for grabs", color: "#b06bff" },
@@ -232,70 +190,12 @@ export default function PrideWork() {
     POSTING_GIG: gigs.filter(g => g.postType === "POSTING_GIG").length,
   }), [gigs]);
 
-  const form = useForm<GigFormData>({
-    resolver: zodResolver(gigSchema),
-    defaultValues: {
-      postType: "POSTING_GIG",
-      name: "",
-      contactEmail: "",
-      title: "",
-      description: "",
-      skills: "",
-      compensation: "",
-      location: "",
-      isRemote: false,
-      gigDate: "",
-      gigTime: "",
-      businessId: null,
-    },
-  });
-
-  const mutation = useMutation({
-    mutationFn: (data: GigFormData) => {
-      trackProductEvent("post_attempt", "gigz");
-      return apiRequest("POST", "/api/gigs", { ...data, acceptRules: true });
-    },
-    onSuccess: (_data, variables) => {
-      trackProductEvent("post_completed", "gigz");
-      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
-      toast({
-        title: "Posted",
-        description: variables.postType === "LOOKING_FOR_WORK"
-          ? "You're on the board. Hosts can find you now."
-          : "Your gig is live. Let the replies roll in.",
-      });
-      form.reset();
-      setAcceptRules(false);
-      setFormOpen(false);
-      setLinkedBusiness(null);
-      setVenueBranch("idle");
-      setVenueQuery("");
-    },
-    onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : "Could not submit post.";
-      toast({ title: "Error", description: message, variant: "destructive" });
-    },
-  });
-
-  const submitGig = (data: GigFormData) => {
-    if (!acceptRules) {
-      toast({ title: "Board rules", description: "Please agree to the GIGZ rules before posting.", variant: "destructive" });
-      return;
-    }
-    const personalsErr = validateGigPostContent(data);
-    if (personalsErr) {
-      toast({ title: "Not a gig post", description: personalsErr, variant: "destructive" });
-      return;
-    }
-    mutation.mutate({ ...data, businessId: isEligiblePoster ? (linkedBusiness?.id ?? null) : null });
-  };
-
   const openForm = (postType: "POSTING_GIG" | "LOOKING_FOR_WORK") => {
     if (!user) {
       setShowAuth(true);
       return;
     }
-    form.setValue("postType", postType);
+    setComposeType(postType);
     setFormOpen(true);
     window.setTimeout(() => document.getElementById("gigs-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
   };
@@ -320,10 +220,6 @@ export default function PrideWork() {
     });
     return rows;
   }, [gigs, filter, remoteOnly, onlyMine, search, sort, user]);
-
-  const postType = form.watch("postType");
-  const formAccent = postType === "LOOKING_FOR_WORK" ? "#19e3ff" : "#b06bff";
-  const formAccentName = postType === "LOOKING_FOR_WORK" ? "cyan" : "purple";
 
   const clearFilters = () => {
     setFilter("ALL");
@@ -393,8 +289,500 @@ export default function PrideWork() {
         />
       </ScrollReveal>
 
-      {formOpen && (
-        <ScrollReveal>
+      {formOpen && <GigComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
+
+      <BoardActiveSection
+        className="diag"
+        sticker="Active board"
+        stickerTone="purple"
+        stickerStyle="mono"
+        title="Open gigs & available talent"
+        resultCount={`${filtered.length} showing`}
+        filters={
+          <>
+            {([
+              { key: "ALL" as const, label: "All", accent: "purple" },
+              { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
+              { key: "POSTING_GIG" as const, label: "GIGZ open", accent: "purple" },
+            ]).map(f => (
+              <BoardFilterChip
+                key={f.key}
+                active={filter === f.key}
+                onClick={() => setFilter(f.key)}
+                accent={f.accent}
+                count={filterCounts[f.key]}
+              >
+                {f.label}
+              </BoardFilterChip>
+            ))}
+          </>
+        }
+        filterRow2={
+          <>
+            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search roles, skills, gigs" />
+            <BoardFilterChip active={remoteOnly} onClick={() => setRemoteOnly(v => !v)} accent="pink">
+              Remote only
+            </BoardFilterChip>
+            {user ? (
+              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
+                My GIGZ
+              </BoardFilterChip>
+            ) : null}
+            <BoardSelectField value={sort} onChange={setSort}>
+              <option value="RECENT">Recently posted</option>
+              <option value="LONGEST">Longest up</option>
+            </BoardSelectField>
+          </>
+        }
+      >
+        {isLoading ? (
+          <BoardFeedSkeleton label="Loading talent & GIGZ posts" shape="board" count={6} />
+        ) : isError ? (
+          <div className="board-empty" style={{ borderColor: "#b06bff" }}>
+            <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />
+            <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
+            <p className="board-copy-sm">Could not load posts. Try again in a moment.</p>
+            <Button variant="neon" accent="purple" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>
+              Try again
+            </Button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="board-empty board-empty--makeover">
+            <p className="display section-heading">Nobody&apos;s on deck yet</p>
+            <p className="board-copy-sm">
+              You bartend, you run sound, you take a good photo at 1am in bad light. Say so. Or post the gig, paid or volunteer, and be honest about which.
+            </p>
+            <div className="board-empty__actions">
+              <Button variant="neon" accent="cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>Post availability</Button>
+              <Button variant="solid" accent="purple" onClick={() => openForm("POSTING_GIG")}>Post a gig</Button>
+              {(filter !== "ALL" || search || remoteOnly) && (
+                <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="board-listing-grid board-listing-grid--makeover">
+            {filtered.map((gig, index) => {
+              const isLooking = gig.postType === "LOOKING_FOR_WORK";
+              const accent = isLooking ? ACCENT.LOOKING_FOR_WORK : ACCENT.POSTING_GIG;
+              const expanded = expandedId === gig.id;
+              const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+              return (
+                <ScrollReveal key={gig.id} delay={Math.min(index * 80, 400)}>
+                  <GigListingCard
+                    gig={gig}
+                    accent={accent}
+                    expanded={expanded}
+                    skills={skills}
+                    isLooking={isLooking}
+                    onToggle={() => setExpandedId(expanded ? null : gig.id)}
+                  />
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        )}
+      </BoardActiveSection>
+
+      <BoardCloseSeam
+        line="Need work · need help · both belong"
+        url="zaylist.com/pride-work"
+      />
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+    </div>
+  );
+}
+
+export function GigListingCard({
+  gig,
+  accent,
+  expanded,
+  skills,
+  isLooking,
+  onToggle,
+}: {
+  gig: GigPost;
+  accent: string;
+  expanded: boolean;
+  skills: string[];
+  isLooking: boolean;
+  onToggle: () => void;
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showAuth, setShowAuth] = useState(false);
+  const [messageBody, setMessageBody] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ title: gig.title, description: gig.description, skills: gig.skills || "", compensation: gig.compensation || "", location: gig.location || "", gigDate: gig.gigDate || "", gigTime: gig.gigTime || "", isRemote: !!gig.isRemote });
+  const updateMutation = useMutation({
+    mutationFn: (changes: Record<string, unknown>) => apiRequest("PUT", `/api/gigs/${gig.id}`, changes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
+      setEditing(false);
+      toast({ title: "Post updated", description: "Completed posts remain in My posts. You can reopen them there." });
+    },
+    onError: (error: Error) => toast({ title: "Could not update post", description: error.message, variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/gigs/${gig.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      toast({ title: "GIGZ post deleted" });
+    },
+    onError: (error: Error) => toast({ title: "Could not delete post", description: error.message, variant: "destructive" }),
+  });
+
+  const messageMutation = useMutation({
+    mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ body: messageBody }),
+    }).then(r => {
+      if (!r.ok) throw new Error("Could not send message");
+      return r.json();
+    }),
+    onSuccess: () => {
+      setMessageBody("");
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+    },
+  });
+
+  const posterLabel = gig.username ? `@${gig.username}` : gig.name;
+  const locationLabel = gig.location || "Portland";
+  const status = [gig.compensation, gig.location].filter(Boolean).join(" · ")
+    || (isLooking ? "Available · message in inbox" : "Open · reply privately");
+  const cta = isLooking ? "Say hi" : "Reply";
+  const profileHref = gig.username ? memberProfileHref(gig.username) : null;
+  const talentName = gig.displayName || gig.name;
+  const talentFirstName = talentName.trim().split(/\s+/)[0] || "them";
+  const availabilityDetail = gig.skills || gig.compensation || locationLabel;
+
+  const openTalentReply = (prefill?: string) => {
+    if (!expanded) onToggle();
+    if (prefill) setMessageBody(prefill);
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/map?layer=gigz&gig=${gig.id}`;
+    const canShare = typeof navigator.share === "function";
+    try {
+      if (canShare) await navigator.share({ title: gig.title, url });
+      else await navigator.clipboard.writeText(url);
+      toast({ title: canShare ? "Shared" : "Link copied" });
+    } catch (error) {
+      if ((error as DOMException)?.name !== "AbortError") {
+        toast({ title: "Could not share", variant: "destructive" });
+      }
+    }
+  };
+
+  const glassVars = {
+    "--listing-accent": accent,
+    "--c": accent,
+    "--_c": accent,
+    position: "relative",
+  } as CSSProperties;
+  const isDemo = gig.username === "hausing_demo";
+
+  return (
+    <article
+      id={`board-post-${gig.id}`}
+      data-testid={`card-gig-${gig.id}`}
+      className={[
+        "board-listing-card board-listing-card--makeover board-listing-card--glass",
+        isLooking ? "board-listing-card--talent" : "is-offering",
+        expanded ? "is-expanded" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={glassVars}
+      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => {
+        // Don't steal Space/Enter from the reply textarea (or any field).
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || (e.target as HTMLElement)?.isContentEditable) {
+          return;
+        }
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+    >
+      {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
+      {isLooking ? (
+        <>
+          <div className="gig-talent-card__topline">
+            <span className="gig-talent-card__availability"><i aria-hidden="true" /> Available for gigs</span>
+            <span className="gig-talent-card__time">Posted {timeAgo(gig.createdAt)}</span>
+          </div>
+          <div className="gig-talent-card__identity">
+            <UserAvatar
+              photoUrl={gig.posterPhotoUrl}
+              avatarChoice={gig.avatarChoice}
+              avatarRing={gig.posterAvatarRing}
+              displayName={gig.displayName || gig.name}
+              username={gig.username}
+              href={profileHref}
+              onClick={e => e.stopPropagation()}
+              size={76}
+            />
+            <div>
+              <h4 className="gig-talent-card__name">{talentName}</h4>
+              <p className="gig-talent-card__role">{gig.title}</p>
+              <p className="gig-talent-card__location">{locationLabel}{gig.isRemote ? " · remote" : ""}</p>
+            </div>
+          </div>
+          <div className="gig-talent-card__actions" onClick={e => e.stopPropagation()}>
+            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} ↗</button>
+            <button type="button" onClick={() => openTalentReply()}>Message</button>
+          </div>
+          <div className="gig-talent-card__footer"><span aria-hidden="true">✦</span>{availabilityDetail}</div>
+        </>
+      ) : (
+        <>
+          <BoardGlassMotif variant="dollar" />
+          <div className="board-listing-card__row">
+            <div
+              className="board-listing-card__thumb"
+              style={gig.imageUrl ? undefined : { background: thumbGradient(false) }}
+            >
+              {gig.imageUrl ? (
+                <img src={gig.imageUrl} alt="" />
+              ) : (
+                <>
+                  <span className="board-listing-card__ghost" aria-hidden="true">{ghostLetter(gig.title)}</span>
+                  <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
+                </>
+              )}
+              {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "#ff1fa0" }}>Remote</span>}
+            </div>
+            <div className="board-listing-card__main">
+              <div className="board-listing-card__tags">
+                <span className="board-listing-card__kind board-listing-card__kind--text">{TYPE_LABELS[gig.postType]}</span>
+                <span className="board-listing-card__time">{timeAgo(gig.createdAt)}</span>
+              </div>
+              <h4 className="board-listing-card__title">{gig.title}</h4>
+              <div className="board-listing-card__poster">
+                {gig.username ? (
+                  <UserAvatar
+                    photoUrl={gig.posterPhotoUrl}
+                    avatarChoice={gig.avatarChoice}
+                    avatarRing={gig.posterAvatarRing}
+                    displayName={gig.displayName}
+                    username={gig.username}
+                    href={memberProfileHref(gig.username)}
+                    onClick={e => e.stopPropagation()}
+                    size={18}
+                  />
+                ) : null}
+                <span>{posterLabel} · {locationLabel}</span>
+              </div>
+              <div className="board-listing-card__footer">
+                <span className="board-listing-card__status">{status}</span>
+                <span className="board-listing-card__cta">{cta} →</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {expanded && (
+        <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
+          <p style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
+          {(skills.length > 0 || gig.compensation || gig.location) && (
+            <div className="gifting-details">
+              {[skills.join(", "), gig.compensation, gig.location].filter(Boolean).join(" · ")}
+            </div>
+          )}
+          {gig.gigDate ? (
+            <div className="gifting-details">
+              <CalendarDays size={14} /> {gig.gigDate}{gig.gigTime ? ` · ${gig.gigTime}` : ""}
+            </div>
+          ) : null}
+          <div className="gifting-listing-actions">
+            <button type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
+            {gig.username && profileHref ? (
+              <Link href={profileHref}>View @{gig.username}&apos;s profile</Link>
+            ) : null}
+            {gig.isMine && <>
+              <button type="button" onClick={() => setEditing(!editing)}>Edit post</button>
+              <button type="button" disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ status: gig.status === "CLOSED" ? "LIVE" : "CLOSED" })}>
+                {gig.status === "CLOSED" ? "Reopen post" : isLooking ? "Mark work found" : "Mark filled"}
+              </button>
+              {gig.status === "CLOSED" && <span role="status">Completed · visible only in your posts</span>}
+            </>}
+            {gig.isMine ? (
+              <button
+                type="button"
+                className="gifting-delete-btn"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (confirm(`Delete "${gig.title}"?`)) deleteMutation.mutate();
+                }}
+              >
+                <Trash2 size={14} /> Delete post
+              </button>
+            ) : null}
+          </div>
+          {editing && gig.isMine && <form className="gifting-form-grid" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); updateMutation.mutate(draft); }}>
+            {(["title", "description", "skills", "compensation", "location", "gigDate", "gigTime"] as const).map(key => <label key={key}>
+              {{ title: "Title", description: "Description", skills: "Skills", compensation: "Pay or rate", location: "Location", gigDate: "Date", gigTime: "Time" }[key]}
+              {key === "description" ? <textarea className="board-text-field" required minLength={20} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /> : <input className="board-text-field" type={key === "gigDate" ? "date" : key === "gigTime" ? "time" : "text"} required={key === "title"} minLength={key === "title" ? 3 : undefined} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} />}
+            </label>)}
+            <label><input type="checkbox" checked={draft.isRemote} onChange={e => setDraft({ ...draft, isRemote: e.target.checked })} /> Remote work</label>
+            <Button type="submit" disabled={updateMutation.isPending}>Save changes</Button>
+            <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+          </form>}
+          {!gig.isMine && gig.userId !== user?.id && (
+            <div className="gifting-response">
+              <textarea
+                value={messageBody}
+                onChange={e => setMessageBody(e.target.value)}
+                placeholder={
+                  isLooking
+                    ? `Ask about their skills and availability for "${gig.title}"...`
+                    : `Private reply about "${gig.title}"...`
+                }
+                maxLength={500}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!user) return setShowAuth(true);
+                  if (!messageBody.trim()) return;
+                  messageMutation.mutate();
+                }}
+                disabled={!messageBody.trim() || messageMutation.isPending}
+              >
+                {messageMutation.isPending ? "Sending…" : isLooking ? "Say hi" : "Send reply"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+    </article>
+  );
+}
+
+
+/** Shared by the map and the fallback posting surface. */
+export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {initialType?: GigFormData["postType"]; onClose: () => void; onPosted: (id: number) => void}) {
+  const {user} = useAuth();
+  const {toast} = useToast();
+  const [acceptRules, setAcceptRules] = useState(false);
+  const [venueQuery, setVenueQuery] = useState("");
+  const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
+  const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
+  const [newBusinessForm, setNewBusinessForm] = useState({
+    name: "", type: "bar", description: "", address: "", neighborhood: "",
+    hours: "", phone: "", website: "", instagram: "", logoImageUrl: "",
+  });
+
+  const { data: ownedBusinesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/directory/mine/owned"],
+    queryFn: () => apiRequest("GET", "/api/directory/mine/owned").then(r => r.json()),
+    enabled: !!user,
+  });
+
+  const isEligiblePoster = !!user && (user.promoterStatus === "approved" || !!user.isAdmin || ownedBusinesses.length > 0);
+
+  const { data: directoryBusinesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/directory"],
+    queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()),
+    enabled: isEligiblePoster,
+    staleTime: 60_000,
+  });
+
+  const venueMatches = useMemo(() => {
+    const q = normalizeVenueQuery(venueQuery);
+    if (q.length < 3) return [];
+    return directoryBusinesses
+      .filter(b => normalizeVenueQuery(b.name).includes(q) || (b.address && normalizeVenueQuery(b.address).includes(q)))
+      .slice(0, 5);
+  }, [directoryBusinesses, venueQuery]);
+
+  const newBusinessMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
+    onSuccess: () => {
+      toast({ title: "Sent to admin for approval", description: "We'll add it to the directory once it's reviewed. Your gig will keep using the plain location for now." });
+      setNewBusinessForm({ name: "", type: "bar", description: "", address: "", neighborhood: "", hours: "", phone: "", website: "", instagram: "", logoImageUrl: "" });
+      setVenueBranch("idle");
+      setVenueQuery("");
+    },
+    onError: (err: Error) => toast({ title: "Could not submit", description: err.message, variant: "destructive" }),
+  });
+
+  const form = useForm<GigFormData>({
+    resolver: zodResolver(gigSchema),
+    defaultValues: {
+      postType: initialType,
+      name: "",
+      contactEmail: "",
+      title: "",
+      description: "",
+      skills: "",
+      compensation: "",
+      location: "",
+      isRemote: false,
+      gigDate: "",
+      gigTime: "",
+      businessId: null,
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: GigFormData) => {
+      trackProductEvent("post_attempt", "gigz");
+      return apiRequest("POST", "/api/gigs", { ...data, acceptRules: true }).then(r => r.json());
+    },
+    onSuccess: (_data, variables) => {
+      trackProductEvent("post_completed", "gigz");
+      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
+      toast({
+        title: "Posted",
+        description: variables.postType === "LOOKING_FOR_WORK"
+          ? "You're on the board. Hosts can find you now."
+          : "Your gig is live. Let the replies roll in.",
+      });
+      form.reset();
+      setAcceptRules(false);
+      onPosted(_data.id);
+      setLinkedBusiness(null);
+      setVenueBranch("idle");
+      setVenueQuery("");
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : "Could not submit post.";
+      toast({ title: "Error", description: message, variant: "destructive" });
+    },
+  });
+
+  const submitGig = (data: GigFormData) => {
+    if (!acceptRules) {
+      toast({ title: "Board rules", description: "Please agree to the GIGZ rules before posting.", variant: "destructive" });
+      return;
+    }
+    const personalsErr = validateGigPostContent(data);
+    if (personalsErr) {
+      toast({ title: "Not a gig post", description: personalsErr, variant: "destructive" });
+      return;
+    }
+    mutation.mutate({ ...data, businessId: isEligiblePoster ? (linkedBusiness?.id ?? null) : null });
+  };
+
+  const postType = form.watch("postType");
+  const formAccent = postType === "LOOKING_FOR_WORK" ? "#19e3ff" : "#b06bff";
+  const formAccentName = postType === "LOOKING_FOR_WORK" ? "cyan" : "purple";
+
+  return (
           <section
             id="gigs-form"
             className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind"
@@ -404,7 +792,7 @@ export default function PrideWork() {
             <button
               type="button"
               className="gifting-close"
-              onClick={() => setFormOpen(false)}
+              onClick={onClose}
               aria-label="Close form"
             >
               <X size={18} />
@@ -641,386 +1029,5 @@ export default function PrideWork() {
               </div>
             </form>
           </section>
-        </ScrollReveal>
-      )}
-
-      <BoardActiveSection
-        className="diag"
-        sticker="Active board"
-        stickerTone="purple"
-        stickerStyle="mono"
-        title="Open gigs & available talent"
-        resultCount={`${filtered.length} showing`}
-        filters={
-          <>
-            {([
-              { key: "ALL" as const, label: "All", accent: "purple" },
-              { key: "LOOKING_FOR_WORK" as const, label: "Talent on deck", accent: "cyan" },
-              { key: "POSTING_GIG" as const, label: "GIGZ open", accent: "purple" },
-            ]).map(f => (
-              <BoardFilterChip
-                key={f.key}
-                active={filter === f.key}
-                onClick={() => setFilter(f.key)}
-                accent={f.accent}
-                count={filterCounts[f.key]}
-              >
-                {f.label}
-              </BoardFilterChip>
-            ))}
-          </>
-        }
-        filterRow2={
-          <>
-            <BoardTextField type="search" value={search} onChange={setSearch} placeholder="Search roles, skills, gigs" />
-            <BoardFilterChip active={remoteOnly} onClick={() => setRemoteOnly(v => !v)} accent="pink">
-              Remote only
-            </BoardFilterChip>
-            {user ? (
-              <BoardFilterChip active={onlyMine} onClick={() => setOnlyMine(value => !value)} accent="cyan">
-                My GIGZ
-              </BoardFilterChip>
-            ) : null}
-            <BoardSelectField value={sort} onChange={setSort}>
-              <option value="RECENT">Recently posted</option>
-              <option value="LONGEST">Longest up</option>
-            </BoardSelectField>
-          </>
-        }
-      >
-        {isLoading ? (
-          <BoardFeedSkeleton label="Loading talent & GIGZ posts" shape="board" count={6} />
-        ) : isError ? (
-          <div className="board-empty" style={{ borderColor: "#b06bff" }}>
-            <Briefcase size={40} style={{ color: "#b06bff", margin: "0 auto" }} />
-            <p className="display section-heading" style={{ color: "#fff" }}>Could not load posts</p>
-            <p className="board-copy-sm">Could not load posts. Try again in a moment.</p>
-            <Button variant="neon" accent="purple" style={{ marginTop: 20 }} onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/gigs"] })}>
-              Try again
-            </Button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="board-empty board-empty--makeover">
-            <p className="display section-heading">Nobody&apos;s on deck yet</p>
-            <p className="board-copy-sm">
-              You bartend, you run sound, you take a good photo at 1am in bad light. Say so. Or post the gig, paid or volunteer, and be honest about which.
-            </p>
-            <div className="board-empty__actions">
-              <Button variant="neon" accent="cyan" onClick={() => openForm("LOOKING_FOR_WORK")}>Post availability</Button>
-              <Button variant="solid" accent="purple" onClick={() => openForm("POSTING_GIG")}>Post a gig</Button>
-              {(filter !== "ALL" || search || remoteOnly) && (
-                <Button variant="neon" accent="cyan" onClick={clearFilters}>Clear filters</Button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="board-listing-grid board-listing-grid--makeover">
-            {filtered.map((gig, index) => {
-              const isLooking = gig.postType === "LOOKING_FOR_WORK";
-              const accent = isLooking ? ACCENT.LOOKING_FOR_WORK : ACCENT.POSTING_GIG;
-              const expanded = expandedId === gig.id;
-              const skills = gig.skills ? gig.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
-              return (
-                <ScrollReveal key={gig.id} delay={Math.min(index * 80, 400)}>
-                  <GigListingCard
-                    gig={gig}
-                    accent={accent}
-                    expanded={expanded}
-                    skills={skills}
-                    isLooking={isLooking}
-                    onToggle={() => setExpandedId(expanded ? null : gig.id)}
-                  />
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        )}
-      </BoardActiveSection>
-
-      <BoardCloseSeam
-        line="Need work · need help · both belong"
-        url="zaylist.com/pride-work"
-      />
-
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
-    </div>
-  );
-}
-
-export function GigListingCard({
-  gig,
-  accent,
-  expanded,
-  skills,
-  isLooking,
-  onToggle,
-}: {
-  gig: GigPost;
-  accent: string;
-  expanded: boolean;
-  skills: string[];
-  isLooking: boolean;
-  onToggle: () => void;
-}) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [showAuth, setShowAuth] = useState(false);
-  const [messageBody, setMessageBody] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState({ title: gig.title, description: gig.description, skills: gig.skills || "", compensation: gig.compensation || "", location: gig.location || "", gigDate: gig.gigDate || "", gigTime: gig.gigTime || "", isRemote: !!gig.isRemote });
-  const updateMutation = useMutation({
-    mutationFn: (changes: Record<string, unknown>) => apiRequest("PUT", `/api/gigs/${gig.id}`, changes),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/gigs/mine"] });
-      setEditing(false);
-      toast({ title: "Post updated", description: "Completed posts remain in My posts. You can reopen them there." });
-    },
-    onError: (error: Error) => toast({ title: "Could not update post", description: error.message, variant: "destructive" }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/gigs/${gig.id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gigs"] });
-      toast({ title: "GIGZ post deleted" });
-    },
-    onError: (error: Error) => toast({ title: "Could not delete post", description: error.message, variant: "destructive" }),
-  });
-
-  const messageMutation = useMutation({
-    mutationFn: () => fetch(`/api/gigs/${gig.id}/message`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ body: messageBody }),
-    }).then(r => {
-      if (!r.ok) throw new Error("Could not send message");
-      return r.json();
-    }),
-    onSuccess: () => {
-      setMessageBody("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-    },
-  });
-
-  const posterLabel = gig.username ? `@${gig.username}` : gig.name;
-  const locationLabel = gig.location || "Portland";
-  const status = [gig.compensation, gig.location].filter(Boolean).join(" · ")
-    || (isLooking ? "Available · message in inbox" : "Open · reply privately");
-  const cta = isLooking ? "Say hi" : "Reply";
-  const profileHref = gig.username ? memberProfileHref(gig.username) : null;
-  const talentName = gig.displayName || gig.name;
-  const talentFirstName = talentName.trim().split(/\s+/)[0] || "them";
-  const availabilityDetail = gig.skills || gig.compensation || locationLabel;
-
-  const openTalentReply = (prefill?: string) => {
-    if (!expanded) onToggle();
-    if (prefill) setMessageBody(prefill);
-  };
-
-  const handleShare = async () => {
-    const url = `${window.location.origin}/pride-work?post=${gig.id}`;
-    const canShare = typeof navigator.share === "function";
-    try {
-      if (canShare) await navigator.share({ title: gig.title, url });
-      else await navigator.clipboard.writeText(url);
-      toast({ title: canShare ? "Shared" : "Link copied" });
-    } catch (error) {
-      if ((error as DOMException)?.name !== "AbortError") {
-        toast({ title: "Could not share", variant: "destructive" });
-      }
-    }
-  };
-
-  const glassVars = {
-    "--listing-accent": accent,
-    "--c": accent,
-    "--_c": accent,
-    position: "relative",
-  } as CSSProperties;
-  const isDemo = gig.username === "hausing_demo";
-
-  return (
-    <article
-      id={`board-post-${gig.id}`}
-      data-testid={`card-gig-${gig.id}`}
-      className={[
-        "board-listing-card board-listing-card--makeover board-listing-card--glass",
-        isLooking ? "board-listing-card--talent" : "is-offering",
-        expanded ? "is-expanded" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={glassVars}
-      onClick={onToggle}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => {
-        // Don't steal Space/Enter from the reply textarea (or any field).
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || (e.target as HTMLElement)?.isContentEditable) {
-          return;
-        }
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-    >
-      {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
-      {isLooking ? (
-        <>
-          <div className="gig-talent-card__topline">
-            <span className="gig-talent-card__availability"><i aria-hidden="true" /> Available for gigs</span>
-            <span className="gig-talent-card__time">Posted {timeAgo(gig.createdAt)}</span>
-          </div>
-          <div className="gig-talent-card__identity">
-            <UserAvatar
-              photoUrl={gig.posterPhotoUrl}
-              avatarChoice={gig.avatarChoice}
-              avatarRing={gig.posterAvatarRing}
-              displayName={gig.displayName || gig.name}
-              username={gig.username}
-              href={profileHref}
-              onClick={e => e.stopPropagation()}
-              size={76}
-            />
-            <div>
-              <h4 className="gig-talent-card__name">{talentName}</h4>
-              <p className="gig-talent-card__role">{gig.title}</p>
-              <p className="gig-talent-card__location">{locationLabel}{gig.isRemote ? " · remote" : ""}</p>
-            </div>
-          </div>
-          <div className="gig-talent-card__actions" onClick={e => e.stopPropagation()}>
-            <button type="button" onClick={() => openTalentReply(`Hi ${talentFirstName}, I’d like to hire you for `)}>Hire {talentFirstName} ↗</button>
-            <button type="button" onClick={() => openTalentReply()}>Message</button>
-          </div>
-          <div className="gig-talent-card__footer"><span aria-hidden="true">✦</span>{availabilityDetail}</div>
-        </>
-      ) : (
-        <>
-          <BoardGlassMotif variant="dollar" />
-          <div className="board-listing-card__row">
-            <div
-              className="board-listing-card__thumb"
-              style={gig.imageUrl ? undefined : { background: thumbGradient(false) }}
-            >
-              {gig.imageUrl ? (
-                <img src={gig.imageUrl} alt="" />
-              ) : (
-                <>
-                  <span className="board-listing-card__ghost" aria-hidden="true">{ghostLetter(gig.title)}</span>
-                  <div className="board-listing-card__thumb-fallback" aria-hidden="true" />
-                </>
-              )}
-              {gig.isRemote && <span className="board-listing-card__grab-badge" style={{ background: "#ff1fa0" }}>Remote</span>}
-            </div>
-            <div className="board-listing-card__main">
-              <div className="board-listing-card__tags">
-                <span className="board-listing-card__kind board-listing-card__kind--text">{TYPE_LABELS[gig.postType]}</span>
-                <span className="board-listing-card__time">{timeAgo(gig.createdAt)}</span>
-              </div>
-              <h4 className="board-listing-card__title">{gig.title}</h4>
-              <div className="board-listing-card__poster">
-                {gig.username ? (
-                  <UserAvatar
-                    photoUrl={gig.posterPhotoUrl}
-                    avatarChoice={gig.avatarChoice}
-                    avatarRing={gig.posterAvatarRing}
-                    displayName={gig.displayName}
-                    username={gig.username}
-                    href={memberProfileHref(gig.username)}
-                    onClick={e => e.stopPropagation()}
-                    size={18}
-                  />
-                ) : null}
-                <span>{posterLabel} · {locationLabel}</span>
-              </div>
-              <div className="board-listing-card__footer">
-                <span className="board-listing-card__status">{status}</span>
-                <span className="board-listing-card__cta">{cta} →</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {expanded && (
-        <div className="board-listing-card__expand" onClick={e => e.stopPropagation()}>
-          <p style={{ whiteSpace: "pre-line" }}>{gig.description}</p>
-          {(skills.length > 0 || gig.compensation || gig.location) && (
-            <div className="gifting-details">
-              {[skills.join(", "), gig.compensation, gig.location].filter(Boolean).join(" · ")}
-            </div>
-          )}
-          {gig.gigDate ? (
-            <div className="gifting-details">
-              <CalendarDays size={14} /> {gig.gigDate}{gig.gigTime ? ` · ${gig.gigTime}` : ""}
-            </div>
-          ) : null}
-          <div className="gifting-listing-actions">
-            <button type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
-            {gig.username && profileHref ? (
-              <Link href={profileHref}>View @{gig.username}&apos;s profile</Link>
-            ) : null}
-            {gig.isMine && <>
-              <button type="button" onClick={() => setEditing(!editing)}>Edit post</button>
-              <button type="button" disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ status: gig.status === "CLOSED" ? "LIVE" : "CLOSED" })}>
-                {gig.status === "CLOSED" ? "Reopen post" : isLooking ? "Mark work found" : "Mark filled"}
-              </button>
-              {gig.status === "CLOSED" && <span role="status">Completed · visible only in your posts</span>}
-            </>}
-            {gig.isMine ? (
-              <button
-                type="button"
-                className="gifting-delete-btn"
-                disabled={deleteMutation.isPending}
-                onClick={() => {
-                  if (confirm(`Delete "${gig.title}"?`)) deleteMutation.mutate();
-                }}
-              >
-                <Trash2 size={14} /> Delete post
-              </button>
-            ) : null}
-          </div>
-          {editing && gig.isMine && <form className="gifting-form-grid" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); updateMutation.mutate(draft); }}>
-            {(["title", "description", "skills", "compensation", "location", "gigDate", "gigTime"] as const).map(key => <label key={key}>
-              {{ title: "Title", description: "Description", skills: "Skills", compensation: "Pay or rate", location: "Location", gigDate: "Date", gigTime: "Time" }[key]}
-              {key === "description" ? <textarea className="board-text-field" required minLength={20} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /> : <input className="board-text-field" type={key === "gigDate" ? "date" : key === "gigTime" ? "time" : "text"} required={key === "title"} minLength={key === "title" ? 3 : undefined} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} />}
-            </label>)}
-            <label><input type="checkbox" checked={draft.isRemote} onChange={e => setDraft({ ...draft, isRemote: e.target.checked })} /> Remote work</label>
-            <Button type="submit" disabled={updateMutation.isPending}>Save changes</Button>
-            <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
-          </form>}
-          {!gig.isMine && gig.userId !== user?.id && (
-            <div className="gifting-response">
-              <textarea
-                value={messageBody}
-                onChange={e => setMessageBody(e.target.value)}
-                placeholder={
-                  isLooking
-                    ? `Ask about their skills and availability for "${gig.title}"...`
-                    : `Private reply about "${gig.title}"...`
-                }
-                maxLength={500}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (!user) return setShowAuth(true);
-                  if (!messageBody.trim()) return;
-                  messageMutation.mutate();
-                }}
-                disabled={!messageBody.trim() || messageMutation.isPending}
-              >
-                {messageMutation.isPending ? "Sending…" : isLooking ? "Say hi" : "Send reply"}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </article>
   );
 }

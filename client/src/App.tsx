@@ -1,3 +1,4 @@
+import MapWorldRedirect from "@/components/MapWorldRedirect";
 import { homeBootLogoHtml } from "@shared/homeBoot";
 import { Switch, Route, Router, Redirect, useLocation } from "wouter";
 import { Suspense, useEffect, type ReactNode } from "react";
@@ -136,12 +137,15 @@ function AppLayout() {
             <Route path="/schedule">{() => <Schedule />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
-            <Route path="/pride-work" component={PrideWork} />
+            <Route path="/pride-work/new">{() => <MapWorldRedirect world="gigz" />}</Route>
+            <Route path="/pride-work">{() => <MapWorldRedirect world="gigz" />}</Route>
             <Route path="/gigs">
-              {() => <Redirect to="/pride-work" />}
+              {() => <MapWorldRedirect world="gigz" />}
             </Route>
-            <Route path="/gifting" component={Gifting} />
-            <Route path="/sellz" component={Sellz} />
+            <Route path="/gifting/new">{() => <MapWorldRedirect world="giftz" />}</Route>
+            <Route path="/gifting">{() => <MapWorldRedirect world="giftz" />}</Route>
+            <Route path="/sellz/new">{() => <MapWorldRedirect world="sellz" />}</Route>
+            <Route path="/sellz">{() => <MapWorldRedirect world="sellz" />}</Route>
             <Route path="/the-hauz/new" component={HousingNew} />
             <Route path="/the-hauz/:id" component={HousingPost} />
             <Route path="/the-hauz" component={Housing} />
@@ -178,9 +182,12 @@ function AppLayout() {
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />
             <Route path="/inbox" component={Inbox} />
-            <Route path="/spotted" component={MissedConnections} />
-            <Route path="/directory/:id/:slug?" component={Directory} />
-            <Route path="/directory" component={Directory} />
+            <Route path="/spotted/new">{() => <MapWorldRedirect world="mizzed" />}</Route>
+            <Route path="/spotted">{() => <MapWorldRedirect world="mizzed" />}</Route>
+            <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
+            <Route path="/directory/:id/:slug?">{params => <MapWorldRedirect world="places" recordId={params.id} />}</Route>
+
+            <Route path="/directory">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/nude-beaches">
               {() => {
                 const tab = new URLSearchParams(window.location.search).get("tab");
@@ -200,7 +207,7 @@ function AppLayout() {
             <Route path="/design-preview" component={DesignSystemSandbox} />
             <Route path="/u/:username" component={MemberProfile} />
             <Route path="/missed-connections">
-              {() => <Redirect to="/spotted" />}
+              {() => <MapWorldRedirect world="mizzed" />}
             </Route>
             <Route component={NotFound} />
             </Switch>

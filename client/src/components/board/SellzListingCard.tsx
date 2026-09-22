@@ -72,7 +72,7 @@ export default function SellzListingCard({ post, expanded, saved, onToggle, onRe
     mutate.mutate({ path, body, method });
   };
   const share = async () => {
-    const url = `${window.location.origin}/sellz?post=${post.id}`;
+    const url = `${window.location.origin}/map?layer=sellz&sell=${post.id}`;
     if (navigator.share) await navigator.share({ title: post.title, url }).catch(() => {});
     else { await navigator.clipboard.writeText(url); toast({ title: "Link copied" }); }
   };

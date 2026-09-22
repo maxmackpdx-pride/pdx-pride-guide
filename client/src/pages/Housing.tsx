@@ -52,7 +52,7 @@ import { trackProductEvent } from "@/lib/analytics";
 const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent: string }> = [
   {
     title: "Say what you need",
-    body: "One question, four answers. Offering a room, looking for housing, forming a HAÜS, or a managed unit.",
+    body: "One question, four answers. Offering a room, looking for housing, forming a HAÜZ, or a managed unit.",
     icon: "add",
     accent: HOUSING_ACCENT_VAR.OFFERING,
   },
@@ -285,7 +285,7 @@ export default function Housing() {
     () => [
       { n: stats?.activePosts ?? 0, l: "Active posts" },
       { n: stats?.roomsOpen ?? 0, l: "Rooms and units" },
-      { n: stats?.formingHouses ?? 0, l: "Forming a HAÜS" },
+      { n: stats?.formingHouses ?? 0, l: "Forming a HAÜZ" },
     ],
     [stats],
   );

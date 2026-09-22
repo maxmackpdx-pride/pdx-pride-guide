@@ -4,7 +4,7 @@ import { ChevronDown, House } from "lucide-react";
 import SmoothDrawer, { SmoothDrawerGroup, SmoothDrawerItem } from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
-export type ZaydarLayerId = "events" | "places" | "mizzed" | "gigz" | "stuff" | "houz";
+export type ZaydarLayerId = "events" | "places" | "mizzed" | "gigz" | "giftz" | "sellz" | "houz";
 
 export type ZaydarLayer = {
   id: ZaydarLayerId;

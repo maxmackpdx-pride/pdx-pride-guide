@@ -27,8 +27,6 @@ export default function Sellz() {
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<any>(blank);
-  const [photos, setPhotos] = useState<FileList | null>(null);
   const [search, setSearch] = useState(() => new URLSearchParams(location.search).get("q") || "");
   const [category, setCategory] = useState(() => new URLSearchParams(location.search).get("category") || "ALL");
   const [condition, setCondition] = useState("ALL");
@@ -147,37 +145,6 @@ export default function Sellz() {
     setSort("NEWEST");
   };
 
-  const create = useMutation({
-    mutationFn: async () => {
-      let photoUrls: string[] = [];
-      if (photos?.length) {
-        const formData = new FormData();
-        Array.from(photos).slice(0, 6).forEach(file => formData.append("photos", file));
-        const upload = await fetch("/api/upload/sellz", { method: "POST", credentials: "include", body: formData });
-        if (!upload.ok) throw new Error(await upload.text());
-        photoUrls = (await upload.json()).urls || [];
-      }
-      const response = await fetch("/api/sellz", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, photoUrls }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || response.statusText);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sellz"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/sellz/mine"] });
-      setFormOpen(false);
-      setForm(blank);
-      setPhotos(null);
-      toast({ title: "Your listing is live" });
-    },
-    onError: (error: any) => toast({ title: "Could not post", description: error.message, variant: "destructive" }),
-  });
-
   const openForm = () => {
     if (!user) return setShowAuth(true);
     setFormOpen(true);
@@ -225,7 +192,7 @@ export default function Sellz() {
         </div>
       </header>
 
-      {formOpen ? <ScrollReveal><section id="sellz-form" className="gifting-form board-path-card pdx-glass-rebind"><button className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close"><X /></button><p className="board-section-kicker board-section-kicker--lime">New listing</p><h2 className="display section-heading">Sell something</h2><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><label className="span">Photos, up to 6<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label></div><label className="gifting-rules"><input type="checkbox" checked={form.negotiable} onChange={e => setForm({ ...form, negotiable: e.target.checked })} />Open to offers</label><label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} />I own this item, described it honestly, and agree to the marketplace rules.</label><Button variant="solid" accent="green" size="lg" disabled={create.isPending || !form.acceptRules || !form.title || !form.price} onClick={() => create.mutate()}>{create.isPending ? "Posting…" : "Post listing"}</Button></section></ScrollReveal> : null}
+      {formOpen && <SellzComposer onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
 
       <main id="sellz-board" className="sellz-market-results">
         <div className="sellz-market-results__head">
@@ -278,4 +245,43 @@ export default function Sellz() {
       {showAuth ? <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" /> : null}
     </div>
   );
+}
+
+
+export function SellzComposer({onClose, onPosted}: {onClose: () => void; onPosted: (id: number) => void}) {
+  const {toast} = useToast();
+  const [form, setForm] = useState<any>(blank);
+  const [photos, setPhotos] = useState<FileList | null>(null);
+  const create = useMutation({
+    mutationFn: async () => {
+      let photoUrls: string[] = [];
+      if (photos?.length) {
+        const formData = new FormData();
+        Array.from(photos).slice(0, 6).forEach(file => formData.append("photos", file));
+        const upload = await fetch("/api/upload/sellz", { method: "POST", credentials: "include", body: formData });
+        if (!upload.ok) throw new Error(await upload.text());
+        photoUrls = (await upload.json()).urls || [];
+      }
+      const response = await fetch("/api/sellz", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, photoUrls }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || response.statusText);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sellz"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sellz/mine"] });
+      onPosted(data.id);
+      setForm(blank);
+      setPhotos(null);
+      toast({ title: "Your listing is live" });
+    },
+    onError: (error: any) => toast({ title: "Could not post", description: error.message, variant: "destructive" }),
+  });
+
+  return <section id="sellz-form" className="gifting-form board-path-card pdx-glass-rebind"><button className="gifting-close" onClick={onClose} aria-label="Close"><X /></button><p className="board-section-kicker board-section-kicker--lime">New listing</p><h2 className="display section-heading">Sell something</h2><div className="gifting-form-grid"><label className="span">Title<input className="board-text-field" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="What are you selling?" /></label><label className="span">Description<textarea className="board-text-field" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Useful details, dimensions, flaws, what is included." /></label><label>Price<input className="board-text-field" inputMode="decimal" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="$" /></label><label>Category<select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map(value => <option key={value}>{value}</option>)}</select></label><label>Condition<select className="board-text-field" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(value => <option key={value}>{value}</option>)}</select></label><label>Neighborhood<input className="board-text-field" value={form.neighborhood} onChange={e => setForm({ ...form, neighborhood: e.target.value })} /></label><label>Handoff<select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>{PICKUP.map(value => <option key={value}>{value}</option>)}</select></label><label className="span">Photos, up to 6<input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} /></label></div><label className="gifting-rules"><input type="checkbox" checked={form.negotiable} onChange={e => setForm({ ...form, negotiable: e.target.checked })} />Open to offers</label><label className="gifting-rules"><input type="checkbox" checked={form.acceptRules} onChange={e => setForm({ ...form, acceptRules: e.target.checked })} />I own this item, described it honestly, and agree to the marketplace rules.</label><Button variant="solid" accent="green" size="lg" disabled={create.isPending || !form.acceptRules || !form.title || !form.price} onClick={() => create.mutate()}>{create.isPending ? "Posting…" : "Post listing"}</Button></section>;
 }

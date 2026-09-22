@@ -2,7 +2,7 @@ import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords"
 export { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   getEventTiming,
   isMissedConnectionPostable,
@@ -9912,6 +9912,7 @@ export interface IStorage {
   getGiftingPost(id: number): any | undefined;
   getGiftingPostsByUser(userId: number): any[];
   createGiftingPost(data: InsertGiftingPost, status?: string): GiftingPost;
+  updateGiftingPost(id: number, userId: number, data: Pick<InsertGiftingPost,"title"|"description"|"category"|"neighborhood"|"pickupPreference"|"photoUrls">): any;
   addGiftingInterest(data: InsertGiftingInterest): GiftingInterest;
   chooseGiftingInterest(postId: number, interestId: number, ownerUserId: number): GiftingInterest | undefined;
   markGiftingResolved(postId: number, userId: number, status: "GIFTED" | "FOUND"): void;
@@ -11193,6 +11194,8 @@ export const storage: IStorage = {
         u.photo_url AS posterPhotoUrl,
         u.avatar_choice AS avatarChoice,
         u.avatar_ring AS posterAvatarRing,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue
       FROM missed_connections m
@@ -11225,6 +11228,8 @@ export const storage: IStorage = {
         u.photo_url AS posterPhotoUrl,
         u.avatar_choice AS avatarChoice,
         u.avatar_ring AS posterAvatarRing,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue
       FROM missed_connections m
@@ -13480,6 +13485,8 @@ export const storage: IStorage = {
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
         m.user_id,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
@@ -13507,6 +13514,8 @@ export const storage: IStorage = {
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
         m.user_id,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
@@ -13534,6 +13543,8 @@ export const storage: IStorage = {
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
         m.user_id,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue,
         e.address AS eventAddress,
@@ -13561,6 +13572,8 @@ export const storage: IStorage = {
         m.created_at AS createdAt,
         m.closes_at AS closesAt,
         m.user_id,
+        CASE WHEN e.status = 'LIVE' THEN e.lat END AS eventLat,
+        CASE WHEN e.status = 'LIVE' THEN e.lng END AS eventLng,
         e.title AS eventTitle,
         e.venue_name AS eventVenue
       FROM missed_connections m
@@ -13802,6 +13815,12 @@ export const storage: IStorage = {
     const ownerId = Number(post.user_id ?? post.userId);
     if (!opts.isAdmin && ownerId !== userId) throw new Error("Not allowed");
     db.update(giftingPosts).set({ status: "REMOVED" } as any).where(eq(giftingPosts.id, id)).run();
+  },
+  updateGiftingPost(id,userId,data) {
+    const post=this.getGiftingPost(id);
+    if(!post || Number(post.user_id ?? post.userId)!==userId || post.status==="REMOVED")throw new Error("Post not found");
+    db.update(giftingPosts).set({title:data.title,description:data.description,category:data.category,neighborhood:data.neighborhood,pickupPreference:data.pickupPreference,photoUrls:data.photoUrls}).where(and(eq(giftingPosts.id,id),eq(giftingPosts.userId,userId))).run();
+    return this.getGiftingPost(id);
   },
   createGiftingPost(data, status) {
     const postType = data.postType === "ISO" ? "ISO" : "GIFT";

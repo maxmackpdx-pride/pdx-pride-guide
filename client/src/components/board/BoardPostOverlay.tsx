@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { X } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import GiftListingCard, { cardAccent, type GiftingPost } from "./GiftListingCard";
 import { GigListingCard, type GigPost } from "@/pages/PrideWork";
@@ -31,38 +32,11 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
   const [showAuth, setShowAuth] = useState(false);
   const dialogRef = useModalA11y({ onClose, enabled: !showAuth });
 
-  const giftQuery = useQuery<GiftingPost[]>({
-    queryKey: ["/api/gifting"],
-    queryFn: async () => {
-      const r = await apiRequest("GET", "/api/gifting");
-      return r.json();
-    },
-    enabled: kind === "gifting",
-  });
-
-  const gigQuery = useQuery<GigPost[]>({
-    queryKey: ["/api/gigs"],
-    queryFn: async () => {
-      const r = await apiRequest("GET", "/api/gigs");
-      return r.json();
-    },
-    enabled: kind === "gig",
-  });
-  const sellzQuery = useQuery<SellzPost[]>({
-    queryKey: ["/api/sellz"],
-    queryFn: async () => {
-      const r = await apiRequest("GET", "/api/sellz");
-      return r.json();
-    },
-    enabled: kind === "sellz",
-  });
-
-  const query = kind === "gifting" ? giftQuery : kind === "sellz" ? sellzQuery : gigQuery;
-  const post = kind === "gifting"
-    ? giftQuery.data?.find(p => p.id === postId)
-    : kind === "sellz"
-      ? sellzQuery.data?.find(p => p.id === postId)
-      : gigQuery.data?.find(g => g.id === postId);
+  const {user}=useAuth();
+  const endpoint=kind==="gig"?"/api/gigs":kind==="gifting"?"/api/gifting":"/api/sellz";
+  const query=useQuery<GiftingPost|GigPost|SellzPost>({queryKey:[endpoint,postId,user?.id],queryFn:()=>apiRequest("GET",`${endpoint}/${postId}`).then(r=>r.json()),retry:1});
+  const post=query.data;
+  const saved=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:kind==="sellz"&&!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
 
   let card: ReactNode = null;
   // Accent tints the panel border + glow, matching the board card's color.
@@ -80,7 +54,7 @@ export default function BoardPostOverlay({ kind, postId, onClose }: Props) {
     );
   } else if (post && kind === "sellz") {
     accent = "#39ff14";
-    card = <SellzListingCard post={post as SellzPost} expanded saved={false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
+    card = <SellzListingCard post={post as SellzPost} expanded saved={saved.data?.includes(postId)||false} onToggle={() => {}} onRequireAuth={() => setShowAuth(true)} onDeleted={onClose} />;
   } else if (post && kind === "gig") {
     const gig = post as GigPost;
     const isLooking = gig.postType === "LOOKING_FOR_WORK";

@@ -2966,6 +2966,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(gigs);
   });
 
+  app.get("/api/gigs/:id", (req,res)=>{
+    const post=storage.getGigPosts().find(post=>post.id===Number(req.params.id));
+    if(!post || post.status!=="LIVE" && post.userId!==req.session?.userId)return res.status(404).json({error:"Not found"});
+    res.json(publicGigPost(post,req.session?.userId));
+  });
+
   app.put("/api/gigs/:id", requireAuth, (req, res) => {
     const id = Number(req.params.id);
     const userId = req.session.userId!;
@@ -3027,7 +3033,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/gifting/:id", (req: any, res) => {
     const post = storage.getGiftingPost(Number(req.params.id));
-    if (!post) return res.status(404).json({ error: "Not found" });
+    if (!post || ["REMOVED","PENDING","REJECTED"].includes(post.status) && Number(post.user_id ?? post.userId)!==req.session?.userId) return res.status(404).json({ error: "Not found" });
     res.json(publicGiftingPost(post, req.session?.userId));
   });
 
@@ -3056,6 +3062,20 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
+  });
+
+  app.put("/api/gifting/:id", requireAuth, (req,res)=>{
+    try {
+      const existing=storage.getGiftingPost(Number(req.params.id));
+      if(!existing || Number(existing.user_id ?? existing.userId)!==req.session.userId || existing.status==="REMOVED")return res.status(404).json({error:"Not found"});
+      const data={title:String(req.body.title||"").trim(),description:String(req.body.description||"").trim(),category:String(req.body.category||"").trim(),neighborhood:String(req.body.neighborhood||"").trim(),pickupPreference:String(req.body.pickupPreference||"").trim(),photoUrls:JSON.stringify(Array.isArray(req.body.photoUrls)?req.body.photoUrls.filter((url:unknown)=>typeof url==="string").slice(0,2):existing.photoUrls||[])};
+      if(!data.title || data.title.length>90 || !data.description)throw new Error("Add a title (up to 90 characters) and description.");
+      const haystack=`${data.title} ${data.description} ${data.category}`.toLowerCase();
+      if(RESTRICTED_GIFTING_TERMS.some(term=>haystack.includes(term)))throw new Error("This post appears to include a restricted item.");
+      if(moderationGate(res,"Gifting board edit",data))return;
+      const post=storage.updateGiftingPost(Number(req.params.id),req.session.userId!,data);
+      res.json(publicGiftingPost(post,req.session.userId));
+    }catch(error:any){res.status(400).json({error:error.message});}
   });
 
   app.post("/api/gifting/:id/interest", requireAuth, (req, res) => {
@@ -3201,7 +3221,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/sellz/:id", (req: any, res) => {
     const post = storage.getSellzPost(Number(req.params.id));
-    if (!post) return res.status(404).json({ error: "Listing not found" });
+    if (!post || ["REMOVED","PENDING","REJECTED"].includes(post.status) && Number(post.user_id ?? post.userId)!==req.session?.userId) return res.status(404).json({ error: "Listing not found" });
     res.json(publicSellzPost(post, req.session?.userId));
   });
 
@@ -4190,6 +4210,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getMissedConnectionsByUser(req.session.userId!));
   });
 
+  app.get("/api/missed-connections/:id", (req,res)=>{
+    const id=Number(req.params.id),viewer=req.session?.userId;
+    const active=storage.getMissedConnections("ACTIVE",viewer).find(post=>post.id===id);
+    const post=active || (viewer?storage.getMissedConnectionsByUser(viewer).find(post=>post.id===id):undefined);
+    if(!post)return res.status(404).json({error:"Not found"});
+    res.json(post);
+  });
+
   app.post("/api/missed-connections", requireAuth, (req, res) => {
     try {
       const rawEventId = req.body.eventId;
@@ -4282,6 +4310,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.put("/api/missed-connections/:id", requireAuth, (req, res) => {
+    if(req.body.status!==undefined && req.body.status!=="ARCHIVED")return res.status(400).json({error:"Only closing a connection is supported here"});
+    if(req.body.title!==undefined && String(req.body.title).length>80)return res.status(400).json({error:"Title max is 80 characters"});
+    if(req.body.body!==undefined && !String(req.body.body).trim())return res.status(400).json({error:"Message required"});
     const patch: any = {};
     ["title", "body", "status"].forEach(k => {
       if (req.body[k] !== undefined) patch[k] = req.body[k];

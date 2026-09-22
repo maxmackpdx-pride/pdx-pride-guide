@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 
 
 import { useLocation, useSearch } from "wouter";
 import { ZAYDAR_PLACE_TYPE_OPTIONS, zaydarTypeIcon, zaydarTypeLabel } from "@/components/ZaydarSearchDrawer";
 import ZaydarLayerSheet, { type ZaydarLayer, type ZaydarLayerId } from "@/components/ZaydarLayerSheet";
+import MapWorldPanel from "@/components/MapWorldPanel";
+import MapComposerOverlay from "@/components/MapComposerOverlay";
+import {readMapCamera,filterWorldRows,locateWorldRow,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
 import { ChevronRight, Navigation } from "lucide-react";
@@ -187,7 +190,8 @@ function rowMarks(rows: MapRow[], kind: Extract<Mark["kind"], "board">): Mark[] 
 }
 
 function boardColor(row: MapRow): string {
-  if (String(row._board) === "The HOÜS") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if (String(row._board) === "The HAÜZ") return row.type === "OFFERING" ? "#FF6600" : row.type === "FORMING" ? "#39FF14" : row.type === "MANAGED" ? "#8800FF" : "#00FFFF";
+  if(row._board === "Mizzed") return "#FF00CC";
   const kind = boardKind(row);
   if (kind === "gig") return "#8800FF";
   if (kind === "gifting") return "#CCFF00";
@@ -195,10 +199,11 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The HOÜS") return "/zaydar-map/icons/housing.svg";
+  if (String(row._board) === "The HAÜZ") return "/zaydar-map/icons/housing.svg";
+  if(row._board === "Mizzed")return "/zaydar-map/icons/mizzed.svg";
   const kind = boardKind(row);
-  if (kind === "gig") return zaydarTypeIcon("service");
-  return zaydarTypeIcon("shop");
+  if (kind === "gig") return "/brand/family/gigz.svg";
+  return kind === "gifting" ? "/brand/family/giftz.svg" : "/brand/family/sellz.svg";
 }
 
 function boardTitle(row: MapRow): string {
@@ -306,6 +311,11 @@ export default function ZaydarMapDemo() {
     setLocation(mapHref(mutate), { replace: true, state: window.history.state });
   }, [setLocation]);
   const query = params.get("q") || "";
+  const initialCamera=useMemo(()=>readMapCamera(new URLSearchParams(window.location.search)),[]);
+  const cameraState=useRef(initialCamera);
+  const cameraWriteTimer=useRef<number>();
+  useEffect(()=>()=>window.clearTimeout(cameraWriteTimer.current),[]);
+
   const timeFilter = readTimeFilter(params);
   const customStart = params.get("from") || "", customEnd = params.get("to") || "";
   const setTimeFilter = (value: TimeFilter) => updateParams(p => {
@@ -313,7 +323,7 @@ export default function ZaydarMapDemo() {
     if (value !== "custom") { p.delete("from"); p.delete("to"); }
   });
   const layerValue = params.get("layer");
-  const activeLayer = layerValue === "boards" ? "stuff" : ["events", "places", "mizzed", "gigz", "stuff", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
+  const activeLayer = layerValue === "boards" || layerValue === "stuff" ? "giftz" : ["events", "places", "mizzed", "gigz", "giftz", "sellz", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
   const changeLayer = useCallback((next: ZaydarLayerId | null) => {
     const current = mapSearchParams().get("layer");
     setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
@@ -322,7 +332,7 @@ export default function ZaydarMapDemo() {
     });
   }, [setLocation]);
   const showEvents = params.get("hideEvents") !== "1", showPlaces = params.get("hidePlaces") !== "1";
-  const showGigz = params.get("hideGigz") !== "1", showStuff = params.get("hideStuff") !== "1", showHouz = params.get("hideHouz") !== "1";
+  const showGigz = params.get("hideGigz") !== "1", showGiftz = params.get("hideGiftz") !== "1" && params.get("hideStuff") !== "1", showSellz = params.get("hideSellz") !== "1" && params.get("hideStuff") !== "1", showMizzed = params.get("hideMizzed") !== "1", showHouz = params.get("hideHouz") !== "1";
   const toggleLayer = (key: string) => updateParams(p => { if (p.get(key) === "1") p.delete(key); else p.set(key, "1"); });
   const housingValue = params.get("housingType");
   const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
@@ -337,17 +347,32 @@ export default function ZaydarMapDemo() {
   const placeTypes = useMemo(() => placeTypesParam !== null ? placeTypesParam.split(",") : [...ZAYDAR_PLACE_TYPE_OPTIONS], [placeTypesParam]);
   const eventTag = params.get("tag");
   const setEventTag = (value: string | null) => updateParams(p => { if (value) p.set("tag", value); else p.delete("tag"); });
-  const boardKindsParam = params.get("boards");
-  const boardKinds = useMemo(() => new Set(boardKindsParam !== null ? boardKindsParam.split(",") : ["Giftz", "Sellz"]), [boardKindsParam]);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [previewDateTime, setPreviewDateTime] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const [mapBounds,setMapBounds] = useState<MapBounds|null>(null);
+  const composeWorldValue=params.get("compose");
+  const composeWorld=(["places","mizzed","gigz","giftz","sellz"].includes(composeWorldValue||"")?composeWorldValue:null) as MapWorld|null;
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const requestedObject=[...OVERLAY_KEYS,"compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
+  useEffect(()=>{if(!canOpenMapObjects && requestedObject.replaceAll("|","").length)setShowAuth(true);},[canOpenMapObjects,requestedObject]);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<ZaydarHandle | null>(null);
+  useEffect(()=>{
+    const restore=()=>{
+      window.clearTimeout(cameraWriteTimer.current);
+      const view=readMapCamera(new URLSearchParams(window.location.search));
+      const current=cameraState.current;
+      if(view && (!current || Math.abs(view.center[0]-current.center[0])>.00001 || Math.abs(view.center[1]-current.center[1])>.00001 || Math.abs(view.zoom-current.zoom)>.01)) {
+        mapRef.current?.send("view",{center:view.center,zoom:view.zoom});
+      }
+    };
+    window.addEventListener("popstate",restore);
+    return()=>window.removeEventListener("popstate",restore);
+  },[]);
   const pageRef = useRef<HTMLElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -430,11 +455,27 @@ export default function ZaydarMapDemo() {
   const { data: gigs = EMPTY_ROWS, isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = EMPTY_ROWS, isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
+  const mineSpecs=useMemo(()=>[["gigz","/api/gigs?mine=1"],["giftz","/api/gifting/mine"],["sellz","/api/sellz/mine"],["mizzed","/api/missed-connections/mine"]] as const,[]);
+  const mineQueries=useQueries({queries:mineSpecs.map(([world,url])=>({queryKey:["map-worlds-mine",world,user?.id],enabled:!!user,queryFn:()=>apiRequest("GET",url).then(r=>r.json()) as Promise<MapRow[]>}))});
+  const mineWorlds=Object.fromEntries(mineSpecs.map(([world],i)=>[world,mineQueries[i]]));
+  const savedSellz=useQuery<number[]>({queryKey:["/api/sellz/saved/ids"],enabled:!!user,queryFn:()=>apiRequest("GET","/api/sellz/saved/ids").then(r=>r.json())});
+  const savedSellzSet=useMemo(()=>new Set(savedSellz.data||[]),[savedSellz.data]);
+  useEffect(()=>{
+    return queryClient.getQueryCache().subscribe(event=>{
+      if(event.type==="updated" && event.action.type==="invalidate" && ["/api/gigs","/api/gifting","/api/sellz","/api/missed-connections"].includes(String(event.query.queryKey[0]))) {
+        void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});
+      }
+    });
+  },[]);
   const housing = useMemo(() => stampHauzMapPoints(Array.isArray(housingRaw) ? housingRaw as MapRow[] : (housingRaw && typeof housingRaw === "object" && Array.isArray((housingRaw as { posts?: unknown[] }).posts) ? (housingRaw as { posts: MapRow[] }).posts : [])), [housingRaw]);
   const housingStats = !Array.isArray(housingRaw) && housingRaw && typeof housingRaw === "object" ? (housingRaw as HousingBoardResponse).stats : undefined;
   const goOverlay = useCallback((key: OverlayKey | null, id?: number) => {
-    const hasOverlay = OVERLAY_KEYS.some(key => mapSearchParams().has(key));
-    setLocation(overlayHref(key, id), { replace: hasOverlay, state: { ...window.history.state,
+    const hasOverlay = [...OVERLAY_KEYS,"compose","houzCompose"].some(key => mapSearchParams().has(key));
+    const href=overlayHref(key,id);
+    const url=new URL(href,window.location.origin);
+    const world=Object.entries(WORLD_DETAIL_KEYS).find(([,detail])=>detail===key)?.[0];
+    if(world)url.searchParams.set("layer",world);
+    setLocation(url.pathname+url.search, { replace: hasOverlay, state: { ...window.history.state,
       mapOverlayReturn: hasOverlay ? window.history.state?.mapOverlayReturn : window.location.pathname + window.location.search,
     } });
   }, [setLocation]);
@@ -470,7 +511,8 @@ export default function ZaydarMapDemo() {
   });
   const selectedHouz = feedHouz || houzDetail.data;
   const mizzedId = mapRecordId(params.get("mizzed") || params.get("spotted"));
-  const selectedMizzed = mizzedId ? mizzed.find(post => post.id === mizzedId) : null;
+  const mizzedDetail=useQuery<MissedConnectionPost>({queryKey:["/api/missed-connections",mizzedId,user?.id],enabled:mizzedId!==null,queryFn:()=>apiRequest("GET",`/api/missed-connections/${mizzedId}`).then(r=>r.json())});
+  const selectedMizzed = mizzedId ? mizzedDetail.data || mizzed.find(post => post.id === mizzedId) : null;
   const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
   const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
   const missingPlace = placeId !== null && !placesLoading && !selectedPlace;
@@ -490,33 +532,34 @@ export default function ZaydarMapDemo() {
     if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
     return matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd, viewTimestamp);
   }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, viewTimestamp]);
-  const visiblePlaces = useMemo(() => places.filter(p => p.type !== "group" && (!q || `${p.name} ${p.type} ${p.neighborhood || ""}`.toLowerCase().includes(q))), [places, q]);
-  const mapPlaces = useMemo(() => visiblePlaces.filter(place => placeTypes.includes(zaydarPlaceType(place))), [visiblePlaces, placeTypes]);
-  const nearbyPlaces = useMemo(() => mapPlaces
-    .map(place => ({ place, point: placePoint(place) }))
-    .filter((entry): entry is { place: Place; point: [number, number] } => Boolean(entry.point))
-    .map(entry => ({ ...entry, distance: milesBetween(mapCenter, entry.point) }))
-    .filter(entry => entry.distance <= 10)
-    .sort((a, b) => a.distance - b.distance)
-    .map(entry => entry.place), [mapPlaces, mapCenter]);
-  const gigRows = useMemo(() => gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })), [gigs]);
-  const stuffRows = useMemo(() => ([
-    ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
-    ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
-  ]), [gifts, sells]);
-  const visibleGigz = useMemo(() => gigRows.filter(row => rowMatchesQuery(row, q)), [gigRows, q]);
-  const visibleStuff = useMemo(() => stuffRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [stuffRows, boardKinds, q]);
-  const visibleMizzed = useMemo(() => mizzed.filter(post => !q || `${post.title} ${post.body} ${spottedPlace(post)}`.toLowerCase().includes(q)), [mizzed, q]);
+  const locatedWorlds = useMemo(()=>{
+    const source:Record<MapWorld,MapRow[]>={places:places.filter(p=>p.type!=="group") as MapRow[],mizzed:mizzed as unknown as MapRow[],gigz:gigs,giftz:gifts,sellz:sells};
+    const board:Record<MapWorld,string>={places:"",mizzed:"Mizzed",gigz:"Gigz",giftz:"Giftz",sellz:"Sellz"};
+    return Object.fromEntries((Object.keys(source) as MapWorld[]).map(world=>{
+      const rows=params.get(`${world}.view`)==="mine" ? mineWorlds[world]?.data||[] : source[world];
+      return [world,rows.map(row=>{
+        if(world==="places") {
+          const points=placeMarks([row as Place]);
+          return {...row,lat:points[0]?.lat,lng:points[0]?.lng,_mapPoints:points,locationLabel:row.neighborhood||"Confirmed address"};
+        }
+        return {...locateWorldRow(row as WorldRow,world,places as unknown as WorldRow[],events as unknown as WorldRow[]),_board:board[world]};
+      })];
+    })) as unknown as Record<MapWorld,WorldRow[]>;
+  },[places,mizzed,gigs,gifts,sells,mineQueries[0].data,mineQueries[1].data,mineQueries[2].data,mineQueries[3].data,params]);
+  const filteredWorlds=useMemo(()=>Object.fromEntries((Object.keys(locatedWorlds) as MapWorld[]).map(world=>[world,filterWorldRows(locatedWorlds[world],world,params,savedSellzSet)])) as Record<MapWorld,WorldRow[]>,[locatedWorlds,params,savedSellzSet]);
+  const mapPlaces=useMemo(()=>filteredWorlds.places.filter(place=>placeTypes.includes(zaydarPlaceType(place as Place))) as unknown as Place[],[filteredWorlds,placeTypes]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
-    .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, housingSaved, housingTags, q]);
+    .map(row => ({ ...row, _board: "The HAÜZ" })), [housing, housingType, housingSaved, housingTags, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
-    ...(showGigz ? rowMarks(visibleGigz, "board") : []),
-    ...(showStuff ? rowMarks(visibleStuff, "board") : []),
+    ...(showGigz ? rowMarks(filteredWorlds.gigz, "board") : []),
+    ...(showMizzed ? rowMarks(filteredWorlds.mizzed, "board") : []),
+    ...(showGiftz ? rowMarks(filteredWorlds.giftz, "board") : []),
+    ...(showSellz ? rowMarks(filteredWorlds.sellz, "board") : []),
     ...(showHouz ? rowMarks(visibleHousing, "board") : []),
-  ], [showEvents, showPlaces, showGigz, showStuff, showHouz, visibleEvents, mapPlaces, visibleGigz, visibleStuff, visibleHousing]);
+  ], [showEvents, showPlaces, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, filteredWorlds, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     if (!canOpenMapObjects) { setShowAuth(true); return; }
@@ -526,10 +569,11 @@ export default function ZaydarMapDemo() {
     else if (mark.kind === "place") { goOverlay("place", (mark.item as Place).id); }
     else {
       const row = mark.item as MapRow;
-      if (String(row._board) === "The HOÜS") {
+      if (String(row._board) === "The HAÜZ") {
         const postId = Number(row.id);
         if (Number.isFinite(postId)) goOverlay("houz", postId);
       }
+      else if (row._board === "Mizzed") { goOverlay("mizzed", Number(row.id)); }
       else {
         const kind = boardKind(row);
         const postId = Number(row.id);
@@ -537,18 +581,13 @@ export default function ZaydarMapDemo() {
       }
     }
   }, [canOpenMapObjects, goOverlay]);
-  const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: `board-${row._board}-${row.id}`, kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
-  const toggleStuffKind = (kind: string) => updateParams(p => {
-    const next = new Set(boardKinds);
-    if (next.has(kind)) next.delete(kind); else next.add(kind);
-    p.set("boards", [...next].join(","));
-  });
+  const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: mapListingKey(row._board,row.id), kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="zaydar-layer-list">
       {rows.slice(0, kind === "houz" ? 50 : 5).map((row, index) => {
         const isPlace = kind === "places";
         const title = isPlace ? String(row.name || "Place") : boardTitle(row);
-        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing").replace("HAÜS", "HOÜS")} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
+        const meta = isPlace ? `${zaydarTypeLabel(String(row.type || "venue"))} · ${String(row.neighborhood || "Portland")}` : kind === "houz" ? `${(HOUSING_TYPE_LABEL[row.type as HousingType] || "Housing")} · ${Array.isArray(row.areas) && row.areas.length ? row.areas.join(", ") : "Portland"}` : `${String(row._board || "Boards")} · ${String(row.neighborhood || "Portland")}`;
         const fallback = isPlace ? directoryFallbackLogo(String(row.type)) : boardIcon(row);
         const photo = isPlace ? resolveDirectoryLogo(String(row.name), typeof row.imageUrl === "string" ? row.imageUrl : undefined) : firstImage(kind === "houz" ? row.photos : row.photoUrls) || firstImage(row.imageUrl);
         return <button type="button" className="zaydar-layer-row" key={`${kind}-${row._board || ""}-${row.id ?? index}`} onClick={event => isPlace ? openMark(placeMarks([row as Place])[0] || { key: `p-${row.id}`, kind: "place", lat: Number(row.lat), lng: Number(row.lng), item: row as Place }, event.currentTarget) : openBoardRow(row, event.currentTarget)}>
@@ -583,76 +622,59 @@ export default function ZaydarMapDemo() {
     </div>}
     <details className="zaydar-layer-rsvps"><summary>Your RSVPs</summary><ZaydarUpcomingRsvps events={events} loading={eventsLoading} onSignIn={() => setShowAuth(true)} onOpen={(event,target) => openMark({key:`e-${event.id}-${event.dateStart}`,kind:"event",lat:event.lat??NaN,lng:event.lng??NaN,item:event},target)} /></details>
   </section>;
-  const placesPanel = <section className="zaydar-layer-panel" aria-labelledby="map-placez-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-placez-title">Placez</h2></div>
-    <div className="zaydar-layer-rail" role="group" aria-label="Place categories">
-      {ZAYDAR_PLACE_TYPE_OPTIONS.map(type => <button type="button" key={type} aria-pressed={placeTypes.includes(type)} onClick={() => updateParams(p => p.set("placeTypes", (placeTypes.includes(type) ? placeTypes.filter(item => item !== type) : [...placeTypes, type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}
-    </div>
-    {placesLoading ? <p>Loading Placez…</p> : placesError ? <p role="alert">Placez could not load. <button type="button" onClick={() => void retryPlaces()}>Try again</button></p> : panelRows(nearbyPlaces as MapRow[], "places")}
-  </section>;
-  const mizzedPanel = <section className="zaydar-layer-panel" aria-labelledby="map-mizzed-title">
-    <div className="zaydar-layer-panel__heading"><small>Map drawer</small><h2 id="map-mizzed-title">Mizzed Connections</h2></div>
-    {mizzedLoading ? <p role="status">Loading Mizzed Connections…</p> : mizzedError ? <p role="alert">Mizzed Connections could not load. <button type="button" onClick={() => void retryMizzed()}>Try again</button></p> : <div className="zaydar-layer-list">
-      {visibleMizzed.slice(0, 5).map(post => <button type="button" className="zaydar-layer-row" key={post.id} onClick={() => canOpenMapObjects ? goOverlay("mizzed", post.id) : setShowAuth(true)}>
-        <img src="/brand/family/mizzed-connection.svg" alt="" loading="lazy" />
-        <span className="zaydar-layer-row__copy"><strong>{post.title || post.body.slice(0, 80)}</strong><small>{spottedPlace(post)}</small></span>
-        <ChevronRight size={18} aria-hidden="true" />
-      </button>)}
-      {!visibleMizzed.length && <p className="zaydar-layer-empty" role="status">No Mizzed Connections match this search.</p>}
-    </div>}
-    <p className="zaydar-layer-location-note">Mizzed posts have no exact map location, so they appear in the drawer without pins.</p>
-  </section>;
-  const gigzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-gigz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-gigz-title">Gigz</h2></div>
-    {gigsLoading ? <p role="status">Loading Gigz…</p> : gigsError ? <p role="alert">Gigz could not load. <button type="button" onClick={() => void retryGigs()}>Try again</button></p> : panelRows(visibleGigz, "boards")}
-  </section>;
-  const stuffPanel = <section className="zaydar-layer-panel" aria-labelledby="map-stuff-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-stuff-title">Stuff</h2></div>
-    <div className="zaydar-layer-rail" role="group" aria-label="Stuff categories">
-      {["Giftz", "Sellz"].map(kind => <button type="button" key={kind} aria-pressed={boardKinds.has(kind)} onClick={() => toggleStuffKind(kind)}>{kind}</button>)}
-    </div>
-    {giftsLoading || sellsLoading ? <p role="status">Loading Stuff…</p> : giftsError || sellsError ? <p role="alert">Stuff could not load. <button type="button" onClick={() => { void retryGifts(); void retrySells(); }}>Try again</button></p> : panelRows(visibleStuff, "boards")}
-  </section>;
+  const openComposer=(world:MapWorld)=>{
+    if(!user){setShowAuth(true);return;}
+    setLocation(mapHref(p=>{clearMapOverlay(p);p.delete("houzCompose");p.set("compose",world);p.set("layer",world);}),{state:{...window.history.state,mapOverlayReturn:window.location.pathname+window.location.search}});
+  };
+  const worldPanels=Object.fromEntries((["places","mizzed","gigz","giftz","sellz"] as MapWorld[]).map(world=>{
+    const isMine=params.get(`${world}.view`)==="mine";
+    const state={places:[placesLoading,placesError,retryPlaces],mizzed:[mizzedLoading,mizzedError,retryMizzed],gigz:[gigsLoading,gigsError,retryGigs],giftz:[giftsLoading,giftsError,retryGifts],sellz:[sellsLoading,sellsError,retrySells]}[world];
+    const rows=world==="places"?mapPlaces as unknown as WorldRow[]:filteredWorlds[world];
+    return [world,<MapWorldPanel key={world} world={world} rows={rows} allRows={locatedWorlds[world]} bounds={mapBounds} params={params} setParam={(key,value)=>updateParams(p=>{if(value)p.set(key,value);else p.delete(key);})} onCreate={()=>openComposer(world)} selectedId={mapRecordId(params.get(WORLD_DETAIL_KEYS[world]))} loading={isMine?mineWorlds[world]?.isLoading:Boolean(state[0])} error={isMine?mineWorlds[world]?.isError:Boolean(state[1])} retry={()=>{if(isMine)void mineWorlds[world]?.refetch();else void (state[2] as ()=>unknown)();}} onOpen={(row,target)=>world==="places"?openMark(placeMarks([row as Place])[0]||{key:`p-${row.id}`,kind:"place",lat:NaN,lng:NaN,item:row as Place},target):openBoardRow(row,target)}>
+      {world==="places" && <div className="zaydar-layer-rail" role="group" aria-label="Place categories">{ZAYDAR_PLACE_TYPE_OPTIONS.map(type=><button key={type} aria-pressed={placeTypes.includes(type)} onClick={()=>updateParams(p=>p.set("placeTypes",(placeTypes.includes(type)?placeTypes.filter(item=>item!==type):[...placeTypes,type]).join(",")))}>{zaydarTypeLabel(type)}</button>)}</div>}
+    </MapWorldPanel>];
+  })) as Record<MapWorld,React.ReactNode>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">HOÜS</h2></div>
-    {housingStats && <div className="zaydar-houz-stats" aria-label="HOÜS board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
-    <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HOÜS</button>
-    <div className="zaydar-layer-rail zaydar-houz-actions" role="group" aria-label="Start a HOÜS post">
+    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">Haüz</h2></div>
+    {housingStats && <div className="zaydar-houz-stats" aria-label="HAÜZ board activity"><span><strong>{housingStats.activePosts}</strong> active</span><span><strong>{housingStats.roomsOpen}</strong> rooms</span><span><strong>{housingStats.formingHouses}</strong> forming</span></div>}
+    <button type="button" className="zaydar-houz-post" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Post to HAÜZ</button>
+    <div className="zaydar-layer-rail zaydar-houz-actions" role="group" aria-label="Start a HAÜZ post">
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "OFFERING")) : setShowAuth(true)}>Offer a room</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "LOOKING")) : setShowAuth(true)}>Find housing</button>
-      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HOÜS</button>
+      <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "FORMING")) : setShowAuth(true)}>Build a HAÜZ</button>
       <button type="button" onClick={() => user ? updateParams(p => p.set("houzCompose", "PM")) : setShowAuth(true)}>List a rental</button>
     </div>
     <div className="zaydar-layer-rail" role="group" aria-label="Housing types">
-      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HOÜS" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
+      {([null, "OFFERING", "LOOKING", "FORMING", "MANAGED"] as const).map(type => <button type="button" key={type || "all"} aria-pressed={housingType === type} onClick={() => setHousingType(type)}>{type === null ? "All HAÜZ" : type === "OFFERING" ? "Rooms" : type === "LOOKING" ? "Looking" : type === "FORMING" ? "Forming" : "Rentals"}</button>)}
       <button type="button" aria-pressed={housingSaved} onClick={() => user ? setHousingSaved(!housingSaved) : setShowAuth(true)}>Saved</button>
     </div>
     <HousingTagFilter applied={housingTags} onApply={setHousingTags} />
-    {housingLoading ? <p role="status">Loading HOÜS…</p> : housingError ? <p role="alert">HOÜS could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
+    {housingLoading ? <p role="status">Loading HAÜZ…</p> : housingError ? <p role="alert">HAÜZ could not load. <button type="button" onClick={() => void retryHousing()}>Try again</button></p> : panelRows(visibleHousing, "houz")}
     <p className="zaydar-layer-location-note">Only listings with a saved map location have pins. Listings without coordinates still appear here.</p>
-    <details className="zaydar-houz-about"><summary>How HOÜS works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
+    <details className="zaydar-houz-about"><summary>How HAÜZ works</summary><p>Offer a room, look for housing, form a household, or list a managed rental. You choose who to contact and nothing opens until the other person accepts.</p><ol><li>Post what you need or have.</li><li>Ask to chat, join, or waitlist.</li><li>Plan together after both sides agree.</li></ol><strong>Zaylist never handles rent, deposits, or fees.</strong></details>
   </section>;
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
-    { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
-    { id: "mizzed", label: "Mizzed", color: "#FF00CC", enabled: true, panel: mizzedPanel, viewMore: [{ label: "More Mizzed", href: "/spotted" }] },
-    { id: "gigz", label: "Gigz", color: "#8800FF", enabled: showGigz, onToggle: () => toggleLayer("hideGigz"), panel: gigzPanel, viewMore: [{ label: "More Gigz", href: "/pride-work" }] },
-    { id: "stuff", label: "Stuff", color: "#CCFF00", enabled: showStuff, onToggle: () => toggleLayer("hideStuff"), panel: stuffPanel, viewMore: [{ label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
-    { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
+    { id:"places",label:"Placez",color:"#00FFFF",enabled:showPlaces,onToggle:()=>toggleLayer("hidePlaces"),panel:worldPanels.places,viewMore:[] },
+    { id:"mizzed",label:"Mizzed",color:"#FF00CC",enabled:showMizzed,onToggle:()=>toggleLayer("hideMizzed"),panel:worldPanels.mizzed,viewMore:[] },
+    { id:"gigz",label:"Gigz",color:"#8800FF",enabled:showGigz,onToggle:()=>toggleLayer("hideGigz"),panel:worldPanels.gigz,viewMore:[] },
+    { id:"giftz",label:"Giftz",color:"#CCFF00",enabled:showGiftz,onToggle:()=>toggleLayer("hideGiftz"),panel:worldPanels.giftz,viewMore:[] },
+    { id:"sellz",label:"Sellz",color:"#39FF14",enabled:showSellz,onToggle:()=>toggleLayer("hideSellz"),panel:worldPanels.sellz,viewMore:[] },
+    { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
   ];
 
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
     const row=mark.item as MapRow;
-    const isHouz=String(row._board)==='The HOÜS';
+    const isHouz=String(row._board)==='The HAÜZ';
     const brands=event?eventBrandLogos(event,places):null;
     const color=event?zaydarEventColor(event,places):place?zaydarPlaceColor(place):boardColor(row);
     const venue=event?places.find(p=>normalizeDirectoryName(p.name)===normalizeDirectoryName(event.venueName||'')):null;
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    return {waypointFamily:place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
@@ -665,9 +687,30 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
   }), [marks, places]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HOÜS')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
+  useEffect(()=>{
+    const key=marks.find(mark=>{
+      if(mark.kind==="place")return Number(mark.item.id)===placeId;
+      if(mark.kind==="event")return Number(mark.item.id)===eventId;
+      const row=mark.item as MapRow;
+      const key=row._board==="Mizzed"?"mizzed":row._board==="The HAÜZ"?"houz":boardKind(row)?boardParam(boardKind(row)!):"";
+      return key && Number(row.id)===mapRecordId(params.get(key));
+    })?.key||null;
+    setSelected(key);
+  },[marks,params,placeId,eventId]);
   return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map" onClickCapture={gateSignedOutControls}>
-    <ZaydarCanvas ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onView={view=>setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center)} />
+    <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
+      if(!canOpenMapObjects){setShowAuth(true);return;}
+      if(!["places","mizzed","gigz","giftz","sellz"].includes(world))return;
+      if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
+      const ids=marks.filter(mark=>keys.includes(mark.key)).map(mark=>mark.item.id).join(",");
+      updateParams(p=>{p.set("layer",world);p.set(`${world}.ids`,ids);});
+    }} onView={view=>{
+      cameraState.current=view;
+      setMapBounds(view.bounds);setMapCenter(current => current[0] === view.center[0] && current[1] === view.center[1] ? current : view.center);
+      window.clearTimeout(cameraWriteTimer.current);
+      cameraWriteTimer.current=window.setTimeout(()=>updateParams(p=>{p.set("lat",view.center[0].toFixed(5));p.set("lng",view.center[1].toFixed(5));p.set("zoom",view.zoom.toFixed(2));}),500);
+    }} />
     <div className="zaydar-map-lockup pdx-glass-rebind" aria-label={`${regionLabel}, ${mapTimeLabel}`}>
       <strong>{regionLabel}</strong>
       <button type="button" className="zaydar-map-time" onClick={() => { const input=timeInputRef.current;if(!input)return;if(input.showPicker)input.showPicker();else input.click(); }} aria-label="Choose a future map date and time">{mapTimeLabel}</button>
@@ -687,9 +730,11 @@ export default function ZaydarMapDemo() {
     {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
-    {canOpenMapObjects && selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
+    {canOpenMapObjects && mizzedId && !selectedMizzed && <p className="zaydar-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
+    {canOpenMapObjects && selectedMizzed && <SpottedDetailModal key={selectedMizzed.id} isMine={selectedMizzed.isMine} status={selectedMizzed.status} postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
     {canOpenMapObjects && selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
+    {user && composeWorld && <MapComposerOverlay key={composeWorld} world={composeWorld} onClose={closeOverlays} onPosted={id=>{void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});setLocation(mapHref(p=>{p.delete("compose");clearMapOverlay(p);p.set(WORLD_DETAIL_KEYS[composeWorld],String(id));p.set("layer",composeWorld);}),{replace:true,state:window.history.state});}}/>}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}
   </section>;
 }

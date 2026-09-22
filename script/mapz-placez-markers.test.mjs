@@ -33,7 +33,7 @@ test('Placez markers stay geographically locked, clear nearby roofs, and retain 
   assert.match(renderer,/const PLACEZ_ROOF_CLEARANCE_METERS=4/);
   assert.match(renderer,/const buildingVisibility=smoothRange\(12,15,target\.getZoom\(\)\)/);
   assert.match(renderer,/const roof=surfaces\.roofs\?\.get\(feature\.properties\.phase\)\?\?PLACEZ_HOVER_METERS/);
-  assert.match(renderer,/const markerY=isPlace\?p\.y-placezHoverLift\(target,feature,surfaces\):raisedY/);
+  assert.match(renderer,/const markerY=isPlace\|\|isWorld\?p\.y-placezHoverLift\(target,feature,surfaces\):raisedY/);
   assert.match(renderer,/const placezBloomMax=\.02/);
   assert.match(renderer,/const markerBloom=isPlace\?Math\.min\(placezBloomMax,/);
   assert.match(renderer,/const PLACEZ_BLOOM_RADIUS_SCALE=\.35/);

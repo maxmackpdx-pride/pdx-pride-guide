@@ -1,16 +1,16 @@
 import {forwardRef,useCallback,useEffect,useImperativeHandle,useMemo,useRef,useState} from 'react';
 
 export type ZaydarHandle={send:(type:string,data?:Record<string,unknown>)=>void};
-type View={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
+export type MapView={center:[number,number];zoom:number;bounds:{south:number;north:number;west:number;east:number}};
 type Row={key:string;coordinates:number[];name:string;color:string;typeIcon?:string;logo:string;alternateLogo?:string;time?:string;avatars?:Array<{url:string;initial:string;background:string;ring:string}>};
 export type MapSelectionRect={left:number;top:number;width:number;height:number};
-type CanvasProps={rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onMode?:(mode:string)=>void;onView:(view:View)=>void};
-type ThreeDProps=CanvasProps&{attempt:number;initialView:View|null;onFailure:(message:string)=>void;onVisible:()=>void};
-const MAP_SRC='/zaydar-map/index.html?v=20260921-downtown-placez-v17';
+type CanvasProps={initialCamera?:MapView|null;rows:Row[];selected:string|null;labelsEnabled:boolean;viewTime:number;onSelect:(key:string,rect?:MapSelectionRect)=>void;onCluster?:(world:string,keys:string[],bounds:number[][],zoom:number)=>void;onMode?:(mode:string)=>void;onView:(view:MapView)=>void};
+type ThreeDProps=CanvasProps&{attempt:number;initialView:MapView|null;onFailure:(message:string)=>void;onVisible:()=>void};
+const MAP_SRC='/zaydar-map/index.html?v=20260922-map-worlds-v1';
 const MAX_3D_ATTEMPTS=3;
 
-const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onMode,onView},ref){
- const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onMode,onView});latest.current={onFailure,onVisible,onSelect,onMode,onView};
+const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,selected,labelsEnabled,viewTime,attempt,initialView,onFailure,onVisible,onSelect,onCluster,onMode,onView},ref){
+ const frame=useRef<HTMLIFrameElement>(null),latest=useRef({onFailure,onVisible,onSelect,onCluster,onMode,onView});latest.current={onFailure,onVisible,onSelect,onCluster,onMode,onView};
  const failed=useRef(false),restoreView=useRef(initialView);
  const [phase,setPhase]=useState('loading'),[firstFrame,setFirstFrame]=useState(false),[ready,setReady]=useState(false);
  const post=(type:string,data:Record<string,unknown>={})=>frame.current?.contentWindow?.postMessage({source:'zaydar-host',type,...data},window.location.origin);
@@ -43,6 +43,7 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
    fail(`3D error: ${detail}`);
   }
   if(event.data.type==='mode')latest.current.onMode?.(event.data.mode);
+  if(event.data.type==='cluster'&&typeof event.data.world==='string'&&Array.isArray(event.data.keys))latest.current.onCluster?.(event.data.world,event.data.keys,event.data.bounds,event.data.zoom);
   if(event.data.type==='select'){
    const source=event.data.rect,frameRect=frame.current?.getBoundingClientRect();
    const rect=source&&frameRect&&[source.left,source.top,source.width,source.height].every(Number.isFinite)
@@ -62,10 +63,10 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
 // Leaflet is deliberately disconnected. Its component is retained separately,
 // but this route never imports, mounts, preloads, or falls back to it.
 export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,ref){
- const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<View|null>(null);
+ const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
  const attempts=useRef(0);
  const [generation,setGeneration]=useState(0),[notice,setNotice]=useState(''),[stopped,setStopped]=useState(false);
- const reportView=(view:View)=>{lastView.current=view;props.onView(view);};
+ const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
  const retry=()=>{attempts.current=0;setStopped(false);setNotice('Restarting 3D map…');setGeneration(value=>value+1);};
  const recover=(reason:string)=>{
   attempts.current+=1;

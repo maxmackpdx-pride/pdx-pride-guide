@@ -16,7 +16,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
-import {createHousingHologramLayer,housingIconSize,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260921-hous-screen-fit';
+import {createWorldWaypointLayer,createHousingHologramLayer,housingIconSize,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260922-world-waypoints';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -65,6 +65,7 @@ const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
 const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
 const housingHolograms=createHousingHologramLayer(maplibregl,terrainHeight,reduced);
+const worldWaypoints=createWorldWaypointLayer(maplibregl,terrainHeight,reduced);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
@@ -77,6 +78,7 @@ function installSceneExtras(){
  map.addLayer(landmarkBuildings,'skyline');
  map.addLayer(portlandLandmarks);
  map.addLayer(housingHolograms);
+ map.addLayer(worldWaypoints);
  map.addLayer(citySparkles);
 }
 map.on('load',()=>{
@@ -203,7 +205,8 @@ function avatarGlowColor(avatar){
  return avatar?.background&&/^#[0-9a-f]{6}$/i.test(avatar.background)?avatar.background:palette[Math.min(2,palette.length-1)];
 }
 function refreshNearbyLights(){
- const features=userLocation?[...lightFeatures,userLocation.feature]:lightFeatures;
+ const sources=lightFeatures.filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places');
+ const features=userLocation?[...sources,userLocation.feature]:sources;
  nearbyLights=createSpatialIndex(features,feature=>feature.geometry.coordinates);
  surfaceCache.delete(map);
 }
@@ -481,6 +484,7 @@ function drawUserLocationAvatar(ctx,target,fade){
 }
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
+ worldWaypoints.beginLayouts();
  const eventLabels=[];
  const cameraMoving=Boolean(target.isMoving?.());
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
@@ -504,7 +508,7 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
- const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures];if(userLocation)reflectionSources.unshift(userLocation.feature);
+ const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures.filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places').filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places')];if(userLocation)reflectionSources.unshift(userLocation.feature);
  waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
  drawUserLocationGlow(lightsContext,target,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
@@ -531,11 +535,11 @@ function drawLights(fade,target=map,surface=lights){
   beacons.push(item);
  }
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
- const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind==='place'&&!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=clusterPlaceMarkers(ordered.filter(item=>(item.feature.properties.kind==='place'||item.feature.properties.waypointFamily)&&!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
  const visibleOrbs=ordered.filter(item=>{
   if(expandedKeys.has(item.feature.properties.key))return false;
   const cluster=placeClusters.byKey.get(item.feature.properties.key);
-  return item.feature.properties.kind!=='place'||!cluster||cluster.leader===item;
+  return !cluster||cluster.leader===item;
  });
  const glowByKey=new Map(visibleOrbs.map(item=>{
   const neighbors=visibleOrbs.filter(other=>other!==item&&Math.hypot(other.p.x-item.p.x,other.p.y-item.p.y)<92).length;
@@ -635,7 +639,7 @@ function drawLights(fade,target=map,surface=lights){
    // must not stack bright discovery balls over the original rings and pin light.
    const orbY=p.y-8;
    const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
-   const placeCluster=feature.properties.kind==='place'?placeClusters.byKey.get(feature.properties.key):null;
+   const placeCluster=placeClusters.byKey.get(feature.properties.key);
    if(placeCluster&&placeCluster.leader.feature.properties.key!==feature.properties.key)continue;
    if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});}
    else if(!underProjector){
@@ -643,12 +647,21 @@ function drawLights(fade,target=map,surface=lights){
     const densityGlow=glowByKey.get(feature.properties.key)??1;
     // Placez stay tied to their geographic anchor. At street zoom they clear
     // nearby roofs; as the 3D buildings disappear they ease back toward 3 m.
-    const markerY=isPlace?p.y-placezHoverLift(target,feature,surfaces):raisedY;
+    const isWorld=Boolean(feature.properties.waypointFamily)&&!isPlace;
+    const markerY=isPlace||isWorld?p.y-placezHoverLift(target,feature,surfaces):raisedY;
     const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
+    if(isWorld){
+     const assigned=worldWaypoints.setLayout(feature.properties.key,{x:0,lift:p.y-markerY,scale:Math.min(1.1,placezScale*.62)});
+     const ready=assigned&&worldWaypoints.isReady(feature.properties.key);
+     if(!ready)drawWorldWaypointFallback(lightsContext,p.x,markerY,color,feature.properties.typeIcon,Math.min(1.1,placezScale*.62));
+     // Glow belongs only to the small data pin, never to its model/frame.
+     drawWaypointDataPin(lightsContext,p.x,markerY+23*Math.min(1.1,placezScale*.62),color,coreAlpha);
+    }else{
     drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
+    }
     if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
     if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null});
+    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null,clusterKeys:placeCluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
    }
   }
   if(!isBar)continue;
@@ -1102,7 +1115,7 @@ function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowSt
  ctx.restore();
 }
 function clusterPlaceMarkers(items,selected,zoom,width,height){
- const radius=zoom<13.5?64:zoom<14.5?52:zoom<15.5?38:zoom<16.25?28:0;
+ const radius=zoom<13.5?64:zoom<14.5?52:zoom<15.5?38:zoom<16.25?28:12;
  const byKey=new Map();
  if(!radius)return {byKey};
  // Pick a deterministic geographic leader so a cluster cannot jump between
@@ -1110,12 +1123,18 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  const pending=[...items].filter(item=>item.p.x>=-40&&item.p.x<=width+40&&item.p.y>=-40&&item.p.y<=height+40).sort((a,b)=>Number(b.feature.properties.key===selected)-Number(a.feature.properties.key===selected)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  while(pending.length){
   const leader=pending.shift(),members=[leader];
-  for(let i=pending.length-1;i>=0;i--)if(Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
+  for(let i=pending.length-1;i>=0;i--)if((pending[i].feature.properties.waypointFamily||'places')===(leader.feature.properties.waypointFamily||'places')&&Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
   const coordinates=members.map(item=>item.feature.geometry.coordinates),west=Math.min(...coordinates.map(point=>point[0])),east=Math.max(...coordinates.map(point=>point[0])),south=Math.min(...coordinates.map(point=>point[1])),north=Math.max(...coordinates.map(point=>point[1]));
   const cluster={leader,members,bounds:[[west,south],[east,north]]};
   for(const member of members)byKey.set(member.feature.properties.key,cluster);
  }
  return {byKey};
+}
+function drawWorldWaypointFallback(ctx,x,y,color,typeIcon,scale){
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.shadowBlur=0;ctx.fillStyle='#081018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-20,-20,40,40,12);ctx.fill();ctx.stroke();const icon=typeIcons.get(typeIcon);if(icon)ctx.drawImage(icon.light,-13,-13,26,26);ctx.restore();
+}
+function drawWaypointDataPin(ctx,x,y,color,alpha){
+ ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor=color;ctx.shadowBlur=3;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
 }
 function drawClusterCount(ctx,x,y,count,color){
  ctx.save();ctx.translate(x+12.5,y-12.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
@@ -1139,6 +1158,7 @@ async function setListings(rows){
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
  housingHolograms.update(lightFeatures.map(feature=>feature.properties));
+ worldWaypoints.update(lightFeatures.map(feature=>feature.properties));
  housingHolograms.setSelected?.(selectedKey);
  refreshNearbyLights();assetsReady=true;updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
@@ -1150,6 +1170,7 @@ window.addEventListener('message',event=>{
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
  if(type==='select'){selectedKey=data.key;housingHolograms.setSelected?.(selectedKey);const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
+ if(type==='fit'&&Array.isArray(data.bounds)){map.fitBounds(data.bounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();}
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
  if(type==='view'&&Array.isArray(data.center)&&data.center.length===2){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.jumpTo({center:[Number(data.center[1]),Number(data.center[0])],zoom:Math.max(10,Math.min(maxExploreZoom,Number(data.zoom)||map.getZoom())),pitch:automaticPitch()});viewState();}
  if(type==='mode'){pauseControl.checked=data.mode!=='flight';pauseControl.dispatchEvent(new Event('input'));}
@@ -1161,7 +1182,7 @@ map.getCanvas().addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY
 map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
- if(hit?.clusterBounds){map.fitBounds(hit.clusterBounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();return;}
+ if(hit?.clusterBounds){if(parent===window)map.fitBounds(hit.clusterBounds,{padding:72,maxZoom:17.25,duration:620});else tell('cluster',{world:hit.clusterWorld||'places',keys:hit.clusterKeys,bounds:hit.clusterBounds,zoom:map.getZoom()});return;}
  if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });
 map.on('moveend',viewState);

@@ -158,7 +158,7 @@ export default function HousingPost() {
       if (data?.alreadyLeading) {
         toast({ title: "You already lead one here" });
       } else {
-        toast({ title: "HAÜS started", description: "Nothing is reserved. The listing stays live." });
+        toast({ title: "HAÜZ started", description: "Nothing is reserved. The listing stays live." });
       }
       navigate(`/the-hauz/${data.postId}`);
     },

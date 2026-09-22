@@ -2,7 +2,7 @@ import { useCallback, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { Button } from "@/components/ds";
@@ -22,6 +22,8 @@ export type SpottedDetailModalProps = {
   place: string;
   kindLabel: string;
   kindColor: string;
+  isMine?: boolean;
+  status?: string;
   onClose: () => void;
 };
 
@@ -35,12 +37,24 @@ export default function SpottedDetailModal({
   kindLabel,
   kindColor,
   onClose,
+  isMine = false,
+  status = "ACTIVE",
 }: SpottedDetailModalProps) {
   const { toast } = useToast();
   const [replyBody, setReplyBody] = useState("");
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useModalA11y({ onClose: handleClose });
 
+  const [editing,setEditing]=useState(false);
+  const [editTitle,setEditTitle]=useState(title);
+  const [editBody,setEditBody]=useState(body);
+  const [reportReason,setReportReason]=useState("");
+  const ownerMutation=useMutation({
+    mutationFn:({method,data}:{method:"PUT"|"DELETE";data?:Record<string,string>})=>apiRequest(method,`/api/missed-connections/${postId}`,data),
+    onSuccess:()=>{void queryClient.invalidateQueries({queryKey:["/api/missed-connections"]});void queryClient.invalidateQueries({queryKey:["/api/missed-connections/mine"]});setEditing(false);toast({title:"Connection updated"});},
+    onError:(error:Error)=>toast({title:"Could not update",description:error.message,variant:"destructive"}),
+  });
+  const reportMutation=useMutation({mutationFn:()=>apiRequest("POST",`/api/missed-connections/${postId}/report`,{reason:reportReason}),onSuccess:()=>{setReportReason("");toast({title:"Report sent"});},onError:(error:Error)=>toast({title:"Could not report",description:error.message,variant:"destructive"})});
   const replyMutation = useMutation({
     mutationFn: () =>
       fetch(`/api/missed-connections/${postId}/reply`, {
@@ -100,7 +114,11 @@ export default function SpottedDetailModal({
         <p className="board-copy-sm board-detail-modal__body" style={{ position: "relative", zIndex: 1 }}>
           {body}
         </p>
-        <div className="board-detail-modal__actions" style={{ position: "relative", zIndex: 1 }}>
+        {isMine ? <div className="board-detail-modal__actions" style={{position:"relative",zIndex:1}}>
+          {editing ? <form onSubmit={e=>{e.preventDefault();ownerMutation.mutate({method:"PUT",data:{title:editTitle,body:editBody}});}}><label>Title<input className="board-text-field" maxLength={80} value={editTitle} onChange={e=>setEditTitle(e.target.value)}/></label><label>Message<textarea className="board-text-field" maxLength={500} rows={5} required value={editBody} onChange={e=>setEditBody(e.target.value)}/></label><Button type="submit" disabled={ownerMutation.isPending||!editBody.trim()}>Save changes</Button><Button type="button" onClick={()=>setEditing(false)}>Cancel</Button></form> : <Button onClick={()=>setEditing(true)}>Edit connection</Button>}
+          {status==="ACTIVE" && <Button disabled={ownerMutation.isPending} onClick={()=>ownerMutation.mutate({method:"PUT",data:{status:"ARCHIVED"}})}>Close connection</Button>}
+          <Button disabled={ownerMutation.isPending} onClick={()=>{if(confirm("Delete this connection?"))ownerMutation.mutate({method:"DELETE"},{onSuccess:onClose});}}>Delete</Button>
+        </div> : status !== "ACTIVE" ? <p role="status">This connection is closed.</p> : <div className="board-detail-modal__actions" style={{ position: "relative", zIndex: 1 }}>
           <textarea
             className="board-text-field"
             value={replyBody}
@@ -131,7 +149,8 @@ export default function SpottedDetailModal({
           <p className="board-copy-sm" style={{ marginTop: 12, color: "#6a675f", fontSize: "0.72rem" }}>
             Replies open a private, anonymous inbox thread. Reveal your profile only when you are both ready.
           </p>
-        </div>
+          <details><summary>Report this connection</summary><label>Reason<input className="board-text-field" value={reportReason} onChange={e=>setReportReason(e.target.value)}/></label><Button disabled={!reportReason.trim()||reportMutation.isPending} onClick={()=>reportMutation.mutate()}>Send report</Button></details>
+        </div>}
       </div>
     </div>,
     document.body,

@@ -30,7 +30,7 @@ export default function HousingComposerOverlay({
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={onClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Post to HOÜS" tabIndex={-1} className="hz hz--sheetpage pdx-glass-rebind" style={{ width: "min(880px, calc(100vw - 24px))", maxHeight: "92vh", overflow: "auto", position: "relative", borderRadius: 18 }} onClick={event => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Post to HAÜZ" tabIndex={-1} className="hz hz--sheetpage pdx-glass-rebind" style={{ width: "min(880px, calc(100vw - 24px))", maxHeight: "92vh", overflow: "auto", position: "relative", borderRadius: 18 }} onClick={event => event.stopPropagation()}>
         <HousingComposer
           initialType={initialType}
           isPropertyManager={Boolean(pm?.approved)}

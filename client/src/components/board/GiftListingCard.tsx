@@ -1,3 +1,4 @@
+import GiftPostEditor from "./GiftPostEditor";
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -168,6 +169,7 @@ type Props = {
 export default function GiftListingCard({ post, expanded, onToggle, onRequireAuth, onDeleted }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [editing,setEditing]=useState(false);
   const [note, setNote] = useState("");
   const [reportText, setReportText] = useState("");
   const raisePendingRef = useRef(new Set<number>());
@@ -226,7 +228,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/gifting?post=${post.id}`;
+    const url = `${window.location.origin}/map?layer=giftz&gift=${post.id}`;
     const canShare = typeof navigator.share === "function";
     try {
       if (canShare) await navigator.share({ title: post.title, url });
@@ -398,6 +400,7 @@ export default function GiftListingCard({ post, expanded, onToggle, onRequireAut
           )}
           {post.isMine && (
             <div className="gifting-owner">
+              {editing ? <GiftPostEditor post={post} onClose={()=>setEditing(false)}/> : <button onClick={()=>setEditing(true)}>Edit listing</button>}
               {post.status === "PENDING" && (
                 <p className="gifting-pending-note">
                   Held for admin review. Only you see this on the board until it&apos;s approved.

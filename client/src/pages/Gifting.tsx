@@ -73,8 +73,7 @@ export default function Gifting() {
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<any>(blankForm);
-  const [photos, setPhotos] = useState<FileList | null>(null);
+  const [composeType, setComposeType] = useState<"GIFT" | "ISO">("GIFT");
   const [filter, setFilter] = useState(() => {
     const type = new URLSearchParams(window.location.search).get("type")?.toUpperCase();
     return type === "GIFT" || type === "ISO" ? type : "ALL";
@@ -193,58 +192,9 @@ export default function Gifting() {
       setShowAuth(true);
       return;
     }
-    setForm({ ...blankForm, postType });
+    setComposeType(postType);
     setFormOpen(true);
     window.setTimeout(() => document.getElementById("gifting-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
-  };
-
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      trackProductEvent("post_attempt", "gifz");
-      let photoUrls: string[] = [];
-      if (photos?.length) {
-        const fd = new FormData();
-        Array.from(photos).slice(0, 2).forEach(file => fd.append("photos", file));
-        const uploadRes = await fetch("/api/upload/gifting", { method: "POST", body: fd, credentials: "include" });
-        if (!uploadRes.ok) throw new Error(await uploadRes.text());
-        photoUrls = (await uploadRes.json()).urls || [];
-      }
-      const res = await fetch("/api/gifting", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ...form, photoUrls }),
-      });
-      if (!res.ok) throw new Error((await res.text()) || res.statusText);
-      return res;
-    },
-    onSuccess: async res => {
-      trackProductEvent("post_completed", "gifz");
-      const body = await res.json();
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
-      toast({ title: "Posted", description: body.message });
-      setForm(blankForm);
-      setPhotos(null);
-      setFormOpen(false);
-    },
-    onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
-  });
-
-  const submitPost = () => {
-    if (!form.acceptRules) {
-      toast({ title: "Accept the community rules first", variant: "destructive" });
-      return;
-    }
-    if (!form.title.trim()) {
-      toast({ title: "Add a title", variant: "destructive" });
-      return;
-    }
-    if (!form.description.trim()) {
-      toast({ title: "Add a description", variant: "destructive" });
-      return;
-    }
-    createMutation.mutate();
   };
 
   const clearFilters = () => {
@@ -301,98 +251,7 @@ export default function Gifting() {
         />
       </ScrollReveal>
 
-      {formOpen && (
-        <ScrollReveal>
-          <section id="gifting-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
-            <button type="button" className="gifting-close" onClick={() => setFormOpen(false)} aria-label="Close form">
-              <X size={18} />
-            </button>
-            <div className="board-section-kicker board-section-kicker--lime">New post</div>
-            <h2 className="display section-heading">
-              {form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
-            </h2>
-            <p className="board-copy-sm">
-              No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.
-            </p>
-            <div className="gifting-form-grid">
-              <label>
-                Post type
-                <select className="board-text-field" value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}>
-                  <option value="GIFT">Gift</option>
-                  <option value="ISO">In search of</option>
-                </select>
-              </label>
-              <label>
-                Category
-                <select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                  {CATEGORIES.map(c => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="span">
-                Title
-                <input
-                  className="board-text-field"
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  maxLength={90}
-                  placeholder="e.g. Rack of drag looks, sizes S to L"
-                />
-              </label>
-              <label className="span">
-                Description
-                <textarea
-                  className="board-text-field"
-                  value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })}
-                  rows={4}
-                  placeholder="What is it, what condition, any details worth knowing."
-                />
-              </label>
-              <label>
-                Neighborhood / pickup area
-                <input
-                  className="board-text-field"
-                  value={form.neighborhood}
-                  onChange={e => setForm({ ...form, neighborhood: e.target.value })}
-                  placeholder="e.g. Inner SE"
-                />
-              </label>
-              <label>
-                Pickup preference
-                <select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>
-                  {PICKUP.map(p => (
-                    <option key={p}>{p}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="span">
-                Photos, up to 2
-                <input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} />
-              </label>
-            </div>
-            <label className="gifting-rules">
-              <input
-                type="checkbox"
-                checked={form.acceptRules}
-                onChange={e => setForm({ ...form, acceptRules: e.target.checked })}
-              />
-              I agree: keep it free, keep it kind, keep it moving.
-            </label>
-            <Button
-              variant="solid"
-              accent="lime"
-              size="lg"
-              arrow
-              disabled={createMutation.isPending || !form.acceptRules}
-              onClick={submitPost}
-            >
-              {createMutation.isPending ? "Posting…" : "Post it"}
-            </Button>
-          </section>
-        </ScrollReveal>
-      )}
+      {formOpen && <GiftComposer initialType={composeType} onClose={() => setFormOpen(false)} onPosted={() => setFormOpen(false)} />}
 
       <BoardActiveSection
         className="diag"
@@ -488,4 +347,153 @@ export default function Gifting() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
     </div>
   );
+}
+
+
+export function GiftComposer({initialType = "GIFT", onClose, onPosted}: {initialType?: "GIFT" | "ISO"; onClose: () => void; onPosted: (id: number) => void}) {
+  const {toast} = useToast();
+  const status = useQuery<{postingOpen: boolean; message: string}>({queryKey: ["/api/gifting/status"]});
+  const postingOpen = status.data?.postingOpen === true;
+  const [form, setForm] = useState<typeof blankForm>({ ...blankForm, postType: initialType });
+  const [photos, setPhotos] = useState<FileList | null>(null);
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      trackProductEvent("post_attempt", "gifz");
+      let photoUrls: string[] = [];
+      if (photos?.length) {
+        const fd = new FormData();
+        Array.from(photos).slice(0, 2).forEach(file => fd.append("photos", file));
+        const uploadRes = await fetch("/api/upload/gifting", { method: "POST", body: fd, credentials: "include" });
+        if (!uploadRes.ok) throw new Error(await uploadRes.text());
+        photoUrls = (await uploadRes.json()).urls || [];
+      }
+      const res = await fetch("/api/gifting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ...form, photoUrls }),
+      });
+      if (!res.ok) throw new Error((await res.text()) || res.statusText);
+      return res;
+    },
+    onSuccess: async res => {
+      trackProductEvent("post_completed", "gifz");
+      const body = await res.json();
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gifting/mine"] });
+      toast({ title: "Posted", description: body.message });
+      setForm(blankForm);
+      setPhotos(null);
+      onPosted(body.id);
+    },
+    onError: (err: any) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
+  });
+
+  const submitPost = () => {
+    if (!form.acceptRules) {
+      toast({ title: "Accept the community rules first", variant: "destructive" });
+      return;
+    }
+    if (!form.title.trim()) {
+      toast({ title: "Add a title", variant: "destructive" });
+      return;
+    }
+    if (!form.description.trim()) {
+      toast({ title: "Add a description", variant: "destructive" });
+      return;
+    }
+    createMutation.mutate();
+  };
+
+  return <>
+    {status.isPending ? <p role="status">Checking posting availability…</p> : status.isError ? <p role="alert">Posting availability could not load. <button onClick={() => void status.refetch()}>Retry</button></p> : !postingOpen ? <p role="status">{status.data?.message}</p> : null}
+          <section id="gifting-form" className="gifting-form-panel gifting-form-panel--makeover pdx-glass-rebind">
+            <button type="button" className="gifting-close" onClick={onClose} aria-label="Close form">
+              <X size={18} />
+            </button>
+            <div className="board-section-kicker board-section-kicker--lime">New post</div>
+            <h2 className="display section-heading">
+              {form.postType === "ISO" ? "Post an in search of" : "Post a gift"}
+            </h2>
+            <p className="board-copy-sm">
+              No selling, trading, exact addresses, unsafe items, or hookup behavior. Keep it free, keep it kind, keep it moving. Posts go live right away and are removed if they break the rules.
+            </p>
+            <div className="gifting-form-grid">
+              <label>
+                Post type
+                <select className="board-text-field" value={form.postType} onChange={e => setForm({ ...form, postType: e.target.value })}>
+                  <option value="GIFT">Gift</option>
+                  <option value="ISO">In search of</option>
+                </select>
+              </label>
+              <label>
+                Category
+                <select className="board-text-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                  {CATEGORIES.map(c => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="span">
+                Title
+                <input
+                  className="board-text-field"
+                  value={form.title}
+                  onChange={e => setForm({ ...form, title: e.target.value })}
+                  maxLength={90}
+                  placeholder="e.g. Rack of drag looks, sizes S to L"
+                />
+              </label>
+              <label className="span">
+                Description
+                <textarea
+                  className="board-text-field"
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                  rows={4}
+                  placeholder="What is it, what condition, any details worth knowing."
+                />
+              </label>
+              <label>
+                Neighborhood / pickup area
+                <input
+                  className="board-text-field"
+                  value={form.neighborhood}
+                  onChange={e => setForm({ ...form, neighborhood: e.target.value })}
+                  placeholder="e.g. Inner SE"
+                />
+              </label>
+              <label>
+                Pickup preference
+                <select className="board-text-field" value={form.pickupPreference} onChange={e => setForm({ ...form, pickupPreference: e.target.value })}>
+                  {PICKUP.map(p => (
+                    <option key={p}>{p}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="span">
+                Photos, up to 2
+                <input type="file" accept="image/*" multiple onChange={e => setPhotos(e.target.files)} />
+              </label>
+            </div>
+            <label className="gifting-rules">
+              <input
+                type="checkbox"
+                checked={form.acceptRules}
+                onChange={e => setForm({ ...form, acceptRules: e.target.checked })}
+              />
+              I agree: keep it free, keep it kind, keep it moving.
+            </label>
+            <Button
+              variant="solid"
+              accent="lime"
+              size="lg"
+              arrow
+              disabled={!postingOpen || createMutation.isPending || !form.acceptRules}
+              onClick={submitPost}
+            >
+              {createMutation.isPending ? "Posting…" : "Post it"}
+            </Button>
+          </section>
+  </>;
 }

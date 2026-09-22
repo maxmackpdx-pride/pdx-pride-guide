@@ -57,27 +57,12 @@ export default function SpottedCardGrid({
   const [sort, setSort] = useState("RECENT");
   const [replyingTo, setReplyingTo] = useState<MissedConnectionPost | null>(null);
 
-  const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
-  const [draftEventId, setDraftEventId] = useState("");
-  const [draftTitle, setDraftTitle] = useState("");
-  const [draftBody, setDraftBody] = useState("");
-  const [draftVenueHint, setDraftVenueHint] = useState("");
-  const [draftCustomEventName, setDraftCustomEventName] = useState("");
-  const [draftCustomLocation, setDraftCustomLocation] = useState("");
   const [composeOpenLocal, setComposeOpenLocal] = useState(false);
   const composeOpen = composeOpenProp ?? composeOpenLocal;
   const setComposeOpen = (open: boolean) => {
     onComposeOpenChange?.(open);
     if (composeOpenProp === undefined) setComposeOpenLocal(open);
   };
-  const [acceptRules, setAcceptRules] = useState(false);
-
-  const groupedEvents = useMemo(() => ({
-    live: linkableEvents.filter(e => e.timing === "live"),
-    upcoming: linkableEvents.filter(e => e.timing === "upcoming"),
-    past: linkableEvents.filter(e => e.timing === "past"),
-  }), [linkableEvents]);
-
   const filterCounts = useMemo(() => ({
     ALL: posts.length,
     EVENT: posts.filter(p => p.eventId != null).length,
@@ -110,70 +95,6 @@ export default function SpottedCardGrid({
     return rows;
   }, [posts, filter, search, sort]);
 
-  const canSubmit = useMemo(() => {
-    if (!draftBody.trim() || !acceptRules) return false;
-    if (spotMode === "event") return !!draftEventId;
-    if (spotMode === CUSTOM_SPOT_KEY) return !!draftCustomEventName.trim() || !!draftCustomLocation.trim();
-    return true;
-  }, [draftBody, acceptRules, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
-
-  const resetDraftSpotFields = (mode: SpotMode) => {
-    setSpotMode(mode);
-    if (mode !== "event") setDraftEventId("");
-    if (mode !== CUSTOM_SPOT_KEY) { setDraftCustomEventName(""); setDraftCustomLocation(""); }
-    if (mode !== AROUND_TOWN_KEY) setDraftVenueHint("");
-  };
-
-  const createMutation = useMutation({
-    mutationFn: () => {
-      const payload: Record<string, unknown> = {
-        title: deriveTitle(draftTitle, draftBody),
-        body: draftBody.trim(),
-        scope: "board",
-      };
-      if (spotMode === "event") payload.eventId = Number(draftEventId);
-      else if (spotMode === CUSTOM_SPOT_KEY) {
-        payload.eventLabel = draftCustomEventName.trim();
-        payload.venueHint = draftCustomLocation.trim();
-      } else payload.venueHint = draftVenueHint.trim() || "Around town";
-      return fetch("/api/missed-connections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      }).then(async r => {
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data.error || "Could not post");
-        return data;
-      });
-    },
-    onSuccess: () => {
-      setDraftTitle(""); setDraftBody(""); setDraftVenueHint("");
-      setDraftCustomEventName(""); setDraftCustomLocation(""); setDraftEventId("");
-      setSpotMode(AROUND_TOWN_KEY);
-      setAcceptRules(false);
-      setComposeOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
-      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
-    },
-    onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
-  });
-
-  const renderEventOptions = (items: LinkableMissedConnectionEvent[], label: string) => {
-    if (!items.length) return null;
-    return (
-      <optgroup label={label}>
-        {items.map(evt => (
-          <option key={evt.id} value={String(evt.id)}>
-            {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
-            {evt.postable ? "" : " (not started yet)"}
-          </option>
-        ))}
-      </optgroup>
-    );
-  };
-
   const clearFilters = () => {
     setFilter("ALL");
     setSearch("");
@@ -188,87 +109,8 @@ export default function SpottedCardGrid({
     setReplyingTo(post);
   };
 
-  const composeFields = (
-    <>
-      <div className="gifting-form-grid">
-        <label>
-          Where did you see them
-          <select
-            className="board-text-field"
-            value={spotMode === "event" ? "EVENT" : spotMode === AROUND_TOWN_KEY ? "TOWN" : "TOWN"}
-            onChange={e => resetDraftSpotFields(e.target.value === "EVENT" ? "event" : AROUND_TOWN_KEY)}
-          >
-            <option value="EVENT">At a Pride event</option>
-            <option value="TOWN">Around town</option>
-          </select>
-        </label>
-        {spotMode === "event" ? (
-          <label>
-            Which event
-            <select className="board-text-field" value={draftEventId} onChange={e => setDraftEventId(e.target.value)}>
-              <option value="">Select a Pride event…</option>
-              {renderEventOptions(groupedEvents.live, "Live / in posting window")}
-              {renderEventOptions(groupedEvents.upcoming, "Upcoming")}
-              {renderEventOptions(groupedEvents.past, "Past events")}
-            </select>
-          </label>
-        ) : (
-          <label>
-            Where around town (optional)
-            <input
-              className="board-text-field"
-              value={draftVenueHint}
-              onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
-              placeholder="e.g. Powell's late stacks, the MAX Blue Line"
-              maxLength={80}
-            />
-          </label>
-        )}
-        <label className="span">
-          Title
-          <input
-            className="board-text-field"
-            value={draftTitle}
-            onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
-            placeholder="e.g. Mesh top, killer moves by the left speaker"
-            maxLength={80}
-          />
-        </label>
-        <label className="span">
-          Your message
-          <textarea
-            className="board-text-field"
-            value={draftBody}
-            onChange={e => setDraftBody(e.target.value.slice(0, 500))}
-            placeholder="What happened, what you'd say if you had the nerve. Specific and kind."
-            rows={4}
-            maxLength={500}
-          />
-          <span className="board-copy-sm" style={{ marginTop: 6, display: "block", color: "#6a675f" }}>
-            {500 - draftBody.length} left
-          </span>
-        </label>
-      </div>
-      <label className="gifting-rules" style={{ marginTop: 16 }}>
-        <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
-        I agree: kind, specific, PG-13, no full names or outing. I understand I stay anonymous until I choose to reveal.
-      </label>
-      <Button
-        variant="solid"
-        accent="magenta"
-        size="lg"
-        arrow
-        style={{ marginTop: 16 }}
-        disabled={!canSubmit || createMutation.isPending}
-        onClick={() => createMutation.mutate()}
-      >
-        {createMutation.isPending ? "Posting…" : "Post it"}
-      </Button>
-    </>
-  );
-
   const composePanel = composeOpen && !makeover && (
-    <div className="spotted-compose-panel">{composeFields}</div>
+    <div className="spotted-compose-panel">{<MizzedComposer linkableEvents={linkableEvents} onPosted={() => setComposeOpen(false)} />}</div>
   );
 
   const composeSection = makeover && composeOpen && (
@@ -282,7 +124,7 @@ export default function SpottedCardGrid({
         <p className="board-copy-sm">
           Keep it kind and specific. No full names, no outing anyone, PG-13. You stay anonymous. This posts to the public board, but every reply is private.
         </p>
-        {composeFields}
+        {<MizzedComposer linkableEvents={linkableEvents} onPosted={() => setComposeOpen(false)} />}
       </section>
     </ScrollReveal>
   );
@@ -418,4 +260,167 @@ export default function SpottedCardGrid({
       {replyModal}
     </div>
   );
+}
+
+export function MizzedComposer({linkableEvents, onPosted}: {linkableEvents: LinkableMissedConnectionEvent[]; onPosted: (id: number) => void}) {
+  const {toast} = useToast();
+  const [spotMode, setSpotMode] = useState<SpotMode>(AROUND_TOWN_KEY);
+  const [draftEventId, setDraftEventId] = useState("");
+  const [draftTitle, setDraftTitle] = useState("");
+  const [draftBody, setDraftBody] = useState("");
+  const [draftVenueHint, setDraftVenueHint] = useState("");
+  const [draftCustomEventName, setDraftCustomEventName] = useState("");
+  const [draftCustomLocation, setDraftCustomLocation] = useState("");
+  const [acceptRules, setAcceptRules] = useState(false);
+
+  const groupedEvents = useMemo(() => ({
+    live: linkableEvents.filter(e => e.timing === "live"),
+    upcoming: linkableEvents.filter(e => e.timing === "upcoming"),
+    past: linkableEvents.filter(e => e.timing === "past"),
+  }), [linkableEvents]);
+
+  const canSubmit = useMemo(() => {
+    if (!draftBody.trim() || !acceptRules) return false;
+    if (spotMode === "event") return !!draftEventId;
+    if (spotMode === CUSTOM_SPOT_KEY) return !!draftCustomEventName.trim() || !!draftCustomLocation.trim();
+    return true;
+  }, [draftBody, acceptRules, spotMode, draftEventId, draftCustomEventName, draftCustomLocation]);
+
+  const resetDraftSpotFields = (mode: SpotMode) => {
+    setSpotMode(mode);
+    if (mode !== "event") setDraftEventId("");
+    if (mode !== CUSTOM_SPOT_KEY) { setDraftCustomEventName(""); setDraftCustomLocation(""); }
+    if (mode !== AROUND_TOWN_KEY) setDraftVenueHint("");
+  };
+
+  const createMutation = useMutation({
+    mutationFn: () => {
+      const payload: Record<string, unknown> = {
+        title: deriveTitle(draftTitle, draftBody),
+        body: draftBody.trim(),
+        scope: "board",
+      };
+      if (spotMode === "event") payload.eventId = Number(draftEventId);
+      else if (spotMode === CUSTOM_SPOT_KEY) {
+        payload.eventLabel = draftCustomEventName.trim();
+        payload.venueHint = draftCustomLocation.trim();
+      } else payload.venueHint = draftVenueHint.trim() || "Around town";
+      return fetch("/api/missed-connections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      }).then(async r => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || "Could not post");
+        return data;
+      });
+    },
+    onSuccess: (data) => {
+      setDraftTitle(""); setDraftBody(""); setDraftVenueHint("");
+      setDraftCustomEventName(""); setDraftCustomLocation(""); setDraftEventId("");
+      setSpotMode(AROUND_TOWN_KEY);
+      setAcceptRules(false);
+      onPosted(data.id);
+      queryClient.invalidateQueries({ queryKey: ["/api/missed-connections"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/missed-connections/mine"] });
+      toast({ title: "Posted", description: "Your note is live. You stay anonymous until you both reveal in inbox." });
+    },
+    onError: (err: Error) => toast({ title: "Could not post", description: err.message, variant: "destructive" }),
+  });
+
+  const renderEventOptions = (items: LinkableMissedConnectionEvent[], label: string) => {
+    if (!items.length) return null;
+    return (
+      <optgroup label={label}>
+        {items.map(evt => (
+          <option key={evt.id} value={String(evt.id)}>
+            {evt.dayOfWeek} · {evt.title} @ {evt.venueName}
+            {evt.postable ? "" : " (not started yet)"}
+          </option>
+        ))}
+      </optgroup>
+    );
+  };
+
+  const composeFields = (
+    <>
+      <div className="gifting-form-grid">
+        <label>
+          Where did you see them
+          <select
+            className="board-text-field"
+            value={spotMode === "event" ? "EVENT" : spotMode === AROUND_TOWN_KEY ? "TOWN" : "TOWN"}
+            onChange={e => resetDraftSpotFields(e.target.value === "EVENT" ? "event" : AROUND_TOWN_KEY)}
+          >
+            <option value="EVENT">At a Pride event</option>
+            <option value="TOWN">Around town</option>
+          </select>
+        </label>
+        {spotMode === "event" ? (
+          <label>
+            Which event
+            <select className="board-text-field" value={draftEventId} onChange={e => setDraftEventId(e.target.value)}>
+              <option value="">Select a Pride event…</option>
+              {renderEventOptions(groupedEvents.live, "Live / in posting window")}
+              {renderEventOptions(groupedEvents.upcoming, "Upcoming")}
+              {renderEventOptions(groupedEvents.past, "Past events")}
+            </select>
+          </label>
+        ) : (
+          <label>
+            Where around town (optional)
+            <input
+              className="board-text-field"
+              value={draftVenueHint}
+              onChange={e => setDraftVenueHint(e.target.value.slice(0, 80))}
+              placeholder="e.g. Powell's late stacks, the MAX Blue Line"
+              maxLength={80}
+            />
+          </label>
+        )}
+        <label className="span">
+          Title
+          <input
+            className="board-text-field"
+            value={draftTitle}
+            onChange={e => setDraftTitle(e.target.value.slice(0, 80))}
+            placeholder="e.g. Mesh top, killer moves by the left speaker"
+            maxLength={80}
+          />
+        </label>
+        <label className="span">
+          Your message
+          <textarea
+            className="board-text-field"
+            value={draftBody}
+            onChange={e => setDraftBody(e.target.value.slice(0, 500))}
+            placeholder="What happened, what you'd say if you had the nerve. Specific and kind."
+            rows={4}
+            maxLength={500}
+          />
+          <span className="board-copy-sm" style={{ marginTop: 6, display: "block", color: "#6a675f" }}>
+            {500 - draftBody.length} left
+          </span>
+        </label>
+      </div>
+      <label className="gifting-rules" style={{ marginTop: 16 }}>
+        <input type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)} />
+        I agree: kind, specific, PG-13, no full names or outing. I understand I stay anonymous until I choose to reveal.
+      </label>
+      <Button
+        variant="solid"
+        accent="magenta"
+        size="lg"
+        arrow
+        style={{ marginTop: 16 }}
+        disabled={!canSubmit || createMutation.isPending}
+        onClick={() => createMutation.mutate()}
+      >
+        {createMutation.isPending ? "Posting…" : "Post it"}
+      </Button>
+    </>
+  );
+
+  return composeFields;
 }

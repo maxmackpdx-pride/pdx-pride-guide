@@ -20,9 +20,9 @@ export function housingScreenFit(matrix,bounds,viewport,size){
 }
 export const HOUSING_HOLOGRAM_LABELS={
   LOOKING:'LOOKING TO RENT',
-  FORMING:'BUILDING A HOÜS',
-  OFFERING:'JOIN OUR HOÜS',
-  MANAGED:'COMMERCIAL RENTAL HOÜS',
+  FORMING:'BUILDING A HAÜZ',
+  OFFERING:'JOIN OUR HAÜZ',
+  MANAGED:'COMMERCIAL RENTAL HAÜZ',
 };
 
 const asset=name=>new URL(`./models/housing/${name}.glb?v=20260920-hous-holograms`,import.meta.url).href;
@@ -39,7 +39,7 @@ const readers={5120:'getInt8',5121:'getUint8',5122:'getInt16',5123:'getUint16',5
 
 function chunks(buffer){
   const view=new DataView(buffer);
-  if(view.getUint32(0,true)!==0x46546c67||view.getUint32(4,true)!==2)throw Error('HOÜS hologram is not a GLB 2.0 file.');
+  if(view.getUint32(0,true)!==0x46546c67||view.getUint32(4,true)!==2)throw Error('HAÜZ hologram is not a GLB 2.0 file.');
   let offset=12,json,binary;
   while(offset<buffer.byteLength){
     const length=view.getUint32(offset,true),type=view.getUint32(offset+4,true),start=offset+8;
@@ -47,7 +47,7 @@ function chunks(buffer){
     if(type===0x004e4942)binary={offset:start,length};
     offset=start+length;
   }
-  if(!json||!binary)throw Error('HOÜS hologram is missing JSON or geometry data.');
+  if(!json||!binary)throw Error('HAÜZ hologram is missing JSON or geometry data.');
   return {json,binary};
 }
 
@@ -55,7 +55,7 @@ function accessorReader(buffer,json,binary,index){
   const accessor=json.accessors[index],bufferView=json.bufferViews[accessor.bufferView];
   const size=componentCounts[accessor.type],bytes=componentBytes[accessor.componentType],stride=bufferView.byteStride??size*bytes;
   const offset=binary.offset+(bufferView.byteOffset??0)+(accessor.byteOffset??0),view=new DataView(buffer),read=readers[accessor.componentType];
-  if(!read)throw Error(`Unsupported HOÜS hologram component type ${accessor.componentType}.`);
+  if(!read)throw Error(`Unsupported HAÜZ hologram component type ${accessor.componentType}.`);
   return {accessor,size,value(vertex,component=0){return view[read](offset+vertex*stride+component*bytes,true);}};
 }
 
@@ -63,16 +63,16 @@ function accessorReader(buffer,json,binary,index){
 export function parseHousingHologramGlb(buffer,heightMeters=120){
   const {json,binary}=chunks(buffer),parts=[];let total=0;
   for(const mesh of json.meshes??[])for(const primitive of mesh.primitives??[]){
-    if((primitive.mode??4)!==4)throw Error('HOÜS hologram must use triangles.');
+    if((primitive.mode??4)!==4)throw Error('HAÜZ hologram must use triangles.');
     const position=accessorReader(buffer,json,binary,primitive.attributes.POSITION);
     const normal=accessorReader(buffer,json,binary,primitive.attributes.NORMAL);
     const indices=primitive.indices===undefined?null:accessorReader(buffer,json,binary,primitive.indices);
     const count=indices?.accessor.count??position.accessor.count;
     parts.push({position,normal,indices,count});total+=count;
   }
-  if(!parts.length)throw Error('HOÜS hologram has no triangle geometry.');
+  if(!parts.length)throw Error('HAÜZ hologram has no triangle geometry.');
   const bounds=parts[0].position.accessor,minimum=bounds.min,maximum=bounds.max;
-  if(!minimum||!maximum)throw Error('HOÜS hologram is missing position bounds.');
+  if(!minimum||!maximum)throw Error('HAÜZ hologram is missing position bounds.');
   const height=maximum[1]-minimum[1],scale=heightMeters/height,centerX=(minimum[0]+maximum[0])/2,centerZ=(minimum[2]+maximum[2])/2;
   const vertices=new Float32Array(total*6);let cursor=0;
   for(const part of parts)for(let index=0;index<part.count;index++){
@@ -91,30 +91,33 @@ export function parseHousingHologramGlb(buffer,heightMeters=120){
   return {vertices,count:total,height:height*scale,baseRadius,bounds:modelBounds};
 }
 
-function loadArrayBuffer(url){return new Promise((resolve,reject)=>{const request=new XMLHttpRequest();request.open('GET',url,true);request.responseType='arraybuffer';request.onload=()=>request.status===0||request.status>=200&&request.status<300?resolve(request.response):reject(Error(`HOÜS hologram request failed (${request.status}).`));request.onerror=()=>reject(Error('HOÜS hologram request failed.'));request.send();});}
+function loadArrayBuffer(url){return new Promise((resolve,reject)=>{const request=new XMLHttpRequest();request.open('GET',url,true);request.responseType='arraybuffer';request.onload=()=>request.status===0||request.status>=200&&request.status<300?resolve(request.response):reject(Error(`HAÜZ hologram request failed (${request.status}).`));request.onerror=()=>reject(Error('HAÜZ hologram request failed.'));request.send();});}
 function rgb(color){return [1,3,5].map(start=>parseInt(color.slice(start,start+2),16)/255);}
 
-export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={matches:false}){
-  const models=new Map(Object.values(HOUSING_HOLOGRAM_MODELS).map(definition=>[definition.id,{...definition,loading:false,count:0}]));
+export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={matches:false},options={}){
+  const definitions=options.models||HOUSING_HOLOGRAM_MODELS;
+  const models=new Map(Object.values(definitions).map(definition=>[definition.id,{...definition,loading:false,count:0}]));
   return {
-    id:'housing-holograms',type:'custom',renderingMode:'3d',instances:[],layouts:new Map(),selected:null,disposed:false,
+    id:options.id||'housing-holograms',type:'custom',renderingMode:'3d',instances:[],layouts:new Map(),selected:null,disposed:false,
     setSelected(key){this.selected=key||null;this.map?.triggerRepaint();},
-    setLayout(key,layout){this.layouts.set(key,layout);},
+    setLayout(key,layout){if(options.frame&&!this.layouts.has(key)&&this.layouts.size>=48)return false;this.layouts.set(key,layout);return true;},
+    beginLayouts(){if(options.frame)this.layouts.clear();},
+    isReady(key){const instance=this.instances.find(instance=>instance.key===key);return Boolean(instance&&models.get(instance.definition.id)?.count);},
     beamHalfWidth(key,scale=1){return housingIconSize(scale).width/2;},
     update(rows){
       this.instances=rows.flatMap(row=>{
-        const definition=HOUSING_HOLOGRAM_MODELS[row.housingModel];
+        const definition=definitions[options.frame?row.waypointFamily:row.housingModel];
         return definition&&Array.isArray(row.coordinates)&&row.coordinates.length===2&&row.coordinates.every(Number.isFinite)
           ?[{key:row.key,coordinates:row.coordinates,color:row.color||'#00FFFF',phase:Number(row.phase)||0,demoOpen:row.demoOpen===true,definition}]:[];
       });
       const keys=new Set(this.instances.map(instance=>instance.key));for(const key of this.layouts.keys())if(!keys.has(key))this.layouts.delete(key);
       this.map?.triggerRepaint();
     },
-    visible(instance){if(this.map.getZoom()<HOUSING_HOLOGRAM_MIN_ZOOM||!instance.demoOpen&&instance.key!==this.selected)return false;const point=this.map.project(instance.coordinates),canvas=this.map.getCanvas();return point.x>-280&&point.y>-360&&point.x<canvas.clientWidth+280&&point.y<canvas.clientHeight+280;},
+    visible(instance){if(options.frame)return this.layouts.has(instance.key);if(this.map.getZoom()<HOUSING_HOLOGRAM_MIN_ZOOM||!instance.demoOpen&&instance.key!==this.selected)return false;const point=this.map.project(instance.coordinates),canvas=this.map.getCanvas();return point.x>-280&&point.y>-360&&point.x<canvas.clientWidth+280&&point.y<canvas.clientHeight+280;},
     async load(model){
-      if(model.loading||model.count||this.disposed)return;model.loading=true;
+      if(model.loading||model.count||model.failed||this.disposed)return;model.loading=true;
       try{const buffer=await loadArrayBuffer(model.url);if(this.disposed)return;const parsed=parseHousingHologramGlb(buffer,model.height);model.vertices=parsed.vertices;model.count=parsed.count;model.baseRadius=parsed.baseRadius;model.bounds=parsed.bounds;model.dirty=true;this.map?.triggerRepaint();}
-      catch(error){console.warn(`${model.id} HOÜS hologram unavailable`,error);}finally{model.loading=false;}
+      catch(error){model.failed=true;console.warn(`${model.id} HAÜZ hologram unavailable`,error);}finally{model.loading=false;}
     },
     onAdd(map,gl){
       this.map=map;this.disposed=false;
@@ -123,9 +126,10 @@ export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={mat
         in vec3 a_position;in vec3 a_normal;uniform mat4 u_matrix;uniform vec2 u_screen_shift;uniform vec3 u_screen_fit;out vec3 v_normal;
         void main(){vec4 clip=u_matrix*vec4(a_position,1.);clip.xy=((clip.xy/clip.w-u_screen_fit.yz)*u_screen_fit.x+u_screen_shift)*clip.w;gl_Position=clip;v_normal=a_normal;}`);
       const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
-        precision highp float;in vec3 v_normal;uniform vec3 u_color;uniform float u_time;uniform float u_phase;out vec4 color;
+        precision highp float;in vec3 v_normal;uniform vec3 u_color;uniform float u_time;uniform float u_phase;uniform float u_frame;out vec4 color;
         float hash(vec2 point){return fract(sin(dot(point,vec2(12.9898,78.233)))*43758.5453);}
         void main(){
+          if(u_frame>.5){float shade=.32+.68*max(0.,dot(normalize(v_normal),normalize(vec3(-.3,-.7,.65))));color=vec4(u_color*shade+.08*pow(shade,6.),.98);return;}
           float clock=floor((u_time+u_phase)*7.);float snow=hash(floor(gl_FragCoord.xy*.52)+clock);
           float scan=.72+.28*smoothstep(.12,.86,fract(gl_FragCoord.y/6.+u_time*1.7+u_phase));
           float dropout=step(.035,snow);float spark=step(.986,snow);
@@ -134,7 +138,7 @@ export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={mat
           color=vec4(u_color*(.68+.38*scan+.5*spark)*edge,alpha);
         }`);
       this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
-      this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.screenShift=gl.getUniformLocation(this.program,'u_screen_shift');this.screenFit=gl.getUniformLocation(this.program,'u_screen_fit');this.color=gl.getUniformLocation(this.program,'u_color');this.time=gl.getUniformLocation(this.program,'u_time');this.phase=gl.getUniformLocation(this.program,'u_phase');
+      this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.screenShift=gl.getUniformLocation(this.program,'u_screen_shift');this.screenFit=gl.getUniformLocation(this.program,'u_screen_fit');this.color=gl.getUniformLocation(this.program,'u_color');this.time=gl.getUniformLocation(this.program,'u_time');this.phase=gl.getUniformLocation(this.program,'u_phase');this.frame=gl.getUniformLocation(this.program,'u_frame');
     },
     upload(gl,model){
       model.buffer=gl.createBuffer();model.vao=gl.createVertexArray();gl.bindVertexArray(model.vao);gl.bindBuffer(gl.ARRAY_BUFFER,model.buffer);gl.bufferData(gl.ARRAY_BUFFER,model.vertices,gl.STATIC_DRAW);
@@ -148,12 +152,12 @@ export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={mat
       const depth=gl.isEnabled(gl.DEPTH_TEST),cull=gl.isEnabled(gl.CULL_FACE),blend=gl.isEnabled(gl.BLEND),depthMask=gl.getParameter(gl.DEPTH_WRITEMASK);
       const srcRgb=gl.getParameter(gl.BLEND_SRC_RGB),dstRgb=gl.getParameter(gl.BLEND_DST_RGB),srcAlpha=gl.getParameter(gl.BLEND_SRC_ALPHA),dstAlpha=gl.getParameter(gl.BLEND_DST_ALPHA);
       gl.disable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(this.program);
-      const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);
+      const seconds=reduced.matches?0:performance.now()/1000;gl.uniform1f(this.time,seconds);gl.uniform1f(this.frame,options.frame?1:0);
       for(const instance of ready){
         const model=models.get(instance.definition.id);if(model.dirty)this.upload(gl,model);
         const origin=maplibre.MercatorCoordinate.fromLngLat(instance.coordinates),unit=origin.meterInMercatorCoordinateUnits(),base=Math.max(0,elevation(instance.coordinates)||0)+3;
         const layout=this.layouts.get(instance.key)??{x:0,lift:178.5*HOUSING_EVENT_HEIGHT_RATIO,scale:1},modelUnit=unit*(layout.scale??1);
-        const angle=instance.definition.bearing*Math.PI/180+seconds*HOUSING_ROTATION_SPEED,cos=Math.cos(angle),sin=Math.sin(angle),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);
+        const angle=instance.definition.bearing*Math.PI/180+(options.frame?0:seconds*HOUSING_ROTATION_SPEED),cos=Math.cos(angle),sin=Math.sin(angle),matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);
         for(let row=0;row<4;row++){
           local[row]=(matrix[row]*cos+matrix[4+row]*sin)*modelUnit;
           local[4+row]=(-matrix[row]*sin+matrix[4+row]*cos)*modelUnit;
@@ -161,14 +165,20 @@ export function createHousingHologramLayer(maplibre,elevation=()=>0,reduced={mat
           local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[8+row]*base*unit+matrix[12+row];
         }
         const canvas=this.map.getCanvas(),point=this.map.project(instance.coordinates);
-        const fit=housingScreenFit(local,model.bounds,{width:canvas.clientWidth,height:canvas.clientHeight},housingIconSize(layout.scale??1));
+        const fit=housingScreenFit(local,model.bounds,{width:canvas.clientWidth,height:canvas.clientHeight},options.frame?{width:42*(layout.scale??1),height:42*(layout.scale??1)}:housingIconSize(layout.scale??1));
         if(!fit)continue;
         gl.uniform3f(this.screenFit,fit.fit,fit.x,fit.y);
         gl.bindVertexArray(model.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.uniform2f(this.screenShift,2*(point.x+(layout.x??0))/canvas.clientWidth-1,1-2*(point.y-(layout.lift??0))/canvas.clientHeight);gl.uniform3fv(this.color,rgb(instance.color));gl.uniform1f(this.phase,instance.phase);gl.drawArrays(gl.TRIANGLES,0,model.count);
       }
       gl.bindVertexArray(null);gl.blendFuncSeparate(srcRgb,dstRgb,srcAlpha,dstAlpha);gl.depthMask(depthMask);if(depth)gl.enable(gl.DEPTH_TEST);else gl.disable(gl.DEPTH_TEST);if(cull)gl.enable(gl.CULL_FACE);else gl.disable(gl.CULL_FACE);if(blend)gl.enable(gl.BLEND);else gl.disable(gl.BLEND);
-      if(!reduced.matches)this.map.triggerRepaint();
+      if(!options.frame&&!reduced.matches)this.map.triggerRepaint();
     },
     onRemove(map,gl){this.disposed=true;for(const model of models.values()){if(model.buffer)gl.deleteBuffer(model.buffer);if(model.vao)gl.deleteVertexArray(model.vao);model.vertices=null;model.count=0;}gl.deleteProgram(this.program);this.instances=[];this.layouts.clear();this.map=null;}
   };
+}
+
+/** The same lightweight loader and screen anchor as Haüz; solid, unbloomed frames. */
+export function createWorldWaypointLayer(maplibre,elevation,reduced) {
+  const definitions=Object.fromEntries(['mizzed','gigz','giftz','sellz'].map(id=>[id,{id,url:new URL(`./models/waypoints/${id}.glb`,import.meta.url).href,height:50,bearing:id==='mizzed'?20:-12}]));
+  return createHousingHologramLayer(maplibre,elevation,reduced,{id:'world-waypoints',models:definitions,frame:true});
 }

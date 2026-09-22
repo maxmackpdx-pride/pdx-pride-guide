@@ -113,7 +113,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
     initialData: initialPost,
     queryFn: async () => {
       const response = await fetch(`/api/housing/${initialPost.id}`, { credentials: "include" });
-      if (!response.ok) throw new Error("This HOÜS post could not load");
+      if (!response.ok) throw new Error("This HAÜZ post could not load");
       return response.json();
     },
   });
@@ -157,7 +157,7 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
   });
   const buildMutation = useMutation({
     mutationFn: async () => { const response = await fetch(`/api/housing/${postId}/build-haus`, { method: "POST", credentials: "include" }); if (!response.ok) throw new Error((await response.json())?.error || "Could not start it"); return response.json(); },
-    onSuccess: (data) => { toast({ title: data?.alreadyLeading ? "You already lead one here" : "HOÜS started", description: data?.alreadyLeading ? undefined : "Nothing is reserved. The listing stays live." }); if (Number.isFinite(Number(data?.postId))) onSelectPost(Number(data.postId)); },
+    onSuccess: (data) => { toast({ title: data?.alreadyLeading ? "You already lead one here" : "HAÜZ started", description: data?.alreadyLeading ? undefined : "Nothing is reserved. The listing stays live." }); if (Number.isFinite(Number(data?.postId))) onSelectPost(Number(data.postId)); },
   });
   const reportMutation = useMutation({
     mutationFn: async (reason: string) => { const response = await fetch(`/api/housing/${postId}/report`, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ reason }) }); if (!response.ok) throw new Error("Could not report"); return response.json(); },
@@ -197,8 +197,8 @@ export default function HousingPostOverlay({ post: initialPost, userId, originRe
 
   return createPortal(
     <div className="board-detail-backdrop" onClick={requestClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HOÜS ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind" style={panelStyle} onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="gifting-close" onClick={requestClose} aria-label="Close HOÜS and return to map" style={{ position: "absolute", top: 10, right: 10, zIndex: 30 }}><X size={18} /></button>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${post.displayName || post.headline} HAÜZ ${detail ? "details" : "card"}`} tabIndex={-1} className="hz pdx-glass-rebind" style={panelStyle} onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="gifting-close" onClick={requestClose} aria-label="Close HAÜZ and return to map" style={{ position: "absolute", top: 10, right: 10, zIndex: 30 }}><X size={18} /></button>
         <div key={detail ? "detail" : "card"} className="houz-overlay-content">
           {detail ? <HousingDetail post={post} h={detailHandlers} isOwner={isOwner} workspace={post.type === "FORMING" ? <HousingWorkspace post={post} onOpenThread={() => openSheet({ view: "inbox" })} /> : undefined} /> : <HousingCard post={post} h={cardHandlers} />}
         </div>

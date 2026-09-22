@@ -6,7 +6,7 @@
   inset: auto max(8px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) 70px;
   display: flex;
   flex-direction: column;
-  height: 62px;
+  height: 80px;
   min-width: 0;
   overflow: hidden;
   box-sizing: border-box;
@@ -48,8 +48,11 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
 }
 .zaydar-layer-sheet.is-open .zaydar-layer-sheet__handle { display: grid; }
 .zaydar-layer-sheet__handle span { width: 32px; height: 4px; border-radius: 6px; background: #00e4ff; opacity: 1; }
-.zaydar-map-demo .zaydar-layer-sheet__chips { display: grid; grid-auto-flow: column; grid-auto-columns: max(106px, calc((100% - 28px) / 6)); gap: 4px; padding: 4px; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; }
-.zaydar-layer-sheet__chips::-webkit-scrollbar { display: none; }
+.zaydar-map-demo .zaydar-layer-sheet__chips { display: grid; grid-auto-flow: column; grid-auto-columns: max(128px, calc((100% - 40px) / 6)); gap: 8px; padding: 10px 14px 8px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-padding-inline: 14px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: #70899a80 #0004; border-radius: 26px; background: #0004; box-shadow: inset 0 3px 8px #0008, inset 0 -1px 0 #d1e5ef20; }
+.zaydar-layer-sheet__chips::-webkit-scrollbar { height: 4px; }
+.zaydar-layer-sheet__chips::-webkit-scrollbar-thumb { border-radius: 4px; background: #70899a80; }
+.zaydar-layer-sheet__chips::-webkit-scrollbar-track { margin-inline: 22px; background: #0004; }
+.zaydar-layer-chip { scroll-snap-align: start; }
 .zaydar-map-demo .zaydar-layer-chip {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
@@ -81,7 +84,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
   width: 100%;
   height: 100%;
   min-width: 0;
-  padding: 0 2px;
+  padding: 8px 10px;
   border: 0 !important;
   background: none;
   color: inherit;
@@ -159,7 +162,7 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
   .zaydar-map-lockup { left: 476px; }
   .zaydar-map-demo .zaydar-layer-sheet, html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek { left: 18px; right: auto; bottom: 18px; width: 440px; }
   .zaydar-map-demo .zaydar-layer-sheet.is-open { left: 18px; right: auto; bottom: 18px; height: min(70%, 540px); border-radius: 24px; }
-  .zaydar-map-demo .zaydar-layer-sheet.is-peek { height: 58px; }
+  .zaydar-map-demo .zaydar-layer-sheet.is-peek { height: 76px; }
   .zaydar-layer-sheet.is-peek .zaydar-layer-chip { grid-template-columns: minmax(0, 1fr) 44px; grid-template-rows: 1fr; height: 48px; }
   .zaydar-layer-sheet.is-peek .zaydar-layer-chip__house { display: block; }
   .zaydar-layer-sheet__footer { padding-left: 21px; }
@@ -200,3 +203,14 @@ html[data-mobile-dock="expanded"] .zaydar-map-demo .zaydar-layer-sheet.is-peek {
   .zaydar-layer-sheet.is-open .zaydar-layer-chip { grid-template-columns: minmax(0, 1fr) 32px; }
   .zaydar-map-demo .zaydar-layer-chip__toggle { font-size: clamp(12px, 3.4vw, 15px); }
 }
+
+/* Existing layer drawer, with independent world controls and forms. */
+.zaydar-world-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.zaydar-world-filters label{display:grid;gap:5px;min-width:0;font-size:12px;color:#b9c8ce}
+.zaydar-world-filters input:not([type=checkbox]),.zaydar-world-filters select{width:100%;min-width:0;min-height:40px;padding:8px;border:1px solid #ffffff24;border-radius:8px;background:#090e12;color:#fff;font:inherit;font-size:14px}
+.zaydar-world-filters label:has(input[type=checkbox]){display:flex;align-items:center}
+.zaydar-layer-row[data-selected=true]{outline:1px solid var(--active-layer-color);outline-offset:-1px;background:#ffffff0a}
+.zaydar-world-unlocated{margin:14px 0}.zaydar-world-unlocated summary{cursor:pointer;padding:10px 0}
+.map-world-composer{width:min(760px,calc(100vw - 24px));max-height:90dvh;overflow:auto;position:relative;border-radius:18px;background:#080c10}
+.map-world-composer>.gifting-form-panel,.map-world-composer .gifting-form,.map-world-composer .directory-form-panel{margin:0;max-width:none;padding:28px 22px}
+.map-world-composer .gifting-close{position:absolute;right:12px;top:12px}
