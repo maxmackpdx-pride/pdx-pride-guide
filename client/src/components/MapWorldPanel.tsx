@@ -10,6 +10,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
   const get=(key:string)=>params.get(`${world}.${key}`)||"";
   const set=(key:string,value:string)=>setParam(`${world}.${key}`,value);
   const name=WORLD_NAMES[world];
+  const applied=[...params.entries()].filter(([key,value])=>key.startsWith(world+".")&&value);
   const select=(key:string,label:string,options:Array<[string,string]>)=><label>{label}<select value={get(key)} onChange={e=>set(key,e.target.value)}>{options.map(([value,text])=><option value={value} key={value}>{text}</option>)}</select></label>;
   const categories=Array.from(new Set([...allRows.map(row=>row.category),get("category")].filter(Boolean))).sort();
   const inView=rows.filter(row=>{const point=mapCoordinates(row.lat,row.lng);return Array.isArray(row._mapPoints) && row._mapPoints.length ? row._mapPoints.some((p:{lat:number;lng:number})=>inMapBounds(p,bounds)) : point && inMapBounds(point,bounds);});
@@ -32,6 +33,7 @@ export default function MapWorldPanel({world,rows,allRows,bounds,params,setParam
       {world !== "places" && select("sort","Sort",[["","Newest"],["oldest","Oldest"],...(world==="mizzed"?[["CLOSING","Closing soon"] as [string,string]]:[]),...(world==="sellz"?[["PRICE_LOW","Price: low to high"],["PRICE_HIGH","Price: high to low"]] as Array<[string,string]>:[])])}
     </div>
     {get("ids") && <p className="zaydar-layer-location-note">Showing this waypoint’s posts. <button onClick={()=>set("ids","")}>Show all in view</button></p>}
+    {applied.length>0&&<div className="map-applied-filters" aria-label="Applied filters">{applied.map(([key,value])=><button key={key} type="button" onClick={()=>setParam(key,"")} aria-label={"Remove "+key.split(".")[1]+" filter"}>{key.endsWith(".ids")?"Selected waypoint":key.endsWith(".owned")?"Queer owned":key.endsWith(".remote")?"Remote friendly":value.replaceAll("_"," ")} ×</button>)}</div>}
     {children}
     {loading ? <p role="status">Loading {name}…</p> : error ? <p role="alert">{name} could not load. <button onClick={retry}>Try again</button></p> : <>
       <p role="status" className="zaydar-layer-location-note">{inView.length} in view{!bounds ? " · waiting for map bounds" : ""}</p>

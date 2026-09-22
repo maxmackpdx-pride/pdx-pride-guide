@@ -10,7 +10,7 @@ import MapComposerOverlay from "@/components/MapComposerOverlay";
 import {readMapCamera,filterWorldRows,locateWorldRow,WORLD_DETAIL_KEYS,type MapWorld,type WorldRow,type MapBounds} from "@/lib/mapWorlds";
 import ZaydarUpcomingRsvps from "@/components/ZaydarUpcomingRsvps";
 import ZaydarCanvas, { type MapSelectionRect, type ZaydarHandle } from "@/components/ZaydarCanvas";
-import { ChevronRight, Navigation } from "lucide-react";
+import { ChevronRight, LocateFixed } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -43,6 +43,8 @@ import { isLocalDemo } from "@/lib/localDemo";
 import "./LivingMap.css";
 import "./ZaydarMapDemo.css";
 import "@/components/ZaydarLayerSheet.css";
+import "../../public/outzide-map/assets/map-continuity.css";
+import { useAttendanceSummariesLive } from "@/hooks/useAttendanceSummariesLive";
 
 type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
@@ -114,7 +116,7 @@ function housingFaceStack(row: MapRow) {
       background: option.bg || "#00FFFF",
       ring: normalizeAvatarRing(typeof person.avatarRing === "string" ? person.avatarRing : null),
     }];
-  }).slice(0, 5);
+  });
 }
 
 function boardKind(row: MapRow): BoardKind | null {
@@ -616,6 +618,7 @@ export default function ZaydarMapDemo() {
       {eventTags.map(tag => <button type="button" key={tag} aria-pressed={eventTag === tag} onClick={() => setEventTag(eventTag === tag ? null : tag)}>{tag.replaceAll("_", " ")}</button>)}
       <button type="button" aria-pressed={timeFilter === "default" && !eventTag} onClick={() => { setTimeFilter("default"); setEventTag(null); }}>All upcoming</button>
     </div>
+    {(timeFilter!=="default"||eventTag) && <div className="map-applied-filters" aria-label="Applied event filters">{timeFilter!=="default"&&<button onClick={()=>setTimeFilter("default")} aria-label="Remove date filter">{timeFilter} ×</button>}{eventTag&&<button onClick={()=>setEventTag(null)} aria-label="Remove event type filter">{eventTag.replaceAll("_"," ")} ×</button>}<button onClick={()=>{setTimeFilter("default");setEventTag(null);}}>Clear all</button></div>}
     {demoEventIds.size>0 && <p className="zaydar-layer-location-note">Demo examples use saved event listings and their original dates.</p>}
     {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="zaydar-layer-list">
       {visibleEvents.slice(0, 5).map(event => {
@@ -673,6 +676,8 @@ export default function ZaydarMapDemo() {
     { id: "houz", label: "Haüz", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
   ];
 
+  useAttendanceSummariesLive();
+  const {data:attendance={}}=useQuery<Record<number,{count:number;preview:Array<{initials:string;photoUrl?:string|null}>}>>({queryKey:["/api/events/attendance-summaries"],queryFn:()=>apiRequest("GET","/api/events/attendance-summaries").then(r=>r.json()),refetchInterval:60000});
   const sceneRows = useMemo(() => marks.map(mark => {
     const event=mark.kind==='event'?mark.item as Event:null;
     const place=mark.kind==='place'?mark.item as Place:null;
@@ -689,14 +694,15 @@ export default function ZaydarMapDemo() {
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
-      avatars:isHouz?housingFaceStack(row):undefined,
+      avatars:isHouz?housingFaceStack(row):event?attendance[event.id]?.preview.map(person=>({url:person.photoUrl||"",initial:person.initials,background:color,ring:""})):undefined,
+      avatarTotal:event?attendance[event.id]?.count:undefined,
       demoOpen:event?demoEventIds.has(event.id):isHouz&&housingDemo(row),
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
-  }), [marks, places, demoEventIds]);
+  }), [marks, places, demoEventIds, attendance]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
@@ -728,10 +734,10 @@ export default function ZaydarMapDemo() {
       {previewDateTime && <button type="button" className="zaydar-map-live" onClick={() => setPreviewDateTime("")}>Live</button>}
     </div>
     <div className="zaydar-demo-navigation pdx-glass-rebind" aria-label="Map controls">
-      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in">+</button>
-      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out">−</button>
-      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" disabled={locating}><Navigation size={18}/></button>
-      <button className="zaydar-control-labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
+      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:1})} aria-label="Zoom in" title="Zoom in">+</button>
+      <button className="zaydar-control-zoom" onClick={()=>mapRef.current?.send('zoom',{delta:-1})} aria-label="Zoom out" title="Zoom out">−</button>
+      <button className="zaydar-control-location" onClick={locateMe} aria-label="Locate me" title="Locate me" aria-busy={locating} disabled={locating}><LocateFixed size={22} aria-hidden="true"/></button>
+      <button className="zaydar-control-labels" title="Show map labels" aria-label="Show map labels" aria-pressed={labels} onClick={()=>{setLabels(v=>!v);mapRef.current?.send('labels',{enabled:!labels});}}>Labels</button>
     </div>
     {locateError&&<p className="zaydar-demo-notice" role="status">{locateError}</p>}
     <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />

@@ -1,0 +1,62 @@
+/* Shared map furniture; category palettes and hologram materials stay local. */
+.outzide-shell,.zaydar-map-demo {
+ --map-ui-control:44px;--map-ui-radius:12px;--map-ui-panel:18px;
+ --map-ui-drawer:440px;--map-ui-motion:220ms;--map-ui-ease:cubic-bezier(.22,.8,.25,1);
+ --map-ui-blur:18px;--map-ui-edge:#d3e7dc26;
+}
+.outzide-shell{--map-ui-ink:#101a16;--map-ui-accent:var(--orange);--map-ui-text:var(--ink);--map-ui-muted:var(--muted)}
+.zaydar-map-demo{--map-ui-ink:#0b151f;--map-ui-accent:#19e3ff;--map-ui-text:#eaf2fa;--map-ui-muted:#b0bfcd}
+.outzide-shell .map-controls,.zaydar-map-demo .zaydar-demo-navigation{
+ width:54px;padding:4px;gap:3px;border-radius:15px;border:1px solid var(--map-ui-edge);
+ background:color-mix(in srgb,var(--map-ui-ink) 92%,transparent);box-shadow:0 0 0 1px #050706,inset 0 1px #ffffff10;
+ backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);
+}
+.outzide-shell .map-controls button,.zaydar-map-demo .zaydar-demo-navigation button{
+ width:var(--map-ui-control);height:var(--map-ui-control);min-width:var(--map-ui-control);min-height:var(--map-ui-control);
+ padding:0;border:0;border-radius:10px;background:transparent;color:var(--map-ui-text);box-shadow:none;
+ display:grid;place-items:center;transition:background var(--map-ui-motion),color var(--map-ui-motion);
+}
+.outzide-shell .map-controls #fire-toggle{width:44px}
+.outzide-shell .map-controls button:hover,.zaydar-map-demo .zaydar-demo-navigation button:hover{background:#ffffff0d}
+.outzide-shell .map-controls button[aria-pressed=true],.zaydar-map-demo .zaydar-demo-navigation button[aria-pressed=true]{color:var(--map-ui-accent);background:#ffffff08;box-shadow:inset 0 -1px var(--map-ui-accent)}
+.outzide-shell .map-controls button:focus-visible,.zaydar-map-demo .zaydar-demo-navigation button:focus-visible{outline:2px solid var(--map-ui-accent);outline-offset:-2px}
+.outzide-shell .discovery,.zaydar-map-demo .zaydar-layer-sheet{border-radius:var(--map-ui-panel);backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);transition-duration:var(--map-ui-motion);transition-timing-function:var(--map-ui-ease)}
+.zaydar-map-demo .zaydar-layer-chip{border-radius:var(--map-ui-radius);background:transparent;border-color:transparent;box-shadow:none}
+.zaydar-map-demo .zaydar-layer-chip[data-enabled=true]{background:color-mix(in srgb,var(--layer-color) 6%,var(--map-ui-ink));border-color:transparent;box-shadow:none}
+.zaydar-map-demo .zaydar-layer-chip__toggle[aria-pressed=true]{box-shadow:inset 0 -1px var(--layer-color)}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button{border-radius:var(--map-ui-radius);border-color:transparent;background:transparent;min-height:44px}
+.zaydar-map-demo .zaydar-layer-sheet .zaydar-layer-rail button[aria-pressed=true]{background:#ffffff08;box-shadow:inset 0 -1px var(--active-layer-color)}
+.map-applied-filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.map-applied-filters button{min-height:36px;padding:6px 9px;border:1px solid var(--map-ui-edge);border-radius:8px;background:none;color:var(--map-ui-text);font-size:12px}
+.zaydar-map-demo .zaydar-layer-sheet__close{width:auto;gap:6px;display:flex;padding:0 10px;border-radius:var(--map-ui-radius);font-size:12px;white-space:nowrap}
+.zaydar-map-demo .zaydar-world-filters label:first-child{grid-column:1/-1}
+.zaydar-map-demo .zaydar-world-filters input[type=search],.outzide-shell .search{border-radius:999px;background:#0004;border-color:var(--map-ui-edge)}
+.outzide-shell #detail .detail-tabs button{min-height:48px;font:600 12px var(--mono);letter-spacing:.04em;background:transparent;border-radius:0}
+.outzide-shell #detail .detail-tools button{border-radius:9px;border-color:color-mix(in srgb,var(--c) 65%,transparent)}
+.outzide-shell .detail-footer{display:flex;gap:8px;flex-shrink:0;padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--c) 30%,transparent);background:#08110ed9}
+.outzide-shell .detail-footer a{flex:1;display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line);border-radius:9px;font-size:13px;text-decoration:none}
+.outzide-shell .detail-footer a:last-child{color:var(--c);border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.outzide-shell .browse-drawer-handle{display:none}
+.face-stack{display:inline-flex;align-items:center;isolation:isolate;padding:2px 5px;pointer-events:none}
+.checkin-face{position:relative;display:grid;place-items:center;flex-shrink:0;width:25px;height:25px;margin-left:-6px;border:2px solid #101719;border-radius:50%;background:#22342d;color:#eeeae0;font:600 11px Inter,Arial,sans-serif;overflow:hidden;box-shadow:0 1px 4px #0008}
+.checkin-face:first-child{margin-left:0}.checkin-face img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.face-overflow{width:auto;min-width:27px;padding:0 4px;background:#e4ead9;color:#172119}
+.outzide-shell .waypoint-icon>.face-stack{left:50%;top:-24px;transform:translateX(-50%)}
+.outzide-shell .waypoint-count{min-width:21px;height:21px;font:700 11px/19px Inter,Arial,sans-serif;border-width:1.5px}
+@media(min-width:960px){.outzide-shell .discovery{width:var(--map-ui-drawer)}.zaydar-map-demo .zaydar-layer-sheet{width:var(--map-ui-drawer)}}
+@media(max-width:760px){
+ .outzide-shell .workspace .discovery{display:flex;position:fixed;inset:auto 10px 16px;width:auto;height:min(64dvh,600px);max-height:calc(100dvh - 150px);border-radius:18px;transition:height var(--map-ui-motion) var(--map-ui-ease)}
+ .outzide-shell .workspace.view-map .discovery{height:52px;overflow:hidden}
+ .outzide-shell .workspace.view-map .discovery>:not(.browse-drawer-handle){display:none}
+ .outzide-shell .browse-drawer-handle{display:flex!important;align-items:center;justify-content:space-between;gap:12px;width:100%;height:52px;min-height:52px;flex-shrink:0;padding:8px 16px;border:0;border-radius:0;background:none;font-size:13px;touch-action:none}
+ .browse-drawer-handle i{width:38px;height:4px;border-radius:4px;background:var(--muted)}
+ .outzide-shell .discovery.choosing-spots>.browse-drawer-handle{display:flex}
+ .outzide-shell .discovery #browse-steps{flex:1;min-height:0}
+ .outzide-shell .map-bottom{bottom:80px}
+ .outzide-shell:has(#detail[open]) .discovery{visibility:hidden}
+}
+@media(prefers-reduced-motion:reduce){.outzide-shell,.zaydar-map-demo{--map-ui-motion:0ms}}
+html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .outzide-shell,[data-calm=true] .zaydar-map-demo{--map-ui-motion:0ms}
+.outzide-shell .waypoint-icon>.face-stack{top:auto;bottom:60px}
+.outzide-shell .waypoint-icon.special>.face-stack{bottom:76px}
+.outzide-shell .waypoint-icon.selected>.face-stack{bottom:122px}
+@media(max-width:760px){.outzide-shell:has(#active-map-filters) .workspace .discovery{top:auto}}

@@ -170,8 +170,8 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
       {open && (
         <div className="zaydar-layer-sheet__footer">
           {activeLayer?.viewMore.map(link => <Link key={link.href} className="zaydar-layer-sheet__more" href={link.href}>{link.label}<ChevronDown size={18} aria-hidden="true" /></Link>)}
-          <button type="button" className="zaydar-layer-sheet__close" aria-label="Close map layer panel" aria-controls={panelId} onClick={() => closePanel(true)}>
-            <ChevronDown size={22} aria-hidden="true" />
+          <button type="button" className="zaydar-layer-sheet__close" aria-label="Back to map" title="Back to map" aria-controls={panelId} onClick={() => closePanel(true)}>
+            <span>Back to map</span><ChevronDown size={18} aria-hidden="true" />
           </button>
         </div>
       )}

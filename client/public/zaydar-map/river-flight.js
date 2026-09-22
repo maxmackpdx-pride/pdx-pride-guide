@@ -1,3 +1,4 @@
+import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
 import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260922-water-reflections-v4';
@@ -775,7 +776,7 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+6*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({avatars:feature.properties.avatars,avatarTotal:feature.properties.avatarTotal,key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+6*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -874,11 +875,11 @@ function renderHologramLabels(labels){
    if(label.kind!=='housing'&&label.time){const clock=document.createElement('span');clock.className='standalone-hologram-clock';clock.textContent=label.time;item.appendChild(clock);}
   }
   let stack=[...root.children].find(node=>node.dataset.labelKey===label.key&&node.dataset.labelRole==='faces');
-  if(label.kind==='housing'&&label.avatars?.length){
+  if(label.avatars?.length){
    if(!stack){stack=document.createElement('span');stack.className='standalone-hologram-faces standalone-hologram-faces--anchored';stack.dataset.labelKey=label.key;stack.dataset.labelRole='faces';root.appendChild(stack);}
-   stack.style.left=`${label.x}px`;stack.style.top=`${label.logoY}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
-   const faceSignature=JSON.stringify([label.color,label.avatars]);
-   if(stack.dataset.signature!==faceSignature){stack.dataset.signature=faceSignature;stack.replaceChildren();stack.setAttribute('aria-label',`${label.avatars.length} people involved`);for(const avatar of label.avatars){const face=document.createElement('span');face.className='standalone-hologram-face';face.style.background=avatar.background||label.color;if(avatar.url){const image=document.createElement('img');image.src=avatar.url;image.alt='';face.appendChild(image);}else face.textContent=avatar.initial||'Z';stack.appendChild(face);}}
+   stack.style.left=`${label.x}px`;stack.style.top=`${label.logoY-label.logoHeight/2-14*label.scale}px`;stack.style.opacity=label.opacity;stack.style.setProperty('--face-scale',label.scale);stack.style.setProperty('--face-size',`${Math.min(18,60/Math.max(1,label.avatars.length*.72+.28))}px`);
+   const faceSignature=JSON.stringify([label.color,label.avatars,label.avatarTotal]);
+   if(stack.dataset.signature!==faceSignature){stack.dataset.signature=faceSignature;stack.innerHTML=faceStackHtml(label.avatars.map(avatar=>({displayName:avatar.initial,photoUrl:avatar.url})),label.avatarTotal??label.avatars.length);}
   }else stack?.remove();
  }
  for(const item of [...root.children])if(!live.has(item.dataset.labelKey))item.remove();
