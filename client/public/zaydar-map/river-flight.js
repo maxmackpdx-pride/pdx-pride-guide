@@ -16,7 +16,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
-import {createWorldWaypointLayer,createHousingHologramLayer,housingIconSize,HOUSING_EVENT_HEIGHT_RATIO,HOUSING_HOLOGRAM_LABELS} from './housing-holograms.js?v=20260922-world-waypoints';
+import {waypointGeometry,drawWaypointHead,drawWaypointFoot} from './waypoint-markers.js?v=20260922-outzide-waypoints';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -64,8 +64,6 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
 const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
-const housingHolograms=createHousingHologramLayer(maplibregl,terrainHeight,reduced);
-const worldWaypoints=createWorldWaypointLayer(maplibregl,terrainHeight,reduced);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
@@ -77,8 +75,6 @@ function installSceneExtras(){
  map.addLayer(portlandBridges,'skyline');
  map.addLayer(landmarkBuildings,'skyline');
  map.addLayer(portlandLandmarks);
- map.addLayer(housingHolograms);
- map.addLayer(worldWaypoints);
  map.addLayer(citySparkles);
 }
 map.on('load',()=>{
@@ -205,7 +201,7 @@ function avatarGlowColor(avatar){
  return avatar?.background&&/^#[0-9a-f]{6}$/i.test(avatar.background)?avatar.background:palette[Math.min(2,palette.length-1)];
 }
 function refreshNearbyLights(){
- const sources=lightFeatures.filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places');
+ const sources=lightFeatures.filter(feature=>feature.properties.kind==='event');
  const features=userLocation?[...sources,userLocation.feature]:sources;
  nearbyLights=createSpatialIndex(features,feature=>feature.geometry.coordinates);
  surfaceCache.delete(map);
@@ -484,7 +480,6 @@ function drawUserLocationAvatar(ctx,target,fade){
 }
 function drawLights(fade,target=map,surface=lights){
  hitTargets=[];
- worldWaypoints.beginLayouts();
  const eventLabels=[];
  const cameraMoving=Boolean(target.isMoving?.());
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
@@ -502,13 +497,12 @@ function drawLights(fade,target=map,surface=lights){
  const hologramMultiplier=2.4-.75*streetProgress;
  const placezScale=1.625*(.375+.625*streetProgress+.2*closeProgress);
  const placezGlow=.375+.625*streetProgress+.12*closeProgress;
- const placezBloomMax=.02;
  const presentationScale=viewportScale*zoomScale*hologramMultiplier;
  const overviewAnchor=.32+.68*smoothRange(11.25,14.25,target.getZoom());
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
- const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures.filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places').filter(feature=>!feature.properties.waypointFamily||feature.properties.waypointFamily==='places')];if(userLocation)reflectionSources.unshift(userLocation.feature);
+ const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures.filter(feature=>feature.properties.kind==='event')];if(userLocation)reflectionSources.unshift(userLocation.feature);
  waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
  drawUserLocationGlow(lightsContext,target,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
@@ -520,7 +514,7 @@ function drawLights(fade,target=map,surface=lights){
  let layout=hologramLayouts.get(target);if(!layout){layout=new Map();hologramLayouts.set(target,layout);}
  const reveal=smoothRange(14.5,16.5,target.getZoom());
  // Expand a few distinct locations; individual event rows remain discoverable as orbs.
- const candidates=ordered.filter(v=>(v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey)||v.feature.properties.housingModel&&(v.feature.properties.demoOpen||v.feature.properties.key===selectedKey))&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
+ const candidates=ordered.filter(v=>(v.feature.properties.kind==='event'&&(activeToday(v.feature)||v.feature.properties.key===selectedKey))&&v.p.x>=0&&v.p.x<=width&&v.p.y>=0&&v.p.y<=height);
  candidates.sort((a,b)=>Number(b.feature.properties.key===selectedKey)-Number(a.feature.properties.key===selectedKey)||Number(activeToday(b.feature))-Number(activeToday(a.feature))||Math.hypot(a.p.x-width/2,a.p.y-height/2)-Math.hypot(b.p.x-width/2,b.p.y-height/2)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  const beacons=[];
  for(const item of candidates){
@@ -535,7 +529,7 @@ function drawLights(fade,target=map,surface=lights){
   beacons.push(item);
  }
  const expandedKeys=new Set(beacons.map(item=>item.feature.properties.key));
- const placeClusters=clusterPlaceMarkers(ordered.filter(item=>(item.feature.properties.kind==='place'||item.feature.properties.waypointFamily)&&!expandedKeys.has(item.feature.properties.key)),selectedKey,target.getZoom(),width,height);
+ const placeClusters=clusterPlaceMarkers(ordered.filter(item=>item.feature.properties.kind!=='event'&&!item.feature.properties.housingModel),selectedKey,target.getZoom(),width,height);
  const visibleOrbs=ordered.filter(item=>{
   if(expandedKeys.has(item.feature.properties.key))return false;
   const cluster=placeClusters.byKey.get(item.feature.properties.key);
@@ -623,45 +617,40 @@ function drawLights(fade,target=map,surface=lights){
   }
   for(const {feature,p,offset,neighbors=0} of ordered){
   const {color,phase}=feature.properties;
-  const bloomScale=feature.properties.type==='nonprofit'?.4:feature.properties.housingModel?.5:1;
+  const bloomScale=feature.properties.type==='nonprofit'?.4:1;
   const isBar=expandedKeys.has(feature.properties.key);
   const hover=reduced.matches||cameraMoving?0:4.5*Math.sin(pulseTime*(.38+.035*Math.sin(phase))+phase)+1.8*Math.sin(pulseTime*.21+phase*1.71);
   const beaconScale=offset?.scale??1;
   const groundScale=projectorGroundScale(target.getZoom());
   const lift=roofLift(target,feature,surfaces),eventTop=offset?p.y+offset.y+offset.avoidY-hover:p.y-lift-hover;
-  const housingLift=HOUSING_EVENT_HEIGHT_RATIO*smoothRange(13.75,14.75,target.getZoom());
-  const hologramTop=feature.properties.housingModel?p.y+(eventTop-p.y)*housingLift:eventTop,raisedY=hologramTop+178.5*beaconScale;
+  const hologramTop=eventTop,raisedY=hologramTop+178.5*beaconScale;
   const logoX=p.x+(offset?.x||0)+(offset?.avoidX||0),beamAlpha=1/(1+neighbors*.56);
-  const beamHalfWidth=feature.properties.housingModel?housingHolograms.beamHalfWidth(feature.properties.key,beaconScale):61.25*beaconScale;
+  const beamHalfWidth=61.25*beaconScale;
   const emergence=isBar?emergenceFor(feature):0;
+  if(feature.properties.kind!=='event'){
+   const cluster=placeClusters.byKey.get(feature.properties.key);
+   if(cluster&&cluster.leader.feature.properties.key!==feature.properties.key)continue;
+   const selected=feature.properties.key===selectedKey;
+   const geometry=waypointGeometry(p,selected,placezHoverLift(target,feature,surfaces));
+   if(pass===0)drawWaypointFoot(lightsContext,geometry,color,hologramMaterials,drawProjectionBeam,coreAlpha,selected);
+   else{
+    // Heads remain readable above buildings; their beam is masked at street level.
+    const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo,selected,coreAlpha);
+    if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
+    if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,feature.properties.type,color,width);
+    hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
+   }
+   continue;
+  }
   if(pass===0){
-   // An expanded projector owns its ground footprint. Nearby event/place rows
-   // must not stack bright discovery balls over the original rings and pin light.
-   const orbY=p.y-8;
-   const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,orbY-beacon.p.y)<42);
-   const placeCluster=placeClusters.byKey.get(feature.properties.key);
-   if(placeCluster&&placeCluster.leader.feature.properties.key!==feature.properties.key)continue;
-   if(isBar){hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});}
+   const underProjector=beacons.some(beacon=>Math.hypot(p.x-beacon.p.x,p.y-8-beacon.p.y)<42);
+   if(isBar)hitTargets.push({key:feature.properties.key,x:p.x,y:p.y,r:28,name:feature.properties.name,category:feature.properties.type});
    else if(!underProjector){
-    const isPlace=feature.properties.kind==='place';
     const densityGlow=glowByKey.get(feature.properties.key)??1;
-    // Placez stay tied to their geographic anchor. At street zoom they clear
-    // nearby roofs; as the 3D buildings disappear they ease back toward 3 m.
-    const isWorld=Boolean(feature.properties.waypointFamily)&&!isPlace;
-    const markerY=isPlace||isWorld?p.y-placezHoverLift(target,feature,surfaces):raisedY;
-    const markerBloom=isPlace?Math.min(placezBloomMax,placezGlow*densityGlow*bloomScale):placezGlow*densityGlow*bloomScale;
-    if(isWorld){
-     const assigned=worldWaypoints.setLayout(feature.properties.key,{x:0,lift:p.y-markerY,scale:Math.min(1.1,placezScale*.62)});
-     const ready=assigned&&worldWaypoints.isReady(feature.properties.key);
-     if(!ready)drawWorldWaypointFallback(lightsContext,p.x,markerY,color,feature.properties.typeIcon,Math.min(1.1,placezScale*.62));
-     // Glow belongs only to the small data pin, never to its model/frame.
-     drawWaypointDataPin(lightsContext,p.x,markerY+23*Math.min(1.1,placezScale*.62),color,coreAlpha);
-    }else{
-    drawDiscoveryOrb(lightsContext,p.x,markerY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,markerBloom,isPlace);
-    }
-    if(placeCluster?.members.length>1)drawClusterCount(lightsContext,p.x,markerY,placeCluster.members.length,color);
-    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,markerY,feature.properties.name,feature.properties.type,color,width);
-    hitTargets.push({key:feature.properties.key,x:p.x,y:markerY,r:isPlace?45:28,name:feature.properties.name,category:feature.properties.type,clusterBounds:placeCluster?.members.length>1?placeCluster.bounds:null,clusterKeys:placeCluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});
+    drawDiscoveryOrb(lightsContext,p.x,raisedY,color,phase,fade*(1-emergence),coreAlpha*(1-emergence),feature.properties.typeIcon,placezScale,placezGlow*densityGlow*bloomScale);
+    if(feature.properties.key===selectedKey)drawSelectedMarkerLabel(lightsContext,p.x,raisedY,feature.properties.name,feature.properties.type,color,width);
+    hitTargets.push({key:feature.properties.key,x:p.x,y:raisedY,r:28,name:feature.properties.name,category:feature.properties.type});
    }
   }
   if(!isBar)continue;
@@ -678,7 +667,6 @@ function drawLights(fade,target=map,surface=lights){
    // Project a soft cone from the exact ground anchor up to the floating artwork.
    lightsContext.save();
    const top=hologramTop,halfWidth=beamHalfWidth;
-   if(feature.properties.housingModel)housingHolograms.setLayout(feature.properties.key,{x:logoX-p.x,lift:p.y-top,scale:beaconScale});
    lightsContext.globalAlpha=(Math.min(1,fade*pulse*beamAlpha*(color===adultVenueColor?1:1.2)))*bloomScale;
    drawProjectionBeam(lightsContext,hologramMaterials.beams.get(color),p,logoX,top,halfWidth);
    lightsContext.beginPath();lightsContext.moveTo(p.x-2,p.y);lightsContext.lineTo(logoX-halfWidth,top);lightsContext.lineTo(logoX+halfWidth,top);lightsContext.lineTo(p.x+2,p.y);lightsContext.closePath();
@@ -788,10 +776,6 @@ function drawLights(fade,target=map,surface=lights){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
     eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
-   }
-   if(feature.properties.housingModel&&coreAlpha>.1){
-    const housingName=HOUSING_HOLOGRAM_LABELS[feature.properties.housingModel],housingIconHeight=housingIconSize(beaconScale).height;
-    if(housingName)eventLabels.push({key:feature.properties.key,kind:'housing',name:housingName,time:'',color,x:logoX,y:hologramCenterY+housingIconHeight/2+3*beaconScale,width:hologramLabelWidth*1.4,scale:beaconScale,logoY:hologramCenterY,logoWidth:beamHalfWidth*2,logoHeight:housingIconHeight,opacity:coreAlpha,avatars:feature.properties.avatars||[]});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -1123,21 +1107,15 @@ function clusterPlaceMarkers(items,selected,zoom,width,height){
  const pending=[...items].filter(item=>item.p.x>=-40&&item.p.x<=width+40&&item.p.y>=-40&&item.p.y<=height+40).sort((a,b)=>Number(b.feature.properties.key===selected)-Number(a.feature.properties.key===selected)||String(a.feature.properties.key).localeCompare(String(b.feature.properties.key)));
  while(pending.length){
   const leader=pending.shift(),members=[leader];
-  for(let i=pending.length-1;i>=0;i--)if((pending[i].feature.properties.waypointFamily||'places')===(leader.feature.properties.waypointFamily||'places')&&Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
+  for(let i=pending.length-1;i>=0;i--)if((pending[i].feature.properties.waypointFamily||pending[i].feature.properties.kind||'places')===(leader.feature.properties.waypointFamily||leader.feature.properties.kind||'places')&&Math.hypot(pending[i].p.x-leader.p.x,pending[i].p.y-leader.p.y)<radius)members.push(...pending.splice(i,1));
   const coordinates=members.map(item=>item.feature.geometry.coordinates),west=Math.min(...coordinates.map(point=>point[0])),east=Math.max(...coordinates.map(point=>point[0])),south=Math.min(...coordinates.map(point=>point[1])),north=Math.max(...coordinates.map(point=>point[1]));
   const cluster={leader,members,bounds:[[west,south],[east,north]]};
   for(const member of members)byKey.set(member.feature.properties.key,cluster);
  }
  return {byKey};
 }
-function drawWorldWaypointFallback(ctx,x,y,color,typeIcon,scale){
- ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.shadowBlur=0;ctx.fillStyle='#081018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-20,-20,40,40,12);ctx.fill();ctx.stroke();const icon=typeIcons.get(typeIcon);if(icon)ctx.drawImage(icon.light,-13,-13,26,26);ctx.restore();
-}
-function drawWaypointDataPin(ctx,x,y,color,alpha){
- ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor=color;ctx.shadowBlur=3;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
-}
-function drawClusterCount(ctx,x,y,count,color){
- ctx.save();ctx.translate(x+12.5,y-12.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
+function drawClusterCount(ctx,x,y,count,color,size=28){
+ ctx.save();ctx.translate(x+size/2-1.5,y-size/2+1.5);ctx.fillStyle='#071018';ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 11px Inter,Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(count),0,.5);ctx.restore();
 }
 function drawSelectedMarkerLabel(ctx,x,y,name,type,color,width){
  const label=String(name||type||'Place');ctx.save();ctx.font='600 12px Inter,Arial,sans-serif';const labelWidth=Math.min(190,ctx.measureText(label).width+22);const labelX=Math.max(labelWidth/2+8,Math.min(width-labelWidth/2-8,x));ctx.fillStyle='#050b12e8';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(labelX-labelWidth/2,y+17,labelWidth,28,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f4fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,labelX,y+31,labelWidth-16);ctx.restore();
@@ -1157,18 +1135,15 @@ async function setListings(rows){
  for(const row of rows){if(row.eventDay!==today||!row.venueKey)continue;const prev=dailyVenues.get(row.venueKey);const rank=r=>r.key===selectedKey?-Infinity:(new Date(r.startsAt).getTime()>=viewTime?new Date(r.startsAt).getTime()-viewTime:1e15-new Date(r.startsAt).getTime());if(!prev||rank(row)<rank(prev))dailyVenues.set(row.venueKey,row);}
  rows=rows.map(row=>({...row,autoToday:row.eventDay===today&&(!row.venueKey||dailyVenues.get(row.venueKey)===row)}));
  lightFeatures=rows.map(row=>{if(!phases.has(row.key))phases.set(row.key,sequence++*2.399963);return {type:'Feature',geometry:{type:'Point',coordinates:row.coordinates},properties:{...row,isBar:true,heightScale:waypointHeightScale(row.coordinates),phase:phases.get(row.key)}};});
- housingHolograms.update(lightFeatures.map(feature=>feature.properties));
- worldWaypoints.update(lightFeatures.map(feature=>feature.properties));
- housingHolograms.setSelected?.(selectedKey);
  refreshNearbyLights();assetsReady=true;updateSceneStatus();scheduleFrame();
  const center=map.getCenter();const queue=[...lightFeatures].sort((a,b)=>Math.hypot(a.geometry.coordinates[0]-center.lng,a.geometry.coordinates[1]-center.lat)-Math.hypot(b.geometry.coordinates[0]-center.lng,b.geometry.coordinates[1]-center.lat));
- await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
+ await Promise.all(Array.from({length:3},async()=>{while(queue.length&&!disposed&&generation===dataGeneration){const f=queue.shift();if(f.properties.kind==='event'){await loadVenueLogo(f.properties.logo,f.properties.logoMode);if(f.properties.alternateLogo)await loadVenueLogo(f.properties.alternateLogo,f.properties.logoMode);}else if(f.properties.waypointLogo)await loadVenueLogo(f.properties.waypointLogo,'alpha');scheduleFrame();await new Promise(r=>setTimeout(r,0));}}));
 }
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==parent||event.data?.source!=='zaydar-host')return;
  const {type,...data}=event.data;
  if(type==='data'&&Array.isArray(data.rows))void setListings(data.rows);
- if(type==='select'){selectedKey=data.key;housingHolograms.setSelected?.(selectedKey);const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
+ if(type==='select'){selectedKey=data.key;const feature=lightFeatures.find(f=>f.properties.key===selectedKey);if(feature){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:feature.geometry.coordinates,zoom:Math.max(16.5,map.getZoom()),duration:700});}scheduleFrame();}
  if(type==='locate'){setUserLocation(data.coordinates,data.avatar);pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.easeTo({center:data.coordinates,zoom:16,duration:700});}
  if(type==='fit'&&Array.isArray(data.bounds)){map.fitBounds(data.bounds,{padding:{top:140,bottom:150,left:72,right:72},maxZoom:17.25,duration:620});scheduleFrame();}
  if(type==='zoom'){pauseControl.checked=true;pauseControl.dispatchEvent(new Event('input'));map.zoomTo(Math.max(10,Math.min(maxExploreZoom,map.getZoom()+data.delta)),{duration:300});}
@@ -1183,7 +1158,7 @@ map.getCanvas().addEventListener('pointerup',e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>7){down=null;return;}down=null;
  const hit=hoveredMapTarget(hitTargets,{x:e.clientX,y:e.clientY,active:true});
  if(hit?.clusterBounds){if(parent===window)map.fitBounds(hit.clusterBounds,{padding:72,maxZoom:17.25,duration:620});else tell('cluster',{world:hit.clusterWorld||'places',keys:hit.clusterKeys,bounds:hit.clusterBounds,zoom:map.getZoom()});return;}
- if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;housingHolograms.setSelected?.(selectedKey);map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
+ if(hit){if(!hit.key.startsWith('directory-'))selectedKey=hit.key;map.getCanvas().setAttribute('aria-label',`${hit.name||'Map marker'}, ${hit.category||'listing'}, selected.`);const width=hit.width||Math.max(32,(hit.r||22)*1.5),height=hit.height||width;tell('select',{key:hit.key,rect:{left:hit.x-width/2,top:hit.y-height/2,width,height}});scheduleFrame();}
 });
 map.on('moveend',viewState);
 map.on('webglcontextlost',()=>startup.fatal('The 3D graphics context was lost.'));

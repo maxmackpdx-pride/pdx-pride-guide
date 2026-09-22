@@ -1,3 +1,4 @@
+import {waypointGeometry} from '../client/public/zaydar-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/zaydar-map/housing-holograms.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,7 +27,7 @@ test('labels and Placez markers stay locked to the map during camera movement',a
   assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
   assert.match(renderer,/reduced\.matches\|\|cameraMoving\?0:/);
   assert.match(renderer,/const placezScale=1\.625\*/);
-  assert.match(renderer,/r:isPlace\?45:28/);
+  assert.match(renderer,/r:Math\.max\(22,geometry\.size\/2\+8\)/);
   assert.match(renderer,/flat\?1:\(\.92\+\.1\*pulse\)/);
   assert.match(renderer,/map\.isMoving\(\)\?1000\/60:frameInterval/);
 });
@@ -94,7 +95,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     logoPointerOffset:()=>({x:0,y:0}),separateHolograms:noop,
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
-    housingHolograms:{beamHalfWidth:()=>18,setLayout:noop},worldWaypoints:{beginLayouts:noop},
+    waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),drawSelectedMarkerLabel:noop,drawClusterCount:noop,
     projectorGroundScale,housingIconSize,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
@@ -103,5 +104,6 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   vm.runInContext(source,context);vm.runInContext('drawLights(1)',context);
   assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections','sky-logo']);
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
-  assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
+  operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
+  assert.deepEqual(operations,['waypoint-beam','building-mask','chrome','building-reflections','waypoint-head']);
 });

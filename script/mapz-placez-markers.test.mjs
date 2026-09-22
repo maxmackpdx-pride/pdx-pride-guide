@@ -26,17 +26,22 @@ test('Placez clusters retain geographic bounds for fit-to-view taps',async()=>{
   assert.match(renderer,/map\.fitBounds\(hit\.clusterBounds/);
 });
 
-test('Placez markers stay geographically locked, clear nearby roofs, and retain compact bloom',async()=>{
+test('non-event markers use the Outzide template while preserving roof clearance',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  assert.match(renderer,/const placezScale=1\.625\*/);
-  assert.match(renderer,/const PLACEZ_HOVER_METERS=3/);
-  assert.match(renderer,/const PLACEZ_ROOF_CLEARANCE_METERS=4/);
+  assert.match(renderer,/waypointGeometry\(p,selected,placezHoverLift\(target,feature,surfaces\)\)/);
   assert.match(renderer,/const buildingVisibility=smoothRange\(12,15,target\.getZoom\(\)\)/);
-  assert.match(renderer,/const roof=surfaces\.roofs\?\.get\(feature\.properties\.phase\)\?\?PLACEZ_HOVER_METERS/);
-  assert.match(renderer,/const markerY=isPlace\|\|isWorld\?p\.y-placezHoverLift\(target,feature,surfaces\):raisedY/);
-  assert.match(renderer,/const placezBloomMax=\.02/);
-  assert.match(renderer,/const markerBloom=isPlace\?Math\.min\(placezBloomMax,/);
-  assert.match(renderer,/const PLACEZ_BLOOM_RADIUS_SCALE=\.35/);
-  assert.match(renderer,/flat\?72\*PLACEZ_BLOOM_RADIUS_SCALE:126/);
+  assert.doesNotMatch(renderer,/createWorldWaypointLayer|createHousingHologramLayer/);
   assert.match(renderer,/String\(a\.feature\.properties\.key\)\.localeCompare/);
+});
+
+test('waypoint heads stay at their map anchor and clear roof heights at every scale',async()=>{
+  const {waypointGeometry}=await import('../client/public/zaydar-map/waypoint-markers.js');
+  for(const selected of [false,true])for(const roof of [0,12,45,200]){
+    const first=waypointGeometry({x:100,y:300},selected,roof);
+    const moved=waypointGeometry({x:290,y:185},selected,roof);
+    assert.equal(moved.x-first.x,190);assert.equal(moved.y-first.y,-115);
+    assert.equal(first.size,selected?44:28);
+    assert.ok(first.bottom<=300-roof);
+    assert.equal(first.y+first.size/2,first.bottom);
+  }
 });

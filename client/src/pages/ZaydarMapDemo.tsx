@@ -199,11 +199,11 @@ function boardColor(row: MapRow): string {
 }
 
 function boardIcon(row: MapRow): string {
-  if (String(row._board) === "The HAÜZ") return "/zaydar-map/icons/housing.svg";
+  if (String(row._board) === "The HAÜZ") return `/zaydar-map/icons/housing-${({LOOKING:"looking",FORMING:"forming",OFFERING:"offering",MANAGED:"managed"} as Record<string,string>)[String(row.type)]||"looking"}.svg`;
   if(row._board === "Mizzed")return "/zaydar-map/icons/mizzed.svg";
   const kind = boardKind(row);
-  if (kind === "gig") return "/brand/family/gigz.svg";
-  return kind === "gifting" ? "/brand/family/giftz.svg" : "/brand/family/sellz.svg";
+  if (kind === "gig") return "/zaydar-map/icons/gigz.svg";
+  return kind === "gifting" ? "/zaydar-map/icons/giftz.svg" : "/zaydar-map/icons/sellz.svg";
 }
 
 function boardTitle(row: MapRow): string {
@@ -674,7 +674,7 @@ export default function ZaydarMapDemo() {
     const type=place?zaydarPlaceType(place):event?(color==='#FF0000'?'adult':venue?.type||'venue'):String(row._board||'board');
     const name=event?.title||place?.name||boardTitle(row);
     const boardLogo=isHouz?firstImage(row.photos)||FORMING_COVER:firstImage(row.photoUrls)||firstImage(row.imageUrl);
-    return {waypointFamily:place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
+    return {waypointLogo:place?resolveDirectoryLogo(place.name,place.imageUrl)?.replace(/\.png(?=\?|$)/,"-white.png"):undefined,waypointFamily:isHouz?"houz":place?"places":row._board==="Mizzed"?"mizzed":row._board==="Gigz"?"gigz":row._board==="Giftz"?"giftz":row._board==="Sellz"?"sellz":undefined,locationLabel:row.locationLabel,kind:mark.kind,typeIcon:place||event?zaydarTypeIcon(type):boardIcon(row),type,key:mark.key,coordinates:[mark.lng,mark.lat],name,color,
       logo:isHouz?'':brands?.primary||(place?resolveDirectoryLogo(place.name,place.imageUrl)||directoryFallbackLogo(place.type):mark.kind==='event'?'/zaydar-map/icons/event.svg':boardLogo||boardIcon(row)),
       alternateLogo:brands?.alternate,
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,

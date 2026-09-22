@@ -23,18 +23,6 @@ test('HAÜZ holograms use aggressively simplified local meshes',async()=>{
   }
 });
 
-test('HAÜZ icons are smaller, rotate slowly, and use a short zoom-responsive beam',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  const layer=await readFile(new URL('../client/public/zaydar-map/housing-holograms.js',import.meta.url),'utf8');
-  assert.equal(HOUSING_ICON_SCALE,.6);
-  assert.equal(HOUSING_EVENT_HEIGHT_RATIO,1/3);
-  assert.ok(HOUSING_ROTATION_SPEED>0&&HOUSING_ROTATION_SPEED<.1);
-  assert.match(renderer,/HOUSING_EVENT_HEIGHT_RATIO\*smoothRange\(13\.75,14\.75,target\.getZoom\(\)\)/);
-  assert.match(renderer,/feature\.properties\.housingModel\?\.5:1/);
-  assert.match(layer,/seconds\*HOUSING_ROTATION_SPEED/);
-  assert.match(layer,/u_screen_shift/);
-});
-
 test('the managed-property house is purple in the asset and renderer mapping',async()=>{
   const buffer=await readFile(modelFiles['hous-purple']),json=glbJson(buffer);
   assert.deepEqual(json.materials[0].pbrMetallicRoughness.baseColorFactor.map(value=>Math.round(value*1000)/1000),[.533,0,1,.58]);
@@ -46,38 +34,6 @@ test('standalone demo includes the four seeded HAÜZ listing roles at neighborho
   assert.deepEqual(rows.map(row=>row.housingModel).sort(),['FORMING','LOOKING','MANAGED','OFFERING']);
   assert.ok(rows.every(row=>row.demoOpen&&row.neighborhoodLabel&&row.coordinates.every(Number.isFinite)));
   assert.equal(rows.find(row=>row.housingModel==='MANAGED').color,'#8800FF');
-});
-
-test('HAÜZ labels use the event-title fitter beneath each icon',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  const labelComponent=await readFile(new URL('../client/src/components/ZaydarEventLabel.tsx',import.meta.url),'utf8');
-  assert.deepEqual(HOUSING_HOLOGRAM_LABELS,{
-    LOOKING:'LOOKING TO RENT',
-    FORMING:'BUILDING A HAÜZ',
-    OFFERING:'JOIN OUR HAÜZ',
-    MANAGED:'COMMERCIAL RENTAL HAÜZ',
-  });
-  assert.match(renderer,/name:housingName,time:'',color/);
-  assert.match(renderer,/kind:'housing'/);
-  assert.match(renderer,/width:hologramLabelWidth\*1\.4,scale:beaconScale/);
-  assert.match(renderer,/y:hologramCenterY\+housingIconHeight\/2\+3\*beaconScale/);
-  assert.match(labelComponent,/const isHousing=label\.kind==='housing'/);
-  assert.match(labelComponent,/!isHousing&&<DigitalClock time=\{label\.time\}/);
-  assert.match(labelComponent,/className="zaydar-event-title"/);
-  assert.match(labelComponent,/solveDynamicText\(isHousing\?twoLineTitle\(label\.name\):label\.name,240/);
-});
-
-test('HAÜZ is isolated from the existing Eventz, Placez, and sparkle pipelines',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  const layer=await readFile(new URL('../client/public/zaydar-map/housing-holograms.js',import.meta.url),'utf8');
-  assert.match(renderer,/map\.addLayer\(housingHolograms\)/);
-  assert.match(renderer,/map\.addLayer\(citySparkles\)/);
-  assert.match(renderer,/kind==='event'/);
-  assert.match(renderer,/clusterPlaceMarkers/);
-  assert.match(layer,/float scan=/);
-  assert.match(layer,/float snow=/);
-  assert.match(layer,/float alpha=\(\.42/);
-  assert.match(layer,/gl\.disable\(gl\.DEPTH_TEST\)/);
 });
 
 test('HAÜZ projection keeps a readable event-relative envelope at every camera distance',async()=>{
@@ -95,17 +51,4 @@ test('HAÜZ projection keeps a readable event-relative envelope at every camera 
   layer.map={getZoom:()=>0,project:()=>({x:50,y:50}),getCanvas:()=>({clientWidth:100,clientHeight:100})};
   assert.equal(layer.visible({demoOpen:true,coordinates:[0,0]}),true);
   assert.equal(layer.visible({demoOpen:false,key:'closed',coordinates:[0,0]}),false);
-});
-
-test('HAÜZ titles are 40% larger, use exactly two rows, and faces stay fixed on the rotating icon',async()=>{
-  const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
-  const labelComponent=await readFile(new URL('../client/src/components/ZaydarEventLabel.tsx',import.meta.url),'utf8');
-  assert.match(renderer,/width:hologramLabelWidth\*1\.4/);
-  assert.match(renderer,/labelRows\(label\.name,label\.width,label\.kind==='housing'\?2:undefined\)/);
-  assert.match(renderer,/stack\.style\.left=`\$\{label\.x\}px`/);
-  assert.match(renderer,/stack\.style\.top=`\$\{label\.logoY\}px`/);
-  assert.match(renderer,/--face-scale/);
-  assert.doesNotMatch(renderer,/label\.logoY-label\.y/);
-  assert.match(labelComponent,/twoLineTitle\(label\.name\)/);
-  assert.match(labelComponent,/left:label\.x,top:label\.logoY/);
 });
