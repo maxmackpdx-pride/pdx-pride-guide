@@ -52,7 +52,6 @@ export const PRIMARY_NAV: NavEntry[] = [
       { href: "/submit", label: "Promoters", accent: "orange" },
     ],
   },
-  { type: "link", href: "/directory", label: "Placez", accent: "blue" },
   { type: "link", href: "/map", label: "Mapz", accent: "blue" },
   {
     type: "dropdown",
@@ -71,14 +70,6 @@ export const PRIMARY_NAV: NavEntry[] = [
     ],
   },
   { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
-  { type: "link", href: "/the-hauz", label: "The Haüz", accent: "cyan" },
-  {
-    type: "dropdown",
-    id: "boards",
-    label: "Boards",
-    accent: "violet",
-    items: BOARD_NAV,
-  },
 ];
 
 export type PageHeaderMeta = {
