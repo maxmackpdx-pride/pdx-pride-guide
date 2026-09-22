@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <filter id="refraction" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency=".025 .035" numOctaves="2" seed="7" result="water"/>
+      <feDisplacementMap in="SourceGraphic" in2="water" scale="21" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation=".45"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="#b4edff" stroke-width="1.5" filter="url(#refraction)">
+    <path d="M-20 20C5-6 31 3 42 23S33 61 9 60-19 43-20 20ZM42 23C67 2 91 9 99 31S86 67 64 60 36 44 42 23ZM99 31C122 10 151 15 169 38S153 77 130 69 96 53 99 31ZM9 60C36 50 57 66 57 88S35 113 13 103-7 77 9 60ZM64 60C89 51 115 70 114 91S91 119 70 105 51 79 64 60ZM130 69C153 63 174 80 175 106S145 132 124 111 111 86 130 69ZM13 103C40 94 62 113 59 137S34 170 11 153-6 122 13 103ZM70 105C95 99 123 119 120 143S93 177 73 158 55 126 70 105ZM124 111C150 102 179 124 176 149S150 179 129 160 109 132 124 111Z"/>
+  </g>
+</svg>

@@ -1,3 +1,4 @@
+import { winterPrideWatches, winterEventScope, explicitWinterPrideEvent } from '../shared/outzWinterEvents';
 import { INGEST_SOURCES } from "@shared/ingestSources";
 import { eventDedupeKey } from "@shared/eventDedupe";
 import { TRUSTED_VENUES } from "@shared/trustedVenues";
@@ -606,6 +607,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   const sanitized = sanitizeEventResearchPatch(input.event);
   if (!sanitized.ok) return sanitized;
   const event = sanitized.patch;
+  if (String(input.candidateKey).startsWith('outz-winter-') && !explicitWinterPrideEvent(event)) return eventResearchError(400, 'Winter resort QSearch sources are LGBTQ+ event-only');
   const missing = EVENT_RESEARCH_REQUIRED_CREATE_FIELDS.filter(field => event[field] == null);
   if (missing.length) {
     return eventResearchError(400, "required event fields are missing", { fields: missing });
@@ -1052,7 +1054,9 @@ export function getEventResearchSourceMemory() {
       archiveBranch: "archive/qsearch-legacy-2026-08-30",
       archiveCommit: "bcb28c4d4550e6f29cc6882bc37481784adb1926",
     },
+    winterPrideWatches,
     rules: {
+      winterResortEvents: winterEventScope,
       sportsBra: "founder_locked_dedicated_lesbian_lgbtq_venue_official_calendar_establishes_relevance_exact_portland_identity_required_archived_direct_scraper_blocked_browser_research_allowed",
       founderLockedDedicatedLgbtqVenues: [
         "Sanctuary Club",

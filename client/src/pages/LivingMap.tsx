@@ -30,6 +30,7 @@ import { carpoolDirectionLabel, formatRiverBratsHour } from "@shared/riverBrats"
 import { BEACH_VERIFY_POINTS } from "@shared/nudeBeaches";
 import { outzPlaceHref, type OutzSnapshot } from "@shared/outz";
 import "./LivingMap.css";
+import "../../public/outzide-map/assets/map-chrome.css";
 
 type Place = Business;
 type BoardKind = "gig" | "gifting" | "sellz";
