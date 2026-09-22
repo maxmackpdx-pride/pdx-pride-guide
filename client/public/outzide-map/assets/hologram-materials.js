@@ -83,7 +83,7 @@ export function drawGroundRipples(ctx, anchor, radius, color, seconds, reducedMo
   ctx.strokeStyle=color;ctx.globalAlpha=.65;ctx.lineWidth=.8;ctx.stroke();
   for(let i=0;i<3;i++){
     const progress=reducedMotion?(i+.5)/3:((seconds/3.6+i/3+phase)%1+1)%1;
-    const waveRadius=radius*(.55+progress*1.3);
+    const waveRadius=radius*(.12+progress*.96);
     const opacity=Math.sin(progress*Math.PI)**2*.5;
     ctx.beginPath();ctx.ellipse(0,0,waveRadius,waveRadius*7.5/27,0,0,Math.PI*2);
     ctx.globalAlpha=opacity*.2;ctx.lineWidth=3;ctx.stroke();
