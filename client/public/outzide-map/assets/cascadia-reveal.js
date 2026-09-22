@@ -10,6 +10,7 @@ export function addCascadiaOutline(style){
  const index=style.layers.findIndex(l=>l.type==='symbol');style.layers.splice(index<0?style.layers.length:index,0,...layers);
 }
 // Fit the outline with room for perspective at the user's current tilt and bearing.
+// An extra 0.18 zoom step gives the silhouette about 13% more breathing room.
 export function cascadiaCamera(width,height,pitch=0,bearing=0){
  const y=lat=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2;
  const north=y(60.1),south=y(40),centerY=(north+south)/2;
@@ -24,7 +25,7 @@ export function cascadiaCamera(width,height,pitch=0,bearing=0){
   scale=Math.min(scale,halfW/(Math.abs(rx)+halfW*perspective),halfH/(Math.abs(ry)*Math.cos(tilt)+halfH*perspective));
  }
  const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*centerY)))*180/Math.PI;
- return {center:[-125.9,centerLat],zoom:Math.log2(scale/512),pitch,bearing};
+ return {center:[-125.9,centerLat],zoom:Math.log2(scale/512)-.18,pitch,bearing};
 }
 export function installCascadiaReveal(map){
  let active=false,framing=false,entryCenter=null,camera;
