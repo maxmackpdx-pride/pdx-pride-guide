@@ -183,9 +183,9 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
     `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,
     `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on OUTZ.`,
     {
-      image: shareCardUrl("nudeBeaches"),
+      image: shareCardUrl("outzide"),
       imageAlt:
-        "OUTZ: River Brats beach community on Zaylist",
+        "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
     },
   );
 
@@ -281,7 +281,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
       <section className="nude-outz-link pdx-glass-card pdx-glass-rebind" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
         <p>BEYOND THE BEACH</p>
         <h2>Camping, trails, and practical trip leads live in OUTZ.</h2>
-        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/outz#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
+        <Link className="pdx-glass-btn pdx-glass-btn--solid pdx-glass-rebind" href="/outzide#outz-stays" style={{ "--c": isRooster ? "#ff6600" : "#39ff14" } as CSSProperties}>
           MORE OUTZ
         </Link>
       </section>

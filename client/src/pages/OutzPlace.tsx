@@ -9,6 +9,7 @@ import OutzMap, { outzAccentForName } from "@/components/OutzMap";
 import { MeetingScheduler } from "@/components/ui/meeting-scheduler";
 import { useAuth } from "@/context/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { shareCardUrl } from "@shared/shareCards";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { OUTZ_BUTTON_ACCENT, OUTZ_KIND_META, OUTZ_MOTIF, outzTempLabel } from "@/lib/outzKinds";
@@ -77,7 +78,7 @@ function formatChatClose(expiresAt: string | null) {
 }
 
 export default function OutzPlace() {
-  const [, params] = useRoute("/outz/:placeSlug");
+  const [, params] = useRoute("/outzide/:placeSlug");
   const slug = params?.placeSlug;
   const { user } = useAuth();
   const { toast } = useToast();
@@ -216,12 +217,13 @@ export default function OutzPlace() {
   });
 
   usePageSeo(
-    place ? `${place.name} · OUTZ | Zaylist` : "OUTZ place | Zaylist",
-    place ? `${place.detail} Check in and join the group chat for this OUTZ destination.` : "OUTZ destination check-in and group chat.",
+    place ? `${place.name} · Outzide | Zaylist` : "Outzide place | Zaylist",
+    place ? `${place.detail} Check in and join the group chat for this Outzide destination.` : "Outzide destination check-in and group chat.",
+    { image: shareCardUrl("outzide"), imageAlt: "Outzide by Zaylist — explore the Northwest" },
   );
 
   if (!snapshotQuery.isLoading && !place) {
-    return <div className="outz-surface outz-place--missing pdx-glass-rebind"><h1>That OUTZ address isn’t current.</h1><Link href="/outz">Back to OUTZ</Link></div>;
+    return <div className="outz-surface outz-place--missing pdx-glass-rebind"><h1>That OUTZ address isn’t current.</h1><Link href="/outzide">Back to OUTZ</Link></div>;
   }
 
   const alert = destination?.alerts[0] ?? null;
@@ -239,7 +241,7 @@ export default function OutzPlace() {
         <header className="outz-stay-hero">
           <img className="outz-stay-hero__terrain" src={`${OUTZ_MOTIF}/${stayPresentation.motif}`} alt="" aria-hidden="true" />
           <div className="outz-stay-hero__copy">
-            <div className="outz-stay-hero__crumb"><Link href="/">Zaylist</Link><span>/</span><Link href="/outz">OUTZ</Link><span>/</span>{stayPresentation.label}</div>
+            <div className="outz-stay-hero__crumb"><Link href="/">Zaylist</Link><span>/</span><Link href="/outzide">OUTZ</Link><span>/</span>{stayPresentation.label}</div>
             <div className="outz-stay-hero__brand pdx-glass-card pdx-glass-rebind">
               {stayPresentation.logo
                 ? <div className="outz-stay-hero__logo-well"><img src={stayPresentation.logo} alt={`${stay.name} logo`} /></div>
@@ -266,7 +268,7 @@ export default function OutzPlace() {
               <span className="outz-hero__crumb">
                 <Link href="/">Zaylist</Link>
                 <span className="outz-hero__crumb-sep" aria-hidden="true">/</span>
-                <Link href="/outz">OUTZ</Link>
+                <Link href="/outzide">OUTZ</Link>
               </span>
             }
             title={place?.name || "Loading place"}

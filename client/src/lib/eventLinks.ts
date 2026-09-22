@@ -176,7 +176,7 @@ export function beachCheckinCalendarEvent(input: {
     `River Brats check-in · ${window}`,
     input.note?.trim() || null,
     `Maps: https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`,
-    `via Zaylist at zaylist.com/outz/${input.beachId}`,
+    `via Zaylist at zaylist.com/outzide/${input.beachId}`,
   ].filter(Boolean) as string[];
   const numericId =
     typeof input.id === "number"

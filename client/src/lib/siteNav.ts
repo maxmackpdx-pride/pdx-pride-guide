@@ -65,9 +65,9 @@ export const PRIMARY_NAV: NavEntry[] = [
      * provides a clear way to browse all currently published spots.
      */
     items: [
-      { href: "/outz", label: "All OutZide", accent: "orange" },
-      { href: "/outz/rooster-rock", label: "Rooster Rock", accent: "orange" },
-      { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
+      { href: "/outzide", label: "All OutZide", accent: "orange" },
+      { href: "/outzide/rooster-rock", label: "Rooster Rock", accent: "orange" },
+      { href: "/outzide/sauvie-island", label: "Sauvie Island", accent: "orange" },
     ],
   },
   { type: "link", href: "/z", label: "Z/ List", accent: "violet" },
@@ -95,9 +95,9 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/the-hauz": { section: "Boards", title: "THE HAÜZ" },
   "/spotted": { section: "Boards", title: "MIZZED CONNECTION" },
   "/directory": { section: "PLACEZ", title: "OUR PLACEZ" },
-  "/outz": { section: "OUTZ", title: "Outdoors" },
-  "/outz/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
-  "/outz/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
+  "/outzide": { section: "OUTZ", title: "Outdoors" },
+  "/outzide/rooster-rock": { section: "OUTZ", title: "Rooster Rock" },
+  "/outzide/sauvie-island": { section: "OUTZ", title: "Sauvie Island" },
   "/about": { section: "About", title: "About" },
   "/aboutz": { section: "About", title: "About" },
   "/resume": { section: "About", title: "Resume" },
@@ -120,12 +120,12 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
  * them and closes with a link to the index.
  */
 export const OUTZ_NAV: NavLinkItem[] = [
-  { href: "/outz/rooster-rock", label: "Rooster Rock", accent: "orange" },
-  { href: "/outz/sauvie-island", label: "Sauvie Island", accent: "orange" },
+  { href: "/outzide/rooster-rock", label: "Rooster Rock", accent: "orange" },
+  { href: "/outzide/sauvie-island", label: "Sauvie Island", accent: "orange" },
 ];
 
 /** Where the drawer's "View All Outz" footer goes. */
-export const OUTZ_INDEX = "/outz";
+export const OUTZ_INDEX = "/outzide";
 
 /** Destinations behind the mobile footer "Events" tab sheet. */
 export const EVENTS_NAV: NavLinkItem[] = [

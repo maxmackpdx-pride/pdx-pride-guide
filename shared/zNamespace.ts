@@ -8,8 +8,8 @@ export const LEGACY_Z_PRODUCT_REDIRECTS: Readonly<Record<string, string>> = {
   "/z/gifz": "/gifting", "/z/gigz": "/pride-work", "/z/mizzed": "/spotted",
   "/z/sellz": "/sellz", "/z/sell": "/sellz", "/z/market": "/sellz",
   "/z/dark": "/next", "/z/darkroom": "/next", "/z/zaydark": "/next",
-  "/z/out": "/outz", "/z/out/rooster-rock": "/outz/rooster-rock",
-  "/z/out/sauvie-island": "/outz/sauvie-island",
+  "/z/out": "/outzide", "/z/out/rooster-rock": "/outzide/rooster-rock",
+  "/z/out/sauvie-island": "/outzide/sauvie-island",
   "/z/ha%C3%BCz": "/the-hauz", "/z/haüz": "/the-hauz",
   "/z/squadz": "/z", "/z/spaces": "/z", "/z/space": "/z", "/z/squads": "/z",
 };

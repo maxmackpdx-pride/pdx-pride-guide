@@ -11,6 +11,7 @@ import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import { HOUSING_TYPES, HOUSING_TYPE_KICKER } from "@shared/housing";
 import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
 import { isEventResearchAgentRequest } from "./eventResearchAuth";
+import { legacyOutzRedirect } from "@shared/outzRoutes";
 
 const app = express();
 const httpServer = createServer(app);
@@ -82,9 +83,9 @@ const PATH_ALIASES: Record<string, string> = {
   "/z/dark": "/next",
   "/z/darkroom": "/next",
   "/z/zaydark": "/next",
-  "/z/out": "/outz",
-  "/z/out/rooster-rock": "/outz/rooster-rock",
-  "/z/out/sauvie-island": "/outz/sauvie-island",
+  "/z/out": "/outzide",
+  "/z/out/rooster-rock": "/outzide/rooster-rock",
+  "/z/out/sauvie-island": "/outzide/sauvie-island",
   "/z/squadz": "/z",
   "/z/spaces": "/z",
   "/z/space": "/z",
@@ -113,9 +114,12 @@ app.use((req, res, next) => {
   const qsIndex = (req.originalUrl || "").indexOf("?");
   const qs = qsIndex >= 0 ? req.originalUrl.slice(qsIndex) : "";
 
+  const outzide = legacyOutzRedirect(req.originalUrl);
+  if (outzide) return res.redirect(301, outzide);
+
   if (lower === "/nude-beaches") {
     const tab = new URLSearchParams(qs.startsWith("?") ? qs.slice(1) : "").get("tab");
-    const dest = tab === "sauvie-island" || tab === "sauvie" ? "/outz/sauvie-island" : "/outz/rooster-rock";
+    const dest = tab === "sauvie-island" || tab === "sauvie" ? "/outzide/sauvie-island" : "/outzide/rooster-rock";
     return res.redirect(301, dest);
   }
 
@@ -132,7 +136,7 @@ app.use((req, res, next) => {
       happening: "/events", hauz: "/the-hauz", placez: "/directory", directory: "/directory",
       places: "/directory", gifz: "/gifting", gigz: "/pride-work", mizzed: "/spotted",
       sellz: "/sellz", sell: "/sellz", market: "/sellz", dark: "/next", darkroom: "/next",
-      zaydark: "/next", out: "/outz",
+      zaydark: "/next", out: "/outzide",
     };
     return res.redirect(301, `${base[prefix]}${rest ? `/${rest}` : ""}${qs}`);
   }

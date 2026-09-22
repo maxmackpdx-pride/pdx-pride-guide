@@ -23,7 +23,7 @@ export default function OutzAdventures({ adventures }: { adventures: MemberProfi
 
   return (
     <section className="pp-adventures" aria-label="Outzide adventures">
-      <ProfileSectionHeader kicker="OUTZIDE" title="Adventures" action={<Link href="/outz">Explore Outzide →</Link>} />
+      <ProfileSectionHeader kicker="OUTZIDE" title="Adventures" action={<Link href="/outzide">Explore Outzide →</Link>} />
       <p className="pp-adventures__note">Your check-in plans · Only visible to you</p>
       {(["upcoming", "previous"] as const).map(kind => {
         const rows = adventures?.[kind] ?? [];
@@ -35,7 +35,7 @@ export default function OutzAdventures({ adventures }: { adventures: MemberProfi
               <ul className="pp-adventures__rail" aria-label={label}>
                 {rows.map(trip => (
                   <li key={trip.id}>
-                    <Link href={`/outz?place=${encodeURIComponent(trip.placeId)}`} className="pp-adventures__card">
+                    <Link href={`/outzide?place=${encodeURIComponent(trip.placeId)}`} className="pp-adventures__card">
                       <time dateTime={trip.calendarDate}>{new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${trip.calendarDate}T12:00:00Z`))}</time>
                       <strong>{places.get(trip.placeId) || trip.placeId.replace(/-/g, " ")}</strong>
                       <span>{formatRiverBratsWindow(trip.arrivalHour, trip.departHour)}</span>

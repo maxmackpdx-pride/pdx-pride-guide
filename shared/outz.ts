@@ -126,7 +126,7 @@ export function outzPlaceSlug(place: Pick<OutzPlace, "id" | "name">) {
 }
 
 export function outzPlaceHref(place: Pick<OutzPlace, "id" | "name">) {
-  return `/outz/${outzPlaceSlug(place)}`;
+  return `/outzide/${outzPlaceSlug(place)}`;
 }
 
 export function outzPlacesFromSnapshot(snapshot: OutzSnapshot): OutzPlace[] {

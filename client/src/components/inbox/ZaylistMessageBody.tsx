@@ -1,12 +1,13 @@
 import { Link } from "wouter";
+import { legacyOutzRedirect } from "@shared/outzRoutes";
 
-const INTERNAL = /(?:https?:\/\/(?:www\.)?zaylist\.com)?\/(u|directory|outz|z)\/[^\s]+/gi;
+const INTERNAL = /(?:https?:\/\/(?:www\.)?zaylist\.com)?\/(u|directory|outzide|outz|z)\/[^\s]+/gi;
 const ATTACHMENT = /(?:https?:\/\/(?:www\.)?zaylist\.com)?(\/uploads\/[^\s]+)/i;
 
 function labelFor(path: string) {
   if (path.startsWith("/u/")) return "ZAYLIST MEMBER";
   if (path.startsWith("/directory")) return "PLACEZ";
-  if (path.startsWith("/outz")) return "OUTZ";
+  if (path.startsWith("/outzide")) return "OUTZIDE";
   if (path.startsWith("/z/")) return "Z/ COMMUNITY";
   return "ZAYLIST";
 }
@@ -21,7 +22,8 @@ export default function ZaylistMessageBody({ body }: { body: string }) {
   if (match) {
   const raw = match[0];
   const parsed = raw.startsWith("http") ? new URL(raw) : null;
-  const path = parsed ? `${parsed.pathname}${parsed.search}` : raw;
+  const originalPath = parsed ? `${parsed.pathname}${parsed.search}${parsed.hash}` : raw;
+  const path = legacyOutzRedirect(originalPath) || originalPath;
   const slug = decodeURIComponent(path.split("?")[0].split("/").filter(Boolean).at(-1) || "Open on Zaylist");
     linkPreview = (
       <Link href={path} className="inbox-zay-link pdx-glass-rebind" aria-label={`Open ${labelFor(path)} link`}>

@@ -24,6 +24,7 @@ export const SHARE_CARD_FILES = {
   prideWork: "zaylist-gig-board-1200x630.png",
   gifting: "zaylist-gifting-1200x630.png",
   nudeBeaches: "zaylist-nude-beaches-1200x630.png",
+  outzide: "outzide-social-northwest-v1.png",
   next: "zaylist-next-1200x630.png",
 } as const;
 
@@ -53,6 +54,7 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
   if (path === "/pride-work" || path === "/gigs") return "prideWork";
   if (path === "/gifting") return "gifting";
   if (path === "/nude-beaches" || path.startsWith("/nude-beaches/")) return "nudeBeaches";
+  if (path === "/outzide" || path.startsWith("/outzide/")) return "outzide";
   if (path === "/next" || path === "/darkroom") return "next";
   return null;
 }
@@ -61,9 +63,9 @@ export function defaultShareCardUrl(bust = "v1"): string {
   return shareCardUrl("home", bust);
 }
 
-/** Preserve the original dimensions of the default site artwork. */
+/** Preserve the original dimensions of the site and Outzide artwork. */
 export function shareCardDimensions(image: string): { width: number; height: number } {
-  return image.split("?")[0].endsWith(`/og/${SHARE_CARD_FILES.home}`)
+  return [SHARE_CARD_FILES.home, SHARE_CARD_FILES.outzide].some(file => image.split("?")[0].endsWith(`/og/${file}`))
     ? { width: 1672, height: 941 }
     : { width: 1200, height: 630 };
 }

@@ -39,6 +39,8 @@ test("feed respects blocks, aggregates check-ins without identities, and exclude
   ride.run(hidden,date,expires,created);
   sqlite.prepare("UPDATE users SET photo_url=? WHERE id=?").run("https://example.com/author.jpg",author);
   const result=getOutzCommunityFeed(snapshot,viewer,now);
+  assert.equal(result.find(i=>i.kind==='post')?.href, '/outzide?place=feed-trail#outz-wall-heading');
+  assert.equal(result.find(i=>i.kind==='carpool')?.href, '/outzide/rooster-rock');
   assert.equal(result.find(i=>i.kind==='post')?.authorAvatarUrl,"https://example.com/author.jpg");
   assert.equal(result.find(i=>i.kind==='carpool')?.authorAvatarUrl,"https://example.com/author.jpg");
   assert.ok(result.filter(i=>i.kind==='checkin').every(i=>!i.authorAvatarUrl));
