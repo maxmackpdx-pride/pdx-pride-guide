@@ -10,7 +10,7 @@ export default function AccessSafety() {
 
   usePageSeo(
     "Access & Safety | Zaylist",
-    "What Zaylist listings cover, what we can't promise, and how to take care of each other during Pride week.",
+    "What Zaylist listings cover, what to check before you go, and how to take care of each other year-round.",
   );
 
   return (
@@ -20,7 +20,7 @@ export default function AccessSafety() {
         title="Access & Safety"
         titleAccent="magenta"
         kicker="Before you go"
-        lede="Six blocks of people, noise, and heat. Plan for access, water, and each other."
+        lede="A good plan makes room for everyone. Check access, confirm the details, and look out for each other wherever Zaylist takes you."
       />
 
       <div className="zine-content">
@@ -35,15 +35,15 @@ export default function AccessSafety() {
             We didn't inspect these venues. We're not standing at the door. Times change, doors move, a room that fit last year sold out this year. Confirm anything that would ruin your night to get wrong.
           </p>
 
-          <h2 className="display panel-heading" style={{ margin: "28px 0 10px" }}>Getting through the week</h2>
+          <h2 className="display panel-heading" style={{ margin: "28px 0 10px" }}>Before you head out</h2>
           <p className="board-copy">
-            Water is not a personality trait but it is a strategy. July in Portland gets hot and the pavement downtown gets hotter. Sunscreen, a hat, shoes you can stand in for six hours.
+            Plan for the weather and the time you’ll be outside. Bring water, comfortable shoes, and the layers or sun protection you need.
           </p>
           <p className="board-copy">
-            Masks are welcome at every event on this site, and some organizers ask for them. Nobody here will look at you funny.
+            Check the organizer’s current health and mask guidance before you go.
           </p>
           <p className="board-copy">
-            Know how you're getting home before you need to know. MAX runs late but not all night.
+            Plan your trip home before you head out, and check current transit schedules if you’re staying late.
           </p>
 
           <h2 className="display panel-heading" style={{ margin: "28px 0 10px" }}>Take care of each other</h2>

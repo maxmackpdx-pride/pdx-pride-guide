@@ -1,3 +1,4 @@
+import PageRecovery from "@/components/PageRecovery";
 import { useState } from "react";
 import { Link } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -47,7 +48,12 @@ export default function Community({ params }: { params: { communitySlug: string 
     onError: err => setError(parseApiError(err, "Community action could not be completed.")),
   });
   if (community.isLoading) return <SpectrumLoader variant="full" label="Loading community" />;
-  if (!community.data) return <div className="z-communities"><section className="z-communities__state"><h1>Community not found</h1><Link href="/z">BACK TO Z/</Link></section></div>;
+  if (!community.data) {
+    const missing = /^(403|404):/.test(community.error?.message || "");
+    return <PageRecovery section="Z/ List" title={missing ? "This community isn’t available." : "We couldn’t load this community."}
+      description={missing ? "The link may have changed, or this community may be private. Explore Z/ List to find a community you can join." : "Your connection to this community was interrupted. Try again, or browse the community list."}
+      href="/z" label="Explore Z/ List" missing={missing} retry={missing ? undefined : () => { void community.refetch(); }} />;
+  }
   const item = community.data;
   const communityLogo = item.imageUrl || (item.sourcePlaceId ? resolveDirectoryLogo(item.name) : null);
   function renderPost(entry: CommunityPost) {

@@ -1,3 +1,4 @@
+import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useRoute, useLocation } from "wouter";
@@ -399,7 +400,7 @@ export default function Events() {
     enabled: !!user,
   });
 
-  const { data: routeEvent } = useQuery<Event>({
+  const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
     queryKey: ["/api/events", routeEventId, routeDay],
     queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDay ? `?day=${routeDay}` : ""}`).then(r => r.json()),
     enabled: routeEventId != null && Number.isFinite(routeEventId),
@@ -558,6 +559,13 @@ export default function Events() {
       window.history.replaceState(null, "", qs ? `/events?${qs}` : "/events");
       return next;
     });
+
+  if (routeMatch && (routeError || !Number.isFinite(routeEventId))) {
+    const missing = !Number.isFinite(routeEventId) || /^404:/.test(routeError?.message || "");
+    return <PageRecovery section="Eventz" title={missing ? "This event isn’t here anymore." : "We couldn’t load this event."}
+      description={missing ? "The listing may have moved or been removed. There’s still plenty happening: find your next plan on Eventz." : "We couldn’t retrieve the event details. Try again before making your plans."}
+      href="/events" label="Browse Eventz" missing={missing} retry={missing ? undefined : () => { void refetchRouteEvent(); }} />;
+  }
 
   return (
     <div className="zine-page events-page board-page board-page--makeover">

@@ -462,10 +462,10 @@ export default function Dashboard() {
           section="Account"
           title="Your Hub"
           titleAccent="cyan"
-          lede="Free, community-run. Log in to manage submissions, boards, and your feed."
+          lede="Your corner of Zaylist. Sign in to manage your profile, posts, messages, and event submissions."
         />
         <div className="dash-inner" style={{ minHeight: "40vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, paddingTop: 48 }}>
-          <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>You need to be logged in to view your dashboard.</p>
+          <p className="dash-mono" style={{ color: "#8c8980", textTransform: "none", letterSpacing: "0.04em" }}>Sign in to pick up where you left off.</p>
           <button type="button" className="dash-btn dash-btn-lime" onClick={() => setShowAuth(true)}>
             Log in / Join
           </button>

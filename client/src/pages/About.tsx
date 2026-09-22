@@ -8,7 +8,7 @@ export default function About() {
   const hostRef = useRef<HTMLDivElement>(null);
 
   usePageSeo(
-    "What’s next for Zaylist | About",
+    "About Zaylist | Queer Portland, connected",
     "From Portland’s first community Pride Guide to the product and system roadmap behind Zaylist.",
   );
 

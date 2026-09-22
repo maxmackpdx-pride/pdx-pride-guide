@@ -1,0 +1,33 @@
+/* Shared interior chrome: consistent frame and glass, room-specific titles and content. */
+.page-header.page-header {
+  width: min(100%, var(--zl-frame, 1200px));
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 56px) var(--zl-gutter, 20px) 0;
+  background: none;
+  border: 0;
+}
+.page-header.page-header::after { display: none; }
+.page-header .page-header__inner,
+.board-hero.board-hero--room .board-hero__inner {
+  width: 100%;
+  max-width: none;
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid hsl(var(--border, 0 0% 20%));
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,.045), transparent 65%), var(--glass-bg, #101114);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.page-header .page-header__crumb,
+.board-hero--room .board-hero__kicker {
+  font: 600 11px/1.6 var(--font-mono, monospace);
+  letter-spacing: .12em;
+}
+.page-header .page-header__title { font-size: clamp(36px, 5vw, 64px); line-height: 1.02; letter-spacing: -.02em; }
+.page-header .page-header__lede,
+.board-hero--room .board-hero__lede { max-width: 58ch; font-size: clamp(16px, 2vw, 19px); line-height: 1.65; color: var(--text-mid, #b6bbc4); }
+.board-hero.board-hero--room { padding-top: clamp(28px, 4vw, 56px); }
+.board-hero--room .board-hero__title { font-size: clamp(48px, 8vw, 104px); line-height: .95; }
+.board-hero--room .board-hero__brand-logo { width: min(100%, 500px); }
+@media (max-width: 600px) {
+  .page-header .page-header__inner, .board-hero.board-hero--room .board-hero__inner { border-radius: 16px; padding: 24px 20px; }
+}

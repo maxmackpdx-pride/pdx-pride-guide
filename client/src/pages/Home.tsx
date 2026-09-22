@@ -22,7 +22,7 @@ type HomeStats = {
 export default function Home() {
   usePageSeo(
     "Zaylist | Queer Portland, all in one place",
-    "Every Portland night worth knowing, in one place. Find the party, the room, the gig, and the people.",
+    "Queer Portland, connected. Explore events, local places, outdoor escapes, and communities on Zaylist.",
     { image: shareCardUrl("home"), imageAlt: "Zaylist: Portland queer events and community" },
   );
 

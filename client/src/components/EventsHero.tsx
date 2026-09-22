@@ -13,8 +13,9 @@ export default function EventsHero({ eventCount, stats }: Props) {
   return (
     <>
       <BoardHero
+        className="board-hero--room"
         accent="cyan"
-        kicker="Portland nights · all year"
+        kicker="Zaylist / Eventz · Portland, all year"
         title={
           <img
             key={eventCount > 0 ? "eventz-hero-ready" : "eventz-hero-pending"}
@@ -23,7 +24,7 @@ export default function EventsHero({ eventCount, stats }: Props) {
             alt="EVENTZ"
           />
         }
-        lede="Every party, show, afterparty, and gathering worth knowing - Pride week and every weekend after, all in one place."
+        lede="Find your next night out, daytime hang, or community gathering. Browse the flyers, check the details, and make a plan."
         actions={<BoardExploreActions showSchedule scheduleLead />}
       />
       <BoardStatsBar stats={stats} variant="band" showLive={false} />

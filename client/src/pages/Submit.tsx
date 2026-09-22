@@ -533,10 +533,10 @@ export default function Submit() {
 
   const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeaderAccent; lede: string }> = {
     landing: {
-      kicker: "HOME · PROMOTERS",
+      kicker: "Zaylist / Eventz · Promoters",
       title: "Promoter hub",
       accent: "lime",
-      lede: "Got an event? Want the fast lane? Spotted something we are missing? Pick your path. Every door shows whether it goes live now or hits review first.",
+      lede: "Bring your gathering to Zaylist. Add an event you organize, claim an existing listing, or suggest something the community should know about.",
     },
     submit: {
       kicker: "Submit an event",
@@ -548,7 +548,7 @@ export default function Submit() {
       kicker: "Promoter verification",
       title: "Apply as promoter",
       accent: "cyan",
-      lede: "Not posting yet, want the fast lane later. Get verified once. Skip the queue after.",
+      lede: "Apply for promoter verification so you’re ready to publish when your next event is.",
     },
     suggest: {
       kicker: "Community tip",
@@ -597,6 +597,7 @@ export default function Submit() {
 
       {mode === "landing" ? (
         <BoardHero
+          className="board-hero--room"
           accent="lime"
           kicker={hero.kicker}
           title={<>Promoter <RainbowHeroWord>hub</RainbowHeroWord></>}

@@ -248,7 +248,7 @@ export const WORLDS: WorldSpec[] = [
     title: "Z/ COMMUNITIES",
     eyebrow: "Find your people",
     headline: "Z/ Communities",
-    body: "Memberships, rules, posts, and the gatherings around them.",
+    body: "Find your people. Join a conversation, share what matters, and make plans together.",
     action: "Open Communities",
     href: "/z",
     accent: "var(--panel-cyan, #19e3ff)",

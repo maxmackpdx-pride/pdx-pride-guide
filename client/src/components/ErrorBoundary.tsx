@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from "react";
-import { Button } from "@/components/ds";
+import PageRecovery from "@/components/PageRecovery";
 
 export default class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -25,13 +25,8 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
     if (error) {
       const showStack = import.meta.env.DEV;
       return (
-        <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#0a0a0a", color: "#fff", fontFamily: "sans-serif", textAlign: "center", padding: 32 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏳️‍🌈</div>
-          <h1 style={{ marginBottom: 8 }}>Something went sideways</h1>
-          <p style={{ opacity: 0.6, marginBottom: 24 }}>An unexpected error occurred. Try refreshing the page.</p>
-          <Button variant="pill" accent="lime" onClick={() => window.location.reload()}>
-            Reload page
-          </Button>
+        <div>
+          <PageRecovery section="Zaylist" title="This page needs a fresh start." description="Something interrupted this page. Try loading it again, or head home to explore another part of Zaylist." href="/" label="Back to Zaylist" missing={false} retry={() => window.location.reload()} />
           {showStack ? (
             <pre style={{ marginTop: 28, maxWidth: "100%", overflow: "auto", textAlign: "left", fontSize: 10, lineHeight: 1.5, color: "#888", background: "#111", border: "1px solid #222", borderRadius: 6, padding: "10px 14px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {error.message}

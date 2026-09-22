@@ -27,13 +27,13 @@ export default function BoardExploreActions({ primary, showSchedule = false, sch
             size="lg"
             arrow={scheduleLead}
           >
-            Schedule
+            My Schedule
           </Button>
         </Link>
       )}
       <Link href="/submit">
         <Button as="span" variant="neon" accent="lime" size="lg">
-          Promoters
+          Add an event
         </Button>
       </Link>
     </>

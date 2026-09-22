@@ -13,16 +13,17 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
     title: "Explore",
     links: [
       ["/events", "EVENTZ"],
-      ["/schedule", "Schedule"],
-      ["/directory", "PLACEZ"],
-      ["/z", "Z/ COMMUNITIES"],
-      ["/directory", "OUR PLACEZ"],
-      ["/outzide", "OUTZ"],
-      ["/outzide/rooster-rock", "OUTZ · Rooster Rock"],
-      ["/outzide/sauvie-island", "OUTZ · Sauvie Island"],
+      ["/schedule", "My Schedule"],
+      ["/map", "Mapz"],
+      ["/z", "Z/ List · Communities"],
+      ["/directory", "Placez on Mapz"],
+      ["/outzide", "Outzide"],
+      ["/outzide/rooster-rock", "Rooster Rock"],
+      ["/outzide/sauvie-island", "Sauvie Island"],
       ["/spotted", "MIZZED CONNECTION"],
       ["/pride-work", "GIGZ"],
       ["/gifting", "GIFTZ"],
+      ["/sellz", "SELLZ"],
       ["/the-hauz", "THE HAÜZ"],
     ],
   },
@@ -65,7 +66,7 @@ export default function Footer() {
               decoding="async"
             />
             <p className="site-footer__tagline">
-              Built by one person in Portland. No committee, no corporate parent  -  just someone who loves this scene.
+              Queer Portland, connected. Nights out, everyday places, outdoor escapes, and people to share them with. Built by Tucker, right here.
             </p>
             <div className="site-footer__controls">
               <FeedbackButton />
@@ -106,7 +107,7 @@ export default function Footer() {
             <SplitFlapSignoff />
           </div>
           <div className="site-footer__legal">
-            <span>Portland, Oregon. Made by Tucker  -  for the community, not shareholders.</span>
+            <span>Made in Portland. Independently built. Community comes first.</span>
             <span className="site-footer__legal-sep" aria-hidden="true">
               ·
             </span>

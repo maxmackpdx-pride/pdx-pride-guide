@@ -146,7 +146,7 @@ export default function HomeStage({ afterWelcome }: Props) {
             </span>
             .
           </h2>
-          <p>You&apos;re looking for the room, the ride, the person, or the thing that makes tonight feel good and tomorrow even better.</p>
+          <p>Queer Portland, connected. Find your night out, your next escape, and your people. Pick a place to start; it’s all part of Zaylist.</p>
         </header>
         {hasPreviewError ? (
           <div className="home-front__preview-error" role="alert">

@@ -1,3 +1,4 @@
+import PageRecovery from "@/components/PageRecovery";
 /**
  * A single THE HAÜZ post.
  *
@@ -58,12 +59,12 @@ export default function HousingPost() {
 
   const postId = Number(params?.id);
 
-  const { data: post, isLoading, isError } = useQuery<HousingPostView>({
+  const { data: post, isLoading, isError, error, refetch } = useQuery<HousingPostView>({
     queryKey: ["/api/housing", postId],
     enabled: Number.isFinite(postId),
     queryFn: async () => {
       const res = await fetch(`/api/housing/${postId}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Not found");
+      if (!res.ok) throw new Error(`${res.status}: Housing post could not load`);
       return res.json();
     },
   });
@@ -238,20 +239,11 @@ export default function HousingPost() {
   }
 
   if (isError || !post) {
-    return (
-      <div className="hz pdx-glass-rebind">
-        <div className="hz-pad">
-          <div className="hz-wrap">
-            <div className="hz-panel hz-empty">
-              That post is not on the board.
-              <div style={{ marginTop: 12 }}>
-                <Chip onClick={goBack}>Back to {returnTo ? "Mapz" : "THE HAÜZ"}</Chip>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    const missing = !Number.isFinite(postId) || /^(403|404):/.test(error?.message || "");
+    return <PageRecovery section="The Haüz" title={missing ? "This housing post isn’t available." : "We couldn’t load this housing post."}
+      description={missing ? "It may have been removed or is no longer available to view. Find current rooms, roommates, and households on The Haüz." : "The board is having trouble loading this post. Try again in a moment."}
+      href={returnTo || "/the-hauz"} label={returnTo ? "Back to Mapz" : "Browse The Haüz"}
+      missing={missing} retry={missing ? undefined : () => { void refetch(); }} />;
   }
 
   const isOwner = !!user && user.id === post.author.userId;

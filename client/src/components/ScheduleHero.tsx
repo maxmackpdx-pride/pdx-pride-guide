@@ -13,18 +13,19 @@ export default function ScheduleHero({ stats }: Props) {
   return (
     <>
       <BoardHero
+        className="board-hero--room"
         accent="cyan"
-        kicker="Portland nights · all year"
+        kicker="Zaylist / Eventz · Your week"
         title={
           <>
             My <RainbowHeroWord>schedule</RainbowHeroWord>
           </>
         }
-        lede="The week laid out flat. Flip to just your RSVPs, filter by vibe, build your nights out of it. Take care of each other."
+        lede="Your week, all in view. Browse what’s on, switch to your RSVPs, and leave room for something unexpected."
         actions={
           <Link href="/events">
             <Button as="span" variant="neon" accent="cyan" size="lg">
-              Browse events
+              Browse Eventz
             </Button>
           </Link>
         }

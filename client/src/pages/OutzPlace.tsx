@@ -1,3 +1,4 @@
+import PageRecovery from "@/components/PageRecovery";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
@@ -222,8 +223,12 @@ export default function OutzPlace() {
     { image: shareCardUrl("outzide"), imageAlt: "Outzide by Zaylist — explore the Northwest" },
   );
 
+  if (snapshotQuery.isError && !place) {
+    return <PageRecovery section="Outzide" title="We couldn’t load this destination." description="The destination details aren’t loading right now. Try again, or explore the Northwest map." href="/outzide" label="Explore Outzide" missing={false} retry={() => { void snapshotQuery.refetch(); }} />;
+  }
+
   if (!snapshotQuery.isLoading && !place) {
-    return <div className="outz-surface outz-place--missing pdx-glass-rebind"><h1>That OUTZ address isn’t current.</h1><Link href="/outzide">Back to OUTZ</Link></div>;
+    return <PageRecovery section="Outzide" title="This spot isn’t at this address." description="The destination link may have changed. Head back to the Northwest map to browse trails, beaches, and places to stay." href="/outzide" label="Explore Outzide" />;
   }
 
   const alert = destination?.alerts[0] ?? null;

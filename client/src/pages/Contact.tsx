@@ -12,15 +12,15 @@ const TOPICS = [
   },
   {
     title: "Take my event down",
-    body: "Just ask. No form, no explanation needed.",
+    body: "Send the event link and let me know it needs to come down.",
   },
   {
     title: "Privacy or your account",
-    body: "Send a message and say what you want removed. It gets removed.",
+    body: "Tell me what you need help with or want removed. Please leave passwords and other sensitive details out of your message.",
   },
   {
     title: "You built something and want to help",
-    body: "Find work or offer your skills on GIGZ. You can also message me here.",
+    body: "Find work or offer your skills through Gigz on Mapz. To help build Zaylist, message me here.",
   },
 ] as const;
 
@@ -55,7 +55,7 @@ export default function Contact() {
 
           <div style={{ marginTop: 36, display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-start" }}>
             <Button type="button" variant="neon" accent="pink" size="md" onClick={() => setContactOpen(true)}>
-              Message me
+              Message Tucker
             </Button>
             <p className="board-copy-sm" style={{ margin: 0, color: "var(--text-lo)" }}>
               Your message goes directly to me.

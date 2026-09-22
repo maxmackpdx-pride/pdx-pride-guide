@@ -1,3 +1,4 @@
+import PageRecovery from "@/components/PageRecovery";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -70,7 +71,7 @@ export default function MemberProfile() {
 
   const { myEventIds, toggleRsvp, showAuth, setShowAuth } = useEventRsvp();
 
-  const { data: apiData, isLoading, error } = useQuery({
+  const { data: apiData, isLoading, error, refetch } = useQuery({
     queryKey: ["profile", username],
     queryFn: async () => {
       const res = await apiRequest("GET", `/api/users/${username}`);
@@ -243,24 +244,10 @@ export default function MemberProfile() {
   }
 
   if (error || !data || !apiData) {
-    const notFound = !!(error && (error as Error & { status?: number }).status === 404);
-    return (
-      <div className="pp-page pp-page--error">
-        <div className="mp-notfound">
-          <p className="display mp-notfound__title">
-            {notFound ? "MEMBER NOT FOUND" : "COULD NOT LOAD PROFILE"}
-          </p>
-          <p className="mp-notfound__copy">
-            {notFound
-              ? `No active member named @${username} on Zaylist.`
-              : "Could not load this profile. Try again in a moment."}
-          </p>
-          <a href="/" className="btn-neon solid pdx-glass-rebind">
-            BACK HOME
-          </a>
-        </div>
-      </div>
-    );
+    const notFound = !!(error && ((error as Error & { status?: number }).status === 404 || /^404:/.test(error.message)));
+    return <PageRecovery section="People" title={notFound ? "This profile isn’t available." : "We couldn’t load this profile."}
+      description={notFound ? "This member may have changed their address or their profile may no longer be available. Find people through Zaylist’s communities." : "The profile couldn’t load just now. Try again in a moment."}
+      href="/z" label="Explore communities" missing={notFound} retry={notFound ? undefined : () => { void refetch(); }} />;
   }
 
   const isOwner = !!data.isOwner;

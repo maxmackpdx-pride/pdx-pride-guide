@@ -20,7 +20,7 @@ export default function Sponsors() {
         title="Sponsors"
         titleAccent="lime"
         kicker="Support Zaylist"
-        lede="This site runs on one person's nights and weekends and a server bill that shows up whether Pride happened or not. Local businesses can help cover it."
+        lede="Help keep queer Portland connected. Local support covers the work and running costs behind Zaylist, all year."
       />
 
       <div className="zine-content">

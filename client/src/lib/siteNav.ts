@@ -99,7 +99,7 @@ export const PAGE_HEADERS: Record<string, PageHeaderMeta> = {
   "/dashboard": { section: "Account", title: "Your Hub" },
   "/settings/notifications": { section: "Account", title: "Notification settings" },
   "/inbox": { section: "Account", title: "Inbox" },
-  "/z": { section: "Zaylist", title: "z/" },
+  "/z": { section: "Zaylist", title: "Z/ List" },
 };
 
 /**
@@ -120,7 +120,7 @@ export const OUTZ_INDEX = "/outzide";
 
 /** Destinations behind the mobile footer "Events" tab sheet. */
 export const EVENTS_NAV: NavLinkItem[] = [
-  { href: "/events", label: "Events" },
+  { href: "/events", label: "Eventz" },
   { href: "/schedule", label: "My Schedule" },
   { href: "/submit", label: "Promoters" },
 ];

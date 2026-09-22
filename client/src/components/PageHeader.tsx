@@ -1,3 +1,4 @@
+import "./InteriorHeader.css";
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import GlitchWord from "@/components/GlitchWord";

@@ -11,7 +11,7 @@ import type { CommunitySummary } from "@shared/community";
 import "./ZIndex.css";
 
 export default function ZIndex() {
-  usePageSeo("Z/ Communities & Topics | Zaylist", "Find Portland queer communities and topics to discuss, with their people, posts, rules, and related EVENTZ.");
+  usePageSeo("Z/ List · Communities | Zaylist", "Find your people in queer Portland. Join communities, share conversations, and make plans together on Zaylist.");
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
@@ -25,9 +25,9 @@ export default function ZIndex() {
   });
   return <div className="z-communities">
     <header className="z-communities__hero">
-      <p className="z-communities__eyebrow">ZAYLIST COMMUNITIES</p>
-      <h1><span>Z/</span> IS WHERE PEOPLE BELONG</h1>
-      <p>Z/ is organized around topics people want to discuss and communities people want to join. Each one connects its conversations, people, rules, and gatherings.</p>
+      <p className="z-communities__eyebrow"><Link href="/">Zaylist</Link> / Communities</p>
+      <h1><span>Z/</span> List</h1>
+      <p className="z-communities__intro">Find your people. Join a conversation, share what matters, and make plans together. Every community has its own voice and its own rules.</p>
       {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}
     </header>
     {creating ? <form id="z-community-create" className="z-community-panel z-community-create" onSubmit={event => { event.preventDefault(); create.mutate(); }} aria-busy={create.isPending}>

@@ -58,7 +58,7 @@ const STEPS: Array<{ title: string; body: string; icon: HousingIconName; accent:
   },
   {
     title: "It lands in the feed",
-    body: "Housing shows up next to events and the other boards. People find you by scrolling.",
+    body: "Your post appears on The Haüz. People can browse by what they need and start a conversation.",
     icon: "boards",
     accent: HOUSING_ACCENT_VAR.LOOKING,
   },
