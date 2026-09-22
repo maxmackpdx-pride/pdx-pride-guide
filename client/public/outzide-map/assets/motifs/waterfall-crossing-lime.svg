@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <title>Waterfall Crossing Adventure Map</title>
+  <g fill="none" stroke="#CCFF00" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 190L186 96L273 181L355 82L520 210"></path>
+    <path d="M213 212H397L384 360Q360 407 304 414Q247 406 232 360Z"></path>
+    <path d="M275 215V350M304 215V372M333 215V350"></path>
+    <path d="M67 448Q170 414 249 449T530 440"></path>
+    <path d="M169 420H421M190 400V440M400 400V440"></path>
+    <path d="M86 507C173 461 232 467 302 506S435 533 523 486" stroke-dasharray="14 15"></path>
+    <path d="M103 526C78 496 84 462 103 462S128 496 103 526Z"></path>
+    <circle cx="103" cy="486" r="8"></circle>
+    <path d="M300 525C275 495 281 461 300 461S325 495 300 525Z"></path>
+    <circle cx="300" cy="485" r="8"></circle>
+    <path d="M498 506C473 476 479 442 498 442S523 476 498 506Z"></path>
+    <circle cx="498" cy="466" r="8"></circle>
+    <path d="M72 382l19-59 19 59-13-11 10 35-16-13-16 13 10-35ZM468 380l19-59 19 59-13-11 10 35-16-13-16 13 10-35Z"></path>
+  </g>
+</svg>

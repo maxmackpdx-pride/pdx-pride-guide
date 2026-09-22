@@ -1,6 +1,10 @@
 export type OutzFeedKind = "weather" | "post" | "checkin" | "carpool";
 export type OutzFeedItem = {
   id: string;
+  placeId?: string;
+  postKind?: string;
+  isMine?: boolean;
+  comments?: Array<{body: string; displayName?: string; username?: string}>;
   kind: OutzFeedKind;
   title: string;
   body: string;

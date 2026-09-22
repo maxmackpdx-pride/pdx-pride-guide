@@ -1,5 +1,6 @@
+import outzMapCatalog from '@shared/outzMapCatalog';
 import { sqlite, storage } from "./storage";
-import "./outzSocial";
+import { getOutzWallPosts } from "./outzSocial";
 import { beachCheckinDateOptions, formatRiverBratsHour } from "@shared/riverBrats";
 import { outzPlaceHref, type OutzSnapshot } from "@shared/outz";
 import type { OutzFeedItem } from "@shared/outzFeed";
@@ -8,8 +9,8 @@ import type { OutzFeedItem } from "@shared/outzFeed";
 export function getOutzCommunityFeed(snapshot: OutzSnapshot, viewerUserId?: number, now = Date.now()): OutzFeedItem[] {
   const places = new Map([...snapshot.destinations, ...snapshot.catalog, ...snapshot.communityStays].map(p => [p.id, p]));
   const beaches = [{ id: "rooster-rock", name: "Rooster Rock" }, { id: "sauvie-island", name: "Sauvie Island" }];
-  const name = (id: string) => places.get(id)?.name || beaches.find(b => b.id === id)?.name;
-  const href = (id: string) => beaches.some(b => b.id === id) ? `/outz/${id}` : outzPlaceHref({ id, name: name(id)! });
+  const name = (id: string) => places.get(id)?.name || beaches.find(b => b.id === id)?.name || outzMapCatalog.find(p => p.id === id)?.name || (id === "__openplans" ? "Decide together" : undefined);
+  const href = (id: string) => beaches.some(b => b.id === id) ? `/outz/${id}` : `/outz?place=${encodeURIComponent(id)}`;
   const allowed = (id: number) => viewerUserId == null || viewerUserId === id || !storage.isMemberInteractionBlocked(viewerUserId, id);
   const dates = beachCheckinDateOptions(now), today = dates[0], lastDay = dates[dates.length - 1];
   const items: OutzFeedItem[] = [];
@@ -19,12 +20,15 @@ export function getOutzCommunityFeed(snapshot: OutzSnapshot, viewerUserId?: numb
       id: number; place_id: string; user_id: number; post_kind: string; body: string; trip_date: string | null;
       created_at: string; displayName: string | null; username: string;
     }>;
+  const walls = new Map<string, ReturnType<typeof getOutzWallPosts>>();
   for (const p of posts) {
     if (p.post_kind === "CARPOOL" && p.trip_date && p.trip_date > lastDay) continue;
     if (!name(p.place_id) || !allowed(p.user_id) || (p.post_kind !== "TRIP_NOTE" && p.trip_date && p.trip_date < today)) continue;
-    items.push({ id: `post:${p.id}`, kind: p.post_kind === "CARPOOL" ? "carpool" : "post",
-      title: p.post_kind === "CARPOOL" ? "Carpool" : p.post_kind === "LOOKING_FOR_COMPANY" ? "Looking for company" : "Trip note",
-      body: p.body, author: p.displayName || p.username, placeName: name(p.place_id)!, href: `${href(p.place_id)}#outz-wall-heading`,
+    if (!walls.has(p.place_id)) walls.set(p.place_id, getOutzWallPosts(p.place_id, viewerUserId));
+    const comments = walls.get(p.place_id)?.find(row => row.id === p.id)?.comments || [];
+    items.push({ comments, id: `post:${p.id}`, kind: p.post_kind === "CARPOOL" ? "carpool" : "post",
+      title: ({CARPOOL:"Carpool",CARPOOL_OFFER:"Offering a ride",CARPOOL_REQUEST:"Looking for a ride",HIKE_BUDDY:"Looking for a hike buddy",CAMP_BUDDY:"Looking for a camp buddy",LOOKING_FOR_COMPANY:"Looking for company"} as Record<string,string>)[p.post_kind] || "Trip note",
+      placeId: p.place_id, postKind: p.post_kind, isMine: p.user_id === viewerUserId, body: p.body, author: p.displayName || p.username, placeName: name(p.place_id)!, href: `${href(p.place_id)}#outz-wall-heading`,
       createdAt: p.created_at, ...(p.trip_date ? { tripDate: p.trip_date } : {}) });
   }
   const checkins = sqlite.prepare(`SELECT user_id, place_id, calendar_date, created_at FROM outz_checkins

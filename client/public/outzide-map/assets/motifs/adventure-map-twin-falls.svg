@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1536" fill="none" stroke="#00DFF5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <title>Cyan Twin Falls Adventure Map</title>
+  <desc>Clean line-art map with mountain range, twin waterfalls, winding trail, pine forest, and waypoint pins.</desc>
+  <defs>
+    <g id="pine">
+      <path d="M0 62V8M0 8l-18 28h11l-19 25h18L-31 88H31L8 61h18L7 36h11L0 8Z"></path>
+    </g>
+    <g id="pin">
+      <path d="M0 54S-30 18-30-7a30 30 0 0 1 60 0C30 18 0 54 0 54Z"></path>
+      <circle cy="-7" r="10"></circle>
+    </g>
+  </defs>
+
+  <path d="M84 255 178 162l26 19 66-67 40 36 35-6 96-102 21 17 55-80 48 73 37 31 40 54 17-12 46 48 43-26 47 51 30-12 77-78 34 30 20 3 69 73"></path>
+  <path d="m168 214 28-30 14 9 60-61 36 35m75 28 60-65v-58m0 0 21 18m54 19-12-31 63-93 32 48m-32 76 36-49 38 57m71 71 45-34 40 42m73-22 55-55 25 17"></path>
+
+  <path d="M28 365c107 8 126-26 211-17 89 10 115-16 201 6 90 23 122 36 208 20 93-18 148-14 348-9"></path>
+  <use href="#pine" transform="translate(57 271) scale(.7)"></use><use href="#pine" transform="translate(102 291) scale(.55)"></use>
+  <use href="#pine" transform="translate(145 273) scale(.68)"></use><use href="#pine" transform="translate(294 279) scale(.65)"></use>
+  <use href="#pine" transform="translate(344 269) scale(.72)"></use><use href="#pine" transform="translate(395 288) scale(.6)"></use>
+  <use href="#pine" transform="translate(659 267) scale(.75)"></use><use href="#pine" transform="translate(707 292) scale(.57)"></use>
+  <use href="#pine" transform="translate(746 276) scale(.68)"></use><use href="#pine" transform="translate(826 285) scale(.63)"></use>
+  <use href="#pine" transform="translate(877 269) scale(.72)"></use><use href="#pine" transform="translate(927 284) scale(.66)"></use>
+
+  <path d="M41 398h95l23-17 110-1 32 18 79-7 61 17 55-14 70 8 64-16 94 6 64-17h113l31 13h70"></path>
+  <path d="M132 399c8 41-5 64 24 91 19 18 16 39 43 57m70-167c0 48 11 67-6 104-9 20 11 33 17 60m91-150c-3 55-17 76 3 112 22 39 1 70 34 103m67-210c-4 67 8 105-4 169-11 58 9 104-1 176m56-345c9 68-8 115 4 175 10 54-8 106 2 169m49-251c-3 72 13 117-4 189-13 55 11 92-4 158m63-337c6 75-8 137 7 205 10 49-5 96 8 155m47-355c-5 52 15 93 4 139-11 48 5 82-12 133m78-298c-10 53 4 81-15 124-13 29-4 69-16 104m103-303c-1 44-19 69-21 112-2 35 12 55-8 91"></path>
+  <path d="M480 399v363m22-361v374m82-380v369m23-374v388" stroke-width="11"></path>
+  <path d="M445 786c25-21 49-20 73 0 22-24 48-24 71 0 20-24 47-23 69 1m-207 25c57 12 120 13 184 1"></path>
+
+  <path d="M605 819c-86 18-62 62 28 70 92 8 129 40 49 69-93 34-181 22-128 82 45 50 154 48 77 106-72 54-203 50-122 119 45 38 142 58 44 116-68 40-152 54-187 78"></path>
+  <path d="M660 820c-51 29-27 51 42 68 104 25 96 67 15 96-54 19-101 27-84 62 21 41 129 57 73 118-53 58-151 60-89 116 52 48 116 63 14 125-67 40-127 52-188 76"></path>
+
+  <path d="M212 326c31 49 33 94 80 126 43 29 22 94 60 139 31 37 13 81 5 119-14 70-118 35-126 111-8 83 80 82 151 91" stroke-dasharray="16 18"></path>
+  <path d="M788 1005c-54 52-34 95-85 139-48 42-29 106-21 164 8 53-45 84-79 124" stroke-dasharray="16 18"></path>
+  <use href="#pin" transform="translate(212 319)"></use><use href="#pin" transform="translate(359 610)"></use>
+  <use href="#pin" transform="translate(779 1006)"></use><use href="#pin" transform="translate(690 1354)"></use>
+
+  <use href="#pine" transform="translate(62 510) scale(.65)"></use><use href="#pine" transform="translate(116 538) scale(.75)"></use>
+  <use href="#pine" transform="translate(66 800) scale(.78)"></use><use href="#pine" transform="translate(141 778) scale(.68)"></use>
+  <use href="#pine" transform="translate(75 1104) scale(.85)"></use><use href="#pine" transform="translate(144 1160) scale(.75)"></use>
+  <use href="#pine" transform="translate(960 490) scale(.64)"></use><use href="#pine" transform="translate(916 566) scale(.7)"></use>
+  <use href="#pine" transform="translate(945 824) scale(.82)"></use><use href="#pine" transform="translate(886 876) scale(.69)"></use>
+  <use href="#pine" transform="translate(950 1150) scale(.86)"></use><use href="#pine" transform="translate(878 1210) scale(.75)"></use>
+  <use href="#pine" transform="translate(340 1090) scale(.7)"></use><use href="#pine" transform="translate(407 1100) scale(.65)"></use>
+  <use href="#pine" transform="translate(775 1230) scale(.68)"></use><use href="#pine" transform="translate(824 1240) scale(.6)"></use>
+
+  <path d="M29 637h75l40 23 72-2 42 19m-225 308h80l52 25 91-9m-226 347 63 2 47 27 77 4m777-766-74 5-38 28-72-1m246 348-75 5-43 24-81 3m211 334-60 2-49 24-75 1"></path>
+  <path d="M190 1265c92-39 167-62 255-65M818 928c-81-18-136-14-204 13M255 747c61-23 113-20 172-5"></path>
+</svg>

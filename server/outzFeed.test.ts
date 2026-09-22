@@ -1,3 +1,4 @@
+import outzMapCatalog from '@shared/outzMapCatalog';
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -42,4 +43,18 @@ test("feed respects blocks, aggregates check-ins without identities, and exclude
   assert.ok(!JSON.stringify(visits).includes('PRIVATE NOTE'));assert.ok(!JSON.stringify(visits).includes('user_id'));assert.equal(visits[0].author,undefined);
   assert.equal(result.filter(i=>i.kind==='carpool').length,1);assert.equal(result.find(i=>i.kind==='carpool')?.title,'Offering a ride');
   assert.ok(!JSON.stringify(result).includes('Blocked post'));assert.ok(!JSON.stringify(result).includes('Past ride'));
+});
+
+test("field-map destinations and destination-free buddy posts retain their kinds and replies", () => {
+  const insert = sqlite.prepare("INSERT INTO outz_wall_posts(place_id,user_id,post_kind,body,trip_date,created_at) VALUES(?,?,?,?,?,?)");
+  const buddy = insert.run("__openplans", author, "HIKE_BUDDY", "Choose a hike together", null, created);
+  const catalog = outzMapCatalog[2];
+  insert.run(catalog.id, author, "CARPOOL_OFFER", "Two seats available", date, created);
+  sqlite.prepare("INSERT INTO outz_wall_comments(post_id,user_id,body,created_at) VALUES(?,?,?,?)").run(buddy.lastInsertRowid, author, "Flexible this weekend", created);
+  const result = getOutzCommunityFeed(snapshot, viewer, now);
+  const open = result.find(item=>item.placeId === "__openplans");
+  assert.equal(open?.postKind, "HIKE_BUDDY");
+  assert.equal(open?.tripDate, undefined);
+  assert.equal(open?.comments?.[0].body, "Flexible this weekend");
+  assert.ok(result.some(item=>item.placeId === catalog.id && item.postKind === "CARPOOL_OFFER"));
 });

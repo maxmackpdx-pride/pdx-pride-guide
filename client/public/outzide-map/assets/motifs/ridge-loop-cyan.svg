@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <title>Ridge Loop Adventure Map</title>
+  <g fill="none" stroke="#00FFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M62 310L165 190L238 260L330 105L438 255L515 185L566 305"></path>
+    <path d="M127 290L167 240L206 280M282 237L330 160L385 238M480 258L516 225L548 274"></path>
+    <path d="M93 410C160 354 239 355 302 404S436 464 514 398" stroke-dasharray="14 15"></path>
+    <path d="M90 488C177 445 258 456 324 493S448 525 522 475"></path>
+    <path d="M112 432C87 402 93 368 112 368S137 402 112 432Z"></path>
+    <circle cx="112" cy="392" r="8"></circle>
+    <path d="M304 436C279 406 285 372 304 372S329 406 304 436Z"></path>
+    <circle cx="304" cy="396" r="8"></circle>
+    <path d="M493 432C468 402 474 368 493 368S518 402 493 432Z"></path>
+    <circle cx="493" cy="392" r="8"></circle>
+    <path d="M84 361l20-62 20 62-14-12 11 37-17-14-17 14 11-37ZM462 365l20-62 20 62-14-12 11 37-17-14-17 14 11-37Z"></path>
+  </g>
+</svg>

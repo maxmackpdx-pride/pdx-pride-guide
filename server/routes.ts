@@ -1,3 +1,4 @@
+import outzMapCatalog from '@shared/outzMapCatalog';
 import { getOutzDetails } from "./outzDetails";
 import { getOutzCommunityFeed } from "./outzFeed";
 import { getOutzFeedWeather } from "./outzFeedWeather";
@@ -1920,6 +1921,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const knownOutzPlace = async (value: unknown) => {
     const placeId = String(value || "").trim();
     if (!placeId || placeId.length > 180) return null;
+    if (outzMapCatalog.some(place => place.id === placeId)) return placeId;
     const snapshot = (await getOutzSnapshot()).data;
     const known = [
       ...snapshot.destinations.map(place => place.id),
@@ -2020,7 +2022,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/outz/wall", async (req: any, res) => {
     try {
-      const placeId = await knownOutzPlace(req.query.place);
+      const placeId = req.query.place === "__openplans" ? "__openplans" : await knownOutzPlace(req.query.place);
       if (!placeId) return res.status(400).json({ error: "Invalid OUTZ place" });
       res.json(getOutzWallPosts(placeId, req.session?.userId));
     } catch (error) {
@@ -2031,11 +2033,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/outz/wall", requireAuth, async (req, res) => {
     try {
-      const placeId = await knownOutzPlace(req.body.placeId);
+      const placeId = req.body.placeId === "__openplans" && ["HIKE_BUDDY", "CAMP_BUDDY"].includes(req.body.postKind) ? "__openplans" : await knownOutzPlace(req.body.placeId);
       const postKind = String(req.body.postKind || "");
       const body = String(req.body.body || "").trim();
       const tripDate = req.body.tripDate ? String(req.body.tripDate) : null;
-      if (!placeId || !["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
+      if (!placeId || !["LOOKING_FOR_COMPANY", "HIKE_BUDDY", "CAMP_BUDDY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST", "TRIP_NOTE"].includes(postKind)) return res.status(400).json({ error: "Invalid OUTZ post" });
       if (!body || body.length > 500) return res.status(400).json({ error: "Post must be 1 to 500 characters" });
       if (tripDate && !isAllowedBeachCheckinDate(tripDate)) return res.status(400).json({ error: "Choose a trip day in the next week" });
       if (moderationGate(res, "OUTZ trip board post", { body })) return;
