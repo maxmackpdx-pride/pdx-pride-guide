@@ -257,7 +257,10 @@ function renderActiveMapFilters(count){
  if(state.browseRegion)chips.push(['browse',browseRegions.find(r=>r.id===state.browseRegion)?.name||'Region']);
  for(const kind of state.activities.length?state.activities:state.kind==='all'?[]:[state.kind])chips.push(['kind:'+kind,kinds[kind]]);
  if(state.query)chips.push(['query','“'+state.query+'”']);
- target.innerHTML='<strong class="matching-count" role="status">'+count+' spots</strong>'+ (chips.length?chips.map(([key,label])=>'<button type="button" data-remove-filter="'+esc(key)+'" aria-label="Remove '+esc(label)+' filter">'+esc(label)+' <span aria-hidden="true">×</span></button>').join('')+'<button type="button" data-remove-filter="all">Clear all</button>':'<span class="filter-scope">All activities · Pacific Northwest</span>');
+ $('#matching-count').textContent=count;
+ $('#matching-count').setAttribute('aria-label',count+' matching spots');
+ target.hidden=!chips.length;
+ target.innerHTML=chips.length?chips.map(([key,label])=>'<button type="button" data-remove-filter="'+esc(key)+'" aria-label="Remove '+esc(label)+' filter">'+esc(label)+' <span aria-hidden="true">×</span></button>').join('')+'<button type="button" data-remove-filter="all">Clear all</button>':'';
  $('#reset-filters').hidden=!chips.length;
  $('#map-key').innerHTML=Object.entries(kinds).filter(([kind])=>kind!=='all').map(([kind,label])=>'<span style="--key-color:'+esc(places.find(p=>p.kind===kind)?.accent||'#eeeae0')+'">'+icon(kind)+'<span>'+esc(label)+'</span></span>').join('');
 }
