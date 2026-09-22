@@ -1769,8 +1769,8 @@
       "name": "Fern Ridge Lake · Richardson Park",
       "kind": "boating",
       "state": "OR",
-      "lat": 44.126,
-      "lng": -123.319,
+      "lat": 44.1180142,
+      "lng": -123.3194646,
       "region": "Eugene · Willamette Valley, OR",
       "detail": "A lake boating destination. Confirm the active launch and reservoir level before travelling.",
       "note": "Check launch access, water levels, wind and local boat restrictions before departure. Confirm permits and the right launch for your watercraft.",
@@ -1781,8 +1781,10 @@
       "collection": "outz-activities-2026",
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "locationPrecision": "mapped-site",
+      "landscape": "lake",
+      "coordinateSource": "https://www.openstreetmap.org/way/966255815",
+      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z"
     },
     {
       "id": "boating-or-dexter-reservoir-lowell",
@@ -1809,8 +1811,8 @@
       "name": "Detroit Lake Boating",
       "kind": "boating",
       "state": "OR",
-      "lat": 44.73,
-      "lng": -122.179,
+      "lat": 44.729984,
+      "lng": -122.176582,
       "region": "Detroit · North Santiam, OR",
       "detail": "A lake boating destination. Confirm the active launch and reservoir level before travelling.",
       "note": "Check launch access, water levels, wind and local boat restrictions before departure. Confirm permits and the right launch for your watercraft.",
@@ -1821,8 +1823,10 @@
       "collection": "outz-activities-2026",
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "locationPrecision": "agency-area",
+      "landscape": "lake",
+      "coordinateSource": "https://stateparks.oregon.gov/index.cfm?do=park.profile&parkId=65",
+      "coordinateCheckedAt": "2026-09-22T23:02:50.431Z"
     },
     {
       "id": "boating-or-wallowa-lake-state-park-launch",
@@ -2509,8 +2513,8 @@
       "name": "Sadie Creek Multi-Use Trails",
       "kind": "atv",
       "state": "WA",
-      "lat": 48.138,
-      "lng": -123.918,
+      "lat": 48.1338994,
+      "lng": -123.9076991,
       "region": "Washington · Forest riding",
       "detail": "A public off-road riding destination. Use the official trail map to choose ATV-compatible routes.",
       "note": "Use the land manager’s current motor-vehicle map. Check vehicle-class and width limits, permits, seasonal closures and fire restrictions before riding.",
@@ -2521,8 +2525,10 @@
       "collection": "outz-activities-2026",
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "forest"
+      "locationPrecision": "mapped-site",
+      "landscape": "forest",
+      "coordinateSource": "https://www.openstreetmap.org/node/10721972637",
+      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z"
     },
     {
       "id": "atv-wa-ahtanum-state-forest-ahtanum-camp",
@@ -2549,8 +2555,8 @@
       "name": "Beverly Dunes",
       "kind": "atv",
       "state": "WA",
-      "lat": 46.833,
-      "lng": -119.923,
+      "lat": 46.8284136,
+      "lng": -119.8961327,
       "region": "Washington · Dune riding",
       "detail": "A public off-road riding destination. Use the official trail map to choose ATV-compatible routes.",
       "note": "Use the land manager’s current motor-vehicle map. Check vehicle-class and width limits, permits, seasonal closures and fire restrictions before riding.",
@@ -2561,8 +2567,10 @@
       "collection": "outz-activities-2026",
       "selectionBasis": "Curated regional destination; not an official ranking.",
       "sourceCheckedAt": "2026-09-22T20:36:26.815Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "dunes"
+      "locationPrecision": "mapped-site",
+      "landscape": "dunes",
+      "coordinateSource": "https://www.openstreetmap.org/relation/21157779",
+      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z"
     },
     {
       "id": "atv-wa-moses-lake-sand-dunes",

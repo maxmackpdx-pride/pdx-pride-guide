@@ -24,7 +24,7 @@ test('activity expansion has requested counts, sourced locations and individual 
  for(const p of additions){
   assert.ok(p.lat>=41.9&&p.lat<=49.1&&p.lng>=-125&&p.lng<=-116,'OR/WA coordinates');
   assert.ok(p.officialUrl.startsWith('https://'));assert.ok(p.sourceName);assert.ok(p.sourceCheckedAt);
-  assert.ok(['agency-area','approximate-area'].includes(p.locationPrecision));
+  assert.ok(['agency-area','approximate-area','mapped-site'].includes(p.locationPrecision));
   assert.ok(shared.includes(p.id),'backend recognizes destination');
   if(p.kind==='atv')assert.equal(p.accent,'#D95757');
  }

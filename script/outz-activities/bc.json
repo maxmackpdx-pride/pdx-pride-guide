@@ -217,8 +217,8 @@
       "state": "BC",
       "country": "CA",
       "browseRegion": "south-island",
-      "lat": 48.325,
-      "lng": -123.636,
+      "lat": 48.3269817,
+      "lng": -123.6390874,
       "region": "Southern Vancouver Island · BC, Canada",
       "detail": "Rocky coastal hiking from the East Sooke park trail network.",
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
@@ -228,8 +228,10 @@
       "art": "assets/motifs/places/bc-east-sooke.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "locationPrecision": "mapped-site",
+      "landscape": "mountain",
+      "coordinateSource": "https://www.openstreetmap.org/way/162579100",
+      "coordinateCheckedAt": "2026-09-22T23:06:44.124Z"
     },
     {
       "id": "bc-jordan-river",
@@ -280,8 +282,8 @@
       "state": "BC",
       "country": "CA",
       "browseRegion": "south-island",
-      "lat": 48.478,
-      "lng": -123.548,
+      "lat": 48.4621928,
+      "lng": -123.5629335,
       "region": "Southern Vancouver Island · BC, Canada",
       "detail": "Forest camping near Goldstream’s river and walking trails.",
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
@@ -291,8 +293,10 @@
       "art": "assets/motifs/places/bc-goldstream.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "mountain"
+      "locationPrecision": "mapped-site",
+      "landscape": "mountain",
+      "coordinateSource": "https://www.openstreetmap.org/way/164113984",
+      "coordinateCheckedAt": "2026-09-22T23:04:46.842Z"
     },
     {
       "id": "bc-sooke-potholes",
@@ -301,8 +305,8 @@
       "state": "BC",
       "country": "CA",
       "browseRegion": "south-island",
-      "lat": 48.418,
-      "lng": -123.696,
+      "lat": 48.461831,
+      "lng": -123.7389582,
       "region": "Southern Vancouver Island · BC, Canada",
       "detail": "Seasonal camping at the north end of Sooke Potholes Regional Park.",
       "note": "Check the official operator for current access, reservations, restrictions and seasonal conditions. ",
@@ -312,8 +316,10 @@
       "art": "assets/motifs/places/bc-sooke-potholes.svg",
       "collection": "outz-bc-2026",
       "sourceCheckedAt": "2026-09-22T21:17:40.855Z",
-      "locationPrecision": "approximate-area",
-      "landscape": "lake"
+      "locationPrecision": "mapped-site",
+      "landscape": "lake",
+      "coordinateSource": "https://www.openstreetmap.org/relation/2742794",
+      "coordinateCheckedAt": "2026-09-22T23:04:46.842Z"
     },
     {
       "id": "bc-thetis",
