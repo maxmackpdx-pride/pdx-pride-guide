@@ -63,8 +63,9 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 @media(prefers-reduced-motion:reduce){.waypoint-head,.waypoint-label,.waypoint-count{translate:none}}
 /* Slow refracted light stays inside the waterside waypoint's glass face. */
 .waypoint-head.watercamp{overflow:hidden;isolation:isolate;background:linear-gradient(145deg,#10263d,#091824)}
-.waypoint-head.watercamp::before,.waypoint-head.watercamp::after{content:"";position:absolute;inset:-100%;pointer-events:none;background:url('./assets/water-caustics.svg') center/82px 82px;opacity:.3;animation:water-refraction-drift 18s ease-in-out infinite alternate;will-change:transform}
-.waypoint-head.watercamp::after{background-size:113px 113px;opacity:.16;animation-duration:25s;animation-delay:-9s;animation-direction:alternate-reverse}
-.waypoint-head.watercamp svg{position:relative;z-index:1;filter:drop-shadow(0 1px 2px #061020)}
+.waypoint-head.watercamp::before,.waypoint-head.watercamp::after{content:"";position:absolute;inset:-100%;pointer-events:none;background:url('./assets/water-caustics.svg') center/82px 82px;opacity:.65;mix-blend-mode:screen;filter:brightness(1.35) drop-shadow(0 0 1px #80dfff);animation:water-refraction-drift 10s ease-in-out infinite alternate,water-refraction-shimmer 3.6s ease-in-out infinite;will-change:transform,opacity}
+.waypoint-head.watercamp::after{background-size:113px 113px;opacity:.45;animation-duration:14s,5.1s;animation-delay:-9s,-1.8s;animation-direction:alternate-reverse,reverse}
+.waypoint-head.watercamp svg{position:relative;z-index:1;color:#c1e5ff;background:#071728ed;border-radius:4px;box-shadow:0 0 3px 2px #071728c9;filter:drop-shadow(0 1px 1px #020810)}
+@keyframes water-refraction-shimmer{0%,100%{opacity:.32}35%{opacity:.85}65%{opacity:.48}80%{opacity:.7}}
 @keyframes water-refraction-drift{from{transform:translate(-9%,-6%) rotate(-8deg) scale(1)}to{transform:translate(9%,8%) rotate(8deg) scale(1.08)}}
 @media(prefers-reduced-motion:reduce){.waypoint-head.watercamp::before,.waypoint-head.watercamp::after{animation:none;will-change:auto}}
