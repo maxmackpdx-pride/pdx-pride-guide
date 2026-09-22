@@ -138,3 +138,10 @@
 .closure-card.is-closed strong { color:#ffaaaa; }
 @keyframes closure-displace { 0%,100% { translate:0; } 25% { translate:1px -1px; } 60% { translate:-1px 1px; } }
 @media(prefers-reduced-motion:reduce) { .waypoint-icon.closure-pulse .closure-symbol { animation:none; } }
+/* A quiet discovery at the furthest zoom, never a new navigation layer. */
+#cascadia-reveal { position:fixed; inset:0; z-index:880; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; pointer-events:none; isolation:isolate; }
+#cascadia-reveal img { display:block; width:min(82vw,1000px); max-height:42dvh; object-fit:contain; filter:drop-shadow(0 0 18px #000b); animation:cascadia-arrive .9s ease-out both; }
+.cascadia-mode #map .maplibregl-marker,.cascadia-mode .hologram-canvas { visibility:hidden; }
+.cascadia-mode :is(.discovery,#detail,#selection-dock,.map-bottom,#trail-feed) { visibility:hidden; pointer-events:none; }
+@keyframes cascadia-arrive { from { opacity:0; scale:.97; filter:drop-shadow(-4px 0 12px #00ffff88) drop-shadow(4px 0 12px #ff00cc88); } to { opacity:1; scale:1; filter:drop-shadow(0 0 18px #000b); } }
+@media(prefers-reduced-motion:reduce) { #cascadia-reveal img { animation:none; } }
