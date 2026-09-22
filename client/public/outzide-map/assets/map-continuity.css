@@ -8,7 +8,7 @@
 .zaydar-map-demo{--map-ui-ink:#0b151f;--map-ui-accent:#19e3ff;--map-ui-text:#eaf2fa;--map-ui-muted:#b0bfcd}
 .outzide-shell .map-controls,.zaydar-map-demo .zaydar-demo-navigation{
  width:54px;padding:4px;gap:3px;border-radius:15px;border:1px solid var(--map-ui-edge);
- background:color-mix(in srgb,var(--map-ui-ink) 92%,transparent);box-shadow:0 0 0 1px #050706,inset 0 1px #ffffff10;
+ background:color-mix(in srgb,var(--map-ui-ink) 84%,transparent);box-shadow:0 0 0 1px #050706,inset 0 1px #ffffff10;
  backdrop-filter:blur(var(--map-ui-blur)) saturate(1.22);
 }
 .outzide-shell .map-controls button,.zaydar-map-demo .zaydar-demo-navigation button{
@@ -60,3 +60,15 @@ html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .
 .outzide-shell .waypoint-icon.special>.face-stack{bottom:76px}
 .outzide-shell .waypoint-icon.selected>.face-stack{bottom:122px}
 @media(max-width:760px){.outzide-shell:has(#active-map-filters) .workspace .discovery{top:auto}}
+
+/* A little more map showing through the shared glass, without fading content. */
+.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-legend,#selection-dock,#trail-feed),
+.zaydar-map-demo .zaydar-layer-sheet{
+ background:linear-gradient(145deg,#deefe70b,transparent 58%),color-mix(in srgb,var(--map-ui-ink) 82%,transparent);
+}
+.outzide-shell #detail:not(.winter-card){background:color-mix(in srgb,var(--map-ui-ink) 84%,transparent)}
+@media(prefers-reduced-transparency:reduce){
+ .outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock,#trail-feed,#detail),
+ .zaydar-map-demo :is(.zaydar-layer-sheet,.zaydar-demo-navigation){background:var(--map-ui-ink)}
+}
+@media(prefers-reduced-transparency:no-preference){.outzide-shell #detail.winter-card{background:linear-gradient(130deg,#263d4380,#0d2021c2 28%,#102122d1)}}
