@@ -69,3 +69,21 @@ export function drawProjectionBeam(ctx, texture, anchor, logoX, top, halfWidth) 
   ctx.drawImage(texture, 0, 0, halfWidth * 2, height);
   ctx.restore();
 }
+
+// Concentric waves travel outward across the same shallow ground plane as the disk.
+// The geographic anchor never follows the floating head; reduced motion stays still.
+export function drawGroundRipples(ctx, anchor, radius, color, seconds, reducedMotion, phase=0) {
+  ctx.save();
+  ctx.translate(anchor.x, anchor.y);
+  ctx.rotate(-.08);
+  ctx.strokeStyle=color;
+  for(let i=0;i<3;i++){
+    const progress=reducedMotion?(i+.5)/3:((seconds/3.6+i/3+phase)%1+1)%1;
+    const waveRadius=radius*(.55+progress*1.3);
+    const opacity=Math.sin(progress*Math.PI)**2*.5;
+    ctx.beginPath();ctx.ellipse(0,0,waveRadius,waveRadius*7.5/27,0,0,Math.PI*2);
+    ctx.globalAlpha=opacity*.2;ctx.lineWidth=3;ctx.stroke();
+    ctx.globalAlpha=opacity;ctx.lineWidth=.8;ctx.stroke();
+  }
+  ctx.restore();
+}
