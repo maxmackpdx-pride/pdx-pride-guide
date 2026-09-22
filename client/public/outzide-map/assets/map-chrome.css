@@ -120,12 +120,12 @@
 #browse-summary small { font-size: 11px; margin: 5px 0; }
 #browse-summary button { font-size: 12px; min-height: 34px; padding: 5px 10px; }
 /* Closure is a status layer, never a permanent change to the category palette. */
-.waypoint-head .closure-symbol { position:absolute; right:0; bottom:0; display:grid; place-items:center; width:19px; height:19px; color:#ef7777; background:#1c080b; border-radius:50%; border:1px solid #ef7777; z-index:8; pointer-events:none; }
+.waypoint-head .closure-symbol { position:absolute; display:none; place-items:center; color:#ef7777; border-radius:50%; z-index:8; pointer-events:none; }
 .waypoint-head .closure-symbol svg { width:16px; height:16px; }
 
 .waypoint-icon.closure-pulse .waypoint-head { color:#ef7777; border-color:#d95757; background:#290d12; box-shadow:0 0 14px #d9575766; }
-.waypoint-icon.closure-pulse .waypoint-head > svg { opacity:.15; }
-.waypoint-icon.closure-pulse .closure-symbol { inset:2px; width:auto; height:auto; border:0; background:#290d12e8; animation:closure-displace .55s steps(2,end) 1; }
+.waypoint-icon.closure-pulse .waypoint-head > svg { visibility:hidden; }
+.waypoint-icon.closure-pulse .closure-symbol { display:grid; inset:2px; width:auto; height:auto; border:0; background:#290d12e8; animation:closure-displace .55s steps(2,end) 1; }
 .waypoint-icon.closure-pulse .closure-symbol svg { width:90%; height:90%; color:#ef7777; }
 .waypoint-icon.closure-pulse .waypoint-head::before,.waypoint-icon.closure-pulse .waypoint-head::after { opacity:0; }
 .closure-cluster-note { position:absolute; top:-20px; left:22px; white-space:nowrap; border:1px solid #d95757; background:#230f14; color:#ffb0b0; border-radius:5px; padding:2px 5px; font:10px var(--mono); }
