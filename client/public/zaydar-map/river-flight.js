@@ -16,7 +16,7 @@ import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
-import {waypointGeometry,drawWaypointHead,drawWaypointFoot} from './waypoint-markers.js?v=20260922-outzide-waypoints';
+import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260922-outzide-waypoints-v2';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
 const startup=window.__zaydarStartup||{phase(){},fatal(){}};
@@ -483,7 +483,7 @@ function drawLights(fade,target=map,surface=lights){
  const eventLabels=[];
  const cameraMoving=Boolean(target.isMoving?.());
  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(viewTime));
- const activeToday=feature=>feature.properties.eventDay===today||(parent===window&&feature.properties.demoOpen===true);
+ const activeToday=feature=>feature.properties.eventDay===today||feature.properties.demoOpen===true;
  const emergenceFor=feature=>feature.properties.key===selectedKey||activeToday(feature)?1:reveal;
  const lights=surface,lightsContext=surface.getContext('2d');
  const surfaces=updateSurfaces(target);
@@ -636,7 +636,7 @@ function drawLights(fade,target=map,surface=lights){
    else{
     // Heads remain readable above buildings; their beam is masked at street level.
     const logo=feature.properties.kind==='place'&&feature.properties.waypointLogo?venueLogos.get(feature.properties.waypointLogo)?.image:null;
-    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo,selected,coreAlpha);
+    drawWaypointHead(lightsContext,geometry,color,typeIcons.get(feature.properties.typeIcon)?.light,logo&&showWaypointLogo(pulseTime,phase,reduced.matches)?logo:null,selected,coreAlpha);
     if(cluster?.members.length>1)drawClusterCount(lightsContext,geometry.x,geometry.y,cluster.members.length,color,geometry.size);
     if(selected)drawSelectedMarkerLabel(lightsContext,geometry.x,geometry.y+geometry.size/2-14,feature.properties.name,feature.properties.type,color,width);
     hitTargets.push({key:feature.properties.key,x:geometry.x,y:geometry.y,r:Math.max(22,geometry.size/2+8),name:feature.properties.name,category:feature.properties.type,color,clusterBounds:cluster?.members.length>1?cluster.bounds:null,clusterKeys:cluster?.members.map(member=>member.feature.properties.key),clusterWorld:feature.properties.waypointFamily});

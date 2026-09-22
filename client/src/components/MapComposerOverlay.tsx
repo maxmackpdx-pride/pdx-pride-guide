@@ -15,7 +15,7 @@ const PlaceComposer=lazy(()=>import("./DirectoryAddPlaceForm"));
 export default function MapComposerOverlay({world,onClose,onPosted}:{world:MapWorld;onClose:()=>void;onPosted:(id:number)=>void}) {
   const dialogRef=useModalA11y({onClose});
   const events=useQuery<LinkableMissedConnectionEvent[]>({queryKey:["/api/missed-connections/postable-events","board"],queryFn:()=>apiRequest("GET","/api/missed-connections/postable-events?scope=board").then(r=>r.json()),enabled:world==="mizzed"});
-  return createPortal(<div className="board-detail-backdrop" onClick={onClose}><div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Post to ${WORLD_NAMES[world]}`} tabIndex={-1} className="map-world-composer" style={{"--listing-accent":WORLD_COLORS[world],"--c":WORLD_COLORS[world]} as CSSProperties} onClick={e=>e.stopPropagation()}>
+  return createPortal(<div className="board-detail-backdrop" onClick={onClose}><div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Post to ${WORLD_NAMES[world]}`} tabIndex={-1} className="map-world-composer pdx-glass-rebind" style={{"--listing-accent":WORLD_COLORS[world],"--c":WORLD_COLORS[world]} as CSSProperties} onClick={e=>e.stopPropagation()}>
     <Suspense fallback={<p role="status">Loading form…</p>}>
       {world==="places" && <PlaceComposer embedded onClose={onClose} onView={onPosted}/>}
       {world==="gigz" && <GigComposer onClose={onClose} onPosted={onPosted}/>}

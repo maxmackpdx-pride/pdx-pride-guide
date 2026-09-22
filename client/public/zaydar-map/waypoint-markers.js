@@ -41,3 +41,11 @@ export function drawWaypointFoot(ctx,geometry,color,materials,drawBeam,alpha=1,s
  if(orb){ctx.globalAlpha=alpha*(selected?1:.75);ctx.drawImage(orb,x-size/2,anchorY-size/2,size,size);}
  ctx.restore();
 }
+
+// One staggered 3–5 second cadence per geographic marker, using the existing
+// map clock. No timers, texture updates, or movement of the waypoint itself.
+export function waypointLogoInterval(phase){return 3+2*(.5+.5*Math.sin(phase*1.731));}
+export function showWaypointLogo(seconds,phase,reducedMotion=false){
+ if(reducedMotion)return true;
+ return Math.floor((seconds+phase)/waypointLogoInterval(phase))%2===1;
+}

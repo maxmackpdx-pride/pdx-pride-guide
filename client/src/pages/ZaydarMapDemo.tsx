@@ -527,11 +527,20 @@ export default function ZaydarMapDemo() {
       return Array.isArray(parsed) ? parsed.filter((tag): tag is string => typeof tag === "string") : [];
     } catch { return []; }
   }))).slice(0, 8), [events]);
+  // The local seed can be months old. Keep two real, unmodified listings as
+  // explicit demo examples without changing the live map's time filters.
+  const demoEventIds = useMemo(() => {
+    if (window.location.pathname !== "/map-demo" || timeFilter !== "default" || eventTag || previewDateTime) return new Set<number>();
+    return new Set(["badlands", "sanctuary"].flatMap(venue => {
+      const example = events.find(event => event.venueName?.toLowerCase().includes(venue) && mapCoordinates(event.lat,event.lng));
+      return example ? [example.id] : [];
+    }));
+  }, [events,timeFilter,eventTag,previewDateTime]);
   const visibleEvents = useMemo(() => events.filter(e => {
     if (!mapCoordinates(e.lat, e.lng)) return false;
     if (q && !`${e.title} ${e.venueName} ${e.neighborhood || ""}`.toLowerCase().includes(q)) return false;
-    return matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd, viewTimestamp);
-  }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, viewTimestamp]);
+    return demoEventIds.has(e.id) || matchesMapEvent(e, timeFilter, eventTag, customStart, customEnd, viewTimestamp);
+  }).sort((a, b) => (parsePacificDateTime(a.dateStart) || 0) - (parsePacificDateTime(b.dateStart) || 0)), [events, q, eventTag, timeFilter, customStart, customEnd, viewTimestamp, demoEventIds]);
   const locatedWorlds = useMemo(()=>{
     const source:Record<MapWorld,MapRow[]>={places:places.filter(p=>p.type!=="group") as MapRow[],mizzed:mizzed as unknown as MapRow[],gigz:gigs,giftz:gifts,sellz:sells};
     const board:Record<MapWorld,string>={places:"",mizzed:"Mizzed",gigz:"Gigz",giftz:"Giftz",sellz:"Sellz"};
@@ -607,6 +616,7 @@ export default function ZaydarMapDemo() {
       {eventTags.map(tag => <button type="button" key={tag} aria-pressed={eventTag === tag} onClick={() => setEventTag(eventTag === tag ? null : tag)}>{tag.replaceAll("_", " ")}</button>)}
       <button type="button" aria-pressed={timeFilter === "default" && !eventTag} onClick={() => { setTimeFilter("default"); setEventTag(null); }}>All upcoming</button>
     </div>
+    {demoEventIds.size>0 && <p className="zaydar-layer-location-note">Demo examples use saved event listings and their original dates.</p>}
     {eventsLoading ? <p role="status">Loading Eventz…</p> : eventsError ? <p role="alert">Eventz could not load. <button type="button" onClick={() => void retryEvents()}>Try again</button></p> : <div className="zaydar-layer-list">
       {visibleEvents.slice(0, 5).map(event => {
         const starts = parsePacificDateTime(event.dateStart) || Date.now();
@@ -680,13 +690,13 @@ export default function ZaydarMapDemo() {
       housingModel:isHouz?String(row.type||'LOOKING'):undefined,
       neighborhoodLabel:isHouz?housingAreaLabel(row):undefined,
       avatars:isHouz?housingFaceStack(row):undefined,
-      demoOpen:isHouz&&housingDemo(row),
+      demoOpen:event?demoEventIds.has(event.id):isHouz&&housingDemo(row),
       logoKey:brands?.directoryId?`directory-${brands.directoryId}`:place?`directory-${place.id}`:undefined,
       alternateLogoKey:brands?.alternateDirectoryId?`directory-${brands.alternateDirectoryId}`:undefined,
       eventDay:event?portlandCalendarDay(event.dateStart):undefined,
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(event.dateStart)):undefined};
-  }), [marks, places]);
+  }), [marks, places, demoEventIds]);
   const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{

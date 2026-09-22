@@ -45,3 +45,16 @@ test('waypoint heads stay at their map anchor and clear roof heights at every sc
     assert.equal(first.y+first.size/2,first.bottom);
   }
 });
+
+test('Placez alternates icon and white logo every 3–5 seconds without changing its anchor',async()=>{
+ const {waypointLogoInterval,showWaypointLogo}=await import('../client/public/zaydar-map/waypoint-markers.js');
+ for(const phase of [0,2.399963,10,50,900]){
+  const interval=waypointLogoInterval(phase);assert.ok(interval>=3&&interval<=5);
+  for(let i=1000;i<1005;i++){
+   const boundary=i*interval-phase;
+   assert.notEqual(showWaypointLogo(boundary-.001,phase),showWaypointLogo(boundary+.001,phase));
+   assert.equal(showWaypointLogo(boundary+.001,phase),showWaypointLogo(boundary+interval-.001,phase));
+  }
+  assert.equal(showWaypointLogo(999,phase,true),true);
+ }
+});
