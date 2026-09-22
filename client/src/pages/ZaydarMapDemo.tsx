@@ -19,6 +19,9 @@ import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import PlaceModal, { type PlaceModalOriginRect } from "@/components/PlaceModal";
 import AuthModal from "@/components/AuthModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
+import SpottedDetailModal from "@/components/SpottedDetailModal";
+import { spottedKind, spottedPlace } from "@/components/SpottedCard";
+import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import HousingPostOverlay from "@/components/housing/HousingPostOverlay";
 import HousingComposerOverlay from "@/components/housing/HousingComposerOverlay";
 import { HousingTagFilter } from "@/components/housing/HousingTagFilter";
@@ -310,7 +313,7 @@ export default function ZaydarMapDemo() {
     if (value !== "custom") { p.delete("from"); p.delete("to"); }
   });
   const layerValue = params.get("layer");
-  const activeLayer = ["events", "places", "boards", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
+  const activeLayer = layerValue === "boards" ? "stuff" : ["events", "places", "mizzed", "gigz", "stuff", "houz"].includes(layerValue || "") ? layerValue as ZaydarLayerId : null;
   const changeLayer = useCallback((next: ZaydarLayerId | null) => {
     const current = mapSearchParams().get("layer");
     setLocation(mapHref(p => { if (next) p.set("layer", next); else p.delete("layer"); }), {
@@ -319,7 +322,7 @@ export default function ZaydarMapDemo() {
     });
   }, [setLocation]);
   const showEvents = params.get("hideEvents") !== "1", showPlaces = params.get("hidePlaces") !== "1";
-  const showBoards = params.get("hideBoards") !== "1", showHouz = params.get("hideHouz") !== "1";
+  const showGigz = params.get("hideGigz") !== "1", showStuff = params.get("hideStuff") !== "1", showHouz = params.get("hideHouz") !== "1";
   const toggleLayer = (key: string) => updateParams(p => { if (p.get(key) === "1") p.delete(key); else p.set(key, "1"); });
   const housingValue = params.get("housingType");
   const housingType = ["OFFERING", "LOOKING", "FORMING", "MANAGED"].includes(housingValue || "") ? housingValue as HousingType : null;
@@ -335,7 +338,7 @@ export default function ZaydarMapDemo() {
   const eventTag = params.get("tag");
   const setEventTag = (value: string | null) => updateParams(p => { if (value) p.set("tag", value); else p.delete("tag"); });
   const boardKindsParam = params.get("boards");
-  const boardKinds = useMemo(() => new Set(boardKindsParam !== null ? boardKindsParam.split(",") : ["Gigz", "Giftz", "Sellz"]), [boardKindsParam]);
+  const boardKinds = useMemo(() => new Set(boardKindsParam !== null ? boardKindsParam.split(",") : ["Giftz", "Sellz"]), [boardKindsParam]);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [previewDateTime, setPreviewDateTime] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -423,6 +426,7 @@ export default function ZaydarMapDemo() {
   const { data: communities = EMPTY_COMMUNITIES } = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"], queryFn: () => apiRequest("GET", "/api/communities").then(r => r.json()) });
   const { data: places = EMPTY_PLACES, isLoading: placesLoading, isError: placesError, refetch: retryPlaces } = useQuery<Place[]>({ queryKey: ["/api/directory"], queryFn: () => apiRequest("GET", "/api/directory").then(r => r.json()) });
   const { data: housingRaw, isLoading: housingLoading, isError: housingError, refetch: retryHousing } = useQuery<unknown>({ queryKey: ["/api/housing", "map"], queryFn: () => apiRequest("GET", "/api/housing").then(r => r.json()) });
+  const { data: mizzed = [], isLoading: mizzedLoading, isError: mizzedError, refetch: retryMizzed } = useQuery<MissedConnectionPost[]>({ queryKey: ["/api/missed-connections"], queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()) });
   const { data: gigs = EMPTY_ROWS, isLoading: gigsLoading, isError: gigsError, refetch: retryGigs } = useQuery<MapRow[]>({ queryKey: ["/api/gigs"], queryFn: () => apiRequest("GET", "/api/gigs").then(r => r.json()) });
   const { data: gifts = EMPTY_ROWS, isLoading: giftsLoading, isError: giftsError, refetch: retryGifts } = useQuery<MapRow[]>({ queryKey: ["/api/gifting"], queryFn: () => apiRequest("GET", "/api/gifting").then(r => r.json()) });
   const { data: sells = EMPTY_ROWS, isLoading: sellsLoading, isError: sellsError, refetch: retrySells } = useQuery<MapRow[]>({ queryKey: ["/api/sellz"], queryFn: () => apiRequest("GET", "/api/sellz").then(r => r.json()) });
@@ -465,6 +469,8 @@ export default function ZaydarMapDemo() {
     queryFn: async () => { const response = await fetch(`/api/housing/${houzId}`, { credentials: "include" }); if (!response.ok) throw new Error("Not found"); return response.json(); },
   });
   const selectedHouz = feedHouz || houzDetail.data;
+  const mizzedId = mapRecordId(params.get("mizzed") || params.get("spotted"));
+  const selectedMizzed = mizzedId ? mizzed.find(post => post.id === mizzedId) : null;
   const boardKey = (["gig", "gift", "sell", "sellz"] as const).find(key => mapRecordId(params.get(key)) !== null);
   const boardOverlay = boardKey ? { kind: boardFromParam(boardKey)!, postId: mapRecordId(params.get(boardKey))! } : null;
   const missingPlace = placeId !== null && !placesLoading && !selectedPlace;
@@ -493,21 +499,24 @@ export default function ZaydarMapDemo() {
     .filter(entry => entry.distance <= 10)
     .sort((a, b) => a.distance - b.distance)
     .map(entry => entry.place), [mapPlaces, mapCenter]);
-  const boardRows = useMemo(() => ([
-    ...gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })),
+  const gigRows = useMemo(() => gigs.map(row => ({ ...row, _board: "Gigz", _href: row.id ? `/pride-work?post=${row.id}` : "/pride-work" })), [gigs]);
+  const stuffRows = useMemo(() => ([
     ...gifts.map(row => ({ ...row, _board: "Giftz", _href: row.id ? `/gifting?post=${row.id}` : "/gifting" })),
     ...sells.map(row => ({ ...row, _board: "Sellz", _href: row.id ? `/sellz?post=${row.id}` : "/sellz" })),
-  ]), [gigs, gifts, sells]);
-  const visibleBoards = useMemo(() => boardRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [boardRows, boardKinds, q]);
+  ]), [gifts, sells]);
+  const visibleGigz = useMemo(() => gigRows.filter(row => rowMatchesQuery(row, q)), [gigRows, q]);
+  const visibleStuff = useMemo(() => stuffRows.filter(row => boardKinds.has(String(row._board)) && rowMatchesQuery(row, q)), [stuffRows, boardKinds, q]);
+  const visibleMizzed = useMemo(() => mizzed.filter(post => !q || `${post.title} ${post.body} ${spottedPlace(post)}`.toLowerCase().includes(q)), [mizzed, q]);
   const visibleHousing = useMemo(() => housing
     .filter(row => (!housingType || row.type === housingType) && (!housingSaved || Boolean(row.saved)) && (!housingTags.length || housingTags.every(tag => Array.isArray(row.tags) && row.tags.includes(tag))) && rowMatchesQuery(row, q))
     .map(row => ({ ...row, _board: "The HOÜS" })), [housing, housingType, housingSaved, housingTags, q]);
   const marks = useMemo<Mark[]>(() => [
     ...(showEvents ? visibleEvents.map(e => ({ key: `e-${e.id}-${e.dateStart}`, kind: "event" as const, lat: e.lat!, lng: e.lng!, item: e })) : []),
     ...(showPlaces ? placeMarks(mapPlaces) : []),
-    ...(showBoards ? rowMarks(visibleBoards, "board") : []),
+    ...(showGigz ? rowMarks(visibleGigz, "board") : []),
+    ...(showStuff ? rowMarks(visibleStuff, "board") : []),
     ...(showHouz ? rowMarks(visibleHousing, "board") : []),
-  ], [showEvents, showPlaces, showBoards, showHouz, visibleEvents, mapPlaces, visibleBoards, visibleHousing]);
+  ], [showEvents, showPlaces, showGigz, showStuff, showHouz, visibleEvents, mapPlaces, visibleGigz, visibleStuff, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
     if (!canOpenMapObjects) { setShowAuth(true); return; }
@@ -529,7 +538,7 @@ export default function ZaydarMapDemo() {
     }
   }, [canOpenMapObjects, goOverlay]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: `board-${row._board}-${row.id}`, kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
-  const toggleBoardKind = (kind: string) => updateParams(p => {
+  const toggleStuffKind = (kind: string) => updateParams(p => {
     const next = new Set(boardKinds);
     if (next.has(kind)) next.delete(kind); else next.add(kind);
     p.set("boards", [...next].join(","));
@@ -581,12 +590,28 @@ export default function ZaydarMapDemo() {
     </div>
     {placesLoading ? <p>Loading Placez…</p> : placesError ? <p role="alert">Placez could not load. <button type="button" onClick={() => void retryPlaces()}>Try again</button></p> : panelRows(nearbyPlaces as MapRow[], "places")}
   </section>;
-  const boardsPanel = <section className="zaydar-layer-panel" aria-labelledby="map-boards-title">
-    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-boards-title">Boards</h2></div>
-    <div className="zaydar-layer-rail" role="group" aria-label="Board kinds">
-      {["Gigz", "Giftz", "Sellz"].map(kind => <button type="button" key={kind} aria-pressed={boardKinds.has(kind)} onClick={() => toggleBoardKind(kind)}>{kind}</button>)}
+  const mizzedPanel = <section className="zaydar-layer-panel" aria-labelledby="map-mizzed-title">
+    <div className="zaydar-layer-panel__heading"><small>Map drawer</small><h2 id="map-mizzed-title">Mizzed Connections</h2></div>
+    {mizzedLoading ? <p role="status">Loading Mizzed Connections…</p> : mizzedError ? <p role="alert">Mizzed Connections could not load. <button type="button" onClick={() => void retryMizzed()}>Try again</button></p> : <div className="zaydar-layer-list">
+      {visibleMizzed.slice(0, 5).map(post => <button type="button" className="zaydar-layer-row" key={post.id} onClick={() => canOpenMapObjects ? goOverlay("mizzed", post.id) : setShowAuth(true)}>
+        <img src="/brand/family/mizzed-connection.svg" alt="" loading="lazy" />
+        <span className="zaydar-layer-row__copy"><strong>{post.title || post.body.slice(0, 80)}</strong><small>{spottedPlace(post)}</small></span>
+        <ChevronRight size={18} aria-hidden="true" />
+      </button>)}
+      {!visibleMizzed.length && <p className="zaydar-layer-empty" role="status">No Mizzed Connections match this search.</p>}
+    </div>}
+    <p className="zaydar-layer-location-note">Mizzed posts have no exact map location, so they appear in the drawer without pins.</p>
+  </section>;
+  const gigzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-gigz-title">
+    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-gigz-title">Gigz</h2></div>
+    {gigsLoading ? <p role="status">Loading Gigz…</p> : gigsError ? <p role="alert">Gigz could not load. <button type="button" onClick={() => void retryGigs()}>Try again</button></p> : panelRows(visibleGigz, "boards")}
+  </section>;
+  const stuffPanel = <section className="zaydar-layer-panel" aria-labelledby="map-stuff-title">
+    <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-stuff-title">Stuff</h2></div>
+    <div className="zaydar-layer-rail" role="group" aria-label="Stuff categories">
+      {["Giftz", "Sellz"].map(kind => <button type="button" key={kind} aria-pressed={boardKinds.has(kind)} onClick={() => toggleStuffKind(kind)}>{kind}</button>)}
     </div>
-    {gigsLoading || giftsLoading || sellsLoading ? <p role="status">Loading Boards…</p> : gigsError || giftsError || sellsError ? <p role="alert">Boards could not load. <button type="button" onClick={() => { void retryGigs(); void retryGifts(); void retrySells(); }}>Try again</button></p> : panelRows(visibleBoards, "boards")}
+    {giftsLoading || sellsLoading ? <p role="status">Loading Stuff…</p> : giftsError || sellsError ? <p role="alert">Stuff could not load. <button type="button" onClick={() => { void retryGifts(); void retrySells(); }}>Try again</button></p> : panelRows(visibleStuff, "boards")}
   </section>;
   const houzPanel = <section className="zaydar-layer-panel" aria-labelledby="map-houz-title">
     <div className="zaydar-layer-panel__heading"><small>Map layer</small><h2 id="map-houz-title">HOÜS</h2></div>
@@ -610,7 +635,9 @@ export default function ZaydarMapDemo() {
   const layers: ZaydarLayer[] = [
     { id: "events", label: "Eventz", color: "#FF00CC", enabled: showEvents, onToggle: () => toggleLayer("hideEvents"), panel: eventPanel, viewMore: [{ label: "View more Eventz", href: "/events" }] },
     { id: "places", label: "Placez", color: "#00FFFF", enabled: showPlaces, onToggle: () => toggleLayer("hidePlaces"), panel: placesPanel, viewMore: [{ label: "View more Placez", href: "/directory" }] },
-    { id: "boards", label: "Boards", color: "#8800FF", enabled: showBoards, onToggle: () => toggleLayer("hideBoards"), panel: boardsPanel, viewMore: [{ label: "Gigz", href: "/pride-work" }, { label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
+    { id: "mizzed", label: "Mizzed", color: "#FF00CC", enabled: true, panel: mizzedPanel, viewMore: [{ label: "More Mizzed", href: "/spotted" }] },
+    { id: "gigz", label: "Gigz", color: "#8800FF", enabled: showGigz, onToggle: () => toggleLayer("hideGigz"), panel: gigzPanel, viewMore: [{ label: "More Gigz", href: "/pride-work" }] },
+    { id: "stuff", label: "Stuff", color: "#CCFF00", enabled: showStuff, onToggle: () => toggleLayer("hideStuff"), panel: stuffPanel, viewMore: [{ label: "Giftz", href: "/gifting" }, { label: "Sellz", href: "/sellz" }] },
     { id: "houz", label: "HOÜS", color: "#00FFFF", enabled: showHouz, onToggle: () => toggleLayer("hideHouz"), panel: houzPanel, viewMore: [] },
   ];
 
@@ -660,6 +687,7 @@ export default function ZaydarMapDemo() {
     {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
     {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
     {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
+    {canOpenMapObjects && selectedMizzed && <SpottedDetailModal postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
     {canOpenMapObjects && selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}

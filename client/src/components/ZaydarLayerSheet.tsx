@@ -4,14 +4,14 @@ import { ChevronDown, House } from "lucide-react";
 import SmoothDrawer, { SmoothDrawerGroup, SmoothDrawerItem } from "./ui/smooth-drawer";
 import { NavGlassLayers, navGlassPointer } from "./ui/nav-glass";
 
-export type ZaydarLayerId = "events" | "places" | "boards" | "houz";
+export type ZaydarLayerId = "events" | "places" | "mizzed" | "gigz" | "stuff" | "houz";
 
 export type ZaydarLayer = {
   id: ZaydarLayerId;
   label: string;
   color: string;
   enabled: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   panel: ReactNode;
   viewMore: { label: string; href: string }[];
 };
@@ -19,6 +19,7 @@ export type ZaydarLayer = {
 export default function ZaydarLayerSheet({ layers, active, onActiveChange: setActive }: { layers: ZaydarLayer[]; active: ZaydarLayerId | null; onActiveChange: (id: ZaydarLayerId | null) => void }) {
   const lastActive = useRef<ZaydarLayerId>("events");
   const triggers = useRef(new Map<ZaydarLayerId, HTMLButtonElement>());
+  const chips = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const gesture = useRef<{ y: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
@@ -26,6 +27,9 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
   const open = active !== null;
 
   useEffect(() => { if (body.current) body.current.scrollTop = 0; if (active) lastActive.current = active; }, [active]);
+  useEffect(() => {
+    if (active && chips.current) triggers.current.get(active)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [active]);
 
   const closePanel = (restoreFocus = false) => {
     if (restoreFocus && active) triggers.current.get(active)?.focus({ preventScroll: true });
@@ -111,31 +115,41 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
         >
           <span />
         </button>
-        <div className="zaydar-layer-sheet__chips" role="group" aria-label="Map layer filters">
+        <div ref={chips} className="zaydar-layer-sheet__chips" role="group" aria-label="Map layer filters">
           {layers.map(layer => (
-            <div className="zaydar-layer-chip" data-active={active === layer.id} data-enabled={layer.enabled} key={layer.id} style={{ "--layer-color": layer.color } as CSSProperties}>
-              <button
-                type="button"
-                className="zaydar-layer-chip__toggle"
-                aria-label={`${layer.label} map filter`}
-                aria-pressed={layer.enabled}
-                title={`${layer.enabled ? "Hide" : "Show"} ${layer.label} pins`}
-                onClick={layer.onToggle}
-              >
-                {layer.id === "houz" && <House className="zaydar-layer-chip__house" size={16} aria-hidden="true" />}
-                <span>{layer.label}</span>
-              </button>
-              <button
+            <div className="zaydar-layer-chip" data-active={active === layer.id} data-enabled={layer.enabled} data-single={!layer.onToggle} key={layer.id} style={{ "--layer-color": layer.color } as CSSProperties}>
+              {layer.onToggle ? <>
+                <button
+                  type="button"
+                  className="zaydar-layer-chip__toggle"
+                  aria-label={`${layer.label} map filter`}
+                  aria-pressed={layer.enabled}
+                  title={`${layer.enabled ? "Hide" : "Show"} ${layer.label} pins`}
+                  onClick={layer.onToggle}
+                >
+                  {layer.id === "houz" && <House className="zaydar-layer-chip__house" size={16} aria-hidden="true" />}
+                  <span>{layer.label}</span>
+                </button>
+                <button
+                  type="button"
+                  ref={element => { if (element) triggers.current.set(layer.id, element); else triggers.current.delete(layer.id); }}
+                  className="zaydar-layer-chip__open"
+                  aria-label={`${active === layer.id ? "Close" : "Open"} ${layer.label} panel`}
+                  aria-controls={panelId}
+                  aria-expanded={active === layer.id}
+                  onClick={() => openLayer(layer.id)}
+                >
+                  <ChevronDown className="zaydar-layer-chip__chevron" size={16} aria-hidden="true" />
+                </button>
+              </> : <button
                 type="button"
                 ref={element => { if (element) triggers.current.set(layer.id, element); else triggers.current.delete(layer.id); }}
-                className="zaydar-layer-chip__open"
+                className="zaydar-layer-chip__open zaydar-layer-chip__single"
                 aria-label={`${active === layer.id ? "Close" : "Open"} ${layer.label} panel`}
                 aria-controls={panelId}
                 aria-expanded={active === layer.id}
                 onClick={() => openLayer(layer.id)}
-              >
-                <ChevronDown className="zaydar-layer-chip__chevron" size={16} aria-hidden="true" />
-              </button>
+              >{layer.label}<ChevronDown className="zaydar-layer-chip__chevron" size={16} aria-hidden="true" /></button>}
             </div>
           ))}
         </div>
@@ -145,7 +159,7 @@ export default function ZaydarLayerSheet({ layers, active, onActiveChange: setAc
       <SmoothDrawerGroup open={open}>
         <SmoothDrawerItem className="zaydar-layer-sheet__panel" key={active || "closed"}>
           {activeLayer?.panel}
-          {activeLayer && <label className="zaydar-layer-visibility">
+          {activeLayer?.onToggle && <label className="zaydar-layer-visibility">
             <input type="checkbox" checked={activeLayer.enabled} onChange={activeLayer.onToggle} />
             Show {activeLayer.label} pins on map
           </label>}
