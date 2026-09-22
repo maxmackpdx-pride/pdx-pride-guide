@@ -9,13 +9,13 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { BOARD_NAV, EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import { EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
 import { HologramWaypoint as MapzMark } from "@/components/ui/hero-z-hologram";
-import { CalendarDays, Compass, LayoutGrid, MessageCircle } from "lucide-react";
+import { CalendarDays, Compass, TreePine, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 // Preserve access to the destinations that do not occupy a bottom-bar tab.
@@ -67,17 +67,16 @@ export default function MobileBottomNav() {
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
   const [eventsOpen, setEventsOpen] = useState(false);
-  const [spaceOpen, setSpaceOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
   const exploreTriggerRef = useRef<HTMLButtonElement>(null);
+  const outzTriggerRef = useRef<HTMLButtonElement>(null);
   const [outzOpen, setOutzOpen] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const overlayOpen = eventsOpen || spaceOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
+  const overlayOpen = eventsOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
-    if (except !== "boards") setSpaceOpen(false);
     if (except !== "explore") setExploreOpen(false);
     if (except !== "outz") setOutzOpen(false);
     if (except !== "hub-sheet") setHubOpen(false);
@@ -95,17 +94,17 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     setEventsOpen(false);
-    setSpaceOpen(false);
     setExploreOpen(false);
     setOutzOpen(false);
     setHubOpen(false);
   }, [location]);
 
   useEffect(() => {
-    const close = () => { setEventsOpen(false); setSpaceOpen(false); setExploreOpen(false); setOutzOpen(false); setHubOpen(false); };
+    const close = () => { setEventsOpen(false); setExploreOpen(false); setOutzOpen(false); setHubOpen(false); };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        if (exploreOpen || outzOpen) exploreTriggerRef.current?.focus();
+        if (exploreOpen) exploreTriggerRef.current?.focus();
+        if (outzOpen) outzTriggerRef.current?.focus();
         close();
       }
     };
@@ -116,10 +115,10 @@ export default function MobileBottomNav() {
     return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
   }, [exploreOpen, outzOpen]);
 
-  const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href)) || navLinkActive(location, OUTZ_INDEX);
+  const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href));
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const boardsActive = BOARD_NAV.some(item => navLinkActive(location, item.href));
-  const activeIndex = open || showAuth ? 4 : spaceOpen ? 3 : exploreOpen || outzOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : boardsActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
+  const outzActive = navLinkActive(location, OUTZ_INDEX);
+  const activeIndex = open || showAuth ? 4 : outzOpen ? 3 : exploreOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -136,15 +135,6 @@ export default function MobileBottomNav() {
     }
     dismissExcept("events");
     setEventsOpen(true);
-  };
-
-  const handleSpace = () => {
-    if (spaceOpen) {
-      setSpaceOpen(false);
-      return;
-    }
-    dismissExcept("boards");
-    setSpaceOpen(true);
   };
 
   const handleExplore = () => {
@@ -205,26 +195,6 @@ export default function MobileBottomNav() {
         </>
       )}
 
-      {spaceOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => setSpaceOpen(false)} aria-hidden="true" />
-          <div className="hub-more-sheet hub-more-sheet--site hub-more-sheet--boards pdx-liquid-overlay" data-accent="violet" role="dialog" aria-label="Boards">
-            <h3>Boards</h3>
-            {BOARD_NAV.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
-                data-accent={item.accent}
-                onClick={() => setSpaceOpen(false)}
-              >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
       {exploreOpen && (
         <>
           <div className="hub-more-backdrop" onClick={() => { setExploreOpen(false); exploreTriggerRef.current?.focus(); }} aria-hidden="true" />
@@ -235,24 +205,14 @@ export default function MobileBottomNav() {
                 <span>{item.label}</span>
               </Link>
             ))}
-            <button
-              type="button"
-              className={`hub-more-item hub-more-item--drawer${outzOpen ? " is-active" : ""}`}
-              data-accent="orange"
-              aria-expanded={outzOpen}
-              aria-haspopup="dialog"
-              onClick={handleOutz}
-            >
-              <span>OutZide</span>
-            </button>
           </div>
         </>
       )}
 
       {outzOpen && (
         <>
-          <div className="hub-more-backdrop" onClick={() => setOutzOpen(false)} aria-hidden="true" />
-          <div className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="OutZide, most visited">
+          <div className="hub-more-backdrop" onClick={() => { setOutzOpen(false); outzTriggerRef.current?.focus(); }} aria-hidden="true" />
+          <div id="mobile-outz-sheet" className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="OutZide, most visited">
             <span className="hub-outz-drawer__kicker">OutZide &middot; Most Visited</span>
             {OUTZ_NAV.map((item, index) => (
               <Link
@@ -365,10 +325,10 @@ export default function MobileBottomNav() {
           <button
             type="button"
             ref={exploreTriggerRef}
-            className={tabClass(exploreActive || exploreOpen || outzOpen, "blue")}
+            className={tabClass(exploreActive || exploreOpen, "blue")}
             data-accent="blue"
             aria-label="Explore"
-            aria-expanded={exploreOpen || outzOpen}
+            aria-expanded={exploreOpen}
             aria-haspopup="dialog"
             aria-controls={exploreOpen ? "mobile-explore-sheet" : undefined}
             onClick={handleExplore}
@@ -391,15 +351,17 @@ export default function MobileBottomNav() {
 
           <button
             type="button"
-            className={tabClass(boardsActive || spaceOpen, "purple")}
-            data-accent="violet"
-            aria-expanded={spaceOpen}
+            ref={outzTriggerRef}
+            className={tabClass(outzActive || outzOpen, "orange")}
+            data-accent="orange"
+            aria-expanded={outzOpen}
             aria-haspopup="dialog"
-            aria-label="Boards"
-            onClick={handleSpace}
+            aria-controls={outzOpen ? "mobile-outz-sheet" : undefined}
+            aria-label="OutZide"
+            onClick={handleOutz}
           >
-            <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Boards</span>
+            <span className="znav-icon-row"><TreePine size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-caption">OutZide</span>
           </button>
 
           <button
