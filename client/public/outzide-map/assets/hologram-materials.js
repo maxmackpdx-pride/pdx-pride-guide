@@ -76,7 +76,11 @@ export function drawGroundRipples(ctx, anchor, radius, color, seconds, reducedMo
   ctx.save();
   ctx.translate(anchor.x, anchor.y);
   ctx.rotate(-.08);
-  ctx.strokeStyle=color;
+  // Flat, opaque water replaces the spherical light core used by other waypoints.
+  const rgb=[1,3,5].map(start=>Math.round(parseInt(color.slice(start,start+2),16)*.38));
+  ctx.globalAlpha=1;ctx.fillStyle=`rgb(${rgb.join(',')})`;
+  ctx.beginPath();ctx.ellipse(0,0,radius,radius*7.5/27,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=color;ctx.globalAlpha=.65;ctx.lineWidth=.8;ctx.stroke();
   for(let i=0;i<3;i++){
     const progress=reducedMotion?(i+.5)/3:((seconds/3.6+i/3+phase)%1+1)%1;
     const waveRadius=radius*(.55+progress*1.3);
