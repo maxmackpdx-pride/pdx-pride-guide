@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import type { ProfileEvent } from "./types";
 import "./FlyerStash.css";
@@ -204,18 +205,19 @@ export default function FlyerStash({
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduced = prefersReducedMotion();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setActive(0);
   }, [n]);
 
   useEffect(() => {
-    if (paused || n <= 1 || reduced) return;
+    if (paused || n <= 1 || reduced || isMobile) return;
     const id = window.setInterval(() => {
       setActive((a) => a + 1);
     }, CYCLE_MS);
     return () => window.clearInterval(id);
-  }, [paused, n, reduced]);
+  }, [paused, n, reduced, isMobile]);
 
   const act = n > 0 ? ((active % n) + n) % n : 0;
 
@@ -371,7 +373,7 @@ export default function FlyerStash({
           <div className="flyer-stash__stage-dots" aria-hidden />
           <div className="flyer-stash__front-label">Front · {stats.frontTitle}</div>
 
-          <div className="flyer-stash__fan-anchor">
+          <div className="flyer-stash__fan-anchor" role="region" aria-label="Past events">
             {laidOut.map((f) => (
               <button
                 key={f.id}

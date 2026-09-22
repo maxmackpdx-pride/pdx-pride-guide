@@ -121,7 +121,17 @@ export type OwnedBusiness = {
   imageUrl: string | null;
 };
 
+export type ProfileAdventure = {
+  id: number;
+  placeId: string;
+  calendarDate: string;
+  arrivalHour: number;
+  departHour: number;
+};
+
 export type MemberProfileData = {
+  outzAdventures?: { upcoming: ProfileAdventure[]; previous: ProfileAdventure[] };
+
   username: string;
   displayName: string | null;
   pronouns?: string | null;

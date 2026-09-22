@@ -535,3 +535,34 @@ html.calm-mode .flyer-stash__dot,
 html.calm-mode .flyer-stash__card-holo {
   animation: none !important;
 }
+
+/* Mobile past events remain in document order in a swipeable rail. */
+@media (max-width: 767px) {
+  .flyer-stash__stage { min-height: 0; }
+  .flyer-stash__front-label,
+  .flyer-stash__controls { display: none; }
+  .flyer-stash__fan-anchor {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 20px 16px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+  }
+  .flyer-stash__card {
+    position: relative;
+    flex: 0 0 180px;
+    width: 180px;
+    height: 256px;
+    margin: 0;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
+    scroll-snap-align: start;
+  }
+}

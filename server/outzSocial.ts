@@ -74,6 +74,14 @@ function ensureOutzSocialSchema() {
       CREATE INDEX IF NOT EXISTS outz_wall_comments_post_idx
         ON outz_wall_comments(post_id, created_at ASC);
     `);
+    const checkinColumns = sqlite.prepare("PRAGMA table_info(outz_checkins)").all() as Array<{ name: string }>;
+    if (!checkinColumns.some(column => column.name === "cancelled_at")) {
+      sqlite.transaction(() => {
+        sqlite.exec("ALTER TABLE outz_checkins ADD COLUMN cancelled_at TEXT");
+        // Legacy inactive rows cannot distinguish cancellation from expiry.
+        sqlite.exec("UPDATE outz_checkins SET cancelled_at = 'legacy-inactive' WHERE is_active = 0");
+      })();
+    }
     const wallColumns = sqlite.prepare("PRAGMA table_info(outz_wall_posts)").all() as Array<{ name: string }>;
     if (!wallColumns.some(column => column.name === "updated_at")) sqlite.exec("ALTER TABLE outz_wall_posts ADD COLUMN updated_at TEXT");
   } catch (error) {
@@ -140,7 +148,7 @@ export function upsertOutzCheckin(data: OutzCheckinInput) {
   if (existing) {
     sqlite.prepare(`
       UPDATE outz_checkins
-      SET arrival_hour = ?, depart_hour = ?, note = ?, is_anonymous = ?, is_active = 1, expires_at = ?, created_at = ?
+      SET arrival_hour = ?, depart_hour = ?, note = ?, is_anonymous = ?, is_active = 1, cancelled_at = NULL, expires_at = ?, created_at = ?
       WHERE id = ?
     `).run(data.arrivalHour, data.departHour, data.note, data.isAnonymous ? 1 : 0, expiresAt, createdAt, existing.id);
     return { id: existing.id };
@@ -153,7 +161,7 @@ export function upsertOutzCheckin(data: OutzCheckinInput) {
 }
 
 export function deleteOutzCheckin(id: number, userId: number) {
-  const result = sqlite.prepare("UPDATE outz_checkins SET is_active = 0 WHERE id = ? AND user_id = ?")
+  const result = sqlite.prepare("UPDATE outz_checkins SET is_active = 0, cancelled_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?")
     .run(id, userId);
   return result.changes > 0;
 }
@@ -280,4 +288,19 @@ export function deleteOutzWallPost(id: number, userId: number) {
     sqlite.prepare("DELETE FROM outz_wall_comments WHERE post_id=?").run(id);
     return sqlite.prepare("DELETE FROM outz_wall_posts WHERE id=? AND user_id=?").run(id, userId).changes > 0;
   })();
+}
+
+/** Private profile history; check-in identities are not public profile data. */
+export function getOutzProfileAdventures(userId: number, viewerUserId?: number, today = pacificTodayDate()) {
+  if (userId !== viewerUserId) return undefined;
+  const rows = sqlite.prepare(`SELECT id, place_id AS placeId, calendar_date AS calendarDate,
+    arrival_hour AS arrivalHour, depart_hour AS departHour
+    FROM outz_checkins WHERE user_id = ? AND cancelled_at IS NULL
+    ORDER BY calendar_date ASC, arrival_hour ASC`).all(userId) as Array<{
+      id: number; placeId: string; calendarDate: string; arrivalHour: number; departHour: number;
+    }>;
+  return {
+    upcoming: rows.filter(row => row.calendarDate >= today),
+    previous: rows.filter(row => row.calendarDate < today).reverse(),
+  };
 }

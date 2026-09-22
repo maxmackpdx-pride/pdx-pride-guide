@@ -24,6 +24,7 @@ import Top8Editor from "@/components/profile/Top8Editor";
 import HostingPanel from "@/components/profile/HostingPanel";
 import TheBigOne from "@/components/profile/TheBigOne";
 import GoingRail from "@/components/profile/GoingRail";
+import OutzAdventures from "@/components/profile/OutzAdventures";
 import FlyerStash from "@/components/profile/FlyerStash";
 import UpdatesPanel from "@/components/profile/UpdatesPanel";
 import ProfileFooter from "@/components/profile/ProfileFooter";
@@ -382,6 +383,8 @@ export default function MemberProfile() {
           events={stashEvents}
           onEventClick={(e) => openEvent(e.id)}
         />
+
+        {isOwner && <OutzAdventures adventures={apiData.outzAdventures} />}
 
         {!isOwner && <SafetyGuide context="profile" compact />}
         <ProfileFooter username={data.username} />

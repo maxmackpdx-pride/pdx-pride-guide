@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import { after, test } from "node:test";
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import path from "node:path";
+mkdirSync(".local", { recursive: true });
+const dir = mkdtempSync(path.resolve(".local/outz-profile-test-"));
+process.env.DATABASE_PATH = path.join(dir, "data.db");
+copyFileSync("data.db", process.env.DATABASE_PATH);
+const { sqlite } = await import("./storage");
+const { getOutzProfileAdventures, upsertOutzCheckin, deleteOutzCheckin, expireOutzCheckins } = await import("./outzSocial");
+after(() => { sqlite.close(); rmSync(dir, { recursive: true, force: true }); });
+const userId = Number(sqlite.prepare("INSERT INTO users(username,email,password_hash) VALUES('adventure_test','adventure@example.test','test-only')").run().lastInsertRowid);
+const plan = (calendarDate: string, placeId = "silver-falls") => upsertOutzCheckin({ userId, placeId, calendarDate, arrivalHour: 10, departHour: 13, note: "Private note", isAnonymous: true });
+
+test("profile adventures keep expired history, separate dates, omit cancellations and protect identities", () => {
+  const past = plan("2000-01-01");
+  const future = plan("2099-01-01");
+  const today = plan("2050-01-01");
+  const cancelled = plan("2099-02-01");
+  assert.equal(deleteOutzCheckin(cancelled.id, userId + 1), false);
+  deleteOutzCheckin(cancelled.id, userId);
+  expireOutzCheckins();
+  const result = getOutzProfileAdventures(userId, userId, "2050-01-01")!;
+  assert.deepEqual(result.upcoming.map(row => row.id), [today.id, future.id]);
+  assert.deepEqual(result.previous.map(row => row.id), [past.id]);
+  assert.equal("note" in result.previous[0], false);
+  assert.equal(getOutzProfileAdventures(userId), undefined);
+  assert.equal(getOutzProfileAdventures(userId, userId + 1), undefined);
+  plan("2099-02-01");
+  assert.equal(getOutzProfileAdventures(userId, userId, "2050-01-01")!.upcoming.length, 3);
+  deleteOutzCheckin(past.id, userId);
+  assert.equal(getOutzProfileAdventures(userId, userId, "2050-01-01")!.previous.length, 0);
+});

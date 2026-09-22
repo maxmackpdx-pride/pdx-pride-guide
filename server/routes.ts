@@ -172,6 +172,7 @@ import {
   getOutzWallPosts,
   getOutzChatMessages,
   getOutzCheckins,
+  getOutzProfileAdventures,
   postOutzChatMessage,
   upsertOutzPlaceRating,
   upsertOutzCheckin,
@@ -4030,6 +4031,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const username = String(req.params.username || "").trim().replace(/^@/, "");
     const profile = storage.getPublicProfile(username, req.session?.userId ?? null, sessionIsAdmin(req));
     if (!profile) return res.status(404).json({ error: "Not found" });
+    if (profile.isOwner) profile.outzAdventures = getOutzProfileAdventures(req.session.userId, req.session.userId);
     res.json(profile);
   });
 
