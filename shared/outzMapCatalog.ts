@@ -855,5 +855,13 @@ export default [
   {
     "id": "glass-bar-island",
     "name": "Glass Bar Island · BRING Beach"
+  },
+  {
+    "id": "highlands-resort",
+    "name": "The Highlands"
+  },
+  {
+    "id": "the-woods-guerneville",
+    "name": "The Woods · Cottages & Cabins"
   }
 ];
