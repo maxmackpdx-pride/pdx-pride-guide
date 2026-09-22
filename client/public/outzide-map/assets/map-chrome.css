@@ -1,0 +1,95 @@
+/* Mapz and Outzide share the frame; each room owns its color and typography. */
+.outzide-shell,
+.living-map-page {
+  --map-chrome-radius: 18px;
+  --map-control-radius: 12px;
+  --map-chrome-rim: #050706;
+  --map-chrome-shadow: 0 0 0 1px var(--map-chrome-rim), 0 16px 44px #0008, inset 0 1px 0 #ffffff16;
+}
+.outzide-shell {
+  --map-chrome-ink: #101a16;
+  --map-chrome-light: #a9bc98;
+  --map-chrome-accent: var(--orange);
+  --map-chrome-text: var(--ink);
+}
+.living-map-page {
+  --map-chrome-ink: #090b13;
+  --map-chrome-light: #94b5cf;
+  --map-chrome-accent: var(--panel-cyan, #19e3ff);
+  --map-chrome-text: #f5f6ff;
+}
+/* Outzide's layered glass, contained in Mapz's dark dock rim. */
+.outzide-shell :is(.topbar,.fieldbar,.discovery,.map-controls,.map-legend,#selection-dock),
+.living-map-page :is(.living-map-drawer.pdx-glass-rebind,.living-map-screen-rail.pdx-glass-rebind,.living-map-key__panel,.living-map-mobile-filters__rail) {
+  background: linear-gradient(145deg,color-mix(in srgb,var(--map-chrome-light) 13%,transparent),transparent 58%),color-mix(in srgb,var(--map-chrome-ink) 90%,transparent);
+  border: 1px solid var(--map-chrome-rim);
+  border-radius: var(--map-chrome-radius);
+  box-shadow: var(--map-chrome-shadow);
+  backdrop-filter: blur(24px) saturate(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+}
+.outzide-shell .topbar { gap: 22px; }
+.outzide-shell .topbar nav {
+  gap: 3px; padding: 4px; border: 1px solid #ffffff12;
+  border-radius: var(--map-control-radius); background: #0003;
+}
+.outzide-shell .topbar nav button { border-radius: 8px; }
+.outzide-shell .topbar nav button[aria-pressed=true] {
+  box-shadow: inset 0 -2px 0 var(--lime),inset 0 1px 0 #ffffff16;
+}
+.outzide-shell .fieldbar { top: 88px; padding: 3px; gap: 8px; height: 50px; }
+.outzide-shell .filters { gap: 5px; padding: 1px; }
+.outzide-shell :is(.filters button,.browse-toggle,#updates-button) {
+  border-radius: var(--map-control-radius); min-height: 42px;
+  transition: background .16s,border-color .16s,box-shadow .16s;
+}
+.outzide-shell .filters button { background: #0002; border-color: transparent; }
+.outzide-shell .filters button[aria-pressed=true] {
+  border-color: #9bb67b77; background: #bada8721;
+  box-shadow: inset 0 -2px 0 var(--lime),inset 0 1px 0 #ffffff16;
+}
+.outzide-shell .header-actions #updates-button { padding: 8px 12px; border: 1px solid #ffffff18; background: #0002; }
+.outzide-shell .search,
+.living-map-page .living-map-search { border-radius: 999px; background: #0004; border-color: #ffffff26; }
+.outzide-shell .search:focus-within,
+.living-map-page .living-map-search:focus-within { box-shadow: 0 0 0 2px var(--map-chrome-accent); }
+.outzide-shell .search input:focus-visible { outline: none; }
+.outzide-shell .map-controls { padding: 5px; gap: 3px; align-items: stretch; border-radius: 15px; }
+.outzide-shell .map-controls button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; box-shadow: none; align-self: center; }
+.outzide-shell .map-controls #fire-toggle { align-self: stretch; border-bottom: 1px solid #ffffff20; border-radius: 9px 9px 4px 4px; }
+.outzide-shell .map-controls button:hover { background: #ffffff0d; }
+.outzide-shell .map-controls button:focus-visible { outline-offset: -2px; }
+.outzide-shell .map-bottom { align-items: flex-start; }
+.outzide-shell .map-key-toggle { order: 2; pointer-events: auto; background: var(--map-chrome-ink); border: 1px solid var(--map-chrome-rim); box-shadow: var(--map-chrome-shadow); border-radius: var(--map-control-radius); min-height: 44px; font-size: 13px; }
+.outzide-shell .map-key-toggle[aria-expanded=true] { color: var(--lime); box-shadow: var(--map-chrome-shadow),inset 0 -2px 0 var(--lime); }
+.outzide-shell .map-legend { order: 1; pointer-events: auto; max-height: 30dvh; overflow: auto; padding: 14px; gap: 14px 20px; }
+.outzide-shell .map-hint { order: 3; border-radius: 8px; background: #101a16cc; }
+.outzide-shell #selection-dock { overflow: hidden; }
+.outzide-shell #selection-dock button { border-radius: inherit; }
+/* Keep Mapz's category/day colors; borrow Outzide's calm glass behind content. */
+.living-map-page .living-map-screen-rail__items button {
+  background: linear-gradient(120deg,color-mix(in srgb,var(--c) 9%,transparent),#090b13cc);
+  box-shadow: inset 0 1px 0 #ffffff0c;
+}
+.living-map-page .living-map-screen-rail__items button:hover {
+  box-shadow: inset 0 1px 0 #ffffff20,0 0 10px color-mix(in srgb,var(--c) 20%,transparent);
+}
+.living-map-page :is(.living-map-key__head,.living-map-filter-panel-head) { background: #090b13e8; border-bottom-color: #ffffff1a; }
+.living-map-page .living-map-drawer-scroll { scrollbar-width: thin; scrollbar-color: #546273 transparent; }
+.living-map-page :is(.living-map-chips,.living-map-time) { scroll-padding-inline: 4px; }
+.living-map-page .living-map-chips button { border-radius: var(--map-control-radius); }
+.living-map-page .living-map-chips button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media(max-width:760px) {
+  .outzide-shell .topbar { gap: 5px; border-radius: 14px; }
+  .outzide-shell .topbar nav { padding: 2px; gap: 0; }
+  .outzide-shell .fieldbar { top: 78px; height: 48px; padding: 4px; border-radius: 14px; }
+  .outzide-shell .filters button,.outzide-shell .browse-toggle { min-height: 38px; }
+  .outzide-shell .header-actions #updates-button { padding: 5px 7px; min-height: 36px; }
+  .outzide-shell .map-legend { display: flex; max-width: min(360px,calc(100vw - 90px)); max-height: 35dvh; }
+  .outzide-shell .map-hint { display: none; }
+  .outzide-shell .map-controls { padding: 3px; }
+  .outzide-shell .map-controls button { width: 40px; height: 40px; min-height: 40px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .outzide-shell :is(.filters button,.browse-toggle,#updates-button) { transition: none; }
+}

@@ -215,3 +215,7 @@ document.addEventListener('submit',e=>{
 
 setInterval(()=>{if(!document.hidden&&!$('#trail-feed').hidden)refreshFeed()},60000);
 init();
+
+// Same compact key interaction as Mapz; Escape returns focus to its trigger.
+$('#map-key-toggle').onclick=()=>{const open=$('#map-key').hidden;$('#map-key').hidden=!open;$('#map-key-toggle').setAttribute('aria-expanded',String(open));};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#map-key').hidden&&!$('#detail').open&&!$('#utility').open){$('#map-key').hidden=true;$('#map-key-toggle').setAttribute('aria-expanded','false');$('#map-key-toggle').focus();}});
