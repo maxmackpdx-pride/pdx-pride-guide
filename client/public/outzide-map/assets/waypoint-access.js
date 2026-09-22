@@ -1,15 +1,15 @@
 // The parent owns authentication; no session data is copied into the map iframe.
-export function createWaypointAccess({requestSignup,onRevoke}){
+export function createWaypointAccess({requestSignup,onRevoke,guestPlaceId=null}){
  let allowed=false,pending=null;
  return {
-  run(action,placeId){if(allowed){action();return true;}pending=action;requestSignup(placeId);return false;},
+  run(action,placeId){if(allowed||(guestPlaceId&&placeId===guestPlaceId)){action();return true;}pending=action;requestSignup(placeId);return false;},
   update(value){allowed=value===true;if(allowed&&pending){const action=pending;pending=null;action();}else if(!allowed)onRevoke();},
   cancel(){pending=null;},
  };
 }
 export function installWaypointAccess(onRevoke){
  const embedded=parent!==window;
- const gate=createWaypointAccess({onRevoke,requestSignup:placeId=>{
+ const gate=createWaypointAccess({onRevoke,guestPlaceId:new URL(location.href).searchParams.get('guestPlace'),requestSignup:placeId=>{
   if(embedded)parent.postMessage({source:'outzide-map',type:'require-auth',placeId},location.origin);
   else {
    const target=new URL('/outzide',/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://www.zaylist.com':location.origin);

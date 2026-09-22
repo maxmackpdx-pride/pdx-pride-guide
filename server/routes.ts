@@ -1464,6 +1464,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  app.get('/api/og/outzide/:id', async (req, res) => {
+    try {
+      const {renderOutzShareCard} = await import('./outzShareCards');
+      const image = await renderOutzShareCard(String(req.params.id));
+      if(!image)return res.status(404).json({error:'Destination not found'});
+      return res.set({'Content-Type':'image/png','Cache-Control':'public, max-age=3600, stale-while-revalidate=86400'}).send(image);
+    } catch(error) {console.error('Outzide share image:',error);return res.status(500).json({error:'Image unavailable'});}
+  });
+
   // 1200×630 branded social cards (replace raw flyer/logo in og:image)
   app.get("/api/og/event/:id", async (req, res) => {
     try {

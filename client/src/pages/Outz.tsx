@@ -1,3 +1,6 @@
+import PageRecovery from "@/components/PageRecovery";
+import { useQuery } from "@tanstack/react-query";
+import { outzShareId, outzSharePath } from "@shared/outzShare";
 import AuthModal from "@/components/AuthModal";
 import {useAuth} from "@/context/AuthContext";
 import { useEffect, useRef, useState } from "react";
@@ -8,8 +11,16 @@ import { shareCardUrl } from "@shared/shareCards";
 export type OutzDiscoveryPlace = { id: string; name: string; region: string; kind: string; short: string; accent: string; cardAccent?: string; note: string; href: string; lat?: number; lng?: number; logo?: string };
 
 export default function Outz() {
-  usePageSeo("Outzide | Northwest field map | Zaylist", "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.", {
-    image: shareCardUrl("outzide"),
+  const sharedId = outzShareId(window.location.pathname);
+  const {data: sharedPlace, isPending: sharePending, isError: shareError, refetch: retryShare} = useQuery({queryKey: ['outz-share', sharedId], enabled: !!sharedId, queryFn: async () => {
+    const response = await fetch('/outzide-map/places.json');
+    if (!response.ok) throw new Error('Destination unavailable');
+    const data = await response.json();
+    return data.places.find((place: {id: string; name: string}) => place.id === sharedId) as {id: string; name: string} | undefined ?? null;
+  }});
+  usePageSeo(sharedPlace ? sharedPlace.name + ' | Outzide by Zaylist' : "Outzide | Northwest field map | Zaylist", "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.", {
+    image: sharedId ? 'https://www.zaylist.com/api/og/outzide/' + encodeURIComponent(sharedId) + '?v=1' : shareCardUrl("outzide"),
+    url: sharedId ? 'https://www.zaylist.com' + outzSharePath(sharedId) : undefined,
     imageAlt: "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
   });
   const frame = useRef<HTMLIFrameElement>(null);
@@ -39,5 +50,6 @@ export default function Outz() {
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, []);
-  return <><iframe onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260922&place=" + encodeURIComponent(new URLSearchParams(window.location.search).get("place") || "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} />{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+  if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="Outzide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
+  return <><iframe onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=20260922&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} />{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

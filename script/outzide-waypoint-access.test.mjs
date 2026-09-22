@@ -13,3 +13,13 @@ test('dismissal drops pending intent; logout revokes open-card access',()=>{
  gate.update(false);gate.run(()=>opened++,'beach');assert.equal(opened,0);assert.equal(revoked,1);
  gate.update('true');assert.equal(opened,0,'only an actual boolean grants access');
 });
+test('a shared destination opens for guests without granting access to other destinations',()=>{
+ const requested=[],opened=[];const gate=createWaypointAccess({guestPlaceId:'shared-trail',requestSignup:id=>requested.push(id),onRevoke(){}});
+ assert.equal(gate.run(()=>opened.push('shared'),'shared-trail'),true);
+ assert.equal(gate.run(()=>opened.push('other'),'another-trail'),false);
+ assert.deepEqual(opened,['shared']);assert.deepEqual(requested,['another-trail']);
+ gate.cancel();gate.update(false);
+ assert.equal(gate.run(()=>opened.push('shared-again'),'shared-trail'),true);
+ assert.equal(gate.run(()=>opened.push('cluster'),'cluster:shared-trail,another-trail'),false);
+ assert.deepEqual(opened,['shared','shared-again']);
+});

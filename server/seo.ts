@@ -1,3 +1,5 @@
+import { outzShareId } from "@shared/outzShare";
+import { getOutzSharePlace } from "./outzShareCards";
 import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import { buildCartoBasemapHead } from "./cartoSnippet";
 import { storage } from "./storage";
@@ -513,6 +515,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const events = getLiveEventsForSeo();
   const canonical = buildCanonicalUrl(requestPath);
   const pathKey = (requestPath.split("?")[0] || "/").replace(/\/$/, "") || "/";
+  const sharedOutz = getOutzSharePlace(outzShareId(pathKey));
   const eventId = parseEventIdFromPath(requestPath);
   const dbEvent = eventId != null ? storage.getEvent(eventId) : null;
   const liveEvent = dbEvent?.status === "LIVE" ? dbEvent : null;
@@ -539,14 +542,14 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
               : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
-  const pageTitle = liveEvent
+  const pageTitle = sharedOutz ? sharedOutz.name + " | Outzide by Zaylist" : liveEvent
     ? `${liveEvent.title} | Portland Queer Events | Zaylist`
     : livePlace
       ? `${livePlace.name} | Queer Portland Directory | Zaylist`
       : liveProfile
         ? `${liveProfile.displayName || liveProfile.username} (@${liveProfile.username}) | Zaylist`
         : routeSeo.title;
-  const pageDescription = liveEvent
+  const pageDescription = sharedOutz ? "Explore " + sharedOutz.name + " · " + sharedOutz.region + ". View this destination on Outzide by Zaylist. No account needed to open this shared location." : liveEvent
     ? truncateText(
         `${liveEvent.venueName || "Portland"}${liveEvent.neighborhood ? ` · ${liveEvent.neighborhood}` : ""}. ${liveEvent.description || ""}`,
         160,
@@ -577,7 +580,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   // Branded share cards: per-entity dynamic OG, else static board share art, else home fallback.
   const boardShareKey =
     !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(pathKey) : null;
-  const pageImage = liveEvent
+  const pageImage = sharedOutz ? `${SITE_URL}/api/og/outzide/${encodeURIComponent(sharedOutz.id)}?v=1` : liveEvent
     ? `${SITE_URL}/api/og/event/${liveEvent.id}`
     : livePlace
       ? `${SITE_URL}/api/og/place/${livePlace.id}`
@@ -641,7 +644,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     url: pageUrl,
     image: pageImage,
     imageAlt: decodeHtmlEntities(
-      liveEvent
+      sharedOutz ? sharedOutz.name + " — location illustration with Outzide and Zaylist logos" : liveEvent
         ? liveEvent.title
         : livePlace
           ? livePlace.name

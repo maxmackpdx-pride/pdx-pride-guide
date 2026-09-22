@@ -12,7 +12,7 @@ const APP_PATHS = new Set([
 ]);
 function isAppPath(pathname: string) {
   const normalized = pathname.replace(/\/+$/, "").toLowerCase() || "/";
-  return APP_PATHS.has(normalized) || /^\/(?:events|directory)\/[^/]+(?:\/[^/]+)?$/.test(normalized)
+  return /^\/outzide\/share\/[^/]+$/.test(normalized) || APP_PATHS.has(normalized) || /^\/(?:events|directory)\/[^/]+(?:\/[^/]+)?$/.test(normalized)
     || /^\/(?:z|u|outzide|the-hauz)\/[^/]+$/.test(normalized) || /^\/submit\/claim\/[^/]+$/.test(normalized);
 }
 

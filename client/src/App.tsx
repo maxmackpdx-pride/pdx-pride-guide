@@ -202,6 +202,7 @@ function AppLayout() {
             </Route>
             <Route path={/^\/outz(?:\/.*)?$/i} component={LegacyOutzRedirect} />
             <Route path="/outzide" component={Outz} />
+            <Route path="/outzide/share/:placeId" component={Outz} />
             <Route path="/outzide/rooster-rock" component={RoosterRock} />
             <Route path="/outzide/sauvie-island" component={SauvieIsland} />
             <Route path="/outzide/:placeSlug" component={OutzPlace} />
