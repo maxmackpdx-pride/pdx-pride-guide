@@ -53,7 +53,8 @@ function placePoint(place: { lat: number; lon: number }) {
 const RIVERS = [
   { name: "Willamette River", lat: 45.552, lon: -122.688 },
 ];
-const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI;
+// Face the venue-rich reference view, with Portland left of center.
+const INITIAL_YAW = -warp((tileX(START_LOCATION.lon)-CENTER[0])/SPAN[0],-.15,5)*Math.PI + .47;
 const MARKERS = PLACES.map(place => ({ ...place, point: placePoint(place) }));
 // Decorative product waypoints, not real listings or claimed venue locations.
 // One per longitude sector keeps the random anchors spread around the globe.
@@ -335,10 +336,11 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
           if (!still) state.progress=Math.max(0,Math.min(1,state.progress+(state.closing?-1:1)*dt/2200));
           if (state.closing && state.progress===0) { states.delete(key); lastShown.current.set(key,elapsed); }
         }
+        const initialReveal = states.size===0 && lastShown.current.size===0;
         const candidates = projected.filter(venue=>venue.anchor.z>.3 && !states.has(venue.phase));
         // Farthest-first picks keep the open set distributed over the visible
         // geography, while a cooldown gives other venues a turn.
-        while (states.size<MAX_HOLOGRAMS && candidates.length && (still || elapsed>=nextOpen.current)) {
+        while (states.size<MAX_HOLOGRAMS && candidates.length && (initialReveal || still || elapsed>=nextOpen.current)) {
           let best=0, bestScore=-Infinity;
           candidates.forEach((venue,index)=>{
             const distance=states.size ? Math.min(...[...states.keys()].map(key=>{
@@ -351,7 +353,7 @@ export function PortlandMetroGlobe({ active, still }: { active: boolean; still: 
             if(score>bestScore){best=index;bestScore=score;}
           });
           const venue=candidates.splice(best,1)[0];
-          states.set(venue.phase,{progress:still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0});
+          states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0});
           nextOpen.current=elapsed+250;
         }
       }
