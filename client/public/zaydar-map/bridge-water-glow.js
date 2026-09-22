@@ -15,7 +15,8 @@ export const BRIDGE_GLOW_THEMES={
  interstate:'trans',
 };
 
-export const BRIDGE_GLOW_SATURATION=1.5;
+export const BRIDGE_GLOW_SATURATION=1.5*1.2;
+export const BRIDGE_GLOW_BRIGHTNESS=1.3;
 export function saturateBridgeColor(rgb,gain=BRIDGE_GLOW_SATURATION){
  // Scale HSV saturation without raising value/brightness; clamp to display gamut.
  const high=Math.max(...rgb),low=Math.min(...rgb),range=high-low;
@@ -52,29 +53,38 @@ export function bridgeWaterPatch(span,project,elevation=()=>0){
  const start=span.samples.reduce((a,b)=>a.fraction<b.fraction?a:b),end=span.samples.reduce((a,b)=>a.fraction>b.fraction?a:b);
  const origin=project(start.coordinate),last=project(end.coordinate);
  const length=Math.hypot(last.x-origin.x,last.y-origin.y)||1,axis={x:(last.x-origin.x)/length,y:(last.y-origin.y)/length};
- const local=coordinate=>{const p=project(coordinate),x=p.x-origin.x,y=p.y-origin.y;return {x:x*axis.x+y*axis.y,y:-x*axis.y+y*axis.x};};
+ const localPoint=p=>{const x=p.x-origin.x,y=p.y-origin.y;return {x:x*axis.x+y*axis.y,y:-x*axis.y+y*axis.x};};
+ const local=coordinate=>localPoint(project(coordinate));
  const points=span.samples.map(sample=>({...local(sample.coordinate),fraction:sample.fraction}));
  const along=Math.max(18,span.step*1.2),across=32;
  const bounds={left:Math.min(...points.map(p=>p.x))-along,right:Math.max(...points.map(p=>p.x))+along,top:Math.min(...points.map(p=>p.y))-across,bottom:Math.max(...points.map(p=>p.y))+across};
  const height=elevation(span.samples[Math.floor(span.samples.length/2)].coordinate)+.1;
  const world=(x,y)=>({x:origin.x+x*axis.x-y*axis.y,y:origin.y+x*axis.y+y*axis.x,z:height});
- return {span,points,along,across,bounds,local,length,corners:[world(bounds.left,bounds.top),world(bounds.right,bounds.top),world(bounds.left,bounds.bottom),world(bounds.right,bounds.bottom)]};
+ return {span,points,along,across,bounds,local,localPoint,length,corners:[world(bounds.left,bounds.top),world(bounds.right,bounds.top),world(bounds.left,bounds.bottom),world(bounds.right,bounds.bottom)]};
 }
 
-function waterRings(features,patch){
- const polygons=[],seen=new Set(),b=patch.bounds;
+function collectWater(features){
+ const unique=new Map();
  for(const feature of features){
   const rings=feature.geometry?.type==='Polygon'?[feature.geometry.coordinates]:feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates:[];
-  for(const polygon of rings){
-   const local=polygon.map(ring=>ring.map(patch.local)),outer=local[0];if(!outer?.length)continue;
-   let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
-   for(const p of outer){left=Math.min(left,p.x);right=Math.max(right,p.x);top=Math.min(top,p.y);bottom=Math.max(bottom,p.y);}
-   if(right<b.left||left>b.right||bottom<b.top||top>b.bottom)continue;
-   const key=JSON.stringify(local.map(ring=>ring.map(p=>[+p.x.toFixed(2),+p.y.toFixed(2)])));
-   if(!seen.has(key)){seen.add(key);polygons.push({key,rings:local});}
-  }
+  for(const polygon of rings)if(polygon[0]?.length){const key=JSON.stringify(polygon);if(!unique.has(key))unique.set(key,polygon);}
  }
- return polygons.sort((a,b)=>a.key.localeCompare(b.key));
+ return [...unique].sort(([a],[b])=>a.localeCompare(b));
+}
+function pointBounds(points){
+ const b={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};
+ for(const p of points){b.left=Math.min(b.left,p.x);b.right=Math.max(b.right,p.x);b.top=Math.min(b.top,p.y);b.bottom=Math.max(b.bottom,p.y);}
+ return b;
+}
+function overlaps(a,b){return a.right>=b.left&&a.left<=b.right&&a.bottom>=b.top&&a.top<=b.bottom;}
+function waterRings(projected,patch){
+ const bounds=pointBounds(patch.corners),polygons=[];
+ for(const polygon of projected){
+  if(!overlaps(polygon.bounds,bounds))continue;
+  const rings=polygon.rings.map(ring=>ring.map(patch.localPoint));
+  if(overlaps(pointBounds(rings[0]),patch.bounds))polygons.push({key:polygon.key,rings});
+ }
+ return polygons;
 }
 
 function paintWaterPatch(canvas,mask,patch,polygons){
@@ -107,11 +117,23 @@ export function createBridgeWaterLayer(maplibre,elevation=()=>0){
  const project=coordinate=>{const p=maplibre.MercatorCoordinate.fromLngLat(coordinate);return {x:(p.x-origin.x)/unit,y:(p.y-origin.y)/unit};};
  const waterHeight=coordinate=>{const p=maplibre.MercatorCoordinate.fromLngLat(coordinate);return elevation(coordinate)*p.meterInMercatorCoordinateUnits()/unit;};
  const atlas=document.createElement('canvas'),tile=document.createElement('canvas'),mask=document.createElement('canvas');
- const cache=new Map();
+ const cache=new Map(),localMatrix=new Float32Array(16);
+ let waterSignature='',projectedWater=[],geometrySignature='';
  return {
   id:'bridge-water-reflections',type:'custom',renderingMode:'3d',count:0,signature:'',dirty:false,
   update(spans,waterFeatures){
-   const entries=spans.map(span=>{const patch=bridgeWaterPatch(span,project,waterHeight),polygons=waterRings(waterFeatures,patch);return {patch,polygons,key:JSON.stringify([span.palette,patch.corners,patch.points,polygons.map(p=>p.key)])};});
+   const collected=collectWater(waterFeatures),nextWaterSignature=collected.map(([key])=>key).join('|');
+   const patches=spans.map(span=>bridgeWaterPatch(span,project,waterHeight));
+   const nextGeometrySignature=JSON.stringify(patches.map(patch=>[patch.span.id,patch.span.palette,patch.corners,patch.points]));
+   if(nextWaterSignature===waterSignature&&nextGeometrySignature===geometrySignature)return;
+   geometrySignature=nextGeometrySignature;
+   // Project each unique water polygon once per source change, not once per
+   // bridge or camera update. Stable views do no masking or texture uploads.
+   if(nextWaterSignature!==waterSignature){
+    waterSignature=nextWaterSignature;
+    projectedWater=collected.map(([key,polygon])=>{const rings=polygon.map(ring=>ring.map(project));return {key,rings,bounds:pointBounds(rings[0])};});
+   }
+   const entries=patches.map(patch=>{const polygons=waterRings(projectedWater,patch);return {patch,polygons,key:JSON.stringify([patch.span.palette,patch.corners,patch.points,polygons.map(p=>p.key)])};});
    const signature=entries.map(entry=>entry.key).join('|');if(signature===this.signature)return;
    this.signature=signature;
    atlas.width=COLUMNS*(TILE_WIDTH+2*GUTTER);atlas.height=Math.max(1,Math.ceil(entries.length/COLUMNS))*(TILE_HEIGHT+2*GUTTER);
@@ -139,7 +161,7 @@ export function createBridgeWaterLayer(maplibre,elevation=()=>0){
     void main(){gl_Position=u_matrix*vec4(a_position,1.);v_uv=a_uv;}`);
    const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
     precision highp float;in vec2 v_uv;uniform sampler2D u_glow;out vec4 color;
-    void main(){vec4 glow=texture(u_glow,v_uv);float alpha=glow.a*.52; if(alpha<.001)discard;color=vec4(glow.rgb*alpha,alpha);}`);
+    void main(){vec4 glow=texture(u_glow,v_uv);float alpha=glow.a*.52; if(alpha<.001)discard;color=vec4(glow.rgb*alpha*${BRIDGE_GLOW_BRIGHTNESS.toFixed(2)},alpha);}`);
    this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);
    if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
    this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.sampler=gl.getUniformLocation(this.program,'u_glow');
@@ -160,7 +182,7 @@ export function createBridgeWaterLayer(maplibre,elevation=()=>0){
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);this.dirty=false;
    }
-   const matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);
+   const matrix=input.defaultProjectionData.mainMatrix,local=localMatrix;
    for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[12+row];}
    gl.useProgram(this.program);gl.bindVertexArray(this.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.uniform1i(this.sampler,0);
    const depth=gl.getParameter(gl.DEPTH_WRITEMASK),cull=gl.isEnabled(gl.CULL_FACE);
@@ -172,7 +194,7 @@ export function createBridgeWaterLayer(maplibre,elevation=()=>0){
   onRemove(map,gl){
    gl.deleteBuffer(this.buffer);gl.deleteVertexArray(this.vao);gl.deleteTexture(this.texture);gl.deleteProgram(this.program);
    for(const canvas of [atlas,tile,mask,...[...cache.values()].map(v=>v.image)])canvas.width=canvas.height=1;
-   cache.clear();this.vertices=null;this.count=0;this.map=null;this.signature='';
+   cache.clear();projectedWater=[];waterSignature='';geometrySignature='';this.vertices=null;this.count=0;this.map=null;this.signature='';
   },
  };
 }

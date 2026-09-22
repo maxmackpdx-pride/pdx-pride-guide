@@ -1,6 +1,6 @@
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260922-water-reflections-v3';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260922-water-reflections-v4';
 import {createBuildingModelLayer} from './building-models.js';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
@@ -17,7 +17,7 @@ import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer,PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
 import {fitBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
-import {bridgeGlowSpans,createBridgeWaterLayer} from './bridge-water-glow.js?v=20260922-water-reflections-v3';
+import {bridgeGlowSpans,createBridgeWaterLayer} from './bridge-water-glow.js?v=20260922-water-reflections-v4';
 import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260922-outzide-waypoints-v2';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';

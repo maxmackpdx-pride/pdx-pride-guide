@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,bridgeWaterPatch,createBridgeWaterLayer} from '../client/public/zaydar-map/bridge-water-glow.js';
+import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,BRIDGE_GLOW_BRIGHTNESS,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,bridgeWaterPatch,createBridgeWaterLayer} from '../client/public/zaydar-map/bridge-water-glow.js';
 import {fitBridgeRoad} from '../client/public/zaydar-map/bridge-fit.js';
 import {PORTLAND_BRIDGE_MODELS} from '../client/public/zaydar-map/st-johns-bridge.js';
 import {createRequire} from 'node:module';
@@ -20,7 +20,7 @@ test('bridge gradients interpolate the rainbow, trans and lesbian flag stops con
   colors.forEach((hex,index)=>assert.deepEqual(bridgeGlowColor(name,index/(colors.length-1)),saturateBridgeColor(hex.slice(1).match(/../g).map(c=>parseInt(c,16)))));
   for(let i=1;i<=1000;i++)assert.ok(bridgeGlowColor(name,i/1000).every((value,j)=>Math.abs(value-bridgeGlowColor(name,(i-1)/1000)[j])<=3));
  }
- assert.deepEqual(bridgeGlowColor('trans',.5),[255,240,255]);
+ assert.deepEqual(bridgeGlowColor('trans',.5),[255,237,255]);
  assert.deepEqual(bridgeGlowColor('trans',.2),bridgeGlowColor('trans',.8));
 });
 
@@ -44,9 +44,9 @@ test('glow follows fitted roads and retains geographic color direction when tile
  assert.ok(bridgeGlowSpans([{id:'interstate',fit:fixture(false,4000)}])[0].samples.length<=73);
 });
 
-test('50 percent saturation boost preserves brightness and neutral white',()=>{
- assert.equal(BRIDGE_GLOW_SATURATION,1.5);
- assert.deepEqual(saturateBridgeColor([120,180,200]),[80,170,200]);
+test('extra 20 percent vibrancy preserves neutral white and brightness increases separately',()=>{
+ assert.equal(BRIDGE_GLOW_SATURATION,1.5*1.2);assert.equal(BRIDGE_GLOW_BRIGHTNESS,1.3);
+ assert.deepEqual(saturateBridgeColor([120,180,200]),[56,164,200]);
  assert.deepEqual(saturateBridgeColor([255,255,255]),[255,255,255]);
  const rgb=saturateBridgeColor([10,100,240]);assert.equal(Math.max(...rgb),240);assert.equal(Math.min(...rgb),0);
 });
@@ -94,7 +94,7 @@ function mockGl(){
  for(const name of ['createShader','createProgram','createBuffer','createVertexArray','createTexture'])gl[name]=()=>({});
  gl.shaderSource=(_,source)=>calls.shaders.push(source);gl.getShaderParameter=gl.getProgramParameter=()=>true;gl.getUniformLocation=(_,name)=>name;gl.getAttribLocation=()=>0;
  gl.bufferData=()=>calls.uploads++;gl.texImage2D=()=>calls.textures++;
- gl.uniformMatrix4fv=(_location,_transpose,matrix)=>calls.matrices.push(matrix);
+ gl.uniformMatrix4fv=(_location,_transpose,matrix)=>calls.matrices.push(matrix.slice());
  gl.getParameter=name=>name===gl.DEPTH_WRITEMASK;gl.isEnabled=()=>true;gl.depthMask=value=>calls.depth.push(value);
  gl.drawArrays=(mode,first,count)=>calls.draws.push({mode,count});
  return {gl,calls};
@@ -110,8 +110,22 @@ test('camera changes only the shared map matrix, never the reflection coordinate
  assert.equal(calls.draws.length,2);assert.ok(calls.draws.every(d=>d.count===6));
  assert.notDeepEqual(calls.matrices[0],calls.matrices[1]);assert.deepEqual(calls.depth,[false,true,false,true]);
  assert.ok(calls.shaders.every(s=>s.includes('#version 300 es')));
+ assert.ok(calls.shaders.some(s=>s.includes('glow.rgb*alpha*1.30')));
  layer.update([],[]);layer.render(gl,camera(1024));assert.equal(layer.count,0,'removed bridges leave no stale reflection');
  layer.onRemove({},gl);assert.equal(layer.count,0);assert.equal(layer.vertices,null);
+});
+
+test('water polygons project once across bridges and stay cached for repeated updates',t=>{
+ canvasFixture(t);let projections=0;
+ const counted={MercatorCoordinate:{fromLngLat(coordinate){projections++;return MercatorCoordinate.fromLngLat(coordinate);}}};
+ const layer=createBridgeWaterLayer(counted),fit=fixture();
+ const spans=bridgeGlowSpans(['broadway','burnside','morrison'].map(id=>({id,fit})));
+ const ring=Array.from({length:1001},(_,i)=>{const a=i/1000*Math.PI*2;return [center[0]+.01*Math.cos(a),center[1]+.01*Math.sin(a)];});
+ const polygon={geometry:{type:'Polygon',coordinates:[ring]}};
+ projections=0;layer.update(spans,[polygon,polygon]);const first=projections;
+ projections=0;layer.update(spans,[polygon]);const repeated=projections;
+ assert.equal(first-repeated,ring.length,'duplicates and additional bridges must not repeat geographic water projection');
+ assert.ok(repeated<100,'unchanged updates only project the small bridge footprints');
 });
 
 test('water reflections render underneath both bridge decks and models',async()=>{
