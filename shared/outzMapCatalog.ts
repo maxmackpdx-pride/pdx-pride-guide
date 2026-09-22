@@ -1079,5 +1079,555 @@ export default [
     "id": "the-woods-guerneville",
     "name": "The Woods · Cottages & Cabins",
     "kind": "stay"
+  },
+  {
+    "id": "fishing-or-barton-park",
+    "name": "Barton Park",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-bethany-pond",
+    "name": "Bethany Pond",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-commonwealth-lake",
+    "name": "Commonwealth Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-dorman-pond",
+    "name": "Dorman Pond",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-estacada-lake",
+    "name": "Estacada Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-faraday-lake",
+    "name": "Faraday Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-gilbert-river",
+    "name": "Gilbert River",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-henry-hagg-lake",
+    "name": "Henry Hagg Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-north-fork-reservoir",
+    "name": "North Fork Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-sandy-hatchery",
+    "name": "Sandy Hatchery",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-st-louis-ponds",
+    "name": "St. Louis Ponds",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-vernonia-lake",
+    "name": "Vernonia Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-crane-prairie-reservoir",
+    "name": "Crane Prairie Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-wickiup-reservoir",
+    "name": "Wickiup Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-davis-lake",
+    "name": "Davis Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-three-creeks-lake",
+    "name": "Three Creeks Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-hosmer-lake",
+    "name": "Hosmer Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-big-lava-lake",
+    "name": "Big Lava Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-south-twin-lake",
+    "name": "South Twin Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-suttle-lake",
+    "name": "Suttle Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-metolius-river-wizard-falls",
+    "name": "Metolius River · Wizard Falls",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-fall-river",
+    "name": "Fall River",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-diamond-lake",
+    "name": "Diamond Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-lake-of-the-woods",
+    "name": "Lake of the Woods",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-fish-lake",
+    "name": "Fish Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-lost-creek-reservoir",
+    "name": "Lost Creek Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-tenmile-lakes",
+    "name": "Tenmile Lakes",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-siltcoos-lake",
+    "name": "Siltcoos Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-wallowa-lake",
+    "name": "Wallowa Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-or-phillips-reservoir",
+    "name": "Phillips Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-washington",
+    "name": "Lake Washington",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-sammamish",
+    "name": "Lake Sammamish",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-green-lake",
+    "name": "Green Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-angle-lake",
+    "name": "Angle Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-pine-lake",
+    "name": "Pine Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-american-lake",
+    "name": "American Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-spanaway-lake",
+    "name": "Spanaway Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-kapowsin",
+    "name": "Lake Kapowsin",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-goodwin",
+    "name": "Lake Goodwin",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-stevens",
+    "name": "Lake Stevens",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-roesiger",
+    "name": "Lake Roesiger",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-whatcom",
+    "name": "Lake Whatcom",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-padden",
+    "name": "Lake Padden",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-pass-lake",
+    "name": "Pass Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-battle-ground-lake",
+    "name": "Battle Ground Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lacamas-lake",
+    "name": "Lacamas Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-merwin",
+    "name": "Lake Merwin",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-yale-reservoir",
+    "name": "Yale Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-silver-lake-cowlitz-county",
+    "name": "Silver Lake · Cowlitz County",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-kress-lake",
+    "name": "Kress Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-riffe-lake",
+    "name": "Riffe Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-mayfield-lake",
+    "name": "Mayfield Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-black-lake-thurston-county",
+    "name": "Black Lake · Thurston County",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-lake-chelan",
+    "name": "Lake Chelan",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-banks-lake",
+    "name": "Banks Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-potholes-reservoir",
+    "name": "Potholes Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-moses-lake",
+    "name": "Moses Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-franklin-roosevelt-lake",
+    "name": "Franklin Roosevelt Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-curlew-lake",
+    "name": "Curlew Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "fishing-wa-conconully-reservoir",
+    "name": "Conconully Reservoir",
+    "kind": "fishing"
+  },
+  {
+    "id": "boating-or-chinook-landing-marine-park",
+    "name": "Chinook Landing Marine Park",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-cedaroak-boat-ramp",
+    "name": "Cedaroak Boat Ramp",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-cook-park",
+    "name": "Cook Park",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-scappoose-bay",
+    "name": "Scappoose Bay",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-willamette-park-portland-launch",
+    "name": "Willamette Park · Portland Launch",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-lake-billy-chinook-crooked-river-launch",
+    "name": "Lake Billy Chinook · Crooked River Launch",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-cultus-lake-boating-site",
+    "name": "Cultus Lake Boating Site",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-elk-lake-boating-site",
+    "name": "Elk Lake Boating Site",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-paulina-lake-little-crater-launch",
+    "name": "Paulina Lake · Little Crater Launch",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-prineville-reservoir-boating",
+    "name": "Prineville Reservoir Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-fern-ridge-lake-richardson-park",
+    "name": "Fern Ridge Lake · Richardson Park",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-dexter-reservoir-lowell",
+    "name": "Dexter Reservoir · Lowell",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-detroit-lake-boating",
+    "name": "Detroit Lake Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-wallowa-lake-state-park-launch",
+    "name": "Wallowa Lake · State Park Launch",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-or-emigrant-lake-boating",
+    "name": "Emigrant Lake Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-lake-chelan-state-park-boating",
+    "name": "Lake Chelan State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-lake-sammamish-state-park-boating",
+    "name": "Lake Sammamish State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-deception-pass-state-park-boating",
+    "name": "Deception Pass State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-lake-wenatchee-state-park-boating",
+    "name": "Lake Wenatchee State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-steamboat-rock-state-park-boating",
+    "name": "Steamboat Rock State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-potholes-state-park-boating",
+    "name": "Potholes State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-sun-lakes-dry-falls-state-park-boating",
+    "name": "Sun Lakes-Dry Falls State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-lincoln-rock-state-park-boating",
+    "name": "Lincoln Rock State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-daroga-state-park-boating",
+    "name": "Daroga State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-twenty-five-mile-creek-state-park-boating",
+    "name": "Twenty-Five Mile Creek State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-curlew-lake-state-park-boating",
+    "name": "Curlew Lake State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-pearrygin-lake-state-park-boating",
+    "name": "Pearrygin Lake State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-ike-kinswa-state-park-boating",
+    "name": "Ike Kinswa State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-twanoh-state-park-boating",
+    "name": "Twanoh State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "boating-wa-joemma-beach-state-park-boating",
+    "name": "Joemma Beach State Park · Boating",
+    "kind": "boating"
+  },
+  {
+    "id": "atv-or-tillamook-state-forest-ohv-areas",
+    "name": "Tillamook State Forest OHV Areas",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-sand-lake-recreation-area",
+    "name": "Sand Lake Recreation Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-oregon-dunes-national-recreation-area",
+    "name": "Oregon Dunes National Recreation Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-winchester-bay",
+    "name": "Winchester Bay",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-shotgun-creek-ohv-area",
+    "name": "Shotgun Creek OHV Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-cline-buttes-ohv-trail-system",
+    "name": "Cline Buttes OHV Trail System",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-east-fort-rock-ohv-trail-system",
+    "name": "East Fort Rock OHV Trail System",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-millican-valley-ohv-trail-system",
+    "name": "Millican Valley OHV Trail System",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-morrow-grant-county-ohv-park",
+    "name": "Morrow/Grant County OHV Park",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-or-virtue-flat-ohv-area",
+    "name": "Virtue Flat OHV Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-walker-valley-orv-area",
+    "name": "Walker Valley ORV Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-reiter-foothills-orv-area",
+    "name": "Reiter Foothills ORV Area",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-tahuya-state-forest-elfendahl-pass",
+    "name": "Tahuya State Forest · Elfendahl Pass",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-capitol-forest-rock-candy",
+    "name": "Capitol Forest · Rock Candy",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-jones-creek-orv-trailhead",
+    "name": "Jones Creek ORV Trailhead",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-sadie-creek-multi-use-trails",
+    "name": "Sadie Creek Multi-Use Trails",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-ahtanum-state-forest-ahtanum-camp",
+    "name": "Ahtanum State Forest · Ahtanum Camp",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-beverly-dunes",
+    "name": "Beverly Dunes",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-moses-lake-sand-dunes",
+    "name": "Moses Lake Sand Dunes",
+    "kind": "atv"
+  },
+  {
+    "id": "atv-wa-riverside-state-park-orv-area",
+    "name": "Riverside State Park · ORV Area",
+    "kind": "atv"
   }
 ];

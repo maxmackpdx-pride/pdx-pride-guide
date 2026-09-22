@@ -62,11 +62,20 @@ html,body{height:100%;overflow:hidden;background:#080c0c}main,.workspace{positio
 .waypoint-head,.waypoint-label,.waypoint-count{translate:var(--sway-x,0px) var(--sway-y,0px)}
 @media(prefers-reduced-motion:reduce){.waypoint-head,.waypoint-label,.waypoint-count{translate:none}}
 /* Refracted light stays inset behind opaque symbols on water destinations. */
-.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring){overflow:hidden;isolation:isolate;--water-ink:var(--c)}
+.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating){overflow:hidden;isolation:isolate;--water-ink:var(--c)}
 .waypoint-head.watercamp{background:linear-gradient(145deg,#10263d,#091824);--water-ink:#c1e5ff}
-.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring)::before,.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring)::after{content:"";position:absolute;inset:3px;border-radius:inherit;z-index:0;pointer-events:none;background:url('./assets/water-caustics.svg') center/42px 42px;opacity:.8;mix-blend-mode:screen;filter:brightness(1.8);animation:water-refraction-drift 8s ease-in-out infinite alternate,water-refraction-shimmer 3.6s ease-in-out infinite;will-change:background-position,opacity}
-.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring)::after{background-size:59px 59px;opacity:.65;animation-duration:12s,5.1s;animation-delay:-9s,-1.8s;animation-direction:alternate-reverse,reverse}
-.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring) svg{position:relative;z-index:1;color:var(--water-ink);background:#071728;border-radius:4px;box-shadow:0 0 1px .5px #071728;filter:drop-shadow(0 1px 1px #020810)}
+.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating)::before,.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating)::after{content:"";position:absolute;inset:3px;border-radius:inherit;z-index:0;pointer-events:none;background:url('./assets/water-caustics.svg') center/42px 42px;opacity:.8;mix-blend-mode:screen;filter:brightness(1.8);animation:water-refraction-drift 8s ease-in-out infinite alternate,water-refraction-shimmer 3.6s ease-in-out infinite;will-change:background-position,opacity}
+.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating)::after{background-size:59px 59px;opacity:.65;animation-duration:12s,5.1s;animation-delay:-9s,-1.8s;animation-direction:alternate-reverse,reverse}
+.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating) svg{position:relative;z-index:1;color:var(--water-ink);background:#071728;border-radius:4px;box-shadow:0 0 1px .5px #071728;filter:drop-shadow(0 1px 1px #020810)}
 @keyframes water-refraction-shimmer{0%,100%{opacity:.55}35%{opacity:1}65%{opacity:.68}80%{opacity:.9}}
 @keyframes water-refraction-drift{from{background-position:0 0}to{background-position:40px 24px}}
-@media(prefers-reduced-motion:reduce){.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring)::before,.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring)::after{animation:none;will-change:auto}}
+@media(prefers-reduced-motion:reduce){.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating)::before,.waypoint-head:is(.watercamp,.beach,.coastcamp,.spring,.fishing,.boating)::after{animation:none;will-change:auto}}
+.type-dot.fishing{color:#55D6A0;transform:none;border-radius:65% 20% 65% 20%;background:#55D6A025}
+.type-dot.boating{color:#6AAFFF;transform:none;clip-path:polygon(0 0,100% 0,75% 100%,25% 100%);background:#6AAFFF}
+.type-dot.atv{color:#D95757;transform:none;border-radius:3px;box-shadow:0 0 4px #d9575726}
+.waypoint-head.fishing{border-radius:50%;background:#0a201b;color:#55D6A0}
+.waypoint-head.boating{border-radius:5px 5px 13px 13px;background:#0b1b30;color:#6AAFFF}
+.waypoint-head.atv{border-radius:8px;background:#240b0e;color:#D95757;border-color:#D95757;box-shadow:0 0 7px #d9575726}
+.activity-info{margin:16px 0;padding:14px;border:1px solid color-mix(in srgb,var(--c) 25%,transparent);border-radius:9px;background:#06120b44}
+.activity-tags{display:flex;gap:8px;margin-bottom:9px}.activity-tags span{font:11px var(--mono);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);border-radius:4px;padding:3px 7px}
+.fieldbar .filters{flex-wrap:nowrap;overflow-x:auto;min-width:0;scrollbar-width:thin}.fieldbar .filters button{flex-shrink:0;white-space:nowrap}
