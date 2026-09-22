@@ -9,28 +9,38 @@ export function addCascadiaOutline(style){
  const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':opacity}}));
  const index=style.layers.findIndex(l=>l.type==='symbol');style.layers.splice(index<0?style.layers.length:index,0,...layers);
 }
-// Fit the outline with room for perspective at the user's current tilt and bearing.
-// An extra 0.18 zoom step gives the silhouette about 13% more breathing room.
-export function cascadiaCamera(width,height,pitch=0,bearing=0){
+// The overview follows the full catalog, independent of the current filters.
+export function destinationExtent(places){
+ const points=places.filter(p=>Number.isFinite(p.lng)&&Number.isFinite(p.lat));
+ if(!points.length)return cascadiaOutline;
+ const west=Math.min(...points.map(p=>p.lng)),east=Math.max(...points.map(p=>p.lng));
+ const south=Math.min(...points.map(p=>p.lat)),north=Math.max(...points.map(p=>p.lat));
+ const latPadding=Math.max(.1,(north-south)*.05),lngPadding=Math.max(.1,(east-west)*.05);
+ return [[west-lngPadding,south-latPadding],[east+lngPadding,south-latPadding],[east+lngPadding,north+latPadding],[west-lngPadding,north+latPadding]];
+}
+// Fit the padded destination extent while preserving the user's tilt and bearing.
+export function cascadiaCamera(width,height,pitch=0,bearing=0,extent=cascadiaOutline){
  const y=lat=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2;
- const north=y(60.1),south=y(40),centerY=(north+south)/2;
+ const north=y(Math.max(...extent.map(p=>p[1]))),south=y(Math.min(...extent.map(p=>p[1]))),centerY=(north+south)/2;
+ const centerLng=(Math.min(...extent.map(p=>p[0]))+Math.max(...extent.map(p=>p[0])))/2;
  const halfW=Math.max(1,width-60)/2,halfH=Math.max(1,height-160)/2;
  const angle=bearing*Math.PI/180,tilt=pitch*Math.PI/180;
  // Use a conservative camera distance (MapLibre's default is ~1.5 viewport heights).
  const distance=Math.max(1,height);let scale=Infinity;
- for(const [lng,lat] of cascadiaOutline){
-  const dx=(lng+125.9)/360,dy=y(lat)-centerY;
+ for(const [lng,lat] of extent){
+  const dx=(lng-centerLng)/360,dy=y(lat)-centerY;
   const rx=dx*Math.cos(angle)+dy*Math.sin(angle),ry=-dx*Math.sin(angle)+dy*Math.cos(angle);
   const perspective=Math.abs(ry)*Math.sin(tilt)/distance;
   scale=Math.min(scale,halfW/(Math.abs(rx)+halfW*perspective),halfH/(Math.abs(ry)*Math.cos(tilt)+halfH*perspective));
  }
  const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*centerY)))*180/Math.PI;
- return {center:[-125.9,centerLat],zoom:Math.log2(scale/512)-.18,pitch,bearing};
+ return {center:[centerLng,centerLat],zoom:Math.log2(scale/512),pitch,bearing};
 }
-export function installCascadiaReveal(map){
+export function installCascadiaReveal(map,places=[]){
+ const extent=destinationExtent(places);
  let active=false,framing=false,entryCenter=null,camera;
  const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
- const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing());};
+ const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing(),extent);};
  const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-'))map.setLayoutProperty(layer.id,'visibility',active?'visible':'none');}};
  const place=()=>{framing=true;map.stop();map.jumpTo(camera);framing=false;};
  const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;layers();}place();};
