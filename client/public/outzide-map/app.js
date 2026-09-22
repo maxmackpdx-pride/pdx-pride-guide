@@ -1,5 +1,5 @@
 import {faceStackHtml,enhanceActivitySelection,installMobileDrawer} from './assets/community-ui.js';
-import {CASCADIA_MIN_ZOOM,isCascadiaZoom,addCascadiaOutline,installCascadiaReveal} from './assets/cascadia-reveal.js?v=cascadia-20260922-catalog';
+import {CASCADIA_MIN_ZOOM,isCascadiaZoom,addCascadiaOutline,installCascadiaReveal} from './assets/cascadia-reveal.js?v=cascadia-20260922-motion';
 import {closureFor,isClosed,closureLabel,refreshClosures,prohibitionIcon,winterOpeningLabel} from './assets/closures.js';
 import {browseRegions,browseRegionFor,matchesBrowse} from './assets/browse-regions.js';
 import {drawWinterSnow} from './assets/winter-hologram.js';

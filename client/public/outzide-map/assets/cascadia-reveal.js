@@ -6,7 +6,7 @@ export const cascadiaOutline=[[-141,60],[-138,60.1],[-135.5,59.7],[-133,58.7],[-
 export function addCascadiaOutline(style){
  style.sources['cascadia-outline']={type:'geojson',lineMetrics:true,data:{type:'Feature',properties:{description:'Original stylized Cascadia bioregion outline — approximate, not an official boundary'},geometry:{type:'LineString',coordinates:cascadiaOutline}}};
  const gradient=['interpolate',['linear'],['line-progress'],0,'#ff2579',.17,'#ff7600',.33,'#eeff25',.5,'#3cff67',.67,'#16eeff',.83,'#7658ff',1,'#ff2579'];
- const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':opacity}}));
+ const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':0,'line-opacity-transition':{duration:0,delay:0}}}));
  const index=style.layers.findIndex(l=>l.type==='symbol');style.layers.splice(index<0?style.layers.length:index,0,...layers);
 }
 // The overview follows the full catalog, independent of the current filters.
@@ -36,17 +36,38 @@ export function cascadiaCamera(width,height,pitch=0,bearing=0,extent=cascadiaOut
  const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*centerY)))*180/Math.PI;
  return {center:[centerLng,centerLat],zoom:Math.log2(scale/512),pitch,bearing};
 }
+// Reverse from the current frame if zoom changes direction during the reveal.
+export function animateCascadia(render){
+ let value=0,frameId=null;
+ return show=>{
+  if(frameId!==null)cancelAnimationFrame(frameId);
+  const target=show?1:0,from=value;
+  if(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches||!globalThis.requestAnimationFrame){value=target;render(value);return;}
+  const duration=(show?850:500)*Math.abs(target-from);let start;
+  const tick=time=>{
+   start??=time;const t=duration?Math.min(1,(time-start)/duration):1;
+   value=from+(target-from)*t*t*(3-2*t);render(value);
+   frameId=t<1?requestAnimationFrame(tick):null;
+  };
+  frameId=requestAnimationFrame(tick);
+ };
+}
 export function installCascadiaReveal(map,places=[]){
  const extent=destinationExtent(places);
- let active=false,framing=false,entryCenter=null,camera;
+ let active=false,framing=false,entryCenter=null,camera,reveal=0;
  const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
  const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing(),extent);};
- const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-'))map.setLayoutProperty(layer.id,'visibility',active?'visible':'none');}};
+ const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-')){map.setLayoutProperty(layer.id,'visibility',active||reveal>0?'visible':'none');const opacity={'cascadia-bloom':.42,'cascadia-halo':.75,'cascadia-core':1}[layer.id];if(opacity!==undefined)map.setPaintProperty?.(layer.id,'line-opacity',opacity*reveal);}}};
+ const animate=animateCascadia(value=>{
+  reveal=value;sign.hidden=value===0&&!active;
+  if(sign.style){sign.style.opacity=String(value);sign.style.transform=`translateY(${(1-value)*10}px) scale(${.955+.045*value})`;sign.style.filter=`blur(${(1-value)*7}px)`;}
+  layers();
+ });
  const place=()=>{framing=true;map.stop();map.jumpTo(camera);framing=false;};
- const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;layers();}place();};
+ const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;sign.setAttribute('aria-hidden','false');animate(true);layers();}place();};
  const update=()=>{if(framing)return;
   if(map.getZoom()<=camera.zoom+.08){if(!active)enter();return;}
-  if(active&&map.getZoom()>camera.zoom+.15){active=false;document.body.classList.toggle('cascadia-mode',false);sign.hidden=true;layers();}
+  if(active&&map.getZoom()>camera.zoom+.15){active=false;document.body.classList.toggle('cascadia-mode',false);sign.setAttribute('aria-hidden','true');animate(false);layers();}
  };
  const configure=()=>{if(framing)return;framing=true;camera=frame();map.setMinZoom(camera.zoom);framing=false;if(active)place();else update();};
  const zoomOut=document.getElementById('zoom-out');if(zoomOut)zoomOut.onclick=()=>{if(map.getZoom()-1<=camera.zoom+.08)enter();else map.zoomOut();};

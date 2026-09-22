@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
 import test from 'node:test';import assert from 'node:assert/strict';
-import {addCascadiaOutline,installCascadiaReveal,cascadiaCamera,destinationExtent} from '../client/public/outzide-map/assets/cascadia-reveal.js';
+import {animateCascadia,addCascadiaOutline,installCascadiaReveal,cascadiaCamera,destinationExtent} from '../client/public/outzide-map/assets/cascadia-reveal.js';
 const places=JSON.parse(readFileSync(new URL('../client/public/outzide-map/places.json',import.meta.url))).places;
 const extent=destinationExtent(places);
 for(const [width,height] of [[1440,900],[390,844],[844,390]])test(`Cascadia fits and is the hard zoom floor at ${width}×${height}`,()=>{
@@ -34,4 +34,22 @@ test('overview uses padded catalog bounds and ignores missing coordinates',()=>{
  assert.equal(extent[0][1],south-(north-south)*.05);assert.equal(extent[2][1],north+(north-south)*.05);
  assert.deepEqual(destinationExtent([...places,{lat:null,lng:null}]),extent);
  assert.ok(extent[0][1]>40);assert.ok(extent[2][1]<51);
+});
+
+test('reveal reverses smoothly mid-flight and reduced motion settles immediately',()=>{
+ const old={raf:globalThis.requestAnimationFrame,cancel:globalThis.cancelAnimationFrame,media:globalThis.matchMedia};
+ const pending=new Map();let id=0,value=0;
+ globalThis.requestAnimationFrame=fn=>{pending.set(++id,fn);return id;};
+ globalThis.cancelAnimationFrame=id=>pending.delete(id);
+ globalThis.matchMedia=()=>({matches:false});
+ const step=time=>{const callbacks=[...pending.values()];pending.clear();callbacks.forEach(fn=>fn(time));};
+ try{
+  const toggle=animateCascadia(v=>value=v);
+  toggle(true);step(0);step(425);assert.equal(value,.5);
+  toggle(false);step(430);assert.equal(value,.5,'no snap on reversal');step(680);assert.equal(value,0);assert.equal(pending.size,0);
+  toggle(true);step(700);step(1550);assert.equal(value,1);
+  toggle(false);step(1600);step(1850);assert.equal(value,.5);
+  toggle(true);step(1855);assert.equal(value,.5);step(2280);assert.equal(value,1);
+  globalThis.matchMedia=()=>({matches:true});toggle(false);assert.equal(value,0);assert.equal(pending.size,0);
+ }finally{globalThis.requestAnimationFrame=old.raf;globalThis.cancelAnimationFrame=old.cancel;globalThis.matchMedia=old.media;}
 });
