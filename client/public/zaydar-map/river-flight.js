@@ -1098,7 +1098,19 @@ function drawDiscoveryOrb(ctx,x,y,color,phase,fade,alpha,typeIcon,scale=1,glowSt
  ctx.globalAlpha=alpha;
  ctx.drawImage(hologramMaterials.orbs.get(color),x-coreSize/2,y-coreSize/2,coreSize,coreSize);
  const icon=typeIcons.get(typeIcon);
- if(icon){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,iconRadius,0,Math.PI*2);ctx.fill();ctx.shadowColor='#000';ctx.shadowBlur=2;ctx.drawImage(color.toUpperCase()==='#FFFFFF'?icon.dark:icon.light,x-iconSize/2,y-iconSize/2,iconSize,iconSize);}
+ // Field Beacon badge: preserve the orb footprint, anchor, and effects beneath it.
+ ctx.save();ctx.translate(x,y);ctx.beginPath();
+ const category=String(typeIcon||'').split('/').pop()?.replace('.svg','')||'';
+ if(/trail|hike/.test(category)){ctx.moveTo(0,-iconRadius);ctx.lineTo(iconRadius,0);ctx.lineTo(0,iconRadius);ctx.lineTo(-iconRadius,0);ctx.closePath();}
+ else if(/beach|swim/.test(category))ctx.arc(0,0,iconRadius,0,Math.PI*2);
+ else ctx.roundRect(-iconRadius,-iconRadius,iconRadius*2,iconRadius*2,4*scale);
+ ctx.fillStyle='#10170f';ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=1.4*scale;ctx.stroke();
+ if(icon){
+  icon.tints??=new Map();let tinted=icon.tints.get(color);
+  if(!tinted){tinted=document.createElement('canvas');tinted.width=tinted.height=32;const ink=tinted.getContext('2d');ink.drawImage(icon.light,0,0,32,32);ink.globalCompositeOperation='source-in';ink.fillStyle=color;ink.fillRect(0,0,32,32);icon.tints.set(color,tinted);}
+  ctx.drawImage(tinted,-iconSize/2,-iconSize/2,iconSize,iconSize);
+ }else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(0,0,2*scale,0,Math.PI*2);ctx.fill();}
+ ctx.restore();
  ctx.restore();
 }
 function clusterPlaceMarkers(items,selected,zoom,width,height){
