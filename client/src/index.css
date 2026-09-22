@@ -5884,21 +5884,26 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
    it does not touch the nav-bar board folders. */
 .site-hub-mtop .site-profile-menu__panel {
   min-width: 300px;
+  max-height: calc(100dvh - 82px);
   padding: 0 0 8px;
   background: #0b0b0b;
   border: 1px solid #24242c;
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 26px rgba(204, 255, 0, .12), 0 0 40px rgba(255, 0, 204, .08);
   overflow: hidden;
+  overflow-y: auto;
 }
 .site-hub-mtop .site-profile-menu__panel::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
+  top: 0; left: 9px; right: 9px;
+  height: 2px;
+  border-radius: 999px;
   background: linear-gradient(90deg, #00ffff, #ffee00, #ff00cc, #ff6600, #00ffff);
   background-size: 200% 100%;
-  animation: navSeamFlow 4s linear infinite;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  animation: dirRefract 7s linear infinite;
 }
 .site-hub-mtop .site-profile-menu__identity {
   padding: 16px 16px 14px;
@@ -5926,6 +5931,35 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
   color: var(--neon-magenta);
   box-shadow: inset 3px 0 0 var(--neon-magenta);
   background: rgba(255, 0, 204, .06);
+}
+.site-hub-mtop .hub-member-folder__toggle,
+.site-hub-mtop .hub-admin-folder--menu .hub-admin-folder__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-meta);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.site-hub-mtop .hub-member-folder__children,
+.site-hub-mtop .hub-admin-folder--menu .hub-admin-folder__children {
+  border-top: 1px solid rgba(172, 207, 231, .11);
+  margin: 3px 8px 5px;
+  padding-top: 4px;
+}
+.site-hub-mtop .hub-member-folder__child,
+.site-hub-mtop .hub-admin-folder--menu .hub-admin-folder__child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  color: #d7dce2;
+}
+.site-hub-mtop .hub-member-folder__child.active {
+  color: var(--neon-cyan);
+  background: rgba(0, 255, 255, .06);
+  box-shadow: inset 3px 0 0 var(--neon-cyan);
 }
 .site-hub-mtop .site-profile-menu__caret {
   background: rgba(204, 255, 0, .12);

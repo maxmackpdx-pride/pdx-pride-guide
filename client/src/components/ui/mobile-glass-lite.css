@@ -25,16 +25,36 @@
     background:transparent;border:1px solid rgba(0,0,0,.5);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 1px 0 rgba(210,231,240,.055);
   }
-  .site-header.site-header--glass .znav-control:not(.is-active):not(.is-open),
+  .site-header.site-header--glass .znav-control:not(.is-active):not(.is-open):not(.znav-hub),
   nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[data-dock-selected="false"] {
     color:#fff;border-color:rgba(0,0,0,.5);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 1px 0 rgba(210,231,240,.055);
   }
   .site-header.site-header--glass .znav-control:is(.is-active,.is-open),
+  .site-header.site-header--glass .znav-hub,
   nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[data-dock-selected="true"] {
     color:var(--nav-c-ink,var(--c,#00ffff));
     border-color:color-mix(in srgb,var(--nav-c,var(--c,#00ffff)) 55%,transparent);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.42),0 0 16px color-mix(in srgb,var(--nav-c,var(--c,#00ffff)) 4%,transparent);
+  }
+  /* Keep the strongest optical cue on the active Hub control and the avatar
+     end cap, rather than adding a broad light wash under the whole bar. */
+  .site-header.site-header--glass .site-profile-menu {
+    position:relative;z-index:5;margin-left:2px;padding-left:6px;
+  }
+  .site-header.site-header--glass .site-profile-menu__avatar-link {
+    position:relative;display:grid;place-items:center;width:46px;height:46px;
+    border-radius:50%;border:1px solid rgba(172,207,231,.22);
+    background:radial-gradient(circle at 36% 22%,rgba(221,244,255,.14),transparent 38%),rgba(0,0,0,.18);
+    box-shadow:inset 0 1px 1px rgba(229,247,255,.18),inset 0 -2px 4px rgba(0,0,0,.45);
+    touch-action:manipulation;
+  }
+  .site-header.site-header--glass .site-profile-menu__avatar-link[aria-expanded="true"] {
+    border-color:rgba(25,227,255,.72);
+    box-shadow:inset 0 1px 1px rgba(229,247,255,.22),0 0 16px rgba(25,227,255,.04);
+  }
+  .site-header.site-header--glass .site-profile-menu__panel {
+    z-index:510;right:0;top:calc(100% + 10px);
   }
   .z-mobile-dock .z-mobile-dock__indicator { background:transparent;box-shadow:none;border-color:transparent; }
   .z-mobile-dock .z-mobile-dock__glow { display:none; }

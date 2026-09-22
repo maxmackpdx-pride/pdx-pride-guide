@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { ChevronDown, Search, Zap } from "lucide-react";
+import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, UserRound, UsersRound, Zap } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
 import { CompactHubLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
@@ -10,7 +10,6 @@ import { useInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "./AuthModal";
 import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
-import CalmModeToggle from "@/components/CalmModeToggle";
 import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
 import { Divider } from "@/components/ds";
 import { navGlassPointer } from "@/components/ui/nav-glass";
@@ -160,22 +159,6 @@ function ProfileMenuPanel({
   return (
     <div className="site-profile-menu__panel pdx-liquid-overlay" role="menu">
       <Link
-        href="/dashboard?edit=profile"
-        role="menuitem"
-        className="site-profile-menu__item"
-        onClick={onClose}
-      >
-        Edit profile
-      </Link>
-      <Link
-        href="/dashboard"
-        role="menuitem"
-        className={`site-profile-menu__item site-profile-menu__item--hub${hubActive ? " active" : ""}`}
-        onClick={onClose}
-      >
-        Hub{unreadCount > 0 ? ` (${unreadCount})` : ""}
-      </Link>
-      <Link
         href={profilePath}
         role="menuitem"
         className="site-profile-menu__identity site-profile-menu__identity--link"
@@ -185,29 +168,15 @@ function ProfileMenuPanel({
         <span className="site-profile-menu__username">@{user.username}</span>
         <span className="site-profile-menu__identity-hint">View public profile</span>
       </Link>
-      <button
-        type="button"
-        role="menuitem"
-        className={`site-profile-menu__item site-profile-menu__item--inbox${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
-        onClick={() => {
-          onClose();
-          openSheet();
-        }}
-      >
-        Inbox{unreadCount > 0 ? ` (${unreadCount})` : ""}
-      </button>
-      <Link
-        href="/dashboard?section=settings"
-        role="menuitem"
-        className={`site-profile-menu__item${hubSection === "settings" ? " active" : ""}`}
-        onClick={onClose}
-      >
-        Notification settings
-      </Link>
-      <div className="site-profile-menu__item site-profile-menu__item--calm" role="none">
-        <CalmModeToggle compact />
-      </div>
-      {isAdmin && canManageTeam && (
+      <HubMemberFolder
+        hubActive={hubActive}
+        hubSection={hubSection}
+        location={location}
+        unreadCount={unreadCount}
+        onClose={onClose}
+        openSheet={openSheet}
+      />
+      {isAdmin && (
         <HubAdminFolder
           variant="menu"
           canManageTeam={canManageTeam}
@@ -228,6 +197,66 @@ function ProfileMenuPanel({
       >
         Sign out
       </button>
+    </div>
+  );
+}
+
+function HubMemberFolder({
+  hubActive,
+  hubSection,
+  location,
+  unreadCount,
+  onClose,
+  openSheet,
+}: {
+  hubActive: boolean;
+  hubSection: ReturnType<typeof parseHubSection> | undefined;
+  location: string;
+  unreadCount: number;
+  onClose: () => void;
+  openSheet: (opts?: { view?: "inbox" | "posts" | "stats"; account?: "personal" | "admin" | "owner"; threadId?: string | null }) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const profileEditorOpen = location.startsWith("/dashboard") && new URLSearchParams(window.location.search).get("edit") === "profile";
+  const items = [
+    { label: "Feed", href: "/dashboard", icon: House, active: hubActive && hubSection === "feed" },
+    { label: "Profile", href: "/dashboard?edit=profile", icon: UserRound, active: profileEditorOpen },
+    { label: "Events", href: "/dashboard?section=events", icon: CalendarDays, active: hubActive && hubSection === "events" },
+    { label: "People", href: "/dashboard?section=people", icon: UsersRound, active: hubActive && hubSection === "people" },
+    { label: "Settings", href: "/dashboard?section=settings", icon: Settings, active: hubActive && hubSection === "settings" },
+  ];
+
+  return (
+    <div className="hub-member-folder">
+      <button
+        type="button"
+        className="site-profile-menu__item hub-member-folder__toggle"
+        aria-expanded={open}
+        aria-controls="profile-member-sections"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span>Member</span>
+        <ChevronDown size={14} strokeWidth={2.4} aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} />
+      </button>
+      {open && (
+        <div id="profile-member-sections" className="hub-member-folder__children" role="group" aria-label="Member sections">
+          {items.map(({ label, href, icon: Icon, active }) => (
+            <Link key={href} href={href} role="menuitem" className={`site-profile-menu__item hub-member-folder__child${active ? " active" : ""}`} onClick={onClose}>
+              <Icon size={16} strokeWidth={2} aria-hidden />
+              <span>{label}</span>
+            </Link>
+          ))}
+          <button
+            type="button"
+            role="menuitem"
+            className={`site-profile-menu__item hub-member-folder__child${location === "/inbox" || location.startsWith("/inbox?") ? " active" : ""}`}
+            onClick={() => { onClose(); openSheet(); }}
+          >
+            <Inbox size={16} strokeWidth={2} aria-hidden />
+            <span>Messages{unreadCount > 0 ? ` (${unreadCount})` : ""}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

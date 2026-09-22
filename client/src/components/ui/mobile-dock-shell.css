@@ -2,7 +2,9 @@
 .z-mobile-dock { display:none; }
 @media (max-width:959px) {
   .site-header.site-header--glass {
-    overflow:hidden;
+    /* The profile menu is anchored below this bar. Clipping the glass shell
+       made the avatar feel untappable because its open menu was invisible. */
+    overflow:visible;
     background:rgba(1,4,8,.27);
   }
   .site-header.site-header--glass > .z-glass__tint {

@@ -153,7 +153,7 @@ export default function HubAdminFolder({
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <FolderKey size={15} strokeWidth={2.2} aria-hidden />
-          Admin folder
+          Admin
         </span>
         <ChevronDown
           size={14}
