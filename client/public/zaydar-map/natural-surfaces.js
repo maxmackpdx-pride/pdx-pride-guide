@@ -1,6 +1,6 @@
 import {vectorStyle} from '../home-flight/city-map.js';
 import {REFLECTION_COLORS,waterReflectionSegments} from './nightlife-materials.js?v=20260920-nightlife';
-import {createBridgeWaterGlow} from './bridge-water-glow.js?v=20260922-pride-underglow';
+import {createBridgeWaterGlow} from './bridge-water-glow.js?v=20260922-pride-underglow-v2';
 
 export const WATER_CYAN = '#389187'; // Five percent cooler and more saturated, with the same HSL lightness.
 export const BUILDING_SOLIDITY = .98;
@@ -294,7 +294,7 @@ export function createWaterBloom() {
           bridgeContext.drawImage(interior,0,0);bridgeContext.globalCompositeOperation='source-over';
         }
         output.save();output.globalCompositeOperation='screen';
-        output.globalAlpha=fade*.34*(reduced?1:.96+.04*Math.sin(time*.3));
+        output.globalAlpha=fade*.52*(reduced?1:.96+.04*Math.sin(time*.3));
         output.drawImage(bridgeSurface,-pad*scale,-pad*scale,bridgeSurface.width*scale,bridgeSurface.height*scale);output.restore();
       }
     },

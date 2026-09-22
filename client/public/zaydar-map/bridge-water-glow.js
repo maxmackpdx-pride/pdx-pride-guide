@@ -1,9 +1,9 @@
 import {sampleBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
 
 export const BRIDGE_GLOW_PALETTES={
- rainbow:['#ff3264','#ff963a','#ffe65c','#45ff97','#32d9ff','#8065ff','#f260ec'],
- trans:['#49dfff','#ff8fcd','#fff5ff','#ff8fcd','#49dfff'],
- lesbian:['#ff522d','#ff996c','#fff0f5','#ff79c6','#f238a7'],
+ rainbow:['#ff145c','#ff7b16','#ffe42b','#19ff79','#08d5ff','#7250ff','#ed28ff'],
+ trans:['#18d8ff','#ff69bf','#fff5ff','#ff69bf','#18d8ff'],
+ lesbian:['#ff3919','#ff8547','#fff0f5','#ff53b5','#f51699'],
 };
 // Major crossings only: Sellwood through St. Johns and north to I-5.
 // Steel and Tilikum carry people/transit; the BNSF railway bridges are excluded.
@@ -51,8 +51,8 @@ export function createBridgeWaterGlow(){
   const color=bridgeGlowColor(palette,bin/48).join(','),canvas=document.createElement('canvas');
   canvas.width=canvas.height=48;const ctx=canvas.getContext('2d');
   const glow=ctx.createRadialGradient(24,24,0,24,24,24);
-  glow.addColorStop(0,`rgba(${color},.20)`);glow.addColorStop(.25,`rgba(${color},.16)`);
-  glow.addColorStop(.6,`rgba(${color},.045)`);glow.addColorStop(1,`rgba(${color},0)`);
+  glow.addColorStop(0,`rgba(${color},.28)`);glow.addColorStop(.25,`rgba(${color},.22)`);
+  glow.addColorStop(.6,`rgba(${color},.065)`);glow.addColorStop(1,`rgba(${color},0)`);
   ctx.fillStyle=glow;ctx.fillRect(0,0,48,48);stamps.set(key,canvas);return canvas;
  }
  return {
@@ -85,7 +85,7 @@ export function createBridgeWaterGlow(){
       const top=Math.min(previous.p.y-previous.lift,p.y-lift),bottom=Math.max(previous.p.y,p.y);
       if(bottom>top+.1){
        const falloff=ctx.createLinearGradient(0,top,0,bottom);
-       falloff.addColorStop(0,`rgba(${color},.12)`);falloff.addColorStop(1,`rgba(${color},0)`);
+       falloff.addColorStop(0,`rgba(${color},.18)`);falloff.addColorStop(1,`rgba(${color},0)`);
        ctx.fillStyle=falloff;ctx.globalAlpha=Math.sin(Math.PI*fraction)**.4;
        ctx.beginPath();ctx.moveTo(previous.p.x,previous.p.y-previous.lift);
        ctx.lineTo(p.x,p.y-lift);ctx.lineTo(p.x,p.y);ctx.lineTo(previous.p.x,previous.p.y);ctx.closePath();ctx.fill();
