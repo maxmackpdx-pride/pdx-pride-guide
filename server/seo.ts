@@ -7,7 +7,7 @@ import { placeUrl } from "@shared/placeSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
-import { defaultShareCardUrl, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
+import { defaultShareCardUrl, shareCardDimensions, shareCardKeyForPath, shareCardUrl } from "@shared/shareCards";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
 
@@ -572,7 +572,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const placeLogo = livePlace
     ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
     : null;
-  // Branded 1200×630 cards: per-entity dynamic OG, else static board share art, else home fallback.
+  // Branded share cards: per-entity dynamic OG, else static board share art, else home fallback.
   const boardShareKey =
     !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(pathKey) : null;
   const pageImage = liveEvent
@@ -650,8 +650,8 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in
     imageType: pageImageIsCard || pageImage.includes("/og/") ? "image/png" : "image/jpeg",
-    imageWidth: 1200,
-    imageHeight: 630,
+    imageWidth: shareCardDimensions(pageImage).width,
+    imageHeight: shareCardDimensions(pageImage).height,
   });
 
   if (!out.includes("zaylist:event-count")) {

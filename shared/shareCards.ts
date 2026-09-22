@@ -1,5 +1,5 @@
 /**
- * Static 1200×630 Open Graph / Twitter share cards (board + site fallback).
+ * Static Open Graph / Twitter share cards (board + site fallback).
  * Files live in client/public/og/ — absolute URLs only for crawlers.
  */
 
@@ -16,7 +16,7 @@ function siteBase(): string {
 
 /** Filename under /og/ (no leading slash in the map values beyond path). */
 export const SHARE_CARD_FILES = {
-  home: "zaylist-home-fallback-1200x630.png",
+  home: "zaylist-social-portland.png",
   events: "zaylist-events-1200x630.png",
   schedule: "zaylist-events-1200x630.png",
   housing: "zaylist-housing-1200x630.png",
@@ -59,4 +59,11 @@ export function shareCardKeyForPath(pathname: string): ShareCardKey | null {
 
 export function defaultShareCardUrl(bust = "v1"): string {
   return shareCardUrl("home", bust);
+}
+
+/** Preserve the original dimensions of the default site artwork. */
+export function shareCardDimensions(image: string): { width: number; height: number } {
+  return image.split("?")[0].endsWith(`/og/${SHARE_CARD_FILES.home}`)
+    ? { width: 1672, height: 941 }
+    : { width: 1200, height: 630 };
 }

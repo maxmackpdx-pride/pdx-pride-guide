@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { defaultShareCardUrl } from "@shared/shareCards";
+import { defaultShareCardUrl, shareCardDimensions } from "@shared/shareCards";
 
 export type PageSeoOptions = {
   url?: string;
@@ -39,6 +39,7 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
 
     const url = options?.url || (typeof window !== "undefined" ? window.location.href.split("#")[0] : "");
     const image = options?.image || defaultShareCardUrl();
+    const imageDimensions = shareCardDimensions(image);
     const imageAlt =
       options?.imageAlt ||
       (options?.image ? title : "Zaylist | Portland queer events, boards, and community");
@@ -66,8 +67,8 @@ export function usePageSeo(title: string, description: string, options?: PageSeo
     upsertMeta("name", "twitter:image", image);
     upsertMeta("name", "twitter:image:alt", imageAlt);
     upsertMeta("property", "og:site_name", "Zaylist");
-    upsertMeta("property", "og:image:width", "1200");
-    upsertMeta("property", "og:image:height", "630");
+    upsertMeta("property", "og:image:width", String(imageDimensions.width));
+    upsertMeta("property", "og:image:height", String(imageDimensions.height));
     upsertMeta("property", "og:image:alt", imageAlt);
     upsertMeta("property", "og:image:secure_url", image);
     upsertMeta("property", "og:image:type", isPng ? "image/png" : "image/jpeg");
