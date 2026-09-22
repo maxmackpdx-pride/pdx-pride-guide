@@ -1,5 +1,8 @@
 // Browse regions are practical discovery areas, not administrative boundaries.
 export const browseRegions = [
+  {id:'vancouver',name:'Vancouver & Lower Mainland',note:'Vancouver, the North Shore & Howe Sound'},
+  {id:'south-island',name:'Southern Vancouver Island',note:'Victoria, Saanich, Sooke & Jordan River'},
+  {id:'whistler',name:'Whistler & Sea-to-Sky',note:'Squamish, Whistler, Callaghan & Pemberton'},
   {id:'portland-gorge',name:'Portland & the Gorge',note:'Portland, Mt. Hood, Sandy & the Columbia Gorge'},
   {id:'oregon-coast',name:'Oregon Coast',note:'Astoria to Brookings'},
   {id:'central-east-or',name:'Valley, Central & Eastern Oregon',note:'Salem, Eugene, Bend, the high desert & the Wallowas'},
@@ -10,6 +13,7 @@ export const browseRegions = [
   {id:'southern-extension',name:'Northern California & Black Rock',note:'Redwoods, Shasta & the Black Rock Desert'},
 ];
 export function browseRegionFor(p) {
+  if(p.state==='BC')return ['vancouver','south-island','whistler'].includes(p.browseRegion)?p.browseRegion:p.lng < -123.3?'south-island':p.lat>=49.65?'whistler':'vancouver';
   if(p.state==='CA'||p.state==='NV')return 'southern-extension';
   if(p.state==='WA'){
     if(p.lng < -123 || (p.lat < 46.7 && p.lng < -122.7))return 'olympic-coast';

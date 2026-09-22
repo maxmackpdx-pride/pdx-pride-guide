@@ -41,7 +41,7 @@ export async function getWinterConditions(id:string){
   if(resort.key==='meadows'){const [raw,poi]=await Promise.all([get('https://www.skihood.com/api/weather/report?includeResortInfo=true&includeSnowInfo=true'),get('https://www.skihood.com/api/weather/poi?include=Nordic%20Center,Lifts,Parking%20Lots,Access%20Gates,TERRAIN_PARKS')]);return parseMeadows(raw,poi,resort.reportUrl)}
   if(resort.key==='bachelor'){const [raw,lifts]=await Promise.all([get('https://api.mtbachelor.com/api/v1/dor/drupal/snow-reports?sort=date&direction=desc'),get('https://api.mtbachelor.com/api/v1/dor/drupal/lifts')]);return parseBachelor(raw,lifts,resort.reportUrl)}
   return parseReportHtml(await get(resort.reportUrl,false),resort.reportUrl);
- })(),getWinterWeather(resort.lat,resort.lng),get(resort.passUrl,false).then(parsePassPrices)]);
+ })(),resort.state==='BC'?Promise.resolve(null):getWinterWeather(resort.lat,resort.lng),get(resort.passUrl,false).then(parsePassPrices)]);
  const data={placeId:id,fetchedAt:new Date().toISOString(),report:report.status==='fulfilled'?report.value:{sourceUrl:resort.reportUrl,updatedAt:null,freshness:'unknown',snow24In:null,baseIn:null,lifts:[],unavailable:true},weather:weather.status==='fulfilled'?weather.value:null,passes:{url:resort.passUrl,note:resort.priceNote,quotes:prices.status==='fulfilled'?prices.value:[],checkedAt:new Date().toISOString()}};
  cache.set(id,{at:Date.now(),data});return data;
  })().finally(()=>pending.delete(id));pending.set(id,work);return work;

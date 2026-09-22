@@ -1,5 +1,60 @@
-// Public resort areas, not exact trail entrances. Generated from script/outz-winter/catalog.json.
+// Public resort areas, not exact trail entrances. Generated from the winter and BC activity catalogs.
 export const winterResorts = [
+  {
+    "id": "winter-bc-cypress",
+    "name": "Cypress Mountain",
+    "state": "BC",
+    "lat": 49.396,
+    "lng": -123.204,
+    "key": "bc-cypress",
+    "reportUrl": "https://www.cypressmountain.com/",
+    "passUrl": "https://www.cypressmountain.com/",
+    "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+  },
+  {
+    "id": "winter-bc-grouse",
+    "name": "Grouse Mountain",
+    "state": "BC",
+    "lat": 49.38,
+    "lng": -123.081,
+    "key": "bc-grouse",
+    "reportUrl": "https://www.grousemountain.com/",
+    "passUrl": "https://www.grousemountain.com/",
+    "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+  },
+  {
+    "id": "winter-bc-seymour",
+    "name": "Mt Seymour",
+    "state": "BC",
+    "lat": 49.367,
+    "lng": -122.949,
+    "key": "bc-seymour",
+    "reportUrl": "https://mtseymour.ca/",
+    "passUrl": "https://mtseymour.ca/",
+    "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+  },
+  {
+    "id": "winter-bc-whistler-blackcomb",
+    "name": "Whistler Blackcomb",
+    "state": "BC",
+    "lat": 50.111,
+    "lng": -122.953,
+    "key": "bc-whistler-blackcomb",
+    "reportUrl": "https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report/.aspx",
+    "passUrl": "https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report/.aspx",
+    "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+  },
+  {
+    "id": "winter-bc-olympic-park",
+    "name": "Whistler Olympic Park",
+    "state": "BC",
+    "lat": 50.143,
+    "lng": -123.121,
+    "key": "bc-olympic-park",
+    "reportUrl": "https://www.whistlerolympicpark.com/",
+    "passUrl": "https://www.whistlerolympicpark.com/",
+    "priceNote": "Canadian resort: prices are CAD unless the operator says otherwise. See official tickets, passes and operating reports for current terms."
+  },
   {
     "id": "winter-meadows",
     "name": "Mt. Hood Meadows",

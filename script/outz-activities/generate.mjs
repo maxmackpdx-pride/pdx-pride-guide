@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const root=new URL('../../',import.meta.url),base=new URL('client/public/outzide-map/',root);
 const data=JSON.parse(fs.readFileSync(new URL('catalog.json',import.meta.url)));
 const dayuse=JSON.parse(fs.readFileSync(new URL('dayuse.json',import.meta.url)));
-data.places.push(...dayuse.places,...JSON.parse(fs.readFileSync(new URL('../outz-winter/catalog.json',import.meta.url))).places);
+data.places.push(...JSON.parse(fs.readFileSync(new URL('bc.json',import.meta.url))).places,...dayuse.places,...JSON.parse(fs.readFileSync(new URL('../outz-winter/catalog.json',import.meta.url))).places);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const pine=(x,y,k=1)=>`<g transform="translate(${x} ${y}) scale(${k})"><path d="M0 0V-58M-18-12 0-45 18-12M-13-29 0-58 13-29"/></g>`;
 function artwork(p){
@@ -19,6 +19,11 @@ function artwork(p){
  scene='<circle cx="'+(63+n)+'" cy="52" r="18"/><path d="M'+(63+n)+' 22v-8M'+(63+n)+' 82v8M'+(33+n)+' 52h-8M'+(93+n)+' 52h8M'+(42+n)+' 31l-6-6M'+(84+n)+' 73l6 6M'+(42+n)+' 73l-6 6M'+(84+n)+' 31l6-6"/>'+trees+(p.landscape==='desert'?canyon:'<path d="M15 132q52-51 105-10t129-16M20 231q62-21 121-6t102-9"/>');
  scene+='<path d="M62 154h139v11H62zM95 165l-26 53M165 165l26 53M58 191h151v9H58zM91 200l-8 18M175 200l8 18M105 174h50"/>';
  if(p.landscape==='coast')scene+='<path d="M20 242q24-9 48 0t48 0 48 0 48 0"/>';
+ }else if(p.collection==='outz-bc-2026'&&['trail','camp','coastcamp','watercamp','beach'].includes(p.kind)){
+ scene=mountain+trees;
+ if(p.kind==='trail')scene+='<path d="M42 249q125-32 77-58t41-61M113 236l-10-24m43-15-19-13"/>';
+ else if(p.kind==='beach')scene+='<circle cx="191" cy="54" r="17"/><path d="M23 165q28-16 55 0t55 0 55 0 55 0M23 204q28-16 55 0t55 0 55 0 55 0M23 241q28-16 55 0t55 0 55 0 55 0"/>';
+ else {scene+='<path d="M67 214 128 122 193 214H67ZM106 214l22-54 25 54M116 120l25 20"/>';if(p.kind!=='camp')scene+='<path d="M15 240q29-14 58 0t58 0 58 0 58 0M25 224q20-8 33 0M200 224q20-8 33 0"/>';}
  }else if(water){
  scene+=`<path d="M16 147Q66 ${130+n} 108 145T248 146M12 204q23-9 44 0t44 0M166 211q23-9 44 0t40 0M25 233q27-10 53 0t53 0 53 0 53 0"/>`;
  if(p.kind==='fishing')scene+=`<g transform="translate(${n/3-3} 0)"><path d="M66 173q43-44 102-5l29-20-2 44-28-17q-56 37-101-2ZM151 158q-9 15 0 30M108 151l15-16 15 18M113 192l14 13 10-19M82 169q17-11 35-8M38 135 83 52q35-28 74-5M157 47q14 20 10 46v29q0 17-11 17t-10-11l6 5M42 129l8 5"/><circle cx="163" cy="170" r="2"/><circle cx="56" cy="111" r="7"/></g>`;
@@ -36,5 +41,5 @@ catalog.activityCatalog={checkedAt:data.checkedAt,selection:data.selection,count
 fs.writeFileSync(path,JSON.stringify(catalog,null,2)+'\n');
 fs.writeFileSync(new URL('shared/outzMapCatalog.ts',root),'/** Public destinations in the Outzide field map. */\nexport default '+JSON.stringify(catalog.places.map(({id,name,kind})=>({id,name,kind})),null,2)+';\n');
 const winter=data.places.filter(p=>p.kind==='winter');
-fs.writeFileSync(new URL('shared/outzWinterCatalog.ts',root),'// Public resort areas, not exact trail entrances. Generated from script/outz-winter/catalog.json.\nexport const winterResorts = '+JSON.stringify(winter.map(p=>({id:p.id,name:p.name,state:p.state,lat:p.lat,lng:p.lng,...p.winter})),null,2)+';\n');
+fs.writeFileSync(new URL('shared/outzWinterCatalog.ts',root),'// Public resort areas, not exact trail entrances. Generated from the winter and BC activity catalogs.\nexport const winterResorts = '+JSON.stringify(winter.map(p=>({id:p.id,name:p.name,state:p.state,lat:p.lat,lng:p.lng,...p.winter})),null,2)+';\n');
 console.log(`Generated ${data.places.length} SVG illustrations; catalog now has ${catalog.places.length} destinations.`);

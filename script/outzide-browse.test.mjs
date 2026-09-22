@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {browseRegions,browseRegionFor,matchesBrowse} from '../client/public/outzide-map/assets/browse-regions.js';
 const places=JSON.parse(readFileSync(new URL('../client/public/outzide-map/places.json',import.meta.url))).places;
-test('all destinations belong to exactly one of eight populated browse regions',()=>{
- assert.equal(browseRegions.length,8);
+test('all destinations belong to exactly one of eleven populated browse regions',()=>{
+ assert.equal(browseRegions.length,11);
  const ids=new Set(browseRegions.map(r=>r.id));
  for(const p of places)assert.ok(ids.has(browseRegionFor(p)),p.name);
  for(const r of browseRegions)assert.ok(places.some(p=>browseRegionFor(p)===r.id),r.name);

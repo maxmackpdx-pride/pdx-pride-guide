@@ -1631,6 +1631,136 @@ export default [
     "kind": "atv"
   },
   {
+    "id": "winter-bc-cypress",
+    "name": "Cypress Mountain",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-bc-grouse",
+    "name": "Grouse Mountain",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-bc-seymour",
+    "name": "Mt Seymour",
+    "kind": "winter"
+  },
+  {
+    "id": "bc-wreck",
+    "name": "Wreck Beach",
+    "kind": "beach"
+  },
+  {
+    "id": "bc-lynn",
+    "name": "Lynn Headwaters Regional Park",
+    "kind": "trail"
+  },
+  {
+    "id": "bc-stanley",
+    "name": "Stanley Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "bc-golden-ears",
+    "name": "Golden Ears Campgrounds",
+    "kind": "watercamp"
+  },
+  {
+    "id": "bc-porteau",
+    "name": "Porteau Cove Campground",
+    "kind": "coastcamp"
+  },
+  {
+    "id": "bc-buntzen",
+    "name": "Buntzen Lake",
+    "kind": "fishing"
+  },
+  {
+    "id": "bc-east-sooke",
+    "name": "East Sooke Coast Trail",
+    "kind": "trail"
+  },
+  {
+    "id": "bc-jordan-river",
+    "name": "Jordan River Campground",
+    "kind": "coastcamp"
+  },
+  {
+    "id": "bc-island-view",
+    "name": "Island View Beach Campground",
+    "kind": "coastcamp"
+  },
+  {
+    "id": "bc-goldstream",
+    "name": "Goldstream Campground",
+    "kind": "camp"
+  },
+  {
+    "id": "bc-sooke-potholes",
+    "name": "Spring Salmon Place Campground",
+    "kind": "watercamp"
+  },
+  {
+    "id": "bc-thetis",
+    "name": "Thetis Lake Regional Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "bc-elk-lake",
+    "name": "Elk Lake Fishing Pier",
+    "kind": "fishing"
+  },
+  {
+    "id": "bc-tod-inlet",
+    "name": "Tod Inlet",
+    "kind": "boating"
+  },
+  {
+    "id": "winter-bc-whistler-blackcomb",
+    "name": "Whistler Blackcomb",
+    "kind": "winter"
+  },
+  {
+    "id": "winter-bc-olympic-park",
+    "name": "Whistler Olympic Park",
+    "kind": "winter"
+  },
+  {
+    "id": "bc-lost-lake",
+    "name": "Lost Lake Park",
+    "kind": "dayuse"
+  },
+  {
+    "id": "bc-rainbow",
+    "name": "Rainbow Park — Alta Lake",
+    "kind": "boating"
+  },
+  {
+    "id": "bc-garibaldi",
+    "name": "Garibaldi Lake Trail",
+    "kind": "trail"
+  },
+  {
+    "id": "bc-brandywine",
+    "name": "Brandywine Falls Trail",
+    "kind": "trail"
+  },
+  {
+    "id": "bc-nairn",
+    "name": "Nairn Falls Campground",
+    "kind": "watercamp"
+  },
+  {
+    "id": "bc-alice",
+    "name": "Alice Lake Campground",
+    "kind": "watercamp"
+  },
+  {
+    "id": "bc-callaghan-atv",
+    "name": "Callaghan Valley ATV Tours",
+    "kind": "atv"
+  },
+  {
     "id": "dayuse-or-dabney-state-recreation-area",
     "name": "Dabney State Recreation Area",
     "kind": "dayuse"
