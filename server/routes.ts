@@ -1,3 +1,4 @@
+import {getOutzClosures} from './outzClosures';
 import { getWinterConditions } from './outzWinter';
 import { publicWinterEvents } from '../shared/outzWinterEvents';
 import { createWaypointStore } from './outzWaypoints';
@@ -1879,6 +1880,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // OUTZ (official outdoor conditions + catalog)
+  app.get('/api/outz/closures', async (_req,res)=>{try{res.setHeader('Cache-Control','no-store');res.json(await getOutzClosures());}catch{res.status(502).json({error:'Closure status unavailable'});}});
   app.get('/api/outz/winter/events', (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.json({ events: publicWinterEvents(storage.getEvents()), fetchedAt: new Date().toISOString() });

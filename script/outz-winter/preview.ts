@@ -1,3 +1,4 @@
+import {getOutzClosures} from '../../server/outzClosures';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -9,6 +10,7 @@ let eventsCache:{at:number;events:any[]}|null=null;
 const server=createServer(async(req,res)=>{try{
  const url=new URL(req.url||'/','http://localhost');
  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405).end();return}
+ if(url.pathname==='/api/outz/closures'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(await getOutzClosures()));return;}
  if(url.pathname.startsWith('/api/outz/winter/')){
   let data:any;
   if(url.pathname==='/api/outz/winter/events'){
