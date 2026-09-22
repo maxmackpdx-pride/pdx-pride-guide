@@ -153,7 +153,7 @@ export const WORLDS: WorldSpec[] = [
     eyebrow: "Explore outside",
     body: "Camping, trails, beaches and stays. Find your next destination.",
     action: "Open OutZide",
-    href: "/outz",
+    href: "/outzide",
     accent: "var(--neon-orange, #ff6600)",
     mark: "/brand/outzide.png",
     slot: "rows",
@@ -264,7 +264,7 @@ export const WORLDS: WorldSpec[] = [
 export const DEMO_OUTZ_ROWS: WorldRow[] = [
   {
     id: "rooster-rock",
-    href: "/outz/rooster-rock",
+    href: "/outzide/rooster-rock",
     name: "Rooster Rock",
     stats: "EASY · RIVER BEACH · THE GORGE",
     sub: "The River Brats crew. NUDE BEACH. Join today's group chat here.",
@@ -273,7 +273,7 @@ export const DEMO_OUTZ_ROWS: WorldRow[] = [
   },
   {
     id: "sauvie-island",
-    href: "/outz/sauvie-island",
+    href: "/outzide/sauvie-island",
     name: "Sauvie Island · Collins Beach",
     stats: "EASY · ISLAND BEACH · 0.5 MI WALK-IN",
     sub: "The Sauvie Sirens crew. NUDE BEACH. Join today's group chat here.",
@@ -282,7 +282,7 @@ export const DEMO_OUTZ_ROWS: WorldRow[] = [
   },
   {
     id: "angels-rest",
-    href: "/outz",
+    href: "/outzide",
     name: "Angel's Rest Trailhead",
     stats: "MODERATE · 4.8 MI · 1,500 FT GAIN",
     sub: "Columbia Gorge. Views over the river at the top. Join today's group chat here.",

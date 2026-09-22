@@ -572,7 +572,7 @@ export default function LivingMap() {
       mizzed: { label: "Mizzed Connections", rows: visibleMizzed, loading: mizzedLoading, error: mizzedError, retry: () => { void retryMizzed(); }, href: row => row.id ? `/spotted?post=${row.id}` : "/spotted" },
       outz: { label: "OutZide Nearby", rows: nearbyOutz, loading: outzLoading, error: outzError, retry: () => { void retryOutz(); }, href: row => outzPlaceHref({ id: String(row.id), name: String(row.name || "OutZide") }) },
       housing: { label: "Housing", rows: visibleHousing, loading: housingLoading, error: housingError, retry: () => { void retryHousing(); }, href: row => row.id ? `/the-hauz/${row.id}` : "/the-hauz" },
-      carpool: { label: "Carpool", rows: carpools.filter(row => rowMatchesQuery(row, q)), loading: carpoolsLoading, error: carpoolsError, retry: () => { void retryCarpools(); }, href: () => "/outz" },
+      carpool: { label: "Carpool", rows: carpools.filter(row => rowMatchesQuery(row, q)), loading: carpoolsLoading, error: carpoolsError, retry: () => { void retryCarpools(); }, href: () => "/outzide" },
       boards: { label: "Gigz · Giftz · Sellz", rows: visibleBoards, loading: gigsLoading || giftsLoading || sellsLoading, error: gigsError || giftsError || sellsError, retry: () => { void retryGigs(); void retryGifts(); void retrySells(); }, href: row => String(row._href || "/pride-work") },
     };
     const item = config[id];
@@ -614,7 +614,7 @@ export default function LivingMap() {
     else if (mark.kind === "place") { setSelectedPlace(mark.item as Place); goOverlay("place", (mark.item as Place).id); }
     else if (mark.kind === "mizzed") { setSelectedMizzed(mark.item as MissedConnectionPost); goOverlay("mizzed", Number((mark.item as MapRow).id)); }
     else if (mark.kind === "housing") setLocation(`/the-hauz/${(mark.item as MapRow).id}`);
-    else setLocation(`/outz/${String((mark.item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
+    else setLocation(`/outzide/${String((mark.item as MapRow)._beachKey || "rooster-rock")}?shore=carpool`);
   }, [goOverlay, setLocation]);
   useEffect(() => {
     if (!createOpen && !keyOpen && !filtersOpen) return;

@@ -219,7 +219,7 @@ export function buildSitemapXml(events: SeoEvent[]) {
     "/sponsors",
     "/access",
     "/z",
-    "/outz",
+    "/outzide",
     "/next",
     "/resume",
     "/legal",
@@ -319,9 +319,9 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Z/ Communities | Zaylist",
     description: "Portland queer communities with real memberships, rules, moderators, posts, and related events.",
   },
-  "/outz": {
-    title: "OUTZ | Zaylist",
-    description: "Outdoor recreation destinations, live conditions, and community updates from Zaylist.",
+  "/outzide": {
+    title: "Outzide | Northwest field map | Zaylist",
+    description: "Explore trails, campgrounds, hot springs, beaches and community stays across Oregon and Washington.",
   },
   "/schedule": {
     title: "Portland Queer Events Schedule | Zaylist",
@@ -534,7 +534,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? "/dashboard"
           : pathKey.startsWith("/the-hauz") || pathKey.startsWith("/hausing")
             ? "/the-hauz"
-            : pathKey;
+            : pathKey.startsWith("/outzide/")
+              ? "/outzide"
+              : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];
 
   const pageTitle = liveEvent
@@ -645,7 +647,9 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? livePlace.name
           : liveProfile
             ? `${liveProfile.displayName || liveProfile.username} on Zaylist`
-            : "Zaylist. EVENTZ, PLACEZ, GIGZ, community, all year.",
+            : boardShareKey === "outzide"
+              ? "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints"
+              : "Zaylist. EVENTZ, PLACEZ, GIGZ, community, all year.",
     ),
     type: ogType,
     // Board share cards + dynamic OG are PNG; legacy jpeg only if something else sneaks in

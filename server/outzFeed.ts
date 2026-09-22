@@ -13,7 +13,7 @@ export function getOutzCommunityFeed(snapshot: OutzSnapshot, viewerUserId?: numb
   const places = new Map([...snapshot.destinations, ...snapshot.catalog, ...snapshot.communityStays].map(p => [p.id, p]));
   const beaches = [{ id: "rooster-rock", name: "Rooster Rock" }, { id: "sauvie-island", name: "Sauvie Island" }];
   const name = (id: string) => places.get(id)?.name || beaches.find(b => b.id === id)?.name || outzMapCatalog.find(p => p.id === id)?.name || (id === "__openplans" ? "Decide together" : undefined);
-  const href = (id: string) => beaches.some(b => b.id === id) ? `/outz/${id}` : `/outz?place=${encodeURIComponent(id)}`;
+  const href = (id: string) => beaches.some(b => b.id === id) ? `/outzide/${id}` : `/outzide?place=${encodeURIComponent(id)}`;
   const allowed = (id: number) => viewerUserId == null || viewerUserId === id || !storage.isMemberInteractionBlocked(viewerUserId, id);
   const dates = beachCheckinDateOptions(now), today = dates[0], lastDay = dates[dates.length - 1];
   const items: OutzFeedItem[] = [];

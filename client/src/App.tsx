@@ -20,10 +20,16 @@ import PrideGlowNudge from "./components/PrideGlowNudge";
 import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
 import { lazyWithReload } from "./lib/lazyWithReload";
+import { legacyOutzRedirect } from "@shared/outzRoutes";
+
+function LegacyOutzRedirect() {
+  const target = legacyOutzRedirect(window.location.pathname + window.location.search + window.location.hash);
+  return <Redirect to={target || "/outzide"} replace />;
+}
 
 /** The intro explains Rooster Rock and Collins Beach specifically, so it belongs
  *  on those two routes only, not on every OUTZ destination page. */
-const RIVER_BRATS_INTRO_PATHS = new Set(["/outz/rooster-rock", "/outz/sauvie-island"]);
+const RIVER_BRATS_INTRO_PATHS = new Set(["/outzide/rooster-rock", "/outzide/sauvie-island"]);
 
 /** Mount intro outside RouteBoundary so a page crash cannot kill the popup. */
 function RiverBratsIntroOnBeaches() {
@@ -104,8 +110,8 @@ function AppLayout() {
   useEffect(() => {
     const path = pathname;
     document.documentElement.dataset.actionContext = path === "/admin" ? "admin"
-      : path === "/outz/rooster-rock" ? "rooster"
-      : path === "/outz/sauvie-island" ? "sauvie"
+      : path === "/outzide/rooster-rock" ? "rooster"
+      : path === "/outzide/sauvie-island" ? "sauvie"
       : isHubPath(path) || path.startsWith("/settings/") ? "hub" : "public";
   }, [pathname]);
   const profile = isProfilePath(location);
@@ -191,13 +197,14 @@ function AppLayout() {
             <Route path="/nude-beaches">
               {() => {
                 const tab = new URLSearchParams(window.location.search).get("tab");
-                return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/outz/sauvie-island" : "/outz/rooster-rock"} />;
+                return <Redirect to={tab === "sauvie-island" || tab === "sauvie" ? "/outzide/sauvie-island" : "/outzide/rooster-rock"} />;
               }}
             </Route>
-            <Route path="/outz" component={Outz} />
-            <Route path="/outz/rooster-rock" component={RoosterRock} />
-            <Route path="/outz/sauvie-island" component={SauvieIsland} />
-            <Route path="/outz/:placeSlug" component={OutzPlace} />
+            <Route path={/^\/outz(?:\/.*)?$/i} component={LegacyOutzRedirect} />
+            <Route path="/outzide" component={Outz} />
+            <Route path="/outzide/rooster-rock" component={RoosterRock} />
+            <Route path="/outzide/sauvie-island" component={SauvieIsland} />
+            <Route path="/outzide/:placeSlug" component={OutzPlace} />
             <Route path="/next">
               {() => <Redirect to="/about" />}
             </Route>

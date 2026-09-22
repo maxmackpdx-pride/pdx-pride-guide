@@ -12,7 +12,7 @@ export function installWaypointAccess(onRevoke){
  const gate=createWaypointAccess({onRevoke,requestSignup:placeId=>{
   if(embedded)parent.postMessage({source:'outzide-map',type:'require-auth',placeId},location.origin);
   else {
-   const target=new URL('/outz',/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://www.zaylist.com':location.origin);
+   const target=new URL('/outzide',/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://www.zaylist.com':location.origin);
    target.searchParams.set('signup','1');if(placeId)target.searchParams.set('place',placeId);location.assign(target.href);
   }
  }});

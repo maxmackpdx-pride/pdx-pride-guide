@@ -44,7 +44,7 @@ export const INFRASTRUCTURE_CARDS: readonly InfraCard[] = [
     accent: "#FF00CC",
   },
   {
-    href: "/outz",
+    href: "/outzide",
     title: "OUTZ",
     description:
       "Rooster Rock and Sauvie Island conditions, carpools, check-ins, and River Brats.",
