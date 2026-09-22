@@ -104,6 +104,13 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
   vm.runInContext(source,context);let labels=[];context.renderHologramLabels=rows=>{labels=rows;};vm.runInContext('drawLights(1)',context);
   assert.equal(labels.length,1);assert.equal(labels[0].name,'Musical Mondays');assert.equal(labels[0].time,'9:00 PM');assert.ok(labels[0].logoY<700);
   assert.deepEqual(operations,['beam','building-mask','chrome','building-reflections','sky-logo']);
+  const anchored={...labels[0]};context.map.project=()=>({x:487,y:681});
+  vm.runInContext('drawLights(1)',context);
+  assert.ok(Math.abs(labels[0].x-anchored.x-37)<1e-8);
+  assert.ok(Math.abs(labels[0].y-anchored.y+19)<1e-8);
+  assert.ok(Math.abs(labels[0].logoY-anchored.logoY+19)<1e-8);
+  assert.ok(Math.abs((labels[0].y-labels[0].logoY)-(anchored.y-anchored.logoY))<1e-8);
+
   context.lightFeatures=[{geometry:{coordinates:[-122.67,45.53]},properties:{key:'houz',kind:'housing',housingModel:'MANAGED',demoOpen:true,logo:'',phase:2,color:'#8800FF',heightScale:1,name:'Property for rent'}}];
   operations.length=0;assert.doesNotThrow(()=>vm.runInContext('drawLights(1)',context));
   assert.deepEqual(operations,['waypoint-beam','building-mask','chrome','building-reflections','waypoint-head']);

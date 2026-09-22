@@ -775,7 +775,7 @@ function drawLights(fade,target=map,surface=lights){
    if(feature.properties.time&&logo&&coreAlpha>.1){
     const fit=logoFit(logo)*renderedArtworkScale;
     const logoWidth=logo.width*fit,logoHeight=logo.height*fit;
-    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+3*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
+    eventLabels.push({key:feature.properties.key,name:feature.properties.name,time:feature.properties.time,color,x:logoX,y:hologramCenterY+logoHeight/2+6*beaconScale,width:hologramLabelWidth,scale:beaconScale,logoKey,logoY:hologramCenterY,logoWidth,logoHeight,opacity:coreAlpha});
    }
    lightsContext.globalAlpha=coreAlpha;
    if(logo){
@@ -844,9 +844,10 @@ function labelRows(text,width,requiredRows){
  const targetWidth=width*.96,targetHeight=width*.52,maxSize=width*.34;
  return candidates.map(lines=>{
   let sizes=lines.map(line=>Math.min(maxSize,targetWidth/Math.max(1,labelMeasureContext.measureText(line).width)*100));
-  const total=sizes.reduce((sum,size)=>sum+size*.82,0);
-  if(total>targetHeight){const ratio=targetHeight/total;sizes=sizes.map(size=>size*ratio);}
-  const height=sizes.reduce((sum,size)=>sum+size*.82,0);
+  const rowGap=Math.max(0,lines.length-1)*.75;
+  const total=sizes.reduce((sum,size)=>sum+size*.86,0);
+  if(total+rowGap>targetHeight){const ratio=(targetHeight-rowGap)/total;sizes=sizes.map(size=>size*ratio);}
+  const height=sizes.reduce((sum,size)=>sum+size*.86,0)+rowGap;
   return {lines,sizes,score:height-lines.length*.05};
  }).sort((a,b)=>b.score-a.score)[0]||{lines:[text],sizes:[14]};
 }
