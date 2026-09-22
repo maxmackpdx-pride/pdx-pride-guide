@@ -72,3 +72,12 @@ html.calm-mode .outzide-shell,html.calm-mode .zaydar-map-demo,[data-calm=true] .
  .zaydar-map-demo :is(.zaydar-layer-sheet,.zaydar-demo-navigation){background:var(--map-ui-ink)}
 }
 @media(prefers-reduced-transparency:no-preference){.outzide-shell #detail.winter-card{background:linear-gradient(130deg,#263d4380,#0d2021c2 28%,#102122d1)}}
+/* Field Feed keeps identity beside the post and separates authors from notices. */
+.field-post-identity{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.field-avatar{position:relative;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;overflow:hidden;background:#334532;color:#e8efd9;border:1px solid #b5cd9c42;font:600 13px var(--body)}
+.field-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.field-avatar svg{width:22px;height:22px}
+.field-author{min-width:0;flex:1}.field-author strong{display:block;font-size:13px;overflow-wrap:anywhere}.field-author>span{display:block;font-size:11px;color:var(--muted)}
+.field-post-identity time{font:10px var(--mono);color:var(--muted);white-space:nowrap;align-self:flex-start;padding-top:3px}
+#field-feed-items .field-post>.post{border:0;background:none;padding:0;margin-top:10px}
+#field-feed-items .field-place-link{margin-left:48px;margin-bottom:6px;font-size:12px}
+@media(max-width:400px){.field-post-identity{gap:8px}.field-post-identity time{font-size:9px}}

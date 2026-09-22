@@ -37,7 +37,11 @@ test("feed respects blocks, aggregates check-ins without identities, and exclude
   const ride=sqlite.prepare("INSERT INTO beach_carpool_posts(user_id,beach_id,post_type,departure_area,trip_date,leave_hour,note,status,expires_at,created_at) VALUES(?,'rooster-rock','OFFERING_RIDE','Portland',?,10,'Ride note','OPEN',?,?)");
   ride.run(author,date,expires,created);
   ride.run(hidden,date,expires,created);
+  sqlite.prepare("UPDATE users SET photo_url=? WHERE id=?").run("https://example.com/author.jpg",author);
   const result=getOutzCommunityFeed(snapshot,viewer,now);
+  assert.equal(result.find(i=>i.kind==='post')?.authorAvatarUrl,"https://example.com/author.jpg");
+  assert.equal(result.find(i=>i.kind==='carpool')?.authorAvatarUrl,"https://example.com/author.jpg");
+  assert.ok(result.filter(i=>i.kind==='checkin').every(i=>!i.authorAvatarUrl));
   assert.equal(result.filter(i=>i.kind==='post').length,1);
   const visits=result.filter(i=>i.kind==='checkin');assert.equal(visits.length,1);assert.match(visits[0].title,/^1 person/);
   assert.ok(!JSON.stringify(visits).includes('PRIVATE NOTE'));assert.ok(!JSON.stringify(visits).includes('user_id'));assert.equal(visits[0].author,undefined);

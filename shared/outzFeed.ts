@@ -13,6 +13,7 @@ export type OutzFeedItem = {
   createdAt: string;
   tripDate?: string;
   author?: string;
+  authorAvatarUrl?: string | null;
   endsAt?: string;
 };
 export type OutzFeedPayload = {
