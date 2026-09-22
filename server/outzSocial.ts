@@ -1,6 +1,7 @@
 import { sqlite, storage } from "./storage";
 import {
   formatBeachGoingChip,
+  beachCheckinDateOptions,
   pacificTodayDate,
   riverBratsChatAccessFromDates,
   riverBratsChatClosesAtIso,
@@ -280,4 +281,14 @@ export function deleteOutzWallPost(id: number, userId: number) {
     sqlite.prepare("DELETE FROM outz_wall_comments WHERE post_id=?").run(id);
     return sqlite.prepare("DELETE FROM outz_wall_posts WHERE id=? AND user_id=?").run(id, userId).changes > 0;
   })();
+}
+
+/** Map summaries reuse the same per-date visibility policy as the check-in cards. */
+export function getOutzMapCheckins(viewerUserId?:number){
+ expireOutzCheckins();const dates=beachCheckinDateOptions(),first=dates[0],last=dates[dates.length-1];
+ const groups=sqlite.prepare(`SELECT DISTINCT place_id AS placeId,calendar_date AS calendarDate FROM outz_checkins WHERE is_active=1 AND calendar_date BETWEEN ? AND ? UNION SELECT DISTINCT beach_id AS placeId,calendar_date AS calendarDate FROM beach_checkins WHERE is_active=1 AND calendar_date BETWEEN ? AND ?`).all(first,last,first,last) as {placeId:string;calendarDate:string}[];
+ const places=new Map<string,Map<number,any>>();
+ for(const g of groups){const rows=['rooster-rock','sauvie-island'].includes(g.placeId)?storage.getBeachCheckins(g.placeId,g.calendarDate,viewerUserId):getOutzCheckins(g.placeId,g.calendarDate,viewerUserId);const people=places.get(g.placeId)||new Map();
+ for(const row of rows){if(!people.has(row.userId))people.set(row.userId,{masked:!!row.masked||!!row.isAnonymous,displayName:row.masked||row.isAnonymous?'Anonymous':row.displayName||row.username,photoUrl:row.masked||row.isAnonymous?null:row.photoUrl});}places.set(g.placeId,people);}
+ return [...places].map(([placeId,people])=>({placeId,total:people.size,people:[...people.values()].slice(0,5)}));
 }

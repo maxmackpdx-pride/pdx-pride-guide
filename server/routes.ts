@@ -176,6 +176,7 @@ import {
   getOutzWallPosts,
   getOutzChatMessages,
   getOutzCheckins,
+  getOutzMapCheckins,
   postOutzChatMessage,
   upsertOutzPlaceRating,
   upsertOutzCheckin,
@@ -1964,6 +1965,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!waypointStore.remove(Number(req.params.id), req.session.userId!)) return res.status(404).json({error:'Waypoint not found'});
     res.json({ok:true});
   });
+
+  app.get("/api/outz/map-checkins", (req:any,res)=>{try{res.setHeader('Cache-Control','no-store');res.json(getOutzMapCheckins(req.session?.userId));}catch{res.status(502).json({error:'Check-ins unavailable'});}});
 
   app.get("/api/outz/checkins", async (req: any, res) => {
     try {
