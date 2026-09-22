@@ -54,9 +54,9 @@
 .outzide-shell .search:focus-within,
 .living-map-page .living-map-search:focus-within { box-shadow: 0 0 0 2px var(--map-chrome-accent); }
 .outzide-shell .search input:focus-visible { outline: none; }
-.outzide-shell .map-controls { padding: 5px; gap: 3px; align-items: stretch; border-radius: 15px; }
-.outzide-shell .map-controls button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; box-shadow: none; align-self: center; }
-.outzide-shell .map-controls #fire-toggle { align-self: stretch; border-bottom: 1px solid #ffffff20; border-radius: 9px 9px 4px 4px; }
+.outzide-shell .map-controls { width: 54px; padding: 4px; gap: 3px; align-items: stretch; border-radius: 15px; }
+.outzide-shell .map-controls button { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; box-shadow: none; align-self: center; }
+.outzide-shell .map-controls #fire-toggle { width: 44px; padding: 0; align-self: center; border-bottom: 1px solid #ffffff20; border-radius: 9px 9px 4px 4px; }
 .outzide-shell .map-controls button:hover { background: #ffffff0d; }
 .outzide-shell .map-controls button:focus-visible { outline-offset: -2px; }
 .outzide-shell .map-bottom { align-items: flex-start; }
@@ -87,8 +87,8 @@
   .outzide-shell .header-actions #updates-button { padding: 5px 7px; min-height: 36px; }
   .outzide-shell .map-legend { display: flex; max-width: min(360px,calc(100vw - 90px)); max-height: 35dvh; }
   .outzide-shell .map-hint { display: none; }
-  .outzide-shell .map-controls { padding: 3px; }
-  .outzide-shell .map-controls button { width: 40px; height: 40px; min-height: 40px; }
+  .outzide-shell .map-controls { width: 50px; padding: 3px; }
+  .outzide-shell .map-controls button,.outzide-shell .map-controls #fire-toggle { width: 40px; height: 40px; min-height: 40px; }
 }
 @media(prefers-reduced-motion:reduce) {
   .outzide-shell :is(.filters button,.browse-toggle,#updates-button) { transition: none; }
