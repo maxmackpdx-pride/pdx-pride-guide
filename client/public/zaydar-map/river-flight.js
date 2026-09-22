@@ -1,6 +1,6 @@
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260921-building-mask-v10';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260922-pride-underglow';
 import {createBuildingModelLayer} from './building-models.js';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
@@ -15,7 +15,9 @@ import {createSpatialIndex} from './spatial-index.js';
 import {settleValue} from './settling.js';
 import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v=20260920-avatar-trackpad';
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
-import {createPortlandBridgeLayer} from './st-johns-bridge.js?v=20260921-layer-join';
+import {createPortlandBridgeLayer,PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
+import {fitBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
+import {bridgeGlowSpans} from './bridge-water-glow.js?v=20260922-pride-underglow';
 import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260922-outzide-waypoints-v2';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -123,14 +125,10 @@ function updateSurfaces(target){
  // still loading at any overview zoom. Otherwise the glitter disappears.
  const overviewRoads=transportation;
  groundLightPools.update(intersectionLightPools(transportation,matchMedia('(pointer:coarse)').matches?90:180));
- const bridgeLights=[];
- for(const feature of bridgeFeatures){
-  const lines=feature.geometry.type==='LineString'?[feature.geometry.coordinates]:feature.geometry.type==='MultiLineString'?feature.geometry.coordinates:[];
-  for(const line of lines)for(let i=1;i<line.length;i+=Math.max(1,Math.ceil(line.length/5))){
-   const a=line[i-1],b=line[Math.min(i,line.length-1)];bridgeLights.push({type:'Feature',geometry:{type:'Point',coordinates:[(a[0]+b[0])/2,(a[1]+b[1])/2]},properties:{color:'#8fc8d4',isBridge:true}});
-  }
- }
- const result={time:now,buildings,reflections,roofs,overviewRoads,bridgeLights:bridgeLights.slice(0,160)};surfaceCache.set(target,result);return result;
+ // Marquam and Interstate use the connected road decks without a GLB model.
+ const roadOnlyBridges=PORTLAND_BRIDGE_MODELS.filter(model=>model.disabled).map(model=>({...model,fit:fitBridgeRoad(allBridgeFeatures,model,terrainHeight)}));
+ const bridgeGlow=bridgeGlowSpans([...portlandBridges.models,...roadOnlyBridges],terrainHeight);
+ const result={time:now,buildings,reflections,roofs,overviewRoads,bridgeGlow};surfaceCache.set(target,result);return result;
 }
 function drawSurfaceReflections(ctx,target,reflections,fade){
  const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686;
@@ -502,8 +500,8 @@ function drawLights(fade,target=map,surface=lights){
  const effectiveHologramLift=hologramLiftScale*overviewAnchor;
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
- const reflectionSources=[...(surfaces.bridgeLights??[]),...lightFeatures.filter(feature=>feature.properties.kind==='event')];if(userLocation)reflectionSources.unshift(userLocation.feature);
- waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
+ const reflectionSources=lightFeatures.filter(feature=>feature.properties.kind==='event');if(userLocation)reflectionSources.unshift(userLocation.feature);
+ waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources,surfaces.bridgeGlow);
  drawUserLocationGlow(lightsContext,target,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
