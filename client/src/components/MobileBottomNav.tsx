@@ -9,13 +9,13 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { EVENTS_NAV, OUTZ_INDEX, OUTZ_NAV, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import { EVENTS_NAV, OUTZ_INDEX, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
 import { HologramWaypoint as MapzMark } from "@/components/ui/hero-z-hologram";
-import { CalendarDays, Compass, TreePine, MessageCircle } from "lucide-react";
+import { CalendarDays, Compass, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
 // Preserve access to the destinations that do not occupy a bottom-bar tab.
@@ -69,16 +69,13 @@ export default function MobileBottomNav() {
   const [eventsOpen, setEventsOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
   const exploreTriggerRef = useRef<HTMLButtonElement>(null);
-  const outzTriggerRef = useRef<HTMLButtonElement>(null);
-  const [outzOpen, setOutzOpen] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const overlayOpen = eventsOpen || exploreOpen || outzOpen || hubOpen || open || showAuth;
+  const overlayOpen = eventsOpen || exploreOpen || hubOpen || open || showAuth;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
     if (except !== "explore") setExploreOpen(false);
-    if (except !== "outz") setOutzOpen(false);
     if (except !== "hub-sheet") setHubOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
@@ -95,16 +92,14 @@ export default function MobileBottomNav() {
   useEffect(() => {
     setEventsOpen(false);
     setExploreOpen(false);
-    setOutzOpen(false);
     setHubOpen(false);
   }, [location]);
 
   useEffect(() => {
-    const close = () => { setEventsOpen(false); setExploreOpen(false); setOutzOpen(false); setHubOpen(false); };
+    const close = () => { setEventsOpen(false); setExploreOpen(false); setHubOpen(false); };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (exploreOpen) exploreTriggerRef.current?.focus();
-        if (outzOpen) outzTriggerRef.current?.focus();
         close();
       }
     };
@@ -113,12 +108,12 @@ export default function MobileBottomNav() {
     window.addEventListener("keydown", onKey);
     desktop.addEventListener("change", onResize);
     return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
-  }, [exploreOpen, outzOpen]);
+  }, [exploreOpen]);
 
   const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href));
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const outzActive = navLinkActive(location, OUTZ_INDEX);
-  const activeIndex = open || showAuth ? 4 : outzOpen ? 3 : exploreOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
+  const activeIndex = open || showAuth ? 4 : exploreOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -144,15 +139,6 @@ export default function MobileBottomNav() {
     }
     dismissExcept("explore");
     setExploreOpen(true);
-  };
-
-  const handleOutz = () => {
-    if (outzOpen) {
-      setOutzOpen(false);
-      return;
-    }
-    dismissExcept("outz");
-    setOutzOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -205,33 +191,6 @@ export default function MobileBottomNav() {
                 <span>{item.label}</span>
               </Link>
             ))}
-          </div>
-        </>
-      )}
-
-      {outzOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => { setOutzOpen(false); outzTriggerRef.current?.focus(); }} aria-hidden="true" />
-          <div id="mobile-outz-sheet" className="hub-outz-drawer pdx-liquid-overlay" role="dialog" aria-label="OutZide, most visited">
-            <span className="hub-outz-drawer__kicker">OutZide &middot; Most Visited</span>
-            {OUTZ_NAV.map((item, index) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="hub-outz-drawer__row"
-                onClick={() => setOutzOpen(false)}
-              >
-                <span className="hub-outz-drawer__num">{index + 1}</span>
-                <span className="hub-outz-drawer__name">{item.label}</span>
-              </Link>
-            ))}
-            <Link
-              href={OUTZ_INDEX}
-              className="hub-outz-drawer__all"
-              onClick={() => setOutzOpen(false)}
-            >
-              View All OutZide &rarr;
-            </Link>
           </div>
         </>
       )}
@@ -349,20 +308,21 @@ export default function MobileBottomNav() {
             <MapzMark />
           </Link>
 
-          <button
-            type="button"
-            ref={outzTriggerRef}
-            className={tabClass(outzActive || outzOpen, "orange")}
+          <Link
+            href={OUTZ_INDEX}
+            className={tabClass(outzActive, "orange")}
             data-accent="orange"
-            aria-expanded={outzOpen}
-            aria-haspopup="dialog"
-            aria-controls={outzOpen ? "mobile-outz-sheet" : undefined}
+            aria-current={outzActive ? "page" : undefined}
             aria-label="OutZide"
-            onClick={handleOutz}
+            onClick={handleNavLink}
           >
-            <span className="znav-icon-row"><TreePine size={20} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span className="znav-icon-row">
+              <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 435 501" overflow="hidden" aria-hidden="true" focusable="false">
+                <image href="/brand/outzide.png" width="1773" height="501" />
+              </svg>
+            </span>
             <span className="znav-caption">OutZide</span>
-          </button>
+          </Link>
 
           <button
             type="button"
