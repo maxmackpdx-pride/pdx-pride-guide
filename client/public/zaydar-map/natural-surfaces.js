@@ -1,6 +1,5 @@
 import {vectorStyle} from '../home-flight/city-map.js';
 import {REFLECTION_COLORS,waterReflectionSegments} from './nightlife-materials.js?v=20260920-nightlife';
-import {createBridgeWaterGlow} from './bridge-water-glow.js?v=20260922-pride-underglow-v2';
 
 export const WATER_CYAN = '#389187'; // Five percent cooler and more saturated, with the same HSL lightness.
 export const BUILDING_SOLIDITY = .98;
@@ -218,12 +217,10 @@ export function inwardDistances(mask,width,height) {
 export function createWaterBloom() {
   const surface=document.createElement('canvas'),interior=document.createElement('canvas'),reflection=document.createElement('canvas');
   const ctx=surface.getContext('2d',{willReadFrequently:true}),maskContext=interior.getContext('2d'),reflectionContext=reflection.getContext('2d');
-  const bridgeSurface=document.createElement('canvas'),bridgeContext=bridgeSurface.getContext('2d'),bridgeGlow=createBridgeWaterGlow();
-  let bridgeSignature='',previousSpans=null;
   let signature='',revision=0,reflectionSignature='',reflectionPaths=[];
   return {
     invalidate(){revision++;},
-    draw(output,map,width,height,fade,time=0,reduced=false,lightSources=[],bridgeSpans=null){
+    draw(output,map,width,height,fade,time=0,reduced=false,lightSources=[]){
       const center=map.getCenter();
       const key=[revision,width,height,center.lng,center.lat,map.getZoom(),map.getBearing(),map.getPitch()].join(':');
       const scale=Math.max(2,Math.max(width,height)/384),pad=32;
@@ -284,20 +281,7 @@ export function createWaterBloom() {
       reflectionContext.globalAlpha=1;
       reflectionContext.globalCompositeOperation='destination-in';reflectionContext.drawImage(interior,0,0);reflectionContext.globalCompositeOperation='source-over';
       output.save();output.globalCompositeOperation='screen';output.globalAlpha=fade*.48;output.drawImage(reflection,-pad*scale,-pad*scale,reflection.width*scale,reflection.height*scale);output.restore();
-      if(bridgeSpans?.length){
-        if(bridgeSignature!==key||previousSpans!==bridgeSpans){
-          bridgeSignature=key;previousSpans=bridgeSpans;
-          bridgeSurface.width=interior.width;bridgeSurface.height=interior.height;
-          bridgeGlow.paint(bridgeContext,map,bridgeSpans,scale,pad,width,height);
-          // Reuse the shoreline/island mask: color stays on water, never land.
-          bridgeContext.globalAlpha=1;bridgeContext.globalCompositeOperation='destination-in';
-          bridgeContext.drawImage(interior,0,0);bridgeContext.globalCompositeOperation='source-over';
-        }
-        output.save();output.globalCompositeOperation='screen';
-        output.globalAlpha=fade*.52*(reduced?1:.96+.04*Math.sin(time*.3));
-        output.drawImage(bridgeSurface,-pad*scale,-pad*scale,bridgeSurface.width*scale,bridgeSurface.height*scale);output.restore();
-      }
     },
-    dispose(){bridgeGlow.dispose();for(const canvas of [surface,interior,reflection,bridgeSurface])canvas.width=canvas.height=1;},
+    dispose(){for(const canvas of [surface,interior,reflection])canvas.width=canvas.height=1;},
   };
 }

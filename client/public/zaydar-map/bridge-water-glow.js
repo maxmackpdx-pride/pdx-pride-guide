@@ -15,16 +15,24 @@ export const BRIDGE_GLOW_THEMES={
  interstate:'trans',
 };
 
+export const BRIDGE_GLOW_SATURATION=1.5;
+export function saturateBridgeColor(rgb,gain=BRIDGE_GLOW_SATURATION){
+ // Scale HSV saturation without raising value/brightness; clamp to display gamut.
+ const high=Math.max(...rgb),low=Math.min(...rgb),range=high-low;
+ if(!range)return [...rgb];
+ const scale=Math.min(gain,high/range);
+ return rgb.map(channel=>Math.round(high+(channel-high)*scale));
+}
 export function bridgeGlowColor(palette,fraction){
  const stops=BRIDGE_GLOW_PALETTES[palette]||BRIDGE_GLOW_PALETTES.rainbow;
  const position=Math.max(0,Math.min(1,fraction))*(stops.length-1);
  const index=Math.min(stops.length-2,Math.floor(position)),mix=position-index;
  const a=parseInt(stops[index].slice(1),16),b=parseInt(stops[index+1].slice(1),16);
- return [16,8,0].map(shift=>Math.round(((a>>shift)&255)*(1-mix)+((b>>shift)&255)*mix));
+ return saturateBridgeColor([16,8,0].map(shift=>((a>>shift)&255)*(1-mix)+((b>>shift)&255)*mix));
 }
 
 /** Sample the same fitted road as the real bridge, never a screen-space guess. */
-export function bridgeGlowSpans(models,elevation=()=>0){
+export function bridgeGlowSpans(models){
  return models.filter(model=>model.fit&&Object.hasOwn(BRIDGE_GLOW_THEMES,model.id)).map(model=>{
   const count=Math.max(8,Math.min(72,Math.ceil(model.fit.length/32)));
   const first=sampleBridgeRoad(model.fit,0).coordinate,last=sampleBridgeRoad(model.fit,1).coordinate;
@@ -32,74 +40,139 @@ export function bridgeGlowSpans(models,elevation=()=>0){
   return {id:model.id,palette:BRIDGE_GLOW_THEMES[model.id],step:model.fit.length/count,
    samples:Array.from({length:count+1},(_,i)=>{
     const sample=sampleBridgeRoad(model.fit,i/count);
-    return {...sample,clearance:Math.max(0,sample.height-elevation(sample.coordinate)),fraction:reverse?1-i/count:i/count};
+    return {...sample,fraction:reverse?1-i/count:i/count};
    })};
  });
 }
 
-const metersPerLatitude=111320;
-function offset(coordinate,east,north){
- return [coordinate[0]+east/(metersPerLatitude*Math.cos(coordinate[1]*Math.PI/180)),coordinate[1]+north/metersPerLatitude];
+// One small atlas and one draw call for all crossings. Every corner lives in
+// Mercator meters, so the map projects the water and the bridges together.
+const TILE_WIDTH=256,TILE_HEIGHT=96,GUTTER=2,COLUMNS=3;
+export function bridgeWaterPatch(span,project,elevation=()=>0){
+ const start=span.samples.reduce((a,b)=>a.fraction<b.fraction?a:b),end=span.samples.reduce((a,b)=>a.fraction>b.fraction?a:b);
+ const origin=project(start.coordinate),last=project(end.coordinate);
+ const length=Math.hypot(last.x-origin.x,last.y-origin.y)||1,axis={x:(last.x-origin.x)/length,y:(last.y-origin.y)/length};
+ const local=coordinate=>{const p=project(coordinate),x=p.x-origin.x,y=p.y-origin.y;return {x:x*axis.x+y*axis.y,y:-x*axis.y+y*axis.x};};
+ const points=span.samples.map(sample=>({...local(sample.coordinate),fraction:sample.fraction}));
+ const along=Math.max(18,span.step*1.2),across=32;
+ const bounds={left:Math.min(...points.map(p=>p.x))-along,right:Math.max(...points.map(p=>p.x))+along,top:Math.min(...points.map(p=>p.y))-across,bottom:Math.max(...points.map(p=>p.y))+across};
+ const height=elevation(span.samples[Math.floor(span.samples.length/2)].coordinate)+.1;
+ const world=(x,y)=>({x:origin.x+x*axis.x-y*axis.y,y:origin.y+x*axis.y+y*axis.x,z:height});
+ return {span,points,along,across,bounds,local,length,corners:[world(bounds.left,bounds.top),world(bounds.right,bounds.top),world(bounds.left,bounds.bottom),world(bounds.right,bounds.bottom)]};
 }
 
-/** Shared tiny stamps, painted only when the camera or fitted bridge geometry changes. */
-export function createBridgeWaterGlow(){
- const stamps=new Map();
- function stamp(palette,fraction){
-  const bin=Math.round(fraction*48),key=palette+bin;
-  if(stamps.has(key))return stamps.get(key);
-  const color=bridgeGlowColor(palette,bin/48).join(','),canvas=document.createElement('canvas');
-  canvas.width=canvas.height=48;const ctx=canvas.getContext('2d');
-  const glow=ctx.createRadialGradient(24,24,0,24,24,24);
-  glow.addColorStop(0,`rgba(${color},.28)`);glow.addColorStop(.25,`rgba(${color},.22)`);
-  glow.addColorStop(.6,`rgba(${color},.065)`);glow.addColorStop(1,`rgba(${color},0)`);
-  ctx.fillStyle=glow;ctx.fillRect(0,0,48,48);stamps.set(key,canvas);return canvas;
+function waterRings(features,patch){
+ const polygons=[],seen=new Set(),b=patch.bounds;
+ for(const feature of features){
+  const rings=feature.geometry?.type==='Polygon'?[feature.geometry.coordinates]:feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates:[];
+  for(const polygon of rings){
+   const local=polygon.map(ring=>ring.map(patch.local)),outer=local[0];if(!outer?.length)continue;
+   let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+   for(const p of outer){left=Math.min(left,p.x);right=Math.max(right,p.x);top=Math.min(top,p.y);bottom=Math.max(bottom,p.y);}
+   if(right<b.left||left>b.right||bottom<b.top||top>b.bottom)continue;
+   const key=JSON.stringify(local.map(ring=>ring.map(p=>[+p.x.toFixed(2),+p.y.toFixed(2)])));
+   if(!seen.has(key)){seen.add(key);polygons.push({key,rings:local});}
+  }
  }
+ return polygons.sort((a,b)=>a.key.localeCompare(b.key));
+}
+
+function paintWaterPatch(canvas,mask,patch,polygons){
+ canvas.width=mask.width=TILE_WIDTH;canvas.height=mask.height=TILE_HEIGHT;
+ const ctx=canvas.getContext('2d'),water=mask.getContext('2d'),b=patch.bounds;
+ const sx=TILE_WIDTH/(b.right-b.left),sy=TILE_HEIGHT/(b.bottom-b.top);
+ const pixel=p=>({x:(p.x-b.left)*sx,y:(p.y-b.top)*sy});
+ for(const polygon of polygons){
+  water.beginPath();
+  for(const ring of polygon.rings){ring.forEach((p,i)=>{const q=pixel(p);if(i)water.lineTo(q.x,q.y);else water.moveTo(q.x,q.y);});water.closePath();}
+  water.fillStyle='#fff';water.fill('evenodd');
+ }
+ // A white alpha mask creates one continuous colored reflection without
+ // neighboring colored stamps washing each other toward white.
+ for(const point of patch.points){
+  const p=pixel(point);ctx.save();ctx.translate(p.x,p.y);ctx.scale(patch.along*sx,patch.across*sy);
+  const feather=ctx.createRadialGradient(0,0,0,0,0,1);
+  feather.addColorStop(0,'rgba(255,255,255,.28)');feather.addColorStop(.25,'rgba(255,255,255,.22)');
+  feather.addColorStop(.6,'rgba(255,255,255,.065)');feather.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.globalAlpha=Math.sin(Math.PI*point.fraction)**.4;ctx.fillStyle=feather;ctx.fillRect(-1,-1,2,2);ctx.restore();
+ }
+ const color=ctx.createLinearGradient(-b.left*sx,0,(patch.length-b.left)*sx,0);
+ for(let i=0;i<=96;i++)color.addColorStop(i/96,`rgb(${bridgeGlowColor(patch.span.palette,i/96).join(',')})`);
+ ctx.globalAlpha=1;ctx.globalCompositeOperation='source-in';ctx.fillStyle=color;ctx.fillRect(0,0,TILE_WIDTH,TILE_HEIGHT);
+ ctx.globalCompositeOperation='destination-in';ctx.drawImage(mask,0,0);ctx.globalCompositeOperation='source-over';
+}
+
+export function createBridgeWaterLayer(maplibre,elevation=()=>0){
+ const origin=maplibre.MercatorCoordinate.fromLngLat([-122.67,45.53]),unit=origin.meterInMercatorCoordinateUnits();
+ const project=coordinate=>{const p=maplibre.MercatorCoordinate.fromLngLat(coordinate);return {x:(p.x-origin.x)/unit,y:(p.y-origin.y)/unit};};
+ const waterHeight=coordinate=>{const p=maplibre.MercatorCoordinate.fromLngLat(coordinate);return elevation(coordinate)*p.meterInMercatorCoordinateUnits()/unit;};
+ const atlas=document.createElement('canvas'),tile=document.createElement('canvas'),mask=document.createElement('canvas');
+ const cache=new Map();
  return {
-  paint(ctx,map,spans,scale,pad,width,height){
-   const zoom=map.getZoom(),pitch=Math.sin(map.getPitch()*Math.PI/180),decks=[];
-   const toPixel=coordinate=>{const p=map.project(coordinate);return {x:p.x/scale+pad,y:p.y/scale+pad};};
-   ctx.globalCompositeOperation='screen';
-   for(const span of spans){
-    let previous=null;
-    for(const sample of span.samples){
-     const {coordinate,dx,dy,fraction}=sample,p=toPixel(coordinate);
-     if(p.x<-40||p.x>width/scale+pad*2+40||p.y<-40||p.y>height/scale+pad*2+40){previous=null;continue;}
-     const along=Math.max(18,span.step*1.2),across=32;
-     const a=toPixel(offset(coordinate,dx*along,-dy*along));
-     const b=toPixel(offset(coordinate,dy*across,dx*across));
-     // The projected east/north basis flattens and rotates the glow with water.
-     ctx.save();ctx.transform(a.x-p.x,a.y-p.y,b.x-p.x,b.y-p.y,p.x,p.y);
-     ctx.globalAlpha=Math.sin(Math.PI*fraction)**.4;
-     ctx.drawImage(stamp(span.palette,fraction),-1,-1,2,2);ctx.restore();
-     const pixelsPerMeter=512*Math.pow(2,zoom)/(40075016.686*Math.cos(coordinate[1]*Math.PI/180));
-     const lift=sample.clearance*pixelsPerMeter*pitch/scale;
-     const halfWidth=Math.max(2,sample.width/2);
-     const left=toPixel(offset(coordinate,-dy*halfWidth,-dx*halfWidth));
-     const right=toPixel(offset(coordinate,dy*halfWidth,dx*halfWidth));
-     left.y-=lift;right.y-=lift;
-     const point={p,left,right,lift,fraction};
-     if(previous){
-      // A faint, bounded wash connects the underside to its water reflection.
-      const color=bridgeGlowColor(span.palette,(fraction+previous.fraction)/2).join(',');
-      const top=Math.min(previous.p.y-previous.lift,p.y-lift),bottom=Math.max(previous.p.y,p.y);
-      if(bottom>top+.1){
-       const falloff=ctx.createLinearGradient(0,top,0,bottom);
-       falloff.addColorStop(0,`rgba(${color},.18)`);falloff.addColorStop(1,`rgba(${color},0)`);
-       ctx.fillStyle=falloff;ctx.globalAlpha=Math.sin(Math.PI*fraction)**.4;
-       ctx.beginPath();ctx.moveTo(previous.p.x,previous.p.y-previous.lift);
-       ctx.lineTo(p.x,p.y-lift);ctx.lineTo(p.x,p.y);ctx.lineTo(previous.p.x,previous.p.y);ctx.closePath();ctx.fill();
-      }
-      decks.push([previous.left,previous.right,right,left]);
-     }
-     previous=point;
+  id:'bridge-water-reflections',type:'custom',renderingMode:'3d',count:0,signature:'',dirty:false,
+  update(spans,waterFeatures){
+   const entries=spans.map(span=>{const patch=bridgeWaterPatch(span,project,waterHeight),polygons=waterRings(waterFeatures,patch);return {patch,polygons,key:JSON.stringify([span.palette,patch.corners,patch.points,polygons.map(p=>p.key)])};});
+   const signature=entries.map(entry=>entry.key).join('|');if(signature===this.signature)return;
+   this.signature=signature;
+   atlas.width=COLUMNS*(TILE_WIDTH+2*GUTTER);atlas.height=Math.max(1,Math.ceil(entries.length/COLUMNS))*(TILE_HEIGHT+2*GUTTER);
+   const ctx=atlas.getContext('2d'),vertices=[],active=new Set();
+   entries.forEach(({patch,polygons,key},index)=>{
+    active.add(patch.span.id);let cached=cache.get(patch.span.id);
+    if(cached?.key!==key){
+     paintWaterPatch(tile,mask,patch,polygons);
+     const image=cached?.image??document.createElement('canvas');image.width=TILE_WIDTH;image.height=TILE_HEIGHT;image.getContext('2d').drawImage(tile,0,0);
+     cached={key,image};cache.set(patch.span.id,cached);
     }
-   }
-   // The water overlay must not recolor the elevated roadway above it.
-   ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=1;ctx.fillStyle='#000';
-   for(const deck of decks){ctx.beginPath();deck.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();}
-   ctx.globalCompositeOperation='source-over';
+    const x=(index%COLUMNS)*(TILE_WIDTH+2*GUTTER)+GUTTER,y=Math.floor(index/COLUMNS)*(TILE_HEIGHT+2*GUTTER)+GUTTER;
+    ctx.drawImage(cached.image,x,y);
+    const uv=[[x/atlas.width,y/atlas.height],[(x+TILE_WIDTH)/atlas.width,y/atlas.height],[x/atlas.width,(y+TILE_HEIGHT)/atlas.height],[(x+TILE_WIDTH)/atlas.width,(y+TILE_HEIGHT)/atlas.height]];
+    for(const i of [0,1,2,2,1,3]){const p=patch.corners[i];vertices.push(p.x,p.y,p.z,...uv[i]);}
+   });
+   for(const [id,cached] of cache)if(!active.has(id)){cached.image.width=cached.image.height=1;cache.delete(id);}
+   this.vertices=new Float32Array(vertices);this.dirty=true;this.map?.triggerRepaint();
   },
-  dispose(){for(const canvas of stamps.values())canvas.width=canvas.height=1;stamps.clear();},
+  onAdd(map,gl){
+   this.map=map;
+   const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;};
+   const vertex=compile(gl.VERTEX_SHADER,`#version 300 es
+    in vec3 a_position;in vec2 a_uv;uniform mat4 u_matrix;out vec2 v_uv;
+    void main(){gl_Position=u_matrix*vec4(a_position,1.);v_uv=a_uv;}`);
+   const fragment=compile(gl.FRAGMENT_SHADER,`#version 300 es
+    precision highp float;in vec2 v_uv;uniform sampler2D u_glow;out vec4 color;
+    void main(){vec4 glow=texture(u_glow,v_uv);float alpha=glow.a*.52; if(alpha<.001)discard;color=vec4(glow.rgb*alpha,alpha);}`);
+   this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);
+   if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
+   this.matrix=gl.getUniformLocation(this.program,'u_matrix');this.sampler=gl.getUniformLocation(this.program,'u_glow');
+   this.buffer=gl.createBuffer();this.vao=gl.createVertexArray();this.texture=gl.createTexture();
+   gl.bindVertexArray(this.vao);gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
+   for(const [name,size,offset] of [['a_position',3,0],['a_uv',2,12]]){const attribute=gl.getAttribLocation(this.program,name);gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,size,gl.FLOAT,false,20,offset);}
+   gl.bindVertexArray(null);this.dirty=!!this.vertices;
+  },
+  render(gl,input){
+   if(!this.vertices?.length&&!this.count)return;
+   const activeTexture=gl.getParameter(gl.ACTIVE_TEXTURE);gl.activeTexture(gl.TEXTURE0);const boundTexture=gl.getParameter(gl.TEXTURE_BINDING_2D);gl.bindTexture(gl.TEXTURE_2D,this.texture);
+   if(this.dirty){
+    gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,this.vertices,gl.STATIC_DRAW);this.count=this.vertices.length/5;
+    const premultiply=gl.getParameter(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL),flip=gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,premultiply);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,flip);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);this.dirty=false;
+   }
+   const matrix=input.defaultProjectionData.mainMatrix,local=new Float32Array(16);
+   for(let row=0;row<4;row++){local[row]=matrix[row]*unit;local[4+row]=matrix[4+row]*unit;local[8+row]=matrix[8+row]*unit;local[12+row]=matrix[row]*origin.x+matrix[4+row]*origin.y+matrix[12+row];}
+   gl.useProgram(this.program);gl.bindVertexArray(this.vao);gl.uniformMatrix4fv(this.matrix,false,local);gl.uniform1i(this.sampler,0);
+   const depth=gl.getParameter(gl.DEPTH_WRITEMASK),cull=gl.isEnabled(gl.CULL_FACE);
+   // Water plane only: no upward curtain, billboard, or depth-writing overlay.
+   gl.depthMask(false);gl.disable(gl.CULL_FACE);gl.drawArrays(gl.TRIANGLES,0,this.count);
+   gl.depthMask(depth);if(cull)gl.enable(gl.CULL_FACE);gl.bindVertexArray(null);
+   gl.bindTexture(gl.TEXTURE_2D,boundTexture);gl.activeTexture(activeTexture);
+  },
+  onRemove(map,gl){
+   gl.deleteBuffer(this.buffer);gl.deleteVertexArray(this.vao);gl.deleteTexture(this.texture);gl.deleteProgram(this.program);
+   for(const canvas of [atlas,tile,mask,...[...cache.values()].map(v=>v.image)])canvas.width=canvas.height=1;
+   cache.clear();this.vertices=null;this.count=0;this.map=null;this.signature='';
+  },
  };
 }

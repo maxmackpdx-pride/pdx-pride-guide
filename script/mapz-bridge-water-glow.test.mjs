@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {BRIDGE_GLOW_PALETTES,bridgeGlowColor,bridgeGlowSpans} from '../client/public/zaydar-map/bridge-water-glow.js';
+import {BRIDGE_GLOW_PALETTES,BRIDGE_GLOW_SATURATION,saturateBridgeColor,bridgeGlowColor,bridgeGlowSpans,bridgeWaterPatch,createBridgeWaterLayer} from '../client/public/zaydar-map/bridge-water-glow.js';
 import {fitBridgeRoad} from '../client/public/zaydar-map/bridge-fit.js';
 import {PORTLAND_BRIDGE_MODELS} from '../client/public/zaydar-map/st-johns-bridge.js';
-import {createWaterBloom} from '../client/public/zaydar-map/natural-surfaces.js';
+import {createRequire} from 'node:module';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+const {MercatorCoordinate}=createRequire(import.meta.url)('maplibre-gl');
 
 const center=[-122.67,45.52];
 function fixture(reverse=false,length=600){
@@ -14,10 +17,10 @@ function fixture(reverse=false,length=600){
 
 test('bridge gradients interpolate the rainbow, trans and lesbian flag stops continuously',()=>{
  for(const [name,colors] of Object.entries(BRIDGE_GLOW_PALETTES)){
-  colors.forEach((hex,index)=>assert.deepEqual(bridgeGlowColor(name,index/(colors.length-1)),hex.slice(1).match(/../g).map(c=>parseInt(c,16))));
-  for(let i=1;i<=1000;i++)assert.ok(bridgeGlowColor(name,i/1000).every((value,j)=>Math.abs(value-bridgeGlowColor(name,(i-1)/1000)[j])<=2));
+  colors.forEach((hex,index)=>assert.deepEqual(bridgeGlowColor(name,index/(colors.length-1)),saturateBridgeColor(hex.slice(1).match(/../g).map(c=>parseInt(c,16)))));
+  for(let i=1;i<=1000;i++)assert.ok(bridgeGlowColor(name,i/1000).every((value,j)=>Math.abs(value-bridgeGlowColor(name,(i-1)/1000)[j])<=3));
  }
- assert.deepEqual(bridgeGlowColor('trans',.5),[255,245,255]);
+ assert.deepEqual(bridgeGlowColor('trans',.5),[255,240,255]);
  assert.deepEqual(bridgeGlowColor('trans',.2),bridgeGlowColor('trans',.8));
 });
 
@@ -36,56 +39,88 @@ test('glow follows fitted roads and retains geographic color direction when tile
  for(const sample of a.samples){
   const match=b.samples.find(p=>Math.hypot(p.coordinate[0]-sample.coordinate[0],p.coordinate[1]-sample.coordinate[1])<1e-8);
   assert.ok(match);assert.ok(Math.abs(match.fraction-sample.fraction)<1e-8);
-  assert.equal(sample.clearance,sample.height-12);
+
  }
  assert.ok(bridgeGlowSpans([{id:'interstate',fit:fixture(false,4000)}])[0].samples.length<=73);
 });
 
-function canvasFixture(){
+test('50 percent saturation boost preserves brightness and neutral white',()=>{
+ assert.equal(BRIDGE_GLOW_SATURATION,1.5);
+ assert.deepEqual(saturateBridgeColor([120,180,200]),[80,170,200]);
+ assert.deepEqual(saturateBridgeColor([255,255,255]),[255,255,255]);
+ const rgb=saturateBridgeColor([10,100,240]);assert.equal(Math.max(...rgb),240);assert.equal(Math.min(...rgb),0);
+});
+
+function canvasFixture(t){
  const canvases=[];
  const document={createElement(){
   const canvas={width:1,height:1},calls=[],stack=[];
   const ctx={globalAlpha:1,globalCompositeOperation:'source-over',
    save(){stack.push([this.globalAlpha,this.globalCompositeOperation]);},
    restore(){[this.globalAlpha,this.globalCompositeOperation]=stack.pop();},
-   transform(...args){assert.ok(args.every(Number.isFinite));calls.push(['transform',...args]);},
-   beginPath(){},moveTo(){},lineTo(){},closePath(){},clearRect(){},stroke(){},
-   fill(){calls.push(['fill',this.globalCompositeOperation]);},fillRect(){},
+   translate(){},scale(){},beginPath(){this.rings=0;},moveTo(){this.rings++;},lineTo(){},closePath(){},
+   fill(rule){calls.push(['fill',this.globalCompositeOperation,rule,this.rings]);},fillRect(){calls.push(['rect',this.globalCompositeOperation]);},
    drawImage(source){calls.push(['image',this.globalCompositeOperation,source]);},
-   createRadialGradient(){return {addColorStop(){}};},
-   createLinearGradient(){return {addColorStop(){}};},
-   getImageData(x,y,w,h){return {data:new Uint8ClampedArray(w*h*4).fill(255)};},
-   createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4)};},putImageData(){},
+   createRadialGradient(){return {addColorStop(){}};},createLinearGradient(){return {addColorStop(){}};},
   };
   canvas.getContext=()=>ctx;canvas.calls=calls;canvases.push(canvas);return canvas;
  }};
- return {document,canvases};
+ const previous=globalThis.document;globalThis.document=document;t.after(()=>{globalThis.document=previous;});
+ return canvases;
 }
 
-test('water glow caches stationary frames, masks land and decks, and reprojects on camera motion',t=>{
- const {document,canvases}=canvasFixture();
- t.mock.method(globalThis,'setTimeout',()=>{throw Error('glow must not start another animation loop');});
- const previousDocument=globalThis.document,previousPath=globalThis.Path2D;
- globalThis.document=document;globalThis.Path2D=class{moveTo(){}lineTo(){}};
- t.after(()=>{globalThis.document=previousDocument;globalThis.Path2D=previousPath;});
- let pan=0,zoom=14,pitch=48,bearing=0;
- const map={getCenter:()=>({lng:center[0]+pan/100000,lat:center[1]}),getZoom:()=>zoom,getPitch:()=>pitch,getBearing:()=>bearing,querySourceFeatures:()=>[],
-  project:([lng,lat])=>{const x=(lng-center[0])*40000,y=(lat-center[1])*40000,angle=bearing*Math.PI/180;return {x:200+pan+x*Math.cos(angle)-y*Math.sin(angle),y:150+x*Math.sin(angle)+y*Math.cos(angle)};}};
- const bloom=createWaterBloom(),output=document.createElement('canvas').getContext('2d');
- const spans=bridgeGlowSpans([{id:'broadway',fit:fixture()}],()=>12);
- const draw=time=>bloom.draw(output,map,400,300,1,time,false,[],spans);
- draw(0);
- const cache=canvases.find(c=>c.calls.some(call=>call[0]==='transform'));
- assert.ok(cache);
- assert.ok(cache.calls.some(c=>c[0]==='fill'&&c[1]==='destination-out'),'bridge roadway is cut out');
- assert.equal(cache.calls.at(-1)[1],'destination-in','water/island mask is applied last');
- const initialCount=cache.calls.length,textureCount=canvases.length;
- draw(1);assert.equal(cache.calls.length,initialCount,'stationary animation only composites cached textures');
- assert.equal(canvases.length,textureCount);
- pan=20;bearing=35;pitch=60;zoom=15;draw(2);
- assert.ok(cache.calls.length>initialCount);
- assert.equal(canvases.length,textureCount,'camera motion reuses stamps');
- const rebuiltCount=cache.calls.length;
- bloom.invalidate();draw(3);assert.ok(cache.calls.length>rebuiltCount,'new source geometry invalidates water clipping');
- bloom.dispose();assert.ok(canvases.filter(c=>c.calls.some(call=>call[0]==='transform')).every(c=>c.width===1&&c.height===1));
+const water=[{geometry:{type:'Polygon',coordinates:[
+ [[-122.68,45.51],[-122.66,45.51],[-122.66,45.53],[-122.68,45.53],[-122.68,45.51]],
+ [[-122.671,45.519],[-122.670,45.519],[-122.670,45.520],[-122.671,45.520],[-122.671,45.519]],
+]}}];
+
+test('reflection texture clips water and islands, and every vertex stays at water level',t=>{
+ const canvases=canvasFixture(t),layer=createBridgeWaterLayer({MercatorCoordinate},()=>3);
+ const spans=bridgeGlowSpans([{id:'broadway',fit:fixture()}]);layer.update(spans,water);
+ const heights=[];for(let i=2;i<layer.vertices.length;i+=5)heights.push(layer.vertices[i]);
+ assert.equal(heights.length,6);assert.ok(heights.every(z=>Math.abs(z-3.1)<.002));
+ assert.ok(canvases.some(c=>c.calls.some(call=>call[0]==='fill'&&call[2]==='evenodd'&&call[3]===2)),'island hole belongs to the water mask');
+ const painted=canvases.find(c=>c.calls.some(call=>call[0]==='rect'&&call[1]==='source-in'));
+ assert.equal(painted.calls.at(-1)[1],'destination-in','only the water portion of the gradient survives');
+ assert.ok(canvases[0].width*canvases[0].height*4<2*1024*1024,'shared atlas stays below 2MB');
+ const patch=bridgeWaterPatch(spans[0],([x,y])=>({x,y}),()=>4);
+ assert.ok(patch.corners.every(p=>p.z===4.1),'bridge deck height never becomes reflection height');
+});
+
+function mockGl(){
+ const gl={},calls={uploads:0,textures:0,matrices:[],draws:[],depth:[],shaders:[]};
+ for(const name of ['ARRAY_BUFFER','STATIC_DRAW','DEPTH_WRITEMASK','CULL_FACE','TRIANGLES','ACTIVE_TEXTURE','TEXTURE0','TEXTURE_BINDING_2D','TEXTURE_2D','UNPACK_PREMULTIPLY_ALPHA_WEBGL','UNPACK_FLIP_Y_WEBGL','RGBA','UNSIGNED_BYTE','TEXTURE_MIN_FILTER','TEXTURE_MAG_FILTER','LINEAR','TEXTURE_WRAP_S','TEXTURE_WRAP_T','CLAMP_TO_EDGE','VERTEX_SHADER','FRAGMENT_SHADER','COMPILE_STATUS','LINK_STATUS','FLOAT'])gl[name]=name;
+ for(const name of ['bindBuffer','useProgram','bindVertexArray','uniform1i','disable','enable','activeTexture','bindTexture','pixelStorei','texParameteri','deleteBuffer','deleteVertexArray','deleteTexture','deleteProgram','compileShader','attachShader','linkProgram','deleteShader','enableVertexAttribArray','vertexAttribPointer'])gl[name]=()=>{};
+ for(const name of ['createShader','createProgram','createBuffer','createVertexArray','createTexture'])gl[name]=()=>({});
+ gl.shaderSource=(_,source)=>calls.shaders.push(source);gl.getShaderParameter=gl.getProgramParameter=()=>true;gl.getUniformLocation=(_,name)=>name;gl.getAttribLocation=()=>0;
+ gl.bufferData=()=>calls.uploads++;gl.texImage2D=()=>calls.textures++;
+ gl.uniformMatrix4fv=(_location,_transpose,matrix)=>calls.matrices.push(matrix);
+ gl.getParameter=name=>name===gl.DEPTH_WRITEMASK;gl.isEnabled=()=>true;gl.depthMask=value=>calls.depth.push(value);
+ gl.drawArrays=(mode,first,count)=>calls.draws.push({mode,count});
+ return {gl,calls};
+}
+
+test('camera changes only the shared map matrix, never the reflection coordinates or textures',t=>{
+ canvasFixture(t);const layer=createBridgeWaterLayer({MercatorCoordinate},()=>0),{gl,calls}=mockGl();
+ layer.onAdd({triggerRepaint(){}},gl);
+ const spans=bridgeGlowSpans([{id:'broadway',fit:fixture()}]);layer.update(spans,water);const vertices=layer.vertices.slice();
+ const camera=(scale,angle=0,pan=0)=>({defaultProjectionData:{mainMatrix:[scale*Math.cos(angle),scale*Math.sin(angle),0,0,-scale*Math.sin(angle),scale*Math.cos(angle),0,0,0,0,scale,0,pan,-pan,0,1]}});
+ layer.render(gl,camera(4096));layer.update(spans,water);layer.render(gl,camera(1024,.5,2));
+ assert.deepEqual(layer.vertices,vertices);assert.equal(calls.uploads,1);assert.equal(calls.textures,1);
+ assert.equal(calls.draws.length,2);assert.ok(calls.draws.every(d=>d.count===6));
+ assert.notDeepEqual(calls.matrices[0],calls.matrices[1]);assert.deepEqual(calls.depth,[false,true,false,true]);
+ assert.ok(calls.shaders.every(s=>s.includes('#version 300 es')));
+ layer.update([],[]);layer.render(gl,camera(1024));assert.equal(layer.count,0,'removed bridges leave no stale reflection');
+ layer.onRemove({},gl);assert.equal(layer.count,0);assert.equal(layer.vertices,null);
+});
+
+test('water reflections render underneath both bridge decks and models',async()=>{
+ const source=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
+ const layers=['water','buildings','skyline'],context={map:{addLayer(layer,before){layers.splice(layers.indexOf(before),0,layer.id);}},
+  ambientSignals:{install(){}},groundLightPools:{id:'pools'},bridgeLayer:{id:'bridge-decks'},bridgeWater:{id:'bridge-water-reflections'},portlandBridges:{id:'models'},landmarkBuildings:{id:'landmarks'},portlandLandmarks:{id:'icons'},citySparkles:{id:'sparkles'}};
+ vm.runInNewContext(source.slice(source.indexOf('function installSceneExtras('),source.indexOf("map.on('load'"))+';installSceneExtras();',context);
+ assert.ok(layers.indexOf('water')<layers.indexOf('bridge-water-reflections'));
+ assert.ok(layers.indexOf('bridge-water-reflections')<layers.indexOf('bridge-decks'));
+ assert.ok(layers.indexOf('bridge-water-reflections')<layers.indexOf('models'));
+ assert.doesNotMatch(source,/surfaces\.bridgeGlow/,'reflection is no longer painted on the screen overlay');
 });

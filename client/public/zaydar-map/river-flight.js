@@ -1,6 +1,6 @@
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
-import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion} from './natural-surfaces.js?v=20260922-pride-underglow-v2';
+import {mapzSurfaceStyle,forestPattern,createWaterBloom,applyBuildingOcclusion,naturalWater} from './natural-surfaces.js?v=20260922-water-reflections-v3';
 import {createBuildingModelLayer} from './building-models.js';
 import {createBuildingChrome} from './nightlife-materials.js?v=20260920-nightlife';
 import {createGroundLightPools} from './ground-light-pools.js?v=20260920-ground-lights';
@@ -17,7 +17,7 @@ import {createMapExploration,nextFlightPitchOffset} from './map-exploration.js?v
 import {createAmbientSignals} from './ambient-signals.js?v=20260920-living-contours';
 import {createPortlandBridgeLayer,PORTLAND_BRIDGE_MODELS} from './st-johns-bridge.js?v=20260921-layer-join';
 import {fitBridgeRoad} from './bridge-fit.js?v=20260921-layer-join';
-import {bridgeGlowSpans} from './bridge-water-glow.js?v=20260922-pride-underglow-v2';
+import {bridgeGlowSpans,createBridgeWaterLayer} from './bridge-water-glow.js?v=20260922-water-reflections-v3';
 import {waypointGeometry,drawWaypointHead,drawWaypointFoot,showWaypointLogo} from './waypoint-markers.js?v=20260922-outzide-waypoints-v2';
 import {createPortlandLandmarkLayer} from './portland-landmarks.js?v=20260921-portland-landmarks-v2';
 import {DAYS,DAY_LIST} from './radix-map.js?v=20260917-days';
@@ -66,6 +66,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const bridgeLayer=createBridgeLayer(maplibregl,terrainHeight,true);
 const landmarkBuildings=createBuildingModelLayer(maplibregl);
 const portlandBridges=createPortlandBridgeLayer(maplibregl,terrainHeight);
+const bridgeWater=createBridgeWaterLayer(maplibregl,terrainHeight);
 const portlandLandmarks=createPortlandLandmarkLayer(maplibregl,terrainHeight,reduced);
 const citySparkles=createCitySparkles(maplibregl,terrainHeight,{visibleCore:true,palette:DAY_LIST});
 const groundLightPools=createGroundLightPools(maplibregl,terrainHeight);
@@ -74,6 +75,7 @@ function installSceneExtras(){
  ambientSignals.install();
  map.addLayer(groundLightPools,'buildings');
  map.addLayer(bridgeLayer,'skyline');
+ map.addLayer(bridgeWater,'bridge-decks');
  map.addLayer(portlandBridges,'skyline');
  map.addLayer(landmarkBuildings,'skyline');
  map.addLayer(portlandLandmarks);
@@ -127,8 +129,8 @@ function updateSurfaces(target){
  groundLightPools.update(intersectionLightPools(transportation,matchMedia('(pointer:coarse)').matches?90:180));
  // Marquam and Interstate use the connected road decks without a GLB model.
  const roadOnlyBridges=PORTLAND_BRIDGE_MODELS.filter(model=>model.disabled).map(model=>({...model,fit:fitBridgeRoad(allBridgeFeatures,model,terrainHeight)}));
- const bridgeGlow=bridgeGlowSpans([...portlandBridges.models,...roadOnlyBridges],terrainHeight);
- const result={time:now,buildings,reflections,roofs,overviewRoads,bridgeGlow};surfaceCache.set(target,result);return result;
+ bridgeWater.update(bridgeGlowSpans([...portlandBridges.models,...roadOnlyBridges]),target.querySourceFeatures('terrain',{sourceLayer:'water',filter:naturalWater}));
+ const result={time:now,buildings,reflections,roofs,overviewRoads};surfaceCache.set(target,result);return result;
 }
 function drawSurfaceReflections(ctx,target,reflections,fade){
  const zoomScale=512*Math.pow(2,target.getZoom())/40075016.686;
@@ -501,7 +503,7 @@ function drawLights(fade,target=map,surface=lights){
  if(lights.width!==Math.round(width*dpr)||lights.height!==Math.round(height*dpr)){lights.width=Math.round(width*dpr);lights.height=Math.round(height*dpr);}
  lightsContext.setTransform(dpr,0,0,dpr,0,0);lightsContext.clearRect(0,0,width,height);
  const reflectionSources=lightFeatures.filter(feature=>feature.properties.kind==='event');if(userLocation)reflectionSources.unshift(userLocation.feature);
- waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources,surfaces.bridgeGlow);
+ waterBloom.draw(lightsContext,target,width,height,fade,pulseTime,reduced.matches,reflectionSources);
  drawUserLocationGlow(lightsContext,target,fade);
  citySparkles.update(buildingGlitter(target,surfaces),pulseTime,reduced.matches);
  const mapOpacity=Number(opacityControl.value),coreAlpha=mapOpacity>0?Math.min(1,fade/mapOpacity):0;
@@ -1071,6 +1073,7 @@ window.addEventListener('pagehide',()=>{
  for(const sprite of lightSprites.values())sprite.width=sprite.height=1;
  if(map.getLayer(citySparkles.id))map.removeLayer(citySparkles.id);
  if(map.getLayer(groundLightPools.id))map.removeLayer(groundLightPools.id);
+ if(map.getLayer(bridgeWater.id))map.removeLayer(bridgeWater.id);
  if(map.getLayer(portlandLandmarks.id))map.removeLayer(portlandLandmarks.id);
  map.remove();venueLogos.clear();logoLoads.clear();lightSprites.clear();lightFeatures=[];userLocation=null;userAvatarImage=null;nearbyLights=()=>[];lights.width=lights.height=1;
 },{once:true});
