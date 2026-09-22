@@ -33,3 +33,6 @@
  .outzide-shell .explore-view-switch button{padding:7px;font-size:12px}
  .outzide-shell:has(#active-map-filters[hidden]) :is(.discovery,.map-top){top:138px}
 }
+
+/* Give the control stack a little breathing room beneath the activity rail. */
+.outzide-shell .map-top{margin-top:8px}
