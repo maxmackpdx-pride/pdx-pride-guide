@@ -4,7 +4,7 @@ import {readFile,access} from 'node:fs/promises';
 const base=new URL('../client/public/outzide-map/',import.meta.url);
 const {places}=JSON.parse(await readFile(new URL('places.json',base),'utf8'));
 test('every destination has unique identity and shipped artwork',async()=>{
- assert.equal(places.length,211);assert.equal(new Set(places.map(p=>p.id)).size,places.length);
+ assert.equal(places.length,214);assert.equal(new Set(places.map(p=>p.id)).size,places.length);
  for(const place of places){assert.ok(place.name);assert.ok(place.art.startsWith('assets/'));await access(new URL(place.art,base));}
 });
 test('production map retains live beach data and never uses session-only social writes',async()=>{

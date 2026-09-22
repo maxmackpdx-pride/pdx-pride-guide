@@ -843,5 +843,17 @@ export default [
   {
     "id": "second-beach-trail",
     "name": "Second Beach Trail"
+  },
+  {
+    "id": "denny-blaine",
+    "name": "Denny Blaine Park"
+  },
+  {
+    "id": "howell-park",
+    "name": "Howell Park"
+  },
+  {
+    "id": "glass-bar-island",
+    "name": "Glass Bar Island · BRING Beach"
   }
 ];
