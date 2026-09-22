@@ -31,3 +31,5 @@
 @media (max-width: 600px) {
   .page-header .page-header__inner, .board-hero.board-hero--room .board-hero__inner { border-radius: 16px; padding: 24px 20px; }
 }
+/* Keep the word readable over the opaque panel; retain its rainbow outline. */
+.board-hero--room .board-hero__title-accent { color: var(--text-hi, #fff); text-shadow: none; }
