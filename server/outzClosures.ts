@@ -1,3 +1,4 @@
+import {getWinterSeasonStatuses} from './outzWinterSeasons';
 import catalog from '../client/public/outzide-map/places.json';
 export const closureSource='https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecreationOpportunities_01/MapServer/0';
 export const normalizeName=(v:string)=>v.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]/g,'');
@@ -10,5 +11,5 @@ export async function getOutzClosures(){
  if(pending)return pending;
  pending=(async()=>{const ids=[...new Set(catalog.places.map(sourceId).filter(id=>id!==null))];const infra=catalog.places.map(p=>/^usfs-([0-9.]+)$/.exec(p.id)?.[1]).filter(Boolean);const features:any[]=[];
  for(let offset=0;offset<Math.max(ids.length,infra.length);offset+=60){const u=new URL(closureSource+'/query');u.search=new URLSearchParams({f:'json',where:[ids.slice(offset,offset+60).length?`recareaid IN (${ids.slice(offset,offset+60).join(',')})`:null,infra.slice(offset,offset+60).length?`infra_cn IN (${infra.slice(offset,offset+60).map(id=>"'"+id+"'").join(',')})`:null].filter(Boolean).join(' OR '),outFields:'recareaid,recareaname,openstatus,infra_cn',returnGeometry:'false'}).toString();const r=await fetch(u,{signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('Closure source unavailable');const data=await r.json();if(data.error||!Array.isArray(data.features)||data.exceededTransferLimit)throw Error('Incomplete closure source');features.push(...data.features);}
- const checkedAt=new Date().toISOString();cache={checkedAt,statuses:matchStatuses(catalog.places,features,checkedAt)};return cache;})().finally(()=>{pending=null;});return pending;
+ const winter=await getWinterSeasonStatuses();const checkedAt=new Date().toISOString();cache={checkedAt,statuses:[...matchStatuses(catalog.places,features,checkedAt),...winter]};return cache;})().finally(()=>{pending=null;});return pending;
 }
