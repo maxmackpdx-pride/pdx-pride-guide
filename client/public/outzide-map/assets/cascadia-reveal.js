@@ -9,18 +9,27 @@ export function addCascadiaOutline(style){
  const layers=[['bloom',17,9,.42],['halo',7,3,.75],['core',2.4,.2,1]].map(([name,width,blur,opacity])=>({id:'cascadia-'+name,type:'line',source:'cascadia-outline',layout:{visibility:'none','line-cap':'round','line-join':'round'},paint:{'line-gradient':gradient,'line-width':width,'line-blur':blur,'line-opacity':opacity}}));
  const index=style.layers.findIndex(l=>l.type==='symbol');style.layers.splice(index<0?style.layers.length:index,0,...layers);
 }
-// Fit the unpitched Mercator silhouette independently of the current map camera/terrain.
-export function cascadiaCamera(width,height){
+// Fit the outline with room for perspective at the user's current tilt and bearing.
+export function cascadiaCamera(width,height,pitch=0,bearing=0){
  const y=lat=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2;
- const north=y(60.1),south=y(40),spanX=30.2/360,spanY=south-north;
- const zoom=Math.log2(Math.min(Math.max(100,width-60)/(512*spanX),Math.max(100,height-160)/(512*spanY)));
- const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*((north+south)/2))))*180/Math.PI;
- return {center:[-125.9,centerLat],zoom,pitch:0,bearing:0};
+ const north=y(60.1),south=y(40),centerY=(north+south)/2;
+ const halfW=Math.max(1,width-60)/2,halfH=Math.max(1,height-160)/2;
+ const angle=bearing*Math.PI/180,tilt=pitch*Math.PI/180;
+ // Use a conservative camera distance (MapLibre's default is ~1.5 viewport heights).
+ const distance=Math.max(1,height);let scale=Infinity;
+ for(const [lng,lat] of cascadiaOutline){
+  const dx=(lng+125.9)/360,dy=y(lat)-centerY;
+  const rx=dx*Math.cos(angle)+dy*Math.sin(angle),ry=-dx*Math.sin(angle)+dy*Math.cos(angle);
+  const perspective=Math.abs(ry)*Math.sin(tilt)/distance;
+  scale=Math.min(scale,halfW/(Math.abs(rx)+halfW*perspective),halfH/(Math.abs(ry)*Math.cos(tilt)+halfH*perspective));
+ }
+ const centerLat=Math.atan(Math.sinh(Math.PI*(1-2*centerY)))*180/Math.PI;
+ return {center:[-125.9,centerLat],zoom:Math.log2(scale/512),pitch,bearing};
 }
 export function installCascadiaReveal(map){
  let active=false,framing=false,entryCenter=null,camera;
  const sign=document.createElement('div');sign.id='cascadia-reveal';sign.hidden=true;sign.setAttribute('role','status');sign.innerHTML='<img src="assets/cascadia-wordmark.png" alt="Cascadia">';document.body.append(sign);
- const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight);};
+ const frame=()=>{const el=map.getContainer();return cascadiaCamera(el.clientWidth,el.clientHeight,map.getPitch(),map.getBearing());};
  const layers=()=>{for(const layer of map.getStyle()?.layers||[]){if(layer.id.startsWith('i5-spectrum-'))map.setLayoutProperty(layer.id,'visibility',active?'none':'visible');if(layer.id.startsWith('cascadia-'))map.setLayoutProperty(layer.id,'visibility',active?'visible':'none');}};
  const place=()=>{framing=true;map.stop();map.jumpTo(camera);framing=false;};
  const enter=()=>{if(framing)return;if(!active){entryCenter=map.getCenter();active=true;document.body.classList.toggle('cascadia-mode',true);sign.hidden=false;layers();}place();};
@@ -28,11 +37,11 @@ export function installCascadiaReveal(map){
   if(map.getZoom()<=camera.zoom+.08){if(!active)enter();return;}
   if(active&&map.getZoom()>camera.zoom+.15){active=false;document.body.classList.toggle('cascadia-mode',false);sign.hidden=true;layers();}
  };
- const configure=()=>{framing=true;camera=frame();map.setMinZoom(camera.zoom);framing=false;if(active)place();else update();};
+ const configure=()=>{if(framing)return;framing=true;camera=frame();map.setMinZoom(camera.zoom);framing=false;if(active)place();else update();};
  const zoomOut=document.getElementById('zoom-out');if(zoomOut)zoomOut.onclick=()=>{if(map.getZoom()-1<=camera.zoom+.08)enter();else map.zoomOut();};
  document.addEventListener('click',e=>{if(active&&e.target.closest('.browse-toggle,#updates-button,[data-kind]'))map.jumpTo({center:entryCenter,zoom:Math.max(5.5,camera.zoom+1)});});
  // Wheel, trackpad and pinch trigger during movement, not only after momentum ends.
  map.on('zoom',update);map.on('zoomend',update);
- map.on('moveend',()=>{if(framing||!active)return;const center=map.getCenter();if(Math.abs(center.lng-camera.center[0])>.01||Math.abs(center.lat-camera.center[1])>.01||map.getPitch()!==0||map.getBearing()!==0)place();});
- map.on('load',()=>{configure();layers();});map.on('resize',configure);configure();return update;
+ map.on('moveend',()=>{if(framing||!active)return;if(map.getPitch()!==camera.pitch||map.getBearing()!==camera.bearing){configure();return;}const center=map.getCenter();if(Math.abs(center.lng-camera.center[0])>.01||Math.abs(center.lat-camera.center[1])>.01)place();});
+ map.on('load',()=>{configure();layers();});map.on('resize',configure);map.on('pitchend',configure);map.on('rotateend',configure);configure();return update;
 }
