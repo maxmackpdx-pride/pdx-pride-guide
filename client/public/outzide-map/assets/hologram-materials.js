@@ -91,3 +91,9 @@ export function drawGroundRipples(ctx, anchor, radius, color, seconds, reducedMo
   }
   ctx.restore();
 }
+
+// Compact at the regional overview; maximum zoom is only 10% above the base size.
+export function groundDiskScale(zoom){
+  const progress=Math.max(0,Math.min(1,(zoom-5)/13));
+  return .45+.65*progress*progress*(3-2*progress);
+}
