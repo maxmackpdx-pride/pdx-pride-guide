@@ -32,6 +32,13 @@ Production deploys use GitHub `master` -> GitHub Actions -> Railway. Do not use
 application tree from the CLI. Before shipping, synchronize safely with `origin/master`,
 commit only the intended diff, push, wait for Railway `SUCCESS`, and probe the affected
 live path when useful. Keep the `domain-redirects` and `domain-redirects-apex` services.
+Use the connected GitHub integration to publish an approved release when terminal Git
+authentication is unavailable. Create blobs for exactly the intended files (base64 for
+binary assets), create a tree based on the current `origin/master` tree, verify its SHA
+matches the local release tree, create a commit with the current remote head as parent,
+then advance `master` without force. Fetch and align the local checkout with the remote
+commit after publication. Preserve the same GitHub Actions, Railway, and live-site checks
+as a terminal push. Do not treat a GitHub ref update alone as a production deployment.
 
 Staging environment `d10b5732-c324-46bc-b557-ac2cc626d4f0` was torn down on 2026-09-18.
 Do not wake or recreate it, apply leftover Railway canvas creates, or attach the

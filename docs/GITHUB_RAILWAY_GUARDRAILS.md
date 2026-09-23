@@ -23,16 +23,24 @@
 3. Make change(s).
 4. Commit only intended production fix(es).
 5. Ask explicitly before pushing.
-6. Push:
-   - `git push origin master`
+6. Publish the approved commit to GitHub `master`:
+   - Prefer the connected GitHub integration for authenticated publication. If local
+     `git push origin master` has working credentials, it is also valid.
+   - With the integration, fetch the remote head immediately before publication. Create
+     blobs for only the intended changed files (base64 for binary assets), build a tree
+     on that remote tree, and compare its SHA with the reviewed local release tree.
+     Create the commit with the remote head as parent, then update the `master` ref with
+     `force: false`. If `master` moved, fetch, reconcile, and recheck before trying again.
+   - Fetch after publication and align the local checkout with the published commit.
 7. Confirm:
    - GitHub Actions workflow `railway-deploy.yml` runs on `master` and finishes.
    - Railway shows deploy SUCCESS.
-8. Probe endpoint:
-   - `https://www.zaylist.com/api/health`
+8. Probe the live endpoint and the affected feature:
+   - `https://www.zaylist.com/api/health` must report the published commit SHA.
+   - Confirm the changed API data or route on the live site.
 
 Never deploy production with `railway up` or `railway sandbox`. The only normal ship
-path is `git push origin master` -> GitHub Actions -> Railway. Keep `domain-redirects`
+path is GitHub `master` -> GitHub Actions -> Railway. Keep `domain-redirects`
 and `domain-redirects-apex` in place.
 
 ## Current production facts (2026-09-19)
