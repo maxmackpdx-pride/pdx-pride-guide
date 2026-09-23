@@ -1,4 +1,3 @@
-import { LockKeyhole } from "lucide-react";
 import type { CSSProperties, MouseEvent } from "react";
 import { Link } from "wouter";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
@@ -81,7 +80,7 @@ export default function UserAvatar({
           aria-hidden="true"
         />
       )}
-      {ring === "chain" && <span className="user-avatar__padlock" aria-hidden="true"><LockKeyhole /></span>}
+      {ring === "chain" && <span className="user-avatar__padlock" aria-hidden="true">🔒</span>}
     </>
   );
 
