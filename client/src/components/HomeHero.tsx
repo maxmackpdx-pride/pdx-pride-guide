@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -11,6 +11,8 @@ import { sharePageLink } from "@/lib/shareEvent";
 import heroLoop from "@/assets/home/hero-loop.mp4";
 import heroLoopPoster from "@/assets/home/hero-loop-poster.jpg";
 import heroWordmark from "@/assets/home/hero-wordmark.webp";
+
+const HOME_TRACK_SRC = "/audio/fuck-meta-remastered.m4a";
 
 /**
  * Letter orbs under Z-A-Y-L-I-S-T (mid-layer glow between bg + wordmark).
@@ -40,8 +42,12 @@ export default function HomeHero() {
   // already-installed app. Detected after mount so SSR/hydration stays stable.
   const [canInstall, setCanInstall] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
+  const [musicProgress, setMusicProgress] = useState(0);
   const panelRef = useRef<HTMLElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (isStandalonePwa()) return;
@@ -186,6 +192,34 @@ export default function HomeHero() {
     }
   };
 
+  const toggleMusic = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      try {
+        await audio.play();
+      } catch {
+        setIsMusicPlaying(false);
+      }
+    } else {
+      audio.pause();
+    }
+  };
+
+  const seekMusic = (value: number) => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(audio.duration)) return;
+    audio.currentTime = audio.duration * value;
+    setMusicProgress(value);
+  };
+
+  const toggleMusicMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    setIsMusicMuted(audio.muted);
+  };
+
   return (
     <section
       ref={panelRef}
@@ -310,6 +344,58 @@ export default function HomeHero() {
 
       <div className="home-hero__inner">
         <h1 className="sr-only">Zaylist</h1>
+      </div>
+
+      <div className="home-hero__music" aria-label="Fuck Meta music player">
+        <audio
+          ref={audioRef}
+          src={HOME_TRACK_SRC}
+          preload="metadata"
+          onPlay={() => setIsMusicPlaying(true)}
+          onPause={() => setIsMusicPlaying(false)}
+          onEnded={() => setIsMusicPlaying(false)}
+          onTimeUpdate={(event) => {
+            const audio = event.currentTarget;
+            setMusicProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+          }}
+        />
+        <button
+          type="button"
+          className="home-hero__music-button"
+          onClick={() => void toggleMusic()}
+          aria-label={isMusicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}
+        >
+          {isMusicPlaying ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5z" /></svg>
+          )}
+        </button>
+        <div className="home-hero__music-track">
+          <span>Fuck Meta</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.001"
+            value={musicProgress}
+            onChange={(event) => seekMusic(Number(event.currentTarget.value))}
+            aria-label="Track position"
+            style={{ "--music-progress": `${musicProgress * 100}%` } as CSSProperties}
+          />
+        </div>
+        <button
+          type="button"
+          className="home-hero__music-button home-hero__music-volume"
+          onClick={toggleMusicMute}
+          aria-label={isMusicMuted ? "Unmute music" : "Mute music"}
+        >
+          {isMusicMuted ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 1.5 3 3m0-3-3 3" /></svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12-1.5a6 6 0 0 1 0 9m-2-6.5a3 3 0 0 1 0 4" /></svg>
+          )}
+        </button>
       </div>
 
       {/* z5  -  CTAs under the wordmark, almost locked */}
