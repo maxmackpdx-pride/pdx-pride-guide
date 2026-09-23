@@ -115,7 +115,9 @@ function AppLayout() {
       : isHubPath(path) || path.startsWith("/settings/") ? "hub" : "public";
   }, [pathname]);
   const profile = isProfilePath(location);
-  const livingMap = ["/map", "/map-demo"].includes(location.split("?")[0]);
+  const routePath = pathname.replace(/\/+$/, "") || "/";
+  const livingMap = ["/map", "/map-demo"].includes(routePath);
+  const hideFooter = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
   return (
     <div
       data-glass-scene
@@ -222,8 +224,8 @@ function AppLayout() {
           </Suspense>
         </RouteBoundary>
       </main>
-      {!livingMap && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
-      {!livingMap && <Footer />}
+      {!hideFooter && <div className="rainbow-bar rainbow-bar--bleed site-pre-footer-rainbow" aria-hidden="true" />}
+      {!hideFooter && <Footer />}
     </div>
   );
 }
