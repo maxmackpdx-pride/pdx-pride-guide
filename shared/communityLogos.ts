@@ -14,7 +14,7 @@ const COMMUNITY_LOGOS: Record<string, string> = {
   "oregon-state-leather-contest": "/community-logos/oregon-state-leather-contest.webp", // oslcontest.org
   "pdx-gaymers": "/community-logos/pdx-gaymers.webp", // pdxgaymers.org
   "pdx-pah-portland-pets-and-handlers": "/community-logos/pdx-pah-portland-pets-and-handlers.webp", // pdxpah.com
-  "pink-ponies": "/directory-logos/Pink_Ponies.png",
+  "pink-ponies": "/community-logos/pink-ponies.jpeg",
   "portland-area-theatre-alliance": "/directory-logos/place-portlandareatheatrealliance.png", // portlandtheatre.com
   "portland-frontrunners": "/community-logos/portland-frontrunners.webp", // pdxfrontrunners.com
   "portland-leather-alliance": "/community-logos/portland-leather-alliance.webp", // portlandleather.org
@@ -26,5 +26,9 @@ const COMMUNITY_LOGOS: Record<string, string> = {
 
 export function communityLogo(community: Pick<CommunitySummary, "slug" | "imageUrl">): string | null {
   // A community moderator's chosen image takes precedence over curated art.
+  // The seeded Placez image is still the yellow version of the Pink Ponies mark.
+  if (community.slug === "pink-ponies" && community.imageUrl === "/directory-logos/Pink_Ponies.png") {
+    return COMMUNITY_LOGOS[community.slug];
+  }
   return community.imageUrl || COMMUNITY_LOGOS[community.slug] || null;
 }

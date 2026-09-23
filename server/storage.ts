@@ -14675,10 +14675,20 @@ export const storage: IStorage = {
       status: "APPROVED",
       adminNotes: `Approved by ${adminName}`,
     }).where(eq(businessClaims.id, id)).run();
+    // Group listings back Z/List communities. An approved claim should give
+    // the representative the community owner role as well as Placez ownership.
+    const community = sqlite.prepare("SELECT id FROM communities WHERE source_business_id=?").get(claim.businessId) as {id:string}|undefined;
+    const communityHasOwner = community && sqlite.prepare("SELECT 1 FROM community_memberships WHERE community_id=? AND role='owner' AND status='active'").get(community.id);
+    if (community && !communityHasOwner) {
+      sqlite.prepare(`INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at)
+        VALUES (?,?,'owner','active','1',?)
+        ON CONFLICT(community_id,user_id) DO UPDATE SET role='owner',status='active'`)
+        .run(community.id,claim.userId,new Date().toISOString());
+    }
     notifyGuideInbox(
       claim.userId,
-      "Venue claim approved",
-      "You're now the owner of your venue. Manage it from your Hub.",
+      community && !communityHasOwner ? "Community claim approved" : "Venue claim approved",
+      community && !communityHasOwner ? "You're now the owner of this Z/List community. Open it to manage members and posts." : "You're now the owner of your venue. Manage it from your Hub.",
       { contextType: "GUIDE_UPDATE" },
     );
     return { ok: true };

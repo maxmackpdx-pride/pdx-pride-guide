@@ -22,6 +22,8 @@ export type CommunitySummary = {
   viewerMembershipStatus: "active" | "pending" | "left" | "removed" | "rejected" | null;
   canManage: boolean;
   sourcePlaceId: number | null;
+  isClaimable: boolean;
+  hasPendingClaim: boolean;
 };
 
 export type CommunityPost = {

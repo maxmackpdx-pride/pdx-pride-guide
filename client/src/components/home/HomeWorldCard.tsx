@@ -546,7 +546,7 @@ export default function HomeWorldCard({
                 const logo = communityLogo(community);
                 return <Link key={community.id} href={`/z/${community.slug}`} className="home-world__community">
                   <span className="home-world__community-image" style={!community.imageUrl && community.slug === "lesbian-culture-club" ? { backgroundColor: "#f5f1e9" } : undefined}>
-                    {logo ? <img src={logo} alt="" loading="lazy" /> : <span aria-hidden="true">Z/</span>}
+                    {logo ? <img src={logo} alt="" loading="lazy" style={community.slug === "yes-coach-productions" && (!community.imageUrl || community.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? { padding: "12%", boxSizing: "border-box" } : undefined} /> : <span aria-hidden="true">Z/</span>}
                   </span>
                   <span className="home-world__community-copy">
                     <span className="home-world__community-address">z/{community.slug}</span>

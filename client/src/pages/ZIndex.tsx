@@ -5,6 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
+import AuthModal from "@/components/AuthModal";
 import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import SpectrumLoader from "@/components/SpectrumLoader";
 import { communityLogo } from "@shared/communityLogos";
@@ -17,12 +18,21 @@ export default function ZIndex() {
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [claimSlug, setClaimSlug] = useState<string | null>(null);
+  const [claimReason, setClaimReason] = useState("");
+  const [claimError, setClaimError] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
   const [draft, setDraft] = useState({ name: "", description: "", neighborhood: "", visibility: "public", membershipPolicy: "open" });
   const communities = useQuery<CommunitySummary[]>({ queryKey: ["/api/communities"] });
   const create = useMutation({
     mutationFn: async () => (await apiRequest("POST", "/api/communities", draft)).json(),
     onSuccess: async (item: CommunitySummary) => { await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); navigate(`/z/${item.slug}`); },
     onError: err => setError(parseApiError(err, "Community could not be created.")),
+  });
+  const claim = useMutation({
+    mutationFn: async () => (await apiRequest("POST", `/api/communities/${encodeURIComponent(claimSlug || "")}/claim`, { claimReason })).json(),
+    onSuccess: async () => { setClaimSlug(null); setClaimReason(""); setClaimError(""); await queryClient.invalidateQueries({ queryKey: ["/api/communities"] }); },
+    onError: err => setClaimError(parseApiError(err, "Could not submit this claim.")),
   });
   return <div className="z-communities">
     <header className="z-communities__hero">
@@ -44,13 +54,24 @@ export default function ZIndex() {
     {communities.isError ? <section className="z-communities__state"><h2>Communities could not load.</h2><button type="button" onClick={() => communities.refetch()}>TRY AGAIN</button></section> : null}
     {!communities.isLoading && !communities.isError && communities.data?.length === 0 ? <section className="z-communities__state"><h2>No public communities yet.</h2><p>Check back soon, or start a community.</p></section> : null}
     <section className="z-communities__grid" aria-label="Communities">
-      {communities.data?.map(community => { const logo = communityLogo(community); return <Link key={community.id} href={`/z/${community.slug}`} className="z-community-card">
-        <div className="z-community-card__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: community.imageUrl ? undefined : "contain", backgroundColor: !community.imageUrl && community.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
+      {communities.data?.map(community => { const logo = communityLogo(community); return <article key={community.id} className="z-community-card">
+        <Link href={`/z/${community.slug}`} className="z-community-card__link">
+        <div className="z-community-card__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: community.slug === "yes-coach-productions" && (!community.imageUrl || community.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !community.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !community.imageUrl && community.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>
         <div className="z-community-card__body">
           <p className="z-community-card__address">z/{community.slug}</p><h2>{community.name}</h2><p>{community.description}</p>
           <div className="z-community-card__meta"><span>{community.memberCount} {community.memberCount === 1 ? "member" : "members"}</span>{community.neighborhood ? <span>{community.neighborhood}</span> : null}</div>
         </div>
-      </Link>; })}
+        </Link>
+        {community.isClaimable ? <div className="z-community-card__claim-area">
+          {community.hasPendingClaim ? <span className="z-community-card__claim-pending">Claim pending review</span> : claimSlug === community.slug ? <form onSubmit={event => { event.preventDefault(); claim.mutate(); }}>
+            <label htmlFor={`claim-${community.id}`}>How are you connected to {community.name}?</label>
+            <textarea id={`claim-${community.id}`} value={claimReason} onChange={event => setClaimReason(event.target.value)} minLength={10} maxLength={500} required autoFocus />
+            {claimError ? <p role="alert">{claimError}</p> : null}
+            <div><button type="submit" disabled={claim.isPending}>SEND FOR REVIEW</button><button type="button" onClick={() => { setClaimSlug(null); setClaimReason(""); setClaimError(""); }}>CANCEL</button></div>
+          </form> : <button type="button" className="z-community-card__claim" onClick={() => { if (!user) { setShowAuth(true); return; } setClaimSlug(community.slug); setClaimReason(""); setClaimError(""); }}>Claim me →</button>}
+        </div> : null}
+      </article>; })}
     </section>
+    {showAuth ? <AuthModal onClose={() => setShowAuth(false)} /> : null}
   </div>;
 }
