@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
@@ -9,7 +9,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { EVENTS_NAV, OUTZ_INDEX, PRIMARY_NAV, navLinkActive } from "@/lib/siteNav";
+import { EVENTS_NAV, OUTZ_INDEX, navLinkActive } from "@/lib/siteNav";
 import { isLocalDemo } from "@/lib/localDemo";
 import { parseHubSection } from "@/components/hub/types";
 import AuthModal from "./AuthModal";
@@ -18,10 +18,6 @@ import { HologramWaypoint as MapzMark } from "@/components/ui/hero-z-hologram";
 import { CalendarDays, Compass, MessageCircle } from "lucide-react";
 
 const MOBILE_ICON = 19;
-// Preserve access to the destinations that do not occupy a bottom-bar tab.
-const EXPLORE_LINKS = ["/z", "/directory", "/the-hauz"].flatMap(href =>
-  PRIMARY_NAV.filter(entry => entry.type === "link" && entry.href === href),
-);
 
 /**
  * "Your Hub" rows in the Hub sheet. Each is a real /dashboard section, in the
@@ -67,15 +63,12 @@ export default function MobileBottomNav() {
   const { open, openSheet, closeSheet } = useInboxSheet();
   const { total: attentionCount } = useInboxAttentionCount();
   const [eventsOpen, setEventsOpen] = useState(false);
-  const [exploreOpen, setExploreOpen] = useState(false);
-  const exploreTriggerRef = useRef<HTMLButtonElement>(null);
   const [hubOpen, setHubOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const overlayOpen = eventsOpen || exploreOpen || hubOpen || open || showAuth;
+  const overlayOpen = eventsOpen || hubOpen || open || showAuth;
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "events") setEventsOpen(false);
-    if (except !== "explore") setExploreOpen(false);
     if (except !== "hub-sheet") setHubOpen(false);
     if (except !== "inbox") closeSheet();
   }, [closeSheet]);
@@ -91,15 +84,13 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     setEventsOpen(false);
-    setExploreOpen(false);
     setHubOpen(false);
   }, [location]);
 
   useEffect(() => {
-    const close = () => { setEventsOpen(false); setExploreOpen(false); setHubOpen(false); };
+    const close = () => { setEventsOpen(false); setHubOpen(false); };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        if (exploreOpen) exploreTriggerRef.current?.focus();
         close();
       }
     };
@@ -108,12 +99,12 @@ export default function MobileBottomNav() {
     window.addEventListener("keydown", onKey);
     desktop.addEventListener("change", onResize);
     return () => { window.removeEventListener("keydown", onKey); desktop.removeEventListener("change", onResize); };
-  }, [exploreOpen]);
+  }, []);
 
-  const exploreActive = EXPLORE_LINKS.some(item => item.type === "link" && navLinkActive(location, item.href));
+  const zListActive = navLinkActive(location, "/z");
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const outzActive = navLinkActive(location, OUTZ_INDEX);
-  const activeIndex = open || showAuth ? 4 : exploreOpen ? 1 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : exploreActive ? 1 : eventsActive ? 0 : -1;
+  const activeIndex = open || showAuth ? 4 : eventsOpen ? 0 : navLinkActive(location, "/map") ? 2 : outzActive ? 3 : zListActive ? 1 : eventsActive ? 0 : -1;
   const hubActive = navLinkActive(location, "/dashboard");
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   const hubSection = navLinkActive(location, "/dashboard") ? parseHubSection(new URLSearchParams(location.split("?")[1] || "").get("section")) : undefined;
@@ -130,15 +121,6 @@ export default function MobileBottomNav() {
     }
     dismissExcept("events");
     setEventsOpen(true);
-  };
-
-  const handleExplore = () => {
-    if (exploreOpen) {
-      setExploreOpen(false);
-      return;
-    }
-    dismissExcept("explore");
-    setExploreOpen(true);
   };
 
   const localDemo = isLocalDemo();
@@ -174,20 +156,6 @@ export default function MobileBottomNav() {
                 className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`}
                 onClick={() => setEventsOpen(false)}
               >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
-      {exploreOpen && (
-        <>
-          <div className="hub-more-backdrop" onClick={() => { setExploreOpen(false); exploreTriggerRef.current?.focus(); }} aria-hidden="true" />
-          <div id="mobile-explore-sheet" className="hub-more-sheet hub-more-sheet--site pdx-liquid-overlay" data-accent="blue" role="dialog" aria-label="Explore">
-            <h3>Explore</h3>
-            {EXPLORE_LINKS.map(item => item.type === "link" && (
-              <Link key={item.href} href={item.href} className={`hub-more-item${navLinkActive(location, item.href) ? " is-active" : ""}`} data-accent={item.accent} onClick={handleNavLink} aria-current={navLinkActive(location, item.href) ? "page" : undefined}>
                 <span>{item.label}</span>
               </Link>
             ))}
@@ -281,20 +249,17 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Eventz</span>
           </button>
 
-          <button
-            type="button"
-            ref={exploreTriggerRef}
-            className={tabClass(exploreActive || exploreOpen, "blue")}
+          <Link
+            href="/z"
+            className={tabClass(zListActive, "blue")}
             data-accent="blue"
-            aria-label="Explore"
-            aria-expanded={exploreOpen}
-            aria-haspopup="dialog"
-            aria-controls={exploreOpen ? "mobile-explore-sheet" : undefined}
-            onClick={handleExplore}
+            aria-label="Z/List"
+            aria-current={zListActive ? "page" : undefined}
+            onClick={handleNavLink}
           >
             <span className="znav-icon-row"><Compass size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Explore</span>
-          </button>
+            <span className="znav-caption">Z/List</span>
+          </Link>
 
           <Link
             href="/map"
