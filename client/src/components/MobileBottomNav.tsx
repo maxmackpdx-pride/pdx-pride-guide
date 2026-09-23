@@ -282,14 +282,17 @@ export default function MobileBottomNav() {
             onClick={handleNavLink}
           >
             <span className="znav-icon-row">
-              <svg width="32" height="32" style={{ width: 32, height: 32, flexShrink: 0 }} viewBox="0 0 510 501" overflow="hidden" aria-hidden="true" focusable="false">
-                <defs>
-                  <filter id="outzide-dock-white" colorInterpolationFilters="sRGB">
-                    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" />
-                  </filter>
-                </defs>
-                <image href="/brand/outzide.png" width="1773" height="501" filter="url(#outzide-dock-white)" />
-                <text x="475" y="271" textAnchor="middle" fill="#fff" stroke="#050506" strokeWidth="18" paintOrder="stroke" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="72" fontWeight="900">E</text>
+              <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 36 42" fill="none" aria-hidden="true" focusable="false">
+                <circle cx="18" cy="21" r="11.5" stroke="#fff" strokeWidth="2.2" />
+                <circle cx="18" cy="21" r="7.5" stroke="#fff" strokeWidth="1.2" opacity=".72" />
+                <path d="M18 7.5 20 11h-4l2-3.5ZM31.5 21 28 23v-4l3.5 2ZM18 34.5 16 31h4l-2 3.5ZM4.5 21 8 19v4l-3.5-2Z" fill="#fff" />
+                <path d="m14.5 14.5 10 6.5-10 6.5v-13Z" fill="#fff" />
+                <g fill="#fff" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="5.4" fontWeight="900" textAnchor="middle">
+                  <text x="18" y="5.5">N</text>
+                  <text x="33.5" y="22.9">E</text>
+                  <text x="18" y="41">S</text>
+                  <text x="2.5" y="22.9">W</text>
+                </g>
               </svg>
             </span>
             <span className="znav-caption">OutZide</span>
