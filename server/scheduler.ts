@@ -4,7 +4,7 @@ import { sendPushToSubscription, buildDeclarativePayload } from "./push/send";
 import { beachVenueLabel, formatRiverBratsHour, isValidBeachId } from "@shared/riverBrats";
 
 // Fires persisted one-shot prompts ("you said 4pm - are you here?") and
-// piggybacks the hourly chat-retention purge. Single-process by design
+// piggybacks the hourly event and chat retention purges. Single-process by design
 // (better-sqlite3, one dyno); claimDuePrompts marks rows SENT atomically.
 
 const TICK_MS = 60_000;
@@ -16,6 +16,7 @@ let lastPurge = 0;
 export function startPromptScheduler() {
   if (started) return;
   started = true;
+  void tick().catch(err => console.error("[scheduler] startup tick failed:", err));
   const timer = setInterval(() => {
     void tick().catch(err => console.error("[scheduler] tick failed:", err));
   }, TICK_MS);
@@ -26,6 +27,12 @@ async function tick() {
   const now = Date.now();
   if (now - lastPurge > PURGE_EVERY_MS) {
     lastPurge = now;
+    try {
+      const removed = storage.purgeExpiredEvents(now);
+      if (removed) console.log(`[scheduler] deleted ${removed} events older than three months`);
+    } catch (err) {
+      console.error("[scheduler] event retention failed:", err);
+    }
     try {
       storage.purgeExpiredChatMessages(now);
     } catch (err) {

@@ -1,3 +1,4 @@
+import { eventRetentionCutoff, isExpiredEvent } from "./eventRetention";
 import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 export { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 import Database from "better-sqlite3";
@@ -3323,7 +3324,7 @@ function seedCheckingPortlandEventsJuly2026() {
 }
 
 /** Hard-delete events and dependent rows (attendance, hosts, messages, etc.). */
-function hardDeleteEventIds(ids: number[]) {
+function hardDeleteEventIds(ids: number[], strict = false) {
   if (!ids.length) return;
   const idPh = ids.map(() => "?").join(",");
   sqlite.prepare(`DELETE FROM attendances WHERE event_id IN (${idPh})`).run(...ids);
@@ -3332,19 +3333,19 @@ function hardDeleteEventIds(ids: number[]) {
   sqlite.prepare(`DELETE FROM event_talent WHERE event_id IN (${idPh})`).run(...ids);
   try {
     sqlite.prepare(`DELETE FROM host_messages WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* table may not exist in older DBs */ }
+  } catch (error) { if (strict) throw error; }
   try {
     sqlite.prepare(`UPDATE hub_feed_posts SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* table may not exist in older DBs */ }
+  } catch (error) { if (strict) throw error; }
   try {
     sqlite.prepare(`UPDATE missed_connections SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
+  } catch (error) { if (strict) throw error; }
   try {
     sqlite.prepare(`UPDATE submissions SET event_id = NULL WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* ignore */ }
+  } catch (error) { if (strict) throw error; }
   try {
     sqlite.prepare(`DELETE FROM moderation_requests WHERE event_id IN (${idPh})`).run(...ids);
-  } catch { /* table may not exist in older DBs */ }
+  } catch (error) { if (strict) throw error; }
   sqlite.prepare(`DELETE FROM events WHERE id IN (${idPh})`).run(...ids);
 }
 
@@ -9940,6 +9941,7 @@ export interface IStorage {
   markPromptSkipped(promptId: number): void;
   claimDuePrompts(nowIso: string, limit?: number): any[];
   purgeExpiredChatMessages(now?: number): void;
+  purgeExpiredEvents(now?: number): number;
   getMyGroupChats(userId: number): any[];
   /** Active non-anon check-in dates for a user at a beach (still in access window). */
   getBeachChatDatesForUser(beachId: string, userId: number): string[];
@@ -15068,6 +15070,17 @@ export const storage: IStorage = {
       return due;
     });
     return claim(nowIso);
+  },
+  purgeExpiredEvents(now = Date.now()) {
+    const cutoff = eventRetentionCutoff(now);
+    return sqlite.transaction(() => {
+      const rows = sqlite.prepare("SELECT id, date_start AS start, date_end AS end FROM events").all() as Array<{ id: number; start: string; end: string }>;
+      const ids = rows.filter(row => isExpiredEvent(row.start, row.end, cutoff)).map(row => row.id);
+      for (let offset = 0; offset < ids.length; offset += 250) {
+        hardDeleteEventIds(ids.slice(offset, offset + 250), true);
+      }
+      return ids.length;
+    })();
   },
   purgeExpiredChatMessages(now = Date.now()) {
     // Hard-delete group chat content CHAT_RETENTION_DAYS after the chat closes.

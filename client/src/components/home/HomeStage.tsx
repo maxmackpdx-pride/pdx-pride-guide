@@ -33,6 +33,7 @@ const IDENTITY_LINES = [
   "You are not a product",
   "Fuck Meta",
   "Connection over content",
+  "Not your daddies Craigslist",
 ] as const;
 
 type Props = {

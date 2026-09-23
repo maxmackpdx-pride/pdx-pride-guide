@@ -89,7 +89,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         activatedPhases.add(index);
         if (index === 2) roadmapFinishArmed = true;
         const phase = roadmapPhases[index],
-          summary = phase.querySelector("summary"),
+          summary = phase.querySelector(".roadmap-phase__summary"),
           stickyTop = Number.parseFloat(getComputedStyle(summary).top) || 0;
         preservePhaseAnchor(summary, () => {
           roadmapPhases.forEach((item, itemIndex) => {
@@ -113,11 +113,11 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
           lastRoadmapScrollY = window.scrollY;
           if (!scrollingDown) return;
           const triggerY = roadmapPhaseTriggerY();
-          if (!activatedPhases.has(1) && nextPhase.querySelector("summary").getBoundingClientRect().top <= triggerY) {
+          if (!activatedPhases.has(1) && nextPhase.querySelector(".roadmap-phase__summary").getBoundingClientRect().top <= triggerY) {
             activateRoadmapPhase(1);
             return;
           }
-          if (!activatedPhases.has(2) && possiblePhase.querySelector("summary").getBoundingClientRect().top <= triggerY) {
+          if (!activatedPhases.has(2) && possiblePhase.querySelector(".roadmap-phase__summary").getBoundingClientRect().top <= triggerY) {
             activateRoadmapPhase(2);
             return;
           }
@@ -383,7 +383,10 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       function sizeDesktopRoutes() {
         const counterHeight = pageRoot.querySelector(".analytics-counter").offsetHeight,
           routeTop = pageRoot.querySelector(".lane-heads").offsetTop + pageRoot.querySelector(".lane-heads").offsetHeight,
-          height = Math.max(0, futureConvergence.offsetTop - routeTop);
+          storyRect = story.getBoundingClientRect(),
+          futureRect = futureConvergence.getBoundingClientRect(),
+          routeEnd = futureRect.height > 0 ? futureRect.top : possiblePhase.getBoundingClientRect().top,
+          height = Math.max(0, routeEnd - storyRect.top - routeTop);
         styleRoot.style.setProperty("--counter-height", `${counterHeight}px`);
         styleRoot.style.setProperty("--routes-top", `${routeTop}px`);
         styleRoot.style.setProperty("--routes-height", `${height}px`);
@@ -393,6 +396,7 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         const futureRect = futureConvergence.getBoundingClientRect(),
           finalNode = futureConvergence.querySelector(".future-goal--final .future-goal__node"),
           finalNodeRect = finalNode.getBoundingClientRect();
+        if (!futureRect.width || !futureRect.height) return;
         finalRouteY = Math.max(120, Math.min(1000, ((finalNodeRect.top + finalNodeRect.height / 2 - futureRect.top) / futureRect.height) * 1000));
         if (mobileRouteQuery.matches) {
           const storyRect = story.getBoundingClientRect();
@@ -499,16 +503,17 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
         .forEach((logo) => (logo.alt = ""));
       function update() {
         const r = story.getBoundingClientRect(),
-          futureRoadmapY = futureConvergence.getBoundingClientRect().top - r.top,
+          desktopRect = desktopRoutes.getBoundingClientRect(),
           routeHeight = Math.max(1, mobileRouteQuery.matches
             ? r.height
-            : futureRoadmapY > 0 ? futureRoadmapY : r.height),
-          travel = Math.max(0, Math.min(routeHeight, innerHeight * 0.58 - r.top));
+            : desktopRect.height),
+          travel = Math.max(0, Math.min(routeHeight, innerHeight * 0.58 - (mobileRouteQuery.matches ? r.top : desktopRect.top)));
         styleRoot.style.setProperty("--progress", (travel / routeHeight).toFixed(4));
         setMobileRouteProgress(mobileProductRoute, travel);
         setMobileRouteProgress(mobileSystemRoute, travel);
-        const futureRect = futureConvergence.getBoundingClientRect(),
-          futureTravel = Math.max(
+        const futureRect = futureConvergence.getBoundingClientRect();
+        if (!futureRect.height) return;
+        const futureTravel = Math.max(
             0,
             Math.min(futureRect.height, innerHeight * 0.58 - futureRect.top),
           );
@@ -529,22 +534,23 @@ export function mountAboutRoadmap(pageRoot: ShadowRoot) {
       }
       window.addEventListener("scroll", update, { passive: true, signal });
       window.addEventListener("resize", () => {
-        update();
         sizeDesktopRoutes();
         drawMobileRoutes();
         sizeFutureRoutes();
+        update();
       }, { signal });
-      update();
       sizeDesktopRoutes();
       sizeFutureRoutes();
       const roadmapResizeObserver = new ResizeObserver(() => {
         sizeDesktopRoutes();
         drawMobileRoutes();
         sizeFutureRoutes();
+        update();
       });
       roadmapResizeObserver.observe(story);
       mobileRouteQuery.addEventListener("change", drawMobileRoutes, { signal });
       drawMobileRoutes();
+      update();
       const o = new IntersectionObserver(
         (es) =>
           es.forEach((e) => {
