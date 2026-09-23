@@ -1,0 +1,43 @@
+import type { Message } from "@shared/schema";
+import { appDestination } from "@shared/appDestination";
+
+/** Channel-neutral content. Web Push and a future APNs sender consume this same intent. */
+export type NotificationIntent = {
+  title: string;
+  body?: string;
+  destination: string;
+  badge: number;
+  tag: string;
+};
+
+export function messageNotificationIntent(message: Message, unreadCount: number): NotificationIntent {
+  const ctx = message.contextType || "THREAD";
+  const label = message.contextLabel?.trim();
+  let title = message.subject?.trim() || "New message";
+  let destination = `/inbox?thread=${encodeURIComponent(message.threadId)}`;
+
+  if (ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE") title = label ? `Host update: ${label}` : "Host update";
+  else if (ctx === "MISSED_CONNECTION") title = "Missed connection reply";
+  else if (ctx === "GIG") title = "GIGZ message";
+  else if (ctx === "GIFTING") title = "GIFTZ update";
+  else if (ctx === "CHECK_IN") title = "Check-in message";
+  else if (ctx === "EVENT_HOST") title = label ? `Event: ${label}` : "Event message";
+  else if (ctx === "EVENT_TALENT" || ctx === "EVENT_TALENT_REQUEST") title = ctx === "EVENT_TALENT_REQUEST" ? "Lineup request" : "Lineup update";
+  else if (ctx === "RIVER_BRATS_CHECKIN") title = "River Brats check-in";
+  else if (ctx === "BEACH_CARPOOL") title = "Carpool message";
+  else if (ctx === "ADMIN_ALERT") {
+    title = message.subject?.trim() || "Admin alert";
+    destination = "/dashboard";
+  } else if (ctx === "SUBMISSION" || ctx === "EVENT_CLAIM" || ctx === "PROMOTER" || ctx === "GUIDE_UPDATE") {
+    title = message.subject?.trim() || "Zaylist update";
+    destination = ctx === "PROMOTER" ? "/submit" : "/dashboard";
+  }
+
+  return {
+    title,
+    body: message.body || undefined,
+    destination: appDestination(destination),
+    badge: unreadCount,
+    tag: `msg-${message.id || "new"}`,
+  };
+}

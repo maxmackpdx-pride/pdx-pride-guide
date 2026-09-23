@@ -498,6 +498,23 @@ function isMainAdminUser(user: any) {
     || storage.hasSiteAdminGrant(user.id);
 }
 
+function notificationPrefsAdmin(userId: number) {
+  const user = storage.getUserById(userId);
+  return Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(userId));
+}
+
+function readNotificationPrefs(userId: number) {
+  return {
+    prefs: storage.getNotificationPrefs(userId),
+    pushConfigured: Boolean(process.env.VAPID_PUBLIC_KEY),
+    isAdmin: notificationPrefsAdmin(userId),
+  };
+}
+
+function updateNotificationPrefs(userId: number, patch: Record<string, boolean>) {
+  return storage.setNotificationPrefs(userId, patch, notificationPrefsAdmin(userId));
+}
+
 /** Live admin check - never trust sticky session.isAdmin alone (revoke must stick). */
 function userIsAdminNow(user: any): boolean {
   return !!(user && (
@@ -1553,7 +1570,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // Session middleware - persisted on the same SQLite volume as user data
   app.use(createSessionMiddleware(sqlite));
   registerCommunityRoutes(app, requireAuth);
-  registerPlatformV1(app);
+  registerPlatformV1(app, { requireAuth, readNotificationPrefs, updateNotificationPrefs });
 
   // ─── FILE UPLOADS ───────────────────────────────────────────────────────
   // Poster image upload (event submit / claim edit)
@@ -4728,29 +4745,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/users/me/notification-prefs", requireAuth, (req, res) => {
-    const user = storage.getUserById(req.session.userId!);
-    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
-    res.json({
-      prefs: storage.getNotificationPrefs(req.session.userId!),
-      pushConfigured: Boolean(process.env.VAPID_PUBLIC_KEY),
-      isAdmin,
-    });
+    res.json(readNotificationPrefs(req.session.userId!));
   });
 
   app.put("/api/users/me/notification-prefs", requireAuth, (req, res) => {
-    const user = storage.getUserById(req.session.userId!);
     const body = req.body || {};
     const patch: Record<string, boolean> = {};
     for (const key of ["messages", "my_events", "account", "admin"] as const) {
       if (typeof body[key] === "boolean") patch[key] = body[key];
     }
-    // Same isAdmin predicate as GET (includes grant-based site admins).
-    const isAdmin = Boolean(user?.subAdmin || isMainAdminUser(user) || storage.hasSiteAdminGrant(req.session.userId!));
-    const prefs = storage.setNotificationPrefs(
-      req.session.userId!,
-      patch,
-      isAdmin,
-    );
+    const prefs = updateNotificationPrefs(req.session.userId!, patch);
     res.json({ prefs });
   });
 

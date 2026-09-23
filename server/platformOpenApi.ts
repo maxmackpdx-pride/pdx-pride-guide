@@ -14,6 +14,10 @@ export const platformOpenApi = {
   servers: [{ url: "https://www.zaylist.com" }],
   paths: {
     "/api/v1": { get: { summary: "API metadata", responses: { "200": { description: "API metadata" } } } },
+    "/api/v1/me/notification-preferences": {
+      get: { summary: "Get my notification preferences", responses: { "200": { description: "Preferences in the v1 envelope" }, "401": { description: "Sign in required" } } },
+      put: { summary: "Update my notification preferences", requestBody: { required: true, content: { "application/json": { schema: { type: "object", additionalProperties: false, properties: { messages: { type: "boolean" }, my_events: { type: "boolean" }, account: { type: "boolean" }, admin: { type: "boolean" } } } } } }, responses: { "200": { description: "Updated preferences in the v1 envelope" }, "401": { description: "Sign in required" }, "422": { $ref: "#/components/responses/ValidationError" } } },
+    },
     "/api/v1/search": { get: { summary: "Search typed Zaylist resources", parameters: [{ name: "q", in: "query", required: true, schema: { type: "string", minLength: 2, maxLength: 200 } }, { name: "types", in: "query", schema: { type: "string" } }, { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100 } }, { name: "cursor", in: "query", schema: { type: "string" } }], responses: { "200": { description: "Visibility-filtered typed search results" }, "422": { $ref: "#/components/responses/ValidationError" } } } },
     "/api/v1/objects/{id}": { get: { summary: "Resolve a typed resource ID", parameters: [{ name: "id", in: "path", required: true, schema: { $ref: "#/components/schemas/TypedId" } }], responses: { "200": { description: "Typed resource" }, "404": { $ref: "#/components/responses/NotFound" } } } },
     "/api/v1/objects/{id}/capabilities": { get: { summary: "Evaluate viewer capabilities", parameters: [{ name: "id", in: "path", required: true, schema: { $ref: "#/components/schemas/TypedId" } }], responses: { "200": { description: "Current capability set" }, "404": { $ref: "#/components/responses/NotFound" } } } },

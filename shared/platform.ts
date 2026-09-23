@@ -62,3 +62,10 @@ export const platformListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   cursor: z.string().max(500).optional(),
 }).strict();
+
+export const notificationPreferencesPatchSchema = z.object({
+  messages: z.boolean().optional(),
+  my_events: z.boolean().optional(),
+  account: z.boolean().optional(),
+  admin: z.boolean().optional(),
+}).strict();

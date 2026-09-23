@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { platformOpenApi } from "./platformOpenApi";
-import { PLATFORM_API_VERSION, parsePlatformId, platformId, platformListQuerySchema, platformObjectTypes, platformSearchQuerySchema, typedIdSchema } from "@shared/platform";
+import { PLATFORM_API_VERSION, notificationPreferencesPatchSchema, parsePlatformId, platformId, platformListQuerySchema, platformObjectTypes, platformSearchQuerySchema, typedIdSchema } from "@shared/platform";
 
 test("typed IDs preserve type and opaque source identity", () => {
   for (const type of platformObjectTypes) {
@@ -28,4 +28,11 @@ test("OpenAPI describes every resource list and detail route", () => {
   }
   assert.ok(platformOpenApi.paths["/api/v1/search"].get);
   assert.ok(platformOpenApi.paths["/api/v1/relationships/{id}"].get);
+  assert.ok(platformOpenApi.paths["/api/v1/me/notification-preferences"].put);
+});
+
+test("v1 notification preference writes accept only known boolean fields", () => {
+  assert.equal(notificationPreferencesPatchSchema.safeParse({ messages: false }).success, true);
+  assert.equal(notificationPreferencesPatchSchema.safeParse({ admin: "true" }).success, false);
+  assert.equal(notificationPreferencesPatchSchema.safeParse({ messages: true, userId: 8 }).success, false);
 });
