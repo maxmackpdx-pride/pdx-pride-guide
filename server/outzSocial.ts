@@ -211,6 +211,15 @@ export function postOutzChatMessage(placeId: string, calendarDate: string, userI
   return { id: Number(result.lastInsertRowid), body, createdAt, isMine: true };
 }
 
+export function getOutzChatPushRecipients(placeId: string, senderId: number): number[] {
+  expireOutzCheckins();
+  const rows = sqlite.prepare(`
+    SELECT DISTINCT user_id AS userId FROM outz_checkins
+    WHERE place_id = ? AND user_id != ? AND is_active = 1 AND is_anonymous = 0 AND expires_at > ?
+  `).all(placeId, senderId, new Date().toISOString()) as Array<{ userId: number }>;
+  return rows.map(row => row.userId);
+}
+
 export function purgeExpiredOutzChatMessages() {
   const cutoff = new Date(Date.now() - 21 * 86_400_000).toISOString().slice(0, 10);
   sqlite.prepare("DELETE FROM outz_chat_messages WHERE calendar_date < ?").run(cutoff);
@@ -274,6 +283,11 @@ export function createOutzWallComment(input: { postId: number; userId: number; b
     INSERT INTO outz_wall_comments (post_id, user_id, body, created_at) VALUES (?, ?, ?, ?)
   `).run(input.postId, input.userId, input.body, new Date().toISOString());
   return { id: Number(result.lastInsertRowid) };
+}
+
+export function getOutzWallPostOwner(postId: number): { userId: number; placeId: string } | undefined {
+  return sqlite.prepare("SELECT user_id AS userId, place_id AS placeId FROM outz_wall_posts WHERE id = ?")
+    .get(postId) as { userId: number; placeId: string } | undefined;
 }
 
 /** Match the author in the mutation itself, including when a caller supplies another user's ID. */

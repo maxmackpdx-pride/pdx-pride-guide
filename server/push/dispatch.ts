@@ -1,12 +1,50 @@
 import type { Message } from "@shared/schema";
-import { pushCategoryForContext } from "@shared/pushCategories";
+import { pushCategoryForContext, type PushCategory } from "@shared/pushCategories";
 import { storage } from "../storage";
 import { buildPushPayloadForMessage } from "./templates";
-import { sendPushToSubscription } from "./send";
+import { buildDeclarativePayload, sendPushToSubscription } from "./send";
 import { isPushConfigured } from "./vapid";
 
 const MAX_PUSH_PER_USER_HOUR = 20;
 const recentPushByUser = new Map<number, number[]>();
+const recentRoomPush = new Map<string, number>();
+
+/** Alerts for map interactions that do not create an Inbox message. */
+export function schedulePushForActivity(input: {
+  recipientIds: number[];
+  senderId: number;
+  category: PushCategory;
+  title: string;
+  body: string;
+  navigate: string;
+  tag: string;
+  roomKey?: string;
+}): void {
+  void dispatchPushForActivity(input).catch(error => console.warn("[push] activity dispatch failed", error));
+}
+
+async function dispatchPushForActivity(input: Parameters<typeof schedulePushForActivity>[0]): Promise<void> {
+  if (!isPushConfigured()) return;
+  const payload = buildDeclarativePayload(input);
+  const now = Date.now();
+  for (const userId of new Set(input.recipientIds)) {
+    if (!userId || userId === input.senderId || storage.isMemberInteractionBlocked(userId, input.senderId)) continue;
+    if (!storage.getNotificationPrefs(userId)[input.category]) continue;
+    const subs = storage.getActivePushSubscriptions(userId);
+    if (!subs.length) continue;
+    // Busy group rooms send at most one alert per member every five minutes.
+    const key = input.roomKey ? `${input.roomKey}:${userId}` : null;
+    if (key && now - (recentRoomPush.get(key) ?? 0) < 5 * 60_000) continue;
+    if (!withinRateLimit(userId)) continue;
+    const results = await Promise.all(subs.map(async sub => {
+      const result = await sendPushToSubscription(sub, payload);
+      if (result.ok) storage.touchPushSubscription(sub.id);
+      else if (result.gone) storage.deactivatePushSubscription(sub.id);
+      return result.ok;
+    }));
+    if (key && results.some(Boolean)) recentRoomPush.set(key, now);
+  }
+}
 
 function withinRateLimit(userId: number): boolean {
   const now = Date.now();

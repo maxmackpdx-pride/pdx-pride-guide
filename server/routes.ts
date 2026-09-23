@@ -1,4 +1,5 @@
 import {getOutzClosures} from './outzClosures';
+import { schedulePushForActivity } from './push/dispatch';
 import { getWinterConditions } from './outzWinter';
 import { publicWinterEvents } from '../shared/outzWinterEvents';
 import { createWaypointStore } from './outzWaypoints';
@@ -175,6 +176,8 @@ import {
   getOutzPlaceRating,
   getOutzWallPosts,
   getOutzChatMessages,
+  getOutzChatPushRecipients,
+  getOutzWallPostOwner,
   getOutzCheckins,
   getOutzProfileAdventures,
   getOutzMapCheckins,
@@ -2039,7 +2042,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (!placeId || !isAllowedBeachCheckinDate(date)) return res.status(400).json({ error: "Invalid OUTZ place or date" });
       if (!body || body.length > 500) return res.status(400).json({ error: "Message must be 1 to 500 characters" });
       if (moderationGate(res, "OUTZ group chat", { body })) return;
-      res.json(postOutzChatMessage(placeId, date, req.session.userId!, body));
+      const message = postOutzChatMessage(placeId, date, req.session.userId!, body);
+      const recipientIds = getOutzChatPushRecipients(placeId, req.session.userId!);
+      res.json(message);
+      schedulePushForActivity({
+        recipientIds,
+        senderId: req.session.userId!, category: "messages",
+        title: "OUTZide group chat", body,
+        navigate: `/outzide?place=${encodeURIComponent(placeId)}`,
+        tag: `outz-chat-${placeId}`, roomKey: `outz-chat-${placeId}`,
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Could not send message" });
     }
@@ -2111,7 +2123,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const body = String(req.body.body || "").trim();
       if (!body || body.length > 300) return res.status(400).json({ error: "Comment must be 1 to 300 characters" });
       if (moderationGate(res, "OUTZ destination comment", { body })) return;
-      res.json(createOutzWallComment({ postId: Number(req.params.id), userId: req.session.userId!, body }));
+      const postId = Number(req.params.id);
+      const comment = createOutzWallComment({ postId, userId: req.session.userId!, body });
+      const post = getOutzWallPostOwner(postId);
+      res.json(comment);
+      if (post) schedulePushForActivity({
+        recipientIds: [post.userId], senderId: req.session.userId!, category: "messages",
+        title: "Reply to your OUTZide post", body,
+        navigate: `/outzide?place=${encodeURIComponent(post.placeId)}`,
+        tag: `outz-comment-${comment.id}`,
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Could not post comment" });
     }
@@ -2696,6 +2717,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
       }
 
       res.status(201).json({ ...biz, potentialMatches, ownershipRequested });
+      try {
+        storage.notifyOwnerModeration(
+          `New Placez listing: ${biz.name}`,
+          `A new listing is live and waiting in the directory review queue.${ownershipRequested ? " An ownership claim is also pending." : ""}`,
+        );
+      } catch (error) { console.warn("[push] Placez listing alert failed", error); }
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Invalid directory listing" });
     }
@@ -2807,6 +2834,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.json({ ok: true, autoApproved: true, ...approval });
     }
     res.json({ ok: true, autoApproved: false, claim: result.claim });
+    try {
+      const venue = storage.getBusiness(id);
+      storage.notifyOwnerModeration(
+        `Placez claim: ${venue?.name || "Venue"}`,
+        "An ownership claim is waiting in the venue claims queue.",
+      );
+    } catch (error) { console.warn("[push] Placez claim alert failed", error); }
   });
 
   app.get("/api/directory/mine/owned", requireAuth, (req, res) => {
