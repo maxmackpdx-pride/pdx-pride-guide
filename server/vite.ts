@@ -32,8 +32,14 @@ export async function setupVite(server: Server, app: Express) {
     allowedHosts: true as const,
   };
 
+  // The shared Vite config is a factory; spreading the function loses root,
+  // aliases, and plugins, so /src/main.tsx cannot resolve in local development.
+  const resolvedViteConfig = await (typeof viteConfig === "function"
+    ? viteConfig({ command: "serve", mode: "development" })
+    : viteConfig);
+
   const vite = await createViteServer({
-    ...viteConfig,
+    ...resolvedViteConfig,
     configFile: false,
     customLogger: {
       ...viteLogger,
@@ -41,7 +47,7 @@ export async function setupVite(server: Server, app: Express) {
         viteLogger.error(msg, options);
       },
     },
-    server: serverOptions,
+    server: { ...resolvedViteConfig.server, ...serverOptions },
     appType: "custom",
   });
 
