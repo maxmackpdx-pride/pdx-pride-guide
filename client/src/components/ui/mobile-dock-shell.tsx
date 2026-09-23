@@ -19,6 +19,7 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
   const rowRef = useRef<HTMLDivElement>(null);
   const scrollState = useRef({ y: 0, travel: 0, collapsed: false });
   const scrollSource = useRef<EventTarget | null>(null);
+  const mapDockSnapshot = useRef<boolean | null>(null);
   const rowId = `mobile-dock-${useId().replace(/:/g, "")}`;
   const [collapsed, setCollapsed] = useState(false);
   const [collapseRequested, setCollapseRequested] = useState(false);
@@ -59,14 +60,20 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
     };
     const syncMapSheet = (event: Event) => {
       if (innerWidth >= 960) return;
-      const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
+      const detail = (event as CustomEvent<{ open?: boolean; restorePrevious?: boolean }>).detail;
+      const open = Boolean(detail?.open);
+      if (detail?.restorePrevious && open && mapDockSnapshot.current === null) {
+        mapDockSnapshot.current = scrollState.current.collapsed;
+      }
+      const nextCollapsed = open || (detail?.restorePrevious ? mapDockSnapshot.current ?? scrollState.current.collapsed : false);
+      if (!open) mapDockSnapshot.current = null;
       scrollState.current = {
         y: scrollSource.current instanceof Element ? scrollSource.current.scrollTop : window.scrollY,
         travel: 0,
-        collapsed: open,
+        collapsed: nextCollapsed,
       };
-      setCollapseRequested(open);
-      setCollapsed(open);
+      setCollapseRequested(nextCollapsed);
+      setCollapsed(nextCollapsed);
     };
     window.addEventListener("zaylist:collapse-mobile-dock", collapseFromMap);
     window.addEventListener("zaylist:drawer", syncMapSheet);
