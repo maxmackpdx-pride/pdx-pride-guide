@@ -318,7 +318,7 @@ export default function MobileBottomNav() {
           >
             <span className="znav-icon-row">
               <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 435 501" overflow="hidden" aria-hidden="true" focusable="false">
-                <image href="/brand/outzide.png" width="1773" height="501" />
+                <image href="/brand/outzide.png" width="1773" height="501" style={{ filter: "brightness(0) invert(1)" }} />
               </svg>
             </span>
             <span className="znav-caption">OutZide</span>
