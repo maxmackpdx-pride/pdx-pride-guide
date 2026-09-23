@@ -11719,6 +11719,22 @@ html.calm-mode .footer-coffee__btn:hover {
     margin-top: 14px;
     gap: 10px;
   }
+
+  /* Outzide is a full-viewport map. Keep its mobile closeout useful, not tall. */
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__inner {
+    padding-top: 14px;
+    padding-bottom: 8px;
+  }
+
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__grid { gap: 14px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__logo { height: 36px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__tagline,
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__flap { display: none; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__controls { padding-top: 0; gap: 6px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__nav { padding-top: 10px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__col-title { min-height: 44px; padding-block: 5px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__bottom { margin-top: 6px; padding-top: 10px; }
+  body:has(iframe[src^="/outzide-map/"]) .site-footer__legal { gap: 4px; font-size: .66rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════
