@@ -53,6 +53,7 @@ html:root .home-front .home-front__auth:focus-visible { outline:2px solid #fff; 
 }
 .home-front__music button { display:flex; align-items:center; justify-content:center; gap:7px; min-width:76px; min-height:38px; padding:7px 12px; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(3,5,9,.88); color:#fff; font:800 11px/1 var(--font-display,"Barlow Condensed",sans-serif); letter-spacing:.08em; text-transform:uppercase; box-shadow:0 5px 20px rgba(0,0,0,.42); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); cursor:pointer; }
 .home-front__music button:hover,.home-front__music button:focus-visible { color:#19e3ff; background:rgba(255,255,255,.16); outline:none; }
+.home-front__music button:disabled { opacity:.55; cursor:wait; }
 @media(min-width:960px) {
   .home-front { --home-desktop-counter-height:clamp(132px,16svh,168px); }
   html:root .home-front .home-front__auth { min-width:220px; min-height:64px; padding:18px 36px; font-size:20px; border-radius:20px; }

@@ -22,7 +22,10 @@ export type { HomeStageBoardKey, HomeStageCardData, HomeStageSamples };
 export { useHomeStageSamples, HomeStageCard };
 
 const WORDMARK = "/brand/family/zaylist-primary.svg";
-const HOME_TRACK = "/audio/fuck-meta-remastered.m4a";
+const HOME_TRACK_PARTS = Array.from(
+  { length: 7 },
+  (_, index) => `/audio/fuck-meta-remastered.part${String(index).padStart(2, "0")}.m4a.part`,
+);
 const IDENTITY_LINES = [
   "Find your people",
   "Share what matters",
@@ -47,10 +50,35 @@ export default function HomeStage({ afterWelcome }: Props) {
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicReady, setMusicReady] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    let cancelled = false;
+    let objectUrl = "";
+
+    void Promise.all(HOME_TRACK_PARTS.map(async url => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Track part failed: ${response.status}`);
+      return response.arrayBuffer();
+    })).then(parts => {
+      if (cancelled) return;
+      objectUrl = URL.createObjectURL(new Blob(parts, { type: "audio/mp4" }));
+      audio.src = objectUrl;
+      audio.load();
+      setMusicReady(true);
+    }).catch(() => setMusicReady(false));
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !musicReady) return;
     audio.volume = 0.7;
 
     let armed = true;
@@ -71,7 +99,7 @@ export default function HomeStage({ afterWelcome }: Props) {
       window.removeEventListener("keydown", startFromInteraction, { capture: true });
       audio.pause();
     };
-  }, []);
+  }, [musicReady]);
 
   const toggleMusic = async () => {
     const audio = audioRef.current;
@@ -159,16 +187,13 @@ export default function HomeStage({ afterWelcome }: Props) {
         <div className="home-front__music" aria-label="Fuck Meta music player">
           <audio
             ref={audioRef}
-            src={HOME_TRACK}
-            preload="auto"
-            autoPlay
             onPlay={() => setMusicPlaying(true)}
             onPause={() => setMusicPlaying(false)}
             onEnded={() => setMusicPlaying(false)}
           />
-          <button type="button" onClick={() => void toggleMusic()} aria-label={musicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}>
+          <button type="button" disabled={!musicReady} onClick={() => void toggleMusic()} aria-label={musicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}>
             <span aria-hidden="true">{musicPlaying ? "Ⅱ" : "▶"}</span>
-            <span>{musicPlaying ? "Pause" : "Play"}</span>
+            <span>{musicReady ? (musicPlaying ? "Pause" : "Play") : "Loading"}</span>
           </button>
         </div>
         {afterWelcome}

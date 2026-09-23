@@ -1017,8 +1017,8 @@ html.calm-mode .home-world__demo,
 .home-world__community-copy strong { color: var(--paper,#fff); font: 800 21px/1.05 var(--font-display); }
 .home-world__community-address { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--c); font: 700 9px/1.2 var(--font-mono,monospace); }
 
-/* Family artwork has a padded 2:1 canvas; crop the blank canvas, not the mark. */
-.home-world:not([data-world="outz"]) .home-world__mark { object-fit: cover; object-position: center; }
+/* Keep every family mark fully visible inside its shared 2:1 artwork frame. */
+.home-world:not([data-world="outz"]) .home-world__mark { object-fit: contain; object-position: left center; }
 .home-world__headline { height: 56px; font-size: 32px; }
 .home-world__community-copy strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .home-world__empty { display: grid; place-items: center; height: 100%; padding: 20px; border: 1px solid color-mix(in srgb,var(--c) 25%,transparent); border-radius: var(--glass-card-radius,14px); color: var(--text-body,#d6d6dc); font-size: 14px; text-align: center; }
