@@ -43,12 +43,14 @@ export default function Outz() {
   useEffect(() => {
     const resize = () => {
       if (!frame.current) return;
-      frame.current.style.height = `${Math.max(360, window.innerHeight - frame.current.getBoundingClientRect().top)}px`;
+      const dockSpace = window.innerWidth < 960 ? (document.documentElement.dataset.mobileDock === "collapsed" ? 80 : 102) : 0;
+      frame.current.style.height = `${Math.max(240, window.innerHeight - frame.current.getBoundingClientRect().top - dockSpace)}px`;
     };
     resize();
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    window.addEventListener("zaylist:mobile-dock", resize);
+    return () => { window.removeEventListener("resize", resize); window.removeEventListener("zaylist:mobile-dock", resize); };
   }, []);
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
-  return <><iframe onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=continuity-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} />{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+  return <><iframe onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=mobile-optics-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} />{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

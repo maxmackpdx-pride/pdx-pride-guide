@@ -295,3 +295,7 @@ html.calm-mode .pdxBoard--event-grid .pdxBoard__meta,
   .pdxBoard--event-grid:hover .pdxBoard__img,.pdxBoard--event-grid:hover .pdxBoard__title,
   .pdxBoard--event-grid:hover .pdxBoard__meta{transform:none;filter:none}
 }
+
+/* Missing flyers use the actual event title on the day-color well. */
+.pdxBoard--event-grid .pdxBoard__poster--text { aspect-ratio:2 / 1; min-height:150px; }
+.pdxBoard__poster--text .pdxBoard__ph { background:radial-gradient(ellipse at top right,color-mix(in srgb,var(--day-c) 22%,transparent),transparent 70%),#090b0e; }

@@ -27,3 +27,7 @@
 @media(max-width:600px){.detail-actions>button{min-height:44px}.browse-toolbar{gap:10px}.directory-browser-header__wordmark{min-width:0;max-width:100%}}
 
 .place-modal-panel__inner>.detail-actions{margin-bottom:12px}
+
+/* A single breadcrumb treatment across interior sections. */
+.hz .section-breadcrumb,.z-communities .section-breadcrumb,.board-hero .section-breadcrumb { font:600 12px/1.5 var(--font-body,sans-serif); letter-spacing:normal; text-transform:none; color:var(--text-meta,#a6a6ad); }
+.hz .section-breadcrumb a,.z-communities .section-breadcrumb a,.board-hero .section-breadcrumb a { color:inherit; text-decoration:none; }

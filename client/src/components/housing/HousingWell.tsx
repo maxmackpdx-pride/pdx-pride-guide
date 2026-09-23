@@ -87,6 +87,7 @@ export function HousingWell({
   const captionRef = useRef<HTMLDivElement | null>(null);
   const [box, setBox] = useState<Box | null>(null);
   const [index, setIndex] = useState(0);
+  const [failedPhotos, setFailedPhotos] = useState<string[]>([]);
 
   useLayoutEffect(() => {
     const el = wellRef.current;
@@ -104,8 +105,9 @@ export function HousingWell({
     return () => ro.disconnect();
   }, []);
 
-  const shots = photos.length ? photos : fallbackPhoto ? [fallbackPhoto] : [];
-  const count = photos.length;
+  const availablePhotos = photos.filter(src => src.trim() && !failedPhotos.includes(src));
+  const shots = availablePhotos.length ? availablePhotos : fallbackPhoto && !failedPhotos.includes(fallbackPhoto) ? [fallbackPhoto] : [];
+  const count = shots.length;
 
   useEffect(() => {
     // Keep the visible slide in range when the photo set changes under us.
@@ -157,7 +159,7 @@ export function HousingWell({
   return (
     <div className={className ? `hz-well ${className}` : "hz-well"} ref={wellRef}>
       {shots.map((src, i) => (
-        <img key={`${src}-${i}`} className={`hz-well__img${i === index ? " is-on" : ""}`} src={src} alt="" />
+        <img key={`${src}-${i}`} className={`hz-well__img${i === index ? " is-on" : ""}`} src={src} alt="" onError={() => setFailedPhotos(previous => previous.includes(src) ? previous : [...previous, src])} />
       ))}
       <span className="hz-well__scrim" aria-hidden="true" />
       <span className="hz-well__scan" aria-hidden="true" />
@@ -202,7 +204,7 @@ export function HousingWell({
         <span className="hz-well__cap">{children}</span>
         {count > 1 ? (
           <span className="hz-dots">
-            {photos.map((_, i) => (
+            {shots.map((_, i) => (
               <button
                 key={i}
                 type="button"

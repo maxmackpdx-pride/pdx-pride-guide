@@ -647,7 +647,7 @@ export default function Events() {
               </div>
               <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
                 <div className="board-filter-row events-filter-row">
-                  {dayChips.map((chip, i) => {
+                  {dayChips.filter(chip => !/^\d{4}-/.test(chip.key)).map((chip, i) => {
                     const selected = activeDay === chip.key;
                     return (
                       <FilterChip
@@ -662,7 +662,17 @@ export default function Events() {
                       </FilterChip>
                     );
                   })}
-                  <div className="events-filter-divider" aria-hidden="true" />
+                  <details className="events-more-filters">
+                    <summary>More filters{activeFilters.length || pastView || /^\d{4}-/.test(activeDay) ? ` · ${activeFilters.length + Number(pastView) + Number(/^\d{4}-/.test(activeDay))} active` : ""}</summary>
+                    <div className="events-more-filters__content">
+                      <div className="events-more-filters__months" role="group" aria-label="Filter by month">
+                        {dayChips.filter(chip => /^\d{4}-/.test(chip.key)).map((chip, i) => (
+                          <FilterChip key={chip.key} selected={activeDay === chip.key} fill={activeDay === chip.key}
+                            accent={windowAccent(chip.key, i)} onToggle={() => setActiveDay(chip.key)} data-testid={`filter-day-${chip.key}`}>
+                            {chip.label}
+                          </FilterChip>
+                        ))}
+                      </div>
                   <FilterChip
                     selected={pastView}
                     fill={pastView}
@@ -685,6 +695,8 @@ export default function Events() {
                       testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
                     />
                   ))}
+                    </div>
+                  </details>
                   <div className="events-filter-search">
                     <SearchInput
                       id="event-search"

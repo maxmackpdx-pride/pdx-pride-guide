@@ -106,6 +106,8 @@ export function MobileDockShell({ children, activeIndex, overlayOpen, location, 
         scrollState.current = { y, travel: 0, collapsed: scrollState.current.collapsed };
         return;
       }
+      // Document pages keep one stable dock; map drawers retain their compact control.
+      if (!location.startsWith("/map") && !location.startsWith("/outzide")) return;
       scrollState.current = advanceDockScroll(scrollState.current, y, held, innerWidth >= 960);
       setCollapseRequested(scrollState.current.collapsed);
     };

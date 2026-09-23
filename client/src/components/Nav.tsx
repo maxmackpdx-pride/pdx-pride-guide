@@ -704,7 +704,7 @@ export default function Nav() {
 
   return (
     <>
-      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass" data-seam="bottom" onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
+      <header ref={headerRef} className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass" data-seam="bottom" data-map-surface={location.startsWith("/map") || location.startsWith("/outzide") || undefined} onPointerMove={navGlassPointer} onPointerLeave={navGlassPointer}>
         <MobileLiquidGlass quiet={false} />
         <div className="site-header-inner">
           <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home">

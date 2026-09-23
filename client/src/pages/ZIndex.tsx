@@ -5,6 +5,7 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ds";
+import SectionBreadcrumb from "@/components/SectionBreadcrumb";
 import SpectrumLoader from "@/components/SpectrumLoader";
 import { resolveDirectoryLogo } from "@/lib/directoryLogos";
 import type { CommunitySummary } from "@shared/community";
@@ -25,7 +26,7 @@ export default function ZIndex() {
   });
   return <div className="z-communities">
     <header className="z-communities__hero">
-      <p className="z-communities__eyebrow"><Link href="/">Zaylist</Link> / Communities</p>
+      <SectionBreadcrumb section="Communities" />
       <h1><span>Z/</span> List</h1>
       <p className="z-communities__intro">Find your people. Join a conversation, share what matters, and make plans together. Every community has its own voice and its own rules.</p>
       {user ? <Button accent="cyan" onClick={() => setCreating(value => !value)} aria-expanded={creating} aria-controls="z-community-create">{creating ? "CANCEL" : "CREATE A COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO CREATE</Button></Link>}

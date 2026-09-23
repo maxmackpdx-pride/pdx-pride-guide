@@ -97,3 +97,9 @@
   @media (prefers-reduced-transparency:reduce) { .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock { background:#080c12; } .z-mobile-dock .z-mobile-liquid__background { backdrop-filter:none;-webkit-backdrop-filter:none; } }
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock { background:#080c12; } }
 }
+
+@media(max-width:959px) {
+ /* Let document content scroll without a second fixed bar over the top. */
+ .site-header.site-header--glass:not([data-map-surface]) { position:relative; top:auto; }
+ .z-mobile-dock[data-collapsed="false"] .z-mobile-dock__restore { display:none; }
+}

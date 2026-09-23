@@ -25,3 +25,6 @@
 .z-communities__eyebrow a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .z-community-card, .z-community-panel, .z-communities__state { border-radius: 16px; border-color: hsl(var(--border, 0 0% 20%)); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
 .z-community-card__body { padding: 24px; }
+
+.z-communities a.z-community-card:hover,.z-communities a.z-community-card:focus { text-decoration:none; }
+.z-community-card:hover h2,.z-community-card:focus-visible h2 { text-decoration:underline; text-underline-offset:4px; }
