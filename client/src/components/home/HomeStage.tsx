@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import AuthModal from "@/components/AuthModal";
 import HomeFlight from "@/components/home/HomeFlight";
@@ -47,8 +47,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
   const [musicPlaying, setMusicPlaying] = useState(false);
-  const [musicMuted, setMusicMuted] = useState(false);
-  const [musicProgress, setMusicProgress] = useState(0);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -80,19 +78,6 @@ export default function HomeStage({ afterWelcome }: Props) {
     if (!audio) return;
     if (audio.paused) await audio.play().catch(() => {});
     else audio.pause();
-  };
-
-  const seekMusic = (value: number) => {
-    const audio = audioRef.current;
-    if (!audio || !Number.isFinite(audio.duration)) return;
-    audio.currentTime = value * audio.duration;
-  };
-
-  const toggleMusicMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = !audio.muted;
-    setMusicMuted(audio.muted);
   };
 
   useEffect(() => {
@@ -180,29 +165,10 @@ export default function HomeStage({ afterWelcome }: Props) {
             onPlay={() => setMusicPlaying(true)}
             onPause={() => setMusicPlaying(false)}
             onEnded={() => setMusicPlaying(false)}
-            onTimeUpdate={event => {
-              const audio = event.currentTarget;
-              setMusicProgress(audio.duration ? audio.currentTime / audio.duration : 0);
-            }}
           />
           <button type="button" onClick={() => void toggleMusic()} aria-label={musicPlaying ? "Pause Fuck Meta" : "Play Fuck Meta"}>
-            {musicPlaying ? "Ⅱ" : "▶"}
-          </button>
-          <div className="home-front__music-track">
-            <span>Fuck Meta</span>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.001"
-              value={musicProgress}
-              aria-label="Track position"
-              onChange={event => seekMusic(Number(event.currentTarget.value))}
-              style={{ "--music-progress": `${musicProgress * 100}%` } as CSSProperties}
-            />
-          </div>
-          <button type="button" onClick={toggleMusicMute} aria-label={musicMuted ? "Unmute music" : "Mute music"}>
-            {musicMuted ? "×" : "♪"}
+            <span aria-hidden="true">{musicPlaying ? "Ⅱ" : "▶"}</span>
+            <span>{musicPlaying ? "Pause" : "Play"}</span>
           </button>
         </div>
         {afterWelcome}
