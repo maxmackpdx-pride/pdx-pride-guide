@@ -1,7 +1,6 @@
 // @ts-nocheck
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import "./event-grid-card.css";
-import { isEventPlaceholderUrl } from "@shared/eventPoster";
 
 const DAY_BASE = {
   MON: "var(--day-mon)", TUE: "var(--day-tue)", WED: "var(--day-wed)",
@@ -96,8 +95,6 @@ export function PosterCard({
   showLink, showDetailsLink, dense,
   className = "", style = {}, ...rest
 }: any) {
-  const [failedImage, setFailedImage] = useState<string | null>(null);
-  const hasFlyer = image && !isEventPlaceholderUrl(image) && failedImage !== image;
   const base = DAY_BASE[day] || "#fff";
   const contrast = DAY_CONTRAST[day] || "#050506";
   const secondary = DAY_SECONDARY[day] || "#00ffff";
@@ -112,8 +109,8 @@ export function PosterCard({
   return (
     <article className={`pdxBoard pdxBoard--event-grid${className ? ` ${className}` : ""}`} style={{ "--day-c": base, "--c": base, "--on-c": contrast, "--opposite-neon": secondary, ...style }} {...rest}>
       <EdgeLight />
-      <div className={`pdxBoard__poster${hasFlyer ? "" : " pdxBoard__poster--text"}`}>
-        {hasFlyer ? <img className="pdxBoard__img" src={image} alt="" onError={() => setFailedImage(image)} /> : <div className="pdxBoard__ph" aria-hidden="true" />}
+      <div className="pdxBoard__poster">
+        {image ? <img className="pdxBoard__img" src={image} alt="" /> : <div className="pdxBoard__ph" aria-hidden="true" />}
         <span className="pdxBoard__scan" aria-hidden="true" />
         <DynamicEventTitle title={title} />
       </div>
