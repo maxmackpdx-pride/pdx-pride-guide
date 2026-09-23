@@ -1,3 +1,4 @@
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTipLinks } from "@/hooks/useTipLinks";
@@ -49,13 +50,14 @@ export default function HomeConstructionNudge() {
     setOpen(false);
   };
 
+  const dialogRef = useModalA11y({ open, onClose: dismiss });
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    if (!open || !dialogRef.current) return;
+    const dialog = dialogRef.current;
+    const background = [...document.body.children].filter((el): el is HTMLElement => el instanceof HTMLElement && !el.contains(dialog));
+    const inertBefore = background.map(el => el.inert);
+    background.forEach(el => { el.inert = true; });
+    return () => background.forEach((el, i) => { el.inert = inertBefore[i]; });
   }, [open]);
 
   if (!open) return null;
@@ -63,6 +65,8 @@ export default function HomeConstructionNudge() {
   return createPortal(
     <div className="pgc-backdrop" role="presentation" onClick={dismiss}>
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="pgc-card"
         role="dialog"
         aria-modal="true"

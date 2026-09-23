@@ -1,5 +1,5 @@
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 
 
@@ -40,7 +40,6 @@ import { HOUSING_TYPE_LABEL, type HousingBoardResponse, type HousingPostView, ty
 import { EVENT_PLACEHOLDER_PENDING, resolveEventPosterUrl } from "@shared/eventPoster";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { AVATAR_EMOJI_OPTIONS, normalizeAvatarRing } from "@shared/avatarRings";
-import { isLocalDemo } from "@/lib/localDemo";
 import "./LivingMap.css";
 import "./ZaydarMapDemo.css";
 import "@/components/ZaydarLayerSheet.css";
@@ -305,8 +304,7 @@ function useDesktop() {
 }
 
 export default function ZaydarMapDemo() {
-  const { user } = useAuth();
-  const canOpenMapObjects = Boolean(user) || isLocalDemo();
+  const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -359,8 +357,8 @@ export default function ZaydarMapDemo() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([45.523, -122.676]);
   const [cardOriginRect, setCardOriginRect] = useState<EventModalOriginRect | PlaceModalOriginRect | null>(null);
   const [showAuth, setShowAuth] = useState(false);
-  const requestedObject=[...OVERLAY_KEYS,"compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
-  useEffect(()=>{if(!canOpenMapObjects && requestedObject.replaceAll("|","").length)setShowAuth(true);},[canOpenMapObjects,requestedObject]);
+  const requestedPrivateAction=["compose","houzCompose","gigz.view","giftz.view","sellz.view","mizzed.view"].map(key=>params.get(key)||"").join("|");
+  useEffect(()=>{if(!authLoading && !user && requestedPrivateAction.replaceAll("|","").length)setShowAuth(true);},[authLoading,user,requestedPrivateAction]);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
   const mapRef = useRef<ZaydarHandle | null>(null);
@@ -378,16 +376,6 @@ export default function ZaydarMapDemo() {
   },[]);
   const pageRef = useRef<HTMLElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
-
-  const gateSignedOutControls = useCallback((event: ReactMouseEvent<HTMLElement>) => {
-    if (canOpenMapObjects) return;
-    const target = event.target as HTMLElement;
-    if (target.closest(".zaydar-control-zoom")) return;
-    if (!target.closest("button,a,input,summary,label")) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setShowAuth(true);
-  }, [canOpenMapObjects]);
 
   const [mapHeight, setMapHeight] = useState<number>();
   const desktop = useDesktop();
@@ -574,7 +562,6 @@ export default function ZaydarMapDemo() {
   ], [showEvents, showPlaces, showGigz, showGiftz, showSellz, showMizzed, showHouz, visibleEvents, mapPlaces, filteredWorlds, visibleHousing]);
 
   const openMark = useCallback((mark: Mark, target?: Element | null) => {
-    if (!canOpenMapObjects) { setShowAuth(true); return; }
     setSelected(mark.key);
     setCardOriginRect(originRect(target || null));
     if (mark.kind === "event") { goOverlay("event", (mark.item as Event).id); }
@@ -592,7 +579,7 @@ export default function ZaydarMapDemo() {
         if (kind && Number.isFinite(postId)) { goOverlay(boardParam(kind), postId); }
       }
     }
-  }, [canOpenMapObjects, goOverlay]);
+  }, [goOverlay]);
   const openBoardRow = (row: MapRow, target?: Element | null) => openMark({ key: mapListingKey(row._board,row.id), kind: "board", lat: Number(row.lat), lng: Number(row.lng), item: row }, target);
   const panelRows = (rows: MapRow[], kind: "places" | "boards" | "houz") => (
     <div className="zaydar-layer-list">
@@ -704,7 +691,7 @@ export default function ZaydarMapDemo() {
       startsAt:event?.dateStart,venueKey:event?normalizeDirectoryName(event.venueName || ""):undefined,
       time:event?eventTimeLabel(event.dateStart):undefined};
   }), [marks, places, demoEventIds, attendance]);
-  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(!canOpenMapObjects){mapRef.current?.send('select',{key:null});setShowAuth(true);return;}if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
+  const onSceneSelect=(key:string,rect?:MapSelectionRect)=>{if(key.startsWith('directory-')){const place=places.find(p=>p.id===Number(key.slice(10)));if(place){const community=place.type==='group'?communities.find(group=>group.sourcePlaceId===place.id):undefined;if(community){setLocation(`/z/${encodeURIComponent(community.slug)}`);return;}goOverlay('place',place.id);}return;}const mark=marks.find(m=>m.key===key);if(mark){openMark(mark);if(rect&&String((mark.item as MapRow)._board)==='The HAÜZ')setCardOriginRect(rect);}};
   useEffect(()=>{
     const key=marks.find(mark=>{
       if(mark.kind==="place")return Number(mark.item.id)===placeId;
@@ -715,9 +702,8 @@ export default function ZaydarMapDemo() {
     })?.key||null;
     setSelected(key);
   },[marks,params,placeId,eventId]);
-  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map" onClickCapture={gateSignedOutControls}>
+  return <section ref={pageRef} className="living-map-page zaydar-map-demo" style={mapHeight===undefined?undefined:{height:mapHeight}} aria-label="Zaylist interactive map">
     <ZaydarCanvas initialCamera={initialCamera} ref={mapRef} rows={sceneRows} selected={selected} labelsEnabled={labels} viewTime={viewTimestamp} onSelect={onSceneSelect} onCluster={(world,keys,bounds,zoom)=>{
-      if(!canOpenMapObjects){setShowAuth(true);return;}
       if(!["places","mizzed","gigz","giftz","sellz"].includes(world))return;
       if(zoom<16.8){mapRef.current?.send("fit",{bounds});return;}
       const ids=marks.filter(mark=>keys.includes(mark.key)).map(mark=>mark.item.id).join(",");
@@ -744,12 +730,12 @@ export default function ZaydarMapDemo() {
     <ZaydarLayerSheet layers={layers} active={activeLayer} onActiveChange={changeLayer} />
     {(missingPlace || (eventId && !feedEvent && eventDetail.isError)) && <p className="zaydar-demo-notice" role="alert">{placesError || eventDetail.isError && !String(eventDetail.error).includes("404:") ? "This listing could not load." : "This listing is no longer available."} <button type="button" onClick={() => { if (placeId) void retryPlaces(); else void eventDetail.refetch(); }}>Retry</button> <button type="button" onClick={closeOverlays}>Back to map</button></p>}
     {eventId && !selectedEvent && (eventsLoading || eventDetail.isLoading) && <p className="zaydar-demo-notice" role="status">Loading event… <button type="button" onClick={closeOverlays}>Back to map</button></p>}
-    {canOpenMapObjects && selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
-    {canOpenMapObjects && selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
-    {canOpenMapObjects && boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
-    {canOpenMapObjects && mizzedId && !selectedMizzed && <p className="zaydar-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
-    {canOpenMapObjects && selectedMizzed && <SpottedDetailModal key={selectedMizzed.id} isMine={selectedMizzed.isMine} status={selectedMizzed.status} postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
-    {canOpenMapObjects && selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
+    {selectedEvent && <EventModal event={selectedEvent} originRect={cardOriginRect} onClose={closeOverlays} onEventUpdated={updateEvent} />}
+    {selectedPlace && <PlaceModal key={selectedPlace.id} place={selectedPlace} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} />}
+    {boardOverlay && <BoardPostOverlay kind={boardOverlay.kind} postId={boardOverlay.postId} onClose={closeOverlays} />}
+    {mizzedId && !selectedMizzed && <p className="zaydar-demo-notice" role={mizzedDetail.isError?"alert":"status"}>{mizzedDetail.isError?"This connection is unavailable or could not load.":"Loading connection…"} <button onClick={()=>void mizzedDetail.refetch()}>Retry</button> <button onClick={closeOverlays}>Back to map</button></p>}
+    {selectedMizzed && <SpottedDetailModal key={selectedMizzed.id} isMine={selectedMizzed.isMine} status={selectedMizzed.status} postId={selectedMizzed.id} title={selectedMizzed.title} body={selectedMizzed.body} place={spottedPlace(selectedMizzed)} kindLabel={spottedKind(selectedMizzed).label} kindColor={spottedKind(selectedMizzed).color} onClose={closeOverlays} />}
+    {selectedHouz && <HousingPostOverlay key={selectedHouz.id} post={selectedHouz} userId={user?.id} originRect={cardOriginRect} onClose={closeOverlays} onRequireAuth={() => setShowAuth(true)} onSelectPost={postId => {setCardOriginRect(null);goOverlay("houz", postId);}} />}
     {user && houzCompose && <HousingComposerOverlay initialType={houzCompose} viewerDisplayName={user.displayName} onClose={() => updateParams(p => p.delete("houzCompose"))} onPosted={postId => { updateParams(p => { p.delete("houzCompose"); clearMapOverlay(p); p.set("houz", String(postId)); }); }} />}
     {user && composeWorld && <MapComposerOverlay key={composeWorld} world={composeWorld} onClose={closeOverlays} onPosted={id=>{void queryClient.invalidateQueries({queryKey:["map-worlds-mine"]});setLocation(mapHref(p=>{p.delete("compose");clearMapOverlay(p);p.set(WORLD_DETAIL_KEYS[composeWorld],String(id));p.set("layer",composeWorld);}),{replace:true,state:window.history.state});}}/>}
     {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="login" />}

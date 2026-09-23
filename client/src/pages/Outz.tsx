@@ -1,3 +1,4 @@
+import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import { useQuery } from "@tanstack/react-query";
 import { outzShareId, outzSharePath } from "@shared/outzShare";
@@ -24,6 +25,15 @@ export default function Outz() {
     imageAlt: "OutZide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
   });
   const frame = useRef<HTMLIFrameElement>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [mapReady, setMapReady] = useState(false);
+  const [mapSlow, setMapSlow] = useState(false);
+  const retryMap = () => { setMapReady(false); setMapSlow(false); setAttempt(value => value + 1); };
+  useEffect(() => {
+    if (mapReady) return;
+    const timer = window.setTimeout(() => setMapSlow(true), 15000);
+    return () => window.clearTimeout(timer);
+  }, [attempt, mapReady]);
   const {user,loading}=useAuth();
   const [showAuth,setShowAuth]=useState(false);
   const [requested,setRequested]=useState(()=>new URLSearchParams(window.location.search).get('signup')==='1');
@@ -32,6 +42,8 @@ export default function Outz() {
     const receive=(event:MessageEvent)=>{
       if(event.origin!==window.location.origin||event.source!==frame.current?.contentWindow||event.data?.source!=='outzide-map')return;
       if(event.data.type==='ready')publish();
+      if(event.data.type==='browse-ready')setMapReady(true);
+      if(event.data.type==='browse-error')setMapSlow(true);
       if(event.data.type==='require-auth'){setRequested(true);publish();if(!loading&&!user)setShowAuth(true);}
     };
     window.addEventListener('message',receive);publish();
@@ -50,7 +62,12 @@ export default function Outz() {
     window.addEventListener("resize", resize);
     window.addEventListener("zaylist:mobile-dock", resize);
     return () => { window.removeEventListener("resize", resize); window.removeEventListener("zaylist:mobile-dock", resize); };
-  }, []);
+  }, [attempt, sharedId]);
   if(sharedId && !sharePending && (shareError || !sharedPlace))return <PageRecovery section="OutZide" title={shareError ? "This destination couldn’t load" : "Destination not found"} description="Browse Outzide to find a destination, or try this link again." href="/outzide" label="Browse Outzide" missing={!shareError} retry={shareError ? () => {void retryShare();} : undefined}/>;
-  return <><iframe onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=mobile-optics-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} />{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+  return <><div style={{ position: "relative" }}>
+    {!mapReady && <div style={{ position: "absolute", inset: "12px 12px auto", zIndex: 2, background: "var(--ink-900, #08090b)", borderRadius: 16 }}><BrowseStatus
+      title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
+      description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
+      onAction={retryMap} actionLabel="Reload Outzide" /></div>}
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=mobile-optics-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "calc(100dvh - 80px)", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

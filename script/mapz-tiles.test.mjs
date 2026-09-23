@@ -27,7 +27,7 @@ test('3D recovery waits for a rendered city frame and preserves the actual error
  assert.match(host,/event\.data\.type==='first-frame'/);
  assert.match(host,/MAX_3D_ATTEMPTS=3/);
  assert.match(host,/phase==='loading'\?25000:60000/);
- assert.match(host,/Restarting 3D/);
+ assert.match(host,/Trying again/);
  assert.match(host,/event\.data\.message/);
  assert.doesNotMatch(host,/type==='booted'/);
  assert.match(renderer,/tell\('first-frame'\)/);
@@ -48,15 +48,17 @@ test('2D is retained but disconnected from both the map host and toggle',()=>{
  assert.doesNotMatch(page,/ZaydarFallback|setRenderer|Switch to.*2D/);
  assert.match(host,/<Zaydar3D key=\{generation\}/);
  assert.match(fallback,/preferCanvas/);
- assert.match(host,/>Retry 3D<\/button>/);
+ assert.match(host,/>Reload map<\/button>/);
 });
 
-test('Mapz is public while signed-out object interactions require authentication',()=>{
+test('Mapz browsing is public while posting and private views require authentication',()=>{
  assert.match(app,/<Route path="\/map-demo" component=\{ZaydarMapDemo\} \/>/);
  assert.match(app,/<Route path="\/map" component=\{ZaydarMapDemo\} \/>/);
  assert.doesNotMatch(app,/SignedInLivingMap/);
- assert.match(page,/if\(!canOpenMapObjects\)\{mapRef\.current\?\.send\('select',\{key:null\}\);setShowAuth\(true\);return;\}/);
- assert.match(page,/target\.closest\("\.zaydar-control-zoom"\)/);
- assert.match(page,/onClickCapture=\{gateSignedOutControls\}/);
+ assert.doesNotMatch(page,/gateSignedOutControls|canOpenMapObjects/);
+ assert.match(page,/if\(!user\)\{setShowAuth\(true\);return;\}/);
+ assert.match(page,/user && composeWorld && <MapComposerOverlay/);
+ assert.match(page,/user && houzCompose && <HousingComposerOverlay/);
+ assert.match(page,/!authLoading && !user && requestedPrivateAction/);
  assert.match(page,/<AuthModal onClose=\{\(\) => setShowAuth\(false\)\} defaultTab="login" \/>/);
 });

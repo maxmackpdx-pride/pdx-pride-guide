@@ -7,6 +7,7 @@ import { homeBootLogoHtml } from "../shared/homeBoot";
 
 const APP_PATHS = new Set([
   "/", "/map-demo", "/index.html", "/z", "/events", "/map", "/schedule", "/submit", "/pride-work", "/gifting", "/sellz",
+  "/pride-work/new", "/gifting/new", "/sellz/new", "/spotted/new",
   "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resume", "/contact", "/sponsors", "/access", "/legal",
   "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/spotted", "/directory", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
 ]);

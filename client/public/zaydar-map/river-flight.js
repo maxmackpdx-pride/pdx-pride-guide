@@ -1,3 +1,4 @@
+import { visibleHologramLabels } from './label-visibility.js';
 import {faceStackHtml} from '../outzide-map/assets/community-ui.js?v=map-continuity-1';
 import {createMapHover,hoveredMapTarget} from './map-hover.js';
 import {createTerrainSampler,TERRAIN_STRENGTH} from './terrain-elevation.js';
@@ -525,7 +526,7 @@ function drawLights(fade,target=map,surface=lights){
    const [otherLng,otherLat]=other.feature.geometry.coordinates;
    const sameLocation=Math.hypot((lng-otherLng)*Math.cos(lat*Math.PI/180),lat-otherLat)<.00065;
    const tooClose=Math.hypot(item.p.x-other.p.x,item.p.y-other.p.y)<(width<768?150:180);
-   return sameLocation||(tooClose&&!activeToday(item.feature));
+   return sameLocation||tooClose;
   }))continue;
   beacons.push(item);
  }
@@ -825,7 +826,7 @@ function drawLights(fade,target=map,surface=lights){
  drawUserLocationAvatar(lightsContext,target,fade);
  // Titles live in this same document and frame cadence as their canvas logos.
  // Crossing the iframe boundary here caused visible lag while panning and zooming.
- renderHologramLabels(eventLabels);
+ renderHologramLabels(visibleHologramLabels(eventLabels, selectedKey, width, height));
  hitTargets.push(...eventLabels.filter(label=>label.opacity>.1).map(label=>({key:label.logoKey||label.key,x:label.x,y:label.logoY,width:label.logoWidth,height:label.logoHeight,color:label.color})));
  hoverTargets=[...hitTargets];
  if(userLocation&&fade>.1){const p=target.project(userLocation.coordinates);hoverTargets.push({x:p.x,y:p.y-27,r:23,color:userLocation.feature.properties.color,hoverOnly:true});}

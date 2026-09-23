@@ -65,19 +65,20 @@ const Zaydar3D=forwardRef<ZaydarHandle,ThreeDProps>(function Zaydar3D({rows,sele
 export default forwardRef<ZaydarHandle,CanvasProps>(function ZaydarCanvas(props,ref){
  const activeControl=useRef<ZaydarHandle>(null),lastView=useRef<MapView|null>(props.initialCamera || null);
  const attempts=useRef(0);
- const [generation,setGeneration]=useState(0),[notice,setNotice]=useState(''),[stopped,setStopped]=useState(false);
+ const [generation,setGeneration]=useState(0),[notice,setNotice]=useState('Loading map…'),[stopped,setStopped]=useState(false);
  const reportView=(view:MapView)=>{lastView.current=view;props.onView(view);};
- const retry=()=>{attempts.current=0;setStopped(false);setNotice('Restarting 3D map…');setGeneration(value=>value+1);};
+ const retry=()=>{attempts.current=0;setStopped(false);setNotice('Loading map…');setGeneration(value=>value+1);};
  const recover=(reason:string)=>{
+  console.warn("Map loading failed:", reason);
   attempts.current+=1;
   if(attempts.current<MAX_3D_ATTEMPTS){
-   setNotice(`Restarting 3D (${attempts.current+1}/${MAX_3D_ATTEMPTS}). ${reason}`);
+   setNotice('The map is taking longer than expected. Trying again…');
    setGeneration(value=>value+1);
-  }else{setStopped(true);setNotice(reason);}
+  }else{setStopped(true);setNotice('The map couldn’t load. You can still browse listings in Map controls.');}
  };
  useImperativeHandle(ref,()=>({send:(type,data={})=>activeControl.current?.send(type,data)}),[]);
  return <>
   <Zaydar3D key={generation} ref={activeControl} {...props} attempt={generation} initialView={lastView.current} onFailure={recover} onVisible={()=>setNotice('')} onView={reportView}/>
-  {notice&&<p className="zaydar-demo-notice" role={stopped?'alert':'status'}>{notice} {stopped&&<button onClick={retry}>Retry 3D</button>}</p>}
+  {notice&&<p className="zaydar-demo-notice" role={stopped?'alert':'status'}>{notice} <button onClick={retry}>Reload map</button></p>}
  </>;
 });

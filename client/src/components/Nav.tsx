@@ -532,7 +532,7 @@ function NotifyMenu({
 
 export default function Nav() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const { openSheet } = useInboxSheet();
   const [showAuth, setShowAuth] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<"login" | "register">("login");
@@ -740,7 +740,9 @@ export default function Nav() {
                 }}
               />
             )}
-            {user ? (
+            {authLoading && !user ? (
+              <span className="hub-mtop__mode-btn" role="status" aria-label="Checking your session">…</span>
+            ) : user ? (
               <ProfileMenu
                 user={user}
                 profileOpen={mobileProfileOpen}
@@ -840,7 +842,7 @@ export default function Nav() {
               </div>
             )}
 
-            {!user && !localDemo && (
+            {!user && !localDemo && !authLoading && (
               <button
                 onClick={() => { setShowAuth(true); setMenuOpen(false); }}
                 className="site-login-button pdx-glass-rebind"

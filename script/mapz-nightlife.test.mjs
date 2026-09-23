@@ -1,3 +1,4 @@
+import {visibleHologramLabels} from '../client/public/zaydar-map/label-visibility.js';
 import {waypointGeometry} from '../client/public/zaydar-map/waypoint-markers.js';
 import {housingIconSize} from '../client/public/zaydar-map/housing-holograms.js';
 import test from 'node:test';
@@ -21,7 +22,7 @@ test('projector circles shrink at overview zoom without a camera-facing guide li
 test('labels and Placez markers stay locked to the map during camera movement',async()=>{
   const renderer=await readFile(new URL('../client/public/zaydar-map/river-flight.js',import.meta.url),'utf8');
   const canvasHost=await readFile(new URL('../client/src/components/ZaydarCanvas.tsx',import.meta.url),'utf8');
-  assert.match(renderer,/renderHologramLabels\(eventLabels\)/);
+  assert.match(renderer,/renderHologramLabels\(visibleHologramLabels\(eventLabels, selectedKey, width, height\)\)/);
   assert.doesNotMatch(renderer,/tell\('labels'/);
   assert.doesNotMatch(canvasHost,/ZaydarEventLabel|event\.data\.type==='labels'/);
   assert.match(renderer,/const cameraMoving=Boolean\(target\.isMoving\?\.\(\)\)/);
@@ -96,7 +97,7 @@ test('actual hologram draw paints sky artwork after building occlusion',async()=
     venueLogos:new Map([['logo',logo]]),logoFocus:{update:noop,active:new Map()},logoFit:()=>.2,logoMotionSeed:0,
     adultVenueColor:'#FF0000',hologramMaterials:{beams:new Map([[color,{}]])},drawProjectionBeam:()=>operations.push('beam'),
     waypointGeometry,placezHoverLift:()=>15,typeIcons:new Map(),drawWaypointFoot:()=>operations.push('waypoint-beam'),drawWaypointHead:()=>operations.push('waypoint-head'),drawSelectedMarkerLabel:noop,drawClusterCount:noop,
-    projectorGroundScale,housingIconSize,
+    projectorGroundScale,housingIconSize,visibleHologramLabels,
     applyBuildingOcclusion:()=>operations.push('building-mask'),buildingChrome:{draw:()=>operations.push('chrome')},
     mapHover:{update:noop},hoverTargets:[],logoPointer:{active:false},
     drawSurfaceReflections:()=>operations.push('building-reflections'),drawUserLocationAvatar:noop,tell:noop,

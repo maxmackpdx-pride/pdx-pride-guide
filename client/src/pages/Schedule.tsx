@@ -1,3 +1,4 @@
+import BrowseStatus from "@/components/BrowseStatus";
 /* ============================================================
    Zaylist | Schedule
    Festival-timeline redesign of /schedule. The whole week side by
@@ -185,7 +186,7 @@ export default function Schedule({
 
   useAttendanceSummariesLive();
 
-  const { data: listings = [] } = useQuery<EventListing[]>({
+  const { data: listings = [], isPending: eventsPending, isError: eventsError, refetch: retryEvents } = useQuery<EventListing[]>({
     queryKey: ["/api/events"],
     queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
     staleTime: 60_000,
@@ -1431,6 +1432,13 @@ export default function Schedule({
   /* ================================================================ */
   /* Render                                                            */
   /* ================================================================ */
+
+  if (eventsPending || eventsError) return <div className={embed ? "sch-root sch-root--embed" : "sch-root schedule-page"}>
+    {!embed && <ScheduleHero stats={[]} />}
+    <BrowseStatus error={eventsError} title={eventsError ? "Events couldn’t load" : "Loading your week…"}
+      description={eventsError ? "Your week and filters are still here. Try loading the events again." : "Checking the event listings before building your schedule."}
+      onAction={eventsError ? () => { void retryEvents(); } : undefined} />
+  </div>;
 
   return (
     <div
