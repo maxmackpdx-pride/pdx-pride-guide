@@ -6,6 +6,8 @@
 
 .outz-place--missing { color: var(--text-hi, #fff); padding: 180px 24px; text-align: center; }
 .outz-place--missing a { color: var(--cyan, #00ffff); }
+.outz-place__follow { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 7px 12px; border: 1px solid var(--outz-c); border-radius: 9px; color: var(--outz-c); background: #0b1616; font: 600 12px var(--font-body, sans-serif); cursor: pointer; }
+.outz-place__follow[aria-pressed="true"] { background: color-mix(in srgb, var(--outz-c) 18%, #0b1616); color: #fff; }
 
 /* The hero is .outz-hero from outz-shared.css, the same one the board home uses. */
 

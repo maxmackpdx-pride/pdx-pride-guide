@@ -941,6 +941,17 @@ try { sqlite.exec(`
   )
 `); } catch(e) {}
 try { sqlite.exec(`CREATE INDEX IF NOT EXISTS business_follows_biz_idx ON business_follows(business_id)`); } catch(e) {}
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS outz_destination_follows (
+    user_id INTEGER NOT NULL,
+    place_id TEXT NOT NULL,
+    place_name TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, place_id)
+  );
+  CREATE INDEX IF NOT EXISTS outz_destination_follows_place_idx
+    ON outz_destination_follows(place_id);
+`);
 try { sqlite.exec(`
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15534,7 +15545,7 @@ export const storage: IStorage = {
     const goingCounts = storage.getAttendanceSummaries();
     const viewerRsvpEventIds = new Set<number>();
     const viewerBeachDays = new Set<string>();
-    if (viewerUserId != null) {
+    if (viewerUserId != null && sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='outz_wall_posts'").get()) {
       for (const row of sqlite.prepare(`
         SELECT event_id AS eventId FROM attendances WHERE user_id = ? AND is_active = 1
       `).all(viewerUserId) as { eventId: number }[]) {
@@ -15836,6 +15847,35 @@ export const storage: IStorage = {
         beachLabel,
         link: `/nude-beaches?tab=${encodeURIComponent(row.beachId)}`,
       });
+    }
+
+    // Destination wall posts enter the Hub only for members following that spot.
+    // Chats and check-in notes stay in their existing destination rooms.
+    if (viewerUserId != null) {
+      const destinationPosts = sqlite.prepare(`
+        SELECT p.id, p.place_id AS placeId, p.user_id AS userId, p.post_kind AS postKind,
+               p.body, p.created_at AS createdAt, f.place_name AS placeName,
+               u.display_name AS displayName, u.username, u.photo_url AS photoUrl,
+               u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
+        FROM outz_wall_posts p
+        JOIN outz_destination_follows f ON f.place_id = p.place_id AND f.user_id = ?
+        JOIN users u ON u.id = p.user_id
+        WHERE datetime(p.created_at) >= datetime('now', '-30 days')
+        ORDER BY p.created_at DESC LIMIT 40
+      `).all(viewerUserId) as any[];
+      for (const row of destinationPosts) {
+        if (row.userId !== viewerUserId && storage.isMemberInteractionBlocked(viewerUserId, row.userId)) continue;
+        items.push({
+          id: `outz-post-${row.id}`,
+          kind: "outz",
+          badge: "OUTZIDE",
+          action: `Posted at ${row.placeName}`,
+          text: row.body,
+          createdAt: row.createdAt,
+          author: hubFeedAuthorFromUser(row),
+          link: `/outzide?place=${encodeURIComponent(row.placeId)}&wall=1`,
+        });
+      }
     }
 
     ensureHubFeedPostsSchema();

@@ -109,5 +109,5 @@ export default function Outz() {
       title={mapSlow ? "Outzide is taking longer than expected" : "Loading Outzide…"}
       description={mapSlow ? "Try loading the field guide again." : "Getting destinations and the map ready."}
       onAction={retryMap} actionLabel="Reload Outzide" /></div>}
-    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=outzide-search-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
+    <iframe key={attempt} onLoad={publish} ref={frame} src={"/outzide-map/index.html?v=outzide-search-20260923&place=" + encodeURIComponent(sharedId || new URLSearchParams(window.location.search).get("place") || "") + (sharedId ? "&guestPlace=" + encodeURIComponent(sharedId) : "") + (new URLSearchParams(window.location.search).get("wall") === "1" ? "&wall=1" : "")} title="Outzide Northwest field map" allow="geolocation" style={{ display: "block", width: "100%", height: "100dvh", border: 0 }} /></div>{showAuth&&<AuthModal defaultTab="register" onClose={closeSignup}/>}</>;
 }

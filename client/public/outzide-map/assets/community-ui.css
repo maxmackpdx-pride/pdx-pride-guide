@@ -36,3 +36,6 @@
 
 /* Give the control stack a little breathing room beneath the activity rail. */
 .outzide-shell .map-top{margin-top:8px}
+
+.outzide-shell .browse-toggle { display:inline-flex; align-items:center; gap:6px; }
+.outzide-shell .browse-toggle svg { flex:none; }

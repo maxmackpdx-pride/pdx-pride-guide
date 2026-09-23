@@ -3,7 +3,7 @@ import PageRecovery from "@/components/PageRecovery";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
-import { ExternalLink, Lock, MapPin, MessageCircle, Star, TentTree } from "lucide-react";
+import { Bell, ExternalLink, Lock, MapPin, MessageCircle, Star, TentTree } from "lucide-react";
 import { Badge, Button } from "@/components/ds";
 import AuthModal from "@/components/AuthModal";
 import BoardHero from "@/components/BoardHero";
@@ -151,6 +151,21 @@ export default function OutzPlace() {
     queryFn: () => apiRequest("GET", `/api/outz/wall?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
     enabled: Boolean(placeId),
   });
+  const followKey = ["/api/outz/follow", placeId] as const;
+  const followQuery = useQuery<{ isFollowing: boolean }>({
+    queryKey: followKey,
+    queryFn: () => apiRequest("GET", `/api/outz/follow?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
+    enabled: Boolean(placeId && user),
+  });
+  const updateFollow = useMutation({
+    mutationFn: (next: boolean) => apiRequest(next ? "POST" : "DELETE", "/api/outz/follow", { placeId }).then(r => r.json() as Promise<{ isFollowing: boolean }>),
+    onSuccess: data => {
+      queryClient.setQueryData(followKey, data);
+      queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
+      toast({ title: data.isFollowing ? "Following destination" : "Destination unfollowed", description: data.isFollowing ? "New wall posts will appear in your Hub." : undefined });
+    },
+    onError: err => toast({ title: "Couldn’t update follow", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),
+  });
 
   const dates = useMemo(() => beachCheckinDateOptions(), []);
   const saveCheckin = useMutation({
@@ -291,6 +306,7 @@ export default function OutzPlace() {
           <div className="outz-place__tags">
             {meta ? <Badge color={meta.color} variant="outline">{meta.label}</Badge> : null}
             <Badge variant="paper">{place?.sourceName}</Badge>
+            {placeId ? <button className="outz-place__follow" type="button" aria-pressed={!!followQuery.data?.isFollowing} disabled={updateFollow.isPending || (!!user && followQuery.isPending)} onClick={() => user ? updateFollow.mutate(!followQuery.data?.isFollowing) : setShowAuth(true)}><Bell size={16} aria-hidden="true" />{followQuery.data?.isFollowing ? "Following" : "Follow destination"}</button> : null}
           </div>
 
           {destination ? (

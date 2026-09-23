@@ -91,6 +91,22 @@ function ensureOutzSocialSchema() {
 }
 ensureOutzSocialSchema();
 
+export function isFollowingOutzDestination(userId: number, placeId: string): boolean {
+  return !!sqlite.prepare("SELECT 1 FROM outz_destination_follows WHERE user_id = ? AND place_id = ?")
+    .get(userId, placeId);
+}
+
+export function followOutzDestination(userId: number, placeId: string, placeName: string): void {
+  sqlite.prepare(`INSERT INTO outz_destination_follows (user_id, place_id, place_name, created_at)
+    VALUES (?, ?, ?, ?) ON CONFLICT(user_id, place_id) DO UPDATE SET place_name = excluded.place_name`)
+    .run(userId, placeId, placeName, new Date().toISOString());
+}
+
+export function unfollowOutzDestination(userId: number, placeId: string): void {
+  sqlite.prepare("DELETE FROM outz_destination_follows WHERE user_id = ? AND place_id = ?")
+    .run(userId, placeId);
+}
+
 export function expireOutzCheckins() {
   sqlite.prepare("UPDATE outz_checkins SET is_active = 0 WHERE is_active = 1 AND expires_at <= ?")
     .run(new Date().toISOString());

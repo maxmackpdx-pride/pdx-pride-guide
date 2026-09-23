@@ -175,6 +175,9 @@ import {
   createOutzWallPost,
   getOutzPlaceRating,
   getOutzWallPosts,
+  isFollowingOutzDestination,
+  followOutzDestination,
+  unfollowOutzDestination,
   getOutzChatMessages,
   getOutzChatPushRecipients,
   getOutzWallPostOwner,
@@ -1959,6 +1962,35 @@ export function registerRoutes(httpServer: Server, app: Express) {
     ];
     return known.includes(placeId) ? placeId : null;
   };
+
+  app.get("/api/outz/follow", async (req: any, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.query.place);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ destination" });
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ isFollowing: req.session?.userId != null && isFollowingOutzDestination(req.session.userId, placeId) });
+    } catch { res.status(502).json({ error: "Could not load destination follow" }); }
+  });
+  app.post("/api/outz/follow", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ destination" });
+      const snapshot = (await getOutzSnapshot()).data;
+      const place = [...snapshot.destinations, ...snapshot.catalog, ...snapshot.communityStays].find(entry => entry.id === placeId)
+        ?? outzMapCatalog.find(entry => entry.id === placeId);
+      if (!place) return res.status(400).json({ error: "Invalid OUTZ destination" });
+      followOutzDestination(req.session.userId!, placeId, place.name);
+      res.json({ isFollowing: true });
+    } catch { res.status(502).json({ error: "Could not follow destination" }); }
+  });
+  app.delete("/api/outz/follow", requireAuth, async (req, res) => {
+    try {
+      const placeId = await knownOutzPlace(req.body.placeId);
+      if (!placeId) return res.status(400).json({ error: "Invalid OUTZ destination" });
+      unfollowOutzDestination(req.session.userId!, placeId);
+      res.json({ isFollowing: false });
+    } catch { res.status(502).json({ error: "Could not unfollow destination" }); }
+  });
 
   const waypointStore = createWaypointStore(sqlite);
   app.get('/api/outz/waypoints', (req: any, res) => {

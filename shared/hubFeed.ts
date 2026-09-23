@@ -9,6 +9,7 @@ export type HubFeedKind =
   | "gig"
   | "housing"
   | "beach"
+  | "outz"
   | "feedback"
   | "feed_text"
   | "feed_photo";
@@ -125,6 +126,7 @@ const TAB_PREDICATES: Record<HubFeedTab, (item: HubFeedItem) => boolean> = {
   posts: (item) =>
     item.kind === "checkin"
     || item.kind === "beach"
+    || item.kind === "outz"
     || item.kind === "feed_text"
     || item.kind === "feed_photo",
   rsvps: (item) => item.kind === "rsvp",
@@ -159,6 +161,7 @@ export function hubFeedBadgeColor(kind: HubFeedKind): string {
     gig: "var(--panel-purple)",
     housing: "var(--panel-cyan)",
     beach: "var(--panel-orange)",
+    outz: "var(--panel-orange)",
     feedback: "var(--panel-lime)",
     feed_text: "var(--panel-cyan)",
     feed_photo: "var(--panel-magenta)",
